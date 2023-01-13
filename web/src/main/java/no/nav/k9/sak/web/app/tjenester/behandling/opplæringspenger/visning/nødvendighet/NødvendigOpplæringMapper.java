@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.visning.nø
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -47,7 +48,8 @@ class NødvendigOpplæringMapper {
                     new JournalpostIdDto(vurdertOpplæring.getJournalpostId().getVerdi()),
                     finnPerioderForJournalpostId(vurdertOpplæring.getJournalpostId(), perioderFraSøknad),
                     vurdertOpplæring.getNødvendigOpplæring() ? Resultat.GODKJENT : Resultat.IKKE_GODKJENT,
-                    vurdertOpplæring.getBegrunnelse())
+                    vurdertOpplæring.getBegrunnelse(),
+                    vurdertOpplæring.getDokumenter().stream().map(dokument -> "" + dokument.getId()).collect(Collectors.toSet()))
                 );
             }
         }
@@ -61,7 +63,8 @@ class NødvendigOpplæringMapper {
                     new JournalpostIdDto(journalpostId.getVerdi()),
                     perioder.stream().map(periode -> new Periode(periode.getFomDato(), periode.getTomDato())).toList(),
                     Resultat.MÅ_VURDERES,
-                    null)
+                    null,
+                    Set.of())
                 );
             }
         }

@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.aksjonspunk
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -10,24 +11,34 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.kontrakt.opplæringspenger.VurderNødvendighetDto;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringHolder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokument;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = VurderNødvendighetDto.class, adapter = AksjonspunktOppdaterer.class)
 public class VurderNødvendighetOppdaterer implements AksjonspunktOppdaterer<VurderNødvendighetDto> {
 
     private VurdertOpplæringRepository vurdertOpplæringRepository;
+    private BehandlingRepository behandlingRepository;
+    private PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
 
     public VurderNødvendighetOppdaterer() {
     }
 
     @Inject
-    public VurderNødvendighetOppdaterer(VurdertOpplæringRepository vurdertOpplæringRepository) {
+    public VurderNødvendighetOppdaterer(VurdertOpplæringRepository vurdertOpplæringRepository,
+                                        BehandlingRepository behandlingRepository,
+                                        PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository) {
         this.vurdertOpplæringRepository = vurdertOpplæringRepository;
+        this.behandlingRepository = behandlingRepository;
+        this.pleietrengendeSykdomDokumentRepository = pleietrengendeSykdomDokumentRepository;
     }
 
     @Override
@@ -44,7 +55,10 @@ public class VurderNødvendighetOppdaterer implements AksjonspunktOppdaterer<Vur
             vurdertOpplæring.addAll(aktiveVurdertInstitusjoner);
         }
 
-        VurdertOpplæring nyVurdertOpplæring = mapDtoTilVurdertOpplæring(dto);
+        final Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
+        final List<PleietrengendeSykdomDokument> alleDokumenter = pleietrengendeSykdomDokumentRepository.hentAlleDokumenterFor(behandling.getFagsak().getPleietrengendeAktørId());
+
+        VurdertOpplæring nyVurdertOpplæring = mapDtoTilVurdertOpplæring(dto, alleDokumenter);
         vurdertOpplæring.add(nyVurdertOpplæring);
 
         VurdertOpplæringHolder nyHolder = new VurdertOpplæringHolder(vurdertOpplæring);
@@ -53,7 +67,8 @@ public class VurderNødvendighetOppdaterer implements AksjonspunktOppdaterer<Vur
         return OppdateringResultat.nyttResultat();
     }
 
-    private VurdertOpplæring mapDtoTilVurdertOpplæring(VurderNødvendighetDto dto) {
-        return new VurdertOpplæring(dto.getJournalpostId().getJournalpostId(), dto.isNødvendigOpplæring(), dto.getBegrunnelse());
+    private VurdertOpplæring mapDtoTilVurdertOpplæring(VurderNødvendighetDto dto, List<PleietrengendeSykdomDokument> alleDokumenter) {
+        return new VurdertOpplæring(dto.getJournalpostId().getJournalpostId(), dto.isNødvendigOpplæring(), dto.getBegrunnelse(),
+            alleDokumenter.stream().filter(dokument -> dto.getTilknyttedeDokumenter().contains("" + dokument.getId())).collect(Collectors.toList()));
     }
 }

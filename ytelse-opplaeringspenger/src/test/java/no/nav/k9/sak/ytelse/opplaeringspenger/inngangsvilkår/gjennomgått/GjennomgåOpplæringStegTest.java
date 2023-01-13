@@ -156,7 +156,7 @@ class GjennomgåOpplæringStegTest {
 
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(), null, null,
             new VurdertOpplæringPerioderHolder(List.of(
-                new VurdertOpplæringPeriode(søknadsperiode.getFom(), søknadsperiode.getTom().minusDays(1), true, ""))),
+                new VurdertOpplæringPeriode(søknadsperiode.getFom(), søknadsperiode.getTom().minusDays(1), true, "", List.of()))),
             null);
         lagreGrunnlag(grunnlag);
 
@@ -186,8 +186,8 @@ class GjennomgåOpplæringStegTest {
 
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(), null, null,
             new VurdertOpplæringPerioderHolder(List.of(
-                new VurdertOpplæringPeriode(søknadsperiode.getFom(), søknadsperiode.getTom().minusDays(1), true, ""),
-                new VurdertOpplæringPeriode(søknadsperiode.getTom(), søknadsperiode.getTom(), false, ""))),
+                new VurdertOpplæringPeriode(søknadsperiode.getFom(), søknadsperiode.getTom().minusDays(1), true, "", List.of()),
+                new VurdertOpplæringPeriode(søknadsperiode.getTom(), søknadsperiode.getTom(), false, "", List.of()))),
             null);
         lagreGrunnlag(grunnlag);
 
@@ -244,7 +244,7 @@ class GjennomgåOpplæringStegTest {
 
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(), null, null,
             new VurdertOpplæringPerioderHolder(List.of(
-                new VurdertOpplæringPeriode(godkjentPeriode.getFom(), godkjentPeriode.getTom(), true, ""))),
+                new VurdertOpplæringPeriode(godkjentPeriode.getFom(), godkjentPeriode.getTom(), true, "", List.of()))),
             null);
         lagreGrunnlag(grunnlag);
 
@@ -274,7 +274,7 @@ class GjennomgåOpplæringStegTest {
 
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(), null, null,
             new VurdertOpplæringPerioderHolder(List.of(
-                new VurdertOpplæringPeriode(kursperiode.getFom(), kursperiode.getTom(), true, ""))),
+                new VurdertOpplæringPeriode(kursperiode.getFom(), kursperiode.getTom(), true, "", List.of()))),
             null);
         lagreGrunnlag(grunnlag);
 
@@ -306,7 +306,7 @@ class GjennomgåOpplæringStegTest {
 
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(), null, null,
             new VurdertOpplæringPerioderHolder(List.of(
-                new VurdertOpplæringPeriode(kursperiode.getFom(), kursperiode.getTom(), true, ""))),
+                new VurdertOpplæringPeriode(kursperiode.getFom(), kursperiode.getTom(), true, "", List.of()))),
             null);
         lagreGrunnlag(grunnlag);
 
@@ -339,7 +339,7 @@ class GjennomgåOpplæringStegTest {
 
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(), null, null,
             new VurdertOpplæringPerioderHolder(List.of(
-                new VurdertOpplæringPeriode(kursperiode.getFom(), kursperiode.getTom(), true, ""))),
+                new VurdertOpplæringPeriode(kursperiode.getFom(), kursperiode.getTom(), true, "", List.of()))),
             new VurdertReisetidHolder(List.of(
                 new VurdertReisetid(DatoIntervallEntitet.fra(reisetidTil), true, "reise"),
                 new VurdertReisetid(DatoIntervallEntitet.fra(reisetidHjem), false, "ikke reise")))

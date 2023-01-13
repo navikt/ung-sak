@@ -16,6 +16,7 @@ import jakarta.persistence.NonUniqueResultException;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -100,8 +101,13 @@ public class PleietrengendeSykdomDokumentRepository {
             .collect(Collectors.toList());
     }
 
-    public List<PleietrengendeSykdomDokument> hentGodkjenteLegeerklæringer(AktørId pleietrengende) {
-        return hentAlleDokumenterFor(pleietrengende).stream().filter(d -> d.getType() == SykdomDokumentType.LEGEERKLÆRING_SYKEHUS && d.getDuplikatAvDokument() == null).collect(Collectors.toList());
+    public List<PleietrengendeSykdomDokument> hentGodkjenteLegeerklæringer(AktørId pleietrengende, FagsakYtelseType fagsakYtelseType) {
+        List<SykdomDokumentType> godjenteDokumenttyper = new ArrayList<>(List.of(SykdomDokumentType.LEGEERKLÆRING_SYKEHUS));
+        if (fagsakYtelseType == FagsakYtelseType.OPPLÆRINGSPENGER) {
+            godjenteDokumenttyper.add(SykdomDokumentType.LEGEERKLÆRING_ANNEN);
+            godjenteDokumenttyper.add(SykdomDokumentType.LEGEERKLÆRING_MED_DOKUMENTASJON_AV_OPPLÆRING);
+        }
+        return hentAlleDokumenterFor(pleietrengende).stream().filter(d -> godjenteDokumenttyper.contains(d.getType()) && d.getDuplikatAvDokument() == null).collect(Collectors.toList());
     }
 
     public Optional<PleietrengendeSykdomDokument> hentDokument(Long dokumentId, AktørId pleietrengende) {

@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.visning.gje
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -39,7 +40,8 @@ class GjennomgåttOpplæringMapper {
             for (VurdertOpplæringPeriode vurdertOpplæringPeriode : grunnlag.getVurdertePerioder().getPerioder()) {
                 vurderinger.add(new OpplæringVurderingDto(vurdertOpplæringPeriode.getPeriode().tilPeriode(),
                     vurdertOpplæringPeriode.getGjennomførtOpplæring() ? Resultat.GODKJENT : Resultat.IKKE_GODKJENT,
-                    vurdertOpplæringPeriode.getBegrunnelse())
+                    vurdertOpplæringPeriode.getBegrunnelse(),
+                    vurdertOpplæringPeriode.getDokumenter().stream().map(dokument -> "" + dokument.getId()).collect(Collectors.toSet()))
                 );
             }
         }
@@ -58,7 +60,8 @@ class GjennomgåttOpplæringMapper {
         tidslinjeSomManglerVurdering.forEach(segment -> vurderinger.add(new OpplæringVurderingDto(
             new Periode(segment.getFom(), segment.getTom()),
             Resultat.MÅ_VURDERES,
-            null))
+            null,
+            Set.of()))
         );
 
         return vurderinger;

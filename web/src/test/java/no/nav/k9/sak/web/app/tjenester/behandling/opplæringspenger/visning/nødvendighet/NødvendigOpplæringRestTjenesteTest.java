@@ -103,7 +103,7 @@ class NødvendigOpplæringRestTjenesteTest {
         var perioderFraSøknad = lagPerioderFraSøknad(journalpostId1, kursperiode1);
         uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), new UttakPerioderHolder(Set.of(perioderFraSøknad)));
 
-        var vurdertOpplæring = new VurdertOpplæring(journalpostId1, true, "fordi");
+        var vurdertOpplæring = new VurdertOpplæring(journalpostId1, true, "fordi", List.of());
         vurdertOpplæringRepository.lagre(behandling.getId(), new VurdertOpplæringHolder(List.of(vurdertOpplæring)));
 
         Response response = restTjeneste.hentVurdertNødvendigOpplæring(new BehandlingUuidDto(behandling.getUuid()));
@@ -131,7 +131,7 @@ class NødvendigOpplæringRestTjenesteTest {
         var perioderFraSøknad2 = lagPerioderFraSøknad(journalpostId2, kursperiode2);
         uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), new UttakPerioderHolder(Set.of(perioderFraSøknad1, perioderFraSøknad2)));
 
-        var vurdertOpplæring = new VurdertOpplæring(journalpostId1, false, "fordi");
+        var vurdertOpplæring = new VurdertOpplæring(journalpostId1, false, "fordi", List.of());
         vurdertOpplæringRepository.lagre(behandling.getId(), new VurdertOpplæringHolder(List.of(vurdertOpplæring)));
 
         Response response = restTjeneste.hentVurdertNødvendigOpplæring(new BehandlingUuidDto(behandling.getUuid()));

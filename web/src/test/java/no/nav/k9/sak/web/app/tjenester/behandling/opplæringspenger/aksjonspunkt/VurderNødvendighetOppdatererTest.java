@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.db.util.CdiDbAwareTest;
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto;
@@ -24,15 +26,19 @@ import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
 
 @CdiDbAwareTest
 public class VurderNødvendighetOppdatererTest {
 
     @Inject
     private VurdertOpplæringRepository vurdertOpplæringRepository;
-
     @Inject
-    public EntityManager entityManager;
+    private EntityManager entityManager;
+    @Inject
+    private BehandlingRepository behandlingRepository;
+    @Inject
+    private PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
 
     private VurderNødvendighetOppdaterer vurderNødvendighetOppdaterer;
     private LocalDate now;
@@ -41,7 +47,7 @@ public class VurderNødvendighetOppdatererTest {
     @BeforeEach
     public void setup() {
         BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-        vurderNødvendighetOppdaterer = new VurderNødvendighetOppdaterer(vurdertOpplæringRepository);
+        vurderNødvendighetOppdaterer = new VurderNødvendighetOppdaterer(vurdertOpplæringRepository, behandlingRepository, pleietrengendeSykdomDokumentRepository);
         now = LocalDate.now();
         TestScenarioBuilder scenario = TestScenarioBuilder.builderMedSøknad();
         scenario.medSøknad().medSøknadsdato(now);
@@ -52,7 +58,7 @@ public class VurderNødvendighetOppdatererTest {
     @Test
     public void skalLagreNyttVurdertOpplæringGrunnlag() {
         final JournalpostIdDto journalpostIdDto = new JournalpostIdDto("1337");
-        final VurderNødvendighetDto dto = new VurderNødvendighetDto(journalpostIdDto, true, "");
+        final VurderNødvendighetDto dto = new VurderNødvendighetDto(journalpostIdDto, true, "", Set.of());
         dto.setBegrunnelse("fordi");
 
         OppdateringResultat resultat = lagreGrunnlag(dto);
@@ -70,10 +76,10 @@ public class VurderNødvendighetOppdatererTest {
     @Test
     public void skalOppdatereVurdertOpplæringGrunnlag() {
         final JournalpostIdDto journalpostIdDto = new JournalpostIdDto("1338");
-        final VurderNødvendighetDto dto1 = new VurderNødvendighetDto(journalpostIdDto, false, "");
+        final VurderNødvendighetDto dto1 = new VurderNødvendighetDto(journalpostIdDto, false, "", Set.of());
         lagreGrunnlag(dto1);
 
-        final VurderNødvendighetDto dto2 = new VurderNødvendighetDto(journalpostIdDto, true, "");
+        final VurderNødvendighetDto dto2 = new VurderNødvendighetDto(journalpostIdDto, true, "", Set.of());
         lagreGrunnlag(dto2);
 
         Optional<VurdertOpplæringGrunnlag> grunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId());
@@ -86,11 +92,11 @@ public class VurderNødvendighetOppdatererTest {
     @Test
     public void skalLagreGrunnlagOgKopiereFraAktivtForAnnenJornalpostId() {
         final JournalpostIdDto journalpostIdDto1 = new JournalpostIdDto("1339");
-        final VurderNødvendighetDto dto1 = new VurderNødvendighetDto(journalpostIdDto1, true, "");
+        final VurderNødvendighetDto dto1 = new VurderNødvendighetDto(journalpostIdDto1, true, "", Set.of());
         lagreGrunnlag(dto1);
 
         final JournalpostIdDto journalpostIdDto2 = new JournalpostIdDto("1340");
-        final VurderNødvendighetDto dto2 = new VurderNødvendighetDto(journalpostIdDto2, true, "");
+        final VurderNødvendighetDto dto2 = new VurderNødvendighetDto(journalpostIdDto2, true, "", Set.of());
         lagreGrunnlag(dto2);
 
         Optional<VurdertOpplæringGrunnlag> grunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId());
