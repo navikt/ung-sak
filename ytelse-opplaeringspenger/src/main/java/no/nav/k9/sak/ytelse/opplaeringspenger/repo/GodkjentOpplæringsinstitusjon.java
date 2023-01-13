@@ -43,7 +43,7 @@ public class GodkjentOpplæringsinstitusjon extends BaseEntitet {
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
     private List<GodkjentOpplæringsinstitusjonPeriode> perioder;
 
-    public GodkjentOpplæringsinstitusjon() {
+    GodkjentOpplæringsinstitusjon() {
     }
 
     public GodkjentOpplæringsinstitusjon(UUID uuid, String navn, List<GodkjentOpplæringsinstitusjonPeriode> perioder) {
