@@ -48,7 +48,7 @@ public class VurderInstitusjonOppdatererTest {
     }
 
     @Test
-    public void skalLagreNyttVurdertInstitusjonGrunnlag() {
+    public void skalLagreNyttGrunnlag() {
         final VurderInstitusjonDto dto = new VurderInstitusjonDto(new JournalpostIdDto("123"), true, "fordi");
 
         OppdateringResultat resultat = lagreGrunnlag(dto);
@@ -65,7 +65,7 @@ public class VurderInstitusjonOppdatererTest {
     }
 
     @Test
-    public void skalOppdatereVurdertInstitusjonGrunnlag() {
+    public void skalOppdatereGrunnlag() {
         final VurderInstitusjonDto dto1 = new VurderInstitusjonDto(new JournalpostIdDto("123"), true, "fordi");
         lagreGrunnlag(dto1);
 

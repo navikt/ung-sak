@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.aksjonspunk
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
 
@@ -22,10 +23,15 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.db.util.CdiDbAwareTest;
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto;
 import no.nav.k9.sak.kontrakt.opplæringspenger.VurderNødvendighetDto;
+import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokument;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentInformasjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
 
 @CdiDbAwareTest
@@ -43,6 +49,7 @@ public class VurderNødvendighetOppdatererTest {
     private VurderNødvendighetOppdaterer vurderNødvendighetOppdaterer;
     private LocalDate now;
     private Behandling behandling;
+    private PleietrengendeSykdomDokument legeerklæring;
 
     @BeforeEach
     public void setup() {
@@ -53,12 +60,14 @@ public class VurderNødvendighetOppdatererTest {
         scenario.medSøknad().medSøknadsdato(now);
         scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDER_NØDVENDIGHET, BehandlingStegType.VURDER_NØDVENDIGHETS_VILKÅR);
         behandling = scenario.lagre(repositoryProvider);
+        scenario.getFagsak().setPleietrengende(AktørId.dummy());
+        legeerklæring = lagreNyttSykdomDokument(SykdomDokumentType.LEGEERKLÆRING_MED_DOKUMENTASJON_AV_OPPLÆRING);
     }
 
     @Test
-    public void skalLagreNyttVurdertOpplæringGrunnlag() {
+    public void skalLagreNyttGrunnlag() {
         final JournalpostIdDto journalpostIdDto = new JournalpostIdDto("1337");
-        final VurderNødvendighetDto dto = new VurderNødvendighetDto(journalpostIdDto, true, "", Set.of());
+        final VurderNødvendighetDto dto = new VurderNødvendighetDto(journalpostIdDto, true, "", Set.of(legeerklæring.getId().toString()));
         dto.setBegrunnelse("fordi");
 
         OppdateringResultat resultat = lagreGrunnlag(dto);
@@ -71,15 +80,18 @@ public class VurderNødvendighetOppdatererTest {
         VurdertOpplæring vurdertOpplæring = grunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring().get(0);
         assertThat(vurdertOpplæring.getNødvendigOpplæring()).isEqualTo(dto.isNødvendigOpplæring());
         assertThat(vurdertOpplæring.getBegrunnelse()).isEqualTo(dto.getBegrunnelse());
+        assertThat(vurdertOpplæring.getDokumenter()).hasSize(1);
+        assertThat(vurdertOpplæring.getDokumenter().get(0)).isEqualTo(legeerklæring);
     }
 
     @Test
-    public void skalOppdatereVurdertOpplæringGrunnlag() {
+    public void skalOppdatereGrunnlag() {
         final JournalpostIdDto journalpostIdDto = new JournalpostIdDto("1338");
-        final VurderNødvendighetDto dto1 = new VurderNødvendighetDto(journalpostIdDto, false, "", Set.of());
+        final VurderNødvendighetDto dto1 = new VurderNødvendighetDto(journalpostIdDto, false, "", Set.of(legeerklæring.getId().toString()));
         lagreGrunnlag(dto1);
 
-        final VurderNødvendighetDto dto2 = new VurderNødvendighetDto(journalpostIdDto, true, "", Set.of());
+        var kursbeskrivelse = lagreNyttSykdomDokument(SykdomDokumentType.DOKUMENTASJON_AV_OPPLÆRING);
+        final VurderNødvendighetDto dto2 = new VurderNødvendighetDto(journalpostIdDto, true, "", Set.of(kursbeskrivelse.getId().toString()));
         lagreGrunnlag(dto2);
 
         Optional<VurdertOpplæringGrunnlag> grunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId());
@@ -87,6 +99,8 @@ public class VurderNødvendighetOppdatererTest {
         assertThat(grunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring()).hasSize(1);
         var vurdertOpplæring = grunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring().get(0);
         assertThat(vurdertOpplæring.getNødvendigOpplæring()).isEqualTo(dto2.isNødvendigOpplæring());
+        assertThat(vurdertOpplæring.getDokumenter()).hasSize(1);
+        assertThat(vurdertOpplæring.getDokumenter().get(0)).isEqualTo(kursbeskrivelse);
     }
 
     @Test
@@ -113,5 +127,13 @@ public class VurderNødvendighetOppdatererTest {
         AksjonspunktOppdaterParameter param = new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, dto);
 
         return vurderNødvendighetOppdaterer.oppdater(dto, param);
+    }
+
+    private PleietrengendeSykdomDokument lagreNyttSykdomDokument(SykdomDokumentType type) {
+        PleietrengendeSykdomDokument dokument = new PleietrengendeSykdomDokument(new JournalpostId("456"), null,
+            new PleietrengendeSykdomDokumentInformasjon(type, false, LocalDate.now(), LocalDateTime.now(), 1L, "meg", LocalDateTime.now()),
+            null, null, null, "meg", LocalDateTime.now());
+        pleietrengendeSykdomDokumentRepository.lagre(dokument, behandling.getFagsak().getPleietrengendeAktørId());
+        return dokument;
     }
 }

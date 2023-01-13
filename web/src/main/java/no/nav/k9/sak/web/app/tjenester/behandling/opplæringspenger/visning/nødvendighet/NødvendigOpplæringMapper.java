@@ -49,7 +49,7 @@ class NødvendigOpplæringMapper {
                     finnPerioderForJournalpostId(vurdertOpplæring.getJournalpostId(), perioderFraSøknad),
                     vurdertOpplæring.getNødvendigOpplæring() ? Resultat.GODKJENT : Resultat.IKKE_GODKJENT,
                     vurdertOpplæring.getBegrunnelse(),
-                    vurdertOpplæring.getDokumenter().stream().map(dokument -> "" + dokument.getId()).collect(Collectors.toSet()))
+                    vurdertOpplæring.getDokumenter().stream().map(dokument -> "" + dokument.getId()).collect(Collectors.toList()))
                 );
             }
         }
@@ -64,7 +64,7 @@ class NødvendigOpplæringMapper {
                     perioder.stream().map(periode -> new Periode(periode.getFomDato(), periode.getTomDato())).toList(),
                     Resultat.MÅ_VURDERES,
                     null,
-                    Set.of())
+                    List.of())
                 );
             }
         }

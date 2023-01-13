@@ -1,7 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.visning.nødvendighet;
 
 import java.util.List;
-import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -42,9 +41,9 @@ public class NødvendighetVurderingDto {
     @JsonProperty(value = "tilknyttedeDokumenter", required = true)
     @Size(max = 100)
     @Valid
-    private Set<String> tilknyttedeDokumenter;
+    private List<String> tilknyttedeDokumenter;
 
-    public NødvendighetVurderingDto(JournalpostIdDto journalpostId, List<Periode> perioder, Resultat resultat, String begrunnelse, Set<String> tilknyttedeDokumenter) {
+    public NødvendighetVurderingDto(JournalpostIdDto journalpostId, List<Periode> perioder, Resultat resultat, String begrunnelse, List<String> tilknyttedeDokumenter) {
         this.journalpostId = journalpostId;
         this.perioder = perioder;
         this.resultat = resultat;
@@ -68,7 +67,7 @@ public class NødvendighetVurderingDto {
         return begrunnelse;
     }
 
-    public Set<String> getTilknyttedeDokumenter() {
+    public List<String> getTilknyttedeDokumenter() {
         return tilknyttedeDokumenter;
     }
 }

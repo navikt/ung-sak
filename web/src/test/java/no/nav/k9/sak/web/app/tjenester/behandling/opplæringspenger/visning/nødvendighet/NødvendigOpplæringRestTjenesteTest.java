@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -20,12 +21,17 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.db.util.CdiDbAwareTest;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringHolder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokument;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentInformasjon;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.KursPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPeriode;
@@ -44,12 +50,15 @@ class NødvendigOpplæringRestTjenesteTest {
     private VurdertOpplæringRepository vurdertOpplæringRepository;
     @Inject
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
+    @Inject
+    private PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
 
     private Behandling behandling;
     private final JournalpostId journalpostId1 = new JournalpostId("1776");
     private final JournalpostId journalpostId2 = new JournalpostId("1789");
     private final Periode kursperiode1 = new Periode(LocalDate.now().minusWeeks(1), LocalDate.now());
     private final Periode kursperiode2 = new Periode(LocalDate.now().plusDays(1), LocalDate.now().plusWeeks(1));
+    private PleietrengendeSykdomDokument dokument;
 
     @BeforeEach
     void setup() {
@@ -57,6 +66,12 @@ class NødvendigOpplæringRestTjenesteTest {
 
         TestScenarioBuilder scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.OPPLÆRINGSPENGER);
         behandling = scenario.lagre(repositoryProvider);
+
+        scenario.getFagsak().setPleietrengende(AktørId.dummy());
+        dokument = new PleietrengendeSykdomDokument(new JournalpostId("456"), null,
+            new PleietrengendeSykdomDokumentInformasjon(SykdomDokumentType.DOKUMENTASJON_AV_OPPLÆRING, false, LocalDate.now(), LocalDateTime.now(), 1L, "meg", LocalDateTime.now()),
+            null, null, null, "meg", LocalDateTime.now());
+        pleietrengendeSykdomDokumentRepository.lagre(dokument, behandling.getFagsak().getPleietrengendeAktørId());
     }
 
     private PerioderFraSøknad lagPerioderFraSøknad(JournalpostId journalpostId, Periode kursperiode) {
@@ -103,7 +118,7 @@ class NødvendigOpplæringRestTjenesteTest {
         var perioderFraSøknad = lagPerioderFraSøknad(journalpostId1, kursperiode1);
         uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), new UttakPerioderHolder(Set.of(perioderFraSøknad)));
 
-        var vurdertOpplæring = new VurdertOpplæring(journalpostId1, true, "fordi", List.of());
+        var vurdertOpplæring = new VurdertOpplæring(journalpostId1, true, "fordi", List.of(dokument));
         vurdertOpplæringRepository.lagre(behandling.getId(), new VurdertOpplæringHolder(List.of(vurdertOpplæring)));
 
         Response response = restTjeneste.hentVurdertNødvendigOpplæring(new BehandlingUuidDto(behandling.getUuid()));
@@ -123,6 +138,8 @@ class NødvendigOpplæringRestTjenesteTest {
         assertThat(result.getVurderinger().get(0).getResultat()).isEqualTo(Resultat.GODKJENT);
         assertThat(result.getVurderinger().get(0).getJournalpostId().getJournalpostId()).isEqualTo(journalpostId1);
         assertThat(result.getVurderinger().get(0).getBegrunnelse()).isEqualTo("fordi");
+        assertThat(result.getVurderinger().get(0).getTilknyttedeDokumenter()).hasSize(1);
+        assertThat(result.getVurderinger().get(0).getTilknyttedeDokumenter().get(0)).isEqualTo(dokument.getId().toString());
     }
 
     @Test

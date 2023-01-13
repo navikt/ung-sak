@@ -1,6 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.visning.gjennomgått;
 
-import java.util.Set;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -35,9 +35,9 @@ public class OpplæringVurderingDto {
     @JsonProperty(value = "tilknyttedeDokumenter", required = true)
     @Size(max = 100)
     @Valid
-    private Set<String> tilknyttedeDokumenter;
+    private List<String> tilknyttedeDokumenter;
 
-    public OpplæringVurderingDto(Periode periode, Resultat resultat, String begrunnelse, Set<String> tilknyttedeDokumenter) {
+    public OpplæringVurderingDto(Periode periode, Resultat resultat, String begrunnelse, List<String> tilknyttedeDokumenter) {
         this.periode = periode;
         this.resultat = resultat;
         this.begrunnelse = begrunnelse;
@@ -56,7 +56,7 @@ public class OpplæringVurderingDto {
         return begrunnelse;
     }
 
-    public Set<String> getTilknyttedeDokumenter() {
+    public List<String> getTilknyttedeDokumenter() {
         return tilknyttedeDokumenter;
     }
 }

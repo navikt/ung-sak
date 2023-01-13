@@ -41,7 +41,7 @@ class GjennomgåttOpplæringMapper {
                 vurderinger.add(new OpplæringVurderingDto(vurdertOpplæringPeriode.getPeriode().tilPeriode(),
                     vurdertOpplæringPeriode.getGjennomførtOpplæring() ? Resultat.GODKJENT : Resultat.IKKE_GODKJENT,
                     vurdertOpplæringPeriode.getBegrunnelse(),
-                    vurdertOpplæringPeriode.getDokumenter().stream().map(dokument -> "" + dokument.getId()).collect(Collectors.toSet()))
+                    vurdertOpplæringPeriode.getDokumenter().stream().map(dokument -> "" + dokument.getId()).collect(Collectors.toList()))
                 );
             }
         }
@@ -61,7 +61,7 @@ class GjennomgåttOpplæringMapper {
             new Periode(segment.getFom(), segment.getTom()),
             Resultat.MÅ_VURDERES,
             null,
-            Set.of()))
+            List.of()))
         );
 
         return vurderinger;
