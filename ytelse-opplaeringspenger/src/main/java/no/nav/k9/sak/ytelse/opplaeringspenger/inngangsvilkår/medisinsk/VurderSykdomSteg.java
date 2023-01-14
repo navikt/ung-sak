@@ -184,7 +184,7 @@ public class VurderSykdomSteg implements BehandlingSteg {
                 .toList());
 
             var fullstendigAvslagsTidslinje = new LocalDateTimeline<>(timeline.toSegments());
-            timeline = timeline.disjoint(Hjelpetidslinjer.lagTidslinjeMedKunHelger(timeline));
+            timeline = Hjelpetidslinjer.fjernHelger(timeline);
             var tidslinjeMedHullSomMangler = Hjelpetidslinjer.utledHullSomMåTettes(timeline, new PåTversAvHelgErKantIKantVurderer());
             timeline = timeline.combine(tidslinjeMedHullSomMangler, StandardCombinators::coalesceRightHandSide, JoinStyle.CROSS_JOIN);
             var manglendeAvslag = fullstendigAvslagsTidslinje.disjoint(timeline);
