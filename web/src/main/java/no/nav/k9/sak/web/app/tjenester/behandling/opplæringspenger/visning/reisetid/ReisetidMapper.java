@@ -32,7 +32,9 @@ class ReisetidMapper {
                 perioder.add(new ReisetidPeriodeDto(
                     kursPeriode.getPeriode().tilPeriode(),
                     kursPeriode.getReiseperiodeTil() != null ? kursPeriode.getReiseperiodeTil().tilPeriode() : null,
-                    kursPeriode.getReiseperiodeHjem() != null ? kursPeriode.getReiseperiodeHjem().tilPeriode() : null));
+                    kursPeriode.getReiseperiodeHjem() != null ? kursPeriode.getReiseperiodeHjem().tilPeriode() : null,
+                    kursPeriode.getBegrunnelseReisetidTil(),
+                    kursPeriode.getBegrunnelseReisetidHjem()));
             }
         }
 
