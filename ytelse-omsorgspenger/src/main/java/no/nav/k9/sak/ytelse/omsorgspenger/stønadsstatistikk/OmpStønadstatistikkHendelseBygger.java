@@ -124,13 +124,17 @@ public class OmpStønadstatistikkHendelseBygger implements StønadstatistikkHend
     private StønadstatistikkPeriode mapPeriode(LocalDateSegment<StønadstatistikkPeriodetidslinjebygger.InformasjonTilStønadstatistikkHendelse> ds) {
         UttakResultatPeriode info = ds.getValue().getUttakresultat();
         final BigDecimal bruttoBeregningsgrunnlag = (ds.getValue().getBeregningsgrunnlagDto() != null) ? ds.getValue().getBeregningsgrunnlagDto().getÅrsinntektVisningstall() : BigDecimal.valueOf(-1);
-                return StønadstatistikkPeriode.forOmsorgspenger(ds.getFom(), ds.getTom(), mapUtfall(ds.getValue()),  mapUtbetalingsgrader(info, ds.getValue().getBeregningsresultatAndeler()), mapInngangsvilkår(ds.getValue()), bruttoBeregningsgrunnlag);
+        return StønadstatistikkPeriode.forOmsorgspenger(ds.getFom(), ds.getTom(), mapUtfall(ds.getValue()), mapUtbetalingsgrader(info, ds.getValue().getBeregningsresultatAndeler()), mapInngangsvilkår(ds.getValue()), bruttoBeregningsgrunnlag);
     }
 
     private StønadstatistikkUtfall mapUtfall(StønadstatistikkPeriodetidslinjebygger.InformasjonTilStønadstatistikkHendelse hendelse) {
         Set<Utfall> alleUtfall = EnumSet.noneOf(Utfall.class);
-        alleUtfall.addAll(hendelse.getVilkårFraK9sak().values().stream().map(VilkårUtfall::getUtfall).toList());
-        alleUtfall.addAll(hendelse.getVilkårFraÅrskvantum().values().stream().map(VilkårUtfall::getUtfall).toList());
+        if (hendelse.getVilkårFraK9sak() != null) {
+            alleUtfall.addAll(hendelse.getVilkårFraK9sak().values().stream().map(VilkårUtfall::getUtfall).toList());
+        }
+        if (hendelse.getVilkårFraÅrskvantum() != null) {
+            alleUtfall.addAll(hendelse.getVilkårFraÅrskvantum().values().stream().map(VilkårUtfall::getUtfall).toList());
+        }
 
         if (alleUtfall.contains(Utfall.IKKE_OPPFYLT)) {
             return StønadstatistikkUtfall.IKKE_OPPFYLT;
@@ -138,10 +142,13 @@ public class OmpStønadstatistikkHendelseBygger implements StønadstatistikkHend
         if (alleUtfall.contains(Utfall.UDEFINERT)) {
             throw new IllegalArgumentException("Ikke-håndtert utfall-type: UDEFINERT");
         }
-        if (alleUtfall.contains(Utfall.IKKE_VURDERT)) {
-            throw new IllegalArgumentException("Ikke-håndtert utfall-type: IKKE_VURDERT");
+        if (alleUtfall.stream().anyMatch(utfall -> utfall == Utfall.OPPFYLT)) {
+            return StønadstatistikkUtfall.OPPFYLT;
         }
-        return StønadstatistikkUtfall.OPPFYLT;
+        if (alleUtfall.isEmpty()) {
+            throw new IllegalArgumentException("Ingen utfall å mappe");
+        }
+        throw new IllegalArgumentException("Har ikke mapping for utfall: " + alleUtfall);
     }
 
     private List<StønadstatistikkUtbetalingsgrad> mapUtbetalingsgrader(UttakResultatPeriode uttakResultatPerioder, List<BeregningsresultatAndel> beregningsresultatAndeler) {
@@ -250,6 +257,9 @@ public class OmpStønadstatistikkHendelseBygger implements StønadstatistikkHend
     }
 
     private List<StønadstatistikkInngangsvilkår> mapVilkårFraK9Sak(Map<VilkårType, VilkårUtfall> vilkår) {
+        if (vilkår == null) {
+            return List.of();
+        }
         return vilkår.entrySet().stream()
             .map(e -> mapVilkår(e.getKey(), e.getValue()))
             .toList();
@@ -282,6 +292,9 @@ public class OmpStønadstatistikkHendelseBygger implements StønadstatistikkHend
     }
 
     private List<StønadstatistikkInngangsvilkår> mapVilkårFraK9Årskvantum(Map<Vilkår, VilkårUtfall> vilkår) {
+        if (vilkår == null) {
+            return List.of();
+        }
         return vilkår.entrySet().stream()
             .map(e -> mapVilkår(e.getKey(), e.getValue()))
             .toList();

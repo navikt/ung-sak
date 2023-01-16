@@ -124,6 +124,7 @@ public class AksjonspunktKodeDefinisjon {
     public static final String VURDER_INSTITUSJON = "9300";
     public static final String VURDER_NØDVENDIGHET = "9301";
     public static final String VURDER_GJENNOMGÅTT_OPPLÆRING = "9302";
+    public static final String VURDER_REISETID = "9303";
 
     // OMS
     public static final String AVKLAR_OMSORGEN_FOR_KODE = "9002";
@@ -141,6 +142,7 @@ public class AksjonspunktKodeDefinisjon {
 
     // Generelt manglende funksjonalitet.
     public static final String AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET = "9999";
+    public static final String AUTO_VENTE_PA_OMSORGENFOR_OMS = "9099";
 
     // Kompletthet for beregning
     public static final String AVKLAR_KOMPLETT_NOK_FOR_BEREGNING_KODE = "9069";

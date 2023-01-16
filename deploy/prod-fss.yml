@@ -238,8 +238,6 @@ spec:
       value: "false"
     - name: PSB_UTTAK_UNNTAK_AKTIVITETER
       value: "AFMX0|2021-03-01"
-    - name: OMP_STONADSTATISTIKK
-      value: "false"
     - name: OMP_VERIFISERING_TILKJENT_YTELSE
       value: "false"
     - name: ENABLE_FAGSAK_AVSLUTTING
@@ -259,7 +257,7 @@ spec:
     - name: ENABLE_PRODUCER_AKSJONSPUNKTHENDELSE_LOS_AIVEN
       value: "true"
     - name: IKKE_YRKESAKTIV_UTEN_SPEILING
-      vale: "false"
+      value: "false"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT

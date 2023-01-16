@@ -25,7 +25,7 @@ class GjennomgåttOpplæringTidslinjeUtleder {
 
         LocalDateTimeline<OpplæringGodkjenningStatus> tidslinjeReisetid = lagTidslinjeReisetid(perioderFraSøknad, vurdertOpplæringGrunnlag, tidslinjeTilVurderingEtterJusteringMotVilkår);
 
-        return tidslinjeMedGjennomgåttOpplæring.crossJoin(tidslinjeReisetid).crossJoin(tidslinjeTilVurderingEtterJusteringMotVilkår.mapValue(value -> OpplæringGodkjenningStatus.MANGLER_VURDERING));
+        return tidslinjeMedGjennomgåttOpplæring.crossJoin(tidslinjeReisetid).crossJoin(tidslinjeTilVurderingEtterJusteringMotVilkår.mapValue(value -> OpplæringGodkjenningStatus.MANGLER_VURDERING_OPPLÆRING));
     }
 
     private LocalDateTimeline<Boolean> lagTidslinjeMedIkkeGodkjentTidligereVilkår(Vilkårene vilkårene) {
@@ -40,7 +40,7 @@ class GjennomgåttOpplæringTidslinjeUtleder {
             var vurdertTidslinje = vurdertOpplæringGrunnlag.getVurdertePerioder().getTidslinjeOpplæring().intersection(tidslinjeTilVurdering);
 
             var godkjentTidslinje = vurdertTidslinje.filterValue(VurdertOpplæringPeriode::getGjennomførtOpplæring).mapValue(value -> OpplæringGodkjenningStatus.GODKJENT);
-            var ikkeGodkjentTidslinje = vurdertTidslinje.disjoint(godkjentTidslinje).mapValue(value -> OpplæringGodkjenningStatus.IKKE_GODKJENT);
+            var ikkeGodkjentTidslinje = vurdertTidslinje.disjoint(godkjentTidslinje).mapValue(value -> OpplæringGodkjenningStatus.IKKE_GODKJENT_OPPLÆRING);
 
             return godkjentTidslinje.crossJoin(ikkeGodkjentTidslinje);
         }
@@ -49,9 +49,9 @@ class GjennomgåttOpplæringTidslinjeUtleder {
     }
 
     private LocalDateTimeline<OpplæringGodkjenningStatus> lagTidslinjeReisetid(Set<PerioderFraSøknad> perioderFraSøknad, VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
-        var oppgittReisetid = ReisetidUtleder.finnOppgittReisetid(perioderFraSøknad).mapValue(value -> OpplæringGodkjenningStatus.IKKE_GODKJENT_REISETID);
-        var godkjentReisetid = ReisetidUtleder.utledGodkjentReisetid(perioderFraSøknad, vurdertOpplæringGrunnlag).mapValue(value -> OpplæringGodkjenningStatus.GODKJENT);
+        var oppgittReisetid = ReisetidUtleder.finnOppgittReisetid(perioderFraSøknad).mapValue(value -> OpplæringGodkjenningStatus.MANGLER_VURDERING_REISETID);
+        var vurdertReisetid = ReisetidUtleder.utledVurdertReisetid(perioderFraSøknad, vurdertOpplæringGrunnlag);
 
-        return godkjentReisetid.crossJoin(oppgittReisetid).intersection(tidslinjeTilVurdering);
+        return vurdertReisetid.crossJoin(oppgittReisetid).intersection(tidslinjeTilVurdering);
     }
 }

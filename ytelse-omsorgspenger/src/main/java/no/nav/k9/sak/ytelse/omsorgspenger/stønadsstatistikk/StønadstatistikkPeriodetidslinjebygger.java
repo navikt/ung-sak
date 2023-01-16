@@ -97,14 +97,32 @@ class StønadstatistikkPeriodetidslinjebygger {
             (datoInterval, datoSegment, datoSegment2) -> new LocalDateSegment<>(datoInterval, datoSegment.getValue().kopiMedVilkårFraÅrskvantum(valueOrNull(datoSegment2)))
             , JoinStyle.LEFT_JOIN);
 
+        LocalDateTimeline<InformasjonTilStønadstatistikkHendelse> deduplisert = medk9årskvantumVilkår.mapValue(this::fjernDuplisertOmsorgenFor);
 
         LocalDateTimeline<Map<VilkårType, VilkårUtfall>> søknadsfristTidslinje = lagSøknadsfristTidslinjePrKravstiller(behandling);
-        medk9årskvantumVilkår.combine(søknadsfristTidslinje,
+        return deduplisert.combine(søknadsfristTidslinje,
             (datoInterval, lhs, rhs) -> new LocalDateSegment<>(datoInterval, lhs != null ? (rhs != null ? lhs.getValue().leggTilVilkårFraK9sak(rhs.getValue()) : lhs.getValue()) : new InformasjonTilStønadstatistikkHendelse().leggTilVilkårFraK9sak(rhs.getValue())),
             JoinStyle.CROSS_JOIN); //må ha CROSS_JOIN for å få med perioder med avslag i søknadsfrist. De blir ikke tatt med i vilkårsperiodene
+    }
 
-
-        return medk9årskvantumVilkår;
+    InformasjonTilStønadstatistikkHendelse fjernDuplisertOmsorgenFor(InformasjonTilStønadstatistikkHendelse hendelse) {
+        VilkårUtfall k9sakOmsorgenFor = hendelse.getVilkårFraK9sak() != null ? hendelse.getVilkårFraK9sak().get(VilkårType.OMSORGEN_FOR) : null;
+        VilkårUtfall k9årskvantumOmsorgenFor = hendelse.getVilkårFraÅrskvantum() != null ? hendelse.getVilkårFraÅrskvantum().get(Vilkår.OMSORGSVILKÅRET) : null;
+        if (k9sakOmsorgenFor == null || k9årskvantumOmsorgenFor == null) {
+            //omsorgen for er ikke lagt til begge steder
+            return hendelse;
+        }
+        if (k9sakOmsorgenFor.getUtfall() == Utfall.IKKE_VURDERT) {
+            Map<VilkårType, VilkårUtfall> k9sakVilkår = new EnumMap<>(hendelse.getVilkårFraK9sak());
+            k9sakVilkår.remove(VilkårType.OMSORGEN_FOR);
+            return hendelse.kopiMedVilkårFraK9sak(k9sakVilkår);
+        }
+        if (k9årskvantumOmsorgenFor.getUtfall() == Utfall.IKKE_VURDERT) {
+            Map<Vilkår, VilkårUtfall> k9årskvantumVilkår = new EnumMap<>(hendelse.getVilkårFraÅrskvantum());
+            k9årskvantumVilkår.remove(Vilkår.OMSORGSVILKÅRET);
+            return hendelse.kopiMedVilkårFraÅrskvantum(k9årskvantumVilkår);
+        }
+        throw new IllegalArgumentException("Kan ikke fjerne duplisert omsorgen for-vilkår, når vurdert i både k9-sak og k9-årskvantum");
     }
 
     private LocalDateTimeline<Map<VilkårType, VilkårUtfall>> lagVilkårTidslinje(Behandling behandling) {

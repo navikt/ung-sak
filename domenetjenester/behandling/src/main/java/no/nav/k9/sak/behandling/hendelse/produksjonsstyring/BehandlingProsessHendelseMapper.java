@@ -121,9 +121,10 @@ public class BehandlingProsessHendelseMapper {
         LocalDateTimeline<KravDokument> eldsteKravTidslinje = LocalDateTimeline.empty();
         for (KravDokument kravdokument : kravdokumenterMedEldsteFørst) {
             final List<SøktPeriode<SøktPeriodeData>> perioder = kravdokumenterMedPeriode.get(kravdokument);
-            final var tidslinje = new LocalDateTimeline<>(perioder.stream()
+            final var segments = perioder.stream()
                     .map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), kravdokument))
-                    .collect(Collectors.toList()));
+                    .collect(Collectors.toList());
+            final var tidslinje = new LocalDateTimeline<>(segments, StandardCombinators::coalesceLeftHandSide);
             eldsteKravTidslinje = eldsteKravTidslinje.union(tidslinje, StandardCombinators::coalesceLeftHandSide);
         }
         return eldsteKravTidslinje;

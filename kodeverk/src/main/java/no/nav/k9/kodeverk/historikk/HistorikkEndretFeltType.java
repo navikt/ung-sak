@@ -55,6 +55,9 @@ public enum HistorikkEndretFeltType implements Kodeverdi {
     BRUTTO_NAERINGSINNTEKT("BRUTTO_NAERINGSINNTEKT", "Brutto næringsinntekt"),
     KOMPLETTHET("KOMPLETTHET", "Avklar inntektsgrunnlag for skjæringstidspunkt"),
     NY_STARTDATO_REFUSJON("NY_STARTDATO_REFUSJON", "Ny startdato for refusjon"),
+    VURDER_NYTT_INNTEKTSFORHOLD("VURDER_NYTT_INNTEKTSFORHOLD", "Skal nytt inntektsforhold redusere utbetaling"),
+    BRUTTO_INNTEKT_NYTT_INNTEKTSFORHOLD("BRUTTO_INNTEKT_NYTT_INNTEKTSFORHOLD", "Brutto inntekt for nytt inntektsforhold som skal redusere utbetaling"),
+
     DELVIS_REFUSJON_FØR_STARTDATO("DELVIS_REFUSJON_FØR_STARTDATO", "Delvis refusjon før startdato"),
     PERIODE_TOM("PERIODE_TOM", "Periode t.o.m."),
 

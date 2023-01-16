@@ -237,8 +237,6 @@ spec:
       value: "true"
     - name: ENABLE_BRUKERDIALOGINNSYN
       value: "true"
-    - name: OMP_STONADSTATISTIKK
-      value: "true"
     - name: OMP_VERIFISERING_TILKJENT_YTELSE
       value: "true"
     - name: SOKNADSFRIST_BENYTT_ELDSTEKRAV_PER_PERIODE
@@ -249,8 +247,6 @@ spec:
       value: "true"
     - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
       value: "2022-08-08"
-    - name: PSB_UTTAK_UNNTAK_BEVAR_VEDTATT_VERDI
-      value: "true"
     - name: BG_FORLENGELSE_BASERT_PAA_UTTAK
       value: "false"
     - name: ENABLE_PRODUCER_DOKUMENTBESTILLING_AIVEN
@@ -262,7 +258,9 @@ spec:
     - name: ENABLE_PRODUCER_AKSJONSPUNKTHENDELSE_LOS_AIVEN
       value: "true"
     - name: IKKE_YRKESAKTIV_UTEN_SPEILING
-      vale: "true"
+      value: "true"
+    - name: OMS_OMSORGENFOR_FLYTTET
+      value: "true"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT

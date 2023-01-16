@@ -30,7 +30,7 @@ public class GodkjentOpplæringsinstitusjonPeriode extends BaseEntitet {
     })
     private DatoIntervallEntitet periode;
 
-    public GodkjentOpplæringsinstitusjonPeriode() {
+    GodkjentOpplæringsinstitusjonPeriode() {
     }
 
     public GodkjentOpplæringsinstitusjonPeriode(LocalDate fomDato, LocalDate tomDato) {
