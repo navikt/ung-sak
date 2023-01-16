@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import no.nav.k9.sak.typer.Periode;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -25,10 +27,22 @@ public class ReisetidPeriodeDto {
     @Valid
     private Periode reisetidHjem;
 
-    public ReisetidPeriodeDto(Periode opplæringPeriode, Periode reisetidTil, Periode reisetidHjem) {
+    @JsonProperty(value = "beskrivelseFraSoekerTil")
+    @Size(max = 4000)
+    @Pattern(regexp = "^[\\p{Pd}\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]*$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    private String beskrivelseFraSoekerTil;
+
+    @JsonProperty(value = "beskrivelseFraSoekerHjem")
+    @Size(max = 4000)
+    @Pattern(regexp = "^[\\p{Pd}\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]*$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    private String beskrivelseFraSoekerHjem;
+
+    public ReisetidPeriodeDto(Periode opplæringPeriode, Periode reisetidTil, Periode reisetidHjem, String beskrivelseFraSoekerTil, String beskrivelseFraSoekerHjem) {
         this.opplæringPeriode = opplæringPeriode;
         this.reisetidTil = reisetidTil;
         this.reisetidHjem = reisetidHjem;
+        this.beskrivelseFraSoekerTil = beskrivelseFraSoekerTil;
+        this.beskrivelseFraSoekerHjem = beskrivelseFraSoekerHjem;
     }
 
     public Periode getOpplæringPeriode() {
@@ -41,5 +55,13 @@ public class ReisetidPeriodeDto {
 
     public Periode getReisetidHjem() {
         return reisetidHjem;
+    }
+
+    public String getBeskrivelseFraSoekerTil() {
+        return beskrivelseFraSoekerTil;
+    }
+
+    public String getBeskrivelseFraSoekerHjem() {
+        return beskrivelseFraSoekerHjem;
     }
 }

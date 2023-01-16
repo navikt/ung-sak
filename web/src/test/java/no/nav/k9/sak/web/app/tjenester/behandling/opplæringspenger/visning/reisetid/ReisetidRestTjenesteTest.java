@@ -65,7 +65,7 @@ class ReisetidRestTjenesteTest {
             Collections.emptyList(),
             Collections.emptyList(),
             Collections.emptyList(),
-            List.of(new KursPeriode(kursperiode.getFom(), kursperiode.getTom(), reiseperiodeTil, reiseperiodeHjem, "institusjon", null)));
+            List.of(new KursPeriode(kursperiode.getFom(), kursperiode.getTom(), reiseperiodeTil, reiseperiodeHjem, "institusjon", null, "fordi", "forda")));
 
         uttakPerioderGrunnlagRepository.lagre(behandling.getId(), perioderFraSøknad);
         uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), new UttakPerioderHolder(Set.of(perioderFraSøknad)));
@@ -88,6 +88,8 @@ class ReisetidRestTjenesteTest {
         assertThat(result.getPerioder().get(0).getOpplæringPeriode()).isEqualTo(kursperiode);
         assertThat(result.getPerioder().get(0).getReisetidTil()).isEqualTo(reiseperiodeTil.tilPeriode());
         assertThat(result.getPerioder().get(0).getReisetidHjem()).isEqualTo(reiseperiodeHjem.tilPeriode());
+        assertThat(result.getPerioder().get(0).getBeskrivelseFraSoekerTil()).isEqualTo("fordi");
+        assertThat(result.getPerioder().get(0).getBeskrivelseFraSoekerHjem()).isEqualTo("forda");
 
         assertThat(result.getVurderinger()).hasSize(1);
 
@@ -209,8 +211,8 @@ class ReisetidRestTjenesteTest {
             Collections.emptyList(),
             Collections.emptyList(),
             List.of(
-                new KursPeriode(kursperiode.getFom(), kursperiode.getTom(), reiseperiodeTil1, reiseperiodeHjem1, "institusjon", null),
-                new KursPeriode(kursperiode2.getFom(), kursperiode2.getTom(), reiseperiodeTil2, reiseperiodeHjem2, "institusjon", null)));
+                new KursPeriode(kursperiode.getFom(), kursperiode.getTom(), reiseperiodeTil1, reiseperiodeHjem1, "institusjon", null, null, null),
+                new KursPeriode(kursperiode2.getFom(), kursperiode2.getTom(), reiseperiodeTil2, reiseperiodeHjem2, "institusjon", null, null, null)));
 
         uttakPerioderGrunnlagRepository.lagre(behandling.getId(), perioderFraSøknad);
         uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), new UttakPerioderHolder(Set.of(perioderFraSøknad)));
