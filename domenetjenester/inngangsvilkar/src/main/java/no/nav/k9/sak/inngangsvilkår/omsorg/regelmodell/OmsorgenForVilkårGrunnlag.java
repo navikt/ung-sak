@@ -9,18 +9,24 @@ public class OmsorgenForVilkårGrunnlag implements VilkårGrunnlag {
     private final Relasjon relasjonMellomSøkerOgPleietrengende;
     private final List<BostedsAdresse> søkersAdresser;
     private final List<BostedsAdresse> pleietrengendeAdresser;
-    private final Boolean erOmsorgsPerson;
+    private final Boolean harBlittVurdertSomOmsorgsPerson;
+    private final List<Fosterbarn> fosterbarn;
+    private final List<BostedsAdresse> deltBostedsAdresser;
 
-    public OmsorgenForVilkårGrunnlag(Relasjon relasjonMellomSøkerOgPleietrengende, List<BostedsAdresse> søkersAdresser, List<BostedsAdresse> pleietrengendeAdresser, Boolean erOmsorgsPerson) {
+    public OmsorgenForVilkårGrunnlag(Relasjon relasjonMellomSøkerOgPleietrengende, List<BostedsAdresse> søkersAdresser,
+                                     List<BostedsAdresse> pleietrengendeAdresser, Boolean harBlittVurdertSomOmsorgsPerson,
+                                     List<Fosterbarn> fosterbarn, List<BostedsAdresse> deltBostedsAdresser) {
 
         this.relasjonMellomSøkerOgPleietrengende = relasjonMellomSøkerOgPleietrengende;
         this.søkersAdresser = søkersAdresser;
         this.pleietrengendeAdresser = pleietrengendeAdresser;
-        this.erOmsorgsPerson = erOmsorgsPerson;
+        this.harBlittVurdertSomOmsorgsPerson = harBlittVurdertSomOmsorgsPerson;
+        this.fosterbarn = fosterbarn;
+        this.deltBostedsAdresser = deltBostedsAdresser;
     }
 
-    public OmsorgenForVilkårGrunnlag(Boolean erOmsorgsPerson) {
-        this(null, null, null, erOmsorgsPerson);
+    public OmsorgenForVilkårGrunnlag(Boolean harBlittVurdertSomOmsorgsPerson) {
+        this(null, null, null, harBlittVurdertSomOmsorgsPerson, null, null);
     }
 
     public Relasjon getRelasjonMellomSøkerOgPleietrengende() {
@@ -36,17 +42,26 @@ public class OmsorgenForVilkårGrunnlag implements VilkårGrunnlag {
     }
 
     public Boolean getHarBlittVurdertSomOmsorgsPerson() {
-        return erOmsorgsPerson;
+        return harBlittVurdertSomOmsorgsPerson;
+    }
+
+    public List<Fosterbarn> getFosterbarn() {
+        return fosterbarn;
+    }
+
+    public List<BostedsAdresse> getDeltBostedsAdresser() {
+        return deltBostedsAdresser;
     }
 
     @Override
     public String toString() {
-        return "OmsorgenForGrunnlag{" +
-            "erOmsorgsPerson=" + erOmsorgsPerson +
-            ", relasjonMellomSøkerOgPleietrengende=" + relasjonMellomSøkerOgPleietrengende +
+        return "OmsorgenForVilkårGrunnlag{" +
+            "relasjonMellomSøkerOgPleietrengende=" + relasjonMellomSøkerOgPleietrengende +
             ", søkersAdresser=" + søkersAdresser +
             ", pleietrengendeAdresser=" + pleietrengendeAdresser +
+            ", harBlittVurdertSomOmsorgsPerson=" + harBlittVurdertSomOmsorgsPerson +
+            ", fosterbarn=" + fosterbarn +
+            ", deltBostedsAdresser=" + deltBostedsAdresser +
             '}';
     }
-
 }

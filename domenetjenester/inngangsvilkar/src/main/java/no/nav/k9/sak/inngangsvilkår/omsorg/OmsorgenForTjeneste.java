@@ -96,7 +96,8 @@ public class OmsorgenForTjeneste {
             }
 
             final OmsorgenForVilkårGrunnlag sg = datoSegment2.getValue();
-            final OmsorgenForVilkårGrunnlag sammensatt = new OmsorgenForVilkårGrunnlag(sg.getRelasjonMellomSøkerOgPleietrengende(), sg.getSøkersAdresser(), sg.getPleietrengendeAdresser(), datoSegment.getValue().getHarBlittVurdertSomOmsorgsPerson());
+            final OmsorgenForVilkårGrunnlag sammensatt = new OmsorgenForVilkårGrunnlag(sg.getRelasjonMellomSøkerOgPleietrengende(), sg.getSøkersAdresser(),
+                sg.getPleietrengendeAdresser(), datoSegment.getValue().getHarBlittVurdertSomOmsorgsPerson(), sg.getFosterbarn(), sg.getDeltBostedsAdresser());
             return new LocalDateSegment<>(datoInterval, sammensatt);
         }, JoinStyle.RIGHT_JOIN);
     }

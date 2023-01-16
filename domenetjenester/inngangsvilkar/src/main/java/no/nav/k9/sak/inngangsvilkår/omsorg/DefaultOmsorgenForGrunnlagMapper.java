@@ -65,7 +65,7 @@ public class DefaultOmsorgenForGrunnlagMapper implements OmsorgenForGrunnlagMapp
             .collect(Collectors.toList());
 
         return new OmsorgenForVilkårGrunnlag(mapReleasjonMellomPleietrengendeOgSøker(personopplysningerAggregat, pleietrengende),
-            mapAdresser(søkerBostedsadresser), mapAdresser(pleietrengendeBostedsadresser), null);
+            mapAdresser(søkerBostedsadresser), mapAdresser(pleietrengendeBostedsadresser), null, null, null);
     }
 
 
