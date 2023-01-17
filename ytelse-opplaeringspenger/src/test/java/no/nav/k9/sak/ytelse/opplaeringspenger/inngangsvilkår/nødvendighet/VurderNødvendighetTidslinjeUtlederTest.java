@@ -68,12 +68,12 @@ class VurderNødvendighetTidslinjeUtlederTest {
     }
 
     private KursPeriode lagKursperiode(LocalDate fom, LocalDate tom, String institusjon, UUID uuid) {
-        return new KursPeriode(fom, tom, null, null, institusjon, uuid);
+        return new KursPeriode(fom, tom, null, null, institusjon, uuid, null, null);
     }
 
     private VurdertOpplæringGrunnlag setupVurderingsgrunnlag(List<VurdertOpplæring> vurdertOpplæring) {
         VurdertOpplæringHolder vurdertOpplæringHolder = new VurdertOpplæringHolder(vurdertOpplæring);
-        return new VurdertOpplæringGrunnlag(1344L, null, vurdertOpplæringHolder, null);
+        return new VurdertOpplæringGrunnlag(1344L, null, vurdertOpplæringHolder, null, null);
     }
 
     @Test

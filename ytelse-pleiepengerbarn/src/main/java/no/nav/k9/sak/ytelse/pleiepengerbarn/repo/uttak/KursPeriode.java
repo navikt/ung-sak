@@ -55,6 +55,12 @@ public class KursPeriode extends BaseEntitet implements IndexKey {
     })
     private DatoIntervallEntitet reiseperiodeHjem;
 
+    @Column(name = "begrunnelse_reisetid_til")
+    private String begrunnelseReisetidTil;
+
+    @Column(name = "begrunnelse_reisetid_hjem")
+    private String begrunnelseReisetidHjem;
+
     @Column(name = "institusjon")
     private String institusjon;
 
@@ -68,16 +74,18 @@ public class KursPeriode extends BaseEntitet implements IndexKey {
     KursPeriode() {
     }
 
-    public KursPeriode(DatoIntervallEntitet periode, DatoIntervallEntitet reiseperiodeTil, DatoIntervallEntitet reiseperiodeHjem, String institusjon, UUID institusjonUuid) {
+    public KursPeriode(DatoIntervallEntitet periode, DatoIntervallEntitet reiseperiodeTil, DatoIntervallEntitet reiseperiodeHjem, String institusjon, UUID institusjonUuid, String begrunnelseReisetidTil, String begrunnelseReisetidHjem) {
         this.periode = periode;
         this.reiseperiodeTil = reiseperiodeTil;
         this.reiseperiodeHjem = reiseperiodeHjem;
         this.institusjon = institusjon;
         this.institusjonUuid = institusjonUuid;
+        this.begrunnelseReisetidTil = begrunnelseReisetidTil;
+        this.begrunnelseReisetidHjem = begrunnelseReisetidHjem;
     }
 
-    public KursPeriode(LocalDate fom, LocalDate tom, DatoIntervallEntitet reiseperiodeTil, DatoIntervallEntitet reiseperiodeHjem, String institusjon, UUID institusjonUuid) {
-        this(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), reiseperiodeTil, reiseperiodeHjem, institusjon, institusjonUuid);
+    public KursPeriode(LocalDate fom, LocalDate tom, DatoIntervallEntitet reiseperiodeTil, DatoIntervallEntitet reiseperiodeHjem, String institusjon, UUID institusjonUuid, String begrunnelseReisetidTil, String begrunnelseReisetidHjem) {
+        this(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), reiseperiodeTil, reiseperiodeHjem, institusjon, institusjonUuid, begrunnelseReisetidTil, begrunnelseReisetidHjem);
     }
 
     public KursPeriode(KursPeriode it) {
@@ -86,6 +94,8 @@ public class KursPeriode extends BaseEntitet implements IndexKey {
         this.reiseperiodeHjem = it.reiseperiodeHjem;
         this.reiseperiodeTil = it.reiseperiodeTil;
         this.institusjonUuid = it.institusjonUuid;
+        this.begrunnelseReisetidTil = it.begrunnelseReisetidTil;
+        this.begrunnelseReisetidHjem = it.begrunnelseReisetidHjem;
     }
 
     public DatoIntervallEntitet getPeriode() {
@@ -108,6 +118,14 @@ public class KursPeriode extends BaseEntitet implements IndexKey {
         return institusjonUuid;
     }
 
+    public String getBegrunnelseReisetidTil() {
+        return begrunnelseReisetidTil;
+    }
+
+    public String getBegrunnelseReisetidHjem() {
+        return begrunnelseReisetidHjem;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -117,17 +135,19 @@ public class KursPeriode extends BaseEntitet implements IndexKey {
             && Objects.equals(institusjon, that.institusjon)
             && Objects.equals(reiseperiodeTil, that.reiseperiodeTil)
             && Objects.equals(reiseperiodeHjem, that.reiseperiodeHjem)
+            && Objects.equals(begrunnelseReisetidTil, that.begrunnelseReisetidTil)
+            && Objects.equals(begrunnelseReisetidHjem, that.begrunnelseReisetidHjem)
             && Objects.equals(institusjonUuid, that.institusjonUuid);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode, institusjon, reiseperiodeTil, reiseperiodeHjem, institusjonUuid);
+        return Objects.hash(periode, institusjon, reiseperiodeTil, reiseperiodeHjem, institusjonUuid, begrunnelseReisetidTil, begrunnelseReisetidHjem);
     }
 
     @Override
     public String getIndexKey() {
-        return IndexKeyComposer.createKey(institusjon, periode, reiseperiodeTil, reiseperiodeHjem, institusjonUuid);
+        return IndexKeyComposer.createKey(institusjon, periode, reiseperiodeTil, reiseperiodeHjem, institusjonUuid, begrunnelseReisetidTil, begrunnelseReisetidHjem);
     }
 
     @Override
@@ -138,6 +158,8 @@ public class KursPeriode extends BaseEntitet implements IndexKey {
             ", institusjonUuid=" + institusjonUuid +
             ", reiseperiodeTil=" + reiseperiodeTil +
             ", reiseperiodeHjem=" + reiseperiodeHjem +
+            ", begrunnelseReisetidTil=" + begrunnelseReisetidTil +
+            ", begrunnelseReisetidHjem=" + begrunnelseReisetidHjem +
             '}';
     }
 }

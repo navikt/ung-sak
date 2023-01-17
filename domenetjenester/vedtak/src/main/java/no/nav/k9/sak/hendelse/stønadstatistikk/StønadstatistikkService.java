@@ -7,7 +7,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
@@ -22,7 +21,6 @@ public class StønadstatistikkService {
     private Instance<StønadstatistikkHendelseBygger> stønadstatistikkHendelseBygger;
     private BehandlingRepository behandlingRepository;
     private ProsessTaskTjeneste prosessTaskRepository;
-    private boolean ompStønadstatistikk;
 
     public StønadstatistikkService() {
 
@@ -30,19 +28,14 @@ public class StønadstatistikkService {
 
     @Inject
     public StønadstatistikkService(@Any Instance<StønadstatistikkHendelseBygger> stønadstatistikkHendelseBygger,
-                                   BehandlingRepository behandlingRepository, ProsessTaskTjeneste prosessTaskRepository,
-                                   @KonfigVerdi(value = "OMP_STONADSTATISTIKK", defaultVerdi = "true") boolean ompStønadstatistikk) {
+                                   BehandlingRepository behandlingRepository, ProsessTaskTjeneste prosessTaskRepository) {
         this.stønadstatistikkHendelseBygger = stønadstatistikkHendelseBygger;
         this.behandlingRepository = behandlingRepository;
         this.prosessTaskRepository = prosessTaskRepository;
-        this.ompStønadstatistikk = ompStønadstatistikk;
     }
 
     public void publiserHendelse(Behandling behandling) {
-        Set<FagsakYtelseType> aktiverteForYtelsetyper = ompStønadstatistikk
-            ? Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN, FagsakYtelseType.OMP)
-            : Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN)
-            ;
+        Set<FagsakYtelseType> aktiverteForYtelsetyper = Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN, FagsakYtelseType.OMP);
 
         if (!aktiverteForYtelsetyper.contains(behandling.getFagsakYtelseType())) {
             return;

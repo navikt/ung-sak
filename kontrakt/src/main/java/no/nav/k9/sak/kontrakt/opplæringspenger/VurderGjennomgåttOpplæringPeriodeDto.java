@@ -24,13 +24,9 @@ public class VurderGjennomgåttOpplæringPeriodeDto {
     @Valid
     private Periode periode;
 
-    @JsonProperty(value = "gjennomførOpplæring", required = true)
+    @JsonProperty(value = "gjennomførtOpplæring", required = true)
     @NotNull
     private Boolean gjennomførtOpplæring;
-
-    @JsonProperty(value = "reisetid", required = true)
-    @Valid
-    private VurderReisetidDto reisetid;
 
     @JsonProperty("begrunnelse")
     @Size(max = 4000)
@@ -40,17 +36,15 @@ public class VurderGjennomgåttOpplæringPeriodeDto {
     public VurderGjennomgåttOpplæringPeriodeDto() {
     }
 
-    public VurderGjennomgåttOpplæringPeriodeDto(Periode periode, Boolean gjennomførtOpplæring, VurderReisetidDto reisetid, String begrunnelse) {
+    public VurderGjennomgåttOpplæringPeriodeDto(Periode periode, Boolean gjennomførtOpplæring, String begrunnelse) {
         this.periode = periode;
         this.gjennomførtOpplæring = gjennomførtOpplæring;
-        this.reisetid = reisetid;
         this.begrunnelse = begrunnelse;
     }
 
-    public VurderGjennomgåttOpplæringPeriodeDto(LocalDate fom, LocalDate tom, Boolean gjennomførtOpplæring, VurderReisetidDto reisetid, String begrunnelse) {
+    public VurderGjennomgåttOpplæringPeriodeDto(LocalDate fom, LocalDate tom, Boolean gjennomførtOpplæring, String begrunnelse) {
         this.periode = new Periode(fom, tom);
         this.gjennomførtOpplæring = gjennomførtOpplæring;
-        this.reisetid = reisetid;
         this.begrunnelse = begrunnelse;
     }
 
@@ -64,9 +58,5 @@ public class VurderGjennomgåttOpplæringPeriodeDto {
 
     public String getBegrunnelse() {
         return begrunnelse;
-    }
-
-    public VurderReisetidDto getReisetid() {
-        return reisetid;
     }
 }

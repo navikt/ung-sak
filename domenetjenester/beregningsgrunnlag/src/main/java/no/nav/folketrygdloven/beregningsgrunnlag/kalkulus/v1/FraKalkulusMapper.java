@@ -14,7 +14,6 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnl
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagBuilder;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.Sammenligningsgrunnlag;
 import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.BGAndelArbeidsforhold;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.BeregningAktivitetAggregatDto;
@@ -104,13 +103,12 @@ public class FraKalkulusMapper {
                 .collect(Collectors.toList());
             builder.leggTilFaktaOmBeregningTilfeller(tilfeller);
         }
+
         Beregningsgrunnlag bg = builder.build();
 
         mapPerioder(beregningsgrunnlagDto.getBeregningsgrunnlagPerioder())
                 .forEach(periodeBuilder -> periodeBuilder.build(bg));
-        if (beregningsgrunnlagDto.getSammenligningsgrunnlag() != null) {
-            mapSammenligningsgrunnlag(beregningsgrunnlagDto.getSammenligningsgrunnlag()).build(bg);
-        }
+
         return bg;
     }
 
@@ -183,12 +181,5 @@ public class FraKalkulusMapper {
             return Arbeidsgiver.virksomhet(arbeidsgiver.getArbeidsgiverOrgnr());
         }
         return Arbeidsgiver.person(new AktørId(arbeidsgiver.getArbeidsgiverAktørId()));
-    }
-
-    private static Sammenligningsgrunnlag.Builder mapSammenligningsgrunnlag(no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.Sammenligningsgrunnlag sammenligningsgrunnlag) {
-        return Sammenligningsgrunnlag.builder()
-                .medSammenligningsperiode(sammenligningsgrunnlag.getSammenligningsperiodeFom(), sammenligningsgrunnlag.getSammenligningsperiodeTom())
-                .medRapportertPrÅr(sammenligningsgrunnlag.getRapportertPrÅr())
-                .medAvvikPromille(sammenligningsgrunnlag.getAvvikPromilleNy().longValue());
     }
 }

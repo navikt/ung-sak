@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger;
+package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.aksjonspunkt;
 
 import java.util.ArrayList;
 import java.util.List;

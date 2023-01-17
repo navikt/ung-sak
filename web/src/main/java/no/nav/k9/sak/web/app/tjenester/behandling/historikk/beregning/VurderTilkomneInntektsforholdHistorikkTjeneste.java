@@ -82,8 +82,8 @@ public class VurderTilkomneInntektsforholdHistorikkTjeneste {
                                                      List<ArbeidsforholdOverstyring> arbeidsforholdOverstyringer) {
 
         var arbeidsforholdInfo = arbeidsgiverHistorikkinnslagTjeneste.lagHistorikkinnslagTekstForBeregningsgrunnlag(
-            AktivitetStatus.ARBEIDSTAKER,
-            Optional.of(e.getArbeidsgiver()),
+            e.getAktivitetStatus(),
+            Optional.ofNullable(e.getArbeidsgiver()),
             Optional.empty(),
             arbeidsforholdOverstyringer);
         historikkBuilder.medEndretFelt(HistorikkEndretFeltType.VURDER_NYTT_INNTEKTSFORHOLD,

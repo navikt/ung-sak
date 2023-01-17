@@ -467,9 +467,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     }
 
     private boolean erIkkeHelg(Periode periode) {
-        final LocalDateTimeline<Boolean> helePerioden = new LocalDateTimeline<>(periode.getFraOgMed(), periode.getTilOgMed(), Boolean.TRUE);
-        final LocalDateTimeline<Boolean> kunHelger = Hjelpetidslinjer.lagTidslinjeMedKunHelger(helePerioden);
-        return !helePerioden.disjoint(kunHelger).isEmpty();
+        LocalDateTimeline<Boolean> ukedagerTidslinje = Hjelpetidslinjer.lagUkestidslinjeForMandagTilFredag(periode.getFraOgMed(), periode.getTilOgMed());
+        return !ukedagerTidslinje.isEmpty();
     }
 
     @GET

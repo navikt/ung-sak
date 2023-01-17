@@ -28,17 +28,13 @@ public class VurdertReisetid extends BaseEntitet {
 
     @Embedded
     @AttributeOverrides({
-        @AttributeOverride(name = "fomDato", column = @Column(name = "reise_til_fom")),
-        @AttributeOverride(name = "tomDato", column = @Column(name = "reise_til_tom"))
+        @AttributeOverride(name = "fomDato", column = @Column(name = "fom", nullable = false)),
+        @AttributeOverride(name = "tomDato", column = @Column(name = "tom", nullable = false))
     })
-    private DatoIntervallEntitet reiseperiodeTil;
+    private DatoIntervallEntitet periode;
 
-    @Embedded
-    @AttributeOverrides({
-        @AttributeOverride(name = "fomDato", column = @Column(name = "reise_hjem_fom")),
-        @AttributeOverride(name = "tomDato", column = @Column(name = "reise_hjem_tom"))
-    })
-    private DatoIntervallEntitet reiseperiodeHjem;
+    @Column(name = "godkjent", nullable = false)
+    private Boolean godkjent;
 
     @Column(name = "begrunnelse", nullable = false)
     private String begrunnelse;
@@ -50,24 +46,24 @@ public class VurdertReisetid extends BaseEntitet {
     VurdertReisetid() {
     }
 
-    public VurdertReisetid(DatoIntervallEntitet reiseperiodeTil, DatoIntervallEntitet reiseperiodeHjem, String begrunnelse) {
-        this.reiseperiodeTil = reiseperiodeTil;
-        this.reiseperiodeHjem = reiseperiodeHjem;
+    public VurdertReisetid(DatoIntervallEntitet periode, Boolean godkjent, String begrunnelse) {
+        this.periode = periode;
+        this.godkjent = godkjent;
         this.begrunnelse = begrunnelse;
     }
 
     public VurdertReisetid(VurdertReisetid that) {
-        this.reiseperiodeTil = that.reiseperiodeTil;
-        this.reiseperiodeHjem = that.reiseperiodeHjem;
+        this.periode = that.periode;
+        this.godkjent = that.godkjent;
         this.begrunnelse = that.begrunnelse;
     }
 
-    public DatoIntervallEntitet getReiseperiodeTil() {
-        return reiseperiodeTil;
+    public DatoIntervallEntitet getPeriode() {
+        return periode;
     }
 
-    public DatoIntervallEntitet getReiseperiodeHjem() {
-        return reiseperiodeHjem;
+    public Boolean getGodkjent() {
+        return godkjent;
     }
 
     public String getBegrunnelse() {
@@ -79,13 +75,13 @@ public class VurdertReisetid extends BaseEntitet {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         VurdertReisetid that = (VurdertReisetid) o;
-        return Objects.equals(reiseperiodeTil, that.reiseperiodeTil)
-            && Objects.equals(reiseperiodeHjem, that.reiseperiodeHjem)
+        return Objects.equals(periode, that.periode)
+            && Objects.equals(godkjent, that.godkjent)
             && Objects.equals(begrunnelse, that.begrunnelse);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(reiseperiodeTil, reiseperiodeHjem, begrunnelse);
+        return Objects.hash(periode, godkjent, begrunnelse);
     }
 }
