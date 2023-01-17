@@ -6,15 +6,6 @@ import java.util.Objects;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
-import no.nav.k9.felles.konfigurasjon.env.Environment;
-import no.nav.k9.kodeverk.person.Diskresjonskode;
-import no.nav.k9.kodeverk.person.NavBrukerKjønn;
-import no.nav.k9.kodeverk.person.PersonstatusType;
-import no.nav.k9.sak.behandlingslager.aktør.PersoninfoArbeidsgiver;
-import no.nav.k9.sak.behandlingslager.aktør.PersoninfoBasis;
-import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.felles.integrasjon.pdl.Adressebeskyttelse;
 import no.nav.k9.felles.integrasjon.pdl.AdressebeskyttelseGradering;
 import no.nav.k9.felles.integrasjon.pdl.AdressebeskyttelseResponseProjection;
@@ -30,9 +21,17 @@ import no.nav.k9.felles.integrasjon.pdl.KjoennResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.KjoennType;
 import no.nav.k9.felles.integrasjon.pdl.Navn;
 import no.nav.k9.felles.integrasjon.pdl.NavnResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.PdlKlient;
 import no.nav.k9.felles.integrasjon.pdl.Person;
 import no.nav.k9.felles.integrasjon.pdl.PersonResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.PdlKlient;
+import no.nav.k9.felles.konfigurasjon.env.Environment;
+import no.nav.k9.kodeverk.person.Diskresjonskode;
+import no.nav.k9.kodeverk.person.NavBrukerKjønn;
+import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.k9.sak.behandlingslager.aktør.PersoninfoArbeidsgiver;
+import no.nav.k9.sak.behandlingslager.aktør.PersoninfoBasis;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.PersonIdent;
 
 @ApplicationScoped
 public class PersonBasisTjeneste {
@@ -50,8 +49,6 @@ public class PersonBasisTjeneste {
     }
 
     private static String mapNavn(Navn navn) {
-        if (navn.getForkortetNavn() != null)
-            return navn.getForkortetNavn();
         return navn.getEtternavn() + " " + navn.getFornavn() + (navn.getMellomnavn() == null ? "" : " " + navn.getMellomnavn());
     }
 
