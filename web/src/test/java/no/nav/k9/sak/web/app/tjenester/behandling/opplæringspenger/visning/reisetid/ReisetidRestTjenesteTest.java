@@ -98,11 +98,15 @@ class ReisetidRestTjenesteTest {
         assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getPeriode()).isEqualTo(reiseperiodeTil.tilPeriode());
         assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getResultat()).isEqualTo(Resultat.MÅ_VURDERES);
         assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getBegrunnelse()).isNull();
+        assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getEndretAv()).isNull();
+        assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getEndretTidspunkt()).isNull();
 
         assertThat(result.getVurderinger().get(0).getReisetidHjem()).hasSize(1);
         assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getPeriode()).isEqualTo(reiseperiodeHjem.tilPeriode());
         assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getResultat()).isEqualTo(Resultat.MÅ_VURDERES);
         assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getBegrunnelse()).isNull();
+        assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getEndretAv()).isNull();
+        assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getEndretTidspunkt()).isNull();
     }
 
     @Test
@@ -129,11 +133,15 @@ class ReisetidRestTjenesteTest {
         assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getPeriode()).isEqualTo(reiseperiodeTil.tilPeriode());
         assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getResultat()).isEqualTo(Resultat.GODKJENT);
         assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getBegrunnelse()).isEqualTo(vurdertReisetidTil.getBegrunnelse());
+        assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getEndretAv()).isEqualTo("VL");
+        assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getEndretTidspunkt()).isNotNull();
 
         assertThat(result.getVurderinger().get(0).getReisetidHjem()).hasSize(1);
         assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getPeriode()).isEqualTo(reiseperiodeHjem.tilPeriode());
         assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getResultat()).isEqualTo(Resultat.IKKE_GODKJENT);
         assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getBegrunnelse()).isEqualTo(vurdertReisetidHjem.getBegrunnelse());
+        assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getEndretAv()).isEqualTo("VL");
+        assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getEndretTidspunkt()).isNotNull();
     }
 
     @Test
@@ -186,11 +194,15 @@ class ReisetidRestTjenesteTest {
         assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getPeriode()).isEqualTo(reiseperiodeTil.tilPeriode());
         assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getResultat()).isEqualTo(Resultat.GODKJENT_AUTOMATISK);
         assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getBegrunnelse()).isNull();
+        assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getEndretAv()).isNull();
+        assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getEndretTidspunkt()).isNull();
 
         assertThat(result.getVurderinger().get(0).getReisetidHjem()).hasSize(1);
         assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getPeriode()).isEqualTo(reiseperiodeHjem.tilPeriode());
         assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getResultat()).isEqualTo(Resultat.GODKJENT_AUTOMATISK);
         assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getBegrunnelse()).isNull();
+        assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getEndretAv()).isNull();
+        assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getEndretTidspunkt()).isNull();
     }
 
     @Test
