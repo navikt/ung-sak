@@ -24,6 +24,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.abakus.vedtak.ytelse.Ytelse;
 import no.nav.abakus.vedtak.ytelse.v1.YtelseV1;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
@@ -32,6 +33,9 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.uttak.Tid;
+import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingModell;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -56,7 +60,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse.feriepenger.Feriepenger
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.SykdomVurderingRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
@@ -74,7 +77,6 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
     private FagsakRepository fagsakRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
-    private SykdomVurderingRepository sykdomVurderingRepository;
     private MedisinskGrunnlagTjeneste medisinskGrunnlagTjeneste;
     private ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste;
     private EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste;
@@ -85,6 +87,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
     private FeriepengerAvvikTjeneste feriepengerAvvikTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
     private boolean enableFeriepengerPåTversAvSaker;
+    private boolean ikkeRevurderEtterAvslagInngangsvilkår;
 
     VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste() {
     }
@@ -94,7 +97,6 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
                                                                FagsakRepository fagsakRepository,
                                                                VilkårResultatRepository vilkårResultatRepository,
                                                                MedisinskGrunnlagRepository medisinskGrunnlagRepository,
-                                                               SykdomVurderingRepository sykdomVurderingRepository,
                                                                MedisinskGrunnlagTjeneste medisinskGrunnlagTjeneste,
                                                                ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste,
                                                                EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
@@ -103,12 +105,12 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
                                                                BehandlingModellRepository behandlingModellRepository,
                                                                UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
                                                                FeriepengerAvvikTjeneste feriepengerAvvikTjeneste, @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
-                                                               @KonfigVerdi(value = "ENABLE_FERIEPENGER_PAA_TVERS_AV_SAKER_OG_PR_AAR", defaultVerdi = "true") boolean enableFeriepengerPåTversAvSaker) {
+                                                               @KonfigVerdi(value = "ENABLE_FERIEPENGER_PAA_TVERS_AV_SAKER_OG_PR_AAR", defaultVerdi = "true") boolean enableFeriepengerPåTversAvSaker,
+                                                               @KonfigVerdi(value = "ikke.revurder.vedtak.etter.avslag.inngangsvilkaar", defaultVerdi = "false") boolean ikkeRevurderEtterAvslagInngangsvilkår) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
-        this.sykdomVurderingRepository = sykdomVurderingRepository;
         this.medisinskGrunnlagTjeneste = medisinskGrunnlagTjeneste;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
         this.erEndringPåEtablertTilsynTjeneste = erEndringPåEtablertTilsynTjeneste;
@@ -119,6 +121,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         this.feriepengerAvvikTjeneste = feriepengerAvvikTjeneste;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.enableFeriepengerPåTversAvSaker = enableFeriepengerPåTversAvSaker;
+        this.ikkeRevurderEtterAvslagInngangsvilkår = ikkeRevurderEtterAvslagInngangsvilkår;
     }
 
     @Override
@@ -141,17 +144,20 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
                 var kandidatFagsak = fagsakRepository.hentSakGittSaksnummer(kandidatsaksnummer, false).orElseThrow();
                 var sisteBehandlingPåKandidat = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(kandidatFagsak.getId()).orElseThrow();
                 var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, sisteBehandlingPåKandidat.getFagsakYtelseType(), sisteBehandlingPåKandidat.getType());
-                var referanse = BehandlingReferanse.fra(sisteBehandlingPåKandidat);
+                var kandidatBehandlingReferanse = BehandlingReferanse.fra(sisteBehandlingPåKandidat);
                 var skalRevurderesPgaSykdom = perioderMedRevurderingSykdom(pleietrengende, kandidatsaksnummer, sisteBehandlingPåKandidat);
-                var skalRevurderesPgaEtablertTilsyn = perioderMedRevurderingPgaEtablertTilsyn(referanse);
-                var skalRevurderesPgaNattevåkOgBeredskap = perioderMedRevurderesPgaNattevåkOgBeredskap(referanse);
-                var skalRevurderesPgaEndretUttak = perioderMedRevurderingPgaUttak(sisteBehandlingPåKandidat, referanse);
+                var skalRevurderesPgaEtablertTilsyn = perioderMedRevurderingPgaEtablertTilsyn(kandidatBehandlingReferanse);
+                var skalRevurderesPgaNattevåkOgBeredskap = perioderMedRevurderesPgaNattevåkOgBeredskap(kandidatBehandlingReferanse);
+                var skalRevurderesPgaEndretUttak = perioderMedRevurderingPgaUttak(kandidatBehandlingReferanse);
+
+                var perioderMedInnvilgetInngangsvilkår = periodermedInnvilgetInngangsvilkår(kandidatBehandlingReferanse);
 
                 var skalRevurdereYtelsePgaEndringAnnenSak = skalRevurderesPgaEtablertTilsyn
                     .union(skalRevurderesPgaNattevåkOgBeredskap, StandardCombinators::alwaysTrueForMatch)
                     .union(skalRevurderesPgaEndretUttak, StandardCombinators::alwaysTrueForMatch)
-                    .union(skalRevurderesPgaSykdom, StandardCombinators::alwaysTrueForMatch);
-                var skalReberegneFeriepenger = enableFeriepengerPåTversAvSaker ? perioderMedRevurderingPgaEndringFeriepenger(sisteBehandlingPåKandidat, referanse) : LocalDateTimeline.empty();
+                    .union(skalRevurderesPgaSykdom, StandardCombinators::alwaysTrueForMatch)
+                    .intersection(perioderMedInnvilgetInngangsvilkår);
+                var skalReberegneFeriepenger = enableFeriepengerPåTversAvSaker ? perioderMedRevurderingPgaEndringFeriepenger(sisteBehandlingPåKandidat, kandidatBehandlingReferanse) : LocalDateTimeline.empty();
 
                 if (!skalRevurdereYtelsePgaEndringAnnenSak.isEmpty() || !skalReberegneFeriepenger.isEmpty()) {
                     if (!skalRevurdereYtelsePgaEndringAnnenSak.isEmpty()) {
@@ -183,6 +189,49 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         return resultat;
     }
 
+    private LocalDateTimeline<Boolean> periodermedInnvilgetInngangsvilkår(BehandlingReferanse kandidatBehandlingReferanse) {
+        if (!ikkeRevurderEtterAvslagInngangsvilkår) {
+            return new LocalDateTimeline<>(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE, true);
+        }
+        LocalDateTimeline<Boolean> result = LocalDateTimeline.empty();
+
+        if (!kandidatBehandlingReferanse.getBehandlingStatus().erFerdigbehandletStatus()) {
+            // Ved åpen behandling trenger vi ikke begrense hvilke
+            result = TidslinjeUtil.tilTidslinjeKomprimert(utledVurderingsperiode(kandidatBehandlingReferanse));
+        }
+        var vilkårene = vilkårResultatRepository.hent(kandidatBehandlingReferanse.getBehandlingId());
+        var vilkårTidslinjer = vilkårene.getVilkårene()
+            .stream()
+            .filter(vilkår -> !Objects.equals(vilkår.getVilkårType(), VilkårType.SØKNADSFRIST))
+            .map(v -> new LocalDateTimeline<>(v.getPerioder()
+                .stream()
+                .map(vp -> new LocalDateSegment<>(vp.getPeriode().toLocalDateInterval(), Objects.equals(Utfall.OPPFYLT, vp.getGjeldendeUtfall())))
+                .toList()))
+            .toList();
+
+        LocalDateTimeline<Boolean> vilkårstidslinje = LocalDateTimeline.empty();
+
+        for (LocalDateTimeline<Boolean> tidslinje : vilkårTidslinjer) {
+            vilkårstidslinje = vilkårstidslinje.combine(tidslinje, this::mergeVilkårsSegmenter, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+
+
+        return vilkårstidslinje.combine(result, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN).compress();
+    }
+
+    private LocalDateSegment<Boolean> mergeVilkårsSegmenter(LocalDateInterval localDateInterval, LocalDateSegment<Boolean> lhs, LocalDateSegment<Boolean> rhs) {
+        if (lhs == null || lhs.getValue() == null) {
+            return rhs;
+        }
+        if (rhs == null || rhs.getValue() == null) {
+            return lhs;
+        }
+        if (!rhs.getValue()) {
+            return new LocalDateSegment<>(localDateInterval, rhs.getValue());
+        }
+        return new LocalDateSegment<>(localDateInterval, lhs.getValue());
+    }
+
     private boolean ytelsesSpesifiktFilter(FagsakYtelseType ytelseType, Saksnummer kandidatsaksnummer) {
         if (Set.of(OPPLÆRINGSPENGER, PLEIEPENGER_SYKT_BARN).contains(ytelseType)) {
             var fagsak = fagsakRepository.hentSakGittSaksnummer(kandidatsaksnummer, false).orElseThrow();
@@ -202,8 +251,8 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         return skalRevurderes.crossJoin(tidslinjeHull, StandardCombinators::coalesceRightHandSide);
     }
 
-    private LocalDateTimeline<Boolean> perioderMedRevurderingPgaUttak(Behandling sisteBehandlingPåKandidat, BehandlingReferanse referanse) {
-        if (!sisteBehandlingPåKandidat.getStatus().erFerdigbehandletStatus() && !samtidigUttakTjeneste.harKommetTilUttak(referanse)) {
+    private LocalDateTimeline<Boolean> perioderMedRevurderingPgaUttak(BehandlingReferanse referanse) {
+        if (!referanse.getBehandlingStatus().erFerdigbehandletStatus() && !samtidigUttakTjeneste.harKommetTilUttak(referanse)) {
             return LocalDateTimeline.empty();
         }
         return TidslinjeUtil.tilTidslinjeKomprimert(samtidigUttakTjeneste.perioderMedEndringerMedUbesluttedeData(referanse));
@@ -237,7 +286,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         }
         var kandidatSykdomBehandling = medisinskGrunnlagRepository.hentGrunnlagForBehandling(sisteBehandlingPåKandidat.getUuid()).orElseThrow();
         var behandling = behandlingRepository.hentBehandlingHvisFinnes(kandidatSykdomBehandling.getBehandlingUuid()).orElseThrow();
-        var vurderingsperioder = utledVurderingsperiode(behandling);
+        var vurderingsperioder = utledVurderingsperiode(BehandlingReferanse.fra(behandling));
         var manglendeOmsorgenForPerioder = medisinskGrunnlagTjeneste.hentManglendeOmsorgenForPerioder(behandling.getId());
         var utledetGrunnlag = medisinskGrunnlagRepository.utledGrunnlag(kandidatsaksnummer, kandidatSykdomBehandling.getBehandlingUuid(), pleietrengende, vurderingsperioder, manglendeOmsorgenForPerioder);
         final LocalDateTimeline<Boolean> endringerISøktePerioder = medisinskGrunnlagTjeneste.sammenlignGrunnlag(Optional.of(kandidatSykdomBehandling.getGrunnlagsdata()), utledetGrunnlag).getDiffPerioder();
@@ -256,9 +305,9 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         return modell.erStegAFørStegB(steg, BehandlingStegType.VURDER_MEDISINSKE_VILKÅR);
     }
 
-    private NavigableSet<DatoIntervallEntitet> utledVurderingsperiode(Behandling behandling) {
-        var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
-        var vilkårene = vilkårResultatRepository.hent(behandling.getId());
+    private NavigableSet<DatoIntervallEntitet> utledVurderingsperiode(BehandlingReferanse referanse) {
+        var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, referanse.getFagsakYtelseType(), referanse.getBehandlingType());
+        var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
 
         return perioderTilVurderingTjeneste.definerendeVilkår()
             .stream()

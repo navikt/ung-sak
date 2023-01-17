@@ -4,6 +4,7 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -122,9 +123,10 @@ public class OmpStønadstatistikkHendelseBygger implements StønadstatistikkHend
     }
 
     private StønadstatistikkPeriode mapPeriode(LocalDateSegment<StønadstatistikkPeriodetidslinjebygger.InformasjonTilStønadstatistikkHendelse> ds) {
+        Year år = Year.of(ds.getFom().getYear());
         UttakResultatPeriode info = ds.getValue().getUttakresultat();
         final BigDecimal bruttoBeregningsgrunnlag = (ds.getValue().getBeregningsgrunnlagDto() != null) ? ds.getValue().getBeregningsgrunnlagDto().getÅrsinntektVisningstall() : BigDecimal.valueOf(-1);
-        return StønadstatistikkPeriode.forOmsorgspenger(ds.getFom(), ds.getTom(), mapUtfall(ds.getValue()), mapUtbetalingsgrader(info, ds.getValue().getBeregningsresultatAndeler()), mapInngangsvilkår(ds.getValue()), bruttoBeregningsgrunnlag);
+        return StønadstatistikkPeriode.forOmsorgspenger(ds.getFom(), ds.getTom(), mapUtfall(ds.getValue()), mapUtbetalingsgrader(info, ds.getValue().getBeregningsresultatAndeler()), mapInngangsvilkår(ds.getValue(), år), bruttoBeregningsgrunnlag);
     }
 
     private StønadstatistikkUtfall mapUtfall(StønadstatistikkPeriodetidslinjebygger.InformasjonTilStønadstatistikkHendelse hendelse) {
@@ -249,18 +251,19 @@ public class OmpStønadstatistikkHendelseBygger implements StønadstatistikkHend
         return b.build();
     }
 
-    private List<StønadstatistikkInngangsvilkår> mapInngangsvilkår(StønadstatistikkPeriodetidslinjebygger.InformasjonTilStønadstatistikkHendelse info) {
+    private List<StønadstatistikkInngangsvilkår> mapInngangsvilkår(StønadstatistikkPeriodetidslinjebygger.InformasjonTilStønadstatistikkHendelse info, Year år) {
         List<StønadstatistikkInngangsvilkår> resultat = new ArrayList<>();
         resultat.addAll(mapVilkårFraK9Årskvantum(info.getVilkårFraÅrskvantum()));
-        resultat.addAll(mapVilkårFraK9Sak(info.getVilkårFraK9sak()));
+        resultat.addAll(mapVilkårFraK9Sak(info.getVilkårFraK9sak(), år));
         return resultat;
     }
 
-    private List<StønadstatistikkInngangsvilkår> mapVilkårFraK9Sak(Map<VilkårType, VilkårUtfall> vilkår) {
+    private List<StønadstatistikkInngangsvilkår> mapVilkårFraK9Sak(Map<VilkårType, VilkårUtfall> vilkår, Year år) {
         if (vilkår == null) {
             return List.of();
         }
         return vilkår.entrySet().stream()
+            .filter(e -> !(år.getValue() == 2023 && e.getKey() == VilkårType.OMSORGEN_FOR && e.getValue().getUtfall() == Utfall.IKKE_VURDERT)) //feil i 2023 som gjorde at noen vedtak ble fattet med IKKE_VURDERT på omsorgsvilkåret
             .map(e -> mapVilkår(e.getKey(), e.getValue()))
             .toList();
     }
@@ -316,6 +319,7 @@ public class OmpStønadstatistikkHendelseBygger implements StønadstatistikkHend
 
     private static String mapK9SakVilkår(VilkårType vilkår) {
         return switch (vilkår) {
+            case OMSORGEN_FOR -> "DVH_OMP_OMSORGSVILKÅRET";
             case K9_VILKÅRET -> "DVH_OMP_K9_VILKÅRET";
             case MEDLEMSKAPSVILKÅRET -> "DVH_OMP_MEDLEMSKAPSVILKÅRET";
             case ALDERSVILKÅR -> "DVH_OMP_ALDERSVILKÅR";
