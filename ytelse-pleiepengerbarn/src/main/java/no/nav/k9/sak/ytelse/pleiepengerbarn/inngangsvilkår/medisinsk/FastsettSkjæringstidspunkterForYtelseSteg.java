@@ -37,10 +37,10 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.domene.medlem.kontrollerfakta.AksjonspunktutlederForMedlemskap;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
 
 @BehandlingStegRef(value = POST_VURDER_MEDISINSKVILKÅR)
 @BehandlingTypeRef

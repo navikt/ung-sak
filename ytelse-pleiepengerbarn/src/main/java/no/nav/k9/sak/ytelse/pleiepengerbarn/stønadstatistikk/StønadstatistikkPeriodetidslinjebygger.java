@@ -18,7 +18,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
+import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.UttakRestKlient;
 import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
