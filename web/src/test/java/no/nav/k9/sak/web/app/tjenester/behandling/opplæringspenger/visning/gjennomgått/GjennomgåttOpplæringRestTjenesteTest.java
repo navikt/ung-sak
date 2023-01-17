@@ -111,6 +111,7 @@ class GjennomgåttOpplæringRestTjenesteTest {
         assertThat(result.getVurderinger().get(0).getPeriode()).isEqualTo(periode1);
         assertThat(result.getVurderinger().get(0).getResultat()).isEqualTo(Resultat.MÅ_VURDERES);
         assertThat(result.getVurderinger().get(0).getBegrunnelse()).isNull();
+        assertThat(result.getVurderinger().get(0).getTilknyttedeDokumenter()).isEmpty();
     }
 
     @Test
