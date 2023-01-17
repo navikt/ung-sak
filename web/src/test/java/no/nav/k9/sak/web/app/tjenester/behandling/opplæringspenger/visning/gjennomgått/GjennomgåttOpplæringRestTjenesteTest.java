@@ -96,6 +96,8 @@ class GjennomgåttOpplæringRestTjenesteTest {
         assertThat(result.getVurderinger().get(0).getPeriode()).isEqualTo(periode1);
         assertThat(result.getVurderinger().get(0).getResultat()).isEqualTo(Resultat.MÅ_VURDERES);
         assertThat(result.getVurderinger().get(0).getBegrunnelse()).isNull();
+        assertThat(result.getVurderinger().get(0).getEndretAv()).isNull();
+        assertThat(result.getVurderinger().get(0).getEndretTidspunkt()).isNull();
     }
 
     @Test
@@ -121,6 +123,8 @@ class GjennomgåttOpplæringRestTjenesteTest {
         assertThat(result.getVurderinger().get(0).getPeriode()).isEqualTo(periode1);
         assertThat(result.getVurderinger().get(0).getResultat()).isEqualTo(Resultat.GODKJENT);
         assertThat(result.getVurderinger().get(0).getBegrunnelse()).isEqualTo(vurdertOpplæringperiode.getBegrunnelse());
+        assertThat(result.getVurderinger().get(0).getEndretAv()).isEqualTo("VL");
+        assertThat(result.getVurderinger().get(0).getEndretTidspunkt()).isNotNull();
     }
 
     @Test

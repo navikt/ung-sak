@@ -1,5 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.visning.gjennomgått;
 
+import java.time.LocalDateTime;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -30,10 +32,22 @@ public class OpplæringVurderingDto {
     @Valid
     private String begrunnelse;
 
-    public OpplæringVurderingDto(Periode periode, Resultat resultat, String begrunnelse) {
+    @JsonProperty(value = "endretAv", required = true)
+    @Size(max = 20)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Valid
+    private String endretAv;
+
+    @JsonProperty(value = "endretTidspunkt", required = true)
+    @Valid
+    private LocalDateTime endretTidspunkt;
+
+    public OpplæringVurderingDto(Periode periode, Resultat resultat, String begrunnelse, String endretAv, LocalDateTime endretTidspunkt) {
         this.periode = periode;
         this.resultat = resultat;
         this.begrunnelse = begrunnelse;
+        this.endretAv = endretAv;
+        this.endretTidspunkt = endretTidspunkt;
     }
 
     public Periode getPeriode() {
@@ -46,5 +60,13 @@ public class OpplæringVurderingDto {
 
     public String getBegrunnelse() {
         return begrunnelse;
+    }
+
+    public String getEndretAv() {
+        return endretAv;
+    }
+
+    public LocalDateTime getEndretTidspunkt() {
+        return endretTidspunkt;
     }
 }

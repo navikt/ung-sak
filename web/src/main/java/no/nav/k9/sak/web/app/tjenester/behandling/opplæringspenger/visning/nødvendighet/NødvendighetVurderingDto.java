@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.visning.nødvendighet;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -38,11 +39,23 @@ public class NødvendighetVurderingDto {
     @Valid
     private String begrunnelse;
 
-    public NødvendighetVurderingDto(JournalpostIdDto journalpostId, List<Periode> perioder, Resultat resultat, String begrunnelse) {
+    @JsonProperty(value = "endretAv", required = true)
+    @Size(max = 20)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Valid
+    private String endretAv;
+
+    @JsonProperty(value = "endretTidspunkt", required = true)
+    @Valid
+    private LocalDateTime endretTidspunkt;
+
+    public NødvendighetVurderingDto(JournalpostIdDto journalpostId, List<Periode> perioder, Resultat resultat, String begrunnelse, String endretAv, LocalDateTime endretTidspunkt) {
         this.journalpostId = journalpostId;
         this.perioder = perioder;
         this.resultat = resultat;
         this.begrunnelse = begrunnelse;
+        this.endretAv = endretAv;
+        this.endretTidspunkt = endretTidspunkt;
     }
 
     public JournalpostIdDto getJournalpostId() {
@@ -59,5 +72,13 @@ public class NødvendighetVurderingDto {
 
     public String getBegrunnelse() {
         return begrunnelse;
+    }
+
+    public String getEndretAv() {
+        return endretAv;
+    }
+
+    public LocalDateTime getEndretTidspunkt() {
+        return endretTidspunkt;
     }
 }

@@ -96,6 +96,8 @@ class NødvendigOpplæringRestTjenesteTest {
         assertThat(result.getVurderinger().get(0).getResultat()).isEqualTo(Resultat.MÅ_VURDERES);
         assertThat(result.getVurderinger().get(0).getJournalpostId().getJournalpostId()).isEqualTo(journalpostId1);
         assertThat(result.getVurderinger().get(0).getBegrunnelse()).isNull();
+        assertThat(result.getVurderinger().get(0).getEndretAv()).isNull();
+        assertThat(result.getVurderinger().get(0).getEndretTidspunkt()).isNull();
     }
 
     @Test
@@ -123,6 +125,8 @@ class NødvendigOpplæringRestTjenesteTest {
         assertThat(result.getVurderinger().get(0).getResultat()).isEqualTo(Resultat.GODKJENT);
         assertThat(result.getVurderinger().get(0).getJournalpostId().getJournalpostId()).isEqualTo(journalpostId1);
         assertThat(result.getVurderinger().get(0).getBegrunnelse()).isEqualTo("fordi");
+        assertThat(result.getVurderinger().get(0).getEndretAv()).isEqualTo("VL");
+        assertThat(result.getVurderinger().get(0).getEndretTidspunkt()).isNotNull();
     }
 
     @Test
