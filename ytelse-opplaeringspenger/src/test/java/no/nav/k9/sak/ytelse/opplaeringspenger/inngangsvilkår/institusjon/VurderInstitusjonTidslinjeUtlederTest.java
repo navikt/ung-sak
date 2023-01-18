@@ -80,7 +80,7 @@ public class VurderInstitusjonTidslinjeUtlederTest {
     }
 
     private KursPeriode lagKursperiode(LocalDate fom, LocalDate tom, String institusjon, UUID uuid) {
-        return new KursPeriode(fom, tom, null, null, institusjon, uuid);
+        return new KursPeriode(fom, tom, null, null, institusjon, uuid, null, null);
     }
 
     private VurdertOpplæringGrunnlag setupVurderingsgrunnlag(List<VurdertInstitusjon> vurderteInstitusjoner) {

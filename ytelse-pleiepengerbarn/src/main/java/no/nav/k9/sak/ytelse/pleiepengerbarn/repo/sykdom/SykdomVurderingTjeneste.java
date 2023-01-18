@@ -167,11 +167,11 @@ public class SykdomVurderingTjeneste {
     }
 
     public SykdomVurderingerOgPerioder hentVurderingerForKontinuerligTilsynOgPleie(Behandling behandling) {
-        return utledPerioder(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, behandling);
+        return utledPerioderPSB(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, behandling);
     }
 
     public SykdomVurderingerOgPerioder hentVurderingerForToOmsorgspersoner(Behandling behandling) {
-        return utledPerioder(SykdomVurderingType.TO_OMSORGSPERSONER, behandling);
+        return utledPerioderPSB(SykdomVurderingType.TO_OMSORGSPERSONER, behandling);
     }
 
     public SykdomVurderingerOgPerioder hentVurderingerForILivetsSluttfase(Behandling behandling) {
@@ -179,7 +179,7 @@ public class SykdomVurderingTjeneste {
     }
 
     public SykdomVurderingerOgPerioder hentVurderingerForLangvarigSykdom(Behandling behandling) {
-        return utledPerioder(SykdomVurderingType.LANGVARIG_SYKDOM, behandling);
+        return utledPerioderOLP(behandling);
     }
 
     private LocalDateTimeline<Boolean> hentInnleggelseUnder18årTidslinje(Behandling behandling) {
@@ -250,9 +250,6 @@ public class SykdomVurderingTjeneste {
         LocalDateTimeline<Boolean> tidslinjeKreverVurdering = utledPerioderSomKreverVurderingPPN(behandling, perioderTilVurdering);
         LocalDateTimeline<Boolean> innleggelserTidslinje = hentAlleInnleggelserTidslinje(behandling);
         LocalDateTimeline<Boolean> alleResterendeVurderingsperioder = finnResterendeVurderingsperioder(behandling, tidslinjeKreverVurdering, vurderinger);
-        if (manglerGodkjentLegeerklæring(behandling.getFagsak().getPleietrengendeAktørId())) {
-            alleResterendeVurderingsperioder = LocalDateTimeline.empty();
-        }
 
         //ta høyde for perioder trukket av søker(e)
         LocalDateTimeline<List<AktørId>> søknadsperioderForAlleSøkere = søknadsperiodeTjeneste.utledSamledePerioderMedSøkereFor(FagsakYtelseType.PPN, behandling.getFagsak().getPleietrengendeAktørId());
@@ -294,7 +291,7 @@ public class SykdomVurderingTjeneste {
         return pleietrengendeOpplysninger.getDødsdato();
     }
 
-    public SykdomVurderingerOgPerioder utledPerioder(SykdomVurderingType sykdomVurderingType, Behandling behandling) {
+    public SykdomVurderingerOgPerioder utledPerioderPSB(SykdomVurderingType sykdomVurderingType, Behandling behandling) {
         final Saksnummer saksnummer = behandling.getFagsak().getSaksnummer();
         final LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> eksisterendeVurderinger = hentVurderinger(sykdomVurderingType, behandling);
         //TODO: Dette er "søknadsperioder" fra sykdomsgrunnlaget. Det skjærer litt med søknadsperiodene vi nå henter rett fra kilden, hvor vi filtrere på trukkede perioder. Bedre navn?
@@ -365,7 +362,7 @@ public class SykdomVurderingTjeneste {
 
     private LocalDateTimeline<Boolean> utledManglerGodkjentLegeerklæringTidslinje(AktørId pleietrengende) {
         if (manglerGodkjentLegeerklæring(pleietrengende)) {
-            return new LocalDateTimeline<Boolean>(LocalDate.MIN, LocalDate.MAX, true);
+            return new LocalDateTimeline<>(LocalDate.MIN, LocalDate.MAX, true);
         }
 
         return LocalDateTimeline.empty();
@@ -428,6 +425,48 @@ public class SykdomVurderingTjeneste {
             return LocalDateTimeline.empty();
         }
         return TidslinjeUtil.kunPerioderSomIkkeFinnesI(vurderingsperioder, vurderingerTidslinje);
+    }
+
+    public SykdomVurderingerOgPerioder utledPerioderOLP(Behandling behandling) {
+        final LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> vurderinger = hentVurderinger(SykdomVurderingType.LANGVARIG_SYKDOM, behandling);
+        final LocalDateTimeline<Set<Saksnummer>> søknadsperioderPåPleietrengende = medisinskGrunnlagRepository.hentSaksnummerForSøktePerioder(behandling.getFagsak().getPleietrengendeAktørId());
+        final LocalDateTimeline<Boolean> søknadsperioderTilSøker = søknadsperioderPåPleietrengende
+            .filterValue(s -> s.contains(behandling.getFagsak().getSaksnummer()))
+            .mapValue(s -> Boolean.TRUE);
+
+        final LocalDateTimeline<Boolean> innleggelserTidslinje = hentAlleInnleggelserTidslinje(behandling);
+        final LocalDateTimeline<Boolean> manglerGodkjentLegeerklæringTidslinje = utledManglerGodkjentLegeerklæringTidslinje(behandling.getFagsak().getPleietrengendeAktørId());
+
+        LocalDateTimeline<Boolean> alleResterendeVurderingsperioder = TidslinjeUtil.toBooleanTimeline(søknadsperioderPåPleietrengende)
+            .disjoint(vurderinger)
+            .disjoint(innleggelserTidslinje)
+            .disjoint(manglerGodkjentLegeerklæringTidslinje);
+
+        //ta høyde for perioder trukket av søker(e)
+        LocalDateTimeline<List<AktørId>> søknadsperioderForAlleSøkere = søknadsperiodeTjeneste.utledSamledePerioderMedSøkereFor(FagsakYtelseType.OPPLÆRINGSPENGER, behandling.getFagsak().getPleietrengendeAktørId());
+        LocalDateTimeline<List<AktørId>> søknadsperioderForInneværendeBehandling = new LocalDateTimeline<>(søknadsperioderForAlleSøkere.stream()
+            .filter(s -> s.getValue().contains(behandling.getAktørId()))
+            .collect(Collectors.toList()));
+
+        LocalDateTimeline<Boolean> resterendeVurderingsperioder = alleResterendeVurderingsperioder
+            .intersection(søknadsperioderTilSøker)
+            .intersection(søknadsperioderForInneværendeBehandling);
+
+        final LocalDateTimeline<Boolean> resterendeValgfrieVurderingsperioder = alleResterendeVurderingsperioder
+            .disjoint(resterendeVurderingsperioder)
+            .intersection(søknadsperioderForAlleSøkere);
+
+        final List<Periode> nyeSøknadsperioder = Collections.emptyList();
+
+        return new SykdomVurderingerOgPerioder(
+            vurderinger,
+            søknadsperioderPåPleietrengende,
+            TidslinjeUtil.tilPerioder(søknadsperioderPåPleietrengende),
+            TidslinjeUtil.tilPerioder(resterendeVurderingsperioder),
+            TidslinjeUtil.tilPerioder(resterendeValgfrieVurderingsperioder),
+            nyeSøknadsperioder,
+            TidslinjeUtil.tilPerioder(innleggelserTidslinje)
+        );
     }
 
     public static class SykdomVurderingerOgPerioder {

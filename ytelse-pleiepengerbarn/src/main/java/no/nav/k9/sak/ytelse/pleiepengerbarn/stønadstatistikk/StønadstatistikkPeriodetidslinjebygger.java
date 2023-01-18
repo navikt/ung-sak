@@ -47,18 +47,14 @@ class StønadstatistikkPeriodetidslinjebygger {
          * tilhørende beregningsgrunnlag og beregningsresultatdata.
          */
         final LocalDateTimeline<UttaksperiodeInfo> uttaksperiodeTidslinje = toUttaksperiodeTidslinje(uttakRestKlient.hentUttaksplan(behandling.getUuid(), true));
-        final LocalDateTimeline<UttaksperiodeInfo> uttaksperiodeUtenHelgerTidslinje = uttaksperiodeTidslinje.disjoint(Hjelpetidslinjer.lagTidslinjeMedKunHelger(uttaksperiodeTidslinje));
+        final LocalDateTimeline<UttaksperiodeInfo> uttaksperiodeUtenHelgerTidslinje = Hjelpetidslinjer.fjernHelger(uttaksperiodeTidslinje);
 
         final LocalDateTimeline<BeregningsgrunnlagDto> beregningsgrunnlagTidslinje = toBeregningsgrunnlagTidslinje(beregningsgrunnlagTjeneste.hentBeregningsgrunnlagDtoer(BehandlingReferanse.fra(behandling)));
         final LocalDateTimeline<List<BeregningsresultatAndel>> beregningsresultatTidslinje = toBeregningsresultatTidslinje(beregningsresultatRepository.hentEndeligBeregningsresultat(behandling.getId()));
 
-        final LocalDateTimeline<InformasjonTilStønadstatistikkHendelse> mellomregning = uttaksperiodeUtenHelgerTidslinje.combine(beregningsgrunnlagTidslinje, (datoInterval, datoSegment, datoSegment2) -> {
-                return new LocalDateSegment<InformasjonTilStønadstatistikkHendelse>(datoInterval, new InformasjonTilStønadstatistikkHendelse(datoSegment.getValue(), valueOrNull(datoSegment2)));
-            }, JoinStyle.LEFT_JOIN);
+        final LocalDateTimeline<InformasjonTilStønadstatistikkHendelse> mellomregning = uttaksperiodeUtenHelgerTidslinje.combine(beregningsgrunnlagTidslinje, (datoInterval, datoSegment, datoSegment2) -> new LocalDateSegment<>(datoInterval, new InformasjonTilStønadstatistikkHendelse(datoSegment.getValue(), valueOrNull(datoSegment2))), JoinStyle.LEFT_JOIN);
 
-        return mellomregning.combine(beregningsresultatTidslinje, (datoInterval, datoSegment, datoSegment2) -> {
-            return new LocalDateSegment<InformasjonTilStønadstatistikkHendelse>(datoInterval, new InformasjonTilStønadstatistikkHendelse(datoSegment.getValue(), valueOrNull(datoSegment2)));
-        }, JoinStyle.LEFT_JOIN);
+        return mellomregning.combine(beregningsresultatTidslinje, (datoInterval, datoSegment, datoSegment2) -> new LocalDateSegment<>(datoInterval, new InformasjonTilStønadstatistikkHendelse(datoSegment.getValue(), valueOrNull(datoSegment2))), JoinStyle.LEFT_JOIN);
     }
 
     private <T> T valueOrNull(LocalDateSegment<T> s) {
@@ -67,7 +63,7 @@ class StønadstatistikkPeriodetidslinjebygger {
 
 
     private LocalDateTimeline<UttaksperiodeInfo> toUttaksperiodeTidslinje(Uttaksplan uttaksplan) {
-        return new LocalDateTimeline<UttaksperiodeInfo>(uttaksplan.getPerioder().entrySet().stream().map(e -> new LocalDateSegment<UttaksperiodeInfo>(e.getKey().getFom(), e.getKey().getTom(), e.getValue())).toList());
+        return new LocalDateTimeline<>(uttaksplan.getPerioder().entrySet().stream().map(e -> new LocalDateSegment<>(e.getKey().getFom(), e.getKey().getTom(), e.getValue())).toList());
     }
 
     private LocalDateTimeline<BeregningsgrunnlagDto> toBeregningsgrunnlagTidslinje(List<BeregningsgrunnlagDto> beregningsgrunnlagListe) {

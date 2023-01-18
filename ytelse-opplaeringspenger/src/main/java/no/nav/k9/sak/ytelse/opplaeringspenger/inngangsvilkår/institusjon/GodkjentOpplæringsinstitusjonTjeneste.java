@@ -48,6 +48,17 @@ public class GodkjentOpplæringsinstitusjonTjeneste {
         return Optional.empty();
     }
 
+    public Optional<GodkjentOpplæringsinstitusjon> hentAktivMedUuid(UUID uuid, LocalDateTimeline<?> aktivTidslinje) {
+        Objects.requireNonNull(uuid);
+        Objects.requireNonNull(aktivTidslinje);
+
+        Optional<GodkjentOpplæringsinstitusjon> institusjon = repository.hentMedUuid(uuid);
+        if (institusjon.isPresent() && erAktiv(institusjon.get(), aktivTidslinje)) {
+            return institusjon;
+        }
+        return Optional.empty();
+    }
+
     public List<GodkjentOpplæringsinstitusjon> hentAlle() {
         return repository.hentAlle();
     }
@@ -60,6 +71,10 @@ public class GodkjentOpplæringsinstitusjonTjeneste {
 
     private boolean erAktiv(GodkjentOpplæringsinstitusjon godkjentOpplæringsInstitusjon, Periode periode) {
         var tidslinje = new LocalDateTimeline<>(periode.getFom(), periode.getTom(), true);
+        return erAktiv(godkjentOpplæringsInstitusjon, tidslinje);
+    }
+
+    private boolean erAktiv(GodkjentOpplæringsinstitusjon godkjentOpplæringsInstitusjon, LocalDateTimeline<?> tidslinje) {
         var aktivTidslinje = godkjentOpplæringsInstitusjon.getTidslinje();
         return tidslinje.disjoint(aktivTidslinje).isEmpty();
     }
