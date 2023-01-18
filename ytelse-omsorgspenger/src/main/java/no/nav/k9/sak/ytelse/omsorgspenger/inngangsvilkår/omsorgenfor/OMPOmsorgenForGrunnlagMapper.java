@@ -2,7 +2,6 @@ package no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.omsorgenfor;
 
 import static java.util.Collections.emptyList;
 
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +16,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.geografisk.AdresseType;
+import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonAdresseEntitet;
@@ -119,18 +119,6 @@ public class OMPOmsorgenForGrunnlagMapper implements OmsorgenForGrunnlagMapper {
     }
 
     private List<Fosterbarn> utledFosterbarnIPerioden(DatoIntervallEntitet vilkårsperiode, List<Fosterbarn> fosterbarna) {
-        LocalDateTimeline<Fosterbarn> fosterbarnTidslinje = new LocalDateTimeline<>(fosterbarna.stream()
-            .map(fosterbarn -> new LocalDateSegment<>(fosterbarn.getFødselsdato(), utledBarnetsTomDatoForPeriode(fosterbarn.getDødsdato(), vilkårsperiode.getTomDato()), fosterbarn))
-            .collect(Collectors.toList()));
-
-        LocalDateTimeline<Fosterbarn> fosterbarnIPeriodenTidslinje = fosterbarnTidslinje.intersection(new LocalDateInterval(vilkårsperiode.getFomDato(), vilkårsperiode.getTomDato()));
-        return fosterbarnIPeriodenTidslinje.stream().map(LocalDateSegment::getValue).toList();
-    }
-
-    private LocalDate utledBarnetsTomDatoForPeriode(LocalDate dødsdato, LocalDate vilkårsperiodeTom) {
-        if (dødsdato != null) {
-            return (dødsdato.isBefore(vilkårsperiodeTom)) ? dødsdato : vilkårsperiodeTom;
-        }
-        return vilkårsperiodeTom;
+        return fosterbarna.stream().filter(barn -> DatoIntervallEntitet.fraOgMedTilOgMed(barn.getFødselsdato(), barn.getDødsdato() != null ? barn.getDødsdato() : Tid.TIDENES_ENDE).overlapper(vilkårsperiode)).toList();
     }
 }

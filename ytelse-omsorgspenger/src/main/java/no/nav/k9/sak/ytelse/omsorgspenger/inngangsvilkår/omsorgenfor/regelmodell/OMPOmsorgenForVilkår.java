@@ -10,6 +10,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.inngangsvilkår.IkkeOppfylt;
 import no.nav.k9.sak.inngangsvilkår.Oppfylt;
 import no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell.OmsorgenForAvslagsårsaker;
+import no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell.OmsorgenForKnekkpunkter;
 import no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell.OmsorgenForVilkår;
 import no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell.OmsorgenForVilkårGrunnlag;
 
@@ -22,7 +23,15 @@ public class OMPOmsorgenForVilkår implements OmsorgenForVilkår {
 
     @Override
     public Evaluation evaluer(OmsorgenForVilkårGrunnlag grunnlag) {
-        return getSpecification().evaluate(grunnlag);
+        throw new IllegalStateException();
+    }
+
+    @Override
+    public Evaluation evaluer(OmsorgenForVilkårGrunnlag input, Object outputContainer) {
+        var omsorgenForKnekkpunkter = (OmsorgenForKnekkpunkter) outputContainer;
+        input.oppdaterKnekkpunkter(omsorgenForKnekkpunkter);
+        //TODO periodiser regelen
+        return OmsorgenForVilkår.super.evaluer(input, outputContainer);
     }
 
     @SuppressWarnings("unchecked")

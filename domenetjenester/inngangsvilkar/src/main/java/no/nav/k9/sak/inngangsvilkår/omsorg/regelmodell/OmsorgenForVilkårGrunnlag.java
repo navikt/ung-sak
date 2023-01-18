@@ -2,6 +2,9 @@ package no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell;
 
 import java.util.List;
 
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.VilkårGrunnlag;
 
 public class OmsorgenForVilkårGrunnlag implements VilkårGrunnlag {
@@ -12,6 +15,7 @@ public class OmsorgenForVilkårGrunnlag implements VilkårGrunnlag {
     private final Boolean harBlittVurdertSomOmsorgsPerson;
     private final List<Fosterbarn> fosterbarn;
     private final List<BostedsAdresse> deltBostedsAdresser;
+    private LocalDateTimeline<Utfall> knekkpunkter = LocalDateTimeline.empty();
 
     public OmsorgenForVilkårGrunnlag(Relasjon relasjonMellomSøkerOgPleietrengende, List<BostedsAdresse> søkersAdresser,
                                      List<BostedsAdresse> pleietrengendeAdresser, Boolean harBlittVurdertSomOmsorgsPerson,
@@ -63,5 +67,12 @@ public class OmsorgenForVilkårGrunnlag implements VilkårGrunnlag {
             ", fosterbarn=" + fosterbarn +
             ", deltBostedsAdresser=" + deltBostedsAdresser +
             '}';
+    }
+
+    public void oppdaterKnekkpunkter(OmsorgenForKnekkpunkter omsorgenForKnekkpunkter) {
+        if (knekkpunkter == null) {
+            throw new IllegalStateException("Kan ikke være null");
+        }
+        knekkpunkter.compress().forEach(it -> omsorgenForKnekkpunkter.leggTil(DatoIntervallEntitet.fra(it.getLocalDateInterval()), it.getValue()));
     }
 }
