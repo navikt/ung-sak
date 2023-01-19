@@ -161,6 +161,11 @@ public class OmsorgenForTjeneste {
         return DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
     }
 
+    public boolean skalHaAksjonspunkt(BehandlingReferanse referanse, LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje, boolean medAlleGamleVurderingerPåNytt) {
+        var omsorgenForVilkår = OmsorgenForVilkår.finnTjeneste(omsorgenForVilkårene, referanse.getFagsakYtelseType());
+        return omsorgenForVilkår.skalHaAksjonspunkt(samletOmsorgenForTidslinje, medAlleGamleVurderingerPåNytt);
+    }
+
     public static class Systemdata {
         private final boolean registrertForeldrerelasjon;
         private final boolean registrertSammeBosted;

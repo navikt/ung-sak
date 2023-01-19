@@ -1,8 +1,11 @@
 package no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell;
 
 import java.util.List;
+import java.util.Objects;
 
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.VilkårGrunnlag;
@@ -57,6 +60,19 @@ public class OmsorgenForVilkårGrunnlag implements VilkårGrunnlag {
         return deltBostedsAdresser;
     }
 
+    public void oppdaterKnekkpunkter(OmsorgenForKnekkpunkter omsorgenForKnekkpunkter) {
+        if (knekkpunkter == null) {
+            throw new IllegalStateException("Kan ikke være null");
+        }
+        knekkpunkter.compress().forEach(it -> omsorgenForKnekkpunkter.leggTil(DatoIntervallEntitet.fra(it.getLocalDateInterval()), it.getValue()));
+    }
+
+    public void leggTilKnekkpunkt(DatoIntervallEntitet periode, Utfall utfall) {
+        Objects.requireNonNull(periode);
+        Objects.requireNonNull(utfall);
+        knekkpunkter = knekkpunkter.combine(new LocalDateSegment<>(periode.toLocalDateInterval(), utfall), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+    }
+
     @Override
     public String toString() {
         return "OmsorgenForVilkårGrunnlag{" +
@@ -67,12 +83,5 @@ public class OmsorgenForVilkårGrunnlag implements VilkårGrunnlag {
             ", fosterbarn=" + fosterbarn +
             ", deltBostedsAdresser=" + deltBostedsAdresser +
             '}';
-    }
-
-    public void oppdaterKnekkpunkter(OmsorgenForKnekkpunkter omsorgenForKnekkpunkter) {
-        if (knekkpunkter == null) {
-            throw new IllegalStateException("Kan ikke være null");
-        }
-        knekkpunkter.compress().forEach(it -> omsorgenForKnekkpunkter.leggTil(DatoIntervallEntitet.fra(it.getLocalDateInterval()), it.getValue()));
     }
 }

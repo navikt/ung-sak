@@ -11,12 +11,16 @@ import org.junit.jupiter.api.Test;
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.evaluation.Resultat;
 import no.nav.fpsak.nare.evaluation.summary.EvaluationSummary;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell.BostedsAdresse;
 import no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell.Fosterbarn;
+import no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell.OmsorgenForKnekkpunkter;
 import no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell.OmsorgenForVilkårGrunnlag;
 import no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.omsorgenfor.regelmodell.OMPOmsorgenForVilkår;
 
 public class OmsorgenForVilkårTest {
+
+    private DatoIntervallEntitet periodeTilVurdering = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusWeeks(4), LocalDate.now());;
 
     @Test
     public void skal_få_innvilget_når_søker_og_barn_har_samme_bosted() {
@@ -28,7 +32,7 @@ public class OmsorgenForVilkårTest {
             List.of(),
             List.of());
 
-        final var evaluation = new OMPOmsorgenForVilkår().evaluer(grunnlag);
+        final var evaluation = new OMPOmsorgenForVilkår().evaluer(grunnlag, new OmsorgenForKnekkpunkter(periodeTilVurdering));
         EvaluationSummary summary = new EvaluationSummary(evaluation);
 
         assertThat(summary).isNotNull();
@@ -47,7 +51,7 @@ public class OmsorgenForVilkårTest {
             List.of(),
             List.of());
 
-        final var evaluation = new OMPOmsorgenForVilkår().evaluer(grunnlag);
+        final var evaluation = new OMPOmsorgenForVilkår().evaluer(grunnlag, new OmsorgenForKnekkpunkter(periodeTilVurdering));
         EvaluationSummary summary = new EvaluationSummary(evaluation);
 
         assertThat(summary).isNotNull();
@@ -66,7 +70,7 @@ public class OmsorgenForVilkårTest {
             List.of(),
             List.of(new BostedsAdresse("2", "a", null, null, "1234", "NOR")));
 
-        final var evaluation = new OMPOmsorgenForVilkår().evaluer(grunnlag);
+        final var evaluation = new OMPOmsorgenForVilkår().evaluer(grunnlag, new OmsorgenForKnekkpunkter(periodeTilVurdering));
         EvaluationSummary summary = new EvaluationSummary(evaluation);
 
         assertThat(summary).isNotNull();
@@ -85,7 +89,7 @@ public class OmsorgenForVilkårTest {
             List.of(new Fosterbarn("3", LocalDate.now().withDayOfMonth(1).withMonth(1), null)),
             List.of());
 
-        final var evaluation = new OMPOmsorgenForVilkår().evaluer(grunnlag);
+        final var evaluation = new OMPOmsorgenForVilkår().evaluer(grunnlag, new OmsorgenForKnekkpunkter(periodeTilVurdering));
         EvaluationSummary summary = new EvaluationSummary(evaluation);
 
         assertThat(summary).isNotNull();
@@ -104,7 +108,7 @@ public class OmsorgenForVilkårTest {
             List.of(),
             List.of());
 
-        final var evaluation = new OMPOmsorgenForVilkår().evaluer(grunnlag);
+        final var evaluation = new OMPOmsorgenForVilkår().evaluer(grunnlag, new OmsorgenForKnekkpunkter(periodeTilVurdering));
         EvaluationSummary summary = new EvaluationSummary(evaluation);
 
         assertThat(summary).isNotNull();

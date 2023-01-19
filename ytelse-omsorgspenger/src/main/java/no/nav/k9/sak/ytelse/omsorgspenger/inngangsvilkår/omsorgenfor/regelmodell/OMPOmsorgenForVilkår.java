@@ -5,6 +5,7 @@ import no.nav.fpsak.nare.Ruleset;
 import no.nav.fpsak.nare.doc.RuleDocumentation;
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.specification.Specification;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.inngangsvilkår.IkkeOppfylt;
@@ -29,9 +30,11 @@ public class OMPOmsorgenForVilkår implements OmsorgenForVilkår {
     @Override
     public Evaluation evaluer(OmsorgenForVilkårGrunnlag input, Object outputContainer) {
         var omsorgenForKnekkpunkter = (OmsorgenForKnekkpunkter) outputContainer;
-        input.oppdaterKnekkpunkter(omsorgenForKnekkpunkter);
         //TODO periodiser regelen
-        return OmsorgenForVilkår.super.evaluer(input, outputContainer);
+        var evaluate = getSpecification().evaluate(input);
+        input.oppdaterKnekkpunkter(omsorgenForKnekkpunkter);
+
+        return evaluate;
     }
 
     @SuppressWarnings("unchecked")
@@ -41,5 +44,10 @@ public class OMPOmsorgenForVilkår implements OmsorgenForVilkår {
         return rs.hvisRegel(HarSøkerOmsorgenForBarn.ID, "Har søker omsorgen for et barn.")
             .hvis(new HarSøkerOmsorgenForBarn(), new Oppfylt())
             .ellers(new IkkeOppfylt(OmsorgenForAvslagsårsaker.IKKE_DOKUMENTERT_OMSORGEN_FOR.toRuleReason()));
+    }
+
+    @Override
+    public boolean skalHaAksjonspunkt(LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje, boolean medAlleGamleVurderingerPåNytt) {
+        return false;
     }
 }
