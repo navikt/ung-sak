@@ -2,6 +2,7 @@ package no.nav.k9.sak.domene.behandling.steg.kompletthet;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.BiFunction;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -32,6 +34,8 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.UtledManglendeInntektsmeldingerFraGrunnlagFunction;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.FinnEksternReferanse;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
+import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
+import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdReferanse;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
@@ -98,7 +102,9 @@ public class KompletthetForBeregningTjeneste {
     }
 
     Map<DatoIntervallEntitet, List<ManglendeVedlegg>> utledAlleManglendeVedlegg(BehandlingReferanse ref,
-                                                                                BiFunction<BehandlingReferanse, LocalDate, Map<Arbeidsgiver, Set<EksternArbeidsforholdRef>>> finnArbeidsforholdForIdentPåDagFunction, boolean skipVurderingMotArbeid, boolean skalIgnorerePerioderFraInfotrygd) {
+                                                                                BiFunction<BehandlingReferanse, LocalDate, Map<Arbeidsgiver, Set<EksternArbeidsforholdRef>>> finnArbeidsforholdForIdentPåDagFunction,
+                                                                                boolean skipVurderingMotArbeid,
+                                                                                boolean skalIgnorerePerioderFraInfotrygd) {
         var perioderMedManglendeVedlegg = new HashMap<DatoIntervallEntitet, List<ManglendeVedlegg>>();
 
         // Utled vilkårsperioder
@@ -111,15 +117,43 @@ public class KompletthetForBeregningTjeneste {
             return perioderMedManglendeVedlegg;
         }
 
-        var inntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(ref.getSaksnummer());
+        // Må filtrere her fordi denne metoden kalles indirekte via rest for avsluttede behandlinger (KompletthetForBeregningRestTjeneste og SøknadDtoTjeneste)
+        var inntektsmeldingMedEksisterendeReferanser = finnInntektsmeldingerMedEksisterendeReferanseIBehandling(ref);
 
         // For alle relevanteperioder vurder kompletthet
         for (DatoIntervallEntitet periode : vilkårsPerioder) {
-            var utledManglendeVedleggForPeriode = utledManglendeVedleggForPeriode(ref, inntektsmeldinger, periode, finnArbeidsforholdForIdentPåDagFunction, skipVurderingMotArbeid);
+            var utledManglendeVedleggForPeriode = utledManglendeVedleggForPeriode(ref, inntektsmeldingMedEksisterendeReferanser, periode, finnArbeidsforholdForIdentPåDagFunction, skipVurderingMotArbeid);
             perioderMedManglendeVedlegg.putAll(utledManglendeVedleggForPeriode);
         }
 
         return perioderMedManglendeVedlegg;
+    }
+
+    /**
+     * Finner inntektsmeldinger med eksternreferanser som eksisterte da behandlingen ble avsluttet/ferdigstilt.
+     * Dersom behandlingen ikke er ferdigbehandlet returneres alle inntektsmeldinger.
+     *
+     * @param ref Behandlingreferanse
+     * @return Set av inntektsmeldinger
+     */
+    private Set<Inntektsmelding> finnInntektsmeldingerMedEksisterendeReferanseIBehandling(BehandlingReferanse ref) {
+        var inntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(ref.getSaksnummer());
+
+        if (!ref.getBehandlingStatus().erFerdigbehandletStatus()) {
+            return inntektsmeldinger;
+        }
+
+
+        var inntektArbeidYtelseGrunnlag = iayTjeneste.hentGrunnlag(ref.getBehandlingId());
+        var arbeidsforholdReferanser = inntektArbeidYtelseGrunnlag.getArbeidsforholdInformasjon().map(ArbeidsforholdInformasjon::getArbeidsforholdReferanser).orElse(Collections.emptyList());
+
+        return inntektsmeldinger.stream()
+            .filter(im -> arbeidsforholdReferanser.stream().anyMatch(harMatchendeReferanse(im)))
+            .collect(Collectors.toSet());
+    }
+
+    private static Predicate<ArbeidsforholdReferanse> harMatchendeReferanse(Inntektsmelding im) {
+        return a -> a.getArbeidsgiver().equals(im.getArbeidsgiver()) && im.getEksternArbeidsforholdRef().map(r -> a.getEksternReferanse().equals(r)).orElse(true);
     }
 
     private LocalDateTimeline<Boolean> utledTidslinje(BehandlingReferanse referanse) {
@@ -146,8 +180,8 @@ public class KompletthetForBeregningTjeneste {
      * Inntektsmeldinger for perioder fra infotrygd vil ha opprinnelig skjæringstidspunkt oppgitt i inntektsmeldingen og ikke i skjæringstidspunktet i k9-sak.
      * Vi sier her at vi ser på inntektsmeldinger som er 2 år og 4 mnd gamle.
      *
-     * @param opprinneligVilkårsperiode     Opprinnelig vilkårsperiode
-     * @param stpMigrertFraInfotrygd Skjæringstidspunkt som er migrert fra infotrygd
+     * @param opprinneligVilkårsperiode Opprinnelig vilkårsperiode
+     * @param stpMigrertFraInfotrygd    Skjæringstidspunkt som er migrert fra infotrygd
      * @return LocaldateSegment for relevant periode for vilkårsperiode
      */
     private LocalDateSegment<Boolean> utvidPeriodeForPeriodeFraInfotrygd(LocalDateInterval opprinneligVilkårsperiode, Optional<LocalDate> stpMigrertFraInfotrygd) {
