@@ -60,8 +60,8 @@ class InstitusjonMapper {
                     finnPerioderForJournalpostId(vurdertInstitusjon.getJournalpostId(), perioderFraSøknad),
                     vurdertInstitusjon.getGodkjent() ? Resultat.GODKJENT_MANUELT : Resultat.IKKE_GODKJENT_MANUELT,
                     vurdertInstitusjon.getBegrunnelse(),
-                    vurdertInstitusjon.getEndretAv() != null ? vurdertInstitusjon.getEndretAv() : vurdertInstitusjon.getOpprettetAv(),
-                    vurdertInstitusjon.getEndretTidspunkt() != null ? vurdertInstitusjon.getEndretTidspunkt() : vurdertInstitusjon.getOpprettetTidspunkt())
+                    vurdertInstitusjon.getVurdertAv(),
+                    vurdertInstitusjon.getVurdertTidspunkt())
                 );
             }
         }

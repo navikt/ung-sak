@@ -66,6 +66,8 @@ class GjennomgåOpplæringOppdatererTest {
         assertThat(periodeFraGrunnlag.getPeriode().getTomDato()).isEqualTo(periodeDto.getPeriode().getTom());
         assertThat(periodeFraGrunnlag.getGjennomførtOpplæring()).isEqualTo(periodeDto.getGjennomførtOpplæring());
         assertThat(periodeFraGrunnlag.getBegrunnelse()).isEqualTo(periodeDto.getBegrunnelse());
+        assertThat(periodeFraGrunnlag.getVurdertAv()).isEqualTo("VL");
+        assertThat(periodeFraGrunnlag.getVurdertTidspunkt()).isNotNull();
     }
 
     @Test
@@ -73,6 +75,8 @@ class GjennomgåOpplæringOppdatererTest {
         var periodeDto1 = new VurderGjennomgåttOpplæringPeriodeDto(idag, idag, false, "test1");
         var dto1 = new VurderGjennomgåttOpplæringDto(List.of(periodeDto1));
         lagreGrunnlag(dto1);
+        var vurdertTidspunkt1 = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId()).orElseThrow().getVurdertePerioder().getPerioder().get(0).getVurdertTidspunkt();
+
         var periodeDto2 = new VurderGjennomgåttOpplæringPeriodeDto(idag, idag.plusDays(1), true, "test2");
         var dto2 = new VurderGjennomgåttOpplæringDto(List.of(periodeDto2));
         lagreGrunnlag(dto2);
@@ -86,6 +90,7 @@ class GjennomgåOpplæringOppdatererTest {
         assertThat(periodeFraGrunnlag.getPeriode().getTomDato()).isEqualTo(periodeDto2.getPeriode().getTom());
         assertThat(periodeFraGrunnlag.getGjennomførtOpplæring()).isEqualTo(periodeDto2.getGjennomførtOpplæring());
         assertThat(periodeFraGrunnlag.getBegrunnelse()).isEqualTo(periodeDto2.getBegrunnelse());
+        assertThat(periodeFraGrunnlag.getVurdertTidspunkt()).isAfter(vurdertTidspunkt1);
     }
 
     @Test
@@ -105,6 +110,7 @@ class GjennomgåOpplæringOppdatererTest {
         var perioderFraGrunnlag2 = grunnlag.get().getVurdertePerioder().getPerioder().stream().filter(perioder -> perioder.getPeriode().getFomDato().equals(periodeDto2.getPeriode().getFom())).findFirst();
         assertThat(perioderFraGrunnlag1).isPresent();
         assertThat(perioderFraGrunnlag2).isPresent();
+        assertThat(perioderFraGrunnlag1.get().getVurdertTidspunkt()).isNotEqualTo(perioderFraGrunnlag2.get().getVurdertTidspunkt());
     }
 
     @Test

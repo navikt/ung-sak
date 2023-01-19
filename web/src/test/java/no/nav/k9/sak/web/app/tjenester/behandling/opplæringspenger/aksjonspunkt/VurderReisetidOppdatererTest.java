@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -77,6 +78,8 @@ class VurderReisetidOppdatererTest {
         assertThat(reisetidFraGrunnlag.getPeriode()).isEqualTo(DatoIntervallEntitet.fra(reiseperiode));
         assertThat(reisetidFraGrunnlag.getGodkjent()).isTrue();
         assertThat(reisetidFraGrunnlag.getBegrunnelse()).isEqualTo("ja");
+        assertThat(reisetidFraGrunnlag.getVurdertAv()).isEqualTo("VL");
+        assertThat(reisetidFraGrunnlag.getVurdertTidspunkt()).isNotNull();
     }
 
     @Test
@@ -87,6 +90,7 @@ class VurderReisetidOppdatererTest {
         var dto1 = new VurderReisetidDto(List.of(
             new VurderReisetidPeriodeDto(reiseperiode, true, "ok")));
         lagreGrunnlag(dto1);
+        LocalDateTime vurdertTidspunkt1 = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId()).orElseThrow().getVurdertReisetid().getReisetid().get(0).getVurdertTidspunkt();
 
         var reiseperiode1 = new Periode(reiseperiode.getFom(), reiseperiode.getFom());
         var reiseperiode2 = new Periode(reiseperiode.getTom(), reiseperiode.getTom());
@@ -106,12 +110,14 @@ class VurderReisetidOppdatererTest {
         assertThat(periode1).isPresent();
         assertThat(periode1.get().getGodkjent()).isFalse();
         assertThat(periode1.get().getBegrunnelse()).isEqualTo("grunn 1");
+        assertThat(periode1.get().getVurdertTidspunkt()).isAfter(vurdertTidspunkt1);
 
         Optional<VurdertReisetid> periode2 = grunnlag.get().getVurdertReisetid().getReisetid().stream()
             .filter(reisetid -> reisetid.getPeriode().equals(DatoIntervallEntitet.fra(reiseperiode2))).findFirst();
         assertThat(periode2).isPresent();
         assertThat(periode2.get().getGodkjent()).isTrue();
         assertThat(periode2.get().getBegrunnelse()).isEqualTo("grunn 2");
+        assertThat(periode2.get().getVurdertTidspunkt()).isAfter(vurdertTidspunkt1);
     }
 
     @Test
@@ -132,6 +138,7 @@ class VurderReisetidOppdatererTest {
         assertThat(grunnlag).isPresent();
         assertThat(grunnlag.get().getVurdertReisetid()).isNotNull();
         assertThat(grunnlag.get().getVurdertReisetid().getReisetid()).hasSize(2);
+        assertThat(grunnlag.get().getVurdertReisetid().getReisetid().get(0).getVurdertTidspunkt()).isNotEqualTo(grunnlag.get().getVurdertReisetid().getReisetid().get(1).getVurdertTidspunkt());
     }
 
     @Test

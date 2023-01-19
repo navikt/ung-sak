@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.aksjonspunk
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -62,6 +63,8 @@ public class VurderInstitusjonOppdatererTest {
         assertThat(vurdertInstitusjon.getGodkjent()).isEqualTo(dto.isGodkjent());
         assertThat(vurdertInstitusjon.getJournalpostId()).isEqualTo(dto.getJournalpostId().getJournalpostId());
         assertThat(vurdertInstitusjon.getBegrunnelse()).isEqualTo(dto.getBegrunnelse());
+        assertThat(vurdertInstitusjon.getVurdertAv()).isEqualTo("VL");
+        assertThat(vurdertInstitusjon.getVurdertTidspunkt()).isNotNull();
     }
 
     @Test
@@ -87,6 +90,7 @@ public class VurderInstitusjonOppdatererTest {
         assertThat(vurdertInstitusjon2.get().getGodkjent()).isEqualTo(dto3.isGodkjent());
         assertThat(vurdertInstitusjon2.get().getJournalpostId()).isEqualTo(dto3.getJournalpostId().getJournalpostId());
         assertThat(vurdertInstitusjon2.get().getBegrunnelse()).isEqualTo(dto3.getBegrunnelse());
+        assertThat(vurdertInstitusjon1.get().getVurdertTidspunkt()).isNotEqualTo(vurdertInstitusjon2.get().getVurdertTidspunkt());
     }
 
     private OppdateringResultat lagreGrunnlag(VurderInstitusjonDto dto) {

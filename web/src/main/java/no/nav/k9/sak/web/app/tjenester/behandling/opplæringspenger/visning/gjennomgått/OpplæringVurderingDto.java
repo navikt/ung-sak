@@ -32,22 +32,22 @@ public class OpplæringVurderingDto {
     @Valid
     private String begrunnelse;
 
-    @JsonProperty(value = "endretAv", required = true)
+    @JsonProperty(value = "vurdertAv", required = true)
     @Size(max = 20)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
-    private String endretAv;
+    private String vurdertAv;
 
-    @JsonProperty(value = "endretTidspunkt", required = true)
+    @JsonProperty(value = "vurdertTidspunkt", required = true)
     @Valid
-    private LocalDateTime endretTidspunkt;
+    private LocalDateTime vurdertTidspunkt;
 
-    public OpplæringVurderingDto(Periode periode, Resultat resultat, String begrunnelse, String endretAv, LocalDateTime endretTidspunkt) {
+    public OpplæringVurderingDto(Periode periode, Resultat resultat, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         this.periode = periode;
         this.resultat = resultat;
         this.begrunnelse = begrunnelse;
-        this.endretAv = endretAv;
-        this.endretTidspunkt = endretTidspunkt;
+        this.vurdertAv = vurdertAv;
+        this.vurdertTidspunkt = vurdertTidspunkt;
     }
 
     public Periode getPeriode() {
@@ -62,11 +62,11 @@ public class OpplæringVurderingDto {
         return begrunnelse;
     }
 
-    public String getEndretAv() {
-        return endretAv;
+    public String getVurdertAv() {
+        return vurdertAv;
     }
 
-    public LocalDateTime getEndretTidspunkt() {
-        return endretTidspunkt;
+    public LocalDateTime getVurdertTidspunkt() {
+        return vurdertTidspunkt;
     }
 }

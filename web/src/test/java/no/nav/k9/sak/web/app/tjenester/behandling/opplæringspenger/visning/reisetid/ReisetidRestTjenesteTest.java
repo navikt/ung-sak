@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -98,15 +99,15 @@ class ReisetidRestTjenesteTest {
         assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getPeriode()).isEqualTo(reiseperiodeTil.tilPeriode());
         assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getResultat()).isEqualTo(Resultat.MÅ_VURDERES);
         assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getBegrunnelse()).isNull();
-        assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getEndretAv()).isNull();
-        assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getEndretTidspunkt()).isNull();
+        assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getVurdertAv()).isNull();
+        assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getVurdertTidspunkt()).isNull();
 
         assertThat(result.getVurderinger().get(0).getReisetidHjem()).hasSize(1);
         assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getPeriode()).isEqualTo(reiseperiodeHjem.tilPeriode());
         assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getResultat()).isEqualTo(Resultat.MÅ_VURDERES);
         assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getBegrunnelse()).isNull();
-        assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getEndretAv()).isNull();
-        assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getEndretTidspunkt()).isNull();
+        assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getVurdertAv()).isNull();
+        assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getVurdertTidspunkt()).isNull();
     }
 
     @Test
@@ -115,8 +116,9 @@ class ReisetidRestTjenesteTest {
         DatoIntervallEntitet reiseperiodeHjem = DatoIntervallEntitet.fraOgMedTilOgMed(kursperiode.getTom().plusDays(1), kursperiode.getTom().plusDays(2));
         setupPerioderFraSøknad(reiseperiodeTil, reiseperiodeHjem);
 
-        var vurdertReisetidTil = new VurdertReisetid(reiseperiodeTil, true, "fordi");
-        var vurdertReisetidHjem = new VurdertReisetid(reiseperiodeHjem, false, "nope");
+        LocalDateTime nå = LocalDateTime.now();
+        var vurdertReisetidTil = new VurdertReisetid(reiseperiodeTil, true, "fordi", "meg", nå);
+        var vurdertReisetidHjem = new VurdertReisetid(reiseperiodeHjem, false, "nope", "deg", nå);
         vurdertOpplæringRepository.lagre(behandling.getId(), new VurdertReisetidHolder(List.of(vurdertReisetidTil, vurdertReisetidHjem)));
 
         Response response = restTjeneste.hentVurdertReisetid(new BehandlingUuidDto(behandling.getUuid()));
@@ -133,15 +135,15 @@ class ReisetidRestTjenesteTest {
         assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getPeriode()).isEqualTo(reiseperiodeTil.tilPeriode());
         assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getResultat()).isEqualTo(Resultat.GODKJENT);
         assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getBegrunnelse()).isEqualTo(vurdertReisetidTil.getBegrunnelse());
-        assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getEndretAv()).isEqualTo("VL");
-        assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getEndretTidspunkt()).isNotNull();
+        assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getVurdertAv()).isEqualTo("meg");
+        assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getVurdertTidspunkt()).isEqualTo(nå);
 
         assertThat(result.getVurderinger().get(0).getReisetidHjem()).hasSize(1);
         assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getPeriode()).isEqualTo(reiseperiodeHjem.tilPeriode());
         assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getResultat()).isEqualTo(Resultat.IKKE_GODKJENT);
         assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getBegrunnelse()).isEqualTo(vurdertReisetidHjem.getBegrunnelse());
-        assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getEndretAv()).isEqualTo("VL");
-        assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getEndretTidspunkt()).isNotNull();
+        assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getVurdertAv()).isEqualTo("deg");
+        assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getVurdertTidspunkt()).isEqualTo(nå);
     }
 
     @Test
@@ -150,7 +152,7 @@ class ReisetidRestTjenesteTest {
         DatoIntervallEntitet reiseperiodeHjem = DatoIntervallEntitet.fraOgMedTilOgMed(kursperiode.getTom().plusDays(1), kursperiode.getTom().plusDays(2));
         setupPerioderFraSøknad(reiseperiodeTil, reiseperiodeHjem);
 
-        var vurdertReisetid = new VurdertReisetid(DatoIntervallEntitet.fraOgMedTilOgMed(reiseperiodeTil.getFomDato(), reiseperiodeTil.getFomDato()), true, "fordi");
+        var vurdertReisetid = new VurdertReisetid(DatoIntervallEntitet.fraOgMedTilOgMed(reiseperiodeTil.getFomDato(), reiseperiodeTil.getFomDato()), true, "fordi", "", LocalDateTime.now());
         vurdertOpplæringRepository.lagre(behandling.getId(), new VurdertReisetidHolder(List.of(vurdertReisetid)));
 
         Response response = restTjeneste.hentVurdertReisetid(new BehandlingUuidDto(behandling.getUuid()));
@@ -194,15 +196,15 @@ class ReisetidRestTjenesteTest {
         assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getPeriode()).isEqualTo(reiseperiodeTil.tilPeriode());
         assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getResultat()).isEqualTo(Resultat.GODKJENT_AUTOMATISK);
         assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getBegrunnelse()).isNull();
-        assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getEndretAv()).isNull();
-        assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getEndretTidspunkt()).isNull();
+        assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getVurdertAv()).isNull();
+        assertThat(result.getVurderinger().get(0).getReisetidTil().get(0).getVurdertTidspunkt()).isNull();
 
         assertThat(result.getVurderinger().get(0).getReisetidHjem()).hasSize(1);
         assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getPeriode()).isEqualTo(reiseperiodeHjem.tilPeriode());
         assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getResultat()).isEqualTo(Resultat.GODKJENT_AUTOMATISK);
         assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getBegrunnelse()).isNull();
-        assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getEndretAv()).isNull();
-        assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getEndretTidspunkt()).isNull();
+        assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getVurdertAv()).isNull();
+        assertThat(result.getVurderinger().get(0).getReisetidHjem().get(0).getVurdertTidspunkt()).isNull();
     }
 
     @Test

@@ -40,8 +40,8 @@ class GjennomgåttOpplæringMapper {
                 vurderinger.add(new OpplæringVurderingDto(vurdertOpplæringPeriode.getPeriode().tilPeriode(),
                     vurdertOpplæringPeriode.getGjennomførtOpplæring() ? Resultat.GODKJENT : Resultat.IKKE_GODKJENT,
                     vurdertOpplæringPeriode.getBegrunnelse(),
-                    vurdertOpplæringPeriode.getEndretAv() != null ? vurdertOpplæringPeriode.getEndretAv() : vurdertOpplæringPeriode.getOpprettetAv(),
-                    vurdertOpplæringPeriode.getEndretTidspunkt() != null ? vurdertOpplæringPeriode.getEndretTidspunkt() : vurdertOpplæringPeriode.getOpprettetTidspunkt())
+                    vurdertOpplæringPeriode.getVurdertAv(),
+                    vurdertOpplæringPeriode.getVurdertTidspunkt())
                 );
             }
         }

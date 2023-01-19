@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.aksjonspunkt;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,6 +20,7 @@ import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPeriode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPerioderHolder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = VurderGjennomgåttOpplæringDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -57,11 +59,14 @@ public class GjennomgåOpplæringOppdaterer implements AksjonspunktOppdaterer<Vu
     }
 
     private List<VurdertOpplæringPeriode> mapDtoTilVurdertOpplæringPerioder(VurderGjennomgåttOpplæringDto dto) {
+        LocalDateTime vurdertTidspunkt = LocalDateTime.now();
         List<VurdertOpplæringPeriode> vurdertOpplæringPerioder = dto.getPerioder()
             .stream()
             .map(periodeDto -> new VurdertOpplæringPeriode(periodeDto.getPeriode().getFom(), periodeDto.getPeriode().getTom(),
                 periodeDto.getGjennomførtOpplæring(),
-                periodeDto.getBegrunnelse()))
+                periodeDto.getBegrunnelse(),
+                getCurrentUserId(),
+                vurdertTidspunkt))
             .toList();
         sjekkOverlappendePerioder(vurdertOpplæringPerioder);
         return vurdertOpplæringPerioder;
@@ -89,5 +94,10 @@ public class GjennomgåOpplæringOppdaterer implements AksjonspunktOppdaterer<Vu
             .map(vurdertOpplæringPeriode -> new LocalDateSegment<>(vurdertOpplæringPeriode.getPeriode().getFomDato(), vurdertOpplæringPeriode.getPeriode().getTomDato(), vurdertOpplæringPeriode))
             .collect(Collectors.toList());
         return new LocalDateTimeline<>(segments);
+    }
+
+    private static String getCurrentUserId() {
+        String brukerident = SubjectHandler.getSubjectHandler().getUid();
+        return brukerident != null ? brukerident : "VL";
     }
 }

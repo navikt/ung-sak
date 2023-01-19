@@ -48,8 +48,8 @@ class NødvendigOpplæringMapper {
                     finnPerioderForJournalpostId(vurdertOpplæring.getJournalpostId(), perioderFraSøknad),
                     vurdertOpplæring.getNødvendigOpplæring() ? Resultat.GODKJENT : Resultat.IKKE_GODKJENT,
                     vurdertOpplæring.getBegrunnelse(),
-                    vurdertOpplæring.getEndretAv() != null ? vurdertOpplæring.getEndretAv() : vurdertOpplæring.getOpprettetAv(),
-                    vurdertOpplæring.getEndretTidspunkt() != null ? vurdertOpplæring.getEndretTidspunkt() : vurdertOpplæring.getOpprettetTidspunkt())
+                    vurdertOpplæring.getVurdertAv(),
+                    vurdertOpplæring.getVurdertTidspunkt())
                 );
             }
         }
