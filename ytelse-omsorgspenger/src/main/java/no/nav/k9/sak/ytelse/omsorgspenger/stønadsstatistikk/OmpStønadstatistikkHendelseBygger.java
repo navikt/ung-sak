@@ -263,7 +263,6 @@ public class OmpStønadstatistikkHendelseBygger implements StønadstatistikkHend
             return List.of();
         }
         return vilkår.entrySet().stream()
-            .filter(e -> !(år.getValue() == 2023 && e.getKey() == VilkårType.OMSORGEN_FOR && e.getValue().getUtfall() == Utfall.IKKE_VURDERT)) //feil i 2023 som gjorde at noen vedtak ble fattet med IKKE_VURDERT på omsorgsvilkåret
             .map(e -> mapVilkår(e.getKey(), e.getValue()))
             .toList();
     }
@@ -313,6 +312,7 @@ public class OmpStønadstatistikkHendelseBygger implements StønadstatistikkHend
         return switch (utfall) {
             case OPPFYLT -> StønadstatistikkUtfall.OPPFYLT;
             case IKKE_OPPFYLT -> StønadstatistikkUtfall.IKKE_OPPFYLT;
+            case IKKE_VURDERT -> StønadstatistikkUtfall.IKKE_VURDERT;
             default -> throw new IllegalArgumentException("Ikke-støttet utfall: " + utfall);
         };
     }
