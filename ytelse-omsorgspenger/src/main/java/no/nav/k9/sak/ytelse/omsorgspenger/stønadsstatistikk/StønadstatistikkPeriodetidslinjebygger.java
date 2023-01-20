@@ -100,12 +100,7 @@ class StønadstatistikkPeriodetidslinjebygger {
             (datoInterval, datoSegment, datoSegment2) -> new LocalDateSegment<>(datoInterval, datoSegment.getValue().kopiMedVilkårFraÅrskvantum(valueOrNull(datoSegment2)))
             , JoinStyle.LEFT_JOIN);
 
-        LocalDateTimeline<InformasjonTilStønadstatistikkHendelse> deduplisert = medk9årskvantumVilkår.mapValue(this::fjernDuplisertOmsorgenFor);
-
-        LocalDateTimeline<Map<VilkårType, VilkårUtfall>> søknadsfristTidslinje = lagSøknadsfristTidslinjePrKravstiller(behandling);
-        return deduplisert.combine(søknadsfristTidslinje,
-            (datoInterval, lhs, rhs) -> new LocalDateSegment<>(datoInterval, lhs != null ? (rhs != null ? lhs.getValue().leggTilVilkårFraK9sak(rhs.getValue()) : lhs.getValue()) : new InformasjonTilStønadstatistikkHendelse().leggTilVilkårFraK9sak(rhs.getValue())),
-            JoinStyle.CROSS_JOIN); //må ha CROSS_JOIN for å få med perioder med avslag i søknadsfrist. De blir ikke tatt med i vilkårsperiodene
+        return medk9årskvantumVilkår.mapValue(this::fjernDuplisertOmsorgenFor);
     }
 
     InformasjonTilStønadstatistikkHendelse fjernDuplisertOmsorgenFor(InformasjonTilStønadstatistikkHendelse hendelse) {
