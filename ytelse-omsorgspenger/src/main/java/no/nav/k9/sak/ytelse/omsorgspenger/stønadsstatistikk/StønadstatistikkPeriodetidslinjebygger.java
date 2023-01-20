@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.omsorgspenger.stønadsstatistikk;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -12,12 +13,14 @@ import java.util.Set;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.aarskvantum.kontrakter.FullUttaksplanForBehandlinger;
 import no.nav.k9.aarskvantum.kontrakter.Vilkår;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
@@ -74,7 +77,7 @@ class StønadstatistikkPeriodetidslinjebygger {
         LocalDateTimeline<UttakResultatPeriode> uttaksperiodeTidslinje = MapFraÅrskvantumResultat.getTimeline(fullUttaksplanForBehandlinger.getAktiviteter());
 
         //legg på beregningsgrunnlag
-        LocalDateTimeline<BeregningsgrunnlagDto> beregningsgrunnlagTidslinje = toBeregningsgrunnlagTidslinje(beregningsgrunnlagTjeneste.hentBeregningsgrunnlagDtoer(BehandlingReferanse.fra(behandling)));
+        LocalDateTimeline<Beregningsgrunnlag> beregningsgrunnlagTidslinje = toBeregningsgrunnlagTidslinje(beregningsgrunnlagTjeneste.hentEksaktFastsattForAllePerioder(BehandlingReferanse.fra(behandling)));
         LocalDateTimeline<InformasjonTilStønadstatistikkHendelse> medBeregningsgrunnlag = uttaksperiodeTidslinje.combine(beregningsgrunnlagTidslinje,
             (datoInterval, datoSegment, datoSegment2) -> new LocalDateSegment<>(datoInterval, new InformasjonTilStønadstatistikkHendelse(datoSegment.getValue(), valueOrNull(datoSegment2)))
             , JoinStyle.LEFT_JOIN);
@@ -226,18 +229,17 @@ class StønadstatistikkPeriodetidslinjebygger {
         return (s != null) ? s.getValue() : null;
     }
 
-    private LocalDateTimeline<BeregningsgrunnlagDto> toBeregningsgrunnlagTidslinje(List<BeregningsgrunnlagDto> beregningsgrunnlagListe) {
+    private LocalDateTimeline<Beregningsgrunnlag> toBeregningsgrunnlagTidslinje(List<Beregningsgrunnlag> beregningsgrunnlagListe) {
         if (beregningsgrunnlagListe.isEmpty()) {
             return LocalDateTimeline.empty();
         }
 
-        final List<LocalDateSegment<BeregningsgrunnlagDto>> segments = new ArrayList<>();
-        for (int i = 0; i < beregningsgrunnlagListe.size(); i++) {
-            final BeregningsgrunnlagDto b = beregningsgrunnlagListe.get(i);
-            final LocalDate tom = (i + 1 < beregningsgrunnlagListe.size()) ? beregningsgrunnlagListe.get(i + 1).getSkjæringstidspunkt().minusDays(1) : Tid.TIDENES_ENDE;
-            segments.add(new LocalDateSegment<>(b.getSkjæringstidspunkt(), tom, b));
-        }
-        return new LocalDateTimeline<>(segments);
+        var segmenter = beregningsgrunnlagListe.stream()
+            .sorted(Comparator.comparing(Beregningsgrunnlag::getSkjæringstidspunkt))
+            .map(b -> new LocalDateSegment<>(b.getSkjæringstidspunkt(), Tid.TIDENES_ENDE, b))
+            .toList();
+
+        return new LocalDateTimeline<>(segmenter, StandardCombinators::coalesceRightHandSide);
     }
 
     private LocalDateTimeline<List<BeregningsresultatAndel>> toBeregningsresultatTidslinje(Optional<BeregningsresultatEntitet> beregningsresultatEntitet) {
@@ -253,7 +255,7 @@ class StønadstatistikkPeriodetidslinjebygger {
 
         private UttakResultatPeriode uttakresultat;
 
-        private BeregningsgrunnlagDto beregningsgrunnlagDto;
+        private Beregningsgrunnlag beregningsgrunnlagDto;
         private List<BeregningsresultatAndel> beregningsresultatAndeler;
 
         Map<Vilkår, VilkårUtfall> vilkårFraÅrskvantum;
@@ -268,7 +270,7 @@ class StønadstatistikkPeriodetidslinjebygger {
             vilkårFraK9sak = info.vilkårFraK9sak;
         }
 
-        public InformasjonTilStønadstatistikkHendelse(UttakResultatPeriode uttakresultat, BeregningsgrunnlagDto beregningsgrunnlagDto) {
+        public InformasjonTilStønadstatistikkHendelse(UttakResultatPeriode uttakresultat, Beregningsgrunnlag beregningsgrunnlagDto) {
             this.uttakresultat = uttakresultat;
             this.beregningsgrunnlagDto = beregningsgrunnlagDto;
         }
@@ -300,7 +302,7 @@ class StønadstatistikkPeriodetidslinjebygger {
             return kopi;
         }
 
-        public BeregningsgrunnlagDto getBeregningsgrunnlagDto() {
+        public Beregningsgrunnlag getBeregningsgrunnlagDto() {
             return beregningsgrunnlagDto;
         }
 
