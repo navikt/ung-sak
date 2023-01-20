@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.utils;
+package no.nav.k9.sak.domene.typer.tid;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -10,7 +10,6 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public final class Hjelpetidslinjer {
 

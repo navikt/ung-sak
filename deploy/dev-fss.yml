@@ -253,6 +253,8 @@ spec:
       value: "true"
     - name: ENABLE_PRODUCER_AKSJONSPUNKTHENDELSE_LOS_AIVEN
       value: "true"
+    - name: ENABLE_SJEKK_TILBAKEKREVING
+      value: "false"
     - name: IKKE_YRKESAKTIV_UTEN_SPEILING
       value: "true"
     - name: OMS_OMSORGENFOR_FLYTTET
