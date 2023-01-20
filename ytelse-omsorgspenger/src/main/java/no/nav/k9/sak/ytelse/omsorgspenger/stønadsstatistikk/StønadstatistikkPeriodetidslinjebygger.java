@@ -12,6 +12,7 @@ import java.util.Set;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -74,7 +75,7 @@ class StønadstatistikkPeriodetidslinjebygger {
         LocalDateTimeline<UttakResultatPeriode> uttaksperiodeTidslinje = MapFraÅrskvantumResultat.getTimeline(fullUttaksplanForBehandlinger.getAktiviteter());
 
         //legg på beregningsgrunnlag
-        LocalDateTimeline<BeregningsgrunnlagDto> beregningsgrunnlagTidslinje = toBeregningsgrunnlagTidslinje(beregningsgrunnlagTjeneste.hentBeregningsgrunnlagDtoer(BehandlingReferanse.fra(behandling)));
+        LocalDateTimeline<Beregningsgrunnlag> beregningsgrunnlagTidslinje = toBeregningsgrunnlagTidslinje(beregningsgrunnlagTjeneste.hentEksaktFastsattForAllePerioder(BehandlingReferanse.fra(behandling)));
         LocalDateTimeline<InformasjonTilStønadstatistikkHendelse> medBeregningsgrunnlag = uttaksperiodeTidslinje.combine(beregningsgrunnlagTidslinje,
             (datoInterval, datoSegment, datoSegment2) -> new LocalDateSegment<>(datoInterval, new InformasjonTilStønadstatistikkHendelse(datoSegment.getValue(), valueOrNull(datoSegment2)))
             , JoinStyle.LEFT_JOIN);
@@ -226,14 +227,14 @@ class StønadstatistikkPeriodetidslinjebygger {
         return (s != null) ? s.getValue() : null;
     }
 
-    private LocalDateTimeline<BeregningsgrunnlagDto> toBeregningsgrunnlagTidslinje(List<BeregningsgrunnlagDto> beregningsgrunnlagListe) {
+    private LocalDateTimeline<Beregningsgrunnlag> toBeregningsgrunnlagTidslinje(List<Beregningsgrunnlag> beregningsgrunnlagListe) {
         if (beregningsgrunnlagListe.isEmpty()) {
             return LocalDateTimeline.empty();
         }
 
-        final List<LocalDateSegment<BeregningsgrunnlagDto>> segments = new ArrayList<>();
+        final List<LocalDateSegment<Beregningsgrunnlag>> segments = new ArrayList<>();
         for (int i = 0; i < beregningsgrunnlagListe.size(); i++) {
-            final BeregningsgrunnlagDto b = beregningsgrunnlagListe.get(i);
+            final var b = beregningsgrunnlagListe.get(i);
             final LocalDate tom = (i + 1 < beregningsgrunnlagListe.size()) ? beregningsgrunnlagListe.get(i + 1).getSkjæringstidspunkt().minusDays(1) : Tid.TIDENES_ENDE;
             segments.add(new LocalDateSegment<>(b.getSkjæringstidspunkt(), tom, b));
         }
@@ -253,7 +254,7 @@ class StønadstatistikkPeriodetidslinjebygger {
 
         private UttakResultatPeriode uttakresultat;
 
-        private BeregningsgrunnlagDto beregningsgrunnlagDto;
+        private Beregningsgrunnlag beregningsgrunnlagDto;
         private List<BeregningsresultatAndel> beregningsresultatAndeler;
 
         Map<Vilkår, VilkårUtfall> vilkårFraÅrskvantum;
@@ -268,7 +269,7 @@ class StønadstatistikkPeriodetidslinjebygger {
             vilkårFraK9sak = info.vilkårFraK9sak;
         }
 
-        public InformasjonTilStønadstatistikkHendelse(UttakResultatPeriode uttakresultat, BeregningsgrunnlagDto beregningsgrunnlagDto) {
+        public InformasjonTilStønadstatistikkHendelse(UttakResultatPeriode uttakresultat, Beregningsgrunnlag beregningsgrunnlagDto) {
             this.uttakresultat = uttakresultat;
             this.beregningsgrunnlagDto = beregningsgrunnlagDto;
         }
@@ -300,7 +301,7 @@ class StønadstatistikkPeriodetidslinjebygger {
             return kopi;
         }
 
-        public BeregningsgrunnlagDto getBeregningsgrunnlagDto() {
+        public Beregningsgrunnlag getBeregningsgrunnlagDto() {
             return beregningsgrunnlagDto;
         }
 

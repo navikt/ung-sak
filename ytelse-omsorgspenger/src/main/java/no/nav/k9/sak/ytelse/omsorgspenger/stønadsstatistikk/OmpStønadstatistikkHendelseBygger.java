@@ -125,7 +125,7 @@ public class OmpStønadstatistikkHendelseBygger implements StønadstatistikkHend
     private StønadstatistikkPeriode mapPeriode(LocalDateSegment<StønadstatistikkPeriodetidslinjebygger.InformasjonTilStønadstatistikkHendelse> ds) {
         Year år = Year.of(ds.getFom().getYear());
         UttakResultatPeriode info = ds.getValue().getUttakresultat();
-        final BigDecimal bruttoBeregningsgrunnlag = (ds.getValue().getBeregningsgrunnlagDto() != null) ? ds.getValue().getBeregningsgrunnlagDto().getÅrsinntektVisningstall() : BigDecimal.valueOf(-1);
+        final BigDecimal bruttoBeregningsgrunnlag = (ds.getValue().getBeregningsgrunnlagDto() != null) ? ds.getValue().getBeregningsgrunnlagDto().getBeregningsgrunnlagPerioder().get(0).getBruttoPrÅr() : BigDecimal.valueOf(-1);
         return StønadstatistikkPeriode.forOmsorgspenger(ds.getFom(), ds.getTom(), mapUtfall(ds.getValue()), mapUtbetalingsgrader(info, ds.getValue().getBeregningsresultatAndeler()), mapInngangsvilkår(ds.getValue(), år), bruttoBeregningsgrunnlag);
     }
 
