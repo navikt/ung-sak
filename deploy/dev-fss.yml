@@ -261,8 +261,6 @@ spec:
       value: "true"
     - name: PSB_BG_BRUKER_OPPTJENING_RESULTAT
       value: "true"
-    - name: IKKE_REVURDER_VEDTAK_ETTER_AVSLAG_INNGANGSVILKAAR
-      value: "true"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT
