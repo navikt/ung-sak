@@ -25,9 +25,9 @@ public class OmsorgenForVilkårTest {
     @Test
     public void skal_få_innvilget_når_søker_og_barn_har_samme_bosted() {
 
-        final var grunnlag = new OmsorgenForVilkårGrunnlag(null,
-            List.of(new BostedsAdresse("1", "a", null, null, "1234", "NOR")),
-            List.of(new BostedsAdresse("2", "a", null, null, "1234", "NOR")),
+        final var grunnlag = new OmsorgenForVilkårGrunnlag(periodeTilVurdering, null,
+            List.of(new BostedsAdresse("1", "a", null, null, "1234", "NOR", periodeTilVurdering)),
+            List.of(new BostedsAdresse("2", "a", null, null, "1234", "NOR", periodeTilVurdering)),
             null,
             List.of(),
             List.of());
@@ -44,9 +44,9 @@ public class OmsorgenForVilkårTest {
     @Test
     public void skal_ikke_få_innvilget_når_søker_og_barn_ikke_har_samme_bosted() {
 
-        final var grunnlag = new OmsorgenForVilkårGrunnlag(null,
-            List.of(new BostedsAdresse("1", "a", null, null, "1234", "NOR")),
-            List.of(new BostedsAdresse("2", "b", null, null, "5678", "NOR")),
+        final var grunnlag = new OmsorgenForVilkårGrunnlag(periodeTilVurdering, null,
+            List.of(new BostedsAdresse("1", "a", null, null, "1234", "NOR", periodeTilVurdering)),
+            List.of(new BostedsAdresse("2", "b", null, null, "5678", "NOR", periodeTilVurdering)),
             null,
             List.of(),
             List.of());
@@ -63,12 +63,12 @@ public class OmsorgenForVilkårTest {
     @Test
     public void skal_få_innvilget_når_søker_og_barn_har_delt_bosted() {
 
-        final var grunnlag = new OmsorgenForVilkårGrunnlag(null,
-            List.of(new BostedsAdresse("1", "a", null, null, "1234", "NOR")),
-            List.of(new BostedsAdresse("2", "b", null, null, "5678", "NOR")),
+        final var grunnlag = new OmsorgenForVilkårGrunnlag(periodeTilVurdering, null,
+            List.of(new BostedsAdresse("1", "a", null, null, "1234", "NOR", periodeTilVurdering)),
+            List.of(new BostedsAdresse("2", "b", null, null, "5678", "NOR", periodeTilVurdering)),
             null,
             List.of(),
-            List.of(new BostedsAdresse("2", "a", null, null, "1234", "NOR")));
+            List.of(new BostedsAdresse("2", "a", null, null, "1234", "NOR", periodeTilVurdering)));
 
         final var evaluation = new OMPOmsorgenForVilkår().evaluer(grunnlag, new OmsorgenForKnekkpunkter(periodeTilVurdering));
         EvaluationSummary summary = new EvaluationSummary(evaluation);
@@ -82,9 +82,9 @@ public class OmsorgenForVilkårTest {
     @Test
     public void skal_få_innvilget_når_søker_har_fosterbarn() {
 
-        final var grunnlag = new OmsorgenForVilkårGrunnlag(null,
-            List.of(new BostedsAdresse("1", "a", null, null, "1234", "NOR")),
-            List.of(new BostedsAdresse("2", "b", null, null, "5678", "NOR")),
+        final var grunnlag = new OmsorgenForVilkårGrunnlag(periodeTilVurdering, null,
+            List.of(new BostedsAdresse("1", "a", null, null, "1234", "NOR", periodeTilVurdering)),
+            List.of(new BostedsAdresse("2", "b", null, null, "5678", "NOR", periodeTilVurdering)),
             null,
             List.of(new Fosterbarn("3", LocalDate.now().withDayOfMonth(1).withMonth(1), null)),
             List.of());
@@ -101,9 +101,9 @@ public class OmsorgenForVilkårTest {
     @Test
     public void skal_få_innvilget_når_søker_ikke_bor_med_noen_barn_fordi_saksbehandler_har_vurdert_at_det_er_omsorg() {
 
-        final var grunnlag = new OmsorgenForVilkårGrunnlag(null,
-            List.of(new BostedsAdresse("1", "a", null, null, "1234", "NOR")),
-            List.of(new BostedsAdresse("2", "b", null, null, "5678", "NOR")),
+        final var grunnlag = new OmsorgenForVilkårGrunnlag(periodeTilVurdering, null,
+            List.of(new BostedsAdresse("1", "a", null, null, "1234", "NOR", periodeTilVurdering)),
+            List.of(new BostedsAdresse("2", "b", null, null, "5678", "NOR", periodeTilVurdering)),
             true,
             List.of(),
             List.of());

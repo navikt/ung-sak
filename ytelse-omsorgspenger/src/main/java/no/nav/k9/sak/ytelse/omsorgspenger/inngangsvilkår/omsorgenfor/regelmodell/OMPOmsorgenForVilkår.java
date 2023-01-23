@@ -30,7 +30,6 @@ public class OMPOmsorgenForVilkår implements OmsorgenForVilkår {
     @Override
     public Evaluation evaluer(OmsorgenForVilkårGrunnlag input, Object outputContainer) {
         var omsorgenForKnekkpunkter = (OmsorgenForKnekkpunkter) outputContainer;
-        //TODO periodiser regelen
         var evaluate = getSpecification().evaluate(input);
         input.oppdaterKnekkpunkter(omsorgenForKnekkpunkter);
 
@@ -48,6 +47,8 @@ public class OMPOmsorgenForVilkår implements OmsorgenForVilkår {
 
     @Override
     public boolean skalHaAksjonspunkt(LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje, boolean medAlleGamleVurderingerPåNytt) {
+        // gå gjennom segmentene i OmsorgenForVilkårGrunnlag
+        // kjør evaluer() med segmentene og se om noe får utfall IKKE_OPPFYLT
         return false;
     }
 }

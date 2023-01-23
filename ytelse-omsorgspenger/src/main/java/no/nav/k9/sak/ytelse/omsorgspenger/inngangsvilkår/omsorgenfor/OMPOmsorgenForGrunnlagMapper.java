@@ -90,7 +90,7 @@ public class OMPOmsorgenForGrunnlagMapper implements OmsorgenForGrunnlagMapper {
             .orElse(List.of());
         List<Fosterbarn> fosterbarnIPerioden = utledFosterbarnIPerioden(vilkårsperiode, fosterbarna);
 
-        return new OmsorgenForVilkårGrunnlag(null, søkersBostedsadresserIPerioden, barnasBostedsadresser, null, fosterbarnIPerioden, barnasDeltBostedsadresser);
+        return new OmsorgenForVilkårGrunnlag(vilkårsperiode, null, søkersBostedsadresserIPerioden, barnasBostedsadresser, null, fosterbarnIPerioden, barnasDeltBostedsadresser);
     }
 
     private List<PersonAdresseEntitet> hentAdresserForBarn(PersonopplysningerAggregat personopplysningerAggregat, PersonopplysningEntitet barn,
@@ -108,7 +108,7 @@ public class OMPOmsorgenForGrunnlagMapper implements OmsorgenForGrunnlagMapper {
         List<PersonAdresseEntitet> aktuelleAdresser = bostedPerioderTidslinje.stream().map(LocalDateSegment::getValue).toList();
 
         return aktuelleAdresser.stream()
-            .map(adresse -> new BostedsAdresse(adresse.getAktørId().getId(), adresse.getAdresselinje1(), adresse.getAdresselinje2(), adresse.getAdresselinje3(), adresse.getPostnummer(), adresse.getLand()))
+            .map(adresse -> new BostedsAdresse(adresse.getAktørId().getId(), adresse.getAdresselinje1(), adresse.getAdresselinje2(), adresse.getAdresselinje3(), adresse.getPostnummer(), adresse.getLand(), adresse.getPeriode()))
             .collect(Collectors.toList());
     }
 

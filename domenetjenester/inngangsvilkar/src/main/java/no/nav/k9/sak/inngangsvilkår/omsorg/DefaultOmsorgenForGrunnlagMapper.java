@@ -64,14 +64,14 @@ public class DefaultOmsorgenForGrunnlagMapper implements OmsorgenForGrunnlagMapp
             .filter(it -> AdresseType.BOSTEDSADRESSE.equals(it.getAdresseType()))
             .collect(Collectors.toList());
 
-        return new OmsorgenForVilkårGrunnlag(mapReleasjonMellomPleietrengendeOgSøker(personopplysningerAggregat, pleietrengende),
+        return new OmsorgenForVilkårGrunnlag(periode, mapReleasjonMellomPleietrengendeOgSøker(personopplysningerAggregat, pleietrengende),
             mapAdresser(søkerBostedsadresser), mapAdresser(pleietrengendeBostedsadresser), null, null, null);
     }
 
 
     private List<BostedsAdresse> mapAdresser(List<PersonAdresseEntitet> pleietrengendeBostedsadresser) {
         return pleietrengendeBostedsadresser.stream()
-            .map(it -> new BostedsAdresse(it.getAktørId().getId(), it.getAdresselinje1(), it.getAdresselinje2(), it.getAdresselinje3(), it.getPostnummer(), it.getLand()))
+            .map(it -> new BostedsAdresse(it.getAktørId().getId(), it.getAdresselinje1(), it.getAdresselinje2(), it.getAdresselinje3(), it.getPostnummer(), it.getLand(), it.getPeriode()))
             .collect(Collectors.toList());
     }
 

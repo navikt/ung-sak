@@ -1,8 +1,19 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.omsorgenfor.regelmodell;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 import no.nav.fpsak.nare.doc.RuleDocumentation;
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.specification.LeafSpecification;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell.BostedsAdresse;
+import no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell.Fosterbarn;
 import no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell.OmsorgenForAvslagsårsaker;
 import no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell.OmsorgenForVilkårGrunnlag;
 
@@ -19,32 +30,45 @@ public class HarSøkerOmsorgenForBarn extends LeafSpecification<OmsorgenForVilk�
     public Evaluation evaluate(OmsorgenForVilkårGrunnlag grunnlag) {
 
         if (grunnlag.getHarBlittVurdertSomOmsorgsPerson() != null && grunnlag.getHarBlittVurdertSomOmsorgsPerson()) {
+            grunnlag.leggTilUtfall(grunnlag.getVilkårsperiode(), Utfall.OPPFYLT);
             return ja();
         }
 
-        if (harSammeBosted(grunnlag)) {
-            return ja();
+        var tidslinje = new LocalDateTimeline<>(grunnlag.getVilkårsperiode().toLocalDateInterval(), Utfall.IKKE_OPPFYLT);
+
+        tidslinje = tidslinje.combine(perioderMedLikeAdresser(grunnlag.getSøkersAdresser(), grunnlag.getPleietrengendeAdresser()), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        tidslinje = tidslinje.combine(perioderMedLikeAdresser(grunnlag.getSøkersAdresser(), grunnlag.getDeltBostedsAdresser()), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        tidslinje = tidslinje.combine(perioderMedFosterbarn(grunnlag), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+
+        tidslinje.forEach(segment -> grunnlag.leggTilUtfall(segment.getLocalDateInterval(), segment.getValue()));
+
+        if (tidslinje.stream().allMatch(it -> Objects.equals(it.getValue(), Utfall.IKKE_OPPFYLT))) {
+            return nei(OmsorgenForAvslagsårsaker.IKKE_DOKUMENTERT_OMSORGEN_FOR.toRuleReason());
         }
 
-        if (harDeltBosted(grunnlag)) {
-            return ja();
-        }
-
-        if (!grunnlag.getFosterbarn().isEmpty()) {
-            return ja();
-        }
-
-        return nei(OmsorgenForAvslagsårsaker.IKKE_DOKUMENTERT_OMSORGEN_FOR.toRuleReason());
+        return ja();
     }
 
-    private boolean harSammeBosted(OmsorgenForVilkårGrunnlag grunnlag) {
-        final var søkersAdresser = grunnlag.getSøkersAdresser();
-        return grunnlag.getPleietrengendeAdresser().stream().anyMatch(it -> søkersAdresser.stream().anyMatch(it::erSammeAdresse));
+    private LocalDateTimeline<Utfall> perioderMedFosterbarn(OmsorgenForVilkårGrunnlag grunnlag) {
+        var segmenter = new ArrayList<LocalDateSegment<Utfall>>();
+        for (Fosterbarn fosterbarn : grunnlag.getFosterbarn()) {
+            var fosterbarnPeriode = DatoIntervallEntitet.fra(fosterbarn.getFødselsdato(), fosterbarn.getDødsdato());
+            if (fosterbarnPeriode.overlapper(grunnlag.getVilkårsperiode())) {
+                segmenter.add(new LocalDateSegment<>(fosterbarnPeriode.overlapp(grunnlag.getVilkårsperiode()).toLocalDateInterval(), Utfall.OPPFYLT));
+            }
+        }
+        return new LocalDateTimeline<>(segmenter);
     }
 
-    private boolean harDeltBosted(OmsorgenForVilkårGrunnlag grunnlag) {
-        final var søkersAdresser = grunnlag.getSøkersAdresser();
-        return grunnlag.getDeltBostedsAdresser().stream().anyMatch(it -> søkersAdresser.stream().anyMatch(it::erSammeAdresse));
-
+    private LocalDateTimeline<Utfall> perioderMedLikeAdresser(List<BostedsAdresse> søkersAdresser, List<BostedsAdresse> barnsAdresser) {
+        var segmenter = new ArrayList<LocalDateSegment<Utfall>>();
+        for (BostedsAdresse søkersAdresse : søkersAdresser) {
+            for (BostedsAdresse barnsAdresse: barnsAdresser) {
+                if (søkersAdresse.getPeriode().overlapper(barnsAdresse.getPeriode()) && søkersAdresse.erSammeAdresse(barnsAdresse)) {
+                    segmenter.add(new LocalDateSegment<>(søkersAdresse.getPeriode().overlapp(barnsAdresse.getPeriode()).toLocalDateInterval(), Utfall.OPPFYLT));
+                }
+            }
+        }
+        return new LocalDateTimeline<>(segmenter);
     }
 }

@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.evaluation.Resultat;
 import no.nav.fpsak.nare.evaluation.summary.EvaluationSummary;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell.BostedsAdresse;
 import no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell.DefaultOmsorgenForVilkår;
 import no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell.OmsorgenForVilkårGrunnlag;
@@ -18,11 +20,13 @@ import no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell.RelasjonsRolle;
 
 public class OmsorgenForVilkårTest {
 
+    private DatoIntervallEntitet periodeTilVurdering = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusWeeks(4), LocalDate.now());;
+
     @Test
     public void skal_få_avslag_hvis_omsorgsperson_bor_sammen_med() {
-        final var grunnlag = new OmsorgenForVilkårGrunnlag(null,
-            List.of(new BostedsAdresse("1", "a", null, null, "1234", "NOR")),
-            List.of(new BostedsAdresse("2", "a", null, null, "9999", "NOR")),
+        final var grunnlag = new OmsorgenForVilkårGrunnlag(periodeTilVurdering, null,
+            List.of(new BostedsAdresse("1", "a", null, null, "1234", "NOR", null)),
+            List.of(new BostedsAdresse("2", "a", null, null, "9999", "NOR", null)),
             null,
             null,
             null);
@@ -38,9 +42,9 @@ public class OmsorgenForVilkårTest {
 
     @Test
     public void skal_få_avslag_hvis_omsorgsperson_bor_sammen_med_og_saksbehandler_ikke_har_vurdert() {
-        final var grunnlag = new OmsorgenForVilkårGrunnlag(null,
-            List.of(new BostedsAdresse("1", "a", null, null, "1234", "NOR")),
-            List.of(new BostedsAdresse("2", "a", null, null, "1234", "NOR")),
+        final var grunnlag = new OmsorgenForVilkårGrunnlag(periodeTilVurdering, null,
+            List.of(new BostedsAdresse("1", "a", null, null, "1234", "NOR", null)),
+            List.of(new BostedsAdresse("2", "a", null, null, "1234", "NOR", null)),
             null,
             null,
             null);
@@ -56,7 +60,7 @@ public class OmsorgenForVilkårTest {
 
     @Test
     public void skal_IKKE_få_avslag_hvis_mor_far_sammen() {
-        final var grunnlag = new OmsorgenForVilkårGrunnlag(new Relasjon("1", "2", RelasjonsRolle.BARN, true),
+        final var grunnlag = new OmsorgenForVilkårGrunnlag(periodeTilVurdering, new Relasjon("1", "2", RelasjonsRolle.BARN, true),
             List.of(),
             List.of(),
             null,
@@ -74,7 +78,7 @@ public class OmsorgenForVilkårTest {
 
     @Test
     public void skal_IKKE_få_avslag_hvis_mor_bor_sammen() {
-        final var grunnlag = new OmsorgenForVilkårGrunnlag(new Relasjon("1", "2", RelasjonsRolle.BARN, true),
+        final var grunnlag = new OmsorgenForVilkårGrunnlag(periodeTilVurdering, new Relasjon("1", "2", RelasjonsRolle.BARN, true),
             List.of(),
             List.of(),
             null,
@@ -92,7 +96,7 @@ public class OmsorgenForVilkårTest {
 
     @Test
     public void skal_IKKE_få_avslag_hvis_far_ikke_bor_sammen_men_saksbehandler_mener_det_er_omsorg() {
-        final var grunnlag = new OmsorgenForVilkårGrunnlag(new Relasjon("1", "2", RelasjonsRolle.BARN, false),
+        final var grunnlag = new OmsorgenForVilkårGrunnlag(periodeTilVurdering, new Relasjon("1", "2", RelasjonsRolle.BARN, false),
             List.of(),
             List.of(),
             true,
