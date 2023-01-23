@@ -6,11 +6,14 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.k9.felles.testutilities.sikkerhet.StaticSubjectHandler;
+import no.nav.k9.felles.testutilities.sikkerhet.SubjectHandlerUtils;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
@@ -27,31 +30,35 @@ import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
 
 @CdiDbAwareTest
-public class VurderNødvendighetOppdatererTest {
+class VurderNødvendighetOppdatererTest {
 
     @Inject
     private VurdertOpplæringRepository vurdertOpplæringRepository;
-
     @Inject
-    public EntityManager entityManager;
+    private EntityManager entityManager;
 
     private VurderNødvendighetOppdaterer vurderNødvendighetOppdaterer;
-    private LocalDate now;
     private Behandling behandling;
+    private static final String brukerId = "bruker1";
+
+    @BeforeAll
+    static void subjectHandlerSetup() {
+        SubjectHandlerUtils.useSubjectHandler(StaticSubjectHandler.class);
+        SubjectHandlerUtils.setInternBruker(brukerId);
+    }
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         vurderNødvendighetOppdaterer = new VurderNødvendighetOppdaterer(vurdertOpplæringRepository);
-        now = LocalDate.now();
         TestScenarioBuilder scenario = TestScenarioBuilder.builderMedSøknad();
-        scenario.medSøknad().medSøknadsdato(now);
+        scenario.medSøknad().medSøknadsdato(LocalDate.now());
         scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDER_NØDVENDIGHET, BehandlingStegType.VURDER_NØDVENDIGHETS_VILKÅR);
         behandling = scenario.lagre(repositoryProvider);
     }
 
     @Test
-    public void skalLagreNyttVurdertOpplæringGrunnlag() {
+    void skalLagreNyttVurdertOpplæringGrunnlag() {
         final JournalpostIdDto journalpostIdDto = new JournalpostIdDto("1337");
         final VurderNødvendighetDto dto = new VurderNødvendighetDto(journalpostIdDto, true, "");
         dto.setBegrunnelse("fordi");
@@ -66,12 +73,12 @@ public class VurderNødvendighetOppdatererTest {
         VurdertOpplæring vurdertOpplæring = grunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring().get(0);
         assertThat(vurdertOpplæring.getNødvendigOpplæring()).isEqualTo(dto.isNødvendigOpplæring());
         assertThat(vurdertOpplæring.getBegrunnelse()).isEqualTo(dto.getBegrunnelse());
-        assertThat(vurdertOpplæring.getVurdertAv()).isEqualTo("VL");
+        assertThat(vurdertOpplæring.getVurdertAv()).isEqualTo(brukerId);
         assertThat(vurdertOpplæring.getVurdertTidspunkt()).isNotNull();
     }
 
     @Test
-    public void skalOppdatereVurdertOpplæringGrunnlag() {
+    void skalOppdatereVurdertOpplæringGrunnlag() {
         final JournalpostIdDto journalpostIdDto = new JournalpostIdDto("1338");
         final VurderNødvendighetDto dto1 = new VurderNødvendighetDto(journalpostIdDto, false, "");
         lagreGrunnlag(dto1);
@@ -89,7 +96,7 @@ public class VurderNødvendighetOppdatererTest {
     }
 
     @Test
-    public void skalLagreGrunnlagOgKopiereFraAktivtForAnnenJornalpostId() {
+    void skalLagreGrunnlagOgKopiereFraAktivtForAnnenJornalpostId() {
         final JournalpostIdDto journalpostIdDto1 = new JournalpostIdDto("1339");
         final VurderNødvendighetDto dto1 = new VurderNødvendighetDto(journalpostIdDto1, true, "");
         lagreGrunnlag(dto1);

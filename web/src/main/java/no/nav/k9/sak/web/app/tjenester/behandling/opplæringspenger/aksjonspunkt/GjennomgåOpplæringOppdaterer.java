@@ -97,7 +97,6 @@ public class GjennomgåOpplæringOppdaterer implements AksjonspunktOppdaterer<Vu
     }
 
     private static String getCurrentUserId() {
-        String brukerident = SubjectHandler.getSubjectHandler().getUid();
-        return brukerident != null ? brukerident : "VL";
+        return SubjectHandler.getSubjectHandler().getUid();
     }
 }

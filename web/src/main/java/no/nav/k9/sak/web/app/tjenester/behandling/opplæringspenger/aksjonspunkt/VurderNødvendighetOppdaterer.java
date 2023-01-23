@@ -60,7 +60,6 @@ public class VurderNødvendighetOppdaterer implements AksjonspunktOppdaterer<Vur
     }
 
     private static String getCurrentUserId() {
-        String brukerident = SubjectHandler.getSubjectHandler().getUid();
-        return brukerident != null ? brukerident : "VL";
+        return SubjectHandler.getSubjectHandler().getUid();
     }
 }

@@ -8,11 +8,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.k9.felles.testutilities.sikkerhet.StaticSubjectHandler;
+import no.nav.k9.felles.testutilities.sikkerhet.SubjectHandlerUtils;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
@@ -22,8 +25,8 @@ import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.db.util.CdiDbAwareTest;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.kontrakt.opplæringspenger.VurderReisetidPeriodeDto;
 import no.nav.k9.sak.kontrakt.opplæringspenger.VurderReisetidDto;
+import no.nav.k9.sak.kontrakt.opplæringspenger.VurderReisetidPeriodeDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
@@ -40,6 +43,13 @@ class VurderReisetidOppdatererTest {
     private VurderReisetidOppdaterer vurderReisetidOppdaterer;
     private Behandling behandling;
     private final LocalDate idag = LocalDate.now();
+    private static final String brukerId = "bruker1";
+
+    @BeforeAll
+    static void subjectHandlerSetup() {
+        SubjectHandlerUtils.useSubjectHandler(StaticSubjectHandler.class);
+        SubjectHandlerUtils.setInternBruker(brukerId);
+    }
 
     @BeforeEach
     void setup() {
@@ -78,7 +88,7 @@ class VurderReisetidOppdatererTest {
         assertThat(reisetidFraGrunnlag.getPeriode()).isEqualTo(DatoIntervallEntitet.fra(reiseperiode));
         assertThat(reisetidFraGrunnlag.getGodkjent()).isTrue();
         assertThat(reisetidFraGrunnlag.getBegrunnelse()).isEqualTo("ja");
-        assertThat(reisetidFraGrunnlag.getVurdertAv()).isEqualTo("VL");
+        assertThat(reisetidFraGrunnlag.getVurdertAv()).isEqualTo(brukerId);
         assertThat(reisetidFraGrunnlag.getVurdertTidspunkt()).isNotNull();
     }
 

@@ -3,14 +3,16 @@ package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.aksjonspunk
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.k9.felles.testutilities.sikkerhet.StaticSubjectHandler;
+import no.nav.k9.felles.testutilities.sikkerhet.SubjectHandlerUtils;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
@@ -27,19 +29,25 @@ import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
 
 @CdiDbAwareTest
-public class VurderInstitusjonOppdatererTest {
+class VurderInstitusjonOppdatererTest {
 
     @Inject
     private VurdertOpplæringRepository vurdertOpplæringRepository;
-
     @Inject
-    public EntityManager entityManager;
+    private EntityManager entityManager;
 
     private VurderInstitusjonOppdaterer vurderInstitusjonOppdaterer;
     private Behandling behandling;
+    private static final String brukerId = "bruker1";
+
+    @BeforeAll
+    static void subjectHandlerSetup() {
+        SubjectHandlerUtils.useSubjectHandler(StaticSubjectHandler.class);
+        SubjectHandlerUtils.setInternBruker(brukerId);
+    }
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         vurderInstitusjonOppdaterer = new VurderInstitusjonOppdaterer(vurdertOpplæringRepository);
         TestScenarioBuilder scenario = TestScenarioBuilder.builderMedSøknad();
@@ -49,7 +57,7 @@ public class VurderInstitusjonOppdatererTest {
     }
 
     @Test
-    public void skalLagreNyttVurdertInstitusjonGrunnlag() {
+    void skalLagreNyttVurdertInstitusjonGrunnlag() {
         final VurderInstitusjonDto dto = new VurderInstitusjonDto(new JournalpostIdDto("123"), true, "fordi");
 
         OppdateringResultat resultat = lagreGrunnlag(dto);
@@ -63,12 +71,12 @@ public class VurderInstitusjonOppdatererTest {
         assertThat(vurdertInstitusjon.getGodkjent()).isEqualTo(dto.isGodkjent());
         assertThat(vurdertInstitusjon.getJournalpostId()).isEqualTo(dto.getJournalpostId().getJournalpostId());
         assertThat(vurdertInstitusjon.getBegrunnelse()).isEqualTo(dto.getBegrunnelse());
-        assertThat(vurdertInstitusjon.getVurdertAv()).isEqualTo("VL");
+        assertThat(vurdertInstitusjon.getVurdertAv()).isEqualTo(brukerId);
         assertThat(vurdertInstitusjon.getVurdertTidspunkt()).isNotNull();
     }
 
     @Test
-    public void skalOppdatereVurdertInstitusjonGrunnlag() {
+    void skalOppdatereVurdertInstitusjonGrunnlag() {
         final VurderInstitusjonDto dto1 = new VurderInstitusjonDto(new JournalpostIdDto("123"), true, "fordi");
         lagreGrunnlag(dto1);
 

@@ -54,7 +54,6 @@ public class VurderInstitusjonOppdaterer implements AksjonspunktOppdaterer<Vurde
     }
 
     private static String getCurrentUserId() {
-        String brukerident = SubjectHandler.getSubjectHandler().getUid();
-        return brukerident != null ? brukerident : "VL";
+        return SubjectHandler.getSubjectHandler().getUid();
     }
 }
