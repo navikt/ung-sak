@@ -13,6 +13,7 @@ import no.nav.abakus.vedtak.ytelse.Desimaltall;
 import no.nav.abakus.vedtak.ytelse.Periode;
 import no.nav.abakus.vedtak.ytelse.v1.anvisning.Anvisning;
 import no.nav.abakus.vedtak.ytelse.v1.anvisning.AnvistAndel;
+import no.nav.abakus.vedtak.ytelse.v1.anvisning.ArbeidsgiverIdent;
 import no.nav.abakus.vedtak.ytelse.v1.anvisning.Inntektklasse;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
@@ -131,14 +132,8 @@ class VedtattYtelseMapper {
             .orElse(null);
     }
 
-    private static no.nav.abakus.iaygrunnlag.Aktør mapAktør(Arbeidsgiver arbeidsgiver) {
-        if (arbeidsgiver == null) {
-            return null;
-        }
-        if (arbeidsgiver.getErVirksomhet()) {
-            return new Organisasjon(arbeidsgiver.getIdentifikator());
-        }
-        return new AktørIdPersonident(arbeidsgiver.getIdentifikator());
+    private static ArbeidsgiverIdent mapAktør(Arbeidsgiver arbeidsgiver) {
+        return arbeidsgiver != null ? new ArbeidsgiverIdent(arbeidsgiver.getIdentifikator()) : null;
     }
 
     private static class AnvistAndelNøkkel implements Comparable<AnvistAndelNøkkel> {

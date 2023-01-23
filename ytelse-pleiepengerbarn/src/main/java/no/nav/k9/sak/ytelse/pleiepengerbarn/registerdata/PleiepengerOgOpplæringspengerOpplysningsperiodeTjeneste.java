@@ -6,6 +6,7 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BA
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.Comparator;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -13,8 +14,10 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.registerinnhenting.OpplysningsperiodeTjeneste;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.skjæringstidspunkt.SkattegrunnlaginnhentingTjeneste;
 import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
@@ -23,6 +26,7 @@ import no.nav.k9.sak.typer.Periode;
 public class PleiepengerOgOpplæringspengerOpplysningsperiodeTjeneste implements OpplysningsperiodeTjeneste {
 
     private BehandlingRepository behandlingRepository;
+    private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
 
     private final Period periodeEtter = Period.parse("P3M");
     private final Period periodeFør = Period.parse("P17M");
@@ -32,8 +36,9 @@ public class PleiepengerOgOpplæringspengerOpplysningsperiodeTjeneste implements
     }
 
     @Inject
-    public PleiepengerOgOpplæringspengerOpplysningsperiodeTjeneste(BehandlingRepository behandlingRepository) {
+    public PleiepengerOgOpplæringspengerOpplysningsperiodeTjeneste(BehandlingRepository behandlingRepository, SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
         this.behandlingRepository = behandlingRepository;
+        this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
     }
 
     @Override
@@ -61,7 +66,9 @@ public class PleiepengerOgOpplæringspengerOpplysningsperiodeTjeneste implements
 
     private LocalDate førsteUttaksdag(Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        return behandling.getFagsak().getPeriode().getFomDato();
+        var kravperioder = søknadsperiodeTjeneste.utledPeriode(behandlingId);
+        var førsteKravdato = kravperioder.stream().map(DatoIntervallEntitet::getFomDato).min(Comparator.naturalOrder());
+        return førsteKravdato.orElse(behandling.getFagsak().getPeriode().getFomDato());
     }
 
 }

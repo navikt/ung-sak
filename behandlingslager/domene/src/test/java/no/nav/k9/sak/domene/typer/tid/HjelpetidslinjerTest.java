@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.utils;
+package no.nav.k9.sak.domene.typer.tid;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

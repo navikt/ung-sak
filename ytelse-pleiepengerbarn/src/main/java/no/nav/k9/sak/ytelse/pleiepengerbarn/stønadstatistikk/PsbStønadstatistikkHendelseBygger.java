@@ -181,7 +181,7 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
 
     private StønadstatistikkPeriode mapPeriode(LocalDateSegment<InformasjonTilStønadstatistikkHendelse> ds) {
         final UttaksperiodeInfo info = ds.getValue().getUttaksperiodeInfo();
-        final BigDecimal bruttoBeregningsgrunnlag = (ds.getValue().getBeregningsgrunnlagDto() != null) ? ds.getValue().getBeregningsgrunnlagDto().getÅrsinntektVisningstall() : BigDecimal.valueOf(-1);
+        final BigDecimal bruttoBeregningsgrunnlag = (ds.getValue().getBeregningsgrunnlag() != null) ? ds.getValue().getBeregningsgrunnlag().getBeregningsgrunnlagPerioder().get(0).getBruttoPrÅr() : BigDecimal.valueOf(-1);
         return new StønadstatistikkPeriode(
             ds.getFom(),
             ds.getTom(),

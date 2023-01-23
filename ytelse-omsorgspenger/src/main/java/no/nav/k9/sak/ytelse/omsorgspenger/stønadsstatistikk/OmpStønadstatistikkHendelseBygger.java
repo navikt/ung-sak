@@ -125,7 +125,7 @@ public class OmpStønadstatistikkHendelseBygger implements StønadstatistikkHend
     private StønadstatistikkPeriode mapPeriode(LocalDateSegment<StønadstatistikkPeriodetidslinjebygger.InformasjonTilStønadstatistikkHendelse> ds) {
         Year år = Year.of(ds.getFom().getYear());
         UttakResultatPeriode info = ds.getValue().getUttakresultat();
-        final BigDecimal bruttoBeregningsgrunnlag = (ds.getValue().getBeregningsgrunnlagDto() != null) ? ds.getValue().getBeregningsgrunnlagDto().getÅrsinntektVisningstall() : BigDecimal.valueOf(-1);
+        final BigDecimal bruttoBeregningsgrunnlag = (ds.getValue().getBeregningsgrunnlagDto() != null) ? ds.getValue().getBeregningsgrunnlagDto().getBeregningsgrunnlagPerioder().get(0).getBruttoPrÅr() : BigDecimal.valueOf(-1);
         return StønadstatistikkPeriode.forOmsorgspenger(ds.getFom(), ds.getTom(), mapUtfall(ds.getValue()), mapUtbetalingsgrader(info, ds.getValue().getBeregningsresultatAndeler()), mapInngangsvilkår(ds.getValue(), år), bruttoBeregningsgrunnlag);
     }
 
@@ -263,7 +263,6 @@ public class OmpStønadstatistikkHendelseBygger implements StønadstatistikkHend
             return List.of();
         }
         return vilkår.entrySet().stream()
-            .filter(e -> !(år.getValue() == 2023 && e.getKey() == VilkårType.OMSORGEN_FOR && e.getValue().getUtfall() == Utfall.IKKE_VURDERT)) //feil i 2023 som gjorde at noen vedtak ble fattet med IKKE_VURDERT på omsorgsvilkåret
             .map(e -> mapVilkår(e.getKey(), e.getValue()))
             .toList();
     }
@@ -313,6 +312,7 @@ public class OmpStønadstatistikkHendelseBygger implements StønadstatistikkHend
         return switch (utfall) {
             case OPPFYLT -> StønadstatistikkUtfall.OPPFYLT;
             case IKKE_OPPFYLT -> StønadstatistikkUtfall.IKKE_OPPFYLT;
+            case IKKE_VURDERT -> StønadstatistikkUtfall.IKKE_VURDERT;
             default -> throw new IllegalArgumentException("Ikke-støttet utfall: " + utfall);
         };
     }

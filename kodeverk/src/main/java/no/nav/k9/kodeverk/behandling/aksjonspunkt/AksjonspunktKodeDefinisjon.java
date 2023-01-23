@@ -95,6 +95,7 @@ public class AksjonspunktKodeDefinisjon {
     public static final String VURDER_PERIODER_MED_OPPTJENING_KODE = "5051";
     public static final String VURDER_ARBEIDSFORHOLD_KODE = "5080";
     public static final String VURDER_FEILUTBETALING_KODE = "5084";
+    public static final String SJEKK_TILBAKEKREVING_KODE = "5085";
     public static final String VURDER_OPPTJENINGSVILKÅRET_KODE = "5089";
 
     public static final String AUTOMATISK_MARKERING_AV_UTENLANDSSAK_KODE = "5068";
@@ -108,6 +109,7 @@ public class AksjonspunktKodeDefinisjon {
 
     public static final String AVKLAR_OMSORGEN_FOR_KODE_V2 = "9020";
 
+
     // PSB
     public static final String KONTROLLER_LEGEERKLÆRING_KODE = "9001";
     public static final String VURDER_NATTEVÅK = "9200";
@@ -119,6 +121,7 @@ public class AksjonspunktKodeDefinisjon {
     public static final String AUTO_VENT_PÅ_KOMPLETT_SØKNAD_FOR_PERIODE = "9006";
     public static final String TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE = "9007";
     public static final String TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE_ANNEN_PART = "9008";
+
 
     // OLP
     public static final String VURDER_INSTITUSJON = "9300";
