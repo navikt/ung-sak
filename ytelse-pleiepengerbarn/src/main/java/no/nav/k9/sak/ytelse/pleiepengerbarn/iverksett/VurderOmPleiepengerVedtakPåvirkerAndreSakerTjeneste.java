@@ -135,7 +135,11 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
 
         List<SakMedPeriode> resultat = new ArrayList<>();
 
-        var vedtattTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(utledVurderingsperiode(BehandlingReferanse.fra(vedtattBehandling)));
+        var datoIntervallEntitets = utledVurderingsperiode(BehandlingReferanse.fra(vedtattBehandling));
+        var vedtattTidslinje = new LocalDateTimeline<>(datoIntervallEntitets.stream()
+            .map(datoIntervall -> new LocalDateSegment<>(datoIntervall.getFomDato(), datoIntervall.getTomDato(), true))
+            .toList(), StandardCombinators::alwaysTrueForMatch)
+            .compress();
 
         for (Saksnummer kandidatsaksnummer : alleSaksnummer) {
             if (!kandidatsaksnummer.equals(fagsak.getSaksnummer())) {
