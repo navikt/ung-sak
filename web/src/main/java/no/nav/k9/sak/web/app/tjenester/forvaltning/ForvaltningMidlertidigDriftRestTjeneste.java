@@ -75,6 +75,7 @@ import no.nav.k9.sak.behandlingslager.behandling.personopplysning.Personopplysni
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
+import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
 import no.nav.k9.sak.hendelse.stønadstatistikk.StønadstatistikkService;
 import no.nav.k9.sak.kontrakt.FeilDto;
 import no.nav.k9.sak.kontrakt.KortTekst;
@@ -95,7 +96,6 @@ import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.frisinn.mottak.FrisinnSøknadInnsending;
 import no.nav.k9.sak.ytelse.frisinn.mottak.FrisinnSøknadMottaker;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
 import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer;
@@ -132,7 +132,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     private StønadstatistikkService stønadstatistikkService;
 
     private DriftLesetilgangVurderer lesetilgangVurderer;
-    
+
     private PersonopplysningRepository personopplysningRepository;
 
     public ForvaltningMidlertidigDriftRestTjeneste() {
@@ -217,7 +217,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
         return Response.ok(new SaksnummerDto(fagsak.getSaksnummer())).build();
     }
-    
+
     @POST
     @Path("/beskyttAktoerId")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -233,7 +233,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         for (AktørId aktørId : aktører.getAktører()) {
             personopplysningRepository.beskyttAktørId(aktørId);
         }
-        
+
         return Response.ok().build();
         */
         throw new IllegalStateException("Dette kallet er deaktivert.");
@@ -467,9 +467,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     }
 
     private boolean erIkkeHelg(Periode periode) {
-        final LocalDateTimeline<Boolean> helePerioden = new LocalDateTimeline<>(periode.getFraOgMed(), periode.getTilOgMed(), Boolean.TRUE);
-        final LocalDateTimeline<Boolean> kunHelger = Hjelpetidslinjer.lagTidslinjeMedKunHelger(helePerioden);
-        return !helePerioden.disjoint(kunHelger).isEmpty();
+        LocalDateTimeline<Boolean> ukedagerTidslinje = Hjelpetidslinjer.lagUkestidslinjeForMandagTilFredag(periode.getFraOgMed(), periode.getTilOgMed());
+        return !ukedagerTidslinje.isEmpty();
     }
 
     @GET

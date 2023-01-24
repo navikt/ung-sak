@@ -83,7 +83,9 @@ class SøknadOversetter {
                     finnReiseperiodeTil(kursPeriodeMedReisetid),
                     finnReiseperiodeHjem(kursPeriodeMedReisetid),
                     kurs.getKursholder().getHolder(),
-                    kurs.getKursholder().getInstitusjonUuid()))
+                    kurs.getKursholder().getInstitusjonUuid(),
+                    kursPeriodeMedReisetid.getBegrunnelseReisetidTil(),
+                    kursPeriodeMedReisetid.getBegrunnelseReisetidHjem()))
             .collect(Collectors.toList());
     }
 

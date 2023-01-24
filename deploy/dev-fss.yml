@@ -96,8 +96,6 @@ spec:
     - name: KAFKA_DOKUMENTBESTILLING_AIVEN_TOPIC
       value: k9saksbehandling.k9-dokumenthendelse-v1
     - name: KAFKA_FATTEVEDTAK_TOPIC
-      value: privat-familie-vedtakFattet-v1-q1
-    - name: KAFKA_FATTEVEDTAK_AIVEN_TOPIC
       value: teamforeldrepenger.familie-vedtakfattet-v1
     - name: KAFKA_VEDTAKHENDELSE_TOPIC
       value: privat-k9-vedtakhendelse
@@ -253,13 +251,15 @@ spec:
       value: "true"
     - name: ENABLE_PRODUCER_VEDTAKHENDELSE_AIVEN
       value: "true"
-    - name: ENABLE_PRODUCER_FATTVEDTAK_AIVEN
-      value: "true"
     - name: ENABLE_PRODUCER_AKSJONSPUNKTHENDELSE_LOS_AIVEN
       value: "true"
+    - name: ENABLE_SJEKK_TILBAKEKREVING
+      value: "false"
     - name: IKKE_YRKESAKTIV_UTEN_SPEILING
       value: "true"
     - name: OMS_OMSORGENFOR_FLYTTET
+      value: "true"
+    - name: PSB_BG_BRUKER_OPPTJENING_RESULTAT
       value: "true"
 
     # Konfigurasjoner
