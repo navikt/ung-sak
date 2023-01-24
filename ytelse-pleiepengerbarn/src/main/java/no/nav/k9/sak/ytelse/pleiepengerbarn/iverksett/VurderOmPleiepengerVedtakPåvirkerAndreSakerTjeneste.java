@@ -135,10 +135,15 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
 
         List<SakMedPeriode> resultat = new ArrayList<>();
 
-        var datoIntervallEntitets = utledVurderingsperiode(BehandlingReferanse.fra(vedtattBehandling));
+        var vedtakReferanse = BehandlingReferanse.fra(vedtattBehandling);
+        var datoIntervallEntitets = utledVurderingsperiode(vedtakReferanse);
+        var trukkedePerioderIVedtaket = utledTrukkedePerioder(vedtakReferanse);
         var vedtattTidslinje = new LocalDateTimeline<>(datoIntervallEntitets.stream()
             .map(datoIntervall -> new LocalDateSegment<>(datoIntervall.getFomDato(), datoIntervall.getTomDato(), true))
             .toList(), StandardCombinators::alwaysTrueForMatch)
+            .combine(new LocalDateTimeline<>(trukkedePerioderIVedtaket.stream()
+                .map(datoIntervall -> new LocalDateSegment<>(datoIntervall.getFomDato(), datoIntervall.getTomDato(), true))
+                .toList(), StandardCombinators::alwaysTrueForMatch), StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN)
             .compress();
 
         for (Saksnummer kandidatsaksnummer : alleSaksnummer) {
@@ -150,7 +155,8 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
                 var skalRevurderesPgaSykdom = perioderMedRevurderingSykdom(pleietrengende, kandidatsaksnummer, sisteBehandlingPåKandidat);
                 var skalRevurderesPgaEtablertTilsyn = perioderMedRevurderingPgaEtablertTilsyn(kandidatBehandlingReferanse);
                 var skalRevurderesPgaNattevåkOgBeredskap = perioderMedRevurderesPgaNattevåkOgBeredskap(kandidatBehandlingReferanse);
-                var skalRevurderesPgaEndretUttak = perioderMedRevurderingPgaUttak(kandidatBehandlingReferanse);
+                var skalRevurderesPgaEndretUttak = perioderMedRevurderingPgaUttak(kandidatBehandlingReferanse)
+                    .intersection(vedtattTidslinje);
 
                 var perioderMedInnvilgetInngangsvilkår = periodermedInnvilgetInngangsvilkår(kandidatBehandlingReferanse);
 
@@ -158,8 +164,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
                     .union(skalRevurderesPgaNattevåkOgBeredskap, StandardCombinators::alwaysTrueForMatch)
                     .union(skalRevurderesPgaEndretUttak, StandardCombinators::alwaysTrueForMatch)
                     .union(skalRevurderesPgaSykdom, StandardCombinators::alwaysTrueForMatch)
-                    .intersection(perioderMedInnvilgetInngangsvilkår)
-                    .intersection(vedtattTidslinje);
+                    .intersection(perioderMedInnvilgetInngangsvilkår);
                 var skalReberegneFeriepenger = enableFeriepengerPåTversAvSaker ? perioderMedRevurderingPgaEndringFeriepenger(sisteBehandlingPåKandidat, kandidatBehandlingReferanse) : LocalDateTimeline.empty();
 
                 if (!skalRevurdereYtelsePgaEndringAnnenSak.isEmpty() || !skalReberegneFeriepenger.isEmpty()) {
@@ -190,6 +195,11 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         }
 
         return resultat;
+    }
+
+    private NavigableSet<DatoIntervallEntitet> utledTrukkedePerioder(BehandlingReferanse referanse) {
+        var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, referanse.getFagsakYtelseType(), referanse.getBehandlingType());
+        return perioderTilVurderingTjeneste.perioderSomSkalTilbakestilles(referanse.getBehandlingId());
     }
 
     private LocalDateTimeline<Boolean> periodermedInnvilgetInngangsvilkår(BehandlingReferanse kandidatBehandlingReferanse) {
