@@ -111,7 +111,7 @@ public class KompletthetForBeregningTjeneste {
             return perioderMedManglendeVedlegg;
         }
 
-        var inntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(ref.getSaksnummer());
+        var inntektsmeldinger = iayTjeneste.hentInntektsmeldingerKommetTomBehandling(ref.getSaksnummer(), ref.getBehandlingId());
 
         // For alle relevanteperioder vurder kompletthet
         for (DatoIntervallEntitet periode : vilkårsPerioder) {
@@ -146,8 +146,8 @@ public class KompletthetForBeregningTjeneste {
      * Inntektsmeldinger for perioder fra infotrygd vil ha opprinnelig skjæringstidspunkt oppgitt i inntektsmeldingen og ikke i skjæringstidspunktet i k9-sak.
      * Vi sier her at vi ser på inntektsmeldinger som er 2 år og 4 mnd gamle.
      *
-     * @param opprinneligVilkårsperiode     Opprinnelig vilkårsperiode
-     * @param stpMigrertFraInfotrygd Skjæringstidspunkt som er migrert fra infotrygd
+     * @param opprinneligVilkårsperiode Opprinnelig vilkårsperiode
+     * @param stpMigrertFraInfotrygd    Skjæringstidspunkt som er migrert fra infotrygd
      * @return LocaldateSegment for relevant periode for vilkårsperiode
      */
     private LocalDateSegment<Boolean> utvidPeriodeForPeriodeFraInfotrygd(LocalDateInterval opprinneligVilkårsperiode, Optional<LocalDate> stpMigrertFraInfotrygd) {
