@@ -1,9 +1,14 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.omsorgenfor.regelmodell;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import no.nav.fpsak.nare.Ruleset;
 import no.nav.fpsak.nare.doc.RuleDocumentation;
 import no.nav.fpsak.nare.evaluation.Evaluation;
+import no.nav.fpsak.nare.evaluation.Resultat;
+import no.nav.fpsak.nare.evaluation.RuleReasonRef;
 import no.nav.fpsak.nare.specification.Specification;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -47,8 +52,13 @@ public class OMPOmsorgenForVilkår implements OmsorgenForVilkår {
 
     @Override
     public boolean skalHaAksjonspunkt(LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje, boolean medAlleGamleVurderingerPåNytt) {
-        // gå gjennom segmentene i OmsorgenForVilkårGrunnlag
-        // kjør evaluer() med segmentene og se om noe får utfall IKKE_OPPFYLT
-        return false;
+        boolean finnesDetEnAvslåttPeriode = samletOmsorgenForTidslinje.stream()
+            .map(grunnlag -> getSpecification().evaluate(grunnlag.getValue()))
+            .anyMatch(vurdering -> vurdering.result().equals(Resultat.NEI));
+
+        if (medAlleGamleVurderingerPåNytt && finnesDetEnAvslåttPeriode) {
+            return true;
+        }
+        return finnesDetEnAvslåttPeriode;
     }
 }
