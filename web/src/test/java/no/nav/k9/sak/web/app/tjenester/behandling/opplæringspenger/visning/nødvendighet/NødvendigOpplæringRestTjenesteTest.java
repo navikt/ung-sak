@@ -70,7 +70,7 @@ class NødvendigOpplæringRestTjenesteTest {
         scenario.getFagsak().setPleietrengende(AktørId.dummy());
         dokument = new OpplæringDokument(new JournalpostId("456"), null,
             new OpplæringDokumentInformasjon(OpplæringDokumentType.DOKUMENTASJON_AV_OPPLÆRING, false, LocalDate.now(), LocalDateTime.now(), 1L, "meg", LocalDateTime.now()),
-            null, null, null, "meg", LocalDateTime.now());
+            behandling.getUuid(), behandling.getFagsak().getSaksnummer(), null, "meg", LocalDateTime.now());
         opplæringDokumentRepository.lagre(dokument);
     }
 
