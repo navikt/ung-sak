@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.visning.reisetid;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -79,7 +80,9 @@ class ReisetidMapper {
                     new ReisetidVurderingData(
                         vurdertReisetid.getGodkjent() ? Resultat.GODKJENT : Resultat.IKKE_GODKJENT,
                         vurdertReisetid.getBegrunnelse(),
-                        null)));
+                        null,
+                        vurdertReisetid.getVurdertAv(),
+                        vurdertReisetid.getVurdertTidspunkt())));
             }
         }
 
@@ -93,7 +96,8 @@ class ReisetidMapper {
                         new ReisetidVurderingData(harVarighetEnDag(
                             kursPeriode.getReiseperiodeTil().tilPeriode()) ? Resultat.GODKJENT_AUTOMATISK : Resultat.MÅ_VURDERES,
                             null,
-                            kursPeriode.getPeriode().tilPeriode())));
+                            kursPeriode.getPeriode().tilPeriode(),
+                            null, null)));
                 }
 
                 if (kursPeriode.getReiseperiodeHjem() != null) {
@@ -103,7 +107,8 @@ class ReisetidMapper {
                         new ReisetidVurderingData(harVarighetEnDag(
                             kursPeriode.getReiseperiodeHjem().tilPeriode()) ? Resultat.GODKJENT_AUTOMATISK : Resultat.MÅ_VURDERES,
                             null,
-                            kursPeriode.getPeriode().tilPeriode())));
+                            kursPeriode.getPeriode().tilPeriode(),
+                            null, null)));
                 }
             }
         }
@@ -118,7 +123,11 @@ class ReisetidMapper {
         Objects.requireNonNull(oppgitt, "oppgitt tidslinje må dekke vurdert tidslinje");
 
         if (vurdert != null) {
-            return new LocalDateSegment<>(interval, new ReisetidVurderingData(vurdert.getValue().getResultat(), vurdert.getValue().getBegrunnelse(), oppgitt.getValue().getKursperiode()));
+            return new LocalDateSegment<>(interval, new ReisetidVurderingData(vurdert.getValue().getResultat(),
+                vurdert.getValue().getBegrunnelse(),
+                oppgitt.getValue().getKursperiode(),
+                vurdert.getValue().getVurdertAv(),
+                vurdert.getValue().getVurdertTidspunkt()));
         }
 
         return new LocalDateSegment<>(interval, oppgitt.getValue());
@@ -130,7 +139,8 @@ class ReisetidMapper {
         tidslinje.stream().forEach(segment -> {
             Periode kursperiode = segment.getValue().getKursperiode();
             List<ReisetidPeriodeVurderingDto> vurderingerForKursperiode = map.containsKey(kursperiode) ? new ArrayList<>(map.get(kursperiode)) : new ArrayList<>();
-            vurderingerForKursperiode.add(new ReisetidPeriodeVurderingDto(segment.getFom(), segment.getTom(), segment.getValue().getResultat(), segment.getValue().getBegrunnelse()));
+            vurderingerForKursperiode.add(new ReisetidPeriodeVurderingDto(segment.getFom(), segment.getTom(), segment.getValue().getResultat(), segment.getValue().getBegrunnelse(),
+                segment.getValue().getVurdertAv(), segment.getValue().getVurdertTidspunkt()));
             map.put(kursperiode, vurderingerForKursperiode);
         });
 
@@ -145,11 +155,15 @@ class ReisetidMapper {
         private final Resultat resultat;
         private final String begrunnelse;
         private final Periode kursperiode;
+        private final String vurdertAv;
+        private final LocalDateTime vurdertTidspunkt;
 
-        ReisetidVurderingData(Resultat resultat, String begrunnelse, Periode kursperiode) {
+        ReisetidVurderingData(Resultat resultat, String begrunnelse, Periode kursperiode, String vurdertAv, LocalDateTime vurdertTidspunkt) {
             this.resultat = resultat;
             this.begrunnelse = begrunnelse;
             this.kursperiode = kursperiode;
+            this.vurdertAv = vurdertAv;
+            this.vurdertTidspunkt = vurdertTidspunkt;
         }
 
         Resultat getResultat() {
@@ -162,6 +176,14 @@ class ReisetidMapper {
 
         Periode getKursperiode() {
             return kursperiode;
+        }
+
+        String getVurdertAv() {
+            return vurdertAv;
+        }
+
+        LocalDateTime getVurdertTidspunkt() {
+            return vurdertTidspunkt;
         }
     }
 }

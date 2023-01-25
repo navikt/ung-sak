@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.visning.institusjon;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -38,11 +39,23 @@ public class InstitusjonVurderingDto {
     @Valid
     private String begrunnelse;
 
-    public InstitusjonVurderingDto(JournalpostIdDto journalpostId, List<Periode> perioder, Resultat resultat, String begrunnelse) {
+    @JsonProperty(value = "vurdertAv", required = true)
+    @Size(max = 20)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Valid
+    private String vurdertAv;
+
+    @JsonProperty(value = "vurdertTidspunkt", required = true)
+    @Valid
+    private LocalDateTime vurdertTidspunkt;
+
+    public InstitusjonVurderingDto(JournalpostIdDto journalpostId, List<Periode> perioder, Resultat resultat, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         this.journalpostId = journalpostId;
         this.perioder = perioder;
         this.resultat = resultat;
         this.begrunnelse = begrunnelse;
+        this.vurdertAv = vurdertAv;
+        this.vurdertTidspunkt = vurdertTidspunkt;
     }
 
     public JournalpostIdDto getJournalpostId() {
@@ -59,5 +72,13 @@ public class InstitusjonVurderingDto {
 
     public String getBegrunnelse() {
         return begrunnelse;
+    }
+
+    public String getVurdertAv() {
+        return vurdertAv;
+    }
+
+    public LocalDateTime getVurdertTidspunkt() {
+        return vurdertTidspunkt;
     }
 }

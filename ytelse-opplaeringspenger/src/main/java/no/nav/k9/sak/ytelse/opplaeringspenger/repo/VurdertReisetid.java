@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.repo;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 import org.hibernate.annotations.Immutable;
@@ -39,6 +40,12 @@ public class VurdertReisetid extends BaseEntitet {
     @Column(name = "begrunnelse", nullable = false)
     private String begrunnelse;
 
+    @Column(name = "vurdert_av", nullable = false)
+    private String vurdertAv;
+
+    @Column(name = "vurdert_tid", nullable = false)
+    private LocalDateTime vurdertTidspunkt;
+
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
@@ -46,16 +53,20 @@ public class VurdertReisetid extends BaseEntitet {
     VurdertReisetid() {
     }
 
-    public VurdertReisetid(DatoIntervallEntitet periode, Boolean godkjent, String begrunnelse) {
+    public VurdertReisetid(DatoIntervallEntitet periode, Boolean godkjent, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         this.periode = periode;
         this.godkjent = godkjent;
         this.begrunnelse = begrunnelse;
+        this.vurdertAv = vurdertAv;
+        this.vurdertTidspunkt = vurdertTidspunkt;
     }
 
     public VurdertReisetid(VurdertReisetid that) {
         this.periode = that.periode;
         this.godkjent = that.godkjent;
         this.begrunnelse = that.begrunnelse;
+        this.vurdertAv = that.vurdertAv;
+        this.vurdertTidspunkt = that.vurdertTidspunkt;
     }
 
     public DatoIntervallEntitet getPeriode() {
@@ -70,6 +81,14 @@ public class VurdertReisetid extends BaseEntitet {
         return begrunnelse;
     }
 
+    public String getVurdertAv() {
+        return vurdertAv;
+    }
+
+    public LocalDateTime getVurdertTidspunkt() {
+        return vurdertTidspunkt;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -77,11 +96,13 @@ public class VurdertReisetid extends BaseEntitet {
         VurdertReisetid that = (VurdertReisetid) o;
         return Objects.equals(periode, that.periode)
             && Objects.equals(godkjent, that.godkjent)
-            && Objects.equals(begrunnelse, that.begrunnelse);
+            && Objects.equals(begrunnelse, that.begrunnelse)
+            && Objects.equals(vurdertAv, that.vurdertAv)
+            && Objects.equals(vurdertTidspunkt, that.vurdertTidspunkt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode, godkjent, begrunnelse);
+        return Objects.hash(periode, godkjent, begrunnelse, vurdertAv, vurdertTidspunkt);
     }
 }

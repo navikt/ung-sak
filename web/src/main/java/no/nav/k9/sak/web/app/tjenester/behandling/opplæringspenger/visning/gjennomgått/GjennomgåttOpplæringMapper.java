@@ -40,7 +40,9 @@ class GjennomgåttOpplæringMapper {
             for (VurdertOpplæringPeriode vurdertOpplæringPeriode : grunnlag.getVurdertePerioder().getPerioder()) {
                 vurderinger.add(new OpplæringVurderingDto(vurdertOpplæringPeriode.getPeriode().tilPeriode(),
                     vurdertOpplæringPeriode.getGjennomførtOpplæring() ? Resultat.GODKJENT : Resultat.IKKE_GODKJENT,
-                    vurdertOpplæringPeriode.getBegrunnelse())
+                    vurdertOpplæringPeriode.getBegrunnelse(),
+                    vurdertOpplæringPeriode.getVurdertAv(),
+                    vurdertOpplæringPeriode.getVurdertTidspunkt())
                 );
             }
         }
@@ -59,7 +61,7 @@ class GjennomgåttOpplæringMapper {
         tidslinjeSomManglerVurdering.forEach(segment -> vurderinger.add(new OpplæringVurderingDto(
             new Periode(segment.getFom(), segment.getTom()),
             Resultat.MÅ_VURDERES,
-            null))
+            null, null, null))
         );
 
         return vurderinger;

@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.aksjonspunkt;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +15,7 @@ import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjon;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjonHolder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = VurderInstitusjonDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -32,7 +34,7 @@ public class VurderInstitusjonOppdaterer implements AksjonspunktOppdaterer<Vurde
     @Override
     public OppdateringResultat oppdater(VurderInstitusjonDto dto, AksjonspunktOppdaterParameter param) {
         List<VurdertInstitusjon> vurderteInstitusjoner = new ArrayList<>();
-        VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon(dto.getJournalpostId().getJournalpostId(), dto.isGodkjent(), dto.getBegrunnelse());
+        VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon(dto.getJournalpostId().getJournalpostId(), dto.isGodkjent(), dto.getBegrunnelse(), getCurrentUserId(), LocalDateTime.now());
         vurderteInstitusjoner.add(vurdertInstitusjon);
 
         var aktivVurdertInstitusjonHolder = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(param.getBehandlingId())
@@ -49,5 +51,9 @@ public class VurderInstitusjonOppdaterer implements AksjonspunktOppdaterer<Vurde
 
         vurdertOpplæringRepository.lagre(param.getBehandlingId(), nyHolder);
         return OppdateringResultat.nyttResultat();
+    }
+
+    private static String getCurrentUserId() {
+        return SubjectHandler.getSubjectHandler().getUid();
     }
 }

@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.repo;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 import org.hibernate.annotations.Immutable;
@@ -36,6 +37,12 @@ public class VurdertInstitusjon extends BaseEntitet {
     @Column(name = "begrunnelse", nullable = false)
     private String begrunnelse;
 
+    @Column(name = "vurdert_av", nullable = false)
+    private String vurdertAv;
+
+    @Column(name = "vurdert_tid", nullable = false)
+    private LocalDateTime vurdertTidspunkt;
+
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
@@ -43,16 +50,20 @@ public class VurdertInstitusjon extends BaseEntitet {
     VurdertInstitusjon() {
     }
 
-    public VurdertInstitusjon(JournalpostId journalpostId, Boolean godkjent, String begrunnelse) {
+    public VurdertInstitusjon(JournalpostId journalpostId, Boolean godkjent, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         this.journalpostId = journalpostId;
         this.godkjent = godkjent;
         this.begrunnelse = begrunnelse;
+        this.vurdertAv = vurdertAv;
+        this.vurdertTidspunkt = vurdertTidspunkt;
     }
 
-    public VurdertInstitusjon(VurdertInstitusjon vurdertInstitusjon) {
-        this.journalpostId = vurdertInstitusjon.journalpostId;
-        this.godkjent = vurdertInstitusjon.godkjent;
-        this.begrunnelse = vurdertInstitusjon.begrunnelse;
+    public VurdertInstitusjon(VurdertInstitusjon that) {
+        this.journalpostId = that.journalpostId;
+        this.godkjent = that.godkjent;
+        this.begrunnelse = that.begrunnelse;
+        this.vurdertAv = that.vurdertAv;
+        this.vurdertTidspunkt = that.vurdertTidspunkt;
     }
 
     public JournalpostId getJournalpostId() {
@@ -67,6 +78,14 @@ public class VurdertInstitusjon extends BaseEntitet {
         return begrunnelse;
     }
 
+    public String getVurdertAv() {
+        return vurdertAv;
+    }
+
+    public LocalDateTime getVurdertTidspunkt() {
+        return vurdertTidspunkt;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -74,12 +93,14 @@ public class VurdertInstitusjon extends BaseEntitet {
         VurdertInstitusjon that = (VurdertInstitusjon) o;
         return Objects.equals(journalpostId, that.journalpostId)
             && Objects.equals(godkjent, that.godkjent)
-            && Objects.equals(begrunnelse, that.begrunnelse);
+            && Objects.equals(begrunnelse, that.begrunnelse)
+            && Objects.equals(vurdertAv, that.vurdertAv)
+            && Objects.equals(vurdertTidspunkt, that.vurdertTidspunkt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(journalpostId, godkjent, begrunnelse);
+        return Objects.hash(journalpostId, godkjent, begrunnelse, vurdertAv, vurdertTidspunkt);
     }
 
     @Override
@@ -88,6 +109,8 @@ public class VurdertInstitusjon extends BaseEntitet {
             "journalpostId=" + journalpostId +
             ", godkjent=" + godkjent +
             ", begrunnelse=" + begrunnelse +
+            ", vurdertAv=" + vurdertAv +
+            ", vurdertTidspunkt=" + vurdertTidspunkt +
             '}';
     }
 }
