@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.opplaeringspenger.repo;
+package no.nav.k9.sak.ytelse.opplaeringspenger.repo.godkjentopplaeringsinstitusjon;
 
 import java.util.List;
 import java.util.Optional;

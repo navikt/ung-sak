@@ -17,14 +17,14 @@ import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.kontrakt.opplæringspenger.VurderGjennomgåttOpplæringDto;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPeriode;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPerioderHolder;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
+import no.nav.k9.sak.kontrakt.opplæringspenger.vurdering.VurderGjennomgåttOpplæringDto;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokument;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokumentRepository;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringGrunnlag;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringPeriode;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringPerioderHolder;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringRepository;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokument;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = VurderGjennomgåttOpplæringDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -32,7 +32,7 @@ public class GjennomgåOpplæringOppdaterer implements AksjonspunktOppdaterer<Vu
 
     private VurdertOpplæringRepository vurdertOpplæringRepository;
     private BehandlingRepository behandlingRepository;
-    private PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
+    private OpplæringDokumentRepository opplæringDokumentRepository;
 
     public GjennomgåOpplæringOppdaterer() {
     }
@@ -40,16 +40,16 @@ public class GjennomgåOpplæringOppdaterer implements AksjonspunktOppdaterer<Vu
     @Inject
     public GjennomgåOpplæringOppdaterer(VurdertOpplæringRepository vurdertOpplæringRepository,
                                         BehandlingRepository behandlingRepository,
-                                        PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository) {
+                                        OpplæringDokumentRepository opplæringDokumentRepository) {
         this.vurdertOpplæringRepository = vurdertOpplæringRepository;
         this.behandlingRepository = behandlingRepository;
-        this.pleietrengendeSykdomDokumentRepository = pleietrengendeSykdomDokumentRepository;
+        this.opplæringDokumentRepository = opplæringDokumentRepository;
     }
 
     @Override
     public OppdateringResultat oppdater(VurderGjennomgåttOpplæringDto dto, AksjonspunktOppdaterParameter param) {
         final Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
-        final List<PleietrengendeSykdomDokument> alleDokumenter = pleietrengendeSykdomDokumentRepository.hentAlleDokumenterFor(behandling.getFagsak().getPleietrengendeAktørId());
+        final List<OpplæringDokument> alleDokumenter = opplæringDokumentRepository.hentDokumenterForSak(behandling.getFagsak().getSaksnummer());
 
         List<VurdertOpplæringPeriode> vurdertOpplæringPerioder = mapDtoTilVurdertOpplæringPerioder(dto, alleDokumenter);
 
@@ -71,7 +71,7 @@ public class GjennomgåOpplæringOppdaterer implements AksjonspunktOppdaterer<Vu
         return OppdateringResultat.nyttResultat();
     }
 
-    private List<VurdertOpplæringPeriode> mapDtoTilVurdertOpplæringPerioder(VurderGjennomgåttOpplæringDto dto, List<PleietrengendeSykdomDokument> alleDokumenter) {
+    private List<VurdertOpplæringPeriode> mapDtoTilVurdertOpplæringPerioder(VurderGjennomgåttOpplæringDto dto, List<OpplæringDokument> alleDokumenter) {
         LocalDateTime vurdertTidspunkt = LocalDateTime.now();
         List<VurdertOpplæringPeriode> vurdertOpplæringPerioder = dto.getPerioder()
             .stream()

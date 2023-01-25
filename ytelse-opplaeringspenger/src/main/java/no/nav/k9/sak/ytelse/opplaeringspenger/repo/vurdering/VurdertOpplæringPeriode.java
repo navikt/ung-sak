@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.opplaeringspenger.repo;
+package no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,7 +23,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokument;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokument;
 
 @Entity(name = "VurdertOpplæringPeriode")
 @Table(name = "olp_vurdert_opplaering_periode")
@@ -57,9 +57,9 @@ public class VurdertOpplæringPeriode extends BaseEntitet {
     @JoinTable(
         name="OLP_VURDERT_OPPLAERING_PERIODE_ANVENDT_DOKUMENT",
         joinColumns = @JoinColumn( name="VURDERT_OPPLAERING_PERIODE_ID"),
-        inverseJoinColumns = @JoinColumn( name="PLEIETRENGENDE_SYKDOM_DOKUMENT_ID")
+        inverseJoinColumns = @JoinColumn( name="OPPLAERING_DOKUMENT_ID")
     )
-    private List<PleietrengendeSykdomDokument> dokumenter = new ArrayList<>();
+    private List<OpplæringDokument> dokumenter = new ArrayList<>();
 
     @Version
     @Column(name = "versjon", nullable = false)
@@ -68,7 +68,7 @@ public class VurdertOpplæringPeriode extends BaseEntitet {
     VurdertOpplæringPeriode() {
     }
 
-    public VurdertOpplæringPeriode(DatoIntervallEntitet periode, Boolean gjennomførtOpplæring, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt, List<PleietrengendeSykdomDokument> dokumenter) {
+    public VurdertOpplæringPeriode(DatoIntervallEntitet periode, Boolean gjennomførtOpplæring, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt, List<OpplæringDokument> dokumenter) {
         this.periode = periode;
         this.gjennomførtOpplæring = gjennomførtOpplæring;
         this.begrunnelse = begrunnelse;
@@ -77,7 +77,7 @@ public class VurdertOpplæringPeriode extends BaseEntitet {
         this.dokumenter = new ArrayList<>(dokumenter);
     }
 
-    public VurdertOpplæringPeriode(LocalDate fom, LocalDate tom, Boolean gjennomførtOpplæring, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt, List<PleietrengendeSykdomDokument> dokumenter) {
+    public VurdertOpplæringPeriode(LocalDate fom, LocalDate tom, Boolean gjennomførtOpplæring, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt, List<OpplæringDokument> dokumenter) {
         this(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), gjennomførtOpplæring, begrunnelse, vurdertAv, vurdertTidspunkt, dokumenter);
     }
 
@@ -110,7 +110,7 @@ public class VurdertOpplæringPeriode extends BaseEntitet {
         return vurdertTidspunkt;
     }
 
-    public List<PleietrengendeSykdomDokument> getDokumenter() {
+    public List<OpplæringDokument> getDokumenter() {
         return new ArrayList<>(dokumenter);
     }
 

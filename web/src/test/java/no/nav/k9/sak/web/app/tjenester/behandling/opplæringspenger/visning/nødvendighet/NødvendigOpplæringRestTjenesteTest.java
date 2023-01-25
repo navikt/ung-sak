@@ -21,17 +21,17 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.db.util.CdiDbAwareTest;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
+import no.nav.k9.sak.kontrakt.opplæringspenger.dokument.OpplæringDokumentType;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringHolder;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokument;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentInformasjon;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokument;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokumentInformasjon;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokumentRepository;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæring;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringHolder;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.KursPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPeriode;
@@ -51,14 +51,14 @@ class NødvendigOpplæringRestTjenesteTest {
     @Inject
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
     @Inject
-    private PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
+    private OpplæringDokumentRepository opplæringDokumentRepository;
 
     private Behandling behandling;
     private final JournalpostId journalpostId1 = new JournalpostId("1776");
     private final JournalpostId journalpostId2 = new JournalpostId("1789");
     private final Periode kursperiode1 = new Periode(LocalDate.now().minusWeeks(1), LocalDate.now());
     private final Periode kursperiode2 = new Periode(LocalDate.now().plusDays(1), LocalDate.now().plusWeeks(1));
-    private PleietrengendeSykdomDokument dokument;
+    private OpplæringDokument dokument;
 
     @BeforeEach
     void setup() {
@@ -68,10 +68,10 @@ class NødvendigOpplæringRestTjenesteTest {
         behandling = scenario.lagre(repositoryProvider);
 
         scenario.getFagsak().setPleietrengende(AktørId.dummy());
-        dokument = new PleietrengendeSykdomDokument(new JournalpostId("456"), null,
-            new PleietrengendeSykdomDokumentInformasjon(SykdomDokumentType.DOKUMENTASJON_AV_OPPLÆRING, false, LocalDate.now(), LocalDateTime.now(), 1L, "meg", LocalDateTime.now()),
+        dokument = new OpplæringDokument(new JournalpostId("456"), null,
+            new OpplæringDokumentInformasjon(OpplæringDokumentType.DOKUMENTASJON_AV_OPPLÆRING, false, LocalDate.now(), LocalDateTime.now(), 1L, "meg", LocalDateTime.now()),
             null, null, null, "meg", LocalDateTime.now());
-        pleietrengendeSykdomDokumentRepository.lagre(dokument, behandling.getFagsak().getPleietrengendeAktørId());
+        opplæringDokumentRepository.lagre(dokument);
     }
 
     private PerioderFraSøknad lagPerioderFraSøknad(JournalpostId journalpostId, Periode kursperiode) {

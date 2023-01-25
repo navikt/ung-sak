@@ -1,4 +1,4 @@
-package no.nav.k9.sak.kontrakt.opplæringspenger;
+package no.nav.k9.sak.kontrakt.opplæringspenger.vurdering;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;

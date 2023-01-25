@@ -1,8 +1,6 @@
-package no.nav.k9.sak.ytelse.opplaeringspenger.repo;
+package no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 import org.hibernate.annotations.Immutable;
@@ -15,30 +13,26 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokument;
 
-@Entity(name = "VurdertOpplæring")
-@Table(name = "olp_vurdert_opplaering")
+@Entity(name = "VurdertInstitusjon")
+@Table(name = "olp_vurdert_institusjon")
 @Immutable
-public class VurdertOpplæring extends BaseEntitet {
+public class VurdertInstitusjon extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_OLP_VURDERT_OPPLAERING")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_OLP_VURDERT_INSTITUSJON")
     private Long id;
 
     @Embedded
     @AttributeOverrides(@AttributeOverride(name = "journalpostId", column = @Column(name = "journalpost_id")))
     private JournalpostId journalpostId;
 
-    @Column(name = "noedvendig_opplaering", nullable = false)
-    private Boolean nødvendigOpplæring = false;
+    @Column(name = "godkjent", nullable = false)
+    private Boolean godkjent = false;
 
     @Column(name = "begrunnelse", nullable = false)
     private String begrunnelse;
@@ -49,49 +43,39 @@ public class VurdertOpplæring extends BaseEntitet {
     @Column(name = "vurdert_tid", nullable = false)
     private LocalDateTime vurdertTidspunkt;
 
-    @OneToMany
-    @JoinTable(
-        name="OLP_VURDERT_OPPLAERING_ANVENDT_DOKUMENT",
-        joinColumns = @JoinColumn( name="VURDERT_OPPLAERING_ID"),
-        inverseJoinColumns = @JoinColumn( name="PLEIETRENGENDE_SYKDOM_DOKUMENT_ID")
-    )
-    private List<PleietrengendeSykdomDokument> dokumenter = new ArrayList<>();
-
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    VurdertOpplæring() {
+    VurdertInstitusjon() {
     }
 
-    public VurdertOpplæring(JournalpostId journalpostId, Boolean nødvendigOpplæring, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt, List<PleietrengendeSykdomDokument> dokumenter) {
+    public VurdertInstitusjon(JournalpostId journalpostId, Boolean godkjent, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         this.journalpostId = journalpostId;
-        this.nødvendigOpplæring = nødvendigOpplæring;
+        this.godkjent = godkjent;
         this.begrunnelse = begrunnelse;
         this.vurdertAv = vurdertAv;
         this.vurdertTidspunkt = vurdertTidspunkt;
-        this.dokumenter = new ArrayList<>(dokumenter);
     }
 
-    public VurdertOpplæring(VurdertOpplæring that) {
+    public VurdertInstitusjon(VurdertInstitusjon that) {
         this.journalpostId = that.journalpostId;
-        this.nødvendigOpplæring = that.nødvendigOpplæring;
+        this.godkjent = that.godkjent;
         this.begrunnelse = that.begrunnelse;
         this.vurdertAv = that.vurdertAv;
         this.vurdertTidspunkt = that.vurdertTidspunkt;
-        this.dokumenter = new ArrayList<>(that.dokumenter);
-    }
-
-    public Boolean getNødvendigOpplæring() {
-        return nødvendigOpplæring;
-    }
-
-    public String getBegrunnelse() {
-        return begrunnelse;
     }
 
     public JournalpostId getJournalpostId() {
         return journalpostId;
+    }
+
+    public Boolean getGodkjent() {
+        return godkjent;
+    }
+
+    public String getBegrunnelse() {
+        return begrunnelse;
     }
 
     public String getVurdertAv() {
@@ -102,18 +86,13 @@ public class VurdertOpplæring extends BaseEntitet {
         return vurdertTidspunkt;
     }
 
-    public List<PleietrengendeSykdomDokument> getDokumenter() {
-        return dokumenter;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        VurdertOpplæring that = (VurdertOpplæring) o;
-        return Objects.equals(nødvendigOpplæring, that.nødvendigOpplæring)
-            && Objects.equals(journalpostId, that.journalpostId)
-            && Objects.equals(dokumenter, that.dokumenter)
+        VurdertInstitusjon that = (VurdertInstitusjon) o;
+        return Objects.equals(journalpostId, that.journalpostId)
+            && Objects.equals(godkjent, that.godkjent)
             && Objects.equals(begrunnelse, that.begrunnelse)
             && Objects.equals(vurdertAv, that.vurdertAv)
             && Objects.equals(vurdertTidspunkt, that.vurdertTidspunkt);
@@ -121,15 +100,14 @@ public class VurdertOpplæring extends BaseEntitet {
 
     @Override
     public int hashCode() {
-        return Objects.hash(journalpostId, nødvendigOpplæring, begrunnelse, vurdertAv, vurdertTidspunkt, dokumenter);
+        return Objects.hash(journalpostId, godkjent, begrunnelse, vurdertAv, vurdertTidspunkt);
     }
 
     @Override
     public String toString() {
-        return "VurdertOpplæring{" +
+        return "VurdertInstitusjon{" +
             "journalpostId=" + journalpostId +
-            ", nødvendigOpplæring=" + nødvendigOpplæring +
-            ", dokumenter=" + dokumenter +
+            ", godkjent=" + godkjent +
             ", begrunnelse=" + begrunnelse +
             ", vurdertAv=" + vurdertAv +
             ", vurdertTidspunkt=" + vurdertTidspunkt +

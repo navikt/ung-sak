@@ -1,7 +1,6 @@
-package no.nav.k9.sak.kontrakt.opplæringspenger;
+package no.nav.k9.sak.kontrakt.opplæringspenger.vurdering;
 
 import java.time.LocalDate;
-import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -18,57 +17,46 @@ import no.nav.k9.sak.typer.Periode;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class VurderGjennomgåttOpplæringPeriodeDto {
+public class VurderReisetidPeriodeDto {
 
     @JsonProperty(value = "periode", required = true)
-    @NotNull
     @Valid
+    @NotNull
     private Periode periode;
 
-    @JsonProperty(value = "gjennomførtOpplæring", required = true)
+    @JsonProperty(value = "godkjent", required = true)
     @NotNull
-    private Boolean gjennomførtOpplæring;
+    private boolean godkjent;
 
     @JsonProperty("begrunnelse")
     @Size(max = 4000)
     @Pattern(regexp = TekstValideringRegex.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String begrunnelse;
 
-    @JsonProperty(value = "tilknyttedeDokumenter")
-    @Size(max = 100)
-    @Valid
-    private Set<String> tilknyttedeDokumenter;
-
-    public VurderGjennomgåttOpplæringPeriodeDto() {
+    public VurderReisetidPeriodeDto() {
     }
 
-    public VurderGjennomgåttOpplæringPeriodeDto(Periode periode, Boolean gjennomførtOpplæring, String begrunnelse, Set<String> tilknyttedeDokumenter) {
+    public VurderReisetidPeriodeDto(Periode periode, boolean godkjent, String begrunnelse) {
         this.periode = periode;
-        this.gjennomførtOpplæring = gjennomførtOpplæring;
+        this.godkjent = godkjent;
         this.begrunnelse = begrunnelse;
-        this.tilknyttedeDokumenter = tilknyttedeDokumenter;
     }
 
-    public VurderGjennomgåttOpplæringPeriodeDto(LocalDate fom, LocalDate tom, Boolean gjennomførtOpplæring, String begrunnelse, Set<String> tilknyttedeDokumenter) {
+    public VurderReisetidPeriodeDto(LocalDate fom, LocalDate tom, boolean godkjent, String begrunnelse) {
         this.periode = new Periode(fom, tom);
-        this.gjennomførtOpplæring = gjennomførtOpplæring;
+        this.godkjent = godkjent;
         this.begrunnelse = begrunnelse;
-        this.tilknyttedeDokumenter = tilknyttedeDokumenter;
     }
 
     public Periode getPeriode() {
         return periode;
     }
 
-    public Boolean getGjennomførtOpplæring() {
-        return gjennomførtOpplæring;
+    public boolean isGodkjent() {
+        return godkjent;
     }
 
     public String getBegrunnelse() {
         return begrunnelse;
-    }
-
-    public Set<String> getTilknyttedeDokumenter() {
-        return tilknyttedeDokumenter;
     }
 }

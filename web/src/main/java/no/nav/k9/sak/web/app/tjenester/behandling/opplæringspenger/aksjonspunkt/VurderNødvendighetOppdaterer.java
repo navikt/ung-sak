@@ -14,13 +14,13 @@ import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.kontrakt.opplæringspenger.VurderNødvendighetDto;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringHolder;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokument;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
+import no.nav.k9.sak.kontrakt.opplæringspenger.vurdering.VurderNødvendighetDto;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokument;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokumentRepository;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæring;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringGrunnlag;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringHolder;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringRepository;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @ApplicationScoped
@@ -29,7 +29,7 @@ public class VurderNødvendighetOppdaterer implements AksjonspunktOppdaterer<Vur
 
     private VurdertOpplæringRepository vurdertOpplæringRepository;
     private BehandlingRepository behandlingRepository;
-    private PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
+    private OpplæringDokumentRepository opplæringDokumentRepository;
 
     public VurderNødvendighetOppdaterer() {
     }
@@ -37,10 +37,10 @@ public class VurderNødvendighetOppdaterer implements AksjonspunktOppdaterer<Vur
     @Inject
     public VurderNødvendighetOppdaterer(VurdertOpplæringRepository vurdertOpplæringRepository,
                                         BehandlingRepository behandlingRepository,
-                                        PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository) {
+                                        OpplæringDokumentRepository opplæringDokumentRepository) {
         this.vurdertOpplæringRepository = vurdertOpplæringRepository;
         this.behandlingRepository = behandlingRepository;
-        this.pleietrengendeSykdomDokumentRepository = pleietrengendeSykdomDokumentRepository;
+        this.opplæringDokumentRepository = opplæringDokumentRepository;
     }
 
     @Override
@@ -58,7 +58,7 @@ public class VurderNødvendighetOppdaterer implements AksjonspunktOppdaterer<Vur
         }
 
         final Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
-        final List<PleietrengendeSykdomDokument> alleDokumenter = pleietrengendeSykdomDokumentRepository.hentAlleDokumenterFor(behandling.getFagsak().getPleietrengendeAktørId());
+        final List<OpplæringDokument> alleDokumenter = opplæringDokumentRepository.hentDokumenterForSak(behandling.getFagsak().getSaksnummer());
 
         VurdertOpplæring nyVurdertOpplæring = mapDtoTilVurdertOpplæring(dto, alleDokumenter);
         vurdertOpplæring.add(nyVurdertOpplæring);
@@ -69,7 +69,7 @@ public class VurderNødvendighetOppdaterer implements AksjonspunktOppdaterer<Vur
         return OppdateringResultat.nyttResultat();
     }
 
-    private VurdertOpplæring mapDtoTilVurdertOpplæring(VurderNødvendighetDto dto, List<PleietrengendeSykdomDokument> alleDokumenter) {
+    private VurdertOpplæring mapDtoTilVurdertOpplæring(VurderNødvendighetDto dto, List<OpplæringDokument> alleDokumenter) {
         return new VurdertOpplæring(dto.getJournalpostId().getJournalpostId(), dto.isNødvendigOpplæring(), dto.getBegrunnelse(), getCurrentUserId(), LocalDateTime.now(),
             alleDokumenter.stream().filter(dokument -> dto.getTilknyttedeDokumenter().contains("" + dokument.getId())).collect(Collectors.toList()));
     }

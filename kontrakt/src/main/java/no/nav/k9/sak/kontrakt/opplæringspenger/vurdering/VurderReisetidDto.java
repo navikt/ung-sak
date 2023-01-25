@@ -1,4 +1,4 @@
-package no.nav.k9.sak.kontrakt.opplæringspenger;
+package no.nav.k9.sak.kontrakt.opplæringspenger.vurdering;
 
 import java.util.List;
 
@@ -17,23 +17,23 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
-@JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_GJENNOMGÅTT_OPPLÆRING)
-public class VurderGjennomgåttOpplæringDto extends BekreftetAksjonspunktDto {
+@JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_REISETID)
+public class VurderReisetidDto extends BekreftetAksjonspunktDto {
 
-    @JsonProperty(value = "perioder", required = true)
+    @JsonProperty(value = "reisetid", required = true)
+    @Size(min = 1)
     @Valid
     @NotNull
-    @Size(min = 1)
-    private List<VurderGjennomgåttOpplæringPeriodeDto> perioder;
+    private List<VurderReisetidPeriodeDto> reisetid;
 
-    public VurderGjennomgåttOpplæringDto() {
+    public VurderReisetidDto() {
     }
 
-    public VurderGjennomgåttOpplæringDto(List<VurderGjennomgåttOpplæringPeriodeDto> perioder) {
-        this.perioder = perioder;
+    public VurderReisetidDto(List<VurderReisetidPeriodeDto> reisetid) {
+        this.reisetid = reisetid;
     }
 
-    public List<VurderGjennomgåttOpplæringPeriodeDto> getPerioder() {
-        return perioder;
+    public List<VurderReisetidPeriodeDto> getReisetid() {
+        return reisetid;
     }
 }

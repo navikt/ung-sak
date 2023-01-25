@@ -26,17 +26,17 @@ import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.db.util.CdiDbAwareTest;
-import no.nav.k9.sak.kontrakt.opplæringspenger.VurderGjennomgåttOpplæringDto;
-import no.nav.k9.sak.kontrakt.opplæringspenger.VurderGjennomgåttOpplæringPeriodeDto;
-import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
+import no.nav.k9.sak.kontrakt.opplæringspenger.dokument.OpplæringDokumentType;
+import no.nav.k9.sak.kontrakt.opplæringspenger.vurdering.VurderGjennomgåttOpplæringDto;
+import no.nav.k9.sak.kontrakt.opplæringspenger.vurdering.VurderGjennomgåttOpplæringPeriodeDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPeriode;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokument;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentInformasjon;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokument;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokumentInformasjon;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokumentRepository;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringPeriode;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringRepository;
 
 @CdiDbAwareTest
 class GjennomgåOpplæringOppdatererTest {
@@ -48,13 +48,13 @@ class GjennomgåOpplæringOppdatererTest {
     @Inject
     private BehandlingRepository behandlingRepository;
     @Inject
-    private PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
+    private OpplæringDokumentRepository opplæringDokumentRepository;
 
     private GjennomgåOpplæringOppdaterer gjennomgåOpplæringOppdaterer;
     private Behandling behandling;
     private final LocalDate idag = LocalDate.now();
     private static final String brukerId = "bruker1";
-    private PleietrengendeSykdomDokument legeerklæring;
+    private OpplæringDokument dokument;
 
     @BeforeAll
     static void subjectHandlerSetup() {
@@ -65,18 +65,18 @@ class GjennomgåOpplæringOppdatererTest {
     @BeforeEach
     void setup() {
         BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-        gjennomgåOpplæringOppdaterer = new GjennomgåOpplæringOppdaterer(vurdertOpplæringRepository, behandlingRepository, pleietrengendeSykdomDokumentRepository);
+        gjennomgåOpplæringOppdaterer = new GjennomgåOpplæringOppdaterer(vurdertOpplæringRepository, behandlingRepository, opplæringDokumentRepository);
         TestScenarioBuilder scenario = TestScenarioBuilder.builderMedSøknad();
         scenario.medSøknad().medSøknadsdato(idag);
         scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDER_GJENNOMGÅTT_OPPLÆRING, BehandlingStegType.VURDER_GJENNOMGÅTT_OPPLÆRING);
         behandling = scenario.lagre(repositoryProvider);
         scenario.getFagsak().setPleietrengende(AktørId.dummy());
-        legeerklæring = lagreNyttSykdomDokument(SykdomDokumentType.LEGEERKLÆRING_MED_DOKUMENTASJON_AV_OPPLÆRING);
+        dokument = lagreNyttDokument(OpplæringDokumentType.LEGEERKLÆRING_MED_DOKUMENTASJON_AV_OPPLÆRING);
     }
 
     @Test
     void skalLagreNyttGrunnlag() {
-        var periodeDto = new VurderGjennomgåttOpplæringPeriodeDto(idag, idag, true, "test", Set.of(legeerklæring.getId().toString()));
+        var periodeDto = new VurderGjennomgåttOpplæringPeriodeDto(idag, idag, true, "test", Set.of(dokument.getId().toString()));
         var dto = new VurderGjennomgåttOpplæringDto(List.of(periodeDto));
 
         var resultat = lagreGrunnlag(dto);
@@ -94,17 +94,17 @@ class GjennomgåOpplæringOppdatererTest {
         assertThat(periodeFraGrunnlag.getVurdertAv()).isEqualTo(brukerId);
         assertThat(periodeFraGrunnlag.getVurdertTidspunkt()).isNotNull();
         assertThat(periodeFraGrunnlag.getDokumenter()).hasSize(1);
-        assertThat(periodeFraGrunnlag.getDokumenter().get(0)).isEqualTo(legeerklæring);
+        assertThat(periodeFraGrunnlag.getDokumenter().get(0)).isEqualTo(dokument);
     }
 
     @Test
     void skalOppdatereGrunnlag() {
-        var periodeDto1 = new VurderGjennomgåttOpplæringPeriodeDto(idag, idag, false, "test1", Set.of(legeerklæring.getId().toString()));
+        var periodeDto1 = new VurderGjennomgåttOpplæringPeriodeDto(idag, idag, false, "test1", Set.of(dokument.getId().toString()));
         var dto1 = new VurderGjennomgåttOpplæringDto(List.of(periodeDto1));
         lagreGrunnlag(dto1);
         var vurdertTidspunkt1 = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId()).orElseThrow().getVurdertePerioder().getPerioder().get(0).getVurdertTidspunkt();
 
-        var kursbeskrivelse = lagreNyttSykdomDokument(SykdomDokumentType.DOKUMENTASJON_AV_OPPLÆRING);
+        var kursbeskrivelse = lagreNyttDokument(OpplæringDokumentType.DOKUMENTASJON_AV_OPPLÆRING);
         var periodeDto2 = new VurderGjennomgåttOpplæringPeriodeDto(idag, idag.plusDays(1), true, "test2", Set.of(kursbeskrivelse.getId().toString()));
         var dto2 = new VurderGjennomgåttOpplæringDto(List.of(periodeDto2));
         lagreGrunnlag(dto2);
@@ -159,11 +159,11 @@ class GjennomgåOpplæringOppdatererTest {
         return gjennomgåOpplæringOppdaterer.oppdater(dto, param);
     }
 
-    private PleietrengendeSykdomDokument lagreNyttSykdomDokument(SykdomDokumentType type) {
-        PleietrengendeSykdomDokument dokument = new PleietrengendeSykdomDokument(new JournalpostId("456"), null,
-            new PleietrengendeSykdomDokumentInformasjon(type, false, LocalDate.now(), LocalDateTime.now(), 1L, "meg", LocalDateTime.now()),
-            null, null, null, "meg", LocalDateTime.now());
-        pleietrengendeSykdomDokumentRepository.lagre(dokument, behandling.getFagsak().getPleietrengendeAktørId());
+    private OpplæringDokument lagreNyttDokument(OpplæringDokumentType type) {
+        OpplæringDokument dokument = new OpplæringDokument(new JournalpostId("456"), null,
+            new OpplæringDokumentInformasjon(type, false, LocalDate.now(), LocalDateTime.now(), 1L, "meg", LocalDateTime.now()),
+            behandling.getUuid(), behandling.getFagsak().getSaksnummer(), null, "meg", LocalDateTime.now());
+        opplæringDokumentRepository.lagre(dokument);
         return dokument;
     }
 }
