@@ -79,8 +79,8 @@ public class GjennomgåOpplæringOppdaterer implements AksjonspunktOppdaterer<Vu
                 periodeDto.getGjennomførtOpplæring(),
                 periodeDto.getBegrunnelse(),
                 getCurrentUserId(),
-                vurdertTidspunkt),
-                alleDokumenter.stream().filter(dokument -> periodeDto.getTilknyttedeDokumenter().contains("" + dokument.getId())).collect(Collectors.toList()))
+                vurdertTidspunkt,
+                alleDokumenter.stream().filter(dokument -> periodeDto.getTilknyttedeDokumenter().contains("" + dokument.getId())).collect(Collectors.toList())))
             .toList();
         sjekkOverlappendePerioder(vurdertOpplæringPerioder);
         return vurdertOpplæringPerioder;
