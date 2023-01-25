@@ -61,14 +61,16 @@ public class HarSøkerOmsorgenForBarn extends LeafSpecification<OmsorgenForVilk�
     }
 
     private LocalDateTimeline<Utfall> perioderMedLikeAdresser(List<BostedsAdresse> søkersAdresser, List<BostedsAdresse> barnsAdresser) {
-        var segmenter = new ArrayList<LocalDateSegment<Utfall>>();
+        var utfallsTidslinje = new LocalDateTimeline<Utfall>(List.of());
+
         for (BostedsAdresse søkersAdresse : søkersAdresser) {
             for (BostedsAdresse barnsAdresse: barnsAdresser) {
                 if (søkersAdresse.getPeriode().overlapper(barnsAdresse.getPeriode()) && søkersAdresse.erSammeAdresse(barnsAdresse)) {
-                    segmenter.add(new LocalDateSegment<>(søkersAdresse.getPeriode().overlapp(barnsAdresse.getPeriode()).toLocalDateInterval(), Utfall.OPPFYLT));
+                    var segment = new LocalDateSegment<>(søkersAdresse.getPeriode().overlapp(barnsAdresse.getPeriode()).toLocalDateInterval(), Utfall.OPPFYLT);
+                    utfallsTidslinje = utfallsTidslinje.combine(segment, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
                 }
             }
         }
-        return new LocalDateTimeline<>(segmenter);
+        return utfallsTidslinje;
     }
 }
