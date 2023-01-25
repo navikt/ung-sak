@@ -1,7 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.omsorgenfor;
 
-import static java.util.Collections.emptyList;
-
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,8 +74,8 @@ public class OMPOmsorgenForGrunnlagMapper implements OmsorgenForGrunnlagMapper {
         List<BostedsAdresse> søkersBostedsadresserIPerioden = utledAdresseperioderIVilkårsperioden(søkerBostedsadresser, vilkårsperiode);
 
         List<PersonopplysningEntitet> barna = personopplysningerAggregat.getBarnaTil(aktørId);
-        List<BostedsAdresse> barnasBostedsadresser = emptyList();
-        List<BostedsAdresse> barnasDeltBostedsadresser = emptyList();
+        List<BostedsAdresse> barnasBostedsadresser = new ArrayList<>();
+        List<BostedsAdresse> barnasDeltBostedsadresser = new ArrayList<>();
 
         for (PersonopplysningEntitet barn : barna) {
             barnasBostedsadresser.addAll(utledAdresseperioderIVilkårsperioden(hentAdresserForBarn(personopplysningerAggregat, barn, AdresseType.BOSTEDSADRESSE), vilkårsperiode));
