@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.aksjonspunkt;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,6 +22,7 @@ import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPeriode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPerioderHolder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
 
@@ -70,13 +72,15 @@ public class GjennomgåOpplæringOppdaterer implements AksjonspunktOppdaterer<Vu
     }
 
     private List<VurdertOpplæringPeriode> mapDtoTilVurdertOpplæringPerioder(VurderGjennomgåttOpplæringDto dto, List<PleietrengendeSykdomDokument> alleDokumenter) {
-
+        LocalDateTime vurdertTidspunkt = LocalDateTime.now();
         List<VurdertOpplæringPeriode> vurdertOpplæringPerioder = dto.getPerioder()
             .stream()
             .map(periodeDto -> new VurdertOpplæringPeriode(periodeDto.getPeriode().getFom(), periodeDto.getPeriode().getTom(),
                 periodeDto.getGjennomførtOpplæring(),
                 periodeDto.getBegrunnelse(),
-                alleDokumenter.stream().filter(dokument -> periodeDto.getTilknyttedeDokumenter().contains("" + dokument.getId())).collect(Collectors.toList())))
+                getCurrentUserId(),
+                vurdertTidspunkt),
+                alleDokumenter.stream().filter(dokument -> periodeDto.getTilknyttedeDokumenter().contains("" + dokument.getId())).collect(Collectors.toList()))
             .toList();
         sjekkOverlappendePerioder(vurdertOpplæringPerioder);
         return vurdertOpplæringPerioder;
@@ -104,5 +108,9 @@ public class GjennomgåOpplæringOppdaterer implements AksjonspunktOppdaterer<Vu
             .map(vurdertOpplæringPeriode -> new LocalDateSegment<>(vurdertOpplæringPeriode.getPeriode().getFomDato(), vurdertOpplæringPeriode.getPeriode().getTomDato(), vurdertOpplæringPeriode))
             .collect(Collectors.toList());
         return new LocalDateTimeline<>(segments);
+    }
+
+    private static String getCurrentUserId() {
+        return SubjectHandler.getSubjectHandler().getUid();
     }
 }

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -109,6 +110,8 @@ class InstitusjonRestTjenesteTest {
         assertThat(result.getVurderinger().get(0).getResultat()).isEqualTo(Resultat.MÅ_VURDERES);
         assertThat(result.getVurderinger().get(0).getJournalpostId().getJournalpostId()).isEqualTo(journalpostId1);
         assertThat(result.getVurderinger().get(0).getBegrunnelse()).isNull();
+        assertThat(result.getVurderinger().get(0).getVurdertAv()).isNull();
+        assertThat(result.getVurderinger().get(0).getVurdertTidspunkt()).isNull();
     }
 
     @Test
@@ -139,6 +142,8 @@ class InstitusjonRestTjenesteTest {
         assertThat(result.getVurderinger().get(0).getResultat()).isEqualTo(Resultat.GODKJENT_AUTOMATISK);
         assertThat(result.getVurderinger().get(0).getJournalpostId().getJournalpostId()).isEqualTo(journalpostId1);
         assertThat(result.getVurderinger().get(0).getBegrunnelse()).isNull();
+        assertThat(result.getVurderinger().get(0).getVurdertAv()).isNull();
+        assertThat(result.getVurderinger().get(0).getVurdertTidspunkt()).isNull();
     }
 
     @Test
@@ -146,7 +151,8 @@ class InstitusjonRestTjenesteTest {
         var perioderFraSøknad = lagPerioderFraSøknad(journalpostId1, kursperiode1, institusjonNavn1, null);
         uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), new UttakPerioderHolder(Set.of(perioderFraSøknad)));
 
-        var vurdertInstitusjon = new VurdertInstitusjon(journalpostId1, true, "fordi");
+        LocalDateTime nå = LocalDateTime.now();
+        var vurdertInstitusjon = new VurdertInstitusjon(journalpostId1, true, "fordi", "meg", nå);
         vurdertOpplæringRepository.lagre(behandling.getId(), new VurdertInstitusjonHolder(List.of(vurdertInstitusjon)));
 
         Response response = restTjeneste.hentVurdertInstitusjon(new BehandlingUuidDto(behandling.getUuid()));
@@ -167,6 +173,8 @@ class InstitusjonRestTjenesteTest {
         assertThat(result.getVurderinger().get(0).getResultat()).isEqualTo(Resultat.GODKJENT_MANUELT);
         assertThat(result.getVurderinger().get(0).getJournalpostId().getJournalpostId()).isEqualTo(journalpostId1);
         assertThat(result.getVurderinger().get(0).getBegrunnelse()).isEqualTo("fordi");
+        assertThat(result.getVurderinger().get(0).getVurdertAv()).isEqualTo("meg");
+        assertThat(result.getVurderinger().get(0).getVurdertTidspunkt()).isEqualTo(nå);
     }
 
     @Test
@@ -180,7 +188,7 @@ class InstitusjonRestTjenesteTest {
         entityManager.persist(godkjentInstitusjon);
         entityManager.flush();
 
-        var vurdertInstitusjon = new VurdertInstitusjon(journalpostId2, false, "nei");
+        var vurdertInstitusjon = new VurdertInstitusjon(journalpostId2, false, "nei", "", LocalDateTime.now());
         vurdertOpplæringRepository.lagre(behandling.getId(), new VurdertInstitusjonHolder(List.of(vurdertInstitusjon)));
 
         Response response = restTjeneste.hentVurdertInstitusjon(new BehandlingUuidDto(behandling.getUuid()));

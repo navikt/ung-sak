@@ -59,7 +59,9 @@ class InstitusjonMapper {
                     new JournalpostIdDto(vurdertInstitusjon.getJournalpostId().getVerdi()),
                     finnPerioderForJournalpostId(vurdertInstitusjon.getJournalpostId(), perioderFraSøknad),
                     vurdertInstitusjon.getGodkjent() ? Resultat.GODKJENT_MANUELT : Resultat.IKKE_GODKJENT_MANUELT,
-                    vurdertInstitusjon.getBegrunnelse())
+                    vurdertInstitusjon.getBegrunnelse(),
+                    vurdertInstitusjon.getVurdertAv(),
+                    vurdertInstitusjon.getVurdertTidspunkt())
                 );
             }
         }
@@ -76,7 +78,7 @@ class InstitusjonMapper {
                     new JournalpostIdDto(journalpostId.getVerdi()),
                     perioder.stream().map(periode -> new Periode(periode.getFomDato(), periode.getTomDato())).toList(),
                     Resultat.GODKJENT_AUTOMATISK,
-                    null)
+                    null, null, null)
                 );
 
             } else if (vurderinger.stream().noneMatch(vurdering -> vurdering.getJournalpostId().getJournalpostId().equals(journalpostId))) {
@@ -84,7 +86,7 @@ class InstitusjonMapper {
                     new JournalpostIdDto(journalpostId.getVerdi()),
                     perioder.stream().map(periode -> new Periode(periode.getFomDato(), periode.getTomDato())).toList(),
                     Resultat.MÅ_VURDERES,
-                    null)
+                    null, null, null)
                 );
             }
         }

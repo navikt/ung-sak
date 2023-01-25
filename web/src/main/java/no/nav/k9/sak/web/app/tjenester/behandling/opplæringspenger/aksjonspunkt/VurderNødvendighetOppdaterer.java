@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.aksjonspunkt;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,7 @@ import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringHolder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = VurderNødvendighetDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -68,7 +70,11 @@ public class VurderNødvendighetOppdaterer implements AksjonspunktOppdaterer<Vur
     }
 
     private VurdertOpplæring mapDtoTilVurdertOpplæring(VurderNødvendighetDto dto, List<PleietrengendeSykdomDokument> alleDokumenter) {
-        return new VurdertOpplæring(dto.getJournalpostId().getJournalpostId(), dto.isNødvendigOpplæring(), dto.getBegrunnelse(),
+        return new VurdertOpplæring(dto.getJournalpostId().getJournalpostId(), dto.isNødvendigOpplæring(), dto.getBegrunnelse(), getCurrentUserId(), LocalDateTime.now(),
             alleDokumenter.stream().filter(dokument -> dto.getTilknyttedeDokumenter().contains("" + dokument.getId())).collect(Collectors.toList()));
+    }
+
+    private static String getCurrentUserId() {
+        return SubjectHandler.getSubjectHandler().getUid();
     }
 }

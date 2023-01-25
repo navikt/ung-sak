@@ -56,8 +56,8 @@ class VedtattYtelseMapperTest {
 
         assertThat(anvisninger.size()).isEqualTo(1);
         assertThat(anvisninger.get(0).getAndeler().size()).isEqualTo(1);
-        assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsgiver().getErOrganisasjon()).isTrue();
-        assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsgiver().getIdent()).isEqualTo(arbeidsgiver.getIdentifikator());
+        assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsgiverIdent().erOrganisasjon()).isTrue();
+        assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsgiverIdent().ident()).isEqualTo(arbeidsgiver.getIdentifikator());
         assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsforholdId()).isEqualTo(eksternReferanse);
         assertThat(anvisninger.get(0).getAndeler().get(0).getInntektklasse()).isEqualTo(Inntektklasse.ARBEIDSTAKER);
         assertThat(anvisninger.get(0).getAndeler().get(0).getUtbetalingsgrad().getVerdi()).isEqualByComparingTo(BigDecimal.valueOf(100));
@@ -94,16 +94,16 @@ class VedtattYtelseMapperTest {
 
         assertThat(anvisninger.size()).isEqualTo(1);
         assertThat(anvisninger.get(0).getAndeler().size()).isEqualTo(2);
-        assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsgiver().getErOrganisasjon()).isTrue();
-        assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsgiver().getIdent()).isEqualTo(arbeidsgiver1.getIdentifikator());
+        assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsgiverIdent().erOrganisasjon()).isTrue();
+        assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsgiverIdent().ident()).isEqualTo(arbeidsgiver1.getIdentifikator());
         assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsforholdId()).isEqualTo(eksternReferanse1);
         assertThat(anvisninger.get(0).getAndeler().get(0).getInntektklasse()).isEqualTo(Inntektklasse.ARBEIDSTAKER);
         assertThat(anvisninger.get(0).getAndeler().get(0).getUtbetalingsgrad().getVerdi()).isEqualByComparingTo(BigDecimal.valueOf(100));
         assertThat(anvisninger.get(0).getAndeler().get(0).getDagsats().getVerdi()).isEqualByComparingTo(BigDecimal.valueOf(dagsats1));
         assertThat(anvisninger.get(0).getAndeler().get(0).getRefusjonsgrad().getVerdi()).isEqualByComparingTo(BigDecimal.valueOf(100));
 
-        assertThat(anvisninger.get(0).getAndeler().get(1).getArbeidsgiver().getErOrganisasjon()).isTrue();
-        assertThat(anvisninger.get(0).getAndeler().get(1).getArbeidsgiver().getIdent()).isEqualTo(arbeidsgiver2.getIdentifikator());
+        assertThat(anvisninger.get(0).getAndeler().get(1).getArbeidsgiverIdent().erOrganisasjon()).isTrue();
+        assertThat(anvisninger.get(0).getAndeler().get(1).getArbeidsgiverIdent().ident()).isEqualTo(arbeidsgiver2.getIdentifikator());
         assertThat(anvisninger.get(0).getAndeler().get(1).getArbeidsforholdId()).isEqualTo(eksternReferanse2);
         assertThat(anvisninger.get(0).getAndeler().get(0).getInntektklasse()).isEqualTo(Inntektklasse.ARBEIDSTAKER);
         assertThat(anvisninger.get(0).getAndeler().get(1).getUtbetalingsgrad().getVerdi()).isEqualByComparingTo(BigDecimal.valueOf(100));
@@ -137,8 +137,8 @@ class VedtattYtelseMapperTest {
 
         assertThat(anvisninger.size()).isEqualTo(1);
         assertThat(anvisninger.get(0).getAndeler().size()).isEqualTo(1);
-        assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsgiver().getErOrganisasjon()).isTrue();
-        assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsgiver().getIdent()).isEqualTo(arbeidsgiver.getIdentifikator());
+        assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsgiverIdent().erOrganisasjon()).isTrue();
+        assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsgiverIdent().ident()).isEqualTo(arbeidsgiver.getIdentifikator());
         assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsforholdId()).isEqualTo(eksternReferanse);
         assertThat(anvisninger.get(0).getAndeler().get(0).getInntektklasse()).isEqualTo(Inntektklasse.ARBEIDSTAKER);
         assertThat(anvisninger.get(0).getAndeler().get(0).getUtbetalingsgrad().getVerdi()).isEqualByComparingTo(BigDecimal.valueOf(100));
@@ -167,8 +167,8 @@ class VedtattYtelseMapperTest {
 
         assertThat(anvisninger.size()).isEqualTo(1);
         assertThat(anvisninger.get(0).getAndeler().size()).isEqualTo(1);
-        assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsgiver().getErOrganisasjon()).isTrue();
-        assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsgiver().getIdent()).isEqualTo(arbeidsgiver.getIdentifikator());
+        assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsgiverIdent().erOrganisasjon()).isTrue();
+        assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsgiverIdent().ident()).isEqualTo(arbeidsgiver.getIdentifikator());
         assertThat(anvisninger.get(0).getAndeler().get(0).getArbeidsforholdId()).isEqualTo(null);
         assertThat(anvisninger.get(0).getAndeler().get(0).getInntektklasse()).isEqualTo(Inntektklasse.ARBEIDSTAKER);
         assertThat(anvisninger.get(0).getAndeler().get(0).getUtbetalingsgrad().getVerdi()).isEqualByComparingTo(BigDecimal.valueOf(100));

@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.repo;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -42,6 +43,12 @@ public class VurdertOpplæring extends BaseEntitet {
     @Column(name = "begrunnelse", nullable = false)
     private String begrunnelse;
 
+    @Column(name = "vurdert_av", nullable = false)
+    private String vurdertAv;
+
+    @Column(name = "vurdert_tid", nullable = false)
+    private LocalDateTime vurdertTidspunkt;
+
     @OneToMany
     @JoinTable(
         name="OLP_VURDERT_OPPLAERING_ANVENDT_DOKUMENT",
@@ -57,10 +64,12 @@ public class VurdertOpplæring extends BaseEntitet {
     VurdertOpplæring() {
     }
 
-    public VurdertOpplæring(JournalpostId journalpostId, Boolean nødvendigOpplæring, String begrunnelse, List<PleietrengendeSykdomDokument> dokumenter) {
+    public VurdertOpplæring(JournalpostId journalpostId, Boolean nødvendigOpplæring, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt, List<PleietrengendeSykdomDokument> dokumenter) {
         this.journalpostId = journalpostId;
         this.nødvendigOpplæring = nødvendigOpplæring;
         this.begrunnelse = begrunnelse;
+        this.vurdertAv = vurdertAv;
+        this.vurdertTidspunkt = vurdertTidspunkt;
         this.dokumenter = new ArrayList<>(dokumenter);
     }
 
@@ -68,6 +77,8 @@ public class VurdertOpplæring extends BaseEntitet {
         this.journalpostId = that.journalpostId;
         this.nødvendigOpplæring = that.nødvendigOpplæring;
         this.begrunnelse = that.begrunnelse;
+        this.vurdertAv = that.vurdertAv;
+        this.vurdertTidspunkt = that.vurdertTidspunkt;
         this.dokumenter = new ArrayList<>(that.dokumenter);
     }
 
@@ -83,6 +94,14 @@ public class VurdertOpplæring extends BaseEntitet {
         return journalpostId;
     }
 
+    public String getVurdertAv() {
+        return vurdertAv;
+    }
+
+    public LocalDateTime getVurdertTidspunkt() {
+        return vurdertTidspunkt;
+    }
+
     public List<PleietrengendeSykdomDokument> getDokumenter() {
         return dokumenter;
     }
@@ -95,12 +114,14 @@ public class VurdertOpplæring extends BaseEntitet {
         return Objects.equals(nødvendigOpplæring, that.nødvendigOpplæring)
             && Objects.equals(journalpostId, that.journalpostId)
             && Objects.equals(dokumenter, that.dokumenter)
-            && Objects.equals(begrunnelse, that.begrunnelse);
+            && Objects.equals(begrunnelse, that.begrunnelse)
+            && Objects.equals(vurdertAv, that.vurdertAv)
+            && Objects.equals(vurdertTidspunkt, that.vurdertTidspunkt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(journalpostId, nødvendigOpplæring, begrunnelse, dokumenter);
+        return Objects.hash(journalpostId, nødvendigOpplæring, begrunnelse, vurdertAv, vurdertTidspunkt, dokumenter);
     }
 
     @Override
@@ -110,6 +131,8 @@ public class VurdertOpplæring extends BaseEntitet {
             ", nødvendigOpplæring=" + nødvendigOpplæring +
             ", dokumenter=" + dokumenter +
             ", begrunnelse=" + begrunnelse +
+            ", vurdertAv=" + vurdertAv +
+            ", vurdertTidspunkt=" + vurdertTidspunkt +
             '}';
     }
 }

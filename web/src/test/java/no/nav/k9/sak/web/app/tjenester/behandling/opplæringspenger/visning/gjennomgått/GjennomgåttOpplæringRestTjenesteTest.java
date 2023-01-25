@@ -111,6 +111,8 @@ class GjennomgåttOpplæringRestTjenesteTest {
         assertThat(result.getVurderinger().get(0).getPeriode()).isEqualTo(periode1);
         assertThat(result.getVurderinger().get(0).getResultat()).isEqualTo(Resultat.MÅ_VURDERES);
         assertThat(result.getVurderinger().get(0).getBegrunnelse()).isNull();
+        assertThat(result.getVurderinger().get(0).getVurdertAv()).isNull();
+        assertThat(result.getVurderinger().get(0).getVurdertTidspunkt()).isNull();
         assertThat(result.getVurderinger().get(0).getTilknyttedeDokumenter()).isEmpty();
     }
 
@@ -120,7 +122,8 @@ class GjennomgåttOpplæringRestTjenesteTest {
         var perioderFraSøknad = lagPerioderFraSøknad(List.of(kursperiode));
         uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), new UttakPerioderHolder(Set.of(perioderFraSøknad)));
 
-        var vurdertOpplæringperiode = new VurdertOpplæringPeriode(periode1.getFom(), periode1.getTom(), true, "derfor", List.of(dokument));
+        LocalDateTime nå = LocalDateTime.now();
+        var vurdertOpplæringperiode = new VurdertOpplæringPeriode(periode1.getFom(), periode1.getTom(), true, "derfor", "meg", nå, List.of(dokument));
         vurdertOpplæringRepository.lagre(behandling.getId(), new VurdertOpplæringPerioderHolder(List.of(vurdertOpplæringperiode)));
 
         Response response = restTjeneste.hentVurdertOpplæring(new BehandlingUuidDto(behandling.getUuid()));
@@ -137,6 +140,8 @@ class GjennomgåttOpplæringRestTjenesteTest {
         assertThat(result.getVurderinger().get(0).getPeriode()).isEqualTo(periode1);
         assertThat(result.getVurderinger().get(0).getResultat()).isEqualTo(Resultat.GODKJENT);
         assertThat(result.getVurderinger().get(0).getBegrunnelse()).isEqualTo(vurdertOpplæringperiode.getBegrunnelse());
+        assertThat(result.getVurderinger().get(0).getVurdertAv()).isEqualTo("meg");
+        assertThat(result.getVurderinger().get(0).getVurdertTidspunkt()).isEqualTo(nå);
         assertThat(result.getVurderinger().get(0).getTilknyttedeDokumenter()).hasSize(1);
         assertThat(result.getVurderinger().get(0).getTilknyttedeDokumenter().get(0)).isEqualTo(dokument.getId().toString());
     }
@@ -148,7 +153,7 @@ class GjennomgåttOpplæringRestTjenesteTest {
         var perioderFraSøknad1 = lagPerioderFraSøknad(List.of(kursperiode1, kursperiode2));
         uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), new UttakPerioderHolder(Set.of(perioderFraSøknad1)));
 
-        var vurdertOpplæringperiode = new VurdertOpplæringPeriode(periode1.getFom(), periode1.getTom(), false, "nei", List.of());
+        var vurdertOpplæringperiode = new VurdertOpplæringPeriode(periode1.getFom(), periode1.getTom(), false, "nei", "", LocalDateTime.now(), List.of());
         vurdertOpplæringRepository.lagre(behandling.getId(), new VurdertOpplæringPerioderHolder(List.of(vurdertOpplæringperiode)));
 
         Response response = restTjeneste.hentVurdertOpplæring(new BehandlingUuidDto(behandling.getUuid()));

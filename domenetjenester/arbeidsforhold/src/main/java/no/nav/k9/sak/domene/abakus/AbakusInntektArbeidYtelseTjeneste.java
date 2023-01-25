@@ -265,6 +265,12 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         return sakInntektsmeldinger.hentInntektsmeldingerSidenRef(behandlingId, eksternReferanse);
     }
 
+    @Override
+    public Set<Inntektsmelding> hentInntektsmeldingerKommetTomBehandling(Saksnummer saksnummer, Long behandlingId) {
+        var sakInntektsmeldinger = hentInntektsmeldinger(saksnummer); // TODO: Fjern denne, hent direkte fra abakus?
+        return sakInntektsmeldinger.hentInntektsmeldingerKommetTom(behandlingId);
+    }
+
     // FIXME: : bør håndteres i egen task (kall asyncabakustjeneste internt).
     @Override
     public void lagreIayAggregat(Long behandlingId, InntektArbeidYtelseAggregatBuilder builder) {

@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.TreeSet;
@@ -74,6 +75,7 @@ public class VurderNødvendighetStegTest {
     private VurderNødvendighetSteg vurderNødvendighetSteg;
     private Periode søknadsperiode;
     private TestScenarioBuilder scenario;
+    private final LocalDateTime nå = LocalDateTime.now();
 
     @BeforeEach
     public void setup() {
@@ -81,8 +83,7 @@ public class VurderNødvendighetStegTest {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         vurderNødvendighetSteg = new VurderNødvendighetSteg(repositoryProvider, perioderTilVurderingTjenesteMock, resultatRepository,
             new VurderNødvendighetTjeneste(repositoryProvider, perioderTilVurderingTjenesteMock, vurdertOpplæringRepository, uttakPerioderGrunnlagRepository));
-        LocalDate now = LocalDate.now();
-        søknadsperiode = new Periode(now.minusMonths(3), now);
+        søknadsperiode = new Periode(nå.toLocalDate().minusMonths(3), nå.toLocalDate());
         scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.OPPLÆRINGSPENGER);
         scenario.leggTilVilkår(VilkårType.NØDVENDIG_OPPLÆRING, Utfall.IKKE_VURDERT);
     }
@@ -152,7 +153,7 @@ public class VurderNødvendighetStegTest {
             behandlingRepository.taSkriveLås(behandling));
         setupPerioderTilVurdering(kontekst);
 
-        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpostId1, true, "", List.of());
+        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpostId1, true, "", "", nå, List.of());
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             null,
             new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
@@ -194,7 +195,7 @@ public class VurderNødvendighetStegTest {
             behandlingRepository.taSkriveLås(behandling));
         setupPerioderTilVurdering(kontekst);
 
-        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpostId1, false, "test", List.of());
+        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpostId1, false, "test", "", nå, List.of());
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             null,
             new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
@@ -261,8 +262,8 @@ public class VurderNødvendighetStegTest {
             behandlingRepository.taSkriveLås(behandling));
         setupPerioderTilVurdering(kontekst);
 
-        VurdertOpplæring vurdertOpplæring1 = new VurdertOpplæring(journalpostId1, true, "test", List.of());
-        VurdertOpplæring vurdertOpplæring2 = new VurdertOpplæring(journalpostId2, false, "tast", List.of());
+        VurdertOpplæring vurdertOpplæring1 = new VurdertOpplæring(journalpostId1, true, "test", "", nå, List.of());
+        VurdertOpplæring vurdertOpplæring2 = new VurdertOpplæring(journalpostId2, false, "tast", "", nå, List.of());
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             null,
             new VurdertOpplæringHolder(List.of(vurdertOpplæring1, vurdertOpplæring2)),
@@ -304,7 +305,7 @@ public class VurderNødvendighetStegTest {
             behandlingRepository.taSkriveLås(behandling));
         setupPerioderTilVurdering(kontekst);
 
-        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpostId1, true, "test", List.of());
+        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpostId1, true, "test", "", nå, List.of());
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             null,
             new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
@@ -387,7 +388,7 @@ public class VurderNødvendighetStegTest {
             behandlingRepository.taSkriveLås(behandling));
         setupPerioderTilVurdering(kontekst);
 
-        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpostId1, true, "", List.of());
+        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpostId1, true, "", "", nå, List.of());
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             null,
             new VurdertOpplæringHolder(List.of(vurdertOpplæring)),
@@ -421,7 +422,7 @@ public class VurderNødvendighetStegTest {
             behandlingRepository.taSkriveLås(behandling));
         setupPerioderTilVurdering(kontekst);
 
-        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpostId1, true, "", List.of());
+        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpostId1, true, "", "", nå, List.of());
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(),
             null,
             new VurdertOpplæringHolder(List.of(vurdertOpplæring)),

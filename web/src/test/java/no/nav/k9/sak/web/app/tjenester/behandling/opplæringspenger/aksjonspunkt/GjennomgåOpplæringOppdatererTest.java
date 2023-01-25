@@ -9,11 +9,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.k9.felles.testutilities.sikkerhet.StaticSubjectHandler;
+import no.nav.k9.felles.testutilities.sikkerhet.SubjectHandlerUtils;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
@@ -50,7 +53,14 @@ class GjennomgåOpplæringOppdatererTest {
     private GjennomgåOpplæringOppdaterer gjennomgåOpplæringOppdaterer;
     private Behandling behandling;
     private final LocalDate idag = LocalDate.now();
+    private static final String brukerId = "bruker1";
     private PleietrengendeSykdomDokument legeerklæring;
+
+    @BeforeAll
+    static void subjectHandlerSetup() {
+        SubjectHandlerUtils.useSubjectHandler(StaticSubjectHandler.class);
+        SubjectHandlerUtils.setInternBruker(brukerId);
+    }
 
     @BeforeEach
     void setup() {
@@ -81,6 +91,8 @@ class GjennomgåOpplæringOppdatererTest {
         assertThat(periodeFraGrunnlag.getPeriode().getTomDato()).isEqualTo(periodeDto.getPeriode().getTom());
         assertThat(periodeFraGrunnlag.getGjennomførtOpplæring()).isEqualTo(periodeDto.getGjennomførtOpplæring());
         assertThat(periodeFraGrunnlag.getBegrunnelse()).isEqualTo(periodeDto.getBegrunnelse());
+        assertThat(periodeFraGrunnlag.getVurdertAv()).isEqualTo(brukerId);
+        assertThat(periodeFraGrunnlag.getVurdertTidspunkt()).isNotNull();
         assertThat(periodeFraGrunnlag.getDokumenter()).hasSize(1);
         assertThat(periodeFraGrunnlag.getDokumenter().get(0)).isEqualTo(legeerklæring);
     }
@@ -90,6 +102,7 @@ class GjennomgåOpplæringOppdatererTest {
         var periodeDto1 = new VurderGjennomgåttOpplæringPeriodeDto(idag, idag, false, "test1", Set.of(legeerklæring.getId().toString()));
         var dto1 = new VurderGjennomgåttOpplæringDto(List.of(periodeDto1));
         lagreGrunnlag(dto1);
+        var vurdertTidspunkt1 = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId()).orElseThrow().getVurdertePerioder().getPerioder().get(0).getVurdertTidspunkt();
 
         var kursbeskrivelse = lagreNyttSykdomDokument(SykdomDokumentType.DOKUMENTASJON_AV_OPPLÆRING);
         var periodeDto2 = new VurderGjennomgåttOpplæringPeriodeDto(idag, idag.plusDays(1), true, "test2", Set.of(kursbeskrivelse.getId().toString()));
@@ -105,6 +118,7 @@ class GjennomgåOpplæringOppdatererTest {
         assertThat(periodeFraGrunnlag.getPeriode().getTomDato()).isEqualTo(periodeDto2.getPeriode().getTom());
         assertThat(periodeFraGrunnlag.getGjennomførtOpplæring()).isEqualTo(periodeDto2.getGjennomførtOpplæring());
         assertThat(periodeFraGrunnlag.getBegrunnelse()).isEqualTo(periodeDto2.getBegrunnelse());
+        assertThat(periodeFraGrunnlag.getVurdertTidspunkt()).isAfter(vurdertTidspunkt1);
         assertThat(periodeFraGrunnlag.getDokumenter()).hasSize(1);
         assertThat(periodeFraGrunnlag.getDokumenter().get(0)).isEqualTo(kursbeskrivelse);
     }
@@ -126,6 +140,7 @@ class GjennomgåOpplæringOppdatererTest {
         var perioderFraGrunnlag2 = grunnlag.get().getVurdertePerioder().getPerioder().stream().filter(perioder -> perioder.getPeriode().getFomDato().equals(periodeDto2.getPeriode().getFom())).findFirst();
         assertThat(perioderFraGrunnlag1).isPresent();
         assertThat(perioderFraGrunnlag2).isPresent();
+        assertThat(perioderFraGrunnlag1.get().getVurdertTidspunkt()).isNotEqualTo(perioderFraGrunnlag2.get().getVurdertTidspunkt());
     }
 
     @Test

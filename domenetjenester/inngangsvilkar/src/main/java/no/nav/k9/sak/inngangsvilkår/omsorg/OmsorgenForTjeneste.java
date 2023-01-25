@@ -14,24 +14,19 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
-import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.sykdom.Resultat;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonAdresseEntitet;
-import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.person.personopplysning.BasisPersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtfallOversetter;
-import no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell.BostedsAdresse;
+import no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell.OmsorgenForGrunnlagMapper;
+import no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell.OmsorgenForKnekkpunkter;
 import no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell.OmsorgenForVilkår;
 import no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell.OmsorgenForVilkårGrunnlag;
-import no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell.Relasjon;
-import no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell.RelasjonsRolle;
 import no.nav.k9.sak.inngangsvilkår.omsorg.repo.OmsorgenForGrunnlag;
 import no.nav.k9.sak.inngangsvilkår.omsorg.repo.OmsorgenForGrunnlagRepository;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
@@ -46,6 +41,7 @@ public class OmsorgenForTjeneste {
     private BasisPersonopplysningTjeneste personopplysningTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
     private Instance<OmsorgenForVilkår> omsorgenForVilkårene;
+    private Instance<OmsorgenForGrunnlagMapper> omsorgenForGrunnlagMappere;
 
     OmsorgenForTjeneste() {
         // CDI
@@ -56,9 +52,10 @@ public class OmsorgenForTjeneste {
                                BehandlingRepository behandlingRepository,
                                BasisPersonopplysningTjeneste personopplysningTjeneste,
                                @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
-                               @Any Instance<OmsorgenForVilkår> omsorgenForVilkårene) {
+                               @Any Instance<OmsorgenForVilkår> omsorgenForVilkårene,
+                               @Any Instance<OmsorgenForGrunnlagMapper> omsorgenForGrunnlagMappere) {
         this.omsorgenForVilkårene = omsorgenForVilkårene;
-
+        this.omsorgenForGrunnlagMappere = omsorgenForGrunnlagMappere;
         this.utfallOversetter = new VilkårUtfallOversetter();
         this.omsorgenForGrunnlagRepository = omsorgenForGrunnlagRepository;
         this.behandlingRepository = behandlingRepository;
@@ -68,37 +65,39 @@ public class OmsorgenForTjeneste {
 
     public List<VilkårData> vurderPerioder(BehandlingReferanse referanse, LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje) {
         final List<VilkårData> resultat = new ArrayList<>();
+        var omsorgenForVilkår = OmsorgenForVilkår.finnTjeneste(omsorgenForVilkårene, referanse.getFagsakYtelseType());
         for (LocalDateSegment<OmsorgenForVilkårGrunnlag> s : samletOmsorgenForTidslinje.toSegments()) {
-            final var evaluation = OmsorgenForVilkår.finnTjeneste(omsorgenForVilkårene, referanse.getFagsakYtelseType()).evaluer(s.getValue());
-            final var vilkårData = utfallOversetter.oversett(VilkårType.OMSORGEN_FOR, evaluation, s.getValue(), DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()));
+            var periode = DatoIntervallEntitet.fra(s.getLocalDateInterval());
+            var knekkpunkter = new OmsorgenForKnekkpunkter(periode);
+            final var evaluation = omsorgenForVilkår.evaluer(s.getValue(), knekkpunkter);
+            final var vilkårData = utfallOversetter.oversett(VilkårType.OMSORGEN_FOR, evaluation, s.getValue(), periode);
             resultat.add(vilkårData);
         }
 
         return resultat;
     }
 
-    public LocalDateTimeline<OmsorgenForVilkårGrunnlag> mapGrunnlag(BehandlingskontrollKontekst kontekst, NavigableSet<DatoIntervallEntitet> perioder) {
-        return mapGrunnlag(kontekst.getBehandlingId(), kontekst.getAktørId(), perioder);
-    }
-
-    public LocalDateTimeline<OmsorgenForVilkårGrunnlag> mapGrunnlag(long behandlingId, AktørId aktørId, NavigableSet<DatoIntervallEntitet> perioder) {
-        final OmsorgenForVilkårGrunnlag systemgrunnlag = oversettSystemdataTilRegelModellOmsorgen(behandlingId, aktørId, perioder);
+    public LocalDateTimeline<OmsorgenForVilkårGrunnlag> mapGrunnlag(BehandlingReferanse referanse, NavigableSet<DatoIntervallEntitet> perioder) {
+        var behandlingId = referanse.getBehandlingId();
+        var grunnlagMapper = OmsorgenForGrunnlagMapper.finnTjeneste(omsorgenForGrunnlagMappere, referanse.getFagsakYtelseType());
+        var grunnlagPerPeriode = grunnlagMapper.map(referanse, perioder);
+        var systemdatatidslinje = new LocalDateTimeline<>(grunnlagPerPeriode.entrySet()
+            .stream().map(entry -> new LocalDateSegment<>(entry.getKey().toLocalDateInterval(), entry.getValue()))
+            .collect(Collectors.toList()));
         final var vurdertOmsorgenForTidslinje = oversettTilRegelModellOmsorgenForVurderinger(behandlingId);
 
-        return slåSammenGrunnlagFraSystemOgVurdering(perioder, systemgrunnlag, vurdertOmsorgenForTidslinje);
+        return slåSammenGrunnlagFraSystemOgVurdering(vurdertOmsorgenForTidslinje, systemdatatidslinje);
     }
 
-    private LocalDateTimeline<OmsorgenForVilkårGrunnlag> slåSammenGrunnlagFraSystemOgVurdering(final NavigableSet<DatoIntervallEntitet> perioder,
-                                                                                               final OmsorgenForVilkårGrunnlag systemgrunnlag,
-                                                                                               final LocalDateTimeline<OmsorgenForVilkårGrunnlag> vurdertOmsorgenForTidslinje) {
-        final var systemdatatidslinje = new LocalDateTimeline<>(perioder.stream().map(p -> new LocalDateSegment<>(p.toLocalDateInterval(), systemgrunnlag)).collect(Collectors.toList()));
+    private LocalDateTimeline<OmsorgenForVilkårGrunnlag> slåSammenGrunnlagFraSystemOgVurdering(final LocalDateTimeline<OmsorgenForVilkårGrunnlag> vurdertOmsorgenForTidslinje, LocalDateTimeline<OmsorgenForVilkårGrunnlag> systemdatatidslinje) {
         return vurdertOmsorgenForTidslinje.combine(systemdatatidslinje, (datoInterval, datoSegment, datoSegment2) -> {
             if (datoSegment == null) {
                 return new LocalDateSegment<>(datoInterval, datoSegment2.getValue());
             }
 
             final OmsorgenForVilkårGrunnlag sg = datoSegment2.getValue();
-            final OmsorgenForVilkårGrunnlag sammensatt = new OmsorgenForVilkårGrunnlag(sg.getRelasjonMellomSøkerOgPleietrengende(), sg.getSøkersAdresser(), sg.getPleietrengendeAdresser(), datoSegment.getValue().getErOmsorgsPerson());
+            final OmsorgenForVilkårGrunnlag sammensatt = new OmsorgenForVilkårGrunnlag(DatoIntervallEntitet.fra(datoInterval), sg.getRelasjonMellomSøkerOgPleietrengende(), sg.getSøkersAdresser(),
+                sg.getPleietrengendeAdresser(), datoSegment.getValue().getHarBlittVurdertSomOmsorgsPerson(), sg.getFosterbarn(), sg.getDeltBostedsAdresser());
             return new LocalDateSegment<>(datoInterval, sammensatt);
         }, JoinStyle.RIGHT_JOIN);
     }
@@ -108,7 +107,7 @@ public class OmsorgenForTjeneste {
         return new LocalDateTimeline<>(
             omsorgenForGrunnlag.map(og -> og.getOmsorgenFor().getPerioder()).orElse(List.of())
                 .stream()
-                .map(ofp -> new LocalDateSegment<>(ofp.getPeriode().getFomDato(), ofp.getPeriode().getTomDato(), new OmsorgenForVilkårGrunnlag(null, null, null, mapToErOmsorgsperson(ofp.getResultat()))))
+                .map(ofp -> new LocalDateSegment<>(ofp.getPeriode().getFomDato(), ofp.getPeriode().getTomDato(), new OmsorgenForVilkårGrunnlag(mapToErOmsorgsperson(ofp.getResultat()))))
                 .collect(Collectors.toList())
         );
     }
@@ -119,48 +118,6 @@ public class OmsorgenForTjeneste {
             case IKKE_OPPFYLT -> false;
             case IKKE_VURDERT -> null;
         };
-    }
-
-    public OmsorgenForVilkårGrunnlag oversettSystemdataTilRegelModellOmsorgen(Long behandlingId, AktørId aktørId, NavigableSet<DatoIntervallEntitet> perioder) {
-        final var personopplysningerAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(behandlingId, aktørId, omsluttendePeriode(perioder)).orElseThrow();
-        final var pleietrengende = behandlingRepository.hentBehandling(behandlingId).getFagsak().getPleietrengendeAktørId();
-
-        // Lar denne stå her inntil videre selv om vi ikke bruker den:
-        final var søkerBostedsadresser = personopplysningerAggregat.getAdresserFor(aktørId)
-            .stream()
-            .filter(it -> AdresseType.BOSTEDSADRESSE.equals(it.getAdresseType()))
-            .collect(Collectors.toList());
-        final var pleietrengendeBostedsadresser = personopplysningerAggregat.getAdresserFor(pleietrengende)
-            .stream()
-            .filter(it -> AdresseType.BOSTEDSADRESSE.equals(it.getAdresseType()))
-            .collect(Collectors.toList());
-
-        return new OmsorgenForVilkårGrunnlag(mapReleasjonMellomPleietrengendeOgSøker(personopplysningerAggregat, pleietrengende),
-            mapAdresser(søkerBostedsadresser), mapAdresser(pleietrengendeBostedsadresser), null);
-    }
-
-    private DatoIntervallEntitet omsluttendePeriode(final NavigableSet<DatoIntervallEntitet> perioder) {
-        final var startDato = perioder.stream().map(DatoIntervallEntitet::getFomDato).min(LocalDate::compareTo).orElse(LocalDate.now());
-        final var sluttDato = perioder.stream().map(DatoIntervallEntitet::getTomDato).max(LocalDate::compareTo).orElse(LocalDate.now());
-        return DatoIntervallEntitet.fraOgMedTilOgMed(startDato, sluttDato);
-    }
-
-    private List<BostedsAdresse> mapAdresser(List<PersonAdresseEntitet> pleietrengendeBostedsadresser) {
-        return pleietrengendeBostedsadresser.stream()
-            .map(it -> new BostedsAdresse(it.getAktørId().getId(), it.getAdresselinje1(), it.getAdresselinje2(), it.getAdresselinje3(), it.getPostnummer(), it.getLand()))
-            .collect(Collectors.toList());
-    }
-
-    private Relasjon mapReleasjonMellomPleietrengendeOgSøker(PersonopplysningerAggregat aggregat, AktørId pleietrengende) {
-        final var relasjoner = aggregat.getSøkersRelasjoner().stream().filter(it -> it.getTilAktørId().equals(pleietrengende)).collect(Collectors.toSet());
-        if (relasjoner.size() > 1) {
-            throw new IllegalStateException("Fant flere relasjoner til barnet. Vet ikke hvilken som skal prioriteres");
-        } else if (relasjoner.size() == 1) {
-            final var relasjonen = relasjoner.iterator().next();
-            return new Relasjon(relasjonen.getAktørId().getId(), relasjonen.getTilAktørId().getId(), RelasjonsRolle.find(relasjonen.getRelasjonsrolle().getKode()), relasjonen.getHarSammeBosted());
-        } else {
-            return null;
-        }
     }
 
     public Systemdata hentSystemdata(Long behandlingId, AktørId aktørId, AktørId optPleietrengendeAktørId) {
@@ -202,6 +159,11 @@ public class OmsorgenForTjeneste {
             .orElseThrow();
 
         return DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
+    }
+
+    public boolean skalHaAksjonspunkt(BehandlingReferanse referanse, LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje, boolean medAlleGamleVurderingerPåNytt) {
+        var omsorgenForVilkår = OmsorgenForVilkår.finnTjeneste(omsorgenForVilkårene, referanse.getFagsakYtelseType());
+        return omsorgenForVilkår.skalHaAksjonspunkt(samletOmsorgenForTidslinje, medAlleGamleVurderingerPåNytt);
     }
 
     public static class Systemdata {

@@ -2,17 +2,18 @@ package no.nav.k9.sak.økonomi.tilbakekreving.klient;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
+import java.util.Optional;
 
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.sak.typer.Saksnummer;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.økonomi.tilbakekreving.dto.BehandlingStatusOgFeilutbetalinger;
 
 @Dependent
 public class K9TilbakeRestKlient {
@@ -21,6 +22,7 @@ public class K9TilbakeRestKlient {
 
     private OidcRestClient restClient;
     private URI uriHarÅpenTilbakekrevingsbehandling;
+    private URI uriFeilutbetalingerSisteBehandling;
     private boolean k9tilbakeAktivert;
 
     K9TilbakeRestKlient() {
@@ -33,16 +35,27 @@ public class K9TilbakeRestKlient {
                                @KonfigVerdi(value = "K9TILBAKE_AKTIVERT", defaultVerdi = "false", required = false) boolean k9tilbakeAktivert) {
         this.restClient = restClient;
         this.uriHarÅpenTilbakekrevingsbehandling = tilUri(urlK9Tilbake, "behandlinger/tilbakekreving/aapen");
+        this.uriFeilutbetalingerSisteBehandling = tilUri(urlK9Tilbake, "feilutbetaling/siste-behandling");
         this.k9tilbakeAktivert = k9tilbakeAktivert;
     }
 
     public boolean harÅpenTilbakekrevingsbehandling(Saksnummer saksnummer) {
         URI uri = leggTilParameter(uriHarÅpenTilbakekrevingsbehandling, "saksnummer", saksnummer.getVerdi());
-        if(k9tilbakeAktivert){
+        if (k9tilbakeAktivert) {
             return restClient.get(uri, Boolean.class);
         } else {
             log.info("k9-tilbake er ikke aktivert - antar at sak {} ikke har tilbakekrevingsbehandling", saksnummer);
             return false;
+        }
+    }
+
+    public Optional<BehandlingStatusOgFeilutbetalinger> hentFeilutbetalingerForSisteBehandling(Saksnummer saksnummer) {
+        URI uri = leggTilParameter(uriFeilutbetalingerSisteBehandling, "saksnummer", saksnummer.getVerdi());
+        if (k9tilbakeAktivert) {
+            return restClient.postReturnsOptional(uri, saksnummer, BehandlingStatusOgFeilutbetalinger.class);
+        } else {
+            log.info("k9-tilbake er ikke aktivert - antar at sak {} ikke har tilbakekrevingsbehandling", saksnummer);
+            return Optional.empty();
         }
     }
 

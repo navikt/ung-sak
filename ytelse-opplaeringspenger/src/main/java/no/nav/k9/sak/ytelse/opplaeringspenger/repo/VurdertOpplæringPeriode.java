@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.repo;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -46,6 +47,12 @@ public class VurdertOpplæringPeriode extends BaseEntitet {
     @Column(name = "begrunnelse", nullable = false)
     private String begrunnelse;
 
+    @Column(name = "vurdert_av", nullable = false)
+    private String vurdertAv;
+
+    @Column(name = "vurdert_tid", nullable = false)
+    private LocalDateTime vurdertTidspunkt;
+
     @OneToMany
     @JoinTable(
         name="OLP_VURDERT_OPPLAERING_PERIODE_ANVENDT_DOKUMENT",
@@ -61,24 +68,25 @@ public class VurdertOpplæringPeriode extends BaseEntitet {
     VurdertOpplæringPeriode() {
     }
 
-    public VurdertOpplæringPeriode(DatoIntervallEntitet periode, Boolean gjennomførtOpplæring, String begrunnelse, List<PleietrengendeSykdomDokument> dokumenter) {
+    public VurdertOpplæringPeriode(DatoIntervallEntitet periode, Boolean gjennomførtOpplæring, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt, List<PleietrengendeSykdomDokument> dokumenter) {
         this.periode = periode;
         this.gjennomførtOpplæring = gjennomførtOpplæring;
         this.begrunnelse = begrunnelse;
+        this.vurdertAv = vurdertAv;
+        this.vurdertTidspunkt = vurdertTidspunkt;
         this.dokumenter = new ArrayList<>(dokumenter);
     }
 
-    public VurdertOpplæringPeriode(LocalDate fom, LocalDate tom, Boolean gjennomførtOpplæring, String begrunnelse, List<PleietrengendeSykdomDokument> dokumenter) {
-        this.periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
-        this.gjennomførtOpplæring = gjennomførtOpplæring;
-        this.begrunnelse = begrunnelse;
-        this.dokumenter = new ArrayList<>(dokumenter);
+    public VurdertOpplæringPeriode(LocalDate fom, LocalDate tom, Boolean gjennomførtOpplæring, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt, List<PleietrengendeSykdomDokument> dokumenter) {
+        this(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), gjennomførtOpplæring, begrunnelse, vurdertAv, vurdertTidspunkt, dokumenter);
     }
 
     public VurdertOpplæringPeriode(VurdertOpplæringPeriode that) {
         this.periode = that.periode;
         this.gjennomførtOpplæring = that.gjennomførtOpplæring;
         this.begrunnelse = that.begrunnelse;
+        this.vurdertAv = that.vurdertAv;
+        this.vurdertTidspunkt = that.vurdertTidspunkt;
         this.dokumenter = new ArrayList<>(that.dokumenter);
     }
 
@@ -94,6 +102,14 @@ public class VurdertOpplæringPeriode extends BaseEntitet {
         return begrunnelse;
     }
 
+    public String getVurdertAv() {
+        return vurdertAv;
+    }
+
+    public LocalDateTime getVurdertTidspunkt() {
+        return vurdertTidspunkt;
+    }
+
     public List<PleietrengendeSykdomDokument> getDokumenter() {
         return new ArrayList<>(dokumenter);
     }
@@ -105,12 +121,14 @@ public class VurdertOpplæringPeriode extends BaseEntitet {
         VurdertOpplæringPeriode that = (VurdertOpplæringPeriode) o;
         return Objects.equals(periode, that.periode)
             && Objects.equals(gjennomførtOpplæring, that.gjennomførtOpplæring)
+            && Objects.equals(begrunnelse, that.begrunnelse)
             && Objects.equals(dokumenter, that.dokumenter)
-            && Objects.equals(begrunnelse, that.begrunnelse);
+            && Objects.equals(vurdertAv, that.vurdertAv)
+            && Objects.equals(vurdertTidspunkt, that.vurdertTidspunkt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode, gjennomførtOpplæring, begrunnelse, dokumenter);
+        return Objects.hash(periode, gjennomførtOpplæring, begrunnelse, vurdertAv, vurdertTidspunkt, dokumenter);
     }
 }
