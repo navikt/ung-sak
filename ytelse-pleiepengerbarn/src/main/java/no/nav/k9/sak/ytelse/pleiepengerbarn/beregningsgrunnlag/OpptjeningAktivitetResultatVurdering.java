@@ -40,7 +40,10 @@ public class OpptjeningAktivitetResultatVurdering implements OpptjeningAktivitet
     }
 
     private VurderingsStatus finnArbeidvurdering(VurderStatusInput input, Opptjening opptjening) {
-        return opptjening.getOpptjeningAktivitet().stream().filter(oa -> oa.getAktivitetReferanse().equals(input.getRegisterAktivitet().getArbeidsgiver().getIdentifikator()))
+        return opptjening.getOpptjeningAktivitet().stream().filter(oa ->
+                oa.getAktivitetType().equals(OpptjeningAktivitetType.ARBEID) &&
+                oa.getAktivitetReferanse() != null &&
+                oa.getAktivitetReferanse().equals(input.getRegisterAktivitet().getArbeidsgiver().getIdentifikator()))
             .filter(oa -> input.getAktivitetPeriode().inkluderer(input.getAktivitetPeriode().getFomDato()))
             .findFirst()
             .map(OpptjeningAktivitet::getKlassifisering)
