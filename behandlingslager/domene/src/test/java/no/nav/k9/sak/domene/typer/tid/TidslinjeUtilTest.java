@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.Year;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
@@ -29,6 +30,13 @@ class TidslinjeUtilTest {
             Year.of(2022), tidslinje2022,
             Year.of(2023), new LocalDateTimeline<>(d_2023_01_01, d_2023_01_01, true)
         ));
+    }
+
+    @Test
+    void name() {
+        Optional<Integer> v = Optional.of(20);
+        Optional<Object> x = v.map(z -> null);
+        System.out.println(x.isPresent());
     }
 
     @Test

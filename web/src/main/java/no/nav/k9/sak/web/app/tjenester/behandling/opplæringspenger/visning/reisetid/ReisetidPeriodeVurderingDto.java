@@ -1,6 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.visning.reisetid;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -31,14 +32,26 @@ public class ReisetidPeriodeVurderingDto {
     @Valid
     private String begrunnelse;
 
-    public ReisetidPeriodeVurderingDto(Periode periode, Resultat resultat, String begrunnelse) {
+    @JsonProperty(value = "vurdertAv", required = true)
+    @Size(max = 20)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Valid
+    private String vurdertAv;
+
+    @JsonProperty(value = "vurdertTidspunkt", required = true)
+    @Valid
+    private LocalDateTime vurdertTidspunkt;
+
+    public ReisetidPeriodeVurderingDto(Periode periode, Resultat resultat, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         this.periode = periode;
         this.resultat = resultat;
         this.begrunnelse = begrunnelse;
+        this.vurdertAv = vurdertAv;
+        this.vurdertTidspunkt = vurdertTidspunkt;
     }
 
-    public ReisetidPeriodeVurderingDto(LocalDate fom, LocalDate tom, Resultat resultat, String begrunnelse) {
-        this(new Periode(fom, tom), resultat, begrunnelse);
+    public ReisetidPeriodeVurderingDto(LocalDate fom, LocalDate tom, Resultat resultat, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt) {
+        this(new Periode(fom, tom), resultat, begrunnelse, vurdertAv, vurdertTidspunkt);
     }
 
     public Periode getPeriode() {
@@ -51,5 +64,13 @@ public class ReisetidPeriodeVurderingDto {
 
     public String getBegrunnelse() {
         return begrunnelse;
+    }
+
+    public String getVurdertAv() {
+        return vurdertAv;
+    }
+
+    public LocalDateTime getVurdertTidspunkt() {
+        return vurdertTidspunkt;
     }
 }

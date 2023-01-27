@@ -6,6 +6,7 @@ import java.util.Set;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPeriode;
@@ -39,26 +40,28 @@ class GjennomgåttOpplæringMapper {
             for (VurdertOpplæringPeriode vurdertOpplæringPeriode : grunnlag.getVurdertePerioder().getPerioder()) {
                 vurderinger.add(new OpplæringVurderingDto(vurdertOpplæringPeriode.getPeriode().tilPeriode(),
                     vurdertOpplæringPeriode.getGjennomførtOpplæring() ? Resultat.GODKJENT : Resultat.IKKE_GODKJENT,
-                    vurdertOpplæringPeriode.getBegrunnelse())
+                    vurdertOpplæringPeriode.getBegrunnelse(),
+                    vurdertOpplæringPeriode.getVurdertAv(),
+                    vurdertOpplæringPeriode.getVurdertTidspunkt())
                 );
             }
         }
 
         LocalDateTimeline<Boolean> tidslinjeTilVurdering = new LocalDateTimeline<>(perioder.stream()
             .map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), true))
-            .toList());
+            .toList(), StandardCombinators::alwaysTrueForMatch);
 
         LocalDateTimeline<Boolean> tidslinjeMedVurdering = new LocalDateTimeline<>(vurderinger.stream()
             .map(OpplæringVurderingDto::getPeriode)
             .map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), true))
-            .toList());
+            .toList(), StandardCombinators::alwaysTrueForMatch);
 
         LocalDateTimeline<Boolean> tidslinjeSomManglerVurdering = tidslinjeTilVurdering.disjoint(tidslinjeMedVurdering);
 
         tidslinjeSomManglerVurdering.forEach(segment -> vurderinger.add(new OpplæringVurderingDto(
             new Periode(segment.getFom(), segment.getTom()),
             Resultat.MÅ_VURDERES,
-            null))
+            null, null, null))
         );
 
         return vurderinger;

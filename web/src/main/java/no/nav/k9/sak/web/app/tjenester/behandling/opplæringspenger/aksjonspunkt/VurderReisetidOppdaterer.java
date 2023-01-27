@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.aksjonspunkt;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,6 +20,7 @@ import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetid;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetidHolder;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = VurderReisetidDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -59,12 +61,15 @@ public class VurderReisetidOppdaterer implements AksjonspunktOppdaterer<VurderRe
     }
 
     private List<VurdertReisetid> mapDtoTilVurdertReisetid(VurderReisetidDto dto) {
+        LocalDateTime vurdertTidspunkt = LocalDateTime.now();
         List<VurdertReisetid> vurdertReisetid = dto.getReisetid()
             .stream()
             .map(reisetidDto -> new VurdertReisetid(
                 DatoIntervallEntitet.fra(reisetidDto.getPeriode()),
                 reisetidDto.isGodkjent(),
-                reisetidDto.getBegrunnelse()))
+                reisetidDto.getBegrunnelse(),
+                getCurrentUserId(),
+                vurdertTidspunkt))
             .toList();
         sjekkOverlappendePerioder(vurdertReisetid);
         return vurdertReisetid;
@@ -92,5 +97,9 @@ public class VurderReisetidOppdaterer implements AksjonspunktOppdaterer<VurderRe
                 vurdertReisetid))
             .collect(Collectors.toList());
         return new LocalDateTimeline<>(segments);
+    }
+
+    private static String getCurrentUserId() {
+        return SubjectHandler.getSubjectHandler().getUid();
     }
 }

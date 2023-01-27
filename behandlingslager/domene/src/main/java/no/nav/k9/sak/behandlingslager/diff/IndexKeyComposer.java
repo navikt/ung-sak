@@ -3,6 +3,7 @@ package no.nav.k9.sak.behandlingslager.diff;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -53,6 +54,9 @@ public final class IndexKeyComposer {
         } else if (LocalDateTime.class.isAssignableFrom(objClass)) {
             LocalDateTime ldt = (LocalDateTime) obj;
             return ldt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        } else if (UUID.class.isAssignableFrom(objClass)) {
+            UUID ldt = (UUID) obj;
+            return ldt.toString();
         } else {
             throw new IllegalArgumentException("Støtter ikke å lage IndexKey for " + objClass.getName() + "[index=" + i + "], " + obj);
         }

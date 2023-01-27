@@ -1,13 +1,13 @@
 package no.nav.k9.sak.domene.abakus;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
@@ -34,7 +34,7 @@ class SakInntektsmeldinger {
         var relevanteKeys = data.keySet()
             .stream()
             .filter(it -> Objects.equals(it.behandlingId, behandlingId) && !it.grunnlagEksternReferanse.equals(eksternReferanse))
-            .collect(Collectors.toList());
+            .toList();
 
         var nyeInntektsmeldinger = new LinkedHashSet<Inntektsmelding>();
         var senesteInntektsmelding = orignInntektsmeldinger.stream().max(Inntektsmelding.COMP_REKKEFØLGE).orElse(null);
@@ -49,8 +49,33 @@ class SakInntektsmeldinger {
         return nyeInntektsmeldinger;
     }
 
+
+    Set<Inntektsmelding> hentInntektsmeldingerKommetTom(Long behandlingId) {
+        if (data.isEmpty()) {
+            return Set.of();
+        }
+        var keyOpt = data.keySet().stream().filter(it -> Objects.equals(it.behandlingId, behandlingId)).max(Comparator.comparing(Key::getOpprettetTidspunkt));
+        if (keyOpt.isEmpty()) {
+            return Set.of();
+        }
+
+        var key = keyOpt.get();
+        var relevanteKeys = data.keySet()
+            .stream()
+            .filter(it -> Objects.equals(it.grunnlagEksternReferanse, key.grunnlagEksternReferanse) || it.opprettetTidspunkt.isBefore(key.opprettetTidspunkt))
+            .toList();
+
+        var nyeInntektsmeldinger = new LinkedHashSet<Inntektsmelding>();
+
+        relevanteKeys.stream()
+            .map(data::get)
+            .forEach(nyeInntektsmeldinger::addAll);
+
+        return nyeInntektsmeldinger;
+    }
+
     private boolean erLiktEllerSenere(Inntektsmelding siste, Inntektsmelding denne) {
-        return siste==null || siste.equals(denne) || denne.getKanalreferanse().compareTo(siste.getKanalreferanse()) >= 0;
+        return siste == null || siste.equals(denne) || denne.getKanalreferanse().compareTo(siste.getKanalreferanse()) >= 0;
     }
 
     static class Key {

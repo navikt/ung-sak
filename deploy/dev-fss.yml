@@ -58,6 +58,20 @@ spec:
       claims:
         extra:
           - "NAVident"
+        groups:
+          # Saksbehandler
+          - id: "466d0df7-22ba-4c68-b848-73478cfd0486",
+          # Veileder
+          - id: "be11a922-59a2-4afa-b5ad-b9e9bd445268",
+          # Overstyrer
+          - id: "f6b0f0bd-3716-4c5a-aa7d-c8b72fdc40b5",
+          # Oppgavestyrer
+          - id: "f3743660-4c76-4845-885f-f38ad478645f",
+          # Beslutter
+          - id: "e5f1ba3d-c29f-4b0c-9cb1-b15fc4253fa3",
+          # Drift
+          - id: "1509dc91-a955-4e72-b64c-2f049e37c0c6",
+      allowAllUsers: false
   accessPolicy:
     inbound:
       rules:
@@ -253,11 +267,13 @@ spec:
       value: "true"
     - name: ENABLE_PRODUCER_AKSJONSPUNKTHENDELSE_LOS_AIVEN
       value: "true"
+    - name: ENABLE_SJEKK_TILBAKEKREVING
+      value: "false"
     - name: IKKE_YRKESAKTIV_UTEN_SPEILING
       value: "true"
     - name: OMS_OMSORGENFOR_FLYTTET
       value: "true"
-    - name: IKKE_REVURDER_VEDTAK_ETTER_AVSLAG_INNGANGSVILKAAR
+    - name: PSB_BG_BRUKER_OPPTJENING_RESULTAT
       value: "true"
 
     # Konfigurasjoner

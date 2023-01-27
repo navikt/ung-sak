@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -133,7 +134,7 @@ class VurderInstitusjonStegTest {
 
     @Test
     void skalReturnereUtenAksjonspunktNårVurderingErKomplett() {
-        VurdertInstitusjonHolder vurdertInstitusjonHolder = new VurdertInstitusjonHolder(List.of(new VurdertInstitusjon(journalpostId, true, "jo")));
+        VurdertInstitusjonHolder vurdertInstitusjonHolder = new VurdertInstitusjonHolder(List.of(new VurdertInstitusjon(journalpostId, true, "jo", "", LocalDateTime.now())));
         vurdertOpplæringRepository.lagre(behandling.getId(), vurdertInstitusjonHolder);
 
         BehandleStegResultat resultat = vurderInstitusjonSteg.utførSteg(kontekst);

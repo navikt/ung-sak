@@ -1,5 +1,7 @@
 package no.nav.k9.sak.test.util.fagsak;
 
+import java.time.LocalDate;
+
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.typer.AktørId;
@@ -16,6 +18,7 @@ public class FagsakBuilder {
 
     private FagsakYtelseType fagsakYtelseType;
     private AktørId aktørId = AktørId.dummy();
+    private AktørId pleietrengendeAktørId;
 
     private FagsakBuilder(FagsakYtelseType fagsakYtelseType) {
         this.fagsakYtelseType = fagsakYtelseType;
@@ -55,12 +58,18 @@ public class FagsakBuilder {
         return this;
     }
 
+    public FagsakBuilder medPleietrengende(AktørId aktørId) {
+        validerFagsakIkkeSatt();
+        this.pleietrengendeAktørId = aktørId;
+        return this;
+    }
+
     public Fagsak build() {
 
         if (fagsak != null) {
             return fagsak;
         } else {
-            fagsak = Fagsak.opprettNy(fagsakYtelseType, aktørId, saksnummer);
+            fagsak = Fagsak.opprettNy(fagsakYtelseType, aktørId, pleietrengendeAktørId, null, saksnummer, LocalDate.now(), null);
             return fagsak;
         }
 

@@ -26,10 +26,10 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.HentEtablertTilsynTjeneste;
 
 @ApplicationScoped
@@ -45,7 +45,7 @@ public class VurderOmEtablertTilsynErEndretTask implements ProsessTaskHandler {
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
     private HentEtablertTilsynTjeneste hentEtablertTilsynTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
-    
+
 
     VurderOmEtablertTilsynErEndretTask() {
     }
@@ -79,15 +79,15 @@ public class VurderOmEtablertTilsynErEndretTask implements ProsessTaskHandler {
             log.info("Starter ikke ET-revurdering for: " + saksnummer.getVerdi() + " siden det er en behandling med status " + sisteBehandlingPåKandidat.getStatus().getKode());
             return;
         }
-                
+
         final NavigableSet<DatoIntervallEntitet> perioder = finnPerioderDerEtablertTilsynHarBlittEndret(sisteBehandlingPåKandidat);
         if (perioder.isEmpty()) {
             log.info("Ingen perioder som må ET-revurderes for: " + saksnummer.getVerdi());
             return;
         }
-        
+
         log.info("Starter ET-revurdering av: " + saksnummer.getVerdi());
-        
+
         final var taskData = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
         taskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK, BehandlingÅrsakType.RE_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON.getKode());
         taskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODER, utledPerioder(perioder));
@@ -96,17 +96,17 @@ public class VurderOmEtablertTilsynErEndretTask implements ProsessTaskHandler {
 
         fagsakProsessTaskRepository.lagreNyGruppe(taskData);
     }
-    
+
     public NavigableSet<DatoIntervallEntitet> finnPerioderDerEtablertTilsynHarBlittEndret(Behandling sisteBehandlingPåKandidat) {
         final BehandlingReferanse ref = BehandlingReferanse.fra(sisteBehandlingPåKandidat);
         final LocalDateTimeline<Boolean> endringerMellomSmurtOgUsmurt = hentEtablertTilsynTjeneste.finnEndringerMellomSmurtOgUsmurt(ref);
         if (endringerMellomSmurtOgUsmurt.isEmpty()) {
             return Collections.emptyNavigableSet();
         }
-        
+
         final var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, sisteBehandlingPåKandidat.getFagsakYtelseType(), sisteBehandlingPåKandidat.getType());
         final LocalDateTimeline<Boolean> perioderSkalRevurdereYtelse = tettHull(perioderTilVurderingTjeneste, endringerMellomSmurtOgUsmurt);
-        
+
         return TidslinjeUtil.tilDatoIntervallEntiteter(perioderSkalRevurdereYtelse);
     }
 
