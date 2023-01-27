@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.mottak;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
@@ -49,6 +50,7 @@ class DokumentmottakerSøknadOLP implements Dokumentmottaker {
     private MottatteDokumentRepository mottatteDokumentRepository;
     private SøknadParser søknadParser;
     private SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer;
+    private OpplæringDokumentVedleggHåndterer opplæringDokumentVedleggHåndterer;
     private ProsessTaskRepository prosessTaskRepository;
     private OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste;
 
@@ -61,11 +63,13 @@ class DokumentmottakerSøknadOLP implements Dokumentmottaker {
                               SøknadParser søknadParser,
                               SøknadOversetter søknadOversetter,
                               SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer,
+                              OpplæringDokumentVedleggHåndterer opplæringDokumentVedleggHåndterer,
                               ProsessTaskRepository prosessTaskRepository,
                               OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.søknadParser = søknadParser;
         this.sykdomsDokumentVedleggHåndterer = sykdomsDokumentVedleggHåndterer;
+        this.opplæringDokumentVedleggHåndterer = opplæringDokumentVedleggHåndterer;
         this.søknadOversetter = søknadOversetter;
         this.prosessTaskRepository = prosessTaskRepository;
         this.oppgittOpptjeningMapperTjeneste = oppgittOpptjeningMapperTjeneste;
@@ -139,13 +143,8 @@ class DokumentmottakerSøknadOLP implements Dokumentmottaker {
             }
 
             try {
-                sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(
-                    behandling,
-                    new JournalpostId(journalpost.getJournalpostId()),
-                    behandling.getFagsak().getPleietrengendeAktørId(),
-                    søknad.getMottattDato().toLocalDateTime(),
-                    journalpostHarInformasjonSomIkkeKanPunsjes,
-                    journalpostHarMedisinskeOpplysninger);
+                håndterVedlegg(behandling, new JournalpostId(journalpost.getJournalpostId()), søknad.getMottattDato().toLocalDateTime(),
+                    journalpostHarInformasjonSomIkkeKanPunsjes, journalpostHarMedisinskeOpplysninger);
             } catch (RuntimeException e) {
                 logger.warn("Feil ved håndtering av forsendelse " + journalpostId.getVerdi() + " med tilknyttet journalpost " + journalpost.getJournalpostId());
                 throw e;
@@ -158,13 +157,16 @@ class DokumentmottakerSøknadOLP implements Dokumentmottaker {
             .findFirst();
 
         if (journalpost.isEmpty()) {
-            sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(behandling,
-                journalpostId,
-                behandling.getFagsak().getPleietrengendeAktørId(),
-                søknad.getMottattDato().toLocalDateTime(),
-                false,
-                true);
+            håndterVedlegg(behandling, journalpostId, søknad.getMottattDato().toLocalDateTime(), false, true);
         }
+    }
+
+    private void håndterVedlegg(Behandling behandling, JournalpostId journalpostId, LocalDateTime mottattidspunkt,
+                                boolean journalpostHarInformasjonSomIkkeKanPunsjes, boolean journalpostHarMedisinskeOpplysninger) {
+        sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(behandling, journalpostId,
+            behandling.getFagsak().getPleietrengendeAktørId(),
+            mottattidspunkt, journalpostHarInformasjonSomIkkeKanPunsjes, journalpostHarMedisinskeOpplysninger);
+        opplæringDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(behandling, journalpostId, mottattidspunkt);
     }
 
     @Override

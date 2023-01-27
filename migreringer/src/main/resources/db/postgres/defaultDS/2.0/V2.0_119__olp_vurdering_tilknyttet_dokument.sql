@@ -3,33 +3,19 @@ create table if not exists OPPLAERING_DOKUMENT
     ID                          BIGINT                                      NOT NULL PRIMARY KEY,
     JOURNALPOST_ID              VARCHAR(50)                                 NOT NULL,
     DOKUMENT_INFO_ID            VARCHAR(50)                                 ,
+    TYPE                        VARCHAR(20)                                 NOT NULL,
+    DATERT                      DATE                                        ,
+    MOTTATT                     TIMESTAMP(3)                                NOT NULL,
     SOEKERS_BEHANDLING_UUID     UUID                                        ,
     SOEKERS_SAKSNUMMER          VARCHAR(19)                                 NOT NULL,
     SOEKERS_PERSON_ID           BIGINT                                      ,
     OPPRETTET_AV                VARCHAR(20)  DEFAULT 'VL'                   NOT NULL,
-    OPPRETTET_TID               TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP      NOT NULL
+    OPPRETTET_TID               TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP      NOT NULL,
+    ENDRET_AV                   VARCHAR(20),
+    ENDRET_TID                  TIMESTAMP(3)
 );
 create sequence if not exists SEQ_OPPLAERING_DOKUMENT increment by 50 minvalue 1000000;
 create unique index UIDX_OPPLAERING_DOKUMENT_1 ON OPPLAERING_DOKUMENT (JOURNALPOST_ID, DOKUMENT_INFO_ID);
-
-create table if not exists OPPLAERING_DOKUMENT_INFORMASJON
-(
-    ID                                  BIGINT                                      NOT NULL PRIMARY KEY,
-    OPPLAERING_DOKUMENT_ID              BIGINT                                      ,
-    DUPLIKAT_AV_OPPLAERING_DOKUMENT_ID  BIGINT                                      ,
-    VERSJON                             BIGINT                                      NOT NULL,
-    TYPE                                VARCHAR(20)                                 NOT NULL,
-    DATERT                              DATE                                        ,
-    MOTTATT                             TIMESTAMP(3)                                NOT NULL,
-    OPPRETTET_AV                        VARCHAR(20)  DEFAULT 'VL'                   NOT NULL,
-    OPPRETTET_TID                       TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP      NOT NULL,
-    har_info_som_ikke_kan_punsjes       BOOLEAN      DEFAULT FALSE                  NOT NULL,
-    CONSTRAINT FK_OPPLAERING_DOKUMENT_INFORMASJON_1 FOREIGN KEY (OPPLAERING_DOKUMENT_ID) REFERENCES OPPLAERING_DOKUMENT(ID),
-    CONSTRAINT FK_OPPLAERING_DOKUMENT_INFORMASJON_2 FOREIGN KEY (DUPLIKAT_AV_OPPLAERING_DOKUMENT_ID) REFERENCES OPPLAERING_DOKUMENT(ID)
-
-);
-create sequence if not exists SEQ_OPPLAERING_DOKUMENT_INFORMASJON increment by 50 minvalue 1000000;
-create unique index UIDX_OPPLAERING_DOKUMENT_INFORMASJON_1 ON OPPLAERING_DOKUMENT_INFORMASJON (OPPLAERING_DOKUMENT_ID, VERSJON);
 
 create table if not exists OLP_VURDERT_OPPLAERING_PERIODE_ANVENDT_DOKUMENT
 (

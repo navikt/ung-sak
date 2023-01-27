@@ -55,15 +55,22 @@ public class Brevkode implements Kodeverdi {
     public static final Brevkode SØKNAD_OMS_UTVIDETRETT_KS = new Brevkode(SØKNAD_OMS_UTVIDETRETT_KS_KODE, "NAV 09-06.05", SØKNAD_RANGERING);
     public static final Brevkode SØKNAD_OMS_UTVIDETRETT_MA = new Brevkode(SØKNAD_OMS_UTVIDETRETT_MA_KODE, "NAV 09-06.07", SØKNAD_RANGERING);
     public static final Brevkode SØKNAD_OMS_UTVIDETRETT_AO = new Brevkode(SØKNAD_OMS_UTVIDETRETT_AO_KODE, "NAV 09-06.10", SØKNAD_RANGERING);
-    public static final String PLEIEPENGER_BARN_SOKNAD_KODE = "PLEIEPENGER_SOKNAD";
-    public static final String SØKNAD_PLEIEPENGER_LIVETS_SLUTTFASE_KODE = "PLEIEPENGER_LIVETS_SLUTTFASE_SOKNAD";
-    public static final String OPPLÆRINGSPENGER_SOKNAD_KODE = "OPPLÆRINGSPENGER_SOKNAD";
     /**
      * Pleiepenger brevkoder.
      */
+    public static final String PLEIEPENGER_BARN_SOKNAD_KODE = "PLEIEPENGER_SOKNAD";
+    public static final String SØKNAD_PLEIEPENGER_LIVETS_SLUTTFASE_KODE = "PLEIEPENGER_LIVETS_SLUTTFASE_SOKNAD";
     public static final Brevkode PLEIEPENGER_BARN_SOKNAD = new Brevkode(PLEIEPENGER_BARN_SOKNAD_KODE, "NAV 09-11.05", SØKNAD_RANGERING);
     public static final Brevkode SØKNAD_PLEIEPENGER_LIVETS_SLUTTFASE = new Brevkode(SØKNAD_PLEIEPENGER_LIVETS_SLUTTFASE_KODE, "NAV 09-12.05", SØKNAD_RANGERING);
+    /**
+     * Opplæringspenger brevkoder.
+     */
+    public static final String OPPLÆRINGSPENGER_SOKNAD_KODE = "OPPLÆRINGSPENGER_SOKNAD";
     public static final Brevkode OPPLÆRINGSPENGER_SOKNAD = new Brevkode(OPPLÆRINGSPENGER_SOKNAD_KODE, "NAV 09-13.05", SØKNAD_RANGERING);
+    public static final String DOKUMENTASJON_AV_OPPLÆRING_KODE = "DOKUMENTASJON_AV_OPPLÆRING";
+    public static final String LEGEERKLÆRING_MED_DOKUMENTASJON_AV_OPPLÆRING_KODE = "LEGEERKLÆRING_MED_DOKUMENTASJON_AV_OPPLÆRING";
+    public static final Brevkode DOKUMENTASJON_AV_OPPLÆRING = new Brevkode(DOKUMENTASJON_AV_OPPLÆRING_KODE, DOKUMENTASJON_AV_OPPLÆRING_KODE, VEDLEGG_RANGERING);
+    public static final Brevkode LEGEERKLÆRING_MED_DOKUMENTASJON_AV_OPPLÆRING = new Brevkode(LEGEERKLÆRING_MED_DOKUMENTASJON_AV_OPPLÆRING_KODE, LEGEERKLÆRING_MED_DOKUMENTASJON_AV_OPPLÆRING_KODE, VEDLEGG_RANGERING);
     // Default
     public static final Brevkode UDEFINERT = new Brevkode("-", null, VEDLEGG_RANGERING);
     public static final String KODEVERK = "DOKUMENT_TYPE_ID";

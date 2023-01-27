@@ -27,7 +27,6 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokument;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokumentInformasjon;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokumentRepository;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæring;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringHolder;
@@ -68,9 +67,7 @@ class NødvendigOpplæringRestTjenesteTest {
         behandling = scenario.lagre(repositoryProvider);
 
         scenario.getFagsak().setPleietrengende(AktørId.dummy());
-        dokument = new OpplæringDokument(new JournalpostId("456"), null,
-            new OpplæringDokumentInformasjon(OpplæringDokumentType.DOKUMENTASJON_AV_OPPLÆRING, false, LocalDate.now(), LocalDateTime.now(), 1L, "meg", LocalDateTime.now()),
-            behandling.getUuid(), behandling.getFagsak().getSaksnummer(), null, "meg", LocalDateTime.now());
+        dokument = new OpplæringDokument(new JournalpostId("456"), null, OpplæringDokumentType.DOKUMENTASJON_AV_OPPLÆRING, behandling.getUuid(), behandling.getFagsak().getSaksnummer(), null, LocalDate.now(), LocalDateTime.now());
         opplæringDokumentRepository.lagre(dokument);
     }
 

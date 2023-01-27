@@ -33,7 +33,6 @@ import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokument;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokumentInformasjon;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokumentRepository;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringPeriode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringRepository;
@@ -160,9 +159,7 @@ class GjennomgåOpplæringOppdatererTest {
     }
 
     private OpplæringDokument lagreNyttDokument(OpplæringDokumentType type) {
-        OpplæringDokument dokument = new OpplæringDokument(new JournalpostId("456"), null,
-            new OpplæringDokumentInformasjon(type, false, LocalDate.now(), LocalDateTime.now(), 1L, "meg", LocalDateTime.now()),
-            behandling.getUuid(), behandling.getFagsak().getSaksnummer(), null, "meg", LocalDateTime.now());
+        OpplæringDokument dokument = new OpplæringDokument(new JournalpostId("456"),null, type, behandling.getUuid(), behandling.getFagsak().getSaksnummer(), null, LocalDate.now(), LocalDateTime.now());
         opplæringDokumentRepository.lagre(dokument);
         return dokument;
     }

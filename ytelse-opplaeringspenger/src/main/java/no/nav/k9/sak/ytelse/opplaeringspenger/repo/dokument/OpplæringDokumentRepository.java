@@ -30,11 +30,12 @@ public class OpplæringDokumentRepository {
         return q.getResultList();
     }
 
-    public Optional<OpplæringDokument> hentDokument(Long dokumentId) {
+    public Optional<OpplæringDokument> hentDokument(Long dokumentId, Saksnummer saksnummer) {
         final TypedQuery<OpplæringDokument> q = entityManager.createQuery(
-            "SELECT d From OpplæringDokument d where d.id = :dokumentId", OpplæringDokument.class);
+            "SELECT d From OpplæringDokument d where d.id = :dokumentId and d.søkersSaksnummer = :saksnummer", OpplæringDokument.class);
 
         q.setParameter("dokumentId", dokumentId);
+        q.setParameter("saksnummer", saksnummer.getVerdi());
 
         return q.getResultList().stream().findFirst();
     }
@@ -45,30 +46,6 @@ public class OpplæringDokumentRepository {
         }
         entityManager.persist(dokument);
         entityManager.flush();
-    }
-
-    public void oppdater(OpplæringDokumentInformasjon dokumentInformasjon) {
-        if (dokumentInformasjon.getDokument().getId() == null) {
-            throw new IllegalStateException("Kan ikke oppdatere dokument som ikke har vært lagret før.");
-        }
-        entityManager.persist(dokumentInformasjon);
-        entityManager.flush();
-    }
-
-    public List<OpplæringDokument> hentDuplikaterAv(Long dokumentId) {
-        final TypedQuery<OpplæringDokument> q = entityManager.createQuery(
-            "SELECT d From OpplæringDokument as d "
-                + "inner join d.informasjon as i "
-                + "inner join i.duplikatAvDokument as dd "
-                + "where dd.id = :dokumentId"
-                + "  and i.versjon = ("
-                + "    select max(i2.versjon) "
-                + "    From OpplæringDokumentInformasjon as i2 "
-                + "    where i2.dokument = i.dokument"
-                + "  )", OpplæringDokument.class);
-
-        q.setParameter("dokumentId", dokumentId);
-        return q.getResultList();
     }
 
     public boolean finnesDokument(JournalpostId journalpostId, String dokumentInfoId) {
@@ -89,5 +66,9 @@ public class OpplæringDokumentRepository {
         Optional<OpplæringDokument> dokument = q.getResultList().stream().findFirst();
 
         return dokument.isPresent();
+    }
+
+    public boolean isDokumentBruktIVurdering(Long dokumentId) {
+        return false; //TODO?
     }
 }
