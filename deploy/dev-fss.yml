@@ -59,18 +59,12 @@ spec:
         extra:
           - "NAVident"
         groups:
-          # Saksbehandler
-          - id: "466d0df7-22ba-4c68-b848-73478cfd0486",
-          # Veileder
-          - id: "be11a922-59a2-4afa-b5ad-b9e9bd445268",
-          # Overstyrer
-          - id: "f6b0f0bd-3716-4c5a-aa7d-c8b72fdc40b5",
-          # Oppgavestyrer
-          - id: "f3743660-4c76-4845-885f-f38ad478645f",
-          # Beslutter
-          - id: "e5f1ba3d-c29f-4b0c-9cb1-b15fc4253fa3",
-          # Drift
-          - id: "1509dc91-a955-4e72-b64c-2f049e37c0c6",
+          - id: "466d0df7-22ba-4c68-b848-73478cfd0486" # Saksbehandler
+          - id: "be11a922-59a2-4afa-b5ad-b9e9bd445268" # Veileder
+          - id: "f6b0f0bd-3716-4c5a-aa7d-c8b72fdc40b5" # Overstyrer
+          - id: "f3743660-4c76-4845-885f-f38ad478645f" # Oppgavestyrer
+          - id: "e5f1ba3d-c29f-4b0c-9cb1-b15fc4253fa3" # Beslutter
+          - id: "1509dc91-a955-4e72-b64c-2f049e37c0c6" # Drift
       allowAllUsers: false
   accessPolicy:
     inbound:
