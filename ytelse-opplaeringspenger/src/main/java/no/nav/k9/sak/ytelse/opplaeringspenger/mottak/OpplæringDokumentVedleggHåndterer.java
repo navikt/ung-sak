@@ -2,7 +2,6 @@ package no.nav.k9.sak.ytelse.opplaeringspenger.mottak;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +31,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PersonRepository;
 public class OpplæringDokumentVedleggHåndterer {
 
     private static final Logger log = LoggerFactory.getLogger(OpplæringDokumentVedleggHåndterer.class);
-    private static final List<String> DOKUMENTASJON_AV_OPPLÆRING_BREVKODER = List.of(Brevkode.DOKUMENTASJON_AV_OPPLÆRING_KODE, Brevkode.LEGEERKLÆRING_MED_DOKUMENTASJON_AV_OPPLÆRING_KODE);
 
     private final OpplæringDokumentRepository opplæringDokumentRepository;
     private final PersonRepository personRepository;
@@ -72,7 +70,8 @@ public class OpplæringDokumentVedleggHåndterer {
 
         log.info("Fant {} vedlegg på søknad", journalpost.getDokumenter().size());
         for (DokumentInfo dokumentInfo : journalpost.getDokumenter()) {
-            if (!DOKUMENTASJON_AV_OPPLÆRING_BREVKODER.contains(dokumentInfo.getBrevkode())) {
+            OpplæringDokumentType dokumentType = finnDokumentType(dokumentInfo.getBrevkode());
+            if (dokumentType == null) {
                 continue;
             }
 
@@ -84,7 +83,7 @@ public class OpplæringDokumentVedleggHåndterer {
             final OpplæringDokument dokument = new OpplæringDokument(
                 journalpostId,
                 dokumentInfo.getDokumentInfoId(),
-                OpplæringDokumentType.DOKUMENTASJON_AV_OPPLÆRING,
+                dokumentType,
                 behandling.getUuid(),
                 behandling.getFagsak().getSaksnummer(),
                 personRepository.hentEllerLagrePerson(behandling.getFagsak().getAktørId()),
@@ -92,6 +91,16 @@ public class OpplæringDokumentVedleggHåndterer {
                 mottattidspunkt);
             opplæringDokumentRepository.lagre(dokument);
         }
+    }
+
+    private OpplæringDokumentType finnDokumentType(String brevkode) {
+        return switch (brevkode) {
+            case Brevkode.DOKUMENTASJON_AV_OPPLÆRING_KODE ->
+                OpplæringDokumentType.DOKUMENTASJON_AV_OPPLÆRING;
+            case Brevkode.LEGEERKLÆRING_MED_DOKUMENTASJON_AV_OPPLÆRING_KODE ->
+                OpplæringDokumentType.LEGEERKLÆRING_MED_DOKUMENTASJON_AV_OPPLÆRING;
+            default -> null;
+        };
     }
 
     private LocalDate utledMottattDato(Journalpost journalpost) {

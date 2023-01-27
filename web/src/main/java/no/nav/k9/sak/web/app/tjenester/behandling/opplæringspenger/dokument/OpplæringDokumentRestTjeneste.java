@@ -54,7 +54,7 @@ public class OpplæringDokumentRestTjeneste {
     public static final String DOKUMENT_LISTE_PATH = BASE_PATH + DOKUMENT_LISTE;
 
     private BehandlingRepository behandlingRepository;
-    private OpplæringDokumentMapper opplæringDokumentMapper;
+    private final OpplæringDokumentMapper opplæringDokumentMapper = new OpplæringDokumentMapper();
     private OpplæringDokumentRepository opplæringDokumentRepository;
     private DokumentArkivTjeneste dokumentArkivTjeneste;
 
@@ -63,11 +63,9 @@ public class OpplæringDokumentRestTjeneste {
 
     @Inject
     public OpplæringDokumentRestTjeneste(BehandlingRepository behandlingRepository,
-                                         OpplæringDokumentMapper opplæringDokumentMapper,
                                          OpplæringDokumentRepository opplæringDokumentRepository,
                                          DokumentArkivTjeneste dokumentArkivTjeneste) {
         this.behandlingRepository = behandlingRepository;
-        this.opplæringDokumentMapper = opplæringDokumentMapper;
         this.opplæringDokumentRepository = opplæringDokumentRepository;
         this.dokumentArkivTjeneste = dokumentArkivTjeneste;
     }

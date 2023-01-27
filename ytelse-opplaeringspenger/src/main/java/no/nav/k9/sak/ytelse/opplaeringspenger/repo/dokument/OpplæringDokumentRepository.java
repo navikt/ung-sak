@@ -67,8 +67,4 @@ public class OpplæringDokumentRepository {
 
         return dokument.isPresent();
     }
-
-    public boolean isDokumentBruktIVurdering(Long dokumentId) {
-        return false; //TODO?
-    }
 }

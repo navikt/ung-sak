@@ -39,10 +39,6 @@ public class OpplæringDokumentDto {
     @Valid
     private boolean fremhevet;
 
-    @JsonProperty(value = "bruktTilMinstEnVurdering")
-    @Valid
-    private boolean bruktTilMinstEnVurdering;
-
     @JsonProperty(value = "links")
     @Size(max = 100)
     @Valid
@@ -51,13 +47,11 @@ public class OpplæringDokumentDto {
     public OpplæringDokumentDto() {
     }
 
-    public OpplæringDokumentDto(String id, OpplæringDokumentType type, LocalDate datert, boolean fremhevet,
-                                boolean bruktTilMinstEnVurdering, List<ResourceLink> links) {
+    public OpplæringDokumentDto(String id, OpplæringDokumentType type, LocalDate datert, boolean fremhevet, List<ResourceLink> links) {
         this.id = id;
         this.type = type;
         this.datert = datert;
         this.fremhevet = fremhevet;
-        this.bruktTilMinstEnVurdering = bruktTilMinstEnVurdering;
         this.links = links;
     }
 
