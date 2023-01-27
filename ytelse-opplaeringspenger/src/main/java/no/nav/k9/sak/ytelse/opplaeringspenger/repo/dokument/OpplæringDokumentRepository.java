@@ -35,7 +35,7 @@ public class OpplæringDokumentRepository {
             "SELECT d From OpplæringDokument d where d.id = :dokumentId and d.søkersSaksnummer = :saksnummer", OpplæringDokument.class);
 
         q.setParameter("dokumentId", dokumentId);
-        q.setParameter("saksnummer", saksnummer.getVerdi());
+        q.setParameter("saksnummer", saksnummer);
 
         return q.getResultList().stream().findFirst();
     }

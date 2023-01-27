@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.opplaeringspenger.repo;
+package no.nav.k9.sak.ytelse.opplaeringspenger.repo.godkjentopplaeringsinstitusjon;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -12,9 +12,6 @@ import org.junit.jupiter.api.Test;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.sak.db.util.CdiDbAwareTest;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.godkjentopplaeringsinstitusjon.GodkjentOpplæringsinstitusjon;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.godkjentopplaeringsinstitusjon.GodkjentOpplæringsinstitusjonPeriode;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.godkjentopplaeringsinstitusjon.GodkjentOpplæringsinstitusjonRepository;
 
 @CdiDbAwareTest
 public class GodkjentOpplæringsinstitusjonRepositoryTest {

@@ -58,4 +58,20 @@ public class OpplæringDokumentDto {
     public String getId() {
         return id;
     }
+
+    public OpplæringDokumentType getType() {
+        return type;
+    }
+
+    public LocalDate getDatert() {
+        return datert;
+    }
+
+    public boolean isFremhevet() {
+        return fremhevet;
+    }
+
+    public List<ResourceLink> getLinks() {
+        return new ArrayList<>(links);
+    }
 }

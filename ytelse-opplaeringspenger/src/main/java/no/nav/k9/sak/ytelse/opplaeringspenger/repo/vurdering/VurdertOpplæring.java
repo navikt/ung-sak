@@ -103,7 +103,7 @@ public class VurdertOpplæring extends BaseEntitet {
     }
 
     public List<OpplæringDokument> getDokumenter() {
-        return dokumenter;
+        return new ArrayList<>(dokumenter);
     }
 
     @Override
