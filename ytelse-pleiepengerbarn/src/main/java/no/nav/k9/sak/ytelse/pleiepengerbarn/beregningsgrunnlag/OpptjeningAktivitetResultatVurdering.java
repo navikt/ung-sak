@@ -1,17 +1,22 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
 
+import java.util.Comparator;
+
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetKlassifisering;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningAktivitet;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurdering;
+import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurderingOpptjeningsvilkår;
 import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.VurderStatusInput;
 
 public class OpptjeningAktivitetResultatVurdering implements OpptjeningAktivitetVurdering {
 
     private final OpptjeningResultat resultat;
+
+    private OpptjeningAktivitetVurderingOpptjeningsvilkår vilkårVurdering = new OpptjeningAktivitetVurderingOpptjeningsvilkår();
 
     public OpptjeningAktivitetResultatVurdering(OpptjeningResultat resultat) {
         this.resultat = resultat;
@@ -32,23 +37,23 @@ public class OpptjeningAktivitetResultatVurdering implements OpptjeningAktivitet
 
     private VurderingsStatus finnStatusForType(VurderStatusInput input, Opptjening opptjening) {
         return opptjening.getOpptjeningAktivitet().stream().filter(oa -> oa.getAktivitetType().equals(input.getType()))
-            .filter(oa -> input.getAktivitetPeriode().inkluderer(input.getAktivitetPeriode().getFomDato()))
-            .findFirst()
+            .filter(oa -> input.getAktivitetPeriode().inkluderer(oa.getTom()))
+            .max(Comparator.comparing(OpptjeningAktivitet::getFom)) // finner siste vurdering siden vi egentlig kun er interessert i vurdering på skjæringtidspunktet
             .map(OpptjeningAktivitet::getKlassifisering)
             .map(OpptjeningAktivitetResultatVurdering::mapTilVurderingsStatus)
-            .orElse(VurderingsStatus.UNDERKJENT);
+            .orElse(vilkårVurdering.vurderStatus(input));
     }
 
     private VurderingsStatus finnArbeidvurdering(VurderStatusInput input, Opptjening opptjening) {
         return opptjening.getOpptjeningAktivitet().stream().filter(oa ->
                 oa.getAktivitetType().equals(OpptjeningAktivitetType.ARBEID) &&
-                oa.getAktivitetReferanse() != null &&
-                oa.getAktivitetReferanse().equals(input.getRegisterAktivitet().getArbeidsgiver().getIdentifikator()))
-            .filter(oa -> input.getAktivitetPeriode().inkluderer(input.getAktivitetPeriode().getFomDato()))
-            .findFirst()
+                    oa.getAktivitetReferanse() != null &&
+                    oa.getAktivitetReferanse().equals(input.getRegisterAktivitet().getArbeidsgiver().getIdentifikator()))
+            .filter(oa -> input.getAktivitetPeriode().inkluderer(oa.getTom()))
+            .max(Comparator.comparing(OpptjeningAktivitet::getFom)) // finner siste vurdering siden vi egentlig kun er interessert i vurdering på skjæringtidspunktet
             .map(OpptjeningAktivitet::getKlassifisering)
             .map(OpptjeningAktivitetResultatVurdering::mapTilVurderingsStatus)
-            .orElse(VurderingsStatus.UNDERKJENT);
+            .orElse(vilkårVurdering.vurderStatus(input));
     }
 
     private static VurderingsStatus mapTilVurderingsStatus(OpptjeningAktivitetKlassifisering klassifisering) {
