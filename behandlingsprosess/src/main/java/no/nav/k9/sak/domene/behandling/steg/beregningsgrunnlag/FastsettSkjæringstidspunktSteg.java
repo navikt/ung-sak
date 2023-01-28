@@ -2,7 +2,6 @@ package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -18,11 +17,12 @@ import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
@@ -32,7 +32,6 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
@@ -52,6 +51,7 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
     private VilkårPeriodeFilterProvider periodeFilterProvider;
+    private boolean framoverhoppVedForlengelseIOpptjening;
 
     protected FastsettSkjæringstidspunktSteg() {
         // for CDI proxy
@@ -63,7 +63,8 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
                                           SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                           BehandlingRepository behandlingRepository,
                                           BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
-                                          VilkårPeriodeFilterProvider periodeFilterProvider) {
+                                          VilkårPeriodeFilterProvider periodeFilterProvider,
+                                          @KonfigVerdi(value = "PSB_FRAMOVERHOPP_VED_FORLENGELSE_OPPTJENING", defaultVerdi = "false") boolean framoverhoppVedForlengelseIOpptjening) {
 
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.fagsakRepository = fagsakRepository;
@@ -71,6 +72,7 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.periodeFilterProvider = periodeFilterProvider;
+        this.framoverhoppVedForlengelseIOpptjening = framoverhoppVedForlengelseIOpptjening;
     }
 
     @Override
@@ -84,6 +86,10 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
         periodeFilter.ignorerAvslåttePerioder().ignorerForlengelseperioder();
         var perioderTilBeregning = new ArrayList<PeriodeTilVurdering>();
         var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter);
+
+        if (framoverhoppVedForlengelseIOpptjening) {
+            perioderTilVurdering = periodeFilter.filtrerPerioder(perioderTilVurdering.stream().map(PeriodeTilVurdering::getPeriode).toList(), VilkårType.OPPTJENINGSVILKÅRET);
+        }
 
         for (var periode : perioderTilVurdering) {
             if (periodeErUtenforFagsaksIntervall(periode.getPeriode(), behandling.getFagsak().getPeriode())) {
