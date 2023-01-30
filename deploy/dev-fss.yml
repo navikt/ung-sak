@@ -261,6 +261,8 @@ spec:
       value: "true"
     - name: PSB_BG_BRUKER_OPPTJENING_RESULTAT
       value: "true"
+    - name: PSB_FRAMOVERHOPP_VED_FORLENGELSE_OPPTJENING
+      value: "true"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT

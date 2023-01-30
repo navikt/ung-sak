@@ -19,21 +19,21 @@ import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.reg
 
 class PleiegradKalkulatorTest {
 
-    LocalDate dag1 = LocalDate.now().minusDays(30);
+    LocalDate dag1 = LocalDate.now().minusDays(29);
     LocalDate dag2 = dag1.plusDays(1);
     LocalDate dag3 = dag1.plusDays(2);
 
     MedisinskVilkårResultat vilkårresultat = new MedisinskVilkårResultat();
 
     @Test
-    void skal_ha_100prosent_pleiegrad_når_dokumentasjon_av_livets_sluttfase_er_OK() {
+    void skal_ha_200prosent_pleiegrad_når_dokumentasjon_av_livets_sluttfase_er_OK() {
         vilkårresultat.setPleieperioder(List.of(
             new PleiePeriode(dag1, dag3, Pleielokasjon.HJEMME)));
         vilkårresultat.setDokumentasjonLivetsSluttfasePerioder(List.of(
             new LivetsSluttfaseDokumentasjonPeriode(dag1, dag2, LivetsSluttfaseDokumentasjon.DOKUMENTERT)));
 
-        assertThat(PleiegradKalkulator.regnUtPleiegrad(vilkårresultat)).isEqualTo(new LocalDateTimeline<>(dag1, dag2, Pleiegrad.LIVETS_SLUTT_TILSYN));
-        assertThat(Pleiegrad.LIVETS_SLUTT_TILSYN.getProsent()).isEqualTo(100);
+        assertThat(PleiegradKalkulator.regnUtPleiegrad(vilkårresultat)).isEqualTo(new LocalDateTimeline<>(dag1, dag2, Pleiegrad.LIVETS_SLUTT_TILSYN_FOM2023));
+        assertThat(Pleiegrad.LIVETS_SLUTT_TILSYN_FOM2023.getProsent()).isEqualTo(200);
     }
 
     @Test
@@ -98,7 +98,7 @@ class PleiegradKalkulatorTest {
 
         assertThat(PleiegradKalkulator.regnUtPleiegrad(vilkårresultat)).isEqualTo(new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(dag1, dag1, Pleiegrad.INGEN),
-            new LocalDateSegment<>(dag2, dag2, Pleiegrad.LIVETS_SLUTT_TILSYN)
+            new LocalDateSegment<>(dag2, dag2, Pleiegrad.LIVETS_SLUTT_TILSYN_FOM2023)
         )));
     }
 
@@ -112,9 +112,9 @@ class PleiegradKalkulatorTest {
             new PleiePeriode(dag3, dag3, Pleielokasjon.HJEMME)));
 
         assertThat(PleiegradKalkulator.regnUtPleiegrad(vilkårresultat)).isEqualTo(new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(dag1, dag1, Pleiegrad.LIVETS_SLUTT_TILSYN),
+            new LocalDateSegment<>(dag1, dag1, Pleiegrad.LIVETS_SLUTT_TILSYN_FOM2023),
             new LocalDateSegment<>(dag2, dag2, Pleiegrad.INGEN),
-            new LocalDateSegment<>(dag3, dag3, Pleiegrad.LIVETS_SLUTT_TILSYN)
+            new LocalDateSegment<>(dag3, dag3, Pleiegrad.LIVETS_SLUTT_TILSYN_FOM2023)
         )));
     }
 }
