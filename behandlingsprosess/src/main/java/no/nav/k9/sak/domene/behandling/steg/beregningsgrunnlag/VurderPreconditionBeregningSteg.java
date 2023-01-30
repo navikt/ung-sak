@@ -60,6 +60,7 @@ import no.nav.k9.sak.ytelse.beregning.grunnlag.InputOverstyringPeriode;
 @ApplicationScoped
 public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
 
+    public static final String HASTESAK_JANUAR_2023 = "BQFSK";
 
     private static final Logger log = LoggerFactory.getLogger(VurderPreconditionBeregningSteg.class);
 
@@ -118,7 +119,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         ryddVedtaksresultatForPerioderTilVurdering(kontekst, referanse);
 
         // 2. Kopierer grunnlag og vilkårsresultat for forlengelser
-        kopierGrunnlagForForlengelseperioder(kontekst, referanse);
+        kopierGrunnlagForForlengelseperioder(kontekst, behandling, referanse);
 
         // 3. Avslår perioder der vi har avslag før beregning eller ingen aktiviteter (ingen grunnlag for beregning)
         avslåBeregningVedBehov(kontekst, behandling, referanse);
@@ -285,10 +286,11 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
     /**
      * Kopierer grunnlag og vilkårsresultat for forlengelser
      *
-     * @param kontekst Behandlingskontrollkontekst
-     * @param ref      behandlingreferanse
+     * @param kontekst   Behandlingskontrollkontekst
+     * @param behandling
+     * @param ref        behandlingreferanse
      */
-    private void kopierGrunnlagForForlengelseperioder(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
+    private void kopierGrunnlagForForlengelseperioder(BehandlingskontrollKontekst kontekst, Behandling behandling, BehandlingReferanse ref) {
         if (ref.getBehandlingType().equals(BehandlingType.REVURDERING)) {
             var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref);
             periodeFilter.ignorerAvslåttePerioder();
@@ -303,7 +305,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
                     originalBehandlingId,
                     forlengelseperioder.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet()));
             }
-            if (framoverhoppVedForlengelseIOpptjening) {
+            if (framoverhoppVedForlengelseIOpptjening || behandling.getFagsak().getSaksnummer().getVerdi().equals(HASTESAK_JANUAR_2023)) {
                 var forlengelserIOpptjening = finnForlengelserKunIOpptjening(periodeFilter, allePerioder, forlengelseperioder);
                 if (!forlengelserIOpptjening.isEmpty()) {
                     log.info("Kopierer beregning for forlengelser i opptjening {}", forlengelserIOpptjening);

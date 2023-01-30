@@ -43,6 +43,7 @@ import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 @ApplicationScoped
 public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
 
+    public static final String HASTESAK_JANUAR_2023 = "BQFSK";
     private final Logger logger = LoggerFactory.getLogger(FastsettSkjæringstidspunktSteg.class);
 
     private BeregningTjeneste kalkulusTjeneste;
@@ -87,7 +88,7 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
         var perioderTilBeregning = new ArrayList<PeriodeTilVurdering>();
         var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter);
 
-        if (framoverhoppVedForlengelseIOpptjening) {
+        if (framoverhoppVedForlengelseIOpptjening || behandling.getFagsak().getSaksnummer().getVerdi().equals(HASTESAK_JANUAR_2023)) {
             perioderTilVurdering = periodeFilter.filtrerPerioder(perioderTilVurdering.stream().map(PeriodeTilVurdering::getPeriode).toList(), VilkårType.OPPTJENINGSVILKÅRET);
         }
 
