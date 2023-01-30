@@ -75,6 +75,10 @@ class SakInntektsmeldinger {
             return Set.of();
         }
 
+        LOGGER.info("Alle keys" + data.keySet());
+        LOGGER.info("Valgt key" + keyOpt.get());
+
+
         var key = keyOpt.get();
         var relevanteKeys = data.keySet()
             .stream()
