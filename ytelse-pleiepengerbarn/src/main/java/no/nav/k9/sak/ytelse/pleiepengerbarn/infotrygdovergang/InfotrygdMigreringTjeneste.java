@@ -45,6 +45,7 @@ import no.nav.k9.sak.domene.iay.modell.AktørYtelse;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.infotrygdovergang.infotrygd.InfotrygdService;
@@ -134,8 +135,9 @@ public class InfotrygdMigreringTjeneste {
         var annenPartInfotrygdTidslinje = lagTidslinje(infotrygdperioder.stream());
         var tilVurderingTidslinje = lagTidslinje(perioderTilVurdering.stream());
 
-        return annenPartInfotrygdTidslinje.intersection(tilVurderingTidslinje)
-            .disjoint(annenPartSøktTidslinje)
+        var tidslinjeMangelendePerioder = annenPartInfotrygdTidslinje.intersection(tilVurderingTidslinje)
+            .disjoint(annenPartSøktTidslinje);
+        return Hjelpetidslinjer.fjernHelger(tidslinjeMangelendePerioder)
             .toSegments()
             .stream()
             .map(s -> DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
