@@ -81,6 +81,10 @@ class SakInntektsmeldinger {
             .filter(it -> Objects.equals(it.grunnlagEksternReferanse, key.grunnlagEksternReferanse) || it.opprettetTidspunkt.isBefore(key.opprettetTidspunkt))
             .toList();
 
+
+        LOGGER.info("Relevante keys" + relevanteKeys);
+
+
         var nyeInntektsmeldinger = new LinkedHashSet<Inntektsmelding>();
 
         relevanteKeys.stream()
@@ -122,6 +126,16 @@ class SakInntektsmeldinger {
         @Override
         public int hashCode() {
             return Objects.hash(behandlingId, grunnlagEksternReferanse, opprettetTidspunkt);
+        }
+
+
+        @Override
+        public String toString() {
+            return "Key{" +
+                "behandlingId=" + behandlingId +
+                ", grunnlagEksternReferanse=" + grunnlagEksternReferanse +
+                ", opprettetTidspunkt=" + opprettetTidspunkt +
+                '}';
         }
     }
 
