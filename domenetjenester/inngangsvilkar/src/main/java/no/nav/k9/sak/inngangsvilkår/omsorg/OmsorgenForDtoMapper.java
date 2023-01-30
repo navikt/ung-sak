@@ -16,6 +16,7 @@ import no.nav.k9.kodeverk.sykdom.Resultat;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.inngangsvilkår.omsorg.repo.OmsorgenForGrunnlag;
 import no.nav.k9.sak.inngangsvilkår.omsorg.repo.OmsorgenForGrunnlagRepository;
@@ -58,10 +59,16 @@ public class OmsorgenForDtoMapper {
 
         final Optional<OmsorgenForGrunnlag> grunnlagOpt = omsorgenForGrunnlagRepository.hentHvisEksisterer(behandlingId);
         if (grunnlagOpt.isEmpty()) {
-            return new OmsorgenForOversiktDto(systemdata.isRegistrertForeldrerelasjon(), systemdata.isRegistrertSammeBosted(), tvingManuellVurdering, true, List.of());
+            List<OmsorgenForPeriode> omsorgsperioderTilVurdering = tidslinjeTilVurdering.stream()
+                .map(LocalDateSegment::getLocalDateInterval)
+                .map(periode -> OmsorgenForPeriode.nyPeriodeFraSøker(
+                    DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), periode.getTomDato()),
+                    null,
+                    null))
+                .collect(Collectors.toList());
+            return new OmsorgenForOversiktDto(systemdata.isRegistrertForeldrerelasjon(), systemdata.isRegistrertSammeBosted(), tvingManuellVurdering, true, toOmsorgenForDtoListe(omsorgsperioderTilVurdering, false, tidslinjeTilVurdering));
         }
         final boolean ikkeVurdertBlirOppfylt = systemdata.isRegistrertForeldrerelasjon() && !tvingManuellVurdering;
-
         final var omsorgenForListe = toOmsorgenForDtoListe(grunnlagOpt.get().getOmsorgenFor().getPerioder(), ikkeVurdertBlirOppfylt, tidslinjeTilVurdering);
         final boolean kanLøseAksjonspunkt = omsorgenForListe.stream().allMatch(o -> o.getResultatEtterAutomatikk() != Resultat.IKKE_VURDERT);
         return new OmsorgenForOversiktDto(
