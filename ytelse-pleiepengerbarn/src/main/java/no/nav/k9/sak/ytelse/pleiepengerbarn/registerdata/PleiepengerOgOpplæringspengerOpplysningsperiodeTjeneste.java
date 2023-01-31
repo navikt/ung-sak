@@ -10,6 +10,9 @@ import java.util.Comparator;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -66,8 +69,19 @@ public class PleiepengerOgOpplæringspengerOpplysningsperiodeTjeneste implements
 
     private LocalDate førsteUttaksdag(Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        var kravperioder = søknadsperiodeTjeneste.utledPeriode(behandlingId);
-        var førsteKravdato = kravperioder.stream().map(DatoIntervallEntitet::getFomDato).min(Comparator.naturalOrder());
+        var kravperioder = søknadsperiodeTjeneste.hentKravperioder(BehandlingReferanse.fra(behandling));
+
+        var søktePerioder = new LocalDateTimeline<>(kravperioder.stream()
+            .filter(it -> !it.isHarTrukketKrav())
+            .map(SøknadsperiodeTjeneste.Kravperiode::getPeriode)
+            .map(p -> new LocalDateSegment<>(p.toLocalDateInterval(), Boolean.TRUE)).toList());
+
+        var truknePerioder = new LocalDateTimeline<>(kravperioder.stream()
+            .filter(SøknadsperiodeTjeneste.Kravperiode::isHarTrukketKrav)
+            .map(SøknadsperiodeTjeneste.Kravperiode::getPeriode)
+            .map(p -> new LocalDateSegment<>(p.toLocalDateInterval(), Boolean.TRUE)).toList());
+
+        var førsteKravdato = søktePerioder.disjoint(truknePerioder).stream().map(LocalDateSegment::getFom).min(Comparator.naturalOrder());
         return førsteKravdato.orElse(behandling.getFagsak().getPeriode().getFomDato());
     }
 
