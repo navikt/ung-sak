@@ -12,6 +12,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
@@ -45,6 +48,8 @@ import no.nav.k9.sak.typer.Periode;
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
 public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregningTjeneste {
+
+    private static Logger LOGGER = LoggerFactory.getLogger(PSBOpptjeningForBeregningTjeneste.class);
 
     private final OpptjeningAktivitetVurderingOpptjeningsvilkår vurderOpptjening = new OpptjeningAktivitetVurderingOpptjeningsvilkår();
     private OpptjeningsperioderTjeneste opptjeningsperioderTjeneste;
@@ -103,6 +108,7 @@ public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
             opptjening.getOpptjeningPeriode(),
             vilkårsperiode,
             yrkesaktivitetFilter);
+        LOGGER.info("Aktiviteter: " + aktiviteter);
         return aktiviteter.stream()
             .filter(oa -> filtrerForVilkårsperiode(vilkårsperiode, oa, vilkårUtfallMerknad))
             .filter(oa -> !oa.getPeriode().getTomDato().isBefore(opptjening.getFom()))
