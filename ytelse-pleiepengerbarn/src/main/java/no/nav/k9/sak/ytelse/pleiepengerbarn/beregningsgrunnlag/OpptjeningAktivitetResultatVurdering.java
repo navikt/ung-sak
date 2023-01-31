@@ -2,9 +2,6 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
 
 import java.util.Comparator;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetKlassifisering;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
@@ -44,7 +41,12 @@ public class OpptjeningAktivitetResultatVurdering implements OpptjeningAktivitet
             .max(Comparator.comparing(OpptjeningAktivitet::getFom)) // finner siste vurdering siden vi egentlig kun er interessert i vurdering på skjæringtidspunktet
             .map(OpptjeningAktivitet::getKlassifisering)
             .map(OpptjeningAktivitetResultatVurdering::mapTilVurderingsStatus)
-            .orElse(vilkårVurdering.vurderStatus(input));
+            .orElse(finnStatusUtenOpptjeningsaktivitet(input));
+    }
+
+    private VurderingsStatus finnStatusUtenOpptjeningsaktivitet(VurderStatusInput input) {
+        var inputVurdering = vilkårVurdering.vurderStatus(input);
+        return inputVurdering.equals(VurderingsStatus.UNDERKJENT) ? VurderingsStatus.UNDERKJENT : VurderingsStatus.GODKJENT;
     }
 
     private VurderingsStatus finnArbeidvurdering(VurderStatusInput input, Opptjening opptjening) {
@@ -56,7 +58,7 @@ public class OpptjeningAktivitetResultatVurdering implements OpptjeningAktivitet
             .max(Comparator.comparing(OpptjeningAktivitet::getFom)) // finner siste vurdering siden vi egentlig kun er interessert i vurdering på skjæringtidspunktet
             .map(OpptjeningAktivitet::getKlassifisering)
             .map(OpptjeningAktivitetResultatVurdering::mapTilVurderingsStatus)
-            .orElse(vilkårVurdering.vurderStatus(input));
+            .orElse(finnStatusUtenOpptjeningsaktivitet(input));
     }
 
     private static VurderingsStatus mapTilVurderingsStatus(OpptjeningAktivitetKlassifisering klassifisering) {
