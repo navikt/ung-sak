@@ -17,8 +17,6 @@ import no.nav.k9.sak.domene.opptjening.aksjonspunkt.VurderStatusInput;
 
 public class OpptjeningAktivitetResultatVurdering implements OpptjeningAktivitetVurdering {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(OpptjeningAktivitetResultatVurdering.class);
-
     private final OpptjeningResultat resultat;
 
     private OpptjeningAktivitetVurderingOpptjeningsvilkår vilkårVurdering = new OpptjeningAktivitetVurderingOpptjeningsvilkår();
@@ -41,11 +39,8 @@ public class OpptjeningAktivitetResultatVurdering implements OpptjeningAktivitet
     }
 
     private VurderingsStatus finnStatusForType(VurderStatusInput input, Opptjening opptjening) {
-        LOGGER.info("Type " + input.getType());
-        LOGGER.info("AktivitetPeriode " + input.getAktivitetPeriode());
-        LOGGER.info("OpptjeningAktiviteter " +  opptjening.getOpptjeningAktivitet());
         return opptjening.getOpptjeningAktivitet().stream().filter(oa -> oa.getAktivitetType().equals(input.getType()))
-            .filter(oa -> input.getAktivitetPeriode().inkluderer(oa.getTom()))
+            .filter(oa -> input.getAktivitetPeriode().overlapper(oa.getFom(), oa.getTom()))
             .max(Comparator.comparing(OpptjeningAktivitet::getFom)) // finner siste vurdering siden vi egentlig kun er interessert i vurdering på skjæringtidspunktet
             .map(OpptjeningAktivitet::getKlassifisering)
             .map(OpptjeningAktivitetResultatVurdering::mapTilVurderingsStatus)
@@ -57,7 +52,7 @@ public class OpptjeningAktivitetResultatVurdering implements OpptjeningAktivitet
                 oa.getAktivitetType().equals(OpptjeningAktivitetType.ARBEID) &&
                     oa.getAktivitetReferanse() != null &&
                     oa.getAktivitetReferanse().equals(input.getRegisterAktivitet().getArbeidsgiver().getIdentifikator()))
-            .filter(oa -> input.getAktivitetPeriode().inkluderer(oa.getTom()))
+            .filter(oa -> input.getAktivitetPeriode().overlapper(oa.getFom(), oa.getTom()))
             .max(Comparator.comparing(OpptjeningAktivitet::getFom)) // finner siste vurdering siden vi egentlig kun er interessert i vurdering på skjæringtidspunktet
             .map(OpptjeningAktivitet::getKlassifisering)
             .map(OpptjeningAktivitetResultatVurdering::mapTilVurderingsStatus)

@@ -49,8 +49,6 @@ import no.nav.k9.sak.typer.Periode;
 @FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
 public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregningTjeneste {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(PSBOpptjeningForBeregningTjeneste.class);
-
     private final OpptjeningAktivitetVurderingOpptjeningsvilkår vurderOpptjening = new OpptjeningAktivitetVurderingOpptjeningsvilkår();
     private OpptjeningsperioderTjeneste opptjeningsperioderTjeneste;
     private OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
@@ -108,7 +106,6 @@ public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
             opptjening.getOpptjeningPeriode(),
             vilkårsperiode,
             yrkesaktivitetFilter);
-        LOGGER.info("Aktiviteter: " + aktiviteter);
         return aktiviteter.stream()
             .filter(oa -> filtrerForVilkårsperiode(vilkårsperiode, oa, vilkårUtfallMerknad))
             .filter(oa -> !oa.getPeriode().getTomDato().isBefore(opptjening.getFom()))
