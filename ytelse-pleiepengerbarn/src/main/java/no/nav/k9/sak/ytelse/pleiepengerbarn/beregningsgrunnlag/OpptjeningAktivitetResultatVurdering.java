@@ -41,7 +41,8 @@ public class OpptjeningAktivitetResultatVurdering implements OpptjeningAktivitet
     }
 
     private VurderingsStatus finnStatusForType(VurderStatusInput input, Opptjening opptjening) {
-        LOGGER.info("VurderStatusInput " + input);
+        LOGGER.info("Type " + input.getType());
+        LOGGER.info("AktivitetPeriode " + input.getAktivitetPeriode());
         LOGGER.info("OpptjeningAktiviteter " +  opptjening.getOpptjeningAktivitet());
         return opptjening.getOpptjeningAktivitet().stream().filter(oa -> oa.getAktivitetType().equals(input.getType()))
             .filter(oa -> input.getAktivitetPeriode().inkluderer(oa.getTom()))
