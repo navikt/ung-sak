@@ -2,7 +2,6 @@ package no.nav.k9.sak.domene.abakus;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -16,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
-import no.nav.k9.sak.typer.JournalpostId;
 
 class SakInntektsmeldinger {
 
@@ -58,44 +56,15 @@ class SakInntektsmeldinger {
     }
 
 
-    Set<Inntektsmelding> hentInntektsmeldingerKommetTom(Long behandlingId) {
+    Set<Inntektsmelding> hentUnikeInntektsmeldinger() {
         if (data.isEmpty()) {
             return Set.of();
         }
 
-        var unikeJournalposter = data.values().stream()
-            .flatMap(Collection::stream)
-            .map(Inntektsmelding::getJournalpostId)
-            .collect(Collectors.toSet());
-
-        LOGGER.info("Journalposter før filtrering av relevante: " + unikeJournalposter);
-
-        var keyOpt = data.keySet().stream().filter(it -> Objects.equals(it.behandlingId, behandlingId)).max(Comparator.comparing(Key::getOpprettetTidspunkt));
-        if (keyOpt.isEmpty()) {
-            return Set.of();
-        }
-
-        LOGGER.info("Alle keys" + data.keySet());
-        LOGGER.info("Valgt key" + keyOpt.get());
-
-
-        var key = keyOpt.get();
-        var relevanteKeys = data.keySet()
+        return data.values()
             .stream()
-            .filter(it -> Objects.equals(it.grunnlagEksternReferanse, key.grunnlagEksternReferanse) || it.opprettetTidspunkt.isBefore(key.opprettetTidspunkt))
-            .toList();
-
-
-        LOGGER.info("Relevante keys" + relevanteKeys);
-
-
-        var nyeInntektsmeldinger = new LinkedHashSet<Inntektsmelding>();
-
-        relevanteKeys.stream()
-            .map(data::get)
-            .forEach(nyeInntektsmeldinger::addAll);
-
-        return nyeInntektsmeldinger;
+            .flatMap(Collection::stream)
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     private boolean erLiktEllerSenere(Inntektsmelding siste, Inntektsmelding denne) {
