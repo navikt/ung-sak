@@ -18,6 +18,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.hendelser.HendelseType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
@@ -76,7 +77,8 @@ public class HendelsemottakTjeneste {
     public Map<Fagsak, BehandlingÅrsakType> mottaHendelse(AktørId aktørId, Hendelse payload) {
         var kandidaterTilRevurdering = finnFagsakerTilVurdering(aktørId, payload);
 
-        log.info("Mottok hendelse '{}', fant {} relevante fagsaker.", payload.getHendelseType(), kandidaterTilRevurdering.keySet().size());
+        List<String> saksnumre = kandidaterTilRevurdering.keySet().stream().map(f -> f.getSaksnummer().getVerdi()).toList();
+        log.info("Mottok hendelse '{}', fant {} relevante fagsaker: {}", payload.getHendelseType(), saksnumre.size(), saksnumre);
 
         for (Map.Entry<Fagsak, BehandlingÅrsakType> entry : kandidaterTilRevurdering.entrySet()) {
             var fagsak = entry.getKey();
@@ -86,10 +88,15 @@ public class HendelsemottakTjeneste {
             tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK, behandlingÅrsak.getKode());
             tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_FOM, payload.getHendelsePeriode().getFom().toString());
             tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_TOM, utledDato(fagsak.getPeriode().getTomDato(), payload, behandlingÅrsak).toString());
-            var tilRevurdering = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow();
-            tilRevurderingTaskData.setBehandling(tilRevurdering.getFagsakId(), tilRevurdering.getId(), tilRevurdering.getAktørId().getId());
+            var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
+            if (sisteBehandling.isPresent()) {
+                Behandling tilRevurdering = sisteBehandling.get();
+                tilRevurderingTaskData.setBehandling(tilRevurdering.getFagsakId(), tilRevurdering.getId(), tilRevurdering.getAktørId().getId());
+                fagsakProsessTaskRepository.lagreNyGruppe(tilRevurderingTaskData);
+            } else {
+                log.warn("Det var ingen behandling knyttet til {}, ignorerte derfor hendelse av type '{}'", fagsak.getSaksnummer().getVerdi(), payload.getHendelseType());
+            }
 
-            fagsakProsessTaskRepository.lagreNyGruppe(tilRevurderingTaskData);
         }
         return kandidaterTilRevurdering;
     }

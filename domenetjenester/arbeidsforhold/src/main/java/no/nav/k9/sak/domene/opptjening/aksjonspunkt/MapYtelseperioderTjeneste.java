@@ -184,7 +184,7 @@ public class MapYtelseperioderTjeneste {
     }
 
     private Tuple<OpptjeningAktivitetType, String> finnYtelseDiskriminator(OpptjeningsperiodeForSaksbehandling ytelse) {
-        String retOrgnr = ytelse.getOrgnr() != null ? ytelse.getOrgnr() : UTEN_ORGNR;
+        String retOrgnr = ytelse.getArbeidsgiver() != null ? ytelse.getArbeidsgiver().getIdentifikator() : UTEN_ORGNR;
         return new Tuple<>(ytelse.getOpptjeningAktivitetType(), retOrgnr);
     }
 
@@ -202,7 +202,7 @@ public class MapYtelseperioderTjeneste {
         OpptjeningsperiodeForSaksbehandling next;
         while (iterator.hasNext()) {
             next = iterator.next();
-            if (erKantIKantPåTversAvHelg(prev.getPeriode(), next.getPeriode())) {
+            if (erKantIKantPåTversAvHelg(prev.getPeriode(), next.getPeriode()) && harSammeVurderingsstatus(prev, next)) {
                 prev = slåSammenToPerioder(prev, next);
             } else {
                 fusjonert.add(prev);
@@ -211,6 +211,10 @@ public class MapYtelseperioderTjeneste {
         }
         fusjonert.add(prev);
         return fusjonert;
+    }
+
+    private static boolean harSammeVurderingsstatus(OpptjeningsperiodeForSaksbehandling prev, OpptjeningsperiodeForSaksbehandling next) {
+        return prev.getVurderingsStatus().equals(next.getVurderingsStatus());
     }
 
     boolean erKantIKantPåTversAvHelg(DatoIntervallEntitet periode1, DatoIntervallEntitet periode2) {
