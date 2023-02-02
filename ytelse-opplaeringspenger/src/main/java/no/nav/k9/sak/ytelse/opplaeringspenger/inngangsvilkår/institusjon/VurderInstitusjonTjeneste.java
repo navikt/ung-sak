@@ -20,6 +20,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.Aksjon;
@@ -72,11 +73,18 @@ public class VurderInstitusjonTjeneste {
         var godkjentTidslinje = tidslinje.filterValue(godkjenning -> Objects.equals(godkjenning, GODKJENT));
         var ikkeGodkjentTidslinje = tidslinje.filterValue(godkjenning -> Objects.equals(godkjenning, IKKE_GODKJENT));
 
+        var tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON));
+        klippBortPerioderSomIkkeHarBehandlingsgrunnlag(vilkårBuilder, tidslinjeTilVurdering.disjoint(tidslinje));
+
         leggTilVilkårResultat(vilkårBuilder, godkjentTidslinje, Utfall.OPPFYLT, Avslagsårsak.UDEFINERT);
         leggTilVilkårResultat(vilkårBuilder, ikkeGodkjentTidslinje, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_GODKJENT_INSTITUSJON);
 
         resultatBuilder.leggTil(vilkårBuilder);
         vilkårResultatRepository.lagre(referanse.getBehandlingId(), resultatBuilder.build());
+    }
+
+    private void klippBortPerioderSomIkkeHarBehandlingsgrunnlag(VilkårBuilder vilkårBuilder, LocalDateTimeline<Boolean> tidslinje) {
+        tidslinje.compress().forEach(segment -> vilkårBuilder.tilbakestill(DatoIntervallEntitet.fra(segment.getLocalDateInterval())));
     }
 
     private void leggTilVilkårResultat(VilkårBuilder vilkårBuilder, LocalDateTimeline<InstitusjonGodkjenningStatus> tidslinje, Utfall utfall, Avslagsårsak avslagsårsak) {

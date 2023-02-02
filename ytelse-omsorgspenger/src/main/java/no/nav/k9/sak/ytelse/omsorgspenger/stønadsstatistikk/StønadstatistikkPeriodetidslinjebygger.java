@@ -1,6 +1,5 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.stønadsstatistikk;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumMap;
@@ -14,7 +13,6 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
-import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
@@ -115,7 +113,8 @@ class StønadstatistikkPeriodetidslinjebygger {
             k9sakVilkår.remove(VilkårType.OMSORGEN_FOR);
             return hendelse.kopiMedVilkårFraK9sak(k9sakVilkår);
         }
-        if (k9årskvantumOmsorgenFor.getUtfall() == Utfall.IKKE_VURDERT) {
+        boolean sammeUtfall = k9årskvantumOmsorgenFor.getUtfall() == k9sakOmsorgenFor.getUtfall();
+        if (k9årskvantumOmsorgenFor.getUtfall() == Utfall.IKKE_VURDERT || sammeUtfall) {
             Map<Vilkår, VilkårUtfall> k9årskvantumVilkår = new EnumMap<>(hendelse.getVilkårFraÅrskvantum());
             k9årskvantumVilkår.remove(Vilkår.OMSORGSVILKÅRET);
             return hendelse.kopiMedVilkårFraÅrskvantum(k9årskvantumVilkår);

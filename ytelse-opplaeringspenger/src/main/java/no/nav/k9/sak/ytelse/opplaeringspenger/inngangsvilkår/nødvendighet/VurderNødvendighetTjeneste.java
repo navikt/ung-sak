@@ -68,7 +68,7 @@ public class VurderNødvendighetTjeneste {
         var tidslinje = hentTidslinjeMedVurdering(referanse);
         var perioderTilVurdering = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.NØDVENDIG_OPPLÆRING);
         var tidslinjeSomSkalFjernes = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering).disjoint(tidslinje);
-        leggTilVilkårsresultatTidligereVilkår(vilkårBuilder, tidslinjeSomSkalFjernes);
+        klippBortPerioderSomIkkeHarBehandlingsgrunnlag(vilkårBuilder, tidslinjeSomSkalFjernes);
 
         leggTilVilkårsresultatNødvendighet(vilkårBuilder, tidslinje);
 
@@ -76,7 +76,7 @@ public class VurderNødvendighetTjeneste {
         vilkårResultatRepository.lagre(referanse.getBehandlingId(), vilkårResultatBuilder.build());
     }
 
-    private void leggTilVilkårsresultatTidligereVilkår(VilkårBuilder vilkårBuilder, LocalDateTimeline<Boolean> tidslinjeSomSkalFjernes) {
+    private void klippBortPerioderSomIkkeHarBehandlingsgrunnlag(VilkårBuilder vilkårBuilder, LocalDateTimeline<Boolean> tidslinjeSomSkalFjernes) {
         tidslinjeSomSkalFjernes.compress().forEach(segment -> vilkårBuilder.tilbakestill(DatoIntervallEntitet.fra(segment.getLocalDateInterval())));
     }
 
