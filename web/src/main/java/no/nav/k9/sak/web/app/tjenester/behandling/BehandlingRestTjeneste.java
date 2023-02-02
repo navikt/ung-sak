@@ -10,6 +10,7 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.UP
 
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -62,6 +63,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
 import no.nav.k9.sak.domene.behandling.steg.iverksettevedtak.HenleggBehandlingTjeneste;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.kontrakt.ProsessTaskGruppeIdDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingDto;
@@ -72,6 +74,7 @@ import no.nav.k9.sak.kontrakt.behandling.ByttBehandlendeEnhetDto;
 import no.nav.k9.sak.kontrakt.behandling.GjenopptaBehandlingDto;
 import no.nav.k9.sak.kontrakt.behandling.HenleggBehandlingDto;
 import no.nav.k9.sak.kontrakt.behandling.NyBehandlingDto;
+import no.nav.k9.sak.kontrakt.behandling.OpprettRevurderingAvPerioderDto;
 import no.nav.k9.sak.kontrakt.behandling.ReåpneBehandlingDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.behandling.SettBehandlingPaVentDto;
@@ -379,7 +382,43 @@ public class BehandlingRestTjeneste {
         } else {
             throw new IllegalArgumentException("Støtter ikke opprette ny behandling for behandlingType:" + behandlingType);
         }
+    }
 
+    @PUT
+    @Path(BEHANDLINGER_PATH)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Opprette ny behandling", tags = "behandlinger", responses = {
+        @ApiResponse(responseCode = "202", description = "Opprett ny behandling pågår", headers = @Header(name = HttpHeaders.LOCATION))
+    })
+    @BeskyttetRessurs(action = CREATE, resource = FAGSAK)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Response opprettNyBehandling(@Context HttpServletRequest request,
+                                        @Parameter(description = "Saksnummer og flagg om det er ny behandling etter klage") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) OpprettRevurderingAvPerioderDto dto)
+        throws URISyntaxException {
+        Saksnummer saksnummer = dto.getSaksnummer();
+        BehandlingType behandlingType = BehandlingType.fraKode(dto.getBehandlingType().getKode());
+        Optional<Fagsak> funnetFagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true);
+
+        if (funnetFagsak.isEmpty()) {
+            throw BehandlingRestTjenesteFeil.FACTORY.fantIkkeFagsak(saksnummer).toException();
+        }
+
+        Fagsak fagsak = funnetFagsak.get();
+        if (BehandlingType.REVURDERING.getKode().equals(behandlingType.getKode())) {
+            var behandlingArsakType = dto.getBehandlingArsakType().entrySet().stream().collect((Collectors.toMap(e -> DatoIntervallEntitet.fra(e.getKey()), Map.Entry::getValue)));
+            Behandling behandling = behandlingsoppretterTjeneste.opprettRevurdering(fagsak, behandlingArsakType);
+            String gruppe = behandlingsprosessTjeneste.asynkStartBehandlingsprosess(behandling);
+            return Redirect.tilBehandlingPollStatus(request, behandling.getUuid(), Optional.of(gruppe));
+
+        } else if (BehandlingType.FØRSTEGANGSSØKNAD.getKode().equals(behandlingType.getKode())) {
+            throw new UnsupportedOperationException("Ikke implementert støtte for å opprette ny førstegangsbehandling for " + fagsak);
+            // ved førstegangssønad opprettes egen task for vurdere denne,
+            // sender derfor ikke viderer til prosesser behandling (i motsetning til de andre).
+            // må også oppfriske hele sakskomplekset, så sender til fagsak poll url
+            // return Redirect.tilFagsakPollStatus(fagsak.getSaksnummer(), Optional.empty());
+        } else {
+            throw new IllegalArgumentException("Støtter ikke opprette ny behandling for behandlingType:" + behandlingType);
+        }
     }
 
     @PUT
@@ -501,6 +540,11 @@ public class BehandlingRestTjeneste {
         return responseBuilder.build();
     }
 
+    private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(Behandling behandling) {
+        return BehandlingTypeRef.Lookup.find(VilkårsPerioderTilVurderingTjeneste.class, vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType())
+            .orElseThrow(() -> new UnsupportedOperationException("VilkårsPerioderTilVurderingTjeneste ikke implementert for ytelse [" + behandling.getFagsakYtelseType() + "], behandlingtype [" + behandling.getType() + "]"));
+    }
+
     private interface BehandlingRestTjenesteFeil extends DeklarerteFeil {
         BehandlingRestTjenesteFeil FACTORY = FeilFactory.create(BehandlingRestTjenesteFeil.class); // NOSONAR
 
@@ -520,11 +564,6 @@ public class BehandlingRestTjeneste {
         public AbacDataAttributter apply(Object obj) {
             return AbacDataAttributter.opprett();
         }
-    }
-
-    private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(Behandling behandling) {
-        return BehandlingTypeRef.Lookup.find(VilkårsPerioderTilVurderingTjeneste.class, vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType())
-            .orElseThrow(() -> new UnsupportedOperationException("VilkårsPerioderTilVurderingTjeneste ikke implementert for ytelse [" + behandling.getFagsakYtelseType() + "], behandlingtype [" + behandling.getType() + "]"));
     }
 
 }
