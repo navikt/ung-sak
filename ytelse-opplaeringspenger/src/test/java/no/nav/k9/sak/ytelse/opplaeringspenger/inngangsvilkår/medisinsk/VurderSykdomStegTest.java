@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Test;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
@@ -33,6 +35,8 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.db.util.CdiDbAwareTest;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.test.util.behandling.personopplysning.PersonInformasjon;
@@ -152,12 +156,16 @@ class VurderSykdomStegTest {
         assertThat(resultat.getAksjonspunktResultater()).isEmpty();
         Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.LANGVARIG_SYKDOM).orElse(null);
         assertThat(vilkår).isNotNull();
-        assertThat(vilkår.getPerioder()).hasSize(1);
-        assertVilkårPeriode(vilkår.getPerioder().get(0),
-            Utfall.IKKE_OPPFYLT,
-            søknadsperiode.getFom(),
-            søknadsperiode.getTom(),
-            Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE);
+        LocalDateTimeline<Boolean> tidslinjeUtenHelg = Hjelpetidslinjer.fjernHelger(TidslinjeUtil.tilTidslinjeKomprimert(List.of(søknadsperiode)));
+        assertThat(vilkår.getPerioder()).hasSize(tidslinjeUtenHelg.getLocalDateIntervals().size());
+        int i = 0;
+        for (LocalDateInterval interval : tidslinjeUtenHelg.getLocalDateIntervals()) {
+            assertVilkårPeriode(vilkår.getPerioder().get(i++),
+                Utfall.IKKE_OPPFYLT,
+                interval.getFomDato(),
+                interval.getTomDato(),
+                Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE);
+        }
     }
 
     @Test

@@ -106,10 +106,9 @@ public class VurderSykdomSteg implements BehandlingSteg {
 
         var tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VilkårType.LANGVARIG_SYKDOM));
 
-        final var tidslinjeMedInstitusjonsvilkårOppfylt = VilkårTidslinjeUtleder.utledOppfylt(vilkårene, VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON);
-        final var tidslinjeUtenInstitusjonsvilkårOppfylt = tidslinjeTilVurdering.disjoint(tidslinjeMedInstitusjonsvilkårOppfylt);
-
-        tidslinjeTilVurdering = tidslinjeTilVurdering.intersection(tidslinjeMedInstitusjonsvilkårOppfylt);
+        final var tidslinjeUtenInstitusjonsvilkårOppfylt = VilkårTidslinjeUtleder.utledAvslått(vilkårene, VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON).intersection(tidslinjeTilVurdering);
+        final var helgetidslinje = Hjelpetidslinjer.lagTidslinjeMedKunHelger(tidslinjeTilVurdering);
+        tidslinjeTilVurdering = tidslinjeTilVurdering.disjoint(helgetidslinje).disjoint(tidslinjeUtenInstitusjonsvilkårOppfylt);
         final var perioderTilVurdering = TidslinjeUtil.tilDatoIntervallEntiteter(tidslinjeTilVurdering);
 
         final MedisinskGrunnlag medisinskGrunnlag = opprettGrunnlag(perioderTilVurdering, behandling);
@@ -119,8 +118,9 @@ public class VurderSykdomSteg implements BehandlingSteg {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)));
         }
 
+        klippBortPerioderSomIkkeHarBehandlingsgrunnlag(vilkårBuilder, tidslinjeUtenInstitusjonsvilkårOppfylt);
+        klippBortPerioderSomIkkeHarBehandlingsgrunnlag(vilkårBuilder, helgetidslinje);
         vurder(kontekst, medisinskGrunnlag, vilkårBuilder, perioderTilVurdering);
-        leggTilResultatIkkeGodkjentInstitusjon(vilkårBuilder, tidslinjeUtenInstitusjonsvilkårOppfylt);
         resultatBuilder.leggTil(vilkårBuilder);
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), resultatBuilder.build());
 
@@ -145,7 +145,7 @@ public class VurderSykdomSteg implements BehandlingSteg {
         return trengerInput || førsteGangManuellRevurdering;
     }
 
-    private void leggTilResultatIkkeGodkjentInstitusjon(VilkårBuilder builder, LocalDateTimeline<Boolean> tidslinje) {
+    private void klippBortPerioderSomIkkeHarBehandlingsgrunnlag(VilkårBuilder builder, LocalDateTimeline<Boolean> tidslinje) {
         TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje).forEach(builder::tilbakestill);
     }
 

@@ -83,9 +83,9 @@ public class VurderNødvendighetStegTest {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         vurderNødvendighetSteg = new VurderNødvendighetSteg(repositoryProvider, perioderTilVurderingTjenesteMock, resultatRepository,
             new VurderNødvendighetTjeneste(repositoryProvider, perioderTilVurderingTjenesteMock, vurdertOpplæringRepository, uttakPerioderGrunnlagRepository));
-        søknadsperiode = new Periode(nå.toLocalDate().minusMonths(3), nå.toLocalDate());
+        søknadsperiode = new Periode(nå.toLocalDate().minusWeeks(2), nå.toLocalDate());
         scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.OPPLÆRINGSPENGER);
-        scenario.leggTilVilkår(VilkårType.NØDVENDIG_OPPLÆRING, Utfall.IKKE_VURDERT);
+        scenario.leggTilVilkår(VilkårType.NØDVENDIG_OPPLÆRING, Utfall.IKKE_VURDERT, søknadsperiode);
     }
 
     private void setupPerioderTilVurdering(BehandlingskontrollKontekst kontekst) {

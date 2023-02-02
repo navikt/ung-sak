@@ -54,25 +54,18 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderHolder;
 class VurderInstitusjonStegTest {
 
     private VurderInstitusjonSteg vurderInstitusjonSteg;
-
     @Inject
     private EntityManager entityManager;
-
     @Inject
     private VilkårResultatRepository vilkårResultatRepository;
-
     @Inject
     private BehandlingRepository behandlingRepository;
-
     @Inject
     private VurdertOpplæringRepository vurdertOpplæringRepository;
-
     @Inject
     private GodkjentOpplæringsinstitusjonTjeneste godkjentOpplæringsinstitusjonTjeneste;
-
     @Inject
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
-
     @Inject
     @FagsakYtelseTypeRef(FagsakYtelseType.OPPLÆRINGSPENGER)
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjenesteBean;
@@ -90,12 +83,12 @@ class VurderInstitusjonStegTest {
         vurderInstitusjonSteg = new VurderInstitusjonSteg(repositoryProvider,
             new VurderInstitusjonTjeneste(repositoryProvider, godkjentOpplæringsinstitusjonTjeneste, perioderTilVurderingTjenesteMock, vurdertOpplæringRepository, uttakPerioderGrunnlagRepository));
 
-        LocalDate fom = LocalDate.now().minusMonths(3);
+        LocalDate fom = LocalDate.now().minusWeeks(2);
         LocalDate tom = LocalDate.now();
         søknadsperiode = new Periode(fom, tom);
         TestScenarioBuilder scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.OPPLÆRINGSPENGER);
-        scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.IKKE_VURDERT);
-        scenario.leggTilVilkår(VilkårType.NØDVENDIG_OPPLÆRING, Utfall.IKKE_VURDERT);
+        scenario.leggTilVilkår(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.IKKE_VURDERT, søknadsperiode);
+        scenario.leggTilVilkår(VilkårType.NØDVENDIG_OPPLÆRING, Utfall.IKKE_VURDERT, søknadsperiode);
         behandling = scenario.lagre(repositoryProvider);
         Fagsak fagsak = behandling.getFagsak();
         kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(), behandlingRepository.taSkriveLås(behandling));
