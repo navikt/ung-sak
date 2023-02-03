@@ -106,9 +106,10 @@ public class VurderSykdomSteg implements BehandlingSteg {
 
         var tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VilkårType.LANGVARIG_SYKDOM));
 
-        final var tidslinjeUtenInstitusjonsvilkårOppfylt = VilkårTidslinjeUtleder.utledAvslått(vilkårene, VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON).intersection(tidslinjeTilVurdering);
-        final var helgetidslinje = Hjelpetidslinjer.lagTidslinjeMedKunHelger(tidslinjeTilVurdering);
-        tidslinjeTilVurdering = tidslinjeTilVurdering.disjoint(helgetidslinje).disjoint(tidslinjeUtenInstitusjonsvilkårOppfylt);
+        final var tidslinjeMedInstitusjonsvilkårOppfylt = VilkårTidslinjeUtleder.utledOppfylt(vilkårene, VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON);
+        final var tidslinjeUtenInstitusjonsvilkårOppfylt = tidslinjeTilVurdering.disjoint(tidslinjeMedInstitusjonsvilkårOppfylt);
+
+        tidslinjeTilVurdering = tidslinjeTilVurdering.intersection(tidslinjeMedInstitusjonsvilkårOppfylt);
         final var perioderTilVurdering = TidslinjeUtil.tilDatoIntervallEntiteter(tidslinjeTilVurdering);
 
         final MedisinskGrunnlag medisinskGrunnlag = opprettGrunnlag(perioderTilVurdering, behandling);
@@ -119,7 +120,6 @@ public class VurderSykdomSteg implements BehandlingSteg {
         }
 
         klippBortPerioderSomIkkeHarBehandlingsgrunnlag(vilkårBuilder, tidslinjeUtenInstitusjonsvilkårOppfylt);
-        klippBortPerioderSomIkkeHarBehandlingsgrunnlag(vilkårBuilder, helgetidslinje);
         vurder(kontekst, medisinskGrunnlag, vilkårBuilder, perioderTilVurdering);
         resultatBuilder.leggTil(vilkårBuilder);
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), resultatBuilder.build());
