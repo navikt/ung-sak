@@ -156,16 +156,12 @@ class VurderSykdomStegTest {
         assertThat(resultat.getAksjonspunktResultater()).isEmpty();
         Vilkår vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.LANGVARIG_SYKDOM).orElse(null);
         assertThat(vilkår).isNotNull();
-        LocalDateTimeline<Boolean> tidslinjeUtenHelg = Hjelpetidslinjer.fjernHelger(TidslinjeUtil.tilTidslinjeKomprimert(List.of(søknadsperiode)));
-        assertThat(vilkår.getPerioder()).hasSize(tidslinjeUtenHelg.getLocalDateIntervals().size());
-        int i = 0;
-        for (LocalDateInterval interval : tidslinjeUtenHelg.getLocalDateIntervals()) {
-            assertVilkårPeriode(vilkår.getPerioder().get(i++),
-                Utfall.IKKE_OPPFYLT,
-                interval.getFomDato(),
-                interval.getTomDato(),
-                Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE);
-        }
+        assertThat(vilkår.getPerioder()).hasSize(1);
+        assertVilkårPeriode(vilkår.getPerioder().get(0),
+            Utfall.IKKE_OPPFYLT,
+            søknadsperiode.getFom(),
+            søknadsperiode.getTom(),
+            Avslagsårsak.IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE);
     }
 
     @Test
