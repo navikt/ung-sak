@@ -578,7 +578,7 @@
             <dependency>
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
-                <version>42.5.1</version>
+                <version>42.5.2</version>
             </dependency>
             <dependency>
                 <groupId>no.nav</groupId>
@@ -710,7 +710,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.1.0</version>
+                    <version>3.2.1</version>
                 </plugin>
             </plugins>
         </pluginManagement>
