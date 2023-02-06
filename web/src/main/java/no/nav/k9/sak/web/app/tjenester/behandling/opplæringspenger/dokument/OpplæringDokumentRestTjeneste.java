@@ -45,11 +45,8 @@ import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokumentRe
 public class OpplæringDokumentRestTjeneste {
 
     public static final String BASE_PATH = "/behandling/opplæring/dokument";
-    private static final String DOKUMENT = "/";
     private static final String DOKUMENT_INNHOLD = "/innhold";
-    public static final String DOKUMENT_PATH = BASE_PATH + DOKUMENT;
     public static final String DOKUMENT_INNHOLD_PATH = BASE_PATH + DOKUMENT_INNHOLD;
-    private static final String DOKUMENT_OVERSIKT = "/oversikt";
     private static final String DOKUMENT_LISTE = "/liste";
     public static final String DOKUMENT_LISTE_PATH = BASE_PATH + DOKUMENT_LISTE;
 

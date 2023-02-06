@@ -62,14 +62,6 @@ public class VurdertOpplæringGrunnlag extends BaseEntitet {
         this.vurdertReisetid = vurdertReisetid;
     }
 
-    public VurdertOpplæringGrunnlag(VurdertOpplæringGrunnlag grunnlag, VurdertInstitusjonHolder vurdertInstitusjonHolder, VurdertOpplæringHolder vurdertOpplæringHolder, VurdertOpplæringPerioderHolder vurdertePerioder, VurdertReisetidHolder vurdertReisetid) {
-        this.behandlingId = grunnlag.behandlingId;
-        this.vurdertInstitusjonHolder = vurdertInstitusjonHolder;
-        this.vurdertOpplæringHolder = vurdertOpplæringHolder;
-        this.vurdertePerioder = vurdertePerioder;
-        this.vurdertReisetid = vurdertReisetid;
-    }
-
     public VurdertOpplæringGrunnlag(Long behandlingId, VurdertOpplæringGrunnlag grunnlag) {
         this.behandlingId = behandlingId;
         this.vurdertInstitusjonHolder = grunnlag.vurdertInstitusjonHolder;
