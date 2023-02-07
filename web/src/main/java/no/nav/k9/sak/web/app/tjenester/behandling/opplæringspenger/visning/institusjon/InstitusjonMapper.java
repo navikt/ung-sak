@@ -12,6 +12,7 @@ import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.institusjon.GodkjentOpplæringsinstitusjonTjeneste;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.godkjentopplaeringsinstitusjon.GodkjentOpplæringsinstitusjon;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertInstitusjon;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.KursPeriode;
@@ -41,13 +42,18 @@ class InstitusjonMapper {
             for (KursPeriode kursPeriode : kursperioder) {
                 perioder.add(new InstitusjonPeriodeDto(
                     new Periode(kursPeriode.getPeriode().getFomDato(), kursPeriode.getPeriode().getTomDato()),
-                    kursPeriode.getInstitusjon(),
+                    finnInstitusjonsnavn(kursPeriode),
                     new JournalpostIdDto(journalpostId.getVerdi()))
                 );
             }
         }
 
         return perioder;
+    }
+
+    private String finnInstitusjonsnavn(KursPeriode kursPeriode) {
+        return kursPeriode.getInstitusjon() != null ? kursPeriode.getInstitusjon()
+            : godkjentOpplæringsinstitusjonTjeneste.hentMedUuid(kursPeriode.getInstitusjonUuid()).map(GodkjentOpplæringsinstitusjon::getNavn).orElse(null);
     }
 
     private List<InstitusjonVurderingDto> mapVurderinger(VurdertOpplæringGrunnlag grunnlag, Set<PerioderFraSøknad> perioderFraSøknad) {
