@@ -102,16 +102,12 @@ public class BehandlingsoppretterTjeneste {
         if (finnesÅpneBehandlingerAvType) {
             return false;
         }
-        switch (type) {
-            case FØRSTEGANGSSØKNAD:
-                return kanOppretteFørstegangsbehandling(fagsakId);
-            case REVURDERING:
-                return kanOppretteRevurdering(fagsakId);
-            case UNNTAKSBEHANDLING:
-                return kanOppretteUnntaksbehandling(fagsakId);
-            default:
-                return false;
-        }
+        return switch (type) {
+            case FØRSTEGANGSSØKNAD -> kanOppretteFørstegangsbehandling(fagsakId);
+            case REVURDERING -> kanOppretteRevurdering(fagsakId);
+            case UNNTAKSBEHANDLING -> kanOppretteUnntaksbehandling(fagsakId);
+            default -> false;
+        };
     }
 
     private boolean kanOppretteFørstegangsbehandling(Long fagsakId) {
