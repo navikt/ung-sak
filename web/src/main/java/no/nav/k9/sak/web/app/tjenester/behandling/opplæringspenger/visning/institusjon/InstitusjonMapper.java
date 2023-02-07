@@ -12,6 +12,7 @@ import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.institusjon.GodkjentOpplæringsinstitusjonTjeneste;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.GodkjentOpplæringsinstitusjon;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjon;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.KursPeriode;
@@ -41,7 +42,8 @@ class InstitusjonMapper {
             for (KursPeriode kursPeriode : kursperioder) {
                 perioder.add(new InstitusjonPeriodeDto(
                     new Periode(kursPeriode.getPeriode().getFomDato(), kursPeriode.getPeriode().getTomDato()),
-                    kursPeriode.getInstitusjon(),
+                    kursPeriode.getInstitusjon() != null ? kursPeriode.getInstitusjon()
+                        : godkjentOpplæringsinstitusjonTjeneste.hentMedUuid(kursPeriode.getInstitusjonUuid()).map(GodkjentOpplæringsinstitusjon::getNavn).orElse(null),
                     new JournalpostIdDto(journalpostId.getVerdi()))
                 );
             }
