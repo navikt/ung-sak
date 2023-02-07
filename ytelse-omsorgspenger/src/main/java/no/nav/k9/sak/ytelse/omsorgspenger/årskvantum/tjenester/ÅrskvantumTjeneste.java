@@ -324,6 +324,7 @@ public class ÅrskvantumTjeneste {
 
     private Optional<Boolean> harOmsorgenForBlittManueltVurdert(LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje, OppgittFraværPeriode fraværPeriode) {
         if (samletOmsorgenForTidslinje.isEmpty()) {
+            // omsorgen for ble ikke vurdert i k9
             return Optional.empty();
         }
         Optional<Boolean> harBlittManueltVurdert = samletOmsorgenForTidslinje.stream()
@@ -332,8 +333,10 @@ public class ÅrskvantumTjeneste {
             .map(omsorgenFor -> omsorgenFor.getValue().getHarBlittVurdertSomOmsorgsPerson());
 
         if (harBlittManueltVurdert.isPresent()) {
+            // omsorgen for har blitt manuelt vurdert, uavhengig av utfall
             return Optional.of(true);
         }
+        // omsorgen for har ikke blitt manuelt vurdert, altså automatisk
         return Optional.of(false);
     }
 
