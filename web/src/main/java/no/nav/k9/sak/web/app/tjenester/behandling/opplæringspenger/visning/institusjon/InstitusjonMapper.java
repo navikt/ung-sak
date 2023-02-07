@@ -42,14 +42,18 @@ class InstitusjonMapper {
             for (KursPeriode kursPeriode : kursperioder) {
                 perioder.add(new InstitusjonPeriodeDto(
                     new Periode(kursPeriode.getPeriode().getFomDato(), kursPeriode.getPeriode().getTomDato()),
-                    kursPeriode.getInstitusjon() != null ? kursPeriode.getInstitusjon()
-                        : godkjentOpplæringsinstitusjonTjeneste.hentMedUuid(kursPeriode.getInstitusjonUuid()).map(GodkjentOpplæringsinstitusjon::getNavn).orElse(null),
+                    finnInstitusjonsnavn(kursPeriode),
                     new JournalpostIdDto(journalpostId.getVerdi()))
                 );
             }
         }
 
         return perioder;
+    }
+
+    private String finnInstitusjonsnavn(KursPeriode kursPeriode) {
+        return kursPeriode.getInstitusjon() != null ? kursPeriode.getInstitusjon()
+            : godkjentOpplæringsinstitusjonTjeneste.hentMedUuid(kursPeriode.getInstitusjonUuid()).map(GodkjentOpplæringsinstitusjon::getNavn).orElse(null);
     }
 
     private List<InstitusjonVurderingDto> mapVurderinger(VurdertOpplæringGrunnlag grunnlag, Set<PerioderFraSøknad> perioderFraSøknad) {
