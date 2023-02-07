@@ -332,12 +332,7 @@ public class ÅrskvantumTjeneste {
             .findFirst()
             .map(omsorgenFor -> omsorgenFor.getValue().getHarBlittVurdertSomOmsorgsPerson());
 
-        if (harBlittManueltVurdert.isPresent()) {
-            // omsorgen for har blitt manuelt vurdert, uavhengig av utfall
-            return Optional.of(true);
-        }
-        // omsorgen for har ikke blitt manuelt vurdert, altså automatisk
-        return Optional.of(false);
+        return Optional.of(harBlittManueltVurdert.isPresent());
     }
 
     private boolean harOmsorgenForBlittVurdertIK9sak(LocalDate fraværsDato) {
