@@ -112,7 +112,7 @@ class VurderInstitusjonTidslinjeUtleder {
                 .map(kursPeriode -> {
                     LocalDate fomDato = kursPeriode.getReiseperiodeTil() != null ? kursPeriode.getReiseperiodeTil().getFomDato() : kursPeriode.getPeriode().getFomDato();
                     LocalDate tomDato = kursPeriode.getReiseperiodeHjem() != null ? kursPeriode.getReiseperiodeHjem().getTomDato() :  kursPeriode.getPeriode().getTomDato();
-                    return new LocalDateSegment<>(fomDato, tomDato, new InstitusjonFraSøknad(fraSøknad.getJournalpostId(), kursPeriode.getInstitusjon(), kursPeriode.getInstitusjonUuid()));
+                    return new LocalDateSegment<>(fomDato, tomDato, new InstitusjonFraSøknad(fraSøknad.getJournalpostId(), kursPeriode.getInstitusjonUuid()));
                 })
                 .collect(Collectors.toCollection(TreeSet::new)));
         }
@@ -122,17 +122,11 @@ class VurderInstitusjonTidslinjeUtleder {
 
     private static class InstitusjonFraSøknad {
         private final JournalpostId journalpostId;
-        private final String navn;
         private final UUID uuid;
 
-        InstitusjonFraSøknad(JournalpostId journalpostId, String navn, UUID uuid) {
+        InstitusjonFraSøknad(JournalpostId journalpostId, UUID uuid) {
             this.journalpostId = journalpostId;
-            this.navn = navn;
             this.uuid = uuid;
-        }
-
-        String getNavn() {
-            return navn;
         }
 
         UUID getUuid() {
@@ -149,13 +143,12 @@ class VurderInstitusjonTidslinjeUtleder {
             if (o == null || getClass() != o.getClass()) return false;
             InstitusjonFraSøknad that = (InstitusjonFraSøknad) o;
             return Objects.equals(journalpostId, that.journalpostId)
-                && Objects.equals(navn, that.navn)
                 && Objects.equals(uuid, that.uuid);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(journalpostId, navn, uuid);
+            return Objects.hash(journalpostId, uuid);
         }
     }
 }
