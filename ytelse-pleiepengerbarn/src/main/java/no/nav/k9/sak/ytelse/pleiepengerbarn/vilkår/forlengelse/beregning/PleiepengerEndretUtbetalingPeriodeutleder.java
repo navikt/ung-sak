@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.beregning;
 
+import static java.lang.Boolean.TRUE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
@@ -26,6 +27,9 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKa
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.EndretUtbetalingPeriodeutleder;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
@@ -39,6 +43,8 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
     private UttakTjeneste uttakRestKlient;
     private BehandlingRepository behandlingRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
+
+    private SøknadsperiodeRepository søknadsperiodeRepository;
     private boolean enabled;
 
 
@@ -49,10 +55,12 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
     public PleiepengerEndretUtbetalingPeriodeutleder(UttakTjeneste uttakRestKlient,
                                                      BehandlingRepository behandlingRepository,
                                                      @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
+                                                     SøknadsperiodeRepository søknadsperiodeRepository,
                                                      @KonfigVerdi(value = "BG_FORLENGELSE_BASERT_PAA_UTTAK", defaultVerdi = "false") boolean enabled) {
         this.uttakRestKlient = uttakRestKlient;
         this.behandlingRepository = behandlingRepository;
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
+        this.søknadsperiodeRepository = søknadsperiodeRepository;
         this.enabled = enabled;
     }
 
@@ -72,6 +80,36 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
             return new TreeSet<>(Set.of(periode));
         }
 
+        var søknadperioderForBehandlingTidslinje = finnTidslinjeForRelevanteSøknadsperioder(behandlingReferanse);
+        var relevantUttaksTidslinje = finnTidslinjeForEndredeUttaksperioder(behandlingReferanse, periode);
+        return relevantUttaksTidslinje.crossJoin(søknadperioderForBehandlingTidslinje, StandardCombinators::coalesceLeftHandSide)
+            .compress()
+            .toSegments()
+            .stream()
+            .map(s -> DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
+            .collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    private LocalDateTimeline<Boolean> finnTidslinjeForRelevanteSøknadsperioder(BehandlingReferanse behandlingReferanse) {
+        var søknadsperiodeGrunnlag = søknadsperiodeRepository.hentGrunnlag(behandlingReferanse.getBehandlingId());
+
+        var søknadsperioderForBehandling = søknadsperiodeGrunnlag.map(SøknadsperiodeGrunnlag::getRelevantSøknadsperioder)
+            .stream()
+            .flatMap(it -> it.getPerioder().stream())
+            .flatMap(p -> p.getPerioder().stream())
+            .map(Søknadsperiode::getPeriode)
+            .map(p -> new LocalDateSegment<>(p.getFomDato(), p.getTomDato(), TRUE)).toList();
+
+        return new LocalDateTimeline<>(søknadsperioderForBehandling, StandardCombinators::coalesceLeftHandSide);
+    }
+
+    private LocalDateTimeline<Boolean> finnTidslinjeForEndredeUttaksperioder(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet periode) {
+        var relevanteUttaksperioder = finnRelevanteUttaksperioder(behandlingReferanse, periode);
+
+        return new LocalDateTimeline<>(relevanteUttaksperioder.stream().map(p -> new LocalDateSegment<>(p.getFomDato(), p.getTomDato(), TRUE)).toList());
+    }
+
+    private NavigableSet<DatoIntervallEntitet> finnRelevanteUttaksperioder(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet periode) {
         var originalBehandlingId = behandlingReferanse.getOriginalBehandlingId()
             .orElseThrow(() -> new IllegalStateException("Forventer å finne original behandling"));
         var originalBehandling = behandlingRepository.hentBehandling(originalBehandlingId);
@@ -86,10 +124,10 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
         var differanse1 = uttakTidslinje.combine(originalUttakTidslinje, StandardCombinators::difference, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         var differanse2 = originalUttakTidslinje.combine(uttakTidslinje, StandardCombinators::difference, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
-        var resultat = new TreeSet<DatoIntervallEntitet>();
-        resultat.addAll(finnRelevanteIntervaller(periode, differanse1));
-        resultat.addAll(finnRelevanteIntervaller(periode, differanse2));
-        return resultat;
+        var relevanteUttaksperioder = new TreeSet<DatoIntervallEntitet>();
+        relevanteUttaksperioder.addAll(finnRelevanteIntervaller(periode, differanse1));
+        relevanteUttaksperioder.addAll(finnRelevanteIntervaller(periode, differanse2));
+        return relevanteUttaksperioder;
     }
 
     private NavigableSet<DatoIntervallEntitet> finnRelevanteIntervaller(DatoIntervallEntitet periode, LocalDateTimeline<Set<Utbetalingsgrader>> differanse1) {

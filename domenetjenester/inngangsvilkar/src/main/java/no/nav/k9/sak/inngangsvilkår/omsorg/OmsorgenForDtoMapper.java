@@ -10,7 +10,6 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.sykdom.Resultat;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -91,25 +90,22 @@ public class OmsorgenForDtoMapper {
         List<LocalDateSegment<OmsorgenForPeriode>> omsorgenForDateSegments = perioder.stream().map(p -> new LocalDateSegment<>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), p)).collect(Collectors.toList());
         LocalDateTimeline<OmsorgenForPeriode> omsorgenForTimeline = new LocalDateTimeline<>(omsorgenForDateSegments);
 
-        LocalDateTimeline<OmsorgenForDto> perioderMedIVurdering = omsorgenForTimeline.combine(tidslinjeTilVurdering, new LocalDateSegmentCombinator<OmsorgenForPeriode, Boolean, OmsorgenForDto>() {
-            @Override
-            public LocalDateSegment<OmsorgenForDto> combine(LocalDateInterval overlappendeIntervall, LocalDateSegment<OmsorgenForPeriode> eksisterendeOmsorgenForPeriode, LocalDateSegment<Boolean> periodeTilVurdering) {
-                OmsorgenForPeriode p = eksisterendeOmsorgenForPeriode.getValue();
-                final boolean readOnly = (periodeTilVurdering == null);
-                OmsorgenForDto omsorgenForDto = new OmsorgenForDto(
-                    toPeriode(overlappendeIntervall),
-                    p.getBegrunnelse(),
-                    p.getRelasjon(),
-                    p.getRelasjonsbeskrivelse(),
-                    readOnly,
-                    p.getResultat(),
-                    mapResultatEtterAutomatikk(p.getResultat(), ikkeVurdertBlirOppfylt));
+        LocalDateTimeline<OmsorgenForDto> perioderMedIVurdering = omsorgenForTimeline.combine(tidslinjeTilVurdering, (overlappendeIntervall, eksisterendeOmsorgenForPeriode, periodeTilVurdering) -> {
+            OmsorgenForPeriode p = eksisterendeOmsorgenForPeriode.getValue();
+            final boolean readOnly = (periodeTilVurdering == null);
+            OmsorgenForDto omsorgenForDto = new OmsorgenForDto(
+                toPeriode(overlappendeIntervall),
+                p.getBegrunnelse(),
+                p.getRelasjon(),
+                p.getRelasjonsbeskrivelse(),
+                readOnly,
+                p.getResultat(),
+                mapResultatEtterAutomatikk(p.getResultat(), ikkeVurdertBlirOppfylt));
 
-                return new LocalDateSegment<OmsorgenForDto>(overlappendeIntervall, omsorgenForDto);
-            }
+            return new LocalDateSegment<>(overlappendeIntervall, omsorgenForDto);
         }, LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
-        return perioderMedIVurdering.stream().map(d -> d.getValue()).collect(Collectors.toList());
+        return perioderMedIVurdering.stream().map(LocalDateSegment::getValue).collect(Collectors.toList());
     }
 
     private Resultat mapResultatEtterAutomatikk(Resultat resultat, boolean ikkeVurdertBlirOppfylt) {

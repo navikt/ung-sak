@@ -66,7 +66,7 @@ class ReisetidRestTjenesteTest {
             Collections.emptyList(),
             Collections.emptyList(),
             Collections.emptyList(),
-            List.of(new KursPeriode(kursperiode.getFom(), kursperiode.getTom(), reiseperiodeTil, reiseperiodeHjem, "institusjon", null, "fordi", "forda")));
+            List.of(new KursPeriode(kursperiode.getFom(), kursperiode.getTom(), reiseperiodeTil, reiseperiodeHjem, null, "fordi", "forda")));
 
         uttakPerioderGrunnlagRepository.lagre(behandling.getId(), perioderFraSøknad);
         uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), new UttakPerioderHolder(Set.of(perioderFraSøknad)));
@@ -225,8 +225,8 @@ class ReisetidRestTjenesteTest {
             Collections.emptyList(),
             Collections.emptyList(),
             List.of(
-                new KursPeriode(kursperiode.getFom(), kursperiode.getTom(), reiseperiodeTil1, reiseperiodeHjem1, "institusjon", null, null, null),
-                new KursPeriode(kursperiode2.getFom(), kursperiode2.getTom(), reiseperiodeTil2, reiseperiodeHjem2, "institusjon", null, null, null)));
+                new KursPeriode(kursperiode.getFom(), kursperiode.getTom(), reiseperiodeTil1, reiseperiodeHjem1, null, null, null),
+                new KursPeriode(kursperiode2.getFom(), kursperiode2.getTom(), reiseperiodeTil2, reiseperiodeHjem2, null, null, null)));
 
         uttakPerioderGrunnlagRepository.lagre(behandling.getId(), perioderFraSøknad);
         uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), new UttakPerioderHolder(Set.of(perioderFraSøknad)));
