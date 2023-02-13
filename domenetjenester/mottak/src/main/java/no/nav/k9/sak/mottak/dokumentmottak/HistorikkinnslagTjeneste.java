@@ -104,7 +104,7 @@ public class HistorikkinnslagTjeneste {
             if (linkTekstHoveddokument != null) {
                 dokumentLinker.add(lagHistorikkInnslagDokumentLink(hoveddokumentJournalMetadata, journalpostId, historikkinnslag, linkTekstHoveddokument));
             }
-            //leggTilHoveddokumentLenke(behandlingType, journalpostId, historikkinnslag, dokumentLinker, hoveddokumentJournalMetadata);
+
             getVedleggsliste(journalpostIdData).forEach(vedleggJournalMetadata ->
                 dokumentLinker.add(lagHistorikkInnslagDokumentLink(vedleggJournalMetadata, journalpostId, historikkinnslag, VEDLEGG)));
         }
@@ -125,33 +125,13 @@ public class HistorikkinnslagTjeneste {
             .anyMatch(dokumentvariant -> Objects.equals(Variantformat.ORIGINAL, dokumentvariant.getVariantformat())); // Ustrukturerte dokumenter kan ha xml med variantformat SKANNING_META
 
         if (elektroniskSøknad) {
-            return hoveddokumentJournalMetadata.getBrevkode().equals(INNTEKTSMELDING_BREVKODE) ? INNTEKTSMELDING : SØKNAD;
+            return hoveddokumentJournalMetadata.getBrevkode().equals(INNTEKTSMELDING_BREVKODE) ? INNTEKTSMELDING : SØKNAD; //TODO endre fra "Søknad" til "Innsending". Spørsmål: trenger vi da å skille mellom "Innsending" og "Ettersendelse"?
         } else {
             boolean harPapirSøknad = hoveddokumentJournalMetadata.getDokumentvarianter().stream().anyMatch(dokumentvariant -> !ArkivFilType.XML.equals(ArkivFilType.fraKode(dokumentvariant.getFiltype())));
             if (harPapirSøknad) {
-                return BehandlingType.UDEFINERT.equals(behandlingType) ? ETTERSENDELSE : PAPIRSØKNAD;
+                return BehandlingType.UDEFINERT.equals(behandlingType) ? ETTERSENDELSE : PAPIRSØKNAD; //Kun frisinn vil gi annen behandlingstype enn UDEFINERT her
             }
-            return null;
-        }
-    }
-
-    private void leggTilHoveddokumentLenke(BehandlingType behandlingType, JournalpostId journalpostId, Historikkinnslag historikkinnslag, List<HistorikkinnslagDokumentLink> dokumentLinker,
-                                           DokumentInfo hoveddokumentJournalMetadata) {
-
-        boolean elektroniskSøknad = hoveddokumentJournalMetadata.getDokumentvarianter().stream()
-            .anyMatch(dokumentvariant -> Objects.equals(Variantformat.ORIGINAL, dokumentvariant.getVariantformat())); // Ustrukturerte dokumenter kan ha xml med variantformat SKANNING_META
-
-        if (elektroniskSøknad) {
-            String linkTekst = hoveddokumentJournalMetadata.getBrevkode().equals(INNTEKTSMELDING_BREVKODE) ? INNTEKTSMELDING : SØKNAD;
-            dokumentLinker.add(lagHistorikkInnslagDokumentLink(hoveddokumentJournalMetadata, journalpostId, historikkinnslag, linkTekst));
-        } else {
-            String linkTekst = BehandlingType.UDEFINERT.equals(behandlingType) ? ETTERSENDELSE : PAPIRSØKNAD;
-            boolean harPapirSøknad = hoveddokumentJournalMetadata.getDokumentvarianter().stream()
-                .anyMatch(dokumentvariant -> !ArkivFilType.XML.equals(ArkivFilType.fraKode(dokumentvariant.getFiltype())));
-
-            if (harPapirSøknad) {
-                dokumentLinker.add(lagHistorikkInnslagDokumentLink(hoveddokumentJournalMetadata, journalpostId, historikkinnslag, linkTekst));
-            }
+            return null; //Hvorfor logger vi ikke dette tilfellet?
         }
     }
 
@@ -180,24 +160,6 @@ public class HistorikkinnslagTjeneste {
             .medHendelse(HistorikkinnslagType.VEDLEGG_MOTTATT);
         builder.build(historikkinnslag);
 
-        historikkRepository.lagre(historikkinnslag);
-    }
-
-    public void opprettHistorikkinnslagForVenteFristRelaterteInnslag(Behandling behandling, HistorikkinnslagType historikkinnslagType, LocalDateTime frist, Venteårsak venteårsak) {
-        HistorikkInnslagTekstBuilder builder = new HistorikkInnslagTekstBuilder();
-        builder.medHendelse(historikkinnslagType);
-        if (frist != null) {
-            builder.medHendelse(historikkinnslagType, frist.toLocalDate());
-        }
-        if (!Venteårsak.UDEFINERT.equals(venteårsak)) {
-            builder.medÅrsak(venteårsak);
-        }
-        Historikkinnslag historikkinnslag = new Historikkinnslag();
-        historikkinnslag.setAktør(HistorikkAktør.VEDTAKSLØSNINGEN);
-        historikkinnslag.setType(historikkinnslagType);
-        historikkinnslag.setBehandlingId(behandling.getId());
-        historikkinnslag.setFagsakId(behandling.getFagsakId());
-        builder.build(historikkinnslag);
         historikkRepository.lagre(historikkinnslag);
     }
 
