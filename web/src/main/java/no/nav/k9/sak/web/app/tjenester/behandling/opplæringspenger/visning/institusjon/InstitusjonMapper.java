@@ -52,8 +52,7 @@ class InstitusjonMapper {
     }
 
     private String finnInstitusjonsnavn(KursPeriode kursPeriode) {
-        return kursPeriode.getInstitusjon() != null ? kursPeriode.getInstitusjon()
-            : godkjentOpplæringsinstitusjonTjeneste.hentMedUuid(kursPeriode.getInstitusjonUuid()).map(GodkjentOpplæringsinstitusjon::getNavn).orElse(null);
+        return godkjentOpplæringsinstitusjonTjeneste.hentMedUuid(kursPeriode.getInstitusjonUuid()).map(GodkjentOpplæringsinstitusjon::getNavn).orElse("Annet - se dokumentasjon av opplæring"); //TODO vurder om dette er en god tekst for "annet" og om den skal settes i frontend isteden
     }
 
     private List<InstitusjonVurderingDto> mapVurderinger(VurdertOpplæringGrunnlag grunnlag, Set<PerioderFraSøknad> perioderFraSøknad) {

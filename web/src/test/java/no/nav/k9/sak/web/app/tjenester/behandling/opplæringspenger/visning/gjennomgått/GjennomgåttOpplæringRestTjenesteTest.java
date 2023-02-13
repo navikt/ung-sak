@@ -59,7 +59,7 @@ class GjennomgåttOpplæringRestTjenesteTest {
     }
 
     private KursPeriode lagKursperiode(Periode periode) {
-        return new KursPeriode(periode.getFom(), periode.getTom(), null, null, "noe", null, null, null);
+        return new KursPeriode(periode.getFom(), periode.getTom(), null, null, null, null, null);
     }
 
     private PerioderFraSøknad lagPerioderFraSøknad(List<KursPeriode> kursperioder) {
