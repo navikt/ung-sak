@@ -57,7 +57,7 @@ public class HistorikkinnslagTjenesteTest {
         Behandling behandling = scenario.lagMocked();
         // Arrange
 
-        String brevkode = Brevkode.LEGEERKLÆRING.getOffisiellKode();
+        String brevkode = Brevkode.PLEIEPENGER_BARN_SOKNAD.getOffisiellKode();
         var hoveddokument = byggJournalMetadata(HOVEDDOKUMENT_DOKUMENT_ID, brevkode, Variantformat.ORIGINAL, Variantformat.ARKIV);
         var vedlegg = byggJournalMetadata(VEDLEGG_DOKUMENT_ID, brevkode, Variantformat.ORIGINAL);
         var respons = new Journalpost();
@@ -81,7 +81,7 @@ public class HistorikkinnslagTjenesteTest {
         assertThat(dokumentLinker).hasSize(2);
         assertThat(dokumentLinker.get(0).getDokumentId()).isEqualTo(HOVEDDOKUMENT_DOKUMENT_ID);
         assertThat(dokumentLinker.get(0).getJournalpostId()).isEqualTo(JOURNALPOST_ID);
-        assertThat(dokumentLinker.get(0).getLinkTekst()).isEqualTo("Innsending");
+        assertThat(dokumentLinker.get(0).getLinkTekst()).isEqualTo("Søknad");
         assertThat(dokumentLinker.get(1).getDokumentId()).isEqualTo(VEDLEGG_DOKUMENT_ID);
         assertThat(dokumentLinker.get(1).getJournalpostId()).isEqualTo(JOURNALPOST_ID);
         assertThat(dokumentLinker.get(1).getLinkTekst()).isEqualTo("Vedlegg");
@@ -119,6 +119,43 @@ public class HistorikkinnslagTjenesteTest {
         assertThat(dokumentLinker.get(0).getDokumentId()).isEqualTo(HOVEDDOKUMENT_DOKUMENT_ID);
         assertThat(dokumentLinker.get(0).getJournalpostId()).isEqualTo(JOURNALPOST_ID);
         assertThat(dokumentLinker.get(0).getLinkTekst()).isEqualTo("Inntektsmelding");
+        assertThat(dokumentLinker.get(1).getDokumentId()).isEqualTo(VEDLEGG_DOKUMENT_ID);
+        assertThat(dokumentLinker.get(1).getJournalpostId()).isEqualTo(JOURNALPOST_ID);
+        assertThat(dokumentLinker.get(1).getLinkTekst()).isEqualTo("Vedlegg");
+    }
+
+    @Test
+    public void skalLagreHistorikkinnslagForLegeerklæring() {
+        var scenario = TestScenarioBuilder.builderMedSøknad();
+
+        Behandling behandling = scenario.lagMocked();
+        // Arrange
+
+        String brevkode = Brevkode.LEGEERKLÆRING.getOffisiellKode();
+        var hoveddokument = byggJournalMetadata(HOVEDDOKUMENT_DOKUMENT_ID, brevkode, Variantformat.ORIGINAL, Variantformat.ARKIV);
+        var vedlegg = byggJournalMetadata(VEDLEGG_DOKUMENT_ID, brevkode, Variantformat.ORIGINAL);
+        var respons = new Journalpost();
+        respons.setJournalpostId(JOURNALPOST_ID.getVerdi());
+        respons.setDokumenter(List.of(hoveddokument, vedlegg));
+
+        when(journalTjeneste.hentJournalpostInfo(any(), any())).thenReturn(respons);
+
+        // Act
+        historikkinnslagTjeneste.opprettHistorikkinnslag(behandling, JOURNALPOST_ID, HistorikkinnslagType.BEH_STARTET);
+
+        // Assert
+        ArgumentCaptor<Historikkinnslag> captor = ArgumentCaptor.forClass(Historikkinnslag.class);
+        verify(historikkRepository, times(1)).lagre(captor.capture());
+        Historikkinnslag historikkinnslag = captor.getValue();
+        assertThat(historikkinnslag.getAktør()).isEqualTo(HistorikkAktør.SØKER);
+        assertThat(historikkinnslag.getType()).isEqualTo(HistorikkinnslagType.BEH_STARTET);
+        assertThat(historikkinnslag.getHistorikkinnslagDeler()).isNotEmpty();
+
+        List<HistorikkinnslagDokumentLink> dokumentLinker = historikkinnslag.getDokumentLinker();
+        assertThat(dokumentLinker).hasSize(2);
+        assertThat(dokumentLinker.get(0).getDokumentId()).isEqualTo(HOVEDDOKUMENT_DOKUMENT_ID);
+        assertThat(dokumentLinker.get(0).getJournalpostId()).isEqualTo(JOURNALPOST_ID);
+        assertThat(dokumentLinker.get(0).getLinkTekst()).isEqualTo("Innsending");
         assertThat(dokumentLinker.get(1).getDokumentId()).isEqualTo(VEDLEGG_DOKUMENT_ID);
         assertThat(dokumentLinker.get(1).getJournalpostId()).isEqualTo(JOURNALPOST_ID);
         assertThat(dokumentLinker.get(1).getLinkTekst()).isEqualTo("Vedlegg");

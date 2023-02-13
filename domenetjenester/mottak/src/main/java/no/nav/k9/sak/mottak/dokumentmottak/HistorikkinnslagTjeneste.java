@@ -5,7 +5,17 @@ import java.util.List;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
+import no.nav.k9.felles.integrasjon.saf.AvsenderMottakerResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.BrukerResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.DokumentInfo;
+import no.nav.k9.felles.integrasjon.saf.DokumentInfoResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.DokumentvariantResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.Journalpost;
+import no.nav.k9.felles.integrasjon.saf.JournalpostQueryRequest;
+import no.nav.k9.felles.integrasjon.saf.JournalpostResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.RelevantDatoResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.SafTjeneste;
+import no.nav.k9.felles.integrasjon.saf.SakResponseProjection;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
@@ -16,27 +26,14 @@ import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagDokumentLink;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.k9.felles.integrasjon.saf.AvsenderMottakerResponseProjection;
-import no.nav.k9.felles.integrasjon.saf.BrukerResponseProjection;
-import no.nav.k9.felles.integrasjon.saf.DokumentInfo;
-import no.nav.k9.felles.integrasjon.saf.DokumentInfoResponseProjection;
-import no.nav.k9.felles.integrasjon.saf.DokumentvariantResponseProjection;
-import no.nav.k9.felles.integrasjon.saf.Journalpost;
-import no.nav.k9.felles.integrasjon.saf.JournalpostQueryRequest;
-import no.nav.k9.felles.integrasjon.saf.JournalpostResponseProjection;
-import no.nav.k9.felles.integrasjon.saf.RelevantDatoResponseProjection;
-import no.nav.k9.felles.integrasjon.saf.SakResponseProjection;
-import no.nav.k9.felles.integrasjon.saf.SafTjeneste;
 
 @Dependent
 public class HistorikkinnslagTjeneste {
 
-    public static final String INNTEKTSMELDING_BREVKODE = Brevkode.INNTEKTSMELDING.getOffisiellKode();
     private static final String VEDLEGG = "Vedlegg";
-    private static final String PAPIRSØKNAD = "Papirsøknad";
+    private static final String SØKNAD = "Søknad";
     private static final String INNSENDING = "Innsending";
     private static final String INNTEKTSMELDING = "Inntektsmelding";
-    private static final String ETTERSENDELSE = "Ettersendelse";
     private HistorikkRepository historikkRepository;
     private SafTjeneste safTjeneste;
 
@@ -113,7 +110,17 @@ public class HistorikkinnslagTjeneste {
     }
 
     private String finnLinkTekstHoveddokument(DokumentInfo hoveddokumentJournalMetadata) {
-        return hoveddokumentJournalMetadata.getBrevkode().equals(INNTEKTSMELDING_BREVKODE) ? INNTEKTSMELDING : INNSENDING;
+        Brevkode brevkode = Brevkode.fraKode(hoveddokumentJournalMetadata.getBrevkode());
+        if (brevkode == null) {
+            return INNSENDING;
+        }
+        if (brevkode.equals(Brevkode.INNTEKTSMELDING)) {
+            return INNTEKTSMELDING;
+        }
+        if (Brevkode.SØKNAD_TYPER.contains(brevkode)) {
+            return SØKNAD;
+        }
+        return INNSENDING;
     }
 
     private HistorikkinnslagDokumentLink lagHistorikkInnslagDokumentLink(DokumentInfo journalMetadata, JournalpostId journalpostId, Historikkinnslag historikkinnslag, String linkTekst) {
