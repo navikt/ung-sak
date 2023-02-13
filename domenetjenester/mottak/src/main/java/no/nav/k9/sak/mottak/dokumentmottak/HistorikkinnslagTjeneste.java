@@ -121,11 +121,15 @@ public class HistorikkinnslagTjeneste {
     }
 
     private String finnLinkTekstHoveddokument(BehandlingType behandlingType, DokumentInfo hoveddokumentJournalMetadata) {
+        if (hoveddokumentJournalMetadata.getBrevkode().equals(INNTEKTSMELDING_BREVKODE)) {
+            return INNTEKTSMELDING;
+        }
+
         boolean elektroniskSøknad = hoveddokumentJournalMetadata.getDokumentvarianter().stream()
             .anyMatch(dokumentvariant -> Objects.equals(Variantformat.ORIGINAL, dokumentvariant.getVariantformat())); // Ustrukturerte dokumenter kan ha xml med variantformat SKANNING_META
 
         if (elektroniskSøknad) {
-            return hoveddokumentJournalMetadata.getBrevkode().equals(INNTEKTSMELDING_BREVKODE) ? INNTEKTSMELDING : SØKNAD; //TODO endre fra "Søknad" til "Innsending". Spørsmål: trenger vi da å skille mellom "Innsending" og "Ettersendelse"?
+            return SØKNAD; //TODO endre fra "Søknad" til "Innsending". Spørsmål: trenger vi da å skille mellom "Innsending" og "Ettersendelse"?
         } else {
             boolean harPapirSøknad = hoveddokumentJournalMetadata.getDokumentvarianter().stream().anyMatch(dokumentvariant -> !ArkivFilType.XML.equals(ArkivFilType.fraKode(dokumentvariant.getFiltype())));
             if (harPapirSøknad) {
