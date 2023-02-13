@@ -16,8 +16,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
+import no.nav.k9.felles.integrasjon.saf.DokumentInfo;
+import no.nav.k9.felles.integrasjon.saf.Dokumentvariant;
+import no.nav.k9.felles.integrasjon.saf.Journalpost;
+import no.nav.k9.felles.integrasjon.saf.SafTjeneste;
+import no.nav.k9.felles.integrasjon.saf.SkjermingType;
+import no.nav.k9.felles.integrasjon.saf.Variantformat;
 import no.nav.k9.kodeverk.dokument.ArkivFilType;
-import no.nav.k9.kodeverk.dokument.DokumentTypeId;
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -26,12 +32,6 @@ import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagDokumentLink;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.k9.felles.integrasjon.saf.DokumentInfo;
-import no.nav.k9.felles.integrasjon.saf.Dokumentvariant;
-import no.nav.k9.felles.integrasjon.saf.Journalpost;
-import no.nav.k9.felles.integrasjon.saf.SkjermingType;
-import no.nav.k9.felles.integrasjon.saf.Variantformat;
-import no.nav.k9.felles.integrasjon.saf.SafTjeneste;
 
 public class HistorikkinnslagTjenesteTest {
 
@@ -51,14 +51,15 @@ public class HistorikkinnslagTjenesteTest {
     }
 
     @Test
-    public void skal_lagre_historikkinnslag_for_elektronisk_søknad() {
+    public void skalLagreHistorikkinnslagForSøknad() {
         var scenario = TestScenarioBuilder.builderMedSøknad();
 
         Behandling behandling = scenario.lagMocked();
         // Arrange
 
-        var hoveddokument = byggJournalMetadata(HOVEDDOKUMENT_DOKUMENT_ID, Variantformat.ORIGINAL, Variantformat.ARKIV);
-        var vedlegg = byggJournalMetadata(VEDLEGG_DOKUMENT_ID, Variantformat.ORIGINAL);
+        String brevkode = Brevkode.LEGEERKLÆRING.getOffisiellKode();
+        var hoveddokument = byggJournalMetadata(HOVEDDOKUMENT_DOKUMENT_ID, brevkode, Variantformat.ORIGINAL, Variantformat.ARKIV);
+        var vedlegg = byggJournalMetadata(VEDLEGG_DOKUMENT_ID, brevkode, Variantformat.ORIGINAL);
         var respons = new Journalpost();
         respons.setJournalpostId(JOURNALPOST_ID.getVerdi());
         respons.setDokumenter(List.of(hoveddokument, vedlegg));
@@ -87,7 +88,44 @@ public class HistorikkinnslagTjenesteTest {
     }
 
     @Test
-    public void skal_ikke_lagre_historikkinnslag_når_det_allerede_finnes() {
+    public void skalLagreHistorikkinnslagForInntektsmelding() {
+        var scenario = TestScenarioBuilder.builderMedSøknad();
+
+        Behandling behandling = scenario.lagMocked();
+        // Arrange
+
+        String brevkode = Brevkode.INNTEKTSMELDING.getOffisiellKode();
+        var hoveddokument = byggJournalMetadata(HOVEDDOKUMENT_DOKUMENT_ID, brevkode, Variantformat.ORIGINAL, Variantformat.ARKIV);
+        var vedlegg = byggJournalMetadata(VEDLEGG_DOKUMENT_ID, brevkode, Variantformat.ORIGINAL);
+        var respons = new Journalpost();
+        respons.setJournalpostId(JOURNALPOST_ID.getVerdi());
+        respons.setDokumenter(List.of(hoveddokument, vedlegg));
+
+        when(journalTjeneste.hentJournalpostInfo(any(), any())).thenReturn(respons);
+
+        // Act
+        historikkinnslagTjeneste.opprettHistorikkinnslag(behandling, JOURNALPOST_ID, HistorikkinnslagType.BEH_STARTET);
+
+        // Assert
+        ArgumentCaptor<Historikkinnslag> captor = ArgumentCaptor.forClass(Historikkinnslag.class);
+        verify(historikkRepository, times(1)).lagre(captor.capture());
+        Historikkinnslag historikkinnslag = captor.getValue();
+        assertThat(historikkinnslag.getAktør()).isEqualTo(HistorikkAktør.SØKER);
+        assertThat(historikkinnslag.getType()).isEqualTo(HistorikkinnslagType.BEH_STARTET);
+        assertThat(historikkinnslag.getHistorikkinnslagDeler()).isNotEmpty();
+
+        List<HistorikkinnslagDokumentLink> dokumentLinker = historikkinnslag.getDokumentLinker();
+        assertThat(dokumentLinker).hasSize(2);
+        assertThat(dokumentLinker.get(0).getDokumentId()).isEqualTo(HOVEDDOKUMENT_DOKUMENT_ID);
+        assertThat(dokumentLinker.get(0).getJournalpostId()).isEqualTo(JOURNALPOST_ID);
+        assertThat(dokumentLinker.get(0).getLinkTekst()).isEqualTo("Inntektsmelding");
+        assertThat(dokumentLinker.get(1).getDokumentId()).isEqualTo(VEDLEGG_DOKUMENT_ID);
+        assertThat(dokumentLinker.get(1).getJournalpostId()).isEqualTo(JOURNALPOST_ID);
+        assertThat(dokumentLinker.get(1).getLinkTekst()).isEqualTo("Vedlegg");
+    }
+
+    @Test
+    public void skalIkkeLagreHistorikkinnslagNårDetAlleredeFinnes() {
         // Arrange
         var scenario = TestScenarioBuilder.builderMedSøknad();
         Behandling behandling = scenario.lagMocked();
@@ -103,7 +141,7 @@ public class HistorikkinnslagTjenesteTest {
         verify(historikkRepository, times(0)).lagre(any(Historikkinnslag.class));
     }
 
-    private DokumentInfo byggJournalMetadata(String dokumentId, Variantformat... variantFormater) {
+    private DokumentInfo byggJournalMetadata(String dokumentId, String brevkode, Variantformat... variantFormater) {
         var varianter = Arrays.stream(variantFormater)
             .map(variantFormat -> new Dokumentvariant(variantFormat, "filnavn", "filuuid",
                 Variantformat.ORIGINAL.equals(variantFormat) ? ArkivFilType.XML.getKode() : ArkivFilType.PDF.getKode(),
@@ -113,7 +151,7 @@ public class HistorikkinnslagTjenesteTest {
         var dokumentInfo = new DokumentInfo();
         dokumentInfo.setDokumentvarianter(varianter);
         dokumentInfo.setDokumentInfoId(dokumentId);
-        dokumentInfo.setBrevkode(DokumentTypeId.LEGEERKLÆRING.getOffisiellKode());
+        dokumentInfo.setBrevkode(brevkode);
         return dokumentInfo;
     }
 }
