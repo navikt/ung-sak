@@ -1,6 +1,5 @@
 package no.nav.k9.sak.mottak.dokumentmottak;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -10,7 +9,6 @@ import jakarta.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.dokument.ArkivFilType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
@@ -40,7 +38,7 @@ public class HistorikkinnslagTjeneste {
     public static final String INNTEKTSMELDING_BREVKODE = Brevkode.INNTEKTSMELDING.getOffisiellKode();
     private static final String VEDLEGG = "Vedlegg";
     private static final String PAPIRSØKNAD = "Papirsøknad";
-    private static final String SØKNAD = "Søknad";
+    private static final String INNSENDING = "Innsending";
     private static final String INNTEKTSMELDING = "Inntektsmelding";
     private static final String ETTERSENDELSE = "Ettersendelse";
     private HistorikkRepository historikkRepository;
@@ -129,7 +127,7 @@ public class HistorikkinnslagTjeneste {
             .anyMatch(dokumentvariant -> Objects.equals(Variantformat.ORIGINAL, dokumentvariant.getVariantformat())); // Ustrukturerte dokumenter kan ha xml med variantformat SKANNING_META
 
         if (elektroniskSøknad) {
-            return SØKNAD; //TODO endre fra "Søknad" til "Innsending". Spørsmål: trenger vi da å skille mellom "Innsending" og "Ettersendelse"?
+            return INNSENDING; //Trenger vi å skille mellom "Innsending" og "Ettersendelse"?
         } else {
             boolean harPapirSøknad = hoveddokumentJournalMetadata.getDokumentvarianter().stream().anyMatch(dokumentvariant -> !ArkivFilType.XML.equals(ArkivFilType.fraKode(dokumentvariant.getFiltype())));
             if (harPapirSøknad) {

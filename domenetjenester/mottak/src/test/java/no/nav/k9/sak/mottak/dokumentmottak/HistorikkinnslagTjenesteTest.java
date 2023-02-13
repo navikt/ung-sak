@@ -33,7 +33,6 @@ import no.nav.k9.felles.integrasjon.saf.SkjermingType;
 import no.nav.k9.felles.integrasjon.saf.Variantformat;
 import no.nav.k9.felles.integrasjon.saf.SafTjeneste;
 
-
 public class HistorikkinnslagTjenesteTest {
 
     private static final JournalpostId JOURNALPOST_ID = new JournalpostId("5");
@@ -52,7 +51,7 @@ public class HistorikkinnslagTjenesteTest {
     }
 
     @Test
-    public void skal_lagre_historikkinnslag_for_elektronisk_søknad() throws Exception {
+    public void skal_lagre_historikkinnslag_for_elektronisk_søknad() {
         var scenario = TestScenarioBuilder.builderMedSøknad();
 
         Behandling behandling = scenario.lagMocked();
@@ -81,14 +80,14 @@ public class HistorikkinnslagTjenesteTest {
         assertThat(dokumentLinker).hasSize(2);
         assertThat(dokumentLinker.get(0).getDokumentId()).isEqualTo(HOVEDDOKUMENT_DOKUMENT_ID);
         assertThat(dokumentLinker.get(0).getJournalpostId()).isEqualTo(JOURNALPOST_ID);
-        assertThat(dokumentLinker.get(0).getLinkTekst()).isEqualTo("Søknad");
+        assertThat(dokumentLinker.get(0).getLinkTekst()).isEqualTo("Innsending");
         assertThat(dokumentLinker.get(1).getDokumentId()).isEqualTo(VEDLEGG_DOKUMENT_ID);
         assertThat(dokumentLinker.get(1).getJournalpostId()).isEqualTo(JOURNALPOST_ID);
         assertThat(dokumentLinker.get(1).getLinkTekst()).isEqualTo("Vedlegg");
     }
 
     @Test
-    public void skal_ikke_lagre_historikkinnslag_når_det_allerede_finnes() throws Exception {
+    public void skal_ikke_lagre_historikkinnslag_når_det_allerede_finnes() {
         // Arrange
         var scenario = TestScenarioBuilder.builderMedSøknad();
         Behandling behandling = scenario.lagMocked();
