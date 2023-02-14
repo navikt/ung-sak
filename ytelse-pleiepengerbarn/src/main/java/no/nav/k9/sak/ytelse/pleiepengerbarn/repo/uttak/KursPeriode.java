@@ -61,9 +61,6 @@ public class KursPeriode extends BaseEntitet implements IndexKey {
     @Column(name = "begrunnelse_reisetid_hjem")
     private String begrunnelseReisetidHjem;
 
-    @Column(name = "institusjon")
-    private String institusjon;
-
     @Column(name = "institusjon_uuid")
     private UUID institusjonUuid;
 
@@ -74,23 +71,21 @@ public class KursPeriode extends BaseEntitet implements IndexKey {
     KursPeriode() {
     }
 
-    public KursPeriode(DatoIntervallEntitet periode, DatoIntervallEntitet reiseperiodeTil, DatoIntervallEntitet reiseperiodeHjem, String institusjon, UUID institusjonUuid, String begrunnelseReisetidTil, String begrunnelseReisetidHjem) {
+    public KursPeriode(DatoIntervallEntitet periode, DatoIntervallEntitet reiseperiodeTil, DatoIntervallEntitet reiseperiodeHjem, UUID institusjonUuid, String begrunnelseReisetidTil, String begrunnelseReisetidHjem) {
         this.periode = periode;
         this.reiseperiodeTil = reiseperiodeTil;
         this.reiseperiodeHjem = reiseperiodeHjem;
-        this.institusjon = institusjon;
         this.institusjonUuid = institusjonUuid;
         this.begrunnelseReisetidTil = begrunnelseReisetidTil;
         this.begrunnelseReisetidHjem = begrunnelseReisetidHjem;
     }
 
-    public KursPeriode(LocalDate fom, LocalDate tom, DatoIntervallEntitet reiseperiodeTil, DatoIntervallEntitet reiseperiodeHjem, String institusjon, UUID institusjonUuid, String begrunnelseReisetidTil, String begrunnelseReisetidHjem) {
-        this(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), reiseperiodeTil, reiseperiodeHjem, institusjon, institusjonUuid, begrunnelseReisetidTil, begrunnelseReisetidHjem);
+    public KursPeriode(LocalDate fom, LocalDate tom, DatoIntervallEntitet reiseperiodeTil, DatoIntervallEntitet reiseperiodeHjem, UUID institusjonUuid, String begrunnelseReisetidTil, String begrunnelseReisetidHjem) {
+        this(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), reiseperiodeTil, reiseperiodeHjem, institusjonUuid, begrunnelseReisetidTil, begrunnelseReisetidHjem);
     }
 
     public KursPeriode(KursPeriode it) {
         this.periode = it.periode;
-        this.institusjon = it.institusjon;
         this.reiseperiodeHjem = it.reiseperiodeHjem;
         this.reiseperiodeTil = it.reiseperiodeTil;
         this.institusjonUuid = it.institusjonUuid;
@@ -100,10 +95,6 @@ public class KursPeriode extends BaseEntitet implements IndexKey {
 
     public DatoIntervallEntitet getPeriode() {
         return periode;
-    }
-
-    public String getInstitusjon() {
-        return institusjon;
     }
 
     public DatoIntervallEntitet getReiseperiodeTil() {
@@ -132,7 +123,6 @@ public class KursPeriode extends BaseEntitet implements IndexKey {
         if (o == null || getClass() != o.getClass()) return false;
         KursPeriode that = (KursPeriode) o;
         return Objects.equals(periode, that.periode)
-            && Objects.equals(institusjon, that.institusjon)
             && Objects.equals(reiseperiodeTil, that.reiseperiodeTil)
             && Objects.equals(reiseperiodeHjem, that.reiseperiodeHjem)
             && Objects.equals(begrunnelseReisetidTil, that.begrunnelseReisetidTil)
@@ -142,19 +132,18 @@ public class KursPeriode extends BaseEntitet implements IndexKey {
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode, institusjon, reiseperiodeTil, reiseperiodeHjem, institusjonUuid, begrunnelseReisetidTil, begrunnelseReisetidHjem);
+        return Objects.hash(periode, reiseperiodeTil, reiseperiodeHjem, institusjonUuid, begrunnelseReisetidTil, begrunnelseReisetidHjem);
     }
 
     @Override
     public String getIndexKey() {
-        return IndexKeyComposer.createKey(institusjon, periode, reiseperiodeTil, reiseperiodeHjem, institusjonUuid, begrunnelseReisetidTil, begrunnelseReisetidHjem);
+        return IndexKeyComposer.createKey(periode, reiseperiodeTil, reiseperiodeHjem, institusjonUuid, begrunnelseReisetidTil, begrunnelseReisetidHjem);
     }
 
     @Override
     public String toString() {
         return "KursPeriode{" +
             "periode=" + periode +
-            ", institusjon=" + institusjon +
             ", institusjonUuid=" + institusjonUuid +
             ", reiseperiodeTil=" + reiseperiodeTil +
             ", reiseperiodeHjem=" + reiseperiodeHjem +

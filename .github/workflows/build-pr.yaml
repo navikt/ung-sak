@@ -9,6 +9,7 @@ on:
       - 'LICENCE'
       - 'CODEOWNERS'
       - 'dev/**'
+  merge_group:
 
 jobs:
   build:

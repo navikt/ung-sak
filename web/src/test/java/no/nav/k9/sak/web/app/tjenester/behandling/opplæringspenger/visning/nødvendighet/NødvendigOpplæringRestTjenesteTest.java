@@ -69,7 +69,7 @@ class NødvendigOpplæringRestTjenesteTest {
             Collections.emptyList(),
             Collections.emptyList(),
             Collections.emptyList(),
-            List.of(new KursPeriode(kursperiode.getFom(), kursperiode.getTom(), null, null, "institusjon", null, null, null)));
+            List.of(new KursPeriode(kursperiode.getFom(), kursperiode.getTom(), null, null, null, null, null)));
 
         uttakPerioderGrunnlagRepository.lagre(behandling.getId(), perioderFraSøknad);
         return perioderFraSøknad;
