@@ -1,5 +1,7 @@
 package no.nav.k9.sak.kontrakt.omsorgspenger;
 
+import java.util.List;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
@@ -10,9 +12,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import jakarta.validation.constraints.Size;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
+import no.nav.k9.sak.kontrakt.person.NorskIdentDto;
 import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -20,7 +24,7 @@ import no.nav.k9.sak.typer.Periode;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 @JsonTypeName(AksjonspunktKodeDefinisjon.AVKLAR_OMSORGEN_FOR_KODE)
 public class AvklarOmsorgenForDto extends BekreftetAksjonspunktDto {
-    
+
     @JsonProperty(value = "harOmsorgenFor", required = true)
     @NotNull
     private Boolean harOmsorgenFor;
@@ -33,11 +37,18 @@ public class AvklarOmsorgenForDto extends BekreftetAksjonspunktDto {
     @Valid
     private Avslagsårsak avslagsårsak;
 
-    public AvklarOmsorgenForDto(String begrunnelse, Boolean harOmsorgenFor, Periode periode, Avslagsårsak avslagsårsak) {
+    @JsonProperty(value = "fosterbarnForOmsorgspenger", required = true)
+    @Valid
+    @Size(max = 100)
+    private List<NorskIdentDto> fosterbarnForOmsorgspenger;
+
+    public AvklarOmsorgenForDto(String begrunnelse, Boolean harOmsorgenFor, Periode periode, Avslagsårsak avslagsårsak,
+                                List<NorskIdentDto> fosterbarnForOmsorgspenger) {
         super(begrunnelse);
         this.harOmsorgenFor = harOmsorgenFor;
         this.periode = periode;
         this.avslagsårsak = avslagsårsak;
+        this.fosterbarnForOmsorgspenger = fosterbarnForOmsorgspenger;
     }
 
     protected AvklarOmsorgenForDto() {
@@ -58,5 +69,9 @@ public class AvklarOmsorgenForDto extends BekreftetAksjonspunktDto {
 
     public Avslagsårsak getAvslagsårsak() {
         return avslagsårsak;
+    }
+
+    public List<NorskIdentDto> getFosterbarnForOmsorgspenger() {
+        return fosterbarnForOmsorgspenger;
     }
 }
