@@ -72,7 +72,7 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
                                  @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
                                  OmsorgenForTjeneste omsorgenForTjeneste,
                                  @Any Instance<BrukerdialoginnsynTjeneste> brukerdialoginnsynTjenester,
-                                 @KonfigVerdi(value = "oms.omsorgenfor.flyttet", defaultVerdi = "false") boolean omsorgenforFlyttet) {
+                                 @KonfigVerdi(value = "oms.omsorgenfor.flyttet", defaultVerdi = "true") boolean omsorgenforFlyttet) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.repositoryProvider = repositoryProvider;
