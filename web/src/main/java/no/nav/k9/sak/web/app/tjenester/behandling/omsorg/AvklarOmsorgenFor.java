@@ -1,7 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.omsorg;
 
 import java.time.LocalDate;
-import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -23,10 +22,6 @@ import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.omsorgspenger.AvklarOmsorgenForDto;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.typer.PersonIdent;
-import no.nav.k9.sak.ytelse.omsorgspenger.repo.Fosterbarn;
-import no.nav.k9.sak.ytelse.omsorgspenger.repo.FosterbarnRepository;
-import no.nav.k9.sak.ytelse.omsorgspenger.repo.Fosterbarna;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarOmsorgenForDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -41,7 +36,6 @@ public class AvklarOmsorgenFor implements AksjonspunktOppdaterer<AvklarOmsorgenF
     private VilkårResultatRepository vilkårResultatRepository;
     private BehandlingRepository behandlingRepository;
     private PersoninfoAdapter personinfoAdapter;
-    private FosterbarnRepository fosterbarnRepository;
 
     AvklarOmsorgenFor() {
         // for CDI proxy
@@ -51,13 +45,11 @@ public class AvklarOmsorgenFor implements AksjonspunktOppdaterer<AvklarOmsorgenF
     AvklarOmsorgenFor(VilkårResultatRepository vilkårResultatRepository,
                       BehandlingRepository behandlingRepository,
                       PersoninfoAdapter personinfoAdapter,
-                      HistorikkTjenesteAdapter historikkAdapter,
-                      FosterbarnRepository fosterbarnRepository) {
+                      HistorikkTjenesteAdapter historikkAdapter) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.behandlingRepository = behandlingRepository;
         this.personinfoAdapter = personinfoAdapter;
         this.historikkAdapter = historikkAdapter;
-        this.fosterbarnRepository = fosterbarnRepository;
     }
 
     @Override
@@ -74,9 +66,6 @@ public class AvklarOmsorgenFor implements AksjonspunktOppdaterer<AvklarOmsorgenF
         var vilkårBuilder = param.getVilkårResultatBuilder();
 
         lagHistorikkInnslag(param, nyttUtfall, dto.getBegrunnelse());
-
-        // Oppretter fosterbarn kun dersom eksplisitt angitt av GUI for omsorgspenger
-        if (dto.getFosterbarnForOmsorgspenger() != null) leggTilFosterbarnForOmsorgspenger(dto, param);
 
         boolean erAvslag = dto.getAvslagsårsak() != null;
         if (erAvslag || erÅpenPeriode(periode)) {
@@ -112,14 +101,6 @@ public class AvklarOmsorgenFor implements AksjonspunktOppdaterer<AvklarOmsorgenF
             .medUtfallManuell(utfallType)
             .medAvslagsårsak(settAvslagsårsak));
         builder.leggTil(vilkårBuilder);
-    }
-
-    private void leggTilFosterbarnForOmsorgspenger(AvklarOmsorgenForDto dto, AksjonspunktOppdaterParameter param) {
-        var fosterbarn = dto.getFosterbarnForOmsorgspenger().stream()
-            .map(barn -> personinfoAdapter.hentAktørIdForPersonIdent(new PersonIdent(barn.getFnr())).orElseThrow(() -> new IllegalArgumentException("Finner ikke fnr")))
-            .map(aktørId -> new Fosterbarn(aktørId))
-            .collect(Collectors.toSet());
-        fosterbarnRepository.lagreOgFlush(param.getBehandlingId(), new Fosterbarna(fosterbarn));
     }
 
     private void lagHistorikkInnslag(AksjonspunktOppdaterParameter param, Utfall nyVerdi, String begrunnelse) {
