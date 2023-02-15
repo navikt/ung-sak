@@ -253,8 +253,6 @@ spec:
       value: "false"
     - name: IKKE_YRKESAKTIV_UTEN_SPEILING
       value: "false"
-    - name: PSB_BG_BRUKER_OPPTJENING_RESULTAT
-      value: "true"
     - name: PSB_FRAMOVERHOPP_VED_FORLENGELSE_OPPTJENING
       value: "false"
 
