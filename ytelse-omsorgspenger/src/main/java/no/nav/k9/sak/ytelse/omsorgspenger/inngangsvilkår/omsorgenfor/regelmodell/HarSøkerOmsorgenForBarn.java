@@ -50,21 +50,22 @@ public class HarSøkerOmsorgenForBarn extends LeafSpecification<OmsorgenForVilk�
     }
 
     private LocalDateTimeline<Utfall> perioderMedFosterbarn(OmsorgenForVilkårGrunnlag grunnlag) {
-        var segmenter = new ArrayList<LocalDateSegment<Utfall>>();
+        var segmenter = new ArrayList<LocalDateSegment<Boolean>>();
         for (Fosterbarn fosterbarn : grunnlag.getFosterbarn()) {
             var fosterbarnPeriode = DatoIntervallEntitet.fra(fosterbarn.getFødselsdato(), fosterbarn.getDødsdato());
             if (fosterbarnPeriode.overlapper(grunnlag.getVilkårsperiode())) {
-                segmenter.add(new LocalDateSegment<>(fosterbarnPeriode.overlapp(grunnlag.getVilkårsperiode()).toLocalDateInterval(), Utfall.OPPFYLT));
+                segmenter.add(new LocalDateSegment<>(fosterbarnPeriode.overlapp(grunnlag.getVilkårsperiode()).toLocalDateInterval(), true));
             }
         }
-        return new LocalDateTimeline<>(segmenter);
+        return new LocalDateTimeline<>(segmenter, StandardCombinators::alwaysTrueForMatch)
+            .mapValue(v -> Utfall.OPPFYLT);
     }
 
     private LocalDateTimeline<Utfall> perioderMedLikeAdresser(List<BostedsAdresse> søkersAdresser, List<BostedsAdresse> barnsAdresser) {
         var utfallsTidslinje = new LocalDateTimeline<Utfall>(List.of());
 
         for (BostedsAdresse søkersAdresse : søkersAdresser) {
-            for (BostedsAdresse barnsAdresse: barnsAdresser) {
+            for (BostedsAdresse barnsAdresse : barnsAdresser) {
                 if (søkersAdresse.getPeriode().overlapper(barnsAdresse.getPeriode()) && søkersAdresse.erSammeAdresse(barnsAdresse)) {
                     var segment = new LocalDateSegment<>(søkersAdresse.getPeriode().overlapp(barnsAdresse.getPeriode()).toLocalDateInterval(), Utfall.OPPFYLT);
                     utfallsTidslinje = utfallsTidslinje.combine(segment, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);

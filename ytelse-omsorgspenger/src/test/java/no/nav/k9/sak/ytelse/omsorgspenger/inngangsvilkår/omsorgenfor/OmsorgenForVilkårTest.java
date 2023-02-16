@@ -20,7 +20,8 @@ import no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.omsorgenfor.regelmodel
 
 public class OmsorgenForVilkårTest {
 
-    private DatoIntervallEntitet periodeTilVurdering = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusWeeks(4), LocalDate.now());;
+    private DatoIntervallEntitet periodeTilVurdering = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusWeeks(4), LocalDate.now());
+    ;
 
     @Test
     public void skal_få_innvilget_når_søker_og_barn_har_samme_bosted() {
@@ -80,13 +81,16 @@ public class OmsorgenForVilkårTest {
     }
 
     @Test
-    public void skal_få_innvilget_når_søker_har_fosterbarn() {
+    public void skal_få_innvilget_når_søker_har_ett_fosterbarn() {
 
         final var grunnlag = new OmsorgenForVilkårGrunnlag(periodeTilVurdering, null,
             List.of(new BostedsAdresse("1", "a", null, null, "1234", "NOR", periodeTilVurdering)),
             List.of(new BostedsAdresse("2", "b", null, null, "5678", "NOR", periodeTilVurdering)),
             null,
-            List.of(new Fosterbarn("3", LocalDate.now().withDayOfMonth(1).withMonth(1), null)),
+            List.of(
+                new Fosterbarn("3", LocalDate.now().minusYears(1), null),
+                new Fosterbarn("4", LocalDate.now().minusYears(11), null)
+            ),
             List.of());
 
         final var evaluation = new OMPOmsorgenForVilkår().evaluer(grunnlag, new OmsorgenForKnekkpunkter(periodeTilVurdering));
@@ -97,6 +101,7 @@ public class OmsorgenForVilkårTest {
         assertThat(utfall).isNotNull();
         assertThat(utfall).isEqualTo(Resultat.JA);
     }
+
 
     @Test
     public void skal_få_innvilget_når_søker_ikke_bor_med_noen_barn_fordi_saksbehandler_har_vurdert_at_det_er_omsorg() {
