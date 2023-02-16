@@ -50,15 +50,14 @@ public class HarSøkerOmsorgenForBarn extends LeafSpecification<OmsorgenForVilk�
     }
 
     private LocalDateTimeline<Utfall> perioderMedFosterbarn(OmsorgenForVilkårGrunnlag grunnlag) {
-        var segmenter = new ArrayList<LocalDateSegment<Boolean>>();
+        var segmenter = new ArrayList<LocalDateSegment<Utfall>>();
         for (Fosterbarn fosterbarn : grunnlag.getFosterbarn()) {
             var fosterbarnPeriode = DatoIntervallEntitet.fra(fosterbarn.getFødselsdato(), fosterbarn.getDødsdato());
             if (fosterbarnPeriode.overlapper(grunnlag.getVilkårsperiode())) {
-                segmenter.add(new LocalDateSegment<>(fosterbarnPeriode.overlapp(grunnlag.getVilkårsperiode()).toLocalDateInterval(), true));
+                segmenter.add(new LocalDateSegment<>(fosterbarnPeriode.overlapp(grunnlag.getVilkårsperiode()).toLocalDateInterval(), Utfall.OPPFYLT));
             }
         }
-        return new LocalDateTimeline<>(segmenter, StandardCombinators::alwaysTrueForMatch)
-            .mapValue(v -> Utfall.OPPFYLT);
+        return new LocalDateTimeline<>(segmenter, StandardCombinators::coalesceRightHandSide);
     }
 
     private LocalDateTimeline<Utfall> perioderMedLikeAdresser(List<BostedsAdresse> søkersAdresser, List<BostedsAdresse> barnsAdresser) {
