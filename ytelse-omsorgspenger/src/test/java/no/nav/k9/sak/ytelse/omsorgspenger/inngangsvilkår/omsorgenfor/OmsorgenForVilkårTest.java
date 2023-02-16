@@ -81,7 +81,7 @@ public class OmsorgenForVilkårTest {
     }
 
     @Test
-    public void skal_få_innvilget_når_søker_har_ett_fosterbarn() {
+    public void skal_få_innvilget_når_søker_har_fosterbarn() {
 
         final var grunnlag = new OmsorgenForVilkårGrunnlag(periodeTilVurdering, null,
             List.of(new BostedsAdresse("1", "a", null, null, "1234", "NOR", periodeTilVurdering)),

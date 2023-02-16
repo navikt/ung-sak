@@ -40,7 +40,7 @@ public class HarSøkerOmsorgenForBarn extends LeafSpecification<OmsorgenForVilk�
         tidslinje = tidslinje.combine(perioderMedLikeAdresser(grunnlag.getSøkersAdresser(), grunnlag.getDeltBostedsAdresser()), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         tidslinje = tidslinje.combine(perioderMedFosterbarn(grunnlag), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
-        tidslinje.forEach(segment -> grunnlag.leggTilUtfall(segment.getLocalDateInterval(), segment.getValue()));
+        grunnlag.leggTilUtfall(tidslinje);
 
         if (tidslinje.stream().allMatch(it -> Objects.equals(it.getValue(), Utfall.IKKE_OPPFYLT))) {
             return nei(OmsorgenForAvslagsårsaker.IKKE_DOKUMENTERT_OMSORGEN_FOR.toRuleReason());
