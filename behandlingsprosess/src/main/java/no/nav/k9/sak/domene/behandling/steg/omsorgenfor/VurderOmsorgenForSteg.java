@@ -87,8 +87,6 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
         final var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         if (skalHoppeOverVurdering(behandling)) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
-        } else if (måSettesPåVent(behandling)) {
-            return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VENTE_PA_OMSORGENFOR_OMS)));
         }
         var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
         final var perioder = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VILKÅRET);
@@ -96,6 +94,9 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
         final var samletOmsorgenForTidslinje = omsorgenForTjeneste.mapGrunnlag(referanse, perioder);
 
         if (skalHaAksjonspunktGrunnetManuellRevurdering(samletOmsorgenForTidslinje, behandling) || omsorgenForTjeneste.skalHaAksjonspunkt(referanse, samletOmsorgenForTidslinje, false)) {
+            if (!omsorgenforFlyttet && behandling.getFagsakYtelseType() == FagsakYtelseType.OMP){
+                return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VENTE_PA_OMSORGENFOR_OMS)));
+            }
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR_V2)));
         } else if (behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR_V2) && harIkkeLengerAksjonspunkt(behandling, samletOmsorgenForTidslinje)) {
             log.info("Har aksjonspunt for omsorgen for, men det er ikke relevant lenger");
@@ -118,15 +119,6 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
         }
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
-    }
-
-    private boolean måSettesPåVent(Behandling behandling) {
-        if (!Objects.equals(behandling.getFagsakYtelseType(), FagsakYtelseType.OMP)) {
-            return false;
-        }
-        var vilkårene = vilkårResultatRepository.hent(behandling.getId());
-
-        return !omsorgenforFlyttet && vilkårene.getVilkår(VILKÅRET).isPresent();
     }
 
     private boolean skalHoppeOverVurdering(Behandling behandling) {
