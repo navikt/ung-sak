@@ -53,6 +53,7 @@ public class OmsorgenForDtoMapper {
     public OmsorgenForOversiktDto map(Long behandlingId, AktørId aktørId, AktørId optPleietrengendeAktørId) {
         final boolean tvingManuellVurdering = false;
         final var systemdata = omsorgenForTjeneste.hentSystemdata(behandlingId, aktørId, optPleietrengendeAktørId);
+        final boolean ikkeVurdertBlirOppfylt = (systemdata.isRegistrertForeldrerelasjon() || systemdata.isRegistrertOmsorgenForMinstEttBarn()) && !tvingManuellVurdering;
 
         final LocalDateTimeline<Boolean> tidslinjeTilVurdering = lagTidslinjeTilVurdering(behandlingId);
 
@@ -65,9 +66,8 @@ public class OmsorgenForDtoMapper {
                     null,
                     null))
                 .collect(Collectors.toList());
-            return new OmsorgenForOversiktDto(systemdata.isRegistrertForeldrerelasjon(), systemdata.isRegistrertSammeBosted(), tvingManuellVurdering, true, toOmsorgenForDtoListe(omsorgsperioderTilVurdering, false, tidslinjeTilVurdering));
+            return new OmsorgenForOversiktDto(systemdata.isRegistrertForeldrerelasjon(), systemdata.isRegistrertSammeBosted(), tvingManuellVurdering, true, toOmsorgenForDtoListe(omsorgsperioderTilVurdering, ikkeVurdertBlirOppfylt, tidslinjeTilVurdering));
         }
-        final boolean ikkeVurdertBlirOppfylt = systemdata.isRegistrertForeldrerelasjon() && !tvingManuellVurdering;
         final var omsorgenForListe = toOmsorgenForDtoListe(grunnlagOpt.get().getOmsorgenFor().getPerioder(), ikkeVurdertBlirOppfylt, tidslinjeTilVurdering);
         final boolean kanLøseAksjonspunkt = omsorgenForListe.stream().allMatch(o -> o.getResultatEtterAutomatikk() != Resultat.IKKE_VURDERT);
         return new OmsorgenForOversiktDto(
