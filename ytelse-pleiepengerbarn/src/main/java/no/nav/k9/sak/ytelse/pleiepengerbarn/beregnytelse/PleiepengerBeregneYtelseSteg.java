@@ -99,7 +99,7 @@ public class PleiepengerBeregneYtelseSteg implements BeregneYtelseSteg {
         var feriepengepåvirkendeFagsakerTjeneste = FinnFeriepengepåvirkendeFagsakerTjeneste.finnTjeneste(feriepengepåvirkendeFagsakerTjenester, ref.getFagsakYtelseType());
         Set<Fagsak> påvirkendeFagsaker = feriepengepåvirkendeFagsakerTjeneste.finnSakerSomPåvirkerFeriepengerFor(behandling.getFagsak());
         var andelerSomKanGiFeriepengerForRelevaneSaker = hentFeriepengeAndelerTjeneste.finnAndelerSomKanGiFeriepenger(påvirkendeFagsaker);
-        feriepengerTjeneste.beregnFeriepengerV2(beregningsresultat, andelerSomKanGiFeriepengerForRelevaneSaker);
+        feriepengerTjeneste.beregnFeriepenger(beregningsresultat, andelerSomKanGiFeriepengerForRelevaneSaker);
 
         // Lagre beregningsresultat
         beregningsresultatRepository.lagre(behandling, beregningsresultat);

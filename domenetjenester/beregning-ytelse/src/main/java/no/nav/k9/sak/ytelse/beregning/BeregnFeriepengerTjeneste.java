@@ -52,11 +52,11 @@ public abstract class BeregnFeriepengerTjeneste {
 
     public abstract boolean ubegrensedeDagerVedRefusjon();
 
-    public void beregnFeriepengerV2(BeregningsresultatEntitet beregningsresultat) {
-        beregnFeriepengerV2(beregningsresultat, LocalDateTimeline.empty());
+    public void beregnFeriepenger(BeregningsresultatEntitet beregningsresultat) {
+        beregnFeriepenger(beregningsresultat, LocalDateTimeline.empty());
     }
 
-    public void beregnFeriepengerV2(BeregningsresultatEntitet beregningsresultat, LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> andelerSomKanGiFeriepengerForRelevaneSaker) {
+    public void beregnFeriepenger(BeregningsresultatEntitet beregningsresultat, LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> andelerSomKanGiFeriepengerForRelevaneSaker) {
         BeregningsresultatFeriepengerRegelModell regelModell = MapBeregningsresultatFeriepengerFraVLTilRegel.mapFra(beregningsresultat, andelerSomKanGiFeriepengerForRelevaneSaker, antallDagerFeriepenger(), feriepengeopptjeningForHelg(), ubegrensedeDagerVedRefusjon());
         String regelInput = toJson(regelModell);
 

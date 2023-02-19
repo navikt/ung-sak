@@ -92,7 +92,7 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
 
         BeregningsresultatVerifiserer.verifiserBeregningsresultat(nyttBeregningsresultat);
 
-        getFeriepengerTjeneste(behandling).ifPresent(tjeneste -> tjeneste.beregnFeriepengerV2(nyttBeregningsresultat));
+        getFeriepengerTjeneste(behandling).ifPresent(tjeneste -> tjeneste.beregnFeriepenger(nyttBeregningsresultat));
         beregningsresultatRepository.lagre(behandling, nyttBeregningsresultat);
 
         opprettHistorikkinnslag(behandling, gammeltBeregningsresultat, nyttBeregningsresultat);
