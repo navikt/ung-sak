@@ -31,7 +31,6 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.MottakerType;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerPrÅr;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerRegelModell;
 import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.FeriepengeOppsummering;
-import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.RegelBeregnFeriepenger;
 import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.RegelBeregnFeriepengerV2;
 import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.SaksnummerOgSisteBehandling;
 
@@ -52,20 +51,6 @@ public abstract class BeregnFeriepengerTjeneste {
     public abstract boolean feriepengeopptjeningForHelg();
 
     public abstract boolean ubegrensedeDagerVedRefusjon();
-
-    public void beregnFeriepenger(BeregningsresultatEntitet beregningsresultat) {
-        BeregningsresultatFeriepengerRegelModell regelModell = MapBeregningsresultatFeriepengerFraVLTilRegel.mapFra(beregningsresultat, antallDagerFeriepenger(), feriepengeopptjeningForHelg(), ubegrensedeDagerVedRefusjon());
-        String regelInput = toJson(regelModell);
-
-        RegelBeregnFeriepenger regelBeregnFeriepenger = new RegelBeregnFeriepenger();
-        Evaluation evaluation = regelBeregnFeriepenger.evaluer(regelModell);
-        String sporing = EvaluationSerializer.asJson(evaluation);
-
-        beregningsresultat.setFeriepengerRegelInput(regelInput);
-        beregningsresultat.setFeriepengerRegelSporing(sporing);
-
-        mapTilResultatFraRegelModell(beregningsresultat, regelModell);
-    }
 
     public void beregnFeriepengerV2(BeregningsresultatEntitet beregningsresultat) {
         beregnFeriepengerV2(beregningsresultat, LocalDateTimeline.empty());

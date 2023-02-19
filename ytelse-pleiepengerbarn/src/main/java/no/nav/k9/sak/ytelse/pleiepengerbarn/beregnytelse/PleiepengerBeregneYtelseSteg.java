@@ -13,7 +13,6 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -51,7 +50,6 @@ public class PleiepengerBeregneYtelseSteg implements BeregneYtelseSteg {
     private Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste;
     private Instance<FinnFeriepengepåvirkendeFagsakerTjeneste> feriepengepåvirkendeFagsakerTjenester;
     private HentFeriepengeAndelerTjeneste hentFeriepengeAndelerTjeneste;
-    private boolean enableFeriepengerPåTversAvSaker;
     private UttakTjeneste uttakTjeneste;
 
     protected PleiepengerBeregneYtelseSteg() {
@@ -65,8 +63,7 @@ public class PleiepengerBeregneYtelseSteg implements BeregneYtelseSteg {
                                         UttakTjeneste uttakTjeneste,
                                         @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste,
                                         @Any Instance<FinnFeriepengepåvirkendeFagsakerTjeneste> feriepengepåvirkendeFagsakerTjenester,
-                                        HentFeriepengeAndelerTjeneste hentFeriepengeAndelerTjeneste,
-                                        @KonfigVerdi(value = "ENABLE_FERIEPENGER_PAA_TVERS_AV_SAKER_OG_PR_AAR", defaultVerdi = "true") boolean enableFeriepengerPåTversAvSaker
+                                        HentFeriepengeAndelerTjeneste hentFeriepengeAndelerTjeneste
     ) {
         this.uttakTjeneste = uttakTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
@@ -76,7 +73,6 @@ public class PleiepengerBeregneYtelseSteg implements BeregneYtelseSteg {
         this.beregnFeriepengerTjeneste = beregnFeriepengerTjeneste;
         this.feriepengepåvirkendeFagsakerTjenester = feriepengepåvirkendeFagsakerTjenester;
         this.hentFeriepengeAndelerTjeneste = hentFeriepengeAndelerTjeneste;
-        this.enableFeriepengerPåTversAvSaker = enableFeriepengerPåTversAvSaker;
     }
 
     @Override
@@ -100,14 +96,10 @@ public class PleiepengerBeregneYtelseSteg implements BeregneYtelseSteg {
         // Beregn feriepenger
         var feriepengerTjeneste = BeregnFeriepengerTjeneste.finnTjeneste(beregnFeriepengerTjeneste, ref.getFagsakYtelseType());
 
-        if (enableFeriepengerPåTversAvSaker) {
-            var feriepengepåvirkendeFagsakerTjeneste = FinnFeriepengepåvirkendeFagsakerTjeneste.finnTjeneste(feriepengepåvirkendeFagsakerTjenester, ref.getFagsakYtelseType());
-            Set<Fagsak> påvirkendeFagsaker = feriepengepåvirkendeFagsakerTjeneste.finnSakerSomPåvirkerFeriepengerFor(behandling.getFagsak());
-            var andelerSomKanGiFeriepengerForRelevaneSaker = hentFeriepengeAndelerTjeneste.finnAndelerSomKanGiFeriepenger(påvirkendeFagsaker);
-            feriepengerTjeneste.beregnFeriepengerV2(beregningsresultat, andelerSomKanGiFeriepengerForRelevaneSaker);
-        } else {
-            feriepengerTjeneste.beregnFeriepenger(beregningsresultat);
-        }
+        var feriepengepåvirkendeFagsakerTjeneste = FinnFeriepengepåvirkendeFagsakerTjeneste.finnTjeneste(feriepengepåvirkendeFagsakerTjenester, ref.getFagsakYtelseType());
+        Set<Fagsak> påvirkendeFagsaker = feriepengepåvirkendeFagsakerTjeneste.finnSakerSomPåvirkerFeriepengerFor(behandling.getFagsak());
+        var andelerSomKanGiFeriepengerForRelevaneSaker = hentFeriepengeAndelerTjeneste.finnAndelerSomKanGiFeriepenger(påvirkendeFagsaker);
+        feriepengerTjeneste.beregnFeriepengerV2(beregningsresultat, andelerSomKanGiFeriepengerForRelevaneSaker);
 
         // Lagre beregningsresultat
         beregningsresultatRepository.lagre(behandling, beregningsresultat);
