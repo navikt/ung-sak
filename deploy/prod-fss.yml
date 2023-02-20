@@ -235,6 +235,8 @@ spec:
     # Feature-flag
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
       value: "false"
+    - name: ENABLE_BRUKERDIALOGINNSYN
+      value: "true"
     - name: PSB_UTTAK_UNNTAK_AKTIVITETER
       value: "AFMX0|2021-03-01"
     - name: OMP_VERIFISERING_TILKJENT_YTELSE
