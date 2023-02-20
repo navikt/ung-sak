@@ -18,6 +18,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -82,17 +83,21 @@ class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
         result.add(sykdomStartpunk);
         log.info("Kjører diff av sykdom, funnet følgende resultat = {}", sykdomStartpunk);
 
-        StartpunktType tilsynStartpunkt = utledStartpunktForEtablertTilsyn(ref);
-        result.add(tilsynStartpunkt);
-        log.info("Kjører diff av etablertTilsyn, funnet følgende resultat = {}", tilsynStartpunkt);
+        if (ref.getFagsakYtelseType() == FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
+            StartpunktType tilsynStartpunkt = utledStartpunktForEtablertTilsyn(ref);
+            result.add(tilsynStartpunkt);
+            log.info("Kjører diff av etablertTilsyn, funnet følgende resultat = {}", tilsynStartpunkt);
+        }
 
         StartpunktType uttakStartpunkt = utledStartpunktForUttak(ref);
         log.info("Kjører diff av uttak, funnet følgende resultat = {}", uttakStartpunkt);
         result.add(uttakStartpunkt);
 
-        StartpunktType nattevåkBeredskapStartpunkt = utledStartpunktForNattevåkOgBeredskap(ref);
-        result.add(nattevåkBeredskapStartpunkt);
-        log.info("Kjører diff av nattevåk & beredskap, funnet følgende resultat = {}", nattevåkBeredskapStartpunkt);
+        if (ref.getFagsakYtelseType() == FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
+            StartpunktType nattevåkBeredskapStartpunkt = utledStartpunktForNattevåkOgBeredskap(ref);
+            result.add(nattevåkBeredskapStartpunkt);
+            log.info("Kjører diff av nattevåk & beredskap, funnet følgende resultat = {}", nattevåkBeredskapStartpunkt);
+        }
 
         return result.stream()
             .min(Comparator.comparing(StartpunktType::getRangering))
