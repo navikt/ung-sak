@@ -3,11 +3,12 @@ package no.nav.k9.sak.hendelse.brukerdialoginnsyn;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -23,6 +24,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.k9.sak.domene.behandling.steg.omsorgenfor.BrukerdialoginnsynTjeneste;
 
 @ApplicationScoped
 @ProsessTask(PubliserOmsorgForBrukerdialoginnsynTask.TASKTYPE)
@@ -30,7 +32,7 @@ public class PubliserOmsorgForBrukerdialoginnsynTask implements ProsessTaskHandl
     public static final String TASKTYPE = "brukerdialoginnsyn.publiserOmsorg";
     private static final Logger logger = LoggerFactory.getLogger(PubliserOmsorgForBrukerdialoginnsynTask.class);
     
-    private BrukerdialoginnsynService brukerdialoginnsynService;
+    private Instance<BrukerdialoginnsynTjeneste> brukerdialoginnsynServicer;
     private BehandlingRepository behandlingRepository;
     private BehandlingModellRepository behandlingModellRepository;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -40,11 +42,11 @@ public class PubliserOmsorgForBrukerdialoginnsynTask implements ProsessTaskHandl
     public PubliserOmsorgForBrukerdialoginnsynTask() {}
 
     @Inject
-    public PubliserOmsorgForBrukerdialoginnsynTask(BrukerdialoginnsynService brukerdialoginnsynService,
+    public PubliserOmsorgForBrukerdialoginnsynTask(@Any Instance<BrukerdialoginnsynTjeneste> brukerdialoginnsynServicer,
             BehandlingRepository behandlingRepository,
             BehandlingModellRepository behandlingModellRepository,
             VilkårResultatRepository vilkårResultatRepository) {
-        this.brukerdialoginnsynService = brukerdialoginnsynService;
+        this.brukerdialoginnsynServicer = brukerdialoginnsynServicer;
         this.behandlingRepository = behandlingRepository;
         this.behandlingModellRepository = behandlingModellRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -72,6 +74,8 @@ public class PubliserOmsorgForBrukerdialoginnsynTask implements ProsessTaskHandl
     private void publiserOmsorgenForHendelseFor(final Behandling b) {
         final var vilkårene = vilkårResultatRepository.hent(b.getId());
         final boolean harOmsorgenFor = harOmsorgenForISistePeriode(vilkårene);
+        
+        var brukerdialoginnsynService = BrukerdialoginnsynTjeneste.finnTjeneste(brukerdialoginnsynServicer, b.getFagsakYtelseType());
         brukerdialoginnsynService.publiserOmsorgenForHendelse(b, harOmsorgenFor);
     }
     
