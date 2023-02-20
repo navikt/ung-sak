@@ -7,13 +7,12 @@ import java.util.UUID;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.k9.formidling.kontrakt.dokumentdataparametre.DokumentdataParametreK9;
 import no.nav.k9.formidling.kontrakt.dokumentdataparametre.FritekstbrevinnholdDto;
 import no.nav.k9.formidling.kontrakt.kodeverk.DokumentMalType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.dokument.bestill.BrevHistorikkinnslag;
@@ -24,7 +23,7 @@ import no.nav.k9.sak.kontrakt.dokument.MottakerDto;
 @Dependent
 public class DokumentKafkaBestiller {
     private BehandlingRepository behandlingRepository;
-    private ProsessTaskRepository prosessTaskRepository;
+    private ProsessTaskTjeneste prosessTaskRepository;
     private BrevHistorikkinnslag brevHistorikkinnslag;
 
     public DokumentKafkaBestiller() {
@@ -33,7 +32,7 @@ public class DokumentKafkaBestiller {
 
     @Inject
     public DokumentKafkaBestiller(BehandlingRepository behandlingRepository,
-                                  ProsessTaskRepository prosessTaskRepository,
+                                  ProsessTaskTjeneste prosessTaskRepository,
                                   BrevHistorikkinnslag brevHistorikkinnslag) {
         this.behandlingRepository = behandlingRepository;
         this.prosessTaskRepository = prosessTaskRepository;
@@ -88,7 +87,7 @@ public class DokumentKafkaBestiller {
     }
 
     private void opprettKafkaTask(Behandling behandling, DokumentMalType dokumentMalType, MottakerDto overstyrtMottaker, String payload) {
-        ProsessTaskData prosessTaskData = new ProsessTaskData(DokumentbestillerKafkaTaskProperties.TASKTYPE);
+        ProsessTaskData prosessTaskData =  ProsessTaskData.forProsessTask(DokumentBestillerKafkaTask.class);
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
 
         prosessTaskData.setPayload(payload);

@@ -1,5 +1,9 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.mottak;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_AO;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_MA;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -10,9 +14,9 @@ import no.nav.k9.sak.behandlingslager.behandling.personopplysning.Personopplysni
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OMP_KS")
-@FagsakYtelseTypeRef("OMP_MA")
-@FagsakYtelseTypeRef("OMP_AO")
+@FagsakYtelseTypeRef(OMSORGSPENGER_KS)
+@FagsakYtelseTypeRef(OMSORGSPENGER_MA)
+@FagsakYtelseTypeRef(OMSORGSPENGER_AO)
 public class GrunnlagKopiererUtvidetRett implements GrunnlagKopierer {
 
     private PersonopplysningRepository personopplysningRepository;

@@ -200,15 +200,6 @@ public class OppgittOpptjening {
             '}';
     }
 
-    /**
-     * Brukes til å filtrere bort tomme oppgitt opptjening elementer ved migrering. Bør ikke være nødvendig til annet.
-     * <p>
-     * har minst noe av oppgitt arbeidsforhold, egen næring, annen aktivitet eller frilans.
-     */
-    public boolean harOpptjening() {
-        return !getOppgittArbeidsforhold().isEmpty() || !getEgenNæring().isEmpty() || !getAnnenAktivitet().isEmpty() || !getFrilans().isEmpty();
-    }
-
     public LocalDateTime getOpprettetTidspunkt() {
         return opprettetTidspunkt;
     }

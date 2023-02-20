@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import no.nav.abakus.iaygrunnlag.request.Dataset;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -50,6 +51,15 @@ public interface InntektArbeidYtelseTjeneste {
      * @return henter optional aggregat
      */
     Optional<InntektArbeidYtelseGrunnlag> finnGrunnlag(Long behandlingId);
+
+    /**
+     *  Finn grunnlag med gitt grunnlagskobling. Bør kun brukes i situasjoner der man ikke har tilgang til behandling som grunnlaget er lagret på.
+     *
+     * @param fagsak Fagsak
+     * @param inntektArbeidYtelseGrunnlagUuid grunnlag-uuid
+     * @return iay-grunnlag
+     */
+    InntektArbeidYtelseGrunnlag hentGrunnlagForGrunnlagId(Fagsak fagsak, UUID inntektArbeidYtelseGrunnlagUuid);
 
     /**
      *
@@ -138,5 +148,6 @@ public interface InntektArbeidYtelseTjeneste {
     void lagreInntektsmeldinger(Saksnummer saksnummer, Long behandlingId, Collection<InntektsmeldingBuilder> builders);
 
     Set<Inntektsmelding> hentInntektsmeldingerSidenRef(Saksnummer saksnummer, Long behandlingId, UUID eksternReferanse);
+    Set<Inntektsmelding> hentInntektsmeldingerKommetTomBehandling(Saksnummer saksnummer, Long behandlingId);
 
 }

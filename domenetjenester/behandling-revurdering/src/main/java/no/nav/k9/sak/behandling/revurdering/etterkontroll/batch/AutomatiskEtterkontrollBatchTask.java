@@ -2,11 +2,10 @@ package no.nav.k9.sak.behandling.revurdering.etterkontroll.batch;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
-import no.nav.k9.sak.behandling.revurdering.etterkontroll.tjeneste.AutomatiskEtterkontrollTjeneste;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
+import no.nav.k9.sak.behandling.revurdering.etterkontroll.tjeneste.AutomatiskEtterkontrollTjeneste;
 
 /**
  * Henter ut behandlinger som har fått innvilget engangsstønad på bakgrunn av terminbekreftelsen,
@@ -24,7 +23,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskHandler;
  */
 
 @ApplicationScoped
-@ProsessTask(AutomatiskEtterkontrollBatchTask.TASKTYPE)
+@ProsessTask(value = AutomatiskEtterkontrollBatchTask.TASKTYPE, cronExpression = "0 15 7 * * *", maxFailedRuns = 1)
 public class AutomatiskEtterkontrollBatchTask implements ProsessTaskHandler {
 
     public static final String TASKTYPE = "batch.etterkontroll";

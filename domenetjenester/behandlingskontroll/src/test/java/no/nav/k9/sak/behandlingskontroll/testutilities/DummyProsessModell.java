@@ -18,8 +18,8 @@ public class DummyProsessModell {
     private static final String YTELSE = "SVP";
     private static final FagsakYtelseType YTELSE_TYPE = FagsakYtelseType.SVANGERSKAPSPENGER;
 
-    @FagsakYtelseTypeRef(YTELSE)
-    @BehandlingTypeRef("BT-002")
+    @FagsakYtelseTypeRef(FagsakYtelseType.SVANGERSKAPSPENGER)
+    @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
     @Produces
     @ApplicationScoped
     public BehandlingModell førstegangsbehandling() {

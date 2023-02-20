@@ -114,15 +114,10 @@ public class RegisterdataEndringshåndterer {
 
     public void utledDiffOgReposisjonerBehandlingVedEndringer(Behandling behandling, EndringsresultatSnapshot grunnlagSnapshot, boolean utledÅrsaker) {
         // Utled diff hvis registerdata skal oppdateres
-        EndringsresultatDiff endringsresultat = oppdaterRegisteropplysninger(behandling, grunnlagSnapshot);
-
-        doReposisjonerBehandlingVedEndringer(behandling, endringsresultat, utledÅrsaker);
-    }
-
-    private EndringsresultatDiff oppdaterRegisteropplysninger(Behandling behandling, EndringsresultatSnapshot grunnlagSnapshot) {
         // Finn alle endringer som registerinnhenting har gjort på behandlingsgrunnlaget
         EndringsresultatDiff endringsresultat = endringsresultatSjekker.finnSporedeEndringerPåBehandlingsgrunnlag(behandling.getId(), grunnlagSnapshot);
-        return endringsresultat;
+
+        doReposisjonerBehandlingVedEndringer(behandling, endringsresultat, utledÅrsaker);
     }
 
     private void lagBehandlingÅrsakerOgHistorikk(Behandling behandling, EndringsresultatDiff endringsresultat) {

@@ -29,8 +29,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class MapUtenlandsoppholdTest {
 
-    private final MapUtenlandsopphold mapper = new MapUtenlandsopphold();
-
     @Test
     void skal_mappe_utenlandsopphold_innenfor_periode_til_vurdering() {
         var periodeTilVurdering = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(30), LocalDate.now());
@@ -48,7 +46,7 @@ class MapUtenlandsoppholdTest {
             List.of(),
             List.of()));
 
-        var result = mapper.map(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering);
+        var result = MapUtenlandsopphold.map(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering);
 
         assertThat(result).hasSize(1);
         var utenlandsopphold = result.get(new LukketPeriode(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato()));
@@ -87,7 +85,7 @@ class MapUtenlandsoppholdTest {
                 List.of(),
                 List.of()));
 
-        var result = mapper.map(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering);
+        var result = MapUtenlandsopphold.map(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering);
 
         assertThat(result).hasSize(1);
         var utenlandsopphold = result.get(new LukketPeriode(utenlandsperiode.getFomDato(), utenlandsperiode.getTomDato()));

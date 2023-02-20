@@ -1,7 +1,10 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -19,14 +22,15 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.behandling.steg.foreslåresultat.ForeslåBehandlingsresultatTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
-@FagsakYtelseTypeRef("PSB")
-@FagsakYtelseTypeRef("PPN")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
+@FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
 @ApplicationScoped
 public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandlingsresultatTjeneste {
 
@@ -61,7 +65,6 @@ public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandling
                 .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
                 .toList()), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
-        timeline.compress();
         if (timeline.isEmpty()) {
             return behandling.getFagsak().getPeriode();
         }
@@ -74,46 +77,35 @@ public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandling
             return true;
         }
         Behandling behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
-        var harIngenPerioderForSykdomsvilkår = harIngenPerioderForSykdomsvilkår(behandling, vilkårene);
-        if (harIngenPerioderForSykdomsvilkår) {
-            return true;
-        }
 
         final var maksPeriode = getMaksPeriode(ref.getBehandlingId());
         final var vilkårTidslinjer = vilkårene.getVilkårTidslinjer(maksPeriode);
 
-        final var avslåtteVilkår = vilkårTidslinjer.entrySet().stream()
-            .filter(e -> harAvslåtteVilkårsPerioder(e.getValue())
+        Set<VilkårType> definerendeVilkårTyper = definerendeVilkårTyper(behandling);
+
+        final boolean harAvslagForVilkårSomIkkeErDefinerende = vilkårTidslinjer.entrySet().stream()
+            .filter(e -> !definerendeVilkårTyper.contains(e.getKey()))
+            .anyMatch(e -> harAvslåtteVilkårsPerioder(e.getValue())
                 && harIngenOppfylteVilkårsPerioder(e.getValue())
-            )
-            .map(Map.Entry::getKey)
-            .toList();
+            );
 
-        if (avslåtteVilkår.isEmpty()) {
-            return false;
-        }
-
-        Set<VilkårType> sykdomVilkårTyper = sykdomVilkårTyper(behandling);
-        boolean harAvslagForVilkårSomIkkeErSykdomsvilkår = avslåtteVilkår.stream().anyMatch(v -> !sykdomVilkårTyper.contains(v));
-        if (harAvslagForVilkårSomIkkeErSykdomsvilkår) {
+        if (harAvslagForVilkårSomIkkeErDefinerende) {
             return true;
         }
 
-        return sykdomVilkårTyper.stream()
-            .allMatch(vilkårtype -> harIngenOppfylteVilkårsPerioder(vilkårTidslinjer.get(vilkårtype)));
+        LocalDateTimeline<VilkårPeriode> tidslinjeMedDefinerendeVilkår = LocalDateTimeline.empty();
+
+        for (VilkårType vilkårType : definerendeVilkårTyper) {
+            var vilkårTidslinje = vilkårTidslinjer.get(vilkårType);
+            if (vilkårTidslinje != null) {
+                tidslinjeMedDefinerendeVilkår = tidslinjeMedDefinerendeVilkår.combine(vilkårTidslinje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            }
+        }
+
+        return harIngenOppfylteVilkårsPerioder(tidslinjeMedDefinerendeVilkår);
     }
 
-    private boolean harIngenPerioderForSykdomsvilkår(Behandling behandling, Vilkårene vilkårene) {
-        return sykdomVilkårTyper(behandling)
-            .stream()
-            .allMatch(it -> harIngenPerioder(it, vilkårene));
-    }
-
-    private boolean harIngenPerioder(VilkårType vilkårType, Vilkårene vilkårene) {
-        return vilkårene.getVilkår(vilkårType).map(Vilkår::getPerioder).orElse(List.of()).isEmpty();
-    }
-
-    private Set<VilkårType> sykdomVilkårTyper(Behandling behandling) {
+    private Set<VilkårType> definerendeVilkårTyper(Behandling behandling) {
         return finnVilkårsperioderTilVurderingTjeneste(behandling).definerendeVilkår();
     }
 

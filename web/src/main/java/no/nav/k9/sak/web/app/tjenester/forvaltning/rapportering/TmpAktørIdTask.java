@@ -2,16 +2,15 @@ package no.nav.k9.sak.web.app.tjenester.forvaltning.rapportering;
 
 import java.util.TreeSet;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 
 @ApplicationScoped
@@ -23,11 +22,11 @@ public class TmpAktørIdTask implements ProsessTaskHandler {
     private static final Logger log = LoggerFactory.getLogger(TmpAktørIdTask.class);
     private TmpAktoerIdRepository aktørIdRepository;
     private AktørTjeneste aktørTjeneste;
-    private ProsessTaskRepository prosessTaskRepository;
+    private ProsessTaskTjeneste prosessTaskRepository;
 
     @Inject
     public TmpAktørIdTask(TmpAktoerIdRepository aktørIdRepository,
-                          ProsessTaskRepository prosessTaskRepository,
+                          ProsessTaskTjeneste prosessTaskRepository,
                           AktørTjeneste aktørTjeneste) {
         this.aktørIdRepository = aktørIdRepository;
         this.prosessTaskRepository = prosessTaskRepository;
@@ -51,7 +50,7 @@ public class TmpAktørIdTask implements ProsessTaskHandler {
             aktørIdRepository.lagre(mapIdenter);
 
             // rescheduler
-            var prosessTaskDataNy = new ProsessTaskData(TASKTYPE);
+            var prosessTaskDataNy = ProsessTaskData.forProsessTask(TmpAktørIdTask.class);
             prosessTaskDataNy.setCallIdFraEksisterende();
             prosessTaskRepository.lagre(prosessTaskDataNy);
         }

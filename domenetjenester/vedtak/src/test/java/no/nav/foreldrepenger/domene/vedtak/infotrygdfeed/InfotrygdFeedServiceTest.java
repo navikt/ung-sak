@@ -14,27 +14,27 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 
 public class InfotrygdFeedServiceTest {
 
-    private ProsessTaskRepository prosessTaskRepository;
+    private ProsessTaskTjeneste taskTjeneste;
 
     private InfotrygdFeedService service;
 
     @BeforeEach
     public void setUp() throws Exception {
-        prosessTaskRepository = mock(ProsessTaskRepository.class);
-        service = new InfotrygdFeedService(prosessTaskRepository);
+        taskTjeneste = mock(ProsessTaskTjeneste.class);
+        service = new InfotrygdFeedService(taskTjeneste);
     }
 
     @Test
     public void mockHelper_lager_sendbar_melding() {
         Behandling behandling = mockHelper().hentBehandling();
         service.publiserHendelse(behandling);
-        verify(prosessTaskRepository).lagre(any(ProsessTaskData.class));
+        verify(taskTjeneste).lagre(any(ProsessTaskData.class));
     }
 
     @Test
@@ -49,7 +49,7 @@ public class InfotrygdFeedServiceTest {
             .hentBehandling();
 
         ArgumentCaptor<ProsessTaskData> captor = ArgumentCaptor.forClass(ProsessTaskData.class);
-        when(prosessTaskRepository.lagre(captor.capture())).thenReturn("urelevant");
+        when(taskTjeneste.lagre(captor.capture())).thenReturn("urelevant");
 
         service.publiserHendelse(behandling);
 
@@ -57,7 +57,6 @@ public class InfotrygdFeedServiceTest {
         assertThat(pd.getTaskType()).isEqualTo(PubliserInfotrygdFeedElementTask.TASKTYPE);
         assertThat(pd.getPropertyValue(PubliserInfotrygdFeedElementTask.KAFKA_KEY_PROPERTY)).isEqualTo("saksnummer");
         assertThat(pd.getSekvens()).isEqualTo("00099-00088"); // fra "versjonFagsak-versjonBehandling"
-        assertThat(pd.getGruppe()).contains(PubliserInfotrygdFeedElementTask.TASKTYPE, "saksnummer");
     }
 
     @Test
@@ -68,7 +67,7 @@ public class InfotrygdFeedServiceTest {
 
         service.publiserHendelse(behandling);
 
-        Mockito.verifyNoInteractions(prosessTaskRepository);
+        Mockito.verifyNoInteractions(taskTjeneste);
     }
 
     @Test

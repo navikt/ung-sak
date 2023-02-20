@@ -44,10 +44,10 @@ public class FastsettBeregningsgrunnlagATFLOppdaterer implements AksjonspunktOpp
     public OppdateringResultat oppdater(FastsettBeregningsgrunnlagATFLDtoer dtoer, AksjonspunktOppdaterParameter param) {
         Map<LocalDate, HåndterBeregningDto> stpTilDtoMap = dtoer.getGrunnlag().stream()
             .collect(Collectors.toMap(dto -> dto.getPeriode().getFom(), dto1 -> MapDtoTilRequest.map(dto1, dtoer.getBegrunnelse())));
-        List<OppdaterBeregningsgrunnlagResultat> oppdateringResultat = oppdateringjeneste.oppdaterBeregning(stpTilDtoMap, param.getRef());
+        List<OppdaterBeregningsgrunnlagResultat> oppdateringResultat = oppdateringjeneste.oppdaterBeregning(stpTilDtoMap, param.getRef(), false);
         List<BeregningsgrunnlagEndring> endringer = oppdateringResultat.stream().flatMap(o -> o.getBeregningsgrunnlagEndring().stream()).collect(Collectors.toList());
         historikkTjeneste.lagHistorikk(param, dtoer, endringer);
-        OppdateringResultat.Builder builder = OppdateringResultat.utenTransisjon();
+        OppdateringResultat.Builder builder = OppdateringResultat.builder();
         håndterEventueltOverflødigAksjonspunkt(param.getBehandling())
             .ifPresent(ap -> builder.medEkstraAksjonspunktResultat(ap.getAksjonspunktDefinisjon(), AksjonspunktStatus.AVBRUTT));
         return builder.build();

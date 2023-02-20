@@ -9,8 +9,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
@@ -28,7 +26,6 @@ public class InngangsvilkårFellesTjeneste {
     private BehandlingRepository behandlingRepository;
     private Instance<ForlengelseTjeneste> forlengelseTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste;
-    private Boolean enableForlengelse;
 
     InngangsvilkårFellesTjeneste() {
         // CDI
@@ -38,13 +35,11 @@ public class InngangsvilkårFellesTjeneste {
     public InngangsvilkårFellesTjeneste(RegelOrkestrerer regelOrkestrerer,
                                         BehandlingRepository behandlingRepository,
                                         @Any Instance<ForlengelseTjeneste> forlengelseTjeneste,
-                                        @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste,
-                                        @KonfigVerdi(value = "forlengelse.opptjening.enablet", defaultVerdi = "false") Boolean enableForlengelse) {
+                                        @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste) {
         this.regelOrkestrerer = regelOrkestrerer;
         this.behandlingRepository = behandlingRepository;
         this.forlengelseTjeneste = forlengelseTjeneste;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
-        this.enableForlengelse = enableForlengelse;
     }
 
     RegelResultat vurderInngangsvilkår(Set<VilkårType> vilkårHåndtertAvSteg, BehandlingReferanse ref, NavigableSet<DatoIntervallEntitet> intervaller) {
@@ -56,7 +51,7 @@ public class InngangsvilkårFellesTjeneste {
         var tjeneste = getPerioderTilVurderingTjeneste(behandling);
         var perioderTilVurdering = tjeneste.utled(behandlingId, vilkårType);
 
-        if (enableForlengelse && behandling.getOriginalBehandlingId().isPresent()) {
+        if (behandling.getOriginalBehandlingId().isPresent()) {
             // Trekk fra periodene som er forlengelse
             var forlengelseTjeneste = ForlengelseTjeneste.finnTjeneste(this.forlengelseTjeneste, behandling.getFagsakYtelseType(), behandling.getType());
 
@@ -77,10 +72,6 @@ public class InngangsvilkårFellesTjeneste {
         var forlengelseTjeneste = ForlengelseTjeneste.finnTjeneste(this.forlengelseTjeneste, behandling.getFagsakYtelseType(), behandling.getType());
 
         return forlengelseTjeneste.utledPerioderSomSkalBehandlesSomForlengelse(BehandlingReferanse.fra(behandling), perioderTilVurdering, vilkårType);
-    }
-
-    public Boolean getEnableForlengelse() {
-        return enableForlengelse;
     }
 
     private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(Behandling behandling) {

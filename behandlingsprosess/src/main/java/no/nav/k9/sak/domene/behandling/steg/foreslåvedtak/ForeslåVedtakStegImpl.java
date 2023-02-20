@@ -1,12 +1,13 @@
 package no.nav.k9.sak.domene.behandling.steg.foreslåvedtak;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.FORESLÅ_VEDTAK;
+
 import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -19,7 +20,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.dokument.bestill.tjenester.FormidlingDokumentdataTjeneste;
 
-@BehandlingStegRef(kode = "FORVEDSTEG")
+@BehandlingStegRef(value = FORESLÅ_VEDTAK)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped
@@ -64,7 +65,7 @@ public class ForeslåVedtakStegImpl implements ForeslåVedtakSteg {
 
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
-        if (!BehandlingStegType.FORESLÅ_VEDTAK.equals(tilSteg)) {
+        if (!FORESLÅ_VEDTAK.equals(tilSteg)) {
             formidlingDokumentdataTjeneste.ryddVedTilbakehopp(kontekst.getBehandlingId());
         }
     }

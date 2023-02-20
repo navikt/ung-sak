@@ -8,30 +8,43 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.http.entity.ContentType;
+import org.apache.http.message.BasicHeader;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.ws.rs.core.HttpHeaders;
-
-import no.nav.k9.aarskvantum.kontrakter.*;
-import no.nav.k9.sak.typer.PersonIdent;
-import org.apache.http.entity.ContentType;
-import org.apache.http.message.BasicHeader;
-
-import no.nav.k9.sak.kontrakt.uttak.Periode;
-import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
+import no.nav.k9.aarskvantum.kontrakter.FullUttaksplanForBehandlinger;
+import no.nav.k9.aarskvantum.kontrakter.FullUttaksplanRequest;
+import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
+import no.nav.k9.aarskvantum.kontrakter.ManuellVurderingRequest;
+import no.nav.k9.aarskvantum.kontrakter.MinMaxRequest;
+import no.nav.k9.aarskvantum.kontrakter.RammevedtakRequest;
+import no.nav.k9.aarskvantum.kontrakter.RammevedtakResponse;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlag;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUtbetalingGrunnlag;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUttrekk;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.LogLevel;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
+import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.sak.kontrakt.uttak.Periode;
+import no.nav.k9.sak.typer.PersonIdent;
+import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
 @Default
+@ScopedRestIntegration(scopeKey = "k9.oms.aarskvantum.scope", defaultScope = "api://prod-fss.k9saksbehandling.k9-aarskvantum/.default")
 public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
 
     private static final Validator VALIDATOR = Validation.buildDefaultValidatorFactory().getValidator();
@@ -187,9 +200,10 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
     }
 
     @Override
-    public RammevedtakResponse hentRammevedtak(PersonIdent personIdent, LukketPeriode periode) {
+    public RammevedtakResponse hentRammevedtak(PersonIdent personIdent, List<PersonIdent> barnFnr, LukketPeriode periode) {
         try {
-            var request = new RammevedtakRequest(personIdent.getIdent(), periode);
+            var barnasFnr = barnFnr.stream().map(barn -> barn.getIdent()).toList();
+            var request = new RammevedtakRequest(personIdent.getIdent(), barnasFnr, periode);
             var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/hentRammevedtak");
             return restKlient.post(endpoint, request, RammevedtakResponse.class);
         } catch (Exception e) {

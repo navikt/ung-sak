@@ -7,15 +7,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
-
 import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingModell;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
+import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 
 /**
  * Modellerer ett behandlingssteg, inklusiv hvilke aksjonspunkter må løses før/etter steget.
@@ -23,35 +21,36 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
  * behandlingssteg.
  */
 class BehandlingStegModellImpl implements BehandlingStegModell {
-    private Instance<BehandlingSteg> stegInstances;
-    private BehandlingSteg steg;
-    private BehandlingStegType behandlingStegType;
-
     /**
      * Aksjonspunkter som må løses ved inngang til behandlingsteg.
      */
     private final Set<String> inngangAksjonpunktKoder = new LinkedHashSet<>();
-
     /**
      * Aksjonspunkter som må løses ved utgang fra behandlingsteg.
      */
     private final Set<String> utgangAksjonpunktKoder = new LinkedHashSet<>();
-
-    /** Hver steg modell må tilhøre en BehandlingModell som beskriver hvordan de henger sammen. */
+    private Instance<BehandlingSteg> stegInstances;
+    private BehandlingSteg steg;
+    private BehandlingStegType behandlingStegType;
+    /**
+     * Hver steg modell må tilhøre en BehandlingModell som beskriver hvordan de henger sammen.
+     */
     private BehandlingModellImpl behandlingModell;
 
     /**
      * Holder for å referere til en konkret, men lazy-initialisert CDI implementasjon av et {@link BehandlingSteg}.
      */
-    BehandlingStegModellImpl(BehandlingModellImpl behandlingModell, 
-        @Any Instance<BehandlingSteg> bean, 
-        BehandlingStegType stegType) {
+    BehandlingStegModellImpl(BehandlingModellImpl behandlingModell,
+                             Instance<BehandlingSteg> bean,
+                             BehandlingStegType stegType) {
         this.stegInstances = Objects.requireNonNull(bean, "bean");
         this.behandlingModell = Objects.requireNonNull(behandlingModell, "behandlingModell");
         this.behandlingStegType = Objects.requireNonNull(stegType, "stegType");
     }
 
-    /** Direkte injisering av {@link BehandlingSteg}. For testing. */
+    /**
+     * Direkte injisering av {@link BehandlingSteg}. For testing.
+     */
     BehandlingStegModellImpl(BehandlingModellImpl behandlingModell, BehandlingSteg steg, BehandlingStegType stegType) {
         this.steg = Objects.requireNonNull(steg, "steg");
         this.behandlingModell = Objects.requireNonNull(behandlingModell, "behandlingModell");
@@ -73,8 +72,8 @@ class BehandlingStegModellImpl implements BehandlingStegModell {
 
     protected void initSteg() {
         if (steg == null) {
-            steg = BehandlingTypeRef.Lookup
-                .find(BehandlingSteg.class, stegInstances, behandlingModell.getFagsakYtelseType(), behandlingModell.getBehandlingType())
+            steg = BehandlingStegRef.Lookup
+                .find(BehandlingSteg.class, stegInstances, behandlingModell.getFagsakYtelseType(), behandlingModell.getBehandlingType(), behandlingStegType)
                 .orElseThrow(() -> {
                     return new IllegalStateException(
                         "Mangler steg definert for stegKode=" + behandlingStegType + " [behandlingType=" //$NON-NLS-1$ //$NON-NLS-2$

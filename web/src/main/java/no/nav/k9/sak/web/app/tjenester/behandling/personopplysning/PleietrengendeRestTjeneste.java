@@ -1,22 +1,13 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.personopplysning;
 
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
-import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
-import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.k9.sak.kontrakt.person.PersonopplysningDto;
-import no.nav.k9.sak.kontrakt.person.PersonopplysningPleietrengendeDto;
-import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -27,9 +18,18 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
+import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.person.PersonopplysningDto;
+import no.nav.k9.sak.kontrakt.person.PersonopplysningPleietrengendeDto;
+import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDiagnose;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
 
 @Path("")
 @ApplicationScoped
@@ -42,7 +42,7 @@ public class PleietrengendeRestTjeneste {
     private BehandlingRepository behandlingRepository;
     private PersonopplysningTjeneste personopplysningTjeneste;
     private TpsTjeneste tpsTjeneste;
-    private SykdomDokumentRepository sykdomDokumentRepository;
+    private PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
 
     public PleietrengendeRestTjeneste() {
         // CDI
@@ -52,11 +52,11 @@ public class PleietrengendeRestTjeneste {
     public PleietrengendeRestTjeneste(BehandlingRepository behandlingRepository,
                                       PersonopplysningTjeneste personopplysningTjeneste,
                                       TpsTjeneste tpsTjeneste,
-                                      SykdomDokumentRepository sykdomDokumentRepository) {
+                                      PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository) {
         this.behandlingRepository = behandlingRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.tpsTjeneste = tpsTjeneste;
-        this.sykdomDokumentRepository = sykdomDokumentRepository;
+        this.pleietrengendeSykdomDokumentRepository = pleietrengendeSykdomDokumentRepository;
     }
 
     @GET
@@ -69,19 +69,25 @@ public class PleietrengendeRestTjeneste {
     public PersonopplysningPleietrengendeDto getPersonopplysninger(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         var ref = BehandlingReferanse.fra(behandling);
-        var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysninger(ref, ref.getFagsakPeriode().getFomDato());
-        var pleietrengendePersonopplysninger = personopplysningerAggregat.getPersonopplysning(behandling.getFagsak().getPleietrengendeAktørId());
-        var personopplysningPleietrengendeDto = new PersonopplysningPleietrengendeDto();
-        personopplysningPleietrengendeDto.setNavn(pleietrengendePersonopplysninger.getNavn());
-        personopplysningPleietrengendeDto.setDodsdato(pleietrengendePersonopplysninger.getDødsdato());
-        var fnr = tpsTjeneste.hentFnr(pleietrengendePersonopplysninger.getAktørId());
-        if (fnr.isPresent()) {
-            personopplysningPleietrengendeDto.setFnr(fnr.get().getIdent());
+        var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysningerHvisEksisterer(ref, ref.getFagsakPeriode().getFomDato());
+        var dto = new PersonopplysningPleietrengendeDto();
+        if (personopplysningerAggregat.isPresent()) {
+            var pleietrengendePersonopplysninger = personopplysningerAggregat.get().getPersonopplysning(behandling.getFagsak().getPleietrengendeAktørId());
+            dto.setNavn(pleietrengendePersonopplysninger.getNavn());
+            dto.setDodsdato(pleietrengendePersonopplysninger.getDødsdato());
+            var fnr = tpsTjeneste.hentFnr(pleietrengendePersonopplysninger.getAktørId());
+            fnr.ifPresent(personIdent -> dto.setFnr(personIdent.getIdent()));
+        } else {
+            var personinfo = tpsTjeneste.hentBrukerForAktør(behandling.getFagsak().getPleietrengendeAktørId()).orElseThrow();
+            dto.setNavn(personinfo.getNavn());
+            dto.setDodsdato(personinfo.getDødsdato());
+            var fnr = tpsTjeneste.hentFnr(behandling.getFagsak().getPleietrengendeAktørId());
+            fnr.ifPresent(personIdent -> dto.setFnr(personIdent.getIdent()));
         }
-        var sykdomDiagnosekoder = sykdomDokumentRepository.hentDiagnosekoder(behandling.getFagsak().getPleietrengendeAktørId());
-        var diagnosekoder = sykdomDiagnosekoder.getDiagnosekoder().stream().map(diagnosekode -> diagnosekode.getDiagnosekode()).toList();
-        personopplysningPleietrengendeDto.setDiagnosekoder(diagnosekoder);
-        return personopplysningPleietrengendeDto;
+        var sykdomDiagnosekoder = pleietrengendeSykdomDokumentRepository.hentDiagnosekoder(behandling.getFagsak().getPleietrengendeAktørId());
+        var diagnosekoder = sykdomDiagnosekoder.getDiagnoser().stream().map(PleietrengendeSykdomDiagnose::getDiagnosekode).toList();
+        dto.setDiagnosekoder(diagnosekoder);
+        return dto;
     }
 
 }

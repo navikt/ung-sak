@@ -25,7 +25,7 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomAksjonspunktDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomAksjonspunkt;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste;
 
 @Produces(MediaType.APPLICATION_JSON)
 @ApplicationScoped
@@ -37,15 +37,15 @@ public class SykdomRestTjeneste {
     private static final String SYKDOM_AKSJONSPUNKT = "/aksjonspunkt";
     public static final String SYKDOM_AKSJONSPUNKT_PATH = BASE_PATH + SYKDOM_AKSJONSPUNKT;
 
-    private SykdomVurderingService sykdomVurderingService;
+    private SykdomVurderingTjeneste sykdomVurderingTjeneste;
     private BehandlingRepository behandlingRepository;
 
     public SykdomRestTjeneste() {
     }
 
     @Inject
-    public SykdomRestTjeneste(SykdomVurderingService sykdomVurderingService, BehandlingRepository behandlingRepository) {
-        this.sykdomVurderingService = sykdomVurderingService;
+    public SykdomRestTjeneste(SykdomVurderingTjeneste sykdomVurderingTjeneste, BehandlingRepository behandlingRepository) {
+        this.sykdomVurderingTjeneste = sykdomVurderingTjeneste;
         this.behandlingRepository = behandlingRepository;
     }
 
@@ -68,7 +68,7 @@ public class SykdomRestTjeneste {
                                                         @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
                                                             BehandlingUuidDto behandlingUuid) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).get();
-        final var aksjonspunkt = sykdomVurderingService.vurderAksjonspunkt(behandling);
+        final var aksjonspunkt = sykdomVurderingTjeneste.vurderAksjonspunkt(behandling);
 
         return toSykdomAksjonspunktDto(aksjonspunkt);
     }
@@ -82,6 +82,7 @@ public class SykdomRestTjeneste {
             aksjonspunkt.isManglerVurderingAvToOmsorgspersoner(),
             aksjonspunkt.isManglerVurderingAvILivetsSluttfase(),
             aksjonspunkt.isHarDataSomIkkeHarBlittTattMedIBehandling(),
-            aksjonspunkt.isNyttDokumentHarIkkekontrollertEksisterendeVurderinger());
+            aksjonspunkt.isNyttDokumentHarIkkekontrollertEksisterendeVurderinger(),
+            aksjonspunkt.isManglerVurderingAvLangvarigSykdom());
     }
 }

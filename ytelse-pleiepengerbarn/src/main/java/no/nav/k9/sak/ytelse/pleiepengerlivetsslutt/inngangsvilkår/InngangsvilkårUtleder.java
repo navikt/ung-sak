@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår;
 
 import static java.util.Arrays.asList;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.ALDERSVILKÅR;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.BEREGNINGSGRUNNLAGVILKÅR;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.I_LIVETS_SLUTTFASE;
@@ -19,7 +20,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.inngangsvilkår.UtledeteVilkår;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 
-@FagsakYtelseTypeRef("PPN")
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @BehandlingTypeRef
 @ApplicationScoped
 public class InngangsvilkårUtleder implements VilkårUtleder {

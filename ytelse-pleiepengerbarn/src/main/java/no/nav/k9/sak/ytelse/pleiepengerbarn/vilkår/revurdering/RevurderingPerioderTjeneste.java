@@ -1,15 +1,21 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
 import no.nav.k9.felles.util.LRUCache;
+import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -22,7 +28,6 @@ import no.nav.k9.sak.trigger.ProsessTriggere;
 import no.nav.k9.sak.trigger.ProsessTriggereRepository;
 import no.nav.k9.sak.trigger.Trigger;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk.KompletthetForBeregningTjeneste;
 
 @ApplicationScoped
 public class RevurderingPerioderTjeneste {
@@ -32,32 +37,35 @@ public class RevurderingPerioderTjeneste {
     private MottatteDokumentRepository mottatteDokumentRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private ProsessTriggereRepository prosessTriggereRepository;
-    private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
+    private Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregningTjenester;
 
     @Inject
     public RevurderingPerioderTjeneste(MottatteDokumentRepository mottatteDokumentRepository,
                                        InntektArbeidYtelseTjeneste iayTjeneste,
                                        ProsessTriggereRepository prosessTriggereRepository,
-                                       KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste) {
+                                       @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregningTjenester) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.iayTjeneste = iayTjeneste;
         this.prosessTriggereRepository = prosessTriggereRepository;
-        this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
+        this.inntektsmeldingerRelevantForBeregningTjenester = inntektsmeldingerRelevantForBeregningTjenester;
     }
 
     RevurderingPerioderTjeneste() {
         // CDI
     }
 
+    //denne funksjonen brukes til å utlede vilkårsperioder
     public Set<DatoIntervallEntitet> utledPerioderFraProsessTriggere(BehandlingReferanse referanse) {
         var prosessTriggere = prosessTriggereRepository.hentGrunnlag(referanse.getBehandlingId());
         return prosessTriggere.map(ProsessTriggere::getTriggere)
             .orElseGet(Set::of)
             .stream()
+            .filter(trigger -> BehandlingÅrsakType.medførerVilkårsperioder(trigger.getÅrsak()))
             .map(Trigger::getPeriode)
             .collect(Collectors.toSet());
     }
 
+    //denne funksjonen brukes for å tilby data til visning
     public Set<PeriodeMedÅrsak> utledPerioderFraProsessTriggereMedÅrsak(BehandlingReferanse referanse) {
         var prosessTriggere = prosessTriggereRepository.hentGrunnlag(referanse.getBehandlingId());
         return prosessTriggere.map(ProsessTriggere::getTriggere)
@@ -67,16 +75,16 @@ public class RevurderingPerioderTjeneste {
             .collect(Collectors.toSet());
     }
 
-    public Set<DatoIntervallEntitet> utledPerioderFraInntektsmeldinger(BehandlingReferanse referanse) {
+    public NavigableSet<DatoIntervallEntitet> utledPerioderFraInntektsmeldinger(BehandlingReferanse referanse, NavigableSet<DatoIntervallEntitet> datoIntervallEntitets) {
         if (!referanse.erRevurdering()) {
-            return Set.of();
+            return new TreeSet<>();
         }
         var mottatteInntektsmeldinger = mottatteDokumentRepository.hentMottatteDokumentForBehandling(referanse.getFagsakId(),
             referanse.getBehandlingId(),
             List.of(Brevkode.INNTEKTSMELDING), false, DokumentStatus.GYLDIG);
 
         if (mottatteInntektsmeldinger.isEmpty()) {
-            return Set.of();
+            return new TreeSet<>();
         }
 
         var cacheEntries = cache.get(referanse.getSaksnummer());
@@ -87,23 +95,33 @@ public class RevurderingPerioderTjeneste {
             return cacheEntries.stream()
                 .map(InntektsmeldingMedPerioder::getPeriode)
                 .filter(Objects::nonNull)
-                .map(it -> kompletthetForBeregningTjeneste.utledRelevantPeriode(referanse, it))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(TreeSet::new));
         }
 
         var sakInntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer(), referanse.getAktørId(), referanse.getFagsakYtelseType());
 
-        var inntektsmeldingerMedPeriode = sakInntektsmeldinger.stream()
-            .filter(im -> mottatteInntektsmeldinger.stream().anyMatch(at -> at.getJournalpostId().equals(im.getJournalpostId())))
-            .map(im -> new InntektsmeldingMedPerioder(im.getJournalpostId(), im.getStartDatoPermisjon().map(dato -> DatoIntervallEntitet.fraOgMedTilOgMed(dato, dato)).orElse(null)))
-            .collect(Collectors.toList());
-        cache.put(referanse.getSaksnummer(), inntektsmeldingerMedPeriode);
+        var relevanteNyeInntektsmeldinger = new ArrayList<InntektsmeldingMedPerioder>();
 
-        return inntektsmeldingerMedPeriode.stream()
+        var inntektsmeldingerRelevantForBeregning = InntektsmeldingerRelevantForBeregning.finnTjeneste(inntektsmeldingerRelevantForBeregningTjenester, referanse.getFagsakYtelseType());
+        for (DatoIntervallEntitet periode : datoIntervallEntitets) {
+            var relevanteInntektsmeldingerForPeriode = inntektsmeldingerRelevantForBeregning.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, periode);
+            var nyeRelevanteMottatteDokumenter = mottatteInntektsmeldinger.stream()
+                .filter(im -> relevanteInntektsmeldingerForPeriode.stream().anyMatch(at -> Objects.equals(at.getJournalpostId(), im.getJournalpostId())))
+                .toList();
+            var nyeRelevanteInntektsmeldinger = sakInntektsmeldinger.stream()
+                .filter(im -> nyeRelevanteMottatteDokumenter.stream().anyMatch(at -> Objects.equals(at.getJournalpostId(), im.getJournalpostId())))
+                .map(im -> new InntektsmeldingMedPerioder(im.getJournalpostId(), periode))
+                .toList();
+
+            relevanteNyeInntektsmeldinger.addAll(nyeRelevanteInntektsmeldinger);
+        }
+
+        cache.put(referanse.getSaksnummer(), relevanteNyeInntektsmeldinger);
+
+        return relevanteNyeInntektsmeldinger.stream()
             .map(InntektsmeldingMedPerioder::getPeriode)
             .filter(Objects::nonNull)
-            .map(it -> kompletthetForBeregningTjeneste.utledRelevantPeriode(referanse, it))
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(TreeSet::new));
     }
 
     private boolean cacheErGood(List<InntektsmeldingMedPerioder> cacheEntries, List<MottattDokument> mottatteInntektsmeldinger) {

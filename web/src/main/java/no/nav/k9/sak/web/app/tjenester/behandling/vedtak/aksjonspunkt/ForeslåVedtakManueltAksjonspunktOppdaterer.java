@@ -6,7 +6,6 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
-import no.nav.k9.sak.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.k9.sak.kontrakt.vedtak.ForeslaVedtakManueltAksjonspuntDto;
 
 @ApplicationScoped
@@ -26,10 +25,9 @@ class ForeslåVedtakManueltAksjonspunktOppdaterer implements AksjonspunktOppdate
 
     @Override
     public OppdateringResultat oppdater(ForeslaVedtakManueltAksjonspuntDto dto, AksjonspunktOppdaterParameter param) {
-        OppdateringResultat.Builder builder = OppdateringResultat.utenTransisjon();
+        OppdateringResultat.Builder builder = OppdateringResultat.builder();
         if (dto.isSkalBrukeOverstyrendeFritekstBrev()) {
             vedtaksbrevHåndterer.håndterTotrinnOgHistorikkinnslag(dto, param, builder);
-            builder.medFremoverHopp(FellesTransisjoner.FREMHOPP_TIL_FATTE_VEDTAK);
         }
         vedtaksbrevHåndterer.oppdaterVedtaksvarsel(dto, param.getBehandlingId(), param.getRef().getFagsakYtelseType());
         return builder.build();

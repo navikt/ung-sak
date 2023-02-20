@@ -11,7 +11,7 @@ import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
+import no.nav.abakus.iaygrunnlag.JsonObjectMapper;
 import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
@@ -87,7 +87,7 @@ public class AsyncAbakusLagreOpptjeningTask extends UnderBehandlingProsessTask {
     }
 
     private void lagreOppgittOpptjening(ProsessTaskData input, boolean erFrisinn) {
-        var jsonReader = IayGrunnlagJsonMapper.getMapper().readerFor(OppgittOpptjeningMottattRequest.class);
+        var jsonReader = JsonObjectMapper.getMapper().readerFor(OppgittOpptjeningMottattRequest.class);
 
         try {
             OppgittOpptjeningMottattRequest request = jsonReader.readValue(Objects.requireNonNull(input.getPayloadAsString(), "mangler payload"));

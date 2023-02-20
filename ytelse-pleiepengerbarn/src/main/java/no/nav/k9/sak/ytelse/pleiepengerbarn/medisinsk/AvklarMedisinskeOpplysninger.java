@@ -1,8 +1,5 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.medisinsk;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -24,55 +21,50 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.medisinsk.aksjonspunkt.AvklarMedisinskeOpplysningerDto;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleiebehovBuilder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomAksjonspunkt;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentHarOppdatertEksisterendeVurderinger;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.SykdomGrunnlagSammenlikningsresultat;
-import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarMedisinskeOpplysningerDto.class, adapter = AksjonspunktOppdaterer.class)
 public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<AvklarMedisinskeOpplysningerDto> {
 
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
-    private SykdomVurderingService sykdomVurderingService;
-    private SykdomGrunnlagService sykdomGrunnlagService;
+    private SykdomVurderingTjeneste sykdomVurderingTjeneste;
+    private MedisinskGrunnlagTjeneste medisinskGrunnlagTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private PleiebehovResultatRepository resultatRepository;
-    private SykdomDokumentRepository sykdomDokumentRepository;
-    private SykdomGrunnlagRepository sykdomGrunnlagRepository;
+    private PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
+    private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
 
     AvklarMedisinskeOpplysninger() {
         // for CDI proxy
     }
 
     @Inject
-    public AvklarMedisinskeOpplysninger(HistorikkTjenesteAdapter historikkTjenesteAdapter, SykdomVurderingService sykdomVurderingService,
-                                        SykdomGrunnlagService sykdomGrunnlagService,
+    public AvklarMedisinskeOpplysninger(HistorikkTjenesteAdapter historikkTjenesteAdapter, SykdomVurderingTjeneste sykdomVurderingTjeneste,
+                                        MedisinskGrunnlagTjeneste medisinskGrunnlagTjeneste,
                                         @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
                                         BehandlingRepository behandlingRepository, VilkårResultatRepository vilkårResultatRepository,
-                                        PleiebehovResultatRepository resultatRepository, SykdomDokumentRepository sykdomDokumentRepository,
-                                        SykdomGrunnlagRepository sykdomGrunnlagRepository) {
+                                        PleiebehovResultatRepository resultatRepository, PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository,
+                                        MedisinskGrunnlagRepository medisinskGrunnlagRepository) {
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
-        this.sykdomVurderingService = sykdomVurderingService;
-        this.sykdomGrunnlagService = sykdomGrunnlagService;
+        this.sykdomVurderingTjeneste = sykdomVurderingTjeneste;
+        this.medisinskGrunnlagTjeneste = medisinskGrunnlagTjeneste;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.resultatRepository = resultatRepository;
-        this.sykdomDokumentRepository = sykdomDokumentRepository;
-        this.sykdomGrunnlagRepository = sykdomGrunnlagRepository;
+        this.pleietrengendeSykdomDokumentRepository = pleietrengendeSykdomDokumentRepository;
+        this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
     }
 
 
@@ -84,11 +76,10 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
         boolean skalHaToTrinn;
 
         final var perioder = vilkårsPerioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-        List<Periode> nyeVurderingsperioder = SykdomUtils.toPeriodeList(perioder);
-        SykdomGrunnlagSammenlikningsresultat sammenlikningsresultat = sykdomGrunnlagService.utledRelevanteEndringerSidenForrigeBehandling(behandling, nyeVurderingsperioder);
+        SykdomGrunnlagSammenlikningsresultat sammenlikningsresultat = medisinskGrunnlagTjeneste.utledRelevanteEndringerSidenForrigeBehandling(behandling, perioder);
 
-        final boolean harTidligereHattRelevantGodkjentLegeerklæring = sykdomGrunnlagRepository.harHattGodkjentLegeerklæringMedUnntakAv(behandling.getFagsak().getPleietrengendeAktørId(), behandling.getUuid());
-        final boolean harGodkjentLegeerklæring = !sykdomDokumentRepository.hentGodkjenteLegeerklæringer(behandling.getFagsak().getPleietrengendeAktørId()).isEmpty();
+        final boolean harTidligereHattRelevantGodkjentLegeerklæring = medisinskGrunnlagRepository.harHattGodkjentLegeerklæringMedUnntakAv(behandling.getFagsak().getPleietrengendeAktørId(), behandling.getUuid());
+        final boolean harGodkjentLegeerklæring = !pleietrengendeSykdomDokumentRepository.hentGodkjenteLegeerklæringer(behandling.getFagsak().getPleietrengendeAktørId()).isEmpty();
 
         final var harFåttFørsteLegeerklæring = !harTidligereHattRelevantGodkjentLegeerklæring && harGodkjentLegeerklæring;
         final var harEndringer = !sammenlikningsresultat.getDiffPerioder().isEmpty();
@@ -96,7 +87,7 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
         skalHaToTrinn = harEndringer || harFåttFørsteLegeerklæring;
 
         if (dto.isIkkeVentPåGodkjentLegeerklæring()) {
-            final SykdomAksjonspunkt sykdomAksjonspunkt = sykdomVurderingService.vurderAksjonspunkt(behandling);
+            final SykdomAksjonspunkt sykdomAksjonspunkt = sykdomVurderingTjeneste.vurderAksjonspunkt(behandling);
             if (!sykdomAksjonspunkt.isManglerGodkjentLegeerklæring()) {
                 throw new IllegalStateException("Saksbehandler har bedt om å avslå sykdomsvilkåret grunnet manglende legeerklæring, selv om en godkjent legeerklæring allerede ligger inne.");
             }
@@ -111,7 +102,7 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
                 oppdaterMedIkkeOppfylt(vilkårType, avslagsårsak, param, behandling);
             }
 
-            return OppdateringResultat.utenTransisjon().medTotrinn().build();
+            return OppdateringResultat.builder().medTotrinn().build();
         }
 
         /*
@@ -128,9 +119,9 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
 
         lagHistorikkinnslag(param, "Sykdom manuelt behandlet.");
 
-        final OppdateringResultat resultat = OppdateringResultat.utenTransisjon().medTotrinnHvis(skalHaToTrinn).build();
-        resultat.skalRekjøreSteg();
-        resultat.setSteg(BehandlingStegType.VURDER_MEDISINSKVILKÅR);
+        final OppdateringResultat resultat = OppdateringResultat.builder().medTotrinnHvis(skalHaToTrinn).build();
+        resultat.rekjørSteg();
+        resultat.setSteg(BehandlingStegType.VURDER_MEDISINSKE_VILKÅR);
 
         return resultat;
     }
@@ -142,14 +133,6 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
             case I_LIVETS_SLUTTFASE -> Avslagsårsak.MANGLENDE_DOKUMENTASJON;
             default -> throw new IllegalArgumentException("Ikke-støttet VilkårType " + vilkårType);
         };
-    }
-
-    private void kvitterUtAlleDokumenterSomLiggerPåPleietrengende(final Behandling behandling) {
-        final LocalDateTime nå = LocalDateTime.now();
-        final List<SykdomDokument> dokumenter = sykdomDokumentRepository.hentDokumentSomIkkeHarOppdatertEksisterendeVurderinger(behandling.getFagsak().getPleietrengendeAktørId());
-        for (var sykdomDokument : dokumenter) {
-            sykdomDokumentRepository.kvitterDokumenterMedOppdatertEksisterendeVurderinger(new SykdomDokumentHarOppdatertEksisterendeVurderinger(sykdomDokument, SubjectHandler.getSubjectHandler().getUid(), nå));
-        }
     }
 
     private void oppdaterMedIkkeOppfylt(VilkårType vilkårType, Avslagsårsak avslagsårsak, AksjonspunktOppdaterParameter param, final Behandling behandling) {

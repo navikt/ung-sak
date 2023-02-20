@@ -56,13 +56,13 @@ public class FaktaOmBeregningVurderingHistorikkTjeneste {
             .ifPresent(toggleEndring -> lagFaktaVurderingInnslag(tekstBuilder, SELVSTENDIG_NÆRINGSDRIVENDE, toggleEndring, this::konvertBooleanTilNyIarbeidslivetVerdiType));
 
         faktaOmBeregningVurderinger.getHarLønnsendringIBeregningsperiodenEndring()
-            .ifPresent(toggleEndring -> tekstBuilder.medEndretFelt(LØNNSENDRING_I_PERIODEN, toggleEndring.getFraVerdi(), toggleEndring.getTilVerdi()));
+            .ifPresent(toggleEndring -> tekstBuilder.medEndretFelt(LØNNSENDRING_I_PERIODEN, toggleEndring.getFraVerdiEllerNull(), toggleEndring.getTilVerdi()));
 
         faktaOmBeregningVurderinger.getHarMilitærSiviltjenesteEndring()
-            .ifPresent(toggleEndring -> tekstBuilder.medEndretFelt(MILITÆR_ELLER_SIVIL, toggleEndring.getFraVerdi(), toggleEndring.getTilVerdi()));
+            .ifPresent(toggleEndring -> tekstBuilder.medEndretFelt(MILITÆR_ELLER_SIVIL, toggleEndring.getFraVerdiEllerNull(), toggleEndring.getTilVerdi()));
 
         faktaOmBeregningVurderinger.getHarEtterlønnSluttpakkeEndring()
-            .ifPresent(toggleEndring -> tekstBuilder.medEndretFelt(VURDER_ETTERLØNN_SLUTTPAKKE, toggleEndring.getFraVerdi(), toggleEndring.getTilVerdi()));
+            .ifPresent(toggleEndring -> tekstBuilder.medEndretFelt(VURDER_ETTERLØNN_SLUTTPAKKE, toggleEndring.getFraVerdiEllerNull(), toggleEndring.getTilVerdi()));
 
         lagHistorikkForErMottattYtelseEndringer(behandlingId,
             tekstBuilder,
@@ -96,11 +96,11 @@ public class FaktaOmBeregningVurderingHistorikkTjeneste {
                 String info = arbeidsgiverHistorikkinnslag.lagArbeidsgiverHistorikkinnslagTekst(erMottattYtelseEndring.getArbeidsgiver(), arbeidsforholdOverstyringer);
                 tekstBuilder.medEndretFelt(MOTTAR_YTELSE_ARBEID,
                     info,
-                    endring.getFraVerdi(),
+                    endring.getFraVerdiEllerNull(),
                     endring.getTilVerdi());
             } else if (erMottattYtelseEndring.getAktivitetStatus().erFrilanser()) {
                 tekstBuilder.medEndretFelt(MOTTAR_YTELSE_FRILANS,
-                    endring.getFraVerdi(),
+                    endring.getFraVerdiEllerNull(),
                     endring.getTilVerdi());
             }
         });
@@ -113,7 +113,7 @@ public class FaktaOmBeregningVurderingHistorikkTjeneste {
             ToggleEndring erGyldighetUtvidet = refusjonskravGyldighetEndring.getErGyldighetUtvidet();
             tekstBuilder.medEndretFelt(NY_REFUSJONSFRIST,
                 arbeidsgiverHistorikkinnslag.lagArbeidsgiverHistorikkinnslagTekst(refusjonskravGyldighetEndring.getArbeidsgiver(), arbeidsforholdOverstyringer),
-                erGyldighetUtvidet.getFraVerdi(), erGyldighetUtvidet.getTilVerdi());
+                erGyldighetUtvidet.getFraVerdiEllerNull(), erGyldighetUtvidet.getTilVerdi());
         });
     }
 
@@ -122,7 +122,7 @@ public class FaktaOmBeregningVurderingHistorikkTjeneste {
                                           String info,
                                           ToggleEndring endring,
                                           KonverterBoolenTilVerdiType konverterer) {
-        HistorikkEndretFeltVerdiType opprinneligVerdi = konverterer.konverter(endring.getFraVerdi());
+        HistorikkEndretFeltVerdiType opprinneligVerdi = konverterer.konverter(endring.getFraVerdiEllerNull());
         HistorikkEndretFeltVerdiType nyVerdi = konverterer.konverter(endring.getTilVerdi());
         tekstBuilder.medEndretFelt(endretFeltType, info, opprinneligVerdi, nyVerdi);
     }
@@ -131,7 +131,7 @@ public class FaktaOmBeregningVurderingHistorikkTjeneste {
                                           HistorikkEndretFeltType endretFeltType,
                                           ToggleEndring endring,
                                           KonverterBoolenTilVerdiType konverterer) {
-        HistorikkEndretFeltVerdiType opprinneligVerdi = konverterer.konverter(endring.getFraVerdi());
+        HistorikkEndretFeltVerdiType opprinneligVerdi = konverterer.konverter(endring.getFraVerdiEllerNull());
         HistorikkEndretFeltVerdiType nyVerdi = konverterer.konverter(endring.getTilVerdi());
         tekstBuilder.medEndretFelt(endretFeltType, opprinneligVerdi, nyVerdi);
     }

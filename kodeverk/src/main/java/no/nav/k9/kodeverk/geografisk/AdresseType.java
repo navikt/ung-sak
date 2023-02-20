@@ -22,6 +22,7 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 public enum AdresseType implements Kodeverdi {
 
     BOSTEDSADRESSE("BOSTEDSADRESSE", "Bostedsadresse", "BOAD"),
+    DELT_BOSTEDSADRESSE("DELT_BOSTEDSADRESSE", "Delt Bostedsadresse", null),
     POSTADRESSE("POSTADRESSE", "Postadresse", "POST"),
     POSTADRESSE_UTLAND("POSTADRESSE_UTLAND", "Postadresse i utlandet", "PUTL"),
     MIDLERTIDIG_POSTADRESSE_NORGE("MIDLERTIDIG_POSTADRESSE_NORGE", "Midlertidig postadresse i Norge", "TIAD"),

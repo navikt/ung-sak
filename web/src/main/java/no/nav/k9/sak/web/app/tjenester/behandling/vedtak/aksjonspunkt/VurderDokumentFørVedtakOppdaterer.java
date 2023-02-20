@@ -14,6 +14,6 @@ class VurderDokumentFørVedtakOppdaterer implements AksjonspunktOppdaterer<Vurde
 
     @Override
     public OppdateringResultat oppdater(VurdereDokumentFørVedtakDto dto, AksjonspunktOppdaterParameter param) {
-        return OppdateringResultat.utenOverhopp();
+        return OppdateringResultat.nyttResultat();
     }
 }

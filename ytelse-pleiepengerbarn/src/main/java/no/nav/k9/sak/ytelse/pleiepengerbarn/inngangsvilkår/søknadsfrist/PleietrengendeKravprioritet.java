@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -12,8 +13,6 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
-
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -53,11 +52,11 @@ public class PleietrengendeKravprioritet {
         return vurderKravprioritet(fagsakId, pleietrengende, false);
     }
 
-    @SuppressWarnings("unchecked")
     public LocalDateTimeline<List<Kravprioritet>> vurderKravprioritet(Long fagsakId, AktørId pleietrengende, boolean brukUbesluttedeData) {
-        final List<Fagsak> fagsaker = fagsakRepository.finnFagsakRelatertTil(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, pleietrengende, null, null, null);
+        Fagsak aktuellFagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
+        final List<Fagsak> fagsaker = utledFagsakerRelevantForKravprio(pleietrengende, aktuellFagsak);
 
-        LocalDateTimeline<List<Kravprioritet>> kravprioritetstidslinje = LocalDateTimeline.EMPTY_TIMELINE;
+        LocalDateTimeline<List<Kravprioritet>> kravprioritetstidslinje = LocalDateTimeline.empty();
         for (Fagsak fagsak : fagsaker) {
             final boolean brukAvsluttetBehandling = !brukUbesluttedeData && !fagsak.getId().equals(fagsakId);
             final LocalDateTimeline<Kravprioritet> fagsakTidslinje = finnEldsteKravTidslinjeForFagsak(fagsak, brukAvsluttetBehandling);
@@ -67,10 +66,16 @@ public class PleietrengendeKravprioritet {
         return kravprioritetstidslinje.compress();
     }
 
+    private List<Fagsak> utledFagsakerRelevantForKravprio(AktørId pleietrengende, Fagsak aktuellFagsak) {
+        if (Objects.equals(FagsakYtelseType.OPPLÆRINGSPENGER, aktuellFagsak.getYtelseType())) {
+            return List.of(aktuellFagsak);
+        }
+        return fagsakRepository.finnFagsakRelatertTil(aktuellFagsak.getYtelseType(), pleietrengende, null, null, null);
+    }
+
 
     private LocalDateTimeline<Kravprioritet> finnEldsteKravTidslinjeForFagsak(Fagsak fagsak, boolean brukAvsluttetBehandling) {
-        @SuppressWarnings("unchecked")
-        LocalDateTimeline<Kravprioritet> fagsakTidslinje = LocalDateTimeline.EMPTY_TIMELINE;
+        LocalDateTimeline<Kravprioritet> fagsakTidslinje = LocalDateTimeline.empty();
         final Optional<Behandling> behandlingOpt;
         if (brukAvsluttetBehandling) {
             behandlingOpt = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsak.getId());
@@ -89,22 +94,17 @@ public class PleietrengendeKravprioritet {
                 .map(vsp -> new LocalDateSegment<>(vsp.getPeriode().toLocalDateInterval(), new Kravprioritet(fagsak, behandlingOpt.get(), kravdokument.getKey().getInnsendingsTidspunkt())))
                 .collect(Collectors.toList())
             );
-            fagsakTidslinje = fagsakTidslinje.union(periodetidslinje, new LocalDateSegmentCombinator<Kravprioritet, Kravprioritet, Kravprioritet>() {
-                @Override
-                public LocalDateSegment<Kravprioritet> combine(LocalDateInterval datoInterval,
-                                                               LocalDateSegment<Kravprioritet> datoSegment,
-                                                               LocalDateSegment<Kravprioritet> datoSegment2) {
-                    if (datoSegment == null) {
-                        return new LocalDateSegment<>(datoInterval, datoSegment2.getValue());
-                    }
-                    if (datoSegment2 == null) {
-                        return new LocalDateSegment<>(datoInterval, datoSegment.getValue());
-                    }
-                    if (datoSegment.getValue().compareTo(datoSegment2.getValue()) <= 0) {
-                        return new LocalDateSegment<>(datoInterval, datoSegment.getValue());
-                    } else {
-                        return new LocalDateSegment<>(datoInterval, datoSegment2.getValue());
-                    }
+            fagsakTidslinje = fagsakTidslinje.union(periodetidslinje, (datoInterval, datoSegment, datoSegment2) -> {
+                if (datoSegment == null) {
+                    return new LocalDateSegment<>(datoInterval, datoSegment2.getValue());
+                }
+                if (datoSegment2 == null) {
+                    return new LocalDateSegment<>(datoInterval, datoSegment.getValue());
+                }
+                if (datoSegment.getValue().compareTo(datoSegment2.getValue()) <= 0) {
+                    return new LocalDateSegment<>(datoInterval, datoSegment.getValue());
+                } else {
+                    return new LocalDateSegment<>(datoInterval, datoSegment2.getValue());
                 }
             });
         }
@@ -112,24 +112,19 @@ public class PleietrengendeKravprioritet {
     }
 
     private LocalDateSegmentCombinator<List<Kravprioritet>, Kravprioritet, List<Kravprioritet>> sortertMedEldsteKravFørst() {
-        return new LocalDateSegmentCombinator<List<Kravprioritet>, Kravprioritet, List<Kravprioritet>>() {
-            @Override
-            public LocalDateSegment<List<Kravprioritet>> combine(LocalDateInterval datoInterval,
-                                                                 LocalDateSegment<List<Kravprioritet>> datoSegment,
-                                                                 LocalDateSegment<Kravprioritet> datoSegment2) {
+        return (datoInterval, datoSegment, datoSegment2) -> {
 
-                if (datoSegment == null) {
-                    return new LocalDateSegment<>(datoInterval, List.of(datoSegment2.getValue()));
-                }
-                if (datoSegment2 == null) {
-                    return new LocalDateSegment<>(datoInterval, datoSegment.getValue());
-                }
-                final List<Kravprioritet> liste = new ArrayList<>(datoSegment.getValue());
-                liste.add(datoSegment2.getValue());
-                Collections.sort(liste);
-
-                return new LocalDateSegment<>(datoInterval, liste);
+            if (datoSegment == null) {
+                return new LocalDateSegment<>(datoInterval, List.of(datoSegment2.getValue()));
             }
+            if (datoSegment2 == null) {
+                return new LocalDateSegment<>(datoInterval, datoSegment.getValue());
+            }
+            final List<Kravprioritet> liste = new ArrayList<>(datoSegment.getValue());
+            liste.add(datoSegment2.getValue());
+            Collections.sort(liste);
+
+            return new LocalDateSegment<>(datoInterval, liste);
         };
     }
 

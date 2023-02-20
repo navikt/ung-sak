@@ -35,10 +35,10 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentIdDto;
 import no.nav.k9.sak.kontrakt.vedtak.DokumentMedUstrukturerteDataDto;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil;
-import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.dokument.SykdomDokumentRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.dokument.PleietrengendeSykdomDokumentRestTjeneste;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokument;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
 
 @Path("")
 @Produces(MediaType.APPLICATION_JSON)
@@ -49,7 +49,7 @@ public class DokumenterMedUstrukturerteDataRestTjeneste {
     public static final String FRITEKSTDOKUMENTER_PATH = "/behandling/vedtak/fritekstdokumenter";
 
     private BehandlingRepository behandlingRepository;
-    private SykdomDokumentRepository sykdomDokumentRepository;
+    private PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
     private SafTjeneste safTjeneste;
 
     public DokumenterMedUstrukturerteDataRestTjeneste() {
@@ -57,9 +57,9 @@ public class DokumenterMedUstrukturerteDataRestTjeneste {
     }
 
     @Inject
-    public DokumenterMedUstrukturerteDataRestTjeneste(BehandlingRepository behandlingRepository, SykdomDokumentRepository sykdomDokumentRepository, SafTjeneste safTjeneste) {
+    public DokumenterMedUstrukturerteDataRestTjeneste(BehandlingRepository behandlingRepository, PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository, SafTjeneste safTjeneste) {
         this.behandlingRepository = behandlingRepository;
-        this.sykdomDokumentRepository = sykdomDokumentRepository;
+        this.pleietrengendeSykdomDokumentRepository = pleietrengendeSykdomDokumentRepository;
         this.safTjeneste = safTjeneste;
     }
 
@@ -86,10 +86,10 @@ public class DokumenterMedUstrukturerteDataRestTjeneste {
             return Collections.emptyList();
         }
 
-        List<SykdomDokument> sykdomDokumenter = sykdomDokumentRepository.hentNyeDokumenterFor(behandlingUuid.getBehandlingUuid());
+        List<PleietrengendeSykdomDokument> pleietrengendeSykdomDokumenter = pleietrengendeSykdomDokumentRepository.hentNyeDokumenterFor(behandlingUuid.getBehandlingUuid());
 
-        return sykdomDokumenter.stream()
-            .filter(SykdomDokument::isHarInfoSomIkkeKanPunsjes)
+        return pleietrengendeSykdomDokumenter.stream()
+            .filter(PleietrengendeSykdomDokument::isHarInfoSomIkkeKanPunsjes)
             .map(d -> new DokumentMedUstrukturerteDataDto(
                 "" + d.getId(),
                 d.getType(),
@@ -99,6 +99,6 @@ public class DokumenterMedUstrukturerteDataRestTjeneste {
     }
 
     private ResourceLink linkForGetDokumentinnhold(String behandlingUuid, String sykdomDokumentId) {
-        return ResourceLink.get(BehandlingDtoUtil.getApiPath(SykdomDokumentRestTjeneste.DOKUMENT_INNHOLD_PATH), "sykdom-dokument-innhold", Map.of(BehandlingUuidDto.NAME, behandlingUuid, SykdomDokumentIdDto.NAME, sykdomDokumentId));
+        return ResourceLink.get(BehandlingDtoUtil.getApiPath(PleietrengendeSykdomDokumentRestTjeneste.DOKUMENT_INNHOLD_PATH), "sykdom-dokument-innhold", Map.of(BehandlingUuidDto.NAME, behandlingUuid, SykdomDokumentIdDto.NAME, sykdomDokumentId));
     }
 }

@@ -4,7 +4,6 @@ import java.util.Collection;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -32,7 +31,6 @@ public class DokumentmottakerInntektsmelding implements Dokumentmottaker {
                                            MottatteDokumentTjeneste mottatteDokumentTjeneste) {
         this.dokumentMottakerFelles = dokumentMottakerFelles;
         this.mottatteDokumentTjeneste = mottatteDokumentTjeneste;
-
     }
 
     @Override

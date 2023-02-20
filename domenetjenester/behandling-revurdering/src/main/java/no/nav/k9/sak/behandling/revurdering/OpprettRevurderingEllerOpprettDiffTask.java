@@ -6,12 +6,11 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -80,7 +79,7 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
 
         var behandlinger = behandlingRepository.hentÅpneBehandlingerIdForFagsakId(fagsakId);
         final BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.fraKode(prosessTaskData.getPropertyValue(BEHANDLING_ÅRSAK));
-        var perioder = utledPerioder(behandlingÅrsakType, prosessTaskData);
+        var perioder = utledPerioder(prosessTaskData);
         if (behandlinger.isEmpty()) {
             var sisteVedtak = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
 
@@ -101,13 +100,14 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
                 throw new IllegalStateException("Fant flere åpne behandlinger");
             }
             var behandlingId = behandlinger.get(0);
-            log.info("Fant åpen behandling='{}', kjører diff for å flytte prosessen tilbake", behandlingId);
+            log.info("Fant åpen behandling='{}', kjører diff for å flytte prosessen tilbake pga {}", behandlingId, behandlingÅrsakType);
             var behandlingLås = behandlingRepository.taSkriveLås(behandlingId);
             var behandling = behandlingRepository.hentBehandling(behandlingId);
             BehandlingÅrsak.builder(behandlingÅrsakType).buildFor(behandling);
             behandlingRepository.lagre(behandling, behandlingLås);
+            var skalTvingeRegisterinnhenting = Set.of(BehandlingÅrsakType.RE_HENDELSE_DØD_BARN, BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER, BehandlingÅrsakType.RE_KLAGE_NY_INNH_LIGNET_INNTEKT).contains(behandlingÅrsakType);
 
-            behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling, false);
+            behandlingProsesseringTjeneste.opprettTasksForGjenopptaOppdaterFortsett(behandling, false, skalTvingeRegisterinnhenting);
 
             // Legger til sist, ønsker diffen denne gir for å sette startpunkt
             if (perioder != null && !perioder.isEmpty()) {
@@ -116,11 +116,7 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
         }
     }
 
-    private Set<DatoIntervallEntitet> utledPerioder(BehandlingÅrsakType årsakType, ProsessTaskData prosessTaskData) {
-        if (!Set.of(BehandlingÅrsakType.RE_SATS_REGULERING, BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON).contains(årsakType)) {
-            return null;
-        }
-
+    private Set<DatoIntervallEntitet> utledPerioder(ProsessTaskData prosessTaskData) {
         var perioderString = prosessTaskData.getPropertyValue(PERIODER);
         if (perioderString != null && !perioderString.isEmpty()) {
             return parseToPeriodeSet(perioderString);

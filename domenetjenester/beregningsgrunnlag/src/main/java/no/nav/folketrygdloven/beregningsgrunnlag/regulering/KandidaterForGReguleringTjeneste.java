@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.folketrygdloven.kalkulus.kodeverk.GrunnbeløpReguleringStatus;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -42,7 +40,13 @@ public class KandidaterForGReguleringTjeneste {
     }
 
     public boolean skalGReguleres(Long fagsakId, DatoIntervallEntitet periode) {
-        var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId).orElseThrow();
+        var sisteBehandlingOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId);
+
+        if (sisteBehandlingOpt.isEmpty()) {
+            return false;
+        }
+
+        var sisteBehandling = sisteBehandlingOpt.get();
 
         if (sisteBehandling.erHenlagt()) {
             var behandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
@@ -70,15 +74,25 @@ public class KandidaterForGReguleringTjeneste {
             .stream()
             .filter(it -> Utfall.OPPFYLT.equals(it.getGjeldendeUtfall()))
             .filter(it -> periode.overlapper(it.getPeriode().getFomDato(), it.getFom()))
-            .collect(Collectors.toList()); // FOM må være i perioden
+            .toList(); // FOM må være i perioden
 
+        if (overlappendeGrunnlag.isEmpty()) {
+            return false;
+        }
+
+        Saksnummer saksnummer = sisteBehandling.getFagsak().getSaksnummer();
         var bg = beregningPerioderGrunnlagRepository.hentGrunnlag(sisteBehandling.getId()).orElseThrow();
+
         List<UUID> koblingerÅSpørreMot = new ArrayList<>();
+
         overlappendeGrunnlag.forEach(og ->
             bg.finnGrunnlagFor(og.getSkjæringstidspunkt()).ifPresent(bgp -> koblingerÅSpørreMot.add(bgp.getEksternReferanse())));
-        Saksnummer saksnummer = sisteBehandling.getFagsak().getSaksnummer();
+
         Map<UUID, GrunnbeløpReguleringStatus> koblingMotVurderingsmap = kalkulusTjeneste.kontrollerBehovForGregulering(koblingerÅSpørreMot, saksnummer);
-        return koblingMotVurderingsmap.values().stream().anyMatch(v -> v.equals(GrunnbeløpReguleringStatus.NØDVENDIG));
+
+        return koblingMotVurderingsmap.values()
+            .stream()
+            .anyMatch(v -> v.equals(GrunnbeløpReguleringStatus.NØDVENDIG));
     }
 
 }

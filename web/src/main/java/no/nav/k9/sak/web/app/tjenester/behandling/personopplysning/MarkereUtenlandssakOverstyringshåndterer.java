@@ -39,7 +39,7 @@ public class MarkereUtenlandssakOverstyringshåndterer extends AbstractOverstyri
 
     @Override
     public OppdateringResultat håndterOverstyring(OverstyringUtenlandssakMarkeringDto dto, Behandling behandling, BehandlingskontrollKontekst kontekst) {
-        OppdateringResultat.Builder builder = OppdateringResultat.utenTransisjon();
+        OppdateringResultat.Builder builder = OppdateringResultat.builder();
         behandling.getÅpentAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.AUTOMATISK_MARKERING_AV_UTENLANDSSAK)
             .ifPresent(ap -> builder.medEkstraAksjonspunktResultat(ap.getAksjonspunktDefinisjon(), AksjonspunktStatus.AVBRUTT));
         return builder.build();

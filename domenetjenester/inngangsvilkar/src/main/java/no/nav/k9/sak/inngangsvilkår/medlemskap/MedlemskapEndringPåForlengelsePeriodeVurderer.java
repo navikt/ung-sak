@@ -4,9 +4,8 @@ import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.k9.kodeverk.vilkår.VilkårTypeKoder;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingskontroll.VilkårTypeRef;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -15,7 +14,7 @@ import no.nav.k9.sak.perioder.EndringPåForlengelsePeriodeVurderer;
 import no.nav.k9.sak.trigger.ProsessTriggereRepository;
 
 @FagsakYtelseTypeRef
-@VilkårTypeRef(VilkårTypeKoder.FP_VK_2)
+@VilkårTypeRef(VilkårType.MEDLEMSKAPSVILKÅRET)
 @ApplicationScoped
 public class MedlemskapEndringPåForlengelsePeriodeVurderer implements EndringPåForlengelsePeriodeVurderer {
 

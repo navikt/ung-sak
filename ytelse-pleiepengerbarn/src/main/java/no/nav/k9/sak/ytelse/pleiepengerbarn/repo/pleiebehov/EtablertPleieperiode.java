@@ -18,7 +18,6 @@ import jakarta.persistence.Version;
 import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PleiegradTypeConverter;
 
 @Entity(name = "Pleieperiode")
 @Table(name = "PB_PLEIEPERIODE")

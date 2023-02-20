@@ -57,9 +57,9 @@ public class AvklarSøknadsfristOppdaterer implements AksjonspunktOppdaterer<Avk
 
         avklartSøknadsfristRepository.lagreAvklaring(param.getBehandlingId(), avklaringer);
 
-        var builder = OppdateringResultat.utenTransisjon()
+        var builder = OppdateringResultat.builder()
             .medTotrinn().build();
-        builder.skalRekjøreSteg();
+        builder.rekjørSteg();
         builder.setSteg(BehandlingStegType.INIT_PERIODER);
         return builder;
     }

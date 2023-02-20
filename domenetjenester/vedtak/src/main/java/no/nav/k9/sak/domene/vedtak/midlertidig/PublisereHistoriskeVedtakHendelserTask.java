@@ -7,14 +7,13 @@ import java.time.temporal.ChronoUnit;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
-import no.nav.k9.sak.domene.vedtak.observer.PubliserVedtakHendelseTask;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
+import no.nav.k9.sak.domene.vedtak.observer.PubliserVedtakHendelseTask;
 
 @ApplicationScoped
 @ProsessTask(TASKTYPE)
@@ -22,16 +21,16 @@ public class PublisereHistoriskeVedtakHendelserTask implements ProsessTaskHandle
     public static final String TASKTYPE = "vedtak.etterfyllHistoriske";
 
     private BehandlingVedtakRepository vedtakRepository;
-    private ProsessTaskRepository prosessTaskRepository;
+    private ProsessTaskTjeneste taskTjeneste;
     private BehandlingLåsRepository behandlingLåsRepository;
 
     @Inject
     public PublisereHistoriskeVedtakHendelserTask(BehandlingVedtakRepository vedtakRepository,
                                                   BehandlingLåsRepository behandlingLåsRepository,
-                                                  ProsessTaskRepository prosessTaskRepository) {
+                                                  ProsessTaskTjeneste taskTjeneste) {
         this.vedtakRepository = vedtakRepository;
         this.behandlingLåsRepository = behandlingLåsRepository;
-        this.prosessTaskRepository = prosessTaskRepository;
+        this.taskTjeneste = taskTjeneste;
     }
 
     @Override
@@ -47,14 +46,14 @@ public class PublisereHistoriskeVedtakHendelserTask implements ProsessTaskHandle
     }
 
     private void opprettTaskForNyIterasjonAvHistoriskeVedtakhendelserTask() {
-        final ProsessTaskData taskData = new ProsessTaskData(TASKTYPE);
+        final ProsessTaskData taskData = ProsessTaskData.forProsessTask(PublisereHistoriskeVedtakHendelserTask.class);
         taskData.setNesteKjøringEtter(LocalDateTime.now().plus(100, ChronoUnit.MILLIS));
-        prosessTaskRepository.lagre(taskData);
+        taskTjeneste.lagre(taskData);
     }
 
     private void opprettTaskForPubliseringAvVedtak(Long behandlingId) {
-        final ProsessTaskData taskData = new ProsessTaskData(PubliserVedtakHendelseTask.TASKTYPE);
+        final ProsessTaskData taskData = ProsessTaskData.forProsessTask(PubliserVedtakHendelseTask.class);
         taskData.setProperty("behandlingId", behandlingId.toString());
-        prosessTaskRepository.lagre(taskData);
+        taskTjeneste.lagre(taskData);
     }
 }

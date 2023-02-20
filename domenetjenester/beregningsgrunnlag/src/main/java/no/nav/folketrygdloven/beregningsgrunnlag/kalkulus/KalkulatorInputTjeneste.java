@@ -14,13 +14,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.KravperioderMapper;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.TilKalkulusMapper;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.KalkulatorInputDto;
 import no.nav.folketrygdloven.kalkulus.iay.v1.InntektArbeidYtelseGrunnlagDto;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
@@ -34,27 +32,26 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("*")
+@FagsakYtelseTypeRef
 public class KalkulatorInputTjeneste {
 
     private Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste;
     private Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning;
     private Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper;
     private VilkårResultatRepository vilkårResultatRepository;
-    private boolean skalMappeAlleKrav;
+    private FinnPGITilgjengeligPåVedtakstidspunktet finnPGITilgjengeligPåVedtakstidspunktet;
 
     @Inject
     public KalkulatorInputTjeneste(@Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste,
                                    @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning,
                                    @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
                                    VilkårResultatRepository vilkårResultatRepository,
-                                   @KonfigVerdi(value = "MAP_ALLE_KRAV", defaultVerdi = "false") boolean skalMappeAlleKrav
-    ) {
+                                   @Any FinnPGITilgjengeligPåVedtakstidspunktet finnPGITilgjengeligPåVedtakstidspunktet) {
         this.opptjeningForBeregningTjeneste = Objects.requireNonNull(opptjeningForBeregningTjeneste, "opptjeningForBeregningTjeneste");
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
         this.ytelseGrunnlagMapper = ytelseGrunnlagMapper;
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.skalMappeAlleKrav = skalMappeAlleKrav;
+        this.finnPGITilgjengeligPåVedtakstidspunktet = finnPGITilgjengeligPåVedtakstidspunktet;
     }
 
     protected KalkulatorInputTjeneste() {
@@ -84,15 +81,17 @@ public class KalkulatorInputTjeneste {
                 sakInntektsmeldinger,
                 ytelsesGrunnlag,
                 vilkårsperiode,
-                vilkårsMerknad);
+                vilkårsMerknad
+            );
         };
     }
 
-    /** Finner vilkårmerknad for opptjeningsvilkåret
-     *  Brukes til å merke saker som skal beregnes som inaktiv § 8-47
+    /**
+     * Finner vilkårmerknad for opptjeningsvilkåret
+     * Brukes til å merke saker som skal beregnes som inaktiv § 8-47
      *
      * @param opptjeningsvilkår Opptjeningvilkår
-     * @param i input
+     * @param i                 input
      * @return Vilkårutfallmerknad
      */
     private VilkårUtfallMerknad finnVilkårmerknadForOpptjening(Optional<Vilkår> opptjeningsvilkår, BeregnInput i) {
@@ -103,13 +102,15 @@ public class KalkulatorInputTjeneste {
         return vilkårsMerknad;
     }
 
-    /** Mapper inputdto for beregning
-     * @param referanse Behandlingreferanse
-     * @param iayGrunnlag   IAY-grunnlag
-     * @param sakInntektsmeldinger  Inntektsmeldinger for saken
-     * @param ytelseGrunnlag Ytelsesspesifikt grunnlag
-     * @param vilkårsperiode Vilkårsperioden
-     * @param vilkårsMerknad Vilkårutfallmerknad fra opptjening (for inaktiv § 8-47)
+    /**
+     * Mapper inputdto for beregning
+     *
+     * @param referanse            Behandlingreferanse
+     * @param iayGrunnlag          IAY-grunnlag
+     * @param sakInntektsmeldinger Inntektsmeldinger for saken
+     * @param ytelseGrunnlag       Ytelsesspesifikt grunnlag
+     * @param vilkårsperiode       Vilkårsperioden
+     * @param vilkårsMerknad       Vilkårutfallmerknad fra opptjening (for inaktiv § 8-47)
      * @return Input-dto
      */
     public KalkulatorInputDto byggDto(BehandlingReferanse referanse,
@@ -123,30 +124,39 @@ public class KalkulatorInputTjeneste {
         OpptjeningForBeregningTjeneste tjeneste = finnOpptjeningForBeregningTjeneste(referanse);
         var imTjeneste = finnInntektsmeldingForBeregningTjeneste(referanse);
 
+
         var oppgittOpptjening = tjeneste.finnOppgittOpptjening(referanse, iayGrunnlag, stp).orElse(null);
-        var grunnlagDto = mapIAYTilKalkulus(referanse, vilkårsperiode, iayGrunnlag, sakInntektsmeldinger, oppgittOpptjening, imTjeneste);
+        var grunnlagDto = mapIAYTilKalkulus(referanse,
+            vilkårsperiode,
+            iayGrunnlag,
+            sakInntektsmeldinger,
+            oppgittOpptjening,
+            imTjeneste,
+            finnPGITilgjengeligPåVedtakstidspunktet);
         var opptjeningAktiviteter = tjeneste.hentEksaktOpptjeningForBeregning(referanse, iayGrunnlag, vilkårsperiode);
 
-        if (opptjeningAktiviteter.isEmpty()) {
+        if (opptjeningAktiviteter.isEmpty() && !erInaktiv(vilkårsMerknad)) {
             throw new IllegalStateException("Forventer opptjening for vilkårsperiode: " + vilkårsperiode + ", iayGrunnlag.opptjening=" + oppgittOpptjening);
         }
 
-        var opptjeningAktiviteterDto = TilKalkulusMapper.mapTilDto(opptjeningAktiviteter.get(), vilkårsMerknad);
+        var opptjeningAktiviteterDto = TilKalkulusMapper.mapTilDto(opptjeningAktiviteter, vilkårsMerknad);
 
-        KalkulatorInputDto kalkulatorInputDto = new KalkulatorInputDto(grunnlagDto, opptjeningAktiviteterDto, stp);
+        var kalkulatorInputDto = new KalkulatorInputDto(grunnlagDto, opptjeningAktiviteterDto, stp);
 
         kalkulatorInputDto.medYtelsespesifiktGrunnlag(ytelseGrunnlag);
 
-        if (skalMappeAlleKrav) {
-            kalkulatorInputDto.medRefusjonsperioderPrInntektsmelding(KravperioderMapper.map(
-                referanse,
-                vilkårsperiode,
-                sakInntektsmeldinger,
-                imTjeneste,
-                grunnlagDto));
-        }
+        kalkulatorInputDto.medRefusjonsperioderPrInntektsmelding(KravperioderMapper.map(
+            referanse,
+            vilkårsperiode,
+            sakInntektsmeldinger,
+            imTjeneste,
+            grunnlagDto));
 
         return kalkulatorInputDto;
+    }
+
+    private boolean erInaktiv(VilkårUtfallMerknad vilkårsMerknad) {
+        return vilkårsMerknad.equals(VilkårUtfallMerknad.VM_7847_B) || vilkårsMerknad.equals(VilkårUtfallMerknad.VM_7847_A);
     }
 
 
@@ -155,8 +165,14 @@ public class KalkulatorInputTjeneste {
                                                                InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag,
                                                                Collection<Inntektsmelding> inntektsmeldinger,
                                                                OppgittOpptjening oppgittOpptjening,
-                                                               InntektsmeldingerRelevantForBeregning imTjeneste) {
-        return new TilKalkulusMapper().mapTilDto(inntektArbeidYtelseGrunnlag, inntektsmeldinger, referanse.getAktørId(), vilkårsperiode, oppgittOpptjening, imTjeneste, referanse);
+                                                               InntektsmeldingerRelevantForBeregning imTjeneste,
+                                                               FinnPGITilgjengeligPåVedtakstidspunktet finnPGITilgjengeligPåVedtakstidspunktet) {
+        return new TilKalkulusMapper(imTjeneste, finnPGITilgjengeligPåVedtakstidspunktet).mapTilDto(inntektArbeidYtelseGrunnlag,
+            inntektsmeldinger,
+            referanse.getAktørId(),
+            vilkårsperiode,
+            oppgittOpptjening,
+            referanse);
     }
 
 
@@ -177,8 +193,7 @@ public class KalkulatorInputTjeneste {
     }
 
     public BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?> getYtelsesspesifikkMapper(FagsakYtelseType ytelseType) {
-        var ytelseTypeKode = ytelseType.getKode();
-        return FagsakYtelseTypeRef.Lookup.find(ytelseGrunnlagMapper, ytelseTypeKode).orElseThrow(
-            () -> new UnsupportedOperationException("Har ikke " + BeregningsgrunnlagYtelsespesifiktGrunnlagMapper.class.getName() + " mapper for ytelsetype=" + ytelseTypeKode));
+        return FagsakYtelseTypeRef.Lookup.find(ytelseGrunnlagMapper, ytelseType).orElseThrow(
+            () -> new UnsupportedOperationException("Har ikke " + BeregningsgrunnlagYtelsespesifiktGrunnlagMapper.class.getName() + " mapper for ytelsetype=" + ytelseType));
     }
 }

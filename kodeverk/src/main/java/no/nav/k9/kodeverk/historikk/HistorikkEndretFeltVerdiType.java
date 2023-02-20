@@ -49,7 +49,8 @@ public enum HistorikkEndretFeltVerdiType implements Kodeverdi {
     INGEN_VARIG_ENDRING_NAERING("INGEN_VARIG_ENDRING_NAERING", "Ingen varig endring i næring"),
     NYOPPSTARTET("NYOPPSTARTET", "nyoppstartet"),
     IKKE_NYOPPSTARTET("IKKE_NYOPPSTARTET", "ikke nyoppstartet"),
-
+    BENYTT("BENYTT", "Benytt"),
+    IKKE_BENYTT("IKKE_BENYTT", "Ikke benytt"),
 
     /** Vilkår. */
     VILKAR_IKKE_OPPFYLT("VILKAR_IKKE_OPPFYLT", "Vilkåret er ikke oppfylt"),

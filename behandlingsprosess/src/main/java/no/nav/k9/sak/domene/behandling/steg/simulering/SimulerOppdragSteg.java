@@ -1,6 +1,7 @@
 package no.nav.k9.sak.domene.behandling.steg.simulering;
 
 import static java.util.Collections.singletonList;
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.SIMULER_OPPDRAG;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
@@ -9,7 +10,7 @@ import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
+import no.nav.k9.felles.exception.IntegrasjonException;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
@@ -28,9 +29,8 @@ import no.nav.k9.sak.økonomi.simulering.tjeneste.SimuleringIntegrasjonTjeneste;
 import no.nav.k9.sak.økonomi.tilbakekreving.klient.K9TilbakeRestKlient;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingValg;
-import no.nav.k9.felles.exception.IntegrasjonException;
 
-@BehandlingStegRef(kode = "SIMOPP")
+@BehandlingStegRef(value = SIMULER_OPPDRAG)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped
@@ -83,7 +83,7 @@ public class SimulerOppdragSteg implements BehandlingSteg {
 
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
-        if (!BehandlingStegType.SIMULER_OPPDRAG.equals(tilSteg)) {
+        if (!SIMULER_OPPDRAG.equals(tilSteg)) {
             Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
             simuleringIntegrasjonTjeneste.kansellerSimulering(behandling);
             tilbakekrevingRepository.deaktiverEksisterendeTilbakekrevingValg(behandling);
@@ -98,7 +98,7 @@ public class SimulerOppdragSteg implements BehandlingSteg {
     private void opprettFortsettBehandlingTask(Behandling behandling) {
         LocalDateTime nesteKjøringEtter = utledNesteKjøring();
         behandlingProsesseringTjeneste.opprettTasksForFortsettBehandlingGjenopptaStegNesteKjøring(behandling,
-            BehandlingStegType.SIMULER_OPPDRAG, nesteKjøringEtter);
+            SIMULER_OPPDRAG, nesteKjøringEtter);
     }
 
     private BehandleStegResultat utledAksjonspunkt(Behandling behandling) {

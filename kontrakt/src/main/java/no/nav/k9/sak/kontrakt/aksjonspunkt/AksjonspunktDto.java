@@ -4,10 +4,6 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -15,6 +11,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
@@ -76,6 +75,16 @@ public class AksjonspunktDto {
 
     @JsonProperty(value = "venteårsak")
     private Venteårsak venteårsak;
+
+    @JsonProperty(value = "venteårsakVariant")
+    @Size(max = 5000)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    private String venteårsakVariant;
+
+    @JsonProperty(value = "opprettetAv")
+    @Size(max = 100)
+    @Pattern(regexp = "^[\\p{Alnum}ÆØÅæøå\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    private String opprettetAv;
 
     public AksjonspunktDto() {
     }
@@ -184,6 +193,22 @@ public class AksjonspunktDto {
         return venteårsak;
     }
 
+    public String getVenteårsakVariant() {
+        return venteårsakVariant;
+    }
+
+    public void setVenteårsakVariant(String venteårsakVariant) {
+        this.venteårsakVariant = venteårsakVariant;
+    }
+
+    public String getOpprettetAv() {
+        return opprettetAv;
+    }
+
+    public void setOpprettetAv(String opprettetAv) {
+        this.opprettetAv = opprettetAv;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this)
@@ -217,6 +242,7 @@ public class AksjonspunktDto {
             + (besluttersBegrunnelse == null ? "" : ", besluttersBegrunnelse=" + besluttersBegrunnelse)
             + (vurderPaNyttArsaker == null ? "" : ", vurderPaNyttArsaker=" + vurderPaNyttArsaker)
             + (venteårsak == null ? "" : ", venteårsak=" + venteårsak)
+            + (venteårsakVariant == null ? "" : ", venteårsak=" + venteårsakVariant)
             + ">";
     }
 }

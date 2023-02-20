@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding;
 
 import static java.util.stream.Collectors.flatMapping;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 
 import java.time.Duration;
 import java.util.Collection;
@@ -41,7 +42,7 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.TrekkUtFraværTjeneste;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 public class OmpManglendePåkrevdeInntektsmeldingerTjeneste implements YtelsespesifikkeInntektsmeldingTjeneste {
 
     private static final Logger logger = LoggerFactory.getLogger(OmpManglendePåkrevdeInntektsmeldingerTjeneste.class);
@@ -54,7 +55,7 @@ public class OmpManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
 
     @Inject
     public OmpManglendePåkrevdeInntektsmeldingerTjeneste(BehandlingRepository behandlingRepository,
-                                                         @FagsakYtelseTypeRef("OMP") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
+                                                         @FagsakYtelseTypeRef(OMSORGSPENGER) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                                                          TrekkUtFraværTjeneste trekkUtFraværTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.trekkUtFraværTjeneste = trekkUtFraværTjeneste;

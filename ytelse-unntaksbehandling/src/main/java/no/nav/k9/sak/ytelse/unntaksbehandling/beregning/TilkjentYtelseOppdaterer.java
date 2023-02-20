@@ -14,7 +14,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
@@ -69,7 +68,8 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
     @Inject
     public TilkjentYtelseOppdaterer(BehandlingRepositoryProvider repositoryProvider,
                                     @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste,
-                                    ArbeidsgiverValidator arbeidsgiverValidator, HistorikkTjenesteAdapter historikkAdapter) {
+                                    ArbeidsgiverValidator arbeidsgiverValidator, HistorikkTjenesteAdapter historikkAdapter
+    ) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
         this.beregnFeriepengerTjeneste = beregnFeriepengerTjeneste;
@@ -93,12 +93,11 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
         BeregningsresultatVerifiserer.verifiserBeregningsresultat(nyttBeregningsresultat);
 
         getFeriepengerTjeneste(behandling).ifPresent(tjeneste -> tjeneste.beregnFeriepenger(nyttBeregningsresultat));
-
         beregningsresultatRepository.lagre(behandling, nyttBeregningsresultat);
 
         opprettHistorikkinnslag(behandling, gammeltBeregningsresultat, nyttBeregningsresultat);
 
-        return OppdateringResultat.utenOverhopp();
+        return OppdateringResultat.nyttResultat();
     }
 
     private void byggAndelForSøkerOgArbeidsgiver(BeregningsresultatEntitet beregningsresultat, TilkjentYtelsePeriodeDto tyPeriode) {

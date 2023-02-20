@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.frisinn.beregningsgrunnlag;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -15,11 +17,10 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregnInput;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulatorInputTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.FinnInntektsmeldingForBeregning;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusRestKlient;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.LagBeregnRequestTjeneste;
@@ -34,7 +35,6 @@ import no.nav.folketrygdloven.kalkulus.request.v1.BeregnForRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregnListeRequest;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -46,7 +46,7 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
  * (https://github.com/navikt/ft-kalkulus/)
  */
 @ApplicationScoped
-@FagsakYtelseTypeRef("FRISINN")
+@FagsakYtelseTypeRef(FRISINN)
 public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
 
 
@@ -58,9 +58,10 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
                                    InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                    VilkårResultatRepository vilkårResultatRepository,
                                    LagBeregnRequestTjeneste beregnRequestTjeneste,
-                                   @FagsakYtelseTypeRef("FRISINN") Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper) {
+                                   @FagsakYtelseTypeRef(FRISINN) Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
+                                   FinnInntektsmeldingForBeregning finnInntektsmeldingForBeregning) {
         super(restTjeneste, vilkårResultatRepository,
-            inntektArbeidYtelseTjeneste, ytelseGrunnlagMapper, beregnRequestTjeneste, false);
+            inntektArbeidYtelseTjeneste, ytelseGrunnlagMapper, beregnRequestTjeneste, finnInntektsmeldingForBeregning);
     }
 
     @Override
@@ -72,7 +73,7 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
         Collection<BgRef> bgReferanser = beregnInput.stream().map(input -> new BgRef(input.getBgReferanse(), input.getSkjæringstidspunkt()))
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
-        var ytelseGrunnlagMapper = getYtelsesspesifikkMapper(FagsakYtelseType.FRISINN);
+        var ytelseGrunnlagMapper = getYtelsesspesifikkMapper(FRISINN);
 
         for (var input : sortertInput) {
             var ytelseGrunnlag = ytelseGrunnlagMapper.lagYtelsespesifiktGrunnlag(ref, input.getVilkårsperiode());
@@ -118,6 +119,7 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
         // samlet request til beregning
         var startBeregningRequest = new BeregnListeRequest(
             ref.getSaksnummer().getVerdi(),
+            ref.getBehandlingUuid(),
             new AktørIdPersonident(ref.getAktørId().getId()),
             YtelseTyperKalkulusStøtterKontrakt.FRISINN,
             new StegType(stegType.getKode()),

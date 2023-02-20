@@ -3,8 +3,6 @@ package no.nav.k9.sak.web.server.jetty.db;
 import java.util.Locale;
 import java.util.Properties;
 
-import javax.sql.DataSource;
-
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -13,7 +11,7 @@ import no.nav.vault.jdbc.hikaricp.VaultError;
 
 public class DatasourceUtil {
 
-    public static DataSource createDatasource(String datasourceName, DatasourceRole role, EnvironmentClass environmentClass, int maxPoolSize) {
+    public static HikariDataSource createDatasource(String datasourceName, DatasourceRole role, EnvironmentClass environmentClass, int maxPoolSize) {
         String rolePrefix = getRolePrefix(datasourceName);
         if (EnvironmentClass.LOCALHOST.equals(environmentClass)) {
             var config = initConnectionPoolConfig(datasourceName, null, maxPoolSize);
@@ -47,6 +45,9 @@ public class DatasourceUtil {
         config.setJdbcUrl(getProperty(dataSourceName + ".url"));
 
         config.setMinimumIdle(0);
+        config.setValidationTimeout(30000);
+        config.setConnectionTimeout(30000);
+        config.setIdleTimeout(600000);
         config.setMaximumPoolSize(maxPoolSize);
         config.setConnectionTestQuery("select 1");
         config.setDriverClassName("org.postgresql.Driver");
@@ -57,7 +58,7 @@ public class DatasourceUtil {
         }
 
         // optimaliserer inserts for postgres
-        var dsProperties=new Properties();
+        var dsProperties = new Properties();
         dsProperties.setProperty("reWriteBatchedInserts", "true");
         dsProperties.setProperty("logServerErrorDetail", "false"); // skrur av batch exceptions som lekker statements i åpen logg
         config.setDataSourceProperties(dsProperties);
@@ -68,7 +69,7 @@ public class DatasourceUtil {
         return config;
     }
 
-    private static DataSource createVaultDatasource(HikariConfig config, String mountPath, String role) {
+    private static HikariDataSource createVaultDatasource(HikariConfig config, String mountPath, String role) {
         try {
             return HikariCPVaultUtil.createHikariDataSourceWithVaultIntegration(config, mountPath, role);
         } catch (VaultError vaultError) {
@@ -76,7 +77,7 @@ public class DatasourceUtil {
         }
     }
 
-    private static DataSource createLocalDatasource(HikariConfig config, String schema, String username, String password) {
+    private static HikariDataSource createLocalDatasource(HikariConfig config, String schema, String username, String password) {
         config.setUsername(username);
         config.setPassword(password); // NOSONAR false positive
         if (schema != null && !schema.isEmpty()) {

@@ -1,5 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.dump.omsorgspenger;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -13,7 +15,7 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 public class OppgittFraværDump implements DebugDumpFagsak {
 
     private EntityManager entityManager;

@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.frisinn.mottak;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
+
 import java.time.LocalDate;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -15,7 +17,7 @@ import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.søknad.frisinn.FrisinnSøknad;
 
-@FagsakYtelseTypeRef("FRISINN")
+@FagsakYtelseTypeRef(FRISINN)
 @ApplicationScoped
 public class FrisinnSøknadMottaker implements SøknadMottakTjeneste<FrisinnSøknadInnsending> {
 

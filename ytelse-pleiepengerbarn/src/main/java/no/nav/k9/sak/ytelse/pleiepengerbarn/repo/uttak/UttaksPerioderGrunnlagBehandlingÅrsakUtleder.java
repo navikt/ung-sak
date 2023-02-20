@@ -1,9 +1,12 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
-
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -11,8 +14,10 @@ import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 import no.nav.k9.sak.domene.registerinnhenting.impl.behandlingårsak.BehandlingÅrsakUtleder;
 
 @ApplicationScoped
-@GrunnlagRef("UttakPerioderGrunnlag")
-@FagsakYtelseTypeRef("PSB")
+@GrunnlagRef(UttaksPerioderGrunnlag.class)
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
+@FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
 public class UttaksPerioderGrunnlagBehandlingÅrsakUtleder implements BehandlingÅrsakUtleder {
 
     @Override

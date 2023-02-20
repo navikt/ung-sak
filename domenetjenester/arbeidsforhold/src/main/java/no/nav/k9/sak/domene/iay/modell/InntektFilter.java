@@ -31,6 +31,7 @@ public class InntektFilter {
     private final Collection<Inntekt> inntekter;
     private final LocalDate skjæringstidspunkt;
     private final Boolean venstreSideASkjæringstidspunkt;
+    private final DatoIntervallEntitet periode;
 
     private BiPredicate<Inntekt, Inntektspost> inntektspostFilter;
 
@@ -43,17 +44,22 @@ public class InntektFilter {
     }
 
     public InntektFilter(Collection<Inntekt> inntekter, LocalDate skjæringstidspunkt, Boolean venstreSideASkjæringstidspunkt) {
-        this.inntekter = inntekter == null ? Collections.emptyList() : inntekter;
-        this.skjæringstidspunkt = skjæringstidspunkt;
-        this.venstreSideASkjæringstidspunkt = venstreSideASkjæringstidspunkt;
+        this(inntekter, null, skjæringstidspunkt, venstreSideASkjæringstidspunkt);
     }
 
     public InntektFilter(Optional<AktørInntekt> aktørInntekt) {
         this(aktørInntekt.isPresent() ? aktørInntekt.get().getInntekt() : Collections.emptyList());
     }
 
+    public InntektFilter(Collection<Inntekt> inntekter, DatoIntervallEntitet periode, LocalDate skjæringstidspunkt, Boolean venstreSideASkjæringstidspunkt) {
+        this.inntekter = inntekter == null ? Collections.emptyList() : inntekter;
+        this.skjæringstidspunkt = skjæringstidspunkt;
+        this.venstreSideASkjæringstidspunkt = venstreSideASkjæringstidspunkt;
+        this.periode = periode;
+    }
+
     public InntektFilter etter(LocalDate skjæringstidspunkt) {
-        return copyWith(this.inntekter, skjæringstidspunkt, false);
+        return copyWith(this.inntekter, null, skjæringstidspunkt, false);
     }
 
     public boolean isEmpty() {
@@ -62,11 +68,11 @@ public class InntektFilter {
 
     public InntektFilter filter(Arbeidsgiver arbeidsgiver) {
         var innt = inntekter.stream().filter(i -> Objects.equals(arbeidsgiver, i.getArbeidsgiver())).collect(Collectors.toList());
-        return copyWith(innt, skjæringstidspunkt, venstreSideASkjæringstidspunkt);
+        return copyWith(innt, null, skjæringstidspunkt, venstreSideASkjæringstidspunkt);
     }
 
     public InntektFilter filter(InntektsKilde kilde) {
-        return copyWith(getAlleInntekter(kilde), skjæringstidspunkt, venstreSideASkjæringstidspunkt);
+        return copyWith(getAlleInntekter(kilde), null, skjæringstidspunkt, venstreSideASkjæringstidspunkt);
     }
 
     public InntektFilter filter(InntektspostType inntektspostType) {
@@ -86,19 +92,19 @@ public class InntektFilter {
     }
 
     public InntektFilter filterBeregnetSkatt() {
-        return copyWith(getAlleInntektBeregnetSkatt(), skjæringstidspunkt, venstreSideASkjæringstidspunkt);
+        return copyWith(getAlleInntektBeregnetSkatt(), null, skjæringstidspunkt, venstreSideASkjæringstidspunkt);
     }
 
     public InntektFilter filterBeregningsgrunnlag() {
-        return copyWith(getAlleInntektBeregningsgrunnlag(), skjæringstidspunkt, venstreSideASkjæringstidspunkt);
+        return copyWith(getAlleInntektBeregningsgrunnlag(), null, skjæringstidspunkt, venstreSideASkjæringstidspunkt);
     }
 
     public InntektFilter filterPensjonsgivende() {
-        return copyWith(getAlleInntektPensjonsgivende(), skjæringstidspunkt, venstreSideASkjæringstidspunkt);
+        return copyWith(getAlleInntektPensjonsgivende(), null, skjæringstidspunkt, venstreSideASkjæringstidspunkt);
     }
 
     public InntektFilter filterSammenligningsgrunnlag() {
-        return copyWith(getAlleInntektSammenligningsgrunnlag(), skjæringstidspunkt, venstreSideASkjæringstidspunkt);
+        return copyWith(getAlleInntektSammenligningsgrunnlag(), null, skjæringstidspunkt, venstreSideASkjæringstidspunkt);
     }
 
     public Collection<Inntektspost> filtrer(Inntekt inntekt, Collection<Inntektspost> inntektsposter) {
@@ -110,7 +116,11 @@ public class InntektFilter {
     }
 
     public InntektFilter før(LocalDate skjæringstidspunkt) {
-        return copyWith(this.inntekter, skjæringstidspunkt, true);
+        return copyWith(this.inntekter, null, skjæringstidspunkt, true);
+    }
+
+    public InntektFilter i(DatoIntervallEntitet periode) {
+        return copyWith(this.inntekter, periode, skjæringstidspunkt, true);
     }
 
     public List<Inntekt> getAlleInntektBeregnetSkatt() {
@@ -210,13 +220,16 @@ public class InntektFilter {
         if (inntektspost == null) {
             return false;
         }
+        if (periode != null) {
+            return inntektspost.getPeriode().overlapper(periode);
+        }
         if (skjæringstidspunkt != null) {
-            DatoIntervallEntitet periode = inntektspost.getPeriode();
+            DatoIntervallEntitet inntektspostPeriode = inntektspost.getPeriode();
             if (venstreSideASkjæringstidspunkt) {
-                return periode.getFomDato().isBefore(skjæringstidspunkt.plusDays(1));
+                return inntektspostPeriode.getFomDato().isBefore(skjæringstidspunkt.plusDays(1));
             } else {
-                return periode.getFomDato().isAfter(skjæringstidspunkt) ||
-                    periode.getFomDato().isBefore(skjæringstidspunkt.plusDays(1)) && periode.getTomDato().isAfter(skjæringstidspunkt);
+                return inntektspostPeriode.getFomDato().isAfter(skjæringstidspunkt) ||
+                    inntektspostPeriode.getFomDato().isBefore(skjæringstidspunkt.plusDays(1)) && inntektspostPeriode.getTomDato().isAfter(skjæringstidspunkt);
             }
         }
         return true;
@@ -233,13 +246,13 @@ public class InntektFilter {
     }
 
     public InntektFilter filter(Predicate<Inntekt> filterFunc) {
-        return copyWith(getAlleInntekter().stream().filter(filterFunc).collect(Collectors.toList()), skjæringstidspunkt, venstreSideASkjæringstidspunkt);
+        return copyWith(getAlleInntekter().stream().filter(filterFunc).collect(Collectors.toList()), null, skjæringstidspunkt, venstreSideASkjæringstidspunkt);
     }
 
     public InntektFilter filter(BiPredicate<Inntekt, Inntektspost> filterFunc) {
         var copy = copyWith(getAlleInntekter().stream()
             .filter(i -> i.getAlleInntektsposter().stream().anyMatch(ip -> filterFunc.test(i, ip)))
-            .collect(Collectors.toList()), skjæringstidspunkt, venstreSideASkjæringstidspunkt);
+            .collect(Collectors.toList()), null, skjæringstidspunkt, venstreSideASkjæringstidspunkt);
 
         if (copy.inntektspostFilter == null)
             copy.inntektspostFilter = filterFunc;
@@ -248,8 +261,8 @@ public class InntektFilter {
         return copy;
     }
 
-    private InntektFilter copyWith(Collection<Inntekt> inntekter, LocalDate skjæringstidspunkt, Boolean venstreSideASkjæringstidspunkt) {
-        var copy = new InntektFilter(inntekter, skjæringstidspunkt, venstreSideASkjæringstidspunkt);
+    private InntektFilter copyWith(Collection<Inntekt> inntekter, DatoIntervallEntitet periode, LocalDate skjæringstidspunkt, Boolean venstreSideASkjæringstidspunkt) {
+        var copy = new InntektFilter(inntekter, periode, skjæringstidspunkt, venstreSideASkjæringstidspunkt);
         copy.inntektspostFilter = this.inntektspostFilter;
         return copy;
     }

@@ -11,6 +11,7 @@ public class ManglendeVedlegg {
     private final Arbeidsgiver arbeidsgiver;
     private final String arbeidsforholdId;
     private Boolean brukerHarSagtAtIkkeKommer = false;
+    private boolean harFraværFraArbeidsgiverIPerioden = true;
 
     public ManglendeVedlegg(DokumentTypeId dokumentType) {
         this(dokumentType, null);
@@ -48,13 +49,22 @@ public class ManglendeVedlegg {
         return brukerHarSagtAtIkkeKommer;
     }
 
+    public boolean getHarFraværFraArbeidsgiverIPerioden() {
+        return harFraværFraArbeidsgiverIPerioden;
+    }
+
+    public void setHarFraværFraArbeidsgiverIPerioden(boolean harFraværFraArbeidsgiverIPerioden) {
+        this.harFraværFraArbeidsgiverIPerioden = harFraværFraArbeidsgiverIPerioden;
+    }
+
     @Override
     public String toString() {
         return getClass().getSimpleName() + "<"
             + "arbeidsgiver=" + arbeidsgiver +
             ", arbeidsforholdId=" + arbeidsforholdId +
             ", dokumentType=" + dokumentType +
-            ", kommerIkke=" + brukerHarSagtAtIkkeKommer
+            ", kommerIkke=" + brukerHarSagtAtIkkeKommer +
+            ", harFraværFraArbeidsgiverIPerioden=" + harFraværFraArbeidsgiverIPerioden
             + ">";
 
     }

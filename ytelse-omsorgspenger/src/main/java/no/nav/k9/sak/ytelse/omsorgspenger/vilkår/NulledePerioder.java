@@ -14,6 +14,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
@@ -37,11 +38,7 @@ class NulledePerioder implements VilkårsPeriodiseringsFunksjon {
 
         nullTimerTidslinje = nullTimerTidslinje.disjoint(fagsakTidslinjeIkkeNull);
 
-        return Collections.unmodifiableNavigableSet(nullTimerTidslinje.compress()
-            .toSegments()
-            .stream()
-            .map(segment -> DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom()))
-            .collect(Collectors.toCollection(TreeSet::new)));
+        return TidslinjeUtil.tilDatoIntervallEntiteter(nullTimerTidslinje.compress());
     }
 
     private LocalDateTimeline<Boolean> opprettTidslinjeFraPerioder(Collection<OppgittFraværPeriode> oppgittePerioder, Predicate<OppgittFraværPeriode> filter) {

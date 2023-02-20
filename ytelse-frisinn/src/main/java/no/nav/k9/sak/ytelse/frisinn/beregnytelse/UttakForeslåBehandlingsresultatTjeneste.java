@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.frisinn.beregnytelse;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -11,7 +13,7 @@ import no.nav.k9.sak.domene.behandling.steg.foreslåresultat.ForeslåBehandlings
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 
-@FagsakYtelseTypeRef("FRISINN")
+@FagsakYtelseTypeRef(FRISINN)
 @ApplicationScoped
 public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandlingsresultatTjeneste {
 
@@ -25,7 +27,7 @@ public class UttakForeslåBehandlingsresultatTjeneste extends ForeslåBehandling
     public UttakForeslåBehandlingsresultatTjeneste(BehandlingRepositoryProvider repositoryProvider,
                                                    VedtakVarselRepository vedtakVarselRepository,
                                                    UttakRepository uttakRepository,
-                                                   @FagsakYtelseTypeRef("FRISINN") RevurderingBehandlingsresultatutleder revurderingBehandlingsresultatutleder) {
+                                                   @FagsakYtelseTypeRef(FRISINN) RevurderingBehandlingsresultatutleder revurderingBehandlingsresultatutleder) {
         super(repositoryProvider, vedtakVarselRepository, revurderingBehandlingsresultatutleder);
         this.uttakRepository = uttakRepository;
     }

@@ -28,11 +28,11 @@ public class PubliserSøknadForBrukerdialoginnsynTask implements ProsessTaskHand
     private static final Logger logger = LoggerFactory.getLogger(PubliserSøknadForBrukerdialoginnsynTask.class);
     private static final String PLEIETRENGENDE_AKTØR_ID = "pleietrengendeAktoerId";
     private static final String MOTTATT_DOKUMENT_ID = "mottattDokumentId";
-    
+
     private MottatteDokumentRepository mottatteDokumentRepository;
     private BrukerdialoginnsynMeldingProducer meldingProducer;
 
-    
+
     public PubliserSøknadForBrukerdialoginnsynTask() {}
 
     @Inject
@@ -42,20 +42,20 @@ public class PubliserSøknadForBrukerdialoginnsynTask implements ProsessTaskHand
         this.meldingProducer = meldingProducer;
     }
 
-    
+
     @Override
     public void doTask(ProsessTaskData pd) {
         final String key = Objects.requireNonNull(pd.getSaksnummer());
         final String aktørId = Objects.requireNonNull(pd.getAktørId());
         final String pleietrengendeAktørId = Objects.requireNonNull(pd.getPropertyValue(PLEIETRENGENDE_AKTØR_ID));
         final long mottattDokumentId = Long.parseLong(pd.getPropertyValue(MOTTATT_DOKUMENT_ID));
-        
+
         final MottattDokument mottattDokument = mottatteDokumentRepository.hentMottattDokument(mottattDokumentId).orElseThrow();
         if (mottattDokument.getStatus() == DokumentStatus.UGYLDIG) {
             logger.info("Ignorerer ugyldig dokument: " + mottattDokumentId);
             return;
         }
-        
+
         /*
          * Det er fint at vi deserialiserer og reserialiserer søknad. Dette sikrer at vi kun sender
          * søknader som følger formatet.
@@ -64,18 +64,18 @@ public class PubliserSøknadForBrukerdialoginnsynTask implements ProsessTaskHand
         final PsbSøknadsinnhold søknadsinnhold = new PsbSøknadsinnhold(mottattDokument.getJournalpostId().getVerdi(), aktørId, pleietrengendeAktørId, søknad);
         final InnsynHendelse<PsbSøknadsinnhold> hendelse = new InnsynHendelse<>(ZonedDateTime.now(), søknadsinnhold);
         final String json = JsonUtils.toString(hendelse);
-                
+
         logger.info("Publiserer hendelse til brukerdialoginnsyn. Key: '{}'", key);
 
         meldingProducer.send(key, json);
     }
-    
-    
+
+
     public static ProsessTaskData createProsessTaskData(Behandling behandling, MottattDokument mottattDokument) {
         Objects.requireNonNull(behandling);
         Objects.requireNonNull(mottattDokument.getId());
-        
-        final ProsessTaskData pd = new ProsessTaskData(PubliserSøknadForBrukerdialoginnsynTask.TASKTYPE);
+
+        final ProsessTaskData pd =  ProsessTaskData.forProsessTask(PubliserSøknadForBrukerdialoginnsynTask.class);
         final Fagsak fagsak = behandling.getFagsak();
         final String saksnummer = fagsak.getSaksnummer().getVerdi();
         final String gruppe = PubliserSøknadForBrukerdialoginnsynTask.TASKTYPE + "-" + saksnummer;
@@ -86,7 +86,7 @@ public class PubliserSøknadForBrukerdialoginnsynTask implements ProsessTaskHand
         pd.setProperty(PLEIETRENGENDE_AKTØR_ID, fagsak.getPleietrengendeAktørId().getId());
         pd.setProperty(MOTTATT_DOKUMENT_ID, mottattDokument.getId().toString());
         pd.setCallIdFraEksisterende();
-        
+
         return pd;
     }
 }

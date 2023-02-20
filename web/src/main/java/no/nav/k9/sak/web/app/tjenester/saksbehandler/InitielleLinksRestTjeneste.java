@@ -6,6 +6,7 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 import java.util.ArrayList;
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.Consumes;
@@ -13,8 +14,6 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-
-import io.swagger.v3.oas.annotations.Operation;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.kontrakt.behandling.InitLinksDto;
@@ -24,6 +23,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.historikk.HistorikkRestTjenest
 import no.nav.k9.sak.web.app.tjenester.dokument.DokumentRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.kodeverk.KodeverkRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.register.RedirectToRegisterRestTjeneste;
 
 
 @Path("/init-fetch")
@@ -60,6 +60,8 @@ public class InitielleLinksRestTjeneste {
         saklenker.add(get(HistorikkRestTjeneste.PATH, "sak-historikk"));
         saklenker.add(get(DokumentRestTjeneste.DOKUMENTER_PATH, "sak-dokumentliste"));
         saklenker.add(get(BehandlingRestTjeneste.BEHANDLINGER_ALLE, "sak-alle-behandlinger"));
+        saklenker.add(get(RedirectToRegisterRestTjeneste.AA_REG_PATH, "arbeidstaker-redirect"));
+        saklenker.add(get(RedirectToRegisterRestTjeneste.AINNTEKT_REG_PATH, "ainntekt-redirect"));
         return new InitLinksDto(lenkene, saklenker);
     }
 

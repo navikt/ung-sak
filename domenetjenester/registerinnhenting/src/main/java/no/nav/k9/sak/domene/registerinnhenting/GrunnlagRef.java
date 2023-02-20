@@ -17,7 +17,6 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.util.AnnotationLiteral;
 import jakarta.inject.Qualifier;
 import jakarta.persistence.Entity;
-
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 
@@ -33,20 +32,21 @@ public @interface GrunnlagRef {
 
     /**
      * Settes til navn på forretningshendelse slik det defineres i KODELISTE-tabellen.
+     * @return
      */
-    String value();
+    Class<?> value();
 
     /** AnnotationLiteral som kan brukes ved CDI søk. */
     class GrunnlagRefLiteral extends AnnotationLiteral<GrunnlagRef> implements GrunnlagRef {
 
-        private String navn;
+        private Class<?> navn;
 
-        public GrunnlagRefLiteral(String navn) {
-            this.navn = navn;
+        public GrunnlagRefLiteral(Class<?> navn) {
+            this.navn = navn != null ? navn : GrunnlagRefLiteral.class;
         }
 
         @Override
-        public String value() {
+        public Class<?> value() {
             return navn;
         }
     }
@@ -65,19 +65,15 @@ public @interface GrunnlagRef {
          * Kan brukes til å finne instanser blant angitte som matcher følgende kode, eller default '*' implementasjon. Merk at Instance bør være
          * injected med riktig forventet klassetype og @Any qualifier.
          */
-        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, Class<?> aggregatClass, FagsakYtelseType ytelseType) {
-            return find(cls, instances, getName(aggregatClass), ytelseType);
-        }
-
-        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, String aggrNavn, FagsakYtelseType ytelseType) {
+        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, Class<?> aggrNavn, FagsakYtelseType ytelseType) {
             Objects.requireNonNull(instances);
             Objects.requireNonNull(aggrNavn);
             Objects.requireNonNull(ytelseType);
 
-            var fagsakInstances = FagsakYtelseTypeRef.Lookup.list(cls, instances, ytelseType.getKode());
+            var fagsakInstances = FagsakYtelseTypeRef.Lookup.list(cls, instances, ytelseType);
 
             for (var inst : fagsakInstances) {
-                for (var navn : coalesce(aggrNavn, "*")) {
+                for (var navn : coalesce(aggrNavn, GrunnlagRefLiteral.class)) {
 
                     Instance<I> selected = inst.select(new GrunnlagRef.GrunnlagRefLiteral(navn));
                     if (selected.isUnsatisfied()) {
@@ -102,7 +98,8 @@ public @interface GrunnlagRef {
             return i;
         }
 
-        private static List<String> coalesce(String... vals) {
+        @SafeVarargs
+        private static <T> List<T> coalesce(T... vals) {
             return Arrays.stream(vals).filter(Objects::nonNull).distinct().collect(Collectors.toList());
         }
     }

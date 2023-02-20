@@ -19,10 +19,10 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.inject.Alternative;
-
 import no.nav.abakus.iaygrunnlag.request.Dataset;
 import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.arbeidsforhold.IAYDiffsjekker;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
@@ -83,6 +83,19 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
     @Override
     public Optional<InntektArbeidYtelseGrunnlag> finnGrunnlag(Long behandlingId) {
         return getAktivtInntektArbeidGrunnlag(behandlingId);
+    }
+
+    /**
+     * Finn grunnlag med gitt grunnlagskobling. Bør kun brukes i situasjoner der man ikke har tilgang til behandling som grunnlaget er lagret på.
+     *
+     * @param fagsak                          Fagsak
+     * @param inntektArbeidYtelseGrunnlagUuid grunnlag-uuid
+     * @return iay-grunnlag
+     */
+    @Override
+    public InntektArbeidYtelseGrunnlag hentGrunnlagForGrunnlagId(Fagsak fagsak, UUID inntektArbeidYtelseGrunnlagUuid) {
+        return grunnlag.stream().filter(g -> Objects.equals(g.getEksternReferanse(), inntektArbeidYtelseGrunnlagUuid))
+            .findFirst().orElseThrow();
     }
 
     @Override
@@ -273,6 +286,12 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
         }
         return resultat.hentInntektsmeldingerSidenRef(behandlingId, eksternReferanse);
     }
+
+    @Override
+    public Set<Inntektsmelding> hentInntektsmeldingerKommetTomBehandling(Saksnummer saksnummer, Long behandlingId) {
+        return Set.of();
+    }
+
 
     @Override
     public Optional<OppgittOpptjening> hentKunOverstyrtOppgittOpptjening(Long behandlingId) {

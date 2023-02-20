@@ -1,13 +1,13 @@
 package no.nav.k9.sak.behandling.prosessering.task;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.prosesstask.api.ProsessTask;
@@ -19,6 +19,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -37,11 +38,12 @@ import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)
 public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
 
-    private static final Logger log = LoggerFactory.getLogger(TilbakeTilStartBehandlingTask.class);
     public static final String TASKTYPE = "behandlingskontroll.tilbakeTilStart";
     public static final String PROPERTY_MANUELT_OPPRETTET = "manueltOpprettet";
     public static final String PROPERTY_START_STEG = "startSteg";
+    private static final Logger log = LoggerFactory.getLogger(TilbakeTilStartBehandlingTask.class);
     private BehandlingRepository behandlingRepository;
+    private MottatteDokumentRepository mottatteDokumentRepository;
     private HistorikkRepository historikkRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private ProsesseringAsynkTjeneste prosesseringAsynkTjeneste;
@@ -56,6 +58,7 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
     @Inject
     public TilbakeTilStartBehandlingTask(BehandlingRepository behandlingRepository,
                                          BehandlingLåsRepository behandlingLåsRepository,
+                                         MottatteDokumentRepository mottatteDokumentRepository,
                                          HistorikkRepository historikkRepository,
                                          ProsesseringAsynkTjeneste prosesseringAsynkTjeneste,
                                          BehandlingskontrollTjeneste behandlingskontrollTjeneste,
@@ -64,6 +67,7 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
                                          OpptjeningRepository opptjeningRepository) {
         super(behandlingLåsRepository);
         this.behandlingRepository = behandlingRepository;
+        this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.historikkRepository = historikkRepository;
         this.prosesseringAsynkTjeneste = prosesseringAsynkTjeneste;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
@@ -82,10 +86,9 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
         var targetSteg = (startSteg != null) ? startSteg : BehandlingStegType.START_STEG;
         var forventetPassertSteg = (startSteg != null) ? startSteg : BehandlingStegType.START_STEG;
 
-        if (targetSteg != BehandlingStegType.START_STEG && (
-                        erSammeStegEllerTidligere(behandling, startSteg, BehandlingStegType.INIT_VILKÅR)
-                        || erSammeStegEllerTidligere(behandling, startSteg, BehandlingStegType.INIT_PERIODER)
-                   )) {
+        if (targetSteg != BehandlingStegType.START_STEG &&
+            (erSammeStegEllerTidligere(behandling, startSteg, BehandlingStegType.INIT_VILKÅR) ||
+                erSammeStegEllerTidligere(behandling, startSteg, BehandlingStegType.INIT_PERIODER))) {
             throw new IllegalStateException("Ikke implementert: Det er ikke støtte for å hoppe til steg før eller lik INIT_VILKÅR (med unntak av START_STEG.");
         }
 
@@ -99,6 +102,9 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
                 behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
             }
 
+            if (harMottatteDokumenterTilBehandling(behandling)) {
+                throw new IllegalStateException("Kan ikke hoppe tilbake når det er mottatte dokumenter som ikke har blitt behandlet ferdig.");
+            }
             prosessTaskRepository.settFeiletTilSuspendert(fagsakId, behandling.getId());
 
             if (startSteg == BehandlingStegType.START_STEG) {
@@ -109,6 +115,10 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
         } else {
             log.warn("Kan ikke resette behandling. Behandling er avsluttet eller ikke kommet forbi {}, kan ikke hoppe tilbake til {}, så gjør ingenting.", forventetPassertSteg, targetSteg);
         }
+    }
+
+    private boolean harMottatteDokumenterTilBehandling(Behandling behandling) {
+        return !mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId(), DokumentStatus.BEHANDLER, DokumentStatus.MOTTATT).isEmpty();
     }
 
     private boolean erSammeStegEllerTidligere(Behandling behandling, BehandlingStegType steg, BehandlingStegType sjekkMotSteg) {

@@ -20,7 +20,6 @@ import jakarta.enterprise.inject.Stereotype;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.enterprise.util.AnnotationLiteral;
 import jakarta.inject.Qualifier;
-
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -36,7 +35,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef.FagsakYtelseTypeRef
 @Stereotype
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE, ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD })
+@Target({ElementType.TYPE, ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
 @Documented
 public @interface BehandlingStegRef {
 
@@ -47,7 +46,7 @@ public @interface BehandlingStegRef {
      *
      * @see no.nav.k9.kodeverk.behandling.BehandlingStegType
      */
-    String kode();
+    BehandlingStegType value();
 
 
     /**
@@ -58,23 +57,19 @@ public @interface BehandlingStegRef {
      */
     public static class BehandlingStegRefLiteral extends AnnotationLiteral<BehandlingStegRef> implements BehandlingStegRef {
 
-        private String stegKode;
+        private BehandlingStegType stegtype;
 
         public BehandlingStegRefLiteral() {
-            this("*");
+            throw new IllegalArgumentException("Type er obligatorisk");
         }
 
-        public BehandlingStegRefLiteral(String stegKode) {
-            this.stegKode = stegKode;
-        }
-
-        public BehandlingStegRefLiteral(BehandlingStegType stegType) {
-            this(stegType == null ? "*" : stegType.getKode());
+        public BehandlingStegRefLiteral(BehandlingStegType stegtype) {
+            this.stegtype = Objects.requireNonNull(stegtype, "stegtype");
         }
 
         @Override
-        public String kode() {
-            return stegKode;
+        public BehandlingStegType value() {
+            return stegtype;
         }
 
     }
@@ -85,44 +80,31 @@ public @interface BehandlingStegRef {
         private Lookup() {
         }
 
-        public static <I> Optional<I> find(Class<I> cls, String ytelseTypeKode, String behandlingType, String behandlingStegRef) {
-            return find(cls, (CDI<I>) CDI.current(), ytelseTypeKode, behandlingType, behandlingStegRef);
-        }
-
         public static <I> Optional<I> find(Class<I> cls, FagsakYtelseType ytelseTypeKode, BehandlingType behandlingType, BehandlingStegType behandlingStegRef) {
             return find(cls, (CDI<I>) CDI.current(), ytelseTypeKode, behandlingType, behandlingStegRef);
         }
 
-        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, FagsakYtelseType ytelseTypeKode, BehandlingType behandlingType,
-                                           BehandlingStegType behandlingStegRef) {
-            return find(cls, instances,
-                ytelseTypeKode == null ? null : ytelseTypeKode.getKode(),
-                behandlingType == null ? null : behandlingType.getKode(),
-                behandlingStegRef == null ? null : behandlingStegRef.getKode());
-        }
-
-        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, String fagsakYtelseType, String behandlingType, String behandlingStegRef) { // NOSONAR
+        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, FagsakYtelseType fagsakYtelseType, BehandlingType behandlingType, BehandlingStegType behandlingStegRef) { // NOSONAR
             Objects.requireNonNull(instances, "instances");
 
-            for (var fagsakLiteral : coalesce(fagsakYtelseType, "*")) {
+            for (var fagsakLiteral : coalesce(fagsakYtelseType, FagsakYtelseType.UDEFINERT)) {
                 var inst = select(cls, instances, new FagsakYtelseTypeRefLiteral(fagsakLiteral));
                 if (inst.isUnsatisfied()) {
                     continue;
                 } else {
-                    for (var behandlingLiteral : coalesce(behandlingType, "*")) {
+                    for (var behandlingLiteral : coalesce(behandlingType, BehandlingType.UDEFINERT)) {
                         var binst = select(cls, inst, new BehandlingTypeRefLiteral(behandlingLiteral));
                         if (binst.isUnsatisfied()) {
                             continue;
                         }
-                        for (var stegRef : coalesce(behandlingStegRef, "*")) {
-                            var cinst = select(cls, binst, new BehandlingStegRefLiteral(stegRef));
-                            if (cinst.isResolvable()) {
-                                return Optional.of(getInstance(cinst));
-                            } else {
-                                if (cinst.isAmbiguous()) {
-                                    throw new IllegalStateException("Har flere matchende instanser for klasse : " + cls.getName() + ", fagsakType="
-                                        + fagsakLiteral + ", behandlingType=" + behandlingLiteral + ", behandlingStegRef=" + stegRef);
-                                }
+
+                        var cinst = select(cls, binst, new BehandlingStegRefLiteral(behandlingStegRef));
+                        if (cinst.isResolvable()) {
+                            return Optional.of(getInstance(cinst));
+                        } else {
+                            if (cinst.isAmbiguous()) {
+                                throw new IllegalStateException("Har flere matchende instanser for klasse : " + cls.getName() + ", fagsakType="
+                                    + fagsakLiteral + ", behandlingType=" + behandlingType + ", behandlingStegRef=" + behandlingStegRef);
                             }
                         }
                     }
@@ -147,7 +129,7 @@ public @interface BehandlingStegRef {
             return i;
         }
 
-        private static List<String> coalesce(String... vals) {
+        private static <T> List<T> coalesce(T... vals) {
             return Arrays.stream(vals).filter(Objects::nonNull).distinct().collect(Collectors.toList());
         }
 
@@ -160,7 +142,7 @@ public @interface BehandlingStegRef {
      */
     @Inherited
     @Retention(RetentionPolicy.RUNTIME)
-    @Target({ ElementType.TYPE })
+    @Target({ElementType.TYPE})
     @Documented
     public @interface ContainerOfBehandlingStegRef {
         BehandlingStegRef[] value();

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="https://jakarta.ee/xml/ns/persistence/orm"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm https://jakarta.ee/xml/ns/persistence/orm/orm_3_0.xsd"
+        version="3.0">
+
+	<sequence-generator name="SEQ_OMP_FOSTERBARN" allocation-size="50" sequence-name="SEQ_OMP_FOSTERBARN" />
+	<sequence-generator name="SEQ_OMP_FOSTERBARNA" allocation-size="50" sequence-name="SEQ_OMP_FOSTERBARNA" />
+	<sequence-generator name="SEQ_OMP_GR_FOSTERBARN" allocation-size="50" sequence-name="SEQ_OMP_GR_FOSTERBARN" />
+
+	<entity class="no.nav.k9.sak.ytelse.omsorgspenger.repo.FosterbarnGrunnlag" />
+	<entity class="no.nav.k9.sak.ytelse.omsorgspenger.repo.Fosterbarna" />
+	<entity class="no.nav.k9.sak.ytelse.omsorgspenger.repo.Fosterbarn" />
+
+</entity-mappings>

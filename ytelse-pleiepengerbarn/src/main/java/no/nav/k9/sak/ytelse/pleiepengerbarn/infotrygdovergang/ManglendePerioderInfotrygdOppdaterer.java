@@ -4,7 +4,6 @@ import java.util.Arrays;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.felles.exception.ManglerTilgangException;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
@@ -14,14 +13,14 @@ import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.infotrygd.ManglendePeriodeBekreftDto;
-import no.nav.k9.sikkerhet.oidc.token.bruker.BrukerTokenProvider;
+import no.nav.k9.sikkerhet.oidc.token.context.ContextAwareTokenProvider;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = ManglendePeriodeBekreftDto.class, adapter = AksjonspunktOppdaterer.class)
-public class ManglendePerioderInfotrygdOppdaterer implements AksjonspunktOppdaterer<ManglendePeriodeBekreftDto>  {
+public class ManglendePerioderInfotrygdOppdaterer implements AksjonspunktOppdaterer<ManglendePeriodeBekreftDto> {
 
     private Environment environment;
-    private BrukerTokenProvider brukerTokenProvider;
+    private ContextAwareTokenProvider brukerTokenProvider;
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
 
 
@@ -29,7 +28,7 @@ public class ManglendePerioderInfotrygdOppdaterer implements AksjonspunktOppdate
     }
 
     @Inject
-    public ManglendePerioderInfotrygdOppdaterer(BrukerTokenProvider brukerTokenProvider, HistorikkTjenesteAdapter historikkTjenesteAdapter) {
+    public ManglendePerioderInfotrygdOppdaterer(ContextAwareTokenProvider brukerTokenProvider, HistorikkTjenesteAdapter historikkTjenesteAdapter) {
         this.brukerTokenProvider = brukerTokenProvider;
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
         this.environment = Environment.current();
@@ -43,7 +42,7 @@ public class ManglendePerioderInfotrygdOppdaterer implements AksjonspunktOppdate
         historikkTjenesteAdapter.tekstBuilder()
             .medBegrunnelse(dto.getBegrunnelse())
             .medSkjermlenke(SkjermlenkeType.INFOTRYGD_MIGRERING);
-        return OppdateringResultat.utenOverhopp();
+        return OppdateringResultat.nyttResultat();
     }
 
     private boolean harTillatelseTilÅLøseAksjonspunkt() {

@@ -1,29 +1,28 @@
 package no.nav.foreldrepenger.domene.vedtak.infotrygdfeed;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 
 @ApplicationScoped
 public class InfotrygdFeedService {
 
-    private ProsessTaskRepository prosessTaskRepository;
+    private ProsessTaskTjeneste taskTjeneste;
 
     public InfotrygdFeedService() {
         // for CDI
     }
 
     @Inject
-    public InfotrygdFeedService(ProsessTaskRepository prosessTaskRepository) {
-        this.prosessTaskRepository = prosessTaskRepository;
+    public InfotrygdFeedService(ProsessTaskTjeneste taskTjeneste) {
+        this.taskTjeneste = taskTjeneste;
     }
 
     private static String tallMedPrefiks(long versjon, int antallSiffer) {
@@ -46,7 +45,7 @@ public class InfotrygdFeedService {
         validerInput(behandling);
 
         ProsessTaskData pd = getProsessTaskData(behandling);
-        prosessTaskRepository.lagre(pd);
+        taskTjeneste.lagre(pd);
     }
 
     private void validerInput(Behandling behandling) {
@@ -62,14 +61,11 @@ public class InfotrygdFeedService {
     }
 
     private ProsessTaskData getProsessTaskData(Behandling behandling) {
-        String tasktype = PubliserInfotrygdFeedElementTask.TASKTYPE;
-        ProsessTaskData pd = new ProsessTaskData(tasktype);
+        ProsessTaskData pd = ProsessTaskData.forProsessTask(PubliserInfotrygdFeedElementTask.class);
 
         Fagsak fagsak = behandling.getFagsak();
 
         String saksnummer = fagsak.getSaksnummer().getVerdi();
-        String gruppe = tasktype + "-" + saksnummer;
-        pd.setGruppe(gruppe);
         pd.setSekvens(lagSekvensnummer(behandling));
         pd.setBehandling(behandling.getFagsak().getSaksnummer().getVerdi(), behandling.getId().toString(), behandling.getAktørId().getId());
         pd.setProperty(PubliserInfotrygdFeedElementTask.KAFKA_KEY_PROPERTY, saksnummer);

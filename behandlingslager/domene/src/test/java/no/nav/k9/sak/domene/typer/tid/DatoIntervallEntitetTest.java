@@ -6,7 +6,7 @@ import java.time.LocalDate;
 
 import org.junit.jupiter.api.Test;
 
-import com.vladmihalcea.hibernate.type.range.Range;
+import no.nav.k9.sak.behandlingslager.Range;
 
 public class DatoIntervallEntitetTest {
 

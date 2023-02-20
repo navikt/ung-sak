@@ -10,11 +10,11 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.k9.sak.kontrakt.sykdom.Resultat;
+import no.nav.k9.kodeverk.sykdom.Resultat;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelser;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurdering;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomInnleggelser;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurdering;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurderingVersjon;
 
 class SykdomSamletVurderingByggTidslinjeTest {
 
@@ -119,12 +119,12 @@ class SykdomSamletVurderingByggTidslinjeTest {
 
 
 
-    public SykdomVurderingVersjon dummyVurdering(SykdomVurderingType type) {
-        final SykdomVurdering sykdomVurdering = new SykdomVurdering(type, Collections.emptyList(), "test", LocalDateTime.now());
-        return new SykdomVurderingVersjon(sykdomVurdering, "Lorem ipsum", Resultat.OPPFYLT, 0L, "test",  LocalDateTime.now(), UUID.randomUUID(), "abs", null, null, List.of(), List.of());
+    public PleietrengendeSykdomVurderingVersjon dummyVurdering(SykdomVurderingType type) {
+        final PleietrengendeSykdomVurdering pleietrengendeSykdomVurdering = new PleietrengendeSykdomVurdering(type, Collections.emptyList(), "test", LocalDateTime.now());
+        return new PleietrengendeSykdomVurderingVersjon(pleietrengendeSykdomVurdering, "Lorem ipsum", Resultat.OPPFYLT, 0L, "test",  LocalDateTime.now(), UUID.randomUUID(), "abs", null, null, List.of(), List.of());
     }
 
-    public SykdomInnleggelser dummyInnleggelser() {
-        return new SykdomInnleggelser(0L, Collections.emptyList(), "test", LocalDateTime.now());
+    public PleietrengendeSykdomInnleggelser dummyInnleggelser() {
+        return new PleietrengendeSykdomInnleggelser(0L, Collections.emptyList(), "test", LocalDateTime.now());
     }
 }

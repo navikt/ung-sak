@@ -7,10 +7,11 @@ import java.util.UUID;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.kafka.InfotrygdFeedMeldingProducer;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.kafka.InfotrygdFeedMeldingProducer;
 import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -32,6 +33,8 @@ public class PubliserInfotrygdFeedElementTask implements ProsessTaskHandler {
     private BehandlingRepository behandlingRepository;
     private InfotrygdFeedMeldingProducer meldingProducer;
     private InfotrygdFeedPeriodeberegner periodeberegner;
+    private InfotrygdFeedMeldingProducer aivenMeldingProducer;
+    private boolean aivenEnabled;
 
     public PubliserInfotrygdFeedElementTask() {
         // CDI
@@ -44,6 +47,8 @@ public class PubliserInfotrygdFeedElementTask implements ProsessTaskHandler {
         this.behandlingRepository = behandlingRepository;
         this.meldingProducer = meldingProducer;
         this.periodeberegner = periodeberegner;
+        this.aivenMeldingProducer = aivenMeldingProducer;
+        this.aivenEnabled = aivenEnabled;
     }
 
     @Override

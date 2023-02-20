@@ -1,22 +1,20 @@
 package no.nav.k9.sak.produksjonsstyring.oppgavebehandling.task;
 
-import static no.nav.k9.sak.produksjonsstyring.oppgavebehandling.task.AvsluttOppgaveTaskProperties.TASKTYPE;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
-import no.nav.k9.prosesstask.api.ProsessTask;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 @ApplicationScoped
-@ProsessTask(TASKTYPE)
+@ProsessTask(AvsluttOppgaveTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)
 public class AvsluttOppgaveTask extends BehandlingProsessTask {
+    public static final String TASKTYPE = "oppgavebehandling.avsluttOppgave";
     private OppgaveTjeneste oppgaveTjeneste;
     private BehandlingRepository behandlingRepository;
 

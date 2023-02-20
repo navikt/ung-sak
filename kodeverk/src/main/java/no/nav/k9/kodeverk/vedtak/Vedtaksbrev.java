@@ -21,7 +21,9 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 public enum Vedtaksbrev implements Kodeverdi {
 
     AUTOMATISK("AUTOMATISK", "Automatisk generert vedtaksbrev"),
+    @Deprecated
     FRITEKST("FRITEKST", "Fritekstbrev"),
+    MANUELL("MANUELL", "Manuell vedtaksbrev"),
     INGEN("INGEN", "Ingen vedtaksbrev"),
     UDEFINERT("-", "Udefinert"),
     ;

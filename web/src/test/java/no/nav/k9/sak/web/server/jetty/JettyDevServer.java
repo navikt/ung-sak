@@ -2,11 +2,8 @@ package no.nav.k9.sak.web.server.jetty;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.sql.DataSource;
 
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConfiguration;
@@ -39,20 +36,20 @@ public class JettyDevServer extends JettyServer {
     }
 
     private static String initCryptoStoreConfig(String storeName, String storeProperty, String storePasswordProperty,
-            String defaultPassword) {
+                                                String defaultPassword) {
         String defaultLocation = getProperty("user.home", ".") + "/.modig/" + storeName + ".jks";
 
         String storePath = getProperty(storeProperty, defaultLocation);
         File storeFile = new File(storePath);
         if (!storeFile.exists()) {
             throw new IllegalStateException("Finner ikke " + storeName + " i " + storePath
-                    + "\n\tKonfigurer enten som System property \'" + storeProperty + "\' eller environment variabel \'"
-                    + storeProperty.toUpperCase().replace('.', '_') + "\'");
+                + "\n\tKonfigurer enten som System property \'" + storeProperty + "\' eller environment variabel \'"
+                + storeProperty.toUpperCase().replace('.', '_') + "\'");
         }
         String password = getProperty(storePasswordProperty, defaultPassword);
         if (password == null) {
             throw new IllegalStateException(
-                    "Passord for å aksessere store " + storeName + " i " + storePath + " er null");
+                "Passord for å aksessere store " + storeName + " i " + storePath + " er null");
         }
 
         System.setProperty(storeProperty, storeFile.getAbsolutePath());
@@ -81,16 +78,9 @@ public class JettyDevServer extends JettyServer {
             super.migrerDatabaser();
         } catch (IllegalStateException e) {
             log.info("Migreringer feilet, cleaner og prøver på nytt for lokal db.");
-            DataSource migreringDs = DatasourceUtil.createDatasource("defaultDS", DatasourceRole.ADMIN,
-                    getEnvironmentClass(), 1);
-            try {
+            try (var migreringDs = DatasourceUtil.createDatasource("defaultDS", DatasourceRole.ADMIN,
+                getEnvironmentClass(), 2)) {
                 DevDatabaseScript.clean(migreringDs);
-            } finally {
-                try {
-                    migreringDs.getConnection().close();
-                } catch (SQLException sqlException) {
-                    log.warn("Klarte ikke stenge connection etter migrering", sqlException);
-                }
             }
             super.migrerDatabaser();
         }
@@ -123,7 +113,7 @@ public class JettyDevServer extends JettyServer {
         // truststore avgjør hva vi stoler på av sertifikater når vi gjør utadgående TLS kall
         initCryptoStoreConfig("truststore", "javax.net.ssl.trustStore", "javax.net.ssl.trustStorePassword", "changeit");
         initCryptoStoreConfig("keystore", "javax.net.ssl.keyStore", "javax.net.ssl.keyStorePassword",
-                "devillokeystore1234");
+            "devillokeystore1234");
     }
 
     @SuppressWarnings("resource")
@@ -140,8 +130,8 @@ public class JettyDevServer extends JettyServer {
         https.addCustomizer(new SecureRequestCustomizer());
 
         ServerConnector sslConnector = new ServerConnector(server,
-                new SslConnectionFactory(sslContextFactory, "http/1.1"),
-                new HttpConnectionFactory(https));
+            new SslConnectionFactory(sslContextFactory, "http/1.1"),
+            new HttpConnectionFactory(https));
         sslConnector.setPort(appKonfigurasjon.getSslPort());
         connectors.add(sslConnector);
 
@@ -157,10 +147,10 @@ public class JettyDevServer extends JettyServer {
     }
 
     @Override
-    protected List<Class<?>> getWebInfClasses() {
-        List<Class<?>> webInfClasses = new ArrayList<>(super.getWebInfClasses());
-        webInfClasses.add(JettyTestApplication.class);
-        return webInfClasses;
+    protected Class<?>[] getJaxRsApplicationClasses() {
+        final List<Class<?>> classes = new ArrayList<>(List.of(super.getJaxRsApplicationClasses()));
+        classes.add(JettyTestApplication.class);
+        return classes.toArray(new Class<?>[0]);
     }
 
 }

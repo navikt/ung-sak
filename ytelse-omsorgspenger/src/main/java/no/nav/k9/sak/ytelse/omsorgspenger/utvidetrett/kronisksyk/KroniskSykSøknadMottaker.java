@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.kronisksyk;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS;
+
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -18,7 +20,7 @@ import no.nav.k9.sak.mottak.SøknadMottakTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 
-@FagsakYtelseTypeRef("OMP_KS")
+@FagsakYtelseTypeRef(OMSORGSPENGER_KS)
 @ApplicationScoped
 public class KroniskSykSøknadMottaker implements SøknadMottakTjeneste<InnsendingInnhold> {
 

@@ -78,15 +78,27 @@ public class OpprettToTrinnsgrunnlag {
             .map(bg -> new BeregningsgrunnlagToTrinn(
                 bg.getSkjæringstidspunkt(),
                 bg.getFaktaOmBeregningTilfeller(),
-                erVarigEndringFastsattForSelvstendingNæringsdrivende(bg)))
+                erVarigEndringFastsatt(bg)))
             .collect(Collectors.toList());
 
+    }
+
+    private boolean erVarigEndringFastsatt(Beregningsgrunnlag beregningsgrunnlag) {
+        return erVarigEndringFastsattForMidlertidigInaktiv(beregningsgrunnlag) || erVarigEndringFastsattForSelvstendingNæringsdrivende(beregningsgrunnlag);
     }
 
     private boolean erVarigEndringFastsattForSelvstendingNæringsdrivende(Beregningsgrunnlag beregningsgrunnlag) {
         return beregningsgrunnlag.getBeregningsgrunnlagPerioder().stream()
             .flatMap(bgps -> bgps.getBeregningsgrunnlagPrStatusOgAndelList().stream())
             .filter(andel -> andel.getAktivitetStatus().equals(AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE))
+            .anyMatch(andel -> andel.getOverstyrtPrÅr() != null);
+    }
+
+    private boolean erVarigEndringFastsattForMidlertidigInaktiv(Beregningsgrunnlag beregningsgrunnlag) {
+        var erMidlertidigInaktiv = beregningsgrunnlag.getAktivitetStatuser().stream().anyMatch(a -> a.getAktivitetStatus().equals(AktivitetStatus.MIDLERTIDIG_INAKTIV));
+        return erMidlertidigInaktiv && beregningsgrunnlag.getBeregningsgrunnlagPerioder().stream()
+            .flatMap(bgps -> bgps.getBeregningsgrunnlagPrStatusOgAndelList().stream())
+            .filter(andel -> andel.getAktivitetStatus().equals(AktivitetStatus.BRUKERS_ANDEL))
             .anyMatch(andel -> andel.getOverstyrtPrÅr() != null);
     }
 

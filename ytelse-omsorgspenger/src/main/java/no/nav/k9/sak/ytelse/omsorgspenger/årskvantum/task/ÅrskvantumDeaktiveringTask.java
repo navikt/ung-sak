@@ -1,24 +1,24 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.task;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
-import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest.ÅrskvantumRestKlient;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskHandler;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
+import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest.ÅrskvantumRestKlient;
 
 @ApplicationScoped
 @ProsessTask(ÅrskvantumDeaktiveringTask.TASKTYPE)
-public class ÅrskvantumDeaktiveringTask implements ProsessTaskHandler {
+@FagsakProsesstaskRekkefølge(gruppeSekvens = true)
+public class ÅrskvantumDeaktiveringTask extends BehandlingProsessTask {
     public static final String TASKTYPE = "iverksetteVedtak.deaktiverUttakForBehandling";
 
     private static final Logger logger = LoggerFactory.getLogger(ÅrskvantumDeaktiveringTask.class);
@@ -38,8 +38,8 @@ public class ÅrskvantumDeaktiveringTask implements ProsessTaskHandler {
     }
 
     @Override
-    public void doTask(ProsessTaskData pd) {
-        Behandling behandling = repositoryProvider.getBehandlingRepository().hentBehandling(pd.getBehandlingId());
+    protected void prosesser(ProsessTaskData prosessTaskData) {
+        Behandling behandling = repositoryProvider.getBehandlingRepository().hentBehandling(prosessTaskData.getBehandlingId());
 
         precondition(behandling);
 

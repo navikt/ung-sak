@@ -19,8 +19,8 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
-@BehandlingTypeRef("BT-002")
-@BehandlingTypeRef("BT-004")
+@BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
+@BehandlingTypeRef(BehandlingType.REVURDERING)
 public class DefaultInformasjonselementerUtleder implements InformasjonselementerUtleder {
 
     private static final Map<BehandlingType, Set<RegisterdataType>> FILTER = Map.of(

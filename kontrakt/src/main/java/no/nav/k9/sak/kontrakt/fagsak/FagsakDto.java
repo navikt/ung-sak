@@ -68,6 +68,10 @@ public class FagsakDto {
     @JsonProperty(value = "relatertPersonAktørId", required = false)
     @Valid
     private AktørId relatertPersonAktørId;
+    
+    @JsonProperty(value = "erPbSak", required = false)
+    private Boolean erPbSak;
+    
 
     public FagsakDto() {
         // Injiseres i test
@@ -83,7 +87,8 @@ public class FagsakDto {
                      Boolean kanRevurderingOpprettes,
                      Boolean skalBehandlesAvInfotrygd,
                      LocalDateTime opprettetTidspunkt,
-                     LocalDateTime endretTidspunkt) {
+                     LocalDateTime endretTidspunkt,
+                     Boolean erPbSak) {
         this.saksnummer = saksnummer;
         this.sakstype = ytelseType;
         this.status = status;
@@ -95,6 +100,7 @@ public class FagsakDto {
         this.endret = endretTidspunkt;
         this.kanRevurderingOpprettes = kanRevurderingOpprettes;
         this.skalBehandlesAvInfotrygd = skalBehandlesAvInfotrygd;
+        this.erPbSak = erPbSak;
     }
 
     @Override
@@ -177,6 +183,10 @@ public class FagsakDto {
     
     public AktørId getPleietrengendeAktørId() {
         return pleietrengendeAktørId;
+    }
+    
+    public boolean erPbSak() {
+        return erPbSak != null && erPbSak;
     }
 
     @Override

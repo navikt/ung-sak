@@ -22,6 +22,12 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectWriter;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -32,19 +38,13 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectWriter;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
@@ -60,12 +60,14 @@ import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.dokument.arkiv.ArkivJournalPost;
 import no.nav.k9.sak.dokument.arkiv.journal.SafAdapter;
 import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.mottak.AktørListeDto;
 import no.nav.k9.sak.kontrakt.mottak.FinnEllerOpprettSak;
+import no.nav.k9.sak.kontrakt.mottak.FinnEllerOpprettSakFnr;
 import no.nav.k9.sak.kontrakt.mottak.FinnSak;
 import no.nav.k9.sak.kontrakt.mottak.JournalpostMottakDto;
 import no.nav.k9.sak.kontrakt.søknad.innsending.Innsending;
@@ -82,6 +84,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.jackson.JacksonJsonConfig;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.infotrygd.PsbInfotrygdRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.infotrygd.PsbPbSakRepository;
 
 /**
  * Mottar dokumenter fra f.eks. FPFORDEL og håndterer dispatch internt for saksbehandlingsløsningen.
@@ -102,6 +105,7 @@ public class FordelRestTjeneste {
     private MottatteDokumentRepository mottatteDokumentRepository;
     private PsbInfotrygdRepository psbInfotrygdRepository;
     private AktørTjeneste aktørTjeneste;
+    private PsbPbSakRepository psbPbSakRepository;
     private ObjectWriter objectWriter = new JacksonJsonConfig().getObjectMapper().writerFor(Innsending.class);
 
     public FordelRestTjeneste() {// For Rest-CDI
@@ -114,7 +118,8 @@ public class FordelRestTjeneste {
                               MottatteDokumentRepository mottatteDokumentRepository,
                               SøknadMottakTjenesteContainer søknadMottakere,
                               PsbInfotrygdRepository psbInfotrygdRepository,
-                              AktørTjeneste aktørTjeneste) {
+                              AktørTjeneste aktørTjeneste,
+                              PsbPbSakRepository psbPbSakRepository) {
         this.dokumentmottakTjeneste = dokumentmottakTjeneste;
         this.safAdapter = safAdapter;
         this.fagsakTjeneste = fagsakTjeneste;
@@ -122,6 +127,7 @@ public class FordelRestTjeneste {
         this.søknadMottakere = søknadMottakere;
         this.psbInfotrygdRepository= psbInfotrygdRepository;
         this.aktørTjeneste = aktørTjeneste;
+        this.psbPbSakRepository = psbPbSakRepository;
     }
 
 
@@ -146,6 +152,21 @@ public class FordelRestTjeneste {
         if (sb.length() > 0) {
             return Response.status(400, sb.toString()).build();
         }
+        return Response.noContent().build();
+    }
+    
+    @POST
+    @Path("/sett-til-pb")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Setter at angitt saksnumre skal behandles som PB (gammel ordning) for PSB-saker.", summary = ("Setter at angitt saksnumre skal behandles som PB (gammel ordning) for PSB-saker."), tags = "fordel")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
+    public Response leggTilPbPerson(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto s) {
+        final Optional<Fagsak> fagsakOpt = fagsakTjeneste.finnFagsakGittSaksnummer(s.getVerdi(), false);
+        if (fagsakOpt.get().getYtelseType() != FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
+            throw new IllegalArgumentException("Kun PSB-fagsaker kan få PB-flagg satt.");
+        }
+        psbPbSakRepository.lagre(fagsakOpt.get().getId());
+        
         return Response.noContent().build();
     }
 
@@ -203,6 +224,41 @@ public class FordelRestTjeneste {
 
         return new SaksnummerDto(nyFagsak.getSaksnummer().getVerdi());
     }
+    
+    @POST
+    @Path("/fagsak/opprett/fnr")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(JSON_UTF8)
+    @Operation(description = "Finn eller opprett ny sak basert på D-/fødselsnummer.", summary = ("Finn eller opprett ny fagsak basert på D-/fødselsnummer."), tags = "fordel")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
+    @Deprecated
+    public SaksnummerDto opprettSakMedFnr(@Parameter(description = "Oppretter fagsak") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) FinnEllerOpprettSakFnr opprettSakDto) {
+        var ytelseType = finnYtelseType(opprettSakDto);
+
+        AktørId aktørId = aktørTjeneste.hentAktørIdForPersonIdent(PersonIdent.fra(opprettSakDto.getSøker())).orElseThrow();
+        AktørId pleietrengendeAktørId = null;
+        if (opprettSakDto.getPleietrengende() != null) {
+            pleietrengendeAktørId = aktørTjeneste.hentAktørIdForPersonIdent(PersonIdent.fra(opprettSakDto.getPleietrengende())).orElseThrow();
+        }
+
+        AktørId relatertPersonAktørId = null;
+        if (opprettSakDto.getRelatertPerson() != null) {
+            relatertPersonAktørId = aktørTjeneste.hentAktørIdForPersonIdent(PersonIdent.fra(opprettSakDto.getRelatertPerson())).orElseThrow();
+        }
+
+        ytelseType.validerNøkkelParametere(pleietrengendeAktørId, relatertPersonAktørId);
+
+        Periode periode = opprettSakDto.getPeriode();
+        if (periode == null) {
+            throw new IllegalArgumentException("Kan ikke opprette fagsak uten å oppgi start av periode (fravær/uttak): " + opprettSakDto);
+        }
+
+        var søknadMottaker = søknadMottakere.finnSøknadMottakerTjeneste(ytelseType);
+
+        var nyFagsak = søknadMottaker.finnEllerOpprettFagsak(ytelseType, aktørId, pleietrengendeAktørId, relatertPersonAktørId, periode.getFom(), periode.getTom());
+
+        return new SaksnummerDto(nyFagsak.getSaksnummer().getVerdi());
+    }
 
     @POST
     @Path("/fagsak/sok")
@@ -245,6 +301,10 @@ public class FordelRestTjeneste {
     }
 
     private FagsakYtelseType finnYtelseType(FinnEllerOpprettSak dto) {
+        return FagsakYtelseType.fraKode(dto.getYtelseType());
+    }
+    
+    private FagsakYtelseType finnYtelseType(FinnEllerOpprettSakFnr dto) {
         return FagsakYtelseType.fraKode(dto.getYtelseType());
     }
 

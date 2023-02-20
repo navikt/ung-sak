@@ -14,8 +14,8 @@
     <name>K9SAK :: Webapp</name>
 
     <properties>
-        <simple.client.version>0.14.1</simple.client.version>
-        <swagger-ui.version>4.2.1</swagger-ui.version>
+        <simple.client.version>0.16.0</simple.client.version>
+        <swagger-ui.version>4.15.5</swagger-ui.version>
     </properties>
 
 
@@ -24,14 +24,14 @@
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-bom</artifactId>
-                <version>11.0.7</version>
+                <version>11.0.13</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.jersey</groupId>
                 <artifactId>jersey-bom</artifactId>
-                <version>3.0.3</version>
+                <version>3.0.8</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -125,6 +125,10 @@
         </dependency>
         <dependency>
             <groupId>no.nav.k9.sak.ytelse</groupId>
+            <artifactId>ytelse-opplaeringspenger</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.k9.sak.ytelse</groupId>
             <artifactId>ytelse-omsorgspenger</artifactId>
         </dependency>
         <dependency>
@@ -188,6 +192,12 @@
         <dependency>
             <groupId>org.jboss.weld.servlet</groupId>
             <artifactId>weld-servlet-core</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.glassfish</groupId>
+                    <artifactId>jakarta.faces</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- For Status side -->
@@ -259,6 +269,10 @@
             <groupId>org.owasp.encoder</groupId>
             <artifactId>encoder</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.jboss</groupId>
+            <artifactId>jandex</artifactId>
+        </dependency>
 
         <!-- bean validation -->
         <dependency>
@@ -293,12 +307,6 @@
             <groupId>no.nav.k9.felles</groupId>
             <artifactId>k9-felles-testutilities</artifactId>
             <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.flywaydb</groupId>
-                    <artifactId>flyway-core</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>no.nav.k9.felles.sikkerhet</groupId>

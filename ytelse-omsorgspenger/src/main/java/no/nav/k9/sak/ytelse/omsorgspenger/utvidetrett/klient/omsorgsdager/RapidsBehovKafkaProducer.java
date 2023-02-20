@@ -36,14 +36,13 @@ public class RapidsBehovKafkaProducer extends RapidsBehovKlient {
 
     @Inject
     public RapidsBehovKafkaProducer(
-        @KonfigVerdi(value = "KAFKA_BEHOV_TOPIC", defaultVerdi = "k9-rapid-v2", required = false) String topic,
+        @KonfigVerdi(value = "KAFKA_K9_RAPID_TOPIC", defaultVerdi = "k9-rapid-v2", required = false) String topic,
         @KonfigVerdi(value = "KAFKA_BROKERS", required = false) String aivenBootstrapServers,
         @KonfigVerdi(value = "KAFKA_TRUSTSTORE_PATH", required = false) String aivenTruststorePath,
         @KonfigVerdi(value = "KAFKA_KEYSTORE_PATH", required = false) String aivenKeystorePath,
         @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String aivenCredstorePassword,
         @KonfigVerdi(value = "KAFKA_OVERRIDE_KEYSTORE_PASSWORD", required = false) String overrideKeystorePassword,
         @KonfigVerdi(value = "BOOTSTRAP_SERVERS", required = false) String onpremBootstrapServers,
-        @KonfigVerdi(value = "K9_RAPID_AIVEN", defaultVerdi = "false") boolean isAivenInUse,
         @KonfigVerdi(value = "systembruker.username", defaultVerdi = "vtp") String username,
         @KonfigVerdi(value = "systembruker.password", defaultVerdi = "vtp") String password) {
 
@@ -51,7 +50,7 @@ public class RapidsBehovKafkaProducer extends RapidsBehovKlient {
         Properties properties = new Properties();
         properties.put(ProducerConfig.CLIENT_ID_CONFIG, this.clientId);
 
-        if (overrideKeystorePassword != null || !isAivenInUse) { // Ikke SSL for onprem & VTP.
+        if (overrideKeystorePassword != null) { // Brukes i test-miljøer tils VTP har støtte for SSL-config.
             this.topic = topic;
             String jaasTemplate = "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"%s\" password=\"%s\";";
             String jaasCfg = String.format(jaasTemplate, username, password);
@@ -60,7 +59,7 @@ public class RapidsBehovKafkaProducer extends RapidsBehovKlient {
             properties.put(SaslConfigs.SASL_MECHANISM, "PLAIN");
             properties.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_SSL");
         } else { // Aiven config
-            this.topic = "omsorgspenger.k9-rapid-v2";
+            this.topic = topic;
             properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, aivenBootstrapServers);
             properties.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.SSL.name);
             properties.put(SslConfigs.SSL_ENDPOINT_IDENTIFICATION_ALGORITHM_CONFIG, "");

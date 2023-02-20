@@ -15,7 +15,6 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
@@ -49,6 +48,7 @@ import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.OrganisasjonsNummerValidator;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.PersonIdent;
+import no.nav.k9.sak.typer.Saksnummer;
 
 @Dependent
 public class SøknadDtoTjeneste {
@@ -121,7 +121,12 @@ public class SøknadDtoTjeneste {
         AktørId pleietrengendeAktør = pleietrengendeAktørIdent != null ? finnAktørId(pleietrengendeAktørIdent) : null;
         ytelsetype.validerNøkkelParametere(pleietrengendeAktør, null);
 
-        return finnSisteFagsakPå(ytelsetype, aktørId, pleietrengendeAktør)
+        final Optional<Fagsak> fagsakOpt = finnSisteFagsakPå(ytelsetype, aktørId, pleietrengendeAktør);
+        return henFagsakPerioder(fagsakOpt);
+    }
+
+    private List<Periode> henFagsakPerioder(Optional<Fagsak> fagsakOpt) {
+        return fagsakOpt
             .flatMap(fagsak -> repositoryProvider.getBehandlingRepository().hentSisteBehandlingForFagsakId(fagsak.getId()))
             .map(behandling -> {
                     final var vilkårsPerioderTilVurderingTjeneste = finnVilkårsPerioderTilVurderingTjeneste(behandling.getFagsak().getYtelseType(), behandling.getType());
@@ -130,6 +135,11 @@ public class SøknadDtoTjeneste {
                 }
             )
             .orElse(Collections.emptyList());
+    }
+    
+    public List<Periode> hentSøknadperioderPåFagsak(Saksnummer saksnummer) {
+        final Optional<Fagsak> fagsakOpt = repositoryProvider.getFagsakRepository().hentSakGittSaksnummer(saksnummer);
+        return henFagsakPerioder(fagsakOpt);
     }
 
     private Optional<Fagsak> finnSisteFagsakPå(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengendeAktørId) {

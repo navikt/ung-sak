@@ -53,12 +53,12 @@ class FinnFeriepengePerioder extends LeafSpecification<BeregningsresultatFeriepe
 
     private LocalDate finnFeriepengerPeriodeTom(BeregningsresultatFeriepengerRegelModell regelModell, LocalDate feriepengePeriodeFom, UttakSjekk uttakFilter) {
         List<BeregningsresultatPeriode> beregningsresultatPerioder = regelModell.getBeregningsresultatPerioder();
-        int maksAntallDager = antallDagerFeriepenger(regelModell.getAntallDagerFeriepenger());
+        int maksAntallDager = regelModell.getAntallDagerFeriepenger();
         LocalDate sisteUttaksdag = finnSisteUttaksdag(beregningsresultatPerioder);
         int antallDager = 0;
 
         for (LocalDate dato = feriepengePeriodeFom; !dato.isAfter(sisteUttaksdag); dato = dato.plusDays(1)) {
-            int antallDagerSomLeggesTilFeriepengeperioden = finnAntallDagerSomSkalLeggesTil(beregningsresultatPerioder, dato, regelModell.harFeriepengeopptjeningFoHelg(), uttakFilter);
+            int antallDagerSomLeggesTilFeriepengeperioden = finnAntallDagerSomSkalLeggesTil(beregningsresultatPerioder, dato, regelModell.harFeriepengeopptjeningForHelg(), uttakFilter);
             antallDager += antallDagerSomLeggesTilFeriepengeperioden;
             if (antallDager == maksAntallDager) {
                 return dato;
@@ -68,10 +68,6 @@ class FinnFeriepengePerioder extends LeafSpecification<BeregningsresultatFeriepe
             }
         }
         return sisteUttaksdag;
-    }
-
-    private int antallDagerFeriepenger(int antallDagerFeriepenger) {
-        return antallDagerFeriepenger;
     }
 
     private int finnAntallDagerSomSkalLeggesTil(List<BeregningsresultatPeriode> beregningsresultatPerioder, LocalDate dato, boolean harFeriepengeopptjeningForHelg, UttakSjekk uttakFilter) {

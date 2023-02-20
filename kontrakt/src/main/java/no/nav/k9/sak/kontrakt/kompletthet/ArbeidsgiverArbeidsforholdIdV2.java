@@ -2,16 +2,15 @@ package no.nav.k9.sak.kontrakt.kompletthet;
 
 import java.util.Objects;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -28,7 +27,6 @@ public class ArbeidsgiverArbeidsforholdIdV2 {
     @NotNull
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String arbeidsforhold;
-
 
     @JsonCreator
     public ArbeidsgiverArbeidsforholdIdV2(@Valid

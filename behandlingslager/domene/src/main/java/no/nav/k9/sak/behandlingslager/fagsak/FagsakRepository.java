@@ -8,16 +8,15 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.hibernate.query.TypedParameterValue;
+import org.hibernate.type.StandardBasicTypes;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
-
-import org.hibernate.jpa.TypedParameterValue;
-import org.hibernate.type.StringType;
-
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -75,6 +74,21 @@ public class FagsakRepository {
             .createQuery("""
                     from Fagsak f
                       where f.brukerAktørId=:aktørId
+                       and f.skalTilInfotrygd=:ikkestengt
+                       and f.ytelseType in (:ytelseTyper)
+                    """,
+                Fagsak.class);
+        query.setParameter("aktørId", aktørId); // NOSONAR
+        query.setParameter("ikkestengt", false); // NOSONAR
+        query.setParameter("ytelseTyper", FagsakYtelseType.kodeMap().values()); // søk bare opp støtte ytelsetyper
+        return query.getResultList();
+    }
+
+    public List<Fagsak> hentSakerHvorBrukerHarMinstEnRolle(AktørId aktørId) {
+        TypedQuery<Fagsak> query = entityManager
+            .createQuery("""
+                    from Fagsak f
+                      where (f.brukerAktørId=:aktørId or pleietrengendeAktørId=:aktørId or relatertPersonAktørId=:aktørId)
                        and f.skalTilInfotrygd=:ikkestengt
                        and f.ytelseType in (:ytelseTyper)
                     """,
@@ -147,19 +161,19 @@ public class FagsakRepository {
      */
     @SuppressWarnings("unchecked")
     public List<Fagsak> finnFagsakRelatertTil(
-            FagsakYtelseType ytelseType,
-            AktørId brukerId,
-            AktørId pleietrengendeAktørId,
-            AktørId relatertPersonAktørId,
-            LocalDate fom,
-            LocalDate tom) {
+        FagsakYtelseType ytelseType,
+        AktørId brukerId,
+        AktørId pleietrengendeAktørId,
+        AktørId relatertPersonAktørId,
+        LocalDate fom,
+        LocalDate tom) {
         Query query;
 
         String sqlString = """
-                        select f.* from Fagsak f
-                          where f.ytelse_type = :ytelseType
-                             and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true
-                """
+                    select f.* from Fagsak f
+                      where f.ytelse_type = :ytelseType
+                         and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true
+            """
             + (brukerId == null ? "" : "and f.bruker_aktoer_id = :brukerAktørId")
             + (pleietrengendeAktørId == null ? "" : " and f.pleietrengende_aktoer_id = :pleietrengendeAktørId")
             + (relatertPersonAktørId == null ? "" : " and f.relatert_person_aktoer_id = :relatertPersonAktørId"); // NOSONAR (avsjekket dynamisk sql)
@@ -193,25 +207,25 @@ public class FagsakRepository {
      */
     @SuppressWarnings("unchecked")
     public List<Fagsak> finnFagsakRelatertTil(
-            FagsakYtelseType ytelseType,
-            AktørId pleietrengendeAktørId,
-            AktørId relatertPersonAktørId,
-            LocalDate fom,
-            LocalDate tom) {
+        FagsakYtelseType ytelseType,
+        AktørId pleietrengendeAktørId,
+        AktørId relatertPersonAktørId,
+        LocalDate fom,
+        LocalDate tom) {
         Query query;
 
         String sql = """
-                select f.* from Fagsak f
-                 where coalesce(f.pleietrengende_aktoer_id, '-1') = coalesce(:pleietrengendeAktørId, '-1')
-                   and coalesce(f.relatert_person_aktoer_id, '-1') = coalesce(:relatertPersonAktørId, '-1')
-                   and f.ytelse_type = :ytelseType
-                   and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true
-                  """;
+            select f.* from Fagsak f
+             where coalesce(f.pleietrengende_aktoer_id, '-1') = coalesce(:pleietrengendeAktørId, '-1')
+               and coalesce(f.relatert_person_aktoer_id, '-1') = coalesce(:relatertPersonAktørId, '-1')
+               and f.ytelse_type = :ytelseType
+               and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true
+              """;
 
         query = entityManager.createNativeQuery(sql, Fagsak.class); // NOSONAR
 
-        query.setParameter("pleietrengendeAktørId", new TypedParameterValue(StringType.INSTANCE, pleietrengendeAktørId == null ? null : pleietrengendeAktørId.getId()));
-        query.setParameter("relatertPersonAktørId", new TypedParameterValue(StringType.INSTANCE, relatertPersonAktørId == null ? null : relatertPersonAktørId.getId()));
+        query.setParameter("pleietrengendeAktørId", new TypedParameterValue<>(StandardBasicTypes.STRING, pleietrengendeAktørId == null ? null : pleietrengendeAktørId.getId()));
+        query.setParameter("relatertPersonAktørId", new TypedParameterValue<>(StandardBasicTypes.STRING, relatertPersonAktørId == null ? null : relatertPersonAktørId.getId()));
         query.setParameter("ytelseType", Objects.requireNonNull(ytelseType, "ytelseType").getKode());
         query.setParameter("fom", fom == null ? Tid.TIDENES_BEGYNNELSE : fom);
         query.setParameter("tom", tom == null ? Tid.TIDENES_ENDE : tom);
@@ -242,16 +256,16 @@ public class FagsakRepository {
         }
 
         String sqlString = """
-                select f.* from Fagsak f
-                where
-                  f.ytelse_type = :ytelseType
-                  and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true
-                  and (
-                     f.bruker_aktoer_id = :brukerAktørId
-                     or f.pleietrengende_aktoer_id IN (:pleietrengendeAktørId)
-                     or f.relatert_person_aktoer_id IN (:relatertPersonAktørId)
-                  )
-                """;
+            select f.* from Fagsak f
+            where
+              f.ytelse_type = :ytelseType
+              and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true
+              and (
+                 f.bruker_aktoer_id = :brukerAktørId
+                 or f.pleietrengende_aktoer_id IN (:pleietrengendeAktørId)
+                 or f.relatert_person_aktoer_id IN (:relatertPersonAktørId)
+              )
+            """;
 
         var query = entityManager.createNativeQuery(
             sqlString,
@@ -289,23 +303,63 @@ public class FagsakRepository {
 
     public List<SakInfotrygdMigrering> hentSakInfotrygdMigreringer(Long fagsakId) {
         TypedQuery<SakInfotrygdMigrering> query = entityManager.createQuery("from SakInfotrygdMigrering " +
-            "where fagsak_id=:fagsakId " +
-            "and aktiv=true", SakInfotrygdMigrering.class);
+            "where fagsakId=:fagsakId " +
+            "and aktiv=true " +
+            "order by skjæringstidspunkt asc", SakInfotrygdMigrering.class);
         query.setParameter("fagsakId", fagsakId); // NOSONAR
         return query.getResultList();
     }
 
-    public Long lagreOgFlush(SakInfotrygdMigrering sakInfotrygdMigrering) {
-        entityManager.persist(sakInfotrygdMigrering);
+    public List<SakInfotrygdMigrering> hentAlleSakInfotrygdMigreringer(Long fagsakId) {
+        TypedQuery<SakInfotrygdMigrering> query = entityManager.createQuery("from SakInfotrygdMigrering " +
+            "where fagsakId=:fagsakId " +
+            "order by skjæringstidspunkt asc", SakInfotrygdMigrering.class);
+        query.setParameter("fagsakId", fagsakId); // NOSONAR
+        return query.getResultList();
+    }
+
+    public List<SakInfotrygdMigrering> hentAlleSakInfotrygdMigreringerForAlleFagsaker() {
+        TypedQuery<SakInfotrygdMigrering> query = entityManager.createQuery("from SakInfotrygdMigrering", SakInfotrygdMigrering.class);
+        return query.getResultList();
+    }
+
+
+    private Optional<SakInfotrygdMigrering> hentSakInfotrygdMigrering(Long fagsakId, LocalDate stp) {
+        TypedQuery<SakInfotrygdMigrering> query = entityManager.createQuery("from SakInfotrygdMigrering " +
+            "where fagsakId=:fagsakId " +
+            "and skjæringstidspunkt=:stp", SakInfotrygdMigrering.class);
+        query.setParameter("fagsakId", fagsakId); // NOSONAR
+        query.setParameter("stp", stp); // NOSONAR
+        return HibernateVerktøy.hentUniktResultat(query);
+    }
+
+
+    public void opprettInfotrygdmigrering(Long fagsakId, LocalDate stp) {
+        var eksisterende = hentSakInfotrygdMigrering(fagsakId, stp);
+        if (eksisterende.isPresent()) {
+            var sakInfotrygdMigrering = eksisterende.get();
+            sakInfotrygdMigrering.setAktiv(true);
+            entityManager.persist(sakInfotrygdMigrering);
+        } else {
+            entityManager.persist(new SakInfotrygdMigrering(fagsakId, stp));
+        }
         entityManager.flush();
-        return sakInfotrygdMigrering.getId();
+    }
+
+    public void deaktiverInfotrygdmigrering(Long fagsakId, LocalDate stp) {
+        var eksisterende = hentSakInfotrygdMigrering(fagsakId, stp);
+        eksisterende.ifPresent(infotrygdMigrering -> {
+            infotrygdMigrering.setAktiv(false);
+            entityManager.persist(infotrygdMigrering);
+            entityManager.flush();
+        });
     }
 
     /**
      * Oppderer status på fagsak.
      *
      * @param fagsakId - id på fagsak
-     * @param status - ny status
+     * @param status   - ny status
      */
     public void oppdaterFagsakStatus(Long fagsakId, FagsakStatus status) {
         Fagsak fagsak = finnEksaktFagsak(fagsakId);

@@ -7,14 +7,13 @@ import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -82,9 +81,7 @@ public class VilkårResultatRepository {
         var differ = vilkårsDiffer();
 
         if (differ.areDifferent(gammeltResultat, nyttResultat)) {
-            if (vilkårsResultat.isPresent()) {
-                deaktiverVilkårsResultat(vilkårsResultat.get());
-            }
+            vilkårsResultat.ifPresent(this::deaktiverVilkårsResultat);
 
             var nyttVilkårsResultat = new VilkårsResultat(behandlingId, nyttResultat);
             entityManager.persist(nyttResultat);
@@ -136,7 +133,9 @@ public class VilkårResultatRepository {
         hentVilkårsResultat(behandlingId).ifPresent(v -> deaktiverVilkårsResultat(v));
     }
 
-    /** Optimalisert spørring for å hente vilkårsresultater uten regelsporing. */
+    /**
+     * Optimalisert spørring for å hente vilkårsresultater uten regelsporing.
+     */
     public List<VilkårPeriodeResultatDto> hentVilkårResultater(Long behandlingId) {
         String sql = "select vv.vilkar_type, vp.fom, vp.tom, nullif('-', vp.utfall) as utfall, nullif('-', vp.overstyrt_utfall) as overstyrt_utfall, vp.avslag_kode" +
             " from rs_vilkars_resultat rv " +

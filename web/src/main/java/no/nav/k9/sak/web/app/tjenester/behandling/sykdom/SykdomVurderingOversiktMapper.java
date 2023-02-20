@@ -8,10 +8,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingEndringDto;
@@ -22,19 +21,18 @@ import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingOversiktElement;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoUtil;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService.SykdomVurderingerOgPerioder;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste.SykdomVurderingerOgPerioder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurderingVersjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleietrengendeAlderPeriode;
 
 public class SykdomVurderingOversiktMapper {
-    public SykdomVurderingOversikt mapPSB(UUID behandlingUuid, Saksnummer saksnummer, SykdomVurderingerOgPerioder sykdomVurderingerOgPerioder, LocalDate pleietrengendesFødselsdato) {
+    public SykdomVurderingOversikt mapPSB(UUID behandlingUuid, Saksnummer saksnummer, SykdomVurderingerOgPerioder sykdomVurderingerOgPerioder, LocalDate pleietrengendesFødselsdato, boolean lukketBehandling) {
         final var elements = tilSykdomVurderingOversiktElement(behandlingUuid, saksnummer, sykdomVurderingerOgPerioder);
 
         return new SykdomVurderingOversikt(
                 elements,
-                sykdomVurderingerOgPerioder.getResterendeVurderingsperioder(),
-                sykdomVurderingerOgPerioder.getResterendeValgfrieVurderingsperioder(),
+                lukketBehandling ? List.of() : sykdomVurderingerOgPerioder.getResterendeVurderingsperioder(),
+                lukketBehandling ? List.of() : sykdomVurderingerOgPerioder.getResterendeValgfrieVurderingsperioder(),
                 sykdomVurderingerOgPerioder.getNyeSøknadsperioder(),
                 sykdomVurderingerOgPerioder.getPerioderSomKanVurderes(),
                 pleietrengendesFødselsdato,
@@ -43,19 +41,34 @@ public class SykdomVurderingOversiktMapper {
                 );
     }
 
-    public SykdomVurderingOversikt mapPPN(UUID behandlingUuid, Saksnummer saksnummer, SykdomVurderingerOgPerioder sykdomVurderingerOgPerioder) {
+    public SykdomVurderingOversikt mapPPN(UUID behandlingUuid, Saksnummer saksnummer, SykdomVurderingerOgPerioder sykdomVurderingerOgPerioder, boolean lukketBehandling) {
         final var elements = tilSykdomVurderingOversiktElement(behandlingUuid, saksnummer, sykdomVurderingerOgPerioder);
 
         Boolean harPerioderDerPleietrengendeErOver18år = null; //ikke relevant for PPN, sender null for å styre oppførsel i frontend
         LocalDate pleietrengendesFødselsdato = null; //ikke relevant for PPN
         return new SykdomVurderingOversikt(
             elements,
-            sykdomVurderingerOgPerioder.getResterendeVurderingsperioder(),
-            sykdomVurderingerOgPerioder.getResterendeValgfrieVurderingsperioder(),
+            lukketBehandling ? List.of() : sykdomVurderingerOgPerioder.getResterendeVurderingsperioder(),
+            lukketBehandling ? List.of() : sykdomVurderingerOgPerioder.getResterendeValgfrieVurderingsperioder(),
             sykdomVurderingerOgPerioder.getNyeSøknadsperioder(),
             sykdomVurderingerOgPerioder.getPerioderSomKanVurderes(),
             pleietrengendesFødselsdato,
             harPerioderDerPleietrengendeErOver18år,
+            Arrays.asList(linkForNyVurdering(behandlingUuid.toString()))
+        );
+    }
+
+    public SykdomVurderingOversikt mapOLP(UUID behandlingUuid, Saksnummer saksnummer, SykdomVurderingerOgPerioder sykdomVurderingerOgPerioder, boolean lukketBehandling) {
+        final var elements = tilSykdomVurderingOversiktElement(behandlingUuid, saksnummer, sykdomVurderingerOgPerioder);
+
+        return new SykdomVurderingOversikt(
+            elements,
+            lukketBehandling ? List.of() : sykdomVurderingerOgPerioder.getResterendeVurderingsperioder(),
+            lukketBehandling ? List.of() : sykdomVurderingerOgPerioder.getResterendeValgfrieVurderingsperioder(),
+            sykdomVurderingerOgPerioder.getNyeSøknadsperioder(),
+            sykdomVurderingerOgPerioder.getPerioderSomKanVurderes(),
+            null,
+            null,
             Arrays.asList(linkForNyVurdering(behandlingUuid.toString()))
         );
     }
@@ -65,38 +78,32 @@ public class SykdomVurderingOversiktMapper {
         elements = medInnleggelser(elements, sykdomVurderingerOgPerioder.getInnleggelsesperioder());
         elements = medInformasjonOmSøktePerioder(elements, saksnummer, sykdomVurderingerOgPerioder.getSaksnummerForPerioder());
 
-        return SykdomUtils.values(elements);
+        return TidslinjeUtil.values(elements.compress());
     }
 
-    private LocalDateTimeline<SykdomVurderingOversiktElement> vurderingerTilElement(LocalDateTimeline<SykdomVurderingVersjon> vurderingerTidslinje, UUID behandlingUuid) {
+    private LocalDateTimeline<SykdomVurderingOversiktElement> vurderingerTilElement(LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> vurderingerTidslinje, UUID behandlingUuid) {
         return vurderingerTidslinje.map(vurdering -> {
             final String sykdomVurderingId = "" + vurdering.getValue().getSykdomVurdering().getId();
             return List.of(new LocalDateSegment<SykdomVurderingOversiktElement>(vurdering.getLocalDateInterval(), new SykdomVurderingOversiktElement(
                     sykdomVurderingId,
                     vurdering.getValue().getResultat(),
                     new Periode(vurdering.getFom(), vurdering.getTom()),
-                    behandlingUuid.equals(vurdering.getValue().getEndretBehandlingUuid()),
+                    behandlingUuid.equals(vurdering.getValue().getEndretForSøkersBehandlingUuid()),
                     Arrays.asList(linkForGetVurdering(behandlingUuid.toString(), sykdomVurderingId), linkForEndreVurdering(behandlingUuid.toString()))
                 )));
         });
     }
 
     private LocalDateTimeline<SykdomVurderingOversiktElement> medInnleggelser(LocalDateTimeline<SykdomVurderingOversiktElement> elementsTidslinje, List<Periode> innleggelsesperioder) {
-        final LocalDateTimeline<Boolean> innleggelsesperioderTidslinje = SykdomUtils.toLocalDateTimeline(innleggelsesperioder);
-        return elementsTidslinje.combine(innleggelsesperioderTidslinje, new LocalDateSegmentCombinator<SykdomVurderingOversiktElement, Boolean, SykdomVurderingOversiktElement>() {
-            @Override
-            public LocalDateSegment<SykdomVurderingOversiktElement> combine(
-                    LocalDateInterval datoInterval,
-                    LocalDateSegment<SykdomVurderingOversiktElement> vs,
-                    LocalDateSegment<Boolean> innleggelse) {
+        final LocalDateTimeline<Boolean> innleggelsesperioderTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(innleggelsesperioder);
+        return elementsTidslinje.combine(innleggelsesperioderTidslinje, (datoInterval, vs, innleggelse) -> {
 
-                final SykdomVurderingOversiktElement oldElement = (vs != null && vs.getValue() != null) ? vs.getValue() : new SykdomVurderingOversiktElement();
-                final SykdomVurderingOversiktElement newElement = new SykdomVurderingOversiktElement(oldElement);
-                newElement.setPeriode(new Periode(datoInterval.getFomDato(), datoInterval.getTomDato()));
-                newElement.setErInnleggelsesperiode(innleggelse != null);
+            final SykdomVurderingOversiktElement oldElement = (vs != null && vs.getValue() != null) ? vs.getValue() : new SykdomVurderingOversiktElement();
+            final SykdomVurderingOversiktElement newElement = new SykdomVurderingOversiktElement(oldElement);
+            newElement.setPeriode(new Periode(datoInterval.getFomDato(), datoInterval.getTomDato()));
+            newElement.setErInnleggelsesperiode(innleggelse != null);
 
-                return new LocalDateSegment<SykdomVurderingOversiktElement>(datoInterval, newElement);
-            }
+            return new LocalDateSegment<SykdomVurderingOversiktElement>(datoInterval, newElement);
         }, LocalDateTimeline.JoinStyle.CROSS_JOIN);
     }
 
@@ -105,21 +112,18 @@ public class SykdomVurderingOversiktMapper {
             Saksnummer saksnummer,
             LocalDateTimeline<Set<Saksnummer>> søktePerioder) {
 
-        return elementsTidslinje.combine(søktePerioder, new LocalDateSegmentCombinator<SykdomVurderingOversiktElement, Set<Saksnummer>, SykdomVurderingOversiktElement>() {
-            @Override
-            public LocalDateSegment<SykdomVurderingOversiktElement> combine(LocalDateInterval datoInterval, LocalDateSegment<SykdomVurderingOversiktElement> element, LocalDateSegment<Set<Saksnummer>> relevanteSaksnummer) {
-                final SykdomVurderingOversiktElement newElement = new SykdomVurderingOversiktElement(element.getValue());
+        return elementsTidslinje.combine(søktePerioder, (datoInterval, element, relevanteSaksnummer) -> {
+            final SykdomVurderingOversiktElement newElement = new SykdomVurderingOversiktElement(element.getValue());
 
-                final Set<Saksnummer> s = relevanteSaksnummer != null ? relevanteSaksnummer.getValue() : Collections.emptySet();
-                final int antallSomBrukerVurdering = s.size();
-                final boolean enAnnenSakEnnSaksnummerBrukerVurderingen = antallSomBrukerVurdering > 1 || (antallSomBrukerVurdering == 1 && !s.contains(saksnummer));
+            final Set<Saksnummer> s = relevanteSaksnummer != null ? relevanteSaksnummer.getValue() : Collections.emptySet();
+            final int antallSomBrukerVurdering = s.size();
+            final boolean enAnnenSakEnnSaksnummerBrukerVurderingen = antallSomBrukerVurdering > 1 || (antallSomBrukerVurdering == 1 && !s.contains(saksnummer));
 
-                newElement.setPeriode(new Periode(datoInterval.getFomDato(), datoInterval.getTomDato()));
-                newElement.setGjelderForSøker(s.contains(saksnummer));
-                newElement.setGjelderForAnnenPart(enAnnenSakEnnSaksnummerBrukerVurderingen);
+            newElement.setPeriode(new Periode(datoInterval.getFomDato(), datoInterval.getTomDato()));
+            newElement.setGjelderForSøker(s.contains(saksnummer));
+            newElement.setGjelderForAnnenPart(enAnnenSakEnnSaksnummerBrukerVurderingen);
 
-                return new LocalDateSegment<>(datoInterval, newElement);
-            }
+            return new LocalDateSegment<>(datoInterval, newElement);
         }, LocalDateTimeline.JoinStyle.LEFT_JOIN).compress();
     }
 

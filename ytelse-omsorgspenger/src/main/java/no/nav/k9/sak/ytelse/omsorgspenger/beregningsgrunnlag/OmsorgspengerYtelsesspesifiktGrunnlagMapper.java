@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.beregningsgrunnlag;
 
 import static java.util.Comparator.comparing;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -10,15 +11,15 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.jetbrains.annotations.NotNull;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
+import no.nav.folketrygdloven.kalkulus.beregning.v1.AktivitetDto;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.OmsorgspengerGrunnlag;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PeriodeMedUtbetalingsgradDto;
-import no.nav.folketrygdloven.kalkulus.beregning.v1.UtbetalingsgradArbeidsforholdDto;
+import no.nav.folketrygdloven.kalkulus.beregning.v1.SøktPeriode;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.UtbetalingsgradPrAktivitetDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Aktør;
 import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
@@ -26,6 +27,9 @@ import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Organisasjon;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
 import no.nav.folketrygdloven.kalkulus.kodeverk.UttakArbeidType;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
 import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
 import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
@@ -36,7 +40,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 @ApplicationScoped
 public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<OmsorgspengerGrunnlag> {
 
@@ -78,8 +82,9 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
     @Override
     public OmsorgspengerGrunnlag lagYtelsespesifiktGrunnlag(BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode) {
         List<Aktivitet> aktiviteter = hentAktiviteter(ref);
+
         if (aktiviteter.isEmpty()) {
-            return new OmsorgspengerGrunnlag(Collections.emptyList());
+            return new OmsorgspengerGrunnlag(Collections.emptyList(), Collections.emptyList());
         }
 
         // Kalkulus forventer å ikke få duplikate arbeidsforhold, så vi samler alle perioder pr arbeidsforhold/aktivitet
@@ -97,7 +102,30 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
             })
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
-        return new OmsorgspengerGrunnlag(utbetalingsgradPrAktivitet);
+
+        return new OmsorgspengerGrunnlag(utbetalingsgradPrAktivitet, mapSøktePerioder(aktiviteter));
+    }
+
+    private static List<SøktPeriode> mapSøktePerioder(List<Aktivitet> aktiviteter) {
+        var harBrukerSøktSegmenter = aktiviteter.stream()
+            .flatMap(a -> a.getUttaksperioder().stream())
+            .filter(p -> p.getUtbetalingsgrad().compareTo(BigDecimal.ZERO) > 0)
+            .map(p -> new LocalDateSegment<>(p.getPeriode().getFom(), p.getPeriode().getTom(), erKravFraBruker(p)))
+            .toList();
+        var brukerHarSøktTidslinje = new LocalDateTimeline<>(harBrukerSøktSegmenter, ellerKombinator());
+
+        return brukerHarSøktTidslinje.toSegments()
+            .stream().map(s -> new SøktPeriode(new Periode(s.getFom(), s.getTom()), s.getValue()))
+            .toList();
+    }
+
+    private static boolean erKravFraBruker(Uttaksperiode p) {
+        return Boolean.FALSE.equals(p.getRefusjonTilArbeidsgiver());
+    }
+
+    private static LocalDateSegmentCombinator<Boolean, Boolean, Boolean> ellerKombinator() {
+        // sjekker ikkje null sidan den kun brukes i konstruktør
+        return (di, lhs, rhs) -> new LocalDateSegment<>(di, lhs.getValue() || rhs.getValue());
     }
 
     @NotNull
@@ -113,7 +141,7 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
         return fullUttaksplan.getAktiviteter();
     }
 
-    private UtbetalingsgradPrAktivitetDto mapTilUtbetalingsgrad(List<Uttaksperiode> perioder, UtbetalingsgradArbeidsforholdDto arbeidsforhold) {
+    private UtbetalingsgradPrAktivitetDto mapTilUtbetalingsgrad(List<Uttaksperiode> perioder, AktivitetDto arbeidsforhold) {
         var utbetalingsgrad = mapUtbetalingsgradPerioder(perioder);
 
         if (perioder.size() != utbetalingsgrad.size()) {
@@ -143,14 +171,14 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
         return p.getUtbetalingsgrad();
     }
 
-    private UtbetalingsgradArbeidsforholdDto mapTilKalkulusArbeidsforhold(Arbeidsforhold arb) {
+    private AktivitetDto mapTilKalkulusArbeidsforhold(Arbeidsforhold arb) {
         if (erTypeMedArbeidsforhold(arb)) {
             var aktør = mapTilKalkulusAktør(arb);
             var type = mapType(arb.getType());
             var internArbeidsforholdId = mapArbeidsforholdId(arb.getArbeidsforholdId());
-            return new UtbetalingsgradArbeidsforholdDto(aktør, internArbeidsforholdId, type);
+            return new AktivitetDto(aktør, internArbeidsforholdId, type);
         } else {
-            return new UtbetalingsgradArbeidsforholdDto(null, null, mapType(arb.getType()));
+            return new AktivitetDto(null, null, mapType(arb.getType()));
         }
     }
 

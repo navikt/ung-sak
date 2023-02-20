@@ -2,17 +2,15 @@ package no.nav.k9.sak.web.app.tasks;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.k9.sak.behandling.prosessering.task.TilbakeTilStartBehandlingTask;
@@ -28,32 +26,31 @@ import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingsoppretterTjeneste;
 public class OpprettManuellRevurderingService {
 
     private static final Logger logger = LoggerFactory.getLogger(OpprettManuellRevurderingService.class);
-    
-    
+
     private BehandlingsoppretterTjeneste behandlingsoppretterTjeneste;
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste;
     private FagsakTjeneste fagsakTjeneste;
-    private ProsessTaskRepository prosessTaskRepository;
+    private ProsessTaskTjeneste taskTjeneste;
     private BehandlingRepository behandlingRepository;
-    
+
     protected OpprettManuellRevurderingService() {
-        
+
     }
-    
+
     @Inject
     public OpprettManuellRevurderingService(BehandlingsoppretterTjeneste behandlingsoppretterTjeneste,
-             BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste,
-             FagsakTjeneste fagsakTjeneste,
-             ProsessTaskRepository prosessTaskRepository,
-             BehandlingRepository behandlingRepository) {
+                                            BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste,
+                                            FagsakTjeneste fagsakTjeneste,
+                                            ProsessTaskTjeneste taskTjeneste,
+                                            BehandlingRepository behandlingRepository) {
         this.behandlingsoppretterTjeneste = behandlingsoppretterTjeneste;
         this.behandlingsprosessTjeneste = behandlingsprosessTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
-        this.prosessTaskRepository = prosessTaskRepository;
+        this.taskTjeneste = taskTjeneste;
         this.behandlingRepository = behandlingRepository;
     }
-    
-    
+
+
     public void revurder(Saksnummer saksnummer) {
         final Optional<Fagsak> funnetFagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true);
         final Fagsak fagsak = funnetFagsak.get();
@@ -70,11 +67,11 @@ public class OpprettManuellRevurderingService {
                 return;
             }
 
-            final ProsessTaskData prosessTaskData = new ProsessTaskData(TilbakeTilStartBehandlingTask.TASKTYPE);
+            final ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(TilbakeTilStartBehandlingTask.class);
             prosessTaskData.setCallIdFraEksisterende();
             prosessTaskData.setBehandling(fagsak.getId(), behandling.getId(), fagsak.getAktørId().getId());
             prosessTaskData.setProperty(TilbakeTilStartBehandlingTask.PROPERTY_MANUELT_OPPRETTET, Boolean.TRUE.toString());
-            prosessTaskRepository.lagre(prosessTaskData);
+            taskTjeneste.lagre(prosessTaskData);
         }
     }
 
@@ -83,7 +80,7 @@ public class OpprettManuellRevurderingService {
             .stream()
             .filter(Behandling::erYtelseBehandling)
             .filter(b -> !b.erStatusFerdigbehandlet())
-            .collect(Collectors.toList());
+            .toList();
 
         if (behandlinger.isEmpty()) {
             return null;

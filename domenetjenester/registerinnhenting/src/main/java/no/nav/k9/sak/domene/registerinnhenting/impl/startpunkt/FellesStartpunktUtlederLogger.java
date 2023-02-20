@@ -16,7 +16,11 @@ public class FellesStartpunktUtlederLogger {
     }
 
     public static void loggEndringSomFørteTilStartpunkt(String klasseNavn, StartpunktType startpunkt, String endring, Object id1, Object id2) {
-        skrivLoggMedStartpunkt(klasseNavn, startpunkt, endring, id1.toString(), id2.toString());
+        skrivLoggMedStartpunkt(klasseNavn, startpunkt, endring, håndtereNull(id1), håndtereNull(id2));
+    }
+
+    private static String håndtereNull(Object id) {
+        return id != null ? id.toString() : null;
     }
 
     static void loggEndringSomFørteTilStartpunkt(String klasseNavn, StartpunktType startpunkt, String endring, UUID id1, UUID id2) {

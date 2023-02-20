@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -8,10 +9,11 @@ import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -22,8 +24,6 @@ import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
@@ -34,21 +34,23 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.PeriodeFraSøknadForBrukerTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.PerioderMedSykdomInnvilgetUtleder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.død.HåndterePleietrengendeDødsfallTjeneste;
 
 @ApplicationScoped
 public class ArbeidBrukerBurdeSøktOmUtleder {
 
+
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
-    private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
-    private VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste;
-    private HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste;
+    private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
+    private Instance<VurderSøknadsfristTjeneste<Søknadsperiode>> søknadsfristTjenester;
+    private Instance<HåndterePleietrengendeDødsfallTjeneste> håndterePleietrengendeDødsfallTjenester;
     private PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste;
     private PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder;
     private OpptjeningRepository opptjeningRepository;
@@ -59,31 +61,33 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
 
     @Inject
     public ArbeidBrukerBurdeSøktOmUtleder(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                          @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
-                                          @FagsakYtelseTypeRef("PSB") VurderSøknadsfristTjeneste<Søknadsperiode> søknadsfristTjeneste,
+                                          @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
+                                          @Any Instance<VurderSøknadsfristTjeneste<Søknadsperiode>> søknadsfristTjenester,
                                           PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste,
                                           PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder,
                                           OpptjeningRepository opptjeningRepository,
                                           VilkårResultatRepository vilkårResultatRepository,
-                                          HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste) {
+                                          @Any Instance<HåndterePleietrengendeDødsfallTjeneste> håndterePleietrengendeDødsfallTjenester) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
-        this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
+        this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
         this.perioderMedSykdomInnvilgetUtleder = perioderMedSykdomInnvilgetUtleder;
         this.opptjeningRepository = opptjeningRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.søknadsfristTjeneste = søknadsfristTjeneste;
-        this.håndterePleietrengendeDødsfallTjeneste = håndterePleietrengendeDødsfallTjeneste;
+        this.søknadsfristTjenester = søknadsfristTjenester;
+        this.håndterePleietrengendeDødsfallTjenester = håndterePleietrengendeDødsfallTjenester;
     }
 
     public Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> utledMangler(BehandlingReferanse referanse) {
+        var søknadsfristTjeneste = VurderSøknadsfristTjeneste.finnSøknadsfristTjeneste(søknadsfristTjenester, referanse.getFagsakYtelseType());
+
         var vurderteSøknadsperioder = søknadsfristTjeneste.vurderSøknadsfrist(referanse);
         var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
         var perioderFraSøknader = periodeFraSøknadForBrukerTjeneste.hentPerioderFraSøknad(referanse);
         var perioderTilVurdering = finnSykdomsperioder(referanse);
         var opptjeningResultat = opptjeningRepository.finnOpptjening(referanse.getBehandlingId());
 
-        var tidslinjeTilVurdering = new LocalDateTimeline<>(perioderTilVurdering.stream().map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), true)).collect(Collectors.toList()));
+        var tidslinjeTilVurdering = utledTidslinjeTilVurdering(perioderTilVurdering, vilkårene.getVilkår(VilkårType.OPPTJENINGSVILKÅRET));
 
         var input = new ArbeidstidMappingInput()
             .medSaksnummer(referanse.getSaksnummer())
@@ -92,14 +96,14 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
             .medTidslinjeTilVurdering(tidslinjeTilVurdering)
             .medOpptjeningsResultat(opptjeningResultat.orElse(null))
             .medVilkår(vilkårene.getVilkår(VilkårType.OPPTJENINGSVILKÅRET).orElseThrow());
+
+        HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste = HåndterePleietrengendeDødsfallTjeneste.velgTjeneste(håndterePleietrengendeDødsfallTjenester, referanse);
         håndterePleietrengendeDødsfallTjeneste.utledUtvidetPeriodeForDødsfall(referanse).ifPresent(input::medAutomatiskUtvidelseVedDødsfall);
 
         var innvilgeteVilkårPerioder = perioderMedSykdomInnvilgetUtleder.utledInnvilgedePerioderTilVurdering(referanse);
 
         var innvilgedeSegmenter = innvilgeteVilkårPerioder.stream()
-            .map(VilkårPeriode::getPeriode)
-            .map(DatoIntervallEntitet::toLocalDateInterval)
-            .map(it -> new LocalDateSegment<>(it, true))
+            .map(periode -> new LocalDateSegment<>(periode.getFomDato(), periode.getTomDato(), true))
             .collect(Collectors.toList());
 
         var timelineMedYtelse = new LocalDateTimeline<>(innvilgedeSegmenter);
@@ -112,10 +116,21 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
         return utledFraInput(timelineMedYtelse, timelineMedInnvilgetYtelse, input, aktørArbeidFraRegister);
     }
 
+    private LocalDateTimeline<Boolean> utledTidslinjeTilVurdering(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Optional<Vilkår> vilkår) {
+        var tidslinje = new LocalDateTimeline<>(perioderTilVurdering.stream().map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), true)).collect(Collectors.toList())).compress();
+        if (vilkår.isEmpty()) {
+            return tidslinje;
+        }
+
+        var opptjeningstidslinje = new LocalDateTimeline<>(vilkår.get().getPerioder().stream().map(VilkårPeriode::getPeriode).map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), true)).collect(Collectors.toList()));
+
+        return opptjeningstidslinje.combine(tidslinje, StandardCombinators::leftOnly, LocalDateTimeline.JoinStyle.LEFT_JOIN);
+    }
+
     private LocalDateTimeline<Boolean> utledYtelse(Vilkårene vilkårene, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
         var timeline = new LocalDateTimeline<>(tidslinjeTilVurdering.stream()
             .map(it -> new LocalDateSegment<>(it.getLocalDateInterval(), true))
-            .collect(Collectors.toList()));
+            .toList());
 
         // NB! Ikke legg til vilkår her uten å prate med en voksen først. (Nei, du regnes ikke som en voksen)
         var vilkår = Set.of(VilkårType.OPPTJENINGSVILKÅRET);
@@ -150,11 +165,19 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
     }
 
     private NavigableSet<DatoIntervallEntitet> finnSykdomsperioder(BehandlingReferanse referanse) {
-        final var s1 = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
-        final var s2 = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.MEDISINSKEVILKÅR_18_ÅR);
-        final var resultat = new TreeSet<>(s1);
-        resultat.addAll(s2);
-        return resultat;
+        VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, referanse.getFagsakYtelseType(), referanse.getBehandlingType());
+
+        var timeline = new LocalDateTimeline<Boolean>(List.of());
+        var definerendeVilkår = perioderTilVurderingTjeneste.definerendeVilkår();
+
+        for (VilkårType vilkårType : definerendeVilkår) {
+            var perioder = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), vilkårType);
+            var periodeTidslinje = new LocalDateTimeline<>(perioder.stream().map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true)).collect(Collectors.toList()));
+
+            timeline = timeline.combine(periodeTidslinje, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+
+        return TidslinjeUtil.tilDatoIntervallEntiteter(timeline.compress());
     }
 
     private HashMap<AktivitetIdentifikator, LocalDateTimeline<Boolean>> utledHvaSomBurdeVærtSøktOm(LocalDateTimeline<Boolean> tidslinjeTilVurdering,
@@ -182,9 +205,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
             skulleVærtSøktOm = skulleVærtSøktOm.intersection(tidslinjeTilVurdering);
             skulleVærtSøktOm = skulleVærtSøktOm.disjoint(helgeTidslinje);
 
-            if (!skulleVærtSøktOm.isEmpty()) {
-                resultat.put(entry.getKey(), skulleVærtSøktOm);
-            }
+            resultat.put(entry.getKey(), skulleVærtSøktOm);
         }
 
         return resultat;
@@ -202,7 +223,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
             var erFrilans = opptjening.orElseThrow()
                 .getOpptjeningAktivitet()
                 .stream()
-                .filter(it -> DatoIntervallEntitet.fraOgMedTilOgMed(skjæringstidspunkt.minusDays(1), skjæringstidspunkt.minusDays(1)).overlapper(it.getFom(), it.getTom()))
+                .filter(it -> erAktivVedSluttAvPerioden(opptjening.get().getTom(), it.getTom()))
                 .anyMatch(it -> OpptjeningAktivitetType.FRILANS.equals(it.getAktivitetType()));
             if (erFrilans) {
                 leggTilSegmentForType(mellomregning, segment, new AktivitetIdentifikator(UttakArbeidType.FRILANSER));
@@ -218,6 +239,10 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
                 leggTilSegmentForType(mellomregning, segment, new AktivitetIdentifikator(UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE));
             }
         }
+    }
+
+    private boolean erAktivVedSluttAvPerioden(LocalDate sisteDagIOpptjeningsperioden, LocalDate aktivitetSlutt) {
+        return Objects.equals(sisteDagIOpptjeningsperioden, aktivitetSlutt) || sisteDagIOpptjeningsperioden.isBefore(aktivitetSlutt);
     }
 
     private void leggTilSegmentForType(Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> mellomregning, LocalDateSegment<Boolean> segment, AktivitetIdentifikator aktivitetIdentifikator) {

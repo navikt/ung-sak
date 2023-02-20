@@ -106,7 +106,7 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
 
         vilkårResultatBuilder.leggTil(vilkårBuilder); // lagres utenfor
 
-        return OppdateringResultat.utenOverhopp();
+        return OppdateringResultat.nyttResultat();
     }
 
     private LocalDateInterval validerAngittPeriode(Fagsak fagsak, LocalDateInterval angittPeriode) {

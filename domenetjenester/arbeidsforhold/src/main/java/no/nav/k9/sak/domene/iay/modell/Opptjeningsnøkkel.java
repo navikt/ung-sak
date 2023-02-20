@@ -115,6 +115,21 @@ public class Opptjeningsnøkkel {
         }
     }
 
+    public String getAktivitetReferanse() {
+        if (this.harType(Opptjeningsnøkkel.Type.ARBEIDSFORHOLD_ID)) {
+            return getAktivitetReferanseFraNøkkel();
+        }
+        return this.getVerdi();
+    }
+
+    private String getAktivitetReferanseFraNøkkel() {
+        String nøkkel = this.getForType(Opptjeningsnøkkel.Type.ORG_NUMMER);
+        if (nøkkel == null) {
+            nøkkel = this.getForType(Opptjeningsnøkkel.Type.AKTØR_ID);
+        }
+        return nøkkel;
+    }
+
     public boolean matcher(Opptjeningsnøkkel other) {
         if (other == null) {
             return false;
@@ -167,9 +182,10 @@ public class Opptjeningsnøkkel {
 
     @Override
     public String toString() {
+        var verdi = getVerdi();
         return getClass().getSimpleName() + "<"
             + "type=" + getType()
-            + ", key=" + getVerdi()
+            + ", key=" + verdi.substring(0, Math.min(verdi.length(), 3))
             + ">";
     }
 
@@ -196,6 +212,7 @@ public class Opptjeningsnøkkel {
                 return new Opptjeningsnøkkel(null, null, id);
             }
         };
+
         abstract Opptjeningsnøkkel nyNøkkel(String id);
     }
 }

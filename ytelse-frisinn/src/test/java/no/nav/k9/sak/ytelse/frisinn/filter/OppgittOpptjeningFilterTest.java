@@ -20,7 +20,6 @@ public class OppgittOpptjeningFilterTest {
 
     private final DatoIntervallEntitet periodeApril = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2020, 3, 30), LocalDate.of(2020, 4, 30));
     private final DatoIntervallEntitet periodeMai = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2020, 5, 1), LocalDate.of(2020, 5, 31));
-    private final boolean frisinnNyttStpToggle = false;
 
     @Test
     public void skal_legge_til_tilkommet_periode_for_SN_FRISINN() {
@@ -40,7 +39,7 @@ public class OppgittOpptjeningFilterTest {
         overstryt.leggTilEgneNæringer(List.of(aprilOverstyrt));
 
         // Act
-        var filter = new OppgittOpptjeningFilter(oppgittOpptjening.build(), overstryt.build(), frisinnNyttStpToggle);
+        var filter = new OppgittOpptjeningFilter(oppgittOpptjening.build(), overstryt.build());
         var oppgittOpptjeningFrisinn = filter.getOppgittOpptjeningFrisinn(LocalDate.of(2020, 3, 1));
 
 
@@ -70,7 +69,7 @@ public class OppgittOpptjeningFilterTest {
         frilansOverstryt.medFrilansOppdrag(List.of(aprilOppdragOverstryt.build()));
         overstryt.leggTilFrilansOpplysninger(frilansOverstryt.build());
 
-        var filter = new OppgittOpptjeningFilter(oppgittOpptjening.build(), overstryt.build(), frisinnNyttStpToggle);
+        var filter = new OppgittOpptjeningFilter(oppgittOpptjening.build(), overstryt.build());
 
         var oppgittOpptjeningFrisinn = filter.getOppgittOpptjeningFrisinn(LocalDate.of(2020, 3, 1));
 
@@ -106,7 +105,7 @@ public class OppgittOpptjeningFilterTest {
         frilansOverstryt.medFrilansOppdrag(List.of(aprilOppdragOverstryt.build()));
         overstryt.leggTilFrilansOpplysninger(frilansOverstryt.build());
 
-        var filter = new OppgittOpptjeningFilter(oppgittOpptjening.build(), overstryt.build(), frisinnNyttStpToggle);
+        var filter = new OppgittOpptjeningFilter(oppgittOpptjening.build(), overstryt.build());
 
         var oppgittOpptjeningFrisinn = filter.getOppgittOpptjeningFrisinn(LocalDate.of(2020, 3, 1));
 
@@ -141,7 +140,7 @@ public class OppgittOpptjeningFilterTest {
         OppgittOpptjeningBuilder overstryt = OppgittOpptjeningBuilder.ny();
         overstryt.leggTilFrilansOpplysninger(aprilOverstyrt.build());
 
-        var filter = new OppgittOpptjeningFilter(oppgittOpptjening.build(), overstryt.build(), frisinnNyttStpToggle);
+        var filter = new OppgittOpptjeningFilter(oppgittOpptjening.build(), overstryt.build());
 
         var oppgittOpptjeningFrisinn = filter.getOppgittOpptjeningStandard();
 
@@ -181,7 +180,7 @@ public class OppgittOpptjeningFilterTest {
         overstyrt.leggTilFrilansOpplysninger(aprilOverstyrt.build());
         overstyrt.leggTilOppgittArbeidsforhold(aprilOverstyrtArbForhold);
 
-        var filter = new OppgittOpptjeningFilter(oppgittOpptjening.build(), overstyrt.build(), frisinnNyttStpToggle);
+        var filter = new OppgittOpptjeningFilter(oppgittOpptjening.build(), overstyrt.build());
 
         var oppgittOpptjeningFrisinn = filter.getOppgittOpptjeningFrisinn(LocalDate.of(2020, 3, 1));
 

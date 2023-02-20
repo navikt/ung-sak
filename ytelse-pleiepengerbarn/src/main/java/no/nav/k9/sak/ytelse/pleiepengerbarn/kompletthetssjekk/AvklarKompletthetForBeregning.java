@@ -6,12 +6,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.kompletthet.Vurdering;
@@ -22,6 +21,7 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkinnslagTekstBuilderFormater;
+import no.nav.k9.sak.domene.behandling.steg.kompletthet.KompletthetForBeregningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
@@ -74,15 +74,15 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
         if (kanFortsette) {
             lagHistorikkinnslag(param, dto);
 
-            return OppdateringResultat.utenTransisjon()
+            return OppdateringResultat.builder()
                 .medTotrinn()
                 .build();
         } else {
-            var resultat = OppdateringResultat.utenTransisjon()
+            var resultat = OppdateringResultat.builder()
                 .medTotrinnHvis(toTrinn)
                 .build();
 
-            resultat.skalRekjøreSteg(); // Rekjører steget for å bli sittende fast, bør håndteres med mer fornuftig logikk senere
+            resultat.rekjørSteg(); // Rekjører steget for å bli sittende fast, bør håndteres med mer fornuftig logikk senere
             resultat.setSteg(BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING); // TODO: Ved fjerning av toggle, endre til å alltid hoppe tilbake
             return resultat;
         }

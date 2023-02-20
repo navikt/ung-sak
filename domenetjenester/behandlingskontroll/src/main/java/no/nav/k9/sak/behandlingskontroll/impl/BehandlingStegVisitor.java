@@ -1,5 +1,6 @@
 package no.nav.k9.sak.behandlingskontroll.impl;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -141,8 +142,10 @@ class BehandlingStegVisitor {
         log.info("Avslutter steg={}, transisjon={} og funnet aksjonspunkter={}, har totalt aksjonspunkter={}", stegType, stegResultat,
             funnetAksjonspunkter.stream().map(Aksjonspunkt::getAksjonspunktDefinisjon).collect(Collectors.toList()), behandling.getAksjonspunkter());
 
+        StegTransisjon transisjon = behandlingModell.finnTransisjon(stegResultat.getTransisjon());
+        var tilbakeFørtTilSteg = utledStegDetFlyttesTil(transisjon, funnetAksjonspunkter);
         // Sett riktig status for steget etter at det er utført. Lagre eventuelle endringer fra steg på behandling
-        guardAlleÅpneAksjonspunkterHarDefinertVurderingspunkt();
+        guardAlleÅpneAksjonspunkterHarDefinertVurderingspunkt(tilbakeFørtTilSteg);
         oppdaterBehandlingStegStatus(behandling, stegType, førsteStegStatus, stegResultat.getNyStegStatus());
 
         // Publiser statusevent
@@ -150,8 +153,6 @@ class BehandlingStegVisitor {
         eventPubliserer.fireEvent(kontekst, førStatus, etterStatus);
 
         // Publiser transisjonsevent
-        StegTransisjon transisjon = behandlingModell.finnTransisjon(stegResultat.getTransisjon());
-
         // FIXME K9:Suspekt støtter bare fremoverhopp her? returnerer null tilSteg om ikke finner (eks. hvis tilbakeføring)
         BehandlingStegType tilSteg = finnFremoverhoppSteg(stegType, transisjon);
         eventPubliserer.fireEvent(opprettEvent(stegResultat, transisjon, stegTilstandFør.orElse(null), tilSteg));
@@ -166,6 +167,18 @@ class BehandlingStegVisitor {
         if (!funnetAksjonspunkter.isEmpty()) {
             eventPubliserer.fireEvent(new AksjonspunktStatusEvent(kontekst, funnetAksjonspunkter, stegType));
         }
+    }
+
+    private BehandlingStegType utledStegDetFlyttesTil(StegTransisjon transisjon, List<Aksjonspunkt> funnetAksjonspunkter) {
+        if (transisjon == null) {
+            return null;
+        }
+        if (Objects.equals(transisjon.getId(), FellesTransisjoner.TILBAKEFØRT_TIL_AKSJONSPUNKT.getId())) {
+            var aksjonspunkter = funnetAksjonspunkter.stream().map(Aksjonspunkt::getAksjonspunktDefinisjon).map(AksjonspunktDefinisjon::getKode).collect(Collectors.toList());
+            var behandlingStegModell = behandlingModell.finnTidligsteStegForAksjonspunktDefinisjon(aksjonspunkter);
+            return behandlingStegModell.getBehandlingStegType();
+        }
+        return null;
     }
 
     private BehandlingTransisjonEvent opprettEvent(StegProsesseringResultat stegResultat, StegTransisjon transisjon, BehandlingStegTilstand fraTilstand, BehandlingStegType tilSteg) {
@@ -273,6 +286,7 @@ class BehandlingStegVisitor {
         }
 
         if (FellesTransisjoner.TILBAKEFØRT_TIL_STEG.getId().equals(transisjon.getId())) {
+            validerTilbakeføringUtenAksjonspunktCircuitBreaker(behandling);
             Optional<BehandlingStegTilstand> forrige = behandling.getSisteBehandlingStegTilstand();
             BehandlingStegStatus behandlingStegStatus = håndterTilbakeføringTilTidligereSteg(behandling, stegModell.getBehandlingStegType(), resultat.getStegType());
             fyrEventBehandlingStegTilbakeføring(forrige, behandling.getSisteBehandlingStegTilstand());
@@ -295,6 +309,15 @@ class BehandlingStegVisitor {
             return behandlingStegKonfigurasjon.getVenter();
         }
         throw new IllegalArgumentException("Utvikler-feil: ikke-håndtert transisjon " + transisjon.getId());
+    }
+
+    private void validerTilbakeføringUtenAksjonspunktCircuitBreaker(Behandling behandling) {
+        LocalDateTime ettDøgnSiden = LocalDateTime.now().minusDays(1);
+        int antallTilbakeføringer = behandlingRepository.antallTilbakeføringerSiden(behandling.getId(), ettDøgnSiden);
+
+        if (antallTilbakeføringer > 100) {
+            throw new IllegalStateException("Mulig evig løkke ved tilbakeføring. Har hatt " + antallTilbakeføringer + " tilbakeføringer uten aksjonspunkt for behandlingen siden " + ettDøgnSiden + ". Stopper prosessering midlertidig. ");
+        }
     }
 
     private BehandlingStegStatus utledUtgangStegStatus(BehandlingStegType behandlingStegType) {
@@ -378,16 +401,14 @@ class BehandlingStegVisitor {
      * Verifiser at alle åpne aksjonspunkter har et definert vurderingspunkt i gjenværende steg hvor de må behandles.
      * Sikrer at ikke abstraktpunkt identifiseres ETTER at de skal være håndtert.
      */
-    private void guardAlleÅpneAksjonspunkterHarDefinertVurderingspunkt() {
-        BehandlingStegType aktivtBehandlingSteg = behandling.getAktivtBehandlingSteg();
+    private void guardAlleÅpneAksjonspunkterHarDefinertVurderingspunkt(BehandlingStegType avsluttendeSteg) {
+        BehandlingStegType aktivtBehandlingSteg = behandling.getAktivtBehandlingSteg() != null ? behandling.getAktivtBehandlingSteg() : avsluttendeSteg;
 
         List<Aksjonspunkt> gjenværendeÅpneAksjonspunkt = new ArrayList<>(behandling.getÅpneAksjonspunkter());
 
         // TODO (FC): Denne bør håndteres med event ved overgang
         behandlingModell.hvertStegFraOgMed(aktivtBehandlingSteg)
-            .forEach(bsm -> {
-                filterVekkAksjonspunktHåndtertAvFremtidigVurderingspunkt(bsm, gjenværendeÅpneAksjonspunkt);
-            });
+            .forEach(bsm -> filterVekkAksjonspunktHåndtertAvFremtidigVurderingspunkt(bsm, gjenværendeÅpneAksjonspunkt));
 
         if (!gjenværendeÅpneAksjonspunkt.isEmpty()) {
             /*

@@ -2,15 +2,15 @@ package no.nav.k9.sak.domene.registerinnhenting.impl;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -24,6 +24,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingskontroll.StartpunktRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.BehandlingStegTilstand;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktTjeneste;
@@ -92,7 +93,7 @@ public class Endringskontroller {
     }
 
     private void doSpolTilStartpunkt(BehandlingReferanse ref, Behandling behandling, StartpunktType startpunktType) {
-        BehandlingStegType fraSteg = behandling.getAktivtBehandlingSteg();
+        BehandlingStegType fraSteg = Optional.ofNullable(behandling.getAktivtBehandlingSteg()).orElse(behandling.getSisteBehandlingStegTilstand().map(BehandlingStegTilstand::getBehandlingSteg).orElseThrow());
         BehandlingStegType tilSteg = behandlingskontrollTjeneste.finnBehandlingSteg(startpunktType, behandling.getFagsakYtelseType(), behandling.getType());
 
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
@@ -147,7 +148,7 @@ public class Endringskontroller {
     // Dersom ingen spesifikk KontrollerFaktaTjeneste er angitt for startpunktet, så utføres generell kontroll av fakta
     // (Det er forventet at protokoll for KontrollerFaktaTjeneste vil evolvere i senere leveranser)
     private List<AksjonspunktResultat> utledAksjonspunkterTilHøyreForStartpunkt(BehandlingReferanse ref, StartpunktType startpunkt) {
-        List<AksjonspunktResultat> startpunktSpesfikkeApForKontrollAvFakta = StartpunktRef.Lookup.find(KontrollerFaktaAksjonspunktUtleder.class, kontrollerFaktaTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType(), startpunkt.getKode())
+        List<AksjonspunktResultat> startpunktSpesfikkeApForKontrollAvFakta = StartpunktRef.Lookup.find(KontrollerFaktaAksjonspunktUtleder.class, kontrollerFaktaTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType(), startpunkt)
             .map(tjeneste -> tjeneste.utledAksjonspunkterTilHøyreForStartpunkt(ref, startpunkt))
             .orElse(Collections.emptyList());
         if (!startpunktSpesfikkeApForKontrollAvFakta.isEmpty()) {

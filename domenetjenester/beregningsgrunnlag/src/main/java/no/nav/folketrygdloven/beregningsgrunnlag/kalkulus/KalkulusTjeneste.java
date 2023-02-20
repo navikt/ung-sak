@@ -1,13 +1,10 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +19,6 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Default;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.FraKalkulusMapper;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.TilKalkulusMapper;
@@ -33,11 +29,13 @@ import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.MapEndringsresultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.OppdaterBeregningsgrunnlagResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
+import no.nav.folketrygdloven.kalkulus.beregning.v1.AvklaringsbehovMedTilstandDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.EksternArbeidsforholdRef;
 import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.ArbeidsforholdReferanseDto;
 import no.nav.folketrygdloven.kalkulus.kodeverk.GrunnbeløpReguleringStatus;
+import no.nav.folketrygdloven.kalkulus.kodeverk.StegType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.Vilkårsavslagsårsak;
 import no.nav.folketrygdloven.kalkulus.kodeverk.YtelseTyperKalkulusStøtterKontrakt;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregningsgrunnlagListeRequest;
@@ -58,7 +56,6 @@ import no.nav.folketrygdloven.kalkulus.response.v1.TilstandListeResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringListeRespons;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAvklaringsbehovDefinisjon;
@@ -73,10 +70,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
-import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Saksnummer;
 
 /**
@@ -88,12 +82,12 @@ import no.nav.k9.sak.typer.Saksnummer;
 @Default
 public class KalkulusTjeneste implements KalkulusApiTjeneste {
 
+    protected InntektArbeidYtelseTjeneste iayTjeneste;
+    protected LagBeregnRequestTjeneste beregnRequestTjeneste;
     private KalkulusRestKlient restTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
-    protected InntektArbeidYtelseTjeneste iayTjeneste;
     private Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper;
-    protected LagBeregnRequestTjeneste beregnRequestTjeneste;
-    private boolean togglePsbMigrering;
+    private FinnInntektsmeldingForBeregning finnInntektsmeldingForBeregning;
 
     public KalkulusTjeneste() {
     }
@@ -104,14 +98,13 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
                             InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                             @Any Instance<BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?>> ytelseGrunnlagMapper,
                             LagBeregnRequestTjeneste beregnRequestTjeneste,
-                            @KonfigVerdi(value = "PSB_INFOTRYGD_MIGRERING", required = false, defaultVerdi = "false") boolean toggleMigrering
-    ) {
+                            FinnInntektsmeldingForBeregning finnInntektsmeldingForBeregning) {
         this.restTjeneste = restTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.iayTjeneste = inntektArbeidYtelseTjeneste;
         this.ytelseGrunnlagMapper = ytelseGrunnlagMapper;
         this.beregnRequestTjeneste = beregnRequestTjeneste;
-        this.togglePsbMigrering = toggleMigrering;
+        this.finnInntektsmeldingForBeregning = finnInntektsmeldingForBeregning;
     }
 
     @Override
@@ -121,9 +114,13 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         if (beregningInput.isEmpty()) {
             return new SamletKalkulusResultat(Collections.emptyMap(), Collections.emptyMap());
         }
+        validerNyReferanse(beregningInput);
         var iayGrunnlag = iayTjeneste.hentGrunnlag(referanse.getBehandlingId());
-        var sakInntektsmeldinger = finnInntektsmeldingerForSak(referanse, beregningInput);
-        var request = beregnRequestTjeneste.lagMedInput(stegType, referanse, beregningInput, iayGrunnlag, sakInntektsmeldinger);
+        var sakInntektsmeldinger = finnInntektsmeldingForBeregning.finnInntektsmeldinger(referanse, beregningInput);
+        var request = beregnRequestTjeneste.lagMedInput(stegType,
+            referanse,
+            beregningInput,
+            iayGrunnlag, sakInntektsmeldinger);
         TilstandListeResponse tilstandResponse = restTjeneste.beregn(request);
         var bgReferanser = beregningInput.stream()
             .map(i -> new BgRef(i.getBgReferanse(), i.getSkjæringstidspunkt()))
@@ -131,22 +128,29 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         return mapFraTilstand(tilstandResponse.getTilstand(), bgReferanser);
     }
 
+    private void validerNyReferanse(List<BeregnInput> beregningInput) {
+        if (beregningInput.stream().anyMatch(i -> i.getOriginalReferanser().stream().anyMatch(r -> r.equals(i.getBgReferanse())))) {
+            throw new IllegalStateException("Ny referanse skal vere ulik original referanse");
+        }
+    }
+
     @Override
-    public void kopier(BehandlingReferanse referanse,
-                       List<BeregnInput> beregningInput) {
+    public void kopier(BehandlingReferanse referanse, List<BeregnInput> beregningInput, StegType stegType) {
         if (beregningInput.isEmpty()) {
             return;
         }
-        var request = getKopierBeregningListeRequest(referanse, beregningInput);
+        var request = getKopierBeregningListeRequest(referanse, beregningInput, stegType);
         restTjeneste.kopierBeregning(request);
     }
 
-    private KopierBeregningListeRequest getKopierBeregningListeRequest(BehandlingReferanse referanse, List<BeregnInput> beregningInput) {
+    private KopierBeregningListeRequest getKopierBeregningListeRequest(BehandlingReferanse referanse, List<BeregnInput> beregningInput, StegType stegType) {
         return new KopierBeregningListeRequest(referanse.getSaksnummer().getVerdi(),
+            referanse.getBehandlingUuid(),
             YtelseTyperKalkulusStøtterKontrakt.fraKode(referanse.getFagsakYtelseType().getKode()),
-        beregningInput.stream().map(i -> new KopierBeregningRequest(i.getBgReferanse(),
-            i.getOriginalReferanseMedSammeSkjæringstidspunkt().orElseThrow(() -> new IllegalStateException("Forventer å finne original referanse med samme skjæringstidspunkt ved kopiering"))
-        )).toList());
+            stegType,
+            beregningInput.stream().map(i -> new KopierBeregningRequest(i.getBgReferanse(),
+                i.getOriginalReferanseMedSammeSkjæringstidspunkt().orElseThrow(() -> new IllegalStateException("Forventer å finne original referanse med samme skjæringstidspunkt ved kopiering"))
+            )).toList());
     }
 
     @Override
@@ -186,7 +190,12 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         var sakInntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer());
         var vilkår = vilkårResultatRepository.hent(referanse.getBehandlingId()).getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
         var bergnInputListe = bgReferanser.stream().map(r -> BeregnInput.forAksjonspunktOppdatering(r.getRef(), vilkår.finnPeriodeForSkjæringstidspunkt(r.getStp()).getPeriode())).toList();
-        var request = beregnRequestTjeneste.lagForAksjonspunktOppdateringMedInput(requestListe, referanse, bergnInputListe, iayGrunnlag, sakInntektsmeldinger);
+        var request = beregnRequestTjeneste.lagForAksjonspunktOppdateringMedInput(
+            requestListe,
+            referanse,
+            bergnInputListe,
+            iayGrunnlag,
+            sakInntektsmeldinger);
         return restTjeneste.oppdaterBeregningListe(request);
     }
 
@@ -265,9 +274,9 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
-    public void deaktiverBeregningsgrunnlag(FagsakYtelseType fagsakYtelseType, Saksnummer saksnummer, List<UUID> bgReferanse) {
+    public void deaktiverBeregningsgrunnlag(FagsakYtelseType fagsakYtelseType, Saksnummer saksnummer, UUID behandlingUuid, List<UUID> bgReferanse) {
         var bgRequests = bgReferanse.stream().map(BeregningsgrunnlagRequest::new).collect(Collectors.toList());
-        var request = new BeregningsgrunnlagListeRequest(saksnummer.getVerdi(), bgRequests);
+        var request = new BeregningsgrunnlagListeRequest(saksnummer.getVerdi(), bgRequests, behandlingUuid);
         restTjeneste.deaktiverBeregningsgrunnlag(request);
     }
 
@@ -284,49 +293,12 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         return restTjeneste;
     }
 
-    private Set<Inntektsmelding> finnInntektsmeldingerForSak(BehandlingReferanse referanse, List<BeregnInput> beregnInput) {
-        var overstyrteInntektsmeldinger = finnOverstyrtInntektsmeldinger(beregnInput);
-        var inntektsmeldingerForSak = iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer());
-        var utvalgteInntektsmeldinger = inntektsmeldingerForSak.stream()
-            .filter(im -> !harIMSomOverstyrer(im, overstyrteInntektsmeldinger))
-            .collect(Collectors.toCollection(HashSet::new));
-        utvalgteInntektsmeldinger.addAll(overstyrteInntektsmeldinger);
-        return utvalgteInntektsmeldinger;
-    }
-
-    private boolean harIMSomOverstyrer(Inntektsmelding im, Set<Inntektsmelding> overstyrteInntektsmeldinger) {
-        return overstyrteInntektsmeldinger.stream().anyMatch(overstyrtIM -> overstyrtIM.getStartDatoPermisjon().equals(im.getStartDatoPermisjon())
-            && overstyrtIM.gjelderSammeArbeidsforhold(im));
-    }
-
-    private Set<Inntektsmelding> finnOverstyrtInntektsmeldinger(List<BeregnInput> beregnInput) {
-        if (!togglePsbMigrering) {
-            return Collections.emptySet();
-        }
-        return beregnInput.stream().flatMap(i -> i.getInputOverstyringPeriode().stream()).flatMap(overstyrtPeriode -> {
-            LocalDate stp = overstyrtPeriode.getSkjæringstidspunkt();
-            return overstyrtPeriode.getAktivitetOverstyringer().stream()
-                .filter(a -> a.getAktivitetStatus().erArbeidstaker())
-                .map(a -> InntektsmeldingBuilder.builder()
-                    .medInnsendingstidspunkt(stp.atStartOfDay())
-                    .medArbeidsgiver(a.getArbeidsgiver())
-                    .medStartDatoPermisjon(stp)
-                    .medRefusjon(a.getRefusjonPrÅr() == null ? BigDecimal.ZERO :
-                        a.getRefusjonPrÅr().getVerdi().divide(BigDecimal.valueOf(12), RoundingMode.HALF_UP), a.getOpphørRefusjon())
-                    .medBeløp(a.getInntektPrÅr().getVerdi().divide(BigDecimal.valueOf(12), RoundingMode.HALF_UP))
-                    .medArbeidsforholdId(InternArbeidsforholdRef.nullRef())
-                    .medJournalpostId("OVERSTYRT_FOR_INFOTRYGDMIGRERING")
-                    .medKanalreferanse("OVERSTYRT_FOR_INFOTRYGDMIGRERING")
-                    .build());
-        }).collect(Collectors.toSet());
-    }
-
     protected SamletKalkulusResultat mapFraTilstand(Collection<TilstandResponse> response, Collection<BgRef> bgReferanser) {
 
         Map<UUID, KalkulusResultat> resultater = new LinkedHashMap<>();
         for (var tilstandResponse : response) {
             var avklaringsbehovResultatList = tilstandResponse.getAvklaringsbehovMedTilstandDto().stream()
-                .map(dto -> BeregningAvklaringsbehovResultat.opprettMedFristFor(BeregningAvklaringsbehovDefinisjon.fraKode(dto.getBeregningAvklaringsbehovDefinisjon().getKode()),
+                .map(dto -> BeregningAvklaringsbehovResultat.opprettMedFristFor(mapTilAvklaringsbehov(dto),
                     dto.getVenteårsak() != null ? BeregningVenteårsak.fraKode(dto.getVenteårsak().getKode()) : null, dto.getVentefrist()))
                 .collect(Collectors.toList());
             KalkulusResultat kalkulusResultat = new KalkulusResultat(avklaringsbehovResultatList);
@@ -342,11 +314,17 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         return new SamletKalkulusResultat(resultater, bgReferanser);
     }
 
+    private BeregningAvklaringsbehovDefinisjon mapTilAvklaringsbehov(AvklaringsbehovMedTilstandDto dto) {
+        return BeregningAvklaringsbehovDefinisjon.fraKode(dto.getBeregningAvklaringsbehovDefinisjon().getKode());
+    }
+
     private Avslagsårsak mapTilAvslagsårsak(Vilkårsavslagsårsak vilkårsavslagsårsak) {
         if (vilkårsavslagsårsak.getKode().equals(BeregningAvslagsårsak.SØKT_FL_INGEN_FL_INNTEKT.getKode())) {
             return Avslagsårsak.SØKT_FRILANS_UTEN_FRILANS_INNTEKT;
         } else if (vilkårsavslagsårsak.getKode().equals(BeregningAvslagsårsak.FOR_LAVT_BG.getKode())) {
             return Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG;
+        } else if (vilkårsavslagsårsak.getKode().equals(BeregningAvslagsårsak.FOR_LAVT_BG_8_47.getKode())) {
+            return Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG_8_47;
         } else if (vilkårsavslagsårsak.getKode().equals(BeregningAvslagsårsak.AVKORTET_GRUNNET_ANNEN_INNTEKT.getKode())) {
             return Avslagsårsak.AVKORTET_GRUNNET_ANNEN_INNTEKT;
         }
@@ -354,12 +332,14 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     }
 
     public BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<?> getYtelsesspesifikkMapper(FagsakYtelseType ytelseType) {
-        var ytelseTypeKode = ytelseType.getKode();
-        return FagsakYtelseTypeRef.Lookup.find(ytelseGrunnlagMapper, ytelseTypeKode).orElseThrow(
-            () -> new UnsupportedOperationException("Har ikke " + BeregningsgrunnlagYtelsespesifiktGrunnlagMapper.class.getName() + " mapper for ytelsetype=" + ytelseTypeKode));
+        return FagsakYtelseTypeRef.Lookup.find(ytelseGrunnlagMapper, ytelseType).orElseThrow(
+            () -> new UnsupportedOperationException("Har ikke " + BeregningsgrunnlagYtelsespesifiktGrunnlagMapper.class.getName() + " mapper for ytelsetype=" + ytelseType));
     }
 
     public Map<UUID, GrunnbeløpReguleringStatus> kontrollerBehovForGregulering(List<UUID> koblingerÅSpørreMot, Saksnummer saksnummer) {
+        if (koblingerÅSpørreMot.isEmpty()) {
+            return Map.of();
+        }
         KontrollerGrunnbeløpRequest request = new KontrollerGrunnbeløpRequest(koblingerÅSpørreMot, saksnummer.getVerdi());
         GrunnbeløpReguleringRespons respons = restTjeneste.kontrollerBehovForGRegulering(request);
         return respons.getResultat();

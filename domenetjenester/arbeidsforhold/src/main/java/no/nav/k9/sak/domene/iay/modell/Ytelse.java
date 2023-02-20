@@ -2,7 +2,6 @@ package no.nav.k9.sak.domene.iay.modell;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -19,11 +18,8 @@ import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Saksnummer;
 
-public class Ytelse implements IndexKey, Comparable<Ytelse> {
+public class Ytelse implements IndexKey {
 
-    private static final Comparator<Ytelse> COMP = Comparator
-        .comparing((Ytelse ytelse) -> ytelse.getYtelseType().getKode(), Comparator.nullsFirst(Comparator.naturalOrder()))
-        .thenComparing(ytelse -> ytelse.getKilde().getKode(), Comparator.nullsFirst(Comparator.naturalOrder()));
 
     private YtelseGrunnlag ytelseGrunnlag;
 
@@ -69,7 +65,7 @@ public class Ytelse implements IndexKey, Comparable<Ytelse> {
 
     @Override
     public String getIndexKey() {
-        Object[] keyParts = { periode, relatertYtelseType, saksnummer };
+        Object[] keyParts = {periode, relatertYtelseType, saksnummer};
         return IndexKeyComposer.createKey(keyParts);
     }
 
@@ -154,17 +150,13 @@ public class Ytelse implements IndexKey, Comparable<Ytelse> {
         return Objects.equals(relatertYtelseType, that.relatertYtelseType) &&
             Objects.equals(temaUnderkategori, that.temaUnderkategori) &&
             Objects.equals(periode, that.periode) &&
-            Objects.equals(saksnummer, that.saksnummer);
+            Objects.equals(saksnummer, that.saksnummer) &&
+            Objects.equals(kilde, that.kilde);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(relatertYtelseType, periode, saksnummer);
-    }
-
-    @Override
-    public int compareTo(Ytelse o) {
-        return COMP.compare(this, o);
+        return Objects.hash(relatertYtelseType, temaUnderkategori, periode, saksnummer, kilde);
     }
 
     @Override

@@ -22,7 +22,7 @@ import no.nav.k9.sak.typer.JournalpostId;
 @Dependent
 public class MottatteDokumentRepository {
 
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
 
     @Inject
     public MottatteDokumentRepository(EntityManager entityManager) {
@@ -115,7 +115,7 @@ public class MottatteDokumentRepository {
     }
 
     public List<MottattDokument> hentMottatteDokument(Long fagsakId, Collection<JournalpostId> journalpostIder) {
-        return hentMottatteDokument(fagsakId, journalpostIder, DokumentStatus.GYLDIG);
+        return hentMottatteDokument(fagsakId, journalpostIder, DokumentStatus.GYLDIG, DokumentStatus.MOTTATT);
     }
 
     public List<MottattDokument> hentMottatteDokument(Long fagsakId, Collection<JournalpostId> journalpostIder, DokumentStatus... statuser) {

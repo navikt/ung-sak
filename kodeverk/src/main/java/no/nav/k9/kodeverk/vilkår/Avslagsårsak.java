@@ -24,11 +24,13 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 public enum Avslagsårsak implements Kodeverdi {
 
     SØKT_FOR_SENT("1007", "Søkt for sent",
-            Map.of(FagsakYtelseType.OMSORGSPENGER, "22-13, 2. ledd")),
+            Map.of(FagsakYtelseType.OMSORGSPENGER, "22-13, 3. ledd")),
     MANGLENDE_DOKUMENTASJON("1019", "Manglende dokumentasjon",
             Map.of(FagsakYtelseType.FP, "21-3,21-7",
-                FagsakYtelseType.OMP, "21-3",
-                FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "9-16")),
+                FagsakYtelseType.OMP, "21-3, 9-5",
+                FagsakYtelseType.PPN, "21-3, 9-13",
+                FagsakYtelseType.OPPLÆRINGSPENGER, "21-3, 9-14",
+                FagsakYtelseType.PSB, "21-3, 9-10")),
     SØKER_ER_IKKE_MEDLEM("1020", "Søker er ikke medlem",
             Map.of(FagsakYtelseType.FP, "14-2",
                 FagsakYtelseType.OMP, "9-2 og 9-3, jamfør kapittel 2")),
@@ -96,12 +98,27 @@ public enum Avslagsårsak implements Kodeverdi {
         FagsakYtelseType.OMSORGSPENGER_AO, "9-6 1. ledd")),
 
     PLEIETRENGENDE_INNLAGT_I_STEDET_FOR_HJEMME("1080", "Pleietrengende innlagt i stedet for hjemme",
-        Map.of(FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "9-13 1. ledd")),
-
+        Map.of(FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "9-13")),
+    IKKE_I_LIVETS_SLUTTFASE("1081", "Ikke i livets sluttfase",
+        Map.of(FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "9-13")),
+    IKKE_NØDVENDIG_OPPLÆRING("1101", "Opplæringen er ikke nødvendig for ta seg av den pleietrengende",
+        Map.of(FagsakYtelseType.OPPLÆRINGSPENGER, "9-14")),
+    IKKE_GODKJENT_INSTITUSJON("1102", "Institusjonen er ikke en godkjent institusjon",
+        Map.of(FagsakYtelseType.OPPLÆRINGSPENGER, "9-14")),
+    IKKE_GJENNOMGÅTT_OPPLÆRING("1103", "Har ikke blitt gjennomgått opplæring",
+        Map.of(FagsakYtelseType.OPPLÆRINGSPENGER, "9-14")),
+    IKKE_PÅ_REISE("1104", "Ikke på reise",
+        Map.of(FagsakYtelseType.OPPLÆRINGSPENGER, "9-14")),
     SØKER_OVER_HØYESTE_ALDER("1090", "Søker er eldre enn høyeste tillate alder.",
             Map.of(FagsakYtelseType.PSB, "9-3 1. ledd")),
     SØKER_HAR_AVGÅTT_MED_DØDEN("1091", "Søker har avgått med døden.",
             Map.of(FagsakYtelseType.PSB, "9-5")),
+
+    BARN_OVER_HØYESTE_ALDER("1092", "Barnet er eldre enn tillatt alder.", Map.of(
+            FagsakYtelseType.OMSORGSPENGER_AO, "9-5 3. ledd",
+            FagsakYtelseType.OMSORGSPENGER_KS, "9-5 3. ledd",
+            FagsakYtelseType.OMSORGSPENGER_MA, "9-5 3. ledd")
+    ),
 
     INGEN_BEREGNINGSREGLER_TILGJENGELIG_I_LØSNINGEN("1099", "Ingen beregningsregler tilgjengelig i løsningen",
             Map.of()),

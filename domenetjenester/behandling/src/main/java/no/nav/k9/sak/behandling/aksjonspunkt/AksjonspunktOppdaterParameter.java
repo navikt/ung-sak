@@ -65,6 +65,10 @@ public final class AksjonspunktOppdaterParameter {
         return ref.getBehandlingId();
     }
 
+    /**
+     * @deprecated Bruk {@link no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste} i stedet.
+     */
+    @Deprecated
     public Skjæringstidspunkt getSkjæringstidspunkt() {
         Objects.requireNonNull(skjæringstidspunkt, "Utviker-feil: this.skjæringstidspunkt er ikke initialisert");
         return skjæringstidspunkt;

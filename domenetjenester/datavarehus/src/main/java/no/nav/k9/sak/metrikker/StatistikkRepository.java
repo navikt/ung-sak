@@ -1,6 +1,5 @@
 package no.nav.k9.sak.metrikker;
 
-import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,6 +21,7 @@ import java.util.stream.Stream;
 import org.hibernate.QueryTimeoutException;
 import org.hibernate.jpa.QueryHints;
 import org.hibernate.query.NativeQuery;
+import org.jboss.weld.interceptor.util.proxy.TargetInstanceProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +29,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
@@ -44,7 +46,9 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskFeil;
+import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 
 @Dependent
@@ -54,17 +58,17 @@ public class StatistikkRepository {
 
     private static final String UDEFINERT = "-";
 
-    static final List<String> YTELSER = List.of(
+    static final List<String> YTELSER = Stream.of(
         FagsakYtelseType.FRISINN,
         FagsakYtelseType.OMSORGSPENGER,
         FagsakYtelseType.OMSORGSPENGER_KS,
         FagsakYtelseType.OMSORGSPENGER_MA,
         FagsakYtelseType.OMSORGSPENGER_AO,
-        FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
-        .stream().map(k -> k.getKode()).collect(Collectors.toList());
+        FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
+        FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE)
+        .map(FagsakYtelseType::getKode).collect(Collectors.toList());
 
-    static final List<String> PROSESS_TASK_STATUSER = List.of(ProsessTaskStatus.KLAR, ProsessTaskStatus.FEILET, ProsessTaskStatus.VENTER_SVAR)
-        .stream().map(k -> k.getDbKode()).collect(Collectors.toList());
+    static final List<String> PROSESS_TASK_STATUSER = Stream.of(ProsessTaskStatus.KLAR, ProsessTaskStatus.FEILET, ProsessTaskStatus.VENTER_SVAR).map(ProsessTaskStatus::getDbKode).collect(Collectors.toList());
     static final List<String> AKSJONSPUNKTER = AksjonspunktDefinisjon.kodeMap().values().stream()
         .filter(p -> !AksjonspunktDefinisjon.UNDEFINED.equals(p)).map(k -> k.getKode()).collect(Collectors.toList());
     static final List<String> AKSJONSPUNKT_STATUSER = AksjonspunktStatus.kodeMap().values().stream()
@@ -83,12 +87,25 @@ public class StatistikkRepository {
     private static final ObjectMapper OM = new ObjectMapper();
 
     static final String PROSESS_TASK_VER = "v4";
+    private final Set<String> taskTyper;
 
     private EntityManager entityManager;
 
     @Inject
-    public StatistikkRepository(EntityManager entityManager) {
+    public StatistikkRepository(EntityManager entityManager, @Any Instance<ProsessTaskHandler> handlers) {
         this.entityManager = entityManager;
+        this.taskTyper = handlers.stream()
+            .map(this::extractClass)
+            .map(it -> it.getAnnotation(ProsessTask.class).value())
+            .collect(Collectors.toSet());
+    }
+
+    private Class<?> extractClass(ProsessTaskHandler bean) {
+        if (!bean.getClass().isAnnotationPresent(ProsessTask.class) && bean instanceof TargetInstanceProxy<?> tip) {
+            return tip.weld_getTargetInstance().getClass();
+        } else {
+            return bean.getClass();
+        }
     }
 
     public List<SensuEvent> hentAlle() {
@@ -144,7 +161,7 @@ public class StatistikkRepository {
             toMap(
                 "ytelse_type", t.get(0, String.class),
                 "fagsak_status", t.get(1, String.class)),
-            Map.of("totalt_antall", t.get(2, BigInteger.class)))).collect(Collectors.toCollection(LinkedHashSet::new));
+            Map.of("totalt_antall", t.get(2, Long.class)))).collect(Collectors.toCollection(LinkedHashSet::new));
 
         /* siden fagsak endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
         var zeroValues = emptyEvents(metricName,
@@ -152,7 +169,7 @@ public class StatistikkRepository {
                 "ytelse_type", YTELSER,
                 "fagsak_status", FAGSAK_STATUS),
             Map.of(
-                metricField, BigInteger.ZERO));
+                metricField, 0L));
 
         values.addAll(zeroValues); // NB: utnytter at Set#addAll ikke legger til verdier som ikke finnes fra før
 
@@ -190,9 +207,9 @@ public class StatistikkRepository {
                 "behandling_type", t.get(1, String.class),
                 "behandling_resultat_type", t.get(2, String.class)),
             Map.of(
-                metricField1, t.get(3, BigInteger.class),
-                metricField2, t.get(4, BigInteger.class),
-                metricField3, t.get(5, BigInteger.class))))
+                metricField1, t.get(3, Long.class),
+                metricField2, t.get(4, Long.class),
+                metricField3, t.get(5, Long.class))))
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
         /* siden aksjonspunkt endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
@@ -202,9 +219,9 @@ public class StatistikkRepository {
                 "behandling_type", BEHANDLING_TYPER,
                 "behandling_resultat_type", BEHANDLING_RESULTAT_TYPER),
             Map.of(
-                metricField1, BigInteger.ZERO,
-                metricField2, BigInteger.ZERO,
-                metricField3, BigInteger.ZERO));
+                metricField1, 0L,
+                metricField2, 0L,
+                metricField3, 0L));
 
         values.addAll(zeroValues); // NB: utnytter at Set#addAll ikke legger til verdier som ikke finnes fra før
 
@@ -233,7 +250,7 @@ public class StatistikkRepository {
                 "behandling_type", t.get(1, String.class),
                 "behandling_status", t.get(2, String.class)),
             Map.of(
-                metricField, t.get(3, BigInteger.class))))
+                metricField, t.get(3, Long.class))))
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
         /* siden behandling endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
@@ -243,7 +260,7 @@ public class StatistikkRepository {
                 "behandling_type", BEHANDLING_TYPER,
                 "behandling_status", BEHANDLING_STATUS),
             Map.of(
-                metricField, BigInteger.ZERO));
+                metricField, 0L));
 
         values.addAll(zeroValues); // NB: utnytter at Set#addAll ikke legger til verdier som ikke finnes fra før
 
@@ -281,7 +298,7 @@ public class StatistikkRepository {
                 "vilkar_type", t.get(3, String.class),
                 "avslag_kode", t.get(4, String.class)),
             Map.of(
-                metricField, t.get(5, BigInteger.class))))
+                metricField, t.get(5, Long.class))))
             .collect(Collectors.toList());
 
         return values;
@@ -315,7 +332,7 @@ public class StatistikkRepository {
         var values = stream.map(t -> {
             String ytelseType = t.get(0, String.class);
             String saksnummer = t.get(1, String.class);
-            String behandlingId = t.get(2, BigInteger.class).toString();
+            String behandlingId = t.get(2, Long.class).toString();
             String behandlingType = t.get(3, String.class);
             String behandlingResultatType = t.get(4, String.class);
             String vilkårType = t.get(5, String.class);
@@ -363,7 +380,7 @@ public class StatistikkRepository {
                 "aksjonspunkt", t.get(1, String.class),
                 "aksjonspunkt_status", t.get(2, String.class)),
             Map.of(
-                metricField, t.get(3, BigInteger.class))))
+                metricField, t.get(3, Number.class))))
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
         /* siden aksjonspunkt endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
@@ -373,7 +390,7 @@ public class StatistikkRepository {
                 "aksjonspunkt", AKSJONSPUNKTER,
                 "aksjonspunkt_status", AKSJONSPUNKT_STATUSER),
             Map.of(
-                metricField, BigInteger.ZERO));
+                metricField, 0L));
 
         values.addAll(zeroValues); // NB: utnytter at Set#addAll ikke legger til verdier som ikke finnes fra før
 
@@ -404,7 +421,7 @@ public class StatistikkRepository {
         var values = stream.map(t -> {
             String ytelseType = t.get(0, String.class);
             String saksnummer = t.get(1, String.class);
-            String behandlingId = t.get(2, BigInteger.class).toString();
+            String behandlingId = t.get(2, Long.class).toString();
             String aksjonspunktKode = t.get(3, String.class);
             String aksjonspunktNavn = coalesce(AksjonspunktDefinisjon.kodeMap().getOrDefault(aksjonspunktKode, AksjonspunktDefinisjon.UNDEFINED).getNavn(), UDEFINERT);
             String aksjonspunktStatus = t.get(4, String.class);
@@ -414,7 +431,7 @@ public class StatistikkRepository {
                 toMap(
                     "ytelse_type", ytelseType,
                     "aksjonspunkt_status", aksjonspunktStatus,
-                    "venteÅrsak", venteÅrsak,
+                    "vente_arsak", venteÅrsak,
                     "aksjonspunkt", aksjonspunktKode),
                 Map.of(
                     "aksjonspunkt_navn", aksjonspunktNavn,
@@ -447,7 +464,7 @@ public class StatistikkRepository {
                 "ytelse_type", t.get(0, String.class),
                 "type", t.get(1, String.class)),
             Map.of(
-                "totalt_antall", t.get(2, BigInteger.class))))
+                "totalt_antall", t.get(2, Long.class))))
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
         /* siden fagsak endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
@@ -456,7 +473,7 @@ public class StatistikkRepository {
                 "ytelse_type", YTELSER,
                 "type", BREVKODER),
             Map.of(
-                metricField, BigInteger.ZERO));
+                metricField, 0L));
 
         values.addAll(zeroValues); // NB: utnytter at Set#addAll ikke legger til verdier som ikke finnes fra før
 
@@ -470,20 +487,18 @@ public class StatistikkRepository {
         // hardkoder statuser for bedre access plan for partisjon i db
         String sql = " select coalesce(f.ytelse_type, 'NONE') as ytelse_type, p.task_type, p.status, count(*) antall " +
             " from prosess_task_type t" +
-            " inner join prosess_task p on p.task_type=t.kode and p.status in ('FEILET', 'VENTER_SVAR', 'KLAR')" +
+            " inner join prosess_task p on p.task_type=t.kode and p.status in (:statuser)" +
             " left outer join fagsak_prosess_task fpt on fpt.prosess_task_id=p.id" +
             " left outer join fagsak f on f.id=fpt.fagsak_id" +
-            " where p.status IN ('FEILET', 'VENTER_SVAR', 'KLAR')" +
+            " where p.status IN (:statuser)" +
             " group by 1, 2, 3" +
             " order by 1, 2, 3";
 
         String metricName = "prosess_task_" + PROSESS_TASK_VER;
         String metricField = "totalt_antall";
 
-        NativeQuery<Tuple> queryType = (NativeQuery<Tuple>) entityManager.createNativeQuery("select kode from prosess_task_type", Tuple.class);
-        var typer = queryType.getResultStream().map(t -> t.get(0, String.class)).collect(Collectors.toSet());
-
-        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class);
+        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
+            .setParameter("statuser", PROSESS_TASK_STATUSER);
 
         Stream<Tuple> stream = query.getResultStream()
             .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class))); // forkaster dummy ytelse_type fra db
@@ -493,17 +508,17 @@ public class StatistikkRepository {
                 "prosess_task_type", t.get(1, String.class),
                 "status", t.get(2, String.class)),
             Map.of(
-                metricField, t.get(3, BigInteger.class))))
+                metricField, t.get(3, Number.class))))
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
         /* siden aksjonspunkt endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
         var zeroValues = emptyEvents(metricName,
             Map.of(
                 "ytelse_type", YTELSER,
-                "prosess_task_type", typer,
+                "prosess_task_type", taskTyper,
                 "status", PROSESS_TASK_STATUSER),
             Map.of(
-                metricField, BigInteger.ZERO));
+                metricField, 0L));
 
         values.addAll(zeroValues); // NB: utnytter at Set#addAll ikke legger til verdier som ikke finnes fra før
 
@@ -538,7 +553,7 @@ public class StatistikkRepository {
         Collection<SensuEvent> values = stream.map(t -> {
             String ytelseType = t.get(0, String.class);
             String saksnummer = t.get(1, String.class);
-            String taskId = t.get(2, BigInteger.class).toString();
+            String taskId = t.get(2, Number.class).toString();
             String taskType = t.get(3, String.class);
             String status = t.get(4, String.class);
             Timestamp sistKjørt = t.get(5, Timestamp.class);
@@ -547,12 +562,12 @@ public class StatistikkRepository {
             String sisteFeil = finnStacktraceStartFra(t.get(6, String.class), 500).orElse(UDEFINERT);
             String taskParams = t.get(7, String.class);
 
-            BigInteger blokkertAvId = t.get(8, BigInteger.class);
+            Number blokkertAvId = t.get(8, Number.class);
             String blokkertAv = blokkertAvId == null ? null : blokkertAvId.toString();
 
             String opprettetTid = t.get(9, Timestamp.class).toInstant().toString();
 
-            var gruppeSekvensnr = t.get(10, BigInteger.class);
+            var gruppeSekvensnr = t.get(10, Long.class);
 
             return SensuEvent.createSensuEvent(metricName,
                 toMap(

@@ -46,7 +46,7 @@ class VilkårDtoMapper {
         dto.setMerknadParametere(it.getMerknadParametere());
         dto.setBegrunnelse(it.getBegrunnelse());
         dto.setMerknad(it.getMerknad());
-        dto.setVurderesIBehandlingen(vurdersIBehandlingen(it, aktuelleVilkårsperioder, vilkårType));
+        dto.setVurderesIBehandlingen(vurderesIBehandlingen(it, aktuelleVilkårsperioder, vilkårType));
 
         if (medVilkårkjøring) {
             dto.setInput(it.getRegelInput());
@@ -55,7 +55,7 @@ class VilkårDtoMapper {
         return dto;
     }
 
-    private static boolean vurdersIBehandlingen(VilkårPeriode vilkårPeriode, Set<DatoIntervallEntitet> aktuelleVilkårsperioder, VilkårType vilkårType) {
+    private static boolean vurderesIBehandlingen(VilkårPeriode vilkårPeriode, Set<DatoIntervallEntitet> aktuelleVilkårsperioder, VilkårType vilkårType) {
         if (aktuelleVilkårsperioder == null) {
             return false;
         }

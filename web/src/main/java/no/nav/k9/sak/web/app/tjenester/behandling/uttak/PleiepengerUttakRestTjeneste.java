@@ -4,7 +4,9 @@ import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
+import java.util.Collection;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,21 +26,28 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.uttak.ArbeidsgiverMedPerioderSomManglerDto;
 import no.nav.k9.sak.kontrakt.uttak.ManglendeArbeidstidDto;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.kontrakt.uttak.UttakArbeidsforhold;
+import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriode;
+import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
+import no.nav.k9.sak.utsatt.UtsattPeriode;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.kjøreplan.KjøreplanUtleder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.AktivitetIdentifikator;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidBrukerBurdeSøktOmUtleder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
+import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
 @ApplicationScoped
@@ -48,13 +57,18 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 public class PleiepengerUttakRestTjeneste {
 
     public static final String GET_UTTAKSPLAN_PATH = "/behandling/pleiepenger/uttak";
+    public static final String GET_UTTAKSPLAN_MED_UTSATT_PERIODE_PATH = "/behandling/pleiepenger/uttak-med-utsatt";
     public static final String GET_SKULLE_SØKT_OM_PATH = "/behandling/pleiepenger/arbeidstid-mangler";
     public static final String GET_DEBUG_INPUT_PATH = "/behandling/pleiepenger/debug-input";
+
+    public static final String GET_DEBUG_KJØREPLAN_PATH = "/behandling/pleiepenger/debug-kjøreplan";
 
     private UttakTjeneste uttakRestKlient;
     private BehandlingRepository behandlingRepository;
     private ArbeidBrukerBurdeSøktOmUtleder manglendeArbeidstidUtleder;
     private MapInputTilUttakTjeneste mapInputTilUttakTjeneste;
+    private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
+    private KjøreplanUtleder kjøreplanUtleder;
 
     public PleiepengerUttakRestTjeneste() {
         // for proxying
@@ -64,11 +78,15 @@ public class PleiepengerUttakRestTjeneste {
     public PleiepengerUttakRestTjeneste(UttakTjeneste uttakRestKlient,
                                         BehandlingRepository behandlingRepository,
                                         ArbeidBrukerBurdeSøktOmUtleder manglendeArbeidstidUtleder,
-                                        MapInputTilUttakTjeneste mapInputTilUttakTjeneste) {
+                                        MapInputTilUttakTjeneste mapInputTilUttakTjeneste,
+                                        UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
+                                        KjøreplanUtleder kjøreplanUtleder) {
         this.uttakRestKlient = uttakRestKlient;
         this.behandlingRepository = behandlingRepository;
         this.manglendeArbeidstidUtleder = manglendeArbeidstidUtleder;
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
+        this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
+        this.kjøreplanUtleder = kjøreplanUtleder;
     }
 
     @GET
@@ -81,6 +99,40 @@ public class PleiepengerUttakRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Uttaksplan getUttaksplan(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
         return uttakRestKlient.hentUttaksplan(behandlingIdDto.getBehandlingUuid(), true);
+    }
+
+
+    @GET
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path(GET_UTTAKSPLAN_MED_UTSATT_PERIODE_PATH)
+    @Operation(description = "Hent uttaksplan for behandling med utsatte perioder", tags = "behandling - pleiepenger/uttak", responses = {
+        @ApiResponse(responseCode = "200", description = "Returnerer uttaksplan for angitt behandling", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UttaksplanMedUtsattePerioder.class)))
+    })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public UttaksplanMedUtsattePerioder uttaksplanMedUtsattePerioder(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
+        var uttaksplan = uttakRestKlient.hentUttaksplan(behandlingIdDto.getBehandlingUuid(), true);
+        var behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
+        var utsattBehandlingAvPeriode = utsattBehandlingAvPeriodeRepository.hentGrunnlag(behandling.getId());
+
+        var utsattePerioderSegmenter = utsattBehandlingAvPeriode.stream()
+            .map(UtsattBehandlingAvPeriode::getPerioder)
+            .flatMap(Collection::stream)
+            .map(UtsattPeriode::getPeriode)
+            .map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), true))
+            .collect(Collectors.toList());
+
+        var utsattePerioder = new LocalDateTimeline<>(utsattePerioderSegmenter)
+            .compress()
+            .getLocalDateIntervals()
+            .stream()
+            .map(DatoIntervallEntitet::fra)
+            .collect(Collectors.toCollection(TreeSet::new))
+            .stream()
+            .map(it -> new LukketPeriode(it.getFomDato(), it.getTomDato()))
+            .collect(Collectors.toSet());
+
+        return new UttaksplanMedUtsattePerioder(uttaksplan, utsattePerioder);
     }
 
     @GET
@@ -97,7 +149,9 @@ public class PleiepengerUttakRestTjeneste {
         var mangler = manglendeArbeidstidUtleder.utledMangler(BehandlingReferanse.fra(behandling));
         return new ManglendeArbeidstidDto(mangler.entrySet()
             .stream()
-            .map(this::mapArbeidsgiver).collect(Collectors.toList()));
+            .filter(it -> !it.getValue().isEmpty())
+            .map(this::mapArbeidsgiver)
+            .collect(Collectors.toList()));
     }
 
     @GET
@@ -117,6 +171,27 @@ public class PleiepengerUttakRestTjeneste {
         return Response.ok(uttaksgrunnlag).build();
     }
 
+    @GET
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path(GET_DEBUG_KJØREPLAN_PATH)
+    @Operation(description = "Henter ut uttaksgrunnlag for behandling", tags = "behandling - pleiepenger/uttak", responses = {
+        @ApiResponse(responseCode = "200", description = "Uttaksgrunnlag", content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    })
+    @BeskyttetRessurs(action = READ, resource = DRIFT)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Response kjøreplan(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
+        var behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
+
+        var referanse = BehandlingReferanse.fra(behandling);
+        var input = kjøreplanUtleder.utledInput(referanse);
+        var kjøreplan = kjøreplanUtleder.utled(referanse);
+
+        var respons = new DebugKjøreplan(input, kjøreplan.getPlan());
+
+        return Response.ok(respons).build();
+    }
+
     private ArbeidsgiverMedPerioderSomManglerDto mapArbeidsgiver(Map.Entry<AktivitetIdentifikator, LocalDateTimeline<Boolean>> entry) {
         var arbeidsgiver = entry.getKey().getArbeidsgiver();
         var uttakArbeidsgiver = new UttakArbeidsforhold(arbeidsgiver != null ? arbeidsgiver.getArbeidsgiverOrgnr() : null, arbeidsgiver != null ? arbeidsgiver.getAktørId() : null, entry.getKey().getAktivitetType(), null);
@@ -124,5 +199,6 @@ public class PleiepengerUttakRestTjeneste {
 
         return new ArbeidsgiverMedPerioderSomManglerDto(uttakArbeidsgiver, perioder);
     }
+
 
 }

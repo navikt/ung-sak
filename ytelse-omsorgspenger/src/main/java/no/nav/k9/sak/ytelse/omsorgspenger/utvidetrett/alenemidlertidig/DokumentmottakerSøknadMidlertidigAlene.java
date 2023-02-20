@@ -1,11 +1,12 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.alenemidlertidig;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_MA;
+
 import java.util.Collection;
 import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
@@ -27,12 +28,13 @@ import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.Søknad;
+import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.felles.type.Språk;
 import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.AnnenForelder.SituasjonType;
 import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerMidlertidigAlene;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OMP_MA")
+@FagsakYtelseTypeRef(OMSORGSPENGER_MA)
 @DokumentGruppeRef(Brevkode.SØKNAD_OMS_UTVIDETRETT_MA_KODE)
 public class DokumentmottakerSøknadMidlertidigAlene implements Dokumentmottaker {
 
@@ -77,22 +79,18 @@ public class DokumentmottakerSøknadMidlertidigAlene implements Dokumentmottaker
     }
 
     private void lagreSøknad(Long behandlingId, JournalpostId journalpostId, Søknad søknad, OmsorgspengerMidlertidigAlene innsendt) {
-        var søknadsperiode = innsendt.getSøknadsperiode();
         boolean elektroniskSøknad = true;
-        DatoIntervallEntitet datoIntervall = søknadsperiode == null
-            ? DatoIntervallEntitet.fraOgMed(søknad.getMottattDato().toLocalDate())
-            : DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiode.getFraOgMed(), søknadsperiode.getTilOgMed());
+        DatoIntervallEntitet søknadsperiode = oversettSøknadsperiode(innsendt.getSøknadsperiode(), søknad);
 
         var søknadBuilder = new SøknadEntitet.Builder()
-            .medSøknadsperiode(datoIntervall)
+            .medSøknadsperiode(søknadsperiode)
             .medElektroniskRegistrert(elektroniskSøknad)
             .medMottattDato(søknad.getMottattDato().toLocalDate())
             .medErEndringssøknad(false)
             .medJournalpostId(journalpostId)
             .medSøknadId(søknad.getSøknadId() == null ? null : søknad.getSøknadId().getId())
             .medSøknadsdato(søknad.getMottattDato().toLocalDate())
-            .medSpråkkode(getSpråkValg(søknad.getSpråk()))
-        ;
+            .medSpråkkode(getSpråkValg(søknad.getSpråk()));
         if (innsendt.getBarn() != null) {
             for (var barn : innsendt.getBarn()) {
                 var barnAktørId = personinfoAdapter.hentAktørIdForPersonIdent(new PersonIdent(barn.getPersonIdent().getVerdi()))
@@ -114,6 +112,17 @@ public class DokumentmottakerSøknadMidlertidigAlene implements Dokumentmottaker
         var søknadEntitet = søknadBuilder.build();
 
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);
+    }
+
+    private DatoIntervallEntitet oversettSøknadsperiode(Periode innsendtSøknadsperiode, Søknad søknad) {
+        if (innsendtSøknadsperiode == null) {
+            //innsending helt uten periode bør antagelig fjernes, men brukes i dag fra søknadsdialogen
+            return DatoIntervallEntitet.fraOgMed(søknad.getMottattDato().toLocalDate());
+        } else if (innsendtSøknadsperiode.getTilOgMed() == null) {
+            return DatoIntervallEntitet.fraOgMed(innsendtSøknadsperiode.getFraOgMed());
+        } else {
+            return DatoIntervallEntitet.fraOgMedTilOgMed(innsendtSøknadsperiode.getFraOgMed(), innsendtSøknadsperiode.getTilOgMed());
+        }
     }
 
     private Språkkode getSpråkValg(Språk språk) {

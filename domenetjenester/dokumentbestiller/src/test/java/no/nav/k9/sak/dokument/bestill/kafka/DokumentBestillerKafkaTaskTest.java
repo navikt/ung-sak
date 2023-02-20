@@ -5,15 +5,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import java.util.UUID;
 
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.formidling.kontrakt.dokumentdataparametre.DokumentdataParametreK9;
 import no.nav.k9.formidling.kontrakt.dokumentdataparametre.FritekstbrevinnholdDto;
@@ -142,7 +141,7 @@ public class DokumentBestillerKafkaTaskTest {
     }
 
     private ProsessTaskData dokumentbestillingProsessTask(Behandling behandling, String bestillingUuid, String payload, DokumentMalType dokumentMalType) {
-        ProsessTaskData prosessTaskData = new ProsessTaskData(DokumentbestillerKafkaTaskProperties.TASKTYPE);
+        ProsessTaskData prosessTaskData =  ProsessTaskData.forProsessTask(DokumentBestillerKafkaTask.class);
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.BEHANDLING_ID, behandling.getId().toString());
         prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE, dokumentMalType.getKode());

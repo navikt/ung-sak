@@ -8,7 +8,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-
+import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.k9.sak.behandlingslager.behandling.RegisterdataDiffsjekker;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
@@ -16,7 +16,6 @@ import no.nav.k9.sak.behandlingslager.diff.DiffEntity;
 import no.nav.k9.sak.behandlingslager.diff.DiffResult;
 import no.nav.k9.sak.behandlingslager.diff.TraverseEntityGraphFactory;
 import no.nav.k9.sak.behandlingslager.diff.TraverseGraph;
-import no.nav.k9.felles.jpa.HibernateVerktøy;
 
 /**
  * Dette er et Repository for håndtering av alle persistente endringer i en Medlemskap for søker.
@@ -264,7 +263,7 @@ public class MedlemskapRepository {
                 .setParameter("behandling_id", behandlingId)
                 .setMaxResults(1); // $NON-NLS-1$
 
-        return query.getResultStream().findFirst();
+        return HibernateVerktøy.hentUniktResultat(query);
     }
 
     /** Henter førsteversjon av aggregat for Medlemskap, hvis det eksisterer. */
@@ -307,6 +306,6 @@ public class MedlemskapRepository {
             "SELECT mbg FROM MedlemskapBehandlingsgrunnlag mbg WHERE mbg.id = :aggregatId", //$NON-NLS-1$
             MedlemskapBehandlingsgrunnlagEntitet.class)
                 .setParameter("aggregatId", aggregatId);
-        return query.getResultStream().findFirst();
+        return HibernateVerktøy.hentUniktResultat(query);
     }
 }

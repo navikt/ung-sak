@@ -1,18 +1,17 @@
 package no.nav.k9.sak.web.app.tjenester.behandling;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
-import no.nav.k9.prosesstask.api.ProsessTask;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 @ApplicationScoped
 @ProsessTask(OppfriskTask.TASKTYPE)
@@ -52,8 +51,8 @@ public class OppfriskTask extends BehandlingProsessTask {
     }
 
 
-    public static final ProsessTaskData create(Behandling behandling, boolean force) {
-        final ProsessTaskData taskData = new ProsessTaskData(OppfriskTask.TASKTYPE);
+    public static ProsessTaskData create(Behandling behandling, boolean force) {
+        final ProsessTaskData taskData =  ProsessTaskData.forProsessTask(OppfriskTask.class);
         taskData.setProperty(PROPERTY_FORCE, Boolean.toString(force));
         taskData.setCallIdFraEksisterende();
         taskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());

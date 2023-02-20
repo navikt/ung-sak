@@ -1,23 +1,25 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.beregnytelse;
 
-import java.time.Duration;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.BEREGN_YTELSE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+
+import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
-import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
+import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
 import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
@@ -38,14 +40,13 @@ import no.nav.k9.sak.domene.behandling.steg.beregnytelse.BeregneYtelseSteg;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
-import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
 
-@FagsakYtelseTypeRef("OMP")
-@BehandlingStegRef(kode = "BERYT")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
+@BehandlingStegRef(value = BEREGN_YTELSE)
 @BehandlingTypeRef
 @ApplicationScoped
 public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
@@ -59,6 +60,7 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
     private Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste;
     private ÅrskvantumTjeneste årskvantumTjeneste;
     private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
+    private OmsorgspengerYtelseVerifiserer omsorgspengerYtelseVerifiserer;
 
     protected OmsorgspengerBeregneYtelseSteg() {
         // for proxy
@@ -70,7 +72,9 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
                                           ÅrskvantumTjeneste årskvantumTjeneste,
                                           FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste,
                                           @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste,
-                                          @FagsakYtelseTypeRef("OMP") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste) {
+                                          @FagsakYtelseTypeRef(OMSORGSPENGER) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
+                                          OmsorgspengerYtelseVerifiserer omsorgspengerYtelseVerifiserer
+    ) {
         this.årskvantumTjeneste = årskvantumTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.kalkulusTjeneste = kalkulusTjeneste;
@@ -78,6 +82,7 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
         this.fastsettBeregningsresultatTjeneste = fastsettBeregningsresultatTjeneste;
         this.beregnFeriepengerTjeneste = beregnFeriepengerTjeneste;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
+        this.omsorgspengerYtelseVerifiserer = omsorgspengerYtelseVerifiserer;
     }
 
     @Override
@@ -93,22 +98,21 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
         var aktiviteter = fullUttaksplan.getAktiviteter();
         var uttaksresultat = new UttakResultat(ref.getFagsakYtelseType(), new MapFraÅrskvantumResultat().mapFra(aktiviteter));
 
-        if (harBådeNullArbeidsforholdsIdOgSpesifikkId(vurdertePerioder, fullUttaksplan)) {
-            throw new IllegalStateException("Sammenhengende periode har både spesifikk arbeidsforholdsId og null. Saken må rulle tilbake til start hvor det forventes aksjonspunkt og arbeidsgiver må kontaktes for å sende inn ny inntektsmeldinger.");
+        if (harBådeNullArbeidsforholdsIdOgSpesifikkId(fullUttaksplan)) {
+            throw new IllegalStateException("Overlappende periode har både spesifikk arbeidsforholdsId og null. Saken må rulle tilbake til start hvor det forventes aksjonspunkt og arbeidsgiver må kontaktes for å sende inn ny inntektsmeldinger.");
         }
         // Kalle regeltjeneste
         var beregningsresultat = fastsettBeregningsresultatTjeneste.fastsettBeregningsresultat(beregningsgrunnlag, uttaksresultat);
 
-        // Verifiser beregningsresultat
-        BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);
-
-        if (harUtbetalingTilBruker(beregningsresultat, vurdertePerioder)) {
-            log.info("Har utbetaling til bruker: {}", beregningsresultat);
-        }
-
         // Beregn feriepenger
         var feriepengerTjeneste = FagsakYtelseTypeRef.Lookup.find(beregnFeriepengerTjeneste, ref.getFagsakYtelseType()).orElseThrow();
         feriepengerTjeneste.beregnFeriepenger(beregningsresultat);
+
+        // Verifiser beregningsresultat
+        omsorgspengerYtelseVerifiserer.verifiser(behandling, beregningsresultat);
+        if (harUtbetalingTilBruker(beregningsresultat, vurdertePerioder)) {
+            log.info("Har utbetaling til bruker: {}", beregningsresultat);
+        }
 
         // Lagre beregningsresultat
         beregningsresultatRepository.lagre(behandling, beregningsresultat);
@@ -116,39 +120,47 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private boolean harBådeNullArbeidsforholdsIdOgSpesifikkId(NavigableSet<DatoIntervallEntitet> vurdertePerioder, FullUttaksplan fullUttaksplan) {
+    private boolean harBådeNullArbeidsforholdsIdOgSpesifikkId(FullUttaksplan fullUttaksplan) {
         var aktiviteter = fullUttaksplan.getAktiviteter();
+        LocalDateTimeline<List<Arbeidsforhold>> arbeidsforholdTidslinje = lagArbeidsforholdTidslinje(aktiviteter);
 
-        var arbeidsgiverMap = new HashMap<DatoIntervallEntitet, Map<String, Set<String>>>();
-
-        for (DatoIntervallEntitet periode : vurdertePerioder) {
-
-            var arbeidsgiverSetHashMap = new HashMap<String, Set<String>>();
-            aktiviteter.stream()
-                .filter(it -> UttakArbeidType.fraKode(it.getArbeidsforhold().getType()).erArbeidstakerEllerFrilans())
-                .filter(it -> it.getUttaksperioder()
-                    .stream()
-                    .filter(at -> !Duration.ZERO.equals(at.getDelvisFravær()))
-                    .anyMatch(at -> periode.overlapper(at.getPeriode().getFom(), at.getPeriode().getTom())))
-                .map(Aktivitet::getArbeidsforhold)
-                .forEach(it -> {
-                    var utledetKey = utledKey(it);
-                    var idSet = arbeidsgiverSetHashMap.getOrDefault(utledetKey, new HashSet<>());
-                    idSet.add(it.getArbeidsforholdId());
-                    arbeidsgiverSetHashMap.put(utledetKey, idSet);
-                });
-            arbeidsgiverMap.put(periode, arbeidsgiverSetHashMap);
-        }
-
-        return arbeidsgiverMap.values()
+        return arbeidsforholdTidslinje.toSegments()
             .stream()
-            .map(Map::entrySet)
-            .flatMap(Collection::stream)
-            .anyMatch(it -> it.getValue().contains(null) && it.getValue().size() > 1);
+            .anyMatch(this::harUgyldigKombinasjonAvArbeidsforholdReferanserHosArbeidsgiver);
+
     }
 
-    private String utledKey(no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold it) {
-        return it.getOrganisasjonsnummer() == null ? it.getAktørId() : it.getOrganisasjonsnummer();
+    private LocalDateTimeline<List<Arbeidsforhold>> lagArbeidsforholdTidslinje(List<Aktivitet> aktiviteter) {
+        var segmenter = aktiviteter.stream()
+            .filter(a -> a.getArbeidsforhold().getType().equals(UttakArbeidType.ARBEIDSTAKER.getKode()))
+            .flatMap(a -> a.getUttaksperioder().stream()
+                .map(p ->
+                    new LocalDateSegment<>(p.getPeriode().getFom(), p.getPeriode().getTom(), a.getArbeidsforhold())))
+            .toList();
+        return LocalDateTimeline.buildGroupOverlappingSegments(segmenter);
+    }
+
+    private boolean harUgyldigKombinasjonAvArbeidsforholdReferanserHosArbeidsgiver(LocalDateSegment<List<Arbeidsforhold>> s) {
+        return grupperPåArbeidsgiver(s.getValue()).values().stream().anyMatch(this::harBlandingAvSpesifikkeOgGenerelleArbeidsforhold);
+    }
+
+    private Map<String, List<Arbeidsforhold>> grupperPåArbeidsgiver(List<Arbeidsforhold> arbeidsforholdList) {
+        return arbeidsforholdList.stream()
+            .collect(Collectors.groupingBy(a -> a.getOrganisasjonsnummer() != null ? a.getOrganisasjonsnummer() : a.getAktørId()));
+    }
+
+    private boolean harBlandingAvSpesifikkeOgGenerelleArbeidsforhold(List<Arbeidsforhold> arbeidsforholdList) {
+        return !(harKunGenerellArbeidsforhold(arbeidsforholdList) || harKunSpesifikkeArbeidsforhold(arbeidsforholdList));
+    }
+
+    private boolean harKunSpesifikkeArbeidsforhold(List<Arbeidsforhold> arbeidsforholdList) {
+        return arbeidsforholdList.stream().allMatch(arbeidsforhold ->
+            arbeidsforhold.getArbeidsforholdId() != null);
+    }
+
+    private boolean harKunGenerellArbeidsforhold(List<Arbeidsforhold> arbeidsforholdList) {
+        return arbeidsforholdList.stream().allMatch(arbeidsforhold ->
+            arbeidsforhold.getArbeidsforholdId() == null);
     }
 
     private boolean harUtbetalingTilBruker(BeregningsresultatEntitet beregningsresultat, NavigableSet<DatoIntervallEntitet> vurdertePerioder) {

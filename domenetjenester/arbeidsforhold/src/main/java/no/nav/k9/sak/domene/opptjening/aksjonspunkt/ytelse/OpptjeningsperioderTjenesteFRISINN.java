@@ -14,12 +14,10 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
-import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.InntektFilter;
@@ -31,6 +29,7 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
+import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
 import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurdering;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
@@ -66,29 +65,26 @@ public class OpptjeningsperioderTjenesteFRISINN {
                                                                                   InntektArbeidYtelseGrunnlag grunnlag,
                                                                                   OppgittOpptjening oppgittOpptjening,
                                                                                   OpptjeningAktivitetVurdering vurderOpptjening,
-                                                                                  DatoIntervallEntitet opptjeningPeriode) {
+                                                                                  DatoIntervallEntitet opptjeningPeriode,
+                                                                                  DatoIntervallEntitet vilkårsperiode) {
         List<OpptjeningsperiodeForSaksbehandling> perioder = new ArrayList<>();
 
         var aktørId = ref.getAktørId();
-        var skjæringstidspunkt = opptjeningPeriode.getTomDato().plusDays(1);
+        var skjæringstidspunkt = vilkårsperiode.getFomDato();
 
         var mapArbeidOpptjening = OpptjeningAktivitetType.hentFraArbeidTypeRelasjoner();
         var filter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(aktørId)).før(skjæringstidspunkt);
         for (var yrkesaktivitet : filter.getYrkesaktiviteter()) {
-            var opptjeningsperioder = MapYrkesaktivitetTilOpptjeningsperiodeTjeneste.mapYrkesaktivitet(ref, yrkesaktivitet, grunnlag, vurderOpptjening, mapArbeidOpptjening, opptjeningPeriode);
+            var opptjeningsperioder = MapYrkesaktivitetTilOpptjeningsperiodeTjeneste.mapYrkesaktivitet(ref, yrkesaktivitet, grunnlag, vurderOpptjening, mapArbeidOpptjening, opptjeningPeriode, vilkårsperiode, Map.of());
             perioder.addAll(opptjeningsperioder);
         }
 
         perioder.addAll(mapOppgittOpptjening(mapArbeidOpptjening, oppgittOpptjening, vurderOpptjening, opptjeningPeriode, ref));
-        perioder.addAll(mapYtelseperioderTjeneste.mapYtelsePerioder(ref, grunnlag, vurderOpptjening, opptjeningPeriode));
+        perioder.addAll(mapYtelseperioderTjeneste.mapYtelsePerioder(ref, vilkårsperiode, vurderOpptjening, true, new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId)).før(opptjeningPeriode.getTomDato())));
         lagOpptjeningsperiodeForFrilansAktivitet(ref, oppgittOpptjening, vurderOpptjening, grunnlag, perioder, opptjeningPeriode,
             mapArbeidOpptjening).ifPresent(perioder::add);
 
         return perioder.stream().sorted(Comparator.comparing(OpptjeningsperiodeForSaksbehandling::getPeriode)).collect(Collectors.toList());
-    }
-
-    public Optional<OpptjeningResultat> hentOpptjeningHvisFinnes(Long behandlingId) {
-        return opptjeningRepository.finnOpptjening(behandlingId);
     }
 
     private List<OpptjeningsperiodeForSaksbehandling> mapOppgittOpptjening(Map<ArbeidType, Set<OpptjeningAktivitetType>> mapArbeidOpptjening, OppgittOpptjening oppgittOpptjening, OpptjeningAktivitetVurdering vurderOpptjening, DatoIntervallEntitet opptjeningPeriode, BehandlingReferanse ref) {

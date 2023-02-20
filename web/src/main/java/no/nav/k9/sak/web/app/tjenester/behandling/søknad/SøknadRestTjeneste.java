@@ -33,6 +33,7 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.søknad.HentSøknadPerioderDto;
 import no.nav.k9.sak.kontrakt.søknad.SøknadDto;
 import no.nav.k9.sak.typer.Periode;
@@ -47,6 +48,7 @@ public class SøknadRestTjeneste {
 
     public static final String SOKNAD_PATH = "/behandling/soknad";
     public static final String SOKNAD_PERIODER_PATH = "/behandling/soknad/perioder";
+    public static final String SOKNAD_PERIODER_SAKSNUMMER_PATH = "/behandling/soknad/perioder/saksnummer";
 
     private BehandlingRepository behandlingRepository;
     private SøknadDtoTjeneste søknadDtoTjeneste;
@@ -82,6 +84,16 @@ public class SøknadRestTjeneste {
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
     public List<Periode> hentSøknadPerioder(@Parameter(description = "Match kritierer for å lete opp fagsaker") @Valid @TilpassetAbacAttributt(supplierClass = MatchHentSøknadAttributter.class) HentSøknadPerioderDto hentSøknadPerioder) {
         return søknadDtoTjeneste.hentSøknadperioderPåFagsak(hentSøknadPerioder.getYtelseType(), hentSøknadPerioder.getBruker(), hentSøknadPerioder.getPleietrengende());
+    }
+    
+    @POST
+    @Path(SOKNAD_PERIODER_SAKSNUMMER_PATH)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(description = "Henter søknadsperioder med saksnummer", tags = "søknad", summary = ("Finner søknadspperioder med saksnummer"))
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
+    public List<Periode> hentSøknadPerioderMedSaksnummer(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto idDto) {
+        return søknadDtoTjeneste.hentSøknadperioderPåFagsak(idDto.getVerdi());
     }
 
     public static class MatchHentSøknadAttributter implements Function<Object, AbacDataAttributter> {

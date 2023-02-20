@@ -9,12 +9,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import no.nav.k9.kodeverk.arbeidsforhold.Arbeidskategori;
-import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.Stillingsprosent;
 
-public class YtelseGrunnlag extends BaseEntitet {
+public class YtelseGrunnlag {
 
     @ChangeTracked
     private List<YtelseStørrelse> ytelseStørrelse = new ArrayList<>();

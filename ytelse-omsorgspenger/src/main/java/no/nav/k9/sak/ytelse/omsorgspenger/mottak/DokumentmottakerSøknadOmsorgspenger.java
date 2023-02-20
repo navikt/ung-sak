@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -13,15 +15,15 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
-
-import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
+import no.nav.abakus.iaygrunnlag.JsonObjectMapper;
+import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapOppgittLandOppholdEntitet;
@@ -48,17 +50,18 @@ import no.nav.k9.søknad.felles.type.Språk;
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 @DokumentGruppeRef(Brevkode.SØKNAD_UTBETALING_OMS_KODE)
 @DokumentGruppeRef(Brevkode.SØKNAD_UTBETALING_OMS_AT_KODE)
 @DokumentGruppeRef(Brevkode.FRAVÆRSKORRIGERING_IM_OMS_KODE)
+@DokumentGruppeRef(Brevkode.PAPIRSØKNAD_UTBETALING_OMS_AT_KODE)
 public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
 
     private SøknadRepository søknadRepository;
     private MedlemskapRepository medlemskapRepository;
     private OmsorgspengerGrunnlagRepository grunnlagRepository;
     private FagsakRepository fagsakRepository;
-    private ProsessTaskRepository prosessTaskRepository;
+    private ProsessTaskTjeneste taskTjeneste;
     private OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste;
 
     private SøknadParser søknadParser;
@@ -75,7 +78,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
     @Inject
     DokumentmottakerSøknadOmsorgspenger(BehandlingRepositoryProvider repositoryProvider,
                                         OmsorgspengerGrunnlagRepository grunnlagRepository,
-                                        ProsessTaskRepository prosessTaskRepository,
+                                        ProsessTaskTjeneste taskTjeneste,
                                         OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste,
                                         SøknadParser søknadParser,
                                         MottatteDokumentRepository mottatteDokumentRepository,
@@ -85,7 +88,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
         this.grunnlagRepository = grunnlagRepository;
-        this.prosessTaskRepository = prosessTaskRepository;
+        this.taskTjeneste = taskTjeneste;
         this.oppgittOpptjeningMapperTjeneste = oppgittOpptjeningMapperTjeneste;
         this.søknadParser = søknadParser;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
@@ -125,16 +128,15 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         try {
             var utbetaling = (OmsorgspengerUtbetaling) søknad.getYtelse();
             var request = Optional.ofNullable(utbetaling.getAktivitet())
-                .map(aktiviteter -> oppgittOpptjeningMapperTjeneste.mapRequest(behandling, dokument, aktiviteter))
-                .orElse(null);
-            if (request == null || request.getOppgittOpptjening() == null) {
+                .flatMap(aktiviteter -> oppgittOpptjeningMapperTjeneste.mapRequest(behandling, dokument, aktiviteter));
+            if (request.map(OppgittOpptjeningMottattRequest::getOppgittOpptjening).isEmpty()) {
                 // Ingenting mer som skal lagres - dokument settes som ferdig
                 mottatteDokumentRepository.oppdaterStatus(List.of(dokument), DokumentStatus.GYLDIG);
                 return;
             }
 
-            var enkeltTask = new ProsessTaskData(AsyncAbakusLagreOpptjeningTask.TASKTYPE);
-            var payload = IayGrunnlagJsonMapper.getMapper().writeValueAsString(request);
+            var enkeltTask = ProsessTaskData.forProsessTask(AsyncAbakusLagreOpptjeningTask.class);
+            var payload = JsonObjectMapper.getMapper().writeValueAsString(request.get());
             enkeltTask.setPayload(payload);
 
             enkeltTask.setProperty(AsyncAbakusLagreOpptjeningTask.JOURNALPOST_ID, dokument.getJournalpostId().getVerdi());
@@ -144,7 +146,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
             enkeltTask.setSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
             enkeltTask.setCallIdFraEksisterende();
 
-            prosessTaskRepository.lagre(enkeltTask);
+            taskTjeneste.lagre(enkeltTask);
         } catch (IOException e) {
             throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Opprettelse av task for lagring av oppgitt opptjening i abakus feiler.", e).toException();
         }

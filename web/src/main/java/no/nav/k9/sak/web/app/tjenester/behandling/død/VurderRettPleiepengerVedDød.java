@@ -29,7 +29,7 @@ public class VurderRettPleiepengerVedDød implements AksjonspunktOppdaterer<Vurd
     @Override
     public OppdateringResultat oppdater(VurderingRettPleiepengerVedDødDto dto, AksjonspunktOppdaterParameter param) {
         rettPleiepengerVedDødRepository.lagreOgFlush(param.getBehandlingId(), new RettPleiepengerVedDød(dto.getVurdering(), dto.getRettVedDødType()));
-        return OppdateringResultat.utenOverhopp();
+        return OppdateringResultat.nyttResultat();
     }
 
 }

@@ -74,12 +74,11 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
         return resultatTimeline.toSegments().stream().map(LocalDateSegment::getValue).collect(Collectors.toList());
     }
 
-    @SuppressWarnings("unchecked")
     private LocalDateTimeline<BeregningsresultatPeriode> intersectTimelines(LocalDateTimeline<BeregningsgrunnlagPeriode> grunnlagTimeline, LocalDateTimeline<List<UttakResultatPeriode>> uttakTimeline,
                                                                             Map<String, Object> resultater, boolean skalVurdereGjelderFor) {
 
         if (grunnlagTimeline.isEmpty() || uttakTimeline.isEmpty()) {
-            return LocalDateTimeline.EMPTY_TIMELINE;
+            return LocalDateTimeline.empty();
         }
 
         var startFørsteÅr = grunnlagTimeline.getMinLocalDate().withDayOfYear(1);
@@ -88,7 +87,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
 
         var nyttårsaftenEtÅrFremITid = LocalDate.now().withMonth(12).withDayOfMonth(31).plus(MAKS_FREMTID);
         if (uttakMaksDato.isAfter(nyttårsaftenEtÅrFremITid)) {
-            throw new IllegalArgumentException("Uttaksplan kan ikke være åpen eller for langt frem i tid. Uttak maksdato:'"+ uttakMaksDato + "', utbetaling maksdato: '" + LocalDate.now().plus(MAKS_FREMTID) + "'");
+            throw new IllegalArgumentException("Uttaksplan kan ikke være åpen eller for langt frem i tid. Uttak maksdato:'"+ uttakMaksDato + "', utbetaling maksdato: '" + nyttårsaftenEtÅrFremITid + "'");
         }
 
         // stopper periodisering her for å unngå 'evigvarende' ekspansjon -
@@ -131,7 +130,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
                 .noneMatch(at -> at.getUttakAktiviteter().stream().allMatch(ad -> BigDecimal.ZERO.compareTo(ad.getUtbetalingsgrad()) == 0)))
             .map(LocalDateSegment::getTom)
             .max(LocalDate::compareTo)
-            .orElse(uttakTimeline.getMaxLocalDate());
+            .orElse(uttakTimeline.getMinLocalDate()); // Setter til MIN date, da det ikke er noen utbetaling i hele tidslinjen. Det bør ikke stoppe her
         return maksUtbetalingsDato;
     }
 

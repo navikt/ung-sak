@@ -2,14 +2,10 @@ package no.nav.k9.sak.kontrakt.behandling;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -23,11 +19,16 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.hendelse.EventHendelse;
+import no.nav.k9.sak.kontrakt.aksjonspunkt.AksjonspunktTilstandDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 
@@ -176,6 +177,17 @@ public class BehandlingProsessHendelse {
     @JsonProperty(value = "relatertPartAktørId", required = false)
     private AktørId relatertPartAktørId;
 
+    @Valid
+    @JsonProperty(value = "aksjonspunktTilstander", required = true)
+    private List<AksjonspunktTilstandDto> aksjonspunktTilstand;
+    
+    /**
+     * {@code true} hvis det finnes minst én ny periode det er søkt om i behandlingen.
+     */
+    @Valid
+    @JsonProperty(value = "nyeKrav", required = false)
+    private Boolean nyeKrav;
+
     public BehandlingProsessHendelse() {
     }
 
@@ -200,6 +212,8 @@ public class BehandlingProsessHendelse {
         this.pleietrengendeAktørId = kopierFra.pleietrengendeAktørId;
         this.relatertPartAktørId = kopierFra.relatertPartAktørId;
         this.ansvarligBeslutterForTotrinn = kopierFra.ansvarligBeslutterForTotrinn;
+        this.aksjonspunktTilstand = kopierFra.aksjonspunktTilstand.stream().map(AksjonspunktTilstandDto::new).toList();
+        this.nyeKrav = kopierFra.nyeKrav;
     }
 
     public static Builder builder() {
@@ -272,6 +286,14 @@ public class BehandlingProsessHendelse {
 
     public String getResultatType() {
         return resultatType;
+    }
+
+    public List<AksjonspunktTilstandDto> getAksjonspunktTilstand() {
+        return aksjonspunktTilstand;
+    }
+    
+    public boolean isNyeKrav() {
+        return nyeKrav != null && nyeKrav;
     }
 
     public static class Builder {
@@ -378,6 +400,16 @@ public class BehandlingProsessHendelse {
 
         public Builder medPleietrengendeAktørId(AktørId aktørId) {
             kladd.pleietrengendeAktørId = aktørId;
+            return this;
+        }
+
+        public Builder medAksjonspunktTilstander(List<AksjonspunktTilstandDto> aksjonspunktTilstand) {
+            kladd.aksjonspunktTilstand = aksjonspunktTilstand;
+            return this;
+        }
+        
+        public Builder medNyeKrav(Boolean nyeKrav) {
+            kladd.nyeKrav = nyeKrav;
             return this;
         }
 

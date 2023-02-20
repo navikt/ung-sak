@@ -14,6 +14,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.hibernate.annotations.BatchSize;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,9 +26,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-
-import org.hibernate.annotations.BatchSize;
-
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -137,12 +136,11 @@ public class Vilkårene extends BaseEntitet {
         return getVilkårTimeline(vilkårType).intersection(new LocalDateInterval(fom, tom));
     }
 
-    @SuppressWarnings("unchecked")
     public LocalDateTimeline<VilkårPeriode> getVilkårTimeline(VilkårType vilkårType) {
         var vilkår = getVilkår(vilkårType);
 
         if (vilkår.isEmpty()) {
-            return LocalDateTimeline.EMPTY_TIMELINE;
+            return LocalDateTimeline.empty();
         } else {
             return new LocalDateTimeline<>(vilkår.get().getPerioder().stream()
                 .map(v -> new LocalDateSegment<>(v.getFom(), v.getTom(), v)).collect(Collectors.toList()));

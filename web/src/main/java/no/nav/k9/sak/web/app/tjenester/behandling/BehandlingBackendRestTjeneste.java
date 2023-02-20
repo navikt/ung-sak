@@ -10,6 +10,12 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -26,14 +32,10 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.Response.Status;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.headers.Header;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.abac.BeskyttetRessursKoder;
+import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingDto;
@@ -41,9 +43,6 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingIdListe;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingStatusListe;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 
 @ApplicationScoped
 @Transactional
@@ -112,7 +111,7 @@ public class BehandlingBackendRestTjeneste {
             var behandling = behandlingsprosessTjeneste.hentBehandling(behandlingUuid);
             if (behandling.erStatusFerdigbehandlet()) {
                 result.add(new BehandlingStatusListe.StatusDto(behandlingUuid, null, behandling.getStatus()));
-            } else if (!sjekkProsessering.opprettTaskForOppfrisking(behandling, false)) {
+            } else if (!behandling.isBehandlingPåVent() && !sjekkProsessering.opprettTaskForOppfrisking(behandling, false)) {
                 result.add(new BehandlingStatusListe.StatusDto(behandlingUuid, null, behandling.getStatus()));
             } else {
                 var taskStatus = sjekkProsessering.sjekkProsessTaskPågårForBehandling(behandling, null);

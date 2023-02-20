@@ -6,6 +6,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
@@ -17,10 +20,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
@@ -65,6 +64,9 @@ public class Aksjonspunkt extends BaseEntitet {
 
     @Column(name="vent_aarsak_variant")
     private String venteårsakVariant;
+
+    @Column(name="ansvarlig_saksbehandler")
+    private String ansvarligSaksbehandler;
 
     @Version
     @Column(name = "versjon", nullable = false)
@@ -235,7 +237,9 @@ public class Aksjonspunkt extends BaseEntitet {
     }
 
     void fjernToTrinnsFlagg() {
-        validerIkkeUtførtAvbruttAllerede();
+        if (!aksjonspunktDefinisjon.kanOverstyreTotrinnEtterLukking()) {
+            validerIkkeUtførtAvbruttAllerede();
+        }
         this.setToTrinnsBehandling(false);
     }
 
@@ -267,6 +271,14 @@ public class Aksjonspunkt extends BaseEntitet {
 
     void setVenteårsak(Venteårsak venteårsak) {
         this.venteårsak = venteårsak;
+    }
+
+    public String getAnsvarligSaksbehandler() {
+        return ansvarligSaksbehandler;
+    }
+
+    public void setAnsvarligSaksbehandler(String ansvarligSaksbehandler) {
+        this.ansvarligSaksbehandler = ansvarligSaksbehandler;
     }
 
     public DatoIntervallEntitet getPeriode() {
@@ -355,6 +367,7 @@ public class Aksjonspunkt extends BaseEntitet {
             til.setPeriode(fra.getPeriode());
             til.setVenteårsak(fra.getVenteårsak());
             til.setVenteårsakVariant(fra.getVenteårsakVariant());
+            til.setAnsvarligSaksbehandler(fra.getAnsvarligSaksbehandler());
             til.setFristTid(fra.getFristTid());
             til.setStatus(fra.getStatus(), fra.getBegrunnelse());
         }
@@ -367,6 +380,11 @@ public class Aksjonspunkt extends BaseEntitet {
         Aksjonspunkt.Builder medVenteårsak(Venteårsak venteårsak, String variant) {
             aksjonspunkt.setVenteårsak(venteårsak);
             aksjonspunkt.setVenteårsakVariant(variant);
+            return this;
+        }
+
+        Aksjonspunkt.Builder medAnsvarligSaksbehandler(String ansvarligSaksbehandler) {
+            aksjonspunkt.setAnsvarligSaksbehandler(ansvarligSaksbehandler);
             return this;
         }
 

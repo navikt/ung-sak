@@ -2,7 +2,6 @@ package no.nav.k9.sak.perioder;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Instance;
-
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -12,7 +11,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 public interface EndringPåForlengelsePeriodeVurderer {
 
     public static EndringPåForlengelsePeriodeVurderer finnVurderer(Instance<EndringPåForlengelsePeriodeVurderer> instances, VilkårType vilkårType, FagsakYtelseType fagsakYtelseType) {
-        Instance<EndringPåForlengelsePeriodeVurderer> selected = instances.select(new VilkårTypeRef.VilkårTypeRefLiteral(vilkårType.getKode()));
+        Instance<EndringPåForlengelsePeriodeVurderer> selected = instances.select(new VilkårTypeRef.VilkårTypeRefLiteral(vilkårType));
         if (selected.isAmbiguous()) {
             return FagsakYtelseTypeRef.Lookup.find(selected, fagsakYtelseType).orElseThrow(() -> new IllegalStateException("Har ikke EndringPåForlengelsePeriodeVurderer for " + fagsakYtelseType));
         } else if (selected.isUnsatisfied()) {

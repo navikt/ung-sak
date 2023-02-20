@@ -4,7 +4,7 @@ import java.util.EnumSet;
 import java.util.Locale;
 import java.util.Map;
 
-import no.nav.inntektsmelding.xml.kodeliste._20180702.YtelseKodeliste;
+import no.nav.inntektsmelding.xml.kodeliste._20210216.YtelseKodeliste;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 
 public class MapYtelseTypeFraInntektsmelding {
@@ -14,7 +14,7 @@ public class MapYtelseTypeFraInntektsmelding {
         lc(YtelseKodeliste.OMSORGSPENGER), FagsakYtelseType.OMSORGSPENGER,
         lc(YtelseKodeliste.OPPLAERINGSPENGER), FagsakYtelseType.OPPLÆRINGSPENGER,
         lc(YtelseKodeliste.PLEIEPENGER_BARN), FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
-        lc(YtelseKodeliste.PLEIEPENGER_PAAROERENDE), FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE,
+        lc(YtelseKodeliste.PLEIEPENGER_NAERSTAAENDE), FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE,
         lc(YtelseKodeliste.SVANGERSKAPSPENGER), FagsakYtelseType.SVANGERSKAPSPENGER,
         lc(YtelseKodeliste.SYKEPENGER), FagsakYtelseType.SYKEPENGER);
 

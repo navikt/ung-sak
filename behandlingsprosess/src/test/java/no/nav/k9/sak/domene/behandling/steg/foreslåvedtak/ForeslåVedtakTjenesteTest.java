@@ -6,22 +6,23 @@ import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -47,6 +48,7 @@ import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.Oppgaveinfo;
 import no.nav.k9.sak.test.util.Whitebox;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.økonomi.tilbakekreving.samkjøring.SjekkTilbakekrevingAksjonspunktUtleder;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -77,6 +79,9 @@ public class ForeslåVedtakTjenesteTest {
     @Mock
     private OverlappendeYtelserTjeneste overlappendeYtelserTjeneste;
 
+    @Mock
+    private SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekreving;
+
     @Spy
     private HistorikkRepository historikkRepository;
 
@@ -100,9 +105,12 @@ public class ForeslåVedtakTjenesteTest {
 
         when(oppgaveTjeneste.harÅpneOppgaverAvType(any(AktørId.class), any(), any())).thenReturn(false);
         when(overlappendeYtelserTjeneste.finnOverlappendeYtelser(any(), anySet())).thenReturn(Map.of());
+        when(sjekkMotTilbakekreving.sjekkMotÅpenIkkeoverlappendeTilbakekreving(any(Behandling.class))).thenReturn(List.of());
 
         SjekkMotAndreYtelserTjeneste sjekkMotAndreYtelserTjeneste = new SjekkMotAndreYtelserTjeneste(historikkRepository, oppgaveTjeneste, overlappendeYtelserTjeneste);
-        tjeneste = new ForeslåVedtakTjeneste(fagsakRepository, behandlingskontrollTjeneste, false, sjekkMotAndreYtelserTjeneste, foreslåVedtakManueltUtledere);
+        SjekkTilbakekrevingAksjonspunktUtleder sjekkTilbakekrevingAksjonspunktUtleder = Mockito.mock(SjekkTilbakekrevingAksjonspunktUtleder.class);
+        when(sjekkTilbakekrevingAksjonspunktUtleder.sjekkMotÅpenIkkeoverlappendeTilbakekreving(any())).thenReturn(List.of());
+        tjeneste = new ForeslåVedtakTjeneste(fagsakRepository, behandlingskontrollTjeneste, sjekkMotAndreYtelserTjeneste, sjekkTilbakekrevingAksjonspunktUtleder, foreslåVedtakManueltUtledere);
     }
 
     @Test

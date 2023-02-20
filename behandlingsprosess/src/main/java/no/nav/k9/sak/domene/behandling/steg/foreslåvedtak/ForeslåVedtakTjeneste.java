@@ -2,19 +2,15 @@ package no.nav.k9.sak.domene.behandling.steg.foreslåvedtak;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -25,6 +21,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.økonomi.tilbakekreving.samkjøring.SjekkTilbakekrevingAksjonspunktUtleder;
 
 @ApplicationScoped
 class ForeslåVedtakTjeneste {
@@ -34,9 +31,9 @@ class ForeslåVedtakTjeneste {
     private SjekkMotAndreYtelserTjeneste sjekkMotAndreYtelserTjeneste;
     private FagsakRepository fagsakRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
-
-    private Boolean deaktiverTotrinnSelektivt;
     private Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere;
+
+    private SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste;
 
     protected ForeslåVedtakTjeneste() {
         // CDI proxy
@@ -45,14 +42,14 @@ class ForeslåVedtakTjeneste {
     @Inject
     ForeslåVedtakTjeneste(FagsakRepository fagsakRepository,
                           BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                          @KonfigVerdi(value = "TOTRINN_TEMP_DEAKTIVERT", defaultVerdi = "false") Boolean deaktiverTotrinnSelektivt,
                           SjekkMotAndreYtelserTjeneste sjekkMotAndreYtelserTjeneste,
+                          SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste,
                           @Any Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere) {
-        this.deaktiverTotrinnSelektivt = Objects.requireNonNull(deaktiverTotrinnSelektivt, "deaktiverTotrinnSelektivt");
         this.sjekkMotAndreYtelserTjeneste = sjekkMotAndreYtelserTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.foreslåVedtakManueltUtledere = foreslåVedtakManueltUtledere;
+        this.sjekkMotTilbakekrevingTjeneste = sjekkMotTilbakekrevingTjeneste;
     }
 
     public BehandleStegResultat foreslåVedtak(Behandling behandling, BehandlingskontrollKontekst kontekst) {
@@ -62,7 +59,9 @@ class ForeslåVedtakTjeneste {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
-        List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = new ArrayList<>(sjekkMotAndreYtelserTjeneste.sjekkMotGsakOppgaverOgOverlappendeYtelser(behandling.getAktørId(), behandling));
+        List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = new ArrayList<>();
+        aksjonspunktDefinisjoner.addAll(sjekkMotAndreYtelserTjeneste.sjekkMotGsakOppgaverOgOverlappendeYtelser(behandling.getAktørId(), behandling));
+        aksjonspunktDefinisjoner.addAll(sjekkMotTilbakekrevingTjeneste.sjekkMotÅpenIkkeoverlappendeTilbakekreving(behandling));
 
         Optional<Aksjonspunkt> vedtakUtenTotrinnskontroll = behandling
             .getÅpentAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL);
@@ -113,11 +112,9 @@ class ForeslåVedtakTjeneste {
         var totrinn = !behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL) &&
             behandling.harAksjonspunktMedTotrinnskontroll();
 
-        if (totrinn && deaktiverTotrinnSelektivt) {
+        if (totrinn) {
             var totrinnAks = behandling.getAksjonspunkter().stream()
-                .filter(a -> a.isToTrinnsBehandling())
-                .filter(a -> a.getAksjonspunktDefinisjon() != AksjonspunktDefinisjon.AVKLAR_FORTSATT_MEDLEMSKAP)
-                .collect(Collectors.toList());
+                .filter(Aksjonspunkt::isToTrinnsBehandling).toList();
             return !totrinnAks.isEmpty();
         }
         return totrinn;

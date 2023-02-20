@@ -30,7 +30,7 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
@@ -65,7 +65,7 @@ public class InnhentDokumentTjenesteTest {
     private AksjonspunktTestSupport aksjonspunktRepository;
 
     @Mock
-    private ProsessTaskRepository prosessTaskRepository;
+    private ProsessTaskTjeneste prosessTaskRepository;
     @Mock
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
     @Mock
@@ -91,7 +91,6 @@ public class InnhentDokumentTjenesteTest {
 
         dokumentmottakerFelles = Mockito.spy(new DokumentmottakerFelles(repositoryProvider,
             prosessTaskRepository,
-            behandlendeEnhetTjeneste,
             historikkinnslagTjeneste));
 
         innhentDokumentTjeneste = Mockito.spy(new InnhentDokumentTjeneste(

@@ -41,6 +41,8 @@ public class Personinfo {
     private List<Adresseinfo> adresseInfoList = new ArrayList<>();
     private SivilstandType sivilstand;
 
+    private List<DeltBosted> deltBostedList = new ArrayList<>();
+
     private Personinfo() {
     }
 
@@ -68,8 +70,12 @@ public class Personinfo {
         return fødselsdato;
     }
 
-    public int getAlder() {
-        return (int) ChronoUnit.YEARS.between(fødselsdato, LocalDate.now());
+    public int getAlder(LocalDate dato) {
+        return (int) ChronoUnit.YEARS.between(fødselsdato, dato);
+    }
+
+    public int getAlderIDag(){
+        return getAlder(LocalDate.now());
     }
 
     public Set<Familierelasjon> getFamilierelasjoner() {
@@ -128,6 +134,10 @@ public class Personinfo {
         return landkode;
     }
 
+    public List<DeltBosted> getDeltBostedList() {
+        return deltBostedList;
+    }
+
     @Override
     public String toString() {
         // tar ikke med aktørId/fnr/personident i toString, så det ikke lekker i logger etc.
@@ -153,7 +163,9 @@ public class Personinfo {
             return this;
         }
 
-        /** @deprecated Bruk {@link #medPersonIdent(PersonIdent)} i stedet! */
+        /**
+         * @deprecated Bruk {@link #medPersonIdent(PersonIdent)} i stedet!
+         */
         @Deprecated
         public Builder medFnr(String fnr) {
             personinfoMal.personIdent = PersonIdent.fra(fnr);
@@ -247,6 +259,11 @@ public class Personinfo {
 
         public Builder medLandkode(Landkoder landkode) {
             personinfoMal.landkode = landkode;
+            return this;
+        }
+
+        public Builder medDeltBostedList(List<DeltBosted> deltBostedList) {
+            personinfoMal.deltBostedList = deltBostedList;
             return this;
         }
 

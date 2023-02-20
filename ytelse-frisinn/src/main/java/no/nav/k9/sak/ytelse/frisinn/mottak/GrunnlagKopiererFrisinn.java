@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.frisinn.mottak;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
+
 import java.util.EnumSet;
 import java.util.List;
 
@@ -18,7 +20,7 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("FRISINN")
+@FagsakYtelseTypeRef(FRISINN)
 public class GrunnlagKopiererFrisinn implements GrunnlagKopierer {
 
     private PersonopplysningRepository personopplysningRepository;

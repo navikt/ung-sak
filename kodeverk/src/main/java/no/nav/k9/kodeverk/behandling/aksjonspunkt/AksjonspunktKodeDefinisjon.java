@@ -25,6 +25,7 @@ public class AksjonspunktKodeDefinisjon {
     public static final String AUTO_VENT_MILITÆR_OG_BG_UNDER_3G_KODE = "7023";
     public static final String AUTO_VENT_GRADERING_FLERE_ARBEIDSFORHOLD_KODE = "7025";
     public static final String AUTO_VENT_ETTERLYST_INNTEKTSMELDING_KODE = "7030";
+    public static final String AUTO_VENT_PÅ_LOVENDRING_8_41_KODE = "7041";
 
     public static final String AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE_KODE = "5021";
     public static final String AVKLAR_LOVLIG_OPPHOLD_KODE = "5019";
@@ -70,12 +71,15 @@ public class AksjonspunktKodeDefinisjon {
 
     public static final String FASTSETT_BEREGNINGSGRUNNLAG_ARBEIDSTAKER_FRILANS_KODE = "5038";
     public static final String FORDEL_BEREGNINGSGRUNNLAG_KODE = "5046";
+    public static final String VURDER_NYTT_INNTEKTSFORHOLD_KODE = "5067";
     public static final String FASTSETT_BEREGNINGSGRUNNLAG_TIDSBEGRENSET_ARBEIDSFORHOLD_KODE = "5047";
     public static final String FASTSETT_BEREGNINGSGRUNNLAG_FOR_SN_NY_I_ARBEIDSLIVET_KODE = "5049";
     public static final String VURDER_GRADERING_UTEN_BEREGNINGSGRUNNLAG_KODE = "5050";
     public static final String AVKLAR_AKTIVITETER_KODE = "5052";
+    public static final String VURDER_REPRESENTERER_STORTINGET_KODE = "5087";
 
     public static final String VURDER_VARIG_ENDRET_ELLER_NYOPPSTARTET_NÆRING_SELVSTENDIG_NÆRINGSDRIVENDE_KODE = "5039";
+    public static final String VURDER_VARIG_ENDRET_ARBEIDSSITUASJON_KODE = "5054";
     public static final String VURDER_FAKTA_FOR_ATFL_SN_KODE = "5058";
     public static final String VURDER_REFUSJON_BERGRUNN_KODE = "5059";
 
@@ -91,6 +95,7 @@ public class AksjonspunktKodeDefinisjon {
     public static final String VURDER_PERIODER_MED_OPPTJENING_KODE = "5051";
     public static final String VURDER_ARBEIDSFORHOLD_KODE = "5080";
     public static final String VURDER_FEILUTBETALING_KODE = "5084";
+    public static final String SJEKK_TILBAKEKREVING_KODE = "5085";
     public static final String VURDER_OPPTJENINGSVILKÅRET_KODE = "5089";
 
     public static final String AUTOMATISK_MARKERING_AV_UTENLANDSSAK_KODE = "5068";
@@ -103,6 +108,7 @@ public class AksjonspunktKodeDefinisjon {
     public static final String AUTO_VENT_BRUKER_70_ÅR = "7035";
 
     public static final String AVKLAR_OMSORGEN_FOR_KODE_V2 = "9020";
+
 
     // PSB
     public static final String KONTROLLER_LEGEERKLÆRING_KODE = "9001";
@@ -117,11 +123,19 @@ public class AksjonspunktKodeDefinisjon {
     public static final String TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE_ANNEN_PART = "9008";
 
 
+    // OLP
+    public static final String VURDER_INSTITUSJON = "9300";
+    public static final String VURDER_NØDVENDIGHET = "9301";
+    public static final String VURDER_GJENNOMGÅTT_OPPLÆRING = "9302";
+    public static final String VURDER_REISETID = "9303";
+
     // OMS
     public static final String AVKLAR_OMSORGEN_FOR_KODE = "9002";
     public static final String VURDER_ÅRSKVANTUM_KVOTE = "9003";
     public static final String VURDER_ÅRSKVANTUM_DOK = "9004";
     public static final String VURDER_OMS_UTVIDET_RETT = "9013";
+    public static final String ÅRSKVANTUM_FOSTERBARN = "9014";
+    public static final String VURDER_ALDERSVILKÅR_BARN = "9015";
 
     // FRISINN
     public static final String AUTO_VENT_FRISINN_BEREGNING = "8000";
@@ -131,6 +145,7 @@ public class AksjonspunktKodeDefinisjon {
 
     // Generelt manglende funksjonalitet.
     public static final String AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET = "9999";
+    public static final String AUTO_VENTE_PA_OMSORGENFOR_OMS = "9099";
 
     // Kompletthet for beregning
     public static final String AVKLAR_KOMPLETT_NOK_FOR_BEREGNING_KODE = "9069";
@@ -171,6 +186,9 @@ public class AksjonspunktKodeDefinisjon {
     public static final String UTEN_FRIST = null;
     public static final boolean TOTRINN = true;
     public static final boolean ENTRINN = false;
+
+    public static final boolean KAN_OVERSTYRE_TOTRINN_ETTER_LUKKING = true;
+    public static final boolean KAN_IKKE_OVERSTYRE_TOTRINN_ETTER_LUKKING = false;
     public static final boolean TILBAKE = true;
     public static final boolean SKAL_IKKE_AVBRYTES = false;
     public static final boolean AVBRYTES = true;

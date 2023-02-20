@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.sykdom.Resultat;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.kontrakt.sykdom.Resultat;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.DiagnoseKilde;
@@ -14,28 +14,28 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodel
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.MedisinskvilkårGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.PeriodeMedKontinuerligTilsyn;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.PeriodeMedUtvidetBehov;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDiagnosekode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagsdata;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDiagnose;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurderingVersjon;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeTidslinjeUtils;
 
 public class InngangsvilkårOversetter {
 
-    public MedisinskvilkårGrunnlag oversettTilRegelModellMedisinsk(VilkårType vilkåret, Long behandlingId, DatoIntervallEntitet periode, SykdomGrunnlagBehandling sykdomGrunnlagBehandling) {
+    public MedisinskvilkårGrunnlag oversettTilRegelModellMedisinsk(VilkårType vilkåret, Long behandlingId, DatoIntervallEntitet periode, MedisinskGrunnlag medisinskGrunnlag) {
         final Periode vilkårsperiode = new Periode(periode.getFomDato(), periode.getTomDato());
 
 
-        var grunnlag = sykdomGrunnlagBehandling.getGrunnlag();
+        var grunnlag = medisinskGrunnlag.getGrunnlagsdata();
         final var vilkårsGrunnlag = new MedisinskvilkårGrunnlag(periode.getFomDato(), periode.getTomDato());
 
         String diagnosekode = null;
-        if (grunnlag.getDiagnosekoder() != null) {
-            diagnosekode = grunnlag.getDiagnosekoder()
-                .getDiagnosekoder()
+        if (grunnlag.getDiagnoser() != null) {
+            diagnosekode = grunnlag.getDiagnoser()
+                .getDiagnoser()
                 .stream()
                 .findAny()
-                .map(SykdomDiagnosekode::getDiagnosekode)
+                .map(PleietrengendeSykdomDiagnose::getDiagnosekode)
                 .orElse(null);
         }
 
@@ -67,8 +67,13 @@ public class InngangsvilkårOversetter {
             .filter(it -> new Periode(it.getFraOgMed(), it.getTilOgMed()).overlaps(vilkårsperiode))
             .collect(Collectors.toList());
 
-        final DiagnoseKilde diagnoseKilde = grunnlag.getGodkjenteLegeerklæringer().isEmpty() ? DiagnoseKilde.ANNET : DiagnoseKilde.SYKHUSLEGE;
-        
+        DiagnoseKilde diagnoseKilde;
+        if (grunnlag.getGodkjenteLegeerklæringer().isEmpty()) {
+            diagnoseKilde = grunnlag.isHarAndreMedisinskeOpplysninger() ? DiagnoseKilde.ANNET : DiagnoseKilde.MANGLENDE;
+        } else {
+            diagnoseKilde = DiagnoseKilde.SYKHUSLEGE;
+        }
+
         vilkårsGrunnlag.medDiagnoseKilde(diagnoseKilde)
             .medDiagnoseKode(diagnosekode)
             .medInnleggelsesPerioder(relevanteInnleggelsesperioder)
@@ -78,7 +83,7 @@ public class InngangsvilkårOversetter {
         return vilkårsGrunnlag;
     }
 
-    private LocalDateTimeline<SykdomVurderingVersjon> toTidslinjeFor(SykdomGrunnlag grunnlag, SykdomVurderingType type) {
-        return SykdomUtils.tilTidslinjeForType(grunnlag.getVurderinger(), type);
+    private LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> toTidslinjeFor(MedisinskGrunnlagsdata grunnlag, SykdomVurderingType type) {
+        return PleietrengendeTidslinjeUtils.tilTidslinjeForType(grunnlag.getVurderinger(), type);
     }
 }

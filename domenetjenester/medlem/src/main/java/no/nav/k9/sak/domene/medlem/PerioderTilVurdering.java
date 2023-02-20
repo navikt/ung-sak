@@ -35,6 +35,10 @@ class PerioderTilVurdering {
         return forlengelseTilVurdering;
     }
 
+    public NavigableSet<DatoIntervallEntitet> getAllePerioderTilVurdering() {
+        return perioderTilVurdering;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

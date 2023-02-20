@@ -58,6 +58,7 @@ public class UttakRepositoryTest {
         var data2 = uttakRepository.hentOppgittUttak(behandlingId);
         assertThat(data2).isNotNull();
         assertThat(data2.getPerioder()).hasSameSizeAs(data.getPerioder());
+        assertThat(data2.getPerioder()).first().extracting(UttakAktivitetPeriode::getJobberNormaltPerUke).isNotNull();
     }
 
     @Test
@@ -71,9 +72,12 @@ public class UttakRepositoryTest {
 
         uttakRepository.lagreOgFlushFastsattUttak(behandlingId, data);
 
+        entityManager.clear();
+
         var data2 = uttakRepository.hentFastsattUttak(behandlingId);
         assertThat(data2).isNotNull();
         assertThat(data2.getPerioder()).hasSameSizeAs(data.getPerioder());
+        assertThat(data2.getPerioder()).first().extracting(UttakAktivitetPeriode::getJobberNormaltPerUke).isNotNull();
     }
 
     @Test

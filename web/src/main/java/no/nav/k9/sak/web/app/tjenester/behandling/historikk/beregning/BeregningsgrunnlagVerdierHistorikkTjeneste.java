@@ -38,7 +38,8 @@ public class BeregningsgrunnlagVerdierHistorikkTjeneste {
         this.refusjonHistorikkTjeneste = refusjonHistorikkTjeneste;
     }
 
-    public void lagHistorikkForBeregningsgrunnlagVerdier(Long behandlingId, BeregningsgrunnlagPeriodeEndring periode, HistorikkInnslagTekstBuilder tekstBuilder) {
+    public void lagHistorikkForBeregningsgrunnlagVerdier(Long behandlingId, BeregningsgrunnlagPeriodeEndring periode,
+                                                         HistorikkInnslagTekstBuilder tekstBuilder) {
         InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingId);
         List<ArbeidsforholdOverstyring> arbeidsforholdOverstyringer = inntektArbeidYtelseGrunnlag.getArbeidsforholdOverstyringer();
         periode.getBeregningsgrunnlagPrStatusOgAndelEndringer()

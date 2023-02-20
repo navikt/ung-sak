@@ -98,16 +98,13 @@ public class VilkårResultatBuilder {
         if (built)
             throw new IllegalStateException("Kan ikke bygge to ganger med samme builder");
 
+        built = true;
         if (!kappOverskytende) {
             validerPerioder();
-            built = true;
             return kladd;
         } else {
-            var ny = new Vilkårene(kladd.getVilkårene(), boundry);
-            built = true;
-            return ny;
+            return new Vilkårene(kladd.getVilkårene(), boundry);
         }
-
     }
 
     private void validerPerioder() {
@@ -149,7 +146,7 @@ public class VilkårResultatBuilder {
                 .medKantIKantVurderer(kantIKantVurderer)
                 .tilbakestill(perioderSomSkalTilbakestilles);
             v.forEach(periode -> builder.leggTil(builder.hentBuilderFor(periode.getFomDato(), periode.getTomDato()).medUtfall(Utfall.IKKE_VURDERT)));
-            leggTil(builder, Objects.equals(VilkårType.MEDLEMSKAPSVILKÅRET, k)); // Trenger en spesialhåndtering av Medlemskap TODO: Fjerne denne når vi har endret vilkåret til ikke å være Maks periode
+            leggTil(builder);
         });
         return this;
     }

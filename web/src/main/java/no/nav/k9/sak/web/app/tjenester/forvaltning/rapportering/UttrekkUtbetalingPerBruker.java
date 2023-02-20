@@ -7,7 +7,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
-
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput;
@@ -18,14 +17,16 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 public class UttrekkUtbetalingPerBruker implements RapportGenerator {
 
     private EntityManager entityManager;
+    private DriftLesetilgangVurderer lesetilgangVurderer;
 
     UttrekkUtbetalingPerBruker() {
         //
     }
 
     @Inject
-    public UttrekkUtbetalingPerBruker(EntityManager entityManager) {
+    public UttrekkUtbetalingPerBruker(EntityManager entityManager, DriftLesetilgangVurderer lesetilgangVurderer) {
         this.entityManager = entityManager;
+        this.lesetilgangVurderer = lesetilgangVurderer;
     }
 
     @SuppressWarnings("unchecked")
@@ -77,12 +78,13 @@ public class UttrekkUtbetalingPerBruker implements RapportGenerator {
             .setParameter("ytelseType", ytelseType.getKode())
             .setParameter("fom", periode.getFomDato())
             .setParameter("tom", periode.getTomDato()) // tar alt overlappende
-            .setHint("javax.persistence.query.timeout", 1 * 90 * 1000) // 1:30 min
+            .setHint("jakarta.persistence.query.timeout", 1 * 90 * 1000) // 1:30 min
         ;
         String path = "utbetaling-per-bruker.csv";
 
         try (Stream<Tuple> stream = query.getResultStream()) {
-            return CsvOutput.dumpResultSetToCsv(path, stream)
+            return CsvOutput.dumpResultSetToCsv(path,
+                    stream.filter(r -> lesetilgangVurderer.harTilgang(String.valueOf(r.get(0)))))
                 .map(v -> List.of(v)).orElse(List.of());
         }
 

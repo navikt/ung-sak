@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
@@ -46,7 +47,6 @@ import no.nav.k9.sak.domene.medlem.UtledVurderingsdatoerForMedlemskapTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -151,7 +151,7 @@ public class UtledVurderingsdatoerForMedlemskapTjenesteImplTest {
 
         LocalDate endringsdato = DAGENS_DATO.plusMonths(1);
         MedlemskapPerioderEntitet endretPeriode = new MedlemskapPerioderBuilder()
-            .medDekningType(MedlemskapDekningType.FULL)
+            .medDekningType(MedlemskapDekningType.UNNTATT)
             .medMedlemskapType(MedlemskapType.ENDELIG)
             .medPeriode(endringsdato, TIDENES_ENDE)
             .medKildeType(MedlemskapKildeType.AVGSYS)
@@ -200,8 +200,8 @@ public class UtledVurderingsdatoerForMedlemskapTjenesteImplTest {
         AktørId søkerAktørId = scenario.getDefaultBrukerAktørId();
 
         DatoIntervallEntitet førsteÅr = DatoIntervallEntitet.fraOgMedTilOgMed(iDag, iDag.plusYears(1));
-        DatoIntervallEntitet andreÅr = DatoIntervallEntitet.fraOgMedTilOgMed(iDag.plusYears(1), iDag.plusYears(2));
-        DatoIntervallEntitet tredjeÅr = DatoIntervallEntitet.fraOgMedTilOgMed(iDag.plusYears(2), iDag.plusYears(3));
+        DatoIntervallEntitet andreÅr = DatoIntervallEntitet.fraOgMedTilOgMed(iDag.plusYears(1).plusDays(1), iDag.plusYears(2));
+        DatoIntervallEntitet tredjeÅr = DatoIntervallEntitet.fraOgMedTilOgMed(iDag.plusYears(2).plusDays(1), iDag.plusYears(3));
         Behandling behandling = scenario.lagre(provider);
         Long behandlingId = behandling.getId();
         PersonopplysningGrunnlagEntitet personopplysningGrunnlag = personopplysningRepository.hentPersonopplysninger(behandlingId);

@@ -21,7 +21,7 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("*")
+@FagsakYtelseTypeRef
 public class DefaultErEndringIBeregningTjeneste implements ErEndringIBeregningVurderer {
 
     protected BeregningTjeneste kalkulusTjeneste;

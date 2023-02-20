@@ -1,13 +1,17 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag;
 
+import static no.nav.folketrygdloven.kalkulus.håndtering.v1.overstyring.OverstyrBeregningsaktiviteterDto.avbryt;
+
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.avklaraktiviteter.AvklarAktiviteterHåndteringDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.fakta.FaktaOmBeregningHåndteringDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.fordeling.FaktaOmFordelingHåndteringDto;
+import no.nav.folketrygdloven.kalkulus.håndtering.v1.fordeling.VurderTilkommetInntektHåndteringDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.foreslå.FastsettBGTidsbegrensetArbeidsforholdHåndteringDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.foreslå.FastsettBeregningsgrunnlagATFLHåndteringDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.foreslå.FastsettBeregningsgrunnlagSNNyIArbeidslivetHåndteringDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.foreslå.FastsettBruttoBeregningsgrunnlagSNHåndteringDto;
+import no.nav.folketrygdloven.kalkulus.håndtering.v1.foreslå.VurderVarigEndretArbeidssituasjonHåndteringDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.foreslå.VurderVarigEndringEllerNyoppstartetSNHåndteringDto;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.overstyring.OverstyrBeregningsgrunnlagHåndteringDto;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunktDto;
@@ -20,8 +24,11 @@ import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBruttoBere
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.OverstyrBeregningsaktiviteterDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.OverstyrBeregningsgrunnlagDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderFaktaOmBeregningDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderVarigEndretArbeidssituasjonDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderVarigEndringEllerNyoppstartetSNDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.fordeling.FordelBeregningsgrunnlagDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.fordeling.VurderTilkomneInntektsforholdDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.fordeling.VurderTilkomneInntektsforholdDtoer;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.refusjon.VurderRefusjonBeregningsgrunnlagDto;
 
 class MapDtoTilRequest {
@@ -29,49 +36,47 @@ class MapDtoTilRequest {
     /**
      * Mapper aksjonspunktdto til håndteringdto i kalkulus.
      *
-     * @param dto BekreftAksjonspunktDto
+     * @param dto         BekreftAksjonspunktDto
      * @param begrunnelse begrunnelsen for aksjonspunktet. I k9sak lagres kun et aksjonspunkt for alle grunnlag og
-     * det er begrunnelsen på dette aksjonspunktet som skal legges ved på alle aksjonspunktene som sendes til kalkulus
+     *                    det er begrunnelsen på dette aksjonspunktet som skal legges ved på alle aksjonspunktene som sendes til kalkulus
      * @return Dto for håndtering av aksjonspunk i Kalkulus
      */
 
     public static HåndterBeregningDto map(BekreftetBeregningsgrunnlagDto dto, String begrunnelse) {
         HåndterBeregningDto håndterBeregningDto = mapSpesifikkDto(dto);
-        håndterBeregningDto.setBegrunnelse(begrunnelse);
+        håndterBeregningDto.setBegrunnelse(dto.getBegrunnelse() != null ? dto.getBegrunnelse() : begrunnelse);
         return håndterBeregningDto;
     }
 
     public static HåndterBeregningDto mapSpesifikkDto(BekreftetBeregningsgrunnlagDto dto) {
-        if (dto instanceof AvklarteAktiviteterDto) {
-            AvklarteAktiviteterDto avklarteAktiviteterDto = (AvklarteAktiviteterDto) dto;
+        if (dto instanceof AvklarteAktiviteterDto avklarteAktiviteterDto) {
             return new AvklarAktiviteterHåndteringDto(OppdatererDtoMapper.mapAvklarteAktiviteterDto(avklarteAktiviteterDto));
         }
-        if (dto instanceof VurderFaktaOmBeregningDto) {
-            VurderFaktaOmBeregningDto faktaOmBeregningDto = (VurderFaktaOmBeregningDto) dto;
+        if (dto instanceof VurderFaktaOmBeregningDto faktaOmBeregningDto) {
             return new FaktaOmBeregningHåndteringDto(OppdatererDtoMapper.mapTilFaktaOmBeregningLagreDto(faktaOmBeregningDto.getFakta()));
         }
-        if (dto instanceof FastsettBeregningsgrunnlagATFLDto) {
-            FastsettBeregningsgrunnlagATFLDto fastsettBeregningsgrunnlagATFLDto = (FastsettBeregningsgrunnlagATFLDto) dto;
+        if (dto instanceof FastsettBeregningsgrunnlagATFLDto fastsettBeregningsgrunnlagATFLDto) {
             return new FastsettBeregningsgrunnlagATFLHåndteringDto(OppdatererDtoMapper.mapTilInntektPrAndelListe(fastsettBeregningsgrunnlagATFLDto.getInntektPrAndelList()), fastsettBeregningsgrunnlagATFLDto.getInntektFrilanser(), null);
         }
-        if (dto instanceof FastsettBGTidsbegrensetArbeidsforholdDto) {
-            FastsettBGTidsbegrensetArbeidsforholdDto fastsettBGTidsbegrensetArbeidsforholdDto = (FastsettBGTidsbegrensetArbeidsforholdDto) dto;
+        if (dto instanceof FastsettBGTidsbegrensetArbeidsforholdDto fastsettBGTidsbegrensetArbeidsforholdDto) {
             return new FastsettBGTidsbegrensetArbeidsforholdHåndteringDto(OppdatererDtoMapper.mapFastsettBGTidsbegrensetArbeidsforholdDto(fastsettBGTidsbegrensetArbeidsforholdDto));
         }
-        if (dto instanceof FastsettBruttoBeregningsgrunnlagSNDto) {
-            FastsettBruttoBeregningsgrunnlagSNDto fastsettBruttoBeregningsgrunnlagSNDto = (FastsettBruttoBeregningsgrunnlagSNDto) dto;
+        if (dto instanceof FastsettBruttoBeregningsgrunnlagSNDto fastsettBruttoBeregningsgrunnlagSNDto) {
             return new FastsettBruttoBeregningsgrunnlagSNHåndteringDto(OppdatererDtoMapper.mapFastsettBruttoBeregningsgrunnlagSNDto(fastsettBruttoBeregningsgrunnlagSNDto));
         }
-        if (dto instanceof VurderVarigEndringEllerNyoppstartetSNDto) {
-            VurderVarigEndringEllerNyoppstartetSNDto vurderVarigEndringEllerNyoppstartetSNDto = (VurderVarigEndringEllerNyoppstartetSNDto) dto;
-            return new VurderVarigEndringEllerNyoppstartetSNHåndteringDto(OppdatererDtoMapper.mapdVurderVarigEndringEllerNyoppstartetSNDto(vurderVarigEndringEllerNyoppstartetSNDto));
+        if (dto instanceof VurderVarigEndringEllerNyoppstartetSNDto vurderVarigEndringEllerNyoppstartetSNDto) {
+            return new VurderVarigEndringEllerNyoppstartetSNHåndteringDto(OppdatererDtoMapper.mapVurderVarigEndringEllerNyoppstartetDto(vurderVarigEndringEllerNyoppstartetSNDto));
         }
-        if (dto instanceof FastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetDto) {
-            FastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetDto fastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetDto = (FastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetDto) dto;
+        if (dto instanceof VurderVarigEndretArbeidssituasjonDto vurderVarigEndretArbeidssituasjonDto) {
+            return new VurderVarigEndretArbeidssituasjonHåndteringDto(OppdatererDtoMapper.mapVurderVarigEndringEllerNyoppstartetDto(vurderVarigEndretArbeidssituasjonDto));
+        }
+        if (dto instanceof FastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetDto fastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetDto) {
             return new FastsettBeregningsgrunnlagSNNyIArbeidslivetHåndteringDto(OppdatererDtoMapper.mapFastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetDto(fastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetDto));
         }
-        if (dto instanceof FordelBeregningsgrunnlagDto) {
-            FordelBeregningsgrunnlagDto fordelBeregningsgrunnlagDto = (FordelBeregningsgrunnlagDto) dto;
+        if (dto instanceof VurderTilkomneInntektsforholdDto inntektsforholdDto) {
+            return new VurderTilkommetInntektHåndteringDto(inntektsforholdDto.getTilkomneInntektsforholdPerioder());
+        }
+        if (dto instanceof FordelBeregningsgrunnlagDto fordelBeregningsgrunnlagDto) {
             return new FaktaOmFordelingHåndteringDto(OppdatererDtoMapper.mapFordelBeregningsgrunnlagDto(fordelBeregningsgrunnlagDto));
         }
         if (dto instanceof VurderRefusjonBeregningsgrunnlagDto) {
@@ -81,15 +86,19 @@ class MapDtoTilRequest {
     }
 
     public static HåndterBeregningDto mapOverstyring(OverstyringAksjonspunktDto dto) {
-        if (dto instanceof OverstyrBeregningsaktiviteterDto) {
-            OverstyrBeregningsaktiviteterDto overstyrBeregningsaktiviteterDto = (OverstyrBeregningsaktiviteterDto) dto;
+        if (dto instanceof OverstyrBeregningsaktiviteterDto overstyrBeregningsaktiviteterDto) {
+            if (dto.skalAvbrytes()) {
+                return avbryt();
+            }
             var mappetDto = new no.nav.folketrygdloven.kalkulus.håndtering.v1.overstyring.OverstyrBeregningsaktiviteterDto(OppdatererDtoMapper.mapOverstyrBeregningsaktiviteterDto(overstyrBeregningsaktiviteterDto.getBeregningsaktivitetLagreDtoList()));
             mappetDto.setBegrunnelse(dto.getBegrunnelse());
             return mappetDto;
         }
-        if (dto instanceof OverstyrBeregningsgrunnlagDto) {
-            OverstyrBeregningsgrunnlagDto overstyrBeregningsgrunnlagDto = (OverstyrBeregningsgrunnlagDto) dto;
-            var mappetDto = new OverstyrBeregningsgrunnlagHåndteringDto(OppdatererDtoMapper.mapTilFaktaOmBeregningLagreDto(overstyrBeregningsgrunnlagDto.getFakta()),
+        if (dto instanceof OverstyrBeregningsgrunnlagDto overstyrBeregningsgrunnlagDto) {
+            if (dto.skalAvbrytes()) {
+                return OverstyrBeregningsgrunnlagHåndteringDto.avbryt();
+            }
+            var mappetDto = new OverstyrBeregningsgrunnlagHåndteringDto(null,
                 OppdatererDtoMapper.mapFastsettBeregningsgrunnlagPeriodeAndeler(overstyrBeregningsgrunnlagDto.getOverstyrteAndeler()));
             mappetDto.setBegrunnelse(dto.getBegrunnelse());
             return mappetDto;

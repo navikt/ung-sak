@@ -1,6 +1,7 @@
 package no.nav.k9.sak.behandling.prosessering;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -50,14 +51,19 @@ public interface BehandlingProsesseringTjeneste {
     // Til bruk for å kjøre behandlingsprosessen videre. Lagrer tasks. Returnerer gruppe-handle
     String opprettTasksForFortsettBehandling(Behandling behandling);
     String opprettTasksForFortsettBehandlingGjenopptaStegNesteKjøring(Behandling behandling, BehandlingStegType behandlingStegType, LocalDateTime nesteKjøringEtter);
+    String opprettTasksForÅHoppeTilbakeTilGittStegOgFortsettDerfra(Behandling behandling, BehandlingStegType behandlingStegType);
 
     // Robust task til bruk ved gjenopptak fra vent (eller annen tilstand) (Hendelse: Manuell input, Frist utløpt, mv)
     // NB oppdaterer registerdata Lagrer tasks
     void opprettTasksForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId);
 
+    void opprettTasksForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId, boolean forceregisterinnhenting);
+
     ProsessTaskGruppe opprettTaskGruppeForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId, boolean skalUtledeÅrsaker);
 
     void opprettTasksForInitiellRegisterInnhenting(Behandling behandling);
+
+    List<String> utledRegisterinnhentingTaskTyper(Behandling behandling);
 
     void feilPågåendeTaskHvisFremtidigTaskEksisterer(Behandling behandling, Long kjørendeTaskId, Set<String> set);
 

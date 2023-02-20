@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlag;
@@ -13,6 +14,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.OppdaterBeregningsgrunnlagResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
+import no.nav.folketrygdloven.kalkulus.kodeverk.StegType;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -29,7 +31,7 @@ public interface BeregningTjeneste {
      * Starter en ny beregning eller starter en beregning på nytt fra starten av
      * Steg 1. FASTSETT_STP_BER
      *
-     * @param referanse {@link BehandlingReferanse}
+     * @param referanse       {@link BehandlingReferanse}
      * @param vilkårsperioder - alle perioder til vurdering
      * @return SamletKalkulusResultat {@link SamletKalkulusResultat}
      */
@@ -44,31 +46,34 @@ public interface BeregningTjeneste {
      * Steg 6. FORDEL_BERGRUNN (Fordel beregningsgrunnlag)<br>
      * Steg 7. FAST_BERGRUNN (Fastsett beregningsgrunnlag)
      *
-     * @param referanse {@link BehandlingReferanse}
+     * @param referanse       {@link BehandlingReferanse}
      * @param vilkårsperioder Vilkårsperioder til vurdering
-     * @param stegType {@link BehandlingStegType}
+     * @param stegType        {@link BehandlingStegType}
      * @return SamletKalkulusResultat {@link KalkulusResultat}
      */
     SamletKalkulusResultat beregn(BehandlingReferanse referanse, Collection<PeriodeTilVurdering> vilkårsperioder, BehandlingStegType stegType);
 
-    /** Kopierer beregningsgrunnlaget lagret i steg VURDER_VILKAR_BERGRUNN (Vurder vilkår) fra original behandling for hver vilkårsperiode
-     * @param referanse Behandlingreferanse
+    /**
+     * Kopierer beregningsgrunnlaget lagret i oppgitt steg fra original behandling for hver vilkårsperiode
+     *
+     * @param referanse       Behandlingreferanse
      * @param vilkårsperioder Vilkårsperioder
+     * @param stegType        Steget/tilstanden det skal lages kopi av
      */
-    void kopier(BehandlingReferanse referanse, Collection<PeriodeTilVurdering> vilkårsperioder);
+    void kopier(BehandlingReferanse referanse, Collection<PeriodeTilVurdering> vilkårsperioder, StegType stegType);
 
 
     /**
      * @param håndterBeregningDto Dto for håndtering av beregning aksjonspunkt
-     * @param ref {@link BehandlingReferanse}
-     * @param skjæringstidspunkt - skjæringtidspunkt
+     * @param ref                 {@link BehandlingReferanse}
+     * @param skjæringstidspunkt  - skjæringtidspunkt
      * @return OppdaterBeregningResultat {@link OppdaterBeregningsgrunnlagResultat}
      */
     OppdaterBeregningsgrunnlagResultat oppdaterBeregning(HåndterBeregningDto håndterBeregningDto, BehandlingReferanse ref, LocalDate skjæringstidspunkt);
 
     /**
      * @param håndterMap Map fra skjæringstidspunkt til Dto for håndtering av beregning aksjonspunkt
-     * @param ref {@link BehandlingReferanse}
+     * @param ref        {@link BehandlingReferanse}
      * @return Liste av OppdaterBeregningResultat {@link OppdaterBeregningsgrunnlagResultat}
      */
     List<OppdaterBeregningsgrunnlagResultat> oppdaterBeregningListe(Map<LocalDate, HåndterBeregningDto> håndterMap, BehandlingReferanse ref);
@@ -83,26 +88,31 @@ public interface BeregningTjeneste {
 
     List<BeregningsgrunnlagGrunnlag> hentGrunnlag(BehandlingReferanse ref, Collection<LocalDate> skjæringstidspunkter);
 
-    List<BeregningsgrunnlagKobling> hentKoblingerForInnvilgedePerioder(BehandlingReferanse ref);
+    List<BeregningsgrunnlagKobling> hentKoblingerForPerioder(BehandlingReferanse ref);
 
-    /** Deaktiverer beregningsgrunnlaget og tilhørende input. Fører til at man ikke har noen aktive beregningsgrunnlag.
-     *
+    List<BeregningsgrunnlagKobling> hentKoblingerForPerioderTilVurdering(BehandlingReferanse ref);
+
+
+    /**
+     * Deaktiverer beregningsgrunnlaget og tilhørende input. Fører til at man ikke har noen aktive beregningsgrunnlag.
+     * <p>
      * Deaktivering skal kun kalles i første steg i beregning.
      *
      * @param ref Behandlingreferanse
-     * @param skjæringstidspunkt
      */
-    public void deaktiverBeregningsgrunnlag(BehandlingReferanse ref, Collection<LocalDate> skjæringstidspunkter);
+    void deaktiverBeregningsgrunnlagForAvslåttEllerFjernetPeriode(BehandlingReferanse ref);
 
-    /** Gjenoppretter det første beregningsgrunnlaget som var opprettet for behandlingen
-     *
-     * Brukes kun av FRISINN
+    /**
+     * Gjenoppretter til beregningsgrunnlaget fra original behandling for perioder som ikke vurderes
      *
      * @param ref Behandlingreferanse
+     * @return
      */
-    void gjenopprettInitiell(BehandlingReferanse ref);
+    Set<DatoIntervallEntitet> gjenopprettTilInitiellDersomIkkeTilVurdering(BehandlingReferanse ref);
 
-    /** Samlet beregningsgrunnlag for visning i GUI bla. */
+    /**
+     * Samlet beregningsgrunnlag for visning i GUI bla.
+     */
     Optional<BeregningsgrunnlagListe> hentBeregningsgrunnlag(BehandlingReferanse ref);
 
 }

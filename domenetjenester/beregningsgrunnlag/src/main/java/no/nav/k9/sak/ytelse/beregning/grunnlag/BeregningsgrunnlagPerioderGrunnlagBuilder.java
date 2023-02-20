@@ -45,10 +45,10 @@ class BeregningsgrunnlagPerioderGrunnlagBuilder {
         return this;
     }
 
-    BeregningsgrunnlagPerioderGrunnlagBuilder deaktiverInputOverstyringer(LocalDate skjæringstidspunkt) {
+    BeregningsgrunnlagPerioderGrunnlagBuilder deaktiverPGIPeriode(LocalDate skjæringstidspunkt) {
         validerState();
         Objects.requireNonNull(skjæringstidspunkt);
-        kladd.deaktiverInputOverstyring(skjæringstidspunkt);
+        kladd.deaktiverPGIPeriode(skjæringstidspunkt);
         return this;
     }
 
@@ -134,6 +134,14 @@ class BeregningsgrunnlagPerioderGrunnlagBuilder {
         validerState();
         Objects.requireNonNull(periode);
         kladd.deaktiverInputOverstyring(periode.getSkjæringstidspunkt());
+        kladd.leggTil(periode);
+        return this;
+    }
+
+    BeregningsgrunnlagPerioderGrunnlagBuilder leggTilSigruninntektPeriode(PGIPeriode periode) {
+        validerState();
+        Objects.requireNonNull(periode);
+        kladd.deaktiverPGIPeriode(periode.getSkjæringstidspunkt());
         kladd.leggTil(periode);
         return this;
     }

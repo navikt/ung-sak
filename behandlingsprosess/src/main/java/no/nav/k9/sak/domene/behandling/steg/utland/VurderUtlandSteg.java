@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.behandling.steg.utland;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_UTLAND;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTOMATISK_MARKERING_AV_UTENLANDSSAK;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.MANUELL_MARKERING_AV_UTLAND_SAKSTYPE;
 
@@ -9,7 +10,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -29,7 +29,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 
-@BehandlingStegRef(kode = "VURDER_UTLAND")
+@BehandlingStegRef(value = VURDER_UTLAND)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped

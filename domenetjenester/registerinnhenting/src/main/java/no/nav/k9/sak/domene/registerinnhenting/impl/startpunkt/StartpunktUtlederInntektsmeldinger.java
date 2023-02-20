@@ -11,7 +11,7 @@ import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 @Dependent
 class StartpunktUtlederInntektsmeldinger {
 
-    private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
+    private final InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
 
     @Inject
     StartpunktUtlederInntektsmeldinger(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste) {
@@ -20,12 +20,12 @@ class StartpunktUtlederInntektsmeldinger {
 
     StartpunktType utledStartpunkt(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag grunnlag1) {
 
-        if (inntektsmeldingErSøknad(ref) && grunnlag1 != null) {
+        if (grunnlag1 != null) {
             var nyeInntektsmeldinger = inntektArbeidYtelseTjeneste.hentInntektsmeldingerSidenRef(ref.getSaksnummer(), ref.getBehandlingId(), grunnlag1.getEksternReferanse());
 
-            // TODO: Validere at det faktisk blir endring i periodene
             if (!nyeInntektsmeldinger.isEmpty()) {
-                return StartpunktType.INIT_PERIODER;
+                // TODO: Validere at det faktisk blir endring i periodene / Endring i IM i bruk
+                return inntektsmeldingErSøknad(ref) ? StartpunktType.INIT_PERIODER : StartpunktType.BEREGNING;
             }
         }
 

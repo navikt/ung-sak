@@ -51,6 +51,6 @@ public class VurderFeilutbetalingOppdaterer implements AksjonspunktOppdaterer<Vu
 
         historikkInnslagBygger.byggHistorikkinnslag(behandlingId, forrigeValg, valg, dto.getBegrunnelse());
 
-        return OppdateringResultat.utenOverhopp();
+        return OppdateringResultat.nyttResultat();
     }
 }

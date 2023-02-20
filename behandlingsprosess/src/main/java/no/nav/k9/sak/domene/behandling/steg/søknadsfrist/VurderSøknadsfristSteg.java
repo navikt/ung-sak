@@ -1,13 +1,17 @@
 package no.nav.k9.sak.domene.behandling.steg.søknadsfrist;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_SØKNADSFRIST;
+
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+
+import org.jetbrains.annotations.NotNull;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -20,14 +24,18 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.AvklartSøknadsfristRepository;
+import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.AvklartSøknadsfristResultat;
+import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.KravDokumentHolder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.perioder.SøknadsfristTjeneste;
 
-@BehandlingStegRef(kode = "VURDER_SØKNADSFRIST")
+@BehandlingStegRef(value = VURDER_SØKNADSFRIST)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped
@@ -37,6 +45,7 @@ public class VurderSøknadsfristSteg implements BehandlingSteg {
     private AksjonspunktKontrollRepository kontrollRepository;
     private Instance<SøknadsfristTjeneste> vurderSøknadsfristTjenester;
     private VilkårResultatRepository vilkårResultatRepository;
+    private AvklartSøknadsfristRepository avklartSøknadsfristRepository;
 
     VurderSøknadsfristSteg() {
         // CDI
@@ -46,11 +55,13 @@ public class VurderSøknadsfristSteg implements BehandlingSteg {
     public VurderSøknadsfristSteg(BehandlingRepository behandlingRepository,
                                   VilkårResultatRepository vilkårResultatRepository,
                                   AksjonspunktKontrollRepository kontrollRepository,
-                                  @Any Instance<SøknadsfristTjeneste> vurderSøknadsfristTjenester) {
+                                  @Any Instance<SøknadsfristTjeneste> vurderSøknadsfristTjenester,
+                                  AvklartSøknadsfristRepository avklartSøknadsfristRepository) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.kontrollRepository = kontrollRepository;
         this.vurderSøknadsfristTjenester = vurderSøknadsfristTjenester;
+        this.avklartSøknadsfristRepository = avklartSøknadsfristRepository;
     }
 
     @Override
@@ -70,11 +81,24 @@ public class VurderSøknadsfristSteg implements BehandlingSteg {
 
         Vilkårene oppdatertVilkår = resultatBuilder.build();
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), oppdatertVilkår, behandling.getFagsak().getPeriode());
+        var avklartSøknadsfristResultatOpt = avklartSøknadsfristRepository.hentHvisEksisterer(kontekst.getBehandlingId());
 
-        if (kreverManuellAvklaring(oppdatertVilkår.getVilkår(VilkårType.SØKNADSFRIST))) {
+        if (kreverManuellAvklaring(oppdatertVilkår.getVilkår(VilkårType.SØKNADSFRIST)) || erManuellRevurderingOgHarGjortVurderingerTidligere(behandling, avklartSøknadsfristResultatOpt)) {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST));
         }
+
         return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    private boolean erManuellRevurderingOgHarGjortVurderingerTidligere(Behandling behandling, Optional<AvklartSøknadsfristResultat> avklartSøknadsfristResultatOpt) {
+        return behandling.erManueltOpprettet() && harGjortAvklaringerTidligere(avklartSøknadsfristResultatOpt) && !behandling.getAksjonspunktFor(AksjonspunktKodeDefinisjon.KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST_KODE).map(Aksjonspunkt::erUtført).orElse(false);
+    }
+
+    private boolean harGjortAvklaringerTidligere(Optional<AvklartSøknadsfristResultat> avklartSøknadsfristResultatOpt) {
+        return avklartSøknadsfristResultatOpt.flatMap(AvklartSøknadsfristResultat::getAvklartHolder)
+            .map(KravDokumentHolder::getDokumenter)
+            .map(Set::isEmpty)
+            .map(it -> !it).orElse(false);
     }
 
     private void settÅpentAksjonspunktTilUtført(no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt aksjonspunkt) {

@@ -11,6 +11,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.k9.sak.behandlingskontroll.transisjoner.TransisjonIdentifikator;
+import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 
 public class BehandleStegResultat {
     private final List<AksjonspunktResultat> aksjonspunktListe;
@@ -29,9 +30,14 @@ public class BehandleStegResultat {
         this.transisjon = transisjon;
     }
 
+    public static BehandleStegResultat utførtMedAksjonspunktResultater(AksjonspunktResultat aksjonspunktResultater) {
+        Objects.requireNonNull(aksjonspunktResultater);
+        return new BehandleStegResultat(FellesTransisjoner.UTFØRT, List.of(aksjonspunktResultater));
+    }
+
     /**
      * Factory-metode basert på liste av {@link AksjonspunktResultat}, støtter callback for å modifisere
-     * {@link Aksjonspunkt}
+     * {@link no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt}
      */
     public static BehandleStegResultat utførtMedAksjonspunktResultater(List<AksjonspunktResultat> aksjonspunktResultater) {
         return new BehandleStegResultat(FellesTransisjoner.UTFØRT, aksjonspunktResultater);
@@ -39,7 +45,6 @@ public class BehandleStegResultat {
 
     /**
      * Setter at behandlingen ligger på angitt steg uten å kjøre videre.
-     * 
      * Den som kaller på denne metoden må selv leggge inn en FortsettBehandlingTask.
      */
     public static BehandleStegResultat tilbakeførtTilStegUtenVidereKjøring(BehandlingStegType tilSteg) {

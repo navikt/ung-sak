@@ -12,6 +12,8 @@
     <sequence-generator name="SEQ_BG_OVST_INPUT_PERIODE" allocation-size="50" sequence-name="SEQ_BG_OVST_INPUT_PERIODE"/>
     <sequence-generator name="SEQ_BG_OVST_AKTIVITET" allocation-size="50" sequence-name="SEQ_BG_OVST_AKTIVITET"/>
     <sequence-generator name="SEQ_BG_OVST_INPUT_PERIODER" allocation-size="50" sequence-name="SEQ_BG_OVST_INPUT_PERIODER"/>
+    <sequence-generator name="SEQ_BG_PGI_PERIODER" allocation-size="50" sequence-name="SEQ_BG_PGI_PERIODER"/>
+    <sequence-generator name="SEQ_BG_PGI_PERIODE" allocation-size="50" sequence-name="SEQ_BG_PGI_PERIODE"/>
 
     <entity class="no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag"/>
     <entity class="no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioder"/>
@@ -21,6 +23,8 @@
     <entity class="no.nav.k9.sak.ytelse.beregning.grunnlag.InputOverstyringPeriode"/>
     <entity class="no.nav.k9.sak.ytelse.beregning.grunnlag.InputAktivitetOverstyring"/>
     <entity class="no.nav.k9.sak.ytelse.beregning.grunnlag.InputOverstyringPerioder"/>
+    <entity class="no.nav.k9.sak.ytelse.beregning.grunnlag.PGIPerioder"/>
+    <entity class="no.nav.k9.sak.ytelse.beregning.grunnlag.PGIPeriode"/>
 
 
 </entity-mappings>

@@ -1,8 +1,8 @@
 package no.nav.k9.sak.behandlingslager.behandling;
 
 import jakarta.persistence.EntityManager;
-
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -27,6 +27,26 @@ public class BasicBehandlingBuilder {
         this.em = em;
         behandlingRepository = new BehandlingRepository(em);
         vilkårResultatRepository = new VilkårResultatRepository(em);
+    }
+
+    public Behandling opprettOgLagreFørstegangssøknad(Fagsak fagsak, BehandlingStatus startStatus) {
+        var builder = Behandling.forFørstegangssøknad(fagsak).medBehandlingStatus(startStatus);
+        Behandling behandling = builder.build();
+
+        lagreBehandling(behandling);
+
+        em.flush();
+        return behandling;
+    }
+
+    public Behandling opprettNyBehandling(Fagsak fagsak, BehandlingType behandlingType, BehandlingStatus startStatus) {
+        var builder = Behandling.nyBehandlingFor(fagsak, behandlingType).medBehandlingStatus(startStatus);
+        Behandling behandling = builder.build();
+
+        lagreBehandling(behandling);
+
+        em.flush();
+        return behandling;
     }
 
     public Behandling opprettOgLagreFørstegangssøknad(FagsakYtelseType ytelse, BehandlingStatus startStatus) {

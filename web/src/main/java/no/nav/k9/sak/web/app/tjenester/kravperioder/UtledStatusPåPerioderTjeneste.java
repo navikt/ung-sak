@@ -1,6 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.kravperioder;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,7 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -17,10 +19,12 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
 import no.nav.k9.sak.kontrakt.krav.KravDokumentMedSøktePerioder;
 import no.nav.k9.sak.kontrakt.krav.KravDokumentType;
 import no.nav.k9.sak.kontrakt.krav.PeriodeMedÅrsaker;
 import no.nav.k9.sak.kontrakt.krav.StatusForPerioderPåBehandling;
+import no.nav.k9.sak.kontrakt.krav.ÅrsakMedPerioder;
 import no.nav.k9.sak.kontrakt.krav.ÅrsakTilVurdering;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.PeriodeMedÅrsak;
@@ -30,10 +34,10 @@ import no.nav.k9.sak.typer.Periode;
 
 public class UtledStatusPåPerioderTjeneste {
 
-    private final Boolean kantIKantVurdererEnablet;
+    private Boolean filtrereUtTilstøtendePeriode;
 
-    public UtledStatusPåPerioderTjeneste(Boolean kantIKantVurdererEnablet) {
-        this.kantIKantVurdererEnablet = kantIKantVurdererEnablet;
+    public UtledStatusPåPerioderTjeneste(Boolean filtrereUtTilstøtendePeriode) {
+        this.filtrereUtTilstøtendePeriode = filtrereUtTilstøtendePeriode;
     }
 
     public StatusForPerioderPåBehandling utled(Behandling behandling,
@@ -46,20 +50,15 @@ public class UtledStatusPåPerioderTjeneste {
 
         var relevanteDokumenterMedPeriode = utledKravdokumenterTilkommetIBehandlingen(kravdokumenter, kravdokumenterMedPeriode);
         var andreRelevanteDokumenterForPeriodenTilVurdering = utledKravdokumenterRelevantForPeriodeTilVurdering(kravdokumenter, kravdokumenterMedPeriode, perioderTilVurdering);
+        var perioderTilVurderingKombinert = new LocalDateTimeline<>(perioderTilVurdering.stream().map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true)).collect(Collectors.toList()), StandardCombinators::alwaysTrueForMatch)
+            .compress();
 
-        var tidslinje = new LocalDateTimeline<ÅrsakerTilVurdering>(List.of());
         var relevanteTidslinjer = relevanteDokumenterMedPeriode.stream()
             .map(entry -> tilSegments(entry, kantIKantVurderer, ÅrsakTilVurdering.FØRSTEGANGSVURDERING))
             .map(LocalDateTimeline::new)
             .toList();
 
-        tidslinje = mergeTidslinjer(relevanteTidslinjer, kantIKantVurderer, this::mergeSegments);
-
-        var tilbakestillingSegmenter = perioderSomSkalTilbakestilles.stream()
-            .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), new ÅrsakerTilVurdering(Set.of(ÅrsakTilVurdering.TRUKKET_KRAV))))
-            .collect(Collectors.toList());
-
-        tidslinje = tidslinje.combine(new LocalDateTimeline<>(tilbakestillingSegmenter), this::mergeSegmentsAndreDokumenter, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        var tidslinje = mergeTidslinjer(relevanteTidslinjer, kantIKantVurderer, this::mergeSegments);
 
         var endringFraBruker = andreRelevanteDokumenterForPeriodenTilVurdering.stream()
             .map(entry -> tilSegments(entry, kantIKantVurderer, utledRevurderingÅrsak(behandling)))
@@ -68,27 +67,94 @@ public class UtledStatusPåPerioderTjeneste {
 
         var endringFraBrukerTidslinje = mergeTidslinjer(endringFraBruker, kantIKantVurderer, this::mergeSegmentsAndreDokumenter);
         tidslinje = tidslinje.combine(endringFraBrukerTidslinje, this::mergeSegmentsAndreDokumenter, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        tidslinje = tidslinje.filterValue(this::harIkkeBareBerørtPeriode);
 
-        for (PeriodeMedÅrsak entry : revurderingPerioderFraAndreParter) {
-            var endringFraAndreParter = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(entry.getPeriode().toLocalDateInterval(), new ÅrsakerTilVurdering(Set.of(ÅrsakTilVurdering.mapFra(entry.getÅrsak()))))));
-            tidslinje = tidslinje.combine(endringFraAndreParter, this::mergeAndreBerørtSaker, LocalDateTimeline.JoinStyle.CROSS_JOIN)
-                .compress();
-        }
+        var endringFraAndreParter = new LocalDateTimeline<>(revurderingPerioderFraAndreParter.stream()
+            .map(entry -> new LocalDateSegment<>(entry.getPeriode().toLocalDateInterval(), new ÅrsakerTilVurdering(Set.of(ÅrsakTilVurdering.mapFra(entry.getÅrsak())))))
+            .collect(Collectors.toList()), this::mergeAndreBerørtSaker);
+        tidslinje = tidslinje.combine(endringFraAndreParter, this::mergeAndreBerørtSaker, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
-        var perioder = tidslinje.compress()
-            .toSegments()
-            .stream()
-            .map(it -> new PeriodeMedÅrsaker(new Periode(it.getFom(), it.getTom()), it.getValue() != null ? it.getValue().getÅrsaker() : Set.of()))
+        tidslinje = tidslinje.intersection(perioderTilVurderingKombinert);
+        var tilbakestillingSegmenter = perioderSomSkalTilbakestilles.stream()
+            .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), new ÅrsakerTilVurdering(Set.of(ÅrsakTilVurdering.TRUKKET_KRAV))))
             .collect(Collectors.toList());
 
-        var perioderTilVurderingKombinert = new LocalDateTimeline<>(perioderTilVurdering.stream().map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true)).collect(Collectors.toList()))
-            .compress()
-            .toSegments()
-            .stream()
-            .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
-            .collect(Collectors.toCollection(TreeSet::new));
+        tidslinje = tidslinje.combine(new LocalDateTimeline<>(tilbakestillingSegmenter, StandardCombinators::coalesceRightHandSide), this::mergeSegmentsAndreDokumenter, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
-        return new StatusForPerioderPåBehandling(perioderTilVurderingKombinert.stream().map(DatoIntervallEntitet::tilPeriode).collect(Collectors.toSet()), perioder, mapKravTilDto(relevanteDokumenterMedPeriode));
+        var perioder = tidslinje.compress()
+            .stream()
+            .map(it -> new PeriodeMedÅrsaker(new Periode(it.getFom(), it.getTom()), transformerÅrsaker(it)))
+            .collect(Collectors.toList());
+
+        var årsakMedPerioder = utledÅrsakMedPerioder(perioder);
+
+        var perioderTilVurderingSet = utledPerioderTilVurdering(perioderTilVurderingKombinert, årsakMedPerioder);
+
+        return new StatusForPerioderPåBehandling(perioderTilVurderingSet, perioder, årsakMedPerioder, mapKravTilDto(relevanteDokumenterMedPeriode));
+    }
+
+    private Set<Periode> utledPerioderTilVurdering(LocalDateTimeline<Boolean> perioderTilVurderingKombinert, List<ÅrsakMedPerioder> årsakMedPerioder) {
+        if (!filtrereUtTilstøtendePeriode) {
+            return perioderTilVurderingKombinert
+                .stream()
+                .map(it -> new Periode(it.getFom(), it.getTom()))
+                .collect(Collectors.toCollection(TreeSet::new));
+        }
+        var segmenter = årsakMedPerioder.stream().map(ÅrsakMedPerioder::getPerioder).flatMap(Collection::stream).map(it -> new LocalDateSegment<>(it.getFom(), it.getTom(), true)).toList();
+        var timeline = new LocalDateTimeline<>(segmenter, StandardCombinators::coalesceRightHandSide);
+        return timeline.compress().stream().map(it -> new Periode(it.getFom(), it.getTom())).collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    private boolean harIkkeBareBerørtPeriode(ÅrsakerTilVurdering it) {
+        if (!filtrereUtTilstøtendePeriode) {
+            return true;
+        }
+        var årsaker = it.getÅrsaker();
+        return !årsaker.isEmpty() && !(årsaker.size() == 1 && årsaker.contains(ÅrsakTilVurdering.REVURDERER_BERØRT_PERIODE));
+    }
+
+    private List<ÅrsakMedPerioder> utledÅrsakMedPerioder(List<PeriodeMedÅrsaker> perioder) {
+        var result = new HashMap<ÅrsakTilVurdering, LocalDateTimeline<Boolean>>();
+        var årsakTilVurderingMap = perioder.stream().flatMap(this::tilÅrsakMedPerioder).collect(Collectors.groupingBy(ÅrsakMedPerioder::getÅrsak,
+            Collectors.flatMapping(it -> Stream.of(it.getPerioder()).flatMap(Collection::stream), Collectors.toCollection(TreeSet<Periode>::new))));
+
+
+        for (Map.Entry<ÅrsakTilVurdering, TreeSet<Periode>> entry : årsakTilVurderingMap.entrySet()) {
+            var key = entry.getKey();
+            var timeline = result.getOrDefault(key, LocalDateTimeline.empty());
+
+            timeline = timeline.combine(new LocalDateTimeline<>(entry.getValue().stream().map(it -> new LocalDateSegment<>(it.getFom(), it.getTom(), true)).collect(Collectors.toSet())), StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            result.put(key, timeline.compress());
+        }
+
+        return result.entrySet()
+            .stream()
+            .map(it -> new ÅrsakMedPerioder(it.getKey(), it.getValue()
+                .toSegments()
+                .stream()
+                .map(at -> new Periode(at.getFom(), at.getTom()))
+                .collect(Collectors.toSet())))
+            .collect(Collectors.toList());
+    }
+
+    private Stream<ÅrsakMedPerioder> tilÅrsakMedPerioder(PeriodeMedÅrsaker it) {
+        return it.getÅrsaker().stream().map(at -> new ÅrsakMedPerioder(at, new TreeSet<>(Set.of(it.getPeriode()))));
+    }
+
+    private Set<ÅrsakTilVurdering> transformerÅrsaker(LocalDateSegment<ÅrsakerTilVurdering> segment) {
+        if (segment.getValue() == null) {
+            return Set.of();
+        }
+
+        var årsaker = segment.getValue().getÅrsaker();
+
+        if (årsaker.size() > 1 && årsaker.contains(ÅrsakTilVurdering.REVURDERER_BERØRT_PERIODE)) {
+            return årsaker.stream()
+                .filter(it -> !it.equals(ÅrsakTilVurdering.REVURDERER_BERØRT_PERIODE))
+                .collect(Collectors.toSet());
+        }
+
+        return årsaker;
     }
 
     private LocalDateTimeline<ÅrsakerTilVurdering> mergeTidslinjer(List<LocalDateTimeline<ÅrsakerTilVurdering>> relevanteTidslinjer, KantIKantVurderer kantIKantVurderer, LocalDateSegmentCombinator<ÅrsakerTilVurdering, ÅrsakerTilVurdering, ÅrsakerTilVurdering> mergeSegments) {
@@ -96,12 +162,8 @@ public class UtledStatusPåPerioderTjeneste {
         for (LocalDateTimeline<ÅrsakerTilVurdering> linje : relevanteTidslinjer) {
             tidslinjen = tidslinjen.combine(linje, mergeSegments, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
-        if (kantIKantVurdererEnablet) {
-            var segmenterSomMangler = utledHullSomMåTettes(tidslinjen, kantIKantVurderer);
-            for (LocalDateSegment<ÅrsakerTilVurdering> segment : segmenterSomMangler) {
-                tidslinjen = tidslinjen.combine(segment, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-            }
-        }
+        var segmenterSomMangler = Hjelpetidslinjer.utledHullSomMåTettes(tidslinjen, kantIKantVurderer);
+        tidslinjen = tidslinjen.combine(segmenterSomMangler, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         return tidslinjen;
     }
 
@@ -113,24 +175,34 @@ public class UtledStatusPåPerioderTjeneste {
     }
 
     private List<KravDokumentMedSøktePerioder> mapKravTilDto(Set<Map.Entry<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>>> relevanteDokumenterMedPeriode) {
-        return relevanteDokumenterMedPeriode.stream().map(it -> new KravDokumentMedSøktePerioder(it.getKey().getJournalpostId(),
+        return relevanteDokumenterMedPeriode.stream()
+            .filter(it -> kravDokumentTypeBrukesAvFormidling(it.getKey().getType()))
+            .map(it -> new KravDokumentMedSøktePerioder(it.getKey().getJournalpostId(),
                 it.getKey().getInnsendingsTidspunkt(),
                 KravDokumentType.fraKode(it.getKey().getType().name()),
                 it.getValue().stream().map(at -> new no.nav.k9.sak.kontrakt.krav.SøktPeriode(at.getPeriode().tilPeriode(), at.getType(), at.getArbeidsgiver(), at.getArbeidsforholdRef())).collect(Collectors.toList())))
-            .collect(Collectors.toList());
+            .toList();
 
+    }
+
+    private boolean kravDokumentTypeBrukesAvFormidling(no.nav.k9.sak.perioder.KravDokumentType kravDokumentType) {
+        return KravDokumentType.fraKode(kravDokumentType.name()) != null;
     }
 
     private LocalDateSegment<ÅrsakerTilVurdering> mergeAndreBerørtSaker(LocalDateInterval interval, LocalDateSegment<ÅrsakerTilVurdering> første, LocalDateSegment<ÅrsakerTilVurdering> siste) {
         Set<ÅrsakTilVurdering> årsaker = new HashSet<>();
-        if (første != null && første.getValue() != null && !første.getValue().getÅrsaker().isEmpty()) {
+        if (første != null && første.getValue() != null) {
             årsaker.addAll(første.getValue().getÅrsaker());
         }
-        if (siste != null && siste.getValue() != null && !siste.getValue().getÅrsaker().isEmpty()) {
+        if (siste != null && siste.getValue() != null) {
             årsaker.addAll(siste.getValue().getÅrsaker());
         }
         if (årsaker.contains(ÅrsakTilVurdering.FØRSTEGANGSVURDERING)) {
-            årsaker = new HashSet<>(Set.of(ÅrsakTilVurdering.FØRSTEGANGSVURDERING));
+            if (årsaker.contains(ÅrsakTilVurdering.UTSATT_BEHANDLING)) {
+                årsaker = new HashSet<>(Set.of(ÅrsakTilVurdering.FØRSTEGANGSVURDERING, ÅrsakTilVurdering.UTSATT_BEHANDLING));
+            } else {
+                årsaker = new HashSet<>(Set.of(ÅrsakTilVurdering.FØRSTEGANGSVURDERING));
+            }
         }
 
         return new LocalDateSegment<>(interval, new ÅrsakerTilVurdering(årsaker));
@@ -186,36 +258,12 @@ public class UtledStatusPåPerioderTjeneste {
             tidslinjen = tidslinjen.combine(segment, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
 
-        if (kantIKantVurdererEnablet) {
-            var segmenterSomMangler = utledHullSomMåTettes(tidslinjen, kantIKantVurderer);
-            for (LocalDateSegment<ÅrsakerTilVurdering> segment : segmenterSomMangler) {
-                tidslinjen = tidslinjen.combine(segment, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-            }
-        }
+        var segmenterSomMangler = Hjelpetidslinjer.utledHullSomMåTettes(tidslinjen, kantIKantVurderer);
+        tidslinjen = tidslinjen.combine(segmenterSomMangler, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
         return tidslinjen.compress()
-            .toSegments()
             .stream()
             .toList();
-    }
-
-    private List<LocalDateSegment<ÅrsakerTilVurdering>> utledHullSomMåTettes(LocalDateTimeline<ÅrsakerTilVurdering> tidslinjen, KantIKantVurderer kantIKantVurderer) {
-        var segmenter = tidslinjen.compress().toSegments();
-
-        LocalDateSegment<ÅrsakerTilVurdering> periode = null;
-        var resultat = new ArrayList<LocalDateSegment<ÅrsakerTilVurdering>>();
-
-        for (LocalDateSegment<ÅrsakerTilVurdering> segment : segmenter) {
-            if (periode == null) {
-                periode = segment;
-            } else if (kantIKantVurderer.erKantIKant(DatoIntervallEntitet.fra(segment.getLocalDateInterval()), DatoIntervallEntitet.fra(periode.getLocalDateInterval()))) {
-                resultat.add(new LocalDateSegment<>(periode.getFom(), segment.getTom(), periode.getValue()));
-            } else {
-                periode = segment;
-            }
-        }
-
-        return resultat;
     }
 
     private Set<Map.Entry<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>>> utledKravdokumenterRelevantForPeriodeTilVurdering(Set<KravDokument> kravdokumenter,

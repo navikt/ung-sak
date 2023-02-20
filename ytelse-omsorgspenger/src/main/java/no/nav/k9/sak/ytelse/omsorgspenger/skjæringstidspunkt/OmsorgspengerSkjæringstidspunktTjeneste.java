@@ -1,12 +1,12 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.skjæringstidspunkt;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -20,12 +20,11 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
-import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 @ApplicationScoped
 public class OmsorgspengerSkjæringstidspunktTjeneste implements SkjæringstidspunktTjeneste {
 
@@ -34,8 +33,6 @@ public class OmsorgspengerSkjæringstidspunktTjeneste implements Skjæringstidsp
     private OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private OmsorgspengerOpphørtidspunktTjeneste opphørTidspunktTjeneste;
-
-    private Period periodeFør = Period.parse("P12M");
 
     OmsorgspengerSkjæringstidspunktTjeneste() {
         // CDI
@@ -75,9 +72,7 @@ public class OmsorgspengerSkjæringstidspunktTjeneste implements Skjæringstidsp
         opptjeningRepository.finnOpptjening(behandlingId)
             .flatMap(it -> it.finnOpptjening(førsteUttaksdato))
             .map(opptjening -> opptjening.getTom().plusDays(1))
-            .ifPresent(skjæringstidspunkt -> {
-                builder.medUtledetSkjæringstidspunkt(skjæringstidspunkt);
-            });
+            .ifPresent(builder::medUtledetSkjæringstidspunkt);
 
         return builder.build();
     }
@@ -127,12 +122,4 @@ public class OmsorgspengerSkjæringstidspunktTjeneste implements Skjæringstidsp
         return behandling.getOpprettetDato().toLocalDate();
     }
 
-    @Override
-    public Periode utledOpplysningsperiode(Long behandlingId, FagsakYtelseType ytelseType, boolean tomDagensDato) {
-        var behandling = behandlingRepository.hentBehandling(behandlingId);
-        LocalDate tom = behandling.getFagsak().getPeriode().getTomDato();
-
-        LocalDate skjæringstidspunkt = this.utledSkjæringstidspunktForRegisterInnhenting(behandlingId, ytelseType);
-        return new Periode(skjæringstidspunkt.minus(periodeFør), tomDagensDato && tom.isBefore(LocalDate.now()) ? LocalDate.now() : tom);
-    }
 }

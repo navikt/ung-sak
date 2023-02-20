@@ -12,6 +12,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.hibernate.jpa.HibernateHints;
+import org.hibernate.query.NativeQuery;
+import org.hibernate.type.StandardBasicTypes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
@@ -19,22 +26,14 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
-
-import org.hibernate.jpa.QueryHints;
-import org.hibernate.query.NativeQuery;
-import org.hibernate.type.StringType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
-
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskEvent;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe.Entry;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.prosesstask.api.ProsessTaskStatus;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.prosesstask.impl.ProsessTaskEntitet;
 import no.nav.k9.prosesstask.impl.TaskManager;
 
@@ -47,7 +46,7 @@ public class FagsakProsessTaskRepository {
     private static final Logger log = LoggerFactory.getLogger(FagsakProsessTaskRepository.class);
     private final Set<ProsessTaskStatus> ferdigStatuser = Set.of(ProsessTaskStatus.FERDIG, ProsessTaskStatus.KJOERT);
     private EntityManager em;
-    private ProsessTaskRepository prosessTaskRepository;
+    private ProsessTaskTjeneste prosessTaskRepository;
     private TaskManager taskManager;
 
     FagsakProsessTaskRepository() {
@@ -55,7 +54,7 @@ public class FagsakProsessTaskRepository {
     }
 
     @Inject
-    public FagsakProsessTaskRepository(EntityManager entityManager, ProsessTaskRepository prosessTaskRepository, TaskManager taskManager) {
+    public FagsakProsessTaskRepository(EntityManager entityManager, ProsessTaskTjeneste prosessTaskRepository, TaskManager taskManager) {
         this.em = entityManager;
         this.prosessTaskRepository = prosessTaskRepository;
         this.taskManager = taskManager;
@@ -71,7 +70,7 @@ public class FagsakProsessTaskRepository {
     }
 
     public Optional<FagsakProsessTask> hent(Long prosessTaskId, boolean lås) {
-        TypedQuery<FagsakProsessTask> query = getEntityManager().createQuery("from FagsakProsessTask fpt where fpt.prosessTaskId=:prosessTaskId",
+        TypedQuery<FagsakProsessTask> query = getEntityManager().createQuery("select fpt from FagsakProsessTask fpt where fpt.prosessTaskId=:prosessTaskId",
             FagsakProsessTask.class);
         query.setParameter("prosessTaskId", prosessTaskId);
         if (lås) {
@@ -88,7 +87,30 @@ public class FagsakProsessTaskRepository {
         query.setParameter("prosessTaskId", prosessTaskId); // NOSONAR
         query.setParameter("fagsakId", fagsakId); // NOSONAR
         query.executeUpdate();
+        frigiVeto(ptData);
         em.flush();
+    }
+
+    boolean frigiVeto(ProsessTaskData blokkerendeTask) {
+        String updateSql = "update PROSESS_TASK SET "
+            + " status='KLAR'"
+            + ", blokkert_av=NULL"
+            + ", siste_kjoering_feil_kode=NULL"
+            + ", siste_kjoering_feil_tekst=NULL"
+            + ", neste_kjoering_etter=NULL"
+            + ", versjon = versjon +1"
+            + " WHERE blokkert_av=:id";
+
+        int frigitt = em.createNativeQuery(updateSql)
+            .setParameter("id", blokkerendeTask.getId())
+            .executeUpdate();
+
+        if (frigitt > 0) {
+            log.info("ProsessTask [id={}, taskType={}] SUSPENDERT. Frigitt {} tidligere blokkerte tasks", blokkerendeTask.getId(), blokkerendeTask.taskType(),
+                frigitt);
+            return true;
+        }
+        return false; // Har ikke hatt noe veto å frigi
     }
 
     public List<ProsessTaskData> finnAlleForAngittSøk(Long fagsakId, String behandlingId, String gruppeId, Collection<ProsessTaskStatus> statuser,
@@ -118,12 +140,12 @@ public class FagsakProsessTaskRepository {
                 ProsessTaskEntitet.class);
 
         query.setParameter("statuses", statusNames)
-            .setParameter("gruppe", gruppeId, StringType.INSTANCE)
+            .setParameter("gruppe", gruppeId, StandardBasicTypes.STRING)
             .setParameter("nesteKjoeringFraOgMed", nesteKjoeringFraOgMed) // max oppløsning på neste_kjoering_etter er sekunder
             .setParameter("nesteKjoeringTilOgMed", nesteKjoeringTilOgMed)
             .setParameter("fagsakId", fagsakId) // NOSONAR
-            .setParameter("behandlingId", behandlingId, StringType.INSTANCE) // NOSONAR
-            .setHint(QueryHints.HINT_READONLY, "true");
+            .setParameter("behandlingId", behandlingId, StandardBasicTypes.STRING) // NOSONAR
+            .setHint(HibernateHints.HINT_READ_ONLY, "true");
 
         List<ProsessTaskEntitet> resultList = query.getResultList();
         return tilProsessTask(resultList);
@@ -253,9 +275,9 @@ public class FagsakProsessTaskRepository {
             }
             // Dersom den ikke er NULL er den kun tillatt dersom den matcher laveste gruppe_sekvensnr for Fagsak i
             // FAGSAK_PROSESS_TASK tabell.
-            TypedQuery<FagsakProsessTask> query = getEntityManager().createQuery("from FagsakProsessTask fpt " +
-                    "where fpt.fagsakId=:fagsakId and gruppeSekvensNr is not null " +
-                    "order by gruppeSekvensNr ",
+            TypedQuery<FagsakProsessTask> query = getEntityManager().createQuery("select fpt from FagsakProsessTask fpt " +
+                    "where fpt.fagsakId=:fagsakId and fpt.gruppeSekvensNr is not null " +
+                    "order by fpt.gruppeSekvensNr ",
                 FagsakProsessTask.class);
             query.setParameter("fagsakId", fagsakId); // NOSONAR
             query.setMaxResults(1);

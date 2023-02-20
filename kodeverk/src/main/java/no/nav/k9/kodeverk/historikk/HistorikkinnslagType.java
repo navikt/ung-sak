@@ -22,6 +22,8 @@ public enum HistorikkinnslagType implements Kodeverdi {
 
     // Mal Type 1
     BREV_SENT("BREV_SENT", "Brev sendt", HistorikkinnslagMal.MAL_TYPE_1),
+    MERKNAD_NY("MERKNAD_NY", "Ny markering", HistorikkinnslagMal.MAL_TYPE_1),
+    MERKNAD_FJERNET("MERKNAD_FJERNET", "Markering fjernet", HistorikkinnslagMal.MAL_TYPE_1),
     BREV_BESTILT("BREV_BESTILT", "Brev bestilt", HistorikkinnslagMal.MAL_TYPE_1),
     BEH_STARTET_PÅ_NYTT("BEH_STARTET_PÅ_NYTT", "Behandling startet på nytt", HistorikkinnslagMal.MAL_TYPE_1),
     BEH_STARTET("BEH_STARTET", "Behandling startet", HistorikkinnslagMal.MAL_TYPE_1),
@@ -45,7 +47,7 @@ public enum HistorikkinnslagType implements Kodeverdi {
     VEDTAK_FATTET("VEDTAK_FATTET", "Vedtak fattet", HistorikkinnslagMal.MAL_TYPE_2),
     UENDRET_UTFALL("UENDRET_UTFALL", "Uendret utfall", HistorikkinnslagMal.MAL_TYPE_2),
     TILBAKEKREVING_VIDEREBEHANDLING("TILBAKEKR_VIDEREBEHANDLING", "Metode for å håndtere tilbakekreving av feilutbetailng er valgt.", HistorikkinnslagMal.MAL_TYPE_2),
-    REGISTRER_OM_VERGE("REGISTRER_OM_VERGE", "Registrering av opplysninger om verge/fullmektig", HistorikkinnslagMal.MAL_TYPE_2),
+    REGISTRER_OM_VERGE("REGISTRER_OM_VERGE", "Registrering av opplysninger om verge/fullmektig/søker under 18 år", HistorikkinnslagMal.MAL_TYPE_2),
     FORSLAG_VEDTAK_UTEN_TOTRINN("FORSLAG_VEDTAK_UTEN_TOTRINN", "Vedtak foreslått", HistorikkinnslagMal.MAL_TYPE_2),
     FORSLAG_VEDTAK("FORSLAG_VEDTAK", "Vedtak foreslått og sendt til beslutter", HistorikkinnslagMal.MAL_TYPE_2),
 
@@ -65,11 +67,13 @@ public enum HistorikkinnslagType implements Kodeverdi {
     FAKTA_ENDRET("FAKTA_ENDRET", "Fakta endret", HistorikkinnslagMal.MAL_TYPE_5),
     BYTT_ENHET("BYTT_ENHET", "Bytt enhet", HistorikkinnslagMal.MAL_TYPE_5),
 
+
     // Mal Type 6
     NY_INFO_FRA_TPS("NY_INFO_FRA_TPS", "Ny info fra TPS", HistorikkinnslagMal.MAL_TYPE_6),
 
     // Mal Type 7
     OVERSTYRT("OVERSTYRT", "Overstyrt", HistorikkinnslagMal.MAL_TYPE_7),
+    FJERNET_OVERSTYRING("FJERNET_OVERSTYRING", "Overstyring er avbrutt gjeldende fra ", HistorikkinnslagMal.MAL_TYPE_7),
 
     // Mal Type 8
     OPPTJENING("OPPTJENING", "Behandlet opptjeningsperiode", HistorikkinnslagMal.MAL_TYPE_8),

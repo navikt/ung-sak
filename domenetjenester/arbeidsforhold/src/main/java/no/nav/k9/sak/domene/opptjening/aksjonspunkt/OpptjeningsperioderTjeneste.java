@@ -8,16 +8,21 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
@@ -25,7 +30,6 @@ import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtale;
 import no.nav.k9.sak.domene.iay.modell.AktørArbeid;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.k9.sak.domene.iay.modell.Inntektspost;
 import no.nav.k9.sak.domene.iay.modell.OppgittAnnenAktivitet;
 import no.nav.k9.sak.domene.iay.modell.OppgittArbeidsforhold;
 import no.nav.k9.sak.domene.iay.modell.OppgittEgenNæring;
@@ -34,6 +38,9 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
+import no.nav.k9.sak.domene.iay.modell.Ytelse;
+import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
+import no.nav.k9.sak.domene.opptjening.MellomliggendeHelgUtleder;
 import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurdering;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
@@ -48,10 +55,12 @@ public class OpptjeningsperioderTjeneste {
 
     protected OpptjeningRepository opptjeningRepository;
     protected OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
-    private MapYtelseperioderTjeneste mapYtelseperioderTjeneste;
+    private final MapYtelseperioderTjeneste mapYtelseperioderTjeneste;
+    private final MellomliggendeHelgUtleder mellomliggendeHelgUtleder = new MellomliggendeHelgUtleder();
 
     @Inject
-    public OpptjeningsperioderTjeneste(OpptjeningRepository opptjeningRepository, OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider) {
+    public OpptjeningsperioderTjeneste(OpptjeningRepository opptjeningRepository,
+                                       OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider) {
         this.opptjeningRepository = opptjeningRepository;
         this.oppgittOpptjeningFilterProvider = oppgittOpptjeningFilterProvider;
         this.mapYtelseperioderTjeneste = new MapYtelseperioderTjeneste();
@@ -60,52 +69,85 @@ public class OpptjeningsperioderTjeneste {
     public List<OpptjeningsperiodeForSaksbehandling> mapPerioderForSaksbehandling(BehandlingReferanse ref,
                                                                                   InntektArbeidYtelseGrunnlag grunnlag,
                                                                                   OpptjeningAktivitetVurdering vurderOpptjening,
-                                                                                  DatoIntervallEntitet opptjeningPeriode) {
+                                                                                  DatoIntervallEntitet opptjeningPeriode,
+                                                                                  DatoIntervallEntitet vilkårsPeriode,
+                                                                                  YrkesaktivitetFilter yrkesaktivitetFilter) {
         List<OpptjeningsperiodeForSaksbehandling> perioder = new ArrayList<>();
 
         var aktørId = ref.getAktørId();
         var skjæringstidspunkt = opptjeningPeriode.getTomDato().plusDays(1);
-        var oppgittOpptjening = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(ref.getBehandlingId())
-            .hentOppgittOpptjening(ref.getBehandlingId(), grunnlag, skjæringstidspunkt).orElse(null);
+        var oppgittOpptjeningFilter = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(ref.getBehandlingId());
+        var oppgittOpptjening = oppgittOpptjeningFilter.hentOppgittOpptjening(ref.getBehandlingId(), grunnlag, skjæringstidspunkt).orElse(null);
 
         var mapArbeidOpptjening = OpptjeningAktivitetType.hentFraArbeidTypeRelasjoner();
-        var filter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(aktørId)).før(skjæringstidspunkt);
-        for (var yrkesaktivitet : filter.getYrkesaktiviteter()) {
-            var opptjeningsperioder = MapYrkesaktivitetTilOpptjeningsperiodeTjeneste.mapYrkesaktivitet(ref, yrkesaktivitet, grunnlag, vurderOpptjening, mapArbeidOpptjening, opptjeningPeriode);
+        var tidslinjePerYtelse = utledYtelsesTidslinjerForValideringAvPermisjoner(new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId)));
+        for (var yrkesaktivitet : yrkesaktivitetFilter.getYrkesaktiviteter()) {
+            var opptjeningsperioder = MapYrkesaktivitetTilOpptjeningsperiodeTjeneste.mapYrkesaktivitet(ref, yrkesaktivitet, grunnlag, vurderOpptjening, mapArbeidOpptjening, opptjeningPeriode, vilkårsPeriode, tidslinjePerYtelse);
             perioder.addAll(opptjeningsperioder);
         }
 
-        perioder.addAll(mapOppgittOpptjening(mapArbeidOpptjening, oppgittOpptjening, vurderOpptjening, ref));
-        perioder.addAll(mapYtelseperioderTjeneste.mapYtelsePerioder(ref, grunnlag, vurderOpptjening, opptjeningPeriode));
+        perioder.addAll(mapOppgittOpptjening(mapArbeidOpptjening, oppgittOpptjening, vurderOpptjening, ref, vilkårsPeriode));
+        var ytelseFilterVenstreSide = new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId)).før(opptjeningPeriode.getTomDato());
+        perioder.addAll(mapYtelseperioderTjeneste.mapYtelsePerioder(ref, vilkårsPeriode, vurderOpptjening, true, ytelseFilterVenstreSide));
         lagOpptjeningsperiodeForFrilansAktivitet(ref, oppgittOpptjening, vurderOpptjening, grunnlag, perioder, opptjeningPeriode,
-            mapArbeidOpptjening).ifPresent(perioder::add);
+            mapArbeidOpptjening, vilkårsPeriode).ifPresent(perioder::add);
 
         return perioder.stream().sorted(Comparator.comparing(OpptjeningsperiodeForSaksbehandling::getPeriode)).collect(Collectors.toList());
+    }
+
+    private Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> utledYtelsesTidslinjerForValideringAvPermisjoner(YtelseFilter ytelseFilter) {
+        var ytelsesperioder = ytelseFilter.getFiltrertYtelser()
+            .stream().flatMap(this::mapYtelseperioder).toList();
+        var gruppertPåYtelse = ytelsesperioder.stream()
+            .collect(Collectors.groupingBy(Ytelseperiode::ytelseType));
+        var timelinePerYtelse = new HashMap<OpptjeningAktivitetType, LocalDateTimeline<Boolean>>();
+
+        for (Map.Entry<OpptjeningAktivitetType, List<Ytelseperiode>> entry : gruppertPåYtelse.entrySet()) {
+            var segmenter = entry.getValue().stream().map(it -> new LocalDateSegment<>(it.periode().toLocalDateInterval(), true)).collect(Collectors.toSet());
+            var timeline = new LocalDateTimeline<>(segmenter, StandardCombinators::alwaysTrueForMatch);
+            var mellomliggendePerioder = mellomliggendeHelgUtleder.beregnMellomliggendeHelg(timeline);
+            timeline = timeline.combine(mellomliggendePerioder, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            timelinePerYtelse.put(entry.getKey(), timeline.compress());
+        }
+
+        return timelinePerYtelse;
+    }
+
+    private Stream<Ytelseperiode> mapYtelseperioder(Ytelse y) {
+        // Bruker vedtaksperioden for foreldrepenger (se https://jira.adeo.no/browse/TSF-2735)
+        if (y.getYtelseType().equals(FagsakYtelseType.FORELDREPENGER)) {
+            return Stream.of(new Ytelseperiode(MapYtelseperioderTjeneste.mapYtelseType(y), y.getPeriode()));
+        } else {
+            return y.getYtelseAnvist().stream().map(ya -> new Ytelseperiode(MapYtelseperioderTjeneste.mapYtelseType(y), MapYtelseperioderTjeneste.hentUtDatoIntervall(y, ya)));
+        }
     }
 
     public Optional<OpptjeningResultat> hentOpptjeningHvisFinnes(Long behandlingId) {
         return opptjeningRepository.finnOpptjening(behandlingId);
     }
 
-    private List<OpptjeningsperiodeForSaksbehandling> mapOppgittOpptjening(Map<ArbeidType, Set<OpptjeningAktivitetType>> mapArbeidOpptjening, OppgittOpptjening oppgittOpptjening, OpptjeningAktivitetVurdering vurderOpptjening, BehandlingReferanse ref) {
+    private List<OpptjeningsperiodeForSaksbehandling> mapOppgittOpptjening(Map<ArbeidType, Set<OpptjeningAktivitetType>> mapArbeidOpptjening, OppgittOpptjening oppgittOpptjening, OpptjeningAktivitetVurdering vurderOpptjening, BehandlingReferanse ref, DatoIntervallEntitet vilkårsPeriode) {
         List<OpptjeningsperiodeForSaksbehandling> oppgittOpptjeningPerioder = new ArrayList<>();
         if (oppgittOpptjening != null) {
             for (Map.Entry<ArbeidType, List<OppgittAnnenAktivitet>> annenAktivitet : oppgittOpptjening.getAnnenAktivitet().stream()
                 .collect(Collectors.groupingBy(OppgittAnnenAktivitet::getArbeidType)).entrySet()) {
-                oppgittOpptjeningPerioder.addAll(mapAnnenAktivitet(annenAktivitet, mapArbeidOpptjening, vurderOpptjening, ref));
+                oppgittOpptjeningPerioder.addAll(mapAnnenAktivitet(annenAktivitet, mapArbeidOpptjening, vurderOpptjening, ref, vilkårsPeriode));
             }
             oppgittOpptjening.getOppgittArbeidsforhold()
                 .forEach(oppgittArbeidsforhold -> oppgittOpptjeningPerioder.add(mapOppgittArbeidsforholdUtenOverstyring(oppgittArbeidsforhold,
-                    mapArbeidOpptjening, vurderOpptjening, ref)));
-            oppgittOpptjening.getEgenNæring().forEach(egenNæring -> oppgittOpptjeningPerioder.add(mapEgenNæring(egenNæring, vurderOpptjening, ref)));
+                    mapArbeidOpptjening, vurderOpptjening, ref, vilkårsPeriode)));
+            oppgittOpptjening.getEgenNæring().forEach(egenNæring -> oppgittOpptjeningPerioder.add(mapEgenNæring(egenNæring, vurderOpptjening, ref, vilkårsPeriode)));
         }
         return oppgittOpptjeningPerioder;
     }
 
     private OpptjeningsperiodeForSaksbehandling mapOppgittArbeidsforholdUtenOverstyring(OppgittArbeidsforhold oppgittArbeidsforhold,
-                                                                                        Map<ArbeidType, Set<OpptjeningAktivitetType>> mapArbeidOpptjening, OpptjeningAktivitetVurdering vurderOpptjening, BehandlingReferanse ref) {
+                                                                                        Map<ArbeidType, Set<OpptjeningAktivitetType>> mapArbeidOpptjening,
+                                                                                        OpptjeningAktivitetVurdering vurderOpptjening,
+                                                                                        BehandlingReferanse ref,
+                                                                                        DatoIntervallEntitet vilkårsPeriode) {
         final OpptjeningAktivitetType type = utledOpptjeningType(mapArbeidOpptjening, oppgittArbeidsforhold.getArbeidType());
-        VurderingsStatus status = vurderOpptjening.vurderStatus(new VurderStatusInput(type, ref));
+        VurderingsStatus status = vurderOpptjening.vurderStatus(lagInput(ref, type, vilkårsPeriode, oppgittArbeidsforhold.getPeriode()));
         return mapOppgittArbeidsperiode(oppgittArbeidsforhold, type, status);
     }
 
@@ -121,12 +163,13 @@ public class OpptjeningsperioderTjeneste {
 
     private List<OpptjeningsperiodeForSaksbehandling> mapAnnenAktivitet(Map.Entry<ArbeidType, List<OppgittAnnenAktivitet>> annenAktivitet,
                                                                         Map<ArbeidType, Set<OpptjeningAktivitetType>> mapArbeidOpptjening, OpptjeningAktivitetVurdering vurderOpptjening,
-                                                                        BehandlingReferanse ref) {
+                                                                        BehandlingReferanse ref, DatoIntervallEntitet vilkårsPeriode) {
         OpptjeningAktivitetType opptjeningAktivitetType = utledOpptjeningType(mapArbeidOpptjening, annenAktivitet.getKey());
         List<OpptjeningsperiodeForSaksbehandling> annenAktivitetPerioder = new ArrayList<>();
         for (OppgittAnnenAktivitet aktivitet : annenAktivitet.getValue()) {
             OpptjeningsperiodeForSaksbehandling.Builder builder = OpptjeningsperiodeForSaksbehandling.Builder.ny();
-            VurderingsStatus status = vurderOpptjening.vurderStatus(new VurderStatusInput(opptjeningAktivitetType, ref));
+            var input = lagInput(ref, opptjeningAktivitetType, vilkårsPeriode, aktivitet.getPeriode());
+            VurderingsStatus status = vurderOpptjening.vurderStatus(input);
             builder.medPeriode(aktivitet.getPeriode())
                 .medOpptjeningAktivitetType(opptjeningAktivitetType)
                 .medVurderingsStatus(status);
@@ -142,8 +185,8 @@ public class OpptjeningsperioderTjeneste {
             .orElse(OpptjeningAktivitetType.UDEFINERT);
     }
 
-    private OpptjeningsperiodeForSaksbehandling mapEgenNæring(OppgittEgenNæring egenNæring, OpptjeningAktivitetVurdering vurderOpptjening, BehandlingReferanse ref) {
-        VurderingsStatus status = vurderOpptjening.vurderStatus(new VurderStatusInput(NÆRING, ref));
+    private OpptjeningsperiodeForSaksbehandling mapEgenNæring(OppgittEgenNæring egenNæring, OpptjeningAktivitetVurdering vurderOpptjening, BehandlingReferanse ref, DatoIntervallEntitet vilkårsPeriode) {
+        VurderingsStatus status = vurderOpptjening.vurderStatus(lagInput(ref, NÆRING, vilkårsPeriode, egenNæring.getPeriode()));
         OpptjeningsperiodeForSaksbehandling.Builder builder = OpptjeningsperiodeForSaksbehandling.Builder.ny()
             .medOpptjeningAktivitetType(NÆRING)
             .medVurderingsStatus(status)
@@ -156,13 +199,21 @@ public class OpptjeningsperioderTjeneste {
         return builder.build();
     }
 
+    private VurderStatusInput lagInput(BehandlingReferanse ref, OpptjeningAktivitetType type, DatoIntervallEntitet vilkårsPeriode, DatoIntervallEntitet aktivitetperiode) {
+        var input = new VurderStatusInput(type, ref);
+        input.setVilkårsperiode(vilkårsPeriode);
+        input.setAktivitetPeriode(aktivitetperiode);
+        return input;
+    }
+
     private Optional<OpptjeningsperiodeForSaksbehandling> lagOpptjeningsperiodeForFrilansAktivitet(BehandlingReferanse behandlingReferanse,
                                                                                                    OppgittOpptjening oppgittOpptjening,
                                                                                                    OpptjeningAktivitetVurdering vurderOpptjening,
                                                                                                    InntektArbeidYtelseGrunnlag grunnlag,
                                                                                                    List<OpptjeningsperiodeForSaksbehandling> perioder,
                                                                                                    DatoIntervallEntitet periode,
-                                                                                                   Map<ArbeidType, Set<OpptjeningAktivitetType>> mapArbeidOpptjening) {
+                                                                                                   Map<ArbeidType, Set<OpptjeningAktivitetType>> mapArbeidOpptjening,
+                                                                                                   DatoIntervallEntitet vilkårsPeriode) {
         // Hvis oppgitt frilansaktivitet brukes perioden derfra og det er allerede laget en OFS.
         if (oppgittOpptjening != null && oppgittOpptjening.getAnnenAktivitet().stream().anyMatch(oaa -> ArbeidType.FRILANSER.equals(oaa.getArbeidType())) ||
             perioder.stream().anyMatch(oaa -> OpptjeningAktivitetType.FRILANS.equals(oaa.getOpptjeningAktivitetType()))) {
@@ -180,7 +231,7 @@ public class OpptjeningsperioderTjeneste {
             DatoIntervallEntitet frilansPeriode = finnFrilansPeriode(oppgittOpptjening, periode, frilansOppdrag);
 
             OpptjeningAktivitetType brukType = utledOpptjeningType(mapArbeidOpptjening, ArbeidType.FRILANSER);
-            VurderingsStatus status = vurderOpptjening.vurderStatus(new VurderStatusInput(brukType, behandlingReferanse));
+            VurderingsStatus status = vurderOpptjening.vurderStatus(lagInput(behandlingReferanse, brukType, vilkårsPeriode, frilansPeriode));
             return Optional.of(OpptjeningsperiodeForSaksbehandling.Builder.ny()
                 .medOpptjeningAktivitetType(brukType)
                 .medVurderingsStatus(status)
@@ -232,7 +283,7 @@ public class OpptjeningsperioderTjeneste {
         return startDatoFrilans.map(startDato -> DatoIntervallEntitet.fraOgMedTilOgMed(startDato, sluttDatoFrilans));
     }
 
-    private boolean harInntektpostForPeriode(Inntektspost ip, DatoIntervallEntitet opptjeningsPeriode) {
-        return opptjeningsPeriode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(ip.getPeriode().getFomDato(), ip.getPeriode().getTomDato()));
+    private record Ytelseperiode(OpptjeningAktivitetType ytelseType, DatoIntervallEntitet periode) {
     }
+
 }

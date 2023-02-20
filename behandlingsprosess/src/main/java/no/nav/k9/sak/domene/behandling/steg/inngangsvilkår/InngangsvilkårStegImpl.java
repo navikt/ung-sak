@@ -86,7 +86,7 @@ public abstract class InngangsvilkårStegImpl implements InngangsvilkårSteg {
         }
 
         //
-        if (inngangsvilkårFellesTjeneste.getEnableForlengelse() && behandling.getOriginalBehandlingId().isPresent()) {
+        if (behandling.getOriginalBehandlingId().isPresent()) {
             var forlengelserTilVurdering = inngangsvilkårFellesTjeneste.utledForlengelserTilVurdering(ref.getBehandlingId(), vilkår);
 
             if (!forlengelserTilVurdering.isEmpty()) {

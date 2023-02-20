@@ -5,6 +5,8 @@ import java.util.Objects;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
+import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
 public class AktivitetIdentifikator {
@@ -27,11 +29,27 @@ public class AktivitetIdentifikator {
         }
     }
 
+    public static AktivitetIdentifikator lagAktivitetIdentifikator(UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforhold) {
+        if (arbeidsgiver != null) {
+            return new AktivitetIdentifikator(aktivitetType, new ArbeidsgiverArbeidsforhold(arbeidsgiver, arbeidsforhold));
+        } else {
+            return new AktivitetIdentifikator(aktivitetType);
+        }
+    }
+
     public static AktivitetIdentifikator lagAktivitetIdentifikator(SøktPeriode<OppgittFraværPeriode> søktPeriode) {
         if (søktPeriode.getArbeidsgiver() != null) {
             return new AktivitetIdentifikator(søktPeriode.getType(), new ArbeidsgiverArbeidsforhold(søktPeriode.getArbeidsgiver(), søktPeriode.getArbeidsforholdRef()));
         } else {
             return new AktivitetIdentifikator(søktPeriode.getType());
+        }
+    }
+
+    public static AktivitetIdentifikator lagAktivitetIdentifikator(OppgittFraværPeriode oppgittFraværPeriode) {
+        if (oppgittFraværPeriode.getArbeidsgiver() != null) {
+            return new AktivitetIdentifikator(oppgittFraværPeriode.getAktivitetType(), new ArbeidsgiverArbeidsforhold(oppgittFraværPeriode.getArbeidsgiver(), oppgittFraværPeriode.getArbeidsforholdRef()));
+        } else {
+            return new AktivitetIdentifikator(oppgittFraværPeriode.getAktivitetType());
         }
     }
 

@@ -4,14 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.formidling.kontrakt.dokumentdataparametre.DokumentdataParametreK9;
 import no.nav.k9.formidling.kontrakt.kodeverk.DokumentMalType;
@@ -20,6 +19,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
 import no.nav.k9.prosesstask.impl.ProsessTaskEventPubliserer;
 import no.nav.k9.prosesstask.impl.ProsessTaskRepositoryImpl;
+import no.nav.k9.prosesstask.impl.ProsessTaskTjenesteImpl;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -59,7 +59,7 @@ public class DokumentKafkaBestillerTest {
         behandling = scenario.getBehandling();
         dokumentKafkaBestiller = new DokumentKafkaBestiller(
             behandlingRepository,
-            prosessTaskRepository,
+            new ProsessTaskTjenesteImpl(prosessTaskRepository),
             brevHistorikkinnslag);
     }
 

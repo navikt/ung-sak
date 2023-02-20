@@ -6,7 +6,7 @@ import java.util.Objects;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
-
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
@@ -16,7 +16,6 @@ import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 /**
@@ -34,7 +33,7 @@ public class HistorikkInnslagForAksjonspunktEventObserver {
          * FIXME property vil være satt i produksjon, men ikke i tester. Uansett er løsningen ikke er god. Kan
          * heller bruker IdentType når det fikses.
          */
-        @KonfigVerdi(value = "systembruker.username", required = false) String systembruker) {
+                                                        @KonfigVerdi(value = "systembruker.username", required = false) String systembruker) {
         this.historikkRepository = historikkRepository;
         this.systembruker = systembruker;
     }
@@ -49,7 +48,7 @@ public class HistorikkInnslagForAksjonspunktEventObserver {
                 LocalDateTime frist = aksjonspunkt.getFristTid();
                 Venteårsak venteårsak = aksjonspunkt.getVenteårsak();
                 opprettHistorikkinnslagForVenteFristRelaterteInnslag(ktx.getBehandlingId(), ktx.getFagsakId(),
-                    HistorikkinnslagType.BEH_VENT, frist, venteårsak);
+                    HistorikkinnslagType.BEH_VENT, frist, venteårsak, aksjonspunkt.getVenteårsakVariant());
             }
         }
     }
@@ -58,7 +57,7 @@ public class HistorikkInnslagForAksjonspunktEventObserver {
                                                                       Long fagsakId,
                                                                       HistorikkinnslagType historikkinnslagType,
                                                                       LocalDateTime fristTid,
-                                                                      Venteårsak venteårsak) {
+                                                                      Venteårsak venteårsak, String venteårsakVariant) {
         HistorikkInnslagTekstBuilder builder = new HistorikkInnslagTekstBuilder();
         if (fristTid != null) {
             builder.medHendelse(historikkinnslagType, fristTid.toLocalDate());
@@ -67,6 +66,9 @@ public class HistorikkInnslagForAksjonspunktEventObserver {
         }
         if (venteårsak != null) {
             builder.medÅrsak(venteårsak);
+        }
+        if (venteårsakVariant != null) {
+            builder.medBegrunnelse(venteårsakVariant);
         }
         Historikkinnslag historikkinnslag = new Historikkinnslag();
         String brukerident = SubjectHandler.getSubjectHandler().getUid();
@@ -82,7 +84,7 @@ public class HistorikkInnslagForAksjonspunktEventObserver {
         for (Aksjonspunkt aksjonspunkt : aksjonspunkterFunnetEvent.getAksjonspunkter()) {
             BehandlingskontrollKontekst ktx = aksjonspunkterFunnetEvent.getKontekst();
             if (aksjonspunkt.erUtført() && aksjonspunkt.getFristTid() != null) {
-                opprettHistorikkinnslagForVenteFristRelaterteInnslag(ktx.getBehandlingId(), ktx.getFagsakId(), HistorikkinnslagType.BEH_GJEN, null, null);
+                opprettHistorikkinnslagForVenteFristRelaterteInnslag(ktx.getBehandlingId(), ktx.getFagsakId(), HistorikkinnslagType.BEH_GJEN, null, null, null);
             }
         }
     }

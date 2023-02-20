@@ -23,7 +23,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 @Dependent
 public class SøknadPerioderTjeneste {
 
-    private static final List<Brevkode> BREVKODER_SØKNAD = List.of(Brevkode.SØKNAD_UTBETALING_OMS, Brevkode.SØKNAD_UTBETALING_OMS_AT);
+    private static final List<Brevkode> BREVKODER_SØKNAD = List.of(Brevkode.SØKNAD_UTBETALING_OMS, Brevkode.SØKNAD_UTBETALING_OMS_AT, Brevkode.PAPIRSØKNAD_UTBETALING_OMS_AT);
     private static final List<Brevkode> BREVKODER_IM_KORRIGERING = List.of(Brevkode.FRAVÆRSKORRIGERING_IM_OMS);
 
     private MottatteDokumentRepository mottatteDokumentRepository;
@@ -37,8 +37,8 @@ public class SøknadPerioderTjeneste {
         this.grunnlagRepository = grunnlagRepository;
     }
 
-    public Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> hentSøktePerioderMedKravdokumentPåFagsak(BehandlingReferanse ref) {
-        var mottatteDokumenter = hentMottatteDokument(ref.getFagsakId());
+    public Map<KravDokument, List<SøktPeriode<OppgittFraværPeriode>>> hentSøktePerioderMedKravdokumentPåFagsak(Long fagsakId) {
+        var mottatteDokumenter = hentMottatteDokument(fagsakId);
         return tilSøktePerioderMedKravdokument(mottatteDokumenter);
     }
 

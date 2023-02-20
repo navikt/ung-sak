@@ -1,103 +1,128 @@
 package no.nav.k9.sak.domene.registerinnhenting.impl.startpunkt;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningGrunnlagDiff;
 import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
+import no.nav.k9.sak.typer.AktørId;
 
 @ApplicationScoped
-@GrunnlagRef("PersonInformasjon")
-@FagsakYtelseTypeRef("PSB")
-@FagsakYtelseTypeRef("PPN")
-@FagsakYtelseTypeRef("OMP")
-@FagsakYtelseTypeRef("FRISINN")
+@GrunnlagRef(PersonInformasjonEntitet.class)
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
+@FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
+@FagsakYtelseTypeRef(OMSORGSPENGER)
+@FagsakYtelseTypeRef(FRISINN)
 class StartpunktUtlederPersonopplysning implements EndringStartpunktUtleder {
 
     private final String source = this.getClass().getSimpleName();
     private PersonopplysningRepository personopplysningRepository;
+    private FagsakRepository fagsakRepository;
 
     StartpunktUtlederPersonopplysning() {
         // For CDI
     }
 
     @Inject
-    StartpunktUtlederPersonopplysning(PersonopplysningRepository personopplysningRepository) {
+    StartpunktUtlederPersonopplysning(PersonopplysningRepository personopplysningRepository,
+                                      FagsakRepository fagsakRepository) {
         this.personopplysningRepository = personopplysningRepository;
+        this.fagsakRepository = fagsakRepository;
     }
 
     @Override
-    public StartpunktType utledStartpunkt(BehandlingReferanse ref, Object grunnlagId1, Object grunnlagId2) {
-        PersonopplysningGrunnlagEntitet grunnlag1 = personopplysningRepository.hentPersonopplysningerPåId((Long) grunnlagId1);
-        PersonopplysningGrunnlagEntitet grunnlag2 = personopplysningRepository.hentPersonopplysningerPåId((Long) grunnlagId2);
-        return utled(ref, grunnlag1, grunnlag2);
+    public StartpunktType utledStartpunkt(BehandlingReferanse ref, Object oppdatertGrunnlagId, Object forrigeGrunnlagId) {
+        PersonopplysningGrunnlagEntitet oppdatertGrunnlag = personopplysningRepository.hentPersonopplysningerPåId((Long) oppdatertGrunnlagId);
+        PersonopplysningGrunnlagEntitet forrigeGrunnlag = personopplysningRepository.hentPersonopplysningerPåId((Long) forrigeGrunnlagId);
+        return utled(ref, oppdatertGrunnlag, forrigeGrunnlag);
     }
 
-    private StartpunktType utled(BehandlingReferanse ref, PersonopplysningGrunnlagEntitet grunnlag1, PersonopplysningGrunnlagEntitet grunnlag2) {
-
-        return hentAlleStartpunktForPersonopplysninger(ref, grunnlag1, grunnlag2).stream()
+    private StartpunktType utled(BehandlingReferanse ref, PersonopplysningGrunnlagEntitet oppdatertGrunnlag, PersonopplysningGrunnlagEntitet forrigeGrunnlag) {
+        return hentAlleStartpunktForPersonopplysninger(ref, oppdatertGrunnlag, forrigeGrunnlag).stream()
             .min(Comparator.comparing(StartpunktType::getRangering))
             .orElse(StartpunktType.UDEFINERT);
     }
 
     // Finn endringer per aggregat under grunnlaget og map dem mot startpunkt. Dekker bruker og TPS-relaterte personer (barn, ekte). Bør spisses der det er behov.
-    private List<StartpunktType> hentAlleStartpunktForPersonopplysninger(BehandlingReferanse ref, PersonopplysningGrunnlagEntitet grunnlag1, PersonopplysningGrunnlagEntitet grunnlag2) {
+    private List<StartpunktType> hentAlleStartpunktForPersonopplysninger(BehandlingReferanse ref, PersonopplysningGrunnlagEntitet oppdatertGrunnlag, PersonopplysningGrunnlagEntitet forrigeGrunnlag) {
         var aktørId = ref.getAktørId();
 
-        PersonopplysningGrunnlagDiff poDiff = new PersonopplysningGrunnlagDiff(aktørId, grunnlag1, grunnlag2);
+        PersonopplysningGrunnlagDiff poDiff = new PersonopplysningGrunnlagDiff(aktørId, oppdatertGrunnlag, forrigeGrunnlag);
         boolean forelderDødEndret = poDiff.erForeldreDødsdatoEndret();
         boolean personstatusEndret = poDiff.erPersonstatusEndretForSøkerFør(null);
         boolean personstatusUnntattDødEndret = personstatusUnntattDødEndret(personstatusEndret, forelderDødEndret);
 
         Set<StartpunktType> startpunkter = new LinkedHashSet<>();
         if (forelderDødEndret) {
-            FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.UTTAKSVILKÅR, "foreldres død", grunnlag1.getId(), grunnlag2.getId());
+            FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.UTTAKSVILKÅR, "foreldres død", oppdatertGrunnlag.getId(), håndtereNull(forrigeGrunnlag));
             startpunkter.add(StartpunktType.UTTAKSVILKÅR);
         }
         if (poDiff.erSivilstandEndretForBruker()) {
-            FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.UTTAKSVILKÅR, "sivilstand", grunnlag1.getId(), grunnlag2.getId());
+            FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.UTTAKSVILKÅR, "sivilstand", oppdatertGrunnlag.getId(), håndtereNull(forrigeGrunnlag));
             startpunkter.add(StartpunktType.UTTAKSVILKÅR);
         }
-        if (poDiff.erBarnDødsdatoEndret()) {
-            FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.BEREGNING, "barnets dødsdato", grunnlag1.getId(), grunnlag2.getId());
-            startpunkter.add(StartpunktType.UTTAKSVILKÅR);
+
+        if (Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN, FagsakYtelseType.OLP).contains(ref.getFagsakYtelseType())) {
+            Fagsak fagsak = fagsakRepository.finnEksaktFagsak(ref.getFagsakId());
+            AktørId pleietrengendeAktørId = fagsak.getPleietrengendeAktørId();
+            if (poDiff.erDødsdatoEndret(pleietrengendeAktørId)) {
+                FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.INNGANGSVILKÅR_MEDISINSK, "pletrengendes dødsdato", oppdatertGrunnlag.getId(), håndtereNull(forrigeGrunnlag));
+                startpunkter.add(StartpunktType.INNGANGSVILKÅR_MEDISINSK);
+            }
+        } else if (Set.of(FagsakYtelseType.OMP).contains(ref.getFagsakYtelseType())) {
+            if (poDiff.erBarnDødsdatoEndret()) {
+                FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.BEREGNING, "barnets dødsdato", oppdatertGrunnlag.getId(), håndtereNull(forrigeGrunnlag));
+                startpunkter.add(StartpunktType.UTTAKSVILKÅR);
+            }
         }
 
         final LocalDate skjæringstidspunkt = ref.getUtledetSkjæringstidspunkt();
         if (personstatusUnntattDødEndret) {
-            leggTilBasertPåSTP(grunnlag1.getId(), grunnlag2.getId(), startpunkter, poDiff.erPersonstatusEndretForSøkerFør(skjæringstidspunkt), "personstatus");
+            leggTilBasertPåSTP(oppdatertGrunnlag.getId(), håndtereNull(forrigeGrunnlag), startpunkter, poDiff.erPersonstatusEndretForSøkerFør(skjæringstidspunkt), "personstatus");
         }
-        if (!Objects.equals(FagsakYtelseType.PSB,ref.getFagsakYtelseType()) && poDiff.erAdresserEndretFør(null)) {
-            leggTilBasertPåSTP(grunnlag1.getId(), grunnlag2.getId(), startpunkter, poDiff.erSøkersAdresseEndretFør(skjæringstidspunkt), "adresse");
+        if (!Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN).contains(ref.getFagsakYtelseType()) && poDiff.erAdresserEndretFør(null)) {
+            leggTilBasertPåSTP(oppdatertGrunnlag.getId(), håndtereNull(forrigeGrunnlag), startpunkter, poDiff.erSøkersAdresseEndretFør(skjæringstidspunkt), "adresse");
         }
 
         if (poDiff.erRegionEndretForBruker()) {
-            FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.INNGANGSVILKÅR_MEDLEMSKAP, "region", grunnlag1.getId(), grunnlag2.getId());
+            FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.INNGANGSVILKÅR_MEDLEMSKAP, "region", oppdatertGrunnlag.getId(), håndtereNull(forrigeGrunnlag));
             startpunkter.add(StartpunktType.INNGANGSVILKÅR_MEDLEMSKAP);
         }
         if (poDiff.erRelasjonerEndret()) {
-            leggTilForRelasjoner(grunnlag1.getId(), grunnlag2.getId(), poDiff, startpunkter);
+            leggTilForRelasjoner(oppdatertGrunnlag.getId(), håndtereNull(forrigeGrunnlag), poDiff, startpunkter);
         }
         if (startpunkter.isEmpty()) {
             // Endringen som trigget utledning av startpunkt skal ikke styre startpunkt
-            FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.UDEFINERT, "personopplysning - andre endringer", grunnlag1.getId(), grunnlag2.getId());
+            FellesStartpunktUtlederLogger.loggEndringSomFørteTilStartpunkt(source, StartpunktType.UDEFINERT, "personopplysning - andre endringer", oppdatertGrunnlag.getId(), håndtereNull(forrigeGrunnlag));
             startpunkter.add(StartpunktType.UDEFINERT);
         }
         return List.copyOf(startpunkter);
+    }
+
+    private Long håndtereNull(PersonopplysningGrunnlagEntitet forrigeGrunnlag) {
+        return forrigeGrunnlag != null ? forrigeGrunnlag.getId() : null;
     }
 
     private void leggTilBasertPåSTP(Long g1Id, Long g2Id, Set<StartpunktType> startpunkter, boolean endretFørStp, String loggMelding) {

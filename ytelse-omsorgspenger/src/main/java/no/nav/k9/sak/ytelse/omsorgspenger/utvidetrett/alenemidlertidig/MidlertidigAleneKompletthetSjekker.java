@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.alenemidlertidig;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_MA;
+
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -13,7 +15,7 @@ import no.nav.k9.sak.kompletthet.Kompletthetsjekker;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 
 /** Kompletthetsjekk for midlertidig alene. forventer ingen vedlegg her foreløpig, så lar ikke ligge på vent. */
-@FagsakYtelseTypeRef("OMP_MA")
+@FagsakYtelseTypeRef(OMSORGSPENGER_MA)
 @BehandlingTypeRef
 @ApplicationScoped
 public class MidlertidigAleneKompletthetSjekker implements Kompletthetsjekker {

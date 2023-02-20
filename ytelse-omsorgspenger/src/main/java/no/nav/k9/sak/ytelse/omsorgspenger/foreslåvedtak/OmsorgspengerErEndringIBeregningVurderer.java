@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.foreslåvedtak;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -12,7 +14,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.behandling.steg.foreslåvedtak.ErEndringIBeregningVurderer;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 public class OmsorgspengerErEndringIBeregningVurderer implements ErEndringIBeregningVurderer {
 
     public OmsorgspengerErEndringIBeregningVurderer() {

@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
@@ -95,6 +94,10 @@ public class ProsessTriggereRepository {
             .orElse(null);
         var grunnlag2 = hentEksisterendeGrunnlagBasertPåGrunnlagId(grunnlagId2)
             .orElseThrow(() -> new IllegalStateException("id2 ikke kjent"));
+        return diff(kunSporedeEndringer, grunnlag1, grunnlag2);
+    }
+
+    DiffResult diff(boolean kunSporedeEndringer, ProsessTriggere grunnlag1, ProsessTriggere grunnlag2) {
         return new RegisterdataDiffsjekker(kunSporedeEndringer).getDiffEntity().diff(grunnlag1, grunnlag2);
     }
 }

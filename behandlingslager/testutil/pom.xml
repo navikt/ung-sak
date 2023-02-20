@@ -19,6 +19,7 @@
             <groupId>no.nav.k9.sak</groupId>
             <artifactId>behandlingslager-domene</artifactId>
         </dependency>
+        <!-- Greit å ha denne i produksjonsscope siden dette er en modul som benyttes i test -->
         <dependency>
             <groupId>no.nav.k9.felles</groupId>
             <artifactId>k9-felles-testutilities</artifactId>

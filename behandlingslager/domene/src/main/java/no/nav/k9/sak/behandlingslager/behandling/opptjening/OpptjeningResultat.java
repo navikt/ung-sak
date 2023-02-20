@@ -7,6 +7,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.Immutable;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,11 +20,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.Immutable;
-
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
@@ -28,7 +27,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 @Table(name = "RS_OPPTJENING")
 @DynamicInsert
 @DynamicUpdate
-public class  OpptjeningResultat extends BaseEntitet {
+public class OpptjeningResultat extends BaseEntitet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_RS_OPPTJENING")
@@ -115,7 +114,7 @@ public class  OpptjeningResultat extends BaseEntitet {
     }
 
     public Optional<Opptjening> finnOpptjening(LocalDate skjæringstidspunkt) {
-        return opptjeningPerioder.stream().filter(it -> it.getOpptjeningPeriode().getTomDato().plusDays(1).equals(skjæringstidspunkt)).findFirst();
+        return opptjeningPerioder.stream().filter(it -> it.getSkjæringstidspunkt().equals(skjæringstidspunkt)).findFirst();
     }
 
     @Override

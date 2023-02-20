@@ -15,12 +15,19 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.Where;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ColumnResult;
 import jakarta.persistence.ConstructorResult;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -34,13 +41,6 @@ import jakarta.persistence.SqlResultSetMapping;
 import jakarta.persistence.SqlResultSetMappings;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-
-import org.hibernate.annotations.BatchSize;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.NaturalId;
-import org.hibernate.annotations.Where;
-
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
@@ -120,7 +120,7 @@ public class Behandling extends BaseEntitet {
     @Column(name = "uuid")
     private UUID uuid;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "fagsak_id", nullable = false, updatable = false)
     private Fagsak fagsak;
 
@@ -331,7 +331,7 @@ public class Behandling extends BaseEntitet {
      * Marker behandling som avsluttet.
      */
     public void avsluttBehandling() {
-        getAksjonspunkterStream().filter(a -> a.erÅpentAksjonspunkt()).forEach(a -> a.avbryt());
+        getAksjonspunkterStream().filter(Aksjonspunkt::erÅpentAksjonspunkt).forEach(Aksjonspunkt::avbryt);
 
         lukkBehandlingStegStatuser(this.behandlingStegTilstander, BehandlingStegStatus.UTFØRT);
         this.status = BehandlingStatus.AVSLUTTET;
@@ -368,7 +368,7 @@ public class Behandling extends BaseEntitet {
     public Optional<BehandlingStegTilstand> getBehandlingStegTilstand() {
         List<BehandlingStegTilstand> tilstander = behandlingStegTilstander.stream()
             .filter(t -> !BehandlingStegStatus.erSluttStatus(t.getBehandlingStegStatus()))
-            .collect(Collectors.toList());
+            .toList();
         if (tilstander.size() > 1) {
             throw new IllegalStateException("Utvikler-feil: Kan ikke ha flere steg samtidig åpne: " + tilstander); //$NON-NLS-1$
         }
@@ -385,14 +385,14 @@ public class Behandling extends BaseEntitet {
         }
 
         // tar nyeste.
-        return behandlingStegTilstander.stream().sorted(COMP_DESC_TID).findFirst();
+        return behandlingStegTilstander.stream().min(COMP_DESC_TID);
     }
 
     public Optional<BehandlingStegTilstand> getBehandlingStegTilstand(BehandlingStegType stegType) {
         List<BehandlingStegTilstand> tilstander = behandlingStegTilstander.stream()
             .filter(t -> !BehandlingStegStatus.erSluttStatus(t.getBehandlingStegStatus())
                 && Objects.equals(stegType, t.getBehandlingSteg()))
-            .collect(Collectors.toList());
+            .toList();
         if (tilstander.size() > 1) {
             throw new IllegalStateException(
                 "Utvikler-feil: Kan ikke ha flere steg samtidig åpne for stegType[" + stegType + "]: " + tilstander); //$NON-NLS-1$ //$NON-NLS-2$

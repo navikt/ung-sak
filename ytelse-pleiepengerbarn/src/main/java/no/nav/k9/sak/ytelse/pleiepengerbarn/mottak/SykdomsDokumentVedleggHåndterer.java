@@ -28,28 +28,32 @@ import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.MapTilBrevkode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokument;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentInformasjon;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomDokumentRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PersonRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokument;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentInformasjon;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.SykdomVurderingRepository;
 
 @Dependent
 public class SykdomsDokumentVedleggHåndterer {
 
     private static final Logger log = LoggerFactory.getLogger(SykdomsDokumentVedleggHåndterer.class);
 
-    private SykdomDokumentRepository sykdomDokumentRepository;
+    private PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
     private SykdomVurderingRepository sykdomVurderingRepository;
+    private PersonRepository personRepository;
     private SafTjeneste safTjeneste;
     private Instance<MapTilBrevkode> brevkodeMappere;
 
     @Inject
-    public SykdomsDokumentVedleggHåndterer(SykdomDokumentRepository sykdomDokumentRepository,
+    public SykdomsDokumentVedleggHåndterer(PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository,
                                            SykdomVurderingRepository sykdomVurderingRepository,
+                                           PersonRepository personRepository,
                                            SafTjeneste safTjeneste,
                                            @Any Instance<MapTilBrevkode> brevkodeMappere) {
         this.safTjeneste = safTjeneste;
-        this.sykdomDokumentRepository = sykdomDokumentRepository;
+        this.pleietrengendeSykdomDokumentRepository = pleietrengendeSykdomDokumentRepository;
+        this.personRepository = personRepository;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
         this.brevkodeMappere = brevkodeMappere;
     }
@@ -87,7 +91,7 @@ public class SykdomsDokumentVedleggHåndterer {
                 continue;
             }
 
-            if (sykdomDokumentRepository.finnesSykdomDokument(journalpostId, dokumentInfo.getDokumentInfoId())) {
+            if (pleietrengendeSykdomDokumentRepository.finnesSykdomDokument(journalpostId, dokumentInfo.getDokumentInfoId())) {
                 log.warn("Tidligere innsendt dokument har blitt sendt inn på nytt -- dette skyldes trolig feil hos avsender. Journalpost: " + journalpostId + ", DokumentInfo: " + dokumentInfo.getDokumentInfoId());
                 continue;
             }
@@ -98,7 +102,7 @@ public class SykdomsDokumentVedleggHåndterer {
             final SykdomDokumentType type = (erDigitalPleiepengerSyktBarnSøknad || !harMedisinskeOpplysninger) ? SykdomDokumentType.ANNET : SykdomDokumentType.UKLASSIFISERT;
             boolean skalAutodateres = erDigitalPleiepengerSyktBarnSøknad || type == SykdomDokumentType.ANNET;
             final LocalDate datert = skalAutodateres ? mottattDato.toLocalDate() : null;
-            final SykdomDokumentInformasjon informasjon = new SykdomDokumentInformasjon(
+            final PleietrengendeSykdomDokumentInformasjon informasjon = new PleietrengendeSykdomDokumentInformasjon(
                 type,
                 harInfoSomIkkeKanPunsjes,
                 datert,
@@ -106,16 +110,16 @@ public class SykdomsDokumentVedleggHåndterer {
                 0L,
                 "VL",
                 mottattidspunkt);
-            final SykdomDokument dokument = new SykdomDokument(
+            final PleietrengendeSykdomDokument dokument = new PleietrengendeSykdomDokument(
                 journalpostId,
                 dokumentInfo.getDokumentInfoId(),
                 informasjon,
                 behandling.getUuid(),
                 behandling.getFagsak().getSaksnummer(),
-                sykdomVurderingRepository.hentEllerLagrePerson(behandling.getFagsak().getAktørId()),
+                personRepository.hentEllerLagrePerson(behandling.getFagsak().getAktørId()),
                 "VL",
                 mottattidspunkt);
-            sykdomDokumentRepository.lagre(dokument, pleietrengendeAktørId);
+            pleietrengendeSykdomDokumentRepository.lagre(dokument, pleietrengendeAktørId);
 
             hoveddokument = false;
         }

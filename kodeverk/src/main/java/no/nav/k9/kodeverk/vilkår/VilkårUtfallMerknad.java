@@ -56,6 +56,12 @@ public enum VilkårUtfallMerknad implements Kodeverdi {
     VM_1069("1069", "Ikke behov for kontinuerlig pleie."),
     VM_1071("1071", "Ikke dokumentert omsorgen for."),
 
+    VM_1080("1080", "Pleietrengende innlagt i stedet for hjemme."),
+    VM_1081("1081", "Ikke i livets sluttfase."),
+
+    VM_1101("1101", "Ikke nødvendig for omsorgen av pleietrengende"),
+    VM_1102("1102", "Institusjonen er ikke godkjent"),
+
     VM_5007("5007", "søknadsfristvilkåret"),
 
     VM_7001("7001", "Søker ikke oppfylt opplysningsplikten jf folketrygdloven §§ 21-7 og 21-3"),
@@ -63,13 +69,16 @@ public enum VilkårUtfallMerknad implements Kodeverdi {
     VM_7003("7003", "Søker er medmor (foreldre2) og har søkt på vegne av seg selv"),
     VM_7004("7004", "Søker er far og har søkt på vegne av seg selv"),
     VM_7006("7006", "Venter på opptjeningsopplysninger"),
-    VM_7847_A("7847A", "Midlertidig inaktiv jf folketrygdloven §§ 8-47"),
-    VM_7847_B("7847B", "Midlertidig inaktiv jf folketrygdloven §§ 8-47"),
+    VM_7847_A("7847A", "Midlertidig inaktiv jf folketrygdloven §§ 8-47 A"),
+    VM_7847_B("7847B", "Midlertidig inaktiv jf folketrygdloven §§ 8-47 B"),
 
     VM_8000("8000", "søkt frilans uten frilansinntekt"),
     VM_8001("8001", "avkortet grunnet annen inntekt"),
     VM_8002("8002", "ingen stønadsdager i søknadsperioden"),
 
+    VM_9002("9002", "Kan ikke automatisk innvilge omsorgen for vilkåret"),
+    VM_9013("9013", "Kan ikke automatisk innvilge alene om omsorgen vilkåret"),
+    VM_9015("9015", "Kan ikke automatisk innvilge aldersvilkåret for barn"),
 
     UDEFINERT("-", "Ikke definert"),
 

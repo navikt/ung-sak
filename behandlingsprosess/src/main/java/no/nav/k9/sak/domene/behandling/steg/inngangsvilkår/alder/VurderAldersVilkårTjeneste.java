@@ -10,29 +10,26 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public class VurderAldersVilkårTjeneste {
 
-    public void vurderPerioder(VilkårBuilder vilkårBuilder, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, LocalDate fødselsdato, LocalDate dødsdato) {
-        var maksdato = fødselsdato.plusYears(70);
-        if (dødsdato != null && maksdato.isAfter(dødsdato)) {
-            maksdato = dødsdato;
-        }
-        var regelInput = "{ 'fødselsdato': '" + fødselsdato + ", 'dødsdato': '" + dødsdato + "', ', 'maksdato': '" + maksdato + "' }";
+    public void vurderPerioder(VilkårBuilder vilkårBuilder, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, LocalDate fødselsdato) {
+        var maksdato = fødselsdato.plusYears(70).minusDays(1);
+        var regelInput = "{ 'fødselsdato': '" + fødselsdato + "', ', 'maksdato': '" + maksdato + "' }";
 
         for (DatoIntervallEntitet periode : perioderTilVurdering) {
-            vurderPeriode(vilkårBuilder, maksdato, dødsdato, regelInput, periode);
+            vurderPeriode(vilkårBuilder, maksdato, regelInput, periode);
         }
     }
 
-    private void vurderPeriode(VilkårBuilder vilkårBuilder, LocalDate maksdato, LocalDate dødsdato, String regelInput, DatoIntervallEntitet periode) {
-        if (periode.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(maksdato, maksdato)) && !periode.getFomDato().equals(maksdato)) {
-            var builder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), maksdato.minusDays(1)));
+    private void vurderPeriode(VilkårBuilder vilkårBuilder, LocalDate maksdato, String regelInput, DatoIntervallEntitet periode) {
+        if (periode.inkluderer(maksdato) && !periode.getFomDato().equals(maksdato)) {
+            var builder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), maksdato));
             builder.medUtfall(Utfall.OPPFYLT)
                 .medRegelInput(regelInput);
 
             vilkårBuilder.leggTil(builder);
 
-            builder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(maksdato, periode.getTomDato()));
+            builder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(maksdato.plusDays(1), periode.getTomDato()));
             builder.medUtfall(Utfall.IKKE_OPPFYLT)
-                .medAvslagsårsak(utledAvslagsårsak(maksdato, dødsdato))
+                .medAvslagsårsak(Avslagsårsak.SØKER_OVER_HØYESTE_ALDER)
                 .medRegelInput(regelInput);
 
             vilkårBuilder.leggTil(builder);
@@ -41,7 +38,7 @@ public class VurderAldersVilkårTjeneste {
             var builder = vilkårBuilder.hentBuilderFor(periode);
             if (periode.getFomDato().isAfter(maksdato) || periode.getFomDato().isEqual(maksdato)) {
                 builder.medUtfall(Utfall.IKKE_OPPFYLT)
-                    .medAvslagsårsak(utledAvslagsårsak(maksdato, dødsdato))
+                    .medAvslagsårsak(Avslagsårsak.SØKER_OVER_HØYESTE_ALDER)
                     .medRegelInput(regelInput);
             } else {
                 builder.medUtfall(Utfall.OPPFYLT)
@@ -51,13 +48,4 @@ public class VurderAldersVilkårTjeneste {
         }
     }
 
-    private Avslagsårsak utledAvslagsårsak(LocalDate maksdato, LocalDate dødsdato) {
-        if (dødsdato == null) {
-            return Avslagsårsak.SØKER_OVER_HØYESTE_ALDER;
-        }
-        if (maksdato.isBefore(dødsdato)) {
-            return Avslagsårsak.SØKER_OVER_HØYESTE_ALDER;
-        }
-        return Avslagsårsak.SØKER_HAR_AVGÅTT_MED_DØDEN;
-    }
 }

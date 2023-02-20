@@ -19,6 +19,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Stereotype;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.enterprise.util.AnnotationLiteral;
+import jakarta.enterprise.util.Nonbinding;
 import jakarta.inject.Qualifier;
 
 import no.nav.k9.kodeverk.behandling.BehandlingType;
@@ -48,28 +49,28 @@ public @interface BehandlingTypeRef {
      *
      * @see no.nav.k9.kodeverk.behandling.BehandlingType
      */
-    String value() default "*";
+    BehandlingType value() default BehandlingType.UDEFINERT;
 
     /** AnnotationLiteral som kan brukes ved CDI søk. */
     public static class BehandlingTypeRefLiteral extends AnnotationLiteral<BehandlingTypeRef> implements BehandlingTypeRef {
 
-        private String navn;
+        private BehandlingType behandlingType;
 
         public BehandlingTypeRefLiteral() {
-            this.navn = "*";
+            this.behandlingType = BehandlingType.UDEFINERT;
         }
 
-        public BehandlingTypeRefLiteral(String navn) {
-            this.navn = navn;
-        }
-
-        public BehandlingTypeRefLiteral(BehandlingType ytelseType) {
-            this.navn = (ytelseType == null ? "*" : ytelseType.getKode());
+        public BehandlingTypeRefLiteral(BehandlingType behandlingType) {
+            if (behandlingType == null ) {
+                this.behandlingType = BehandlingType.UDEFINERT;
+            } else {
+                this.behandlingType = behandlingType;
+            }
         }
 
         @Override
-        public String value() {
-            return navn;
+        public BehandlingType value() {
+            return behandlingType;
         }
     }
 
@@ -79,46 +80,36 @@ public @interface BehandlingTypeRef {
         private Lookup() {
         }
 
-        public static <I> Optional<I> find(Class<I> cls, String ytelseTypeKode, String behandlingType) {
-            return find(cls, (CDI<I>) CDI.current(), ytelseTypeKode, behandlingType);
-        }
-
         public static <I> Optional<I> find(Class<I> cls, FagsakYtelseType ytelseTypeKode, BehandlingType behandlingType) {
             return find(cls, (CDI<I>) CDI.current(), ytelseTypeKode, behandlingType);
         }
 
-        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, FagsakYtelseType ytelseTypeKode, BehandlingType behandlingType) {
-            return find(cls, instances,
-                ytelseTypeKode == null ? null : ytelseTypeKode.getKode(),
-                behandlingType == null ? null : behandlingType.getKode());
-        }
-
         public static <I> I get(Class<I> cls, Instance<I> instances, FagsakYtelseType ytelseType, BehandlingType behandlingType) {
             var result = find(cls, instances,
-                ytelseType == null ? null : ytelseType.getKode(),
-                behandlingType == null ? null : behandlingType.getKode());
+                ytelseType,
+                behandlingType);
 
             return result.orElseThrow(
                 () -> new UnsupportedOperationException("Har ikke " + cls.getSimpleName() + " for ytelseType=" + ytelseType + ", behandlingType=" + behandlingType + ", blant:" + instances));
         }
 
-        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, String fagsakYtelseType, String behandlingType) { // NOSONAR
+        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, FagsakYtelseType fagsakYtelseType, BehandlingType behandlingType) { // NOSONAR
             Objects.requireNonNull(instances, "instances");
 
-            for (var fagsakLiteral : coalesce(fagsakYtelseType, "*")) {
+            for (var fagsakLiteral : coalesce(fagsakYtelseType, FagsakYtelseType.UDEFINERT)) {
                 var inst = select(cls, instances, new FagsakYtelseTypeRefLiteral(fagsakLiteral));
 
                 if (inst.isUnsatisfied()) {
                     continue;
                 } else {
-                    for (var behandlingLiteral : coalesce(behandlingType, "*")) {
-                        var binst = select(cls, inst, new BehandlingTypeRefLiteral(behandlingLiteral));
+                    for (var behandlingtypeLiteral : coalesce(behandlingType, BehandlingType.UDEFINERT)) {
+                        var binst = select(cls, inst, new BehandlingTypeRefLiteral(behandlingtypeLiteral));
                         if (binst.isResolvable()) {
                             return Optional.of(getInstance(binst));
                         } else {
                             if (binst.isAmbiguous()) {
                                 throw new IllegalStateException(
-                                    "Har flere matchende instanser for klasse : " + cls.getName() + ", fagsakType=" + fagsakLiteral + ", behandlingType=" + behandlingLiteral + ", instanser=" + binst);
+                                    "Har flere matchende instanser for klasse : " + cls.getName() + ", fagsakType=" + fagsakLiteral + ", behandlingType=" + behandlingType + ", instanser=" + binst);
                             }
                         }
                     }
@@ -136,7 +127,7 @@ public @interface BehandlingTypeRef {
             return i;
         }
 
-        private static List<String> coalesce(String... vals) {
+        private static <T> List<T> coalesce(T... vals) {
             return Arrays.stream(vals).filter(Objects::nonNull).distinct().collect(Collectors.toList());
         }
 

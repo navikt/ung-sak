@@ -54,7 +54,7 @@ public class AvklarArbeidsforholdOppdaterer implements AksjonspunktOppdaterer<Av
 
         List<AvklarArbeidsforholdDto> arbeidsforhold = avklarArbeidsforholdDto.getArbeidsforhold();
         if (arbeidsforhold.isEmpty()) {
-            return OppdateringResultat.utenTransisjon().build();
+            return OppdateringResultat.builder().build();
         }
         var grunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(param.getBehandlingId());
         var informasjonBuilder = arbeidsforholdTjeneste.opprettBuilderFor(behandlingId);
@@ -76,7 +76,7 @@ public class AvklarArbeidsforholdOppdaterer implements AksjonspunktOppdaterer<Av
         // krever totrinn hvis saksbehandler har tatt stilling til dette aksjonspunktet
         arbeidsforholdTjeneste.lagre(param.getBehandlingId(), param.getAktørId(), informasjonBuilder);
 
-        return OppdateringResultat.utenTransisjon().build();
+        return OppdateringResultat.builder().build();
     }
 
     private boolean harVærtHåndtertVedAksjonspunktFør(no.nav.k9.sak.kontrakt.arbeidsforhold.InntektArbeidYtelseArbeidsforholdV2Dto it) {

@@ -32,7 +32,7 @@ class BeregningsgrunnlagPerioder extends BaseEntitet {
     private Long id;
 
     @Immutable
-    @JoinColumn(name = "bg_grunnlag_id", nullable = false, updatable = false)
+    @JoinColumn(name = "bg_grunnlag_id", nullable = false, updatable = false )
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     private List<BeregningsgrunnlagPeriode> grunnlagPerioder = new ArrayList<>();
 

@@ -7,9 +7,7 @@ import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.UttakRestKlient;
-import no.nav.pleiepengerbarn.uttak.kontrakter.EndrePerioderGrunnlag;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Simulering;
-import no.nav.pleiepengerbarn.uttak.kontrakter.Simuleringsgrunnlag;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
@@ -35,18 +33,8 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
     }
 
     @Override
-    public Simulering simulerUttaksplanV2(Simuleringsgrunnlag request) {
-        return restKlient.simulerUttaksplanV2(request);
-    }
-
-    @Override
     public Uttaksplan opprettUttaksplan(Uttaksgrunnlag request) {
         return restKlient.opprettUttaksplan(request);
-    }
-
-    @Override
-    public Uttaksplan endreUttaksplan(EndrePerioderGrunnlag request) {
-        return restKlient.endreUttaksplan(request);
     }
 
     @Override

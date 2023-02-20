@@ -64,6 +64,11 @@
             <artifactId>formidling-kontrakt-jakarta</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>no.nav.k9.felles.integrasjon</groupId>
+            <artifactId>k9-kafka-klient</artifactId>
+        </dependency>
+
         <!-- Test -->
 		<dependency>
 			<groupId>no.nav.k9.sak</groupId>

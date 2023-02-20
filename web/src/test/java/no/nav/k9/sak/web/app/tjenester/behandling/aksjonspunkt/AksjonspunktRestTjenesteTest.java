@@ -12,16 +12,22 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 
+import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
+import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftedeAksjonspunkterDto;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
@@ -30,7 +36,9 @@ import no.nav.k9.sak.kontrakt.vedtak.AksjonspunktGodkjenningDto;
 import no.nav.k9.sak.kontrakt.vedtak.FatterVedtakAksjonspunktDto;
 import no.nav.k9.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.k9.felles.exception.FunksjonellException;
+import no.nav.k9.sak.typer.AktørId;
 
+@ExtendWith(CdiAwareExtension.class)
 public class AksjonspunktRestTjenesteTest {
 
     private static final long behandlingId = 1L;
@@ -39,6 +47,8 @@ public class AksjonspunktRestTjenesteTest {
     private AksjonspunktRestTjeneste aksjonspunktRestTjeneste;
     private AksjonspunktApplikasjonTjeneste aksjonspunktApplikasjonTjenesteMock = mock(AksjonspunktApplikasjonTjeneste.class);
     private BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjenesteMock = mock(BehandlingsutredningApplikasjonTjeneste.class);
+    private BehandlingskontrollTjeneste behandlingskontrollTjenesteMock = mock(BehandlingskontrollTjeneste.class);
+    private BehandlingskontrollKontekst behandlingskontrollKontekst = new BehandlingskontrollKontekst(3L, new AktørId(4L), new BehandlingLås(behandlingId));
     private BehandlingRepository behandlingRepository = mock(BehandlingRepository.class);
     private Behandling behandling = mock(Behandling.class);
     private TotrinnTjeneste totrinnTjeneste = mock(TotrinnTjeneste.class);
@@ -49,10 +59,13 @@ public class AksjonspunktRestTjenesteTest {
         when(behandlingRepository.hentBehandling(anyLong())).thenReturn(behandling);
         when(behandlingRepository.hentBehandling(any(UUID.class))).thenReturn(behandling);
         when(behandling.getStatus()).thenReturn(no.nav.k9.kodeverk.behandling.BehandlingStatus.OPPRETTET);
-        doNothing().when(behandlingsutredningApplikasjonTjenesteMock).kanEndreBehandling(anyLong(), anyLong());
-        aksjonspunktRestTjeneste = new AksjonspunktRestTjeneste(aksjonspunktApplikasjonTjenesteMock, behandlingRepository,
-            behandlingsutredningApplikasjonTjenesteMock, totrinnTjeneste);
 
+        when(behandlingskontrollTjenesteMock.initBehandlingskontroll(anyLong())).thenReturn(behandlingskontrollKontekst);
+
+        doNothing().when(behandlingsutredningApplikasjonTjenesteMock).kanEndreBehandling(anyLong(), anyLong());
+
+        aksjonspunktRestTjeneste = new AksjonspunktRestTjeneste(aksjonspunktApplikasjonTjenesteMock, behandlingRepository,
+            behandlingsutredningApplikasjonTjenesteMock, behandlingskontrollTjenesteMock, totrinnTjeneste);
     }
 
     @SuppressWarnings("resource")
@@ -70,7 +83,7 @@ public class AksjonspunktRestTjenesteTest {
 
         aksjonspunktRestTjeneste.bekreft(mock(HttpServletRequest.class), BekreftedeAksjonspunkterDto.lagDto(behandlingId, behandlingVersjon, aksjonspunkt));
 
-        verify(aksjonspunktApplikasjonTjenesteMock).bekreftAksjonspunkter(ArgumentMatchers.anyCollection(), anyLong());
+        verify(aksjonspunktApplikasjonTjenesteMock).bekreftAksjonspunkter(ArgumentMatchers.anyCollection(), anyLong(), any(BehandlingskontrollKontekst.class));
     }
 
     @SuppressWarnings("resource")

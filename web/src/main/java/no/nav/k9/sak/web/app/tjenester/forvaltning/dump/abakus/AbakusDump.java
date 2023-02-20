@@ -1,16 +1,21 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.dump.abakus;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import com.fasterxml.jackson.databind.ObjectWriter;
 
-import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import no.nav.abakus.iaygrunnlag.JsonObjectMapper;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -19,12 +24,14 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OMP")
-@FagsakYtelseTypeRef("PSB")
-@FagsakYtelseTypeRef("FRISINN")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
+@FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
+@FagsakYtelseTypeRef(FRISINN)
 public class AbakusDump implements DebugDumpBehandling, DebugDumpFagsak {
 
-    private final ObjectWriter iayMapper = IayGrunnlagJsonMapper.getMapper().writerWithDefaultPrettyPrinter();
+    private final ObjectWriter iayMapper = JsonObjectMapper.getMapper().writerWithDefaultPrettyPrinter();
     private AbakusTjenesteAdapter tjeneste;
 
     AbakusDump() {

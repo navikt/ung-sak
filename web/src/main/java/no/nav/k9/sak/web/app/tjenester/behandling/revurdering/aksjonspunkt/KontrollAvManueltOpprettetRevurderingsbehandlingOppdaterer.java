@@ -15,7 +15,7 @@ class KontrollAvManueltOpprettetRevurderingsbehandlingOppdaterer implements Aksj
 
     @Override
     public OppdateringResultat oppdater(KontrollAvManueltOpprettetRevurderingsbehandlingDto dto, AksjonspunktOppdaterParameter param) {
-        return OppdateringResultat.utenOverhopp();
+        return OppdateringResultat.nyttResultat();
     }
 
 }

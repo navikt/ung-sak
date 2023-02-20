@@ -8,10 +8,9 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.abakus.iaygrunnlag.request.Dataset;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.typer.AktørId;
 
@@ -21,18 +20,12 @@ import no.nav.k9.sak.typer.AktørId;
 @Dependent
 public class AsyncInntektArbeidYtelseTjeneste {
 
-    public static enum OpptjeningType {
-        NORMAL,
-        NORMAL_AGGREGAT,
-        OVERSTYRT,
-    }
-
-    private ProsessTaskRepository prosessTaskRepository;
+    private ProsessTaskTjeneste prosessTaskRepository;
     private BehandlingRepository behandlingRepository;
 
     @Inject
     public AsyncInntektArbeidYtelseTjeneste(BehandlingRepository behandlingRepository,
-                                            ProsessTaskRepository prosessTaskRepository) {
+                                            ProsessTaskTjeneste prosessTaskRepository) {
         this.behandlingRepository = behandlingRepository;
         this.prosessTaskRepository = prosessTaskRepository;
     }
@@ -45,7 +38,7 @@ public class AsyncInntektArbeidYtelseTjeneste {
         AktørId aktørId = behandling.getAktørId();
         var saksnummer = behandling.getFagsak().getSaksnummer();
 
-        var enkeltTask = new ProsessTaskData(AsyncAbakusKopierGrunnlagTask.TASKTYPE);
+        var enkeltTask = ProsessTaskData.forProsessTask(AsyncAbakusKopierGrunnlagTask.class);
         enkeltTask.setCallIdFraEksisterende();
         enkeltTask.setBehandling(behandling.getFagsakId(), targetBehandlingId, aktørId.getId());
         enkeltTask.setSaksnummer(saksnummer.getVerdi());

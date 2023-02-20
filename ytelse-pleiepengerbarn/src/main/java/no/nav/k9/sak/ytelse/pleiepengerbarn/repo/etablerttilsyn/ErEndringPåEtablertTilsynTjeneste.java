@@ -1,29 +1,32 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
+import java.util.TreeSet;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagService;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagTjeneste;
 
 @Dependent
 public class ErEndringPåEtablertTilsynTjeneste {
 
     private EtablertTilsynTjeneste etablertTilsynTjeneste;
-    private SykdomGrunnlagService sykdomGrunnlagService;
+    private MedisinskGrunnlagTjeneste medisinskGrunnlagTjeneste;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
 
     @Inject
     public ErEndringPåEtablertTilsynTjeneste(EtablertTilsynTjeneste etablertTilsynTjeneste,
-                                             SykdomGrunnlagService sykdomGrunnlagService,
-                                             @FagsakYtelseTypeRef("PSB") @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
+                                             MedisinskGrunnlagTjeneste medisinskGrunnlagTjeneste,
+                                             @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
         this.etablertTilsynTjeneste = etablertTilsynTjeneste;
-        this.sykdomGrunnlagService = sykdomGrunnlagService;
+        this.medisinskGrunnlagTjeneste = medisinskGrunnlagTjeneste;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
     }
 
@@ -48,9 +51,9 @@ public class ErEndringPåEtablertTilsynTjeneste {
     }
 
     private LocalDateTimeline<Boolean> endringerFra(BehandlingReferanse referanse, LocalDateTimeline<Boolean> resultat) {
-        resultat = SykdomUtils.kunPerioderSomIkkeFinnesI(resultat, SykdomUtils.toLocalDateTimeline(sykdomGrunnlagService.hentManglendeOmsorgenForPerioder(referanse.getBehandlingId())));
+        resultat = TidslinjeUtil.kunPerioderSomIkkeFinnesI(resultat, TidslinjeUtil.tilTidslinjeKomprimert(new TreeSet<>(medisinskGrunnlagTjeneste.hentManglendeOmsorgenForPerioder(referanse.getBehandlingId()))));
         //resultat = SykdomUtils.kunPerioderSomIkkeFinnesI(resultat, SykdomUtils.toLocalDateTimeline(utled(referanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR)));
-        resultat = resultat.intersection(SykdomUtils.toLocalDateTimeline(perioderTilVurderingTjeneste.utledFullstendigePerioder(referanse.getBehandlingId())));
+        resultat = resultat.intersection(TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurderingTjeneste.utledFullstendigePerioder(referanse.getBehandlingId())));
         return resultat;
     }
 }

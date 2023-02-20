@@ -59,6 +59,10 @@ public class SakInfotrygdMigrering extends BaseEntitet {
         return skjæringstidspunkt;
     }
 
+    public Boolean getAktiv() {
+        return aktiv;
+    }
+
     public void setSkjæringstidspunkt(LocalDate skjæringstidspunkt) {
         this.skjæringstidspunkt = skjæringstidspunkt;
     }

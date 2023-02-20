@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.kronisksyk;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS;
+
 import java.util.Collection;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -30,7 +32,7 @@ import no.nav.k9.søknad.felles.type.Språk;
 import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerKroniskSyktBarn;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef("OMP_KS")
+@FagsakYtelseTypeRef(OMSORGSPENGER_KS)
 @DokumentGruppeRef(Brevkode.SØKNAD_OMS_UTVIDETRETT_KS_KODE)
 public class DokumentmottakerSøknadUtvidetRettKroniskSyk implements Dokumentmottaker {
 

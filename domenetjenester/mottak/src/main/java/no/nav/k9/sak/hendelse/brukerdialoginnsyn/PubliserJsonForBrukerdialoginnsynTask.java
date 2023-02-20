@@ -20,10 +20,10 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 public class PubliserJsonForBrukerdialoginnsynTask implements ProsessTaskHandler {
     public static final String TASKTYPE = "brukerdialoginnsyn.publiserJson";
     private static final Logger logger = LoggerFactory.getLogger(PubliserJsonForBrukerdialoginnsynTask.class);
-    
+
     private BrukerdialoginnsynMeldingProducer meldingProducer;
 
-    
+
     public PubliserJsonForBrukerdialoginnsynTask() {}
 
     @Inject
@@ -31,23 +31,23 @@ public class PubliserJsonForBrukerdialoginnsynTask implements ProsessTaskHandler
         this.meldingProducer = meldingProducer;
     }
 
-    
+
     @Override
     public void doTask(ProsessTaskData pd) {
         final String key = Objects.requireNonNull(pd.getSaksnummer());
         final String json = pd.getPayloadAsString();
-                
+
         logger.info("Publiserer JSON-hendelse til brukerdialoginnsyn. Key: '{}'", key);
 
         meldingProducer.send(key, json);
     }
-    
-    
+
+
     public static ProsessTaskData createProsessTaskData(Behandling behandling, String json) {
         Objects.requireNonNull(behandling);
         Objects.requireNonNull(json);
-        
-        final ProsessTaskData pd = new ProsessTaskData(PubliserJsonForBrukerdialoginnsynTask.TASKTYPE);
+
+        final ProsessTaskData pd =  ProsessTaskData.forProsessTask(PubliserJsonForBrukerdialoginnsynTask.class);
         final Fagsak fagsak = behandling.getFagsak();
         final String saksnummer = fagsak.getSaksnummer().getVerdi();
         final String gruppe = PubliserJsonForBrukerdialoginnsynTask.TASKTYPE + "-" + saksnummer;
@@ -57,10 +57,10 @@ public class PubliserJsonForBrukerdialoginnsynTask implements ProsessTaskHandler
         pd.setAktørId(fagsak.getAktørId().getId());
         pd.setPayload(json);
         pd.setCallIdFraEksisterende();
-        
+
         return pd;
     }
-    
+
     static String lagSekvensnummer(Behandling behandling) {
         // Sekvensnummeret bør la seg sortere slik at meldingene blir sendt (når det er mulig) i riktig rekkefølge.
         int antallSiffer = 10; // et vilkårlig antall siffer som er stort nok til å holde på et versjonsnummer
@@ -68,7 +68,7 @@ public class PubliserJsonForBrukerdialoginnsynTask implements ProsessTaskHandler
         String sekvensnummerBehandling = tallMedPrefiks(behandling.getVersjon(), antallSiffer);
         return String.format("%s-%s", sekvensnummerFagsak, sekvensnummerBehandling);
     }
-    
+
     private static String tallMedPrefiks(long versjon, int antallSiffer) {
         if (Long.toString(versjon).length() > antallSiffer) {
             throw new IllegalArgumentException("Versjonsnummeret er for stort");

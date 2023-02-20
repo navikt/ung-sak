@@ -3,25 +3,23 @@ package no.nav.k9.sak.behandling.revurdering.etterkontroll.tjeneste;
 import java.time.Period;
 import java.util.List;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import no.nav.k9.felles.log.mdc.MDCOperations;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandling.revurdering.etterkontroll.EtterkontrollRepository;
 import no.nav.k9.sak.behandling.revurdering.etterkontroll.task.AutomatiskEtterkontrollTask;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
-import no.nav.k9.prosesstask.api.TaskStatus;
-import no.nav.k9.felles.log.mdc.MDCOperations;
 
 @ApplicationScoped
 public class AutomatiskEtterkontrollTjeneste {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(AutomatiskEtterkontrollTjeneste.class);
 
-    private ProsessTaskRepository prosessTaskRepository;
-    private Period etterkontrollTidTilbake = Period.parse("P0D"); // Er allerede satt 60D fram i EK-repo
+    private ProsessTaskTjeneste prosessTaskRepository;
+    private final Period etterkontrollTidTilbake = Period.parse("P0D"); // Er allerede satt 60D fram i EK-repo
     private EtterkontrollRepository etterkontrollRepository;
 
     AutomatiskEtterkontrollTjeneste() {
@@ -29,8 +27,8 @@ public class AutomatiskEtterkontrollTjeneste {
     }
 
     @Inject
-    public AutomatiskEtterkontrollTjeneste(ProsessTaskRepository prosessTaskRepository,
-            EtterkontrollRepository etterkontrollRepository) {
+    public AutomatiskEtterkontrollTjeneste(ProsessTaskTjeneste prosessTaskRepository,
+                                           EtterkontrollRepository etterkontrollRepository) {
         this.prosessTaskRepository = prosessTaskRepository;
         this.etterkontrollRepository = etterkontrollRepository;
     }
@@ -48,8 +46,8 @@ public class AutomatiskEtterkontrollTjeneste {
         }
     }
 
-    private String opprettEtterkontrollTask(Behandling kandidat, String callId) {
-        ProsessTaskData prosessTaskData = new ProsessTaskData(AutomatiskEtterkontrollTask.TASKTYPE);
+    private void opprettEtterkontrollTask(Behandling kandidat, String callId) {
+        ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(AutomatiskEtterkontrollTask.class);
         prosessTaskData.setBehandling(kandidat.getFagsakId(), kandidat.getId(), kandidat.getAktørId().getId());
         prosessTaskData.setSekvens("1");
         prosessTaskData.setPrioritet(100);
@@ -58,12 +56,5 @@ public class AutomatiskEtterkontrollTjeneste {
         prosessTaskData.setCallId(callId);
 
         prosessTaskRepository.lagre(prosessTaskData);
-        //TODO(OJR) må endres i forbindelsen med at løsningen ser på task_grupper på en annet måte nå, hvis en prosess feiler i en gruppe stopper alt opp..
-        return prosessTaskData.getGruppe();
     }
-
-    public List<TaskStatus> hentStatusForEtterkontrollGruppe(String gruppe) {
-        return prosessTaskRepository.finnStatusForTaskIGruppe(AutomatiskEtterkontrollTask.TASKTYPE, gruppe);
-    }
-
 }

@@ -1,10 +1,12 @@
 package no.nav.k9.sak.domene.behandling.steg.vedtak;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.FATTE_VEDTAK;
+
 import java.util.Objects;
+import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -20,7 +22,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.økonomi.simulering.tjeneste.SimulerInntrekkSjekkeTjeneste;
 
-@BehandlingStegRef(kode = "FVEDSTEG")
+@BehandlingStegRef(value = FATTE_VEDTAK)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped
@@ -62,7 +64,8 @@ public class FatteVedtakSteg implements BehandlingSteg {
         if (Objects.equals(BehandlingType.UNNTAKSBEHANDLING, fra.getBehandlingType())) {
             return;
         }
-        if (Objects.equals(FagsakYtelseType.OMSORGSPENGER, fra.getFagsakYtelseType()) || Objects.equals(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, fra.getFagsakYtelseType())) {
+
+        if (Set.of(FagsakYtelseType.OMSORGSPENGER, FagsakYtelseType.PSB, FagsakYtelseType.PPN).contains(fra.getFagsakYtelseType())){
             // Konsistenssjekk ved at vi har like mange grunnlag som vi har vilkårsperioder innvilget
             beregningsgrunnlagTjeneste.hentEksaktFastsattForAllePerioder(fra);
         }

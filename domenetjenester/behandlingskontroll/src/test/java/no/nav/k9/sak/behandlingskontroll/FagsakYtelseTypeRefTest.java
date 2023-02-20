@@ -1,5 +1,6 @@
 package no.nav.k9.sak.behandlingskontroll;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -24,7 +25,7 @@ public class FagsakYtelseTypeRefTest {
         Assertions.assertThrows(IllegalStateException.class, () -> {
 
             // Act
-            FagsakYtelseTypeRef.Lookup.find(Bokstav.class, FagsakYtelseType.PLEIEPENGER_SYKT_BARN);
+            FagsakYtelseTypeRef.Lookup.find(Bokstav.class, PLEIEPENGER_SYKT_BARN);
 
         }, "Har flere matchende instanser");
     }
@@ -40,13 +41,13 @@ public class FagsakYtelseTypeRefTest {
     }
 
     @ApplicationScoped
-    @FagsakYtelseTypeRef("PSB")
+    @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
     public static class A implements Bokstav {
 
     }
 
     @ApplicationScoped
-    @FagsakYtelseTypeRef("PSB")
+    @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
     public static class B implements Bokstav {
 
     }

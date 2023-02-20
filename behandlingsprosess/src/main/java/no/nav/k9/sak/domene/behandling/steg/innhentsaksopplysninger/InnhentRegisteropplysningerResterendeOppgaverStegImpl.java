@@ -1,21 +1,17 @@
 package no.nav.k9.sak.domene.behandling.steg.innhentsaksopplysninger;
 
 import static java.util.Collections.singletonList;
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.INREG_AVSL;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_VENT_ETTERLYST_INNTEKTSMELDING;
 import static no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat.opprettForAksjonspunkt;
 import static no.nav.k9.sak.domene.behandling.steg.kompletthet.VurderKompletthetStegFelles.autopunktAlleredeUtført;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
@@ -31,13 +27,11 @@ import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.kompletthet.KompletthetModell;
 import no.nav.k9.sak.kompletthet.KompletthetResultat;
 
-@BehandlingStegRef(kode = "INREG_AVSL")
+@BehandlingStegRef(value = INREG_AVSL)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped
 public class InnhentRegisteropplysningerResterendeOppgaverStegImpl implements BehandlingSteg {
-
-    private static final Set<PersonstatusType> HÅNDTERTE_PERSONSTATUSER = EnumSet.of(PersonstatusType.BOSA, PersonstatusType.DØD, PersonstatusType.DØDD, PersonstatusType.UTVA, PersonstatusType.ADNR);
 
     private BehandlingRepository behandlingRepository;
     private PersonopplysningTjeneste personopplysningTjeneste;
@@ -70,23 +64,15 @@ public class InnhentRegisteropplysningerResterendeOppgaverStegImpl implements Be
                 return BehandleStegResultat.utførtMedAksjonspunktResultater(singletonList(opprettForAksjonspunkt(AUTO_VENT_ETTERLYST_INNTEKTSMELDING)));
             }
         }
-        return BehandleStegResultat.utførtMedAksjonspunkter(sjekkPersonstatus(ref));
+        return BehandleStegResultat.utførtMedAksjonspunkter(sjekkSøkerUnder18År(ref));
 
     }
 
-    private List<AksjonspunktDefinisjon> sjekkPersonstatus(BehandlingReferanse ref) {
-        var personopplysninger = personopplysningTjeneste.hentPersonopplysninger(ref, ref.getFagsakPeriode().getFomDato());
-        List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = new ArrayList<>();
-        for (var personstatus : personopplysninger.getPersonstatuserFor(ref.getAktørId())) {
-            if (!HÅNDTERTE_PERSONSTATUSER.contains(personstatus.getPersonstatus())) {
-                throw new IllegalStateException("Personstatus ikke støttet i løsning ennå: " + personstatus.getPersonstatus());
-            }
-        }
-
+    private List<AksjonspunktDefinisjon> sjekkSøkerUnder18År(BehandlingReferanse ref) {
         if (erSøkerUnder18ar(ref)) {
-            aksjonspunktDefinisjoner.add(AksjonspunktDefinisjon.AVKLAR_VERGE);
+            return List.of(AksjonspunktDefinisjon.AVKLAR_VERGE);
         }
-        return aksjonspunktDefinisjoner;
+        return List.of();
     }
 
     private boolean erSøkerUnder18ar(BehandlingReferanse ref) {

@@ -4,11 +4,17 @@ import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_REF_BERGRU
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagReferanserTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
+import no.nav.folketrygdloven.kalkulus.kodeverk.StegType;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -22,10 +28,12 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningStegTjeneste.FortsettBeregningResultatCallback;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
+import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
 
-@FagsakYtelseTypeRef("*")
-@BehandlingStegRef(kode = "VURDER_REF_BERGRUNN")
+@FagsakYtelseTypeRef
+@BehandlingStegRef(value = VURDER_REF_BERGRUNN)
 @BehandlingTypeRef
 @ApplicationScoped
 public class VurderRefusjonBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {
@@ -34,6 +42,9 @@ public class VurderRefusjonBeregningsgrunnlagSteg implements BeregningsgrunnlagS
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
     private VilkårTjeneste vilkårTjeneste;
     private BeregningStegTjeneste beregningStegTjeneste;
+    private VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
+    private BeregningsgrunnlagReferanserTjeneste referanserTjeneste;
+    private BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
 
     protected VurderRefusjonBeregningsgrunnlagSteg() {
         // CDI Proxy
@@ -42,12 +53,18 @@ public class VurderRefusjonBeregningsgrunnlagSteg implements BeregningsgrunnlagS
     @Inject
     public VurderRefusjonBeregningsgrunnlagSteg(BehandlingRepository behandlingRepository,
                                                 BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
-                                                VilkårTjeneste vilkårTjeneste, BeregningStegTjeneste beregningStegTjeneste) {
+                                                VilkårTjeneste vilkårTjeneste, BeregningStegTjeneste beregningStegTjeneste,
+                                                VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
+                                                BeregningsgrunnlagReferanserTjeneste referanserTjeneste,
+                                                BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste) {
 
         this.behandlingRepository = behandlingRepository;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.vilkårTjeneste = vilkårTjeneste;
         this.beregningStegTjeneste = beregningStegTjeneste;
+        this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
+        this.referanserTjeneste = referanserTjeneste;
+        this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
     }
 
     @Override
@@ -55,6 +72,7 @@ public class VurderRefusjonBeregningsgrunnlagSteg implements BeregningsgrunnlagS
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         var ref = BehandlingReferanse.fra(behandling);
         validerVurdertVilkår(ref);
+        kopierGrunnlagForNyePerioderGrunnetEndretUttak(ref, kontekst);
         var callback = new HåndterResultat();
         beregningStegTjeneste.fortsettBeregningInkludertForlengelser(ref, VURDER_REF_BERGRUNN, callback);
         return BehandleStegResultat.utførtMedAksjonspunktResultater(callback.aksjonspunktResultater);
@@ -72,6 +90,42 @@ public class VurderRefusjonBeregningsgrunnlagSteg implements BeregningsgrunnlagS
         if (harIkkeVurderteVilkårTilVurdering) {
             throw new IllegalStateException("Har vilkårsperiode til vurdering som ikke er vurdert");
         }
+    }
+
+    private void kopierGrunnlagForNyePerioderGrunnetEndretUttak(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
+        if (ref.getBehandlingType().equals(BehandlingType.REVURDERING)) {
+            Set<PeriodeTilVurdering> nyePerioder = finnPerioderSomVurderesGrunnetEndretUttak(ref);
+            if (!nyePerioder.isEmpty()) {
+                beregningsgrunnlagTjeneste.kopier(ref, nyePerioder, StegType.VURDER_VILKAR_BERGRUNN);
+                var originalBehandlingId = ref.getOriginalBehandlingId().orElseThrow();
+                beregningsgrunnlagVilkårTjeneste.kopierVilkårresultatFraForrigeBehandling(kontekst,
+                    originalBehandlingId,
+                    nyePerioder.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet()));
+            }
+        }
+    }
+
+    private Set<PeriodeTilVurdering> finnPerioderSomVurderesGrunnetEndretUttak(BehandlingReferanse ref) {
+        var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref).ignorerAvslåttePerioder()
+            .markerEndringIUttak();
+        var allePerioder = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter);
+        var endretUttakPerioder = allePerioder.stream()
+            .filter(PeriodeTilVurdering::erForlengelse)
+            .filter(PeriodeTilVurdering::erEndringIUttak)
+            .collect(Collectors.toSet());
+        var skjæringstidspunkter = endretUttakPerioder.stream().map(PeriodeTilVurdering::getSkjæringstidspunkt).collect(Collectors.toSet());
+        var endretUttakReferanser = referanserTjeneste.finnBeregningsgrunnlagsReferanseFor(
+            ref.getBehandlingId(),
+            skjæringstidspunkter,
+            false,
+            true);
+        var nyeStpTilVurdering = endretUttakReferanser.stream()
+            .filter(BgRef::erGenerertReferanse) // Generert referanse betyr at eksisterende var lik initiell
+            .map(BgRef::getStp)
+            .collect(Collectors.toSet());
+        return endretUttakPerioder.stream()
+            .filter(p -> nyeStpTilVurdering.contains(p.getSkjæringstidspunkt()))
+            .collect(Collectors.toSet());
     }
 
     class HåndterResultat implements FortsettBeregningResultatCallback {

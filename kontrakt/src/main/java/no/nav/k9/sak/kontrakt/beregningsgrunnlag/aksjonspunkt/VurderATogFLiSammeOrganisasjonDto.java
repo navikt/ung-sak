@@ -27,6 +27,10 @@ public class VurderATogFLiSammeOrganisasjonDto {
         //
     }
 
+    public VurderATogFLiSammeOrganisasjonDto(List<VurderATogFLiSammeOrganisasjonAndelDto> vurderATogFLiSammeOrganisasjonAndelListe) {
+        this.vurderATogFLiSammeOrganisasjonAndelListe = vurderATogFLiSammeOrganisasjonAndelListe;
+    }
+
     public List<VurderATogFLiSammeOrganisasjonAndelDto> getVurderATogFLiSammeOrganisasjonAndelListe() {
         return vurderATogFLiSammeOrganisasjonAndelListe;
     }

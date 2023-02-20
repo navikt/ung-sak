@@ -14,6 +14,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -23,7 +24,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 public class GjenopptaBehandlingTaskTest {
 
@@ -54,7 +54,7 @@ public class GjenopptaBehandlingTaskTest {
         when(mockBehandlingRepository.hentBehandling(Mockito.anyString())).thenReturn(behandling);
         when(mockEnhetsTjeneste.sjekkEnhetEtterEndring(any())).thenReturn(Optional.empty());
 
-        ProsessTaskData prosessTaskData = new ProsessTaskData(GjenopptaBehandlingTask.TASKTYPE);
+        ProsessTaskData prosessTaskData =  ProsessTaskData.forProsessTask(GjenopptaBehandlingTask.class);
         prosessTaskData.setBehandling(0L, behandlingId, AktørId.dummy().getId());
 
         task.doTask(prosessTaskData);
@@ -78,7 +78,7 @@ public class GjenopptaBehandlingTaskTest {
         when(kontekst.getSkriveLås()).thenReturn(lås);
         when(mockEnhetsTjeneste.sjekkEnhetEtterEndring(any())).thenReturn(Optional.of(enhet));
 
-        ProsessTaskData prosessTaskData = new ProsessTaskData(GjenopptaBehandlingTask.TASKTYPE);
+        ProsessTaskData prosessTaskData =  ProsessTaskData.forProsessTask(GjenopptaBehandlingTask.class);
         prosessTaskData.setBehandling(0L, behandlingId, "0");
 
         task.doTask(prosessTaskData);

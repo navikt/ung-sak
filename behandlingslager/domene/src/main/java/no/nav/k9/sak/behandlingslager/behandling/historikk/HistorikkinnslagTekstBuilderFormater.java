@@ -2,6 +2,7 @@ package no.nav.k9.sak.behandlingslager.behandling.historikk;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 
@@ -24,6 +25,9 @@ public final class HistorikkinnslagTekstBuilderFormater {
         if (verdi instanceof LocalDateInterval) {
             LocalDateInterval interval = (LocalDateInterval) verdi;
             return formatDate(interval.getFomDato()) + " - " + formatDate(interval.getTomDato());
+        }
+        if (verdi instanceof Number) {
+            return String.format(Locale.US, "%,d", ((Number) verdi).intValue()).replace(",", " ");
         }
         return verdi.toString();
     }

@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.mottak;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
+
 import java.time.LocalDate;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -15,7 +17,7 @@ import no.nav.k9.sak.mottak.SøknadMottakTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 
-@FagsakYtelseTypeRef("PPN")
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @ApplicationScoped
 public class PPNSøknadMottaker implements SøknadMottakTjeneste<PPNSøknadInnsending> {
 

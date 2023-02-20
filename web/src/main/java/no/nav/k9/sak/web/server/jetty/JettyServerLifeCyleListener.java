@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.inject.spi.CDI;
-import no.nav.k9.prosesstask.impl.TaskManager;
+import no.nav.k9.felles.apptjeneste.AppServiceHandler;
 
 public class JettyServerLifeCyleListener implements LifeCycle.Listener {
 
@@ -13,15 +13,25 @@ public class JettyServerLifeCyleListener implements LifeCycle.Listener {
 
     @Override
     public void lifeCycleStarted(LifeCycle event) {
-        log.info("Starting task consumption");
-        var taskManager = CDI.current().select(TaskManager.class).get();
-        taskManager.start();
+        for (AppServiceHandler ash : findAppServiceHandlers()) {
+            log.info("Starting " + ash.getClass().getSimpleName());
+            ash.start();
+        }
     }
 
     @Override
     public void lifeCycleStopping(LifeCycle event) {
-        log.info("Shutting down tasks");
-        var taskManager = CDI.current().select(TaskManager.class).get();
-        taskManager.stop();
+        for (AppServiceHandler ash : findAppServiceHandlers()) {
+            log.info("Stopping " + ash.getClass().getSimpleName());
+            try {
+                ash.stop();
+            } catch (Exception e) {
+                log.error("Exception while stopping AppServiceHandler.", e);
+            }
+        }
+    }
+    
+    private static Iterable<AppServiceHandler> findAppServiceHandlers() {
+        return CDI.current().select(AppServiceHandler.class);
     }
 }

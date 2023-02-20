@@ -5,10 +5,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.fakta.FaktaOmBeregningTilfelleDto;
-import no.nav.folketrygdloven.kalkulus.kodeverk.AktivitetStatus;
 import no.nav.folketrygdloven.kalkulus.kodeverk.AndelKilde;
 import no.nav.folketrygdloven.kalkulus.kodeverk.Inntektskategori;
-import no.nav.folketrygdloven.kalkulus.kodeverk.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.ArbeidstakerandelUtenIMMottarYtelseDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.AvklarteAktiviteterDto;
@@ -42,7 +40,8 @@ import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderMilitærDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderNyoppstartetFLDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderSelvstendigNæringsdrivendeNyIArbeidslivetDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderTidsbegrensetArbeidsforholdDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderVarigEndringEllerNyoppstartetSNDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderVarigEndring;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderVarigEndringEllerNyoppstartetDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderteArbeidsforholdDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.fordeling.FordelBeregningsgrunnlagAndelDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.fordeling.FordelBeregningsgrunnlagDto;
@@ -69,8 +68,8 @@ public class OppdatererDtoMapper {
         return new no.nav.folketrygdloven.kalkulus.håndtering.v1.foreslå.FastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetDto(dto.getBruttoBeregningsgrunnlag());
     }
 
-    public static no.nav.folketrygdloven.kalkulus.håndtering.v1.foreslå.FastsettBruttoBeregningsgrunnlagSNDto mapFastsettBruttoBeregningsgrunnlagSNDto(FastsettBruttoBeregningsgrunnlagSNDto dto) {
-        return new no.nav.folketrygdloven.kalkulus.håndtering.v1.foreslå.FastsettBruttoBeregningsgrunnlagSNDto(dto.getBruttoBeregningsgrunnlag());
+    public static no.nav.folketrygdloven.kalkulus.håndtering.v1.foreslå.FastsettBruttoBeregningsgrunnlagDto mapFastsettBruttoBeregningsgrunnlagSNDto(FastsettBruttoBeregningsgrunnlagSNDto dto) {
+        return new no.nav.folketrygdloven.kalkulus.håndtering.v1.foreslå.FastsettBruttoBeregningsgrunnlagDto(dto.getBruttoBeregningsgrunnlag());
     }
 
     public static no.nav.folketrygdloven.kalkulus.håndtering.v1.fordeling.FordelBeregningsgrunnlagDto mapFordelBeregningsgrunnlagDto(FordelBeregningsgrunnlagDto dto) {
@@ -81,9 +80,10 @@ public class OppdatererDtoMapper {
         return new no.nav.folketrygdloven.kalkulus.håndtering.v1.refusjon.VurderRefusjonBeregningsgrunnlagDto(mapTilRefusjonAndeler(dto.getFastsatteAndeler()));
     }
 
-    public static no.nav.folketrygdloven.kalkulus.håndtering.v1.foreslå.VurderVarigEndringEllerNyoppstartetSNDto mapdVurderVarigEndringEllerNyoppstartetSNDto(VurderVarigEndringEllerNyoppstartetSNDto dto) {
-        return new no.nav.folketrygdloven.kalkulus.håndtering.v1.foreslå.VurderVarigEndringEllerNyoppstartetSNDto(dto.getErVarigEndretNaering(), dto.getBruttoBeregningsgrunnlag());
+    public static no.nav.folketrygdloven.kalkulus.håndtering.v1.foreslå.VurderVarigEndringEllerNyoppstartetDto mapVurderVarigEndringEllerNyoppstartetDto(VurderVarigEndring dto) {
+        return new no.nav.folketrygdloven.kalkulus.håndtering.v1.foreslå.VurderVarigEndringEllerNyoppstartetDto(dto.erVarigEndret(), dto.getBruttoBeregningsgrunnlag());
     }
+
 
     public static List<no.nav.folketrygdloven.kalkulus.håndtering.v1.avklaraktiviteter.BeregningsaktivitetLagreDto> mapOverstyrBeregningsaktiviteterDto(List<BeregningsaktivitetLagreDto> beregningsaktivitetLagreDtoList) {
         return beregningsaktivitetLagreDtoList.stream().map(OppdatererDtoMapper::mapTilBeregningsaktivitetLagreDto).collect(Collectors.toList());
@@ -91,7 +91,7 @@ public class OppdatererDtoMapper {
 
 
     public static no.nav.folketrygdloven.kalkulus.håndtering.v1.fakta.FaktaBeregningLagreDto mapTilFaktaOmBeregningLagreDto(FaktaBeregningLagreDto fakta) {
-        return fakta == null ? null : new no.nav.folketrygdloven.kalkulus.håndtering.v1.fakta.FaktaBeregningLagreDto(
+        return fakta == null || fakta.getFaktaOmBeregningTilfeller().isEmpty() ? null : new no.nav.folketrygdloven.kalkulus.håndtering.v1.fakta.FaktaBeregningLagreDto(
                 fakta.getVurderNyoppstartetFL() == null ? null : mapVurderNyoppstartetFLDto(fakta.getVurderNyoppstartetFL()),
                 fakta.getVurderTidsbegrensetArbeidsforhold() == null ? null : mapTidsbegrensetArbeidsforhold(fakta.getVurderTidsbegrensetArbeidsforhold()),
                 fakta.getVurderNyIArbeidslivet() == null ? null : mapVurderNyIArbeidslivet(fakta.getVurderNyIArbeidslivet()),
@@ -379,11 +379,6 @@ public class OppdatererDtoMapper {
             redigerbarAndel.getArbeidsgiverId(),
             redigerbarAndel.getArbeidsforholdId().getReferanse(),
             redigerbarAndel.getNyAndel(),
-            redigerbarAndel.getAktivitetStatus() == null ? null : AktivitetStatus.fraKode(redigerbarAndel.getAktivitetStatus().getKode()),
-            redigerbarAndel.getArbeidsforholdType() == null ? null : OpptjeningAktivitetType.fraKode(redigerbarAndel.getArbeidsforholdType().getKode()),
-            redigerbarAndel.getLagtTilAvSaksbehandler(),
-            redigerbarAndel.getBeregningsperiodeFom(),
-            redigerbarAndel.getBeregningsperiodeTom(),
             redigerbarAndel.getKilde() == null ? AndelKilde.PROSESS_START : AndelKilde.fraKode(redigerbarAndel.getKilde().getKode())
             );
     }

@@ -1,15 +1,18 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.KONTROLLER_FAKTA_UTTAK;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.NavigableSet;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.sykdom.Resultat;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
@@ -19,9 +22,8 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
-import no.nav.k9.sak.kontrakt.sykdom.Resultat;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død.RettPleiepengerVedDødRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynForPleietrengende;
@@ -30,9 +32,9 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.død.HåndterePleietrengendeD�
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidBrukerBurdeSøktOmUtleder;
 
 @ApplicationScoped
-@BehandlingStegRef(kode = "KOFAKUT")
+@BehandlingStegRef(value = KONTROLLER_FAKTA_UTTAK)
 @BehandlingTypeRef
-@FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 public class FaktaOmUttakSteg implements BehandlingSteg {
 
     private UnntakEtablertTilsynGrunnlagRepository unntakEtablertTilsynGrunnlagRepository;
@@ -43,7 +45,6 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
     private ArbeidBrukerBurdeSøktOmUtleder arbeidBrukerBurdeSøktOmUtleder;
     private HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste;
     private PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder;
-    private Boolean utvidVedDødsfall;
 
     protected FaktaOmUttakSteg() {
         // for proxy
@@ -56,9 +57,8 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
                             BehandlingRepository behandlingRepository,
                             PersonopplysningTjeneste personopplysningTjeneste,
                             ArbeidBrukerBurdeSøktOmUtleder arbeidBrukerBurdeSøktOmUtleder,
-                            HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste,
-                            PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder,
-                            @KonfigVerdi(value = "PSB_UTVIDE_VED_DODSFALL", defaultVerdi = "false") Boolean utvidVedDødsfall) {
+                            @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste,
+                            PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder) {
         this.unntakEtablertTilsynGrunnlagRepository = unntakEtablertTilsynGrunnlagRepository;
         this.rettPleiepengerVedDødRepository = rettPleiepengerVedDødRepository;
         this.pleiebehovResultatRepository = pleiebehovResultatRepository;
@@ -67,7 +67,6 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
         this.arbeidBrukerBurdeSøktOmUtleder = arbeidBrukerBurdeSøktOmUtleder;
         this.håndterePleietrengendeDødsfallTjeneste = håndterePleietrengendeDødsfallTjeneste;
         this.perioderMedSykdomInnvilgetUtleder = perioderMedSykdomInnvilgetUtleder;
-        this.utvidVedDødsfall = utvidVedDødsfall;
     }
 
     @SuppressWarnings("unused")
@@ -95,16 +94,14 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
             aksjonspunkter.add(AksjonspunktDefinisjon.MANGLER_AKTIVITETER);
         }
 
+        håndterePleietrengendeDødsfallTjeneste.utvidPerioderVedDødsfall(referanse);
         if (aksjonspunkter.isEmpty()) {
-            if (utvidVedDødsfall) {
-                håndterePleietrengendeDødsfallTjeneste.utvidPerioderVedDødsfall(referanse);
-            }
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
         return BehandleStegResultat.utførtMedAksjonspunkter(aksjonspunkter);
     }
 
-    private List<AksjonspunktDefinisjon> vurderAksjonspunktForNattevåkOgBeredskap(Behandling behandling, UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende, Set<VilkårPeriode> innvilgedePerioderTilVurdering) {
+    private List<AksjonspunktDefinisjon> vurderAksjonspunktForNattevåkOgBeredskap(Behandling behandling, UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende, NavigableSet<DatoIntervallEntitet> innvilgedePerioderTilVurdering) {
         var aksjonspunkter = new ArrayList<AksjonspunktDefinisjon>();
         if (søktOmNattevåk(unntakEtablertTilsynForPleietrengende) && harNoenGodkjentPerioderMedSykdom(innvilgedePerioderTilVurdering)) {
             if (harNattevåkPerioderSomIkkeErVurdert(unntakEtablertTilsynForPleietrengende)) {
@@ -139,8 +136,8 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
         return false;
     }
 
-    private boolean harNoenGodkjentPerioderMedSykdom(Set<VilkårPeriode> innvilgetePerioder) {
-        return !innvilgetePerioder.isEmpty();
+    private boolean harNoenGodkjentPerioderMedSykdom(NavigableSet<DatoIntervallEntitet> innvilgedePerioder) {
+        return !innvilgedePerioder.isEmpty();
     }
 
     private boolean søktOmNattevåk(UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende) {

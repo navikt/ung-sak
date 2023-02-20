@@ -1,0 +1,1 @@
+drop sequence if exists SEQ_SYKDOM_VURDERING_VERSJON_BESLUTTET;

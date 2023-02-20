@@ -6,9 +6,9 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.NavigableSet;
-import java.util.stream.Collectors;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -19,10 +19,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -69,19 +65,17 @@ public class OverlapendeYtelserRestTjeneste {
         var ytelseTyperSomSjekkesMot = behandling.getFagsakYtelseType().hentK9YtelserForOverlappSjekk();
         var overlappendeYtelser = overlappendeYtelserTjeneste.finnOverlappendeYtelser(BehandlingReferanse.fra(behandling), ytelseTyperSomSjekkesMot);
 
-        var overlappendeYtelseDtoer = overlappendeYtelser.entrySet().stream()
-            .sorted(Comparator.comparing((Map.Entry<Ytelse, NavigableSet<LocalDateInterval>> e) -> e.getKey().getYtelseType().getKode())
+        return overlappendeYtelser.entrySet().stream()
+            .sorted(Comparator.comparing((Map.Entry<Ytelse, ?> e) -> e.getKey().getYtelseType().getKode())
                 .thenComparing(e -> e.getKey().getKilde()))
             .map(entry -> {
                 var ytelse = entry.getKey();
                 var overlappendePerioder = entry.getValue().stream()
-                    .map(dateInterval -> new OverlappendeYtelsePeriodeDto(dateInterval.getFomDato(), dateInterval.getTomDato()))
-                    .collect(Collectors.toList());
+                    .map(segment -> new OverlappendeYtelsePeriodeDto(segment.getFom(), segment.getTom()))
+                    .toList();
                 return new OverlappendeYtelseDto(ytelse.getYtelseType(), ytelse.getKilde(), ytelse.getSaksnummer(), overlappendePerioder);
             })
-            .collect(Collectors.toList());
-
-        return overlappendeYtelseDtoer;
+            .toList();
     }
 
 }

@@ -2,7 +2,6 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.prosess;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
-
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -15,11 +14,10 @@ import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 @ApplicationScoped
 public class ProsessModell {
 
-    private static final String YTELSE = "PSB";
     private static final FagsakYtelseType YTELSE_TYPE = FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
-    @FagsakYtelseTypeRef(YTELSE)
-    @BehandlingTypeRef("BT-002")
+    @FagsakYtelseTypeRef(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
+    @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
     @Produces
     @ApplicationScoped
     public BehandlingModell førstegangsbehandling() {
@@ -38,19 +36,19 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA, StartpunktType.KONTROLLER_FAKTA)
             .medSteg(BehandlingStegType.ALDERSVILKÅRET)
             .medSteg(BehandlingStegType.VURDER_OMSORG_FOR, StartpunktType.INNGANGSVILKÅR_OMSORGENFOR)
-            .medSteg(BehandlingStegType.VURDER_MEDISINSKVILKÅR, StartpunktType.INNGANGSVILKÅR_MEDISINSK)
+            .medSteg(BehandlingStegType.VURDER_MEDISINSKE_VILKÅR, StartpunktType.INNGANGSVILKÅR_MEDISINSK)
             .medSteg(BehandlingStegType.POST_VURDER_MEDISINSKVILKÅR)
             .medSteg(BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR, StartpunktType.INNGANGSVILKÅR_MEDLEMSKAP)
             .medSteg(BehandlingStegType.FASTSETT_OPPTJENINGSPERIODE, StartpunktType.OPPTJENING)
             .medSteg(BehandlingStegType.VURDER_OPPTJENING_FAKTA)
             .medSteg(BehandlingStegType.VURDER_OPPTJENINGSVILKÅR)
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA_UTTAK, StartpunktType.UTTAKSVILKÅR, StartpunktType.BEREGNING)
-            .medSteg(BehandlingStegType.VURDER_UTTAK)
             .medSteg(BehandlingStegType.PRECONDITION_BEREGNING)
             .medSteg(BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING)
             .medSteg(BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING)
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA_BEREGNING)
             .medSteg(BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG)
+            .medSteg(BehandlingStegType.FORTSETT_FORESLÅ_BEREGNINGSGRUNNLAG)
             .medSteg(BehandlingStegType.VURDER_VILKAR_BERGRUNN)
             .medSteg(BehandlingStegType.VURDER_UTTAK_V2, StartpunktType.UTTAKSVILKÅR_VURDERING)
             .medSteg(BehandlingStegType.VURDER_REF_BERGRUNN)
@@ -67,8 +65,8 @@ public class ProsessModell {
         return modellBuilder.build();
     }
 
-    @FagsakYtelseTypeRef(YTELSE)
-    @BehandlingTypeRef("BT-004")
+    @FagsakYtelseTypeRef(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
+    @BehandlingTypeRef(BehandlingType.REVURDERING)
     @Produces
     @ApplicationScoped
     public BehandlingModell revurdering() {
@@ -88,19 +86,19 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA, StartpunktType.KONTROLLER_FAKTA)
             .medSteg(BehandlingStegType.ALDERSVILKÅRET)
             .medSteg(BehandlingStegType.VURDER_OMSORG_FOR, StartpunktType.INNGANGSVILKÅR_OMSORGENFOR)
-            .medSteg(BehandlingStegType.VURDER_MEDISINSKVILKÅR, StartpunktType.INNGANGSVILKÅR_MEDISINSK)
+            .medSteg(BehandlingStegType.VURDER_MEDISINSKE_VILKÅR, StartpunktType.INNGANGSVILKÅR_MEDISINSK)
             .medSteg(BehandlingStegType.POST_VURDER_MEDISINSKVILKÅR)
             .medSteg(BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR, StartpunktType.INNGANGSVILKÅR_MEDLEMSKAP)
             .medSteg(BehandlingStegType.FASTSETT_OPPTJENINGSPERIODE, StartpunktType.OPPTJENING)
             .medSteg(BehandlingStegType.VURDER_OPPTJENING_FAKTA)
             .medSteg(BehandlingStegType.VURDER_OPPTJENINGSVILKÅR)
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA_UTTAK, StartpunktType.UTTAKSVILKÅR, StartpunktType.BEREGNING)
-            .medSteg(BehandlingStegType.VURDER_UTTAK)
             .medSteg(BehandlingStegType.PRECONDITION_BEREGNING)
             .medSteg(BehandlingStegType.VURDER_KOMPLETTHET_BEREGNING)
             .medSteg(BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING)
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA_BEREGNING)
             .medSteg(BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG)
+            .medSteg(BehandlingStegType.FORTSETT_FORESLÅ_BEREGNINGSGRUNNLAG)
             .medSteg(BehandlingStegType.VURDER_VILKAR_BERGRUNN)
             .medSteg(BehandlingStegType.VURDER_UTTAK_V2, StartpunktType.UTTAKSVILKÅR_VURDERING)
             .medSteg(BehandlingStegType.VURDER_REF_BERGRUNN)

@@ -1,10 +1,10 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
 import java.time.LocalDate;
-import java.util.Map;
-import java.util.Optional;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -44,7 +44,10 @@ public class BeregnInput {
     }
 
 
-    public BeregnInput(UUID bgReferanse, DatoIntervallEntitet vilkårsperiode, Map<LocalDate, UUID> originalReferanser, InputOverstyringPeriode inputOverstyringPeriode) {
+    public BeregnInput(UUID bgReferanse,
+                       DatoIntervallEntitet vilkårsperiode,
+                       Map<LocalDate, UUID> originalReferanser,
+                       InputOverstyringPeriode inputOverstyringPeriode) {
         this.bgReferanse = bgReferanse;
         this.vilkårsperiode = vilkårsperiode;
         this.originalReferanser = originalReferanser;
@@ -79,6 +82,7 @@ public class BeregnInput {
     public Optional<InputOverstyringPeriode> getInputOverstyringPeriode() {
         return Optional.ofNullable(inputOverstyringPeriode);
     }
+
     public List<UUID> getOriginalReferanser() {
         return originalReferanser == null ? Collections.emptyList() : originalReferanser.values().stream().toList();
     }

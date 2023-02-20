@@ -61,19 +61,25 @@ import no.nav.k9.sak.web.app.tjenester.behandling.historikk.HistorikkRestTjenest
 import no.nav.k9.sak.web.app.tjenester.behandling.kompletthet.KompletthetForBeregningRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.kontroll.KontrollRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.omsorg.OmsorgenForRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.FosterbarnRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.RammevedtakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.ÅrskvantumRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.visning.gjennomgått.GjennomgåttOpplæringRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.visning.institusjon.InstitusjonRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.visning.nødvendighet.NødvendigOpplæringRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.visning.reisetid.ReisetidRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.opptjening.OpptjeningRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.personopplysning.PersonRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.personopplysning.PleietrengendeRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomVurderingRestTjeneste;
-import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.dokument.SykdomDokumentRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.dokument.PleietrengendeSykdomDokumentRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.søknad.SøknadRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.søknadsfrist.SøknadsfristRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.tilbakekreving.TilbakekrevingRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.tilsyn.VurderTilsynRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.uttak.PleiepengerUttakRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.uttak.UtenlandsoppholdRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.uttak.UttakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.vedtak.DokumenterMedUstrukturerteDataRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.vedtak.TotrinnskontrollRestTjeneste;
@@ -81,6 +87,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.vilkår.VilkårRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.brev.BrevRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.kravperioder.PerioderTilBehandlingMedKildeRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.los.LosRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.saksbehandler.SaksbehandlerRestTjeneste;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
@@ -91,22 +98,18 @@ import no.nav.k9.sikkerhet.context.SubjectHandler;
 @Dependent
 public class BehandlingDtoTjeneste {
 
-    private BehandlingRepository behandlingRepository;
-    private BehandlingVedtakRepository behandlingVedtakRepository;
-    private SøknadRepository søknadRepository;
-    private TilbakekrevingRepository tilbakekrevingRepository;
-    private VilkårResultatRepository vilkårResultatRepository;
-    private TotrinnTjeneste totrinnTjeneste;
+    private final BehandlingRepository behandlingRepository;
+    private final BehandlingVedtakRepository behandlingVedtakRepository;
+    private final SøknadRepository søknadRepository;
+    private final TilbakekrevingRepository tilbakekrevingRepository;
+    private final VilkårResultatRepository vilkårResultatRepository;
+    private final TotrinnTjeneste totrinnTjeneste;
 
     /**
      * denne kan overstyres for testing lokalt
      */
-    private String k9OppdragProxyUrl;
-    private Instance<InformasjonselementerUtleder> informasjonselementer;
-
-    BehandlingDtoTjeneste() {
-        // for CDI proxy
-    }
+    private final String k9OppdragProxyUrl;
+    private final Instance<InformasjonselementerUtleder> informasjonselementer;
 
     @Inject
     public BehandlingDtoTjeneste(BehandlingRepository behandlingRepository,
@@ -173,6 +176,7 @@ public class BehandlingDtoTjeneste {
             dto.leggTil(getFraMap(BeregningsresultatRestTjeneste.HAR_SAMME_RESULTAT_PATH, "har-samme-resultat", uuidQueryParams));
         }
         dto.leggTil(getFraMap(PerioderTilBehandlingMedKildeRestTjeneste.BEHANDLING_PERIODER, "behandling-perioder-årsak", uuidQueryParams));
+        dto.leggTil(getFraMap(PerioderTilBehandlingMedKildeRestTjeneste.BEHANDLING_PERIODER_MED_VILKÅR, "behandling-perioder-årsak-med-vilkår", uuidQueryParams));
     }
 
     private void leggTilHandlingerResourceLinks(Behandling behandling, BehandlingDto dto) {
@@ -211,7 +215,7 @@ public class BehandlingDtoTjeneste {
             return Collections.emptyList();
         }
         Optional<BehandlingVedtak> gjeldendeVedtak = behandlingVedtakRepository.hentGjeldendeVedtak(behandlinger.get(0).getFagsak());
-        Optional<Long> behandlingMedGjeldendeVedtak = gjeldendeVedtak.map(bv -> bv.getBehandlingId());
+        Optional<Long> behandlingMedGjeldendeVedtak = gjeldendeVedtak.map(BehandlingVedtak::getBehandlingId);
         return behandlinger.stream().map(behandling -> {
             boolean erBehandlingMedGjeldendeVedtak = erBehandlingMedGjeldendeVedtak(behandling, behandlingMedGjeldendeVedtak);
             var behandlingsresultat = lagBehandlingsresultat(behandling);
@@ -221,8 +225,7 @@ public class BehandlingDtoTjeneste {
 
     BehandlingsresultatDto lagBehandlingsresultat(Behandling behandling) {
         var ref = BehandlingReferanse.fra(behandling);
-        var behandlingsresultat = lagBehandlingsresultat(ref);
-        return behandlingsresultat;
+        return lagBehandlingsresultat(ref);
     }
 
     private BehandlingsresultatDto lagBehandlingsresultat(BehandlingReferanse ref) {
@@ -316,6 +319,7 @@ public class BehandlingDtoTjeneste {
 
         dto.leggTil(getFraMap(BrevRestTjeneste.HENT_VEDTAKVARSEL_PATH, "vedtak-varsel", uuidQueryParams));
         lagFormidlingLink(behandling).forEach(dto::leggTil);
+        lagLosLink(behandling).forEach(dto::leggTil);
     }
 
     private void leggTilBeregnetYtelseBaserteLinks(Behandling behandling, BehandlingDto dto, Map<String, String> uuidQueryParams) {
@@ -338,6 +342,7 @@ public class BehandlingDtoTjeneste {
             dto.leggTil(getFraMap(BeregningsresultatRestTjeneste.BEREGNINGSRESULTAT_UTBETALT_PATH, "beregningsresultat-utbetalt", uuidQueryParams));
             lagBeregningsgrunnlagLink(behandling).ifPresent(dto::leggTil);
             lagBeregningsgrunnlagAlleLink(behandling).ifPresent(dto::leggTil);
+            lagBeregningsgrunnlagReferanserLink(behandling).ifPresent(dto::leggTil);
             lagOverstyrInputBergningLink(behandling).ifPresent(dto::leggTil);
             lagSimuleringResultatLink(behandling).ifPresent(dto::leggTil);
             lagTilbakekrevingValgLink(behandling).forEach(dto::leggTil);
@@ -351,28 +356,28 @@ public class BehandlingDtoTjeneste {
 
         var ytelseType = behandling.getFagsakYtelseType();
         switch (ytelseType) {
-            case FRISINN:
+            case FRISINN -> {
                 dto.leggTil(getFraMap(UttakRestTjeneste.UTTAK_OPPGITT, "uttak-oppgitt", uuidQueryParams));
                 dto.leggTil(getFraMap(UttakRestTjeneste.UTTAK_FASTSATT, "uttak-fastsatt", uuidQueryParams));
                 dto.leggTil(getFraMap(InntektArbeidYtelseRestTjeneste.OPPGITT_OPPTJENING_PATH_V2, "oppgitt-opptjening-v2", uuidQueryParams));
                 dto.leggTil(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER, "beregning-koblinger", uuidQueryParams));
-                break;
-            case OMSORGSPENGER:
+                dto.leggTil(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER_TIL_VURDERING, "beregning-koblinger-til-vurdering", uuidQueryParams));
+            }
+            case OMSORGSPENGER -> {
                 dto.leggTil(getFraMap(PersonRestTjeneste.MEDLEMSKAP_V2_PATH, "soeker-medlemskap-v2", uuidQueryParams));
                 dto.leggTil(getFraMap(OmsorgenForRestTjeneste.OMSORGEN_FOR_OPPLYSNINGER_PATH, "omsorgen-for", uuidQueryParams));
                 dto.leggTil(getFraMap(ÅrskvantumRestTjeneste.FORBRUKTEDAGER, "forbrukte-dager", uuidQueryParams));
+                dto.leggTil(getFraMap(FosterbarnRestTjeneste.FOSTERBARN_PATH, "fosterbarn", uuidQueryParams));
                 dto.leggTil(getFraMap(ÅrskvantumRestTjeneste.FULL_UTTAKSPLAN, "full-uttaksplan", saksnummerAndUuidQueryParam));
                 dto.leggTil(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER, "beregning-koblinger", uuidQueryParams));
+                dto.leggTil(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER_TIL_VURDERING, "beregning-koblinger-til-vurdering", uuidQueryParams));
                 dto.leggTil(getFraMap(OverlapendeYtelserRestTjeneste.OVERLAPPENDE_YTELSER_PATH, "overlappende-ytelser", uuidQueryParams));
-                break;
-            case OMSORGSPENGER_KS:
-            case OMSORGSPENGER_MA:
-            case OMSORGSPENGER_AO:
+            }
+            case OMSORGSPENGER_KS, OMSORGSPENGER_MA, OMSORGSPENGER_AO -> {
                 dto.leggTil(getFraMap(OmsorgenForRestTjeneste.OMSORGEN_FOR_OPPLYSNINGER_PATH, "omsorgen-for", uuidQueryParams));
                 dto.leggTil(getFraMap(RammevedtakRestTjeneste.RAMMEVEDTAK, "rammevedtak", uuidQueryParams));
-                break;
-            case OPPLÆRINGSPENGER:
-            case PLEIEPENGER_SYKT_BARN:
+            }
+            case PLEIEPENGER_SYKT_BARN -> {
                 dto.leggTil(getFraMap(PersonRestTjeneste.MEDLEMSKAP_V2_PATH, "soeker-medlemskap-v2", uuidQueryParams));
                 dto.leggTil(getFraMap(SykdomRestTjeneste.SYKDOM_AKSJONSPUNKT_PATH, "sykdom-aksjonspunkt", uuidQueryParams));
                 dto.leggTil(getFraMap(SykdomVurderingRestTjeneste.VURDERING_OVERSIKT_KTP_PATH, "sykdom-vurdering-oversikt-ktp", uuidQueryParams));
@@ -380,15 +385,18 @@ public class BehandlingDtoTjeneste {
                 dto.leggTil(getFraMap(SykdomVurderingRestTjeneste.VURDERING_PATH, "sykdom-vurdering-direkte", uuidQueryParams));
                 dto.leggTil(post(SykdomVurderingRestTjeneste.VURDERING_PATH, "sykdom-vurdering-opprettelse", new SykdomVurderingOpprettelseDto(behandling.getUuid().toString())));
                 dto.leggTil(post(SykdomVurderingRestTjeneste.VURDERING_PATH, "sykdom-vurdering-endring", new SykdomVurderingEndringDto(behandling.getUuid().toString())));
-                dto.leggTil(getFraMap(SykdomDokumentRestTjeneste.DOKUMENT_OVERSIKT_PATH, "sykdom-dokument-oversikt", uuidQueryParams));
-                dto.leggTil(getFraMap(SykdomDokumentRestTjeneste.DOKUMENT_LISTE_PATH, "sykdom-dokument-liste", uuidQueryParams));
-                dto.leggTil(getFraMap(SykdomDokumentRestTjeneste.DOKUMENTER_SOM_IKKE_HAR_OPPDATERT_EKSISTERENDE_VURDERINGER_PATH, "sykdom-dokument-eksisterendevurderinger", uuidQueryParams));
-                dto.leggTil(getFraMap(SykdomDokumentRestTjeneste.SYKDOM_INNLEGGELSE_PATH, "sykdom-innleggelse", uuidQueryParams));
-                dto.leggTil(getFraMap(SykdomDokumentRestTjeneste.SYKDOM_DIAGNOSEKODER_PATH, "sykdom-diagnosekoder", uuidQueryParams));
+                dto.leggTil(getFraMap(PleietrengendeSykdomDokumentRestTjeneste.DOKUMENT_OVERSIKT_PATH, "sykdom-dokument-oversikt", uuidQueryParams));
+                dto.leggTil(getFraMap(PleietrengendeSykdomDokumentRestTjeneste.DOKUMENT_LISTE_PATH, "sykdom-dokument-liste", uuidQueryParams));
+                dto.leggTil(getFraMap(PleietrengendeSykdomDokumentRestTjeneste.DOKUMENTER_SOM_IKKE_HAR_OPPDATERT_EKSISTERENDE_VURDERINGER_PATH, "sykdom-dokument-eksisterendevurderinger", uuidQueryParams));
+                dto.leggTil(getFraMap(PleietrengendeSykdomDokumentRestTjeneste.SYKDOM_INNLEGGELSE_PATH, "sykdom-innleggelse", uuidQueryParams));
+                dto.leggTil(getFraMap(PleietrengendeSykdomDokumentRestTjeneste.SYKDOM_DIAGNOSEKODER_PATH, "sykdom-diagnosekoder", uuidQueryParams));
                 dto.leggTil(getFraMap(PleiepengerUttakRestTjeneste.GET_UTTAKSPLAN_PATH, "pleiepenger-sykt-barn-uttaksplan", uuidQueryParams));
+                dto.leggTil(getFraMap(PleiepengerUttakRestTjeneste.GET_UTTAKSPLAN_MED_UTSATT_PERIODE_PATH, "pleiepenger-uttaksplan-med-utsatt", uuidQueryParams));
                 dto.leggTil(getFraMap(PleiepengerUttakRestTjeneste.GET_SKULLE_SØKT_OM_PATH, "psb-manglende-arbeidstid", uuidQueryParams));
+                dto.leggTil(getFraMap(UtenlandsoppholdRestTjeneste.UTTAK_UTENLANDSOPPHOLD, "utenlandsopphold", uuidQueryParams));
                 dto.leggTil(getFraMap(OmsorgenForRestTjeneste.OMSORGEN_FOR_OPPLYSNINGER_PATH, "omsorgen-for", uuidQueryParams));
                 dto.leggTil(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER, "beregning-koblinger", uuidQueryParams));
+                dto.leggTil(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER_TIL_VURDERING, "beregning-koblinger-til-vurdering", uuidQueryParams));
                 dto.leggTil(getFraMap(OverlapendeYtelserRestTjeneste.OVERLAPPENDE_YTELSER_PATH, "overlappende-ytelser", uuidQueryParams));
                 dto.leggTil(getFraMap(VurderTilsynRestTjeneste.BASEPATH, "pleiepenger-sykt-barn-tilsyn", uuidQueryParams));
                 dto.leggTil(getFraMap(RettVedDødRestTjeneste.BASEPATH, "rett-ved-dod", uuidQueryParams));
@@ -397,30 +405,60 @@ public class BehandlingDtoTjeneste {
                 dto.leggTil(getFraMap(SaksbehandlerRestTjeneste.SAKSBEHANDLER_PATH, "saksbehandler-info", uuidQueryParams));
                 dto.leggTil(getFraMap(BehandlingRestTjeneste.DIREKTE_OVERGANG_PATH, "direkte-overgang", uuidQueryParams));
                 leggTilUttakEndepunkt(behandling, dto);
-                break;
-            case PLEIEPENGER_NÆRSTÅENDE:
+            }
+            case PLEIEPENGER_NÆRSTÅENDE -> {
                 dto.leggTil(getFraMap(PersonRestTjeneste.MEDLEMSKAP_V2_PATH, "soeker-medlemskap-v2", uuidQueryParams));
                 dto.leggTil(getFraMap(SykdomRestTjeneste.SYKDOM_AKSJONSPUNKT_PATH, "sykdom-aksjonspunkt", uuidQueryParams));
                 dto.leggTil(getFraMap(SykdomVurderingRestTjeneste.VURDERING_OVERSIKT_SLU_PATH, "sykdom-vurdering-oversikt-slu", uuidQueryParams));
                 dto.leggTil(getFraMap(SykdomVurderingRestTjeneste.VURDERING_PATH, "sykdom-vurdering-direkte", uuidQueryParams));
                 dto.leggTil(post(SykdomVurderingRestTjeneste.VURDERING_PATH, "sykdom-vurdering-opprettelse", new SykdomVurderingOpprettelseDto(behandling.getUuid().toString())));
                 dto.leggTil(post(SykdomVurderingRestTjeneste.VURDERING_PATH, "sykdom-vurdering-endring", new SykdomVurderingEndringDto(behandling.getUuid().toString())));
-                dto.leggTil(getFraMap(SykdomDokumentRestTjeneste.DOKUMENT_OVERSIKT_PATH, "sykdom-dokument-oversikt", uuidQueryParams));
-                dto.leggTil(getFraMap(SykdomDokumentRestTjeneste.DOKUMENT_LISTE_PATH, "sykdom-dokument-liste", uuidQueryParams));
-                dto.leggTil(getFraMap(SykdomDokumentRestTjeneste.DOKUMENTER_SOM_IKKE_HAR_OPPDATERT_EKSISTERENDE_VURDERINGER_PATH, "sykdom-dokument-eksisterendevurderinger", uuidQueryParams));
-                dto.leggTil(getFraMap(SykdomDokumentRestTjeneste.SYKDOM_INNLEGGELSE_PATH, "sykdom-innleggelse", uuidQueryParams));
+                dto.leggTil(getFraMap(PleietrengendeSykdomDokumentRestTjeneste.DOKUMENT_OVERSIKT_PATH, "sykdom-dokument-oversikt", uuidQueryParams));
+                dto.leggTil(getFraMap(PleietrengendeSykdomDokumentRestTjeneste.DOKUMENT_LISTE_PATH, "sykdom-dokument-liste", uuidQueryParams));
+                dto.leggTil(getFraMap(PleietrengendeSykdomDokumentRestTjeneste.DOKUMENTER_SOM_IKKE_HAR_OPPDATERT_EKSISTERENDE_VURDERINGER_PATH, "sykdom-dokument-eksisterendevurderinger", uuidQueryParams));
+                dto.leggTil(getFraMap(PleietrengendeSykdomDokumentRestTjeneste.SYKDOM_INNLEGGELSE_PATH, "sykdom-innleggelse", uuidQueryParams));
                 dto.leggTil(getFraMap(PleiepengerUttakRestTjeneste.GET_UTTAKSPLAN_PATH, "pleiepenger-sykt-barn-uttaksplan", uuidQueryParams));
+                dto.leggTil(getFraMap(PleiepengerUttakRestTjeneste.GET_UTTAKSPLAN_MED_UTSATT_PERIODE_PATH, "pleiepenger-uttaksplan-med-utsatt", uuidQueryParams));
                 dto.leggTil(getFraMap(PleiepengerUttakRestTjeneste.GET_SKULLE_SØKT_OM_PATH, "psb-manglende-arbeidstid", uuidQueryParams));
                 dto.leggTil(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER, "beregning-koblinger", uuidQueryParams));
+                dto.leggTil(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER_TIL_VURDERING, "beregning-koblinger-til-vurdering", uuidQueryParams));
                 dto.leggTil(getFraMap(OverlapendeYtelserRestTjeneste.OVERLAPPENDE_YTELSER_PATH, "overlappende-ytelser", uuidQueryParams));
                 dto.leggTil(getFraMap(VurderTilsynRestTjeneste.BASEPATH, "pleiepenger-sykt-barn-tilsyn", uuidQueryParams));
                 dto.leggTil(getFraMap(PleietrengendeRestTjeneste.BASE_PATH, "om-pleietrengende", uuidQueryParams));
                 dto.leggTil(getFraMap(DokumenterMedUstrukturerteDataRestTjeneste.FRITEKSTDOKUMENTER_PATH, "pleiepenger-fritekstdokumenter", uuidQueryParams));
                 dto.leggTil(getFraMap(SaksbehandlerRestTjeneste.SAKSBEHANDLER_PATH, "saksbehandler-info", uuidQueryParams));
                 leggTilUttakEndepunkt(behandling, dto);
-                break;
-            default:
-                throw new UnsupportedOperationException("Støtter ikke ytelse " + ytelseType);
+            }
+            case OPPLÆRINGSPENGER -> {
+                dto.leggTil(getFraMap(PersonRestTjeneste.MEDLEMSKAP_V2_PATH, "soeker-medlemskap-v2", uuidQueryParams));
+                dto.leggTil(getFraMap(SykdomRestTjeneste.SYKDOM_AKSJONSPUNKT_PATH, "sykdom-aksjonspunkt", uuidQueryParams));
+                dto.leggTil(getFraMap(SykdomVurderingRestTjeneste.VURDERING_OVERSIKT_LVS_PATH, "sykdom-vurdering-oversikt-lvs", uuidQueryParams));
+                dto.leggTil(getFraMap(SykdomVurderingRestTjeneste.VURDERING_PATH, "sykdom-vurdering-direkte", uuidQueryParams));
+                dto.leggTil(post(SykdomVurderingRestTjeneste.VURDERING_PATH, "sykdom-vurdering-opprettelse", new SykdomVurderingOpprettelseDto(behandling.getUuid().toString())));
+                dto.leggTil(post(SykdomVurderingRestTjeneste.VURDERING_PATH, "sykdom-vurdering-endring", new SykdomVurderingEndringDto(behandling.getUuid().toString())));
+                dto.leggTil(getFraMap(PleietrengendeSykdomDokumentRestTjeneste.DOKUMENT_OVERSIKT_PATH, "sykdom-dokument-oversikt", uuidQueryParams));
+                dto.leggTil(getFraMap(PleietrengendeSykdomDokumentRestTjeneste.DOKUMENT_LISTE_PATH, "sykdom-dokument-liste", uuidQueryParams));
+                dto.leggTil(getFraMap(PleietrengendeSykdomDokumentRestTjeneste.DOKUMENTER_SOM_IKKE_HAR_OPPDATERT_EKSISTERENDE_VURDERINGER_PATH, "sykdom-dokument-eksisterendevurderinger", uuidQueryParams));
+                dto.leggTil(getFraMap(PleietrengendeSykdomDokumentRestTjeneste.SYKDOM_INNLEGGELSE_PATH, "sykdom-innleggelse", uuidQueryParams));
+                dto.leggTil(getFraMap(PleietrengendeSykdomDokumentRestTjeneste.SYKDOM_DIAGNOSEKODER_PATH, "sykdom-diagnosekoder", uuidQueryParams));
+                dto.leggTil(getFraMap(PleiepengerUttakRestTjeneste.GET_UTTAKSPLAN_PATH, "pleiepenger-sykt-barn-uttaksplan", uuidQueryParams));
+                dto.leggTil(getFraMap(PleiepengerUttakRestTjeneste.GET_UTTAKSPLAN_MED_UTSATT_PERIODE_PATH, "pleiepenger-uttaksplan-med-utsatt", uuidQueryParams));
+                dto.leggTil(getFraMap(PleiepengerUttakRestTjeneste.GET_SKULLE_SØKT_OM_PATH, "psb-manglende-arbeidstid", uuidQueryParams));
+                dto.leggTil(getFraMap(UtenlandsoppholdRestTjeneste.UTTAK_UTENLANDSOPPHOLD, "utenlandsopphold", uuidQueryParams));
+                dto.leggTil(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER, "beregning-koblinger", uuidQueryParams));
+                dto.leggTil(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER_TIL_VURDERING, "beregning-koblinger-til-vurdering", uuidQueryParams));
+                dto.leggTil(getFraMap(OverlapendeYtelserRestTjeneste.OVERLAPPENDE_YTELSER_PATH, "overlappende-ytelser", uuidQueryParams));
+                dto.leggTil(getFraMap(PleietrengendeRestTjeneste.BASE_PATH, "om-pleietrengende", uuidQueryParams));
+                dto.leggTil(getFraMap(DokumenterMedUstrukturerteDataRestTjeneste.FRITEKSTDOKUMENTER_PATH, "pleiepenger-fritekstdokumenter", uuidQueryParams));
+                dto.leggTil(getFraMap(SaksbehandlerRestTjeneste.SAKSBEHANDLER_PATH, "saksbehandler-info", uuidQueryParams));
+                dto.leggTil(getFraMap(BehandlingRestTjeneste.DIREKTE_OVERGANG_PATH, "direkte-overgang", uuidQueryParams));
+                dto.leggTil(getFraMap(InstitusjonRestTjeneste.BASEPATH, "institusjon", uuidQueryParams));
+                dto.leggTil(getFraMap(GjennomgåttOpplæringRestTjeneste.BASEPATH, "gjennomgått-opplæring", uuidQueryParams));
+                dto.leggTil(getFraMap(NødvendigOpplæringRestTjeneste.BASEPATH, "nødvendig-opplæring", uuidQueryParams));
+                dto.leggTil(getFraMap(ReisetidRestTjeneste.BASEPATH, "reisetid", uuidQueryParams));
+                leggTilUttakEndepunkt(behandling, dto);
+            }
+            default -> throw new UnsupportedOperationException("Støtter ikke ytelse " + ytelseType);
         }
 
     }
@@ -451,6 +489,12 @@ public class BehandlingDtoTjeneste {
         return Optional.of(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_ALLE, "beregningsgrunnlag-alle", queryParams));
     }
 
+    private Optional<ResourceLink> lagBeregningsgrunnlagReferanserLink(Behandling behandling) {
+        var queryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
+        return Optional.of(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER_TIL_VURDERING, "beregningreferanser-til-vurdering", queryParams));
+    }
+
+
     private Optional<ResourceLink> lagOverstyrInputBergningLink(Behandling behandling) {
         var queryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
         return Optional.of(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_OVERSTYR_INPUT, "overstyr-input-beregning", queryParams));
@@ -461,7 +505,7 @@ public class BehandlingDtoTjeneste {
     }
 
     private Optional<ResourceLink> lagSimuleringResultatLink(Behandling behandling) {
-        return Optional.of(ResourceLink.post(k9OppdragProxyUrl + "/simulering/detaljert-resultat", "simuleringResultat", behandling.getUuid()));
+        return Optional.of(ResourceLink.eksternPost(k9OppdragProxyUrl + "/simulering/detaljert-resultat", "simuleringResultat", behandling.getUuid()));
     }
 
     private List<ResourceLink> lagFormidlingLink(Behandling behandling) {
@@ -476,11 +520,11 @@ public class BehandlingDtoTjeneste {
             "avsenderApplikasjon", AvsenderApplikasjon.K9SAK.name());
 
         List<ResourceLink> links = new ArrayList<>();
-        links.add(ResourceLink.get(FORMIDLING_PATH + "/brev/maler", "brev-maler", standardFormidlingParams));
-        links.add(ResourceLink.get(FORMIDLING_PATH + "/brev/tilgjengeligevedtaksbrev", "tilgjengelige-vedtaksbrev", standardFormidlingParams));
-        links.add(ResourceLink.get(FORMIDLING_PATH + "/brev/informasjonsbehov", "informasjonsbehov-vedtaksbrev", standardFormidlingParams));
-        links.add(ResourceLink.get(FORMIDLING_DOKUMENTDATA_PATH, "dokumentdata-hente", behandlingUuid));
-        links.add(ResourceLink.post(FORMIDLING_DOKUMENTDATA_PATH + "/" + behandling.getUuid(), "dokumentdata-lagre", null));
+        links.add(ResourceLink.eksternGet(FORMIDLING_PATH + "/brev/maler", "brev-maler", standardFormidlingParams));
+        links.add(ResourceLink.eksternGet(FORMIDLING_PATH + "/brev/tilgjengeligevedtaksbrev", "tilgjengelige-vedtaksbrev", standardFormidlingParams));
+        links.add(ResourceLink.eksternGet(FORMIDLING_PATH + "/brev/informasjonsbehov", "informasjonsbehov-vedtaksbrev", standardFormidlingParams));
+        links.add(ResourceLink.eksternGet(FORMIDLING_DOKUMENTDATA_PATH, "dokumentdata-hente", behandlingUuid));
+        links.add(ResourceLink.eksternPost(FORMIDLING_DOKUMENTDATA_PATH + "/" + behandling.getUuid(), "dokumentdata-lagre", null));
         return links;
     }
 
@@ -496,8 +540,13 @@ public class BehandlingDtoTjeneste {
         return links;
     }
 
-    public Boolean finnBehandlingOperasjonRettigheter(Behandling behandling) {
-        return this.søknadRepository.hentSøknadHvisEksisterer(behandling.getId()).isPresent();
+    private List<ResourceLink> lagLosLink(Behandling behandling) {
+        var queryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
+
+        List<ResourceLink> links = new ArrayList<>();
+        links.add(getFraMap(LosRestTjeneste.MERKNAD_PATH, "los-hente-merknad", queryParams));
+        links.add(post(LosRestTjeneste.MERKNAD_PATH, "los-lagre-merknad", new BehandlingUuidDto(behandling.getUuid())));
+        return links;
     }
 
     public BehandlingOperasjonerDto lovligeOperasjoner(Behandling b) {

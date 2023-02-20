@@ -13,11 +13,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakLås;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakLåsRepository;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.task.OpprettOppgaveVurderKonsekvensTask;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 public class OpprettOppgaveVurderKonsekvensTaskTest {
 
@@ -42,7 +42,7 @@ public class OpprettOppgaveVurderKonsekvensTaskTest {
     @Test
     public void skal_opprette_oppgave_for_å_vurdere_konsekvens_basert_på_fagsakId() {
         // Arrange
-        ProsessTaskData prosessTaskData = new ProsessTaskData(OpprettOppgaveVurderKonsekvensTask.TASKTYPE);
+        ProsessTaskData prosessTaskData =  ProsessTaskData.forProsessTask(OpprettOppgaveVurderKonsekvensTask.class);
         prosessTaskData.setFagsakId(FAGSAK_ID);
         prosessTaskData.setProperty(OpprettOppgaveVurderKonsekvensTask.KEY_BESKRIVELSE, OpprettOppgaveVurderKonsekvensTask.STANDARD_BESKRIVELSE);
         prosessTaskData.setProperty(OpprettOppgaveVurderKonsekvensTask.KEY_PRIORITET, OpprettOppgaveVurderKonsekvensTask.PRIORITET_NORM);

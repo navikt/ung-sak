@@ -8,7 +8,7 @@ import no.nav.k9.sak.inngangsvilkår.VilkårUtfallOversetter;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.Medisinskvilkår;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.medisinsk.regelmodell.MedisinskvilkårGrunnlag;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlagBehandling;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlag;
 
 public class MedisinskVilkårTjeneste {
 
@@ -19,8 +19,8 @@ public class MedisinskVilkårTjeneste {
 
     }
 
-    public VilkårData vurderPerioder(VilkårType vilkåret, BehandlingskontrollKontekst kontekst, DatoIntervallEntitet periodeTilVurdering, SykdomGrunnlagBehandling sykdomGrunnlagBehandling) {
-        MedisinskvilkårGrunnlag grunnlag = inngangsvilkårOversetter.oversettTilRegelModellMedisinsk(vilkåret, kontekst.getBehandlingId(), periodeTilVurdering, sykdomGrunnlagBehandling);
+    public VilkårData vurderPerioder(VilkårType vilkåret, BehandlingskontrollKontekst kontekst, DatoIntervallEntitet periodeTilVurdering, MedisinskGrunnlag medisinskGrunnlag) {
+        MedisinskvilkårGrunnlag grunnlag = inngangsvilkårOversetter.oversettTilRegelModellMedisinsk(vilkåret, kontekst.getBehandlingId(), periodeTilVurdering, medisinskGrunnlag);
         MedisinskVilkårResultat resultat = new MedisinskVilkårResultat();
 
         final var evaluation = new Medisinskvilkår().evaluer(grunnlag, resultat);

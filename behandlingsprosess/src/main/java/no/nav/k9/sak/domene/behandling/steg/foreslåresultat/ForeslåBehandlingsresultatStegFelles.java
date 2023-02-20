@@ -1,17 +1,16 @@
 package no.nav.k9.sak.domene.behandling.steg.foreslåresultat;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
-
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -19,6 +18,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
@@ -77,7 +77,7 @@ public abstract class ForeslåBehandlingsresultatStegFelles implements ForeslåB
                 "Behandling " + behandling.getId() + " har ugyldig resultatType=" + resultatType + ", støtter ikke allerede henlagt behandling i Foreslå Behandlingsresultat");
         }
 
-        if (BehandlingResultatType.getInnvilgetKoder().contains(resultatType) || Objects.equals(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, behandling.getFagsakYtelseType())) {
+        if (BehandlingResultatType.getInnvilgetKoder().contains(resultatType) || Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN, FagsakYtelseType.OLP, FagsakYtelseType.OMP).contains(behandling.getFagsakYtelseType())) {
             validerAtAlleVilkårErVurdert(behandling.getId());
         }
     }
@@ -102,7 +102,7 @@ public abstract class ForeslåBehandlingsresultatStegFelles implements ForeslåB
     private void validerVilkår(Vilkår vilkår) {
         List<VilkårPeriode> ikkeVurdertePerioder = vilkår.getPerioder().stream()
             .filter((Predicate<? super VilkårPeriode>) at -> Utfall.IKKE_VURDERT.equals(at.getGjeldendeUtfall()))
-            .collect(Collectors.toList());
+            .toList();
         if (!ikkeVurdertePerioder.isEmpty()) {
             throw new IllegalStateException(
                 "Vilkåret " + vilkår.getVilkårType() + " har en eller flere perioder som ikke er vurdert: " + ikkeVurdertePerioder);
@@ -115,6 +115,10 @@ public abstract class ForeslåBehandlingsresultatStegFelles implements ForeslåB
             var behandlingId = kontekst.getBehandlingId();
             Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
             behandling.setBehandlingResultatType(BehandlingResultatType.IKKE_FASTSATT);
+
+            var beslutterFatteVedtak = behandling.getÅpentAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.FATTER_VEDTAK);
+            beslutterFatteVedtak.ifPresent(Aksjonspunkt::avbryt);
+
             behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
         }
     }

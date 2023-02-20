@@ -63,7 +63,19 @@ public class EtablertTilsynTjeneste {
         final EtablertTilsyn forrigeBehandlingEtablertTilsyn = behandlingOpt.flatMap(behandlingId -> etablertTilsynRepository.hentHvisEksisterer(behandlingId))
             .map(EtablertTilsynGrunnlag::getEtablertTilsyn)
             .orElse(new EtablertTilsyn(List.of()));
-        return uhåndterteEndringerFraForrige(behandlingRef, forrigeBehandlingEtablertTilsyn).compress();
+
+        var etablertTilsyn = utledGrunnlagForBehandling(behandlingRef);
+
+        return sammenlignGrunnlag(etablertTilsyn, forrigeBehandlingEtablertTilsyn).compress();
+    }
+
+    private EtablertTilsyn utledGrunnlagForBehandling(BehandlingReferanse behandlingRef) {
+        if (behandlingRef.getBehandlingStatus().erFerdigbehandletStatus()) {
+            return etablertTilsynRepository.hentHvisEksisterer(behandlingRef.getBehandlingId())
+                .map(EtablertTilsynGrunnlag::getEtablertTilsyn)
+                .orElse(new EtablertTilsyn(List.of()));
+        }
+        return utledGrunnlagForTilsynstidlinje(behandlingRef);
     }
 
     public LocalDateTimeline<Boolean> finnForskjellerFraEksisterendeVersjon(BehandlingReferanse behandlingRef) {
@@ -82,6 +94,10 @@ public class EtablertTilsynTjeneste {
     private LocalDateTimeline<Boolean> uhåndterteEndringerFraForrige(BehandlingReferanse behandlingRef, EtablertTilsyn forrigeBehandlingEtablertTilsyn) {
         final EtablertTilsyn nyBehandlingtablertTilsyn = utledGrunnlagForTilsynstidlinje(behandlingRef);
 
+        return sammenlignGrunnlag(forrigeBehandlingEtablertTilsyn, nyBehandlingtablertTilsyn);
+    }
+
+    private LocalDateTimeline<Boolean> sammenlignGrunnlag(EtablertTilsyn forrigeBehandlingEtablertTilsyn, EtablertTilsyn nyBehandlingtablertTilsyn) {
         final LocalDateTimeline<Duration> forrigeBehandlingEtablertTilsynTidslinje = tilTidslinje(forrigeBehandlingEtablertTilsyn);
         final LocalDateTimeline<Duration> nyBehandlingEtablertTilsynTidslinje = tilTidslinje(nyBehandlingtablertTilsyn);
 
@@ -112,11 +128,11 @@ public class EtablertTilsynTjeneste {
                 .flatMap(Collection::stream)
                 .toList();
 
-            for (var periode : tilsynsordningPerioder) {
-                final var kilde = søkersSaksnummer.equals(kravDokument.getFagsak().getSaksnummer()) ? Kilde.SØKER : Kilde.ANDRE;
-                final var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode.getPeriode().getFomDato(), periode.getPeriode().getTomDato(), new UtledetEtablertTilsyn(periode.getVarighet(), kilde, kravDokument.getKravDokument().getJournalpostId()))));
-                resultatTimeline = resultatTimeline.combine(timeline, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-            }
+            final var kilde = søkersSaksnummer.equals(kravDokument.getFagsak().getSaksnummer()) ? Kilde.SØKER : Kilde.ANDRE;
+            var tidslinjeForDokumentet = new LocalDateTimeline<>(tilsynsordningPerioder.stream()
+                .map(periode -> new LocalDateSegment<>(periode.getPeriode().toLocalDateInterval(), new UtledetEtablertTilsyn(periode.getVarighet(), kilde, kravDokument.getKravDokument().getJournalpostId())))
+                .toList());
+            resultatTimeline = resultatTimeline.combine(tidslinjeForDokumentet, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
         return resultatTimeline.compress();
     }

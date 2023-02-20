@@ -59,7 +59,7 @@ public class UnntakEtablertTilsynOppdateringService {
 
         unntakEtablertTilsynGrunnlagRepository.lagre(behandlingId, nyttUnntakEtablertTilsynForPleietrengende);
 
-        return OppdateringResultat.utenOverhopp();
+        return OppdateringResultat.nyttResultat();
     }
 
     private UnntakEtablertTilsyn oppdater(UnntakEtablertTilsyn unntakEtablertTilsyn, VurderingDto vurdering, Long behandlingId, AktørId søkersAktørId) {

@@ -4,7 +4,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
+
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,10 +17,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 
@@ -50,6 +48,12 @@ public class BeregningsgrunnlagPerioderGrunnlag extends BaseEntitet {
     @JoinColumn(name = "bg_ovst_input_id", nullable = false, updatable = false)
     private InputOverstyringPerioder inputOverstyringPerioder;
 
+    @ChangeTracked
+    @ManyToOne
+    @JoinColumn(name = "bg_pgi_id", nullable = false, updatable = false)
+    private PGIPerioder PGIPerioder;
+
+
     @Column(name = "aktiv", nullable = false, updatable = true)
     private boolean aktiv = true;
 
@@ -64,6 +68,7 @@ public class BeregningsgrunnlagPerioderGrunnlag extends BaseEntitet {
         this.grunnlagPerioder = eksisterende.grunnlagPerioder != null ? new BeregningsgrunnlagPerioder(eksisterende.grunnlagPerioder) : null;
         this.kompletthetPerioder = eksisterende.kompletthetPerioder != null ? new KompletthetPerioder(eksisterende.kompletthetPerioder) : null;
         this.inputOverstyringPerioder = eksisterende.inputOverstyringPerioder != null ? new InputOverstyringPerioder(eksisterende.inputOverstyringPerioder) : null;
+        this.PGIPerioder = eksisterende.PGIPerioder != null ? new PGIPerioder(eksisterende.PGIPerioder) : null;
     }
 
     void setBehandlingId(Long behandlingId) {
@@ -80,6 +85,10 @@ public class BeregningsgrunnlagPerioderGrunnlag extends BaseEntitet {
 
     InputOverstyringPerioder getInputOverstyringHolder() {
         return inputOverstyringPerioder;
+    }
+
+    PGIPerioder getPGIHolder() {
+        return PGIPerioder;
     }
 
     public List<BeregningsgrunnlagPeriode> getGrunnlagPerioder() {
@@ -103,12 +112,16 @@ public class BeregningsgrunnlagPerioderGrunnlag extends BaseEntitet {
         return inputOverstyringPerioder.getInputOverstyringPerioder();
     }
 
-    public Optional<BeregningsgrunnlagPeriode> finnGrunnlagFor(LocalDate skjæringstidspunkt) {
-        return getGrunnlagPerioder().stream().filter(it -> it.getSkjæringstidspunkt().equals(skjæringstidspunkt)).findFirst();
+    public List<PGIPeriode> getPGIPerioder() {
+        if (PGIPerioder == null) {
+            return List.of();
+        }
+        return PGIPerioder.getPGIPerioder();
     }
 
-    public Optional<BeregningsgrunnlagPeriode> finnGrunnlagFor(UUID eksternRef) {
-        return getGrunnlagPerioder().stream().filter(it -> it.getEksternReferanse().equals(eksternRef)).findFirst();
+
+    public Optional<BeregningsgrunnlagPeriode> finnGrunnlagFor(LocalDate skjæringstidspunkt) {
+        return getGrunnlagPerioder().stream().filter(it -> it.getSkjæringstidspunkt().equals(skjæringstidspunkt)).findFirst();
     }
 
     void deaktiver(LocalDate skjæringstidspunkt) {
@@ -137,6 +150,13 @@ public class BeregningsgrunnlagPerioderGrunnlag extends BaseEntitet {
         }
     }
 
+    void deaktiverPGIPeriode(LocalDate skjæringstidspunkt) {
+        Objects.requireNonNull(skjæringstidspunkt);
+        if (this.PGIPerioder != null) {
+            this.PGIPerioder.deaktiver(skjæringstidspunkt);
+        }
+    }
+
     void leggTil(BeregningsgrunnlagPeriode periode) {
         Objects.requireNonNull(periode);
         if (this.grunnlagPerioder == null) {
@@ -159,6 +179,14 @@ public class BeregningsgrunnlagPerioderGrunnlag extends BaseEntitet {
             this.inputOverstyringPerioder = new InputOverstyringPerioder();
         }
         this.inputOverstyringPerioder.leggTil(periode);
+    }
+
+    void leggTil(PGIPeriode periode) {
+        Objects.requireNonNull(periode);
+        if (this.PGIPerioder == null) {
+            this.PGIPerioder = new PGIPerioder();
+        }
+        this.PGIPerioder.leggTil(periode);
     }
 
 

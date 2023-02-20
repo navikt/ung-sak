@@ -17,7 +17,7 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
-import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -42,7 +42,7 @@ public class InnhentDokumentTjeneste {
     private final BehandlingRepository behandlingRepository;
     private final BehandlingLåsRepository behandlingLåsRepository;
     private final BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
-    private final ProsessTaskRepository taskRepository;
+    private final ProsessTaskTjeneste taskRepository;
 
     @Inject
     public InnhentDokumentTjeneste(@Any Instance<Dokumentmottaker> mottakere,
@@ -50,7 +50,7 @@ public class InnhentDokumentTjeneste {
                                    Behandlingsoppretter behandlingsoppretter,
                                    BehandlingRepositoryProvider repositoryProvider,
                                    BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
-                                   ProsessTaskRepository taskRepository) {
+                                   ProsessTaskTjeneste taskRepository) {
         this.mottakere = mottakere;
         this.dokumentMottakerFelles = dokumentMottakerFelles;
         this.behandlingsoppretter = behandlingsoppretter;

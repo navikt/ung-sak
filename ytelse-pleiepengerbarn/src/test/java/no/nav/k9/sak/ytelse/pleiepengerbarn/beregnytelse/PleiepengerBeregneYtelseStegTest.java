@@ -13,15 +13,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
+import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusInMemoryTjeneste;
@@ -48,27 +46,33 @@ import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
+import no.nav.k9.sak.vilkår.VilkårTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse.feriepenger.FinnFeriepengepåvirkendeFagsakerTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse.feriepenger.HentFeriepengeAndelerTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakInMemoryTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.AnnenPart;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Utenlandsopphold;
+import no.nav.pleiepengerbarn.uttak.kontrakter.UtenlandsoppholdÅrsak;
 import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
 public class PleiepengerBeregneYtelseStegTest {
-
     @Inject
-    private EntityManager entityManager;
-
     private BehandlingRepositoryProvider repositoryProvider;
+    @Inject
     private BeregningsresultatRepository beregningsresultatRepository;
+    @Inject
     private BehandlingRepository behandlingRepository;
-
+    @Inject
+    private BeregningPerioderGrunnlagRepository bgGrunnlagRepository;
     @Inject
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     @Inject
@@ -78,7 +82,8 @@ public class PleiepengerBeregneYtelseStegTest {
     @Mock
     private FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste = mock(FastsettBeregningsresultatTjeneste.class);
     private BeregnFeriepengerTjeneste beregnFeriepengerTjeneste = mock(BeregnFeriepengerTjeneste.class);
-    private BeregningPerioderGrunnlagRepository bgGrunnlagRepository;
+    private FinnFeriepengepåvirkendeFagsakerTjeneste finnFeriepengepåvirkendeFagsakerTjeneste = mock(FinnFeriepengepåvirkendeFagsakerTjeneste.class);
+    private HentFeriepengeAndelerTjeneste hentAndelserSomKanGiFeriepengerTjeneste = mock(HentFeriepengeAndelerTjeneste.class);
     private BeregningTjeneste beregningTjeneste;
 
     private PleiepengerBeregneYtelseSteg steg;
@@ -86,11 +91,20 @@ public class PleiepengerBeregneYtelseStegTest {
 
     @BeforeEach
     public void setup() {
-        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-        beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
-        behandlingRepository = repositoryProvider.getBehandlingRepository();
-        bgGrunnlagRepository = new BeregningPerioderGrunnlagRepository(entityManager, repositoryProvider.getVilkårResultatRepository());
-        beregningTjeneste = new BeregningsgrunnlagTjeneste(new UnitTestLookupInstanceImpl<>(kalkulusTjeneste), repositoryProvider.getVilkårResultatRepository(), bgGrunnlagRepository, true);
+        beregningTjeneste = new BeregningsgrunnlagTjeneste(
+            new UnitTestLookupInstanceImpl<>(kalkulusTjeneste),
+            repositoryProvider.getVilkårResultatRepository(), bgGrunnlagRepository,
+            new VilkårTjeneste(behandlingRepository,
+                null,
+                null,
+                null,
+                repositoryProvider.getVilkårResultatRepository(),
+                repositoryProvider.getFagsakRepository()),
+            new VilkårPeriodeFilterProvider(
+                repositoryProvider.getFagsakRepository(),
+                repositoryProvider.getVilkårResultatRepository(),
+                new UnitTestLookupInstanceImpl<>(null),
+                new UnitTestLookupInstanceImpl<>(null)));
         beregningsresultat = BeregningsresultatEntitet.builder()
             .medRegelInput("regelInput")
             .medRegelSporing("regelSporing")
@@ -98,7 +112,10 @@ public class PleiepengerBeregneYtelseStegTest {
         steg = new PleiepengerBeregneYtelseSteg(repositoryProvider, beregningTjeneste,
             fastsettBeregningsresultatTjeneste,
             uttakTjeneste,
-            new UnitTestLookupInstanceImpl<>(beregnFeriepengerTjeneste));
+            new UnitTestLookupInstanceImpl<>(beregnFeriepengerTjeneste),
+            new UnitTestLookupInstanceImpl<>(finnFeriepengepåvirkendeFagsakerTjeneste),
+            hentAndelserSomKanGiFeriepengerTjeneste
+        );
     }
 
     private Behandling lagre(AbstractTestScenario<?> scenario) {
@@ -184,7 +201,8 @@ public class PleiepengerBeregneYtelseStegTest {
     private void byggUttakPlanResultat(Behandling behandling, LocalDate stp) {
         var periode = new LukketPeriode(stp, stp.plusDays(2));
         var uttaksplan = new Uttaksplan(Map.of(periode, new UttaksperiodeInfo(no.nav.pleiepengerbarn.uttak.kontrakter.Utfall.OPPFYLT,
-            BigDecimal.valueOf(100), List.of(), BigDecimal.valueOf(100), null, Set.of(), Map.of(), BigDecimal.valueOf(100), null, Set.of(), behandling.getUuid().toString(), AnnenPart.ALENE, null, null, null, false)), List.of());
+            BigDecimal.valueOf(100), List.of(), BigDecimal.valueOf(100), null, Set.of(), Map.of(), BigDecimal.valueOf(100), null, Set.of(), behandling.getUuid().toString(), AnnenPart.ALENE, null, null, null, false, new Utenlandsopphold(null,
+            UtenlandsoppholdÅrsak.INGEN))), List.of());
 
         uttakTjeneste.lagreUttakResultatPerioder(behandling.getFagsak().getSaksnummer(), behandling.getUuid(), uttaksplan);
     }

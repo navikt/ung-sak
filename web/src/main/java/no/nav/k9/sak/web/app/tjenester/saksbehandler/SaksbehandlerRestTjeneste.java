@@ -6,10 +6,13 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -20,16 +23,16 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.exception.VLException;
 import no.nav.k9.felles.integrasjon.ldap.LdapBruker;
 import no.nav.k9.felles.integrasjon.ldap.LdapBrukeroppslag;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.felles.util.LRUCache;
+import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
@@ -38,8 +41,8 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.saksbehandler.SaksbehandlerDto;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingService;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurderingVersjon;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste;
 
 @Path("/saksbehandler")
 @ApplicationScoped
@@ -54,7 +57,7 @@ public class SaksbehandlerRestTjeneste {
 
     private HistorikkRepository historikkRepository;
     private BehandlingRepository behandlingRepository;
-    private SykdomVurderingService sykdomVurderingService;
+    private SykdomVurderingTjeneste sykdomVurderingTjeneste;
 
     public SaksbehandlerRestTjeneste() {
         //NOSONAR
@@ -65,11 +68,11 @@ public class SaksbehandlerRestTjeneste {
         @KonfigVerdi(value = "systembruker.username", required = false) String systembruker,
         HistorikkRepository historikkRepository,
         BehandlingRepository behandlingRepository,
-        SykdomVurderingService sykdomVurderingService) {
+        SykdomVurderingTjeneste sykdomVurderingTjeneste) {
         this.systembruker = systembruker;
         this.historikkRepository = historikkRepository;
         this.behandlingRepository = behandlingRepository;
-        this.sykdomVurderingService = sykdomVurderingService;
+        this.sykdomVurderingTjeneste = sykdomVurderingTjeneste;
     }
 
     @GET
@@ -86,39 +89,61 @@ public class SaksbehandlerRestTjeneste {
         @NotNull
         @Valid
         @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-            BehandlingUuidDto behandlingUuid) {
+        BehandlingUuidDto behandlingUuid) {
 
         Behandling behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
         List<Historikkinnslag> historikkinnslag = historikkRepository.hentHistorikkForSaksnummer(behandling.getFagsak().getSaksnummer());
 
-        LocalDateTimeline<SykdomVurderingVersjon> ktpTimeline = sykdomVurderingService.hentVurderinger(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, behandling);
-        LocalDateTimeline<SykdomVurderingVersjon> toopTimeline = sykdomVurderingService.hentVurderinger(SykdomVurderingType.TO_OMSORGSPERSONER, behandling);
+        LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> ktpTimeline = sykdomVurderingTjeneste.hentVurderinger(SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE, behandling);
+        LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> toopTimeline = sykdomVurderingTjeneste.hentVurderinger(SykdomVurderingType.TO_OMSORGSPERSONER, behandling);
 
-        Set<String> unikeIdenter = historikkinnslag.stream().map(i -> i.getOpprettetAv()).collect(Collectors.toSet());
-        unikeIdenter.addAll(historikkinnslag.stream().map(i -> i.getEndretAv()).collect(Collectors.toSet()));
-        unikeIdenter.addAll(ktpTimeline.stream().map(i -> i.getValue().getEndretAv()).collect(Collectors.toSet()));
-        unikeIdenter.addAll(toopTimeline.stream().map(i -> i.getValue().getEndretAv()).collect(Collectors.toSet()));
+        Set<String> unikeIdenter = historikkinnslag.stream()
+            .map(BaseEntitet::getOpprettetAv)
+            .collect(Collectors.toSet());
+
+        unikeIdenter.addAll(historikkinnslag.stream()
+            .map(BaseEntitet::getEndretAv)
+            .collect(Collectors.toSet()));
+
+        unikeIdenter.addAll(ktpTimeline.stream()
+            .map(LocalDateSegment::getValue)
+            .map(PleietrengendeSykdomVurderingVersjon::getEndretAv)
+            .collect(Collectors.toSet()));
+
+        unikeIdenter.addAll(toopTimeline.stream()
+            .map(LocalDateSegment::getValue)
+            .map(PleietrengendeSykdomVurderingVersjon::getEndretAv)
+            .collect(Collectors.toSet()));
 
         unikeIdenter.remove(systembruker);
 
         Map<String, String> identTilNavn = new HashMap<>();
 
-        unikeIdenter.forEach(ident -> {
-            if (ident != null) {
-                if (!identTilNavn.containsKey(ident)) {
-                    String saksbehandlerCachet = cache.get(ident);
-                    if (saksbehandlerCachet != null) {
-                        identTilNavn.put(ident, saksbehandlerCachet);
-                    } else {
-                        LdapBruker ldapBruker = new LdapBrukeroppslag().hentBrukerinformasjon(ident);
-                        String brukernavn = ldapBruker.getDisplayName();
-                        cache.put(ident, brukernavn);
-                    }
-                }
-            }
-        });
+        unikeIdenter.stream()
+            .filter(Objects::nonNull)
+            .map(String::trim)
+            .forEach(ident -> hentNavForIdent(identTilNavn, ident));
 
         return new SaksbehandlerDto(identTilNavn);
+    }
+
+    private void hentNavForIdent(Map<String, String> identTilNavn, String ident) {
+        if (!identTilNavn.containsKey(ident)) {
+            String saksbehandlerCachet = cache.get(ident);
+            if (saksbehandlerCachet == null) {
+                try {
+                    LdapBruker ldapBruker = new LdapBrukeroppslag().hentBrukerinformasjon(ident);
+                    String brukernavn = ldapBruker.getDisplayName();
+                    cache.put(ident, brukernavn);
+                    saksbehandlerCachet = brukernavn;
+                } catch (VLException e) {
+                    // Feil mot LDAP
+                }
+            }
+            if (saksbehandlerCachet != null) {
+                identTilNavn.put(ident, saksbehandlerCachet);
+            }
+        }
     }
 
 }

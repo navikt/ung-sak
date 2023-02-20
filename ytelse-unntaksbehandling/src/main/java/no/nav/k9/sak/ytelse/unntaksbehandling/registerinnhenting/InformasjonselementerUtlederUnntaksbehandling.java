@@ -17,7 +17,7 @@ import no.nav.k9.sak.domene.registerinnhenting.InformasjonselementerUtleder;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
-@BehandlingTypeRef("BT-010")
+@BehandlingTypeRef(BehandlingType.UNNTAKSBEHANDLING)
 public class InformasjonselementerUtlederUnntaksbehandling implements InformasjonselementerUtleder {
 
     private static final Map<BehandlingType, Set<RegisterdataType>> FILTER = Map.of(

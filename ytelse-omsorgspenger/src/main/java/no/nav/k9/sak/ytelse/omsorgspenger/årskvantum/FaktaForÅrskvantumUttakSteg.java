@@ -1,8 +1,10 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.KONTROLLER_FAKTA_UTTAK;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
@@ -14,9 +16,9 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 
 /** Samle sammen fakta for fravær. */
 @ApplicationScoped
-@BehandlingStegRef(kode = "KOFAKUT")
+@BehandlingStegRef(value = KONTROLLER_FAKTA_UTTAK)
 @BehandlingTypeRef
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 public class FaktaForÅrskvantumUttakSteg implements BehandlingSteg {
 
     @SuppressWarnings("unused")

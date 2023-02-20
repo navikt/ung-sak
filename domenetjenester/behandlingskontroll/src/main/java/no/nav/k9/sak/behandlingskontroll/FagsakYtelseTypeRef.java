@@ -48,9 +48,7 @@ public @interface FagsakYtelseTypeRef {
      *
      * @see no.nav.k9.kodeverk.behandling.FagsakYtelseType
      */
-    String value()
-
-    default "*";
+    FagsakYtelseType value() default FagsakYtelseType.UDEFINERT;
 
     /**
      * container for repeatable annotations.
@@ -70,22 +68,18 @@ public @interface FagsakYtelseTypeRef {
      */
     public static class FagsakYtelseTypeRefLiteral extends AnnotationLiteral<FagsakYtelseTypeRef> implements FagsakYtelseTypeRef {
 
-        private String navn;
+        private FagsakYtelseType navn;
 
         public FagsakYtelseTypeRefLiteral() {
-            this("*");
-        }
-
-        public FagsakYtelseTypeRefLiteral(String navn) {
-            this.navn = navn;
+            this.navn = FagsakYtelseType.UDEFINERT;
         }
 
         public FagsakYtelseTypeRefLiteral(FagsakYtelseType ytelseType) {
-            this.navn = (ytelseType == null ? "*" : ytelseType.getKode());
+            this.navn = (ytelseType == null ? FagsakYtelseType.UDEFINERT : ytelseType);
         }
 
         @Override
-        public String value() {
+        public FagsakYtelseType value() {
             return navn;
         }
 
@@ -97,20 +91,8 @@ public @interface FagsakYtelseTypeRef {
         private Lookup() {
         }
 
-        public static <I> Optional<I> find(Class<I> cls, String ytelseTypeKode) {
-            return find(cls, (CDI<I>) CDI.current(), ytelseTypeKode);
-        }
-
         public static <I> Optional<I> find(Class<I> cls, FagsakYtelseType ytelseTypeKode) {
-            return find(cls, (CDI<I>) CDI.current(), ytelseTypeKode.getKode());
-        }
-
-        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, FagsakYtelseType ytelseTypeKode) {
-            return find(cls, instances, ytelseTypeKode.getKode());
-        }
-
-        public static <I> Optional<I> find(Instance<I> instances, String ytelseTypeKode) {
-            return find(null, instances, ytelseTypeKode);
+            return find(cls, (CDI<I>) CDI.current(), ytelseTypeKode);
         }
 
         /**
@@ -118,14 +100,14 @@ public @interface FagsakYtelseTypeRef {
          * injected med riktig forventet klassetype og @Any qualifier.
          */
         public static <I> Optional<I> find(Instance<I> instances, FagsakYtelseType ytelseTypeKode) {
-            return find(null, instances, ytelseTypeKode.getKode());
+            return find(null, instances, ytelseTypeKode);
         }
 
-        public static <I> List<Instance<I>> list(Class<I> cls, Instance<I> instances, String ytelseTypeKode) {
+        public static <I> List<Instance<I>> list(Class<I> cls, Instance<I> instances, FagsakYtelseType ytelseTypeKode) {
             Objects.requireNonNull(instances, "instances");
 
             final List<Instance<I>> resultat = new ArrayList<>();
-            Consumer<String> search = (String s) -> {
+            Consumer<FagsakYtelseType> search = (FagsakYtelseType s) -> {
                 var inst = select(cls, instances, new FagsakYtelseTypeRefLiteral(s));
                 if (inst.isUnsatisfied()) {
                     return;
@@ -133,15 +115,14 @@ public @interface FagsakYtelseTypeRef {
                 resultat.add(inst);
             };
 
-            search.accept(ytelseTypeKode);
-            search.accept("*"); // finn default
+            coalesce(ytelseTypeKode, FagsakYtelseType.UDEFINERT).forEach(search);
             return List.copyOf(resultat);
         }
 
-        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, String ytelseTypeKode) {
+        public static <I> Optional<I> find(Class<I> cls, Instance<I> instances, FagsakYtelseType ytelseTypeKode) {
             Objects.requireNonNull(instances, "instances");
 
-            for (var fagsakLiteral : coalesce(ytelseTypeKode, "*")) {
+            for (var fagsakLiteral : coalesce(ytelseTypeKode, FagsakYtelseType.UDEFINERT)) {
                 var inst = select(cls, instances, new FagsakYtelseTypeRefLiteral(fagsakLiteral));
                 if (inst.isResolvable()) {
                     return Optional.of(getInstance(inst));
@@ -180,7 +161,7 @@ public @interface FagsakYtelseTypeRef {
             return i;
         }
 
-        private static List<String> coalesce(String... vals) {
+        private static <T> List<T> coalesce(T... vals) {
             return Arrays.stream(vals).filter(Objects::nonNull).distinct().collect(Collectors.toList());
         }
     }

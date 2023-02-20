@@ -1,16 +1,17 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_UTTAK;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
-import no.nav.k9.aarskvantum.kontrakter.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import no.nav.k9.aarskvantum.kontrakter.Aksjonspunkt;
+import no.nav.k9.aarskvantum.kontrakter.Bekreftet;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -23,19 +24,18 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.ytelse.omsorgspenger.repo.FosterbarnRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
 @ApplicationScoped
-@BehandlingStegRef(kode = "VURDER_UTTAK")
+@BehandlingStegRef(value = VURDER_UTTAK)
 @BehandlingTypeRef
-@FagsakYtelseTypeRef("OMP")
+@FagsakYtelseTypeRef(OMSORGSPENGER)
 public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
-
-    private static final Logger log = LoggerFactory.getLogger(VurderÅrskvantumUttakSteg.class);
 
     private BehandlingRepository behandlingRepository;
     private ÅrskvantumTjeneste årskvantumTjeneste;
-
+    private FosterbarnRepository fosterbarnRepository;
 
     VurderÅrskvantumUttakSteg() {
         // for proxy
@@ -43,9 +43,11 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
 
     @Inject
     public VurderÅrskvantumUttakSteg(BehandlingRepository behandlingRepository,
-                                     ÅrskvantumTjeneste årskvantumTjeneste) {
+                                     ÅrskvantumTjeneste årskvantumTjeneste,
+                                     FosterbarnRepository fosterbarnRepository) {
         this.behandlingRepository = behandlingRepository;
         this.årskvantumTjeneste = årskvantumTjeneste;
+        this.fosterbarnRepository = fosterbarnRepository;
     }
 
     @Override
@@ -62,8 +64,8 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
         }
 
         var årskvantumResultat = årskvantumTjeneste.beregnÅrskvantumUttak(ref);
-
-        var årskvantumAksjonspunkter = oversettTilAksjonspunkter(årskvantumResultat);
+        boolean harBehandletFosterbarnISakenAllerede = fosterbarnRepository.hentHvisEksisterer(behandlingId).isPresent();
+        var årskvantumAksjonspunkter = oversettTilAksjonspunkter(årskvantumResultat, harBehandletFosterbarnISakenAllerede);
 
         if (!årskvantumAksjonspunkter.isEmpty()) {
             opprettAksjonspunktForÅrskvantum(årskvantumAksjonspunkter);
@@ -81,7 +83,7 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
         }
     }
 
-    private List<AksjonspunktResultat> opprettAksjonspunktForÅrskvantum(List<AksjonspunktDefinisjon> apDef) {
+    private List<AksjonspunktResultat> opprettAksjonspunktForÅrskvantum(Collection<AksjonspunktDefinisjon> apDef) {
         var aksjonspunktResultat = new ArrayList<AksjonspunktResultat>();
         apDef.forEach(aksjonspunktDefinisjon ->
             aksjonspunktResultat.add(AksjonspunktResultat.opprettForAksjonspunkt(aksjonspunktDefinisjon))
@@ -89,22 +91,24 @@ public class VurderÅrskvantumUttakSteg implements BehandlingSteg {
         return aksjonspunktResultat;
     }
 
-    public List<AksjonspunktDefinisjon> oversettTilAksjonspunkter(ÅrskvantumResultat årskvantumResultat) {
+    public List<AksjonspunktDefinisjon> oversettTilAksjonspunkter(ÅrskvantumResultat årskvantumResultat, boolean harBehandletFosterbarnISakenAllerede) {
         var aksjonspunkter = årskvantumResultat.getUttaksplan().getAksjonspunkter();
-        if (!aksjonspunkter.isEmpty()) {
-            var aksjonspunktDefinisjoner = new ArrayList<AksjonspunktDefinisjon>();
-            aksjonspunkter.forEach(aksjonspunkt -> {
-                if (Aksjonspunkt.VURDER_ÅRSKVANTUM_KVOTE_9003.equals(aksjonspunkt)) {
-                    aksjonspunktDefinisjoner.add(AksjonspunktDefinisjon.VURDER_ÅRSKVANTUM_KVOTE);
-                } else if (Aksjonspunkt.VURDER_ÅRSKVANTUM_DOK_9004.equals(aksjonspunkt)) {
-                    aksjonspunktDefinisjoner.add(AksjonspunktDefinisjon.VURDER_ÅRSKVANTUM_DOK);
-                } else {
-                    throw new IllegalStateException("Ukjent aksjonspunkt fra årskvantum. [Kode=" + aksjonspunkt + "]");
-                }
-            });
-            return aksjonspunktDefinisjoner;
+        var aksjonspunktDefinisjoner = new ArrayList<AksjonspunktDefinisjon>();
+        aksjonspunkter.forEach(aksjonspunkt -> {
+            if (Aksjonspunkt.VURDER_ÅRSKVANTUM_KVOTE_9003.equals(aksjonspunkt)) {
+                aksjonspunktDefinisjoner.add(AksjonspunktDefinisjon.VURDER_ÅRSKVANTUM_KVOTE);
+            } else if (Aksjonspunkt.VURDER_ÅRSKVANTUM_DOK_9004.equals(aksjonspunkt)) {
+                aksjonspunktDefinisjoner.add(AksjonspunktDefinisjon.VURDER_ÅRSKVANTUM_DOK);
+            } else if (Aksjonspunkt.ÅRSKVANTUM_FOSTERBARN_9014.equals(aksjonspunkt)) {
+                aksjonspunktDefinisjoner.add(AksjonspunktDefinisjon.ÅRSKVANTUM_FOSTERBARN);
+            } else {
+                throw new IllegalStateException("Ukjent aksjonspunkt fra årskvantum. [Kode=" + aksjonspunkt + "]");
+            }
+        });
+        if (harBehandletFosterbarnISakenAllerede) {
+            aksjonspunktDefinisjoner.remove(AksjonspunktDefinisjon.ÅRSKVANTUM_FOSTERBARN);
         }
-        return Collections.emptyList();
+        return aksjonspunktDefinisjoner;
     }
 
 }

@@ -12,11 +12,11 @@ import org.mockito.ArgumentCaptor;
 
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakLås;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakLåsRepository;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.task.OpprettOppgaveVurderDokumentTask;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
 
 public class OpprettOppgaveVurderDokumentTaskTest {
 
@@ -44,7 +44,7 @@ public class OpprettOppgaveVurderDokumentTaskTest {
         DokumentTypeId dokumentTypeId = DokumentTypeId.INNTEKTSMELDING;
 
         // Arrange
-        ProsessTaskData prosessTaskData = new ProsessTaskData(OpprettOppgaveVurderDokumentTask.TASKTYPE);
+        ProsessTaskData prosessTaskData =  ProsessTaskData.forProsessTask(OpprettOppgaveVurderDokumentTask.class);
         prosessTaskData.setFagsakId(FAGSAK_ID);
         prosessTaskData.setProperty(OpprettOppgaveVurderDokumentTask.KEY_DOKUMENT_TYPE, dokumentTypeId.getKode());
         ArgumentCaptor<Long> fagsakIdCaptor = ArgumentCaptor.forClass(Long.class);

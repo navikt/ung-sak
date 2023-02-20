@@ -9,7 +9,7 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.abakus.iaygrunnlag.IayGrunnlagJsonMapper;
+import no.nav.abakus.iaygrunnlag.JsonObjectMapper;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
@@ -121,7 +121,7 @@ public class IAYDtoMapperLagretKonverteringTest {
 
         var dto = mapper.mapTilDto(YtelseType.OMSORGSPENGER, grunnlag, true);
 
-        IayGrunnlagJsonMapper.getMapper().writerWithDefaultPrettyPrinter().writeValue(System.out, dto);
+        JsonObjectMapper.getMapper().writerWithDefaultPrettyPrinter().writeValue(System.out, dto);
 
         assertThat(dto).isNotNull();
     }

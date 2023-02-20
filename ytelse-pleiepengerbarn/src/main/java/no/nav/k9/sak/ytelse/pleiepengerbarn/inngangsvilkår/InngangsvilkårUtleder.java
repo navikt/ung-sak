@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår;
 
 import static java.util.Arrays.asList;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.ALDERSVILKÅR;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.BEREGNINGSGRUNNLAGVILKÅR;
 import static no.nav.k9.kodeverk.vilkår.VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR;
@@ -21,7 +22,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.inngangsvilkår.UtledeteVilkår;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 
-@FagsakYtelseTypeRef("PSB")
+@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @BehandlingTypeRef
 @ApplicationScoped
 public class InngangsvilkårUtleder implements VilkårUtleder {

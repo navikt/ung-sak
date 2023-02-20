@@ -1,12 +1,12 @@
 package no.nav.k9.sak.kontrakt.tilsyn.aksjonspunkt;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import no.nav.k9.sak.kontrakt.sykdom.Resultat;
-import no.nav.k9.sak.typer.Periode;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import no.nav.k9.kodeverk.sykdom.Resultat;
+import no.nav.k9.sak.typer.Periode;
 
 public class VurderingDto {
 

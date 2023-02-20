@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.frisinn.beregnytelse;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -44,7 +46,7 @@ import no.nav.k9.sak.ytelse.beregning.BeregningsresultatMapper;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultatPeriode;
 
-@FagsakYtelseTypeRef("FRISINN")
+@FagsakYtelseTypeRef(FRISINN)
 @ApplicationScoped
 public class FRISINNBeregningsresultatMapper implements BeregningsresultatMapper {
 

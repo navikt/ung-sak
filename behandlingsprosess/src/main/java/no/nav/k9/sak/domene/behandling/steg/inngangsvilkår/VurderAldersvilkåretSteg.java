@@ -1,5 +1,7 @@
 package no.nav.k9.sak.domene.behandling.steg.inngangsvilkår;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.ALDERSVILKÅRET;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -20,7 +22,7 @@ import no.nav.k9.sak.domene.person.personopplysning.BasisPersonopplysningTjenest
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 @ApplicationScoped
-@BehandlingStegRef(kode = "VURDER_ALDER")
+@BehandlingStegRef(value = ALDERSVILKÅRET)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 public class VurderAldersvilkåretSteg implements BehandlingSteg {
@@ -59,8 +61,7 @@ public class VurderAldersvilkåretSteg implements BehandlingSteg {
         var perioderTilVurdering = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.ALDERSVILKÅR);
         var personopplysningerAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonPåTidspunkt(behandling.getId(), behandling.getAktørId(), behandling.getFagsak().getPeriode().getFomDato());
         var fødselsdato = personopplysningerAggregat.getSøker().getFødselsdato();
-        var dødsdato = personopplysningerAggregat.getSøker().getDødsdato();
-        vurderAldersVilkårTjeneste.vurderPerioder(vilkårBuilder, perioderTilVurdering, fødselsdato, dødsdato);
+        vurderAldersVilkårTjeneste.vurderPerioder(vilkårBuilder, perioderTilVurdering, fødselsdato);
         resultatBuilder.leggTil(vilkårBuilder);
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), resultatBuilder.build());
 

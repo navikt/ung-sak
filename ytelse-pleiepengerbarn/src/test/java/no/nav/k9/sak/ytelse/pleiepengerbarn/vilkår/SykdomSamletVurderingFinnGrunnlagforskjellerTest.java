@@ -15,25 +15,25 @@ import org.junit.jupiter.api.Test;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.sak.kontrakt.sykdom.Resultat;
+import no.nav.k9.kodeverk.sykdom.Resultat;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelsePeriode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelser;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurdering;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagsdata;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomInnleggelsePeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomInnleggelser;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurdering;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurderingVersjon;
 
 class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
 
     @Test
     public void nyttGrunnlagErLikt() {
-        List<SykdomVurderingVersjon> gmlVurderinger = Arrays.asList(vurderingVersjonMock(
+        List<PleietrengendeSykdomVurderingVersjon> gmlVurderinger = Arrays.asList(vurderingVersjonMock(
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.IKKE_OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 15))));
         LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, null));
-        List<SykdomVurderingVersjon> nyVurderinger = Arrays.asList(vurderingVersjonMock(
+        List<PleietrengendeSykdomVurderingVersjon> nyVurderinger = Arrays.asList(vurderingVersjonMock(
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.IKKE_OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 15))));
@@ -47,12 +47,12 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
 
     @Test
     public void nyttGrunnlagHarSammeUtstrekningMenOverstyrer() {
-        List<SykdomVurderingVersjon> gmlVurderinger = Arrays.asList(vurderingVersjonMock(
+        List<PleietrengendeSykdomVurderingVersjon> gmlVurderinger = Arrays.asList(vurderingVersjonMock(
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.IKKE_OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 15))));
         LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, null));
-        List<SykdomVurderingVersjon> nyVurderinger = Arrays.asList(vurderingVersjonMock(
+        List<PleietrengendeSykdomVurderingVersjon> nyVurderinger = Arrays.asList(vurderingVersjonMock(
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 15))));
@@ -69,7 +69,7 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
 
     @Test
     public void gammeltGrunnlagHarFlereVurderingerForSammePeriode() {
-        List<SykdomVurderingVersjon> gmlVurderinger = Arrays.asList(
+        List<PleietrengendeSykdomVurderingVersjon> gmlVurderinger = Arrays.asList(
             vurderingVersjonMock(
                 SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
                 Resultat.IKKE_OPPFYLT,
@@ -85,7 +85,7 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
         );
 
         LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, null));
-        List<SykdomVurderingVersjon> nyVurderinger = Arrays.asList(vurderingVersjonMock(
+        List<PleietrengendeSykdomVurderingVersjon> nyVurderinger = Arrays.asList(vurderingVersjonMock(
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 15))));
@@ -102,12 +102,12 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
 
     @Test
     public void nyttGrunnlagOverstyrerDelerAvGammel() {
-        List<SykdomVurderingVersjon> gmlVurderinger = Arrays.asList(vurderingVersjonMock(
+        List<PleietrengendeSykdomVurderingVersjon> gmlVurderinger = Arrays.asList(vurderingVersjonMock(
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.IKKE_OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 15))));
         LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, null));
-        List<SykdomVurderingVersjon> nyVurderinger = Arrays.asList(vurderingVersjonMock(
+        List<PleietrengendeSykdomVurderingVersjon> nyVurderinger = Arrays.asList(vurderingVersjonMock(
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 10))));
@@ -124,12 +124,12 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
 
     @Test
     public void nyttGrunnlagHarTilstøtendePeriode() {
-        List<SykdomVurderingVersjon> gmlVurderinger = Arrays.asList(vurderingVersjonMock(
+        List<PleietrengendeSykdomVurderingVersjon> gmlVurderinger = Arrays.asList(vurderingVersjonMock(
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.IKKE_OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 15))));
         LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, null));
-        List<SykdomVurderingVersjon> nyVurderinger = Arrays.asList(vurderingVersjonMock(
+        List<PleietrengendeSykdomVurderingVersjon> nyVurderinger = Arrays.asList(vurderingVersjonMock(
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 16), LocalDate.of(2021, 1, 20))));
@@ -146,12 +146,12 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
 
     @Test
     public void nyttGrunnlagErIkkeTilstøtende() {
-        List<SykdomVurderingVersjon> gmlVurderinger = Arrays.asList(vurderingVersjonMock(
+        List<PleietrengendeSykdomVurderingVersjon> gmlVurderinger = Arrays.asList(vurderingVersjonMock(
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.IKKE_OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 10))));
         LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, null));
-        List<SykdomVurderingVersjon> nyVurderinger = Arrays.asList(vurderingVersjonMock(
+        List<PleietrengendeSykdomVurderingVersjon> nyVurderinger = Arrays.asList(vurderingVersjonMock(
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 15), LocalDate.of(2021, 1, 20))));
@@ -171,16 +171,16 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
 
     @Test
     public void nyttGrunnlagHarInnleggelse() {
-        List<SykdomVurderingVersjon> gmlVurderinger = Arrays.asList(vurderingVersjonMock(
+        List<PleietrengendeSykdomVurderingVersjon> gmlVurderinger = Arrays.asList(vurderingVersjonMock(
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 15))));
         LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, null));
-        List<SykdomVurderingVersjon> nyVurderinger = Arrays.asList(vurderingVersjonMock(
+        List<PleietrengendeSykdomVurderingVersjon> nyVurderinger = Arrays.asList(vurderingVersjonMock(
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 15))));
-        SykdomInnleggelser innleggelser = innleggelserMock(new Periode(LocalDate.of(2021, 1, 15), LocalDate.of(2021, 1, 20)));
+        PleietrengendeSykdomInnleggelser innleggelser = innleggelserMock(new Periode(LocalDate.of(2021, 1, 15), LocalDate.of(2021, 1, 20)));
         LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(nyVurderinger, innleggelser));
 
 
@@ -194,11 +194,11 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
 
     @Test
     public void nyttGrunnlagHarInnleggelseIkkeVurdering() { //Ugyldig case? Med for full testdekning.
-        List<SykdomVurderingVersjon> gmlVurderinger = Arrays.asList(vurderingVersjonMock(
+        List<PleietrengendeSykdomVurderingVersjon> gmlVurderinger = Arrays.asList(vurderingVersjonMock(
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 15))));
-        SykdomInnleggelser innleggelser = innleggelserMock(new Periode(LocalDate.of(2021, 1, 15), LocalDate.of(2021, 1, 20)));
+        PleietrengendeSykdomInnleggelser innleggelser = innleggelserMock(new Periode(LocalDate.of(2021, 1, 15), LocalDate.of(2021, 1, 20)));
         LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, innleggelser));
         LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(Collections.emptyList(), innleggelser));
 
@@ -213,12 +213,12 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
 
     @Test
     public void nyttGrunnlagHarToOmsorgspersoner() {
-        List<SykdomVurderingVersjon> gmlVurderinger = Arrays.asList(vurderingVersjonMock(
+        List<PleietrengendeSykdomVurderingVersjon> gmlVurderinger = Arrays.asList(vurderingVersjonMock(
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 15))));
         LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, null));
-        List<SykdomVurderingVersjon> nyVurderinger = Arrays.asList(
+        List<PleietrengendeSykdomVurderingVersjon> nyVurderinger = Arrays.asList(
             vurderingVersjonMock(
                 SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
                 Resultat.OPPFYLT,
@@ -240,7 +240,7 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
 
     @Test
     public void nyttGrunnlagOverstyrerToOmsorgspersoner() {
-        List<SykdomVurderingVersjon> gmlVurderinger = Arrays.asList(vurderingVersjonMock(
+        List<PleietrengendeSykdomVurderingVersjon> gmlVurderinger = Arrays.asList(vurderingVersjonMock(
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 15))),
@@ -249,7 +249,7 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
                 Resultat.IKKE_OPPFYLT,
                 new Periode(LocalDate.of(2021, 1, 9), LocalDate.of(2021, 1, 15))));
         LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, null));
-        List<SykdomVurderingVersjon> nyVurderinger = Arrays.asList(
+        List<PleietrengendeSykdomVurderingVersjon> nyVurderinger = Arrays.asList(
             vurderingVersjonMock(
                 SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
                 Resultat.OPPFYLT,
@@ -269,29 +269,37 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
         assertThat(interval.getTomDato()).isEqualTo(LocalDate.of(2021, 1, 15));
     }
 
-
-    private SykdomGrunnlag grunnlagMock(List<SykdomVurderingVersjon> vurderinger, SykdomInnleggelser innleggelser) {
-        return new SykdomGrunnlag(null, new ArrayList<>(), new ArrayList<>(), vurderinger, new ArrayList<>(), innleggelser, null, "test", LocalDateTime.now());
+    private MedisinskGrunnlagsdata grunnlagMock(List<PleietrengendeSykdomVurderingVersjon> vurderinger, PleietrengendeSykdomInnleggelser innleggelser) {
+        return new MedisinskGrunnlagsdata(
+            null,
+            new ArrayList<>(), //søktePerioder
+            vurderinger, //vurderinger
+            new ArrayList<>(), //godkjenteLegeerklæringer
+            false,
+            innleggelser,
+            null,
+            "test",
+            LocalDateTime.now());
     }
 
-    private SykdomInnleggelser innleggelserMock(Periode... perioder) {
-        return new SykdomInnleggelser(
+    private PleietrengendeSykdomInnleggelser innleggelserMock(Periode... perioder) {
+        return new PleietrengendeSykdomInnleggelser(
             0L,
-            Arrays.stream(perioder).map(p -> new SykdomInnleggelsePeriode(p.getFom(), p.getTom(), "", LocalDateTime.now())).collect(Collectors.toList()),
+            Arrays.stream(perioder).map(p -> new PleietrengendeSykdomInnleggelsePeriode(p.getFom(), p.getTom(), "", LocalDateTime.now())).collect(Collectors.toList()),
             "",
             LocalDateTime.now()
         );
     }
 
-    private SykdomVurderingVersjon vurderingVersjonMock(SykdomVurderingType type, Resultat resultat, Periode... perioder) {
+    private PleietrengendeSykdomVurderingVersjon vurderingVersjonMock(SykdomVurderingType type, Resultat resultat, Periode... perioder) {
         return vurderingVersjonMock(type, resultat, 0L, perioder);
     }
 
-    private SykdomVurderingVersjon vurderingVersjonMock(SykdomVurderingType type, Resultat resultat, long rangering, Periode... perioder) {
-        var vurdering = new SykdomVurdering(type, Collections.emptyList(), "", LocalDateTime.now());
+    private PleietrengendeSykdomVurderingVersjon vurderingVersjonMock(SykdomVurderingType type, Resultat resultat, long rangering, Periode... perioder) {
+        var vurdering = new PleietrengendeSykdomVurdering(type, Collections.emptyList(), "", LocalDateTime.now());
         vurdering.setRangering(rangering);
 
-        SykdomVurderingVersjon vurderingVersjon = new SykdomVurderingVersjon(
+        PleietrengendeSykdomVurderingVersjon vurderingVersjon = new PleietrengendeSykdomVurderingVersjon(
             vurdering,
             "",
             resultat,

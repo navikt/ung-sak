@@ -1,6 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt;
 
 import static no.nav.k9.felles.feil.LogLevel.ERROR;
+import static no.nav.k9.felles.feil.LogLevel.INFO;
 import static no.nav.k9.felles.feil.LogLevel.WARN;
 
 import java.time.LocalDate;
@@ -11,7 +12,6 @@ import java.util.Objects;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
@@ -142,7 +142,7 @@ public class BehandlingsutredningApplikasjonTjeneste {
         @TekniskFeil(feilkode = "K9-760741", feilmelding = "Behandling [ytelseType=%s, behandlingId=%s, saksnummer=%s] pågår eller feilet, kan ikke gjøre endringer inntil det er klart: %s", logLevel = WARN)
         Feil prosessUnderveisKanIkkeEndreTilKlart(FagsakYtelseType ytelseType, Long behandlingId, Saksnummer saksnummer, AsyncPollingStatus st);
 
-        @FunksjonellFeil(feilkode = "K9-837578", feilmelding = "Behandlingen [%s] har blitt oppdatert med ny informasjon av systemet, eller er endret av en annen saksbehandler. Prøv å laste inn behandlingen på nytt, hvis problemet vedvarer ta kontakt på teams. Fikk versjon [%s], har versjon [%s]", løsningsforslag = "Last inn behandlingen på nytt.", logLevel = WARN, exceptionClass = BehandlingEndretKonfliktException.class)
+        @FunksjonellFeil(feilkode = "K9-837578", feilmelding = "Behandlingen [%s] har blitt oppdatert med ny informasjon av systemet, eller er endret av en annen saksbehandler. Prøv å laste inn behandlingen på nytt, hvis problemet vedvarer ta kontakt på teams. Fikk versjon [%s], har versjon [%s]", løsningsforslag = "Last inn behandlingen på nytt.", logLevel = INFO, exceptionClass = BehandlingEndretKonfliktException.class)
         Feil endringerHarForekommetPåBehandlingen(Long behandlingId, Long versjonInn, Long versjonEksisterende);
     }
 }

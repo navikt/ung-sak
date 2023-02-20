@@ -23,6 +23,7 @@ public class YtelseFilter {
     private final Collection<Ytelse> ytelser;
     private final LocalDate skjæringstidspunkt;
     private final Boolean venstreSideASkjæringstidspunkt;
+    private final DatoIntervallEntitet periode;
 
     private Predicate<Ytelse> ytelseFilter;
 
@@ -35,17 +36,22 @@ public class YtelseFilter {
     }
 
     public YtelseFilter(Collection<Ytelse> inntekter, LocalDate skjæringstidspunkt, Boolean venstreSideASkjæringstidspunkt) {
-        this.ytelser = inntekter == null ? Collections.emptyList() : inntekter;
-        this.skjæringstidspunkt = skjæringstidspunkt;
-        this.venstreSideASkjæringstidspunkt = venstreSideASkjæringstidspunkt;
+        this(inntekter, null, skjæringstidspunkt, venstreSideASkjæringstidspunkt);
     }
 
     public YtelseFilter(Optional<AktørYtelse> aktørYtelse) {
         this(aktørYtelse.isPresent() ? aktørYtelse.get().getAlleYtelser() : Collections.emptyList());
     }
 
+    public YtelseFilter(Collection<Ytelse> ytelser, DatoIntervallEntitet periode, LocalDate skjæringstidspunkt, Boolean venstreSideASkjæringstidspunkt) {
+        this.ytelser = ytelser == null ? Collections.emptyList() : ytelser;
+        this.skjæringstidspunkt = skjæringstidspunkt;
+        this.venstreSideASkjæringstidspunkt = venstreSideASkjæringstidspunkt;
+        this.periode = periode;
+    }
+
     public YtelseFilter etter(LocalDate skjæringstidspunkt) {
-        return copyWith(this.ytelser, skjæringstidspunkt, false);
+        return copyWith(this.ytelser, null, skjæringstidspunkt, false);
     }
 
     public boolean isEmpty() {
@@ -56,8 +62,11 @@ public class YtelseFilter {
         return getFiltrertYtelser().isEmpty();
     }
 
+    public YtelseFilter i(DatoIntervallEntitet periode) {
+        return copyWith(this.ytelser, periode, skjæringstidspunkt, true);
+    }
     public YtelseFilter før(LocalDate skjæringstidspunkt) {
-        return copyWith(this.ytelser, skjæringstidspunkt, true);
+        return copyWith(this.ytelser, null, skjæringstidspunkt, true);
     }
 
     public List<Ytelse> getAlleYtelser() {
@@ -86,18 +95,22 @@ public class YtelseFilter {
     private Collection<Ytelse> getFiltrertYtelser(Collection<Ytelse> ytelser) {
         Collection<Ytelse> resultat = ytelser.stream()
             .filter(yt -> (this.ytelseFilter == null || this.ytelseFilter.test(yt)) && skalMedEtterSkjæringstidspunktVurdering(yt))
-            .collect(Collectors.toList());
+            .toList();
         return Collections.unmodifiableCollection(resultat);
     }
 
     private boolean skalMedEtterSkjæringstidspunktVurdering(Ytelse ytelse) {
+        if (periode != null) {
+            return ytelse.getPeriode().overlapper(periode);
+        }
+
         if (skjæringstidspunkt != null) {
-            DatoIntervallEntitet periode = ytelse.getPeriode();
+            DatoIntervallEntitet ytelsePeriode = ytelse.getPeriode();
             if (venstreSideASkjæringstidspunkt) {
-                return periode.getFomDato().isBefore(skjæringstidspunkt.plusDays(1));
+                return ytelsePeriode.getFomDato().isBefore(skjæringstidspunkt.plusDays(1));
             } else {
-                return periode.getFomDato().isAfter(skjæringstidspunkt) ||
-                    periode.getFomDato().isBefore(skjæringstidspunkt.plusDays(1)) && periode.getTomDato().isAfter(skjæringstidspunkt);
+                return ytelsePeriode.getFomDato().isAfter(skjæringstidspunkt) ||
+                    ytelsePeriode.getFomDato().isBefore(skjæringstidspunkt.plusDays(1)) && ytelsePeriode.getTomDato().isAfter(skjæringstidspunkt);
             }
         }
         return true;
@@ -111,7 +124,7 @@ public class YtelseFilter {
     }
 
     public YtelseFilter filter(Predicate<Ytelse> filterFunc) {
-        var copy = copyWith(getFiltrertYtelser().stream().filter(filterFunc).collect(Collectors.toList()), skjæringstidspunkt, venstreSideASkjæringstidspunkt);
+        var copy = copyWith(getFiltrertYtelser().stream().filter(filterFunc).collect(Collectors.toList()), periode, skjæringstidspunkt, venstreSideASkjæringstidspunkt);
         if (copy.ytelseFilter == null) {
             copy.ytelseFilter = filterFunc;
         } else {
@@ -120,8 +133,8 @@ public class YtelseFilter {
         return copy;
     }
 
-    private YtelseFilter copyWith(Collection<Ytelse> ytelser, LocalDate skjæringstidspunkt, Boolean venstreSideASkjæringstidspunkt) {
-        var copy = new YtelseFilter(ytelser, skjæringstidspunkt, venstreSideASkjæringstidspunkt);
+    private YtelseFilter copyWith(Collection<Ytelse> ytelser, DatoIntervallEntitet periode, LocalDate skjæringstidspunkt, Boolean venstreSideASkjæringstidspunkt) {
+        var copy = new YtelseFilter(ytelser, periode, skjæringstidspunkt, venstreSideASkjæringstidspunkt);
         copy.ytelseFilter = this.ytelseFilter;
         return copy;
     }

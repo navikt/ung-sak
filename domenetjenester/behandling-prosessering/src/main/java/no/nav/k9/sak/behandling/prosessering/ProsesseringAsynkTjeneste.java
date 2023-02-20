@@ -9,14 +9,13 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
+import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 import no.nav.k9.sak.behandling.prosessering.task.FortsettBehandlingTask;
 import no.nav.k9.sak.behandling.prosessering.task.StartBehandlingTask;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
-import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 
 @Dependent
 public class ProsesseringAsynkTjeneste {
@@ -102,7 +101,7 @@ public class ProsesseringAsynkTjeneste {
      */
     public String asynkStartBehandlingProsess(Behandling behandling) {
         ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
-        ProsessTaskData taskData = new ProsessTaskData(StartBehandlingTask.TASKTYPE);
+        ProsessTaskData taskData =  ProsessTaskData.forProsessTask(StartBehandlingTask.class);
         taskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         taskData.setCallIdFraEksisterende();
         gruppe.addNesteSekvensiell(taskData);
@@ -116,7 +115,7 @@ public class ProsesseringAsynkTjeneste {
      */
     public String asynkProsesserBehandlingMergeGruppe(Behandling behandling) {
         ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
-        ProsessTaskData taskData = new ProsessTaskData(FortsettBehandlingTask.TASKTYPE);
+        ProsessTaskData taskData =  ProsessTaskData.forProsessTask(FortsettBehandlingTask.class);
         taskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         taskData.setCallIdFraEksisterende();
         gruppe.addNesteSekvensiell(taskData);

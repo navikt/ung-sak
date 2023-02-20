@@ -31,6 +31,10 @@ public abstract class OverstyringAksjonspunktDto implements AksjonspunktKode, Ov
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String begrunnelse;
 
+
+    @JsonProperty("avbrutt")
+    private Boolean avbrutt;
+
     protected OverstyringAksjonspunktDto() {
         // default ctor
     }
@@ -52,6 +56,11 @@ public abstract class OverstyringAksjonspunktDto implements AksjonspunktKode, Ov
     @Override
     public Periode getPeriode() {
         return periode;
+    }
+
+    @Override
+    public boolean skalAvbrytes() {
+        return avbrutt != null && avbrutt;
     }
 
     @Override
@@ -77,6 +86,6 @@ public abstract class OverstyringAksjonspunktDto implements AksjonspunktKode, Ov
 
     @Override
     public String toString() {
-        return getClass() + "<kode=" + getKode() + ", begrunnelse=" + getBegrunnelse() + ", periode=" + getPeriode() + ">";
+        return getClass() + "<kode=" + getKode() + ", begrunnelse=" + getBegrunnelse() + ", skalAvbrytes=" + skalAvbrytes() + ", periode=" + getPeriode() + ">";
     }
 }

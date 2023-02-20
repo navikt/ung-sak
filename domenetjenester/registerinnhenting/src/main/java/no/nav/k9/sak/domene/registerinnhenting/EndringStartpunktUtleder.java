@@ -3,7 +3,6 @@ package no.nav.k9.sak.domene.registerinnhenting;
 import java.util.Optional;
 
 import jakarta.enterprise.inject.Instance;
-
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
@@ -17,10 +16,6 @@ public interface EndringStartpunktUtleder {
     }
 
     static Optional<EndringStartpunktUtleder> finnUtleder(Instance<EndringStartpunktUtleder> utledere, Class<?> aggregat, FagsakYtelseType ytelseType) {
-        return GrunnlagRef.Lookup.find(EndringStartpunktUtleder.class, utledere, aggregat, ytelseType);
-    }
-
-    static Optional<EndringStartpunktUtleder> finnUtleder(Instance<EndringStartpunktUtleder> utledere, String aggregat, FagsakYtelseType ytelseType) {
         return GrunnlagRef.Lookup.find(EndringStartpunktUtleder.class, utledere, aggregat, ytelseType);
     }
 }

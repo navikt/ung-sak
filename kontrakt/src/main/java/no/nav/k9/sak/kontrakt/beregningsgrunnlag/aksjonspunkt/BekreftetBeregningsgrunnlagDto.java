@@ -11,6 +11,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import no.nav.k9.sak.typer.Periode;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -22,6 +24,12 @@ public abstract class BekreftetBeregningsgrunnlagDto {
     @Valid
     @NotNull
     private Periode periode;
+
+    @JsonProperty("begrunnelse")
+    @Size(max = 4000)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    private String begrunnelse;
+
 
     protected BekreftetBeregningsgrunnlagDto() {
         // For Jackson
@@ -37,6 +45,14 @@ public abstract class BekreftetBeregningsgrunnlagDto {
 
     public void setPeriode(Periode periode) {
         this.periode = periode;
+    }
+
+    public String getBegrunnelse() {
+        return begrunnelse;
+    }
+
+    public void setBegrunnelse(String begrunnelse) {
+        this.begrunnelse = begrunnelse;
     }
 
     @Override

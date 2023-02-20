@@ -8,24 +8,18 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomGrunnlag;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomInnleggelser;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomUtils;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingVersjon;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagsdata;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomInnleggelser;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurderingVersjon;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeTidslinjeUtils;
 
 public class SykdomSamletVurdering {
-    private SykdomVurderingVersjon ktp;
-    private SykdomVurderingVersjon toOp;
-    private SykdomInnleggelser innleggelser;
 
-    public SykdomSamletVurdering() {
-    }
 
-    public SykdomSamletVurdering(SykdomVurderingVersjon ktp, SykdomVurderingVersjon toOp, SykdomInnleggelser innleggelser) {
-        this.ktp = ktp;
-        this.toOp = toOp;
-        this.innleggelser = innleggelser;
-    }
+    private PleietrengendeSykdomVurderingVersjon ktp;
+    private PleietrengendeSykdomVurderingVersjon toOp;
+    private PleietrengendeSykdomVurderingVersjon slu;
+    private PleietrengendeSykdomInnleggelser innleggelser;
 
     public SykdomSamletVurdering kombinerForSammeTidslinje(SykdomSamletVurdering annet) {
         SykdomSamletVurdering ny = new SykdomSamletVurdering();
@@ -37,27 +31,38 @@ public class SykdomSamletVurdering {
             throw new IllegalStateException("Uventet overlapp mellom vurderinger");
         }
 
+        if (this.getSlu() != null && annet.getSlu() != null && !this.getSlu().equals(annet.getSlu())) {
+            throw new IllegalStateException("Uventet overlapp mellom vurderinger");
+        }
+
         if (this.getInnleggelser() != null && annet.getInnleggelser() != null && !this.getInnleggelser().equals(annet.getInnleggelser())) {
             throw new IllegalStateException("Uventet overlapp mellom innleggelser");
         }
         ny.setKtp(this.getKtp() != null ? this.getKtp() : annet.getKtp());
         ny.setToOp(this.getToOp() != null ? this.getToOp() : annet.getToOp());
+        ny.setSlu(this.getSlu() != null ? this.getSlu() : annet.getSlu());
         ny.setInnleggelser(this.getInnleggelser() != null ? this.getInnleggelser() : annet.getInnleggelser());
         return ny;
     }
 
-    public static LocalDateTimeline<SykdomSamletVurdering> grunnlagTilTidslinje(SykdomGrunnlag grunnlag) {
+    public static LocalDateTimeline<SykdomSamletVurdering> grunnlagTilTidslinje(MedisinskGrunnlagsdata grunnlag) {
         final Collection<LocalDateSegment<SykdomSamletVurdering>> segments = new ArrayList<>();
 
-        SykdomUtils.tilTidslinjeForType(grunnlag.getVurderinger(), SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE).forEach(s -> {
+        PleietrengendeTidslinjeUtils.tilTidslinjeForType(grunnlag.getVurderinger(), SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE).forEach(s -> {
             SykdomSamletVurdering samletVurdering = new SykdomSamletVurdering();
             samletVurdering.setKtp(s.getValue());
             segments.add(new LocalDateSegment<>(s.getFom(), s.getTom(), samletVurdering));
         });
 
-        SykdomUtils.tilTidslinjeForType(grunnlag.getVurderinger(), SykdomVurderingType.TO_OMSORGSPERSONER).forEach(s -> {
+        PleietrengendeTidslinjeUtils.tilTidslinjeForType(grunnlag.getVurderinger(), SykdomVurderingType.TO_OMSORGSPERSONER).forEach(s -> {
             SykdomSamletVurdering samletVurdering = new SykdomSamletVurdering();
             samletVurdering.setToOp(s.getValue());
+            segments.add(new LocalDateSegment<>(s.getFom(), s.getTom(), samletVurdering));
+        });
+
+        PleietrengendeTidslinjeUtils.tilTidslinjeForType(grunnlag.getVurderinger(), SykdomVurderingType.LIVETS_SLUTTFASE).forEach(s -> {
+            SykdomSamletVurdering samletVurdering = new SykdomSamletVurdering();
+            samletVurdering.setSlu(s.getValue());
             segments.add(new LocalDateSegment<>(s.getFom(), s.getTom(), samletVurdering));
         });
 
@@ -88,14 +93,14 @@ public class SykdomSamletVurdering {
                 if (right == null || left == null) {
                     return new LocalDateSegment<>(localDateInterval, true);
                 }
-                SykdomInnleggelser innleggelser1 = left.getValue().getInnleggelser();
-                SykdomInnleggelser innleggelser2 = right.getValue().getInnleggelser();
+                PleietrengendeSykdomInnleggelser innleggelser1 = left.getValue().getInnleggelser();
+                PleietrengendeSykdomInnleggelser innleggelser2 = right.getValue().getInnleggelser();
                 if (innleggelser1 == null && innleggelser2 != null || innleggelser1 != null && innleggelser2 == null) {
                     return new LocalDateSegment<>(localDateInterval, true);
                 }
 
-                SykdomVurderingVersjon toOp1 = left.getValue().getToOp();
-                SykdomVurderingVersjon toOp2 = right.getValue().getToOp();
+                PleietrengendeSykdomVurderingVersjon toOp1 = left.getValue().getToOp();
+                PleietrengendeSykdomVurderingVersjon toOp2 = right.getValue().getToOp();
                 if (toOp1 == null && toOp2 != null || toOp1 != null && toOp2 == null) {
                     return new LocalDateSegment<>(localDateInterval, true);
                 } else if (toOp1 != null && toOp2 != null) {
@@ -104,12 +109,22 @@ public class SykdomSamletVurdering {
                     }
                 }
 
-                SykdomVurderingVersjon ktp1 = left.getValue().getKtp();
-                SykdomVurderingVersjon ktp2 = right.getValue().getKtp();
+                PleietrengendeSykdomVurderingVersjon ktp1 = left.getValue().getKtp();
+                PleietrengendeSykdomVurderingVersjon ktp2 = right.getValue().getKtp();
                 if (ktp1 == null && ktp2 != null || ktp1 != null && ktp2 == null) {
                     return new LocalDateSegment<>(localDateInterval, true);
                 } else if (ktp1 != null && ktp2 != null) {
                     if (ktp1.getResultat() != ktp2.getResultat()) {
+                        return new LocalDateSegment<>(localDateInterval, true);
+                    }
+                }
+
+                PleietrengendeSykdomVurderingVersjon slu1 = left.getValue().getSlu();
+                PleietrengendeSykdomVurderingVersjon slu2 = right.getValue().getSlu();
+                if (slu1 == null && slu2 != null || slu1 != null && slu2 == null) {
+                    return new LocalDateSegment<>(localDateInterval, true);
+                } else if (slu1 != null && slu2 != null) {
+                    if (slu1.getResultat() != slu2.getResultat()) {
                         return new LocalDateSegment<>(localDateInterval, true);
                     }
                 }
@@ -118,27 +133,35 @@ public class SykdomSamletVurdering {
         }, LocalDateTimeline.JoinStyle.CROSS_JOIN).compress();
     }
 
-    public SykdomVurderingVersjon getKtp() {
+    public PleietrengendeSykdomVurderingVersjon getKtp() {
         return ktp;
     }
 
-    public void setKtp(SykdomVurderingVersjon ktp) {
+    public void setKtp(PleietrengendeSykdomVurderingVersjon ktp) {
         this.ktp = ktp;
     }
 
-    public SykdomVurderingVersjon getToOp() {
+    public PleietrengendeSykdomVurderingVersjon getToOp() {
         return toOp;
     }
 
-    public void setToOp(SykdomVurderingVersjon toOp) {
+    public void setToOp(PleietrengendeSykdomVurderingVersjon toOp) {
         this.toOp = toOp;
     }
 
-    public SykdomInnleggelser getInnleggelser() {
+    public PleietrengendeSykdomVurderingVersjon getSlu() {
+        return slu;
+    }
+
+    public void setSlu(PleietrengendeSykdomVurderingVersjon slu) {
+        this.slu = slu;
+    }
+
+    public PleietrengendeSykdomInnleggelser getInnleggelser() {
         return innleggelser;
     }
 
-    public void setInnleggelser(SykdomInnleggelser innleggelser) {
+    public void setInnleggelser(PleietrengendeSykdomInnleggelser innleggelser) {
         this.innleggelser = innleggelser;
     }
 }

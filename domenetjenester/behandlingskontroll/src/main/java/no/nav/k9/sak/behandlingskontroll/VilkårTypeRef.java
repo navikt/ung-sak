@@ -7,11 +7,12 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Objects;
 
 import jakarta.enterprise.inject.Stereotype;
 import jakarta.enterprise.util.AnnotationLiteral;
 import jakarta.inject.Qualifier;
-
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.VilkårTypeRef.ContainerOfVilkårTypeRef;
 
 @Repeatable(value = ContainerOfVilkårTypeRef.class)
@@ -26,9 +27,7 @@ public @interface VilkårTypeRef {
     /**
      * Settes til navn på vilkår slik det defineres i VILKÅR_TYPE tabellen.
      */
-    String value()
-
-        default "*";
+    VilkårType value() default VilkårType.UDEFINERT;
 
     /**
      * container for repeatable annotations.
@@ -48,18 +47,18 @@ public @interface VilkårTypeRef {
      */
     public static class VilkårTypeRefLiteral extends AnnotationLiteral<VilkårTypeRef> implements VilkårTypeRef {
 
-        private String navn;
+        private VilkårType navn;
 
         public VilkårTypeRefLiteral() {
-            this("*");
+            this(VilkårType.UDEFINERT);
         }
 
-        public VilkårTypeRefLiteral(String navn) {
-            this.navn = navn;
+        public VilkårTypeRefLiteral(VilkårType vilkårType) {
+            this.navn = Objects.requireNonNull(vilkårType);
         }
 
         @Override
-        public String value() {
+        public VilkårType value() {
             return navn;
         }
 
