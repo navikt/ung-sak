@@ -39,7 +39,7 @@ public class BeregnFeriepengerTjenesteTest {
             .build();
 
         // Act
-        BeregnFeriepengerTjeneste.mapTilResultatFraRegelModellV2(beregningsresultat, regelmodell);
+        BeregnFeriepengerTjeneste.mapTilResultatFraRegelModell(beregningsresultat, regelmodell);
 
         // Assert
         var andelTimeline = beregningsresultat.getBeregningsresultatAndelTimeline();
@@ -61,7 +61,7 @@ public class BeregnFeriepengerTjenesteTest {
             .build();
 
         // Act
-        BeregnFeriepengerTjeneste.mapTilResultatFraRegelModellV2(beregningsresultat, regelmodell);
+        BeregnFeriepengerTjeneste.mapTilResultatFraRegelModell(beregningsresultat, regelmodell);
 
         // Assert
         // Assert

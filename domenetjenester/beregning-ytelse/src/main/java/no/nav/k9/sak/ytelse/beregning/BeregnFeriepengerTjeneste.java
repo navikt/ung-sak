@@ -67,7 +67,7 @@ public abstract class BeregnFeriepengerTjeneste {
         beregningsresultat.setFeriepengerRegelInput(regelInput);
         beregningsresultat.setFeriepengerRegelSporing(sporing);
 
-        mapTilResultatFraRegelModellV2(beregningsresultat, regelModell);
+        mapTilResultatFraRegelModell(beregningsresultat, regelModell);
     }
 
     public FeriepengeOppsummering beregnFeriepengerOppsummering(BeregningsresultatEntitet beregningsresultat, LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> andelerSomKanGiFeriepengerForRelevaneSaker) {
@@ -93,7 +93,7 @@ public abstract class BeregnFeriepengerTjeneste {
         return jsonFac.toJson(grunnlag, BeregnFeriepengerFeil.FACTORY::jsonMappingFeilet);
     }
 
-    static void mapTilResultatFraRegelModellV2(BeregningsresultatEntitet resultat, BeregningsresultatFeriepengerRegelModell regelModell) {
+    static void mapTilResultatFraRegelModell(BeregningsresultatEntitet resultat, BeregningsresultatFeriepengerRegelModell regelModell) {
         regelModell.getBeregningsresultatPerioder().forEach(regelBeregningsresultatPeriode -> mapPeriode(resultat, regelBeregningsresultatPeriode));
     }
 

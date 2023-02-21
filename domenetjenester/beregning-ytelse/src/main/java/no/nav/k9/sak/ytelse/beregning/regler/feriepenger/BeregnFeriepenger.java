@@ -22,14 +22,14 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.MottakerType;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerPrÅr;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerRegelModell;
 
-class BeregnFeriepengerV2 extends LeafSpecification<BeregningsresultatFeriepengerRegelModell> {
+class BeregnFeriepenger extends LeafSpecification<BeregningsresultatFeriepengerRegelModell> {
 
     public static final String ID = "FP_BR 8.6.1";
     public static final String BESKRIVELSE = "Beregn feriepenger for periode som går over flere kalenderår.";
 
     private static final BigDecimal FERIEPENGER_SATS = BigDecimal.valueOf(0.102);
 
-    BeregnFeriepengerV2() {
+    BeregnFeriepenger() {
         super(ID, BESKRIVELSE);
     }
 
