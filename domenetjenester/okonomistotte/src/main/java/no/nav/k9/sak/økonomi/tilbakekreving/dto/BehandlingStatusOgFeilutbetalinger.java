@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.sak.typer.Periode;
 
@@ -14,7 +15,7 @@ public class BehandlingStatusOgFeilutbetalinger {
     private List<Periode> feilutbetaltePerioder;
 
     @JsonCreator
-    public BehandlingStatusOgFeilutbetalinger(LocalDate avsluttetDato, List<Periode> feilutbetaltePerioder) {
+    public BehandlingStatusOgFeilutbetalinger(@JsonProperty("avsluttetDato") LocalDate avsluttetDato, @JsonProperty("feilutbetaltePerioder") List<Periode> feilutbetaltePerioder) {
         this.avsluttetDato = avsluttetDato;
         this.feilutbetaltePerioder = feilutbetaltePerioder;
     }

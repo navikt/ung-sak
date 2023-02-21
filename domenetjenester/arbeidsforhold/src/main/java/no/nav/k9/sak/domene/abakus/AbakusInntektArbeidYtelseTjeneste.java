@@ -32,6 +32,8 @@ import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagSakSnapshotDto;
 import no.nav.abakus.iaygrunnlag.v1.OverstyrtInntektArbeidYtelseDto;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
@@ -63,6 +65,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     private AbakusTjeneste abakusTjeneste;
     private BehandlingRepository behandlingRepository;
     private FagsakRepository fagsakRepository;
+    private MottatteDokumentRepository mottatteDokumentRepository;
     private IAYRequestCache requestCache;
     private AsyncInntektArbeidYtelseTjeneste asyncIayTjeneste;
 
@@ -80,10 +83,12 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     public AbakusInntektArbeidYtelseTjeneste(AbakusTjeneste abakusTjeneste,
                                              AsyncInntektArbeidYtelseTjeneste asyncIayTjeneste,
                                              BehandlingRepository behandlingRepository,
+                                             MottatteDokumentRepository mottatteDokumentRepository,
                                              FagsakRepository fagsakRepository,
                                              IAYRequestCache requestCache) {
         this.behandlingRepository = Objects.requireNonNull(behandlingRepository, "behandlingRepository");
         this.abakusTjeneste = Objects.requireNonNull(abakusTjeneste, "abakusTjeneste");
+        this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.requestCache = Objects.requireNonNull(requestCache, "requestCache");
         this.fagsakRepository = Objects.requireNonNull(fagsakRepository, "fagsakRepository");
         this.asyncIayTjeneste = asyncIayTjeneste;
@@ -267,8 +272,29 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
 
     @Override
     public Set<Inntektsmelding> hentInntektsmeldingerKommetTomBehandling(Saksnummer saksnummer, Long behandlingId) {
-        var sakInntektsmeldinger = hentInntektsmeldinger(saksnummer); // TODO: Fjern denne, hent direkte fra abakus?
-        return sakInntektsmeldinger.hentInntektsmeldingerKommetTom(behandlingId);
+        var sakInntektsmeldinger = hentInntektsmeldinger(saksnummer);
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        return utledUnikeInntektsmeldinger(behandling, sakInntektsmeldinger);
+    }
+
+    private Set<Inntektsmelding> utledUnikeInntektsmeldinger(Behandling behandling, SakInntektsmeldinger unikeInntektsmeldingerForFagsak) {
+        var inntektsmeldingerForFagsak = unikeInntektsmeldingerForFagsak.hentUnikeInntektsmeldinger();
+        if (behandling.erAvsluttet()) {
+            var mottattDokumenter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(behandling.getFagsakId());
+            return inntektsmeldingerForFagsak.stream()
+                .filter(it -> utledInnsendingstidspunkt(mottattDokumenter, it).isBefore(behandling.getAvsluttetDato()))
+                .sorted(Inntektsmelding.COMP_REKKEFØLGE)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        }
+        return inntektsmeldingerForFagsak;
+    }
+
+    private LocalDateTime utledInnsendingstidspunkt(List<MottattDokument> mottattDokumenter, Inntektsmelding im) {
+        return mottattDokumenter.stream()
+            .filter(it -> Objects.equals(it.getJournalpostId(), im.getJournalpostId()))
+            .findFirst()
+            .map(MottattDokument::getInnsendingstidspunkt)
+            .orElseThrow();
     }
 
     // FIXME: : bør håndteres i egen task (kall asyncabakustjeneste internt).

@@ -5,6 +5,7 @@ import static no.nav.k9.kodeverk.behandling.BehandlingStegType.PRECONDITION_BERE
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -20,6 +21,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjen
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.FastsettPGIPeriodeTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningForBeregningTjeneste;
 import no.nav.folketrygdloven.kalkulus.kodeverk.StegType;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAvklaringsbehovDefinisjon;
@@ -47,6 +49,7 @@ import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
+import no.nav.k9.sak.vilkår.VilkårPeriodeFilter;
 import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.InputOverstyringPeriode;
@@ -57,6 +60,7 @@ import no.nav.k9.sak.ytelse.beregning.grunnlag.InputOverstyringPeriode;
 @ApplicationScoped
 public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
 
+    public static final String HASTESAK_JANUAR_2023 = "BQFSK";
 
     private static final Logger log = LoggerFactory.getLogger(VurderPreconditionBeregningSteg.class);
 
@@ -72,6 +76,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
     private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
     private VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
     private FastsettPGIPeriodeTjeneste fastsettPGIPeriodeTjeneste;
+    private boolean framoverhoppVedForlengelseIOpptjening;
 
 
     protected VurderPreconditionBeregningSteg() {
@@ -89,7 +94,8 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
                                            BeregningsgrunnlagTjeneste kalkulusTjeneste,
                                            BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
                                            VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
-                                           FastsettPGIPeriodeTjeneste fastsettPGIPeriodeTjeneste) {
+                                           FastsettPGIPeriodeTjeneste fastsettPGIPeriodeTjeneste,
+                                           @KonfigVerdi(value = "PSB_FRAMOVERHOPP_VED_FORLENGELSE_OPPTJENING", defaultVerdi = "false") boolean framoverhoppVedForlengelseIOpptjening) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
@@ -101,6 +107,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
         this.fastsettPGIPeriodeTjeneste = fastsettPGIPeriodeTjeneste;
+        this.framoverhoppVedForlengelseIOpptjening = framoverhoppVedForlengelseIOpptjening;
     }
 
     @Override
@@ -112,7 +119,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         ryddVedtaksresultatForPerioderTilVurdering(kontekst, referanse);
 
         // 2. Kopierer grunnlag og vilkårsresultat for forlengelser
-        kopierGrunnlagForForlengelseperioder(kontekst, referanse);
+        kopierGrunnlagForForlengelseperioder(kontekst, behandling, referanse);
 
         // 3. Avslår perioder der vi har avslag før beregning eller ingen aktiviteter (ingen grunnlag for beregning)
         avslåBeregningVedBehov(kontekst, behandling, referanse);
@@ -279,10 +286,11 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
     /**
      * Kopierer grunnlag og vilkårsresultat for forlengelser
      *
-     * @param kontekst Behandlingskontrollkontekst
-     * @param ref      behandlingreferanse
+     * @param kontekst   Behandlingskontrollkontekst
+     * @param behandling
+     * @param ref        behandlingreferanse
      */
-    private void kopierGrunnlagForForlengelseperioder(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
+    private void kopierGrunnlagForForlengelseperioder(BehandlingskontrollKontekst kontekst, Behandling behandling, BehandlingReferanse ref) {
         if (ref.getBehandlingType().equals(BehandlingType.REVURDERING)) {
             var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref);
             periodeFilter.ignorerAvslåttePerioder();
@@ -297,7 +305,21 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
                     originalBehandlingId,
                     forlengelseperioder.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet()));
             }
+            if (framoverhoppVedForlengelseIOpptjening || behandling.getFagsak().getSaksnummer().getVerdi().equals(HASTESAK_JANUAR_2023)) {
+                var forlengelserIOpptjening = finnForlengelserKunIOpptjening(periodeFilter, allePerioder, forlengelseperioder);
+                if (!forlengelserIOpptjening.isEmpty()) {
+                    log.info("Kopierer beregning for forlengelser i opptjening {}", forlengelserIOpptjening);
+                    kalkulusTjeneste.kopier(ref, forlengelserIOpptjening, StegType.FASTSETT_STP_BER);
+                }
+            }
         }
+    }
+
+    private static Set<PeriodeTilVurdering> finnForlengelserKunIOpptjening(VilkårPeriodeFilter periodeFilter, NavigableSet<PeriodeTilVurdering> allePerioder, Set<PeriodeTilVurdering> forlengelseperioder) {
+        return periodeFilter.filtrerPerioder(allePerioder.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet()), VilkårType.OPPTJENINGSVILKÅRET).stream()
+            .filter(PeriodeTilVurdering::erForlengelse)
+            .filter(p -> forlengelseperioder.stream().noneMatch(it -> it.getPeriode().equals(p.getPeriode())))
+            .collect(Collectors.toSet());
     }
 
 

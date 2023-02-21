@@ -22,6 +22,7 @@ public enum BeregningAvslagsårsak implements Kodeverdi {
 
     SØKT_FL_INGEN_FL_INNTEKT("SØKT_FL_INGEN_FL_INNTEKT", "Søkt frilans uten frilansinntekt"),
     FOR_LAVT_BG("FOR_LAVT_BG", "For lavt beregningsgrunnlag"),
+    FOR_LAVT_BG_8_47("FOR_LAVT_BG_8_47", "For lavt beregningsgrunnlag for midlertidig inaktiv"),
     AVKORTET_GRUNNET_ANNEN_INNTEKT("AVKORTET_GRUNNET_ANNEN_INNTEKT", "Avkortet grunnet annen inntekt"),
     UNDEFINED,;
 

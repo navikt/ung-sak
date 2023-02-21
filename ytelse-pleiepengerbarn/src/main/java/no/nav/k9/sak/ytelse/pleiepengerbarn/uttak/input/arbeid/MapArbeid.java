@@ -117,7 +117,7 @@ public class MapArbeid {
 
         List<VilkårPeriode> midlertidigInaktivVilkårsperioder = vilkår != null ? vilkår.getPerioder().stream()
             .filter(it -> it.getPeriode().overlapper(periode))
-            .filter(it -> Objects.equals(VilkårUtfallMerknad.VM_7847_A, it.getMerknad()))
+            .filter(it -> Objects.equals(VilkårUtfallMerknad.VM_7847_A, it.getMerknad()) || Objects.equals(VilkårUtfallMerknad.VM_7847_B, it.getMerknad()))
             .collect(Collectors.toList()) : List.of();
 
         mapInaktivePerioder(arbeidsforhold, midlertidigInaktivVilkårsperioder);

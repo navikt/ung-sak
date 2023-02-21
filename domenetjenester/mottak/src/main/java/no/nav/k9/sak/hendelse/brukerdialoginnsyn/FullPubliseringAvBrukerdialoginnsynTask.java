@@ -60,6 +60,20 @@ public class FullPubliseringAvBrukerdialoginnsynTask implements ProsessTaskHandl
                 + "ORDER BY m.mottatt_tidspunkt ASC");
         
         final int antall = q.executeUpdate();
-        logger.info("Full init brukerdialoginnsyn med antall: " + antall);
+        
+        logger.info("Full init søknadbrukerdialoginnsyn med antall: " + antall);
+        
+        final Query omsorgenForQuery = entityManager.createNativeQuery("insert into prosess_task (id, task_type, task_gruppe, neste_kjoering_etter, task_parametere)\n"
+                + "select nextval('seq_prosess_task'),\n"
+                + "  'brukerdialoginnsyn.publiserOmsorg',\n"
+                + "  nextval('seq_prosess_task_gruppe'),\n"
+                + "  current_timestamp at time zone 'UTC' + interval '5 minutes',\n"
+                + "  'fagsakId=' || f.id\n"
+                + "from fagsak f\n"
+                + "where f.ytelse_type = 'PSB'");
+        
+        final int antallOmsorgenFor = omsorgenForQuery.executeUpdate();
+        
+        logger.info("Full init omsorgbrukerdialoginnsyn med antall: " + antallOmsorgenFor);
     }
 }

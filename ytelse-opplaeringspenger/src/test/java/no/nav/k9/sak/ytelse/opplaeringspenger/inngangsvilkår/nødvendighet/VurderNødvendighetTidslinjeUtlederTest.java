@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,7 +51,7 @@ class VurderNødvendighetTidslinjeUtlederTest {
     }
 
     private Set<PerioderFraSøknad> setupEnkelKursperiode() {
-        KursPeriode kursPeriode = lagKursperiode(søknadsperiodeFom, søknadsperiodeTom, "institusjon", null);
+        KursPeriode kursPeriode = lagKursperiode(søknadsperiodeFom, søknadsperiodeTom);
         return Set.of(setupPerioderFraSøknad(journalpost1, List.of(kursPeriode)));
     }
 
@@ -68,8 +67,8 @@ class VurderNødvendighetTidslinjeUtlederTest {
             kursperioder);
     }
 
-    private KursPeriode lagKursperiode(LocalDate fom, LocalDate tom, String institusjon, UUID uuid) {
-        return new KursPeriode(fom, tom, null, null, institusjon, uuid, null, null);
+    private KursPeriode lagKursperiode(LocalDate fom, LocalDate tom) {
+        return new KursPeriode(fom, tom, null, null, null, null, null);
     }
 
     private VurdertOpplæringGrunnlag setupVurderingsgrunnlag(List<VurdertOpplæring> vurdertOpplæring) {
@@ -145,8 +144,8 @@ class VurderNødvendighetTidslinjeUtlederTest {
 
     @Test
     void vurderingManglerDelvis() {
-        KursPeriode kursPeriode1 = lagKursperiode(søknadsperiodeFom, søknadsperiodeTom.minusDays(1), "her", null);
-        KursPeriode kursPeriode2 = lagKursperiode(søknadsperiodeTom, søknadsperiodeTom, "der", null);
+        KursPeriode kursPeriode1 = lagKursperiode(søknadsperiodeFom, søknadsperiodeTom.minusDays(1));
+        KursPeriode kursPeriode2 = lagKursperiode(søknadsperiodeTom, søknadsperiodeTom);
         PerioderFraSøknad perioderFraSøknad1 = setupPerioderFraSøknad(journalpost1, List.of(kursPeriode1));
         PerioderFraSøknad perioderFraSøknad2 = setupPerioderFraSøknad(journalpost2, List.of(kursPeriode2));
         VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost1, true, "", "", LocalDateTime.now());

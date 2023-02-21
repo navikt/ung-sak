@@ -131,7 +131,7 @@ public class BeregningStegTjeneste {
     }
 
     private boolean ingenRelevantEndring(BehandlingReferanse ref, PeriodeTilVurdering p) {
-        return p.erForlengelse() && EndretUtbetalingPeriodeutleder.finnUtleder(endretUtbetalingPeriodeutleder, ref.getFagsakYtelseType())
+        return p.erForlengelse() && EndretUtbetalingPeriodeutleder.finnUtleder(endretUtbetalingPeriodeutleder, ref.getFagsakYtelseType(), ref.getBehandlingType())
             .utledPerioder(ref, p.getPeriode()).isEmpty();
     }
 

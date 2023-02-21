@@ -10,6 +10,7 @@ import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.evaluation.Resultat;
 import no.nav.fpsak.nare.evaluation.RuleReasonRef;
 import no.nav.fpsak.nare.specification.Specification;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -52,13 +53,18 @@ public class OMPOmsorgenForVilkår implements OmsorgenForVilkår {
 
     @Override
     public boolean skalHaAksjonspunkt(LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje, boolean medAlleGamleVurderingerPåNytt) {
-        boolean finnesDetEnAvslåttPeriode = samletOmsorgenForTidslinje.stream()
-            .map(grunnlag -> getSpecification().evaluate(grunnlag.getValue()))
-            .anyMatch(vurdering -> vurdering.result().equals(Resultat.NEI));
+        var avslåttTidslinje = new LocalDateTimeline<>(samletOmsorgenForTidslinje.stream()
+            .map(grunnlag -> new LocalDateSegment<>(grunnlag.getLocalDateInterval(), getSpecification().evaluate(grunnlag.getValue()).result().equals(Resultat.NEI)))
+            .toList())
+            .filterValue(it -> it);
 
-        if (medAlleGamleVurderingerPåNytt && finnesDetEnAvslåttPeriode) {
-            return true;
-        }
-        return finnesDetEnAvslåttPeriode;
+        var vurdertTidslinje = new LocalDateTimeline<>(samletOmsorgenForTidslinje.stream()
+            .map(grunnlag -> new LocalDateSegment<>(grunnlag.getLocalDateInterval(), grunnlag.getValue().getHarBlittVurdertSomOmsorgsPerson() != null && !medAlleGamleVurderingerPåNytt))
+            .toList())
+            .filterValue(it -> it);
+
+        var ikkeVurdertAvslåttPeriode = avslåttTidslinje.disjoint(vurdertTidslinje);
+
+        return !ikkeVurdertAvslåttPeriode.isEmpty();
     }
 }

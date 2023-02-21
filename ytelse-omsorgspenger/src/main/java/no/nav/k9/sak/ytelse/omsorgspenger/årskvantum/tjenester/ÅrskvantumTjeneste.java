@@ -16,6 +16,7 @@ import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -69,6 +70,8 @@ import no.nav.k9.sak.domene.opptjening.OpptjeningInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.person.personopplysning.BasisPersonopplysningTjeneste;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.inngangsvilkår.omsorg.OmsorgenForTjeneste;
+import no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell.OmsorgenForVilkårGrunnlag;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -103,6 +106,7 @@ public class ÅrskvantumTjeneste {
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste;
     private MottatteDokumentRepository mottatteDokumentRepository;
+    private OmsorgenForTjeneste omsorgenForTjeneste;
 
     ÅrskvantumTjeneste() {
         // CDI
@@ -119,7 +123,8 @@ public class ÅrskvantumTjeneste {
                               @FagsakYtelseTypeRef(OMSORGSPENGER) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste,
                               TrekkUtFraværTjeneste trekkUtFraværTjeneste,
                               OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste,
-                              MottatteDokumentRepository mottatteDokumentRepository) {
+                              MottatteDokumentRepository mottatteDokumentRepository,
+                              OmsorgenForTjeneste omsorgenForTjeneste) {
         this.grunnlagRepository = grunnlagRepository;
         this.behandlingRepository = behandlingRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
@@ -133,6 +138,7 @@ public class ÅrskvantumTjeneste {
         this.opptjeningTjeneste = opptjeningTjeneste;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.mapOppgittFraværOgVilkårsResultat = new MapOppgittFraværOgVilkårsResultat();
+        this.omsorgenForTjeneste = omsorgenForTjeneste;
     }
 
     public void bekreftUttaksplan(Long behandlingId) {
@@ -272,6 +278,9 @@ public class ÅrskvantumTjeneste {
         var mottatteDokumenter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(ref.getFagsakId()).stream()
             .collect(Collectors.toMap(MottattDokument::getJournalpostId, e -> e));
 
+        NavigableSet<DatoIntervallEntitet> periodene = fraværsPerioderMedUtfallOgPerArbeidsgiver.stream().map(fraværsperioder -> fraværsperioder.getPeriode().getPeriode()).collect(Collectors.toCollection(TreeSet::new));
+        LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje = (harOmsorgenForBlittVurdertIK9sak(periodene.first().getFomDato())) ? omsorgenForTjeneste.mapGrunnlag(ref, periodene): LocalDateTimeline.empty();
+
         for (WrappedOppgittFraværPeriode wrappedOppgittFraværPeriode : fraværsPerioderMedUtfallOgPerArbeidsgiver) {
             var fraværPeriode = wrappedOppgittFraværPeriode.getPeriode();
             var periode = new LukketPeriode(fraværPeriode.getFom(), fraværPeriode.getTom());
@@ -306,10 +315,24 @@ public class ÅrskvantumTjeneste {
                 opprinneligBehandlingUuid.map(UUID::toString).orElse(null),
                 avvikImSøknad,
                 utledVurderteVilkår(arbeidforholdStatus, wrappedOppgittFraværPeriode),
-                List.of()); // TODO HN legger til hjemler her når omsorgsvilkåret er på plass
+                List.of(),
+                harOmsorgenForBlittManueltVurdert(samletOmsorgenForTidslinje, fraværPeriode).orElse(null));
             fraværPerioder.add(uttaksperiodeOmsorgspenger);
         }
         return fraværPerioder;
+    }
+
+    private Optional<Boolean> harOmsorgenForBlittManueltVurdert(LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje, OppgittFraværPeriode fraværPeriode) {
+        if (samletOmsorgenForTidslinje.isEmpty()) {
+            // omsorgen for ble ikke vurdert i k9
+            return Optional.empty();
+        }
+        Optional<Boolean> harBlittManueltVurdert = samletOmsorgenForTidslinje.stream()
+            .filter(omsorgsperiode -> omsorgsperiode.overlapper(new LocalDateSegment(fraværPeriode.getPeriode().toLocalDateInterval(), true)))
+            .findFirst()
+            .map(omsorgenFor -> omsorgenFor.getValue().getHarBlittVurdertSomOmsorgsPerson());
+
+        return Optional.of(harBlittManueltVurdert.isPresent());
     }
 
     private boolean harOmsorgenForBlittVurdertIK9sak(LocalDate fraværsDato) {

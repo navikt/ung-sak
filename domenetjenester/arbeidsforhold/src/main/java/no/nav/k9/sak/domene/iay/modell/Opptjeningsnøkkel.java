@@ -182,9 +182,10 @@ public class Opptjeningsnøkkel {
 
     @Override
     public String toString() {
+        var verdi = getVerdi();
         return getClass().getSimpleName() + "<"
             + "type=" + getType()
-            + ", key=" + getVerdi()
+            + ", key=" + verdi.substring(0, Math.min(verdi.length(), 3))
             + ">";
     }
 

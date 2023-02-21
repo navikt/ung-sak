@@ -58,20 +58,7 @@ spec:
       claims:
         extra:
           - "NAVident"
-        groups:
-          # Saksbehandler
-          - id: "466d0df7-22ba-4c68-b848-73478cfd0486",
-          # Veileder
-          - id: "be11a922-59a2-4afa-b5ad-b9e9bd445268",
-          # Overstyrer
-          - id: "f6b0f0bd-3716-4c5a-aa7d-c8b72fdc40b5",
-          # Oppgavestyrer
-          - id: "f3743660-4c76-4845-885f-f38ad478645f",
-          # Beslutter
-          - id: "e5f1ba3d-c29f-4b0c-9cb1-b15fc4253fa3",
-          # Drift
-          - id: "1509dc91-a955-4e72-b64c-2f049e37c0c6",
-      allowAllUsers: false
+      allowAllUsers: true
   accessPolicy:
     inbound:
       rules:
@@ -260,7 +247,7 @@ spec:
     - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
       value: "2022-08-08"
     - name: BG_FORLENGELSE_BASERT_PAA_UTTAK
-      value: "false"
+      value: "true"
     - name: ENABLE_PRODUCER_DOKUMENTBESTILLING_AIVEN
       value: "true"
     - name: ENABLE_PRODUCER_VEDTAKHENDELSE_AIVEN
@@ -268,18 +255,18 @@ spec:
     - name: ENABLE_PRODUCER_AKSJONSPUNKTHENDELSE_LOS_AIVEN
       value: "true"
     - name: ENABLE_SJEKK_TILBAKEKREVING
-      value: "false"
+      value: "true"
     - name: IKKE_YRKESAKTIV_UTEN_SPEILING
       value: "true"
     - name: OMS_OMSORGENFOR_FLYTTET
       value: "true"
-    - name: PSB_BG_BRUKER_OPPTJENING_RESULTAT
+    - name: PSB_FRAMOVERHOPP_VED_FORLENGELSE_OPPTJENING
+      value: "true"
+    - name: OMS_ZERO_REFUSJON_ER_KRAV
       value: "true"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT
-      value: "true"
-    - name: ENABLE_FERIEPENGER_PAA_TVERS_AV_SAKER_OG_PR_AAR
       value: "true"
 
     # Audit logging

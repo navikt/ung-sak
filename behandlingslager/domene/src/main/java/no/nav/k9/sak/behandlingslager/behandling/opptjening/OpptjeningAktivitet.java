@@ -160,7 +160,7 @@ public class OpptjeningAktivitet extends BaseEntitet implements IndexKey {
     public String toString() {
         return getClass().getSimpleName()
             + "<aktivitetType=" + aktivitetType //$NON-NLS-1$
-            + (aktivitetReferanse == null ? "" : ", aktivitetReferanse[" + aktivitetReferanseType + "]=" + aktivitetReferanse) //$NON-NLS-1$ //$NON-NLS-2$
+            + (aktivitetReferanse == null ? "" : ", aktivitetReferanse[" + aktivitetReferanseType + "]=" + aktivitetReferanse.substring(0, Math.min(aktivitetReferanse.length(), 3))) //$NON-NLS-1$ //$NON-NLS-2$
             + ", klassifisering=" + klassifisering
             + " [" + periode.getFomDato() + ", " + periode.getTomDato() + "]" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
             + ">"; //$NON-NLS-1$

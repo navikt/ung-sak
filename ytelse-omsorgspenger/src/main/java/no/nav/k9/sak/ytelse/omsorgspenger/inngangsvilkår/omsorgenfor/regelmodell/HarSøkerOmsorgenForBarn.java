@@ -40,7 +40,7 @@ public class HarSøkerOmsorgenForBarn extends LeafSpecification<OmsorgenForVilk�
         tidslinje = tidslinje.combine(perioderMedLikeAdresser(grunnlag.getSøkersAdresser(), grunnlag.getDeltBostedsAdresser()), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         tidslinje = tidslinje.combine(perioderMedFosterbarn(grunnlag), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
-        tidslinje.forEach(segment -> grunnlag.leggTilUtfall(segment.getLocalDateInterval(), segment.getValue()));
+        grunnlag.leggTilUtfall(tidslinje);
 
         if (tidslinje.stream().allMatch(it -> Objects.equals(it.getValue(), Utfall.IKKE_OPPFYLT))) {
             return nei(OmsorgenForAvslagsårsaker.IKKE_DOKUMENTERT_OMSORGEN_FOR.toRuleReason());
@@ -57,14 +57,14 @@ public class HarSøkerOmsorgenForBarn extends LeafSpecification<OmsorgenForVilk�
                 segmenter.add(new LocalDateSegment<>(fosterbarnPeriode.overlapp(grunnlag.getVilkårsperiode()).toLocalDateInterval(), Utfall.OPPFYLT));
             }
         }
-        return new LocalDateTimeline<>(segmenter);
+        return new LocalDateTimeline<>(segmenter, StandardCombinators::coalesceRightHandSide);
     }
 
     private LocalDateTimeline<Utfall> perioderMedLikeAdresser(List<BostedsAdresse> søkersAdresser, List<BostedsAdresse> barnsAdresser) {
         var utfallsTidslinje = new LocalDateTimeline<Utfall>(List.of());
 
         for (BostedsAdresse søkersAdresse : søkersAdresser) {
-            for (BostedsAdresse barnsAdresse: barnsAdresser) {
+            for (BostedsAdresse barnsAdresse : barnsAdresser) {
                 if (søkersAdresse.getPeriode().overlapper(barnsAdresse.getPeriode()) && søkersAdresse.erSammeAdresse(barnsAdresse)) {
                     var segment = new LocalDateSegment<>(søkersAdresse.getPeriode().overlapp(barnsAdresse.getPeriode()).toLocalDateInterval(), Utfall.OPPFYLT);
                     utfallsTidslinje = utfallsTidslinje.combine(segment, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);

@@ -1,18 +1,24 @@
 package no.nav.k9.sak.domene.abakus;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 
 class SakInntektsmeldinger {
+
+    private static Logger LOGGER = LoggerFactory.getLogger(SakInntektsmeldinger.class);
 
     private final Map<Key, Set<Inntektsmelding>> data = new LinkedHashMap<>();
     private final Map<Key, InntektArbeidYtelseGrunnlag> grunnlag = new LinkedHashMap<>();
@@ -50,28 +56,15 @@ class SakInntektsmeldinger {
     }
 
 
-    Set<Inntektsmelding> hentInntektsmeldingerKommetTom(Long behandlingId) {
+    Set<Inntektsmelding> hentUnikeInntektsmeldinger() {
         if (data.isEmpty()) {
             return Set.of();
         }
-        var keyOpt = data.keySet().stream().filter(it -> Objects.equals(it.behandlingId, behandlingId)).max(Comparator.comparing(Key::getOpprettetTidspunkt));
-        if (keyOpt.isEmpty()) {
-            return Set.of();
-        }
 
-        var key = keyOpt.get();
-        var relevanteKeys = data.keySet()
+        return data.values()
             .stream()
-            .filter(it -> Objects.equals(it.grunnlagEksternReferanse, key.grunnlagEksternReferanse) || it.opprettetTidspunkt.isBefore(key.opprettetTidspunkt))
-            .toList();
-
-        var nyeInntektsmeldinger = new LinkedHashSet<Inntektsmelding>();
-
-        relevanteKeys.stream()
-            .map(data::get)
-            .forEach(nyeInntektsmeldinger::addAll);
-
-        return nyeInntektsmeldinger;
+            .flatMap(Collection::stream)
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     private boolean erLiktEllerSenere(Inntektsmelding siste, Inntektsmelding denne) {
@@ -106,6 +99,16 @@ class SakInntektsmeldinger {
         @Override
         public int hashCode() {
             return Objects.hash(behandlingId, grunnlagEksternReferanse, opprettetTidspunkt);
+        }
+
+
+        @Override
+        public String toString() {
+            return "Key{" +
+                "behandlingId=" + behandlingId +
+                ", grunnlagEksternReferanse=" + grunnlagEksternReferanse +
+                ", opprettetTidspunkt=" + opprettetTidspunkt +
+                '}';
         }
     }
 
