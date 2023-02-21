@@ -189,6 +189,10 @@ public class BehandlingProsessHendelse {
     private Boolean nyeKrav;
 
     @Valid
+    @JsonProperty(value = "fraEndringsdialog", required = false)
+    private Boolean fraEndringsdialog;
+
+    @Valid
     @JsonProperty(value = "vedtaksdato")
     private LocalDate vedtaksdato;
 
@@ -219,6 +223,7 @@ public class BehandlingProsessHendelse {
         this.aksjonspunktTilstand = kopierFra.aksjonspunktTilstand.stream().map(AksjonspunktTilstandDto::new).toList();
         this.nyeKrav = kopierFra.nyeKrav;
         this.vedtaksdato = kopierFra.vedtaksdato;
+        this.fraEndringsdialog = kopierFra.fraEndringsdialog;
     }
 
     public static Builder builder() {
@@ -299,6 +304,10 @@ public class BehandlingProsessHendelse {
 
     public boolean isNyeKrav() {
         return nyeKrav != null && nyeKrav;
+    }
+
+    public boolean isFraEndringsdialog() {
+        return fraEndringsdialog != null && fraEndringsdialog;
     }
 
     public LocalDate getVedtaksdato() {
@@ -424,6 +433,11 @@ public class BehandlingProsessHendelse {
 
         public Builder medVedtaksdato(LocalDate vedtaksdato) {
             kladd.vedtaksdato = vedtaksdato;
+            return this;
+        }
+
+        public Builder medFraEndringsdialog(Boolean fraEndringsdialog) {
+            kladd.fraEndringsdialog = fraEndringsdialog;
             return this;
         }
 
