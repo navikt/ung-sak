@@ -36,11 +36,10 @@ public class BeregnFeriepengerTjenesteTest {
         no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet beregningsresultat = lagVlBeregningsresultat();
         BeregningsresultatFeriepengerRegelModell regelmodell = BeregningsresultatFeriepengerRegelModell.builder()
             .medBeregningsresultatPerioder(List.of(periode))
-            .medFeriepengerPeriode(STP, STP.plusMonths(10))
             .build();
 
         // Act
-        BeregnFeriepengerTjeneste.mapTilResultatFraRegelModell(beregningsresultat, regelmodell);
+        BeregnFeriepengerTjeneste.mapTilResultatFraRegelModellV2(beregningsresultat, regelmodell);
 
         // Assert
         var andelTimeline = beregningsresultat.getBeregningsresultatAndelTimeline();
@@ -59,11 +58,10 @@ public class BeregnFeriepengerTjenesteTest {
         no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet beregningsresultat = lagVlBeregningsresultat();
         BeregningsresultatFeriepengerRegelModell regelmodell = BeregningsresultatFeriepengerRegelModell.builder()
             .medBeregningsresultatPerioder(List.of(periode))
-            .medFeriepengerPeriode(STP, STP.plusMonths(10))
             .build();
 
         // Act
-        BeregnFeriepengerTjeneste.mapTilResultatFraRegelModell(beregningsresultat, regelmodell);
+        BeregnFeriepengerTjeneste.mapTilResultatFraRegelModellV2(beregningsresultat, regelmodell);
 
         // Assert
         // Assert

@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.beregning.regler.feriepenger;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.evaluation.summary.EvaluationSerializer;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatAndel;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatPeriode;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.AktivitetStatus;
@@ -40,6 +42,7 @@ public class RegelBeregnFeriepengerTest {
             .medBeregningsresultatPerioder(List.of(periode1, periode2))
             .medInntektskategorier(Collections.singleton(Inntektskategori.ARBEIDSTAKER))
             .medAntallDagerFeriepenger(60)
+            .medAndelerSomKanGiFeriepengerForRelevaneSaker(LocalDateTimeline.empty())
             .build();
 
         RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger();
@@ -47,8 +50,6 @@ public class RegelBeregnFeriepengerTest {
         String sporing = EvaluationSerializer.asJson(evaluation);
 
         assertThat(sporing).isNotNull();
-        assertThat(regelModell.getFeriepengerPeriodeBruker().getFomDato()).isEqualTo(LocalDate.of(2018, 1, 6));
-        assertThat(regelModell.getFeriepengerPeriodeBruker().getTomDato()).isEqualTo(LocalDate.of(2018, 3, 16));
 
         regelModell.getBeregningsresultatPerioder().stream().flatMap(p -> p.getBeregningsresultatAndelList().stream())
             .forEach(andel -> assertThat(andel.getBeregningsresultatFeriepengerPrÅrListe()).hasSize(1));
@@ -59,11 +60,11 @@ public class RegelBeregnFeriepengerTest {
         BeregningsresultatAndel andelBruker3 = periode2.getBeregningsresultatAndelList().get(0);
         BeregningsresultatAndel andelArbeidsgiver3 = periode2.getBeregningsresultatAndelList().get(1);
 
-        assertThat(andelBruker1.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(1606.5));
+        assertThat(andelBruker1.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(1607));
         assertThat(andelBruker2.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(459));
         assertThat(andelArbeidsgiver1.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(2754));
         assertThat(andelArbeidsgiver2.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(2295));
-        assertThat(andelBruker3.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(76.5));
+        assertThat(andelBruker3.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(76));
         assertThat(andelArbeidsgiver3.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(204));
     }
 
@@ -82,6 +83,7 @@ public class RegelBeregnFeriepengerTest {
             .medBeregningsresultatPerioder(List.of(periode0, periode1, periode2))
             .medInntektskategorier(Collections.singleton(Inntektskategori.ARBEIDSTAKER))
             .medAntallDagerFeriepenger(60)
+            .medAndelerSomKanGiFeriepengerForRelevaneSaker(LocalDateTimeline.empty())
             .build();
 
         RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger();
@@ -89,8 +91,6 @@ public class RegelBeregnFeriepengerTest {
         String sporing = EvaluationSerializer.asJson(evaluation);
 
         assertThat(sporing).isNotNull();
-        assertThat(regelModell.getFeriepengerPeriodeBruker().getFomDato()).isEqualTo(LocalDate.of(2018, 1, 6));
-        assertThat(regelModell.getFeriepengerPeriodeBruker().getTomDato()).isEqualTo(LocalDate.of(2018, 3, 23));
 
         regelModell.getBeregningsresultatPerioder().stream().flatMap(p -> p.getBeregningsresultatAndelList().stream())
             .forEach(andel -> {
@@ -107,7 +107,7 @@ public class RegelBeregnFeriepengerTest {
         BeregningsresultatAndel andelBruker3 = periode2.getBeregningsresultatAndelList().get(0);
         BeregningsresultatAndel andelArbeidsgiver3 = periode2.getBeregningsresultatAndelList().get(1);
 
-        assertThat(andelBruker1.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(1606.5));
+        assertThat(andelBruker1.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(1607));
         assertThat(andelBruker2.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(459));
         assertThat(andelArbeidsgiver1.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(2754));
         assertThat(andelArbeidsgiver2.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(2295));
@@ -134,6 +134,7 @@ public class RegelBeregnFeriepengerTest {
             .medBeregningsresultatPerioder(List.of(periode1, periode2, periode3))
             .medInntektskategorier(Collections.singleton(Inntektskategori.ARBEIDSTAKER))
             .medAntallDagerFeriepenger(60)
+            .medAndelerSomKanGiFeriepengerForRelevaneSaker(LocalDateTimeline.empty())
             .build();
 
         RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger();
@@ -141,8 +142,6 @@ public class RegelBeregnFeriepengerTest {
         String sporing = EvaluationSerializer.asJson(evaluation);
 
         assertThat(sporing).isNotNull();
-        assertThat(regelModell.getFeriepengerPeriodeBruker().getFomDato()).isEqualTo(LocalDate.of(2018, 1, 17));
-        assertThat(regelModell.getFeriepengerPeriodeBruker().getTomDato()).isEqualTo(LocalDate.of(2018, 4, 8));
 
         assertThat(regelModell.getBeregningsresultatPerioder().stream().flatMap(p -> p.getBeregningsresultatAndelList().stream())
             .flatMap(a -> a.getBeregningsresultatFeriepengerPrÅrListe().stream()).collect(Collectors.toList())).hasSize(6);
@@ -157,19 +156,19 @@ public class RegelBeregnFeriepengerTest {
         BeregningsresultatAndel andelBruker4 = periode3.getBeregningsresultatAndelList().get(0);
         BeregningsresultatAndel andelArbeidsgiver4 = periode3.getBeregningsresultatAndelList().get(1);
 
-        assertThat(andelBruker1.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(1606.5));
+        assertThat(andelBruker1.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(1607));
         assertThat(andelBruker2.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(459));
         assertThat(andelArbeidsgiver1.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(2754));
         assertThat(andelArbeidsgiver2.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(2295));
-        assertThat(andelBruker4.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(249.9));
-        assertThat(andelArbeidsgiver4.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(428.400));
+        assertThat(andelBruker4.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(249));
+        assertThat(andelArbeidsgiver4.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(428));
     }
 
     @Test
     public void skalBeregneFeriepengerOverFlereÅr() {
-        BeregningsresultatPeriode periode1 = new BeregningsresultatPeriode(LocalDate.of(2018, 11, 1), LocalDate.of(2019, 1, 5)); // 47 ukedager
+        BeregningsresultatPeriode periode1 = new BeregningsresultatPeriode(LocalDate.of(2018, 11, 1), LocalDate.of(2019, 1, 5)); // 47 ukedager (hvorav 4 i 2019)
         BeregningsresultatPeriode periode2 = new BeregningsresultatPeriode(LocalDate.of(2019, 1, 6), LocalDate.of(2019, 2, 5)); // 22 ukedager
-        BeregningsresultatPeriode periode3 = new BeregningsresultatPeriode(LocalDate.of(2019, 2, 6), LocalDate.of(2019, 4, 16)); // 50 ukedager
+        BeregningsresultatPeriode periode3 = new BeregningsresultatPeriode(LocalDate.of(2019, 2, 6), LocalDate.of(2019, 5, 16)); // 50 ukedager
         byggAndelerForPeriode(periode1, 1000, 0, arbeidsforhold1);
         byggAndelerForPeriode(periode2, 0, 0, arbeidsforhold1);
         byggAndelerForPeriode(periode3, 500, 500, arbeidsforhold1);
@@ -178,6 +177,7 @@ public class RegelBeregnFeriepengerTest {
             .medBeregningsresultatPerioder(List.of(periode1, periode2, periode3))
             .medInntektskategorier(Collections.singleton(Inntektskategori.ARBEIDSTAKER))
             .medAntallDagerFeriepenger(60)
+            .medAndelerSomKanGiFeriepengerForRelevaneSaker(LocalDateTimeline.empty())
             .build();
 
         RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger();
@@ -185,8 +185,6 @@ public class RegelBeregnFeriepengerTest {
         String sporing = EvaluationSerializer.asJson(evaluation);
 
         assertThat(sporing).isNotNull();
-        assertThat(regelModell.getFeriepengerPeriodeBruker().getFomDato()).isEqualTo(LocalDate.of(2018, 11, 1));
-        assertThat(regelModell.getFeriepengerPeriodeBruker().getTomDato()).isEqualTo(LocalDate.of(2019, 2, 22));
 
         regelModell.getBeregningsresultatPerioder().get(0).getBeregningsresultatAndelList().forEach(andel -> assertThat(andel.getBeregningsresultatFeriepengerPrÅrListe()).hasSize(2));
         regelModell.getBeregningsresultatPerioder().get(1).getBeregningsresultatAndelList().forEach(andel -> assertThat(andel.getBeregningsresultatFeriepengerPrÅrListe()).isEmpty());
@@ -195,11 +193,16 @@ public class RegelBeregnFeriepengerTest {
         BeregningsresultatAndel andelBruker2 = periode3.getBeregningsresultatAndelList().get(0);
         BeregningsresultatAndel andelArbeidsgiver = periode3.getBeregningsresultatAndelList().get(1);
 
-        assertThat(andelBruker1.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(4386));
-        assertThat(andelBruker1.getBeregningsresultatFeriepengerPrÅrListe().get(1).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(408));
 
-        assertThat(andelBruker2.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(663));
-        assertThat(andelArbeidsgiver.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(663));
+        BigDecimal periode1feriepenger2018 = andelBruker1.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp();
+        BigDecimal periode1feriepenger2019 = andelBruker1.getBeregningsresultatFeriepengerPrÅrListe().get(1).getÅrsbeløp();
+        BigDecimal periode3feriepengerBruker2019 = andelBruker2.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp();
+        BigDecimal periode3feriepengerRefusjon2019 = andelArbeidsgiver.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp();
+
+        assertThat(periode1feriepenger2018).isEqualByComparingTo(BigDecimal.valueOf(1000*0.102*43).setScale(0, RoundingMode.HALF_UP)); //1000 dagsats, 10.2% sats, 44 dager
+        assertThat(periode1feriepenger2019).isEqualByComparingTo(BigDecimal.valueOf(1000*0.102*4).setScale(0, RoundingMode.HALF_UP)); //som over, men 3 dager
+        assertThat(periode3feriepengerBruker2019).isEqualByComparingTo(BigDecimal.valueOf(500*0.102*56).setScale(0, RoundingMode.HALF_UP)); //500 dagsats, sats, 56 dager (kvote nullstilles ved årskifte, 4 dager brukt i forrige periode)
+        assertThat(periode3feriepengerRefusjon2019).isEqualByComparingTo(BigDecimal.valueOf(500*0.102*56).setScale(0, RoundingMode.HALF_UP));
     }
 
     @Test
@@ -220,6 +223,7 @@ public class RegelBeregnFeriepengerTest {
             .medInntektskategorier(Collections.singleton(Inntektskategori.ARBEIDSTAKER))
             .medAntallDagerFeriepenger(60)
             .medFeriepengeopptjeningForHelg(true)
+            .medAndelerSomKanGiFeriepengerForRelevaneSaker(LocalDateTimeline.empty())
             .build();
 
         RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger();
@@ -227,8 +231,6 @@ public class RegelBeregnFeriepengerTest {
         String sporing = EvaluationSerializer.asJson(evaluation);
 
         assertThat(sporing).isNotNull();
-        assertThat(regelModell.getFeriepengerPeriodeBruker().getFomDato()).isEqualTo(lørdag);
-        assertThat(regelModell.getFeriepengerPeriodeBruker().getTomDato()).isEqualTo(lørdag.plusWeeks(2));
 
         List<BeregningsresultatPeriode> perioder = regelModell.getBeregningsresultatPerioder();
         perioder.get(0).getBeregningsresultatAndelList().forEach(andel -> assertThat(andel.getBeregningsresultatFeriepengerPrÅrListe()).hasSize(1));
@@ -238,9 +240,9 @@ public class RegelBeregnFeriepengerTest {
         BeregningsresultatAndel andelBruker2 = periode2.getBeregningsresultatAndelList().get(0);
         BeregningsresultatAndel andelBruker3 = periode3.getBeregningsresultatAndelList().get(0);
 
-        assertThat(andelBruker1.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(new BigDecimal("10.2")); //10.2 % av 100 * 1 dag
-        assertThat(andelBruker2.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(new BigDecimal("40.8"));//10.2 % av 200 * 2 dager
-        assertThat(andelBruker3.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(new BigDecimal("61.2"));//10.2 % av 300 * 2 dager
+        assertThat(andelBruker1.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(new BigDecimal("10")); //10.2 % av 100 * 1 dag, avrundet
+        assertThat(andelBruker2.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(new BigDecimal("41"));//10.2 % av 200 * 2 dager, avrundet
+        assertThat(andelBruker3.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(new BigDecimal("61"));//10.2 % av 300 * 2 dager, avrundet
     }
 
     @Test
@@ -257,6 +259,7 @@ public class RegelBeregnFeriepengerTest {
             .medAntallDagerFeriepenger(60)
             .medFeriepengeopptjeningForHelg(true)
             .medUbegrensetFeriepengedagerVedRefusjon(true)
+            .medAndelerSomKanGiFeriepengerForRelevaneSaker(LocalDateTimeline.empty())
             .build();
 
         RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger();
@@ -264,10 +267,6 @@ public class RegelBeregnFeriepengerTest {
         String sporing = EvaluationSerializer.asJson(evaluation);
 
         assertThat(sporing).isNotNull();
-        assertThat(regelModell.getFeriepengerPeriodeBruker().getFomDato()).isEqualTo(fom);
-        assertThat(regelModell.getFeriepengerPeriodeBruker().getTomDato()).isEqualTo(fom.plusDays(59));
-        assertThat(regelModell.getFeriepengerPeriodeRefusjon().getFomDato()).isEqualTo(fom);
-        assertThat(regelModell.getFeriepengerPeriodeRefusjon().getTomDato()).isEqualTo(tom);
 
         List<BeregningsresultatPeriode> perioder = regelModell.getBeregningsresultatPerioder();
         assertThat(perioder).hasSize(1);
@@ -298,6 +297,7 @@ public class RegelBeregnFeriepengerTest {
             .medAntallDagerFeriepenger(48)
             .medFeriepengeopptjeningForHelg(true)
             .medUbegrensetFeriepengedagerVedRefusjon(true)
+            .medAndelerSomKanGiFeriepengerForRelevaneSaker(LocalDateTimeline.empty())
             .build();
 
         RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger();
@@ -305,10 +305,6 @@ public class RegelBeregnFeriepengerTest {
         String sporing = EvaluationSerializer.asJson(evaluation);
 
         assertThat(sporing).isNotNull();
-        assertThat(regelModell.getFeriepengerPeriodeBruker().getFomDato()).isBetween(fom1, fom2); //alle dager i range vil være OK
-        assertThat(regelModell.getFeriepengerPeriodeBruker().getTomDato()).isEqualTo(fom2.plusDays(47));
-        assertThat(regelModell.getFeriepengerPeriodeRefusjon().getFomDato()).isEqualTo(fom1);
-        assertThat(regelModell.getFeriepengerPeriodeRefusjon().getTomDato()).isBetween(tom1, tom2); //alle dager i range vil være OK
 
         List<BeregningsresultatPeriode> perioder = regelModell.getBeregningsresultatPerioder();
         assertThat(perioder).hasSize(2);
@@ -317,7 +313,7 @@ public class RegelBeregnFeriepengerTest {
         assertThat(brAndeler2).hasSize(1);
         brAndeler2.forEach(andel -> assertThat(andel.getBeregningsresultatFeriepengerPrÅrListe()).hasSize(1));
         BeregningsresultatAndel andelBruker = brAndeler2.stream().filter(BeregningsresultatAndel::erBrukerMottaker).findFirst().orElseThrow();
-        assertThat(andelBruker.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(new BigDecimal("489.6")); //10.2 % av 100 kr * 48 dager (dager kappes)
+        assertThat(andelBruker.getBeregningsresultatFeriepengerPrÅrListe().get(0).getÅrsbeløp()).isEqualByComparingTo(new BigDecimal("490")); //10.2 % av 100 kr * 48 dager (dager kappes), avrudet
     }
 
     @Test
@@ -333,6 +329,7 @@ public class RegelBeregnFeriepengerTest {
             .medAntallDagerFeriepenger(60)
             .medFeriepengeopptjeningForHelg(true)
             .medUbegrensetFeriepengedagerVedRefusjon(true)
+            .medAndelerSomKanGiFeriepengerForRelevaneSaker(LocalDateTimeline.empty())
             .build();
 
         RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger();
@@ -340,10 +337,6 @@ public class RegelBeregnFeriepengerTest {
         String sporing = EvaluationSerializer.asJson(evaluation);
 
         assertThat(sporing).isNotNull();
-        assertThat(regelModell.getFeriepengerPeriodeBruker().getFomDato()).isEqualTo(fom);
-        assertThat(regelModell.getFeriepengerPeriodeBruker().getTomDato()).isEqualTo(tom);
-        assertThat(regelModell.getFeriepengerPeriodeRefusjon().getFomDato()).isEqualTo(fom);
-        assertThat(regelModell.getFeriepengerPeriodeRefusjon().getTomDato()).isEqualTo(tom);
 
         List<BeregningsresultatPeriode> perioder = regelModell.getBeregningsresultatPerioder();
         assertThat(perioder).hasSize(1);
@@ -365,6 +358,7 @@ public class RegelBeregnFeriepengerTest {
             .medAntallDagerFeriepenger(60)
             .medFeriepengeopptjeningForHelg(true)
             .medUbegrensetFeriepengedagerVedRefusjon(true)
+            .medAndelerSomKanGiFeriepengerForRelevaneSaker(LocalDateTimeline.empty())
             .build();
 
         RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger();
@@ -372,8 +366,6 @@ public class RegelBeregnFeriepengerTest {
         String sporing = EvaluationSerializer.asJson(evaluation);
 
         assertThat(sporing).isNotNull();
-        assertThat(regelModell.getFeriepengerPeriodeBruker()).isNull();
-        assertThat(regelModell.getFeriepengerPeriodeRefusjon()).isNull();
         assertThat(regelModell.getBeregningsresultatPerioder()).isEmpty();
     }
 

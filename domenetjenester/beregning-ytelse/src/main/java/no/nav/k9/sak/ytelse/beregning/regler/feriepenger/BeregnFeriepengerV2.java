@@ -7,12 +7,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.specification.LeafSpecification;
@@ -28,11 +23,11 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.Beregningsresultat
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerRegelModell;
 
 class BeregnFeriepengerV2 extends LeafSpecification<BeregningsresultatFeriepengerRegelModell> {
-    private static final Logger logger = LoggerFactory.getLogger(BeregnFeriepengerV2.class);
-    public static final String ID = "FP_BR 8.6";
+
+    public static final String ID = "FP_BR 8.6.1";
     public static final String BESKRIVELSE = "Beregn feriepenger for periode som går over flere kalenderår.";
 
-    private static final BigDecimal FERIEPENGER_SATS_PROSENT = BigDecimal.valueOf(0.102);
+    private static final BigDecimal FERIEPENGER_SATS = BigDecimal.valueOf(0.102);
 
     BeregnFeriepengerV2() {
         super(ID, BESKRIVELSE);
@@ -41,37 +36,29 @@ class BeregnFeriepengerV2 extends LeafSpecification<BeregningsresultatFeriepenge
     @Override
     public Evaluation evaluate(BeregningsresultatFeriepengerRegelModell regelModell) {
         Map<String, Object> regelsporing = new LinkedHashMap<>();
-        LocalDateTimeline<Boolean> tidslinjeDenneSakenHarAndelSomKanGiFeriepenger = FeriepengerForAndelUtil.utledTidslinjerHarAndelSomKanGiFeriepenger(regelModell.getBeregningsresultatPerioder());
 
-        LocalDateTimeline<Boolean> tidslinjeYtelseKanGiFeriepenger = tidslinjeDenneSakenHarAndelSomKanGiFeriepenger.union(regelModell.getAndelerSomKanGiFeriepengerForRelevaneSaker(), StandardCombinators::alwaysTrueForMatch)
-            .compress();
+        LocalDateTimeline<Boolean> tidslinjeFeriepengerInnenforKvote;
+        LocalDateTimeline<Boolean> tidslinjeFeriepengerInnenforKvoteRefusjon;
 
-        LocalDateTimeline<Boolean> tidslinjeFeriepengerInnenforKvote = utledPerioderInnenforKvote(tidslinjeYtelseKanGiFeriepenger, regelModell);
-        LocalDateTimeline<Boolean> tidslinjeFeriepengerInnenforKvoteRefusjon = regelModell.harUbegrensetFeriepengedagerVedRefusjon() ? tidslinjeYtelseKanGiFeriepenger : tidslinjeFeriepengerInnenforKvote;
-
-        regelsporingTidslinjerYtelseKanGiFeriepenger(regelsporing, tidslinjeYtelseKanGiFeriepenger);
-        regelsporingTidslinjerInnenforKvote(regelsporing, regelModell, tidslinjeFeriepengerInnenforKvote);
+        if (regelModell.harUbegrensetFeriepengedagerVedRefusjon()) {
+            //gjelder omsorsgspenger
+            LocalDateTimeline<Boolean> tidslinjeYtelseKanGiFeriepenger = FeriepengerForAndelUtil.utledTidslinjerHarAndelSomKanGiFeriepengerTilBruker(regelModell.getBeregningsresultatPerioder());
+            tidslinjeFeriepengerInnenforKvote = utledPerioderInnenforKvote(tidslinjeYtelseKanGiFeriepenger, regelModell);
+            tidslinjeFeriepengerInnenforKvoteRefusjon = FeriepengerForAndelUtil.utledTidslinjerHarAndelSomKanGiFeriepengerTilRefusjon(regelModell.getBeregningsresultatPerioder());
+            regelsporing.put("perioder-feriepenger-til-bruker", prettyPrint(tidslinjeFeriepengerInnenforKvote));
+            regelsporing.put("perioder-feriepenger-ved-refusjon", prettyPrint(tidslinjeFeriepengerInnenforKvoteRefusjon));
+        } else {
+            LocalDateTimeline<Boolean> tidslinjeDenneSakenHarAndelSomKanGiFeriepenger = FeriepengerForAndelUtil.utledTidslinjerHarAndelSomKanGiFeriepenger(regelModell.getBeregningsresultatPerioder());
+            LocalDateTimeline<Boolean> tidslinjeYtelseKanGiFeriepenger = tidslinjeDenneSakenHarAndelSomKanGiFeriepenger.union(regelModell.getAndelerSomKanGiFeriepengerForRelevaneSaker(), StandardCombinators::alwaysTrueForMatch).compress();
+            tidslinjeFeriepengerInnenforKvote = utledPerioderInnenforKvote(tidslinjeYtelseKanGiFeriepenger, regelModell);
+            tidslinjeFeriepengerInnenforKvoteRefusjon = tidslinjeFeriepengerInnenforKvote;
+            regelsporing.put("perioder-med-feriepenger-på-tvers-av-saker", prettyPrint(tidslinjeYtelseKanGiFeriepenger));
+        }
 
         beregn(regelsporing, regelModell, tidslinjeFeriepengerInnenforKvote, MottakerType.BRUKER);
         beregn(regelsporing, regelModell, tidslinjeFeriepengerInnenforKvoteRefusjon, MottakerType.ARBEIDSGIVER);
 
-        LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> andreSakerOverKvote = regelModell.getAndelerSomKanGiFeriepengerForRelevaneSaker().disjoint(tidslinjeFeriepengerInnenforKvote);
-        if (!andreSakerOverKvote.isEmpty()) {
-            //TODO automatisk revurdere de andre sakene istedet
-            logger.warn("Feriepengutregning i denne saken viser at følgende saker nå er over kvote på feriepenger, og bør revurderes: {}", andreSakerOverKvote.stream().flatMap(segment -> segment.getValue().stream()).map(segment -> segment.saksnummer()).collect(Collectors.toSet()));
-        }
         return beregnet(regelsporing);
-    }
-
-    private static void regelsporingTidslinjerYtelseKanGiFeriepenger(Map<String, Object> regelsporing, LocalDateTimeline<Boolean> tidslinjeYtelseKanGiFeriepenger) {
-        regelsporing.put("perioder-med-andeler-som-kan-gi-feriepenger", prettyPrint(tidslinjeYtelseKanGiFeriepenger));
-    }
-
-    private static void regelsporingTidslinjerInnenforKvote(Map<String, Object> regelsporing, BeregningsresultatFeriepengerRegelModell regelModell, LocalDateTimeline<Boolean> tidslinjeFeriepengerInnenforKvote) {
-        regelsporing.put("perioder-med-andeler-som-kan-gi-feriepenger-og-er-innenfor-kvote", prettyPrint(tidslinjeFeriepengerInnenforKvote));
-        if (regelModell.harUbegrensetFeriepengedagerVedRefusjon()) {
-            regelsporing.put("perioder-med-andeler-som-kan-gi-feriepenger-og-er-innenfor-kvote", prettyPrint(tidslinjeFeriepengerInnenforKvote));
-        }
     }
 
     private static void beregn(Map<String, Object> regelsporing, BeregningsresultatFeriepengerRegelModell regelModell, LocalDateTimeline<Boolean> tidslinjeHvorFeriepengerGis, MottakerType mottakerType) {
@@ -83,7 +70,7 @@ class BeregnFeriepengerV2 extends LeafSpecification<BeregningsresultatFeriepenge
         for (BeregningsresultatPeriode periode : beregningsresultatPerioder) {
             LocalDateTimeline<Boolean> overlapp = tidslinjeHvorFeriepengerGis.intersection(periode.getPeriode());
             if (!overlapp.isEmpty() && periode.getBeregningsresultatAndelList().stream().anyMatch(andelFilter)) {
-                for (LocalDateInterval åretsOverlapp : IntervallUtil.periodiserPrÅr(unikPeriode(overlapp))) {
+                for (LocalDateInterval åretsOverlapp : IntervallUtil.splittVedÅrskifte(overlapp).getLocalDateIntervals()) {
                     long antallFeriepengerDager = harFeriepengeopptjeningForHelg
                         ? IntervallUtil.beregnKalanderdager(åretsOverlapp)
                         : IntervallUtil.beregnUkedager(åretsOverlapp);
@@ -97,7 +84,7 @@ class BeregnFeriepengerV2 extends LeafSpecification<BeregningsresultatFeriepenge
                             continue;
                         }
                         long feriepengerGrunnlag = andel.getDagsats() * antallFeriepengerDager;
-                        BigDecimal feriepengerAndelPrÅr = BigDecimal.valueOf(feriepengerGrunnlag).multiply(FERIEPENGER_SATS_PROSENT);
+                        BigDecimal feriepengerAndelPrÅr = BigDecimal.valueOf(feriepengerGrunnlag).multiply(FERIEPENGER_SATS);
                         FeriepengeNøkkel nøkkel = new FeriepengeNøkkel(andel.getMottakerType(), andel.getMottakerType() == MottakerType.BRUKER ? null : andel.getArbeidsgiverId(), åretsOverlapp.getFomDato().getYear());
                         BigDecimal tidligereAvrunding = avrundingTilgode.getOrDefault(nøkkel, BigDecimal.ZERO);
                         BigDecimal endeligFeriepengerForAndelen = feriepengerAndelPrÅr.subtract(tidligereAvrunding).setScale(0, RoundingMode.HALF_UP);
@@ -125,14 +112,6 @@ class BeregnFeriepengerV2 extends LeafSpecification<BeregningsresultatFeriepenge
 
     record FeriepengeNøkkel(MottakerType mottakerType, String mottakerId, int år) {
 
-    }
-
-    private static LocalDateInterval unikPeriode(LocalDateTimeline<?> tidslinje) {
-        var perioder = tidslinje.getLocalDateIntervals();
-        if (perioder.size() == 1) {
-            return perioder.iterator().next();
-        }
-        throw new IllegalArgumentException("Forventet tidslinje med nøyaktig en periode, men fikk: " + tidslinje);
     }
 
     private static String prettyPrint(LocalDateTimeline<Boolean> tidslinjeFeriepengerInnenforKvote) {
