@@ -2,7 +2,6 @@ package no.nav.k9.sak.ytelse.beregning.adapter;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.BeregningsgrunnlagUtil;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
@@ -31,6 +30,7 @@ public class MapBeregningsresultatFraRegelTilVL {
     private no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode mapFraPeriode(BeregningsresultatPeriode resultatPeriode, no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet eksisterendeResultat) {
         no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode nyPeriode = no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode.builder()
             .medBeregningsresultatPeriodeFomOgTom(resultatPeriode.getFom(), resultatPeriode.getTom())
+            .medInntektGraderingprosent(resultatPeriode.getInntektGraderingsprosent())
             .build(eksisterendeResultat);
         resultatPeriode.getBeregningsresultatAndelList().forEach(bra -> mapFraAndel(bra, nyPeriode, resultatPeriode.getPeriode()));
         return nyPeriode;

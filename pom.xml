@@ -155,7 +155,7 @@
             <dependency>
                 <groupId>no.nav.folketrygdloven.kalkulus</groupId>
                 <artifactId>kalkulus-kontrakt-jakarta</artifactId>
-                <version>2.2.1</version>
+                <version><!-- sett inn oppdatert versjon her, når ft-kalkulus-konstrakten er deployet --></version>
             </dependency>
 
             <dependency>

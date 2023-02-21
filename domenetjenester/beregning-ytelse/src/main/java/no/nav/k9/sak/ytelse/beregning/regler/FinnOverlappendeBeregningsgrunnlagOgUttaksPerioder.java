@@ -98,15 +98,16 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
 
         final int[] i = {0}; // Periode-teller til regelsporing
         return grunnlagTimelinePeriodisertÅr.intersection(uttakTimeline, (dateInterval, grunnlagSegment, uttakSegment) -> {
-            BeregningsresultatPeriode resultatPeriode = new BeregningsresultatPeriode(dateInterval);
+            BeregningsgrunnlagPeriode grunnlag = grunnlagSegment.getValue();
+            List<UttakResultatPeriode> uttakResultatPeriode = uttakSegment.getValue();
+
+            BeregningsresultatPeriode resultatPeriode = new BeregningsresultatPeriode(dateInterval, grunnlag.getInntektGraderingsprosent());
 
             // Regelsporing
             String periodeNavn = "BeregningsresultatPeriode[" + i[0] + "]";
             resultater.put(periodeNavn + ".fom", dateInterval.getFomDato());
             resultater.put(periodeNavn + ".tom", dateInterval.getTomDato());
 
-            BeregningsgrunnlagPeriode grunnlag = grunnlagSegment.getValue();
-            List<UttakResultatPeriode> uttakResultatPeriode = uttakSegment.getValue();
 
             grunnlag.getBeregningsgrunnlagPrStatus(AktivitetStatus.ATFL).forEach(gbps -> {
                 // for hver arbeidstaker andel: map fra grunnlag til 1-2 resultatAndel
