@@ -193,7 +193,7 @@ public class BehandlingProsessHendelse {
     private Boolean fraEndringsdialog;
 
     @Valid
-    @JsonProperty(value = "vedtaksdato")
+    @JsonProperty(value = "vedtaksdato", required = false)
     private LocalDate vedtaksdato;
 
     public BehandlingProsessHendelse() {
