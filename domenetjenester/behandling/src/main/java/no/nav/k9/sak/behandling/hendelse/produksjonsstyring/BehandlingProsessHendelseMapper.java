@@ -1,5 +1,6 @@
 package no.nav.k9.sak.behandling.hendelse.produksjonsstyring;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Comparator;
@@ -43,7 +44,7 @@ import no.nav.k9.søknad.felles.Kildesystem;
 
 @Dependent
 public class BehandlingProsessHendelseMapper {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(BehandlingProsessHendelseMapper.class);
     private Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester;
     private MottatteDokumentRepository mottatteDokumentRepository;
@@ -57,19 +58,19 @@ public class BehandlingProsessHendelseMapper {
         this.søknadsfristTjenester = søknadsfristTjenester;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
     }
-    
-    
-    public BehandlingProsessHendelse getProduksjonstyringEventDto(EventHendelse eventHendelse, Behandling behandling) {
+
+    public BehandlingProsessHendelse getProduksjonstyringEventDto(EventHendelse eventHendelse, Behandling behandling, LocalDate vedtaksdato) {
         Map<String, String> aksjonspunktKoderMedStatusListe = new HashMap<>();
         var fagsak = behandling.getFagsak();
         behandling.getAksjonspunkter().forEach(aksjonspunkt -> aksjonspunktKoderMedStatusListe.put(aksjonspunkt.getAksjonspunktDefinisjon().getKode(), aksjonspunkt.getStatus().getKode()));
-        
+
         final boolean nyeKrav = sjekkOmDetHarKommetNyeKrav(behandling);
         final boolean fraEndringsdialog = sjekkOmDetFinnesEndringFraEndringsdialog(behandling);
-        
+
         return BehandlingProsessHendelse.builder()
             .medEksternId(behandling.getUuid())
             .medEventTid(LocalDateTime.now())
+            .medVedtaksdato(vedtaksdato)
             .medFagsystem(Fagsystem.K9SAK)
             .medSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi())
             .medAktørId(behandling.getAktørId().getId())
@@ -93,17 +94,22 @@ public class BehandlingProsessHendelseMapper {
             .medFraEndringsdialog(fraEndringsdialog)
             .build();
     }
-    
+
+    public BehandlingProsessHendelse getProduksjonstyringEventDto(EventHendelse eventHendelse, Behandling behandling) {
+        return getProduksjonstyringEventDto(eventHendelse, behandling, null);
+    }
+
+
     private boolean sjekkOmDetFinnesEndringFraEndringsdialog(Behandling behandling) {
         if (behandling.getFagsakYtelseType() != FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
             return false;
         }
-        
+
         final List<MottattDokument> dokumenter = mottatteDokumentRepository.hentMottatteDokumentForBehandling(behandling.getFagsakId(),
                 behandling.getId(),
                 List.of(Brevkode.PLEIEPENGER_BARN_SOKNAD),
                 false);
-        
+
         return dokumenter.stream().anyMatch(md -> {
             try {
                 final Søknad søknad = JsonUtils.fromString(md.getPayload(), Søknad.class);
@@ -125,21 +131,21 @@ public class BehandlingProsessHendelseMapper {
                 it.getFristTid())
         ).toList();
     }
-    
+
     private boolean sjekkOmDetHarKommetNyeKrav(Behandling behandling) {
         final var behandlingRef = BehandlingReferanse.fra(behandling);
         final var søknadsfristTjeneste = finnVurderSøknadsfristTjeneste(behandlingRef);
         if (søknadsfristTjeneste == null) {
             return false;
         }
-        
+
         final Set<KravDokument> kravdokumenter = søknadsfristTjeneste.relevanteKravdokumentForBehandling(behandlingRef);
         if (kravdokumenter.isEmpty()) {
             return false;
         }
-        
+
         final LocalDateTimeline<KravDokument> eldsteKravTidslinje = hentKravdokumenterMedEldsteKravFørst(behandlingRef, søknadsfristTjeneste);
-        
+
         return eldsteKravTidslinje
                 .stream()
                 .anyMatch(it -> kravdokumenter.stream()
@@ -153,7 +159,7 @@ public class BehandlingProsessHendelseMapper {
                 .stream()
                 .sorted(Comparator.comparing(KravDokument::getInnsendingsTidspunkt))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
-        
+
         LocalDateTimeline<KravDokument> eldsteKravTidslinje = LocalDateTimeline.empty();
         for (KravDokument kravdokument : kravdokumenterMedEldsteFørst) {
             final List<SøktPeriode<SøktPeriodeData>> perioder = kravdokumenterMedPeriode.get(kravdokument);
@@ -165,10 +171,10 @@ public class BehandlingProsessHendelseMapper {
         }
         return eldsteKravTidslinje;
     }
-    
+
     private VurderSøknadsfristTjeneste<VurdertSøktPeriode.SøktPeriodeData> finnVurderSøknadsfristTjeneste(BehandlingReferanse ref) {
         final FagsakYtelseType ytelseType = ref.getFagsakYtelseType();
-        
+
         @SuppressWarnings("unchecked")
         final var tjeneste = (VurderSøknadsfristTjeneste<VurdertSøktPeriode.SøktPeriodeData>) FagsakYtelseTypeRef.Lookup.find(søknadsfristTjenester, ytelseType).orElse(null);
         return tjeneste;
