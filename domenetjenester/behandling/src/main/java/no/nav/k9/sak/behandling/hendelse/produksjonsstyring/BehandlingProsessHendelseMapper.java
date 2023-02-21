@@ -55,7 +55,7 @@ public class BehandlingProsessHendelseMapper {
     public BehandlingProsessHendelseMapper(@Any Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester,
             MottatteDokumentRepository mottatteDokumentRepository) {
         this.søknadsfristTjenester = søknadsfristTjenester;
-        this.mottatteDokumentRepository = ;
+        this.mottatteDokumentRepository = mottatteDokumentRepository;
     }
     
     
