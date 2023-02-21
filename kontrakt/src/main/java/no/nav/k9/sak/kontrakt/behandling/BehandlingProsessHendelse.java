@@ -187,6 +187,10 @@ public class BehandlingProsessHendelse {
     @Valid
     @JsonProperty(value = "nyeKrav", required = false)
     private Boolean nyeKrav;
+    
+    @Valid
+    @JsonProperty(value = "fraEndringsdialog", required = false)
+    private Boolean fraEndringsdialog;
 
     public BehandlingProsessHendelse() {
     }
@@ -214,6 +218,7 @@ public class BehandlingProsessHendelse {
         this.ansvarligBeslutterForTotrinn = kopierFra.ansvarligBeslutterForTotrinn;
         this.aksjonspunktTilstand = kopierFra.aksjonspunktTilstand.stream().map(AksjonspunktTilstandDto::new).toList();
         this.nyeKrav = kopierFra.nyeKrav;
+        this.fraEndringsdialog = kopierFra.fraEndringsdialog;
     }
 
     public static Builder builder() {
@@ -294,6 +299,10 @@ public class BehandlingProsessHendelse {
     
     public boolean isNyeKrav() {
         return nyeKrav != null && nyeKrav;
+    }
+    
+    public boolean isFraEndringsdialog() {
+        return fraEndringsdialog != null && fraEndringsdialog;
     }
 
     public static class Builder {
@@ -410,6 +419,11 @@ public class BehandlingProsessHendelse {
         
         public Builder medNyeKrav(Boolean nyeKrav) {
             kladd.nyeKrav = nyeKrav;
+            return this;
+        }
+        
+        public Builder medFraEndringsdialog(Boolean fraEndringsdialog) {
+            kladd.fraEndringsdialog = fraEndringsdialog;
             return this;
         }
 
