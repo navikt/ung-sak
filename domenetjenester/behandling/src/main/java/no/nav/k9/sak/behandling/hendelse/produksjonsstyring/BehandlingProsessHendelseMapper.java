@@ -10,6 +10,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -19,11 +22,14 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.hendelse.EventHendelse;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.AksjonspunktTilstandDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingProsessHendelse;
 import no.nav.k9.sak.perioder.KravDokument;
@@ -31,18 +37,25 @@ import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode.SøktPeriodeData;
+import no.nav.k9.søknad.JsonUtils;
+import no.nav.k9.søknad.Søknad;
+import no.nav.k9.søknad.felles.Kildesystem;
 
 @Dependent
 public class BehandlingProsessHendelseMapper {
     
+    private static final Logger logger = LoggerFactory.getLogger(BehandlingProsessHendelseMapper.class);
     private Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester;
+    private MottatteDokumentRepository mottatteDokumentRepository;
 
     public BehandlingProsessHendelseMapper() {
     }
 
     @Inject
-    public BehandlingProsessHendelseMapper(@Any Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester) {
+    public BehandlingProsessHendelseMapper(@Any Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester,
+            MottatteDokumentRepository mottatteDokumentRepository) {
         this.søknadsfristTjenester = søknadsfristTjenester;
+        this.mottatteDokumentRepository = mottatteDokumentRepository;
     }
     
     
@@ -52,6 +65,7 @@ public class BehandlingProsessHendelseMapper {
         behandling.getAksjonspunkter().forEach(aksjonspunkt -> aksjonspunktKoderMedStatusListe.put(aksjonspunkt.getAksjonspunktDefinisjon().getKode(), aksjonspunkt.getStatus().getKode()));
         
         final boolean nyeKrav = sjekkOmDetHarKommetNyeKrav(behandling);
+        final boolean fraEndringsdialog = sjekkOmDetFinnesEndringFraEndringsdialog(behandling);
         
         return BehandlingProsessHendelse.builder()
             .medEksternId(behandling.getUuid())
@@ -76,9 +90,31 @@ public class BehandlingProsessHendelseMapper {
             .medAnsvarligBeslutterForTotrinn(behandling.getAnsvarligBeslutter())
             .medAksjonspunktTilstander(lagAksjonspunkttilstander(behandling.getAksjonspunkter()))
             .medNyeKrav(nyeKrav)
+            .medFraEndringsdialog(fraEndringsdialog)
             .build();
     }
     
+    private boolean sjekkOmDetFinnesEndringFraEndringsdialog(Behandling behandling) {
+        if (behandling.getFagsakYtelseType() != FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
+            return false;
+        }
+        
+        final List<MottattDokument> dokumenter = mottatteDokumentRepository.hentMottatteDokumentForBehandling(behandling.getFagsakId(),
+                behandling.getId(),
+                List.of(Brevkode.PLEIEPENGER_BARN_SOKNAD),
+                false);
+        
+        return dokumenter.stream().anyMatch(md -> {
+            try {
+                final Søknad søknad = JsonUtils.fromString(md.getPayload(), Søknad.class);
+                return søknad.getKildesystem().map(ks -> ks == Kildesystem.ENDRINGSDIALOG).orElse(false);
+            } catch (RuntimeException e) {
+                logger.warn("Uventet feil ved parsing av søknad for oversendelse til k9-los. Setter endringsflagget til false på oppgaven.", e);
+                return false;
+            }
+        });
+    }
+
     public List<AksjonspunktTilstandDto> lagAksjonspunkttilstander(Collection<Aksjonspunkt> aksjonspunkter) {
         return aksjonspunkter.stream().map(it ->
             new AksjonspunktTilstandDto(
