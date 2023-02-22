@@ -32,7 +32,6 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.Beregningsresultat
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerRegelModell;
 import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.FeriepengeOppsummering;
 import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.RegelBeregnFeriepenger;
-import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.RegelBeregnFeriepengerV2;
 import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.SaksnummerOgSisteBehandling;
 
 public abstract class BeregnFeriepengerTjeneste {
@@ -54,7 +53,11 @@ public abstract class BeregnFeriepengerTjeneste {
     public abstract boolean ubegrensedeDagerVedRefusjon();
 
     public void beregnFeriepenger(BeregningsresultatEntitet beregningsresultat) {
-        BeregningsresultatFeriepengerRegelModell regelModell = MapBeregningsresultatFeriepengerFraVLTilRegel.mapFra(beregningsresultat, antallDagerFeriepenger(), feriepengeopptjeningForHelg(), ubegrensedeDagerVedRefusjon());
+        beregnFeriepenger(beregningsresultat, LocalDateTimeline.empty());
+    }
+
+    public void beregnFeriepenger(BeregningsresultatEntitet beregningsresultat, LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> andelerSomKanGiFeriepengerForRelevaneSaker) {
+        BeregningsresultatFeriepengerRegelModell regelModell = MapBeregningsresultatFeriepengerFraVLTilRegel.mapFra(beregningsresultat, andelerSomKanGiFeriepengerForRelevaneSaker, antallDagerFeriepenger(), feriepengeopptjeningForHelg(), ubegrensedeDagerVedRefusjon());
         String regelInput = toJson(regelModell);
 
         RegelBeregnFeriepenger regelBeregnFeriepenger = new RegelBeregnFeriepenger();
@@ -67,27 +70,9 @@ public abstract class BeregnFeriepengerTjeneste {
         mapTilResultatFraRegelModell(beregningsresultat, regelModell);
     }
 
-    public void beregnFeriepengerV2(BeregningsresultatEntitet beregningsresultat) {
-        beregnFeriepengerV2(beregningsresultat, LocalDateTimeline.empty());
-    }
-
-    public void beregnFeriepengerV2(BeregningsresultatEntitet beregningsresultat, LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> andelerSomKanGiFeriepengerForRelevaneSaker) {
-        BeregningsresultatFeriepengerRegelModell regelModell = MapBeregningsresultatFeriepengerFraVLTilRegel.mapFra(beregningsresultat, andelerSomKanGiFeriepengerForRelevaneSaker, antallDagerFeriepenger(), feriepengeopptjeningForHelg(), ubegrensedeDagerVedRefusjon());
-        String regelInput = toJson(regelModell);
-
-        RegelBeregnFeriepengerV2 regelBeregnFeriepenger = new RegelBeregnFeriepengerV2();
-        Evaluation evaluation = regelBeregnFeriepenger.evaluer(regelModell);
-        String sporing = EvaluationSerializer.asJson(evaluation);
-
-        beregningsresultat.setFeriepengerRegelInput(regelInput);
-        beregningsresultat.setFeriepengerRegelSporing(sporing);
-
-        mapTilResultatFraRegelModellV2(beregningsresultat, regelModell);
-    }
-
     public FeriepengeOppsummering beregnFeriepengerOppsummering(BeregningsresultatEntitet beregningsresultat, LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> andelerSomKanGiFeriepengerForRelevaneSaker) {
         BeregningsresultatFeriepengerRegelModell regelModell = MapBeregningsresultatFeriepengerFraVLTilRegel.mapFra(beregningsresultat, andelerSomKanGiFeriepengerForRelevaneSaker, antallDagerFeriepenger(), feriepengeopptjeningForHelg(), ubegrensedeDagerVedRefusjon());
-        RegelBeregnFeriepengerV2 regelBeregnFeriepenger = new RegelBeregnFeriepengerV2();
+        RegelBeregnFeriepenger regelBeregnFeriepenger = new RegelBeregnFeriepenger();
         regelBeregnFeriepenger.evaluer(regelModell);
 
         FeriepengeOppsummering.Builder feriepengeoppsummeringBuilder = new FeriepengeOppsummering.Builder();
@@ -109,15 +94,6 @@ public abstract class BeregnFeriepengerTjeneste {
     }
 
     static void mapTilResultatFraRegelModell(BeregningsresultatEntitet resultat, BeregningsresultatFeriepengerRegelModell regelModell) {
-
-        if (regelModell.getFeriepengerPeriodeBruker() == null && regelModell.getFeriepengerPeriodeRefusjon() == null) {
-            return;
-        }
-
-        regelModell.getBeregningsresultatPerioder().forEach(regelBeregningsresultatPeriode -> mapPeriode(resultat, regelBeregningsresultatPeriode));
-    }
-
-    static void mapTilResultatFraRegelModellV2(BeregningsresultatEntitet resultat, BeregningsresultatFeriepengerRegelModell regelModell) {
         regelModell.getBeregningsresultatPerioder().forEach(regelBeregningsresultatPeriode -> mapPeriode(resultat, regelBeregningsresultatPeriode));
     }
 

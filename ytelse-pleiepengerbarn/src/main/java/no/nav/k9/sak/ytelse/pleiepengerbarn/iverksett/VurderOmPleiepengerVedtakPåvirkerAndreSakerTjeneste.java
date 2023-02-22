@@ -29,7 +29,6 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -85,7 +84,6 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
     private FeriepengerAvvikTjeneste feriepengerAvvikTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
-    private boolean enableFeriepengerPåTversAvSaker;
 
     VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste() {
     }
@@ -102,8 +100,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
                                                                SøknadsperiodeTjeneste søknadsperiodeTjeneste,
                                                                BehandlingModellRepository behandlingModellRepository,
                                                                UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
-                                                               FeriepengerAvvikTjeneste feriepengerAvvikTjeneste, @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
-                                                               @KonfigVerdi(value = "ENABLE_FERIEPENGER_PAA_TVERS_AV_SAKER_OG_PR_AAR", defaultVerdi = "true") boolean enableFeriepengerPåTversAvSaker) {
+                                                               FeriepengerAvvikTjeneste feriepengerAvvikTjeneste, @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -117,7 +114,6 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
         this.feriepengerAvvikTjeneste = feriepengerAvvikTjeneste;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
-        this.enableFeriepengerPåTversAvSaker = enableFeriepengerPåTversAvSaker;
     }
 
     @Override
@@ -165,7 +161,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
                     .union(skalRevurderesPgaEndretUttak, StandardCombinators::alwaysTrueForMatch)
                     .union(skalRevurderesPgaSykdom, StandardCombinators::alwaysTrueForMatch)
                     .intersection(perioderMedInnvilgetInngangsvilkår);
-                var skalReberegneFeriepenger = enableFeriepengerPåTversAvSaker ? perioderMedRevurderingPgaEndringFeriepenger(sisteBehandlingPåKandidat, kandidatBehandlingReferanse) : LocalDateTimeline.empty();
+                var skalReberegneFeriepenger = perioderMedRevurderingPgaEndringFeriepenger(sisteBehandlingPåKandidat, kandidatBehandlingReferanse);
 
                 if (!skalRevurdereYtelsePgaEndringAnnenSak.isEmpty() || !skalReberegneFeriepenger.isEmpty()) {
                     if (!skalRevurdereYtelsePgaEndringAnnenSak.isEmpty()) {
@@ -175,13 +171,10 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
                     } else {
                         resultat.add(new SakMedPeriode(kandidatsaksnummer, kandidatFagsak.getYtelseType(), TidslinjeUtil.tilDatoIntervallEntiteter(skalReberegneFeriepenger), BehandlingÅrsakType.RE_FERIEPENGER_ENDRING_FRA_ANNEN_SAK));
                     }
-                    if (enableFeriepengerPåTversAvSaker) {
-                        log.info("Sak='{}' revurderes pga => sykdom={}, etablertTilsyn={}, nattevåk&beredskap={}, uttak={}, feriepenger={}", kandidatsaksnummer, !skalRevurderesPgaSykdom.isEmpty(), !skalRevurderesPgaEtablertTilsyn.isEmpty(), !skalRevurderesPgaNattevåkOgBeredskap.isEmpty(), !skalRevurderesPgaEndretUttak.isEmpty(), skalReberegneFeriepenger);
-                        if (Environment.current().isDev() && !skalRevurderesPgaEndretUttak.isEmpty()) {
-                            log.info("Endringer i uttak: {}", skalRevurderesPgaEndretUttak);
-                        }
-                    } else {
-                        log.info("Sak='{}' revurderes pga => sykdom={}, etablertTilsyn={}, nattevåk&beredskap={}, uttak={}", kandidatsaksnummer, !skalRevurderesPgaSykdom.isEmpty(), !skalRevurderesPgaEtablertTilsyn.isEmpty(), !skalRevurderesPgaNattevåkOgBeredskap.isEmpty(), !skalRevurderesPgaEndretUttak.isEmpty());
+
+                    log.info("Sak='{}' revurderes pga => sykdom={}, etablertTilsyn={}, nattevåk&beredskap={}, uttak={}, feriepenger={}", kandidatsaksnummer, !skalRevurderesPgaSykdom.isEmpty(), !skalRevurderesPgaEtablertTilsyn.isEmpty(), !skalRevurderesPgaNattevåkOgBeredskap.isEmpty(), !skalRevurderesPgaEndretUttak.isEmpty(), skalReberegneFeriepenger);
+                    if (Environment.current().isDev() && !skalRevurderesPgaEndretUttak.isEmpty()) {
+                        log.info("Endringer i uttak: {}", skalRevurderesPgaEndretUttak);
                     }
                 }
             }
@@ -279,10 +272,16 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
     }
 
     private LocalDateTimeline<Boolean> perioderMedRevurderesPgaNattevåkOgBeredskap(BehandlingReferanse referanse) {
+        if (referanse.getFagsakYtelseType() != FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
+            return LocalDateTimeline.empty();
+        }
         return TidslinjeUtil.tilTidslinjeKomprimert(endringUnntakEtablertTilsynTjeneste.utledRelevanteEndringerSidenBehandling(referanse.getBehandlingId(), referanse.getPleietrengendeAktørId()));
     }
 
     private LocalDateTimeline<Boolean> perioderMedRevurderingPgaEtablertTilsyn(BehandlingReferanse referanse) {
+        if (referanse.getFagsakYtelseType() != FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
+            return LocalDateTimeline.empty();
+        }
         return erEndringPåEtablertTilsynTjeneste.perioderMedEndringerFraEksisterendeVersjon(referanse)
             .filterValue(Objects::nonNull);
     }
