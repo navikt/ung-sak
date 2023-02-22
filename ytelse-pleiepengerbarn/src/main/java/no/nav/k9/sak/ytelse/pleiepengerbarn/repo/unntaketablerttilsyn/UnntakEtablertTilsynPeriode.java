@@ -84,12 +84,14 @@ public class UnntakEtablertTilsynPeriode extends BaseEntitet implements IndexKey
         this.vurdertTidspunkt = that.vurdertTidspunkt;
     }
 
-    public UnntakEtablertTilsynPeriode(DatoIntervallEntitet periode, String begrunnelse, Resultat resultat, AktørId aktørId, Long kildeBehandlingId) {
+    public UnntakEtablertTilsynPeriode(DatoIntervallEntitet periode, String begrunnelse, Resultat resultat, AktørId aktørId, Long kildeBehandlingId, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         this.periode = periode;
         this.begrunnelse = begrunnelse;
         this.resultat = resultat;
         this.aktørId = aktørId;
         this.kildeBehandlingId = kildeBehandlingId;
+        this.vurdertAv = vurdertAv;
+        this.vurdertTidspunkt = vurdertTidspunkt;
     }
 
     public Long getId() {
