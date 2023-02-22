@@ -1,9 +1,5 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="JettyDevServer" type="Application" factoryName="Application" nameIsGenerated="true">
-    <envs>
-      <env name="FORLENGELSE_MEDLEMSKAP_ENABLET" value="true" />
-      <env name="FORLENGELSE_OPPTJENING_ENABLET" value="true" />
-    </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.k9.sak.web.server.jetty.JettyDevServer" />
     <module name="web-webapp" />
     <option name="WORKING_DIRECTORY" value="%MODULE_WORKING_DIR%" />

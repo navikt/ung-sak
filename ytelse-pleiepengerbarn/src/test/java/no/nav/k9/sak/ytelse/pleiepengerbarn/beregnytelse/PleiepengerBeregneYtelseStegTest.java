@@ -20,7 +20,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusInMemoryTjeneste;
@@ -44,8 +43,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.k9.sak.db.util.JpaExtension;
-import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
 import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
@@ -68,14 +65,14 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
 public class PleiepengerBeregneYtelseStegTest {
-
     @Inject
-    private EntityManager entityManager;
-
     private BehandlingRepositoryProvider repositoryProvider;
+    @Inject
     private BeregningsresultatRepository beregningsresultatRepository;
+    @Inject
     private BehandlingRepository behandlingRepository;
-
+    @Inject
+    private BeregningPerioderGrunnlagRepository bgGrunnlagRepository;
     @Inject
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     @Inject
@@ -87,7 +84,6 @@ public class PleiepengerBeregneYtelseStegTest {
     private BeregnFeriepengerTjeneste beregnFeriepengerTjeneste = mock(BeregnFeriepengerTjeneste.class);
     private FinnFeriepengepåvirkendeFagsakerTjeneste finnFeriepengepåvirkendeFagsakerTjeneste = mock(FinnFeriepengepåvirkendeFagsakerTjeneste.class);
     private HentFeriepengeAndelerTjeneste hentAndelserSomKanGiFeriepengerTjeneste = mock(HentFeriepengeAndelerTjeneste.class);
-    private BeregningPerioderGrunnlagRepository bgGrunnlagRepository;
     private BeregningTjeneste beregningTjeneste;
 
     private PleiepengerBeregneYtelseSteg steg;
@@ -95,10 +91,6 @@ public class PleiepengerBeregneYtelseStegTest {
 
     @BeforeEach
     public void setup() {
-        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-        beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
-        behandlingRepository = repositoryProvider.getBehandlingRepository();
-        bgGrunnlagRepository = new BeregningPerioderGrunnlagRepository(entityManager, repositoryProvider.getVilkårResultatRepository());
         beregningTjeneste = new BeregningsgrunnlagTjeneste(
             new UnitTestLookupInstanceImpl<>(kalkulusTjeneste),
             repositoryProvider.getVilkårResultatRepository(), bgGrunnlagRepository,
@@ -122,8 +114,7 @@ public class PleiepengerBeregneYtelseStegTest {
             uttakTjeneste,
             new UnitTestLookupInstanceImpl<>(beregnFeriepengerTjeneste),
             new UnitTestLookupInstanceImpl<>(finnFeriepengepåvirkendeFagsakerTjeneste),
-            hentAndelserSomKanGiFeriepengerTjeneste,
-            true
+            hentAndelserSomKanGiFeriepengerTjeneste
         );
     }
 

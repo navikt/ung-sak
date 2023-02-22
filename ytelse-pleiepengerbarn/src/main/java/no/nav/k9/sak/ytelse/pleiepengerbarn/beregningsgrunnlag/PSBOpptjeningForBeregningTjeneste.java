@@ -7,13 +7,9 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BA
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -21,13 +17,11 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter.OpptjeningPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningForBeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningsaktiviteterPerYtelse;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -35,8 +29,6 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
-import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurdering;
-import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurderingOpptjeningsvilkår;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
 import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderTjeneste;
@@ -49,12 +41,9 @@ import no.nav.k9.sak.typer.Periode;
 @FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
 public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregningTjeneste {
 
-    private final OpptjeningAktivitetVurderingOpptjeningsvilkår vurderOpptjening = new OpptjeningAktivitetVurderingOpptjeningsvilkår();
     private OpptjeningsperioderTjeneste opptjeningsperioderTjeneste;
     private OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
     private VilkårResultatRepository vilkårResultatRepository;
-
-    private boolean skalBrukeOpptjeningResultat;
 
     private OpptjeningsaktiviteterPerYtelse opptjeningsaktiviteter = new OpptjeningsaktiviteterPerYtelse(Set.of(
         OpptjeningAktivitetType.VIDERE_ETTERUTDANNING,
@@ -68,12 +57,10 @@ public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
     @Inject
     public PSBOpptjeningForBeregningTjeneste(OpptjeningsperioderTjeneste opptjeningsperioderTjeneste,
                                              OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider,
-                                             VilkårResultatRepository vilkårResultatRepository,
-                                             @KonfigVerdi(value = "PSB_BG_BRUKER_OPPTJENING_RESULTAT", defaultVerdi = "false") boolean skalBrukeOpptjeningResultat) {
+                                             VilkårResultatRepository vilkårResultatRepository) {
         this.opptjeningsperioderTjeneste = opptjeningsperioderTjeneste;
         this.oppgittOpptjeningFilterProvider = oppgittOpptjeningFilterProvider;
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.skalBrukeOpptjeningResultat = skalBrukeOpptjeningResultat;
     }
 
 
@@ -102,7 +89,7 @@ public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
         var yrkesaktivitetFilter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(behandlingReferanse.getAktørId()));
         var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse,
             iayGrunnlag,
-            finnVurderer(opptjeningResultat.get()),
+            new OpptjeningAktivitetResultatVurdering(opptjeningResultat.get()),
             opptjening.getOpptjeningPeriode(),
             vilkårsperiode,
             yrkesaktivitetFilter);
@@ -110,19 +97,8 @@ public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
             .filter(oa -> filtrerForVilkårsperiode(vilkårsperiode, oa, vilkårUtfallMerknad))
             .filter(oa -> !oa.getPeriode().getTomDato().isBefore(opptjening.getFom()))
             .filter(oa -> opptjeningsaktiviteter.erRelevantAktivitet(oa.getOpptjeningAktivitetType()))
-            .filter(this::filtrerBasertPåVurdering)
+            .filter(oa -> oa.getVurderingsStatus().equals(VurderingsStatus.GODKJENT))
             .collect(Collectors.toList());
-    }
-
-    private boolean filtrerBasertPåVurdering(OpptjeningsperiodeForSaksbehandling oa) {
-        if (skalBrukeOpptjeningResultat) {
-            return oa.getVurderingsStatus().equals(VurderingsStatus.GODKJENT);
-        }
-        return !erAvslåttArbeid(oa);
-    }
-
-    private OpptjeningAktivitetVurdering finnVurderer(OpptjeningResultat opptjeningResultat) {
-        return skalBrukeOpptjeningResultat ? new OpptjeningAktivitetResultatVurdering(opptjeningResultat) : vurderOpptjening;
     }
 
     private boolean filtrerForVilkårsperiode(DatoIntervallEntitet vilkårsperiode, OpptjeningsperiodeForSaksbehandling oa, VilkårUtfallMerknad vilkårUtfallMerknad) {
@@ -131,10 +107,6 @@ public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
 
     private boolean erInaktiv(VilkårUtfallMerknad vilkårUtfallMerknad) {
         return VilkårUtfallMerknad.VM_7847_B.equals(vilkårUtfallMerknad) || VilkårUtfallMerknad.VM_7847_A.equals(vilkårUtfallMerknad);
-    }
-
-    private boolean erAvslåttArbeid(OpptjeningsperiodeForSaksbehandling oa) {
-        return oa.getOpptjeningAktivitetType().equals(OpptjeningAktivitetType.ARBEID) && Objects.equals(oa.getVurderingsStatus(), VurderingsStatus.UNDERKJENT);
     }
 
     @Override

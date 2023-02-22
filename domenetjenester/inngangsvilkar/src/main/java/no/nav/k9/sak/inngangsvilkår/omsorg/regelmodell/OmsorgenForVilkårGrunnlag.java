@@ -3,8 +3,6 @@ package no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell;
 import java.util.List;
 import java.util.Objects;
 
-import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -67,22 +65,18 @@ public class OmsorgenForVilkårGrunnlag implements VilkårGrunnlag {
     }
 
     public void oppdaterKnekkpunkter(OmsorgenForKnekkpunkter omsorgenForKnekkpunkter) {
-        if (knekkpunkter == null) {
-            throw new IllegalStateException("Kan ikke være null");
-        }
-        knekkpunkter.compress().forEach(it -> omsorgenForKnekkpunkter.leggTil(DatoIntervallEntitet.fra(it.getLocalDateInterval()), it.getValue()));
+        omsorgenForKnekkpunkter.leggTil(knekkpunkter.compress());
     }
 
     public void leggTilUtfall(DatoIntervallEntitet periode, Utfall utfall) {
         Objects.requireNonNull(periode);
         Objects.requireNonNull(utfall);
-        knekkpunkter = knekkpunkter.combine(new LocalDateSegment<>(periode.toLocalDateInterval(), utfall), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        leggTilUtfall(new LocalDateTimeline<>(periode.toLocalDateInterval(), utfall));
     }
 
-    public void leggTilUtfall(LocalDateInterval periode, Utfall utfall) {
-        Objects.requireNonNull(periode);
-        Objects.requireNonNull(utfall);
-        knekkpunkter = knekkpunkter.combine(new LocalDateSegment<>(periode, utfall), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+    public void leggTilUtfall(LocalDateTimeline<Utfall> utfallTidslinje) {
+        Objects.requireNonNull(utfallTidslinje);
+        knekkpunkter = knekkpunkter.combine(utfallTidslinje, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
     }
 
     @Override
