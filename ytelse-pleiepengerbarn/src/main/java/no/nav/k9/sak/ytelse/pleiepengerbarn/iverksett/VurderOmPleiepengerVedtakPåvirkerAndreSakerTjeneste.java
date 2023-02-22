@@ -272,10 +272,16 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
     }
 
     private LocalDateTimeline<Boolean> perioderMedRevurderesPgaNattevåkOgBeredskap(BehandlingReferanse referanse) {
+        if (referanse.getFagsakYtelseType() != FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
+            return LocalDateTimeline.empty();
+        }
         return TidslinjeUtil.tilTidslinjeKomprimert(endringUnntakEtablertTilsynTjeneste.utledRelevanteEndringerSidenBehandling(referanse.getBehandlingId(), referanse.getPleietrengendeAktørId()));
     }
 
     private LocalDateTimeline<Boolean> perioderMedRevurderingPgaEtablertTilsyn(BehandlingReferanse referanse) {
+        if (referanse.getFagsakYtelseType() != FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
+            return LocalDateTimeline.empty();
+        }
         return erEndringPåEtablertTilsynTjeneste.perioderMedEndringerFraEksisterendeVersjon(referanse)
             .filterValue(Objects::nonNull);
     }

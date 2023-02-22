@@ -20,4 +20,20 @@ public class FeriepengerForAndelUtil {
         );
     }
 
+    public static LocalDateTimeline<Boolean> utledTidslinjerHarAndelSomKanGiFeriepengerTilBruker(List<BeregningsresultatPeriode> beregningsresultatPerioder) {
+        return utledTidslinjeHarAndelSomKanGiFeriepenger(beregningsresultatPerioder, true);
+    }
+
+    public static LocalDateTimeline<Boolean> utledTidslinjerHarAndelSomKanGiFeriepengerTilRefusjon(List<BeregningsresultatPeriode> beregningsresultatPerioder) {
+        return utledTidslinjeHarAndelSomKanGiFeriepenger(beregningsresultatPerioder, false);
+    }
+
+    private static LocalDateTimeline<Boolean> utledTidslinjeHarAndelSomKanGiFeriepenger(List<BeregningsresultatPeriode> beregningsresultatPerioder, boolean tilBruker) {
+        return new LocalDateTimeline<>(beregningsresultatPerioder.stream()
+            .filter(periode -> periode.getBeregningsresultatAndelList().stream().anyMatch(andel -> tilBruker == andel.erBrukerMottaker() && andel.girRettTilFeriepenger()))
+            .map(periode -> new LocalDateSegment<>(periode.getFom(), periode.getTom(), true))
+            .toList()
+        );
+    }
+
 }
