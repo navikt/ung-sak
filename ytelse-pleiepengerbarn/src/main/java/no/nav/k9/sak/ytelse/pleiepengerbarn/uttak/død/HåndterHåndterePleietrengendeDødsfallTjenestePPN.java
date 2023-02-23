@@ -25,7 +25,7 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 @ApplicationScoped
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 public class HåndterHåndterePleietrengendeDødsfallTjenestePPN implements HåndterePleietrengendeDødsfallTjeneste {
-    private VilkårForlengingTjeneste vilkårForlengingTjeneste = new VilkårForlengingTjeneste();
+    private final VilkårForlengingTjeneste vilkårForlengingTjeneste = new VilkårForlengingTjeneste();
     private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     private PersonopplysningTjeneste personopplysningTjeneste;
@@ -108,7 +108,7 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePPN implements Hån
     }
 
     private boolean harGodkjentSykdomPåDødsdatoen(LocalDate dødsdato, Vilkårene vilkårene) {
-        Optional<VilkårPeriode> periode = vilkårene.getVilkår(VilkårType.I_LIVETS_SLUTTFASE).orElseThrow().finnPeriodeSomInneholderDato(dødsdato);
+        Optional<VilkårPeriode> periode = vilkårene.getVilkår(VilkårType.I_LIVETS_SLUTTFASE).flatMap(it -> it.finnPeriodeSomInneholderDato(dødsdato));
         return periode.isPresent() && periode.get().getUtfall() == Utfall.OPPFYLT;
     }
 
