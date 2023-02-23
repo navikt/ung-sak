@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
@@ -79,6 +80,7 @@ public class BeregningsresultatPeriodeDto {
     @JsonProperty(value = "inntektGraderingsprosent")
     @DecimalMin("0")
     @DecimalMax("100")
+    @Digits(integer = 3, fraction = 2)
     @Valid
     private BigDecimal inntektGraderingsprosent;
 
