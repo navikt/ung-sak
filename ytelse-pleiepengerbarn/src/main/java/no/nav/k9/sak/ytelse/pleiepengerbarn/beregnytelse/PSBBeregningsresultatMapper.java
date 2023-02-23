@@ -123,6 +123,7 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
 
         var dtoer = brpTimline.toSegments().stream()
             .map(seg -> BeregningsresultatPeriodeDto.build(seg.getFom(), seg.getTom())
+                .medInntektGraderingsprosent(seg.getValue().getInntektGraderingsprosent())
                 .medDagsats(seg.getValue().getDagsats())
                 .medAndeler(lagAndeler(seg.getValue(), andelTilSisteUtbetalingsdatoMap, iayGrunnlag))
                 .create())
