@@ -30,6 +30,7 @@ import no.nav.k9.sak.domene.abakus.AbakusInntektArbeidYtelseTjenesteFeil;
 import no.nav.k9.sak.mottak.dokumentmottak.AsyncAbakusLagreOpptjeningTask;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.Dokumentmottaker;
+import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakerFelles;
 import no.nav.k9.sak.mottak.dokumentmottak.OppgittOpptjeningMapper;
 import no.nav.k9.sak.mottak.dokumentmottak.SøknadParser;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -53,6 +54,7 @@ class DokumentmottakerSøknadOLP implements Dokumentmottaker {
     private OpplæringDokumentVedleggHåndterer opplæringDokumentVedleggHåndterer;
     private ProsessTaskRepository prosessTaskRepository;
     private OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste;
+    private DokumentmottakerFelles dokumentmottakerFelles;
 
     DokumentmottakerSøknadOLP() {
         // for CDI proxy
@@ -65,7 +67,8 @@ class DokumentmottakerSøknadOLP implements Dokumentmottaker {
                               SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer,
                               OpplæringDokumentVedleggHåndterer opplæringDokumentVedleggHåndterer,
                               ProsessTaskRepository prosessTaskRepository,
-                              OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste) {
+                              OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste,
+                              DokumentmottakerFelles dokumentmottakerFelles) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.søknadParser = søknadParser;
         this.sykdomsDokumentVedleggHåndterer = sykdomsDokumentVedleggHåndterer;
@@ -73,6 +76,7 @@ class DokumentmottakerSøknadOLP implements Dokumentmottaker {
         this.søknadOversetter = søknadOversetter;
         this.prosessTaskRepository = prosessTaskRepository;
         this.oppgittOpptjeningMapperTjeneste = oppgittOpptjeningMapperTjeneste;
+        this.dokumentmottakerFelles = dokumentmottakerFelles;
     }
 
     @Override
@@ -87,6 +91,7 @@ class DokumentmottakerSøknadOLP implements Dokumentmottaker {
             mottatteDokumentRepository.lagre(dokument, DokumentStatus.BEHANDLER);
             // Søknadsinnhold som persisteres "lokalt" i k9-sak
             persister(søknad, behandling, dokument.getJournalpostId());
+            dokumentmottakerFelles.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), dokument.getJournalpostId(), dokument.getType());
             // Søknadsinnhold som persisteres eksternt (abakus)
             lagreOppgittOpptjeningFraSøknad(søknad, behandling, dokument);
         }

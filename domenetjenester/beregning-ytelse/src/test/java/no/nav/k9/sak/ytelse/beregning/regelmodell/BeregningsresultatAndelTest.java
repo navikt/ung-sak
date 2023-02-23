@@ -26,7 +26,7 @@ class BeregningsresultatAndelTest {
     }
 
     private BeregningsresultatAndel lagAndel(int dagsats, Inntektskategori inntektskategori){
-        BeregningsresultatPeriode periode = new BeregningsresultatPeriode(LocalDate.now(), LocalDate.now());
+        BeregningsresultatPeriode periode = new BeregningsresultatPeriode(LocalDate.now(), LocalDate.now(), null);
         return BeregningsresultatAndel.builder()
             .medBrukerErMottaker(true)
             .medDagsats((long)dagsats)

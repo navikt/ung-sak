@@ -26,6 +26,7 @@ public class BeregningsgrunnlagPeriode {
     private BigDecimal redusertPrÅr;
     private Long dagsats;
     private List<BeregningsgrunnlagPeriodeÅrsak> beregningsgrunnlagPeriodeÅrsaker = new ArrayList<>();
+    private BigDecimal inntektGraderingsprosent;
 
     public BeregningsgrunnlagPeriode(BeregningsgrunnlagPeriode eksisterende) {
         this.beregningsgrunnlag = eksisterende.getBeregningsgrunnlag();
@@ -36,6 +37,7 @@ public class BeregningsgrunnlagPeriode {
         this.redusertPrÅr = eksisterende.getRedusertPrÅr();
         this.dagsats = eksisterende.getDagsats();
         this.beregningsgrunnlagPeriodeÅrsaker = eksisterende.getBeregningsgrunnlagPeriodeÅrsaker();
+        this.inntektGraderingsprosent = eksisterende.inntektGraderingsprosent;
     }
 
     public BeregningsgrunnlagPeriode() {
@@ -96,6 +98,10 @@ public class BeregningsgrunnlagPeriode {
         return dagsats;
     }
 
+    public BigDecimal getInntektGraderingsprosent() {
+        return inntektGraderingsprosent;
+    }
+
     public List<BeregningsgrunnlagPeriodeÅrsak> getBeregningsgrunnlagPeriodeÅrsaker() {
         return Collections.unmodifiableList(beregningsgrunnlagPeriodeÅrsaker);
     }
@@ -142,7 +148,9 @@ public class BeregningsgrunnlagPeriode {
                 && Objects.equals(this.getBruttoPrÅr(), other.getBruttoPrÅr())
                 && Objects.equals(this.getAvkortetPrÅr(), other.getAvkortetPrÅr())
                 && Objects.equals(this.getRedusertPrÅr(), other.getRedusertPrÅr())
-                && Objects.equals(this.getDagsats(), other.getDagsats());
+                && Objects.equals(this.getDagsats(), other.getDagsats())
+                && Objects.equals(this.getInntektGraderingsprosent(), other.getInntektGraderingsprosent())
+            ;
     }
 
     @Override
@@ -238,6 +246,12 @@ public class BeregningsgrunnlagPeriode {
         public Builder medRedusertPrÅr(BigDecimal redusertPrÅr) {
             verifiserKanModifisere();
             kladd.redusertPrÅr = redusertPrÅr;
+            return this;
+        }
+
+        public Builder medInntektGraderingsprosent(BigDecimal inntektGraderingsprosent) {
+            verifiserKanModifisere();
+            kladd.inntektGraderingsprosent = inntektGraderingsprosent;
             return this;
         }
 

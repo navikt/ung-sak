@@ -64,7 +64,7 @@ public class MapBeregningsresultatFeriepengerFraVLTilRegel {
     }
 
     private static BeregningsresultatPeriode mapBeregningsresultatPerioder(no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode perioder) {
-        BeregningsresultatPeriode periode = new BeregningsresultatPeriode(perioder.getBeregningsresultatPeriodeFom(), perioder.getBeregningsresultatPeriodeTom());
+        BeregningsresultatPeriode periode = new BeregningsresultatPeriode(perioder.getBeregningsresultatPeriodeFom(), perioder.getBeregningsresultatPeriodeTom(), perioder.getInntektGraderingsprosent());
         perioder.getBeregningsresultatAndelList().forEach(andel -> mapBeregningsresultatAndel(andel, periode));
         return periode;
     }
