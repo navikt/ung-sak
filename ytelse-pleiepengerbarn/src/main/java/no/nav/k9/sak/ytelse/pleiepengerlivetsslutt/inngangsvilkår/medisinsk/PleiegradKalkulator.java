@@ -13,7 +13,7 @@ import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.reg
 
 public class PleiegradKalkulator {
 
-    private static final LocalDate DATO_FOR_NY_MAX_PLEIEGRAD = LocalDate.of(2023, 1, 1);
+    public static final LocalDate DATO_FOR_NY_MAX_PLEIEGRAD = LocalDate.of(2023, 1, 1);
 
     static LocalDateTimeline<Pleiegrad> MAX_PLEIEGRAD = new LocalDateTimeline<>(List.of(
         new LocalDateSegment<>(LocalDate.MIN, DATO_FOR_NY_MAX_PLEIEGRAD.minusDays(1), Pleiegrad.LIVETS_SLUTT_TILSYN),

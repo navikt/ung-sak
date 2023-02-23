@@ -23,10 +23,8 @@ import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningRequest;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingskontroll.VilkårTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -126,7 +124,7 @@ public class LagBeregnRequestTjeneste {
 
 
     public NavigableSet<DatoIntervallEntitet> utledForlengelseperiode(BehandlingReferanse referanse, DatoIntervallEntitet periodeTilVurdering) {
-        var utleder = EndretUtbetalingPeriodeutleder.finnUtleder(periodeUtleder, referanse.getFagsakYtelseType());
+        var utleder = EndretUtbetalingPeriodeutleder.finnUtleder(periodeUtleder, referanse.getFagsakYtelseType(), referanse.getBehandlingType());
         return utleder.utledPerioder(referanse, periodeTilVurdering);
     }
 

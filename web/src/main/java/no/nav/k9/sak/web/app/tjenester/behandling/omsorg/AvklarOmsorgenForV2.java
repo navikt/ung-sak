@@ -14,6 +14,7 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
+import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
@@ -22,6 +23,10 @@ import no.nav.k9.sak.inngangsvilkår.omsorg.repo.OmsorgenForSaksbehandlervurderi
 import no.nav.k9.sak.kontrakt.omsorg.AvklarOmsorgenForDto;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.typer.PersonIdent;
+import no.nav.k9.sak.ytelse.omsorgspenger.repo.Fosterbarn;
+import no.nav.k9.sak.ytelse.omsorgspenger.repo.FosterbarnRepository;
+import no.nav.k9.sak.ytelse.omsorgspenger.repo.Fosterbarna;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarOmsorgenForDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -34,22 +39,32 @@ public class AvklarOmsorgenForV2 implements AksjonspunktOppdaterer<AvklarOmsorge
 
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste;
 
+    private FosterbarnRepository fosterbarnRepository;
+
+    private PersoninfoAdapter personinfoAdapter;
 
     AvklarOmsorgenForV2() {
         // for CDI proxy
     }
 
     @Inject
-    AvklarOmsorgenForV2(HistorikkTjenesteAdapter historikkAdapter, OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository, @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste) {
+    AvklarOmsorgenForV2(HistorikkTjenesteAdapter historikkAdapter, OmsorgenForGrunnlagRepository omsorgenForGrunnlagRepository,
+                        @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
+                        FosterbarnRepository fosterbarnRepository, PersoninfoAdapter personinfoAdapter) {
         this.historikkAdapter = historikkAdapter;
         this.omsorgenForGrunnlagRepository = omsorgenForGrunnlagRepository;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
+        this.fosterbarnRepository = fosterbarnRepository;
+        this.personinfoAdapter = personinfoAdapter;
     }
 
 
     @Override
     public OppdateringResultat oppdater(AvklarOmsorgenForDto dto, AksjonspunktOppdaterParameter param) {
         Long behandlingId = param.getBehandlingId();
+
+        // Oppretter fosterbarn kun dersom eksplisitt angitt av GUI for omsorgspenger
+        if (dto.getFosterbarnForOmsorgspenger() != null) leggTilFosterbarnForOmsorgspenger(dto, param);
 
         sjekkAtPerioderTilOppdateringErTillatt(dto, param, behandlingId);
 
@@ -71,6 +86,14 @@ public class AvklarOmsorgenForV2 implements AksjonspunktOppdaterer<AvklarOmsorge
         if (!oppdateringUtenforSøknadsperiode.isEmpty()) {
             throw new IllegalArgumentException("Oppdatering av omsorgen for utenfor søknadsperiode er ikke tillatt");
         }
+    }
+
+    private void leggTilFosterbarnForOmsorgspenger(AvklarOmsorgenForDto dto, AksjonspunktOppdaterParameter param) {
+        var fosterbarn = dto.getFosterbarnForOmsorgspenger().stream()
+            .map(barn -> personinfoAdapter.hentAktørIdForPersonIdent(new PersonIdent(barn.getFnr())).orElseThrow(() -> new IllegalArgumentException("Finner ikke fnr")))
+            .map(aktørId -> new Fosterbarn(aktørId))
+            .collect(Collectors.toSet());
+        fosterbarnRepository.lagreOgFlush(param.getBehandlingId(), new Fosterbarna(fosterbarn));
     }
 
     private List<OmsorgenForSaksbehandlervurdering> toOmsorgenForSaksbehandlervurderinger(AvklarOmsorgenForDto dto) {

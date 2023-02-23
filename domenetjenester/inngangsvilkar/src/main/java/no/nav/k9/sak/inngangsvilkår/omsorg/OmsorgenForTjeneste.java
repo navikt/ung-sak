@@ -18,6 +18,7 @@ import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.sykdom.Resultat;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.person.personopplysning.BasisPersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -125,14 +126,17 @@ public class OmsorgenForTjeneste {
         var vilkårsPerioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
         var fullstendigePerioder = vilkårsPerioderTilVurderingTjeneste.utledFullstendigePerioder(behandlingId);
         var pleietrengende = Optional.ofNullable(optPleietrengendeAktørId);
-        if (fullstendigePerioder.isEmpty() || pleietrengende.isEmpty()) {
-            return new Systemdata(false, false);
+        if (pleietrengende.isEmpty()) {
+            return hentSystemdataNårPleietrengendeMangler(behandling, fullstendigePerioder);
+        }
+        if (fullstendigePerioder.isEmpty()) {
+            return new Systemdata(false, false, false);
         }
         var periode = mapTilPeriode(fullstendigePerioder);
 
         var optAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(behandlingId, aktørId, periode);
         if (optAggregat.isEmpty()) {
-            return new Systemdata(false, false);
+            return new Systemdata(false, false, false);
         }
         var aggregat = optAggregat.get();
         var pleietrengendeAktørId = pleietrengende.get();
@@ -141,8 +145,20 @@ public class OmsorgenForTjeneste {
         var registrertForeldrerelasjon = relasjon.stream().anyMatch(it -> RelasjonsRolleType.BARN.equals(it.getRelasjonsrolle()));
         var registrertSammeBosted = aggregat.harSøkerSammeAdresseSom(pleietrengendeAktørId, RelasjonsRolleType.BARN);
 
-        return new Systemdata(registrertForeldrerelasjon, registrertSammeBosted);
+        return new Systemdata(registrertForeldrerelasjon, registrertSammeBosted, false);
 
+    }
+
+    private Systemdata hentSystemdataNårPleietrengendeMangler(Behandling behandling, NavigableSet<DatoIntervallEntitet> fullstendigePerioder) {
+        if (fullstendigePerioder.isEmpty()) {
+            return new Systemdata(false, false, false);
+        }
+        var referanse = BehandlingReferanse.fra(behandling);
+
+        final var samletOmsorgenForTidslinje = mapGrunnlag(referanse, fullstendigePerioder);
+        var registrertOmsorgenFoMinstEttBarn = !skalHaAksjonspunkt(referanse, samletOmsorgenForTidslinje, false);
+
+        return new Systemdata(false, false, registrertOmsorgenFoMinstEttBarn);
     }
 
     private DatoIntervallEntitet mapTilPeriode(NavigableSet<DatoIntervallEntitet> perioder) {
@@ -169,11 +185,12 @@ public class OmsorgenForTjeneste {
     public static class Systemdata {
         private final boolean registrertForeldrerelasjon;
         private final boolean registrertSammeBosted;
+        private final boolean registrertOmsorgenForMinstEttBarn;
 
-
-        public Systemdata(boolean registrertForeldrerelasjon, boolean registrertSammeBosted) {
+        public Systemdata(boolean registrertForeldrerelasjon, boolean registrertSammeBosted, boolean registrertOmsorgenForMinstEttBarn) {
             this.registrertForeldrerelasjon = registrertForeldrerelasjon;
             this.registrertSammeBosted = registrertSammeBosted;
+            this.registrertOmsorgenForMinstEttBarn = registrertOmsorgenForMinstEttBarn;
         }
 
 
@@ -183,6 +200,10 @@ public class OmsorgenForTjeneste {
 
         public boolean isRegistrertSammeBosted() {
             return registrertSammeBosted;
+        }
+
+        public boolean isRegistrertOmsorgenForMinstEttBarn() {
+            return registrertOmsorgenForMinstEttBarn;
         }
     }
 }
