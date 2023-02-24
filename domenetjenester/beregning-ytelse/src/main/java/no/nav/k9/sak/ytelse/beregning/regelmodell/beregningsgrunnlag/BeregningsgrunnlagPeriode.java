@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -11,6 +12,7 @@ public class BeregningsgrunnlagPeriode {
     @JsonManagedReference
     private List<BeregningsgrunnlagPrStatus> beregningsgrunnlagPrStatus = new ArrayList<>();
     private Periode bgPeriode;
+    private BigDecimal inntektGraderingsprosent;
 
     public BeregningsgrunnlagPeriode() {
     }
@@ -35,6 +37,10 @@ public class BeregningsgrunnlagPeriode {
         return bgPeriode;
     }
 
+    public BigDecimal getInntektGraderingsprosent() {
+        return inntektGraderingsprosent;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -48,6 +54,11 @@ public class BeregningsgrunnlagPeriode {
 
         public Builder medPeriode(Periode beregningsgrunnlagPeriode) {
             beregningsgrunnlagPeriodeMal.bgPeriode = beregningsgrunnlagPeriode;
+            return this;
+        }
+
+        public Builder medInntektGraderingsprosent(BigDecimal inntektGraderingsprosent) {
+            beregningsgrunnlagPeriodeMal.inntektGraderingsprosent = inntektGraderingsprosent;
             return this;
         }
 

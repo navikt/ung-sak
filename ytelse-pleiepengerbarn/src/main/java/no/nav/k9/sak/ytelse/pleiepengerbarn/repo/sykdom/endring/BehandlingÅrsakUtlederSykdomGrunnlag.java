@@ -106,10 +106,16 @@ class BehandlingÅrsakUtlederSykdomGrunnlag implements BehandlingÅrsakUtleder {
     }
 
     private boolean harEndringerForNattevåkOgBeredskap(BehandlingReferanse ref) {
+        if (Set.of(PLEIEPENGER_NÆRSTÅENDE, OPPLÆRINGSPENGER).contains(ref.getFagsakYtelseType())) {
+            return false;
+        }
         return endringUnntakEtablertTilsynTjeneste.harEndringerSidenBehandling(ref.getBehandlingId(), ref.getPleietrengendeAktørId()) && skalGiÅrsak(ref, BehandlingStegType.KONTROLLER_FAKTA_UTTAK);
     }
 
     private boolean harEndringerForEtablertTilsyn(BehandlingReferanse referanse) {
+        if (Set.of(PLEIEPENGER_NÆRSTÅENDE, OPPLÆRINGSPENGER).contains(referanse.getFagsakYtelseType())) {
+            return false;
+        }
         return erEndringPåEtablertTilsynTjeneste.erEndringerSidenBehandling(referanse) && skalGiÅrsak(referanse, BehandlingStegType.VURDER_UTTAK_V2);
     }
 

@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.beregning.regelmodell;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,13 +12,15 @@ public class BeregningsresultatPeriode {
 
     private List<BeregningsresultatAndel> beregningsresultatAndelList = new ArrayList<>();
     private LocalDateInterval periode;
+    private BigDecimal inntektGraderingsprosent;
 
-    public BeregningsresultatPeriode(LocalDateInterval periode) {
+    public BeregningsresultatPeriode(LocalDateInterval periode, BigDecimal inntektGraderingsprosent) {
         this.periode = periode;
+        this.inntektGraderingsprosent = inntektGraderingsprosent;
     }
 
-    public BeregningsresultatPeriode(LocalDate fom, LocalDate tom) {
-        this(new LocalDateInterval(fom, tom));
+    public BeregningsresultatPeriode(LocalDate fom, LocalDate tom, BigDecimal inntektGraderingsprosent) {
+        this(new LocalDateInterval(fom, tom), inntektGraderingsprosent);
     }
 
     public LocalDate getFom() {
@@ -30,6 +33,10 @@ public class BeregningsresultatPeriode {
 
     public LocalDateInterval getPeriode() {
         return periode;
+    }
+
+    public BigDecimal getInntektGraderingsprosent() {
+        return inntektGraderingsprosent;
     }
 
     public List<BeregningsresultatAndel> getBeregningsresultatAndelList() {

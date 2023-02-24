@@ -123,7 +123,8 @@ public class FraKalkulusMapper {
                 .medBeregningsgrunnlagPeriode(beregningsgrunnlagPeriodeDto.getBeregningsgrunnlagPeriodeFom(), beregningsgrunnlagPeriodeDto.getBeregningsgrunnlagPeriodeTom())
                 .medAvkortetPrÅr(beregningsgrunnlagPeriodeDto.getAvkortetPrÅr())
                 .medBruttoPrÅr(beregningsgrunnlagPeriodeDto.getBruttoPrÅr())
-                .medRedusertPrÅr(beregningsgrunnlagPeriodeDto.getRedusertPrÅr());
+                .medRedusertPrÅr(beregningsgrunnlagPeriodeDto.getRedusertPrÅr())
+                .medInntektGraderingsprosent(beregningsgrunnlagPeriodeDto.getInntektGraderingsprosent());
         mapAndeler(beregningsgrunnlagPeriodeDto.getBeregningsgrunnlagPrStatusOgAndelList()).forEach(periodeBuilder::leggTilBeregningsgrunnlagPrStatusOgAndel);
         return periodeBuilder;
     }

@@ -36,7 +36,6 @@ public class BeregnFeriepengerTjenesteTest {
         no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet beregningsresultat = lagVlBeregningsresultat();
         BeregningsresultatFeriepengerRegelModell regelmodell = BeregningsresultatFeriepengerRegelModell.builder()
             .medBeregningsresultatPerioder(List.of(periode))
-            .medFeriepengerPeriode(STP, STP.plusMonths(10))
             .build();
 
         // Act
@@ -59,7 +58,6 @@ public class BeregnFeriepengerTjenesteTest {
         no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet beregningsresultat = lagVlBeregningsresultat();
         BeregningsresultatFeriepengerRegelModell regelmodell = BeregningsresultatFeriepengerRegelModell.builder()
             .medBeregningsresultatPerioder(List.of(periode))
-            .medFeriepengerPeriode(STP, STP.plusMonths(10))
             .build();
 
         // Act
@@ -100,7 +98,7 @@ public class BeregnFeriepengerTjenesteTest {
     }
 
     private BeregningsresultatPeriode lagPeriodeMedAndel(BigDecimal årsbeløp) {
-        BeregningsresultatPeriode periode = new BeregningsresultatPeriode(PERIODE);
+        BeregningsresultatPeriode periode = new BeregningsresultatPeriode(PERIODE, null);
         BeregningsresultatAndel andel = BeregningsresultatAndel.builder().medAktivitetStatus(AktivitetStatus.ATFL)
             .medBrukerErMottaker(true)
             .medInntektskategori(Inntektskategori.ARBEIDSTAKER)

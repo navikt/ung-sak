@@ -235,12 +235,12 @@ spec:
     # Feature-flag
     - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
       value: "false"
+    - name: ENABLE_BRUKERDIALOGINNSYN
+      value: "true"
     - name: PSB_UTTAK_UNNTAK_AKTIVITETER
       value: "AFMX0|2021-03-01"
     - name: OMP_VERIFISERING_TILKJENT_YTELSE
       value: "false"
-    - name: ENABLE_FAGSAK_AVSLUTTING
-      value: "true"
     - name: SOKNADSFRIST_BENYTT_ELDSTEKRAV_PER_PERIODE
       value: "false"
     - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
@@ -257,8 +257,6 @@ spec:
       value: "false"
     - name: IKKE_YRKESAKTIV_UTEN_SPEILING
       value: "false"
-    - name: PSB_BG_BRUKER_OPPTJENING_RESULTAT
-      value: "true"
     - name: PSB_FRAMOVERHOPP_VED_FORLENGELSE_OPPTJENING
       value: "false"
     - name: OMS_ZERO_REFUSJON_ER_KRAV
@@ -266,8 +264,6 @@ spec:
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT
-      value: "true"
-    - name: ENABLE_FERIEPENGER_PAA_TVERS_AV_SAKER_OG_PR_AAR
       value: "true"
 
     # Audit logging
