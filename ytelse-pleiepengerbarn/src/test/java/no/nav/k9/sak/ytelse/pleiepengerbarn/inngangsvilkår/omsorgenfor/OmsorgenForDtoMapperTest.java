@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.omsorgenfor;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -66,8 +67,22 @@ class OmsorgenForDtoMapperTest {
         assertThat(omsorgenForDtos.get(2).isReadOnly()).isFalse();
     }
 
+    @Test
+    public void skalMappeVurdertAvOgVurdertTid() {
+        List<OmsorgenForPeriode> omsorgenForPerioder = List.of(mockOmsorgenForPeriode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 10)));
+
+        LocalDateTimeline<Boolean> tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(List.of(new Periode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 10))));
+
+        List<OmsorgenForDto> omsorgenForDtos = dtoMapper.toOmsorgenForDtoListe(omsorgenForPerioder, true, tidslinjeTilVurdering);
+
+        assertThat(omsorgenForDtos.size()).isEqualTo(1);
+
+        assertThat(omsorgenForDtos.get(0).getVurdertAv()).isEqualTo("noen");
+        assertThat(omsorgenForDtos.get(0).getVurdertTidspunkt()).isEqualTo(LocalDateTime.of(2021, 2, 25, 0, 0));
+    }
+
     private OmsorgenForPeriode mockOmsorgenForPeriode(LocalDate fom, LocalDate tom) {
         DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
-        return new OmsorgenForPeriode(periode, BarnRelasjon.FAR, "relasjon", "fordi test", Resultat.IKKE_OPPFYLT);
+        return new OmsorgenForPeriode(periode, BarnRelasjon.FAR, "relasjon", "fordi test", Resultat.IKKE_OPPFYLT, "noen", LocalDateTime.of(2021, 2, 25, 0, 0));
     }
 }
