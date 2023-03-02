@@ -1,6 +1,7 @@
 package no.nav.k9.sak.behandlingslager.behandling.medlemskap;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 import jakarta.persistence.Column;
@@ -65,6 +66,12 @@ public class VurdertLøpendeMedlemskapEntitet extends BaseEntitet implements Vur
     @Column(name = "manuell_vurd", nullable = false)
     private MedlemskapManuellVurderingType medlemsperiodeManuellVurdering = MedlemskapManuellVurderingType.UDEFINERT;
 
+    @Column(name = "vurdert_av", nullable = false, updatable = false)
+    private String vurdertAv;
+
+    @Column(name = "vurdert_tid", nullable = false, updatable = false)
+    private LocalDateTime vurdertTidspunkt;
+
     VurdertLøpendeMedlemskapEntitet() {
         // hibernate
     }
@@ -80,6 +87,8 @@ public class VurdertLøpendeMedlemskapEntitet extends BaseEntitet implements Vur
         this.erEøsBorger = medlemskap.getErEøsBorger();
         this.vurderingsdato = medlemskap.getVurderingsdato();
         this.begrunnelse = medlemskap.getBegrunnelse();
+        this.vurdertAv = medlemskap.getVurdertAv();
+        this.vurdertTidspunkt = medlemskap.getVurdertTidspunkt();
     }
 
     @Override
@@ -138,6 +147,24 @@ public class VurdertLøpendeMedlemskapEntitet extends BaseEntitet implements Vur
     }
 
     @Override
+    public String getVurdertAv() {
+        return vurdertAv;
+    }
+
+    @Override
+    public LocalDateTime getVurdertTidspunkt() {
+        return vurdertTidspunkt;
+    }
+
+    public void setVurdertAv(String vurdertAv) {
+        this.vurdertAv = vurdertAv;
+    }
+
+    public void setVurdertTidspunkt(LocalDateTime vurdertTidspunkt) {
+        this.vurdertTidspunkt = vurdertTidspunkt;
+    }
+
+    @Override
     public String toString() {
         return getClass().getSimpleName() + "<"
             + "vurderingsdato=" + vurderingsdato
@@ -146,6 +173,8 @@ public class VurdertLøpendeMedlemskapEntitet extends BaseEntitet implements Vur
             + ", lovligOppholdVurdering=" + lovligOppholdVurdering
             + ", erEøsBorger=" + erEøsBorger
             + ", begrunnelse=" + begrunnelse
+            + ", vurdertAv=" + vurdertAv
+            + ", vurdertTidspunkt=" + vurdertTidspunkt
             + ">";
     }
 

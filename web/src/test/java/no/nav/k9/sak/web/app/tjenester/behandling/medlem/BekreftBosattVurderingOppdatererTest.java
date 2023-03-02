@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,6 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
+import no.nav.k9.felles.testutilities.sikkerhet.StaticSubjectHandler;
+import no.nav.k9.felles.testutilities.sikkerhet.SubjectHandlerUtils;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
@@ -67,6 +70,9 @@ public class BekreftBosattVurderingOppdatererTest {
         bekreftetPeriode.setBosattVurdering(true);
         BekreftBosattVurderingDto dto = new BekreftBosattVurderingDto("test", List.of(bekreftetPeriode));
 
+        SubjectHandlerUtils.useSubjectHandler(StaticSubjectHandler.class);
+        SubjectHandlerUtils.setInternBruker("bruker");
+
         // Act
         final MedlemskapAksjonspunktTjeneste medlemskapTjeneste = new MedlemskapAksjonspunktTjeneste(
             repositoryProvider, mock(HistorikkTjenesteAdapter.class), skjæringstidspunktTjeneste);
@@ -75,7 +81,11 @@ public class BekreftBosattVurderingOppdatererTest {
 
         // Assert
         var vurdertMedlemskap = getVurdertMedlemskap(behandling.getId(), repositoryProvider);
-        assertThat(vurdertMedlemskap.getPerioder().iterator().next().getBosattVurdering()).isTrue();
+        assertThat(vurdertMedlemskap.getPerioder()).hasSize(1);
+        var vurdertLøpendeMedlemskap = vurdertMedlemskap.getPerioder().iterator().next();
+        assertThat(vurdertLøpendeMedlemskap.getBosattVurdering()).isTrue();
+        assertThat(vurdertLøpendeMedlemskap.getVurdertAv()).isEqualTo("bruker");
+        assertThat(vurdertLøpendeMedlemskap.getVurdertTidspunkt()).isBefore(LocalDateTime.now());
     }
 
 
