@@ -279,7 +279,7 @@ public class ÅrskvantumTjeneste {
             .collect(Collectors.toMap(MottattDokument::getJournalpostId, e -> e));
 
         NavigableSet<DatoIntervallEntitet> periodene = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.OMSORGEN_FOR);
-        LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje = (harOmsorgenForBlittVurdertIK9sak(periodene.first().getFomDato())) ? omsorgenForTjeneste.mapGrunnlag(ref, periodene): LocalDateTimeline.empty();
+        LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje = (harOmsorgenForBlittVurdertIK9sak(fagsakPeriode.getFomDato())) ? omsorgenForTjeneste.mapGrunnlag(ref, periodene): LocalDateTimeline.empty();
 
         for (WrappedOppgittFraværPeriode wrappedOppgittFraværPeriode : fraværsPerioderMedUtfallOgPerArbeidsgiver) {
             var fraværPeriode = wrappedOppgittFraværPeriode.getPeriode();
