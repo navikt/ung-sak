@@ -278,7 +278,7 @@ public class ÅrskvantumTjeneste {
         var mottatteDokumenter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(ref.getFagsakId()).stream()
             .collect(Collectors.toMap(MottattDokument::getJournalpostId, e -> e));
 
-        NavigableSet<DatoIntervallEntitet> periodene = fraværsPerioderMedUtfallOgPerArbeidsgiver.stream().map(fraværsperioder -> fraværsperioder.getPeriode().getPeriode()).collect(Collectors.toCollection(TreeSet::new));
+        NavigableSet<DatoIntervallEntitet> periodene = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.OMSORGEN_FOR);
         LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje = (harOmsorgenForBlittVurdertIK9sak(periodene.first().getFomDato())) ? omsorgenForTjeneste.mapGrunnlag(ref, periodene): LocalDateTimeline.empty();
 
         for (WrappedOppgittFraværPeriode wrappedOppgittFraværPeriode : fraværsPerioderMedUtfallOgPerArbeidsgiver) {
