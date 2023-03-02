@@ -14,6 +14,9 @@ import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
@@ -30,33 +33,36 @@ public class DødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderingU
     public static final Set<FagsakYtelseType> RELEVANTE_YTELSER = Set.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE);
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
+    private PersonopplysningRepository personopplysningRepository;
 
     public DødsfallFagsakTilVurderingUtleder() {
         // For CDI
     }
 
     @Inject
-    public DødsfallFagsakTilVurderingUtleder(FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository) {
+    public DødsfallFagsakTilVurderingUtleder(FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository, PersonopplysningRepository personopplysningRepository) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
+        this.personopplysningRepository = personopplysningRepository;
     }
 
     @Override
     public Map<Fagsak, BehandlingÅrsakType> finnFagsakerTilVurdering(AktørId aktørId, Hendelse hendelse) {
         List<AktørId> dødsfallAktører = hendelse.getHendelseInfo().getAktørIder();
         LocalDate dødsdato = hendelse.getHendelsePeriode().getFom();
+        String hendelseId = hendelse.getHendelseInfo().getHendelseId();
 
         var fagsaker = new HashMap<Fagsak, BehandlingÅrsakType>();
 
         for (FagsakYtelseType fagsakYtelseType : RELEVANTE_YTELSER) {
             for (AktørId aktør : dødsfallAktører) {
                 for (Fagsak fagsak : fagsakRepository.finnFagsakRelatertTil(fagsakYtelseType, aktør, null, null, dødsdato, null)) {
-                    if (!hendelseHåndtertTidligere(fagsak, BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER)) {
+                    if (erNyInformasjonIHendelsen(fagsak, aktør, dødsdato, hendelseId)) {
                         fagsaker.put(fagsak, BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER);
                     }
                 }
                 for (Fagsak fagsak : fagsakRepository.finnFagsakRelatertTil(fagsakYtelseType, null, aktør, null, dødsdato, null)) {
-                    if (!hendelseHåndtertTidligere(fagsak, BehandlingÅrsakType.RE_HENDELSE_DØD_BARN)) {
+                    if (erNyInformasjonIHendelsen(fagsak, aktør, dødsdato, hendelseId)) {
                         fagsaker.put(fagsak, BehandlingÅrsakType.RE_HENDELSE_DØD_BARN);
                     }
                 }
@@ -69,14 +75,20 @@ public class DødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderingU
 
     /**
      * idempotens-sjekk for å hindre at det opprettes flere revurderinger fra samme hendelse.
+     * hindrer også revurdering hvis hendelsen kommer etter at behandlingen er oppdatert med ny data.
      */
-    private boolean hendelseHåndtertTidligere(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType) {
-        for (Behandling behandling : behandlingRepository.hentAbsoluttAlleBehandlingerForSaksnummer(fagsak.getSaksnummer())) {
-            if (behandling.getBehandlingÅrsaker().stream().anyMatch(årsak -> årsak.getBehandlingÅrsakType().equals(behandlingÅrsakType))) {
-                logger.info("Dødsfallhendelse for sak {} var allerede håndtert i behandling {}", fagsak.getSaksnummer(), behandling.getUuid());
-                return true;
+    private boolean erNyInformasjonIHendelsen(Fagsak fagsak, AktørId aktør, LocalDate dødsdato, String hendelseId) {
+        Behandling behandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow();
+        PersonopplysningGrunnlagEntitet personopplysninger = personopplysningRepository.hentPersonopplysninger(behandling.getId());
+        if (personopplysninger != null) {
+            for (PersonopplysningEntitet personopplysning : personopplysninger.getGjeldendeVersjon().getPersonopplysninger()) {
+                if (aktør.equals(personopplysning.getAktørId()) && dødsdato.equals(personopplysning.getDødsdato())) {
+                    logger.info("Persondata på behandling {} for {} var allerede oppdatert med dato som kom i hendelse {}.", behandling.getUuid(), fagsak.getSaksnummer(), hendelseId);
+                    return false;
+                }
             }
         }
-        return false;
+        return true;
     }
+
 }
