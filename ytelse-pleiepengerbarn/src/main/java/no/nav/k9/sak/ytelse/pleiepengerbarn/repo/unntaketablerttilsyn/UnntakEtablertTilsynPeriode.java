@@ -1,6 +1,5 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 import jakarta.persistence.AttributeOverride;
@@ -59,12 +58,6 @@ public class UnntakEtablertTilsynPeriode extends BaseEntitet implements IndexKey
     @Column(name = "kilde_behandling_id", nullable = false, updatable = false)
     private Long kildeBehandlingId;
 
-    @Column(name = "vurdert_av", nullable = false, updatable = false)
-    private String vurdertAv;
-
-    @Column(name = "vurdert_tid", nullable = false, updatable = false)
-    private LocalDateTime vurdertTidspunkt;
-
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
@@ -80,18 +73,14 @@ public class UnntakEtablertTilsynPeriode extends BaseEntitet implements IndexKey
         this.periode = that.periode;
         this.kildeBehandlingId = that.kildeBehandlingId;
         this.aktørId = that.aktørId;
-        this.vurdertAv = that.vurdertAv;
-        this.vurdertTidspunkt = that.vurdertTidspunkt;
     }
 
-    public UnntakEtablertTilsynPeriode(DatoIntervallEntitet periode, String begrunnelse, Resultat resultat, AktørId aktørId, Long kildeBehandlingId, String vurdertAv, LocalDateTime vurdertTidspunkt) {
+    public UnntakEtablertTilsynPeriode(DatoIntervallEntitet periode, String begrunnelse, Resultat resultat, AktørId aktørId, Long kildeBehandlingId) {
         this.periode = periode;
         this.begrunnelse = begrunnelse;
         this.resultat = resultat;
         this.aktørId = aktørId;
         this.kildeBehandlingId = kildeBehandlingId;
-        this.vurdertAv = vurdertAv;
-        this.vurdertTidspunkt = vurdertTidspunkt;
     }
 
     public Long getId() {
@@ -132,14 +121,6 @@ public class UnntakEtablertTilsynPeriode extends BaseEntitet implements IndexKey
         return aktørId;
     }
 
-    public String getVurdertAv() {
-        return vurdertAv;
-    }
-
-    public LocalDateTime getVurdertTidspunkt() {
-        return vurdertTidspunkt;
-    }
-
     public UnntakEtablertTilsynPeriode medPeriode(DatoIntervallEntitet periode) {
         this.periode = periode;
         return this;
@@ -165,34 +146,17 @@ public class UnntakEtablertTilsynPeriode extends BaseEntitet implements IndexKey
         return this;
     }
 
-    public UnntakEtablertTilsynPeriode medVurdertAv(String vurdertAv) {
-        this.vurdertAv = vurdertAv;
-        return this;
-    }
-
-    public UnntakEtablertTilsynPeriode medVurdertTidspunkt(LocalDateTime vurdertTidspunkt) {
-        this.vurdertTidspunkt = vurdertTidspunkt;
-        return this;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UnntakEtablertTilsynPeriode that = (UnntakEtablertTilsynPeriode) o;
-        return periode.equals(that.periode)
-            && unntakEtablertTilsyn.equals(that.unntakEtablertTilsyn)
-            && begrunnelse.equals(that.begrunnelse)
-            && resultat == that.resultat
-            && kildeBehandlingId.equals(that.kildeBehandlingId)
-            && aktørId.equals(that.aktørId)
-            && vurdertAv.equals(that.vurdertAv)
-            && vurdertTidspunkt.equals(that.vurdertTidspunkt);
+        return periode.equals(that.periode) && unntakEtablertTilsyn.equals(that.unntakEtablertTilsyn) && begrunnelse.equals(that.begrunnelse) && resultat == that.resultat && kildeBehandlingId.equals(that.kildeBehandlingId) && aktørId.equals(that.aktørId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode, unntakEtablertTilsyn, begrunnelse, resultat, kildeBehandlingId, aktørId, vurdertAv, vurdertTidspunkt);
+        return Objects.hash(periode, unntakEtablertTilsyn, begrunnelse, resultat, kildeBehandlingId, aktørId);
     }
 
     @Override
@@ -204,8 +168,6 @@ public class UnntakEtablertTilsynPeriode extends BaseEntitet implements IndexKey
             ", versjon=" + versjon +
             ", kildeBehandlingId=" + kildeBehandlingId +
             ", aktørId=" + aktørId +
-            ", vurdertAv=" + vurdertAv +
-            ", vurdertTidspunkt=" + vurdertTidspunkt +
             '}';
     }
 }
