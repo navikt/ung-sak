@@ -3,7 +3,6 @@ package no.nav.k9.sak.web.app.tjenester.behandling.tilsyn;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -11,8 +10,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import jakarta.inject.Inject;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.k9.felles.testutilities.sikkerhet.StaticSubjectHandler;
-import no.nav.k9.felles.testutilities.sikkerhet.SubjectHandlerUtils;
 import no.nav.k9.kodeverk.sykdom.Resultat;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -40,13 +37,9 @@ class UnntakEtablertTilsynOppdateringServiceTest {
     private static final AktørId pleietrengende = AktørId.dummy();
     private static final String BESKRIVELSE1 = "Jeg trenger beredskap.";
     private static final String BEGRUNNELSE1 = "Alt skal være ok.";
-    private static final String BRUKER = "bruker";
 
     @Test
     public void beredskap_skal_oppdateres() {
-        SubjectHandlerUtils.useSubjectHandler(StaticSubjectHandler.class);
-        SubjectHandlerUtils.setInternBruker(BRUKER);
-
         opprettGrunnlag(BEHANDLING1);
         var opprinneligGrunnlag = repo.hentHvisEksistererUnntakPleietrengende(pleietrengende).get();
         sjekkUnntakEtablertTilsyn(opprinneligGrunnlag.getBeredskap(), "", Resultat.IKKE_VURDERT);
@@ -68,8 +61,6 @@ class UnntakEtablertTilsynOppdateringServiceTest {
         assertThat(unntakEtablertTilsyn.getPerioder().get(0).getPeriode()).isEqualTo(PERIODE1);
         assertThat(unntakEtablertTilsyn.getPerioder().get(0).getBegrunnelse()).isEqualTo(begrunnelse);
         assertThat(unntakEtablertTilsyn.getPerioder().get(0).getResultat()).isEqualTo(resultat);
-        assertThat(unntakEtablertTilsyn.getPerioder().get(0).getVurdertAv()).isEqualTo(BRUKER);
-        assertThat(unntakEtablertTilsyn.getPerioder().get(0).getVurdertTidspunkt()).isBefore(LocalDateTime.now());
     }
 
 
@@ -81,9 +72,7 @@ class UnntakEtablertTilsynOppdateringServiceTest {
                     "",
                     Resultat.IKKE_VURDERT,
                     pleietrengende,
-                    123L,
-                    BRUKER,
-                    LocalDateTime.now()
+                    123L
                 )
             ),
             List.of(
