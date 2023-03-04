@@ -2,7 +2,6 @@ package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum;
 
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -38,15 +37,12 @@ import no.nav.k9.sak.ytelse.omsorgspenger.inngangsvilkår.søknadsfrist.SøknadP
 import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.AktivitetTypeArbeidsgiver;
 import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.KravDokumentFravær;
 import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.OppgittFraværHolder;
-import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
-import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFravær;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 
 @Dependent
 public class TrekkUtFraværTjeneste {
     private static final Logger log = LoggerFactory.getLogger(TrekkUtFraværTjeneste.class);
 
-    private OmsorgspengerGrunnlagRepository grunnlagRepository;
     private BehandlingRepository behandlingRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
@@ -56,14 +52,12 @@ public class TrekkUtFraværTjeneste {
     private InntektsmeldingSøktePerioderMapper inntektsmeldingMapper;
 
     @Inject
-    public TrekkUtFraværTjeneste(OmsorgspengerGrunnlagRepository grunnlagRepository,
-                                 BehandlingRepository behandlingRepository,
+    public TrekkUtFraværTjeneste(BehandlingRepository behandlingRepository,
                                  MottatteDokumentRepository mottatteDokumentRepository,
                                  InntektArbeidYtelseTjeneste iayTjeneste,
                                  @FagsakYtelseTypeRef(OMSORGSPENGER) VurderSøknadsfristTjeneste<OppgittFraværPeriode> søknadsfristTjeneste,
                                  SøknadPerioderTjeneste søknadPerioderTjeneste,
                                  InntektsmeldingSøktePerioderMapper inntektsmeldingMapper) {
-        this.grunnlagRepository = grunnlagRepository;
         this.behandlingRepository = behandlingRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.iayTjeneste = iayTjeneste;
@@ -72,36 +66,17 @@ public class TrekkUtFraværTjeneste {
         this.inntektsmeldingMapper = inntektsmeldingMapper;
     }
 
-    OppgittFravær samleSammenOppgittFravær(Long behandlingId) {
-
+    public List<OppgittFraværPeriode> samleSammenOppgittFravær(Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
-
-        List<OppgittFraværPeriode> fravær; // Tar med eventuelle perioder som tilkommer en åpen manuelt opprettet behandling
         if (behandling.erManueltOpprettet()) {
+            // Tar med eventuelle perioder som tilkommer en åpen manuelt opprettet behandling
             var oppgittFravær = alleFraværsperioderPåFagsak(behandling);
-            fravær = KravDokumentFravær.mapTilOppgittFraværPeriode(oppgittFravær);
+            return KravDokumentFravær.mapTilOppgittFraværPeriode(oppgittFravær);
         } else {
             var fraværFraKravDokument = fraværPåBehandling(behandling);
-            log.info("Legger til totalt {} perioder fra inntektsmeldinger og søknader", fraværFraKravDokument.size());
-            if (fraværFraKravDokument.isEmpty()) {
-                // Kan inntreffe dersom IM er av variant ikkeFravaer eller ikke refusjon. Da brukes fraværsperioder kopiert fra forrige behandling
-                // TODO: Logg heller dokumenter tilknyttet behandling
-                log.warn("Kun kravdokument uten fraværsperioder er knyttet til behandling. Fraværsperioder fra tidligere behandlinger brukes, forventer noop for ytelse.");
-                var oppgittOpt = grunnlagRepository.hentSammenslåttOppgittFraværHvisEksisterer(behandling.getId());
-                fravær = new ArrayList<>(oppgittOpt.orElseThrow().getPerioder());
-            } else {
-                fravær = fraværFraKravDokument;
-            }
+            log.info("Fant totalt {} perioder fra inntektsmeldinger og søknader", fraværFraKravDokument.size());
+            return fraværFraKravDokument;
         }
-        log.info("Fravær har totalt {} perioder: {}",
-            fravær.size(),
-            fravær.stream()
-                .map(OppgittFraværPeriode::getPeriode)
-                .toList());
-        if (fravær.isEmpty()) {
-            throw new IllegalStateException("Utvikler feil, forventer fraværsperioder til behandlingen");
-        }
-        return new OppgittFravær(fravær);
     }
 
     private List<OppgittFraværPeriode> fraværPåBehandling(Behandling behandling) {
@@ -115,8 +90,7 @@ public class TrekkUtFraværTjeneste {
         søkteFraværsperioder.putAll(søktFraværFraImPåBehandling(behandling));
         søkteFraværsperioder.putAll(fraværFraSøknaderPåBehandling(behandling));
 
-        var vurdertePerioder = søknadsfristTjeneste.vurderSøknadsfrist(behandling.getId(), søkteFraværsperioder);
-        return vurdertePerioder;
+        return søknadsfristTjeneste.vurderSøknadsfrist(behandling.getId(), søkteFraværsperioder);
     }
 
     public List<OppgittFraværPeriode> fraværFraInntektsmeldingerPåFagsak(Behandling behandling) {
