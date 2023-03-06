@@ -259,6 +259,8 @@ spec:
       value: "false"
     - name: PSB_FRAMOVERHOPP_VED_FORLENGELSE_OPPTJENING
       value: "false"
+    - name: OMP_NULL_HELG_I_KRAVPERIODER
+      value: "false"
     - name: OMS_ZERO_REFUSJON_ER_KRAV
       value: "false"
 
