@@ -3,7 +3,6 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -29,9 +28,7 @@ public class EndringUnntakEtablertTilsynTjenesteTest {
                     "Fordi forda",
                     Resultat.OPPFYLT,
                     AktørId.dummy(),
-                    1L,
-                    "nav",
-                    LocalDateTime.now()
+                    1L
                 )
             ), List.of()),
             new UnntakEtablertTilsyn(List.of(), List.of())
@@ -45,9 +42,7 @@ public class EndringUnntakEtablertTilsynTjenesteTest {
                         "Ny grunn",
                         Resultat.OPPFYLT,
                         AktørId.dummy(),
-                        2L,
-                        "nav",
-                        LocalDateTime.now()
+                        2L
                     )
                 ), List.of()),
                 new UnntakEtablertTilsyn(List.of(), List.of())
@@ -70,9 +65,7 @@ public class EndringUnntakEtablertTilsynTjenesteTest {
                         "Ny grunn",
                         Resultat.OPPFYLT,
                         AktørId.dummy(),
-                        2L,
-                        "nav",
-                        LocalDateTime.now()
+                        2L
                     )
                 ), List.of()),
                 new UnntakEtablertTilsyn(List.of(), List.of())
@@ -95,9 +88,7 @@ public class EndringUnntakEtablertTilsynTjenesteTest {
                     "Fordi forda",
                     Resultat.IKKE_OPPFYLT,
                     AktørId.dummy(),
-                    1L,
-                    "nav",
-                    LocalDateTime.now()
+                    1L
                 )
             ), List.of()),
             new UnntakEtablertTilsyn(List.of(), List.of())
@@ -111,9 +102,7 @@ public class EndringUnntakEtablertTilsynTjenesteTest {
                         "Ny grunn",
                         Resultat.OPPFYLT,
                         AktørId.dummy(),
-                        2L,
-                        "nav",
-                        LocalDateTime.now()
+                        2L
                     )
                 ), List.of()),
                 new UnntakEtablertTilsyn(List.of(), List.of())
