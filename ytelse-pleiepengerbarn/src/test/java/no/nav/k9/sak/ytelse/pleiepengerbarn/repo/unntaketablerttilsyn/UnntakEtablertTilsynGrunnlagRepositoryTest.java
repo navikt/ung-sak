@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -127,7 +128,9 @@ class UnntakEtablertTilsynGrunnlagRepositoryTest {
             .medBegrunnelse(begrunnelse)
             .medResultat(resultat)
             .medAktørId(new AktørId(456L))
-            .medKildeBehandlingId(123L);
+            .medKildeBehandlingId(123L)
+            .medVurdertAv("nav")
+            .medVurdertTidspunkt(LocalDateTime.now());
         return periode;
     }
 
