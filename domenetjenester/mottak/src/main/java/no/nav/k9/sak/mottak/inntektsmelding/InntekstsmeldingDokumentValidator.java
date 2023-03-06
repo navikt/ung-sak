@@ -40,7 +40,8 @@ public class InntekstsmeldingDokumentValidator implements DokumentValidator {
         List<InntektsmeldingBuilder> builders = inntektsmeldingParser.parseInntektsmeldinger(mottattDokument);
         for (InntektsmeldingBuilder builder : builders) {
             //builder har validering
-            builder.build();
+            boolean ignorerValideringInternArbeidsforhold = true;
+            builder.build(ignorerValideringInternArbeidsforhold);
         }
 
     }
