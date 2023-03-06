@@ -92,8 +92,8 @@ public class EtablertTilsynNattevåkOgBeredskapMapper {
                 uetPeriode.getBegrunnelse(),
                 uetPeriode.getResultat(),
                 tilKilde(søkersAktørId, uetPeriode.getAktørId()),
-                uetPeriode.getVurdertAv(),
-                uetPeriode.getVurdertTidspunkt()
+                uetPeriode.getOpprettetAv(),
+                uetPeriode.getOpprettetTidspunkt()
             )
         ).toList();
     }
