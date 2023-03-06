@@ -57,10 +57,10 @@ public class OmsorgenForPeriode extends BaseEntitet implements IndexKey {
     @Convert(converter = SykdomResultatTypeConverter.class)
     private Resultat resultat;
 
-    @Column(name = "vurdert_av", nullable = false, updatable = false)
+    @Column(name = "vurdert_av", updatable = false) //TODO set nullable = false
     private String vurdertAv;
 
-    @Column(name = "vurdert_tid", nullable = false, updatable = false)
+    @Column(name = "vurdert_tid", updatable = false) //TODO set nullable = false
     private LocalDateTime vurdertTidspunkt;
 
     @ManyToOne
