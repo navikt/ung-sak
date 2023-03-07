@@ -63,6 +63,12 @@ public class BeregningsresultatPeriode extends BaseEntitet {
     @Column(name = "gradering_inntekt_prosent")
     private BigDecimal inntektGraderingsprosent;
 
+    @Column(name = "graderingsfaktor_inntekt")
+    private BigDecimal graderingsfaktorInntekt;
+
+    @Column(name = "graderingsfaktor_tid")
+    private BigDecimal graderingsfaktorTid;
+
     @Embedded
     @AttributeOverrides({
         @AttributeOverride(name = "fomDato", column = @Column(name = "br_periode_fom")),
@@ -114,6 +120,14 @@ public class BeregningsresultatPeriode extends BaseEntitet {
 
     public BigDecimal getInntektGraderingsprosent() {
         return inntektGraderingsprosent;
+    }
+
+    public BigDecimal getGraderingsfaktorInntekt() {
+        return graderingsfaktorInntekt;
+    }
+
+    public BigDecimal getGraderingsfaktorTid() {
+        return graderingsfaktorTid;
     }
 
     void addBeregningsresultatAndel(BeregningsresultatAndel beregningsresultatAndel) {
@@ -175,6 +189,17 @@ public class BeregningsresultatPeriode extends BaseEntitet {
             beregningsresultatPeriodeMal.inntektGraderingsprosent = inntektGraderingsprosent;
             return this;
         }
+
+        public Builder medGraderingsfaktorInntekt(BigDecimal graderingsfaktorInntekt) {
+            beregningsresultatPeriodeMal.graderingsfaktorInntekt = graderingsfaktorInntekt;
+            return this;
+        }
+
+        public Builder medGraderingsfaktorTid(BigDecimal graderingsfaktorTid) {
+            beregningsresultatPeriodeMal.graderingsfaktorTid = graderingsfaktorTid;
+            return this;
+        }
+
 
         public BeregningsresultatPeriode build(BeregningsresultatEntitet beregningsresultat) {
             beregningsresultatPeriodeMal.beregningsresultat = beregningsresultat;

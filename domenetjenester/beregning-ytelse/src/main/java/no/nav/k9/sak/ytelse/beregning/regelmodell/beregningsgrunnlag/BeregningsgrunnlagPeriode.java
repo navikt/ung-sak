@@ -13,14 +13,17 @@ public class BeregningsgrunnlagPeriode {
     private List<BeregningsgrunnlagPrStatus> beregningsgrunnlagPrStatus = new ArrayList<>();
     private Periode bgPeriode;
     private BigDecimal inntektGraderingsprosent;
+    private BigDecimal graderingsfaktorTid;
+    private BigDecimal graderingsfaktorInntekt;
+
 
     public BeregningsgrunnlagPeriode() {
     }
 
     public List<BeregningsgrunnlagPrStatus> getBeregningsgrunnlagPrStatus(AktivitetStatus aktivitetStatus) {
         return beregningsgrunnlagPrStatus.stream()
-                .filter(af -> aktivitetStatus.equals(af.getAktivitetStatus()))
-                .collect(Collectors.toList());
+            .filter(af -> aktivitetStatus.equals(af.getAktivitetStatus()))
+            .collect(Collectors.toList());
     }
 
     public List<BeregningsgrunnlagPrStatus> getBeregningsgrunnlagPrStatus() {
@@ -41,6 +44,14 @@ public class BeregningsgrunnlagPeriode {
         return inntektGraderingsprosent;
     }
 
+    public BigDecimal getGraderingsfaktorTid() {
+        return graderingsfaktorTid;
+    }
+
+    public BigDecimal getGraderingsfaktorInntekt() {
+        return graderingsfaktorInntekt;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -59,6 +70,16 @@ public class BeregningsgrunnlagPeriode {
 
         public Builder medInntektGraderingsprosent(BigDecimal inntektGraderingsprosent) {
             beregningsgrunnlagPeriodeMal.inntektGraderingsprosent = inntektGraderingsprosent;
+            return this;
+        }
+
+        public Builder medGraderingsfaktorTid(BigDecimal graderingsfaktorTid) {
+            beregningsgrunnlagPeriodeMal.graderingsfaktorTid = graderingsfaktorTid;
+            return this;
+        }
+
+        public Builder medGraderingsfaktorInntekt(BigDecimal graderingsfaktorInntekt) {
+            beregningsgrunnlagPeriodeMal.graderingsfaktorInntekt = graderingsfaktorInntekt;
             return this;
         }
 
