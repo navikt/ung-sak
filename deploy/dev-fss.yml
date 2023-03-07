@@ -262,7 +262,11 @@ spec:
       value: "true"
     - name: PSB_FRAMOVERHOPP_VED_FORLENGELSE_OPPTJENING
       value: "true"
+    - name: OMP_NULL_HELG_I_KRAVPERIODER
+      value: "true"
     - name: OMS_ZERO_REFUSJON_ER_KRAV
+      value: "true"
+    - name: ENABLE_NY_SJEKK_OMP_INGEN_PERIODER
       value: "true"
 
     # Konfigurasjoner
