@@ -19,6 +19,10 @@ public class ValiderInntektsmelding {
             if (harRefusjonskrav(kladd)) {
                 if (!harFravær(kladd)) {
                     throw new IllegalArgumentException("Har refusjonskrav men ikke oppgitt fravær. Gir ikke mening. JournalpostId=" + kladd.getJournalpostId());
+                } else if (harDelvisRefusjonskrav(kladd)) {
+                    throw new IllegalArgumentException("Har refusjonskrav, men refusjonsbeløp er ikke lik månedsbeløp. JournalpostId=" + kladd.getJournalpostId());
+                } else if (harOppgittRefusjonskravPå0Kroner(kladd)) {
+                    throw new IllegalArgumentException("Har refusjonskrav, men refusjonsbeløp er 0. Trekk av krav skal gjøres ved å oppgi fravær på 0 timer. JournalpostId=" + kladd.getJournalpostId());
                 } else {
                     // OK - vanligste forventet tilfelle - refusjonskrav med fravær
                 }
@@ -53,6 +57,17 @@ public class ValiderInntektsmelding {
                 // OK - inntektsmelding opplyser kun brutto inntekt for arbeidsforhold uten inntekt
             }
         }
+    }
+
+    private boolean harOppgittRefusjonskravPå0Kroner(Inntektsmelding kladd) {
+        return kladd.getRefusjonBeløpPerMnd() != null && kladd.getRefusjonBeløpPerMnd().getVerdi() != null
+            && kladd.getRefusjonBeløpPerMnd().getVerdi().signum() == 0;
+    }
+
+    private boolean harDelvisRefusjonskrav(Inntektsmelding kladd) {
+        return kladd.getRefusjonBeløpPerMnd() != null && kladd.getRefusjonBeløpPerMnd().getVerdi() != null
+            && kladd.getInntektBeløp() != null && kladd.getInntektBeløp().getVerdi() != null
+            && kladd.getInntektBeløp().getVerdi().compareTo(kladd.getRefusjonBeløpPerMnd().getVerdi()) != 0;
     }
 
     private boolean harRefusjonskrav(Inntektsmelding kladd) {

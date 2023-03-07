@@ -19,12 +19,12 @@
             </beregnetInntekt>
         </arbeidsforhold>
         <refusjon>
-            <refusjonsbeloepPrMnd>50000</refusjonsbeloepPrMnd>
+            <refusjonsbeloepPrMnd>75000</refusjonsbeloepPrMnd>
             <refusjonsopphoersdato>2018-09-02</refusjonsopphoersdato>
             <endringIRefusjonListe>
                 <endringIRefusjon>
                     <endringsdato>2018-08-01</endringsdato>
-                    <refusjonsbeloepPrMnd>14000</refusjonsbeloepPrMnd>
+                    <refusjonsbeloepPrMnd>75000</refusjonsbeloepPrMnd>
                 </endringIRefusjon>
             </endringIRefusjonListe>
         </refusjon>
