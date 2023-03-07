@@ -152,6 +152,8 @@ spec:
       value: api://dev-fss.k9saksbehandling.ftkalkulus/.default
     - name: ABAKUS_CALLBACK_URL
       value: http://k9-sak.k9saksbehandling/k9/sak/api/registerdata/iay/callback
+    - name: ABAKUS_CALLBACK_SCOPE
+      value: api://dev-fss.k9saksbehandling.k9-sak/.default
     - name: ABAC_PDP_ENDPOINT_URL
       value: http://abac-k9.k9saksbehandling/application/authorize
     - name: K9_OPPDRAG_PROXY_URL
