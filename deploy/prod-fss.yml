@@ -261,6 +261,8 @@ spec:
       value: "false"
     - name: OMS_ZERO_REFUSJON_ER_KRAV
       value: "false"
+    - name: ENABLE_NY_SJEKK_OMP_INGEN_PERIODER
+      value: "false"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT
