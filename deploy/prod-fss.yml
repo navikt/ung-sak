@@ -68,6 +68,8 @@ spec:
         - application: k9-formidling
         - application: k9-formidling-dokumentdata
         - application: k9-punsj
+        - application: fpabakus
+          namespace: teamforedrepenger
   env:
     - name: TZ
       value: "Europe/Oslo"
