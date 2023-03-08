@@ -270,7 +270,7 @@ spec:
     - name: K9TILBAKE_AKTIVERT
       value: "true"
     - name: FLYWAY_REPAIR_ON_FAIL
-      value: "true"
+      value: "false"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
