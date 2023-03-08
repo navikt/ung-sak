@@ -201,7 +201,7 @@ spec:
     - name: K9_OMS_AARSKVANTUM_SCOPE
       value: api://dev-fss.k9saksbehandling.k9-aarskvantum/.default
     - name: K9_OMS_UTVIDETRETT_URL
-      value: https://omsorgsdager.dev.intern.nav.no/api
+      value: https://omsorgsdager.intern.dev.nav.no/api
 
     # Restservice PSB spesifikt
     - name: K9_PSB_UTTAK_URL
@@ -272,8 +272,11 @@ spec:
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT
       value: "true"
+    - name: FLYWAY_REPAIR_ON_FAIL
+      value: "true"
 
-    # Audit logging
+
+      # Audit logging
     - name: AUDITLOGGER_ENABLED
       value: "true"
     - name: AUDITLOGGER_VENDOR
