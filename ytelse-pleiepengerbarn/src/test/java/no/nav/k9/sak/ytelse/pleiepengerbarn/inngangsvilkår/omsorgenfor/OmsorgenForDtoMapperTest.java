@@ -28,42 +28,112 @@ class OmsorgenForDtoMapperTest {
 
     @Test
     public void toOmsorgenForDtoListeCase1Test() {
-        List<OmsorgenForPeriode> omsorgenForPerioder = List.of(mockOmsorgenForPeriode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 15)));
+        List<OmsorgenForPeriode> manueltVurdertOmsorgenForPerioder = List.of(mockOmsorgenForPeriode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 15)));
 
         LocalDateTimeline<Boolean> tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(Arrays.asList(new Periode(LocalDate.of(2021, 2, 10), LocalDate.of(2021, 2, 20))));
 
-        List<OmsorgenForDto> omsorgenForDtos = dtoMapper.toOmsorgenForDtoListe(omsorgenForPerioder, true, tidslinjeTilVurdering);
+        List<OmsorgenForDto> omsorgenForDtos = dtoMapper.toOmsorgenForDtoListe(manueltVurdertOmsorgenForPerioder, true, tidslinjeTilVurdering);
 
         assertThat(omsorgenForDtos.size()).isEqualTo(2);
 
-        assertThat(omsorgenForDtos.get(0).getPeriode()).isEqualTo(new Periode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 9)));
-        assertThat(omsorgenForDtos.get(0).isReadOnly()).isTrue();
+        assertThat(omsorgenForDtos.get(0).getPeriode()).isEqualTo(new Periode(LocalDate.of(2021, 2, 10), LocalDate.of(2021, 2, 15)));
+        assertThat(omsorgenForDtos.get(0).isReadOnly()).isFalse();
+        assertThat(omsorgenForDtos.get(0).getResultat()).isEqualTo(Resultat.IKKE_OPPFYLT);
 
-        assertThat(omsorgenForDtos.get(1).getPeriode()).isEqualTo(new Periode(LocalDate.of(2021, 2, 10), LocalDate.of(2021, 2, 15)));
+        assertThat(omsorgenForDtos.get(1).getPeriode()).isEqualTo(new Periode(LocalDate.of(2021, 2, 16), LocalDate.of(2021, 2, 20)));
         assertThat(omsorgenForDtos.get(1).isReadOnly()).isFalse();
+        assertThat(omsorgenForDtos.get(1).getResultat()).isEqualTo(Resultat.IKKE_VURDERT);
     }
 
     @Test
     public void toOmsorgenForDtoListeCase2Test() {
-        List<OmsorgenForPeriode> omsorgenForPerioder = List.of(mockOmsorgenForPeriode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 20)));
+        List<OmsorgenForPeriode> manueltVurdertOmsorgenForPerioder = List.of(mockOmsorgenForPeriode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 20)));
 
         LocalDateTimeline<Boolean> tidslinjeTilVurdering =
             TidslinjeUtil.tilTidslinjeKomprimert(Arrays.asList(
                 new Periode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 5)),
                 new Periode(LocalDate.of(2021, 2, 10), LocalDate.of(2021, 2, 25))));
 
-        List<OmsorgenForDto> omsorgenForDtos = dtoMapper.toOmsorgenForDtoListe(omsorgenForPerioder, true, tidslinjeTilVurdering);
+        List<OmsorgenForDto> omsorgenForDtos = dtoMapper.toOmsorgenForDtoListe(manueltVurdertOmsorgenForPerioder, true, tidslinjeTilVurdering);
 
         assertThat(omsorgenForDtos.size()).isEqualTo(3);
 
         assertThat(omsorgenForDtos.get(0).getPeriode()).isEqualTo(new Periode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 5)));
         assertThat(omsorgenForDtos.get(0).isReadOnly()).isFalse();
+        assertThat(omsorgenForDtos.get(0).getResultat()).isEqualTo(Resultat.IKKE_OPPFYLT);
 
-        assertThat(omsorgenForDtos.get(1).getPeriode()).isEqualTo(new Periode(LocalDate.of(2021, 2, 6), LocalDate.of(2021, 2, 9)));
-        assertThat(omsorgenForDtos.get(1).isReadOnly()).isTrue();
+        assertThat(omsorgenForDtos.get(1).getPeriode()).isEqualTo(new Periode(LocalDate.of(2021, 2, 10), LocalDate.of(2021, 2, 20)));
+        assertThat(omsorgenForDtos.get(1).isReadOnly()).isFalse();
+        assertThat(omsorgenForDtos.get(1).getResultat()).isEqualTo(Resultat.IKKE_OPPFYLT);
 
-        assertThat(omsorgenForDtos.get(2).getPeriode()).isEqualTo(new Periode(LocalDate.of(2021, 2, 10), LocalDate.of(2021, 2, 20)));
+        assertThat(omsorgenForDtos.get(2).getPeriode()).isEqualTo(new Periode(LocalDate.of(2021, 2, 21), LocalDate.of(2021, 2, 25)));
         assertThat(omsorgenForDtos.get(2).isReadOnly()).isFalse();
+        assertThat(omsorgenForDtos.get(2).getResultat()).isEqualTo(Resultat.IKKE_VURDERT);
+    }
+
+    @Test
+    public void flere_perioder_i_tidslinjen_hvor_kun_en_er_vurdert() {
+        List<OmsorgenForPeriode> manueltVurdertOmsorgenForPerioder = List.of(mockOmsorgenForPeriode(LocalDate.of(2021, 2, 10), LocalDate.of(2021, 2, 15)));
+
+        LocalDateTimeline<Boolean> tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(Arrays.asList(
+            new Periode(LocalDate.of(2021, 2, 10), LocalDate.of(2021, 2, 15)),
+            new Periode(LocalDate.of(2021, 2, 17), LocalDate.of(2021, 2, 20))));
+
+        List<OmsorgenForDto> omsorgenForDtos = dtoMapper.toOmsorgenForDtoListe(manueltVurdertOmsorgenForPerioder, true, tidslinjeTilVurdering);
+
+        assertThat(omsorgenForDtos.size()).isEqualTo(2);
+
+        assertThat(omsorgenForDtos.get(0).getPeriode()).isEqualTo(new Periode(LocalDate.of(2021, 2, 10), LocalDate.of(2021, 2, 15)));
+        assertThat(omsorgenForDtos.get(0).isReadOnly()).isFalse();
+        assertThat(omsorgenForDtos.get(0).getResultat()).isEqualTo(Resultat.IKKE_OPPFYLT);
+
+        assertThat(omsorgenForDtos.get(1).getPeriode()).isEqualTo(new Periode(LocalDate.of(2021, 2, 17), LocalDate.of(2021, 2, 20)));
+        assertThat(omsorgenForDtos.get(1).isReadOnly()).isFalse();
+        assertThat(omsorgenForDtos.get(1).getResultat()).isEqualTo(Resultat.IKKE_VURDERT);
+    }
+
+    @Test
+    public void en_lang_tidslinje_hvor_bare_et_subset_er_vurdert_av_saksbehandler() {
+        List<OmsorgenForPeriode> manueltVurdertOmsorgenForPerioder = List.of(mockOmsorgenForPeriode(LocalDate.of(2021, 2, 10), LocalDate.of(2021, 2, 15)));
+
+        LocalDateTimeline<Boolean> tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(Arrays.asList(new Periode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 20))));
+
+        List<OmsorgenForDto> omsorgenForDtos = dtoMapper.toOmsorgenForDtoListe(manueltVurdertOmsorgenForPerioder, true, tidslinjeTilVurdering);
+
+        assertThat(omsorgenForDtos.size()).isEqualTo(3);
+
+        assertThat(omsorgenForDtos.get(0).getPeriode()).isEqualTo(new Periode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 9)));
+        assertThat(omsorgenForDtos.get(0).isReadOnly()).isFalse();
+        assertThat(omsorgenForDtos.get(0).getResultat()).isEqualTo(Resultat.IKKE_VURDERT);
+
+        assertThat(omsorgenForDtos.get(1).getPeriode()).isEqualTo(new Periode(LocalDate.of(2021, 2, 10), LocalDate.of(2021, 2, 15)));
+        assertThat(omsorgenForDtos.get(1).isReadOnly()).isFalse();
+        assertThat(omsorgenForDtos.get(1).getResultat()).isEqualTo(Resultat.IKKE_OPPFYLT);
+
+        assertThat(omsorgenForDtos.get(2).getPeriode()).isEqualTo(new Periode(LocalDate.of(2021, 2, 16), LocalDate.of(2021, 2, 20)));
+        assertThat(omsorgenForDtos.get(2).isReadOnly()).isFalse();
+        assertThat(omsorgenForDtos.get(2).getResultat()).isEqualTo(Resultat.IKKE_VURDERT);
+    }
+
+    @Test
+    public void en_lang_tidslinje_hvor_halve_perioden_er_vurdert_av_saksbehandler_samt_lenger_frem_i_tid() {
+        List<OmsorgenForPeriode> manueltVurdertOmsorgenForPerioder = List.of(mockOmsorgenForPeriode(LocalDate.of(2021, 2, 10), LocalDate.of(2021, 2, 25)));
+
+        LocalDateTimeline<Boolean> tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(Arrays.asList(new Periode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 20))));
+
+        List<OmsorgenForDto> omsorgenForDtos = dtoMapper.toOmsorgenForDtoListe(manueltVurdertOmsorgenForPerioder, true, tidslinjeTilVurdering);
+
+        assertThat(omsorgenForDtos.size()).isEqualTo(2);
+
+        assertThat(omsorgenForDtos.get(0).getPeriode()).isEqualTo(new Periode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 9)));
+        assertThat(omsorgenForDtos.get(0).isReadOnly()).isFalse();
+        assertThat(omsorgenForDtos.get(0).getResultat()).isEqualTo(Resultat.IKKE_VURDERT);
+
+        assertThat(omsorgenForDtos.get(1).getPeriode()).isEqualTo(new Periode(LocalDate.of(2021, 2, 10), LocalDate.of(2021, 2, 20)));
+        assertThat(omsorgenForDtos.get(1).isReadOnly()).isFalse();
+        assertThat(omsorgenForDtos.get(1).getResultat()).isEqualTo(Resultat.IKKE_OPPFYLT);
+
+        // her skal ikke den siste perioden fra 20 til 25 returneres fordi det ikke er mulig med omsorgen for-perioder utenfor tidslinjen
     }
 
     private OmsorgenForPeriode mockOmsorgenForPeriode(LocalDate fom, LocalDate tom) {
