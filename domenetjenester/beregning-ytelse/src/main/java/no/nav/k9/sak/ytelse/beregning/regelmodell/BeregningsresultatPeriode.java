@@ -13,14 +13,26 @@ public class BeregningsresultatPeriode {
     private List<BeregningsresultatAndel> beregningsresultatAndelList = new ArrayList<>();
     private LocalDateInterval periode;
     private BigDecimal inntektGraderingsprosent;
+    private BigDecimal graderingsfaktorTid;
+    private BigDecimal graderingsfaktorInntekt;
 
-    public BeregningsresultatPeriode(LocalDateInterval periode, BigDecimal inntektGraderingsprosent) {
+
+    public BeregningsresultatPeriode(LocalDateInterval periode,
+                                     BigDecimal inntektGraderingsprosent,
+                                     BigDecimal graderingsfaktorTid,
+                                     BigDecimal graderingsfaktorInntekt) {
         this.periode = periode;
         this.inntektGraderingsprosent = inntektGraderingsprosent;
+        this.graderingsfaktorTid = graderingsfaktorTid;
+        this.graderingsfaktorInntekt = graderingsfaktorInntekt;
     }
 
-    public BeregningsresultatPeriode(LocalDate fom, LocalDate tom, BigDecimal inntektGraderingsprosent) {
-        this(new LocalDateInterval(fom, tom), inntektGraderingsprosent);
+    public BeregningsresultatPeriode(LocalDate fom,
+                                     LocalDate tom,
+                                     BigDecimal inntektGraderingsprosent,
+                                     BigDecimal graderingsfaktorTid,
+                                     BigDecimal graderingsfaktorInntekt) {
+        this(new LocalDateInterval(fom, tom), inntektGraderingsprosent, graderingsfaktorTid, graderingsfaktorInntekt);
     }
 
     public LocalDate getFom() {
@@ -37,6 +49,14 @@ public class BeregningsresultatPeriode {
 
     public BigDecimal getInntektGraderingsprosent() {
         return inntektGraderingsprosent;
+    }
+
+    public BigDecimal getGraderingsfaktorTid() {
+        return graderingsfaktorTid;
+    }
+
+    public BigDecimal getGraderingsfaktorInntekt() {
+        return graderingsfaktorInntekt;
     }
 
     public List<BeregningsresultatAndel> getBeregningsresultatAndelList() {

@@ -127,7 +127,8 @@ public class JettyServer {
             initSql = null;
         }
         try (HikariDataSource migreringDs = DatasourceUtil.createDatasource("defaultDS", DatasourceRole.ADMIN, environmentClass, 2)) {
-            DatabaseScript.migrate(migreringDs, initSql);
+            var flywayRepairOnFail = Boolean.valueOf(ENV.getProperty("FLYWAY_REPAIR_ON_FAIL", "false"));
+            DatabaseScript.migrate(migreringDs, initSql, flywayRepairOnFail);
         }
     }
 
