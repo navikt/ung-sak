@@ -29,7 +29,6 @@ public class GraderingMotInntektKandidatUtledningTask implements ProsessTaskHand
     private InntektGraderingRepository inntektGraderingRepository;
     private KandidaterForInntektgraderingTjeneste kandidaterForInntektgraderingTjeneste;
 
-    private FagsakRepository fagsakRepository;
 
 
     GraderingMotInntektKandidatUtledningTask() {
@@ -37,10 +36,9 @@ public class GraderingMotInntektKandidatUtledningTask implements ProsessTaskHand
     }
 
     @Inject
-    public GraderingMotInntektKandidatUtledningTask(InntektGraderingRepository inntektGraderingRepository, KandidaterForInntektgraderingTjeneste kandidaterForInntektgraderingTjeneste, FagsakRepository fagsakRepository) {
+    public GraderingMotInntektKandidatUtledningTask(InntektGraderingRepository inntektGraderingRepository, KandidaterForInntektgraderingTjeneste kandidaterForInntektgraderingTjeneste) {
         this.inntektGraderingRepository = inntektGraderingRepository;
         this.kandidaterForInntektgraderingTjeneste = kandidaterForInntektgraderingTjeneste;
-        this.fagsakRepository = fagsakRepository;
     }
 
     @Override
