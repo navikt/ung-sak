@@ -1,5 +1,6 @@
 package no.nav.k9.sak.behandling.hendelse;
 
+import org.hibernate.jpa.SpecHints;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +38,8 @@ public class MigrerUnntakEtablertTilsynVurdertAvTask implements ProsessTaskHandl
                 "vurdert_tid = (select opprettet_tid from psb_unntak_etablert_tilsyn_periode where " +
                     "fom = it.fom and tom = it.tom and begrunnelse is not distinct from it.begrunnelse and resultat = it.resultat and soeker_aktoer_id = it.soeker_aktoer_id and kilde_behandling_id = it.kilde_behandling_id " +
                     "order by opprettet_tid limit 1) " +
-            "where kilde_behandling_id = " + behandlingId + " and vurdert_av is null and vurdert_tid is null");
+            "where kilde_behandling_id = " + behandlingId + " and vurdert_av is null and vurdert_tid is null")
+            .setHint(SpecHints.HINT_SPEC_QUERY_TIMEOUT, 30000);
         final int antall = q.executeUpdate();
         logger.info(TASKTYPE + " oppdatert " + antall + " rader");
     }

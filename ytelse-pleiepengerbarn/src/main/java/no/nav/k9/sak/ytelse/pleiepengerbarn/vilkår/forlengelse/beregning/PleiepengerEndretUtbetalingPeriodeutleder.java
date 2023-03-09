@@ -20,6 +20,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
@@ -29,6 +30,8 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKa
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.EndretUtbetalingPeriodeutleder;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.trigger.ProsessTriggereRepository;
+import no.nav.k9.sak.trigger.Trigger;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
@@ -48,6 +51,8 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
 
     private SøknadsperiodeRepository søknadsperiodeRepository;
+
+    private ProsessTriggereRepository prosessTriggereRepository;
     private boolean enabled;
 
 
@@ -59,11 +64,13 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
                                                      BehandlingRepository behandlingRepository,
                                                      @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
                                                      SøknadsperiodeRepository søknadsperiodeRepository,
+                                                     ProsessTriggereRepository prosessTriggereRepository,
                                                      @KonfigVerdi(value = "BG_FORLENGELSE_BASERT_PAA_UTTAK", defaultVerdi = "false") boolean enabled) {
         this.uttakRestKlient = uttakRestKlient;
         this.behandlingRepository = behandlingRepository;
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
         this.søknadsperiodeRepository = søknadsperiodeRepository;
+        this.prosessTriggereRepository = prosessTriggereRepository;
         this.enabled = enabled;
     }
 
@@ -83,14 +90,27 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
             return new TreeSet<>(Set.of(periode));
         }
 
+        var tidslinjeFraProessTriggere = finnTidslinjeFraProsessTriggere(behandlingReferanse);
         var søknadperioderForBehandlingTidslinje = finnTidslinjeForRelevanteSøknadsperioder(behandlingReferanse);
         var relevantUttaksTidslinje = finnTidslinjeForEndredeUttaksperioder(behandlingReferanse, periode);
-        return relevantUttaksTidslinje.crossJoin(søknadperioderForBehandlingTidslinje, StandardCombinators::coalesceLeftHandSide)
+        return relevantUttaksTidslinje
+            .crossJoin(søknadperioderForBehandlingTidslinje, StandardCombinators::coalesceLeftHandSide)
+            .crossJoin(tidslinjeFraProessTriggere, StandardCombinators::coalesceLeftHandSide)
             .compress()
             .toSegments()
             .stream()
             .map(s -> DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
             .collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    private LocalDateTimeline<Boolean> finnTidslinjeFraProsessTriggere(BehandlingReferanse behandlingReferanse) {
+        var prosessTriggere = prosessTriggereRepository.hentGrunnlag(behandlingReferanse.getBehandlingId());
+        var perioderFraTriggere = prosessTriggere.stream().flatMap(it -> it.getTriggere().stream())
+            .filter(it -> it.getÅrsak().equals(BehandlingÅrsakType.RE_ENDRET_FORDELING))
+            .map(Trigger::getPeriode)
+            .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), TRUE))
+            .collect(Collectors.toSet());
+        return new LocalDateTimeline<>(perioderFraTriggere);
     }
 
     private LocalDateTimeline<Boolean> finnTidslinjeForRelevanteSøknadsperioder(BehandlingReferanse behandlingReferanse) {
