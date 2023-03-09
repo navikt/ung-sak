@@ -250,7 +250,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         @NotNull
         @Valid
         @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-            BehandlingIdDto behandlingIdDto) {
+        BehandlingIdDto behandlingIdDto) {
 
         final var behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
         final String json = StønadstatistikkSerializer.toJson(stønadstatistikkService.lagHendelse(behandling.getId()));
@@ -449,9 +449,9 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             return false;
         }
         return ytelse.getTilsynsordning().getPerioder()
-                .entrySet()
-                .stream()
-                .anyMatch(p -> !p.getValue().getEtablertTilsynTimerPerDag().isZero());
+            .entrySet()
+            .stream()
+            .anyMatch(p -> !p.getValue().getEtablertTilsynTimerPerDag().isZero());
     }
 
     private boolean harReellPeriodeMedNullNormal(PleiepengerSyktBarn soknad) {
@@ -693,7 +693,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         return Response.ok().build();
 
     }
-
+    
     @POST
     @Path("/innhent-registerdata")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
