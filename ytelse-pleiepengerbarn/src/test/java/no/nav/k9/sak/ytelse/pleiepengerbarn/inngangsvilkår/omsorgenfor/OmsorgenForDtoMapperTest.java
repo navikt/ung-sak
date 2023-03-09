@@ -28,11 +28,11 @@ class OmsorgenForDtoMapperTest {
 
     @Test
     public void toOmsorgenForDtoListeCase1Test() {
-        List<OmsorgenForPeriode> manueltVurdertOmsorgenForPerioder = List.of(mockOmsorgenForPeriode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 15)));
+        List<OmsorgenForPeriode> vurdertOmsorgenForPerioder = List.of(mockOmsorgenForPeriode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 15)));
 
         LocalDateTimeline<Boolean> tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(Arrays.asList(new Periode(LocalDate.of(2021, 2, 10), LocalDate.of(2021, 2, 20))));
 
-        List<OmsorgenForDto> omsorgenForDtos = dtoMapper.toOmsorgenForDtoListe(manueltVurdertOmsorgenForPerioder, true, tidslinjeTilVurdering);
+        List<OmsorgenForDto> omsorgenForDtos = dtoMapper.toOmsorgenForDtoListe(vurdertOmsorgenForPerioder, true, tidslinjeTilVurdering);
 
         assertThat(omsorgenForDtos.size()).isEqualTo(2);
 
@@ -47,14 +47,14 @@ class OmsorgenForDtoMapperTest {
 
     @Test
     public void toOmsorgenForDtoListeCase2Test() {
-        List<OmsorgenForPeriode> manueltVurdertOmsorgenForPerioder = List.of(mockOmsorgenForPeriode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 20)));
+        List<OmsorgenForPeriode> vurdertOmsorgenForPerioder = List.of(mockOmsorgenForPeriode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 20)));
 
         LocalDateTimeline<Boolean> tidslinjeTilVurdering =
             TidslinjeUtil.tilTidslinjeKomprimert(Arrays.asList(
                 new Periode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 5)),
                 new Periode(LocalDate.of(2021, 2, 10), LocalDate.of(2021, 2, 25))));
 
-        List<OmsorgenForDto> omsorgenForDtos = dtoMapper.toOmsorgenForDtoListe(manueltVurdertOmsorgenForPerioder, true, tidslinjeTilVurdering);
+        List<OmsorgenForDto> omsorgenForDtos = dtoMapper.toOmsorgenForDtoListe(vurdertOmsorgenForPerioder, true, tidslinjeTilVurdering);
 
         assertThat(omsorgenForDtos.size()).isEqualTo(3);
 
@@ -73,13 +73,13 @@ class OmsorgenForDtoMapperTest {
 
     @Test
     public void flere_perioder_i_tidslinjen_hvor_kun_en_er_vurdert() {
-        List<OmsorgenForPeriode> manueltVurdertOmsorgenForPerioder = List.of(mockOmsorgenForPeriode(LocalDate.of(2021, 2, 10), LocalDate.of(2021, 2, 15)));
+        List<OmsorgenForPeriode> vurdertOmsorgenForPerioder = List.of(mockOmsorgenForPeriode(LocalDate.of(2021, 2, 10), LocalDate.of(2021, 2, 15)));
 
         LocalDateTimeline<Boolean> tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(Arrays.asList(
             new Periode(LocalDate.of(2021, 2, 10), LocalDate.of(2021, 2, 15)),
             new Periode(LocalDate.of(2021, 2, 17), LocalDate.of(2021, 2, 20))));
 
-        List<OmsorgenForDto> omsorgenForDtos = dtoMapper.toOmsorgenForDtoListe(manueltVurdertOmsorgenForPerioder, true, tidslinjeTilVurdering);
+        List<OmsorgenForDto> omsorgenForDtos = dtoMapper.toOmsorgenForDtoListe(vurdertOmsorgenForPerioder, true, tidslinjeTilVurdering);
 
         assertThat(omsorgenForDtos.size()).isEqualTo(2);
 
@@ -94,11 +94,11 @@ class OmsorgenForDtoMapperTest {
 
     @Test
     public void en_lang_tidslinje_hvor_bare_et_subset_er_vurdert_av_saksbehandler() {
-        List<OmsorgenForPeriode> manueltVurdertOmsorgenForPerioder = List.of(mockOmsorgenForPeriode(LocalDate.of(2021, 2, 10), LocalDate.of(2021, 2, 15)));
+        List<OmsorgenForPeriode> vurdertOmsorgenForPerioder = List.of(mockOmsorgenForPeriode(LocalDate.of(2021, 2, 10), LocalDate.of(2021, 2, 15)));
 
         LocalDateTimeline<Boolean> tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(Arrays.asList(new Periode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 20))));
 
-        List<OmsorgenForDto> omsorgenForDtos = dtoMapper.toOmsorgenForDtoListe(manueltVurdertOmsorgenForPerioder, true, tidslinjeTilVurdering);
+        List<OmsorgenForDto> omsorgenForDtos = dtoMapper.toOmsorgenForDtoListe(vurdertOmsorgenForPerioder, true, tidslinjeTilVurdering);
 
         assertThat(omsorgenForDtos.size()).isEqualTo(3);
 
@@ -117,11 +117,11 @@ class OmsorgenForDtoMapperTest {
 
     @Test
     public void en_lang_tidslinje_hvor_halve_perioden_er_vurdert_av_saksbehandler_samt_lenger_frem_i_tid() {
-        List<OmsorgenForPeriode> manueltVurdertOmsorgenForPerioder = List.of(mockOmsorgenForPeriode(LocalDate.of(2021, 2, 10), LocalDate.of(2021, 2, 25)));
+        List<OmsorgenForPeriode> vurdertOmsorgenForPerioder = List.of(mockOmsorgenForPeriode(LocalDate.of(2021, 2, 10), LocalDate.of(2021, 2, 25)));
 
         LocalDateTimeline<Boolean> tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(Arrays.asList(new Periode(LocalDate.of(2021, 2, 1), LocalDate.of(2021, 2, 20))));
 
-        List<OmsorgenForDto> omsorgenForDtos = dtoMapper.toOmsorgenForDtoListe(manueltVurdertOmsorgenForPerioder, true, tidslinjeTilVurdering);
+        List<OmsorgenForDto> omsorgenForDtos = dtoMapper.toOmsorgenForDtoListe(vurdertOmsorgenForPerioder, true, tidslinjeTilVurdering);
 
         assertThat(omsorgenForDtos.size()).isEqualTo(2);
 
