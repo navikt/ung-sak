@@ -87,7 +87,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
 
         var nyttårsaftenEtÅrFremITid = LocalDate.now().withMonth(12).withDayOfMonth(31).plus(MAKS_FREMTID);
         if (uttakMaksDato.isAfter(nyttårsaftenEtÅrFremITid)) {
-            throw new IllegalArgumentException("Uttaksplan kan ikke være åpen eller for langt frem i tid. Uttak maksdato:'"+ uttakMaksDato + "', utbetaling maksdato: '" + nyttårsaftenEtÅrFremITid + "'");
+            throw new IllegalArgumentException("Uttaksplan kan ikke være åpen eller for langt frem i tid. Uttak maksdato:'" + uttakMaksDato + "', utbetaling maksdato: '" + nyttårsaftenEtÅrFremITid + "'");
         }
 
         // stopper periodisering her for å unngå 'evigvarende' ekspansjon -
@@ -101,7 +101,11 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
             BeregningsgrunnlagPeriode grunnlag = grunnlagSegment.getValue();
             List<UttakResultatPeriode> uttakResultatPeriode = uttakSegment.getValue();
 
-            BeregningsresultatPeriode resultatPeriode = new BeregningsresultatPeriode(dateInterval, grunnlag.getInntektGraderingsprosent());
+            BeregningsresultatPeriode resultatPeriode = new BeregningsresultatPeriode(
+                dateInterval,
+                grunnlag.getInntektGraderingsprosent(),
+                grunnlag.getGraderingsfaktorTid(),
+                grunnlag.getGraderingsfaktorInntekt());
 
             // Regelsporing
             String periodeNavn = "BeregningsresultatPeriode[" + i[0] + "]";
