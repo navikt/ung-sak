@@ -90,9 +90,21 @@ public class OmsorgenForDtoMapper {
         List<LocalDateSegment<OmsorgenForPeriode>> omsorgenForDateSegments = perioder.stream().map(p -> new LocalDateSegment<>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), p)).collect(Collectors.toList());
         LocalDateTimeline<OmsorgenForPeriode> omsorgenForTimeline = new LocalDateTimeline<>(omsorgenForDateSegments);
 
-        LocalDateTimeline<OmsorgenForDto> perioderMedIVurdering = omsorgenForTimeline.combine(tidslinjeTilVurdering, (overlappendeIntervall, eksisterendeOmsorgenForPeriode, periodeTilVurdering) -> {
-            OmsorgenForPeriode p = eksisterendeOmsorgenForPeriode.getValue();
+        LocalDateTimeline<OmsorgenForDto> perioderMedIVurdering = tidslinjeTilVurdering.combine(omsorgenForTimeline, (overlappendeIntervall, periodeTilVurdering, vurdertOmsorgenForPeriode) -> {
             final boolean readOnly = (periodeTilVurdering == null);
+            if (vurdertOmsorgenForPeriode == null) {
+                Resultat resultat = Resultat.IKKE_VURDERT;
+                OmsorgenForDto omsorgenForDto = new OmsorgenForDto(
+                    toPeriode(overlappendeIntervall),
+                    null,
+                    null,
+                    null,
+                    readOnly,
+                    resultat,
+                    mapResultatEtterAutomatikk(resultat, ikkeVurdertBlirOppfylt));
+                return new LocalDateSegment<>(overlappendeIntervall, omsorgenForDto);
+            }
+            OmsorgenForPeriode p = vurdertOmsorgenForPeriode.getValue();
             OmsorgenForDto omsorgenForDto = new OmsorgenForDto(
                 toPeriode(overlappendeIntervall),
                 p.getBegrunnelse(),
