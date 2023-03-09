@@ -128,7 +128,10 @@ public class BehandlingProsessHendelseMapper {
                 it.getStatus(),
                 it.getVenteårsak(),
                 it.getAnsvarligSaksbehandler(),
-                it.getFristTid())
+                it.getFristTid(),
+                it.getOpprettetTidspunkt(),
+                it.getEndretTidspunkt()
+            )
         ).toList();
     }
 
