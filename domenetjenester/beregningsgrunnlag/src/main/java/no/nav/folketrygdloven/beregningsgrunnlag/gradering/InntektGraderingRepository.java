@@ -1,7 +1,7 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.gradering;
 
-import java.math.BigInteger;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 
 import jakarta.enterprise.context.Dependent;
@@ -9,8 +9,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.uttak.Tid;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 
 @Dependent
 public class InntektGraderingRepository {
@@ -22,11 +21,11 @@ public class InntektGraderingRepository {
         this.entityManager = entityManager;
     }
 
-    public Long dryRun(FagsakYtelseType ytelseType, LocalDate fom) {
+    public List<Fagsak> hentFagsaker(FagsakYtelseType ytelseType, LocalDate fom) {
         Query query;
 
         String sql = """
-            select count(f.saksnummer) from Fagsak f
+            select f.* from Fagsak f
              where f.ytelse_type = :ytelseType
                and upper(f.periode) > :fom
                and not exists(select 1 from Behandling b inner join
@@ -39,7 +38,8 @@ public class InntektGraderingRepository {
         query.setParameter("ytelseType", Objects.requireNonNull(ytelseType, "ytelseType").getKode());
         query.setParameter("fom", fom);
 
-        return ((BigInteger) query.getSingleResult()).longValueExact();
+        List<Fagsak> result = query.getResultList();
+        return result;
     }
 
     public Long startInntektGraderingForPeriode(FagsakYtelseType ytelseType, LocalDate fom) {
