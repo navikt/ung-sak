@@ -2,6 +2,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.gradering;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,8 +13,6 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
-import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @ProsessTask(GraderingMotInntektKandidatUtledningTask.TASKTYPE)
@@ -49,14 +48,15 @@ public class GraderingMotInntektKandidatUtledningTask implements ProsessTaskHand
         var dryRun = Boolean.parseBoolean(dryRunValue);
 
         if (dryRun) {
-            var fagsaker = inntektGraderingRepository.hentFagsaker(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, FOM_DATO_INNTEKT_GRADERING);
+            var fagsaker = inntektGraderingRepository.hentFagsakIdOgSaksnummer(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, FOM_DATO_INNTEKT_GRADERING);
             log.info("DRYRUN - Fant {} kandidater til gradering mot inntekt.", fagsaker.size());
             if (kalkulusUtledning) {
-                var saksnummerMedAksjonspunkt = fagsaker.stream().filter(f -> {
-                        var vurderingsperioder = kandidaterForInntektgraderingTjeneste.finnGraderingMotInntektPerioder(f.getId(), LocalDate.of(2023, 4, 1));
+                List<String> saksnummerMedAksjonspunkt = fagsaker.entrySet().stream()
+                    .filter(f -> {
+                        var vurderingsperioder = kandidaterForInntektgraderingTjeneste.finnGraderingMotInntektPerioder(f.getKey(), LocalDate.of(2023, 4, 1));
                         return !vurderingsperioder.isEmpty();
                     })
-                    .map(Fagsak::getSaksnummer)
+                    .map(Map.Entry::getValue)
                     .map(Saksnummer::getVerdi)
                     .toList();
                 log.info("KALKULUSUTLEDNING - Fant følgende saksnummer som kandidater til gradering mot inntekt: {} .", saksnummerMedAksjonspunkt);
