@@ -59,10 +59,10 @@ public class UnntakEtablertTilsynPeriode extends BaseEntitet implements IndexKey
     @Column(name = "kilde_behandling_id", nullable = false, updatable = false)
     private Long kildeBehandlingId;
 
-    @Column(name = "vurdert_av", nullable = false, updatable = false)
+    @Column(name = "vurdert_av", updatable = false) //TODO set nullable = false
     private String vurdertAv;
 
-    @Column(name = "vurdert_tid", nullable = false, updatable = false)
+    @Column(name = "vurdert_tid", updatable = false) //TODO set nullable = false
     private LocalDateTime vurdertTidspunkt;
 
     @Version
