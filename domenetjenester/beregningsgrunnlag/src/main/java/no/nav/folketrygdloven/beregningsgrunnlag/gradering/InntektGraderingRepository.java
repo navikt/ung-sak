@@ -2,14 +2,16 @@ package no.nav.folketrygdloven.beregningsgrunnlag.gradering;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.typer.Saksnummer;
 
 @Dependent
 public class InntektGraderingRepository {
@@ -21,11 +23,11 @@ public class InntektGraderingRepository {
         this.entityManager = entityManager;
     }
 
-    public List<Fagsak> hentFagsaker(FagsakYtelseType ytelseType, LocalDate fom) {
+    public Map<Long, Saksnummer> hentFagsakIdOgSaksnummer(FagsakYtelseType ytelseType, LocalDate fom) {
         Query query;
 
         String sql = """
-            select f.* from Fagsak f
+            select f.id, f.saksnummer from Fagsak f
              where f.ytelse_type = :ytelseType
                and upper(f.periode) > :fom
                and not exists(select 1 from Behandling b inner join
@@ -38,8 +40,12 @@ public class InntektGraderingRepository {
         query.setParameter("ytelseType", Objects.requireNonNull(ytelseType, "ytelseType").getKode());
         query.setParameter("fom", fom);
 
-        List<Fagsak> result = query.getResultList();
-        return result;
+        List<Object[]> result = query.getResultList();
+
+        return result.stream().collect(Collectors.toMap(
+            o -> (Long) o[0],
+            o -> new Saksnummer((String) o[1])
+        ));
     }
 
     public Long startInntektGraderingForPeriode(FagsakYtelseType ytelseType, LocalDate fom) {
