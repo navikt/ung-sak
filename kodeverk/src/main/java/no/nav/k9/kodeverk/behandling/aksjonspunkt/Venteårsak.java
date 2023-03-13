@@ -189,4 +189,8 @@ public enum Venteårsak implements Kodeverdi {
     public String getKodeverk() {
         return KODEVERK;
     }
+
+    public Ventekategori getVentekategori() {
+        return ventekategori;
+    }
 }

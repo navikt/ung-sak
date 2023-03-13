@@ -690,6 +690,11 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         return getKode();
     }
 
+    public Ventekategori getDefaultVentekategori() {
+        return defaultVentekategori;
+    }
+
+
     @Override
     public String getNavn() {
         return navn;
