@@ -31,7 +31,7 @@ public class MigrerOmsorgenForVurdertAvTask implements ProsessTaskHandler {
     @Override
     public void doTask(ProsessTaskData pd) {
         final Long behandlingId = Long.parseLong(pd.getBehandlingId());
-        final Query q = entityManager.createNativeQuery("with gr as (select * from gr_omsorgen_for where behandling_id = " + behandlingId + ") " +
+        final Query q = entityManager.createNativeQuery("with gr as (select * from gr_omsorgen_for where behandling_id = :behandlingId) " +
             "update omsorgen_for_periode it " +
             "set vurdert_av = " +
                 "(select ofp.opprettet_av from omsorgen_for_periode ofp " +
@@ -44,6 +44,7 @@ public class MigrerOmsorgenForVurdertAvTask implements ProsessTaskHandler {
                 "and ofp.fom = it.fom and ofp.tom = it.tom and ofp.begrunnelse is not distinct from it.begrunnelse and ofp.resultat = it.resultat and ofp.relasjon is not distinct from it.relasjon and ofp.relasjonsbeskrivelse is not distinct from it.relasjonsbeskrivelse " +
                 "order by opprettet_tid limit 1) " +
             "where omsorgen_for_id in (select omsorgen_for_id from gr) and vurdert_av is null and vurdert_tid is null");
+        q.setParameter("behandlingId", behandlingId);
         final int antall = q.executeUpdate();
         logger.info(TASKTYPE + " oppdatert " + antall + " rader");
     }
