@@ -258,8 +258,6 @@ spec:
       value: "true"
     - name: IKKE_YRKESAKTIV_UTEN_SPEILING
       value: "true"
-    - name: OMS_OMSORGENFOR_FLYTTET
-      value: "true"
     - name: PSB_FRAMOVERHOPP_VED_FORLENGELSE_OPPTJENING
       value: "true"
     - name: OMP_NULL_HELG_I_KRAVPERIODER

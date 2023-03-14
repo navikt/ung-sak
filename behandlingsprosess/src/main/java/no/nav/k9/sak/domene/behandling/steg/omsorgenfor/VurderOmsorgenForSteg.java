@@ -61,7 +61,6 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private Instance<BrukerdialoginnsynTjeneste> brukerdialoginnsynTjenester;
-    private boolean omsorgenforFlyttet;
 
     VurderOmsorgenForSteg() {
         // CDI
@@ -71,15 +70,13 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
     public VurderOmsorgenForSteg(BehandlingRepositoryProvider repositoryProvider,
                                  @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
                                  OmsorgenForTjeneste omsorgenForTjeneste,
-                                 @Any Instance<BrukerdialoginnsynTjeneste> brukerdialoginnsynTjenester,
-                                 @KonfigVerdi(value = "oms.omsorgenfor.flyttet", defaultVerdi = "false") boolean omsorgenforFlyttet) {
+                                 @Any Instance<BrukerdialoginnsynTjeneste> brukerdialoginnsynTjenester) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.repositoryProvider = repositoryProvider;
         this.perioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
         this.omsorgenForTjeneste = omsorgenForTjeneste;
         this.brukerdialoginnsynTjenester = brukerdialoginnsynTjenester;
-        this.omsorgenforFlyttet = omsorgenforFlyttet;
     }
 
     @Override
@@ -87,8 +84,6 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
         final var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         if (skalHoppeOverVurdering(behandling)) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
-        } else if (måSettesPåVent(behandling)) {
-            return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VENTE_PA_OMSORGENFOR_OMS)));
         }
         var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
         final var perioder = perioderTilVurderingTjeneste.utled(kontekst.getBehandlingId(), VILKÅRET);
@@ -118,15 +113,6 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
         }
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
-    }
-
-    private boolean måSettesPåVent(Behandling behandling) {
-        if (!Objects.equals(behandling.getFagsakYtelseType(), FagsakYtelseType.OMP)) {
-            return false;
-        }
-        var vilkårene = vilkårResultatRepository.hent(behandling.getId());
-
-        return !omsorgenforFlyttet && vilkårene.getVilkår(VILKÅRET).isPresent();
     }
 
     private boolean skalHoppeOverVurdering(Behandling behandling) {
