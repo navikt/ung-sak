@@ -259,12 +259,18 @@ spec:
       value: "false"
     - name: PSB_FRAMOVERHOPP_VED_FORLENGELSE_OPPTJENING
       value: "false"
+    - name: OMP_NULL_HELG_I_KRAVPERIODER
+      value: "false"
     - name: OMS_ZERO_REFUSJON_ER_KRAV
+      value: "false"
+    - name: ENABLE_NY_SJEKK_OMP_INGEN_PERIODER
       value: "false"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT
       value: "true"
+    - name: FLYWAY_REPAIR_ON_FAIL
+      value: "false"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
