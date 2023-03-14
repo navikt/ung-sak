@@ -17,7 +17,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_ABSENT, content = JsonInclude.Include.NON_EMPTY)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
-public class RevurderOgInnhentPGIDto {
+public class RevurderPeriodeDto {
 
 
     @JsonProperty(value = "skjæringstidspunkt", required = true)
@@ -31,10 +31,10 @@ public class RevurderOgInnhentPGIDto {
     @Pattern(regexp = "^[a-zA-Z0-9]*$")
     private String saksnummer;
 
-    public RevurderOgInnhentPGIDto() {
+    public RevurderPeriodeDto() {
     }
 
-    public RevurderOgInnhentPGIDto(LocalDate skjæringstidspunkt, String saksnummer) {
+    public RevurderPeriodeDto(LocalDate skjæringstidspunkt, String saksnummer) {
         this.skjæringstidspunkt = skjæringstidspunkt;
         this.saksnummer = saksnummer;
     }
