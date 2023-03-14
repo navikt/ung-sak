@@ -18,16 +18,16 @@ import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 @ApplicationScoped
 public class KalkulusStartpunktUtleder {
 
-    private FramoverhoppTilKontrollerFaktaSjekker framoverhoppTilKontrollerFaktaSjekker;
+    private FinnPerioderMedStartIKontrollerFakta finnPerioderMedStartIKontrollerFakta;
     private VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
     private BeregningsgrunnlagVilkårTjeneste vilkårTjeneste;
 
 
     @Inject
-    public KalkulusStartpunktUtleder(FramoverhoppTilKontrollerFaktaSjekker framoverhoppTilKontrollerFaktaSjekker,
+    public KalkulusStartpunktUtleder(FinnPerioderMedStartIKontrollerFakta finnPerioderMedStartIKontrollerFakta,
                                      VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
                                      BeregningsgrunnlagVilkårTjeneste vilkårTjeneste) {
-        this.framoverhoppTilKontrollerFaktaSjekker = framoverhoppTilKontrollerFaktaSjekker;
+        this.finnPerioderMedStartIKontrollerFakta = finnPerioderMedStartIKontrollerFakta;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
         this.vilkårTjeneste = vilkårTjeneste;
     }
@@ -51,8 +51,8 @@ public class KalkulusStartpunktUtleder {
         if (ref.getBehandlingType().equals(BehandlingType.REVURDERING)) {
             var forlengelseperioder = utenAvslagFørBeregning.stream().filter(PeriodeTilVurdering::erForlengelse).collect(Collectors.toCollection(TreeSet::new));
             settStartpunkt(forlengelseperioder, periodeStartStegMap, BehandlingStegType.VURDER_REF_BERGRUNN);
-            var hoppTilFaktaBeregningPerioder = framoverhoppTilKontrollerFaktaSjekker.finnPerioderForFramoverhoppTilKontrollerFakta(ref, utenAvslagFørBeregning, forlengelseperioder);
-            settStartpunkt(hoppTilFaktaBeregningPerioder, periodeStartStegMap, BehandlingStegType.KONTROLLER_FAKTA_BEREGNING);
+            var startIKontrollerFaktaBeregning = finnPerioderMedStartIKontrollerFakta.finnPerioder(ref, utenAvslagFørBeregning, forlengelseperioder);
+            settStartpunkt(startIKontrollerFaktaBeregning, periodeStartStegMap, BehandlingStegType.KONTROLLER_FAKTA_BEREGNING);
         }
 
         var perioderFraStart = finnPerioderFraStart(periodeStartStegMap, utenAvslagFørBeregning);
@@ -63,7 +63,7 @@ public class KalkulusStartpunktUtleder {
 
     private static NavigableSet<PeriodeTilVurdering> finnPerioderFraStart(HashMap<BehandlingStegType, NavigableSet<PeriodeTilVurdering>> periodeStartStegMap, NavigableSet<PeriodeTilVurdering> utenAvslagFørBeregning) {
         var allePerioderMedHopp = periodeStartStegMap.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
-        var perioderFraStart = utenAvslagFørBeregning.stream().filter(it -> allePerioderMedHopp.stream().noneMatch(p -> p.getPeriode().equals(it.getPeriode()))).collect(Collectors.toCollection(TreeSet::new));
+        var perioderFraStart = utenAvslagFørBeregning.stream().filter(it -> !allePerioderMedHopp.contains(it)).collect(Collectors.toCollection(TreeSet::new));
         return perioderFraStart;
     }
 

@@ -5,7 +5,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -16,34 +16,39 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 
-@ApplicationScoped
-public class FramoverhoppTilKontrollerFaktaSjekker {
+@Dependent
+public class FinnPerioderMedStartIKontrollerFakta {
 
-    private VilkårResultatRepository vilkårResultatRepository;
-    private VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
+    private final VilkårResultatRepository vilkårResultatRepository;
+    private final VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
 
 
     @Inject
-    public FramoverhoppTilKontrollerFaktaSjekker(VilkårResultatRepository vilkårResultatRepository,
-                                                 VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
+    public FinnPerioderMedStartIKontrollerFakta(VilkårResultatRepository vilkårResultatRepository,
+                                                VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
     }
 
-    public FramoverhoppTilKontrollerFaktaSjekker() {
-        // CDI Proxy
-    }
-
-    public NavigableSet<PeriodeTilVurdering> finnPerioderForFramoverhoppTilKontrollerFakta(BehandlingReferanse ref,
-                                                                                  NavigableSet<PeriodeTilVurdering> allePerioder,
-                                                                                  Set<PeriodeTilVurdering> forlengelseperioderBeregning) {
+    /**
+     * Finner perioder skal kopiere resultatet fra fastsett skjæringstidspunkt fra forrige behandling/kobling og starte prosessering av nytt beregningsgrunnlag
+     * i steget kontroller fakta beregning
+     *
+     * @param ref                          Behandlingreferanse
+     * @param allePerioder                 Alle perioder (vilkårsperioder)
+     * @param forlengelseperioderBeregning Perioder med forlengelse i beregning
+     * @return Perioder med start i kontroller fakta beregning
+     */
+    public NavigableSet<PeriodeTilVurdering> finnPerioder(BehandlingReferanse ref,
+                                                          NavigableSet<PeriodeTilVurdering> allePerioder,
+                                                          Set<PeriodeTilVurdering> forlengelseperioderBeregning) {
         var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref);
         periodeFilter.ignorerAvslåttePerioder();
         var oppfylteBeregningsperioderForrigeBehandling = finnOppfylteVilkårsperioderForrigeBehandling(ref);
         return periodeFilter.filtrerPerioder(allePerioder.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet()), VilkårType.OPPTJENINGSVILKÅRET).stream()
             .filter(PeriodeTilVurdering::erForlengelse)
-            .filter(periode -> forlengelseperioderBeregning.stream().noneMatch(it -> it.getPeriode().equals(periode.getPeriode())))
-            .filter(periode -> oppfylteBeregningsperioderForrigeBehandling.stream().anyMatch(it -> it.equals(periode.getPeriode())))
+            .filter(periode -> !forlengelseperioderBeregning.contains(periode))
+            .filter(periode -> oppfylteBeregningsperioderForrigeBehandling.contains(periode.getPeriode()))
             .collect(Collectors.toCollection(TreeSet::new));
     }
 
