@@ -258,7 +258,7 @@ spec:
       value: "true"
     - name: IKKE_YRKESAKTIV_UTEN_SPEILING
       value: "true"
-    - name: PSB_FRAMOVERHOPP_VED_FORLENGELSE_OPPTJENING
+    - name: PSB_START_I_KOFAKBER_VED_FORLENGELSE_OPPTJENING
       value: "true"
     - name: OMP_NULL_HELG_I_KRAVPERIODER
       value: "true"

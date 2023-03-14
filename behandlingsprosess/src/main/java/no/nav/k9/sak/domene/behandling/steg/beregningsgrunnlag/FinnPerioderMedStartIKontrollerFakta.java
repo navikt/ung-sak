@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -22,12 +23,16 @@ public class FinnPerioderMedStartIKontrollerFakta {
     private final VilkårResultatRepository vilkårResultatRepository;
     private final VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
 
+    private final boolean isEnabled;
+
 
     @Inject
     public FinnPerioderMedStartIKontrollerFakta(VilkårResultatRepository vilkårResultatRepository,
-                                                VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
+                                                VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
+                                                @KonfigVerdi(value = "PSB_START_I_KOFAKBER_VED_FORLENGELSE_OPPTJENING",defaultVerdi = "false") boolean isEnabled) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
+        this.isEnabled = isEnabled;
     }
 
     /**
@@ -42,6 +47,9 @@ public class FinnPerioderMedStartIKontrollerFakta {
     public NavigableSet<PeriodeTilVurdering> finnPerioder(BehandlingReferanse ref,
                                                           NavigableSet<PeriodeTilVurdering> allePerioder,
                                                           Set<PeriodeTilVurdering> forlengelseperioderBeregning) {
+        if (!isEnabled) {
+            return new TreeSet<>();
+        }
         var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref);
         periodeFilter.ignorerAvslåttePerioder();
         var oppfylteBeregningsperioderForrigeBehandling = finnOppfylteVilkårsperioderForrigeBehandling(ref);
