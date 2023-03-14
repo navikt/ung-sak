@@ -493,6 +493,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         this.skjermlenkeType = skjermlenkeType;
         this.tilbakehoppVedGjenopptakelse = false;
         this.fristPeriode = null;
+        this.defaultVentekategori = defaultVentekategori;
     }
 
     // Bruk for ordinære aksjonspunkt og overstyring
@@ -517,6 +518,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         this.skjermlenkeType = skjermlenkeType;
         this.tilbakehoppVedGjenopptakelse = false;
         this.fristPeriode = null;
+        this.defaultVentekategori = defaultVentekategori;
     }
 
     // Bruk for autopunkt i 7nnn serien
@@ -543,6 +545,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         this.skjermlenkeType = skjermlenkeType;
         this.tilbakehoppVedGjenopptakelse = tilbakehoppVedGjenopptakelse;
         this.fristPeriode = fristPeriode;
+        this.defaultVentekategori = defaultVentekategori;
     }
 
     private AksjonspunktDefinisjon(String kode,
@@ -568,6 +571,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         this.skjermlenkeType = skjermlenkeType;
         this.tilbakehoppVedGjenopptakelse = tilbakehoppVedGjenopptakelse;
         this.skalAvbrytesVedTilbakeføring = skalAvbrytesVedTilbakeføring;
+        this.defaultVentekategori = defaultVentekategori;
     }
 
     private AksjonspunktDefinisjon(String kode,
@@ -595,6 +599,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         this.skjermlenkeType = skjermlenkeType;
         this.tilbakehoppVedGjenopptakelse = tilbakehoppVedGjenopptakelse;
         this.skalAvbrytesVedTilbakeføring = skalAvbrytesVedTilbakeføring;
+        this.defaultVentekategori = defaultVentekategori;
     }
 
     @JsonCreator(mode = Mode.DELEGATING)

@@ -140,6 +140,7 @@ public enum Venteårsak implements Kodeverdi {
         this.kode = kode;
         this.navn = navn;
         this.kanVelgesIGui = kanVelgesIGui;
+        this.ventekategori = ventekategori;
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
