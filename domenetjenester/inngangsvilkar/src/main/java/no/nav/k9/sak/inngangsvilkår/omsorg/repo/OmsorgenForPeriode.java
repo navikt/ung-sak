@@ -23,7 +23,6 @@ import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.behandlingslager.kodeverk.SykdomResultatTypeConverter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.omsorg.BarnRelasjon;
-import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @Entity(name = "OmsorgenForPeriode")
 @Table(name = "OMSORGEN_FOR_PERIODE")
@@ -57,10 +56,10 @@ public class OmsorgenForPeriode extends BaseEntitet implements IndexKey {
     @Convert(converter = SykdomResultatTypeConverter.class)
     private Resultat resultat;
 
-    @Column(name = "vurdert_av", updatable = false) //TODO set nullable = false
+    @Column(name = "vurdert_av", updatable = false)
     private String vurdertAv;
 
-    @Column(name = "vurdert_tid", updatable = false) //TODO set nullable = false
+    @Column(name = "vurdert_tid", updatable = false)
     private LocalDateTime vurdertTidspunkt;
 
     @ManyToOne
@@ -99,7 +98,7 @@ public class OmsorgenForPeriode extends BaseEntitet implements IndexKey {
     }
 
     public static OmsorgenForPeriode nyPeriodeFraSøker(DatoIntervallEntitet periode, BarnRelasjon relasjon, String relasjonsbeskrivelse) {
-        return new OmsorgenForPeriode(periode, relasjon, relasjonsbeskrivelse, null, Resultat.IKKE_VURDERT, SubjectHandler.getSubjectHandler().getUid(), LocalDateTime.now());
+        return new OmsorgenForPeriode(periode, relasjon, relasjonsbeskrivelse, null, Resultat.IKKE_VURDERT, null, null);
     }
 
     public DatoIntervallEntitet getPeriode() {

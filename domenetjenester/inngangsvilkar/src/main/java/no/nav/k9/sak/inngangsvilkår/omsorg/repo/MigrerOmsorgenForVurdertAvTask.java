@@ -43,7 +43,7 @@ public class MigrerOmsorgenForVurdertAvTask implements ProsessTaskHandler {
                 "where ofp.omsorgen_for_id in (select omsorgen_for_id from gr) " +
                 "and ofp.fom = it.fom and ofp.tom = it.tom and ofp.begrunnelse is not distinct from it.begrunnelse and ofp.resultat = it.resultat and ofp.relasjon is not distinct from it.relasjon and ofp.relasjonsbeskrivelse is not distinct from it.relasjonsbeskrivelse " +
                 "order by opprettet_tid limit 1) " +
-            "where omsorgen_for_id in (select omsorgen_for_id from gr) and vurdert_av is null and vurdert_tid is null");
+            "where omsorgen_for_id in (select omsorgen_for_id from gr) and resultat != 'IKKE_VURDERT' and vurdert_av is null and vurdert_tid is null");
         q.setParameter("behandlingId", behandlingId);
         final int antall = q.executeUpdate();
         logger.info(TASKTYPE + " oppdatert " + antall + " rader");
