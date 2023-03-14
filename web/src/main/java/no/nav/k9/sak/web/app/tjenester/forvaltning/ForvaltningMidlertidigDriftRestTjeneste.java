@@ -693,7 +693,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         return Response.ok().build();
 
     }
-    
+
     @POST
     @Path("/innhent-registerdata")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -809,7 +809,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                 var sb = new StringBuilder(200);
                 try (BufferedReader br = new BufferedReader(
                     new InputStreamReader(inputStream))) {
-                    sb.append(br.readLine()).append('\n');
+                    br.lines().forEach(l -> sb.append(l).append('\n'));
                 }
 
                 return new OpprettManuellRevurdering(sb.toString());
