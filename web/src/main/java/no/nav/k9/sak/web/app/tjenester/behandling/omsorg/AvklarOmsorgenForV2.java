@@ -99,6 +99,7 @@ public class AvklarOmsorgenForV2 implements AksjonspunktOppdaterer<AvklarOmsorge
     }
 
     private List<OmsorgenForSaksbehandlervurdering> toOmsorgenForSaksbehandlervurderinger(AvklarOmsorgenForDto dto) {
+        LocalDateTime now = LocalDateTime.now();
         return dto.getOmsorgsperioder()
             .stream()
             .map(op -> new OmsorgenForSaksbehandlervurdering(
@@ -106,7 +107,7 @@ public class AvklarOmsorgenForV2 implements AksjonspunktOppdaterer<AvklarOmsorge
                 op.getBegrunnelse(),
                 op.getResultat(),
                 getCurrentUserId(),
-                LocalDateTime.now()
+                now
             ))
             .collect(Collectors.toList());
     }
