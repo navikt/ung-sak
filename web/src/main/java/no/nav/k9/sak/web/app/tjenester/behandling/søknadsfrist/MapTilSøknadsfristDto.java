@@ -45,7 +45,7 @@ public class MapTilSøknadsfristDto {
                 .stream()
                 .filter(it -> Objects.equals(it.getJournalpostId(), key.getJournalpostId()))
                 .findFirst()
-                .map(it -> new AvklarteOpplysninger(it.getErGodkjent(), it.getFraDato(), it.getBegrunnelse())))
+                .map(it -> new AvklarteOpplysninger(it.getErGodkjent(), it.getFraDato(), it.getBegrunnelse(), it.getOpprettetAv(), it.getOpprettetTidspunkt())))
             .orElse(null);
     }
 
@@ -56,7 +56,7 @@ public class MapTilSøknadsfristDto {
                 .stream()
                 .filter(it -> Objects.equals(it.getJournalpostId(), key.getJournalpostId()))
                 .findFirst()
-                .map(it -> new AvklarteOpplysninger(it.getErGodkjent(), it.getFraDato(), it.getBegrunnelse())))
+                .map(it -> new AvklarteOpplysninger(it.getErGodkjent(), it.getFraDato(), it.getBegrunnelse(), it.getOpprettetAv(), it.getOpprettetTidspunkt())))
             .orElse(null);
     }
 
