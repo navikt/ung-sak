@@ -76,6 +76,11 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
             LOG_CONTEXT.add("saksnummer", pipBehandlingsData.getSaksnummer());
         });
 
+        Set<Saksnummer> saksnummere = attributter.getVerdier(AppAbacAttributtType.SAKSNUMMER);
+        if (saksnummere != null && !saksnummere.isEmpty() && behandlingData.isEmpty()) {
+            LOG_CONTEXT.add("saksnummer", saksnummere.size() == 1 ? saksnummere.iterator().next().toString() : saksnummere.toString());
+        }
+
         if (!fagsakIder.isEmpty()) {
             LOG_CONTEXT.add("fagsak", fagsakIder.size() == 1 ? fagsakIder.iterator().next().toString() : fagsakIder.toString());
         }
