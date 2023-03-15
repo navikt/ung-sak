@@ -24,7 +24,7 @@ spec:
     failureThreshold: 27
   replicas:
     min: 2
-    max: 3
+    max: 2
     cpuThresholdPercentage: 80
   prometheus:
     enabled: true
