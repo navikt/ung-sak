@@ -25,9 +25,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
@@ -45,35 +43,37 @@ public class FinnInntektsmeldingForBeregning {
     private Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning;
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
+    private FiltrerInntektsmeldingForBeregningInputOverstyring finnForOverstyringTjeneste;
+
 
     public FinnInntektsmeldingForBeregning() {
     }
 
     @Inject
     public FinnInntektsmeldingForBeregning(@Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning,
-                                           InntektArbeidYtelseTjeneste iayTjeneste) {
+                                           InntektArbeidYtelseTjeneste iayTjeneste, FiltrerInntektsmeldingForBeregningInputOverstyring finnForOverstyringTjeneste) {
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
         this.iayTjeneste = iayTjeneste;
+        this.finnForOverstyringTjeneste = finnForOverstyringTjeneste;
     }
 
     Set<Inntektsmelding> finnInntektsmeldinger(BehandlingReferanse referanse, List<BeregnInput> beregnInput) {
         var inntektsmeldingerForSak = iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer());
-        var imTjeneste = finnInntektsmeldingForBeregningTjeneste(referanse);
-        Set<Inntektsmelding> overstyrteInntektsmeldinger = finnOverstyrteInntektsmeldinger(beregnInput, inntektsmeldingerForSak, imTjeneste);
+        Set<Inntektsmelding> overstyrteInntektsmeldinger = finnOverstyrteInntektsmeldinger(referanse, beregnInput, inntektsmeldingerForSak);
         var inntektsmeldinger = new HashSet<Inntektsmelding>();
         inntektsmeldinger.addAll(overstyrteInntektsmeldinger);
         inntektsmeldinger.addAll(inntektsmeldingerForSak);
         return inntektsmeldinger;
     }
 
-    private static Set<Inntektsmelding> finnOverstyrteInntektsmeldinger(List<BeregnInput> beregnInput, Set<Inntektsmelding> inntektsmeldingerForSak, InntektsmeldingerRelevantForBeregning imTjeneste) {
+    private Set<Inntektsmelding> finnOverstyrteInntektsmeldinger(BehandlingReferanse referanse, List<BeregnInput> beregnInput, Set<Inntektsmelding> inntektsmeldingerForSak) {
         return beregnInput.stream().flatMap(i -> {
-            var mottatteInntektsmeldingerForPeriode = imTjeneste.utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldingerForSak, i.getVilkårsperiode());
-            return i.getInputOverstyringPeriode().stream().flatMap(overstyrtPeriode -> mapInntektsmeldingerForOverstyrtPeriode(mottatteInntektsmeldingerForPeriode, overstyrtPeriode));
+            var relevanteInntektsmeldinger = finnForOverstyringTjeneste.finnGyldighetstidslinjeForInntektsmeldinger(referanse, inntektsmeldingerForSak, i.getVilkårsperiode());
+            return i.getInputOverstyringPeriode().stream().flatMap(overstyrtPeriode -> mapInntektsmeldingerForOverstyrtPeriode(relevanteInntektsmeldinger, overstyrtPeriode));
         }).collect(Collectors.toSet());
     }
 
-    private static Stream<Inntektsmelding> mapInntektsmeldingerForOverstyrtPeriode(List<Inntektsmelding> mottatteInntektsmeldingerForPeriode, InputOverstyringPeriode overstyrtPeriode) {
+    private static Stream<Inntektsmelding> mapInntektsmeldingerForOverstyrtPeriode(LocalDateTimeline<Set<Inntektsmelding>> mottatteInntektsmeldingerForPeriode, InputOverstyringPeriode overstyrtPeriode) {
         LocalDate stp = overstyrtPeriode.getSkjæringstidspunkt();
         return overstyrtPeriode.getAktivitetOverstyringer().stream()
             .filter(a -> a.getAktivitetStatus().erArbeidstaker())
@@ -82,27 +82,33 @@ public class FinnInntektsmeldingForBeregning {
 
     static Inntektsmelding mapAktivitetTilInntektsmelding(InputAktivitetOverstyring a,
                                                           LocalDate stp,
-                                                          Collection<Inntektsmelding> inntektsmeldingerForSak) {
+                                                          LocalDateTimeline<Set<Inntektsmelding>> inntektsmeldingerForSak) {
         var inntektsmeldingerForAktivitet = finnInntektsmeldingerMottattForAktivitet(inntektsmeldingerForSak, a);
+        var alleInntektsmeldinger = inntektsmeldingerForAktivitet.toSegments().stream()
+            .flatMap(s -> s.getValue().stream())
+            .collect(Collectors.toSet());
         logger.info("Overgang fra infotrygd: Mapper overstyring for aktivitet " + a
-            + " Fant mottatte " + inntektsmeldingerForAktivitet.size() + " inntektsmeldinger for abrbeidsgiver: "
-            + inntektsmeldingerForAktivitet.stream().map(Inntektsmelding::getJournalpostId).toList());
+            + " Fant mottatte " + alleInntektsmeldinger.size() + " inntektsmeldinger for abrbeidsgiver: "
+            + alleInntektsmeldinger.stream().map(Inntektsmelding::getJournalpostId).toList());
 
         var summertRefusjonTidslinje = lagSummertRefusjontidslinje(stp, inntektsmeldingerForAktivitet);
 
-        return mapInntektsmelding(stp, a, summertRefusjonTidslinje, inntektsmeldingerForAktivitet);
+        return mapInntektsmelding(stp, a, summertRefusjonTidslinje, alleInntektsmeldinger);
     }
 
-    public static Set<Inntektsmelding> finnInntektsmeldingerMottattForAktivitet(Collection<Inntektsmelding> inntektsmeldingerForSak, InputAktivitetOverstyring a) {
-        return inntektsmeldingerForSak.stream().filter(im -> im.getArbeidsgiver().equals(a.getArbeidsgiver()))
-            .collect(Collectors.toSet());
+    public static LocalDateTimeline<Set<Inntektsmelding>> finnInntektsmeldingerMottattForAktivitet(LocalDateTimeline<Set<Inntektsmelding>> inntektsmeldingerForSak, InputAktivitetOverstyring a) {
+        return inntektsmeldingerForSak.mapValue(ims -> ims.stream().filter(i -> a.getArbeidsgiver().equals(i.getArbeidsgiver())).collect(Collectors.toSet()));
     }
 
-    public static LocalDateTimeline<BigDecimal> lagSummertRefusjontidslinje(LocalDate stp, Collection<Inntektsmelding> inntektsmeldingerForAktivitet) {
-        return inntektsmeldingerForAktivitet.stream()
-            .map(im -> tilRefusjontidslinje(im, stp))
-            .reduce((tidslinje1, tidslinje2) -> tidslinje1.combine(tidslinje2, StandardCombinators::sum, LocalDateTimeline.JoinStyle.CROSS_JOIN))
-            .orElse(LocalDateTimeline.empty())
+    public static LocalDateTimeline<BigDecimal> lagSummertRefusjontidslinje(LocalDate stp, LocalDateTimeline<Set<Inntektsmelding>> inntektsmeldingerForAktivitet) {
+        return inntektsmeldingerForAktivitet
+            .map(ims -> ims.getValue().stream()
+                .map(im -> tilRefusjontidslinje(im, stp))
+                .reduce((t1, t2) -> t1.crossJoin(t2, StandardCombinators::sum))
+                .orElse(LocalDateTimeline.empty())
+                .intersection(ims.getLocalDateInterval())
+                .stream()
+                .toList())
             .compress();
     }
 
@@ -168,11 +174,8 @@ public class FinnInntektsmeldingForBeregning {
         if (summertRefusjonTidslinje.isEmpty()) {
             return a.getOpphørRefusjon();
         }
-        var opphørFraInntektsmelding = summertRefusjonTidslinje.toSegments().stream()
-            .filter(s -> s.getTom().equals(TIDENES_ENDE) && s.getValue().compareTo(BigDecimal.ZERO) == 0)
-            .findFirst()
-            .map(LocalDateSegment::getFom);
-        return opphørFraInntektsmelding.map(d -> d.minusDays(1)).orElse(null);
+        return summertRefusjonTidslinje.filterValue(r -> r.compareTo(BigDecimal.ZERO) > 0)
+            .getMaxLocalDate();
     }
 
     private static BigDecimal finnRefusjonVedStp(LocalDate stp,
@@ -223,12 +226,6 @@ public class FinnInntektsmeldingForBeregning {
 
     private static boolean refusjonOpphørerFørStart(LocalDate startdatoRefusjon, LocalDate refusjonOpphører) {
         return refusjonOpphører != null && refusjonOpphører.isBefore(startdatoRefusjon);
-    }
-
-    private InntektsmeldingerRelevantForBeregning finnInntektsmeldingForBeregningTjeneste(BehandlingReferanse referanse) {
-        FagsakYtelseType ytelseType = referanse.getFagsakYtelseType();
-        return FagsakYtelseTypeRef.Lookup.find(inntektsmeldingerRelevantForBeregning, ytelseType)
-            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + InntektsmeldingerRelevantForBeregning.class.getSimpleName() + " for ytelseType=" + ytelseType));
     }
 
 }

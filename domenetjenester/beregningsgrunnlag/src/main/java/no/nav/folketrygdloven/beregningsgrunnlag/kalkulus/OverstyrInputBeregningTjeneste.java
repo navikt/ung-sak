@@ -4,15 +4,18 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
+import java.util.NavigableSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.arbeidsforhold.Arbeidskategori;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -53,6 +56,8 @@ public class OverstyrInputBeregningTjeneste {
     private Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning;
     private PåTversAvHelgErKantIKantVurderer kantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
 
+    private FiltrerInntektsmeldingForBeregningInputOverstyring filtrerInntektsmeldingTjeneste;
+
     public OverstyrInputBeregningTjeneste() {
     }
 
@@ -62,26 +67,31 @@ public class OverstyrInputBeregningTjeneste {
                                           BeregningPerioderGrunnlagRepository grunnlagRepository,
                                           InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                           @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
-                                          @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning) {
+                                          @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning,
+                                          FiltrerInntektsmeldingForBeregningInputOverstyring filtrerInntektsmeldingTjeneste) {
         this.fagsakRepository = fagsakRepository;
         this.opptjeningForBeregningTjenester = opptjeningForBeregningTjenester;
         this.grunnlagRepository = grunnlagRepository;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
+        this.filtrerInntektsmeldingTjeneste = filtrerInntektsmeldingTjeneste;
     }
 
     public List<OverstyrBeregningInputPeriode> getPerioderForInputOverstyring(BehandlingReferanse behandlingReferanse) {
         List<SakInfotrygdMigrering> sakInfotrygdMigreringer = fagsakRepository.hentSakInfotrygdMigreringer(behandlingReferanse.getFagsakId());
+        var inntektsmeldingerForSak = inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(behandlingReferanse.getSaksnummer());
+        var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingReferanse.getId());
+        var perioderTilVurdering = getPerioderTilVurderingTjeneste(behandlingReferanse).utled(behandlingReferanse.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         return sakInfotrygdMigreringer.stream().map(sakInfotrygdMigrering -> {
             LocalDate migrertStp = sakInfotrygdMigrering.getSkjæringstidspunkt();
-            List<OpptjeningAktiviteter.OpptjeningPeriode> arbeidsaktiviteter = finnArbeidsaktiviteterForOverstyring(behandlingReferanse, migrertStp);
+            var vilkårsperiode = finnVilkårsperiode(perioderTilVurdering, migrertStp);
+            List<OpptjeningAktiviteter.OpptjeningPeriode> arbeidsaktiviteter = finnArbeidsaktiviteterForOverstyring(behandlingReferanse, vilkårsperiode);
             Optional<InputOverstyringPeriode> overstyrtInputPeriode = finnEksisterendeOverstyring(behandlingReferanse, migrertStp);
-            List<Inntektsmelding> inntektsmeldingerForPeriode = finnInntektsmeldingerForPeriode(behandlingReferanse, migrertStp);
+            var inntektsmeldingerForPeriode = filtrerInntektsmeldingTjeneste.finnGyldighetstidslinjeForInntektsmeldinger(behandlingReferanse, inntektsmeldingerForSak, vilkårsperiode);
             var overstyrteAktiviteter = arbeidsaktiviteter.stream()
                 .map(a -> mapTilOverstyrAktiviteter(migrertStp, overstyrtInputPeriode, a, inntektsmeldingerForPeriode))
                 .collect(Collectors.toList());
-            var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingReferanse.getId());
             var ytelseGrunnlag = finnYtelseGrunnlagForMigrering(behandlingReferanse, migrertStp, iayGrunnlag);
             var harKategoriNæring = harNæring(ytelseGrunnlag);
             var harKategoriFrilans = harFrilans(ytelseGrunnlag);
@@ -89,11 +99,10 @@ public class OverstyrInputBeregningTjeneste {
         }).collect(Collectors.toList());
     }
 
-    private List<Inntektsmelding> finnInntektsmeldingerForPeriode(BehandlingReferanse behandlingReferanse, LocalDate migrertStp) {
-        var inntektsmeldingerForSak = inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(behandlingReferanse.getSaksnummer());
-        var imTjeneste = finnInntektsmeldingForBeregningTjeneste(behandlingReferanse);
-        var inntektsmeldingerForPeriode = imTjeneste.utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldingerForSak, DatoIntervallEntitet.fraOgMedTilOgMed(migrertStp, migrertStp));
-        return inntektsmeldingerForPeriode;
+    private static DatoIntervallEntitet finnVilkårsperiode(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, LocalDate migrertStp) {
+        return perioderTilVurdering.stream()
+            .filter(p -> p.getFomDato().equals(migrertStp))
+            .findFirst().orElseThrow(() -> new IllegalStateException("Fant ingen periode for sakinfotrygdmigrering"));
     }
 
     private boolean harNæring(Optional<YtelseGrunnlag> ytelseGrunnlag) {
@@ -153,20 +162,14 @@ public class OverstyrInputBeregningTjeneste {
             .findFirst();
     }
 
-    private List<OpptjeningAktiviteter.OpptjeningPeriode> finnArbeidsaktiviteterForOverstyring(BehandlingReferanse behandlingReferanse, LocalDate migrertStp) {
-        var perioderTilVurdering = getPerioderTilVurderingTjeneste(behandlingReferanse).utled(behandlingReferanse.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-
-        var vilkårsperiode = perioderTilVurdering.stream()
-            .filter(p -> p.getFomDato().equals(migrertStp))
-            .findFirst().orElseThrow(() -> new IllegalStateException("Fant ingen periode for sakinfotrygdmigrering"));
-
+    private List<OpptjeningAktiviteter.OpptjeningPeriode> finnArbeidsaktiviteterForOverstyring(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsperiode) {
         var opptjeningAktiviteter = finnOpptjeningForBeregningTjeneste(behandlingReferanse).hentEksaktOpptjeningForBeregning(
             behandlingReferanse,
             inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingReferanse.getId()), vilkårsperiode);
 
         return opptjeningAktiviteter.stream()
             .flatMap(a -> a.getOpptjeningPerioder().stream())
-            .filter(a -> !a.getPeriode().getTom().isBefore(migrertStp.minusDays(1)))
+            .filter(a -> !a.getPeriode().getTom().isBefore(vilkårsperiode.getFomDato().minusDays(1)))
             .filter(a -> a.getType().equals(OpptjeningAktivitetType.ARBEID))
             .collect(Collectors.groupingBy(a -> a.getArbeidsgiverOrgNummer() != null ? a.getArbeidsgiverOrgNummer() : a.getArbeidsgiverAktørId()))
             .entrySet().stream()
@@ -174,7 +177,10 @@ public class OverstyrInputBeregningTjeneste {
             .collect(Collectors.toList());
     }
 
-    private OverstyrBeregningAktivitet mapTilOverstyrAktiviteter(LocalDate migrertStp, Optional<InputOverstyringPeriode> overstyrtInputPeriode, OpptjeningAktiviteter.OpptjeningPeriode a, List<Inntektsmelding> inntektsmeldingerForPeriode) {
+    private OverstyrBeregningAktivitet mapTilOverstyrAktiviteter(LocalDate migrertStp,
+                                                                 Optional<InputOverstyringPeriode> overstyrtInputPeriode,
+                                                                 OpptjeningAktiviteter.OpptjeningPeriode a,
+                                                                 LocalDateTimeline<Set<Inntektsmelding>> inntektsmeldingerForPeriode) {
         var arbeidsgiver = a.getArbeidsgiverOrgNummer() != null ? Arbeidsgiver.virksomhet(a.getArbeidsgiverOrgNummer()) :
             Arbeidsgiver.person(new AktørId(a.getArbeidsgiverAktørId()));
         var inntektsmeldingAktivitet = mapTilInntektsmeldingAktivitet(migrertStp, arbeidsgiver, inntektsmeldingerForPeriode);
@@ -198,23 +204,29 @@ public class OverstyrInputBeregningTjeneste {
     }
 
     public static Optional<OverstyrBeregningAktivitet> mapTilInntektsmeldingAktivitet(LocalDate migrertStp,
-                                                                                Arbeidsgiver arbeidsgiver,
-                                                                                List<Inntektsmelding> inntektsmeldingerForPeriode) {
-        var inntektsmeldingerForArbeidsgiver = inntektsmeldingerForPeriode.stream().filter(i -> arbeidsgiver.equals(i.getArbeidsgiver())).collect(Collectors.toList());
+                                                                                      Arbeidsgiver arbeidsgiver,
+                                                                                      LocalDateTimeline<Set<Inntektsmelding>> inntektsmeldingerForPeriode) {
+
+        var inntektsmeldingerForArbeidsgiver = inntektsmeldingerForPeriode.mapValue(ims -> ims.stream().filter(i -> arbeidsgiver.equals(i.getArbeidsgiver())).collect(Collectors.toSet()));
+
+
         if (inntektsmeldingerForArbeidsgiver.isEmpty()) {
             return Optional.empty();
         }
-        Optional<LocalDateSegment<BigDecimal>> førsteRefusjonssegment = finnFørsteRefusjonsegment(migrertStp, inntektsmeldingerForArbeidsgiver);
-        var harRefusjonskrav = førsteRefusjonssegment.isPresent();
+        var refusjonTidslinje = FinnInntektsmeldingForBeregning.lagSummertRefusjontidslinje(migrertStp, inntektsmeldingerForArbeidsgiver);
+
+        Optional<LocalDateSegment<BigDecimal>> førsteRefusjonssegment = finnFørsteRefusjonsegment(migrertStp, refusjonTidslinje);
+        var harRefusjonskrav = !refusjonTidslinje.filterValue(r -> r.compareTo(BigDecimal.ZERO) > 0).isEmpty();
         var refusjonskravFraIM = førsteRefusjonssegment
             .map(LocalDateSegment::getValue)
             .map(BigDecimal.valueOf(12)::multiply)
             .map(BigDecimal::intValue);
-        var startdatoRefusjon = førsteRefusjonssegment.map(LocalDateSegment::getFom);
-        var refusjonOpphører = inntektsmeldingerForArbeidsgiver.stream().map(Inntektsmelding::getRefusjonOpphører)
-            .filter(Objects::nonNull)
-            .min(Comparator.naturalOrder());
-        var inntekt = inntektsmeldingerForArbeidsgiver.stream().map(Inntektsmelding::getInntektBeløp)
+        var startdatoRefusjon = harRefusjonskrav ? refusjonTidslinje.filterValue(r -> r.compareTo(BigDecimal.ZERO) > 0)
+            .getMinLocalDate() : null;
+        var refusjonOpphører = harRefusjonskrav ? finnOpphør(refusjonTidslinje) : null;
+        var inntektsmeldingerVedStart = inntektsmeldingerForArbeidsgiver.intersection(new LocalDateInterval(migrertStp, migrertStp)).toSegments().iterator().next().getValue();
+        var inntekt = inntektsmeldingerVedStart.stream()
+            .map(Inntektsmelding::getInntektBeløp)
             .map(Beløp::getVerdi)
             .map(BigDecimal.valueOf(12)::multiply)
             .reduce(BigDecimal::add)
@@ -225,15 +237,18 @@ public class OverstyrInputBeregningTjeneste {
             arbeidsgiver.getArbeidsgiverAktørId() == null ? null : new AktørId(arbeidsgiver.getArbeidsgiverAktørId()),
             inntekt,
             refusjonskravFraIM.orElse(null),
-            startdatoRefusjon.orElse(null),
-            refusjonOpphører.orElse(null),
+            startdatoRefusjon,
+            refusjonOpphører,
             !harRefusjonskrav
         ));
     }
 
-    private static Optional<LocalDateSegment<BigDecimal>> finnFørsteRefusjonsegment(LocalDate migrertStp,
-                                                                                   List<Inntektsmelding> inntektsmeldingerForArbeidsgiver) {
-        var refusjonTidslinje = FinnInntektsmeldingForBeregning.lagSummertRefusjontidslinje(migrertStp, inntektsmeldingerForArbeidsgiver);
+    private static LocalDate finnOpphør(LocalDateTimeline<BigDecimal> refusjonTidslinje) {
+        return refusjonTidslinje.filterValue(r -> r.compareTo(BigDecimal.ZERO) > 0)
+            .getMaxLocalDate();
+    }
+
+    private static Optional<LocalDateSegment<BigDecimal>> finnFørsteRefusjonsegment(LocalDate migrertStp, LocalDateTimeline<BigDecimal> refusjonTidslinje) {
         return refusjonTidslinje.toSegments().stream()
             .filter(s -> s.getValue().compareTo(BigDecimal.ZERO) > 0)
             .filter(s -> s.getTom().isAfter(migrertStp))

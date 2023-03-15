@@ -9,16 +9,19 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.FiltrerInntektsmeldingForBeregningInputOverstyring;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningForBeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OverstyrInputBeregningTjeneste;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.exception.ManglerTilgangException;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
@@ -54,7 +57,6 @@ import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnla
 import no.nav.k9.sak.ytelse.beregning.grunnlag.InputAktivitetOverstyring;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.InputOverstyringPeriode;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
-import no.nav.k9.sikkerhet.oidc.token.context.ContextAwareTokenProvider;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = OverstyrInputForBeregningDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -68,6 +70,8 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
     private ArbeidsgiverHistorikkinnslag arbeidsgiverHistorikkinnslag;
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
     private Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning;
+
+    private FiltrerInntektsmeldingForBeregningInputOverstyring filtrerInntektsmeldinger;
     private Environment environment;
 
 
@@ -82,7 +86,7 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
                                     @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste,
                                     ArbeidsgiverHistorikkinnslag arbeidsgiverHistorikkinnslag,
                                     HistorikkTjenesteAdapter historikkTjenesteAdapter,
-                                    @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning) {
+                                    @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning, FiltrerInntektsmeldingForBeregningInputOverstyring filtrerInntektsmeldinger) {
         this.grunnlagRepository = grunnlagRepository;
         this.opptjeningForBeregningTjeneste = opptjeningForBeregningTjeneste;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
@@ -90,6 +94,7 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
         this.arbeidsgiverHistorikkinnslag = arbeidsgiverHistorikkinnslag;
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
+        this.filtrerInntektsmeldinger = filtrerInntektsmeldinger;
         this.environment = Environment.current();
     }
 
@@ -112,9 +117,10 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
         FagsakYtelseType fagsakYtelseType = ref.getFagsakYtelseType();
         NavigableSet<DatoIntervallEntitet> perioderTilVurdering = getPerioderTilVurderingTjeneste(fagsakYtelseType, ref.getBehandlingType())
             .utled(behandlingId, VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        var inntektsmeldingerForSak = inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(ref.getSaksnummer());
         var overstyrtePerioder = dto.getPerioder().stream()
             .filter(it -> !it.getAktivitetliste().isEmpty())
-            .map(it -> mapPeriode(ref, iayGrunnlag, perioderTilVurdering, it))
+            .map(it -> mapPeriode(ref, iayGrunnlag, perioderTilVurdering, it, inntektsmeldingerForSak))
             .collect(Collectors.toList());
 
         lagHistorikk(behandlingId, overstyrtePerioder);
@@ -171,11 +177,12 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
     private InputOverstyringPeriode mapPeriode(BehandlingReferanse ref,
                                                InntektArbeidYtelseGrunnlag iayGrunnlag,
                                                NavigableSet<DatoIntervallEntitet> perioderTilVurdering,
-                                               OverstyrBeregningInputPeriode overstyrtPeriode) {
+                                               OverstyrBeregningInputPeriode overstyrtPeriode,
+                                               Set<Inntektsmelding> inntektsmeldingerForSak) {
         var vilkårsperiode = perioderTilVurdering.stream().filter(p -> p.getFomDato().equals(overstyrtPeriode.getSkjaeringstidspunkt())).findFirst()
             .orElseThrow(() -> new IllegalArgumentException("Fikk inn periode som ikke er til vurdering i behandlingen"));
 
-        var inntektsmeldingerForPeriode = finnInntektsmeldingerForPeriode(ref, overstyrtPeriode.getSkjaeringstidspunkt());
+        var inntektsmeldingerForPeriode = finnInntektsmeldingerForPeriode(ref, inntektsmeldingerForSak, vilkårsperiode);
         var opptjeningAktiviteter = finnOpptjeningForBeregningTjeneste(ref.getFagsakYtelseType()).hentEksaktOpptjeningForBeregning(ref, iayGrunnlag, vilkårsperiode)
             .orElseThrow()
             .getOpptjeningPerioder()
@@ -191,7 +198,7 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
     private List<InputAktivitetOverstyring> mapAktiviteter(List<OverstyrBeregningAktivitet> aktivitetliste,
                                                            LocalDate skjaeringstidspunkt,
                                                            List<OpptjeningAktiviteter.OpptjeningPeriode> opptjeningAktiviteter,
-                                                           List<Inntektsmelding> inntektsmeldingerForPeriode) {
+                                                           LocalDateTimeline<Set<Inntektsmelding>> inntektsmeldingerForPeriode) {
         return aktivitetliste.stream()
             .map(a -> mapAktivitet(opptjeningAktiviteter, skjaeringstidspunkt, a, inntektsmeldingerForPeriode))
             .collect(Collectors.toList());
@@ -201,7 +208,7 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
     private InputAktivitetOverstyring mapAktivitet(List<OpptjeningAktiviteter.OpptjeningPeriode> opptjeningAktiviteter,
                                                    LocalDate skjaeringstidspunkt,
                                                    OverstyrBeregningAktivitet overstyrtAktivitet,
-                                                   List<Inntektsmelding> inntektsmeldingerForPeriode) {
+                                                   LocalDateTimeline<Set<Inntektsmelding>> inntektsmeldingerForPeriode) {
         List<OpptjeningAktiviteter.OpptjeningPeriode> opptjeningsaktivitetForArbeidsgiver = opptjeningAktiviteter.stream().filter(oa -> Objects.equals(oa.getArbeidsgiverOrgNummer(), finnOrgnrString(overstyrtAktivitet)) ||
                 Objects.equals(oa.getArbeidsgiverAktørId(), finnAktørIdString(overstyrtAktivitet)))
             .collect(Collectors.toList());
@@ -262,10 +269,8 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
         return a.getArbeidsgiverOrgnr() != null ? Arbeidsgiver.virksomhet(a.getArbeidsgiverOrgnr()) : Arbeidsgiver.person(a.getArbeidsgiverAktørId());
     }
 
-    private List<Inntektsmelding> finnInntektsmeldingerForPeriode(BehandlingReferanse behandlingReferanse, LocalDate migrertStp) {
-        var inntektsmeldingerForSak = inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(behandlingReferanse.getSaksnummer());
-        var imTjeneste = finnInntektsmeldingForBeregningTjeneste(behandlingReferanse);
-        return imTjeneste.utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldingerForSak, DatoIntervallEntitet.fraOgMedTilOgMed(migrertStp, migrertStp));
+    private LocalDateTimeline<Set<Inntektsmelding>> finnInntektsmeldingerForPeriode(BehandlingReferanse behandlingReferanse, Set<Inntektsmelding> inntektsmeldingerForSak, DatoIntervallEntitet vilkårsperiode) {
+        return filtrerInntektsmeldinger.finnGyldighetstidslinjeForInntektsmeldinger(behandlingReferanse, inntektsmeldingerForSak, vilkårsperiode);
     }
 
     private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(FagsakYtelseType fagsakYtelseType, BehandlingType type) {
