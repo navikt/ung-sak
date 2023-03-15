@@ -100,8 +100,8 @@ public class VurdertLøpendeMedlemskapEntitet extends BaseEntitet implements Vur
         this.oppholdsrettVurdering = oppholdsrettVurdering;
     }
 
-    void setVuderingsdato(LocalDate vuderingsdato) {
-        this.vurderingsdato = vuderingsdato;
+    void setVurderingsdato(LocalDate vurderingsdato) {
+        this.vurderingsdato = vurderingsdato;
     }
 
     @Override
