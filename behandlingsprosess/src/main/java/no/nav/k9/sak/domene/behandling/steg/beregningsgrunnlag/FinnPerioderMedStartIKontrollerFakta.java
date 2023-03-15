@@ -29,7 +29,7 @@ public class FinnPerioderMedStartIKontrollerFakta {
     @Inject
     public FinnPerioderMedStartIKontrollerFakta(VilkårResultatRepository vilkårResultatRepository,
                                                 VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
-                                                @KonfigVerdi(value = "PSB_START_I_KOFAKBER_VED_FORLENGELSE_OPPTJENING",defaultVerdi = "false") boolean isEnabled) {
+                                                @KonfigVerdi(value = "PSB_START_I_KOFAKBER_VED_FORLENGELSE_OPPTJENING", defaultVerdi = "false") boolean isEnabled) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
         this.isEnabled = isEnabled;
@@ -53,8 +53,14 @@ public class FinnPerioderMedStartIKontrollerFakta {
         var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref);
         periodeFilter.ignorerAvslåttePerioder();
         var oppfylteBeregningsperioderForrigeBehandling = finnOppfylteVilkårsperioderForrigeBehandling(ref);
-        return periodeFilter.filtrerPerioder(allePerioder.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet()), VilkårType.OPPTJENINGSVILKÅRET).stream()
+        var perioder = allePerioder.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet());
+        var forlengelserIOpptjening = periodeFilter.filtrerPerioder(perioder, VilkårType.OPPTJENINGSVILKÅRET).stream()
             .filter(PeriodeTilVurdering::erForlengelse)
+            .collect(Collectors.toSet());
+
+        // Filtrerer ut perioder som er forlengelse i opptjening, men ikkje beregning
+        return allePerioder.stream()
+            .filter(forlengelserIOpptjening::contains)
             .filter(periode -> !forlengelseperioderBeregning.contains(periode))
             .filter(periode -> oppfylteBeregningsperioderForrigeBehandling.contains(periode.getPeriode()))
             .collect(Collectors.toCollection(TreeSet::new));
