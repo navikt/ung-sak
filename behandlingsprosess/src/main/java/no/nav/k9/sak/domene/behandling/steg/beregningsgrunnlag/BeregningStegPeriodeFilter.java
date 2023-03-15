@@ -30,7 +30,8 @@ public class BeregningStegPeriodeFilter {
     public NavigableSet<PeriodeTilVurdering> filtrerPerioder(BehandlingReferanse behandlingReferanse, BehandlingStegType behandlingStegType) {
         var perioderPrStartSteg = kalkulusStartpunktUtleder.utledPerioderPrStartpunkt(behandlingReferanse);
         var modell = behandlingModellRepository.getModell(behandlingReferanse.getBehandlingType(), behandlingReferanse.getFagsakYtelseType());
-        return perioderPrStartSteg.entrySet().stream().filter(e -> modell.erStegAFørStegB(e.getKey(), behandlingStegType) || e.getKey().equals(behandlingStegType))
+        return perioderPrStartSteg.entrySet().stream()
+            .filter(e -> modell.erStegAFørStegB(e.getKey(), behandlingStegType) || e.getKey().equals(behandlingStegType))
             .flatMap(e -> e.getValue().stream())
             .collect(Collectors.toCollection(TreeSet::new));
     }
