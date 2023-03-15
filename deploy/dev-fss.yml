@@ -187,9 +187,9 @@ spec:
     - name: K9_FORMIDLING_SCOPE
       value: api://dev-fss.k9saksbehandling.k9-formidling/.default
     - name : K9_PUNSJ_URL
-      value: https://k9-punsj.dev.intern.nav.no/api
+      value: http://k9-punsj.k9saksbehandling/api
     - name: INFOTRYGD_BS_BASE_URI
-      value: https://k9-infotrygd.dev.intern.nav.no
+      value: http://k9-infotrygd.k9saksbehandling
     - name: ARBEID_OG_INNTEKT_BASE_URL
       value: https://arbeid-og-inntekt.nais.preprod.local
     - name: K9_LOS_URL
