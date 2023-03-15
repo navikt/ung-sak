@@ -34,6 +34,7 @@ public enum BehandlingÅrsakType implements Kodeverdi {
     BERØRT_BEHANDLING("BERØRT-BEHANDLING", "Endring i den andre forelderens uttak"),
     RE_ANNET("RE-ANNET", "Annet"),
     RE_SATS_REGULERING("RE-SATS-REGULERING", "Regulering av grunnbeløp"),
+    RE_ENDRET_FORDELING("RE-ENDRET-FORDELING", "Endring som kun påvirker fordeling, avkorting og reduksjon av ytelse"),
     //For automatiske informasjonsbrev
     INFOBREV_BEHANDLING("INFOBREV_BEHANDLING", "Sende informasjonsbrev"),
     INFOBREV_OPPHOLD("INFOBREV_OPPHOLD", "Sende informasjonsbrev om opphold det ikke er søkt om"),
