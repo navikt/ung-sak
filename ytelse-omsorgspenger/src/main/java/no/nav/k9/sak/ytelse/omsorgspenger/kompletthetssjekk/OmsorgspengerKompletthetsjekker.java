@@ -63,7 +63,7 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
                                            OmsorgspengerGrunnlagRepository grunnlagRepository,
                                            KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste,
                                            TrekkUtFraværTjeneste trekkUtFraværTjeneste,
-                                           @KonfigVerdi(value = "ENABLE_NY_SJEKK_OMP_INGEN_PERIODER", defaultVerdi = "false") boolean brukNySjekk) {
+                                           @KonfigVerdi(value = "OMS_ZERO_REFUSJON_ER_KRAV", defaultVerdi = "false") boolean brukNySjekk) {
         this.kompletthetssjekkerInntektsmelding = kompletthetssjekkerInntektsmelding;
         this.inntektsmeldingTjeneste = inntektsmeldingTjeneste;
         this.behandlingRepository = behandlingRepository;
@@ -116,7 +116,7 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
     public boolean ingenSøknadsperioderNy(BehandlingReferanse ref) {
         var fraværFraKravPåBehandlingen = trekkUtFraværTjeneste.samleSammenOppgittFravær(ref.getBehandlingId());
         List<Inntektsmelding> inntektsmeldinger = inntektsmeldingTjeneste.hentAlleInntektsmeldingerForAngitteBehandlinger(Set.of(ref.getBehandlingId()));
-        return fraværFraKravPåBehandlingen.isEmpty() && inntektsmeldinger.stream().noneMatch(Inntektsmelding::harRefusjonskrav);
+        return fraværFraKravPåBehandlingen.isEmpty() && inntektsmeldinger.stream().noneMatch(Inntektsmelding::harRefusjonskravNy);
     }
 
     public boolean ingenSøknadsperioderGammel(BehandlingReferanse ref) {
