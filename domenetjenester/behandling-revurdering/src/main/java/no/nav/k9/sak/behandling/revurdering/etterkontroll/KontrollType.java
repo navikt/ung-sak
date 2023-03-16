@@ -18,7 +18,7 @@ public enum KontrollType {
 
     MANGLENDE_FØDSEL("MANGLENDE_FØDSEL", "Kontroll manglende fødsel"),
     OVERLAPPENDE_YTELSE("OVERLAPPENDE_YTELSE", "Kontroll overlappende ytelse"),
-    ;
+    UDEFINERT("-", "Udefinert");
 
     private static final Map<String, KontrollType> KODER = new LinkedHashMap<>();
 

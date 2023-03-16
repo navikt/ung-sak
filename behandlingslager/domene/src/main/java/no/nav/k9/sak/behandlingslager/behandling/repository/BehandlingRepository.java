@@ -3,7 +3,6 @@ package no.nav.k9.sak.behandlingslager.behandling.repository;
 import static no.nav.k9.felles.jpa.HibernateVerktøy.hentEksaktResultat;
 import static no.nav.k9.felles.jpa.HibernateVerktøy.hentUniktResultat;
 
-import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -274,6 +273,26 @@ public class BehandlingRepository {
             .collect(Collectors.toList()); // NB List - må ivareta rekkefølge sortert på tid
     }
 
+    public List<Behandling> finnAlleIkkeHenlagteBehandlinger(Long fagsakId) {
+        // BehandlingResultatType = Innvilget, endret, ikke endret, avslått.
+        Objects.requireNonNull(fagsakId, FAGSAK_ID); // NOSONAR
+
+        TypedQuery<Behandling> query = getEntityManager().createQuery(
+            "SELECT behandling FROM Behandling behandling " +
+                "WHERE behandling.fagsak.id=:fagsakId " +
+                "ORDER BY behandling.opprettetTidspunkt DESC",
+            Behandling.class);
+
+        query.setParameter(FAGSAK_ID, fagsakId);
+        query.setParameter("avsluttetOgIverkKode", BehandlingStatus.getFerdigbehandletStatuser());
+        query.setHint(QueryHints.HINT_READONLY, true);
+
+        // lukker bort henlagte
+        return query.getResultList().stream()
+            .filter(b -> !b.getBehandlingResultatType().erHenleggelse())
+            .collect(Collectors.toList()); // NB List - må ivareta rekkefølge sortert på tid
+    }
+
     public Optional<Behandling> finnSisteInnvilgetBehandling(Long fagsakId) {
         // BehandlingResultatType = Innvilget, endret.
         Objects.requireNonNull(fagsakId, FAGSAK_ID);
@@ -412,5 +431,10 @@ public class BehandlingRepository {
         query.setParameter("tidspunkt", tidspunkt);
 
         return (Long) query.getSingleResult();
+    }
+
+    public Optional<Behandling> finnSisteIkkeHenlagteBehandling(Long fagsakId) {
+        Objects.requireNonNull(fagsakId, FAGSAK_ID);
+        return optionalFirst(finnAlleIkkeHenlagteBehandlinger(fagsakId));
     }
 }
