@@ -1,11 +1,8 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
-import static no.nav.k9.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -18,13 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
@@ -40,19 +34,14 @@ public class FinnInntektsmeldingForBeregning {
     private static final Logger logger = LoggerFactory.getLogger(FinnInntektsmeldingForBeregning.class);
 
 
-    private Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning;
     private InntektArbeidYtelseTjeneste iayTjeneste;
-
     private FiltrerInntektsmeldingForBeregningInputOverstyring finnForOverstyringTjeneste;
-
 
     public FinnInntektsmeldingForBeregning() {
     }
 
     @Inject
-    public FinnInntektsmeldingForBeregning(@Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning,
-                                           InntektArbeidYtelseTjeneste iayTjeneste, FiltrerInntektsmeldingForBeregningInputOverstyring finnForOverstyringTjeneste) {
-        this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
+    public FinnInntektsmeldingForBeregning(InntektArbeidYtelseTjeneste iayTjeneste, FiltrerInntektsmeldingForBeregningInputOverstyring finnForOverstyringTjeneste) {
         this.iayTjeneste = iayTjeneste;
         this.finnForOverstyringTjeneste = finnForOverstyringTjeneste;
     }
@@ -68,48 +57,41 @@ public class FinnInntektsmeldingForBeregning {
 
     private Set<Inntektsmelding> finnOverstyrteInntektsmeldinger(BehandlingReferanse referanse, List<BeregnInput> beregnInput, Set<Inntektsmelding> inntektsmeldingerForSak) {
         return beregnInput.stream().flatMap(i -> {
-            var relevanteInntektsmeldinger = finnForOverstyringTjeneste.finnGyldighetstidslinjeForInntektsmeldinger(referanse, inntektsmeldingerForSak, i.getVilkårsperiode());
-            return i.getInputOverstyringPeriode().stream().flatMap(overstyrtPeriode -> mapInntektsmeldingerForOverstyrtPeriode(relevanteInntektsmeldinger, overstyrtPeriode));
+            var inntektsmeldingTidslinje = finnForOverstyringTjeneste.finnGyldighetstidslinjeForInntektsmeldinger(referanse, inntektsmeldingerForSak, i.getVilkårsperiode());
+            return i.getInputOverstyringPeriode().stream().flatMap(overstyrtPeriode -> mapInntektsmeldingerForOverstyrtPeriode(inntektsmeldingTidslinje, overstyrtPeriode));
         }).collect(Collectors.toSet());
     }
 
-    private static Stream<Inntektsmelding> mapInntektsmeldingerForOverstyrtPeriode(LocalDateTimeline<Set<Inntektsmelding>> mottatteInntektsmeldingerForPeriode, InputOverstyringPeriode overstyrtPeriode) {
+    private static Stream<Inntektsmelding> mapInntektsmeldingerForOverstyrtPeriode(LocalDateTimeline<Set<Inntektsmelding>> inntektsmeldingTidslinje, InputOverstyringPeriode overstyrtPeriode) {
         LocalDate stp = overstyrtPeriode.getSkjæringstidspunkt();
         return overstyrtPeriode.getAktivitetOverstyringer().stream()
             .filter(a -> a.getAktivitetStatus().erArbeidstaker())
-            .map(a -> mapAktivitetTilInntektsmelding(a, stp, mottatteInntektsmeldingerForPeriode));
+            .map(a -> mapAktivitetTilInntektsmelding(a, stp, inntektsmeldingTidslinje));
     }
 
     static Inntektsmelding mapAktivitetTilInntektsmelding(InputAktivitetOverstyring a,
                                                           LocalDate stp,
-                                                          LocalDateTimeline<Set<Inntektsmelding>> inntektsmeldingerForSak) {
-        var inntektsmeldingerForAktivitet = finnInntektsmeldingerMottattForAktivitet(inntektsmeldingerForSak, a);
-        var alleInntektsmeldinger = inntektsmeldingerForAktivitet.toSegments().stream()
-            .flatMap(s -> s.getValue().stream())
-            .collect(Collectors.toSet());
+                                                          LocalDateTimeline<Set<Inntektsmelding>> inntektsmeldingTidslinje) {
+        var inntektsmeldingerForAktivitet = finnInntektsmeldingerMottattForAktivitet(inntektsmeldingTidslinje, a);
+        var alleInntektsmeldinger = finnAlleInntektsmeldingerForHelePerioden(inntektsmeldingerForAktivitet);
+
         logger.info("Overgang fra infotrygd: Mapper overstyring for aktivitet " + a
             + " Fant mottatte " + alleInntektsmeldinger.size() + " inntektsmeldinger for abrbeidsgiver: "
             + alleInntektsmeldinger.stream().map(Inntektsmelding::getJournalpostId).toList());
 
-        var summertRefusjonTidslinje = lagSummertRefusjontidslinje(stp, inntektsmeldingerForAktivitet);
+        var summertRefusjonTidslinje = FinnRefusjonskravTidslinje.lagTidslinje(stp, inntektsmeldingerForAktivitet);
 
         return mapInntektsmelding(stp, a, summertRefusjonTidslinje, alleInntektsmeldinger);
     }
 
-    public static LocalDateTimeline<Set<Inntektsmelding>> finnInntektsmeldingerMottattForAktivitet(LocalDateTimeline<Set<Inntektsmelding>> inntektsmeldingerForSak, InputAktivitetOverstyring a) {
-        return inntektsmeldingerForSak.mapValue(ims -> ims.stream().filter(i -> a.getArbeidsgiver().equals(i.getArbeidsgiver())).collect(Collectors.toSet()));
+    private static Set<Inntektsmelding> finnAlleInntektsmeldingerForHelePerioden(LocalDateTimeline<Set<Inntektsmelding>> inntektsmeldingerForAktivitet) {
+        return inntektsmeldingerForAktivitet.toSegments().stream()
+            .flatMap(s -> s.getValue().stream())
+            .collect(Collectors.toSet());
     }
 
-    public static LocalDateTimeline<BigDecimal> lagSummertRefusjontidslinje(LocalDate stp, LocalDateTimeline<Set<Inntektsmelding>> inntektsmeldingerForAktivitet) {
-        return inntektsmeldingerForAktivitet
-            .map(ims -> ims.getValue().stream()
-                .map(im -> tilRefusjontidslinje(im, stp))
-                .reduce((t1, t2) -> t1.crossJoin(t2, StandardCombinators::sum))
-                .orElse(LocalDateTimeline.empty())
-                .intersection(ims.getLocalDateInterval())
-                .stream()
-                .toList())
-            .compress();
+    public static LocalDateTimeline<Set<Inntektsmelding>> finnInntektsmeldingerMottattForAktivitet(LocalDateTimeline<Set<Inntektsmelding>> inntektsmeldingerForSak, InputAktivitetOverstyring a) {
+        return inntektsmeldingerForSak.mapValue(ims -> ims.stream().filter(i -> a.getArbeidsgiver().equals(i.getArbeidsgiver())).collect(Collectors.toSet()));
     }
 
 
@@ -117,6 +99,7 @@ public class FinnInntektsmeldingForBeregning {
         var opphører = finnOpphør(a, summertRefusjonTidslinje);
         var startDato = a.getStartdatoRefusjon().filter(d -> !d.isBefore(stp)).orElse(stp);
 
+        // Hack for å sørge for at inntektsmeldingen velges blant inntektsmeldinger med samem skjæringstidspunkt
         var kanalReferansePrefiks = finnKanalReferansePrefiks(stp, inntektsmeldingerForAktivitet);
         var inntektsmeldingBuilder = InntektsmeldingBuilder.builder()
             .medInnsendingstidspunkt(stp.atStartOfDay())
@@ -137,7 +120,7 @@ public class FinnInntektsmeldingForBeregning {
      *
      * @param stp                           Skjæringstidspunkt
      * @param inntektsmeldingerForAktivitet Inntektsmeldinger for samme arbeidsgiver som aktuell overstyrt aktivitet
-     * @return
+     * @return prefiks for kanalreferanse
      */
     private static String finnKanalReferansePrefiks(LocalDate stp, Collection<Inntektsmelding> inntektsmeldingerForAktivitet) {
         return inntektsmeldingerForAktivitet.stream().filter(im -> im.getStartDatoPermisjon().isPresent() && im.getStartDatoPermisjon().get().equals(stp))
@@ -193,39 +176,5 @@ public class FinnInntektsmeldingForBeregning {
         return stpOverlapp.getValue();
     }
 
-    private static LocalDateTimeline<BigDecimal> tilRefusjontidslinje(Inntektsmelding im, LocalDate startdatoRefusjon) {
-        ArrayList<LocalDateSegment<BigDecimal>> alleSegmenter = new ArrayList<>();
-        var opphørsdatoRefusjon = im.getRefusjonOpphører();
-        if (refusjonOpphørerFørStart(startdatoRefusjon, opphørsdatoRefusjon)) {
-            return LocalDateTimeline.empty();
-        }
-        // Refusjon fra start
-        if (!(im.getRefusjonBeløpPerMnd() == null || im.getRefusjonBeløpPerMnd().getVerdi().compareTo(BigDecimal.ZERO) == 0)) {
-            alleSegmenter.add(new LocalDateSegment<>(startdatoRefusjon, TIDENES_ENDE, im.getRefusjonBeløpPerMnd().getVerdi()));
-        }
-
-        // Opphør
-        if (opphørsdatoRefusjon != null && opphørsdatoRefusjon.isBefore(TIDENES_ENDE)) {
-            alleSegmenter.add(new LocalDateSegment<>(opphørsdatoRefusjon.plusDays(1), TIDENES_ENDE, BigDecimal.ZERO));
-        }
-
-        // Endringer i mellom
-        alleSegmenter.addAll(im.getEndringerRefusjon().stream()
-            .map(e ->
-                new LocalDateSegment<>(e.getFom(), TIDENES_ENDE, e.getRefusjonsbeløp().getVerdi())
-            ).collect(Collectors.toList()));
-
-        return new LocalDateTimeline<>(alleSegmenter, (interval, lhs, rhs) -> {
-            if (lhs.getFom().isBefore(rhs.getFom())) {
-                return new LocalDateSegment<>(interval, rhs.getValue());
-            }
-            return new LocalDateSegment<>(interval, lhs.getValue());
-        });
-
-    }
-
-    private static boolean refusjonOpphørerFørStart(LocalDate startdatoRefusjon, LocalDate refusjonOpphører) {
-        return refusjonOpphører != null && refusjonOpphører.isBefore(startdatoRefusjon);
-    }
 
 }

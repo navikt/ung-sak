@@ -1,5 +1,6 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -17,6 +18,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtale;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
+import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
@@ -41,21 +43,32 @@ public class FiltrerInntektsmeldingForBeregningInputOverstyring {
         var imTjeneste = finnInntektsmeldingForBeregningTjeneste(behandlingReferanse);
         var inntektsmeldingerForPeriode = imTjeneste.utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldingerForSak, periode);
         var gyldighetFraAareg = finnGyldighetstidslinjeFraAktiveArbeidsforhold(behandlingReferanse, inntektsmeldingerForPeriode, periode);
+        return finnGyldighetForOverlappMotPeriode(periode, gyldighetFraAareg);
+    }
 
+    private static LocalDateTimeline<Set<Inntektsmelding>> finnGyldighetForOverlappMotPeriode(DatoIntervallEntitet periode, LocalDateTimeline<Set<Inntektsmelding>> gyldighetFraAareg) {
         return gyldighetFraAareg.intersection(new LocalDateInterval(periode.getFomDato(), periode.getTomDato()));
     }
 
     private LocalDateTimeline<Set<Inntektsmelding>> finnGyldighetstidslinjeFraAktiveArbeidsforhold(BehandlingReferanse behandlingReferanse, List<Inntektsmelding> inntektsmeldingerForPeriode, DatoIntervallEntitet periode) {
-        var iayGrunnlag = iayTjeneste.hentGrunnlag(behandlingReferanse.getBehandlingId());
-        var yrkesaktivitetFilter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(behandlingReferanse.getAktørId()));
-        var yrkesaktiviteter = yrkesaktivitetFilter.getYrkesaktiviteter();
-        var inntektsmeldingsegmenter = inntektsmeldingerForPeriode.stream().flatMap(im ->
+        var yrkesaktiviteter = finnYrkesaktiviteter(behandlingReferanse);
+        var inntektsmeldingsegmenter = filtrerAktiveOgOpprettSegmenter(inntektsmeldingerForPeriode, yrkesaktiviteter);
+        return new LocalDateTimeline<>(inntektsmeldingsegmenter, StandardCombinators::union);
+    }
+
+    private static List<LocalDateSegment<Set<Inntektsmelding>>> filtrerAktiveOgOpprettSegmenter(List<Inntektsmelding> inntektsmeldingerForPeriode, Collection<Yrkesaktivitet> yrkesaktiviteter) {
+        return inntektsmeldingerForPeriode.stream().flatMap(im ->
             yrkesaktiviteter.stream()
                 .filter(it -> it.gjelderFor(im.getArbeidsgiver(), im.getArbeidsforholdRef()))
                 .flatMap(it -> it.getAnsettelsesPeriode().stream())
                 .map(AktivitetsAvtale::getPeriode)
                 .map(p -> new LocalDateSegment<>(p.getFomDato(), p.getTomDato(), Set.of(im)))).toList();
-        return new LocalDateTimeline<>(inntektsmeldingsegmenter, StandardCombinators::union);
+    }
+
+    private Collection<Yrkesaktivitet> finnYrkesaktiviteter(BehandlingReferanse behandlingReferanse) {
+        var iayGrunnlag = iayTjeneste.hentGrunnlag(behandlingReferanse.getBehandlingId());
+        var yrkesaktivitetFilter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(behandlingReferanse.getAktørId()));
+        return yrkesaktivitetFilter.getYrkesaktiviteter();
     }
 
     private InntektsmeldingerRelevantForBeregning finnInntektsmeldingForBeregningTjeneste(BehandlingReferanse behandlingReferanse) {
