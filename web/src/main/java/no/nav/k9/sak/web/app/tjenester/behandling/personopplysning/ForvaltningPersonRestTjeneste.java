@@ -52,13 +52,11 @@ import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.kontrakt.person.AktørIdDto;
 import no.nav.k9.sak.kontrakt.person.AktørIdOgFnrDto;
 import no.nav.k9.sak.kontrakt.person.AktørInfoDto;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
@@ -68,8 +66,7 @@ import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 @Path("/forvaltning/person")
 public class ForvaltningPersonRestTjeneste {
 
-    private AktørTjeneste aktørTjeneste;
-
+    private AktørIdSplittTjeneste aktørIdSplittTjeneste;
     private TpsTjeneste tpsTjeneste;
     private FagsakRepository fagsakRepository;
 
@@ -78,8 +75,8 @@ public class ForvaltningPersonRestTjeneste {
     }
 
     @Inject
-    public ForvaltningPersonRestTjeneste(AktørTjeneste aktørTjeneste, TpsTjeneste tpsTjeneste, FagsakRepository fagsakRepository) {
-        this.aktørTjeneste = aktørTjeneste;
+    public ForvaltningPersonRestTjeneste(AktørIdSplittTjeneste aktørIdSplittTjeneste, TpsTjeneste tpsTjeneste, FagsakRepository fagsakRepository) {
+        this.aktørIdSplittTjeneste = aktørIdSplittTjeneste;
         this.tpsTjeneste = tpsTjeneste;
         this.fagsakRepository = fagsakRepository;
     }
@@ -130,22 +127,8 @@ public class ForvaltningPersonRestTjeneste {
     @BeskyttetRessurs(action = UPDATE, resource = DRIFT)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response oppdaterAktørIdBruker(@Valid @NotNull OppdaterAktørIdDto dto) {
-        Fagsak fagsak = fagsakRepository.hentSakGittSaksnummer(dto.getSaksnummer().getSaksnummer()).orElseThrow();
-
-        AktørId gammelAktørId = fagsak.getAktørId();
-        Optional<PersonIdent> gammelPersonIdent = aktørTjeneste.hentPersonIdentForAktørId(gammelAktørId);
-        if (gammelPersonIdent.isPresent()) {
-            return Response.status(400, "Fagsaken har gyldig aktørId for bruker").build();
-        }
-
-        AktørId nyAktørId = dto.getAktørId();
-        Optional<PersonIdent> nyPersonIdent = aktørTjeneste.hentPersonIdentForAktørId(nyAktørId);
-        if (nyPersonIdent.isEmpty()) {
-            return Response.status(400, "Ny aktørId er ugyldig").build();
-        }
-
-        fagsakRepository.oppdaterBruker(fagsak.getId(), nyAktørId);
-        return Response.accepted("Oppdatert fagsaken").build();
+        aktørIdSplittTjeneste.patchBrukerAktørId(dto.getAktørId(), dto.getSaksnummer());
+        return Response.ok().build();
     }
 
     static class OppdaterAktørIdDto implements AbacDto {
