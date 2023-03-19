@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.behandling.personopplysning;
 import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
 import static no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput.dumpAsCsv;
 
 import java.io.BufferedReader;
@@ -51,11 +52,13 @@ import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.kontrakt.person.AktørIdDto;
 import no.nav.k9.sak.kontrakt.person.AktørIdOgFnrDto;
 import no.nav.k9.sak.kontrakt.person.AktørInfoDto;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
@@ -65,6 +68,8 @@ import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 @Path("/forvaltning/person")
 public class ForvaltningPersonRestTjeneste {
 
+    private AktørTjeneste aktørTjeneste;
+
     private TpsTjeneste tpsTjeneste;
     private FagsakRepository fagsakRepository;
 
@@ -73,7 +78,8 @@ public class ForvaltningPersonRestTjeneste {
     }
 
     @Inject
-    public ForvaltningPersonRestTjeneste(TpsTjeneste tpsTjeneste, FagsakRepository fagsakRepository) {
+    public ForvaltningPersonRestTjeneste(AktørTjeneste aktørTjeneste, TpsTjeneste tpsTjeneste, FagsakRepository fagsakRepository) {
+        this.aktørTjeneste = aktørTjeneste;
         this.tpsTjeneste = tpsTjeneste;
         this.fagsakRepository = fagsakRepository;
     }
@@ -111,6 +117,63 @@ public class ForvaltningPersonRestTjeneste {
         return Response.ok(output, MediaType.TEXT_PLAIN_TYPE).build();
     }
 
+
+    @POST
+    @Produces(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/oppdater-aktoer-bruker")
+    @Operation(description = "Oppdater aktørId for bruker på sak med ugyldig aktørId pga aktørSplitt/merge", tags = "forvaltning - person", responses = {
+        @ApiResponse(responseCode = "200",
+            description = "Fiks ugyldig aktørId",
+            content = @Content(mediaType = MediaType.TEXT_PLAIN))
+    })
+    @BeskyttetRessurs(action = UPDATE, resource = DRIFT)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Response oppdaterAktørIdBruker(@Valid @NotNull OppdaterAktørIdDto dto) {
+        Fagsak fagsak = fagsakRepository.hentSakGittSaksnummer(dto.getSaksnummer().getSaksnummer()).orElseThrow();
+
+        AktørId gammelAktørId = fagsak.getAktørId();
+        Optional<PersonIdent> gammelPersonIdent = aktørTjeneste.hentPersonIdentForAktørId(gammelAktørId);
+        if (gammelPersonIdent.isPresent()) {
+            return Response.status(400, "Fagsaken har gyldig aktørId for bruker").build();
+        }
+
+        AktørId nyAktørId = dto.getAktørId();
+        Optional<PersonIdent> nyPersonIdent = aktørTjeneste.hentPersonIdentForAktørId(nyAktørId);
+        if (nyPersonIdent.isEmpty()) {
+            return Response.status(400, "Ny aktørId er ugyldig").build();
+        }
+
+        fagsakRepository.oppdaterBruker(fagsak.getId(), nyAktørId);
+        return Response.accepted("Oppdatert fagsaken").build();
+    }
+
+    static class OppdaterAktørIdDto implements AbacDto {
+        private Saksnummer saksnummer;
+        private AktørId aktørId;
+
+        public Saksnummer getSaksnummer() {
+            return saksnummer;
+        }
+
+        public void setSaksnummer(Saksnummer saksnummer) {
+            this.saksnummer = saksnummer;
+        }
+
+        public AktørId getAktørId() {
+            return aktørId;
+        }
+
+        public void setAktørId(AktørId aktørId) {
+            this.aktørId = aktørId;
+        }
+
+        @Override
+        public AbacDataAttributter abacAttributter() {
+            //ikke mulig med reell tilgangskontroll, siden aktørId på saken er ugyldig
+            return AbacDataAttributter.opprett();
+        }
+    }
 
     @GET
     @Operation(description = "Henter saksnumre for en person. Kan for eksempel brukes for å finne ut om k9 er påvirket av 'aktør-splitt'", tags = "aktoer", responses = {

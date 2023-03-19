@@ -5,9 +5,6 @@ import java.util.Objects;
 
 import org.hibernate.annotations.Type;
 
-import no.nav.k9.sak.behandlingslager.PostgreSQLRangeType;
-import no.nav.k9.sak.behandlingslager.Range;
-
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
@@ -24,6 +21,8 @@ import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.behandlingslager.PostgreSQLRangeType;
+import no.nav.k9.sak.behandlingslager.Range;
 import no.nav.k9.sak.behandlingslager.kodeverk.FagsakStatusKodeverdiConverter;
 import no.nav.k9.sak.behandlingslager.kodeverk.FagsakYtelseTypeKodeverdiConverter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -44,7 +43,7 @@ public class Fagsak extends BaseEntitet {
     private FagsakYtelseType ytelseType = FagsakYtelseType.UDEFINERT;
 
     @Embedded
-    @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "bruker_aktoer_id", unique = true, nullable = false, updatable = false)))
+    @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "bruker_aktoer_id", unique = true, nullable = false, updatable = true)))
     private AktørId brukerAktørId;
 
     @Embedded
@@ -93,13 +92,17 @@ public class Fagsak extends BaseEntitet {
         setPeriode(fom, tom);
     }
 
-    /** Oppretter en default fagsak, med startdato fra i dag. */
+    /**
+     * Oppretter en default fagsak, med startdato fra i dag.
+     */
     @Deprecated(forRemoval = true)
     public static Fagsak opprettNy(FagsakYtelseType ytelseType, AktørId bruker) {
         return new Fagsak(ytelseType, bruker, null, null, null, LocalDate.now(), null);
     }
 
-    /** Oppretter en default fagsak, med startdato fra i dag. */
+    /**
+     * Oppretter en default fagsak, med startdato fra i dag.
+     */
     @Deprecated(forRemoval = true)
     public static Fagsak opprettNy(FagsakYtelseType ytelseType, AktørId bruker, Saksnummer saksnummer) {
         return new Fagsak(ytelseType, bruker, null, null, saksnummer, LocalDate.now(), null);
@@ -145,6 +148,12 @@ public class Fagsak extends BaseEntitet {
             throw new IllegalArgumentException("Kan ikke nullstille pleietrengende. Prøver å endre fra " + this.pleietrengendeAktørId + " til " + aktørId);
         }
         this.pleietrengendeAktørId = aktørId;
+    }
+
+    //midlertidig her pga behov for å fikse sak ifbm splitt/merge aktør
+    @Deprecated(forRemoval = true)
+    public void setBruker(AktørId aktørId) {
+        this.brukerAktørId = aktørId;
     }
 
     public void setRelatertPerson(AktørId aktørId) {
