@@ -66,6 +66,7 @@ import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAvklaringsbehovDefinisjon;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAvslagsårsak;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningVenteårsak;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
+import no.nav.k9.kodeverk.beregningsgrunnlag.KalkulusResultatKode;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -301,10 +302,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
 
         Map<UUID, KalkulusResultat> resultater = new LinkedHashMap<>();
         for (var tilstandResponse : response) {
-            var avklaringsbehovResultatList = tilstandResponse.getAvklaringsbehovMedTilstandDto().stream()
-                .map(dto -> BeregningAvklaringsbehovResultat.opprettMedFristFor(mapTilAvklaringsbehov(dto),
-                    dto.getVenteårsak() != null ? BeregningVenteårsak.fraKode(dto.getVenteårsak().getKode()) : null, dto.getVentefrist()))
-                .collect(Collectors.toList());
+            List<BeregningAvklaringsbehovResultat> avklaringsbehovResultatList = finnAvklaringsbehovListe(tilstandResponse);
             KalkulusResultat kalkulusResultat = new KalkulusResultat(avklaringsbehovResultatList);
             if (tilstandResponse.getVilkarOppfylt() != null) {
                 if (tilstandResponse.getVilkårsavslagsårsak() != null && !tilstandResponse.getVilkarOppfylt()) {
@@ -313,9 +311,22 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
                     kalkulusResultat = kalkulusResultat.medVilkårResultat(tilstandResponse.getVilkarOppfylt());
                 }
             }
+            if (tilstandResponse.getResultatkode() != null) {
+                kalkulusResultat.medResultatKode(KalkulusResultatKode.fraKode(tilstandResponse.getResultatkode()));
+            }
             resultater.put(tilstandResponse.getEksternReferanse(), kalkulusResultat);
         }
         return new SamletKalkulusResultat(resultater, bgReferanser);
+    }
+
+    private List<BeregningAvklaringsbehovResultat> finnAvklaringsbehovListe(TilstandResponse tilstandResponse) {
+        if (tilstandResponse.getAvklaringsbehovMedTilstandDto() != null) {
+            return tilstandResponse.getAvklaringsbehovMedTilstandDto().stream()
+                .map(dto -> BeregningAvklaringsbehovResultat.opprettMedFristFor(mapTilAvklaringsbehov(dto),
+                    dto.getVenteårsak() != null ? BeregningVenteårsak.fraKode(dto.getVenteårsak().getKode()) : null, dto.getVentefrist()))
+                .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
     }
 
     private BeregningAvklaringsbehovDefinisjon mapTilAvklaringsbehov(AvklaringsbehovMedTilstandDto dto) {

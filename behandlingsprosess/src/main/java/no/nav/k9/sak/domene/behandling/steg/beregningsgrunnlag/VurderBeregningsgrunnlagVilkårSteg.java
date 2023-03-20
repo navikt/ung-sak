@@ -10,8 +10,13 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.beregningsgrunnlag.KalkulusResultatKode;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
@@ -36,6 +41,9 @@ public class VurderBeregningsgrunnlagVilkårSteg implements BeregningsgrunnlagSt
     private BeregningStegTjeneste beregningStegTjeneste;
     private VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
 
+    private ProsessTaskTjeneste prosessTaskTjeneste;
+
+
     protected VurderBeregningsgrunnlagVilkårSteg() {
         // CDI Proxy
     }
@@ -44,12 +52,14 @@ public class VurderBeregningsgrunnlagVilkårSteg implements BeregningsgrunnlagSt
     public VurderBeregningsgrunnlagVilkårSteg(BehandlingRepository behandlingRepository,
                                               BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                               BeregningStegTjeneste beregningStegTjeneste,
-                                              VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
+                                              VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
+                                              ProsessTaskTjeneste prosessTaskTjeneste) {
 
         this.behandlingRepository = behandlingRepository;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.beregningStegTjeneste = beregningStegTjeneste;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
+        this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
     @Override
@@ -82,6 +92,14 @@ public class VurderBeregningsgrunnlagVilkårSteg implements BeregningsgrunnlagSt
 
         @Override
         public void håndter(KalkulusResultat kalkulusResultat, DatoIntervallEntitet periode) {
+            if (kalkulusResultat.getKalkulusResultatKode() != null && kalkulusResultat.getKalkulusResultatKode().equals(KalkulusResultatKode.UTTAK_OG_BEREGNING_UGYLDIG_TILSTAND)) {
+                var rullTilbakeData = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
+                rullTilbakeData.setProperty(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK, BehandlingÅrsakType.RE_ENDRING_BEREGNINGSGRUNNLAG.getKode());
+                rullTilbakeData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_FOM, periode.getFomDato().toString());
+                rullTilbakeData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_TOM, periode.getTomDato().toString());
+                prosessTaskTjeneste.lagre(rullTilbakeData);
+                return;
+            }
             if (kalkulusResultat.getVilkårOppfylt() != null && !kalkulusResultat.getVilkårOppfylt()) {
                 beregningsgrunnlagVilkårTjeneste.lagreAvslåttVilkårresultat(kontekst, periode, kalkulusResultat.getAvslagsårsak());
             } else if (kalkulusResultat.getVilkårOppfylt() != null) {

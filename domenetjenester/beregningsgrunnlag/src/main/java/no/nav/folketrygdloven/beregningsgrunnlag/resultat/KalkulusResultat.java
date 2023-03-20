@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import no.nav.k9.kodeverk.beregningsgrunnlag.KalkulusResultatKode;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
@@ -12,6 +13,8 @@ public class KalkulusResultat {
     private List<BeregningAvklaringsbehovResultat> beregningAvklaringsbehovResultat;
     private Boolean vilkårOppfylt;
     private Avslagsårsak avslagsårsak;
+
+    private KalkulusResultatKode kalkulusResultatKode;
     private Map<DatoIntervallEntitet, BeregningVilkårResultat> vilkårResultatPrPeriode = new HashMap<>();
 
     public KalkulusResultat(List<BeregningAvklaringsbehovResultat> beregningAvklaringsbehovResultat) {
@@ -22,6 +25,12 @@ public class KalkulusResultat {
         this.vilkårOppfylt = vilkårOppfylt;
         return this;
     }
+
+    public KalkulusResultat medResultatKode(KalkulusResultatKode kalkulusResultatKode) {
+        this.kalkulusResultatKode = kalkulusResultatKode;
+        return this;
+    }
+
 
     public KalkulusResultat medAvslåttVilkår(Avslagsårsak avslagsårsak) {
         this.vilkårOppfylt = false;
@@ -48,6 +57,10 @@ public class KalkulusResultat {
 
     public Avslagsårsak getAvslagsårsak() {
         return avslagsårsak;
+    }
+
+    public KalkulusResultatKode getKalkulusResultatKode() {
+        return kalkulusResultatKode;
     }
 
     @Override
