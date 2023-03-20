@@ -12,6 +12,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
 
 @Dependent
 public class AktørIdSplittTjeneste {
@@ -31,7 +32,7 @@ public class AktørIdSplittTjeneste {
         this.entityManager = entityManager;
     }
 
-    public void patchBrukerAktørId(AktørId nyAktørId, Saksnummer saksnummer) {
+    public void patchBrukerAktørId(AktørId nyAktørId, Saksnummer saksnummer, String begrunnelse, String tjeneste) {
         Fagsak fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer).orElseThrow();
         AktørId gammelAktørId = fagsak.getAktørId();
 
@@ -56,6 +57,8 @@ public class AktørIdSplittTjeneste {
         logger.info("oppdaterte {} rader i fagsak", antallRaderFagsak);
 
         oppdaterPoAggregat(nyAktørId, saksnummer, gammelAktørId);
+
+        entityManager.persist(new DiagnostikkFagsakLogg(fagsak.getId(), tjeneste, begrunnelse));
     }
 
     private void oppdaterPoAggregat(AktørId nyAktørId, Saksnummer saksnummer, AktørId gammelAktørId) {

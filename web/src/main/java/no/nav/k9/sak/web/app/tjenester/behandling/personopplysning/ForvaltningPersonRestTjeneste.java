@@ -32,6 +32,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -50,6 +51,7 @@ import no.nav.k9.felles.sikkerhet.abac.AbacDto;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.felles.util.InputValideringRegex;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
@@ -127,13 +129,24 @@ public class ForvaltningPersonRestTjeneste {
     @BeskyttetRessurs(action = UPDATE, resource = DRIFT)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response oppdaterAktørIdBruker(@Valid @NotNull OppdaterAktørIdDto dto) {
-        aktørIdSplittTjeneste.patchBrukerAktørId(dto.getAktørId(), dto.getSaksnummer());
+        aktørIdSplittTjeneste.patchBrukerAktørId(dto.getAktørId(), dto.getSaksnummer(), dto.getBegrunnelse(), "/forvaltning/person/oppdater-aktoer-bruker");
         return Response.ok().build();
     }
 
     static class OppdaterAktørIdDto implements AbacDto {
+
+        @Valid
+        @NotNull
         private Saksnummer saksnummer;
+        @Valid
+        @NotNull
         private AktørId aktørId;
+
+        @Valid
+        @NotNull
+        @Size(max = 1000)
+        @Pattern(regexp = InputValideringRegex.FRITEKST)
+        private String begrunnelse;
 
         public Saksnummer getSaksnummer() {
             return saksnummer;
@@ -149,6 +162,14 @@ public class ForvaltningPersonRestTjeneste {
 
         public void setAktørId(AktørId aktørId) {
             this.aktørId = aktørId;
+        }
+
+        public String getBegrunnelse() {
+            return begrunnelse;
+        }
+
+        public void setBegrunnelse(String begrunnelse) {
+            this.begrunnelse = begrunnelse;
         }
 
         @Override
