@@ -9,6 +9,8 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
@@ -30,7 +32,7 @@ class FinnInntektsmeldingForBeregningTest {
             new Beløp(BigDecimal.valueOf(12000)), null, null, AktivitetStatus.ARBEIDSTAKER, null);
 
         // Act
-        var mappetInntektsmelding = FinnInntektsmeldingForBeregning.mapAktivitetTilInntektsmelding(aktivitet, stp, Set.of());
+        var mappetInntektsmelding = FinnInntektsmeldingForBeregning.mapAktivitetTilInntektsmelding(aktivitet, stp, LocalDateTimeline.empty());
 
         // Assert
         assertThat(mappetInntektsmelding.getArbeidsgiver()).isEqualTo(virksomhet);
@@ -49,13 +51,17 @@ class FinnInntektsmeldingForBeregningTest {
             new Beløp(BigDecimal.valueOf(12000)), null, null, AktivitetStatus.ARBEIDSTAKER, null);
 
         // Act
-        var mappetInntektsmelding = FinnInntektsmeldingForBeregning.mapAktivitetTilInntektsmelding(aktivitet, stp, Set.of(inntektsmelding));
+        var mappetInntektsmelding = FinnInntektsmeldingForBeregning.mapAktivitetTilInntektsmelding(aktivitet, stp, lagTidslinjeFra(stp, Set.of(inntektsmelding)));
 
         // Assert
         assertThat(mappetInntektsmelding.getArbeidsgiver()).isEqualTo(virksomhet);
         assertThat(mappetInntektsmelding.getInntektBeløp()).isEqualTo(new Beløp(1));
         assertThat(mappetInntektsmelding.getRefusjonBeløpPerMnd()).isEqualTo(new Beløp(1));
         assertThat(mappetInntektsmelding.getRefusjonOpphører()).isEqualTo(stp.plusDays(10));
+    }
+
+    private static LocalDateTimeline<Set<Inntektsmelding>> lagTidslinjeFra(LocalDate stp, Set<Inntektsmelding> inntektsmeldinger) {
+        return new LocalDateTimeline<>(new LocalDateInterval(stp, stp.plusMonths(1)), inntektsmeldinger);
     }
 
     @Test
@@ -70,7 +76,8 @@ class FinnInntektsmeldingForBeregningTest {
             new Beløp(BigDecimal.valueOf(12000)), null, null, AktivitetStatus.ARBEIDSTAKER, null);
 
         // Act
-        var mappetInntektsmelding = FinnInntektsmeldingForBeregning.mapAktivitetTilInntektsmelding(aktivitet, stp, Set.of(inntektsmelding1, inntektsmelding2));
+        var mappetInntektsmelding = FinnInntektsmeldingForBeregning.mapAktivitetTilInntektsmelding(aktivitet, stp,
+            lagTidslinjeFra(stp, Set.of(inntektsmelding1, inntektsmelding2)));
 
         // Assert
         assertThat(mappetInntektsmelding.getArbeidsgiver()).isEqualTo(virksomhet);
@@ -92,7 +99,8 @@ class FinnInntektsmeldingForBeregningTest {
             new Beløp(BigDecimal.valueOf(12000)), null, null, AktivitetStatus.ARBEIDSTAKER, null);
 
         // Act
-        var mappetInntektsmelding = FinnInntektsmeldingForBeregning.mapAktivitetTilInntektsmelding(aktivitet, stp, Set.of(inntektsmelding1, inntektsmelding2));
+        var mappetInntektsmelding = FinnInntektsmeldingForBeregning.mapAktivitetTilInntektsmelding(aktivitet, stp,
+            lagTidslinjeFra(stp, Set.of(inntektsmelding1, inntektsmelding2)));
 
         // Assert
         assertThat(mappetInntektsmelding.getArbeidsgiver()).isEqualTo(virksomhet);

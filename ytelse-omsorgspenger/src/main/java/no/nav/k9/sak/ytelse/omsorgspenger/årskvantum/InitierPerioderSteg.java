@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
@@ -37,6 +38,7 @@ public class InitierPerioderSteg implements BehandlingSteg {
     private TrekkUtFraværTjeneste trekkUtFraværTjeneste;
 
     private BehandlingRepository behandlingRepository;
+    private boolean zeroErKrav;
 
     protected InitierPerioderSteg() {
         // for proxy
@@ -44,10 +46,13 @@ public class InitierPerioderSteg implements BehandlingSteg {
 
     @Inject
     public InitierPerioderSteg(OmsorgspengerGrunnlagRepository grunnlagRepository,
-                               TrekkUtFraværTjeneste trekkUtFraværTjeneste, BehandlingRepository behandlingRepository) {
+                               TrekkUtFraværTjeneste trekkUtFraværTjeneste,
+                               BehandlingRepository behandlingRepository,
+                               @KonfigVerdi(value = "OMS_ZERO_REFUSJON_ER_KRAV", defaultVerdi = "false") boolean zeroErKrav) {
         this.trekkUtFraværTjeneste = trekkUtFraværTjeneste;
         this.grunnlagRepository = grunnlagRepository;
         this.behandlingRepository = behandlingRepository;
+        this.zeroErKrav = zeroErKrav;
     }
 
     @Override
@@ -56,7 +61,7 @@ public class InitierPerioderSteg implements BehandlingSteg {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
         var samletFravær = trekkUtFraværTjeneste.samleSammenOppgittFravær(behandlingId);
-        if (samletFravær.isEmpty() && !behandling.erManueltOpprettet()) {
+        if (!zeroErKrav && samletFravær.isEmpty() && !behandling.erManueltOpprettet()) {
             // FIXME veldig merkelig håndtering. Vi kommer hit ved IM uten kravperide, men ikke når vi også har andre krav.
             // ..... det kopieres magisk fra forrige behandling (eller inneværende, etter tilbakehopp). Bør være perioder fra fagsaken, for at det skal bli konsistent
 
