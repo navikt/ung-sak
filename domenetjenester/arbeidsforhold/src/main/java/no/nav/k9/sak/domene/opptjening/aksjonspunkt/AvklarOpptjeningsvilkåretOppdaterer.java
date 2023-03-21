@@ -167,7 +167,7 @@ public class AvklarOpptjeningsvilkåretOppdaterer implements AksjonspunktOppdate
         var opptjPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(opptjeningPeriode.getFom(), opptjeningPeriode.getTom());
         var stp = opptjPeriode.getTomDato().plusDays(1);
         var iayGrunnlag = iayTjeneste.finnGrunnlag(ref.getBehandlingId()).orElseThrow();
-        var yrkesaktivitetFilter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(ref.getAktørId())).før(periode.getFom());
+        var yrkesaktivitetFilter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(ref.getAktørId())).før(periode.getFom().plusDays(1));
         var opptjeningAktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(ref, iayGrunnlag, vurderForOpptjeningsvilkår, opptjPeriode, DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom()), yrkesaktivitetFilter);
 
         // Validering før opptjening kan gå videre til beregningsvilkår
