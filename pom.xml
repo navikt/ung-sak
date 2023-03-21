@@ -43,7 +43,7 @@
         <felles.version>1.1.0</felles.version>
         <swagger.version>2.2.3</swagger.version>
         <junit.version>5.9.2</junit.version>
-        <k9format.version>8.0.7</k9format.version>
+        <k9format.version>8.0.8</k9format.version>
          <jackson.version>2.14.2</jackson.version>
         <asm.version>9.4</asm.version>
         <kotlin-stdlib.version>1.8.10</kotlin-stdlib.version>
@@ -145,7 +145,7 @@
             <dependency>
                 <groupId>no.nav.k9.formidling</groupId>
                 <artifactId>formidling-kontrakt-jakarta</artifactId>
-                <version>0.0.26</version>
+                <version>0.0.29</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.foreldrepenger.abakus</groupId>
@@ -563,7 +563,7 @@
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>io.github.classgraph</groupId>
                 <artifactId>classgraph</artifactId>
-                <version>4.8.156</version>
+                <version>4.8.157</version>
             </dependency>
 
             <dependency>
@@ -584,7 +584,7 @@
             <dependency>
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
-                <version>42.5.4</version>
+                <version>42.6.0</version>
             </dependency>
             <dependency>
                 <groupId>no.nav</groupId>

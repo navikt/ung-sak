@@ -17,11 +17,9 @@ import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -52,7 +50,7 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
     private VilkårPeriodeFilterProvider periodeFilterProvider;
-    private boolean framoverhoppVedForlengelseIOpptjening;
+    private BeregningStegPeriodeFilter beregningStegPeriodeFilter;
 
     protected FastsettSkjæringstidspunktSteg() {
         // for CDI proxy
@@ -65,7 +63,7 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
                                           BehandlingRepository behandlingRepository,
                                           BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                           VilkårPeriodeFilterProvider periodeFilterProvider,
-                                          @KonfigVerdi(value = "PSB_FRAMOVERHOPP_VED_FORLENGELSE_OPPTJENING", defaultVerdi = "false") boolean framoverhoppVedForlengelseIOpptjening) {
+                                          BeregningStegPeriodeFilter beregningStegPeriodeFilter) {
 
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.fagsakRepository = fagsakRepository;
@@ -73,7 +71,7 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.periodeFilterProvider = periodeFilterProvider;
-        this.framoverhoppVedForlengelseIOpptjening = framoverhoppVedForlengelseIOpptjening;
+        this.beregningStegPeriodeFilter = beregningStegPeriodeFilter;
     }
 
     @Override
@@ -82,16 +80,8 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         var skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
         var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
-        var periodeFilter = periodeFilterProvider.getFilter(ref);
-
-        periodeFilter.ignorerAvslåttePerioder().ignorerForlengelseperioder();
         var perioderTilBeregning = new ArrayList<PeriodeTilVurdering>();
-        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter);
-
-        if (framoverhoppVedForlengelseIOpptjening || behandling.getFagsak().getSaksnummer().getVerdi().equals(HASTESAK_JANUAR_2023)) {
-            perioderTilVurdering = periodeFilter.filtrerPerioder(perioderTilVurdering.stream().map(PeriodeTilVurdering::getPeriode).toList(), VilkårType.OPPTJENINGSVILKÅRET);
-        }
-
+        var perioderTilVurdering = beregningStegPeriodeFilter.filtrerPerioder(ref, FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING);
         for (var periode : perioderTilVurdering) {
             if (periodeErUtenforFagsaksIntervall(periode.getPeriode(), behandling.getFagsak().getPeriode())) {
                 avslåVilkår(kontekst, Avslagsårsak.INGEN_BEREGNINGSREGLER_TILGJENGELIG_I_LØSNINGEN, periode.getPeriode());
