@@ -1,7 +1,8 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.KONTROLLER_FAKTA_BEREGNING;
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.PRECONDITION_BEREGNING;
-import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_VILKAR_BERGRUNN;
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_REF_BERGRUNN;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -57,8 +58,6 @@ import no.nav.k9.sak.ytelse.beregning.grunnlag.InputOverstyringPeriode;
 @BehandlingTypeRef
 @ApplicationScoped
 public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
-
-
     private static final Logger log = LoggerFactory.getLogger(VurderPreconditionBeregningSteg.class);
 
 
@@ -73,6 +72,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
     private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
     private VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
     private FastsettPGIPeriodeTjeneste fastsettPGIPeriodeTjeneste;
+    private KalkulusStartpunktUtleder kalkulusStartpunktUtleder;
 
 
     protected VurderPreconditionBeregningSteg() {
@@ -90,7 +90,8 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
                                            BeregningsgrunnlagTjeneste kalkulusTjeneste,
                                            BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
                                            VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
-                                           FastsettPGIPeriodeTjeneste fastsettPGIPeriodeTjeneste) {
+                                           FastsettPGIPeriodeTjeneste fastsettPGIPeriodeTjeneste,
+                                           KalkulusStartpunktUtleder kalkulusStartpunktUtleder) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
@@ -102,6 +103,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
         this.fastsettPGIPeriodeTjeneste = fastsettPGIPeriodeTjeneste;
+        this.kalkulusStartpunktUtleder = kalkulusStartpunktUtleder;
     }
 
     @Override
@@ -127,10 +129,10 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         // 6. avbryter alle aksjonspunkt i beregning som er åpne (aksjonspunkt reutledes på nytt ved behov)
         abrytÅpneBeregningaksjonspunkter(kontekst, behandling);
 
-        // 6. kopierer input overstyringer for migrering fra infotrygd
+        // 7. kopierer input overstyringer for migrering fra infotrygd
         kopierInputOverstyring(behandling);
 
-        // 7. Dekativerer PGI-periode dersom ikke lenger relevant
+        // 8. Dekativerer PGI-periode dersom ikke lenger relevant
         fastsettPGIPeriodeTjeneste.fjernPGIDersomIkkeRelevant(behandling.getId());
 
         return BehandleStegResultat.utførtMedAksjonspunktResultater(finnAksjonspunkter(behandling));
@@ -203,7 +205,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         var perioderTilVurderingIBeregning = periodeFilter.filtrerPerioder(vurdertePerioderIOpptjening, VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
             .stream().map(PeriodeTilVurdering::getPeriode).toList();
 
-        var opptjeningForBeregningTjeneste = finnOpptjeningForBeregningTjeneste(behandling);
+        var opptjeningForBeregningTjeneste = finnOpptjeningForBeregningTjeneste(BehandlingReferanse.fra(behandling));
         var grunnlag = iayTjeneste.hentGrunnlag(behandling.getId());
 
         var avslåttePerioder = vilkåret.getPerioder()
@@ -253,14 +255,15 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
             .orElseThrow(() -> new UnsupportedOperationException("VilkårsPerioderTilVurderingTjeneste ikke implementert for ytelse [" + ref.getFagsakYtelseType() + "], behandlingtype [" + ref.getBehandlingType() + "]"));
     }
 
-    private OpptjeningForBeregningTjeneste finnOpptjeningForBeregningTjeneste(Behandling behandling) {
-        FagsakYtelseType ytelseType = behandling.getFagsakYtelseType();
+    private OpptjeningForBeregningTjeneste finnOpptjeningForBeregningTjeneste(BehandlingReferanse behandlingRef) {
+        FagsakYtelseType ytelseType = behandlingRef.getFagsakYtelseType();
         return FagsakYtelseTypeRef.Lookup.find(opptjeningForBeregningTjeneste, ytelseType)
             .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + OpptjeningForBeregningTjeneste.class.getSimpleName() + " for ytelseType=" + ytelseType));
     }
 
     private List<AksjonspunktResultat> finnAksjonspunkter(Behandling behandling) {
         FagsakYtelseType ytelseType = behandling.getFagsakYtelseType();
+
         var tjeneste = FagsakYtelseTypeRef.Lookup.find(aksjonspunktUtledere, ytelseType);
         return tjeneste.map(utleder -> utleder.utledAksjonspunkterFor(new AksjonspunktUtlederInput(BehandlingReferanse.fra(behandling))))
             .orElse(Collections.emptyList());
@@ -283,22 +286,26 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
      * @param ref      behandlingreferanse
      */
     private void kopierGrunnlagForForlengelseperioder(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
+        var perioderPrStartpunkt = kalkulusStartpunktUtleder.utledPerioderPrStartpunkt(ref);
         if (ref.getBehandlingType().equals(BehandlingType.REVURDERING)) {
             var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref);
             periodeFilter.ignorerAvslåttePerioder();
-            var allePerioder = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter);
-            var forlengelseperioder = allePerioder.stream().filter(PeriodeTilVurdering::erForlengelse).collect(Collectors.toSet());
-            if (!forlengelseperioder.isEmpty()) {
-                log.info("Kopierer beregning for forlengelser {}", forlengelseperioder);
-                kalkulusTjeneste.kopier(ref, forlengelseperioder, StegType.VURDER_VILKAR_BERGRUNN);
+            var startpunktVurderRefusjon = perioderPrStartpunkt.get(VURDER_REF_BERGRUNN);
+            if (!startpunktVurderRefusjon.isEmpty()) {
+                log.info("Kopierer beregning for startpunkt vurder refusjon {}", startpunktVurderRefusjon);
+                kalkulusTjeneste.kopier(ref, startpunktVurderRefusjon, StegType.VURDER_VILKAR_BERGRUNN);
                 var originalBehandlingId = ref.getOriginalBehandlingId().orElseThrow();
                 beregningsgrunnlagVilkårTjeneste.kopierVilkårresultatFraForrigeBehandling(
                     kontekst,
                     originalBehandlingId,
-                    forlengelseperioder.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet()));
+                    startpunktVurderRefusjon.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet()));
+            }
+            var startpunktKontrollerFakta = perioderPrStartpunkt.get(KONTROLLER_FAKTA_BEREGNING);
+            if (!startpunktKontrollerFakta.isEmpty()) {
+                log.info("Kopierer beregning for startpunkt kontroller fakta {}", startpunktKontrollerFakta);
+                kalkulusTjeneste.kopier(ref, startpunktKontrollerFakta, StegType.FASTSETT_STP_BER);
             }
         }
     }
-
 
 }

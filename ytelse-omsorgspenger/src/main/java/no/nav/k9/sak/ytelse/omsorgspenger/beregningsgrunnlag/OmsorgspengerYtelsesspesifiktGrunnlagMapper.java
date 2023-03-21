@@ -19,6 +19,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagYtel
 import no.nav.folketrygdloven.kalkulus.beregning.v1.AktivitetDto;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.OmsorgspengerGrunnlag;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PeriodeMedUtbetalingsgradDto;
+import no.nav.folketrygdloven.kalkulus.beregning.v1.SøktPeriode;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.UtbetalingsgradPrAktivitetDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Aktør;
 import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
@@ -26,6 +27,9 @@ import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Organisasjon;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
 import no.nav.folketrygdloven.kalkulus.kodeverk.UttakArbeidType;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
 import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
 import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
@@ -78,8 +82,9 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
     @Override
     public OmsorgspengerGrunnlag lagYtelsespesifiktGrunnlag(BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode) {
         List<Aktivitet> aktiviteter = hentAktiviteter(ref);
+
         if (aktiviteter.isEmpty()) {
-            return new OmsorgspengerGrunnlag(Collections.emptyList());
+            return new OmsorgspengerGrunnlag(Collections.emptyList(), Collections.emptyList());
         }
 
         // Kalkulus forventer å ikke få duplikate arbeidsforhold, så vi samler alle perioder pr arbeidsforhold/aktivitet
@@ -97,7 +102,30 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
             })
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
-        return new OmsorgspengerGrunnlag(utbetalingsgradPrAktivitet);
+
+        return new OmsorgspengerGrunnlag(utbetalingsgradPrAktivitet, mapSøktePerioder(aktiviteter));
+    }
+
+    private static List<SøktPeriode> mapSøktePerioder(List<Aktivitet> aktiviteter) {
+        var harBrukerSøktSegmenter = aktiviteter.stream()
+            .flatMap(a -> a.getUttaksperioder().stream())
+            .filter(p -> p.getUtbetalingsgrad().compareTo(BigDecimal.ZERO) > 0)
+            .map(p -> new LocalDateSegment<>(p.getPeriode().getFom(), p.getPeriode().getTom(), erKravFraBruker(p)))
+            .toList();
+        var brukerHarSøktTidslinje = new LocalDateTimeline<>(harBrukerSøktSegmenter, ellerKombinator());
+
+        return brukerHarSøktTidslinje.toSegments()
+            .stream().map(s -> new SøktPeriode(new Periode(s.getFom(), s.getTom()), s.getValue()))
+            .toList();
+    }
+
+    private static boolean erKravFraBruker(Uttaksperiode p) {
+        return Boolean.FALSE.equals(p.getRefusjonTilArbeidsgiver());
+    }
+
+    private static LocalDateSegmentCombinator<Boolean, Boolean, Boolean> ellerKombinator() {
+        // sjekker ikkje null sidan den kun brukes i konstruktør
+        return (di, lhs, rhs) -> new LocalDateSegment<>(di, lhs.getValue() || rhs.getValue());
     }
 
     @NotNull

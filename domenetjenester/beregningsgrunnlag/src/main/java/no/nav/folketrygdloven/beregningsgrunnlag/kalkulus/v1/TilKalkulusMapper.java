@@ -11,8 +11,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.FinnPGITilgjengeligPåVedtakstidspunktet;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter.OpptjeningPeriode;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Aktør;
@@ -368,7 +368,7 @@ public class TilKalkulusMapper {
     }
 
     private static boolean gjelderSøktYtelse(Permisjon p, DatoIntervallEntitet vilkårsPeriode) {
-        return p.getPermisjonsbeskrivelseType().equals(no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType.VELFERDSPERMISJON) &&
+        return no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType.K9_VELFERDSPERMISJON.contains(p.getPermisjonsbeskrivelseType()) &&
             p.getProsentsats().getVerdi().compareTo(BigDecimal.valueOf(100)) >= 0 && p.getPeriode().overlapper(vilkårsPeriode);
     }
 

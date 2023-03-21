@@ -1,20 +1,17 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet;
 
 import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.GODKJENT;
-import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.IKKE_GJENNOMGÅTT_OPPLÆRING;
 import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.IKKE_GODKJENT;
-import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.IKKE_GODKJENT_INSTITUSJON;
-import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.IKKE_GODKJENT_SYKDOMSVILKÅR;
 import static no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.nødvendighet.NødvendighetGodkjenningStatus.MANGLER_VURDERING;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,7 +51,7 @@ class VurderNødvendighetTidslinjeUtlederTest {
     }
 
     private Set<PerioderFraSøknad> setupEnkelKursperiode() {
-        KursPeriode kursPeriode = lagKursperiode(søknadsperiodeFom, søknadsperiodeTom, "institusjon", null);
+        KursPeriode kursPeriode = lagKursperiode(søknadsperiodeFom, søknadsperiodeTom);
         return Set.of(setupPerioderFraSøknad(journalpost1, List.of(kursPeriode)));
     }
 
@@ -70,13 +67,13 @@ class VurderNødvendighetTidslinjeUtlederTest {
             kursperioder);
     }
 
-    private KursPeriode lagKursperiode(LocalDate fom, LocalDate tom, String institusjon, UUID uuid) {
-        return new KursPeriode(fom, tom, null, null, institusjon, uuid, "beskrivelse");
+    private KursPeriode lagKursperiode(LocalDate fom, LocalDate tom) {
+        return new KursPeriode(fom, tom, null, null, null, null, null);
     }
 
     private VurdertOpplæringGrunnlag setupVurderingsgrunnlag(List<VurdertOpplæring> vurdertOpplæring) {
         VurdertOpplæringHolder vurdertOpplæringHolder = new VurdertOpplæringHolder(vurdertOpplæring);
-        return new VurdertOpplæringGrunnlag(1344L, null, vurdertOpplæringHolder, null);
+        return new VurdertOpplæringGrunnlag(1344L, null, vurdertOpplæringHolder, null, null);
     }
 
     @Test
@@ -97,7 +94,7 @@ class VurderNødvendighetTidslinjeUtlederTest {
     @Test
     void vurderingGodkjent() {
         Set<PerioderFraSøknad> perioderFraSøknad = setupEnkelKursperiode();
-        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost1, true, "");
+        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost1, true, "", "", LocalDateTime.now());
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæring));
 
         var vilkårResultatBuilder = new VilkårResultatBuilder();
@@ -114,7 +111,7 @@ class VurderNødvendighetTidslinjeUtlederTest {
     @Test
     void vurderingIkkeGodkjent() {
         Set<PerioderFraSøknad> perioderFraSøknad = setupEnkelKursperiode();
-        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost1, false, "");
+        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost1, false, "", "", LocalDateTime.now());
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæring));
 
         var vilkårResultatBuilder = new VilkårResultatBuilder();
@@ -131,7 +128,7 @@ class VurderNødvendighetTidslinjeUtlederTest {
     @Test
     void vurderingMangler() {
         Set<PerioderFraSøknad> perioderFraSøknad = setupEnkelKursperiode();
-        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost2, true, "");
+        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost2, true, "", "", LocalDateTime.now());
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæring));
 
         var vilkårResultatBuilder = new VilkårResultatBuilder();
@@ -147,11 +144,11 @@ class VurderNødvendighetTidslinjeUtlederTest {
 
     @Test
     void vurderingManglerDelvis() {
-        KursPeriode kursPeriode1 = lagKursperiode(søknadsperiodeFom, søknadsperiodeTom.minusDays(1), "her", null);
-        KursPeriode kursPeriode2 = lagKursperiode(søknadsperiodeTom, søknadsperiodeTom, "der", null);
+        KursPeriode kursPeriode1 = lagKursperiode(søknadsperiodeFom, søknadsperiodeTom.minusDays(1));
+        KursPeriode kursPeriode2 = lagKursperiode(søknadsperiodeTom, søknadsperiodeTom);
         PerioderFraSøknad perioderFraSøknad1 = setupPerioderFraSøknad(journalpost1, List.of(kursPeriode1));
         PerioderFraSøknad perioderFraSøknad2 = setupPerioderFraSøknad(journalpost2, List.of(kursPeriode2));
-        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost1, true, "");
+        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost1, true, "", "", LocalDateTime.now());
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæring));
 
         var vilkårResultatBuilder = new VilkårResultatBuilder();
@@ -170,7 +167,7 @@ class VurderNødvendighetTidslinjeUtlederTest {
     @Test
     void ikkeGodkjentInstitusjon() {
         Set<PerioderFraSøknad> perioderFraSøknad = setupEnkelKursperiode();
-        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost1, true, "");
+        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost1, true, "", "", LocalDateTime.now());
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæring));
 
         var vilkårResultatBuilder = new VilkårResultatBuilder();
@@ -181,13 +178,13 @@ class VurderNødvendighetTidslinjeUtlederTest {
 
         var resultat = vurderNødvendighetTidslinjeUtleder.utled(vilkårene, perioderFraSøknad, vurdertOpplæringGrunnlag, søknadsperiode);
         assertThat(resultat).isNotNull();
-        assertTidslinje(resultat, IKKE_GODKJENT_INSTITUSJON);
+        assertThat(resultat).isEmpty();
     }
 
     @Test
     void ikkeGodkjentSykdom() {
         Set<PerioderFraSøknad> perioderFraSøknad = setupEnkelKursperiode();
-        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost1, true, "");
+        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost1, true, "", "", LocalDateTime.now());
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæring));
 
         var vilkårResultatBuilder = new VilkårResultatBuilder();
@@ -198,13 +195,13 @@ class VurderNødvendighetTidslinjeUtlederTest {
 
         var resultat = vurderNødvendighetTidslinjeUtleder.utled(vilkårene, perioderFraSøknad, vurdertOpplæringGrunnlag, søknadsperiode);
         assertThat(resultat).isNotNull();
-        assertTidslinje(resultat, IKKE_GODKJENT_SYKDOMSVILKÅR);
+        assertThat(resultat).isEmpty();
     }
 
     @Test
     void ikkeGodkjentOpplæring() {
         Set<PerioderFraSøknad> perioderFraSøknad = setupEnkelKursperiode();
-        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost1, true, "");
+        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost1, true, "", "", LocalDateTime.now());
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæring));
 
         var vilkårResultatBuilder = new VilkårResultatBuilder();
@@ -215,13 +212,13 @@ class VurderNødvendighetTidslinjeUtlederTest {
 
         var resultat = vurderNødvendighetTidslinjeUtleder.utled(vilkårene, perioderFraSøknad, vurdertOpplæringGrunnlag, søknadsperiode);
         assertThat(resultat).isNotNull();
-        assertTidslinje(resultat, IKKE_GJENNOMGÅTT_OPPLÆRING);
+        assertThat(resultat).isEmpty();
     }
 
     @Test
     void delvisGodkjentOpplæring() {
         Set<PerioderFraSøknad> perioderFraSøknad = setupEnkelKursperiode();
-        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost1, true, "");
+        VurdertOpplæring vurdertOpplæring = new VurdertOpplæring(journalpost1, true, "", "", LocalDateTime.now());
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæring));
 
         var vilkårResultatBuilder = new VilkårResultatBuilder();
@@ -235,10 +232,11 @@ class VurderNødvendighetTidslinjeUtlederTest {
         assertThat(resultat).isNotNull();
         var forventetGodkjentTidslinje = resultat.intersection(new LocalDateTimeline<>(søknadsperiodeTom.minusWeeks(1).plusDays(1), søknadsperiodeTom, true));
         assertTidslinje(forventetGodkjentTidslinje, GODKJENT);
-        assertTidslinje(resultat.disjoint(forventetGodkjentTidslinje), IKKE_GJENNOMGÅTT_OPPLÆRING);
+        assertThat(resultat.disjoint(forventetGodkjentTidslinje)).isEmpty();
     }
 
     private void assertTidslinje(LocalDateTimeline<NødvendighetGodkjenningStatus> tidslinje, NødvendighetGodkjenningStatus forventetStatus) {
+        assertThat(tidslinje).isNotEmpty();
         assertThat(tidslinje.disjoint(tidslinje.filterValue(v -> Objects.equals(v, forventetStatus)))).isEmpty();
     }
 }

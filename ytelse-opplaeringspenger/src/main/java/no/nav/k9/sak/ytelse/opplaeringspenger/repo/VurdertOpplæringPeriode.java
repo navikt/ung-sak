@@ -1,21 +1,19 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.repo;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 import org.hibernate.annotations.Immutable;
 
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
@@ -40,12 +38,14 @@ public class VurdertOpplæringPeriode extends BaseEntitet {
     @Column(name = "gjennomfoert_opplaering", nullable = false)
     private Boolean gjennomførtOpplæring;
 
-    @JoinColumn(name = "vurdert_reisetid_id", unique = true)
-    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
-    private VurdertReisetid reisetid;
-
     @Column(name = "begrunnelse", nullable = false)
     private String begrunnelse;
+
+    @Column(name = "vurdert_av", nullable = false)
+    private String vurdertAv;
+
+    @Column(name = "vurdert_tid", nullable = false)
+    private LocalDateTime vurdertTidspunkt;
 
     @Version
     @Column(name = "versjon", nullable = false)
@@ -54,25 +54,24 @@ public class VurdertOpplæringPeriode extends BaseEntitet {
     VurdertOpplæringPeriode() {
     }
 
-    public VurdertOpplæringPeriode(DatoIntervallEntitet periode, Boolean gjennomførtOpplæring, VurdertReisetid reisetid, String begrunnelse) {
+    public VurdertOpplæringPeriode(DatoIntervallEntitet periode, Boolean gjennomførtOpplæring, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         this.periode = periode;
         this.gjennomførtOpplæring = gjennomførtOpplæring;
-        this.reisetid = reisetid;
         this.begrunnelse = begrunnelse;
+        this.vurdertAv = vurdertAv;
+        this.vurdertTidspunkt = vurdertTidspunkt;
     }
 
-    public VurdertOpplæringPeriode(LocalDate fom, LocalDate tom, Boolean gjennomførtOpplæring, VurdertReisetid reisetid, String begrunnelse) {
-        this.periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
-        this.gjennomførtOpplæring = gjennomførtOpplæring;
-        this.begrunnelse = begrunnelse;
-        this.reisetid = reisetid;
+    public VurdertOpplæringPeriode(LocalDate fom, LocalDate tom, Boolean gjennomførtOpplæring, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt) {
+        this(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), gjennomførtOpplæring, begrunnelse, vurdertAv, vurdertTidspunkt);
     }
 
     public VurdertOpplæringPeriode(VurdertOpplæringPeriode that) {
         this.periode = that.periode;
         this.gjennomførtOpplæring = that.gjennomførtOpplæring;
         this.begrunnelse = that.begrunnelse;
-        this.reisetid = that.reisetid != null ? new VurdertReisetid(that.reisetid) : null;
+        this.vurdertAv = that.vurdertAv;
+        this.vurdertTidspunkt = that.vurdertTidspunkt;
     }
 
     public DatoIntervallEntitet getPeriode() {
@@ -87,8 +86,12 @@ public class VurdertOpplæringPeriode extends BaseEntitet {
         return begrunnelse;
     }
 
-    public VurdertReisetid getReisetid() {
-        return reisetid;
+    public String getVurdertAv() {
+        return vurdertAv;
+    }
+
+    public LocalDateTime getVurdertTidspunkt() {
+        return vurdertTidspunkt;
     }
 
     @Override
@@ -98,12 +101,13 @@ public class VurdertOpplæringPeriode extends BaseEntitet {
         VurdertOpplæringPeriode that = (VurdertOpplæringPeriode) o;
         return Objects.equals(periode, that.periode)
             && Objects.equals(gjennomførtOpplæring, that.gjennomførtOpplæring)
-            && Objects.equals(reisetid, that.reisetid)
-            && Objects.equals(begrunnelse, that.begrunnelse);
+            && Objects.equals(begrunnelse, that.begrunnelse)
+            && Objects.equals(vurdertAv, that.vurdertAv)
+            && Objects.equals(vurdertTidspunkt, that.vurdertTidspunkt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode, gjennomførtOpplæring, reisetid, begrunnelse);
+        return Objects.hash(periode, gjennomførtOpplæring, begrunnelse, vurdertAv, vurdertTidspunkt);
     }
 }

@@ -2,7 +2,9 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.Optional;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -15,9 +17,9 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.SykdomGrunnlagSammenlikningsresultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.SykdomSamletVurdering;
@@ -61,32 +63,32 @@ public class MedisinskGrunnlagTjeneste {
         return hentOmsorgenForTidslinje(behandlingId).filterValue(v -> v.getGjeldendeUtfall() == Utfall.IKKE_OPPFYLT);
     }
 
-    public List<Periode> hentManglendeOmsorgenForPerioder(Long behandlingId) {
-        return TidslinjeUtil.tilPerioder(hentManglendeOmsorgenForTidslinje(behandlingId));
+    public NavigableSet<DatoIntervallEntitet> hentManglendeOmsorgenForPerioder(Long behandlingId) {
+        return TidslinjeUtil.tilDatoIntervallEntiteter(hentManglendeOmsorgenForTidslinje(behandlingId));
     }
 
     public SykdomGrunnlagSammenlikningsresultat utledRelevanteEndringerSidenForrigeGrunnlag(Behandling behandling) {
         final Optional<MedisinskGrunnlag> grunnlagBehandling = medisinskGrunnlagRepository.hentGrunnlagForBehandling(behandling.getUuid());
 
-        final List<Periode> søknadsperioderSomSkalFjernes = hentManglendeOmsorgenForPerioder(behandling.getId());
+        final NavigableSet<DatoIntervallEntitet> søknadsperioderSomSkalFjernes = hentManglendeOmsorgenForPerioder(behandling.getId());
         final MedisinskGrunnlagsdata utledetGrunnlag = medisinskGrunnlagRepository.utledGrunnlag(behandling.getFagsak().getSaksnummer(), behandling.getUuid(), behandling.getFagsak().getPleietrengendeAktørId(),
-            grunnlagBehandling.map(bg -> bg.getGrunnlagsdata().getSøktePerioder().stream().map(sp -> new Periode(sp.getFom(), sp.getTom())).collect(Collectors.toList())).orElse(List.of()),
+            grunnlagBehandling.map(bg -> bg.getGrunnlagsdata().getSøktePerioder().stream().map(sp -> DatoIntervallEntitet.fraOgMedTilOgMed(sp.getFom(), sp.getTom())).collect(Collectors.toCollection(TreeSet::new))).orElse(new TreeSet<>()),
             søknadsperioderSomSkalFjernes
             );
 
         return sammenlignGrunnlag(grunnlagBehandling.map(MedisinskGrunnlag::getGrunnlagsdata), utledetGrunnlag);
     }
 
-    public SykdomGrunnlagSammenlikningsresultat utledRelevanteEndringerSidenForrigeBehandling(Behandling behandling, List<Periode> nyeVurderingsperioder) {
+    public SykdomGrunnlagSammenlikningsresultat utledRelevanteEndringerSidenForrigeBehandling(Behandling behandling, NavigableSet<DatoIntervallEntitet> nyeVurderingsperioder) {
         final Optional<MedisinskGrunnlag> forrigeGrunnlagBehandling = medisinskGrunnlagRepository.hentGrunnlagFraForrigeBehandling(behandling.getFagsak().getSaksnummer(), behandling.getUuid());
-        final List<Periode> søknadsperioderSomSkalFjernes = hentManglendeOmsorgenForPerioder(behandling.getId());
+        final NavigableSet<DatoIntervallEntitet> søknadsperioderSomSkalFjernes = hentManglendeOmsorgenForPerioder(behandling.getId());
         final MedisinskGrunnlagsdata utledetGrunnlag = medisinskGrunnlagRepository.utledGrunnlag(behandling.getFagsak().getSaksnummer(), behandling.getUuid(), behandling.getFagsak().getPleietrengendeAktørId(), nyeVurderingsperioder, søknadsperioderSomSkalFjernes);
 
         return sammenlignGrunnlag(forrigeGrunnlagBehandling.map(MedisinskGrunnlag::getGrunnlagsdata), utledetGrunnlag);
     }
 
-    public MedisinskGrunnlagsdata utledGrunnlagMedManglendeOmsorgFjernet(Saksnummer saksnummer, UUID behandlingUuid, Long behandlingId, AktørId pleietrengende, List<Periode> vurderingsperioder) {
-        final List<Periode> søknadsperioderSomSkalFjernes = hentManglendeOmsorgenForPerioder(behandlingId);
+    public MedisinskGrunnlagsdata utledGrunnlagMedManglendeOmsorgFjernet(Saksnummer saksnummer, UUID behandlingUuid, Long behandlingId, AktørId pleietrengende, NavigableSet<DatoIntervallEntitet> vurderingsperioder) {
+        final NavigableSet<DatoIntervallEntitet> søknadsperioderSomSkalFjernes = hentManglendeOmsorgenForPerioder(behandlingId);
         return medisinskGrunnlagRepository.utledGrunnlag(saksnummer, behandlingUuid, pleietrengende, vurderingsperioder, søknadsperioderSomSkalFjernes);
     }
 
@@ -110,7 +112,7 @@ public class MedisinskGrunnlagTjeneste {
         final LocalDateTimeline<SykdomSamletVurdering> nyBehandlingTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(utledetGrunnlag);
         final LocalDateTimeline<Boolean> endringerSidenForrigeBehandling = SykdomSamletVurdering.finnGrunnlagsforskjeller(forrigeGrunnlagTidslinje, nyBehandlingTidslinje);
 
-        final LocalDateTimeline<Boolean> søktePerioderTimeline = TidslinjeUtil.tilTidslinjeKomprimert(utledetGrunnlag.getSøktePerioder().stream().map(p -> new Periode(p.getFom(), p.getTom())).collect(Collectors.toList()));
+        final LocalDateTimeline<Boolean> søktePerioderTimeline = TidslinjeUtil.tilTidslinjeKomprimert(utledetGrunnlag.getSøktePerioder().stream().map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFom(), p.getTom())).collect(Collectors.toCollection(TreeSet::new)));
         return endringerSidenForrigeBehandling.intersection(søktePerioderTimeline);
     }
 

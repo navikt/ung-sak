@@ -12,6 +12,9 @@ import java.util.TreeSet;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -39,6 +42,7 @@ import no.nav.k9.sak.typer.ArbeidsforholdRef;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
@@ -46,6 +50,8 @@ import no.nav.k9.sak.ytelse.beregning.grunnlag.KompletthetPeriode;
 
 @ApplicationScoped
 public class KompletthetForBeregningTjeneste {
+
+    private static Logger LOGGER = LoggerFactory.getLogger(KompletthetForBeregningTjeneste.class);
 
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning;
@@ -111,7 +117,10 @@ public class KompletthetForBeregningTjeneste {
             return perioderMedManglendeVedlegg;
         }
 
-        var inntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(ref.getSaksnummer());
+        var inntektsmeldinger = iayTjeneste.hentInntektsmeldingerKommetTomBehandling(ref.getSaksnummer(), ref.getBehandlingId());
+        var journalpostIds = inntektsmeldinger.stream().map(Inntektsmelding::getJournalpostId).toList();
+        LOGGER.info("Tar hensyn til inntektsmeldinger i kompletthetvurdering: " + journalpostIds);
+
 
         // For alle relevanteperioder vurder kompletthet
         for (DatoIntervallEntitet periode : vilkårsPerioder) {
@@ -146,8 +155,8 @@ public class KompletthetForBeregningTjeneste {
      * Inntektsmeldinger for perioder fra infotrygd vil ha opprinnelig skjæringstidspunkt oppgitt i inntektsmeldingen og ikke i skjæringstidspunktet i k9-sak.
      * Vi sier her at vi ser på inntektsmeldinger som er 2 år og 4 mnd gamle.
      *
-     * @param opprinneligVilkårsperiode     Opprinnelig vilkårsperiode
-     * @param stpMigrertFraInfotrygd Skjæringstidspunkt som er migrert fra infotrygd
+     * @param opprinneligVilkårsperiode Opprinnelig vilkårsperiode
+     * @param stpMigrertFraInfotrygd    Skjæringstidspunkt som er migrert fra infotrygd
      * @return LocaldateSegment for relevant periode for vilkårsperiode
      */
     private LocalDateSegment<Boolean> utvidPeriodeForPeriodeFraInfotrygd(LocalDateInterval opprinneligVilkårsperiode, Optional<LocalDate> stpMigrertFraInfotrygd) {

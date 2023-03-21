@@ -71,28 +71,31 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
+import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
 import no.nav.k9.sak.hendelse.stønadstatistikk.StønadstatistikkService;
 import no.nav.k9.sak.kontrakt.FeilDto;
 import no.nav.k9.sak.kontrakt.KortTekst;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto;
+import no.nav.k9.sak.kontrakt.mottak.AktørListeDto;
 import no.nav.k9.sak.kontrakt.stønadstatistikk.StønadstatistikkSerializer;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tasks.OpprettManuellRevurderingTask;
 import no.nav.k9.sak.web.app.tjenester.behandling.SjekkProsessering;
+import no.nav.k9.sak.web.app.tjenester.fordeling.FordelRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.rapportering.DriftLesetilgangVurderer;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.frisinn.mottak.FrisinnSøknadInnsending;
 import no.nav.k9.sak.ytelse.frisinn.mottak.FrisinnSøknadMottaker;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
 import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer;
@@ -130,6 +133,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
     private DriftLesetilgangVurderer lesetilgangVurderer;
 
+    private PersonopplysningRepository personopplysningRepository;
+
     public ForvaltningMidlertidigDriftRestTjeneste() {
         // For Rest-CDI
     }
@@ -145,7 +150,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                                                    SjekkProsessering sjekkProsessering,
                                                    EntityManager entityManager,
                                                    StønadstatistikkService stønadstatistikkService,
-                                                   DriftLesetilgangVurderer lesetilgangVurderer) {
+                                                   DriftLesetilgangVurderer lesetilgangVurderer,
+                                                   PersonopplysningRepository personopplysningRepository) {
 
         this.frisinnSøknadMottaker = frisinnSøknadMottaker;
         this.tpsTjeneste = tpsTjeneste;
@@ -158,6 +164,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         this.entityManager = entityManager;
         this.stønadstatistikkService = stønadstatistikkService;
         this.lesetilgangVurderer = lesetilgangVurderer;
+        this.personopplysningRepository = personopplysningRepository;
     }
 
     /**
@@ -193,7 +200,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             .inntekter(lagDummyInntekt(manuellSøknadDto))
             .søknadsperiode(manuellSøknadDto.getPeriode())
             .mottattDato(ZonedDateTime.now(ZoneId.of("Europe/Paris")))
-            .søker(no.nav.k9.søknad.felles.personopplysninger.Søker.builder().norskIdentitetsnummer(NorskIdentitetsnummer.of(fnr.getIdent())).build())
+            .søker(new no.nav.k9.søknad.felles.personopplysninger.Søker(NorskIdentitetsnummer.of(fnr.getIdent())))
             .build();
         var valideringsfeil = validerSøknad(fagsak, søknad);
         if (valideringsfeil.isPresent()) {
@@ -212,6 +219,27 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     }
 
     @POST
+    @Path("/beskyttAktoerId")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(description = "Beskytt aktørid og oppdaterer nødvendige tabeller", tags = "forvaltning", responses = {
+        @ApiResponse(responseCode = "200", description = "AktørId er endret."),
+        @ApiResponse(responseCode = "400", description = "AktørId er uendret."),
+        @ApiResponse(responseCode = "500", description = "Feilet pga ukjent feil.")
+    })
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = DRIFT)
+    public Response beskyttAktoerId(@Parameter(description = "Liste med aktør-IDer") @TilpassetAbacAttributt(supplierClass = FordelRestTjeneste.AbacDataSupplier.class) @Valid AktørListeDto aktører) {
+        /*
+        for (AktørId aktørId : aktører.getAktører()) {
+            personopplysningRepository.beskyttAktørId(aktørId);
+        }
+
+        return Response.ok().build();
+        */
+        throw new IllegalStateException("Dette kallet er deaktivert.");
+    }
+
+    @POST
     @Path("/stonadstatistikk")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
@@ -222,7 +250,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         @NotNull
         @Valid
         @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-            BehandlingIdDto behandlingIdDto) {
+        BehandlingIdDto behandlingIdDto) {
 
         final var behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
         final String json = StønadstatistikkSerializer.toJson(stønadstatistikkService.lagHendelse(behandling.getId()));
@@ -364,7 +392,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
         return Response.ok(saksnummerliste).build();
     }
-    
+
     @GET
     @Path("/saker-med-feil4")
     @Produces(MediaType.TEXT_PLAIN)
@@ -412,7 +440,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     private boolean erFraBrukerdialogPsb(Søknad søknad) {
         return søknad.getJournalposter() == null || søknad.getJournalposter().isEmpty();
     }
-    
+
     private boolean harOmsorgstilbud(PleiepengerSyktBarn ytelse) {
         if (ytelse.getTilsynsordning() == null) {
             return false;
@@ -421,9 +449,9 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             return false;
         }
         return ytelse.getTilsynsordning().getPerioder()
-                .entrySet()
-                .stream()
-                .anyMatch(p -> !p.getValue().getEtablertTilsynTimerPerDag().isZero());
+            .entrySet()
+            .stream()
+            .anyMatch(p -> !p.getValue().getEtablertTilsynTimerPerDag().isZero());
     }
 
     private boolean harReellPeriodeMedNullNormal(PleiepengerSyktBarn soknad) {
@@ -439,9 +467,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     }
 
     private boolean erIkkeHelg(Periode periode) {
-        final LocalDateTimeline<Boolean> helePerioden = new LocalDateTimeline<>(periode.getFraOgMed(), periode.getTilOgMed(), Boolean.TRUE);
-        final LocalDateTimeline<Boolean> kunHelger = Hjelpetidslinjer.lagTidslinjeMedKunHelger(helePerioden);
-        return !helePerioden.disjoint(kunHelger).isEmpty();
+        LocalDateTimeline<Boolean> ukedagerTidslinje = Hjelpetidslinjer.lagUkestidslinjeForMandagTilFredag(periode.getFraOgMed(), periode.getTilOgMed());
+        return !ukedagerTidslinje.isEmpty();
     }
 
     @GET
@@ -782,7 +809,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                 var sb = new StringBuilder(200);
                 try (BufferedReader br = new BufferedReader(
                     new InputStreamReader(inputStream))) {
-                    sb.append(br.readLine()).append('\n');
+                    br.lines().forEach(l -> sb.append(l).append('\n'));
                 }
 
                 return new OpprettManuellRevurdering(sb.toString());

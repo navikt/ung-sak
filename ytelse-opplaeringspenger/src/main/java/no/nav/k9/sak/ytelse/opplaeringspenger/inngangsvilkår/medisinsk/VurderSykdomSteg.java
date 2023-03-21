@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.TreeSet;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -41,10 +41,10 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.RyddVilkårTyper;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.VilkårTidslinjeUtleder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.medisinsk.regelmodell.MedisinskVilkårResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomAksjonspunkt;
@@ -52,7 +52,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
 
 @BehandlingStegRef(value = BehandlingStegType.VURDER_MEDISINSKE_VILKÅR)
 @BehandlingTypeRef
@@ -120,8 +119,8 @@ public class VurderSykdomSteg implements BehandlingSteg {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)));
         }
 
+        klippBortPerioderSomIkkeHarBehandlingsgrunnlag(vilkårBuilder, tidslinjeUtenInstitusjonsvilkårOppfylt);
         vurder(kontekst, medisinskGrunnlag, vilkårBuilder, perioderTilVurdering);
-        leggTilResultatIkkeGodkjentInstitusjon(vilkårBuilder, tidslinjeUtenInstitusjonsvilkårOppfylt);
         resultatBuilder.leggTil(vilkårBuilder);
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), resultatBuilder.build());
 
@@ -134,13 +133,8 @@ public class VurderSykdomSteg implements BehandlingSteg {
             behandling.getUuid(),
             behandling.getAktørId(),
             behandling.getFagsak().getPleietrengendeAktørId(),
-            perioderSamlet.stream()
-                .map(p -> new Periode(p.getFomDato(), p.getTomDato()))
-                .collect(Collectors.toList()),
-            //TODO tom liste her?
-            perioderSamlet.stream()
-                .map(p -> new Periode(p.getFomDato(), p.getTomDato()))
-                .collect(Collectors.toList())
+            perioderSamlet,
+            new TreeSet<>()
         );
     }
 
@@ -151,11 +145,8 @@ public class VurderSykdomSteg implements BehandlingSteg {
         return trengerInput || førsteGangManuellRevurdering;
     }
 
-    private void leggTilResultatIkkeGodkjentInstitusjon(VilkårBuilder builder, LocalDateTimeline<Boolean> tidslinje) {
-        TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje)
-            .forEach(datoIntervallEntitet -> builder.leggTil(builder.hentBuilderFor(datoIntervallEntitet)
-                .medUtfall(Utfall.IKKE_OPPFYLT)
-                .medAvslagsårsak(Avslagsårsak.IKKE_GODKJENT_INSTITUSJON)));
+    private void klippBortPerioderSomIkkeHarBehandlingsgrunnlag(VilkårBuilder builder, LocalDateTimeline<Boolean> tidslinje) {
+        TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje).forEach(builder::tilbakestill);
     }
 
     private void vurder(BehandlingskontrollKontekst kontekst,
@@ -190,7 +181,7 @@ public class VurderSykdomSteg implements BehandlingSteg {
                 .toList());
 
             var fullstendigAvslagsTidslinje = new LocalDateTimeline<>(timeline.toSegments());
-            timeline = timeline.disjoint(Hjelpetidslinjer.lagTidslinjeMedKunHelger(timeline));
+            timeline = Hjelpetidslinjer.fjernHelger(timeline);
             var tidslinjeMedHullSomMangler = Hjelpetidslinjer.utledHullSomMåTettes(timeline, new PåTversAvHelgErKantIKantVurderer());
             timeline = timeline.combine(tidslinjeMedHullSomMangler, StandardCombinators::coalesceRightHandSide, JoinStyle.CROSS_JOIN);
             var manglendeAvslag = fullstendigAvslagsTidslinje.disjoint(timeline);

@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.repo;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 import org.hibernate.annotations.Immutable;
@@ -28,20 +29,22 @@ public class VurdertReisetid extends BaseEntitet {
 
     @Embedded
     @AttributeOverrides({
-        @AttributeOverride(name = "fomDato", column = @Column(name = "reise_til_fom")),
-        @AttributeOverride(name = "tomDato", column = @Column(name = "reise_til_tom"))
+        @AttributeOverride(name = "fomDato", column = @Column(name = "fom", nullable = false)),
+        @AttributeOverride(name = "tomDato", column = @Column(name = "tom", nullable = false))
     })
-    private DatoIntervallEntitet reiseperiodeTil;
+    private DatoIntervallEntitet periode;
 
-    @Embedded
-    @AttributeOverrides({
-        @AttributeOverride(name = "fomDato", column = @Column(name = "reise_hjem_fom")),
-        @AttributeOverride(name = "tomDato", column = @Column(name = "reise_hjem_tom"))
-    })
-    private DatoIntervallEntitet reiseperiodeHjem;
+    @Column(name = "godkjent", nullable = false)
+    private Boolean godkjent;
 
     @Column(name = "begrunnelse", nullable = false)
     private String begrunnelse;
+
+    @Column(name = "vurdert_av", nullable = false)
+    private String vurdertAv;
+
+    @Column(name = "vurdert_tid", nullable = false)
+    private LocalDateTime vurdertTidspunkt;
 
     @Version
     @Column(name = "versjon", nullable = false)
@@ -50,28 +53,40 @@ public class VurdertReisetid extends BaseEntitet {
     VurdertReisetid() {
     }
 
-    public VurdertReisetid(DatoIntervallEntitet reiseperiodeTil, DatoIntervallEntitet reiseperiodeHjem, String begrunnelse) {
-        this.reiseperiodeTil = reiseperiodeTil;
-        this.reiseperiodeHjem = reiseperiodeHjem;
+    public VurdertReisetid(DatoIntervallEntitet periode, Boolean godkjent, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt) {
+        this.periode = periode;
+        this.godkjent = godkjent;
         this.begrunnelse = begrunnelse;
+        this.vurdertAv = vurdertAv;
+        this.vurdertTidspunkt = vurdertTidspunkt;
     }
 
     public VurdertReisetid(VurdertReisetid that) {
-        this.reiseperiodeTil = that.reiseperiodeTil;
-        this.reiseperiodeHjem = that.reiseperiodeHjem;
+        this.periode = that.periode;
+        this.godkjent = that.godkjent;
         this.begrunnelse = that.begrunnelse;
+        this.vurdertAv = that.vurdertAv;
+        this.vurdertTidspunkt = that.vurdertTidspunkt;
     }
 
-    public DatoIntervallEntitet getReiseperiodeTil() {
-        return reiseperiodeTil;
+    public DatoIntervallEntitet getPeriode() {
+        return periode;
     }
 
-    public DatoIntervallEntitet getReiseperiodeHjem() {
-        return reiseperiodeHjem;
+    public Boolean getGodkjent() {
+        return godkjent;
     }
 
     public String getBegrunnelse() {
         return begrunnelse;
+    }
+
+    public String getVurdertAv() {
+        return vurdertAv;
+    }
+
+    public LocalDateTime getVurdertTidspunkt() {
+        return vurdertTidspunkt;
     }
 
     @Override
@@ -79,13 +94,15 @@ public class VurdertReisetid extends BaseEntitet {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         VurdertReisetid that = (VurdertReisetid) o;
-        return Objects.equals(reiseperiodeTil, that.reiseperiodeTil)
-            && Objects.equals(reiseperiodeHjem, that.reiseperiodeHjem)
-            && Objects.equals(begrunnelse, that.begrunnelse);
+        return Objects.equals(periode, that.periode)
+            && Objects.equals(godkjent, that.godkjent)
+            && Objects.equals(begrunnelse, that.begrunnelse)
+            && Objects.equals(vurdertAv, that.vurdertAv)
+            && Objects.equals(vurdertTidspunkt, that.vurdertTidspunkt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(reiseperiodeTil, reiseperiodeHjem, begrunnelse);
+        return Objects.hash(periode, godkjent, begrunnelse, vurdertAv, vurdertTidspunkt);
     }
 }

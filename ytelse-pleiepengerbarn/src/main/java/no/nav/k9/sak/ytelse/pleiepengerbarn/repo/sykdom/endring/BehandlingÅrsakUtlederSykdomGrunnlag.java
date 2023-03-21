@@ -6,10 +6,12 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BA
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
+import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
@@ -27,13 +29,13 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 import no.nav.k9.sak.domene.registerinnhenting.impl.behandlingårsak.BehandlingÅrsakUtleder;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagsdata;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagsdata;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
 
 @ApplicationScoped
@@ -104,10 +106,16 @@ class BehandlingÅrsakUtlederSykdomGrunnlag implements BehandlingÅrsakUtleder {
     }
 
     private boolean harEndringerForNattevåkOgBeredskap(BehandlingReferanse ref) {
+        if (Set.of(PLEIEPENGER_NÆRSTÅENDE, OPPLÆRINGSPENGER).contains(ref.getFagsakYtelseType())) {
+            return false;
+        }
         return endringUnntakEtablertTilsynTjeneste.harEndringerSidenBehandling(ref.getBehandlingId(), ref.getPleietrengendeAktørId()) && skalGiÅrsak(ref, BehandlingStegType.KONTROLLER_FAKTA_UTTAK);
     }
 
     private boolean harEndringerForEtablertTilsyn(BehandlingReferanse referanse) {
+        if (Set.of(PLEIEPENGER_NÆRSTÅENDE, OPPLÆRINGSPENGER).contains(referanse.getFagsakYtelseType())) {
+            return false;
+        }
         return erEndringPåEtablertTilsynTjeneste.erEndringerSidenBehandling(referanse) && skalGiÅrsak(referanse, BehandlingStegType.VURDER_UTTAK_V2);
     }
 
@@ -115,7 +123,7 @@ class BehandlingÅrsakUtlederSykdomGrunnlag implements BehandlingÅrsakUtleder {
         var sykdomGrunnlag = medisinskGrunnlagRepository.hentGrunnlagForBehandling(ref.getBehandlingUuid())
             .map(MedisinskGrunnlag::getGrunnlagsdata);
 
-        List<Periode> nyeVurderingsperioder = utledVurderingsperiode(ref);
+        NavigableSet<DatoIntervallEntitet> nyeVurderingsperioder = utledVurderingsperiode(ref);
         var utledGrunnlag = medisinskGrunnlagTjeneste.utledGrunnlagMedManglendeOmsorgFjernet(ref.getSaksnummer(), ref.getBehandlingUuid(), ref.getBehandlingId(), ref.getPleietrengendeAktørId(), nyeVurderingsperioder);
         var sykdomGrunnlagSammenlikningsresultat = medisinskGrunnlagTjeneste.sammenlignGrunnlag(sykdomGrunnlag, utledGrunnlag);
 
@@ -132,10 +140,10 @@ class BehandlingÅrsakUtlederSykdomGrunnlag implements BehandlingÅrsakUtleder {
         return BehandlingStatus.OPPRETTET.equals(ref.getBehandlingStatus());
     }
 
-    private List<Periode> utledVurderingsperiode(BehandlingReferanse ref) {
+    private NavigableSet<DatoIntervallEntitet> utledVurderingsperiode(BehandlingReferanse ref) {
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(ref.getBehandlingId());
         if (vilkårene.isEmpty()) {
-            return List.of();
+            return new TreeSet<>();
         }
 
         VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType());
@@ -146,7 +154,6 @@ class BehandlingÅrsakUtlederSykdomGrunnlag implements BehandlingÅrsakUtleder {
             .flatMap(Optional::stream)
             .flatMap(Collection::stream)
             .map(VilkårPeriode::getPeriode)
-            .map(it -> new Periode(it.getFomDato(), it.getTomDato()))
-            .toList();
+            .collect(Collectors.toCollection(TreeSet::new));
     }
 }

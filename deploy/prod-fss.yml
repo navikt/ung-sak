@@ -24,7 +24,7 @@ spec:
     failureThreshold: 27
   replicas:
     min: 2
-    max: 3
+    max: 2
     cpuThresholdPercentage: 80
   prometheus:
     enabled: true
@@ -32,10 +32,10 @@ spec:
   resources:
     limits:
       cpu: "4000m"
-      memory: "2048Mi"
+      memory: "4096Mi"
     requests:
       cpu: "500m"
-      memory: "1024Mi"
+      memory: "4096Mi"
   ingresses:
     - "https://k9-sak.nais.adeo.no/"
   kafka:
@@ -50,6 +50,24 @@ spec:
       - mountPath: /var/run/secrets/nais.io/vault
         kvPath: /kv/prod/fss/k9-sak/k9saksbehandling
   sidecar: true
+  azure:
+    application:
+      enabled: true
+      replyURLs:
+        - "https://k9.intern.nav.no/k9/sak/cb"
+      claims:
+        extra:
+          - "NAVident"
+      allowAllUsers: true
+  accessPolicy:
+    inbound:
+      rules:
+        - application: k9-sak
+        - application: k9-tilbake
+        - application: k9-klage
+        - application: k9-formidling
+        - application: k9-formidling-dokumentdata
+        - application: k9-punsj
   env:
     - name: TZ
       value: "Europe/Oslo"
@@ -76,13 +94,9 @@ spec:
       value: privat-k9-aksjonspunkthendelse
     - name: KAFKA_AKSJONSPUNKTHENDELSE_AIVEN_TOPIC
       value: k9saksbehandling.k9sak-aksjonspunkthendelse
-    - name: KAFKA_DOKUMENTBESTILLING_TOPIC
-      value: privat-k9-dokumenthendelse
     - name: KAFKA_DOKUMENTBESTILLING_AIVEN_TOPIC
       value: k9saksbehandling.k9-dokumenthendelse-v1
     - name: KAFKA_FATTEVEDTAK_TOPIC
-      value: privat-familie-vedtakFattet-v1
-    - name: KAFKA_FATTEVEDTAK_AIVEN_TOPIC
       value: teamforeldrepenger.familie-vedtakfattet-v1
     - name: KAFKA_VEDTAKHENDELSE_TOPIC
       value: privat-k9-vedtakhendelse
@@ -107,7 +121,7 @@ spec:
 
     # Loadbalancerconfig
     - name: LOADBALANCER_URL
-      value: https://app.adeo.no
+      value: https://k9.intern.nav.no
 
     # LDAP
     - name: LDAP_URL
@@ -130,34 +144,50 @@ spec:
       value: http://infotrygd-hendelser.infotrygd/infotrygd/hendelser
     - name: FPABAKUS_URL
       value: http://fpabakus.teamforeldrepenger/fpabakus
+    - name: FPABAKUS_SCOPE
+      value: api://prod-fss.teamforeldrepenger.fpabakus/.default
     - name: FTKALKULUS_URL
       value: http://ftkalkulus.k9saksbehandling/ftkalkulus
+    - name: FTKALKULUS_SCOPE
+      value: api://prod-fss.k9saksbehandling.ftkalkulus/.default
     - name: ABAKUS_CALLBACK_URL
       value: http://k9-sak.k9saksbehandling/k9/sak/api/registerdata/iay/callback
     - name: ABAC_PDP_ENDPOINT_URL
       value: http://abac-k9.k9saksbehandling/application/authorize
     - name: K9_OPPDRAG_PROXY_URL
-      value: https://app.adeo.no/k9/oppdrag/api
+      value: /k9/oppdrag/api
     - name: ARBEIDSFORDELING_RS_URL
       value: https://app.adeo.no/norg2/api/v1/arbeidsfordeling/enheter
     - name: OPPGAVE_RS_URI
       value: https://oppgave.nais.adeo.no/api/v1/oppgaver
+    - name: OPPGAVE_RS_SCOPE
+      value: api://prod-fss.oppgavehandtering.oppgave/.default
     - name: MEDL2_RS_URL
       value: https://medlemskap-medl-api.intern.nav.no/api/v1/medlemskapsunntak
+    - name: MEDL2_RS_SCOPE
+      value: api://prod-fss.team-rocket.medlemskap-medl-api/.default
     - name: PDL_BASE_URL
       value: http://pdl-api.pdl/graphql
+    - name: PDL_SCOPE
+      value: api://prod-fss.pdl.pdl-api/.default
     - name: ORGANISASJON_RS_URL
       value: https://modapp.adeo.no/ereg/api/v1/organisasjon
     - name: K9_FORMIDLING_DOKUMENTDATA_URL
       value: http://k9-formidling-dokumentdata.k9saksbehandling/k9/formidling/dokumentdata
+    - name: K9_FORMIDLING_DOKUMENTDATA_SCOPE
+      value: api://prod-fss.k9saksbehandling.k9-formidling-dokumentdata/.default
     - name: K9_OPPDRAG_DIREKTE_URL
       value: http://k9-oppdrag.k9saksbehandling/k9/oppdrag/api
+    - name: K9_OPPDRAG_SCOPE
+      value: api://prod-fss.k9saksbehandling.k9-oppdrag/.default
     - name: K9_TILBAKE_DIREKTE_URL
       value: http://k9-tilbake.k9saksbehandling/k9/tilbake/api
     - name: K9_FORMIDLING_URL
       value: http://k9-formidling.k9saksbehandling/k9/formidling
+    - name: K9_FORMIDLING_SCOPE
+      value: api://prod-fss.k9saksbehandling.k9-formidling/.default
     - name: K9_PUNSJ_URL
-      value: https://k9-punsj.nais.adeo.no/api
+      value: https://k9-punsj.intern.nav.no/api
     - name: INFOTRYGD_BS_BASE_URI
       value: https://k9-infotrygd.intern.nav.no
     - name: ARBEID_OG_INNTEKT_BASE_URL
@@ -168,6 +198,8 @@ spec:
     # Restservice OMS spesifikt
     - name: K9_OMS_AARSKVANTUM_URL
       value: http://k9-aarskvantum.k9saksbehandling
+    - name: K9_OMS_AARSKVANTUM_SCOPE
+      value: api://prod-fss.k9saksbehandling.k9-aarskvantum/.default
     - name: K9_OMS_UTVIDETRETT_URL
       value: https://omsorgsdager.intern.nav.no/api
 
@@ -178,16 +210,18 @@ spec:
     # Graphql services
     - name: SAF_BASE_URL
       value: http://saf.teamdokumenthandtering
+    - name: SAF_SCOPE
+      value: api://prod-fss.teamdokumenthandtering.saf/.default
 
     # Sikkerhet:
+    - name: APP_AUTH_SCHEMA_AZUREAD_ADDITIONAL_PATHS
+      value: "/k9/formidling/dokumentdata,api://prod-fss.k9saksbehandling.k9-formidling-dokumentdata/.default;/k9/formidling,api://prod-fss.k9saksbehandling.k9-formidling/.default"
+    - name: APP_AUTH_SCHEMA_AZUREAD_OPTIONAL_PATHS
+      value: "/k9/klage,api://prod-fss.k9saksbehandling.k9-klage/.default;/k9/tilbake,api://prod-fss.k9saksbehandling.k9-tilbake/.default;/k9/oppdrag,api://prod-fss.k9saksbehandling.k9-oppdrag/.default"
     - name: SECURITYTOKENSERVICE_URL
       value: https://sts.adeo.no/SecurityTokenServiceProvider/
     - name: OIDC_STS_HOST_URL
       value: https://security-token-service.nais.adeo.no
-    - name: OIDC_OPENAM_HOST_URL
-      value: https://isso.adeo.no/isso/oauth2
-    - name: OIDC_OPENAM_CLIENT_ID
-      value: k9-sak-p
 
     - name: ABAC_ATTRIBUTT_DRIFT
       value: "no.nav.abac.attributter.k9.drift"
@@ -199,12 +233,12 @@ spec:
       value: "3030"
 
     # Feature-flag
+    - name: ENABLE_BRUKERDIALOGINNSYN
+      value: "true"
     - name: PSB_UTTAK_UNNTAK_AKTIVITETER
       value: "AFMX0|2021-03-01"
     - name: OMP_VERIFISERING_TILKJENT_YTELSE
       value: "false"
-    - name: ENABLE_FAGSAK_AVSLUTTING
-      value: "true"
     - name: SOKNADSFRIST_BENYTT_ELDSTEKRAV_PER_PERIODE
       value: "false"
     - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
@@ -215,16 +249,24 @@ spec:
       value: "true"
     - name: ENABLE_PRODUCER_VEDTAKHENDELSE_AIVEN
       value: "true"
-    - name: ENABLE_PRODUCER_FATTVEDTAK_AIVEN
-      value: "true"
     - name: ENABLE_PRODUCER_AKSJONSPUNKTHENDELSE_LOS_AIVEN
+      value: "true"
+    - name: ENABLE_SJEKK_TILBAKEKREVING
+      value: "false"
+    - name: IKKE_YRKESAKTIV_UTEN_SPEILING
+      value: "false"
+    - name: PSB_START_I_KOFAKBER_VED_FORLENGELSE_OPPTJENING
+      value: "false"
+    - name: OMP_NULL_HELG_I_KRAVPERIODER
+      value: "false"
+    - name: OMS_ZERO_REFUSJON_ER_KRAV
       value: "false"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT
       value: "true"
-    - name: ENABLE_FERIEPENGER_PAA_TVERS_AV_SAKER_OG_PR_AAR
-      value: "true"
+    - name: FLYWAY_REPAIR_ON_FAIL
+      value: "false"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

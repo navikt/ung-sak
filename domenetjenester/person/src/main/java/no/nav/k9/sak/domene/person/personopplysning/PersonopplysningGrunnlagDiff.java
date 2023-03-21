@@ -109,10 +109,13 @@ public class PersonopplysningGrunnlagDiff {
         return !Objects.equals(hentDødsdatoer(grunnlag1, foreldre), hentDødsdatoer(grunnlag2, foreldre));
     }
 
+    public boolean erDødsdatoEndret(AktørId aktørId) {
+        return !Objects.equals(hentDødsdatoer(grunnlag1, Set.of(aktørId)), hentDødsdatoer(grunnlag2, Set.of(aktørId)));
+    }
+
     public boolean erBarnDødsdatoEndret() {
         return !Objects.equals(hentDødsdatoer(grunnlag1, søkersBarnUnion), hentDødsdatoer(grunnlag2, søkersBarnUnion));
     }
-
     private List<PersonstatusEntitet> hentPersonstatusFør(PersonopplysningGrunnlagEntitet grunnlag, AktørId person, LocalDate stp) {
         return registerVersjon(grunnlag).map(PersonInformasjonEntitet::getPersonstatus).orElse(Collections.emptyList()).stream()
             .filter(ps -> person.equals(ps.getAktørId()))

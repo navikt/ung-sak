@@ -15,9 +15,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import jakarta.inject.Inject;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -59,31 +57,18 @@ public class MottattDokumentOversetterInntektsmeldingTest {
     private static final String ORGNR = OrgNummer.KUNSTIG_ORG;
 
     @Inject
-    private EntityManager entityManager;
-
-    private VirksomhetTjeneste virksomhetTjeneste ;
-    private FileToStringUtil fileToStringUtil ;
-    private BehandlingRepositoryProvider repositoryProvider ;
-
-    private InntektArbeidYtelseTjeneste iayTjeneste ;
-    private InntektsmeldingTjeneste inntektsmeldingTjeneste ;
-    private MottatteDokumentRepository mottatteDokumentRepository ;
-    private MottattDokumentOversetterInntektsmelding oversetter;
+    private BehandlingRepositoryProvider repositoryProvider;
+    @Inject
+    private MottatteDokumentRepository mottatteDokumentRepository;
+    private VirksomhetTjeneste virksomhetTjeneste = mock(VirksomhetTjeneste.class);
+    private InntektArbeidYtelseTjeneste iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
+    private InntektsmeldingTjeneste inntektsmeldingTjeneste = new InntektsmeldingTjeneste(iayTjeneste);
+    private MottattDokumentOversetterInntektsmelding oversetter = new MottattDokumentOversetterInntektsmelding(virksomhetTjeneste);
 
     @BeforeEach
     public void setUp() throws Exception {
-
-        virksomhetTjeneste = mock(VirksomhetTjeneste.class);
-        fileToStringUtil = new FileToStringUtil();
-        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-
-        iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
-        inntektsmeldingTjeneste = new InntektsmeldingTjeneste(iayTjeneste);
-        mottatteDokumentRepository = new MottatteDokumentRepository(entityManager);
-
         when(virksomhetTjeneste.finnOrganisasjon(ORGNR))
             .thenReturn(Optional.of(Virksomhet.getBuilder().medOrgnr(ORGNR).medNavn("Ukjent Firma").medRegistrert(LocalDate.now().minusDays(1)).build()));
-        oversetter = new MottattDokumentOversetterInntektsmelding(virksomhetTjeneste);
     }
 
     @Test
@@ -252,14 +237,14 @@ public class MottattDokumentOversetterInntektsmeldingTest {
     private MottattDokument opprettDokument(Behandling behandling, String inntektsmeldingFilnavn, LocalDateTime mottattTidspunkt) throws IOException, URISyntaxException {
         final InntektArbeidYtelseAggregatBuilder inntektArbeidYtelseAggregatBuilder = iayTjeneste.opprettBuilderForRegister(behandling.getId());
         iayTjeneste.lagreIayAggregat(behandling.getId(), inntektArbeidYtelseAggregatBuilder);
-        final String xml = fileToStringUtil.readFile(inntektsmeldingFilnavn);
+        final String xml = FileToStringUtil.readFile(inntektsmeldingFilnavn);
         final MottattDokument.Builder builder = new MottattDokument.Builder();
 
         MottattDokument mottattDokument = builder
             .medFagsakId(behandling.getFagsakId())
             .medMottattTidspunkt(mottattTidspunkt)
             .medMottattDato(mottattTidspunkt.toLocalDate())
-            .medKanalreferanse("AR"+inntektsmeldingFilnavn)
+            .medKanalreferanse("AR" + inntektsmeldingFilnavn)
             .medJournalPostId(new JournalpostId("123123123"))
             .medPayload(xml)
             .build();

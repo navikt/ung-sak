@@ -10,10 +10,10 @@ public class BeregningResultatMapper {
     public static AksjonspunktResultat map(BeregningAvklaringsbehovResultat beregningResultat) {
         if (beregningResultat.harFrist()) {
             return AksjonspunktResultat.opprettForAksjonspunktMedFrist(
-                AksjonspunktDefinisjon.fraKode(beregningResultat.getBeregningAvklaringsbehovDefinisjon().getKode()),
+                AksjonspunktDefinisjon.fraKode(beregningResultat.getBeregningAvklaringsbehovDefinisjon().getInternKode()),
                 Venteårsak.fraKode(beregningResultat.getVenteårsak().getKode()),
                 beregningResultat.getVentefrist());
         }
-        return AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.fraKode(beregningResultat.getBeregningAvklaringsbehovDefinisjon().getKode()));
+        return AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.fraKode(beregningResultat.getBeregningAvklaringsbehovDefinisjon().getInternKode()));
     }
 }

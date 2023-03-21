@@ -404,14 +404,13 @@ public class BehandlingRepository {
         return Optional.of(value);
     }
 
-    public int antallTilbakeføringerSiden(Long behandlingId, LocalDateTime tidspunkt) {
+    public long antallTilbakeføringerSiden(Long behandlingId, LocalDateTime tidspunkt) {
         Query query = getEntityManager().createNativeQuery(
             "SELECT count(*) FROM behandling_steg_tilstand WHERE behandling_id = :behandling_id AND behandling_steg_status = :tilbakeført_status AND opprettet_tid > :tidspunkt");
         query.setParameter("behandling_id", behandlingId);
         query.setParameter("tilbakeført_status", BehandlingStegStatus.TILBAKEFØRT.getKode());
         query.setParameter("tidspunkt", tidspunkt);
 
-        BigInteger resultat = (BigInteger) query.getSingleResult();
-        return resultat.intValue();
+        return (Long) query.getSingleResult();
     }
 }

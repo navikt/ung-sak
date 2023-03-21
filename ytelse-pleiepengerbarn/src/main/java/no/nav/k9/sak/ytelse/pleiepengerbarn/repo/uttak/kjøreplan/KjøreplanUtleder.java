@@ -31,6 +31,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKa
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
@@ -42,7 +43,7 @@ import no.nav.k9.sak.utsatt.UtsattPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomInnleggelsePeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
+import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.PleiegradKalkulator;
 
 @Dependent
 public class KjøreplanUtleder {
@@ -356,6 +357,10 @@ public class KjøreplanUtleder {
     }
 
     private LocalDateTimeline<Boolean> hentTidslinjeMedFlereOmsorgspersoner(Behandling behandling) {
+        var iLivetsSluttToPersoner = sykdomVurderingTjeneste.hentVurderinger(SykdomVurderingType.LIVETS_SLUTTFASE, behandling)
+            .filterValue(it -> it.getResultat() == Resultat.OPPFYLT)
+            .mapValue(it -> true)
+            .intersection(new LocalDateInterval(PleiegradKalkulator.DATO_FOR_NY_MAX_PLEIEGRAD, LocalDateInterval.TIDENES_ENDE));
         var sykdomVurderingerOgPerioder = sykdomVurderingTjeneste.hentVurderinger(SykdomVurderingType.TO_OMSORGSPERSONER, behandling)
             .filterValue(it -> it.getResultat() == Resultat.OPPFYLT)
             .mapValue(it -> true);
@@ -365,8 +370,8 @@ public class KjøreplanUtleder {
         var tidslinje = new LocalDateTimeline<>(innleggelser.stream()
             .map(i -> new LocalDateSegment<>(i.getFom(), i.getTom(), Boolean.TRUE))
             .collect(Collectors.toList()))
-            .combine(sykdomVurderingerOgPerioder,
-                StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            .combine(sykdomVurderingerOgPerioder, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN)
+            .combine(iLivetsSluttToPersoner, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         var localDateSegments = Hjelpetidslinjer.utledHullSomMåTettes(tidslinje, new PåTversAvHelgErKantIKantVurderer());
         return tidslinje.combine(localDateSegments, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
     }

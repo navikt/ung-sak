@@ -3,6 +3,7 @@ package no.nav.k9.sak.vilkår;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Optional;
@@ -67,7 +68,8 @@ public class VilkårPeriodeFilter {
     private TreeSet<PeriodeTilVurdering> filtrer(VilkårType vilkårType,
                                                  List<SakInfotrygdMigrering> sakInfotrygdMigreringer,
                                                  Optional<Vilkår> vilkår,
-                                                 Collection<DatoIntervallEntitet> filterPerioder) {
+                                                 Collection<DatoIntervallEntitet> inputPerioder) {
+        var filterPerioder = new HashSet<>(inputPerioder);
         if (skalIgnorereAvslåttePerioder) {
             var avslåttePerioderUtenInkludertÅrsak = filtrerVilkårsperiode(vilkår, this::avslåttUtenInkludertÅrsak);
             filtrerBort(filterPerioder, avslåttePerioderUtenInkludertÅrsak);

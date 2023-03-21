@@ -101,9 +101,6 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         if (vilkårsperioder == null || vilkårsperioder.isEmpty()) {
             throw new IllegalArgumentException("Forventer minst en vilkårsperiode");
         }
-        if (!vilkårsperioder.stream().allMatch(PeriodeTilVurdering::erForlengelse)) {
-            throw new IllegalArgumentException("Kun forlengelseperioder kan kopieres fra original behandling");
-        }
         var skjæringstidspunkter = vilkårsperioder.stream()
             .map(PeriodeTilVurdering::getPeriode)
             .map(DatoIntervallEntitet::getFomDato)

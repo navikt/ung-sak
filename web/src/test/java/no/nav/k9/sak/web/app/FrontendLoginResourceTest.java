@@ -13,7 +13,7 @@ import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.ContextPathHolder;
 import no.nav.k9.sikkerhet.oidc.config.OpenIDProvider;
 import no.nav.k9.sikkerhet.oidc.token.OidcToken;
-import no.nav.k9.sikkerhet.oidc.token.bruker.BrukerTokenProvider;
+import no.nav.k9.sikkerhet.oidc.token.context.ContextAwareTokenProvider;
 
 public class FrontendLoginResourceTest {
 
@@ -22,7 +22,7 @@ public class FrontendLoginResourceTest {
     @BeforeEach
     void setUp() {
         ContextPathHolder.instance("/k9/sak");
-        var mock = mock(BrukerTokenProvider.class);
+        var mock = mock(ContextAwareTokenProvider.class);
         var mockToken = mock(OidcToken.class);
         when(mockToken.getIssuer()).thenReturn(OpenIDProvider.ISSO);
         when(mock.getToken()).thenReturn(mockToken);

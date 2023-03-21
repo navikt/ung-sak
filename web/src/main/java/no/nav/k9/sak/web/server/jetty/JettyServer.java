@@ -108,23 +108,13 @@ public class JettyServer {
 
     protected void konfigurerSikkerhet() {
         var factory = new DefaultAuthConfigFactory();
-        var enabledAzureAd = Boolean.parseBoolean(Environment.current().getProperty("app.auth.schema.azuread.enabled", String.class, "false").replace("\"", ""));
-        var azureAdDomain = Environment.current().getProperty("app.auth.schema.azuread.domain", String.class, "").replace("\"", "");
-        log.info("AzureAD-status :: enabled={}, domain={}", enabledAzureAd, azureAdDomain);
 
-        OidcAuthModule serverAuthModule = enabledAzureAd ? azureAdEnabledAuthModule(azureAdDomain) : new OidcAuthModule();
-        factory.registerConfigProvider(new JaspiAuthConfigProvider(serverAuthModule),
+        factory.registerConfigProvider(new JaspiAuthConfigProvider(new OidcAuthModule()),
             "HttpServlet",
             "server " + appKonfigurasjon.getContextPath(),
             "OIDC Authentication");
 
         AuthConfigFactory.setFactory(factory);
-    }
-
-    private OidcAuthModule azureAdEnabledAuthModule(String azureAdDomain) {
-        var oidcAuthModule = new OidcAuthModule();
-        oidcAuthModule.enableAzureAd(azureAdDomain);
-        return oidcAuthModule;
     }
 
     protected void migrerDatabaser() throws IOException {
@@ -137,7 +127,8 @@ public class JettyServer {
             initSql = null;
         }
         try (HikariDataSource migreringDs = DatasourceUtil.createDatasource("defaultDS", DatasourceRole.ADMIN, environmentClass, 2)) {
-            DatabaseScript.migrate(migreringDs, initSql);
+            var flywayRepairOnFail = Boolean.valueOf(ENV.getProperty("FLYWAY_REPAIR_ON_FAIL", "false"));
+            DatabaseScript.migrate(migreringDs, initSql, flywayRepairOnFail);
         }
     }
 

@@ -1,16 +1,17 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.gjennomgått;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPeriode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetid;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.KursPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
@@ -34,32 +35,36 @@ class ReisetidUtleder {
         return TidslinjeUtil.tilTidslinjeKomprimert(reisetid);
     }
 
-    static LocalDateTimeline<Boolean> utledGodkjentReisetid(Set<PerioderFraSøknad> perioderFraSøknad, VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag) {
+    static LocalDateTimeline<OpplæringGodkjenningStatus> utledVurdertReisetid(Set<PerioderFraSøknad> perioderFraSøknad, VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag) {
         Objects.requireNonNull(perioderFraSøknad);
 
-        NavigableSet<DatoIntervallEntitet> godkjentReisetid = new TreeSet<>();
+        List<LocalDateSegment<OpplæringGodkjenningStatus>> segmenter = new ArrayList<>();
         for (PerioderFraSøknad perioder : perioderFraSøknad) {
             for (KursPeriode kursPeriode : perioder.getKurs()) {
                 if (kanGodkjennesAutomatisk(kursPeriode.getReiseperiodeTil())) {
-                    godkjentReisetid.add(kursPeriode.getReiseperiodeTil());
+                    segmenter.add(new LocalDateSegment<>(
+                        kursPeriode.getReiseperiodeTil().getFomDato(),
+                        kursPeriode.getReiseperiodeTil().getTomDato(),
+                        OpplæringGodkjenningStatus.GODKJENT));
                 }
                 if (kanGodkjennesAutomatisk(kursPeriode.getReiseperiodeHjem())) {
-                    godkjentReisetid.add(kursPeriode.getReiseperiodeHjem());
+                    segmenter.add(new LocalDateSegment<>(
+                        kursPeriode.getReiseperiodeHjem().getFomDato(),
+                        kursPeriode.getReiseperiodeHjem().getTomDato(),
+                        OpplæringGodkjenningStatus.GODKJENT));
                 }
             }
         }
-        if (vurdertOpplæringGrunnlag != null && vurdertOpplæringGrunnlag.getVurdertePerioder() != null) {
-            List<VurdertReisetid> vurdertReisetid = vurdertOpplæringGrunnlag.getVurdertePerioder().getPerioder().stream().map(VurdertOpplæringPeriode::getReisetid).filter(Objects::nonNull).toList();
+        if (vurdertOpplæringGrunnlag != null && vurdertOpplæringGrunnlag.getVurdertReisetid() != null) {
+            List<VurdertReisetid> vurdertReisetid = vurdertOpplæringGrunnlag.getVurdertReisetid().getReisetid().stream().toList();
             for (VurdertReisetid reisetid : vurdertReisetid) {
-                if (reisetid.getReiseperiodeTil() != null) {
-                    godkjentReisetid.add(reisetid.getReiseperiodeTil());
-                }
-                if (reisetid.getReiseperiodeHjem() != null) {
-                    godkjentReisetid.add(reisetid.getReiseperiodeHjem());
-                }
+                segmenter.add(new LocalDateSegment<>(
+                    reisetid.getPeriode().getFomDato(),
+                    reisetid.getPeriode().getTomDato(),
+                    reisetid.getGodkjent() ? OpplæringGodkjenningStatus.GODKJENT : OpplæringGodkjenningStatus.IKKE_GODKJENT_REISETID));
             }
         }
-        return TidslinjeUtil.tilTidslinjeKomprimert(godkjentReisetid);
+        return new LocalDateTimeline<>(segmenter);
     }
 
     private static boolean kanGodkjennesAutomatisk(DatoIntervallEntitet reisetid) {

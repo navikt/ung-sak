@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -59,7 +60,7 @@ public class VurderInstitusjonTidslinjeUtlederTest {
     }
 
     private Set<PerioderFraSøknad> setupEnkelKursperiode(UUID uuid) {
-        KursPeriode kursPeriode = lagKursperiode(søknadsperiodeFom, søknadsperiodeTom, institusjon1, uuid);
+        KursPeriode kursPeriode = lagKursperiode(søknadsperiodeFom, søknadsperiodeTom, uuid);
         return setupKursperioder(journalpost1, List.of(kursPeriode));
     }
 
@@ -79,13 +80,13 @@ public class VurderInstitusjonTidslinjeUtlederTest {
             kursperiode);
     }
 
-    private KursPeriode lagKursperiode(LocalDate fom, LocalDate tom, String institusjon, UUID uuid) {
-        return new KursPeriode(fom, tom, null, null, institusjon, uuid, "beskrivelse");
+    private KursPeriode lagKursperiode(LocalDate fom, LocalDate tom, UUID uuid) {
+        return new KursPeriode(fom, tom, null, null, uuid, null, null);
     }
 
     private VurdertOpplæringGrunnlag setupVurderingsgrunnlag(List<VurdertInstitusjon> vurderteInstitusjoner) {
         VurdertInstitusjonHolder vurdertInstitusjonHolder = new VurdertInstitusjonHolder(vurderteInstitusjoner);
-        return new VurdertOpplæringGrunnlag(behandlingId, vurdertInstitusjonHolder, null, null);
+        return new VurdertOpplæringGrunnlag(behandlingId, vurdertInstitusjonHolder, null, null, null);
     }
 
     private void setupGodkjentOpplæringsinstitusjonIRegister(String navn, LocalDate fom, LocalDate tom, UUID uuid) {
@@ -137,7 +138,7 @@ public class VurderInstitusjonTidslinjeUtlederTest {
     @Test
     public void institusjonGodkjentIVurderingsgrunnlag() {
         Set<PerioderFraSøknad> perioderFraSøknad = setupEnkelKursperiode();
-        VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon(journalpost1, true, "begrunnelse");
+        VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon(journalpost1, true, "begrunnelse", "", LocalDateTime.now());
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertInstitusjon));
 
         var resultat = vurderInstitusjonTidslinjeUtleder.utled(perioderFraSøknad, vurdertOpplæringGrunnlag, søknadstidslinje);
@@ -147,13 +148,13 @@ public class VurderInstitusjonTidslinjeUtlederTest {
 
     @Test
     public void enAvToinstitusjonerGodkjentIVurderingsgrunnlag() {
-        KursPeriode kursPeriode1 = lagKursperiode(søknadsperiodeFom, søknadsperiodeFom.plusMonths(1), institusjon1, null);
-        KursPeriode kursPeriode2 = lagKursperiode(søknadsperiodeFom.plusMonths(1).plusDays(1), søknadsperiodeTom, institusjon2, null);
+        KursPeriode kursPeriode1 = lagKursperiode(søknadsperiodeFom, søknadsperiodeFom.plusMonths(1), null);
+        KursPeriode kursPeriode2 = lagKursperiode(søknadsperiodeFom.plusMonths(1).plusDays(1), søknadsperiodeTom, null);
         PerioderFraSøknad perioderFraSøknad1 = setupEnkelKursperiode(journalpost1, List.of(kursPeriode1));
         PerioderFraSøknad perioderFraSøknad2 = setupEnkelKursperiode(journalpost2, List.of(kursPeriode2));
         Set<PerioderFraSøknad> perioderFraSøknad = Set.of(perioderFraSøknad1, perioderFraSøknad2);
-        VurdertInstitusjon vurdertInstitusjon1 = new VurdertInstitusjon(journalpost1, true, "ja");
-        VurdertInstitusjon vurdertInstitusjon2 = new VurdertInstitusjon(journalpost2, false, "nei");
+        VurdertInstitusjon vurdertInstitusjon1 = new VurdertInstitusjon(journalpost1, true, "ja", "", LocalDateTime.now());
+        VurdertInstitusjon vurdertInstitusjon2 = new VurdertInstitusjon(journalpost2, false, "nei", "", LocalDateTime.now());
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertInstitusjon1, vurdertInstitusjon2));
 
         var resultat = vurderInstitusjonTidslinjeUtleder.utled(perioderFraSøknad, vurdertOpplæringGrunnlag, søknadstidslinje);
@@ -165,8 +166,8 @@ public class VurderInstitusjonTidslinjeUtlederTest {
 
     @Test
     public void enAvToinstitusjonerGodkjentIRegisteret() {
-        KursPeriode kursPeriode1 = lagKursperiode(søknadsperiodeFom, søknadsperiodeFom.plusMonths(1), institusjon1, institusjon1Uuid);
-        KursPeriode kursPeriode2 = lagKursperiode(søknadsperiodeFom.plusMonths(1).plusDays(1), søknadsperiodeTom, institusjon2, institusjon2Uuid);
+        KursPeriode kursPeriode1 = lagKursperiode(søknadsperiodeFom, søknadsperiodeFom.plusMonths(1), institusjon1Uuid);
+        KursPeriode kursPeriode2 = lagKursperiode(søknadsperiodeFom.plusMonths(1).plusDays(1), søknadsperiodeTom, institusjon2Uuid);
         Set<PerioderFraSøknad> perioderFraSøknad = setupKursperioder(journalpost1, List.of(kursPeriode1, kursPeriode2));
         setupGodkjentOpplæringsinstitusjonIRegister(institusjon1, søknadsperiodeFom, søknadsperiodeTom, institusjon1Uuid);
         setupGodkjentOpplæringsinstitusjonIRegister(institusjon2, søknadsperiodeTom.plusDays(1), null, institusjon2Uuid);
@@ -180,13 +181,13 @@ public class VurderInstitusjonTidslinjeUtlederTest {
 
     @Test
     public void enInstitusjonGodkjentIRegisteretEnGodkjentIVurderingsgrunnlag() {
-        KursPeriode kursPeriode1 = lagKursperiode(søknadsperiodeFom, søknadsperiodeFom.plusMonths(1), institusjon1, institusjon1Uuid);
-        KursPeriode kursPeriode2 = lagKursperiode(søknadsperiodeFom.plusMonths(1).plusDays(1), søknadsperiodeTom, institusjon2, null);
+        KursPeriode kursPeriode1 = lagKursperiode(søknadsperiodeFom, søknadsperiodeFom.plusMonths(1), institusjon1Uuid);
+        KursPeriode kursPeriode2 = lagKursperiode(søknadsperiodeFom.plusMonths(1).plusDays(1), søknadsperiodeTom, null);
         PerioderFraSøknad perioderFraSøknad1 = setupEnkelKursperiode(journalpost1, List.of(kursPeriode1));
         PerioderFraSøknad perioderFraSøknad2 = setupEnkelKursperiode(journalpost2, List.of(kursPeriode2));
         Set<PerioderFraSøknad> perioderFraSøknad = Set.of(perioderFraSøknad1, perioderFraSøknad2);
         setupGodkjentOpplæringsinstitusjonIRegister(institusjon1, søknadsperiodeFom, søknadsperiodeTom, institusjon1Uuid);
-        VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon(journalpost2, true, "ja");
+        VurdertInstitusjon vurdertInstitusjon = new VurdertInstitusjon(journalpost2, true, "ja", "", LocalDateTime.now());
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertInstitusjon));
 
         var resultat = vurderInstitusjonTidslinjeUtleder.utled(perioderFraSøknad, vurdertOpplæringGrunnlag, søknadstidslinje);

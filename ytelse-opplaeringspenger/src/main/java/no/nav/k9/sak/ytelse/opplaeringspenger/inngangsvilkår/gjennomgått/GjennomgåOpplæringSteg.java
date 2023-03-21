@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.gjennomgått;
 
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -18,7 +19,6 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.Aksjon;
 
 @BehandlingStegRef(value = BehandlingStegType.VURDER_GJENNOMGÅTT_OPPLÆRING)
 @BehandlingTypeRef
@@ -40,23 +40,25 @@ public class GjennomgåOpplæringSteg implements BehandlingSteg {
         this.gjennomgåttOpplæringTjeneste = gjennomgåttOpplæringTjeneste;
     }
 
-    private boolean trengerAvklaring(Aksjon aksjon) {
-        return !Objects.equals(aksjon, Aksjon.FORTSETT);
-    }
-
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
 
         var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         var referanse = BehandlingReferanse.fra(behandling);
-        var aksjon = gjennomgåttOpplæringTjeneste.vurder(referanse);
+        var aksjoner = gjennomgåttOpplæringTjeneste.vurder(referanse);
 
-        if (trengerAvklaring(aksjon)) {
-            return BehandleStegResultat.utførtMedAksjonspunktResultater(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_GJENNOMGÅTT_OPPLÆRING));
+        List<AksjonspunktResultat> aksjonspunkter = new ArrayList<>();
+        if (aksjoner.contains(Aksjon.TRENGER_AVKLARING_OPPLÆRING)) {
+            aksjonspunkter.add(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_GJENNOMGÅTT_OPPLÆRING));
+        }
+        if (aksjoner.contains(Aksjon.TRENGER_AVKLARING_REISETID)) {
+            aksjonspunkter.add(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.VURDER_REISETID));
+        }
+        if (!aksjonspunkter.isEmpty()) {
+            return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunkter);
         }
 
         gjennomgåttOpplæringTjeneste.lagreVilkårsResultat(referanse);
-
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 

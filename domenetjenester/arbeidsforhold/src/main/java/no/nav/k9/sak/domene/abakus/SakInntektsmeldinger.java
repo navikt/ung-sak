@@ -1,6 +1,7 @@
 package no.nav.k9.sak.domene.abakus;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -9,10 +10,15 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 
 class SakInntektsmeldinger {
+
+    private static Logger LOGGER = LoggerFactory.getLogger(SakInntektsmeldinger.class);
 
     private final Map<Key, Set<Inntektsmelding>> data = new LinkedHashMap<>();
     private final Map<Key, InntektArbeidYtelseGrunnlag> grunnlag = new LinkedHashMap<>();
@@ -34,7 +40,7 @@ class SakInntektsmeldinger {
         var relevanteKeys = data.keySet()
             .stream()
             .filter(it -> Objects.equals(it.behandlingId, behandlingId) && !it.grunnlagEksternReferanse.equals(eksternReferanse))
-            .collect(Collectors.toList());
+            .toList();
 
         var nyeInntektsmeldinger = new LinkedHashSet<Inntektsmelding>();
         var senesteInntektsmelding = orignInntektsmeldinger.stream().max(Inntektsmelding.COMP_REKKEFØLGE).orElse(null);
@@ -49,8 +55,20 @@ class SakInntektsmeldinger {
         return nyeInntektsmeldinger;
     }
 
+
+    Set<Inntektsmelding> hentUnikeInntektsmeldinger() {
+        if (data.isEmpty()) {
+            return Set.of();
+        }
+
+        return data.values()
+            .stream()
+            .flatMap(Collection::stream)
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
     private boolean erLiktEllerSenere(Inntektsmelding siste, Inntektsmelding denne) {
-        return siste==null || siste.equals(denne) || denne.getKanalreferanse().compareTo(siste.getKanalreferanse()) >= 0;
+        return siste == null || siste.equals(denne) || denne.getKanalreferanse().compareTo(siste.getKanalreferanse()) >= 0;
     }
 
     static class Key {
@@ -81,6 +99,16 @@ class SakInntektsmeldinger {
         @Override
         public int hashCode() {
             return Objects.hash(behandlingId, grunnlagEksternReferanse, opprettetTidspunkt);
+        }
+
+
+        @Override
+        public String toString() {
+            return "Key{" +
+                "behandlingId=" + behandlingId +
+                ", grunnlagEksternReferanse=" + grunnlagEksternReferanse +
+                ", opprettetTidspunkt=" + opprettetTidspunkt +
+                '}';
         }
     }
 

@@ -2,57 +2,36 @@ package no.nav.k9.sak.behandling.hendelse;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.kodeverk.Fagsystem;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.hendelse.EventHendelse;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
-import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandling.hendelse.produksjonsstyring.BehandlingProsessHendelseMapper;
 import no.nav.k9.sak.behandling.hendelse.produksjonsstyring.PubliserEventTask;
 import no.nav.k9.sak.behandling.hendelse.produksjonsstyring.PubliserEventTaskImpl;
 import no.nav.k9.sak.behandling.hendelse.produksjonsstyring.PubliserProduksjonsstyringHendelseTask;
 import no.nav.k9.sak.behandling.hendelse.produksjonsstyring.PubliserProduksjonsstyringHendelseTaskImpl;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingskontroll.events.AksjonspunktStatusEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingStatusEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingskontrollEvent;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
+import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
+import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
-import no.nav.k9.sak.kontrakt.aksjonspunkt.AksjonspunktTilstandDto;
-import no.nav.k9.sak.kontrakt.behandling.BehandlingProsessHendelse;
 import no.nav.k9.sak.kontrakt.produksjonsstyring.los.ProduksjonsstyringAksjonspunktHendelse;
 import no.nav.k9.sak.kontrakt.produksjonsstyring.los.ProduksjonsstyringBehandlingAvsluttetHendelse;
 import no.nav.k9.sak.kontrakt.produksjonsstyring.los.ProduksjonsstyringBehandlingOpprettetHendelse;
-import no.nav.k9.sak.perioder.KravDokument;
-import no.nav.k9.sak.perioder.SøktPeriode;
-import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
-import no.nav.k9.sak.perioder.VurdertSøktPeriode;
-import no.nav.k9.sak.perioder.VurdertSøktPeriode.SøktPeriodeData;
 
 @ApplicationScoped
 public class BehandlingskontrollEventObserver {
@@ -61,18 +40,21 @@ public class BehandlingskontrollEventObserver {
 
     private ProsessTaskTjeneste prosessTaskRepository;
     private BehandlingRepository behandlingRepository;
-    private Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester;
+    private BehandlingVedtakRepository behandlingVedtakRepository;
+    private BehandlingProsessHendelseMapper behandlingProsessHendelseMapper;
 
     public BehandlingskontrollEventObserver() {
     }
 
     @Inject
     public BehandlingskontrollEventObserver(ProsessTaskTjeneste prosessTaskRepository,
-            BehandlingRepository behandlingRepository,
-            @Any Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester) {
+                                            BehandlingRepository behandlingRepository,
+                                            BehandlingVedtakRepository behandlingVedtakRepository,
+                                            BehandlingProsessHendelseMapper behandlingProsessHendelseMapper) {
         this.prosessTaskRepository = prosessTaskRepository;
         this.behandlingRepository = behandlingRepository;
-        this.søknadsfristTjenester = søknadsfristTjenester;
+        this.behandlingVedtakRepository = behandlingVedtakRepository;
+        this.behandlingProsessHendelseMapper = behandlingProsessHendelseMapper;
     }
 
     public void observerStoppetEvent(@Observes BehandlingskontrollEvent.StoppetEvent event) {
@@ -80,7 +62,7 @@ public class BehandlingskontrollEventObserver {
             ProsessTaskData prosessTaskData = opprettProsessTaskBehandlingprosess(event.getBehandlingId(), EventHendelse.BEHANDLINGSKONTROLL_EVENT);
             prosessTaskRepository.lagre(prosessTaskData);
         } catch (Exception ex) {
-            log.warn("Publisering av StoppetEvent feilet", ex);
+            throw new RuntimeException("Publisering av StoppetEvent feilet", ex);
         }
     }
 
@@ -90,16 +72,16 @@ public class BehandlingskontrollEventObserver {
             try {
                 ProsessTaskData prosessTaskData = opprettProsessTaskBehandlingprosess(event.getBehandlingId(), EventHendelse.AKSJONSPUNKT_OPPRETTET);
                 prosessTaskRepository.lagre(prosessTaskData);
-            } catch (Exception ex) {
-                log.warn("Publisering av AksjonspunkterFunnetEvent feilet", ex);
+            } catch (IOException ex) {
+                throw new RuntimeException("Publisering av AksjonspunkterFunnetEvent feilet", ex);
             }
         }
 
         try {
             ProsessTaskData prosessTaskData = opprettProsessTaskAksjonspunkthendelse(event.getBehandlingId(), event);
             prosessTaskRepository.lagre(prosessTaskData);
-        } catch (Exception ex) {
-            log.warn("Publisering av Aksjonspunkthendelse feilet", ex);
+        } catch (IOException ex) {
+            throw new RuntimeException("Publisering av Aksjonspunkthendelse feilet", ex);
         }
     }
 
@@ -107,8 +89,8 @@ public class BehandlingskontrollEventObserver {
         try {
             ProsessTaskData prosessTaskData = opprettProsessTaskBehandlingOpprettetEvent(event.getBehandlingId());
             prosessTaskRepository.lagre(prosessTaskData);
-        } catch (Exception ex) {
-            log.warn("Publisering av BehandlingOpprettetHendelse feilet", ex);
+        } catch (IOException ex) {
+            throw new RuntimeException("Publisering av BehandlingOpprettetHendelse feilet", ex);
         }
     }
 
@@ -117,40 +99,64 @@ public class BehandlingskontrollEventObserver {
         try {
             ProsessTaskData prosessTaskData = opprettProsessTaskBehandlingprosess(event.getBehandlingId(), EventHendelse.AKSJONSPUNKT_AVBRUTT);
             prosessTaskRepository.lagre(prosessTaskData);
-        } catch (Exception ex) {
-            log.warn("Publisering av BehandlingAvsluttetEvent feilet", ex);
+        } catch (IOException ex) {
+            throw new RuntimeException("Publisering av BehandlingAvsluttetEvent feilet", ex);
         }
 
         try {
             ProsessTaskData prosessTaskData = opprettProsessTaskBehandlingAvsluttetEvent(event.getBehandlingId());
             prosessTaskRepository.lagre(prosessTaskData);
-        } catch (Exception ex) {
-            log.warn("Publisering av BehandlingAvsluttetHendelse for produksjonsstyring feilet", ex);
+        } catch (IOException ex) {
+            throw new RuntimeException("Publisering av BehandlingAvsluttetHendelse for produksjonsstyring feilet", ex);
         }
     }
 
-    public void observerAksjonspunktHarEndretBehandlendeEnhetEvent(@Observes BehandlingEnhetEvent event) {
+    public void observerVedtakFattetEvent(@Observes BehandlingVedtakEvent event) {
         try {
-            ProsessTaskData prosessTaskData = opprettProsessTaskBehandlingprosess(event.getBehandlingId(), EventHendelse.AKSJONSPUNKT_HAR_ENDRET_BEHANDLENDE_ENHET);
+            ProsessTaskData prosessTaskData = opprettProsessTaskVedtattBehandlingprosess(event.getBehandlingId(), event.getVedtak());
             prosessTaskRepository.lagre(prosessTaskData);
-        } catch (Exception ex) {
-            log.warn("Publisering av AksjonspunktHarEndretBehandlendeEnhetEvent feilet", ex);
+        } catch (IOException ex) {
+            throw new RuntimeException("Publisering av BehandlingskontrollEvent feilet", ex);
         }
     }
 
-    private ProsessTaskData opprettProsessTaskBehandlingprosess(Long behandlingId, EventHendelse eventHendelse) throws IOException {
+    private ProsessTaskData opprettProsessTaskVedtattBehandlingprosess(Long behandlingId, BehandlingVedtak vedtak) throws IOException {
         ProsessTaskData taskData = ProsessTaskData.forProsessTask(PubliserEventTaskImpl.class);
         taskData.setCallIdFraEksisterende();
         taskData.setPrioritet(50);
 
         Optional<Behandling> behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId);
 
-        var dto = getProduksjonstyringEventDto(eventHendelse, behandling.get());
+        var dto = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(EventHendelse.BEHANDLINGSKONTROLL_EVENT, behandling.get(),vedtak.getVedtaksdato());
         var aksjonspunkter = dto.getAksjonspunktKoderMedStatusListe();
         taskData.setPayload(JsonObjectMapper.getJson(dto));
         taskData.setProperty(PubliserEventTask.PROPERTY_KEY, behandlingId.toString());
         taskData.setProperty(PubliserEventTask.BESKRIVELSE, String.valueOf(aksjonspunkter));
         return taskData;
+    }
+
+    public void observerAksjonspunktHarEndretBehandlendeEnhetEvent(@Observes BehandlingEnhetEvent event) {
+        try {
+            ProsessTaskData prosessTaskData = opprettProsessTaskBehandlingprosess(event.getBehandlingId(), EventHendelse.AKSJONSPUNKT_HAR_ENDRET_BEHANDLENDE_ENHET);
+            prosessTaskRepository.lagre(prosessTaskData);
+        } catch (IOException ex) {
+            throw new RuntimeException("Publisering av AksjonspunktHarEndretBehandlendeEnhetEvent feilet", ex);
+        }
+    }
+
+    private ProsessTaskData opprettProsessTaskBehandlingprosess(Long behandlingId, EventHendelse eventHendelse) throws IOException {
+            ProsessTaskData taskData = ProsessTaskData.forProsessTask(PubliserEventTaskImpl.class);
+            taskData.setCallIdFraEksisterende();
+            taskData.setPrioritet(50);
+
+            Optional<Behandling> behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId);
+
+            var dto = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(eventHendelse, behandling.get());
+            var aksjonspunkter = dto.getAksjonspunktKoderMedStatusListe();
+            taskData.setPayload(JsonObjectMapper.getJson(dto));
+            taskData.setProperty(PubliserEventTask.PROPERTY_KEY, behandlingId.toString());
+            taskData.setProperty(PubliserEventTask.BESKRIVELSE, String.valueOf(aksjonspunkter));
+            return taskData;
     }
 
 
@@ -209,103 +215,12 @@ public class BehandlingskontrollEventObserver {
         ProduksjonsstyringAksjonspunktHendelse dto = new ProduksjonsstyringAksjonspunktHendelse(
             behandling.getUuid(),
             LocalDateTime.now(),
-            lagAksjonspunkttilstander(hendelse.getAksjonspunkter())
+            behandlingProsessHendelseMapper.lagAksjonspunkttilstander(hendelse.getAksjonspunkter())
         );
 
         taskData.setPayload(JsonObjectMapper.getJson(dto));
         taskData.setProperty(PubliserProduksjonsstyringHendelseTask.PROPERTY_KEY, behandlingId.toString());
         taskData.setProperty(PubliserProduksjonsstyringHendelseTask.BESKRIVELSE, String.valueOf(dto.aksjonspunktTilstander));
         return taskData;
-    }
-
-    private List<AksjonspunktTilstandDto> lagAksjonspunkttilstander(Collection<Aksjonspunkt> aksjonspunkter) {
-        return aksjonspunkter.stream().map(it ->
-            new AksjonspunktTilstandDto(
-                it.getAksjonspunktDefinisjon().getKode(),
-                it.getStatus(),
-                it.getVenteårsak(),
-                it.getAnsvarligSaksbehandler(),
-                it.getFristTid())
-        ).toList();
-    }
-
-    private BehandlingProsessHendelse getProduksjonstyringEventDto(EventHendelse eventHendelse, Behandling behandling) {
-        Map<String, String> aksjonspunktKoderMedStatusListe = new HashMap<>();
-        var fagsak = behandling.getFagsak();
-        behandling.getAksjonspunkter().forEach(aksjonspunkt -> aksjonspunktKoderMedStatusListe.put(aksjonspunkt.getAksjonspunktDefinisjon().getKode(), aksjonspunkt.getStatus().getKode()));
-        
-        final boolean nyeKrav = sjekkOmDetHarKommetNyeKrav(behandling);
-        
-        return BehandlingProsessHendelse.builder()
-            .medEksternId(behandling.getUuid())
-            .medEventTid(LocalDateTime.now())
-            .medFagsystem(Fagsystem.K9SAK)
-            .medSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi())
-            .medAktørId(behandling.getAktørId().getId())
-            .getBehandlingstidFrist(behandling.getBehandlingstidFrist())
-            .medEventHendelse(eventHendelse)
-            .medBehandlingStatus(behandling.getStatus().getKode())
-            .medBehandlingSteg(behandling.getAktivtBehandlingSteg() == null ? null : behandling.getAktivtBehandlingSteg().getKode())
-            .medYtelseTypeKode(behandling.getFagsakYtelseType().getKode())
-            .medBehandlingTypeKode(behandling.getType().getKode())
-            .medOpprettetBehandling(behandling.getOpprettetDato())
-            .medBehandlingResultat(behandling.getBehandlingResultatType())
-            .medAksjonspunktKoderMedStatusListe(aksjonspunktKoderMedStatusListe)
-            .medAnsvarligSaksbehandlerForTotrinn(behandling.getAnsvarligSaksbehandler())
-            .medBehandlendeEnhet(behandling.getBehandlendeEnhet())
-            .medFagsakPeriode(fagsak.getPeriode().tilPeriode())
-            .medPleietrengendeAktørId(fagsak.getPleietrengendeAktørId())
-            .medRelatertPartAktørId(fagsak.getRelatertPersonAktørId())
-            .medAnsvarligBeslutterForTotrinn(behandling.getAnsvarligBeslutter())
-            .medAksjonspunktTilstander(lagAksjonspunkttilstander(behandling.getAksjonspunkter()))
-            .medNyeKrav(nyeKrav)
-            .build();
-    }
-    
-    public boolean sjekkOmDetHarKommetNyeKrav(Behandling behandling) {
-        final var behandlingRef = BehandlingReferanse.fra(behandling);
-        final var søknadsfristTjeneste = finnVurderSøknadsfristTjeneste(behandlingRef);
-        if (søknadsfristTjeneste == null) {
-            return false;
-        }
-        
-        final Set<KravDokument> kravdokumenter = søknadsfristTjeneste.relevanteKravdokumentForBehandling(behandlingRef);
-        if (kravdokumenter.isEmpty()) {
-            return false;
-        }
-        
-        final LocalDateTimeline<KravDokument> eldsteKravTidslinje = hentKravdokumenterMedEldsteKravFørst(behandlingRef, søknadsfristTjeneste);
-        
-        return eldsteKravTidslinje
-                .stream()
-                .anyMatch(it -> kravdokumenter.stream()
-                    .anyMatch(at -> at.getJournalpostId().equals(it.getValue().getJournalpostId())));
-    }
-
-    private LocalDateTimeline<KravDokument> hentKravdokumenterMedEldsteKravFørst(BehandlingReferanse behandlingRef,
-            VurderSøknadsfristTjeneste<SøktPeriodeData> søknadsfristTjeneste) {
-        final Map<KravDokument, List<SøktPeriode<SøktPeriodeData>>> kravdokumenterMedPeriode = søknadsfristTjeneste.hentPerioderTilVurdering(behandlingRef);
-        final var kravdokumenterMedEldsteFørst = kravdokumenterMedPeriode.keySet()
-                .stream()
-                .sorted(Comparator.comparing(KravDokument::getInnsendingsTidspunkt))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-        
-        LocalDateTimeline<KravDokument> eldsteKravTidslinje = LocalDateTimeline.empty();
-        for (KravDokument kravdokument : kravdokumenterMedEldsteFørst) {
-            final List<SøktPeriode<SøktPeriodeData>> perioder = kravdokumenterMedPeriode.get(kravdokument);
-            final var tidslinje = new LocalDateTimeline<>(perioder.stream()
-                    .map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), kravdokument))
-                    .collect(Collectors.toList()));
-            eldsteKravTidslinje = eldsteKravTidslinje.union(tidslinje, StandardCombinators::coalesceLeftHandSide);
-        }
-        return eldsteKravTidslinje;
-    }
-    
-    private VurderSøknadsfristTjeneste<VurdertSøktPeriode.SøktPeriodeData> finnVurderSøknadsfristTjeneste(BehandlingReferanse ref) {
-        final FagsakYtelseType ytelseType = ref.getFagsakYtelseType();
-        
-        @SuppressWarnings("unchecked")
-        final var tjeneste = (VurderSøknadsfristTjeneste<VurdertSøktPeriode.SøktPeriodeData>) FagsakYtelseTypeRef.Lookup.find(søknadsfristTjenester, ytelseType).orElse(null);
-        return tjeneste;
     }
 }

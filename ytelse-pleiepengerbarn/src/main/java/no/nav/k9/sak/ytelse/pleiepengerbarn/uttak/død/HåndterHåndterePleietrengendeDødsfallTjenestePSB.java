@@ -14,6 +14,10 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
 import no.nav.k9.kodeverk.uttak.RettVedDødType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -28,9 +32,11 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleiebehovBuilder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleieperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultat;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død.RettPleiepengerVedDødRepository;
@@ -64,9 +70,9 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
     }
 
-    private static DatoIntervallEntitet utledPeriode(DatoIntervallEntitet periode, DatoIntervallEntitet last) {
-        if (last.getTomDato().isAfter(periode.getTomDato())) {
-            return DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), last.getTomDato());
+    private static DatoIntervallEntitet utledPeriode(DatoIntervallEntitet periode, TreeSet<DatoIntervallEntitet> last) {
+        if (!last.isEmpty() && last.last().getTomDato().isAfter(periode.getTomDato())) {
+            return DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), last.last().getTomDato());
         }
         return periode;
     }
@@ -116,26 +122,50 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
 
         var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
 
-        var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene).medKantIKantVurderer(vilkårsPerioderTilVurderingTjeneste.getKantIKantVurderer());
-        var perioder = vilkårsPerioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.OPPTJENINGSVILKÅRET);
-        var perioderSomMåforlenges = TidslinjeUtil.tilTidslinjeKomprimert(perioder)
-            .intersection(periode.toLocalDateInterval())
-            .compress()
-            .stream().map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval())).collect(Collectors.toCollection(TreeSet::new));
-        if (perioderSomMåforlenges.size() > 1) {
-            throw new IllegalStateException("Fant flere perioder som må forlenges.");
-        }
-        periode = utledPeriode(periode, perioderSomMåforlenges.last());
+        var kantIKantVurderer = vilkårsPerioderTilVurderingTjeneste.getKantIKantVurderer();
+        var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene).medKantIKantVurderer(kantIKantVurderer);
+        var perioder = utledPerioder(referanse);
+        var tidslinjen = TidslinjeUtil.tilTidslinjeKomprimert(perioder)
+            .intersection(new LocalDateInterval(periode.getFomDato(), LocalDateInterval.TIDENES_ENDE))
+            .combine(new LocalDateTimeline<>(periode.toLocalDateInterval(), true), StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN)
+            .compress();
 
-        forlengMedisinskeVilkår(resultatBuilder, vilkårene, periode, pleietrengendePersonopplysninger.getFødselsdato());
-        forlengOgVurderAldersvilkåret(resultatBuilder, periode, brukerPersonopplysninger);
-        forlengAndreVilkår(periode, vilkårene, resultatBuilder);
+        tidslinjen = tidslinjen.combine(Hjelpetidslinjer.utledHullSomMåTettes(tidslinjen, kantIKantVurderer), StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+
+        var perioderSomMåforlenges = tidslinjen.stream()
+            .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
+            .collect(Collectors.toCollection(TreeSet::new));
+
+        var periodeSomOverlapperMedDødsfallet = perioderSomMåforlenges.stream().filter(it -> it.overlapper(utvidelsesperiode.get())).collect(Collectors.toCollection(TreeSet::new));
+
+        if (periodeSomOverlapperMedDødsfallet.size() > 1) {
+            throw new IllegalStateException("Fant flere perioder som må forlenges." + perioderSomMåforlenges);
+        }
+        periode = utledPeriode(periode, periodeSomOverlapperMedDødsfallet);
+
+        forlengPeriode(periode, pleietrengendePersonopplysninger, brukerPersonopplysninger, vilkårene, resultatBuilder);
+
         vilkårResultatRepository.lagre(referanse.getBehandlingId(), resultatBuilder.build());
 
         final var nåværendeResultat = resultatRepository.hentHvisEksisterer(referanse.getBehandlingId());
         var builder = nåværendeResultat.map(PleiebehovResultat::getPleieperioder).map(EtablertPleiebehovBuilder::builder).orElse(EtablertPleiebehovBuilder.builder());
         builder.tilbakeStill(periode);
+        builder.leggTil(new EtablertPleieperiode(periode, Pleiegrad.KONTINUERLIG_TILSYN));
         resultatRepository.lagreOgFlush(referanse.getBehandlingId(), builder);
+    }
+
+    private void forlengPeriode(DatoIntervallEntitet periode, PersonopplysningEntitet pleietrengendePersonopplysninger, PersonopplysningEntitet brukerPersonopplysninger, Vilkårene vilkårene, VilkårResultatBuilder resultatBuilder) {
+        forlengMedisinskeVilkår(resultatBuilder, vilkårene, periode, pleietrengendePersonopplysninger.getFødselsdato());
+        forlengOgVurderAldersvilkåret(resultatBuilder, periode, brukerPersonopplysninger);
+        forlengAndreVilkår(periode, vilkårene, resultatBuilder);
+    }
+
+    private NavigableSet<DatoIntervallEntitet> utledPerioder(BehandlingReferanse referanse) {
+        var perioderUnder = vilkårsPerioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
+        var perioderOver = vilkårsPerioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.MEDISINSKEVILKÅR_18_ÅR);
+        var perioder = new TreeSet<>(perioderUnder);
+        perioder.addAll(perioderOver);
+        return perioder;
     }
 
     private UtvidelseAvPeriode utledUtvidelse(RettVedDødType rettVedDød) {
@@ -191,7 +221,7 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
 
     private boolean harGodkjentSykdomPåDødsdatoen(LocalDate dødsdato, Vilkårene vilkårene) {
         for (VilkårType vilkårType : Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR)) {
-            Optional<VilkårPeriode> periode = vilkårene.getVilkår(vilkårType).orElseThrow().finnPeriodeSomInneholderDato(dødsdato);
+            Optional<VilkårPeriode> periode = vilkårene.getVilkår(vilkårType).flatMap(it -> it.finnPeriodeSomInneholderDato(dødsdato));
             if (periode.isPresent() && periode.get().getUtfall() == Utfall.OPPFYLT) {
                 return true;
             }

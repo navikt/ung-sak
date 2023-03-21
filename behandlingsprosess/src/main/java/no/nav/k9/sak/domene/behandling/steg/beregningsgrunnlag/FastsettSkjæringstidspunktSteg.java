@@ -18,6 +18,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
@@ -28,6 +29,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
@@ -39,13 +41,16 @@ import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 @ApplicationScoped
 public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
 
+    public static final String HASTESAK_JANUAR_2023 = "BQFSK";
     private final Logger logger = LoggerFactory.getLogger(FastsettSkjæringstidspunktSteg.class);
 
     private BeregningTjeneste kalkulusTjeneste;
+    private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
     private VilkårPeriodeFilterProvider periodeFilterProvider;
+    private BeregningStegPeriodeFilter beregningStegPeriodeFilter;
 
     protected FastsettSkjæringstidspunktSteg() {
         // for CDI proxy
@@ -53,16 +58,20 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
 
     @Inject
     public FastsettSkjæringstidspunktSteg(BeregningTjeneste kalkulusTjeneste,
+                                          FagsakRepository fagsakRepository,
                                           SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                           BehandlingRepository behandlingRepository,
                                           BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
-                                          VilkårPeriodeFilterProvider periodeFilterProvider) {
+                                          VilkårPeriodeFilterProvider periodeFilterProvider,
+                                          BeregningStegPeriodeFilter beregningStegPeriodeFilter) {
 
         this.kalkulusTjeneste = kalkulusTjeneste;
+        this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.periodeFilterProvider = periodeFilterProvider;
+        this.beregningStegPeriodeFilter = beregningStegPeriodeFilter;
     }
 
     @Override
@@ -71,12 +80,8 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         var skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
         var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
-        var periodeFilter = periodeFilterProvider.getFilter(ref);
-
-        periodeFilter.ignorerAvslåttePerioder().ignorerForlengelseperioder();
         var perioderTilBeregning = new ArrayList<PeriodeTilVurdering>();
-        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter);
-
+        var perioderTilVurdering = beregningStegPeriodeFilter.filtrerPerioder(ref, FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING);
         for (var periode : perioderTilVurdering) {
             if (periodeErUtenforFagsaksIntervall(periode.getPeriode(), behandling.getFagsak().getPeriode())) {
                 avslåVilkår(kontekst, Avslagsårsak.INGEN_BEREGNINGSREGLER_TILGJENGELIG_I_LØSNINGEN, periode.getPeriode());
@@ -101,23 +106,31 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
         logger.info("Beregner steg {} for perioder {} ", FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING, vilkårsperioder);
 
         var resultat = kalkulusTjeneste.startBeregning(ref, vilkårsperioder, BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING);
+
+        var infotrygdmigreringer = fagsakRepository.hentSakInfotrygdMigreringer(kontekst.getFagsakId());
         var aksjonspunktResultater = new ArrayList<AksjonspunktResultat>();
         for (var entry : resultat.getResultater().entrySet()) {
             var kalkulusResultat = entry.getValue();
             Boolean vilkårOppfylt = kalkulusResultat.getVilkårOppfylt();
+
+            var stp = resultat.getStp(entry.getKey());
+            var erInfotrygdmigrering = infotrygdmigreringer.stream().anyMatch(sakInfotrygdMigrering -> sakInfotrygdMigrering.getSkjæringstidspunkt().equals(stp));
             if (vilkårOppfylt != null && !vilkårOppfylt) {
                 var bgReferanse = entry.getKey();
                 avslå(kontekst, vilkårsperioder, resultat, kalkulusResultat, bgReferanse);
             } else {
-                aksjonspunktResultater.addAll(aksjonspunkter(kalkulusResultat));
+                aksjonspunktResultater.addAll(aksjonspunkter(kalkulusResultat, erInfotrygdmigrering));
             }
         }
 
         return Collections.unmodifiableList(aksjonspunktResultater);
     }
 
-    private List<AksjonspunktResultat> aksjonspunkter(KalkulusResultat kalkulusResultat) {
-        return kalkulusResultat.getBeregningAksjonspunktResultat().stream().map(BeregningResultatMapper::map).collect(Collectors.toList());
+    private List<AksjonspunktResultat> aksjonspunkter(KalkulusResultat kalkulusResultat, boolean erInfotrygdmigrering) {
+        return kalkulusResultat.getBeregningAksjonspunktResultat().stream()
+            .map(BeregningResultatMapper::map)
+            .filter(r -> !erInfotrygdmigrering || !r.getAksjonspunktDefinisjon().equals(AksjonspunktDefinisjon.AUTO_VENT_PÅ_INNTEKT_RAPPORTERINGSFRIST))
+            .collect(Collectors.toList());
     }
 
     private void avslå(BehandlingskontrollKontekst kontekst, List<PeriodeTilVurdering> vilkårsperioder, SamletKalkulusResultat resultat, KalkulusResultat kalkulusResultat,
