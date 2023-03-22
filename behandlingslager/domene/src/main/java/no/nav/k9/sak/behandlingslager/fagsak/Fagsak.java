@@ -43,7 +43,7 @@ public class Fagsak extends BaseEntitet {
     private FagsakYtelseType ytelseType = FagsakYtelseType.UDEFINERT;
 
     @Embedded
-    @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "bruker_aktoer_id", unique = true, nullable = false)))
+    @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "bruker_aktoer_id", unique = true, nullable = false, updatable = false)))
     private AktørId brukerAktørId;
 
     @Embedded
