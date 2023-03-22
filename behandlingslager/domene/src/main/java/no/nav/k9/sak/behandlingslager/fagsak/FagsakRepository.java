@@ -132,15 +132,6 @@ public class FagsakRepository {
         entityManager.flush();
     }
 
-    //midlertidig her for bruk ifbm splitt/merge aktør på bruker
-    @Deprecated (forRemoval = true)
-    public void oppdaterBruker(Long fagsakId, AktørId brukerAktørId) {
-        Fagsak fagsak = finnEksaktFagsak(fagsakId);
-        fagsak.setBruker(brukerAktørId);
-        entityManager.persist(fagsak);
-        entityManager.flush();
-    }
-
     public void oppdaterPeriode(Long fagsakId, LocalDate fom, LocalDate tom) {
         Fagsak fagsak = finnEksaktFagsak(fagsakId);
         fagsak.setPeriode(fom, tom);

@@ -43,7 +43,7 @@ public class Fagsak extends BaseEntitet {
     private FagsakYtelseType ytelseType = FagsakYtelseType.UDEFINERT;
 
     @Embedded
-    @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "bruker_aktoer_id", unique = true, nullable = false, updatable = true)))
+    @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "bruker_aktoer_id", unique = true, nullable = false)))
     private AktørId brukerAktørId;
 
     @Embedded
@@ -148,12 +148,6 @@ public class Fagsak extends BaseEntitet {
             throw new IllegalArgumentException("Kan ikke nullstille pleietrengende. Prøver å endre fra " + this.pleietrengendeAktørId + " til " + aktørId);
         }
         this.pleietrengendeAktørId = aktørId;
-    }
-
-    //midlertidig her pga behov for å fikse sak ifbm splitt/merge aktør
-    @Deprecated(forRemoval = true)
-    public void setBruker(AktørId aktørId) {
-        this.brukerAktørId = aktørId;
     }
 
     public void setRelatertPerson(AktørId aktørId) {
