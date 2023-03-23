@@ -19,6 +19,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
 import no.nav.k9.aarskvantum.kontrakter.Periodetype;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
+import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
@@ -33,13 +34,16 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.UtledeteVilkår;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
+import no.nav.k9.sak.perioder.PeriodeMedÅrsak;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 import no.nav.k9.sak.trigger.ProsessTriggere;
 import no.nav.k9.sak.trigger.ProsessTriggereRepository;
+import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriode;
 import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.KravDokumentFravær;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
+import no.nav.k9.sak.ytelse.omsorgspenger.vilkår.revurdering.RevurderingPerioderTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.TrekkUtFraværTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
@@ -58,6 +62,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     private VilkårResultatRepository vilkårResultatRepository;
     private ÅrskvantumTjeneste årskvantumTjeneste;
     private ProsessTriggereRepository prosessTriggereRepository;
+    private RevurderingPerioderTjeneste revurderingPerioderTjeneste;
 
     OMPVilkårsPerioderTilVurderingTjeneste() {
         // CDI
@@ -70,7 +75,8 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
                                                   TrekkUtFraværTjeneste trekkUtFraværTjeneste,
                                                   VilkårResultatRepository vilkårResultatRepository,
                                                   ÅrskvantumTjeneste årskvantumTjeneste,
-                                                  ProsessTriggereRepository prosessTriggereRepository) {
+                                                  ProsessTriggereRepository prosessTriggereRepository,
+                                                  RevurderingPerioderTjeneste revurderingPerioderTjeneste) {
         this.vilkårUtleder = vilkårUtleder;
         søktePerioder = new SøktePerioder(omsorgspengerGrunnlagRepository);
         nulledePerioder = new NulledePerioder(omsorgspengerGrunnlagRepository);
@@ -79,6 +85,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.årskvantumTjeneste = årskvantumTjeneste;
         this.prosessTriggereRepository = prosessTriggereRepository;
+        this.revurderingPerioderTjeneste = revurderingPerioderTjeneste;
     }
 
     @Override
@@ -151,14 +158,21 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     private NavigableSet<DatoIntervallEntitet> utledVilkårsPerioderFraPerioderTilVurdering(Behandling behandling, Vilkår vilkår, Set<DatoIntervallEntitet> perioder,
                                                                                            NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles) {
         var prosessTriggere = prosessTriggereRepository.hentGrunnlag(behandling.getId());
+        var referanse = BehandlingReferanse.fra(behandling);
+        var perioderTilVurdering = new TreeSet<>(revurderingPerioderTjeneste.utledPerioderFraProsessTriggere(referanse));
+        perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse, utledFullstendigePerioder(behandling.getId())));
+
 
         return vilkår.getPerioder()
             .stream()
             .filter(it -> perioder.stream().anyMatch(p -> it.getPeriode().overlapper(p))
                 || overlapperMedÅrsakPeriode(it, prosessTriggere)
                 || perioderSomSkalTilbakestilles.stream().anyMatch(p -> it.getPeriode().overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(p.getFomDato().minusDays(1), p.getTomDato().plusDays(1))))
-                || perioderSomSkalTilbakestilles.stream().anyMatch(p -> erKantIKantVurderer.erKantIKant(it.getPeriode(), p)))
+                || perioderSomSkalTilbakestilles.stream().anyMatch(p -> erKantIKantVurderer.erKantIKant(it.getPeriode(), p))
+            )
             .map(VilkårPeriode::getPeriode)
+            //TODO merge denne filteren med forrige
+            .filter(datoIntervallEntitet -> perioderTilVurdering.stream().anyMatch(it -> datoIntervallEntitet.overlapper(it.getFomDato().minusDays(1), it.getTomDato().plusDays(1))))
             .collect(Collectors.toCollection(TreeSet::new));
     }
 
@@ -194,5 +208,20 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     @Override
     public KantIKantVurderer getKantIKantVurderer() {
         return erKantIKantVurderer;
+    }
+
+    @Override
+    public NavigableSet<PeriodeMedÅrsak> utledRevurderingPerioder(BehandlingReferanse referanse) {
+        var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
+        var periodeMedÅrsaks = new TreeSet<PeriodeMedÅrsak>();
+
+        periodeMedÅrsaks.addAll(revurderingPerioderTjeneste.utledPerioderFraProsessTriggereMedÅrsak(referanse));
+
+        periodeMedÅrsaks.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse, utledFullstendigePerioder(behandling.getId()))
+            .stream()
+            .map(it -> new PeriodeMedÅrsak(it, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING))
+            .collect(Collectors.toSet()));
+
+        return periodeMedÅrsaks;
     }
 }

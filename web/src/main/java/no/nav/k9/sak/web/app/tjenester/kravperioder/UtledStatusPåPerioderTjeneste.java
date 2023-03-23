@@ -266,9 +266,10 @@ public class UtledStatusPåPerioderTjeneste {
             .toList();
     }
 
-    private Set<Map.Entry<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>>> utledKravdokumenterRelevantForPeriodeTilVurdering(Set<KravDokument> kravdokumenter,
-                                                                                                                                                  Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterMedPeriode,
-                                                                                                                                                  NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
+    private Set<Map.Entry<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>>> utledKravdokumenterRelevantForPeriodeTilVurdering(
+        Set<KravDokument> kravdokumenter,
+        Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterMedPeriode,
+        NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
         return kravdokumenterMedPeriode.entrySet()
             .stream()
             .filter(it -> kravdokumenter.stream()
