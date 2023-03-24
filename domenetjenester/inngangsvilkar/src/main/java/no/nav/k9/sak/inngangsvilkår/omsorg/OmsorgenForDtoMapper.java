@@ -101,7 +101,9 @@ public class OmsorgenForDtoMapper {
                     null,
                     readOnly,
                     resultat,
-                    mapResultatEtterAutomatikk(resultat, ikkeVurdertBlirOppfylt));
+                    mapResultatEtterAutomatikk(resultat, ikkeVurdertBlirOppfylt),
+                    null,
+                    null);
                 return new LocalDateSegment<>(overlappendeIntervall, omsorgenForDto);
             }
             OmsorgenForPeriode p = vurdertOmsorgenForPeriode.getValue();
@@ -112,7 +114,9 @@ public class OmsorgenForDtoMapper {
                 p.getRelasjonsbeskrivelse(),
                 readOnly,
                 p.getResultat(),
-                mapResultatEtterAutomatikk(p.getResultat(), ikkeVurdertBlirOppfylt));
+                mapResultatEtterAutomatikk(p.getResultat(), ikkeVurdertBlirOppfylt),
+                p.getVurdertAv(),
+                p.getVurdertTidspunkt());
 
             return new LocalDateSegment<>(overlappendeIntervall, omsorgenForDto);
         }, LocalDateTimeline.JoinStyle.LEFT_JOIN);

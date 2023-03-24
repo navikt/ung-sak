@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.omsorg;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,6 +28,7 @@ import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.Fosterbarn;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.FosterbarnRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.Fosterbarna;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarOmsorgenForDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -97,14 +99,21 @@ public class AvklarOmsorgenForV2 implements AksjonspunktOppdaterer<AvklarOmsorge
     }
 
     private List<OmsorgenForSaksbehandlervurdering> toOmsorgenForSaksbehandlervurderinger(AvklarOmsorgenForDto dto) {
+        LocalDateTime now = LocalDateTime.now();
         return dto.getOmsorgsperioder()
             .stream()
             .map(op -> new OmsorgenForSaksbehandlervurdering(
                 DatoIntervallEntitet.fraOgMedTilOgMed(op.getPeriode().getFom(), op.getPeriode().getTom()),
                 op.getBegrunnelse(),
-                op.getResultat()
+                op.getResultat(),
+                getCurrentUserId(),
+                now
             ))
             .collect(Collectors.toList());
+    }
+
+    private static String getCurrentUserId() {
+        return SubjectHandler.getSubjectHandler().getUid();
     }
 
     private void lagHistorikkInnslag(AksjonspunktOppdaterParameter param, String begrunnelse) {
