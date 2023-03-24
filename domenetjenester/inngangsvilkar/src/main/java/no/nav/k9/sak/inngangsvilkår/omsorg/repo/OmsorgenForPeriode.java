@@ -1,5 +1,7 @@
 package no.nav.k9.sak.inngangsvilkår.omsorg.repo;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
@@ -54,6 +56,12 @@ public class OmsorgenForPeriode extends BaseEntitet implements IndexKey {
     @Convert(converter = SykdomResultatTypeConverter.class)
     private Resultat resultat;
 
+    @Column(name = "vurdert_av", updatable = false)
+    private String vurdertAv;
+
+    @Column(name = "vurdert_tid", updatable = false)
+    private LocalDateTime vurdertTidspunkt;
+
     @ManyToOne
     @JoinColumn(name = "omsorgen_for_id", nullable = false, updatable = false, unique = true)
     private OmsorgenFor omsorgenFor;
@@ -67,29 +75,30 @@ public class OmsorgenForPeriode extends BaseEntitet implements IndexKey {
     }
 
     public OmsorgenForPeriode(DatoIntervallEntitet periode, BarnRelasjon relasjon, String relasjonsbeskrivelse,
-                              String begrunnelse, Resultat resultat) {
+                              String begrunnelse, Resultat resultat, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         this.periode = periode;
         this.relasjon = relasjon;
         this.relasjonsbeskrivelse = relasjonsbeskrivelse;
         this.begrunnelse = begrunnelse;
         this.resultat = resultat;
+        this.vurdertAv = vurdertAv;
+        this.vurdertTidspunkt = vurdertTidspunkt;
     }
 
     OmsorgenForPeriode(OmsorgenForPeriode omsorgenForPeriode) {
-        this(omsorgenForPeriode.periode, omsorgenForPeriode.relasjon, omsorgenForPeriode.relasjonsbeskrivelse, omsorgenForPeriode.begrunnelse, omsorgenForPeriode.resultat);
+        this(omsorgenForPeriode.periode, omsorgenForPeriode.relasjon, omsorgenForPeriode.relasjonsbeskrivelse, omsorgenForPeriode.begrunnelse, omsorgenForPeriode.resultat, omsorgenForPeriode.vurdertAv, omsorgenForPeriode.vurdertTidspunkt);
     }
 
     OmsorgenForPeriode(OmsorgenForPeriode omsorgenForPeriode, DatoIntervallEntitet periode) {
-        this(periode, omsorgenForPeriode.relasjon, omsorgenForPeriode.relasjonsbeskrivelse, omsorgenForPeriode.begrunnelse, omsorgenForPeriode.resultat);
+        this(periode, omsorgenForPeriode.relasjon, omsorgenForPeriode.relasjonsbeskrivelse, omsorgenForPeriode.begrunnelse, omsorgenForPeriode.resultat, omsorgenForPeriode.vurdertAv, omsorgenForPeriode.vurdertTidspunkt);
     }
 
     OmsorgenForPeriode(OmsorgenForPeriode omsorgenForPeriode, DatoIntervallEntitet periode, OmsorgenForSaksbehandlervurdering vurdering) {
-        this(periode, omsorgenForPeriode.relasjon, omsorgenForPeriode.relasjonsbeskrivelse, vurdering.getBegrunnelse(), vurdering.getResultat());
+        this(periode, omsorgenForPeriode.relasjon, omsorgenForPeriode.relasjonsbeskrivelse, vurdering.getBegrunnelse(), vurdering.getResultat(), vurdering.getVurdertAv(), vurdering.getVurdertTidspunkt());
     }
 
-    public static final OmsorgenForPeriode nyPeriodeFraSøker(DatoIntervallEntitet periode, BarnRelasjon relasjon, String relasjonsbeskrivelse) {
-        return new OmsorgenForPeriode(periode, relasjon, relasjonsbeskrivelse, null, Resultat.IKKE_VURDERT);
-
+    public static OmsorgenForPeriode nyPeriodeFraSøker(DatoIntervallEntitet periode, BarnRelasjon relasjon, String relasjonsbeskrivelse) {
+        return new OmsorgenForPeriode(periode, relasjon, relasjonsbeskrivelse, null, Resultat.IKKE_VURDERT, null, null);
     }
 
     public DatoIntervallEntitet getPeriode() {
@@ -123,6 +132,14 @@ public class OmsorgenForPeriode extends BaseEntitet implements IndexKey {
 
     public OmsorgenFor getOmsorgenFor() {
         return omsorgenFor;
+    }
+
+    public String getVurdertAv() {
+        return vurdertAv;
+    }
+
+    public LocalDateTime getVurdertTidspunkt() {
+        return vurdertTidspunkt;
     }
 
     void setOmsorgenFor(OmsorgenFor omsorgenFor) {

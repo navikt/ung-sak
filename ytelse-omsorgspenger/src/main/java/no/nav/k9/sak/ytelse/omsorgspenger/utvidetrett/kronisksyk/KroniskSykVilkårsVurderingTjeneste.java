@@ -113,11 +113,11 @@ public class KroniskSykVilkårsVurderingTjeneste implements VilkårsPerioderTilV
         // kan ikke gå lenger enn til 18 år (kun oppfylt i årskvantum om kronisk syk også fins
         var maksdato = barninfo.getFødselsdato().plusYears(18).withMonth(12).withDayOfMonth(31);
 
-        if (maksdato.isAfter(søknadFom)) {
-            return DatoIntervallEntitet.fraOgMedTilOgMed(mindato, maksdato);
-        } else {
-            log.warn("maksdato [{}] er før søknadsdato[{}], har ingen periode å vurdere", maksdato, søknadFom);
+        if (maksdato.isBefore(mindato) || søknadFom.isAfter(maksdato)) {
+            log.warn("Har ingen reell periode å vurdere. mindato {}, maksdato {}, søknadsdato {}", mindato, maksdato, søknadFom);
             return DatoIntervallEntitet.fraOgMedTilOgMed(søknadFom, søknadFom);
+        } else {
+            return DatoIntervallEntitet.fraOgMedTilOgMed(mindato, maksdato);
         }
     }
 
