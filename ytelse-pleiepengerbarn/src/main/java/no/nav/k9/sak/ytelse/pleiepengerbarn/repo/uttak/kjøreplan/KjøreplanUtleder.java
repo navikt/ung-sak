@@ -19,7 +19,6 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -76,14 +75,8 @@ public class KjøreplanUtleder {
     }
 
     private LocalDateTimeline<List<InternalKravprioritet>> getSplittetKravperioderPåInnleggelser(LocalDateTimeline<List<InternalKravprioritet>> kravTidslinje, LocalDateTimeline<Boolean> toOmsorgspersonerTidslinje, LocalDateTimeline<Boolean> tidslinjeMedFriKjøring) {
-        LocalDateSegmentCombinator<List<InternalKravprioritet>, Boolean, List<InternalKravprioritet>> combinator = (localDateInterval, leftSegment, rightSegment) -> {
-            if (leftSegment == null) {
-                return null;
-            }
-            return new LocalDateSegment<>(localDateInterval, leftSegment.getValue());
-        };
-        return kravTidslinje.combine(tidslinjeMedFriKjøring, combinator, LocalDateTimeline.JoinStyle.LEFT_JOIN)
-            .combine(toOmsorgspersonerTidslinje, combinator, LocalDateTimeline.JoinStyle.LEFT_JOIN);
+        return kravTidslinje.combine(tidslinjeMedFriKjøring, StandardCombinators::leftOnly, LocalDateTimeline.JoinStyle.LEFT_JOIN)
+            .combine(toOmsorgspersonerTidslinje, StandardCombinators::leftOnly, LocalDateTimeline.JoinStyle.LEFT_JOIN);
     }
 
     public Kjøreplan utled(BehandlingReferanse referanse) {
