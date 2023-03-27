@@ -154,7 +154,7 @@ public class FinnInntektsmeldingForBeregning {
     }
 
     private static LocalDate finnOpphør(InputAktivitetOverstyring a, LocalDateTimeline<BigDecimal> summertRefusjonTidslinje) {
-        if (summertRefusjonTidslinje.isEmpty()) {
+        if (summertRefusjonTidslinje.filterValue(r -> r.compareTo(BigDecimal.ZERO) > 0).isEmpty()) {
             return a.getOpphørRefusjon();
         }
         return summertRefusjonTidslinje.filterValue(r -> r.compareTo(BigDecimal.ZERO) > 0)
