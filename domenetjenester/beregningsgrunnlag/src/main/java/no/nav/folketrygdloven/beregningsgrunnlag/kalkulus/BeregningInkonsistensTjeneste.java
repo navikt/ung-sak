@@ -18,6 +18,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnl
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
@@ -97,24 +98,29 @@ public class BeregningInkonsistensTjeneste {
     }
 
     private NavigableSet<DatoIntervallEntitet> finnPerioderMedInkonsistens(BehandlingReferanse ref) {
+        if (!ref.getBehandlingType().equals(BehandlingType.REVURDERING)) {
+            return new TreeSet<>();
+        }
         var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(ref.getBehandlingId());
         var forlengelser = finnForlengelserIBeregning(ref);
-        var gjeldendeGrunnlag = finnBeregningsgrunnlagsliste(ref, forlengelser);
         var opptjeningForBeregningTjeneste = finnOpptjeningForBeregningTjeneste(ref);
         return utledPerioderMedInkonsistens(ref,
             iayGrunnlag,
             forlengelser,
-            gjeldendeGrunnlag,
             opptjeningForBeregningTjeneste);
     }
 
-    private NavigableSet<DatoIntervallEntitet> utledPerioderMedInkonsistens(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag, NavigableSet<DatoIntervallEntitet> forlengelser, List<BeregningsgrunnlagGrunnlag> gjeldendeGrunnlag, OpptjeningForBeregningTjeneste opptjeningForBeregningTjeneste) {
+    private NavigableSet<DatoIntervallEntitet> utledPerioderMedInkonsistens(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                                                            NavigableSet<DatoIntervallEntitet> forlengelser,
+                                                                            OpptjeningForBeregningTjeneste opptjeningForBeregningTjeneste) {
         NavigableSet<DatoIntervallEntitet> perioderSomRevurderes = new TreeSet<>();
-        gjeldendeGrunnlag.stream().map(BeregningsgrunnlagGrunnlag::getBeregningsgrunnlag)
+        var perioderSomSkalHaBrukersAndel = finnPerioderSomSkalHaBrukersAndel(ref, iayGrunnlag, forlengelser, opptjeningForBeregningTjeneste);
+        var originaleBeregningsgrunnlag = finnOriginalBeregningsgrunnlagsliste(ref, perioderSomSkalHaBrukersAndel);
+        originaleBeregningsgrunnlag.stream().map(BeregningsgrunnlagGrunnlag::getBeregningsgrunnlag)
             .flatMap(Optional::stream)
             .forEach(bg -> {
-                var periode = forlengelser.stream().filter(p -> p.getFomDato().equals(bg.getSkjæringstidspunkt())).findFirst().orElseThrow();
-                boolean erInkosistent = vurderInkosistensForPeriode(ref, opptjeningForBeregningTjeneste, iayGrunnlag, bg, periode);
+                var periode = perioderSomSkalHaBrukersAndel.stream().filter(p -> p.getFomDato().equals(bg.getSkjæringstidspunkt())).findFirst().orElseThrow();
+                boolean erInkosistent = !vurderHarBrukersAndel(bg);
                 if (erInkosistent) {
                     LOG.warn("Fant inkosistens mellom opptjening og beregning for periode {}. Trigger automatisk revurdering av beregning.", periode);
                     perioderSomRevurderes.add(periode);
@@ -123,31 +129,37 @@ public class BeregningInkonsistensTjeneste {
         return perioderSomRevurderes;
     }
 
+    private TreeSet<DatoIntervallEntitet> finnPerioderSomSkalHaBrukersAndel(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag, NavigableSet<DatoIntervallEntitet> forlengelser, OpptjeningForBeregningTjeneste opptjeningForBeregningTjeneste) {
+        return forlengelser.stream()
+            .filter(periode -> skalHaBrukersAndelIBeregning(ref, opptjeningForBeregningTjeneste, iayGrunnlag, periode))
+            .collect(Collectors.toCollection(TreeSet::new));
+    }
+
     private NavigableSet<DatoIntervallEntitet> finnForlengelserIBeregning(BehandlingReferanse ref) {
         var perioderTilVurdering = vilkårTjeneste.utledPerioderTilVurdering(ref, VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         return ForlengelseTjeneste.finnTjeneste(forlengelseTjeneste, ref.getFagsakYtelseType(), ref.getBehandlingType())
             .utledPerioderSomSkalBehandlesSomForlengelse(ref, perioderTilVurdering, VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
     }
 
-    private List<BeregningsgrunnlagGrunnlag> finnBeregningsgrunnlagsliste(BehandlingReferanse ref, NavigableSet<DatoIntervallEntitet> forlengelser) {
-        var bgReferanser = beregningsgrunnlagReferanserTjeneste.finnReferanseEllerLagNy(ref.getBehandlingId(),
-            forlengelser.stream().map(DatoIntervallEntitet::getFomDato).collect(Collectors.toSet()),
+    private List<BeregningsgrunnlagGrunnlag> finnOriginalBeregningsgrunnlagsliste(BehandlingReferanse ref, NavigableSet<DatoIntervallEntitet> perioder) {
+        var bgReferanser = beregningsgrunnlagReferanserTjeneste.finnReferanseEllerLagNy(ref.getOriginalBehandlingId().orElseThrow(),
+            perioder.stream().map(DatoIntervallEntitet::getFomDato).collect(Collectors.toSet()),
             true,
             false);
         return kalkulusTjeneste.hentGrunnlag(ref, bgReferanser);
     }
 
-    private boolean vurderInkosistensForPeriode(BehandlingReferanse ref, OpptjeningForBeregningTjeneste opptjeningForBeregningTjeneste, InntektArbeidYtelseGrunnlag iayGrunnlag, Beregningsgrunnlag bg, DatoIntervallEntitet periode) {
-        boolean harBrukersAndel = vurderHarBrukersAndel(bg);
-        boolean erKunYtelse = vurderHarKunYtelse(ref, opptjeningForBeregningTjeneste, iayGrunnlag, bg, periode);
+    private boolean skalHaBrukersAndelIBeregning(BehandlingReferanse ref, OpptjeningForBeregningTjeneste opptjeningForBeregningTjeneste, InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                                 DatoIntervallEntitet periode) {
         var erMidlertidigInaktiv = erMidlertidigInaktiv(ref, periode);
-        return (erKunYtelse || erMidlertidigInaktiv) && !harBrukersAndel;
+        boolean erKunYtelse = vurderHarKunYtelse(ref, opptjeningForBeregningTjeneste, iayGrunnlag, periode);
+        return erKunYtelse || erMidlertidigInaktiv;
     }
 
-    private static boolean vurderHarKunYtelse(BehandlingReferanse ref, OpptjeningForBeregningTjeneste opptjeningForBeregningTjeneste, InntektArbeidYtelseGrunnlag iayGrunnlag, Beregningsgrunnlag bg, DatoIntervallEntitet periode) {
+    private static boolean vurderHarKunYtelse(BehandlingReferanse ref, OpptjeningForBeregningTjeneste opptjeningForBeregningTjeneste, InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet periode) {
         var opptjeningAktiviteter = opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(ref, iayGrunnlag, periode);
         var aktiviteterPåStp = opptjeningAktiviteter.stream().flatMap(a -> a.getOpptjeningPerioder().stream())
-            .filter(p -> p.getPeriode().overlaps(new Periode(bg.getSkjæringstidspunkt(), bg.getSkjæringstidspunkt())))
+            .filter(p -> p.getPeriode().overlaps(new Periode(periode.getFomDato(), periode.getFomDato())))
             .toList();
         return erKunYtelse(aktiviteterPåStp);
     }
