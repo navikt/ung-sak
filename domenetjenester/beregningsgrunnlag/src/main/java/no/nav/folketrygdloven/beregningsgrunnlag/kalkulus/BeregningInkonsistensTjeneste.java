@@ -76,7 +76,7 @@ public class BeregningInkonsistensTjeneste {
     }
 
     /**
-     * Sjekker om Beregning og Opptjening har inkosistent data
+     * Sjekker om Beregning og Opptjening har inkonsistent data
      * <p>
      * Inkonsistens betyr at aktivitetstatus i beregning ikke matcher status fra opptjening.
      * Dette kan skje i følgende caser:
@@ -120,9 +120,9 @@ public class BeregningInkonsistensTjeneste {
             .flatMap(Optional::stream)
             .forEach(bg -> {
                 var periode = perioderSomSkalHaBrukersAndel.stream().filter(p -> p.getFomDato().equals(bg.getSkjæringstidspunkt())).findFirst().orElseThrow();
-                boolean erInkosistent = !vurderHarBrukersAndel(bg);
-                if (erInkosistent) {
-                    LOG.warn("Fant inkosistens mellom opptjening og beregning for periode {}. Trigger automatisk revurdering av beregning.", periode);
+                boolean erInkonsistent = !vurderHarBrukersAndel(bg);
+                if (erInkonsistent) {
+                    LOG.info("Fant inkosistens mellom opptjening og beregning for periode {}. Trigger automatisk revurdering av beregning.", periode);
                     perioderSomRevurderes.add(periode);
                 }
             });
