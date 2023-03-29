@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
@@ -59,9 +60,9 @@ public class BeregningInkonsistensTjeneste {
     @Inject
     public BeregningInkonsistensTjeneste(KalkulusTjeneste kalkulusTjeneste,
                                          BeregningsgrunnlagReferanserTjeneste beregningsgrunnlagReferanserTjeneste,
-                                         Instance<ForlengelseTjeneste> forlengelseTjeneste,
+                                         @Any Instance<ForlengelseTjeneste> forlengelseTjeneste,
                                          VilkårTjeneste vilkårTjeneste,
-                                         Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste,
+                                         @Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste,
                                          InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                          ProsessTriggereRepository prosessTriggereRepository,
                                          @KonfigVerdi(value = "BEREGNING_VURDER_INKONSISTENS", defaultVerdi = "false") boolean sjekkEnabled) {
@@ -122,7 +123,7 @@ public class BeregningInkonsistensTjeneste {
                 var periode = perioderSomSkalHaBrukersAndel.stream().filter(p -> p.getFomDato().equals(bg.getSkjæringstidspunkt())).findFirst().orElseThrow();
                 boolean erInkonsistent = !vurderHarBrukersAndel(bg);
                 if (erInkonsistent) {
-                    LOG.info("Fant inkosistens mellom opptjening og beregning for periode {}. Trigger automatisk revurdering av beregning.", periode);
+                    LOG.info("Fant inkonsistens mellom opptjening og beregning for periode {}. Trigger automatisk revurdering av beregning.", periode);
                     perioderSomRevurderes.add(periode);
                 }
             });
