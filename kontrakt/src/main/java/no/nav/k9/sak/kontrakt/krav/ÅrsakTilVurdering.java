@@ -43,6 +43,7 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
     HENDELSE_DØD_PLEIETRENGENDE("HENDELSE_DØD_PLEIETRENGENDE", "Dødsfall pleietrengende"),
     // Vurderes på nytt pga G_REGULERING
     G_REGULERING("G_REGULERING", "G-regulering"),
+    REVURDERER_BEREGNING("REVURDERER_BEREGNING", "Endring opplysninger som påvirker beregningsgrunnlaget."),
     ENDRING_I_FORDELING("ENDRING_I_FORDELING", "Endring som påvirker fordeling og/eller gradering av ytelse."),
 
     // Vurderes for første gang
@@ -69,6 +70,7 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
         sammenheng.put(BehandlingÅrsakType.RE_OPPLYSNINGER_OM_MEDLEMSKAP, REVURDERER_BERØRT_PERIODE);
         sammenheng.put(BehandlingÅrsakType.RE_KLAGE_NY_INNH_LIGNET_INNTEKT, REVURDERER_LIGNET_INNTEKT);
         sammenheng.put(BehandlingÅrsakType.RE_OPPLYSNINGER_OM_BEREGNINGSGRUNNLAG, MANUELT_REVURDERER_PERIODE);
+        sammenheng.put(BehandlingÅrsakType.RE_ENDRING_BEREGNINGSGRUNNLAG, REVURDERER_BEREGNING);
         sammenheng.put(BehandlingÅrsakType.RE_ENDRET_FORDELING, ENDRING_I_FORDELING);
         SAMMENHENG = Collections.unmodifiableMap(sammenheng);
     }
