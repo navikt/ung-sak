@@ -161,7 +161,7 @@ public class BeregningInkonsistensTjeneste {
     private static boolean vurderHarKunYtelse(BehandlingReferanse ref, OpptjeningForBeregningTjeneste opptjeningForBeregningTjeneste, InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet periode) {
         var opptjeningAktiviteter = opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(ref, iayGrunnlag, periode);
         var aktiviteterPåStp = opptjeningAktiviteter.stream().flatMap(a -> a.getOpptjeningPerioder().stream())
-            .filter(p -> p.getPeriode().overlaps(new Periode(periode.getFomDato(), periode.getFomDato())))
+            .filter(p -> p.getPeriode().overlaps(new Periode(periode.getFomDato().minusDays(1), periode.getFomDato().minusDays(1))))
             .toList();
         return erKunYtelse(aktiviteterPåStp);
     }
