@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -41,7 +42,7 @@ import no.nav.k9.sak.vilkår.VilkårTjeneste;
 public class BeregningInkonsistensTjeneste {
 
     private static final Logger LOG = LoggerFactory.getLogger(BeregningInkonsistensTjeneste.class);
-    public static final long BEHANDLING_ID_MED_FEIL = 1658475L;
+    public static final Set<Long> BEHANDLING_ID_MED_FEIL = Set.of(1658475L, 1672398L, 1670372L);
 
     private final KalkulusTjeneste kalkulusTjeneste;
     private final BeregningsgrunnlagReferanserTjeneste beregningsgrunnlagReferanserTjeneste;
@@ -90,7 +91,7 @@ public class BeregningInkonsistensTjeneste {
      * @param ref Behandlingreferanse
      */
     public void sjekkInkonsistensOgOpprettProsesstrigger(BehandlingReferanse ref) {
-        if (!sjekkEnabled && !ref.getBehandlingId().equals(BEHANDLING_ID_MED_FEIL)) {
+        if (!sjekkEnabled && !BEHANDLING_ID_MED_FEIL.contains(ref.getBehandlingId())) {
             return;
         }
         NavigableSet<DatoIntervallEntitet> perioderSomRevurderes = finnPerioderMedInkonsistens(ref);
