@@ -41,6 +41,7 @@ import no.nav.k9.sak.vilkår.VilkårTjeneste;
 public class BeregningInkonsistensTjeneste {
 
     private static final Logger LOG = LoggerFactory.getLogger(BeregningInkonsistensTjeneste.class);
+    public static final long BEHANDLING_ID_MED_FEIL = 1658475L;
 
     private final KalkulusTjeneste kalkulusTjeneste;
     private final BeregningsgrunnlagReferanserTjeneste beregningsgrunnlagReferanserTjeneste;
@@ -89,7 +90,7 @@ public class BeregningInkonsistensTjeneste {
      * @param ref Behandlingreferanse
      */
     public void sjekkInkonsistensOgOpprettProsesstrigger(BehandlingReferanse ref) {
-        if (!sjekkEnabled) {
+        if (!sjekkEnabled && !ref.getBehandlingId().equals(BEHANDLING_ID_MED_FEIL)) {
             return;
         }
         NavigableSet<DatoIntervallEntitet> perioderSomRevurderes = finnPerioderMedInkonsistens(ref);
