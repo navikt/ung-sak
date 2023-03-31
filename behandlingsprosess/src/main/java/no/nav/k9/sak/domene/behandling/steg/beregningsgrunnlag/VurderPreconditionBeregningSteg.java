@@ -9,6 +9,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningInkonsistensTjeneste;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederInput;
@@ -32,6 +33,8 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
     private RyddOgGjenopprettBeregningTjeneste ryddOgGjenopprettBeregningTjeneste;
     private KopierBeregningTjeneste kopierBeregningTjeneste;
 
+    private BeregningInkonsistensTjeneste inkonsistensTjeneste;
+
 
     protected VurderPreconditionBeregningSteg() {
         // for CDI proxy
@@ -42,12 +45,14 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
                                            @Any Instance<PreconditionBeregningAksjonspunktUtleder> aksjonspunktUtledere,
                                            VurderAvslagGrunnetOpptjening vurderAvslagGrunnetOpptjening,
                                            RyddOgGjenopprettBeregningTjeneste ryddOgGjenopprettBeregningTjeneste,
-                                           KopierBeregningTjeneste kopierBeregningTjeneste) {
+                                           KopierBeregningTjeneste kopierBeregningTjeneste,
+                                           BeregningInkonsistensTjeneste inkonsistensTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.aksjonspunktUtledere = aksjonspunktUtledere;
         this.vurderAvslagGrunnetOpptjening = vurderAvslagGrunnetOpptjening;
         this.ryddOgGjenopprettBeregningTjeneste = ryddOgGjenopprettBeregningTjeneste;
         this.kopierBeregningTjeneste = kopierBeregningTjeneste;
+        this.inkonsistensTjeneste = inkonsistensTjeneste;
     }
 
     @Override
@@ -64,10 +69,13 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         // 3. Rydder fjernet eller avslått periode (må vurdere avslag mellom dei to rydde-kalla)
         ryddOgGjenopprettBeregningTjeneste.deaktiverAvslåtteEllerFjernetPerioder(referanse);
 
-        // 4. Kopier
+        // 4 Vurder inkonsistens
+        inkonsistensTjeneste.sjekkInkonsistensOgOpprettProsesstrigger(referanse);
+
+        // 5. Kopier
         kopierBeregningTjeneste.kopierVurderinger(kontekst);
 
-        // 5. Utled aksjonspunkt
+        // 6. Utled aksjonspunkt
         var aksjonspunkter = finnAksjonspunkter(referanse);
 
         return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunkter);
