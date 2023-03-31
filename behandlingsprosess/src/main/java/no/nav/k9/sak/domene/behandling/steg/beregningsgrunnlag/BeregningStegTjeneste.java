@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -128,7 +129,20 @@ public class BeregningStegTjeneste {
 
         @Override
         public void håndter(KalkulusResultat kalkulusResultat, DatoIntervallEntitet periode) {
-            aksjonspunktResultater.addAll(kalkulusResultat.getBeregningAksjonspunktResultat().stream().map(BeregningResultatMapper::map).collect(Collectors.toList()));
+            var apPrKode = kalkulusResultat.getBeregningAksjonspunktResultat().stream()
+                .map(BeregningResultatMapper::map)
+                .collect(Collectors.toMap(AksjonspunktResultat::getAksjonspunktDefinisjon, Function.identity(), this::finnSenesteFrist));
+            aksjonspunktResultater.addAll(apPrKode.values());
+        }
+
+        private AksjonspunktResultat finnSenesteFrist(AksjonspunktResultat ap1, AksjonspunktResultat ap2) {
+            if (ap1.getFrist() == null) {
+                return ap1;
+            }
+            if (ap2.getFrist() == null) {
+                return ap2;
+            }
+            return ap1.getFrist().isBefore(ap2.getFrist()) ? ap2 : ap1;
         }
     }
 
