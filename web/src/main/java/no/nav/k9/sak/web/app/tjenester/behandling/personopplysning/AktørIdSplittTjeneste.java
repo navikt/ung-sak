@@ -46,7 +46,7 @@ public class AktørIdSplittTjeneste {
             throw new IllegalArgumentException("Ny aktørId er ugyldig - kan ikke patche");
         }
 
-        int antallRaderFagsak = entityManager.createNativeQuery("update fagsak set bruker_aktoer_id = :ny_aktoer_id, endret_av='splitt ' || :gammel_aktoer_id, endret_tid=current_timestamp where saksnummer = :saksnummer")
+        int antallRaderFagsak = entityManager.createNativeQuery("update fagsak set bruker_aktoer_id = :ny_aktoer_id, endret_av='bytte ' || :gammel_aktoer_id, endret_tid=current_timestamp where saksnummer = :saksnummer")
             .setParameter("ny_aktoer_id", nyAktørId.getAktørId())
             .setParameter("gammel_aktoer_id", gammelAktørId.getAktørId())
             .setParameter("saksnummer", saksnummer.getVerdi())
@@ -78,7 +78,7 @@ public class AktørIdSplittTjeneste {
         if (!kolonne.matches("^[a-z_]$")) {
             throw new IllegalArgumentException("Ugyldig kolonnenavn");
         }
-        int antall = entityManager.createNativeQuery("update " + tabellnavn + " set " + kolonne + " = :ny_aktoer_id, endret_av='splitt ' || :gammel_aktoer_id, endret_tid=current_timestamp where " + kolonne + " = :gammel_aktoer_id and po_informasjon_id in (select pi.id from fagsak f join behandling b on f.id = b.fagsak_id join gr_personopplysning gp on b.id = gp.behandling_id join po_informasjon pi on (gp.registrert_informasjon_id = pi.id or gp.overstyrt_informasjon_id = pi.id) where f.saksnummer = :saksnummer)")
+        int antall = entityManager.createNativeQuery("update " + tabellnavn + " set " + kolonne + " = :ny_aktoer_id, endret_av='bytte ' || :gammel_aktoer_id, endret_tid=current_timestamp where " + kolonne + " = :gammel_aktoer_id and po_informasjon_id in (select pi.id from fagsak f join behandling b on f.id = b.fagsak_id join gr_personopplysning gp on b.id = gp.behandling_id join po_informasjon pi on (gp.registrert_informasjon_id = pi.id or gp.overstyrt_informasjon_id = pi.id) where f.saksnummer = :saksnummer)")
             .setParameter("ny_aktoer_id", nyAktørId.getAktørId())
             .setParameter("gammel_aktoer_id", gammelAktørId.getAktørId())
             .setParameter("saksnummer", saksnummer.getVerdi())
