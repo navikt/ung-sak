@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
@@ -40,7 +41,11 @@ public class AktørIdSplittTjeneste {
             throw new IllegalArgumentException("Tjenesten er utviklet for OMP i første omgang");
         }
         if (aktørTjeneste.hentPersonIdentForAktørId(gammelAktørId).isPresent()) {
-            throw new IllegalStateException("Fagsaken har gyldig aktørId for bruker - kan ikke patche");
+            if (Environment.current().isDev() || Environment.current().isLocal()) {//ignorerer sjekk i dev for testbarhet
+                logger.warn("Patcher fagsak som har gyldig aktørId.");
+            } else {
+                throw new IllegalStateException("Fagsaken har gyldig aktørId for bruker - kan ikke patche");
+            }
         }
         if (aktørTjeneste.hentPersonIdentForAktørId(nyAktørId).isEmpty()) {
             throw new IllegalArgumentException("Ny aktørId er ugyldig - kan ikke patche");
@@ -72,13 +77,14 @@ public class AktørIdSplittTjeneste {
 
     private void oppdaterPoTabell(AktørId gammelAktørId, AktørId nyAktørId, Saksnummer saksnummer, String tabellnavn, String kolonne, int minsteForventeTreff, int maxForventetTreff) {
         //streng validering av parametre som brukes til generering av sql - for å unngå injection ved evt. feil bruk av denne metoden
-        if (!tabellnavn.matches("^[a-z_]$")) {
+        if (!tabellnavn.matches("^[a-z_]+$")) {
             throw new IllegalArgumentException("Ugyldig tabellnavn");
         }
-        if (!kolonne.matches("^[a-z_]$")) {
+        if (!kolonne.matches("^[a-z_]+$")) {
             throw new IllegalArgumentException("Ugyldig kolonnenavn");
         }
-        int antall = entityManager.createNativeQuery("update " + tabellnavn + " set " + kolonne + " = :ny_aktoer_id, endret_av='bytte ' || :gammel_aktoer_id, endret_tid=current_timestamp where " + kolonne + " = :gammel_aktoer_id and po_informasjon_id in (select pi.id from fagsak f join behandling b on f.id = b.fagsak_id join gr_personopplysning gp on b.id = gp.behandling_id join po_informasjon pi on (gp.registrert_informasjon_id = pi.id or gp.overstyrt_informasjon_id = pi.id) where f.saksnummer = :saksnummer)")
+        String sql = "update " + tabellnavn + " set " + kolonne + " = :ny_aktoer_id, endret_av='bytte ' || :gammel_aktoer_id, endret_tid=current_timestamp where " + kolonne + " = :gammel_aktoer_id and po_informasjon_id in (select pi.id from fagsak f join behandling b on f.id = b.fagsak_id join gr_personopplysning gp on b.id = gp.behandling_id join po_informasjon pi on (gp.registrert_informasjon_id = pi.id or gp.overstyrt_informasjon_id = pi.id) where f.saksnummer = :saksnummer)";
+        int antall = entityManager.createNativeQuery(sql)
             .setParameter("ny_aktoer_id", nyAktørId.getAktørId())
             .setParameter("gammel_aktoer_id", gammelAktørId.getAktørId())
             .setParameter("saksnummer", saksnummer.getVerdi())
