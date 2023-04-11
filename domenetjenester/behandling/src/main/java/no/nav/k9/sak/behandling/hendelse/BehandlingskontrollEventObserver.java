@@ -127,7 +127,7 @@ public class BehandlingskontrollEventObserver {
 
         Optional<Behandling> behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId);
 
-        var dto = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(EventHendelse.BEHANDLINGSKONTROLL_EVENT, behandling.get(),vedtak.getVedtaksdato());
+        var dto = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(EventHendelse.BEHANDLINGSKONTROLL_EVENT, behandling.get(), vedtak.getVedtaksdato());
         var aksjonspunkter = dto.getAksjonspunktKoderMedStatusListe();
         taskData.setPayload(JsonObjectMapper.getJson(dto));
         taskData.setProperty(PubliserEventTask.PROPERTY_KEY, behandlingId.toString());
@@ -145,18 +145,18 @@ public class BehandlingskontrollEventObserver {
     }
 
     private ProsessTaskData opprettProsessTaskBehandlingprosess(Long behandlingId, EventHendelse eventHendelse) throws IOException {
-            ProsessTaskData taskData = ProsessTaskData.forProsessTask(PubliserEventTaskImpl.class);
-            taskData.setCallIdFraEksisterende();
-            taskData.setPrioritet(50);
+        ProsessTaskData taskData = ProsessTaskData.forProsessTask(PubliserEventTaskImpl.class);
+        taskData.setCallIdFraEksisterende();
+        taskData.setPrioritet(50);
 
-            Optional<Behandling> behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId);
+        Optional<Behandling> behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId);
 
-            var dto = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(eventHendelse, behandling.get());
-            var aksjonspunkter = dto.getAksjonspunktKoderMedStatusListe();
-            taskData.setPayload(JsonObjectMapper.getJson(dto));
-            taskData.setProperty(PubliserEventTask.PROPERTY_KEY, behandlingId.toString());
-            taskData.setProperty(PubliserEventTask.BESKRIVELSE, String.valueOf(aksjonspunkter));
-            return taskData;
+        var dto = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(eventHendelse, behandling.get());
+        var aksjonspunkter = dto.getAksjonspunktKoderMedStatusListe();
+        taskData.setPayload(JsonObjectMapper.getJson(dto));
+        taskData.setProperty(PubliserEventTask.PROPERTY_KEY, behandlingId.toString());
+        taskData.setProperty(PubliserEventTask.BESKRIVELSE, String.valueOf(aksjonspunkter));
+        return taskData;
     }
 
 
@@ -201,7 +201,7 @@ public class BehandlingskontrollEventObserver {
 
         taskData.setPayload(JsonObjectMapper.getJson(dto));
         taskData.setProperty(PubliserProduksjonsstyringHendelseTask.PROPERTY_KEY, behandlingId.toString());
-        taskData.setProperty(PubliserProduksjonsstyringHendelseTask.BESKRIVELSE, "BehandlingOpprettetHendelseTask");
+        taskData.setProperty(PubliserProduksjonsstyringHendelseTask.BESKRIVELSE, "BehandlingAvsluttetHendelseTask");
         return taskData;
     }
 
@@ -220,7 +220,14 @@ public class BehandlingskontrollEventObserver {
 
         taskData.setPayload(JsonObjectMapper.getJson(dto));
         taskData.setProperty(PubliserProduksjonsstyringHendelseTask.PROPERTY_KEY, behandlingId.toString());
-        taskData.setProperty(PubliserProduksjonsstyringHendelseTask.BESKRIVELSE, String.valueOf(dto.aksjonspunktTilstander));
+        taskData.setProperty(PubliserProduksjonsstyringHendelseTask.BESKRIVELSE, begrensAntallTegn(String.valueOf(dto.aksjonspunktTilstander), 500));
         return taskData;
     }
+
+    private static String begrensAntallTegn(String input, int maxAntall) {
+        return input.length() > maxAntall
+            ? input.substring(0, maxAntall) + "..."
+            : input;
+    }
+
 }
