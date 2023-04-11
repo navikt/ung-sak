@@ -226,7 +226,7 @@ public class BehandlingskontrollEventObserver {
 
     private static String begrensAntallTegn(String input, int maxAntall) {
         return input.length() > maxAntall
-            ? input.substring(0, maxAntall) + "..."
+            ? input.substring(0, maxAntall) + "...(" + (input.length() - maxAntall) + " tegn fjernet)"
             : input;
     }
 
