@@ -24,6 +24,8 @@ import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
 import no.nav.k9.sak.kontrakt.krav.KravDokumentMedSøktePerioder;
 import no.nav.k9.sak.kontrakt.krav.KravDokumentType;
 import no.nav.k9.sak.kontrakt.krav.PeriodeMedÅrsaker;
+import no.nav.k9.sak.kontrakt.krav.PerioderMedÅrsakPerKravstiller;
+import no.nav.k9.sak.kontrakt.krav.RolleType;
 import no.nav.k9.sak.kontrakt.krav.StatusForPerioderPåBehandling;
 import no.nav.k9.sak.kontrakt.krav.ÅrsakMedPerioder;
 import no.nav.k9.sak.kontrakt.krav.ÅrsakTilVurdering;
@@ -49,13 +51,9 @@ public class UtledStatusPåPerioderTjeneste {
                                                NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles,
                                                NavigableSet<PeriodeMedÅrsak> revurderingPerioderFraAndreParter) {
 
-        var relevanteDokumenterMedPeriode = utledKravdokumenterTilkommetIBehandlingen(kravdokumenter, kravdokumenterMedPeriode);
-
-        //perioder fra dokumenter som ikke tilhører denne behandlingen, men overlapper med perioderTilVurdering
-        var andreRelevanteDokumenterForPeriodenTilVurdering = utledKravdokumenterRelevantForPeriodeTilVurdering(kravdokumenter, kravdokumenterMedPeriode, perioderTilVurdering);
         var perioderTilVurderingKombinert = new LocalDateTimeline<>(perioderTilVurdering.stream().map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true)).collect(Collectors.toList()), StandardCombinators::alwaysTrueForMatch)
             .compress();
-
+        var relevanteDokumenterMedPeriode = utledKravdokumenterTilkommetIBehandlingen(kravdokumenter, kravdokumenterMedPeriode);
         var relevanteTidslinjer = relevanteDokumenterMedPeriode.stream()
             .map(entry -> tilSegments(entry, kantIKantVurderer, ÅrsakTilVurdering.FØRSTEGANGSVURDERING))
             .map(LocalDateTimeline::new)
@@ -63,6 +61,9 @@ public class UtledStatusPåPerioderTjeneste {
 
         //tidslinjer med perioder fra dokumenter tilkommet i behandling
         var tidslinje = mergeTidslinjer(relevanteTidslinjer, kantIKantVurderer, this::mergeSegments);
+
+        //perioder fra dokumenter som ikke tilhører denne behandlingen, men overlapper med perioderTilVurdering
+        var andreRelevanteDokumenterForPeriodenTilVurdering = utledKravdokumenterRelevantForPeriodeTilVurdering(kravdokumenter, kravdokumenterMedPeriode, perioderTilVurdering);
 
         var endringFraBruker = andreRelevanteDokumenterForPeriodenTilVurdering.stream()
             .map(entry -> tilSegments(entry, kantIKantVurderer, utledRevurderingÅrsak(behandling)))
@@ -96,7 +97,8 @@ public class UtledStatusPåPerioderTjeneste {
 
         var perioderTilVurderingSet = utledPerioderTilVurdering(perioderTilVurderingKombinert, årsakMedPerioder);
 
-        return new StatusForPerioderPåBehandling(perioderTilVurderingSet, perioder, årsakMedPerioder, mapKravTilDto(relevanteDokumenterMedPeriode));
+        return new StatusForPerioderPåBehandling(perioderTilVurderingSet, perioder, årsakMedPerioder, mapKravTilDto(relevanteDokumenterMedPeriode),
+            List.of(new PerioderMedÅrsakPerKravstiller(RolleType.BRUKER, null, Collections.emptyList())));
     }
 
     private Set<Periode> utledPerioderTilVurdering(LocalDateTimeline<Boolean> perioderTilVurderingKombinert, List<ÅrsakMedPerioder> årsakMedPerioder) {
