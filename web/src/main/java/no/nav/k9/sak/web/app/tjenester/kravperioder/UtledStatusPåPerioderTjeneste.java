@@ -101,24 +101,20 @@ public class UtledStatusPåPerioderTjeneste {
         NavigableSet<PeriodeMedÅrsak> revurderingPerioderFraAndreParter) {
 
 
-        var kravdokumenterPerKravstiller = kravdokumenterMedPeriode.entrySet()
+        var kravdokumenterPerKravstiller = kravdokumenter
             .stream()
-            .filter(it1 -> kravdokumenter.stream()
-                .anyMatch(at -> at.getJournalpostId().equals(it1.getKey().getJournalpostId())))
-            .map(this::mapTilKravdokumentPerRolle)
-            .collect(Collectors.groupingBy(KravdokumentPerRolle::rolleType));
+            .map(kravDokument -> mapTilKravdokumentPerRolle(kravDokument, kravdokumenterMedPeriode))
+            .collect(Collectors.groupingBy(KravdokumenterPerKravstiller::rolleType));
 
+        var brukerKravdokumenter = kravdokumenterPerKravstiller.getOrDefault(RolleType.BRUKER, Collections.emptyList());
 
-        var brukerKravdokumenter = kravdokumenterPerKravstiller.getOrDefault(RolleType.BRUKER, Collections.emptyList())
-            .stream().map(KravdokumentPerRolle::kravdokument).collect(Collectors.toSet());
-
-        HashSet<PerioderMedÅrsakPerKravstiller> resultat = new HashSet<>();
+        Set<PerioderMedÅrsakPerKravstiller> resultat = new HashSet<>();
 
         if (!brukerKravdokumenter.isEmpty()){
             resultat.add(new PerioderMedÅrsakPerKravstiller(RolleType.BRUKER, null,
                 perioderMedÅrsaker(behandling,
                     kantIKantVurderer,
-                    brukerKravdokumenter,
+                    brukerKravdokumenter.stream().map(KravdokumenterPerKravstiller::kravdokumentForBehandling).collect(Collectors.toSet()),
                     kravdokumenterMedPeriode,
                     perioderTilVurdering,
                     perioderSomSkalTilbakestilles,
@@ -129,15 +125,14 @@ public class UtledStatusPåPerioderTjeneste {
         var ka = kravdokumenterPerKravstiller.get(RolleType.ARBEIDSGIVER);
 
         if (ka != null) {
-            validerKravdokumentArbeidsgiver(ka);
             ka.stream()
-                .collect(Collectors.groupingBy(KravdokumentPerRolle::arbeidsgiver))
-                .forEach((arbeidsgiver, kravdokumentPerRolles) ->
+                .collect(Collectors.groupingBy(KravdokumenterPerKravstiller::arbeidsgiver))
+                .forEach((arbeidsgiver, kravdokumenterPerArbeidsgiver) ->
                     resultat.add(new PerioderMedÅrsakPerKravstiller(RolleType.ARBEIDSGIVER, arbeidsgiver,
                         perioderMedÅrsaker(behandling,
                             kantIKantVurderer,
-                            kravdokumentPerRolles.stream().map(KravdokumentPerRolle::kravdokument).collect(Collectors.toSet()),
-                            kravdokumenterMedPeriode,
+                            kravdokumenterPerArbeidsgiver.stream().map(KravdokumenterPerKravstiller::kravdokumentForBehandling).collect(Collectors.toSet()),
+                            alleKravdokumenterForArbeidsgiver(kravdokumenterMedPeriode, arbeidsgiver),
                             perioderTilVurdering,
                             perioderSomSkalTilbakestilles,
                             revurderingPerioderFraAndreParter
@@ -148,28 +143,44 @@ public class UtledStatusPåPerioderTjeneste {
         return resultat;
     }
 
-    private static void validerKravdokumentArbeidsgiver(List<KravdokumentPerRolle> ka) {
-        var utenArbeidsgiver = ka.stream()
-            .filter(it -> it.arbeidsgiver == null)
-            .map(kravdokumentPerRolle -> kravdokumentPerRolle.kravdokument().getJournalpostId().getVerdi())
-            .collect(Collectors.toSet());
 
-        if (!utenArbeidsgiver.isEmpty()) {
-            throw new IllegalStateException(String.format("Forventet arbeidsgiver på IM men var null for journalpostider=%s", utenArbeidsgiver));
+    @NotNull
+    private KravdokumenterPerKravstiller mapTilKravdokumentPerRolle(
+        KravDokument kravdokumentPåBehandling,
+        Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> alleKravdokumenterMedPeriode) {
+
+        RolleType rolleType = utledRolle(kravdokumentPåBehandling.getType());
+
+        if (rolleType == RolleType.ARBEIDSGIVER) {
+
+            Arbeidsgiver arbeidsgiver = alleKravdokumenterMedPeriode.entrySet()
+                .stream()
+                .filter(it -> kravdokumentPåBehandling.getJournalpostId().equals(it.getKey().getJournalpostId()))
+                .findAny().orElseThrow(() -> new IllegalArgumentException("Kravdokument mangler i alle kravdokument lista"))
+                .getValue().stream()
+                .findAny().orElseThrow(() -> new IllegalArgumentException("Mangler søknadsdata for kravdokument"))
+                .getArbeidsgiver();
+
+            return new KravdokumenterPerKravstiller(
+                rolleType,
+                arbeidsgiver,
+                kravdokumentPåBehandling
+            );
         }
 
+        return new KravdokumenterPerKravstiller(
+            rolleType,
+            null,
+            kravdokumentPåBehandling
+        );
     }
 
     @NotNull
-    private KravdokumentPerRolle mapTilKravdokumentPerRolle(Map.Entry<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> it) {
-        RolleType rolleType = utledRolle(it.getKey().getType());
-        return new KravdokumentPerRolle(
-            rolleType,
-            rolleType == RolleType.ARBEIDSGIVER ?
-                it.getValue().stream().findAny().orElseThrow(() -> new IllegalArgumentException("Mangler søknadsdata"))
-                    .getArbeidsgiver() : null,
-            it.getKey()
-        );
+    private static Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> alleKravdokumenterForArbeidsgiver(Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> alleKravdokumenterMedPeriode, Arbeidsgiver arbeidsgiver) {
+        return alleKravdokumenterMedPeriode.entrySet()
+            .stream()
+            .filter(e -> e.getValue().stream().anyMatch(at -> at.getArbeidsgiver() == arbeidsgiver))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     @NotNull
@@ -177,7 +188,7 @@ public class UtledStatusPåPerioderTjeneste {
         return type == no.nav.k9.sak.perioder.KravDokumentType.SØKNAD ? RolleType.BRUKER : RolleType.ARBEIDSGIVER;
     }
 
-    private record KravdokumentPerRolle(RolleType rolleType, Arbeidsgiver arbeidsgiver, KravDokument kravdokument) {}
+    private record KravdokumenterPerKravstiller(RolleType rolleType, Arbeidsgiver arbeidsgiver, KravDokument kravdokumentForBehandling) {}
 
 
     @NotNull
