@@ -12,6 +12,10 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
@@ -33,11 +37,14 @@ import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.PeriodeMedÅrsak;
 import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Periode;
 
 public class UtledStatusPåPerioderTjeneste {
 
     private Boolean filtrereUtTilstøtendePeriode;
+
+    private static Logger LOGGER = LoggerFactory.getLogger(UtledStatusPåPerioderTjeneste.class);
 
     public UtledStatusPåPerioderTjeneste(Boolean filtrereUtTilstøtendePeriode) {
         this.filtrereUtTilstøtendePeriode = filtrereUtTilstøtendePeriode;
@@ -51,9 +58,140 @@ public class UtledStatusPåPerioderTjeneste {
                                                NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles,
                                                NavigableSet<PeriodeMedÅrsak> revurderingPerioderFraAndreParter) {
 
+
+        List<PeriodeMedÅrsaker> perioder = perioderMedÅrsaker(behandling,
+            kantIKantVurderer,
+            kravdokumenter,
+            kravdokumenterMedPeriode,
+            perioderTilVurdering,
+            perioderSomSkalTilbakestilles,
+            revurderingPerioderFraAndreParter
+        );
+
+
+        var årsakMedPerioder = utledÅrsakMedPerioder(perioder);
+
         var perioderTilVurderingKombinert = new LocalDateTimeline<>(perioderTilVurdering.stream().map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true)).collect(Collectors.toList()), StandardCombinators::alwaysTrueForMatch)
             .compress();
+
+        var perioderTilVurderingSet = utledPerioderTilVurdering(perioderTilVurderingKombinert, årsakMedPerioder);
+
+        var perioderMedÅrsakPerKravstiller = perioderMedÅrsakPerKravstiller(behandling,
+            kantIKantVurderer,
+            kravdokumenter,
+            kravdokumenterMedPeriode,
+            perioderTilVurdering,
+            perioderSomSkalTilbakestilles,
+            revurderingPerioderFraAndreParter);
+
         var relevanteDokumenterMedPeriode = utledKravdokumenterTilkommetIBehandlingen(kravdokumenter, kravdokumenterMedPeriode);
+
+        return new StatusForPerioderPåBehandling(perioderTilVurderingSet, perioder, årsakMedPerioder, mapKravTilDto(relevanteDokumenterMedPeriode),
+            perioderMedÅrsakPerKravstiller.stream().toList());
+    }
+
+    @NotNull
+    private Set<PerioderMedÅrsakPerKravstiller> perioderMedÅrsakPerKravstiller(
+        Behandling behandling,
+        KantIKantVurderer kantIKantVurderer,
+        Set<KravDokument> kravdokumenter,
+        Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterMedPeriode,
+        NavigableSet<DatoIntervallEntitet> perioderTilVurdering,
+        NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles,
+        NavigableSet<PeriodeMedÅrsak> revurderingPerioderFraAndreParter) {
+
+
+        var kravdokumenterPerKravstiller = kravdokumenterMedPeriode.entrySet()
+            .stream()
+            .filter(it1 -> kravdokumenter.stream()
+                .anyMatch(at -> at.getJournalpostId().equals(it1.getKey().getJournalpostId())))
+            .map(this::mapTilKravdokumentPerRolle)
+            .collect(Collectors.groupingBy(KravdokumentPerRolle::rolleType));
+
+
+        var brukerKravdokumenter = kravdokumenterPerKravstiller.getOrDefault(RolleType.BRUKER, Collections.emptyList())
+            .stream().map(KravdokumentPerRolle::kravdokument).collect(Collectors.toSet());
+
+        HashSet<PerioderMedÅrsakPerKravstiller> resultat = new HashSet<>();
+
+        if (!brukerKravdokumenter.isEmpty()){
+            resultat.add(new PerioderMedÅrsakPerKravstiller(RolleType.BRUKER, null,
+                perioderMedÅrsaker(behandling,
+                    kantIKantVurderer,
+                    brukerKravdokumenter,
+                    kravdokumenterMedPeriode,
+                    perioderTilVurdering,
+                    perioderSomSkalTilbakestilles,
+                    revurderingPerioderFraAndreParter
+            )));
+        }
+
+        var ka = kravdokumenterPerKravstiller.get(RolleType.ARBEIDSGIVER);
+
+        if (ka != null) {
+            validerKravdokumentArbeidsgiver(ka);
+            ka.stream()
+                .collect(Collectors.groupingBy(KravdokumentPerRolle::arbeidsgiver))
+                .forEach((arbeidsgiver, kravdokumentPerRolles) ->
+                    resultat.add(new PerioderMedÅrsakPerKravstiller(RolleType.ARBEIDSGIVER, arbeidsgiver,
+                        perioderMedÅrsaker(behandling,
+                            kantIKantVurderer,
+                            kravdokumentPerRolles.stream().map(KravdokumentPerRolle::kravdokument).collect(Collectors.toSet()),
+                            kravdokumenterMedPeriode,
+                            perioderTilVurdering,
+                            perioderSomSkalTilbakestilles,
+                            revurderingPerioderFraAndreParter
+                        ))
+                    ));
+        }
+
+        return resultat;
+    }
+
+    private static void validerKravdokumentArbeidsgiver(List<KravdokumentPerRolle> ka) {
+        var utenArbeidsgiver = ka.stream()
+            .filter(it -> it.arbeidsgiver == null)
+            .map(kravdokumentPerRolle -> kravdokumentPerRolle.kravdokument().getJournalpostId().getVerdi())
+            .collect(Collectors.toSet());
+
+        if (!utenArbeidsgiver.isEmpty()) {
+            throw new IllegalStateException(String.format("Forventet arbeidsgiver på IM men var null for journalpostider=%s", utenArbeidsgiver));
+        }
+
+    }
+
+    @NotNull
+    private KravdokumentPerRolle mapTilKravdokumentPerRolle(Map.Entry<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> it) {
+        RolleType rolleType = utledRolle(it.getKey().getType());
+        return new KravdokumentPerRolle(
+            rolleType,
+            rolleType == RolleType.ARBEIDSGIVER ?
+                it.getValue().stream().findAny().orElseThrow(() -> new IllegalArgumentException("Mangler søknadsdata"))
+                    .getArbeidsgiver() : null,
+            it.getKey()
+        );
+    }
+
+    @NotNull
+    private RolleType utledRolle(no.nav.k9.sak.perioder.KravDokumentType type) {
+        return type == no.nav.k9.sak.perioder.KravDokumentType.SØKNAD ? RolleType.BRUKER : RolleType.ARBEIDSGIVER;
+    }
+
+    private record KravdokumentPerRolle(RolleType rolleType, Arbeidsgiver arbeidsgiver, KravDokument kravdokument) {}
+
+
+    @NotNull
+    private List<PeriodeMedÅrsaker> perioderMedÅrsaker(
+        Behandling behandling,
+        KantIKantVurderer kantIKantVurderer,
+        Set<KravDokument> kravdokumenter,
+        Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterMedPeriode,
+        NavigableSet<DatoIntervallEntitet> perioderTilVurdering,
+        NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles,
+        NavigableSet<PeriodeMedÅrsak> revurderingPerioderFraAndreParter) {
+
+        var relevanteDokumenterMedPeriode = utledKravdokumenterTilkommetIBehandlingen(kravdokumenter, kravdokumenterMedPeriode);
+
         var relevanteTidslinjer = relevanteDokumenterMedPeriode.stream()
             .map(entry -> tilSegments(entry, kantIKantVurderer, ÅrsakTilVurdering.FØRSTEGANGSVURDERING))
             .map(LocalDateTimeline::new)
@@ -81,6 +219,10 @@ public class UtledStatusPåPerioderTjeneste {
             .collect(Collectors.toList()), this::mergeAndreBerørtSaker);
         tidslinje = tidslinje.combine(endringFraAndreParter, this::mergeAndreBerørtSaker, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
+
+        var perioderTilVurderingKombinert = new LocalDateTimeline<>(perioderTilVurdering.stream().map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true)).collect(Collectors.toList()), StandardCombinators::alwaysTrueForMatch)
+            .compress();
+
         tidslinje = tidslinje.intersection(perioderTilVurderingKombinert);
         var tilbakestillingSegmenter = perioderSomSkalTilbakestilles.stream()
             .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), new ÅrsakerTilVurdering(Set.of(ÅrsakTilVurdering.TRUKKET_KRAV))))
@@ -92,13 +234,7 @@ public class UtledStatusPåPerioderTjeneste {
             .stream()
             .map(it -> new PeriodeMedÅrsaker(new Periode(it.getFom(), it.getTom()), transformerÅrsaker(it)))
             .collect(Collectors.toList());
-
-        var årsakMedPerioder = utledÅrsakMedPerioder(perioder);
-
-        var perioderTilVurderingSet = utledPerioderTilVurdering(perioderTilVurderingKombinert, årsakMedPerioder);
-
-        return new StatusForPerioderPåBehandling(perioderTilVurderingSet, perioder, årsakMedPerioder, mapKravTilDto(relevanteDokumenterMedPeriode),
-            List.of(new PerioderMedÅrsakPerKravstiller(RolleType.BRUKER, null, Collections.emptyList())));
+        return perioder;
     }
 
     private Set<Periode> utledPerioderTilVurdering(LocalDateTimeline<Boolean> perioderTilVurderingKombinert, List<ÅrsakMedPerioder> årsakMedPerioder) {
@@ -246,7 +382,7 @@ public class UtledStatusPåPerioderTjeneste {
         return new LocalDateSegment<>(interval, new ÅrsakerTilVurdering(årsaker, kravDokumentTyper));
     }
 
-    private static Set<ÅrsakTilVurdering> utledÅrsakForEndring(Set<no.nav.k9.sak.perioder.KravDokumentType> kravDokumentTyper) {
+    private Set<ÅrsakTilVurdering> utledÅrsakForEndring(Set<no.nav.k9.sak.perioder.KravDokumentType> kravDokumentTyper) {
         if (kravDokumentTyper.contains(no.nav.k9.sak.perioder.KravDokumentType.SØKNAD)) {
             return Set.of(ÅrsakTilVurdering.ENDRING_FRA_BRUKER);
         }

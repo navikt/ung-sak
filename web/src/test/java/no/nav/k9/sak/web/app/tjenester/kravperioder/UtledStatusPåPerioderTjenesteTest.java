@@ -16,10 +16,12 @@ import org.junit.jupiter.api.Test;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.krav.PeriodeMedÅrsaker;
+import no.nav.k9.sak.kontrakt.krav.RolleType;
 import no.nav.k9.sak.kontrakt.krav.StatusForPerioderPåBehandling;
 import no.nav.k9.sak.kontrakt.krav.ÅrsakTilVurdering;
 import no.nav.k9.sak.perioder.KravDokument;
@@ -28,6 +30,8 @@ import no.nav.k9.sak.perioder.PeriodeMedÅrsak;
 import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Periode;
 
@@ -37,6 +41,8 @@ class UtledStatusPåPerioderTjenesteTest {
     private final UtledStatusPåPerioderTjeneste utledStatusPåPerioderTjeneste = new UtledStatusPåPerioderTjeneste(false);
     private final LocalDate IDAG = LocalDate.now();
     private final LocalDateTime NÅ = LocalDateTime.now();
+    private final Arbeidsgiver ARBEIDSGIVER1 = Arbeidsgiver.virksomhet("000000000");
+    private final Arbeidsgiver ARBEIDSGIVER2 = Arbeidsgiver.virksomhet("000000001");
 
     @Test
     void samme_inntektsmelding_revurdering() {
@@ -53,7 +59,7 @@ class UtledStatusPåPerioderTjenesteTest {
         LocalDate tom = IDAG;
 
         var kravdokumenterMedPeriode = Map.of(
-            kravDokTilkommetBehandling, List.of(byggSøktPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))),
+            kravDokTilkommetBehandling, List.of(byggSøktPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), ARBEIDSGIVER1)),
             kravDokTidligereBehandling, List.of(byggSøktPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom)))
         );
 
@@ -73,7 +79,57 @@ class UtledStatusPåPerioderTjenesteTest {
             revurderingPerioderFraAndreParter
         );
 
-        assertThat(utled.getPerioderMedÅrsak().stream().findFirst().get().getÅrsaker()).containsOnly(ÅrsakTilVurdering.REVURDERER_NY_INNTEKTSMELDING);
+        var perioderMedÅrsakPerKravstiller = utled.getPerioderMedÅrsakPerKravstiller();
+        assertThat(perioderMedÅrsakPerKravstiller).hasSize(1);
+        assertThat(perioderMedÅrsakPerKravstiller.get(0).kravstiller()).isEqualTo(RolleType.ARBEIDSGIVER);
+        assertThat(perioderMedÅrsakPerKravstiller.get(0).arbeidsgiver()).isEqualTo(ARBEIDSGIVER1);
+        assertThat(perioderMedÅrsakPerKravstiller.get(0).perioderMedÅrsak()
+            .stream().findFirst().get().getÅrsaker()).containsOnly(ÅrsakTilVurdering.REVURDERER_NY_INNTEKTSMELDING);
+
+    }
+
+    @Test
+    void samme_inntektsmelding_revurdering_flere_arbeidsgivere() {
+        var førstegangsscenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.OMSORGSPENGER);
+        Behandling behandling = førstegangsscenario
+            .medBehandlingType(BehandlingType.REVURDERING)
+            .lagMocked();
+
+
+        KravDokument kravDokTilkommetBehandling = new KravDokument(new JournalpostId("1"), NÅ, KravDokumentType.INNTEKTSMELDING);
+        KravDokument kravDokTidligereBehandling = new KravDokument(new JournalpostId("2"), NÅ, KravDokumentType.INNTEKTSMELDING);
+
+        LocalDate fom = IDAG.minusMonths(1);
+        LocalDate tom = IDAG;
+
+        var kravdokumenterMedPeriode = Map.of(
+            kravDokTilkommetBehandling, List.of(byggSøktPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), ARBEIDSGIVER1)),
+            kravDokTidligereBehandling, List.of(byggSøktPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom)))
+        );
+
+        var perioderTilVurdering = new TreeSet<>(Set.of(DatoIntervallEntitet.fra(fom, tom)));
+
+        NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles = new TreeSet<>();
+
+        var revurderingPerioderFraAndreParter = revurderingPerioderFraAndreParter(fom, tom, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
+
+        StatusForPerioderPåBehandling utled = utledStatusPåPerioderTjeneste.utled(
+            behandling,
+            new PåTversAvHelgErKantIKantVurderer(),
+            Set.of(kravDokTilkommetBehandling),
+            kravdokumenterMedPeriode,
+            perioderTilVurdering,
+            perioderSomSkalTilbakestilles,
+            revurderingPerioderFraAndreParter
+        );
+
+        var perioderMedÅrsakPerKravstiller = utled.getPerioderMedÅrsakPerKravstiller();
+        assertThat(perioderMedÅrsakPerKravstiller).hasSize(1);
+        assertThat(perioderMedÅrsakPerKravstiller.get(0).kravstiller()).isEqualTo(RolleType.ARBEIDSGIVER);
+        assertThat(perioderMedÅrsakPerKravstiller.get(0).arbeidsgiver()).isEqualTo(ARBEIDSGIVER1);
+        assertThat(perioderMedÅrsakPerKravstiller.get(0).perioderMedÅrsak()
+            .stream().findFirst().get().getÅrsaker()).containsOnly(ÅrsakTilVurdering.REVURDERER_NY_INNTEKTSMELDING);
+
     }
 
     @Test
@@ -93,7 +149,7 @@ class UtledStatusPåPerioderTjenesteTest {
 
         var kravdokumenterMedPeriode = Map.of(
             søknadTilkommetBehandling, List.of(byggSøktPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))),
-            inntektsmeldingTidligereBehandling, List.of(byggSøktPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom)))
+            inntektsmeldingTidligereBehandling, List.of(byggSøktPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), ARBEIDSGIVER1))
         );
 
         var perioderTilVurdering = new TreeSet<>(Set.of(DatoIntervallEntitet.fra(fom, tom)));
@@ -161,6 +217,12 @@ class UtledStatusPåPerioderTjenesteTest {
         assertThat(svar.getPerioderMedÅrsak().get(0).getPeriode()).isEqualTo(new Periode(fom, tom));
         assertThat(svar.getPerioderMedÅrsak().get(0).getÅrsaker()).containsOnly(ÅrsakTilVurdering.FØRSTEGANGSVURDERING);
 
+        var perioderMedÅrsakPerKravstiller = svar.getPerioderMedÅrsakPerKravstiller();
+        assertThat(perioderMedÅrsakPerKravstiller).hasSize(1);
+        assertThat(perioderMedÅrsakPerKravstiller.get(0).kravstiller()).isEqualTo(RolleType.BRUKER);
+        var perioderMedÅrsak = perioderMedÅrsakPerKravstiller.get(0).perioderMedÅrsak();
+        assertThat(perioderMedÅrsak).containsExactlyInAnyOrderElementsOf(svar.getPerioderMedÅrsak());
+
     }
 
     @Test
@@ -217,6 +279,12 @@ class UtledStatusPåPerioderTjenesteTest {
             tuple(førstegangsvurdering, Set.of(ÅrsakTilVurdering.FØRSTEGANGSVURDERING))
         );
 
+
+        var perioderMedÅrsakPerKravstiller = svar.getPerioderMedÅrsakPerKravstiller();
+        assertThat(perioderMedÅrsakPerKravstiller).hasSize(1);
+        assertThat(perioderMedÅrsakPerKravstiller.get(0).kravstiller()).isEqualTo(RolleType.BRUKER);
+        var perioderMedÅrsak = perioderMedÅrsakPerKravstiller.get(0).perioderMedÅrsak();
+        assertThat(perioderMedÅrsak).containsExactlyInAnyOrderElementsOf(svar.getPerioderMedÅrsak());
     }
 
     private static TreeSet<PeriodeMedÅrsak> revurderingPerioderFraAndreParter(LocalDate fom, LocalDate tom, BehandlingÅrsakType reEndretInntektsmelding) {
@@ -224,6 +292,11 @@ class UtledStatusPåPerioderTjenesteTest {
     }
 
     private SøktPeriode<VurdertSøktPeriode.SøktPeriodeData> byggSøktPeriode(DatoIntervallEntitet periode) {
+        return byggSøktPeriode(periode, null);
+    }
+
+
+    private SøktPeriode<VurdertSøktPeriode.SøktPeriodeData> byggSøktPeriode(DatoIntervallEntitet periode, Arbeidsgiver virksomhet) {
         var dummyObjekt = new VurdertSøktPeriode.SøktPeriodeData() {
             @Override
             public <V> V getPayload() {
@@ -231,8 +304,12 @@ class UtledStatusPåPerioderTjenesteTest {
             }
         };
 
-        return new SøktPeriode<>(periode, dummyObjekt);
-    }
+        if (virksomhet == null) {
+            return new SøktPeriode<>(periode, dummyObjekt);
+        }
+        var arbeidsforholdRef = InternArbeidsforholdRef.nyRef();
 
+        return new SøktPeriode<>(periode, UttakArbeidType.ARBEIDSTAKER, virksomhet, arbeidsforholdRef, dummyObjekt);
+    }
 
 }
