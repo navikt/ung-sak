@@ -127,11 +127,9 @@ public class BehandlingskontrollEventObserver {
 
         Optional<Behandling> behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId);
 
-        var dto = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(EventHendelse.BEHANDLINGSKONTROLL_EVENT, behandling.get(),vedtak.getVedtaksdato());
-        var aksjonspunkter = dto.getAksjonspunktKoderMedStatusListe();
+        var dto = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(EventHendelse.BEHANDLINGSKONTROLL_EVENT, behandling.get(), vedtak.getVedtaksdato());
         taskData.setPayload(JsonObjectMapper.getJson(dto));
         taskData.setProperty(PubliserEventTask.PROPERTY_KEY, behandlingId.toString());
-        taskData.setProperty(PubliserEventTask.BESKRIVELSE, String.valueOf(aksjonspunkter));
         return taskData;
     }
 
@@ -145,18 +143,16 @@ public class BehandlingskontrollEventObserver {
     }
 
     private ProsessTaskData opprettProsessTaskBehandlingprosess(Long behandlingId, EventHendelse eventHendelse) throws IOException {
-            ProsessTaskData taskData = ProsessTaskData.forProsessTask(PubliserEventTaskImpl.class);
-            taskData.setCallIdFraEksisterende();
-            taskData.setPrioritet(50);
+        ProsessTaskData taskData = ProsessTaskData.forProsessTask(PubliserEventTaskImpl.class);
+        taskData.setCallIdFraEksisterende();
+        taskData.setPrioritet(50);
 
-            Optional<Behandling> behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId);
+        Optional<Behandling> behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId);
 
-            var dto = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(eventHendelse, behandling.get());
-            var aksjonspunkter = dto.getAksjonspunktKoderMedStatusListe();
-            taskData.setPayload(JsonObjectMapper.getJson(dto));
-            taskData.setProperty(PubliserEventTask.PROPERTY_KEY, behandlingId.toString());
-            taskData.setProperty(PubliserEventTask.BESKRIVELSE, String.valueOf(aksjonspunkter));
-            return taskData;
+        var dto = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(eventHendelse, behandling.get());
+        taskData.setPayload(JsonObjectMapper.getJson(dto));
+        taskData.setProperty(PubliserEventTask.PROPERTY_KEY, behandlingId.toString());
+        return taskData;
     }
 
 
