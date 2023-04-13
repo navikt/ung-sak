@@ -137,14 +137,14 @@ class GjennomgåttOpplæringTidslinjeUtlederTest {
     @Test
     void vurderingManglerDelvis() {
         Set<PerioderFraSøknad> perioderFraSøknad = setupEnkelKursperiode();
-        VurdertOpplæringPeriode vurdertOpplæringPeriode = new VurdertOpplæringPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiodeFom, søknadsperiodeTom.minusDays(1)), true, "", "", nå, List.of());
+        VurdertOpplæringPeriode vurdertOpplæringPeriode = new VurdertOpplæringPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiodeFom, søknadsperiodeTom.minusWeeks(1)), true, "", "", nå, List.of());
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæringPeriode));
 
         var vilkårene = vilkårResultatBuilder.build();
 
         var resultat = gjennomgåttOpplæringTidslinjeUtleder.utled(vilkårene, perioderFraSøknad, vurdertOpplæringGrunnlag, søknadsperiode);
         assertThat(resultat).isNotNull();
-        var forventetGodkjentTidslinje = resultat.intersection(new LocalDateTimeline<>(søknadsperiodeFom, søknadsperiodeTom.minusDays(1), true));
+        var forventetGodkjentTidslinje = resultat.intersection(new LocalDateTimeline<>(søknadsperiodeFom, søknadsperiodeTom.minusWeeks(1), true));
         assertTidslinje(forventetGodkjentTidslinje, GODKJENT);
         assertTidslinje(resultat.disjoint(forventetGodkjentTidslinje), MANGLER_VURDERING_OPPLÆRING);
     }

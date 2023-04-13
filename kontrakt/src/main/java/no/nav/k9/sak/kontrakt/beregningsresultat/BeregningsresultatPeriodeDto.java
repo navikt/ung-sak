@@ -32,6 +32,8 @@ public class BeregningsresultatPeriodeDto {
         private LocalDate tom;
 
         private BigDecimal inntektGraderingsprosent;
+        private BigDecimal graderingsfaktorInntekt;
+        private BigDecimal graderingsfaktorTid;
 
         private Builder() {
             this.andeler = new ArrayList<>();
@@ -53,6 +55,16 @@ public class BeregningsresultatPeriodeDto {
 
         public Builder medInntektGraderingsprosent(BigDecimal inntektGraderingsprosent) {
             this.inntektGraderingsprosent = inntektGraderingsprosent;
+            return this;
+        }
+
+        public Builder medGraderingsfaktorInntekt(BigDecimal graderingsfaktorInntekt) {
+            this.graderingsfaktorInntekt = graderingsfaktorInntekt;
+            return this;
+        }
+
+        public Builder medGraderingsfaktorTid(BigDecimal graderingsfaktorTid) {
+            this.graderingsfaktorTid = graderingsfaktorTid;
             return this;
         }
 
@@ -84,6 +96,20 @@ public class BeregningsresultatPeriodeDto {
     @Valid
     private BigDecimal inntektGraderingsprosent;
 
+    @JsonProperty(value = "graderingsfaktorInntekt")
+    @DecimalMin("0")
+    @DecimalMax("100")
+    @Digits(integer = 3, fraction = 2)
+    @Valid
+    private BigDecimal graderingsfaktorInntekt;
+
+    @JsonProperty(value = "graderingsfaktorTid")
+    @DecimalMin("0")
+    @DecimalMax("100")
+    @Digits(integer = 3, fraction = 2)
+    @Valid
+    private BigDecimal graderingsfaktorTid;
+
     @JsonProperty(value = "fom", required = true)
     @Valid
     private LocalDate fom;
@@ -97,6 +123,8 @@ public class BeregningsresultatPeriodeDto {
         tom = builder.tom;
         dagsats = builder.dagsats;
         inntektGraderingsprosent = builder.inntektGraderingsprosent;
+        graderingsfaktorInntekt = builder.graderingsfaktorInntekt;
+        graderingsfaktorTid = builder.graderingsfaktorTid;
         andeler = List.copyOf(builder.andeler);
     }
 
@@ -130,6 +158,14 @@ public class BeregningsresultatPeriodeDto {
 
     public BigDecimal getInntektGraderingsprosent() {
         return inntektGraderingsprosent;
+    }
+
+    public BigDecimal getGraderingsfaktorInntekt() {
+        return graderingsfaktorInntekt;
+    }
+
+    public BigDecimal getGraderingsfaktorTid() {
+        return graderingsfaktorTid;
     }
 
     public void setAndeler(List<BeregningsresultatPeriodeAndelDto> andeler) {

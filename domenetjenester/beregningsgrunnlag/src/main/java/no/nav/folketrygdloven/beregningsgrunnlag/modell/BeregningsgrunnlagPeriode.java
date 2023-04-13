@@ -27,6 +27,8 @@ public class BeregningsgrunnlagPeriode {
     private Long dagsats;
     private List<BeregningsgrunnlagPeriodeÅrsak> beregningsgrunnlagPeriodeÅrsaker = new ArrayList<>();
     private BigDecimal inntektGraderingsprosent;
+    private BigDecimal graderingsfaktorTid;
+    private BigDecimal graderingsfaktorInntekt;
 
     public BeregningsgrunnlagPeriode(BeregningsgrunnlagPeriode eksisterende) {
         this.beregningsgrunnlag = eksisterende.getBeregningsgrunnlag();
@@ -38,6 +40,9 @@ public class BeregningsgrunnlagPeriode {
         this.dagsats = eksisterende.getDagsats();
         this.beregningsgrunnlagPeriodeÅrsaker = eksisterende.getBeregningsgrunnlagPeriodeÅrsaker();
         this.inntektGraderingsprosent = eksisterende.inntektGraderingsprosent;
+        this.graderingsfaktorInntekt = eksisterende.graderingsfaktorInntekt;
+        this.graderingsfaktorTid = eksisterende.graderingsfaktorTid;
+
     }
 
     public BeregningsgrunnlagPeriode() {
@@ -100,6 +105,14 @@ public class BeregningsgrunnlagPeriode {
 
     public BigDecimal getInntektGraderingsprosent() {
         return inntektGraderingsprosent;
+    }
+
+    public BigDecimal getGraderingsfaktorTid() {
+        return graderingsfaktorTid;
+    }
+
+    public BigDecimal getGraderingsfaktorInntekt() {
+        return graderingsfaktorInntekt;
     }
 
     public List<BeregningsgrunnlagPeriodeÅrsak> getBeregningsgrunnlagPeriodeÅrsaker() {
@@ -189,39 +202,9 @@ public class BeregningsgrunnlagPeriode {
             kladd = eksisterendeBeregningsgrunnlagPeriod;
         }
 
-        public Builder leggTilBeregningsgrunnlagPrStatusOgAndel(BeregningsgrunnlagPrStatusOgAndel beregningsgrunnlagPrStatusOgAndel) {
-            verifiserKanModifisere();
-            kladd.beregningsgrunnlagPrStatusOgAndelList.add(beregningsgrunnlagPrStatusOgAndel);
-            return this;
-        }
-
-        public Builder fjernBeregningsgrunnlagPrStatusOgAndelerSomIkkeLiggerIListeAvAndelsnr(List<Long> listeAvAndelsnr) {
-            verifiserKanModifisere();
-            List<BeregningsgrunnlagPrStatusOgAndel> andelerSomSkalFjernes = new ArrayList<>();
-            for (BeregningsgrunnlagPrStatusOgAndel andel : kladd.getBeregningsgrunnlagPrStatusOgAndelList()) {
-                if (!listeAvAndelsnr.contains(andel.getAndelsnr()) && andel.getLagtTilAvSaksbehandler()) {
-                    andelerSomSkalFjernes.add(andel);
-                }
-            }
-            kladd.beregningsgrunnlagPrStatusOgAndelList.removeAll(andelerSomSkalFjernes);
-            return this;
-        }
-
         public Builder leggTilBeregningsgrunnlagPrStatusOgAndel(BeregningsgrunnlagPrStatusOgAndel.Builder prStatusOgAndelBuilder) {
             verifiserKanModifisere();
             prStatusOgAndelBuilder.build(kladd);
-            return this;
-        }
-
-        public Builder medBeregningsgrunnlagPrStatusOgAndel(List<BeregningsgrunnlagPrStatusOgAndel> beregningsgrunnlagPrStatusOgAndeler) {
-            verifiserKanModifisere();
-            kladd.beregningsgrunnlagPrStatusOgAndelList = beregningsgrunnlagPrStatusOgAndeler;
-            return this;
-        }
-
-        public Builder fjernBeregningsgrunnlagPrStatusOgAndel(BeregningsgrunnlagPrStatusOgAndel beregningsgrunnlagPrStatusOgAndel) {
-            verifiserKanModifisere();
-            kladd.beregningsgrunnlagPrStatusOgAndelList.remove(beregningsgrunnlagPrStatusOgAndel);
             return this;
         }
 
@@ -255,19 +238,17 @@ public class BeregningsgrunnlagPeriode {
             return this;
         }
 
-        public Builder leggTilPeriodeÅrsak(PeriodeÅrsak periodeÅrsak) {
+
+        public Builder medGraderingsfaktorInntekt(BigDecimal graderingsfaktorInntekt) {
             verifiserKanModifisere();
-            if (!kladd.getPeriodeÅrsaker().contains(periodeÅrsak)) {
-                BeregningsgrunnlagPeriodeÅrsak.Builder bgPeriodeÅrsakBuilder = new BeregningsgrunnlagPeriodeÅrsak.Builder();
-                bgPeriodeÅrsakBuilder.medPeriodeÅrsak(periodeÅrsak);
-                bgPeriodeÅrsakBuilder.build(kladd);
-            }
+            kladd.graderingsfaktorInntekt = graderingsfaktorInntekt;
             return this;
         }
 
-        public Builder leggTilPeriodeÅrsaker(Collection<PeriodeÅrsak> periodeÅrsaker) {
+
+        public Builder medGraderingsfaktorTid(BigDecimal graderingsfaktorTid) {
             verifiserKanModifisere();
-            periodeÅrsaker.forEach(this::leggTilPeriodeÅrsak);
+            kladd.graderingsfaktorTid = graderingsfaktorTid;
             return this;
         }
 

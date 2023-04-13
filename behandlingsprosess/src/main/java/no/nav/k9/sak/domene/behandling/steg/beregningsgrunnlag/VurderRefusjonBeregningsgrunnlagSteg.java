@@ -98,8 +98,8 @@ public class VurderRefusjonBeregningsgrunnlagSteg implements BeregningsgrunnlagS
             if (!nyePerioder.isEmpty()) {
                 beregningsgrunnlagTjeneste.kopier(ref, nyePerioder, StegType.VURDER_VILKAR_BERGRUNN);
                 var originalBehandlingId = ref.getOriginalBehandlingId().orElseThrow();
-                beregningsgrunnlagVilkårTjeneste.kopierVilkårresultatFraForrigeBehandling(kontekst,
-                    originalBehandlingId,
+                beregningsgrunnlagVilkårTjeneste.kopierVilkårresultatFraForrigeBehandling(
+                    kontekst.getBehandlingId(), originalBehandlingId,
                     nyePerioder.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet()));
             }
         }

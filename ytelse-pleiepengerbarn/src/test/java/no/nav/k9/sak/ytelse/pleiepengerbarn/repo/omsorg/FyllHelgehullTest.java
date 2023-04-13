@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.omsorg;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,11 +32,11 @@ class FyllHelgehullTest {
         List<OmsorgenForPeriode> perioder = new ArrayList<>();
         var stp = mandagenFør(LocalDate.now().minusWeeks(8));
         var søknadsperiode1 = DatoIntervallEntitet.fra(stp, stp.plusDays(4));
-        perioder.add(new OmsorgenForPeriode(søknadsperiode1, BarnRelasjon.MOR, "", "", Resultat.OPPFYLT));
+        perioder.add(new OmsorgenForPeriode(søknadsperiode1, BarnRelasjon.MOR, "", "", Resultat.OPPFYLT, "noen", LocalDateTime.now()));
 
         var stp2 = mandagenFør(søknadsperiode1.getTomDato().plusDays(3));
         var søknadsperiode2 = DatoIntervallEntitet.fra(stp2, stp2.plusDays(4));
-        perioder.add(new OmsorgenForPeriode(søknadsperiode2, BarnRelasjon.MOR, "", "", Resultat.IKKE_VURDERT));
+        perioder.add(new OmsorgenForPeriode(søknadsperiode2, BarnRelasjon.MOR, "", "", Resultat.IKKE_VURDERT, "noen", LocalDateTime.now()));
 
         boolean endret = repo.fyllHelgehull(perioder);
         assertThat(endret).isTrue();
@@ -49,11 +50,11 @@ class FyllHelgehullTest {
         List<OmsorgenForPeriode> perioder = new ArrayList<>();
         var stp = mandagenFør(LocalDate.now().minusWeeks(8));
         var søknadsperiode1 = DatoIntervallEntitet.fra(stp, stp.plusDays(4));
-        perioder.add(new OmsorgenForPeriode(søknadsperiode1, BarnRelasjon.MOR, "", "", Resultat.IKKE_VURDERT));
+        perioder.add(new OmsorgenForPeriode(søknadsperiode1, BarnRelasjon.MOR, "", "", Resultat.IKKE_VURDERT, "noen", LocalDateTime.now()));
 
         var stp2 = mandagenFør(søknadsperiode1.getTomDato().plusDays(3));
         var søknadsperiode2 = DatoIntervallEntitet.fra(stp2, stp2.plusDays(4));
-        perioder.add(new OmsorgenForPeriode(søknadsperiode2, BarnRelasjon.MOR, "", "", Resultat.IKKE_OPPFYLT));
+        perioder.add(new OmsorgenForPeriode(søknadsperiode2, BarnRelasjon.MOR, "", "", Resultat.IKKE_OPPFYLT, "noen", LocalDateTime.now()));
 
         boolean endret = repo.fyllHelgehull(perioder);
         assertThat(endret).isTrue();
@@ -67,11 +68,11 @@ class FyllHelgehullTest {
         List<OmsorgenForPeriode> perioder = new ArrayList<>();
         var stp = mandagenFør(LocalDate.now().minusWeeks(8));
         var søknadsperiode1 = DatoIntervallEntitet.fra(stp, stp.plusDays(4));
-        perioder.add(new OmsorgenForPeriode(søknadsperiode1, BarnRelasjon.MOR, "", "", Resultat.OPPFYLT));
+        perioder.add(new OmsorgenForPeriode(søknadsperiode1, BarnRelasjon.MOR, "", "", Resultat.OPPFYLT, "noen", LocalDateTime.now()));
 
         var stp2 = mandagenFør(søknadsperiode1.getFomDato().minusWeeks(1));
         var søknadsperiode2 = DatoIntervallEntitet.fra(stp2, stp2.plusDays(4));
-        perioder.add(new OmsorgenForPeriode(søknadsperiode2, BarnRelasjon.MOR, "", "", Resultat.IKKE_VURDERT));
+        perioder.add(new OmsorgenForPeriode(søknadsperiode2, BarnRelasjon.MOR, "", "", Resultat.IKKE_VURDERT, "noen", LocalDateTime.now()));
 
         boolean endret = repo.fyllHelgehull(perioder);
         assertThat(endret).isTrue();
@@ -85,11 +86,11 @@ class FyllHelgehullTest {
         List<OmsorgenForPeriode> perioder = new ArrayList<>();
         var stp = mandagenFør(LocalDate.now().minusWeeks(8));
         var søknadsperiode1 = DatoIntervallEntitet.fra(stp, stp.plusDays(1));
-        perioder.add(new OmsorgenForPeriode(søknadsperiode1, BarnRelasjon.MOR, "", "", Resultat.OPPFYLT));
+        perioder.add(new OmsorgenForPeriode(søknadsperiode1, BarnRelasjon.MOR, "", "", Resultat.OPPFYLT, "noen", LocalDateTime.now()));
 
         var stp2 = stp.plusDays(3);
         var søknadsperiode2 = DatoIntervallEntitet.fra(stp2, stp2.plusDays(1));
-        perioder.add(new OmsorgenForPeriode(søknadsperiode2, BarnRelasjon.MOR, "", "", Resultat.IKKE_VURDERT));
+        perioder.add(new OmsorgenForPeriode(søknadsperiode2, BarnRelasjon.MOR, "", "", Resultat.IKKE_VURDERT, "noen", LocalDateTime.now()));
 
         boolean endret = repo.fyllHelgehull(perioder);
         assertThat(endret).isFalse();
@@ -108,11 +109,11 @@ class FyllHelgehullTest {
         List<OmsorgenForPeriode> perioder = new ArrayList<>();
         var stp = mandagenFør(LocalDate.now().minusWeeks(8));
         var søknadsperiode1 = DatoIntervallEntitet.fra(stp, stp.plusDays(6));
-        perioder.add(new OmsorgenForPeriode(søknadsperiode1, BarnRelasjon.MOR, "", "", Resultat.OPPFYLT));
+        perioder.add(new OmsorgenForPeriode(søknadsperiode1, BarnRelasjon.MOR, "", "", Resultat.OPPFYLT, "noen", LocalDateTime.now()));
 
         var stp2 = stp.plusWeeks(1);
         var søknadsperiode2 = DatoIntervallEntitet.fra(stp2, stp2.plusDays(4));
-        perioder.add(new OmsorgenForPeriode(søknadsperiode2, BarnRelasjon.MOR, "", "", Resultat.IKKE_VURDERT));
+        perioder.add(new OmsorgenForPeriode(søknadsperiode2, BarnRelasjon.MOR, "", "", Resultat.IKKE_VURDERT, "noen", LocalDateTime.now()));
 
         boolean endret = repo.fyllHelgehull(perioder);
         assertThat(endret).isFalse();
