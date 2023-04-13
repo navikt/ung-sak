@@ -263,6 +263,8 @@ spec:
       value: "false"
     - name: BEREGNING_VURDER_INKONSISTENS
       value: "false"
+    - name: PSB_BEREGNING_INKLUDER_KUN_VURDERT_OPPTJENING
+      value: "false"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT
