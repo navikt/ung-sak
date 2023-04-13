@@ -20,6 +20,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningForBeregning
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningsaktiviteterPerYtelse;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -128,7 +129,7 @@ public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
             .filter(e -> !e.getValue().isEmpty())
             .flatMap(e -> {
                 var segmenter = e.getValue().stream().map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), v.getVurderingsStatus())).toList();
-                var tidslinje = new LocalDateTimeline<>(segmenter);
+                var tidslinje = new LocalDateTimeline<>(segmenter, StandardCombinators::coalesceLeftHandSide);
                 var first = e.getValue().get(0);
                 return tidslinje.compress().toSegments().stream().map(s ->
                     OpptjeningsperiodeForSaksbehandling.Builder.kopi(first)
