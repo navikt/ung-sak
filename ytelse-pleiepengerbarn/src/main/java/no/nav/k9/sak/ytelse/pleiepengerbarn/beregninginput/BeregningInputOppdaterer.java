@@ -183,7 +183,7 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
             .orElseThrow(() -> new IllegalArgumentException("Fikk inn periode som ikke er til vurdering i behandlingen"));
 
         var inntektsmeldingerForPeriode = finnInntektsmeldingerForPeriode(ref, inntektsmeldingerForSak, vilkårsperiode);
-        var opptjeningAktiviteter = finnOpptjeningForBeregningTjeneste(ref.getFagsakYtelseType()).hentEksaktOpptjeningForBeregning(ref, iayGrunnlag, vilkårsperiode)
+        var opptjeningAktiviteter = finnOpptjeningForBeregningTjeneste(ref.getFagsakYtelseType()).hentEksaktOpptjeningForBeregning(ref, iayGrunnlag, vilkårsperiode, true)
             .orElseThrow()
             .getOpptjeningPerioder()
             .stream()

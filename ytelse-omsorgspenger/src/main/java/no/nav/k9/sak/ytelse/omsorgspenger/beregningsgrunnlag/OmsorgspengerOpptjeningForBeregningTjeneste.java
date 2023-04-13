@@ -123,7 +123,7 @@ public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningFo
 
     @Override
     public Optional<OpptjeningAktiviteter> hentEksaktOpptjeningForBeregning(BehandlingReferanse ref,
-                                                                            InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode) {
+                                                                            InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode, boolean skalInkludereAktiviterUtenVurdertOpptjening) {
         Optional<OpptjeningAktiviteter> opptjeningAktiviteter = hentOpptjeningForBeregning(ref, iayGrunnlag, vilkårsperiode);
         return opptjeningAktiviteter;
     }

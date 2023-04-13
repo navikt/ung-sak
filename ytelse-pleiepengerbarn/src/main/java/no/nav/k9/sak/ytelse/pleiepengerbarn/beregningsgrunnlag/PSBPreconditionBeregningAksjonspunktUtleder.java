@@ -224,7 +224,7 @@ public class PSBPreconditionBeregningAksjonspunktUtleder implements Precondition
             .allMatch(stp -> {
                 var opptjeningAktiviteter = opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(param.getRef(),
                     inntektArbeidYtelseTjeneste.hentGrunnlag(param.getBehandlingId()),
-                    finnPeriodeTilVurdering(perioderTilVurdering, stp));
+                    finnPeriodeTilVurdering(perioderTilVurdering, stp), true);
                 if (opptjeningAktiviteter.isEmpty()) {
                     return false;
                 }

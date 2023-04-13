@@ -1,8 +1,5 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
 
-import java.time.LocalDate;
-import java.util.Comparator;
-
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetKlassifisering;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
@@ -13,16 +10,17 @@ import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurderingOpptjeningsvi
 import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.VurderStatusInput;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.typer.Periode;
 
 public class OpptjeningAktivitetResultatVurdering implements OpptjeningAktivitetVurdering {
 
     private final OpptjeningResultat resultat;
 
     private OpptjeningAktivitetVurderingOpptjeningsvilkår vilkårVurdering = new OpptjeningAktivitetVurderingOpptjeningsvilkår();
+    private final boolean ingenOpptjeningAktivitetMappesTilUnderkjent;
 
-    public OpptjeningAktivitetResultatVurdering(OpptjeningResultat resultat) {
+    public OpptjeningAktivitetResultatVurdering(OpptjeningResultat resultat, boolean utenAktivitetMappesTilUnderkjent) {
         this.resultat = resultat;
+        this.ingenOpptjeningAktivitetMappesTilUnderkjent = utenAktivitetMappesTilUnderkjent;
     }
 
     /**
@@ -50,6 +48,11 @@ public class OpptjeningAktivitetResultatVurdering implements OpptjeningAktivitet
     }
 
     private VurderingsStatus finnStatusUtenOpptjeningsaktivitet(VurderStatusInput input) {
+
+        if (ingenOpptjeningAktivitetMappesTilUnderkjent) {
+            return VurderingsStatus.UNDERKJENT;
+        }
+
         var inputVurdering = vilkårVurdering.vurderStatus(input);
         return inputVurdering.equals(VurderingsStatus.UNDERKJENT) ? VurderingsStatus.UNDERKJENT : VurderingsStatus.GODKJENT;
     }

@@ -218,7 +218,7 @@ public class OverstyrInputBeregningTjeneste {
     private List<OpptjeningAktiviteter.OpptjeningPeriode> finnArbeidsaktiviteterForOverstyring(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsperiode) {
         var opptjeningAktiviteter = finnOpptjeningForBeregningTjeneste(behandlingReferanse).hentEksaktOpptjeningForBeregning(
             behandlingReferanse,
-            inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingReferanse.getId()), vilkårsperiode);
+            inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingReferanse.getId()), vilkårsperiode, true);
 
         return opptjeningAktiviteter.stream()
             .flatMap(a -> a.getOpptjeningPerioder().stream())

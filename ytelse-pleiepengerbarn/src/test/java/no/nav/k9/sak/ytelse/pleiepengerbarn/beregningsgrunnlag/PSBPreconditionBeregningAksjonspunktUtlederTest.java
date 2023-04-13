@@ -112,7 +112,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
             .thenReturn(new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)))));
 
         opptjeningForBeregningTjeneste = mock(PSBOpptjeningForBeregningTjeneste.class);
-        when(opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(any(), any(), any()))
+        when(opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(any(), any(), any(), true))
             .thenReturn(Optional.of(new OpptjeningAktiviteter(List.of(
                 OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.PLEIEPENGER, new Periode(STP.minusMonths(1), STP),
                     null, null, null)))));
@@ -213,7 +213,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
     @Test
     void skal_ikke_returnere_aksjonspunt_ved_pleiepenger_av_dagpenger() {
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), Arbeidskategori.DAGPENGER, behandling);
-        when(opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(any(), any(), any()))
+        when(opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(any(), any(), any(), true))
             .thenReturn(Optional.of(new OpptjeningAktiviteter(List.of(
                 OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.PLEIEPENGER_AV_DAGPENGER, new Periode(STP, STP.plusDays(10)),
                     null, null, null)))));
@@ -227,7 +227,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
     @Test
     void skal_sette_på_vent_ved_pleiepenger_av_næring_uten_søkt_om_næring() {
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), Arbeidskategori.SELVSTENDIG_NÆRINGSDRIVENDE, behandling);
-        when(opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(any(), any(), any()))
+        when(opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(any(), any(), any(), true))
             .thenReturn(Optional.of(new OpptjeningAktiviteter(List.of(
                 OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.NÆRING, new Periode(STP, STP.plusDays(10)),
                     null, null, null)))));
@@ -242,7 +242,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
     @Test
     void skal_returnere_aksjonspunkt_ved_pleiepenger_av_næring_med_søkt_om_næring() {
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), Arbeidskategori.SELVSTENDIG_NÆRINGSDRIVENDE, behandling);
-        when(opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(any(), any(), any()))
+        when(opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(any(), any(), any(), true))
             .thenReturn(Optional.of(new OpptjeningAktiviteter(List.of(
                 OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.NÆRING, new Periode(STP, STP.plusDays(10)),
                     null, null, null)))));
@@ -260,7 +260,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
     @Test
     void skal_sette_på_vent_ved_pleiepenger_av_frilans_uten_søkt_om_frilans() {
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), Arbeidskategori.FRILANSER, behandling);
-        when(opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(any(), any(), any()))
+        when(opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(any(), any(), any(), true))
             .thenReturn(Optional.of(new OpptjeningAktiviteter(List.of(
                 OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.FRILANS, new Periode(STP, STP.plusDays(10)),
                     null, null, null)))));
@@ -276,7 +276,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
     @Test
     void skal_returnere_aksjonspunkt_ved_pleiepenger_av_frilans_med_søkt_om_frilans() {
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), Arbeidskategori.FRILANSER, behandling);
-        when(opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(any(), any(), any()))
+        when(opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(any(), any(), any(), true))
             .thenReturn(Optional.of(new OpptjeningAktiviteter(List.of(
                 OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.FRILANS, new Periode(STP, STP.plusDays(10)),
                     null, null, null)))));

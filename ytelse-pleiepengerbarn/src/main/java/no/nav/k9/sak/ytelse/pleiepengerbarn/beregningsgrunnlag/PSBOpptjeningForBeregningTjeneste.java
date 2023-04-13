@@ -75,11 +75,13 @@ public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
      * @param behandlingReferanse Aktuell behandling referanse
      * @param iayGrunnlag         {@link InntektArbeidYtelseGrunnlag}
      * @param vilkårsperiode
+     * @param skalInkludereAktiviterUtenVurdertOpptjening
      * @return {@link OpptjeningsperiodeForSaksbehandling}er
      */
     private List<OpptjeningsperiodeForSaksbehandling> hentRelevanteOpptjeningsaktiviteterForBeregning(BehandlingReferanse behandlingReferanse,
                                                                                                       InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                                                                      DatoIntervallEntitet vilkårsperiode) {
+                                                                                                      DatoIntervallEntitet vilkårsperiode,
+                                                                                                      boolean skalInkludereAktiviterUtenVurdertOpptjening) {
 
         Long behandlingId = behandlingReferanse.getId();
         var opptjeningsvilkår = vilkårResultatRepository.hent(behandlingReferanse.getBehandlingId()).getVilkår(VilkårType.OPPTJENINGSVILKÅRET);
@@ -92,7 +94,7 @@ public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
         }
         var opptjening = opptjeningResultat.flatMap(it -> it.finnOpptjening(vilkårsperiode.getFomDato())).orElseThrow();
         var yrkesaktivitetFilter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(behandlingReferanse.getAktørId()));
-        List<OpptjeningsperiodeForSaksbehandling> opptjeningAktivitetPerioder = mapPerioder(behandlingReferanse, iayGrunnlag, vilkårsperiode, opptjeningResultat, opptjening, yrkesaktivitetFilter);
+        List<OpptjeningsperiodeForSaksbehandling> opptjeningAktivitetPerioder = mapPerioder(behandlingReferanse, iayGrunnlag, vilkårsperiode, opptjeningResultat, opptjening, yrkesaktivitetFilter, skalInkludereAktiviterUtenVurdertOpptjening);
 
         return opptjeningAktivitetPerioder.stream()
             .filter(oa -> filtrerForVilkårsperiode(vilkårsperiode, oa, vilkårUtfallMerknad))
@@ -102,10 +104,15 @@ public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
             .collect(Collectors.toList());
     }
 
-    private List<OpptjeningsperiodeForSaksbehandling> mapPerioder(BehandlingReferanse behandlingReferanse, InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode, Optional<OpptjeningResultat> opptjeningResultat, Opptjening opptjening, YrkesaktivitetFilter yrkesaktivitetFilter) {
+    private List<OpptjeningsperiodeForSaksbehandling> mapPerioder(BehandlingReferanse behandlingReferanse,
+                                                                  InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                                                  DatoIntervallEntitet vilkårsperiode,
+                                                                  Optional<OpptjeningResultat> opptjeningResultat,
+                                                                  Opptjening opptjening, YrkesaktivitetFilter yrkesaktivitetFilter,
+                                                                  boolean skalInkludereAktiviterUtenVurdertOpptjening) {
         var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse,
             iayGrunnlag,
-            new OpptjeningAktivitetResultatVurdering(opptjeningResultat.get()),
+            new OpptjeningAktivitetResultatVurdering(opptjeningResultat.get(), !skalInkludereAktiviterUtenVurdertOpptjening),
             opptjening.getOpptjeningPeriode(),
             vilkårsperiode,
             yrkesaktivitetFilter);
@@ -149,8 +156,9 @@ public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
 
     private Optional<OpptjeningAktiviteter> hentOpptjeningForBeregning(BehandlingReferanse ref,
                                                                        InntektArbeidYtelseGrunnlag iayGrunnlag,
-                                                                       DatoIntervallEntitet stp) {
-        var opptjeningsPerioder = hentRelevanteOpptjeningsaktiviteterForBeregning(ref, iayGrunnlag, stp)
+                                                                       DatoIntervallEntitet stp,
+                                                                       boolean skalInkludereAktiviterUtenVurdertOpptjening) {
+        var opptjeningsPerioder = hentRelevanteOpptjeningsaktiviteterForBeregning(ref, iayGrunnlag, stp, skalInkludereAktiviterUtenVurdertOpptjening)
             .stream()
             .map(this::mapOpptjeningPeriode)
             .collect(Collectors.toList());
@@ -162,8 +170,8 @@ public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
 
     @Override
     public Optional<OpptjeningAktiviteter> hentEksaktOpptjeningForBeregning(BehandlingReferanse ref,
-                                                                            InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode) {
-        Optional<OpptjeningAktiviteter> opptjeningAktiviteter = hentOpptjeningForBeregning(ref, iayGrunnlag, vilkårsperiode);
+                                                                            InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode, boolean skalInkludereAktiviterUtenVurdertOpptjening) {
+        Optional<OpptjeningAktiviteter> opptjeningAktiviteter = hentOpptjeningForBeregning(ref, iayGrunnlag, vilkårsperiode, skalInkludereAktiviterUtenVurdertOpptjening);
         return opptjeningAktiviteter;
     }
 

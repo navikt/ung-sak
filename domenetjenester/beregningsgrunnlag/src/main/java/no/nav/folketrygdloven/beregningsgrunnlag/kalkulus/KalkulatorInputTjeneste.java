@@ -133,7 +133,7 @@ public class KalkulatorInputTjeneste {
             oppgittOpptjening,
             imTjeneste,
             finnPGITilgjengeligPåVedtakstidspunktet);
-        var opptjeningAktiviteter = tjeneste.hentEksaktOpptjeningForBeregning(referanse, iayGrunnlag, vilkårsperiode);
+        var opptjeningAktiviteter = tjeneste.hentEksaktOpptjeningForBeregning(referanse, iayGrunnlag, vilkårsperiode, true);
 
         if (opptjeningAktiviteter.isEmpty() && !erInaktiv(vilkårsMerknad)) {
             throw new IllegalStateException("Forventer opptjening for vilkårsperiode: " + vilkårsperiode + ", iayGrunnlag.opptjening=" + oppgittOpptjening);
