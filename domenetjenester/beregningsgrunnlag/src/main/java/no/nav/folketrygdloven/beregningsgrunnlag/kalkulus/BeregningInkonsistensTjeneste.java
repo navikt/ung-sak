@@ -118,6 +118,9 @@ public class BeregningInkonsistensTjeneste {
                                                                             OpptjeningForBeregningTjeneste opptjeningForBeregningTjeneste) {
         NavigableSet<DatoIntervallEntitet> perioderSomRevurderes = new TreeSet<>();
         var perioderSomSkalHaBrukersAndel = finnPerioderSomSkalHaBrukersAndel(ref, iayGrunnlag, forlengelser, opptjeningForBeregningTjeneste);
+        if (!perioderSomSkalHaBrukersAndel.isEmpty()) {
+            LOG.info("Fant perioder som skal ha brukers andel i beregning: {}", perioderSomSkalHaBrukersAndel);
+        }
         var originaleBeregningsgrunnlag = finnOriginalBeregningsgrunnlagsliste(ref, perioderSomSkalHaBrukersAndel);
         originaleBeregningsgrunnlag.stream().map(BeregningsgrunnlagGrunnlag::getBeregningsgrunnlag)
             .flatMap(Optional::stream)
