@@ -93,7 +93,13 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
         if (dødsdato == null) {
             return Optional.empty();
         }
-        var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
+        var vilkåreneOpt = vilkårResultatRepository.hentHvisEksisterer(referanse.getBehandlingId());
+
+        if (vilkåreneOpt.isEmpty()) {
+            return Optional.empty();
+        }
+
+        var vilkårene = vilkåreneOpt.get();
 
         if (!harGodkjentSykdomPåDødsdatoen(dødsdato, vilkårene)) {
             return Optional.empty();
