@@ -179,7 +179,7 @@ public class UtledStatusPåPerioderTjeneste {
     private static Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> alleKravdokumenterForArbeidsgiver(Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> alleKravdokumenterMedPeriode, Arbeidsgiver arbeidsgiver) {
         return alleKravdokumenterMedPeriode.entrySet()
             .stream()
-            .filter(e -> e.getValue().stream().anyMatch(at -> at.getArbeidsgiver() == arbeidsgiver))
+            .filter(e -> e.getValue().stream().anyMatch(at -> at.getArbeidsgiver().equals(arbeidsgiver)))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
