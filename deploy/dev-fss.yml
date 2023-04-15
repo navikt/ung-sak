@@ -186,7 +186,7 @@ spec:
       value: http://k9-formidling.k9saksbehandling/k9/formidling
     - name: K9_FORMIDLING_SCOPE
       value: api://dev-fss.k9saksbehandling.k9-formidling/.default
-    - name : K9_PUNSJ_URL
+    - name: K9_PUNSJ_URL
       value: http://k9-punsj.k9saksbehandling/api
     - name: INFOTRYGD_BS_BASE_URI
       value: http://k9-infotrygd.k9saksbehandling
@@ -264,9 +264,6 @@ spec:
       value: "true"
     - name: BEREGNING_VURDER_INKONSISTENS
       value: "true"
-    - name: PSB_BEREGNING_INKLUDER_KUN_VURDERT_OPPTJENING
-      value: "true"
-
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT

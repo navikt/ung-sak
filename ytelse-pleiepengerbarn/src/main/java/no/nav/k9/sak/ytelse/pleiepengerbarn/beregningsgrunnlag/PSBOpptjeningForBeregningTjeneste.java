@@ -21,7 +21,6 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.Opptjeningsaktiviteter
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
@@ -48,7 +47,6 @@ import no.nav.k9.sak.typer.Periode;
 @FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
 public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregningTjeneste {
 
-    public static final long BEHANDLING_MED_TILKOMMET_FRILANS = 1672398L;
     private OpptjeningsperioderTjeneste opptjeningsperioderTjeneste;
     private OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -57,7 +55,6 @@ public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
         OpptjeningAktivitetType.VIDERE_ETTERUTDANNING,
         OpptjeningAktivitetType.UTENLANDSK_ARBEIDSFORHOLD,
         OpptjeningAktivitetType.ARBEIDSAVKLARING));
-    private boolean skalUnderkjenneAktiviteterUtenVurdertOpptjening;
 
     protected PSBOpptjeningForBeregningTjeneste() {
         // For proxy
@@ -66,12 +63,10 @@ public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
     @Inject
     public PSBOpptjeningForBeregningTjeneste(OpptjeningsperioderTjeneste opptjeningsperioderTjeneste,
                                              OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider,
-                                             VilkårResultatRepository vilkårResultatRepository,
-                                             @KonfigVerdi(value = "PSB_BEREGNING_INKLUDER_KUN_VURDERT_OPPTJENING", defaultVerdi = "false") boolean skalUnderkjenneAktiviteterUtenVurdertOpptjening) {
+                                             VilkårResultatRepository vilkårResultatRepository) {
         this.opptjeningsperioderTjeneste = opptjeningsperioderTjeneste;
         this.oppgittOpptjeningFilterProvider = oppgittOpptjeningFilterProvider;
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.skalUnderkjenneAktiviteterUtenVurdertOpptjening = skalUnderkjenneAktiviteterUtenVurdertOpptjening;
     }
 
 
@@ -111,7 +106,7 @@ public class PSBOpptjeningForBeregningTjeneste implements OpptjeningForBeregning
     private List<OpptjeningsperiodeForSaksbehandling> mapPerioder(BehandlingReferanse behandlingReferanse, InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode, Optional<OpptjeningResultat> opptjeningResultat, Opptjening opptjening, YrkesaktivitetFilter yrkesaktivitetFilter) {
         var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse,
             iayGrunnlag,
-            new OpptjeningAktivitetResultatVurdering(opptjeningResultat.get(), behandlingReferanse.getBehandlingId().equals(BEHANDLING_MED_TILKOMMET_FRILANS) || skalUnderkjenneAktiviteterUtenVurdertOpptjening),
+            new OpptjeningAktivitetResultatVurdering(opptjeningResultat.get()),
             opptjening.getOpptjeningPeriode(),
             vilkårsperiode,
             yrkesaktivitetFilter);

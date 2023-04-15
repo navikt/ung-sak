@@ -6,7 +6,6 @@ import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningAktivitet;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurdering;
-import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurderingOpptjeningsvilkår;
 import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.VurderStatusInput;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -15,12 +14,9 @@ public class OpptjeningAktivitetResultatVurdering implements OpptjeningAktivitet
 
     private final OpptjeningResultat resultat;
 
-    private OpptjeningAktivitetVurderingOpptjeningsvilkår vilkårVurdering = new OpptjeningAktivitetVurderingOpptjeningsvilkår();
-    private boolean skalUnderkjenneAktiviteterUtenVurdertOpptjening;
 
-    public OpptjeningAktivitetResultatVurdering(OpptjeningResultat resultat, boolean skalUnderkjenneAktiviteterUtenVurdertOpptjening) {
+    public OpptjeningAktivitetResultatVurdering(OpptjeningResultat resultat) {
         this.resultat = resultat;
-        this.skalUnderkjenneAktiviteterUtenVurdertOpptjening = skalUnderkjenneAktiviteterUtenVurdertOpptjening;
     }
 
     /**
@@ -44,17 +40,7 @@ public class OpptjeningAktivitetResultatVurdering implements OpptjeningAktivitet
             .findFirst()
             .map(OpptjeningAktivitet::getKlassifisering)
             .map(OpptjeningAktivitetResultatVurdering::mapTilVurderingsStatus)
-            .orElse(finnStatusUtenOpptjeningsaktivitet(input));
-    }
-
-    private VurderingsStatus finnStatusUtenOpptjeningsaktivitet(VurderStatusInput input) {
-
-        if (skalUnderkjenneAktiviteterUtenVurdertOpptjening) {
-            return VurderingsStatus.UNDERKJENT;
-        }
-
-        var inputVurdering = vilkårVurdering.vurderStatus(input);
-        return inputVurdering.equals(VurderingsStatus.UNDERKJENT) ? VurderingsStatus.UNDERKJENT : VurderingsStatus.GODKJENT;
+            .orElse(VurderingsStatus.UNDERKJENT);
     }
 
     private VurderingsStatus finnArbeidvurdering(VurderStatusInput input, Opptjening opptjening) {
@@ -68,7 +54,7 @@ public class OpptjeningAktivitetResultatVurdering implements OpptjeningAktivitet
             .findFirst()
             .map(OpptjeningAktivitet::getKlassifisering)
             .map(OpptjeningAktivitetResultatVurdering::mapTilVurderingsStatus)
-            .orElse(finnStatusUtenOpptjeningsaktivitet(input));
+            .orElse(VurderingsStatus.UNDERKJENT);
     }
 
     private static VurderingsStatus mapTilVurderingsStatus(OpptjeningAktivitetKlassifisering klassifisering) {
