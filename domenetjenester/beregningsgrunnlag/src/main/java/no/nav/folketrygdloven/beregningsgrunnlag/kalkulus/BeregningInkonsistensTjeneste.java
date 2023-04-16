@@ -42,7 +42,7 @@ import no.nav.k9.sak.vilkår.VilkårTjeneste;
 public class BeregningInkonsistensTjeneste {
 
     private static final Logger LOG = LoggerFactory.getLogger(BeregningInkonsistensTjeneste.class);
-    public static final Set<Long> BEHANDLING_ID_MED_FEIL = Set.of(1658475L, 1672398L, 1670372L);
+    public static final Set<Long> BEHANDLING_ID_MED_FEIL = Set.of(1658475L, 1672398L, 1670372L, 1676515L, 1675707L);
 
     private final KalkulusTjeneste kalkulusTjeneste;
     private final BeregningsgrunnlagReferanserTjeneste beregningsgrunnlagReferanserTjeneste;
