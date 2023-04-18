@@ -146,6 +146,51 @@ class UtledStatusPåPerioderTjenesteTest {
     }
 
     @Test
+    void im_uten_refusjonskrav_ignoreres() {
+        var førstegangsscenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.OMSORGSPENGER);
+        Behandling behandling = førstegangsscenario
+            .medBehandlingType(BehandlingType.REVURDERING)
+            .lagMocked();
+
+
+        JournalpostId jid = new JournalpostId("1");
+        KravDokument kravDokTilkommetBehandling = new KravDokument(jid, NÅ, KravDokumentType.INNTEKTSMELDING);
+        KravDokument kravDokTilkommetBehandling_utenRefusjonskrev = new KravDokument(jid, NÅ, KravDokumentType.INNTEKTSMELDING_UTEN_REFUSJONSKRAV);
+
+        KravDokument kravDokTidligereBehandling = new KravDokument(new JournalpostId("2"), NÅ, KravDokumentType.INNTEKTSMELDING);
+
+        LocalDate fom = IDAG.minusMonths(1);
+        LocalDate tom = IDAG;
+
+
+
+        var kravdokumenterMedPeriode = Map.of(
+            kravDokTilkommetBehandling_utenRefusjonskrev, List.of(byggSøktPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), ARBEIDSGIVER1)),
+            kravDokTidligereBehandling, List.of(byggSøktPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), ARBEIDSGIVER1))
+        );
+
+        var perioderTilVurdering = new TreeSet<>(Set.of(DatoIntervallEntitet.fra(fom, tom)));
+
+        NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles = new TreeSet<>();
+
+        var revurderingPerioderFraAndreParter = new TreeSet<PeriodeMedÅrsak>();
+
+        StatusForPerioderPåBehandling utled = utledStatusPåPerioderTjeneste.utled(
+            behandling,
+            new PåTversAvHelgErKantIKantVurderer(),
+            Set.of(kravDokTilkommetBehandling),
+            kravdokumenterMedPeriode,
+            perioderTilVurdering,
+            perioderSomSkalTilbakestilles,
+            revurderingPerioderFraAndreParter
+        );
+
+        var perioderMedÅrsakPerKravstiller = utled.getPerioderMedÅrsakPerKravstiller();
+        assertThat(perioderMedÅrsakPerKravstiller).hasSize(0);
+
+    }
+
+    @Test
     void samme_søknad_inntektsmelding_revurdering() {
         var førstegangsscenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.PLEIEPENGER_SYKT_BARN);
         Behandling behandling = førstegangsscenario
