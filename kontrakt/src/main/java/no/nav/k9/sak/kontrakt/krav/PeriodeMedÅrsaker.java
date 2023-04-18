@@ -56,12 +56,4 @@ public class PeriodeMedÅrsaker {
     public int hashCode() {
         return Objects.hash(periode, årsaker);
     }
-
-    @Override
-    public String toString() {
-        return "PeriodeMedÅrsaker{" +
-            "periode=" + periode +
-            ", årsaker=" + årsaker +
-            '}';
-    }
 }

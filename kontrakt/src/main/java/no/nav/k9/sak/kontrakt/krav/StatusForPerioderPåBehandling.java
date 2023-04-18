@@ -38,22 +38,15 @@ public class StatusForPerioderPåBehandling {
     @JsonProperty("dokumenterTilBehandling")
     private List<KravDokumentMedSøktePerioder> dokumenterTilBehandling;
 
-    @Valid
-    @Size
-    @JsonProperty("perioderMedÅrsakPerKravstiller")
-    private List<PerioderMedÅrsakPerKravstiller> perioderMedÅrsakPerKravstiller;
-
     @JsonCreator
     public StatusForPerioderPåBehandling(@Valid @Size @JsonProperty("perioderTilVurdering") Set<Periode> perioderTilVurdering,
                                          @Valid @Size @JsonProperty("perioderMedÅrsak") List<PeriodeMedÅrsaker> perioderMedÅrsak,
                                          @Valid @Size @JsonProperty("årsakMedPerioder") List<ÅrsakMedPerioder> årsakMedPerioder,
-                                         @Valid @Size @JsonProperty("dokumenterTilBehandling") List<KravDokumentMedSøktePerioder> dokumenterTilBehandling,
-                                         @Valid @Size @JsonProperty("perioderMedÅrsakPerKravstiller") List<PerioderMedÅrsakPerKravstiller> perioderMedÅrsakPerKravstiller) {
+                                         @Valid @Size @JsonProperty("dokumenterTilBehandling") List<KravDokumentMedSøktePerioder> dokumenterTilBehandling) {
         this.perioderTilVurdering = perioderTilVurdering;
         this.perioderMedÅrsak = perioderMedÅrsak;
         this.årsakMedPerioder = årsakMedPerioder;
         this.dokumenterTilBehandling = dokumenterTilBehandling;
-        this.perioderMedÅrsakPerKravstiller = perioderMedÅrsakPerKravstiller;
     }
 
     public Set<Periode> getPerioderTilVurdering() {
@@ -70,9 +63,5 @@ public class StatusForPerioderPåBehandling {
 
     public List<KravDokumentMedSøktePerioder> getDokumenterTilBehandling() {
         return dokumenterTilBehandling;
-    }
-
-    public List<PerioderMedÅrsakPerKravstiller> getPerioderMedÅrsakPerKravstiller() {
-        return perioderMedÅrsakPerKravstiller;
     }
 }
