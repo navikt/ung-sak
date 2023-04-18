@@ -207,14 +207,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
         var revurderingPerioderFraAndreParter = perioderTilVurderingTjeneste.utledRevurderingPerioder(ref);
         var kantIKantVurderer = perioderTilVurderingTjeneste.getKantIKantVurderer();
 
-        var statusForPerioderPåBehandling = statusPåPerioderTjeneste.utled
-            (behandling,
-                kantIKantVurderer,
-                kravdokumenter,
-                kravdokumenterMedPeriode,
-                perioderTilVurdering,
-                perioderSomSkalTilbakestilles,
-                revurderingPerioderFraAndreParter);
+        var statusForPerioderPåBehandling = statusPåPerioderTjeneste.utled(behandling, kantIKantVurderer, kravdokumenter, kravdokumenterMedPeriode, perioderTilVurdering, perioderSomSkalTilbakestilles, revurderingPerioderFraAndreParter);
         return statusForPerioderPåBehandling;
     }
 }

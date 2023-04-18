@@ -152,14 +152,12 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
                                                                                            NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles) {
         var prosessTriggere = prosessTriggereRepository.hentGrunnlag(behandling.getId());
 
-
         return vilkår.getPerioder()
             .stream()
             .filter(it -> perioder.stream().anyMatch(p -> it.getPeriode().overlapper(p))
                 || overlapperMedÅrsakPeriode(it, prosessTriggere)
                 || perioderSomSkalTilbakestilles.stream().anyMatch(p -> it.getPeriode().overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(p.getFomDato().minusDays(1), p.getTomDato().plusDays(1))))
-                || perioderSomSkalTilbakestilles.stream().anyMatch(p -> erKantIKantVurderer.erKantIKant(it.getPeriode(), p))
-            )
+                || perioderSomSkalTilbakestilles.stream().anyMatch(p -> erKantIKantVurderer.erKantIKant(it.getPeriode(), p)))
             .map(VilkårPeriode::getPeriode)
             .collect(Collectors.toCollection(TreeSet::new));
     }
@@ -197,5 +195,4 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     public KantIKantVurderer getKantIKantVurderer() {
         return erKantIKantVurderer;
     }
-
 }
