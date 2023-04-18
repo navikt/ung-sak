@@ -12,7 +12,6 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +20,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -42,12 +42,18 @@ import no.nav.k9.sak.typer.Periode;
 
 public class UtledStatusPåPerioderTjeneste {
 
-    private Boolean filtrereUtTilstøtendePeriode;
-
     private static Logger LOGGER = LoggerFactory.getLogger(UtledStatusPåPerioderTjeneste.class);
+    private Boolean filtrereUtTilstøtendePeriode;
 
     public UtledStatusPåPerioderTjeneste(Boolean filtrereUtTilstøtendePeriode) {
         this.filtrereUtTilstøtendePeriode = filtrereUtTilstøtendePeriode;
+    }
+
+    private static Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> alleKravdokumenterForArbeidsgiver(Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> alleKravdokumenterMedPeriode, Arbeidsgiver arbeidsgiver) {
+        return alleKravdokumenterMedPeriode.entrySet()
+            .stream()
+            .filter(e -> e.getValue().stream().anyMatch(at -> at.getArbeidsgiver().equals(arbeidsgiver)))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public StatusForPerioderPåBehandling utled(Behandling behandling,
@@ -76,13 +82,18 @@ public class UtledStatusPåPerioderTjeneste {
 
         var perioderTilVurderingSet = utledPerioderTilVurdering(perioderTilVurderingKombinert, årsakMedPerioder);
 
-        var perioderMedÅrsakPerKravstiller = perioderMedÅrsakPerKravstiller(behandling,
-            kantIKantVurderer,
-            kravdokumenter,
-            kravdokumenterMedPeriode,
-            perioderTilVurdering,
-            perioderSomSkalTilbakestilles,
-            revurderingPerioderFraAndreParter);
+        Set<PerioderMedÅrsakPerKravstiller> perioderMedÅrsakPerKravstiller;
+        if (behandling.getFagsakYtelseType() == FagsakYtelseType.OMP) {
+            perioderMedÅrsakPerKravstiller = perioderMedÅrsakPerKravstiller(behandling,
+                kantIKantVurderer,
+                kravdokumenter,
+                kravdokumenterMedPeriode,
+                perioderTilVurdering,
+                perioderSomSkalTilbakestilles,
+                revurderingPerioderFraAndreParter);
+        } else {
+            perioderMedÅrsakPerKravstiller = Set.of(new PerioderMedÅrsakPerKravstiller(RolleType.BRUKER, null, perioder));
+        }
 
         var relevanteDokumenterMedPeriode = utledKravdokumenterTilkommetIBehandlingen(kravdokumenter, kravdokumenterMedPeriode);
 
@@ -90,7 +101,6 @@ public class UtledStatusPåPerioderTjeneste {
             perioderMedÅrsakPerKravstiller.stream().toList());
     }
 
-    @NotNull
     private Set<PerioderMedÅrsakPerKravstiller> perioderMedÅrsakPerKravstiller(
         Behandling behandling,
         KantIKantVurderer kantIKantVurderer,
@@ -110,7 +120,7 @@ public class UtledStatusPåPerioderTjeneste {
 
         Set<PerioderMedÅrsakPerKravstiller> resultat = new HashSet<>();
 
-        if (!brukerKravdokumenter.isEmpty()){
+        if (!brukerKravdokumenter.isEmpty()) {
             resultat.add(new PerioderMedÅrsakPerKravstiller(RolleType.BRUKER, null,
                 perioderMedÅrsaker(behandling,
                     kantIKantVurderer,
@@ -119,7 +129,7 @@ public class UtledStatusPåPerioderTjeneste {
                     perioderTilVurdering,
                     perioderSomSkalTilbakestilles,
                     revurderingPerioderFraAndreParter
-            )));
+                )));
         }
 
         var ka = kravdokumenterPerKravstiller.get(RolleType.ARBEIDSGIVER);
@@ -143,8 +153,6 @@ public class UtledStatusPåPerioderTjeneste {
         return resultat;
     }
 
-
-    @NotNull
     private KravdokumenterPerKravstiller mapTilKravdokumentPerRolle(
         KravDokument kravdokumentPåBehandling,
         Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> alleKravdokumenterMedPeriode) {
@@ -175,23 +183,10 @@ public class UtledStatusPåPerioderTjeneste {
         );
     }
 
-    @NotNull
-    private static Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> alleKravdokumenterForArbeidsgiver(Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> alleKravdokumenterMedPeriode, Arbeidsgiver arbeidsgiver) {
-        return alleKravdokumenterMedPeriode.entrySet()
-            .stream()
-            .filter(e -> e.getValue().stream().anyMatch(at -> at.getArbeidsgiver().equals(arbeidsgiver)))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    @NotNull
     private RolleType utledRolle(no.nav.k9.sak.perioder.KravDokumentType type) {
         return type == no.nav.k9.sak.perioder.KravDokumentType.SØKNAD ? RolleType.BRUKER : RolleType.ARBEIDSGIVER;
     }
 
-    private record KravdokumenterPerKravstiller(RolleType rolleType, Arbeidsgiver arbeidsgiver, KravDokument kravdokumentForBehandling) {}
-
-
-    @NotNull
     private List<PeriodeMedÅrsaker> perioderMedÅrsaker(
         Behandling behandling,
         KantIKantVurderer kantIKantVurderer,
@@ -461,5 +456,9 @@ public class UtledStatusPåPerioderTjeneste {
             .filter(it -> kravdokumenter.stream()
                 .anyMatch(at -> at.getJournalpostId().equals(it.getKey().getJournalpostId())))
             .collect(Collectors.toSet());
+    }
+
+    private record KravdokumenterPerKravstiller(RolleType rolleType, Arbeidsgiver arbeidsgiver,
+                                                KravDokument kravdokumentForBehandling) {
     }
 }
