@@ -270,8 +270,10 @@
             <artifactId>encoder</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.jboss</groupId>
+            <!-- lagt her for  sikre samme versjon som på plugin -->
+            <groupId>io.smallrye</groupId>
             <artifactId>jandex</artifactId>
+            <version>${jandex.version}</version>
         </dependency>
 
         <!-- bean validation -->
