@@ -12,12 +12,15 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import no.nav.k9.kodeverk.beregningsgrunnlag.PeriodeÅrsak;
 import no.nav.k9.sak.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.k9.sak.typer.Beløp;
 
 public class BeregningsgrunnlagPeriode {
 
+    @JsonBackReference
     private Beregningsgrunnlag beregningsgrunnlag;
     private List<BeregningsgrunnlagPrStatusOgAndel> beregningsgrunnlagPrStatusOgAndelList = new ArrayList<>();
     private ÅpenDatoIntervallEntitet periode;
@@ -26,6 +29,9 @@ public class BeregningsgrunnlagPeriode {
     private BigDecimal redusertPrÅr;
     private Long dagsats;
     private List<BeregningsgrunnlagPeriodeÅrsak> beregningsgrunnlagPeriodeÅrsaker = new ArrayList<>();
+    private BigDecimal inntektGraderingsprosent;
+    private BigDecimal graderingsfaktorTid;
+    private BigDecimal graderingsfaktorInntekt;
 
     public BeregningsgrunnlagPeriode(BeregningsgrunnlagPeriode eksisterende) {
         this.beregningsgrunnlag = eksisterende.getBeregningsgrunnlag();
@@ -36,6 +42,10 @@ public class BeregningsgrunnlagPeriode {
         this.redusertPrÅr = eksisterende.getRedusertPrÅr();
         this.dagsats = eksisterende.getDagsats();
         this.beregningsgrunnlagPeriodeÅrsaker = eksisterende.getBeregningsgrunnlagPeriodeÅrsaker();
+        this.inntektGraderingsprosent = eksisterende.inntektGraderingsprosent;
+        this.graderingsfaktorInntekt = eksisterende.graderingsfaktorInntekt;
+        this.graderingsfaktorTid = eksisterende.graderingsfaktorTid;
+
     }
 
     public BeregningsgrunnlagPeriode() {
@@ -96,6 +106,18 @@ public class BeregningsgrunnlagPeriode {
         return dagsats;
     }
 
+    public BigDecimal getInntektGraderingsprosent() {
+        return inntektGraderingsprosent;
+    }
+
+    public BigDecimal getGraderingsfaktorTid() {
+        return graderingsfaktorTid;
+    }
+
+    public BigDecimal getGraderingsfaktorInntekt() {
+        return graderingsfaktorInntekt;
+    }
+
     public List<BeregningsgrunnlagPeriodeÅrsak> getBeregningsgrunnlagPeriodeÅrsaker() {
         return Collections.unmodifiableList(beregningsgrunnlagPeriodeÅrsaker);
     }
@@ -142,7 +164,9 @@ public class BeregningsgrunnlagPeriode {
                 && Objects.equals(this.getBruttoPrÅr(), other.getBruttoPrÅr())
                 && Objects.equals(this.getAvkortetPrÅr(), other.getAvkortetPrÅr())
                 && Objects.equals(this.getRedusertPrÅr(), other.getRedusertPrÅr())
-                && Objects.equals(this.getDagsats(), other.getDagsats());
+                && Objects.equals(this.getDagsats(), other.getDagsats())
+                && Objects.equals(this.getInntektGraderingsprosent(), other.getInntektGraderingsprosent())
+            ;
     }
 
     @Override
@@ -181,39 +205,9 @@ public class BeregningsgrunnlagPeriode {
             kladd = eksisterendeBeregningsgrunnlagPeriod;
         }
 
-        public Builder leggTilBeregningsgrunnlagPrStatusOgAndel(BeregningsgrunnlagPrStatusOgAndel beregningsgrunnlagPrStatusOgAndel) {
-            verifiserKanModifisere();
-            kladd.beregningsgrunnlagPrStatusOgAndelList.add(beregningsgrunnlagPrStatusOgAndel);
-            return this;
-        }
-
-        public Builder fjernBeregningsgrunnlagPrStatusOgAndelerSomIkkeLiggerIListeAvAndelsnr(List<Long> listeAvAndelsnr) {
-            verifiserKanModifisere();
-            List<BeregningsgrunnlagPrStatusOgAndel> andelerSomSkalFjernes = new ArrayList<>();
-            for (BeregningsgrunnlagPrStatusOgAndel andel : kladd.getBeregningsgrunnlagPrStatusOgAndelList()) {
-                if (!listeAvAndelsnr.contains(andel.getAndelsnr()) && andel.getLagtTilAvSaksbehandler()) {
-                    andelerSomSkalFjernes.add(andel);
-                }
-            }
-            kladd.beregningsgrunnlagPrStatusOgAndelList.removeAll(andelerSomSkalFjernes);
-            return this;
-        }
-
         public Builder leggTilBeregningsgrunnlagPrStatusOgAndel(BeregningsgrunnlagPrStatusOgAndel.Builder prStatusOgAndelBuilder) {
             verifiserKanModifisere();
             prStatusOgAndelBuilder.build(kladd);
-            return this;
-        }
-
-        public Builder medBeregningsgrunnlagPrStatusOgAndel(List<BeregningsgrunnlagPrStatusOgAndel> beregningsgrunnlagPrStatusOgAndeler) {
-            verifiserKanModifisere();
-            kladd.beregningsgrunnlagPrStatusOgAndelList = beregningsgrunnlagPrStatusOgAndeler;
-            return this;
-        }
-
-        public Builder fjernBeregningsgrunnlagPrStatusOgAndel(BeregningsgrunnlagPrStatusOgAndel beregningsgrunnlagPrStatusOgAndel) {
-            verifiserKanModifisere();
-            kladd.beregningsgrunnlagPrStatusOgAndelList.remove(beregningsgrunnlagPrStatusOgAndel);
             return this;
         }
 
@@ -241,19 +235,23 @@ public class BeregningsgrunnlagPeriode {
             return this;
         }
 
-        public Builder leggTilPeriodeÅrsak(PeriodeÅrsak periodeÅrsak) {
+        public Builder medInntektGraderingsprosent(BigDecimal inntektGraderingsprosent) {
             verifiserKanModifisere();
-            if (!kladd.getPeriodeÅrsaker().contains(periodeÅrsak)) {
-                BeregningsgrunnlagPeriodeÅrsak.Builder bgPeriodeÅrsakBuilder = new BeregningsgrunnlagPeriodeÅrsak.Builder();
-                bgPeriodeÅrsakBuilder.medPeriodeÅrsak(periodeÅrsak);
-                bgPeriodeÅrsakBuilder.build(kladd);
-            }
+            kladd.inntektGraderingsprosent = inntektGraderingsprosent;
             return this;
         }
 
-        public Builder leggTilPeriodeÅrsaker(Collection<PeriodeÅrsak> periodeÅrsaker) {
+
+        public Builder medGraderingsfaktorInntekt(BigDecimal graderingsfaktorInntekt) {
             verifiserKanModifisere();
-            periodeÅrsaker.forEach(this::leggTilPeriodeÅrsak);
+            kladd.graderingsfaktorInntekt = graderingsfaktorInntekt;
+            return this;
+        }
+
+
+        public Builder medGraderingsfaktorTid(BigDecimal graderingsfaktorTid) {
+            verifiserKanModifisere();
+            kladd.graderingsfaktorTid = graderingsfaktorTid;
             return this;
         }
 

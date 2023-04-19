@@ -55,15 +55,16 @@ public class OMPOmsorgenForVilkår implements OmsorgenForVilkår {
     public boolean skalHaAksjonspunkt(LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje, boolean medAlleGamleVurderingerPåNytt) {
         var avslåttTidslinje = new LocalDateTimeline<>(samletOmsorgenForTidslinje.stream()
             .map(grunnlag -> new LocalDateSegment<>(grunnlag.getLocalDateInterval(), getSpecification().evaluate(grunnlag.getValue()).result().equals(Resultat.NEI)))
-            .toList());
+            .toList())
+            .filterValue(it -> it);
 
         var vurdertTidslinje = new LocalDateTimeline<>(samletOmsorgenForTidslinje.stream()
             .map(grunnlag -> new LocalDateSegment<>(grunnlag.getLocalDateInterval(), grunnlag.getValue().getHarBlittVurdertSomOmsorgsPerson() != null && !medAlleGamleVurderingerPåNytt))
             .toList())
             .filterValue(it -> it);
 
-        var ikkeVurdertAvslåtttPeriode = avslåttTidslinje.disjoint(vurdertTidslinje);
+        var ikkeVurdertAvslåttPeriode = avslåttTidslinje.disjoint(vurdertTidslinje);
 
-        return !ikkeVurdertAvslåtttPeriode.isEmpty();
+        return !ikkeVurdertAvslåttPeriode.isEmpty();
     }
 }

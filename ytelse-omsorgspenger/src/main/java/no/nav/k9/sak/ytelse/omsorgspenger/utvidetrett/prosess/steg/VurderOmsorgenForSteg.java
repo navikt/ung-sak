@@ -89,9 +89,16 @@ public class VurderOmsorgenForSteg implements BehandlingSteg {
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
         var vilkårTimeline = vilkårene.getVilkårTimeline(VILKÅRET);
         var søknadsperiode = søknad.getSøknadsperiode();
-        var intersectTimeline = vilkårTimeline.intersection(new LocalDateInterval(søknadsperiode.getFomDato(), fagsak.getPeriode().getTomDato()));
 
-        boolean noenAndreVilkårErHeltAvslått = vilkårTjeneste.erNoenVilkårHeltAvslått(behandlingId, VILKÅRET, intersectTimeline.getMinLocalDate(), intersectTimeline.getMaxLocalDate());
+
+        //når søker om KS etter året barnet er 18 år (men før 18+3år), blir hele utledet søknadperiode utenfor fagsakens periode
+        boolean ksSøktEtter18År = fagsak.getYtelseType() == OMSORGSPENGER_KS && søknadsperiode.getFomDato().isAfter(fagsak.getPeriode().getTomDato());
+
+        LocalDateTimeline<VilkårPeriode> intersectTimeline = ksSøktEtter18År
+            ? LocalDateTimeline.empty()
+            : vilkårTimeline.intersection(new LocalDateInterval(søknadsperiode.getFomDato(), fagsak.getPeriode().getTomDato()));
+
+        boolean noenAndreVilkårErHeltAvslått = !intersectTimeline.isEmpty() && vilkårTjeneste.erNoenVilkårHeltAvslått(behandlingId, VILKÅRET, intersectTimeline.getMinLocalDate(), intersectTimeline.getMaxLocalDate());
         if (noenAndreVilkårErHeltAvslått) {
             vilkårTjeneste.settVilkårutfallTilIkkeVurdert(behandlingId, VILKÅRET, new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(vilkårTimeline.getMinLocalDate(), vilkårTimeline.getMaxLocalDate()))));
             behandling.getAksjonspunktMedDefinisjonOptional(AKTUELT_AKSJONSPUNKT).ifPresent(Aksjonspunkt::avbryt);

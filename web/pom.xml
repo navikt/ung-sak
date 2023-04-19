@@ -15,7 +15,7 @@
 
     <properties>
         <simple.client.version>0.16.0</simple.client.version>
-        <swagger-ui.version>4.15.5</swagger-ui.version>
+        <swagger-ui.version>4.18.2</swagger-ui.version>
     </properties>
 
 
@@ -24,7 +24,7 @@
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-bom</artifactId>
-                <version>11.0.13</version>
+                <version>11.0.15</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -270,8 +270,10 @@
             <artifactId>encoder</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.jboss</groupId>
+            <!-- lagt her for  sikre samme versjon som på plugin -->
+            <groupId>io.smallrye</groupId>
             <artifactId>jandex</artifactId>
+            <version>${jandex.version}</version>
         </dependency>
 
         <!-- bean validation -->

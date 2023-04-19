@@ -87,7 +87,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
 
         var nyttårsaftenEtÅrFremITid = LocalDate.now().withMonth(12).withDayOfMonth(31).plus(MAKS_FREMTID);
         if (uttakMaksDato.isAfter(nyttårsaftenEtÅrFremITid)) {
-            throw new IllegalArgumentException("Uttaksplan kan ikke være åpen eller for langt frem i tid. Uttak maksdato:'"+ uttakMaksDato + "', utbetaling maksdato: '" + nyttårsaftenEtÅrFremITid + "'");
+            throw new IllegalArgumentException("Uttaksplan kan ikke være åpen eller for langt frem i tid. Uttak maksdato:'" + uttakMaksDato + "', utbetaling maksdato: '" + nyttårsaftenEtÅrFremITid + "'");
         }
 
         // stopper periodisering her for å unngå 'evigvarende' ekspansjon -
@@ -98,15 +98,20 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
 
         final int[] i = {0}; // Periode-teller til regelsporing
         return grunnlagTimelinePeriodisertÅr.intersection(uttakTimeline, (dateInterval, grunnlagSegment, uttakSegment) -> {
-            BeregningsresultatPeriode resultatPeriode = new BeregningsresultatPeriode(dateInterval);
+            BeregningsgrunnlagPeriode grunnlag = grunnlagSegment.getValue();
+            List<UttakResultatPeriode> uttakResultatPeriode = uttakSegment.getValue();
+
+            BeregningsresultatPeriode resultatPeriode = new BeregningsresultatPeriode(
+                dateInterval,
+                grunnlag.getInntektGraderingsprosent(),
+                grunnlag.getGraderingsfaktorTid(),
+                grunnlag.getGraderingsfaktorInntekt());
 
             // Regelsporing
             String periodeNavn = "BeregningsresultatPeriode[" + i[0] + "]";
             resultater.put(periodeNavn + ".fom", dateInterval.getFomDato());
             resultater.put(periodeNavn + ".tom", dateInterval.getTomDato());
 
-            BeregningsgrunnlagPeriode grunnlag = grunnlagSegment.getValue();
-            List<UttakResultatPeriode> uttakResultatPeriode = uttakSegment.getValue();
 
             grunnlag.getBeregningsgrunnlagPrStatus(AktivitetStatus.ATFL).forEach(gbps -> {
                 // for hver arbeidstaker andel: map fra grunnlag til 1-2 resultatAndel

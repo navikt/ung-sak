@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -26,7 +27,6 @@ import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.EndretUtbetalingPeriodeutleder;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
-import no.nav.k9.sak.vilkår.VilkårPeriodeFilter;
 import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 
 @Dependent
@@ -42,16 +42,18 @@ public class BeregningStegTjeneste {
     private final BeregningsgrunnlagVilkårTjeneste vilkårTjeneste;
     private final VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
     private final Instance<EndretUtbetalingPeriodeutleder> endretUtbetalingPeriodeutleder;
+    private BeregningStegPeriodeFilter beregningStegPeriodeFilter;
 
     @Inject
     public BeregningStegTjeneste(BeregningTjeneste kalkulusTjeneste,
                                  BeregningsgrunnlagVilkårTjeneste vilkårTjeneste,
                                  VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
-                                 @Any Instance<EndretUtbetalingPeriodeutleder> endretUtbetalingPeriodeutleder) {
+                                 @Any Instance<EndretUtbetalingPeriodeutleder> endretUtbetalingPeriodeutleder, BeregningStegPeriodeFilter beregningStegPeriodeFilter) {
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.vilkårTjeneste = vilkårTjeneste;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
         this.endretUtbetalingPeriodeutleder = endretUtbetalingPeriodeutleder;
+        this.beregningStegPeriodeFilter = beregningStegPeriodeFilter;
     }
 
 
@@ -64,14 +66,10 @@ public class BeregningStegTjeneste {
     }
 
     public void fortsettBeregningInkludertForlengelser(BehandlingReferanse ref, BehandlingStegType stegType, FortsettBeregningResultatCallback resultatCallback) {
-        var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref);
-        logger.info("Alle perioder til vurdering {}", vilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter));
-
-        periodeFilter.ignorerAvslåttePerioder();
-        var perioderTilVurdering = vilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter);
+        var perioder = beregningStegPeriodeFilter.filtrerPerioder(ref, stegType);
 
         // Beregner dersom endring i uttak
-        var forlengelserMedEndring = perioderTilVurdering.stream()
+        var forlengelserMedEndring = perioder.stream()
             .filter(p -> !ingenRelevantEndring(ref, p))
             .collect(Collectors.toCollection(TreeSet::new));
 
@@ -80,7 +78,7 @@ public class BeregningStegTjeneste {
         }
 
         // Kopierer dersom ingen endring
-        var forlengelserUtenEndring = perioderTilVurdering.stream()
+        var forlengelserUtenEndring = perioder.stream()
             .filter(p -> ingenRelevantEndring(ref, p))
             .collect(Collectors.toCollection(TreeSet::new));
 
@@ -90,17 +88,8 @@ public class BeregningStegTjeneste {
     }
 
     public void fortsettBeregning(BehandlingReferanse ref, BehandlingStegType stegType, FortsettBeregningResultatCallback resultatCallback) {
-        var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref);
-        periodeFilter.ignorerForlengelseperioder();
-        fortsettBeregning(ref, stegType, resultatCallback, periodeFilter);
-    }
-
-    private void fortsettBeregning(BehandlingReferanse ref, BehandlingStegType stegType,
-                                   FortsettBeregningResultatCallback resultatCallback,
-                                   VilkårPeriodeFilter periodeFilter) {
-        periodeFilter.ignorerAvslåttePerioder();
-        var perioderTilVurdering = vilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter);
-        fortsettBeregning(ref, stegType, resultatCallback, perioderTilVurdering);
+        var perioder = beregningStegPeriodeFilter.filtrerPerioder(ref, stegType);
+        fortsettBeregning(ref, stegType, resultatCallback, perioder);
     }
 
     private void fortsettBeregning(BehandlingReferanse ref, BehandlingStegType stegType,
@@ -131,7 +120,7 @@ public class BeregningStegTjeneste {
     }
 
     private boolean ingenRelevantEndring(BehandlingReferanse ref, PeriodeTilVurdering p) {
-        return p.erForlengelse() && EndretUtbetalingPeriodeutleder.finnUtleder(endretUtbetalingPeriodeutleder, ref.getFagsakYtelseType())
+        return p.erForlengelse() && EndretUtbetalingPeriodeutleder.finnUtleder(endretUtbetalingPeriodeutleder, ref.getFagsakYtelseType(), ref.getBehandlingType())
             .utledPerioder(ref, p.getPeriode()).isEmpty();
     }
 
@@ -140,7 +129,20 @@ public class BeregningStegTjeneste {
 
         @Override
         public void håndter(KalkulusResultat kalkulusResultat, DatoIntervallEntitet periode) {
-            aksjonspunktResultater.addAll(kalkulusResultat.getBeregningAksjonspunktResultat().stream().map(BeregningResultatMapper::map).collect(Collectors.toList()));
+            var apPrKode = kalkulusResultat.getBeregningAksjonspunktResultat().stream()
+                .map(BeregningResultatMapper::map)
+                .collect(Collectors.toMap(AksjonspunktResultat::getAksjonspunktDefinisjon, Function.identity(), this::finnSenesteFrist));
+            aksjonspunktResultater.addAll(apPrKode.values());
+        }
+
+        private AksjonspunktResultat finnSenesteFrist(AksjonspunktResultat ap1, AksjonspunktResultat ap2) {
+            if (ap1.getFrist() == null) {
+                return ap1;
+            }
+            if (ap2.getFrist() == null) {
+                return ap2;
+            }
+            return ap1.getFrist().isBefore(ap2.getFrist()) ? ap2 : ap1;
         }
     }
 

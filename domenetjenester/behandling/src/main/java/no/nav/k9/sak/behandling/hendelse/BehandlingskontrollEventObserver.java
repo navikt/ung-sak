@@ -24,6 +24,9 @@ import no.nav.k9.sak.behandlingskontroll.events.BehandlingStatusEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingskontrollEvent;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
+import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
+import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.kontrakt.produksjonsstyring.los.ProduksjonsstyringAksjonspunktHendelse;
@@ -37,6 +40,7 @@ public class BehandlingskontrollEventObserver {
 
     private ProsessTaskTjeneste prosessTaskRepository;
     private BehandlingRepository behandlingRepository;
+    private BehandlingVedtakRepository behandlingVedtakRepository;
     private BehandlingProsessHendelseMapper behandlingProsessHendelseMapper;
 
     public BehandlingskontrollEventObserver() {
@@ -44,10 +48,12 @@ public class BehandlingskontrollEventObserver {
 
     @Inject
     public BehandlingskontrollEventObserver(ProsessTaskTjeneste prosessTaskRepository,
-            BehandlingRepository behandlingRepository,
-            BehandlingProsessHendelseMapper behandlingProsessHendelseMapper) {
+                                            BehandlingRepository behandlingRepository,
+                                            BehandlingVedtakRepository behandlingVedtakRepository,
+                                            BehandlingProsessHendelseMapper behandlingProsessHendelseMapper) {
         this.prosessTaskRepository = prosessTaskRepository;
         this.behandlingRepository = behandlingRepository;
+        this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.behandlingProsessHendelseMapper = behandlingProsessHendelseMapper;
     }
 
@@ -105,6 +111,28 @@ public class BehandlingskontrollEventObserver {
         }
     }
 
+    public void observerVedtakFattetEvent(@Observes BehandlingVedtakEvent event) {
+        try {
+            ProsessTaskData prosessTaskData = opprettProsessTaskVedtattBehandlingprosess(event.getBehandlingId(), event.getVedtak());
+            prosessTaskRepository.lagre(prosessTaskData);
+        } catch (IOException ex) {
+            throw new RuntimeException("Publisering av BehandlingskontrollEvent feilet", ex);
+        }
+    }
+
+    private ProsessTaskData opprettProsessTaskVedtattBehandlingprosess(Long behandlingId, BehandlingVedtak vedtak) throws IOException {
+        ProsessTaskData taskData = ProsessTaskData.forProsessTask(PubliserEventTaskImpl.class);
+        taskData.setCallIdFraEksisterende();
+        taskData.setPrioritet(50);
+
+        Optional<Behandling> behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId);
+
+        var dto = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(EventHendelse.BEHANDLINGSKONTROLL_EVENT, behandling.get(), vedtak.getVedtaksdato());
+        taskData.setPayload(JsonObjectMapper.getJson(dto));
+        taskData.setProperty(PubliserEventTask.PROPERTY_KEY, behandlingId.toString());
+        return taskData;
+    }
+
     public void observerAksjonspunktHarEndretBehandlendeEnhetEvent(@Observes BehandlingEnhetEvent event) {
         try {
             ProsessTaskData prosessTaskData = opprettProsessTaskBehandlingprosess(event.getBehandlingId(), EventHendelse.AKSJONSPUNKT_HAR_ENDRET_BEHANDLENDE_ENHET);
@@ -122,10 +150,8 @@ public class BehandlingskontrollEventObserver {
         Optional<Behandling> behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId);
 
         var dto = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(eventHendelse, behandling.get());
-        var aksjonspunkter = dto.getAksjonspunktKoderMedStatusListe();
         taskData.setPayload(JsonObjectMapper.getJson(dto));
         taskData.setProperty(PubliserEventTask.PROPERTY_KEY, behandlingId.toString());
-        taskData.setProperty(PubliserEventTask.BESKRIVELSE, String.valueOf(aksjonspunkter));
         return taskData;
     }
 

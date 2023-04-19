@@ -21,8 +21,10 @@ public class InntektsmeldingBuilder {
 
     public static final Comparator<? super InntektsmeldingBuilder> COMP_REKKEFØLGE = Comparator.comparing(InntektsmeldingBuilder::getKanalreferanse, Comparator.nullsLast(Comparator.naturalOrder()));
     private final Inntektsmelding kladd;
+
     private EksternArbeidsforholdRef eksternArbeidsforholdId;
     private boolean erBygget;
+
 
     InntektsmeldingBuilder(Inntektsmelding kladd) {
         this.kladd = kladd;
@@ -40,7 +42,12 @@ public class InntektsmeldingBuilder {
         return build(false);
     }
 
-    public Inntektsmelding build(boolean ignore) { // NOSONAR
+    public Inntektsmelding build(boolean ignore) {
+        return build(ignore, false);
+    }
+
+
+    public Inntektsmelding build(boolean ignore, boolean zeroErKrav) { // NOSONAR
         var internRef = getInternArbeidsforholdRef();
         Objects.requireNonNull(kladd.getKanalreferanse(), "kanalreferanse er ikke satt");
         if (internRef.isPresent() && !ignore) {
@@ -51,7 +58,7 @@ public class InntektsmeldingBuilder {
             }
         }
 
-        new ValiderInntektsmelding().valider(this);
+        new ValiderInntektsmelding(zeroErKrav).valider(this);
 
         erBygget = true; // Kan ikke bygge mer med samme builder, vil bare returnere samme kladd.
         return kladd;

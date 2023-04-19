@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -11,14 +12,18 @@ public class BeregningsgrunnlagPeriode {
     @JsonManagedReference
     private List<BeregningsgrunnlagPrStatus> beregningsgrunnlagPrStatus = new ArrayList<>();
     private Periode bgPeriode;
+    private BigDecimal inntektGraderingsprosent;
+    private BigDecimal graderingsfaktorTid;
+    private BigDecimal graderingsfaktorInntekt;
+
 
     public BeregningsgrunnlagPeriode() {
     }
 
     public List<BeregningsgrunnlagPrStatus> getBeregningsgrunnlagPrStatus(AktivitetStatus aktivitetStatus) {
         return beregningsgrunnlagPrStatus.stream()
-                .filter(af -> aktivitetStatus.equals(af.getAktivitetStatus()))
-                .collect(Collectors.toList());
+            .filter(af -> aktivitetStatus.equals(af.getAktivitetStatus()))
+            .collect(Collectors.toList());
     }
 
     public List<BeregningsgrunnlagPrStatus> getBeregningsgrunnlagPrStatus() {
@@ -35,6 +40,18 @@ public class BeregningsgrunnlagPeriode {
         return bgPeriode;
     }
 
+    public BigDecimal getInntektGraderingsprosent() {
+        return inntektGraderingsprosent;
+    }
+
+    public BigDecimal getGraderingsfaktorTid() {
+        return graderingsfaktorTid;
+    }
+
+    public BigDecimal getGraderingsfaktorInntekt() {
+        return graderingsfaktorInntekt;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -48,6 +65,21 @@ public class BeregningsgrunnlagPeriode {
 
         public Builder medPeriode(Periode beregningsgrunnlagPeriode) {
             beregningsgrunnlagPeriodeMal.bgPeriode = beregningsgrunnlagPeriode;
+            return this;
+        }
+
+        public Builder medInntektGraderingsprosent(BigDecimal inntektGraderingsprosent) {
+            beregningsgrunnlagPeriodeMal.inntektGraderingsprosent = inntektGraderingsprosent;
+            return this;
+        }
+
+        public Builder medGraderingsfaktorTid(BigDecimal graderingsfaktorTid) {
+            beregningsgrunnlagPeriodeMal.graderingsfaktorTid = graderingsfaktorTid;
+            return this;
+        }
+
+        public Builder medGraderingsfaktorInntekt(BigDecimal graderingsfaktorInntekt) {
+            beregningsgrunnlagPeriodeMal.graderingsfaktorInntekt = graderingsfaktorInntekt;
             return this;
         }
 

@@ -32,6 +32,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat
 import no.nav.folketrygdloven.kalkulus.beregning.v1.AvklaringsbehovMedTilstandDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.EksternArbeidsforholdRef;
 import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
+import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.ArbeidsforholdReferanseDto;
 import no.nav.folketrygdloven.kalkulus.kodeverk.GrunnbeløpReguleringStatus;
@@ -50,12 +51,15 @@ import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.KontrollerGrunnbeløpRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.KopierBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.KopierBeregningRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.simulerTilkommetInntekt.SimulerTilkommetInntektForRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.simulerTilkommetInntekt.SimulerTilkommetInntektListeRequest;
 import no.nav.folketrygdloven.kalkulus.response.v1.Grunnbeløp;
 import no.nav.folketrygdloven.kalkulus.response.v1.GrunnbeløpReguleringRespons;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandListeResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringListeRespons;
+import no.nav.folketrygdloven.kalkulus.response.v1.simulerTilkommetInntekt.SimulertTilkommetInntektPrReferanse;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAvklaringsbehovDefinisjon;
@@ -323,6 +327,8 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
             return Avslagsårsak.SØKT_FRILANS_UTEN_FRILANS_INNTEKT;
         } else if (vilkårsavslagsårsak.getKode().equals(BeregningAvslagsårsak.FOR_LAVT_BG.getKode())) {
             return Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG;
+        } else if (vilkårsavslagsårsak.getKode().equals(BeregningAvslagsårsak.FOR_LAVT_BG_8_47.getKode())) {
+            return Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG_8_47;
         } else if (vilkårsavslagsårsak.getKode().equals(BeregningAvslagsårsak.AVKORTET_GRUNNET_ANNEN_INNTEKT.getKode())) {
             return Avslagsårsak.AVKORTET_GRUNNET_ANNEN_INNTEKT;
         }
@@ -342,4 +348,25 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         GrunnbeløpReguleringRespons respons = restTjeneste.kontrollerBehovForGRegulering(request);
         return respons.getResultat();
     }
+
+    public Map<UUID, List<DatoIntervallEntitet>> simulerTilkommetInntekt(Map<UUID, DatoIntervallEntitet> koblingerOgPeriode,
+                                                                         Saksnummer saksnummer) {
+        if (koblingerOgPeriode.isEmpty()) {
+            return Map.of();
+        }
+        var request = new SimulerTilkommetInntektListeRequest(
+            saksnummer.getVerdi(),
+            YtelseTyperKalkulusStøtterKontrakt.PLEIEPENGER_SYKT_BARN,
+            koblingerOgPeriode.entrySet().stream()
+                .map(e ->
+                    new SimulerTilkommetInntektForRequest(e.getKey(),
+                        List.of(new Periode(e.getValue().getFomDato(), e.getValue().getTomDato()))))
+                .toList());
+        var respons = restTjeneste.simulerTilkommetInntekt(request);
+        return respons.getSimulertListe().stream().collect(Collectors.toMap(
+            SimulertTilkommetInntektPrReferanse::getEksternReferanse,
+            it -> it.getTilkommetAktivitetPerioder().stream().map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFom(), p.getTom())).toList()
+        ));
+    }
+
 }

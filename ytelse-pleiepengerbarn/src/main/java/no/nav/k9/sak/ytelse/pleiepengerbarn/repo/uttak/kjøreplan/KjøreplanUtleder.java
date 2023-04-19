@@ -23,6 +23,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.sykdom.Resultat;
+import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
@@ -30,6 +31,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
@@ -43,17 +45,17 @@ import no.nav.k9.sak.utsatt.UtsattPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomInnleggelsePeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
+import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.PleiegradKalkulator;
 
 @Dependent
 public class KjøreplanUtleder {
     private final FagsakRepository fagsakRepository;
     private final BehandlingRepository behandlingRepository;
-
     private final MottatteDokumentRepository mottatteDokumentRepository;
-
     private final Instance<VurderSøknadsfristTjeneste<Søknadsperiode>> søknadsfristTjenester;
     private final SykdomVurderingTjeneste sykdomVurderingTjeneste;
     private final UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
+    private final PersonopplysningTjeneste personopplysningTjeneste;
 
     @Inject
     public KjøreplanUtleder(FagsakRepository fagsakRepository,
@@ -61,22 +63,20 @@ public class KjøreplanUtleder {
                             MottatteDokumentRepository mottatteDokumentRepository,
                             @Any Instance<VurderSøknadsfristTjeneste<Søknadsperiode>> søknadsfristTjenester,
                             SykdomVurderingTjeneste sykdomVurderingTjeneste,
-                            UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository) {
+                            UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
+                            PersonopplysningTjeneste personopplysningTjeneste) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.søknadsfristTjenester = søknadsfristTjenester;
         this.sykdomVurderingTjeneste = sykdomVurderingTjeneste;
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
+        this.personopplysningTjeneste = personopplysningTjeneste;
     }
 
-    private LocalDateTimeline<List<InternalKravprioritet>> getSplittetKravperioderPåInnleggelser(LocalDateTimeline<List<InternalKravprioritet>> kravTidslinje, LocalDateTimeline<Boolean> toOmsorgspersonerTidslinje) {
-        return kravTidslinje.combine(toOmsorgspersonerTidslinje, (localDateInterval, leftSegment, rightSegment) -> {
-            if (leftSegment == null) {
-                return null;
-            }
-            return new LocalDateSegment<>(localDateInterval, leftSegment.getValue());
-        }, LocalDateTimeline.JoinStyle.LEFT_JOIN);
+    private LocalDateTimeline<List<InternalKravprioritet>> getSplittetKravperioderPåInnleggelser(LocalDateTimeline<List<InternalKravprioritet>> kravTidslinje, LocalDateTimeline<Boolean> toOmsorgspersonerTidslinje, LocalDateTimeline<Boolean> tidslinjeMedFriKjøring) {
+        return kravTidslinje.combine(tidslinjeMedFriKjøring, StandardCombinators::leftOnly, LocalDateTimeline.JoinStyle.LEFT_JOIN)
+            .combine(toOmsorgspersonerTidslinje, StandardCombinators::leftOnly, LocalDateTimeline.JoinStyle.LEFT_JOIN);
     }
 
     public Kjøreplan utled(BehandlingReferanse referanse) {
@@ -97,8 +97,21 @@ public class KjøreplanUtleder {
 
         var toOmsorgspersonerTidslinje = hentTidslinjeMedFlereOmsorgspersoner(behandling); // Inkludere 200% avklaringer?
         var utsattePerioderPerBehandling = utledUtsattePerioderFraBehandling(fagsaker);
+        var tidslinjeMedFriKjøring = utledPeriodeMedFriPrioritet(behandling);
 
-        return new KravPrioInput(aktuellFagsak.getId(), aktuellFagsak.getSaksnummer(), utsattePerioderPerBehandling, toOmsorgspersonerTidslinje, fagsaker);
+        return new KravPrioInput(aktuellFagsak.getId(), aktuellFagsak.getSaksnummer(), utsattePerioderPerBehandling, toOmsorgspersonerTidslinje, tidslinjeMedFriKjøring, fagsaker);
+    }
+
+    private LocalDateTimeline<Boolean> utledPeriodeMedFriPrioritet(Behandling behandling) {
+        var referanse = BehandlingReferanse.fra(behandling);
+        var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysninger(referanse, referanse.getFagsakPeriode().getFomDato());
+        var pleietrengendePersonopplysninger = personopplysningerAggregat.getPersonopplysning(referanse.getPleietrengendeAktørId());
+
+        var dødsdato = pleietrengendePersonopplysninger.getDødsdato();
+        if (dødsdato == null) {
+            return LocalDateTimeline.empty();
+        }
+        return new LocalDateTimeline<>(dødsdato.plusDays(1), Tid.TIDENES_ENDE, true);
     }
 
     private List<Fagsak> utledRelevanteFagsaker(Fagsak aktuellFagsak) {
@@ -148,7 +161,8 @@ public class KjøreplanUtleder {
         Map<Long, Boolean> trengerÅUtsettePerioder = utledBehovForUtsettelse(input, kravprioritetPåEndringerOgVedtakstatus, kravprioForEldsteKrav);
         var toOmsorgspersonerTidslinje = input.getToOmsorgspersonerTidslinje();
 
-        LocalDateTimeline<List<InternalKravprioritet>> splittetKravperioderPåInnleggelser = getSplittetKravperioderPåInnleggelser(kravprioForEldsteKrav, toOmsorgspersonerTidslinje);
+        var tidslinjeMedFriKjøring = input.getTidslinjeMedFriKjøring();
+        LocalDateTimeline<List<InternalKravprioritet>> splittetKravperioderPåInnleggelser = getSplittetKravperioderPåInnleggelser(kravprioForEldsteKrav, toOmsorgspersonerTidslinje, tidslinjeMedFriKjøring);
 
         for (LocalDateSegment<List<InternalKravprioritet>> segment : splittetKravperioderPåInnleggelser) {
             var prio = new HashSet<AksjonPerFagsak>();
@@ -161,7 +175,7 @@ public class KjøreplanUtleder {
                 }
                 if (!harUbehandledeKrav) {
                     // DO NOTHING
-                } else if (prio.isEmpty() || erInnvilgetToPersonerOgKravetErNrToIPrio(toOmsorgspersonerTidslinje, segment.getValue().indexOf(internalKravprioritet), segment.getLocalDateInterval())) {
+                } else if (prio.isEmpty() || erInnvilgetToPersonerOgKravetErNrToIPrio(toOmsorgspersonerTidslinje, segment.getValue().indexOf(internalKravprioritet), segment.getLocalDateInterval()) || erFriPrioritet(segment.getLocalDateInterval(), tidslinjeMedFriKjøring)) {
                     prio.add(new AksjonPerFagsak(internalKravprioritet.getFagsak(), Aksjon.BEHANDLE));
                 } else if (trengerÅUtsettePerioder.get(internalKravprioritet.getFagsak())) {
                     prio.add(new AksjonPerFagsak(internalKravprioritet.getFagsak(), Aksjon.UTSETT));
@@ -175,6 +189,19 @@ public class KjøreplanUtleder {
         }
 
         return new LocalDateTimeline<>(segmenter);
+    }
+
+    private boolean erFriPrioritet(LocalDateInterval localDateInterval, LocalDateTimeline<Boolean> tidslinjeMedFriKjøring) {
+        if (tidslinjeMedFriKjøring.isEmpty()) {
+            return false;
+        }
+
+        var overlappendeFriperiode = tidslinjeMedFriKjøring.intersection(localDateInterval);
+        if (overlappendeFriperiode.isEmpty()) {
+            return false;
+        }
+
+        return overlappendeFriperiode.stream().allMatch(it -> Objects.equals(it.getLocalDateInterval(), localDateInterval));
     }
 
     private boolean erInnvilgetToPersonerOgKravetErNrToIPrio(LocalDateTimeline<Boolean> toOmsorgspersonerTidslinje, int prioritetPlassering, LocalDateInterval localDateInterval) {
@@ -356,6 +383,10 @@ public class KjøreplanUtleder {
     }
 
     private LocalDateTimeline<Boolean> hentTidslinjeMedFlereOmsorgspersoner(Behandling behandling) {
+        var iLivetsSluttToPersoner = sykdomVurderingTjeneste.hentVurderinger(SykdomVurderingType.LIVETS_SLUTTFASE, behandling)
+            .filterValue(it -> it.getResultat() == Resultat.OPPFYLT)
+            .mapValue(it -> true)
+            .intersection(new LocalDateInterval(PleiegradKalkulator.DATO_FOR_NY_MAX_PLEIEGRAD, LocalDateInterval.TIDENES_ENDE));
         var sykdomVurderingerOgPerioder = sykdomVurderingTjeneste.hentVurderinger(SykdomVurderingType.TO_OMSORGSPERSONER, behandling)
             .filterValue(it -> it.getResultat() == Resultat.OPPFYLT)
             .mapValue(it -> true);
@@ -365,8 +396,8 @@ public class KjøreplanUtleder {
         var tidslinje = new LocalDateTimeline<>(innleggelser.stream()
             .map(i -> new LocalDateSegment<>(i.getFom(), i.getTom(), Boolean.TRUE))
             .collect(Collectors.toList()))
-            .combine(sykdomVurderingerOgPerioder,
-                StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            .combine(sykdomVurderingerOgPerioder, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN)
+            .combine(iLivetsSluttToPersoner, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         var localDateSegments = Hjelpetidslinjer.utledHullSomMåTettes(tidslinje, new PåTversAvHelgErKantIKantVurderer());
         return tidslinje.combine(localDateSegments, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
     }

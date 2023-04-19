@@ -5,6 +5,7 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -14,6 +15,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
@@ -31,6 +33,7 @@ import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.mottak.inntektsmelding.KompletthetssjekkerInntektsmelding;
 import no.nav.k9.sak.mottak.kompletthetssjekk.KompletthetsjekkerFelles;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.TrekkUtFraværTjeneste;
 
 @ApplicationScoped
 @BehandlingTypeRef
@@ -45,6 +48,9 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
     private OmsorgspengerGrunnlagRepository grunnlagRepository;
     private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
 
+    private TrekkUtFraværTjeneste trekkUtFraværTjeneste;
+    private boolean brukNySjekk;
+
     OmsorgspengerKompletthetsjekker() {
         // CDI
     }
@@ -55,13 +61,17 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
                                            BehandlingRepository behandlingRepository,
                                            KompletthetsjekkerFelles fellesUtil,
                                            OmsorgspengerGrunnlagRepository grunnlagRepository,
-                                           KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste) {
+                                           KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste,
+                                           TrekkUtFraværTjeneste trekkUtFraværTjeneste,
+                                           @KonfigVerdi(value = "OMS_ZERO_REFUSJON_ER_KRAV", defaultVerdi = "false") boolean brukNySjekk) {
         this.kompletthetssjekkerInntektsmelding = kompletthetssjekkerInntektsmelding;
         this.inntektsmeldingTjeneste = inntektsmeldingTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.fellesUtil = fellesUtil;
         this.grunnlagRepository = grunnlagRepository;
         this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
+        this.trekkUtFraværTjeneste = trekkUtFraværTjeneste;
+        this.brukNySjekk = brukNySjekk;
     }
 
     @Override
@@ -97,6 +107,19 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
 
     @Override
     public boolean ingenSøknadsperioder(BehandlingReferanse ref) {
+        if (brukNySjekk) {
+            return ingenSøknadsperioderNy(ref);
+        }
+        return ingenSøknadsperioderGammel(ref);
+    }
+
+    public boolean ingenSøknadsperioderNy(BehandlingReferanse ref) {
+        var fraværFraKravPåBehandlingen = trekkUtFraværTjeneste.samleSammenOppgittFravær(ref.getBehandlingId());
+        List<Inntektsmelding> inntektsmeldinger = inntektsmeldingTjeneste.hentAlleInntektsmeldingerForAngitteBehandlinger(Set.of(ref.getBehandlingId()));
+        return fraværFraKravPåBehandlingen.isEmpty() && inntektsmeldinger.stream().noneMatch(Inntektsmelding::harRefusjonskravNy);
+    }
+
+    public boolean ingenSøknadsperioderGammel(BehandlingReferanse ref) {
         return !harRefusjonskravFraMottatteInntektsmeldinger(ref)
             && !harSøknadsperiode(ref)
             && !harFraværskorrigering(ref);

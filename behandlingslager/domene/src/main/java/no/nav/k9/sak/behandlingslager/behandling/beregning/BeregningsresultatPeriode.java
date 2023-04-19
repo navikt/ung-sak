@@ -10,6 +10,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.CascadeType;
@@ -26,10 +29,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
@@ -61,10 +60,19 @@ public class BeregningsresultatPeriode extends BaseEntitet {
     @OrderBy("periode, arbeidsgiver.arbeidsgiverOrgnr, arbeidsgiver.arbeidsgiverAktørId, arbeidsforholdRef, aktivitetStatus, inntektskategori")
     private List<BeregningsresultatAndel> beregningsresultatAndelList = new ArrayList<>();
 
+    @Column(name = "gradering_inntekt_prosent")
+    private BigDecimal inntektGraderingsprosent;
+
+    @Column(name = "graderingsfaktor_inntekt")
+    private BigDecimal graderingsfaktorInntekt;
+
+    @Column(name = "graderingsfaktor_tid")
+    private BigDecimal graderingsfaktorTid;
+
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(name = "fomDato", column = @Column(name = "br_periode_fom")),
-            @AttributeOverride(name = "tomDato", column = @Column(name = "br_periode_tom"))
+        @AttributeOverride(name = "fomDato", column = @Column(name = "br_periode_fom")),
+        @AttributeOverride(name = "tomDato", column = @Column(name = "br_periode_tom"))
     })
     private DatoIntervallEntitet periode;
 
@@ -110,10 +118,22 @@ public class BeregningsresultatPeriode extends BaseEntitet {
         return beregningsresultat;
     }
 
+    public BigDecimal getInntektGraderingsprosent() {
+        return inntektGraderingsprosent;
+    }
+
+    public BigDecimal getGraderingsfaktorInntekt() {
+        return graderingsfaktorInntekt;
+    }
+
+    public BigDecimal getGraderingsfaktorTid() {
+        return graderingsfaktorTid;
+    }
+
     void addBeregningsresultatAndel(BeregningsresultatAndel beregningsresultatAndel) {
         Objects.requireNonNull(beregningsresultatAndel, "beregningsresultatAndel");
         if (!beregningsresultatAndelList.contains(beregningsresultatAndel)) { // NOSONAR Class defines List based fields but uses them like Sets: Ingening å tjene på å bytte til Set ettersom det er
-                                                                              // små lister
+            // små lister
             beregningsresultatAndelList.add(beregningsresultatAndel);
         }
     }
@@ -138,7 +158,10 @@ public class BeregningsresultatPeriode extends BaseEntitet {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "<periode=" + periode + ", andeler=[" + beregningsresultatAndelList.size() + "]>";
+        return getClass().getSimpleName()
+            + "<periode=" + periode
+            + (inntektGraderingsprosent != null ? ", inntektsgradering=" + inntektGraderingsprosent.toPlainString() : "")
+            + ", andeler=[" + beregningsresultatAndelList.size() + "]>";
     }
 
     @Override
@@ -161,6 +184,22 @@ public class BeregningsresultatPeriode extends BaseEntitet {
             beregningsresultatPeriodeMal.periode = DatoIntervallEntitet.fraOgMedTilOgMed(beregningsresultatPeriodeFom, beregningsresultatPeriodeTom);
             return this;
         }
+
+        public Builder medInntektGraderingprosent(BigDecimal inntektGraderingsprosent) {
+            beregningsresultatPeriodeMal.inntektGraderingsprosent = inntektGraderingsprosent;
+            return this;
+        }
+
+        public Builder medGraderingsfaktorInntekt(BigDecimal graderingsfaktorInntekt) {
+            beregningsresultatPeriodeMal.graderingsfaktorInntekt = graderingsfaktorInntekt;
+            return this;
+        }
+
+        public Builder medGraderingsfaktorTid(BigDecimal graderingsfaktorTid) {
+            beregningsresultatPeriodeMal.graderingsfaktorTid = graderingsfaktorTid;
+            return this;
+        }
+
 
         public BeregningsresultatPeriode build(BeregningsresultatEntitet beregningsresultat) {
             beregningsresultatPeriodeMal.beregningsresultat = beregningsresultat;

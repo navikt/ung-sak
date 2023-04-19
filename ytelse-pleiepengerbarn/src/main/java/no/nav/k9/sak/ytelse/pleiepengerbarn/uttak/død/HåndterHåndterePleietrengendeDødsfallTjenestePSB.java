@@ -93,7 +93,13 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
         if (dødsdato == null) {
             return Optional.empty();
         }
-        var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
+        var vilkåreneOpt = vilkårResultatRepository.hentHvisEksisterer(referanse.getBehandlingId());
+
+        if (vilkåreneOpt.isEmpty()) {
+            return Optional.empty();
+        }
+
+        var vilkårene = vilkåreneOpt.get();
 
         if (!harGodkjentSykdomPåDødsdatoen(dødsdato, vilkårene)) {
             return Optional.empty();
@@ -221,7 +227,7 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
 
     private boolean harGodkjentSykdomPåDødsdatoen(LocalDate dødsdato, Vilkårene vilkårene) {
         for (VilkårType vilkårType : Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR)) {
-            Optional<VilkårPeriode> periode = vilkårene.getVilkår(vilkårType).orElseThrow().finnPeriodeSomInneholderDato(dødsdato);
+            Optional<VilkårPeriode> periode = vilkårene.getVilkår(vilkårType).flatMap(it -> it.finnPeriodeSomInneholderDato(dødsdato));
             if (periode.isPresent() && periode.get().getUtfall() == Utfall.OPPFYLT) {
                 return true;
             }

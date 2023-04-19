@@ -119,8 +119,8 @@ public class VurderSykdomSteg implements BehandlingSteg {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)));
         }
 
+        klippBortPerioderSomIkkeHarBehandlingsgrunnlag(vilkårBuilder, tidslinjeUtenInstitusjonsvilkårOppfylt);
         vurder(kontekst, medisinskGrunnlag, vilkårBuilder, perioderTilVurdering);
-        leggTilResultatIkkeGodkjentInstitusjon(vilkårBuilder, tidslinjeUtenInstitusjonsvilkårOppfylt);
         resultatBuilder.leggTil(vilkårBuilder);
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), resultatBuilder.build());
 
@@ -145,7 +145,7 @@ public class VurderSykdomSteg implements BehandlingSteg {
         return trengerInput || førsteGangManuellRevurdering;
     }
 
-    private void leggTilResultatIkkeGodkjentInstitusjon(VilkårBuilder builder, LocalDateTimeline<Boolean> tidslinje) {
+    private void klippBortPerioderSomIkkeHarBehandlingsgrunnlag(VilkårBuilder builder, LocalDateTimeline<Boolean> tidslinje) {
         TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje).forEach(builder::tilbakestill);
     }
 

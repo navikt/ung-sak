@@ -72,9 +72,9 @@ public class GjennomgåttOpplæringTjeneste {
 
         var tidslinje = hentTidslinjeMedVurdering(referanse);
         var perioderTilVurdering = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.GJENNOMGÅ_OPPLÆRING);
-        var tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering);
+        var tidslinjeSomSkalFjernes = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering).disjoint(tidslinje);
 
-        klippBortPerioderSomIkkeHarBehandlingsgrunnlag(vilkårBuilder, tidslinjeTilVurdering.disjoint(tidslinje));
+        klippBortPerioderSomIkkeHarBehandlingsgrunnlag(vilkårBuilder, tidslinjeSomSkalFjernes);
 
         leggTilVilkårsresultatReisetid(vilkårBuilder, tidslinje);
         leggTilVilkårsresultatgjennomgåttOpplæring(vilkårBuilder, tidslinje);

@@ -56,10 +56,9 @@ public class BeregningsgrunnlagVilkårTjeneste {
         vilkårTjeneste.lagreVilkårresultat(kontekst, vilkårType, vilkårsPeriode, avslagsårsak);
     }
 
-    public void kopierVilkårresultatFraForrigeBehandling(BehandlingskontrollKontekst kontekst,
-                                                         Long originalBehandlingId,
+    public void kopierVilkårresultatFraForrigeBehandling(Long behandlingId, Long originalBehandlingId,
                                                          Set<DatoIntervallEntitet> perioder) {
-        var originalVilkårResultat = vilkårTjeneste.hentVilkårResultat(kontekst.getBehandlingId());
+        var originalVilkårResultat = vilkårTjeneste.hentVilkårResultat(behandlingId);
         var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(originalVilkårResultat);
         var vedtattUtfallPåVilkåret = vilkårTjeneste.hentHvisEksisterer(originalBehandlingId)
             .orElseThrow()
@@ -74,7 +73,7 @@ public class BeregningsgrunnlagVilkårTjeneste {
         }
 
         vilkårResultatBuilder.leggTil(vilkårBuilder);
-        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), vilkårResultatBuilder.build());
+        vilkårResultatRepository.lagre(behandlingId, vilkårResultatBuilder.build());
 
     }
 
@@ -99,6 +98,7 @@ public class BeregningsgrunnlagVilkårTjeneste {
 
         vilkårTjeneste.settVilkårutfallTilIkkeVurdert(behandlingId, vilkårType, perioderSomSkalTilbakestilles);
     }
+
 
     public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref, boolean skalIgnorereAvslåttePerioder) {
         return vilkårTjeneste.utledPerioderTilVurdering(ref, vilkårType, skalIgnorereAvslåttePerioder, true, false);

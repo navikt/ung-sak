@@ -28,18 +28,18 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
 @FagsakYtelseTypeRef(FRISINN)
-public class KalkulusDump implements DebugDumpBehandling {
+public class KalkulusEksaktFastsattDump implements DebugDumpBehandling {
 
 
     private final ObjectWriter objectWriter = JsonMapper.getMapper().writerWithDefaultPrettyPrinter();
     private KalkulusTjenesteAdapter tjeneste;
 
-    KalkulusDump() {
+    KalkulusEksaktFastsattDump() {
         // for proxy
     }
 
     @Inject
-    public KalkulusDump(KalkulusTjenesteAdapter tjeneste) {
+    public KalkulusEksaktFastsattDump(KalkulusTjenesteAdapter tjeneste) {
         this.tjeneste = tjeneste;
     }
 
@@ -47,18 +47,18 @@ public class KalkulusDump implements DebugDumpBehandling {
     public List<DumpOutput> dump(Behandling behandling) {
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
         try {
-            var data = ContainerContextRunner.doRun(behandling, () -> tjeneste.hentBeregningsgrunnlagForGui(ref));
+            var data = ContainerContextRunner.doRun(behandling, () -> tjeneste.hentBeregningsgrunnlagFastsatt(ref));
 
             if (data.isEmpty()) {
                 return List.of();
             }
-            var content = objectWriter.writeValueAsString(data.get());
-            return List.of(new DumpOutput("kalkulus-beregningsgrunnlag-for-gui.json", content));
+            var content = objectWriter.writeValueAsString(data);
+            return List.of(new DumpOutput("kalkulus-beregningsgrunnlag-fastsatt.json", content));
         } catch (Exception e) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);
-            return List.of(new DumpOutput("kalkulus-beregningsgrunnlag-for-gui-ERROR.txt", sw.toString()));
+            return List.of(new DumpOutput("kalkulus-beregningsgrunnlag-fastsatt-ERROR.txt", sw.toString()));
         }
     }
 

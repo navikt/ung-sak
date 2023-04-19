@@ -1,22 +1,19 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
 
-import java.util.Comparator;
-
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetKlassifisering;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningAktivitet;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurdering;
-import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurderingOpptjeningsvilkår;
 import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.VurderStatusInput;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public class OpptjeningAktivitetResultatVurdering implements OpptjeningAktivitetVurdering {
 
     private final OpptjeningResultat resultat;
 
-    private OpptjeningAktivitetVurderingOpptjeningsvilkår vilkårVurdering = new OpptjeningAktivitetVurderingOpptjeningsvilkår();
 
     public OpptjeningAktivitetResultatVurdering(OpptjeningResultat resultat) {
         this.resultat = resultat;
@@ -36,29 +33,28 @@ public class OpptjeningAktivitetResultatVurdering implements OpptjeningAktivitet
     }
 
     private VurderingsStatus finnStatusForType(VurderStatusInput input, Opptjening opptjening) {
+        var opptjeningsperiodeTom = opptjening.getTom();
         return opptjening.getOpptjeningAktivitet().stream().filter(oa -> oa.getAktivitetType().equals(input.getType()))
             .filter(oa -> input.getAktivitetPeriode().overlapper(oa.getFom(), oa.getTom()))
-            .max(Comparator.comparing(OpptjeningAktivitet::getFom)) // finner siste vurdering siden vi egentlig kun er interessert i vurdering på skjæringtidspunktet
+            .filter(oa -> DatoIntervallEntitet.fraOgMedTilOgMed(oa.getFom(), oa.getTom()).inkluderer(opptjeningsperiodeTom)) // finner vurdering dagen før skjæringstidspunktet
+            .findFirst()
             .map(OpptjeningAktivitet::getKlassifisering)
             .map(OpptjeningAktivitetResultatVurdering::mapTilVurderingsStatus)
-            .orElse(finnStatusUtenOpptjeningsaktivitet(input));
-    }
-
-    private VurderingsStatus finnStatusUtenOpptjeningsaktivitet(VurderStatusInput input) {
-        var inputVurdering = vilkårVurdering.vurderStatus(input);
-        return inputVurdering.equals(VurderingsStatus.UNDERKJENT) ? VurderingsStatus.UNDERKJENT : VurderingsStatus.GODKJENT;
+            .orElse(VurderingsStatus.UNDERKJENT);
     }
 
     private VurderingsStatus finnArbeidvurdering(VurderStatusInput input, Opptjening opptjening) {
+        var opptjeningsperiodeTom = opptjening.getTom();
         return opptjening.getOpptjeningAktivitet().stream().filter(oa ->
                 oa.getAktivitetType().equals(OpptjeningAktivitetType.ARBEID) &&
                     oa.getAktivitetReferanse() != null &&
                     oa.getAktivitetReferanse().equals(input.getRegisterAktivitet().getArbeidsgiver().getIdentifikator()))
             .filter(oa -> input.getAktivitetPeriode().overlapper(oa.getFom(), oa.getTom()))
-            .max(Comparator.comparing(OpptjeningAktivitet::getFom)) // finner siste vurdering siden vi egentlig kun er interessert i vurdering på skjæringtidspunktet
+            .filter(oa -> DatoIntervallEntitet.fraOgMedTilOgMed(oa.getFom(), oa.getTom()).inkluderer(opptjeningsperiodeTom)) // finner vurdering dagen før skjæringstidspunktet
+            .findFirst()
             .map(OpptjeningAktivitet::getKlassifisering)
             .map(OpptjeningAktivitetResultatVurdering::mapTilVurderingsStatus)
-            .orElse(finnStatusUtenOpptjeningsaktivitet(input));
+            .orElse(VurderingsStatus.UNDERKJENT);
     }
 
     private static VurderingsStatus mapTilVurderingsStatus(OpptjeningAktivitetKlassifisering klassifisering) {

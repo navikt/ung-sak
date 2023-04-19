@@ -72,7 +72,7 @@ class InstitusjonRestTjenesteTest {
         behandling = scenario.lagre(repositoryProvider);
     }
 
-    private PerioderFraSøknad lagPerioderFraSøknad(JournalpostId journalpostId, Periode kursperiode, String institusjonNavn, UUID institusjonUuid) {
+    private PerioderFraSøknad lagPerioderFraSøknad(JournalpostId journalpostId, Periode kursperiode, UUID institusjonUuid) {
         PerioderFraSøknad perioderFraSøknad = new PerioderFraSøknad(journalpostId,
             List.of(new UttakPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(kursperiode.getFom(), kursperiode.getTom()), Duration.ofHours(7).plusMinutes(30))),
             Collections.emptyList(),
@@ -81,7 +81,7 @@ class InstitusjonRestTjenesteTest {
             Collections.emptyList(),
             Collections.emptyList(),
             Collections.emptyList(),
-            List.of(new KursPeriode(kursperiode.getFom(), kursperiode.getTom(), null, null, institusjonNavn, institusjonUuid, null, null)));
+            List.of(new KursPeriode(kursperiode.getFom(), kursperiode.getTom(), null, null, institusjonUuid, null, null)));
 
         uttakPerioderGrunnlagRepository.lagre(behandling.getId(), perioderFraSøknad);
         return perioderFraSøknad;
@@ -89,7 +89,7 @@ class InstitusjonRestTjenesteTest {
 
     @Test
     void ingenVurdering() {
-        var perioderFraSøknad = lagPerioderFraSøknad(journalpostId1, kursperiode1, institusjonNavn1, institusjonUuid);
+        var perioderFraSøknad = lagPerioderFraSøknad(journalpostId1, kursperiode1, null);
         uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), new UttakPerioderHolder(Set.of(perioderFraSøknad)));
 
         Response response = restTjeneste.hentVurdertInstitusjon(new BehandlingUuidDto(behandling.getUuid()));
@@ -101,7 +101,7 @@ class InstitusjonRestTjenesteTest {
 
         assertThat(result.getPerioder()).hasSize(1);
         assertThat(result.getPerioder().get(0).getPeriode()).isEqualTo(kursperiode1);
-        assertThat(result.getPerioder().get(0).getInstitusjon()).isEqualTo(institusjonNavn1);
+        assertThat(result.getPerioder().get(0).getInstitusjon()).isEqualTo("Annet - se dokumentasjon av opplæring");
         assertThat(result.getPerioder().get(0).getJournalpostId().getJournalpostId()).isEqualTo(journalpostId1);
 
         assertThat(result.getVurderinger()).hasSize(1);
@@ -116,11 +116,11 @@ class InstitusjonRestTjenesteTest {
 
     @Test
     void automatiskVurdering() {
-        var perioderFraSøknad = lagPerioderFraSøknad(journalpostId1, kursperiode1, institusjonNavn1, institusjonUuid);
+        var perioderFraSøknad = lagPerioderFraSøknad(journalpostId1, kursperiode1, institusjonUuid);
         uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), new UttakPerioderHolder(Set.of(perioderFraSøknad)));
 
         var godkjentPeriode = new GodkjentOpplæringsinstitusjonPeriode(kursperiode1.getFom(), kursperiode1.getTom());
-        var godkjentInstitusjon = new GodkjentOpplæringsinstitusjon(institusjonUuid, institusjonNavn1, List.of(godkjentPeriode));
+        var godkjentInstitusjon = new GodkjentOpplæringsinstitusjon(institusjonUuid, institusjonNavn2, List.of(godkjentPeriode));
         entityManager.persist(godkjentInstitusjon);
         entityManager.flush();
 
@@ -133,7 +133,7 @@ class InstitusjonRestTjenesteTest {
 
         assertThat(result.getPerioder()).hasSize(1);
         assertThat(result.getPerioder().get(0).getPeriode()).isEqualTo(kursperiode1);
-        assertThat(result.getPerioder().get(0).getInstitusjon()).isEqualTo(institusjonNavn1);
+        assertThat(result.getPerioder().get(0).getInstitusjon()).isEqualTo(institusjonNavn2);
         assertThat(result.getPerioder().get(0).getJournalpostId().getJournalpostId()).isEqualTo(journalpostId1);
 
         assertThat(result.getVurderinger()).hasSize(1);
@@ -148,7 +148,7 @@ class InstitusjonRestTjenesteTest {
 
     @Test
     void manuellVurdering() {
-        var perioderFraSøknad = lagPerioderFraSøknad(journalpostId1, kursperiode1, institusjonNavn1, null);
+        var perioderFraSøknad = lagPerioderFraSøknad(journalpostId1, kursperiode1, null);
         uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), new UttakPerioderHolder(Set.of(perioderFraSøknad)));
 
         LocalDateTime nå = LocalDateTime.now();
@@ -164,7 +164,7 @@ class InstitusjonRestTjenesteTest {
 
         assertThat(result.getPerioder()).hasSize(1);
         assertThat(result.getPerioder().get(0).getPeriode()).isEqualTo(kursperiode1);
-        assertThat(result.getPerioder().get(0).getInstitusjon()).isEqualTo(institusjonNavn1);
+        assertThat(result.getPerioder().get(0).getInstitusjon()).isEqualTo("Annet - se dokumentasjon av opplæring");
         assertThat(result.getPerioder().get(0).getJournalpostId().getJournalpostId()).isEqualTo(journalpostId1);
 
         assertThat(result.getVurderinger()).hasSize(1);
@@ -179,8 +179,8 @@ class InstitusjonRestTjenesteTest {
 
     @Test
     void kombinertVurdering() {
-        var perioderFraSøknad1 = lagPerioderFraSøknad(journalpostId1, kursperiode1, institusjonNavn1, institusjonUuid);
-        var perioderFraSøknad2 = lagPerioderFraSøknad(journalpostId2, kursperiode2, institusjonNavn2, null);
+        var perioderFraSøknad1 = lagPerioderFraSøknad(journalpostId1, kursperiode1, institusjonUuid);
+        var perioderFraSøknad2 = lagPerioderFraSøknad(journalpostId2, kursperiode2, null);
         uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), new UttakPerioderHolder(Set.of(perioderFraSøknad1, perioderFraSøknad2)));
 
         var godkjentPeriode = new GodkjentOpplæringsinstitusjonPeriode(kursperiode1.getFom(), kursperiode1.getTom());

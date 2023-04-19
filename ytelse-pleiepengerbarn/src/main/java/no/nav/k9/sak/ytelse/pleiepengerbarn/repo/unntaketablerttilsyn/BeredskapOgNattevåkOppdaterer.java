@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +12,7 @@ import no.nav.k9.kodeverk.sykdom.Resultat;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 public class BeredskapOgNattevåkOppdaterer {
 
@@ -60,6 +62,8 @@ public class BeredskapOgNattevåkOppdaterer {
                     .medResultat(periode.resultat())
                     .medAktørId(aktørId)
                     .medKildeBehandlingId(kildeBehandlingId)
+                    .medVurdertAv(getCurrentUserId())
+                    .medVurdertTidspunkt(LocalDateTime.now())
                     )
         ).toList();
 
@@ -83,7 +87,6 @@ public class BeredskapOgNattevåkOppdaterer {
         return new LocalDateSegment<>(dateInterval, rv);
     }
 
-
     private static List<UnntakEtablertTilsynBeskrivelse> finnUnntakEtablertTilsynBeskrivelser(UnntakEtablertTilsyn eksisterendeUnntakEtablertTilsyn, LocalDate mottattDato, AktørId søkersAktørId, List<Unntaksperiode> nyeUnntak, Long kildeBehandlingId) {
         var beskrivelser = new ArrayList<UnntakEtablertTilsynBeskrivelse>();
         if (eksisterendeUnntakEtablertTilsyn != null) {
@@ -103,5 +106,8 @@ public class BeredskapOgNattevåkOppdaterer {
         return beskrivelser;
     }
 
+    private static String getCurrentUserId() {
+        return SubjectHandler.getSubjectHandler().getUid();
+    }
 }
 

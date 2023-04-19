@@ -11,7 +11,6 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.NyttInntektsforholdEndring;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.OppdaterBeregningsgrunnlagResultat;
-import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
@@ -53,7 +52,7 @@ public class VurderTilkomneInntektsforholdHistorikkTjeneste {
         var arbeidsforholOverstyringer = inntektArbeidYtelseTjeneste.hentGrunnlag(param.getBehandlingId())
             .getArbeidsforholdOverstyringer();
         var behandlingReferanse = param.getRef();
-        var endretUtbetalingPeriodeutleder = EndretUtbetalingPeriodeutleder.finnUtleder(this.endretUtbetalingPeriodeutleder, behandlingReferanse.getFagsakYtelseType());
+        var endretUtbetalingPeriodeutleder = EndretUtbetalingPeriodeutleder.finnUtleder(this.endretUtbetalingPeriodeutleder, behandlingReferanse.getFagsakYtelseType(), behandlingReferanse.getBehandlingType());
         var perioder = endretUtbetalingPeriodeutleder.utledPerioder(behandlingReferanse);
         for (var endringer : beregningsgrunnlagEndringer) {
             if (endringer.getBeregningsgrunnlagEndring().isPresent()) {

@@ -43,15 +43,13 @@ public class SøknadDokumentmottaker {
     }
 
     @Inject
-    public SøknadDokumentmottaker(@KonfigVerdi(value = "FRISINN_FLERE_SOKNADER_SAMME_DAG", defaultVerdi = "true") Boolean flereSøknaderSammeDag,
-                                  DokumentmottakerFelles dokumentmottakerFelles,
+    public SøknadDokumentmottaker(DokumentmottakerFelles dokumentmottakerFelles,
                                   SaksnummerRepository saksnummerRepository,
                                   Behandlingsoppretter behandlingsoppretter,
                                   LagreSøknad søknadOversetter,
                                   LagreOppgittOpptjening lagreOppgittOpptjening,
                                   FagsakTjeneste fagsakTjeneste,
                                   BehandlingRepositoryProvider provider) {
-        this.flereSøknaderSammeDag = flereSøknaderSammeDag;
         this.dokumentmottakerFelles = dokumentmottakerFelles;
         this.saksnummerRepository = saksnummerRepository;
         this.behandlingsoppretter = behandlingsoppretter;
@@ -127,9 +125,6 @@ public class SøknadDokumentmottaker {
     }
 
     private void validerIngenAvsluttedeBehandlingerIDag(Fagsak fagsak) {
-        if (flereSøknaderSammeDag) {
-            return;
-        }
         // For å forhindre at k9-forsendelse gjør flere brevutsendelser samme dag.
         // Økonomi (OS) må ha kjørt utbetaling for returnere riktig etterbetaling til k9-forsendelse.
         var behandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());

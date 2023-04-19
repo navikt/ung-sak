@@ -18,9 +18,11 @@ import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonAdresseEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
+import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell.BostedsAdresse;
@@ -37,6 +39,7 @@ public class OMPOmsorgenForGrunnlagMapper implements OmsorgenForGrunnlagMapper {
 
     private PersonopplysningTjeneste personopplysningTjeneste;
     private FosterbarnRepository fosterbarnRepository;
+    private PersoninfoAdapter personinfoAdapter;
 
 
     OMPOmsorgenForGrunnlagMapper() {
@@ -44,9 +47,11 @@ public class OMPOmsorgenForGrunnlagMapper implements OmsorgenForGrunnlagMapper {
     }
 
     @Inject
-    public OMPOmsorgenForGrunnlagMapper(PersonopplysningTjeneste personopplysningTjeneste, FosterbarnRepository fosterbarnRepository) {
+    public OMPOmsorgenForGrunnlagMapper(PersonopplysningTjeneste personopplysningTjeneste, FosterbarnRepository fosterbarnRepository,
+                                        PersoninfoAdapter personinfoAdapter) {
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.fosterbarnRepository = fosterbarnRepository;
+        this.personinfoAdapter = personinfoAdapter;
     }
 
     @Override
@@ -114,7 +119,11 @@ public class OMPOmsorgenForGrunnlagMapper implements OmsorgenForGrunnlagMapper {
     private Fosterbarn mapFosterbarn(Long behandlingId, AktørId aktørId, DatoIntervallEntitet vilkårsperiode) {
         final var personopplysningerAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(behandlingId, aktørId, vilkårsperiode).orElseThrow();
         PersonopplysningEntitet personopplysning = personopplysningerAggregat.getPersonopplysning(aktørId);
-        return new Fosterbarn(aktørId.getId(), personopplysning.getFødselsdato(), personopplysning.getDødsdato());
+        if (personopplysning != null) {
+            return new Fosterbarn(aktørId.getId(), personopplysning.getFødselsdato(), personopplysning.getDødsdato());
+        }
+        Personinfo personinfo = personinfoAdapter.hentPersoninfo(aktørId);
+        return new Fosterbarn(aktørId.getId(), personinfo.getFødselsdato(), personinfo.getDødsdato());
     }
 
     private List<Fosterbarn> utledFosterbarnIPerioden(DatoIntervallEntitet vilkårsperiode, List<Fosterbarn> fosterbarna) {
