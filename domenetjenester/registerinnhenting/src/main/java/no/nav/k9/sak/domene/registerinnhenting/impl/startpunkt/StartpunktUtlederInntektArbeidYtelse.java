@@ -134,6 +134,11 @@ class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
                         leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.OPPTJENING, "aktør inntekt for periode " + relevantInntektsperiode);
                     }
                 }
+
+                if (PLEIEPENGER_SYKT_BARN.equals(ref.getFagsakYtelseType()) && diff.endringAvMottakAvOmsorgsstønadOgFosterhjemsgodtgjørelse(periode, ref.getAktørId())) {
+                    leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.UTTAKSVILKÅR_VURDERING, "omsorgsstønad/fosterhjemsgodtgjørelse for periode " + periode);
+
+                }
             }
         }
 
