@@ -27,6 +27,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
+import no.nav.k9.sak.domene.opptjening.MellomliggendeHelgUtleder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.EndretUtbetalingPeriodeutleder;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
@@ -93,14 +94,22 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
         var tidslinjeFraProessTriggere = finnTidslinjeFraProsessTriggere(behandlingReferanse);
         var søknadperioderForBehandlingTidslinje = finnTidslinjeForRelevanteSøknadsperioder(behandlingReferanse);
         var relevantUttaksTidslinje = finnTidslinjeForEndredeUttaksperioder(behandlingReferanse, periode);
-        return relevantUttaksTidslinje
+
+        var tidslinje = relevantUttaksTidslinje
             .crossJoin(søknadperioderForBehandlingTidslinje, StandardCombinators::coalesceLeftHandSide)
             .crossJoin(tidslinjeFraProessTriggere, StandardCombinators::coalesceLeftHandSide)
-            .compress()
-            .toSegments()
-            .stream()
-            .map(s -> DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
-            .collect(Collectors.toCollection(TreeSet::new));
+            .compress();
+
+        tidslinje = fyllMellomromDersomKunHelg(tidslinje).compress();
+
+        return finnRelevanteIntervaller(periode, tidslinje);
+    }
+
+    private static LocalDateTimeline<Boolean> fyllMellomromDersomKunHelg(LocalDateTimeline<Boolean> tidslinje) {
+        var mellomliggendeHelgUtleder = new MellomliggendeHelgUtleder();
+        var mellomliggendePerioder = mellomliggendeHelgUtleder.beregnMellomliggendeHelg(tidslinje);
+        tidslinje = tidslinje.combine(mellomliggendePerioder, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        return tidslinje;
     }
 
     private LocalDateTimeline<Boolean> finnTidslinjeFraProsessTriggere(BehandlingReferanse behandlingReferanse) {
@@ -148,16 +157,15 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
         var differanse2 = originalUttakTidslinje.combine(uttakTidslinje, StandardCombinators::difference, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
         var relevanteUttaksperioder = new TreeSet<DatoIntervallEntitet>();
-        relevanteUttaksperioder.addAll(finnRelevanteIntervaller(periode, differanse1));
-        relevanteUttaksperioder.addAll(finnRelevanteIntervaller(periode, differanse2));
+        relevanteUttaksperioder.addAll(finnRelevanteIntervaller(periode, differanse1.filterValue(v -> !v.isEmpty())));
+        relevanteUttaksperioder.addAll(finnRelevanteIntervaller(periode, differanse2.filterValue(v -> !v.isEmpty())));
         return relevanteUttaksperioder;
     }
 
-    private NavigableSet<DatoIntervallEntitet> finnRelevanteIntervaller(DatoIntervallEntitet periode, LocalDateTimeline<Set<Utbetalingsgrader>> differanse1) {
+    private <V> NavigableSet<DatoIntervallEntitet> finnRelevanteIntervaller(DatoIntervallEntitet periode, LocalDateTimeline<V> differanse1) {
         var kantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
 
         var intervaller1 = differanse1.toSegments().stream()
-            .filter(s -> !s.getValue().isEmpty())
             .map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFom(), p.getTom()))
             .sorted(Comparator.naturalOrder())
             .toList();
