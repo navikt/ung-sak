@@ -179,7 +179,6 @@ public class BehandlingskontrollEventObserver {
 
         taskData.setPayload(JsonObjectMapper.getJson(dto));
         taskData.setProperty(PubliserProduksjonsstyringHendelseTask.PROPERTY_KEY, behandlingId.toString());
-        taskData.setProperty(PubliserProduksjonsstyringHendelseTask.BESKRIVELSE, "BehandlingOpprettetHendelseTask");
         return taskData;
     }
 
@@ -197,7 +196,6 @@ public class BehandlingskontrollEventObserver {
 
         taskData.setPayload(JsonObjectMapper.getJson(dto));
         taskData.setProperty(PubliserProduksjonsstyringHendelseTask.PROPERTY_KEY, behandlingId.toString());
-        taskData.setProperty(PubliserProduksjonsstyringHendelseTask.BESKRIVELSE, "BehandlingOpprettetHendelseTask");
         return taskData;
     }
 
@@ -216,7 +214,6 @@ public class BehandlingskontrollEventObserver {
 
         taskData.setPayload(JsonObjectMapper.getJson(dto));
         taskData.setProperty(PubliserProduksjonsstyringHendelseTask.PROPERTY_KEY, behandlingId.toString());
-        taskData.setProperty(PubliserProduksjonsstyringHendelseTask.BESKRIVELSE, String.valueOf(dto.aksjonspunktTilstander));
         return taskData;
     }
 }
