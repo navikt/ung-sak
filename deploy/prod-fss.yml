@@ -244,7 +244,7 @@ spec:
     - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
       value: "2023-01-02"
     - name: BG_FORLENGELSE_BASERT_PAA_UTTAK
-      value: "false"
+      value: "true"
     - name: ENABLE_PRODUCER_DOKUMENTBESTILLING_AIVEN
       value: "true"
     - name: ENABLE_PRODUCER_VEDTAKHENDELSE_AIVEN
