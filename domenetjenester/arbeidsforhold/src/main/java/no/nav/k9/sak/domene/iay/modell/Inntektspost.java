@@ -151,13 +151,14 @@ public class Inntektspost implements IndexKey {
         return Objects.equals(this.getInntektspostType(), other.getInntektspostType())
             && Objects.equals(this.getYtelseType(), other.getYtelseType())
             && Objects.equals(this.getSkatteOgAvgiftsregelType(), other.getSkatteOgAvgiftsregelType())
+            && Objects.equals(this.getLønnsinntektBeskrivelse(), other.getLønnsinntektBeskrivelse())
             && Objects.equals(this.getPeriode().getFomDato(), other.getPeriode().getFomDato())
             && Objects.equals(this.getPeriode().getTomDato(), other.getPeriode().getTomDato());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getInntektspostType(), getYtelseType(), getSkatteOgAvgiftsregelType(), getPeriode().getFomDato(), getPeriode().getTomDato());
+        return Objects.hash(getInntektspostType(), getYtelseType(), getSkatteOgAvgiftsregelType(), getLønnsinntektBeskrivelse(), getPeriode().getFomDato(), getPeriode().getTomDato());
     }
 
     @Override
@@ -166,6 +167,7 @@ public class Inntektspost implements IndexKey {
             "ytelseType=" + ytelseType +
             "inntektspostType=" + inntektspostType +
             "skatteOgAvgiftsregelType=" + skatteOgAvgiftsregelType +
+            "lønnsinntektBeskrivelse=" + lønnsinntektBeskrivelse +
             ", fraOgMed=" + periode.getFomDato() +
             ", tilOgMed=" + periode.getTomDato() +
             ", beløp=" + beløp +
