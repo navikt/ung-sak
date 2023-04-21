@@ -7,7 +7,6 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import no.nav.k9.kodeverk.arbeidsforhold.LønnsinntektBeskrivelse;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.diff.DiffResult;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
@@ -174,12 +173,6 @@ public class IAYGrunnlagDiff {
         return erAndreYtelserEndret;
     }
 
-    public boolean endringAvMottakAvOmsorgsstønadOgFosterhjemsgodtgjørelse(DatoIntervallEntitet periode, AktørId aktørId) {
-        boolean førHarOmsorgsstønad = harAktørOmsorgsstønadIPeriode(grunnlag1, periode, aktørId);
-        boolean etterHarOmsorgsstønad = harAktørOmsorgsstønadIPeriode(grunnlag2, periode, aktørId);
-        return førHarOmsorgsstønad != etterHarOmsorgsstønad;
-    }
-
     private List<Ytelse> hentYtelserForAktør(InntektArbeidYtelseGrunnlag grunnlag, LocalDate skjæringstidspunkt, AktørId aktørId,
                                              Predicate<Ytelse> predikatYtelseskilde) {
         if (grunnlag == null) {
@@ -190,17 +183,6 @@ public class IAYGrunnlagDiff {
             .filter(predikatYtelseskilde)
             .collect(Collectors.toList());
     }
-
-    private boolean harAktørOmsorgsstønadIPeriode(InntektArbeidYtelseGrunnlag grunnlag, DatoIntervallEntitet periode, AktørId aktørId) {
-        if (grunnlag == null) {
-            return false;
-        }
-        var filter = new InntektFilter(grunnlag.getAktørInntektFraRegister(aktørId));
-        return filter.getFiltrertInntektsposter().stream()
-            .filter(it -> it.getPeriode().overlapper(periode))
-            .anyMatch(it -> it.getLønnsinntektBeskrivelse() != null && it.getLønnsinntektBeskrivelse().equals(LønnsinntektBeskrivelse.KOMMUNAL_OMSORGSLOENN_OG_FOSTERHJEMSGODTGJOERELSE));
-    }
-
 
     private List<Ytelse> hentYtelserForAktør(InntektArbeidYtelseGrunnlag grunnlag, DatoIntervallEntitet periode, AktørId aktørId,
                                              Predicate<Ytelse> predikatYtelseskilde) {
