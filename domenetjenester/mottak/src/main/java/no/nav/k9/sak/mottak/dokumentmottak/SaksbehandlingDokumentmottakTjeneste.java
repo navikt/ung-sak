@@ -97,6 +97,7 @@ public class SaksbehandlingDokumentmottakTjeneste {
 
     private boolean valider(MottattDokument m) {
         boolean valid = true;
+        log.info("Validerer dokument av type " + m.getType().getKode());
         DokumentValidator dokumentValidator = dokumentValidatorProvider.finnValidator(m.getType());
         try {
             dokumentValidator.validerDokument(m);
