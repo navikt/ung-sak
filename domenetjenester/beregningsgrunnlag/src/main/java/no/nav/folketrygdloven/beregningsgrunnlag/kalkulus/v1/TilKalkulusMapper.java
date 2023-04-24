@@ -48,7 +48,6 @@ import no.nav.folketrygdloven.kalkulus.kodeverk.Arbeidskategori;
 import no.nav.folketrygdloven.kalkulus.kodeverk.InntektPeriodeType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.InntektskildeType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.InntektspostType;
-import no.nav.folketrygdloven.kalkulus.kodeverk.LønnsinntektBeskrivelse;
 import no.nav.folketrygdloven.kalkulus.kodeverk.NaturalYtelseType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.OpptjeningAktivitetType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.PermisjonsbeskrivelseType;
@@ -326,9 +325,6 @@ public class TilKalkulusMapper {
         if (inntektspost.getYtelseType() != null) {
             var ytelseType = inntektspost.getYtelseType();
             utbetalingsPostDto.medUtbetaltYtelseType(mapUtbetaltYtelseTypeTilGrunnlag(ytelseType));
-        }
-        if (inntektspost.getLønnsinntektBeskrivelse() != null) {
-            utbetalingsPostDto.medLønnsinntektBeskrivelse(inntektspost.getLønnsinntektBeskrivelse().getKode());
         }
         return utbetalingsPostDto;
     }

@@ -10,7 +10,6 @@ import no.nav.k9.kodeverk.arbeidsforhold.InntektPeriodeType;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsmeldingInnsendingsårsak;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
-import no.nav.k9.kodeverk.arbeidsforhold.LønnsinntektBeskrivelse;
 import no.nav.k9.kodeverk.arbeidsforhold.NaturalYtelseType;
 import no.nav.k9.kodeverk.arbeidsforhold.NæringsinntektType;
 import no.nav.k9.kodeverk.arbeidsforhold.OffentligYtelseType;
@@ -251,13 +250,6 @@ public final class KodeverkMapper {
             ? SkatteOgAvgiftsregelType.UDEFINERT
             : SkatteOgAvgiftsregelType.fraKode(dto.getKode());
     }
-
-    static LønnsinntektBeskrivelse mapLønnsinntektBeskrivelseFraDto(no.nav.abakus.iaygrunnlag.kodeverk.LønnsinntektBeskrivelse dto) {
-        return dto == null
-            ? LønnsinntektBeskrivelse.UDEFINERT
-            : LønnsinntektBeskrivelse.fraKode(dto.getKode());
-    }
-
 
     static InntektspostType mapInntektspostTypeFraDto(no.nav.abakus.iaygrunnlag.kodeverk.InntektspostType dto) {
         return dto == null

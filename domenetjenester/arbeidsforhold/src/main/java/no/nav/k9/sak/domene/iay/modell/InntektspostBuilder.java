@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
-import no.nav.k9.kodeverk.arbeidsforhold.LønnsinntektBeskrivelse;
 import no.nav.k9.kodeverk.arbeidsforhold.SkatteOgAvgiftsregelType;
 import no.nav.k9.kodeverk.arbeidsforhold.YtelseType;
 import no.nav.k9.sak.typer.Beløp;
@@ -27,11 +26,6 @@ public class InntektspostBuilder {
 
     public InntektspostBuilder medSkatteOgAvgiftsregelType(SkatteOgAvgiftsregelType skatteOgAvgiftsregelType) {
         this.inntektspost.setSkatteOgAvgiftsregelType(skatteOgAvgiftsregelType);
-        return this;
-    }
-
-    public InntektspostBuilder medLønnsinntektBeskrivelse(LønnsinntektBeskrivelse lønnsinntektBeskrivelse) {
-        this.inntektspost.setLønnsinntektBeskrivelse(lønnsinntektBeskrivelse);
         return this;
     }
 

@@ -20,7 +20,6 @@ import org.mockito.Mockito;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
-import no.nav.k9.kodeverk.arbeidsforhold.LønnsinntektBeskrivelse;
 import no.nav.k9.kodeverk.arbeidsforhold.SkatteOgAvgiftsregelType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -239,8 +238,7 @@ public class AvklarArbeidsforholdOppdatererTest {
             .medInntektspostType(InntektspostType.LØNN)
             .medPeriode(LocalDate.now().minusMonths(3), LocalDate.now())
             .medBeløp(BigDecimal.TEN)
-            .medSkatteOgAvgiftsregelType(SkatteOgAvgiftsregelType.NETTOLØNN)
-            .medLønnsinntektBeskrivelse(LønnsinntektBeskrivelse.KOMMUNAL_OMSORGSLOENN_OG_FOSTERHJEMSGODTGJOERELSE));
+            .medSkatteOgAvgiftsregelType(SkatteOgAvgiftsregelType.NETTOLØNN));
         var aktørInntekt = aiBuilder.leggTilInntekt(ibuilder);
         builder.leggTilAktørInntekt(aktørInntekt);
         iayTjeneste.lagreIayAggregat(behandling.getId(), builder);

@@ -91,7 +91,6 @@ class MapAktørInntekt {
                 .medInntektspostType(KodeverkMapper.mapInntektspostTypeFraDto(post.getInntektspostType()))
                 .medPeriode(post.getPeriode().getFom(), post.getPeriode().getTom())
                 .medSkatteOgAvgiftsregelType(KodeverkMapper.mapSkatteOgAvgiftsregelFraDto(post.getSkattAvgiftType()))
-                .medLønnsinntektBeskrivelse(KodeverkMapper.mapLønnsinntektBeskrivelseFraDto(post.getLønnsinntektBeskrivelse()))
                 .medYtelse(KodeverkMapper.mapUtbetaltYtelseTypeTilGrunnlag(post.getYtelseType()));
         }
 
