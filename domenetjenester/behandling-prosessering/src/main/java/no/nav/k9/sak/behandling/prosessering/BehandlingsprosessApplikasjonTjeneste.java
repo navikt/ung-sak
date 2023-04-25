@@ -88,7 +88,7 @@ public class BehandlingsprosessApplikasjonTjeneste {
      *
      * @return Prosess Task gruppenavn som kan brukes til å sjekke fremdrift
      */
-    public String asynkInnhentingAvRegisteropplysningerOgKjørProsess(Behandling behandling) {
+    private String asynkInnhentingAvRegisteropplysningerOgKjørProsess(Behandling behandling) {
         ProsessTaskGruppe gruppe = behandlingProsesseringTjeneste.lagOppdaterFortsettTasksForPolling(behandling);
         String gruppeNavn = prosesseringAsynkTjeneste.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(behandling.getFagsakId(), String.valueOf(behandling.getId()),
             gruppe);
