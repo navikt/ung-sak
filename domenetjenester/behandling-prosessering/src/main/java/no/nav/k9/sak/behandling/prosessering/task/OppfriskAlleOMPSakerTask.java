@@ -24,7 +24,7 @@ public class OppfriskAlleOMPSakerTask implements ProsessTaskHandler {
 
     private static final Logger log = LoggerFactory.getLogger(OppfriskAlleOMPSakerTask.class);
 
-    public static final String TASKTYPE = "omp.oppdateralle";
+    public static final String TASKTYPE = "omp.oppfriskalle";
 
     private EntityManager entityManager;
     private ProsessTaskTjeneste prosessTaskTjeneste;
