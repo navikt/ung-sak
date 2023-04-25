@@ -16,6 +16,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -62,6 +63,7 @@ public class HentDataTilUttakTjeneste {
     private HentPerioderTilVurderingTjeneste hentPerioderTilVurderingTjeneste;
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
     private HentEtablertTilsynTjeneste hentEtablertTilsynTjeneste;
+    private boolean kunRelevantePerioder;
 
     @Inject
     public HentDataTilUttakTjeneste(VilkårResultatRepository vilkårResultatRepository,
@@ -80,7 +82,8 @@ public class HentDataTilUttakTjeneste {
                                     @Any Instance<HåndterePleietrengendeDødsfallTjeneste> håndterePleietrengendeDødsfallTjenester,
                                     HentPerioderTilVurderingTjeneste hentPerioderTilVurderingTjeneste,
                                     UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
-                                    HentEtablertTilsynTjeneste hentEtablertTilsynTjeneste) {
+                                    HentEtablertTilsynTjeneste hentEtablertTilsynTjeneste,
+                                    @KonfigVerdi(value = "UTTAK_KUN_RELEVANTE_PERIODER", defaultVerdi = "false") boolean kunRelevantePerioder) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.pleiebehovResultatRepository = pleiebehovResultatRepository;
         this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
@@ -98,6 +101,7 @@ public class HentDataTilUttakTjeneste {
         this.hentPerioderTilVurderingTjeneste = hentPerioderTilVurderingTjeneste;
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
         this.hentEtablertTilsynTjeneste = hentEtablertTilsynTjeneste;
+        this.kunRelevantePerioder = kunRelevantePerioder;
     }
 
     public InputParametere hentUtData(BehandlingReferanse referanse, boolean brukUbesluttedeData) {
@@ -116,7 +120,11 @@ public class HentDataTilUttakTjeneste {
         if (skalMappeHeleTidslinjen) {
             perioderTilVurdering = hentPerioderTilVurderingTjeneste.hentPerioderTilVurderingMedUbesluttet(behandling, utvidetPeriodeSomFølgeAvDødsfall);
         } else {
-            perioderTilVurdering = hentPerioderTilVurderingTjeneste.hentPerioderTilVurderingUtenUbesluttet(behandling);
+            if (kunRelevantePerioder) {
+                perioderTilVurdering = hentPerioderTilVurderingTjeneste.hentKunRelevantePerioder(behandling);
+            } else {
+                perioderTilVurdering = hentPerioderTilVurderingTjeneste.hentPerioderTilVurderingUtenUbesluttet(behandling);
+            }
         }
 
         var utvidetRevurderingPerioder = perioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(referanse);
