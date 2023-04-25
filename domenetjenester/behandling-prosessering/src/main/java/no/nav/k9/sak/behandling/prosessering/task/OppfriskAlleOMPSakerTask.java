@@ -1,6 +1,6 @@
 package no.nav.k9.sak.behandling.prosessering.task;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -59,8 +59,8 @@ public class OppfriskAlleOMPSakerTask implements ProsessTaskHandler {
         }
 
         //opprett ny oppfrisk-alle task til neste måned
-        final ProsessTaskData nesteKjøringTask = ProsessTaskData.forProsessTask((OppfriskAlleOMPSakerTask.class));
-        nesteKjøringTask.setNesteKjøringEtter(LocalDateTime.now().plusMonths(1).toLocalDate().atTime(23, 30));
+        final ProsessTaskData nesteKjøringTask = ProsessTaskData.forProsessTask(OppfriskAlleOMPSakerTask.class);
+        nesteKjøringTask.setNesteKjøringEtter(LocalDate.now().plusMonths(1).atTime(23, 30));
         prosessTaskTjeneste.lagre(nesteKjøringTask);
     }
 
