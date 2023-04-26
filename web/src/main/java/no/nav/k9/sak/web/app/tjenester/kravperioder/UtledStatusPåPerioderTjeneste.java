@@ -380,10 +380,10 @@ public class UtledStatusPåPerioderTjeneste {
         }
 
         if (årsaker.contains(ÅrsakTilVurdering.REVURDERER_BERØRT_PERIODE) && årsaker.contains(ÅrsakTilVurdering.FØRSTEGANGSVURDERING)) {
-            årsaker = utledÅrsakForEndring(kravDokumentTyper);
+            årsaker = new HashSet<>(utledÅrsakForEndring(kravDokumentTyper));
         }
         if (årsaker.contains(ÅrsakTilVurdering.MANUELT_REVURDERER_PERIODE) && årsaker.contains(ÅrsakTilVurdering.FØRSTEGANGSVURDERING)) {
-            årsaker = utledÅrsakForEndring(kravDokumentTyper);
+            årsaker = new HashSet<>(utledÅrsakForEndring(kravDokumentTyper));
             årsaker.add(ÅrsakTilVurdering.MANUELT_REVURDERER_PERIODE);
         }
         if (årsaker.contains(ÅrsakTilVurdering.TRUKKET_KRAV) && årsaker.contains(ÅrsakTilVurdering.FØRSTEGANGSVURDERING)) {
@@ -397,7 +397,8 @@ public class UtledStatusPåPerioderTjeneste {
         if (kravDokumentTyper.contains(no.nav.k9.sak.perioder.KravDokumentType.SØKNAD)) {
             return Set.of(ÅrsakTilVurdering.ENDRING_FRA_BRUKER);
         }
-        if (kravDokumentTyper.contains(no.nav.k9.sak.perioder.KravDokumentType.INNTEKTSMELDING)) {
+        if (kravDokumentTyper.contains(no.nav.k9.sak.perioder.KravDokumentType.INNTEKTSMELDING)
+            || kravDokumentTyper.contains(no.nav.k9.sak.perioder.KravDokumentType.INNTEKTSMELDING_UTEN_REFUSJONSKRAV)) {
             return Set.of(ÅrsakTilVurdering.REVURDERER_NY_INNTEKTSMELDING);
         }
         return Collections.emptySet();

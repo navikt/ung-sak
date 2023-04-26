@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -104,6 +105,7 @@ class BeredskapOgNattevåkOppdatererTest {
             List.of()
         );
 
+        ventMinstEttMillisekund();
         setBruker("enball");
 
         var oppdatertUnntakEtablertTilsyn1 = BeredskapOgNattevåkOppdaterer.oppdaterMedPerioderFraAksjonspunkt(
@@ -114,6 +116,7 @@ class BeredskapOgNattevåkOppdatererTest {
             List.of(new Unntaksperiode(LocalDate.parse("2020-01-01"), LocalDate.parse("2020-01-31"), "1", Resultat.OPPFYLT))
         );
 
+        ventMinstEttMillisekund();
         setBruker("toball");
 
         var oppdatertUnntakEtablertTilsyn2 = BeredskapOgNattevåkOppdaterer.oppdaterMedPerioderFraAksjonspunkt(
@@ -137,5 +140,12 @@ class BeredskapOgNattevåkOppdatererTest {
     private static void setBruker(String brukerId) {
         SubjectHandlerUtils.useSubjectHandler(StaticSubjectHandler.class);
         SubjectHandlerUtils.setInternBruker(brukerId);
+    }
+
+    private static void ventMinstEttMillisekund(){
+        LocalDateTime t0 = LocalDateTime.now();
+        while (t0.equals(LocalDateTime.now())){
+
+        }
     }
 }
