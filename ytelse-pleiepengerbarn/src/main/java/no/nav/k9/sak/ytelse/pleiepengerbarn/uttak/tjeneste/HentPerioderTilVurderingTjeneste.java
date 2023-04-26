@@ -53,7 +53,7 @@ public class HentPerioderTilVurderingTjeneste {
         var perioderTilVurderingTjeneste = perioderTilVurderingTjeneste(referanse);
 
         var forlengelseTjeneste = ForlengelseTjeneste.finnTjeneste(forlengelseTjenester, behandling.getFagsakYtelseType(), behandling.getType());
-        var søknadsperioderForBehandling = søknadsperiodeTjeneste.utledPeriode(behandling.getId());
+        var søknadsperioderForBehandling = søknadsperiodeTjeneste.utledPeriode(behandling.getId(), true);
 
         NavigableSet<DatoIntervallEntitet> relevantePerioder = new TreeSet<>();
         final var allePerioderTilVurdering = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.OPPTJENINGSVILKÅRET);
