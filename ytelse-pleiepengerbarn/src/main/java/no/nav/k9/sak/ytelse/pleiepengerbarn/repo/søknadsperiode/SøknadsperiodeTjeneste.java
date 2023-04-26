@@ -72,7 +72,7 @@ public class SøknadsperiodeTjeneste {
         return samletTimelineForAlleSøkere;
     }
 
-    public NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
+    public NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId, boolean fjernTrukket) {
         var søknadsperioder = søknadsperiodeRepository.hentGrunnlag(behandlingId)
             .map(SøknadsperiodeGrunnlag::getRelevantSøknadsperioder);
 
@@ -82,7 +82,7 @@ public class SøknadsperiodeTjeneste {
             final var søknadsperioders = søknadsperioder.get().getPerioder();
             final var behandling = behandlingRepository.hentBehandling(behandlingId);
 
-            return utledVurderingsperioderFraSøknadsperioder(BehandlingReferanse.fra(behandling), søknadsperioders);
+            return utledVurderingsperioderFraSøknadsperioder(BehandlingReferanse.fra(behandling), søknadsperioders, fjernTrukket);
         }
     }
 
@@ -96,14 +96,14 @@ public class SøknadsperiodeTjeneste {
             final var søknadsperioders = søknadsperioder.get().getPerioder();
             final var behandling = behandlingRepository.hentBehandling(behandlingId);
 
-            return utledVurderingsperioderFraSøknadsperioder(BehandlingReferanse.fra(behandling), søknadsperioders);
+            return utledVurderingsperioderFraSøknadsperioder(BehandlingReferanse.fra(behandling), søknadsperioders, true);
         }
     }
 
-    public NavigableSet<DatoIntervallEntitet> utledVurderingsperioderFraSøknadsperioder(BehandlingReferanse referanse, Set<Søknadsperioder> søknadsperioders) {
+    public NavigableSet<DatoIntervallEntitet> utledVurderingsperioderFraSøknadsperioder(BehandlingReferanse referanse, Set<Søknadsperioder> søknadsperioders, boolean fjernTrukket) {
         return hentKravperioder(referanse, søknadsperioders)
             .stream()
-            .filter(kp -> !kp.isHarTrukketKrav())
+            .filter(kp -> !fjernTrukket || !kp.isHarTrukketKrav())
             .map(Kravperiode::getPeriode)
             .collect(Collectors.toCollection(TreeSet::new));
     }
