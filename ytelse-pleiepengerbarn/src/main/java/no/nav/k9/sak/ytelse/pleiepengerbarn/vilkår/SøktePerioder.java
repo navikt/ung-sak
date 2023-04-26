@@ -18,6 +18,6 @@ public class SøktePerioder implements VilkårsPeriodiseringsFunksjon {
 
     @Override
     public NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
-        return søknadsperiodeTjeneste.utledPeriode(behandlingId);
+        return søknadsperiodeTjeneste.utledPeriode(behandlingId, true);
     }
 }

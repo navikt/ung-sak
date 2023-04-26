@@ -4,7 +4,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Optional;
-import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -18,7 +17,6 @@ import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -42,8 +40,6 @@ import no.nav.k9.sak.vilkår.VilkårTjeneste;
 public class BeregningInkonsistensTjeneste {
 
     private static final Logger LOG = LoggerFactory.getLogger(BeregningInkonsistensTjeneste.class);
-    public static final Set<Long> BEHANDLING_ID_MED_FEIL = Set.of(1658475L, 1672398L, 1670372L);
-
     private final KalkulusTjeneste kalkulusTjeneste;
     private final BeregningsgrunnlagReferanserTjeneste beregningsgrunnlagReferanserTjeneste;
 
@@ -57,8 +53,6 @@ public class BeregningInkonsistensTjeneste {
 
     private final ProsessTriggereRepository prosessTriggereRepository;
 
-    private final boolean sjekkEnabled;
-
     @Inject
     public BeregningInkonsistensTjeneste(KalkulusTjeneste kalkulusTjeneste,
                                          BeregningsgrunnlagReferanserTjeneste beregningsgrunnlagReferanserTjeneste,
@@ -66,8 +60,7 @@ public class BeregningInkonsistensTjeneste {
                                          VilkårTjeneste vilkårTjeneste,
                                          @Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste,
                                          InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                         ProsessTriggereRepository prosessTriggereRepository,
-                                         @KonfigVerdi(value = "BEREGNING_VURDER_INKONSISTENS", defaultVerdi = "false") boolean sjekkEnabled) {
+                                         ProsessTriggereRepository prosessTriggereRepository) {
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.beregningsgrunnlagReferanserTjeneste = beregningsgrunnlagReferanserTjeneste;
         this.forlengelseTjeneste = forlengelseTjeneste;
@@ -75,7 +68,6 @@ public class BeregningInkonsistensTjeneste {
         this.opptjeningForBeregningTjenester = opptjeningForBeregningTjeneste;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.prosessTriggereRepository = prosessTriggereRepository;
-        this.sjekkEnabled = sjekkEnabled;
     }
 
     /**
@@ -91,9 +83,6 @@ public class BeregningInkonsistensTjeneste {
      * @param ref Behandlingreferanse
      */
     public void sjekkInkonsistensOgOpprettProsesstrigger(BehandlingReferanse ref) {
-        if (!sjekkEnabled && !BEHANDLING_ID_MED_FEIL.contains(ref.getBehandlingId())) {
-            return;
-        }
         NavigableSet<DatoIntervallEntitet> perioderSomRevurderes = finnPerioderMedInkonsistens(ref);
         if (!perioderSomRevurderes.isEmpty()) {
             prosessTriggereRepository.leggTil(ref.getId(), perioderSomRevurderes.stream().map(it -> new Trigger(BehandlingÅrsakType.RE_ENDRING_BEREGNINGSGRUNNLAG, it)).collect(Collectors.toSet()));
@@ -118,6 +107,9 @@ public class BeregningInkonsistensTjeneste {
                                                                             OpptjeningForBeregningTjeneste opptjeningForBeregningTjeneste) {
         NavigableSet<DatoIntervallEntitet> perioderSomRevurderes = new TreeSet<>();
         var perioderSomSkalHaBrukersAndel = finnPerioderSomSkalHaBrukersAndel(ref, iayGrunnlag, forlengelser, opptjeningForBeregningTjeneste);
+        if (!perioderSomSkalHaBrukersAndel.isEmpty()) {
+            LOG.info("Fant perioder som skal ha brukers andel i beregning: {}", perioderSomSkalHaBrukersAndel);
+        }
         var originaleBeregningsgrunnlag = finnOriginalBeregningsgrunnlagsliste(ref, perioderSomSkalHaBrukersAndel);
         originaleBeregningsgrunnlag.stream().map(BeregningsgrunnlagGrunnlag::getBeregningsgrunnlag)
             .flatMap(Optional::stream)

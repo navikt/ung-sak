@@ -79,7 +79,7 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
         SykdomGrunnlagSammenlikningsresultat sammenlikningsresultat = medisinskGrunnlagTjeneste.utledRelevanteEndringerSidenForrigeBehandling(behandling, perioder);
 
         final boolean harTidligereHattRelevantGodkjentLegeerklæring = medisinskGrunnlagRepository.harHattGodkjentLegeerklæringMedUnntakAv(behandling.getFagsak().getPleietrengendeAktørId(), behandling.getUuid());
-        final boolean harGodkjentLegeerklæring = !pleietrengendeSykdomDokumentRepository.hentGodkjenteLegeerklæringer(behandling.getFagsak().getPleietrengendeAktørId()).isEmpty();
+        final boolean harGodkjentLegeerklæring = !pleietrengendeSykdomDokumentRepository.hentGodkjenteLegeerklæringer(behandling.getFagsak().getPleietrengendeAktørId(), behandling.getFagsakYtelseType()).isEmpty();
 
         final var harFåttFørsteLegeerklæring = !harTidligereHattRelevantGodkjentLegeerklæring && harGodkjentLegeerklæring;
         final var harEndringer = !sammenlikningsresultat.getDiffPerioder().isEmpty();

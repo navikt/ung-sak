@@ -7,17 +7,16 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Optional;
-
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.InntrekkBeslutning;
@@ -33,6 +32,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.db.util.JpaExtension;
+import no.nav.k9.sak.db.util.Repository;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.økonomi.simulering.klient.K9OppdragRestKlient;
@@ -41,8 +41,6 @@ import no.nav.k9.sak.økonomi.tilbakekreving.klient.K9TilbakeRestKlient;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingValg;
 import no.nav.k9.sak.økonomi.tilkjentytelse.TilkjentYtelseTjeneste;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.k9.sak.db.util.Repository;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -82,7 +80,7 @@ public class SimulerOppdragStegTest {
 
 
         TilkjentYtelseBehandlingInfoV1 info = new TilkjentYtelseBehandlingInfoV1();
-        TilkjentYtelse ty = new TilkjentYtelse(LocalDate.now(), Collections.emptyList());
+        TilkjentYtelse ty = new TilkjentYtelse(Collections.emptyList());
         InntrekkBeslutning ib = new InntrekkBeslutning(true);
         TilkjentYtelseOppdrag tyo = new TilkjentYtelseOppdrag(ty, info, ib);
         when(tilkjentYtelseTjenesteMock.hentTilkjentYtelseOppdrag(behandling)).thenReturn(tyo);

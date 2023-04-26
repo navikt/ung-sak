@@ -28,6 +28,10 @@ public class MottattInntektsmeldingException extends DokumentValideringException
             return new MottattInntektsmeldingException("Behandling [" + id + "] pågår, avventer å håndtere mottatt dokument til det er prosessert");
         }
 
+        public MottattInntektsmeldingException behandlingUnderIverksettingAvventerKnytteMottattDokumentTilBehandling(Long id) {
+            return new MottattInntektsmeldingException("Behandling [" + id + "] er i iverksetting-status og kan ikke hoppes tilbake. Avventer å håndtere mottatt dokument til behandlingen er avsluttet");
+        }
+
         public MottattInntektsmeldingException inntektsmeldingSemantiskValideringFeil(String feilmelding) {
             return new MottattInntektsmeldingException("Ugyldig inntektsmelding , bryter med forretningsregel validering: " + feilmelding);
         }

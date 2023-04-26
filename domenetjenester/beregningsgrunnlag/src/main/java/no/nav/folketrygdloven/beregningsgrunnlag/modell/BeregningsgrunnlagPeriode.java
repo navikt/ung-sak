@@ -12,12 +12,15 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import no.nav.k9.kodeverk.beregningsgrunnlag.PeriodeÅrsak;
 import no.nav.k9.sak.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.k9.sak.typer.Beløp;
 
 public class BeregningsgrunnlagPeriode {
 
+    @JsonBackReference
     private Beregningsgrunnlag beregningsgrunnlag;
     private List<BeregningsgrunnlagPrStatusOgAndel> beregningsgrunnlagPrStatusOgAndelList = new ArrayList<>();
     private ÅpenDatoIntervallEntitet periode;

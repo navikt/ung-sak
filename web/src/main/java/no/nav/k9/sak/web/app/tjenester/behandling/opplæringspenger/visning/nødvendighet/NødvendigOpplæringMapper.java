@@ -3,12 +3,13 @@ package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.visning.nø
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæring;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.KursPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 
@@ -49,7 +50,8 @@ class NødvendigOpplæringMapper {
                     vurdertOpplæring.getNødvendigOpplæring() ? Resultat.GODKJENT : Resultat.IKKE_GODKJENT,
                     vurdertOpplæring.getBegrunnelse(),
                     vurdertOpplæring.getVurdertAv(),
-                    vurdertOpplæring.getVurdertTidspunkt())
+                    vurdertOpplæring.getVurdertTidspunkt(),
+                    vurdertOpplæring.getDokumenter().stream().map(dokument -> "" + dokument.getId()).collect(Collectors.toList()))
                 );
             }
         }
@@ -63,7 +65,7 @@ class NødvendigOpplæringMapper {
                     new JournalpostIdDto(journalpostId.getVerdi()),
                     perioder.stream().map(periode -> new Periode(periode.getFomDato(), periode.getTomDato())).toList(),
                     Resultat.MÅ_VURDERES,
-                    null, null, null)
+                    null, null, null, List.of())
                 );
             }
         }

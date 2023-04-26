@@ -49,13 +49,19 @@ public class NødvendighetVurderingDto {
     @Valid
     private LocalDateTime vurdertTidspunkt;
 
-    public NødvendighetVurderingDto(JournalpostIdDto journalpostId, List<Periode> perioder, Resultat resultat, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt) {
+    @JsonProperty(value = "tilknyttedeDokumenter", required = true)
+    @Size(max = 100)
+    @Valid
+    private List<String> tilknyttedeDokumenter;
+
+    public NødvendighetVurderingDto(JournalpostIdDto journalpostId, List<Periode> perioder, Resultat resultat, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt, List<String> tilknyttedeDokumenter) {
         this.journalpostId = journalpostId;
         this.perioder = perioder;
         this.resultat = resultat;
         this.begrunnelse = begrunnelse;
         this.vurdertAv = vurdertAv;
         this.vurdertTidspunkt = vurdertTidspunkt;
+        this.tilknyttedeDokumenter = tilknyttedeDokumenter;
     }
 
     public JournalpostIdDto getJournalpostId() {
@@ -80,5 +86,9 @@ public class NødvendighetVurderingDto {
 
     public LocalDateTime getVurdertTidspunkt() {
         return vurdertTidspunkt;
+    }
+
+    public List<String> getTilknyttedeDokumenter() {
+        return tilknyttedeDokumenter;
     }
 }
