@@ -142,7 +142,7 @@ class VurderNødvendighetOppdatererTest {
     }
 
     private OpplæringDokument lagreNyttDokument(OpplæringDokumentType type) {
-        OpplæringDokument dokument = new OpplæringDokument(new JournalpostId("456"),null, type, behandling.getUuid(), behandling.getFagsak().getSaksnummer(), null, LocalDate.now(), LocalDateTime.now());
+        OpplæringDokument dokument = new OpplæringDokument(new JournalpostId("456"),null, type, behandling.getUuid(), LocalDate.now(), LocalDateTime.now());
         opplæringDokumentRepository.lagre(dokument);
         return dokument;
     }

@@ -56,8 +56,7 @@ class OpplæringDokumentRestTjenesteTest {
         scenario.medSøknad().medSøknadsdato(LocalDate.now());
         behandling = scenario.lagre(repositoryProvider);
 
-        dokument = new OpplæringDokument(journalpostId, dokumentInfoId, OpplæringDokumentType.DOKUMENTASJON_AV_OPPLÆRING,
-            behandling.getUuid(), behandling.getFagsak().getSaksnummer(), null, LocalDate.now(), LocalDateTime.now());
+        dokument = new OpplæringDokument(journalpostId, dokumentInfoId, OpplæringDokumentType.DOKUMENTASJON_AV_OPPLÆRING, behandling.getUuid(), LocalDate.now(), LocalDateTime.now());
         opplæringDokumentRepository.lagre(dokument);
     }
 

@@ -67,7 +67,7 @@ class NødvendigOpplæringRestTjenesteTest {
         behandling = scenario.lagre(repositoryProvider);
 
         scenario.getFagsak().setPleietrengende(AktørId.dummy());
-        dokument = new OpplæringDokument(new JournalpostId("456"), null, OpplæringDokumentType.DOKUMENTASJON_AV_OPPLÆRING, behandling.getUuid(), behandling.getFagsak().getSaksnummer(), null, LocalDate.now(), LocalDateTime.now());
+        dokument = new OpplæringDokument(new JournalpostId("456"), null, OpplæringDokumentType.DOKUMENTASJON_AV_OPPLÆRING, behandling.getUuid(), LocalDate.now(), LocalDateTime.now());
         opplæringDokumentRepository.lagre(dokument);
     }
 

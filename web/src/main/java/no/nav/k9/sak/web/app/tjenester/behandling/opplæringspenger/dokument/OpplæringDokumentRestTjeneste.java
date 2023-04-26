@@ -88,7 +88,7 @@ public class OpplæringDokumentRestTjeneste {
         BehandlingUuidDto behandlingUuid) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
 
-        final List<OpplæringDokument> dokumenter = opplæringDokumentRepository.hentDokumenterForSak(behandling.getFagsak().getSaksnummer());
+        final List<OpplæringDokument> dokumenter = opplæringDokumentRepository.hentDokumenterForSak(behandling.getFagsak().getId());
         return opplæringDokumentMapper.mapDokumenter(behandling.getUuid(), dokumenter);
     }
 
@@ -110,7 +110,7 @@ public class OpplæringDokumentRestTjeneste {
         @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class)
         SykdomDokumentIdDto dokumentId) {
         final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
-        final var dokument = opplæringDokumentRepository.hentDokument(Long.valueOf(dokumentId.getSykdomDokumentId()), behandling.getFagsak().getSaksnummer()).orElseThrow();
+        final var dokument = opplæringDokumentRepository.hentDokument(Long.valueOf(dokumentId.getSykdomDokumentId()), behandling.getFagsak().getId()).orElseThrow();
         try {
             Response.ResponseBuilder responseBuilder = Response.ok(
                 new ByteArrayInputStream(dokumentArkivTjeneste.hentDokumnet(dokument.getJournalpostId(), dokument.getDokumentInfoId())));

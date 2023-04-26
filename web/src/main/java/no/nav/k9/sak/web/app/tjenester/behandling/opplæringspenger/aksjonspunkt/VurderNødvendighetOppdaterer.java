@@ -58,7 +58,7 @@ public class VurderNødvendighetOppdaterer implements AksjonspunktOppdaterer<Vur
         }
 
         final Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
-        final List<OpplæringDokument> alleDokumenter = opplæringDokumentRepository.hentDokumenterForSak(behandling.getFagsak().getSaksnummer());
+        final List<OpplæringDokument> alleDokumenter = opplæringDokumentRepository.hentDokumenterForSak(behandling.getFagsak().getId());
 
         VurdertOpplæring nyVurdertOpplæring = mapDtoTilVurdertOpplæring(dto, alleDokumenter);
         vurdertOpplæring.add(nyVurdertOpplæring);

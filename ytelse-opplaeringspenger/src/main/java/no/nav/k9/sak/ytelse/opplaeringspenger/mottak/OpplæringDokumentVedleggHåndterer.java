@@ -25,7 +25,6 @@ import no.nav.k9.sak.kontrakt.opplæringspenger.dokument.OpplæringDokumentType;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokument;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokumentRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PersonRepository;
 
 @Dependent
 public class OpplæringDokumentVedleggHåndterer {
@@ -33,16 +32,12 @@ public class OpplæringDokumentVedleggHåndterer {
     private static final Logger log = LoggerFactory.getLogger(OpplæringDokumentVedleggHåndterer.class);
 
     private final OpplæringDokumentRepository opplæringDokumentRepository;
-    private final PersonRepository personRepository;
     private final SafTjeneste safTjeneste;
 
     @Inject
-    public OpplæringDokumentVedleggHåndterer(OpplæringDokumentRepository opplæringDokumentRepository,
-                                             PersonRepository personRepository,
-                                             SafTjeneste safTjeneste) {
+    public OpplæringDokumentVedleggHåndterer(OpplæringDokumentRepository opplæringDokumentRepository, SafTjeneste safTjeneste) {
         this.safTjeneste = safTjeneste;
         this.opplæringDokumentRepository = opplæringDokumentRepository;
-        this.personRepository = personRepository;
     }
 
     public void leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(Behandling behandling, JournalpostId journalpostId, LocalDateTime mottattidspunkt) {
@@ -85,8 +80,6 @@ public class OpplæringDokumentVedleggHåndterer {
                 dokumentInfo.getDokumentInfoId(),
                 dokumentType,
                 behandling.getUuid(),
-                behandling.getFagsak().getSaksnummer(),
-                personRepository.hentEllerLagrePerson(behandling.getFagsak().getAktørId()),
                 utledMottattDato(journalpost),
                 mottattidspunkt);
             opplæringDokumentRepository.lagre(dokument);

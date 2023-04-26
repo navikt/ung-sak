@@ -49,7 +49,7 @@ public class GjennomgåOpplæringOppdaterer implements AksjonspunktOppdaterer<Vu
     @Override
     public OppdateringResultat oppdater(VurderGjennomgåttOpplæringDto dto, AksjonspunktOppdaterParameter param) {
         final Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
-        final List<OpplæringDokument> alleDokumenter = opplæringDokumentRepository.hentDokumenterForSak(behandling.getFagsak().getSaksnummer());
+        final List<OpplæringDokument> alleDokumenter = opplæringDokumentRepository.hentDokumenterForSak(behandling.getFagsak().getId());
 
         List<VurdertOpplæringPeriode> vurdertOpplæringPerioder = mapDtoTilVurdertOpplæringPerioder(dto, alleDokumenter);
 

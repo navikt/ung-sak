@@ -5,23 +5,16 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.kontrakt.opplæringspenger.dokument.OpplæringDokumentType;
 import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.Person;
 
 @Entity(name = "OpplæringDokument")
 @Table(name = "OPPLAERING_DOKUMENT")
@@ -42,17 +35,8 @@ public class OpplæringDokument extends BaseEntitet {
     @Convert(converter = OpplæringDokumentTypeConverter.class)
     private OpplæringDokumentType type;
 
-    @Column(name = "SOEKERS_BEHANDLING_UUID")
+    @Column(name = "SOEKERS_BEHANDLING_UUID", nullable = false)
     private UUID søkersBehandlingUuid;
-
-    @Column(name = "SOEKERS_SAKSNUMMER", nullable = false)
-    @Embedded
-    @AttributeOverrides(@AttributeOverride(name = "saksnummer", column = @Column(name = "soekers_saksnummer")))
-    private Saksnummer søkersSaksnummer;
-
-    @ManyToOne
-    @JoinColumn(name = "SOEKERS_PERSON_ID")
-    private Person søker;
 
     @Column(name = "DATERT")
     private LocalDate datert;
@@ -63,13 +47,11 @@ public class OpplæringDokument extends BaseEntitet {
     OpplæringDokument() {
     }
 
-    public OpplæringDokument(JournalpostId journalpostId, String dokumentInfoId, OpplæringDokumentType type, UUID søkersBehandlingUuid, Saksnummer søkersSaksnummer, Person søker, LocalDate datert, LocalDateTime mottatt) {
+    public OpplæringDokument(JournalpostId journalpostId, String dokumentInfoId, OpplæringDokumentType type, UUID søkersBehandlingUuid, LocalDate datert, LocalDateTime mottatt) {
         this.journalpostId = Objects.requireNonNull(journalpostId, "journalpostId");;
         this.dokumentInfoId = dokumentInfoId;
         this.type = Objects.requireNonNull(type, "type");
         this.søkersBehandlingUuid = søkersBehandlingUuid;
-        this.søkersSaksnummer = Objects.requireNonNull(søkersSaksnummer, "søkersSaksnummer");;
-        this.søker = søker;
         this.datert = datert;
         this.mottatt = Objects.requireNonNull(mottatt, "mottatt");
     }
@@ -88,14 +70,6 @@ public class OpplæringDokument extends BaseEntitet {
 
     public UUID getSøkersBehandlingUuid() {
         return søkersBehandlingUuid;
-    }
-
-    public Saksnummer getSøkersSaksnummer() {
-        return søkersSaksnummer;
-    }
-
-    public Person getSøker() {
-        return søker;
     }
 
     public Long getId() {

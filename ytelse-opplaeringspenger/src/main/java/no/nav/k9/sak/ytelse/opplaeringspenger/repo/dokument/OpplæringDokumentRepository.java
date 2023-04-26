@@ -21,21 +21,27 @@ public class OpplæringDokumentRepository {
         this.entityManager = Objects.requireNonNull(entityManager, "entityManager");
     }
 
-    public List<OpplæringDokument> hentDokumenterForSak(Saksnummer saksnummer) {
+    public List<OpplæringDokument> hentDokumenterForSak(Long fagsakId) {
         final TypedQuery<OpplæringDokument> q = entityManager.createQuery(
-            "SELECT d From OpplæringDokument d where d.søkersSaksnummer = :saksnummer", OpplæringDokument.class);
+            "SELECT d From OpplæringDokument d " +
+                "inner join Behandling b on b.uuid = d.søkersBehandlingUuid " +
+                "where b.fagsak.id = :fagsakId",
+            OpplæringDokument.class);
 
-        q.setParameter("saksnummer", saksnummer);
+        q.setParameter("fagsakId", fagsakId);
 
         return q.getResultList();
     }
 
-    public Optional<OpplæringDokument> hentDokument(Long dokumentId, Saksnummer saksnummer) {
+    public Optional<OpplæringDokument> hentDokument(Long dokumentId, Long fagsakId) {
         final TypedQuery<OpplæringDokument> q = entityManager.createQuery(
-            "SELECT d From OpplæringDokument d where d.id = :dokumentId and d.søkersSaksnummer = :saksnummer", OpplæringDokument.class);
+            "SELECT d From OpplæringDokument d " +
+                "inner join Behandling b on b.uuid = d.søkersBehandlingUuid " +
+                "where d.id = :dokumentId and b.fagsak.id = :fagsakId",
+            OpplæringDokument.class);
 
         q.setParameter("dokumentId", dokumentId);
-        q.setParameter("saksnummer", saksnummer);
+        q.setParameter("fagsakId", fagsakId);
 
         return q.getResultList().stream().findFirst();
     }
