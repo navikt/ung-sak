@@ -25,8 +25,12 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.dokument.Brevkode;
+import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -39,6 +43,7 @@ import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperioder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperioderHolder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
@@ -63,6 +68,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
         ORGANISASJONSNUMMER2, null, null);
     public static final Duration SJU_OG_EN_HALV_TIME = Duration.ofHours(7).plusMinutes(30);
     public static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.now();
+    public static final String JOURNALPOST_ID = "123567324234";
     @Inject
     private EntityManager entityManager;
 
@@ -77,17 +83,25 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
 
     private SøknadsperiodeRepository søknadsperiodeRepository;
 
+    @Inject
+    private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
+
     private PleiepengerEndretUtbetalingPeriodeutleder utleder;
+    private MottatteDokumentRepository mottatteDokumentRepository;
 
     @BeforeEach
     void setUp() {
         fagsakRepository = new FagsakRepository(entityManager);
         behandlingRepository = new BehandlingRepository(entityManager);
         søknadsperiodeRepository = new SøknadsperiodeRepository(entityManager);
-        utleder = new PleiepengerEndretUtbetalingPeriodeutleder(uttakTjeneste, behandlingRepository, null, søknadsperiodeRepository, new ProsessTriggereRepository(entityManager), true);
+        mottatteDokumentRepository = new MottatteDokumentRepository(entityManager);
+        utleder = new PleiepengerEndretUtbetalingPeriodeutleder(uttakTjeneste, behandlingRepository, null,
+            new ProsessTriggereRepository(entityManager), søknadsperiodeTjeneste, true);
         originalBehandling = opprettBehandling(SKJÆRINGSTIDSPUNKT);
         behandling = Behandling.fraTidligereBehandling(originalBehandling, BehandlingType.REVURDERING).build();
         behandlingRepository.lagre(behandling, new BehandlingLås(null));
+
+        mottatteDokumentRepository.lagre(byggMottattDokument(behandling.getFagsakId()), DokumentStatus.GYLDIG);
     }
 
     @Test
@@ -122,7 +136,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
 
 
         var søknadsperiode = new Søknadsperiode(SKJÆRINGSTIDSPUNKT.plusDays(dagerEtterSTPSøknadFom), SKJÆRINGSTIDSPUNKT.plusDays(antallDager));
-        var søknadsperioder = new Søknadsperioder(new JournalpostId(1L), søknadsperiode);
+        var søknadsperioder = new Søknadsperioder(new JournalpostId(JOURNALPOST_ID), søknadsperiode);
         søknadsperiodeRepository.lagre(behandling.getId(), søknadsperioder);
         søknadsperiodeRepository.lagreRelevanteSøknadsperioder(behandling.getId(), new SøknadsperioderHolder(søknadsperioder));
         var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.plusDays(antallDager)));
@@ -148,10 +162,10 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
 
 
         var søknadsperiode = new Søknadsperiode(SKJÆRINGSTIDSPUNKT.plusDays(dagerEtterSTPSøknadFom), SKJÆRINGSTIDSPUNKT.plusDays(antallDager));
-        var søknadsperioder = new Søknadsperioder(new JournalpostId(1L), søknadsperiode);
+        var søknadsperioder = new Søknadsperioder(new JournalpostId(JOURNALPOST_ID), søknadsperiode);
         søknadsperiodeRepository.lagre(behandling.getId(), søknadsperioder);
         søknadsperiodeRepository.lagreRelevanteSøknadsperioder(behandling.getId(), new SøknadsperioderHolder(søknadsperioder));
-        var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(SKJÆRINGSTIDSPUNKT, fom.plusDays(dagerEtterSTPSøknadFom - 3)));
+        var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(SKJÆRINGSTIDSPUNKT, fom.plusDays(dagerEtterSTPSøknadFom - 4)));
 
         assertThat(forlengelseperioder.size()).isEqualTo(0);
     }
@@ -358,5 +372,15 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
         return behandling;
     }
 
+
+    public static MottattDokument byggMottattDokument(Long fagsakId) {
+        MottattDokument.Builder builder = new MottattDokument.Builder();
+        builder.medMottattDato(LocalDate.now());
+        builder.medType(Brevkode.PLEIEPENGER_BARN_SOKNAD);
+        builder.medPayload("payload");
+        builder.medFagsakId(fagsakId);
+        builder.medJournalPostId(new JournalpostId(JOURNALPOST_ID));
+        return builder.build();
+    }
 
 }

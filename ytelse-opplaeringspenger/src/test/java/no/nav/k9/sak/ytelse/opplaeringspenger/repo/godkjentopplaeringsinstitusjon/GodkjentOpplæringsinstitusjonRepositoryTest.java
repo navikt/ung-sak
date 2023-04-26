@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.opplaeringspenger.repo;
+package no.nav.k9.sak.ytelse.opplaeringspenger.repo.godkjentopplaeringsinstitusjon;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

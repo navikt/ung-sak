@@ -3,13 +3,14 @@ package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.visning.gje
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPeriode;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringGrunnlag;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.KursPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 
@@ -42,7 +43,8 @@ class GjennomgåttOpplæringMapper {
                     vurdertOpplæringPeriode.getGjennomførtOpplæring() ? Resultat.GODKJENT : Resultat.IKKE_GODKJENT,
                     vurdertOpplæringPeriode.getBegrunnelse(),
                     vurdertOpplæringPeriode.getVurdertAv(),
-                    vurdertOpplæringPeriode.getVurdertTidspunkt())
+                    vurdertOpplæringPeriode.getVurdertTidspunkt(),
+                    vurdertOpplæringPeriode.getDokumenter().stream().map(dokument -> "" + dokument.getId()).collect(Collectors.toList()))
                 );
             }
         }
@@ -61,7 +63,7 @@ class GjennomgåttOpplæringMapper {
         tidslinjeSomManglerVurdering.forEach(segment -> vurderinger.add(new OpplæringVurderingDto(
             new Periode(segment.getFom(), segment.getTom()),
             Resultat.MÅ_VURDERES,
-            null, null, null))
+            null, null, null, List.of()))
         );
 
         return vurderinger;

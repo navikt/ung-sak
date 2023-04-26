@@ -1,6 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.visning.gjennomgått;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -42,12 +43,18 @@ public class OpplæringVurderingDto {
     @Valid
     private LocalDateTime vurdertTidspunkt;
 
-    public OpplæringVurderingDto(Periode periode, Resultat resultat, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt) {
+    @JsonProperty(value = "tilknyttedeDokumenter", required = true)
+    @Size(max = 100)
+    @Valid
+    private List<String> tilknyttedeDokumenter;
+
+    public OpplæringVurderingDto(Periode periode, Resultat resultat, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt, List<String> tilknyttedeDokumenter) {
         this.periode = periode;
         this.resultat = resultat;
         this.begrunnelse = begrunnelse;
         this.vurdertAv = vurdertAv;
         this.vurdertTidspunkt = vurdertTidspunkt;
+        this.tilknyttedeDokumenter = tilknyttedeDokumenter;
     }
 
     public Periode getPeriode() {
@@ -68,5 +75,9 @@ public class OpplæringVurderingDto {
 
     public LocalDateTime getVurdertTidspunkt() {
         return vurdertTidspunkt;
+    }
+
+    public List<String> getTilknyttedeDokumenter() {
+        return tilknyttedeDokumenter;
     }
 }

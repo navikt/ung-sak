@@ -14,12 +14,16 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.kontrakt.opplæringspenger.VurderGjennomgåttOpplæringDto;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPeriode;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPerioderHolder;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
+import no.nav.k9.sak.kontrakt.opplæringspenger.vurdering.VurderGjennomgåttOpplæringDto;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokument;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokumentRepository;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringGrunnlag;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringPeriode;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringPerioderHolder;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringRepository;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @ApplicationScoped
@@ -27,18 +31,27 @@ import no.nav.k9.sikkerhet.context.SubjectHandler;
 public class GjennomgåOpplæringOppdaterer implements AksjonspunktOppdaterer<VurderGjennomgåttOpplæringDto> {
 
     private VurdertOpplæringRepository vurdertOpplæringRepository;
+    private BehandlingRepository behandlingRepository;
+    private OpplæringDokumentRepository opplæringDokumentRepository;
 
     public GjennomgåOpplæringOppdaterer() {
     }
 
     @Inject
-    public GjennomgåOpplæringOppdaterer(VurdertOpplæringRepository vurdertOpplæringRepository) {
+    public GjennomgåOpplæringOppdaterer(VurdertOpplæringRepository vurdertOpplæringRepository,
+                                        BehandlingRepository behandlingRepository,
+                                        OpplæringDokumentRepository opplæringDokumentRepository) {
         this.vurdertOpplæringRepository = vurdertOpplæringRepository;
+        this.behandlingRepository = behandlingRepository;
+        this.opplæringDokumentRepository = opplæringDokumentRepository;
     }
 
     @Override
     public OppdateringResultat oppdater(VurderGjennomgåttOpplæringDto dto, AksjonspunktOppdaterParameter param) {
-        List<VurdertOpplæringPeriode> vurdertOpplæringPerioder = mapDtoTilVurdertOpplæringPerioder(dto);
+        final Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
+        final List<OpplæringDokument> alleDokumenter = opplæringDokumentRepository.hentDokumenterForSak(behandling.getFagsak().getId());
+
+        List<VurdertOpplæringPeriode> vurdertOpplæringPerioder = mapDtoTilVurdertOpplæringPerioder(dto, alleDokumenter);
 
         var aktivHolder = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(param.getBehandlingId())
             .map(VurdertOpplæringGrunnlag::getVurdertePerioder);
@@ -58,7 +71,7 @@ public class GjennomgåOpplæringOppdaterer implements AksjonspunktOppdaterer<Vu
         return OppdateringResultat.nyttResultat();
     }
 
-    private List<VurdertOpplæringPeriode> mapDtoTilVurdertOpplæringPerioder(VurderGjennomgåttOpplæringDto dto) {
+    private List<VurdertOpplæringPeriode> mapDtoTilVurdertOpplæringPerioder(VurderGjennomgåttOpplæringDto dto, List<OpplæringDokument> alleDokumenter) {
         LocalDateTime vurdertTidspunkt = LocalDateTime.now();
         List<VurdertOpplæringPeriode> vurdertOpplæringPerioder = dto.getPerioder()
             .stream()
@@ -66,7 +79,8 @@ public class GjennomgåOpplæringOppdaterer implements AksjonspunktOppdaterer<Vu
                 periodeDto.getGjennomførtOpplæring(),
                 periodeDto.getBegrunnelse(),
                 getCurrentUserId(),
-                vurdertTidspunkt))
+                vurdertTidspunkt,
+                alleDokumenter.stream().filter(dokument -> periodeDto.getTilknyttedeDokumenter().contains("" + dokument.getId())).collect(Collectors.toList())))
             .toList();
         sjekkOverlappendePerioder(vurdertOpplæringPerioder);
         return vurdertOpplæringPerioder;
