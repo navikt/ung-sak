@@ -49,9 +49,6 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
     private UttakTjeneste uttakRestKlient;
     private BehandlingRepository behandlingRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
-
-    private SøknadsperiodeRepository søknadsperiodeRepository;
-
     private ProsessTriggereRepository prosessTriggereRepository;
 
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
@@ -65,14 +62,12 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
     public PleiepengerEndretUtbetalingPeriodeutleder(UttakTjeneste uttakRestKlient,
                                                      BehandlingRepository behandlingRepository,
                                                      @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
-                                                     SøknadsperiodeRepository søknadsperiodeRepository,
                                                      ProsessTriggereRepository prosessTriggereRepository,
                                                      SøknadsperiodeTjeneste søknadsperiodeTjeneste,
                                                      @KonfigVerdi(value = "BG_FORLENGELSE_BASERT_PAA_UTTAK", defaultVerdi = "false") boolean enabled) {
         this.uttakRestKlient = uttakRestKlient;
         this.behandlingRepository = behandlingRepository;
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
-        this.søknadsperiodeRepository = søknadsperiodeRepository;
         this.prosessTriggereRepository = prosessTriggereRepository;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
         this.enabled = enabled;
