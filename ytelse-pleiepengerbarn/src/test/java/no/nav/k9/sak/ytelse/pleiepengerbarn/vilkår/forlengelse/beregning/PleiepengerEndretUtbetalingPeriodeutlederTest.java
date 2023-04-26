@@ -16,7 +16,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -135,7 +134,6 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
     }
 
     @Test
-    @Disabled("feiler på onsdager")
     void skal_returnere_tom_liste_for_søknadsendringer_utenfor_periode() {
         var fom = SKJÆRINGSTIDSPUNKT;
         var dagerEtterSTPSøknadFom = 5;
