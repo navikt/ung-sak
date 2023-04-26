@@ -16,6 +16,9 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag.ForvaltningBeregningRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag.HentKalkulatorInputDump;
+import no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag.KalkulatorInputPrVilkårperiodeDto;
 
 @Dependent
 @Default
@@ -24,15 +27,23 @@ class KalkulusTjenesteAdapter {
     private BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
     private VilkårTjeneste vilkårTjeneste;
 
+    private ForvaltningBeregningRestTjeneste forvaltningBeregningRestTjeneste;
+
+    private HentKalkulatorInputDump hentKalkulatorInputDump;
+
     KalkulusTjenesteAdapter() {
         // CDI proxy
     }
 
     @Inject
     KalkulusTjenesteAdapter(BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
-                            VilkårTjeneste vilkårTjeneste) {
+                            VilkårTjeneste vilkårTjeneste,
+                            ForvaltningBeregningRestTjeneste forvaltningBeregningRestTjeneste,
+                            HentKalkulatorInputDump hentKalkulatorInputDump) {
         this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
         this.vilkårTjeneste = vilkårTjeneste;
+        this.forvaltningBeregningRestTjeneste = forvaltningBeregningRestTjeneste;
+        this.hentKalkulatorInputDump = hentKalkulatorInputDump;
     }
 
     public Optional<BeregningsgrunnlagListe> hentBeregningsgrunnlagForGui(BehandlingReferanse ref) {
@@ -52,6 +63,10 @@ class KalkulusTjenesteAdapter {
 
         return beregningsgrunnlagTjeneste.hentEksaktFastsatt(ref, skjæringstidspunkter);
 
+    }
+
+    public List<KalkulatorInputPrVilkårperiodeDto> hentKalkulatorInput(BehandlingReferanse ref) {
+        return hentKalkulatorInputDump.getKalkulatorInputPrVilkårperiodeDtos(ref);
     }
 
 
