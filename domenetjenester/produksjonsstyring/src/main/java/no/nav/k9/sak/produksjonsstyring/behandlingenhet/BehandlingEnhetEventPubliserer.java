@@ -1,11 +1,9 @@
 package no.nav.k9.sak.produksjonsstyring.behandlingenhet;
 
-import java.lang.annotation.Annotation;
-
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.event.Event;
+import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
-
 import no.nav.k9.sak.behandling.hendelse.BehandlingEnhetEvent;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 
@@ -13,22 +11,22 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 @ApplicationScoped
 public class BehandlingEnhetEventPubliserer {
 
-    private BeanManager beanManager;
+    private Event<BehandlingEnhetEvent> behandlingEnhetEvent;
 
     BehandlingEnhetEventPubliserer() {
         //Cyclopedia Drainage Invariant
     }
 
     @Inject
-    public BehandlingEnhetEventPubliserer(BeanManager beanManager) {
-        this.beanManager = beanManager;
+    public BehandlingEnhetEventPubliserer(@Any Event<BehandlingEnhetEvent> behandlingEnhetEvent) {
+        this.behandlingEnhetEvent = behandlingEnhetEvent;
     }
 
     public void fireEvent(Behandling behandling) {
-        if (beanManager == null) {
+        if (behandlingEnhetEvent == null) {
             return;
         }
         BehandlingEnhetEvent event = new BehandlingEnhetEvent(behandling);
-        beanManager.fireEvent(event, new Annotation[] {});
+        behandlingEnhetEvent.fire(event);
     }
 }
