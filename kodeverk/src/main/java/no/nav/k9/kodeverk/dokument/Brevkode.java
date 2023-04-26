@@ -66,7 +66,7 @@ public class Brevkode implements Kodeverdi {
      * Opplæringspenger brevkoder.
      */
     public static final String OPPLÆRINGSPENGER_SOKNAD_KODE = "OPPLÆRINGSPENGER_SOKNAD";
-    public static final Brevkode OPPLÆRINGSPENGER_SOKNAD = new Brevkode(OPPLÆRINGSPENGER_SOKNAD_KODE, "NAV 09-13.05", SØKNAD_RANGERING);
+    public static final Brevkode OPPLÆRINGSPENGER_SOKNAD = new Brevkode(OPPLÆRINGSPENGER_SOKNAD_KODE, "NAV 09-11.08", SØKNAD_RANGERING);
     public static final String DOKUMENTASJON_AV_OPPLÆRING_KODE = "DOKUMENTASJON_AV_OPPLÆRING";
     public static final String LEGEERKLÆRING_MED_DOKUMENTASJON_AV_OPPLÆRING_KODE = "LEGEERKLÆRING_MED_DOKUMENTASJON_AV_OPPLÆRING";
     public static final Brevkode DOKUMENTASJON_AV_OPPLÆRING = new Brevkode(DOKUMENTASJON_AV_OPPLÆRING_KODE, DOKUMENTASJON_AV_OPPLÆRING_KODE, VEDLEGG_RANGERING);
