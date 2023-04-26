@@ -1,4 +1,4 @@
-package no.nav.k9.sak.kontrakt.opplæringspenger;
+package no.nav.k9.sak.kontrakt.opplæringspenger.godkjentopplaeringsinstitusjon;
 
 import java.time.LocalDate;
 import java.util.List;

@@ -22,11 +22,11 @@ import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.db.util.CdiDbAwareTest;
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto;
-import no.nav.k9.sak.kontrakt.opplæringspenger.VurderInstitusjonDto;
+import no.nav.k9.sak.kontrakt.opplæringspenger.vurdering.VurderInstitusjonDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjon;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertInstitusjon;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringGrunnlag;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringRepository;
 
 @CdiDbAwareTest
 class VurderInstitusjonOppdatererTest {
@@ -57,7 +57,7 @@ class VurderInstitusjonOppdatererTest {
     }
 
     @Test
-    void skalLagreNyttVurdertInstitusjonGrunnlag() {
+    void skalLagreNyttGrunnlag() {
         final VurderInstitusjonDto dto = new VurderInstitusjonDto(new JournalpostIdDto("123"), true, "fordi");
 
         OppdateringResultat resultat = lagreGrunnlag(dto);
@@ -76,7 +76,7 @@ class VurderInstitusjonOppdatererTest {
     }
 
     @Test
-    void skalOppdatereVurdertInstitusjonGrunnlag() {
+    void skalOppdatereGrunnlag() {
         final VurderInstitusjonDto dto1 = new VurderInstitusjonDto(new JournalpostIdDto("123"), true, "fordi");
         lagreGrunnlag(dto1);
 

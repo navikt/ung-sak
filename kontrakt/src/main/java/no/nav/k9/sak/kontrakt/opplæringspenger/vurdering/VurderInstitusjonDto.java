@@ -1,4 +1,4 @@
-package no.nav.k9.sak.kontrakt.opplæringspenger;
+package no.nav.k9.sak.kontrakt.opplæringspenger.vurdering;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -15,32 +15,32 @@ import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
-@JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_NØDVENDIGHET)
-public class VurderNødvendighetDto extends BekreftetAksjonspunktDto {
+@JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_INSTITUSJON)
+public class VurderInstitusjonDto extends BekreftetAksjonspunktDto {
 
     @JsonProperty(value = "journalpostId", required = true)
     @Valid
     @NotNull
     private JournalpostIdDto journalpostId;
 
-    @JsonProperty(value = "nødvendigOpplæring", required = true)
+    @JsonProperty(value = "godkjent", required = true)
     @NotNull
-    private boolean nødvendigOpplæring;
+    private boolean godkjent;
 
-    public VurderNødvendighetDto() {
+    public VurderInstitusjonDto() {
     }
 
-    public VurderNødvendighetDto(JournalpostIdDto journalpostId, boolean nødvendigOpplæring, String begrunnelse) {
+    public VurderInstitusjonDto(JournalpostIdDto journalpostId, boolean godkjent, String begrunnelse) {
         super(begrunnelse);
         this.journalpostId = journalpostId;
-        this.nødvendigOpplæring = nødvendigOpplæring;
+        this.godkjent = godkjent;
     }
 
     public JournalpostIdDto getJournalpostId() {
         return journalpostId;
     }
 
-    public boolean isNødvendigOpplæring() {
-        return nødvendigOpplæring;
+    public boolean isGodkjent() {
+        return godkjent;
     }
 }

@@ -40,6 +40,7 @@ import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.dokument.arkiv.DokumentArkivTjeneste;
@@ -441,7 +442,7 @@ public class PleietrengendeSykdomDokumentRestTjeneste {
         final boolean harEndretType = gmlInformasjon.getType() != sykdomDokumentEndringDto.getType();
         final boolean harBlittSattSomDuplikat = gmlInformasjon.getDuplikatAvDokument() == null && sykdomDokumentEndringDto.getDuplikatAvId() != null;
         final boolean harBlittEndret = harEndretType || harBlittSattSomDuplikat;
-        final boolean harIngenAnnenGodkjentLegeerklæring = !harMinstEnAnnenGodkjentLegeerklæring(gmlInformasjon.getDokument(), behandling.getFagsak().getPleietrengendeAktørId());
+        final boolean harIngenAnnenGodkjentLegeerklæring = !harMinstEnAnnenGodkjentLegeerklæring(gmlInformasjon.getDokument(), behandling.getFagsak().getPleietrengendeAktørId(), behandling.getFagsakYtelseType());
         final boolean harTidligereHattRelevantGodkjentLegeerklæring = medisinskGrunnlagRepository.harHattGodkjentLegeerklæringMedUnntakAv(behandling.getFagsak().getPleietrengendeAktørId(), behandling.getUuid());
 
         if (varGodkjentLegeerklæring && harBlittEndret && harIngenAnnenGodkjentLegeerklæring && harTidligereHattRelevantGodkjentLegeerklæring) {
@@ -450,8 +451,8 @@ public class PleietrengendeSykdomDokumentRestTjeneste {
     }
 
 
-    private boolean harMinstEnAnnenGodkjentLegeerklæring(PleietrengendeSykdomDokument pleietrengendeSykdomDokument, final AktørId pleietrengende) {
-        return pleietrengendeSykdomDokumentRepository.hentGodkjenteLegeerklæringer(pleietrengende).stream().anyMatch(d -> !Objects.equals(d.getId(), pleietrengendeSykdomDokument.getId()));
+    private boolean harMinstEnAnnenGodkjentLegeerklæring(PleietrengendeSykdomDokument pleietrengendeSykdomDokument, final AktørId pleietrengende, FagsakYtelseType fagsakYtelseType) {
+        return pleietrengendeSykdomDokumentRepository.hentGodkjenteLegeerklæringer(pleietrengende, fagsakYtelseType).stream().anyMatch(d -> !Objects.equals(d.getId(), pleietrengendeSykdomDokument.getId()));
     }
 
     /**
