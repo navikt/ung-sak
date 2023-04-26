@@ -64,6 +64,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.omsorg.OmsorgenForRestTjeneste
 import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.FosterbarnRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.RammevedtakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.omsorgspenger.ÅrskvantumRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.dokument.OpplæringDokumentRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.visning.gjennomgått.GjennomgåttOpplæringRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.visning.institusjon.InstitusjonRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.opplæringspenger.visning.nødvendighet.NødvendigOpplæringRestTjeneste;
@@ -456,6 +457,7 @@ public class BehandlingDtoTjeneste {
                 dto.leggTil(getFraMap(GjennomgåttOpplæringRestTjeneste.BASEPATH, "gjennomgått-opplæring", uuidQueryParams));
                 dto.leggTil(getFraMap(NødvendigOpplæringRestTjeneste.BASEPATH, "nødvendig-opplæring", uuidQueryParams));
                 dto.leggTil(getFraMap(ReisetidRestTjeneste.BASEPATH, "reisetid", uuidQueryParams));
+                dto.leggTil(getFraMap(OpplæringDokumentRestTjeneste.DOKUMENT_LISTE_PATH, "opplæring-dokument-liste", uuidQueryParams));
                 leggTilUttakEndepunkt(behandling, dto);
             }
             default -> throw new UnsupportedOperationException("Støtter ikke ytelse " + ytelseType);

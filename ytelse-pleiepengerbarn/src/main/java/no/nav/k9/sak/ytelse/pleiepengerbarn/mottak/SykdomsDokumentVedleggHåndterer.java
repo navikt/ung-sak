@@ -23,6 +23,7 @@ import no.nav.k9.felles.integrasjon.saf.Kanal;
 import no.nav.k9.felles.integrasjon.saf.LogiskVedleggResponseProjection;
 import no.nav.k9.felles.integrasjon.saf.RelevantDatoResponseProjection;
 import no.nav.k9.felles.integrasjon.saf.SafTjeneste;
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.typer.AktørId;
@@ -86,8 +87,10 @@ public class SykdomsDokumentVedleggHåndterer {
         log.info("Fant {} vedlegg på søknad", journalpost.getDokumenter().size());
         boolean hoveddokument = true;
         for (DokumentInfo dokumentInfo : journalpost.getDokumenter()) {
-            if (dokumentInfo.getBrevkode() != null && dokumentInfo.getBrevkode().equals("K9_PUNSJ_INNSENDING")) {
-               // Oppsummerings-PDFen fra punsj skal ikke klassifiseres under sykdom.
+            if (dokumentInfo.getBrevkode() != null && (dokumentInfo.getBrevkode().equals("K9_PUNSJ_INNSENDING")
+                || dokumentInfo.getBrevkode().equals(Brevkode.DOKUMENTASJON_AV_OPPLÆRING_KODE))) {
+                // Oppsummerings-PDFen fra punsj skal ikke klassifiseres under sykdom.
+                // Dokumentasjon av opplæring skal ikke klassifiseres under sykdom.
                 continue;
             }
 

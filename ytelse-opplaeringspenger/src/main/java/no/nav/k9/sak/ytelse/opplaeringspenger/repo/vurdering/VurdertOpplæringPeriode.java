@@ -1,7 +1,9 @@
-package no.nav.k9.sak.ytelse.opplaeringspenger.repo;
+package no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import org.hibernate.annotations.Immutable;
@@ -14,10 +16,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokument;
 
 @Entity(name = "VurdertOpplæringPeriode")
 @Table(name = "olp_vurdert_opplaering_periode")
@@ -47,6 +53,14 @@ public class VurdertOpplæringPeriode extends BaseEntitet {
     @Column(name = "vurdert_tid", nullable = false)
     private LocalDateTime vurdertTidspunkt;
 
+    @OneToMany
+    @JoinTable(
+        name="OLP_VURDERT_OPPLAERING_PERIODE_ANVENDT_DOKUMENT",
+        joinColumns = @JoinColumn( name="VURDERT_OPPLAERING_PERIODE_ID"),
+        inverseJoinColumns = @JoinColumn( name="OPPLAERING_DOKUMENT_ID")
+    )
+    private List<OpplæringDokument> dokumenter = new ArrayList<>();
+
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
@@ -54,16 +68,17 @@ public class VurdertOpplæringPeriode extends BaseEntitet {
     VurdertOpplæringPeriode() {
     }
 
-    public VurdertOpplæringPeriode(DatoIntervallEntitet periode, Boolean gjennomførtOpplæring, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt) {
+    public VurdertOpplæringPeriode(DatoIntervallEntitet periode, Boolean gjennomførtOpplæring, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt, List<OpplæringDokument> dokumenter) {
         this.periode = periode;
         this.gjennomførtOpplæring = gjennomførtOpplæring;
         this.begrunnelse = begrunnelse;
         this.vurdertAv = vurdertAv;
         this.vurdertTidspunkt = vurdertTidspunkt;
+        this.dokumenter = new ArrayList<>(dokumenter);
     }
 
-    public VurdertOpplæringPeriode(LocalDate fom, LocalDate tom, Boolean gjennomførtOpplæring, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt) {
-        this(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), gjennomførtOpplæring, begrunnelse, vurdertAv, vurdertTidspunkt);
+    public VurdertOpplæringPeriode(LocalDate fom, LocalDate tom, Boolean gjennomførtOpplæring, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt, List<OpplæringDokument> dokumenter) {
+        this(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), gjennomførtOpplæring, begrunnelse, vurdertAv, vurdertTidspunkt, dokumenter);
     }
 
     public VurdertOpplæringPeriode(VurdertOpplæringPeriode that) {
@@ -72,6 +87,7 @@ public class VurdertOpplæringPeriode extends BaseEntitet {
         this.begrunnelse = that.begrunnelse;
         this.vurdertAv = that.vurdertAv;
         this.vurdertTidspunkt = that.vurdertTidspunkt;
+        this.dokumenter = new ArrayList<>(that.dokumenter);
     }
 
     public DatoIntervallEntitet getPeriode() {
@@ -94,6 +110,10 @@ public class VurdertOpplæringPeriode extends BaseEntitet {
         return vurdertTidspunkt;
     }
 
+    public List<OpplæringDokument> getDokumenter() {
+        return new ArrayList<>(dokumenter);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -102,12 +122,13 @@ public class VurdertOpplæringPeriode extends BaseEntitet {
         return Objects.equals(periode, that.periode)
             && Objects.equals(gjennomførtOpplæring, that.gjennomførtOpplæring)
             && Objects.equals(begrunnelse, that.begrunnelse)
+            && Objects.equals(dokumenter, that.dokumenter)
             && Objects.equals(vurdertAv, that.vurdertAv)
             && Objects.equals(vurdertTidspunkt, that.vurdertTidspunkt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode, gjennomførtOpplæring, begrunnelse, vurdertAv, vurdertTidspunkt);
+        return Objects.hash(periode, gjennomførtOpplæring, begrunnelse, vurdertAv, vurdertTidspunkt, dokumenter);
     }
 }

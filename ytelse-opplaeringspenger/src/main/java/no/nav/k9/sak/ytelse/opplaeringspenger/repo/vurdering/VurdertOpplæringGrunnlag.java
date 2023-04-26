@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.opplaeringspenger.repo;
+package no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering;
 
 import org.hibernate.annotations.Immutable;
 
@@ -56,14 +56,6 @@ public class VurdertOpplæringGrunnlag extends BaseEntitet {
 
     public VurdertOpplæringGrunnlag(Long behandlingId, VurdertInstitusjonHolder vurdertInstitusjonHolder, VurdertOpplæringHolder vurdertOpplæringHolder, VurdertOpplæringPerioderHolder vurdertePerioder, VurdertReisetidHolder vurdertReisetid) {
         this.behandlingId = behandlingId;
-        this.vurdertInstitusjonHolder = vurdertInstitusjonHolder;
-        this.vurdertOpplæringHolder = vurdertOpplæringHolder;
-        this.vurdertePerioder = vurdertePerioder;
-        this.vurdertReisetid = vurdertReisetid;
-    }
-
-    public VurdertOpplæringGrunnlag(VurdertOpplæringGrunnlag grunnlag, VurdertInstitusjonHolder vurdertInstitusjonHolder, VurdertOpplæringHolder vurdertOpplæringHolder, VurdertOpplæringPerioderHolder vurdertePerioder, VurdertReisetidHolder vurdertReisetid) {
-        this.behandlingId = grunnlag.behandlingId;
         this.vurdertInstitusjonHolder = vurdertInstitusjonHolder;
         this.vurdertOpplæringHolder = vurdertOpplæringHolder;
         this.vurdertePerioder = vurdertePerioder;

@@ -36,12 +36,12 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPeriode;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPerioderHolder;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetid;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetidHolder;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringGrunnlag;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringPeriode;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringPerioderHolder;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringRepository;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertReisetid;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertReisetidHolder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.KursPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPeriode;
@@ -158,7 +158,7 @@ class GjennomgåOpplæringStegTest {
 
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(), null, null,
             new VurdertOpplæringPerioderHolder(List.of(
-                new VurdertOpplæringPeriode(søknadsperiode.getFom(), søknadsperiode.getTom().minusWeeks(1), true, "", "", nå))),
+                new VurdertOpplæringPeriode(søknadsperiode.getFom(), søknadsperiode.getTom().minusWeeks(1), true, "", "", nå, List.of()))),
             null);
         lagreGrunnlag(grunnlag);
 
@@ -188,8 +188,8 @@ class GjennomgåOpplæringStegTest {
 
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(), null, null,
             new VurdertOpplæringPerioderHolder(List.of(
-                new VurdertOpplæringPeriode(søknadsperiode.getFom(), søknadsperiode.getTom().minusWeeks(1), true, "", "", nå),
-                new VurdertOpplæringPeriode(søknadsperiode.getTom().minusWeeks(1).plusDays(1), søknadsperiode.getTom(), false, "", "", nå))),
+                new VurdertOpplæringPeriode(søknadsperiode.getFom(), søknadsperiode.getTom().minusWeeks(1), true, "", "", nå, List.of()),
+                new VurdertOpplæringPeriode(søknadsperiode.getTom().minusWeeks(1).plusDays(1), søknadsperiode.getTom(), false, "", "", nå, List.of()))),
             null);
         lagreGrunnlag(grunnlag);
 
@@ -246,7 +246,7 @@ class GjennomgåOpplæringStegTest {
 
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(), null, null,
             new VurdertOpplæringPerioderHolder(List.of(
-                new VurdertOpplæringPeriode(godkjentPeriode.getFom(), godkjentPeriode.getTom(), true, "", "", nå))),
+                new VurdertOpplæringPeriode(godkjentPeriode.getFom(), godkjentPeriode.getTom(), true, "", "", nå, List.of()))),
             null);
         lagreGrunnlag(grunnlag);
 
@@ -276,7 +276,7 @@ class GjennomgåOpplæringStegTest {
 
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(), null, null,
             new VurdertOpplæringPerioderHolder(List.of(
-                new VurdertOpplæringPeriode(kursperiode.getFom(), kursperiode.getTom(), true, "", "", nå))),
+                new VurdertOpplæringPeriode(kursperiode.getFom(), kursperiode.getTom(), true, "", "", nå, List.of()))),
             null);
         lagreGrunnlag(grunnlag);
 
@@ -308,7 +308,7 @@ class GjennomgåOpplæringStegTest {
 
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(), null, null,
             new VurdertOpplæringPerioderHolder(List.of(
-                new VurdertOpplæringPeriode(kursperiode.getFom(), kursperiode.getTom(), true, "", "", nå))),
+                new VurdertOpplæringPeriode(kursperiode.getFom(), kursperiode.getTom(), true, "", "", nå, List.of()))),
             null);
         lagreGrunnlag(grunnlag);
 
@@ -341,7 +341,7 @@ class GjennomgåOpplæringStegTest {
 
         VurdertOpplæringGrunnlag grunnlag = new VurdertOpplæringGrunnlag(behandling.getId(), null, null,
             new VurdertOpplæringPerioderHolder(List.of(
-                new VurdertOpplæringPeriode(kursperiode.getFom(), kursperiode.getTom(), true, "", "", nå))),
+                new VurdertOpplæringPeriode(kursperiode.getFom(), kursperiode.getTom(), true, "", "", nå, List.of()))),
             new VurdertReisetidHolder(List.of(
                 new VurdertReisetid(DatoIntervallEntitet.fra(reisetidTil), true, "reise", "", nå),
                 new VurdertReisetid(DatoIntervallEntitet.fra(reisetidHjem), false, "ikke reise", "", nå)))

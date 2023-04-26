@@ -15,17 +15,19 @@
     <sequence-generator name="SEQ_OLP_VURDERT_INSTITUSJON_HOLDER" allocation-size="50" sequence-name="SEQ_OLP_VURDERT_INSTITUSJON_HOLDER" />
     <sequence-generator name="SEQ_GODKJENTE_OPPLAERINGSINSTITUSJONER" allocation-size="50" sequence-name="SEQ_GODKJENTE_OPPLAERINGSINSTITUSJONER" />
     <sequence-generator name="SEQ_GODKJENTE_OPPLAERINGSINSTITUSJONER" allocation-size="50" sequence-name="SEQ_GODKJENT_OPPLAERINGSINSTITUSJON_PERIODE" />
+    <sequence-generator name="SEQ_OPPLAERING_DOKUMENT" allocation-size="50" sequence-name="SEQ_OPPLAERING_DOKUMENT" />
 
-    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag" />
-    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæring" />
-    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringHolder" />
-    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPeriode" />
-    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPerioderHolder" />
-    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetid" />
-    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetidHolder" />
-    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjon" />
-    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertInstitusjonHolder" />
-    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.GodkjentOpplæringsinstitusjon" />
-    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.GodkjentOpplæringsinstitusjonPeriode" />
+    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringGrunnlag" />
+    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæring" />
+    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringHolder" />
+    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringPeriode" />
+    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringPerioderHolder" />
+    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertReisetid" />
+    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertReisetidHolder" />
+    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertInstitusjon" />
+    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertInstitusjonHolder" />
+    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.godkjentopplaeringsinstitusjon.GodkjentOpplæringsinstitusjon" />
+    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.godkjentopplaeringsinstitusjon.GodkjentOpplæringsinstitusjonPeriode" />
+    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokument" />
 
 </entity-mappings>
