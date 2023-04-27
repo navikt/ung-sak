@@ -120,11 +120,7 @@ public class HentDataTilUttakTjeneste {
         if (skalMappeHeleTidslinjen) {
             perioderTilVurdering = hentPerioderTilVurderingTjeneste.hentPerioderTilVurderingMedUbesluttet(behandling, utvidetPeriodeSomFølgeAvDødsfall);
         } else {
-            if (kunRelevantePerioder) {
-                perioderTilVurdering = hentPerioderTilVurderingTjeneste.hentKunRelevantePerioder(behandling);
-            } else {
-                perioderTilVurdering = hentPerioderTilVurderingTjeneste.hentPerioderTilVurderingUtenUbesluttet(behandling);
-            }
+            perioderTilVurdering = hentPerioderTilVurderingTjeneste.hentPerioderTilVurderingUtenUbesluttet(behandling);
         }
 
         var utvidetRevurderingPerioder = perioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(referanse);

@@ -12,16 +12,12 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
-import no.nav.k9.sak.perioder.ForlengelseTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.trigger.ProsessTriggereRepository;
-import no.nav.k9.sak.trigger.Trigger;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 
 @Dependent
@@ -29,19 +25,13 @@ public class HentPerioderTilVurderingTjeneste {
 
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
-    private Instance<ForlengelseTjeneste> forlengelseTjenester;
-
-    private ProsessTriggereRepository prosessTriggereRepository;
 
     @Inject
     public HentPerioderTilVurderingTjeneste(
         SøknadsperiodeTjeneste søknadsperiodeTjeneste,
-        @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
-        @Any Instance<ForlengelseTjeneste> forlengelseTjenester, ProsessTriggereRepository prosessTriggereRepository) {
+        @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
-        this.forlengelseTjenester = forlengelseTjenester;
-        this.prosessTriggereRepository = prosessTriggereRepository;
     }
 
     public NavigableSet<DatoIntervallEntitet> hentPerioderTilVurderingUtenUbesluttet(Behandling behandling) {
@@ -49,40 +39,6 @@ public class HentPerioderTilVurderingTjeneste {
         var søknadsperioder = TidslinjeUtil.tilTidslinjeKomprimert(finnSykdomsperioder(referanse));
 
         return fjernTrukkedePerioder(referanse, søknadsperioder);
-    }
-
-
-    public NavigableSet<DatoIntervallEntitet> hentKunRelevantePerioder(Behandling behandling) {
-        var referanse = BehandlingReferanse.fra(behandling);
-        var perioderTilVurderingTjeneste = perioderTilVurderingTjeneste(referanse);
-        final var allePerioderTilVurdering = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.OPPTJENINGSVILKÅRET);
-
-        var forlengelseTjeneste = ForlengelseTjeneste.finnTjeneste(forlengelseTjenester, behandling.getFagsakYtelseType(), behandling.getType());
-        var søknadsperioderForBehandling = søknadsperiodeTjeneste.utledPeriode(behandling.getId(), true);
-
-        NavigableSet<DatoIntervallEntitet> relevantePerioder = new TreeSet<>();
-        var forlengelseperioder = forlengelseTjeneste.utledPerioderSomSkalBehandlesSomForlengelse(referanse, allePerioderTilVurdering, VilkårType.OPPTJENINGSVILKÅRET);
-        for (DatoIntervallEntitet periodeTilVurdering : allePerioderTilVurdering) {
-            if (forlengelseperioder.contains(periodeTilVurdering)) {
-                var overlappendeSøknadsperioder = søknadsperioderForBehandling.stream().filter(sp -> sp.overlapper(periodeTilVurdering)).collect(Collectors.toCollection(TreeSet::new));
-                relevantePerioder.addAll(overlappendeSøknadsperioder);
-            } else {
-                relevantePerioder.add(periodeTilVurdering);
-            }
-        }
-
-        relevantePerioder.addAll(finnPerioderFraProsessTriggere(referanse, allePerioderTilVurdering));
-
-        return TidslinjeUtil.tilDatoIntervallEntiteter(TidslinjeUtil.tilTidslinjeKomprimert(relevantePerioder));
-    }
-
-    private NavigableSet<DatoIntervallEntitet> finnPerioderFraProsessTriggere(BehandlingReferanse behandlingReferanse, NavigableSet<DatoIntervallEntitet> allePerioderTilVurdering) {
-        var prosessTriggere = prosessTriggereRepository.hentGrunnlag(behandlingReferanse.getBehandlingId());
-        return prosessTriggere.stream().flatMap(it -> it.getTriggere().stream())
-            .filter(it -> it.getÅrsak().equals(BehandlingÅrsakType.RE_ENDRET_FORDELING))
-            .map(Trigger::getPeriode)
-            .filter(p -> allePerioderTilVurdering.stream().anyMatch(it -> it.overlapper(p)))
-            .collect(Collectors.toCollection(TreeSet::new));
     }
 
 
