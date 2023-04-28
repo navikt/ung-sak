@@ -255,7 +255,7 @@ spec:
     - name: ENABLE_SJEKK_TILBAKEKREVING
       value: "true"
     - name: IKKE_YRKESAKTIV_UTEN_SPEILING
-      value: "true"
+      value: "false"
     - name: PSB_START_I_KOFAKBER_VED_FORLENGELSE_OPPTJENING
       value: "true"
     - name: OMP_NULL_HELG_I_KRAVPERIODER
