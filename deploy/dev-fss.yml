@@ -255,15 +255,14 @@ spec:
     - name: ENABLE_SJEKK_TILBAKEKREVING
       value: "true"
     - name: IKKE_YRKESAKTIV_UTEN_SPEILING
-      value: "true"
+      value: "false"
     - name: PSB_START_I_KOFAKBER_VED_FORLENGELSE_OPPTJENING
       value: "true"
     - name: OMP_NULL_HELG_I_KRAVPERIODER
       value: "true"
     - name: OMS_ZERO_REFUSJON_ER_KRAV
       value: "true"
-    - name: UTTAK_KUN_RELEVANTE_PERIODER
-      value: "true"
+
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT
