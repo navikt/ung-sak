@@ -20,17 +20,15 @@ import jakarta.enterprise.inject.Stereotype;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.enterprise.util.AnnotationLiteral;
 import jakarta.inject.Qualifier;
-import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
-import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
+import no.nav.k9.sak.behandling.revurdering.etterkontroll.tjeneste.KontrollTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef.FagsakYtelseTypeRefLiteral;
 
 /**
- * Marker type som implementerer interface {@link BehandlingSteg} for å skille ulike implementasjoner av samme steg for ulike
- * behandlingtyper.<br>
+ * Marker type som implementerer interface {@link KontrollTjeneste} for å skille ulike implementasjoner av samme kontrolltjenese for ulike
+ * kontroll typer.<br>
  * <p>
- * NB: Settes kun dersom det er flere implementasjoner av med samme {@link BehandlingStegRef}.
+ * NB: Settes kun dersom det er flere implementasjoner av med samme {@link KontrollTjeneste}.
  */
 @Repeatable(EtterkontrollRef.ContainerOfEtterkontrollRef.class)
 @Qualifier
@@ -42,11 +40,11 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef.FagsakYtelseTypeRef
 public @interface EtterkontrollRef {
 
     /**
-     * Kode-verdi som skiller ulike implementasjoner for ulike behandling typer.
+     * Kode-verdi som skiller ulike implementasjoner for ulike kontroll typer.
      * <p>
-     * Må matche ett innslag i <code>BEHANDling_TYPE</code> tabell for å kunne kjøres.
+     * Må matche ett innslag i <code>KontrollType</code> tabell for å kunne kjøres.
      *
-     * @see BehandlingType
+     * @see KontrollType
      */
     KontrollType value() default KontrollType.UDEFINERT;
 
