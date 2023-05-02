@@ -9,6 +9,10 @@ import java.util.List;
 import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -42,6 +46,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.RyddVilkårTyper;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleiebehovBuilder;
@@ -61,6 +66,8 @@ import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.reg
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @ApplicationScoped
 public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
+
+    private static final Logger log = LoggerFactory.getLogger(VurderILivetsSluttfaseSteg.class);
 
     private final MedisinskVilkårTjeneste medisinskVilkårTjeneste = new MedisinskVilkårTjeneste();
     private BehandlingRepositoryProvider repositoryProvider;
@@ -122,6 +129,17 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
         builder.medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer());
         vurderVilkår(behandlingId, medisinskGrunnlag, builder, perioder);
         vilkårResultatRepository.lagre(behandlingId, builder.build());
+
+        Optional<Vilkår> vilkåret = vilkårene.getVilkår(VilkårType.I_LIVETS_SLUTTFASE);
+        if (vilkåret.isPresent()) {
+            NavigableSet<DatoIntervallEntitet> perioderFraVilkåret = vilkåret.get().getPerioder().stream().map(VilkårPeriode::getPeriode).collect(Collectors.toCollection(TreeSet::new));
+            LocalDateTimeline<Boolean> tidslinjeFraVilkåret = TidslinjeUtil.tilTidslinjeKomprimert(perioderFraVilkåret);
+            LocalDateTimeline<Boolean> tidslinjeFraPerioderTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(perioder);
+            if (!tidslinjeFraPerioderTilVurdering.disjoint(tidslinjeFraVilkåret).isEmpty()) {
+                //Feilsøking for saker som feiler med IllegalStateException: Vilkårsperiode med ikke supportert utfall ‘IKKE_VURDERT’, vilkår=‘I_LIVETS_SLUTTFASE’
+                log.info("[behandlingId={}] Har vilkårsperioder som ikke finnes i perioder til vurdering: {}", behandlingId, tidslinjeFraPerioderTilVurdering.disjoint(tidslinjeFraVilkåret));
+            }
+        }
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
