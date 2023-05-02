@@ -215,7 +215,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         "Overstyring av medisinskvilkår for pleietrengende 18 år",
         BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDISINSKE_VILKÅR, VurderingspunktType.UT, VilkårType.MEDISINSKEVILKÅR_18_ÅR,
         SkjermlenkeType.PUNKT_FOR_MEDISINSK, TOTRINN, AVVENTER_SAKSBEHANDLER),
-    OVERSTYRING_AV_OMSORGEN_FOR(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_OMSORGENFOR_KODE, AksjonspunktType.OVERSTYRING, "Overstyring av OMPorgen for",
+    OVERSTYRING_AV_OMSORGEN_FOR(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_OMSORGENFOR_KODE, AksjonspunktType.OVERSTYRING, "Overstyring av Omsorgen for",
         BehandlingStatus.UTREDES, BehandlingStegType.VURDER_OMSORG_FOR, VurderingspunktType.UT, VilkårType.OMSORGEN_FOR,
         SkjermlenkeType.PUNKT_FOR_OMSORGEN_FOR, TOTRINN, AVVENTER_SAKSBEHANDLER),
     OVERSTYRING_AV_BEREGNING(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_BEREGNING_KODE,
