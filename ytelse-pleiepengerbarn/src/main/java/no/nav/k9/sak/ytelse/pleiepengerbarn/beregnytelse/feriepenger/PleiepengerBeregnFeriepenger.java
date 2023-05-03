@@ -6,7 +6,8 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BA
 
 import java.util.Set;
 
-import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -24,7 +25,7 @@ import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.SaksnummerOgSisteBehand
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
-@Dependent
+@ApplicationScoped
 
 //for grenser, se https://www.nav.no/no/nav-og-samfunn/kontakt-nav/utbetalinger/snarveier/ferie-og-feriepenger#chapter-11
 
@@ -37,7 +38,7 @@ public class PleiepengerBeregnFeriepenger implements BeregnFeriepengerTjeneste {
     private Instance<FinnFeriepengepåvirkendeFagsakerTjeneste> feriepengepåvirkendeFagsakerTjenester;
 
     @Inject
-    public PleiepengerBeregnFeriepenger(HentFeriepengeAndelerTjeneste hentFeriepengeAndelerTjeneste, Instance<FinnFeriepengepåvirkendeFagsakerTjeneste> feriepengepåvirkendeFagsakerTjenester) {
+    public PleiepengerBeregnFeriepenger(HentFeriepengeAndelerTjeneste hentFeriepengeAndelerTjeneste, @Any Instance<FinnFeriepengepåvirkendeFagsakerTjeneste> feriepengepåvirkendeFagsakerTjenester) {
         this.hentFeriepengeAndelerTjeneste = hentFeriepengeAndelerTjeneste;
         this.feriepengepåvirkendeFagsakerTjenester = feriepengepåvirkendeFagsakerTjenester;
     }
