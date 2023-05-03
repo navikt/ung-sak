@@ -280,6 +280,7 @@ public class BehandlingRepository {
         TypedQuery<Behandling> query = getEntityManager().createQuery(
             "SELECT behandling FROM Behandling behandling " +
                 "WHERE behandling.fagsak.id=:fagsakId " +
+                "AND behandling.status IN :avsluttetOgIverkKode " +
                 "ORDER BY behandling.opprettetTidspunkt DESC",
             Behandling.class);
 

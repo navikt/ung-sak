@@ -8,13 +8,13 @@ import java.time.Period;
 import java.util.List;
 import java.util.Optional;
 
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -29,11 +29,10 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-public class BehandlingRepositoryFinnKandidaterTilRevurderingImplTest {
+public class EtterkontrollRepositoryFinnKandidaterTilRevurderingImplTest {
 
     private final static int revurderingDagerTilbake = 0;
 
@@ -65,11 +64,11 @@ public class BehandlingRepositoryFinnKandidaterTilRevurderingImplTest {
             .medKontrollType(KontrollType.MANGLENDE_FØDSEL).build();
         etterkontrollRepository.lagre(etterkontroll);
 
-        final List<Behandling> behandlings = etterkontrollRepository
+        final List<Etterkontroll> etterkontroller = etterkontrollRepository
             .finnKandidaterForAutomatiskEtterkontroll(Period.parse("P" + revurderingDagerTilbake + "D"));
 
-        assertThat(behandlings).hasSize(1);
-        assertThat(behandlings.get(0).getId()).isEqualTo(behandling.getId());
+        assertThat(etterkontroller).hasSize(1);
+        assertThat(etterkontroller.get(0).getFagsakId()).isEqualTo(behandling.getFagsakId());
     }
 
     @Test
@@ -82,56 +81,14 @@ public class BehandlingRepositoryFinnKandidaterTilRevurderingImplTest {
 
         etterkontrollRepository.avflaggDersomEksisterer(behandling.getFagsakId(), KontrollType.MANGLENDE_FØDSEL);
 
-        final List<Behandling> behandlings = etterkontrollRepository
+        final List<Etterkontroll> etterkontroller = etterkontrollRepository
             .finnKandidaterForAutomatiskEtterkontroll(Period.parse("P" + revurderingDagerTilbake + "D"));
 
-        assertThat(behandlings).isEmpty();
+        assertThat(etterkontroller).isEmpty();
     }
 
     @Test
-    public void skal_ikke_velge_henlagt_behandling() {
-        Behandling behandling = opprettRevurderingsKandidat();
-
-        Etterkontroll etterkontroll = new Etterkontroll.Builder(behandling.getFagsakId()).medErBehandlet(false).medKontrollTidspunkt(LocalDate.now().atStartOfDay().minusDays(revurderingDagerTilbake))
-            .medKontrollType(KontrollType.MANGLENDE_FØDSEL).build();
-        etterkontrollRepository.lagre(etterkontroll);
-
-        Behandling henlagtBehandling = Behandling.fraTidligereBehandling(behandling, BehandlingType.FØRSTEGANGSSØKNAD).build();
-        behandlingRepository.lagre(henlagtBehandling, behandlingRepository.taSkriveLås(henlagtBehandling));
-
-        henlagtBehandling.setBehandlingResultatType(BehandlingResultatType.HENLAGT_SØKNAD_TRUKKET);
-        henlagtBehandling.avsluttBehandling();
-        behandlingRepository.lagre(henlagtBehandling, behandlingRepository.taSkriveLås(henlagtBehandling));
-
-        final List<Behandling> behandlings = etterkontrollRepository
-            .finnKandidaterForAutomatiskEtterkontroll(Period.parse("P0D"));
-
-        assertThat(behandlings).hasSize(1);
-        assertThat(behandlings.get(0).getId()).isEqualTo(behandling.getId());
-    }
-
-    @Test
-    public void fagsak_som_har_eksisterende_etterkontrollsbehandling_skal_ikke_være_kandidat_til_revurdering() {
-        Behandling behandling = opprettRevurderingsKandidat();
-
-        Etterkontroll etterkontroll = new Etterkontroll.Builder(behandling.getFagsakId()).medErBehandlet(false).medKontrollTidspunkt(LocalDate.now().atStartOfDay().minusDays(revurderingDagerTilbake))
-            .medKontrollType(KontrollType.MANGLENDE_FØDSEL).build();
-        etterkontrollRepository.lagre(etterkontroll);
-
-        Behandling revurderingsBehandling = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING)
-            .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.RE_AVVIK_ANTALL_BARN)).build();
-
-        behandlingRepository.lagre(revurderingsBehandling, behandlingRepository.taSkriveLås(revurderingsBehandling));
-
-        etterkontrollRepository.avflaggDersomEksisterer(behandling.getFagsakId(), KontrollType.MANGLENDE_FØDSEL);
-
-        List<Behandling> fagsakList = etterkontrollRepository
-            .finnKandidaterForAutomatiskEtterkontroll(Period.parse("P" + revurderingDagerTilbake + "D"));
-
-        assertThat(fagsakList).isEmpty();
-    }
-
-    @Test
+    @Deprecated //Overflødig?
     public void skal_hente_ut_siste_vedtak_til_revurdering() {
         Behandling behandling = opprettRevurderingsKandidat();
 
@@ -150,10 +107,12 @@ public class BehandlingRepositoryFinnKandidaterTilRevurderingImplTest {
             .medKontrollTidspunkt(LocalDate.now().atStartOfDay().minusDays(revurderingDagerTilbake)).medKontrollType(KontrollType.MANGLENDE_FØDSEL).build();
         etterkontrollRepository.lagre(etterkontroll);
 
-        List<Behandling> fagsakList = etterkontrollRepository
-            .finnKandidaterForAutomatiskEtterkontroll(Period.parse("P" + revurderingDagerTilbake + "D"));
+        List<Long> fagsakList = etterkontrollRepository
+            .finnKandidaterForAutomatiskEtterkontroll(Period.parse("P" + revurderingDagerTilbake + "D"))
+            .stream().map(Etterkontroll::getFagsakId)
+            .toList();
 
-        assertThat(fagsakList).containsOnly(revurderingsBehandling);
+        assertThat(fagsakList).containsOnly(revurderingsBehandling.getFagsakId());
     }
 
     @Test
@@ -164,7 +123,7 @@ public class BehandlingRepositoryFinnKandidaterTilRevurderingImplTest {
             .medKontrollType(KontrollType.MANGLENDE_FØDSEL).build();
         etterkontrollRepository.lagre(etterkontroll);
 
-        List<Behandling> fagsakList = etterkontrollRepository
+        List<Etterkontroll> fagsakList = etterkontrollRepository
             .finnKandidaterForAutomatiskEtterkontroll(Period.parse("P5D"));
 
         assertThat(fagsakList).isEmpty();
