@@ -1,4 +1,4 @@
-package no.nav.k9.sak.behandling.revurdering;
+package no.nav.k9.sak.behandling.revurdering.etterkontroll;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,9 +18,6 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.k9.sak.behandling.revurdering.etterkontroll.Etterkontroll;
-import no.nav.k9.sak.behandling.revurdering.etterkontroll.EtterkontrollRepository;
-import no.nav.k9.sak.behandling.revurdering.etterkontroll.KontrollType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
