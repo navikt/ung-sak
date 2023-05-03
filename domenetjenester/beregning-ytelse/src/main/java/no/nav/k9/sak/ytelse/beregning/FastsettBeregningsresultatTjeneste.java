@@ -4,17 +4,9 @@ import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.evaluation.summary.EvaluationSerializer;
-import no.nav.k9.felles.feil.Feil;
-import no.nav.k9.felles.feil.FeilFactory;
-import no.nav.k9.felles.feil.LogLevel;
-import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
-import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.ytelse.beregning.adapter.MapBeregningsresultatFraRegelTilVL;
 import no.nav.k9.sak.ytelse.beregning.adapter.MapBeregningsresultatFraVLTilRegel;
@@ -25,7 +17,6 @@ import no.nav.k9.sak.ytelse.beregning.regler.RegelFastsettBeregningsresultat;
 @ApplicationScoped
 public class FastsettBeregningsresultatTjeneste {
 
-    private JacksonJsonConfig jacksonJsonConfig = new JacksonJsonConfig();
     private MapBeregningsresultatFraVLTilRegel mapBeregningsresultatFraVLTilRegel;
     private MapBeregningsresultatFraRegelTilVL mapBeregningsresultatFraRegelTilVL;
 
@@ -65,16 +56,6 @@ public class FastsettBeregningsresultatTjeneste {
     }
 
     private String toJson(BeregningsresultatRegelmodell grunnlag) {
-        var jsonFac = this.jacksonJsonConfig;
-        return jsonFac.toJson(grunnlag, FastsettBeregningsresultatFeil.FACTORY::jsonMappingFeilet);
-    }
-
-    interface FastsettBeregningsresultatFeil extends DeklarerteFeil {
-        FastsettBeregningsresultatFeil FACTORY = FeilFactory.create(FastsettBeregningsresultatFeil.class); // NOSONAR ok med konstant
-
-        @TekniskFeil(feilkode = "FP-563791",
-            feilmelding = "JSON mapping feilet",
-            logLevel = LogLevel.ERROR)
-        Feil jsonMappingFeilet(JsonProcessingException var1);
+        return JacksonJsonConfig.toJson(grunnlag);
     }
 }

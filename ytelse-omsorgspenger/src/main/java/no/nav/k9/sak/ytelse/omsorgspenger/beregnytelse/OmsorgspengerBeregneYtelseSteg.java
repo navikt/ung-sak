@@ -106,7 +106,7 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
 
         // Beregn feriepenger
         var feriepengerTjeneste = FagsakYtelseTypeRef.Lookup.find(beregnFeriepengerTjeneste, ref.getFagsakYtelseType()).orElseThrow();
-        feriepengerTjeneste.beregnFeriepenger(beregningsresultat);
+        feriepengerTjeneste.beregnFeriepenger(ref, beregningsresultat);
 
         // Verifiser beregningsresultat
         omsorgspengerYtelseVerifiserer.verifiser(behandling, beregningsresultat);
