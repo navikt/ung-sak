@@ -20,6 +20,10 @@ public class FinnFeriepengepåvirkendeFagsakerTjenestePPN implements FinnFeriepe
 
     private FagsakRepository fagsakRepository;
 
+    FinnFeriepengepåvirkendeFagsakerTjenestePPN() {
+        //for CDI proxy
+    }
+
     @Inject
     public FinnFeriepengepåvirkendeFagsakerTjenestePPN(FagsakRepository fagsakRepository) {
         this.fagsakRepository = fagsakRepository;

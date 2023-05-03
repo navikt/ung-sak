@@ -37,6 +37,10 @@ public class PleiepengerBeregnFeriepenger implements BeregnFeriepengerTjeneste {
     private HentFeriepengeAndelerTjeneste hentFeriepengeAndelerTjeneste;
     private Instance<FinnFeriepengepåvirkendeFagsakerTjeneste> feriepengepåvirkendeFagsakerTjenester;
 
+    PleiepengerBeregnFeriepenger() {
+        //for CDI proxy
+    }
+
     @Inject
     public PleiepengerBeregnFeriepenger(HentFeriepengeAndelerTjeneste hentFeriepengeAndelerTjeneste, @Any Instance<FinnFeriepengepåvirkendeFagsakerTjeneste> feriepengepåvirkendeFagsakerTjenester) {
         this.hentFeriepengeAndelerTjeneste = hentFeriepengeAndelerTjeneste;

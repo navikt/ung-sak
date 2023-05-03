@@ -4,7 +4,7 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 
 import java.util.Set;
 
-import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.ApplicationScoped;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -17,7 +17,7 @@ import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.FeriepengeOppsummering;
 import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.SaksnummerOgSisteBehandling;
 
 @FagsakYtelseTypeRef(OMSORGSPENGER)
-@Dependent
+@ApplicationScoped
 
 //for grenser, se https://www.nav.no/no/nav-og-samfunn/kontakt-nav/utbetalinger/snarveier/ferie-og-feriepenger#chapter-10
 
