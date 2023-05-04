@@ -25,6 +25,7 @@ import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
@@ -92,7 +93,7 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
 
         BeregningsresultatVerifiserer.verifiserBeregningsresultat(nyttBeregningsresultat);
 
-        getFeriepengerTjeneste(behandling).ifPresent(tjeneste -> tjeneste.beregnFeriepenger(nyttBeregningsresultat));
+        getFeriepengerTjeneste(behandling).ifPresent(tjeneste -> tjeneste.beregnFeriepenger(BehandlingReferanse.fra(behandling), nyttBeregningsresultat));
         beregningsresultatRepository.lagre(behandling, nyttBeregningsresultat);
 
         opprettHistorikkinnslag(behandling, gammeltBeregningsresultat, nyttBeregningsresultat);

@@ -55,7 +55,6 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagYtelseKalkulator;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusRestKlient;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagKobling;
 import no.nav.folketrygdloven.kalkulus.kodeverk.YtelseTyperKalkulusStøtterKontrakt;
@@ -101,8 +100,6 @@ public class ForvaltningBeregningRestTjeneste {
     private BehandlingRepository behandlingRepository;
 
     private InntektArbeidYtelseTjeneste iayTjeneste;
-
-    private BeregningsgrunnlagYtelseKalkulator forvaltningBeregning;
     private AksjonspunktRepository aksjonspunktRepository;
     private BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
     private KalkulusRestKlient kalkulusSystemRestKlient;
@@ -112,13 +109,14 @@ public class ForvaltningBeregningRestTjeneste {
 
     private FagsakTjeneste fagsakTjeneste;
 
+    private HentKalkulatorInputDump hentKalkulatorInputDump;
+
 
     public ForvaltningBeregningRestTjeneste() {
     }
 
     @Inject
-    public ForvaltningBeregningRestTjeneste(BeregningsgrunnlagYtelseKalkulator forvaltningBeregning,
-                                            BehandlingRepository behandlingRepository,
+    public ForvaltningBeregningRestTjeneste(BehandlingRepository behandlingRepository,
                                             InntektArbeidYtelseTjeneste iayTjeneste,
                                             BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                             AksjonspunktRepository aksjonspunktRepository,
@@ -126,8 +124,8 @@ public class ForvaltningBeregningRestTjeneste {
                                             SystemUserOidcRestClient systemUserOidcRestClient,
                                             @KonfigVerdi(value = "ftkalkulus.url") URI endpoint,
                                             RevurderBeregningTjeneste revurderBeregningTjeneste,
-                                            EntityManager entityManager, FagsakTjeneste fagsakTjeneste) {
-        this.forvaltningBeregning = forvaltningBeregning;
+                                            EntityManager entityManager, FagsakTjeneste fagsakTjeneste,
+                                            HentKalkulatorInputDump hentKalkulatorInputDump) {
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
@@ -136,6 +134,7 @@ public class ForvaltningBeregningRestTjeneste {
         this.revurderBeregningTjeneste = revurderBeregningTjeneste;
         this.entityManager = entityManager;
         this.fagsakTjeneste = fagsakTjeneste;
+        this.hentKalkulatorInputDump = hentKalkulatorInputDump;
         this.kalkulusSystemRestKlient = new KalkulusRestKlient(systemUserOidcRestClient, endpoint);
     }
 
@@ -151,21 +150,7 @@ public class ForvaltningBeregningRestTjeneste {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         var ref = BehandlingReferanse.fra(behandling);
 
-        var iayGrunnlag = iayTjeneste.hentGrunnlag(ref.getBehandlingId());
-        var sakInntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(ref.getSaksnummer());
-
-        var mapper = forvaltningBeregning.getYtelsesspesifikkMapper(ref.getFagsakYtelseType());
-
-        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, false);
-
-        List<KalkulatorInputPrVilkårperiodeDto> inputListe = perioderTilVurdering.stream()
-            .filter(periode -> !periodeErUtenforFagsaksIntervall(periode, behandling.getFagsak().getPeriode()))
-            .map(vilkårsperiode -> {
-                var ytelseGrunnlag = mapper.lagYtelsespesifiktGrunnlag(ref, vilkårsperiode);
-                var kalkulatorInput = forvaltningBeregning.getKalkulatorInputTjeneste(ref.getFagsakYtelseType()).byggDto(ref, iayGrunnlag, sakInntektsmeldinger, ytelseGrunnlag, vilkårsperiode, null);
-                return new KalkulatorInputPrVilkårperiodeDto(vilkårsperiode, kalkulatorInput);
-            })
-            .collect(Collectors.toList());
+        List<KalkulatorInputPrVilkårperiodeDto> inputListe = hentKalkulatorInputDump.getKalkulatorInputPrVilkårperiodeDtos(ref);
 
         CacheControl cc = new CacheControl();
         cc.setNoCache(true);
@@ -229,7 +214,7 @@ public class ForvaltningBeregningRestTjeneste {
         List<String> saksummer = behandlingerMedAksjonspunkt.keySet().stream()
             .map(Behandling::getFagsak).map(Fagsak::getSaksnummer)
             .map(Saksnummer::getVerdi)
-            .collect(Collectors.toList());
+            .toList();
         logger.info("Fant følgende saksnummer med aksjonspunkt " + migrerAksjonspunktDto.getAksjonspunktKode()
             + ": " + saksummer);
         List<MigrerAksjonspunktRequest> aksjonspunktData = behandlingerMedAksjonspunkt.entrySet().stream().map(e -> lagAksjonspunktData(e.getKey(), e.getValue())).collect(Collectors.toList());
@@ -242,7 +227,7 @@ public class ForvaltningBeregningRestTjeneste {
         var ref = BehandlingReferanse.fra(behandling);
         var stpTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true).stream()
             .map(DatoIntervallEntitet::getFomDato)
-            .collect(Collectors.toList());
+            .toList();
         var bgReferanser = beregningsgrunnlagTjeneste.hentKoblingerForPerioder(ref)
             .stream()
             .filter(kobling -> stpTilVurdering.contains(kobling.getSkjæringstidspunkt()))
@@ -303,11 +288,6 @@ public class ForvaltningBeregningRestTjeneste {
             brukForrigeSkatteoppgjørDto.getSaksnummer(),
             brukForrigeSkatteoppgjørDto.getBehandlingIdForrigeSkatteoppgjør(),
             brukForrigeSkatteoppgjørDto.getSkjæringstidspunkt());
-    }
-
-
-    private boolean periodeErUtenforFagsaksIntervall(DatoIntervallEntitet vilkårPeriode, DatoIntervallEntitet fagsakPeriode) {
-        return !vilkårPeriode.overlapper(fagsakPeriode);
     }
 
 

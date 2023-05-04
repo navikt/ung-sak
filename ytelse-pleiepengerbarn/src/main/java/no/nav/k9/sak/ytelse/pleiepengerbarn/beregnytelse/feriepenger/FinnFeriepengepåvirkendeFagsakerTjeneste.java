@@ -4,6 +4,7 @@ import java.util.Set;
 
 import jakarta.enterprise.inject.Instance;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 
@@ -12,5 +13,5 @@ public interface FinnFeriepengepåvirkendeFagsakerTjeneste {
         return FagsakYtelseTypeRef.Lookup.find(feriepengepåvirkendeFagsakerTjenester, fagsakYtelseType).orElseThrow();
     }
 
-    Set<Fagsak> finnSakerSomPåvirkerFeriepengerFor(Fagsak fagsak);
+    Set<Fagsak> finnSakerSomPåvirkerFeriepengerFor(BehandlingReferanse behandlingReferanse);
 }
