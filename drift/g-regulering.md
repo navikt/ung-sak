@@ -4,7 +4,7 @@ Dokumentasjon for å kjøre g-regulering for ytelser i k9-sak.
 
 ## Forutsettninger
 
-- Oppdatert g-sats i ft-kalkulus
+- Oppdatert g-sats i ft-kalkulus og ft-kalkulus må være prodsatt
 - Bruker med driftstilgang
 
 ## Utførelse
