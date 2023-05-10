@@ -106,11 +106,7 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         final Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         if (søknadsperiodeTjeneste.utledFullstendigPeriode(kontekst.getBehandlingId()).isEmpty()) {
-            if (behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)) {
-                behandling.getAksjonspunktFor(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)
-                    .avbryt();
-                behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
-            }
+            avbrytSykdomsAksjonspunktHvisFinnes(kontekst, behandling);
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
@@ -143,7 +139,16 @@ public class VurderSykdomOgKontinuerligTilsynSteg implements BehandlingSteg {
         vurder(kontekst, medisinskGrunnlag, builder, VilkårType.MEDISINSKEVILKÅR_18_ÅR, perioder18år, perioder18årUtenOmsorgenFor);
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), builder.build());
 
+        avbrytSykdomsAksjonspunktHvisFinnes(kontekst, behandling);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    private void avbrytSykdomsAksjonspunktHvisFinnes(BehandlingskontrollKontekst kontekst, Behandling behandling) {
+        if (behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)) {
+            behandling.getAksjonspunktFor(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)
+                .avbryt();
+            behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
+        }
     }
 
     private NavigableSet<DatoIntervallEntitet> kunPerioderMedOmsorgenFor(final LocalDateTimeline<Utfall> perioderUnder18årTidslinje, Utfall utfall) {
