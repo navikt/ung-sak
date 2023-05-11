@@ -76,7 +76,7 @@ public class FinnFeriepengepåvirkendeFagsakerTjenestePSB implements FinnFeriepe
             .flatMap(ay -> ay.getAlleYtelser().stream())
             .filter(ay -> ay.getKilde() == Fagsystem.INFOTRYGD)
             .filter(ay -> ay.getYtelseType() == OPPLÆRINGSPENGER || ay.getYtelseType() == PLEIEPENGER_SYKT_BARN)
-            .filter(ay -> ay.getYtelseAnvist().stream().flatMap(ya -> ya.getYtelseAnvistAndeler().stream()).anyMatch(this::kanHaFereipenger))
+            .filter(ay -> ay.getYtelseAnvist().stream().flatMap(ya -> ya.getYtelseAnvistAndeler().stream()).anyMatch(this::kanHaFeriepenger))
             .toList();
 
         long dummyInfotrygdBehandlingId = 0;
@@ -84,10 +84,10 @@ public class FinnFeriepengepåvirkendeFagsakerTjenestePSB implements FinnFeriepe
         return new LocalDateTimeline<>(segmenter, StandardCombinators::union);
     }
 
-    private boolean kanHaFereipenger(YtelseAnvistAndel andel) {
-        boolean inntektskategoriMedFereiepenger = andel.getInntektskategori() == Inntektskategori.ARBEIDSTAKER || andel.getInntektskategori() == Inntektskategori.SJØMANN;
+    private boolean kanHaFeriepenger(YtelseAnvistAndel andel) {
+        boolean inntektskategoriMedFeriepenger = andel.getInntektskategori() == Inntektskategori.ARBEIDSTAKER || andel.getInntektskategori() == Inntektskategori.SJØMANN;
         boolean harTilkjentYtelse = andel.getDagsats() != null && andel.getDagsats().getVerdi().compareTo(BigDecimal.ZERO) > 0;
-        return inntektskategoriMedFereiepenger && harTilkjentYtelse;
+        return inntektskategoriMedFeriepenger && harTilkjentYtelse;
 
     }
 
