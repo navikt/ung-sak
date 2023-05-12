@@ -7,6 +7,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.InfotrygdFeriepengegrunnlag;
 import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.SaksnummerOgSisteBehandling;
 
 public interface FinnFeriepengepåvirkendeFagsakerTjeneste {
@@ -15,4 +16,7 @@ public interface FinnFeriepengepåvirkendeFagsakerTjeneste {
     }
 
     LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> finnPåvirkedeSaker(BehandlingReferanse behandling);
+
+    InfotrygdFeriepengegrunnlag finnInfotrygdFeriepengegrunnlag(BehandlingReferanse behandlingReferanse);
+
 }
