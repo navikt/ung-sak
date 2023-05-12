@@ -12,6 +12,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.specification.LeafSpecification;
@@ -31,10 +35,12 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.InfotrygdFeriepeng
 
 class BeregnFeriepenger extends LeafSpecification<BeregningsresultatFeriepengerRegelModell> {
 
-    public static final String ID = "FP_BR 8.6.1";
+    public static final String ID = "FP_BR 8.6.1 v2";
     public static final String BESKRIVELSE = "Beregn feriepenger for periode som går over flere kalenderår.";
 
     private static final BigDecimal FERIEPENGER_SATS = BigDecimal.valueOf(0.102);
+
+    private static final Logger logger = LoggerFactory.getLogger(BeregnFeriepenger.class);
 
     BeregnFeriepenger() {
         super(ID, BESKRIVELSE);
@@ -63,17 +69,29 @@ class BeregnFeriepenger extends LeafSpecification<BeregningsresultatFeriepengerR
             regelsporing.put("perioder-med-feriepenger-på-tvers-av-saker", prettyPrint(tidslinjeYtelseKanGiFeriepenger));
         }
 
+        beregnInfotrygdFeriepengerKorrigering(regelsporing, regelModell, tidslinjeFeriepengerInnenforKvote);
+
         beregn(regelsporing, regelModell, tidslinjeFeriepengerInnenforKvote, MottakerType.BRUKER);
         beregn(regelsporing, regelModell, tidslinjeFeriepengerInnenforKvoteRefusjon, MottakerType.ARBEIDSGIVER);
 
-        beregnInfotrygdFeriepengerKorrigering(regelsporing, regelModell, tidslinjeFeriepengerInnenforKvote);
 
         return beregnet(regelsporing);
     }
 
+    /**
+     * For søknadsperioder til og med 2023 er opplæringspenger i Infotrygd og pleiepenger sykt barn er i k9-sak. Dette samtidig med at de deler kvote.
+     * For å unngå feilutbetaling av feriepenger, må disse sees under ett. Valgt løsning er er to-delt.
+     * <p>
+     * Del 1 er at k9-sak tar med infotrygd-saken inn i egen feriepengeberegning, og slik teller dager hvor Infotrygd forbruker feriepenger.
+     * <p>
+     * Del 2 er at k9-sak korrigerer så godt som mulig ved å redusere egen feriepengeutbetaling når infotrygd har utbetalt feriepenger for perioder etter at kvota er brukt opp i k9-sak.
+     * <p>
+     * Funksjonen under dekker del 2.
+     */
     private static void beregnInfotrygdFeriepengerKorrigering(Map<String, Object> regelsporing, BeregningsresultatFeriepengerRegelModell regelModell, LocalDateTimeline<Boolean> tidslinjeFeriepengerInnenforKvote) {
         InfotrygdFeriepengegrunnlag infotrygdFeriepengegrunnlag = regelModell.getInfotrygdFeriepengegrunnlag();
         if (infotrygdFeriepengegrunnlag == null) {
+            regelModell.setFeriepengekorrigeringInfotrygd(List.of());
             return;
         }
 
@@ -89,7 +107,7 @@ class BeregnFeriepenger extends LeafSpecification<BeregningsresultatFeriepengerR
             LocalDateTimeline<BigDecimal> trengerKorrigering = infotrygdFeriepengeTidslinje.disjoint(tidslinjeFeriepengerInnenforKvote);
             NavigableMap<Year, LocalDateTimeline<BigDecimal>> korrigeringPrÅr = TidslinjeUtil.splittOgGruperPåÅrstall(trengerKorrigering);
             for (Map.Entry<Year, LocalDateTimeline<BigDecimal>> e : korrigeringPrÅr.entrySet()) {
-                BigDecimal korrigering = summerFeriepenger(e.getValue()).negate();
+                BigDecimal korrigering = summerFeriepenger(e.getValue());
                 resultat.add(FeriepengekorrigeringInfotrygd.forBruker(e.getKey(), korrigering));
             }
         }
@@ -101,7 +119,7 @@ class BeregnFeriepenger extends LeafSpecification<BeregningsresultatFeriepengerR
                 LocalDateTimeline<BigDecimal> trengerKorrigering = infotrygdFeriepengeTidslinje.disjoint(tidslinjeFeriepengerInnenforKvote);
                 NavigableMap<Year, LocalDateTimeline<BigDecimal>> korrigeringPrÅr = TidslinjeUtil.splittOgGruperPåÅrstall(trengerKorrigering);
                 for (Map.Entry<Year, LocalDateTimeline<BigDecimal>> e : korrigeringPrÅr.entrySet()) {
-                    BigDecimal korrigering = summerFeriepenger(e.getValue()).negate();
+                    BigDecimal korrigering = summerFeriepenger(e.getValue());
                     resultat.add(FeriepengekorrigeringInfotrygd.forRefusjon(e.getKey(), arbeidsgiver, korrigering));
                 }
             }));
@@ -122,6 +140,8 @@ class BeregnFeriepenger extends LeafSpecification<BeregningsresultatFeriepengerR
         boolean harFeriepengeopptjeningForHelg = regelModell.harFeriepengeopptjeningForHelg();
         Predicate<BeregningsresultatAndel> andelFilter = andel -> andel.girRettTilFeriepenger() && andel.getMottakerType() == mottakerType;
         Map<FeriepengeNøkkel, BigDecimal> avrundingTilgode = new HashMap<>();
+        Map<FeriepengeNøkkel, BigDecimal> infotrygdKorrigering = map(regelModell.getFeriepengekorrigeringInfotrygd());
+        BigDecimal korrigeringsbehov = infotrygdKorrigering.values().stream().reduce(BigDecimal::add).orElse(BigDecimal.ZERO);
 
         for (BeregningsresultatPeriode periode : beregningsresultatPerioder) {
             LocalDateTimeline<Boolean> overlapp = tidslinjeHvorFeriepengerGis.intersection(periode.getPeriode());
@@ -139,14 +159,25 @@ class BeregnFeriepenger extends LeafSpecification<BeregningsresultatFeriepengerR
                         if (!andelFilter.test(andel)) {
                             continue;
                         }
+                        String andelId = andel.getArbeidsforhold() != null ? andel.getArbeidsgiverId() : andel.getAktivitetStatus().name();
                         long feriepengerGrunnlag = andel.getDagsats() * antallFeriepengerDager;
                         BigDecimal feriepengerAndelPrÅr = BigDecimal.valueOf(feriepengerGrunnlag).multiply(FERIEPENGER_SATS);
                         FeriepengeNøkkel nøkkel = new FeriepengeNøkkel(andel.getMottakerType(), andel.getMottakerType() == MottakerType.BRUKER ? null : andel.getArbeidsgiverId(), åretsOverlapp.getFomDato().getYear());
+                        if (infotrygdKorrigering.containsKey(nøkkel)) {
+                            BigDecimal gjenståendeKorrigering = infotrygdKorrigering.get(nøkkel);
+                            BigDecimal korreksjon = feriepengerAndelPrÅr.compareTo(gjenståendeKorrigering) > 0 ? gjenståendeKorrigering : feriepengerAndelPrÅr;
+                            regelsporing.put("Feriepenger." + andel.getMottakerType() + "." + andelId + " i " + periodeNavn + " redusert.pga.korrigering.mot.infotrygd.med", korreksjon);
+                            gjenståendeKorrigering = gjenståendeKorrigering.subtract(korreksjon);
+                            if (gjenståendeKorrigering.signum() == 0) {
+                                infotrygdKorrigering.remove(nøkkel);
+                            } else {
+                                infotrygdKorrigering.put(nøkkel, gjenståendeKorrigering);
+                            }
+                        }
                         BigDecimal tidligereAvrunding = avrundingTilgode.getOrDefault(nøkkel, BigDecimal.ZERO);
                         BigDecimal endeligFeriepengerForAndelen = feriepengerAndelPrÅr.subtract(tidligereAvrunding).setScale(0, RoundingMode.HALF_UP);
                         BigDecimal avrunding = endeligFeriepengerForAndelen.subtract(feriepengerAndelPrÅr);
 
-                        String andelId = andel.getArbeidsforhold() != null ? andel.getArbeidsgiverId() : andel.getAktivitetStatus().name();
                         if (feriepengerAndelPrÅr.compareTo(BigDecimal.ZERO) != 0) {
                             regelsporing.put("Feriepenger." + andel.getMottakerType() + "." + andelId + " i " + periodeNavn, feriepengerAndelPrÅr);
                         }
@@ -164,6 +195,19 @@ class BeregnFeriepenger extends LeafSpecification<BeregningsresultatFeriepengerR
                 }
             }
         }
+        if (korrigeringsbehov.signum() != 0) {
+            BigDecimal gjenståendeKorrigeringsbehov = infotrygdKorrigering.values().stream().reduce(BigDecimal::add).orElse(BigDecimal.ZERO);
+            if (gjenståendeKorrigeringsbehov.signum() == 0) {
+                logger.info("Korrigerte feilutbetalte feriepenger fra infotrygd.");
+            } else {
+                logger.warn("Klarte ikke å korrigere 100% av feilutbetalte feriepenger fra infotrygd. Gjenstår {} % av det som skulle korrigeres.", BigDecimal.valueOf(100).multiply(gjenståendeKorrigeringsbehov).divide(korrigeringsbehov, 0, RoundingMode.HALF_UP));
+            }
+        }
+    }
+
+    private static Map<FeriepengeNøkkel, BigDecimal> map(List<FeriepengekorrigeringInfotrygd> feriepengekorrigeringInfotrygd) {
+        return feriepengekorrigeringInfotrygd.stream()
+            .collect(Collectors.toMap(it -> new FeriepengeNøkkel(it.erRefusjon() ? MottakerType.ARBEIDSGIVER : MottakerType.BRUKER, it.erRefusjon() ? it.getArbeidsgiver().getIdentifikator() : null, it.getOpptjeningsår().getValue()), FeriepengekorrigeringInfotrygd::getKorrigeringsbeløp, BigDecimal::add));
     }
 
     record FeriepengeNøkkel(MottakerType mottakerType, String mottakerId, int år) {
