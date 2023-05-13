@@ -205,10 +205,10 @@ public class FagsakProsessTaskRepository {
             return lagreNyGruppe(gruppe);
         }
 
-        var vetoedTasksAvSammeTypeSomNye = new HashSet<>(planlagteTaskTyperBlokkertAvKjørende);
-        vetoedTasksAvSammeTypeSomNye.retainAll(nyeTaskTyper);
+        var vetoedTasksAvSammeTypeSomNy = new HashSet<>(planlagteTaskTyperBlokkertAvKjørende);
+        vetoedTasksAvSammeTypeSomNy.retainAll(nyeTaskTyper);
 
-        if (!vetoedTasksAvSammeTypeSomNye.isEmpty() && nyeTaskTyper.containsAll(vetoedTasksAvSammeTypeSomNye) && Objects.equals(nyeTaskTyper.size(), vetoedTasksAvSammeTypeSomNye.size())) {
+        if (!vetoedTasksAvSammeTypeSomNy.isEmpty() && nyeTaskTyper.containsAll(vetoedTasksAvSammeTypeSomNy) && Objects.equals(nyeTaskTyper.size(), vetoedTasksAvSammeTypeSomNy.size())) {
             var grupper = planlagteTasksBlokkertAvKjørende.stream().map(ProsessTaskData::getGruppe).collect(Collectors.toSet());
             log.info("Skipper opprettelse av gruppe med tasks: [{}], Har allerede vetoet tasks av samme type [{}]", toStringEntry(gruppe.getTasks()), planlagteTaskTyperBlokkertAvKjørende);
             return grupper.stream().findFirst().orElseThrow();
