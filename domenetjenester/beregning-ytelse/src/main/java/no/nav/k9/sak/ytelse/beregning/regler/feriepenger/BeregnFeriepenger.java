@@ -140,20 +140,21 @@ class BeregnFeriepenger extends LeafSpecification<BeregningsresultatFeriepengerR
         boolean harFeriepengeopptjeningForHelg = regelModell.harFeriepengeopptjeningForHelg();
         Predicate<BeregningsresultatAndel> andelFilter = andel -> andel.girRettTilFeriepenger() && andel.getMottakerType() == mottakerType;
         Map<FeriepengeNøkkel, BigDecimal> avrundingTilgode = new HashMap<>();
-        Map<FeriepengeNøkkel, BigDecimal> infotrygdKorrigering = map(regelModell.getFeriepengekorrigeringInfotrygd());
+        Map<Year, BigDecimal> infotrygdKorrigering = map(regelModell.getFeriepengekorrigeringInfotrygd());
         BigDecimal korrigeringsbehov = infotrygdKorrigering.values().stream().reduce(BigDecimal::add).orElse(BigDecimal.ZERO);
 
         for (BeregningsresultatPeriode periode : beregningsresultatPerioder) {
             LocalDateTimeline<Boolean> overlapp = tidslinjeHvorFeriepengerGis.intersection(periode.getPeriode());
             if (!overlapp.isEmpty() && periode.getBeregningsresultatAndelList().stream().anyMatch(andelFilter)) {
                 for (LocalDateInterval åretsOverlapp : IntervallUtil.splittVedÅrskifte(overlapp).getLocalDateIntervals()) {
+                    Year opptjeningsår =  Year.of(åretsOverlapp.getFomDato().getYear());
                     long antallFeriepengerDager = harFeriepengeopptjeningForHelg
                         ? IntervallUtil.beregnKalanderdager(åretsOverlapp)
                         : IntervallUtil.beregnUkedager(åretsOverlapp);
 
                     String periodeNavn = "perioden " + åretsOverlapp + "for " + mottakerType.name().toLowerCase();
                     regelsporing.put("Antall feriepengedager i " + periodeNavn, antallFeriepengerDager);
-                    regelsporing.put("Opptjeningsår i " + periodeNavn, åretsOverlapp.getFomDato().getYear());
+                    regelsporing.put("Opptjeningsår i " + periodeNavn, opptjeningsår);
 
                     for (BeregningsresultatAndel andel : periode.getBeregningsresultatAndelList()) {
                         if (!andelFilter.test(andel)) {
@@ -162,18 +163,19 @@ class BeregnFeriepenger extends LeafSpecification<BeregningsresultatFeriepengerR
                         String andelId = andel.getArbeidsforhold() != null ? andel.getArbeidsgiverId() : andel.getAktivitetStatus().name();
                         long feriepengerGrunnlag = andel.getDagsats() * antallFeriepengerDager;
                         BigDecimal feriepengerAndelPrÅr = BigDecimal.valueOf(feriepengerGrunnlag).multiply(FERIEPENGER_SATS);
-                        FeriepengeNøkkel nøkkel = new FeriepengeNøkkel(andel.getMottakerType(), andel.getMottakerType() == MottakerType.BRUKER ? null : andel.getArbeidsgiverId(), åretsOverlapp.getFomDato().getYear());
-                        if (infotrygdKorrigering.containsKey(nøkkel)) {
-                            BigDecimal gjenståendeKorrigering = infotrygdKorrigering.get(nøkkel);
+
+                        if (infotrygdKorrigering.containsKey(opptjeningsår)) {
+                            BigDecimal gjenståendeKorrigering = infotrygdKorrigering.get(opptjeningsår);
                             BigDecimal korreksjon = feriepengerAndelPrÅr.compareTo(gjenståendeKorrigering) > 0 ? gjenståendeKorrigering : feriepengerAndelPrÅr;
                             regelsporing.put("Feriepenger." + andel.getMottakerType() + "." + andelId + " i " + periodeNavn + " redusert.pga.korrigering.mot.infotrygd.med", korreksjon);
                             gjenståendeKorrigering = gjenståendeKorrigering.subtract(korreksjon);
                             if (gjenståendeKorrigering.signum() == 0) {
-                                infotrygdKorrigering.remove(nøkkel);
+                                infotrygdKorrigering.remove(opptjeningsår);
                             } else {
-                                infotrygdKorrigering.put(nøkkel, gjenståendeKorrigering);
+                                infotrygdKorrigering.put(opptjeningsår, gjenståendeKorrigering);
                             }
                         }
+                        FeriepengeNøkkel nøkkel = new FeriepengeNøkkel(andel.getMottakerType(), andel.getMottakerType() == MottakerType.BRUKER ? null : andel.getArbeidsgiverId(), opptjeningsår.getValue());
                         BigDecimal tidligereAvrunding = avrundingTilgode.getOrDefault(nøkkel, BigDecimal.ZERO);
                         BigDecimal endeligFeriepengerForAndelen = feriepengerAndelPrÅr.subtract(tidligereAvrunding).setScale(0, RoundingMode.HALF_UP);
                         BigDecimal avrunding = endeligFeriepengerForAndelen.subtract(feriepengerAndelPrÅr);
@@ -205,9 +207,9 @@ class BeregnFeriepenger extends LeafSpecification<BeregningsresultatFeriepengerR
         }
     }
 
-    private static Map<FeriepengeNøkkel, BigDecimal> map(List<FeriepengekorrigeringInfotrygd> feriepengekorrigeringInfotrygd) {
+    private static Map<Year, BigDecimal> map(List<FeriepengekorrigeringInfotrygd> feriepengekorrigeringInfotrygd) {
         return feriepengekorrigeringInfotrygd.stream()
-            .collect(Collectors.toMap(it -> new FeriepengeNøkkel(it.erRefusjon() ? MottakerType.ARBEIDSGIVER : MottakerType.BRUKER, it.erRefusjon() ? it.getArbeidsgiver().getIdentifikator() : null, it.getOpptjeningsår().getValue()), FeriepengekorrigeringInfotrygd::getKorrigeringsbeløp, BigDecimal::add));
+            .collect(Collectors.toMap(FeriepengekorrigeringInfotrygd::getOpptjeningsår, FeriepengekorrigeringInfotrygd::getKorrigeringsbeløp, BigDecimal::add));
     }
 
     record FeriepengeNøkkel(MottakerType mottakerType, String mottakerId, int år) {
