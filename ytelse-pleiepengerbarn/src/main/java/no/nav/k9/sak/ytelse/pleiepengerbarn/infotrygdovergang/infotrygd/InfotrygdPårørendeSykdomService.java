@@ -50,6 +50,15 @@ public class InfotrygdPårørendeSykdomService {
         return relevanteGrunnlagPrSøker;
     }
 
+    public Map<String, List<PeriodeMedBehandlingstema>> hentRelevanteGrunnlagsperioderPrPleietrengende(InfotrygdPårørendeSykdomRequest request) {
+        List<PårørendeSykdom> grunnlag = client.getGrunnlagForPleietrengende(new PersonRequest(request.getFraOgMed(), request.getTilOgMed(), List.of(request.getFødselsnummer())));
+        return grunnlag.stream()
+            .filter(gr -> erRelevant(gr, request.getRelevanteBehandlingstemaer()))
+            .collect(Collectors.groupingBy(
+                PårørendeSykdom::foedselsnummerSoeker,
+                Collectors.flatMapping(mapTilPeriodeMedBehandlingstema(), Collectors.toList())));
+    }
+
     private Function<PårørendeSykdom, Stream<PeriodeMedBehandlingstema>> mapTilPeriodeMedBehandlingstema() {
         return gr -> gr.vedtak().stream().map(v -> new PeriodeMedBehandlingstema(v.periode(), gr.behandlingstema().getKode()));
     }
@@ -98,10 +107,6 @@ public class InfotrygdPårørendeSykdomService {
         }
 
         return relevanteBehandlingstemaer.contains(sak.getBehandlingstema().getKode());
-    }
-
-    public List<PårørendeSykdom> hentGrunnlagForSøker(InfotrygdPårørendeSykdomRequest request) {
-        return client.getGrunnlagForPleietrengende(new PersonRequest(request.getFraOgMed(), request.getTilOgMed(), List.of(request.getFødselsnummer())));
     }
 
 }

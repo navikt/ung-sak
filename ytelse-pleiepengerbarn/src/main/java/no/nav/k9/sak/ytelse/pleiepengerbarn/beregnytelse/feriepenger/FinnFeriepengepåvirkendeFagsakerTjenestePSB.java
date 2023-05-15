@@ -35,6 +35,7 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.InfotrygdFeriepengegrunnlag;
 import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.SaksnummerOgSisteBehandling;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.infotrygdovergang.infotrygd.InfotrygdPårørendeSykdomService;
 
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
@@ -44,6 +45,7 @@ public class FinnFeriepengepåvirkendeFagsakerTjenestePSB implements FinnFeriepe
     private FagsakRepository fagsakRepository;
     private HentFeriepengeAndelerTjeneste hentFeriepengeAndelerTjeneste;
     private InntektArbeidYtelseTjeneste iayTjeneste;
+    private InfotrygdPårørendeSykdomService infotrygdPårørendeSykdomService;
     private boolean korrigerMotInfotrygd;
 
     /**
@@ -59,10 +61,12 @@ public class FinnFeriepengepåvirkendeFagsakerTjenestePSB implements FinnFeriepe
     public FinnFeriepengepåvirkendeFagsakerTjenestePSB(FagsakRepository fagsakRepository,
                                                        HentFeriepengeAndelerTjeneste hentFeriepengeAndelerTjeneste,
                                                        InntektArbeidYtelseTjeneste iayTjeneste,
+                                                       InfotrygdPårørendeSykdomService infotrygdPårørendeSykdomService,
                                                        @KonfigVerdi(value = "FERIEPENGER_INFOTRYGD_KORRIGER", defaultVerdi = "false") boolean korrigerMotInfotrygd) {
         this.fagsakRepository = fagsakRepository;
         this.hentFeriepengeAndelerTjeneste = hentFeriepengeAndelerTjeneste;
         this.iayTjeneste = iayTjeneste;
+        this.infotrygdPårørendeSykdomService = infotrygdPårørendeSykdomService;
         this.korrigerMotInfotrygd = korrigerMotInfotrygd;
     }
 
