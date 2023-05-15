@@ -5,8 +5,10 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BA
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -43,6 +45,11 @@ public class FinnFeriepengepåvirkendeFagsakerTjenestePSB implements FinnFeriepe
     private HentFeriepengeAndelerTjeneste hentFeriepengeAndelerTjeneste;
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private boolean korrigerMotInfotrygd;
+
+    /**
+     * periode hvor feriepenger skal samkjøres mellom k9 og infotrygd, ved at det korrigeres fra k9-siden.
+     */
+    private static final LocalDateInterval SAMKJØRINGSPERIODE = new LocalDateInterval(LocalDate.of(2022, 1, 1), LocalDate.of(2023, 12, 31));
 
     FinnFeriepengepåvirkendeFagsakerTjenestePSB() {
         //for CDI proxy
@@ -85,14 +92,18 @@ public class FinnFeriepengepåvirkendeFagsakerTjenestePSB implements FinnFeriepe
             for (Ytelse ytelse : ytelser) {
                 Saksnummer saksnummer = ytelse.getSaksnummer();
                 for (YtelseAnvist anvist : ytelse.getYtelseAnvist()) {
-                    LocalDateInterval periode = new LocalDateInterval(anvist.getAnvistFOM(), anvist.getAnvistTOM());
+                    LocalDateInterval anvistPeriode = new LocalDateInterval(anvist.getAnvistFOM(), anvist.getAnvistTOM());
+                    Optional<LocalDateInterval> overlapp = anvistPeriode.overlap(SAMKJØRINGSPERIODE);
+                    if (overlapp.isEmpty()) {
+                        continue;
+                    }
                     for (YtelseAnvistAndel andel : anvist.getYtelseAnvistAndeler()) {
                         boolean inntektskategoriMedFeriepenger = andel.getInntektskategori() == Inntektskategori.ARBEIDSTAKER || andel.getInntektskategori() == Inntektskategori.SJØMANN;
                         if (inntektskategoriMedFeriepenger) {
                             BigDecimal dagsatsRefusjon = andel.getDagsats().getVerdi().multiply(andel.getRefusjonsgradProsent().getVerdi()).setScale(2, RoundingMode.HALF_UP);
                             BigDecimal dagsatsBruker = andel.getDagsats().getVerdi().subtract(dagsatsRefusjon);
                             Arbeidsgiver arbeidsgiver = andel.getArbeidsgiver().orElse(null);
-                            andeler.add(new InfotrygdFeriepengegrunnlag.InfotrygdFeriepengegrunnlagAndel(periode, saksnummer, arbeidsgiver, dagsatsBruker, dagsatsRefusjon));
+                            andeler.add(new InfotrygdFeriepengegrunnlag.InfotrygdFeriepengegrunnlagAndel(overlapp.get(), saksnummer, arbeidsgiver, dagsatsBruker, dagsatsRefusjon));
                         }
                     }
                 }
