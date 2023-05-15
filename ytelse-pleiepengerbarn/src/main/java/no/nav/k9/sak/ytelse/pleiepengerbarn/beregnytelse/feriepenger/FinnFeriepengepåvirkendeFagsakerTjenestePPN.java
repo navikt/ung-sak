@@ -14,6 +14,7 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.InfotrygdFeriepengegrunnlag;
 import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.SaksnummerOgSisteBehandling;
 
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
@@ -38,6 +39,12 @@ public class FinnFeriepengepåvirkendeFagsakerTjenestePPN implements FinnFeriepe
     public LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> finnPåvirkedeSaker(BehandlingReferanse behandling) {
         Set<Fagsak> påvirkendeFagsaker = finnSakerSomPåvirkerFeriepengerFor(behandling);
         return hentFeriepengeAndelerTjeneste.finnAndelerSomKanGiFeriepenger(påvirkendeFagsaker);
+    }
+
+    @Override
+    public InfotrygdFeriepengegrunnlag finnInfotrygdFeriepengegrunnlag(BehandlingReferanse behandlingReferanse) {
+        //ingen saker i infotrygd som er aktuelle
+        return null;
     }
 
     private Set<Fagsak> finnSakerSomPåvirkerFeriepengerFor(BehandlingReferanse behandlingReferanse) {
