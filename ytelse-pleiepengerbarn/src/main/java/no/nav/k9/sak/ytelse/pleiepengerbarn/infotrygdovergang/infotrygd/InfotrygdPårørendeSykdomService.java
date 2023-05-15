@@ -100,4 +100,8 @@ public class InfotrygdPårørendeSykdomService {
         return relevanteBehandlingstemaer.contains(sak.getBehandlingstema().getKode());
     }
 
+    public List<PårørendeSykdom> hentGrunnlagForSøker(InfotrygdPårørendeSykdomRequest request) {
+        return client.getGrunnlagForPleietrengende(new PersonRequest(request.getFraOgMed(), request.getTilOgMed(), List.of(request.getFødselsnummer())));
+    }
+
 }
