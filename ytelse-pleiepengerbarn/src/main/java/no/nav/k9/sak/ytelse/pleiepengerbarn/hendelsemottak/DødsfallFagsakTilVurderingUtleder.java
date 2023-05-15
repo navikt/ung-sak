@@ -1,16 +1,5 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.hendelsemottak;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -28,6 +17,12 @@ import no.nav.k9.sak.hendelsemottak.tjenester.FagsakerTilVurderingUtleder;
 import no.nav.k9.sak.hendelsemottak.tjenester.HendelseTypeRef;
 import no.nav.k9.sak.kontrakt.hendelser.Hendelse;
 import no.nav.k9.sak.typer.AktørId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @ApplicationScoped
 @HendelseTypeRef("PDL_DØDSFALL")
@@ -86,7 +81,13 @@ public class DødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderingU
      * hindrer også revurdering hvis hendelsen kommer etter at behandlingen er oppdatert med ny data.
      */
     private boolean erNyInformasjonIHendelsen(Fagsak fagsak, AktørId aktør, LocalDate dødsdato, String hendelseId) {
-        Behandling behandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow();
+        Optional<Behandling> behandlingOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
+        if (behandlingOpt.isEmpty()) {
+            logger.info("Det er ingen behandling på fagsak. Ignorer hendelse");
+            return false;
+        }
+
+        Behandling behandling = behandlingOpt.get();
         PersonopplysningGrunnlagEntitet personopplysninger = personopplysningRepository.hentPersonopplysninger(behandling.getId());
         if (personopplysninger != null) {
             for (PersonopplysningEntitet personopplysning : personopplysninger.getGjeldendeVersjon().getPersonopplysninger()) {
