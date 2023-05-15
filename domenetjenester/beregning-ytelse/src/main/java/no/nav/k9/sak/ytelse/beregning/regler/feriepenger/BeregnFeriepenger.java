@@ -221,7 +221,7 @@ class BeregnFeriepenger extends LeafSpecification<BeregningsresultatFeriepengerR
     }
 
     private static String prettyPrintMedVerdier(LocalDateTimeline<BigDecimal> tidlinje) {
-        return String.join(",", tidlinje.stream().map(segment -> segment.getFom() + "-" + segment.getTom() + ":" + segment.getValue().setScale(2, RoundingMode.UNNECESSARY)).toList());
+        return String.join(",", tidlinje.stream().map(segment -> segment.getFom() + "-" + segment.getTom() + ":" + segment.getValue().setScale(2, RoundingMode.HALF_UP)).toList());
     }
 
     private LocalDateTimeline<Boolean> utledPerioderInnenforKvote(LocalDateTimeline<Boolean> tidslinjeHvorYtelseHarEllerKanGiFeriepenger, BeregningsresultatFeriepengerRegelModell regelModell) {
