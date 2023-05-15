@@ -262,8 +262,6 @@ spec:
       value: "true"
     - name: OMS_ZERO_REFUSJON_ER_KRAV
       value: "true"
-    - name: FERIEPENGER_INFOTRYGD_KORRIGER
-      value: "true"
 
 
     # Konfigurasjoner
