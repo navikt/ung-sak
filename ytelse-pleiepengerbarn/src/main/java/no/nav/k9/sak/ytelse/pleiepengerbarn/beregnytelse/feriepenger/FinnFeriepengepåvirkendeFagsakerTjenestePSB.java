@@ -13,6 +13,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.abakus.iaygrunnlag.kodeverk.Inntektskategori;
@@ -47,6 +50,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.infotrygdovergang.infotrygd.Infotryg
 @FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
 @ApplicationScoped
 public class FinnFeriepengepåvirkendeFagsakerTjenestePSB implements FinnFeriepengepåvirkendeFagsakerTjeneste {
+
+    private static final Logger log = LoggerFactory.getLogger(FinnFeriepengepåvirkendeFagsakerTjenestePSB.class);
 
     private FagsakRepository fagsakRepository;
     private HentFeriepengeAndelerTjeneste hentFeriepengeAndelerTjeneste;
@@ -110,7 +115,7 @@ public class FinnFeriepengepåvirkendeFagsakerTjenestePSB implements FinnFeriepe
                     .fødselsnummer(personIdentTjeneste.hentFnrForAktør(behandling.getAktørId()).getIdent())
                     .fraOgMed(SAMKJØRINGSPERIODE.getFomDato())
                     .tilOgMed(SAMKJØRINGSPERIODE.getTomDato())
-                    .relevanteBehandlingstemaer(Set.of("PN", "OP")) //TODO er dette riktig behandlingstema?
+                    .relevanteBehandlingstemaer(Set.of("PN", "OP"))
                     .build(),
                 personIdentTjeneste.hentFnrForAktør(behandling.getFagsak().getPleietrengendeAktørId()).getIdent());
             LocalDateTimeline<Boolean> tidslinjeInfotrygdPleietrengende = TidslinjeUtil.tilTidslinjeKomprimert(infotrygdVedtaksperioderForPleietrengende);
@@ -125,7 +130,9 @@ public class FinnFeriepengepåvirkendeFagsakerTjenestePSB implements FinnFeriepe
                     }
                     LocalDateTimeline<Boolean> tidslinjeAnvist = new LocalDateTimeline<>(overlapp.get(), Boolean.TRUE);
                     if (!tidslinjeAnvist.intersects(tidslinjeInfotrygdPleietrengende)) {
+                        log.info("Tar ikke med periode: {} i feriepengegrunnlag fra infotrygd. Funnet tidslinje for pleietrengende er: {}", overlapp.get(), tidslinjeInfotrygdPleietrengende);
                         continue;
+                        // Merk at vi ikke hensyntar evt overlappende ytelser for ulike pleietrengende her
                     }
                     for (YtelseAnvistAndel andel : anvist.getYtelseAnvistAndeler()) {
                         boolean inntektskategoriMedFeriepenger = andel.getInntektskategori() == Inntektskategori.ARBEIDSTAKER || andel.getInntektskategori() == Inntektskategori.SJØMANN;
@@ -133,7 +140,6 @@ public class FinnFeriepengepåvirkendeFagsakerTjenestePSB implements FinnFeriepe
                             BigDecimal dagsatsRefusjon = andel.getDagsats().getVerdi().multiply(andel.getRefusjonsgradProsent().getVerdi()).setScale(2, RoundingMode.HALF_UP);
                             BigDecimal dagsatsBruker = andel.getDagsats().getVerdi().subtract(dagsatsRefusjon);
                             Arbeidsgiver arbeidsgiver = andel.getArbeidsgiver().orElse(null);
-                            //TODO kan vi anta at anvist andel alltid vil overlappe fullt eller ikke i det hele tatt med tidslinjen fra infotrygd? Hvis ikke må vi modifisere perioden vi bruker her
                             andeler.add(new InfotrygdFeriepengegrunnlag.InfotrygdFeriepengegrunnlagAndel(overlapp.get(), saksnummer, arbeidsgiver, dagsatsBruker, dagsatsRefusjon));
                         }
                     }

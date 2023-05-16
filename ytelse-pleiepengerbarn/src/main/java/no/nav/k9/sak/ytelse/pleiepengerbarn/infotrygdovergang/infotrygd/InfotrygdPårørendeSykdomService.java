@@ -53,8 +53,10 @@ public class InfotrygdPårørendeSykdomService {
 
     public List<Periode> hentRelevanteGrunnlagsperioderForPleietrengende(InfotrygdPårørendeSykdomRequest request, String pleietrengendeFnr) {
         List<PårørendeSykdom> grunnlag = client.getGrunnlagForPleietrengende(new PersonRequest(request.getFraOgMed(), request.getTilOgMed(), List.of(request.getFødselsnummer())));
+        log.info("Tema fra infotrygd: {}", grunnlag.stream().map(gr -> gr.tema().getKode()).collect(Collectors.toList()));
+        log.info("Behandlingstema fra infotrygd: {}", grunnlag.stream().map(gr -> gr.behandlingstema().getKode()).collect(Collectors.toList()));
         return grunnlag.stream()
-            .filter(gr -> erRelevant(gr, request.getRelevanteBehandlingstemaer())) //TODO dekker tema "BS" også OLP?
+            .filter(gr -> erRelevant(gr, request.getRelevanteBehandlingstemaer()))
             .filter(gr -> Objects.equals(gr.foedselsnummerPleietrengende(), pleietrengendeFnr))
             .collect(Collectors.flatMapping(mapTilPeriode(), Collectors.toList()));
     }
@@ -64,7 +66,7 @@ public class InfotrygdPårørendeSykdomService {
     }
 
     private Function<PårørendeSykdom, Stream<Periode>> mapTilPeriode() {
-        return gr -> gr.vedtak().stream().map(VedtakPårørendeSykdomInfotrygd::periode); //TODO skal vi filtrere vekk perioder med utbetalingsgrad=0?
+        return gr -> gr.vedtak().stream().map(VedtakPårørendeSykdomInfotrygd::periode);
     }
 
     private List<VedtakPleietrengende> hentRelevantePleietrengendeVedtakIInfotrygd(InfotrygdPårørendeSykdomRequest request) {
