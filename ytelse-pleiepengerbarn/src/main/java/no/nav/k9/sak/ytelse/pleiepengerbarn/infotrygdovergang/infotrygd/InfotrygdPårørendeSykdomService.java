@@ -54,8 +54,8 @@ public class InfotrygdPårørendeSykdomService {
     public List<Periode> hentRelevanteGrunnlagsperioderForPleietrengende(InfotrygdPårørendeSykdomRequest request, String pleietrengendeFnr) {
         List<PårørendeSykdom> grunnlag = client.getGrunnlagForPleietrengende(new PersonRequest(request.getFraOgMed(), request.getTilOgMed(), List.of(request.getFødselsnummer())));
         return grunnlag.stream()
+            .filter(gr -> erRelevant(gr, request.getRelevanteBehandlingstemaer())) //TODO dekker tema "BS" også OLP?
             .filter(gr -> Objects.equals(gr.foedselsnummerPleietrengende(), pleietrengendeFnr))
-            .filter(gr -> erRelevant(gr, request.getRelevanteBehandlingstemaer()))
             .collect(Collectors.flatMapping(mapTilPeriode(), Collectors.toList()));
     }
 

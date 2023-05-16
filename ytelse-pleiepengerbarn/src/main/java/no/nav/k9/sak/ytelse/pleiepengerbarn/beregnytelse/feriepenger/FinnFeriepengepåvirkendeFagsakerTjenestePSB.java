@@ -34,6 +34,7 @@ import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Ytelse;
 import no.nav.k9.sak.domene.iay.modell.YtelseAnvist;
 import no.nav.k9.sak.domene.iay.modell.YtelseAnvistAndel;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -76,7 +77,7 @@ public class FinnFeriepengepåvirkendeFagsakerTjenestePSB implements FinnFeriepe
         this.hentFeriepengeAndelerTjeneste = hentFeriepengeAndelerTjeneste;
         this.iayTjeneste = iayTjeneste;
         this.infotrygdPårørendeSykdomService = infotrygdPårørendeSykdomService;
-        this.behandlingRepository =behandlingRepository;
+        this.behandlingRepository = behandlingRepository;
         this.personIdentTjeneste = personIdentTjeneste;
         this.korrigerMotInfotrygd = korrigerMotInfotrygd;
     }
@@ -112,6 +113,7 @@ public class FinnFeriepengepåvirkendeFagsakerTjenestePSB implements FinnFeriepe
                     .relevanteBehandlingstemaer(Set.of("PN", "OP")) //TODO er dette riktig behandlingstema?
                     .build(),
                 personIdentTjeneste.hentFnrForAktør(behandling.getFagsak().getPleietrengendeAktørId()).getIdent());
+            LocalDateTimeline<Boolean> tidslinjeInfotrygdPleietrengende = TidslinjeUtil.tilTidslinjeKomprimert(infotrygdVedtaksperioderForPleietrengende);
 
             for (Ytelse ytelse : ytelser) {
                 Saksnummer saksnummer = ytelse.getSaksnummer();
@@ -121,13 +123,17 @@ public class FinnFeriepengepåvirkendeFagsakerTjenestePSB implements FinnFeriepe
                     if (overlapp.isEmpty()) {
                         continue;
                     }
-                    //TODO filtrere bort perioder som ikke ligger i infotrygdVedtaksperioderForPleietrengende her?
+                    LocalDateTimeline<Boolean> tidslinjeAnvist = new LocalDateTimeline<>(overlapp.get(), Boolean.TRUE);
+                    if (!tidslinjeAnvist.intersects(tidslinjeInfotrygdPleietrengende)) {
+                        continue;
+                    }
                     for (YtelseAnvistAndel andel : anvist.getYtelseAnvistAndeler()) {
                         boolean inntektskategoriMedFeriepenger = andel.getInntektskategori() == Inntektskategori.ARBEIDSTAKER || andel.getInntektskategori() == Inntektskategori.SJØMANN;
                         if (inntektskategoriMedFeriepenger) {
                             BigDecimal dagsatsRefusjon = andel.getDagsats().getVerdi().multiply(andel.getRefusjonsgradProsent().getVerdi()).setScale(2, RoundingMode.HALF_UP);
                             BigDecimal dagsatsBruker = andel.getDagsats().getVerdi().subtract(dagsatsRefusjon);
                             Arbeidsgiver arbeidsgiver = andel.getArbeidsgiver().orElse(null);
+                            //TODO kan vi anta at anvist andel alltid vil overlappe fullt eller ikke i det hele tatt med tidslinjen fra infotrygd? Hvis ikke må vi modifisere perioden vi bruker her
                             andeler.add(new InfotrygdFeriepengegrunnlag.InfotrygdFeriepengegrunnlagAndel(overlapp.get(), saksnummer, arbeidsgiver, dagsatsBruker, dagsatsRefusjon));
                         }
                     }
