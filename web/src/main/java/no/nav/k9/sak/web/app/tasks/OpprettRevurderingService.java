@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
@@ -50,15 +51,15 @@ public class OpprettRevurderingService {
         this.behandlingRepository = behandlingRepository;
     }
 
-    public void opprettManuellRevurdering(Saksnummer saksnummer, BehandlingÅrsakType behandlingÅrsakType) {
-        revurder(saksnummer, behandlingÅrsakType, true);
+    public void opprettManuellRevurdering(Saksnummer saksnummer, BehandlingÅrsakType behandlingÅrsakType, BehandlingStegType startStegVedÅpenBehandling) {
+        revurder(saksnummer, behandlingÅrsakType, startStegVedÅpenBehandling, true);
     }
 
-    public void opprettAutomatiskRevurdering(Saksnummer saksnummer, BehandlingÅrsakType behandlingÅrsakType) {
-        revurder(saksnummer, behandlingÅrsakType, false);
+    public void opprettAutomatiskRevurdering(Saksnummer saksnummer, BehandlingÅrsakType behandlingÅrsakType, BehandlingStegType startStegVedÅpenBehandling) {
+        revurder(saksnummer, behandlingÅrsakType, startStegVedÅpenBehandling, false);
     }
 
-    private void revurder(Saksnummer saksnummer, BehandlingÅrsakType behandlingÅrsakType, boolean manuell) {
+    private void revurder(Saksnummer saksnummer, BehandlingÅrsakType behandlingÅrsakType, BehandlingStegType startStegVedÅpenBehandling, boolean manuell) {
         final Optional<Fagsak> funnetFagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true);
         final Fagsak fagsak = funnetFagsak.get();
 
@@ -79,6 +80,7 @@ public class OpprettRevurderingService {
             prosessTaskData.setCallIdFraEksisterende();
             prosessTaskData.setBehandling(fagsak.getId(), behandling.getId(), fagsak.getAktørId().getId());
             prosessTaskData.setProperty(TilbakeTilStartBehandlingTask.PROPERTY_MANUELT_OPPRETTET, Boolean.toString(manuell));
+            prosessTaskData.setProperty(TilbakeTilStartBehandlingTask.PROPERTY_START_STEG, startStegVedÅpenBehandling.getKode());
             taskTjeneste.lagre(prosessTaskData);
         }
     }

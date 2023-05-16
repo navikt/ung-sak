@@ -68,7 +68,7 @@ public class PsbFeilretteTask implements ProsessTaskHandler {
             beregningsgrunnlagTjeneste.hentEksaktFastsattForAllePerioder(ref);
         } catch (ManglerBeregningsgrunnlagException e) {
             logger.info("Mangler beregningsgrunnlag i behandling " + ref.getBehandlingUuid().toString() + " sak: " + saksnummer.getVerdi());
-            opprettRevurderingService.opprettManuellRevurdering(saksnummer, BehandlingÅrsakType.RE_ANNET);
+            opprettRevurderingService.opprettManuellRevurdering(saksnummer, BehandlingÅrsakType.RE_ANNET, BehandlingStegType.START_STEG);
         }
     }
 

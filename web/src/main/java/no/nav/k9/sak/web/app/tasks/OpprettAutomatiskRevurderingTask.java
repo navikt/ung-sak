@@ -4,6 +4,7 @@ import java.util.Objects;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -30,6 +31,7 @@ public class OpprettAutomatiskRevurderingTask implements ProsessTaskHandler {
     public void doTask(ProsessTaskData pd) {
         var saksnummer = Objects.requireNonNull(pd.getSaksnummer(), "saksnummer");
         BehandlingÅrsakType revurderingÅrsak = BehandlingÅrsakType.fraKode(Objects.requireNonNull(pd.getPropertyValue("revurderingÅrsak"), "revurderingÅrsak"));
-        opprettRevurderingService.opprettAutomatiskRevurdering(new Saksnummer(saksnummer), revurderingÅrsak);
+        BehandlingStegType startStegVedÅpenBehandling = BehandlingStegType.fraKode(Objects.requireNonNull(pd.getPropertyValue("startSteg"), "startSteg"));
+        opprettRevurderingService.opprettAutomatiskRevurdering(new Saksnummer(saksnummer), revurderingÅrsak, startStegVedÅpenBehandling);
     }
 }
