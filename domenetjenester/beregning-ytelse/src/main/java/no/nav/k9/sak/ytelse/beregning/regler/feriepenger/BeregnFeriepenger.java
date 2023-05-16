@@ -152,7 +152,7 @@ class BeregnFeriepenger extends LeafSpecification<BeregningsresultatFeriepengerR
                         ? IntervallUtil.beregnKalanderdager(åretsOverlapp)
                         : IntervallUtil.beregnUkedager(åretsOverlapp);
 
-                    String periodeNavn = "perioden " + åretsOverlapp + "for " + mottakerType.name().toLowerCase();
+                    String periodeNavn = "perioden " + åretsOverlapp + " for " + mottakerType.name().toLowerCase();
                     regelsporing.put("Antall feriepengedager i " + periodeNavn, antallFeriepengerDager);
                     regelsporing.put("Opptjeningsår i " + periodeNavn, opptjeningsår);
 
