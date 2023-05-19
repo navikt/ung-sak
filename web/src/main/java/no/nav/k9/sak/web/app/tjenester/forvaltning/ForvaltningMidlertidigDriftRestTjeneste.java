@@ -299,7 +299,6 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         var fødselsnumre = new LinkedHashSet<>(Arrays.asList(alleFødselsnumre.split("\\s+")));
 
         final StringBuilder sb = new StringBuilder();
-        int index = 1;
         for (var fødselsnummer : fødselsnumre) {
             try {
                 final Optional<AktørId> aktørIdOpt = tpsTjeneste.hentAktørForFnr(PersonIdent.fra(fødselsnummer));
@@ -312,12 +311,11 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                     }
                 }
             } catch (RuntimeException e) {
-                sb.append(", " + index);
+                sb.append(fødselsnummer + "\n");
             }
-            index++;
         }
         
-        return Response.ok("Kjørt. Fnr med følgende indeks (starter på 1) fikk ikke task: " + sb.toString()).build();
+        return Response.ok("Kjørt. Følgende fnr fikk ikke task: " + sb.toString()).build();
     }
 
     @GET
