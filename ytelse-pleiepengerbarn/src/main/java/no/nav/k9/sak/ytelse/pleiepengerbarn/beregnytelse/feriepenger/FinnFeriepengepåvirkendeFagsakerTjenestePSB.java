@@ -121,6 +121,7 @@ public class FinnFeriepengepåvirkendeFagsakerTjenestePSB implements FinnFeriepe
             for (Periode periode : infotrygdVedtaksperioderForPleietrengende) {
                 tidslinjeInfotrygdPleietrengende = tidslinjeInfotrygdPleietrengende.crossJoin(new LocalDateTimeline<>(periode.getFom(), periode.getTom(), true));
             }
+            tidslinjeInfotrygdPleietrengende = tidslinjeInfotrygdPleietrengende.compress();
 
             for (Ytelse ytelse : ytelser) {
                 Saksnummer saksnummer = ytelse.getSaksnummer();
