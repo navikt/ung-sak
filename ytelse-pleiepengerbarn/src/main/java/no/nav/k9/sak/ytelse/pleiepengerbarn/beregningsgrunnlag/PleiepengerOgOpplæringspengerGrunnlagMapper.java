@@ -112,13 +112,19 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
             faktiskArbeidstid = Duration.ofHours(0L);
         }
         
+        final BigDecimal HUNDRE_PROSENT = new BigDecimal(100);
+        
         /*
          * XXX: Dette er samme måte å regne ut på som i uttak. På sikt bør vi nok flytte
          *      denne logikken til pleiepenger-barn-uttak.
          */
         final BigDecimal aktivitetsgrad = new BigDecimal(faktiskArbeidstid.toMillis()).setScale(2, RoundingMode.HALF_UP)
                 .divide(new BigDecimal(utbetalingsgrader.getNormalArbeidstid().toMillis()), 2, RoundingMode.HALF_UP)
-                .multiply(new BigDecimal(100));
+                .multiply(HUNDRE_PROSENT);
+        
+        if (aktivitetsgrad.compareTo(HUNDRE_PROSENT) >= 0) {
+            return HUNDRE_PROSENT;
+        }
         
         return aktivitetsgrad;
     }
