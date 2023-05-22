@@ -118,7 +118,10 @@ public class FinnFeriepengepåvirkendeFagsakerTjenestePSB implements FinnFeriepe
                     .relevanteBehandlingstemaer(Set.of("PN", "OP"))
                     .build(),
                 personIdentTjeneste.hentFnrForAktør(behandling.getFagsak().getPleietrengendeAktørId()).getIdent());
-            LocalDateTimeline<Boolean> tidslinjeInfotrygdPleietrengende = TidslinjeUtil.tilTidslinjeKomprimert(infotrygdVedtaksperioderForPleietrengende);
+            LocalDateTimeline<Boolean> tidslinjeInfotrygdPleietrengende = LocalDateTimeline.empty();
+            for (Periode periode : infotrygdVedtaksperioderForPleietrengende) {
+                tidslinjeInfotrygdPleietrengende = tidslinjeInfotrygdPleietrengende.crossJoin(TidslinjeUtil.tilTidslinjeKomprimert(List.of(periode)));
+            }
 
             for (Ytelse ytelse : ytelser) {
                 Saksnummer saksnummer = ytelse.getSaksnummer();
