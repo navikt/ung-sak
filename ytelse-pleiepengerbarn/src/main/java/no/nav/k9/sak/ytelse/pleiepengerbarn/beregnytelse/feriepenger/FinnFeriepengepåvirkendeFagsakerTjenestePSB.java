@@ -37,7 +37,6 @@ import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Ytelse;
 import no.nav.k9.sak.domene.iay.modell.YtelseAnvist;
 import no.nav.k9.sak.domene.iay.modell.YtelseAnvistAndel;
-import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -120,7 +119,7 @@ public class FinnFeriepengepåvirkendeFagsakerTjenestePSB implements FinnFeriepe
                 personIdentTjeneste.hentFnrForAktør(behandling.getFagsak().getPleietrengendeAktørId()).getIdent());
             LocalDateTimeline<Boolean> tidslinjeInfotrygdPleietrengende = LocalDateTimeline.empty();
             for (Periode periode : infotrygdVedtaksperioderForPleietrengende) {
-                tidslinjeInfotrygdPleietrengende = tidslinjeInfotrygdPleietrengende.crossJoin(TidslinjeUtil.tilTidslinjeKomprimert(List.of(periode)));
+                tidslinjeInfotrygdPleietrengende = tidslinjeInfotrygdPleietrengende.crossJoin(new LocalDateTimeline<>(periode.getFom(), periode.getTom(), true));
             }
 
             for (Ytelse ytelse : ytelser) {
