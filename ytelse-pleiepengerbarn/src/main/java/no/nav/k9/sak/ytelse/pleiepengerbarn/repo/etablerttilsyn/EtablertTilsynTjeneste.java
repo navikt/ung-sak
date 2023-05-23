@@ -3,6 +3,8 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
@@ -14,6 +16,7 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.tilsyn.Kilde;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.PeriodeFraSøknadForPleietrengendeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.PeriodeFraSøknadForPleietrengendeTjeneste.FagsakKravDokument;
@@ -38,13 +41,37 @@ public class EtablertTilsynTjeneste {
     }
 
 
-    public LocalDateTimeline<UtledetEtablertTilsyn> beregnTilsynstidlinje(BehandlingReferanse behandlingRef) {
+    public LocalDateTimeline<UtledetEtablertTilsyn> beregnTilsynstidlinje(BehandlingReferanse behandlingRef, boolean brukUbesluttedeData) {
         final var tilsynsgrunnlagPåTversAvFagsaker = periodeFraSøknadForPleietrengendeTjeneste.hentAllePerioderTilVurdering(behandlingRef.getPleietrengendeAktørId(), behandlingRef.getFagsakPeriode());
-        return byggTidslinje(behandlingRef.getSaksnummer(), tilsynsgrunnlagPåTversAvFagsaker);
+        if (brukUbesluttedeData) {
+            return byggTidslinjeMedUbesluttedeData(behandlingRef.getSaksnummer(), tilsynsgrunnlagPåTversAvFagsaker);
+        } else {
+            return byggTidslinjeMedBesluttedeData(behandlingRef, tilsynsgrunnlagPåTversAvFagsaker);
+        }
+    }
+
+
+    private LocalDateTimeline<UtledetEtablertTilsyn> byggTidslinjeMedBesluttedeData(BehandlingReferanse behandlingRef, List<FagsakKravDokument> tilsynsgrunnlagPåTversAvFagsaker) {
+        final Map<JournalpostId, FagsakKravDokument> kravdokumenter = tilsynsgrunnlagPåTversAvFagsaker.stream()
+                .collect(Collectors.toMap(fkd -> fkd.getKravDokument().getJournalpostId(), Function.identity()));
+        
+        final List<EtablertTilsynPeriode> etPerioder = etablertTilsynRepository.hentHvisEksisterer(behandlingRef.getBehandlingId())
+                .map(EtablertTilsynGrunnlag::getEtablertTilsyn)
+                .map(EtablertTilsyn::getPerioder)
+                .orElse(List.of());
+        
+        final Saksnummer søkersSaksnummer = behandlingRef.getSaksnummer();
+        final var segments = etPerioder.stream().map(etPeriode -> {
+            final var kilde = søkersSaksnummer.equals(kravdokumenter.get(etPeriode.getJournalpostId()).getFagsak().getSaksnummer()) ? Kilde.SØKER : Kilde.ANDRE;
+            final UtledetEtablertTilsyn uet = new UtledetEtablertTilsyn(etPeriode.getVarighet(), kilde, etPeriode.getJournalpostId());
+            return new LocalDateSegment<>(etPeriode.getPeriode().toLocalDateInterval(), uet);
+        }).collect(Collectors.toList());
+        
+        return new LocalDateTimeline<>(segments);
     }
 
     public EtablertTilsyn utledGrunnlagForTilsynstidlinje(BehandlingReferanse behandlingRef) {
-        final LocalDateTimeline<UtledetEtablertTilsyn> tilsynstidslinje = beregnTilsynstidlinje(behandlingRef);
+        final LocalDateTimeline<UtledetEtablertTilsyn> tilsynstidslinje = beregnTilsynstidlinje(behandlingRef, true);
 
         final List<EtablertTilsynPeriode> tilsynsperioder = tilsynstidslinje.stream()
             .map(s -> new EtablertTilsynPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()), s.getValue().getVarighet(), s.getValue().getJournalpostId()))
@@ -118,7 +145,7 @@ public class EtablertTilsynTjeneste {
         );
     }
 
-    private LocalDateTimeline<UtledetEtablertTilsyn> byggTidslinje(Saksnummer søkersSaksnummer, List<FagsakKravDokument> fagsakKravDokumenter) {
+    private LocalDateTimeline<UtledetEtablertTilsyn> byggTidslinjeMedUbesluttedeData(Saksnummer søkersSaksnummer, List<FagsakKravDokument> fagsakKravDokumenter) {
         var resultatTimeline = new LocalDateTimeline<UtledetEtablertTilsyn>(List.of());
         for (FagsakKravDokument kravDokument : fagsakKravDokumenter) {
             var tilsynsordningPerioder = kravDokument.getPerioderFraSøknad()
