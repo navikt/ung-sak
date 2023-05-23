@@ -62,7 +62,10 @@ import no.nav.k9.felles.sikkerhet.abac.AbacDto;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
@@ -88,6 +91,7 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tasks.OpprettManuellRevurderingTask;
+import no.nav.k9.sak.web.app.tasks.OpprettRevurderingService;
 import no.nav.k9.sak.web.app.tjenester.behandling.SjekkProsessering;
 import no.nav.k9.sak.web.app.tjenester.fordeling.FordelRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
@@ -134,6 +138,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     private DriftLesetilgangVurderer lesetilgangVurderer;
 
     private PersonopplysningRepository personopplysningRepository;
+    private OpprettRevurderingService opprettRevurderingService;
 
     public ForvaltningMidlertidigDriftRestTjeneste() {
         // For Rest-CDI
@@ -151,7 +156,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                                                    EntityManager entityManager,
                                                    StønadstatistikkService stønadstatistikkService,
                                                    DriftLesetilgangVurderer lesetilgangVurderer,
-                                                   PersonopplysningRepository personopplysningRepository) {
+                                                   PersonopplysningRepository personopplysningRepository,
+                                                   OpprettRevurderingService opprettRevurderingService) {
 
         this.frisinnSøknadMottaker = frisinnSøknadMottaker;
         this.tpsTjeneste = tpsTjeneste;
@@ -165,6 +171,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         this.stønadstatistikkService = stønadstatistikkService;
         this.lesetilgangVurderer = lesetilgangVurderer;
         this.personopplysningRepository = personopplysningRepository;
+        this.opprettRevurderingService = opprettRevurderingService;
     }
 
     /**
@@ -279,6 +286,36 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             idx++;
         }
 
+    }
+    
+    @POST
+    @Path("/feriepengerevurdering")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(description = "Oppretter automatisk revurdering av feriepenger.", summary = ("Oppretter automatisk revurdering av feriepenger."), tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
+    public Response opprettFeriepengerevurdering(@Parameter(description = "Fødselsnumre (skilt med mellomrom eller linjeskift)") @Valid OpprettManuellRevurdering opprettManuellRevurdering) {
+        var alleFødselsnumre = Objects.requireNonNull(opprettManuellRevurdering.getSaksnumre(), "fødselsnumre"); // XXX: gjenbruker DTO siden vi sletter koden etterpå.
+        var fødselsnumre = new LinkedHashSet<>(Arrays.asList(alleFødselsnumre.split("\\s+")));
+
+        final StringBuilder sb = new StringBuilder();
+        for (var fødselsnummer : fødselsnumre) {
+            try {
+                final Optional<AktørId> aktørIdOpt = tpsTjeneste.hentAktørForFnr(PersonIdent.fra(fødselsnummer));
+                final List<Fagsak> fagsaker = fagsakTjeneste.finnFagsakerForAktør(aktørIdOpt.get());
+                for (Fagsak f : fagsaker) {
+                    if (f.getYtelseType() == FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
+                        opprettRevurderingService.opprettAutomatiskRevurdering(f.getSaksnummer(),
+                                BehandlingÅrsakType.RE_FERIEPENGER_ENDRING_FRA_ANNEN_SAK,
+                                BehandlingStegType.START_STEG);
+                    }
+                }
+            } catch (RuntimeException e) {
+                sb.append(fødselsnummer + "\n");
+            }
+        }
+        
+        return Response.ok("Kjørt. Følgende fnr fikk ikke task: " + sb.toString()).build();
     }
 
     @GET

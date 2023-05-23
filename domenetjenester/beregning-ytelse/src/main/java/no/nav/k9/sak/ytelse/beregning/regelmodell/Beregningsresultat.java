@@ -4,9 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.FeriepengekorrigeringInfotrygd;
+
 public class Beregningsresultat {
 
     private List<BeregningsresultatPeriode> beregningsresultatPerioder = new ArrayList<>();
+
+    private List<FeriepengekorrigeringInfotrygd> feriepengekorrigeringInfotrygd = new ArrayList<>();
+
     private String regelInput;
     private String regelSporing;
 
