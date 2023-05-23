@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
@@ -51,23 +50,31 @@ public class EtablertTilsynTjeneste {
     }
 
 
-    private LocalDateTimeline<UtledetEtablertTilsyn> byggTidslinjeMedBesluttedeData(BehandlingReferanse behandlingRef, List<FagsakKravDokument> tilsynsgrunnlagPåTversAvFagsaker) {
-        final Map<JournalpostId, FagsakKravDokument> kravdokumenter = tilsynsgrunnlagPåTversAvFagsaker.stream()
-                .collect(Collectors.toMap(fkd -> fkd.getKravDokument().getJournalpostId(), Function.identity()));
-        
+    private LocalDateTimeline<UtledetEtablertTilsyn> byggTidslinjeMedBesluttedeData(BehandlingReferanse behandlingRef, List<FagsakKravDokument> tilsynsgrunnlagPåTversAvFagsaker) {        
         final List<EtablertTilsynPeriode> etPerioder = etablertTilsynRepository.hentHvisEksisterer(behandlingRef.getBehandlingId())
                 .map(EtablertTilsynGrunnlag::getEtablertTilsyn)
                 .map(EtablertTilsyn::getPerioder)
                 .orElse(List.of());
         
         final Saksnummer søkersSaksnummer = behandlingRef.getSaksnummer();
+        final Map<JournalpostId, Kilde> kravdokumentKilde = finnKravdokumentkilde(tilsynsgrunnlagPåTversAvFagsaker, søkersSaksnummer);
+        
         final var segments = etPerioder.stream().map(etPeriode -> {
-            final var kilde = søkersSaksnummer.equals(kravdokumenter.get(etPeriode.getJournalpostId()).getFagsak().getSaksnummer()) ? Kilde.SØKER : Kilde.ANDRE;
+            final var kilde = kravdokumentKilde.get(etPeriode.getJournalpostId());
             final UtledetEtablertTilsyn uet = new UtledetEtablertTilsyn(etPeriode.getVarighet(), kilde, etPeriode.getJournalpostId());
             return new LocalDateSegment<>(etPeriode.getPeriode().toLocalDateInterval(), uet);
         }).collect(Collectors.toList());
         
         return new LocalDateTimeline<>(segments);
+    }
+
+
+    private Map<JournalpostId, Kilde> finnKravdokumentkilde(List<FagsakKravDokument> tilsynsgrunnlagPåTversAvFagsaker,
+            final Saksnummer søkersSaksnummer) {
+        return tilsynsgrunnlagPåTversAvFagsaker.stream()
+                .collect(Collectors.toMap(fkd -> fkd.getKravDokument().getJournalpostId(), fkd -> {
+                    return søkersSaksnummer.equals(fkd.getFagsak().getSaksnummer()) ? Kilde.SØKER : Kilde.ANDRE;
+                }));
     }
 
     public EtablertTilsyn utledGrunnlagForTilsynstidlinje(BehandlingReferanse behandlingRef) {
