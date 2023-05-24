@@ -40,10 +40,12 @@ class FagsakProsessTaskRepositoryTest {
 
     private Long fagsakId;
     private Long behandlingId;
-    private final TaskType fortsettBehandlingTaskType = new TaskType("behandlingskontroll.fortsettBehandling");
+    private final TaskType taskTypeA = new TaskType("A");
+    private final TaskType taskTypeB = new TaskType("B");
+    private final TaskType taskTypeC = new TaskType("C");
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         ProsessTaskTjeneste prosessTaskTjeneste = new ProsessTaskTjenesteImpl(new ProsessTaskRepositoryImpl(entityManager, null, null));
         taskManager = Mockito.mock(TaskManager.class);
         fagsakProsessTaskRepository = new FagsakProsessTaskRepository(entityManager, prosessTaskTjeneste, taskManager);
@@ -53,11 +55,25 @@ class FagsakProsessTaskRepositoryTest {
         behandlingId = fagsakId + 1;
     }
 
+    private ProsessTaskData setupKjørendeTask(TaskType taskType) {
+        ProsessTaskData kjørendeTask = lagTask(taskType, ProsessTaskStatus.KLAR);
+        fagsakProsessTaskRepository.lagreNyGruppe(kjørendeTask);
+        FagsakProsessTask fagsakProsessTask = new FagsakProsessTask(fagsakId, behandlingId.toString(), kjørendeTask.getId(), 111L, taskType.value());
+        fagsakProsessTaskRepository.lagre(fagsakProsessTask);
+        when(taskManager.getCurrentTask()).thenReturn(kjørendeTask);
+        return kjørendeTask;
+    }
+
+    private ProsessTaskData lagTask(TaskType taskType, ProsessTaskStatus status) {
+        ProsessTaskData nyTask = ProsessTaskData.forTaskType(taskType);
+        nyTask.setBehandling(fagsakId, behandlingId);
+        nyTask.setStatus(status);
+        return nyTask;
+    }
+
     @Test
     void skalLagreNyTaskNårViIkkeHarAndreTaskerPåBehandling() {
-        ProsessTaskData nyTask = ProsessTaskData.forTaskType(fortsettBehandlingTaskType);
-        nyTask.setBehandling(fagsakId, behandlingId);
-        nyTask.setStatus(ProsessTaskStatus.KLAR);
+        ProsessTaskData nyTask = lagTask(taskTypeA, ProsessTaskStatus.KLAR);
         ProsessTaskGruppe nyGruppe = new ProsessTaskGruppe(nyTask);
 
         fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, nyGruppe);
@@ -66,17 +82,13 @@ class FagsakProsessTaskRepositoryTest {
 
     @Test
     void skalLagreNyTaskNårViIkkeHarAndreTaskerAvSammeTypePåBehandling() {
-        ProsessTaskData eksisterendeTask = ProsessTaskData.forTaskType(fortsettBehandlingTaskType);
-        eksisterendeTask.setBehandling(fagsakId, behandlingId);
-        eksisterendeTask.setStatus(ProsessTaskStatus.KLAR);
+        ProsessTaskData eksisterendeTask = lagTask(taskTypeA, ProsessTaskStatus.KLAR);
         ProsessTaskGruppe eksisterendeGruppe = new ProsessTaskGruppe(eksisterendeTask);
         fagsakProsessTaskRepository.lagreNyGruppe(eksisterendeGruppe);
-        FagsakProsessTask fagsakProsessTask1 = new FagsakProsessTask(fagsakId, behandlingId.toString(), eksisterendeTask.getId(), 444L, fortsettBehandlingTaskType.value());
+        FagsakProsessTask fagsakProsessTask1 = new FagsakProsessTask(fagsakId, behandlingId.toString(), eksisterendeTask.getId(), 444L, eksisterendeTask.getTaskType());
         fagsakProsessTaskRepository.lagre(fagsakProsessTask1);
 
-        ProsessTaskData nyTask = ProsessTaskData.forTaskType(new TaskType("en.annen.task.type"));
-        nyTask.setBehandling(fagsakId, behandlingId);
-        nyTask.setStatus(ProsessTaskStatus.KLAR);
+        ProsessTaskData nyTask = lagTask(taskTypeB, ProsessTaskStatus.KLAR);
         ProsessTaskGruppe nyGruppe = new ProsessTaskGruppe(nyTask);
 
         fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, nyGruppe);
@@ -85,16 +97,12 @@ class FagsakProsessTaskRepositoryTest {
 
     @Test
     void skalFeileNårViHarAnnenTaskAvSammeTypePåBehandling() {
-        ProsessTaskData feiletTask = ProsessTaskData.forTaskType(fortsettBehandlingTaskType);
-        feiletTask.setBehandling(fagsakId, behandlingId);
-        feiletTask.setStatus(ProsessTaskStatus.KLAR);
-        fagsakProsessTaskRepository.lagreNyGruppe(feiletTask);
-        FagsakProsessTask fagsakProsessTask1 = new FagsakProsessTask(fagsakId, behandlingId.toString(), feiletTask.getId(), 333L, fortsettBehandlingTaskType.value());
+        ProsessTaskData eksisterendeTask = lagTask(taskTypeA, ProsessTaskStatus.KLAR);
+        fagsakProsessTaskRepository.lagreNyGruppe(eksisterendeTask);
+        FagsakProsessTask fagsakProsessTask1 = new FagsakProsessTask(fagsakId, behandlingId.toString(), eksisterendeTask.getId(), 333L, eksisterendeTask.getTaskType());
         fagsakProsessTaskRepository.lagre(fagsakProsessTask1);
 
-        ProsessTaskData nyTask = ProsessTaskData.forTaskType(fortsettBehandlingTaskType);
-        nyTask.setBehandling(fagsakId, behandlingId);
-        nyTask.setStatus(ProsessTaskStatus.KLAR);
+        ProsessTaskData nyTask = lagTask(taskTypeA, ProsessTaskStatus.KLAR);
         ProsessTaskGruppe nyGruppe = new ProsessTaskGruppe(nyTask);
 
         assertThrows(IllegalStateException.class, () ->
@@ -103,82 +111,62 @@ class FagsakProsessTaskRepositoryTest {
 
     @Test
     void skalFeileNårViHarFeiletTaskPåBehandling() {
-        ProsessTaskData feiletTask = ProsessTaskData.forTaskType(fortsettBehandlingTaskType);
-        feiletTask.setBehandling(fagsakId, behandlingId);
-        feiletTask.setStatus(ProsessTaskStatus.FEILET);
+        ProsessTaskData feiletTask = lagTask(taskTypeA, ProsessTaskStatus.FEILET);
         fagsakProsessTaskRepository.lagreNyGruppe(feiletTask);
-        FagsakProsessTask fagsakProsessTask1 = new FagsakProsessTask(fagsakId, behandlingId.toString(), feiletTask.getId(), 333L, fortsettBehandlingTaskType.value());
+        FagsakProsessTask fagsakProsessTask1 = new FagsakProsessTask(fagsakId, behandlingId.toString(), feiletTask.getId(), 333L, feiletTask.getTaskType());
         fagsakProsessTaskRepository.lagre(fagsakProsessTask1);
 
-        ProsessTaskData nyTask = ProsessTaskData.forTaskType(new TaskType("en.annen.task.type"));
-        nyTask.setBehandling(fagsakId, behandlingId);
-        nyTask.setStatus(ProsessTaskStatus.KLAR);
+        ProsessTaskData nyTask = lagTask(taskTypeB, ProsessTaskStatus.KLAR);
         ProsessTaskGruppe nyGruppe = new ProsessTaskGruppe(nyTask);
+
         assertThrows(IllegalStateException.class, () ->
             fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, nyGruppe));
     }
 
     @Test
-    void skalIkkeLagreNyTaskNårTaskAvSammeTypeErVetoetAvKjørendeTask() {
-        ProsessTaskData kjørendeTask = ProsessTaskData.forTaskType(fortsettBehandlingTaskType);
-        kjørendeTask.setBehandling(fagsakId, behandlingId);
-        kjørendeTask.setStatus(ProsessTaskStatus.KLAR);
-        fagsakProsessTaskRepository.lagreNyGruppe(kjørendeTask);
-        FagsakProsessTask fagsakProsessTask1 = new FagsakProsessTask(fagsakId, behandlingId.toString(), kjørendeTask.getId(), 111L, fortsettBehandlingTaskType.value());
-        fagsakProsessTaskRepository.lagre(fagsakProsessTask1);
-        when(taskManager.getCurrentTask()).thenReturn(kjørendeTask);
+    void skalLagreNyTaskSelvOmKjørendeTaskErAvSammeType() {
+        setupKjørendeTask(taskTypeA);
 
-        ProsessTaskData vetoetTask = ProsessTaskData.forTaskType(fortsettBehandlingTaskType);
-        vetoetTask.setBehandling(fagsakId, behandlingId);
-        vetoetTask.setStatus(ProsessTaskStatus.VETO);
-        vetoetTask.setBlokkertAvProsessTaskId(kjørendeTask.getId());
-        ProsessTaskGruppe eksisterendeGruppe = new ProsessTaskGruppe(vetoetTask);
-        fagsakProsessTaskRepository.lagreNyGruppe(eksisterendeGruppe);
-        FagsakProsessTask fagsakProsessTask2 = new FagsakProsessTask(fagsakId, behandlingId.toString(), vetoetTask.getId(), 222L, fortsettBehandlingTaskType.value());
-        fagsakProsessTaskRepository.lagre(fagsakProsessTask2);
-
-        ProsessTaskData nyTask = ProsessTaskData.forTaskType(fortsettBehandlingTaskType);
-        nyTask.setBehandling(fagsakId, behandlingId);
-        nyTask.setStatus(ProsessTaskStatus.KLAR);
+        ProsessTaskData nyTask = lagTask(taskTypeA, ProsessTaskStatus.KLAR);
         ProsessTaskGruppe nyGruppe = new ProsessTaskGruppe(nyTask);
-        fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, nyGruppe);
 
-        assertThat(nyTask.getId()).isNull();
-        var alleTasker = fagsakProsessTaskRepository.sjekkStatusProsessTasks(fagsakId, behandlingId, null);
-        assertThat(alleTasker).hasSize(2);
-        assertThat(alleTasker.stream()
-            .filter(t -> !Objects.equals(t.getId(), kjørendeTask.getId()) && !Objects.equals(t.getId(), vetoetTask.getId())))
-            .isEmpty();
+        fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, nyGruppe);
+        assertThat(nyTask.getId()).isNotNull();
     }
 
     @Test
-    void skalIkkeLagreNyTaskNårTaskAvSammeTypeErISammeGruppeSomTaskVetoetAvKjørendeTask() {
-        ProsessTaskData kjørendeTask = ProsessTaskData.forTaskType(new TaskType("kjørende.task.type"));
-        kjørendeTask.setBehandling(fagsakId, behandlingId);
-        kjørendeTask.setStatus(ProsessTaskStatus.KLAR);
-        fagsakProsessTaskRepository.lagreNyGruppe(kjørendeTask);
-        FagsakProsessTask fagsakProsessTask1 = new FagsakProsessTask(fagsakId, behandlingId.toString(), kjørendeTask.getId(), 111L, "kjørende.task.type");
-        fagsakProsessTaskRepository.lagre(fagsakProsessTask1);
-        when(taskManager.getCurrentTask()).thenReturn(kjørendeTask);
+    void skalLagreNyTaskSelvOmTaskAvAnnenTypeErVetoetAvKjørendeTask() {
+        ProsessTaskData kjørendeTask = setupKjørendeTask(taskTypeA);
 
-        ProsessTaskData vetoetTask = ProsessTaskData.forTaskType(new TaskType("en.annen.task.type"));
-        vetoetTask.setBehandling(fagsakId, behandlingId);
-        vetoetTask.setStatus(ProsessTaskStatus.VETO);
+        ProsessTaskData vetoetTask = lagTask(taskTypeB, ProsessTaskStatus.VETO);
         vetoetTask.setBlokkertAvProsessTaskId(kjørendeTask.getId());
-        ProsessTaskData taskSomVenter = ProsessTaskData.forTaskType((fortsettBehandlingTaskType));
-        taskSomVenter.setBehandling(fagsakId, behandlingId);
-        taskSomVenter.setStatus(ProsessTaskStatus.KLAR);
-        ProsessTaskGruppe eksisterendeGruppe = new ProsessTaskGruppe(vetoetTask);
-        eksisterendeGruppe.addNesteSekvensiell(taskSomVenter);
-        fagsakProsessTaskRepository.lagreNyGruppe(eksisterendeGruppe);
-        FagsakProsessTask fagsakProsessTask2 = new FagsakProsessTask(fagsakId, behandlingId.toString(), vetoetTask.getId(), 222L, "en.annen.task.type");
-        fagsakProsessTaskRepository.lagre(fagsakProsessTask2);
-        FagsakProsessTask fagsakProsessTask3 = new FagsakProsessTask(fagsakId, behandlingId.toString(), taskSomVenter.getId(), 333L, fortsettBehandlingTaskType.value());
-        fagsakProsessTaskRepository.lagre(fagsakProsessTask3);
+        fagsakProsessTaskRepository.lagreNyGruppe(vetoetTask);
+        FagsakProsessTask fagsakProsessTask1 = new FagsakProsessTask(fagsakId, behandlingId.toString(), vetoetTask.getId(), 222L, vetoetTask.getTaskType());
+        fagsakProsessTaskRepository.lagre(fagsakProsessTask1);
 
-        ProsessTaskData nyTask = ProsessTaskData.forTaskType(fortsettBehandlingTaskType);
-        nyTask.setBehandling(fagsakId, behandlingId);
-        nyTask.setStatus(ProsessTaskStatus.KLAR);
+        ProsessTaskData nyTask = lagTask(taskTypeC, ProsessTaskStatus.KLAR);
+        ProsessTaskGruppe nyGruppe = new ProsessTaskGruppe(nyTask);
+
+        fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, nyGruppe);
+        assertThat(nyTask.getId()).isNotNull();
+    }
+
+    @Test
+    void skalIkkeLagreNyTaskNårTaskAvSammeTypeErVetoetAvKjørendeTask() {
+        ProsessTaskData kjørendeTask = setupKjørendeTask(taskTypeA);
+
+        ProsessTaskData vetoetTask = lagTask(taskTypeB, ProsessTaskStatus.VETO);
+        vetoetTask.setBlokkertAvProsessTaskId(kjørendeTask.getId());
+        ProsessTaskData taskIGruppeMedVetoet = lagTask(taskTypeC, ProsessTaskStatus.KLAR);
+        ProsessTaskGruppe eksisterendeGruppe = new ProsessTaskGruppe(vetoetTask);
+        eksisterendeGruppe.addNesteSekvensiell(taskIGruppeMedVetoet);
+        fagsakProsessTaskRepository.lagreNyGruppe(eksisterendeGruppe);
+        FagsakProsessTask fagsakProsessTask1 = new FagsakProsessTask(fagsakId, behandlingId.toString(), vetoetTask.getId(), 222L, vetoetTask.getTaskType());
+        fagsakProsessTaskRepository.lagre(fagsakProsessTask1);
+        FagsakProsessTask fagsakProsessTask2 = new FagsakProsessTask(fagsakId, behandlingId.toString(), taskIGruppeMedVetoet.getId(), 333L, taskIGruppeMedVetoet.getTaskType());
+        fagsakProsessTaskRepository.lagre(fagsakProsessTask2);
+
+        ProsessTaskData nyTask = lagTask(taskTypeB, ProsessTaskStatus.KLAR);
         ProsessTaskGruppe nyGruppe = new ProsessTaskGruppe(nyTask);
         fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, nyGruppe);
 
@@ -186,7 +174,123 @@ class FagsakProsessTaskRepositoryTest {
         var alleTasker = fagsakProsessTaskRepository.sjekkStatusProsessTasks(fagsakId, behandlingId, null);
         assertThat(alleTasker).hasSize(3);
         assertThat(alleTasker.stream()
-            .filter(t -> !Objects.equals(t.getId(), kjørendeTask.getId()) && !Objects.equals(t.getId(), vetoetTask.getId()) && !Objects.equals(t.getId(), taskSomVenter.getId())))
+            .filter(t -> !Objects.equals(t.getId(), kjørendeTask.getId()) && !Objects.equals(t.getId(), vetoetTask.getId()) && !Objects.equals(t.getId(), taskIGruppeMedVetoet.getId())))
             .isEmpty();
+    }
+
+    @Test
+    void skalIkkeLagreNyTaskNårTaskAvSammeTypeErISammeGruppeSomTaskVetoetAvKjørendeTask() {
+        ProsessTaskData kjørendeTask = setupKjørendeTask(taskTypeA);
+
+        ProsessTaskData vetoetTask = lagTask(taskTypeB, ProsessTaskStatus.VETO);
+        vetoetTask.setBlokkertAvProsessTaskId(kjørendeTask.getId());
+        ProsessTaskData taskIGruppeMedVetoet = lagTask(taskTypeC, ProsessTaskStatus.KLAR);
+        ProsessTaskGruppe eksisterendeGruppe = new ProsessTaskGruppe(vetoetTask);
+        eksisterendeGruppe.addNesteSekvensiell(taskIGruppeMedVetoet);
+        fagsakProsessTaskRepository.lagreNyGruppe(eksisterendeGruppe);
+        FagsakProsessTask fagsakProsessTask1 = new FagsakProsessTask(fagsakId, behandlingId.toString(), vetoetTask.getId(), 222L, vetoetTask.getTaskType());
+        fagsakProsessTaskRepository.lagre(fagsakProsessTask1);
+        FagsakProsessTask fagsakProsessTask2 = new FagsakProsessTask(fagsakId, behandlingId.toString(), taskIGruppeMedVetoet.getId(), 333L, taskIGruppeMedVetoet.getTaskType());
+        fagsakProsessTaskRepository.lagre(fagsakProsessTask2);
+
+        ProsessTaskData nyTask = lagTask(taskTypeC, ProsessTaskStatus.KLAR);
+        ProsessTaskGruppe nyGruppe = new ProsessTaskGruppe(nyTask);
+
+        fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, nyGruppe);
+        assertThat(nyTask.getId()).isNull();
+    }
+
+    @Test
+    void skalFeileNårViSkalOppretteToTasksOgViBareHarEnVetoetTask() {
+        ProsessTaskData kjørendeTask = setupKjørendeTask(taskTypeA);
+
+        ProsessTaskData vetoetTask = lagTask(taskTypeB, ProsessTaskStatus.VETO);
+        vetoetTask.setBlokkertAvProsessTaskId(kjørendeTask.getId());
+        fagsakProsessTaskRepository.lagreNyGruppe(vetoetTask);
+        FagsakProsessTask fagsakProsessTask1 = new FagsakProsessTask(fagsakId, behandlingId.toString(), vetoetTask.getId(), 222L, vetoetTask.getTaskType());
+        fagsakProsessTaskRepository.lagre(fagsakProsessTask1);
+
+        ProsessTaskData nyTask1 = lagTask(taskTypeA, ProsessTaskStatus.KLAR);
+        ProsessTaskData nyTask2 = lagTask(taskTypeB, ProsessTaskStatus.KLAR);
+        ProsessTaskGruppe nyGruppe = new ProsessTaskGruppe(nyTask1);
+        nyGruppe.addNesteSekvensiell(nyTask2);
+
+        assertThrows(IllegalStateException.class, () ->
+            fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, nyGruppe));
+    }
+
+    @Test
+    void skalIkkeLagreNyeTaskerNårViSkalOppretteToTasksOgViHarEnVetoetOgEnIGruppeMedVetoetAvSammeType() {
+        ProsessTaskData kjørendeTask = setupKjørendeTask(taskTypeA);
+
+        ProsessTaskData vetoetTask = lagTask(taskTypeA, ProsessTaskStatus.VETO);
+        vetoetTask.setBlokkertAvProsessTaskId(kjørendeTask.getId());
+        ProsessTaskData taskIGruppeMedVetoet = lagTask(taskTypeB, ProsessTaskStatus.KLAR);
+        ProsessTaskGruppe eksisterendeGruppe = new ProsessTaskGruppe(vetoetTask);
+        eksisterendeGruppe.addNesteSekvensiell(taskIGruppeMedVetoet);
+        fagsakProsessTaskRepository.lagreNyGruppe(eksisterendeGruppe);
+        FagsakProsessTask fagsakProsessTask1 = new FagsakProsessTask(fagsakId, behandlingId.toString(), vetoetTask.getId(), 222L, vetoetTask.getTaskType());
+        fagsakProsessTaskRepository.lagre(fagsakProsessTask1);
+        FagsakProsessTask fagsakProsessTask2 = new FagsakProsessTask(fagsakId, behandlingId.toString(), taskIGruppeMedVetoet.getId(), 333L, taskIGruppeMedVetoet.getTaskType());
+        fagsakProsessTaskRepository.lagre(fagsakProsessTask2);
+
+        ProsessTaskData nyTask1 = lagTask(taskTypeA, ProsessTaskStatus.KLAR);
+        ProsessTaskData nyTask2 = lagTask(taskTypeB, ProsessTaskStatus.KLAR);
+        ProsessTaskGruppe nyGruppe = new ProsessTaskGruppe(nyTask1);
+        nyGruppe.addNesteSekvensiell(nyTask2);
+
+        fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, nyGruppe);
+        assertThat(nyTask1.getId()).isNull();
+        assertThat(nyTask2.getId()).isNull();
+    }
+
+    @Test
+    void skalFeileNårViSkalOppretteToTasksOgViHarEnVetoetOgEnIGruppeMedVetoetMenSomHarEnAnnenType() {
+        ProsessTaskData kjørendeTask = setupKjørendeTask(taskTypeA);
+
+        ProsessTaskData vetoetTask = lagTask(taskTypeA, ProsessTaskStatus.VETO);
+        vetoetTask.setBlokkertAvProsessTaskId(kjørendeTask.getId());
+        ProsessTaskData taskIGruppeMedVetoet = lagTask(taskTypeC, ProsessTaskStatus.KLAR);
+        ProsessTaskGruppe eksisterendeGruppe = new ProsessTaskGruppe(vetoetTask);
+        eksisterendeGruppe.addNesteSekvensiell(taskIGruppeMedVetoet);
+        fagsakProsessTaskRepository.lagreNyGruppe(eksisterendeGruppe);
+        FagsakProsessTask fagsakProsessTask1 = new FagsakProsessTask(fagsakId, behandlingId.toString(), vetoetTask.getId(), 222L, vetoetTask.getTaskType());
+        fagsakProsessTaskRepository.lagre(fagsakProsessTask1);
+        FagsakProsessTask fagsakProsessTask2 = new FagsakProsessTask(fagsakId, behandlingId.toString(), taskIGruppeMedVetoet.getId(), 333L, taskIGruppeMedVetoet.getTaskType());
+        fagsakProsessTaskRepository.lagre(fagsakProsessTask2);
+
+        ProsessTaskData nyTask1 = lagTask(taskTypeA, ProsessTaskStatus.KLAR);
+        ProsessTaskData nyTask2 = lagTask(taskTypeB, ProsessTaskStatus.KLAR);
+        ProsessTaskGruppe nyGruppe = new ProsessTaskGruppe(nyTask1);
+        nyGruppe.addNesteSekvensiell(nyTask2);
+
+        assertThrows(IllegalStateException.class, () ->
+            fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, nyGruppe));
+    }
+
+    @Test
+    void skalFeileNårViSkalOppretteTreTasksOgViKunHarEnVetoetTaskOgEnISammeGruppeSomVetoetAvSammeType() {
+        ProsessTaskData kjørendeTask = setupKjørendeTask(taskTypeA);
+
+        ProsessTaskData vetoetTask = lagTask(taskTypeA, ProsessTaskStatus.VETO);
+        vetoetTask.setBlokkertAvProsessTaskId(kjørendeTask.getId());
+        ProsessTaskData taskIGruppeMedVetoet = lagTask(taskTypeB, ProsessTaskStatus.KLAR);
+        ProsessTaskGruppe eksisterendeGruppe = new ProsessTaskGruppe(vetoetTask);
+        eksisterendeGruppe.addNesteSekvensiell(taskIGruppeMedVetoet);
+        fagsakProsessTaskRepository.lagreNyGruppe(eksisterendeGruppe);
+        FagsakProsessTask fagsakProsessTask1 = new FagsakProsessTask(fagsakId, behandlingId.toString(), vetoetTask.getId(), 222L, vetoetTask.getTaskType());
+        fagsakProsessTaskRepository.lagre(fagsakProsessTask1);
+        FagsakProsessTask fagsakProsessTask2 = new FagsakProsessTask(fagsakId, behandlingId.toString(), taskIGruppeMedVetoet.getId(), 333L, taskIGruppeMedVetoet.getTaskType());
+        fagsakProsessTaskRepository.lagre(fagsakProsessTask2);
+
+        ProsessTaskData nyTask1 = lagTask(taskTypeA, ProsessTaskStatus.KLAR);
+        ProsessTaskData nyTask2 = lagTask(taskTypeB, ProsessTaskStatus.KLAR);
+        ProsessTaskData nyTask3 = lagTask(taskTypeC, ProsessTaskStatus.KLAR);
+        ProsessTaskGruppe nyGruppe = new ProsessTaskGruppe(nyTask1);
+        nyGruppe.addNesteSekvensiell(nyTask2);
+        nyGruppe.addNesteSekvensiell(nyTask3);
+
+        assertThrows(IllegalStateException.class, () ->
+            fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, nyGruppe));
     }
 }

@@ -215,13 +215,13 @@ public class FagsakProsessTaskRepository {
             .map(ProsessTaskData::getTaskType)
             .collect(Collectors.toSet());
 
-        var vetoedTasksAvSammeTypeSomNy = new HashSet<>(planlagteTaskTyperBlokkertAvKjørende);
-        vetoedTasksAvSammeTypeSomNy.addAll(ventendeTaskTyperIGruppeMedBlokkert);
-        vetoedTasksAvSammeTypeSomNy.retainAll(nyeTaskTyper);
+        var vetoetEllerVentendeTasksAvSammeTypeSomNy = new HashSet<>(planlagteTaskTyperBlokkertAvKjørende);
+        vetoetEllerVentendeTasksAvSammeTypeSomNy.addAll(ventendeTaskTyperIGruppeMedBlokkert);
+        vetoetEllerVentendeTasksAvSammeTypeSomNy.retainAll(nyeTaskTyper);
 
-        if (!vetoedTasksAvSammeTypeSomNy.isEmpty() && nyeTaskTyper.containsAll(vetoedTasksAvSammeTypeSomNy) && Objects.equals(nyeTaskTyper.size(), vetoedTasksAvSammeTypeSomNy.size())) {
+        if (vetoetEllerVentendeTasksAvSammeTypeSomNy.containsAll(nyeTaskTyper)) {
             var grupper = planlagteTasksBlokkertAvKjørende.stream().map(ProsessTaskData::getGruppe).collect(Collectors.toSet());
-            log.info("Skipper opprettelse av gruppe med tasks: [{}], Har allerede vetoet tasks av samme type [{}], Og ventende tasks i samme gruppe som vetoet [{}]",
+            log.info("Skipper opprettelse av gruppe med tasks: [{}], Har allerede vetoet tasks av samme type [{}], Og ventende tasks i gruppe med vetoet [{}]",
                 toStringEntry(gruppe.getTasks()), planlagteTaskTyperBlokkertAvKjørende, ventendeTaskTyperIGruppeMedBlokkert);
             return grupper.stream().findFirst().orElseThrow();
         }
