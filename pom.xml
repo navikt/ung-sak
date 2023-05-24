@@ -564,7 +564,7 @@
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>io.github.classgraph</groupId>
                 <artifactId>classgraph</artifactId>
-                <version>4.8.158</version>
+                <version>4.8.160</version>
             </dependency>
 
             <dependency>
@@ -712,7 +712,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>flatten-maven-plugin</artifactId>
-                    <version>1.4.1</version>
+                    <version>1.5.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
