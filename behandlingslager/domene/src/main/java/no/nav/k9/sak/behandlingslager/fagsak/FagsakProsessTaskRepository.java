@@ -46,7 +46,7 @@ public class FagsakProsessTaskRepository {
     private static final Logger log = LoggerFactory.getLogger(FagsakProsessTaskRepository.class);
     private final Set<ProsessTaskStatus> ferdigStatuser = Set.of(ProsessTaskStatus.FERDIG, ProsessTaskStatus.KJOERT);
     private EntityManager em;
-    private ProsessTaskTjeneste prosessTaskRepository;
+    private ProsessTaskTjeneste prosessTaskTjeneste;
     private TaskManager taskManager;
 
     FagsakProsessTaskRepository() {
@@ -54,14 +54,14 @@ public class FagsakProsessTaskRepository {
     }
 
     @Inject
-    public FagsakProsessTaskRepository(EntityManager entityManager, ProsessTaskTjeneste prosessTaskRepository, TaskManager taskManager) {
+    public FagsakProsessTaskRepository(EntityManager entityManager, ProsessTaskTjeneste prosessTaskTjeneste, TaskManager taskManager) {
         this.em = entityManager;
-        this.prosessTaskRepository = prosessTaskRepository;
+        this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.taskManager = taskManager;
     }
 
     public void lagre(FagsakProsessTask fagsakProsessTask) {
-        ProsessTaskData ptData = prosessTaskRepository.finn(fagsakProsessTask.getProsessTaskId());
+        ProsessTaskData ptData = prosessTaskTjeneste.finn(fagsakProsessTask.getProsessTaskId());
         log.debug("Linker fagsak[{}] -> prosesstask[{}], tasktype=[{}] gruppeSekvensNr=[{}]", fagsakProsessTask.getFagsakId(), fagsakProsessTask.getProsessTaskId(), ptData.getTaskType(),
             fagsakProsessTask.getGruppeSekvensNr());
         EntityManager em = getEntityManager();
@@ -80,7 +80,7 @@ public class FagsakProsessTaskRepository {
     }
 
     public void fjern(Long fagsakId, Long prosessTaskId, Long gruppeSekvensNr) {
-        ProsessTaskData ptData = prosessTaskRepository.finn(prosessTaskId);
+        ProsessTaskData ptData = prosessTaskTjeneste.finn(prosessTaskId);
         log.debug("Fjerner link fagsak[{}] -> prosesstask[{}], tasktype=[{}] gruppeSekvensNr=[{}]", fagsakId, prosessTaskId, ptData.getTaskType(), gruppeSekvensNr);
         EntityManager em = getEntityManager();
         Query query = em.createNativeQuery("delete from FAGSAK_PROSESS_TASK where prosess_task_id = :prosessTaskId and fagsak_id=:fagsakId");
@@ -153,12 +153,12 @@ public class FagsakProsessTaskRepository {
 
     public String lagreNyGruppe(ProsessTaskData taskData) {
         Optional.ofNullable(MDC.get("prosess_steg")).ifPresent(v -> taskData.setProperty("parent.steg", v));
-        return prosessTaskRepository.lagre(taskData);
+        return prosessTaskTjeneste.lagre(taskData);
     }
 
     public String lagreNyGruppe(ProsessTaskGruppe gruppe) {
         Optional.ofNullable(MDC.get("prosess_steg")).ifPresent(v -> gruppe.setProperty("parent.steg", v));
-        return prosessTaskRepository.lagre(gruppe);
+        return prosessTaskTjeneste.lagre(gruppe);
     }
 
     public String lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(Long fagsakId, Long behandlingId, ProsessTaskGruppe gruppe) {
