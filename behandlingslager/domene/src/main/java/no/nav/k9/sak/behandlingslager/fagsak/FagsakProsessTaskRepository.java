@@ -158,7 +158,9 @@ public class FagsakProsessTaskRepository {
 
     public String lagreNyGruppe(ProsessTaskGruppe gruppe) {
         Optional.ofNullable(MDC.get("prosess_steg")).ifPresent(v -> gruppe.setProperty("parent.steg", v));
-        return prosessTaskTjeneste.lagre(gruppe);
+        String nyGruppeId = prosessTaskTjeneste.lagre(gruppe);
+        log.info("Lagret gruppe {} med tasker: [{}]. Kjørende task er {}", nyGruppeId, toStringEntry(gruppe.getTasks()), taskManager.getCurrentTask());
+        return nyGruppeId;
     }
 
     public String lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(Long fagsakId, Long behandlingId, ProsessTaskGruppe gruppe) {
