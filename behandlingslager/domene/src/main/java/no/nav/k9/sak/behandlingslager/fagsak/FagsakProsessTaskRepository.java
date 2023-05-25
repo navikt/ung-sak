@@ -166,9 +166,8 @@ public class FagsakProsessTaskRepository {
     }
 
     public String lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(Long fagsakId, String behandlingId, ProsessTaskGruppe gruppe) {
-        //TODO fiks kommentar
-        // oppretter nye tasks hvis gamle har feilet og matcher angitt gruppe, eller tidligere er FERDIG. Ignorerer hvis tidligere gruppe fortsatt
-        // er KLAR
+        // Oppretter nye tasks hvis ingen eksisterende har feilet eller er av samme type som nye.
+        // Ignorerer hvis eksisterende gruppe er vetoet og matcher tasktyper i ny gruppe
         List<ProsessTaskData> eksisterendeTasks = sjekkStatusProsessTasks(fagsakId, behandlingId, null);
 
         gruppe.setCallIdFraEksisterende();
