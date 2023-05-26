@@ -2,15 +2,15 @@ package no.nav.k9.sak.web.app.tasks;
 
 import java.util.Optional;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.ManglerBeregningsgrunnlagException;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
@@ -31,64 +31,64 @@ public class PsbFeilretteTask implements ProsessTaskHandler {
 
     private BehandlingRepository behandlingRepository;
     private BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
-    private OpprettManuellRevurderingService opprettManuellRevurderingService;
+    private OpprettRevurderingService opprettRevurderingService;
     private FagsakRepository fagsakRepository;
     private BehandlingModellRepository behandlingModellRepository;
-    
-    
+
+
     public PsbFeilretteTask() {}
 
     @Inject
     public PsbFeilretteTask(BehandlingRepository behandlingRepository,
             BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
-            OpprettManuellRevurderingService opprettManuellRevurderingService,
+            OpprettRevurderingService opprettRevurderingService,
             FagsakRepository fagsakRepository,
             BehandlingModellRepository behandlingModellRepository) {
         this.behandlingRepository = behandlingRepository;
         this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
-        this.opprettManuellRevurderingService = opprettManuellRevurderingService;
+        this.opprettRevurderingService = opprettRevurderingService;
         this.fagsakRepository = fagsakRepository;
         this.behandlingModellRepository = behandlingModellRepository;
     }
 
-    
+
     @Override
     public void doTask(ProsessTaskData pd) {
         final Saksnummer saksnummer = new Saksnummer(pd.getSaksnummer());
         final Fagsak fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer).orElseThrow();
         final Optional<Behandling> behandlingSomSkalSjekkes = finnBehandlingSomSkalSjekkes(fagsak.getId());
-        
+
         if (behandlingSomSkalSjekkes.isEmpty()) {
             return;
         }
-        
+
         final BehandlingReferanse ref = BehandlingReferanse.fra(behandlingSomSkalSjekkes.get());
-        
+
         try {
             beregningsgrunnlagTjeneste.hentEksaktFastsattForAllePerioder(ref);
         } catch (ManglerBeregningsgrunnlagException e) {
             logger.info("Mangler beregningsgrunnlag i behandling " + ref.getBehandlingUuid().toString() + " sak: " + saksnummer.getVerdi());
-            opprettManuellRevurderingService.revurder(saksnummer);
+            opprettRevurderingService.opprettManuellRevurdering(saksnummer, BehandlingÅrsakType.RE_ANNET, BehandlingStegType.START_STEG);
         }
     }
-    
+
     private Optional<Behandling> finnBehandlingSomSkalSjekkes(Long fagsakId) {
         final Optional<Behandling> sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId);
         if (sisteBehandling.isEmpty()) {
             return Optional.empty();
         }
-        
+
         if (harKommetTilBekreftUttak(BehandlingReferanse.fra(sisteBehandling.get()))) {
             return sisteBehandling;
         }
-        
+
         if (sisteBehandling.get().getOriginalBehandlingId().isEmpty()) {
             return Optional.empty();
         }
-        
+
         return Optional.of(behandlingRepository.hentBehandling(sisteBehandling.get().getOriginalBehandlingId().get()));
     }
-    
+
     private boolean harKommetTilBekreftUttak(BehandlingReferanse ref) {
         final var behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
         final BehandlingStegType steg = behandling.getAktivtBehandlingSteg();

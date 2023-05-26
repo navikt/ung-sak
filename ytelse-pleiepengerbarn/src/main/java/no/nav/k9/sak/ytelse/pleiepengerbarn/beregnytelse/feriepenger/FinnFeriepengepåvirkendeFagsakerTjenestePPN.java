@@ -8,11 +8,14 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.InfotrygdFeriepengegrunnlag;
+import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.SaksnummerOgSisteBehandling;
 
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @ApplicationScoped
@@ -20,17 +23,31 @@ public class FinnFeriepengepåvirkendeFagsakerTjenestePPN implements FinnFeriepe
 
     private FagsakRepository fagsakRepository;
 
+    private HentFeriepengeAndelerTjeneste hentFeriepengeAndelerTjeneste;
+
     FinnFeriepengepåvirkendeFagsakerTjenestePPN() {
         //for CDI proxy
     }
 
     @Inject
-    public FinnFeriepengepåvirkendeFagsakerTjenestePPN(FagsakRepository fagsakRepository) {
+    public FinnFeriepengepåvirkendeFagsakerTjenestePPN(FagsakRepository fagsakRepository, HentFeriepengeAndelerTjeneste hentFeriepengeAndelerTjeneste) {
         this.fagsakRepository = fagsakRepository;
+        this.hentFeriepengeAndelerTjeneste = hentFeriepengeAndelerTjeneste;
     }
 
     @Override
-    public Set<Fagsak> finnSakerSomPåvirkerFeriepengerFor(BehandlingReferanse behandlingReferanse) {
+    public LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> finnPåvirkedeSaker(BehandlingReferanse behandling) {
+        Set<Fagsak> påvirkendeFagsaker = finnSakerSomPåvirkerFeriepengerFor(behandling);
+        return hentFeriepengeAndelerTjeneste.finnAndelerSomKanGiFeriepenger(påvirkendeFagsaker);
+    }
+
+    @Override
+    public InfotrygdFeriepengegrunnlag finnInfotrygdFeriepengegrunnlag(BehandlingReferanse behandlingReferanse) {
+        //ingen saker i infotrygd som er aktuelle
+        return null;
+    }
+
+    private Set<Fagsak> finnSakerSomPåvirkerFeriepengerFor(BehandlingReferanse behandlingReferanse) {
         List<Fagsak> fagsakerForPleietrengende = fagsakRepository.finnFagsakRelatertTil(FagsakYtelseType.PPN, null, behandlingReferanse.getPleietrengendeAktørId(), null, null, null);
 
         return fagsakerForPleietrengende.stream()

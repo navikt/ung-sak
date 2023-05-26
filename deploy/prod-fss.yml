@@ -261,6 +261,8 @@ spec:
       value: "false"
     - name: OMS_ZERO_REFUSJON_ER_KRAV
       value: "false"
+    - name: FERIEPENGER_INFOTRYGD_KORRIGER
+      value: "true"
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT
