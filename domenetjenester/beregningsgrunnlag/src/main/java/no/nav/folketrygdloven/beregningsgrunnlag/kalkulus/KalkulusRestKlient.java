@@ -43,7 +43,7 @@ import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringListeRespons;
 import no.nav.folketrygdloven.kalkulus.response.v1.regelinput.Saksnummer;
-import no.nav.folketrygdloven.kalkulus.response.v1.simulerTilkommetInntekt.SimulertTilkommetInntekt;
+import no.nav.folketrygdloven.kalkulus.response.v1.simulerTilkommetInntekt.SimulertTilkommetAktivitetListe;
 import no.nav.folketrygdloven.kalkulus.response.v1.simulerTilkommetInntekt.SimulertTilkommetInntektListe;
 import no.nav.k9.felles.exception.VLException;
 import no.nav.k9.felles.feil.Feil;
@@ -72,6 +72,7 @@ public class KalkulusRestKlient {
     private final ObjectReader dtoListeReader = kalkulusMapper.readerFor(BeregningsgrunnlagListe.class);
     private final ObjectReader behovForGreguleringReader = kalkulusMapper.readerFor(GrunnbeløpReguleringRespons.class);
     private final ObjectReader tilkommetInntektReader = kalkulusMapper.readerFor(SimulertTilkommetInntektListe.class);
+    private final ObjectReader tilkommetAktivitetReader = kalkulusMapper.readerFor(SimulertTilkommetAktivitetListe.class);
 
     private final ObjectReader grunnlagListReader = kalkulusMapper.readerFor(new TypeReference<List<BeregningsgrunnlagGrunnlagDto>>() {
     });
@@ -92,7 +93,7 @@ public class KalkulusRestKlient {
 
     private URI kontrollerGrunnbeløp;
     private URI simulerTilkommetInntekt;
-
+    private URI simulerTilkommetAktivitet;
 
     private URI migrerAksjonspunkter;
     private URI komprimerRegelinput;
@@ -133,6 +134,7 @@ public class KalkulusRestKlient {
         this.komprimerFlereRegelinput = toUri("/api/kalkulus/v1/komprimerAntallRegelSporinger");
         this.kopierOgResettEndpoint = toUri("/api/kalkulus/v1//kopierOgResett/bolk");
         this.simulerTilkommetInntekt = toUri("/api/kalkulus/v1/simulerTilkommetInntektForKoblinger");
+        this.simulerTilkommetAktivitet = toUri("/api/kalkulus/v1/simulerTilkommetAktivitetForKoblinger");
     }
 
 
@@ -226,6 +228,15 @@ public class KalkulusRestKlient {
         var endpoint = simulerTilkommetInntekt;
         try {
             return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), tilkommetInntektReader);
+        } catch (JsonProcessingException e) {
+            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
+        }
+    }
+    
+    public SimulertTilkommetAktivitetListe simulerTilkommetAktivitet(SimulerTilkommetInntektListeRequest request) {
+        var endpoint = simulerTilkommetAktivitet;
+        try {
+            return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), tilkommetAktivitetReader);
         } catch (JsonProcessingException e) {
             throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
         }

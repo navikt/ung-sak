@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -16,6 +17,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetKlassifisering;
@@ -55,7 +57,7 @@ public class MapArbeid {
 
         return arbeidsforhold.keySet()
             .stream()
-            .map(key -> mapArbeidsgiver(arbeidsforhold, key))
+            .map(key -> mapArbeidsgiver(arbeidsforhold, key, input))
             .collect(Collectors.toList());
     }
 
@@ -474,25 +476,52 @@ public class MapArbeid {
         return arbeidsforhold;
     }
 
-    private Arbeid mapArbeidsgiver(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, AktivitetIdentifikator key) {
+    private Arbeid mapArbeidsgiver(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, AktivitetIdentifikator key, ArbeidstidMappingInput input) {
         var perioder = new HashMap<LukketPeriode, ArbeidsforholdPeriodeInfo>();
         arbeidsforhold.get(key)
             .compress()
             .toSegments()
             .stream()
             .filter(it -> Objects.nonNull(it.getValue()))
-            .forEach(p -> mapArbeidForPeriode(arbeidsforhold, perioder, p));
+            .forEach(p -> mapArbeidForPeriode(arbeidsforhold, perioder, p, input));
 
         return new Arbeid(mapArbeidsforhold(key), perioder);
     }
 
-    private void mapArbeidForPeriode(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, HashMap<LukketPeriode, ArbeidsforholdPeriodeInfo> perioder, LocalDateSegment<WrappedArbeid> p) {
+    private void mapArbeidForPeriode(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold, HashMap<LukketPeriode, ArbeidsforholdPeriodeInfo> perioder, LocalDateSegment<WrappedArbeid> p, ArbeidstidMappingInput input) {
         var periode = p.getValue().getPeriode();
         var antallLinjerPerArbeidsgiver = arbeidsforhold.keySet().stream().filter(it -> Objects.equals(periode.getAktivitetType(), it.getAktivitetType()) && periode.getArbeidsgiver() != null && Objects.equals(it.getArbeidsgiver(), periode.getArbeidsgiver())).count();
         var jobberNormalt = justerIHenholdTilAntallet(antallLinjerPerArbeidsgiver, Optional.ofNullable(periode.getJobberNormaltTimerPerDag()).orElse(justerIHenholdTilAntallet(antallLinjerPerArbeidsgiver, Duration.ZERO)));
         var jobberFaktisk = justerIHenholdTilAntallet(antallLinjerPerArbeidsgiver, Optional.ofNullable(periode.getFaktiskArbeidTimerPerDag()).orElse(justerIHenholdTilAntallet(antallLinjerPerArbeidsgiver, Duration.ZERO)));
-        perioder.put(new LukketPeriode(p.getFom(), p.getTom()),
-            new ArbeidsforholdPeriodeInfo(jobberNormalt, jobberFaktisk));
+
+        final List<Entry<AktivitetIdentifikator, LocalDateTimeline<Boolean>>> resultater = input.getTilkommetAktivitetsperioder().entrySet().stream()
+            .filter(it ->
+                Objects.equals(periode.getAktivitetType(), it.getKey().getAktivitetType())
+                && periode.getArbeidsgiver() != null
+                && Objects.equals(it.getKey().getArbeidsgiver(), periode.getArbeidsgiver())
+            )
+            .toList();
+        if (resultater.size() > 1) {
+            throw new IllegalStateException("Det skal ikke være mulig med flere forekomster av samme tilkommet aktivitet.");
+        }
+        
+        if (resultater.isEmpty() || resultater.get(0).getValue().isEmpty()) {
+            perioder.put(new LukketPeriode(p.getFom(), p.getTom()),
+                    new ArbeidsforholdPeriodeInfo(jobberNormalt, jobberFaktisk, false));
+            return;
+        }
+        
+        final var tilkommetTidslinje = resultater.get(0).getValue();
+        final LocalDateTimeline<Boolean> vanligTidslinje = new LocalDateTimeline<Boolean>(p.getFom(), p.getTom(), false);
+        final var justertTilkommetTidslinje = vanligTidslinje.combine(tilkommetTidslinje, (di, ds1, ds2) -> {
+            return new LocalDateSegment<Boolean>(di, (ds2 != null));
+        }, JoinStyle.LEFT_JOIN);
+        
+        justertTilkommetTidslinje.toSegments().forEach(s -> {
+            final boolean tilkommet = (s.getValue() != null && s.getValue());
+            perioder.put(new LukketPeriode(s.getLocalDateInterval().getFomDato(), s.getLocalDateInterval().getTomDato()),
+                    new ArbeidsforholdPeriodeInfo(jobberNormalt, jobberFaktisk, tilkommet));
+        });
     }
 
     private Duration justerIHenholdTilAntallet(long antallLinjerPerArbeidsgiver, Duration duration) {

@@ -59,6 +59,8 @@ import no.nav.folketrygdloven.kalkulus.response.v1.TilstandListeResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringListeRespons;
+import no.nav.folketrygdloven.kalkulus.response.v1.simulerTilkommetInntekt.SimulertTilkommetAktivitet;
+import no.nav.folketrygdloven.kalkulus.response.v1.simulerTilkommetInntekt.SimulertTilkommetAktivitetPrReferanse;
 import no.nav.folketrygdloven.kalkulus.response.v1.simulerTilkommetInntekt.SimulertTilkommetInntektPrReferanse;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -369,4 +371,23 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         ));
     }
 
+    public Map<UUID, List<SimulertTilkommetAktivitet>> simulerTilkommetAktivitet(Map<UUID, DatoIntervallEntitet> koblingerOgPeriode,
+            Saksnummer saksnummer) {
+        if (koblingerOgPeriode.isEmpty()) {
+            return Map.of();
+        }
+        var request = new SimulerTilkommetInntektListeRequest(
+                saksnummer.getVerdi(),
+                YtelseTyperKalkulusStøtterKontrakt.PLEIEPENGER_SYKT_BARN,
+                koblingerOgPeriode.entrySet().stream()
+                    .map(e ->
+                        new SimulerTilkommetInntektForRequest(e.getKey(),
+                                List.of(new Periode(e.getValue().getFomDato(), e.getValue().getTomDato()))))
+                    .toList());
+        var respons = restTjeneste.simulerTilkommetAktivitet(request);
+        return respons.getSimulertListe().stream().collect(Collectors.toMap(
+            SimulertTilkommetAktivitetPrReferanse::getEksternReferanse,
+            it -> it.getTilkommedeAktiviteter()
+        ));
+    }
 }

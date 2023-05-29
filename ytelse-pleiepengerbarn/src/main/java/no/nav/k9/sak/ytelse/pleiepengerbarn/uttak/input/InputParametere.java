@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -28,6 +29,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynForPleietrengende;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.AktivitetIdentifikator;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidstidMappingInput;
 
 public class InputParametere {
 
@@ -52,6 +55,7 @@ public class InputParametere {
     private DatoIntervallEntitet utvidetPeriodeSomFølgeAvDødsfall;
     private Map<UUID, UUID> sisteVedtatteBehandlingForBehandling;
     private UtsattBehandlingAvPeriode utsattBehandlingAvPerioder;
+    private Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> tilkommetAktivitetsperioder  = new HashMap<>();
 
     public InputParametere() {
     }
@@ -243,6 +247,15 @@ public class InputParametere {
 
     public InputParametere medSisteVedtatteBehandlingForBehandling(Map<UUID, UUID> sisteVedtatteBehandlingForBehandling) {
         this.sisteVedtatteBehandlingForBehandling = sisteVedtatteBehandlingForBehandling;
+        return this;
+    }
+    
+    public Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> getTilkommetAktivitetsperioder() {
+        return tilkommetAktivitetsperioder;
+    }
+    
+    public InputParametere medTilkommetAktivitetsperioder(Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> tilkommetAktivitetsperioder) {
+        this.tilkommetAktivitetsperioder = tilkommetAktivitetsperioder;
         return this;
     }
 }
