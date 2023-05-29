@@ -50,7 +50,7 @@ public class ÅpneProsessTaskDump implements DebugDumpFagsak {
             + " from prosess_task t "
             + " inner join fagsak_prosess_task ft on ft.prosess_task_id=t.id"
             + " inner join fagsak f on f.id=ft.fagsak_id"
-            + " where status in ('FEILET', 'KLAR') and f.saksnummer=:saksnummer";
+            + " where status in ('FEILET', 'KLAR', 'VETO') and f.saksnummer=:saksnummer";
 
         var query = entityManager.createNativeQuery(sql, Tuple.class)
             .setParameter("saksnummer", fagsak.getSaksnummer().getVerdi());
