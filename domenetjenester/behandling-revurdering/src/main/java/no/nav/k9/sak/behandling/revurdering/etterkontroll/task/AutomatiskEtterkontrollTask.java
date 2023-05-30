@@ -7,7 +7,6 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandling.revurdering.etterkontroll.tjeneste.UtførKontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -24,10 +23,10 @@ import no.nav.k9.sak.behandlingslager.task.FagsakProsessTask;
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)
 public class AutomatiskEtterkontrollTask extends FagsakProsessTask {
     public static final String TASKTYPE = "behandlingsprosess.etterkontroll";
+    //TODO denne blir aldri satt fra BatchTask'en når skal den brukes?
     public static final String KUN_AKTUELL_BEHANDLING = "etterkontrollBehandling";
     private static final Logger log = LoggerFactory.getLogger(AutomatiskEtterkontrollTask.class);
     private BehandlingRepository behandlingRepository;
-    private ProsessTaskTjeneste taskTjeneste;
     private UtførKontrollTjeneste utførKontrollTjeneste;
 
     AutomatiskEtterkontrollTask() {
@@ -36,10 +35,9 @@ public class AutomatiskEtterkontrollTask extends FagsakProsessTask {
 
     @Inject
     public AutomatiskEtterkontrollTask(BehandlingRepositoryProvider repositoryProvider,// NOSONAR
-                                       ProsessTaskTjeneste taskTjeneste, UtførKontrollTjeneste utførKontrollTjeneste) {
+                                       UtførKontrollTjeneste utførKontrollTjeneste) {
         super(repositoryProvider.getFagsakLåsRepository(), repositoryProvider.getBehandlingLåsRepository());
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
-        this.taskTjeneste = taskTjeneste;
         this.utførKontrollTjeneste = utførKontrollTjeneste;
     }
 

@@ -1,3 +1,4 @@
+//TODO bør ligge i en annen pakke da det ikke er revurdering spesifikt?
 package no.nav.k9.sak.behandling.revurdering.etterkontroll.tjeneste;
 
 import java.util.Objects;

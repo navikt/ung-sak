@@ -58,7 +58,7 @@ public class EtterkontrollRepositoryFinnKandidaterTilRevurderingImplTest {
         Behandling behandling = opprettRevurderingsKandidat();
 
         Etterkontroll etterkontroll = new Etterkontroll.Builder(behandling.getFagsakId()).medErBehandlet(false).medKontrollTidspunkt(LocalDate.now().atStartOfDay().minusDays(revurderingDagerTilbake))
-            .medKontrollType(KontrollType.MANGLENDE_FØDSEL).build();
+            .medKontrollType(KontrollType.FORSINKET_SAKSBEHANDLINGSTID).build();
         etterkontrollRepository.lagre(etterkontroll);
 
         final List<Etterkontroll> etterkontroller = etterkontrollRepository
@@ -73,10 +73,10 @@ public class EtterkontrollRepositoryFinnKandidaterTilRevurderingImplTest {
         Behandling behandling = opprettRevurderingsKandidat();
 
         Etterkontroll etterkontroll = new Etterkontroll.Builder(behandling.getFagsakId()).medErBehandlet(false).medKontrollTidspunkt(LocalDate.now().atStartOfDay().minusDays(revurderingDagerTilbake))
-            .medKontrollType(KontrollType.MANGLENDE_FØDSEL).build();
+            .medKontrollType(KontrollType.FORSINKET_SAKSBEHANDLINGSTID).build();
         etterkontrollRepository.lagre(etterkontroll);
 
-        etterkontrollRepository.avflaggDersomEksisterer(behandling.getFagsakId(), KontrollType.MANGLENDE_FØDSEL);
+        etterkontrollRepository.avflaggDersomEksisterer(behandling.getFagsakId(), KontrollType.FORSINKET_SAKSBEHANDLINGSTID);
 
         final List<Etterkontroll> etterkontroller = etterkontrollRepository
             .finnKandidaterForAutomatiskEtterkontroll(Period.parse("P" + revurderingDagerTilbake + "D"));
@@ -101,7 +101,7 @@ public class EtterkontrollRepositoryFinnKandidaterTilRevurderingImplTest {
         behandlingRepository.lagre(revurderingsBehandling, behandlingRepository.taSkriveLås(revurderingsBehandling));
 
         Etterkontroll etterkontroll = new Etterkontroll.Builder(revurderingsBehandling.getFagsakId()).medErBehandlet(false)
-            .medKontrollTidspunkt(LocalDate.now().atStartOfDay().minusDays(revurderingDagerTilbake)).medKontrollType(KontrollType.MANGLENDE_FØDSEL).build();
+            .medKontrollTidspunkt(LocalDate.now().atStartOfDay().minusDays(revurderingDagerTilbake)).medKontrollType(KontrollType.FORSINKET_SAKSBEHANDLINGSTID).build();
         etterkontrollRepository.lagre(etterkontroll);
 
         List<Long> fagsakList = etterkontrollRepository
@@ -117,7 +117,7 @@ public class EtterkontrollRepositoryFinnKandidaterTilRevurderingImplTest {
         opprettRevurderingsKandidat();
 
         Etterkontroll etterkontroll = new Etterkontroll.Builder(behandling.getFagsakId()).medErBehandlet(false).medKontrollTidspunkt(LocalDate.now().atStartOfDay().minusDays(revurderingDagerTilbake))
-            .medKontrollType(KontrollType.MANGLENDE_FØDSEL).build();
+            .medKontrollType(KontrollType.FORSINKET_SAKSBEHANDLINGSTID).build();
         etterkontrollRepository.lagre(etterkontroll);
 
         List<Etterkontroll> fagsakList = etterkontrollRepository
