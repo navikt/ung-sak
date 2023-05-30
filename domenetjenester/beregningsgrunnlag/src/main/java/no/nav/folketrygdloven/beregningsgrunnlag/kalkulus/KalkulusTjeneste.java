@@ -351,14 +351,15 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         return respons.getResultat();
     }
 
-    public Map<UUID, List<DatoIntervallEntitet>> simulerTilkommetInntekt(Map<UUID, DatoIntervallEntitet> koblingerOgPeriode,
+    public Map<UUID, List<DatoIntervallEntitet>> simulerTilkommetInntekt(FagsakYtelseType ytelseType, Map<UUID, DatoIntervallEntitet> koblingerOgPeriode,
                                                                          Saksnummer saksnummer) {
         if (koblingerOgPeriode.isEmpty()) {
             return Map.of();
         }
+        final YtelseTyperKalkulusStøtterKontrakt ytelseTypeKalkulus = YtelseTyperKalkulusStøtterKontrakt.fraKode(ytelseType.getKode());
         var request = new SimulerTilkommetInntektListeRequest(
             saksnummer.getVerdi(),
-            YtelseTyperKalkulusStøtterKontrakt.PLEIEPENGER_SYKT_BARN,
+            ytelseTypeKalkulus,
             koblingerOgPeriode.entrySet().stream()
                 .map(e ->
                     new SimulerTilkommetInntektForRequest(e.getKey(),
@@ -371,14 +372,15 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         ));
     }
 
-    public Map<UUID, List<SimulertTilkommetAktivitet>> simulerTilkommetAktivitet(Map<UUID, DatoIntervallEntitet> koblingerOgPeriode,
+    public Map<UUID, List<SimulertTilkommetAktivitet>> simulerTilkommetAktivitet(FagsakYtelseType ytelseType, Map<UUID, DatoIntervallEntitet> koblingerOgPeriode,
             Saksnummer saksnummer) {
         if (koblingerOgPeriode.isEmpty()) {
             return Map.of();
         }
+        final YtelseTyperKalkulusStøtterKontrakt ytelseTypeKalkulus = YtelseTyperKalkulusStøtterKontrakt.fraKode(ytelseType.getKode());
         var request = new SimulerTilkommetInntektListeRequest(
                 saksnummer.getVerdi(),
-                YtelseTyperKalkulusStøtterKontrakt.PLEIEPENGER_SYKT_BARN,
+                ytelseTypeKalkulus,
                 koblingerOgPeriode.entrySet().stream()
                     .map(e ->
                         new SimulerTilkommetInntektForRequest(e.getKey(),

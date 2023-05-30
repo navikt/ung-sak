@@ -16,6 +16,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.folketrygdloven.kalkulus.response.v1.simulerTilkommetInntekt.SimulertTilkommetAktivitet;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -100,7 +101,8 @@ public class KandidaterForInntektgraderingTjeneste {
             bg.finnGrunnlagFor(og.getSkjæringstidspunkt()).ifPresent(bgp ->
                 koblingerÅSpørreMot.put(bgp.getEksternReferanse(), finnPeriode(dato, og))));
 
-        Map<UUID, List<DatoIntervallEntitet>> koblingMotVurderingsmap = kalkulusTjeneste.simulerTilkommetInntekt(koblingerÅSpørreMot, saksnummer);
+        final FagsakYtelseType ytelseType = sisteBehandling.getFagsak().getYtelseType();
+        Map<UUID, List<DatoIntervallEntitet>> koblingMotVurderingsmap = kalkulusTjeneste.simulerTilkommetInntekt(ytelseType, koblingerÅSpørreMot, saksnummer);
 
         return koblingMotVurderingsmap.values().stream().flatMap(Collection::stream)
             .collect(Collectors.toSet());
@@ -155,7 +157,9 @@ public class KandidaterForInntektgraderingTjeneste {
             bg.finnGrunnlagFor(og.getSkjæringstidspunkt()).ifPresent(bgp ->
                 koblingerÅSpørreMot.put(bgp.getEksternReferanse(), finnPeriode(dato, og))));
 
-        final Map<UUID, List<SimulertTilkommetAktivitet>> koblingMotAktiviteter = kalkulusTjeneste.simulerTilkommetAktivitet(koblingerÅSpørreMot, saksnummer);
+        final FagsakYtelseType ytelseType = sisteBehandling.getFagsak().getYtelseType();
+        
+        final Map<UUID, List<SimulertTilkommetAktivitet>> koblingMotAktiviteter = kalkulusTjeneste.simulerTilkommetAktivitet(ytelseType, koblingerÅSpørreMot, saksnummer);
         
         final Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> sammenslåttResultat = new HashMap<>();
         koblingMotAktiviteter.values().stream().flatMap(Collection::stream).forEach(s -> {

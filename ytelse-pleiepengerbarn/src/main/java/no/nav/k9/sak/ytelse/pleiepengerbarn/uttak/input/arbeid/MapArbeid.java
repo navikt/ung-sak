@@ -513,12 +513,10 @@ public class MapArbeid {
         
         final var tilkommetTidslinje = resultater.get(0).getValue();
         final LocalDateTimeline<Boolean> vanligTidslinje = new LocalDateTimeline<Boolean>(p.getFom(), p.getTom(), false);
-        final var justertTilkommetTidslinje = vanligTidslinje.combine(tilkommetTidslinje, (di, ds1, ds2) -> {
-            return new LocalDateSegment<Boolean>(di, (ds2 != null));
-        }, JoinStyle.LEFT_JOIN);
+        final var justertTilkommetTidslinje = vanligTidslinje.combine(tilkommetTidslinje, StandardCombinators::coalesceRightHandSide, JoinStyle.LEFT_JOIN);
         
         justertTilkommetTidslinje.toSegments().forEach(s -> {
-            final boolean tilkommet = (s.getValue() != null && s.getValue());
+            final boolean tilkommet = s.getValue();
             perioder.put(new LukketPeriode(s.getLocalDateInterval().getFomDato(), s.getLocalDateInterval().getTomDato()),
                     new ArbeidsforholdPeriodeInfo(jobberNormalt, jobberFaktisk, tilkommet));
         });
