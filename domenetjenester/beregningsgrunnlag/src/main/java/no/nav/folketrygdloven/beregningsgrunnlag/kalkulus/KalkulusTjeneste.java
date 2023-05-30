@@ -53,15 +53,17 @@ import no.nav.folketrygdloven.kalkulus.request.v1.KopierBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.KopierBeregningRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.simulerTilkommetInntekt.SimulerTilkommetInntektForRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.simulerTilkommetInntekt.SimulerTilkommetInntektListeRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.tilkommetAktivitet.UtledTilkommetAktivitetForRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.tilkommetAktivitet.UtledTilkommetAktivitetListeRequest;
 import no.nav.folketrygdloven.kalkulus.response.v1.Grunnbeløp;
 import no.nav.folketrygdloven.kalkulus.response.v1.GrunnbeløpReguleringRespons;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandListeResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringListeRespons;
-import no.nav.folketrygdloven.kalkulus.response.v1.simulerTilkommetInntekt.SimulertTilkommetAktivitet;
-import no.nav.folketrygdloven.kalkulus.response.v1.simulerTilkommetInntekt.SimulertTilkommetAktivitetPrReferanse;
 import no.nav.folketrygdloven.kalkulus.response.v1.simulerTilkommetInntekt.SimulertTilkommetInntektPrReferanse;
+import no.nav.folketrygdloven.kalkulus.response.v1.tilkommetAktivitet.UtledetTilkommetAktivitet;
+import no.nav.folketrygdloven.kalkulus.response.v1.tilkommetAktivitet.UtledetTilkommetAktivitetPrReferanse;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAvklaringsbehovDefinisjon;
@@ -372,23 +374,23 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         ));
     }
 
-    public Map<UUID, List<SimulertTilkommetAktivitet>> simulerTilkommetAktivitet(FagsakYtelseType ytelseType, Map<UUID, DatoIntervallEntitet> koblingerOgPeriode,
+    public Map<UUID, List<UtledetTilkommetAktivitet>> utledTilkommetAktivitet(FagsakYtelseType ytelseType, Map<UUID, DatoIntervallEntitet> koblingerOgPeriode,
             Saksnummer saksnummer) {
         if (koblingerOgPeriode.isEmpty()) {
             return Map.of();
         }
         final YtelseTyperKalkulusStøtterKontrakt ytelseTypeKalkulus = YtelseTyperKalkulusStøtterKontrakt.fraKode(ytelseType.getKode());
-        var request = new SimulerTilkommetInntektListeRequest(
+        var request = new UtledTilkommetAktivitetListeRequest(
                 saksnummer.getVerdi(),
                 ytelseTypeKalkulus,
                 koblingerOgPeriode.entrySet().stream()
                     .map(e ->
-                        new SimulerTilkommetInntektForRequest(e.getKey(),
+                        new UtledTilkommetAktivitetForRequest(e.getKey(),
                                 List.of(new Periode(e.getValue().getFomDato(), e.getValue().getTomDato()))))
                     .toList());
-        var respons = restTjeneste.simulerTilkommetAktivitet(request);
-        return respons.getSimulertListe().stream().collect(Collectors.toMap(
-            SimulertTilkommetAktivitetPrReferanse::getEksternReferanse,
+        var respons = restTjeneste.utledTilkommetAktivitet(request);
+        return respons.getListe().stream().collect(Collectors.toMap(
+            UtledetTilkommetAktivitetPrReferanse::getEksternReferanse,
             it -> it.getTilkommedeAktiviteter()
         ));
     }

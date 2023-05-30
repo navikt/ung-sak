@@ -15,8 +15,8 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.folketrygdloven.beregningsgrunnlag.gradering.AktivitetstatusOgArbeidsgiver;
-import no.nav.folketrygdloven.beregningsgrunnlag.gradering.KandidaterForInntektgraderingTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.tilkommetAktivitet.AktivitetstatusOgArbeidsgiver;
+import no.nav.folketrygdloven.beregningsgrunnlag.tilkommetAktivitet.TilkommetAktivitetTjeneste;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
@@ -67,7 +67,7 @@ public class HentDataTilUttakTjeneste {
     private HentPerioderTilVurderingTjeneste hentPerioderTilVurderingTjeneste;
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
     private HentEtablertTilsynTjeneste hentEtablertTilsynTjeneste;
-    private KandidaterForInntektgraderingTjeneste kandidaterForInntektgraderingTjeneste;
+    private TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste;
     private boolean tilkommetAktivitetEnabled;
 
     @Inject
@@ -88,7 +88,7 @@ public class HentDataTilUttakTjeneste {
                                     HentPerioderTilVurderingTjeneste hentPerioderTilVurderingTjeneste,
                                     UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
                                     HentEtablertTilsynTjeneste hentEtablertTilsynTjeneste,
-                                    KandidaterForInntektgraderingTjeneste kandidaterForInntektgraderingTjeneste,
+                                    TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste,
                                     @KonfigVerdi(value = "TILKOMMET_AKTIVITET_ENABLED", required = false, defaultVerdi = "false") boolean tilkommetAktivitetEnabled) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.pleiebehovResultatRepository = pleiebehovResultatRepository;
@@ -107,7 +107,7 @@ public class HentDataTilUttakTjeneste {
         this.hentPerioderTilVurderingTjeneste = hentPerioderTilVurderingTjeneste;
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
         this.hentEtablertTilsynTjeneste = hentEtablertTilsynTjeneste;
-        this.kandidaterForInntektgraderingTjeneste = kandidaterForInntektgraderingTjeneste;
+        this.tilkommetAktivitetTjeneste = tilkommetAktivitetTjeneste;
         this.tilkommetAktivitetEnabled = tilkommetAktivitetEnabled;
     }
 
@@ -132,7 +132,7 @@ public class HentDataTilUttakTjeneste {
         
         final Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> tilkommetAktivitetsperioder;
         if (tilkommetAktivitetEnabled) {
-            final Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> tilkommedeAktiviteterRaw = kandidaterForInntektgraderingTjeneste.finnTilkommedeAktiviteter(referanse.getBehandlingId(), LocalDate.of(2020, 1, 1));
+            final Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> tilkommedeAktiviteterRaw = tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(referanse.getBehandlingId(), LocalDate.of(2020, 1, 1));
             tilkommetAktivitetsperioder = tilkommedeAktiviteterRaw.entrySet().stream()
                     .collect(Collectors.toMap(e -> new AktivitetIdentifikator(e.getKey().getAktivitetType(), e.getKey().getArbeidsgiver(), null), e -> e.getValue()));
         } else {
