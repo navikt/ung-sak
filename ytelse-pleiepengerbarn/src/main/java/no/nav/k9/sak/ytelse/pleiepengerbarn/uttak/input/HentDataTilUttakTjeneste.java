@@ -19,6 +19,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.gradering.AktivitetstatusOgArbe
 import no.nav.folketrygdloven.beregningsgrunnlag.gradering.KandidaterForInntektgraderingTjeneste;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -67,6 +68,7 @@ public class HentDataTilUttakTjeneste {
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
     private HentEtablertTilsynTjeneste hentEtablertTilsynTjeneste;
     private KandidaterForInntektgraderingTjeneste kandidaterForInntektgraderingTjeneste;
+    private boolean tilkommetAktivitetEnabled;
 
     @Inject
     public HentDataTilUttakTjeneste(VilkårResultatRepository vilkårResultatRepository,
@@ -86,7 +88,8 @@ public class HentDataTilUttakTjeneste {
                                     HentPerioderTilVurderingTjeneste hentPerioderTilVurderingTjeneste,
                                     UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
                                     HentEtablertTilsynTjeneste hentEtablertTilsynTjeneste,
-                                    KandidaterForInntektgraderingTjeneste kandidaterForInntektgraderingTjeneste) {
+                                    KandidaterForInntektgraderingTjeneste kandidaterForInntektgraderingTjeneste,
+                                    @KonfigVerdi(value = "TILKOMMET_AKTIVITET_ENABLED", required = false, defaultVerdi = "false") boolean tilkommetAktivitetEnabled) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.pleiebehovResultatRepository = pleiebehovResultatRepository;
         this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
@@ -105,6 +108,7 @@ public class HentDataTilUttakTjeneste {
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
         this.hentEtablertTilsynTjeneste = hentEtablertTilsynTjeneste;
         this.kandidaterForInntektgraderingTjeneste = kandidaterForInntektgraderingTjeneste;
+        this.tilkommetAktivitetEnabled = tilkommetAktivitetEnabled;
     }
 
     public InputParametere hentUtData(BehandlingReferanse referanse, boolean brukUbesluttedeData) {
@@ -126,9 +130,14 @@ public class HentDataTilUttakTjeneste {
             perioderTilVurdering = hentPerioderTilVurderingTjeneste.hentPerioderTilVurderingUtenUbesluttet(behandling);
         }
         
-        final Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> tilkommedeAktiviteterRaw = kandidaterForInntektgraderingTjeneste.finnTilkommedeAktiviteter(referanse.getBehandlingId(), LocalDate.of(2020, 1, 1));
-        final Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> tilkommetAktivitetsperioder = tilkommedeAktiviteterRaw.entrySet().stream()
-                .collect(Collectors.toMap(e -> new AktivitetIdentifikator(e.getKey().getAktivitetType(), e.getKey().getArbeidsgiver(), null), e -> e.getValue()));
+        final Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> tilkommetAktivitetsperioder;
+        if (tilkommetAktivitetEnabled) {
+            final Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> tilkommedeAktiviteterRaw = kandidaterForInntektgraderingTjeneste.finnTilkommedeAktiviteter(referanse.getBehandlingId(), LocalDate.of(2020, 1, 1));
+            tilkommetAktivitetsperioder = tilkommedeAktiviteterRaw.entrySet().stream()
+                    .collect(Collectors.toMap(e -> new AktivitetIdentifikator(e.getKey().getAktivitetType(), e.getKey().getArbeidsgiver(), null), e -> e.getValue()));
+        } else {
+            tilkommetAktivitetsperioder = new HashMap<>();
+        }
 
         var utvidetRevurderingPerioder = perioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(referanse);
         var vurderteSøknadsperioder = søknadsfristTjeneste.vurderSøknadsfrist(referanse);
