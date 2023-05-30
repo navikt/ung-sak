@@ -140,8 +140,6 @@ public class KandidaterForInntektgraderingTjeneste {
             .getPerioder()
             .stream()
             .filter(it -> Utfall.OPPFYLT.equals(it.getGjeldendeUtfall()))
-            // Hvorfor?
-            //.filter(it -> it.getPeriode().overlapper(dato, dato))
             .toList();
 
         if (overlappendeGrunnlag.isEmpty()) {
