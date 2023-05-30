@@ -113,10 +113,6 @@ public class KopierBeregningTjeneste {
      * @param ref behandlingreferanse
      */
     private void kopierGrunnlagForForlengelseperioder(BehandlingReferanse ref) {
-        if (ref.getSaksnummer().getVerdi().equals("BU6o4") && ref.getBehandlingId() == 1676591) {
-            log.warn("Grunnlag er allerede kopiert for forlengelse for BU6o4. Hopper over kopiering. Hastesak. Varig løsning (for resterende saker) er sannsynligvis å fjerne kopi ved starten av precondition steget.");
-            return;
-        }
         var perioderPrStartpunkt = kalkulusStartpunktUtleder.utledPerioderPrStartpunkt(ref);
         if (ref.getBehandlingType().equals(BehandlingType.REVURDERING)) {
             var startpunktVurderRefusjon = perioderPrStartpunkt.get(VURDER_REF_BERGRUNN);
