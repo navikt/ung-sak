@@ -1,24 +1,45 @@
 package no.nav.k9.sak.web.app.tjenester.kravperioder;
 
-import no.nav.fpsak.tidsserie.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.NavigableSet;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
-import no.nav.k9.sak.kontrakt.krav.*;
+import no.nav.k9.sak.kontrakt.krav.KravDokumentMedSøktePerioder;
+import no.nav.k9.sak.kontrakt.krav.KravDokumentType;
+import no.nav.k9.sak.kontrakt.krav.PeriodeMedÅrsaker;
+import no.nav.k9.sak.kontrakt.krav.PerioderMedÅrsakPerKravstiller;
+import no.nav.k9.sak.kontrakt.krav.RolleType;
+import no.nav.k9.sak.kontrakt.krav.StatusForPerioderPåBehandling;
+import no.nav.k9.sak.kontrakt.krav.ÅrsakMedPerioder;
+import no.nav.k9.sak.kontrakt.krav.ÅrsakTilVurdering;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.PeriodeMedÅrsak;
 import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Periode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class UtledStatusPåPerioderTjeneste {
 
@@ -93,7 +114,7 @@ public class UtledStatusPåPerioderTjeneste {
         NavigableSet<PeriodeMedÅrsak> revurderingPerioderFraAndreParter,
         List<PeriodeMedÅrsaker> perioderMedÅrsakPåTversAvKravstillere) {
 
-        Set<PerioderMedÅrsakPerKravstiller> resultat = new HashSet<>();
+        Set<PerioderMedÅrsakPerKravstiller> resultat = new LinkedHashSet<>();
 
         if (kravdokumenter.stream().anyMatch(it -> it.getType() == no.nav.k9.sak.perioder.KravDokumentType.SØKNAD)) {
             resultat.add(new PerioderMedÅrsakPerKravstiller(RolleType.BRUKER, null,
