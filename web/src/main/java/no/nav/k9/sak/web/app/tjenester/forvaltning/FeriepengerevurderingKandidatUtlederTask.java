@@ -72,7 +72,7 @@ public class FeriepengerevurderingKandidatUtlederTask implements ProsessTaskHand
                 if (antallDager > 60 && flereÅr) {
                     logger.info("Sak {} kandidat for revurdering. Opptjening i {}", saksnummer, prÅr.keySet());
                 } else {
-                    logger.info("Sak {} ikke kandidat for revurdering. {} dager flereÅr {}", saksnummer, antallDager, flereÅr);
+                    logger.info("Sak {} ikke kandidat for revurdering.", saksnummer);
                 }
             }
         }
