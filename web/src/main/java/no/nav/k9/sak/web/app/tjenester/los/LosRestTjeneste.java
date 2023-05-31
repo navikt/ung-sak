@@ -6,6 +6,9 @@ import static no.nav.k9.sak.web.app.tjenester.los.LosRestTjeneste.BASE_PATH;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -22,14 +25,12 @@ import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
-import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
-import no.nav.k9.sak.behandlingslager.behandling.historikk.HistorikkRepository;
-import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoTjeneste;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 
@@ -41,13 +42,16 @@ public class LosRestTjeneste {
 
     public static final String BASE_PATH = "/los";
     public static final String MERKNAD = "/merknad";
+    public static final String BEHANDLING = "/behandling";
     public static final String MERKNAD_PATH = BASE_PATH + MERKNAD;
+    public static final String BEHANDLING_PATH = BASE_PATH + BEHANDLING;
 
     private LosSystemUserKlient losKlient;
 
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
 
     private BehandlingRepository behandlingRepository;
+    private BehandlingDtoTjeneste behandlingDtoTjeneste;
 
     public LosRestTjeneste() {
         // For Rest-CDI
@@ -57,17 +61,40 @@ public class LosRestTjeneste {
     public LosRestTjeneste(
         LosSystemUserKlient losKlient,
         HistorikkTjenesteAdapter historikkTjenesteAdapter,
-        BehandlingRepository behandlingRepository
-    ) {
+        BehandlingRepository behandlingRepository,
+        BehandlingDtoTjeneste behandlingDtoTjeneste) {
         this.losKlient = losKlient;
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
         this.behandlingRepository = behandlingRepository;
+        this.behandlingDtoTjeneste = behandlingDtoTjeneste;
+    }
+
+    @GET
+    @Path(BEHANDLING_PATH)
+    @Operation(
+        description = "Hent behandling gitt id",
+        summary = ("Returnerer behandlingen som er tilknyttet id."),
+        tags = "los",
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Returnerer Behandling",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                    schema = @Schema(implementation = BehandlingDto.class)))
+    })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Response hentBehandlingData(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+        var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
+        var dto = behandlingDtoTjeneste.lagBehandlingDtoUtenResourceLinks(behandling);
+        Response.ResponseBuilder responseBuilder = Response.ok().entity(dto);
+        return responseBuilder.build();
     }
 
     @GET
     @Path(MERKNAD)
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(description = "Henter merknad på oppgave i los", tags = "merknad")
+    @Operation(description = "Henter merknad på oppgave i los", tags = "los")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response getMerknad(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
@@ -78,7 +105,7 @@ public class LosRestTjeneste {
 
     @POST
     @Path(MERKNAD)
-    @Operation(description = "Lagrer merknad på oppgave i los", tags = "merknad")
+    @Operation(description = "Lagrer merknad på oppgave i los", tags = "los")
     @BeskyttetRessurs(action = READ, resource = FAGSAK) // Står som read så veileder har tilgang
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response postMerknad(@Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) MerknadEndretDto merknadEndret) {

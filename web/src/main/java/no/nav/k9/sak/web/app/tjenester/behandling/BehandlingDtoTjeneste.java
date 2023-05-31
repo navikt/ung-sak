@@ -211,6 +211,28 @@ public class BehandlingDtoTjeneste {
         dto.leggTil(post(BrevRestTjeneste.BREV_BESTILL_PATH, "brev-bestill", new BestillBrevDto()));
     }
 
+
+    public BehandlingDto lagBehandlingDtoUtenResourceLinks(Behandling behandling) {
+        if (behandling == null) {
+            return null;
+        }
+        Optional<BehandlingVedtak> gjeldendeVedtak = behandlingVedtakRepository.hentGjeldendeVedtak(behandling.getFagsak());
+        Optional<Long> behandlingMedGjeldendeVedtak = gjeldendeVedtak.map(BehandlingVedtak::getBehandlingId);
+
+        boolean erBehandlingMedGjeldendeVedtak = erBehandlingMedGjeldendeVedtak(behandling, behandlingMedGjeldendeVedtak);
+        return lagBehandlingDtoUtenResourceLinks(behandling, erBehandlingMedGjeldendeVedtak);
+
+    }
+
+    private BehandlingDto lagBehandlingDtoUtenResourceLinks(Behandling behandling,
+                                           boolean erBehandlingMedGjeldendeVedtak) {
+        var dto = new BehandlingDto();
+        var behandlingVedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId()).orElse(null);
+        BehandlingDtoUtil.setStandardfelter(behandling, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak);
+
+        return dto;
+    }
+
     public List<BehandlingDto> lagBehandlingDtoer(List<Behandling> behandlinger) {
         if (behandlinger.isEmpty()) {
             return Collections.emptyList();
