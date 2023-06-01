@@ -28,8 +28,8 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
-import no.nav.k9.sak.kontrakt.behandling.BehandlingDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.produksjonsstyring.los.BehandlingMedFagsakDto;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoTjeneste;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
@@ -47,11 +47,9 @@ public class LosRestTjeneste {
     public static final String BEHANDLING_PATH = BASE_PATH + BEHANDLING;
 
     private LosSystemUserKlient losKlient;
-
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
-
     private BehandlingRepository behandlingRepository;
-    private BehandlingDtoTjeneste behandlingDtoTjeneste;
+
 
     public LosRestTjeneste() {
         // For Rest-CDI
@@ -66,7 +64,6 @@ public class LosRestTjeneste {
         this.losKlient = losKlient;
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
         this.behandlingRepository = behandlingRepository;
-        this.behandlingDtoTjeneste = behandlingDtoTjeneste;
     }
 
     @GET
@@ -80,13 +77,17 @@ public class LosRestTjeneste {
                 responseCode = "200",
                 description = "Returnerer Behandling",
                 content = @Content(mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(implementation = BehandlingDto.class)))
+                    schema = @Schema(implementation = BehandlingMedFagsakDto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response hentBehandlingData(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
-        var dto = behandlingDtoTjeneste.lagBehandlingDtoUtenResourceLinks(behandling);
+
+        BehandlingMedFagsakDto dto = new BehandlingMedFagsakDto();
+        dto.setSakstype(behandling.getFagsakYtelseType());
+        dto.setBehandlingResultatType(behandling.getBehandlingResultatType());
+
         Response.ResponseBuilder responseBuilder = Response.ok().entity(dto);
         return responseBuilder.build();
     }
