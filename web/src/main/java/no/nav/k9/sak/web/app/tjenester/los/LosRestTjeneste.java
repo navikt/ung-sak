@@ -49,12 +49,8 @@ public class LosRestTjeneste {
     public static final String BEHANDLING_PATH = BASE_PATH + BEHANDLING;
 
     private LosSystemUserKlient losKlient;
-
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
-
     private BehandlingRepository behandlingRepository;
-    private FagsakRepository fagsakRepository;
-    private BehandlingDtoTjeneste behandlingDtoTjeneste;
 
 
     public LosRestTjeneste() {
@@ -70,7 +66,6 @@ public class LosRestTjeneste {
         this.losKlient = losKlient;
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
         this.behandlingRepository = behandlingRepository;
-        this.behandlingDtoTjeneste = behandlingDtoTjeneste;
     }
 
     @GET
