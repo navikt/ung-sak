@@ -67,7 +67,7 @@ public class LosRestTjeneste {
     }
 
     @GET
-    @Path(BEHANDLING_PATH)
+    @Path(BEHANDLING)
     @Operation(
         description = "Hent behandling gitt id",
         summary = ("Returnerer behandlingen som er tilknyttet id."),
