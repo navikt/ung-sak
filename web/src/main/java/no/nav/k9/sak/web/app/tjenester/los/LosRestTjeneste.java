@@ -27,9 +27,11 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.produksjonsstyring.los.LosspesifikkBehandlingDto;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoTjeneste;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
@@ -51,7 +53,9 @@ public class LosRestTjeneste {
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
 
     private BehandlingRepository behandlingRepository;
+    private FagsakRepository fagsakRepository;
     private BehandlingDtoTjeneste behandlingDtoTjeneste;
+
 
     public LosRestTjeneste() {
         // For Rest-CDI
@@ -80,13 +84,17 @@ public class LosRestTjeneste {
                 responseCode = "200",
                 description = "Returnerer Behandling",
                 content = @Content(mediaType = MediaType.APPLICATION_JSON,
-                    schema = @Schema(implementation = BehandlingDto.class)))
+                    schema = @Schema(implementation = LosspesifikkBehandlingDto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response hentBehandlingData(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
-        var dto = behandlingDtoTjeneste.lagBehandlingDtoUtenResourceLinks(behandling);
+
+        LosspesifikkBehandlingDto dto = new LosspesifikkBehandlingDto();
+        dto.setSakstype(behandling.getFagsakYtelseType());
+        dto.setBehandlingResultatType(behandling.getBehandlingResultatType());
+
         Response.ResponseBuilder responseBuilder = Response.ok().entity(dto);
         return responseBuilder.build();
     }
