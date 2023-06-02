@@ -22,10 +22,12 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import no.nav.k9.felles.jpa.TomtResultatException;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
@@ -82,14 +84,17 @@ public class LosRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response hentBehandlingData(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
-        var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
+        try {
+            var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
+            BehandlingMedFagsakDto dto = new BehandlingMedFagsakDto();
+            dto.setSakstype(behandling.getFagsakYtelseType());
+            dto.setBehandlingResultatType(behandling.getBehandlingResultatType());
 
-        BehandlingMedFagsakDto dto = new BehandlingMedFagsakDto();
-        dto.setSakstype(behandling.getFagsakYtelseType());
-        dto.setBehandlingResultatType(behandling.getBehandlingResultatType());
-
-        Response.ResponseBuilder responseBuilder = Response.ok().entity(dto);
-        return responseBuilder.build();
+            Response.ResponseBuilder responseBuilder = Response.ok().entity(dto);
+            return responseBuilder.build();
+        } catch (TomtResultatException e) {
+            return Response.noContent().build();
+        }
     }
 
     @GET
