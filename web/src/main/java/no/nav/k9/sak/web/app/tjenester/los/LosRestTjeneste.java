@@ -80,20 +80,20 @@ public class LosRestTjeneste {
                 description = "Returnerer Behandling",
                 content = @Content(mediaType = MediaType.APPLICATION_JSON,
                     schema = @Schema(implementation = BehandlingMedFagsakDto.class)))
-    })
+        })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response hentBehandlingData(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
-        try {
-            var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
+        var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid());
+        if (behandling.isPresent()) {
             BehandlingMedFagsakDto dto = new BehandlingMedFagsakDto();
-            dto.setSakstype(behandling.getFagsakYtelseType());
-            dto.setBehandlingResultatType(behandling.getBehandlingResultatType());
+            dto.setSakstype(behandling.get().getFagsakYtelseType());
+            dto.setBehandlingResultatType(behandling.get().getBehandlingResultatType());
 
             Response.ResponseBuilder responseBuilder = Response.ok().entity(dto);
             return responseBuilder.build();
-        } catch (TomtResultatException e) {
-            return Response.noContent().build();
+        } else {
+            return Response.noContent().build()
         }
     }
 
