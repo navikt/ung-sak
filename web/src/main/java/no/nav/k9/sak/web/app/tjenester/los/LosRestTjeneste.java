@@ -93,7 +93,7 @@ public class LosRestTjeneste {
             Response.ResponseBuilder responseBuilder = Response.ok().entity(dto);
             return responseBuilder.build();
         } else {
-            return Response.noContent().build()
+            return Response.noContent().build();
         }
     }
 
