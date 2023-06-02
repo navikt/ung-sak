@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.time.LocalDateTime;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -66,10 +67,29 @@ class ForsinketSaksbehandlingEtterkontrollTest {
             .medKontrollTidspunkt(LocalDateTime.now())
             .build();
 
-        forsinketSaksbehandlingKontroll.utfør(etterkontroll);
+
+        boolean resultat = forsinketSaksbehandlingKontroll.utfør(etterkontroll);
+        assertThat(resultat).isTrue();
 
         verifyNoInteractions(dokumentbestiller);
     }
 
+
+    //TODO hvordan finne ut om behandling er utenlandsk? Husk å logge at brev ikke ble bestilt!
+    @Test
+    @Disabled
+    void skal_ikke_bestille_brev_hvis_behandling_er_utenlandsk() {
+        Behandling b = scenarioBuilder.lagMocked();
+
+        Etterkontroll etterkontroll = new Etterkontroll.Builder(b)
+            .medKontrollType(KontrollType.FORSINKET_SAKSBEHANDLINGSTID)
+            .medKontrollTidspunkt(LocalDateTime.now())
+            .build();
+
+        boolean resultat = forsinketSaksbehandlingKontroll.utfør(etterkontroll);
+        assertThat(resultat).isTrue();
+
+        verifyNoInteractions(dokumentbestiller);
+    }
 
 }

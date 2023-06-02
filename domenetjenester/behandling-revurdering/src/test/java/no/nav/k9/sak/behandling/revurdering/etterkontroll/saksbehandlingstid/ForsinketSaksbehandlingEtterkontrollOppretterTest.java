@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -63,6 +64,21 @@ class ForsinketSaksbehandlingEtterkontrollOppretterTest {
 
 
     }
+
+    //TODO
+    @Test
+    @Disabled
+    void skal_ignorere_etterkontroll_hvis_frist_allerede_utløpt() {
+
+    }
+
+    //TODO
+    @Test
+    @Disabled
+    void skal_ignorere_etterkontroll_hvis_frist_utløper_om_få_dager() {
+
+    }
+
 
 
 
