@@ -2209,7 +2209,7 @@ comment on column ABAKUS_INNHENTING_LOGG.GRUNNLAG_UUID is 'UUID til aktivt nytt 
 create sequence if not exists SEQ_PROSESS_TASK_GRUPPE increment by 50 minvalue 1000000;
 create sequence if not exists SEQ_ABAKUS_INN_LOGG increment by 50 minvalue 1000000;
 create sequence if not exists SEQ_AKSJONSPUNKT increment by 50 minvalue 1000000;
-create sequence if not exists SEQ_BEHANDLING increment by 50 minvalue 1000000;
+create sequence if not exists SEQ_BEHANDLING increment by 50 minvalue 3000000;
 create sequence if not exists SEQ_BEHANDLING_ARSAK increment by 50 minvalue 1000000;
 create sequence if not exists SEQ_BEHANDLING_RESULTAT increment by 50 minvalue 1000000;
 create sequence if not exists SEQ_BEHANDLING_RESULTAT_YT increment by 50 minvalue 1000000;
@@ -2243,7 +2243,7 @@ create sequence if not exists SEQ_BR_PERIODE increment by 50 minvalue 1000000;
 create sequence if not exists SEQ_BR_RESULTAT_BEHANDLING increment by 50 minvalue 1000000;
 create sequence if not exists SEQ_BR_SATS increment by 50 minvalue 1000000;
 create sequence if not exists SEQ_ETTERKONTROLL increment by 50 minvalue 1000000;
-create sequence if not exists SEQ_FAGSAK increment by 50 minvalue 1000000;
+create sequence if not exists SEQ_FAGSAK increment by 50 minvalue 2000000;
 create sequence if not exists SEQ_FAGSAK_PROSESS_TASK increment by 50 minvalue 1000000;
 create sequence if not exists SEQ_GR_BEREGNINGSGRUNNLAG increment by 50 minvalue 1000000;
 create sequence if not exists SEQ_GR_MEDLEMSKAP increment by 50 minvalue 1000000;
