@@ -22,10 +22,12 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import no.nav.k9.felles.jpa.TomtResultatException;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
@@ -78,18 +80,21 @@ public class LosRestTjeneste {
                 description = "Returnerer Behandling",
                 content = @Content(mediaType = MediaType.APPLICATION_JSON,
                     schema = @Schema(implementation = BehandlingMedFagsakDto.class)))
-    })
+        })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response hentBehandlingData(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
-        var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
+        var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid());
+        if (behandling.isPresent()) {
+            BehandlingMedFagsakDto dto = new BehandlingMedFagsakDto();
+            dto.setSakstype(behandling.get().getFagsakYtelseType());
+            dto.setBehandlingResultatType(behandling.get().getBehandlingResultatType());
 
-        BehandlingMedFagsakDto dto = new BehandlingMedFagsakDto();
-        dto.setSakstype(behandling.getFagsakYtelseType());
-        dto.setBehandlingResultatType(behandling.getBehandlingResultatType());
-
-        Response.ResponseBuilder responseBuilder = Response.ok().entity(dto);
-        return responseBuilder.build();
+            Response.ResponseBuilder responseBuilder = Response.ok().entity(dto);
+            return responseBuilder.build();
+        } else {
+            return Response.noContent().build()
+        }
     }
 
     @GET
