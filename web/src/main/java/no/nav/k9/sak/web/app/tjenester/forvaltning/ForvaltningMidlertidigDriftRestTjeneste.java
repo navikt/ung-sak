@@ -317,8 +317,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                 for (Fagsak f : fagsaker) {
                     if (f.getYtelseType() == FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
                         opprettRevurderingService.opprettAutomatiskRevurdering(f.getSaksnummer(),
-                                BehandlingÅrsakType.RE_FERIEPENGER_ENDRING_FRA_ANNEN_SAK,
-                                BehandlingStegType.START_STEG);
+                            BehandlingÅrsakType.RE_FERIEPENGER_ENDRING_FRA_ANNEN_SAK,
+                            BehandlingStegType.START_STEG);
                     }
                 }
             } catch (RuntimeException e) {
@@ -338,29 +338,27 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response finnSakerSomSkalRevurderes() {
         String preparedStatement = """
-            select saksnummer
+            insert into prosess_task (task_type, id, task_sekvens, task_gruppe, task_parametere)
+             with gruppe as (select nextval('seq_prosess_task_gruppe') as gruppe_id)
+             select 'feriepenger.revurdering.kandidatutleder.task', nextval('seq_prosess_task'), row_number() over (order by saksnummer), gruppe_id, 'saksummer=' || saksnummer
              from (
-                select saksnummer,
-                b.avsluttet_dato,
-                rank() over (partition by saksnummer order by b.avsluttet_dato desc nulls first) omvendt_rekkefolge
-                from fagsak f
-                join behandling b on f.id = b.fagsak_id
-                where f.ytelse_type = :ytelse_type
-                 and b.behandling_resultat_type not in (:henleggelse_aarsaker)
-             ) t
+                     select saksnummer,
+                            b.avsluttet_dato,
+                            rank() over (partition by saksnummer order by b.avsluttet_dato desc nulls first) omvendt_rekkefolge
+                     from fagsak f
+                     join behandling b on f.id = b.fagsak_id
+                     where f.ytelse_type = :ytelse_type
+                      and b.behandling_resultat_type not in (:henleggelse_aarsaker)
+                 ) t
+             left outer join gruppe on (true)
              where omvendt_rekkefolge = 1 and avsluttet_dato < to_date('2022-11-19', 'YYYY-MM-DD')
             """;
         Query query = entityManager.createNativeQuery(preparedStatement)
             .setParameter("ytelse_type", FagsakYtelseType.PSB.getKode())
             .setParameter("henleggelse_aarsaker", BehandlingResultatType.getAlleHenleggelseskoder().stream().map(BehandlingResultatType::getKode).toList());
-        List<String> resultat = query.getResultList();
-        logger.info("Lager {} tasker for å sjekke kandidater for revurdering av feriepenger", resultat.size());
-        for (String saksnummer : resultat) {
-            ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(FeriepengerevurderingKandidatUtlederTask.class);
-            prosessTaskData.setSaksnummer(saksnummer);
-            prosessTaskTjeneste.lagre(prosessTaskData);
-        }
-        return Response.ok(resultat.toString()).build();
+        int resultat = query.executeUpdate();
+        logger.info("Lagde {} tasker for å sjekke kandidater for revurdering av feriepenger", resultat);
+        return Response.ok("Lagde " + resultat + " tasker for å sjekke kandidater for revurdering av feriepenger").build();
     }
 
     @GET
