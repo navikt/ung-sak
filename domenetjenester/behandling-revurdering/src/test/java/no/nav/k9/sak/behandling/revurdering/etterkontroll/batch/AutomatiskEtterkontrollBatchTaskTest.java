@@ -57,8 +57,6 @@ class AutomatiskEtterkontrollBatchTaskTest {
     }
 
 
-
-
     @Test
     public void skal_ikke_velge_kontroller_frem_i_tid() {
         Behandling behandling = opprettBehandling();

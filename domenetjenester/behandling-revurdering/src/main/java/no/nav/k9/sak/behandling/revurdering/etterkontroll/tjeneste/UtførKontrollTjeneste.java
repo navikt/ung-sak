@@ -6,7 +6,7 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
@@ -14,7 +14,7 @@ import no.nav.k9.sak.behandling.revurdering.etterkontroll.Etterkontroll;
 import no.nav.k9.sak.behandling.revurdering.etterkontroll.EtterkontrollRepository;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 
-@ApplicationScoped
+@Dependent
 public class UtførKontrollTjeneste {
 
     private static final Logger log = LoggerFactory.getLogger(UtførKontrollTjeneste.class);

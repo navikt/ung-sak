@@ -42,7 +42,7 @@ class UtførKontrollTjenesteTest {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         etterkontrollRepository = new EtterkontrollRepository(entityManager);
 
-        tjeneste = new UtførKontrollTjeneste(etterkontrollRepository, new UnitTestLookupInstanceImpl(kontrollTjeneste));
+        tjeneste = new UtførKontrollTjeneste(etterkontrollRepository, new UnitTestLookupInstanceImpl<>(kontrollTjeneste));
 
     }
 

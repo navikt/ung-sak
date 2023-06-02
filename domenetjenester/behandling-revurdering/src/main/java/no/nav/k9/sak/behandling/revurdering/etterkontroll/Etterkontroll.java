@@ -69,8 +69,8 @@ public class Etterkontroll extends BaseEntitet {
         return kontrollType;
     }
 
-    public void setKontrollTidspunktt(LocalDateTime kontrollTidspunkt) {
-        this.kontrollTidspunkt = kontrollTidspunkt;
+    public LocalDateTime getKontrollTidspunkt() {
+        return kontrollTidspunkt;
     }
 
     @Override
