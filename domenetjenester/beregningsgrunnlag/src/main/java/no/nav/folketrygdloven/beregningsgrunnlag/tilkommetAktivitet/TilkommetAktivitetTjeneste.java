@@ -50,7 +50,7 @@ public class TilkommetAktivitetTjeneste {
         this.kalkulusTjeneste = kalkulusTjeneste;
     }
 
-    public Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> finnTilkommedeAktiviteter(Long fagsakId, LocalDate dato) {
+    public Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> finnTilkommedeAktiviteter(Long fagsakId) {
         var sisteBehandlingOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId);
 
         if (sisteBehandlingOpt.isEmpty()) {
@@ -96,8 +96,9 @@ public class TilkommetAktivitetTjeneste {
         Map<UUID, DatoIntervallEntitet> koblingerÅSpørreMot = new HashMap<>();
 
         overlappendeGrunnlag.forEach(og ->
-            bg.finnGrunnlagFor(og.getSkjæringstidspunkt()).ifPresent(bgp ->
-                koblingerÅSpørreMot.put(bgp.getEksternReferanse(), finnPeriode(dato, og))));
+            bg.finnGrunnlagFor(og.getSkjæringstidspunkt()).ifPresent(bgp -> {
+                koblingerÅSpørreMot.put(bgp.getEksternReferanse(), og.getPeriode());
+            }));
 
         final FagsakYtelseType ytelseType = sisteBehandling.getFagsak().getYtelseType();
         
@@ -133,11 +134,5 @@ public class TilkommetAktivitetTjeneste {
         }
         final AktivitetstatusOgArbeidsgiver aktivitetstatusOgArbeidsgiver = new AktivitetstatusOgArbeidsgiver(uttakArbeidType, arbeidsgiver);
         return aktivitetstatusOgArbeidsgiver;
-    }
-    
-    private static DatoIntervallEntitet finnPeriode(LocalDate dato, VilkårPeriode og) {
-        return dato.isAfter(og.getSkjæringstidspunkt()) ?
-            DatoIntervallEntitet.fraOgMedTilOgMed(dato, og.getTom())
-            : og.getPeriode();
     }
 }

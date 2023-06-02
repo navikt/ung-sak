@@ -132,7 +132,7 @@ public class HentDataTilUttakTjeneste {
         
         final Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> tilkommetAktivitetsperioder;
         if (tilkommetAktivitetEnabled) {
-            final Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> tilkommedeAktiviteterRaw = tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(referanse.getFagsakId(), LocalDate.of(2020, 1, 1));
+            final Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> tilkommedeAktiviteterRaw = tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(referanse.getFagsakId());
             tilkommetAktivitetsperioder = tilkommedeAktiviteterRaw.entrySet().stream()
                     .collect(Collectors.toMap(e -> new AktivitetIdentifikator(e.getKey().getAktivitetType(), e.getKey().getArbeidsgiver(), null), e -> e.getValue()));
         } else {
