@@ -53,6 +53,11 @@
             <artifactId>arbeidsforhold</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>no.nav.k9.sak</groupId>
+            <artifactId>dokumentbestiller</artifactId>
+        </dependency>
+
         <!-- Test dependencies -->
         <dependency>
             <groupId>no.nav.k9.sak</groupId>

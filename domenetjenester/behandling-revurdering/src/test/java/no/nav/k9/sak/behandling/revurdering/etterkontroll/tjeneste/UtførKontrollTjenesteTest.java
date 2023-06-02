@@ -50,7 +50,7 @@ class UtførKontrollTjenesteTest {
     void utfører_alle_etterkontroller_på_behandling() {
         when(kontrollTjeneste.utfør(any())).thenReturn(true);
 
-        Behandling behandling = opprettBehandling(null);
+        Behandling behandling = opprettBehandling();
         etterkontrollRepository.lagre(new Etterkontroll.Builder(behandling)
             .medErBehandlet(false)
             .medKontrollTidspunkt(LocalDateTime.now())
@@ -75,7 +75,7 @@ class UtførKontrollTjenesteTest {
     void utfører_alle_aktive_etterkontroller_på_fagsak() {
         when(kontrollTjeneste.utfør(any())).thenReturn(true);
 
-        Behandling behandling1 = opprettBehandling(null);
+        Behandling behandling1 = opprettBehandling();
 
         Behandling behandling2 = Behandling.fraTidligereBehandling(behandling1, BehandlingType.REVURDERING).build();
         BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
@@ -108,8 +108,8 @@ class UtførKontrollTjenesteTest {
     }
 
 
-    private Behandling opprettBehandling(Long fagsakId) {
-        var scenario = TestScenarioBuilder.builderMedSøknad().medFagsakId(fagsakId)
+    private Behandling opprettBehandling() {
+        var scenario = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingsresultat(BehandlingResultatType.INNVILGET);
 
         scenario.medBehandlingVedtak().medAnsvarligSaksbehandler("asdf");
