@@ -23,7 +23,7 @@ import no.nav.k9.sak.behandling.revurdering.etterkontroll.batch.AutomatiskEtterk
 @Transactional
 public class EtterkontrollRestTjeneste {
 
-    public static final String KJØR_ETTERKONTROLL_BATCH_PATH = "/etterkontroll/batch";
+    public static final String KJØR_ETTERKONTROLL_LAUNCH_PATH = "/etterkontroll/launch";
     public static final Logger log = LoggerFactory.getLogger(EtterkontrollRestTjeneste.class);
 
     private AutomatiskEtterkontrollBatchTask batchTask;
@@ -36,7 +36,7 @@ public class EtterkontrollRestTjeneste {
     }
 
     @POST
-    @Path(KJØR_ETTERKONTROLL_BATCH_PATH)
+    @Path(KJØR_ETTERKONTROLL_LAUNCH_PATH)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Utfører klare etterkontroller uten å vente på fast kjøring", tags = "etterkontroll")
     @BeskyttetRessurs(action = CREATE, resource = DRIFT) //TODO er det ok?
