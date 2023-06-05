@@ -3,6 +3,9 @@ package no.nav.k9.sak.behandling.revurdering.etterkontroll.saksbehandlingstid;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
@@ -18,6 +21,8 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 @Dependent
 @Priority(2) //For å kunne override i test
 public class ForsinketSaksbehandlingEtterkontrollOppretterImpl implements ForsinketSaksbehandlingEtterkontrollOppretter {
+
+    private static final Logger log = LoggerFactory.getLogger(ForsinketSaksbehandlingEtterkontrollOppretterImpl.class);
 
     private EtterkontrollRepository etterkontrollRepository;
     private BehandlingRepository behandlingRepository;
@@ -47,6 +52,7 @@ public class ForsinketSaksbehandlingEtterkontrollOppretterImpl implements Forsin
         }
 
         LocalDateTime frist = fristUtleder.get().utledFrist(behandling);
+        log.info("Oppretter etterkontroll med frist {}", frist);
 
         etterkontrollRepository.lagre(new Etterkontroll.Builder(behandling)
             .medKontrollTidspunkt(frist)

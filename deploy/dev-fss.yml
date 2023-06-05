@@ -266,6 +266,8 @@ spec:
       value: "true"
     - name: TILKOMMET_AKTIVITET_ENABLED
       value: "true"
+    - name: ENABLE_ETTERKONTROLL_FORSINKET_SAKB
+      value: "true"
 
 
     # Konfigurasjoner

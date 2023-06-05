@@ -40,12 +40,12 @@ public class UtførKontrollTjeneste {
             .toList();
 
         for (Etterkontroll etterkontroll : etterkontroller) {
-            log.info("Utfører etterkontroll av type = {}, for behandling = {}", etterkontroll.getKontrollType(), behandling.getId());
+            log.info("Utfører etterkontroll av type = {}", etterkontroll.getKontrollType());
             var kontrollTjeneste = KontrollTjeneste.finnTjeneste(kontrollTjenester, behandling.getFagsakYtelseType(), etterkontroll.getKontrollType());
 
             var utført = kontrollTjeneste.utfør(etterkontroll);
             if (utført) {
-                log.info("Utført etterkontroll av type = {}, for behandling = {}", etterkontroll.getKontrollType(), behandling.getId());
+                log.info("Utført etterkontroll av type = {}", etterkontroll.getKontrollType());
                 etterkontroll.setErBehandlet(true);
                 etterkontrollRepository.lagre(etterkontroll);
             }

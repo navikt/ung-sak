@@ -3,6 +3,9 @@ package no.nav.k9.sak.behandling.revurdering.etterkontroll.saksbehandlingstid;
 
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.formidling.kontrakt.kodeverk.IdType;
@@ -23,6 +26,8 @@ import no.nav.k9.sak.kontrakt.dokument.MottakerDto;
 @EtterkontrollRef(KontrollType.FORSINKET_SAKSBEHANDLINGSTID)
 @ApplicationScoped
 public class ForsinketSaksbehandlingEtterkontroll implements KontrollTjeneste {
+
+    private static final Logger log = LoggerFactory.getLogger(ForsinketSaksbehandlingEtterkontroll.class);
 
     private DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste;
     private BehandlingRepository behandlingRepository;
@@ -45,10 +50,13 @@ public class ForsinketSaksbehandlingEtterkontroll implements KontrollTjeneste {
 
         var behandling = behandlingRepository.hentBehandling(etterkontroll.getBehandlingId());
         if (!behandling.erAvsluttet()) {
+            log.info("Behandling er ikke ferdigstilt innen fristen. Bestiller brev om forlenget saksbehandling.");
             dokumentBestillerApplikasjonTjeneste.bestillDokument(new BestillBrevDto(
                 behandling.getId(), DokumentMalType.FORLENGET_DOK,
                 new MottakerDto(behandling.getAktørId().getId(), IdType.AKTØRID.toString())
             ), HistorikkAktør.VEDTAKSLØSNINGEN);
+        } else {
+            log.info("Behandling ferdigstilt innen fristen. Bestiller ikke brev.");
         }
 
         return true;
