@@ -18,5 +18,5 @@ public interface KontrollTjeneste {
      *
      * @return er behandlet ferdig
      */
-    public boolean utfør(Etterkontroll etterkontroll);
+    boolean utfør(Etterkontroll etterkontroll);
 }

@@ -7,7 +7,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.k9.sak.behandlingskontroll.events.BehandlingStatusEvent;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.sak.behandlingskontroll.events.BehandlingStegOvergangEvent;
 
 @ApplicationScoped
 public class ForsinketSaksbehandlingObserver {
@@ -28,8 +29,9 @@ public class ForsinketSaksbehandlingObserver {
         this.isEnabled = isEnabled;
     }
 
-    public void observerBehandlingOpprettet(@Observes BehandlingStatusEvent.BehandlingOpprettetEvent event) {
-        if (isEnabled) {
+    public void observerBehandlingOpprettet(@Observes BehandlingStegOvergangEvent event) {
+        if (isEnabled && event.getFraStegType() == null && event.getTilStegType() == BehandlingStegType.START_STEG) {
+            //TODO blir callid og annen context med automatisk?
             log.info("Vurderer behov for etterkontroll for forsinket saksbehandling");
             oppretter.opprettEtterkontroll(event.getBehandlingId());
         }

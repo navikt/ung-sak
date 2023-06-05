@@ -37,6 +37,7 @@ public class AutomatiskEtterkontrollBatchTask implements ProsessTaskHandler {
     public AutomatiskEtterkontrollBatchTask(BehandlingRepositoryProvider repositoryProvider,
                                             EtterkontrollRepository repository,
                                             ProsessTaskTjeneste prosessTaskTjeneste,
+                                            //brukes for å slå av i verdikjedetest.
                                             @KonfigVerdi(value = "ENABLE_AUTOMATISK_ETTERKONTROLL", defaultVerdi = "true") boolean isEnabled
     ) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
