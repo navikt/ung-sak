@@ -17,9 +17,9 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.kontrakt.opplæringspenger.vurdering.VurderNødvendighetDto;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokument;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokumentRepository;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæring;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertNødvendighet;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringGrunnlag;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringHolder;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertNødvendighetHolder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringRepository;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 
@@ -45,32 +45,32 @@ public class VurderNødvendighetOppdaterer implements AksjonspunktOppdaterer<Vur
 
     @Override
     public OppdateringResultat oppdater(VurderNødvendighetDto dto, AksjonspunktOppdaterParameter param) {
-        List<VurdertOpplæring> vurdertOpplæring = new ArrayList<>();
+        List<VurdertNødvendighet> vurdertNødvendighet = new ArrayList<>();
 
-        Optional<VurdertOpplæringHolder> aktivVurdertOpplæringHolder = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(param.getBehandlingId())
-            .map(VurdertOpplæringGrunnlag::getVurdertOpplæringHolder);
+        Optional<VurdertNødvendighetHolder> aktivVurdertNødvendighetHolder = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(param.getBehandlingId())
+            .map(VurdertOpplæringGrunnlag::getVurdertNødvendighetHolder);
 
-        if (aktivVurdertOpplæringHolder.isPresent()) {
-            List<VurdertOpplæring> aktiveVurdertInstitusjoner = aktivVurdertOpplæringHolder.get().getVurdertOpplæring().stream()
-                .filter(aktivVurdertOpplæring -> !aktivVurdertOpplæring.getJournalpostId().equals(dto.getJournalpostId().getJournalpostId()))
+        if (aktivVurdertNødvendighetHolder.isPresent()) {
+            List<VurdertNødvendighet> aktiveVurdertNødvendighet = aktivVurdertNødvendighetHolder.get().getVurdertNødvendighet().stream()
+                .filter(aktivVurdertNødvendighet -> !aktivVurdertNødvendighet.getJournalpostId().equals(dto.getJournalpostId().getJournalpostId()))
                 .toList();
-            vurdertOpplæring.addAll(aktiveVurdertInstitusjoner);
+            vurdertNødvendighet.addAll(aktiveVurdertNødvendighet);
         }
 
         final Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
         final List<OpplæringDokument> alleDokumenter = opplæringDokumentRepository.hentDokumenterForSak(behandling.getFagsak().getId());
 
-        VurdertOpplæring nyVurdertOpplæring = mapDtoTilVurdertOpplæring(dto, alleDokumenter);
-        vurdertOpplæring.add(nyVurdertOpplæring);
+        VurdertNødvendighet nyVurdertNødvendighet = mapDtoTilVurdertNødvendighet(dto, alleDokumenter);
+        vurdertNødvendighet.add(nyVurdertNødvendighet);
 
-        VurdertOpplæringHolder nyHolder = new VurdertOpplæringHolder(vurdertOpplæring);
+        VurdertNødvendighetHolder nyHolder = new VurdertNødvendighetHolder(vurdertNødvendighet);
 
         vurdertOpplæringRepository.lagre(param.getBehandlingId(), nyHolder);
         return OppdateringResultat.nyttResultat();
     }
 
-    private VurdertOpplæring mapDtoTilVurdertOpplæring(VurderNødvendighetDto dto, List<OpplæringDokument> alleDokumenter) {
-        return new VurdertOpplæring(dto.getJournalpostId().getJournalpostId(), dto.isNødvendigOpplæring(), dto.getBegrunnelse(), getCurrentUserId(), LocalDateTime.now(),
+    private VurdertNødvendighet mapDtoTilVurdertNødvendighet(VurderNødvendighetDto dto, List<OpplæringDokument> alleDokumenter) {
+        return new VurdertNødvendighet(dto.getJournalpostId().getJournalpostId(), dto.isNødvendigOpplæring(), dto.getBegrunnelse(), getCurrentUserId(), LocalDateTime.now(),
             alleDokumenter.stream().filter(dokument -> dto.getTilknyttedeDokumenter().contains("" + dokument.getId())).collect(Collectors.toList()));
     }
 

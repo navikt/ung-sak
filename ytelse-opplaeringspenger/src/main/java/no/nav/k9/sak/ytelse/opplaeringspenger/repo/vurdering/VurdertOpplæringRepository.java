@@ -46,7 +46,7 @@ public class VurdertOpplæringRepository {
 
         var nyttGrunnlag = new VurdertOpplæringGrunnlag(behandlingId,
             vurdertInstitusjonHolder,
-            aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertOpplæringHolder).orElse(null),
+            aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertNødvendighetHolder).orElse(null),
             aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertePerioder).orElse(null),
             aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertReisetid).orElse(null));
         deaktiverEksisterendeGrunnlag(aktivtGrunnlag);
@@ -56,20 +56,20 @@ public class VurdertOpplæringRepository {
         entityManager.flush();
     }
 
-    public void lagre(Long behandlingId, VurdertOpplæringHolder vurdertOpplæringHolder) {
+    public void lagre(Long behandlingId, VurdertNødvendighetHolder vurdertNødvendighetHolder) {
         Objects.requireNonNull(behandlingId, "behandlingId");
-        Objects.requireNonNull(vurdertOpplæringHolder, "vurdertOpplæringHolder");
+        Objects.requireNonNull(vurdertNødvendighetHolder, "vurdertNødvendighetHolder");
 
         var aktivtGrunnlag = getAktivtGrunnlag(behandlingId);
 
         var nyttGrunnlag = new VurdertOpplæringGrunnlag(behandlingId,
             aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertInstitusjonHolder).orElse(null),
-            vurdertOpplæringHolder,
+                vurdertNødvendighetHolder,
             aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertePerioder).orElse(null),
             aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertReisetid).orElse(null));
         deaktiverEksisterendeGrunnlag(aktivtGrunnlag);
 
-        entityManager.persist(nyttGrunnlag.getVurdertOpplæringHolder());
+        entityManager.persist(nyttGrunnlag.getVurdertNødvendighetHolder());
         entityManager.persist(nyttGrunnlag);
         entityManager.flush();
     }
@@ -82,7 +82,7 @@ public class VurdertOpplæringRepository {
 
         var nyttGrunnlag = new VurdertOpplæringGrunnlag(behandlingId,
             aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertInstitusjonHolder).orElse(null),
-            aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertOpplæringHolder).orElse(null),
+            aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertNødvendighetHolder).orElse(null),
             vurdertOpplæringPerioderHolder,
             aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertReisetid).orElse(null));
         deaktiverEksisterendeGrunnlag(aktivtGrunnlag);
@@ -100,7 +100,7 @@ public class VurdertOpplæringRepository {
 
         var nyttGrunnlag = new VurdertOpplæringGrunnlag(behandlingId,
             aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertInstitusjonHolder).orElse(null),
-            aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertOpplæringHolder).orElse(null),
+            aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertNødvendighetHolder).orElse(null),
             aktivtGrunnlag.map(VurdertOpplæringGrunnlag::getVurdertePerioder).orElse(null),
             vurdertReisetidHolder);
         deaktiverEksisterendeGrunnlag(aktivtGrunnlag);

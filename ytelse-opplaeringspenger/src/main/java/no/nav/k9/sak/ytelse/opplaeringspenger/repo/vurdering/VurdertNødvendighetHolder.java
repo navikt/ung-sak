@@ -23,40 +23,40 @@ import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.typer.JournalpostId;
 
-@Entity(name = "VurdertOpplæringHolder")
-@Table(name = "olp_vurdert_opplaering_holder")
+@Entity(name = "VurdertNødvendighetHolder")
+@Table(name = "olp_vurdert_noedvendighet_holder")
 @Immutable
-public class VurdertOpplæringHolder extends BaseEntitet {
+public class VurdertNødvendighetHolder extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_OLP_VURDERT_OPPLAERING_HOLDER")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_OLP_VURDERT_NOEDVENDIGHET_HOLDER")
     private Long id;
 
     @ChangeTracked
     @BatchSize(size = 20)
     @JoinColumn(name = "holder_id", nullable = false)
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
-    private Set<VurdertOpplæring> vurdertOpplæring;
+    private Set<VurdertNødvendighet> vurdertNødvendighet;
 
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    VurdertOpplæringHolder() {
+    VurdertNødvendighetHolder() {
     }
 
-    public VurdertOpplæringHolder(List<VurdertOpplæring> vurdertOpplæring) {
-        Objects.requireNonNull(vurdertOpplæring);
-        this.vurdertOpplæring = vurdertOpplæring.stream()
-            .map(VurdertOpplæring::new)
+    public VurdertNødvendighetHolder(List<VurdertNødvendighet> vurdertNødvendighet) {
+        Objects.requireNonNull(vurdertNødvendighet);
+        this.vurdertNødvendighet = vurdertNødvendighet.stream()
+            .map(VurdertNødvendighet::new)
             .collect(Collectors.toSet());
     }
 
-    public List<VurdertOpplæring> getVurdertOpplæring() {
-        return vurdertOpplæring.stream().toList();
+    public List<VurdertNødvendighet> getVurdertNødvendighet() {
+        return vurdertNødvendighet.stream().toList();
     }
 
-    public Optional<VurdertOpplæring> finnVurderingForJournalpostId(JournalpostId journalpostId) {
-        return vurdertOpplæring.stream().filter(vo -> vo.getJournalpostId().equals(journalpostId)).findFirst();
+    public Optional<VurdertNødvendighet> finnVurderingForJournalpostId(JournalpostId journalpostId) {
+        return vurdertNødvendighet.stream().filter(vo -> vo.getJournalpostId().equals(journalpostId)).findFirst();
     }
 }

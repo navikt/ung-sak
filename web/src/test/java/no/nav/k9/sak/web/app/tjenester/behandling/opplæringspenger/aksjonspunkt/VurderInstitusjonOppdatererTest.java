@@ -66,7 +66,7 @@ class VurderInstitusjonOppdatererTest {
         Optional<VurdertOpplæringGrunnlag> grunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId());
         assertThat(grunnlag).isPresent();
         assertThat(grunnlag.get().getVurdertInstitusjonHolder().getVurdertInstitusjon()).hasSize(1);
-        assertThat(grunnlag.get().getVurdertOpplæringHolder()).isNull();
+        assertThat(grunnlag.get().getVurdertNødvendighetHolder()).isNull();
         VurdertInstitusjon vurdertInstitusjon = grunnlag.get().getVurdertInstitusjonHolder().getVurdertInstitusjon().get(0);
         assertThat(vurdertInstitusjon.getGodkjent()).isEqualTo(dto.isGodkjent());
         assertThat(vurdertInstitusjon.getJournalpostId()).isEqualTo(dto.getJournalpostId().getJournalpostId());
