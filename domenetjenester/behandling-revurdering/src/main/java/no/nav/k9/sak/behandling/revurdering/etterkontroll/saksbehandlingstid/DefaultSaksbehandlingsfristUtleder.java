@@ -21,7 +21,7 @@ public class DefaultSaksbehandlingsfristUtleder implements SaksbehandlingsfristU
     @Inject
     public DefaultSaksbehandlingsfristUtleder(
         SøknadRepository søknadRepository,
-        @KonfigVerdi(value = "SAKSBEHANDLINGSFRIST_UKER", defaultVerdi = "7L") Long fristUker
+        @KonfigVerdi(value = "DEFAULT_SAKSBEHANDLINGSFRIST_UKER", defaultVerdi = "7") Long fristUker
     ) {
         this.søknadRepository = søknadRepository;
         this.fristUker = fristUker;

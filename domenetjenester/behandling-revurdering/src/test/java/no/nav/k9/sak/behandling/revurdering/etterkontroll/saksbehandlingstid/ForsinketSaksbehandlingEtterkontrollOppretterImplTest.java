@@ -10,24 +10,20 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.sak.behandling.revurdering.etterkontroll.Etterkontroll;
 import no.nav.k9.sak.behandling.revurdering.etterkontroll.EtterkontrollRepository;
 import no.nav.k9.sak.behandling.revurdering.etterkontroll.KontrollType;
-import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.k9.sak.behandlingskontroll.events.BehandlingStatusEvent;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 
-class ForsinketSaksbehandlingEtterkontrollOppretterTest {
+class ForsinketSaksbehandlingEtterkontrollOppretterImplTest {
 
     private final EtterkontrollRepository etterkontrollRepository = mock();
     private final BehandlingRepository behandlingRepository = mock();
     private final SaksbehandlingsfristUtleder fristUtleder = mock();
 
-    private ForsinketSaksbehandlingEtterkontrollOppretter oppretter = new ForsinketSaksbehandlingEtterkontrollOppretter(
+    private ForsinketSaksbehandlingEtterkontrollOppretter oppretter = new ForsinketSaksbehandlingEtterkontrollOppretterImpl(
         etterkontrollRepository,
         new UnitTestLookupInstanceImpl<>(fristUtleder),
         behandlingRepository
@@ -45,14 +41,8 @@ class ForsinketSaksbehandlingEtterkontrollOppretterTest {
         var captor = ArgumentCaptor.forClass(Etterkontroll.class);
         when(etterkontrollRepository.lagre(captor.capture())).thenReturn(1L);
 
-        var kontekst = new BehandlingskontrollKontekst(
-            behandling.getFagsakId(),
-            behandling.getAktørId(),
-            new BehandlingLås(behandling.getId()));
 
-        var e = BehandlingStatusEvent.nyEvent(kontekst, BehandlingStatus.OPPRETTET);
-
-        oppretter.observerStartEvent((BehandlingStatusEvent.BehandlingOpprettetEvent) e);
+        oppretter.opprettEtterkontroll(behandling.getId());
 
 
         Etterkontroll etterkontroll = captor.getValue();
