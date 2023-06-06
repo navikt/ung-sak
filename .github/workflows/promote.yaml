@@ -39,9 +39,9 @@ jobs:
           TAG_INPUT: ${{ github.event.issue.title }}
           CLUSTER_INPUT: ${{ github.event.comment.body }}
         run: |
-          echo "TAG=$(echo '$TAG_INPUT' | awk '{print $NF}' | awk -F- '{print $NF}')" >> $GITHUB_ENV
-          echo "IMAGE=$IMAGE_BASE:$(echo '$TAG_INPUT' | awk '{print $NF}')" >> $GITHUB_ENV
-          echo "CLUSTER=$(echo '$CLUSTER_INPUT' | cut -d' ' -f2)" >> $GITHUB_ENV
+          echo "TAG=$(echo $TAG_INPUT | awk '{print $NF}' | awk -F- '{print $NF}')" >> $GITHUB_ENV
+          echo "IMAGE=$IMAGE_BASE:$(echo $TAG_INPUT | awk '{print $NF}')" >> $GITHUB_ENV
+          echo "CLUSTER=$(echo $CLUSTER_INPUT | cut -d' ' -f2)" >> $GITHUB_ENV
 
       - name: Sjekk ut kode
         uses: actions/checkout@v3
