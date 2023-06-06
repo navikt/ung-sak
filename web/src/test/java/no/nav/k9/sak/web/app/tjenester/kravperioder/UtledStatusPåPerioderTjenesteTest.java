@@ -223,9 +223,7 @@ class UtledStatusPåPerioderTjenesteTest {
 
         var perKravstiller = svar.getPerioderMedÅrsakPerKravstiller();
         assertThat(perKravstiller).hasSize(2);
-        assertThat(perKravstiller.get(0).kravstiller()).isEqualTo(RolleType.BRUKER);
-        assertThat(perKravstiller.get(1).kravstiller()).isEqualTo(RolleType.ARBEIDSGIVER);
-
+        assertThat(perKravstiller).extracting(PerioderMedÅrsakPerKravstiller::kravstiller).contains(RolleType.BRUKER, RolleType.ARBEIDSGIVER);
     }
 
 

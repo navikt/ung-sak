@@ -264,6 +264,8 @@ spec:
       value: "true"
     - name: FERIEPENGER_INFOTRYGD_KORRIGER
       value: "true"
+    - name: TILKOMMET_AKTIVITET_ENABLED
+      value: "true"
 
 
     # Konfigurasjoner
