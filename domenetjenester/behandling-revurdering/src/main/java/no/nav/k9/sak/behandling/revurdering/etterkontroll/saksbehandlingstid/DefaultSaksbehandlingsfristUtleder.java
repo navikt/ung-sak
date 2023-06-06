@@ -16,15 +16,16 @@ import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 public class DefaultSaksbehandlingsfristUtleder implements SaksbehandlingsfristUtleder {
 
     private SøknadRepository søknadRepository;
-    private Long fristUker;
+    private Long fristMinutter;
 
     @Inject
     public DefaultSaksbehandlingsfristUtleder(
         SøknadRepository søknadRepository,
-        @KonfigVerdi(value = "DEFAULT_SAKSBEHANDLINGSFRIST_UKER", defaultVerdi = "7") Long fristUker
+        //Default 7 uker
+        @KonfigVerdi(value = "DEFAULT_SAKSBEHANDLINGSFRIST_MIN", defaultVerdi = "70560") Long fristMinutter
     ) {
         this.søknadRepository = søknadRepository;
-        this.fristUker = fristUker;
+        this.fristMinutter = fristMinutter;
     }
 
     DefaultSaksbehandlingsfristUtleder() {
@@ -33,6 +34,6 @@ public class DefaultSaksbehandlingsfristUtleder implements SaksbehandlingsfristU
     @Override
     public LocalDateTime utledFrist(Behandling behandling) {
         SøknadEntitet søknadEntitet = søknadRepository.hentSøknad(behandling.getId());
-        return søknadEntitet.getSøknadsdato().plusWeeks(fristUker).atStartOfDay();
+        return søknadEntitet.getSøknadsdato().plusWeeks(fristMinutter).atStartOfDay();
     }
 }
