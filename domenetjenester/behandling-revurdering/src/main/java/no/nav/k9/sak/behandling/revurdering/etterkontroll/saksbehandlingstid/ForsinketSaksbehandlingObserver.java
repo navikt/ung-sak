@@ -8,6 +8,8 @@ import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingStegOvergangEvent;
 
 @ApplicationScoped
@@ -15,26 +17,27 @@ public class ForsinketSaksbehandlingObserver {
 
     private static final Logger log = LoggerFactory.getLogger(ForsinketSaksbehandlingObserver.class);
 
-    private ForsinketSaksbehandlingEtterkontrollOppretter oppretter;
     private boolean isEnabled;
+    private ProsessTaskTjeneste prosessTaskTjeneste;
 
     public ForsinketSaksbehandlingObserver() {}
 
     @Inject
     public ForsinketSaksbehandlingObserver(
-        ForsinketSaksbehandlingEtterkontrollOppretter oppretter,
-        @KonfigVerdi(value = "ENABLE_ETTERKONTROLL_FORSINKET_SAKB", defaultVerdi = "false") boolean isEnabled
-    ) {
-        this.oppretter = oppretter;
+        @KonfigVerdi(value = "ENABLE_ETTERKONTROLL_FORSINKET_SAKB", defaultVerdi = "false") boolean isEnabled,
+        ProsessTaskTjeneste prosessTaskTjeneste) {
         this.isEnabled = isEnabled;
+        this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
     public void observerBehandlingOpprettet(@Observes BehandlingStegOvergangEvent event) {
         if (isEnabled && event.getFraStegType() == null && event.getTilStegType() == BehandlingStegType.START_STEG) {
-            //TODO blir callid og annen context med automatisk?
-            // endre til lage bruke prosesstask for å kunne rekjøre osv.
-            log.info("Vurderer behov for etterkontroll for forsinket saksbehandling");
-            oppretter.opprettEtterkontroll(event.getBehandlingId());
+            log.info("Vurderer behov for forsinket saksbehandling etterkontroll");
+            var pd = ProsessTaskData.forProsessTask(ForsinketSaksbehandlingEtterkontrollOppretterTask.class);
+            pd.setBehandling(event.getFagsakId(), event.getBehandlingId(), event.getAktørId().getAktørId());
+            pd.setCallIdFraEksisterende();
+
+            prosessTaskTjeneste.lagre(pd);
         }
     }
 }

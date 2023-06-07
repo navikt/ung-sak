@@ -6,11 +6,13 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.annotation.Priority;
-import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.sak.behandling.revurdering.etterkontroll.Etterkontroll;
 import no.nav.k9.sak.behandling.revurdering.etterkontroll.EtterkontrollRepository;
 import no.nav.k9.sak.behandling.revurdering.etterkontroll.KontrollType;
@@ -18,22 +20,23 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 
-@Dependent
-@Priority(2) //For å kunne override i test
-public class ForsinketSaksbehandlingEtterkontrollOppretterImpl implements ForsinketSaksbehandlingEtterkontrollOppretter {
+@ApplicationScoped
+@ProsessTask(value = ForsinketSaksbehandlingEtterkontrollOppretterTask.TASKTYPE)
+public class ForsinketSaksbehandlingEtterkontrollOppretterTask implements ProsessTaskHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(ForsinketSaksbehandlingEtterkontrollOppretterImpl.class);
+    public static final String TASKTYPE = "forsinketsaksbehandling.etterkontroll.oppretter";
+    private static final Logger log = LoggerFactory.getLogger(ForsinketSaksbehandlingEtterkontrollOppretterTask.class);
 
     private EtterkontrollRepository etterkontrollRepository;
     private BehandlingRepository behandlingRepository;
 
     private Instance<SaksbehandlingsfristUtleder> fristUtledere;
 
-    public ForsinketSaksbehandlingEtterkontrollOppretterImpl() {
+    public ForsinketSaksbehandlingEtterkontrollOppretterTask() {
     }
 
     @Inject
-    public ForsinketSaksbehandlingEtterkontrollOppretterImpl(
+    public ForsinketSaksbehandlingEtterkontrollOppretterTask(
         EtterkontrollRepository etterkontrollRepository,
         @Any Instance<SaksbehandlingsfristUtleder> fristUtledere,
         BehandlingRepository behandlingRepository) {
@@ -43,11 +46,12 @@ public class ForsinketSaksbehandlingEtterkontrollOppretterImpl implements Forsin
     }
 
     @Override
-    public void opprettEtterkontroll(Long behandlingId) {
+    public void doTask(ProsessTaskData prosessTaskData) {
+        String behandlingId = prosessTaskData.getBehandlingId();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var fristUtleder = finnUtleder(behandling);
 
-        if(fristUtleder.isEmpty()) {
+        if (fristUtleder.isEmpty()) {
             return;
         }
 
