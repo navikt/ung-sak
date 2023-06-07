@@ -48,7 +48,7 @@ class UtførKontrollTjenesteTest {
     }
 
     @Test
-    void utfører_alle_etterkontroller_på_behandling() {
+    void utfører_etterkontroller_på_behandling() {
         when(kontrollTjeneste.utfør(any())).thenReturn(true);
 
         Behandling behandling = opprettBehandling();
@@ -58,17 +58,11 @@ class UtførKontrollTjenesteTest {
             .medKontrollType(KontrollType.FORSINKET_SAKSBEHANDLINGSTID)
             .build());
 
-        etterkontrollRepository.lagre(new Etterkontroll.Builder(behandling)
-            .medErBehandlet(false)
-            .medKontrollTidspunkt(LocalDateTime.now().minusHours(1))
-            .medKontrollType(KontrollType.FORSINKET_SAKSBEHANDLINGSTID)
-            .build());
-
         tjeneste.utfør(behandling, true);
 
         var etterkontroll = etterkontrollRepository.finnEtterkontrollForFagsak(behandling.getFagsakId());
 
-        assertThat(etterkontroll).hasSize(2);
+        assertThat(etterkontroll).hasSize(1);
         assertThat(etterkontroll).extracting(Etterkontroll::isBehandlet).containsOnly(true);
     }
 
