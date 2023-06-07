@@ -21,6 +21,16 @@ public class SkattegrunnlaginnhentingTjeneste {
         return new Periode(LocalDate.of(førsteÅr, 1, 1), LocalDate.of(sisteÅr, 12, 31));
     }
 
+    //TODO fjern etter behandlingen er gjennom her (saksnr ADR64)
+    public static Periode utledSkattegrunnlagOpplysningsperiode(LocalDate førsteSkjæringstidspunkt, LocalDate fagsakperiodeTom, LocalDate dagensDato, Long behandlingId) {
+        int sisteÅr = finnSisteÅr(fagsakperiodeTom, dagensDato);
+        int førsteÅr = finnFørsteÅr(førsteSkjæringstidspunkt, dagensDato);
+        if (førsteÅr <= 2015 && behandlingId != 1689758L) {
+            throw new IllegalStateException("Første år må være etter 2015");
+        }
+        return new Periode(LocalDate.of(førsteÅr, 1, 1), LocalDate.of(sisteÅr, 12, 31));
+    }
+
     private static int finnFørsteÅr(LocalDate førsteSkjæringstidspunkt, LocalDate dagensDato) {
         var stpÅr = førsteSkjæringstidspunkt.getYear();
         int sisteTilgjengeligeÅr = finnSisteTilgjengeligeÅr(dagensDato);
