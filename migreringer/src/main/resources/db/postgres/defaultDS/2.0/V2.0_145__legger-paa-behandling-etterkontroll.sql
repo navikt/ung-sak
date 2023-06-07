@@ -4,6 +4,11 @@ drop index if exists idx_etterkontroll_1;
 create index if not exists idx_etterkontroll_1
     on etterkontroll (fagsak_id);
 
+-- tillatter kun én etterkontroll per behandling per kontrolltype
+create unique index if not exists idx_etterkontroll_4
+    on etterkontroll (behandling_id, kontroll_type)
+    where behandlet = true
+
 -- mye brukt condition
 create index if not exists idx_etterkontroll_3
     on etterkontroll (behandlet, kontroll_tid);
