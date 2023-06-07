@@ -68,15 +68,4 @@ class ForsinketSaksbehandlingEtterkontrollOppretterTaskTest {
 
     }
 
-    //TODO
-    @Test
-    @Disabled
-    void skal_ignorere_etterkontroll_hvis_frist_utløper_om_få_dager() {
-
-    }
-
-
-
-
-
 }
