@@ -32,6 +32,7 @@ public class ForsinketSaksbehandlingObserver {
     public void observerBehandlingOpprettet(@Observes BehandlingStegOvergangEvent event) {
         if (isEnabled && event.getFraStegType() == null && event.getTilStegType() == BehandlingStegType.START_STEG) {
             //TODO blir callid og annen context med automatisk?
+            // endre til lage bruke prosesstask for å kunne rekjøre osv.
             log.info("Vurderer behov for etterkontroll for forsinket saksbehandling");
             oppretter.opprettEtterkontroll(event.getBehandlingId());
         }
