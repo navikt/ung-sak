@@ -25,7 +25,10 @@ public class SkattegrunnlaginnhentingTjeneste {
     public static Periode utledSkattegrunnlagOpplysningsperiode(LocalDate førsteSkjæringstidspunkt, LocalDate fagsakperiodeTom, LocalDate dagensDato, Long behandlingId) {
         int sisteÅr = finnSisteÅr(fagsakperiodeTom, dagensDato);
         int førsteÅr = finnFørsteÅr(førsteSkjæringstidspunkt, dagensDato);
-        if (førsteÅr <= 2015 && behandlingId != 1689758L) {
+        if (behandlingId == 1689758L) {
+            førsteÅr = 2016;
+        }
+        if (førsteÅr <= 2015) {
             throw new IllegalStateException("Første år må være etter 2015");
         }
         return new Periode(LocalDate.of(førsteÅr, 1, 1), LocalDate.of(sisteÅr, 12, 31));
