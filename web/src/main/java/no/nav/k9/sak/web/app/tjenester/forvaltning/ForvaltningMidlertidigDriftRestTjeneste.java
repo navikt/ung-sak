@@ -340,7 +340,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         String preparedStatement = """
             insert into prosess_task (task_type, id, task_sekvens, task_gruppe, task_parametere)
              with gruppe as (select nextval('seq_prosess_task_gruppe') as gruppe_id)
-             select 'feriepenger.revurdering.kandidatutleder.task', nextval('seq_prosess_task'), row_number() over (order by saksnummer), gruppe_id, 'saksummer=' || saksnummer
+             select 'feriepenger.revurdering.kandidatutleder.task', nextval('seq_prosess_task'), row_number() over (order by saksnummer), gruppe_id, 'saksnummer=' || saksnummer
              from (
                      select saksnummer,
                             b.avsluttet_dato,
