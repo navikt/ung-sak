@@ -7,7 +7,7 @@ create index if not exists idx_etterkontroll_1
 -- tillater kun én etterkontroll per behandling per kontrolltype
 create unique index if not exists idx_etterkontroll_4
     on etterkontroll (behandling_id, kontroll_type)
-    where behandlet = true;
+    where behandlet = false;
 
 -- mye brukt condition
 create index if not exists idx_etterkontroll_3
