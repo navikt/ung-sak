@@ -43,11 +43,13 @@ public class OppfriskAlleOMPSakerBatchTask implements ProsessTaskHandler {
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
 
-        //finn id på alle åpne behandlinger av OMP
+        //finn alle åpne behandlinger av OMP som ikke er oppdatert de siste 30 dagene
         final Query q = entityManager.createNativeQuery("select b.* from behandling b " +
             "inner join fagsak f on f.id=b.fagsak_id " +
             "where f.ytelse_type = 'OMP' " +
-                "and b.behandling_status in ('OPPRE', 'UTRED')",
+                "and b.behandling_status = 'UTRED' " +
+                "and b.opprettet_dato <= current_date - interval '30 days' " +
+                "and (b.endret_tid is null or b.endret_tid <= current_date - interval '30 days')",
             Behandling.class);
         final List<Behandling> behandlinger = q.getResultList();
 
