@@ -1,6 +1,5 @@
 package no.nav.k9.sak.behandling.prosessering.task;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -19,10 +18,10 @@ import no.nav.k9.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 
 @ApplicationScoped
-@ProsessTask(OppfriskAlleOMPSakerTask.TASKTYPE)
-public class OppfriskAlleOMPSakerTask implements ProsessTaskHandler {
+@ProsessTask(value = OppfriskAlleOMPSakerBatchTask.TASKTYPE, cronExpression = "0 0 23 1 * *")
+public class OppfriskAlleOMPSakerBatchTask implements ProsessTaskHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(OppfriskAlleOMPSakerTask.class);
+    private static final Logger log = LoggerFactory.getLogger(OppfriskAlleOMPSakerBatchTask.class);
 
     public static final String TASKTYPE = "omp.oppfriskalle";
 
@@ -30,12 +29,12 @@ public class OppfriskAlleOMPSakerTask implements ProsessTaskHandler {
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private ProsesseringAsynkTjeneste prosesseringAsynkTjeneste;
 
-    public OppfriskAlleOMPSakerTask() {}
+    public OppfriskAlleOMPSakerBatchTask() {}
 
     @Inject
-    public OppfriskAlleOMPSakerTask(EntityManager entityManager,
-                                    ProsessTaskTjeneste prosessTaskTjeneste,
-                                    ProsesseringAsynkTjeneste prosesseringAsynkTjeneste) {
+    public OppfriskAlleOMPSakerBatchTask(EntityManager entityManager,
+                                         ProsessTaskTjeneste prosessTaskTjeneste,
+                                         ProsesseringAsynkTjeneste prosesseringAsynkTjeneste) {
         this.entityManager = entityManager;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.prosesseringAsynkTjeneste = prosesseringAsynkTjeneste;
@@ -57,11 +56,6 @@ public class OppfriskAlleOMPSakerTask implements ProsessTaskHandler {
         for (Behandling behandling : behandlinger) {
             opprettTaskForOppfrisking(behandling);
         }
-
-        //opprett ny oppfrisk-alle task til neste måned
-        final ProsessTaskData nesteKjøringTask = ProsessTaskData.forProsessTask(OppfriskAlleOMPSakerTask.class);
-        nesteKjøringTask.setNesteKjøringEtter(LocalDate.now().plusMonths(1).atTime(23, 30));
-        prosessTaskTjeneste.lagre(nesteKjøringTask);
     }
 
     private void opprettTaskForOppfrisking(Behandling behandling) {
