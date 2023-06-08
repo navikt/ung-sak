@@ -1,6 +1,7 @@
 package no.nav.k9.sak.behandling.revurdering.etterkontroll.saksbehandlingstid;
 
 import java.time.LocalDateTime;
+import java.time.Period;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -16,16 +17,16 @@ import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 public class DefaultSaksbehandlingsfristUtleder implements SaksbehandlingsfristUtleder {
 
     private SøknadRepository søknadRepository;
-    private Long fristMinutter;
+    private Period fristPeriode;
 
     @Inject
     public DefaultSaksbehandlingsfristUtleder(
         SøknadRepository søknadRepository,
-        //Default 7 uker
-        @KonfigVerdi(value = "DEFAULT_SAKSBEHANDLINGSFRIST_MIN", defaultVerdi = "70560") Long fristMinutter
+        @KonfigVerdi(value = "DEFAULT_SAKSBEHANDLINGSFRIST_PERIODE", defaultVerdi = "P7W") String fristPeriode
+        //Brukes kun for test med frist mindre enn 1 dag.
     ) {
         this.søknadRepository = søknadRepository;
-        this.fristMinutter = fristMinutter;
+        this.fristPeriode = Period.parse(fristPeriode);
     }
 
     DefaultSaksbehandlingsfristUtleder() {
@@ -34,6 +35,6 @@ public class DefaultSaksbehandlingsfristUtleder implements SaksbehandlingsfristU
     @Override
     public LocalDateTime utledFrist(Behandling behandling) {
         SøknadEntitet søknadEntitet = søknadRepository.hentSøknad(behandling.getId());
-        return søknadEntitet.getSøknadsdato().plusWeeks(fristMinutter).atStartOfDay();
+        return søknadEntitet.getSøknadsdato().plus(fristPeriode).atStartOfDay();
     }
 }

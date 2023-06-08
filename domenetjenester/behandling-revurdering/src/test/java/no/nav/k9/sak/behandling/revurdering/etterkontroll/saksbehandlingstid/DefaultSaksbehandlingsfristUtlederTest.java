@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.Test;
@@ -17,12 +16,10 @@ import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 public class DefaultSaksbehandlingsfristUtlederTest {
 
     private final SøknadRepository søknadRepository = mock();
-    private final DefaultSaksbehandlingsfristUtleder utleder =
-        new DefaultSaksbehandlingsfristUtleder(søknadRepository, 1L);
 
     @Test
     void testUtledFrist() {
-        LocalDate søknadsdato = LocalDateTime.now().toLocalDate();
+        var søknadsdato = LocalDateTime.now().toLocalDate();
         TestScenarioBuilder testScenarioBuilder = TestScenarioBuilder
             .builderMedSøknad()
             .medSøknadDato(søknadsdato);
@@ -31,8 +28,14 @@ public class DefaultSaksbehandlingsfristUtlederTest {
 
         when(søknadRepository.hentSøknad(behandling.getId())).thenReturn(søknadEntitet);
 
-        LocalDateTime frist = utleder.utledFrist(behandling);
+        LocalDateTime fristEnUke = lagFristUtleder("P1W").utledFrist(behandling);
+        assertThat(fristEnUke).isEqualTo(søknadsdato.plusWeeks(1).atStartOfDay());
 
-        assertThat(frist.toLocalDate()).isEqualTo(søknadsdato.plusWeeks(1));
+        LocalDateTime frist0Uker = lagFristUtleder("P0W").utledFrist(behandling);
+        assertThat(frist0Uker).isEqualTo(søknadsdato.atStartOfDay());
+    }
+
+    private DefaultSaksbehandlingsfristUtleder lagFristUtleder(String periode) {
+        return new DefaultSaksbehandlingsfristUtleder(søknadRepository, periode);
     }
 }

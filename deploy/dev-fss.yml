@@ -268,9 +268,9 @@ spec:
       value: "true"
     - name: ENABLE_ETTERKONTROLL_FORSINKET_SAKB
       value: "true"
-      #Brukes for test
-    - name: DEFAULT_SAKSBEHANDLINGSFRIST_MIN
-      value: "5"
+      #Fjernes etter test
+    - name: DEFAULT_SAKSBEHANDLINGSFRIST_PERIODE
+      value: "P0W"
 
 
     # Konfigurasjoner
