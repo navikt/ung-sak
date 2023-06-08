@@ -23,11 +23,14 @@ import no.nav.k9.sak.behandlingslager.task.FagsakProsessTask;
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)
 public class AutomatiskEtterkontrollTask extends FagsakProsessTask {
     public static final String TASKTYPE = "behandlingsprosess.etterkontroll";
+    public static final String ETTERKONTROLL_ID = "etterkontrollId";
+
     //TODO denne blir aldri satt fra BatchTask'en når skal den brukes?
     public static final String KUN_AKTUELL_BEHANDLING = "etterkontrollBehandling";
     private static final Logger log = LoggerFactory.getLogger(AutomatiskEtterkontrollTask.class);
     private BehandlingRepository behandlingRepository;
     private UtførKontrollTjeneste utførKontrollTjeneste;
+
 
     AutomatiskEtterkontrollTask() {
         // for CDI proxy
@@ -43,15 +46,12 @@ public class AutomatiskEtterkontrollTask extends FagsakProsessTask {
 
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
-        var fagsakId = prosessTaskData.getFagsakId();
-        var behandlingId = prosessTaskData.getBehandlingId();
-        var kunAktuellBehandling = Boolean.parseBoolean(prosessTaskData.getPropertyValue(KUN_AKTUELL_BEHANDLING));
-        Behandling behandlingForEtterkontroll = behandlingRepository.hentBehandling(behandlingId);
+        Behandling behandlingForEtterkontroll = behandlingRepository
+            .hentBehandling(prosessTaskData.getBehandlingId());
 
         BehandlingProsessTask.logContext(behandlingForEtterkontroll);
-        log.info("Etterkontrollerer fagsak med fagsakId = {}, behandling = {}, kunAktuellBehandlingen = {}", fagsakId, behandlingId, kunAktuellBehandling);
-
-        utførKontrollTjeneste.utfør(behandlingForEtterkontroll, kunAktuellBehandling);
+        utførKontrollTjeneste.utfør(behandlingForEtterkontroll,
+            prosessTaskData.getPropertyValue(AutomatiskEtterkontrollTask.ETTERKONTROLL_ID));
 
     }
 

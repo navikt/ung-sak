@@ -10,6 +10,8 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
+import no.nav.k9.felles.jpa.HibernateVerktøy;
 
 /**
  * Oppdatering av tilstand for etterkontroll av behandling.
@@ -33,6 +35,7 @@ public class EtterkontrollRepository {
     }
 
 
+    @Deprecated
     public List<Etterkontroll> finnEtterkontrollAvTypeForFagsak(long fagsakId, KontrollType kontrollType) {
         List<Etterkontroll> resultList = entityManager.createQuery(
                 "from Etterkontroll " +
@@ -45,6 +48,7 @@ public class EtterkontrollRepository {
 
     }
 
+    @Deprecated
     public List<Etterkontroll> finnEtterkontrollForFagsak(long fagsakId) {
         List<Etterkontroll> resultList = entityManager.createQuery(
                 "from Etterkontroll " +
@@ -73,6 +77,7 @@ public class EtterkontrollRepository {
      *
      * @param fagsakId id i databasen
      */
+    @Deprecated
     public int avflaggDersomEksisterer(Long fagsakId, KontrollType kontrollType) {
         int antall = 0;
         List<Etterkontroll> etterkontroll = finnEtterkontrollAvTypeForFagsak(fagsakId, kontrollType);
@@ -105,4 +110,9 @@ public class EtterkontrollRepository {
         return new ArrayList<>(result);
     }
 
+    public Etterkontroll hent(String id) {
+        TypedQuery<Etterkontroll> query = getEntityManager().createQuery("from Etterkontroll k where id=:etterkontrollId", Etterkontroll.class);
+        query.setParameter("etterkontrollId", id);
+        return HibernateVerktøy.hentEksaktResultat(query);
+    }
 }

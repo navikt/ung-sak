@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -16,7 +15,6 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
-import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.sak.behandling.revurdering.etterkontroll.Etterkontroll;
 import no.nav.k9.sak.behandling.revurdering.etterkontroll.EtterkontrollRepository;
 import no.nav.k9.sak.behandling.revurdering.etterkontroll.KontrollType;
@@ -52,59 +50,18 @@ class UtførKontrollTjenesteTest {
         when(kontrollTjeneste.utfør(any())).thenReturn(true);
 
         Behandling behandling = opprettBehandling();
-        etterkontrollRepository.lagre(new Etterkontroll.Builder(behandling)
+        Long etterkontrollId = etterkontrollRepository.lagre(new Etterkontroll.Builder(behandling)
             .medErBehandlet(false)
             .medKontrollTidspunkt(LocalDateTime.now())
             .medKontrollType(KontrollType.FORSINKET_SAKSBEHANDLINGSTID)
             .build());
 
-        tjeneste.utfør(behandling, true);
+        tjeneste.utfør(behandling, etterkontrollId.toString());
 
-        var etterkontroll = etterkontrollRepository.finnEtterkontrollForFagsak(behandling.getFagsakId());
+        var etterkontroll = etterkontrollRepository.hent(etterkontrollId.toString());
 
-        assertThat(etterkontroll).hasSize(1);
-        assertThat(etterkontroll).extracting(Etterkontroll::isBehandlet).containsOnly(true);
+        assertThat(etterkontroll.isBehandlet()).isTrue();
     }
-
-    //TODO denne feiler fordi behandlinger som ikke har nådd kontrolltid blir evaluert.
-    // Har vi behov for å kjøre etterkontroller på  alle behandlinger på fagsak?
-    @Test
-    @Disabled
-    void utfører_alle_aktive_etterkontroller_på_fagsak() {
-        when(kontrollTjeneste.utfør(any())).thenReturn(true);
-
-        Behandling behandling1 = opprettBehandling();
-
-        Behandling behandling2 = Behandling.fraTidligereBehandling(behandling1, BehandlingType.REVURDERING).build();
-        BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
-        behandlingRepository.lagre(behandling2,  behandlingRepository.taSkriveLås(behandling2));
-
-        etterkontrollRepository.lagre(new Etterkontroll.Builder(behandling1.getFagsakId())
-            .medErBehandlet(false)
-            .medKontrollTidspunkt(LocalDateTime.now())
-            .medKontrollType(KontrollType.FORSINKET_SAKSBEHANDLINGSTID)
-            .build());
-
-        etterkontrollRepository.lagre(new Etterkontroll.Builder(behandling2.getFagsakId())
-            .medErBehandlet(false)
-            .medKontrollTidspunkt(LocalDateTime.now())
-            .medKontrollType(KontrollType.FORSINKET_SAKSBEHANDLINGSTID)
-            .build());
-
-        etterkontrollRepository.lagre(new Etterkontroll.Builder(behandling2.getFagsakId())
-            .medErBehandlet(false)
-            .medKontrollTidspunkt(LocalDateTime.now().plusDays(2))
-            .medKontrollType(KontrollType.FORSINKET_SAKSBEHANDLINGSTID)
-            .build());
-
-
-        tjeneste.utfør(behandling1, false);
-
-        var etterkontrolls = etterkontrollRepository.finnEtterkontrollForFagsak(behandling2.getFagsak().getId());
-        assertThat(etterkontrolls).hasSize(2);
-        assertThat(etterkontrolls).extracting(Etterkontroll::isBehandlet).containsOnly(true);
-    }
-
 
     private Behandling opprettBehandling() {
         var scenario = TestScenarioBuilder.builderMedSøknad()

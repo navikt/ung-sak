@@ -1,8 +1,6 @@
 //TODO bør ligge i en annen pakke da det ikke er revurdering spesifikt?
 package no.nav.k9.sak.behandling.revurdering.etterkontroll.tjeneste;
 
-import java.util.Objects;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,7 +8,6 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.k9.sak.behandling.revurdering.etterkontroll.Etterkontroll;
 import no.nav.k9.sak.behandling.revurdering.etterkontroll.EtterkontrollRepository;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 
@@ -32,23 +29,25 @@ public class UtførKontrollTjeneste {
         this.kontrollTjenester = kontrollTjenester;
     }
 
-    public void utfør(Behandling behandling, boolean kunAktuellBehandling) {
-        var etterkontroller = etterkontrollRepository.finnEtterkontrollForFagsak(behandling.getFagsakId())
-            .stream()
-            .filter(it -> !it.isBehandlet())
-            .filter(it -> !kunAktuellBehandling || (it.getBehandlingId() != null && Objects.equals(it.getBehandlingId(), behandling.getId())))
-            .toList();
+    public void utfør(Behandling behandling, String etterkontrollId) {
+        var etterkontroll = etterkontrollRepository.hent(etterkontrollId);
+        if (etterkontroll.isBehandlet()) {
+            log.info("Etterkontroll av kontrolltype = {} var allerede behandlet", etterkontroll.getKontrollType());
+            return;
+        }
 
-        for (Etterkontroll etterkontroll : etterkontroller) {
-            log.info("Utfører etterkontroll av type = {}", etterkontroll.getKontrollType());
-            var kontrollTjeneste = KontrollTjeneste.finnTjeneste(kontrollTjenester, behandling.getFagsakYtelseType(), etterkontroll.getKontrollType());
+        log.info("Utfører etterkontroll av type = {} og kontrollTidspunkt = {} ",
+                etterkontroll.getKontrollType(), etterkontroll.getKontrollTidspunkt());
 
-            var utført = kontrollTjeneste.utfør(etterkontroll);
-            if (utført) {
-                log.info("Utført etterkontroll av type = {}", etterkontroll.getKontrollType());
-                etterkontroll.setErBehandlet(true);
-                etterkontrollRepository.lagre(etterkontroll);
-            }
+        var kontrollTjeneste = KontrollTjeneste.finnTjeneste(kontrollTjenester, behandling.getFagsakYtelseType(), etterkontroll.getKontrollType());
+
+        var utført = kontrollTjeneste.utfør(etterkontroll);
+        if (utført) {
+            log.info("Utført etterkontroll av type = {}", etterkontroll.getKontrollType());
+            etterkontroll.setErBehandlet(true);
+            etterkontrollRepository.lagre(etterkontroll);
+        } else {
+            log.info("Etterkontroll ble ikke utført");
         }
     }
 }

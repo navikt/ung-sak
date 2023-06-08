@@ -72,7 +72,7 @@ public class AutomatiskEtterkontrollBatchTask implements ProsessTaskHandler {
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         prosessTaskData.setSekvens("1");
         prosessTaskData.setPrioritet(100);
-
+        prosessTaskData.setProperty(AutomatiskEtterkontrollTask.ETTERKONTROLL_ID, kandidat.getId().toString());
         // unik per task da det er ulike tasks for hver behandling
         prosessTaskData.setCallId(callId);
 
