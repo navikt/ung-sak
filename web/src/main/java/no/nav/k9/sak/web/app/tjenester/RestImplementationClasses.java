@@ -49,7 +49,6 @@ import no.nav.k9.sak.web.app.tjenester.behandling.vedtak.TotrinnskontrollRestTje
 import no.nav.k9.sak.web.app.tjenester.behandling.vilkår.VilkårRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.brev.BrevRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.dokument.DokumentRestTjeneste;
-import no.nav.k9.sak.web.app.tjenester.etterkontroll.EtterkontrollRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fordeling.FordelHendelseRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.fordeling.FordelRestTjeneste;
@@ -129,7 +128,6 @@ public class RestImplementationClasses {
         classes.add(NødvendigOpplæringRestTjeneste.class);
         classes.add(ReisetidRestTjeneste.class);
         classes.add(OpplæringDokumentRestTjeneste.class);
-        classes.add(EtterkontrollRestTjeneste.class);
 
         // Forvaltningstjenester - fjernes løpende
         classes.add(ProsessTaskRestTjeneste.class);
