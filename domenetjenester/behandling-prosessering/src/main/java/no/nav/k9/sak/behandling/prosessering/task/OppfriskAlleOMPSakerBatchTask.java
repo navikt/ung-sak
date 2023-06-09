@@ -55,6 +55,10 @@ public class OppfriskAlleOMPSakerBatchTask implements ProsessTaskHandler {
         final List<Behandling> behandlinger = q.getResultList();
 
         //opprett oppfrisk-tasker for alle behandlingene
+        if (behandlinger.isEmpty()) {
+            log.info("Ingen behandlinger som skal oppfriskes");
+            return;
+        }
         log.info("Starter asynk oppfrisking av " + behandlinger.size() + " behandlinger");
         opprettTaskerForOppfrisking(behandlinger);
     }
@@ -67,7 +71,8 @@ public class OppfriskAlleOMPSakerBatchTask implements ProsessTaskHandler {
                 gruppe.addNesteParallell(oppfriskTaskData);
             }
         }
-        prosessTaskTjeneste.lagre(gruppe);
+        String gruppeId = prosessTaskTjeneste.lagre(gruppe);
+        log.info("Lagret oppfrisk-tasker i taskgruppe [{}]", gruppeId);
     }
 
     private boolean harPågåendeEllerFeiletTask(Behandling behandling) {
