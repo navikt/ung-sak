@@ -12,6 +12,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
@@ -55,16 +56,18 @@ public class OppfriskAlleOMPSakerBatchTask implements ProsessTaskHandler {
 
         //opprett oppfrisk-tasker for alle behandlingene
         log.info("Starter asynk oppfrisking av " + behandlinger.size() + " behandlinger");
-        for (Behandling behandling : behandlinger) {
-            opprettTaskForOppfrisking(behandling);
-        }
+        opprettTaskerForOppfrisking(behandlinger);
     }
 
-    private void opprettTaskForOppfrisking(Behandling behandling) {
-        if (!behandling.erStatusFerdigbehandlet() && !behandling.isBehandlingPåVent() && !harPågåendeEllerFeiletTask(behandling)) {
-            final ProsessTaskData oppfriskTaskData = OppfriskTask.create(behandling, false);
-            prosessTaskTjeneste.lagre(oppfriskTaskData);
+    private void opprettTaskerForOppfrisking(List<Behandling> behandlinger) {
+        final ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
+        for (Behandling behandling : behandlinger) {
+            if (!behandling.erStatusFerdigbehandlet() && !behandling.isBehandlingPåVent() && !harPågåendeEllerFeiletTask(behandling)) {
+                final ProsessTaskData oppfriskTaskData = OppfriskTask.create(behandling, false);
+                gruppe.addNesteParallell(oppfriskTaskData);
+            }
         }
+        prosessTaskTjeneste.lagre(gruppe);
     }
 
     private boolean harPågåendeEllerFeiletTask(Behandling behandling) {
