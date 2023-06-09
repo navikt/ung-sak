@@ -2,6 +2,7 @@ package no.nav.k9.sak.behandling.revurdering.etterkontroll.saksbehandlingstid;
 
 import java.time.LocalDateTime;
 import java.time.Period;
+import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -34,7 +35,8 @@ public class DefaultSaksbehandlingsfristUtleder implements SaksbehandlingsfristU
 
     @Override
     public LocalDateTime utledFrist(Behandling behandling) {
-        SøknadEntitet søknadEntitet = søknadRepository.hentSøknad(behandling.getId());
-        return søknadEntitet.getSøknadsdato().plus(fristPeriode).atStartOfDay();
+        Optional<SøknadEntitet> s = søknadRepository.hentSøknadHvisEksisterer(behandling.getId());
+        return s.map(it -> it.getSøknadsdato().plus(fristPeriode).atStartOfDay())
+            .orElse(null);
     }
 }

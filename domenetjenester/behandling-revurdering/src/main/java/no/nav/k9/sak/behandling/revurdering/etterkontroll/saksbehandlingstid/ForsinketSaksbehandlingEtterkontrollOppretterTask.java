@@ -58,6 +58,11 @@ public class ForsinketSaksbehandlingEtterkontrollOppretterTask implements Proses
         }
 
         LocalDateTime frist = fristUtleder.get().utledFrist(behandling);
+        if (frist == null) {
+            log.info("Ingen frist utledet. Lager ikke etterkontroll");
+            return;
+        }
+
         log.info("Oppretter etterkontroll med frist {}", frist);
 
         etterkontrollRepository.lagre(new Etterkontroll.Builder(behandling)
