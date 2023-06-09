@@ -19,9 +19,11 @@ import no.nav.k9.sak.behandling.revurdering.etterkontroll.KontrollType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 
 @ApplicationScoped
 @ProsessTask(value = ForsinketSaksbehandlingEtterkontrollOppretterTask.TASKTYPE)
+@FagsakProsesstaskRekkefølge(gruppeSekvens = true)
 public class ForsinketSaksbehandlingEtterkontrollOppretterTask implements ProsessTaskHandler {
 
     public static final String TASKTYPE = "forsinketsaksbehandling.etterkontroll.oppretter";
