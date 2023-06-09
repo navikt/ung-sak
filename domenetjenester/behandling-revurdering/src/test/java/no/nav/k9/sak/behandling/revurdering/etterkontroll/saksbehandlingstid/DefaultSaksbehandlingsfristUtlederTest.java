@@ -29,11 +29,11 @@ public class DefaultSaksbehandlingsfristUtlederTest {
 
         when(søknadRepository.hentSøknadHvisEksisterer(behandling.getId())).thenReturn(Optional.of(søknadEntitet));
 
-        LocalDateTime fristEnUke = lagFristUtleder("P1W").utledFrist(behandling);
-        assertThat(fristEnUke).isEqualTo(søknadsdato.plusWeeks(1).atStartOfDay());
+        var fristEnUke = lagFristUtleder("P1W").utledFrist(behandling);
+        assertThat(fristEnUke).get().isEqualTo(søknadsdato.plusWeeks(1).atStartOfDay());
 
-        LocalDateTime frist0Uker = lagFristUtleder("P0W").utledFrist(behandling);
-        assertThat(frist0Uker).isEqualTo(søknadsdato.atStartOfDay());
+        var frist0Uker = lagFristUtleder("P0W").utledFrist(behandling);
+        assertThat(frist0Uker).get().isEqualTo(søknadsdato.atStartOfDay());
     }
 
     private DefaultSaksbehandlingsfristUtleder lagFristUtleder(String periode) {

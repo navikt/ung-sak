@@ -2,9 +2,11 @@ package no.nav.k9.sak.behandling.revurdering.etterkontroll.saksbehandlingstid;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -37,7 +39,7 @@ class ForsinketSaksbehandlingEtterkontrollOppretterTaskTest {
         var behandling = TestScenarioBuilder.builderMedSøknad().lagMocked();
 
         when(behandlingRepository.hentBehandling(behandling.getId().toString())).thenReturn(behandling);
-        when(fristUtleder.utledFrist(behandling)).thenReturn(søknadsdato.plusWeeks(7).atStartOfDay());
+        when(fristUtleder.utledFrist(behandling)).thenReturn(Optional.of(søknadsdato.plusWeeks(7).atStartOfDay()));
 
         var captor = ArgumentCaptor.forClass(Etterkontroll.class);
         when(etterkontrollRepository.lagre(captor.capture())).thenReturn(1L);
@@ -50,6 +52,20 @@ class ForsinketSaksbehandlingEtterkontrollOppretterTaskTest {
         assertThat(etterkontroll.isBehandlet()).isFalse();
         assertThat(etterkontroll.getKontrollTidspunkt().toLocalDate())
             .isEqualTo(søknadsdato.plusWeeks(7));
+
+
+    }
+
+    @Test
+    void skal_ikke_opprette_etterkontroll_hvis_frist_mangler() {
+        var behandling = TestScenarioBuilder.builderMedSøknad().lagMocked();
+
+        when(behandlingRepository.hentBehandling(behandling.getId().toString())).thenReturn(behandling);
+        when(fristUtleder.utledFrist(behandling)).thenReturn(Optional.empty());
+
+        oppretter.doTask(lagTask(behandling));
+
+        verifyNoInteractions(etterkontrollRepository);
 
 
     }

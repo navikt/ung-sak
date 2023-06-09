@@ -1,6 +1,5 @@
 package no.nav.k9.sak.behandling.revurdering.etterkontroll.saksbehandlingstid;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -57,11 +56,13 @@ public class ForsinketSaksbehandlingEtterkontrollOppretterTask implements Proses
             return;
         }
 
-        LocalDateTime frist = fristUtleder.get().utledFrist(behandling);
-        if (frist == null) {
+        var fristOpt = fristUtleder.get().utledFrist(behandling);
+        if (fristOpt.isEmpty()) {
             log.info("Ingen frist utledet. Lager ikke etterkontroll");
             return;
         }
+
+        var frist = fristOpt.get();
 
         log.info("Oppretter etterkontroll med frist {}", frist);
 

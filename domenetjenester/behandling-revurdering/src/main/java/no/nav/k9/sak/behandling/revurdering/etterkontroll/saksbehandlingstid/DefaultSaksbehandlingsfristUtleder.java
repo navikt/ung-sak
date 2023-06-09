@@ -10,7 +10,6 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 
 @FagsakYtelseTypeRef(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
@@ -34,9 +33,8 @@ public class DefaultSaksbehandlingsfristUtleder implements SaksbehandlingsfristU
     }
 
     @Override
-    public LocalDateTime utledFrist(Behandling behandling) {
-        Optional<SøknadEntitet> s = søknadRepository.hentSøknadHvisEksisterer(behandling.getId());
-        return s.map(it -> it.getSøknadsdato().plus(fristPeriode).atStartOfDay())
-            .orElse(null);
+    public Optional<LocalDateTime> utledFrist(Behandling behandling) {
+        return søknadRepository.hentSøknadHvisEksisterer(behandling.getId())
+            .map(it -> it.getSøknadsdato().plus(fristPeriode).atStartOfDay());
     }
 }
