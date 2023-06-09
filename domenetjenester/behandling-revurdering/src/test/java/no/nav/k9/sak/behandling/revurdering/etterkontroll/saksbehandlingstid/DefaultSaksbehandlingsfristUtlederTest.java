@@ -5,6 +5,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +27,7 @@ public class DefaultSaksbehandlingsfristUtlederTest {
         Behandling behandling = testScenarioBuilder.lagMocked();
         SøknadEntitet søknadEntitet = testScenarioBuilder.medSøknad().build();
 
-        when(søknadRepository.hentSøknad(behandling.getId())).thenReturn(søknadEntitet);
+        when(søknadRepository.hentSøknadHvisEksisterer(behandling.getId())).thenReturn(Optional.of(søknadEntitet));
 
         LocalDateTime fristEnUke = lagFristUtleder("P1W").utledFrist(behandling);
         assertThat(fristEnUke).isEqualTo(søknadsdato.plusWeeks(1).atStartOfDay());
