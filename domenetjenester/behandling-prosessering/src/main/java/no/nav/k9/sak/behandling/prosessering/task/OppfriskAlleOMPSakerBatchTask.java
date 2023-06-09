@@ -62,7 +62,7 @@ public class OppfriskAlleOMPSakerBatchTask implements ProsessTaskHandler {
     private void opprettTaskerForOppfrisking(List<Behandling> behandlinger) {
         final ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
         for (Behandling behandling : behandlinger) {
-            if (!behandling.erStatusFerdigbehandlet() && !behandling.isBehandlingPåVent() && !harPågåendeEllerFeiletTask(behandling)) {
+            if (!behandling.isBehandlingPåVent() && !harPågåendeEllerFeiletTask(behandling)) {
                 final ProsessTaskData oppfriskTaskData = OppfriskTask.create(behandling, false);
                 gruppe.addNesteParallell(oppfriskTaskData);
             }
