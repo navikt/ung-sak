@@ -6,7 +6,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,7 +18,6 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
-import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandling.revurdering.etterkontroll.Etterkontroll;
@@ -61,7 +59,7 @@ class AutomatiskEtterkontrollBatchTaskTest {
     public void skal_ikke_velge_kontroller_frem_i_tid() {
         Behandling behandling = opprettBehandling();
 
-        Etterkontroll etterkontroll = new Etterkontroll.Builder(behandling.getFagsakId())
+        Etterkontroll etterkontroll = new Etterkontroll.Builder(behandling)
             .medErBehandlet(false)
             .medKontrollTidspunkt(LocalDateTime.now().plusDays(2))
             .medKontrollType(KontrollType.FORSINKET_SAKSBEHANDLINGSTID)
@@ -78,38 +76,11 @@ class AutomatiskEtterkontrollBatchTaskTest {
     public void skal_velge_kontroller_for_behandling() {
         Behandling behandling = opprettBehandling();
 
-        Etterkontroll etterkontroll = new Etterkontroll.Builder(behandling.getFagsakId())
+        Etterkontroll etterkontroll = new Etterkontroll.Builder(behandling)
             .medErBehandlet(false)
             .medKontrollTidspunkt(LocalDateTime.now().minusDays(1))
             .medKontrollType(KontrollType.FORSINKET_SAKSBEHANDLINGSTID).build();
         etterkontrollRepository.lagre(etterkontroll);
-
-        task.doTask(null);
-
-        List<ProsessTaskData> nyeProsesstasker = hentProsesstasker();
-
-        assertThat(nyeProsesstasker).hasSize(1);
-
-        ProsessTaskData taskData = nyeProsesstasker.get(0);
-        assertThat(taskData.getTaskType()).isEqualTo(AutomatiskEtterkontrollTask.TASKTYPE);
-        assertThat(taskData.getBehandlingId()).isEqualTo(behandling.getId().toString());
-
-    }
-
-    @Test
-    public void skal_ikke_velge_henlagt_behandling() {
-        Behandling behandling = opprettBehandling();
-
-        Etterkontroll etterkontroll = new Etterkontroll.Builder(behandling.getFagsakId()).medErBehandlet(false).medKontrollTidspunkt(LocalDate.now().atStartOfDay().minusDays(0))
-            .medKontrollType(KontrollType.FORSINKET_SAKSBEHANDLINGSTID).build();
-        etterkontrollRepository.lagre(etterkontroll);
-
-        Behandling henlagtBehandling = Behandling.fraTidligereBehandling(behandling, BehandlingType.FØRSTEGANGSSØKNAD).build();
-        behandlingRepository.lagre(henlagtBehandling, behandlingRepository.taSkriveLås(henlagtBehandling));
-
-        henlagtBehandling.setBehandlingResultatType(BehandlingResultatType.HENLAGT_SØKNAD_TRUKKET);
-        henlagtBehandling.avsluttBehandling();
-        behandlingRepository.lagre(henlagtBehandling, behandlingRepository.taSkriveLås(henlagtBehandling));
 
         task.doTask(null);
 

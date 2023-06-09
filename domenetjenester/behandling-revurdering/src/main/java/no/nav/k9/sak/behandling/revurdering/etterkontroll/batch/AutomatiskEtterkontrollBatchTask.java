@@ -15,7 +15,6 @@ import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandling.revurdering.etterkontroll.Etterkontroll;
 import no.nav.k9.sak.behandling.revurdering.etterkontroll.EtterkontrollRepository;
 import no.nav.k9.sak.behandling.revurdering.etterkontroll.task.AutomatiskEtterkontrollTask;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 
@@ -58,7 +57,7 @@ public class AutomatiskEtterkontrollBatchTask implements ProsessTaskHandler {
 
     private void opprettEtterkontrollTask(Etterkontroll kandidat, String callId) {
         ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(AutomatiskEtterkontrollTask.class);
-        var behandling = utledBehandling(kandidat);
+        var behandling = behandlingRepository.hentBehandling(kandidat.getBehandlingId());
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         prosessTaskData.setSekvens("1");
         prosessTaskData.setPrioritet(100);
@@ -69,10 +68,4 @@ public class AutomatiskEtterkontrollBatchTask implements ProsessTaskHandler {
         prosessTaskTjeneste.lagre(prosessTaskData);
     }
 
-    private Behandling utledBehandling(Etterkontroll kandidat) {
-        if (kandidat.getBehandlingId() != null) {
-            return behandlingRepository.hentBehandling(kandidat.getBehandlingId());
-        }
-        return behandlingRepository.finnSisteIkkeHenlagteBehandling(kandidat.getFagsakId()).orElseThrow();
-    }
 }

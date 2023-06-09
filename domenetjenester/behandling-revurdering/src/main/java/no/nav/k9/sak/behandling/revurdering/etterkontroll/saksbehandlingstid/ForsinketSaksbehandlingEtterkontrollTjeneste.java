@@ -25,15 +25,15 @@ import no.nav.k9.sak.kontrakt.dokument.MottakerDto;
 @FagsakYtelseTypeRef(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
 @EtterkontrollRef(KontrollType.FORSINKET_SAKSBEHANDLINGSTID)
 @ApplicationScoped
-public class ForsinketSaksbehandlingEtterkontroll implements KontrollTjeneste {
+public class ForsinketSaksbehandlingEtterkontrollTjeneste implements KontrollTjeneste {
 
-    private static final Logger log = LoggerFactory.getLogger(ForsinketSaksbehandlingEtterkontroll.class);
+    private static final Logger log = LoggerFactory.getLogger(ForsinketSaksbehandlingEtterkontrollTjeneste.class);
 
     private DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste;
     private BehandlingRepository behandlingRepository;
 
     @Inject
-    public ForsinketSaksbehandlingEtterkontroll(
+    public ForsinketSaksbehandlingEtterkontrollTjeneste(
         DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste,
         BehandlingRepository behandlingRepository) {
 
@@ -41,7 +41,7 @@ public class ForsinketSaksbehandlingEtterkontroll implements KontrollTjeneste {
         this.behandlingRepository = behandlingRepository;
     }
 
-    ForsinketSaksbehandlingEtterkontroll() {
+    ForsinketSaksbehandlingEtterkontrollTjeneste() {
     }
 
     @Override

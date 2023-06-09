@@ -1,4 +1,4 @@
-alter table Etterkontroll add column if not exists behandling_id bigint references behandling;
+alter table Etterkontroll add column if not exists behandling_id bigint not null references behandling;
 -- tillater flere etterkontroller på samme fagsak.
 drop index if exists idx_etterkontroll_1;
 create index if not exists idx_etterkontroll_1

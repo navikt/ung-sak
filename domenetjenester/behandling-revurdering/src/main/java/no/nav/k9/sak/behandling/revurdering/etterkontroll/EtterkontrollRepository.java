@@ -35,33 +35,8 @@ public class EtterkontrollRepository {
     }
 
 
-    @Deprecated
-    public List<Etterkontroll> finnEtterkontrollAvTypeForFagsak(long fagsakId, KontrollType kontrollType) {
-        List<Etterkontroll> resultList = entityManager.createQuery(
-                "from Etterkontroll " +
-                    "where fagsakId = :fagsakId and kontrollType = :kontrollType", Etterkontroll.class)//$NON-NLS-1$
-            .setParameter("fagsakId", fagsakId)
-            .setParameter("kontrollType", kontrollType)
-            .getResultList();
-
-        return resultList;
-
-    }
-
-    @Deprecated
-    public List<Etterkontroll> finnEtterkontrollForFagsak(long fagsakId) {
-        List<Etterkontroll> resultList = entityManager.createQuery(
-                "from Etterkontroll " +
-                    "where fagsakId = :fagsakId", Etterkontroll.class)//$NON-NLS-1$
-            .setParameter("fagsakId", fagsakId)
-            .getResultList();
-
-        return resultList;
-
-    }
-
     /**
-     * Lagrer etterkontroll  på en fagsak
+     * Lagrer etterkontroll
      *
      * @return id for {@link Etterkontroll} opprettet
      */
@@ -71,23 +46,6 @@ public class EtterkontrollRepository {
         return etterkontroll.getId();
     }
 
-
-    /**
-     * Setter sak til behandlet=Y i etterkontroll slik at batch ikke plukker saken opp for revurdering
-     *
-     * @param fagsakId id i databasen
-     */
-    @Deprecated
-    public int avflaggDersomEksisterer(Long fagsakId, KontrollType kontrollType) {
-        int antall = 0;
-        List<Etterkontroll> etterkontroll = finnEtterkontrollAvTypeForFagsak(fagsakId, kontrollType);
-        for (Etterkontroll ek : etterkontroll) {
-            ek.setErBehandlet(true);
-            lagre(ek);
-            antall++;
-        }
-        return antall;
-    }
 
     public List<Etterkontroll> finnKandidaterForAutomatiskEtterkontroll(Period etterkontrollTidTilbake) {
 

@@ -26,7 +26,7 @@ public class Etterkontroll extends BaseEntitet {
     @Column(name = "fagsak_id", nullable = false, updatable = false)
     private Long fagsakId;
 
-    @Column(name = "behandling_id", nullable = true, updatable = false)
+    @Column(name = "behandling_id", nullable = false, updatable = false)
     private Long behandlingId;
 
     @DiffIgnore
@@ -75,22 +75,15 @@ public class Etterkontroll extends BaseEntitet {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Etterkontroll)) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         Etterkontroll that = (Etterkontroll) o;
-        return Objects.equals(fagsakId, that.fagsakId) &&
-            Objects.equals(kontrollType, that.kontrollType);
-
-
+        return erBehandlet == that.erBehandlet && Objects.equals(fagsakId, that.fagsakId) && Objects.equals(behandlingId, that.behandlingId) && Objects.equals(kontrollTidspunkt, that.kontrollTidspunkt) && kontrollType == that.kontrollType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(fagsakId, kontrollType);
+        return Objects.hash(fagsakId, behandlingId, kontrollTidspunkt, kontrollType, erBehandlet);
     }
 
     public static class Builder {

@@ -1,4 +1,4 @@
-package no.nav.k9.sak.behandling.revurdering.etterkontroll.tjeneste;
+package no.nav.k9.sak.behandling.revurdering.etterkontroll.saksbehandlingstid;
 
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -18,18 +18,17 @@ import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.sak.behandling.revurdering.etterkontroll.Etterkontroll;
 import no.nav.k9.sak.behandling.revurdering.etterkontroll.KontrollType;
-import no.nav.k9.sak.behandling.revurdering.etterkontroll.saksbehandlingstid.ForsinketSaksbehandlingEtterkontroll;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 
-class ForsinketSaksbehandlingEtterkontrollTest {
+class ForsinketSaksbehandlingEtterkontrollTjenesteTest {
 
     private final DokumentBestillerApplikasjonTjeneste dokumentbestiller = mock();
     private final TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad();
-    private final ForsinketSaksbehandlingEtterkontroll forsinketSaksbehandlingKontroll =
-        new ForsinketSaksbehandlingEtterkontroll(dokumentbestiller, scenarioBuilder.mockBehandlingRepository());
+    private final ForsinketSaksbehandlingEtterkontrollTjeneste forsinketSaksbehandlingKontroll =
+        new ForsinketSaksbehandlingEtterkontrollTjeneste(dokumentbestiller, scenarioBuilder.mockBehandlingRepository());
 
     @Test
     void skal_bestille_brev_hvis_behandling_er_åpen() {

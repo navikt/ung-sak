@@ -5,14 +5,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -35,7 +36,6 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -126,6 +126,24 @@ public class BehandlingRevurderingRepositoryImplTest {
         assertThat(result).anySatisfy(r -> r.getId().equals(behandling.getId()));
         assertThat(result).hasSize(1);
     }
+
+    @Test
+    public void skal_finne_nyeste_innvilgete_avsluttede_behandling_som_ikke_er_henlagt() {
+        var behandling = opprettRevurderingsKandidat();
+        behandling.avsluttBehandling();
+        behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
+
+        Behandling henlagtBehandling = Behandling.fraTidligereBehandling(behandling, BehandlingType.FØRSTEGANGSSØKNAD).build();
+        behandlingRepository.lagre(henlagtBehandling, behandlingRepository.taSkriveLås(henlagtBehandling));
+
+        henlagtBehandling.setBehandlingResultatType(BehandlingResultatType.HENLAGT_SØKNAD_TRUKKET);
+        henlagtBehandling.avsluttBehandling();
+        behandlingRepository.lagre(henlagtBehandling, behandlingRepository.taSkriveLås(henlagtBehandling));
+
+        Optional<Behandling> resultatOpt = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(behandling.getFagsak().getId());
+        assertThat(resultatOpt).hasValueSatisfying(resultat -> assertThat(resultat.getId()).isEqualTo(behandling.getId()));
+    }
+
 
     private Behandling opprettOgLagreRevurderingMedBehandlingÅrsak() {
         Behandling revurderingsBehandling = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING)
