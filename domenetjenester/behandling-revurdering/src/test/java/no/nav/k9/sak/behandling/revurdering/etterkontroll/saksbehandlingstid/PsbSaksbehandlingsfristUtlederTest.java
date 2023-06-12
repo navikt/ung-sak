@@ -14,7 +14,7 @@ import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 
-public class DefaultSaksbehandlingsfristUtlederTest {
+public class PsbSaksbehandlingsfristUtlederTest {
 
     private final SøknadRepository søknadRepository = mock();
 
@@ -36,7 +36,7 @@ public class DefaultSaksbehandlingsfristUtlederTest {
         assertThat(frist0Uker).get().isEqualTo(søknadsdato.atStartOfDay());
     }
 
-    private DefaultSaksbehandlingsfristUtleder lagFristUtleder(String periode) {
-        return new DefaultSaksbehandlingsfristUtleder(søknadRepository, periode);
+    private PsbSaksbehandlingsfristUtleder lagFristUtleder(String periode) {
+        return new PsbSaksbehandlingsfristUtleder(søknadRepository, periode);
     }
 }

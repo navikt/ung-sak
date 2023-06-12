@@ -14,13 +14,13 @@ import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 
 @FagsakYtelseTypeRef(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
 @ApplicationScoped
-public class DefaultSaksbehandlingsfristUtleder implements SaksbehandlingsfristUtleder {
+public class PsbSaksbehandlingsfristUtleder implements SaksbehandlingsfristUtleder {
 
     private SøknadRepository søknadRepository;
     private Period fristPeriode;
 
     @Inject
-    public DefaultSaksbehandlingsfristUtleder(
+    public PsbSaksbehandlingsfristUtleder(
         SøknadRepository søknadRepository,
         @KonfigVerdi(value = "DEFAULT_SAKSBEHANDLINGSFRIST_PERIODE", defaultVerdi = "P7W") String fristPeriode
         //Brukes kun for test med frist mindre enn 1 dag.
@@ -29,7 +29,7 @@ public class DefaultSaksbehandlingsfristUtleder implements SaksbehandlingsfristU
         this.fristPeriode = Period.parse(fristPeriode);
     }
 
-    DefaultSaksbehandlingsfristUtleder() {
+    PsbSaksbehandlingsfristUtleder() {
     }
 
     @Override
