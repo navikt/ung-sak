@@ -4,6 +4,7 @@ import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.OVERSTYRING_FRISINN_OPPGITT_OPPTJENING;
 
@@ -330,6 +331,35 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     }
 
     @POST
+    @Path("/feriepengerevurdering-saksnumre")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(description = "Oppretter automatisk revurdering av feriepenger.", summary = ("Oppretter automatisk revurdering av feriepenger."), tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = DRIFT)
+    public Response opprettFeriepengerevurderingSaksnumre(@Parameter(description = "Saksnumre (skilt med mellomrom eller linjeskift)") @Valid OpprettManuellRevurdering opprettRevurdering) {
+        var saksnummerStreng = Objects.requireNonNull(opprettRevurdering.getSaksnumre(), "saksnumre");
+        var saksnumrene = new LinkedHashSet<>(Arrays.asList(saksnummerStreng.split("\\s+")));
+
+        final StringBuilder sb = new StringBuilder();
+        for (var saksnummer : saksnumrene) {
+            try {
+                Fagsak fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(new Saksnummer(saksnummer), false).orElseThrow(() -> new IllegalArgumentException("Finner ikke sak " + saksnummer));
+                if (fagsak.getYtelseType() != PLEIEPENGER_SYKT_BARN) {
+                    throw new IllegalArgumentException("Fagsak " + saksnummer + " var ikke PSB-sak");
+                }
+                opprettRevurderingService.opprettAutomatiskRevurdering(new Saksnummer(saksnummer),
+                    BehandlingÅrsakType.RE_FERIEPENGER_ENDRING_FRA_ANNEN_SAK,
+                    BehandlingStegType.START_STEG);
+            } catch (RuntimeException e) {
+                sb.append(saksnummer + "\n");
+                logger.warn("Ignorerte " + saksnummer, e);
+            }
+        }
+
+        return Response.ok("Kjørt. Følgende saksnumre fikk ikke task: " + sb).build();
+    }
+
+    @POST
     @Path("/feriepengerevurderingkandidater")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
@@ -340,7 +370,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         String preparedStatement = """
             insert into prosess_task (task_type, id, task_sekvens, task_gruppe, task_parametere)
              with gruppe as (select nextval('seq_prosess_task_gruppe') as gruppe_id)
-             select 'feriepenger.revurdering.kandidatutleder.task', nextval('seq_prosess_task'), row_number() over (order by saksnummer), gruppe_id, 'saksummer=' || saksnummer
+             select 'feriepenger.revurdering.kandidatutleder.task', nextval('seq_prosess_task'), row_number() over (order by saksnummer), gruppe_id, 'saksnummer=' || saksnummer
              from (
                      select saksnummer,
                             b.avsluttet_dato,
