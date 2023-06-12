@@ -7,10 +7,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
-import no.nav.k9.sak.behandlingskontroll.events.BehandlingStegOvergangEvent;
+import no.nav.k9.sak.behandlingskontroll.events.BehandlingStatusEvent;
 
 @ApplicationScoped
 public class ForsinketSaksbehandlingObserver {
@@ -30,8 +30,8 @@ public class ForsinketSaksbehandlingObserver {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
-    public void observerBehandlingOpprettet(@Observes BehandlingStegOvergangEvent event) {
-        if (isEnabled && event.getFraStegType() == null && event.getTilStegType() == BehandlingStegType.START_STEG) {
+    public void observerBehandlingOpprettet(@Observes BehandlingStatusEvent.BehandlingOpprettetEvent event) {
+        if (isEnabled && event.getNyStatus() == BehandlingStatus.UTREDES) {
             log.info("Vurderer behov for forsinket saksbehandling etterkontroll");
             var pd = ProsessTaskData.forProsessTask(ForsinketSaksbehandlingEtterkontrollOppretterTask.class);
             pd.setBehandling(event.getFagsakId(), event.getBehandlingId(), event.getAktørId().getAktørId());
