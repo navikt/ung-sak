@@ -1,7 +1,5 @@
 package no.nav.k9.sak.behandling.revurdering.etterkontroll.saksbehandlingstid;
 
-import java.util.Optional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,6 +7,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
@@ -52,13 +51,8 @@ public class ForsinketSaksbehandlingEtterkontrollOppretterTask implements Proses
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var fristUtleder = finnUtleder(behandling);
 
-        if (fristUtleder.isEmpty()) {
-            return;
-        }
-
-        var fristOpt = fristUtleder.get().utledFrist(behandling);
+        var fristOpt = fristUtleder.utledFrist(behandling);
         if (fristOpt.isEmpty()) {
-            log.info("Ingen frist utledet. Lager ikke etterkontroll");
             return;
         }
 
@@ -74,7 +68,9 @@ public class ForsinketSaksbehandlingEtterkontrollOppretterTask implements Proses
 
     }
 
-    private Optional<SaksbehandlingsfristUtleder> finnUtleder(Behandling behandling) {
-        return FagsakYtelseTypeRef.Lookup.find(fristUtledere, behandling.getFagsakYtelseType());
+    private SaksbehandlingsfristUtleder finnUtleder(Behandling behandling) {
+        FagsakYtelseType ytelseType = behandling.getFagsakYtelseType();
+        return FagsakYtelseTypeRef.Lookup.find(fristUtledere, ytelseType)
+            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + SaksbehandlingsfristUtleder.class.getSimpleName() + " for ytelseType=" + ytelseType));
     }
 }
