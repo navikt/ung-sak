@@ -1,7 +1,6 @@
 package no.nav.k9.sak.behandling.revurdering.etterkontroll;
 
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -47,10 +46,7 @@ public class EtterkontrollRepository {
     }
 
 
-    public List<Etterkontroll> finnKandidaterForAutomatiskEtterkontroll(Period etterkontrollTidTilbake) {
-
-        LocalDate datoTilbakeITid = LocalDate.now().minus(etterkontrollTidTilbake);
-        java.time.LocalDateTime datoTidTilbake = datoTilbakeITid.atStartOfDay();
+    public List<Etterkontroll> finnKandidaterForAutomatiskEtterkontroll() {
 
         Query query1 = getEntityManager().createQuery(
             "SELECT k " +
@@ -58,7 +54,7 @@ public class EtterkontrollRepository {
                 "    WHERE k.erBehandlet = false" +
                 "    AND k.kontrollTidspunkt <= :periodeTilbake" //$NON-NLS-1$
         );
-        query1.setParameter("periodeTilbake", datoTidTilbake);
+        query1.setParameter("periodeTilbake", LocalDate.now().atStartOfDay());
         @SuppressWarnings("unchecked")
         List<Etterkontroll> result = query1.getResultList();
 

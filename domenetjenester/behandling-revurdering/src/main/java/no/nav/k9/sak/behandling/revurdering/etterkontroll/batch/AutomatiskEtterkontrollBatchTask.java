@@ -1,7 +1,5 @@
 package no.nav.k9.sak.behandling.revurdering.etterkontroll.batch;
 
-import java.time.Period;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +40,7 @@ public class AutomatiskEtterkontrollBatchTask implements ProsessTaskHandler {
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
-        var etterkontroller = repository.finnKandidaterForAutomatiskEtterkontroll(Period.ZERO);
+        var etterkontroller = repository.finnKandidaterForAutomatiskEtterkontroll();
 
         String callId = MDCOperations.getCallId();
         callId = (callId == null ? MDCOperations.generateCallId() : callId) + "_";

@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Period;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -26,8 +25,6 @@ import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
 public class EtterkontrollRepositoryTest {
-
-    private final static int revurderingDagerTilbake = 0;
 
     @Inject
     private EntityManager entityManager;
@@ -52,19 +49,19 @@ public class EtterkontrollRepositoryTest {
         Etterkontroll etterkontroll1 = new Etterkontroll
             .Builder(behandling)
             .medErBehandlet(false)
-            .medKontrollTidspunkt(LocalDate.now().atStartOfDay().minusDays(revurderingDagerTilbake))
+            .medKontrollTidspunkt(LocalDate.now().atStartOfDay())
             .medKontrollType(KontrollType.FORSINKET_SAKSBEHANDLINGSTID).build();
         etterkontrollRepository.lagre(etterkontroll1);
 
         Etterkontroll etterkontroll2 = new Etterkontroll
             .Builder(behandling)
             .medErBehandlet(true)
-            .medKontrollTidspunkt(LocalDate.now().atStartOfDay().minusDays(revurderingDagerTilbake))
+            .medKontrollTidspunkt(LocalDate.now().atStartOfDay())
             .medKontrollType(KontrollType.FORSINKET_SAKSBEHANDLINGSTID).build();
         etterkontrollRepository.lagre(etterkontroll2);
 
         final List<Etterkontroll> etterkontroller = etterkontrollRepository
-            .finnKandidaterForAutomatiskEtterkontroll(Period.parse("P" + revurderingDagerTilbake + "D"));
+            .finnKandidaterForAutomatiskEtterkontroll();
 
         assertThat(etterkontroller).hasSize(1);
         assertThat(etterkontroller.get(0).getFagsakId()).isEqualTo(behandling.getFagsakId());
@@ -76,12 +73,12 @@ public class EtterkontrollRepositoryTest {
 
         Etterkontroll etterkontroll = new Etterkontroll.Builder(behandling)
             .medErBehandlet(false)
-            .medKontrollTidspunkt(LocalDate.now().atStartOfDay().minusDays(revurderingDagerTilbake))
+            .medKontrollTidspunkt(LocalDate.now().atStartOfDay().plusDays(5))
             .medKontrollType(KontrollType.FORSINKET_SAKSBEHANDLINGSTID).build();
         etterkontrollRepository.lagre(etterkontroll);
 
         List<Etterkontroll> fagsakList = etterkontrollRepository
-            .finnKandidaterForAutomatiskEtterkontroll(Period.parse("P5D"));
+            .finnKandidaterForAutomatiskEtterkontroll();
 
         assertThat(fagsakList).isEmpty();
     }
@@ -93,13 +90,13 @@ public class EtterkontrollRepositoryTest {
 
         Etterkontroll etterkontroll1 = new Etterkontroll.Builder(behandling)
             .medErBehandlet(false)
-            .medKontrollTidspunkt(LocalDate.now().atStartOfDay().minusDays(revurderingDagerTilbake))
+            .medKontrollTidspunkt(LocalDate.now().atStartOfDay())
             .medKontrollType(KontrollType.FORSINKET_SAKSBEHANDLINGSTID).build();
         etterkontrollRepository.lagre(etterkontroll1);
 
         Etterkontroll etterkontroll2 = new Etterkontroll.Builder(behandling)
             .medErBehandlet(false)
-            .medKontrollTidspunkt(LocalDate.now().atStartOfDay().minusDays(revurderingDagerTilbake))
+            .medKontrollTidspunkt(LocalDate.now().atStartOfDay())
             .medKontrollType(KontrollType.FORSINKET_SAKSBEHANDLINGSTID).build();
 
         assertThatThrownBy(() -> etterkontrollRepository.lagre(etterkontroll2))
