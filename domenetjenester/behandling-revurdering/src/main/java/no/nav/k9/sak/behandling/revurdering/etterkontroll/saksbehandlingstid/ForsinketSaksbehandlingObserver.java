@@ -30,7 +30,7 @@ public class ForsinketSaksbehandlingObserver {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
-    public void observerBehandlingOpprettet(@Observes BehandlingStatusEvent.BehandlingOpprettetEvent event) {
+    public void observerBehandlingOpprettet(@Observes BehandlingStatusEvent event) {
         if (isEnabled && event.getNyStatus() == BehandlingStatus.UTREDES) {
             log.info("Vurderer behov for forsinket saksbehandling etterkontroll");
             var pd = ProsessTaskData.forProsessTask(ForsinketSaksbehandlingEtterkontrollOppretterTask.class);
