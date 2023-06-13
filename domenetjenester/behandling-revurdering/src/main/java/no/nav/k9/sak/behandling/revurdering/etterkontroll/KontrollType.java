@@ -16,6 +16,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum KontrollType {
 
+    //ikke i bruk, men har vært i bruk tidligere så er lagret i DB
+    OVERLAPPENDE_YTELSE("OVERLAPPENDE_YTELSE", "Kontroll overlappende ytelse"),
     UDEFINERT("-", "Udefinert"),
     FORSINKET_SAKSBEHANDLINGSTID("FORSINKET_SAKSBEHANDLINGSTID", "Kontroll forsinket saksbehandling");
 

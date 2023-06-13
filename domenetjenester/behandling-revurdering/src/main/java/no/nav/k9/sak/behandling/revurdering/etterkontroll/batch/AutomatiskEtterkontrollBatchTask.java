@@ -1,5 +1,7 @@
 package no.nav.k9.sak.behandling.revurdering.etterkontroll.batch;
 
+import java.util.Objects;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +57,10 @@ public class AutomatiskEtterkontrollBatchTask implements ProsessTaskHandler {
 
     private void opprettEtterkontrollTask(Etterkontroll kandidat, String callId) {
         ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(AutomatiskEtterkontrollTask.class);
+
+        Objects.requireNonNull(kandidat.getBehandlingId(),
+            "Utviklerfeil: Behandlingsid må være satt. Kun gamle ferdige etterkontroller manlger behandlingid");
+
         var behandling = behandlingRepository.hentBehandling(kandidat.getBehandlingId());
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         prosessTaskData.setSekvens("1");
