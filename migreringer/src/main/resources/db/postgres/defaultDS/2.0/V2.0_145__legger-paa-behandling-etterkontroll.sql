@@ -5,9 +5,8 @@ create index if not exists idx_etterkontroll_1
     on etterkontroll (fagsak_id);
 
 -- tillater kun én etterkontroll per behandling per kontrolltype
--- fagsak er med pga gammel data som mangler behandling_id
 create unique index if not exists idx_etterkontroll_4
-    on etterkontroll (fagsak_id, behandling_id, kontroll_type)
+    on etterkontroll (behandling_id, kontroll_type)
     where behandlet = false;
 
 -- mye brukt condition
