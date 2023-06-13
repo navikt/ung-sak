@@ -267,7 +267,7 @@ spec:
     - name: TILKOMMET_AKTIVITET_ENABLED
       value: "true"
     - name: ENABLE_ETTERKONTROLL_FORSINKET_SAKB
-      value: "false"
+      value: "true"
       #Fjernes etter test
     - name: DEFAULT_SAKSBEHANDLINGSFRIST_PERIODE
       value: "P0W"
