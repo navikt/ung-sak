@@ -263,6 +263,9 @@ spec:
       value: "false"
     - name: FERIEPENGER_INFOTRYGD_KORRIGER
       value: "true"
+    - name: ENABLE_ETTERKONTROLL_FORSINKET_SAKB
+      value: "false"
+
 
     # Konfigurasjoner
     - name: K9TILBAKE_AKTIVERT
