@@ -69,7 +69,7 @@ public class BehandlingskontrollEventPubliserer {
             // gjør ingenting
             return;
         }
-        doFireEvent(BehandlingStatusEvent.nyEvent(kontekst, nyStatus));
+        doFireEvent(BehandlingStatusEvent.nyEvent(kontekst, nyStatus, gammelStatus));
     }
 
     public void fireEvent(BehandlingskontrollEvent event) {

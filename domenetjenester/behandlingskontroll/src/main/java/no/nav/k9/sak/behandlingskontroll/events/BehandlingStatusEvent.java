@@ -13,13 +13,14 @@ import no.nav.k9.sak.typer.AktørId;
  */
 public class BehandlingStatusEvent implements BehandlingEvent {
 
-    private BehandlingskontrollKontekst kontekst;
+    private final BehandlingskontrollKontekst kontekst;
+    private final BehandlingStatus nyStatus;
+    private final BehandlingStatus gammelStatus;
 
-    private BehandlingStatus nyStatus;
-
-    BehandlingStatusEvent(BehandlingskontrollKontekst kontekst, BehandlingStatus nyStatus) {
+    BehandlingStatusEvent(BehandlingskontrollKontekst kontekst, BehandlingStatus nyStatus, BehandlingStatus gammelStatus) {
         this.kontekst = kontekst;
         this.nyStatus = nyStatus;
+        this.gammelStatus = gammelStatus;
     }
 
     @Override
@@ -45,6 +46,10 @@ public class BehandlingStatusEvent implements BehandlingEvent {
         return nyStatus;
     }
 
+    public BehandlingStatus getGammelStatus() {
+        return gammelStatus;
+    }
+
     static void validerRiktigStatus(BehandlingStatus nyStatus, BehandlingStatus expected) {
         if (!Objects.equals(expected, nyStatus)) {
             throw new IllegalArgumentException("Kan bare være " + expected + ", fikk: " + nyStatus);
@@ -55,31 +60,32 @@ public class BehandlingStatusEvent implements BehandlingEvent {
     public String toString() {
         return getClass().getSimpleName() + "<" + kontekst + //$NON-NLS-1$
             ", nyStatus=" + nyStatus + //$NON-NLS-1$
+            ", gammelStatus=" + gammelStatus + //$NON-NLS-1$
             ">"; //$NON-NLS-1$
     }
 
     public static class BehandlingAvsluttetEvent extends BehandlingStatusEvent {
-        BehandlingAvsluttetEvent(BehandlingskontrollKontekst kontekst, BehandlingStatus nyStatus) {
-            super(kontekst, nyStatus);
+        BehandlingAvsluttetEvent(BehandlingskontrollKontekst kontekst, BehandlingStatus nyStatus, BehandlingStatus gammelStatus) {
+            super(kontekst, nyStatus, gammelStatus);
             validerRiktigStatus(nyStatus, BehandlingStatus.AVSLUTTET);
         }
     }
 
     public static class BehandlingOpprettetEvent extends BehandlingStatusEvent {
-        BehandlingOpprettetEvent(BehandlingskontrollKontekst kontekst, BehandlingStatus nyStatus) {
-            super(kontekst, nyStatus);
+        BehandlingOpprettetEvent(BehandlingskontrollKontekst kontekst, BehandlingStatus nyStatus, BehandlingStatus gammelStatus) {
+            super(kontekst, nyStatus, gammelStatus);
             validerRiktigStatus(nyStatus, BehandlingStatus.OPPRETTET);
         }
     }
 
     @SuppressWarnings("unchecked")
-    public static <V extends BehandlingStatusEvent> V nyEvent(BehandlingskontrollKontekst kontekst, BehandlingStatus nyStatus) {
+    public static <V extends BehandlingStatusEvent> V nyEvent(BehandlingskontrollKontekst kontekst, BehandlingStatus nyStatus, BehandlingStatus gammelStatus) {
         if (BehandlingStatus.AVSLUTTET.equals(nyStatus)) {
-            return (V) new BehandlingAvsluttetEvent(kontekst, nyStatus);
+            return (V) new BehandlingAvsluttetEvent(kontekst, nyStatus, gammelStatus);
         } else if (BehandlingStatus.OPPRETTET.equals(nyStatus)) {
-            return (V) new BehandlingOpprettetEvent(kontekst, nyStatus);
+            return (V) new BehandlingOpprettetEvent(kontekst, nyStatus, gammelStatus);
         } else {
-            return (V) new BehandlingStatusEvent(kontekst, nyStatus);
+            return (V) new BehandlingStatusEvent(kontekst, nyStatus, gammelStatus);
         }
     }
 }
