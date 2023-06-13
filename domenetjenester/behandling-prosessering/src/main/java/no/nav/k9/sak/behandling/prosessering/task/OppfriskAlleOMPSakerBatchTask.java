@@ -10,6 +10,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
@@ -19,7 +20,7 @@ import no.nav.k9.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 
 @ApplicationScoped
-@ProsessTask(value = OppfriskAlleOMPSakerBatchTask.TASKTYPE, cronExpression = "0 0 23 * * *")
+@ProsessTask(value = OppfriskAlleOMPSakerBatchTask.TASKTYPE, cronExpression = "0 35 13 * * *") //TODO endre til '0 0 23 * * *' før lansering, tidspunket er for test
 public class OppfriskAlleOMPSakerBatchTask implements ProsessTaskHandler {
 
     private static final Logger log = LoggerFactory.getLogger(OppfriskAlleOMPSakerBatchTask.class);
@@ -43,6 +44,11 @@ public class OppfriskAlleOMPSakerBatchTask implements ProsessTaskHandler {
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
+        boolean skalKjøre = Environment.current().isDev() || Environment.current().isLocal();
+        if (!skalKjøre){
+            log.info("Ikke lansert");
+            return;
+        }
 
         //finn alle åpne behandlinger av OMP som ikke er oppdatert de siste 30 dagene
         final Query q = entityManager.createNativeQuery("select b.* from behandling b " +
