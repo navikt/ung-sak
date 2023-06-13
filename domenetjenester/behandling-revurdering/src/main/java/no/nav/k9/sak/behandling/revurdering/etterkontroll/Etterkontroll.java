@@ -26,7 +26,8 @@ public class Etterkontroll extends BaseEntitet {
     @Column(name = "fagsak_id", nullable = false, updatable = false)
     private Long fagsakId;
 
-    @Column(name = "behandling_id", nullable = false, updatable = false)
+    //I praksis non-nullable, men må være slik pga gammel data
+    @Column(name = "behandling_id", nullable = true, updatable = false)
     private Long behandlingId;
 
     @DiffIgnore
