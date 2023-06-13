@@ -335,7 +335,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
     @Operation(description = "Oppretter automatisk revurdering av feriepenger.", summary = ("Oppretter automatisk revurdering av feriepenger."), tags = "forvaltning")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = DRIFT)
     public Response opprettFeriepengerevurderingSaksnumre(@Parameter(description = "Saksnumre (skilt med mellomrom eller linjeskift)") @Valid OpprettManuellRevurdering opprettRevurdering) {
         var saksnummerStreng = Objects.requireNonNull(opprettRevurdering.getSaksnumre(), "saksnumre");
         var saksnumrene = new LinkedHashSet<>(Arrays.asList(saksnummerStreng.split("\\s+")));

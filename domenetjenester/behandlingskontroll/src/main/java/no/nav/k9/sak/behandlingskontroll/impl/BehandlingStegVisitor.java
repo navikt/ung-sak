@@ -384,11 +384,7 @@ class BehandlingStegVisitor {
     }
 
     protected void settBehandlingStegSomGjeldende(BehandlingStegType nesteStegType, BehandlingStegStatus sluttStegStatusVedOvergang) {
-        BehandlingStatus førStatus = behandling.getStatus();
         oppdaterBehandlingStegType(nesteStegType, null, sluttStegStatusVedOvergang);
-        if (!Objects.equals(førStatus, behandling.getStatus())) {
-            eventPubliserer.fireEvent(kontekst, førStatus, behandling.getStatus());
-        }
     }
 
     private boolean erSammeStegSomFør(BehandlingStegType stegType, BehandlingStegType nåværendeBehandlingSteg) {
