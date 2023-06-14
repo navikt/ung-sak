@@ -7,6 +7,7 @@ import java.util.Optional;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -34,6 +35,10 @@ public class PsbSaksbehandlingsfristUtleder implements SaksbehandlingsfristUtled
 
     @Override
     public Optional<LocalDateTime> utledFrist(Behandling behandling) {
+        if (behandling.getType() != BehandlingType.FØRSTEGANGSSØKNAD) {
+            return Optional.empty();
+        }
+
         return søknadRepository.hentSøknadHvisEksisterer(behandling.getId())
             .map(it -> it.getSøknadsdato().plus(fristPeriode).atStartOfDay());
     }
