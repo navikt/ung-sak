@@ -265,6 +265,8 @@ spec:
       value: "true"
     - name: ENABLE_ETTERKONTROLL_FORSINKET_SAKB
       value: "false"
+    - name: PSB_DODSDATO_HELG_FLYTTE_TIL_FREDAG
+      value: "false"
 
 
     # Konfigurasjoner

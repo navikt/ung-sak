@@ -11,6 +11,7 @@ import java.util.NavigableSet;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.sykdom.Resultat;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -45,6 +46,7 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
     private ArbeidBrukerBurdeSøktOmUtleder arbeidBrukerBurdeSøktOmUtleder;
     private HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste;
     private PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder;
+    private boolean dødsdatoIHelgFlytteTilFredag;
 
     protected FaktaOmUttakSteg() {
         // for proxy
@@ -58,7 +60,8 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
                             PersonopplysningTjeneste personopplysningTjeneste,
                             ArbeidBrukerBurdeSøktOmUtleder arbeidBrukerBurdeSøktOmUtleder,
                             @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste,
-                            PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder) {
+                            PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder,
+                            @KonfigVerdi(value = "PSB_DODSDATO_HELG_FLYTTE_TIL_FREDAG", defaultVerdi = "true") boolean dødsdatoIHelgFlytteTilFredag) {
         this.unntakEtablertTilsynGrunnlagRepository = unntakEtablertTilsynGrunnlagRepository;
         this.rettPleiepengerVedDødRepository = rettPleiepengerVedDødRepository;
         this.pleiebehovResultatRepository = pleiebehovResultatRepository;
@@ -67,6 +70,7 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
         this.arbeidBrukerBurdeSøktOmUtleder = arbeidBrukerBurdeSøktOmUtleder;
         this.håndterePleietrengendeDødsfallTjeneste = håndterePleietrengendeDødsfallTjeneste;
         this.perioderMedSykdomInnvilgetUtleder = perioderMedSykdomInnvilgetUtleder;
+        this.dødsdatoIHelgFlytteTilFredag = dødsdatoIHelgFlytteTilFredag;
     }
 
     @SuppressWarnings("unused")
@@ -178,14 +182,15 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
     private boolean dødDatoInnenforPleiebehov(Long behandlingId, LocalDate dødsdato) {
         var pleiebehov = pleiebehovResultatRepository.hentHvisEksisterer(behandlingId);
 
-        // Hvis dødsdato er i helg, så flytt den til mandag slik at den vil overlappe med eventuelle pleieperioder(fordi det ikke er mulig å søke i helg).
-        var flyttetDødsdato = flyttDatoTilNærmesteMandagHvisHelg(dødsdato);
+        // Hvis dødsdato er i helg, så flytt den til mandag og fredag slik at den vil overlappe med eventuelle pleieperioder(fordi det ikke er mulig å søke i helg).
+        var flyttetDødsdatoMandag = flyttDatoTilNærmesteMandagHvisHelg(dødsdato);
+        var flyttetDødsdatoFredag = dødsdatoIHelgFlytteTilFredag ? flyttDatoTilNærmesteFredagHvisHelg(dødsdato) : dødsdato;
 
         if (pleiebehov.isPresent()) {
             var overlappendePleiehov = pleiebehov.get().getPleieperioder().getPerioder()
                 .stream()
                 .filter(pleiebehovPeriode -> pleiebehovPeriode.getGrad().getProsent() > 0)
-                .filter(pleiebehovPeriode -> pleiebehovPeriode.getPeriode().inkluderer(flyttetDødsdato))
+                .filter(pleiebehovPeriode -> pleiebehovPeriode.getPeriode().inkluderer(flyttetDødsdatoMandag) || pleiebehovPeriode.getPeriode().inkluderer(flyttetDødsdatoFredag))
                 .findAny();
             return overlappendePleiehov.isPresent();
         }
@@ -197,6 +202,15 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
             return dato.plusDays(2);
         } else if (dato.getDayOfWeek() == DayOfWeek.SUNDAY) {
             return dato.plusDays(1);
+        }
+        return dato;
+    }
+
+    private LocalDate flyttDatoTilNærmesteFredagHvisHelg(LocalDate dato) {
+        if (dato.getDayOfWeek() == DayOfWeek.SATURDAY) {
+            return dato.minusDays(1);
+        } else if (dato.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            return dato.minusDays(2);
         }
         return dato;
     }
