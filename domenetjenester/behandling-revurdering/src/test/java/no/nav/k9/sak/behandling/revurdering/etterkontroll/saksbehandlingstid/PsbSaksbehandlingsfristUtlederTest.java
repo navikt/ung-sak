@@ -49,6 +49,18 @@ public class PsbSaksbehandlingsfristUtlederTest {
     }
 
     @Test
+    void skal_ikke_utlede_frist_for_avsluttet_behandling() {
+        var søknadsdato = LocalDateTime.now().toLocalDate();
+        TestScenarioBuilder testScenarioBuilder = lagScenario(BehandlingType.FØRSTEGANGSSØKNAD, søknadsdato);
+        Behandling behandling = testScenarioBuilder.lagMocked();
+        behandling.avsluttBehandling();
+
+        var fristEnUke = lagFristUtleder("P1W").utledFrist(behandling);
+        assertThat(fristEnUke).isEmpty();
+
+    }
+
+    @Test
     void skal_ikke_utlede_frist_for_automatiske_utenlandssaker() {
         var søknadsdato = LocalDateTime.now().toLocalDate();
         TestScenarioBuilder builder = lagScenario(BehandlingType.FØRSTEGANGSSØKNAD, søknadsdato);

@@ -46,6 +46,11 @@ public class PsbSaksbehandlingsfristUtleder implements SaksbehandlingsfristUtled
             return Optional.empty();
         }
 
+        if (behandling.erAvsluttet()) {
+            log.info("Utleder ikke frist for avsluttet sak");
+            return Optional.empty();
+        }
+
         if (erUtenlandssak(behandling)) {
             log.info("Utleder ikke frist for utenlandssak");
             return Optional.empty();
@@ -56,7 +61,13 @@ public class PsbSaksbehandlingsfristUtleder implements SaksbehandlingsfristUtled
     }
 
     private static boolean erUtenlandssak(Behandling behandling) {
-        return behandling.harAksjonspunktMedType(AksjonspunktDefinisjon.AUTOMATISK_MARKERING_AV_UTENLANDSSAK)
-            || behandling.harAksjonspunktMedType(AksjonspunktDefinisjon.MANUELL_MARKERING_AV_UTLAND_SAKSTYPE);
+        return erOpprettetEllerUtført(behandling, AksjonspunktDefinisjon.AUTOMATISK_MARKERING_AV_UTENLANDSSAK)
+            || erOpprettetEllerUtført(behandling, AksjonspunktDefinisjon.MANUELL_MARKERING_AV_UTLAND_SAKSTYPE);
+    }
+
+    private static boolean erOpprettetEllerUtført(Behandling behandling, AksjonspunktDefinisjon ap) {
+        return behandling.getAksjonspunktMedDefinisjonOptional(ap)
+            .map(it -> !it.erAvbrutt())
+            .isPresent();
     }
 }

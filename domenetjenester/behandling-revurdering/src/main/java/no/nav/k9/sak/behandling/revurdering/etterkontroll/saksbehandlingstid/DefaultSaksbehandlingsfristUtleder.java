@@ -11,7 +11,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 @FagsakYtelseTypeRef
 public class DefaultSaksbehandlingsfristUtleder implements SaksbehandlingsfristUtleder {
     @Override
-    public Optional<LocalDateTime> utledFrist(Behandling behandlingId) {
+    public Optional<LocalDateTime> utledFrist(Behandling behandling) {
         return Optional.empty();
     }
 }

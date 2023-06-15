@@ -7,15 +7,12 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.sak.behandling.revurdering.etterkontroll.Etterkontroll;
 import no.nav.k9.sak.behandling.revurdering.etterkontroll.EtterkontrollRepository;
 import no.nav.k9.sak.behandling.revurdering.etterkontroll.KontrollType;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 
@@ -49,7 +46,7 @@ public class ForsinketSaksbehandlingEtterkontrollOppretterTask implements Proses
     public void doTask(ProsessTaskData prosessTaskData) {
         String behandlingId = prosessTaskData.getBehandlingId();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
-        var fristUtleder = finnUtleder(behandling);
+        var fristUtleder = SaksbehandlingsfristUtleder.finnUtleder(behandling, fristUtledere);
 
         var fristOpt = fristUtleder.utledFrist(behandling);
         if (fristOpt.isEmpty()) {
@@ -68,9 +65,4 @@ public class ForsinketSaksbehandlingEtterkontrollOppretterTask implements Proses
 
     }
 
-    private SaksbehandlingsfristUtleder finnUtleder(Behandling behandling) {
-        FagsakYtelseType ytelseType = behandling.getFagsakYtelseType();
-        return FagsakYtelseTypeRef.Lookup.find(fristUtledere, ytelseType)
-            .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + SaksbehandlingsfristUtleder.class.getSimpleName() + " for ytelseType=" + ytelseType));
-    }
 }
