@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.formidling.kontrakt.kodeverk.IdType;
@@ -38,7 +39,8 @@ public class ForsinketSaksbehandlingEtterkontrollTjeneste implements KontrollTje
     @Inject
     public ForsinketSaksbehandlingEtterkontrollTjeneste(
         DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste,
-        BehandlingRepository behandlingRepository, Instance<SaksbehandlingsfristUtleder> fristUtledere) {
+        BehandlingRepository behandlingRepository,
+        @Any Instance<SaksbehandlingsfristUtleder> fristUtledere) {
 
         this.dokumentBestillerApplikasjonTjeneste = dokumentBestillerApplikasjonTjeneste;
         this.behandlingRepository = behandlingRepository;
