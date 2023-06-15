@@ -24,7 +24,7 @@ public class ForsinketSaksbehandlingObserver {
 
     @Inject
     public ForsinketSaksbehandlingObserver(
-        @KonfigVerdi(value = "ENABLE_ETTERKONTROLL_FORSINKET_SAKB", defaultVerdi = "true") boolean isEnabled,
+        @KonfigVerdi(value = "ENABLE_ETTERKONTROLL_FORSINKET_SAKB", defaultVerdi = "false") boolean isEnabled,
         ProsessTaskTjeneste prosessTaskTjeneste) {
         this.isEnabled = isEnabled;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
