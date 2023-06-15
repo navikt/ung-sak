@@ -57,9 +57,12 @@ public class PsbSaksbehandlingsfristUtleder implements SaksbehandlingsfristUtled
         }
 
         return søknadRepository.hentSøknadHvisEksisterer(behandling.getId())
-            .map(it -> it.getSøknadsdato().plus(fristPeriode).atStartOfDay());
+            .map(it -> it.getMottattDato().plus(fristPeriode).atStartOfDay());
     }
 
+    /**
+     * Best effort utenlandssjekk. Denne kan gi true, men likevel ikke være utenlandsk.
+     */
     private static boolean erUtenlandssak(Behandling behandling) {
         return erOpprettetEllerUtført(behandling, AksjonspunktDefinisjon.AUTOMATISK_MARKERING_AV_UTENLANDSSAK)
             || erOpprettetEllerUtført(behandling, AksjonspunktDefinisjon.MANUELL_MARKERING_AV_UTLAND_SAKSTYPE);

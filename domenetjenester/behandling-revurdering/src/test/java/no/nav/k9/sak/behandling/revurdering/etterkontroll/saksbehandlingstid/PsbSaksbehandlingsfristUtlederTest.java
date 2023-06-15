@@ -23,24 +23,24 @@ public class PsbSaksbehandlingsfristUtlederTest {
 
     @Test
     void skal_utlede_frist() {
-        var søknadsdato = LocalDateTime.now().toLocalDate();
-        TestScenarioBuilder testScenarioBuilder = lagScenario(BehandlingType.FØRSTEGANGSSØKNAD, søknadsdato);
+        var mottattDato = LocalDateTime.now().toLocalDate();
+        TestScenarioBuilder testScenarioBuilder = lagScenario(BehandlingType.FØRSTEGANGSSØKNAD, mottattDato);
         Behandling behandling = testScenarioBuilder.lagMocked();
         SøknadEntitet søknadEntitet = testScenarioBuilder.medSøknad().build();
 
         when(søknadRepository.hentSøknadHvisEksisterer(behandling.getId())).thenReturn(Optional.of(søknadEntitet));
 
         var fristEnUke = lagFristUtleder("P1W").utledFrist(behandling);
-        assertThat(fristEnUke).get().isEqualTo(søknadsdato.plusWeeks(1).atStartOfDay());
+        assertThat(fristEnUke).get().isEqualTo(mottattDato.plusWeeks(1).atStartOfDay());
 
         var frist0Uker = lagFristUtleder("P0W").utledFrist(behandling);
-        assertThat(frist0Uker).get().isEqualTo(søknadsdato.atStartOfDay());
+        assertThat(frist0Uker).get().isEqualTo(mottattDato.atStartOfDay());
     }
 
     @Test
     void skal_ikke_utlede_frist_for_revurderinger() {
-        var søknadsdato = LocalDateTime.now().toLocalDate();
-        TestScenarioBuilder testScenarioBuilder = lagScenario(BehandlingType.REVURDERING, søknadsdato);
+        var mottattDato = LocalDateTime.now().toLocalDate();
+        TestScenarioBuilder testScenarioBuilder = lagScenario(BehandlingType.REVURDERING, mottattDato);
         Behandling behandling = testScenarioBuilder.lagMocked();
 
         var fristEnUke = lagFristUtleder("P1W").utledFrist(behandling);
@@ -50,8 +50,8 @@ public class PsbSaksbehandlingsfristUtlederTest {
 
     @Test
     void skal_ikke_utlede_frist_for_avsluttet_behandling() {
-        var søknadsdato = LocalDateTime.now().toLocalDate();
-        TestScenarioBuilder testScenarioBuilder = lagScenario(BehandlingType.FØRSTEGANGSSØKNAD, søknadsdato);
+        var mottattDato = LocalDateTime.now().toLocalDate();
+        TestScenarioBuilder testScenarioBuilder = lagScenario(BehandlingType.FØRSTEGANGSSØKNAD, mottattDato);
         Behandling behandling = testScenarioBuilder.lagMocked();
         behandling.avsluttBehandling();
 
@@ -62,8 +62,8 @@ public class PsbSaksbehandlingsfristUtlederTest {
 
     @Test
     void skal_ikke_utlede_frist_for_automatiske_utenlandssaker() {
-        var søknadsdato = LocalDateTime.now().toLocalDate();
-        TestScenarioBuilder builder = lagScenario(BehandlingType.FØRSTEGANGSSØKNAD, søknadsdato);
+        var mottattDato = LocalDateTime.now().toLocalDate();
+        TestScenarioBuilder builder = lagScenario(BehandlingType.FØRSTEGANGSSØKNAD, mottattDato);
 
         builder.leggTilAksjonspunkt(
             AksjonspunktDefinisjon.AUTOMATISK_MARKERING_AV_UTENLANDSSAK,
@@ -78,8 +78,8 @@ public class PsbSaksbehandlingsfristUtlederTest {
 
     @Test
     void skal_ikke_utlede_frist_for_manuelle_utenlandssaker() {
-        var søknadsdato = LocalDateTime.now().toLocalDate();
-        TestScenarioBuilder builder = lagScenario(BehandlingType.FØRSTEGANGSSØKNAD, søknadsdato);
+        var mottattDato = LocalDateTime.now().toLocalDate();
+        TestScenarioBuilder builder = lagScenario(BehandlingType.FØRSTEGANGSSØKNAD, mottattDato);
 
         builder.leggTilAksjonspunkt(
             AksjonspunktDefinisjon.MANUELL_MARKERING_AV_UTLAND_SAKSTYPE,
@@ -92,11 +92,12 @@ public class PsbSaksbehandlingsfristUtlederTest {
 
     }
 
-    private static TestScenarioBuilder lagScenario(BehandlingType førstegangssøknad, LocalDate søknadsdato) {
-        return TestScenarioBuilder
+    private static TestScenarioBuilder lagScenario(BehandlingType førstegangssøknad, LocalDate mottattDato) {
+        TestScenarioBuilder testScenarioBuilder = TestScenarioBuilder
             .builderMedSøknad()
-            .medBehandlingType(førstegangssøknad)
-            .medSøknadDato(søknadsdato);
+            .medBehandlingType(førstegangssøknad);
+        testScenarioBuilder.medSøknad().medMottattDato(mottattDato);
+        return testScenarioBuilder;
     }
 
 
