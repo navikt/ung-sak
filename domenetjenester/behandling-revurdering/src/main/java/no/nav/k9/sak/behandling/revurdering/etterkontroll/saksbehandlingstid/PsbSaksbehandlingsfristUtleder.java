@@ -4,10 +4,15 @@ import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
@@ -15,6 +20,8 @@ import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 @FagsakYtelseTypeRef(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
 @ApplicationScoped
 public class PsbSaksbehandlingsfristUtleder implements SaksbehandlingsfristUtleder {
+
+    private static Logger log = LoggerFactory.getLogger(PsbSaksbehandlingsfristUtleder.class);
 
     private SøknadRepository søknadRepository;
     private Period fristPeriode;
@@ -32,9 +39,35 @@ public class PsbSaksbehandlingsfristUtleder implements SaksbehandlingsfristUtled
     PsbSaksbehandlingsfristUtleder() {
     }
 
+
     @Override
     public Optional<LocalDateTime> utledFrist(Behandling behandling) {
+        if (behandling.getType() != BehandlingType.FØRSTEGANGSSØKNAD) {
+            return Optional.empty();
+        }
+
+        if (behandling.erAvsluttet()) {
+            log.info("Utleder ikke frist for avsluttet sak");
+            return Optional.empty();
+        }
+
+        if (erUtenlandssak(behandling)) {
+            log.info("Utleder ikke frist for utenlandssak");
+            return Optional.empty();
+        }
+
         return søknadRepository.hentSøknadHvisEksisterer(behandling.getId())
             .map(it -> it.getSøknadsdato().plus(fristPeriode).atStartOfDay());
+    }
+
+    private static boolean erUtenlandssak(Behandling behandling) {
+        return erOpprettetEllerUtført(behandling, AksjonspunktDefinisjon.AUTOMATISK_MARKERING_AV_UTENLANDSSAK)
+            || erOpprettetEllerUtført(behandling, AksjonspunktDefinisjon.MANUELL_MARKERING_AV_UTLAND_SAKSTYPE);
+    }
+
+    private static boolean erOpprettetEllerUtført(Behandling behandling, AksjonspunktDefinisjon ap) {
+        return behandling.getAksjonspunktMedDefinisjonOptional(ap)
+            .map(it -> !it.erAvbrutt())
+            .isPresent();
     }
 }
