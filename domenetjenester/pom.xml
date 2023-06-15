@@ -35,8 +35,8 @@
         <module>skjaeringstidspunkt</module>
         <module>punsj</module>
         <module>bom</module>
-
         <module>behandlingskontroll</module>
+        <module>etterkontroll</module>
     </modules>
 
 </project>

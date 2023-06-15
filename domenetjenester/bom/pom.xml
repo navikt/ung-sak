@@ -66,6 +66,10 @@
         </dependency>
         <dependency>
             <groupId>no.nav.k9.sak</groupId>
+            <artifactId>etterkontroll</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.k9.sak</groupId>
             <artifactId>beregning-ytelse</artifactId>
         </dependency>
         <dependency>
