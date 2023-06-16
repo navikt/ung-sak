@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -26,23 +27,20 @@ class ForsinketSaksbehandlingEtterkontrollOppretterTaskTest {
     private final BehandlingRepository behandlingRepository = mock();
     private final SaksbehandlingsfristUtleder fristUtleder = mock();
 
-    private final ForsinketSaksbehandlingEtterkontrollOppretterTask oppretter = new ForsinketSaksbehandlingEtterkontrollOppretterTask(
-        etterkontrollRepository,
-        new UnitTestLookupInstanceImpl<>(fristUtleder),
-        behandlingRepository
-    );
+
 
 
     @Test
     void skal_opprette_etterkontroll_ved_ny_behandling() {
-        LocalDate søknadsdato = LocalDate.now().minusMonths(1);
         var behandling = TestScenarioBuilder.builderMedSøknad().lagMocked();
+        var frist = LocalDate.now().minusMonths(1).plusWeeks(7);
 
         when(behandlingRepository.hentBehandling(behandling.getId().toString())).thenReturn(behandling);
-        when(fristUtleder.utledFrist(behandling)).thenReturn(Optional.of(søknadsdato.plusWeeks(7).atStartOfDay()));
+        when(fristUtleder.utledFrist(behandling)).thenReturn(Optional.of(frist.atStartOfDay()));
 
         var captor = ArgumentCaptor.forClass(Etterkontroll.class);
         when(etterkontrollRepository.lagre(captor.capture())).thenReturn(1L);
+        var oppretter = lagOppretter(null);
 
         oppretter.doTask(lagTask(behandling));
 
@@ -51,9 +49,67 @@ class ForsinketSaksbehandlingEtterkontrollOppretterTaskTest {
         assertThat(etterkontroll.getBehandlingId()).isEqualTo(behandling.getId());
         assertThat(etterkontroll.isBehandlet()).isFalse();
         assertThat(etterkontroll.getKontrollTidspunkt().toLocalDate())
-            .isEqualTo(søknadsdato.plusWeeks(7));
+            .isEqualTo(frist);
 
 
+    }
+
+    @Test
+    void skal_opprette_etterkontroll_X_dager_etter_frist_hvis_frist_allerede_er_utgått_og_toggle_på() {
+        var behandling = TestScenarioBuilder.builderMedSøknad().lagMocked();
+        var now = LocalDateTime.now();
+        var frist1 = now.minusDays(1);
+
+        when(behandlingRepository.hentBehandling(behandling.getId().toString())).thenReturn(behandling);
+        when(fristUtleder.utledFrist(behandling)).thenReturn(Optional.of(frist1));
+
+        var captor = ArgumentCaptor.forClass(Etterkontroll.class);
+        when(etterkontrollRepository.lagre(captor.capture())).thenReturn(1L);
+        var oppretter = lagOppretter("P3D");
+
+        oppretter.doTask(lagTask(behandling));
+
+        var etterkontroll = captor.getValue();
+        assertThat(etterkontroll.getKontrollTidspunkt().toLocalDate())
+            .isEqualTo(frist1.toLocalDate().plusDays(3));
+
+        var frist2 = now;
+        when(fristUtleder.utledFrist(behandling)).thenReturn(Optional.of(frist2));
+
+        oppretter.doTask(lagTask(behandling));
+
+        etterkontroll = captor.getValue();
+        assertThat(etterkontroll.getKontrollTidspunkt().toLocalDate())
+            .isEqualTo(frist2.toLocalDate().plusDays(3));
+
+    }
+
+    @Test
+    void skal_opprette_etterkontroll_på_frist_hvis_frist_ikke_gått_ut_og_toggle_på() {
+        var behandling = TestScenarioBuilder.builderMedSøknad().lagMocked();
+        var now = LocalDateTime.now();
+        var frist = now.plusDays(1);
+
+        when(behandlingRepository.hentBehandling(behandling.getId().toString())).thenReturn(behandling);
+        when(fristUtleder.utledFrist(behandling)).thenReturn(Optional.of(frist));
+
+        var captor = ArgumentCaptor.forClass(Etterkontroll.class);
+        when(etterkontrollRepository.lagre(captor.capture())).thenReturn(1L);
+
+        lagOppretter("P3D").doTask(lagTask(behandling));
+
+        var etterkontroll = captor.getValue();
+        assertThat(etterkontroll.getKontrollTidspunkt().toLocalDate())
+            .isEqualTo(frist.toLocalDate());
+
+    }
+
+    private ForsinketSaksbehandlingEtterkontrollOppretterTask lagOppretter(String ventetid) {
+        return new ForsinketSaksbehandlingEtterkontrollOppretterTask(
+            etterkontrollRepository,
+            new UnitTestLookupInstanceImpl<>(fristUtleder),
+            behandlingRepository,
+            ventetid);
     }
 
     @Test
@@ -63,7 +119,7 @@ class ForsinketSaksbehandlingEtterkontrollOppretterTaskTest {
         when(behandlingRepository.hentBehandling(behandling.getId().toString())).thenReturn(behandling);
         when(fristUtleder.utledFrist(behandling)).thenReturn(Optional.empty());
 
-        oppretter.doTask(lagTask(behandling));
+        lagOppretter(null).doTask(lagTask(behandling));
 
         verifyNoInteractions(etterkontrollRepository);
 

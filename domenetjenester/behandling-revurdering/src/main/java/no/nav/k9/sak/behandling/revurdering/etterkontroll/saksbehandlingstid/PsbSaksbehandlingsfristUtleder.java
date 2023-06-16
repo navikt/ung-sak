@@ -30,7 +30,6 @@ public class PsbSaksbehandlingsfristUtleder implements SaksbehandlingsfristUtled
     public PsbSaksbehandlingsfristUtleder(
         SøknadRepository søknadRepository,
         @KonfigVerdi(value = "DEFAULT_SAKSBEHANDLINGSFRIST_PERIODE", defaultVerdi = "P7W") String fristPeriode
-        //Brukes kun for test med frist mindre enn 1 dag.
     ) {
         this.søknadRepository = søknadRepository;
         this.fristPeriode = Period.parse(fristPeriode);

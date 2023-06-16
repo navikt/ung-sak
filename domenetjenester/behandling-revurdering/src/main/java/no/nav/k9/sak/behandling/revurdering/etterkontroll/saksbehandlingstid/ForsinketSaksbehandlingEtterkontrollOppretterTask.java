@@ -1,5 +1,10 @@
 package no.nav.k9.sak.behandling.revurdering.etterkontroll.saksbehandlingstid;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Period;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -7,6 +12,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
@@ -26,6 +32,7 @@ public class ForsinketSaksbehandlingEtterkontrollOppretterTask implements Proses
 
     private EtterkontrollRepository etterkontrollRepository;
     private BehandlingRepository behandlingRepository;
+    private Optional<Period> ventetidPeriode;
 
     private Instance<SaksbehandlingsfristUtleder> fristUtledere;
 
@@ -36,10 +43,12 @@ public class ForsinketSaksbehandlingEtterkontrollOppretterTask implements Proses
     public ForsinketSaksbehandlingEtterkontrollOppretterTask(
         EtterkontrollRepository etterkontrollRepository,
         @Any Instance<SaksbehandlingsfristUtleder> fristUtledere,
-        BehandlingRepository behandlingRepository) {
+        BehandlingRepository behandlingRepository,
+        @KonfigVerdi(value = "VENTETID_VED_UTGÅTT_SAKSBEHANDLINGSFRIST", required = false) String ventetidVedUtgåttFrist) {
         this.etterkontrollRepository = etterkontrollRepository;
         this.fristUtledere = fristUtledere;
         this.behandlingRepository = behandlingRepository;
+        this.ventetidPeriode = Optional.ofNullable(ventetidVedUtgåttFrist).map(Period::parse);
     }
 
     @Override
@@ -53,10 +62,16 @@ public class ForsinketSaksbehandlingEtterkontrollOppretterTask implements Proses
             return;
         }
 
-        var frist = fristOpt.get();
+        var utledetFrist = fristOpt.get();
+        LocalDateTime frist;
+        if (ventetidPeriode.isPresent() && !utledetFrist.toLocalDate().isAfter(LocalDate.now())) {
+            log.info("Frist {} er på eller før dagens dato. Utvider frist med {}", utledetFrist, ventetidPeriode.get());
+            frist = utledetFrist.plus(ventetidPeriode.get());
+        } else {
+            frist = utledetFrist;
+        }
 
         log.info("Oppretter etterkontroll med frist {}", frist);
-
         etterkontrollRepository.lagre(new Etterkontroll.Builder(behandling)
             .medKontrollTidspunkt(frist)
             .medKontrollType(KontrollType.FORSINKET_SAKSBEHANDLINGSTID)
