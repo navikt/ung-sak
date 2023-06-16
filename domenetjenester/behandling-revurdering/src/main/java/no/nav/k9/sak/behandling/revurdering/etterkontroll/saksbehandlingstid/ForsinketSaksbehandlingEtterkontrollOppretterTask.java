@@ -62,15 +62,7 @@ public class ForsinketSaksbehandlingEtterkontrollOppretterTask implements Proses
             return;
         }
 
-        var utledetFrist = fristOpt.get();
-        LocalDateTime frist;
-        var now = LocalDate.now();
-        if (ventetidPeriode.isPresent() && !utledetFrist.toLocalDate().isAfter(now)) {
-            log.info("Frist {} er på eller før dagens dato. Utvider frist med {}", utledetFrist, ventetidPeriode.get());
-            frist = now.atStartOfDay().plus(ventetidPeriode.get());
-        } else {
-            frist = utledetFrist;
-        }
+        LocalDateTime frist = bestemFaktiskFrist(fristOpt.get());
 
         log.info("Oppretter etterkontroll med frist {}", frist);
         etterkontrollRepository.lagre(new Etterkontroll.Builder(behandling)
@@ -79,6 +71,16 @@ public class ForsinketSaksbehandlingEtterkontrollOppretterTask implements Proses
             .build()
         );
 
+    }
+
+    private LocalDateTime bestemFaktiskFrist(LocalDateTime utledetFrist) {
+        var now = LocalDate.now();
+        if (ventetidPeriode.isPresent() && !utledetFrist.toLocalDate().isAfter(now)) {
+            log.info("Frist {} er på eller før dagens dato. Utvider frist med {} fra dagens dato", utledetFrist, ventetidPeriode.get());
+            return now.atStartOfDay().plus(ventetidPeriode.get());
+        }
+
+        return utledetFrist;
     }
 
 }
