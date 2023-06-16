@@ -260,16 +260,16 @@ public class MapArbeid {
     }
 
     private void mapPerioderMedType(Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> arbeidsforhold,
-                                    List<VilkårPeriode> dagpengerPåSkjæringstidspunktet,
+                                    List<VilkårPeriode> vilkårsPerioder,
                                     DatoIntervallEntitet periode, UttakArbeidType type) {
 
         var tidslinje = new LocalDateTimeline<WrappedArbeid>(List.of());
-        for (VilkårPeriode vilkårPeriode : dagpengerPåSkjæringstidspunktet) {
+        for (VilkårPeriode vilkårPeriode : vilkårsPerioder) {
             var vp = vilkårPeriode.getPeriode();
             var other = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(vp.getFomDato(), vp.getTomDato(), new WrappedArbeid(new ArbeidPeriode(vp, type, null, null, Duration.ofMinutes((long) (7.5 * 60)), Duration.ZERO)))));
             tidslinje = tidslinje.combine(other, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
-        if (!dagpengerPåSkjæringstidspunktet.isEmpty()) {
+        if (!vilkårsPerioder.isEmpty()) {
             arbeidsforhold.put(new AktivitetIdentifikator(type, null, null), tidslinje.intersection(periode.toLocalDateInterval()).compress());
         }
     }
@@ -497,10 +497,10 @@ public class MapArbeid {
         final List<Entry<AktivitetIdentifikator, LocalDateTimeline<Boolean>>> resultater = input.getTilkommetAktivitetsperioder().entrySet().stream()
             .filter(it ->
                 Objects.equals(periode.getAktivitetType(), it.getKey().getAktivitetType())
-                && periode.getArbeidsgiver() != null
-                && Objects.equals(it.getKey().getArbeidsgiver(), periode.getArbeidsgiver())
+                && (periode.getArbeidsgiver() != null || Objects.equals(it.getKey().getArbeidsgiver(), periode.getArbeidsgiver()))
             )
             .toList();
+        
         if (resultater.size() > 1) {
             throw new IllegalStateException("Det skal ikke være mulig med flere forekomster av samme tilkommet aktivitet.");
         }
