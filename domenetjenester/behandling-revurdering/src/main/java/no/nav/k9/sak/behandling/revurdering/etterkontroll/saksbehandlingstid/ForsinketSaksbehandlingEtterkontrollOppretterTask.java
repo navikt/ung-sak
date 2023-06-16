@@ -64,9 +64,10 @@ public class ForsinketSaksbehandlingEtterkontrollOppretterTask implements Proses
 
         var utledetFrist = fristOpt.get();
         LocalDateTime frist;
-        if (ventetidPeriode.isPresent() && !utledetFrist.toLocalDate().isAfter(LocalDate.now())) {
+        var now = LocalDate.now();
+        if (ventetidPeriode.isPresent() && !utledetFrist.toLocalDate().isAfter(now)) {
             log.info("Frist {} er på eller før dagens dato. Utvider frist med {}", utledetFrist, ventetidPeriode.get());
-            frist = utledetFrist.plus(ventetidPeriode.get());
+            frist = now.atStartOfDay().plus(ventetidPeriode.get());
         } else {
             frist = utledetFrist;
         }

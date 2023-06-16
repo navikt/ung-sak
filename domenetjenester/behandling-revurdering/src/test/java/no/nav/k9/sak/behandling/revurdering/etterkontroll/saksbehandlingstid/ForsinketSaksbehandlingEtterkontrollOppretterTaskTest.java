@@ -55,10 +55,10 @@ class ForsinketSaksbehandlingEtterkontrollOppretterTaskTest {
     }
 
     @Test
-    void skal_opprette_etterkontroll_X_dager_etter_frist_hvis_frist_allerede_er_utgått_og_toggle_på() {
+    void skal_opprette_etterkontroll_X_dager_etter_i_dag_hvis_frist_allerede_er_utgått_og_toggle_på() {
         var behandling = TestScenarioBuilder.builderMedSøknad().lagMocked();
         var now = LocalDateTime.now();
-        var frist1 = now.minusDays(1);
+        var frist1 = now.minusMonths(1);
 
         when(behandlingRepository.hentBehandling(behandling.getId().toString())).thenReturn(behandling);
         when(fristUtleder.utledFrist(behandling)).thenReturn(Optional.of(frist1));
@@ -71,7 +71,7 @@ class ForsinketSaksbehandlingEtterkontrollOppretterTaskTest {
 
         var etterkontroll = captor.getValue();
         assertThat(etterkontroll.getKontrollTidspunkt().toLocalDate())
-            .isEqualTo(frist1.toLocalDate().plusDays(3));
+            .isEqualTo(now.toLocalDate().plusDays(3));
 
         var frist2 = now;
         when(fristUtleder.utledFrist(behandling)).thenReturn(Optional.of(frist2));
@@ -80,7 +80,7 @@ class ForsinketSaksbehandlingEtterkontrollOppretterTaskTest {
 
         etterkontroll = captor.getValue();
         assertThat(etterkontroll.getKontrollTidspunkt().toLocalDate())
-            .isEqualTo(frist2.toLocalDate().plusDays(3));
+            .isEqualTo(now.toLocalDate().plusDays(3));
 
     }
 
