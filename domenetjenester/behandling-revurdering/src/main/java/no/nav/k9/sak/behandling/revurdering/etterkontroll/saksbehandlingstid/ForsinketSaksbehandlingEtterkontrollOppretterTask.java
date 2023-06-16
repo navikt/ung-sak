@@ -3,7 +3,6 @@ package no.nav.k9.sak.behandling.revurdering.etterkontroll.saksbehandlingstid;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +31,7 @@ public class ForsinketSaksbehandlingEtterkontrollOppretterTask implements Proses
 
     private EtterkontrollRepository etterkontrollRepository;
     private BehandlingRepository behandlingRepository;
-    private Optional<Period> ventetidPeriode;
+    private Period ventetidPeriode;
 
     private Instance<SaksbehandlingsfristUtleder> fristUtledere;
 
@@ -48,7 +47,7 @@ public class ForsinketSaksbehandlingEtterkontrollOppretterTask implements Proses
         this.etterkontrollRepository = etterkontrollRepository;
         this.fristUtledere = fristUtledere;
         this.behandlingRepository = behandlingRepository;
-        this.ventetidPeriode = Optional.ofNullable(ventetidVedUtgåttFrist).map(Period::parse);
+        this.ventetidPeriode = ventetidVedUtgåttFrist != null ? Period.parse(ventetidVedUtgåttFrist) : null;
     }
 
     @Override
@@ -75,9 +74,9 @@ public class ForsinketSaksbehandlingEtterkontrollOppretterTask implements Proses
 
     private LocalDateTime bestemFaktiskFrist(LocalDateTime utledetFrist) {
         var now = LocalDate.now();
-        if (ventetidPeriode.isPresent() && !utledetFrist.toLocalDate().isAfter(now)) {
-            log.info("Frist {} er på eller før dagens dato. Utvider frist med {} fra dagens dato", utledetFrist, ventetidPeriode.get());
-            return now.atStartOfDay().plus(ventetidPeriode.get());
+        if (ventetidPeriode != null && !utledetFrist.toLocalDate().isAfter(now)) {
+            log.info("Frist {} er på eller før dagens dato. Utvider frist med {} fra dagens dato", utledetFrist, ventetidPeriode);
+            return now.atStartOfDay().plus(ventetidPeriode);
         }
 
         return utledetFrist;
