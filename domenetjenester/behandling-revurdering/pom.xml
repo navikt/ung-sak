@@ -25,17 +25,7 @@
 
         <dependency>
             <groupId>no.nav.k9.sak</groupId>
-            <artifactId>produksjonsstyring</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>no.nav.k9.sak</groupId>
             <artifactId>behandling-prosessering</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>no.nav.k9.felles.sikkerhet</groupId>
-            <artifactId>k9-felles-sikkerhet</artifactId>
         </dependency>
 
         <dependency>
@@ -48,15 +38,6 @@
             <artifactId>uttak</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>no.nav.k9.sak</groupId>
-            <artifactId>arbeidsforhold</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>no.nav.k9.sak</groupId>
-            <artifactId>dokumentbestiller</artifactId>
-        </dependency>
 
         <!-- Test dependencies -->
         <dependency>
