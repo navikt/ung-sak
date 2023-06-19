@@ -35,6 +35,8 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
 
     private BeregningInkonsistensTjeneste inkonsistensTjeneste;
 
+    private OpptjeningsaktiviteterPreconditionForBeregning opptjeningsaktiviteterPreconditionForBeregning;
+
 
     protected VurderPreconditionBeregningSteg() {
         // for CDI proxy
@@ -46,13 +48,15 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
                                            VurderAvslagGrunnetOpptjening vurderAvslagGrunnetOpptjening,
                                            RyddOgGjenopprettBeregningTjeneste ryddOgGjenopprettBeregningTjeneste,
                                            KopierBeregningTjeneste kopierBeregningTjeneste,
-                                           BeregningInkonsistensTjeneste inkonsistensTjeneste) {
+                                           BeregningInkonsistensTjeneste inkonsistensTjeneste,
+                                           OpptjeningsaktiviteterPreconditionForBeregning opptjeningsaktiviteterPreconditionForBeregning) {
         this.behandlingRepository = behandlingRepository;
         this.aksjonspunktUtledere = aksjonspunktUtledere;
         this.vurderAvslagGrunnetOpptjening = vurderAvslagGrunnetOpptjening;
         this.ryddOgGjenopprettBeregningTjeneste = ryddOgGjenopprettBeregningTjeneste;
         this.kopierBeregningTjeneste = kopierBeregningTjeneste;
         this.inkonsistensTjeneste = inkonsistensTjeneste;
+        this.opptjeningsaktiviteterPreconditionForBeregning = opptjeningsaktiviteterPreconditionForBeregning;
     }
 
     @Override
@@ -71,6 +75,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
 
         // 4 Vurder inkonsistens
         inkonsistensTjeneste.sjekkInkonsistensOgOpprettProsesstrigger(referanse);
+        opptjeningsaktiviteterPreconditionForBeregning.sjekkOpptjeningsaktiviter(referanse.getBehandlingId());
 
         // 5. Kopier
         kopierBeregningTjeneste.kopierVurderinger(kontekst);
