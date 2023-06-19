@@ -246,12 +246,6 @@ spec:
       value: "2022-08-08"
     - name: BG_FORLENGELSE_BASERT_PAA_UTTAK
       value: "true"
-    - name: ENABLE_PRODUCER_DOKUMENTBESTILLING_AIVEN
-      value: "true"
-    - name: ENABLE_PRODUCER_VEDTAKHENDELSE_AIVEN
-      value: "true"
-    - name: ENABLE_PRODUCER_AKSJONSPUNKTHENDELSE_LOS_AIVEN
-      value: "true"
     - name: ENABLE_SJEKK_TILBAKEKREVING
       value: "true"
     - name: IKKE_YRKESAKTIV_UTEN_SPEILING
@@ -271,8 +265,6 @@ spec:
 
 
     # Konfigurasjoner
-    - name: K9TILBAKE_AKTIVERT
-      value: "true"
     - name: FLYWAY_REPAIR_ON_FAIL
       value: "true"
 
