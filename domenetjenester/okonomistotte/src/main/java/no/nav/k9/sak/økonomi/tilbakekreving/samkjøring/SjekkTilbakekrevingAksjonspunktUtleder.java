@@ -1,13 +1,18 @@
 package no.nav.k9.sak.økonomi.tilbakekreving.samkjøring;
 
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -16,9 +21,11 @@ import no.nav.k9.sak.økonomi.tilbakekreving.dto.BehandlingStatusOgFeilutbetalin
 import no.nav.k9.sak.økonomi.tilbakekreving.klient.K9TilbakeRestKlient;
 
 
-
 @Dependent
 public class SjekkTilbakekrevingAksjonspunktUtleder {
+
+    private static final Logger logger = LoggerFactory.getLogger(SjekkTilbakekrevingAksjonspunktUtleder.class);
+
     private boolean lansert;
     private SjekkEndringUtbetalingTilBrukerTjeneste sjekkEndringUtbetalingTilBrukerTjeneste;
     private K9TilbakeRestKlient k9TilbakeRestKlient;
@@ -66,12 +73,17 @@ public class SjekkTilbakekrevingAksjonspunktUtleder {
         //da skal ytelsesbehandlingen gjennomføres, slik at tilbakekrevingsbehandlingen kan få oppdaterte tall - selv om den sperres
         LocalDateTimeline<Boolean> tilbakekrevingensPerioder = lagTidslinjeHvorFeilutbetalt(feilutbetaling);
         LocalDateTimeline<Boolean> tilbakekrevingenHeleMåneder = utvidTilHeleMåneder(tilbakekrevingensPerioder);
+        if (Environment.current().isDev()) {
+            logger.info("Tilbakekrevingens perioder {}", tilbakekrevingensPerioder);
+            logger.info("Tilbakekrevingens perioder i hele måneder {}", tilbakekrevingenHeleMåneder);
+            logger.info("Endring i utbetaling til bruker {}", endringUtbetalingTilBruker);
+        }
         return tilbakekrevingenHeleMåneder.intersects(endringUtbetalingTilBruker);
     }
 
     private static LocalDateTimeline<Boolean> utvidTilHeleMåneder(LocalDateTimeline<Boolean> tidslinje) {
         List<LocalDateSegment<Boolean>> segmenter = tidslinje.stream()
-            .map(segment -> new LocalDateSegment<>(segment.getFom().withDayOfMonth(1), segment.getTom().withDayOfMonth(1).minusDays(1).plusMonths(1), true))
+            .map(segment -> new LocalDateSegment<>(segment.getFom().with(TemporalAdjusters.firstDayOfMonth()), segment.getTom().with(TemporalAdjusters.lastDayOfMonth()), true))
             .toList();
         return new LocalDateTimeline<>(segmenter, StandardCombinators::alwaysTrueForMatch);
 

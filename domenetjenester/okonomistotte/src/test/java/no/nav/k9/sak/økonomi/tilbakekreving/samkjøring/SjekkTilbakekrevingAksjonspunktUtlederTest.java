@@ -66,6 +66,21 @@ class SjekkTilbakekrevingAksjonspunktUtlederTest {
     }
 
     @Test
+    void skal_ikke_ha_aksjonspunkt_når_det_er_endring_til_bruker_og_åpen_tilbakekreving_overlapper_med_endringene_også_i_slutt_av_måned() {
+
+        LocalDate sisteMars = LocalDate.of(2023, 3, 31);
+
+        Mockito.when(k9TilbakeRestKlient.hentFeilutbetalingerForSisteBehandling(behandling.getFagsak().getSaksnummer())).thenReturn(
+            Optional.of(new BehandlingStatusOgFeilutbetalinger(null, List.of(new Periode(sisteMars, sisteMars))))
+        );
+        Mockito.when(sjekkEndringUtbetalingTilBrukerTjeneste.endringerUtbetalingTilBruker(behandling)).thenReturn(
+            new LocalDateTimeline<>(sisteMars, sisteMars, true)
+        );
+        List<AksjonspunktDefinisjon> aksjonspunkt = utleder.sjekkMotÅpenIkkeoverlappendeTilbakekreving(behandling);
+        Assertions.assertThat(aksjonspunkt).isEmpty();
+    }
+
+    @Test
     void skal_ikke_ha_aksjonspunkt_når_det_er_endring_til_bruker_og_endringene_er_i_samme_måned_som_tilbakekrevingen() {
         Mockito.when(k9TilbakeRestKlient.hentFeilutbetalingerForSisteBehandling(behandling.getFagsak().getSaksnummer())).thenReturn(
             Optional.of(new BehandlingStatusOgFeilutbetalinger(null, List.of(new Periode(_2022_jan_01, _2022_jan_12))))
