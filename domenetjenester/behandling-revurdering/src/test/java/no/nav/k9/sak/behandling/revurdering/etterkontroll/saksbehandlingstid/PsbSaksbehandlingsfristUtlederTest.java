@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -102,6 +103,6 @@ public class PsbSaksbehandlingsfristUtlederTest {
 
 
     private PsbSaksbehandlingsfristUtleder lagFristUtleder(String periode) {
-        return new PsbSaksbehandlingsfristUtleder(søknadRepository, periode);
+        return new PsbSaksbehandlingsfristUtleder(søknadRepository, Period.parse(periode));
     }
 }

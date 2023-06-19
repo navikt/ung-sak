@@ -29,10 +29,10 @@ public class PsbSaksbehandlingsfristUtleder implements SaksbehandlingsfristUtled
     @Inject
     public PsbSaksbehandlingsfristUtleder(
         SøknadRepository søknadRepository,
-        @KonfigVerdi(value = "DEFAULT_SAKSBEHANDLINGSFRIST_PERIODE", defaultVerdi = "P7W") String fristPeriode
+        @KonfigVerdi(value = "DEFAULT_SAKSBEHANDLINGSFRIST_PERIODE", defaultVerdi = "P7W") Period fristPeriode
     ) {
         this.søknadRepository = søknadRepository;
-        this.fristPeriode = Period.parse(fristPeriode);
+        this.fristPeriode = fristPeriode;
     }
 
     PsbSaksbehandlingsfristUtleder() {

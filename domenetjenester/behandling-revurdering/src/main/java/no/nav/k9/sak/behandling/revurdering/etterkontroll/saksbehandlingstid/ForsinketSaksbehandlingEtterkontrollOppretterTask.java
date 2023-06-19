@@ -43,11 +43,11 @@ public class ForsinketSaksbehandlingEtterkontrollOppretterTask implements Proses
         EtterkontrollRepository etterkontrollRepository,
         @Any Instance<SaksbehandlingsfristUtleder> fristUtledere,
         BehandlingRepository behandlingRepository,
-        @KonfigVerdi(value = "VENTETID_VED_UTGÅTT_SAKSBEHANDLINGSFRIST", required = false) String ventetidVedUtgåttFrist) {
+        @KonfigVerdi(value = "VENTETID_VED_UTGÅTT_SAKSBEHANDLINGSFRIST", defaultVerdi = "P0D") Period ventetidVedUtgåttFrist) {
         this.etterkontrollRepository = etterkontrollRepository;
         this.fristUtledere = fristUtledere;
         this.behandlingRepository = behandlingRepository;
-        this.ventetidPeriode = ventetidVedUtgåttFrist != null ? Period.parse(ventetidVedUtgåttFrist) : null;
+        this.ventetidPeriode = ventetidVedUtgåttFrist;
     }
 
     @Override
@@ -61,25 +61,27 @@ public class ForsinketSaksbehandlingEtterkontrollOppretterTask implements Proses
             return;
         }
 
-        LocalDateTime frist = bestemFaktiskFrist(fristOpt.get());
+        LocalDateTime kontrollTidspunkt = bestemKontrolltidspunkt(fristOpt.get());
 
-        log.info("Oppretter etterkontroll med frist {}", frist);
+        log.info("Oppretter etterkontroll på tidspunkt {}.", kontrollTidspunkt);
         etterkontrollRepository.lagre(new Etterkontroll.Builder(behandling)
-            .medKontrollTidspunkt(frist)
+            .medKontrollTidspunkt(kontrollTidspunkt)
             .medKontrollType(KontrollType.FORSINKET_SAKSBEHANDLINGSTID)
             .build()
         );
 
     }
 
-    private LocalDateTime bestemFaktiskFrist(LocalDateTime utledetFrist) {
+    private LocalDateTime bestemKontrolltidspunkt(LocalDateTime frist) {
         var now = LocalDate.now();
-        if (ventetidPeriode != null && !utledetFrist.toLocalDate().isAfter(now)) {
-            log.info("Frist {} er på eller før dagens dato. Utvider frist med {} fra dagens dato", utledetFrist, ventetidPeriode);
-            return now.atStartOfDay().plus(ventetidPeriode);
+        if (!frist.toLocalDate().isAfter(now)) {
+            var utvidet = now.atStartOfDay().plus(ventetidPeriode);
+            log.warn("Frist {} har allerede passert! Utvider kontrolltidspunkt med {} fra dagens dato til {}",
+                frist, ventetidPeriode, utvidet);
+            return utvidet;
         }
 
-        return utledetFrist;
+        return frist;
     }
 
 }

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -55,7 +56,7 @@ class ForsinketSaksbehandlingEtterkontrollOppretterTaskTest {
     }
 
     @Test
-    void skal_opprette_etterkontroll_X_dager_etter_i_dag_hvis_frist_allerede_er_utgått_og_toggle_på() {
+    void skal_opprette_etterkontroll_X_dager_etter_i_dag_hvis_frist_allerede_er_utgått() {
         var behandling = TestScenarioBuilder.builderMedSøknad().lagMocked();
         var now = LocalDateTime.now();
         var frist1 = now.minusMonths(1);
@@ -73,6 +74,7 @@ class ForsinketSaksbehandlingEtterkontrollOppretterTaskTest {
         assertThat(etterkontroll.getKontrollTidspunkt().toLocalDate())
             .isEqualTo(now.toLocalDate().plusDays(3));
 
+        //grensetilfelle dagens dato
         var frist2 = now;
         when(fristUtleder.utledFrist(behandling)).thenReturn(Optional.of(frist2));
 
@@ -85,7 +87,7 @@ class ForsinketSaksbehandlingEtterkontrollOppretterTaskTest {
     }
 
     @Test
-    void skal_opprette_etterkontroll_på_frist_hvis_frist_ikke_gått_ut_og_toggle_på() {
+    void skal_opprette_etterkontroll_på_frist_hvis_frist_ikke_gått_ut() {
         var behandling = TestScenarioBuilder.builderMedSøknad().lagMocked();
         var now = LocalDateTime.now();
         var frist = now.plusDays(1);
@@ -109,7 +111,8 @@ class ForsinketSaksbehandlingEtterkontrollOppretterTaskTest {
             etterkontrollRepository,
             new UnitTestLookupInstanceImpl<>(fristUtleder),
             behandlingRepository,
-            ventetid);
+            ventetid != null ? Period.parse(ventetid) : Period.ofDays(0)
+        );
     }
 
     @Test
