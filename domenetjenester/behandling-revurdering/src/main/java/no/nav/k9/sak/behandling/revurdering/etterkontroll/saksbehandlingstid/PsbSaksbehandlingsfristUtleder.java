@@ -29,11 +29,10 @@ public class PsbSaksbehandlingsfristUtleder implements SaksbehandlingsfristUtled
     @Inject
     public PsbSaksbehandlingsfristUtleder(
         SøknadRepository søknadRepository,
-        @KonfigVerdi(value = "DEFAULT_SAKSBEHANDLINGSFRIST_PERIODE", defaultVerdi = "P7W") String fristPeriode
-        //Brukes kun for test med frist mindre enn 1 dag.
+        @KonfigVerdi(value = "DEFAULT_SAKSBEHANDLINGSFRIST_PERIODE", defaultVerdi = "P7W") Period fristPeriode
     ) {
         this.søknadRepository = søknadRepository;
-        this.fristPeriode = Period.parse(fristPeriode);
+        this.fristPeriode = fristPeriode;
     }
 
     PsbSaksbehandlingsfristUtleder() {
@@ -57,9 +56,12 @@ public class PsbSaksbehandlingsfristUtleder implements SaksbehandlingsfristUtled
         }
 
         return søknadRepository.hentSøknadHvisEksisterer(behandling.getId())
-            .map(it -> it.getSøknadsdato().plus(fristPeriode).atStartOfDay());
+            .map(it -> it.getMottattDato().plus(fristPeriode).atStartOfDay());
     }
 
+    /**
+     * Best effort utenlandssjekk. Denne kan gi true, men likevel ikke være utenlandsk.
+     */
     private static boolean erUtenlandssak(Behandling behandling) {
         return erOpprettetEllerUtført(behandling, AksjonspunktDefinisjon.AUTOMATISK_MARKERING_AV_UTENLANDSSAK)
             || erOpprettetEllerUtført(behandling, AksjonspunktDefinisjon.MANUELL_MARKERING_AV_UTLAND_SAKSTYPE);
