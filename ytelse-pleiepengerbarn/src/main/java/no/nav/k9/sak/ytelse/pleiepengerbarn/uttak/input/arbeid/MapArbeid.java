@@ -497,7 +497,7 @@ public class MapArbeid {
         final List<Entry<AktivitetIdentifikator, LocalDateTimeline<Boolean>>> resultater = input.getTilkommetAktivitetsperioder().entrySet().stream()
             .filter(it ->
                 Objects.equals(periode.getAktivitetType(), it.getKey().getAktivitetType())
-                && (periode.getArbeidsgiver() != null || Objects.equals(it.getKey().getArbeidsgiver(), periode.getArbeidsgiver()))
+                && Objects.equals(it.getKey().getArbeidsgiver(), periode.getArbeidsgiver())
             )
             .toList();
         
