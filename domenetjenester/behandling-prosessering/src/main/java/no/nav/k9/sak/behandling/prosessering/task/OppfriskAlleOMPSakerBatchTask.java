@@ -19,7 +19,7 @@ import no.nav.k9.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 
 @ApplicationScoped
-@ProsessTask(value = OppfriskAlleOMPSakerBatchTask.TASKTYPE, cronExpression = "0 0 23 * * *")
+@ProsessTask(value = OppfriskAlleOMPSakerBatchTask.TASKTYPE, cronExpression = "0 0 20 * * MON-FRI")
 public class OppfriskAlleOMPSakerBatchTask implements ProsessTaskHandler {
 
     private static final Logger log = LoggerFactory.getLogger(OppfriskAlleOMPSakerBatchTask.class);
