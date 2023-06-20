@@ -1,6 +1,5 @@
 package no.nav.k9.sak.økonomi.tilbakekreving.samkjøring;
 
-import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,7 +10,6 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -72,21 +70,11 @@ public class SjekkTilbakekrevingAksjonspunktUtleder {
         //endringen i ytelsesbehandlingen treffer samme perioder (i hele måneder) som i tilbakekrevingen.
         //da skal ytelsesbehandlingen gjennomføres, slik at tilbakekrevingsbehandlingen kan få oppdaterte tall - selv om den sperres
         LocalDateTimeline<Boolean> tilbakekrevingensPerioder = lagTidslinjeHvorFeilutbetalt(feilutbetaling);
-        LocalDateTimeline<Boolean> tilbakekrevingenHeleMåneder = utvidTilHeleMåneder(tilbakekrevingensPerioder);
         if (Environment.current().isDev()) {
             logger.info("Tilbakekrevingens perioder {}", tilbakekrevingensPerioder);
-            logger.info("Tilbakekrevingens perioder i hele måneder {}", tilbakekrevingenHeleMåneder);
             logger.info("Endring i utbetaling til bruker {}", endringUtbetalingTilBruker);
         }
-        return tilbakekrevingenHeleMåneder.intersects(endringUtbetalingTilBruker);
-    }
-
-    private static LocalDateTimeline<Boolean> utvidTilHeleMåneder(LocalDateTimeline<Boolean> tidslinje) {
-        List<LocalDateSegment<Boolean>> segmenter = tidslinje.stream()
-            .map(segment -> new LocalDateSegment<>(segment.getFom().with(TemporalAdjusters.firstDayOfMonth()), segment.getTom().with(TemporalAdjusters.lastDayOfMonth()), true))
-            .toList();
-        return new LocalDateTimeline<>(segmenter, StandardCombinators::alwaysTrueForMatch);
-
+        return tilbakekrevingensPerioder.intersects(endringUtbetalingTilBruker);
     }
 
     private static LocalDateTimeline<Boolean> lagTidslinjeHvorFeilutbetalt(BehandlingStatusOgFeilutbetalinger feilutbetaling) {
