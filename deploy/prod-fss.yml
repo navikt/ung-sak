@@ -261,6 +261,8 @@ spec:
       value: "false"
     - name: PSB_DODSDATO_HELG_FLYTTE_TIL_FREDAG
       value: "false"
+    - name: FERIEPENGER_RASKT_VED_DOED
+      value: "false"
 
 
     # Konfigurasjoner
