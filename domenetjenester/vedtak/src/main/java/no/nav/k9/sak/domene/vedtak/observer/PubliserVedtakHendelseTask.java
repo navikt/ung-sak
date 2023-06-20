@@ -14,6 +14,7 @@ import jakarta.validation.ValidatorFactory;
 import no.nav.folketrygdloven.beregningsgrunnlag.JacksonJsonConfig;
 import no.nav.k9.felles.integrasjon.kafka.GenerellKafkaProducer;
 import no.nav.k9.felles.integrasjon.kafka.KafkaPropertiesBuilder;
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -56,7 +57,6 @@ public class PubliserVedtakHendelseTask extends BehandlingProsessTask {
         @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String trustStorePassword,
         @KonfigVerdi(value = "KAFKA_KEYSTORE_PATH", required = false) String keyStoreLocation,
         @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String keyStorePassword,
-        @KonfigVerdi(value = "ENABLE_PRODUCER_VEDTAKHENDELSE_AIVEN", defaultVerdi = "false") boolean aivenEnabled,
         @KonfigVerdi("systembruker.username") String username,
         @KonfigVerdi("systembruker.password") String password
     ) {
@@ -64,6 +64,8 @@ public class PubliserVedtakHendelseTask extends BehandlingProsessTask {
 
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingVedtakRepository = behandlingVedtakRepository;
+
+        boolean aivenEnabled = !Environment.current().isLocal(); //har ikke støtte i vtp
 
         String _topicName = aivenEnabled ? topicV2 : topic;
         String _bootstrapServer = aivenEnabled ? bootstrapServersAiven : bootstrapServersOnPrem;
