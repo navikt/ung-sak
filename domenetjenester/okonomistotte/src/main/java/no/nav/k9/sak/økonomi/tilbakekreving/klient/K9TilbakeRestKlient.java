@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.økonomi.tilbakekreving.dto.BehandlingStatusOgFeilutbetalinger;
@@ -31,12 +32,12 @@ public class K9TilbakeRestKlient {
 
     @Inject
     public K9TilbakeRestKlient(OidcRestClient restClient,
-                               @KonfigVerdi(value = "k9.tilbake.direkte.url", defaultVerdi = "http://k9-tilbake/k9/tilbake/api") String urlK9Tilbake,
-                               @KonfigVerdi(value = "K9TILBAKE_AKTIVERT", defaultVerdi = "false", required = false) boolean k9tilbakeAktivert) {
+                               @KonfigVerdi(value = "k9.tilbake.direkte.url", defaultVerdi = "http://k9-tilbake/k9/tilbake/api") String urlK9Tilbake) {
+
         this.restClient = restClient;
         this.uriHarÅpenTilbakekrevingsbehandling = tilUri(urlK9Tilbake, "behandlinger/tilbakekreving/aapen");
         this.uriFeilutbetalingerSisteBehandling = tilUri(urlK9Tilbake, "feilutbetaling/siste-behandling");
-        this.k9tilbakeAktivert = k9tilbakeAktivert;
+        this.k9tilbakeAktivert = !Environment.current().isLocal(); //i proaksis mocker bort k9-tilbake ved kjøring lokalt og i verdikjedetester.
     }
 
     public boolean harÅpenTilbakekrevingsbehandling(Saksnummer saksnummer) {
