@@ -46,6 +46,9 @@ public class BeregningsresultatDump implements DebugDumpFagsak {
                       ,replace(cast(b.opprettet_tid as varchar), ' ', 'T') opprettet_tid
                       ,bp.br_periode_fom
                       ,bp.br_periode_tom
+                      ,bp.gradering_inntekt_prosent
+                      ,bp.graderingsfaktor_inntekt
+                      ,bp.graderingsfaktor_tid
                       ,ba.dagsats
                       ,ba.inntektskategori
                       ,ba.stillingsprosent
