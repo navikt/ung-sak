@@ -14,6 +14,7 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.økonomi.simulering.tjeneste.SimuleringIntegrasjonTjeneste;
 import no.nav.k9.sak.økonomi.tilbakekreving.dto.BehandlingStatusOgFeilutbetalinger;
 import no.nav.k9.sak.økonomi.tilbakekreving.klient.K9TilbakeRestKlient;
 
@@ -25,6 +26,7 @@ class SjekkTilbakekrevingAksjonspunktUtlederTest {
 
     SjekkTilbakekrevingAksjonspunktUtleder utleder;
 
+    SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste;
 
     LocalDate _2022_jan_01 = LocalDate.of(2022, 1, 1);
     LocalDate _2022_jan_07 = LocalDate.of(2022, 1, 7);
@@ -37,7 +39,8 @@ class SjekkTilbakekrevingAksjonspunktUtlederTest {
     public SjekkTilbakekrevingAksjonspunktUtlederTest() {
         sjekkEndringUtbetalingTilBrukerTjeneste = Mockito.mock(SjekkEndringUtbetalingTilBrukerTjeneste.class);
         k9TilbakeRestKlient = Mockito.mock(K9TilbakeRestKlient.class);
-        utleder = new SjekkTilbakekrevingAksjonspunktUtleder(sjekkEndringUtbetalingTilBrukerTjeneste, k9TilbakeRestKlient, true);
+        simuleringIntegrasjonTjeneste = Mockito.mock(SimuleringIntegrasjonTjeneste.class);
+        utleder = new SjekkTilbakekrevingAksjonspunktUtleder(sjekkEndringUtbetalingTilBrukerTjeneste, k9TilbakeRestKlient, simuleringIntegrasjonTjeneste, true);
     }
 
     @Test

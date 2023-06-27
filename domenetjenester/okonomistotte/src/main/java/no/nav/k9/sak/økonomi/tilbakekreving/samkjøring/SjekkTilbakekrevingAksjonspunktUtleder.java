@@ -13,8 +13,10 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.økonomi.simulering.tjeneste.SimuleringIntegrasjonTjeneste;
 import no.nav.k9.sak.økonomi.tilbakekreving.dto.BehandlingStatusOgFeilutbetalinger;
 import no.nav.k9.sak.økonomi.tilbakekreving.klient.K9TilbakeRestKlient;
 
@@ -26,15 +28,18 @@ public class SjekkTilbakekrevingAksjonspunktUtleder {
 
     private boolean lansert;
     private SjekkEndringUtbetalingTilBrukerTjeneste sjekkEndringUtbetalingTilBrukerTjeneste;
+    private SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste;
     private K9TilbakeRestKlient k9TilbakeRestKlient;
 
     @Inject
     public SjekkTilbakekrevingAksjonspunktUtleder(SjekkEndringUtbetalingTilBrukerTjeneste sjekkEndringUtbetalingTilBrukerTjeneste,
                                                   K9TilbakeRestKlient k9TilbakeRestKlient,
+                                                  SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste,
                                                   @KonfigVerdi(value = "ENABLE_SJEKK_TILBAKEKREVING", defaultVerdi = "true") boolean lansert) {
         this.sjekkEndringUtbetalingTilBrukerTjeneste = sjekkEndringUtbetalingTilBrukerTjeneste;
         this.k9TilbakeRestKlient = k9TilbakeRestKlient;
         this.lansert = lansert;
+        this.simuleringIntegrasjonTjeneste = simuleringIntegrasjonTjeneste;
     }
 
     /**
@@ -49,21 +54,41 @@ public class SjekkTilbakekrevingAksjonspunktUtleder {
         if (!lansert) {
             return List.of();
         }
-        return harÅpenIkkeoverlappendeTilbakekreving(aktuellBehandling)
+        return påvirkerÅpenTilbakekrevingsbehandling(aktuellBehandling)
             ? List.of(AksjonspunktDefinisjon.SJEKK_TILBAKEKREVING)
             : List.of();
     }
 
-    boolean harÅpenIkkeoverlappendeTilbakekreving(Behandling aktuellBehandling) {
-        LocalDateTimeline<Boolean> endringUtbetalingTilBruker = sjekkEndringUtbetalingTilBrukerTjeneste.endringerUtbetalingTilBruker(aktuellBehandling);
-        if (endringUtbetalingTilBruker.isEmpty()) {
+    boolean simuleringViserFeilutbetaling(Behandling behandling) {
+        Optional<SimuleringResultatDto> simuleringResultatDto = simuleringIntegrasjonTjeneste.hentResultat(behandling);
+        if (simuleringResultatDto.isEmpty()) {
             return false;
         }
+        SimuleringResultatDto simuleringsresultat = simuleringResultatDto.get();
+        return simuleringsresultat.harFeilutbetaling();
 
+    }
+
+    boolean påvirkerÅpenTilbakekrevingsbehandling(Behandling aktuellBehandling) {
         Fagsak fagsak = aktuellBehandling.getFagsak();
         Optional<BehandlingStatusOgFeilutbetalinger> feilutbetaling = k9TilbakeRestKlient.hentFeilutbetalingerForSisteBehandling(fagsak.getSaksnummer());
         boolean harÅpenTilbakekrevingsbehandling = feilutbetaling.isPresent() && feilutbetaling.get().getAvsluttetDato() == null;
-        return harÅpenTilbakekrevingsbehandling && !overlapperTilbakekrevingsbehandlingen(endringUtbetalingTilBruker, feilutbetaling.get());
+        if (!harÅpenTilbakekrevingsbehandling) {
+            logger.info("Har ingen åpen tilbakekrevingsbehandling");
+            return false;
+        }
+        LocalDateTimeline<Boolean> endringUtbetalingTilBruker = sjekkEndringUtbetalingTilBrukerTjeneste.endringerUtbetalingTilBruker(aktuellBehandling);
+        if (endringUtbetalingTilBruker.isEmpty()) {
+            logger.info("ingen endring i utbetaling til bruker");
+            return false;
+        }
+        if (simuleringViserFeilutbetaling(aktuellBehandling)) {
+            logger.info("Simulering viser feilutbetaling, så tilbakekrevingsbehandling er påvirket");
+            return true;
+        }
+        boolean overlappendeEndring = overlapperTilbakekrevingsbehandlingen(endringUtbetalingTilBruker, feilutbetaling.get());
+        logger.info("Behandlingen overlapper {} tilbakekrevingsbehandlingen", overlappendeEndring ? "" : " ikke ");
+        return overlappendeEndring;
     }
 
     private static boolean overlapperTilbakekrevingsbehandlingen(LocalDateTimeline<Boolean> endringUtbetalingTilBruker, BehandlingStatusOgFeilutbetalinger feilutbetaling) {
