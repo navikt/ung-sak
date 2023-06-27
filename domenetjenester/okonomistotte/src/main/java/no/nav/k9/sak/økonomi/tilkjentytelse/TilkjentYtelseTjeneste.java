@@ -13,7 +13,6 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.oppdrag.kontrakt.Saksnummer;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.InntrekkBeslutning;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelse;
@@ -46,7 +45,6 @@ public class TilkjentYtelseTjeneste {
     private BeregningsresultatRepository beregningsresultatRepository;
 
     private PersonopplysningRepository personopplysningRepository;
-    private boolean feriepengerUmiddelbartVedDød;
 
     TilkjentYtelseTjeneste() {
         // for CDI proxy
@@ -57,15 +55,13 @@ public class TilkjentYtelseTjeneste {
                                   BehandlingVedtakRepository behandlingVedtakRepository,
                                   TilbakekrevingRepository tilbakekrevingRepository,
                                   BeregningsresultatRepository beregningsresultatRepository,
-                                  PersonopplysningRepository personopplysningRepository,
-                                  @KonfigVerdi(value = "FERIEPENGER_RASKT_VED_DOED", defaultVerdi = "false") boolean feriepengerRasktVedDød
+                                  PersonopplysningRepository personopplysningRepository
     ) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.tilbakekrevingRepository = tilbakekrevingRepository;
         this.beregningsresultatRepository = beregningsresultatRepository;
         this.personopplysningRepository = personopplysningRepository;
-        this.feriepengerUmiddelbartVedDød = feriepengerRasktVedDød;
     }
 
     public TilkjentYtelseBehandlingInfoV1 hentilkjentYtelseBehandlingInfo(Long behandlingId) {
@@ -73,14 +69,11 @@ public class TilkjentYtelseTjeneste {
         BehandlingVedtak vedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandlingId)
             .orElse(null);
 
-        if (feriepengerUmiddelbartVedDød){
-            LocalDate dødsdato = hentBrukersDødsdato(behandling);
-            return mapBehandlingsinfo(behandling, vedtak, dødsdato);
-        }
-        return mapBehandlingsinfo(behandling, vedtak, null);
+        LocalDate dødsdato = hentBrukersDødsdato(behandling);
+        return mapBehandlingsinfo(behandling, vedtak, dødsdato);
     }
 
-    private LocalDate hentBrukersDødsdato(Behandling behandling){
+    private LocalDate hentBrukersDødsdato(Behandling behandling) {
         PersonopplysningGrunnlagEntitet personopplysningerGrunnlag = personopplysningRepository.hentPersonopplysninger(behandling.getId());
         PersonopplysningEntitet brukerPersonopplysninger = personopplysningerGrunnlag.getGjeldendeVersjon().getPersonopplysning(behandling.getAktørId());
         return brukerPersonopplysninger.getDødsdato();
