@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.død;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -30,7 +31,8 @@ class VilkårForlengingTjeneste {
         resultatBuilder.leggTil(vilkårBuilder);
     }
 
-    public void forlengeVilkårMedPeriode(Set<VilkårType> vilkår, VilkårResultatBuilder resultatBuilder, Vilkårene vilkårene, DatoIntervallEntitet periode, LocalDate dødsdato, boolean dødsdatoIHelgFiks) {
+    public void forlengVilkårMedPeriodeVedDødsfall(Set<VilkårType> vilkår, VilkårResultatBuilder resultatBuilder, Vilkårene vilkårene, DatoIntervallEntitet periode, LocalDate dødsdato, boolean dødsdatoIHelgFiks) {
+        Objects.requireNonNull(dødsdato);
         for (VilkårType vilkårType : vilkår) {
             var vilkårBuilder = resultatBuilder.hentBuilderFor(vilkårType);
             var eksisterendeResultat = finnVurderingPåDødsdato(dødsdato, vilkårene.getVilkår(vilkårType).orElseThrow(), dødsdatoIHelgFiks).orElseThrow();

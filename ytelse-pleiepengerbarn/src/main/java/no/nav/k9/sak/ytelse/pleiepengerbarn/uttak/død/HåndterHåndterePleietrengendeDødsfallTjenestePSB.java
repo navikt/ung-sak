@@ -247,7 +247,7 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
 
     private void forlengAndreVilkår(DatoIntervallEntitet periode, Vilkårene vilkårene, VilkårResultatBuilder resultatBuilder, LocalDate dødsdato) {
         Set<VilkårType> vilkår = Set.of(VilkårType.OPPTJENINGSVILKÅRET, VilkårType.OMSORGEN_FOR, VilkårType.OPPTJENINGSPERIODEVILKÅR, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, VilkårType.MEDLEMSKAPSVILKÅRET, VilkårType.SØKNADSFRIST);
-        vilkårForlengingTjeneste.forlengeVilkårMedPeriode(vilkår, resultatBuilder, vilkårene, periode, dødsdato, dødsdatoIHelgFiks);
+        vilkårForlengingTjeneste.forlengVilkårMedPeriodeVedDødsfall(vilkår, resultatBuilder, vilkårene, periode, dødsdato, dødsdatoIHelgFiks);
     }
 
     private boolean harGodkjentSykdomPåDødsdatoen(LocalDate dødsdato, Vilkårene vilkårene) {
