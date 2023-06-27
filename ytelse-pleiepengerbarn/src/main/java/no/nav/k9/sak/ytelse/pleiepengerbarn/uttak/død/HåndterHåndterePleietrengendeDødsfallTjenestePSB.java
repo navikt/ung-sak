@@ -4,6 +4,7 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BA
 import static no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleietrengendeAlderPeriode.ALDER_FOR_STRENGERE_PSB_VURDERING;
 import static no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleietrengendeAlderPeriode.MAKSÅR;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.NavigableSet;
@@ -17,6 +18,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.medisinsk.Pleiegrad;
 import no.nav.k9.kodeverk.uttak.RettVedDødType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -25,6 +27,7 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -52,6 +55,7 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
     private PersonopplysningTjeneste personopplysningTjeneste;
     private RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository;
     private PleiebehovResultatRepository resultatRepository;
+    private boolean dødsdatoIHelgFiks;
 
     HåndterHåndterePleietrengendeDødsfallTjenestePSB() {
         // CDI
@@ -62,12 +66,14 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
                                                             @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
                                                             PersonopplysningTjeneste personopplysningTjeneste,
                                                             RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository,
-                                                            PleiebehovResultatRepository resultatRepository) {
+                                                            PleiebehovResultatRepository resultatRepository,
+                                                            @KonfigVerdi(value = "PSB_DODSDATO_HELG_FLYTTE_TIL_FREDAG", defaultVerdi = "true") boolean dødsdatoIHelgFiks) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.rettPleiepengerVedDødRepository = rettPleiepengerVedDødRepository;
         this.resultatRepository = resultatRepository;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
+        this.dødsdatoIHelgFiks = dødsdatoIHelgFiks;
     }
 
     private static DatoIntervallEntitet utledPeriode(DatoIntervallEntitet periode, TreeSet<DatoIntervallEntitet> last) {
@@ -111,7 +117,26 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
         if (!sisteDagPgaDødsfall.isAfter(dødsdato)) {
             return Optional.empty();
         }
-        return Optional.of(DatoIntervallEntitet.fraOgMedTilOgMed(dødsdato.plusDays(1), sisteDagPgaDødsfall));
+
+        var førsteDagPgaDødsfall = finnFørsteDagPgaDødsfall(dødsdato, vilkårene);
+        return Optional.of(DatoIntervallEntitet.fraOgMedTilOgMed(førsteDagPgaDødsfall, sisteDagPgaDødsfall));
+    }
+
+    private LocalDate finnFørsteDagPgaDødsfall(LocalDate dødsdato, Vilkårene vilkårene) {
+        if (dødsdatoIHelgFiks) {
+            // Håndtere tilfeller der det er søkt om pleiepenger tom fredag, og pleietrengende dør lørdag eller søndag
+            // Vil da utvide fom lørdag for å gjøre perioden sammenhengende, ellers får vi problemer med å hente opptjening
+            final DayOfWeek dødsdag = dødsdato.getDayOfWeek();
+            if (dødsdag == DayOfWeek.SATURDAY || dødsdag == DayOfWeek.SUNDAY) {
+                final VilkårPeriode sykdomsvurderingPåDødsdato = finnSykdomVurderingPåDødsdato(dødsdato, vilkårene);
+                final LocalDate fredagenFørDødsdatoIHelg = dødsdag == DayOfWeek.SATURDAY ? dødsdato.minusDays(1) : dødsdato.minusDays(2);
+                if (sykdomsvurderingPåDødsdato.getPeriode().overlapp(DatoIntervallEntitet.fraOgMedTilOgMed(fredagenFørDødsdatoIHelg, fredagenFørDødsdatoIHelg)) != null) {
+                    return fredagenFørDødsdatoIHelg.plusDays(1);
+                }
+            }
+        }
+
+        return dødsdato.plusDays(1);
     }
 
     @Override
@@ -130,8 +155,8 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
 
         var kantIKantVurderer = vilkårsPerioderTilVurderingTjeneste.getKantIKantVurderer();
         var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene).medKantIKantVurderer(kantIKantVurderer);
-        var perioder = utledPerioder(referanse);
-        var tidslinjen = TidslinjeUtil.tilTidslinjeKomprimert(perioder)
+        var perioderTilVurdering = utledPerioderTilVurdering(referanse);
+        var tidslinjen = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering)
             .intersection(new LocalDateInterval(periode.getFomDato(), LocalDateInterval.TIDENES_ENDE))
             .combine(new LocalDateTimeline<>(periode.toLocalDateInterval(), true), StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN)
             .compress();
@@ -161,12 +186,12 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
     }
 
     private void forlengPeriode(DatoIntervallEntitet periode, PersonopplysningEntitet pleietrengendePersonopplysninger, PersonopplysningEntitet brukerPersonopplysninger, Vilkårene vilkårene, VilkårResultatBuilder resultatBuilder) {
-        forlengMedisinskeVilkår(resultatBuilder, vilkårene, periode, pleietrengendePersonopplysninger.getFødselsdato());
+        forlengMedisinskeVilkår(resultatBuilder, vilkårene, periode, pleietrengendePersonopplysninger.getFødselsdato(), pleietrengendePersonopplysninger.getDødsdato());
         forlengOgVurderAldersvilkåret(resultatBuilder, periode, brukerPersonopplysninger);
-        forlengAndreVilkår(periode, vilkårene, resultatBuilder);
+        forlengAndreVilkår(periode, vilkårene, resultatBuilder, pleietrengendePersonopplysninger.getDødsdato());
     }
 
-    private NavigableSet<DatoIntervallEntitet> utledPerioder(BehandlingReferanse referanse) {
+    private NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse referanse) {
         var perioderUnder = vilkårsPerioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
         var perioderOver = vilkårsPerioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), VilkårType.MEDISINSKEVILKÅR_18_ÅR);
         var perioder = new TreeSet<>(perioderUnder);
@@ -181,13 +206,12 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
         };
     }
 
-    private void forlengMedisinskeVilkår(VilkårResultatBuilder resultatBuilder, Vilkårene vilkårene, DatoIntervallEntitet periode, LocalDate fødselsdato) {
-        var dødsdato = periode.getFomDato().minusDays(1); //utvidelsesperioden begynner dagen etter dødsdato
+    private void forlengMedisinskeVilkår(VilkårResultatBuilder resultatBuilder, Vilkårene vilkårene, DatoIntervallEntitet periode, LocalDate fødselsdato, LocalDate dødsdato) {
         var eksisterendeResultat = finnSykdomVurderingPåDødsdato(dødsdato, vilkårene);
-        var set = new TreeSet<>(Set.of(periode));
+        var forlengelsesPerioder = new TreeSet<>(Set.of(periode));
 
-        var perioderUnder18år = PleietrengendeAlderPeriode.utledPeriodeIHenhold(set, fødselsdato, -MAKSÅR, ALDER_FOR_STRENGERE_PSB_VURDERING);
-        var perioderOver18år = PleietrengendeAlderPeriode.utledPeriodeIHenhold(set, fødselsdato, ALDER_FOR_STRENGERE_PSB_VURDERING, MAKSÅR);
+        var perioderUnder18år = PleietrengendeAlderPeriode.utledPeriodeIHenhold(forlengelsesPerioder, fødselsdato, -MAKSÅR, ALDER_FOR_STRENGERE_PSB_VURDERING);
+        var perioderOver18år = PleietrengendeAlderPeriode.utledPeriodeIHenhold(forlengelsesPerioder, fødselsdato, ALDER_FOR_STRENGERE_PSB_VURDERING, MAKSÅR);
 
         if (!perioderUnder18år.isEmpty()) {
             var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
@@ -208,7 +232,8 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
 
     private VilkårPeriode finnSykdomVurderingPåDødsdato(LocalDate dødsdato, Vilkårene vilkårene) {
         for (VilkårType vilkårType : Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR)) {
-            Optional<VilkårPeriode> vilkårPeriodeForDødsdato = vilkårene.getVilkår(vilkårType).orElseThrow().finnPeriodeSomInneholderDato(dødsdato);
+            Vilkår vilkår = vilkårene.getVilkår(vilkårType).orElseThrow();
+            Optional<VilkårPeriode> vilkårPeriodeForDødsdato = vilkårForlengingTjeneste.finnVurderingPåDødsdato(dødsdato, vilkår, dødsdatoIHelgFiks);
             if (vilkårPeriodeForDødsdato.isPresent()) {
                 return vilkårPeriodeForDødsdato.get();
             }
@@ -220,14 +245,32 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePSB implements Hån
         vilkårForlengingTjeneste.forlengOgVurderAldersvilkåret(resultatBuilder, periode, brukerPersonopplysninger);
     }
 
-    private void forlengAndreVilkår(DatoIntervallEntitet periode, Vilkårene vilkårene, VilkårResultatBuilder resultatBuilder) {
+    private void forlengAndreVilkår(DatoIntervallEntitet periode, Vilkårene vilkårene, VilkårResultatBuilder resultatBuilder, LocalDate dødsdato) {
         Set<VilkårType> vilkår = Set.of(VilkårType.OPPTJENINGSVILKÅRET, VilkårType.OMSORGEN_FOR, VilkårType.OPPTJENINGSPERIODEVILKÅR, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, VilkårType.MEDLEMSKAPSVILKÅRET, VilkårType.SØKNADSFRIST);
-        vilkårForlengingTjeneste.forlengeVilkårMedPeriode(vilkår, resultatBuilder, vilkårene, periode);
+        vilkårForlengingTjeneste.forlengVilkårMedPeriodeVedDødsfall(vilkår, resultatBuilder, vilkårene, periode, dødsdato, dødsdatoIHelgFiks);
     }
 
     private boolean harGodkjentSykdomPåDødsdatoen(LocalDate dødsdato, Vilkårene vilkårene) {
+        if (harGodkjentSykdomPådato(dødsdato, vilkårene)) {
+            return true;
+        }
+
+        if (dødsdatoIHelgFiks) {
+            final DayOfWeek ukedag = dødsdato.getDayOfWeek();
+            if (ukedag == DayOfWeek.SATURDAY) {
+                return harGodkjentSykdomPådato(dødsdato.minusDays(1), vilkårene) || harGodkjentSykdomPådato(dødsdato.plusDays(2), vilkårene);
+            }
+            if (ukedag == DayOfWeek.SUNDAY) {
+                return harGodkjentSykdomPådato(dødsdato.minusDays(2), vilkårene) || harGodkjentSykdomPådato(dødsdato.plusDays(1), vilkårene);
+            }
+        }
+
+        return false;
+    }
+
+    private boolean harGodkjentSykdomPådato(LocalDate dato, Vilkårene vilkårene) {
         for (VilkårType vilkårType : Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR)) {
-            Optional<VilkårPeriode> periode = vilkårene.getVilkår(vilkårType).flatMap(it -> it.finnPeriodeSomInneholderDato(dødsdato));
+            Optional<VilkårPeriode> periode = vilkårene.getVilkår(vilkårType).flatMap(it -> it.finnPeriodeSomInneholderDato(dato));
             if (periode.isPresent() && periode.get().getUtfall() == Utfall.OPPFYLT) {
                 return true;
             }
