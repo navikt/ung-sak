@@ -262,8 +262,6 @@ spec:
       value: "true"
     - name: ENABLE_ETTERKONTROLL_FORSINKET_SAKB
       value: "true"
-    - name: FERIEPENGER_RASKT_VED_DOED
-      value: "true"
 
 
     # Konfigurasjoner
