@@ -24,7 +24,6 @@ import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -66,9 +65,6 @@ public class VurderNødvendighetStegTest {
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
     @Inject
     private PleiebehovResultatRepository resultatRepository;
-    @Inject
-    @FagsakYtelseTypeRef(FagsakYtelseType.OPPLÆRINGSPENGER)
-    private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjenesteBean;
     private BehandlingRepositoryProvider repositoryProvider;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjenesteMock;
     private Behandling behandling;
@@ -79,7 +75,7 @@ public class VurderNødvendighetStegTest {
 
     @BeforeEach
     public void setup() {
-        perioderTilVurderingTjenesteMock = spy(perioderTilVurderingTjenesteBean);
+        perioderTilVurderingTjenesteMock = spy(VilkårsPerioderTilVurderingTjeneste.class);
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         vurderNødvendighetSteg = new VurderNødvendighetSteg(repositoryProvider, perioderTilVurderingTjenesteMock, resultatRepository,
             new VurderNødvendighetTjeneste(repositoryProvider, perioderTilVurderingTjenesteMock, vurdertOpplæringRepository, uttakPerioderGrunnlagRepository));
