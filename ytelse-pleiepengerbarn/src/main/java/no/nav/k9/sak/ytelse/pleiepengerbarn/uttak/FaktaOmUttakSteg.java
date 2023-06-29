@@ -11,7 +11,6 @@ import java.util.NavigableSet;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.sykdom.Resultat;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -46,7 +45,6 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
     private ArbeidBrukerBurdeSøktOmUtleder arbeidBrukerBurdeSøktOmUtleder;
     private HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste;
     private PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder;
-    private boolean dødsdatoIHelgFlytteTilFredag;
 
     protected FaktaOmUttakSteg() {
         // for proxy
@@ -60,8 +58,7 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
                             PersonopplysningTjeneste personopplysningTjeneste,
                             ArbeidBrukerBurdeSøktOmUtleder arbeidBrukerBurdeSøktOmUtleder,
                             @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste,
-                            PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder,
-                            @KonfigVerdi(value = "PSB_DODSDATO_HELG_FLYTTE_TIL_FREDAG", defaultVerdi = "true") boolean dødsdatoIHelgFlytteTilFredag) {
+                            PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder) {
         this.unntakEtablertTilsynGrunnlagRepository = unntakEtablertTilsynGrunnlagRepository;
         this.rettPleiepengerVedDødRepository = rettPleiepengerVedDødRepository;
         this.pleiebehovResultatRepository = pleiebehovResultatRepository;
@@ -70,7 +67,6 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
         this.arbeidBrukerBurdeSøktOmUtleder = arbeidBrukerBurdeSøktOmUtleder;
         this.håndterePleietrengendeDødsfallTjeneste = håndterePleietrengendeDødsfallTjeneste;
         this.perioderMedSykdomInnvilgetUtleder = perioderMedSykdomInnvilgetUtleder;
-        this.dødsdatoIHelgFlytteTilFredag = dødsdatoIHelgFlytteTilFredag;
     }
 
     @SuppressWarnings("unused")
@@ -184,7 +180,7 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
 
         // Hvis dødsdato er i helg, så flytt den til mandag og fredag slik at den vil overlappe med eventuelle pleieperioder(fordi det ikke er mulig å søke i helg).
         var flyttetDødsdatoMandag = flyttDatoTilNærmesteMandagHvisHelg(dødsdato);
-        var flyttetDødsdatoFredag = dødsdatoIHelgFlytteTilFredag ? flyttDatoTilNærmesteFredagHvisHelg(dødsdato) : dødsdato;
+        var flyttetDødsdatoFredag = flyttDatoTilNærmesteFredagHvisHelg(dødsdato);
 
         if (pleiebehov.isPresent()) {
             var overlappendePleiehov = pleiebehov.get().getPleieperioder().getPerioder()
