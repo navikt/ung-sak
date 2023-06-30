@@ -114,7 +114,7 @@ public class DokumentKafkaBestillerTest {
     }
 
     private BestillBrevDto lagBestillBrevDto(DokumentMalType dokumentMalType, String fritekst, FritekstbrevinnholdDto fritekstbrev) {
-        return new BestillBrevDto(behandling.getId(), no.nav.k9.kodeverk.dokument.DokumentMalType.fraKode(dokumentMalType.getKode()), fritekst, null, fritekstbrev);
+        return new BestillBrevDto(behandling.getId(), no.nav.k9.kodeverk.dokument.DokumentMalType.fraKode(dokumentMalType.getKode()), fritekst, null, fritekstbrev, fritekst);
     }
 
 }

@@ -1,7 +1,9 @@
 package no.nav.k9.sak.behandling.revurdering.etterkontroll.saksbehandlingstid;
 
 
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,13 +62,20 @@ public class ForsinketSaksbehandlingEtterkontrollTjeneste implements KontrollTje
             log.info("Behandling er ikke ferdigstilt innen fristen. Bestiller brev om forlenget saksbehandling.");
             dokumentBestillerApplikasjonTjeneste.bestillDokument(new BestillBrevDto(
                 behandling.getId(), DokumentMalType.FORLENGET_DOK,
-                new MottakerDto(behandling.getAktørId().getId(), IdType.AKTØRID.toString())
+                new MottakerDto(behandling.getAktørId().getId(), IdType.AKTØRID.toString()),
+                lagUnikDokumentbestillingId(etterkontroll, behandling.getUuid())
             ), HistorikkAktør.VEDTAKSLØSNINGEN);
         } else {
             log.info("Behandling ferdigstilt innen fristen eller har ikke lenger frist. Bestiller ikke brev.");
         }
 
         return true;
+    }
+
+    private static String lagUnikDokumentbestillingId(Etterkontroll etterkontroll, UUID uuid) {
+        return UUID.nameUUIDFromBytes(String.format(
+            "%d%s", etterkontroll.getId(), uuid.toString()
+        ).getBytes(StandardCharsets.UTF_8)).toString();
     }
 
     private boolean harFortsattFrist(Behandling behandling) {

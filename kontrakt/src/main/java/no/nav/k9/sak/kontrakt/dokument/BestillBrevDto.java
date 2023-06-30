@@ -1,18 +1,17 @@
 package no.nav.k9.sak.kontrakt.dokument;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import no.nav.k9.abac.AbacAttributt;
 import no.nav.k9.kodeverk.dokument.DokumentMalType;
 
@@ -51,27 +50,39 @@ public class BestillBrevDto {
     @Valid
     private FritekstbrevinnholdDto fritekstbrev;
 
+    /**
+     * Kun et brev av med denne id'en blir bestilt - evt. påfølgende vil feile. Hvis null så skal random uuid brukes
+     */
+    @JsonProperty("dokumentbestillingsId")
+    private String dokumentbestillingsId;
+
     public BestillBrevDto() { // NOSONAR
     }
 
     public BestillBrevDto(long behandlingId, DokumentMalType dokumentMalType) {
-        this(behandlingId, dokumentMalType, null, null, null);
+        this(behandlingId, dokumentMalType, null, null, null, null);
     }
 
     public BestillBrevDto(long behandlingId, DokumentMalType dokumentMalType, String fritekst) {
-        this(behandlingId, dokumentMalType, fritekst, null, null);
+        this(behandlingId, dokumentMalType, fritekst, null, null, null);
     }
 
     public BestillBrevDto(long behandlingId, DokumentMalType dokumentMalType, MottakerDto mottakerDto) {
-        this(behandlingId, dokumentMalType, null, mottakerDto, null);
+        this(behandlingId, dokumentMalType, null, mottakerDto, null, null);
     }
 
-    public BestillBrevDto(long behandlingId, DokumentMalType dokumentMalType, String fritekst, MottakerDto overstyrtMottaker, FritekstbrevinnholdDto fritekstbrev) { // NOSONAR
+    public BestillBrevDto(long behandlingId, DokumentMalType dokumentMalType, MottakerDto mottakerDto, String dokumentbestillingsId) {
+        this(behandlingId, dokumentMalType, null, mottakerDto, null, dokumentbestillingsId);
+    }
+
+
+    public BestillBrevDto(long behandlingId, DokumentMalType dokumentMalType, String fritekst, MottakerDto overstyrtMottaker, FritekstbrevinnholdDto fritekstbrev, String dokumentbestillingsId) { // NOSONAR
         this.behandlingId = behandlingId;
         this.brevmalkode = dokumentMalType == null ? null : dokumentMalType.getKode();
         this.fritekst = fritekst;
         this.overstyrtMottaker = overstyrtMottaker;
         this.fritekstbrev = fritekstbrev;
+        this.dokumentbestillingsId = dokumentbestillingsId;
     }
 
     @AbacAttributt("behandlingId")
@@ -121,5 +132,13 @@ public class BestillBrevDto {
 
     public void setFritekstbrev(FritekstbrevinnholdDto fritekstbrev) {
         this.fritekstbrev = fritekstbrev;
+    }
+
+    public String getDokumentbestillingsId() {
+        return dokumentbestillingsId;
+    }
+
+    public void setDokumentbestillingsId(String dokumentbestillingsId) {
+        this.dokumentbestillingsId = dokumentbestillingsId;
     }
 }

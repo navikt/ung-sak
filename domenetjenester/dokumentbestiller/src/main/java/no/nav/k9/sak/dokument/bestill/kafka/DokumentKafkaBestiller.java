@@ -54,7 +54,7 @@ public class DokumentKafkaBestiller {
         for (BestillBrevDto bestillBrevDto : bestillBrevDtoer) {
             var payload = mapDokumentdataParametre(bestillBrevDto);
 
-            opprettKafkaTask(behandling, dokumentMalType, bestillBrevDto.getOverstyrtMottaker(), tilJson(payload));
+            opprettKafkaTask(behandling, dokumentMalType, bestillBrevDto.getOverstyrtMottaker(), tilJson(payload), bestillBrevDto.getDokumentbestillingsId());
         }
         brevHistorikkinnslag.opprettHistorikkinnslagForBestiltBrevFraKafka(aktør, behandling, dokumentMalType);
     }
@@ -82,11 +82,11 @@ public class DokumentKafkaBestiller {
     }
 
     public void bestillBrev(Behandling behandling, DokumentMalType dokumentMalType, HistorikkAktør aktør) {
-        opprettKafkaTask(behandling, dokumentMalType, null, null);
+        opprettKafkaTask(behandling, dokumentMalType, null, null, null);
         brevHistorikkinnslag.opprettHistorikkinnslagForBestiltBrevFraKafka(aktør, behandling, dokumentMalType);
     }
 
-    private void opprettKafkaTask(Behandling behandling, DokumentMalType dokumentMalType, MottakerDto overstyrtMottaker, String payload) {
+    private void opprettKafkaTask(Behandling behandling, DokumentMalType dokumentMalType, MottakerDto overstyrtMottaker, String payload, String dokumentbestillingId) {
         ProsessTaskData prosessTaskData =  ProsessTaskData.forProsessTask(DokumentBestillerKafkaTask.class);
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
 
@@ -98,7 +98,8 @@ public class DokumentKafkaBestiller {
             prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.OVERSTYRT_MOTTAKER,
                 overstyrtMottaker.id + DokumentbestillerKafkaTaskProperties.OVERSTYRT_MOTTAKER_SEPARATOR + overstyrtMottaker.type);
         }
-        prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.BESTILLING_UUID, UUID.randomUUID().toString());
+        prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.BESTILLING_UUID,
+            dokumentbestillingId == null ? dokumentbestillingId : UUID.randomUUID().toString());
         prosessTaskData.setCallIdFraEksisterende();
         prosessTaskRepository.lagre(prosessTaskData);
     }
