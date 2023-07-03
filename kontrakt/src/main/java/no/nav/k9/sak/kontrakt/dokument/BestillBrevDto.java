@@ -54,6 +54,9 @@ public class BestillBrevDto {
      * Kun et brev av med denne id'en blir bestilt - evt. påfølgende vil feile. Hvis null så skal random uuid brukes
      */
     @JsonProperty("dokumentbestillingsId")
+    @Valid
+    @Size(max = 50)
+    @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$")
     private String dokumentbestillingsId;
 
     public BestillBrevDto() { // NOSONAR

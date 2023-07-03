@@ -74,7 +74,7 @@ public class DokumentBestillerKafkaTask implements ProsessTaskHandler {
 
         Dokumentbestilling d = mapDokumentbestilling(behandling, prosessTaskData);
         String json = serialiser(d);
-        log.info("Bestiller brev {} med id={} og mottakerType={}", d.getDokumentMal(), d.getDokumentbestillingId(), d.getOverstyrtMottaker().type);
+        log.info("Bestiller brev {} med id={} og mottakerType={}", d.getDokumentMal(), d.getDokumentbestillingId(), d.getOverstyrtMottaker().type.name());
         dokumentbestillingProducer.publiserDokumentbestillingJson(json);
     }
 
