@@ -99,7 +99,7 @@ public class DokumentKafkaBestiller {
                 overstyrtMottaker.id + DokumentbestillerKafkaTaskProperties.OVERSTYRT_MOTTAKER_SEPARATOR + overstyrtMottaker.type);
         }
         prosessTaskData.setProperty(DokumentbestillerKafkaTaskProperties.BESTILLING_UUID,
-            dokumentbestillingId == null ? dokumentbestillingId : UUID.randomUUID().toString());
+            dokumentbestillingId != null ? dokumentbestillingId : UUID.randomUUID().toString());
         prosessTaskData.setCallIdFraEksisterende();
         prosessTaskRepository.lagre(prosessTaskData);
     }
