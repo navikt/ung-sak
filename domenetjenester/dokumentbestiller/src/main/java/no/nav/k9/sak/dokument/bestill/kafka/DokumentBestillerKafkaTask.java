@@ -7,13 +7,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
-
 import no.nav.k9.formidling.kontrakt.dokumentdataparametre.DokumentdataParametreK9;
 import no.nav.k9.formidling.kontrakt.hendelse.Dokumentbestilling;
 import no.nav.k9.formidling.kontrakt.kodeverk.AvsenderApplikasjon;
@@ -34,6 +36,7 @@ import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)
 public class DokumentBestillerKafkaTask implements ProsessTaskHandler {
 
+    private static Logger log = LoggerFactory.getLogger(DokumentBestillerKafkaTask.class);
     private DokumentbestillingProducer dokumentbestillingProducer;
     private BehandlingRepository behandlingRepository;
     private Validator validator;
@@ -69,8 +72,9 @@ public class DokumentBestillerKafkaTask implements ProsessTaskHandler {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         BehandlingProsessTask.logContext(behandling);
 
-        Dokumentbestilling dokumentbestilling = mapDokumentbestilling(behandling, prosessTaskData);
-        String json = serialiser(dokumentbestilling);
+        Dokumentbestilling d = mapDokumentbestilling(behandling, prosessTaskData);
+        String json = serialiser(d);
+        log.info("Bestiller brev {} med id={} og mottakerType={}", d.getDokumentMal(), d.getDokumentbestillingId(), d.getOverstyrtMottaker().type);
         dokumentbestillingProducer.publiserDokumentbestillingJson(json);
     }
 

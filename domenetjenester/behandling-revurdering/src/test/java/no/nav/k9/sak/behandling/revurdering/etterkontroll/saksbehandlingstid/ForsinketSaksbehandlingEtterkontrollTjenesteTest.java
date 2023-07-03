@@ -75,9 +75,8 @@ class ForsinketSaksbehandlingEtterkontrollTjenesteTest {
         assertThat(brev.getOverstyrtMottaker().id).isEqualTo(b.getAktørId().getId());
         assertThat(brev.getOverstyrtMottaker().type).isEqualTo(IdType.AKTØRID.toString());
 
-        String uuid = UUID.nameUUIDFromBytes(
-            (etterkontrollId + b.getUuid().toString()).getBytes(StandardCharsets.UTF_8)
-        ).toString();
+        String uuidKilde = etterkontrollId + b.getUuid().toString() + DokumentMalType.FORLENGET_DOK.getKode();
+        String uuid = UUID.nameUUIDFromBytes(uuidKilde.getBytes(StandardCharsets.UTF_8)).toString();
 
         assertThat(brev.getDokumentbestillingsId()).isEqualTo(uuid);
     }

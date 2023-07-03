@@ -63,7 +63,7 @@ public class ForsinketSaksbehandlingEtterkontrollTjeneste implements KontrollTje
             dokumentBestillerApplikasjonTjeneste.bestillDokument(new BestillBrevDto(
                 behandling.getId(), DokumentMalType.FORLENGET_DOK,
                 new MottakerDto(behandling.getAktørId().getId(), IdType.AKTØRID.toString()),
-                lagUnikDokumentbestillingId(etterkontroll, behandling.getUuid())
+                lagUnikDokumentbestillingId(etterkontroll, behandling.getUuid(), DokumentMalType.FORLENGET_DOK)
             ), HistorikkAktør.VEDTAKSLØSNINGEN);
         } else {
             log.info("Behandling ferdigstilt innen fristen eller har ikke lenger frist. Bestiller ikke brev.");
@@ -72,9 +72,9 @@ public class ForsinketSaksbehandlingEtterkontrollTjeneste implements KontrollTje
         return true;
     }
 
-    private static String lagUnikDokumentbestillingId(Etterkontroll etterkontroll, UUID uuid) {
+    private static String lagUnikDokumentbestillingId(Etterkontroll etterkontroll, UUID uuid, DokumentMalType mal) {
         return UUID.nameUUIDFromBytes(String.format(
-            "%d%s", etterkontroll.getId(), uuid.toString()
+            "%d%s%s", etterkontroll.getId(), uuid.toString(), mal.getKode()
         ).getBytes(StandardCharsets.UTF_8)).toString();
     }
 
