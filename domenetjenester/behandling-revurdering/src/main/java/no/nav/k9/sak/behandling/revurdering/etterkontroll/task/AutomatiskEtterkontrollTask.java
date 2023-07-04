@@ -13,7 +13,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
-import no.nav.k9.sak.behandlingslager.task.FagsakProsessTask;
 
 /**
  * @Dependent scope for å hente konfig ved hver kjøring.
@@ -21,12 +20,10 @@ import no.nav.k9.sak.behandlingslager.task.FagsakProsessTask;
 @Dependent
 @ProsessTask(AutomatiskEtterkontrollTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)
-public class AutomatiskEtterkontrollTask extends FagsakProsessTask {
+public class AutomatiskEtterkontrollTask extends BehandlingProsessTask {
     public static final String TASKTYPE = "behandlingsprosess.etterkontroll";
     public static final String ETTERKONTROLL_ID = "etterkontrollId";
 
-    //TODO denne blir aldri satt fra BatchTask'en når skal den brukes?
-    public static final String KUN_AKTUELL_BEHANDLING = "etterkontrollBehandling";
     private static final Logger log = LoggerFactory.getLogger(AutomatiskEtterkontrollTask.class);
     private BehandlingRepository behandlingRepository;
     private UtførKontrollTjeneste utførKontrollTjeneste;
@@ -39,7 +36,7 @@ public class AutomatiskEtterkontrollTask extends FagsakProsessTask {
     @Inject
     public AutomatiskEtterkontrollTask(BehandlingRepositoryProvider repositoryProvider,// NOSONAR
                                        UtførKontrollTjeneste utførKontrollTjeneste) {
-        super(repositoryProvider.getFagsakLåsRepository(), repositoryProvider.getBehandlingLåsRepository());
+        super(repositoryProvider.getBehandlingLåsRepository());
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.utførKontrollTjeneste = utførKontrollTjeneste;
     }

@@ -5,12 +5,15 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,18 +52,21 @@ class ForsinketSaksbehandlingEtterkontrollTjenesteTest {
     void skal_bestille_brev_hvis_behandling_er_åpen() {
         Behandling b = scenarioBuilder.medBehandlingStatus(BehandlingStatus.OPPRETTET).lagMocked();
 
-        Etterkontroll etterkontroll = new Etterkontroll.Builder(b)
+        Etterkontroll etterkontroll = spy(new Etterkontroll.Builder(b)
             .medKontrollType(KontrollType.FORSINKET_SAKSBEHANDLINGSTID)
             .medKontrollTidspunkt(LocalDateTime.now())
-            .build();
+            .build());
+
+        long etterkontrollId = 300623L;
+        when(etterkontroll.getId()).thenReturn(etterkontrollId);
 
         boolean resultat = forsinketSaksbehandlingKontroll.utfør(etterkontroll);
         assertThat(resultat).isTrue();
 
-        verifyBestillDokument(b);
+        verifyBestillDokument(b, etterkontrollId);
     }
 
-    private void verifyBestillDokument(Behandling b) {
+    private void verifyBestillDokument(Behandling b, long etterkontrollId) {
         ArgumentCaptor<BestillBrevDto> c = ArgumentCaptor.forClass(BestillBrevDto.class);
         verify(dokumentbestiller).bestillDokument(c.capture(), eq(HistorikkAktør.VEDTAKSLØSNINGEN));
         BestillBrevDto brev = c.getValue();
@@ -68,6 +74,11 @@ class ForsinketSaksbehandlingEtterkontrollTjenesteTest {
         assertThat(brev.getBrevmalkode()).isEqualTo(DokumentMalType.FORLENGET_DOK.getKode());
         assertThat(brev.getOverstyrtMottaker().id).isEqualTo(b.getAktørId().getId());
         assertThat(brev.getOverstyrtMottaker().type).isEqualTo(IdType.AKTØRID.toString());
+
+        String uuidKilde = etterkontrollId + b.getUuid().toString() + DokumentMalType.FORLENGET_DOK.getKode();
+        String uuid = UUID.nameUUIDFromBytes(uuidKilde.getBytes(StandardCharsets.UTF_8)).toString();
+
+        assertThat(brev.getDokumentbestillingsId()).isEqualTo(uuid);
     }
 
     @Test

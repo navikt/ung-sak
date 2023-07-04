@@ -258,7 +258,7 @@ spec:
     - name: FERIEPENGER_INFOTRYGD_KORRIGER
       value: "true"
     - name: ENABLE_ETTERKONTROLL_FORSINKET_SAKB
-      value: "false"
+      value: "true"
     - name: PSB_DODSDATO_HELG_FLYTTE_TIL_FREDAG
       value: "false"
 

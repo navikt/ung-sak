@@ -32,7 +32,7 @@ public class UtførKontrollTjeneste {
     public void utfør(Behandling behandling, String etterkontrollId) {
         var etterkontroll = etterkontrollRepository.hent(etterkontrollId);
         if (etterkontroll.isBehandlet()) {
-            log.info("Etterkontroll av kontrolltype = {} var allerede behandlet", etterkontroll.getKontrollType());
+            log.info("Etterkontroll av kontrolltype = {} var allerede behandlet med id = {}", etterkontroll.getKontrollType(), etterkontrollId);
             return;
         }
 
