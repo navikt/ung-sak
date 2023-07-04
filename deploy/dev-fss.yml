@@ -24,7 +24,7 @@ spec:
     failureThreshold: 27
   replicas:
     min: 2
-    max: 3
+    max: 2
     cpuThresholdPercentage: 80
   prometheus:
     enabled: true
@@ -190,10 +190,10 @@ spec:
       value: http://k9-formidling.k9saksbehandling/k9/formidling
     - name: K9_FORMIDLING_SCOPE
       value: api://dev-fss.k9saksbehandling.k9-formidling/.default
-    - name : K9_PUNSJ_URL
-      value: https://k9-punsj.dev.intern.nav.no/api
+    - name: K9_PUNSJ_URL
+      value: http://k9-punsj.k9saksbehandling/api
     - name: INFOTRYGD_BS_BASE_URI
-      value: https://k9-infotrygd.dev.intern.nav.no
+      value: http://k9-infotrygd.k9saksbehandling
     - name: ARBEID_OG_INNTEKT_BASE_URL
       value: https://arbeid-og-inntekt.nais.preprod.local
     - name: K9_LOS_URL
@@ -205,7 +205,7 @@ spec:
     - name: K9_OMS_AARSKVANTUM_SCOPE
       value: api://dev-fss.k9saksbehandling.k9-aarskvantum/.default
     - name: K9_OMS_UTVIDETRETT_URL
-      value: https://omsorgsdager.dev.intern.nav.no/api
+      value: https://omsorgsdager.intern.dev.nav.no/api
 
     # Restservice PSB spesifikt
     - name: K9_PSB_UTTAK_URL
@@ -236,8 +236,6 @@ spec:
       value: "3030"
 
     # Feature-flag
-    - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
-      value: "true"
     - name: ENABLE_BRUKERDIALOGINNSYN
       value: "true"
     - name: OMP_VERIFISERING_TILKJENT_YTELSE
@@ -252,32 +250,30 @@ spec:
       value: "2022-08-08"
     - name: BG_FORLENGELSE_BASERT_PAA_UTTAK
       value: "true"
-    - name: ENABLE_PRODUCER_DOKUMENTBESTILLING_AIVEN
-      value: "true"
-    - name: ENABLE_PRODUCER_VEDTAKHENDELSE_AIVEN
-      value: "true"
-    - name: ENABLE_PRODUCER_AKSJONSPUNKTHENDELSE_LOS_AIVEN
-      value: "true"
     - name: ENABLE_SJEKK_TILBAKEKREVING
       value: "true"
     - name: IKKE_YRKESAKTIV_UTEN_SPEILING
-      value: "true"
-    - name: OMS_OMSORGENFOR_FLYTTET
-      value: "true"
-    - name: PSB_FRAMOVERHOPP_VED_FORLENGELSE_OPPTJENING
+      value: "false"
+    - name: PSB_START_I_KOFAKBER_VED_FORLENGELSE_OPPTJENING
       value: "true"
     - name: OMP_NULL_HELG_I_KRAVPERIODER
       value: "true"
     - name: OMS_ZERO_REFUSJON_ER_KRAV
       value: "true"
-    - name: ENABLE_NY_SJEKK_OMP_INGEN_PERIODER
+    - name: FERIEPENGER_INFOTRYGD_KORRIGER
       value: "true"
+    - name: TILKOMMET_AKTIVITET_ENABLED
+      value: "true"
+    - name: ENABLE_ETTERKONTROLL_FORSINKET_SAKB
+      value: "true"
+
 
     # Konfigurasjoner
-    - name: K9TILBAKE_AKTIVERT
+    - name: FLYWAY_REPAIR_ON_FAIL
       value: "true"
 
-    # Audit logging
+
+      # Audit logging
     - name: AUDITLOGGER_ENABLED
       value: "true"
     - name: AUDITLOGGER_VENDOR

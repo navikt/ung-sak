@@ -9,6 +9,7 @@ public class DokumentbestillerKafkaTaskProperties {
     public static final String OVERSTYRT_MOTTAKER = "overstyrtMottaker";
     public static final String OVERSTYRT_MOTTAKER_SEPARATOR = ";";
 
+    //Ikke lenger uuid, men renamer ikke pga bakoverkompatiblitet
     public static final String BESTILLING_UUID = "bestillingUuid";
 
 

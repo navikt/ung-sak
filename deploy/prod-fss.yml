@@ -24,7 +24,7 @@ spec:
     failureThreshold: 27
   replicas:
     min: 2
-    max: 3
+    max: 2
     cpuThresholdPercentage: 80
   prometheus:
     enabled: true
@@ -237,8 +237,6 @@ spec:
       value: "3030"
 
     # Feature-flag
-    - name: FRISINN_FLERE_SOKNADER_SAMME_DAG
-      value: "false"
     - name: ENABLE_BRUKERDIALOGINNSYN
       value: "true"
     - name: PSB_UTTAK_UNNTAK_AKTIVITETER
@@ -250,29 +248,28 @@ spec:
     - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
       value: "2023-01-02"
     - name: BG_FORLENGELSE_BASERT_PAA_UTTAK
-      value: "false"
-    - name: ENABLE_PRODUCER_DOKUMENTBESTILLING_AIVEN
-      value: "true"
-    - name: ENABLE_PRODUCER_VEDTAKHENDELSE_AIVEN
-      value: "true"
-    - name: ENABLE_PRODUCER_AKSJONSPUNKTHENDELSE_LOS_AIVEN
       value: "true"
     - name: ENABLE_SJEKK_TILBAKEKREVING
       value: "false"
     - name: IKKE_YRKESAKTIV_UTEN_SPEILING
       value: "false"
-    - name: PSB_FRAMOVERHOPP_VED_FORLENGELSE_OPPTJENING
+    - name: PSB_START_I_KOFAKBER_VED_FORLENGELSE_OPPTJENING
       value: "false"
     - name: OMP_NULL_HELG_I_KRAVPERIODER
       value: "false"
     - name: OMS_ZERO_REFUSJON_ER_KRAV
       value: "false"
-    - name: ENABLE_NY_SJEKK_OMP_INGEN_PERIODER
+    - name: FERIEPENGER_INFOTRYGD_KORRIGER
+      value: "true"
+    - name: ENABLE_ETTERKONTROLL_FORSINKET_SAKB
+      value: "true"
+    - name: PSB_DODSDATO_HELG_FLYTTE_TIL_FREDAG
       value: "false"
 
+
     # Konfigurasjoner
-    - name: K9TILBAKE_AKTIVERT
-      value: "true"
+    - name: FLYWAY_REPAIR_ON_FAIL
+      value: "false"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

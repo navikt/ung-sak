@@ -5,10 +5,13 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRST�
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -51,7 +54,7 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
     public PleiepengerOgOpplæringspengerGrunnlagMapper(UttakTjeneste uttakRestKlient) {
         this.uttakRestKlient = uttakRestKlient;
     }
-
+    
     @Override
     public YtelsespesifiktGrunnlagDto lagYtelsespesifiktGrunnlag(BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode) {
         var uttaksplan = uttakRestKlient.hentUttaksplan(ref.getBehandlingUuid(), false);
@@ -85,14 +88,45 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
     private Map<AktivitetDto, PeriodeMedUtbetalingsgradDto> lagUtbetalingsgrad(LukketPeriode periode, UttaksperiodeInfo plan) {
         var perArbeidsforhold = plan.getUtbetalingsgrader()
             .stream()
-            .collect(Collectors.toMap(this::mapUtbetalingsgradArbeidsforhold, Utbetalingsgrader::getUtbetalingsgrad));
+            .collect(Collectors.toMap(this::mapUtbetalingsgradArbeidsforhold, Function.identity()));
 
         Map<AktivitetDto, PeriodeMedUtbetalingsgradDto> res = new HashMap<>();
         for (var entry : perArbeidsforhold.entrySet()) {
-            var utbetalingsgradPeriode = lagPeriode(periode, entry.getValue());
+            var utbetalingsgrader = entry.getValue();
+            var aktivitetsgrad = hentAktivitetsgrad(utbetalingsgrader);
+            var utbetalingsgradPeriode = lagPeriode(periode, utbetalingsgrader.getUtbetalingsgrad(), aktivitetsgrad);
             res.put(entry.getKey(), utbetalingsgradPeriode);
         }
         return res;
+    }
+
+    private BigDecimal hentAktivitetsgrad(Utbetalingsgrader utbetalingsgrader) {
+        if (utbetalingsgrader.getNormalArbeidstid().isZero()) {
+            return new BigDecimal(100).subtract(utbetalingsgrader.getUtbetalingsgrad());
+        }
+        
+        final Duration faktiskArbeidstid;
+        if (utbetalingsgrader.getFaktiskArbeidstid() != null) {
+            faktiskArbeidstid = utbetalingsgrader.getFaktiskArbeidstid();
+        } else {
+            faktiskArbeidstid = Duration.ofHours(0L);
+        }
+        
+        final BigDecimal HUNDRE_PROSENT = new BigDecimal(100);
+        
+        /*
+         * XXX: Dette er samme måte å regne ut på som i uttak. På sikt bør vi nok flytte
+         *      denne logikken til pleiepenger-barn-uttak.
+         */
+        final BigDecimal aktivitetsgrad = new BigDecimal(faktiskArbeidstid.toMillis()).setScale(2, RoundingMode.HALF_UP)
+                .divide(new BigDecimal(utbetalingsgrader.getNormalArbeidstid().toMillis()), 2, RoundingMode.HALF_UP)
+                .multiply(HUNDRE_PROSENT);
+        
+        if (aktivitetsgrad.compareTo(HUNDRE_PROSENT) >= 0) {
+            return HUNDRE_PROSENT;
+        }
+        
+        return aktivitetsgrad;
     }
 
     private AktivitetDto mapUtbetalingsgradArbeidsforhold(Utbetalingsgrader utbGrad) {
@@ -110,9 +144,9 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
             arbeidsforhold.getType().equals(no.nav.k9.kodeverk.uttak.UttakArbeidType.IKKE_YRKESAKTIV_UTEN_ERSTATNING.getKode());
     }
 
-    private PeriodeMedUtbetalingsgradDto lagPeriode(LukketPeriode periode, BigDecimal utbetalingsgrad) {
+    private PeriodeMedUtbetalingsgradDto lagPeriode(LukketPeriode periode, BigDecimal utbetalingsgrad, BigDecimal aktivitetsgrad) {
         var kalkulusPeriode = new no.nav.folketrygdloven.kalkulus.felles.v1.Periode(periode.getFom(), periode.getTom());
-        return new PeriodeMedUtbetalingsgradDto(kalkulusPeriode, utbetalingsgrad);
+        return new PeriodeMedUtbetalingsgradDto(kalkulusPeriode, utbetalingsgrad, aktivitetsgrad);
     }
 
     private AktivitetDto lagArbeidsforhold(Arbeidsforhold arb) {

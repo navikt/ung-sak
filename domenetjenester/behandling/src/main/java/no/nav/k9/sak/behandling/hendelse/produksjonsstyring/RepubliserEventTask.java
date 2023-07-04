@@ -27,7 +27,7 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingProsessHendelse;
 @ProsessTask(RepubliserEventTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)
 public class RepubliserEventTask implements ProsessTaskHandler {
-    private static final Logger log = LoggerFactory.getLogger(RepubliserEventTask.class);    
+    private static final Logger log = LoggerFactory.getLogger(RepubliserEventTask.class);
     public static final String TASKTYPE = "oppgavebehandling.RepubliserEvent";
 
     private BehandlingRepository behandlingRepository;
@@ -40,8 +40,8 @@ public class RepubliserEventTask implements ProsessTaskHandler {
 
     @Inject
     public RepubliserEventTask(BehandlingRepository behandlingRepository,
-            BehandlingProsessHendelseMapper behandlingProsessHendelseMapper,
-            ProsessTaskTjeneste prosessTaskTjeneste) {
+                               BehandlingProsessHendelseMapper behandlingProsessHendelseMapper,
+                               ProsessTaskTjeneste prosessTaskTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingProsessHendelseMapper = behandlingProsessHendelseMapper;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
@@ -54,7 +54,7 @@ public class RepubliserEventTask implements ProsessTaskHandler {
             log.error("behandlingUuid er påkrevd. Kjøring avbrutt.");
             return;
         }
-        
+
         final Optional<Behandling> behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid);
         if (behandling.isEmpty()) {
             log.error("Kunne ikke finne behandling. Kjøring avbrutt.");
@@ -65,15 +65,13 @@ public class RepubliserEventTask implements ProsessTaskHandler {
         }
 
         final var dto = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(EventHendelse.BEHANDLINGSKONTROLL_EVENT, behandling.get());
-        final var aksjonspunkter = dto.getAksjonspunktKoderMedStatusListe();
 
         final ProsessTaskData nyProsessTask = ProsessTaskData.forProsessTask(PubliserEventTaskImpl.class);
         nyProsessTask.setCallIdFraEksisterende();
         nyProsessTask.setPrioritet(50);
         nyProsessTask.setPayload(toJson(dto));
-        
+
         nyProsessTask.setProperty(PubliserEventTask.PROPERTY_KEY, behandling.get().getId().toString());
-        nyProsessTask.setProperty(PubliserEventTask.BESKRIVELSE, String.valueOf(aksjonspunkter));
 
         prosessTaskTjeneste.lagre(nyProsessTask);
     }

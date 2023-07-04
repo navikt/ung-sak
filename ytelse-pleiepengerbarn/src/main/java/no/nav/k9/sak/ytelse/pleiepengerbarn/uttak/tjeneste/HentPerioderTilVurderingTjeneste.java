@@ -28,11 +28,10 @@ public class HentPerioderTilVurderingTjeneste {
 
     @Inject
     public HentPerioderTilVurderingTjeneste(
-            SøknadsperiodeTjeneste søknadsperiodeTjeneste,
-            @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
+        SøknadsperiodeTjeneste søknadsperiodeTjeneste,
+        @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
-
     }
 
     public NavigableSet<DatoIntervallEntitet> hentPerioderTilVurderingUtenUbesluttet(Behandling behandling) {
@@ -41,6 +40,7 @@ public class HentPerioderTilVurderingTjeneste {
 
         return fjernTrukkedePerioder(referanse, søknadsperioder);
     }
+
 
     public NavigableSet<DatoIntervallEntitet> hentPerioderTilVurderingMedUbesluttet(Behandling behandling, Optional<DatoIntervallEntitet> utvidetPeriodeSomFølgeAvDødsfall) {
         BehandlingReferanse referanse = BehandlingReferanse.fra(behandling);

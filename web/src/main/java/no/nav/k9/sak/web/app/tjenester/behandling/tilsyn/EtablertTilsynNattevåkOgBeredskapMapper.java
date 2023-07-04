@@ -20,6 +20,10 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.EtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.delt.UtledetEtablertTilsyn;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsyn;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynGrunnlag;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynPeriode;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsynRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsyn;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynBeskrivelse;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynForPleietrengende;
@@ -30,11 +34,15 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.HentEtablertTilsynTjenes
 public class EtablertTilsynNattevåkOgBeredskapMapper {
 
     private EtablertTilsynTjeneste etablertTilsynTjeneste;
+    private EtablertTilsynRepository etablertTilsynRepository;
     private HentEtablertTilsynTjeneste hentEtablertTilsynTjeneste;
 
     @Inject
-    public EtablertTilsynNattevåkOgBeredskapMapper(EtablertTilsynTjeneste etablertTilsynTjeneste, HentEtablertTilsynTjeneste hentEtablertTilsynTjeneste) {
+    public EtablertTilsynNattevåkOgBeredskapMapper(EtablertTilsynTjeneste etablertTilsynTjeneste,
+            EtablertTilsynRepository etablertTilsynRepository,
+            HentEtablertTilsynTjeneste hentEtablertTilsynTjeneste) {
         this.etablertTilsynTjeneste = etablertTilsynTjeneste;
+        this.etablertTilsynRepository = etablertTilsynRepository;
         this.hentEtablertTilsynTjeneste = hentEtablertTilsynTjeneste;
     }
 
@@ -43,14 +51,14 @@ public class EtablertTilsynNattevåkOgBeredskapMapper {
         var nattevåk = unntakEtablertTilsynForPleietrengende.map(UnntakEtablertTilsynForPleietrengende::getNattevåk);
 
         return new EtablertTilsynNattevåkOgBeredskapDto(
-            tilEtablertTilsyn(behandlingRef),
+            tilEtablertTilsyn(behandlingRef, brukUbesluttedeData),
             tilSmørtEtablertTilsyn(behandlingRef, unntakEtablertTilsynForPleietrengende, brukUbesluttedeData),
             tilNattevåk(nattevåk, behandlingRef.getAktørId()),
             tilBeredskap(beredskap, behandlingRef.getAktørId()));
     }
 
-    private List<EtablertTilsynPeriodeDto> tilEtablertTilsyn(BehandlingReferanse behandlingRef) {
-        final LocalDateTimeline<UtledetEtablertTilsyn> etablertTilsyntidslinje = etablertTilsynTjeneste.beregnTilsynstidlinje(behandlingRef);
+    private List<EtablertTilsynPeriodeDto> tilEtablertTilsyn(BehandlingReferanse behandlingRef, boolean brukUbesluttedeData) {
+        final LocalDateTimeline<UtledetEtablertTilsyn> etablertTilsyntidslinje = etablertTilsynTjeneste.beregnTilsynstidlinje(behandlingRef, brukUbesluttedeData);
         return etablertTilsyntidslinje.stream().map(entry -> new EtablertTilsynPeriodeDto(new Periode(entry.getFom(), entry.getTom()), entry.getValue().getVarighet(), entry.getValue().getKilde())).toList();
     }
 
@@ -92,8 +100,8 @@ public class EtablertTilsynNattevåkOgBeredskapMapper {
                 uetPeriode.getBegrunnelse(),
                 uetPeriode.getResultat(),
                 tilKilde(søkersAktørId, uetPeriode.getAktørId()),
-                uetPeriode.getVurdertAv() != null ? uetPeriode.getVurdertAv() : uetPeriode.getOpprettetAv(), //TODO fjern condition når vurdertAv er not null
-                uetPeriode.getVurdertTidspunkt() != null ? uetPeriode.getVurdertTidspunkt() : uetPeriode.getOpprettetTidspunkt() //TODO fjern condition når vurdertTid er not null
+                uetPeriode.getVurdertAv(),
+                uetPeriode.getVurdertTidspunkt()
             )
         ).toList();
     }

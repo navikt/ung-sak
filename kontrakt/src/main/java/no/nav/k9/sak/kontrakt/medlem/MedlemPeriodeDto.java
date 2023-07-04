@@ -1,6 +1,7 @@
 package no.nav.k9.sak.kontrakt.medlem;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
@@ -62,6 +63,16 @@ public class MedlemPeriodeDto {
 
     @JsonProperty(value = "vurderingsdato")
     private LocalDate vurderingsdato;
+
+    @JsonProperty(value = "vurdertAv")
+    @Size(max = 20)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Valid
+    private String vurdertAv;
+
+    @JsonProperty(value = "vurdertTidspunkt")
+    @Valid
+    private LocalDateTime vurdertTidspunkt;
 
     public MedlemPeriodeDto() {
         // trengs for deserialisering av JSON
@@ -160,5 +171,21 @@ public class MedlemPeriodeDto {
 
     public void setVurderingsdato(LocalDate vurderingsdato) {
         this.vurderingsdato = vurderingsdato;
+    }
+
+    public String getVurdertAv() {
+        return vurdertAv;
+    }
+
+    public void setVurdertAv(String vurdertAv) {
+        this.vurdertAv = vurdertAv;
+    }
+
+    public LocalDateTime getVurdertTidspunkt() {
+        return vurdertTidspunkt;
+    }
+
+    public void setVurdertTidspunkt(LocalDateTime vurdertTidspunkt) {
+        this.vurdertTidspunkt = vurdertTidspunkt;
     }
 }

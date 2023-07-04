@@ -21,12 +21,16 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.db.util.CdiDbAwareTest;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.opplæringspenger.dokument.OpplæringDokumentType;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPeriode;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPerioderHolder;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokument;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokumentRepository;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringPeriode;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringPerioderHolder;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.KursPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPeriode;
@@ -45,10 +49,13 @@ class GjennomgåttOpplæringRestTjenesteTest {
     private VurdertOpplæringRepository vurdertOpplæringRepository;
     @Inject
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
+    @Inject
+    private OpplæringDokumentRepository opplæringDokumentRepository;
 
     private Behandling behandling;
     private final Periode periode1 = new Periode(LocalDate.now().minusWeeks(1), LocalDate.now());
     private final Periode periode2 = new Periode(LocalDate.now().plusDays(1), LocalDate.now().plusWeeks(1));
+    private OpplæringDokument dokument;
 
     @BeforeEach
     void setup() {
@@ -56,6 +63,10 @@ class GjennomgåttOpplæringRestTjenesteTest {
 
         TestScenarioBuilder scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.OPPLÆRINGSPENGER);
         behandling = scenario.lagre(repositoryProvider);
+
+        scenario.getFagsak().setPleietrengende(AktørId.dummy());
+        dokument = new OpplæringDokument(new JournalpostId("456"),null, OpplæringDokumentType.DOKUMENTASJON_AV_OPPLÆRING, behandling.getUuid(), LocalDate.now(), LocalDateTime.now());
+        opplæringDokumentRepository.lagre(dokument);
     }
 
     private KursPeriode lagKursperiode(Periode periode) {
@@ -99,6 +110,7 @@ class GjennomgåttOpplæringRestTjenesteTest {
         assertThat(result.getVurderinger().get(0).getBegrunnelse()).isNull();
         assertThat(result.getVurderinger().get(0).getVurdertAv()).isNull();
         assertThat(result.getVurderinger().get(0).getVurdertTidspunkt()).isNull();
+        assertThat(result.getVurderinger().get(0).getTilknyttedeDokumenter()).isEmpty();
     }
 
     @Test
@@ -108,7 +120,7 @@ class GjennomgåttOpplæringRestTjenesteTest {
         uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), new UttakPerioderHolder(Set.of(perioderFraSøknad)));
 
         LocalDateTime nå = LocalDateTime.now();
-        var vurdertOpplæringperiode = new VurdertOpplæringPeriode(periode1.getFom(), periode1.getTom(), true, "derfor", "meg", nå);
+        var vurdertOpplæringperiode = new VurdertOpplæringPeriode(periode1.getFom(), periode1.getTom(), true, "derfor", "meg", nå, List.of(dokument));
         vurdertOpplæringRepository.lagre(behandling.getId(), new VurdertOpplæringPerioderHolder(List.of(vurdertOpplæringperiode)));
 
         Response response = restTjeneste.hentVurdertOpplæring(new BehandlingUuidDto(behandling.getUuid()));
@@ -127,6 +139,8 @@ class GjennomgåttOpplæringRestTjenesteTest {
         assertThat(result.getVurderinger().get(0).getBegrunnelse()).isEqualTo(vurdertOpplæringperiode.getBegrunnelse());
         assertThat(result.getVurderinger().get(0).getVurdertAv()).isEqualTo("meg");
         assertThat(result.getVurderinger().get(0).getVurdertTidspunkt()).isEqualTo(nå);
+        assertThat(result.getVurderinger().get(0).getTilknyttedeDokumenter()).hasSize(1);
+        assertThat(result.getVurderinger().get(0).getTilknyttedeDokumenter().get(0)).isEqualTo(dokument.getId().toString());
     }
 
     @Test
@@ -136,7 +150,7 @@ class GjennomgåttOpplæringRestTjenesteTest {
         var perioderFraSøknad1 = lagPerioderFraSøknad(List.of(kursperiode1, kursperiode2));
         uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), new UttakPerioderHolder(Set.of(perioderFraSøknad1)));
 
-        var vurdertOpplæringperiode = new VurdertOpplæringPeriode(periode1.getFom(), periode1.getTom(), false, "nei", "", LocalDateTime.now());
+        var vurdertOpplæringperiode = new VurdertOpplæringPeriode(periode1.getFom(), periode1.getTom(), false, "nei", "", LocalDateTime.now(), List.of());
         vurdertOpplæringRepository.lagre(behandling.getId(), new VurdertOpplæringPerioderHolder(List.of(vurdertOpplæringperiode)));
 
         Response response = restTjeneste.hentVurdertOpplæring(new BehandlingUuidDto(behandling.getUuid()));

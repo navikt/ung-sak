@@ -26,11 +26,11 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeB
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.typer.JournalpostId;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringGrunnlag;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPeriode;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringPerioderHolder;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetid;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetidHolder;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringGrunnlag;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringPeriode;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringPerioderHolder;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertReisetid;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertReisetidHolder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.KursPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 
@@ -99,7 +99,7 @@ class GjennomgåttOpplæringTidslinjeUtlederTest {
     @Test
     void vurderingGodkjent() {
         Set<PerioderFraSøknad> perioderFraSøknad = setupEnkelKursperiode();
-        VurdertOpplæringPeriode vurdertOpplæringPeriode = new VurdertOpplæringPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiodeFom, søknadsperiodeTom), true, "", "", nå);
+        VurdertOpplæringPeriode vurdertOpplæringPeriode = new VurdertOpplæringPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiodeFom, søknadsperiodeTom), true, "", "", nå, List.of());
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæringPeriode));
 
         var vilkårene = vilkårResultatBuilder.build();
@@ -112,7 +112,7 @@ class GjennomgåttOpplæringTidslinjeUtlederTest {
     @Test
     void vurderingIkkeGodkjent() {
         Set<PerioderFraSøknad> perioderFraSøknad = setupEnkelKursperiode();
-        VurdertOpplæringPeriode vurdertOpplæringPeriode = new VurdertOpplæringPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiodeFom, søknadsperiodeTom), false, "", "", nå);
+        VurdertOpplæringPeriode vurdertOpplæringPeriode = new VurdertOpplæringPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiodeFom, søknadsperiodeTom), false, "", "", nå, List.of());
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæringPeriode));
 
         var vilkårene = vilkårResultatBuilder.build();
@@ -137,14 +137,14 @@ class GjennomgåttOpplæringTidslinjeUtlederTest {
     @Test
     void vurderingManglerDelvis() {
         Set<PerioderFraSøknad> perioderFraSøknad = setupEnkelKursperiode();
-        VurdertOpplæringPeriode vurdertOpplæringPeriode = new VurdertOpplæringPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiodeFom, søknadsperiodeTom.minusDays(1)), true, "", "", nå);
+        VurdertOpplæringPeriode vurdertOpplæringPeriode = new VurdertOpplæringPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiodeFom, søknadsperiodeTom.minusWeeks(1)), true, "", "", nå, List.of());
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæringPeriode));
 
         var vilkårene = vilkårResultatBuilder.build();
 
         var resultat = gjennomgåttOpplæringTidslinjeUtleder.utled(vilkårene, perioderFraSøknad, vurdertOpplæringGrunnlag, søknadsperiode);
         assertThat(resultat).isNotNull();
-        var forventetGodkjentTidslinje = resultat.intersection(new LocalDateTimeline<>(søknadsperiodeFom, søknadsperiodeTom.minusDays(1), true));
+        var forventetGodkjentTidslinje = resultat.intersection(new LocalDateTimeline<>(søknadsperiodeFom, søknadsperiodeTom.minusWeeks(1), true));
         assertTidslinje(forventetGodkjentTidslinje, GODKJENT);
         assertTidslinje(resultat.disjoint(forventetGodkjentTidslinje), MANGLER_VURDERING_OPPLÆRING);
     }
@@ -152,7 +152,7 @@ class GjennomgåttOpplæringTidslinjeUtlederTest {
     @Test
     void ikkeGodkjentInstitusjon() {
         Set<PerioderFraSøknad> perioderFraSøknad = setupEnkelKursperiode();
-        VurdertOpplæringPeriode vurdertOpplæringPeriode = new VurdertOpplæringPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiodeFom, søknadsperiodeTom), true, "", "", nå);
+        VurdertOpplæringPeriode vurdertOpplæringPeriode = new VurdertOpplæringPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiodeFom, søknadsperiodeTom), true, "", "", nå, List.of());
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæringPeriode));
 
         setupVilkårResultat(VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON, Utfall.IKKE_OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
@@ -166,7 +166,7 @@ class GjennomgåttOpplæringTidslinjeUtlederTest {
     @Test
     void ikkeGodkjentSykdom() {
         Set<PerioderFraSøknad> perioderFraSøknad = setupEnkelKursperiode();
-        VurdertOpplæringPeriode vurdertOpplæringPeriode = new VurdertOpplæringPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiodeFom, søknadsperiodeTom), true, "", "", nå);
+        VurdertOpplæringPeriode vurdertOpplæringPeriode = new VurdertOpplæringPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiodeFom, søknadsperiodeTom), true, "", "", nå, List.of());
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæringPeriode));
 
         setupVilkårResultat(VilkårType.LANGVARIG_SYKDOM, Utfall.IKKE_OPPFYLT, søknadsperiodeFom, søknadsperiodeTom);
@@ -185,7 +185,7 @@ class GjennomgåttOpplæringTidslinjeUtlederTest {
             null, null, null);
         Set<PerioderFraSøknad> perioderFraSøknad = setupPerioderFraSøknad(List.of(kursPeriode));
 
-        VurdertOpplæringPeriode vurdertOpplæringPeriode = new VurdertOpplæringPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiodeFom.plusDays(2), søknadsperiodeTom.minusDays(2)), true, "", "", nå);
+        VurdertOpplæringPeriode vurdertOpplæringPeriode = new VurdertOpplæringPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiodeFom.plusDays(2), søknadsperiodeTom.minusDays(2)), true, "", "", nå, List.of());
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæringPeriode));
 
         var vilkårene = vilkårResultatBuilder.build();
@@ -205,7 +205,7 @@ class GjennomgåttOpplæringTidslinjeUtlederTest {
         KursPeriode kursPeriode = new KursPeriode(opplæringPeriode, reisetidTil, reisetidHjem, null, null, null);
         Set<PerioderFraSøknad> perioderFraSøknad = setupPerioderFraSøknad(List.of(kursPeriode));
 
-        VurdertOpplæringPeriode vurdertOpplæringPeriode = new VurdertOpplæringPeriode(opplæringPeriode, true, "", "", nå);
+        VurdertOpplæringPeriode vurdertOpplæringPeriode = new VurdertOpplæringPeriode(opplæringPeriode, true, "", "", nå, List.of());
         List<VurdertReisetid> vurdertReisetid = List.of(
             new VurdertReisetid(reisetidTil, true, "ja", "", nå),
             new VurdertReisetid(reisetidHjem, false, "nei", "", nå));
@@ -227,7 +227,7 @@ class GjennomgåttOpplæringTidslinjeUtlederTest {
         KursPeriode kursPeriode = new KursPeriode(søknadsperiodeFom.plusDays(1), søknadsperiodeTom.minusDays(1), reisetidTil, reisetidHjem, null, null, null);
         Set<PerioderFraSøknad> perioderFraSøknad = setupPerioderFraSøknad(List.of(kursPeriode));
 
-        VurdertOpplæringPeriode vurdertOpplæringPeriode = new VurdertOpplæringPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiodeFom.plusDays(1), søknadsperiodeTom.minusDays(1)), true, "", "", nå);
+        VurdertOpplæringPeriode vurdertOpplæringPeriode = new VurdertOpplæringPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiodeFom.plusDays(1), søknadsperiodeTom.minusDays(1)), true, "", "", nå, List.of());
         VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag = setupVurderingsgrunnlag(List.of(vurdertOpplæringPeriode));
 
         var vilkårene = vilkårResultatBuilder.build();

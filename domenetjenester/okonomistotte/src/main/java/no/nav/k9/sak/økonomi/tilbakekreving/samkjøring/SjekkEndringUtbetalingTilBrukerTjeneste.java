@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -12,6 +15,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
@@ -23,6 +27,8 @@ import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
 
 @Dependent
 public class SjekkEndringUtbetalingTilBrukerTjeneste {
+
+    private static final Logger logger = LoggerFactory.getLogger(SjekkEndringUtbetalingTilBrukerTjeneste.class);
 
     private BeregningsresultatRepository beregningsresultatRepository;
     private BehandlingRepository behandlingRepository;
@@ -43,6 +49,11 @@ public class SjekkEndringUtbetalingTilBrukerTjeneste {
         FagsakYtelseType fagsakYtelseType = behandling.getFagsakYtelseType();
         LocalDateTimeline<Boolean> endringYtelse = endringerUtbetalingYtelseTilBruker(fagsakYtelseType, resultatNå, resultatFør);
         LocalDateTimeline<Boolean> endringFeriepenger = endringerUtbetalingFeriepengerTilBruker(resultatNå, resultatFør);
+        if (Environment.current().isDev()) {
+            logger.info("Sammenlignet resultat fra behandling {} med inneværende {}", (forrigeBehandling != null ? forrigeBehandling.getId() : null), behandling.getId());
+            logger.info("Endring ytelse {}", endringYtelse);
+            logger.info("Endring feriepenger {}", endringFeriepenger);
+        }
         return endringYtelse.crossJoin(endringFeriepenger, StandardCombinators::alwaysTrueForMatch);
     }
 

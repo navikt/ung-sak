@@ -25,12 +25,12 @@ import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.db.util.CdiDbAwareTest;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.kontrakt.opplæringspenger.VurderReisetidDto;
-import no.nav.k9.sak.kontrakt.opplæringspenger.VurderReisetidPeriodeDto;
+import no.nav.k9.sak.kontrakt.opplæringspenger.vurdering.VurderReisetidPeriodeDto;
+import no.nav.k9.sak.kontrakt.opplæringspenger.vurdering.VurderReisetidDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertReisetid;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringRepository;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertReisetid;
 
 @CdiDbAwareTest
 class VurderReisetidOppdatererTest {

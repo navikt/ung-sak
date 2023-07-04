@@ -1,5 +1,7 @@
 package no.nav.k9.sak.kontrakt.omsorg;
 
+import java.time.LocalDateTime;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -49,12 +51,21 @@ public class OmsorgenForDto {
     @Valid
     private Resultat resultatEtterAutomatikk;
 
+    @JsonProperty(value = "vurdertAv")
+    @Size(max = 20)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Valid
+    private String vurdertAv;
+
+    @JsonProperty(value = "vurdertTidspunkt")
+    @Valid
+    private LocalDateTime vurdertTidspunkt;
 
     OmsorgenForDto() {
 
     }
 
-    public OmsorgenForDto(Periode periode, String begrunnelse, BarnRelasjon relasjon, String relasjonsbeskrivelse, boolean readOnly, Resultat resultat, Resultat resultatEtterAutomatikk) {
+    public OmsorgenForDto(Periode periode, String begrunnelse, BarnRelasjon relasjon, String relasjonsbeskrivelse, boolean readOnly, Resultat resultat, Resultat resultatEtterAutomatikk, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         this.periode = periode;
         this.begrunnelse = begrunnelse;
         this.relasjon = relasjon;
@@ -62,6 +73,8 @@ public class OmsorgenForDto {
         this.readOnly = readOnly;
         this.resultat = resultat;
         this.resultatEtterAutomatikk = resultatEtterAutomatikk;
+        this.vurdertAv = vurdertAv;
+        this.vurdertTidspunkt = vurdertTidspunkt;
     }
 
 
@@ -91,5 +104,13 @@ public class OmsorgenForDto {
 
     public Resultat getResultatEtterAutomatikk() {
         return resultatEtterAutomatikk;
+    }
+
+    public String getVurdertAv() {
+        return vurdertAv;
+    }
+
+    public LocalDateTime getVurdertTidspunkt() {
+        return vurdertTidspunkt;
     }
 }

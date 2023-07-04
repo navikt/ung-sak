@@ -8,6 +8,7 @@ import java.util.Objects;
 
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
+import no.nav.k9.kodeverk.arbeidsforhold.LønnsinntektBeskrivelse;
 import no.nav.k9.kodeverk.arbeidsforhold.NæringsinntektType;
 import no.nav.k9.kodeverk.arbeidsforhold.OffentligYtelseType;
 import no.nav.k9.kodeverk.arbeidsforhold.PensjonTrygdType;
@@ -32,6 +33,8 @@ public class Inntektspost implements IndexKey {
 
     private SkatteOgAvgiftsregelType skatteOgAvgiftsregelType = SkatteOgAvgiftsregelType.UDEFINERT;
 
+    private LønnsinntektBeskrivelse lønnsinntektBeskrivelse = LønnsinntektBeskrivelse.UDEFINERT;
+
     /** Brukes kun til FK validering. Default OffentligYtelseType. Må settes sammen med {@link #ytelse} */
     private String ytelseType = OffentligYtelseType.KODEVERK;
 
@@ -51,6 +54,7 @@ public class Inntektspost implements IndexKey {
     Inntektspost(Inntektspost inntektspost) {
         this.inntektspostType = inntektspost.getInntektspostType();
         this.skatteOgAvgiftsregelType = inntektspost.getSkatteOgAvgiftsregelType();
+        this.lønnsinntektBeskrivelse = inntektspost.getLønnsinntektBeskrivelse();
         this.ytelse = inntektspost.getYtelseType().getKode();
         this.periode = inntektspost.getPeriode();
         this.beløp = inntektspost.getBeløp();
@@ -59,7 +63,7 @@ public class Inntektspost implements IndexKey {
 
     @Override
     public String getIndexKey() {
-        Object[] keyParts = { getInntektspostType(), getYtelseType().getKodeverk(), getYtelseType().getKode(), getSkatteOgAvgiftsregelType(), periode };
+        Object[] keyParts = { getInntektspostType(), getYtelseType().getKodeverk(), getYtelseType().getKode(), getSkatteOgAvgiftsregelType(), getLønnsinntektBeskrivelse(), periode };
         return IndexKeyComposer.createKey(keyParts);
     }
 
@@ -95,6 +99,14 @@ public class Inntektspost implements IndexKey {
 
     void setSkatteOgAvgiftsregelType(SkatteOgAvgiftsregelType skatteOgAvgiftsregelType) {
         this.skatteOgAvgiftsregelType = skatteOgAvgiftsregelType;
+    }
+
+    public LønnsinntektBeskrivelse getLønnsinntektBeskrivelse() {
+        return lønnsinntektBeskrivelse;
+    }
+
+    public void setLønnsinntektBeskrivelse(LønnsinntektBeskrivelse lønnsinntektBeskrivelse) {
+        this.lønnsinntektBeskrivelse = lønnsinntektBeskrivelse;
     }
 
     void setPeriode(LocalDate fom, LocalDate tom) {
@@ -139,13 +151,14 @@ public class Inntektspost implements IndexKey {
         return Objects.equals(this.getInntektspostType(), other.getInntektspostType())
             && Objects.equals(this.getYtelseType(), other.getYtelseType())
             && Objects.equals(this.getSkatteOgAvgiftsregelType(), other.getSkatteOgAvgiftsregelType())
+            && Objects.equals(this.getLønnsinntektBeskrivelse(), other.getLønnsinntektBeskrivelse())
             && Objects.equals(this.getPeriode().getFomDato(), other.getPeriode().getFomDato())
             && Objects.equals(this.getPeriode().getTomDato(), other.getPeriode().getTomDato());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getInntektspostType(), getYtelseType(), getSkatteOgAvgiftsregelType(), getPeriode().getFomDato(), getPeriode().getTomDato());
+        return Objects.hash(getInntektspostType(), getYtelseType(), getSkatteOgAvgiftsregelType(), getLønnsinntektBeskrivelse(), getPeriode().getFomDato(), getPeriode().getTomDato());
     }
 
     @Override
@@ -154,6 +167,7 @@ public class Inntektspost implements IndexKey {
             "ytelseType=" + ytelseType +
             "inntektspostType=" + inntektspostType +
             "skatteOgAvgiftsregelType=" + skatteOgAvgiftsregelType +
+            "lønnsinntektBeskrivelse=" + lønnsinntektBeskrivelse +
             ", fraOgMed=" + periode.getFomDato() +
             ", tilOgMed=" + periode.getTomDato() +
             ", beløp=" + beløp +

@@ -12,18 +12,17 @@ public class KravPrioInput {
 
     private final long aktuellFagsakId;
     private final Saksnummer aktuellSak;
-
     private final Map<Long, NavigableSet<DatoIntervallEntitet>> utsattePerioderPerBehandling;
-
     private final LocalDateTimeline<Boolean> toOmsorgspersonerTidslinje;
+    private final LocalDateTimeline<Boolean> tidslinjeMedFriKjøring;
     private final List<SakOgBehandlinger> sakOgBehandlinger;
 
-
-    public KravPrioInput(long aktuellFagsakId, Saksnummer aktuellSak, Map<Long, NavigableSet<DatoIntervallEntitet>> utsattePerioderPerBehandling, LocalDateTimeline<Boolean> toOmsorgspersonerTidslinje, List<SakOgBehandlinger> sakOgBehandlinger) {
+    public KravPrioInput(long aktuellFagsakId, Saksnummer aktuellSak, Map<Long, NavigableSet<DatoIntervallEntitet>> utsattePerioderPerBehandling, LocalDateTimeline<Boolean> toOmsorgspersonerTidslinje, LocalDateTimeline<Boolean> tidslinjeMedFriKjøring, List<SakOgBehandlinger> sakOgBehandlinger) {
         this.aktuellFagsakId = aktuellFagsakId;
         this.aktuellSak = aktuellSak;
         this.utsattePerioderPerBehandling = utsattePerioderPerBehandling;
         this.toOmsorgspersonerTidslinje = toOmsorgspersonerTidslinje;
+        this.tidslinjeMedFriKjøring = tidslinjeMedFriKjøring;
         this.sakOgBehandlinger = sakOgBehandlinger;
     }
 
@@ -33,6 +32,10 @@ public class KravPrioInput {
 
     public LocalDateTimeline<Boolean> getToOmsorgspersonerTidslinje() {
         return toOmsorgspersonerTidslinje;
+    }
+
+    public LocalDateTimeline<Boolean> getTidslinjeMedFriKjøring() {
+        return tidslinjeMedFriKjøring;
     }
 
     public List<SakOgBehandlinger> getSakOgBehandlinger() {

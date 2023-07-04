@@ -64,7 +64,9 @@ public class PunsjRestTjeneste {
         Behandling behandling = behandlingsprosessTjeneste.hentBehandling(behandlingUuid.getBehandlingUuid());
         AktørId søker = behandling.getAktørId();
         AktørId barnet = behandling.getFagsak().getPleietrengendeAktørId();
-        Optional<JournalpostIderDto> uferdigJournalpostIderPåAktør = klient.getUferdigJournalpostIderPåAktør(søker.getAktørId(), barnet.getAktørId());
+        String barnetAktørId = (barnet != null) ? barnet.getAktørId() : null;
+
+        Optional<JournalpostIderDto> uferdigJournalpostIderPåAktør = klient.getUferdigJournalpostIderPåAktør(søker.getAktørId(), barnetAktørId);
         if (uferdigJournalpostIderPåAktør.isPresent()) {
             return Response.ok(uferdigJournalpostIderPåAktør.get()).build();
         }

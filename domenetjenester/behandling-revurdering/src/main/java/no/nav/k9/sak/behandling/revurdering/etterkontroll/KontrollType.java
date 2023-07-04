@@ -16,9 +16,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum KontrollType {
 
-    MANGLENDE_FØDSEL("MANGLENDE_FØDSEL", "Kontroll manglende fødsel"),
+    //ikke i bruk, men har vært i bruk tidligere så er lagret i DB
+    @Deprecated
     OVERLAPPENDE_YTELSE("OVERLAPPENDE_YTELSE", "Kontroll overlappende ytelse"),
-    ;
+    UDEFINERT("-", "Udefinert"),
+    FORSINKET_SAKSBEHANDLINGSTID("FORSINKET_SAKSBEHANDLINGSTID", "Kontroll forsinket saksbehandling");
 
     private static final Map<String, KontrollType> KODER = new LinkedHashMap<>();
 

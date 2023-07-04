@@ -10,6 +10,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -131,6 +132,7 @@ public class InnhentDokumentTjeneste {
                     return BehandlingMedOpprettelseResultat.nyBehandling(nyBehandling);
                 }
             } else {
+                sjekkBehandlingKanHoppesTilbake(sisteBehandling);
                 return BehandlingMedOpprettelseResultat.eksisterendeBehandling(sisteBehandling);
             }
         }
@@ -162,7 +164,7 @@ public class InnhentDokumentTjeneste {
     private void sjekkBehandlingKanLåses(Behandling behandling) {
         int forsøk = 3;
 
-        BehandlingLås lås = null;
+        BehandlingLås lås;
         while (--forsøk >= 0) {
             lås = behandlingLåsRepository.taLåsHvisLedig(behandling.getId());
             if (lås != null) {
@@ -178,6 +180,14 @@ public class InnhentDokumentTjeneste {
 
         // noen andre holder på siden vi ikke fikk fatt på lås, så avbryter denne gang
         throw MottattInntektsmeldingException.FACTORY.behandlingPågårAvventerKnytteMottattDokumentTilBehandling(behandling.getId());
+    }
+
+    private void sjekkBehandlingKanHoppesTilbake(Behandling behandling) {
+        boolean underIverksetting = behandling.getStatus() == BehandlingStatus.IVERKSETTER_VEDTAK;
+        if (underIverksetting) {
+            //vedtak er fattet og behandlingen kan derfor ikke oppdateres. Må vente til behandlingen er avsluttet, og det vil så opprettes ny behandling når dokumentet sendes på nytt
+            throw MottattInntektsmeldingException.FACTORY.behandlingUnderIverksettingAvventerKnytteMottattDokumentTilBehandling(behandling.getId());
+        }
     }
 
     private Dokumentmottaker getDokumentmottaker(Brevkode brevkode, Fagsak fagsak) {
