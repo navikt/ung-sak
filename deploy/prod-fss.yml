@@ -259,9 +259,6 @@ spec:
       value: "true"
     - name: ENABLE_ETTERKONTROLL_FORSINKET_SAKB
       value: "true"
-    - name: PSB_DODSDATO_HELG_FLYTTE_TIL_FREDAG
-      value: "false"
-
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
