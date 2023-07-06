@@ -565,7 +565,7 @@
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>io.github.classgraph</groupId>
                 <artifactId>classgraph</artifactId>
-                <version>4.8.160</version>
+                <version>4.8.161</version>
             </dependency>
 
             <dependency>
