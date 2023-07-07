@@ -6,6 +6,7 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRST�
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
@@ -33,7 +34,6 @@ import no.nav.k9.sak.perioder.EndretUtbetalingPeriodeutleder;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.trigger.ProsessTriggereRepository;
 import no.nav.k9.sak.trigger.Trigger;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
@@ -75,11 +75,15 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
 
     @Override
     public NavigableSet<DatoIntervallEntitet> utledPerioder(BehandlingReferanse behandlingReferanse) {
-        var periodeTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjenester, behandlingReferanse.getFagsakYtelseType(), behandlingReferanse.getBehandlingType());
+        var periodeTjeneste = getPeriodeTjeneste(behandlingReferanse);
         return periodeTjeneste.utled(behandlingReferanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR).stream()
             .flatMap(p -> utledPerioder(behandlingReferanse, p).stream())
             .collect(Collectors.toCollection(TreeSet::new));
 
+    }
+
+    private VilkårsPerioderTilVurderingTjeneste getPeriodeTjeneste(BehandlingReferanse behandlingReferanse) {
+        return VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjenester, behandlingReferanse.getFagsakYtelseType(), behandlingReferanse.getBehandlingType());
     }
 
     @Override
@@ -139,6 +143,11 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
             .orElseThrow(() -> new IllegalStateException("Forventer å finne original behandling"));
         var originalBehandling = behandlingRepository.hentBehandling(originalBehandlingId);
 
+        var vilkårFraOriginalBehandling = getPeriodeTjeneste(behandlingReferanse)
+            .utled(originalBehandlingId, VilkårType.BEREGNINGSGRUNNLAGVILKÅR).stream().map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFomDato(), it.getTomDato()))
+            .collect(Collectors.toSet());
+
+
         var uttaksplan = uttakRestKlient.hentUttaksplan(behandlingReferanse.getBehandlingUuid(), true);
         var originalUttakslpan = uttakRestKlient.hentUttaksplan(originalBehandling.getUuid(), true);
 
@@ -150,29 +159,51 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
         var differanse2 = originalUttakTidslinje.combine(uttakTidslinje, StandardCombinators::difference, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
         var relevanteUttaksperioder = new TreeSet<DatoIntervallEntitet>();
-        relevanteUttaksperioder.addAll(finnRelevanteIntervaller(periode, differanse1.filterValue(v -> !v.isEmpty())));
-        relevanteUttaksperioder.addAll(finnRelevanteIntervaller(periode, differanse2.filterValue(v -> !v.isEmpty())));
+        var endringer1 = differanse1.filterValue(v -> !v.isEmpty());
+        relevanteUttaksperioder.addAll(finnRelevanteIntervaller(periode, endringer1));
+        relevanteUttaksperioder.addAll(finnKantIKantMed(endringer1, vilkårFraOriginalBehandling));
+
+        var endringer2 = differanse2.filterValue(v -> !v.isEmpty());
+        relevanteUttaksperioder.addAll(finnRelevanteIntervaller(periode, endringer2));
+        relevanteUttaksperioder.addAll(finnKantIKantMed(endringer2, vilkårFraOriginalBehandling));
         return relevanteUttaksperioder;
     }
 
-    private <V> NavigableSet<DatoIntervallEntitet> finnRelevanteIntervaller(DatoIntervallEntitet vilkårsperiode, LocalDateTimeline<V> differanse1) {
+
+
+    private List<DatoIntervallEntitet> finnKantIKantMed(LocalDateTimeline<?> differanse, Set<DatoIntervallEntitet> stp) {
         var kantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
 
-        var intervaller1 = differanse1.toSegments().stream()
-            .map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFom(), p.getTom()))
+        var segsKantIKantMedEndring = stp.stream()
+            .filter(k -> differanse.toSegments().stream().anyMatch(it -> kantIKantVurderer.erKantIKant(k, tilIntervall(it))))
+            .toList();
+        return segsKantIKantMedEndring;
+    }
+
+    private DatoIntervallEntitet tilIntervall(LocalDateSegment<?> s) {
+        return DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom());
+    }
+
+    private <V> NavigableSet<DatoIntervallEntitet> finnRelevanteIntervaller(DatoIntervallEntitet vilkårsperiode, LocalDateTimeline<V> differanse) {
+        var kantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
+
+        var intervaller = differanse.toSegments().stream()
+            .map(this::tilIntervall)
             .sorted(Comparator.naturalOrder())
             .toList();
 
-        var resultat1 = new TreeSet<DatoIntervallEntitet>();
+        var resultat = new TreeSet<DatoIntervallEntitet>();
 
-        for (var intervall : intervaller1) {
+        for (var intervall : intervaller) {
             if (intervall.overlapper(vilkårsperiode)) {
-                resultat1.add(intervall);
-            } else if (resultat1.stream().anyMatch(r -> kantIKantVurderer.erKantIKant(intervall, r)) || kantIKantVurderer.erKantIKant(intervall, vilkårsperiode)) {
-                resultat1.add(intervall);
+                resultat.add(intervall);
+            } else if (resultat.stream().anyMatch(r -> kantIKantVurderer.erKantIKant(intervall, r)) || kantIKantVurderer.erKantIKant(intervall, vilkårsperiode)) {
+                resultat.add(intervall);
             }
         }
-        return resultat1;
+
+
+        return resultat;
     }
 
     private LocalDateTimeline<Set<Utbetalingsgrader>> lagTidslinje(Uttaksplan uttaksplan) {
