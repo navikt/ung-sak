@@ -1,6 +1,8 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.beregning;
 
+import static java.util.Collections.emptyNavigableSet;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -37,6 +39,8 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.trigger.ProsessTriggereRepository;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -89,19 +93,23 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
     private PleiepengerEndretUtbetalingPeriodeutleder utleder;
     private MottatteDokumentRepository mottatteDokumentRepository;
 
+    private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = mock();
+
     @BeforeEach
     void setUp() {
         fagsakRepository = new FagsakRepository(entityManager);
         behandlingRepository = new BehandlingRepository(entityManager);
         søknadsperiodeRepository = new SøknadsperiodeRepository(entityManager);
         mottatteDokumentRepository = new MottatteDokumentRepository(entityManager);
-        utleder = new PleiepengerEndretUtbetalingPeriodeutleder(uttakTjeneste, behandlingRepository, null,
+        utleder = new PleiepengerEndretUtbetalingPeriodeutleder(uttakTjeneste, behandlingRepository, new UnitTestLookupInstanceImpl<>(vilkårsPerioderTilVurderingTjeneste),
             new ProsessTriggereRepository(entityManager), søknadsperiodeTjeneste, true);
         originalBehandling = opprettBehandling(SKJÆRINGSTIDSPUNKT);
         behandling = Behandling.fraTidligereBehandling(originalBehandling, BehandlingType.REVURDERING).build();
         behandlingRepository.lagre(behandling, new BehandlingLås(null));
 
         mottatteDokumentRepository.lagre(byggMottattDokument(behandling.getFagsakId()), DokumentStatus.GYLDIG);
+
+        when(vilkårsPerioderTilVurderingTjeneste.utled(any(), any())).thenReturn(emptyNavigableSet());
     }
 
     @Test
