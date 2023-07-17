@@ -30,6 +30,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
 import no.nav.k9.sak.domene.opptjening.MellomliggendeHelgUtleder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.EndretUtbetalingPeriodeutleder;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.trigger.ProsessTriggereRepository;
@@ -154,22 +155,13 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
         var uttakTidslinje = lagTidslinje(uttaksplan);
         var originalUttakTidslinje = lagTidslinje(originalUttakslpan);
 
-        // Må bruke difference begge veier for å finne både nye arbeidsforhold og eventuelt fjernede arbeidsforhold
-        var differanse1 = uttakTidslinje.combine(originalUttakTidslinje, StandardCombinators::difference, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-        var differanse2 = originalUttakTidslinje.combine(uttakTidslinje, StandardCombinators::difference, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        var endringer = uttakTidslinje.combine(originalUttakTidslinje, TidslinjeUtil::forskjell, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
         var relevanteUttaksperioder = new TreeSet<DatoIntervallEntitet>();
-        var endringer1 = differanse1.filterValue(v -> !v.isEmpty());
-        relevanteUttaksperioder.addAll(finnRelevanteIntervaller(periode, endringer1));
-        relevanteUttaksperioder.addAll(finnKantIKantMed(endringer1, vilkårFraOriginalBehandling));
-
-        var endringer2 = differanse2.filterValue(v -> !v.isEmpty());
-        relevanteUttaksperioder.addAll(finnRelevanteIntervaller(periode, endringer2));
-        relevanteUttaksperioder.addAll(finnKantIKantMed(endringer2, vilkårFraOriginalBehandling));
+        relevanteUttaksperioder.addAll(finnRelevanteIntervaller(periode, endringer));
+        relevanteUttaksperioder.addAll(finnKantIKantMed(endringer, vilkårFraOriginalBehandling));
         return relevanteUttaksperioder;
     }
-
-
 
     private List<DatoIntervallEntitet> finnKantIKantMed(LocalDateTimeline<?> differanse, Set<DatoIntervallEntitet> stp) {
         var kantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
