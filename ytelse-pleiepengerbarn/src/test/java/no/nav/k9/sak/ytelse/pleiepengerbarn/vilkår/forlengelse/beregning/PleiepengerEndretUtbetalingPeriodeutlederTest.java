@@ -346,13 +346,22 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
         assertThat(periode.getTomDato()).isEqualTo(fom.plusDays(11));
     }
 
+    //hull på 10 dager mellom stp1 og stp2 periodene inkl fom og tom
+    //men tettes bare delvis
+        /*
+          beh1    |---|     |----|
+          ben2         |---|
+         */
+    //TODO: endre dette til kant-i-kant med tom dato og stp2
     @Test
     void skal_inkludere_uttak_uten_endring_hvis_kant_i_kant_med_tidligere_stp() {
         var stp1 = SKJÆRINGSTIDSPUNKT;
         var antallDager = 5;
         var tom1 = stp1.plusDays(antallDager);
 
-        var antallDagerHull = 8; //hull på 10 dager mellom stp1 og stp2 periodene inkl fom og tom
+
+
+        var antallDagerHull = 8;
         var stp2 = tom1.plusDays(antallDagerHull+2);
         var antallDager2 = 20;
         var tom2 = stp2.plusDays(antallDager2);
@@ -388,6 +397,61 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
         var periode = forlengelseperioder.iterator().next();
         assertThat(periode.getFomDato()).isEqualTo(stp1);
         assertThat(periode.getTomDato()).isEqualTo(tom2);
+    }
+
+    //hull på 10 dager mellom stp1 og stp2 periodene inkl fom og tom
+    //men tettes bare delvis
+        /*
+          beh1    |---|           |----|
+          ben2            |---|
+         */
+    //TODO: endre dette til kant-i-kant med tom dato og stp2
+    @Test
+    void skal_inkludere_uttak_kun_med_endring_hvis_ikke_kant_i_kant_fra_tidligere_stp() {
+        var stp1 = SKJÆRINGSTIDSPUNKT;
+        var antallDager = 5;
+        var tom1 = stp1.plusDays(antallDager);
+
+
+        var antallDagerHull = 4;
+        var fomHull = tom1.plusDays(3);
+        var tomHull = fomHull.plusDays(antallDagerHull);
+
+        var stp2 = tomHull.plusDays(3);
+        var antallDager2 = 20;
+        var tom2 = stp2.plusDays(antallDager2);
+
+        var utbPeriode = List.of(fullUtbetaling(ARBEIDSFORHOLD_1));
+
+        Map<LukketPeriode, UttaksperiodeInfo> perioder = new HashMap<>();
+        leggTilPeriode(perioder, stp1, utbPeriode, antallDager);
+        leggTilPeriode(perioder, stp2, utbPeriode, antallDager2);
+        Uttaksplan uttaksplanOriginal = new Uttaksplan(perioder, List.of());
+
+        Map<LukketPeriode, UttaksperiodeInfo> perioder_tette_hull = new HashMap<>();
+        leggTilPeriode(perioder_tette_hull, stp1, utbPeriode, antallDager);
+        leggTilPeriode(perioder_tette_hull, fomHull, utbPeriode, antallDagerHull);
+        leggTilPeriode(perioder_tette_hull, stp2, utbPeriode, antallDager2);
+        Uttaksplan uttaksplan_tette_hull = new Uttaksplan(perioder_tette_hull, List.of());
+
+        when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
+            .thenReturn(uttaksplan_tette_hull);
+        when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
+            .thenReturn(uttaksplanOriginal);
+
+        when(vilkårsPerioderTilVurderingTjeneste.utled(originalBehandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR))
+            .thenReturn(new TreeSet<>(List.of(
+                DatoIntervallEntitet.fraOgMedTilOgMed(stp1, tom1),
+                DatoIntervallEntitet.fraOgMedTilOgMed(stp2, tom2)
+            )));
+
+
+        var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(stp1, tom2));
+
+        assertThat(forlengelseperioder.size()).isEqualTo(1);
+        var periode = forlengelseperioder.iterator().next();
+        assertThat(periode.getFomDato()).isEqualTo(fomHull);
+        assertThat(periode.getTomDato()).isEqualTo(tomHull);
     }
 
 
