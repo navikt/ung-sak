@@ -5,6 +5,7 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NavigableSet;
@@ -65,7 +66,7 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
                                                      @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
                                                      ProsessTriggereRepository prosessTriggereRepository,
                                                      SøknadsperiodeTjeneste søknadsperiodeTjeneste,
-                                                     @KonfigVerdi(value = "BG_FORLENGELSE_BASERT_PAA_UTTAK", defaultVerdi = "false") boolean enabled) {
+                                                     @KonfigVerdi(value = "BG_FORLENGELSE_BASERT_PAA_UTTAK", defaultVerdi = "true") boolean enabled) {
         this.uttakRestKlient = uttakRestKlient;
         this.behandlingRepository = behandlingRepository;
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
@@ -96,16 +97,16 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
 
         var tidslinjeFraProessTriggere = finnTidslinjeFraProsessTriggere(behandlingReferanse);
         var søknadperioderForBehandlingTidslinje = finnTidslinjeForRelevanteSøknadsperioder(behandlingReferanse);
-        var relevantUttaksTidslinje = finnTidslinjeForEndredeUttaksperioder(behandlingReferanse, vilkårsperiode);
+        var påvirketAvUttaksendringTidslinje = finnTidslinjePåvirketAvUttaksendring(behandlingReferanse, vilkårsperiode);
 
-        var tidslinje = relevantUttaksTidslinje
+        var tidslinje = påvirketAvUttaksendringTidslinje
             .crossJoin(søknadperioderForBehandlingTidslinje, StandardCombinators::coalesceLeftHandSide)
             .crossJoin(tidslinjeFraProessTriggere, StandardCombinators::coalesceLeftHandSide)
             .compress();
 
         tidslinje = fyllMellomromDersomKunHelg(tidslinje).compress();
 
-        return finnRelevanteIntervaller(vilkårsperiode, tidslinje);
+        return finnUttaksendringerSomOverlapperEllerErKantiKantMedPerioden(vilkårsperiode, tidslinje);
     }
 
     private static LocalDateTimeline<Boolean> fyllMellomromDersomKunHelg(LocalDateTimeline<Boolean> tidslinje) {
@@ -133,13 +134,7 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
         return new LocalDateTimeline<>(søknadsperioderForBehandling, StandardCombinators::coalesceLeftHandSide);
     }
 
-    private LocalDateTimeline<Boolean> finnTidslinjeForEndredeUttaksperioder(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet periode) {
-        var relevanteUttaksperioder = finnRelevanteUttaksperioder(behandlingReferanse, periode);
-
-        return new LocalDateTimeline<>(relevanteUttaksperioder.stream().map(p -> new LocalDateSegment<>(p.getFomDato(), p.getTomDato(), TRUE)).toList());
-    }
-
-    private NavigableSet<DatoIntervallEntitet> finnRelevanteUttaksperioder(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet periode) {
+    private LocalDateTimeline<Boolean> finnTidslinjePåvirketAvUttaksendring(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet periode) {
         var originalBehandlingId = behandlingReferanse.getOriginalBehandlingId()
             .orElseThrow(() -> new IllegalStateException("Forventer å finne original behandling"));
         var originalBehandling = behandlingRepository.hentBehandling(originalBehandlingId);
@@ -148,35 +143,34 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
             .utled(originalBehandlingId, VilkårType.BEREGNINGSGRUNNLAGVILKÅR).stream().map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFomDato(), it.getTomDato()))
             .collect(Collectors.toSet());
 
-
         var uttaksplan = uttakRestKlient.hentUttaksplan(behandlingReferanse.getBehandlingUuid(), true);
         var originalUttakslpan = uttakRestKlient.hentUttaksplan(originalBehandling.getUuid(), true);
 
         var uttakTidslinje = lagTidslinje(uttaksplan);
         var originalUttakTidslinje = lagTidslinje(originalUttakslpan);
 
-        var endringer = uttakTidslinje.combine(originalUttakTidslinje, TidslinjeUtil::forskjell, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        var uttaksendringer = uttakTidslinje.combine(originalUttakTidslinje, TidslinjeUtil::forskjell, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
-        var relevanteUttaksperioder = new TreeSet<DatoIntervallEntitet>();
-        relevanteUttaksperioder.addAll(finnRelevanteIntervaller(periode, endringer));
-        relevanteUttaksperioder.addAll(finnKantIKantMed(endringer, vilkårFraOriginalBehandling));
-        return relevanteUttaksperioder;
+        var resultatperioder = new ArrayList<DatoIntervallEntitet>();
+        resultatperioder.addAll(finnUttaksendringerSomOverlapperEllerErKantiKantMedPerioden(periode, uttaksendringer));
+        resultatperioder.addAll(finnVilkårsperioderSomUmiddelbartEtterfølgerUttaksendringer(uttaksendringer, vilkårFraOriginalBehandling));
+
+        return new LocalDateTimeline<>(resultatperioder.stream().map(p -> new LocalDateSegment<>(p.getFomDato(), p.getTomDato(), TRUE)).toList(), StandardCombinators::alwaysTrueForMatch);
     }
 
-    private List<DatoIntervallEntitet> finnKantIKantMed(LocalDateTimeline<?> differanse, Set<DatoIntervallEntitet> stp) {
+    private List<DatoIntervallEntitet> finnVilkårsperioderSomUmiddelbartEtterfølgerUttaksendringer(LocalDateTimeline<?> uttaksendringer, Set<DatoIntervallEntitet> vilkårFraOrginalBehandling) {
         var kantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
-
-        var segsKantIKantMedEndring = stp.stream()
-            .filter(k -> differanse.toSegments().stream().anyMatch(it -> kantIKantVurderer.erKantIKant(k, tilIntervall(it))))
+        return vilkårFraOrginalBehandling.stream()
+            .filter(gammelVilkårsperiode -> uttaksendringer.stream()
+                .anyMatch(uttaksendring -> uttaksendring.getTom().isBefore(gammelVilkårsperiode.getTomDato()) && kantIKantVurderer.erKantIKant(gammelVilkårsperiode, tilIntervall(uttaksendring))))
             .toList();
-        return segsKantIKantMedEndring;
     }
 
     private DatoIntervallEntitet tilIntervall(LocalDateSegment<?> s) {
         return DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom());
     }
 
-    private <V> NavigableSet<DatoIntervallEntitet> finnRelevanteIntervaller(DatoIntervallEntitet vilkårsperiode, LocalDateTimeline<V> differanse) {
+    private <V> NavigableSet<DatoIntervallEntitet> finnUttaksendringerSomOverlapperEllerErKantiKantMedPerioden(DatoIntervallEntitet vilkårsperiode, LocalDateTimeline<V> differanse) {
         var kantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
 
         var intervaller = differanse.toSegments().stream()
