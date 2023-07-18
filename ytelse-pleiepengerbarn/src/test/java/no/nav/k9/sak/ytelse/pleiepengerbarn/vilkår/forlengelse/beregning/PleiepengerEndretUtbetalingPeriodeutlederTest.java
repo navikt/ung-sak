@@ -545,11 +545,12 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
         var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(stp1, tomForlengelse));
 
         assertThat(forlengelseperioder.size()).isEqualTo(2);
-        var periode = forlengelseperioder.iterator().next();
+        var iterator = forlengelseperioder.iterator();
+        var periode = iterator.next();
         assertThat(periode.getFomDato()).isEqualTo(fomEndring);
         assertThat(periode.getTomDato()).isEqualTo(tomEndring);
 
-        periode = forlengelseperioder.iterator().next();
+        periode = iterator.next();
         assertThat(periode.getFomDato()).isEqualTo(fomForlengelse);
         assertThat(periode.getTomDato()).isEqualTo(tomForlengelse);
     }
