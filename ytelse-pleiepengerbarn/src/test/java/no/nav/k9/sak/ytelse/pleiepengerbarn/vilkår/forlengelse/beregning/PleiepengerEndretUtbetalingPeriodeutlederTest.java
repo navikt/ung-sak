@@ -352,7 +352,6 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
           ben2         |---|
           res          |---------|
          */
-    //TODO: endre dette til kant-i-kant med tom dato og stp2
     @Test
     void skal_inkludere_uttak_uten_endring_hvis_kant_i_kant_med_tidligere_stp() {
         var stp1 = SKJÆRINGSTIDSPUNKT;
@@ -404,7 +403,6 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
           ben2               |---|
           resultat           |---|
          */
-    //TODO: endre dette til kant-i-kant med tom dato og stp2
     @Test
     void skal_inkludere_uttak_kun_med_endring_hvis_ikke_kant_i_kant_fra_tidligere_stp() {
         var stp1 = SKJÆRINGSTIDSPUNKT;
