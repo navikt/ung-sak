@@ -483,12 +483,18 @@
                 <artifactId>hamcrest</artifactId>
                 <version>2.2</version>
             </dependency>
-
             <dependency>
                 <groupId>org.glassfish.jaxb</groupId>
                 <artifactId>jaxb-runtime</artifactId>
                 <version>4.0.3</version>
             </dependency>
+            <dependency>
+                <groupId>org.xerial.snappy</groupId>
+                <artifactId>snappy-java</artifactId>
+                <!-- oppdaterer versjon for å bli kvitt CVE-2023-34455 CVE-2023-34454 CVE-2023-34453 -->
+                <version>1.1.10.2</version>
+            </dependency>
+
             <!-- lagt her for å sikre dependencyConvergence -->
             <dependency>
                 <groupId>org.osgi</groupId>
