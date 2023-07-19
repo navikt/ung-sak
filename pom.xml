@@ -40,13 +40,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <felles.version>2.0.3</felles.version>
+        <felles.version>2.0.4</felles.version>
         <swagger.version>2.2.3</swagger.version>
         <junit.version>5.9.3</junit.version>
         <k9format.version>8.3.4</k9format.version>
         <jackson.version>2.15.2</jackson.version>
         <asm.version>9.5</asm.version>
-        <kotlin-stdlib.version>1.8.22</kotlin-stdlib.version>
+        <kotlin-stdlib.version>1.9.0</kotlin-stdlib.version>
         <jandex.version>3.1.2</jandex.version>
 
     </properties>
@@ -75,7 +75,7 @@
             <dependency>
                 <groupId>no.nav.fpsak.tidsserie</groupId>
                 <artifactId>fpsak-tidsserie</artifactId>
-                <version>2.6.7</version>
+                <version>2.6.8</version>
             </dependency>
             <dependency>
                 <groupId>org.hibernate.validator</groupId>
@@ -386,7 +386,7 @@
             <dependency>
                 <groupId>no.nav.fpsak.nare</groupId>
                 <artifactId>fpsak-nare-core</artifactId>
-                <version>2.5.3</version>
+                <version>2.5.4</version>
             </dependency>
 
             <!-- Prosjektets egne TEST AVHENGIGHETER -->
@@ -863,7 +863,7 @@
                     <dependency>
                         <groupId>no.nav.k9.dev</groupId>
                         <artifactId>dev-jakarta-transform</artifactId>
-                        <version>0.6.7</version>
+                        <version>0.6.11</version>
                     </dependency>
                     <dependency>
                         <groupId>ant-contrib</groupId>
