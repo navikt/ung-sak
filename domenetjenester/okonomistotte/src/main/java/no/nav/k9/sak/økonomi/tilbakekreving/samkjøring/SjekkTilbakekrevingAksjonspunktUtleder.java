@@ -1,5 +1,6 @@
 package no.nav.k9.sak.økonomi.tilbakekreving.samkjøring;
 
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,7 +11,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.felles.konfigurasjon.env.Environment;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
@@ -86,26 +87,25 @@ public class SjekkTilbakekrevingAksjonspunktUtleder {
             logger.info("Simulering viser feilutbetaling, så tilbakekrevingsbehandling er påvirket");
             return true;
         }
-        boolean overlappendeEndring = overlapperTilbakekrevingsbehandlingen(endringUtbetalingTilBruker, feilutbetaling.get());
-        logger.info("Behandlingen overlapper {} tilbakekrevingsbehandlingen", overlappendeEndring ? "" : " ikke ");
-        return overlappendeEndring;
-    }
-
-    private static boolean overlapperTilbakekrevingsbehandlingen(LocalDateTimeline<Boolean> endringUtbetalingTilBruker, BehandlingStatusOgFeilutbetalinger feilutbetaling) {
-        //endringen i ytelsesbehandlingen treffer samme perioder (i hele måneder) som i tilbakekrevingen.
-        //da skal ytelsesbehandlingen gjennomføres, slik at tilbakekrevingsbehandlingen kan få oppdaterte tall - selv om den sperres
-        LocalDateTimeline<Boolean> tilbakekrevingensPerioder = lagTidslinjeHvorFeilutbetalt(feilutbetaling);
-        if (Environment.current().isDev()) {
-            logger.info("Tilbakekrevingens perioder {}", tilbakekrevingensPerioder);
-            logger.info("Endring i utbetaling til bruker {}", endringUtbetalingTilBruker);
-        }
-        return tilbakekrevingensPerioder.intersects(endringUtbetalingTilBruker);
+        LocalDateTimeline<Boolean> tilbakekrevingensPerioder = lagTidslinjeHvorFeilutbetalt(feilutbetaling.get());
+        LocalDateTimeline<Boolean> utvidetTilbakekrevingsperioder = utvidMedHeleForrigeOgNesteMåned(tilbakekrevingensPerioder);
+        boolean påvirker = utvidetTilbakekrevingsperioder.intersects(endringUtbetalingTilBruker);
+        logger.info("Endring i utbetaling til bruker overlapper {} tilbakekrevingsbehandlingen eller måned som ligger inntil", påvirker ? "" : " ikke ");
+        return påvirker;
     }
 
     private static LocalDateTimeline<Boolean> lagTidslinjeHvorFeilutbetalt(BehandlingStatusOgFeilutbetalinger feilutbetaling) {
         return new LocalDateTimeline<>(feilutbetaling.getFeilutbetaltePerioder().stream()
             .map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), true))
             .toList());
+    }
+
+    private static LocalDateTimeline<Boolean> utvidMedHeleForrigeOgNesteMåned(LocalDateTimeline<Boolean> tidslinje) {
+        return new LocalDateTimeline<>(tidslinje.stream().map(segment -> new LocalDateSegment<>(
+            segment.getFom().minusMonths(1).with(TemporalAdjusters.firstDayOfMonth()),
+            segment.getTom().plusMonths(1).with(TemporalAdjusters.lastDayOfMonth()),
+            segment.getValue())
+        ).toList(), StandardCombinators::alwaysTrueForMatch);
     }
 
 }
