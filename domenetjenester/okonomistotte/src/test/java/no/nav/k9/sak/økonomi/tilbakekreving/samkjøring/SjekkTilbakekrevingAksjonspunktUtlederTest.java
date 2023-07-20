@@ -11,6 +11,7 @@ import org.mockito.Mockito;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.Periode;
@@ -97,6 +98,42 @@ class SjekkTilbakekrevingAksjonspunktUtlederTest {
         );
         List<AksjonspunktDefinisjon> aksjonspunkt = utleder.sjekkMotÅpenIkkeoverlappendeTilbakekreving(behandling);
         Assertions.assertThat(aksjonspunkt).isEmpty();
+    }
+
+    @Test
+    void skal_ha_aksjonspunkt_når_det_er_tilbakekrevingsbehandling_og_økning_av_feilutbetalt_beløp() {
+        Mockito.when(k9TilbakeRestKlient.hentFeilutbetalingerForSisteBehandling(behandling.getFagsak().getSaksnummer())).thenReturn(
+            Optional.of(new BehandlingStatusOgFeilutbetalinger(null, List.of(new Periode(_2023_feb_15, _2023_feb_15))))
+        );
+        boolean slåttAvInntrekk = false;
+        Long feilutbetaling = 1000L;
+        Long inntrekk = 0L;
+        Mockito.when(simuleringIntegrasjonTjeneste.hentResultat(behandling)).thenReturn(
+            Optional.of(new SimuleringResultatDto(feilutbetaling, inntrekk, slåttAvInntrekk)));
+        Mockito.when(sjekkEndringUtbetalingTilBrukerTjeneste.endringerUtbetalingTilBruker(behandling)).thenReturn(
+            new LocalDateTimeline<>(_2022_jan_01, _2022_jan_12, true)
+        );
+
+        List<AksjonspunktDefinisjon> aksjonspunkt = utleder.sjekkMotÅpenIkkeoverlappendeTilbakekreving(behandling);
+        Assertions.assertThat(aksjonspunkt).containsOnly(AksjonspunktDefinisjon.SJEKK_TILBAKEKREVING);
+    }
+
+    @Test
+    void skal_ha_aksjonspunkt_når_det_er_tilbakekrevingsbehandling_og_inntrekk() {
+        Mockito.when(k9TilbakeRestKlient.hentFeilutbetalingerForSisteBehandling(behandling.getFagsak().getSaksnummer())).thenReturn(
+            Optional.of(new BehandlingStatusOgFeilutbetalinger(null, List.of(new Periode(_2023_feb_15, _2023_feb_15))))
+        );
+        boolean slåttAvInntrekk = false;
+        Long feilutbetaling = 0L;
+        Long inntrekk = 1310L;
+        Mockito.when(simuleringIntegrasjonTjeneste.hentResultat(behandling)).thenReturn(
+            Optional.of(new SimuleringResultatDto(feilutbetaling, inntrekk, slåttAvInntrekk)));
+        Mockito.when(sjekkEndringUtbetalingTilBrukerTjeneste.endringerUtbetalingTilBruker(behandling)).thenReturn(
+            new LocalDateTimeline<>(_2022_jan_01, _2022_jan_12, true)
+        );
+
+        List<AksjonspunktDefinisjon> aksjonspunkt = utleder.sjekkMotÅpenIkkeoverlappendeTilbakekreving(behandling);
+        Assertions.assertThat(aksjonspunkt).containsOnly(AksjonspunktDefinisjon.SJEKK_TILBAKEKREVING);
     }
 
     @Test

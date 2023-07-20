@@ -66,8 +66,7 @@ public class SjekkTilbakekrevingAksjonspunktUtleder {
             return false;
         }
         SimuleringResultatDto simuleringsresultat = simuleringResultatDto.get();
-        return simuleringsresultat.harFeilutbetaling();
-
+        return simuleringsresultat.harFeilutbetaling() || simuleringsresultat.harInntrekkmulighet();
     }
 
     boolean påvirkerÅpenTilbakekrevingsbehandling(Behandling aktuellBehandling) {
