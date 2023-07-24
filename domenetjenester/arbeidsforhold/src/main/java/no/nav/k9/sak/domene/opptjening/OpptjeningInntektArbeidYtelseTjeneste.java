@@ -1,6 +1,7 @@
 package no.nav.k9.sak.domene.opptjening;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -12,13 +13,20 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.iay.modell.AktørYtelse;
 import no.nav.k9.sak.domene.iay.modell.InntektFilter;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
+import no.nav.k9.sak.domene.iay.modell.Ytelse;
+import no.nav.k9.sak.domene.iay.modell.YtelseAnvist;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
@@ -72,6 +80,27 @@ public class OpptjeningInntektArbeidYtelseTjeneste {
             alle.put(stp, List.copyOf(result));
         }
         return Collections.unmodifiableNavigableMap(alle);
+    }
+
+    public LocalDateTimeline<Boolean> finnAapTidslinje(Long behandlingId, AktørId aktørId) {
+        var grunnlagOpt = iayTjeneste.finnGrunnlag(behandlingId);
+        if (grunnlagOpt.isEmpty()) {
+            return LocalDateTimeline.empty();
+        }
+        var iayGrunnlag = grunnlagOpt.get();
+        Optional<AktørYtelse> ytelser = iayGrunnlag.getAktørYtelseFraRegister(aktørId);
+        if (ytelser.isEmpty()) {
+            return LocalDateTimeline.empty();
+        }
+        List<LocalDateSegment<Boolean>> segmenter = new ArrayList<>();
+        for (Ytelse ytelse : ytelser.get().getAlleYtelser()) {
+            if (FagsakYtelseType.ARBEIDSAVKLARINGSPENGER == ytelse.getYtelseType()) {
+                for (YtelseAnvist ytelseAnvist : ytelse.getYtelseAnvist()) {
+                    segmenter.add(new LocalDateSegment<>(ytelseAnvist.getAnvistFOM(), ytelseAnvist.getAnvistTOM(), true));
+                }
+            }
+        }
+        return new LocalDateTimeline<Boolean>(segmenter, StandardCombinators::alwaysTrueForMatch);
     }
 
     public NavigableMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>> hentRelevanteOpptjeningAktiveterForVilkårVurdering(BehandlingReferanse ref,

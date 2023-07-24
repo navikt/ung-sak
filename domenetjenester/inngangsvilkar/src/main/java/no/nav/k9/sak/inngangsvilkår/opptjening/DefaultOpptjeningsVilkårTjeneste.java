@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.fpsak.nare.evaluation.Evaluation;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -23,19 +23,22 @@ import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtfallOversetter;
 import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.Opptjeningsvilkår;
 import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.OpptjeningsvilkårResultat;
+import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.OpptjeningsvilkårV2;
 import no.nav.k9.sak.typer.AktørId;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
 public class DefaultOpptjeningsVilkårTjeneste implements OpptjeningsVilkårTjeneste {
     private OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste;
+    private boolean manuellVurderingSNogAAP;
 
     public DefaultOpptjeningsVilkårTjeneste() {
     }
 
     @Inject
-    public DefaultOpptjeningsVilkårTjeneste(OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste) {
+    public DefaultOpptjeningsVilkårTjeneste(OpptjeningInntektArbeidYtelseTjeneste opptjeningTjeneste, @KonfigVerdi(value = "OPPTJENING_MANUELT_VURDER_AAP_SN", defaultVerdi = "true") boolean manuellVurderingSNogAAP) {
         this.opptjeningTjeneste = opptjeningTjeneste;
+        this.manuellVurderingSNogAAP = manuellVurderingSNogAAP;
     }
 
     @Override
@@ -54,6 +57,7 @@ public class DefaultOpptjeningsVilkårTjeneste implements OpptjeningsVilkårTjen
         OpptjeningResultat opptjeningResultat = opptjeningTjeneste.hentOpptjening(behandlingId);
         var relevanteOpptjeningAktiveter = opptjeningTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(behandlingReferanse, sortertPerioder);
         var relevanteOpptjeningInntekter = opptjeningTjeneste.hentRelevanteOpptjeningInntekterForVilkårVurdering(behandlingId, aktørId, sortertFomDatoer);
+        var aapTidslinje = manuellVurderingSNogAAP ? opptjeningTjeneste.finnAapTidslinje(behandlingId, aktørId) : null;
 
         //TODO håndter selvstendig næringsdrivende
         for (var vilkårPeriode : sortertPerioder) {
@@ -63,8 +67,10 @@ public class DefaultOpptjeningsVilkårTjeneste implements OpptjeningsVilkårTjen
 
             var inntektPerioder = relevanteOpptjeningInntekter.get(stp);
             var aktivitetPerioder = relevanteOpptjeningAktiveter.get(vilkårPeriode);
-            var grunnlag = new OpptjeningsgrunnlagAdapter(behandlingstidspunkt, opptjening.getFom(), opptjening.getTom())
-                .mapTilGrunnlag(aktivitetPerioder, inntektPerioder);
+            OpptjeningsgrunnlagAdapter adapter = new OpptjeningsgrunnlagAdapter(behandlingstidspunkt, opptjening.getFom(), opptjening.getTom());
+            var grunnlag = manuellVurderingSNogAAP
+                ? adapter.mapTilGrunnlag(aktivitetPerioder, inntektPerioder, aapTidslinje)
+                : adapter.mapTilGrunnlag(aktivitetPerioder, inntektPerioder);
 
             // TODO(OJR) overstyrer konfig for fp... burde blitt flyttet ut til konfig verdier.. både for FP og for SVP???
             grunnlag.setMinsteAntallDagerGodkjent(28);
@@ -77,7 +83,9 @@ public class DefaultOpptjeningsVilkårTjeneste implements OpptjeningsVilkårTjen
 
             // returner egen output i tillegg for senere lagring
             OpptjeningsvilkårResultat output = new OpptjeningsvilkårResultat();
-            Evaluation evaluation = new Opptjeningsvilkår().evaluer(grunnlag, output);
+            Evaluation evaluation = manuellVurderingSNogAAP
+                ? new OpptjeningsvilkårV2().evaluer(grunnlag, output)
+                : new Opptjeningsvilkår().evaluer(grunnlag, output);
 
             VilkårData vilkårData = new VilkårUtfallOversetter().oversett(VilkårType.OPPTJENINGSVILKÅRET, evaluation, grunnlag, vilkårPeriode);
             vilkårData.setEkstraVilkårresultat(output);

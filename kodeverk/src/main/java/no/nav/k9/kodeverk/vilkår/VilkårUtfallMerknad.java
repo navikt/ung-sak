@@ -66,6 +66,7 @@ public enum VilkårUtfallMerknad implements Kodeverdi {
     VM_1102("1102", "Institusjonen er ikke godkjent"),
 
     VM_5007("5007", "søknadsfristvilkåret"),
+    VM_5089("5089", "Kan ikke automatisk innvilge opptjeningsvilkåret"),
 
     VM_7001("7001", "Søker ikke oppfylt opplysningsplikten jf folketrygdloven §§ 21-7 og 21-3"),
     VM_7002("7002", "Start ny vilkårsvurdering"),

@@ -259,6 +259,8 @@ spec:
       value: "true"
     - name: ENABLE_ETTERKONTROLL_FORSINKET_SAKB
       value: "true"
+    - name: OPPTJENING_MANUELT_VURDER_AAP_SN
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
