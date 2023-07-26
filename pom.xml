@@ -40,7 +40,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <felles.version>2.0.4</felles.version>
+        <felles.version>2.0.5</felles.version>
         <swagger.version>2.2.3</swagger.version>
         <junit.version>5.9.3</junit.version>
         <k9format.version>8.3.4</k9format.version>
