@@ -89,7 +89,7 @@
 
         <dependency>
             <groupId>no.nav.k9.sak</groupId>
-            <artifactId>kontrakt-jakarta</artifactId>
+            <artifactId>kontrakt</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.k9.sak</groupId>
