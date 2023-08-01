@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.server.batch;
 import java.time.LocalDate;
 import java.util.Objects;
 
+import org.hibernate.jpa.SpecHints;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +60,8 @@ public class BatchProsessTaskRepository {
         logger.info("Sletter {} rader fra prosess_task_partition_ferdig_{}", antall, partisjonsNr);
 
 
-        Query query = entityManager.createNativeQuery("TRUNCATE prosess_task_partition_ferdig_" + partisjonsNr);
+        Query query = entityManager.createNativeQuery("TRUNCATE prosess_task_partition_ferdig_" + partisjonsNr)
+            .setHint(SpecHints.HINT_SPEC_QUERY_TIMEOUT, 30000);
         query.executeUpdate(); //TRUNCATE rapporterer 0 rader uansett hvor mange som blir slettet
         entityManager.flush();
 
