@@ -200,7 +200,6 @@ public class FagsakProsessTaskRepository {
         }
 
         Set<ProsessTaskData> planlagteTasksBlokkertAvKjørende = eksisterendeTasks.stream()
-            .filter(t -> currentTaskData == null || !Objects.equals(t.getId(), currentTaskData.getId())) // se bort fra oss selv (hvis vi kjører i en task)
             .filter(t -> Objects.equals(t.getStatus(), ProsessTaskStatus.VETO) && currentTaskData != null && Objects.equals(currentTaskData.getId(), t.getBlokkertAvProsessTaskId()))
             .collect(Collectors.toSet());
         Set<String> planlagteTaskTyperBlokkertAvKjørende = planlagteTasksBlokkertAvKjørende.stream()
@@ -221,10 +220,9 @@ public class FagsakProsessTaskRepository {
         vetoetEllerVentendeTasksAvSammeTypeSomNy.retainAll(nyeTaskTyper);
 
         if (vetoetEllerVentendeTasksAvSammeTypeSomNy.containsAll(nyeTaskTyper)) {
-            var grupper = planlagteTasksBlokkertAvKjørende.stream().map(ProsessTaskData::getGruppe).collect(Collectors.toSet());
             log.info("Skipper opprettelse av gruppe med tasks: [{}], Har allerede vetoet tasks av samme type [{}], Og ventende tasks i gruppe med vetoet [{}]",
                 toStringEntry(gruppe.getTasks()), planlagteTaskTyperBlokkertAvKjørende, ventendeTaskTyperIGruppeMedBlokkert);
-            return grupper.stream().findFirst().orElseThrow();
+            return blokkerteGrupper.stream().findFirst().orElse(null);
         }
 
         throw new IllegalStateException("Kan ikke opprette gruppe med tasks: [" + toStringEntry(gruppe.getTasks()) + "]"
