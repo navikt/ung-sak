@@ -7,7 +7,9 @@ import java.time.Year;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -69,5 +71,32 @@ class TidslinjeUtilTest {
             new LocalDateSegment<>(mandag_uke1, fredag_uke1, true),
             new LocalDateSegment<>(mandag_uke2, mandag_uke2, true)
         )));
+    }
+
+    @Test
+    void skal_utlede_forskjell_for_sett() {
+        LocalDate dag1 = LocalDate.now();
+        LocalDate dag2 = dag1.plusDays(1);
+        LocalDate dag3 = dag1.plusDays(2);
+        LocalDateTimeline<Set<String>> tidslinjeA = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(dag1, dag1, Set.of("A")),
+            new LocalDateSegment<>(dag2, dag2, Set.of("A", "B")),
+            new LocalDateSegment<>(dag3, dag3, Set.of("A", "C")))
+        );
+        LocalDateTimeline<Set<String>> tidslinjeB = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(dag2, dag2, Set.of("A", "B")),
+            new LocalDateSegment<>(dag3, dag3, Set.of("A")))
+        );
+
+        LocalDateTimeline<Set<String>> resultat = tidslinjeA.combine(tidslinjeB, TidslinjeUtil::forskjell, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        Assertions.assertThat(resultat)
+            .isEqualTo(new LocalDateTimeline<>(List.of(
+                    new LocalDateSegment<>(dag1, dag1, Set.of("A")),
+                    new LocalDateSegment<>(dag3, dag3, Set.of("C")))
+                )
+            );
+
+
+        Assertions.assertThat(new LocalDateTimeline<>(dag1, dag1, Set.of()).combine(new LocalDateTimeline<>(dag2, dag2, Set.of()), TidslinjeUtil::forskjell, LocalDateTimeline.JoinStyle.CROSS_JOIN)).isEqualTo(LocalDateTimeline.EMPTY_TIMELINE);
     }
 }

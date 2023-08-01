@@ -31,6 +31,13 @@ public class JettyDevServer extends JettyServer {
     }
 
     public static void main(String[] args) throws Exception {
+
+        //konfigurerer tasker til å polle mer aggressivt, gjør at verdikjede kjører raskere lokalt
+        System.setProperty("task.manager.runner.threads", "4");
+        System.setProperty("task.manager.polling.delay", "40");
+        System.setProperty("task.manager.polling.wait", "1");
+
+
         JettyDevServer devServer = new JettyDevServer();
         devServer.bootStrap();
     }

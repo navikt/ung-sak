@@ -57,9 +57,12 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePPN implements Hån
         if (dødsdato == null) {
             return Optional.empty();
         }
-        var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
+        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(referanse.getBehandlingId());
+        if (vilkårene.isEmpty()){
+            return Optional.empty();
+        }
 
-        if (!harGodkjentSykdomPåDødsdatoen(dødsdato, vilkårene)) {
+        if (!harGodkjentSykdomPåDødsdatoen(dødsdato, vilkårene.get())) {
             return Optional.empty();
         }
         LocalDate sisteDato = vilkårResultatRepository.hent(referanse.getBehandlingId()).getAlleIntervaller().getMaxLocalDate();

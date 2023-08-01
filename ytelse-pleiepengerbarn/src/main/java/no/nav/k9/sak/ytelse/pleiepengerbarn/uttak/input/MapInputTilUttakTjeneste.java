@@ -132,7 +132,8 @@ public class MapInputTilUttakTjeneste {
             .medInaktivTidslinje(inaktivTidslinje)
             .medInntektArbeidYtelseGrunnlag(input.getInntektArbeidYtelseGrunnlag())
             .medBruker(behandling.getAktørId())
-            .medSakerSomMåSpesialHåndteres(MapUnntakFraAktivitetGenerering.mapUnntak(unntak));
+            .medSakerSomMåSpesialHåndteres(MapUnntakFraAktivitetGenerering.mapUnntak(unntak))
+            .medTilkommetAktivitetsperioder(input.getTilkommetAktivitetsperioder());
 
         input.getUtvidetPeriodeSomFølgeAvDødsfall().ifPresent(arbeidstidInput::medAutomatiskUtvidelseVedDødsfall);
 
@@ -166,6 +167,7 @@ public class MapInputTilUttakTjeneste {
             perioderSomSkalTilbakestilles,
             arbeid,
             pleiebehov,
+            new HashMap<>(), // Overstyringer.
             lovbestemtFerie,
             inngangsvilkår,
             tilsynsperioder,

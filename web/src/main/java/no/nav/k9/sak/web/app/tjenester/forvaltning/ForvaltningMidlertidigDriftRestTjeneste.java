@@ -2,7 +2,9 @@ package no.nav.k9.sak.web.app.tjenester.forvaltning;
 
 import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.OVERSTYRING_FRISINN_OPPGITT_OPPTJENING;
 
@@ -29,6 +31,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -62,6 +67,7 @@ import no.nav.k9.felles.sikkerhet.abac.AbacDto;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -121,6 +127,8 @@ import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
 @Transactional
 public class ForvaltningMidlertidigDriftRestTjeneste {
 
+    private static final Logger logger = LoggerFactory.getLogger(ForvaltningMidlertidigDriftRestTjeneste.class);
+
     private FrisinnSøknadMottaker frisinnSøknadMottaker;
     private TpsTjeneste tpsTjeneste;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
@@ -140,6 +148,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     private PersonopplysningRepository personopplysningRepository;
     private OpprettRevurderingService opprettRevurderingService;
 
+    private ProsessTaskTjeneste prosessTaskTjeneste;
+
     public ForvaltningMidlertidigDriftRestTjeneste() {
         // For Rest-CDI
     }
@@ -157,7 +167,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                                                    StønadstatistikkService stønadstatistikkService,
                                                    DriftLesetilgangVurderer lesetilgangVurderer,
                                                    PersonopplysningRepository personopplysningRepository,
-                                                   OpprettRevurderingService opprettRevurderingService) {
+                                                   OpprettRevurderingService opprettRevurderingService,
+                                                   ProsessTaskTjeneste prosessTaskTjeneste) {
 
         this.frisinnSøknadMottaker = frisinnSøknadMottaker;
         this.tpsTjeneste = tpsTjeneste;
@@ -172,6 +183,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         this.lesetilgangVurderer = lesetilgangVurderer;
         this.personopplysningRepository = personopplysningRepository;
         this.opprettRevurderingService = opprettRevurderingService;
+        this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
     /**
@@ -287,7 +299,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         }
 
     }
-    
+
     @POST
     @Path("/feriepengerevurdering")
     @Consumes(MediaType.TEXT_PLAIN)
@@ -306,16 +318,77 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                 for (Fagsak f : fagsaker) {
                     if (f.getYtelseType() == FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
                         opprettRevurderingService.opprettAutomatiskRevurdering(f.getSaksnummer(),
-                                BehandlingÅrsakType.RE_FERIEPENGER_ENDRING_FRA_ANNEN_SAK,
-                                BehandlingStegType.START_STEG);
+                            BehandlingÅrsakType.RE_FERIEPENGER_ENDRING_FRA_ANNEN_SAK,
+                            BehandlingStegType.START_STEG);
                     }
                 }
             } catch (RuntimeException e) {
                 sb.append(fødselsnummer + "\n");
             }
         }
-        
+
         return Response.ok("Kjørt. Følgende fnr fikk ikke task: " + sb.toString()).build();
+    }
+
+    @POST
+    @Path("/feriepengerevurdering-saksnumre")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(description = "Oppretter automatisk revurdering av feriepenger.", summary = ("Oppretter automatisk revurdering av feriepenger."), tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = DRIFT)
+    public Response opprettFeriepengerevurderingSaksnumre(@Parameter(description = "Saksnumre (skilt med mellomrom eller linjeskift)") @Valid OpprettManuellRevurdering opprettRevurdering) {
+        var saksnummerStreng = Objects.requireNonNull(opprettRevurdering.getSaksnumre(), "saksnumre");
+        var saksnumrene = new LinkedHashSet<>(Arrays.asList(saksnummerStreng.split("\\s+")));
+
+        final StringBuilder sb = new StringBuilder();
+        for (var saksnummer : saksnumrene) {
+            try {
+                Fagsak fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(new Saksnummer(saksnummer), false).orElseThrow(() -> new IllegalArgumentException("Finner ikke sak " + saksnummer));
+                if (fagsak.getYtelseType() != PLEIEPENGER_SYKT_BARN) {
+                    throw new IllegalArgumentException("Fagsak " + saksnummer + " var ikke PSB-sak");
+                }
+                opprettRevurderingService.opprettAutomatiskRevurdering(new Saksnummer(saksnummer),
+                    BehandlingÅrsakType.RE_FERIEPENGER_ENDRING_FRA_ANNEN_SAK,
+                    BehandlingStegType.START_STEG);
+            } catch (RuntimeException e) {
+                sb.append(saksnummer + "\n");
+                logger.warn("Ignorerte " + saksnummer, e);
+            }
+        }
+
+        return Response.ok("Kjørt. Følgende saksnumre fikk ikke task: " + sb).build();
+    }
+
+    @POST
+    @Path("/feriepengerevurderingkandidater")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(description = "Oppretter task som logger saker som vør vurderes for revurdering av feriepenger etter fiks av at kvote er pr år", tags = "feriepenger")
+    @BeskyttetRessurs(action = CREATE, resource = DRIFT)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Response finnSakerSomSkalRevurderes() {
+        String preparedStatement = """
+            insert into prosess_task (task_type, id, task_sekvens, task_gruppe, task_parametere)
+             with gruppe as (select nextval('seq_prosess_task_gruppe') as gruppe_id)
+             select 'feriepenger.revurdering.kandidatutleder.task', nextval('seq_prosess_task'), row_number() over (order by saksnummer), gruppe_id, 'saksnummer=' || saksnummer
+             from (
+                     select saksnummer,
+                            b.avsluttet_dato,
+                            rank() over (partition by saksnummer order by b.avsluttet_dato desc nulls first) omvendt_rekkefolge
+                     from fagsak f
+                     join behandling b on f.id = b.fagsak_id
+                     where f.ytelse_type = :ytelse_type
+                      and b.behandling_resultat_type not in (:henleggelse_aarsaker)
+                 ) t
+             left outer join gruppe on (true)
+             where omvendt_rekkefolge = 1 and avsluttet_dato < to_date('2022-11-19', 'YYYY-MM-DD')
+            """;
+        Query query = entityManager.createNativeQuery(preparedStatement)
+            .setParameter("ytelse_type", FagsakYtelseType.PSB.getKode())
+            .setParameter("henleggelse_aarsaker", BehandlingResultatType.getAlleHenleggelseskoder().stream().map(BehandlingResultatType::getKode).toList());
+        int resultat = query.executeUpdate();
+        logger.info("Lagde {} tasker for å sjekke kandidater for revurdering av feriepenger", resultat);
+        return Response.ok("Lagde " + resultat + " tasker for å sjekke kandidater for revurdering av feriepenger").build();
     }
 
     @GET

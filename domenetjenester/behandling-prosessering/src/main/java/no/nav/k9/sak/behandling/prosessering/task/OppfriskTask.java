@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.behandling;
+package no.nav.k9.sak.behandling.prosessering.task;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,6 +7,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -25,17 +26,17 @@ public class OppfriskTask extends BehandlingProsessTask {
     public static final String TASKTYPE = "behandling.oppfrisk";
 
     private BehandlingRepository repository;
-    private SjekkProsessering sjekkProsessering;
+    private BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste;
 
     OppfriskTask() {
         // for CDI proxy
     }
 
     @Inject
-    public OppfriskTask(BehandlingLåsRepository behandlingLåsRepository, BehandlingRepository repository, SjekkProsessering sjekkProsessering) {
+    public OppfriskTask(BehandlingLåsRepository behandlingLåsRepository, BehandlingRepository repository, BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste) {
         super(behandlingLåsRepository);
         this.repository = repository;
-        this.sjekkProsessering = sjekkProsessering;
+        this.behandlingsprosessApplikasjonTjeneste = behandlingsprosessApplikasjonTjeneste;
     }
 
     @Override
@@ -43,13 +44,12 @@ public class OppfriskTask extends BehandlingProsessTask {
         try {
             var behandling = repository.hentBehandling(prosessTaskData.getBehandlingId());
             logContext(behandling);
-            var forceInnhent = Boolean.valueOf(prosessTaskData.getPropertyValue(PROPERTY_FORCE));
-            sjekkProsessering.asynkInnhentingAvRegisteropplysningerOgKjørProsess(behandling, forceInnhent);
+            boolean forceInnhent = Boolean.parseBoolean(prosessTaskData.getPropertyValue(PROPERTY_FORCE));
+            behandlingsprosessApplikasjonTjeneste.asynkInnhentingAvRegisteropplysningerOgKjørProsess(behandling, forceInnhent);
         } catch (RuntimeException e) {
             log.info("Uventet feil ved oppfrisking av behandling.", e);
         }
     }
-
 
     public static ProsessTaskData create(Behandling behandling, boolean force) {
         final ProsessTaskData taskData =  ProsessTaskData.forProsessTask(OppfriskTask.class);

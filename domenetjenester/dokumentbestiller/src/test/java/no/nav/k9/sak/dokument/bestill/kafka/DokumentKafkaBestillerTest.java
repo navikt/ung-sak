@@ -1,8 +1,10 @@
 package no.nav.k9.sak.dokument.bestill.kafka;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +19,7 @@ import no.nav.k9.formidling.kontrakt.kodeverk.DokumentMalType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskRepository;
+import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 import no.nav.k9.prosesstask.impl.ProsessTaskEventPubliserer;
 import no.nav.k9.prosesstask.impl.ProsessTaskRepositoryImpl;
 import no.nav.k9.prosesstask.impl.ProsessTaskTjenesteImpl;
@@ -70,12 +73,18 @@ public class DokumentKafkaBestillerTest {
         HistorikkAktør aktør = HistorikkAktør.SAKSBEHANDLER;
         dokumentKafkaBestiller.bestillBrevFraKafka(bestillBrevDto, aktør);
         Mockito.verify(brevHistorikkinnslag, Mockito.times(1)).opprettHistorikkinnslagForBestiltBrevFraKafka(aktør, behandling, innhentDok);
-        List<ProsessTaskData> prosessTaskDataListe = prosessTaskRepository.finnIkkeStartet();
+        List<ProsessTaskData> prosessTaskDataListe = prosessTaskRepository.finnAlle(DokumentbestillerKafkaTaskProperties.TASKTYPE, ProsessTaskStatus.KLAR);
+
         assertThat(prosessTaskDataListe).anySatisfy(taskData -> {
-            assertThat(taskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.BEHANDLING_ID)).isEqualTo(behandling.getId().toString());
-            assertThat(taskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE)).isEqualTo(innhentDok.getKode());
-            assertThat(JsonObjectMapper.fromJson(taskData.getPayloadAsString(), DokumentdataParametreK9.class).getFritekst()).isNull();
-        });
+                assertThat(taskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.BEHANDLING_ID)).isEqualTo(behandling.getId().toString());
+                assertThat(taskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE)).isEqualTo(innhentDok.getKode());
+                assertThat(JsonObjectMapper.fromJson(taskData.getPayloadAsString(), DokumentdataParametreK9.class).getFritekst()).isNull();
+                assertThatNoException().isThrownBy(() ->
+                    UUID.fromString(taskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.BESTILLING_UUID))
+                );
+            }
+        );
+
     }
 
     @Test
@@ -86,7 +95,7 @@ public class DokumentKafkaBestillerTest {
         HistorikkAktør aktør = HistorikkAktør.SAKSBEHANDLER;
         dokumentKafkaBestiller.bestillBrevFraKafka(bestillBrevDto, aktør);
         Mockito.verify(brevHistorikkinnslag, Mockito.times(1)).opprettHistorikkinnslagForBestiltBrevFraKafka(aktør, behandling, innhentDok);
-        List<ProsessTaskData> prosessTaskDataListe = prosessTaskRepository.finnIkkeStartet();
+        List<ProsessTaskData> prosessTaskDataListe = prosessTaskRepository.finnAlle(DokumentbestillerKafkaTaskProperties.TASKTYPE, ProsessTaskStatus.KLAR);
         assertThat(prosessTaskDataListe).anySatisfy(taskData -> {
             assertThat(taskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.BEHANDLING_ID)).isEqualTo(behandling.getId().toString());
             assertThat(taskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE)).isEqualTo(innhentDok.getKode());
@@ -103,7 +112,7 @@ public class DokumentKafkaBestillerTest {
         HistorikkAktør aktør = HistorikkAktør.SAKSBEHANDLER;
         dokumentKafkaBestiller.bestillBrevFraKafka(bestillBrevDto, aktør);
         Mockito.verify(brevHistorikkinnslag, Mockito.times(1)).opprettHistorikkinnslagForBestiltBrevFraKafka(aktør, behandling, generellFritekstbrev);
-        List<ProsessTaskData> prosessTaskDataListe = prosessTaskRepository.finnIkkeStartet();
+        List<ProsessTaskData> prosessTaskDataListe = prosessTaskRepository.finnAlle(DokumentbestillerKafkaTaskProperties.TASKTYPE, ProsessTaskStatus.KLAR);
         assertThat(prosessTaskDataListe).anySatisfy(taskData -> {
             assertThat(taskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.BEHANDLING_ID)).isEqualTo(behandling.getId().toString());
             assertThat(taskData.getPropertyValue(DokumentbestillerKafkaTaskProperties.DOKUMENT_MAL_TYPE)).isEqualTo(generellFritekstbrev.getKode());
@@ -114,7 +123,7 @@ public class DokumentKafkaBestillerTest {
     }
 
     private BestillBrevDto lagBestillBrevDto(DokumentMalType dokumentMalType, String fritekst, FritekstbrevinnholdDto fritekstbrev) {
-        return new BestillBrevDto(behandling.getId(), no.nav.k9.kodeverk.dokument.DokumentMalType.fraKode(dokumentMalType.getKode()), fritekst, null, fritekstbrev);
+        return new BestillBrevDto(behandling.getId(), no.nav.k9.kodeverk.dokument.DokumentMalType.fraKode(dokumentMalType.getKode()), fritekst, null, fritekstbrev, null);
     }
 
 }

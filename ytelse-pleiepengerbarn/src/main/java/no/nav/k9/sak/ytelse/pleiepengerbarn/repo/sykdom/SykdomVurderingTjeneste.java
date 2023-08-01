@@ -185,10 +185,10 @@ public class SykdomVurderingTjeneste {
     private LocalDateTimeline<Boolean> hentInnleggelseUnder18årTidslinje(Behandling behandling) {
         final var innleggelser = hentInnleggelser(behandling);
 
-        final LocalDateTimeline<Boolean> innleggelsesperioderTidslinje = new LocalDateTimeline<Boolean>(innleggelser.getPerioder()
+        final LocalDateTimeline<Boolean> innleggelsesperioderTidslinje = new LocalDateTimeline<>(innleggelser.getPerioder()
             .stream()
             .map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), Boolean.TRUE))
-            .toList());
+            .toList(), StandardCombinators::alwaysTrueForMatch);
         final LocalDate pleietrengendesFødselsdato = finnPleietrengendesFødselsdato(behandling);
         return innleggelsesperioderTidslinje.intersection(new LocalDateInterval(null, pleietrengendesFødselsdato.plusYears(PleietrengendeAlderPeriode.ALDER_FOR_STRENGERE_PSB_VURDERING).minusDays(1))).compress();
     }

@@ -2,7 +2,6 @@ package no.nav.k9.sak.web.app.tjenester.fordeling;
 
 import static no.nav.k9.abac.BeskyttetRessursKoder.APPLIKASJON;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.k9.felles.feil.LogLevel.WARN;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,6 +20,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -45,10 +47,7 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
-import no.nav.k9.felles.feil.Feil;
-import no.nav.k9.felles.feil.FeilFactory;
-import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
-import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
+import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.AbacDto;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
@@ -60,7 +59,6 @@ import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.dokument.arkiv.ArkivJournalPost;
 import no.nav.k9.sak.dokument.arkiv.journal.SafAdapter;
 import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
@@ -96,6 +94,8 @@ public class FordelRestTjeneste {
 
     static final String BASE_PATH = "/fordel";
     private static final String JSON_UTF8 = "application/json; charset=UTF-8";
+    private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess");
+    private static final Logger logger = LoggerFactory.getLogger(FordelRestTjeneste.class);
 
     private SaksbehandlingDokumentmottakTjeneste dokumentmottakTjeneste;
     private SafAdapter safAdapter;
@@ -154,7 +154,7 @@ public class FordelRestTjeneste {
         }
         return Response.noContent().build();
     }
-    
+
     @POST
     @Path("/sett-til-pb")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -166,7 +166,7 @@ public class FordelRestTjeneste {
             throw new IllegalArgumentException("Kun PSB-fagsaker kan få PB-flagg satt.");
         }
         psbPbSakRepository.lagre(fagsakOpt.get().getId());
-        
+
         return Response.noContent().build();
     }
 
@@ -224,7 +224,7 @@ public class FordelRestTjeneste {
 
         return new SaksnummerDto(nyFagsak.getSaksnummer().getVerdi());
     }
-    
+
     @POST
     @Path("/fagsak/opprett/fnr")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -303,7 +303,7 @@ public class FordelRestTjeneste {
     private FagsakYtelseType finnYtelseType(FinnEllerOpprettSak dto) {
         return FagsakYtelseType.fraKode(dto.getYtelseType());
     }
-    
+
     private FagsakYtelseType finnYtelseType(FinnEllerOpprettSakFnr dto) {
         return FagsakYtelseType.fraKode(dto.getYtelseType());
     }
@@ -358,7 +358,6 @@ public class FordelRestTjeneste {
     @Operation(description = "Ny journalpost skal behandles.", summary = ("Varsel om en nye journalposter som skal behandles i systemet. Alle må tilhøre samme saksnummer, og være av samme type(brevkode, ytelsetype)"), tags = "fordel")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
     public void mottaJournalposter(@Parameter(description = "Krever saksnummer, journalpostId og behandlingstemaOffisiellKode") @Valid List<AbacJournalpostMottakDto> mottattJournalposter) {
-
         Set<Saksnummer> saksnummere = mottattJournalposter.stream().map(m -> m.getSaksnummer()).collect(Collectors.toSet());
         if (saksnummere.size() > 1) {
             throw new UnsupportedOperationException("Støtter ikke mottak av journalposter for ulike saksnummer: " + saksnummere);
@@ -368,6 +367,9 @@ public class FordelRestTjeneste {
         if (ytelseTyper.size() > 1) {
             throw new UnsupportedOperationException("Støtter ikke mottak av journalposter av ulike ytelseTyper: " + ytelseTyper);
         }
+        LOG_CONTEXT.add("ytelseType", ytelseTyper.iterator().next());
+        LOG_CONTEXT.add("journalpostId", String.join(",", mottattJournalposter.stream().map(v->v.getJournalpostId().getVerdi()).toList()));
+        logger.info("Mottok journalposter");
 
         List<InngåendeSaksdokument> saksdokumenter = mottattJournalposter.stream()
             .map(this::mapJournalpost)
@@ -450,7 +452,7 @@ public class FordelRestTjeneste {
             super();
         }
 
-        static Optional<String> getPayloadValiderLengde(String base64EncodedPayload) {
+        static Optional<String> getPayload(String base64EncodedPayload) {
             if (base64EncodedPayload == null) {
                 return Optional.empty();
             }
@@ -460,23 +462,12 @@ public class FordelRestTjeneste {
 
         @JsonIgnore
         public Optional<String> getPayload() {
-            return getPayloadValiderLengde(base64EncodedPayload);
+            return getPayload(base64EncodedPayload);
         }
 
         @Override
         public AbacDataAttributter abacAttributter() {
             return AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.SAKSNUMMER, getSaksnummer());
-        }
-
-        interface JournalpostMottakFeil extends DeklarerteFeil {
-
-            JournalpostMottakFeil FACTORY = FeilFactory.create(JournalpostMottakFeil.class);
-
-            @TekniskFeil(feilkode = "F-217605", feilmelding = "Input-validering-feil: Avsender sendte payload, men oppgav ikke lengde på innhold", logLevel = WARN)
-            Feil manglerPayloadLength();
-
-            @TekniskFeil(feilkode = "F-483098", feilmelding = "Input-validering-feil: Avsender oppgav at lengde på innhold var %s, men lengden var egentlig %s", logLevel = WARN)
-            Feil feilPayloadLength(Integer oppgitt, Integer faktisk);
         }
     }
 
