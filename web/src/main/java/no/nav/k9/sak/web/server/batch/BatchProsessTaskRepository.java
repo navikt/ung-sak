@@ -55,7 +55,7 @@ public class BatchProsessTaskRepository {
 
     long tømNestePartisjon() {
         String partisjonsNr = utledPartisjonsNr(LocalDate.now());
-        Long antall = (Long) entityManager.createNativeQuery("select * from prosess_task_partition_ferdig_" + partisjonsNr).getSingleResult();
+        Long antall = (Long) entityManager.createNativeQuery("select count(*) from prosess_task_partition_ferdig_" + partisjonsNr).getSingleResult();
         logger.info("Sletter {} rader fra prosess_task_partition_ferdig_{}", antall, partisjonsNr);
 
 
