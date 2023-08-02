@@ -293,4 +293,40 @@ class FagsakProsessTaskRepositoryTest {
         assertThrows(IllegalStateException.class, () ->
             fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, nyGruppe));
     }
+
+    @Test
+    void skalFeileNårTaskPropertiesIVetoetTaskIkkeMatcherNyTask() {
+        ProsessTaskData kjørendeTask = setupKjørendeTask(taskTypeA);
+
+        ProsessTaskData vetoetTask = lagTask(taskTypeB, ProsessTaskStatus.VETO);
+        vetoetTask.setBlokkertAvProsessTaskId(kjørendeTask.getId());
+        vetoetTask.setProperty("type", "A");
+        vetoetTask.setCallId("187623");
+        fagsakProsessTaskRepository.lagreNyGruppe(vetoetTask);
+        FagsakProsessTask fagsakProsessTask1 = new FagsakProsessTask(fagsakId, behandlingId.toString(), vetoetTask.getId(), 222L, vetoetTask.getTaskType());
+        fagsakProsessTaskRepository.lagre(fagsakProsessTask1);
+
+        ProsessTaskData nyTask = lagTask(taskTypeB, ProsessTaskStatus.KLAR);
+        nyTask.setProperty("type", "B");
+        ProsessTaskGruppe nyGruppe = new ProsessTaskGruppe(nyTask);
+        assertThrows(IllegalStateException.class, () ->
+            fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, nyGruppe));
+    }
+
+    @Test
+    void skalIkkeFeileFordiIgnorerteTaskPropertiesErForskjellig() {
+        ProsessTaskData kjørendeTask = setupKjørendeTask(taskTypeA);
+
+        ProsessTaskData vetoetTask = lagTask(taskTypeB, ProsessTaskStatus.VETO);
+        vetoetTask.setBlokkertAvProsessTaskId(kjørendeTask.getId());
+        vetoetTask.setCallId("187623");
+        fagsakProsessTaskRepository.lagreNyGruppe(vetoetTask);
+        FagsakProsessTask fagsakProsessTask1 = new FagsakProsessTask(fagsakId, behandlingId.toString(), vetoetTask.getId(), 222L, vetoetTask.getTaskType());
+        fagsakProsessTaskRepository.lagre(fagsakProsessTask1);
+
+        ProsessTaskData nyTask = lagTask(taskTypeB, ProsessTaskStatus.KLAR);
+        ProsessTaskGruppe nyGruppe = new ProsessTaskGruppe(nyTask);
+        fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, nyGruppe);
+        assertThat(nyTask.getId()).isNull();
+    }
 }

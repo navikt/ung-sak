@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -45,6 +46,7 @@ public class FagsakProsessTaskRepository {
 
     private static final Logger log = LoggerFactory.getLogger(FagsakProsessTaskRepository.class);
     private final Set<ProsessTaskStatus> ferdigStatuser = Set.of(ProsessTaskStatus.FERDIG, ProsessTaskStatus.KJOERT);
+    private final Set<String> unikeTaskProperties = Set.of("callId", "parent.");
     private EntityManager em;
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private TaskManager taskManager;
@@ -184,10 +186,10 @@ public class FagsakProsessTaskRepository {
             throw new IllegalStateException("Kan ikke opprette gruppe med tasks: [" + toStringEntry(gruppe.getTasks()) + "].  Har allerede feilende task [" + feilet.get() + "]");
         }
 
-        var currentTaskData = taskManager.getCurrentTask();
-        var nyeTasks = gruppe.getTasks();
+        ProsessTaskData currentTaskData = taskManager.getCurrentTask();
+        List<ProsessTaskData> nyeTasks = gruppe.getTasks().stream().map(Entry::getTask).toList();
 
-        Set<String> nyeTaskTyper = nyeTasks.stream().map(t -> t.getTask().getTaskType()).collect(Collectors.toSet());
+        Set<String> nyeTaskTyper = nyeTasks.stream().map(ProsessTaskData::getTaskType).collect(Collectors.toSet());
         Set<String> eksisterendeTaskTyper = eksisterendeTasks.stream()
             .filter(t -> currentTaskData == null || !Objects.equals(t.getId(), currentTaskData.getId())) // se bort fra oss selv (hvis vi kjører i en task)
             .map(ProsessTaskData::getTaskType).collect(Collectors.toSet());
@@ -215,11 +217,14 @@ public class FagsakProsessTaskRepository {
             .map(ProsessTaskData::getTaskType)
             .collect(Collectors.toSet());
 
+        Set<ProsessTaskData> vetoetEllerVentendeTasks = new HashSet<>(planlagteTasksBlokkertAvKjørende);
+        vetoetEllerVentendeTasks.addAll(ventendeTasksIGruppeMedBlokkert);
+
         var vetoetEllerVentendeTasksAvSammeTypeSomNy = new HashSet<>(planlagteTaskTyperBlokkertAvKjørende);
         vetoetEllerVentendeTasksAvSammeTypeSomNy.addAll(ventendeTaskTyperIGruppeMedBlokkert);
         vetoetEllerVentendeTasksAvSammeTypeSomNy.retainAll(nyeTaskTyper);
 
-        if (vetoetEllerVentendeTasksAvSammeTypeSomNy.containsAll(nyeTaskTyper)) {
+        if (vetoetEllerVentendeTasksAvSammeTypeSomNy.containsAll(nyeTaskTyper) && taskPropertiesMatcher(vetoetEllerVentendeTasks, nyeTasks)) {
             log.info("Skipper opprettelse av gruppe med tasks: [{}], Har allerede vetoet tasks av samme type [{}], Og ventende tasks i gruppe med vetoet [{}]",
                 toStringEntry(gruppe.getTasks()), planlagteTaskTyperBlokkertAvKjørende, ventendeTaskTyperIGruppeMedBlokkert);
             return blokkerteGrupper.stream().findFirst().orElse(null);
@@ -228,6 +233,58 @@ public class FagsakProsessTaskRepository {
         throw new IllegalStateException("Kan ikke opprette gruppe med tasks: [" + toStringEntry(gruppe.getTasks()) + "]"
             + " Har allerede [" + toStringTask(eksisterendeTasks) + "]"
             + " Eksisterende tasktyper hensyntatt [" + eksisterendeTaskTyper + "]");
+    }
+
+    private boolean taskPropertiesMatcher(Set<ProsessTaskData> eksisterendeTasks, List<ProsessTaskData> nyeTasks) {
+        for (ProsessTaskData ny : nyeTasks) {
+            boolean taskMatch = false;
+            var propertiesNy = hentRelevanteProperties(ny.getProperties());
+            var propNamesNy = propertiesNy.stringPropertyNames();
+            for (ProsessTaskData eksisterende : eksisterendeTasks) {
+                if (eksisterende.getTaskType().equals(ny.getTaskType())) {
+                    var propertiesEksisterende = hentRelevanteProperties(eksisterende.getProperties());
+                    if (propertiesNy.size() != propertiesEksisterende.size()) {
+                        continue;
+                    }
+
+                    boolean propsMatch = true;
+                    for (String propName : propNamesNy) {
+                        if (!propertiesNy.getProperty(propName).equals(propertiesEksisterende.getProperty(propName))) {
+                            propsMatch = false;
+                            break;
+                        }
+                    }
+                    if (propsMatch) {
+                        taskMatch = true;
+                        break;
+                    }
+                }
+
+            }
+            if (!taskMatch) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private Properties hentRelevanteProperties(Properties props) {
+        Properties relProps = new Properties();
+        props.forEach((key, value) -> {
+            if (!erUnikProperty((String) key)) {
+                relProps.setProperty((String) key, (String) value);
+            }
+        });
+        return relProps;
+    }
+
+    private boolean erUnikProperty(String propName) {
+        for (String unikPropName : unikeTaskProperties) {
+            if (propName.contains(unikPropName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private String toStringTask(Collection<ProsessTaskData> tasks) {
