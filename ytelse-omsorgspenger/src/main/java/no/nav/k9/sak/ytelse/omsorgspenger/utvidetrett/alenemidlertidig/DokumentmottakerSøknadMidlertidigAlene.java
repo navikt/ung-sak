@@ -93,9 +93,11 @@ public class DokumentmottakerSøknadMidlertidigAlene implements Dokumentmottaker
             .medSpråkkode(getSpråkValg(søknad.getSpråk()));
         if (innsendt.getBarn() != null) {
             for (var barn : innsendt.getBarn()) {
-                var barnAktørId = personinfoAdapter.hentAktørIdForPersonIdent(new PersonIdent(barn.getPersonIdent().getVerdi()))
-                    .orElseThrow(() -> new IllegalArgumentException("Mangler personIdent for søknadId=" + søknad.getSøknadId()));
-                søknadBuilder.leggTilAngittPerson(new SøknadAngittPersonEntitet(barnAktørId, RelasjonsRolleType.BARN));
+                if (barn.getPersonIdent() != null) {
+                    var barnAktørId = personinfoAdapter.hentAktørIdForPersonIdent(new PersonIdent(barn.getPersonIdent().getVerdi()))
+                        .orElseThrow(() -> new IllegalArgumentException("Mangler personIdent for søknadId=" + søknad.getSøknadId()));
+                    søknadBuilder.leggTilAngittPerson(new SøknadAngittPersonEntitet(barnAktørId, RelasjonsRolleType.BARN));
+                }
             }
         }
 
