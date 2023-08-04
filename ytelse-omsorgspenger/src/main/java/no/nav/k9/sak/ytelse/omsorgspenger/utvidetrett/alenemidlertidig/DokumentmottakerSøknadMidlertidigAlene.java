@@ -5,6 +5,9 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_MA;
 import java.util.Collection;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -37,6 +40,8 @@ import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerMidler
 @FagsakYtelseTypeRef(OMSORGSPENGER_MA)
 @DokumentGruppeRef(Brevkode.SØKNAD_OMS_UTVIDETRETT_MA_KODE)
 public class DokumentmottakerSøknadMidlertidigAlene implements Dokumentmottaker {
+
+    private static final Logger log = LoggerFactory.getLogger(DokumentmottakerSøknadMidlertidigAlene.class);
 
     private SøknadRepository søknadRepository;
 
@@ -97,6 +102,8 @@ public class DokumentmottakerSøknadMidlertidigAlene implements Dokumentmottaker
                     var barnAktørId = personinfoAdapter.hentAktørIdForPersonIdent(new PersonIdent(barn.getPersonIdent().getVerdi()))
                         .orElseThrow(() -> new IllegalArgumentException("Mangler personIdent for søknadId=" + søknad.getSøknadId()));
                     søknadBuilder.leggTilAngittPerson(new SøknadAngittPersonEntitet(barnAktørId, RelasjonsRolleType.BARN));
+                } else {
+                    log.info("Personident på barn var null i søknadId={}, journalpostId={}", søknad.getSøknadId(), journalpostId);
                 }
             }
         }
