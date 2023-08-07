@@ -46,7 +46,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.k9</groupId>
-            <artifactId>inntektsmelding-v1-jakarta</artifactId>
+            <artifactId>inntektsmelding-v1</artifactId>
         </dependency>
 
         <!-- JAXB for å parse Inntektsmelding -->
