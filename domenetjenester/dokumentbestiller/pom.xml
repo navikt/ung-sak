@@ -61,7 +61,7 @@
 
         <dependency>
             <groupId>no.nav.k9.formidling</groupId>
-            <artifactId>eksterne-kontrakter</artifactId>
+            <artifactId>formidling-kontrakt-jakarta</artifactId>
         </dependency>
 
         <dependency>

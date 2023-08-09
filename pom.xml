@@ -43,7 +43,7 @@
         <felles.version>2.0.5</felles.version>
         <swagger.version>2.2.3</swagger.version>
         <junit.version>5.10.0</junit.version>
-        <k9format.version>9.0.1</k9format.version>
+        <k9format.version>8.3.4</k9format.version>
         <jackson.version>2.15.2</jackson.version>
         <asm.version>9.5</asm.version>
         <kotlin-stdlib.version>1.9.0</kotlin-stdlib.version>
@@ -146,8 +146,8 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.k9.formidling</groupId>
-                <artifactId>eksterne-kontrakter</artifactId>
-                <version>1.0.0</version>
+                <artifactId>formidling-kontrakt-jakarta</artifactId>
+                <version>0.0.34</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.foreldrepenger.abakus</groupId>
@@ -348,22 +348,22 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.k9</groupId>
-                <artifactId>soknad-frisinn</artifactId>
+                <artifactId>soknad-frisinn-jakarta</artifactId>
                 <version>${k9format.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.k9</groupId>
-                <artifactId>soknad</artifactId>
+                <artifactId>soknad-jakarta</artifactId>
                 <version>${k9format.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.k9</groupId>
-                <artifactId>innsyn</artifactId>
+                <artifactId>innsyn-jakarta</artifactId>
                 <version>${k9format.version}</version>
             </dependency>
            <dependency>
                 <groupId>no.nav.k9</groupId>
-                <artifactId>inntektsmelding-v1</artifactId>
+                <artifactId>inntektsmelding-v1-jakarta</artifactId>
                 <version>${k9format.version}</version>
             </dependency>
 
