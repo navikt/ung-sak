@@ -8,6 +8,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
@@ -16,6 +17,7 @@ import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.AvklartKravDokume
 import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.AvklartSøknadsfristRepository;
 import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.AvklartSøknadsfristResultat;
 import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.KravDokumentHolder;
+import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.søknadsfrist.aksjonspunkt.AvklarSøknadsfristDto;
 
 @ApplicationScoped
@@ -23,14 +25,16 @@ import no.nav.k9.sak.kontrakt.søknadsfrist.aksjonspunkt.AvklarSøknadsfristDto;
 public class AvklarSøknadsfristOppdaterer implements AksjonspunktOppdaterer<AvklarSøknadsfristDto> {
 
     private AvklartSøknadsfristRepository avklartSøknadsfristRepository;
+    private HistorikkTjenesteAdapter historikkAdapter;
 
     AvklarSøknadsfristOppdaterer() {
         // CDI
     }
 
     @Inject
-    public AvklarSøknadsfristOppdaterer(AvklartSøknadsfristRepository avklartSøknadsfristRepository) {
+    public AvklarSøknadsfristOppdaterer(AvklartSøknadsfristRepository avklartSøknadsfristRepository, HistorikkTjenesteAdapter historikkAdapter) {
         this.avklartSøknadsfristRepository = avklartSøknadsfristRepository;
+        this.historikkAdapter = historikkAdapter;
     }
 
     private Set<AvklartKravDokument> mapTilAvklartKrav(Long behandlingId, AvklarSøknadsfristDto dto) {
@@ -57,10 +61,18 @@ public class AvklarSøknadsfristOppdaterer implements AksjonspunktOppdaterer<Avk
 
         avklartSøknadsfristRepository.lagreAvklaring(param.getBehandlingId(), avklaringer);
 
+        lagHistorikkInnslag(param, "Søknadsfrist manuelt behandlet.");
+
         var builder = OppdateringResultat.builder()
             .medTotrinn().build();
         builder.rekjørSteg();
         builder.setSteg(BehandlingStegType.INIT_PERIODER);
         return builder;
+    }
+
+    private void lagHistorikkInnslag(AksjonspunktOppdaterParameter param, String begrunnelse) {
+        historikkAdapter.tekstBuilder()
+            .medBegrunnelse(begrunnelse, param.erBegrunnelseEndret())
+            .medSkjermlenke(SkjermlenkeType.SOEKNADSFRIST);
     }
 }
