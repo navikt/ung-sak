@@ -1,5 +1,6 @@
-package no.nav.k9.sak.behandlingslager.behandling.notat;
+package no.nav.k9.sak.behandlingslager.notat;
 
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.typer.AktørId;
 
 public class NotatBuilder {
@@ -8,6 +9,12 @@ public class NotatBuilder {
     private AktørId gjelder;
     private Long fagsakId;
     private boolean skjult;
+
+    public static NotatBuilder forFagsak(Fagsak fagsak, boolean gjelderPleietrengende) {
+        return new NotatBuilder()
+            .fagsakId(fagsak.getId())
+            .gjelder(gjelderPleietrengende ? fagsak.getPleietrengendeAktørId() : fagsak.getAktørId());
+    }
 
     public NotatBuilder id(Long id) {
         this.id = id;

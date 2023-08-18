@@ -6,6 +6,6 @@
 
 	<sequence-generator name="SEQ_NOTAT" allocation-size="50" sequence-name="SEQ_NOTAT" />
 
-	<entity class="no.nav.k9.sak.behandlingslager.behandling.notat.NotatEntitet" />
+	<entity class="no.nav.k9.sak.behandlingslager.notat.NotatEntitet" />
 
 </entity-mappings>

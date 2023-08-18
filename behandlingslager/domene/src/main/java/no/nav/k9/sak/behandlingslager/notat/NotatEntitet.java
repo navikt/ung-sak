@@ -1,4 +1,4 @@
-package no.nav.k9.sak.behandlingslager.behandling.notat;
+package no.nav.k9.sak.behandlingslager.notat;
 
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
@@ -10,8 +10,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+import no.nav.k9.kodeverk.notat.NotatGjelderType;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.typer.AktørId;
+//TODO flytt til parent
+
 
 @Entity(name = "NotatEntitet")
 @Table(name = "notat")
@@ -21,7 +24,7 @@ public class NotatEntitet extends BaseEntitet {
     private Long id;
 
     @Column(name = "notat_tekst", nullable = false, updatable = false)
-    private String notatTekst;
+    private String notatTekst; //TODO endre til value objekt?
 
     @Embedded
     @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "gjelder_aktoer_id", unique = true, nullable = false, updatable = false)))
@@ -73,15 +76,28 @@ public class NotatEntitet extends BaseEntitet {
         return skjult;
     }
 
-    public String getOpprettetAv() {
-        return opprettetAv;
-    }
-
     public boolean isAktiv() {
         return aktiv;
     }
 
     public Long getErstattetAvNotatId() {
         return erstattetAvNotatId;
+    }
+
+    public long getVersjon() {
+        return versjon;
+    } // todo trenger ikke pga erstattMed?
+
+    public void erstattMed(Long notatId) {
+        erstattetAvNotatId = notatId;
+        aktiv = false;
+    }
+
+    public void skjul(boolean skjult) {
+        this.skjult = skjult;
+    }
+
+    public NotatGjelderType getGjelderType() {
+        return NotatGjelderType.FAGSAK; //TODO utled
     }
 }

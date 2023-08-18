@@ -18,6 +18,9 @@ import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.behandlingslager.notat.NotatBuilder;
+import no.nav.k9.sak.behandlingslager.notat.NotatEntitet;
+import no.nav.k9.sak.behandlingslager.notat.NotatRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
@@ -25,7 +28,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-class NotatEntitetTest {
+class NotatRepositoryTest {
 
     @Inject
     private EntityManager entityManager;
