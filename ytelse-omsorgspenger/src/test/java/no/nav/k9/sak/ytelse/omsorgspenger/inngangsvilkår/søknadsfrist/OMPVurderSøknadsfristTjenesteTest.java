@@ -33,7 +33,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 public class OMPVurderSøknadsfristTjenesteTest {
 
     private AvklartSøknadsfristRepository avklartSøknadsfristRepository = mock(AvklartSøknadsfristRepository.class);
-    private InntektsmeldingSøktePerioderMapper inntektsmeldingMapper = new InntektsmeldingSøktePerioderMapper(false, false);
+    private InntektsmeldingSøktePerioderMapper inntektsmeldingMapper = new InntektsmeldingSøktePerioderMapper(false);
     private OMPVurderSøknadsfristTjeneste tjeneste = new OMPVurderSøknadsfristTjeneste(null, inntektsmeldingMapper, null, new VurderSøknadsfrist(LocalDate.of(2021, 1, 1)), avklartSøknadsfristRepository, null);
 
     @BeforeEach
