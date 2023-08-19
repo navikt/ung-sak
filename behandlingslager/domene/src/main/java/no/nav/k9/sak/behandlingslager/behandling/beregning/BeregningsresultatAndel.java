@@ -491,9 +491,6 @@ public class BeregningsresultatAndel extends BaseEntitet {
         }
 
         public BeregningsresultatAndel buildFor(BeregningsresultatPeriode beregningsresultatPeriode) {
-            if (mal.utbetalingsgradOppdrag == null){
-                throw new IllegalArgumentException("mangler utbetalingsgrad for oppdrag");
-            }
             mal.beregningsresultatPeriode = beregningsresultatPeriode;
             mal.periode = beregningsresultatPeriode.getPeriode().toRange();
             mal.beregningsresultat = beregningsresultatPeriode.getBeregningsresultat();
