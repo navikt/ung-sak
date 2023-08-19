@@ -152,8 +152,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
 
         // Fra dagsats gradert ifht utbetalingsgrad
         long dagsatsBruker = årsbeløpTilDagsats(beregningsgrunnlagPrStatus.getRedusertBrukersAndelPrÅr());
-        long maksimalDagsats = årsbeløpTilDagsats(grunnlag.getBruttoBeregningsgrunnlag());
-
+        BigDecimal utbetalingsgradOppdrag = prosentAvMaksimal(beregningsgrunnlagPrStatus.getRedusertBrukersAndelPrÅr(), grunnlag.getBruttoBeregningsgrunnlag());
         resultatPeriode.addBeregningsresultatAndel(
             BeregningsresultatAndel.builder()
                 .medBrukerErMottaker(true)
@@ -162,7 +161,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
                 .medAktivitetStatus(beregningsgrunnlagPrStatus.getAktivitetStatus())
                 .medInntektskategori(beregningsgrunnlagPrStatus.getInntektskategori())
                 .medUtbetalingssgrad(uttakAktivitet.getUtbetalingsgrad())
-                .medUtbetalingssgradOppdrag(prosentAvMaksimalDagsats(dagsatsBruker, maksimalDagsats))
+                .medUtbetalingssgradOppdrag(utbetalingsgradOppdrag)
                 .medStillingsprosent(uttakAktivitet.getStillingsgrad())
                 .build(resultatPeriode));
 
@@ -172,8 +171,8 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
 
     }
 
-    private static BigDecimal prosentAvMaksimalDagsats(long dagsats, long maksimalDagsats) {
-        return BigDecimal.valueOf(100).multiply(BigDecimal.valueOf(dagsats)).divide(BigDecimal.valueOf(maksimalDagsats), 2, RoundingMode.HALF_UP);
+    private static BigDecimal prosentAvMaksimal(BigDecimal input, BigDecimal maks) {
+        return BigDecimal.valueOf(100).multiply(input).divide(maks, 2, RoundingMode.HALF_UP);
     }
 
     private Optional<UttakAktivitet> matchUttakAktivitetMedBeregningsgrunnlagPrStatus(BeregningsgrunnlagPrStatus beregningsgrunnlagPrStatus, List<UttakAktivitet> uttakAktiviteter) {
@@ -204,10 +203,13 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
         UttakAktivitet uttakAktivitet = uttakAktivitetOpt.get();
         String arbeidsgiverId = arbeidsforhold.getArbeidsgiverId();
 
-        long maksimalDagsats = årsbeløpTilDagsats(grunnlag.getBruttoBeregningsgrunnlag());
         // Fra dagsats gradert ifht utbetalingsgrad
         Long dagsatsBruker = årsbeløpTilDagsats(arbeidsforhold.getRedusertBrukersAndelPrÅr());
         Long dagsatsArbeidsgiver = årsbeløpTilDagsats(arbeidsforhold.getRedusertRefusjonPrÅr());
+
+        BigDecimal utbetalingsgradOppdragBruker = prosentAvMaksimal(arbeidsforhold.getRedusertBrukersAndelPrÅr(), grunnlag.getBruttoBeregningsgrunnlag());
+        BigDecimal utbetalingsgradOppdragRefusjon = prosentAvMaksimal(arbeidsforhold.getRedusertRefusjonPrÅr(), grunnlag.getBruttoBeregningsgrunnlag());
+
 
         resultatPeriode.addBeregningsresultatAndel(
             BeregningsresultatAndel.builder()
@@ -215,7 +217,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
                 .medBrukerErMottaker(true)
                 .medStillingsprosent(uttakAktivitet.getStillingsgrad())
                 .medUtbetalingssgrad(uttakAktivitet.getUtbetalingsgrad())
-                .medUtbetalingssgradOppdrag(prosentAvMaksimalDagsats(dagsatsBruker, maksimalDagsats))
+                .medUtbetalingssgradOppdrag(utbetalingsgradOppdragBruker)
                 .medDagsats(dagsatsBruker)
                 .medDagsatsFraBg(arbeidsforhold.getDagsatsBruker())
                 .medAktivitetStatus(AktivitetStatus.ATFL)
@@ -234,7 +236,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
                     .medBrukerErMottaker(false)
                     .medStillingsprosent(uttakAktivitet.getStillingsgrad())
                     .medUtbetalingssgrad(uttakAktivitet.getUtbetalingsgrad())
-                    .medUtbetalingssgradOppdrag(prosentAvMaksimalDagsats(dagsatsArbeidsgiver, maksimalDagsats))
+                    .medUtbetalingssgradOppdrag(utbetalingsgradOppdragRefusjon)
                     .medDagsats(dagsatsArbeidsgiver)
                     .medDagsatsFraBg(arbeidsforhold.getDagsatsArbeidsgiver())
                     .medInntektskategori(arbeidsforhold.getInntektskategori())
