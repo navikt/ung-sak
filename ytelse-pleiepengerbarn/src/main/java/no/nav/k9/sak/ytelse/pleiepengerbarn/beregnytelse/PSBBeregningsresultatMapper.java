@@ -220,6 +220,8 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
                     .medRefusjon(arbeidsgiversAndel.map(BeregningsresultatAndel::getDagsats).orElse(0))
                     .medTilSøker(brukersAndel.getDagsats())
                     .medUtbetalingsgrad(brukersAndel.getUtbetalingsgrad())
+                    .medUtbetalingsgradOppdragForBruker(brukersAndel.getUtbetalingsgradOppdrag())
+                    .medUtbetalingsgradOppdragForRefusjon(arbeidsgiversAndel.map(BeregningsresultatAndel::getUtbetalingsgradOppdrag).orElse(null))
                     .medSisteUtbetalingsdato(andelTilSisteUtbetalingsdatoMap.getOrDefault(genererAndelKey(brukersAndel), Optional.empty()).orElse(null))
                     .medAktivitetstatus(brukersAndel.getAktivitetStatus())
                     .medInntektskategori(brukersAndel.getInntektskategori())

@@ -47,6 +47,7 @@ public class MapBeregningsgrunnlagFraVLTilRegel {
             .medGraderingsfaktorInntekt(vlBGPeriode.getGraderingsfaktorInntekt());
         List<BeregningsgrunnlagPrStatus> beregningsgrunnlagPrStatus = mapVLBGPrStatus(vlBGPeriode);
         beregningsgrunnlagPrStatus.forEach(regelBGPeriode::medBeregningsgrunnlagPrStatus);
+        regelBGPeriode.medBruttoBeregningsgrunnlag(vlBGPeriode.getBruttoPrÅr());
 
         return regelBGPeriode.build();
     }

@@ -8,8 +8,6 @@ import java.util.Optional;
 import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import no.nav.k9.sak.behandlingslager.PostgreSQLRangeType;
-import no.nav.k9.sak.behandlingslager.Range;
 
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
@@ -31,6 +29,8 @@ import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.behandlingslager.PostgreSQLRangeType;
+import no.nav.k9.sak.behandlingslager.Range;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.behandlingslager.kodeverk.AktivitetStatusKodeverdiConverter;
 import no.nav.k9.sak.behandlingslager.kodeverk.InntektskategoriKodeverdiConverter;
@@ -89,6 +89,9 @@ public class BeregningsresultatAndel extends BaseEntitet {
     @Column(name = "utbetalingsgrad", nullable = false)
     private BigDecimal utbetalingsgrad;
 
+    @Column(name = "utbetalingsgrad_oppdrag", nullable = true)
+    private BigDecimal utbetalingsgradOppdrag;
+
     @Column(name = "dagsats_fra_bg", nullable = false)
     private int dagsatsFraBg;
 
@@ -132,6 +135,7 @@ public class BeregningsresultatAndel extends BaseEntitet {
         this.dagsats = fraAndel.dagsats;
         this.stillingsprosent = fraAndel.stillingsprosent;
         this.utbetalingsgrad = fraAndel.utbetalingsgrad;
+        this.utbetalingsgradOppdrag = fraAndel.utbetalingsgradOppdrag;
         this.dagsatsFraBg = fraAndel.dagsatsFraBg;
         this.feriepengerBeløp = fraAndel.feriepengerBeløp;
         this.aktivitetStatus = fraAndel.aktivitetStatus;
@@ -152,6 +156,7 @@ public class BeregningsresultatAndel extends BaseEntitet {
         this.dagsats = fraAndel.dagsats;
         this.stillingsprosent = fraAndel.stillingsprosent;
         this.utbetalingsgrad = fraAndel.utbetalingsgrad;
+        this.utbetalingsgradOppdrag = fraAndel.utbetalingsgradOppdrag;
         this.dagsatsFraBg = fraAndel.dagsatsFraBg;
         this.feriepengerBeløp = fraAndel.feriepengerBeløp;
         this.aktivitetStatus = fraAndel.aktivitetStatus;
@@ -173,6 +178,7 @@ public class BeregningsresultatAndel extends BaseEntitet {
         this.dagsats = fraAndel.dagsats;
         this.stillingsprosent = fraAndel.stillingsprosent;
         this.utbetalingsgrad = fraAndel.utbetalingsgrad;
+        this.utbetalingsgradOppdrag = fraAndel.utbetalingsgradOppdrag;
         this.dagsatsFraBg = fraAndel.dagsatsFraBg;
         this.feriepengerBeløp = fraAndel.feriepengerBeløp;
         this.aktivitetStatus = fraAndel.aktivitetStatus;
@@ -281,6 +287,10 @@ public class BeregningsresultatAndel extends BaseEntitet {
         return utbetalingsgrad;
     }
 
+    public BigDecimal getUtbetalingsgradOppdrag() {
+        return utbetalingsgradOppdrag;
+    }
+
     public int getDagsatsFraBg() {
         return dagsatsFraBg;
     }
@@ -344,6 +354,7 @@ public class BeregningsresultatAndel extends BaseEntitet {
             ", dagsats=" + dagsats +
             ", stillingsprosent=" + stillingsprosent +
             ", utbetalingsgrad=" + utbetalingsgrad +
+            (utbetalingsgradOppdrag != null ? ", utbetalingsgradOppdrag=" + utbetalingsgradOppdrag : "") +
             ", dagsatsFraBg=" + dagsatsFraBg +
             ", aktivitetStatus=" + aktivitetStatus +
             ", inntektskategori=" + inntektskategori +
@@ -367,6 +378,7 @@ public class BeregningsresultatAndel extends BaseEntitet {
             && Objects.equals(this.getDagsats(), other.getDagsats())
             && equals(this.getStillingsprosent(), other.getStillingsprosent())
             && equals(this.getUtbetalingsgrad(), other.getUtbetalingsgrad())
+            && Objects.equals(this.getUtbetalingsgradOppdrag(), other.getUtbetalingsgradOppdrag())
             && Objects.equals(this.getDagsatsFraBg(), other.getDagsatsFraBg())
             && Objects.equals(this.getFeriepengerÅrsbeløp(), other.getFeriepengerÅrsbeløp());
     }
@@ -377,8 +389,7 @@ public class BeregningsresultatAndel extends BaseEntitet {
 
     @Override
     public int hashCode() {
-        return Objects.hash(brukerErMottaker, arbeidsgiver, arbeidsforholdRef, arbeidsforholdType, dagsats, aktivitetStatus, dagsatsFraBg, stillingsprosent, utbetalingsgrad, inntektskategori,
-            feriepengerBeløp);
+        return Objects.hash(brukerErMottaker, arbeidsgiver, arbeidsforholdRef, arbeidsforholdType, dagsats, aktivitetStatus, dagsatsFraBg, stillingsprosent, utbetalingsgrad, utbetalingsgradOppdrag, inntektskategori, feriepengerBeløp);
     }
 
     public static class Builder {
@@ -458,6 +469,11 @@ public class BeregningsresultatAndel extends BaseEntitet {
             return this;
         }
 
+        public Builder medUtbetalingsgradOppdrag(BigDecimal utbetalingsgradOppdrag) {
+            mal.utbetalingsgradOppdrag = utbetalingsgradOppdrag;
+            return this;
+        }
+
         public Builder medDagsatsFraBg(int dagsatsFraBg) {
             this.dagsatsFraBg = dagsatsFraBg;
             mal.dagsatsFraBg = dagsatsFraBg;
@@ -475,6 +491,9 @@ public class BeregningsresultatAndel extends BaseEntitet {
         }
 
         public BeregningsresultatAndel buildFor(BeregningsresultatPeriode beregningsresultatPeriode) {
+            if (mal.utbetalingsgradOppdrag == null){
+                throw new IllegalArgumentException("mangler utbetalingsgrad for oppdrag");
+            }
             mal.beregningsresultatPeriode = beregningsresultatPeriode;
             mal.periode = beregningsresultatPeriode.getPeriode().toRange();
             mal.beregningsresultat = beregningsresultatPeriode.getBeregningsresultat();

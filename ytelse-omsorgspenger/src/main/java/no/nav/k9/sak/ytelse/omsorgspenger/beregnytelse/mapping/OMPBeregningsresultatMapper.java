@@ -12,11 +12,10 @@ import java.util.Optional;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.jetbrains.annotations.NotNull;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
@@ -157,7 +156,6 @@ public class OMPBeregningsresultatMapper implements BeregningsresultatMapper {
                 BeregningsresultatPeriodeAndelDto.Builder dtoBuilder = BeregningsresultatPeriodeAndelDto.build()
                     .medRefusjon(arbeidsgiversAndel.map(BeregningsresultatAndel::getDagsats).orElse(0))
                     .medTilSøker(brukersAndel.getDagsats())
-                    .medUtbetalingsgrad(brukersAndel.getUtbetalingsgrad())
                     .medSisteUtbetalingsdato(andelTilSisteUtbetalingsdatoMap.getOrDefault(genererAndelKey(brukersAndel), Optional.empty()).orElse(null))
                     .medAktivitetstatus(brukersAndel.getAktivitetStatus())
                     .medInntektskategori(brukersAndel.getInntektskategori())
@@ -167,7 +165,10 @@ public class OMPBeregningsresultatMapper implements BeregningsresultatMapper {
                     .medAktørId(arbeidsgiver.filter(Arbeidsgiver::erAktørId).map(Arbeidsgiver::getAktørId).orElse(null))
                     .medArbeidsforholdType(brukersAndel.getArbeidsforholdType())
                     .medStillingsprosent(brukersAndel.getStillingsprosent())
-                    .medUtbetalingsgrad(brukersAndel.getUtbetalingsgrad());
+                    .medUtbetalingsgrad(brukersAndel.getUtbetalingsgrad())
+                    .medUtbetalingsgradOppdragForBruker(brukersAndel.getUtbetalingsgradOppdrag())
+                    .medUtbetalingsgradOppdragForRefusjon(arbeidsgiversAndel.map(BeregningsresultatAndel::getUtbetalingsgradOppdrag).orElse(null))
+                    ;
                 uttaksplan.ifPresent(it -> mapUttakForAndel(beregningsresultatPeriode.getPeriode(), brukersAndel, dtoBuilder, it));
                 var internArbeidsforholdId = brukersAndel.getArbeidsforholdRef() != null ? brukersAndel.getArbeidsforholdRef().getReferanse() : null;
                 dtoBuilder.medArbeidsforholdId(internArbeidsforholdId);
