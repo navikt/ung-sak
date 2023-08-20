@@ -6,7 +6,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
-
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput;
@@ -49,6 +48,7 @@ public class AksjonspunktDump implements DebugDumpFagsak {
                   inner join behandling b on b.id=a.behandling_id
                   inner join fagsak f on f.id=b.fagsak_id
                   where f.saksnummer=:saksnummer
+                  order by a.opprettet_tid
                  """;
 
         var query = entityManager.createNativeQuery(sql, Tuple.class)
