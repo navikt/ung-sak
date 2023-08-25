@@ -104,6 +104,8 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
             BeregningsresultatPeriode resultatPeriode = new BeregningsresultatPeriode(
                 dateInterval,
                 grunnlag.getInntektGraderingsprosent(),
+                grunnlag.getTotalUtbetalingsgradFraUttak(),
+                grunnlag.getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(),
                 grunnlag.getGraderingsfaktorTid(),
                 grunnlag.getGraderingsfaktorInntekt());
 

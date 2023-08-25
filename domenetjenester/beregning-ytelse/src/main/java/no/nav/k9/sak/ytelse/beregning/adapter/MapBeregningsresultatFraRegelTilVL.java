@@ -39,6 +39,8 @@ public class MapBeregningsresultatFraRegelTilVL {
         no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode nyPeriode = no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode.builder()
             .medBeregningsresultatPeriodeFomOgTom(resultatPeriode.getFom(), resultatPeriode.getTom())
             .medInntektGraderingprosent(resultatPeriode.getInntektGraderingsprosent())
+            .medTotalUtbetalingsgradFraUttak(resultatPeriode.getTotalUtbetalingsgradFraUttak())
+            .medTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(resultatPeriode.getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt())
             .medGraderingsfaktorInntekt(resultatPeriode.getGraderingsfaktorInntekt())
             .medGraderingsfaktorTid(resultatPeriode.getGraderingsfaktorTid())
             .build(eksisterendeResultat);
