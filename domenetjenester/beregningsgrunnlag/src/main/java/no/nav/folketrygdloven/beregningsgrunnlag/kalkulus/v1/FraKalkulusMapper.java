@@ -125,6 +125,8 @@ public class FraKalkulusMapper {
             .medBruttoPrÅr(beregningsgrunnlagPeriodeDto.getBruttoPrÅr())
             .medRedusertPrÅr(beregningsgrunnlagPeriodeDto.getRedusertPrÅr())
             .medInntektGraderingsprosent(beregningsgrunnlagPeriodeDto.getInntektGraderingsprosent())
+            .medTotalUtbetalingsgradFraUttak(beregningsgrunnlagPeriodeDto.getTotalUtbetalingsgradFraUttak())
+            .medTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(beregningsgrunnlagPeriodeDto.getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt())
             .medGraderingsfaktorTid(beregningsgrunnlagPeriodeDto.getGraderingsfaktorTid())
             .medGraderingsfaktorInntekt(beregningsgrunnlagPeriodeDto.getGraderingsfaktorInntekt());
         mapAndeler(beregningsgrunnlagPeriodeDto.getBeregningsgrunnlagPrStatusOgAndelList()).forEach(periodeBuilder::leggTilBeregningsgrunnlagPrStatusOgAndel);

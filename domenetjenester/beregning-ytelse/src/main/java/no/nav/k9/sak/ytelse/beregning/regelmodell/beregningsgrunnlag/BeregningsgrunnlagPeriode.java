@@ -13,6 +13,8 @@ public class BeregningsgrunnlagPeriode {
     private List<BeregningsgrunnlagPrStatus> beregningsgrunnlagPrStatus = new ArrayList<>();
     private Periode bgPeriode;
     private BigDecimal inntektGraderingsprosent;
+    private BigDecimal totalUtbetalingsgradFraUttak;
+    private BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
     private BigDecimal graderingsfaktorTid;
     private BigDecimal graderingsfaktorInntekt;
     private BigDecimal bruttoBeregningsgrunnlag;
@@ -45,6 +47,14 @@ public class BeregningsgrunnlagPeriode {
         return inntektGraderingsprosent;
     }
 
+    public BigDecimal getTotalUtbetalingsgradFraUttak() {
+        return totalUtbetalingsgradFraUttak;
+    }
+
+    public BigDecimal getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt() {
+        return totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
+    }
+
     public BigDecimal getGraderingsfaktorTid() {
         return graderingsfaktorTid;
     }
@@ -75,6 +85,16 @@ public class BeregningsgrunnlagPeriode {
 
         public Builder medInntektGraderingsprosent(BigDecimal inntektGraderingsprosent) {
             beregningsgrunnlagPeriodeMal.inntektGraderingsprosent = inntektGraderingsprosent;
+            return this;
+        }
+
+       public Builder medTotalUtbetalingsgradFraUttak(BigDecimal totalUtbetalingsgradFraUttak) {
+            beregningsgrunnlagPeriodeMal.totalUtbetalingsgradFraUttak = totalUtbetalingsgradFraUttak;
+            return this;
+        }
+
+       public Builder medTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt) {
+            beregningsgrunnlagPeriodeMal.totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt = totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
             return this;
         }
 
