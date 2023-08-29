@@ -50,7 +50,7 @@ public class ForvaltningUnntaksløypaRestTjeneste {
             select saksnummer
              from behandling b
              join fagsak f on b.fagsak_id = f.id
-             where b.behandling_type = :behandlingType and behandling_status <> :behandlingAvsluttetStatus;
+             where b.behandling_type = :behandlingType and behandling_status <> :behandlingAvsluttetStatus
             """;
         Query query = entityManager.createNativeQuery(preparedStatement)
             .setParameter("behandlingType", BehandlingType.UNNTAKSBEHANDLING.getKode())
