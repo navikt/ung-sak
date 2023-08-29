@@ -56,6 +56,7 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.DiagnostikkRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningInfotrygMigreringRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningMidlertidigDriftRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningOppdragRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningUnntaksløypaRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.rapportering.RapporteringRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.integrasjonstatus.IntegrasjonstatusRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.kodeverk.KodeverkRestTjeneste;
@@ -137,6 +138,7 @@ public class RestImplementationClasses {
         classes.add(ForvaltningBeregningRestTjeneste.class);
         classes.add(ForvaltningInfotrygMigreringRestTjeneste.class);
         classes.add(ForvaltningPersonRestTjeneste.class);
+        classes.add(ForvaltningUnntaksløypaRestTjeneste.class);
         classes.add(DiagnostikkRestTjeneste.class);
         classes.add(RapporteringRestTjeneste.class);
 
