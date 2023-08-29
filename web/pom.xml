@@ -98,7 +98,7 @@
 
         <dependency>
             <groupId>no.nav.foreldrepenger.abakus</groupId>
-            <artifactId>abakus-kontrakt-jakarta</artifactId>
+            <artifactId>abakus-kontrakt</artifactId>
         </dependency>
 
         <dependency>

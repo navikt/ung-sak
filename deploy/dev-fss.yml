@@ -262,6 +262,9 @@ spec:
       value: "true"
     - name: ENABLE_ETTERKONTROLL_FORSINKET_SAKB
       value: "true"
+    - name: ENABLE_UTBETALINGSGRAD_OPPDRAG
+      value: "true"
+
 
 
     # Konfigurasjoner
