@@ -25,6 +25,7 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
@@ -68,6 +69,7 @@ public class HentDataTilUttakTjeneste {
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
     private HentEtablertTilsynTjeneste hentEtablertTilsynTjeneste;
     private TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste;
+    private UttakNyeReglerRepository uttakNyeReglerRepository;
     private boolean tilkommetAktivitetEnabled;
 
     @Inject
@@ -89,6 +91,7 @@ public class HentDataTilUttakTjeneste {
                                     UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
                                     HentEtablertTilsynTjeneste hentEtablertTilsynTjeneste,
                                     TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste,
+                                    UttakNyeReglerRepository uttakNyeReglerRepository,
                                     @KonfigVerdi(value = "TILKOMMET_AKTIVITET_ENABLED", required = false, defaultVerdi = "false") boolean tilkommetAktivitetEnabled) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.pleiebehovResultatRepository = pleiebehovResultatRepository;
@@ -108,6 +111,7 @@ public class HentDataTilUttakTjeneste {
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
         this.hentEtablertTilsynTjeneste = hentEtablertTilsynTjeneste;
         this.tilkommetAktivitetTjeneste = tilkommetAktivitetTjeneste;
+        this.uttakNyeReglerRepository = uttakNyeReglerRepository;
         this.tilkommetAktivitetEnabled = tilkommetAktivitetEnabled;
     }
 
@@ -129,7 +133,7 @@ public class HentDataTilUttakTjeneste {
         } else {
             perioderTilVurdering = hentPerioderTilVurderingTjeneste.hentPerioderTilVurderingUtenUbesluttet(behandling);
         }
-        
+
         final Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> tilkommetAktivitetsperioder;
         if (tilkommetAktivitetEnabled) {
             final Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> tilkommedeAktiviteterRaw = tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(referanse.getFagsakId());
@@ -178,6 +182,8 @@ public class HentDataTilUttakTjeneste {
             }
         }
 
+        LocalDate virkningsdatoNyeRegler = uttakNyeReglerRepository.finnDatoForNyeRegler(referanse.getBehandlingId()).orElse(null);
+
         return new InputParametere()
             .medBehandling(behandling)
             .medVilkårene(vilkårene)
@@ -199,7 +205,9 @@ public class HentDataTilUttakTjeneste {
             .medUnntakEtablertTilsynForPleietrengende(unntakEtablertTilsynForPleietrengende.orElse(null))
             .medUtsattePerioder(utsattePerioder.orElse(null))
             .medSisteVedtatteBehandlingForBehandling(sisteVedtatteBehandlinger)
-            .medTilkommetAktivitetsperioder(tilkommetAktivitetsperioder);
+            .medTilkommetAktivitetsperioder(tilkommetAktivitetsperioder)
+            .medVirkningsdatoNyeRegler(virkningsdatoNyeRegler)
+            ;
     }
 
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste(BehandlingReferanse behandlingReferanse) {

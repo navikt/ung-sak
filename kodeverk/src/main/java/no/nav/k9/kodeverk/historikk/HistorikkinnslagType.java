@@ -50,6 +50,7 @@ public enum HistorikkinnslagType implements Kodeverdi {
     REGISTRER_OM_VERGE("REGISTRER_OM_VERGE", "Registrering av opplysninger om verge/fullmektig/søker under 18 år", HistorikkinnslagMal.MAL_TYPE_2),
     FORSLAG_VEDTAK_UTEN_TOTRINN("FORSLAG_VEDTAK_UTEN_TOTRINN", "Vedtak foreslått", HistorikkinnslagMal.MAL_TYPE_2),
     FORSLAG_VEDTAK("FORSLAG_VEDTAK", "Vedtak foreslått og sendt til beslutter", HistorikkinnslagMal.MAL_TYPE_2),
+    VIRKNINGSDATO_UTTAK_NYE_REGLER("VIRKNINGSDATO_UTTAK_NYE_REGLER", "Nye regler for uttak.", HistorikkinnslagMal.MAL_TYPE_2),
 
     // Mal Type 3
     SAK_RETUR("SAK_RETUR", "Sak retur", HistorikkinnslagMal.MAL_TYPE_3),

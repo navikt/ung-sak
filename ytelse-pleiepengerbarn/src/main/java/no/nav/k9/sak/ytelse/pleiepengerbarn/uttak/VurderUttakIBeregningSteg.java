@@ -5,6 +5,7 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -25,6 +27,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
 import no.nav.k9.sak.utsatt.UtsattPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.EtablertTilsynTjeneste;
@@ -49,6 +52,8 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
     private EtablertTilsynTjeneste etablertTilsynTjeneste;
     private SamtidigUttakTjeneste samtidigUttakTjeneste;
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
+    private UttakNyeReglerRepository uttakNyeReglerRepository;
+    private boolean brukDatoNyRegelUttak;
 
     VurderUttakIBeregningSteg() {
         // for proxy
@@ -60,13 +65,17 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
                                      UttakTjeneste uttakTjeneste,
                                      EtablertTilsynTjeneste etablertTilsynTjeneste,
                                      SamtidigUttakTjeneste samtidigUttakTjeneste,
-                                     UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository) {
+                                     UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
+                                     UttakNyeReglerRepository uttakNyeReglerRepository,
+                                     @KonfigVerdi(value = "ENABLE_DATO_NY_REGEL_UTTAK", defaultVerdi = "false") boolean brukDatoNyRegelUttak) {
         this.behandlingRepository = behandlingRepository;
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
         this.uttakTjeneste = uttakTjeneste;
         this.etablertTilsynTjeneste = etablertTilsynTjeneste;
         this.samtidigUttakTjeneste = samtidigUttakTjeneste;
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
+        this.uttakNyeReglerRepository = uttakNyeReglerRepository;
+        this.brukDatoNyRegelUttak = brukDatoNyRegelUttak;
     }
 
     @Override
@@ -77,10 +86,17 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
 
         etablertTilsynTjeneste.opprettGrunnlagForTilsynstidlinje(ref);
 
-        return eksperimentærHåndteringAvSamtidigUttak(behandling, kontekst, ref);
+        List<AksjonspunktDefinisjon> aksjonspunkter = new ArrayList<>();
+        if (brukDatoNyRegelUttak) {
+            if (uttakNyeReglerRepository.finnDatoForNyeRegler(behandlingId).isEmpty()) {
+                aksjonspunkter.add(AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK);
+            }
+        }
+        aksjonspunkter.addAll(eksperimentærHåndteringAvSamtidigUttak(behandling, kontekst, ref));
+        return BehandleStegResultat.utførtMedAksjonspunkter(aksjonspunkter);
     }
 
-    private BehandleStegResultat eksperimentærHåndteringAvSamtidigUttak(Behandling behandling, BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
+    private List<AksjonspunktDefinisjon> eksperimentærHåndteringAvSamtidigUttak(Behandling behandling, BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
         var kjøreplan = samtidigUttakTjeneste.utledPrioriteringsrekkefølge(ref);
         log.info("[Kjøreplan] annenSakSomMåBehandlesFørst={}, Har perioder uten prio={}, Perioder med prio={}", !kjøreplan.kanAktuellFagsakFortsette(),
             kjøreplan.perioderSomIkkeKanBehandlesForAktuellFagsak(),
@@ -100,11 +116,10 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
             if (behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK)) {
                 avbrytAksjonspunkt(behandling, kontekst);
             }
-
-            return BehandleStegResultat.utførtUtenAksjonspunkter();
+            return List.of();
         } else {
             log.info("[Kjøreplan] Venter på behandling av andre fagsaker");
-            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK));
+            return List.of(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK);
         }
     }
 
