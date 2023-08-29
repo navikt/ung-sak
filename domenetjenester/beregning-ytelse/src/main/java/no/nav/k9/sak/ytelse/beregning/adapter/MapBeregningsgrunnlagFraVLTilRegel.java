@@ -43,6 +43,8 @@ public class MapBeregningsgrunnlagFraVLTilRegel {
         final BeregningsgrunnlagPeriode.Builder regelBGPeriode = BeregningsgrunnlagPeriode.builder()
             .medPeriode(Periode.of(vlBGPeriode.getBeregningsgrunnlagPeriodeFom(), vlBGPeriode.getBeregningsgrunnlagPeriodeTom()))
             .medInntektGraderingsprosent(vlBGPeriode.getInntektGraderingsprosent())
+            .medTotalUtbetalingsgradFraUttak(vlBGPeriode.getTotalUtbetalingsgradFraUttak())
+            .medTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(vlBGPeriode.getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt())
             .medGraderingsfaktorTid(vlBGPeriode.getGraderingsfaktorTid())
             .medGraderingsfaktorInntekt(vlBGPeriode.getGraderingsfaktorInntekt());
         List<BeregningsgrunnlagPrStatus> beregningsgrunnlagPrStatus = mapVLBGPrStatus(vlBGPeriode);
