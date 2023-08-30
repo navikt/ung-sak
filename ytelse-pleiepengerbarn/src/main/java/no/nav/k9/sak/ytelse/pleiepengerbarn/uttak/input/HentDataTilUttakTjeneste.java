@@ -25,6 +25,7 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
@@ -68,7 +69,9 @@ public class HentDataTilUttakTjeneste {
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
     private HentEtablertTilsynTjeneste hentEtablertTilsynTjeneste;
     private TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste;
+    private UttakNyeReglerRepository uttakNyeReglerRepository;
     private boolean tilkommetAktivitetEnabled;
+    private boolean nyRegelEnabled;
 
     @Inject
     public HentDataTilUttakTjeneste(VilkårResultatRepository vilkårResultatRepository,
@@ -89,7 +92,11 @@ public class HentDataTilUttakTjeneste {
                                     UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
                                     HentEtablertTilsynTjeneste hentEtablertTilsynTjeneste,
                                     TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste,
-                                    @KonfigVerdi(value = "TILKOMMET_AKTIVITET_ENABLED", required = false, defaultVerdi = "false") boolean tilkommetAktivitetEnabled) {
+                                    UttakNyeReglerRepository uttakNyeReglerRepository,
+                                    @KonfigVerdi(value = "TILKOMMET_AKTIVITET_ENABLED", required = false, defaultVerdi = "false") boolean tilkommetAktivitetEnabled,
+                                    @KonfigVerdi(value = "ENABLE_DATO_NY_REGEL_UTTAK", required = false, defaultVerdi = "false") boolean nyRegelEnabled
+
+    ) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.pleiebehovResultatRepository = pleiebehovResultatRepository;
         this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
@@ -108,7 +115,9 @@ public class HentDataTilUttakTjeneste {
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
         this.hentEtablertTilsynTjeneste = hentEtablertTilsynTjeneste;
         this.tilkommetAktivitetTjeneste = tilkommetAktivitetTjeneste;
+        this.uttakNyeReglerRepository = uttakNyeReglerRepository;
         this.tilkommetAktivitetEnabled = tilkommetAktivitetEnabled;
+        this.nyRegelEnabled = nyRegelEnabled;
     }
 
     public InputParametere hentUtData(BehandlingReferanse referanse, boolean brukUbesluttedeData) {
@@ -129,7 +138,7 @@ public class HentDataTilUttakTjeneste {
         } else {
             perioderTilVurdering = hentPerioderTilVurderingTjeneste.hentPerioderTilVurderingUtenUbesluttet(behandling);
         }
-        
+
         final Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> tilkommetAktivitetsperioder;
         if (tilkommetAktivitetEnabled) {
             final Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> tilkommedeAktiviteterRaw = tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(referanse.getFagsakId());
@@ -178,6 +187,11 @@ public class HentDataTilUttakTjeneste {
             }
         }
 
+        LocalDate virkningsdatoNyeRegler = uttakNyeReglerRepository.finnDatoForNyeRegler(referanse.getBehandlingId()).orElse(null);
+        if (virkningsdatoNyeRegler != null && !nyRegelEnabled){
+            throw new IllegalStateException("Har lagret virkningsdato for nye regler i uttak, men de nye reglene er skrudd av.");
+        }
+
         return new InputParametere()
             .medBehandling(behandling)
             .medVilkårene(vilkårene)
@@ -199,7 +213,9 @@ public class HentDataTilUttakTjeneste {
             .medUnntakEtablertTilsynForPleietrengende(unntakEtablertTilsynForPleietrengende.orElse(null))
             .medUtsattePerioder(utsattePerioder.orElse(null))
             .medSisteVedtatteBehandlingForBehandling(sisteVedtatteBehandlinger)
-            .medTilkommetAktivitetsperioder(tilkommetAktivitetsperioder);
+            .medTilkommetAktivitetsperioder(tilkommetAktivitetsperioder)
+            .medVirkningsdatoNyeRegler(virkningsdatoNyeRegler)
+            ;
     }
 
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste(BehandlingReferanse behandlingReferanse) {

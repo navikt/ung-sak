@@ -264,6 +264,8 @@ spec:
       value: "true"
     - name: ENABLE_UTBETALINGSGRAD_OPPDRAG
       value: "true"
+    - name: ENABLE_DATO_NY_REGEL_UTTAK
+      value: "true"
 
 
 

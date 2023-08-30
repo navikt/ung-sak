@@ -167,6 +167,7 @@ public class MapInputTilUttakTjeneste {
             perioderSomSkalTilbakestilles,
             arbeid,
             pleiebehov,
+            input.getVirkningsdatoNyeRegler(),
             new HashMap<>(), // Overstyringer.
             lovbestemtFerie,
             inngangsvilkår,
