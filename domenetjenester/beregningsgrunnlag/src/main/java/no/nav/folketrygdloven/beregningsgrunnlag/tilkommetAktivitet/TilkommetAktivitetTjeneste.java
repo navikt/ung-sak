@@ -13,6 +13,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.folketrygdloven.kalkulus.response.v1.tilkommetAktivitet.UtledetTilkommetAktivitet;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -21,7 +22,6 @@ import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -50,7 +50,15 @@ public class TilkommetAktivitetTjeneste {
         this.kalkulusTjeneste = kalkulusTjeneste;
     }
 
-    public Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> finnTilkommedeAktiviteter(Long fagsakId) {
+    /**
+     * Henter ut tilkommede aktiviteter for angitt fagsak.
+     * 
+     * @param fagsakId IDen til fagsaken.
+     * @param virkningstidspunkt Fra-og-med-datoen man skal få tilkommede aktiviteter for.
+     * @return En {@code Map} med alle tilkommede aktiviteter med tilhørende perioden den
+     *          den regnes å være tilkommet i.
+     */
+    public Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> finnTilkommedeAktiviteter(Long fagsakId, LocalDate virkningstidspunkt) {
         var sisteBehandlingOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId);
 
         if (sisteBehandlingOpt.isEmpty()) {
@@ -114,7 +122,12 @@ public class TilkommetAktivitetTjeneste {
                     .collect(Collectors.toList())
                     );
             LocalDateTimeline<Boolean> sammenslått = periodetidslinje.crossJoin(nyePerioder);
-            sammenslåttResultat.put(aktivitetstatusOgArbeidsgiver, sammenslått);
+            if (virkningstidspunkt != null) {
+                sammenslått = sammenslått.intersection(new LocalDateInterval(virkningstidspunkt, LocalDateInterval.TIDENES_ENDE));
+            }
+            if (!sammenslått.isEmpty()) {
+                sammenslåttResultat.put(aktivitetstatusOgArbeidsgiver, sammenslått);
+            }
         });
 
         return sammenslåttResultat;
