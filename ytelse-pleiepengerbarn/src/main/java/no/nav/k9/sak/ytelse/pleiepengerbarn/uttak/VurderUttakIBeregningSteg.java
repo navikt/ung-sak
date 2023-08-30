@@ -5,8 +5,11 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
-import java.util.ArrayList;
+import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -14,9 +17,11 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.folketrygdloven.beregningsgrunnlag.tilkommetAktivitet.TilkommetAktivitetTjeneste;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
@@ -34,7 +39,10 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.EtablertTilsynTj
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
+import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
 @ApplicationScoped
 @BehandlingStegRef(value = VURDER_UTTAK_V2)
@@ -53,6 +61,8 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
     private SamtidigUttakTjeneste samtidigUttakTjeneste;
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
     private UttakNyeReglerRepository uttakNyeReglerRepository;
+    private TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste;
+
     private boolean brukDatoNyRegelUttak;
 
     VurderUttakIBeregningSteg() {
@@ -67,6 +77,7 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
                                      SamtidigUttakTjeneste samtidigUttakTjeneste,
                                      UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
                                      UttakNyeReglerRepository uttakNyeReglerRepository,
+                                     TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste,
                                      @KonfigVerdi(value = "ENABLE_DATO_NY_REGEL_UTTAK", defaultVerdi = "false") boolean brukDatoNyRegelUttak) {
         this.behandlingRepository = behandlingRepository;
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
@@ -75,6 +86,7 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
         this.samtidigUttakTjeneste = samtidigUttakTjeneste;
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
         this.uttakNyeReglerRepository = uttakNyeReglerRepository;
+        this.tilkommetAktivitetTjeneste = tilkommetAktivitetTjeneste;
         this.brukDatoNyRegelUttak = brukDatoNyRegelUttak;
     }
 
@@ -86,17 +98,19 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
 
         etablertTilsynTjeneste.opprettGrunnlagForTilsynstidlinje(ref);
 
-        List<AksjonspunktDefinisjon> aksjonspunkter = new ArrayList<>();
-        if (brukDatoNyRegelUttak) {
-            if (uttakNyeReglerRepository.finnDatoForNyeRegler(behandlingId).isEmpty()) {
-                aksjonspunkter.add(AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK);
-            }
+        Optional<AksjonspunktDefinisjon> autopunktVentAnnenSak = håndteringAvSamtidigUttak(behandling, kontekst, ref);
+        if (autopunktVentAnnenSak.isPresent()) {
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(autopunktVentAnnenSak.get()));
         }
-        aksjonspunkter.addAll(eksperimentærHåndteringAvSamtidigUttak(behandling, kontekst, ref));
-        return BehandleStegResultat.utførtMedAksjonspunkter(aksjonspunkter);
+        Optional<AksjonspunktDefinisjon> aksjonspunktSetteDatoNyeRegler = utledAksjonspunktDatoForNyeRegler(behandling);
+        if (aksjonspunktSetteDatoNyeRegler.isPresent()) {
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(aksjonspunktSetteDatoNyeRegler.get()));
+        }
+
+        return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private List<AksjonspunktDefinisjon> eksperimentærHåndteringAvSamtidigUttak(Behandling behandling, BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
+    private Optional<AksjonspunktDefinisjon> håndteringAvSamtidigUttak(Behandling behandling, BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
         var kjøreplan = samtidigUttakTjeneste.utledPrioriteringsrekkefølge(ref);
         log.info("[Kjøreplan] annenSakSomMåBehandlesFørst={}, Har perioder uten prio={}, Perioder med prio={}", !kjøreplan.kanAktuellFagsakFortsette(),
             kjøreplan.perioderSomIkkeKanBehandlesForAktuellFagsak(),
@@ -116,11 +130,51 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
             if (behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK)) {
                 avbrytAksjonspunkt(behandling, kontekst);
             }
-            return List.of();
+            return Optional.empty();
         } else {
             log.info("[Kjøreplan] Venter på behandling av andre fagsaker");
-            return List.of(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK);
+            return Optional.of(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK);
         }
+    }
+
+    private Optional<AksjonspunktDefinisjon> utledAksjonspunktDatoForNyeRegler(Behandling behandling) {
+        if (!brukDatoNyRegelUttak) {
+            return Optional.empty();
+        }
+        if (uttakNyeReglerRepository.finnDatoForNyeRegler(behandling.getId()).isPresent()) {
+            log.info("Har allerede satt dato for nye regler");
+            return Optional.empty(); //dato er allerede satt
+        }
+        return harAktivitetIkkeYrkesaktivEllerKunYtelse(behandling) || harTilkommmetAktivitet(behandling)
+            ? Optional.of(AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK)
+            : Optional.empty();
+    }
+
+    private boolean harTilkommmetAktivitet(Behandling behandling) {
+        //har ikke satt dato for nye regler i uttak (utleder AP for det her), så kan ikke begrense perioden (derav LocalDate.MIN)
+        boolean harTilkommetAktivitet = tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(behandling.getFagsakId(), LocalDate.MIN).isEmpty();
+        log.info("Har {} tilkommet aktivitet", (harTilkommetAktivitet ? "" : "ikke"));
+        return harTilkommetAktivitet;
+    }
+
+    private boolean harAktivitetIkkeYrkesaktivEllerKunYtelse(Behandling behandling) {
+        Uttaksplan uttaksplan = uttakTjeneste.hentUttaksplan(behandling.getUuid(), false);
+        return harEnAv(uttaksplan, Set.of(UttakArbeidType.KUN_YTELSE, UttakArbeidType.IKKE_YRKESAKTIV));
+    }
+
+    boolean harEnAv(Uttaksplan uttaksplan, Collection<UttakArbeidType> aktivitettyper) {
+        for (UttaksperiodeInfo uttaksperiodeInfo : uttaksplan.getPerioder().values()) {
+            for (Utbetalingsgrader utbetalingsgrader : uttaksperiodeInfo.getUtbetalingsgrader()) {
+                for (UttakArbeidType aktivitettype : aktivitettyper) {
+                    if (utbetalingsgrader.getArbeidsforhold().getType().equals(aktivitettype.getKode())) {
+                        log.info("Har aktivitet IY/KY");
+                        return true;
+                    }
+                }
+            }
+        }
+        log.info("Har ikke aktivitet IY/KY");
+        return false;
     }
 
     private void avbrytAksjonspunkt(Behandling behandling, BehandlingskontrollKontekst kontekst) {
