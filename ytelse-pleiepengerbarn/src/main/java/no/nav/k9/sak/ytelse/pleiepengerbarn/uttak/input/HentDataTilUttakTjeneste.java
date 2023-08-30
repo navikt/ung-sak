@@ -139,9 +139,14 @@ public class HentDataTilUttakTjeneste {
             perioderTilVurdering = hentPerioderTilVurderingTjeneste.hentPerioderTilVurderingUtenUbesluttet(behandling);
         }
 
+        LocalDate virkningsdatoNyeRegler = uttakNyeReglerRepository.finnDatoForNyeRegler(referanse.getBehandlingId()).orElse(null);
+        if (virkningsdatoNyeRegler != null && !nyRegelEnabled){
+            throw new IllegalStateException("Har lagret virkningsdato for nye regler i uttak, men de nye reglene er skrudd av.");
+        }
+        
         final Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> tilkommetAktivitetsperioder;
         if (tilkommetAktivitetEnabled) {
-            final Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> tilkommedeAktiviteterRaw = tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(referanse.getFagsakId());
+            final Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> tilkommedeAktiviteterRaw = tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(referanse.getFagsakId(), virkningsdatoNyeRegler);
             tilkommetAktivitetsperioder = tilkommedeAktiviteterRaw.entrySet().stream()
                     .collect(Collectors.toMap(e -> new AktivitetIdentifikator(e.getKey().getAktivitetType(), e.getKey().getArbeidsgiver(), null), e -> e.getValue()));
         } else {
@@ -185,11 +190,6 @@ public class HentDataTilUttakTjeneste {
             } else {
                 sisteVedtatteBehandlinger.put(uuid, b.getOriginalBehandlingId().map(it -> behandlingRepository.hentBehandling(it)).map(Behandling::getUuid).orElse(null));
             }
-        }
-
-        LocalDate virkningsdatoNyeRegler = uttakNyeReglerRepository.finnDatoForNyeRegler(referanse.getBehandlingId()).orElse(null);
-        if (virkningsdatoNyeRegler != null && !nyRegelEnabled){
-            throw new IllegalStateException("Har lagret virkningsdato for nye regler i uttak, men de nye reglene er skrudd av.");
         }
 
         return new InputParametere()
