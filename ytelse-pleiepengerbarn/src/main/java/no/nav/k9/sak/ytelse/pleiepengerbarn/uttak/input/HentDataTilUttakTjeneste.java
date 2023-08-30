@@ -71,6 +71,7 @@ public class HentDataTilUttakTjeneste {
     private TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste;
     private UttakNyeReglerRepository uttakNyeReglerRepository;
     private boolean tilkommetAktivitetEnabled;
+    private boolean nyRegelEnabled;
 
     @Inject
     public HentDataTilUttakTjeneste(VilkårResultatRepository vilkårResultatRepository,
@@ -92,7 +93,10 @@ public class HentDataTilUttakTjeneste {
                                     HentEtablertTilsynTjeneste hentEtablertTilsynTjeneste,
                                     TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste,
                                     UttakNyeReglerRepository uttakNyeReglerRepository,
-                                    @KonfigVerdi(value = "TILKOMMET_AKTIVITET_ENABLED", required = false, defaultVerdi = "false") boolean tilkommetAktivitetEnabled) {
+                                    @KonfigVerdi(value = "TILKOMMET_AKTIVITET_ENABLED", required = false, defaultVerdi = "false") boolean tilkommetAktivitetEnabled,
+                                    @KonfigVerdi(value = "ENABLE_DATO_NY_REGEL_UTTAK", required = false, defaultVerdi = "false") boolean nyRegelEnabled
+
+    ) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.pleiebehovResultatRepository = pleiebehovResultatRepository;
         this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
@@ -113,6 +117,7 @@ public class HentDataTilUttakTjeneste {
         this.tilkommetAktivitetTjeneste = tilkommetAktivitetTjeneste;
         this.uttakNyeReglerRepository = uttakNyeReglerRepository;
         this.tilkommetAktivitetEnabled = tilkommetAktivitetEnabled;
+        this.nyRegelEnabled = nyRegelEnabled;
     }
 
     public InputParametere hentUtData(BehandlingReferanse referanse, boolean brukUbesluttedeData) {
@@ -183,6 +188,9 @@ public class HentDataTilUttakTjeneste {
         }
 
         LocalDate virkningsdatoNyeRegler = uttakNyeReglerRepository.finnDatoForNyeRegler(referanse.getBehandlingId()).orElse(null);
+        if (virkningsdatoNyeRegler != null && !nyRegelEnabled){
+            throw new IllegalStateException("Har lagret virkningsdato for nye regler i uttak, men de nye reglene er skrudd av.");
+        }
 
         return new InputParametere()
             .medBehandling(behandling)

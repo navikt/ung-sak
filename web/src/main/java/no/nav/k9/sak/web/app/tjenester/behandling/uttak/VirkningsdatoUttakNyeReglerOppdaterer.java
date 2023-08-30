@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
@@ -24,19 +25,27 @@ public class VirkningsdatoUttakNyeReglerOppdaterer implements AksjonspunktOppdat
 
     private UttakNyeReglerRepository uttakNyeReglerRepository;
     private HistorikkRepository historikkRepository;
+    private boolean nyRegelEnabled;
 
     VirkningsdatoUttakNyeReglerOppdaterer() {
         //for CDI proxy
     }
 
     @Inject
-    public VirkningsdatoUttakNyeReglerOppdaterer(UttakNyeReglerRepository uttakNyeReglerRepository, HistorikkRepository historikkRepository) {
+    public VirkningsdatoUttakNyeReglerOppdaterer(UttakNyeReglerRepository uttakNyeReglerRepository,
+                                                 HistorikkRepository historikkRepository,
+                                                 @KonfigVerdi(value = "ENABLE_DATO_NY_REGEL_UTTAK", required = false, defaultVerdi = "false") boolean nyRegelEnabled) {
         this.uttakNyeReglerRepository = uttakNyeReglerRepository;
         this.historikkRepository = historikkRepository;
+        this.nyRegelEnabled = nyRegelEnabled;
     }
 
     @Override
     public OppdateringResultat oppdater(VurderVirkningsdatoUttakNyeReglerDto dto, AksjonspunktOppdaterParameter param) {
+        if (!nyRegelEnabled){
+            throw new IllegalStateException("Mulighet for å sette virkningsdato for nye regler for uttak er ikke lansert.");
+        }
+
         LocalDate eksisterendeDato = uttakNyeReglerRepository.finnDatoForNyeRegler(param.getBehandlingId()).orElse(null);
         uttakNyeReglerRepository.lagreDatoForNyeRegler(param.getBehandlingId(), dto.getVirkningsdato());
         opprettHistorikkInnslag(param.getBehandlingId(), dto.getVirkningsdato(), eksisterendeDato, dto.getBegrunnelse());
