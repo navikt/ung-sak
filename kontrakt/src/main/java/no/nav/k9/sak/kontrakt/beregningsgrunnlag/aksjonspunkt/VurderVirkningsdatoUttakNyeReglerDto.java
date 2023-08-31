@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertFalse;
 import jakarta.validation.constraints.NotNull;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
@@ -36,5 +37,10 @@ public class VurderVirkningsdatoUttakNyeReglerDto extends BekreftetAksjonspunktD
 
     public LocalDate getVirkningsdato() {
         return virkningsdato;
+    }
+
+    @AssertFalse(message = "Virkningsdato er utenfor gyldig intervall 01.01.2017-31.12.2024")
+    public boolean isVirkningsdatoUgyldig() {
+        return virkningsdato.isBefore(LocalDate.of(2017, 1, 1)) || virkningsdato.isAfter(LocalDate.of(2024, 12, 31));
     }
 }
