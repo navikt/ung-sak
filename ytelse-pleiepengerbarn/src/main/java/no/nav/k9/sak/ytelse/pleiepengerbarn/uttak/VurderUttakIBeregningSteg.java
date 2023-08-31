@@ -152,7 +152,7 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
 
     private boolean harTilkommmetAktivitet(Behandling behandling) {
         //har ikke satt dato for nye regler i uttak (utleder AP for det her), så kan ikke begrense perioden (derav LocalDate.MIN)
-        boolean harTilkommetAktivitet = tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(behandling.getFagsakId(), LocalDate.MIN).isEmpty();
+        boolean harTilkommetAktivitet = !tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(behandling.getFagsakId(), LocalDate.MIN).isEmpty();
         log.info("Har {} tilkommet aktivitet", (harTilkommetAktivitet ? "" : "ikke"));
         return harTilkommetAktivitet;
     }
