@@ -29,7 +29,7 @@ public class UttaksplanMedUtsattePerioder {
     @Size
     private Set<LukketPeriode> utsattePerioder;
     
-    @JsonProperty(value = "tom")
+    @JsonProperty(value = "virkningsdatoUttakNyeRegler")
     @Valid
     private LocalDate virkningsdatoUttakNyeRegler;
 
