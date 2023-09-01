@@ -4,6 +4,7 @@ import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TreeSet;
@@ -32,6 +33,7 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.uttak.ArbeidsgiverMedPerioderSomManglerDto;
@@ -69,6 +71,7 @@ public class PleiepengerUttakRestTjeneste {
     private MapInputTilUttakTjeneste mapInputTilUttakTjeneste;
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
     private KjøreplanUtleder kjøreplanUtleder;
+    private UttakNyeReglerRepository uttakNyeReglerRepository;
 
     public PleiepengerUttakRestTjeneste() {
         // for proxying
@@ -80,13 +83,15 @@ public class PleiepengerUttakRestTjeneste {
                                         ArbeidBrukerBurdeSøktOmUtleder manglendeArbeidstidUtleder,
                                         MapInputTilUttakTjeneste mapInputTilUttakTjeneste,
                                         UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
-                                        KjøreplanUtleder kjøreplanUtleder) {
+                                        KjøreplanUtleder kjøreplanUtleder,
+                                        UttakNyeReglerRepository uttakNyeReglerRepository) {
         this.uttakRestKlient = uttakRestKlient;
         this.behandlingRepository = behandlingRepository;
         this.manglendeArbeidstidUtleder = manglendeArbeidstidUtleder;
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
         this.kjøreplanUtleder = kjøreplanUtleder;
+        this.uttakNyeReglerRepository = uttakNyeReglerRepository;
     }
 
     @GET
@@ -132,7 +137,8 @@ public class PleiepengerUttakRestTjeneste {
             .map(it -> new LukketPeriode(it.getFomDato(), it.getTomDato()))
             .collect(Collectors.toSet());
 
-        return new UttaksplanMedUtsattePerioder(uttaksplan, utsattePerioder);
+        final LocalDate virkningsdatoUttakNyeRegler = uttakNyeReglerRepository.finnDatoForNyeRegler(behandling.getId()).orElse(null);
+        return new UttaksplanMedUtsattePerioder(uttaksplan, utsattePerioder, virkningsdatoUttakNyeRegler);
     }
 
     @GET

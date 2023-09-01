@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.uttak;
 
+import java.time.LocalDate;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -27,13 +28,18 @@ public class UttaksplanMedUtsattePerioder {
     @Valid
     @Size
     private Set<LukketPeriode> utsattePerioder;
+    
+    @JsonProperty(value = "virkningsdatoUttakNyeRegler")
+    @Valid
+    private LocalDate virkningsdatoUttakNyeRegler;
 
     public UttaksplanMedUtsattePerioder() {
     }
 
-    public UttaksplanMedUtsattePerioder(Uttaksplan uttaksplan, Set<LukketPeriode> utsattePerioder) {
+    public UttaksplanMedUtsattePerioder(Uttaksplan uttaksplan, Set<LukketPeriode> utsattePerioder, LocalDate virkningsdatoUttakNyeRegler) {
         this.uttaksplan = uttaksplan;
         this.utsattePerioder = utsattePerioder;
+        this.virkningsdatoUttakNyeRegler = virkningsdatoUttakNyeRegler; 
     }
 
     public Uttaksplan getUttaksplan() {
@@ -42,5 +48,9 @@ public class UttaksplanMedUtsattePerioder {
 
     public Set<LukketPeriode> getUtsattePerioder() {
         return utsattePerioder;
+    }
+    
+    public LocalDate getVirkningsdatoUttakNyeRegler() {
+        return virkningsdatoUttakNyeRegler;
     }
 }
