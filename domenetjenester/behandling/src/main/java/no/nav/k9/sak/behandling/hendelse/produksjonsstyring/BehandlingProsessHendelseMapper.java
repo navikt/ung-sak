@@ -81,6 +81,7 @@ public class BehandlingProsessHendelseMapper {
             .medYtelseTypeKode(behandling.getFagsakYtelseType().getKode())
             .medBehandlingTypeKode(behandling.getType().getKode())
             .medOpprettetBehandling(behandling.getOpprettetDato())
+            .medEldsteDatoMedEndringFraSøker(finnEldsteMottattdato(behandling))
             .medBehandlingResultat(behandling.getBehandlingResultatType())
             .medAksjonspunktKoderMedStatusListe(aksjonspunktKoderMedStatusListe)
             .medAnsvarligSaksbehandlerForTotrinn(behandling.getAnsvarligSaksbehandler())
@@ -93,6 +94,24 @@ public class BehandlingProsessHendelseMapper {
             .medNyeKrav(nyeKrav)
             .medFraEndringsdialog(fraEndringsdialog)
             .build();
+    }
+
+    private LocalDateTime finnEldsteMottattdato(Behandling behandling) {
+        final var behandlingRef = BehandlingReferanse.fra(behandling);
+        final var søknadsfristTjeneste = finnVurderSøknadsfristTjeneste(behandlingRef);
+        if (søknadsfristTjeneste == null) {
+            return null;
+        }
+
+        final Set<KravDokument> kravdokumenter = søknadsfristTjeneste.relevanteKravdokumentForBehandling(behandlingRef);
+        if (kravdokumenter.isEmpty()) {
+            return null;
+        }
+
+        return kravdokumenter.stream()
+            .min(Comparator.comparing(KravDokument::getInnsendingsTidspunkt))
+            .get()
+            .getInnsendingsTidspunkt();
     }
 
     public BehandlingProsessHendelse getProduksjonstyringEventDto(EventHendelse eventHendelse, Behandling behandling) {
