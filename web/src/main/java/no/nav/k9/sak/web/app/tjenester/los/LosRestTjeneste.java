@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -25,16 +27,26 @@ import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.jpa.TomtResultatException;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.produksjonsstyring.los.BehandlingMedFagsakDto;
+import no.nav.k9.sak.perioder.KravDokument;
+import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
+import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoTjeneste;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
+
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.Set;
 
 @ApplicationScoped
 @Path(BASE_PATH)
@@ -51,6 +63,7 @@ public class LosRestTjeneste {
     private LosSystemUserKlient losKlient;
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
     private BehandlingRepository behandlingRepository;
+    private Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester;
 
 
     public LosRestTjeneste() {
@@ -62,10 +75,12 @@ public class LosRestTjeneste {
         LosSystemUserKlient losKlient,
         HistorikkTjenesteAdapter historikkTjenesteAdapter,
         BehandlingRepository behandlingRepository,
-        BehandlingDtoTjeneste behandlingDtoTjeneste) {
+        BehandlingDtoTjeneste behandlingDtoTjeneste,
+        @Any Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester) {
         this.losKlient = losKlient;
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
         this.behandlingRepository = behandlingRepository;
+        this.søknadsfristTjenester = søknadsfristTjenester;
     }
 
     @GET
@@ -89,12 +104,39 @@ public class LosRestTjeneste {
             BehandlingMedFagsakDto dto = new BehandlingMedFagsakDto();
             dto.setSakstype(behandling.get().getFagsakYtelseType());
             dto.setBehandlingResultatType(behandling.get().getBehandlingResultatType());
+            dto.setEldsteDatoMedEndringFraSøker(finnEldsteMottattdato(behandling.get()));
 
             Response.ResponseBuilder responseBuilder = Response.ok().entity(dto);
             return responseBuilder.build();
         } else {
             return Response.noContent().build();
         }
+    }
+
+    private LocalDateTime finnEldsteMottattdato(Behandling behandling) {
+        final var behandlingRef = BehandlingReferanse.fra(behandling);
+        final var søknadsfristTjeneste = finnVurderSøknadsfristTjeneste(behandlingRef);
+        if (søknadsfristTjeneste == null) {
+            return null;
+        }
+
+        final Set<KravDokument> kravdokumenter = søknadsfristTjeneste.relevanteKravdokumentForBehandling(behandlingRef);
+        if (kravdokumenter.isEmpty()) {
+            return null;
+        }
+
+        return kravdokumenter.stream()
+            .min(Comparator.comparing(KravDokument::getInnsendingsTidspunkt))
+            .get()
+            .getInnsendingsTidspunkt();
+    }
+
+    private VurderSøknadsfristTjeneste<VurdertSøktPeriode.SøktPeriodeData> finnVurderSøknadsfristTjeneste(BehandlingReferanse ref) {
+        final FagsakYtelseType ytelseType = ref.getFagsakYtelseType();
+
+        @SuppressWarnings("unchecked")
+        final var tjeneste = (VurderSøknadsfristTjeneste<VurdertSøktPeriode.SøktPeriodeData>) FagsakYtelseTypeRef.Lookup.find(søknadsfristTjenester, ytelseType).orElse(null);
+        return tjeneste;
     }
 
     @GET
