@@ -15,6 +15,7 @@ spec:
     replication: 3  # see min/max requirements
     retentionBytes: -1  # -1 means unlimited
     retentionHours: 2160
+    maxMessageBytes: 5242880
   acl:
     - team: k9saksbehandling
       application: k9-sak

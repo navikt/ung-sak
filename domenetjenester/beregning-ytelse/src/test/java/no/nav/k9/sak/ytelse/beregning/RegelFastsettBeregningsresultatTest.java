@@ -81,10 +81,12 @@ public class RegelFastsettBeregningsresultatTest {
         assertThat(brukerAndeler).hasSize(1);
         assertThat(brukerAndeler.get(0).getArbeidsforhold().getIdentifikator()).isEqualTo("111");
         assertThat(brukerAndeler.get(0).getDagsats()).isEqualTo(1000);
+        assertThat(brukerAndeler.get(0).getUtbetalingsgradOppdrag()).isEqualByComparingTo(BigDecimal.valueOf(50));
 
         assertThat(arbAndeler).hasSize(1);
         assertThat(arbAndeler.get(0).getArbeidsforhold().getIdentifikator()).isEqualTo("111");
         assertThat(arbAndeler.get(0).getDagsats()).isEqualTo(1000);
+        assertThat(arbAndeler.get(0).getUtbetalingsgradOppdrag()).isEqualByComparingTo(BigDecimal.valueOf(50));
     }
 
     @Test
@@ -311,6 +313,7 @@ public class RegelFastsettBeregningsresultatTest {
         BeregningsgrunnlagPeriode periode = BeregningsgrunnlagPeriode.builder()
             .medPeriode(Periode.of(DT_MINUS_3W, LocalDate.MAX))
             .medBeregningsgrunnlagPrStatus(prStatus)
+            .medBruttoBeregningsgrunnlag(BigDecimal.valueOf(520000))
             .build();
         return Beregningsgrunnlag.builder()
             .medAktivitetStatuser(Collections.singletonList(AktivitetStatus.ATFL))
@@ -328,11 +331,13 @@ public class RegelFastsettBeregningsresultatTest {
 
         BeregningsgrunnlagPeriode periode1 = BeregningsgrunnlagPeriode.builder()
             .medPeriode(Periode.of(BG_PERIODE_1.getFomDato(), BG_PERIODE_1.getTomDato()))
+            .medBruttoBeregningsgrunnlag(BigDecimal.valueOf(520000))
             .medBeregningsgrunnlagPrStatus(prStatus1)
             .build();
 
         BeregningsgrunnlagPeriode periode2 = BeregningsgrunnlagPeriode.builder()
             .medPeriode(Periode.of(BG_PERIODE_2.getFomDato(), BG_PERIODE_2.getTomDato()))
+            .medBruttoBeregningsgrunnlag(BigDecimal.valueOf(520000))
             .medBeregningsgrunnlagPrStatus(prStatus2)
             .build();
 

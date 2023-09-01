@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.prosesstask.api.ProsessTask;
@@ -27,7 +28,7 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
 
     public static final String TASKTYPE = "innhentsaksopplysninger.håndterMottattDokument";
     public static final String MOTTATT_DOKUMENT_ID_KEY = "mottattDokumentId";
-    public static final String BEHANDLING_ÅRSAK_TYPE_KEY = "arsakType";
+    private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess");
     private static final Logger log = LoggerFactory.getLogger(HåndterMottattDokumentTask.class);
     private InnhentDokumentTjeneste innhentDokumentTjeneste;
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
@@ -70,6 +71,10 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
         if (mottatteDokumenter.isEmpty()) {
             log.info("Ingen dokumenter fortsatt markert MOTTATT, avbryter denne tasken (behandlet av tidligere kjøring)");
             return;
+        }
+        LOG_CONTEXT.add("journalpostId", String.join(",", mottatteDokumenter.stream().map(d -> d.getJournalpostId().getVerdi()).toList()));
+        for (MottattDokument mottattDokument : mottatteDokumenter) {
+            log.info("Håndterer mottak av journalpostId {}", mottattDokument.getJournalpostId().getVerdi());
         }
 
         validerDokumenter(behandlingId, mottatteDokumenter);

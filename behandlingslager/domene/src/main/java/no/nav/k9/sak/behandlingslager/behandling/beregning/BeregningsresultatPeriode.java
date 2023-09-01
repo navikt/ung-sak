@@ -62,6 +62,11 @@ public class BeregningsresultatPeriode extends BaseEntitet {
 
     @Column(name = "gradering_inntekt_prosent")
     private BigDecimal inntektGraderingsprosent;
+    @Column(name = "total_utbetalingsgrad_fra_uttak")
+    private BigDecimal totalUtbetalingsgradFraUttak;
+
+    @Column(name = "total_utbetalingsgrad_etter_reduksjon_ved_tilkommet_inntekt")
+    private BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
 
     @Column(name = "graderingsfaktor_inntekt")
     private BigDecimal graderingsfaktorInntekt;
@@ -122,6 +127,14 @@ public class BeregningsresultatPeriode extends BaseEntitet {
         return inntektGraderingsprosent;
     }
 
+    public BigDecimal getTotalUtbetalingsgradFraUttak() {
+        return totalUtbetalingsgradFraUttak;
+    }
+
+    public BigDecimal getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt() {
+        return totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
+    }
+
     public BigDecimal getGraderingsfaktorInntekt() {
         return graderingsfaktorInntekt;
     }
@@ -129,6 +142,7 @@ public class BeregningsresultatPeriode extends BaseEntitet {
     public BigDecimal getGraderingsfaktorTid() {
         return graderingsfaktorTid;
     }
+
 
     void addBeregningsresultatAndel(BeregningsresultatAndel beregningsresultatAndel) {
         Objects.requireNonNull(beregningsresultatAndel, "beregningsresultatAndel");
@@ -161,6 +175,8 @@ public class BeregningsresultatPeriode extends BaseEntitet {
         return getClass().getSimpleName()
             + "<periode=" + periode
             + (inntektGraderingsprosent != null ? ", inntektsgradering=" + inntektGraderingsprosent.toPlainString() : "")
+            + (totalUtbetalingsgradFraUttak != null ? ", totalUtbetalingsgradFraUttak=" + totalUtbetalingsgradFraUttak.toPlainString() : "")
+            + (totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt != null ? ", totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt=" + totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt.toPlainString() : "")
             + ", andeler=[" + beregningsresultatAndelList.size() + "]>";
     }
 
@@ -187,6 +203,15 @@ public class BeregningsresultatPeriode extends BaseEntitet {
 
         public Builder medInntektGraderingprosent(BigDecimal inntektGraderingsprosent) {
             beregningsresultatPeriodeMal.inntektGraderingsprosent = inntektGraderingsprosent;
+            return this;
+        }
+
+        public Builder medTotalUtbetalingsgradFraUttak(BigDecimal totalUtbetalingsgradFraUttak) {
+            beregningsresultatPeriodeMal.totalUtbetalingsgradFraUttak = totalUtbetalingsgradFraUttak;
+            return this;
+        }
+        public Builder medTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt) {
+            beregningsresultatPeriodeMal.totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt = totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
             return this;
         }
 

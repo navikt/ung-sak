@@ -5,6 +5,9 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 import java.time.LocalDate;
 import java.util.Arrays;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -21,6 +24,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 @ApplicationScoped
 public class OmsorgspengerSøknadMottaker implements SøknadMottakTjeneste<OmsorgspengerSøknadInnsending> {
 
+    private final static Logger logger = LoggerFactory.getLogger(OmsorgspengerSøknadMottaker.class);
     private static final int CUT_OFF_OMP = 2020;
     private FagsakTjeneste fagsakTjeneste;
     private SaksnummerRepository saksnummerRepository;
@@ -40,6 +44,7 @@ public class OmsorgspengerSøknadMottaker implements SøknadMottakTjeneste<Omsor
         ytelseType.validerNøkkelParametere(pleietrengendeAktørId, relatertPersonAktørId);
         var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, null, null, startDato, sluttDato);
         if (fagsak.isPresent()) {
+            logger.info("Fant fagsak {} for periode {}/{}", fagsak.get().getSaksnummer().getVerdi(), startDato, sluttDato);
             return fagsak.get();
         }
 
@@ -56,7 +61,9 @@ public class OmsorgspengerSøknadMottaker implements SøknadMottakTjeneste<Omsor
             if (p.overlapper(angittPeriode)) {
                 if (p.getFomDato().getYear() >= CUT_OFF_OMP) {
                     // ta utgangspunkt i året i år først, sjekk deretter fjoråret. Men ikke tillatt 2019 eller tidligere her
-                    return opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, ytelseType, p.getFomDato(), p.getTomDato());
+                    Fagsak nyFagsak = opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, ytelseType, p.getFomDato(), p.getTomDato());
+                    logger.info("Opprettet fagsak {} med periode {}/{}. Etterspurte fagsak for periode {}/{}", nyFagsak.getSaksnummer().getVerdi(), p.getFomDato(), p.getTomDato(), startDato, sluttDato);
+                    return nyFagsak;
                 }
             }
         }
