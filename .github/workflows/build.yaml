@@ -23,6 +23,10 @@ jobs:
   build:
     name: Bygg
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+      issues: write
 
     services:
       postgres:
