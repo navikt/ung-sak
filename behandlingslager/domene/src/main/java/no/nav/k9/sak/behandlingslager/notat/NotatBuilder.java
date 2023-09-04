@@ -1,38 +1,33 @@
 package no.nav.k9.sak.behandlingslager.notat;
 
+import java.util.Objects;
+import java.util.UUID;
+
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.typer.AktørId;
 
 public class NotatBuilder {
-    private Long id;
+    private UUID uuid;
     private String notatTekst;
     private AktørId gjelder;
     private Long fagsakId;
-    private boolean skjult;
+    private boolean skjult = false;
 
-    public static NotatBuilder forFagsak(Fagsak fagsak, boolean gjelderPleietrengende) {
-        return new NotatBuilder()
-            .fagsakId(fagsak.getId())
-            .gjelder(gjelderPleietrengende ? fagsak.getPleietrengendeAktørId() : fagsak.getAktørId());
-    }
+    private NotatBuilder() {}
 
-    public NotatBuilder id(Long id) {
-        this.id = id;
-        return this;
+    public static NotatBuilder of(Fagsak fagsak, boolean gjelderPleietrengende) {
+        var builder = new NotatBuilder();
+        if (gjelderPleietrengende) {
+            builder.gjelder = fagsak.getPleietrengendeAktørId();
+        } else {
+            builder.fagsakId = fagsak.getId();
+        }
+
+        return builder;
     }
 
     public NotatBuilder notatTekst(String notatTekst) {
         this.notatTekst = notatTekst;
-        return this;
-    }
-
-    public NotatBuilder gjelder(AktørId gjelder) {
-        this.gjelder = gjelder;
-        return this;
-    }
-
-    public NotatBuilder fagsakId(Long fagsakId) {
-        this.fagsakId = fagsakId;
         return this;
     }
 
@@ -41,7 +36,16 @@ public class NotatBuilder {
         return this;
     }
 
-    public NotatEntitet build() {
-        return new NotatEntitet(id, notatTekst, gjelder, fagsakId, skjult);
+    public Notat build() {
+        Objects.requireNonNull(notatTekst, "Notattekst må være satt");
+        if (gjelder != null) {
+            if (fagsakId != null) throw new IllegalArgumentException("Kan ikke sette både fagsak og aktør");
+            return new NotatAktørEntitet(gjelder, notatTekst, skjult);
+        }
+        if (fagsakId != null) {
+            return new NotatSakEntitet(fagsakId, notatTekst, skjult);
+        }
+
+        throw new IllegalArgumentException("Verken gjelder eller fagsak er satt");
     }
 }

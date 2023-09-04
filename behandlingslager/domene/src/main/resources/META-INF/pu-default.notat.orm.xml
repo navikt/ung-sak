@@ -4,8 +4,13 @@
         xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm https://jakarta.ee/xml/ns/persistence/orm/orm_3_0.xsd"
         version="3.0">
 
-	<sequence-generator name="SEQ_NOTAT" allocation-size="50" sequence-name="SEQ_NOTAT" />
+	<sequence-generator name="seq_notat_aktoer" allocation-size="50" sequence-name="seq_notat_aktoer" />
+	<sequence-generator name="seq_notat_aktoer_tekst" allocation-size="50" sequence-name="seq_notat_aktoer_tekst" />
+	<sequence-generator name="seq_notat_sak" allocation-size="50" sequence-name="seq_notat_sak" />
+	<sequence-generator name="seq_notat_sak_tekst" allocation-size="50" sequence-name="seq_notat_sak_tekst" />
 
-	<entity class="no.nav.k9.sak.behandlingslager.notat.NotatEntitet" />
+	<entity class="no.nav.k9.sak.behandlingslager.notat.NotatAktørEntitet" />
+	<entity class="no.nav.k9.sak.behandlingslager.notat.NotatSakEntitet" />
+	<entity class="no.nav.k9.sak.behandlingslager.notat.NotatAktørTekst" />
 
 </entity-mappings>

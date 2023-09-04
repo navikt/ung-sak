@@ -57,14 +57,12 @@ class NotatRestTjenesteTest {
         notatRestTjeneste.opprett(notatDto);
         NotatDto notat = notatRestTjeneste.hentForFagsak(fagsakId).stream().findFirst().orElseThrow();
 
-        assertThat(notat.notatTekst()).isEqualTo(tekst);
-        assertThat(notat.fagsakId()).isEqualTo(fagsakId);
-        assertThat(notat.notatGjelderType()).isEqualTo(NotatGjelderType.FAGSAK);
-        assertThat(notat.skjult()).isFalse();
-        assertThat(notat.opprettetAv()).isEqualTo("VL");
-        assertThat(notat.opprettetTidspunkt()).isNotNull();
-        assertThat(notat.endretAv()).isNull();
-        assertThat(notat.endretTidspunkt()).isNull();
+        assertThat(notat.getNotatTekst()).isEqualTo(tekst);
+        assertThat(notat.isSkjult()).isFalse();
+        assertThat(notat.getOpprettetAv()).isEqualTo("VL");
+        assertThat(notat.getOpprettetTidspunkt()).isNotNull();
+        assertThat(notat.getEndretAv()).isNull();
+        assertThat(notat.getEndretTidspunkt()).isNull();
 
     }
 
@@ -79,22 +77,22 @@ class NotatRestTjenesteTest {
 
         notatRestTjeneste.opprett(notatDto);
         NotatDto notat = notatRestTjeneste.hentForFagsak(fagsakId).stream().findFirst().orElseThrow();
-        assertThat(notat.skjult()).isFalse();
-        notatRestTjeneste.skjul(notat.id(), true);
-        NotatDto skjultNotat = notatRestTjeneste.hent(notat.id());
-        assertThat(skjultNotat.skjult()).isTrue();
-        assertThat(skjultNotat.opprettetTidspunkt()).isNotNull();
-        assertThat(skjultNotat.endretTidspunkt()).isNull();
+        assertThat(notat.isSkjult()).isFalse();
+        notatRestTjeneste.skjul(notat.getUuid(), true);
+        NotatDto skjultNotat = notatRestTjeneste.hent(notat.getUuid());
+        assertThat(skjultNotat.isSkjult()).isTrue();
+        assertThat(skjultNotat.getOpprettetTidspunkt()).isEqualTo(notat.getOpprettetTidspunkt());
+        assertThat(skjultNotat.getEndretTidspunkt()).isNotNull();
     }
 
     @Test
-    void skalEndreTekstOgPleietrengende() {
+    void skalEndreTekst() {
         var mor = AktørId.dummy();
         var pleietrengende = AktørId.dummy();
 
         var morSak = TestScenarioBuilder.builderMedSøknad(mor).medPleietrengende(pleietrengende).lagreFagsak(repositoryProvider);
 
-        String morTekst = "notat som gjelder pleietrengende";
+        String morTekst = "et nytt notat ";
         notatRestTjeneste.opprett(new NyttNotatDto(
             morTekst,
             morSak.getId(),
@@ -103,23 +101,22 @@ class NotatRestTjenesteTest {
 
         List<NotatDto> morNotater = notatRestTjeneste.hentForFagsak(morSak.getId());
         NotatDto morNotat = morNotater.stream().findFirst().orElseThrow();
-        assertThat(morNotat.notatGjelderType()).isEqualTo(NotatGjelderType.FAGSAK);
-        assertThat(morNotat.notatTekst()).isEqualTo(morTekst);
-        assertThat(morNotat.opprettetTidspunkt()).isNotNull();
-        assertThat(morNotat.endretTidspunkt()).isNull();
+        assertThat(morNotat.getGjelderType()).isEqualTo(NotatGjelderType.FAGSAK);
+        assertThat(morNotat.getNotatTekst()).isEqualTo(morTekst);
+        assertThat(morNotat.getOpprettetTidspunkt()).isNotNull();
+        assertThat(morNotat.getEndretTidspunkt()).isNull();
 
-        var pleietrengendeTekst = "notat endret til å gjelde pleietrengende";
-        notatRestTjeneste.endre(morNotat.id(), new EndreNotatDto(
-            morNotat.id(),
-            pleietrengendeTekst,
-            NotatGjelderType.PLEIETRENGENDE,
-            morNotat.versjon()));
+        var endretTekst = "et endret notat";
+        notatRestTjeneste.endre(morNotat.getUuid(), new EndreNotatDto(
+            morNotat.getUuid(),
+            endretTekst,
+            morNotat.getVersjon()));
 
-        NotatDto endretNotat = notatRestTjeneste.hent(morNotat.id());
-        assertThat(endretNotat.notatGjelderType()).isEqualTo(NotatGjelderType.PLEIETRENGENDE);
-        assertThat(endretNotat.notatTekst()).isEqualTo(pleietrengendeTekst);
-        assertThat(endretNotat.opprettetTidspunkt()).isEqualTo(morNotat.opprettetTidspunkt());
-        assertThat(endretNotat.endretTidspunkt()).isAfter(morNotat.opprettetTidspunkt());
+        NotatDto endretNotat = notatRestTjeneste.hent(morNotat.getUuid());
+        assertThat(endretNotat.getGjelderType()).isEqualTo(NotatGjelderType.FAGSAK);
+        assertThat(endretNotat.getNotatTekst()).isEqualTo(endretTekst);
+        assertThat(endretNotat.getOpprettetAv()).isEqualTo(morNotat.getOpprettetAv());
+        assertThat(endretNotat.getEndretTidspunkt()).isAfter(morNotat.getOpprettetTidspunkt());
 
 
 
@@ -156,14 +153,17 @@ class NotatRestTjenesteTest {
 
         List<NotatDto> morNotater = notatRestTjeneste.hentForFagsak(morSak.getId());
         assertThat(morNotater).hasSize(2);
-        assertThat(morNotater).extracting(NotatDto::notatTekst).containsExactlyInAnyOrder(morNotat, pleietrengedeNotat);
+        assertThat(morNotater).extracting(NotatDto::getNotatTekst).containsExactlyInAnyOrder(morNotat, pleietrengedeNotat);
 
 
         List<NotatDto> farNotater = notatRestTjeneste.hentForFagsak(farSak.getId());
         assertThat(farNotater).hasSize(2);
-        assertThat(farNotater).extracting(NotatDto::notatTekst).containsExactlyInAnyOrder(farNotat, pleietrengedeNotat);
+        assertThat(farNotater).extracting(NotatDto::getNotatTekst).containsExactlyInAnyOrder(farNotat, pleietrengedeNotat);
 
     }
+
+
+
 
     @Test
     void notatPåPsbPleietrengendeSkalIkkeHentesPåPils() {

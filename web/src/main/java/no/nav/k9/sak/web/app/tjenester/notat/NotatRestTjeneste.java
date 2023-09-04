@@ -6,6 +6,7 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,9 +29,11 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.notat.NotatGjelderType;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.behandlingslager.notat.Notat;
+import no.nav.k9.sak.behandlingslager.notat.NotatAktørEntitet;
 import no.nav.k9.sak.behandlingslager.notat.NotatBuilder;
-import no.nav.k9.sak.behandlingslager.notat.NotatEntitet;
 import no.nav.k9.sak.behandlingslager.notat.NotatRepository;
+import no.nav.k9.sak.behandlingslager.notat.NotatSakEntitet;
 import no.nav.k9.sak.kontrakt.notat.EndreNotatDto;
 import no.nav.k9.sak.kontrakt.notat.NotatDto;
 import no.nav.k9.sak.kontrakt.notat.NyttNotatDto;
@@ -59,7 +62,7 @@ public class NotatRestTjeneste {
     public List<NotatDto> hentForFagsak(@QueryParam("fagsakId") long fagsakId) {
         Fagsak fagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
 
-        List<NotatEntitet> notater = notatRepository.hentForSakOgAktør(fagsakId, fagsak.getPleietrengendeAktørId());
+        List<Notat> notater = notatRepository.hentForSakOgAktør(fagsakId, fagsak.getYtelseType(), fagsak.getPleietrengendeAktørId());
 
         return notater.stream().map(this::mapDto).collect(Collectors.toList());
 
@@ -71,7 +74,7 @@ public class NotatRestTjeneste {
     @Operation(description = "Henter notat", tags = "notat")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public NotatDto hent(@PathParam("notatId") long notatId) {
+    public NotatDto hent(@PathParam("notatId") UUID notatId) {
         var notatEntitet = notatRepository.hent(notatId);
         return mapDto(notatEntitet);
 
@@ -85,15 +88,16 @@ public class NotatRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response opprett(@Parameter(description = "Nytt notat") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) NyttNotatDto nyttNotatDto) {
         Fagsak fagsak = fagsakRepository.finnEksaktFagsak(nyttNotatDto.fagsakId());
-        opprettNotat(fagsak, nyttNotatDto.notatTekst(), nyttNotatDto.notatGjelderType());
-        return Response.status(Response.Status.CREATED).build();
+        Notat notat = opprettNotat(fagsak, nyttNotatDto.notatTekst(), nyttNotatDto.notatGjelderType());
+        return Response.status(Response.Status.CREATED).entity(mapDto(notat)).build();
 
     }
 
-    private NotatEntitet opprettNotat(Fagsak fagsak, String notatTekst, NotatGjelderType notatGjelderType) {
+    private Notat opprettNotat(Fagsak fagsak, String notatTekst, NotatGjelderType notatGjelderType) {
         var gjelderPleietrengende = notatGjelderType == NotatGjelderType.PLEIETRENGENDE;
-        NotatEntitet entitet = NotatBuilder.forFagsak(fagsak, gjelderPleietrengende).
-            notatTekst(notatTekst).build();
+        Notat entitet = NotatBuilder.of(fagsak, gjelderPleietrengende)
+            .notatTekst(notatTekst)
+            .build();
         notatRepository.opprett(entitet);
         return entitet;
     }
@@ -105,15 +109,15 @@ public class NotatRestTjeneste {
     @BeskyttetRessurs(action = UPDATE, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response endre(
-        @PathParam("notatId") long notatId,
+        @PathParam("notatId") UUID notatId,
         @Parameter(description = "Notat som skal endres") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) EndreNotatDto endreNotatDto) {
-        var notat = notatRepository.hent(notatId);
-        Fagsak fagsak = fagsakRepository.finnEksaktFagsak(notat.getFagsakId());
-
-        var nyttNotat = opprettNotat(fagsak, endreNotatDto.notatTekst(), endreNotatDto.notatGjelderType());
-
-        notat.erstattMed(nyttNotat.getId()); //todo constraint på erstattId + primær nøkkel?
-        notatRepository.oppdater(notat);
+//        var notat = notatRepository.hent(notatId);
+//        Fagsak fagsak = fagsakRepository.finnEksaktFagsak(notat.getFagsakId());
+//
+//        var nyttNotat = opprettNotat(fagsak, endreNotatDto.notatTekst(), endreNotatDto.notatGjelderType());
+//
+//        notat.erstattMed(nyttNotat.getId()); //todo constraint på erstattId + primær nøkkel?
+//        notatRepository.oppdater(notat);
 
         return Response.status(Response.Status.CREATED).build();
 
@@ -125,7 +129,7 @@ public class NotatRestTjeneste {
     @Operation(description = "Skjul notat", tags = "notat")
     @BeskyttetRessurs(action = UPDATE, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response skjul(@PathParam("notatId") long notatId, @QueryParam("skjul") boolean skjul) {
+    public Response skjul(@PathParam("notatId") UUID notatId, @QueryParam("skjul") boolean skjul) {
         var notat = notatRepository.hent(notatId);
         notat.skjul(skjul);
         notatRepository.oppdater(notat);
@@ -133,19 +137,37 @@ public class NotatRestTjeneste {
 
     }
 
-    private NotatDto mapDto(NotatEntitet entitet) {
-        return new NotatDto(
-            entitet.getId(),
-            entitet.getNotatTekst(),
-            entitet.getFagsakId(),
-            entitet.getGjelderType(),
-            entitet.isSkjult(),
-            entitet.getVersjon(),
-            entitet.getOpprettetAv(),
-            entitet.getOpprettetTidspunkt(),
-            entitet.getEndretAv(),
-            entitet.getEndretTidspunkt()
-        );
+
+    private NotatDto mapDto(Notat entitet) {
+        //TODO to interface or not to interface, that is the question....
+        if (entitet instanceof NotatAktørEntitet aktørEntitet) {
+            return new NotatDto(
+                aktørEntitet.getId(),
+                aktørEntitet.getUuid(),
+                aktørEntitet.getNotatTekst(),
+                aktørEntitet.isSkjult(),
+                NotatGjelderType.PLEIETRENGENDE,
+                aktørEntitet.getVersjon(),
+                aktørEntitet.getOpprettetAv(),
+                aktørEntitet.getOpprettetTidspunkt(),
+                aktørEntitet.getEndretAv(),
+                aktørEntitet.getEndretTidspunkt());
+        } else if (entitet instanceof NotatSakEntitet fagsakNotat) {
+            return new NotatDto(
+                fagsakNotat.getId(),
+                fagsakNotat.getUuid(),
+                fagsakNotat.getNotatTekst(),
+                fagsakNotat.isSkjult(),
+                NotatGjelderType.FAGSAK,
+                fagsakNotat.getVersjon(),
+                fagsakNotat.getOpprettetAv(),
+                fagsakNotat.getOpprettetTidspunkt(),
+                fagsakNotat.getEndretAv(),
+                fagsakNotat.getEndretTidspunkt()
+            );
+        }
+
+        throw new IllegalStateException("Utviklerfeil: Støtter ikke Notat typen");
     }
 
 }

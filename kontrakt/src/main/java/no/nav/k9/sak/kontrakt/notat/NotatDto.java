@@ -1,11 +1,12 @@
 package no.nav.k9.sak.kontrakt.notat;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -13,55 +14,109 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import no.nav.k9.kodeverk.notat.NotatGjelderType;
 import no.nav.k9.sak.kontrakt.dokument.TekstValideringRegex;
-//TODO valideringer
 
+/**
+ * Dto for notat entiteter. Brukes bare til serialisering.
+ */
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    property = "gjelderType")
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public record NotatDto(
-    @JsonProperty(value = "id")
-    Long id,
+public class NotatDto { //TODO gjør om til record
 
-    @JsonProperty(value = "notatTekst", required = true)
+    //TODO fjern
+    @JsonProperty(value = "id")
+    private Long id;
+
+    @JsonProperty(value = "uuid")
+    private UUID uuid;
+
+    @JsonProperty(value = "notatTekst")
     @Size(max = 4000)
     @Pattern(regexp = TekstValideringRegex.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @NotNull
-    String notatTekst,
+    private String notatTekst;
 
-    @JsonProperty(value = "fagsakId", required = true)
+    @JsonProperty(value = "skjult")
     @NotNull
-    Long fagsakId,
+    private boolean skjult;
 
-    @JsonProperty(value = "notatGjelderType", required = true)
-    @NotNull
-    NotatGjelderType notatGjelderType,
+    @JsonProperty("gjelderType")
+    private NotatGjelderType gjelderType;
 
-    @JsonProperty(value = "skjult", required = true)
+    @JsonProperty(value = "versjon")
     @NotNull
-    boolean skjult,
-
-    @JsonProperty(value = "versjon", required = true)
-    @NotNull
-    long versjon,
+    long versjon;
 
     @JsonProperty(value = "opprettetAv")
     @Size(max = 100)
     @Pattern(regexp = "^[\\p{Alnum}ÆØÅæøå\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
-    String opprettetAv,
+    private String opprettetAv;
 
     @JsonProperty(value = "opprettetTidspunkt")
-    LocalDateTime opprettetTidspunkt,
-
+    private LocalDateTime opprettetTidspunkt;
 
     @JsonProperty(value = "endretAv")
     @Size(max = 20)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
-    String endretAv,
+    private String endretAv;
 
     @JsonProperty(value = "endretTidspunkt")
     @Valid
-    LocalDateTime endretTidspunkt
+    private LocalDateTime endretTidspunkt;
 
-) {
+    public NotatDto(Long id, UUID uuid, String notatTekst, boolean skjult, NotatGjelderType gjelderType, long versjon, String opprettetAv, LocalDateTime opprettetTidspunkt, String endretAv, LocalDateTime endretTidspunkt) {
+        this.id = id;
+        this.uuid = uuid;
+        this.notatTekst = notatTekst;
+        this.skjult = skjult;
+        this.gjelderType = gjelderType;
+        this.versjon = versjon;
+        this.opprettetAv = opprettetAv;
+        this.opprettetTidspunkt = opprettetTidspunkt;
+        this.endretAv = endretAv;
+        this.endretTidspunkt = endretTidspunkt;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getNotatTekst() {
+        return notatTekst;
+    }
+
+    public boolean isSkjult() {
+        return skjult;
+    }
+
+    public NotatGjelderType getGjelderType() {
+        return gjelderType;
+    }
+
+    public long getVersjon() {
+        return versjon;
+    }
+
+    public String getOpprettetAv() {
+        return opprettetAv;
+    }
+
+    public LocalDateTime getOpprettetTidspunkt() {
+        return opprettetTidspunkt;
+    }
+
+    public String getEndretAv() {
+        return endretAv;
+    }
+
+    public LocalDateTime getEndretTidspunkt() {
+        return endretTidspunkt;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
 }

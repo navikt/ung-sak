@@ -18,9 +18,10 @@ import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.behandlingslager.notat.Notat;
 import no.nav.k9.sak.behandlingslager.notat.NotatBuilder;
-import no.nav.k9.sak.behandlingslager.notat.NotatEntitet;
 import no.nav.k9.sak.behandlingslager.notat.NotatRepository;
+import no.nav.k9.sak.behandlingslager.notat.NotatSakEntitet;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
@@ -49,22 +50,20 @@ class NotatRepositoryTest {
         Long fagsakId = fagsakRepository.opprettNy(fagsak);
         String tekst = "en tekst med litt notater";
 
-        NotatEntitet notat = new NotatBuilder()
+        Notat notat = NotatBuilder.of(fagsak, false)
             .notatTekst(tekst)
-            .fagsakId(fagsakId)
-            .gjelder(fagsak.getAktørId())
             .skjult(false)
             .build();
 
-        Long notatId = notatRepository.opprett(notat);
-        NotatEntitet lagretNotat = notatRepository.hent(notatId);
+        var notatId = notatRepository.opprett(notat);
+        NotatSakEntitet lagretNotat = (NotatSakEntitet) notatRepository.hent(notatId);
         assertThat(lagretNotat.getNotatTekst()).isEqualTo(tekst);
         assertThat(lagretNotat.getFagsakId()).isEqualTo(fagsakId);
-        assertThat(lagretNotat.getGjelder()).isEqualTo(fagsak.getAktørId());
         assertThat(lagretNotat.getOpprettetAv()).isEqualTo("VL");
-        assertThat(lagretNotat.isSkjult()).isFalse();
         assertThat(lagretNotat.isAktiv()).isTrue();
-        assertThat(lagretNotat.getErstattetAvNotatId()).isNull();
+        assertThat(lagretNotat.getVersjon()).isEqualTo(0);
+
+        //TODO sjekk at fagsak notat har verdi og aktør notat mangler verdi
 
     }
 
