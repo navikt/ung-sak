@@ -1,7 +1,10 @@
 package no.nav.k9.sak.behandlingslager.behandling.uttak;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -32,8 +35,31 @@ public class OverstyrUttakRepository {
         return mapFraEntitetTidslinje(hentSomEntitetTidslinje(behandlingId));
     }
 
+    public void oppdaterOverstyringer(Long behandlingId, List<Long> slettes, LocalDateTimeline<OverstyrtUttakPeriode> oppdaterEllerLagre) {
+        LocalDateTimeline<OverstyrtUttakPeriode> eksisterendeOverstyringer = hentOverstyrtUttak(behandlingId);
+        Map<Long, LocalDateSegment<OverstyrtUttakPeriode>> eksisterendeOverstyringerPrId = eksisterendeOverstyringer.stream().collect(Collectors.toMap(segment -> segment.getValue().getId(), segment -> segment));
+        slettes.forEach(slettesId -> fjernOverstyring(behandlingId, slettesId));
+
+        List<LocalDateSegment<OverstyrtUttakPeriode>> segmenterSomEndres =new ArrayList<>();
+        oppdaterEllerLagre.stream().forEach(segment -> {
+            OverstyrtUttakPeriode nyOverstyring = segment.getValue();
+            Long eksisterendeOverstyringId = nyOverstyring.getId();
+            LocalDateSegment<OverstyrtUttakPeriode> eksisterendeOverstyring = eksisterendeOverstyringId != null ? eksisterendeOverstyringerPrId.get(eksisterendeOverstyringId) : null;
+            boolean harEndring = !Objects.equals(nyOverstyring, eksisterendeOverstyring);
+            if (harEndring && eksisterendeOverstyringId != null){
+                fjernOverstyring(behandlingId, eksisterendeOverstyringId);
+            }
+            if (harEndring){
+                segmenterSomEndres.add(segment);
+            }
+        });
+
+        fjernOverstyringerSomOverlapper(behandlingId, new LocalDateTimeline<>(segmenterSomEndres));
+
+    }
+
     public void leggTilOverstyring(Long behandlingId, LocalDateInterval periode, OverstyrtUttakPeriode overstyring) {
-        fjernOverstyringerForPerioden(behandlingId, periode);
+        fjernOverstyringerSomOverlapper(behandlingId, new LocalDateTimeline<>(periode, true));
 
         OverstyrtUttakPeriodeEntitet nyOverstyring = new OverstyrtUttakPeriodeEntitet(behandlingId, DatoIntervallEntitet.fra(periode), overstyring.getSøkersUttaksgrad(), map(overstyring.getOverstyrtUtbetalingsgrad()));
         entityManager.persist(nyOverstyring);
@@ -41,15 +67,15 @@ public class OverstyrUttakRepository {
         entityManager.flush();
     }
 
-    private void fjernOverstyringerForPerioden(Long behandlingId, LocalDateInterval periodeSomRyddes) {
+    private void fjernOverstyringerSomOverlapper(Long behandlingId, LocalDateTimeline<?> perioderSomRyddes) {
         LocalDateTimeline<OverstyrtUttakPeriodeEntitet> eksisterendeOverstyringer = hentSomEntitetTidslinje(behandlingId);
 
-        Set<OverstyrtUttakPeriodeEntitet> påvirkedeEksisterendeOverstyringer = eksisterendeOverstyringer.intersection(periodeSomRyddes).stream().map(LocalDateSegment::getValue).collect(Collectors.toSet());
+        Set<OverstyrtUttakPeriodeEntitet> påvirkedeEksisterendeOverstyringer = eksisterendeOverstyringer.intersection(perioderSomRyddes).stream().map(LocalDateSegment::getValue).collect(Collectors.toSet());
         påvirkedeEksisterendeOverstyringer.forEach(eksisterendeOverstyring -> {
             eksisterendeOverstyring.deaktiver();
             entityManager.persist(eksisterendeOverstyring);
         });
-        LocalDateTimeline<OverstyrtUttakPeriodeEntitet> delvisBevaringsverdigeEksisterendeOverstyringer = tilTidslinje(påvirkedeEksisterendeOverstyringer).disjoint(periodeSomRyddes);
+        LocalDateTimeline<OverstyrtUttakPeriodeEntitet> delvisBevaringsverdigeEksisterendeOverstyringer = tilTidslinje(påvirkedeEksisterendeOverstyringer).disjoint(perioderSomRyddes);
         delvisBevaringsverdigeEksisterendeOverstyringer.stream().forEach(
             segment -> {
                 OverstyrtUttakPeriodeEntitet bevaringsverdigPåvirketOverstyring = segment.getValue().kopiMedNyPeriode(DatoIntervallEntitet.fra(segment.getLocalDateInterval()));

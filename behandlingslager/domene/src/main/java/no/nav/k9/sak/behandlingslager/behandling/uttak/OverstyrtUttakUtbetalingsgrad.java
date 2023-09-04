@@ -24,6 +24,14 @@ public class OverstyrtUttakUtbetalingsgrad {
         this.utbetalingsgrad = utbetalingsgrad;
     }
 
+    public OverstyrtUttakUtbetalingsgrad(UttakArbeidType aktivitetType, String arbeidsgiverOrgNr, String arbeidsgiverAktørId, InternArbeidsforholdRef internArbeidsforholdRef, BigDecimal utbetalingsgrad) {
+        this.aktivitetType = aktivitetType;
+        this.arbeidsgiverOrgNr = arbeidsgiverOrgNr;
+        this.arbeidsgiverAktørId = arbeidsgiverAktørId;
+        this.internArbeidsforholdRef = internArbeidsforholdRef.getReferanse();
+        this.utbetalingsgrad = utbetalingsgrad;
+    }
+
     public UttakArbeidType getAktivitetType() {
         return aktivitetType;
     }
@@ -51,11 +59,16 @@ public class OverstyrtUttakUtbetalingsgrad {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         OverstyrtUttakUtbetalingsgrad that = (OverstyrtUttakUtbetalingsgrad) o;
-        return aktivitetType == that.aktivitetType && Objects.equals(arbeidsgiverOrgNr, that.arbeidsgiverOrgNr) && Objects.equals(arbeidsgiverAktørId, that.arbeidsgiverAktørId) && Objects.equals(internArbeidsforholdRef, that.internArbeidsforholdRef) && utbetalingsgrad.equals(that.utbetalingsgrad);
+        return aktivitetType == that.aktivitetType
+            && Objects.equals(arbeidsgiverOrgNr, that.arbeidsgiverOrgNr)
+            && Objects.equals(arbeidsgiverAktørId, that.arbeidsgiverAktørId)
+            && Objects.equals(internArbeidsforholdRef, that.internArbeidsforholdRef)
+            && utbetalingsgrad.compareTo(that.utbetalingsgrad) == 0;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(aktivitetType, arbeidsgiverOrgNr, arbeidsgiverAktørId, internArbeidsforholdRef, utbetalingsgrad);
+        //kan ikke ha utbetalingsgrad i hash når bruker compareTo i equals
+        return Objects.hash(aktivitetType, arbeidsgiverOrgNr, arbeidsgiverAktørId, internArbeidsforholdRef);
     }
 }

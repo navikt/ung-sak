@@ -1,0 +1,63 @@
+package no.nav.k9.sak.kontrakt.uttak.overstyring;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotNull;
+import no.nav.k9.sak.typer.Periode;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+@JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
+public class OverstyrUttakPeriodeDto  {
+
+    @JsonProperty(value = "id")
+    private Long id;
+
+    @JsonProperty(value = "fom", required = true)
+    @NotNull
+    private Periode periode;
+
+    @JsonProperty(value = "søkersUttakgsgrad")
+    @DecimalMin("0")
+    @DecimalMax("100")
+    private BigDecimal søkersUttakgsgrad;
+
+    @JsonProperty(value = "utbetalingsgrader")
+    private List<OverstyrUttakUtbetalingsgradDto> utbetalingsgrader;
+
+    public OverstyrUttakPeriodeDto() {
+        //
+    }
+
+    public OverstyrUttakPeriodeDto(Long id, Periode periode, BigDecimal søkersUttakgsgrad, List<OverstyrUttakUtbetalingsgradDto> utbetalingsgrader) {
+        this.id = id;
+        this.periode = periode;
+        this.søkersUttakgsgrad = søkersUttakgsgrad;
+        this.utbetalingsgrader = utbetalingsgrader;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Periode getPeriode() {
+        return periode;
+    }
+
+    public BigDecimal getSøkersUttakgsgrad() {
+        return søkersUttakgsgrad;
+    }
+
+    public List<OverstyrUttakUtbetalingsgradDto> getUtbetalingsgrader() {
+        return utbetalingsgrader;
+    }
+}
