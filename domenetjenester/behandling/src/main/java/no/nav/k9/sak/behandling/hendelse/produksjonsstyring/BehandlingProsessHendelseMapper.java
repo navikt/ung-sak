@@ -96,7 +96,7 @@ public class BehandlingProsessHendelseMapper {
             .build();
     }
 
-    private LocalDateTime finnEldsteMottattdato(Behandling behandling) {
+    public LocalDateTime finnEldsteMottattdato(Behandling behandling) {
         final var behandlingRef = BehandlingReferanse.fra(behandling);
         final var søknadsfristTjeneste = finnVurderSøknadsfristTjeneste(behandlingRef);
         if (søknadsfristTjeneste == null) {

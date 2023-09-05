@@ -1,9 +1,5 @@
 package no.nav.k9.sak.web.app.tjenester.los;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.k9.sak.web.app.tjenester.los.LosRestTjeneste.BASE_PATH;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -16,37 +12,26 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import no.nav.k9.felles.jpa.TomtResultatException;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
-import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandling.hendelse.produksjonsstyring.BehandlingProsessHendelseMapper;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.produksjonsstyring.los.BehandlingMedFagsakDto;
-import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
-import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoTjeneste;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 
-import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.Set;
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import static no.nav.k9.sak.web.app.tjenester.los.LosRestTjeneste.BASE_PATH;
 
 @ApplicationScoped
 @Path(BASE_PATH)
@@ -64,6 +49,7 @@ public class LosRestTjeneste {
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
     private BehandlingRepository behandlingRepository;
     private Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester;
+    private BehandlingProsessHendelseMapper behandlingProsessHendelseMapper;
 
 
     public LosRestTjeneste() {
@@ -76,11 +62,13 @@ public class LosRestTjeneste {
         HistorikkTjenesteAdapter historikkTjenesteAdapter,
         BehandlingRepository behandlingRepository,
         BehandlingDtoTjeneste behandlingDtoTjeneste,
-        @Any Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester) {
+        @Any Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester,
+        BehandlingProsessHendelseMapper behandlingProsessHendelseMapper) {
         this.losKlient = losKlient;
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
         this.behandlingRepository = behandlingRepository;
         this.søknadsfristTjenester = søknadsfristTjenester;
+        this.behandlingProsessHendelseMapper = behandlingProsessHendelseMapper;
     }
 
     @GET
@@ -104,39 +92,13 @@ public class LosRestTjeneste {
             BehandlingMedFagsakDto dto = new BehandlingMedFagsakDto();
             dto.setSakstype(behandling.get().getFagsakYtelseType());
             dto.setBehandlingResultatType(behandling.get().getBehandlingResultatType());
-            dto.setEldsteDatoMedEndringFraSøker(finnEldsteMottattdato(behandling.get()));
+            dto.setEldsteDatoMedEndringFraSøker(behandlingProsessHendelseMapper.finnEldsteMottattdato(behandling.get()));
 
             Response.ResponseBuilder responseBuilder = Response.ok().entity(dto);
             return responseBuilder.build();
         } else {
             return Response.noContent().build();
         }
-    }
-
-    private LocalDateTime finnEldsteMottattdato(Behandling behandling) {
-        final var behandlingRef = BehandlingReferanse.fra(behandling);
-        final var søknadsfristTjeneste = finnVurderSøknadsfristTjeneste(behandlingRef);
-        if (søknadsfristTjeneste == null) {
-            return null;
-        }
-
-        final Set<KravDokument> kravdokumenter = søknadsfristTjeneste.relevanteKravdokumentForBehandling(behandlingRef);
-        if (kravdokumenter.isEmpty()) {
-            return null;
-        }
-
-        return kravdokumenter.stream()
-            .min(Comparator.comparing(KravDokument::getInnsendingsTidspunkt))
-            .get()
-            .getInnsendingsTidspunkt();
-    }
-
-    private VurderSøknadsfristTjeneste<VurdertSøktPeriode.SøktPeriodeData> finnVurderSøknadsfristTjeneste(BehandlingReferanse ref) {
-        final FagsakYtelseType ytelseType = ref.getFagsakYtelseType();
-
-        @SuppressWarnings("unchecked")
-        final var tjeneste = (VurderSøknadsfristTjeneste<VurdertSøktPeriode.SøktPeriodeData>) FagsakYtelseTypeRef.Lookup.find(søknadsfristTjenester, ytelseType).orElse(null);
-        return tjeneste;
     }
 
     @GET
