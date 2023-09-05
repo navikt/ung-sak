@@ -146,7 +146,6 @@ public class BehandlingProsessHendelse {
 
     @JsonSerialize(using = ToStringSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    @NotNull
     @Valid
     @JsonProperty(value = "eldsteDatoMedEndringFraSøker", required = true)
     private LocalDateTime eldsteDatoMedEndringFraSøker;
