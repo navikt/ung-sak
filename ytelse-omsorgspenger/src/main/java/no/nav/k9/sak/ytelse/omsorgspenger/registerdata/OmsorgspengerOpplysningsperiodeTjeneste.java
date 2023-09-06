@@ -107,7 +107,7 @@ public class OmsorgspengerOpplysningsperiodeTjeneste implements Opplysningsperio
             return førsteDagIUttaket;
         }
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        return behandling.getOpprettetDato().toLocalDate();
+        return behandling.getFagsak().getPeriode().getFomDato();
     }
 
 
