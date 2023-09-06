@@ -22,6 +22,7 @@ import no.nav.k9.kodeverk.sykdom.Resultat;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrtUttakPeriode;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -44,6 +45,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.uttak.MapUttak;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeid;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Barn;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
+import no.nav.pleiepengerbarn.uttak.kontrakter.OverstyrtInput;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Pleiebehov;
 import no.nav.pleiepengerbarn.uttak.kontrakter.RettVedDød;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Søker;
@@ -157,6 +159,7 @@ public class MapInputTilUttakTjeneste {
         Map<LukketPeriode, UtenlandsoppholdInfo> utenlandsoppholdperioder = MapUtenlandsopphold.map(vurderteSøknadsperioder, perioderFraSøknader, tidslinjeTilVurdering);
 
         Map<String, String> sisteVedtatteBehandlingForAvktuellBehandling = mapSisteVedtatteBehandlingForBehandling(input.getSisteVedtatteBehandlingForBehandling());
+        Map<LukketPeriode, OverstyrtInput> overstyrtUttak = map(input.getOverstyrtUttak());
         return new Uttaksgrunnlag(
             mapTilYtelseType(behandling),
             barn,
@@ -168,7 +171,7 @@ public class MapInputTilUttakTjeneste {
             arbeid,
             pleiebehov,
             input.getVirkningsdatoNyeRegler(),
-            new HashMap<>(), // Overstyringer.
+            overstyrtUttak,
             lovbestemtFerie,
             inngangsvilkår,
             tilsynsperioder,
@@ -178,6 +181,12 @@ public class MapInputTilUttakTjeneste {
             sisteVedtatteBehandlingForAvktuellBehandling,
             utenlandsoppholdperioder
         );
+    }
+
+    private Map<LukketPeriode, OverstyrtInput> map(LocalDateTimeline<OverstyrtUttakPeriode> overstyrtUttak) {
+        Map<LukketPeriode, OverstyrtInput> overstyrt = new HashMap<>();
+        //TODO implementer når kontrakt er oppdatert
+        return overstyrt;
     }
 
     private Map<String, String> mapSisteVedtatteBehandlingForBehandling(Map<UUID, UUID> sisteVedtatteBehandlingForBehandling) {

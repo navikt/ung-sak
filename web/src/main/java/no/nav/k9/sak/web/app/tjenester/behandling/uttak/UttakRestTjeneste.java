@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.behandling.uttak;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -17,6 +18,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -38,6 +40,7 @@ import no.nav.k9.sak.kontrakt.uttak.OppgittUttakDto;
 import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrUttakArbeidsforholdDto;
 import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrUttakPeriodeDto;
 import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrUttakUtbetalingsgradDto;
+import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrbareUttakAktiviterDto;
 import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrtUttakDto;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.Periode;
@@ -54,6 +57,7 @@ public class UttakRestTjeneste {
     public static final String UTTAK_OPPGITT = BASE_PATH + "/oppgitt";
     public static final String UTTAK_FASTSATT = BASE_PATH + "/fastsatt";
     public static final String UTTAK_OVERSTYRT = BASE_PATH + "/overstyrt";
+    public static final String UTTAK_OVERSTYRBARE_AKTIVITETER = BASE_PATH + "/overstyrbare-aktiviteter";
 
     private MapUttak mapUttak;
     private OverstyrUttakRepository overstyrUttakRepository;
@@ -106,14 +110,39 @@ public class UttakRestTjeneste {
     @Path(UTTAK_OVERSTYRT)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Hent overstyrt uttak for behandling", tags = "behandling - uttak", responses = {
-        @ApiResponse(responseCode = "200", description = "Returnerer uttak overstyrt av overstyrer, null hvis ikke finnes noe", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FastsattUttakDto.class)))
+        @ApiResponse(responseCode = "200", description = "Returnerer uttak overstyrt av overstyrer, null hvis ikke finnes noe", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = OverstyrtUttakDto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public OverstyrtUttakDto getOverstyrtUttak(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
         LocalDateTimeline<OverstyrtUttakPeriode> overstyrtUttak = overstyrUttakRepository.hentOverstyrtUttak(behandling.getId());
-        if (overstyrtUttak.isEmpty()){
+        if (overstyrtUttak.isEmpty()) {
+            return null;
+        }
+        return new OverstyrtUttakDto(overstyrtUttak.stream().map(this::map).toList());
+    }
+
+    @GET
+    @Path(UTTAK_OVERSTYRBARE_AKTIVITETER)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Hent overstyrbare aktiviteter for uttak for behandling", tags = "behandling - uttak", responses = {
+        @ApiResponse(responseCode = "200", description = "Returnerer overstyrbare aktiviteter", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = OverstyrbareUttakAktiviterDto.class)))
+    })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public OverstyrtUttakDto getOverstyrbareAktiviterForUttak(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto,
+                                                              @NotNull @QueryParam("fom") @Pattern(regexp = "\\d\\d\\d\\d-\\d\\d-\\d\\d") String fom,
+                                                              @NotNull @QueryParam("tom") @Pattern(regexp = "\\d\\d\\d\\d-\\d\\d-\\d\\d") String tom) {
+        LocalDate fomDato = LocalDate.parse(fom);
+        LocalDate tomDato = LocalDate.parse(tom);
+        if (fomDato.isAfter(tomDato)){
+            throw new IllegalArgumentException("fom kan ikke være etter tom");
+        }
+
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
+        LocalDateTimeline<OverstyrtUttakPeriode> overstyrtUttak = overstyrUttakRepository.hentOverstyrtUttak(behandling.getId());
+        if (overstyrtUttak.isEmpty()) {
             return null;
         }
         return new OverstyrtUttakDto(overstyrtUttak.stream().map(this::map).toList());
