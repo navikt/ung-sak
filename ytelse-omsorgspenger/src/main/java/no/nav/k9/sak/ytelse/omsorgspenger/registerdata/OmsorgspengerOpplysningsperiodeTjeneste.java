@@ -27,7 +27,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 @ApplicationScoped
 public class OmsorgspengerOpplysningsperiodeTjeneste implements OpplysningsperiodeTjeneste {
 
-private static final Logger logger = LoggerFactory.getLogger(OmsorgspengerOpplysningsperiodeTjeneste.class);
+    private static final Logger logger = LoggerFactory.getLogger(OmsorgspengerOpplysningsperiodeTjeneste.class);
     private BehandlingRepository behandlingRepository;
     private OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository;
     private VilkårResultatRepository vilkårResultatRepository;
