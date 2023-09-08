@@ -1,40 +1,37 @@
 package no.nav.k9.sak.web.app.tjenester.los;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.k9.sak.web.app.tjenester.los.LosRestTjeneste.BASE_PATH;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import no.nav.k9.felles.jpa.TomtResultatException;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandling.hendelse.produksjonsstyring.BehandlingProsessHendelseMapper;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.produksjonsstyring.los.BehandlingMedFagsakDto;
+import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingDtoTjeneste;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
+
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import static no.nav.k9.sak.web.app.tjenester.los.LosRestTjeneste.BASE_PATH;
 
 @ApplicationScoped
 @Path(BASE_PATH)
@@ -51,6 +48,8 @@ public class LosRestTjeneste {
     private LosSystemUserKlient losKlient;
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
     private BehandlingRepository behandlingRepository;
+    private Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester;
+    private BehandlingProsessHendelseMapper behandlingProsessHendelseMapper;
 
 
     public LosRestTjeneste() {
@@ -62,10 +61,14 @@ public class LosRestTjeneste {
         LosSystemUserKlient losKlient,
         HistorikkTjenesteAdapter historikkTjenesteAdapter,
         BehandlingRepository behandlingRepository,
-        BehandlingDtoTjeneste behandlingDtoTjeneste) {
+        BehandlingDtoTjeneste behandlingDtoTjeneste,
+        @Any Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester,
+        BehandlingProsessHendelseMapper behandlingProsessHendelseMapper) {
         this.losKlient = losKlient;
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
         this.behandlingRepository = behandlingRepository;
+        this.søknadsfristTjenester = søknadsfristTjenester;
+        this.behandlingProsessHendelseMapper = behandlingProsessHendelseMapper;
     }
 
     @GET
@@ -89,6 +92,7 @@ public class LosRestTjeneste {
             BehandlingMedFagsakDto dto = new BehandlingMedFagsakDto();
             dto.setSakstype(behandling.get().getFagsakYtelseType());
             dto.setBehandlingResultatType(behandling.get().getBehandlingResultatType());
+            dto.setEldsteDatoMedEndringFraSøker(behandlingProsessHendelseMapper.finnEldsteMottattdato(behandling.get()));
 
             Response.ResponseBuilder responseBuilder = Response.ok().entity(dto);
             return responseBuilder.build();

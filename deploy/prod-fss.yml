@@ -261,6 +261,8 @@ spec:
       value: "true"
     - name: ENABLE_UTBETALINGSGRAD_OPPDRAG
       value: "false"
+    - name: ENABLE_DATO_NY_REGEL_UTTAK
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

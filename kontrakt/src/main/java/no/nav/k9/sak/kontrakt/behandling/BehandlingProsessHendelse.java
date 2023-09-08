@@ -144,6 +144,12 @@ public class BehandlingProsessHendelse {
     @JsonProperty(value = "behandlingTypeKode", required = true)
     private String behandlingTypeKode;
 
+    @JsonSerialize(using = ToStringSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @Valid
+    @JsonProperty(value = "eldsteDatoMedEndringFraSøker", required = true)
+    private LocalDateTime eldsteDatoMedEndringFraSøker;
+
     /**
      * Tidspunkt behandling ble opprettet
      */
@@ -214,6 +220,7 @@ public class BehandlingProsessHendelse {
         this.resultatType = kopierFra.resultatType;
         this.behandlingTypeKode = kopierFra.behandlingTypeKode;
         this.opprettetBehandling = kopierFra.opprettetBehandling;
+        this.eldsteDatoMedEndringFraSøker = kopierFra.eldsteDatoMedEndringFraSøker;
         this.aksjonspunktKoderMedStatusListe = kopierFra.aksjonspunktKoderMedStatusListe;
         this.ansvarligSaksbehandlerForTotrinn = kopierFra.ansvarligSaksbehandlerForTotrinn;
         this.fagsakPeriode = kopierFra.fagsakPeriode;
@@ -387,6 +394,11 @@ public class BehandlingProsessHendelse {
 
         public Builder medOpprettetBehandling(LocalDateTime opprettetBehandling) {
             kladd.opprettetBehandling = opprettetBehandling;
+            return this;
+        }
+
+        public Builder medEldsteDatoMedEndringFraSøker(LocalDateTime eldsteDatoMedEndringFraSøker) {
+            kladd.eldsteDatoMedEndringFraSøker = eldsteDatoMedEndringFraSøker;
             return this;
         }
 
