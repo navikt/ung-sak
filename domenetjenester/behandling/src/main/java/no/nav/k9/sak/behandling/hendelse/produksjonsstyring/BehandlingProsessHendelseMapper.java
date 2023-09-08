@@ -81,7 +81,7 @@ public class BehandlingProsessHendelseMapper {
             .medYtelseTypeKode(behandling.getFagsakYtelseType().getKode())
             .medBehandlingTypeKode(behandling.getType().getKode())
             .medOpprettetBehandling(behandling.getOpprettetDato())
-            .medEldsteDatoMedEndringFraSøker(finnEldsteMottattdato(behandling))
+            //.medEldsteDatoMedEndringFraSøker(finnEldsteMottattdato(behandling))
             .medBehandlingResultat(behandling.getBehandlingResultatType())
             .medAksjonspunktKoderMedStatusListe(aksjonspunktKoderMedStatusListe)
             .medAnsvarligSaksbehandlerForTotrinn(behandling.getAnsvarligSaksbehandler())
