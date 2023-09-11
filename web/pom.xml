@@ -15,7 +15,7 @@
 
     <properties>
         <simple.client.version>0.16.0</simple.client.version>
-        <swagger-ui.version>5.3.1</swagger-ui.version>
+        <swagger-ui.version>5.4.2</swagger-ui.version>
     </properties>
 
 
