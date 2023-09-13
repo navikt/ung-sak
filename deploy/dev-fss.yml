@@ -272,6 +272,8 @@ spec:
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
       value: "true"
+    - name: RESTART_APP_ON_ERROR
+      value: "true"
 
 
       # Audit logging

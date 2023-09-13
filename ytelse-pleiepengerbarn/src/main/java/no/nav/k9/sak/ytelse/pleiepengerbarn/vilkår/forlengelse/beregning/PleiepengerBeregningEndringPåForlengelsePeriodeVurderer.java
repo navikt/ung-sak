@@ -44,6 +44,7 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
         BehandlingÅrsakType.RE_SATS_REGULERING,
         BehandlingÅrsakType.RE_ENDRING_BEREGNINGSGRUNNLAG,
         BehandlingÅrsakType.RE_KLAGE_MED_END_INNTEKT,
+        BehandlingÅrsakType.RE_KLAGE_NY_INNH_LIGNET_INNTEKT,
         BehandlingÅrsakType.RE_OPPLYSNINGER_OM_BEREGNINGSGRUNNLAG);
 
     private BehandlingRepository behandlingRepository;
