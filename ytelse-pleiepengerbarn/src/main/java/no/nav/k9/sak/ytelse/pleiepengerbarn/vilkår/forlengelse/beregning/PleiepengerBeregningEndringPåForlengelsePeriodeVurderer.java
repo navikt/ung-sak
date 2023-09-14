@@ -136,7 +136,7 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
         return mottatteInntektsmeldinger.stream()
             .filter(it -> Objects.equals(it.getJournalpostId(), inntektsmelding.getJournalpostId()))
             .findAny()
-            .map(MottattDokument::getMottattTidspunkt)
+            .map(MottattDokument::getOpprettetTidspunkt)
             .orElse(LocalDateTime.now());
     }
 
