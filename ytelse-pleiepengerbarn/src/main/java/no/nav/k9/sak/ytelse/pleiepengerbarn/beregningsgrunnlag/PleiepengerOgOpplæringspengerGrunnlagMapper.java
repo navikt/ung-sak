@@ -54,7 +54,7 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
     public PleiepengerOgOpplæringspengerGrunnlagMapper(UttakTjeneste uttakRestKlient) {
         this.uttakRestKlient = uttakRestKlient;
     }
-    
+
     @Override
     public YtelsespesifiktGrunnlagDto lagYtelsespesifiktGrunnlag(BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode) {
         var uttaksplan = uttakRestKlient.hentUttaksplan(ref.getBehandlingUuid(), false);
@@ -104,28 +104,28 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
         if (utbetalingsgrader.getNormalArbeidstid().isZero()) {
             return new BigDecimal(100).subtract(utbetalingsgrader.getUtbetalingsgrad());
         }
-        
+
         final Duration faktiskArbeidstid;
         if (utbetalingsgrader.getFaktiskArbeidstid() != null) {
             faktiskArbeidstid = utbetalingsgrader.getFaktiskArbeidstid();
         } else {
             faktiskArbeidstid = Duration.ofHours(0L);
         }
-        
+
         final BigDecimal HUNDRE_PROSENT = new BigDecimal(100);
-        
+
         /*
          * XXX: Dette er samme måte å regne ut på som i uttak. På sikt bør vi nok flytte
          *      denne logikken til pleiepenger-barn-uttak.
          */
-        final BigDecimal aktivitetsgrad = new BigDecimal(faktiskArbeidstid.toMillis()).setScale(2, RoundingMode.HALF_DOWN)
-                .divide(new BigDecimal(utbetalingsgrader.getNormalArbeidstid().toMillis()), 2, RoundingMode.HALF_DOWN)
+        final BigDecimal aktivitetsgrad = new BigDecimal(faktiskArbeidstid.toMillis()).setScale(4, RoundingMode.HALF_DOWN)
+                .divide(new BigDecimal(utbetalingsgrader.getNormalArbeidstid().toMillis()), 4, RoundingMode.HALF_DOWN)
                 .multiply(HUNDRE_PROSENT);
-        
+
         if (aktivitetsgrad.compareTo(HUNDRE_PROSENT) >= 0) {
             return HUNDRE_PROSENT;
         }
-        
+
         return aktivitetsgrad;
     }
 
