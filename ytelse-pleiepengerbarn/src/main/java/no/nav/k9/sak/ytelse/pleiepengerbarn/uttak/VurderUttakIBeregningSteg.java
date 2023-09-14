@@ -141,10 +141,22 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
         if (!brukDatoNyRegelUttak) {
             return Optional.empty();
         }
-        if (uttakNyeReglerRepository.finnDatoForNyeRegler(behandling.getId()).isPresent()) {
-            log.info("Har allerede satt dato for nye regler");
-            return Optional.empty(); //dato er allerede satt
+        final boolean førsteGangManuellRevurdering = behandling.erManueltOpprettet()
+                && !behandling.harAksjonspunktMedType(AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK);
+        
+        final boolean datoHarBlittSatt = uttakNyeReglerRepository.finnDatoForNyeRegler(behandling.getId()).isPresent();        
+        if (datoHarBlittSatt && !førsteGangManuellRevurdering) {
+            return Optional.empty();
         }
+        if (datoHarBlittSatt && førsteGangManuellRevurdering) {
+            // Reutled aksjonspunkt ved manuell revurdering.
+            return Optional.of(AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK);
+        }
+        
+        /*
+         * OBS: Vi må tillate at aksjonspunkt kan bli utledet ved manuell revurdering der
+         * det ikke er noe aksjonspunkt der fra før.
+         */
         return harAktivitetIkkeYrkesaktivEllerKunYtelse(behandling) || harTilkommmetAktivitet(behandling)
             ? Optional.of(AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK)
             : Optional.empty();
