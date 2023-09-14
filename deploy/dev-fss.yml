@@ -35,7 +35,7 @@ spec:
       memory: "512Mi"
     requests:
       cpu: "200m"
-      memory: "1024Mi"
+      memory: "512Mi"
   ingresses:
     - "https://k9-sak.nais.preprod.local/"
   kafka:
