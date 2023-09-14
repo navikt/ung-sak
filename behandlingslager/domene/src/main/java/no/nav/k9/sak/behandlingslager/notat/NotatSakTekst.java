@@ -5,10 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 
 @Entity(name = "NotatSakTekst")
@@ -18,26 +15,38 @@ public class NotatSakTekst extends BaseEntitet implements NotatTekst {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_notat_sak_tekst")
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "notat_id")
-    private NotatSakEntitet notatSakEntitet;
-
-    @Column(name = "tekst")
+    @Column(name = "tekst", nullable = false, updatable = false)
     private String tekst;
 
-    @Column(name = "aktiv", nullable = false, updatable = false)
+    @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
 
-    @Version
+    //Håndterer versjoner manuelt uten @Version fordi versjon er knyttet til fremmednøkkel notat_id og for
+    // alle tekstendringer så lages ny rad.
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    public NotatSakTekst(String tekst, NotatSakEntitet notatSakEntitet) {
+    public NotatSakTekst(String tekst, long versjon) {
         this.tekst = tekst;
-        this.notatSakEntitet = notatSakEntitet;
+        this.versjon = versjon;
     }
+
+    NotatSakTekst() { }
 
     public String getTekst() {
         return tekst;
+    }
+
+    public void deaktiver() {
+        this.aktiv = false;
+    }
+
+    @Override
+    public boolean isAktiv() {
+        return aktiv;
+    }
+
+    public long getVersjon() {
+        return this.versjon;
     }
 }

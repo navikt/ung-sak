@@ -13,14 +13,16 @@ import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.notat.NotatGjelderType;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.notat.NotatRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.kontrakt.notat.EndreNotatDto;
 import no.nav.k9.sak.kontrakt.notat.NotatDto;
-import no.nav.k9.sak.kontrakt.notat.NyttNotatDto;
+import no.nav.k9.sak.kontrakt.notat.OpprettNotatDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Saksnummer;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -45,17 +47,18 @@ class NotatRestTjenesteTest {
 
     @Test
     void skalOppretteOgHenteNotat() {
-        Long fagsakId = TestScenarioBuilder.builderMedSøknad().lagreFagsak(repositoryProvider).getId();
+        Fagsak fagsak = TestScenarioBuilder.builderMedSøknad().lagreFagsak(repositoryProvider);
+        var saksnummer = fagsak.getSaksnummer();
         String tekst = "en tekst med litt notater";
 
-        var notatDto = new NyttNotatDto(
+        var notatDto = new OpprettNotatDto(
             tekst,
-            fagsakId,
+            saksnummer,
             NotatGjelderType.FAGSAK
         );
 
         notatRestTjeneste.opprett(notatDto);
-        NotatDto notat = notatRestTjeneste.hentForFagsak(fagsakId).stream().findFirst().orElseThrow();
+        NotatDto notat = hentForFagsak(saksnummer).stream().findFirst().orElseThrow();
 
         assertThat(notat.getNotatTekst()).isEqualTo(tekst);
         assertThat(notat.isSkjult()).isFalse();
@@ -66,20 +69,25 @@ class NotatRestTjenesteTest {
 
     }
 
+    private List<NotatDto> hentForFagsak(Saksnummer saksnummer) {
+        return (List<NotatDto>) notatRestTjeneste.hentForFagsak(saksnummer).getEntity();
+    }
+
     @Test
     void skalSkjuleNotat() {
-        Long fagsakId = TestScenarioBuilder.builderMedSøknad().lagreFagsak(repositoryProvider).getId();
-        var notatDto = new NyttNotatDto(
+        var saksnummer = TestScenarioBuilder.builderMedSøknad().lagreFagsak(repositoryProvider).getSaksnummer();
+        var notatDto = new OpprettNotatDto(
             "tekst",
-            fagsakId,
+            saksnummer,
             NotatGjelderType.FAGSAK
         );
 
         notatRestTjeneste.opprett(notatDto);
-        NotatDto notat = notatRestTjeneste.hentForFagsak(fagsakId).stream().findFirst().orElseThrow();
+        NotatDto notat = hentForFagsak(saksnummer).stream().findFirst().orElseThrow();
         assertThat(notat.isSkjult()).isFalse();
         notatRestTjeneste.skjul(notat.getUuid(), true);
         NotatDto skjultNotat = notatRestTjeneste.hent(notat.getUuid());
+        assertThat(skjultNotat.getUuid()).isEqualTo(notat.getUuid());
         assertThat(skjultNotat.isSkjult()).isTrue();
         assertThat(skjultNotat.getOpprettetTidspunkt()).isEqualTo(notat.getOpprettetTidspunkt());
         assertThat(skjultNotat.getEndretTidspunkt()).isNotNull();
@@ -92,14 +100,15 @@ class NotatRestTjenesteTest {
 
         var morSak = TestScenarioBuilder.builderMedSøknad(mor).medPleietrengende(pleietrengende).lagreFagsak(repositoryProvider);
 
-        String morTekst = "et nytt notat ";
-        notatRestTjeneste.opprett(new NyttNotatDto(
+        String morTekst = "et gammelt notat ";
+        var saksnummer = morSak.getSaksnummer();
+        notatRestTjeneste.opprett(new OpprettNotatDto(
             morTekst,
-            morSak.getId(),
+            saksnummer,
             NotatGjelderType.FAGSAK
         ));
 
-        List<NotatDto> morNotater = notatRestTjeneste.hentForFagsak(morSak.getId());
+        List<NotatDto> morNotater = hentForFagsak(saksnummer);
         NotatDto morNotat = morNotater.stream().findFirst().orElseThrow();
         assertThat(morNotat.getGjelderType()).isEqualTo(NotatGjelderType.FAGSAK);
         assertThat(morNotat.getNotatTekst()).isEqualTo(morTekst);
@@ -128,35 +137,35 @@ class NotatRestTjenesteTest {
         var far = AktørId.dummy();
         var pleietrengende = AktørId.dummy();
 
-        var morSak = TestScenarioBuilder.builderMedSøknad(mor).medPleietrengende(pleietrengende).lagreFagsak(repositoryProvider);
-        var farSak = TestScenarioBuilder.builderUtenSøknad(far).medPleietrengende(pleietrengende).lagreFagsak(repositoryProvider);
+        var morSak = TestScenarioBuilder.builderMedSøknad(mor).medPleietrengende(pleietrengende).lagreFagsak(repositoryProvider).getSaksnummer();
+        var farSak = TestScenarioBuilder.builderUtenSøknad(far).medPleietrengende(pleietrengende).lagreFagsak(repositoryProvider).getSaksnummer();
 
         String morNotat = "notat som gjelder mor";
-        notatRestTjeneste.opprett(new NyttNotatDto(
+        notatRestTjeneste.opprett(new OpprettNotatDto(
             morNotat,
-            morSak.getId(),
+            morSak,
             NotatGjelderType.FAGSAK
         ));
         String pleietrengedeNotat = "notat som gjelder pleietrengende";
-        notatRestTjeneste.opprett(new NyttNotatDto(
+        notatRestTjeneste.opprett(new OpprettNotatDto(
             pleietrengedeNotat,
-            morSak.getId(),
+            morSak,
             NotatGjelderType.PLEIETRENGENDE
         ));
 
         String farNotat = "notat som gjelder far";
-        notatRestTjeneste.opprett(new NyttNotatDto(
+        notatRestTjeneste.opprett(new OpprettNotatDto(
             farNotat,
-            farSak.getId(),
+            farSak,
             NotatGjelderType.FAGSAK
         ));
 
-        List<NotatDto> morNotater = notatRestTjeneste.hentForFagsak(morSak.getId());
+        List<NotatDto> morNotater = hentForFagsak(morSak);
         assertThat(morNotater).hasSize(2);
         assertThat(morNotater).extracting(NotatDto::getNotatTekst).containsExactlyInAnyOrder(morNotat, pleietrengedeNotat);
 
 
-        List<NotatDto> farNotater = notatRestTjeneste.hentForFagsak(farSak.getId());
+        List<NotatDto> farNotater = hentForFagsak(farSak);
         assertThat(farNotater).hasSize(2);
         assertThat(farNotater).extracting(NotatDto::getNotatTekst).containsExactlyInAnyOrder(farNotat, pleietrengedeNotat);
 

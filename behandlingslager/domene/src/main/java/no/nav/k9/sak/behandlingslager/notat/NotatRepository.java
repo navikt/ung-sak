@@ -24,15 +24,15 @@ public class NotatRepository {
         this.entityManager = entityManager;
     }
 
-    public UUID opprett(Notat notat) {
+    public UUID lagre(NotatEntitet notat) {
         entityManager.persist(notat);
         entityManager.flush();
         return notat.getUuid();
     }
 
-    public Notat hent(UUID notatId) {
-        Optional<Notat> notatPåSak = hentForSak(notatId).map(it -> it);
-        Optional<Notat> notatPåAktør = hentForAktør(notatId).map(it -> it);
+    public NotatEntitet hent(UUID notatId) {
+        Optional<NotatEntitet> notatPåSak = hentForSak(notatId).map(it -> it);
+        Optional<NotatEntitet> notatPåAktør = hentForAktør(notatId).map(it -> it);
 
         if (notatPåSak.isPresent() && notatPåAktør.isPresent()) {
             throw new IllegalStateException(String.format("Utviklerfeil: Det finnes notat for både sak og aktør med samme uuid=%s", notatId));
@@ -59,11 +59,11 @@ public class NotatRepository {
 
     public List<Notat> hentForSakOgAktør(long fagsakId, FagsakYtelseType ytelseType, AktørId pleietrengendeAktørId) {
         TypedQuery<NotatSakEntitet> sakNotat = entityManager.createQuery(
-            "select n from NotatSakEntitet n where n.fagsakId = :fagsakId and aktiv = true", NotatSakEntitet.class);
+            "from NotatSakEntitet n where n.fagsakId = :fagsakId and aktiv = true", NotatSakEntitet.class);
         sakNotat.setParameter("fagsakId", fagsakId);
 
         TypedQuery<NotatAktørEntitet> aktoerNotat = entityManager.createQuery(
-            "select n from NotatAktørEntitet n where n.aktørId = :aktørId and ytelseType = :ytelseType and aktiv = true", NotatAktørEntitet.class);
+            "from NotatAktørEntitet n where n.aktørId = :aktørId and ytelseType = :ytelseType and aktiv = true", NotatAktørEntitet.class);
         aktoerNotat.setParameter("aktørId", pleietrengendeAktørId);
         aktoerNotat.setParameter("ytelseType", ytelseType);
 
@@ -71,10 +71,6 @@ public class NotatRepository {
         resultat.addAll(aktoerNotat.getResultList());
 
         return resultat;
-    }
-    public void oppdater(Notat notat) {
-        entityManager.merge(notat);
-        entityManager.flush();
     }
 
 

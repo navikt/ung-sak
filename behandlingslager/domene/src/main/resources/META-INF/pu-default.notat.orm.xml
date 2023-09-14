@@ -12,5 +12,6 @@
 	<entity class="no.nav.k9.sak.behandlingslager.notat.NotatAktørEntitet" />
 	<entity class="no.nav.k9.sak.behandlingslager.notat.NotatSakEntitet" />
 	<entity class="no.nav.k9.sak.behandlingslager.notat.NotatAktørTekst" />
+	<entity class="no.nav.k9.sak.behandlingslager.notat.NotatSakTekst" />
 
 </entity-mappings>

@@ -1,6 +1,9 @@
 package no.nav.k9.sak.behandlingslager.notat;
 
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hibernate.annotations.Where;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -9,47 +12,32 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
-import no.nav.k9.kodeverk.notat.NotatGjelderType;
-import no.nav.k9.sak.behandlingslager.BaseEntitet;
 
 
 @Entity(name = "NotatSakEntitet")
 @Table(name = "notat_sak")
-public class NotatSakEntitet extends BaseEntitet implements Notat {
+public class NotatSakEntitet extends NotatEntitet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_notat_sak")
     private Long id;
 
-    @Column(name = "uuid", nullable = false, updatable = false)
-    private UUID uuid;
-
-    @Column(name = "fagsak_id")
+    @Column(name = "fagsak_id", updatable = false, nullable = false)
     private long fagsakId;
 
-
-    @OneToOne(mappedBy = "notatSakEntitet", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private NotatSakTekst notatSakTekst;
-
-
-    @Column(name = "skjult", nullable = false, updatable = true)
-    private boolean skjult;
-
-    @Column(name = "aktiv", nullable = false, updatable = false)
-    private boolean aktiv = true;
-
-    @Version
-    @Column(name = "versjon", nullable = false)
-    private long versjon;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @JoinColumn(name = "notat_id", nullable = false)
+    @Where(clause = "aktiv = true")
+    private List<NotatSakTekst> notatSakTekst;
 
     NotatSakEntitet(long fagsakId, String notatTekst, boolean skjult) {
-        this.notatSakTekst = new NotatSakTekst(notatTekst, this);
+        super(skjult);
+        this.notatSakTekst = new ArrayList<>();
+        this.notatSakTekst.add(new NotatSakTekst(notatTekst, 0));
         this.fagsakId = fagsakId;
-        this.skjult = skjult;
-        this.uuid = UUID.randomUUID();
     }
 
     NotatSakEntitet() {
@@ -61,37 +49,22 @@ public class NotatSakEntitet extends BaseEntitet implements Notat {
 
     @Override
     public String getNotatTekst() {
-        return notatSakTekst.getTekst();
+        return finnNotatTekst().getTekst();
     }
 
-    public boolean isAktiv() {
-        return aktiv;
+    private NotatSakTekst finnNotatTekst() {
+        List<NotatSakTekst> aktiv = notatSakTekst.stream().filter(NotatSakTekst::isAktiv).toList();
+        if (aktiv.size() != 1) {
+            throw new IllegalStateException("Utviklerfeil: forventet 1 aktiv notattekst men fant %d".formatted(aktiv.size()));
+        }
+        return aktiv.get(0);
     }
 
-    public long getVersjon() {
-        return versjon;
-    }
-
-    public NotatGjelderType getGjelderType() {
-        return NotatGjelderType.PLEIETRENGENDE;
-    }
 
     @Override
-    public Long getId() {
-        return id;
-    }
-
-    public boolean isSkjult() {
-        return skjult;
-    }
-
-    @Override
-    public UUID getUuid() {
-        return uuid;
-    }
-
-    @Override
-    public void skjul(boolean skjul) {
-        this.skjult = skjul;
+    public void nyTekst(String tekst) {
+        var notatSakTekst = this.finnNotatTekst();
+        notatSakTekst.deaktiver();
+        this.notatSakTekst.add(new NotatSakTekst(tekst, notatSakTekst.getVersjon() + 1));
     }
 }

@@ -6,6 +6,7 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -21,6 +22,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -32,15 +34,18 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.notat.Notat;
 import no.nav.k9.sak.behandlingslager.notat.NotatAktørEntitet;
 import no.nav.k9.sak.behandlingslager.notat.NotatBuilder;
+import no.nav.k9.sak.behandlingslager.notat.NotatEntitet;
 import no.nav.k9.sak.behandlingslager.notat.NotatRepository;
 import no.nav.k9.sak.behandlingslager.notat.NotatSakEntitet;
 import no.nav.k9.sak.kontrakt.notat.EndreNotatDto;
 import no.nav.k9.sak.kontrakt.notat.NotatDto;
-import no.nav.k9.sak.kontrakt.notat.NyttNotatDto;
+import no.nav.k9.sak.kontrakt.notat.OpprettNotatDto;
+import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
 @Path("")
 @ApplicationScoped
+@Produces(MediaType.APPLICATION_JSON)
 @Transactional
 public class NotatRestTjeneste {
 
@@ -53,18 +58,23 @@ public class NotatRestTjeneste {
         this.fagsakRepository = fagsakRepository;
     }
 
+    NotatRestTjeneste() {}
+
     @GET
     @Path("/notat")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Henter alle notater for fagsak", tags = "notat")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public List<NotatDto> hentForFagsak(@QueryParam("fagsakId") long fagsakId) {
-        Fagsak fagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
+    public Response hentForFagsak(@QueryParam("saksnummer") Saksnummer saksnummer) {
+        Optional<Fagsak> fagsakOpt = fagsakRepository.hentSakGittSaksnummer(saksnummer);
+        if (fagsakOpt.isEmpty()) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        var fagsak = fagsakOpt.get();
+        List<Notat> notater = notatRepository.hentForSakOgAktør(fagsak.getId(), fagsak.getYtelseType(), fagsak.getPleietrengendeAktørId());
 
-        List<Notat> notater = notatRepository.hentForSakOgAktør(fagsakId, fagsak.getYtelseType(), fagsak.getPleietrengendeAktørId());
-
-        return notater.stream().map(this::mapDto).collect(Collectors.toList());
+        return Response.ok().entity(notater.stream().map(this::mapDto).collect(Collectors.toList())).build();
 
     }
 
@@ -86,19 +96,22 @@ public class NotatRestTjeneste {
     @Operation(description = "Lag nytt notat", tags = "notat")
     @BeskyttetRessurs(action = CREATE, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response opprett(@Parameter(description = "Nytt notat") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) NyttNotatDto nyttNotatDto) {
-        Fagsak fagsak = fagsakRepository.finnEksaktFagsak(nyttNotatDto.fagsakId());
-        Notat notat = opprettNotat(fagsak, nyttNotatDto.notatTekst(), nyttNotatDto.notatGjelderType());
+    public Response opprett(@Parameter(description = "Nytt notat") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) OpprettNotatDto opprettNotatDto) {
+        Optional<Fagsak> fagsak = fagsakRepository.hentSakGittSaksnummer(opprettNotatDto.saksnummer().getSaksnummer());
+        if (fagsak.isEmpty()) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        Notat notat = opprettNotat(fagsak.get(), opprettNotatDto.notatTekst(), opprettNotatDto.notatGjelderType());
         return Response.status(Response.Status.CREATED).entity(mapDto(notat)).build();
 
     }
 
     private Notat opprettNotat(Fagsak fagsak, String notatTekst, NotatGjelderType notatGjelderType) {
         var gjelderPleietrengende = notatGjelderType == NotatGjelderType.PLEIETRENGENDE;
-        Notat entitet = NotatBuilder.of(fagsak, gjelderPleietrengende)
+        NotatEntitet entitet = NotatBuilder.of(fagsak, gjelderPleietrengende)
             .notatTekst(notatTekst)
             .build();
-        notatRepository.opprett(entitet);
+        notatRepository.lagre(entitet);
         return entitet;
     }
 
@@ -111,15 +124,11 @@ public class NotatRestTjeneste {
     public Response endre(
         @PathParam("notatId") UUID notatId,
         @Parameter(description = "Notat som skal endres") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) EndreNotatDto endreNotatDto) {
-//        var notat = notatRepository.hent(notatId);
-//        Fagsak fagsak = fagsakRepository.finnEksaktFagsak(notat.getFagsakId());
-//
-//        var nyttNotat = opprettNotat(fagsak, endreNotatDto.notatTekst(), endreNotatDto.notatGjelderType());
-//
-//        notat.erstattMed(nyttNotat.getId()); //todo constraint på erstattId + primær nøkkel?
-//        notatRepository.oppdater(notat);
+        var notat = notatRepository.hent(notatId);
+        notat.nyTekst(endreNotatDto.notatTekst());
+        notatRepository.lagre(notat);
 
-        return Response.status(Response.Status.CREATED).build();
+        return Response.status(Response.Status.OK).entity(mapDto(notat)).build();
 
     }
 
@@ -132,7 +141,7 @@ public class NotatRestTjeneste {
     public Response skjul(@PathParam("notatId") UUID notatId, @QueryParam("skjul") boolean skjul) {
         var notat = notatRepository.hent(notatId);
         notat.skjul(skjul);
-        notatRepository.oppdater(notat);
+        notatRepository.lagre(notat);
         return Response.ok().build();
 
     }
@@ -142,7 +151,6 @@ public class NotatRestTjeneste {
         //TODO to interface or not to interface, that is the question....
         if (entitet instanceof NotatAktørEntitet aktørEntitet) {
             return new NotatDto(
-                aktørEntitet.getId(),
                 aktørEntitet.getUuid(),
                 aktørEntitet.getNotatTekst(),
                 aktørEntitet.isSkjult(),
@@ -154,7 +162,6 @@ public class NotatRestTjeneste {
                 aktørEntitet.getEndretTidspunkt());
         } else if (entitet instanceof NotatSakEntitet fagsakNotat) {
             return new NotatDto(
-                fagsakNotat.getId(),
                 fagsakNotat.getUuid(),
                 fagsakNotat.getNotatTekst(),
                 fagsakNotat.isSkjult(),

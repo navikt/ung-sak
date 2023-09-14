@@ -11,10 +11,11 @@ create table if not exists notat_aktoer
     opprettet_av  varchar(20)  default 'VL'              not null,
     opprettet_tid timestamp(3) default CURRENT_TIMESTAMP not null,
     endret_av     varchar(20),
-    endret_tid    timestamp(3)
+    endret_tid    timestamp(3),
+    unique (uuid, versjon)
 );
 
-create unique index uidx_notat_aktoer ON notat_aktoer (uuid) where aktiv = true;
+create index if not exists uidx_notat_aktoer ON notat_aktoer (uuid) where aktiv = true;
 create index if not exists idx_notat_aktor on notat_aktoer (aktoer_id, ytelse_type);
 create sequence if not exists seq_notat_aktoer increment by 50 minvalue 1000000;
 
@@ -30,12 +31,14 @@ create table if not exists notat_aktoer_tekst
     opprettet_av  varchar(20)  default 'VL'              not null,
     opprettet_tid timestamp(3) default CURRENT_TIMESTAMP not null,
     endret_av     varchar(20),
-    endret_tid    timestamp(3)
+    endret_tid    timestamp(3),
+    unique (notat_id, versjon)
 );
 
-create unique index uidx_notat_aktoer_tekst ON notat_aktoer_tekst (notat_id) where aktiv = true;
+create index if not exists uidx_notat_aktoer_tekst ON notat_aktoer_tekst (notat_id) where aktiv = true;
 create sequence if not exists seq_notat_aktoer_tekst increment by 50 minvalue 1000000;
 comment on column notat_aktoer_tekst.tekst is 'Tekst i notatet';
+comment on column notat_aktoer_tekst.versjon is 'Versjon av notat teksten med notat_id';
 
 
 -- notat sak
@@ -50,10 +53,11 @@ create table if not exists notat_sak
     opprettet_av  varchar(20)  default 'VL'              not null,
     opprettet_tid timestamp(3) default CURRENT_TIMESTAMP not null,
     endret_av     varchar(20),
-    endret_tid    timestamp(3)
+    endret_tid    timestamp(3),
+    unique (uuid, versjon)
 );
 
-create unique index uidx_notat_sak ON notat_sak (uuid) where aktiv = true;
+create index if not exists uidx_notat_sak ON notat_sak (uuid) where aktiv = true;
 create index if not exists idx_notat_sak on notat_sak (fagsak_id);
 create sequence if not exists seq_notat_sak increment by 50 minvalue 1000000;
 
@@ -69,9 +73,11 @@ create table if not exists notat_sak_tekst
     opprettet_av  varchar(20)  default 'VL'              not null,
     opprettet_tid timestamp(3) default CURRENT_TIMESTAMP not null,
     endret_av     varchar(20),
-    endret_tid    timestamp(3)
+    endret_tid    timestamp(3),
+    unique (notat_id, versjon)
 );
 
-create unique index uidx_notat_sak_tekst ON notat_sak_tekst (notat_id) where aktiv = true;
+create index if not exists uidx_notat_sak_tekst ON notat_sak_tekst (notat_id) where aktiv = true;
 create sequence if not exists seq_notat_sak_tekst increment by 50 minvalue 1000000;
 comment on column notat_sak_tekst.tekst is 'Tekst i notatet';
+comment on column notat_sak_tekst.versjon is 'Versjon av notat teksten med notat_id';

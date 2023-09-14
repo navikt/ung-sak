@@ -18,8 +18,8 @@ import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.behandlingslager.notat.Notat;
 import no.nav.k9.sak.behandlingslager.notat.NotatBuilder;
+import no.nav.k9.sak.behandlingslager.notat.NotatEntitet;
 import no.nav.k9.sak.behandlingslager.notat.NotatRepository;
 import no.nav.k9.sak.behandlingslager.notat.NotatSakEntitet;
 import no.nav.k9.sak.db.util.JpaExtension;
@@ -50,12 +50,12 @@ class NotatRepositoryTest {
         Long fagsakId = fagsakRepository.opprettNy(fagsak);
         String tekst = "en tekst med litt notater";
 
-        Notat notat = NotatBuilder.of(fagsak, false)
+        NotatEntitet notat = NotatBuilder.of(fagsak, false)
             .notatTekst(tekst)
             .skjult(false)
             .build();
 
-        var notatId = notatRepository.opprett(notat);
+        var notatId = notatRepository.lagre(notat);
         NotatSakEntitet lagretNotat = (NotatSakEntitet) notatRepository.hent(notatId);
         assertThat(lagretNotat.getNotatTekst()).isEqualTo(tekst);
         assertThat(lagretNotat.getFagsakId()).isEqualTo(fagsakId);
@@ -66,6 +66,7 @@ class NotatRepositoryTest {
         //TODO sjekk at fagsak notat har verdi og aktør notat mangler verdi
 
     }
+
 
     private Fagsak lagFagsak() {
         final Personinfo personinfo = new Personinfo.Builder()
