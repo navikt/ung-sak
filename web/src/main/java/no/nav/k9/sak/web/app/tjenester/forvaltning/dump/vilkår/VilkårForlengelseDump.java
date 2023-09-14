@@ -74,16 +74,22 @@ public class VilkårForlengelseDump implements DebugDumpBehandling {
 
     private List<VilkårForlengelseDto> utledForlengelseData(Vilkårene vilkårene, BehandlingReferanse ref) {
 
+        var forlengelseTjeneste = ForlengelseTjeneste.finnTjeneste(tjeneste, ref.getFagsakYtelseType(), ref.getBehandlingType());
+        var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjeneste, ref.getFagsakYtelseType(), ref.getBehandlingType());
         return vilkårene.getVilkårene().stream().flatMap(v -> {
-
             var perioder = v.getPerioder().stream().map(VilkårPeriode::getPeriode).collect(Collectors.toCollection(TreeSet::new));
-            var forlengelseperioder = ForlengelseTjeneste.finnTjeneste(tjeneste, ref.getFagsakYtelseType(), ref.getBehandlingType()).utledPerioderSomSkalBehandlesSomForlengelse(ref,
-                perioder,
-                v.getVilkårType());
-
-            var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjeneste, ref.getFagsakYtelseType(), ref.getBehandlingType());
             var perioderTilVurdering = perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), v.getVilkårType());
-            return perioder.stream().map(p -> new VilkårForlengelseDto(p, v.getVilkårType(), perioderTilVurdering.contains(p), forlengelseperioder.contains(p)));
+
+            try {
+                var forlengelseperioder = forlengelseTjeneste.utledPerioderSomSkalBehandlesSomForlengelse(ref,
+                    perioderTilVurdering,
+                    v.getVilkårType());
+
+                return perioder.stream().map(p -> new VilkårForlengelseDto(p, v.getVilkårType(), perioderTilVurdering.contains(p), forlengelseperioder.contains(p)));
+            } catch (IllegalArgumentException e) {
+                // Liten hack for å håndtere vilkår som ikkje støtter forlengelse
+                return perioder.stream().map(p -> new VilkårForlengelseDto(p, v.getVilkårType(), perioderTilVurdering.contains(p), false));
+            }
 
         }).toList();
     }
