@@ -104,7 +104,7 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
             .toList();
 
         var inntektsmeldingerForrigeVedtak = inntektsmeldinger.stream()
-            .filter(it -> finnEksaktMottattTidspunkt(it, mottatteInntektsmeldinger).isBefore(originalBehandling.getAvsluttetDato()))
+            .filter(it -> erInntektsmeldingITidligereBehandling(it, referanse.getBehandlingId(), mottatteInntektsmeldinger))
             .toList();
 
         var relevanteInntektsmeldingerForrigeVedtak = utledRelevanteForPeriode(BehandlingReferanse.fra(originalBehandling), inntektsmeldingerForrigeVedtak, periode);
@@ -132,12 +132,10 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
         return relevanteImTjeneste.utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldingBegrenset, periode);
     }
 
-    private LocalDateTime finnEksaktMottattTidspunkt(Inntektsmelding inntektsmelding, List<MottattDokument> mottatteInntektsmeldinger) {
+    private boolean erInntektsmeldingITidligereBehandling(Inntektsmelding inntektsmelding, Long behandlingId, List<MottattDokument> mottatteInntektsmeldinger) {
         return mottatteInntektsmeldinger.stream()
             .filter(it -> Objects.equals(it.getJournalpostId(), inntektsmelding.getJournalpostId()))
-            .findAny()
-            .map(MottattDokument::getMottattTidspunkt)
-            .orElse(LocalDateTime.now());
+            .anyMatch(md -> md.getBehandlingId() != behandlingId);
     }
 
     private boolean harMarkertPeriodeForReberegning(EndringPåForlengelseInput input, DatoIntervallEntitet periode) {
