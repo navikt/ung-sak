@@ -1,6 +1,7 @@
 package no.nav.k9.sak.behandlingslager.notat;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.OptimisticLockException;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
@@ -89,6 +91,38 @@ class NotatRepositoryTest {
         assertThat(lagretNotat.getOpprettetAv()).isEqualTo("VL");
         assertThat(lagretNotat.isAktiv()).isTrue();
         assertThat(lagretNotat.getVersjon()).isEqualTo(0);
+
+    }
+
+    @Test
+    void skalFeileHvisEndrerPåGammelVersjon() {
+        var fagsak = lagFagsakMedPleietrengende();
+        String tekst = "en tekst med litt notater på aktør";
+
+        //Klient 1 lager notat
+        NotatEntitet originalNotat = NotatBuilder.of(fagsak, true)
+            .notatTekst(tekst)
+            .skjult(false)
+            .build();
+        notatRepository.lagre(originalNotat);
+        entityManager.detach(originalNotat);
+
+        //Klient 1 endrer notat, men har ikke lagret
+        var notatKopi1 = notatRepository.hentForSakOgAktør(fagsak).get(0);
+        notatKopi1.nyTekst("endring som vil feile");
+        entityManager.detach(notatKopi1);
+
+        //Klient 2 endrer også samme notatet og rekker å lagre
+        var notatKopi2 = notatRepository.hentForSakOgAktør(fagsak).get(0);
+        notatKopi2.nyTekst("endring som går bra");
+        notatRepository.lagre(notatKopi2);
+
+        //Klient 1 forsøker å lagre over på utdatert versjon
+        assertThatThrownBy(() -> {
+            entityManager.merge(notatKopi1);
+            entityManager.flush();
+        }).isInstanceOf(OptimisticLockException.class);
+
 
     }
 
