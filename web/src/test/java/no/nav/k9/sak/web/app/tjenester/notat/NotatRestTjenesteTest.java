@@ -2,7 +2,9 @@ package no.nav.k9.sak.web.app.tjenester.notat;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.notat.NotatGjelderType;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -17,9 +20,11 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.notat.NotatRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
+import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.notat.EndreNotatDto;
 import no.nav.k9.sak.kontrakt.notat.NotatDto;
 import no.nav.k9.sak.kontrakt.notat.OpprettNotatDto;
+import no.nav.k9.sak.kontrakt.notat.SkjulNotatDto;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -57,7 +62,7 @@ class NotatRestTjenesteTest {
             NotatGjelderType.FAGSAK
         );
 
-        notatRestTjeneste.opprett(notatDto);
+        opprettNotat(notatDto);
         NotatDto notat = hentForFagsak(saksnummer).stream().findFirst().orElseThrow();
 
         assertThat(notat.getNotatTekst()).isEqualTo(tekst);
@@ -69,9 +74,7 @@ class NotatRestTjenesteTest {
 
     }
 
-    private List<NotatDto> hentForFagsak(Saksnummer saksnummer) {
-        return (List<NotatDto>) notatRestTjeneste.hentForFagsak(saksnummer).getEntity();
-    }
+
 
     @Test
     void skalSkjuleNotat() {
@@ -82,16 +85,25 @@ class NotatRestTjenesteTest {
             NotatGjelderType.FAGSAK
         );
 
-        notatRestTjeneste.opprett(notatDto);
+        opprettNotat(notatDto);
         NotatDto notat = hentForFagsak(saksnummer).stream().findFirst().orElseThrow();
         assertThat(notat.isSkjult()).isFalse();
-        notatRestTjeneste.skjul(notat.getUuid(), true);
-        NotatDto skjultNotat = notatRestTjeneste.hent(notat.getUuid());
+
+        skjulNotat(new SkjulNotatDto(
+            notat.getUuid(),
+            true,
+            saksnummer,
+            notat.getVersjon()
+        ));
+        NotatDto skjultNotat = hentNotat(saksnummer, notat.getUuid());
         assertThat(skjultNotat.getUuid()).isEqualTo(notat.getUuid());
         assertThat(skjultNotat.isSkjult()).isTrue();
         assertThat(skjultNotat.getOpprettetTidspunkt()).isEqualTo(notat.getOpprettetTidspunkt());
         assertThat(skjultNotat.getEndretTidspunkt()).isNotNull();
+
+        //TODO sjekk versjon
     }
+
 
     @Test
     void skalEndreTekst() {
@@ -102,7 +114,7 @@ class NotatRestTjenesteTest {
 
         String morTekst = "et gammelt notat ";
         var saksnummer = morSak.getSaksnummer();
-        notatRestTjeneste.opprett(new OpprettNotatDto(
+        opprettNotat(new OpprettNotatDto(
             morTekst,
             saksnummer,
             NotatGjelderType.FAGSAK
@@ -116,12 +128,13 @@ class NotatRestTjenesteTest {
         assertThat(morNotat.getEndretTidspunkt()).isNull();
 
         var endretTekst = "et endret notat";
-        notatRestTjeneste.endre(morNotat.getUuid(), new EndreNotatDto(
+        endreNotat(new EndreNotatDto(
             morNotat.getUuid(),
             endretTekst,
+            saksnummer,
             morNotat.getVersjon()));
 
-        NotatDto endretNotat = notatRestTjeneste.hent(morNotat.getUuid());
+        NotatDto endretNotat = hentNotat(saksnummer, morNotat.getUuid());
         assertThat(endretNotat.getGjelderType()).isEqualTo(NotatGjelderType.FAGSAK);
         assertThat(endretNotat.getNotatTekst()).isEqualTo(endretTekst);
         assertThat(endretNotat.getOpprettetAv()).isEqualTo(morNotat.getOpprettetAv());
@@ -130,6 +143,7 @@ class NotatRestTjenesteTest {
 
 
     }
+
 
     @Test
     void skalOppretteNotatPåPleietrengendeOgHentePåAnnenForeldresSak() {
@@ -141,20 +155,20 @@ class NotatRestTjenesteTest {
         var farSak = TestScenarioBuilder.builderUtenSøknad(far).medPleietrengende(pleietrengende).lagreFagsak(repositoryProvider).getSaksnummer();
 
         String morNotat = "notat som gjelder mor";
-        notatRestTjeneste.opprett(new OpprettNotatDto(
+        opprettNotat(new OpprettNotatDto(
             morNotat,
             morSak,
             NotatGjelderType.FAGSAK
         ));
         String pleietrengedeNotat = "notat som gjelder pleietrengende";
-        notatRestTjeneste.opprett(new OpprettNotatDto(
+        opprettNotat(new OpprettNotatDto(
             pleietrengedeNotat,
             morSak,
             NotatGjelderType.PLEIETRENGENDE
         ));
 
         String farNotat = "notat som gjelder far";
-        notatRestTjeneste.opprett(new OpprettNotatDto(
+        opprettNotat(new OpprettNotatDto(
             farNotat,
             farSak,
             NotatGjelderType.FAGSAK
@@ -178,5 +192,27 @@ class NotatRestTjenesteTest {
     void notatPåPsbPleietrengendeSkalIkkeHentesPåPils() {
         //TODO
     }
+
+
+    private NotatDto hentNotat(Saksnummer saksnummer, UUID uuid) {
+        return ((Collection<NotatDto>) notatRestTjeneste.hent(new SaksnummerDto(saksnummer), uuid).getEntity()).stream().findFirst().orElseThrow();
+    }
+
+    private Response skjulNotat(SkjulNotatDto skjulNotatDto) {
+        return notatRestTjeneste.skjul(skjulNotatDto);
+    }
+
+    private void opprettNotat(OpprettNotatDto notatDto) {
+        notatRestTjeneste.opprett(notatDto);
+    }
+
+    private List<NotatDto> hentForFagsak(Saksnummer saksnummer) {
+        return (List<NotatDto>) notatRestTjeneste.hent(new SaksnummerDto(saksnummer), null).getEntity();
+    }
+
+    private Response endreNotat(EndreNotatDto endreNotatDto) {
+        return notatRestTjeneste.endre(endreNotatDto);
+    }
+
 
 }

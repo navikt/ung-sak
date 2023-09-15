@@ -5,8 +5,8 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.CR
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -16,12 +16,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
@@ -37,9 +36,11 @@ import no.nav.k9.sak.behandlingslager.notat.NotatBuilder;
 import no.nav.k9.sak.behandlingslager.notat.NotatEntitet;
 import no.nav.k9.sak.behandlingslager.notat.NotatRepository;
 import no.nav.k9.sak.behandlingslager.notat.NotatSakEntitet;
+import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.notat.EndreNotatDto;
 import no.nav.k9.sak.kontrakt.notat.NotatDto;
 import no.nav.k9.sak.kontrakt.notat.OpprettNotatDto;
+import no.nav.k9.sak.kontrakt.notat.SkjulNotatDto;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
@@ -58,7 +59,8 @@ public class NotatRestTjeneste {
         this.fagsakRepository = fagsakRepository;
     }
 
-    NotatRestTjeneste() {}
+    NotatRestTjeneste() {
+    }
 
     @GET
     @Path("/notat")
@@ -66,27 +68,17 @@ public class NotatRestTjeneste {
     @Operation(description = "Henter alle notater for fagsak", tags = "notat")
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response hentForFagsak(@QueryParam("saksnummer") Saksnummer saksnummer) {
-        Optional<Fagsak> fagsakOpt = fagsakRepository.hentSakGittSaksnummer(saksnummer);
-        if (fagsakOpt.isEmpty()) {
-            return Response.status(Response.Status.NOT_FOUND).build();
+    public Response hent(
+        @NotNull @QueryParam(SaksnummerDto.NAME) @Parameter(description = "Saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummer,
+        @QueryParam("notatId") @Parameter(description = "Notat uuid") UUID notatId
+    ) {
+        if (notatId != null) {
+            NotatEntitet notat = hentNotat(saksnummer.getVerdi(), notatId);
+            return Response.ok().entity(Collections.singleton(mapDto(notat))).build();
         }
-        var fagsak = fagsakOpt.get();
-        List<Notat> notater = notatRepository.hentForSakOgAktør(fagsak.getId(), fagsak.getYtelseType(), fagsak.getPleietrengendeAktørId());
 
+        List<NotatEntitet> notater = hentAlle(saksnummer.getVerdi());
         return Response.ok().entity(notater.stream().map(this::mapDto).collect(Collectors.toList())).build();
-
-    }
-
-    @GET
-    @Path("/notat/{notatId}")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(description = "Henter notat", tags = "notat")
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
-    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public NotatDto hent(@PathParam("notatId") UUID notatId) {
-        var notatEntitet = notatRepository.hent(notatId);
-        return mapDto(notatEntitet);
 
     }
 
@@ -96,35 +88,31 @@ public class NotatRestTjeneste {
     @Operation(description = "Lag nytt notat", tags = "notat")
     @BeskyttetRessurs(action = CREATE, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response opprett(@Parameter(description = "Nytt notat") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) OpprettNotatDto opprettNotatDto) {
-        Optional<Fagsak> fagsak = fagsakRepository.hentSakGittSaksnummer(opprettNotatDto.saksnummer().getSaksnummer());
-        if (fagsak.isEmpty()) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
-        Notat notat = opprettNotat(fagsak.get(), opprettNotatDto.notatTekst(), opprettNotatDto.notatGjelderType());
-        return Response.status(Response.Status.CREATED).entity(mapDto(notat)).build();
+    public Response opprett(
+        @NotNull @Parameter(description = "Nytt notat") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) OpprettNotatDto opprettNotatDto
+    ) {
+        Fagsak fagsak = hentSak(opprettNotatDto.saksnummer().getSaksnummer());
 
-    }
-
-    private Notat opprettNotat(Fagsak fagsak, String notatTekst, NotatGjelderType notatGjelderType) {
-        var gjelderPleietrengende = notatGjelderType == NotatGjelderType.PLEIETRENGENDE;
+        var gjelderPleietrengende = opprettNotatDto.notatGjelderType() == NotatGjelderType.PLEIETRENGENDE;
         NotatEntitet entitet = NotatBuilder.of(fagsak, gjelderPleietrengende)
-            .notatTekst(notatTekst)
+            .notatTekst(opprettNotatDto.notatTekst())
             .build();
         notatRepository.lagre(entitet);
-        return entitet;
+        return Response.status(Response.Status.CREATED).entity(mapDto(entitet)).build();
+
     }
 
     @POST
-    @Path("/notat/{notatId}")
+    @Path("/notat/endre")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Endre eksistrende notat", tags = "notat")
     @BeskyttetRessurs(action = UPDATE, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response endre(
-        @PathParam("notatId") UUID notatId,
-        @Parameter(description = "Notat som skal endres") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) EndreNotatDto endreNotatDto) {
-        var notat = notatRepository.hent(notatId);
+       @NotNull @Parameter(description = "Notat som skal endres") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) EndreNotatDto endreNotatDto
+    ) {
+        var notat = hentNotat(endreNotatDto.saksnummer().getSaksnummer(), endreNotatDto.uuid());
+
         notat.nyTekst(endreNotatDto.notatTekst());
         notatRepository.lagre(notat);
 
@@ -132,20 +120,53 @@ public class NotatRestTjeneste {
 
     }
 
-    @PUT
-    @Path("/notat/{notatId}/toggle-skjul")
+
+    @POST
+    @Path("/notat/skjul")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Skjul notat", tags = "notat")
     @BeskyttetRessurs(action = UPDATE, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response skjul(@PathParam("notatId") UUID notatId, @QueryParam("skjul") boolean skjul) {
-        var notat = notatRepository.hent(notatId);
-        notat.skjul(skjul);
+    public Response skjul(
+        @NotNull @Parameter(description = "Notat som skal skjules") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SkjulNotatDto skjulNotatDto
+    ) {
+        var notat = hentNotat(skjulNotatDto.saksnummer().getSaksnummer(), skjulNotatDto.uuid());
+        notat.skjul(skjulNotatDto.skjul());
         notatRepository.lagre(notat);
         return Response.ok().build();
 
     }
 
+    //Notat må hentes basert på saksnummer for tilgangssjekk!
+    private NotatEntitet hentNotat(Saksnummer saksnummer, UUID notatUuid) {
+        var notater = hentAlle(saksnummer);
+
+        if (notater.isEmpty()) {
+            throw NotatFeil.FACTORY.fantIkkeNotat().toException();
+        }
+
+        var notat = notater.stream()
+            .filter(it -> it.getUuid() == notatUuid)
+            .toList();
+
+        if (notat.size() > 1) {
+            throw new IllegalStateException("Utvilkerfeil: Flere notater med samme id");
+        }
+
+        return notat.get(0);
+    }
+
+    private List<NotatEntitet> hentAlle(Saksnummer saksnummer) {
+        var fagsak = hentSak(saksnummer);
+
+        return notatRepository.hentForSakOgAktør(fagsak);
+    }
+
+
+    private Fagsak hentSak(Saksnummer saksnummer) {
+        return fagsakRepository.hentSakGittSaksnummer(saksnummer)
+            .orElseThrow(() -> NotatFeil.FACTORY.fantIkkeSak().toException());
+    }
 
     private NotatDto mapDto(Notat entitet) {
         //TODO to interface or not to interface, that is the question....

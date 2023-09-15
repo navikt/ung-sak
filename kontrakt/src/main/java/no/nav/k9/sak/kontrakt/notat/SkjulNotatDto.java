@@ -8,25 +8,20 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import no.nav.k9.abac.AbacAttributt;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
-import no.nav.k9.sak.kontrakt.dokument.TekstValideringRegex;
 import no.nav.k9.sak.typer.Saksnummer;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public record EndreNotatDto(
+public record SkjulNotatDto(
     @JsonProperty(value = "uuid", required = true)
     UUID uuid,
 
-    @JsonProperty(value = "notatTekst", required = true)
-    @Size(max = 4000)
-    @Pattern(regexp = TekstValideringRegex.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
-    String notatTekst,
+    @JsonProperty(value = "skjul", required = true)
+    boolean skjul,
 
     @AbacAttributt("saksnummer")
     @JsonProperty(value = SaksnummerDto.NAME, required = true)
