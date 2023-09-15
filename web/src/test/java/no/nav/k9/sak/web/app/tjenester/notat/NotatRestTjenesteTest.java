@@ -2,7 +2,6 @@ package no.nav.k9.sak.web.app.tjenester.notat;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,7 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.GenericType;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.notat.NotatGjelderType;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -195,11 +194,13 @@ class NotatRestTjenesteTest {
 
 
     private NotatDto hentNotat(Saksnummer saksnummer, UUID uuid) {
-        return ((Collection<NotatDto>) notatRestTjeneste.hent(new SaksnummerDto(saksnummer), uuid).getEntity()).stream().findFirst().orElseThrow();
+        return notatRestTjeneste.hent(new SaksnummerDto(saksnummer), uuid)
+            .readEntity(new GenericType<List<NotatDto>>(){})
+            .stream().findFirst().orElseThrow();
     }
 
-    private Response skjulNotat(SkjulNotatDto skjulNotatDto) {
-        return notatRestTjeneste.skjul(skjulNotatDto);
+    private void skjulNotat(SkjulNotatDto skjulNotatDto) {
+        notatRestTjeneste.skjul(skjulNotatDto);
     }
 
     private void opprettNotat(OpprettNotatDto notatDto) {
@@ -207,11 +208,13 @@ class NotatRestTjenesteTest {
     }
 
     private List<NotatDto> hentForFagsak(Saksnummer saksnummer) {
-        return (List<NotatDto>) notatRestTjeneste.hent(new SaksnummerDto(saksnummer), null).getEntity();
+        return notatRestTjeneste.hent(new SaksnummerDto(saksnummer), null)
+            .readEntity(new GenericType<>() {
+            });
     }
 
-    private Response endreNotat(EndreNotatDto endreNotatDto) {
-        return notatRestTjeneste.endre(endreNotatDto);
+    private void endreNotat(EndreNotatDto endreNotatDto) {
+        notatRestTjeneste.endre(endreNotatDto);
     }
 
 

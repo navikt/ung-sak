@@ -133,7 +133,7 @@ public class NotatRestTjeneste {
         var notat = hentNotat(skjulNotatDto.saksnummer().getSaksnummer(), skjulNotatDto.uuid());
         notat.skjul(skjulNotatDto.skjul());
         notatRepository.lagre(notat);
-        return Response.ok().build();
+        return  Response.status(Response.Status.OK).entity(mapDto(notat)).build();
 
     }
 
