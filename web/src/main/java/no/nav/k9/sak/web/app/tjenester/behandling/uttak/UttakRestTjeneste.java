@@ -4,7 +4,10 @@ import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -17,10 +20,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
@@ -29,6 +33,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrUttakRepository;
@@ -42,9 +47,17 @@ import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrUttakPeriodeDto;
 import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrUttakUtbetalingsgradDto;
 import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrbareUttakAktiviterDto;
 import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrtUttakDto;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeidsforhold;
+import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
+import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
 @ApplicationScoped
 @Transactional
@@ -63,15 +76,18 @@ public class UttakRestTjeneste {
     private OverstyrUttakRepository overstyrUttakRepository;
     private BehandlingRepository behandlingRepository;
 
+    private UttakTjeneste uttakTjeneste;
+
     public UttakRestTjeneste() {
         // for proxying
     }
 
     @Inject
-    public UttakRestTjeneste(MapUttak mapOppgittUttak, OverstyrUttakRepository overstyrUttakRepository, BehandlingRepository behandlingRepository) {
+    public UttakRestTjeneste(MapUttak mapOppgittUttak, OverstyrUttakRepository overstyrUttakRepository, BehandlingRepository behandlingRepository, UttakTjeneste uttakTjeneste) {
         this.mapUttak = mapOppgittUttak;
         this.overstyrUttakRepository = overstyrUttakRepository;
         this.behandlingRepository = behandlingRepository;
+        this.uttakTjeneste = uttakTjeneste;
     }
 
     /**
@@ -123,7 +139,7 @@ public class UttakRestTjeneste {
         return new OverstyrtUttakDto(overstyrtUttak.stream().map(this::map).toList());
     }
 
-    @GET
+    @POST
     @Path(UTTAK_OVERSTYRBARE_AKTIVITETER)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Hent overstyrbare aktiviteter for uttak for behandling", tags = "behandling - uttak", responses = {
@@ -131,22 +147,66 @@ public class UttakRestTjeneste {
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public OverstyrtUttakDto getOverstyrbareAktiviterForUttak(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto,
-                                                              @NotNull @QueryParam("fom") @Pattern(regexp = "\\d\\d\\d\\d-\\d\\d-\\d\\d") String fom,
-                                                              @NotNull @QueryParam("tom") @Pattern(regexp = "\\d\\d\\d\\d-\\d\\d-\\d\\d") String tom) {
-        LocalDate fomDato = LocalDate.parse(fom);
-        LocalDate tomDato = LocalDate.parse(tom);
-        if (fomDato.isAfter(tomDato)){
-            throw new IllegalArgumentException("fom kan ikke være etter tom");
+    public OverstyrbareUttakAktiviterDto hentOverstyrbareAktiviterForUttak(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) OverstyrbareAktiviteterForUttakRequest request) {
+        BehandlingUuidDto behandlingIdDto = request.getBehandlingIdDto();
+        Periode periode = new Periode(request.getFom(), request.getTom());
+
+        Uttaksplan uttaksplan = uttakTjeneste.hentUttaksplan(behandlingIdDto.getBehandlingUuid(), false);
+
+        Set<OverstyrUttakArbeidsforholdDto> aktiviteter = new LinkedHashSet<>();
+
+        for (Map.Entry<LukketPeriode, UttaksperiodeInfo> entry : uttaksplan.getPerioder().entrySet()) {
+            Periode uttakperiode = new Periode(entry.getKey().getFom(), entry.getKey().getTom());
+            if (uttakperiode.overlaps(periode)) {
+                UttaksperiodeInfo periodeInfo = entry.getValue();
+                for (Utbetalingsgrader utbetalingsgrader : periodeInfo.getUtbetalingsgrader()) {
+                    aktiviteter.add(map(utbetalingsgrader.getArbeidsforhold()));
+                }
+            }
         }
 
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
-        LocalDateTimeline<OverstyrtUttakPeriode> overstyrtUttak = overstyrUttakRepository.hentOverstyrtUttak(behandling.getId());
-        if (overstyrtUttak.isEmpty()) {
-            return null;
-        }
-        return new OverstyrtUttakDto(overstyrtUttak.stream().map(this::map).toList());
+        return new OverstyrbareUttakAktiviterDto(new ArrayList<>(aktiviteter));
     }
+
+    public static class OverstyrbareAktiviteterForUttakRequest {
+
+        @Valid
+        @NotNull
+        private BehandlingUuidDto behandlingIdDto;
+        @Valid
+        @NotNull
+        private LocalDate fom;
+        @Valid
+        @NotNull
+        private LocalDate tom;
+
+        public OverstyrbareAktiviteterForUttakRequest(BehandlingUuidDto behandlingIdDto, LocalDate fom, LocalDate tom) {
+            this.behandlingIdDto = behandlingIdDto;
+            this.fom = fom;
+            this.tom = tom;
+        }
+
+        public OverstyrbareAktiviteterForUttakRequest() {
+        }
+
+        public BehandlingUuidDto getBehandlingIdDto() {
+            return behandlingIdDto;
+        }
+
+        public LocalDate getFom() {
+            return fom;
+        }
+
+        public LocalDate getTom() {
+            return tom;
+        }
+
+        @AssertTrue(message = "ugyldg periode - fom kan ikke være etter tom")
+        boolean gyldigPeriode() {
+            return !fom.isAfter(tom);
+        }
+    }
+
 
     private OverstyrUttakPeriodeDto map(LocalDateSegment<OverstyrtUttakPeriode> periode) {
         return new OverstyrUttakPeriodeDto(periode.getValue().getId(), new Periode(periode.getFom(), periode.getTom()), periode.getValue().getSøkersUttaksgrad(), map(periode.getValue().getOverstyrtUtbetalingsgrad()));
@@ -164,5 +224,15 @@ public class UttakRestTjeneste {
             overstyrtUtbetalingsgrad.getInternArbeidsforholdRef());
         return new OverstyrUttakUtbetalingsgradDto(aktivitet, overstyrtUtbetalingsgrad.getUtbetalingsgrad());
     }
+
+    private OverstyrUttakArbeidsforholdDto map(Arbeidsforhold arbeidsforhold) {
+        return new OverstyrUttakArbeidsforholdDto(
+            UttakArbeidType.fraKode(arbeidsforhold.getType()),
+            arbeidsforhold.getOrganisasjonsnummer() != null ? new OrgNummer(arbeidsforhold.getOrganisasjonsnummer()) : null,
+            arbeidsforhold.getAktørId() != null ? new AktørId(arbeidsforhold.getAktørId()) : null,
+            arbeidsforhold.getArbeidsforholdId() != null ? InternArbeidsforholdRef.ref(arbeidsforhold.getArbeidsforholdId()) : null
+        );
+    }
+
 
 }

@@ -1,5 +1,7 @@
 package no.nav.k9.sak.kontrakt.uttak.overstyring;
 
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -54,5 +56,18 @@ public class OverstyrUttakArbeidsforholdDto {
 
     public InternArbeidsforholdRef getInternArbeidsforholdId() {
         return internArbeidsforholdId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        OverstyrUttakArbeidsforholdDto that = (OverstyrUttakArbeidsforholdDto) o;
+        return type == that.type && Objects.equals(orgnr, that.orgnr) && Objects.equals(aktørId, that.aktørId) && Objects.equals(internArbeidsforholdId, that.internArbeidsforholdId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, orgnr, aktørId, internArbeidsforholdId);
     }
 }

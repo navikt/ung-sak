@@ -21,17 +21,17 @@ public class OverstyrbareUttakAktiviterDto {
     @Valid
     @NotNull
     @Size(max = 100)
-    private List<OverstyrbareUttakAktiviterDto> arbeidsforholdsperioder;
+    private List<OverstyrUttakArbeidsforholdDto> arbeidsforholdsperioder;
 
     public OverstyrbareUttakAktiviterDto() {
         //
     }
 
-    public OverstyrbareUttakAktiviterDto(List<OverstyrbareUttakAktiviterDto> arbeidsforholdsperioder) {
+    public OverstyrbareUttakAktiviterDto(List<OverstyrUttakArbeidsforholdDto> arbeidsforholdsperioder) {
         this.arbeidsforholdsperioder = arbeidsforholdsperioder;
     }
 
-    public List<OverstyrbareUttakAktiviterDto> getArbeidsforholdsperioder() {
+    public List<OverstyrUttakArbeidsforholdDto> getArbeidsforholdsperioder() {
         return arbeidsforholdsperioder;
     }
 }

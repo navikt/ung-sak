@@ -24,7 +24,6 @@ public class OverstyrtUttakDto  {
     private List<OverstyrUttakPeriodeDto> overstyringer;
 
     public OverstyrtUttakDto() {
-        //
     }
 
     public OverstyrtUttakDto(List<OverstyrUttakPeriodeDto> overstyringer) {
