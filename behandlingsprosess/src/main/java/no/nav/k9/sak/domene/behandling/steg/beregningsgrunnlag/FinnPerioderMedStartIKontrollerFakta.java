@@ -25,6 +25,8 @@ public class FinnPerioderMedStartIKontrollerFakta {
 
     private final boolean isEnabled;
 
+    private final Set<Long> BEHANDLING_ID_MED_FREMOVERHOPP = Set.of(1685776L);
+
 
     @Inject
     public FinnPerioderMedStartIKontrollerFakta(VilkårResultatRepository vilkårResultatRepository,
@@ -47,7 +49,7 @@ public class FinnPerioderMedStartIKontrollerFakta {
     public NavigableSet<PeriodeTilVurdering> finnPerioder(BehandlingReferanse ref,
                                                           NavigableSet<PeriodeTilVurdering> allePerioder,
                                                           Set<PeriodeTilVurdering> forlengelseperioderBeregning) {
-        if (!isEnabled) {
+        if (!isEnabled && !BEHANDLING_ID_MED_FREMOVERHOPP.contains(ref.getBehandlingId())) {
             return new TreeSet<>();
         }
         var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref);
