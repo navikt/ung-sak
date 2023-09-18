@@ -8,8 +8,10 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -20,12 +22,14 @@ public class OverstyrUttakUtbetalingsgradDto {
 
     @JsonProperty(value = "arbeidsforhold", required = true)
     @NotNull
+    @Valid
     private OverstyrUttakArbeidsforholdDto arbeidsforhold;
 
     @JsonProperty(value = "utbetalingsgrad")
     @NotNull
     @DecimalMin("0")
     @DecimalMax("100")
+    @Digits(integer = 3, fraction = 2)
     private BigDecimal utbetalingsgrad;
 
     public OverstyrUttakUtbetalingsgradDto() {
