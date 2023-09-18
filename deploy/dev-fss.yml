@@ -266,6 +266,8 @@ spec:
       value: "true"
     - name: ENABLE_DATO_NY_REGEL_UTTAK
       value: "true"
+    - name: PSB_FILTRER_IM_PAA_BEHANDLING_ID
+      value: "true"
     - name: ENABLE_INNTEKTSMELDING_CACHE
       value: "true"
 
