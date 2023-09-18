@@ -71,6 +71,7 @@ public enum Venteårsak implements Kodeverdi {
     OPPD_ÅPEN_BEH("OPPD_ÅPEN_BEH", "Venter på oppdatering av åpen behandling", false, AVVENTER_ANNET), //TODO?
     VENT_DEKGRAD_REGEL("VENT_DEKGRAD_REGEL", "Venter på 80% dekningsgrad-regel", false, AVVENTER_TEKNISK_FEIL),
     VENT_ØKONOMI("VENT_ØKONOMI", "Venter på økonomiløsningen", false, AVVENTER_ANNET),
+    VENT_TILBAKEKREVING("VENT_TILBAKEKREVING", "Venter på tilbakekrevingsbehandling", true, AVVENTER_ANNET),
     VENTELØNN_ELLER_MILITÆR_MED_FLERE_AKTIVITETER("VENTELØNN_ELLER_MILITÆR_MED_FLERE_AKTIVITETER", "Mangel i løsning for oppgitt ventelønn og/eller militær i kombinasjon med andre statuser", false, AVVENTER_TEKNISK_FEIL),
     VENT_BEREGNING_TILBAKE_I_TID("VENT_BEREGNING_TILBAKE_I_TID", "Endring i tilkjent ytelse bakover i tid. Dette håndteres ikke i løsningen enda.", false, AVVENTER_TEKNISK_FEIL),
     BRUKER_70ÅR_VED_REFUSJON("BRUKER_70ÅR_VED_REFUSJON", "Mangel i løsning for brukere som er 70 år eller eldre", false, AVVENTER_TEKNISK_FEIL),

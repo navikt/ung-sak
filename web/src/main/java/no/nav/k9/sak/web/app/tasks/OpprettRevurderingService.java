@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
@@ -23,9 +24,9 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingsoppretterTjeneste;
 
 @ApplicationScoped
-public class OpprettManuellRevurderingService {
+public class OpprettRevurderingService {
 
-    private static final Logger logger = LoggerFactory.getLogger(OpprettManuellRevurderingService.class);
+    private static final Logger logger = LoggerFactory.getLogger(OpprettRevurderingService.class);
 
     private BehandlingsoppretterTjeneste behandlingsoppretterTjeneste;
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste;
@@ -33,16 +34,16 @@ public class OpprettManuellRevurderingService {
     private ProsessTaskTjeneste taskTjeneste;
     private BehandlingRepository behandlingRepository;
 
-    protected OpprettManuellRevurderingService() {
+    protected OpprettRevurderingService() {
 
     }
 
     @Inject
-    public OpprettManuellRevurderingService(BehandlingsoppretterTjeneste behandlingsoppretterTjeneste,
-                                            BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste,
-                                            FagsakTjeneste fagsakTjeneste,
-                                            ProsessTaskTjeneste taskTjeneste,
-                                            BehandlingRepository behandlingRepository) {
+    public OpprettRevurderingService(BehandlingsoppretterTjeneste behandlingsoppretterTjeneste,
+                                     BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste,
+                                     FagsakTjeneste fagsakTjeneste,
+                                     ProsessTaskTjeneste taskTjeneste,
+                                     BehandlingRepository behandlingRepository) {
         this.behandlingsoppretterTjeneste = behandlingsoppretterTjeneste;
         this.behandlingsprosessTjeneste = behandlingsprosessTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
@@ -50,15 +51,23 @@ public class OpprettManuellRevurderingService {
         this.behandlingRepository = behandlingRepository;
     }
 
+    public void opprettManuellRevurdering(Saksnummer saksnummer, BehandlingÅrsakType behandlingÅrsakType, BehandlingStegType startStegVedÅpenBehandling) {
+        revurder(saksnummer, behandlingÅrsakType, startStegVedÅpenBehandling, true);
+    }
 
-    public void revurder(Saksnummer saksnummer) {
+    public void opprettAutomatiskRevurdering(Saksnummer saksnummer, BehandlingÅrsakType behandlingÅrsakType, BehandlingStegType startStegVedÅpenBehandling) {
+        revurder(saksnummer, behandlingÅrsakType, startStegVedÅpenBehandling, false);
+    }
+
+    private void revurder(Saksnummer saksnummer, BehandlingÅrsakType behandlingÅrsakType, BehandlingStegType startStegVedÅpenBehandling, boolean manuell) {
         final Optional<Fagsak> funnetFagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true);
         final Fagsak fagsak = funnetFagsak.get();
-        final BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.RE_ANNET;
 
         final RevurderingTjeneste revurderingTjeneste = FagsakYtelseTypeRef.Lookup.find(RevurderingTjeneste.class, fagsak.getYtelseType()).orElseThrow();
         if (revurderingTjeneste.kanRevurderingOpprettes(fagsak)) {
-            final Behandling behandling = behandlingsoppretterTjeneste.opprettRevurdering(fagsak, behandlingÅrsakType);
+            final Behandling behandling = manuell
+                ? behandlingsoppretterTjeneste.opprettManuellRevurdering(fagsak, behandlingÅrsakType)
+                : behandlingsoppretterTjeneste.opprettAutomatiskRevurdering(fagsak, behandlingÅrsakType);
             behandlingsprosessTjeneste.asynkStartBehandlingsprosess(behandling);
         } else {
             final Behandling behandling = finnBehandlingSomKanSendesTilbakeTilStart(saksnummer);
@@ -70,7 +79,8 @@ public class OpprettManuellRevurderingService {
             final ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(TilbakeTilStartBehandlingTask.class);
             prosessTaskData.setCallIdFraEksisterende();
             prosessTaskData.setBehandling(fagsak.getId(), behandling.getId(), fagsak.getAktørId().getId());
-            prosessTaskData.setProperty(TilbakeTilStartBehandlingTask.PROPERTY_MANUELT_OPPRETTET, Boolean.TRUE.toString());
+            prosessTaskData.setProperty(TilbakeTilStartBehandlingTask.PROPERTY_MANUELT_OPPRETTET, Boolean.toString(manuell));
+            prosessTaskData.setProperty(TilbakeTilStartBehandlingTask.PROPERTY_START_STEG, startStegVedÅpenBehandling.getKode());
             taskTjeneste.lagre(prosessTaskData);
         }
     }

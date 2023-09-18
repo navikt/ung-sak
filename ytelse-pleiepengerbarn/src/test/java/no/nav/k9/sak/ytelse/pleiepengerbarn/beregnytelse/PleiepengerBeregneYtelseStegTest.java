@@ -112,9 +112,7 @@ public class PleiepengerBeregneYtelseStegTest {
         steg = new PleiepengerBeregneYtelseSteg(repositoryProvider, beregningTjeneste,
             fastsettBeregningsresultatTjeneste,
             uttakTjeneste,
-            new UnitTestLookupInstanceImpl<>(beregnFeriepengerTjeneste),
-            new UnitTestLookupInstanceImpl<>(finnFeriepengepåvirkendeFagsakerTjeneste),
-            hentAndelserSomKanGiFeriepengerTjeneste
+            new UnitTestLookupInstanceImpl<>(beregnFeriepengerTjeneste)
         );
     }
 

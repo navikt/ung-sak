@@ -13,8 +13,11 @@ public class BeregningsgrunnlagPeriode {
     private List<BeregningsgrunnlagPrStatus> beregningsgrunnlagPrStatus = new ArrayList<>();
     private Periode bgPeriode;
     private BigDecimal inntektGraderingsprosent;
+    private BigDecimal totalUtbetalingsgradFraUttak;
+    private BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
     private BigDecimal graderingsfaktorTid;
     private BigDecimal graderingsfaktorInntekt;
+    private BigDecimal bruttoBeregningsgrunnlag;
 
 
     public BeregningsgrunnlagPeriode() {
@@ -44,6 +47,14 @@ public class BeregningsgrunnlagPeriode {
         return inntektGraderingsprosent;
     }
 
+    public BigDecimal getTotalUtbetalingsgradFraUttak() {
+        return totalUtbetalingsgradFraUttak;
+    }
+
+    public BigDecimal getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt() {
+        return totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
+    }
+
     public BigDecimal getGraderingsfaktorTid() {
         return graderingsfaktorTid;
     }
@@ -54,6 +65,10 @@ public class BeregningsgrunnlagPeriode {
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    public BigDecimal getBruttoBeregningsgrunnlag() {
+        return bruttoBeregningsgrunnlag;
     }
 
     public static class Builder {
@@ -73,6 +88,16 @@ public class BeregningsgrunnlagPeriode {
             return this;
         }
 
+       public Builder medTotalUtbetalingsgradFraUttak(BigDecimal totalUtbetalingsgradFraUttak) {
+            beregningsgrunnlagPeriodeMal.totalUtbetalingsgradFraUttak = totalUtbetalingsgradFraUttak;
+            return this;
+        }
+
+       public Builder medTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt) {
+            beregningsgrunnlagPeriodeMal.totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt = totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
+            return this;
+        }
+
         public Builder medGraderingsfaktorTid(BigDecimal graderingsfaktorTid) {
             beregningsgrunnlagPeriodeMal.graderingsfaktorTid = graderingsfaktorTid;
             return this;
@@ -88,6 +113,11 @@ public class BeregningsgrunnlagPeriode {
             return this;
         }
 
+        public Builder medBruttoBeregningsgrunnlag(BigDecimal bruttoBeregningsgrunnlag){
+            beregningsgrunnlagPeriodeMal.bruttoBeregningsgrunnlag = bruttoBeregningsgrunnlag;
+            return this;
+        }
+
         public BeregningsgrunnlagPeriode build() {
             verifyStateForBuild();
             return beregningsgrunnlagPeriodeMal;
@@ -97,6 +127,7 @@ public class BeregningsgrunnlagPeriode {
             Objects.requireNonNull(beregningsgrunnlagPeriodeMal.beregningsgrunnlagPrStatus, "beregningsgrunnlagPrStatus");
             Objects.requireNonNull(beregningsgrunnlagPeriodeMal.bgPeriode, "bgPeriode");
             Objects.requireNonNull(beregningsgrunnlagPeriodeMal.bgPeriode.getFom(), "bgPeriode.getFom()");
+            Objects.requireNonNull(beregningsgrunnlagPeriodeMal.bruttoBeregningsgrunnlag, "bruttoBeregningsgrunnlag");
         }
     }
 }

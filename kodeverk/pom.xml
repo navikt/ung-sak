@@ -10,7 +10,7 @@
         <version>${revision}${sha1}${changelist}</version>
     </parent>
 
-    <artifactId>kodeverk-jakarta</artifactId>
+    <artifactId>kodeverk</artifactId>
     <packaging>jar</packaging>
     <name>K9SAK :: Kodeverk</name>
     <description>Kodeverk for tjenester eksponert / topics publisert av K9SAK</description>

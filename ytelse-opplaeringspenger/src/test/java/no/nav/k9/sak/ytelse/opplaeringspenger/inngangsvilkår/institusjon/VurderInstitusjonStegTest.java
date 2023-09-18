@@ -25,7 +25,6 @@ import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -66,9 +65,6 @@ class VurderInstitusjonStegTest {
     private GodkjentOpplæringsinstitusjonTjeneste godkjentOpplæringsinstitusjonTjeneste;
     @Inject
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
-    @Inject
-    @FagsakYtelseTypeRef(FagsakYtelseType.OPPLÆRINGSPENGER)
-    private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjenesteBean;
 
     private Behandling behandling;
     private Periode søknadsperiode;
@@ -78,7 +74,7 @@ class VurderInstitusjonStegTest {
 
     @BeforeEach
     void setup() {
-        VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjenesteMock = spy(perioderTilVurderingTjenesteBean);
+        VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjenesteMock = spy(VilkårsPerioderTilVurderingTjeneste.class);
         BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         vurderInstitusjonSteg = new VurderInstitusjonSteg(repositoryProvider,
             new VurderInstitusjonTjeneste(repositoryProvider, godkjentOpplæringsinstitusjonTjeneste, perioderTilVurderingTjenesteMock, vurdertOpplæringRepository, uttakPerioderGrunnlagRepository));
@@ -96,6 +92,9 @@ class VurderInstitusjonStegTest {
         when(perioderTilVurderingTjenesteMock.utled(kontekst.getBehandlingId(), VilkårType.NØDVENDIG_OPPLÆRING))
             .thenReturn(new TreeSet<>(List.of(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))));
 
+        when(perioderTilVurderingTjenesteMock.utled(kontekst.getBehandlingId(), VilkårType.GODKJENT_OPPLÆRINGSINSTITUSJON))
+            .thenReturn(new TreeSet<>(List.of(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))));
+
         PerioderFraSøknad perioderFraSøknad = new PerioderFraSøknad(journalpostId,
             List.of(new UttakPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), Duration.ofHours(7).plusMinutes(30))),
             Collections.emptyList(),
@@ -108,6 +107,7 @@ class VurderInstitusjonStegTest {
         uttakPerioderGrunnlagRepository.lagre(behandling.getId(), perioderFraSøknad);
         uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), new UttakPerioderHolder(Set.of(perioderFraSøknad)));
     }
+
 
     @Test
     void skalReturnereAksjonspunktNårDetManglerVurdering() {

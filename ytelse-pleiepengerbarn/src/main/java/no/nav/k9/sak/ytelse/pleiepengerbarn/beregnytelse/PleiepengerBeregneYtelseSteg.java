@@ -29,8 +29,6 @@ import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse.feriepenger.FinnFeriepengepåvirkendeFagsakerTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse.feriepenger.HentFeriepengeAndelerTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
@@ -46,8 +44,6 @@ public class PleiepengerBeregneYtelseSteg implements BeregneYtelseSteg {
     private BeregningsresultatRepository beregningsresultatRepository;
     private FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste;
     private Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste;
-    private Instance<FinnFeriepengepåvirkendeFagsakerTjeneste> feriepengepåvirkendeFagsakerTjenester;
-    private HentFeriepengeAndelerTjeneste hentFeriepengeAndelerTjeneste;
     private UttakTjeneste uttakTjeneste;
 
     protected PleiepengerBeregneYtelseSteg() {
@@ -59,18 +55,13 @@ public class PleiepengerBeregneYtelseSteg implements BeregneYtelseSteg {
                                         BeregningTjeneste kalkulusTjeneste,
                                         FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste,
                                         UttakTjeneste uttakTjeneste,
-                                        @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste,
-                                        @Any Instance<FinnFeriepengepåvirkendeFagsakerTjeneste> feriepengepåvirkendeFagsakerTjenester,
-                                        HentFeriepengeAndelerTjeneste hentFeriepengeAndelerTjeneste
-    ) {
+                                        @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste) {
         this.uttakTjeneste = uttakTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
         this.fastsettBeregningsresultatTjeneste = fastsettBeregningsresultatTjeneste;
         this.beregnFeriepengerTjeneste = beregnFeriepengerTjeneste;
-        this.feriepengepåvirkendeFagsakerTjenester = feriepengepåvirkendeFagsakerTjenester;
-        this.hentFeriepengeAndelerTjeneste = hentFeriepengeAndelerTjeneste;
     }
 
     @Override

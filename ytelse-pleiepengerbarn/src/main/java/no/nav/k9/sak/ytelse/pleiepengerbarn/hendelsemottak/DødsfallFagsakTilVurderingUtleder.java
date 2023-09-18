@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
@@ -86,7 +88,13 @@ public class DødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderingU
      * hindrer også revurdering hvis hendelsen kommer etter at behandlingen er oppdatert med ny data.
      */
     private boolean erNyInformasjonIHendelsen(Fagsak fagsak, AktørId aktør, LocalDate dødsdato, String hendelseId) {
-        Behandling behandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow();
+        Optional<Behandling> behandlingOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
+        if (behandlingOpt.isEmpty()) {
+            logger.info("Det er ingen behandling på fagsak. Ignorer hendelse");
+            return false;
+        }
+
+        Behandling behandling = behandlingOpt.get();
         PersonopplysningGrunnlagEntitet personopplysninger = personopplysningRepository.hentPersonopplysninger(behandling.getId());
         if (personopplysninger != null) {
             for (PersonopplysningEntitet personopplysning : personopplysninger.getGjeldendeVersjon().getPersonopplysninger()) {
@@ -104,8 +112,18 @@ public class DødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderingU
      * mot API-et fra PDL i tilfelle dødsdato skal være korrigert etter at hendelsen ble opprettet, for å unngå å feilaktig trigge revurdering.
      */
     private LocalDate hentOppdatertDødsdato(AktørId aktør, LocalDate dødsdatoFraHendelse, LocalDateTime hendelseOpprettetTidspunkt, String hendelseId) {
-        Personinfo personinfo = personinfoAdapter.hentPersoninfo(aktør);
-        LocalDate dødsdatoFraApi = personinfo.getDødsdato();
+        LocalDate dødsdatoFraApi;
+
+        try {
+            Personinfo personinfo = personinfoAdapter.hentPersoninfo(aktør);
+            dødsdatoFraApi = personinfo.getDødsdato();
+        } catch (NullPointerException e) {
+            if (Environment.current().isDev() && "Navbruker må ha navn".equals(e.getMessage())) {
+                logger.warn("Ignorerte dødshendelse for bruker som ikke har navn, skjer kun i dev. Hendelseid {}", hendelseId);
+                return null;
+            }
+            throw e;
+        }
 
         if (dødsdatoFraApi == null) {
             logger.warn("Mottok dødshendelse {} opprettet {}, men API-et fra PDL har ikke registrert dødsfall på aktuell person. Går videre med ingen dødsdato.", hendelseId, hendelseOpprettetTidspunkt);

@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -94,13 +95,13 @@ public class KandidaterForInntektgraderingTjeneste {
             bg.finnGrunnlagFor(og.getSkjæringstidspunkt()).ifPresent(bgp ->
                 koblingerÅSpørreMot.put(bgp.getEksternReferanse(), finnPeriode(dato, og))));
 
-        Map<UUID, List<DatoIntervallEntitet>> koblingMotVurderingsmap = kalkulusTjeneste.simulerTilkommetInntekt(koblingerÅSpørreMot, saksnummer);
-
+        final FagsakYtelseType ytelseType = sisteBehandling.getFagsak().getYtelseType();
+        Map<UUID, List<DatoIntervallEntitet>> koblingMotVurderingsmap = kalkulusTjeneste.simulerTilkommetInntekt(ytelseType, koblingerÅSpørreMot, saksnummer);
 
         return koblingMotVurderingsmap.values().stream().flatMap(Collection::stream)
             .collect(Collectors.toSet());
     }
-
+    
     private static DatoIntervallEntitet finnPeriode(LocalDate dato, VilkårPeriode og) {
         return dato.isAfter(og.getSkjæringstidspunkt()) ?
             DatoIntervallEntitet.fraOgMedTilOgMed(dato, og.getTom())

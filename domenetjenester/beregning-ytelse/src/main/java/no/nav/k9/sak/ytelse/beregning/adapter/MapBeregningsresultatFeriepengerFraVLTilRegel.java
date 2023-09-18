@@ -13,6 +13,7 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatPeriode;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforhold;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Inntektskategori;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerRegelModell;
+import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.InfotrygdFeriepengegrunnlag;
 import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.SaksnummerOgSisteBehandling;
 
 public class MapBeregningsresultatFeriepengerFraVLTilRegel {
@@ -21,20 +22,8 @@ public class MapBeregningsresultatFeriepengerFraVLTilRegel {
         //Skal ikke instansieres
     }
 
-    public static BeregningsresultatFeriepengerRegelModell mapFra(BeregningsresultatEntitet beregningsresultat, int antallDagerFeriepenger, boolean feriepengeopptjeningForHelg, boolean ubegrensedeDagerVedRefusjon) {
-        List<BeregningsresultatPeriode> beregningsresultatPerioder = mapBeregningsresultat(beregningsresultat);
-        Set<Inntektskategori> inntektskategorier = mapInntektskategorier(beregningsresultat);
 
-        return BeregningsresultatFeriepengerRegelModell.builder()
-            .medBeregningsresultatPerioder(beregningsresultatPerioder)
-            .medInntektskategorier(inntektskategorier)
-            .medAntallDagerFeriepenger(antallDagerFeriepenger)
-            .medFeriepengeopptjeningForHelg(feriepengeopptjeningForHelg)
-            .medUbegrensetFeriepengedagerVedRefusjon(ubegrensedeDagerVedRefusjon)
-            .build();
-    }
-
-    public static BeregningsresultatFeriepengerRegelModell mapFra(BeregningsresultatEntitet beregningsresultat, LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> andelerSomKanGiFeriepengerForRelevaneSaker, int antallDagerFeriepenger, boolean feriepengeopptjeningForHelg, boolean ubegrensedeDagerVedRefusjon) {
+    public static BeregningsresultatFeriepengerRegelModell mapFra(BeregningsresultatEntitet beregningsresultat, LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> andelerSomKanGiFeriepengerForRelevaneSaker, InfotrygdFeriepengegrunnlag infotrygdFeriepengegrunnlag, int antallDagerFeriepenger, boolean feriepengeopptjeningForHelg, boolean ubegrensedeDagerVedRefusjon) {
 
         List<BeregningsresultatPeriode> beregningsresultatPerioder = mapBeregningsresultat(beregningsresultat);
         Set<Inntektskategori> inntektskategorier = mapInntektskategorier(beregningsresultat);
@@ -42,6 +31,7 @@ public class MapBeregningsresultatFeriepengerFraVLTilRegel {
         return BeregningsresultatFeriepengerRegelModell.builder()
             .medBeregningsresultatPerioder(beregningsresultatPerioder)
             .medAndelerSomKanGiFeriepengerForRelevaneSaker(andelerSomKanGiFeriepengerForRelevaneSaker)
+            .medInfotrygdFeriepengegrunnlag(infotrygdFeriepengegrunnlag)
             .medInntektskategorier(inntektskategorier)
             .medAntallDagerFeriepenger(antallDagerFeriepenger)
             .medFeriepengeopptjeningForHelg(feriepengeopptjeningForHelg)
@@ -64,7 +54,15 @@ public class MapBeregningsresultatFeriepengerFraVLTilRegel {
     }
 
     private static BeregningsresultatPeriode mapBeregningsresultatPerioder(no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode inputPeriode) {
-        BeregningsresultatPeriode periode = new BeregningsresultatPeriode(inputPeriode.getBeregningsresultatPeriodeFom(), inputPeriode.getBeregningsresultatPeriodeTom(), inputPeriode.getInntektGraderingsprosent(), inputPeriode.getGraderingsfaktorTid(), inputPeriode.getGraderingsfaktorInntekt());
+        BeregningsresultatPeriode periode = new BeregningsresultatPeriode(
+                inputPeriode.getBeregningsresultatPeriodeFom(),
+            inputPeriode.getBeregningsresultatPeriodeTom(),
+            inputPeriode.getInntektGraderingsprosent(),
+            inputPeriode.getTotalUtbetalingsgradFraUttak(),
+            inputPeriode.getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(),
+            inputPeriode.getGraderingsfaktorTid(),
+            inputPeriode.getGraderingsfaktorInntekt()
+        );
         inputPeriode.getBeregningsresultatAndelList().forEach(andel -> mapBeregningsresultatAndel(andel, periode));
         return periode;
     }

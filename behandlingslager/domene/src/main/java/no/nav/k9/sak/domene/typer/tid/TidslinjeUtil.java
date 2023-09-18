@@ -64,7 +64,7 @@ public class TidslinjeUtil {
     }
 
     public static <T> NavigableMap<Year, LocalDateTimeline<T>> splittOgGruperPåÅrstall(LocalDateTimeline<T> tidslinje) {
-        if (tidslinje.isEmpty()){
+        if (tidslinje.isEmpty()) {
             return new TreeMap<>();
         }
         var tidsserieMedSplittedeSegmenter = tidslinje.splitAtRegular(tidslinje.getMinLocalDate().withDayOfYear(1), tidslinje.getMaxLocalDate(), Period.ofYears(1));
@@ -106,6 +106,21 @@ public class TidslinjeUtil {
             }
         }
         return new LocalDateSegment<>(dateInterval, resultat);
+    }
+
+    /**
+     * elementer som er i lhs eller rhs, men ikke i begge
+     */
+    public static <T> LocalDateSegment<Set<T>> forskjell(LocalDateInterval dateInterval, LocalDateSegment<Set<T>> lhs, LocalDateSegment<Set<T>> rhs) {
+        Set<T> lhsValues = lhs != null && lhs.getValue() != null ? lhs.getValue() : Set.of();
+        Set<T> rhsValues = rhs != null && rhs.getValue() != null ? rhs.getValue() : Set.of();
+        HashSet<T> forskjell = new HashSet<>();
+        lhsValues.stream().filter(v -> !rhsValues.contains(v)).forEach(forskjell::add);
+        rhsValues.stream().filter(v -> !lhsValues.contains(v)).forEach(forskjell::add);
+        if (forskjell.isEmpty()) {
+            return null; //fjerner segmentet
+        }
+        return new LocalDateSegment<>(dateInterval, forskjell);
     }
 
     public static <T> LocalDateTimeline<T> begrensTilAntallDager(LocalDateTimeline<T> tidslinje, int maxAntallDager, boolean tellHelg) {
