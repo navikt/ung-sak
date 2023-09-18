@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.typer.AktørId;
@@ -24,12 +25,15 @@ public class OverstyrUttakArbeidsforholdDto {
     private UttakArbeidType type;
 
     @JsonProperty(value = "orgnr")
+    @Valid
     private OrgNummer orgnr;
 
     @JsonProperty(value = "aktørId")
+    @Valid
     private AktørId aktørId;
 
     @JsonProperty(value = "arbeidsforholdId")
+    @Valid
     private InternArbeidsforholdRef internArbeidsforholdId;
 
     public OverstyrUttakArbeidsforholdDto() {

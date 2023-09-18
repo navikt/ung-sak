@@ -11,6 +11,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import no.nav.k9.sak.typer.Periode;
 
@@ -20,6 +22,8 @@ import no.nav.k9.sak.typer.Periode;
 public class OverstyrUttakPeriodeDto  {
 
     @JsonProperty(value = "id")
+    @Min(value = 999951) //sekvens begynner på 1M og tar 50 om gangen
+    @Max(value = Integer.MAX_VALUE)
     private Long id;
 
     @JsonProperty(value = "fom", required = true)
