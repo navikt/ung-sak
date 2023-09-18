@@ -5,6 +5,7 @@ create table if not exists overstyrt_uttak_periode
     fom               date                                   not null,
     tom               date                                   not null,
     soeker_uttaksgrad numeric(19, 4)                         null,
+    begrunnelse       varchar(4000)                          not null,
     aktiv             boolean      default false             not null,
     versjon           bigint       default 0                 not null,
     opprettet_av      varchar(20)  default 'vl'              not null,

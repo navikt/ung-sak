@@ -209,7 +209,7 @@ public class UttakRestTjeneste {
 
 
     private OverstyrUttakPeriodeDto map(LocalDateSegment<OverstyrtUttakPeriode> periode) {
-        return new OverstyrUttakPeriodeDto(periode.getValue().getId(), new Periode(periode.getFom(), periode.getTom()), periode.getValue().getSøkersUttaksgrad(), map(periode.getValue().getOverstyrtUtbetalingsgrad()));
+        return new OverstyrUttakPeriodeDto(periode.getValue().getId(), new Periode(periode.getFom(), periode.getTom()), periode.getValue().getSøkersUttaksgrad(), map(periode.getValue().getOverstyrtUtbetalingsgrad()), periode.getValue().getBegrunnelse());
     }
 
     private List<OverstyrUttakUtbetalingsgradDto> map(Set<OverstyrtUttakUtbetalingsgrad> overstyrtUtbetalingsgrad) {

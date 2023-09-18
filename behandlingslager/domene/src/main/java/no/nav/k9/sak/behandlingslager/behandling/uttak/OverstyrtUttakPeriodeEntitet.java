@@ -51,18 +51,22 @@ public class OverstyrtUttakPeriodeEntitet extends BaseEntitet {
     @JoinColumn(name = "overstyrt_uttak_periode_id", nullable = false, updatable = false)
     private List<OverstyrtUttakUtbetalingsgradEntitet> overstyrtUtbetalingsgrad;
 
+    @Column(name = "begrunnelse")
+    private String begrunnelse;
+
     OverstyrtUttakPeriodeEntitet() {
     }
 
-    public OverstyrtUttakPeriodeEntitet(Long behandlingId, DatoIntervallEntitet periode, BigDecimal søkersUttaksgrad, List<OverstyrtUttakUtbetalingsgradEntitet> overstyrtUtbetalingsgrad) {
+    public OverstyrtUttakPeriodeEntitet(Long behandlingId, DatoIntervallEntitet periode, BigDecimal søkersUttaksgrad, List<OverstyrtUttakUtbetalingsgradEntitet> overstyrtUtbetalingsgrad, String begrunnelse) {
         this.behandlingId = behandlingId;
         this.periode = periode;
         this.søkersUttaksgrad = søkersUttaksgrad;
         this.overstyrtUtbetalingsgrad = overstyrtUtbetalingsgrad;
+        this.begrunnelse = begrunnelse;
     }
 
     public OverstyrtUttakPeriodeEntitet kopiMedNyPeriode(DatoIntervallEntitet nyPeriode) {
-        return new OverstyrtUttakPeriodeEntitet(behandlingId, nyPeriode, søkersUttaksgrad, overstyrtUtbetalingsgrad.stream().map(OverstyrtUttakUtbetalingsgradEntitet::new).toList());
+        return new OverstyrtUttakPeriodeEntitet(behandlingId, nyPeriode, søkersUttaksgrad, overstyrtUtbetalingsgrad.stream().map(OverstyrtUttakUtbetalingsgradEntitet::new).toList(), begrunnelse);
     }
 
     public BigDecimal getSøkersUttaksgrad() {
@@ -87,5 +91,9 @@ public class OverstyrtUttakPeriodeEntitet extends BaseEntitet {
 
     public Long getId() {
         return id;
+    }
+
+    public String getBegrunnelse() {
+        return begrunnelse;
     }
 }

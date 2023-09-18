@@ -41,7 +41,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
         <felles.version>2.0.7</felles.version>
-        <swagger.version>2.2.3</swagger.version>
+        <swagger.version>2.2.15</swagger.version>
         <junit.version>5.10.0</junit.version>
         <k9format.version>9.0.2</k9format.version>
         <jackson.version>2.15.2</jackson.version>
@@ -82,7 +82,6 @@
                 <artifactId>hibernate-validator</artifactId>
                 <version>8.0.1.Final</version>
             </dependency>
-
             <dependency>
                 <!-- Importer først for å sikre samme avhengigheter gjennom hele. -->
                 <groupId>no.nav.k9.felles</groupId>
