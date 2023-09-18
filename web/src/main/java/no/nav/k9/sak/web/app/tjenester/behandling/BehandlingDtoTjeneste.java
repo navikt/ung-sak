@@ -210,6 +210,7 @@ public class BehandlingDtoTjeneste {
         // Brev
         dto.leggTil(post(BrevRestTjeneste.BREV_BESTILL_PATH, "brev-bestill", new BestillBrevDto()));
     }
+    
 
     public List<BehandlingDto> lagBehandlingDtoer(List<Behandling> behandlinger) {
         if (behandlinger.isEmpty()) {

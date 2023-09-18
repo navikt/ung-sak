@@ -28,11 +28,11 @@
 		<!-- Integrasjon avhengigheter -->
         <dependency>
             <groupId>no.nav.k9</groupId>
-            <artifactId>soknad-jakarta</artifactId>
+            <artifactId>soknad</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.k9</groupId>
-            <artifactId>innsyn-jakarta</artifactId>
+            <artifactId>innsyn</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.k9.felles.integrasjon</groupId>

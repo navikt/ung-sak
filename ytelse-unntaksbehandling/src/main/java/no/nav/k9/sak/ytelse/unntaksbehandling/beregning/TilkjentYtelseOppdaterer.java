@@ -18,6 +18,7 @@ import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.FunksjonellFeil;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -25,6 +26,7 @@ import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
@@ -60,6 +62,7 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
     private VilkårResultatRepository vilkårResultatRepository;
     private ArbeidsgiverValidator arbeidsgiverValidator;
     private HistorikkTjenesteAdapter historikkAdapter;
+    private boolean brukUtbetalingsgradOppdrag;
 
     TilkjentYtelseOppdaterer() {
         // for CDI proxy
@@ -68,7 +71,8 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
     @Inject
     public TilkjentYtelseOppdaterer(BehandlingRepositoryProvider repositoryProvider,
                                     @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste,
-                                    ArbeidsgiverValidator arbeidsgiverValidator, HistorikkTjenesteAdapter historikkAdapter
+                                    ArbeidsgiverValidator arbeidsgiverValidator, HistorikkTjenesteAdapter historikkAdapter,
+                                    @KonfigVerdi(value = "ENABLE_UTBETALINGSGRAD_OPPDRAG", defaultVerdi = "false") boolean brukUtbetalingsgradOppdrag
     ) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
@@ -76,6 +80,7 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.arbeidsgiverValidator = arbeidsgiverValidator;
         this.historikkAdapter = historikkAdapter;
+        this.brukUtbetalingsgradOppdrag = brukUtbetalingsgradOppdrag;
     }
 
     @Override
@@ -92,7 +97,7 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
 
         BeregningsresultatVerifiserer.verifiserBeregningsresultat(nyttBeregningsresultat);
 
-        getFeriepengerTjeneste(behandling).ifPresent(tjeneste -> tjeneste.beregnFeriepenger(nyttBeregningsresultat));
+        getFeriepengerTjeneste(behandling).ifPresent(tjeneste -> tjeneste.beregnFeriepenger(BehandlingReferanse.fra(behandling), nyttBeregningsresultat));
         beregningsresultatRepository.lagre(behandling, nyttBeregningsresultat);
 
         opprettHistorikkinnslag(behandling, gammeltBeregningsresultat, nyttBeregningsresultat);
@@ -132,6 +137,7 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
             .medDagsats(dagsats)
             .medDagsatsFraBg(0) // Settes kun senere dersom aksjonspunkt for vurdering av tilbaketrekk
             .medUtbetalingsgrad(utbetalingsgrad)
+            .medUtbetalingsgradOppdrag(brukUtbetalingsgradOppdrag ? utbetalingsgrad : null) //kontekst er unntaksløypa, forventer ikke at saksbehandler skiller utbetalingsgradene
             .medArbeidsgiver(arbeidsgiver)
             .medArbeidsforholdRef(InternArbeidsforholdRef.nullRef())
             .medAktivitetStatus(aktivitetStatusFor(tyAndel.getInntektskategori()))

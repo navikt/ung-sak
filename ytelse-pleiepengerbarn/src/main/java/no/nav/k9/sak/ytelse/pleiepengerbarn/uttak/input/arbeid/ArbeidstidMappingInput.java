@@ -26,6 +26,7 @@ public class ArbeidstidMappingInput {
     private OpptjeningResultat opptjeningResultat;
     private Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> inaktivTidslinje;
     private Map<Saksnummer, Set<LocalDate>> sakerSomMåSpesialhåndteres = new HashMap<>();
+    private Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> tilkommetAktivitetsperioder  = new HashMap<>();
     private InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag;
     private DatoIntervallEntitet utvidetPeriodeSomFølgeAvDødsfall;
 
@@ -141,5 +142,14 @@ public class ArbeidstidMappingInput {
 
     public AktørId getBruker() {
         return bruker;
+    }
+    
+    public Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> getTilkommetAktivitetsperioder() {
+        return tilkommetAktivitetsperioder;
+    }
+    
+    public ArbeidstidMappingInput medTilkommetAktivitetsperioder(Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> tilkommetAktivitetsperioder) {
+        this.tilkommetAktivitetsperioder = tilkommetAktivitetsperioder;
+        return this;
     }
 }

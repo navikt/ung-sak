@@ -9,6 +9,9 @@ jobs:
   promote:
     if: contains(github.event.comment.html_url, '/issues/') && startsWith( github.event.comment.body, '/promote ' )
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
     steps:
       - name: Acknowledge command
         uses: actions/github-script@v6
@@ -35,13 +38,16 @@ jobs:
             });
       - name: Set variabler for deploy
         shell: bash
+        env:
+          TAG_INPUT: ${{ github.event.issue.title }}
+          CLUSTER_INPUT: ${{ github.event.comment.body }}
         run: |
-          echo "TAG=$(echo '${{ github.event.issue.title }}' | awk '{print $NF}' | awk -F- '{print $NF}')" >> $GITHUB_ENV
-          echo "IMAGE=$IMAGE_BASE:$(echo '${{  github.event.issue.title }}' | awk '{print $NF}')" >> $GITHUB_ENV
-          echo "CLUSTER=$(echo '${{github.event.comment.body}}' | cut -d' ' -f2)" >> $GITHUB_ENV
+          echo "TAG=$(echo $TAG_INPUT | awk '{print $NF}' | awk -F- '{print $NF}')" >> $GITHUB_ENV
+          echo "IMAGE=$IMAGE_BASE:$(echo $TAG_INPUT | awk '{print $NF}')" >> $GITHUB_ENV
+          echo "CLUSTER=$(echo $CLUSTER_INPUT | cut -d' ' -f2)" >> $GITHUB_ENV
 
       - name: Sjekk ut kode
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ steps.issue_comment.outputs.sha }}
 

@@ -17,10 +17,13 @@ import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.SaksnummerOgSisteBehand
 public class BeregningsresultatFeriepengerRegelModell {
     private Set<Inntektskategori> inntektskategorier;
     private List<BeregningsresultatPeriode> beregningsresultatPerioder;
+    private List<FeriepengekorrigeringInfotrygd> feriepengekorrigeringInfotrygd;
     private int antallDagerFeriepenger;
     private boolean feriepengeopptjeningForHelg;
     private boolean ubegrensetFeriepengedagerVedRefusjon;
     private List<PeriodeMedSakOgBehandling> andelerSomKanGiFeriepengerForRelevaneSaker;
+
+    private InfotrygdFeriepengegrunnlag infotrygdFeriepengegrunnlag;
 
     private BeregningsresultatFeriepengerRegelModell() {
         //tom konstruktør
@@ -32,6 +35,14 @@ public class BeregningsresultatFeriepengerRegelModell {
 
     public List<BeregningsresultatPeriode> getBeregningsresultatPerioder() {
         return beregningsresultatPerioder;
+    }
+
+    public List<FeriepengekorrigeringInfotrygd> getFeriepengekorrigeringInfotrygd() {
+        return feriepengekorrigeringInfotrygd;
+    }
+
+    public void setFeriepengekorrigeringInfotrygd(List<FeriepengekorrigeringInfotrygd> feriepengekorrigeringInfotrygd) {
+        this.feriepengekorrigeringInfotrygd = feriepengekorrigeringInfotrygd;
     }
 
     @JsonIgnore
@@ -46,8 +57,13 @@ public class BeregningsresultatFeriepengerRegelModell {
         return andelerSomKanGiFeriepengerForRelevaneSaker;
     }
 
+    public InfotrygdFeriepengegrunnlag getInfotrygdFeriepengegrunnlag() {
+        return infotrygdFeriepengegrunnlag;
+    }
+
     public record PeriodeMedSakOgBehandling(LocalDateInterval periode, Set<SaksnummerOgSisteBehandling> sak) {
     }
+
 
     public int getAntallDagerFeriepenger() {
         return antallDagerFeriepenger;
@@ -94,6 +110,11 @@ public class BeregningsresultatFeriepengerRegelModell {
             kladd.andelerSomKanGiFeriepengerForRelevaneSaker = feriepengerTilkjentForRelevanteSaker.stream()
                 .map(segment -> new PeriodeMedSakOgBehandling(segment.getLocalDateInterval(), segment.getValue()))
                 .toList();
+            return this;
+        }
+
+        public Builder medInfotrygdFeriepengegrunnlag(InfotrygdFeriepengegrunnlag infotrygdFeriepengegrunnlag) {
+            kladd.infotrygdFeriepengegrunnlag = infotrygdFeriepengegrunnlag;
             return this;
         }
 

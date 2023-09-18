@@ -5,7 +5,6 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
-import java.util.Set;
 import java.util.UUID;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -25,14 +24,11 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.behandling.steg.beregnytelse.BeregneYtelseSteg;
 import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse.feriepenger.FinnFeriepengepåvirkendeFagsakerTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse.feriepenger.HentFeriepengeAndelerTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
@@ -48,8 +44,6 @@ public class PleiepengerBeregneYtelseSteg implements BeregneYtelseSteg {
     private BeregningsresultatRepository beregningsresultatRepository;
     private FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste;
     private Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste;
-    private Instance<FinnFeriepengepåvirkendeFagsakerTjeneste> feriepengepåvirkendeFagsakerTjenester;
-    private HentFeriepengeAndelerTjeneste hentFeriepengeAndelerTjeneste;
     private UttakTjeneste uttakTjeneste;
 
     protected PleiepengerBeregneYtelseSteg() {
@@ -61,18 +55,13 @@ public class PleiepengerBeregneYtelseSteg implements BeregneYtelseSteg {
                                         BeregningTjeneste kalkulusTjeneste,
                                         FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste,
                                         UttakTjeneste uttakTjeneste,
-                                        @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste,
-                                        @Any Instance<FinnFeriepengepåvirkendeFagsakerTjeneste> feriepengepåvirkendeFagsakerTjenester,
-                                        HentFeriepengeAndelerTjeneste hentFeriepengeAndelerTjeneste
-    ) {
+                                        @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste) {
         this.uttakTjeneste = uttakTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
         this.fastsettBeregningsresultatTjeneste = fastsettBeregningsresultatTjeneste;
         this.beregnFeriepengerTjeneste = beregnFeriepengerTjeneste;
-        this.feriepengepåvirkendeFagsakerTjenester = feriepengepåvirkendeFagsakerTjenester;
-        this.hentFeriepengeAndelerTjeneste = hentFeriepengeAndelerTjeneste;
     }
 
     @Override
@@ -95,11 +84,7 @@ public class PleiepengerBeregneYtelseSteg implements BeregneYtelseSteg {
 
         // Beregn feriepenger
         var feriepengerTjeneste = BeregnFeriepengerTjeneste.finnTjeneste(beregnFeriepengerTjeneste, ref.getFagsakYtelseType());
-
-        var feriepengepåvirkendeFagsakerTjeneste = FinnFeriepengepåvirkendeFagsakerTjeneste.finnTjeneste(feriepengepåvirkendeFagsakerTjenester, ref.getFagsakYtelseType());
-        Set<Fagsak> påvirkendeFagsaker = feriepengepåvirkendeFagsakerTjeneste.finnSakerSomPåvirkerFeriepengerFor(behandling.getFagsak());
-        var andelerSomKanGiFeriepengerForRelevaneSaker = hentFeriepengeAndelerTjeneste.finnAndelerSomKanGiFeriepenger(påvirkendeFagsaker);
-        feriepengerTjeneste.beregnFeriepenger(beregningsresultat, andelerSomKanGiFeriepengerForRelevaneSaker);
+        feriepengerTjeneste.beregnFeriepenger(ref, beregningsresultat);
 
         // Lagre beregningsresultat
         beregningsresultatRepository.lagre(behandling, beregningsresultat);

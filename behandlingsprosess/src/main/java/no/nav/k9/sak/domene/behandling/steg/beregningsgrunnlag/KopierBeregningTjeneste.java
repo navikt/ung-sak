@@ -110,7 +110,7 @@ public class KopierBeregningTjeneste {
     /**
      * Kopierer grunnlag og vilkårsresultat for forlengelser
      *
-     * @param ref      behandlingreferanse
+     * @param ref behandlingreferanse
      */
     private void kopierGrunnlagForForlengelseperioder(BehandlingReferanse ref) {
         var perioderPrStartpunkt = kalkulusStartpunktUtleder.utledPerioderPrStartpunkt(ref);

@@ -1,39 +1,28 @@
 package no.nav.k9.sak.web.app.tjenester.kravperioder;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.NavigableSet;
-import java.util.Set;
-import java.util.TreeSet;
-
-import org.junit.jupiter.api.Test;
-
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.kontrakt.krav.PeriodeMedÅrsaker;
-import no.nav.k9.sak.kontrakt.krav.PerioderMedÅrsakPerKravstiller;
-import no.nav.k9.sak.kontrakt.krav.RolleType;
-import no.nav.k9.sak.kontrakt.krav.StatusForPerioderPåBehandling;
-import no.nav.k9.sak.kontrakt.krav.ÅrsakTilVurdering;
-import no.nav.k9.sak.perioder.KravDokument;
+import no.nav.k9.sak.kontrakt.krav.*;
 import no.nav.k9.sak.perioder.KravDokumentType;
-import no.nav.k9.sak.perioder.PeriodeMedÅrsak;
 import no.nav.k9.sak.perioder.SøktPeriode;
-import no.nav.k9.sak.perioder.VurdertSøktPeriode;
+import no.nav.k9.sak.perioder.*;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Periode;
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 class UtledStatusPåPerioderTjenesteTest {
 
@@ -189,6 +178,54 @@ class UtledStatusPåPerioderTjenesteTest {
         assertThat(perioderMedÅrsakPerKravstiller).hasSize(0);
 
     }
+
+    @Test
+    void im_og_søknad_kombinasjon_omp() {
+        var førstegangsscenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.OMSORGSPENGER);
+        Behandling behandling = førstegangsscenario
+            .medBehandlingType(BehandlingType.REVURDERING)
+            .lagMocked();
+
+
+        KravDokument kravDokTilkommetBehandling_im = new KravDokument(new JournalpostId("3"), NÅ, KravDokumentType.INNTEKTSMELDING);
+        KravDokument kravDokTilkommetBehandling_søknad = new KravDokument(new JournalpostId("2"), NÅ, KravDokumentType.SØKNAD);
+        KravDokument kravDokTidligereBehandling = new KravDokument(new JournalpostId("1"), NÅ, KravDokumentType.INNTEKTSMELDING);
+
+        LocalDate fom = IDAG.minusMonths(1);
+        LocalDate tom = IDAG;
+
+
+
+        var kravdokumenterMedPeriode = Map.of(
+            kravDokTilkommetBehandling_im, List.of(byggSøktPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), ARBEIDSGIVER1)),
+            kravDokTilkommetBehandling_søknad, List.of(byggSøktPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))),
+            kravDokTidligereBehandling, List.of(byggSøktPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), ARBEIDSGIVER1))
+        );
+
+        var perioderTilVurdering = new TreeSet<>(Set.of(DatoIntervallEntitet.fra(fom, tom)));
+
+        NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles = new TreeSet<>();
+
+        var revurderingPerioderFraAndreParter = new TreeSet<PeriodeMedÅrsak>();
+
+        StatusForPerioderPåBehandling svar = utledStatusPåPerioderTjeneste.utled(
+            behandling,
+            new PåTversAvHelgErKantIKantVurderer(),
+            Set.of(kravDokTilkommetBehandling_im, kravDokTilkommetBehandling_søknad),
+            kravdokumenterMedPeriode,
+            perioderTilVurdering,
+            perioderSomSkalTilbakestilles,
+            revurderingPerioderFraAndreParter
+        );
+
+        assertThat(svar.getPerioderMedÅrsak().get(0).getPeriode()).isEqualTo(new Periode(fom, tom));
+        assertThat(svar.getPerioderMedÅrsak().get(0).getÅrsaker()).containsOnly(ÅrsakTilVurdering.ENDRING_FRA_BRUKER);
+
+        var perKravstiller = svar.getPerioderMedÅrsakPerKravstiller();
+        assertThat(perKravstiller).hasSize(2);
+        assertThat(perKravstiller).extracting(PerioderMedÅrsakPerKravstiller::kravstiller).contains(RolleType.BRUKER, RolleType.ARBEIDSGIVER);
+    }
+
 
     @Test
     void samme_søknad_inntektsmelding_revurdering() {

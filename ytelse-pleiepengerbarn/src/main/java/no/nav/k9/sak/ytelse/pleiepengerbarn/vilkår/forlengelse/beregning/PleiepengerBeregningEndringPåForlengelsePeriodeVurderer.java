@@ -16,12 +16,14 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingskontroll.VilkårTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -44,6 +46,7 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
         BehandlingÅrsakType.RE_SATS_REGULERING,
         BehandlingÅrsakType.RE_ENDRING_BEREGNINGSGRUNNLAG,
         BehandlingÅrsakType.RE_KLAGE_MED_END_INNTEKT,
+        BehandlingÅrsakType.RE_KLAGE_NY_INNH_LIGNET_INNTEKT,
         BehandlingÅrsakType.RE_OPPLYSNINGER_OM_BEREGNINGSGRUNNLAG);
 
     private BehandlingRepository behandlingRepository;
@@ -52,6 +55,8 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
     private ProsessTriggereRepository prosessTriggereRepository;
     private Instance<EndringPåForlengelsePeriodeVurderer> endringsVurderere;
     private HarEndretKompletthetVurderer harEndretKompletthetVurderer;
+
+    private boolean brukIdTilInntektsmeldingfiltreringEnabled;
 
     PleiepengerBeregningEndringPåForlengelsePeriodeVurderer() {
     }
@@ -62,13 +67,15 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
                                                                    ProsessTriggereRepository prosessTriggereRepository,
                                                                    @Any Instance<EndringPåForlengelsePeriodeVurderer> endringsVurderere,
                                                                    @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning,
-                                                                   HarEndretKompletthetVurderer harEndretKompletthetVurderer) {
+                                                                   HarEndretKompletthetVurderer harEndretKompletthetVurderer,
+                                                                   @KonfigVerdi(value = "PSB_FILTRER_IM_PAA_BEHANDLING_ID", defaultVerdi = "false") boolean brukIdTilInntektsmeldingfiltreringEnabled) {
         this.behandlingRepository = behandlingRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
         this.prosessTriggereRepository = prosessTriggereRepository;
         this.endringsVurderere = endringsVurderere;
         this.harEndretKompletthetVurderer = harEndretKompletthetVurderer;
+        this.brukIdTilInntektsmeldingfiltreringEnabled = brukIdTilInntektsmeldingfiltreringEnabled;
     }
 
     @Override
@@ -102,9 +109,8 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
             .filter(it -> Objects.equals(Brevkode.INNTEKTSMELDING, it.getType()))
             .toList();
 
-        var inntektsmeldingerForrigeVedtak = inntektsmeldinger.stream()
-            .filter(it -> finnEksaktMottattTidspunkt(it, mottatteInntektsmeldinger).isBefore(originalBehandling.getAvsluttetDato()))
-            .toList();
+        var inntektsmeldingerForrigeVedtak = finnInntektsmeldingerFraForrigeVedtak(referanse, originalBehandling, inntektsmeldinger, mottatteInntektsmeldinger);
+
 
         var relevanteInntektsmeldingerForrigeVedtak = utledRelevanteForPeriode(BehandlingReferanse.fra(originalBehandling), inntektsmeldingerForrigeVedtak, periode);
         var relevanteInntektsmeldinger = utledRelevanteForPeriode(referanse, inntektsmeldinger, periode);
@@ -114,6 +120,18 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
             .collect(Collectors.toSet()), relevanteInntektsmeldinger.stream()
             .map(Inntektsmelding::getJournalpostId)
             .collect(Collectors.toSet()));
+    }
+
+    private List<Inntektsmelding> finnInntektsmeldingerFraForrigeVedtak(BehandlingReferanse referanse, Behandling originalBehandling, Collection<Inntektsmelding> inntektsmeldinger, List<MottattDokument> mottatteInntektsmeldinger) {
+        if (brukIdTilInntektsmeldingfiltreringEnabled) {
+            return inntektsmeldinger.stream()
+                .filter(it -> erInntektsmeldingITidligereBehandling(it, referanse.getBehandlingId(), mottatteInntektsmeldinger))
+                .toList();
+        }
+
+        return inntektsmeldinger.stream()
+            .filter(it -> finnEksaktMottattTidspunkt(it, mottatteInntektsmeldinger).isBefore(originalBehandling.getAvsluttetDato()))
+            .toList();
     }
 
     boolean harEndretSeg(Set<JournalpostId> forrigeVedtakJournalposter, Set<JournalpostId> denneBehandlingJournalposter) {
@@ -129,6 +147,12 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
         var relevanteImTjeneste = InntektsmeldingerRelevantForBeregning.finnTjeneste(inntektsmeldingerRelevantForBeregning, referanse.getFagsakYtelseType());
         var inntektsmeldingBegrenset = relevanteImTjeneste.begrensSakInntektsmeldinger(referanse, inntektsmeldinger, periode);
         return relevanteImTjeneste.utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldingBegrenset, periode);
+    }
+
+    private boolean erInntektsmeldingITidligereBehandling(Inntektsmelding inntektsmelding, Long behandlingId, List<MottattDokument> mottatteInntektsmeldinger) {
+        return mottatteInntektsmeldinger.stream()
+            .filter(it -> Objects.equals(it.getJournalpostId(), inntektsmelding.getJournalpostId()))
+            .anyMatch(md -> md.getBehandlingId() != behandlingId);
     }
 
     private LocalDateTime finnEksaktMottattTidspunkt(Inntektsmelding inntektsmelding, List<MottattDokument> mottatteInntektsmeldinger) {
