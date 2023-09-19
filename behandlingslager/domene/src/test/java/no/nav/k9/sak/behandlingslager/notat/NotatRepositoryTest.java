@@ -95,7 +95,7 @@ class NotatRepositoryTest {
     }
 
     @Test
-    void skalFeileHvisEndrerPåGammelVersjon() {
+    void skalFeileHvisEndrerPåUtdatertVersjon() {
         var fagsak = lagFagsakMedPleietrengende();
         String tekst = "en tekst med litt notater på aktør";
 
@@ -115,9 +115,10 @@ class NotatRepositoryTest {
         //Klient 2 endrer også samme notatet og rekker å lagre
         var notatKopi2 = notatRepository.hentForSakOgAktør(fagsak).get(0);
         notatKopi2.nyTekst("endring som går bra");
-        notatRepository.lagre(notatKopi2);
+        notatRepository.lagre(notatKopi2); //persist + flush
+        entityManager.detach(notatKopi2);
 
-        //Klient 1 forsøker å lagre over på utdatert versjon
+        //Klient 1 forsøker å lagre utdatert versjon
         assertThatThrownBy(() -> {
             entityManager.merge(notatKopi1);
             entityManager.flush();
