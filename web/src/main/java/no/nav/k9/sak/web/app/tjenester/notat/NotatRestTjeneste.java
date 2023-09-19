@@ -42,6 +42,7 @@ import no.nav.k9.sak.kontrakt.notat.NotatDto;
 import no.nav.k9.sak.kontrakt.notat.OpprettNotatDto;
 import no.nav.k9.sak.kontrakt.notat.SkjulNotatDto;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
 @Path("")
@@ -70,7 +71,7 @@ public class NotatRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response hent(
         @NotNull @QueryParam(SaksnummerDto.NAME) @Parameter(description = "Saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummer,
-        @QueryParam("notatId") @Parameter(description = "Notat uuid") UUID notatId
+        @QueryParam("notatId") @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) @Parameter(description = "Notat uuid") UUID notatId
     ) {
         if (notatId != null) {
             NotatEntitet notat = hentNotat(saksnummer.getVerdi(), notatId);
@@ -113,8 +114,10 @@ public class NotatRestTjeneste {
     ) {
         var notat = hentNotat(endreNotatDto.saksnummer().getSaksnummer(), endreNotatDto.uuid());
 
-        notat.nyTekst(endreNotatDto.notatTekst());
-        notatRepository.lagre(notat);
+        if (!notat.getNotatTekst().equals(endreNotatDto.notatTekst())) {
+            notat.nyTekst(endreNotatDto.notatTekst());
+            notatRepository.lagre(notat);
+        }
 
         return Response.status(Response.Status.OK).entity(mapDto(notat)).build();
 
@@ -131,8 +134,11 @@ public class NotatRestTjeneste {
         @NotNull @Parameter(description = "Notat som skal skjules") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SkjulNotatDto skjulNotatDto
     ) {
         var notat = hentNotat(skjulNotatDto.saksnummer().getSaksnummer(), skjulNotatDto.uuid());
-        notat.skjul(skjulNotatDto.skjul());
-        notatRepository.lagre(notat);
+        if (notat.isSkjult() != skjulNotatDto.skjul()) {
+            notat.skjul(skjulNotatDto.skjul());
+            notatRepository.lagre(notat);
+        }
+
         return  Response.status(Response.Status.OK).entity(mapDto(notat)).build();
 
     }
@@ -141,16 +147,16 @@ public class NotatRestTjeneste {
     private NotatEntitet hentNotat(Saksnummer saksnummer, UUID notatUuid) {
         var notater = hentAlle(saksnummer);
 
-        if (notater.isEmpty()) {
-            throw NotatFeil.FACTORY.fantIkkeNotat().toException();
-        }
-
         var notat = notater.stream()
-            .filter(it -> it.getUuid() == notatUuid)
+            .filter(it -> it.getUuid().equals(notatUuid))
             .toList();
 
         if (notat.size() > 1) {
             throw new IllegalStateException("Utvilkerfeil: Flere notater med samme id");
+        }
+
+        if (notat.isEmpty()) {
+            throw NotatFeil.FACTORY.fantIkkeNotat().toException();
         }
 
         return notat.get(0);
