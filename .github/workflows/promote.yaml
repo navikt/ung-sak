@@ -9,6 +9,9 @@ jobs:
   promote:
     if: contains(github.event.comment.html_url, '/issues/') && startsWith( github.event.comment.body, '/promote ' )
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
     steps:
       - name: Acknowledge command
         uses: actions/github-script@v6
@@ -44,7 +47,7 @@ jobs:
           echo "CLUSTER=$(echo $CLUSTER_INPUT | cut -d' ' -f2)" >> $GITHUB_ENV
 
       - name: Sjekk ut kode
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ steps.issue_comment.outputs.sha }}
 

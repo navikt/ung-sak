@@ -22,6 +22,7 @@ public class BeregningsresultatAndel {
     private Long dagsats;
     private BigDecimal stillingsprosent = BigDecimal.valueOf(100);
     private BigDecimal utbetalingsgrad = BigDecimal.valueOf(100);
+    private BigDecimal utbetalingsgradOppdrag;
     private Long dagsatsFraBg;
     private AktivitetStatus aktivitetStatus;
     private Inntektskategori inntektskategori;
@@ -38,7 +39,7 @@ public class BeregningsresultatAndel {
         return brukerErMottaker;
     }
 
-    public MottakerType getMottakerType(){
+    public MottakerType getMottakerType() {
         return brukerErMottaker ? MottakerType.BRUKER : MottakerType.ARBEIDSGIVER;
     }
 
@@ -52,6 +53,10 @@ public class BeregningsresultatAndel {
 
     public BigDecimal getUtbetalingsgrad() {
         return utbetalingsgrad;
+    }
+
+    public BigDecimal getUtbetalingsgradOppdrag() {
+        return utbetalingsgradOppdrag;
     }
 
     public Long getDagsatsFraBg() {
@@ -86,8 +91,8 @@ public class BeregningsresultatAndel {
     public String toString() {
         String arbeidsgiverId = arbeidsforhold != null
             ? (arbeidsforhold.getReferanseType() == ReferanseType.AKTØR_ID
-                ? "(personlig arbeidsgiver)" // tar ikke med personidentifiserende/sensitive opplysninger
-                : arbeidsforhold.getIdentifikator())
+            ? "(personlig arbeidsgiver)" // tar ikke med personidentifiserende/sensitive opplysninger
+            : arbeidsforhold.getIdentifikator())
             : null;
 
         return "BeregningsresultatAndel{" +
@@ -139,6 +144,11 @@ public class BeregningsresultatAndel {
 
         public Builder medUtbetalingssgrad(BigDecimal utbetalingsgrad) {
             beregningsresultatAndelMal.utbetalingsgrad = utbetalingsgrad;
+            return this;
+        }
+
+        public Builder medUtbetalingssgradOppdrag(BigDecimal utbetalingsgradOppdrag) {
+            beregningsresultatAndelMal.utbetalingsgradOppdrag = utbetalingsgradOppdrag;
             return this;
         }
 

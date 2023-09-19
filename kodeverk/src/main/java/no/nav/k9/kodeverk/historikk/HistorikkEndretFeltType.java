@@ -75,6 +75,7 @@ public enum HistorikkEndretFeltType implements Kodeverdi {
     ER_SÆRLIGE_GRUNNER_TIL_REDUKSJON("ER_SÆRLIGE_GRUNNER_TIL_REDUKSJON", "Er det særlige grunner til reduksjon"),
     ER_VILKÅRENE_TILBAKEKREVING_OPPFYLT("ER_VILKÅRENE_TILBAKEKREVING_OPPFYLT", "Er vilkårene for tilbakekreving oppfylt"),
     FASTSETT_VIDERE_BEHANDLING("FASTSETT_VIDERE_BEHANDLING", "Fastsett videre behandling"),
+    VIRKNINGSDATO_UTTAK_NYE_REGLER("VIRKNINGSDATO_UTTAK_NYE_REGLER", "Virkningsdato"),
     TILBAKETREKK("TILBAKETREKK", "Tilbaketrekk"),
 
     /** Vilkår */

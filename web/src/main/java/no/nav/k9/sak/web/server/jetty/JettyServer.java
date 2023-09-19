@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.server.jetty;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.jetty.jaas.JAASLoginService;
 import org.eclipse.jetty.plus.jndi.EnvEntry;
@@ -43,9 +44,14 @@ import no.nav.k9.sak.web.server.jetty.db.EnvironmentClass;
 
 public class JettyServer {
 
+    public static final AtomicBoolean KILL_APPLICATION = new AtomicBoolean(false);
+
     private static final Environment ENV = Environment.current();
     private static final Logger log = LoggerFactory.getLogger(JettyServer.class);
     private AppKonfigurasjon appKonfigurasjon;
+
+    private static byte[] EMERGENCY_HEAP_SPACE = new byte[8192000];
+
 
     public JettyServer() {
         this(new JettyWebKonfigurasjon());
@@ -60,7 +66,9 @@ public class JettyServer {
     }
 
     public static void main(String[] args) throws Exception {
-        JettyServer jettyServer;
+
+
+        final JettyServer jettyServer;
 
         if (args.length > 0) {
             int serverPort = Integer.parseUnsignedInt(args[0]);
@@ -68,7 +76,26 @@ public class JettyServer {
         } else {
             jettyServer = new JettyServer();
         }
+
+        taNedApplikasjonVedError();
+
         jettyServer.bootStrap();
+    }
+
+    private static void taNedApplikasjonVedError() {
+        String restartAppOnError = System.getenv("RESTART_APP_ON_ERROR");
+        if (Boolean.parseBoolean(restartAppOnError)) {
+            Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+                // Frigir minne for å sikre at vi kan logge exception
+                EMERGENCY_HEAP_SPACE = null;
+                log.error("Uncaught exception for thread " + t.getId(), e);
+
+                if (e instanceof Error) {
+                    KILL_APPLICATION.set(true);
+                }
+
+            });
+        }
     }
 
     private void start(AppKonfigurasjon appKonfigurasjon) throws Exception {
@@ -177,6 +204,8 @@ public class JettyServer {
         jerseyHolder.addStartupClasses(getJaxRsApplicationClasses());
 
         webAppContext.setThrowUnavailableOnStartupException(true);
+
+
 
         return webAppContext;
     }
