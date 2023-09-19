@@ -48,7 +48,6 @@ public class LosRestTjeneste {
     private LosSystemUserKlient losKlient;
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
     private BehandlingRepository behandlingRepository;
-    private Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester;
     private BehandlingProsessHendelseMapper behandlingProsessHendelseMapper;
 
 
@@ -61,13 +60,10 @@ public class LosRestTjeneste {
         LosSystemUserKlient losKlient,
         HistorikkTjenesteAdapter historikkTjenesteAdapter,
         BehandlingRepository behandlingRepository,
-        BehandlingDtoTjeneste behandlingDtoTjeneste,
-        @Any Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester,
         BehandlingProsessHendelseMapper behandlingProsessHendelseMapper) {
         this.losKlient = losKlient;
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
         this.behandlingRepository = behandlingRepository;
-        this.søknadsfristTjenester = søknadsfristTjenester;
         this.behandlingProsessHendelseMapper = behandlingProsessHendelseMapper;
     }
 
