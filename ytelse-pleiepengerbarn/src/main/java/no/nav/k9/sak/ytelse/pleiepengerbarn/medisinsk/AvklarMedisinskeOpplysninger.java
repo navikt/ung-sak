@@ -95,6 +95,14 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
                 throw new IllegalStateException("Det finnes uklassifiserte dokumenter på behandlingen. Disse må klassifiseres før man kan gi avslag grunnet manglende godkjent legeerklæring.");
             }
 
+            /*
+             * Vanligvis viser vi begrunnelsen fra saksbehandler som en del av historikkinnslaget, men dette
+             * er ikke aktuelt for sykdom. Grunnen til dette er at vurderingene på sykdom gjøres på barnet.
+             * 
+             * Saksbehandler løser sykdomsaksjonspunktet i frontend ved å bare trykke "Fortsett", og det som
+             * da skjer er at vi lager et grunnlag med opplysninger i saken. Dette er fint å dokumentere
+             * gjennom et historikkinnslag, men det er da ingen begrunnelse for løsingen av aksjonspunktet.
+             */
             lagHistorikkinnslag(param, "Sykdom manuelt behandlet: Mangler godkjent legeerklæring.");
 
             for (VilkårType vilkårType : vilkårsPerioderTilVurderingTjeneste.definerendeVilkår()) {
