@@ -174,6 +174,9 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
     }
 
     private static BigDecimal prosentAvMaksimal(BigDecimal input, BigDecimal maks) {
+        if (maks.signum() == 0) {
+            return BigDecimal.ZERO;
+        }
         return BigDecimal.valueOf(100).multiply(input).divide(maks, 2, RoundingMode.HALF_UP);
     }
 
