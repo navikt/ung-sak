@@ -34,6 +34,7 @@ import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokument
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.abakus.AbakusInntektArbeidYtelseTjenesteFeil;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -198,6 +199,11 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         // Utvide fagsakperiode
         var maksPeriode = grunnlagRepository.hentMaksPeriode(behandlingId).orElseThrow();
         fagsakRepository.utvidPeriode(fagsakId, maksPeriode.getFomDato(), maksPeriode.getTomDato());
+
+        Fagsak oppdatertFagsak = fagsakRepository.hentSakGittSaksnummer(behandling.getFagsak().getSaksnummer()).orElseThrow();
+        if (oppdatertFagsak.getPeriode().getFomDato().getYear() != oppdatertFagsak.getPeriode().getTomDato().getYear()){
+            throw new IllegalStateException("Etter mottak av søknad/korrigertIM blir fagsak for omsorgspenger utvidet til å spenne over flere år (forventer kun ett år pr sak): " + maksPeriode.getFomDato().getYear() + " til " + maksPeriode.getTomDato().getYear());
+        }
     }
 
     private void lagreMedlemskapinfo(Long behandlingId, OmsorgspengerUtbetaling ytelse, LocalDate forsendelseMottatt) {

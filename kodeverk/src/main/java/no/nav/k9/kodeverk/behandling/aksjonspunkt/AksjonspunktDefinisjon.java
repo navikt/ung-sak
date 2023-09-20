@@ -350,6 +350,9 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     VENT_ANNEN_PSB_SAK(AksjonspunktKodeDefinisjon.VENT_ANNEN_PSB_SAK_KODE, AksjonspunktType.MANUELL,
         "En annen sak tilknyttet barnet må behandles frem til uttak, eller besluttes, før denne saken kan behandles videre.", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_UTTAK_V2, VurderingspunktType.UT, UTEN_VILKÅR,
         UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST, AVVENTER_SAKSBEHANDLER),
+    VURDER_DATO_NY_REGEL_UTTAK(AksjonspunktKodeDefinisjon.VURDER_DATO_NY_REGEL_UTTAK, AksjonspunktType.MANUELL,
+        "Vurder hvilken dato ny regel for utbetalingsgrad i uttak skal gjelde fra.", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_UTTAK_V2, VurderingspunktType.UT, UTEN_VILKÅR,
+        SkjermlenkeType.UTTAK, TOTRINN, TILBAKE, AVBRYTES, AVVENTER_SAKSBEHANDLER),
 
     // Gruppe: 93xx - Opplæringspenger
     VURDER_INSTITUSJON(AksjonspunktKodeDefinisjon.VURDER_INSTITUSJON, AksjonspunktType.MANUELL,

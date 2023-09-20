@@ -23,7 +23,6 @@ import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -62,9 +61,6 @@ class GjennomgåOpplæringStegTest {
     private VurdertOpplæringRepository vurdertOpplæringRepository;
     @Inject
     private UttakPerioderGrunnlagRepository uttakPerioderGrunnlagRepository;
-    @Inject
-    @FagsakYtelseTypeRef(FagsakYtelseType.OPPLÆRINGSPENGER)
-    private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjenesteBean;
 
     private BehandlingRepositoryProvider repositoryProvider;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjenesteMock;
@@ -75,7 +71,7 @@ class GjennomgåOpplæringStegTest {
 
     @BeforeEach
     void setup(){
-        perioderTilVurderingTjenesteMock = spy(perioderTilVurderingTjenesteBean);
+        perioderTilVurderingTjenesteMock = spy(VilkårsPerioderTilVurderingTjeneste.class);
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         GjennomgåttOpplæringTjeneste gjennomgåttOpplæringTjeneste = new GjennomgåttOpplæringTjeneste(vilkårResultatRepository, perioderTilVurderingTjenesteMock, uttakPerioderGrunnlagRepository, vurdertOpplæringRepository);
         gjennomgåOpplæringSteg = new GjennomgåOpplæringSteg(repositoryProvider, gjennomgåttOpplæringTjeneste);

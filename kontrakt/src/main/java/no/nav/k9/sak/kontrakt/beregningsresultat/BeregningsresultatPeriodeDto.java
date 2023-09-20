@@ -32,6 +32,8 @@ public class BeregningsresultatPeriodeDto {
         private LocalDate tom;
 
         private BigDecimal inntektGraderingsprosent;
+        private BigDecimal totalUtbetalingsgradFraUttak;
+        private BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
         private BigDecimal graderingsfaktorInntekt;
         private BigDecimal graderingsfaktorTid;
 
@@ -55,6 +57,16 @@ public class BeregningsresultatPeriodeDto {
 
         public Builder medInntektGraderingsprosent(BigDecimal inntektGraderingsprosent) {
             this.inntektGraderingsprosent = inntektGraderingsprosent;
+            return this;
+        }
+
+        public Builder medTotalUtbetalingsgradFraUttak(BigDecimal totalUtbetalingsgradFraUttak) {
+            this.totalUtbetalingsgradFraUttak = totalUtbetalingsgradFraUttak;
+            return this;
+        }
+
+        public Builder medTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt) {
+            this.totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt = totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
             return this;
         }
 
@@ -96,6 +108,20 @@ public class BeregningsresultatPeriodeDto {
     @Valid
     private BigDecimal inntektGraderingsprosent;
 
+    @JsonProperty(value = "totalUtbetalingsgradFraUttak")
+    @DecimalMin("0")
+    @DecimalMax("1")
+    @Digits(integer = 1, fraction = 4)
+    @Valid
+    private BigDecimal totalUtbetalingsgradFraUttak;
+
+    @JsonProperty(value = "totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt")
+    @DecimalMin("0")
+    @DecimalMax("1")
+    @Digits(integer = 1, fraction = 4)
+    @Valid
+    private BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
+
     @JsonProperty(value = "graderingsfaktorInntekt")
     @DecimalMin("0")
     @DecimalMax("100")
@@ -123,6 +149,8 @@ public class BeregningsresultatPeriodeDto {
         tom = builder.tom;
         dagsats = builder.dagsats;
         inntektGraderingsprosent = builder.inntektGraderingsprosent;
+        totalUtbetalingsgradFraUttak = builder.totalUtbetalingsgradFraUttak;
+        totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt = builder.totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
         graderingsfaktorInntekt = builder.graderingsfaktorInntekt;
         graderingsfaktorTid = builder.graderingsfaktorTid;
         andeler = List.copyOf(builder.andeler);
@@ -158,6 +186,14 @@ public class BeregningsresultatPeriodeDto {
 
     public BigDecimal getInntektGraderingsprosent() {
         return inntektGraderingsprosent;
+    }
+
+    public BigDecimal getTotalUtbetalingsgradFraUttak() {
+        return totalUtbetalingsgradFraUttak;
+    }
+
+    public BigDecimal getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt() {
+        return totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
     }
 
     public BigDecimal getGraderingsfaktorInntekt() {

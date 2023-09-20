@@ -86,6 +86,6 @@ public abstract class OverstyringAksjonspunktDto implements AksjonspunktKode, Ov
 
     @Override
     public String toString() {
-        return getClass() + "<kode=" + getKode() + ", begrunnelse=" + getBegrunnelse() + ", skalAvbrytes=" + skalAvbrytes() + ", periode=" + getPeriode() + ">";
+        return getClass() + "<kode=" + getKode() + ", begrunnelse=" + getBegrunnelse() + ", skalAvbrytes=" + skalAvbrytes() + ", periode=" + getPeriode() + ", innvilgelseMerknadKode=" + getInnvilgelseMerknadKode() + ">";
     }
 }

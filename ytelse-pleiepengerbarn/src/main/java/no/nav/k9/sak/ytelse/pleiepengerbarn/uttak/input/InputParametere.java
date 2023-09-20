@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +31,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtab
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.AktivitetIdentifikator;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidstidMappingInput;
 
 public class InputParametere {
 
@@ -56,6 +56,8 @@ public class InputParametere {
     private Map<UUID, UUID> sisteVedtatteBehandlingForBehandling;
     private UtsattBehandlingAvPeriode utsattBehandlingAvPerioder;
     private Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> tilkommetAktivitetsperioder  = new HashMap<>();
+
+    private LocalDate virkningsdatoNyeRegler;
 
     public InputParametere() {
     }
@@ -249,13 +251,20 @@ public class InputParametere {
         this.sisteVedtatteBehandlingForBehandling = sisteVedtatteBehandlingForBehandling;
         return this;
     }
-    
+
     public Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> getTilkommetAktivitetsperioder() {
         return tilkommetAktivitetsperioder;
     }
-    
+
     public InputParametere medTilkommetAktivitetsperioder(Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> tilkommetAktivitetsperioder) {
         this.tilkommetAktivitetsperioder = tilkommetAktivitetsperioder;
+        return this;
+    }
+    public LocalDate getVirkningsdatoNyeRegler() {
+        return virkningsdatoNyeRegler;
+    }
+    public InputParametere medVirkningsdatoNyeRegler(LocalDate virkningsdatoNyeRegler) {
+        this.virkningsdatoNyeRegler = virkningsdatoNyeRegler;
         return this;
     }
 }

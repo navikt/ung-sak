@@ -149,7 +149,6 @@ public class SamtidigUttakTjeneste {
         }
 
         // Det skal kun slippes én behandling gjennom.
-
         final Simulering simulering = simulerUttakKunBesluttet(ref);
 
         return simulering.getUttakplanEndret();

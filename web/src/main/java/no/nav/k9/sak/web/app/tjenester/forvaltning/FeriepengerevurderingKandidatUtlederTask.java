@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.forvaltning;
 import java.time.LocalDate;
 import java.time.Year;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.Set;
@@ -54,6 +55,13 @@ public class FeriepengerevurderingKandidatUtlederTask implements ProsessTaskHand
         String saksnummer = Objects.requireNonNull(pd.getPropertyValue("saksnummer"));
         Fagsak fagsak = fagsakRepository.hentSakGittSaksnummer(new Saksnummer(saksnummer)).orElseThrow();
         Behandling sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow();
+        if (sisteBehandling.erHenlagt()) {
+            sisteBehandling = behandlingRepository.hentAbsoluttAlleBehandlingerForSaksnummer(new Saksnummer(saksnummer))
+                .stream()
+                .filter(b -> !b.erHenlagt())
+                .max(Comparator.comparing(Behandling::getOpprettetTidspunkt))
+                .orElseThrow();
+        }
         if (!sisteBehandling.erAvsluttet()) {
             logger.info("Siste behandling er åpen for {}, avbryter", saksnummer);
         } else if (sisteBehandling.getAvsluttetDato().isAfter(LocalDate.of(2022, 11, 19).atStartOfDay())) {
@@ -63,7 +71,7 @@ public class FeriepengerevurderingKandidatUtlederTask implements ProsessTaskHand
             LocalDateTimeline<Boolean> feriepengeopptjeningTidslinje = beregningsresultat.getBeregningsresultatAndelTimeline()
                 .filterValue(andeler -> andeler.stream().anyMatch(andel -> andel.getDagsats() != 0 && Set.of(Inntektskategori.ARBEIDSTAKER, Inntektskategori.SJØMANN).contains(andel.getInntektskategori())))
                 .mapValue(v -> true);
-            if (feriepengeopptjeningTidslinje.isEmpty()){
+            if (feriepengeopptjeningTidslinje.isEmpty()) {
                 logger.info("Sak {} ikke kandidat for revurdering - ikke noe grunnlag. ", saksnummer);
             } else {
                 long antallDager = tellDager(Hjelpetidslinjer.fjernHelger(feriepengeopptjeningTidslinje));

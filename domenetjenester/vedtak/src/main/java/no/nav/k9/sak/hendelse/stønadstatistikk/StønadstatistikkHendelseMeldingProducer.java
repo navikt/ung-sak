@@ -50,7 +50,8 @@ public class StønadstatistikkHendelseMeldingProducer {
         properties.put(StreamsConfig.APPLICATION_ID_CONFIG, appNamespace + "." + appName);
         properties.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SSL");
         properties.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, aivenBootstrapServers);
-        
+        properties.put(ProducerConfig.MAX_REQUEST_SIZE_CONFIG, "5242880"); // 5MB
+
         if (overrideKeystorePassword != null) {
             // TODO: Gjør at dette er mulig mot vtp:
             //properties.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, overrideKeystorePassword);
@@ -68,11 +69,11 @@ public class StønadstatistikkHendelseMeldingProducer {
             properties.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, aivenCredstorePassword);
             properties.put(SslConfigs.SSL_KEY_PASSWORD_CONFIG, aivenCredstorePassword);
         }
-        
+
         this.producer = createProducer(properties);
         this.topic = topic;
     }
-    
+
     public void flushAndClose() {
         producer.flush();
         producer.close();
@@ -114,7 +115,7 @@ public class StønadstatistikkHendelseMeldingProducer {
             properties.put("sasl.jaas.config", jaasCfg);
         }
     }
-    
+
     private void setSecurity(String username, Properties properties) {
         if (username != null && !username.isEmpty()) {
             properties.put("security.protocol", "SASL_SSL");
