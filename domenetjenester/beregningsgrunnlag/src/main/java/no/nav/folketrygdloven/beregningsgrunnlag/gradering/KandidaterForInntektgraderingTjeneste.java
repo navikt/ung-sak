@@ -79,7 +79,7 @@ public class KandidaterForInntektgraderingTjeneste {
             .getPerioder()
             .stream()
             .filter(it -> Utfall.OPPFYLT.equals(it.getGjeldendeUtfall()))
-            .filter(it -> it.getPeriode().overlapper(dato, dato))
+            .filter(it -> !it.getPeriode().getTomDato().isBefore(dato))
             .toList();
 
         if (overlappendeGrunnlag.isEmpty()) {
@@ -101,7 +101,7 @@ public class KandidaterForInntektgraderingTjeneste {
         return koblingMotVurderingsmap.values().stream().flatMap(Collection::stream)
             .collect(Collectors.toSet());
     }
-    
+
     private static DatoIntervallEntitet finnPeriode(LocalDate dato, VilkårPeriode og) {
         return dato.isAfter(og.getSkjæringstidspunkt()) ?
             DatoIntervallEntitet.fraOgMedTilOgMed(dato, og.getTom())

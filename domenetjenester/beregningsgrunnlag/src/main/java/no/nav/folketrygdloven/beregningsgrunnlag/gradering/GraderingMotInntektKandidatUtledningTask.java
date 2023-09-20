@@ -24,7 +24,7 @@ public class GraderingMotInntektKandidatUtledningTask implements ProsessTaskHand
     public static final String KALKULUS_UTLEDNING = "kalkulusUtledning";
 
     private static final Logger log = LoggerFactory.getLogger(GraderingMotInntektKandidatUtledningTask.class);
-    public static final LocalDate FOM_DATO_INNTEKT_GRADERING = LocalDate.of(2023, 4, 1);
+    public static final LocalDate FOM_DATO_INNTEKT_GRADERING = LocalDate.of(2023, 11, 6);
     private InntektGraderingRepository inntektGraderingRepository;
     private KandidaterForInntektgraderingTjeneste kandidaterForInntektgraderingTjeneste;
 
@@ -53,7 +53,7 @@ public class GraderingMotInntektKandidatUtledningTask implements ProsessTaskHand
             if (kalkulusUtledning) {
                 List<String> saksnummerMedAksjonspunkt = fagsaker.entrySet().stream()
                     .filter(f -> {
-                        var vurderingsperioder = kandidaterForInntektgraderingTjeneste.finnGraderingMotInntektPerioder(f.getKey(), LocalDate.of(2023, 4, 1));
+                        var vurderingsperioder = kandidaterForInntektgraderingTjeneste.finnGraderingMotInntektPerioder(f.getKey(), FOM_DATO_INNTEKT_GRADERING);
                         return !vurderingsperioder.isEmpty();
                     })
                     .map(Map.Entry::getValue)
