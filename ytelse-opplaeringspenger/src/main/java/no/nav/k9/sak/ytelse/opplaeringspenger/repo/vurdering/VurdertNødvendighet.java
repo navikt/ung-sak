@@ -24,13 +24,13 @@ import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokument;
 
-@Entity(name = "VurdertOpplæring")
-@Table(name = "olp_vurdert_opplaering")
+@Entity(name = "VurdertNødvendighet")
+@Table(name = "olp_vurdert_noedvendighet")
 @Immutable
-public class VurdertOpplæring extends BaseEntitet {
+public class VurdertNødvendighet extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_OLP_VURDERT_OPPLAERING")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_OLP_VURDERT_NOEDVENDIGHET")
     private Long id;
 
     @Embedded
@@ -51,8 +51,8 @@ public class VurdertOpplæring extends BaseEntitet {
 
     @OneToMany
     @JoinTable(
-        name="OLP_VURDERT_OPPLAERING_ANVENDT_DOKUMENT",
-        joinColumns = @JoinColumn( name="VURDERT_OPPLAERING_ID"),
+        name="OLP_VURDERT_NOEDVENDIGHET_ANVENDT_DOKUMENT",
+        joinColumns = @JoinColumn( name="VURDERT_NOEDVENDIGHET_ID"),
         inverseJoinColumns = @JoinColumn( name="OPPLAERING_DOKUMENT_ID")
     )
     private List<OpplæringDokument> dokumenter = new ArrayList<>();
@@ -61,10 +61,10 @@ public class VurdertOpplæring extends BaseEntitet {
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    VurdertOpplæring() {
+    VurdertNødvendighet() {
     }
 
-    public VurdertOpplæring(JournalpostId journalpostId, Boolean nødvendigOpplæring, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt, List<OpplæringDokument> dokumenter) {
+    public VurdertNødvendighet(JournalpostId journalpostId, Boolean nødvendigOpplæring, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt, List<OpplæringDokument> dokumenter) {
         this.journalpostId = journalpostId;
         this.nødvendigOpplæring = nødvendigOpplæring;
         this.begrunnelse = begrunnelse;
@@ -73,7 +73,7 @@ public class VurdertOpplæring extends BaseEntitet {
         this.dokumenter = new ArrayList<>(dokumenter);
     }
 
-    public VurdertOpplæring(VurdertOpplæring that) {
+    public VurdertNødvendighet(VurdertNødvendighet that) {
         this.journalpostId = that.journalpostId;
         this.nødvendigOpplæring = that.nødvendigOpplæring;
         this.begrunnelse = that.begrunnelse;
@@ -110,7 +110,7 @@ public class VurdertOpplæring extends BaseEntitet {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        VurdertOpplæring that = (VurdertOpplæring) o;
+        VurdertNødvendighet that = (VurdertNødvendighet) o;
         return Objects.equals(nødvendigOpplæring, that.nødvendigOpplæring)
             && Objects.equals(journalpostId, that.journalpostId)
             && Objects.equals(dokumenter, that.dokumenter)
@@ -126,7 +126,7 @@ public class VurdertOpplæring extends BaseEntitet {
 
     @Override
     public String toString() {
-        return "VurdertOpplæring{" +
+        return "VurdertNødvendighet{" +
             "journalpostId=" + journalpostId +
             ", nødvendigOpplæring=" + nødvendigOpplæring +
             ", dokumenter=" + dokumenter +

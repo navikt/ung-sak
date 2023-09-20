@@ -69,7 +69,7 @@ public class OpptjeningsvilkåretOverstyringshåndtererTest {
         Behandling behandling = scenario.getBehandling();
         // Dto
         OverstyringOpptjeningsvilkåretDto overstyringspunktDto = new OverstyringOpptjeningsvilkåretDto(periode, false,
-            "test av overstyring opptjeningsvilkåret", "1035");
+            "test av overstyring opptjeningsvilkåret", "1035", null);
         assertThat(behandling.getAksjonspunkter()).hasSize(1);
 
         // Act
@@ -99,7 +99,7 @@ public class OpptjeningsvilkåretOverstyringshåndtererTest {
         Behandling behandling = scenario.getBehandling();
         // Dto
         OverstyringOpptjeningsvilkåretDto overstyringspunktDto = new OverstyringOpptjeningsvilkåretDto(periode, false,
-            "test av overstyring opptjeningsvilkåret", "1035");
+            "test av overstyring opptjeningsvilkåret", "1035", null);
 
         // Act
         var aksjonspunkterDto = BekreftetOgOverstyrteAksjonspunkterDto.lagDto(behandling.getId(), behandling.getVersjon(), Set.of(overstyringspunktDto), Collections.emptyList());
@@ -130,7 +130,7 @@ public class OpptjeningsvilkåretOverstyringshåndtererTest {
         // Dto
 
         OverstyringOpptjeningsvilkåretDto overstyringspunktDto = new OverstyringOpptjeningsvilkåretDto(periode, true,
-            "test av overstyring opptjeningsvilkåret", "1035");
+            "test av overstyring opptjeningsvilkåret", "1035", null);
 
         // Act
         try {

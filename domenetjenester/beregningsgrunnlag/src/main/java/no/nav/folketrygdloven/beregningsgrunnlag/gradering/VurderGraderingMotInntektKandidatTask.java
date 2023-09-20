@@ -47,7 +47,7 @@ public class VurderGraderingMotInntektKandidatTask extends FagsakProsessTask {
 
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
-        var vurderingsperioder = kandidaterForInntektgraderingTjeneste.finnGraderingMotInntektPerioder(prosessTaskData.getFagsakId(), LocalDate.of(2023, 4, 1));
+        var vurderingsperioder = kandidaterForInntektgraderingTjeneste.finnGraderingMotInntektPerioder(prosessTaskData.getFagsakId(), LocalDate.of(2023, 11, 6));
         if (!vurderingsperioder.isEmpty()) {
             log.info("Fagsaken skal vurderes for tilkommet inntekt");
             var data = ProsessTaskData.forTaskType(new TaskType(BEHANDLINGSKONTROLL_OPPRETT_REVURDERING_ELLER_DIFF_TASK));
@@ -56,7 +56,7 @@ public class VurderGraderingMotInntektKandidatTask extends FagsakProsessTask {
             data.setProperty(PERIODER, utledPerioder(vurderingsperioder));
             taskRepository.lagre(data);
         } else {
-            log.info("Fagsaken trenger IKKE g-reguleres");
+            log.info("Fagsaken skal ikke vurderes for tilkommet inntekt");
         }
     }
 

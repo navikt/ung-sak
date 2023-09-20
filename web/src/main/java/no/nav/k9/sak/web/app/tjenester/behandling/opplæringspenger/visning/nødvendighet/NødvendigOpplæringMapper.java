@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæring;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertNødvendighet;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.KursPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
@@ -42,16 +42,16 @@ class NødvendigOpplæringMapper {
     private List<NødvendighetVurderingDto> mapVurderinger(VurdertOpplæringGrunnlag grunnlag, Set<PerioderFraSøknad> perioderFraSøknad) {
         List<NødvendighetVurderingDto> vurderinger = new ArrayList<>();
 
-        if (grunnlag != null && grunnlag.getVurdertOpplæringHolder() != null) {
-            for (VurdertOpplæring vurdertOpplæring : grunnlag.getVurdertOpplæringHolder().getVurdertOpplæring()) {
+        if (grunnlag != null && grunnlag.getVurdertNødvendighetHolder() != null) {
+            for (VurdertNødvendighet vurdertNødvendighet : grunnlag.getVurdertNødvendighetHolder().getVurdertNødvendighet()) {
                 vurderinger.add(new NødvendighetVurderingDto(
-                    new JournalpostIdDto(vurdertOpplæring.getJournalpostId().getVerdi()),
-                    finnPerioderForJournalpostId(vurdertOpplæring.getJournalpostId(), perioderFraSøknad),
-                    vurdertOpplæring.getNødvendigOpplæring() ? Resultat.GODKJENT : Resultat.IKKE_GODKJENT,
-                    vurdertOpplæring.getBegrunnelse(),
-                    vurdertOpplæring.getVurdertAv(),
-                    vurdertOpplæring.getVurdertTidspunkt(),
-                    vurdertOpplæring.getDokumenter().stream().map(dokument -> "" + dokument.getId()).collect(Collectors.toList()))
+                    new JournalpostIdDto(vurdertNødvendighet.getJournalpostId().getVerdi()),
+                    finnPerioderForJournalpostId(vurdertNødvendighet.getJournalpostId(), perioderFraSøknad),
+                    vurdertNødvendighet.getNødvendigOpplæring() ? Resultat.GODKJENT : Resultat.IKKE_GODKJENT,
+                    vurdertNødvendighet.getBegrunnelse(),
+                    vurdertNødvendighet.getVurdertAv(),
+                    vurdertNødvendighet.getVurdertTidspunkt(),
+                    vurdertNødvendighet.getDokumenter().stream().map(dokument -> "" + dokument.getId()).collect(Collectors.toList()))
                 );
             }
         }
