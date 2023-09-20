@@ -25,8 +25,8 @@ import no.nav.k9.sak.kontrakt.dokument.TekstValideringRegex;
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class NotatDto { //TODO gjør om til record
 
-    @JsonProperty(value = "uuid")
-    private UUID uuid;
+    @JsonProperty(value = "notatId")
+    private UUID notatId;
 
     @JsonProperty(value = "notatTekst")
     @Size(max = 4000)
@@ -63,8 +63,8 @@ public class NotatDto { //TODO gjør om til record
     @Valid
     private LocalDateTime endretTidspunkt;
 
-    public NotatDto(UUID uuid, String notatTekst, boolean skjult, NotatGjelderType gjelderType, long versjon, String opprettetAv, LocalDateTime opprettetTidspunkt, String endretAv, LocalDateTime endretTidspunkt) {
-        this.uuid = uuid;
+    public NotatDto(UUID notatId, String notatTekst, boolean skjult, NotatGjelderType gjelderType, long versjon, String opprettetAv, LocalDateTime opprettetTidspunkt, String endretAv, LocalDateTime endretTidspunkt) {
+        this.notatId = notatId;
         this.notatTekst = notatTekst;
         this.skjult = skjult;
         this.gjelderType = gjelderType;
@@ -107,7 +107,7 @@ public class NotatDto { //TODO gjør om til record
         return endretTidspunkt;
     }
 
-    public UUID getUuid() {
-        return uuid;
+    public UUID getNotatId() {
+        return notatId;
     }
 }

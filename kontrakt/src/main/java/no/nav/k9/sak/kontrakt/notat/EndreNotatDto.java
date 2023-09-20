@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -20,8 +21,8 @@ import no.nav.k9.sak.typer.Saksnummer;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public record EndreNotatDto(
-    @JsonProperty(value = "uuid", required = true)
-    UUID uuid,
+    @JsonProperty(value = "notatId", required = true)
+    UUID notatId,
 
     @JsonProperty(value = "notatTekst", required = true)
     @Size(max = 4000)
@@ -31,6 +32,7 @@ public record EndreNotatDto(
     @AbacAttributt("saksnummer")
     @JsonProperty(value = SaksnummerDto.NAME, required = true)
     @NotNull
+    @Valid
     Saksnummer saksnummer,
 
     @JsonProperty(value = "versjon", required = true)

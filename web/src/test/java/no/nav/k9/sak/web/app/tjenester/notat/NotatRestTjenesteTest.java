@@ -93,13 +93,13 @@ class NotatRestTjenesteTest {
         assertThat(notat.isSkjult()).isFalse();
 
         skjulNotat(new SkjulNotatDto(
-            notat.getUuid(),
+            notat.getNotatId(),
             true,
             saksnummer,
             notat.getVersjon()
         ));
-        NotatDto skjultNotat = hentNotat(saksnummer, notat.getUuid());
-        assertThat(skjultNotat.getUuid()).isEqualTo(notat.getUuid());
+        NotatDto skjultNotat = hentNotat(saksnummer, notat.getNotatId());
+        assertThat(skjultNotat.getNotatId()).isEqualTo(notat.getNotatId());
         assertThat(skjultNotat.isSkjult()).isTrue();
         assertThat(skjultNotat.getOpprettetTidspunkt()).isEqualTo(notat.getOpprettetTidspunkt());
         assertThat(skjultNotat.getEndretTidspunkt()).isNotNull();
@@ -133,12 +133,12 @@ class NotatRestTjenesteTest {
 
         var endretTekst = "et endret notat";
         endreNotat(new EndreNotatDto(
-            morNotat.getUuid(),
+            morNotat.getNotatId(),
             endretTekst,
             saksnummer,
             morNotat.getVersjon()));
 
-        NotatDto endretNotat = hentNotat(saksnummer, morNotat.getUuid());
+        NotatDto endretNotat = hentNotat(saksnummer, morNotat.getNotatId());
         assertThat(endretNotat.getGjelderType()).isEqualTo(NotatGjelderType.FAGSAK);
         assertThat(endretNotat.getNotatTekst()).isEqualTo(endretTekst);
         assertThat(endretNotat.getOpprettetAv()).isEqualTo(morNotat.getOpprettetAv());

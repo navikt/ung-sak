@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import no.nav.k9.abac.AbacAttributt;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
@@ -17,8 +18,8 @@ import no.nav.k9.sak.typer.Saksnummer;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public record SkjulNotatDto(
-    @JsonProperty(value = "uuid", required = true)
-    UUID uuid,
+    @JsonProperty(value = "notatId", required = true)
+    UUID notatId,
 
     @JsonProperty(value = "skjul", required = true)
     boolean skjul,
@@ -26,6 +27,7 @@ public record SkjulNotatDto(
     @AbacAttributt("saksnummer")
     @JsonProperty(value = SaksnummerDto.NAME, required = true)
     @NotNull
+    @Valid
     Saksnummer saksnummer,
 
     @JsonProperty(value = "versjon", required = true)

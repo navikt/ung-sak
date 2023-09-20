@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -29,6 +30,7 @@ public record OpprettNotatDto(
     @AbacAttributt("saksnummer")
     @JsonProperty(value = SaksnummerDto.NAME, required = true)
     @NotNull
+    @Valid
     Saksnummer saksnummer,
 
     @JsonProperty(value = "notatGjelderType", required = true)

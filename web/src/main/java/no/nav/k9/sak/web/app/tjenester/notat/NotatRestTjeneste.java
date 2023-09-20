@@ -71,7 +71,7 @@ public class NotatRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response hent(
         @NotNull @QueryParam(SaksnummerDto.NAME) @Parameter(description = "Saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummer,
-        @QueryParam("notatId") @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) @Parameter(description = "Notat uuid") UUID notatId
+        @QueryParam("notatId") @Parameter(description = "Notat uuid")  @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) UUID notatId
     ) {
         if (notatId != null) {
             NotatEntitet notat = hentNotat(saksnummer.getVerdi(), notatId);
@@ -112,7 +112,7 @@ public class NotatRestTjeneste {
     public Response endre(
        @NotNull @Parameter(description = "Notat som skal endres") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) EndreNotatDto endreNotatDto
     ) {
-        var notat = hentNotat(endreNotatDto.saksnummer().getSaksnummer(), endreNotatDto.uuid());
+        var notat = hentNotat(endreNotatDto.saksnummer().getSaksnummer(), endreNotatDto.notatId());
 
         if (!notat.getNotatTekst().equals(endreNotatDto.notatTekst())) {
             notat.nyTekst(endreNotatDto.notatTekst());
@@ -133,7 +133,7 @@ public class NotatRestTjeneste {
     public Response skjul(
         @NotNull @Parameter(description = "Notat som skal skjules") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SkjulNotatDto skjulNotatDto
     ) {
-        var notat = hentNotat(skjulNotatDto.saksnummer().getSaksnummer(), skjulNotatDto.uuid());
+        var notat = hentNotat(skjulNotatDto.saksnummer().getSaksnummer(), skjulNotatDto.notatId());
         if (notat.isSkjult() != skjulNotatDto.skjul()) {
             notat.skjul(skjulNotatDto.skjul());
             notatRepository.lagre(notat);
