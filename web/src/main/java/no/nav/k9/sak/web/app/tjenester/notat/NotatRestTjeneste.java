@@ -145,21 +145,21 @@ public class NotatRestTjeneste {
 
     //Notat må hentes basert på saksnummer for tilgangssjekk!
     private NotatEntitet hentNotat(Saksnummer saksnummer, UUID notatUuid) {
-        var notater = hentAlle(saksnummer);
+        var notaterPåSak = hentAlle(saksnummer);
 
-        var notat = notater.stream()
+        var notater = notaterPåSak.stream()
             .filter(it -> it.getUuid().equals(notatUuid))
             .toList();
 
-        if (notat.size() > 1) {
+        if (notater.size() > 1) {
             throw new IllegalStateException("Utvilkerfeil: Flere notater med samme id");
         }
 
-        if (notat.isEmpty()) {
+        if (notater.isEmpty()) {
             throw NotatFeil.FACTORY.fantIkkeNotat().toException();
         }
 
-        return notat.get(0);
+        return notater.get(0);
     }
 
     private List<NotatEntitet> hentAlle(Saksnummer saksnummer) {
