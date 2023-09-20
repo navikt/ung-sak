@@ -266,7 +266,7 @@ spec:
     - name: PSB_FILTRER_IM_PAA_BEHANDLING_ID
       value: "false"
     - name: ENABLE_INNTEKTSMELDING_CACHE
-      value: "false"
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
