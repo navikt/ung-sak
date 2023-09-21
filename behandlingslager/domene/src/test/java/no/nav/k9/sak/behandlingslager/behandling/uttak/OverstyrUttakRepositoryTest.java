@@ -1,11 +1,12 @@
 package no.nav.k9.sak.behandlingslager.behandling.uttak;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -13,6 +14,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -29,21 +31,18 @@ import no.nav.k9.sak.typer.Saksnummer;
 class OverstyrUttakRepositoryTest {
 
     @Inject
-    BehandlingRepository behandlingRepository;
+    private BehandlingRepository behandlingRepository;
     @Inject
-    FagsakRepository fagsakRepository;
+    private FagsakRepository fagsakRepository;
     @Inject
-    OverstyrUttakRepository overstyrUttakRepository;
+    private OverstyrUttakRepository overstyrUttakRepository;
 
-    Arbeidsgiver arbeidsgiver1 = Arbeidsgiver.virksomhet("111111111");
-    InternArbeidsforholdRef arbeidsforholdRef = InternArbeidsforholdRef.nyRef();
-    Arbeidsgiver arbeidsgiver2 = Arbeidsgiver.virksomhet("222222222");
-    Arbeidsgiver arbeidsgiverPerson = Arbeidsgiver.person(new AktørId("3333333333333"));
-
-    LocalDate dag1 = LocalDate.now();
-    LocalDate dag2 = dag1.plusDays(1);
-    LocalDate dag3 = dag1.plusDays(2);
-    Long behandlingId;
+    private Arbeidsgiver arbeidsgiver1 = Arbeidsgiver.virksomhet("111111111");
+    private InternArbeidsforholdRef arbeidsforholdRef = InternArbeidsforholdRef.nyRef();
+    private LocalDate dag1 = LocalDate.now();
+    private LocalDate dag2 = dag1.plusDays(1);
+    private LocalDate dag3 = dag1.plusDays(2);
+    private Long behandlingId;
 
     @BeforeEach
     void setUp() {
@@ -52,48 +51,71 @@ class OverstyrUttakRepositoryTest {
     }
 
     @Test
+    void skal_ikke_ha_overstyring_i_utgangspunktet() {
+        assertThat(overstyrUttakRepository.harNoeOverstyrtUttak(behandlingId)).isFalse();
+        assertThat(overstyrUttakRepository.hentOverstyrtUttak(behandlingId)).isEqualTo(LocalDateTimeline.empty());
+    }
+
+    @Test
     void skal_lagre_og_hente_overstyring() {
         LocalDateInterval periode1 = new LocalDateInterval(dag1, dag1);
         LocalDateInterval periode2 = new LocalDateInterval(dag2, dag2);
         OverstyrtUttakPeriode overstyrtUttakPeriodePeriode1 = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(), "begrunnelse");
         OverstyrtUttakPeriode overstyrtUttakPeriodePeriode2 = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver1, arbeidsforholdRef, new BigDecimal("0.23"))), "begrunnelse");
-        overstyrUttakRepository.leggTilOverstyring(behandlingId, periode1, overstyrtUttakPeriodePeriode1);
-        overstyrUttakRepository.leggTilOverstyring(behandlingId, periode2, overstyrtUttakPeriodePeriode2);
 
-        Assertions.assertThat(overstyrUttakRepository.harOverstyring(behandlingId)).isTrue();
-        Assertions.assertThat(overstyrUttakRepository.hentOverstyrtUttak(behandlingId)).isEqualTo(new LocalDateTimeline<>(List.of(
+        LocalDateTimeline<OverstyrtUttakPeriode> oppdateringer = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(periode1, overstyrtUttakPeriodePeriode1),
             new LocalDateSegment<>(periode2, overstyrtUttakPeriodePeriode2))
-        ));
+        );
 
+        overstyrUttakRepository.oppdaterOverstyringAvUttak(behandlingId, List.of(), oppdateringer);
+
+        assertThat(overstyrUttakRepository.harNoeOverstyrtUttak(behandlingId)).isTrue();
+        assertThat(overstyrUttakRepository.hentOverstyrtUttak(behandlingId)).isEqualTo(oppdateringer);
+    }
+
+    @Test
+    void skal_legge_til_ikkeoverlappende_overstyring() {
+        LocalDateInterval periode1 = new LocalDateInterval(dag1, dag1);
+        OverstyrtUttakPeriode overstyrtUttakPeriodeOrginal = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(), "begrunnelse");
+        LocalDateTimeline<OverstyrtUttakPeriode> eksisterendeOverstyringer = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode1, overstyrtUttakPeriodeOrginal)));
+        overstyrUttakRepository.oppdaterOverstyringAvUttak(behandlingId, List.of(), eksisterendeOverstyringer);
+
+        //legger til ny periode
+        LocalDateInterval periode2 = new LocalDateInterval(dag2, dag2);
+        OverstyrtUttakPeriode overstyrtUttakPeriodeNy = new OverstyrtUttakPeriode(new BigDecimal("0.30"), Set.of(new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver1, arbeidsforholdRef, new BigDecimal("0.23"))), "begrunnelse");
+        LocalDateTimeline<OverstyrtUttakPeriode> oppdaterteOverstyringer = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode2, overstyrtUttakPeriodeNy)));
+        overstyrUttakRepository.oppdaterOverstyringAvUttak(behandlingId, List.of(), oppdaterteOverstyringer);
+
+        assertThat(overstyrUttakRepository.harNoeOverstyrtUttak(behandlingId)).isTrue();
+        assertThat(overstyrUttakRepository.hentOverstyrtUttak(behandlingId)).isEqualTo(new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(periode1, overstyrtUttakPeriodeOrginal),
+            new LocalDateSegment<>(periode2, overstyrtUttakPeriodeNy)
+        )));
     }
 
     @Test
     void skal_overskrive_eksisterende_overstyring_for_perioden_for_ny_overstyring() {
-        Assertions.assertThat(overstyrUttakRepository.harOverstyring(behandlingId)).isFalse();
-        Assertions.assertThat(overstyrUttakRepository.hentOverstyrtUttak(behandlingId)).isEqualTo(LocalDateTimeline.empty());
-
         LocalDateInterval periodeHele = new LocalDateInterval(dag1, dag3);
-        LocalDateInterval periode1 = new LocalDateInterval(dag1, dag1);
-        LocalDateInterval periode2 = new LocalDateInterval(dag2, dag2);
-        LocalDateInterval periode3 = new LocalDateInterval(dag3, dag3);
         OverstyrtUttakPeriode overstyrtUttakPeriodeOrginal = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(), "begrunnelse");
-        OverstyrtUttakPeriode overstyrtUttakPeriodeNy = new OverstyrtUttakPeriode(new BigDecimal("0.30"), Set.of(new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver1, arbeidsforholdRef, new BigDecimal("0.23"))), "begrunnelse");
-        overstyrUttakRepository.leggTilOverstyring(behandlingId, periodeHele, overstyrtUttakPeriodeOrginal);
-        overstyrUttakRepository.leggTilOverstyring(behandlingId, periode2, overstyrtUttakPeriodeNy);
+        LocalDateTimeline<OverstyrtUttakPeriode> eksisterendeOverstyringer = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periodeHele, overstyrtUttakPeriodeOrginal)));
+        overstyrUttakRepository.oppdaterOverstyringAvUttak(behandlingId, List.of(), eksisterendeOverstyringer);
 
-        Assertions.assertThat(overstyrUttakRepository.harOverstyring(behandlingId)).isTrue();
-        Assertions.assertThat(overstyrUttakRepository.hentOverstyrtUttak(behandlingId)).isEqualTo(new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(periode1, overstyrtUttakPeriodeOrginal),
-            new LocalDateSegment<>(periode2, overstyrtUttakPeriodeNy),
-            new LocalDateSegment<>(periode3, overstyrtUttakPeriodeOrginal))
-        ));
+
+        //overskriver deler av perioden
+        LocalDateInterval periode2 = new LocalDateInterval(dag2, dag2);
+        OverstyrtUttakPeriode overstyrtUttakPeriodeNy = new OverstyrtUttakPeriode(new BigDecimal("0.30"), Set.of(new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver1, arbeidsforholdRef, new BigDecimal("0.23"))), "begrunnelse");
+        LocalDateTimeline<OverstyrtUttakPeriode> oppdaterteOverstyringer = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode2, overstyrtUttakPeriodeNy)));
+        overstyrUttakRepository.oppdaterOverstyringAvUttak(behandlingId, List.of(), oppdaterteOverstyringer);
+
+        assertThat(overstyrUttakRepository.harNoeOverstyrtUttak(behandlingId)).isTrue();
+        assertThat(overstyrUttakRepository.hentOverstyrtUttak(behandlingId)).isEqualTo(eksisterendeOverstyringer.crossJoin(oppdaterteOverstyringer, StandardCombinators::coalesceRightHandSide));
     }
 
     @Test
     void skal_overskrive_eksisterende_overstyringer_for_perioden_for_ny_overstyring() {
-        Assertions.assertThat(overstyrUttakRepository.harOverstyring(behandlingId)).isFalse();
-        Assertions.assertThat(overstyrUttakRepository.hentOverstyrtUttak(behandlingId)).isEqualTo(LocalDateTimeline.empty());
+        assertThat(overstyrUttakRepository.harNoeOverstyrtUttak(behandlingId)).isFalse();
+        assertThat(overstyrUttakRepository.hentOverstyrtUttak(behandlingId)).isEqualTo(LocalDateTimeline.empty());
 
         LocalDateInterval periodeHele = new LocalDateInterval(dag1, dag3);
         LocalDateInterval periode1 = new LocalDateInterval(dag1, dag1);
@@ -102,14 +124,74 @@ class OverstyrUttakRepositoryTest {
         OverstyrtUttakPeriode overstyrtUttakPeriodeOrginal = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(), "begrunnelse");
         OverstyrtUttakPeriode overstyrtUttakPeriodeOrginal2 = new OverstyrtUttakPeriode(new BigDecimal("0.36"), Set.of(), "begrunnelse");
         OverstyrtUttakPeriode overstyrtUttakPeriodeNy = new OverstyrtUttakPeriode(new BigDecimal("0.30"), Set.of(new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver1, arbeidsforholdRef, new BigDecimal("0.23"))), "begrunnelse");
-        overstyrUttakRepository.leggTilOverstyring(behandlingId, periode1, overstyrtUttakPeriodeOrginal);
-        overstyrUttakRepository.leggTilOverstyring(behandlingId, periode2, overstyrtUttakPeriodeOrginal2);
-        overstyrUttakRepository.leggTilOverstyring(behandlingId, periode3, overstyrtUttakPeriodeOrginal);
-        overstyrUttakRepository.leggTilOverstyring(behandlingId, periodeHele, overstyrtUttakPeriodeNy);
 
-        Assertions.assertThat(overstyrUttakRepository.harOverstyring(behandlingId)).isTrue();
-        Assertions.assertThat(overstyrUttakRepository.hentOverstyrtUttak(behandlingId)).isEqualTo(new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periodeHele, overstyrtUttakPeriodeNy))));
+        LocalDateTimeline<OverstyrtUttakPeriode> eksisterendeOverstyringer = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(periode1, overstyrtUttakPeriodeOrginal),
+            new LocalDateSegment<>(periode2, overstyrtUttakPeriodeOrginal2),
+            new LocalDateSegment<>(periode3, overstyrtUttakPeriodeOrginal))
+        );
+        overstyrUttakRepository.oppdaterOverstyringAvUttak(behandlingId, List.of(), eksisterendeOverstyringer);
+
+
+        //overskriver hele perioden
+        LocalDateTimeline<OverstyrtUttakPeriode> oppdaterteOverstyringer = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periodeHele, overstyrtUttakPeriodeNy)));
+        overstyrUttakRepository.oppdaterOverstyringAvUttak(behandlingId, List.of(), oppdaterteOverstyringer);
+
+
+        assertThat(overstyrUttakRepository.harNoeOverstyrtUttak(behandlingId)).isTrue();
+        assertThat(overstyrUttakRepository.hentOverstyrtUttak(behandlingId)).isEqualTo(oppdaterteOverstyringer);
     }
+
+    @Test
+    void skal_lagre_og_slette_med_id() {
+        assertThat(overstyrUttakRepository.harNoeOverstyrtUttak(behandlingId)).isFalse();
+        assertThat(overstyrUttakRepository.hentOverstyrtUttak(behandlingId)).isEqualTo(LocalDateTimeline.empty());
+
+        LocalDateInterval periode1 = new LocalDateInterval(dag1, dag1);
+        LocalDateInterval periode2 = new LocalDateInterval(dag2, dag2);
+        OverstyrtUttakPeriode overstyrtUttakPeriodePeriode1 = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(), "begrunnelse");
+        OverstyrtUttakPeriode overstyrtUttakPeriodePeriode2 = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver1, arbeidsforholdRef, new BigDecimal("0.23"))), "begrunnelse");
+        LocalDateTimeline<OverstyrtUttakPeriode> oppdateringer = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(periode1, overstyrtUttakPeriodePeriode1),
+            new LocalDateSegment<>(periode2, overstyrtUttakPeriodePeriode2))
+        );
+        overstyrUttakRepository.oppdaterOverstyringAvUttak(behandlingId, List.of(), oppdateringer);
+        LocalDateTimeline<OverstyrtUttakPeriode> eksisterendeOverstyringer = overstyrUttakRepository.hentOverstyrtUttak(behandlingId);
+
+        //fjern periode1 gitt id
+        Long idSomSlettes = eksisterendeOverstyringer.intersection(periode1).stream().toList().get(0).getValue().getId();
+        overstyrUttakRepository.oppdaterOverstyringAvUttak(behandlingId, List.of(idSomSlettes), LocalDateTimeline.empty());
+
+        //kun periode 2 skal finnes
+        assertThat(overstyrUttakRepository.hentOverstyrtUttak(behandlingId)).isEqualTo(new LocalDateTimeline<>(periode2, overstyrtUttakPeriodePeriode2));
+    }
+
+    @Test
+    void skal_oppdatere_periode_på_eksisterende_overstyring_gitt_id() {
+        assertThat(overstyrUttakRepository.harNoeOverstyrtUttak(behandlingId)).isFalse();
+        assertThat(overstyrUttakRepository.hentOverstyrtUttak(behandlingId)).isEqualTo(LocalDateTimeline.empty());
+
+        LocalDateInterval periodeOriginal = new LocalDateInterval(dag1, dag1);
+        OverstyrtUttakPeriode overstyrtUttakPeriodePeriode1 = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(), "begrunnelse");
+        LocalDateTimeline<OverstyrtUttakPeriode> oppdateringer = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(periodeOriginal, overstyrtUttakPeriodePeriode1))
+        );
+        overstyrUttakRepository.oppdaterOverstyringAvUttak(behandlingId, List.of(), oppdateringer);
+        LocalDateTimeline<OverstyrtUttakPeriode> eksisterendeOverstyringer = overstyrUttakRepository.hentOverstyrtUttak(behandlingId);
+
+        //fjern periode1 gitt id
+        LocalDateInterval periodeNy = new LocalDateInterval(dag2, dag2);
+        Long id = eksisterendeOverstyringer.stream().toList().get(0).getValue().getId();
+        OverstyrtUttakPeriode verdier = new OverstyrtUttakPeriode(id, new BigDecimal("0.35"), Set.of(), "begrunnelse");
+        LocalDateTimeline<OverstyrtUttakPeriode> oppdateringer2 = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(periodeNy, verdier))
+        );
+        overstyrUttakRepository.oppdaterOverstyringAvUttak(behandlingId, List.of(), oppdateringer2);
+
+        //kun ny periode skal finnes
+        assertThat(overstyrUttakRepository.hentOverstyrtUttak(behandlingId)).isEqualTo(new LocalDateTimeline<>(periodeNy, verdier));
+    }
+
 
     private Long lagBehandling(Fagsak fagsak) {
         Behandling.Builder builder = Behandling.forFørstegangssøknad(fagsak);

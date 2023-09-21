@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
@@ -23,23 +24,23 @@ import no.nav.k9.sak.typer.Periode;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
-public class OverstyrUttakPeriodeDto  {
+public class OverstyrUttakPeriodeDto {
 
     @JsonProperty(value = "id")
     @Min(value = 999951) //sekvens begynner på 1M og tar 50 om gangen
     @Max(value = Integer.MAX_VALUE)
     private Long id;
 
-    @JsonProperty(value = "fom", required = true)
+    @JsonProperty(value = "periode", required = true)
     @NotNull
     @Valid
     private Periode periode;
 
-    @JsonProperty(value = "søkersUttakgsgrad")
+    @JsonProperty(value = "søkersUttaksgrad")
     @DecimalMin("0")
     @DecimalMax("100")
     @Digits(integer = 3, fraction = 2)
-    private BigDecimal søkersUttakgsgrad;
+    private BigDecimal søkersUttaksgrad;
 
     @JsonProperty(value = "utbetalingsgrader")
     @Valid
@@ -57,10 +58,10 @@ public class OverstyrUttakPeriodeDto  {
         //
     }
 
-    public OverstyrUttakPeriodeDto(Long id, Periode periode, BigDecimal søkersUttakgsgrad, List<OverstyrUttakUtbetalingsgradDto> utbetalingsgrader, String begrunnelse) {
+    public OverstyrUttakPeriodeDto(Long id, Periode periode, BigDecimal søkersUttaksgrad, List<OverstyrUttakUtbetalingsgradDto> utbetalingsgrader, String begrunnelse) {
         this.id = id;
         this.periode = periode;
-        this.søkersUttakgsgrad = søkersUttakgsgrad;
+        this.søkersUttaksgrad = søkersUttaksgrad;
         this.utbetalingsgrader = utbetalingsgrader;
         this.begrunnelse = begrunnelse;
     }
@@ -73,8 +74,8 @@ public class OverstyrUttakPeriodeDto  {
         return periode;
     }
 
-    public BigDecimal getSøkersUttakgsgrad() {
-        return søkersUttakgsgrad;
+    public BigDecimal getSøkersUttaksgrad() {
+        return søkersUttaksgrad;
     }
 
     public List<OverstyrUttakUtbetalingsgradDto> getUtbetalingsgrader() {
@@ -83,5 +84,10 @@ public class OverstyrUttakPeriodeDto  {
 
     public String getBegrunnelse() {
         return begrunnelse;
+    }
+
+    @AssertTrue(message = "Perioder skal være lukket (ha start og slutt)")
+    public boolean getPerioderErLukket() {
+        return periode.getFom() != null && periode.getTom() != null;
     }
 }

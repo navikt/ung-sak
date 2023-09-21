@@ -16,7 +16,6 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
-import no.nav.k9.sak.behandling.aksjonspunkt.AbstractOverstyringshåndterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandling.aksjonspunkt.Overstyringshåndterer;
@@ -36,7 +35,7 @@ import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrUttakUtbetalingsgradDto;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = OverstyrUttakDto.class, adapter = Overstyringshåndterer.class)
-public class UttakOverstyringshåndterer extends AbstractOverstyringshåndterer<OverstyrUttakDto> {
+public class UttakOverstyringshåndterer implements Overstyringshåndterer<OverstyrUttakDto> {
 
     private OverstyrUttakRepository overstyrUttakRepository;
     private HistorikkRepository historikkRepository;
@@ -57,7 +56,7 @@ public class UttakOverstyringshåndterer extends AbstractOverstyringshåndterer<
 
         LocalDateTimeline<OverstyrtUttakPeriode> oppdateringer = new LocalDateTimeline<>(dto.getLagreEllerOppdater().stream().map(this::mapTilSegment).toList());
         List<Long> perioderTilSletting = dto.getSlett().stream().map(OverstyrUttakSlettPeriodeDto::getId).toList();
-        overstyrUttakRepository.oppdaterOverstyringer(behandling.getId(), perioderTilSletting, oppdateringer);
+        overstyrUttakRepository.oppdaterOverstyringAvUttak(behandling.getId(), perioderTilSletting, oppdateringer);
 
         LocalDateTimeline<OverstyrtUttakPeriode> overstyringerEtterOppdatering = overstyrUttakRepository.hentOverstyrtUttak(behandling.getId());
 
@@ -70,14 +69,29 @@ public class UttakOverstyringshåndterer extends AbstractOverstyringshåndterer<
         }
     }
 
+    @Override
+    public void håndterAksjonspunktForOverstyringPrecondition(OverstyrUttakDto dto, Behandling behandling) {
+
+    }
+
+    @Override
+    public void håndterAksjonspunktForOverstyringHistorikk(OverstyrUttakDto dto, Behandling behandling, boolean endretBegrunnelse) {
+        //håndtert i håndterOverstyring-metoden
+    }
+
+    @Override
+    public AksjonspunktDefinisjon aksjonspunktForInstans() {
+        return AksjonspunktDefinisjon.OVERSTYRING_AV_UTTAK;
+    }
+
     private void lagreHistorikkinnslagForEndringer(Long behandingId, LocalDateTimeline<OverstyrtUttakPeriode> overstyringerFørOppdatering, LocalDateTimeline<OverstyrtUttakPeriode> overstyringerEtterOppdatering) {
         LocalDateTimeline<OverstyrtUttakPeriode> slettedeOverstyringer = overstyringerFørOppdatering.disjoint(overstyringerEtterOppdatering);
         LocalDateTimeline<OverstyrtUttakPeriode> nyeOverstyringer = overstyringerEtterOppdatering.disjoint(overstyringerFørOppdatering);
         LocalDateTimeline<OverstyrtUttakPeriode> oppdaterteOverstyringer = overstyringerEtterOppdatering.disjoint(nyeOverstyringer);
 
-        lagreHistorikkinnslag(behandingId, slettedeOverstyringer, HistorikkinnslagType.OVST_UTTAK_FJERNE);
-        lagreHistorikkinnslag(behandingId, oppdaterteOverstyringer, HistorikkinnslagType.OVST_UTTAK_OPPDATERE);
-        lagreHistorikkinnslag(behandingId, nyeOverstyringer, HistorikkinnslagType.OVST_UTTAK);
+        lagreHistorikkinnslag(behandingId, nyeOverstyringer, HistorikkinnslagType.OVST_UTTAK_NY);
+        lagreHistorikkinnslag(behandingId, slettedeOverstyringer, HistorikkinnslagType.OVST_UTTAK_FJERNET);
+        lagreHistorikkinnslag(behandingId, oppdaterteOverstyringer, HistorikkinnslagType.OVST_UTTAK_OPPDATERT);
     }
 
     private void lagreHistorikkinnslag(Long behandlingId, LocalDateTimeline<OverstyrtUttakPeriode> overstyring, HistorikkinnslagType aksjon) {
@@ -103,7 +117,7 @@ public class UttakOverstyringshåndterer extends AbstractOverstyringshåndterer<
 
     private OverstyrtUttakPeriode map(OverstyrUttakPeriodeDto dto) {
         Set<OverstyrtUttakUtbetalingsgrad> utbetalingsgrader = dto.getUtbetalingsgrader().stream().map(this::map).collect(Collectors.toSet());
-        return new OverstyrtUttakPeriode(dto.getId(), dto.getSøkersUttakgsgrad(), utbetalingsgrader, dto.getBegrunnelse());
+        return new OverstyrtUttakPeriode(dto.getId(), dto.getSøkersUttaksgrad(), utbetalingsgrader, dto.getBegrunnelse());
     }
 
     private OverstyrtUttakUtbetalingsgrad map(OverstyrUttakUtbetalingsgradDto dto) {
@@ -112,12 +126,6 @@ public class UttakOverstyringshåndterer extends AbstractOverstyringshåndterer<
         String aktoerId = arbeidsforhold.getAktørId() != null ? arbeidsforhold.getAktørId().getAktørId() : null;
         return new OverstyrtUttakUtbetalingsgrad(arbeidsforhold.getType(), orgnr, aktoerId, arbeidsforhold.getInternArbeidsforholdId(), dto.getUtbetalingsgrad());
     }
-
-    @Override
-    protected void lagHistorikkInnslag(Behandling behandling, OverstyrUttakDto dto) {
-       //håndtert i håndterOverstyring-metoden
-    }
-
 
     String formater(LocalDateInterval periode) {
         DateTimeFormatter format = DateTimeFormatter.ofPattern("dd.MM.yyyy");

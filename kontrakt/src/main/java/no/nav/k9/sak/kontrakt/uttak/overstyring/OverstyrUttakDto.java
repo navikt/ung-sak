@@ -83,17 +83,12 @@ public class OverstyrUttakDto extends OverstyringAksjonspunktDto {
     }
 
     @AssertFalse(message = "Har ingen slett- og/eller lagreEllerOppdater-operasjon")
-    boolean harIngenOperasjon(){
+    public boolean getHarIngenOperasjon() {
         return lagreEllerOppdater.isEmpty() && slett.isEmpty();
     }
 
-    @AssertTrue(message = "Ikke alle perioder er lukket. Minst en periode mangler fom- eller tom-felt")
-    boolean allePerioderErLukket() {
-        return lagreEllerOppdater.stream().allMatch(p -> p.getPeriode().getFom() != null && p.getPeriode().getTom() != null);
-    }
-
     @AssertTrue(message = "Det er duplikat id i slett- og/eller lagreEllerOppdater-feltene")
-    boolean harIngenDuplikatIdI() {
+    public boolean getHarIngenDuplikatId() {
         List<Long> alleIder = new ArrayList<>();
         for (OverstyrUttakSlettPeriodeDto dto : slett) {
             alleIder.add(dto.getId());
@@ -107,8 +102,8 @@ public class OverstyrUttakDto extends OverstyringAksjonspunktDto {
         return alleIder.size() == unike.size();
     }
 
-    @AssertFalse(message = "Det er overlappende perioder i lagreElllerOppdater-feltet")
-    boolean harOverlappendePerioder() {
+    @AssertFalse(message = "Det er overlappende perioder i lagreEllerOppdater-feltet")
+    public boolean getHarOverlappendePerioder() {
         List<Periode> sortertePerioder = new ArrayList<>(lagreEllerOppdater.stream()
             .map(OverstyrUttakPeriodeDto::getPeriode)
             .sorted(Comparator.naturalOrder())

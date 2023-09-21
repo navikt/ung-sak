@@ -18,9 +18,9 @@ public class OverstyrtUttakUtbetalingsgrad {
 
     public OverstyrtUttakUtbetalingsgrad(UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiverId, InternArbeidsforholdRef internArbeidsforholdRef, BigDecimal utbetalingsgrad) {
         this.aktivitetType = aktivitetType;
-        this.arbeidsgiverOrgNr = arbeidsgiverId.getArbeidsgiverOrgnr();
-        this.arbeidsgiverAktørId = arbeidsgiverId.getArbeidsgiverAktørId();
-        this.internArbeidsforholdRef = internArbeidsforholdRef.getReferanse();
+        this.arbeidsgiverOrgNr = arbeidsgiverId != null ? arbeidsgiverId.getArbeidsgiverOrgnr() : null;
+        this.arbeidsgiverAktørId = arbeidsgiverId != null ? arbeidsgiverId.getArbeidsgiverAktørId() : null;
+        this.internArbeidsforholdRef = internArbeidsforholdRef != null ? internArbeidsforholdRef.getReferanse() : null;
         this.utbetalingsgrad = utbetalingsgrad;
     }
 
@@ -28,7 +28,7 @@ public class OverstyrtUttakUtbetalingsgrad {
         this.aktivitetType = aktivitetType;
         this.arbeidsgiverOrgNr = arbeidsgiverOrgNr;
         this.arbeidsgiverAktørId = arbeidsgiverAktørId;
-        this.internArbeidsforholdRef = internArbeidsforholdRef.getReferanse();
+        this.internArbeidsforholdRef = internArbeidsforholdRef != null ? internArbeidsforholdRef.getReferanse() : null;
         this.utbetalingsgrad = utbetalingsgrad;
     }
 

@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -31,6 +33,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.abac.AbacAttributt;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
@@ -205,6 +208,12 @@ public class UttakRestTjeneste {
         boolean gyldigPeriode() {
             return !fom.isAfter(tom);
         }
+
+        @JsonIgnore
+        @AbacAttributt("behandlingUuid")
+        public UUID getBehandlingUuid() {
+            return behandlingIdDto.getBehandlingUuid();
+        }
     }
 
 
@@ -219,8 +228,8 @@ public class UttakRestTjeneste {
     private OverstyrUttakUtbetalingsgradDto map(OverstyrtUttakUtbetalingsgrad overstyrtUtbetalingsgrad) {
         OverstyrUttakArbeidsforholdDto aktivitet = new OverstyrUttakArbeidsforholdDto(
             overstyrtUtbetalingsgrad.getAktivitetType(),
-            overstyrtUtbetalingsgrad.getArbeidsgiverId().getOrgnr() != null ? new OrgNummer(overstyrtUtbetalingsgrad.getArbeidsgiverId().getOrgnr()) : null,
-            overstyrtUtbetalingsgrad.getArbeidsgiverId().getAktørId(),
+            overstyrtUtbetalingsgrad.getArbeidsgiverId() != null && overstyrtUtbetalingsgrad.getArbeidsgiverId().getOrgnr() != null ? new OrgNummer(overstyrtUtbetalingsgrad.getArbeidsgiverId().getOrgnr()) : null,
+            overstyrtUtbetalingsgrad.getArbeidsgiverId() != null ? overstyrtUtbetalingsgrad.getArbeidsgiverId().getAktørId() : null,
             overstyrtUtbetalingsgrad.getInternArbeidsforholdRef());
         return new OverstyrUttakUtbetalingsgradDto(aktivitet, overstyrtUtbetalingsgrad.getUtbetalingsgrad());
     }

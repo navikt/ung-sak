@@ -12,7 +12,6 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -27,7 +26,7 @@ public class OverstyrUttakRepository {
         this.entityManager = entityManager;
     }
 
-    public boolean harOverstyring(Long behandlingId) {
+    public boolean harNoeOverstyrtUttak(Long behandlingId) {
         return !hentOverstyrtUttak(behandlingId).isEmpty();
     }
 
@@ -35,41 +34,38 @@ public class OverstyrUttakRepository {
         return mapFraEntitetTidslinje(hentSomEntitetTidslinje(behandlingId));
     }
 
-    public void oppdaterOverstyringer(Long behandlingId, List<Long> slettes, LocalDateTimeline<OverstyrtUttakPeriode> oppdaterEllerLagre) {
-        LocalDateTimeline<OverstyrtUttakPeriode> eksisterendeOverstyringer = hentOverstyrtUttak(behandlingId);
-        Map<Long, LocalDateSegment<OverstyrtUttakPeriode>> eksisterendeOverstyringerPrId = eksisterendeOverstyringer.stream().collect(Collectors.toMap(segment -> segment.getValue().getId(), segment -> segment));
+    public void oppdaterOverstyringAvUttak(Long behandlingId, List<Long> slettes, LocalDateTimeline<OverstyrtUttakPeriode> oppdaterEllerLagre) {
+        LocalDateTimeline<OverstyrtUttakPeriodeEntitet> eksisterendeOverstyringer = hentSomEntitetTidslinje(behandlingId);
+        Map<Long, LocalDateSegment<OverstyrtUttakPeriodeEntitet>> eksisterendeOverstyringerPrId = eksisterendeOverstyringer.stream().collect(Collectors.toMap(segment -> segment.getValue().getId(), segment -> segment));
         slettes.forEach(slettesId -> fjernOverstyring(behandlingId, slettesId));
 
-        List<LocalDateSegment<OverstyrtUttakPeriode>> segmenterSomEndres =new ArrayList<>();
+        List<LocalDateSegment<OverstyrtUttakPeriode>> segmenterSomEndres = new ArrayList<>();
         oppdaterEllerLagre.stream().forEach(segment -> {
             OverstyrtUttakPeriode nyOverstyring = segment.getValue();
             Long eksisterendeOverstyringId = nyOverstyring.getId();
-            LocalDateSegment<OverstyrtUttakPeriode> eksisterendeOverstyring = eksisterendeOverstyringId != null ? eksisterendeOverstyringerPrId.get(eksisterendeOverstyringId) : null;
+            LocalDateSegment<OverstyrtUttakPeriode> eksisterendeOverstyring = eksisterendeOverstyringId != null ? mapFraEntitet(eksisterendeOverstyringerPrId.get(eksisterendeOverstyringId)) : null;
             boolean harEndring = !Objects.equals(nyOverstyring, eksisterendeOverstyring);
-            if (harEndring && eksisterendeOverstyringId != null){
-                fjernOverstyring(behandlingId, eksisterendeOverstyringId);
-            }
-            if (harEndring){
+            if (harEndring) {
                 segmenterSomEndres.add(segment);
             }
         });
 
-        fjernOverstyringerSomOverlapper(behandlingId, new LocalDateTimeline<>(segmenterSomEndres));
+        fjernEksisterendeOverstyringerSomOverlapper(new LocalDateTimeline<>(segmenterSomEndres), eksisterendeOverstyringer);
+        segmenterSomEndres.stream().forEach(segment -> {
+                Long eksisterendeOverstyringId = segment.getValue().getId();
+                if (eksisterendeOverstyringId != null) {
+                    fjernOverstyring(behandlingId, eksisterendeOverstyringId);
+                }
+                OverstyrtUttakPeriode overstyring = segment.getValue();
+                OverstyrtUttakPeriodeEntitet nyOverstyring = new OverstyrtUttakPeriodeEntitet(behandlingId, DatoIntervallEntitet.fra(segment.getLocalDateInterval()), overstyring.getSøkersUttaksgrad(), map(overstyring.getOverstyrtUtbetalingsgrad()), overstyring.getBegrunnelse());
+                entityManager.persist(nyOverstyring);
+            }
+        );
+
         entityManager.flush();
     }
 
-    public void leggTilOverstyring(Long behandlingId, LocalDateInterval periode, OverstyrtUttakPeriode overstyring) {
-        fjernOverstyringerSomOverlapper(behandlingId, new LocalDateTimeline<>(periode, true));
-
-        OverstyrtUttakPeriodeEntitet nyOverstyring = new OverstyrtUttakPeriodeEntitet(behandlingId, DatoIntervallEntitet.fra(periode), overstyring.getSøkersUttaksgrad(), map(overstyring.getOverstyrtUtbetalingsgrad()), overstyring.getBegrunnelse());
-        entityManager.persist(nyOverstyring);
-
-        entityManager.flush();
-    }
-
-    private void fjernOverstyringerSomOverlapper(Long behandlingId, LocalDateTimeline<?> perioderSomRyddes) {
-        LocalDateTimeline<OverstyrtUttakPeriodeEntitet> eksisterendeOverstyringer = hentSomEntitetTidslinje(behandlingId);
-
+    private void fjernEksisterendeOverstyringerSomOverlapper(LocalDateTimeline<?> perioderSomRyddes, LocalDateTimeline<OverstyrtUttakPeriodeEntitet> eksisterendeOverstyringer) {
         Set<OverstyrtUttakPeriodeEntitet> påvirkedeEksisterendeOverstyringer = eksisterendeOverstyringer.intersection(perioderSomRyddes).stream().map(LocalDateSegment::getValue).collect(Collectors.toSet());
         påvirkedeEksisterendeOverstyringer.forEach(eksisterendeOverstyring -> {
             eksisterendeOverstyring.deaktiver();
@@ -90,7 +86,8 @@ public class OverstyrUttakRepository {
     }
 
     private LocalDateTimeline<OverstyrtUttakPeriodeEntitet> hentSomEntitetTidslinje(Long behandlingId) {
-        return tilTidslinje(finnOverstyrtePerioder(behandlingId));
+        Collection<OverstyrtUttakPeriodeEntitet> entiteter = finnOverstyrtePerioder(behandlingId);
+        return tilTidslinje(entiteter);
     }
 
     private Collection<OverstyrtUttakPeriodeEntitet> finnOverstyrtePerioder(Long behandlingId) {
@@ -112,8 +109,17 @@ public class OverstyrUttakRepository {
 
     private LocalDateTimeline<OverstyrtUttakPeriode> mapFraEntitetTidslinje(LocalDateTimeline<OverstyrtUttakPeriodeEntitet> entiteter) {
         return new LocalDateTimeline<>(entiteter.stream()
-            .map(ou -> new LocalDateSegment<>(ou.getFom(), ou.getTom(), new OverstyrtUttakPeriode(ou.getValue().getId(), ou.getValue().getSøkersUttaksgrad(), map(ou.getValue().getOverstyrtUtbetalingsgrad()), ou.getValue().getBegrunnelse())))
+            .map(this::mapFraEntitet)
             .toList());
+    }
+
+    private LocalDateSegment<OverstyrtUttakPeriode> mapFraEntitet(LocalDateSegment<OverstyrtUttakPeriodeEntitet> ou) {
+        OverstyrtUttakPeriodeEntitet entitet = ou.getValue();
+        return new LocalDateSegment<>(ou.getLocalDateInterval(), mapFraEntitet(entitet));
+    }
+
+    private OverstyrtUttakPeriode mapFraEntitet(OverstyrtUttakPeriodeEntitet entitet) {
+        return new OverstyrtUttakPeriode(entitet.getId(), entitet.getSøkersUttaksgrad(), map(entitet.getOverstyrtUtbetalingsgrad()), entitet.getBegrunnelse());
     }
 
     private LocalDateTimeline<OverstyrtUttakPeriodeEntitet> tilTidslinje(Collection<OverstyrtUttakPeriodeEntitet> entiteter) {
