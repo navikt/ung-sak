@@ -257,13 +257,13 @@ spec:
     - name: FERIEPENGER_INFOTRYGD_KORRIGER
       value: "true"
     - name: TILKOMMET_AKTIVITET_ENABLED
-      value: "true"
+      value: "false"
     - name: ENABLE_ETTERKONTROLL_FORSINKET_SAKB
       value: "true"
     - name: ENABLE_UTBETALINGSGRAD_OPPDRAG
       value: "true"
     - name: ENABLE_DATO_NY_REGEL_UTTAK
-      value: "true"
+      value: "false"
     - name: PSB_FILTRER_IM_PAA_BEHANDLING_ID
       value: "true"
     - name: ENABLE_INNTEKTSMELDING_CACHE
