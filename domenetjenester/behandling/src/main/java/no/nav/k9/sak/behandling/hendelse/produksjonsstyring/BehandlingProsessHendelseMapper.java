@@ -103,7 +103,13 @@ public class BehandlingProsessHendelseMapper {
             return null;
         }
 
-        final Set<KravDokument> kravdokumenter = søknadsfristTjeneste.relevanteKravdokumentForBehandling(behandlingRef);
+        final Set<KravDokument> kravdokumenter;
+        try {
+            kravdokumenter = søknadsfristTjeneste.relevanteKravdokumentForBehandling(behandlingRef);
+        } catch (Exception e) {
+            logger.info("Innhenting av kravdokumenter feilet, " + e.getMessage());
+            return null;
+        }
         return kravdokumenter.stream()
             .filter(kd -> {
                 final boolean manglerInnsendingstidspunkt = (kd.getInnsendingsTidspunkt() == null);
