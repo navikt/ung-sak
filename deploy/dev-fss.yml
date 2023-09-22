@@ -251,11 +251,11 @@ spec:
     - name: OMP_NULL_HELG_I_KRAVPERIODER
       value: "true"
     - name: TILKOMMET_AKTIVITET_ENABLED
-      value: "false"
+      value: "true"
     - name: ENABLE_UTBETALINGSGRAD_OPPDRAG
       value: "true"
     - name: ENABLE_DATO_NY_REGEL_UTTAK
-      value: "false"
+      value: "true"
     - name: PSB_FILTRER_IM_PAA_BEHANDLING_ID
       value: "true"
 
