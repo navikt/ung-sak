@@ -232,8 +232,6 @@ spec:
       value: "3030"
 
     # Feature-flag
-    - name: ENABLE_BRUKERDIALOGINNSYN
-      value: "true"
     - name: OMP_VERIFISERING_TILKJENT_YTELSE
       value: "true"
     - name: SOKNADSFRIST_BENYTT_ELDSTEKRAV_PER_PERIODE
@@ -244,8 +242,6 @@ spec:
       value: "true"
     - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
       value: "2022-08-08"
-    - name: BG_FORLENGELSE_BASERT_PAA_UTTAK
-      value: "true"
     - name: ENABLE_SJEKK_TILBAKEKREVING
       value: "true"
     - name: IKKE_YRKESAKTIV_UTEN_SPEILING
@@ -256,19 +252,13 @@ spec:
       value: "true"
     - name: OMS_ZERO_REFUSJON_ER_KRAV
       value: "false"
-    - name: FERIEPENGER_INFOTRYGD_KORRIGER
-      value: "true"
     - name: TILKOMMET_AKTIVITET_ENABLED
       value: "false"
-    - name: ENABLE_ETTERKONTROLL_FORSINKET_SAKB
-      value: "true"
     - name: ENABLE_UTBETALINGSGRAD_OPPDRAG
       value: "true"
     - name: ENABLE_DATO_NY_REGEL_UTTAK
       value: "false"
     - name: PSB_FILTRER_IM_PAA_BEHANDLING_ID
-      value: "true"
-    - name: ENABLE_INNTEKTSMELDING_CACHE
       value: "true"
 
 
