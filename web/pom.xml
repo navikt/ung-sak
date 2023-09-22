@@ -15,7 +15,7 @@
 
     <properties>
         <simple.client.version>0.16.0</simple.client.version>
-        <swagger-ui.version>5.6.1</swagger-ui.version>
+        <swagger-ui.version>5.7.2</swagger-ui.version>
     </properties>
 
 
@@ -24,14 +24,14 @@
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-bom</artifactId>
-                <version>11.0.15</version>
+                <version>11.0.16</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.jersey</groupId>
                 <artifactId>jersey-bom</artifactId>
-                <version>3.0.8</version>
+                <version>3.0.11</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

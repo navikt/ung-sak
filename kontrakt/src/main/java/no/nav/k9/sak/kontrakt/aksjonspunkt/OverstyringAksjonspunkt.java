@@ -13,4 +13,8 @@ public interface OverstyringAksjonspunkt {
 
     boolean skalAvbrytes();
 
+    default String getInnvilgelseMerknadKode() {
+        return null;
+    }
+
 }

@@ -22,12 +22,12 @@ public class GraderingMotInntektKandidatUtledningTask implements ProsessTaskHand
     public static final String TASKTYPE = "gradering.kandidatUtledning";
     public static final String DRYRUN = "dryrun";
     public static final String KALKULUS_UTLEDNING = "kalkulusUtledning";
+    public static final String YTELSE = "ytelse";
 
     private static final Logger log = LoggerFactory.getLogger(GraderingMotInntektKandidatUtledningTask.class);
-    public static final LocalDate FOM_DATO_INNTEKT_GRADERING = LocalDate.of(2023, 4, 1);
+    public static final LocalDate FOM_DATO_INNTEKT_GRADERING = LocalDate.of(2023, 11, 6);
     private InntektGraderingRepository inntektGraderingRepository;
     private KandidaterForInntektgraderingTjeneste kandidaterForInntektgraderingTjeneste;
-
 
 
     GraderingMotInntektKandidatUtledningTask() {
@@ -45,15 +45,16 @@ public class GraderingMotInntektKandidatUtledningTask implements ProsessTaskHand
         var dryRunValue = prosessTaskData.getPropertyValue(DRYRUN);
         var kalkulusUtledningValue = prosessTaskData.getPropertyValue(KALKULUS_UTLEDNING);
         var kalkulusUtledning = Boolean.parseBoolean(kalkulusUtledningValue);
+        var ytelseType = prosessTaskData.getPropertyValue(YTELSE);
+        FagsakYtelseType fagsakYtelseType = ytelseType != null ? FagsakYtelseType.fraKode(YTELSE) : FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
         var dryRun = Boolean.parseBoolean(dryRunValue);
-
         if (dryRun) {
-            var fagsaker = inntektGraderingRepository.hentFagsakIdOgSaksnummer(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, FOM_DATO_INNTEKT_GRADERING);
+            var fagsaker = inntektGraderingRepository.hentFagsakIdOgSaksnummer(fagsakYtelseType, FOM_DATO_INNTEKT_GRADERING);
             log.info("DRYRUN - Fant {} kandidater til gradering mot inntekt.", fagsaker.size());
             if (kalkulusUtledning) {
                 List<String> saksnummerMedAksjonspunkt = fagsaker.entrySet().stream()
                     .filter(f -> {
-                        var vurderingsperioder = kandidaterForInntektgraderingTjeneste.finnGraderingMotInntektPerioder(f.getKey(), LocalDate.of(2023, 4, 1));
+                        var vurderingsperioder = kandidaterForInntektgraderingTjeneste.finnGraderingMotInntektPerioder(f.getKey(), FOM_DATO_INNTEKT_GRADERING);
                         return !vurderingsperioder.isEmpty();
                     })
                     .map(Map.Entry::getValue)

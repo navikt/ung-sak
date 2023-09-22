@@ -5,8 +5,8 @@
                  version="3.0">
 
     <sequence-generator name="SEQ_GR_OPPLAERING" allocation-size="50" sequence-name="SEQ_GR_OPPLAERING" />
-    <sequence-generator name="SEQ_OLP_VURDERT_OPPLAERING" allocation-size="50" sequence-name="SEQ_OLP_VURDERT_OPPLAERING" />
-    <sequence-generator name="SEQ_OLP_VURDERT_OPPLAERING_HOLDER" allocation-size="50" sequence-name="SEQ_OLP_VURDERT_OPPLAERING_HOLDER" />
+    <sequence-generator name="SEQ_OLP_VURDERT_NOEDVENDIGHET" allocation-size="50" sequence-name="SEQ_OLP_VURDERT_NOEDVENDIGHET" />
+    <sequence-generator name="SEQ_OLP_VURDERT_NOEDVENDIGHET_HOLDER" allocation-size="50" sequence-name="SEQ_OLP_VURDERT_NOEDVENDIGHET_HOLDER" />
     <sequence-generator name="SEQ_OLP_VURDERT_OPPLAERING_PERIODE" allocation-size="50" sequence-name="SEQ_OLP_VURDERT_OPPLAERING_PERIODE" />
     <sequence-generator name="SEQ_OLP_VURDERT_OPPLAERING_PERIODER_HOLDER" allocation-size="50" sequence-name="SEQ_OLP_VURDERT_OPPLAERING_PERIODER_HOLDER" />
     <sequence-generator name="SEQ_OLP_VURDERT_REISETID" allocation-size="50" sequence-name="SEQ_OLP_VURDERT_REISETID" />
@@ -18,8 +18,8 @@
     <sequence-generator name="SEQ_OPPLAERING_DOKUMENT" allocation-size="50" sequence-name="SEQ_OPPLAERING_DOKUMENT" />
 
     <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringGrunnlag" />
-    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæring" />
-    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringHolder" />
+    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertNødvendighet" />
+    <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertNødvendighetHolder" />
     <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringPeriode" />
     <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringPerioderHolder" />
     <entity class="no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertReisetid" />

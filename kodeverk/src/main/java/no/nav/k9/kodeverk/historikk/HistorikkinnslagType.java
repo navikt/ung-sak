@@ -42,6 +42,7 @@ public enum HistorikkinnslagType implements Kodeverdi {
     MIGRERT_FRA_INFOTRYGD("MIGRERT_FRA_INFOTRYGD", "Behandling gjelder flytting av sak fra Infotrygd", HistorikkinnslagMal.MAL_TYPE_1),
     MANGELFULL_SØKNAD("MANGELFULL_SØKNAD", "Mangelfull søknad", HistorikkinnslagMal.MAL_TYPE_1),
     KØET_BEH_GJEN("KØET_BEH_GJEN", "Køet behandling er gjenopptatt", HistorikkinnslagMal.MAL_TYPE_1),
+    SØKNADSFRIST_VURDERT("SØKNADSFRIST_VURDERT", "Søknadsfrist manuelt vurdert:", HistorikkinnslagMal.MAL_TYPE_1),
 
     // Mal Type 2
     VEDTAK_FATTET("VEDTAK_FATTET", "Vedtak fattet", HistorikkinnslagMal.MAL_TYPE_2),

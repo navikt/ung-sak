@@ -31,8 +31,8 @@ public class VurdertOpplæringGrunnlag extends BaseEntitet {
 
     @ManyToOne
     @Immutable
-    @JoinColumn(name = "vurdert_opplaering_holder_id", updatable = false, unique = true)
-    private VurdertOpplæringHolder vurdertOpplæringHolder;
+    @JoinColumn(name = "vurdert_noedvendighet_holder_id", updatable = false, unique = true)
+    private VurdertNødvendighetHolder vurdertNødvendighetHolder;
 
     @ManyToOne
     @Immutable
@@ -54,10 +54,10 @@ public class VurdertOpplæringGrunnlag extends BaseEntitet {
     VurdertOpplæringGrunnlag() {
     }
 
-    public VurdertOpplæringGrunnlag(Long behandlingId, VurdertInstitusjonHolder vurdertInstitusjonHolder, VurdertOpplæringHolder vurdertOpplæringHolder, VurdertOpplæringPerioderHolder vurdertePerioder, VurdertReisetidHolder vurdertReisetid) {
+    public VurdertOpplæringGrunnlag(Long behandlingId, VurdertInstitusjonHolder vurdertInstitusjonHolder, VurdertNødvendighetHolder vurdertNødvendighetHolder, VurdertOpplæringPerioderHolder vurdertePerioder, VurdertReisetidHolder vurdertReisetid) {
         this.behandlingId = behandlingId;
         this.vurdertInstitusjonHolder = vurdertInstitusjonHolder;
-        this.vurdertOpplæringHolder = vurdertOpplæringHolder;
+        this.vurdertNødvendighetHolder = vurdertNødvendighetHolder;
         this.vurdertePerioder = vurdertePerioder;
         this.vurdertReisetid = vurdertReisetid;
     }
@@ -65,7 +65,7 @@ public class VurdertOpplæringGrunnlag extends BaseEntitet {
     public VurdertOpplæringGrunnlag(Long behandlingId, VurdertOpplæringGrunnlag grunnlag) {
         this.behandlingId = behandlingId;
         this.vurdertInstitusjonHolder = grunnlag.vurdertInstitusjonHolder;
-        this.vurdertOpplæringHolder = grunnlag.vurdertOpplæringHolder;
+        this.vurdertNødvendighetHolder = grunnlag.vurdertNødvendighetHolder;
         this.vurdertePerioder = grunnlag.vurdertePerioder;
         this.vurdertReisetid = grunnlag.vurdertReisetid;
     }
@@ -74,8 +74,8 @@ public class VurdertOpplæringGrunnlag extends BaseEntitet {
         return vurdertInstitusjonHolder;
     }
 
-    public VurdertOpplæringHolder getVurdertOpplæringHolder() {
-        return vurdertOpplæringHolder;
+    public VurdertNødvendighetHolder getVurdertNødvendighetHolder() {
+        return vurdertNødvendighetHolder;
     }
 
     public VurdertOpplæringPerioderHolder getVurdertePerioder() {
