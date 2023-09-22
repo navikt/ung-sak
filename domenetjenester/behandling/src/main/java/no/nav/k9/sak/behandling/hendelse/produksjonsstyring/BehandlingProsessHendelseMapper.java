@@ -104,14 +104,17 @@ public class BehandlingProsessHendelseMapper {
         }
 
         final Set<KravDokument> kravdokumenter = søknadsfristTjeneste.relevanteKravdokumentForBehandling(behandlingRef);
-        if (kravdokumenter.isEmpty()) {
-            return null;
-        }
-
         return kravdokumenter.stream()
+            .filter(kd -> {
+                final boolean manglerInnsendingstidspunkt = (kd.getInnsendingsTidspunkt() == null);
+                if (manglerInnsendingstidspunkt) {
+                    logger.info("Mangler innsendingstidspunkt for: " + behandlingRef.getFagsakYtelseType().getKode() + " " + behandlingRef.getSaksnummer().getVerdi());
+                }
+                return !manglerInnsendingstidspunkt;
+            })
             .min(Comparator.comparing(KravDokument::getInnsendingsTidspunkt))
-            .get()
-            .getInnsendingsTidspunkt();
+            .map(KravDokument::getInnsendingsTidspunkt)
+            .orElse(null);
     }
 
     public BehandlingProsessHendelse getProduksjonstyringEventDto(EventHendelse eventHendelse, Behandling behandling) {
