@@ -104,7 +104,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
         søknadsperiodeRepository = new SøknadsperiodeRepository(entityManager);
         mottatteDokumentRepository = new MottatteDokumentRepository(entityManager);
         utleder = new PleiepengerEndretUtbetalingPeriodeutleder(uttakTjeneste, behandlingRepository, new UnitTestLookupInstanceImpl<>(vilkårsPerioderTilVurderingTjeneste),
-            new ProsessTriggereRepository(entityManager), søknadsperiodeTjeneste, true);
+            new ProsessTriggereRepository(entityManager), søknadsperiodeTjeneste);
         originalBehandling = opprettBehandling(SKJÆRINGSTIDSPUNKT);
         behandling = Behandling.fraTidligereBehandling(originalBehandling, BehandlingType.REVURDERING).build();
         behandlingRepository.lagre(behandling, new BehandlingLås(null));

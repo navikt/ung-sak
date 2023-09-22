@@ -20,7 +20,6 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -54,7 +53,6 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
     private ProsessTriggereRepository prosessTriggereRepository;
 
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
-    private boolean enabled;
 
 
     public PleiepengerEndretUtbetalingPeriodeutleder() {
@@ -65,14 +63,12 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
                                                      BehandlingRepository behandlingRepository,
                                                      @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
                                                      ProsessTriggereRepository prosessTriggereRepository,
-                                                     SøknadsperiodeTjeneste søknadsperiodeTjeneste,
-                                                     @KonfigVerdi(value = "BG_FORLENGELSE_BASERT_PAA_UTTAK", defaultVerdi = "true") boolean enabled) {
+                                                     SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
         this.uttakRestKlient = uttakRestKlient;
         this.behandlingRepository = behandlingRepository;
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
         this.prosessTriggereRepository = prosessTriggereRepository;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
-        this.enabled = enabled;
     }
 
     @Override
@@ -90,10 +86,6 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
 
     @Override
     public NavigableSet<DatoIntervallEntitet> utledPerioder(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsperiode) {
-
-        if (!enabled) {
-            return new TreeSet<>(Set.of(vilkårsperiode));
-        }
 
         var tidslinjeFraProessTriggere = finnTidslinjeFraProsessTriggere(behandlingReferanse);
         var søknadperioderForBehandlingTidslinje = finnTidslinjeForRelevanteSøknadsperioder(behandlingReferanse);
