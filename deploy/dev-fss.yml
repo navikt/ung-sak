@@ -254,8 +254,6 @@ spec:
       value: "true"
     - name: OMP_NULL_HELG_I_KRAVPERIODER
       value: "true"
-    - name: OMS_ZERO_REFUSJON_ER_KRAV
-      value: "false"
     - name: FERIEPENGER_INFOTRYGD_KORRIGER
       value: "true"
     - name: TILKOMMET_AKTIVITET_ENABLED

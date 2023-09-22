@@ -253,8 +253,6 @@ spec:
       value: "false"
     - name: OMP_NULL_HELG_I_KRAVPERIODER
       value: "false"
-    - name: OMS_ZERO_REFUSJON_ER_KRAV
-      value: "false"
     - name: FERIEPENGER_INFOTRYGD_KORRIGER
       value: "true"
     - name: ENABLE_ETTERKONTROLL_FORSINKET_SAKB
