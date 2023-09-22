@@ -69,7 +69,7 @@ public enum HistorikkEndretFeltType implements Kodeverdi {
     UTLAND("UTLAND", "Utland"),
 
     /** Uttak */
-    UTTAK_OVERSTYRT_PERIODE("UTTAK_OVERSTYRT_PERIODE", "Perioder hvor uttak er overstyrt helt eller delvis"),
+    UTTAK_OVERSTYRT_PERIODE("UTTAK_OVERSTYRT_PERIODE", "Aktuell uttaksperiode"),
 
     /** Tilkjent ytelse */
     TILKJENT_YTELSE("TILKJENT_YTELSE", "Tilkjent ytelse"),

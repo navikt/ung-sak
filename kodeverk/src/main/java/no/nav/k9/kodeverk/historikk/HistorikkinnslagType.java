@@ -87,9 +87,9 @@ public enum HistorikkinnslagType implements Kodeverdi {
     // Mal Type 10
     FASTSATT_UTTAK("FASTSATT_UTTAK", "Manuelt fastsetting av uttak", HistorikkinnslagMal.MAL_TYPE_10),
     OVST_UTTAK("OVST_UTTAK", "Manuelt overstyring av uttak", HistorikkinnslagMal.MAL_TYPE_10),
-    OVST_UTTAK_NY("OVST_UTTAK_NY", "Manuelt overstyring av uttak for periode", HistorikkinnslagMal.MAL_TYPE_10),
-    OVST_UTTAK_FJERNET("OVST_UTTAK_FJERNE", "Manuelt overstyring av uttak - fjernet overstyring for periode", HistorikkinnslagMal.MAL_TYPE_10),
-    OVST_UTTAK_OPPDATERT("OVST_UTTAK_OPPDATERE", "Manuelt overstyring av uttak - oppdaterte overstyring for periode", HistorikkinnslagMal.MAL_TYPE_10),
+    OVST_UTTAK_NY("OVST_UTTAK_NY", "Manuell overstyring av uttak - la til overstyring for periode", HistorikkinnslagMal.MAL_TYPE_5),
+    OVST_UTTAK_FJERNET("OVST_UTTAK_FJERNE", "Manuell overstyring av uttak - fjernet overstyring for periode", HistorikkinnslagMal.MAL_TYPE_5),
+    OVST_UTTAK_OPPDATERT("OVST_UTTAK_OPPDATERE", "Manuell overstyring av uttak - oppdaterte overstyring for periode", HistorikkinnslagMal.MAL_TYPE_5),
 
     UDEFINERT("-", "Ikke definert", null),
     ;
