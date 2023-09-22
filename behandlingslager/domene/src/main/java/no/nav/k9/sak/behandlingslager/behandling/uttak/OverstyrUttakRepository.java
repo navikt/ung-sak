@@ -26,10 +26,6 @@ public class OverstyrUttakRepository {
         this.entityManager = entityManager;
     }
 
-    public boolean harNoeOverstyrtUttak(Long behandlingId) {
-        return !hentOverstyrtUttak(behandlingId).isEmpty();
-    }
-
     public LocalDateTimeline<OverstyrtUttakPeriode> hentOverstyrtUttak(Long behandlingId) {
         return mapFraEntitetTidslinje(hentSomEntitetTidslinje(behandlingId));
     }
@@ -65,6 +61,13 @@ public class OverstyrUttakRepository {
         entityManager.flush();
     }
 
+    public void kopierGrunnlagFraEksisterendeBehandling(Long originalBehandlingId, Long nyBehandlingId) {
+        LocalDateTimeline<OverstyrtUttakPeriodeEntitet> eksisterendeOverstyringer = hentSomEntitetTidslinje(originalBehandlingId);
+        if (!eksisterendeOverstyringer.isEmpty()) {
+            oppdaterOverstyringAvUttak(nyBehandlingId, List.of(), mapFraEntitetTidslinje(eksisterendeOverstyringer));
+        }
+    }
+
     private void fjernEksisterendeOverstyringerSomOverlapper(LocalDateTimeline<?> perioderSomRyddes, LocalDateTimeline<OverstyrtUttakPeriodeEntitet> eksisterendeOverstyringer) {
         Set<OverstyrtUttakPeriodeEntitet> påvirkedeEksisterendeOverstyringer = eksisterendeOverstyringer.intersection(perioderSomRyddes).stream().map(LocalDateSegment::getValue).collect(Collectors.toSet());
         påvirkedeEksisterendeOverstyringer.forEach(eksisterendeOverstyring -> {
@@ -79,7 +82,7 @@ public class OverstyrUttakRepository {
             });
     }
 
-    public void fjernOverstyring(Long behandlingId, Long overstyrtUttakPeriodeId) {
+    private void fjernOverstyring(Long behandlingId, Long overstyrtUttakPeriodeId) {
         OverstyrtUttakPeriodeEntitet entitet = finnOverstyrtPeriode(behandlingId, overstyrtUttakPeriodeId);
         entitet.deaktiver();
         entityManager.persist(entitet);

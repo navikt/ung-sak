@@ -52,7 +52,6 @@ class OverstyrUttakRepositoryTest {
 
     @Test
     void skal_ikke_ha_overstyring_i_utgangspunktet() {
-        assertThat(overstyrUttakRepository.harNoeOverstyrtUttak(behandlingId)).isFalse();
         assertThat(overstyrUttakRepository.hentOverstyrtUttak(behandlingId)).isEqualTo(LocalDateTimeline.empty());
     }
 
@@ -70,7 +69,6 @@ class OverstyrUttakRepositoryTest {
 
         overstyrUttakRepository.oppdaterOverstyringAvUttak(behandlingId, List.of(), oppdateringer);
 
-        assertThat(overstyrUttakRepository.harNoeOverstyrtUttak(behandlingId)).isTrue();
         assertThat(overstyrUttakRepository.hentOverstyrtUttak(behandlingId)).isEqualTo(oppdateringer);
     }
 
@@ -87,7 +85,6 @@ class OverstyrUttakRepositoryTest {
         LocalDateTimeline<OverstyrtUttakPeriode> oppdaterteOverstyringer = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode2, overstyrtUttakPeriodeNy)));
         overstyrUttakRepository.oppdaterOverstyringAvUttak(behandlingId, List.of(), oppdaterteOverstyringer);
 
-        assertThat(overstyrUttakRepository.harNoeOverstyrtUttak(behandlingId)).isTrue();
         assertThat(overstyrUttakRepository.hentOverstyrtUttak(behandlingId)).isEqualTo(new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(periode1, overstyrtUttakPeriodeOrginal),
             new LocalDateSegment<>(periode2, overstyrtUttakPeriodeNy)
@@ -108,15 +105,11 @@ class OverstyrUttakRepositoryTest {
         LocalDateTimeline<OverstyrtUttakPeriode> oppdaterteOverstyringer = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode2, overstyrtUttakPeriodeNy)));
         overstyrUttakRepository.oppdaterOverstyringAvUttak(behandlingId, List.of(), oppdaterteOverstyringer);
 
-        assertThat(overstyrUttakRepository.harNoeOverstyrtUttak(behandlingId)).isTrue();
         assertThat(overstyrUttakRepository.hentOverstyrtUttak(behandlingId)).isEqualTo(eksisterendeOverstyringer.crossJoin(oppdaterteOverstyringer, StandardCombinators::coalesceRightHandSide));
     }
 
     @Test
     void skal_overskrive_eksisterende_overstyringer_for_perioden_for_ny_overstyring() {
-        assertThat(overstyrUttakRepository.harNoeOverstyrtUttak(behandlingId)).isFalse();
-        assertThat(overstyrUttakRepository.hentOverstyrtUttak(behandlingId)).isEqualTo(LocalDateTimeline.empty());
-
         LocalDateInterval periodeHele = new LocalDateInterval(dag1, dag3);
         LocalDateInterval periode1 = new LocalDateInterval(dag1, dag1);
         LocalDateInterval periode2 = new LocalDateInterval(dag2, dag2);
@@ -137,14 +130,11 @@ class OverstyrUttakRepositoryTest {
         LocalDateTimeline<OverstyrtUttakPeriode> oppdaterteOverstyringer = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periodeHele, overstyrtUttakPeriodeNy)));
         overstyrUttakRepository.oppdaterOverstyringAvUttak(behandlingId, List.of(), oppdaterteOverstyringer);
 
-
-        assertThat(overstyrUttakRepository.harNoeOverstyrtUttak(behandlingId)).isTrue();
         assertThat(overstyrUttakRepository.hentOverstyrtUttak(behandlingId)).isEqualTo(oppdaterteOverstyringer);
     }
 
     @Test
     void skal_lagre_og_slette_med_id() {
-        assertThat(overstyrUttakRepository.harNoeOverstyrtUttak(behandlingId)).isFalse();
         assertThat(overstyrUttakRepository.hentOverstyrtUttak(behandlingId)).isEqualTo(LocalDateTimeline.empty());
 
         LocalDateInterval periode1 = new LocalDateInterval(dag1, dag1);
@@ -168,7 +158,6 @@ class OverstyrUttakRepositoryTest {
 
     @Test
     void skal_oppdatere_periode_på_eksisterende_overstyring_gitt_id() {
-        assertThat(overstyrUttakRepository.harNoeOverstyrtUttak(behandlingId)).isFalse();
         assertThat(overstyrUttakRepository.hentOverstyrtUttak(behandlingId)).isEqualTo(LocalDateTimeline.empty());
 
         LocalDateInterval periodeOriginal = new LocalDateInterval(dag1, dag1);
@@ -192,13 +181,11 @@ class OverstyrUttakRepositoryTest {
         assertThat(overstyrUttakRepository.hentOverstyrtUttak(behandlingId)).isEqualTo(new LocalDateTimeline<>(periodeNy, verdier));
     }
 
-
     private Long lagBehandling(Fagsak fagsak) {
         Behandling.Builder builder = Behandling.forFørstegangssøknad(fagsak);
         Behandling behandling = builder.build();
         return behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
     }
-
 
     private Fagsak lagFagsak() {
         Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, AktørId.dummy(), new Saksnummer("AAAAA"), dag1, dag1);
