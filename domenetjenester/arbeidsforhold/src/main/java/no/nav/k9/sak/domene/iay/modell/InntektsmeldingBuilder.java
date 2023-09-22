@@ -42,12 +42,7 @@ public class InntektsmeldingBuilder {
         return build(false);
     }
 
-    public Inntektsmelding build(boolean ignore) {
-        return build(ignore, false);
-    }
-
-
-    public Inntektsmelding build(boolean ignore, boolean zeroErKrav) { // NOSONAR
+    public Inntektsmelding build(boolean ignore) { // NOSONAR
         var internRef = getInternArbeidsforholdRef();
         Objects.requireNonNull(kladd.getKanalreferanse(), "kanalreferanse er ikke satt");
         if (internRef.isPresent() && !ignore) {
@@ -58,7 +53,7 @@ public class InntektsmeldingBuilder {
             }
         }
 
-        new ValiderInntektsmelding(zeroErKrav).valider(this);
+        new ValiderInntektsmelding().valider(this);
 
         erBygget = true; // Kan ikke bygge mer med samme builder, vil bare returnere samme kladd.
         return kladd;

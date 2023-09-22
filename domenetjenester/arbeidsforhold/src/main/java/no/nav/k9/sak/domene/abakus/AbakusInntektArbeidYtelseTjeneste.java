@@ -30,7 +30,6 @@ import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagDto;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagSakSnapshotDto;
 import no.nav.abakus.iaygrunnlag.v1.OverstyrtInntektArbeidYtelseDto;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
@@ -70,7 +69,6 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     private IAYRequestCache requestCache;
     private AsyncInntektArbeidYtelseTjeneste asyncIayTjeneste;
 
-    private boolean enableInntektsmeldingCache;
 
     /**
      * CDI ctor for proxies.
@@ -88,15 +86,13 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
                                              BehandlingRepository behandlingRepository,
                                              MottatteDokumentRepository mottatteDokumentRepository,
                                              FagsakRepository fagsakRepository,
-                                             IAYRequestCache requestCache,
-                                             @KonfigVerdi(value = "ENABLE_INNTEKTSMELDING_CACHE", defaultVerdi = "false") boolean enableInntektsmeldingCache) {
+                                             IAYRequestCache requestCache) {
         this.behandlingRepository = Objects.requireNonNull(behandlingRepository, "behandlingRepository");
         this.abakusTjeneste = Objects.requireNonNull(abakusTjeneste, "abakusTjeneste");
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.requestCache = Objects.requireNonNull(requestCache, "requestCache");
         this.fagsakRepository = Objects.requireNonNull(fagsakRepository, "fagsakRepository");
         this.asyncIayTjeneste = asyncIayTjeneste;
-        this.enableInntektsmeldingCache = enableInntektsmeldingCache;
     }
 
     @Override
@@ -472,17 +468,12 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         var request = initInntektsmeldingerRequest(aktørId, saksnummer, ytelseType);
 
         List<Inntektsmelding> inntektsmeldinger;
-        if (enableInntektsmeldingCache) {
-            if (requestCache.getInntektsmeldingerForSak(request) != null) {
-                inntektsmeldinger = requestCache.getInntektsmeldingerForSak(request);
-            } else {
-                var dto = hentUnikeInntektsmeldinger(request);
-                inntektsmeldinger = mapResult(dto).getAlleInntektsmeldinger();
-                requestCache.leggTilInntektsmeldinger(request, inntektsmeldinger);
-            }
+        if (requestCache.getInntektsmeldingerForSak(request) != null) {
+            inntektsmeldinger = requestCache.getInntektsmeldingerForSak(request);
         } else {
             var dto = hentUnikeInntektsmeldinger(request);
             inntektsmeldinger = mapResult(dto).getAlleInntektsmeldinger();
+            requestCache.leggTilInntektsmeldinger(request, inntektsmeldinger);
         }
 
         return inntektsmeldinger.stream()
