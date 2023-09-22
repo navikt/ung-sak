@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.tilkommetAktivitet.TilkommetAktivitetTjeneste;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -33,9 +35,11 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
 import no.nav.k9.sak.utsatt.UtsattPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.EtablertTilsynTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
@@ -62,6 +66,7 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
     private UttakNyeReglerRepository uttakNyeReglerRepository;
     private TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste;
+    private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
 
     private boolean brukDatoNyRegelUttak;
 
@@ -78,6 +83,7 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
                                      UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
                                      UttakNyeReglerRepository uttakNyeReglerRepository,
                                      TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste,
+                                     SøknadsperiodeTjeneste søknadsperiodeTjeneste,
                                      @KonfigVerdi(value = "ENABLE_DATO_NY_REGEL_UTTAK", defaultVerdi = "false") boolean brukDatoNyRegelUttak) {
         this.behandlingRepository = behandlingRepository;
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
@@ -87,6 +93,7 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
         this.uttakNyeReglerRepository = uttakNyeReglerRepository;
         this.tilkommetAktivitetTjeneste = tilkommetAktivitetTjeneste;
+        this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
         this.brukDatoNyRegelUttak = brukDatoNyRegelUttak;
     }
 
@@ -142,9 +149,9 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
             return Optional.empty();
         }
         final boolean førsteGangManuellRevurdering = behandling.erManueltOpprettet()
-                && !behandling.harAksjonspunktMedType(AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK);
-        
-        final boolean datoHarBlittSatt = uttakNyeReglerRepository.finnDatoForNyeRegler(behandling.getId()).isPresent();        
+            && !behandling.harAksjonspunktMedType(AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK);
+
+        final boolean datoHarBlittSatt = uttakNyeReglerRepository.finnDatoForNyeRegler(behandling.getId()).isPresent();
         if (datoHarBlittSatt && !førsteGangManuellRevurdering) {
             return Optional.empty();
         }
@@ -152,7 +159,7 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
             // Reutled aksjonspunkt ved manuell revurdering.
             return Optional.of(AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK);
         }
-        
+
         /*
          * OBS: Vi må tillate at aksjonspunkt kan bli utledet ved manuell revurdering der
          * det ikke er noe aksjonspunkt der fra før.
@@ -163,8 +170,13 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
     }
 
     private boolean harTilkommmetAktivitet(Behandling behandling) {
-        //har ikke satt dato for nye regler i uttak (utleder AP for det her), så kan ikke begrense perioden (derav LocalDate.MIN)
-        boolean harTilkommetAktivitet = !tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(behandling.getFagsakId(), LocalDate.MIN).isEmpty();
+        //tilkommet aktivitet etter søknadsperiodene påvirker ikke behandlingen
+        LocalDateTimeline<Boolean> søknadsperioder = TidslinjeUtil.tilTidslinjeKomprimert(søknadsperiodeTjeneste.utledFullstendigPeriode(behandling.getId()));
+        if (søknadsperioder.isEmpty()) {
+            return false;
+        }
+        LocalDateInterval aktuellPeriode = new LocalDateInterval(LocalDate.MIN, søknadsperioder.getMaxLocalDate());
+        boolean harTilkommetAktivitet = !tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(behandling.getFagsakId(), aktuellPeriode).isEmpty();
         log.info("Har {} tilkommet aktivitet", (harTilkommetAktivitet ? "" : "ikke"));
         return harTilkommetAktivitet;
     }
