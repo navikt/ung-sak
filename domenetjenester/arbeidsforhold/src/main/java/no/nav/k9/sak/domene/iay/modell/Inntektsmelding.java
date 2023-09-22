@@ -1,6 +1,5 @@
 package no.nav.k9.sak.domene.iay.modell;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -429,11 +428,6 @@ public class Inntektsmelding implements IndexKey {
 
     public boolean harRefusjonskrav() {
         return getRefusjonBeløpPerMnd() != null || getRefusjonOpphører() != null || !getEndringerRefusjon().isEmpty();
-    }
-
-
-    public boolean harRefusjonskravNy() {
-        return (getRefusjonBeløpPerMnd() != null && getRefusjonBeløpPerMnd().getVerdi().compareTo(BigDecimal.ZERO) > 0) || !getEndringerRefusjon().isEmpty();
     }
 
     public boolean harFravær() {
