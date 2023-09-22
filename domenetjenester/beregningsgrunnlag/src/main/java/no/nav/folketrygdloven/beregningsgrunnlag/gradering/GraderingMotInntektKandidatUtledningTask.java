@@ -46,7 +46,7 @@ public class GraderingMotInntektKandidatUtledningTask implements ProsessTaskHand
         var kalkulusUtledningValue = prosessTaskData.getPropertyValue(KALKULUS_UTLEDNING);
         var kalkulusUtledning = Boolean.parseBoolean(kalkulusUtledningValue);
         var ytelseType = prosessTaskData.getPropertyValue(YTELSE);
-        FagsakYtelseType fagsakYtelseType = ytelseType != null ? FagsakYtelseType.fraKode(YTELSE) : FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+        FagsakYtelseType fagsakYtelseType = ytelseType != null ? FagsakYtelseType.fraKode(ytelseType) : FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
         var dryRun = Boolean.parseBoolean(dryRunValue);
         if (dryRun) {
             var fagsaker = inntektGraderingRepository.hentFagsakIdOgSaksnummer(fagsakYtelseType, FOM_DATO_INNTEKT_GRADERING);
