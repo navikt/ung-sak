@@ -258,6 +258,8 @@ spec:
       value: "true"
     - name: PSB_FILTRER_IM_PAA_BEHANDLING_ID
       value: "true"
+    - name: OPPTJENING_AP_VED_AKSEPTERT_MELLOMLIGGENDE_HELG
+      value: "true"
 
 
     # Konfigurasjoner
