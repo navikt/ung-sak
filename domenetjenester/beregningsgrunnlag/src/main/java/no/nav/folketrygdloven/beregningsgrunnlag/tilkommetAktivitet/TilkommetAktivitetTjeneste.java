@@ -41,9 +41,9 @@ public class TilkommetAktivitetTjeneste {
 
     @Inject
     public TilkommetAktivitetTjeneste(BehandlingRepository behandlingRepository,
-                                                 VilkårResultatRepository vilkårResultatRepository,
-                                                 BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
-                                                 KalkulusTjeneste kalkulusTjeneste) {
+                                      VilkårResultatRepository vilkårResultatRepository,
+                                      BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
+                                      KalkulusTjeneste kalkulusTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
@@ -52,13 +52,26 @@ public class TilkommetAktivitetTjeneste {
 
     /**
      * Henter ut tilkommede aktiviteter for angitt fagsak.
-     * 
-     * @param fagsakId IDen til fagsaken.
+     *
+     * @param fagsakId           IDen til fagsaken.
      * @param virkningstidspunkt Fra-og-med-datoen man skal få tilkommede aktiviteter for.
      * @return En {@code Map} med alle tilkommede aktiviteter med tilhørende perioden den
-     *          den regnes å være tilkommet i.
+     * den regnes å være tilkommet i.
      */
     public Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> finnTilkommedeAktiviteter(Long fagsakId, LocalDate virkningstidspunkt) {
+        LocalDateInterval aktuellPeriode = virkningstidspunkt != null ? new LocalDateInterval(virkningstidspunkt, LocalDateInterval.TIDENES_ENDE) : null;
+        return finnTilkommedeAktiviteter(fagsakId, aktuellPeriode);
+    }
+
+    /**
+     * Henter ut tilkommede aktiviteter for angitt fagsak.
+     *
+     * @param fagsakId           IDen til fagsaken.
+     * @param aktuellPeriode  perioden det sjekkes tilkommede aktiviteter for.
+     * @return En {@code Map} med alle tilkommede aktiviteter med tilhørende perioden den
+     * den regnes å være tilkommet i.
+     */
+    public Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> finnTilkommedeAktiviteter(Long fagsakId, LocalDateInterval aktuellPeriode) {
         var sisteBehandlingOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId);
 
         if (sisteBehandlingOpt.isEmpty()) {
@@ -109,21 +122,21 @@ public class TilkommetAktivitetTjeneste {
             }));
 
         final FagsakYtelseType ytelseType = sisteBehandling.getFagsak().getYtelseType();
-        
+
         final Map<UUID, List<UtledetTilkommetAktivitet>> koblingMotAktiviteter = kalkulusTjeneste.utledTilkommetAktivitet(ytelseType, koblingerÅSpørreMot, saksnummer);
-        
+
         final Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> sammenslåttResultat = new HashMap<>();
         koblingMotAktiviteter.values().stream().flatMap(Collection::stream).forEach(s -> {
             final AktivitetstatusOgArbeidsgiver aktivitetstatusOgArbeidsgiver = mapTilAktivitetstatusOgArbeidsgiver(s);
             LocalDateTimeline<Boolean> periodetidslinje = sammenslåttResultat.getOrDefault(aktivitetstatusOgArbeidsgiver, LocalDateTimeline.empty());
             LocalDateTimeline<Boolean> nyePerioder = new LocalDateTimeline<>(s.getPerioder()
-                    .stream()
-                    .map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), true))
-                    .collect(Collectors.toList())
-                    );
+                .stream()
+                .map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), true))
+                .collect(Collectors.toList())
+            );
             LocalDateTimeline<Boolean> sammenslått = periodetidslinje.crossJoin(nyePerioder);
-            if (virkningstidspunkt != null) {
-                sammenslått = sammenslått.intersection(new LocalDateInterval(virkningstidspunkt, LocalDateInterval.TIDENES_ENDE));
+            if (aktuellPeriode != null) {
+                sammenslått = sammenslått.intersection(aktuellPeriode);
             }
             if (!sammenslått.isEmpty()) {
                 sammenslåttResultat.put(aktivitetstatusOgArbeidsgiver, sammenslått);
