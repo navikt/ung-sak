@@ -14,22 +14,22 @@ import jakarta.validation.constraints.Size;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class ArbeidsgiverOversiktDto {
+public class ArbeidsgiverOgArbeidsforholdOversiktDto {
 
     @Valid
     @Size
     @JsonProperty(value = "arbeidsgivere")
-    private final Map<String, ArbeidsgiverOpplysningDto> arbeidsgivere;
+    private final Map<String, ArbeidsgiverOgArbeidsforholdOpplysningerDto> arbeidsgivere;
 
-    public ArbeidsgiverOversiktDto() {
+    public ArbeidsgiverOgArbeidsforholdOversiktDto() {
         this.arbeidsgivere = new HashMap<>();
     }
 
-    public ArbeidsgiverOversiktDto(Map<String, ArbeidsgiverOpplysningDto> arbeidsgivere) {
+    public ArbeidsgiverOgArbeidsforholdOversiktDto(Map<String, ArbeidsgiverOgArbeidsforholdOpplysningerDto> arbeidsgivere) {
         this.arbeidsgivere = arbeidsgivere;
     }
 
-    public Map<String, ArbeidsgiverOpplysningDto> getArbeidsgivere() {
+    public Map<String, ArbeidsgiverOgArbeidsforholdOpplysningerDto> getArbeidsgivere() {
         return arbeidsgivere;
     }
 }

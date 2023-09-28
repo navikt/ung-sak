@@ -31,7 +31,9 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningAggregat;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdIdDto;
-import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverOpplysningerDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverOgArbeidsforholdOpplysningerDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverOgArbeidsforholdOversiktDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverOpplysningDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverOversiktDto;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 
@@ -50,8 +52,7 @@ public class ArbeidsgiverOversiktTjeneste {
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
     }
 
-
-    public ArbeidsgiverOversiktDto getArbeidsgiverOpplysninger(UUID behandlingUuid) {
+    public ArbeidsgiverOgArbeidsforholdOversiktDto getArbeidsgiverOgArbeidsforholdOpplysninger(UUID behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid);
 
         Set<Arbeidsgiver> arbeidsgivere = new HashSet<>();
@@ -125,31 +126,31 @@ public class ArbeidsgiverOversiktTjeneste {
             .map(Inntektsmelding::getArbeidsgiver)
             .forEach(arbeidsgivere::add);
 
-        Map<String, ArbeidsgiverOpplysningerDto> oversikt = new HashMap<>();
+        Map<String, ArbeidsgiverOgArbeidsforholdOpplysningerDto> oversikt = new HashMap<>();
 
         var referanser = grunnlag.flatMap(gr -> gr.getArbeidsforholdInformasjon().map(ArbeidsforholdInformasjon::getArbeidsforholdReferanser))
             .orElse(Collections.emptyList());
 
         arbeidsgivere.stream()
             .map(a -> this.mapFra(a, referanser))
-            .collect(Collectors.groupingBy(ArbeidsgiverOpplysningerDto::getIdentifikator))
-            .forEach((key, value) -> oversikt.putIfAbsent(key, value.stream().findFirst().orElseGet(() -> new ArbeidsgiverOpplysningerDto(key, "Ukjent", mapReferanserForIdentifikator(referanser, key)))));
-        return new ArbeidsgiverOversiktDto(oversikt);
+            .collect(Collectors.groupingBy(ArbeidsgiverOgArbeidsforholdOpplysningerDto::getIdentifikator))
+            .forEach((key, value) -> oversikt.putIfAbsent(key, value.stream().findFirst().orElseGet(() -> new ArbeidsgiverOgArbeidsforholdOpplysningerDto(key, "Ukjent", mapReferanserForIdentifikator(referanser, key)))));
+        return new ArbeidsgiverOgArbeidsforholdOversiktDto(oversikt);
     }
 
-    private ArbeidsgiverOpplysningerDto mapFra(Arbeidsgiver arbeidsgiver, Collection<ArbeidsforholdReferanse> referanser) {
+    private ArbeidsgiverOgArbeidsforholdOpplysningerDto mapFra(Arbeidsgiver arbeidsgiver, Collection<ArbeidsforholdReferanse> referanser) {
         var identifikator = arbeidsgiver.getIdentifikator();
         try {
             ArbeidsgiverOpplysninger opplysninger = arbeidsgiverTjeneste.hent(arbeidsgiver);
             List<ArbeidsforholdIdDto> arbeidsforholdreferanser = mapReferanserForIdentifikator(referanser, identifikator);
             if (arbeidsgiver.getErVirksomhet()) {
-                return new ArbeidsgiverOpplysningerDto(identifikator, opplysninger.getNavn(), arbeidsforholdreferanser);
+                return new ArbeidsgiverOgArbeidsforholdOpplysningerDto(identifikator, opplysninger.getNavn(), arbeidsforholdreferanser);
             } else {
-                return new ArbeidsgiverOpplysningerDto(identifikator, opplysninger.getAlternativIdentifikator(),
+                return new ArbeidsgiverOgArbeidsforholdOpplysningerDto(identifikator, opplysninger.getAlternativIdentifikator(),
                     opplysninger.getNavn(), opplysninger.getFødselsdato(), arbeidsforholdreferanser);
             }
         } catch (Exception e) {
-            return new ArbeidsgiverOpplysningerDto(identifikator, "Feil ved oppslag", mapReferanserForIdentifikator(referanser, identifikator));
+            return new ArbeidsgiverOgArbeidsforholdOpplysningerDto(identifikator, "Feil ved oppslag", mapReferanserForIdentifikator(referanser, identifikator));
         }
     }
 
@@ -159,5 +160,33 @@ public class ArbeidsgiverOversiktTjeneste {
             .map(r -> new ArbeidsforholdIdDto(r.getInternReferanse().getUUIDReferanse(), r.getEksternReferanse().getReferanse()))
             .toList();
     }
+
+
+    public ArbeidsgiverOversiktDto getArbeidsgiverOpplysning(Collection<Arbeidsgiver> arbeidsgivere) {
+        Map<String, ArbeidsgiverOpplysningDto> oversikt = new HashMap<>();
+
+        arbeidsgivere.stream()
+            .map(this::mapFra)
+            .collect(Collectors.groupingBy(ArbeidsgiverOpplysningDto::getIdentifikator))
+            .forEach((key, value) -> oversikt.putIfAbsent(key, value.stream().findFirst().orElseGet(() -> new ArbeidsgiverOpplysningDto(key, "Ukjent"))));
+
+        return new ArbeidsgiverOversiktDto(oversikt);
+
+    }
+
+    private ArbeidsgiverOpplysningDto mapFra(Arbeidsgiver arbeidsgiver) {
+        var identifikator = arbeidsgiver.getIdentifikator();
+        try {
+            ArbeidsgiverOpplysninger opplysninger = arbeidsgiverTjeneste.hent(arbeidsgiver);
+            if (arbeidsgiver.getErVirksomhet()) {
+                return new ArbeidsgiverOpplysningDto(identifikator, opplysninger.getNavn());
+            } else {
+                return new ArbeidsgiverOpplysningDto(identifikator, opplysninger.getAlternativIdentifikator(), opplysninger.getNavn(), opplysninger.getFødselsdato());
+            }
+        } catch (Exception e) {
+            return new ArbeidsgiverOpplysningDto(identifikator, "Feil ved oppslag");
+        }
+    }
+
 
 }

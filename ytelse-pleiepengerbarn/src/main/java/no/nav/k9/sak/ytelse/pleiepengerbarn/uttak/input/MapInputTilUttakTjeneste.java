@@ -206,7 +206,7 @@ public class MapInputTilUttakTjeneste {
             overstyrtUttakUtbetalingsgrad.getAktivitetType().getKode(),
             overstyrtUttakUtbetalingsgrad.getArbeidsgiverId() != null ? overstyrtUttakUtbetalingsgrad.getArbeidsgiverId().getArbeidsgiverOrgnr() : null,
             overstyrtUttakUtbetalingsgrad.getArbeidsgiverId() != null ? overstyrtUttakUtbetalingsgrad.getArbeidsgiverId().getArbeidsgiverAktørId() : null,
-            overstyrtUttakUtbetalingsgrad.getInternArbeidsforholdRef() != null ? overstyrtUttakUtbetalingsgrad.getInternArbeidsforholdRef().getReferanse() : null
+            null //TODO fjerne arbeidsforholdref fra kontrakten?
         );
 
         return new OverstyrtUtbetalingsgradPerArbeidsforhold(overstyrtUttakUtbetalingsgrad.getUtbetalingsgrad(), arbeidsforhold);

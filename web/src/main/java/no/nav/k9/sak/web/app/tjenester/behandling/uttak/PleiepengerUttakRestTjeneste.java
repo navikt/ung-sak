@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -58,7 +59,7 @@ import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrUttakUtbetalingsgradDto;
 import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrbareUttakAktiviterDto;
 import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrtUttakDto;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriode;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
@@ -247,8 +248,17 @@ public class PleiepengerUttakRestTjeneste {
         if (overstyrtUttak.isEmpty()) {
             return null;
         }
-        ArbeidsgiverOversiktDto arbeidsgiverOversikt = arbeidsgiverOversiktTjeneste.getArbeidsgiverOpplysninger(behandlingUuid);
+        Set<Arbeidsgiver> arbeidsgivere = utledArbeidsgivere(overstyrtUttak);
+        ArbeidsgiverOversiktDto arbeidsgiverOversikt = arbeidsgiverOversiktTjeneste.getArbeidsgiverOpplysning(arbeidsgivere);
         return new OverstyrtUttakDto(overstyrtUttak.stream().map(this::map).toList(), arbeidsgiverOversikt);
+    }
+
+    private static Set<Arbeidsgiver> utledArbeidsgivere(LocalDateTimeline<OverstyrtUttakPeriode> overstyrtUttak) {
+        return overstyrtUttak.stream()
+            .flatMap(ou -> ou.getValue().getOverstyrtUtbetalingsgrad().stream())
+            .map(OverstyrtUttakUtbetalingsgrad::getArbeidsgiverId)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
     }
 
     @POST
@@ -272,13 +282,28 @@ public class PleiepengerUttakRestTjeneste {
             if (uttakperiode.overlaps(periode)) {
                 UttaksperiodeInfo periodeInfo = entry.getValue();
                 for (Utbetalingsgrader utbetalingsgrader : periodeInfo.getUtbetalingsgrader()) {
-                    aktiviteter.add(map(utbetalingsgrader.getArbeidsforhold()));
+                    OverstyrUttakArbeidsforholdDto aktivitet = map(utbetalingsgrader.getArbeidsforhold());
+                    aktiviteter.add(aktivitet);
                 }
             }
         }
 
-        ArbeidsgiverOversiktDto arbeidsgiverOversikt = arbeidsgiverOversiktTjeneste.getArbeidsgiverOpplysninger(behandlingUuid);
+        Set<Arbeidsgiver> arbeidsgivere = utledArbeidsgivere(aktiviteter);
+        ArbeidsgiverOversiktDto arbeidsgiverOversikt = arbeidsgiverOversiktTjeneste.getArbeidsgiverOpplysning(arbeidsgivere);
         return new OverstyrbareUttakAktiviterDto(new ArrayList<>(aktiviteter), arbeidsgiverOversikt);
+    }
+
+    private static Set<Arbeidsgiver> utledArbeidsgivere(Set<OverstyrUttakArbeidsforholdDto> aktiviteter) {
+        return aktiviteter.stream()
+            .filter(a -> a.getAktørId() != null || a.getOrgnr() != null)
+            .map(a -> {
+                if (a.getOrgnr() != null) {
+                    return new Arbeidsgiver(a.getOrgnr().getId(), null);
+                } else {
+                    return new Arbeidsgiver(null, a.getAktørId());
+                }
+            })
+            .collect(Collectors.toSet());
     }
 
 
@@ -294,8 +319,7 @@ public class PleiepengerUttakRestTjeneste {
         OverstyrUttakArbeidsforholdDto aktivitet = new OverstyrUttakArbeidsforholdDto(
             overstyrtUtbetalingsgrad.getAktivitetType(),
             overstyrtUtbetalingsgrad.getArbeidsgiverId() != null && overstyrtUtbetalingsgrad.getArbeidsgiverId().getOrgnr() != null ? new OrgNummer(overstyrtUtbetalingsgrad.getArbeidsgiverId().getOrgnr()) : null,
-            overstyrtUtbetalingsgrad.getArbeidsgiverId() != null ? overstyrtUtbetalingsgrad.getArbeidsgiverId().getAktørId() : null,
-            overstyrtUtbetalingsgrad.getInternArbeidsforholdRef());
+            overstyrtUtbetalingsgrad.getArbeidsgiverId() != null ? overstyrtUtbetalingsgrad.getArbeidsgiverId().getAktørId() : null);
         return new OverstyrUttakUtbetalingsgradDto(aktivitet, overstyrtUtbetalingsgrad.getUtbetalingsgrad());
     }
 
@@ -303,8 +327,7 @@ public class PleiepengerUttakRestTjeneste {
         return new OverstyrUttakArbeidsforholdDto(
             UttakArbeidType.fraKode(arbeidsforhold.getType()),
             arbeidsforhold.getOrganisasjonsnummer() != null ? new OrgNummer(arbeidsforhold.getOrganisasjonsnummer()) : null,
-            arbeidsforhold.getAktørId() != null ? new AktørId(arbeidsforhold.getAktørId()) : null,
-            arbeidsforhold.getArbeidsforholdId() != null ? InternArbeidsforholdRef.ref(arbeidsforhold.getArbeidsforholdId()) : null
+            arbeidsforhold.getAktørId() != null ? new AktørId(arbeidsforhold.getAktørId()) : null
         );
     }
 

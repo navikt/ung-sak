@@ -22,7 +22,6 @@ create table if not exists overstyrt_uttak_utbetalingsgrad
     aktivitet_type             varchar(100)                           not null,
     arbeidsgiver_orgnr         varchar(100)                           null,
     arbeidsgiver_aktoer_id     varchar(100)                           null,
-    intern_arbeidsforhold_ref  varchar(100)                           null,
     utbetalingsgrad            numeric(19, 4)                         not null,
     versjon                    bigint       default 0                 not null,
     opprettet_av               varchar(20)  default 'vl'              not null,
