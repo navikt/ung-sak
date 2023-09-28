@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,6 +46,7 @@ import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrtUttakPeriode;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrtUttakUtbetalingsgrad;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverOversiktDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.uttak.ArbeidsgiverMedPerioderSomManglerDto;
 import no.nav.k9.sak.kontrakt.uttak.ManglendeArbeidstidDto;
@@ -61,6 +63,7 @@ import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriode;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
 import no.nav.k9.sak.utsatt.UtsattPeriode;
+import no.nav.k9.sak.web.app.tjenester.behandling.arbeidsforhold.ArbeidsgiverOversiktTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.uttak.overstyring.OverstyrbareAktiviteterForUttakRequest;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.kjøreplan.KjøreplanUtleder;
@@ -98,6 +101,7 @@ public class PleiepengerUttakRestTjeneste {
     private KjøreplanUtleder kjøreplanUtleder;
     private UttakNyeReglerRepository uttakNyeReglerRepository;
     private OverstyrUttakRepository overstyrUttakRepository;
+    private ArbeidsgiverOversiktTjeneste arbeidsgiverOversiktTjeneste;
 
     public PleiepengerUttakRestTjeneste() {
         // for proxying
@@ -111,7 +115,8 @@ public class PleiepengerUttakRestTjeneste {
                                         UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
                                         KjøreplanUtleder kjøreplanUtleder,
                                         UttakNyeReglerRepository uttakNyeReglerRepository,
-                                        OverstyrUttakRepository overstyrUttakRepository) {
+                                        OverstyrUttakRepository overstyrUttakRepository,
+                                        ArbeidsgiverOversiktTjeneste arbeidsgiverOversiktTjeneste) {
         this.uttakTjeneste = uttakTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.manglendeArbeidstidUtleder = manglendeArbeidstidUtleder;
@@ -120,6 +125,7 @@ public class PleiepengerUttakRestTjeneste {
         this.kjøreplanUtleder = kjøreplanUtleder;
         this.uttakNyeReglerRepository = uttakNyeReglerRepository;
         this.overstyrUttakRepository = overstyrUttakRepository;
+        this.arbeidsgiverOversiktTjeneste = arbeidsgiverOversiktTjeneste;
     }
 
     @GET
@@ -235,12 +241,14 @@ public class PleiepengerUttakRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public OverstyrtUttakDto getOverstyrtUttak(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
+        UUID behandlingUuid = behandlingIdDto.getBehandlingUuid();
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid);
         LocalDateTimeline<OverstyrtUttakPeriode> overstyrtUttak = overstyrUttakRepository.hentOverstyrtUttak(behandling.getId());
         if (overstyrtUttak.isEmpty()) {
             return null;
         }
-        return new OverstyrtUttakDto(overstyrtUttak.stream().map(this::map).toList());
+        ArbeidsgiverOversiktDto arbeidsgiverOversikt = arbeidsgiverOversiktTjeneste.getArbeidsgiverOpplysninger(behandlingUuid);
+        return new OverstyrtUttakDto(overstyrtUttak.stream().map(this::map).toList(), arbeidsgiverOversikt);
     }
 
     @POST
@@ -253,9 +261,9 @@ public class PleiepengerUttakRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public OverstyrbareUttakAktiviterDto hentOverstyrbareAktiviterForUttak(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) OverstyrbareAktiviteterForUttakRequest request) {
         BehandlingUuidDto behandlingIdDto = request.getBehandlingIdDto();
+        UUID behandlingUuid = behandlingIdDto.getBehandlingUuid();
         no.nav.k9.sak.typer.Periode periode = new no.nav.k9.sak.typer.Periode(request.getFom(), request.getTom());
-
-        Uttaksplan uttaksplan = uttakTjeneste.hentUttaksplan(behandlingIdDto.getBehandlingUuid(), false);
+        Uttaksplan uttaksplan = uttakTjeneste.hentUttaksplan(behandlingUuid, false);
 
         Set<OverstyrUttakArbeidsforholdDto> aktiviteter = new LinkedHashSet<>();
 
@@ -269,7 +277,8 @@ public class PleiepengerUttakRestTjeneste {
             }
         }
 
-        return new OverstyrbareUttakAktiviterDto(new ArrayList<>(aktiviteter));
+        ArbeidsgiverOversiktDto arbeidsgiverOversikt = arbeidsgiverOversiktTjeneste.getArbeidsgiverOpplysninger(behandlingUuid);
+        return new OverstyrbareUttakAktiviterDto(new ArrayList<>(aktiviteter), arbeidsgiverOversikt);
     }
 
 

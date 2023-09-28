@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverOversiktDto;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -23,15 +24,25 @@ public class OverstyrbareUttakAktiviterDto {
     @Size(max = 100)
     private List<OverstyrUttakArbeidsforholdDto> arbeidsforholdsperioder;
 
+    @JsonProperty(value = "arbeidsgiverOversikt")
+    @Valid
+    @NotNull
+    private ArbeidsgiverOversiktDto arbeidsgiverOversikt;
+
     public OverstyrbareUttakAktiviterDto() {
         //
     }
 
-    public OverstyrbareUttakAktiviterDto(List<OverstyrUttakArbeidsforholdDto> arbeidsforholdsperioder) {
+    public OverstyrbareUttakAktiviterDto(List<OverstyrUttakArbeidsforholdDto> arbeidsforholdsperioder, ArbeidsgiverOversiktDto arbeidsgiverOversikt) {
         this.arbeidsforholdsperioder = arbeidsforholdsperioder;
+        this.arbeidsgiverOversikt = arbeidsgiverOversikt;
     }
 
     public List<OverstyrUttakArbeidsforholdDto> getArbeidsforholdsperioder() {
         return arbeidsforholdsperioder;
+    }
+
+    public ArbeidsgiverOversiktDto getArbeidsgiverOversikt() {
+        return arbeidsgiverOversikt;
     }
 }
