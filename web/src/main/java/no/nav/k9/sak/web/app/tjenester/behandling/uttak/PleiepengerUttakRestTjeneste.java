@@ -50,6 +50,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.AktivitetIdentifi
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidBrukerBurdeSøktOmUtleder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Simulering;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
 @ApplicationScoped
@@ -59,6 +61,7 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 public class PleiepengerUttakRestTjeneste {
 
     public static final String GET_UTTAKSPLAN_PATH = "/behandling/pleiepenger/uttak";
+    public static final String SIMULER_UTTAKSPLAN_PATH = "/behandling/pleiepenger/simuler";
     public static final String GET_UTTAKSPLAN_MED_UTSATT_PERIODE_PATH = "/behandling/pleiepenger/uttak-med-utsatt";
     public static final String GET_SKULLE_SØKT_OM_PATH = "/behandling/pleiepenger/arbeidstid-mangler";
     public static final String GET_DEBUG_INPUT_PATH = "/behandling/pleiepenger/debug-input";
@@ -139,6 +142,22 @@ public class PleiepengerUttakRestTjeneste {
 
         final LocalDate virkningsdatoUttakNyeRegler = uttakNyeReglerRepository.finnDatoForNyeRegler(behandling.getId()).orElse(null);
         return new UttaksplanMedUtsattePerioder(uttaksplan, utsattePerioder, virkningsdatoUttakNyeRegler);
+    }
+    
+    @GET
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path(SIMULER_UTTAKSPLAN_PATH)
+    @Operation(description = "Simuler uttaksplan mot ubesluttede data", tags = "behandling - pleiepenger/uttak", responses = {
+        @ApiResponse(responseCode = "200", description = "Returnerer simulert uttaksplan for angitt behandling", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Simulering.class)))
+    })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Simulering simulertUttaksplan(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
+        final var behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
+        final var ref = BehandlingReferanse.fra(behandling);
+        
+        final Uttaksgrunnlag uttaksgrunnlag = mapInputTilUttakTjeneste.hentUtUbesluttededataOgMapRequest(ref);
+        return uttakRestKlient.simulerUttaksplan(uttaksgrunnlag);
     }
 
     @GET

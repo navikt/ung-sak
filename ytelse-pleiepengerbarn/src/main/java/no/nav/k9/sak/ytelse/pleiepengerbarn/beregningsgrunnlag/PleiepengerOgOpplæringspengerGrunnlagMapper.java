@@ -7,10 +7,12 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BA
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -31,6 +33,7 @@ import no.nav.folketrygdloven.kalkulus.felles.v1.Organisasjon;
 import no.nav.folketrygdloven.kalkulus.kodeverk.UttakArbeidType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeidsforhold;
@@ -45,16 +48,18 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 public class PleiepengerOgOpplæringspengerGrunnlagMapper implements BeregningsgrunnlagYtelsespesifiktGrunnlagMapper<YtelsespesifiktGrunnlagDto> {
 
     private UttakTjeneste uttakRestKlient;
+    private UttakNyeReglerRepository uttakNyeReglerRepository;
 
     public PleiepengerOgOpplæringspengerGrunnlagMapper() {
         // for proxy
     }
 
     @Inject
-    public PleiepengerOgOpplæringspengerGrunnlagMapper(UttakTjeneste uttakRestKlient) {
+    public PleiepengerOgOpplæringspengerGrunnlagMapper(UttakTjeneste uttakRestKlient, UttakNyeReglerRepository uttakNyeReglerRepository) {
         this.uttakRestKlient = uttakRestKlient;
+        this.uttakNyeReglerRepository = uttakNyeReglerRepository;
     }
-    
+
     @Override
     public YtelsespesifiktGrunnlagDto lagYtelsespesifiktGrunnlag(BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode) {
         var uttaksplan = uttakRestKlient.hentUttaksplan(ref.getBehandlingUuid(), false);
@@ -73,13 +78,16 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
                 .collect(Collectors.toList());
         }
 
-        return mapTilYtelseSpesifikkType(ref, utbetalingsgrader);
+        var datoForNyeRegler = uttakNyeReglerRepository.finnDatoForNyeRegler(ref.getBehandlingId());
+
+
+        return mapTilYtelseSpesifikkType(ref, utbetalingsgrader, datoForNyeRegler);
     }
 
-    private YtelsespesifiktGrunnlagDto mapTilYtelseSpesifikkType(BehandlingReferanse ref, List<UtbetalingsgradPrAktivitetDto> utbetalingsgrader) {
+    private YtelsespesifiktGrunnlagDto mapTilYtelseSpesifikkType(BehandlingReferanse ref, List<UtbetalingsgradPrAktivitetDto> utbetalingsgrader, Optional<LocalDate> datoForNyeRegler) {
         return switch (ref.getFagsakYtelseType()) {
-            case PLEIEPENGER_SYKT_BARN -> new PleiepengerSyktBarnGrunnlag(utbetalingsgrader);
-            case PLEIEPENGER_NÆRSTÅENDE -> new PleiepengerNærståendeGrunnlag(utbetalingsgrader);
+            case PLEIEPENGER_SYKT_BARN -> new PleiepengerSyktBarnGrunnlag(utbetalingsgrader, datoForNyeRegler.orElse(null));
+            case PLEIEPENGER_NÆRSTÅENDE -> new PleiepengerNærståendeGrunnlag(utbetalingsgrader, datoForNyeRegler.orElse(null));
             case OPPLÆRINGSPENGER -> new OpplæringspengerGrunnlag(utbetalingsgrader);
             default -> throw new IllegalStateException("Ikke støttet ytelse for kalkulus Pleiepenger: " + ref.getFagsakYtelseType());
         };
@@ -104,16 +112,16 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
         if (utbetalingsgrader.getNormalArbeidstid().isZero()) {
             return new BigDecimal(100).subtract(utbetalingsgrader.getUtbetalingsgrad());
         }
-        
+
         final Duration faktiskArbeidstid;
         if (utbetalingsgrader.getFaktiskArbeidstid() != null) {
             faktiskArbeidstid = utbetalingsgrader.getFaktiskArbeidstid();
         } else {
             faktiskArbeidstid = Duration.ofHours(0L);
         }
-        
+
         final BigDecimal HUNDRE_PROSENT = new BigDecimal(100);
-        
+
         /*
          * XXX: Dette er samme måte å regne ut på som i uttak. På sikt bør vi nok flytte
          *      denne logikken til pleiepenger-barn-uttak.
@@ -121,11 +129,11 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
         final BigDecimal aktivitetsgrad = new BigDecimal(faktiskArbeidstid.toMillis()).setScale(2, RoundingMode.HALF_DOWN)
                 .divide(new BigDecimal(utbetalingsgrader.getNormalArbeidstid().toMillis()), 2, RoundingMode.HALF_DOWN)
                 .multiply(HUNDRE_PROSENT);
-        
+
         if (aktivitetsgrad.compareTo(HUNDRE_PROSENT) >= 0) {
             return HUNDRE_PROSENT;
         }
-        
+
         return aktivitetsgrad;
     }
 
