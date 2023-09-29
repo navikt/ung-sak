@@ -258,6 +258,8 @@ spec:
       value: "true"
     - name: PSB_FILTRER_IM_PAA_BEHANDLING_ID
       value: "true"
+    - name: DISABLE_TOTRINN_BREV
+      value: "true"
 
 
     # Konfigurasjoner

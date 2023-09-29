@@ -1,44 +1,33 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
-import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
-import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.k9.sak.domene.vedtak.VedtakTjeneste;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.vedtak.VedtaksbrevOverstyringDto;
-import no.nav.k9.sikkerhet.context.SubjectHandler;
 
-@ApplicationScoped
-public class VedtaksbrevHåndterer {
-    protected HistorikkTjenesteAdapter historikkApplikasjonTjeneste;
-    VedtakVarselRepository vedtakVarselRepository;
-    protected OpprettToTrinnsgrunnlag opprettToTrinnsgrunnlag;
+@Dependent
+public class ForeslåVedtakOppdatererTjeneste {
+    private HistorikkTjenesteAdapter historikkApplikasjonTjeneste;
+    private OpprettToTrinnsgrunnlag opprettToTrinnsgrunnlag;
     private VedtakTjeneste vedtakTjeneste;
 
-    VedtaksbrevHåndterer() {
-        //
-    }
-
     @Inject
-    public VedtaksbrevHåndterer(VedtakVarselRepository vedtakVarselRepository,
-                                HistorikkTjenesteAdapter historikkApplikasjonTjeneste,
-                                OpprettToTrinnsgrunnlag opprettToTrinnsgrunnlag,
-                                VedtakTjeneste vedtakTjeneste) {
+    public ForeslåVedtakOppdatererTjeneste(HistorikkTjenesteAdapter historikkApplikasjonTjeneste,
+                                           OpprettToTrinnsgrunnlag opprettToTrinnsgrunnlag,
+                                           VedtakTjeneste vedtakTjeneste) {
         this.historikkApplikasjonTjeneste = historikkApplikasjonTjeneste;
-        this.vedtakVarselRepository = vedtakVarselRepository;
         this.opprettToTrinnsgrunnlag = opprettToTrinnsgrunnlag;
         this.vedtakTjeneste = vedtakTjeneste;
     }
@@ -52,22 +41,6 @@ public class VedtaksbrevHåndterer {
             opprettAksjonspunktForFatterVedtak(builder);
         }
         opprettHistorikkinnslag(behandling);
-    }
-
-    void oppdaterVedtaksvarsel(VedtaksbrevOverstyringDto dto, Long behandlingId, FagsakYtelseType fagsakYtelseType) {
-        if (fagsakYtelseType != FagsakYtelseType.FRISINN) return;
-
-        vedtakVarselRepository.hentHvisEksisterer(behandlingId).ifPresent(v -> {
-            v.setRedusertUtbetalingÅrsaker(dto.getRedusertUtbetalingÅrsaker());
-            if (dto.isSkalUndertrykkeBrev()) {
-                v.setVedtaksbrev(Vedtaksbrev.INGEN);
-            }
-            vedtakVarselRepository.lagre(behandlingId, v);
-        });
-    }
-
-    void oppdaterBegrunnelse(Behandling behandling) {
-        behandling.setAnsvarligSaksbehandler(getCurrentUserId());
     }
 
     private void opprettAksjonspunktForFatterVedtak(OppdateringResultat.Builder builder) {
@@ -88,10 +61,6 @@ public class VedtaksbrevHåndterer {
         innslag.setBehandlingId(behandling.getId());
         tekstBuilder.build(innslag);
         historikkApplikasjonTjeneste.lagInnslag(innslag);
-    }
-
-    protected String getCurrentUserId() {
-        return SubjectHandler.getSubjectHandler().getUid();
     }
 
 }
