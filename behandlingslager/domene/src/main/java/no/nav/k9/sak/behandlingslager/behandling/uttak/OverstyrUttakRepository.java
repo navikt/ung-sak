@@ -36,17 +36,18 @@ public class OverstyrUttakRepository {
         slettes.forEach(slettesId -> fjernOverstyring(behandlingId, slettesId));
 
         List<LocalDateSegment<OverstyrtUttakPeriode>> segmenterSomEndres = new ArrayList<>();
-        for (LocalDateSegment<OverstyrtUttakPeriode> segment : oppdaterEllerLagre) {
+        oppdaterEllerLagre.stream().forEach(segment -> {
             OverstyrtUttakPeriode nyOverstyring = segment.getValue();
             Long eksisterendeOverstyringId = nyOverstyring.getId();
-            LocalDateSegment<OverstyrtUttakPeriode> eksisterendeOverstyringSegment = eksisterendeOverstyringId != null ? mapFraEntitet(eksisterendeOverstyringerPrId.get(eksisterendeOverstyringId)) : null;
-            boolean harEndring = !Objects.equals(segment, eksisterendeOverstyringSegment);
+            LocalDateSegment<OverstyrtUttakPeriode> eksisterendeOverstyring = eksisterendeOverstyringId != null ? mapFraEntitet(eksisterendeOverstyringerPrId.get(eksisterendeOverstyringId)) : null;
+            boolean harEndring = !Objects.equals(nyOverstyring, eksisterendeOverstyring);
             if (harEndring) {
                 segmenterSomEndres.add(segment);
             }
-        }
+        });
+
         fjernEksisterendeOverstyringerSomOverlapper(new LocalDateTimeline<>(segmenterSomEndres), eksisterendeOverstyringer);
-        segmenterSomEndres.forEach(segment -> {
+        segmenterSomEndres.stream().forEach(segment -> {
                 Long eksisterendeOverstyringId = segment.getValue().getId();
                 if (eksisterendeOverstyringId != null) {
                     fjernOverstyring(behandlingId, eksisterendeOverstyringId);
@@ -143,11 +144,11 @@ public class OverstyrUttakRepository {
     }
 
     private OverstyrtUttakUtbetalingsgradEntitet map(OverstyrtUttakUtbetalingsgrad overstyrtUtbetalingsgrad) {
-        return new OverstyrtUttakUtbetalingsgradEntitet(overstyrtUtbetalingsgrad.getAktivitetType(), overstyrtUtbetalingsgrad.getArbeidsgiverId(), overstyrtUtbetalingsgrad.getUtbetalingsgrad());
+        return new OverstyrtUttakUtbetalingsgradEntitet(overstyrtUtbetalingsgrad.getAktivitetType(), overstyrtUtbetalingsgrad.getArbeidsgiverId(), overstyrtUtbetalingsgrad.getInternArbeidsforholdRef(), overstyrtUtbetalingsgrad.getUtbetalingsgrad());
     }
 
     private OverstyrtUttakUtbetalingsgrad map(OverstyrtUttakUtbetalingsgradEntitet overstyrtUtbetalingsgrad) {
-        return new OverstyrtUttakUtbetalingsgrad(overstyrtUtbetalingsgrad.getAktivitetType(), overstyrtUtbetalingsgrad.getArbeidsgiverId(), overstyrtUtbetalingsgrad.getUtbetalingsgrad());
+        return new OverstyrtUttakUtbetalingsgrad(overstyrtUtbetalingsgrad.getAktivitetType(), overstyrtUtbetalingsgrad.getArbeidsgiverId(), overstyrtUtbetalingsgrad.getInternArbeidsforholdRef(), overstyrtUtbetalingsgrad.getUtbetalingsgrad());
     }
 
 }

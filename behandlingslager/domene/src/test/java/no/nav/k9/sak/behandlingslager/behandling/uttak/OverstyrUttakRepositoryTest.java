@@ -24,6 +24,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.CdiDbAwareTest;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @CdiDbAwareTest
@@ -37,6 +38,7 @@ class OverstyrUttakRepositoryTest {
     private OverstyrUttakRepository overstyrUttakRepository;
 
     private Arbeidsgiver arbeidsgiver1 = Arbeidsgiver.virksomhet("111111111");
+    private InternArbeidsforholdRef arbeidsforholdRef = InternArbeidsforholdRef.nyRef();
     private LocalDate dag1 = LocalDate.now();
     private LocalDate dag2 = dag1.plusDays(1);
     private LocalDate dag3 = dag1.plusDays(2);
@@ -58,7 +60,7 @@ class OverstyrUttakRepositoryTest {
         LocalDateInterval periode1 = new LocalDateInterval(dag1, dag1);
         LocalDateInterval periode2 = new LocalDateInterval(dag2, dag2);
         OverstyrtUttakPeriode overstyrtUttakPeriodePeriode1 = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(), "begrunnelse");
-        OverstyrtUttakPeriode overstyrtUttakPeriodePeriode2 = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver1, new BigDecimal("0.23"))), "begrunnelse");
+        OverstyrtUttakPeriode overstyrtUttakPeriodePeriode2 = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver1, arbeidsforholdRef, new BigDecimal("0.23"))), "begrunnelse");
 
         LocalDateTimeline<OverstyrtUttakPeriode> oppdateringer = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(periode1, overstyrtUttakPeriodePeriode1),
@@ -79,7 +81,7 @@ class OverstyrUttakRepositoryTest {
 
         //legger til ny periode
         LocalDateInterval periode2 = new LocalDateInterval(dag2, dag2);
-        OverstyrtUttakPeriode overstyrtUttakPeriodeNy = new OverstyrtUttakPeriode(new BigDecimal("0.30"), Set.of(new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver1, new BigDecimal("0.23"))), "begrunnelse");
+        OverstyrtUttakPeriode overstyrtUttakPeriodeNy = new OverstyrtUttakPeriode(new BigDecimal("0.30"), Set.of(new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver1, arbeidsforholdRef, new BigDecimal("0.23"))), "begrunnelse");
         LocalDateTimeline<OverstyrtUttakPeriode> oppdaterteOverstyringer = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode2, overstyrtUttakPeriodeNy)));
         overstyrUttakRepository.oppdaterOverstyringAvUttak(behandlingId, List.of(), oppdaterteOverstyringer);
 
@@ -99,7 +101,7 @@ class OverstyrUttakRepositoryTest {
 
         //overskriver deler av perioden
         LocalDateInterval periode2 = new LocalDateInterval(dag2, dag2);
-        OverstyrtUttakPeriode overstyrtUttakPeriodeNy = new OverstyrtUttakPeriode(new BigDecimal("0.30"), Set.of(new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver1, new BigDecimal("0.23"))), "begrunnelse");
+        OverstyrtUttakPeriode overstyrtUttakPeriodeNy = new OverstyrtUttakPeriode(new BigDecimal("0.30"), Set.of(new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver1, arbeidsforholdRef, new BigDecimal("0.23"))), "begrunnelse");
         LocalDateTimeline<OverstyrtUttakPeriode> oppdaterteOverstyringer = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode2, overstyrtUttakPeriodeNy)));
         overstyrUttakRepository.oppdaterOverstyringAvUttak(behandlingId, List.of(), oppdaterteOverstyringer);
 
@@ -114,7 +116,7 @@ class OverstyrUttakRepositoryTest {
         LocalDateInterval periode3 = new LocalDateInterval(dag3, dag3);
         OverstyrtUttakPeriode overstyrtUttakPeriodeOrginal = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(), "begrunnelse");
         OverstyrtUttakPeriode overstyrtUttakPeriodeOrginal2 = new OverstyrtUttakPeriode(new BigDecimal("0.36"), Set.of(), "begrunnelse");
-        OverstyrtUttakPeriode overstyrtUttakPeriodeNy = new OverstyrtUttakPeriode(new BigDecimal("0.30"), Set.of(new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver1, new BigDecimal("0.23"))), "begrunnelse");
+        OverstyrtUttakPeriode overstyrtUttakPeriodeNy = new OverstyrtUttakPeriode(new BigDecimal("0.30"), Set.of(new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver1, arbeidsforholdRef, new BigDecimal("0.23"))), "begrunnelse");
 
         LocalDateTimeline<OverstyrtUttakPeriode> eksisterendeOverstyringer = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(periode1, overstyrtUttakPeriodeOrginal),
@@ -138,7 +140,7 @@ class OverstyrUttakRepositoryTest {
         LocalDateInterval periode1 = new LocalDateInterval(dag1, dag1);
         LocalDateInterval periode2 = new LocalDateInterval(dag2, dag2);
         OverstyrtUttakPeriode overstyrtUttakPeriodePeriode1 = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(), "begrunnelse");
-        OverstyrtUttakPeriode overstyrtUttakPeriodePeriode2 = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver1, new BigDecimal("0.23"))), "begrunnelse");
+        OverstyrtUttakPeriode overstyrtUttakPeriodePeriode2 = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver1, arbeidsforholdRef, new BigDecimal("0.23"))), "begrunnelse");
         LocalDateTimeline<OverstyrtUttakPeriode> oppdateringer = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(periode1, overstyrtUttakPeriodePeriode1),
             new LocalDateSegment<>(periode2, overstyrtUttakPeriodePeriode2))

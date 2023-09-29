@@ -3,13 +3,13 @@ package no.nav.k9.sak.kontrakt.arbeidsforhold;
 import java.util.HashMap;
 import java.util.Map;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Size;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -19,17 +19,17 @@ public class ArbeidsgiverOversiktDto {
     @Valid
     @Size
     @JsonProperty(value = "arbeidsgivere")
-    private final Map<String, ArbeidsgiverOpplysningDto> arbeidsgivere;
+    private final Map<String, ArbeidsgiverOpplysningerDto> arbeidsgivere;
 
     public ArbeidsgiverOversiktDto() {
         this.arbeidsgivere = new HashMap<>();
     }
 
-    public ArbeidsgiverOversiktDto(Map<String, ArbeidsgiverOpplysningDto> arbeidsgivere) {
+    public ArbeidsgiverOversiktDto(Map<String, ArbeidsgiverOpplysningerDto> arbeidsgivere) {
         this.arbeidsgivere = arbeidsgivere;
     }
 
-    public Map<String, ArbeidsgiverOpplysningDto> getArbeidsgivere() {
+    public Map<String, ArbeidsgiverOpplysningerDto> getArbeidsgivere() {
         return arbeidsgivere;
     }
 }

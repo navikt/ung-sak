@@ -124,7 +124,7 @@ public class UttakOverstyringshåndterer implements Overstyringshåndterer<Overs
         OverstyrUttakArbeidsforholdDto arbeidsforhold = dto.getArbeidsforhold();
         String orgnr = arbeidsforhold.getOrgnr() != null ? arbeidsforhold.getOrgnr().getOrgNummer() : null;
         String aktoerId = arbeidsforhold.getAktørId() != null ? arbeidsforhold.getAktørId().getAktørId() : null;
-        return new OverstyrtUttakUtbetalingsgrad(arbeidsforhold.getType(), orgnr, aktoerId, dto.getUtbetalingsgrad());
+        return new OverstyrtUttakUtbetalingsgrad(arbeidsforhold.getType(), orgnr, aktoerId, arbeidsforhold.getInternArbeidsforholdId(), dto.getUtbetalingsgrad());
     }
 
     String formater(LocalDateInterval periode) {

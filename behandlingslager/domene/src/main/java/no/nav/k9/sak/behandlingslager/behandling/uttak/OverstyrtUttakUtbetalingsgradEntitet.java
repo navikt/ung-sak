@@ -16,6 +16,7 @@ import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 @Entity(name = "OverstyrtUttakUtbetalingsgrad")
 @Table(name = "OVERSTYRT_UTTAK_UTBETALINGSGRAD")
@@ -40,13 +41,17 @@ public class OverstyrtUttakUtbetalingsgradEntitet extends BaseEntitet {
     @Column(name = "arbeidsgiver_aktoer_id", nullable = true)
     private String arbeidsgiverAktørId;
 
+    @Column(name = "intern_arbeidsforhold_ref", nullable = true)
+    private String internArbeidsforholdRef;
+
     @Column(name = "utbetalingsgrad")
     private BigDecimal utbetalingsgrad;
 
-    public OverstyrtUttakUtbetalingsgradEntitet(UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiverId, BigDecimal utbetalingsgrad) {
+    public OverstyrtUttakUtbetalingsgradEntitet(UttakArbeidType aktivitetType, Arbeidsgiver arbeidsgiverId, InternArbeidsforholdRef internArbeidsforholdRef, BigDecimal utbetalingsgrad) {
         this.aktivitetType = aktivitetType;
         this.arbeidsgiverOrgNr = arbeidsgiverId != null ? arbeidsgiverId.getArbeidsgiverOrgnr() : null;
         this.arbeidsgiverAktørId = arbeidsgiverId != null ? arbeidsgiverId.getArbeidsgiverAktørId() : null;
+        this.internArbeidsforholdRef = internArbeidsforholdRef != null ? internArbeidsforholdRef.getReferanse() : null;
         this.utbetalingsgrad = utbetalingsgrad;
     }
 
@@ -54,6 +59,7 @@ public class OverstyrtUttakUtbetalingsgradEntitet extends BaseEntitet {
         this.aktivitetType = original.aktivitetType;
         this.arbeidsgiverOrgNr = original.arbeidsgiverOrgNr;
         this.arbeidsgiverAktørId = original.arbeidsgiverAktørId;
+        this.internArbeidsforholdRef = original.internArbeidsforholdRef;
         this.utbetalingsgrad = original.utbetalingsgrad;
     }
 
@@ -73,6 +79,10 @@ public class OverstyrtUttakUtbetalingsgradEntitet extends BaseEntitet {
         } else {
             return null;
         }
+    }
+
+    public InternArbeidsforholdRef getInternArbeidsforholdRef() {
+        return internArbeidsforholdRef != null ? InternArbeidsforholdRef.ref(internArbeidsforholdRef) : null;
     }
 
     public BigDecimal getUtbetalingsgrad() {
