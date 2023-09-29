@@ -12,14 +12,15 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.felles.testutilities.sikkerhet.StaticSubjectHandler;
+import no.nav.k9.felles.testutilities.sikkerhet.SubjectHandlerUtils;
 import no.nav.k9.formidling.kontrakt.informasjonsbehov.InformasjonsbehovDto;
 import no.nav.k9.formidling.kontrakt.informasjonsbehov.InformasjonsbehovListeDto;
 import no.nav.k9.formidling.kontrakt.kodeverk.informasjonsbehov.InformasjonsbehovDatatype;
@@ -48,8 +49,9 @@ import no.nav.k9.sak.produksjonsstyring.totrinn.VurderÅrsakTotrinnsvurdering;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt.FatterVedtakAksjonspunktOppdaterer;
 import no.nav.k9.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt.ForeslåVedtakAksjonspunktOppdaterer;
+import no.nav.k9.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt.ForeslåVedtakOppdatererTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt.FrisinnVedtaksvarselTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt.OpprettToTrinnsgrunnlag;
-import no.nav.k9.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt.VedtaksbrevHåndterer;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -80,10 +82,13 @@ public class AksjonspunktOppdatererTest {
     @Inject
     private VedtakVarselRepository vedtakVarselRepository;
 
+    FrisinnVedtaksvarselTjeneste frisinnVedtaksvarselTjeneste;
+
     @BeforeEach
     public void setup() {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         formidlingKlient = mock(K9FormidlingKlient.class);
+        frisinnVedtaksvarselTjeneste = mock(FrisinnVedtaksvarselTjeneste.class);
         when(formidlingKlient.hentInformasjonsbehov(any(UUID.class), any(FagsakYtelseType.class))).thenReturn(mockTomtInformasjonsbehov());
     }
 
@@ -100,19 +105,12 @@ public class AksjonspunktOppdatererTest {
         repositoryProvider.getBehandlingRepository().lagre(behandling, behandlingLås);
 
         var dto = new ForeslaVedtakAksjonspunktDto("begrunnelse", null, null, false, null, false);
-        var vedtaksbrevHåndterer = new VedtaksbrevHåndterer(
-            vedtakVarselRepository,
+        var vedtaksbrevHåndterer = new ForeslåVedtakOppdatererTjeneste(
             mock(HistorikkTjenesteAdapter.class),
             opprettTotrinnsgrunnlag,
-            vedtakTjeneste) {
-            @Override
-            protected String getCurrentUserId() {
-                // return test verdi
-                return "hello";
-            }
-        };
+            vedtakTjeneste);
 
-        var foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(vedtaksbrevHåndterer, formidlingKlient);
+        var foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(vedtaksbrevHåndterer, frisinnVedtaksvarselTjeneste, formidlingKlient);
 
         when(formidlingKlient.hentInformasjonsbehov(any(UUID.class), any(FagsakYtelseType.class))).thenReturn(mockInformasjonsbehovMedKode());
 
@@ -135,19 +133,12 @@ public class AksjonspunktOppdatererTest {
         repositoryProvider.getBehandlingRepository().lagre(behandling, behandlingLås);
 
         var dto = new ForeslaVedtakAksjonspunktDto("begrunnelse", null, null, true, null, false);
-        var vedtaksbrevHåndterer = new VedtaksbrevHåndterer(
-            vedtakVarselRepository,
+        var vedtaksbrevHåndterer = new ForeslåVedtakOppdatererTjeneste(
             mock(HistorikkTjenesteAdapter.class),
             opprettTotrinnsgrunnlag,
-            vedtakTjeneste) {
-            @Override
-            protected String getCurrentUserId() {
-                // return test verdi
-                return "hello";
-            }
-        };
+            vedtakTjeneste);
 
-        var foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(vedtaksbrevHåndterer, formidlingKlient);
+        var foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(vedtaksbrevHåndterer, frisinnVedtaksvarselTjeneste, formidlingKlient);
         OppdateringResultat oppdateringResultat = foreslaVedtakAksjonspunktOppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
 
         assertThat(behandling.getFagsakYtelseType()).isEqualTo(FagsakYtelseType.PSB);
@@ -161,20 +152,16 @@ public class AksjonspunktOppdatererTest {
 
         Behandling behandling = scenario.lagre(repositoryProvider);
 
+        SubjectHandlerUtils.useSubjectHandler(StaticSubjectHandler.class);
+        SubjectHandlerUtils.setInternBruker("hello");
+
         var dto = new ForeslaVedtakAksjonspunktDto("begrunnelse", null, null, false, null, false);
-        var vedtaksbrevHåndterer = new VedtaksbrevHåndterer(
-            vedtakVarselRepository,
+        var vedtaksbrevHåndterer = new ForeslåVedtakOppdatererTjeneste(
             mock(HistorikkTjenesteAdapter.class),
             opprettTotrinnsgrunnlag,
-            vedtakTjeneste) {
-            @Override
-            protected String getCurrentUserId() {
-                // return test verdi
-                return "hello";
-            }
-        };
+            vedtakTjeneste);
 
-        var foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(vedtaksbrevHåndterer, formidlingKlient);
+        var foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(vedtaksbrevHåndterer, frisinnVedtaksvarselTjeneste, formidlingKlient);
 
         foreslaVedtakAksjonspunktOppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
         assertThat(behandling.getAnsvarligSaksbehandler()).isEqualTo("hello");

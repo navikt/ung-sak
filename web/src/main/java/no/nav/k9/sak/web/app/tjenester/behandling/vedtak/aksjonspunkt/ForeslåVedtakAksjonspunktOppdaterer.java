@@ -13,12 +13,14 @@ import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.behandling.steg.vurdermanueltbrev.K9FormidlingKlient;
 import no.nav.k9.sak.kontrakt.vedtak.ForeslaVedtakAksjonspunktDto;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = ForeslaVedtakAksjonspunktDto.class, adapter = AksjonspunktOppdaterer.class)
 public class ForeslåVedtakAksjonspunktOppdaterer implements AksjonspunktOppdaterer<ForeslaVedtakAksjonspunktDto> {
 
-    private VedtaksbrevHåndterer vedtaksbrevHåndterer;
+    private ForeslåVedtakOppdatererTjeneste foreslåVedtakOppdatererTjeneste;
+    private FrisinnVedtaksvarselTjeneste frisinnVedtaksvarselTjeneste;
     private K9FormidlingKlient formidlingKlient;
 
     ForeslåVedtakAksjonspunktOppdaterer() {
@@ -26,26 +28,29 @@ public class ForeslåVedtakAksjonspunktOppdaterer implements AksjonspunktOppdate
     }
 
     @Inject
-    public ForeslåVedtakAksjonspunktOppdaterer(VedtaksbrevHåndterer vedtaksbrevHåndterer, K9FormidlingKlient formidlingKlient) {
-        this.vedtaksbrevHåndterer = vedtaksbrevHåndterer;
+    public ForeslåVedtakAksjonspunktOppdaterer(ForeslåVedtakOppdatererTjeneste foreslåVedtakOppdatererTjeneste, FrisinnVedtaksvarselTjeneste frisinnVedtaksvarselTjeneste, K9FormidlingKlient formidlingKlient) {
+        this.foreslåVedtakOppdatererTjeneste = foreslåVedtakOppdatererTjeneste;
+        this.frisinnVedtaksvarselTjeneste = frisinnVedtaksvarselTjeneste;
         this.formidlingKlient = formidlingKlient;
     }
 
     @Override
     public OppdateringResultat oppdater(ForeslaVedtakAksjonspunktDto dto, AksjonspunktOppdaterParameter param) {
         Behandling behandling = param.getBehandling();
-        vedtaksbrevHåndterer.oppdaterBegrunnelse(behandling);
+        behandling.setAnsvarligSaksbehandler(SubjectHandler.getSubjectHandler().getUid());
 
         OppdateringResultat.Builder builder = OppdateringResultat.builder();
-        if (Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN).contains( behandling.getFagsakYtelseType())) {
+        if (Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN).contains(behandling.getFagsakYtelseType())) {
             if (dto.isSkalBrukeOverstyrendeFritekstBrev() || trengerManueltBrev(behandling)) {
                 builder.medTotrinn();
             }
         }
 
-        vedtaksbrevHåndterer.håndterTotrinnOgHistorikkinnslag(dto, param, builder);
+        foreslåVedtakOppdatererTjeneste.håndterTotrinnOgHistorikkinnslag(dto, param, builder);
 
-        vedtaksbrevHåndterer.oppdaterVedtaksvarsel(dto, param.getBehandlingId(), param.getRef().getFagsakYtelseType());
+        if (param.getRef().getFagsakYtelseType() == FagsakYtelseType.FRISINN) {
+            frisinnVedtaksvarselTjeneste.oppdaterVedtaksvarsel(dto, param.getBehandlingId(), param.getRef().getFagsakYtelseType());
+        }
 
         return builder.build();
     }
