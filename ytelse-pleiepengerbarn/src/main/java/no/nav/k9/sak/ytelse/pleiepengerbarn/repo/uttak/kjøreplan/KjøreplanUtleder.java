@@ -300,15 +300,29 @@ public class KjøreplanUtleder {
             if (unikeSakerMedKrav.stream().noneMatch(it -> Objects.equals(it, fagsakId))) {
                 continue;
             }
-            var eldsteKravprio = kravprioForEldsteKrav.getSegment(segment.getLocalDateInterval()).getValue();
-            if (Objects.equals(eldsteKravprio.get(0).getFagsak(), fagsakId)) {
+            final boolean høyestePrioritet = harHøyestePrioritet(fagsakId, segment, kravprioForEldsteKrav);
+            if (høyestePrioritet) {
                 harPrioritetIPeriodeAndreHarKravPå = true;
             }
-            if (!Objects.equals(eldsteKravprio.get(0).getFagsak(), fagsakId)) {
+            if (!høyestePrioritet) {
                 harIkkePrioritetIPeriodeAndreHarKravPå = true;
             }
         }
         return harPrioritetIPeriodeAndreHarKravPå && harIkkePrioritetIPeriodeAndreHarKravPå;
+    }
+    
+    private boolean harHøyestePrioritet(Long fagsakId, LocalDateSegment<List<InternalKravprioritet>> segment, LocalDateTimeline<List<InternalKravprioritet>> kravprioForEldsteKrav) {
+        final List<InternalKravprioritet> ubehandlet = segment.getValue();
+        var eldsteKravprio = kravprioForEldsteKrav.getSegment(segment.getLocalDateInterval())
+                .getValue()
+                .stream()
+                .filter(s -> fagsakErIListe(s.getFagsak(), ubehandlet))
+                .toList();
+        return Objects.equals(eldsteKravprio.get(0).getFagsak(), fagsakId);
+    }
+
+    private boolean fagsakErIListe(Long fagsakId, List<InternalKravprioritet> ubehandlet) {
+        return ubehandlet.stream().anyMatch(ik -> ik.getFagsak() == fagsakId);
     }
 
     LocalDateTimeline<List<InternalKravprioritet>> utledInternKravprio(List<SakOgBehandlinger> sakOgBehandlinger) {
