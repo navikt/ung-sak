@@ -93,7 +93,7 @@ public class AksjonspunktOppdatererTest {
     }
 
     @Test
-    public void foreslå_vedtak_aksjonspunkt_setter_totrinn_på_pleiepenger_hvis_det_er_manuelt_brev() {
+    public void foreslå_vedtak_aksjonspunkt_setter_totrinn_på_pleiepenger_hvis_det_er_manuelt_brev_og_togglet_på() {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         scenario.medSøknad();
 
@@ -110,7 +110,7 @@ public class AksjonspunktOppdatererTest {
             opprettTotrinnsgrunnlag,
             vedtakTjeneste);
 
-        var foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(vedtaksbrevHåndterer, frisinnVedtaksvarselTjeneste, formidlingKlient);
+        var foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(vedtaksbrevHåndterer, frisinnVedtaksvarselTjeneste, formidlingKlient, false);
 
         when(formidlingKlient.hentInformasjonsbehov(any(UUID.class), any(FagsakYtelseType.class))).thenReturn(mockInformasjonsbehovMedKode());
 
@@ -121,7 +121,7 @@ public class AksjonspunktOppdatererTest {
     }
 
     @Test
-    public void foreslå_vedtak_aksjonspunkt_setter_totrinn_på_pleiepenger_hvis_det_er_overstyrt_brev() {
+    public void foreslå_vedtak_aksjonspunkt_setter_totrinn_på_pleiepenger_hvis_det_er_overstyrt_brev_og_togglet_på() {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         scenario.medSøknad();
 
@@ -138,7 +138,7 @@ public class AksjonspunktOppdatererTest {
             opprettTotrinnsgrunnlag,
             vedtakTjeneste);
 
-        var foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(vedtaksbrevHåndterer, frisinnVedtaksvarselTjeneste, formidlingKlient);
+        var foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(vedtaksbrevHåndterer, frisinnVedtaksvarselTjeneste, formidlingKlient, false);
         OppdateringResultat oppdateringResultat = foreslaVedtakAksjonspunktOppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
 
         assertThat(behandling.getFagsakYtelseType()).isEqualTo(FagsakYtelseType.PSB);
@@ -161,7 +161,7 @@ public class AksjonspunktOppdatererTest {
             opprettTotrinnsgrunnlag,
             vedtakTjeneste);
 
-        var foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(vedtaksbrevHåndterer, frisinnVedtaksvarselTjeneste, formidlingKlient);
+        var foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(vedtaksbrevHåndterer, frisinnVedtaksvarselTjeneste, formidlingKlient, false );
 
         foreslaVedtakAksjonspunktOppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
         assertThat(behandling.getAnsvarligSaksbehandler()).isEqualTo("hello");
