@@ -257,7 +257,8 @@ spec:
       value: "false"
     - name: ENABLE_OVERSTYR_UTTAK
       value: "false"
-
+    - name: DISABLE_TOTRINN_BREV
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

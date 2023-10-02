@@ -260,6 +260,8 @@ spec:
       value: "true"
     - name: ENABLE_OVERSTYR_UTTAK
       value: "true"
+    - name: DISABLE_TOTRINN_BREV
+      value: "true"
 
 
     # Konfigurasjoner
