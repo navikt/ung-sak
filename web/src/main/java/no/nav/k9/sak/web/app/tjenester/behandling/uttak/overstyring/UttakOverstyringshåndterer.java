@@ -10,6 +10,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
@@ -39,19 +40,24 @@ public class UttakOverstyringshåndterer implements Overstyringshåndterer<Overs
 
     private OverstyrUttakRepository overstyrUttakRepository;
     private HistorikkRepository historikkRepository;
+    private boolean lansert;
 
     UttakOverstyringshåndterer() {
         //for CDI proxy
     }
 
     @Inject
-    public UttakOverstyringshåndterer(OverstyrUttakRepository overstyrUttakRepository, HistorikkRepository historikkRepository) {
+    public UttakOverstyringshåndterer(OverstyrUttakRepository overstyrUttakRepository, HistorikkRepository historikkRepository, @KonfigVerdi(value = "ENABLE_OVERSTYR_UTTAK", defaultVerdi = "false") boolean lansert) {
         this.overstyrUttakRepository = overstyrUttakRepository;
         this.historikkRepository = historikkRepository;
+        this.lansert = lansert;
     }
 
     @Override
     public OppdateringResultat håndterOverstyring(OverstyrUttakDto dto, Behandling behandling, BehandlingskontrollKontekst kontekst) {
+        if (!lansert) {
+            throw new IllegalArgumentException("Overstyring av uttak er ikke lansert.");
+        }
         LocalDateTimeline<OverstyrtUttakPeriode> overstyringerFørOppdatering = overstyrUttakRepository.hentOverstyrtUttak(behandling.getId());
 
         LocalDateTimeline<OverstyrtUttakPeriode> oppdateringer = new LocalDateTimeline<>(dto.getLagreEllerOppdater().stream().map(this::mapTilSegment).toList());

@@ -255,6 +255,9 @@ spec:
       value: "false"
     - name: PSB_FILTRER_IM_PAA_BEHANDLING_ID
       value: "false"
+    - name: ENABLE_OVERSTYR_UTTAK
+      value: "false"
+
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
