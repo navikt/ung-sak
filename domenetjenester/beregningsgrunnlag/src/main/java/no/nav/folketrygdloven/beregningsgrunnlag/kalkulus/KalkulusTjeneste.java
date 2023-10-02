@@ -53,8 +53,6 @@ import no.nav.folketrygdloven.kalkulus.request.v1.KopierBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.KopierBeregningRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.simulerTilkommetInntekt.SimulerTilkommetInntektForRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.simulerTilkommetInntekt.SimulerTilkommetInntektListeRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.tilkommetAktivitet.UtledTilkommetAktivitetForRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.tilkommetAktivitet.UtledTilkommetAktivitetListeRequest;
 import no.nav.folketrygdloven.kalkulus.response.v1.Grunnbeløp;
 import no.nav.folketrygdloven.kalkulus.response.v1.GrunnbeløpReguleringRespons;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandListeResponse;
@@ -374,24 +372,21 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         ));
     }
 
-    public Map<UUID, List<UtledetTilkommetAktivitet>> utledTilkommetAktivitet(FagsakYtelseType ytelseType, Map<UUID, DatoIntervallEntitet> koblingerOgPeriode,
-            Saksnummer saksnummer) {
+
+    public Map<UUID, List<UtledetTilkommetAktivitet>> utledTilkommetAktivitet(Map<UUID, DatoIntervallEntitet> koblingerOgPeriode,
+                                                                              BehandlingReferanse referanse) {
         if (koblingerOgPeriode.isEmpty()) {
             return Map.of();
         }
-        final YtelseTyperKalkulusStøtterKontrakt ytelseTypeKalkulus = YtelseTyperKalkulusStøtterKontrakt.fraKode(ytelseType.getKode());
-        var request = new UtledTilkommetAktivitetListeRequest(
-                saksnummer.getVerdi(),
-                ytelseTypeKalkulus,
-                koblingerOgPeriode.entrySet().stream()
-                    .map(e ->
-                        new UtledTilkommetAktivitetForRequest(e.getKey(),
-                                List.of(new Periode(e.getValue().getFomDato(), e.getValue().getTomDato()))))
-                    .toList());
+
+        var iayGrunnlag = iayTjeneste.hentGrunnlag(referanse.getBehandlingId());
+        var sakInntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer());
+        var beregnInput = koblingerOgPeriode.entrySet().stream().map(e -> BeregnInput.forTilkommetInntektUtledning(e.getKey(), e.getValue())).toList();
+        var request = beregnRequestTjeneste.lagForUtledningAvTilkommetInntekt(referanse, beregnInput, iayGrunnlag, sakInntektsmeldinger);
         var respons = restTjeneste.utledTilkommetAktivitet(request);
         return respons.getListe().stream().collect(Collectors.toMap(
             UtledetTilkommetAktivitetPrReferanse::getEksternReferanse,
-            it -> it.getTilkommedeAktiviteter()
+            UtledetTilkommetAktivitetPrReferanse::getTilkommedeAktiviteter
         ));
     }
 }
