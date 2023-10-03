@@ -68,6 +68,9 @@ public enum HistorikkEndretFeltType implements Kodeverdi {
     OPPHOLDSRETT_IKKE_EOS("OPPHOLDSRETT_IKKE_EOS", "Bruker har ikke oppholdsrett i EØS"),
     UTLAND("UTLAND", "Utland"),
 
+    /** Uttak */
+    UTTAK_OVERSTYRT_PERIODE("UTTAK_OVERSTYRT_PERIODE", "Aktuell uttaksperiode"),
+
     /** Tilkjent ytelse */
     TILKJENT_YTELSE("TILKJENT_YTELSE", "Tilkjent ytelse"),
 

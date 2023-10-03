@@ -25,6 +25,8 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrUttakRepository;
+import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrtUttakPeriode;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -70,6 +72,7 @@ public class HentDataTilUttakTjeneste {
     private HentEtablertTilsynTjeneste hentEtablertTilsynTjeneste;
     private TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste;
     private UttakNyeReglerRepository uttakNyeReglerRepository;
+    private OverstyrUttakRepository overstyrUttakRepository;
     private boolean tilkommetAktivitetEnabled;
     private boolean nyRegelEnabled;
 
@@ -93,6 +96,7 @@ public class HentDataTilUttakTjeneste {
                                     HentEtablertTilsynTjeneste hentEtablertTilsynTjeneste,
                                     TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste,
                                     UttakNyeReglerRepository uttakNyeReglerRepository,
+                                    OverstyrUttakRepository overstyrUttakRepository,
                                     @KonfigVerdi(value = "TILKOMMET_AKTIVITET_ENABLED", required = false, defaultVerdi = "false") boolean tilkommetAktivitetEnabled,
                                     @KonfigVerdi(value = "ENABLE_DATO_NY_REGEL_UTTAK", required = false, defaultVerdi = "false") boolean nyRegelEnabled
 
@@ -116,6 +120,7 @@ public class HentDataTilUttakTjeneste {
         this.hentEtablertTilsynTjeneste = hentEtablertTilsynTjeneste;
         this.tilkommetAktivitetTjeneste = tilkommetAktivitetTjeneste;
         this.uttakNyeReglerRepository = uttakNyeReglerRepository;
+        this.overstyrUttakRepository = overstyrUttakRepository;
         this.tilkommetAktivitetEnabled = tilkommetAktivitetEnabled;
         this.nyRegelEnabled = nyRegelEnabled;
     }
@@ -143,7 +148,7 @@ public class HentDataTilUttakTjeneste {
         if (virkningsdatoNyeRegler != null && !nyRegelEnabled){
             throw new IllegalStateException("Har lagret virkningsdato for nye regler i uttak, men de nye reglene er skrudd av.");
         }
-        
+
         final Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> tilkommetAktivitetsperioder;
         if (tilkommetAktivitetEnabled) {
             final Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> tilkommedeAktiviteterRaw = tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(referanse.getFagsakId(), virkningsdatoNyeRegler);
@@ -191,6 +196,7 @@ public class HentDataTilUttakTjeneste {
                 sisteVedtatteBehandlinger.put(uuid, b.getOriginalBehandlingId().map(it -> behandlingRepository.hentBehandling(it)).map(Behandling::getUuid).orElse(null));
             }
         }
+        LocalDateTimeline<OverstyrtUttakPeriode> overstyrtUttak = overstyrUttakRepository.hentOverstyrtUttak(behandling.getId());
 
         return new InputParametere()
             .medBehandling(behandling)
@@ -215,6 +221,7 @@ public class HentDataTilUttakTjeneste {
             .medSisteVedtatteBehandlingForBehandling(sisteVedtatteBehandlinger)
             .medTilkommetAktivitetsperioder(tilkommetAktivitetsperioder)
             .medVirkningsdatoNyeRegler(virkningsdatoNyeRegler)
+            .medOverstyrtUttak(overstyrtUttak)
             ;
     }
 
