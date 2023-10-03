@@ -9,7 +9,9 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import no.nav.abakus.vedtak.ytelse.v1.anvisning.Anvisning;
+import no.nav.abakus.vedtak.ytelse.v1.anvisning.AnvistAndel;
 import no.nav.abakus.vedtak.ytelse.v1.anvisning.Inntektklasse;
+import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
@@ -209,6 +211,57 @@ class VedtattYtelseMapperTest {
         assertThat(anvisninger.get(0).getAndeler().get(0).getDagsats().getVerdi()).isEqualByComparingTo(BigDecimal.valueOf(dagsats));
         assertThat(anvisninger.get(0).getAndeler().get(0).getRefusjonsgrad().getVerdi()).isEqualByComparingTo(BigDecimal.ZERO);
     }
+
+
+    @Test
+    void skal_mappe_brukers_andel_og_frilans_med_samme_inntektskategori() {
+
+        BeregningsresultatEntitet resultat = BeregningsresultatEntitet.builder()
+            .medRegelInput("input")
+            .medRegelSporing("regelsporing")
+            .build();
+
+        BeregningsresultatPeriode periode = BeregningsresultatPeriode.builder()
+            .medBeregningsresultatPeriodeFomOgTom(SKJÆRINGSTIDSPUNKT, SKJÆRINGSTIDSPUNKT.plusDays(10))
+            .build(resultat);
+        int dagsats = 500;
+        BeregningsresultatAndel.builder()
+            .medStillingsprosent(BigDecimal.valueOf(100))
+            .medDagsats(0)
+            .medDagsatsFraBg(0)
+            .medBrukerErMottaker(true)
+            .medUtbetalingsgrad(BigDecimal.valueOf(100))
+            .medAktivitetStatus(AktivitetStatus.BRUKERS_ANDEL)
+            .medInntektskategori(Inntektskategori.ARBEIDSTAKER_UTEN_FERIEPENGER)
+            .buildFor(periode);
+
+        BeregningsresultatAndel.builder()
+            .medStillingsprosent(BigDecimal.valueOf(100))
+            .medDagsats(dagsats)
+            .medDagsatsFraBg(dagsats)
+            .medBrukerErMottaker(true)
+            .medUtbetalingsgrad(BigDecimal.valueOf(50))
+            .medAktivitetStatus(AktivitetStatus.FRILANSER)
+            .medInntektskategori(Inntektskategori.ARBEIDSTAKER_UTEN_FERIEPENGER)
+            .buildFor(periode);
+
+        List<Anvisning> anvisninger = VedtattYtelseMapper.mapAnvisninger(resultat, List.of());
+
+        assertThat(anvisninger.size()).isEqualTo(1);
+        assertThat(anvisninger.get(0).getAndeler().size()).isEqualTo(2);
+
+
+        var frilansandel = anvisninger.get(0).getAndeler().stream().filter(a  -> a.getUtbetalingsgrad().getVerdi().compareTo(BigDecimal.valueOf(50)) == 0).findFirst().orElseThrow();
+        assertThat(frilansandel.getInntektklasse()).isEqualTo(Inntektklasse.ARBEIDSTAKER_UTEN_FERIEPENGER);
+        assertThat(frilansandel.getDagsats().getVerdi()).isEqualByComparingTo(BigDecimal.valueOf(dagsats));
+        assertThat(frilansandel.getRefusjonsgrad().getVerdi()).isEqualByComparingTo(BigDecimal.ZERO);
+
+        var brukers_andel = anvisninger.get(0).getAndeler().stream().filter(a  -> a.getUtbetalingsgrad().getVerdi().compareTo(BigDecimal.valueOf(100)) == 0).findFirst().orElseThrow();
+        assertThat(brukers_andel.getInntektklasse()).isEqualTo(Inntektklasse.ARBEIDSTAKER_UTEN_FERIEPENGER);
+        assertThat(brukers_andel.getDagsats().getVerdi()).isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(brukers_andel.getRefusjonsgrad().getVerdi()).isEqualByComparingTo(BigDecimal.ZERO);
+    }
+
 
 
 
