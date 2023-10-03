@@ -196,12 +196,12 @@ public class MapInputTilUttakTjeneste {
         return overstyrt;
     }
 
-    private OverstyrtInput map(OverstyrtUttakPeriode overstyrtUttakPeriode){
+    private OverstyrtInput map(OverstyrtUttakPeriode overstyrtUttakPeriode) {
         List<OverstyrtUtbetalingsgradPerArbeidsforhold> overstyrteUtbetalingsgrader = overstyrtUttakPeriode.getOverstyrtUtbetalingsgrad().stream().map(this::map).toList();
         return new OverstyrtInput(overstyrtUttakPeriode.getSøkersUttaksgrad(), overstyrteUtbetalingsgrader);
     }
 
-    private OverstyrtUtbetalingsgradPerArbeidsforhold map(OverstyrtUttakUtbetalingsgrad overstyrtUttakUtbetalingsgrad){
+    private OverstyrtUtbetalingsgradPerArbeidsforhold map(OverstyrtUttakUtbetalingsgrad overstyrtUttakUtbetalingsgrad) {
         Arbeidsforhold arbeidsforhold = new Arbeidsforhold(
             overstyrtUttakUtbetalingsgrad.getAktivitetType().getKode(),
             overstyrtUttakUtbetalingsgrad.getArbeidsgiverId() != null ? overstyrtUttakUtbetalingsgrad.getArbeidsgiverId().getArbeidsgiverOrgnr() : null,

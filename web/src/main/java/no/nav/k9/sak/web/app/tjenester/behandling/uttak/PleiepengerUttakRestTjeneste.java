@@ -73,10 +73,10 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidBrukerBurde
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeidsforhold;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
-import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
-import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Simulering;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
+import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
 @ApplicationScoped
@@ -177,7 +177,7 @@ public class PleiepengerUttakRestTjeneste {
         final LocalDate virkningsdatoUttakNyeRegler = uttakNyeReglerRepository.finnDatoForNyeRegler(behandling.getId()).orElse(null);
         return new UttaksplanMedUtsattePerioder(uttaksplan, utsattePerioder, virkningsdatoUttakNyeRegler);
     }
-    
+
     @GET
     @Consumes(MediaType.APPLICATION_JSON)
     @Path(SIMULER_UTTAKSPLAN_PATH)
@@ -189,9 +189,9 @@ public class PleiepengerUttakRestTjeneste {
     public Simulering simulertUttaksplan(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
         final var behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
         final var ref = BehandlingReferanse.fra(behandling);
-        
+
         final Uttaksgrunnlag uttaksgrunnlag = mapInputTilUttakTjeneste.hentUtUbesluttededataOgMapRequest(ref);
-        return uttakRestKlient.simulerUttaksplan(uttaksgrunnlag);
+        return uttakTjeneste.simulerUttaksplan(uttaksgrunnlag);
     }
 
     @GET
