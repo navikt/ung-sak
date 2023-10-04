@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.tilkommetAktivitet.TilkommetAktivitetTjeneste;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
@@ -18,6 +20,8 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
 import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
@@ -32,8 +36,8 @@ class AksjonspunktUtlederNyeRegler {
     private UttakTjeneste uttakTjeneste;
     private UttakNyeReglerRepository uttakNyeReglerRepository;
     private TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste;
-
     private AksjonspunktKontrollRepository aksjonspunktKontrollRepository;
+    private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
 
     private boolean brukDatoNyRegelUttak;
 
@@ -46,12 +50,15 @@ class AksjonspunktUtlederNyeRegler {
                                         UttakTjeneste uttakTjeneste,
                                         UttakNyeReglerRepository uttakNyeReglerRepository,
                                         TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste,
-                                        AksjonspunktKontrollRepository aksjonspunktKontrollRepository, @KonfigVerdi(value = "ENABLE_DATO_NY_REGEL_UTTAK", defaultVerdi = "false") boolean brukDatoNyRegelUttak) {
+                                        AksjonspunktKontrollRepository aksjonspunktKontrollRepository,
+                                        SøknadsperiodeTjeneste søknadsperiodeTjeneste,
+                                        @KonfigVerdi(value = "ENABLE_DATO_NY_REGEL_UTTAK", defaultVerdi = "false") boolean brukDatoNyRegelUttak) {
         this.behandlingRepository = behandlingRepository;
         this.uttakTjeneste = uttakTjeneste;
         this.uttakNyeReglerRepository = uttakNyeReglerRepository;
         this.tilkommetAktivitetTjeneste = tilkommetAktivitetTjeneste;
         this.aksjonspunktKontrollRepository = aksjonspunktKontrollRepository;
+        this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
         this.brukDatoNyRegelUttak = brukDatoNyRegelUttak;
     }
 
@@ -92,8 +99,13 @@ class AksjonspunktUtlederNyeRegler {
     }
 
     private boolean harTilkommmetAktivitet(Behandling behandling) {
-        //har ikke satt dato for nye regler i uttak (utleder AP for det her), så kan ikke begrense perioden (derav LocalDate.MIN)
-        boolean harTilkommetAktivitet = !tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(behandling.getFagsakId(), LocalDate.MIN).isEmpty();
+        //tilkommet aktivitet etter søknadsperiodene påvirker ikke behandlingen
+        LocalDateTimeline<Boolean> søknadsperioder = TidslinjeUtil.tilTidslinjeKomprimert(søknadsperiodeTjeneste.utledFullstendigPeriode(behandling.getId()));
+        if (søknadsperioder.isEmpty()) {
+            return false;
+        }
+        LocalDateInterval aktuellPeriode = new LocalDateInterval(LocalDate.MIN, søknadsperioder.getMaxLocalDate());
+        boolean harTilkommetAktivitet = !tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(behandling.getFagsakId(), aktuellPeriode).isEmpty();
         log.info("Har {} tilkommet aktivitet", (harTilkommetAktivitet ? "" : "ikke"));
         return harTilkommetAktivitet;
     }

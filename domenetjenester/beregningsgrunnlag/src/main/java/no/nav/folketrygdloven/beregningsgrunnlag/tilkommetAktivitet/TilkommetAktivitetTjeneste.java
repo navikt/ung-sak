@@ -50,6 +50,7 @@ public class TilkommetAktivitetTjeneste {
         this.kalkulusTjeneste = kalkulusTjeneste;
     }
 
+
     /**
      * Henter ut tilkommede aktiviteter for angitt fagsak.
      *
@@ -59,6 +60,19 @@ public class TilkommetAktivitetTjeneste {
      * den regnes å være tilkommet i.
      */
     public Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> finnTilkommedeAktiviteter(Long fagsakId, LocalDate virkningstidspunkt) {
+        LocalDateInterval aktuellPeriode = virkningstidspunkt != null ? new LocalDateInterval(virkningstidspunkt, LocalDateInterval.TIDENES_ENDE) : null;
+        return finnTilkommedeAktiviteter(fagsakId, aktuellPeriode);
+    }
+
+    /**
+     * Henter ut tilkommede aktiviteter for angitt fagsak.
+     *
+     * @param fagsakId           IDen til fagsaken.
+     * @param aktuellPeriode  perioden det sjekkes tilkommede aktiviteter for.
+     * @return En {@code Map} med alle tilkommede aktiviteter med tilhørende perioden den
+     * den regnes å være tilkommet i.
+     */
+    public Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> finnTilkommedeAktiviteter(Long fagsakId, LocalDateInterval aktuellPeriode) {
         var sisteBehandlingOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId);
 
         if (sisteBehandlingOpt.isEmpty()) {
@@ -120,8 +134,8 @@ public class TilkommetAktivitetTjeneste {
                 .collect(Collectors.toList())
             );
             LocalDateTimeline<Boolean> sammenslått = periodetidslinje.crossJoin(nyePerioder);
-            if (virkningstidspunkt != null) {
-                sammenslått = sammenslått.intersection(new LocalDateInterval(virkningstidspunkt, LocalDateInterval.TIDENES_ENDE));
+            if (aktuellPeriode != null) {
+                sammenslått = sammenslått.intersection(aktuellPeriode);
             }
             if (!sammenslått.isEmpty()) {
                 sammenslåttResultat.put(aktivitetstatusOgArbeidsgiver, sammenslått);
