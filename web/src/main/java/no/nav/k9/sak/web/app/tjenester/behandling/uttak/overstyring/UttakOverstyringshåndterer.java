@@ -123,7 +123,7 @@ public class UttakOverstyringshåndterer implements Overstyringshåndterer<Overs
 
     private OverstyrtUttakPeriode map(OverstyrUttakPeriodeDto dto) {
         Set<OverstyrtUttakUtbetalingsgrad> utbetalingsgrader = dto.getUtbetalingsgrader().stream().map(this::map).collect(Collectors.toSet());
-        return new OverstyrtUttakPeriode(dto.getId(), dto.getSøkersUttaksgrad(), utbetalingsgrader, dto.getBegrunnelse(), dto.getSaksbehandler());
+        return new OverstyrtUttakPeriode(dto.getId(), dto.getSøkersUttaksgrad(), utbetalingsgrader, dto.getBegrunnelse());
     }
 
     private OverstyrtUttakUtbetalingsgrad map(OverstyrUttakUtbetalingsgradDto dto) {

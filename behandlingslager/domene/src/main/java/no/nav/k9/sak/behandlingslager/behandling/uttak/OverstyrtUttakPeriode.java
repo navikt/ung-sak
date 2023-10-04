@@ -13,17 +13,22 @@ public class OverstyrtUttakPeriode {
     private String begrunnelse;
     private String saksbehandler;
 
-    public OverstyrtUttakPeriode(Long id, BigDecimal søkersUttaksgrad, Set<OverstyrtUttakUtbetalingsgrad> overstyrtUtbetalingsgrad, String begrunnelse, String saksbehandler) {
+    /**
+     * brukes i overstyringhåndterer (saksbehandler blir satt av repository)
+     */
+    public OverstyrtUttakPeriode(Long id, BigDecimal søkersUttaksgrad, Set<OverstyrtUttakUtbetalingsgrad> overstyrtUtbetalingsgrad, String begrunnelse) {
         Objects.requireNonNull(overstyrtUtbetalingsgrad, "overstyrtUtbetalingsgrad");
         this.id = id;
         this.søkersUttaksgrad = søkersUttaksgrad;
         this.overstyrtUtbetalingsgrad = overstyrtUtbetalingsgrad;
         this.begrunnelse = begrunnelse;
-        this.saksbehandler = saksbehandler;
     }
 
-    public OverstyrtUttakPeriode(BigDecimal søkersUttaksgrad, Set<OverstyrtUttakUtbetalingsgrad> overstyrtUtbetalingsgrad, String begrunnelse, String saksbehandler) {
-        this(null, søkersUttaksgrad, overstyrtUtbetalingsgrad, begrunnelse, saksbehandler);
+    // brukes av repository for å tilby data
+    OverstyrtUttakPeriode(Long id, BigDecimal søkersUttaksgrad, Set<OverstyrtUttakUtbetalingsgrad> overstyrtUtbetalingsgrad, String begrunnelse, String saksbehandler) {
+        this(id, søkersUttaksgrad, overstyrtUtbetalingsgrad, begrunnelse);
+        Objects.requireNonNull(saksbehandler, "saksbehandler");
+        this.saksbehandler = saksbehandler;
     }
 
     public BigDecimal getSøkersUttaksgrad() {
