@@ -259,6 +259,9 @@ spec:
       value: "false"
     - name: DISABLE_TOTRINN_BREV
       value: "false"
+    - name: FL_FRA_SOKNAD
+      value: "false
+
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

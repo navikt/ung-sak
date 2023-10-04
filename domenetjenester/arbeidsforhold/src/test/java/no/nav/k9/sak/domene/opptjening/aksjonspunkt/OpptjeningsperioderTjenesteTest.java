@@ -100,7 +100,7 @@ class OpptjeningsperioderTjenesteTest {
         vurderForVilkår = new OpptjeningAktivitetVurderingOpptjeningsvilkår();
         vilkårResultatRepository = new VilkårResultatRepository(entityManager);
 
-        opptjeningsperioderTjeneste = new OpptjeningsperioderTjeneste(repositoryProvider.getOpptjeningRepository(), oppgittOpptjeningFilterProvider);
+        opptjeningsperioderTjeneste = new OpptjeningsperioderTjeneste(repositoryProvider.getOpptjeningRepository(), oppgittOpptjeningFilterProvider, false);
         when(oppgittOpptjeningFilterProvider.finnOpptjeningFilter(Mockito.anyLong())).thenReturn(new OppgittOpptjeningFilter() {
         });
 
