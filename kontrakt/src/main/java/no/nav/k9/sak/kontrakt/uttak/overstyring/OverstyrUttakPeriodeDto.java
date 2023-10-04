@@ -54,6 +54,8 @@ public class OverstyrUttakPeriodeDto {
     private String begrunnelse;
 
     @JsonProperty("saksbehandler")
+    @Pattern(regexp = "^[\\p{Graph}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Size(max = 100)
     private String saksbehandler;
 
     public OverstyrUttakPeriodeDto() {
