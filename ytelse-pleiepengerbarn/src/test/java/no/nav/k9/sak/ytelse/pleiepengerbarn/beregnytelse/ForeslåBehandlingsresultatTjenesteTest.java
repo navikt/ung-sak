@@ -260,9 +260,8 @@ public class ForeslåBehandlingsresultatTjenesteTest {
 
     private void lagreUttak(Behandling behandling) {
         var periode = new LukketPeriode(FOM, TOM);
-        var uttaksplan = new Uttaksplan(Map.of(periode, new UttaksperiodeInfo(no.nav.pleiepengerbarn.uttak.kontrakter.Utfall.OPPFYLT,
-            BigDecimal.valueOf(100), List.of(), BigDecimal.valueOf(100), null, Set.of(), Map.of(), BigDecimal.valueOf(100), null, Set.of(), behandling.getUuid().toString(), AnnenPart.ALENE, null, null, null, false, new Utenlandsopphold(null,
-        UtenlandsoppholdÅrsak.INGEN))), List.of());
+        UttaksperiodeInfo uttaksperiodeInfo = new UttaksperiodeInfo(no.nav.pleiepengerbarn.uttak.kontrakter.Utfall.OPPFYLT, BigDecimal.valueOf(100), List.of(), BigDecimal.valueOf(100), null, Set.of(), Map.of(), BigDecimal.valueOf(100), null, Set.of(), behandling.getUuid().toString(), AnnenPart.ALENE, null, null, null, false, new Utenlandsopphold(null, UtenlandsoppholdÅrsak.INGEN), false);
+        var uttaksplan = new Uttaksplan(Map.of(periode, uttaksperiodeInfo), List.of());
 
         uttakTjeneste.lagreUttakResultatPerioder(behandling.getFagsak().getSaksnummer(), behandling.getUuid(), uttaksplan);
     }
