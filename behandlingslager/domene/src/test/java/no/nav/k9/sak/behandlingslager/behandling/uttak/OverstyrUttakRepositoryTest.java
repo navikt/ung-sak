@@ -59,8 +59,8 @@ class OverstyrUttakRepositoryTest {
     void skal_lagre_og_hente_overstyring() {
         LocalDateInterval periode1 = new LocalDateInterval(dag1, dag1);
         LocalDateInterval periode2 = new LocalDateInterval(dag2, dag2);
-        OverstyrtUttakPeriode overstyrtUttakPeriodePeriode1 = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(), "begrunnelse");
-        OverstyrtUttakPeriode overstyrtUttakPeriodePeriode2 = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver1, arbeidsforholdRef, new BigDecimal("0.23"))), "begrunnelse");
+        OverstyrtUttakPeriode overstyrtUttakPeriodePeriode1 = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(), "begrunnelse", "saksbehandler1");
+        OverstyrtUttakPeriode overstyrtUttakPeriodePeriode2 = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver1, arbeidsforholdRef, new BigDecimal("0.23"))), "begrunnelse", "saksbehandler1");
 
         LocalDateTimeline<OverstyrtUttakPeriode> oppdateringer = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(periode1, overstyrtUttakPeriodePeriode1),
@@ -75,13 +75,13 @@ class OverstyrUttakRepositoryTest {
     @Test
     void skal_legge_til_ikkeoverlappende_overstyring() {
         LocalDateInterval periode1 = new LocalDateInterval(dag1, dag1);
-        OverstyrtUttakPeriode overstyrtUttakPeriodeOrginal = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(), "begrunnelse");
+        OverstyrtUttakPeriode overstyrtUttakPeriodeOrginal = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(), "begrunnelse", "saksbehandler1");
         LocalDateTimeline<OverstyrtUttakPeriode> eksisterendeOverstyringer = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode1, overstyrtUttakPeriodeOrginal)));
         overstyrUttakRepository.oppdaterOverstyringAvUttak(behandlingId, List.of(), eksisterendeOverstyringer);
 
         //legger til ny periode
         LocalDateInterval periode2 = new LocalDateInterval(dag2, dag2);
-        OverstyrtUttakPeriode overstyrtUttakPeriodeNy = new OverstyrtUttakPeriode(new BigDecimal("0.30"), Set.of(new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver1, arbeidsforholdRef, new BigDecimal("0.23"))), "begrunnelse");
+        OverstyrtUttakPeriode overstyrtUttakPeriodeNy = new OverstyrtUttakPeriode(new BigDecimal("0.30"), Set.of(new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver1, arbeidsforholdRef, new BigDecimal("0.23"))), "begrunnelse", "saksbehandler1");
         LocalDateTimeline<OverstyrtUttakPeriode> oppdaterteOverstyringer = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode2, overstyrtUttakPeriodeNy)));
         overstyrUttakRepository.oppdaterOverstyringAvUttak(behandlingId, List.of(), oppdaterteOverstyringer);
 
@@ -94,14 +94,14 @@ class OverstyrUttakRepositoryTest {
     @Test
     void skal_overskrive_eksisterende_overstyring_for_perioden_for_ny_overstyring() {
         LocalDateInterval periodeHele = new LocalDateInterval(dag1, dag3);
-        OverstyrtUttakPeriode overstyrtUttakPeriodeOrginal = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(), "begrunnelse");
+        OverstyrtUttakPeriode overstyrtUttakPeriodeOrginal = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(), "begrunnelse", "saksbehandler1");
         LocalDateTimeline<OverstyrtUttakPeriode> eksisterendeOverstyringer = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periodeHele, overstyrtUttakPeriodeOrginal)));
         overstyrUttakRepository.oppdaterOverstyringAvUttak(behandlingId, List.of(), eksisterendeOverstyringer);
 
 
         //overskriver deler av perioden
         LocalDateInterval periode2 = new LocalDateInterval(dag2, dag2);
-        OverstyrtUttakPeriode overstyrtUttakPeriodeNy = new OverstyrtUttakPeriode(new BigDecimal("0.30"), Set.of(new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver1, arbeidsforholdRef, new BigDecimal("0.23"))), "begrunnelse");
+        OverstyrtUttakPeriode overstyrtUttakPeriodeNy = new OverstyrtUttakPeriode(new BigDecimal("0.30"), Set.of(new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver1, arbeidsforholdRef, new BigDecimal("0.23"))), "begrunnelse", "saksbehandler1");
         LocalDateTimeline<OverstyrtUttakPeriode> oppdaterteOverstyringer = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode2, overstyrtUttakPeriodeNy)));
         overstyrUttakRepository.oppdaterOverstyringAvUttak(behandlingId, List.of(), oppdaterteOverstyringer);
 
@@ -114,9 +114,9 @@ class OverstyrUttakRepositoryTest {
         LocalDateInterval periode1 = new LocalDateInterval(dag1, dag1);
         LocalDateInterval periode2 = new LocalDateInterval(dag2, dag2);
         LocalDateInterval periode3 = new LocalDateInterval(dag3, dag3);
-        OverstyrtUttakPeriode overstyrtUttakPeriodeOrginal = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(), "begrunnelse");
-        OverstyrtUttakPeriode overstyrtUttakPeriodeOrginal2 = new OverstyrtUttakPeriode(new BigDecimal("0.36"), Set.of(), "begrunnelse");
-        OverstyrtUttakPeriode overstyrtUttakPeriodeNy = new OverstyrtUttakPeriode(new BigDecimal("0.30"), Set.of(new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver1, arbeidsforholdRef, new BigDecimal("0.23"))), "begrunnelse");
+        OverstyrtUttakPeriode overstyrtUttakPeriodeOrginal = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(), "begrunnelse", "saksbehandler1");
+        OverstyrtUttakPeriode overstyrtUttakPeriodeOrginal2 = new OverstyrtUttakPeriode(new BigDecimal("0.36"), Set.of(), "begrunnelse", "saksbehandler1");
+        OverstyrtUttakPeriode overstyrtUttakPeriodeNy = new OverstyrtUttakPeriode(new BigDecimal("0.30"), Set.of(new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver1, arbeidsforholdRef, new BigDecimal("0.23"))), "begrunnelse", "saksbehandler1");
 
         LocalDateTimeline<OverstyrtUttakPeriode> eksisterendeOverstyringer = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(periode1, overstyrtUttakPeriodeOrginal),
@@ -139,8 +139,8 @@ class OverstyrUttakRepositoryTest {
 
         LocalDateInterval periode1 = new LocalDateInterval(dag1, dag1);
         LocalDateInterval periode2 = new LocalDateInterval(dag2, dag2);
-        OverstyrtUttakPeriode overstyrtUttakPeriodePeriode1 = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(), "begrunnelse");
-        OverstyrtUttakPeriode overstyrtUttakPeriodePeriode2 = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver1, arbeidsforholdRef, new BigDecimal("0.23"))), "begrunnelse");
+        OverstyrtUttakPeriode overstyrtUttakPeriodePeriode1 = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(), "begrunnelse", "saksbehandler1");
+        OverstyrtUttakPeriode overstyrtUttakPeriodePeriode2 = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver1, arbeidsforholdRef, new BigDecimal("0.23"))), "begrunnelse", "saksbehandler1");
         LocalDateTimeline<OverstyrtUttakPeriode> oppdateringer = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(periode1, overstyrtUttakPeriodePeriode1),
             new LocalDateSegment<>(periode2, overstyrtUttakPeriodePeriode2))
@@ -161,7 +161,7 @@ class OverstyrUttakRepositoryTest {
         assertThat(overstyrUttakRepository.hentOverstyrtUttak(behandlingId)).isEqualTo(LocalDateTimeline.empty());
 
         LocalDateInterval periodeOriginal = new LocalDateInterval(dag1, dag1);
-        OverstyrtUttakPeriode overstyrtUttakPeriodePeriode1 = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(), "begrunnelse");
+        OverstyrtUttakPeriode overstyrtUttakPeriodePeriode1 = new OverstyrtUttakPeriode(new BigDecimal("0.35"), Set.of(), "begrunnelse", "saksbehandler1");
         LocalDateTimeline<OverstyrtUttakPeriode> oppdateringer = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(periodeOriginal, overstyrtUttakPeriodePeriode1))
         );
@@ -171,7 +171,7 @@ class OverstyrUttakRepositoryTest {
         //fjern periode1 gitt id
         LocalDateInterval periodeNy = new LocalDateInterval(dag2, dag2);
         Long id = eksisterendeOverstyringer.stream().toList().get(0).getValue().getId();
-        OverstyrtUttakPeriode verdier = new OverstyrtUttakPeriode(id, new BigDecimal("0.35"), Set.of(), "begrunnelse");
+        OverstyrtUttakPeriode verdier = new OverstyrtUttakPeriode(id, new BigDecimal("0.35"), Set.of(), "begrunnelse", "saksbehandler1");
         LocalDateTimeline<OverstyrtUttakPeriode> oppdateringer2 = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(periodeNy, verdier))
         );

@@ -11,17 +11,19 @@ public class OverstyrtUttakPeriode {
     private BigDecimal søkersUttaksgrad;
     private Set<OverstyrtUttakUtbetalingsgrad> overstyrtUtbetalingsgrad;
     private String begrunnelse;
+    private String saksbehandler;
 
-    public OverstyrtUttakPeriode(Long id, BigDecimal søkersUttaksgrad, Set<OverstyrtUttakUtbetalingsgrad> overstyrtUtbetalingsgrad, String begrunnelse) {
+    public OverstyrtUttakPeriode(Long id, BigDecimal søkersUttaksgrad, Set<OverstyrtUttakUtbetalingsgrad> overstyrtUtbetalingsgrad, String begrunnelse, String saksbehandler) {
         Objects.requireNonNull(overstyrtUtbetalingsgrad, "overstyrtUtbetalingsgrad");
         this.id = id;
         this.søkersUttaksgrad = søkersUttaksgrad;
         this.overstyrtUtbetalingsgrad = overstyrtUtbetalingsgrad;
         this.begrunnelse = begrunnelse;
+        this.saksbehandler = saksbehandler;
     }
 
-    public OverstyrtUttakPeriode(BigDecimal søkersUttaksgrad, Set<OverstyrtUttakUtbetalingsgrad> overstyrtUtbetalingsgrad, String begrunnelse) {
-        this(null, søkersUttaksgrad, overstyrtUtbetalingsgrad, begrunnelse);
+    public OverstyrtUttakPeriode(BigDecimal søkersUttaksgrad, Set<OverstyrtUttakUtbetalingsgrad> overstyrtUtbetalingsgrad, String begrunnelse, String saksbehandler) {
+        this(null, søkersUttaksgrad, overstyrtUtbetalingsgrad, begrunnelse, saksbehandler);
     }
 
     public BigDecimal getSøkersUttaksgrad() {
@@ -40,6 +42,10 @@ public class OverstyrtUttakPeriode {
         return begrunnelse;
     }
 
+    public String getSaksbehandler() {
+        return saksbehandler;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -48,6 +54,7 @@ public class OverstyrtUttakPeriode {
         return nullsafeEqualByCompareTo(søkersUttaksgrad, that.søkersUttaksgrad)
             && overstyrtUtbetalingsgrad.equals(that.overstyrtUtbetalingsgrad)
             && begrunnelse.equals(that.begrunnelse);
+        //saksbehandler eksplisitt ikke her, siden equals brukes for å sjekke om det er reelle endringer
     }
 
     private static boolean nullsafeEqualByCompareTo(BigDecimal a, BigDecimal b) {
