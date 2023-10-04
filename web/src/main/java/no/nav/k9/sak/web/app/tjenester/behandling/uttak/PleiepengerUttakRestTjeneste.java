@@ -46,6 +46,8 @@ import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrtUttakPeriode;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrtUttakUtbetalingsgrad;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsforholdIdDto;
+import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverOpplysningerDto;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverOversiktDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.uttak.ArbeidsgiverMedPerioderSomManglerDto;
@@ -283,20 +285,27 @@ public class PleiepengerUttakRestTjeneste {
         UUID behandlingUuid = behandlingIdDto.getBehandlingUuid();
         no.nav.k9.sak.typer.Periode periode = new no.nav.k9.sak.typer.Periode(request.getFom(), request.getTom());
         Uttaksplan uttaksplan = uttakTjeneste.hentUttaksplan(behandlingUuid, false);
+        ArbeidsgiverOversiktDto arbeidsgiverOversikt = arbeidsgiverOversiktTjeneste.getArbeidsgiverOpplysninger(behandlingUuid);
 
         Set<OverstyrUttakArbeidsforholdDto> aktiviteter = new LinkedHashSet<>();
-
         for (Map.Entry<LukketPeriode, UttaksperiodeInfo> entry : uttaksplan.getPerioder().entrySet()) {
             no.nav.k9.sak.typer.Periode uttakperiode = new no.nav.k9.sak.typer.Periode(entry.getKey().getFom(), entry.getKey().getTom());
             if (uttakperiode.overlaps(periode)) {
                 UttaksperiodeInfo periodeInfo = entry.getValue();
                 for (Utbetalingsgrader utbetalingsgrader : periodeInfo.getUtbetalingsgrader()) {
-                    aktiviteter.add(map(utbetalingsgrader.getArbeidsforhold()));
+                    Arbeidsforhold arbeidsforhold = utbetalingsgrader.getArbeidsforhold();
+                    ArbeidsgiverOpplysningerDto arbeidsgiverOpplysninger = arbeidsgiverOversikt.getArbeidsgivere().get(arbeidsforhold.getOrganisasjonsnummer());
+                    if (arbeidsforhold.getArbeidsforholdId() == null && arbeidsgiverOpplysninger != null && !arbeidsgiverOpplysninger.getArbeidsforholdreferanser().isEmpty()) {
+                        for (ArbeidsforholdIdDto arbeidsforholdId : arbeidsgiverOpplysninger.getArbeidsforholdreferanser()) {
+                            aktiviteter.add(map(arbeidsforhold, InternArbeidsforholdRef.ref(arbeidsforholdId.getInternArbeidsforholdId())));
+                        }
+                    } else {
+                        aktiviteter.add(map(arbeidsforhold));
+                    }
                 }
             }
         }
 
-        ArbeidsgiverOversiktDto arbeidsgiverOversikt = arbeidsgiverOversiktTjeneste.getArbeidsgiverOpplysninger(behandlingUuid);
         return new OverstyrbareUttakAktiviterDto(new ArrayList<>(aktiviteter), arbeidsgiverOversikt);
     }
 
@@ -324,6 +333,15 @@ public class PleiepengerUttakRestTjeneste {
             arbeidsforhold.getOrganisasjonsnummer() != null ? new OrgNummer(arbeidsforhold.getOrganisasjonsnummer()) : null,
             arbeidsforhold.getAktørId() != null ? new AktørId(arbeidsforhold.getAktørId()) : null,
             arbeidsforhold.getArbeidsforholdId() != null ? InternArbeidsforholdRef.ref(arbeidsforhold.getArbeidsforholdId()) : null
+        );
+    }
+
+    private OverstyrUttakArbeidsforholdDto map(Arbeidsforhold arbeidsforhold, InternArbeidsforholdRef arbeidsforholdRef) {
+        return new OverstyrUttakArbeidsforholdDto(
+            UttakArbeidType.fraKode(arbeidsforhold.getType()),
+            arbeidsforhold.getOrganisasjonsnummer() != null ? new OrgNummer(arbeidsforhold.getOrganisasjonsnummer()) : null,
+            arbeidsforhold.getAktørId() != null ? new AktørId(arbeidsforhold.getAktørId()) : null,
+            arbeidsforholdRef
         );
     }
 
