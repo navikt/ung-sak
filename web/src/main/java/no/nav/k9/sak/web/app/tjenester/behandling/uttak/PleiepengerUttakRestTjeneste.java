@@ -302,7 +302,7 @@ public class PleiepengerUttakRestTjeneste {
 
 
     private OverstyrUttakPeriodeDto map(LocalDateSegment<OverstyrtUttakPeriode> periode) {
-        return new OverstyrUttakPeriodeDto(periode.getValue().getId(), new no.nav.k9.sak.typer.Periode(periode.getFom(), periode.getTom()), periode.getValue().getSøkersUttaksgrad(), map(periode.getValue().getOverstyrtUtbetalingsgrad()), periode.getValue().getBegrunnelse());
+        return new OverstyrUttakPeriodeDto(periode.getValue().getId(), new no.nav.k9.sak.typer.Periode(periode.getFom(), periode.getTom()), periode.getValue().getSøkersUttaksgrad(), map(periode.getValue().getOverstyrtUtbetalingsgrad()), periode.getValue().getBegrunnelse(), periode.getValue().getSaksbehandler());
     }
 
     private List<OverstyrUttakUtbetalingsgradDto> map(Set<OverstyrtUttakUtbetalingsgrad> overstyrtUtbetalingsgrad) {

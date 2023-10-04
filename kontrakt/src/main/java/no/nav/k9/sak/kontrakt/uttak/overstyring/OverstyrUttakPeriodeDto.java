@@ -53,17 +53,22 @@ public class OverstyrUttakPeriodeDto {
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String begrunnelse;
 
+    @JsonProperty("saksbehandler")
+    @Pattern(regexp = "^[\\p{Graph}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Size(max = 100)
+    private String saksbehandler;
 
     public OverstyrUttakPeriodeDto() {
         //
     }
 
-    public OverstyrUttakPeriodeDto(Long id, Periode periode, BigDecimal søkersUttaksgrad, List<OverstyrUttakUtbetalingsgradDto> utbetalingsgrader, String begrunnelse) {
+    public OverstyrUttakPeriodeDto(Long id, Periode periode, BigDecimal søkersUttaksgrad, List<OverstyrUttakUtbetalingsgradDto> utbetalingsgrader, String begrunnelse, String saksbehandler) {
         this.id = id;
         this.periode = periode;
         this.søkersUttaksgrad = søkersUttaksgrad;
         this.utbetalingsgrader = utbetalingsgrader;
         this.begrunnelse = begrunnelse;
+        this.saksbehandler = saksbehandler;
     }
 
     public Long getId() {
@@ -84,6 +89,10 @@ public class OverstyrUttakPeriodeDto {
 
     public String getBegrunnelse() {
         return begrunnelse;
+    }
+
+    public String getSaksbehandler() {
+        return saksbehandler;
     }
 
     @AssertTrue(message = "Perioder skal være lukket (ha start og slutt)")

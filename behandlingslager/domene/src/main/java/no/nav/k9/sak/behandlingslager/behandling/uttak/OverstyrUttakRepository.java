@@ -15,6 +15,7 @@ import jakarta.persistence.TypedQuery;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @Dependent
 public class OverstyrUttakRepository {
@@ -31,6 +32,7 @@ public class OverstyrUttakRepository {
     }
 
     public void oppdaterOverstyringAvUttak(Long behandlingId, List<Long> slettes, LocalDateTimeline<OverstyrtUttakPeriode> oppdaterEllerLagre) {
+        String saksbehandlerIdent = SubjectHandler.getSubjectHandler().getUid();
         LocalDateTimeline<OverstyrtUttakPeriodeEntitet> eksisterendeOverstyringer = hentSomEntitetTidslinje(behandlingId);
         Map<Long, LocalDateSegment<OverstyrtUttakPeriodeEntitet>> eksisterendeOverstyringerPrId = eksisterendeOverstyringer.stream().collect(Collectors.toMap(segment -> segment.getValue().getId(), segment -> segment));
         slettes.forEach(slettesId -> fjernOverstyring(behandlingId, slettesId));
@@ -53,7 +55,7 @@ public class OverstyrUttakRepository {
                     fjernOverstyring(behandlingId, eksisterendeOverstyringId);
                 }
                 OverstyrtUttakPeriode overstyring = segment.getValue();
-                OverstyrtUttakPeriodeEntitet nyOverstyring = new OverstyrtUttakPeriodeEntitet(behandlingId, DatoIntervallEntitet.fra(segment.getLocalDateInterval()), overstyring.getSøkersUttaksgrad(), map(overstyring.getOverstyrtUtbetalingsgrad()), overstyring.getBegrunnelse());
+            OverstyrtUttakPeriodeEntitet nyOverstyring = new OverstyrtUttakPeriodeEntitet(behandlingId, DatoIntervallEntitet.fra(segment.getLocalDateInterval()), overstyring.getSøkersUttaksgrad(), map(overstyring.getOverstyrtUtbetalingsgrad()), overstyring.getBegrunnelse(), saksbehandlerIdent);
                 entityManager.persist(nyOverstyring);
             }
         );
@@ -122,7 +124,7 @@ public class OverstyrUttakRepository {
     }
 
     private OverstyrtUttakPeriode mapFraEntitet(OverstyrtUttakPeriodeEntitet entitet) {
-        return new OverstyrtUttakPeriode(entitet.getId(), entitet.getSøkersUttaksgrad(), map(entitet.getOverstyrtUtbetalingsgrad()), entitet.getBegrunnelse());
+        return new OverstyrtUttakPeriode(entitet.getId(), entitet.getSøkersUttaksgrad(), map(entitet.getOverstyrtUtbetalingsgrad()), entitet.getBegrunnelse(), entitet.getSaksbehandler());
     }
 
     private LocalDateTimeline<OverstyrtUttakPeriodeEntitet> tilTidslinje(Collection<OverstyrtUttakPeriodeEntitet> entiteter) {

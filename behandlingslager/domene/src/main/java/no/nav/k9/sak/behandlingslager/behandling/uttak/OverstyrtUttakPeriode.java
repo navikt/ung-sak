@@ -11,7 +11,11 @@ public class OverstyrtUttakPeriode {
     private BigDecimal søkersUttaksgrad;
     private Set<OverstyrtUttakUtbetalingsgrad> overstyrtUtbetalingsgrad;
     private String begrunnelse;
+    private String saksbehandler;
 
+    /**
+     * brukes i overstyringhåndterer (saksbehandler blir satt av repository)
+     */
     public OverstyrtUttakPeriode(Long id, BigDecimal søkersUttaksgrad, Set<OverstyrtUttakUtbetalingsgrad> overstyrtUtbetalingsgrad, String begrunnelse) {
         Objects.requireNonNull(overstyrtUtbetalingsgrad, "overstyrtUtbetalingsgrad");
         this.id = id;
@@ -20,8 +24,11 @@ public class OverstyrtUttakPeriode {
         this.begrunnelse = begrunnelse;
     }
 
-    public OverstyrtUttakPeriode(BigDecimal søkersUttaksgrad, Set<OverstyrtUttakUtbetalingsgrad> overstyrtUtbetalingsgrad, String begrunnelse) {
-        this(null, søkersUttaksgrad, overstyrtUtbetalingsgrad, begrunnelse);
+    // brukes av repository for å tilby data
+    OverstyrtUttakPeriode(Long id, BigDecimal søkersUttaksgrad, Set<OverstyrtUttakUtbetalingsgrad> overstyrtUtbetalingsgrad, String begrunnelse, String saksbehandler) {
+        this(id, søkersUttaksgrad, overstyrtUtbetalingsgrad, begrunnelse);
+        Objects.requireNonNull(saksbehandler, "saksbehandler");
+        this.saksbehandler = saksbehandler;
     }
 
     public BigDecimal getSøkersUttaksgrad() {
@@ -40,6 +47,10 @@ public class OverstyrtUttakPeriode {
         return begrunnelse;
     }
 
+    public String getSaksbehandler() {
+        return saksbehandler;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -48,6 +59,7 @@ public class OverstyrtUttakPeriode {
         return nullsafeEqualByCompareTo(søkersUttaksgrad, that.søkersUttaksgrad)
             && overstyrtUtbetalingsgrad.equals(that.overstyrtUtbetalingsgrad)
             && begrunnelse.equals(that.begrunnelse);
+        //saksbehandler eksplisitt ikke her, siden equals brukes for å sjekke om det er reelle endringer
     }
 
     private static boolean nullsafeEqualByCompareTo(BigDecimal a, BigDecimal b) {
