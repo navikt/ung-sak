@@ -260,7 +260,7 @@ spec:
     - name: DISABLE_TOTRINN_BREV
       value: "false"
     - name: FL_FRA_SOKNAD
-      value: "false
+      value: "false"
 
 
     # Konfigurasjoner
