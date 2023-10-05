@@ -12,5 +12,6 @@ jobs:
     permissions:
       actions: read
       security-events: write
+      contents: read
     with:
       use-reader: true
