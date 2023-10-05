@@ -65,6 +65,7 @@ import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
 import no.nav.k9.sak.utsatt.UtsattPeriode;
 import no.nav.k9.sak.web.app.tjenester.behandling.arbeidsforhold.ArbeidsgiverOversiktTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.uttak.overstyring.OverstyrbareAktiviteterForUttakRequest;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.ContainerContextRunner;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.kjøreplan.KjøreplanUtleder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
@@ -225,7 +226,8 @@ public class PleiepengerUttakRestTjeneste {
     public Response debugInput(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
         var behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
 
-        var uttaksgrunnlag = mapInputTilUttakTjeneste.hentUtOgMapRequest(BehandlingReferanse.fra(behandling));
+        // Gjer kall via egen tråd for å kunne kalle med system kontekst (kreves ved kall til kalkulus)
+        var uttaksgrunnlag = ContainerContextRunner.doRun(behandling, () -> mapInputTilUttakTjeneste.hentUtOgMapRequest(BehandlingReferanse.fra(behandling)));
 
         return Response.ok(uttaksgrunnlag).build();
     }
