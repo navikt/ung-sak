@@ -64,7 +64,7 @@ class MapOpptjeningTest {
         behandlingRepository = new BehandlingRepository(entityManager);
         vilkårResultatRepository = new VilkårResultatRepository(entityManager);
         opptjeningRepository = new OpptjeningRepository(entityManager, behandlingRepository, vilkårResultatRepository);
-        OpptjeningsperioderTjeneste opptjeningsperioderTjeneste = new OpptjeningsperioderTjeneste(opptjeningRepository, dummyOppgittOpptjeningFilter());
+        OpptjeningsperioderTjeneste opptjeningsperioderTjeneste = new OpptjeningsperioderTjeneste(opptjeningRepository, dummyOppgittOpptjeningFilter(), false);
         iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
         mapOpptjening = new MapOpptjening(opptjeningsperioderTjeneste, null, iayTjeneste, vilkårResultatRepository);
         aktørId = AktørId.dummy();
