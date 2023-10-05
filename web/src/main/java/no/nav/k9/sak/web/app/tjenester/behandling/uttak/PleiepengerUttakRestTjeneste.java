@@ -22,10 +22,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -38,6 +40,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
+import no.nav.k9.prosesstask.rest.AbacEmptySupplier;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -46,6 +49,7 @@ import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrtUttakPeriode;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrtUttakUtbetalingsgrad;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.kontrakt.KortTekst;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverOversiktDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.uttak.ArbeidsgiverMedPerioderSomManglerDto;
@@ -66,6 +70,7 @@ import no.nav.k9.sak.utsatt.UtsattPeriode;
 import no.nav.k9.sak.web.app.tjenester.behandling.arbeidsforhold.ArbeidsgiverOversiktTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.uttak.overstyring.OverstyrbareAktiviteterForUttakRequest;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.ContainerContextRunner;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.kjøreplan.KjøreplanUtleder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
@@ -105,6 +110,8 @@ public class PleiepengerUttakRestTjeneste {
     private KjøreplanUtleder kjøreplanUtleder;
     private UttakNyeReglerRepository uttakNyeReglerRepository;
     private OverstyrUttakRepository overstyrUttakRepository;
+
+    private EntityManager entityManager;
     private ArbeidsgiverOversiktTjeneste arbeidsgiverOversiktTjeneste;
 
     public PleiepengerUttakRestTjeneste() {
@@ -120,6 +127,7 @@ public class PleiepengerUttakRestTjeneste {
                                         KjøreplanUtleder kjøreplanUtleder,
                                         UttakNyeReglerRepository uttakNyeReglerRepository,
                                         OverstyrUttakRepository overstyrUttakRepository,
+                                        EntityManager entityManager,
                                         ArbeidsgiverOversiktTjeneste arbeidsgiverOversiktTjeneste) {
         this.uttakTjeneste = uttakTjeneste;
         this.behandlingRepository = behandlingRepository;
@@ -129,6 +137,7 @@ public class PleiepengerUttakRestTjeneste {
         this.kjøreplanUtleder = kjøreplanUtleder;
         this.uttakNyeReglerRepository = uttakNyeReglerRepository;
         this.overstyrUttakRepository = overstyrUttakRepository;
+        this.entityManager = entityManager;
         this.arbeidsgiverOversiktTjeneste = arbeidsgiverOversiktTjeneste;
     }
 
@@ -214,17 +223,21 @@ public class PleiepengerUttakRestTjeneste {
             .collect(Collectors.toList()));
     }
 
-    @GET
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @POST
     @Path(GET_DEBUG_INPUT_PATH)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Henter ut uttaksgrunnlag for behandling", tags = "behandling - pleiepenger/uttak", responses = {
         @ApiResponse(responseCode = "200", description = "Uttaksgrunnlag", content = @Content(mediaType = MediaType.APPLICATION_JSON))
     })
     @BeskyttetRessurs(action = READ, resource = DRIFT)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response debugInput(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
+    public Response debugInput(@NotNull @FormParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto,
+                               @NotNull @FormParam("begrunnelse") @Parameter(description = "begrunnelse", allowEmptyValue = false, required = true, schema = @Schema(type = "string", maximum = "2000")) @Valid @TilpassetAbacAttributt(supplierClass = AbacEmptySupplier.class) KortTekst begrunnelse) {
         var behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
+
+        entityManager.persist(new DiagnostikkFagsakLogg(behandling.getFagsak().getId(), GET_DEBUG_INPUT_PATH, begrunnelse.getTekst()));
+        entityManager.flush();
 
         // Gjer kall via egen tråd for å kunne kalle med system kontekst (kreves ved kall til kalkulus)
         var uttaksgrunnlag = ContainerContextRunner.doRun(behandling, () -> mapInputTilUttakTjeneste.hentUtOgMapRequest(BehandlingReferanse.fra(behandling)));
