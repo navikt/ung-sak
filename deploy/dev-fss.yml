@@ -188,8 +188,6 @@ spec:
       value: api://dev-fss.k9saksbehandling.k9-formidling/.default
     - name: K9_PUNSJ_URL
       value: http://k9-punsj.k9saksbehandling/api
-    - name: K9_PUNSJ_SCOPE
-      value: api://dev-fss.k9saksbehandling.k9-punsj/.default
     - name: INFOTRYGD_BS_BASE_URI
       value: http://k9-infotrygd.k9saksbehandling
     - name: ARBEID_OG_INNTEKT_BASE_URL
