@@ -6,6 +6,8 @@ import java.net.URISyntaxException;
 import java.util.Objects;
 import java.util.Optional;
 
+import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
+import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
@@ -42,6 +44,7 @@ import no.nav.k9.sak.kontrakt.dokument.JournalpostIderDto;
 
 
 @ApplicationScoped
+@ScopedRestIntegration(scopeKey = "k9.punsj.scope", defaultScope = "api://prod-fss.k9saksbehandling.k9-punsj/.default")
 public class PunsjRestKlient {
 
     private static final Logger log = LoggerFactory.getLogger(PunsjRestKlient.class);
@@ -60,7 +63,7 @@ public class PunsjRestKlient {
         .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
         .setVisibility(PropertyAccessor.CREATOR, JsonAutoDetect.Visibility.ANY);
     private final ObjectReader journalpostIderReader = objectMapper.readerFor(JournalpostIderDto.class);
-    private CloseableHttpClient restClient;
+    private OidcRestClient restClient;
     private URI punsjEndpoint;
 
     protected PunsjRestKlient() {
@@ -68,8 +71,10 @@ public class PunsjRestKlient {
     }
 
     @Inject
-    public PunsjRestKlient(SystemUserOidcRestClient restClient,
-                           @KonfigVerdi(value = "k9.punsj.url") URI endpoint) {
+    public PunsjRestKlient(
+        OidcRestClient restClient,
+        @KonfigVerdi(value = "k9.punsj.url") URI endpoint
+    ) {
         this(endpoint);
         this.restClient = restClient;
     }
