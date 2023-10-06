@@ -84,7 +84,7 @@ public class OverstyrUttakDto extends OverstyringAksjonspunktDto {
 
     @AssertFalse(message = "Har ingen slett- og/eller lagreEllerOppdater-operasjon")
     public boolean getHarIngenOperasjon() {
-        return lagreEllerOppdater.isEmpty() && slett.isEmpty();
+        return !gåVidere && lagreEllerOppdater.isEmpty() && slett.isEmpty();
     }
 
     @AssertTrue(message = "Det er duplikat id i slett- og/eller lagreEllerOppdater-feltene")
