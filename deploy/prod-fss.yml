@@ -259,6 +259,8 @@ spec:
       value: "false"
     - name: FL_FRA_SOKNAD
       value: "false"
+    - name: FILTRER_UGYLDIG_IM
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
