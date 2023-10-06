@@ -113,11 +113,22 @@ public class TilkjentYtelseTjeneste {
         if (!valideringsfeil.isEmpty()) {
             try {
                 TilkjentYtelseOppdrag maskert = maskerer.masker(tilkjentYtelseOppdrag);
-                throw new IllegalArgumentException("Valideringsfeil:\"" + valideringsfeil + "\" for " + objectMapper.writeValueAsString(maskert));
+                String input = objectMapper.writeValueAsString(maskert);
+                //avkorter input for å unngå at logginnslag brytes. Ser ut som loggen p.t. tåler ca 9000 tegn herfra, setter lavere for sikkerhets skyld
+                String avkortetInput = begrensTilAntall(input, 6000);
+                throw new IllegalArgumentException("Valideringsfeil:\"" + valideringsfeil + "\" for " + avkortetInput);
             } catch (JsonProcessingException e) {
                 throw new IllegalArgumentException("Det var valideringsfeil, men fikk også Json-feil i håndtering av feilen", e);
             }
         }
+    }
+
+    private static String begrensTilAntall(String uavkortet, int antallTegn) {
+        if (uavkortet == null || uavkortet.length() <= antallTegn) {
+            return uavkortet;
+        }
+        int antallFjernedeTegn = uavkortet.length() - antallTegn;
+        return uavkortet.substring(0, antallTegn - 1) + "...(fjernet " + antallFjernedeTegn + " tegn)";
     }
 
     private InntrekkBeslutning utledInntrekkBeslutning(Behandling behandling) {
