@@ -68,6 +68,9 @@ public class BeregningsresultatPeriode extends BaseEntitet {
     @Column(name = "total_utbetalingsgrad_etter_reduksjon_ved_tilkommet_inntekt")
     private BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
 
+    @Column(name = "reduksjonsfaktor_inaktiv_type_a")
+    private BigDecimal reduksjonsfaktorInaktivTypeA;
+
     @Column(name = "graderingsfaktor_inntekt")
     private BigDecimal graderingsfaktorInntekt;
 
@@ -135,6 +138,10 @@ public class BeregningsresultatPeriode extends BaseEntitet {
         return totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
     }
 
+    public BigDecimal getReduksjonsfaktorInaktivTypeA() {
+        return reduksjonsfaktorInaktivTypeA;
+    }
+
     public BigDecimal getGraderingsfaktorInntekt() {
         return graderingsfaktorInntekt;
     }
@@ -177,6 +184,7 @@ public class BeregningsresultatPeriode extends BaseEntitet {
             + (inntektGraderingsprosent != null ? ", inntektsgradering=" + inntektGraderingsprosent.toPlainString() : "")
             + (totalUtbetalingsgradFraUttak != null ? ", totalUtbetalingsgradFraUttak=" + totalUtbetalingsgradFraUttak.toPlainString() : "")
             + (totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt != null ? ", totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt=" + totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt.toPlainString() : "")
+            + (reduksjonsfaktorInaktivTypeA != null ? ", reduksjonsfaktorInaktivTypeA=" + reduksjonsfaktorInaktivTypeA.toPlainString() : "")
             + ", andeler=[" + beregningsresultatAndelList.size() + "]>";
     }
 
@@ -210,8 +218,14 @@ public class BeregningsresultatPeriode extends BaseEntitet {
             beregningsresultatPeriodeMal.totalUtbetalingsgradFraUttak = totalUtbetalingsgradFraUttak;
             return this;
         }
+
         public Builder medTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt) {
             beregningsresultatPeriodeMal.totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt = totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
+            return this;
+        }
+
+        public Builder medReduksjonsfaktorInaktivTypeA(BigDecimal reduksjonsfaktorInaktivTypeA) {
+            beregningsresultatPeriodeMal.reduksjonsfaktorInaktivTypeA = reduksjonsfaktorInaktivTypeA;
             return this;
         }
 

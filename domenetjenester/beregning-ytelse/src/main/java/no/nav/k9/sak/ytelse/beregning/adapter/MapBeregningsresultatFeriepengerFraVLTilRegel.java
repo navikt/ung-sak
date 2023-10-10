@@ -60,6 +60,7 @@ public class MapBeregningsresultatFeriepengerFraVLTilRegel {
             inputPeriode.getInntektGraderingsprosent(),
             inputPeriode.getTotalUtbetalingsgradFraUttak(),
             inputPeriode.getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(),
+            inputPeriode.getReduksjonsfaktorInaktivTypeA(),
             inputPeriode.getGraderingsfaktorTid(),
             inputPeriode.getGraderingsfaktorInntekt()
         );

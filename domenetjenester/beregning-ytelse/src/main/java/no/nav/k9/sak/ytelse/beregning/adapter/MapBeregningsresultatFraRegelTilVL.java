@@ -41,6 +41,7 @@ public class MapBeregningsresultatFraRegelTilVL {
             .medInntektGraderingprosent(resultatPeriode.getInntektGraderingsprosent())
             .medTotalUtbetalingsgradFraUttak(resultatPeriode.getTotalUtbetalingsgradFraUttak())
             .medTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(resultatPeriode.getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt())
+            .medReduksjonsfaktorInaktivTypeA(resultatPeriode.getReduksjonsfaktorInaktivTypeA())
             .medGraderingsfaktorInntekt(resultatPeriode.getGraderingsfaktorInntekt())
             .medGraderingsfaktorTid(resultatPeriode.getGraderingsfaktorTid())
             .build(eksisterendeResultat);

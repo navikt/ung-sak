@@ -106,6 +106,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
                 grunnlag.getInntektGraderingsprosent(),
                 grunnlag.getTotalUtbetalingsgradFraUttak(),
                 grunnlag.getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(),
+                grunnlag.getReduksjonsfaktorInaktivTypeA(),
                 grunnlag.getGraderingsfaktorTid(),
                 grunnlag.getGraderingsfaktorInntekt());
 
@@ -154,7 +155,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
 
         // Fra dagsats gradert ifht utbetalingsgrad
         long dagsatsBruker = årsbeløpTilDagsats(beregningsgrunnlagPrStatus.getRedusertBrukersAndelPrÅr());
-        BigDecimal utbetalingsgradOppdrag = prosentAvMaksimal(beregningsgrunnlagPrStatus.getRedusertBrukersAndelPrÅr(), grunnlag.getBruttoBeregningsgrunnlag());
+        BigDecimal utbetalingsgradOppdrag = utbetalingsgradOppdrag(beregningsgrunnlagPrStatus.getRedusertBrukersAndelPrÅr(), grunnlag);
         resultatPeriode.addBeregningsresultatAndel(
             BeregningsresultatAndel.builder()
                 .medBrukerErMottaker(true)
@@ -170,7 +171,14 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
         // Regelsporing
         String beskrivelse = periodeNavn + BRUKER_ANDEL + "['" + beregningsgrunnlagPrStatus.getAktivitetStatus().name() + "']" + DAGSATS_BRUKER;
         resultater.put(beskrivelse, dagsatsBruker);
+    }
 
+    private static BigDecimal utbetalingsgradOppdrag(BigDecimal redusertBrukersAndelPrÅr, BeregningsgrunnlagPeriode grunnlag) {
+        boolean erMidlertidigInaktivTypeA = grunnlag.getReduksjonsfaktorInaktivTypeA() != null;
+        BigDecimal maksimalUtbetaling = erMidlertidigInaktivTypeA
+            ? grunnlag.getBruttoBeregningsgrunnlag().multiply(grunnlag.getReduksjonsfaktorInaktivTypeA()).setScale(0, RoundingMode.HALF_UP)
+            : grunnlag.getBruttoBeregningsgrunnlag();
+        return prosentAvMaksimal(redusertBrukersAndelPrÅr, maksimalUtbetaling);
     }
 
     private static BigDecimal prosentAvMaksimal(BigDecimal input, BigDecimal maks) {
@@ -181,8 +189,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
     }
 
     private Optional<UttakAktivitet> matchUttakAktivitetMedBeregningsgrunnlagPrStatus(BeregningsgrunnlagPrStatus beregningsgrunnlagPrStatus, List<UttakAktivitet> uttakAktiviteter) {
-
-        var match = uttakAktiviteter.stream()
+        return uttakAktiviteter.stream()
             .filter(aktivitet -> {
                 var aktivitetStatus = beregningsgrunnlagPrStatus.getAktivitetStatus();
                 if ((aktivitet.getType().equals(UttakArbeidType.ANNET))) {
@@ -193,7 +200,6 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
                 }
             })
             .findFirst();
-        return match;
     }
 
     private void opprettBeregningsresultatAndelerATFL(BeregningsgrunnlagPeriode grunnlag, BeregningsgrunnlagPrArbeidsforhold arbeidsforhold, BeregningsresultatPeriode resultatPeriode,
@@ -212,8 +218,8 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
         Long dagsatsBruker = årsbeløpTilDagsats(arbeidsforhold.getRedusertBrukersAndelPrÅr());
         Long dagsatsArbeidsgiver = årsbeløpTilDagsats(arbeidsforhold.getRedusertRefusjonPrÅr());
 
-        BigDecimal utbetalingsgradOppdragBruker = prosentAvMaksimal(arbeidsforhold.getRedusertBrukersAndelPrÅr(), grunnlag.getBruttoBeregningsgrunnlag());
-        BigDecimal utbetalingsgradOppdragRefusjon = prosentAvMaksimal(arbeidsforhold.getRedusertRefusjonPrÅr(), grunnlag.getBruttoBeregningsgrunnlag());
+        BigDecimal utbetalingsgradOppdragBruker = utbetalingsgradOppdrag(arbeidsforhold.getRedusertBrukersAndelPrÅr(), grunnlag);
+        BigDecimal utbetalingsgradOppdragRefusjon = utbetalingsgradOppdrag(arbeidsforhold.getRedusertRefusjonPrÅr(), grunnlag);
 
 
         resultatPeriode.addBeregningsresultatAndel(
