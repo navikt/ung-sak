@@ -15,6 +15,7 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
+import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrtUttakPeriode;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -58,6 +59,7 @@ public class InputParametere {
     private Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> tilkommetAktivitetsperioder  = new HashMap<>();
 
     private LocalDate virkningsdatoNyeRegler;
+    private LocalDateTimeline<OverstyrtUttakPeriode> overstyrtUttak ;
 
     public InputParametere() {
     }
@@ -265,6 +267,15 @@ public class InputParametere {
     }
     public InputParametere medVirkningsdatoNyeRegler(LocalDate virkningsdatoNyeRegler) {
         this.virkningsdatoNyeRegler = virkningsdatoNyeRegler;
+        return this;
+    }
+
+    public LocalDateTimeline<OverstyrtUttakPeriode> getOverstyrtUttak() {
+        return overstyrtUttak;
+    }
+
+    public InputParametere medOverstyrtUttak(LocalDateTimeline<OverstyrtUttakPeriode> overstyrtUttak) {
+        this.overstyrtUttak = overstyrtUttak;
         return this;
     }
 }

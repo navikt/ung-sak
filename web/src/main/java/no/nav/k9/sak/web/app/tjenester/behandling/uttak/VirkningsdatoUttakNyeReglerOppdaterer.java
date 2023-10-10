@@ -49,7 +49,7 @@ public class VirkningsdatoUttakNyeReglerOppdaterer implements AksjonspunktOppdat
         LocalDate eksisterendeDato = uttakNyeReglerRepository.finnDatoForNyeRegler(param.getBehandlingId()).orElse(null);
         uttakNyeReglerRepository.lagreDatoForNyeRegler(param.getBehandlingId(), dto.getVirkningsdato());
         opprettHistorikkInnslag(param.getBehandlingId(), dto.getVirkningsdato(), eksisterendeDato, dto.getBegrunnelse());
-        return OppdateringResultat.builder().build();
+        return OppdateringResultat.builder().medTotrinn().build();
     }
 
     private void opprettHistorikkInnslag(Long behandlingId, LocalDate nyVirkningsdato, LocalDate eksisterendeDato, String begrunnelse) {

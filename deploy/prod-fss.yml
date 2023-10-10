@@ -255,6 +255,12 @@ spec:
       value: "false"
     - name: PSB_FILTRER_IM_PAA_BEHANDLING_ID
       value: "false"
+    - name: ENABLE_OVERSTYR_UTTAK
+      value: "false"
+    - name: FL_FRA_SOKNAD
+      value: "false"
+    - name: FILTRER_UGYLDIG_IM
+      value: "false"
     - name: OPPTJENING_AP_VED_AKSEPTERT_MELLOMLIGGENDE_HELG
       value: "false"
 

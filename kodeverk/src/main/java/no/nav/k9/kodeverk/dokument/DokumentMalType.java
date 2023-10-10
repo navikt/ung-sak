@@ -30,6 +30,7 @@ public enum DokumentMalType implements Kodeverdi {
     ETTERLYS_INNTEKTSMELDING_DOK("INNLYS", "Etterlys inntektsmelding"),
     ETTERLYS_INNTEKTSMELDING_PURRING("INNLYS_PURRING", "Etterlys inntektsmelding - purring"),
     GENERELT_FRITEKSTBREV("GENERELT_FRITEKSTBREV", "Fritekst generelt brev"),
+    VARSEL_FRITEKST("VARSEL_FRITEKST", "Varselsbrev fritekst"),
 
     ;
 

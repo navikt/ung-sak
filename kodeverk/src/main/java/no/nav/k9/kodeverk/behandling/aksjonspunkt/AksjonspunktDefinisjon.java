@@ -229,6 +229,8 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, TOTRINN, AVVENTER_SAKSBEHANDLER),
     OVERSTYRING_AV_BEREGNINGSGRUNNLAG(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_BEREGNINGSGRUNNLAG_KODE, AksjonspunktType.OVERSTYRING, "Overstyring av beregningsgrunnlag",
         BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_FAKTA_BEREGNING, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_BEREGNING, TOTRINN, AVVENTER_SAKSBEHANDLER),
+    OVERSTYRING_AV_UTTAK(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_UTTAK_KODE, AksjonspunktType.OVERSTYRING, "Overstyring av uttak",
+        BehandlingStatus.UTREDES, BehandlingStegType.VURDER_UTTAK_V2, VurderingspunktType.UT, UTEN_VILKÅR, SkjermlenkeType.UTTAK, TOTRINN, AVVENTER_SAKSBEHANDLER),
     OVERSTYRING_AV_K9_VILKÅRET(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_K9_VILKÅRET_KODE, AksjonspunktType.OVERSTYRING, "Overstyring av K9-vilkåret",
         Set.of(BehandlingStatus.OPPRETTET, BehandlingStatus.UTREDES), BehandlingStegType.MANUELL_VILKÅRSVURDERING, VurderingspunktType.INN, UTEN_VILKÅR,
         SkjermlenkeType.PUNKT_FOR_MAN_VILKÅRSVURDERING, TOTRINN, AVVENTER_SAKSBEHANDLER),
@@ -352,7 +354,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST, AVVENTER_SAKSBEHANDLER),
     VURDER_DATO_NY_REGEL_UTTAK(AksjonspunktKodeDefinisjon.VURDER_DATO_NY_REGEL_UTTAK, AksjonspunktType.MANUELL,
         "Vurder hvilken dato ny regel for utbetalingsgrad i uttak skal gjelde fra.", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_UTTAK_V2, VurderingspunktType.UT, UTEN_VILKÅR,
-        SkjermlenkeType.UTTAK, TOTRINN, TILBAKE, AVBRYTES, AVVENTER_SAKSBEHANDLER),
+        SkjermlenkeType.UTTAK, ENTRINN, TILBAKE, SKAL_IKKE_AVBRYTES, AVVENTER_SAKSBEHANDLER),
 
     // Gruppe: 93xx - Opplæringspenger
     VURDER_INSTITUSJON(AksjonspunktKodeDefinisjon.VURDER_INSTITUSJON, AksjonspunktType.MANUELL,

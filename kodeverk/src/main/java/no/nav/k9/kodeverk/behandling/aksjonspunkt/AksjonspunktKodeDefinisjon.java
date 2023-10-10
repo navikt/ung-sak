@@ -51,6 +51,7 @@ public class AksjonspunktKodeDefinisjon {
     public static final String OVERSTYRING_AV_BEREGNINGSAKTIVITETER_KODE = "6014";
     public static final String OVERSTYRING_AV_BEREGNINGSGRUNNLAG_KODE = "6015";
     public static final String OVERSTYRING_AV_K9_VILKÅRET_KODE = "6016";
+    public static final String OVERSTYRING_AV_UTTAK_KODE = "6017";
     public static final String MANUELL_MARKERING_AV_UTLAND_SAKSTYPE_KODE = "6068";
 
     public static final String SØKERS_OPPLYSNINGSPLIKT_MANU_KODE = "5017";

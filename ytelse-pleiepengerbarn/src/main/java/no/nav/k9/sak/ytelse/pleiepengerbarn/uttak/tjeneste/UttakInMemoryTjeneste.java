@@ -87,6 +87,7 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
     }
 
     private UttaksperiodeInfo mapTilUttaksperiodeInfo(SøktUttak periode, Uttaksgrunnlag input) {
+        boolean manueltOverstyrt = false;
         return new UttaksperiodeInfo(Utfall.OPPFYLT,
             _100,
             mapUtbetalingsgrader(periode, input),
@@ -103,8 +104,8 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
             null,
             null,
             false,
-            new Utenlandsopphold(null,
-            UtenlandsoppholdÅrsak.INGEN));
+            new Utenlandsopphold(null, UtenlandsoppholdÅrsak.INGEN),
+            manueltOverstyrt);
     }
 
     private Map<String, Utfall> mapInngangsvilkår(Map<String, List<Vilkårsperiode>> inngangsvilkår) {

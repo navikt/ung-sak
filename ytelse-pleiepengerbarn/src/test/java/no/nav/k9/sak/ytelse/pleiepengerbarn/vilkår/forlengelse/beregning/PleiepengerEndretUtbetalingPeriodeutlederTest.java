@@ -515,7 +515,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
         var fomForlengelse = tom1.plusDays(1);
         var tomForlengelse = fomForlengelse.plusDays(20);
 
-        var original = List.of(delvisUtbetaling(ARBEIDSFORHOLD_1, BigDecimal.valueOf(60) ));
+        var original = List.of(delvisUtbetaling(ARBEIDSFORHOLD_1, BigDecimal.valueOf(60)));
         var endring = List.of(fullUtbetaling(ARBEIDSFORHOLD_1));
 
         Map<LukketPeriode, UttaksperiodeInfo> perioder = new HashMap<>();
@@ -536,7 +536,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
 
         when(vilkårsPerioderTilVurderingTjeneste.utled(originalBehandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR))
             .thenReturn(new TreeSet<>(List.of(
-                DatoIntervallEntitet.fraOgMedTilOgMed(stp1,tom1 )
+                DatoIntervallEntitet.fraOgMedTilOgMed(stp1, tom1)
             )));
 
 
@@ -552,7 +552,6 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
         assertThat(periode.getFomDato()).isEqualTo(fomForlengelse);
         assertThat(periode.getTomDato()).isEqualTo(tomForlengelse);
     }
-
 
 
     private Uttaksplan lagUttaksplanEnPeriode(LocalDate fom, int antallDager, List<Utbetalingsgrader> utbetalingsgrader) {
@@ -581,14 +580,13 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
                 new HashMap<>(), BigDecimal.valueOf(100), null,
                 Set.of(), UUID.randomUUID().toString(),
                 AnnenPart.ALENE, null, null, null,
-                false, null));
+                false, null, false));
     }
 
-    private Behandling opprettBehandling(@SuppressWarnings("unused") LocalDate skjæringstidspunkt) {
-        var fagsak = Fagsak.opprettNy(FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
-            AktørId.dummy(), new Saksnummer("SAK"), skjæringstidspunkt, skjæringstidspunkt.plusDays(3));
-        @SuppressWarnings("unused")
-        Long fagsakId = fagsakRepository.opprettNy(fagsak);
+    private Behandling opprettBehandling(LocalDate skjæringstidspunkt) {
+        var fagsak = Fagsak.opprettNy(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, AktørId.dummy(), new Saksnummer("SAK"), skjæringstidspunkt, skjæringstidspunkt.plusDays(3));
+
+        fagsakRepository.opprettNy(fagsak);
         var builder = Behandling.forFørstegangssøknad(fagsak);
         var behandling = builder.build();
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
