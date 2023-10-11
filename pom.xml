@@ -40,7 +40,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <felles.version>2.0.10</felles.version>
+        <felles.version>2.0.11</felles.version>
         <swagger.version>2.2.15</swagger.version>
         <junit.version>5.10.0</junit.version>
         <k9format.version>9.0.4</k9format.version>
@@ -475,7 +475,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>5.5.0</version>
+                <version>5.6.0</version>
             </dependency>
             <dependency>
                 <groupId>org.hamcrest</groupId>
