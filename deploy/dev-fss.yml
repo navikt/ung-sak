@@ -264,6 +264,8 @@ spec:
       value: "true"
     - name: FILTRER_UGYLDIG_IM
       value: "true"
+    - name: ENABLE_UTENLANDSOPPHOLD_PILS
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
