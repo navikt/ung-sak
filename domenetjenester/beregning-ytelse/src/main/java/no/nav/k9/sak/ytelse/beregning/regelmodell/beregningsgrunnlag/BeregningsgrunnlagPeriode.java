@@ -15,6 +15,7 @@ public class BeregningsgrunnlagPeriode {
     private BigDecimal inntektGraderingsprosent;
     private BigDecimal totalUtbetalingsgradFraUttak;
     private BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
+    private BigDecimal reduksjonsfaktorInaktivTypeA;
     private BigDecimal graderingsfaktorTid;
     private BigDecimal graderingsfaktorInntekt;
     private BigDecimal bruttoBeregningsgrunnlag;
@@ -55,6 +56,10 @@ public class BeregningsgrunnlagPeriode {
         return totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
     }
 
+    public BigDecimal getReduksjonsfaktorInaktivTypeA() {
+        return reduksjonsfaktorInaktivTypeA;
+    }
+
     public BigDecimal getGraderingsfaktorTid() {
         return graderingsfaktorTid;
     }
@@ -88,13 +93,18 @@ public class BeregningsgrunnlagPeriode {
             return this;
         }
 
-       public Builder medTotalUtbetalingsgradFraUttak(BigDecimal totalUtbetalingsgradFraUttak) {
+        public Builder medTotalUtbetalingsgradFraUttak(BigDecimal totalUtbetalingsgradFraUttak) {
             beregningsgrunnlagPeriodeMal.totalUtbetalingsgradFraUttak = totalUtbetalingsgradFraUttak;
             return this;
         }
 
-       public Builder medTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt) {
+        public Builder medTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt) {
             beregningsgrunnlagPeriodeMal.totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt = totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
+            return this;
+        }
+
+        public Builder medReduksjonsfaktorInaktivTypeA(BigDecimal reduksjonsfaktorInaktivTypeA) {
+            beregningsgrunnlagPeriodeMal.reduksjonsfaktorInaktivTypeA = reduksjonsfaktorInaktivTypeA;
             return this;
         }
 
@@ -113,7 +123,7 @@ public class BeregningsgrunnlagPeriode {
             return this;
         }
 
-        public Builder medBruttoBeregningsgrunnlag(BigDecimal bruttoBeregningsgrunnlag){
+        public Builder medBruttoBeregningsgrunnlag(BigDecimal bruttoBeregningsgrunnlag) {
             beregningsgrunnlagPeriodeMal.bruttoBeregningsgrunnlag = bruttoBeregningsgrunnlag;
             return this;
         }
