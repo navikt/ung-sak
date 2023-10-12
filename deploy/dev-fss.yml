@@ -266,6 +266,9 @@ spec:
       value: "true"
     - name: ENABLE_UTENLANDSOPPHOLD_PILS
       value: "true"
+    - name: PERIODISERT_RAMMEVEDTAK
+      value: "true"
+
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
