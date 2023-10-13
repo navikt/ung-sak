@@ -89,6 +89,14 @@ public class StønadstatistikkPeriode {
     @Valid
     private BigDecimal bruttoBeregningsgrunnlag;
 
+    @JsonProperty(value = "totalUtbetalingsgradFraUttak")
+    @Valid
+    private BigDecimal totalUtbetalingsgradFraUttak;
+    
+    @JsonProperty(value = "totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt")
+    @Valid
+    private BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
+    
 
     protected StønadstatistikkPeriode() {
 
@@ -108,7 +116,9 @@ public class StønadstatistikkPeriode {
                                    StønadstatistikkUtfall nattevåk,
                                    StønadstatistikkUtfall beredskap,
                                    Duration søkersTapteTimer,
-                                   BigDecimal bruttoBeregningsgrunnlag) {
+                                   BigDecimal bruttoBeregningsgrunnlag,
+                                   BigDecimal totalUtbetalingsgradFraUttak,
+                                   BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt) {
         this.fom = fom;
         this.tom = tom;
         this.utfall = utfall;
@@ -124,6 +134,8 @@ public class StønadstatistikkPeriode {
         this.beredskap = beredskap;
         this.søkersTapteTimer = søkersTapteTimer;
         this.bruttoBeregningsgrunnlag = bruttoBeregningsgrunnlag;
+        this.totalUtbetalingsgradFraUttak = totalUtbetalingsgradFraUttak;
+        this.totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt = totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
     }
 
     public static StønadstatistikkPeriode forOmsorgspenger(LocalDate fom,
@@ -203,5 +215,20 @@ public class StønadstatistikkPeriode {
 
     public BigDecimal getBruttoBeregningsgrunnlag() {
         return bruttoBeregningsgrunnlag;
+    }
+    
+    public BigDecimal getTotalUtbetalingsgradFraUttak() {
+        return totalUtbetalingsgradFraUttak;
+    }
+    
+    public BigDecimal getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt() {
+        return totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
+    }
+    
+    public boolean isNedjustertGrunnetTilkommetInntekt() {
+        if (BigDecimal.valueOf(-1L).compareTo(totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt) == 0) {
+            return false;
+        }
+        return totalUtbetalingsgradFraUttak.compareTo(totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt) > 0;
     }
 }
