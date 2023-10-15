@@ -26,7 +26,6 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.StegProsesseringResultat;
 import no.nav.k9.sak.behandlingskontroll.events.AksjonspunktStatusEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingStegOvergangEvent;
-import no.nav.k9.sak.behandlingskontroll.events.BehandlingStegTilstandEndringEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingTransisjonEvent;
 import no.nav.k9.sak.behandlingskontroll.spi.BehandlingskontrollServiceProvider;
 import no.nav.k9.sak.behandlingskontroll.transisjoner.FellesTransisjoner;
@@ -156,12 +155,6 @@ class BehandlingStegVisitor {
         // FIXME K9:Suspekt støtter bare fremoverhopp her? returnerer null tilSteg om ikke finner (eks. hvis tilbakeføring)
         BehandlingStegType tilSteg = finnFremoverhoppSteg(stegType, transisjon);
         eventPubliserer.fireEvent(opprettEvent(stegResultat, transisjon, stegTilstandFør.orElse(null), tilSteg));
-
-        // Publiser event om endring i stegets tilstand
-        BehandlingStegTilstandSnapshot fraTilstand = BehandlingModellImpl.tilBehandlingsStegSnapshot(stegTilstandFør);
-        BehandlingStegTilstandSnapshot tilTilstand = BehandlingModellImpl.tilBehandlingsStegSnapshot(behandling.getBehandlingStegTilstand());
-        BehandlingStegTilstandEndringEvent behandlingStegTilstandEndringEvent = BehandlingModellImpl.nyBehandlingStegTilstandEndring(kontekst, fraTilstand, tilTilstand);
-        eventPubliserer.fireEvent(behandlingStegTilstandEndringEvent);
 
         // Publiser de funnede aksjonspunktene
         if (!funnetAksjonspunkter.isEmpty()) {
