@@ -53,7 +53,8 @@ class UtvidetRettIverksettTaskTest {
 
     @BeforeEach
     void setUp() {
-        utvidetRettIverksettTask = new UtvidetRettIverksettTask(vilkårTjeneste, behandlingRepository, vilkårResultatRepository, utvidetRettKlient, true);
+        PeriodisertUtvidetRettIverksettTjeneste periodisertUtvidetRettIverksettTjeneste = new PeriodisertUtvidetRettIverksettTjeneste(behandlingRepository, vilkårResultatRepository, true);
+        utvidetRettIverksettTask = new UtvidetRettIverksettTask(vilkårTjeneste, behandlingRepository, utvidetRettKlient, periodisertUtvidetRettIverksettTjeneste, true);
     }
 
     @Test
@@ -71,12 +72,12 @@ class UtvidetRettIverksettTaskTest {
         List<IverksettelseHendelse> iverksettelserSendt = utvidetRettKlient.getHendelser();
         assertThat(iverksettelserSendt).hasSize(1);
         assertThat(iverksettelserSendt.get(0).innvilgelse()).isTrue();
-        KroniskSyktBarn v = (KroniskSyktBarn) iverksettelserSendt.get(0).hendelse();
-        assertThat(v.getSøker().getAktørId()).isEqualTo(søker);
-        assertThat(v.getBarn().getAktørId()).isEqualTo(pleietrengende);
-        assertThat(v.getPeriode().getFom()).isEqualTo(fom);
-        assertThat(v.getPeriode().getTom()).isEqualTo(tom);
-        assertThat(v.getBehandlingUuid()).isEqualTo(behandling.getUuid());
+        KroniskSyktBarn ksb = (KroniskSyktBarn) iverksettelserSendt.get(0).hendelse();
+        assertThat(ksb.getSøker().getAktørId()).isEqualTo(søker);
+        assertThat(ksb.getBarn().getAktørId()).isEqualTo(pleietrengende);
+        assertThat(ksb.getPeriode().getFom()).isEqualTo(fom);
+        assertThat(ksb.getPeriode().getTom()).isEqualTo(tom);
+        assertThat(ksb.getBehandlingUuid()).isEqualTo(behandling.getUuid());
     }
 
     @Test
@@ -97,27 +98,19 @@ class UtvidetRettIverksettTaskTest {
         utvidetRettIverksettTask.doTask(taskdata);
 
         List<IverksettelseHendelse> iverksettelserSendt = utvidetRettKlient.getHendelser();
-        assertThat(iverksettelserSendt).hasSize(2);
+        assertThat(iverksettelserSendt).hasSize(1);
 
-        assertThat(iverksettelserSendt.get(0).innvilgelse()).isTrue();
-        KroniskSyktBarn v1 = (KroniskSyktBarn) iverksettelserSendt.get(0).hendelse();
-        assertThat(v1.getSøker().getAktørId()).isEqualTo(søker);
-        assertThat(v1.getBarn().getAktørId()).isEqualTo(pleietrengende);
-        assertThat(v1.getPeriode().getFom()).isEqualTo(fom2);
-        assertThat(v1.getPeriode().getTom()).isEqualTo(tom2);
-        assertThat(v1.getBehandlingUuid()).isEqualTo(revurdering.getUuid());
-
-        assertThat(iverksettelserSendt.get(1).innvilgelse()).isFalse();
-        KroniskSyktBarn v2 = (KroniskSyktBarn) iverksettelserSendt.get(1).hendelse();
-        assertThat(v2.getSøker().getAktørId()).isEqualTo(søker);
-        assertThat(v2.getBarn().getAktørId()).isEqualTo(pleietrengende);
-        assertThat(v2.getPeriode().getFom()).isEqualTo(tom2.plusDays(1));
-        assertThat(v2.getPeriode().getTom()).isEqualTo(tom1);
-        assertThat(v2.getBehandlingUuid()).isEqualTo(revurdering.getUuid());
+        assertThat(iverksettelserSendt.get(0).innvilgelse()).isFalse();
+        KroniskSyktBarn ksb = (KroniskSyktBarn) iverksettelserSendt.get(0).hendelse();
+        assertThat(ksb.getSøker().getAktørId()).isEqualTo(søker);
+        assertThat(ksb.getBarn().getAktørId()).isEqualTo(pleietrengende);
+        assertThat(ksb.getPeriode().getFom()).isEqualTo(tom2.plusDays(1));
+        assertThat(ksb.getPeriode().getTom()).isEqualTo(tom1);
+        assertThat(ksb.getBehandlingUuid()).isEqualTo(revurdering.getUuid());
     }
 
     @Test
-    void skal_opprettholde_tidligere_innvilget_periode_som_er_før_revurderingens_periode() {
+    void skal_ikke_sende_endringer_på_tidligere_innvilget_periode_som_er_før_revurderingens_periode() {
         Fagsak fagsak = lagFagsak();
 
         LocalDate fom1 = LocalDate.of(2023, 1, 1);
@@ -134,23 +127,43 @@ class UtvidetRettIverksettTaskTest {
         utvidetRettIverksettTask.doTask(taskdata);
 
         List<IverksettelseHendelse> iverksettelserSendt = utvidetRettKlient.getHendelser();
-        assertThat(iverksettelserSendt).hasSize(2);
+        assertThat(iverksettelserSendt).hasSize(1);
 
         assertThat(iverksettelserSendt.get(0).innvilgelse()).isTrue();
-        KroniskSyktBarn v1 = (KroniskSyktBarn) iverksettelserSendt.get(0).hendelse();
-        assertThat(v1.getSøker().getAktørId()).isEqualTo(søker);
-        assertThat(v1.getBarn().getAktørId()).isEqualTo(pleietrengende);
-        assertThat(v1.getPeriode().getFom()).isEqualTo(fom1);
-        assertThat(v1.getPeriode().getTom()).isEqualTo(tom1);
-        assertThat(v1.getBehandlingUuid()).isEqualTo(revurdering.getUuid());
+        KroniskSyktBarn ksb = (KroniskSyktBarn) iverksettelserSendt.get(0).hendelse();
+        assertThat(ksb.getSøker().getAktørId()).isEqualTo(søker);
+        assertThat(ksb.getBarn().getAktørId()).isEqualTo(pleietrengende);
+        assertThat(ksb.getPeriode().getFom()).isEqualTo(fom2);
+        assertThat(ksb.getPeriode().getTom()).isEqualTo(tom2);
+        assertThat(ksb.getBehandlingUuid()).isEqualTo(revurdering.getUuid());
+    }
 
-        assertThat(iverksettelserSendt.get(1).innvilgelse()).isTrue();
-        KroniskSyktBarn v2 = (KroniskSyktBarn) iverksettelserSendt.get(1).hendelse();
-        assertThat(v2.getSøker().getAktørId()).isEqualTo(søker);
-        assertThat(v2.getBarn().getAktørId()).isEqualTo(pleietrengende);
-        assertThat(v2.getPeriode().getFom()).isEqualTo(fom2);
-        assertThat(v2.getPeriode().getTom()).isEqualTo(tom2);
-        assertThat(v2.getBehandlingUuid()).isEqualTo(revurdering.getUuid());
+    @Test
+    void skal_feile_dersom_det_må_sendes_over_mer_enn_en_periode_til_omsorgsdager() {
+        //testen kan fjernes dersom omsorgsdager får støtte for å ta imot flere perioder for samme behandling
+        Fagsak fagsak = lagFagsak();
+
+        LocalDate fom1 = LocalDate.of(2023, 1, 1);
+        LocalDate tom1 = LocalDate.of(2030, 12, 31);
+        Behandling behandling = lagFørstegangsbehandling(fagsak);
+        leggTilInnvilgetVilkår(fom1, tom1, behandling);
+
+        Behandling revurdering = lagRevurdering(behandling);
+        LocalDate fom2 = LocalDate.of(2022, 1, 1);
+        LocalDate tom2 = LocalDate.of(2024, 12, 31);
+        leggTilInnvilgetVilkår(fom2, tom2, revurdering);
+
+        ProsessTaskData taskdata = ProsessTaskDataBuilder.forProsessTask(UtvidetRettIverksettTask.class).medProperty("behandlingId", revurdering.getId().toString()).build();
+
+        IllegalStateException exception;
+        try {
+            utvidetRettIverksettTask.doTask(taskdata);
+            exception = null;
+        } catch (IllegalStateException e) {
+            exception = e;
+        }
+        assertThat(exception).isNotNull();
+        assertThat(exception.getMessage()).startsWith("Kan ikke sende mer enn en periode ved iverksetting av rammevedtak");
     }
 
     private Behandling lagFørstegangsbehandling(Fagsak fagsak) {
