@@ -36,7 +36,6 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingStegUtfall;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.StegProsesseringResultat;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingStegOvergangEvent;
-import no.nav.k9.sak.behandlingskontroll.events.BehandlingStegTilstandEndringEvent;
 import no.nav.k9.sak.behandlingskontroll.impl.transisjoner.Transisjoner;
 import no.nav.k9.sak.behandlingskontroll.transisjoner.StegTransisjon;
 import no.nav.k9.sak.behandlingskontroll.transisjoner.TransisjonIdentifikator;
@@ -84,11 +83,6 @@ public class BehandlingModellImpl implements AutoCloseable, BehandlingModell {
         this.fagsakYtelseType = fagsakYtelseType;
         this.behandlingType = behandlingType;
         this.lookup = (stegType, behType, ytType) -> new BehandlingStegModellImpl(this, lookup.apply(stegType, behType, ytType), stegType);
-    }
-
-    static BehandlingStegTilstandEndringEvent nyBehandlingStegTilstandEndring(BehandlingskontrollKontekst kontekst, BehandlingStegTilstandSnapshot fraTilstand,
-                                                                              BehandlingStegTilstandSnapshot tilTilstand) {
-        return new BehandlingStegTilstandEndringEvent(kontekst, fraTilstand, tilTilstand);
     }
 
     static BehandlingStegTilstandSnapshot tilBehandlingsStegSnapshot(Optional<BehandlingStegTilstand> tilstand) {
