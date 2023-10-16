@@ -9,6 +9,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetKlassifisering;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
@@ -29,8 +30,9 @@ public class VurderOpptjeningsvilkårSteg extends VurderOpptjeningsvilkårStegFe
     public VurderOpptjeningsvilkårSteg(BehandlingRepositoryProvider repositoryProvider,
                                        OpptjeningRepository opptjeningRepository,
                                        InngangsvilkårFellesTjeneste inngangsvilkårFellesTjeneste,
-                                       @Any Instance<HåndtereAutomatiskAvslag> automatiskAvslagHåndterer) {
-        super(repositoryProvider, opptjeningRepository, inngangsvilkårFellesTjeneste, VURDER_OPPTJENINGSVILKÅR, automatiskAvslagHåndterer);
+                                       @Any Instance<HåndtereAutomatiskAvslag> automatiskAvslagHåndterer,
+                                       @KonfigVerdi(value = "OPPTJENING_AP_VED_AKSEPTERT_MELLOMLIGGENDE_HELG", defaultVerdi = "false") boolean triggeApVedAkseptertMellomliggendeHelg) {
+        super(repositoryProvider, opptjeningRepository, inngangsvilkårFellesTjeneste, VURDER_OPPTJENINGSVILKÅR, automatiskAvslagHåndterer, triggeApVedAkseptertMellomliggendeHelg);
     }
 
     @Override

@@ -265,6 +265,8 @@ spec:
       value: "false"
     - name: PERIODISERT_RAMMEVEDTAK
       value: "false"
+    - name: OPPTJENING_AP_VED_AKSEPTERT_MELLOMLIGGENDE_HELG
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
