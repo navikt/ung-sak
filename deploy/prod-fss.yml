@@ -261,6 +261,10 @@ spec:
       value: "false"
     - name: FILTRER_UGYLDIG_IM
       value: "false"
+    - name: ENABLE_UTENLANDSOPPHOLD_PILS
+      value: "false"
+    - name: PERIODISERT_RAMMEVEDTAK
+      value: "false
     - name: OPPTJENING_AP_VED_AKSEPTERT_MELLOMLIGGENDE_HELG
       value: "false"
 

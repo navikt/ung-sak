@@ -16,7 +16,6 @@ import no.nav.k9.sak.behandlingskontroll.events.AksjonspunktStatusEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingStatusEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingStegOvergangEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingStegStatusEvent;
-import no.nav.k9.sak.behandlingskontroll.events.BehandlingStegTilstandEndringEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingTransisjonEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingskontrollEvent;
 import no.nav.k9.sak.behandlingslager.behandling.BehandlingEvent;
@@ -90,7 +89,4 @@ public class BehandlingskontrollEventPubliserer {
         behandlingEvent.fire(event);
     }
 
-    public void fireEvent(BehandlingStegTilstandEndringEvent event) {
-        doFireEvent(event);
-    }
 }

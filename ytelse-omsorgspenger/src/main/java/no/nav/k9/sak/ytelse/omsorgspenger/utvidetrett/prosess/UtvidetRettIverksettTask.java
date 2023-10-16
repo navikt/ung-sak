@@ -7,14 +7,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
+import org.jboss.weld.exceptions.IllegalStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -47,6 +48,9 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
     private VilkårTjeneste vilkårTjeneste;
     private BehandlingRepository behandlingRepository;
     private UtvidetRettKlient utvidetRettKlient;
+    private PeriodisertUtvidetRettIverksettTjeneste periodisertUtvidetRettIverksettTjeneste;
+    private boolean brukPeriodisertRammevedtak;
+
 
     protected UtvidetRettIverksettTask() {
     }
@@ -54,15 +58,49 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
     @Inject
     public UtvidetRettIverksettTask(VilkårTjeneste vilkårTjeneste,
                                     BehandlingRepository behandlingRepository,
-                                    UtvidetRettKlient utvidetRettKlient) {
+                                    UtvidetRettKlient utvidetRettKlient,
+                                    PeriodisertUtvidetRettIverksettTjeneste periodisertUtvidetRettIverksettTjeneste,
+                                    @KonfigVerdi(value = "PERIODISERT_RAMMEVEDTAK", defaultVerdi = "false") boolean brukPeriodisertRammevedtak) {
         this.vilkårTjeneste = vilkårTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.utvidetRettKlient = utvidetRettKlient;
+        this.periodisertUtvidetRettIverksettTjeneste = periodisertUtvidetRettIverksettTjeneste;
+        this.brukPeriodisertRammevedtak = brukPeriodisertRammevedtak;
     }
 
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
+        if (brukPeriodisertRammevedtak) {
+            håndterAktuellOgTilpassTidligerePerioder(prosessTaskData);
+        } else {
+            håndterAktuellPeriode(prosessTaskData);
+        }
+    }
 
+    private void håndterAktuellOgTilpassTidligerePerioder(ProsessTaskData prosessTaskData) {
+        var behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
+        LocalDateTimeline<Utfall> resultat = periodisertUtvidetRettIverksettTjeneste.utfallSomErEndret(behandling);
+        if (resultat.size() > 1) {
+            throw new IllegalStateException("Kan ikke sende mer enn en periode ved iverksetting av rammevedtak, siden omsorgsdager p.t. ikke støtter det. Har perioder: " + resultat);
+        }
+        resultat.forEach(segment -> {
+            Periode vedtakperiode = new Periode(segment.getFom(), segment.getTom());
+            var iverksett = mapIverksett(behandling, vedtakperiode);
+            switch (segment.getValue()) {
+                case OPPFYLT -> {
+                    log.info("Iverksetter innvilget rammevedtak for periode: {}", vedtakperiode);
+                    utvidetRettKlient.innvilget(iverksett);
+                }
+                case IKKE_OPPFYLT -> {
+                    log.info("Iverksetter avslått rammevedtak for periode: {}", vedtakperiode);
+                    utvidetRettKlient.avslått(iverksett);
+                }
+                default -> throw new IllegalArgumentException("Ikke-støtet verdi: " + segment.getValue());
+            }
+        });
+    }
+
+    private void håndterAktuellPeriode(ProsessTaskData prosessTaskData) {
         Long behandlingId = Long.valueOf(prosessTaskData.getBehandlingId());
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         logContext(behandling);
@@ -89,16 +127,12 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
     private UtvidetRett mapIverksett(Behandling behandling, Periode periode) {
         var ytelseType = behandling.getFagsakYtelseType();
 
-        switch (ytelseType) {
-            case OMSORGSPENGER_KS:
-                return mapKroniskSyktBarn(behandling, periode);
-            case OMSORGSPENGER_MA:
-                return mapMidlertidigAlene(behandling, periode);
-            case OMSORGSPENGER_AO:
-                return mapAleneOmsorg(behandling, periode);
-            default:
-                throw new UnsupportedOperationException("Støtter ikke ytelseType=[" + ytelseType + "]");
-        }
+        return switch (ytelseType) {
+            case OMSORGSPENGER_KS -> mapKroniskSyktBarn(behandling, periode);
+            case OMSORGSPENGER_MA -> mapMidlertidigAlene(behandling, periode);
+            case OMSORGSPENGER_AO -> mapAleneOmsorg(behandling, periode);
+            default -> throw new UnsupportedOperationException("Støtter ikke ytelseType=[" + ytelseType + "]");
+        };
     }
 
     private UtvidetRett mapAleneOmsorg(Behandling behandling, Periode periode) {

@@ -31,6 +31,7 @@ public class BeregningsgrunnlagPeriode {
     private BigDecimal inntektGraderingsprosent;
     private BigDecimal totalUtbetalingsgradFraUttak;
     private BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
+    private BigDecimal reduksjonsfaktorInaktivTypeA;
     private BigDecimal graderingsfaktorTid;
     private BigDecimal graderingsfaktorInntekt;
 
@@ -48,7 +49,7 @@ public class BeregningsgrunnlagPeriode {
         this.graderingsfaktorTid = eksisterende.graderingsfaktorTid;
         this.totalUtbetalingsgradFraUttak = eksisterende.totalUtbetalingsgradFraUttak;
         this.totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt = eksisterende.totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
-
+        this.reduksjonsfaktorInaktivTypeA = eksisterende.reduksjonsfaktorInaktivTypeA;
     }
 
     public BeregningsgrunnlagPeriode() {
@@ -119,6 +120,10 @@ public class BeregningsgrunnlagPeriode {
 
     public BigDecimal getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt() {
         return totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
+    }
+
+    public BigDecimal getReduksjonsfaktorInaktivTypeA() {
+        return reduksjonsfaktorInaktivTypeA;
     }
 
     public BigDecimal getGraderingsfaktorTid() {
@@ -264,12 +269,17 @@ public class BeregningsgrunnlagPeriode {
             return this;
         }
 
+        public Builder medReduksjonsfaktorInaktivTypeA(BigDecimal reduksjonsfaktorInaktivTypeA) {
+            verifiserKanModifisere();
+            kladd.reduksjonsfaktorInaktivTypeA = reduksjonsfaktorInaktivTypeA;
+            return this;
+        }
+
         public Builder medGraderingsfaktorInntekt(BigDecimal graderingsfaktorInntekt) {
             verifiserKanModifisere();
             kladd.graderingsfaktorInntekt = graderingsfaktorInntekt;
             return this;
         }
-
 
         public Builder medGraderingsfaktorTid(BigDecimal graderingsfaktorTid) {
             verifiserKanModifisere();

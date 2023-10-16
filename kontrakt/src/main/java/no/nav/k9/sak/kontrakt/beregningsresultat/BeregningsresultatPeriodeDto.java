@@ -34,6 +34,7 @@ public class BeregningsresultatPeriodeDto {
         private BigDecimal inntektGraderingsprosent;
         private BigDecimal totalUtbetalingsgradFraUttak;
         private BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
+        private BigDecimal reduksjonsfaktorInaktivTypeA;
         private BigDecimal graderingsfaktorInntekt;
         private BigDecimal graderingsfaktorTid;
 
@@ -67,6 +68,11 @@ public class BeregningsresultatPeriodeDto {
 
         public Builder medTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt) {
             this.totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt = totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
+            return this;
+        }
+
+        public Builder medReduksjonsfaktorInaktivTypeA(BigDecimal reduksjonsfaktorInaktivTypeA) {
+            this.reduksjonsfaktorInaktivTypeA = reduksjonsfaktorInaktivTypeA;
             return this;
         }
 
@@ -122,6 +128,13 @@ public class BeregningsresultatPeriodeDto {
     @Valid
     private BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
 
+    @JsonProperty(value = "reduksjonsfaktorInaktivTypeA")
+    @Valid
+    @DecimalMin(value = "0.00", message = "verdien ${validatedValue} må være >= {value}")
+    @DecimalMax(value = "1.00", message = "verdien ${validatedValue} må være <= {value}")
+    @Digits(integer = 10, fraction = 4)
+    private BigDecimal reduksjonsfaktorInaktivTypeA;
+
     @JsonProperty(value = "graderingsfaktorInntekt")
     @DecimalMin("0")
     @DecimalMax("100")
@@ -151,6 +164,7 @@ public class BeregningsresultatPeriodeDto {
         inntektGraderingsprosent = builder.inntektGraderingsprosent;
         totalUtbetalingsgradFraUttak = builder.totalUtbetalingsgradFraUttak;
         totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt = builder.totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
+        reduksjonsfaktorInaktivTypeA = builder.reduksjonsfaktorInaktivTypeA;
         graderingsfaktorInntekt = builder.graderingsfaktorInntekt;
         graderingsfaktorTid = builder.graderingsfaktorTid;
         andeler = List.copyOf(builder.andeler);
@@ -194,6 +208,10 @@ public class BeregningsresultatPeriodeDto {
 
     public BigDecimal getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt() {
         return totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
+    }
+
+    public BigDecimal getReduksjonsfaktorInaktivTypeA() {
+        return reduksjonsfaktorInaktivTypeA;
     }
 
     public BigDecimal getGraderingsfaktorInntekt() {

@@ -126,6 +126,7 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
                 .medInntektGraderingsprosent(seg.getValue().getInntektGraderingsprosent())
                 .medTotalUtbetalingsgradFraUttak(seg.getValue().getTotalUtbetalingsgradFraUttak())
                 .medTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(seg.getValue().getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt())
+                .medReduksjonsfaktorInaktivTypeA(seg.getValue().getReduksjonsfaktorInaktivTypeA())
                 .medGraderingsfaktorInntekt(seg.getValue().getGraderingsfaktorInntekt())
                 .medGraderingsfaktorTid(seg.getValue().getGraderingsfaktorTid())
                 .medDagsats(seg.getValue().getDagsats())
