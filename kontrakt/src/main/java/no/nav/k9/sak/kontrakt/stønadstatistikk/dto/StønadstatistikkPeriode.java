@@ -226,6 +226,9 @@ public class StønadstatistikkPeriode {
     }
     
     public boolean isNedjustertGrunnetTilkommetInntekt() {
+        if (totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt == null) {
+            return false;
+        }
         if (BigDecimal.valueOf(-1L).compareTo(totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt) == 0) {
             return false;
         }
