@@ -1,6 +1,5 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
-import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Set;
 
@@ -54,7 +53,6 @@ public class OpptjeningsaktiviteterPreconditionForBeregning {
                 sjekkHarAktivitetIHelePerioden(opptjening);
             }
 
-
             if (harIkkeInnhentetSigrunForAlleÅr(vilkårPeriode) && skalBrukeSigruninntekt(vilkårPeriode, opptjening)) {
                 throw new IllegalStateException("Kan ikke beregne for status Midlertidig inaktiv eller SN for skjæringstidspunkt før 2019. Sjekk at søknadsperiode er riktig og håndter ved overstyring.");
             }
@@ -75,15 +73,6 @@ public class OpptjeningsaktiviteterPreconditionForBeregning {
                 a.getAktivitetType().equals(OpptjeningAktivitetType.NÆRING) &&
                     !a.getFom().isAfter(vilkårPeriode.getSkjæringstidspunkt().minusDays(1)) &&
                     !a.getTom().isBefore(vilkårPeriode.getSkjæringstidspunkt().minusDays(1)));
-    }
-
-    private void sjekkHarAktivitetForHelePerioden(LocalDate skjæringstidspunkt, OpptjeningResultat opptjeningResultat, Opptjening opptjening) {
-        Optional<Opptjening> opptjeningOpt = opptjeningResultat.finnOpptjening(skjæringstidspunkt);
-        if (opptjeningOpt.isEmpty()) {
-            logger.warn("Fant ikke opptjening for skjæringstidspunkt {}", skjæringstidspunkt);
-        } else {
-            sjekkHarAktivitetIHelePerioden(opptjening);
-        }
     }
 
     private void sjekkHarAktivitetIHelePerioden(Opptjening opptjening) {
