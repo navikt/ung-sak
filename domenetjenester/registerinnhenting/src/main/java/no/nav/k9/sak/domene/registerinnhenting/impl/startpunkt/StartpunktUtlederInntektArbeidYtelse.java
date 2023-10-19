@@ -98,12 +98,6 @@ class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
 
         Saksnummer saksnummer = ref.getSaksnummer();
 
-        if (harAksjonspunkt5080(ref)) {
-            leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.KONTROLLER_ARBEIDSFORHOLD, "manuell vurdering av arbeidsforhold");
-        } else if (erPåkrevdManuelleAvklaringer(ref)) {
-            leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.KONTROLLER_ARBEIDSFORHOLD, "manuell vurdering av arbeidsforhold");
-        }
-        
 
         if (FagsakYtelseType.FRISINN.equals(ref.getFagsakYtelseType())) {
             diffForFrisinn(ref, grunnlagId1, grunnlagId2, startpunkter, diff, saksnummer);
@@ -130,6 +124,20 @@ class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
                 }
             }
         }
+
+
+        if (!startpunkter.isEmpty()) {
+            return startpunkter; // quick exit sidan KONTROLLER_ARBEIDSFORHOLD startpunkt er uvanlig
+        }
+
+
+        if (harAksjonspunkt5080(ref)) {
+            leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.KONTROLLER_ARBEIDSFORHOLD, "manuell vurdering av arbeidsforhold");
+        } else if (erPåkrevdManuelleAvklaringer(ref)) {
+            leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.KONTROLLER_ARBEIDSFORHOLD, "manuell vurdering av arbeidsforhold");
+        }
+
+
 
         return startpunkter;
     }
