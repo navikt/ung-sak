@@ -101,7 +101,6 @@ class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
 
         if (FagsakYtelseType.FRISINN.equals(ref.getFagsakYtelseType())) {
             diffForFrisinn(ref, grunnlagId1, grunnlagId2, startpunkter, diff, saksnummer);
-
         } else {
             var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType());
             var perioderTilVurdering = perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.OPPTJENINGSVILKÅRET);
@@ -123,11 +122,6 @@ class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
                     }
                 }
             }
-        }
-
-
-        if (!startpunkter.isEmpty()) {
-            return startpunkter; // quick exit sidan KONTROLLER_ARBEIDSFORHOLD startpunkt er uvanlig
         }
 
 
