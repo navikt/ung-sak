@@ -62,6 +62,7 @@ class NotatRepositoryTest {
         assertThat(lagretNotat.getUuid()).isEqualTo(notatId);
         assertThat(lagretNotat.getNotatTekst()).isEqualTo(tekst);
         assertThat(lagretNotat.getFagsakId()).isEqualTo(fagsakId);
+
         assertThat(lagretNotat.getOpprettetAv()).isEqualTo("VL");
         assertThat(lagretNotat.isAktiv()).isTrue();
         assertThat(lagretNotat.getVersjon()).isEqualTo(0);
