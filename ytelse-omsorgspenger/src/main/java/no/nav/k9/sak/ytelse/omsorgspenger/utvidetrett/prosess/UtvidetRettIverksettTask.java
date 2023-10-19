@@ -81,6 +81,7 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
         var behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
         LocalDateTimeline<Utfall> resultat = periodisertUtvidetRettIverksettTjeneste.utfallSomErEndret(behandling);
         if (resultat.size() > 1) {
+            //begrensningen kan fjernes dersom omsorgsdager får støtte for å ta imot flere perioder for samme behandling
             throw new IllegalStateException("Kan ikke sende mer enn en periode ved iverksetting av rammevedtak, siden omsorgsdager p.t. ikke støtter det. Har perioder: " + resultat);
         }
         resultat.forEach(segment -> {
