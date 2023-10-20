@@ -193,8 +193,8 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
             totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt = beregningsgrunnlagPeriode.getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt();
         } else {
             bruttoBeregningsgrunnlag = BigDecimal.valueOf(-1);
-            totalUtbetalingsgradFraUttak = BigDecimal.valueOf(-1);
-            totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt = BigDecimal.valueOf(-1); 
+            totalUtbetalingsgradFraUttak = null;
+            totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt = null; 
         }
         
         return new StønadstatistikkPeriode(
