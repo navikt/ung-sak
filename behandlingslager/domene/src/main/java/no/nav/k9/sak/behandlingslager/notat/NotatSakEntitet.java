@@ -17,6 +17,9 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 
+/**
+ * Notat som gjelder og lever sammen med en fagsak.
+ */
 @Entity(name = "NotatSakEntitet")
 @Table(name = "notat_sak")
 public class NotatSakEntitet extends NotatEntitet {

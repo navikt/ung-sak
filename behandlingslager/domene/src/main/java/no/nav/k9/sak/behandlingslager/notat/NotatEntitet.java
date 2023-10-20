@@ -8,9 +8,17 @@ import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Version;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
+
+/**
+ * Reprensenterer notat.
+ *
+ */
 @MappedSuperclass
 public abstract class NotatEntitet extends BaseEntitet {
 
+    /**
+     * for å kunne skille på notater på tvers av rader i sak og aktør
+     */
     @NaturalId
     @Column(name = "uuid", nullable = false, updatable = false)
     private UUID uuid;

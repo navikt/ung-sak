@@ -24,6 +24,10 @@ import no.nav.k9.sak.behandlingslager.kodeverk.FagsakYtelseTypeKodeverdiConverte
 import no.nav.k9.sak.typer.AktørId;
 
 
+/**
+ * Notater som gjelder en person uavhengig av fagsak. F.eks. pleietrengende som deles på
+ * flere fagsaker.
+ */
 @Entity(name = "NotatAktørEntitet")
 @Table(name = "notat_aktoer")
 public class NotatAktørEntitet extends NotatEntitet {

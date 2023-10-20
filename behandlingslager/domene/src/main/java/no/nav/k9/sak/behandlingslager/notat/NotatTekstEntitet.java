@@ -5,6 +5,14 @@ import jakarta.persistence.MappedSuperclass;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 
 
+/**
+ * Representasjon av notattekst. Lagret tekst skal ikke endres.
+ * Endring skal gi ny instans og versjon fordi alle tekstendringer må lagres for å støtte innsynskrav.
+ *
+ * Delt opp i 2 tabeller lagre sakspesifikke og personspesfikke tekster i hver for seg.
+ * Dette pga etterlevelseskrav: Hvis noen ønsker å slette all data om seg selv så må vi kunne fjerne de på en enkel måte.
+ *
+ */
 @MappedSuperclass
 abstract class NotatTekstEntitet extends BaseEntitet {
 
