@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +14,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.felles.testutilities.sikkerhet.StaticSubjectHandler;
+import no.nav.k9.felles.testutilities.sikkerhet.SubjectHandlerUtils;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.notat.NotatGjelderType;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -48,6 +51,13 @@ class NotatRestTjenesteTest {
         fagsakRepository = new FagsakRepository(entityManager);
         notatRepository = new NotatRepository(entityManager);
         notatRestTjeneste = new NotatRestTjeneste(notatRepository, fagsakRepository);
+        SubjectHandlerUtils.useSubjectHandler(StaticSubjectHandler.class);
+        SubjectHandlerUtils.setInternBruker("enSaksbehandler");
+    }
+
+    @AfterEach
+    void tearDown() {
+        SubjectHandlerUtils.reset();
     }
 
     @Test
@@ -67,7 +77,7 @@ class NotatRestTjenesteTest {
 
         assertThat(notat.getNotatTekst()).isEqualTo(tekst);
         assertThat(notat.isSkjult()).isFalse();
-        assertThat(notat.getOpprettetAv()).isEqualTo("VL");
+        assertThat(notat.getOpprettetAv()).isEqualTo("enSaksbehandler");
         assertThat(notat.getOpprettetTidspunkt()).isNotNull();
         assertThat(notat.getEndretAv()).isNull();
         assertThat(notat.getEndretTidspunkt()).isNull();
