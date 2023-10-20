@@ -174,7 +174,6 @@ public class NotatRestTjeneste {
     }
 
     private NotatDto mapDto(NotatEntitet entitet) {
-        //TODO to interface or not to interface, that is the question....
         if (entitet instanceof NotatAktørEntitet aktørEntitet) {
             return new NotatDto(
                 aktørEntitet.getUuid(),
