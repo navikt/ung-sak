@@ -44,10 +44,4 @@ public class NotatRepository {
         return resultat;
     }
 
-
-    //TODO test at endring fører til flere versjoner
-
-    //TODO test optimistisk låsing
-
-
 }

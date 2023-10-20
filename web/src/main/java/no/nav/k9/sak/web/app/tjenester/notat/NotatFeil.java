@@ -15,4 +15,7 @@ public interface NotatFeil extends DeklarerteFeil {
 
     @TekniskFeil(feilkode = "K9-NOTAT-100002", feilmelding = "Fant ikke notat", logLevel = LogLevel.ERROR, exceptionClass = TomtResultatException.class)
     Feil fantIkkeNotat();
+
+    @TekniskFeil(feilkode = "K9-NOTAT-100003", feilmelding = "Klarte ikke å endre notat med versjon=%d da den er utdatert. Nyeste versjon=%d. Refresh og prøv igjen. Husk å ta vare på teksten din før refresh", logLevel = LogLevel.ERROR)
+    Feil notatUtdatert(long versjon, long nyesteVersjon);
 }

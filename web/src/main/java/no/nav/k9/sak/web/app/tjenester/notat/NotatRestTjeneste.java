@@ -111,7 +111,7 @@ public class NotatRestTjeneste {
     public Response endre(
        @NotNull @Parameter(description = "Notat som skal endres") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) EndreNotatDto endreNotatDto
     ) {
-        var notat = hentNotat(endreNotatDto.saksnummer().getSaksnummer(), endreNotatDto.notatId());
+        var notat = hentNotatForEndring(endreNotatDto.saksnummer().getSaksnummer(), endreNotatDto.notatId(), endreNotatDto.versjon());
 
         if (!notat.getNotatTekst().equals(endreNotatDto.notatTekst())) {
             notat.nyTekst(endreNotatDto.notatTekst());
@@ -132,7 +132,7 @@ public class NotatRestTjeneste {
     public Response skjul(
         @NotNull @Parameter(description = "Notat som skal skjules") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SkjulNotatDto skjulNotatDto
     ) {
-        var notat = hentNotat(skjulNotatDto.saksnummer().getSaksnummer(), skjulNotatDto.notatId());
+        var notat = hentNotatForEndring(skjulNotatDto.saksnummer().getSaksnummer(), skjulNotatDto.notatId(), skjulNotatDto.versjon());
         if (notat.isSkjult() != skjulNotatDto.skjul()) {
             notat.skjul(skjulNotatDto.skjul());
             notatRepository.lagre(notat);
@@ -159,6 +159,15 @@ public class NotatRestTjeneste {
         }
 
         return notater.get(0);
+    }
+
+    private NotatEntitet hentNotatForEndring(Saksnummer saksnummer, UUID notatUuid, long versjon) {
+        var notat = hentNotat(saksnummer, notatUuid);
+        if (notat.getVersjon() != versjon) {
+            throw NotatFeil.FACTORY.notatUtdatert(versjon, notat.getVersjon()).toException();
+        }
+
+        return notat;
     }
 
     private List<NotatEntitet> hentAlle(Saksnummer saksnummer) {

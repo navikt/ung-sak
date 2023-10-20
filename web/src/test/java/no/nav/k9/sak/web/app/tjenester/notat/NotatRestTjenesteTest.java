@@ -1,6 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.notat;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Collection;
 import java.util.List;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.k9.felles.exception.TekniskException;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.felles.testutilities.sikkerhet.StaticSubjectHandler;
 import no.nav.k9.felles.testutilities.sikkerhet.SubjectHandlerUtils;
@@ -156,6 +158,41 @@ class NotatRestTjenesteTest {
         assertThat(endretNotat.versjon()).isEqualTo(1);
     }
 
+
+    @Test
+    void skalFeileHvisEndrerPåEldreVersjon() {
+        var mor = AktørId.dummy();
+        var pleietrengende = AktørId.dummy();
+
+        var morSak = TestScenarioBuilder.builderMedSøknad(mor).medPleietrengende(pleietrengende).lagreFagsak(repositoryProvider);
+
+        var saksnummer = morSak.getSaksnummer();
+        opprettNotat(new OpprettNotatDto(
+                "et gammelt notat ",
+                saksnummer,
+                NotatGjelderType.FAGSAK
+        ));
+
+        NotatDto morNotat = hentForFagsak(saksnummer).stream().findFirst().orElseThrow();
+        long førsteVersjon = morNotat.versjon();
+
+        endreNotat(new EndreNotatDto(
+                morNotat.notatId(),
+                "et endret notat",
+                saksnummer,
+                førsteVersjon));
+
+        NotatDto endretNotat = hentNotat(saksnummer, morNotat.notatId());
+        assertThat(endretNotat.versjon()).isEqualTo(1);
+
+        assertThatThrownBy(() ->
+                endreNotat(new EndreNotatDto(
+                        morNotat.notatId(),
+                        "endrer gammel versjon",
+                        saksnummer,
+                        førsteVersjon))
+        ).isInstanceOf(TekniskException.class);
+    }
 
     @Test
     void skalOppretteNotatPåPleietrengendeOgHentePåAnnenForeldresSak() {
