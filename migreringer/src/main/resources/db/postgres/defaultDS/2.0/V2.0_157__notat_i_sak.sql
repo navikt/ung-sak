@@ -15,8 +15,7 @@ create table if not exists notat_aktoer
     unique (uuid, versjon)
 );
 
-create index if not exists uidx_notat_aktoer ON notat_aktoer (uuid) where aktiv = true;
-create index if not exists idx_notat_aktor on notat_aktoer (aktoer_id, ytelse_type);
+create index if not exists idx_notat_aktor on notat_aktoer (aktoer_id, ytelse_type) where aktiv = true;
 create sequence if not exists seq_notat_aktoer increment by 50 minvalue 1000000;
 
 comment on table notat_aktoer is 'Notat som gjelder en aktør, foreløpig bare pleietrengende';
@@ -57,8 +56,7 @@ create table if not exists notat_sak
     unique (uuid, versjon)
 );
 
-create index if not exists uidx_notat_sak ON notat_sak (uuid) where aktiv = true;
-create index if not exists idx_notat_sak on notat_sak (fagsak_id);
+create index if not exists idx_notat_sak on notat_sak (fagsak_id) where aktiv = true;
 create sequence if not exists seq_notat_sak increment by 50 minvalue 1000000;
 
 comment on table notat_sak is 'Notat som gjelder en fagsak';
