@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +15,8 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.OptimisticLockException;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.felles.testutilities.sikkerhet.StaticSubjectHandler;
+import no.nav.k9.felles.testutilities.sikkerhet.SubjectHandlerUtils;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
@@ -41,6 +44,14 @@ class NotatRepositoryTest {
     void setup() {
         fagsakRepository = new FagsakRepository(entityManager);
         notatRepository = new NotatRepository(entityManager);
+        SubjectHandlerUtils.useSubjectHandler(StaticSubjectHandler.class);
+        SubjectHandlerUtils.setInternBruker("enSaksbehandler");
+
+    }
+
+    @AfterEach
+    void tearDown() {
+        SubjectHandlerUtils.reset();
     }
 
     @Test
@@ -63,7 +74,7 @@ class NotatRepositoryTest {
         assertThat(lagretNotat.getNotatTekst()).isEqualTo(tekst);
         assertThat(lagretNotat.getFagsakId()).isEqualTo(fagsakId);
 
-        assertThat(lagretNotat.getOpprettetAv()).isEqualTo("VL");
+        assertThat(lagretNotat.getOpprettetAv()).isEqualTo("enSaksbehandler");
         assertThat(lagretNotat.isAktiv()).isTrue();
         assertThat(lagretNotat.getVersjon()).isEqualTo(0);
 
@@ -89,7 +100,7 @@ class NotatRepositoryTest {
         assertThat(lagretNotat.getNotatTekst()).isEqualTo(tekst);
         assertThat(lagretNotat.getAktørId()).isEqualTo(fagsak.getPleietrengendeAktørId());
         assertThat(lagretNotat.getYtelseType()).isEqualTo(fagsak.getYtelseType());
-        assertThat(lagretNotat.getOpprettetAv()).isEqualTo("VL");
+        assertThat(lagretNotat.getOpprettetAv()).isEqualTo("enSaksbehandler");
         assertThat(lagretNotat.isAktiv()).isTrue();
         assertThat(lagretNotat.getVersjon()).isEqualTo(0);
 
