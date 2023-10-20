@@ -14,6 +14,8 @@ public enum NotatGjelderType implements Kodeverdi {
     private final String kode;
     private final String navn;
 
+    private static final String KODEVERK = "NOTAT_GJELDER";
+
     NotatGjelderType(String kode, String navn) {
         this.kode = kode;
         this.navn = navn;
@@ -26,12 +28,12 @@ public enum NotatGjelderType implements Kodeverdi {
 
     @Override
     public String getOffisiellKode() {
-        return null;
+        return getKode();
     }
 
     @Override
     public String getKodeverk() {
-        return null;
+        return KODEVERK;
     }
 
     @Override

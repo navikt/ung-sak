@@ -30,7 +30,6 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.notat.NotatGjelderType;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.behandlingslager.notat.Notat;
 import no.nav.k9.sak.behandlingslager.notat.NotatAktørEntitet;
 import no.nav.k9.sak.behandlingslager.notat.NotatBuilder;
 import no.nav.k9.sak.behandlingslager.notat.NotatEntitet;
@@ -174,7 +173,7 @@ public class NotatRestTjeneste {
             .orElseThrow(() -> NotatFeil.FACTORY.fantIkkeSak().toException());
     }
 
-    private NotatDto mapDto(Notat entitet) {
+    private NotatDto mapDto(NotatEntitet entitet) {
         //TODO to interface or not to interface, that is the question....
         if (entitet instanceof NotatAktørEntitet aktørEntitet) {
             return new NotatDto(

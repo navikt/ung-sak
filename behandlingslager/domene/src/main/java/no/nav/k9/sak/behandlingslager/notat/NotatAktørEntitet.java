@@ -20,7 +20,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.notat.NotatGjelderType;
 import no.nav.k9.sak.behandlingslager.kodeverk.FagsakYtelseTypeKodeverdiConverter;
 import no.nav.k9.sak.typer.AktørId;
 
@@ -58,10 +57,6 @@ public class NotatAktørEntitet extends NotatEntitet {
 
     public AktørId getAktørId() {
         return aktørId;
-    }
-
-    public NotatGjelderType getGjelderType() {
-        return NotatGjelderType.PLEIETRENGENDE;
     }
 
     public FagsakYtelseType getYtelseType() {

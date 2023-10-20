@@ -9,7 +9,7 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Version;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 @MappedSuperclass
-public abstract class NotatEntitet extends BaseEntitet implements Notat {
+public abstract class NotatEntitet extends BaseEntitet {
 
     @NaturalId
     @Column(name = "uuid", nullable = false, updatable = false)
@@ -32,8 +32,9 @@ public abstract class NotatEntitet extends BaseEntitet implements Notat {
         this.uuid = UUID.randomUUID();
     }
 
-    @Override
     public abstract String getNotatTekst();
+
+    public abstract void nyTekst(String tekst);
 
     public boolean isAktiv() {
         return aktiv;
@@ -47,12 +48,10 @@ public abstract class NotatEntitet extends BaseEntitet implements Notat {
         return skjult;
     }
 
-    @Override
     public UUID getUuid() {
         return uuid;
     }
 
-    @Override
     public void skjul(boolean skjul) {
         this.skjult = skjul;
     }
