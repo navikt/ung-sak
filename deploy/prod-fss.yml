@@ -257,8 +257,6 @@ spec:
       value: "false"
     - name: ENABLE_OVERSTYR_UTTAK
       value: "false"
-    - name: FL_FRA_SOKNAD
-      value: "false"
     - name: FILTRER_UGYLDIG_IM
       value: "false"
     - name: ENABLE_UTENLANDSOPPHOLD_PILS
