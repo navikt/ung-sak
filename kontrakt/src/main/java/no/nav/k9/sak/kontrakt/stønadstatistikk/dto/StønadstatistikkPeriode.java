@@ -9,10 +9,12 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import no.nav.k9.sak.kontrakt.stønadstatistikk.dto.StønadstatistikkHendelse.View;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -22,79 +24,101 @@ public class StønadstatistikkPeriode {
     @JsonProperty(value = "fom", required = true)
     @NotNull
     @Valid
+    @JsonView(View.V1.class)
     private LocalDate fom;
 
     @JsonProperty(value = "tom", required = true)
     @NotNull
     @Valid
+    @JsonView(View.V1.class)
     private LocalDate tom;
 
     @JsonProperty(value = "utfall", required = true)
     @NotNull
     @Valid
+    @JsonView(View.V1.class)
     private StønadstatistikkUtfall utfall;
 
     @JsonProperty(value = "uttaksgrad", required = true)
     @Valid
+    @JsonView(View.V1.class)
     private BigDecimal uttaksgrad;
 
     @JsonProperty(value = "utbetalingsgrader", required = true)
     @Size(max = 1000)
     @NotNull
     @Valid
+    @JsonView(View.V1.class)
     private List<StønadstatistikkUtbetalingsgrad> utbetalingsgrader;
 
     @JsonProperty(value = "søkersTapteArbeidstid")
     @Valid
+    @JsonView(View.V1.class)
     private BigDecimal søkersTapteArbeidstid;
 
     @JsonProperty(value = "oppgittTilsyn")
     @Valid
+    @JsonView(View.V1.class)
     private Duration oppgittTilsyn;
 
     @JsonProperty(value = "årsaker", required = true)
     @Size(max = 100)
     @NotNull
     @Valid
+    @JsonView(View.V1.class)
     private List<String> årsaker;
 
     @JsonProperty(value = "inngangsvilkår", required = true)
     @Size(max = 1000)
     @NotNull
     @Valid
+    @JsonView(View.V1.class)
     private List<StønadstatistikkInngangsvilkår> inngangsvilkår;
 
     @JsonProperty(value = "pleiebehov")
     @Valid
+    @JsonView(View.V1.class)
     private BigDecimal pleiebehov;
 
     @JsonProperty(value = "graderingMotTilsyn")
     @Valid
+    @JsonView(View.V1.class)
     private StønadstatistikkGraderingMotTilsyn graderingMotTilsyn;
 
     @JsonProperty(value = "nattevåk")
     @Valid
+    @JsonView(View.V1.class)
     private StønadstatistikkUtfall nattevåk;
 
     @JsonProperty(value = "beredskap")
     @Valid
+    @JsonView(View.V1.class)
     private StønadstatistikkUtfall beredskap;
 
     @JsonProperty(value = "søkersTapteTimer")
     @Valid
+    @JsonView(View.V1.class)
     private Duration søkersTapteTimer;
 
     @JsonProperty(value = "bruttoBeregningsgrunnlag", required = true)
     @NotNull
     @Valid
+    @JsonView(View.V1.class)
     private BigDecimal bruttoBeregningsgrunnlag;
+    
+    @JsonProperty(value = "totalUtbetalingsgrad")
+    @Valid
+    @JsonView(View.V2.class)
+    private BigDecimal totalUtbetalingsgrad;
 
     @JsonProperty(value = "totalUtbetalingsgradFraUttak")
     @Valid
+    @JsonView(View.V2.class)
     private BigDecimal totalUtbetalingsgradFraUttak;
     
     @JsonProperty(value = "totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt")
     @Valid
+    @JsonView(View.V2.class)
     private BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
     
 
@@ -136,6 +160,14 @@ public class StønadstatistikkPeriode {
         this.bruttoBeregningsgrunnlag = bruttoBeregningsgrunnlag;
         this.totalUtbetalingsgradFraUttak = totalUtbetalingsgradFraUttak;
         this.totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt = totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
+        
+        if (totalUtbetalingsgradFraUttak != null
+                && totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt != null
+                && totalUtbetalingsgradFraUttak.compareTo(totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt) > 0){
+            totalUtbetalingsgrad = totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
+        } else {
+            totalUtbetalingsgrad = totalUtbetalingsgradFraUttak;
+        }
     }
 
     public static StønadstatistikkPeriode forOmsorgspenger(LocalDate fom,
@@ -217,21 +249,15 @@ public class StønadstatistikkPeriode {
         return bruttoBeregningsgrunnlag;
     }
     
+    public BigDecimal getTotalUtbetalingsgrad() {
+        return totalUtbetalingsgrad;
+    }
+    
     public BigDecimal getTotalUtbetalingsgradFraUttak() {
         return totalUtbetalingsgradFraUttak;
     }
     
     public BigDecimal getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt() {
         return totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
-    }
-    
-    public boolean isNedjustertGrunnetTilkommetInntekt() {
-        if (totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt == null) {
-            return false;
-        }
-        if (BigDecimal.valueOf(-1L).compareTo(totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt) == 0) {
-            return false;
-        }
-        return totalUtbetalingsgradFraUttak.compareTo(totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt) > 0;
     }
 }
