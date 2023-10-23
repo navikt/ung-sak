@@ -1,16 +1,21 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess;
 
+import java.time.LocalDate;
+import java.util.Map;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Dependent
 public class PeriodisertUtvidetRettIverksettTjeneste {
@@ -41,11 +46,21 @@ public class PeriodisertUtvidetRettIverksettTjeneste {
     }
 
     private LocalDateTimeline<Utfall> hentUtfall(Long behandlingId) {
-        return vilkårResultatRepository.hentHvisEksisterer(behandlingId)
-            .map(vr -> vr.getVilkårTimeline(VilkårType.UTVIDETRETT))
-            .orElse(LocalDateTimeline.empty())
-            .mapValue(VilkårPeriode::getUtfall)
-            .compress();
+        Map<VilkårType, LocalDateTimeline<VilkårPeriode>> vilkårTidslinjer = vilkårResultatRepository.hent(behandlingId).getVilkårTidslinjer(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.MIN, LocalDate.MAX));
+        LocalDateTimeline<Boolean> tidlinjeNoeInnvilget = harMinstEtVilkårMedUtfall(vilkårTidslinjer, Utfall.OPPFYLT);
+        LocalDateTimeline<Boolean> tidlinjeNoeAvslått = harMinstEtVilkårMedUtfall(vilkårTidslinjer, Utfall.IKKE_OPPFYLT);
+        //samlet resultat er OPPFYLT hvis minst ett vilkår er OPPFYLT og ingen vilkår er IKKE_OPPFYLT.
+        return tidlinjeNoeInnvilget.mapValue(v -> Utfall.OPPFYLT).crossJoin(tidlinjeNoeAvslått.mapValue(v -> Utfall.IKKE_OPPFYLT), StandardCombinators::coalesceRightHandSide);
+
     }
+
+    private LocalDateTimeline<Boolean> harMinstEtVilkårMedUtfall(Map<VilkårType, LocalDateTimeline<VilkårPeriode>> vilkårTidslinjer, Utfall ønsketUtfall) {
+        return vilkårTidslinjer.values().stream()
+            .map(tidslinje -> tidslinje.filterValue(v -> v.getUtfall() == ønsketUtfall))
+            .map(tidslinje -> tidslinje.mapValue(v -> true))
+            .reduce((a, b) -> a.crossJoin(b, StandardCombinators::alwaysTrueForMatch))
+            .orElse(LocalDateTimeline.empty());
+    }
+
 
 }

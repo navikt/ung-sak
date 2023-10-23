@@ -70,7 +70,7 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
 
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
-        if (brukPeriodisertRammevedtak) {
+        if (1==1 || brukPeriodisertRammevedtak) {
             håndterAktuellOgTilpassTidligerePerioder(prosessTaskData);
         } else {
             håndterAktuellPeriode(prosessTaskData);
@@ -96,7 +96,7 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
                     log.info("Iverksetter avslått rammevedtak for periode: {}", vedtakperiode);
                     utvidetRettKlient.avslått(iverksett);
                 }
-                default -> throw new IllegalArgumentException("Ikke-støtet verdi: " + segment.getValue());
+                default -> throw new IllegalArgumentException("Ikke-støttet verdi: " + segment.getValue() + " for " + segment.getLocalDateInterval());
             }
         });
     }

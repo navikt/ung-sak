@@ -164,7 +164,6 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
             utfallOgAvslagsårsakNå = new LocalDateTimeline<>(avslagFom, avslagTom, new UtfallOgAvslagsårsak(Utfall.IKKE_OPPFYLT, dto.getAvslagsårsak()));
         } else if (minMaxPerioder.erÅpenPeriode(periode)) {
             utfallOgAvslagsårsakNå = new LocalDateTimeline<>(minFom, maksTom, new UtfallOgAvslagsårsak(nyttUtfall, null/* avslagsårsak kan bare være null her */));
-            oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, minFom, maksTom, null /* avslagsårsak kan bare være null her */);
         } else {
             var angittPeriode = validerAngittPeriode(fagsak, new LocalDateInterval(periode.getFom(), periode.getTom()));
             utfallOgAvslagsårsakNå = new LocalDateTimeline<>(angittPeriode.getFomDato(), angittPeriode.getTomDato(), new UtfallOgAvslagsårsak(nyttUtfall, null/* avslagsårsak kan bare være null her */));
