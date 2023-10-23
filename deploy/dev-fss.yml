@@ -260,8 +260,6 @@ spec:
       value: "true"
     - name: ENABLE_OVERSTYR_UTTAK
       value: "true"
-    - name: FL_FRA_SOKNAD
-      value: "true"
     - name: FILTRER_UGYLDIG_IM
       value: "true"
     - name: ENABLE_UTENLANDSOPPHOLD_PILS
@@ -270,7 +268,8 @@ spec:
       value: "true"
     - name: STONADSTATISTIKK_V2
       value: "true"
-
+    - name: OPPTJENING_AP_VED_AKSEPTERT_MELLOMLIGGENDE_HELG
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

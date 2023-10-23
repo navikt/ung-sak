@@ -15,7 +15,7 @@
 
     <properties>
         <simple.client.version>0.16.0</simple.client.version>
-        <swagger-ui.version>5.7.2</swagger-ui.version>
+        <swagger-ui.version>5.9.0</swagger-ui.version>
     </properties>
 
 
@@ -41,6 +41,19 @@
                 <groupId>org.webjars</groupId>
                 <artifactId>swagger-ui</artifactId>
                 <version>${swagger-ui.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-yaml</artifactId>
+                <version>${jackson.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <!--Kan kollidere med versjon fra swagger-->
+                        <groupId>org.yaml</groupId>
+                        <artifactId>snakeyaml</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
         </dependencies>

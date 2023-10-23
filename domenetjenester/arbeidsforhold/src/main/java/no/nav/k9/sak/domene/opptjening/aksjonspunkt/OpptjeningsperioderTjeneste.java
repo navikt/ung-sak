@@ -58,15 +58,12 @@ public class OpptjeningsperioderTjeneste {
     protected OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
     private final MapYtelseperioderTjeneste mapYtelseperioderTjeneste;
     private final MellomliggendeHelgUtleder mellomliggendeHelgUtleder = new MellomliggendeHelgUtleder();
-    private final boolean frilansFraSøknadEnabled;
 
     @Inject
     public OpptjeningsperioderTjeneste(OpptjeningRepository opptjeningRepository,
-                                       OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider,
-                                       @KonfigVerdi(value = "FL_FRA_SOKNAD", defaultVerdi = "false") boolean frilansFraSøknadEnabled) {
+                                       OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider) {
         this.opptjeningRepository = opptjeningRepository;
         this.oppgittOpptjeningFilterProvider = oppgittOpptjeningFilterProvider;
-        this.frilansFraSøknadEnabled = frilansFraSøknadEnabled;
         this.mapYtelseperioderTjeneste = new MapYtelseperioderTjeneste();
     }
 
@@ -230,7 +227,7 @@ public class OpptjeningsperioderTjeneste {
 
         Collection<Yrkesaktivitet> frilansOppdrag = filter.getFrilansOppdrag();
 
-        if (aktørArbeidFraRegister.isPresent() && !frilansOppdrag.isEmpty() || (frilansFraSøknadEnabled && oppgittOpptjening != null && oppgittOpptjening.getFrilans().isPresent())) {
+        if (aktørArbeidFraRegister.isPresent() && !frilansOppdrag.isEmpty() || (oppgittOpptjening != null && oppgittOpptjening.getFrilans().isPresent())) {
 
             DatoIntervallEntitet frilansPeriode = finnFrilansPeriode(oppgittOpptjening, periode, frilansOppdrag);
 
