@@ -10,8 +10,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -53,7 +56,7 @@ class UtvidetRettIverksettTaskTest {
 
     @BeforeEach
     void setUp() {
-        PeriodisertUtvidetRettIverksettTjeneste periodisertUtvidetRettIverksettTjeneste = new PeriodisertUtvidetRettIverksettTjeneste(behandlingRepository, vilkårResultatRepository, true);
+        PeriodisertUtvidetRettIverksettTjeneste periodisertUtvidetRettIverksettTjeneste = new PeriodisertUtvidetRettIverksettTjeneste(vilkårResultatRepository, true);
         utvidetRettIverksettTask = new UtvidetRettIverksettTask(vilkårTjeneste, behandlingRepository, utvidetRettKlient, periodisertUtvidetRettIverksettTjeneste, true);
     }
 
@@ -92,7 +95,11 @@ class UtvidetRettIverksettTaskTest {
         Behandling revurdering = lagRevurdering(behandling);
         LocalDate fom2 = LocalDate.of(2023, 1, 1);
         LocalDate tom2 = LocalDate.of(2024, 12, 31);
-        leggTilInnvilgetVilkår(fom2, tom2, revurdering);
+        LocalDateTimeline<Utfall> resultat = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom2, tom2, Utfall.OPPFYLT),
+            new LocalDateSegment<>(tom2.plusDays(1), tom1, Utfall.IKKE_OPPFYLT) //settes til ikke-oppfylt i AvklarUtvidetRett (aksjonspunkt-oppdaterer)
+        ));
+        leggTilVilkårResultat(resultat, revurdering);
 
         ProsessTaskData taskdata = ProsessTaskDataBuilder.forProsessTask(UtvidetRettIverksettTask.class).medProperty("behandlingId", revurdering.getId().toString()).build();
         utvidetRettIverksettTask.doTask(taskdata);
@@ -151,7 +158,12 @@ class UtvidetRettIverksettTaskTest {
         Behandling revurdering = lagRevurdering(behandling);
         LocalDate fom2 = LocalDate.of(2022, 1, 1);
         LocalDate tom2 = LocalDate.of(2024, 12, 31);
-        leggTilInnvilgetVilkår(fom2, tom2, revurdering);
+
+        LocalDateTimeline<Utfall> resultat = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom2, tom2, Utfall.OPPFYLT),
+            new LocalDateSegment<>(tom2.plusDays(1), tom1, Utfall.IKKE_OPPFYLT)
+        ));
+        leggTilVilkårResultat(resultat, revurdering);
 
         ProsessTaskData taskdata = ProsessTaskDataBuilder.forProsessTask(UtvidetRettIverksettTask.class).medProperty("behandlingId", revurdering.getId().toString()).build();
 
@@ -188,6 +200,15 @@ class UtvidetRettIverksettTaskTest {
 
     private void leggTilInnvilgetVilkår(LocalDate fom, LocalDate tom, Behandling behandling) {
         vilkårResultatRepository.lagre(behandling.getId(), new VilkårResultatBuilder().leggTil(new VilkårBuilder(VilkårType.UTVIDETRETT).leggTil(new VilkårPeriodeBuilder().medPeriode(fom, tom).medBegrunnelse("joda").medUtfall(Utfall.OPPFYLT))).build());
+    }
+
+    private void leggTilVilkårResultat(LocalDateTimeline<Utfall> utfall, Behandling behandling) {
+        VilkårBuilder builder = new VilkårBuilder(VilkårType.UTVIDETRETT);
+        for (LocalDateSegment<Utfall> segment : utfall.toSegments()) {
+            Avslagsårsak avslagsårsak = segment.getValue() == Utfall.IKKE_OPPFYLT ? Avslagsårsak.IKKE_UTVIDETRETT : null;
+            builder.leggTil(new VilkårPeriodeBuilder().medPeriode(segment.getFom(), segment.getTom()).medBegrunnelse("joda").medUtfall(segment.getValue()).medAvslagsårsak(avslagsårsak));
+        }
+        vilkårResultatRepository.lagre(behandling.getId(), new VilkårResultatBuilder().leggTil(builder).build());
     }
 
     private static class UtvidetRettTestKlient implements UtvidetRettKlient {
