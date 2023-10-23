@@ -266,6 +266,8 @@ spec:
       value: "true"
     - name: PERIODISERT_RAMMEVEDTAK
       value: "true"
+    - name: STONADSTATISTIKK_V2
+      value: "true"
     - name: OPPTJENING_AP_VED_AKSEPTERT_MELLOMLIGGENDE_HELG
       value: "true"
 
