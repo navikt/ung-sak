@@ -1,6 +1,5 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
-import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Set;
 
@@ -12,6 +11,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
@@ -47,19 +47,32 @@ public class OpptjeningsaktiviteterPreconditionForBeregning {
 
         Vilkår opptjeningsvilkåret = vilkårResultatRepository.hent(behandlingId).getVilkår(VilkårType.OPPTJENINGSVILKÅRET).orElseThrow();
         for (VilkårPeriode vilkårPeriode : opptjeningsvilkåret.getPerioder()) {
+            var opptjening = opptjeningsresultat.get().finnOpptjening(vilkårPeriode.getSkjæringstidspunkt())
+                .orElseThrow(() -> new IllegalStateException("Fant ikke opptjening for skjæringstidspunkt " + vilkårPeriode.getSkjæringstidspunkt()));
             if (vilkårPeriode.getUtfall() == Utfall.OPPFYLT && !MIDLERTIDIG_INAKTIV_KODER.contains(vilkårPeriode.getMerknad())) {
-                sjekkHarAktivitetForHelePerioden(vilkårPeriode.getSkjæringstidspunkt(), opptjeningsresultat.get());
+                sjekkHarAktivitetIHelePerioden(opptjening);
+            }
+
+            if (harIkkeInnhentetSigrunForAlleÅr(vilkårPeriode) && skalBrukeSigruninntekt(vilkårPeriode, opptjening)) {
+                throw new IllegalStateException("Kan ikke beregne for status Midlertidig inaktiv eller SN for skjæringstidspunkt før 2019. Sjekk at søknadsperiode er riktig og håndter ved overstyring.");
             }
         }
     }
 
-    private void sjekkHarAktivitetForHelePerioden(LocalDate skjæringstidspunkt, OpptjeningResultat opptjeningResultat) {
-        Optional<Opptjening> opptjeningOpt = opptjeningResultat.finnOpptjening(skjæringstidspunkt);
-        if (opptjeningOpt.isEmpty()) {
-            logger.warn("Fant ikke opptjening for skjæringstidspunkt {}", skjæringstidspunkt);
-        } else {
-            sjekkHarAktivitetIHelePerioden(opptjeningOpt.get());
-        }
+    private static boolean harIkkeInnhentetSigrunForAlleÅr(VilkårPeriode vilkårPeriode) {
+        return vilkårPeriode.getSkjæringstidspunkt().getYear() < 2019;
+    }
+
+    private static boolean skalBrukeSigruninntekt(VilkårPeriode vilkårPeriode, Opptjening opptjening) {
+        return MIDLERTIDIG_INAKTIV_KODER.contains(vilkårPeriode.getMerknad()) || harNæringVedSkjæringstidspunkt(vilkårPeriode, opptjening);
+    }
+
+    private static boolean harNæringVedSkjæringstidspunkt(VilkårPeriode vilkårPeriode, Opptjening opptjening) {
+        return opptjening.getOpptjeningAktivitet().stream()
+            .anyMatch(a ->
+                a.getAktivitetType().equals(OpptjeningAktivitetType.NÆRING) &&
+                    !a.getFom().isAfter(vilkårPeriode.getSkjæringstidspunkt().minusDays(1)) &&
+                    !a.getTom().isBefore(vilkårPeriode.getSkjæringstidspunkt().minusDays(1)));
     }
 
     private void sjekkHarAktivitetIHelePerioden(Opptjening opptjening) {

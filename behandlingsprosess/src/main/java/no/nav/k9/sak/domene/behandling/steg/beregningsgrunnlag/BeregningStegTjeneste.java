@@ -27,7 +27,6 @@ import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.EndretUtbetalingPeriodeutleder;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
-import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 
 @Dependent
 public class BeregningStegTjeneste {
@@ -39,19 +38,14 @@ public class BeregningStegTjeneste {
     private final Logger logger = LoggerFactory.getLogger(BeregningStegTjeneste.class);
 
     private final BeregningTjeneste kalkulusTjeneste;
-    private final BeregningsgrunnlagVilkårTjeneste vilkårTjeneste;
-    private final VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
     private final Instance<EndretUtbetalingPeriodeutleder> endretUtbetalingPeriodeutleder;
-    private BeregningStegPeriodeFilter beregningStegPeriodeFilter;
+    private final BeregningStegPeriodeFilter beregningStegPeriodeFilter;
 
     @Inject
     public BeregningStegTjeneste(BeregningTjeneste kalkulusTjeneste,
-                                 BeregningsgrunnlagVilkårTjeneste vilkårTjeneste,
-                                 VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
-                                 @Any Instance<EndretUtbetalingPeriodeutleder> endretUtbetalingPeriodeutleder, BeregningStegPeriodeFilter beregningStegPeriodeFilter) {
+                                 @Any Instance<EndretUtbetalingPeriodeutleder> endretUtbetalingPeriodeutleder,
+                                 BeregningStegPeriodeFilter beregningStegPeriodeFilter) {
         this.kalkulusTjeneste = kalkulusTjeneste;
-        this.vilkårTjeneste = vilkårTjeneste;
-        this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
         this.endretUtbetalingPeriodeutleder = endretUtbetalingPeriodeutleder;
         this.beregningStegPeriodeFilter = beregningStegPeriodeFilter;
     }
