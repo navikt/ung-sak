@@ -75,7 +75,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
 
         // 4 Vurder inkonsistens
         inkonsistensTjeneste.sjekkInkonsistensOgOpprettProsesstrigger(referanse);
-        opptjeningsaktiviteterPreconditionForBeregning.sjekkOpptjeningsaktiviter(referanse.getBehandlingId());
+        opptjeningsaktiviteterPreconditionForBeregning.sjekkOpptjeningsaktiviter(referanse);
 
         // 5. Kopier
         kopierBeregningTjeneste.kopierVurderinger(kontekst);
