@@ -62,6 +62,7 @@ import no.nav.k9.sak.web.app.tjenester.integrasjonstatus.IntegrasjonstatusRestTj
 import no.nav.k9.sak.web.app.tjenester.kodeverk.KodeverkRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.kravperioder.PerioderTilBehandlingMedKildeRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.los.LosRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.notat.NotatRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.opplæringsinstitusjon.GodkjentOpplæringsinstitusjonRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.punsj.PunsjRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.register.RedirectToRegisterRestTjeneste;
@@ -141,6 +142,7 @@ public class RestImplementationClasses {
         classes.add(ForvaltningUnntaksløypaRestTjeneste.class);
         classes.add(DiagnostikkRestTjeneste.class);
         classes.add(RapporteringRestTjeneste.class);
+        classes.add(NotatRestTjeneste.class);
 
         deprecatedServicesForBrev(classes);
 
