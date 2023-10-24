@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
+import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -26,6 +27,7 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 
 @Dependent
+@ScopedRestIntegration(scopeKey = "K9_INFOTRYGD_SCOPE", defaultScope = "api://prod-fss:k9saksbehandling:k9-infotrygd-grunnlag-paaroerende-sykdom/.default")
 class InfotrygdPårørendeSykdomClient {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final JsonConverter jsonConverter = new JsonConverter();
@@ -33,7 +35,9 @@ class InfotrygdPårørendeSykdomClient {
     private URI baseUri;
 
     @Inject
-    InfotrygdPårørendeSykdomClient(OidcRestClient httpClient, @KonfigVerdi("infotrygd.bs.base.uri") URI baseUri) {
+    InfotrygdPårørendeSykdomClient(
+        OidcRestClient httpClient,
+        @KonfigVerdi("K9_INFOTRYGD_BASE_URL") URI baseUri) {
         this.httpClient = httpClient;
         this.baseUri = baseUri;
     }
