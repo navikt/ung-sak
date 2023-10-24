@@ -182,7 +182,7 @@ public class FraKalkulusMapper {
             .medNaturalytelseTilkommetPrÅr(bgAndelArbeidsforhold.getNaturalytelseTilkommetPrÅr());
     }
 
-    private static Arbeidsgiver mapArbeidsgiver(no.nav.folketrygdloven.kalkulus.response.v1.Arbeidsgiver arbeidsgiver) {
+    public static Arbeidsgiver mapArbeidsgiver(no.nav.folketrygdloven.kalkulus.response.v1.Arbeidsgiver arbeidsgiver) {
         if (arbeidsgiver.getArbeidsgiverOrgnr() != null) {
             return Arbeidsgiver.virksomhet(arbeidsgiver.getArbeidsgiverOrgnr());
         }

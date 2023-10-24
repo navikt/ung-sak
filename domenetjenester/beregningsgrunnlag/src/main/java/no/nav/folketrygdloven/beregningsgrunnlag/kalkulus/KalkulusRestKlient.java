@@ -32,6 +32,7 @@ import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.KontrollerGrunnbeløpRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.KopierBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.KopierOgResettBeregningListeRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.forvaltning.OppdaterYtelsesspesifiktGrunnlagListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.migrerAksjonspunkt.MigrerAksjonspunktListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.regelinput.KomprimerRegelInputRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.simulerTilkommetInntekt.SimulerTilkommetInntektListeRequest;
@@ -42,6 +43,7 @@ import no.nav.folketrygdloven.kalkulus.response.v1.KopiResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandListeResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.BeregningsgrunnlagGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
+import no.nav.folketrygdloven.kalkulus.response.v1.forvaltning.EndretPeriodeListeRespons;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringListeRespons;
 import no.nav.folketrygdloven.kalkulus.response.v1.regelinput.Saksnummer;
 import no.nav.folketrygdloven.kalkulus.response.v1.simulerTilkommetInntekt.SimulertTilkommetInntektListe;
@@ -73,6 +75,9 @@ public class KalkulusRestKlient {
     private final ObjectReader dtoListeReader = kalkulusMapper.readerFor(BeregningsgrunnlagListe.class);
     private final ObjectReader behovForGreguleringReader = kalkulusMapper.readerFor(GrunnbeløpReguleringRespons.class);
     private final ObjectReader tilkommetInntektReader = kalkulusMapper.readerFor(SimulertTilkommetInntektListe.class);
+
+    private final ObjectReader endringVedSimulerFastsettReader = kalkulusMapper.readerFor(EndretPeriodeListeRespons.class);
+
     private final ObjectReader tilkommetAktivitetReader = kalkulusMapper.readerFor(UtledetTilkommetAktivitetListe.class);
 
     private final ObjectReader grunnlagListReader = kalkulusMapper.readerFor(new TypeReference<List<BeregningsgrunnlagGrunnlagDto>>() {
@@ -98,6 +103,9 @@ public class KalkulusRestKlient {
 
     private URI migrerAksjonspunkter;
     private URI komprimerRegelinput;
+
+    private URI simulerFastsettMedOppdatertUttak;
+
     private URI komprimerFlereRegelinput;
 
     private URI kopierOgResettEndpoint;
@@ -136,6 +144,7 @@ public class KalkulusRestKlient {
         this.kopierOgResettEndpoint = toUri("/api/kalkulus/v1//kopierOgResett/bolk");
         this.simulerTilkommetInntekt = toUri("/api/kalkulus/v1/simulerTilkommetInntektForKoblinger");
         this.utledTilkommetAktivitet = toUri("/api/kalkulus/v1/utledTilkommetAktivitetForKoblinger");
+        this.simulerFastsettMedOppdatertUttak = toUri("/api/kalkulus/v1/forvaltning/fastsettMedOppdatertUttak/bolk");
     }
 
 
@@ -233,7 +242,17 @@ public class KalkulusRestKlient {
             throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
         }
     }
-    
+
+    public EndretPeriodeListeRespons simulerFastsettMedOppdatertUttak(OppdaterYtelsesspesifiktGrunnlagListeRequest request) {
+        var endpoint = simulerFastsettMedOppdatertUttak;
+        try {
+            return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), endringVedSimulerFastsettReader);
+        } catch (JsonProcessingException e) {
+            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
+        }
+    }
+
+
     public UtledetTilkommetAktivitetListe utledTilkommetAktivitet(UtledTilkommetAktivitetListeRequest request) {
         var endpoint = utledTilkommetAktivitet;
         try {
