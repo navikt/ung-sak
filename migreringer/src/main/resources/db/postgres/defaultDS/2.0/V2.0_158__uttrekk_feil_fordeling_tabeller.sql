@@ -17,6 +17,7 @@ CREATE TABLE DUMP_SIMULERT_UTB_DIFF
     ID                      bigint                              not null PRIMARY KEY,
     ekstern_referanse       bigint                              not null,
     skjaeringstidspunkt     DATE                                NOT NULL,
+    kalkulus_request        JSONB                               NOT NULL,
     dump_grunnlag_id        bigint                              not null,
     VERSJON                 bigint       default 0              not null,
     OPPRETTET_AV            VARCHAR(20)  default 'VL'           not null,

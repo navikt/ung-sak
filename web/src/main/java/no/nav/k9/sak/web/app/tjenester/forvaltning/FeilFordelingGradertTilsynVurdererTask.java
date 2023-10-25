@@ -10,7 +10,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -50,6 +53,7 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.utbetalingdiff.DumpSimul
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.PleiepengerOgOpplæringspengerGrunnlagMapper;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.UttakRestKlient;
+import no.nav.k9.sak.økonomi.tilkjentytelse.JsonMapper;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
 import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
@@ -151,28 +155,40 @@ public class FeilFordelingGradertTilsynVurdererTask implements ProsessTaskHandle
 
 
         var endretPeriodeListeRespons = kalkulusRestKlient.simulerFastsettMedOppdatertUttak(request);
-        var mappetSimulertDiff = mapKalkulusRespons(endretPeriodeListeRespons);
+        var mappetSimulertDiff = mapKalkulusRespons(endretPeriodeListeRespons, request);
         return new DataDumpGrunnlag(sisteBehandling.getId(), mappetSimulertDiff);
     }
 
-    private static List<DumpSimulertUtbetalingDiff> mapKalkulusRespons(EndretPeriodeListeRespons endretPeriodeListeRespons) {
+    private static List<DumpSimulertUtbetalingDiff> mapKalkulusRespons(EndretPeriodeListeRespons endretPeriodeListeRespons, OppdaterYtelsesspesifiktGrunnlagListeRequest request) {
         return endretPeriodeListeRespons.getPerioderPrReferanse().stream().map(r ->
             new DumpSimulertUtbetalingDiff(
                 r.getEksternReferanse(),
-                r.getPeriodedifferanser().stream().map(p ->
-                    new DumpSimulertUtbetalingDiffPeriode(
-                        DatoIntervallEntitet.fraOgMedTilOgMed(p.getPeriode().getFom(), p.getPeriode().getTom()),
-                        p.getAndeldifferanser().stream().map(a -> new DumpSimulertUtbetalingDiffAndel(
-                            mapArbeidsgiver(a.getArbeidsgiver()),
-                            a.getGammelDagsats().intValue(),
-                            a.getNyDagsats().intValue(),
-                            a.getGammelDagsatsBruker().intValue(),
-                            a.getNyDagsatsBruker().intValue(),
-                            a.getGammelDagsatsArbeidsgiver().intValue(),
-                            a.getNyDagsatsArbeidsgiver().intValue()
-                        )).toList()
+                finnRequestJson(request, r.getEksternReferanse()), r.getPeriodedifferanser().stream().map(p ->
+                new DumpSimulertUtbetalingDiffPeriode(
+                    DatoIntervallEntitet.fraOgMedTilOgMed(p.getPeriode().getFom(), p.getPeriode().getTom()),
+                    p.getAndeldifferanser().stream().map(a -> new DumpSimulertUtbetalingDiffAndel(
+                        mapArbeidsgiver(a.getArbeidsgiver()),
+                        a.getGammelDagsats().intValue(),
+                        a.getNyDagsats().intValue(),
+                        a.getGammelDagsatsBruker().intValue(),
+                        a.getNyDagsatsBruker().intValue(),
+                        a.getGammelDagsatsArbeidsgiver().intValue(),
+                        a.getNyDagsatsArbeidsgiver().intValue()
                     )).toList()
+                )).toList()
             )).toList();
+    }
+
+    private static String finnRequestJson(OppdaterYtelsesspesifiktGrunnlagListeRequest request, UUID eksternReferanse) {
+        return request.getYtelsespesifiktGrunnlagListe().stream().filter(it -> it.getEksternReferanse().equals(eksternReferanse))
+            .map(OppdaterYtelsesspesifiktGrunnlagForRequest::getYtelsespesifiktGrunnlag)
+            .map(it -> {
+                try {
+                    return JsonMapper.getMapper().writerWithDefaultPrettyPrinter().writeValueAsString(it);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            }).findFirst().orElseThrow(() -> new IllegalStateException("Forventer å finne request for response for ekstern referanse " + eksternReferanse));
     }
 
     private List<DatoIntervallEntitet> finnPerioderMedForventetEndring(Optional<BeregningsresultatEntitet> beregningsresultatEntitet, Uttaksplan uttaksplan) {

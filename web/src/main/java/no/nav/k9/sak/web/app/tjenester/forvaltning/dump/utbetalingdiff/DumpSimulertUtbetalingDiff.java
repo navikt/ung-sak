@@ -3,6 +3,8 @@ package no.nav.k9.sak.web.app.tjenester.forvaltning.dump.utbetalingdiff;
 import java.util.List;
 import java.util.UUID;
 
+import org.hibernate.annotations.ColumnTransformer;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -25,6 +27,10 @@ public class DumpSimulertUtbetalingDiff extends BaseEntitet {
     @Column(name = "ekstern_referanse", nullable = false)
     private UUID eksternReferanse;
 
+    @ColumnTransformer(write = "?::jsonb")
+    @Column(name = "kalkulus_request", nullable = false, updatable = false)
+    private String kalkulusRequest;
+
     @OneToMany
     @JoinColumn(name = "dump_simulert_utb_diff_id", nullable = false, updatable = false)
     private List<DumpSimulertUtbetalingDiffPeriode> perioder;
@@ -33,8 +39,9 @@ public class DumpSimulertUtbetalingDiff extends BaseEntitet {
     public DumpSimulertUtbetalingDiff() {
     }
 
-    public DumpSimulertUtbetalingDiff(UUID eksternReferanse, List<DumpSimulertUtbetalingDiffPeriode> perioder) {
+    public DumpSimulertUtbetalingDiff(UUID eksternReferanse, String kalkulusRequest, List<DumpSimulertUtbetalingDiffPeriode> perioder) {
         this.eksternReferanse = eksternReferanse;
+        this.kalkulusRequest = kalkulusRequest;
         this.perioder = perioder;
     }
 }
