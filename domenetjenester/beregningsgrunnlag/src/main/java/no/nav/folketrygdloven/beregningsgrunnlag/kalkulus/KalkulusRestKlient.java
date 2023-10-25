@@ -144,7 +144,7 @@ public class KalkulusRestKlient {
         this.kopierOgResettEndpoint = toUri("/api/kalkulus/v1//kopierOgResett/bolk");
         this.simulerTilkommetInntekt = toUri("/api/kalkulus/v1/simulerTilkommetInntektForKoblinger");
         this.utledTilkommetAktivitet = toUri("/api/kalkulus/v1/utledTilkommetAktivitetForKoblinger");
-        this.simulerFastsettMedOppdatertUttak = toUri("/api/kalkulus/v1/forvaltning/fastsettMedOppdatertUttak/bolk");
+        this.simulerFastsettMedOppdatertUttak = toUri("/api/kalkulus/v1/forvaltning/simulerFastsettMedOppdatertUttak/bolk");
     }
 
 
