@@ -1,4 +1,4 @@
-create table DUMP_GR
+create table DUMP_SIMULERT_UTB
 (
     ID            bigint                              not null PRIMARY KEY,
     BEHANDLING_ID bigint                              not null,
@@ -8,7 +8,7 @@ create table DUMP_GR
     OPPRETTET_TID TIMESTAMP(3) default localtimestamp not null,
     ENDRET_AV     VARCHAR(20),
     ENDRET_TID    TIMESTAMP(3),
-    constraint FK_DUMP_GR_01
+    constraint FK_DUMP_SIMULERT_UTB_01
         foreign key (BEHANDLING_ID) references behandling
 );
 
@@ -24,8 +24,8 @@ CREATE TABLE DUMP_SIMULERT_UTB_DIFF
     ENDRET_AV               VARCHAR(20),
     ENDRET_TID              TIMESTAMP(3),
     constraint FK_DUMP_SIMULERT_UTB_DIFF_01
-        foreign key (dump_grunnlag_id) references DUMP_GR
-)
+        foreign key (dump_grunnlag_id) references DUMP_SIMULERT_UTB
+);
 
 CREATE TABLE DUMP_SIMULERT_UTB_DIFF_PERIODE
 (
@@ -40,7 +40,7 @@ CREATE TABLE DUMP_SIMULERT_UTB_DIFF_PERIODE
     ENDRET_TID                  TIMESTAMP(3),
     constraint FK_DUMP_SIMULERT_UTB_DIFF_PERIODE_01
         foreign key (dump_simulert_utb_diff_id) references DUMP_SIMULERT_UTB_DIFF
-)
+);
 
 CREATE TABLE DUMP_SIMULERT_UTB_DIFF_ANDEL
 (
@@ -61,7 +61,7 @@ CREATE TABLE DUMP_SIMULERT_UTB_DIFF_ANDEL
     ENDRET_TID                      TIMESTAMP(3),
     constraint FK_DUMP_SIMULERT_UTB_DIFF_ANDEL_01
         foreign key (PERIODE_ID) references DUMP_SIMULERT_UTB_DIFF_PERIODE
-)
+);
 
 create sequence if not exists SEQ_DUMP_GR increment by 50 minvalue 1000000;
 create sequence if not exists SEQ_DUMP_SIMULERT_UTB_DIFF increment by 50 minvalue 1000000;
