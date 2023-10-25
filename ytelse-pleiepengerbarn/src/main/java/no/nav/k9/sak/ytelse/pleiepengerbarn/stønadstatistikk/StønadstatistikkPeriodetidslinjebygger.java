@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.stønadstatistikk;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -13,6 +14,8 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriod
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
+import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
@@ -73,14 +76,38 @@ class StønadstatistikkPeriodetidslinjebygger {
         
         assertSammeVerdierForSammeStp(beregningsgrunnlagListe);
 
-        var segmenter = beregningsgrunnlagListe.stream()
-            .sorted(Comparator.comparing(Beregningsgrunnlag::getSkjæringstidspunkt))
-            .map(Beregningsgrunnlag::getBeregningsgrunnlagPerioder)
+        var stpTidslinje = toStpBeregningsgrunnlagTidslinje(beregningsgrunnlagListe);
+        
+        var periodeSegmenter = stpTidslinje.stream()
+            .map(s -> toGjeldendeBeregningsgrunnlagPeriode(s))
             .flatMap(Collection::stream)
-            .map(bp -> new LocalDateSegment<>(bp.getPeriode().getFomDato(), bp.getPeriode().getTomDato(), bp))
             .toList();
 
-        return new LocalDateTimeline<>(segmenter);
+        return new LocalDateTimeline<>(periodeSegmenter);
+    }
+
+    private LocalDateTimeline<Beregningsgrunnlag> toStpBeregningsgrunnlagTidslinje(List<Beregningsgrunnlag> beregningsgrunnlagListe) {
+        var stpSegmenter = beregningsgrunnlagListe.stream()
+                .sorted(Comparator.comparing(Beregningsgrunnlag::getSkjæringstidspunkt))
+                .map(b -> new LocalDateSegment<>(b.getSkjæringstidspunkt(), Tid.TIDENES_ENDE, b))
+                .toList();
+        var stpTidslinje = new LocalDateTimeline<>(stpSegmenter, StandardCombinators::coalesceRightHandSide);
+        return stpTidslinje;
+    }
+
+    private static List<LocalDateSegment<BeregningsgrunnlagPeriode>> toGjeldendeBeregningsgrunnlagPeriode(LocalDateSegment<Beregningsgrunnlag> s) {
+        return s.getValue().getBeregningsgrunnlagPerioder()
+            .stream()
+            .map(bp -> new LocalDateSegment<>(bp.getPeriode().getFomDato(),
+                    minDate(bp.getPeriode().getTomDato(), s.getTom()),
+                    bp)
+            )
+            .toList();
+    }
+
+
+    private static LocalDate minDate(LocalDate tomDato, LocalDate sTom) {
+        return tomDato.isBefore(sTom) ? tomDato : sTom;
     }
     
     private void assertSammeVerdierForSammeStp(List<Beregningsgrunnlag> beregningsgrunnlagListe) {
