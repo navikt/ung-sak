@@ -3,7 +3,6 @@ package no.nav.k9.sak.web.app.tjenester.notat;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
 
 import java.util.Collections;
 import java.util.List;
@@ -106,7 +105,7 @@ public class NotatRestTjeneste {
     @Path("/notat/endre")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Endre eksistrende notat", tags = "notat")
-    @BeskyttetRessurs(action = UPDATE, resource = FAGSAK)
+    @BeskyttetRessurs(action = CREATE, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response endre(
        @NotNull @Parameter(description = "Notat som skal endres") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) EndreNotatDto endreNotatDto
@@ -127,7 +126,7 @@ public class NotatRestTjeneste {
     @Path("/notat/skjul")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Skjul notat", tags = "notat")
-    @BeskyttetRessurs(action = UPDATE, resource = FAGSAK)
+    @BeskyttetRessurs(action = CREATE, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response skjul(
         @NotNull @Parameter(description = "Notat som skal skjules") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SkjulNotatDto skjulNotatDto
