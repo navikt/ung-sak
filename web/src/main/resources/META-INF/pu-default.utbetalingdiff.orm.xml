@@ -4,13 +4,13 @@
         xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm https://jakarta.ee/xml/ns/persistence/orm/orm_3_0.xsd"
         version="3.0">
 
-    <sequence-generator name="SEQ_DUMP_GR" allocation-size="50" sequence-name="SEQ_DUMP_GR" />
+    <sequence-generator name="SEQ_DUMP_SIMULERT_UTB" allocation-size="50" sequence-name="SEQ_DUMP_SIMULERT_UTB" />
     <sequence-generator name="SEQ_DUMP_SIMULERT_UTB_DIFF" allocation-size="50" sequence-name="SEQ_DUMP_SIMULERT_UTB_DIFF" />
     <sequence-generator name="SEQ_DUMP_SIMULERT_UTB_DIFF_PERIODE" allocation-size="50" sequence-name="SEQ_DUMP_SIMULERT_UTB_DIFF_PERIODE" />
     <sequence-generator name="SEQ_DUMP_SIMULERT_UTB_DIFF_ANDEL" allocation-size="50" sequence-name="SEQ_DUMP_SIMULERT_UTB_DIFF_ANDEL" />
 
     <entity class="no.nav.k9.sak.web.app.tjenester.forvaltning.dump.utbetalingdiff.DumpSimulertUtbetalingDiff" />
-    <entity class="no.nav.k9.sak.web.app.tjenester.forvaltning.dump.utbetalingdiff.DataDumpGrunnlag" />
+    <entity class="no.nav.k9.sak.web.app.tjenester.forvaltning.dump.utbetalingdiff.DataDumpSimulertUtbetaling" />
     <entity class="no.nav.k9.sak.web.app.tjenester.forvaltning.dump.utbetalingdiff.DumpSimulertUtbetalingDiffPeriode" />
     <entity class="no.nav.k9.sak.web.app.tjenester.forvaltning.dump.utbetalingdiff.DumpSimulertUtbetalingDiffAndel" />
 

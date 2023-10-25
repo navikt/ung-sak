@@ -64,7 +64,7 @@ CREATE TABLE DUMP_SIMULERT_UTB_DIFF_ANDEL
         foreign key (PERIODE_ID) references DUMP_SIMULERT_UTB_DIFF_PERIODE
 );
 
-create sequence if not exists SEQ_DUMP_GR increment by 50 minvalue 1000000;
+create sequence if not exists SEQ_DUMP_SIMULERT_UTB increment by 50 minvalue 1000000;
 create sequence if not exists SEQ_DUMP_SIMULERT_UTB_DIFF increment by 50 minvalue 1000000;
 create sequence if not exists SEQ_DUMP_SIMULERT_UTB_DIFF_PERIODE increment by 50 minvalue 1000000;
 create sequence if not exists SEQ_DUMP_SIMULERT_UTB_DIFF_ANDEL increment by 50 minvalue 1000000;

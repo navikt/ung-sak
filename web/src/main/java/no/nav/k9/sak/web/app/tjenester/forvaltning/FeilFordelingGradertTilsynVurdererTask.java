@@ -46,7 +46,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.utbetalingdiff.DataDumpGrunnlag;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.utbetalingdiff.DataDumpSimulertUtbetaling;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.utbetalingdiff.DumpSimulertUtbetalingDiff;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.utbetalingdiff.DumpSimulertUtbetalingDiffAndel;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.utbetalingdiff.DumpSimulertUtbetalingDiffPeriode;
@@ -104,7 +104,7 @@ public class FeilFordelingGradertTilsynVurdererTask implements ProsessTaskHandle
         var fagsakIdSaksnummerMap = hentFagsakIdOgSaksnummer(new Periode(periode));
 
 
-        List<DataDumpGrunnlag> resultater = new ArrayList<>();
+        List<DataDumpSimulertUtbetaling> resultater = new ArrayList<>();
 
         for (var fagsakIdOgSaksnummerEntry : fagsakIdSaksnummerMap.entrySet()) {
             var fagsakId = fagsakIdOgSaksnummerEntry.getKey();
@@ -122,7 +122,7 @@ public class FeilFordelingGradertTilsynVurdererTask implements ProsessTaskHandle
 
     }
 
-    private DataDumpGrunnlag kallKalkulusOgMapDiff(Behandling sisteBehandling, Uttaksplan uttaksplan, List<DatoIntervallEntitet> perioderMedForventetEndring) {
+    private DataDumpSimulertUtbetaling kallKalkulusOgMapDiff(Behandling sisteBehandling, Uttaksplan uttaksplan, List<DatoIntervallEntitet> perioderMedForventetEndring) {
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(sisteBehandling.getId());
 
         var vilkårsperioder = vilkårene.flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR))
@@ -156,7 +156,7 @@ public class FeilFordelingGradertTilsynVurdererTask implements ProsessTaskHandle
 
         var endretPeriodeListeRespons = kalkulusRestKlient.simulerFastsettMedOppdatertUttak(request);
         var mappetSimulertDiff = mapKalkulusRespons(endretPeriodeListeRespons, request);
-        return new DataDumpGrunnlag(sisteBehandling.getId(), mappetSimulertDiff);
+        return new DataDumpSimulertUtbetaling(sisteBehandling.getId(), mappetSimulertDiff);
     }
 
     private static List<DumpSimulertUtbetalingDiff> mapKalkulusRespons(EndretPeriodeListeRespons endretPeriodeListeRespons, OppdaterYtelsesspesifiktGrunnlagListeRequest request) {

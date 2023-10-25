@@ -13,11 +13,11 @@ import jakarta.persistence.Table;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 
 @Entity(name = "DataDumpGrunnlag")
-@Table(name = "DUMP_GR")
-public class DataDumpGrunnlag extends BaseEntitet {
+@Table(name = "DUMP_SIMULERT_UTB")
+public class DataDumpSimulertUtbetaling extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_DUMP_GR")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_DUMP_SIMULERT_UTB")
     private Long id;
 
     @Column(name = "behandling_id", nullable = false, updatable = false)
@@ -27,11 +27,11 @@ public class DataDumpGrunnlag extends BaseEntitet {
     @JoinColumn(name = "dump_grunnlag_id", nullable = false, updatable = false)
     private List<DumpSimulertUtbetalingDiff> simulertUtbetalingListe;
 
-    public DataDumpGrunnlag() {
+    public DataDumpSimulertUtbetaling() {
     }
 
-    public DataDumpGrunnlag(Long behandlingId,
-                            List<DumpSimulertUtbetalingDiff> simulertUtbetalingListe) {
+    public DataDumpSimulertUtbetaling(Long behandlingId,
+                                      List<DumpSimulertUtbetalingDiff> simulertUtbetalingListe) {
         this.behandlingId = behandlingId;
         this.simulertUtbetalingListe = simulertUtbetalingListe;
     }
