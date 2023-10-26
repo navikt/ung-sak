@@ -43,6 +43,7 @@ public class BehandlingÅrsakUtlederOmsorgspengerGrunnlag implements Behandling�
         Set<OppgittFraværPeriode> fraværFraSøknad1 = hentFraværFraSøknad(omsorgspengerGrunnlag1);
         Set<OppgittFraværPeriode> fraværFraSøknad2 = hentFraværFraSøknad(omsorgspengerGrunnlag2);
         if (!fraværFraSøknad1.equals(fraværFraSøknad2)) {
+            //ikke presist, vi kommer hit både ved endinger fra bruker, og hvis saksbehandler punsjer på vegne av bruker
             resultat.add(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER);
         }
         Set<OppgittFraværPeriode> korrigeringIm1 = hentKorrigeringIm(omsorgspengerGrunnlag1);
