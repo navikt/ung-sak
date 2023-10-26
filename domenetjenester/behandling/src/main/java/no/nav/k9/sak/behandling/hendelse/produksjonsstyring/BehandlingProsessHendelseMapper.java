@@ -59,7 +59,7 @@ public class BehandlingProsessHendelseMapper {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
     }
 
-    public BehandlingProsessHendelse getProduksjonstyringEventDto(EventHendelse eventHendelse, Behandling behandling, LocalDate vedtaksdato) {
+    public BehandlingProsessHendelse getProduksjonstyringEventDto(LocalDateTime eventTid, EventHendelse eventHendelse, Behandling behandling, LocalDate vedtaksdato) {
         Map<String, String> aksjonspunktKoderMedStatusListe = new HashMap<>();
         var fagsak = behandling.getFagsak();
         behandling.getAksjonspunkter().forEach(aksjonspunkt -> aksjonspunktKoderMedStatusListe.put(aksjonspunkt.getAksjonspunktDefinisjon().getKode(), aksjonspunkt.getStatus().getKode()));
@@ -69,7 +69,7 @@ public class BehandlingProsessHendelseMapper {
 
         return BehandlingProsessHendelse.builder()
             .medEksternId(behandling.getUuid())
-            .medEventTid(LocalDateTime.now())
+            .medEventTid(eventTid)
             .medVedtaksdato(vedtaksdato)
             .medFagsystem(Fagsystem.K9SAK)
             .medSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi())
@@ -124,7 +124,7 @@ public class BehandlingProsessHendelseMapper {
     }
 
     public BehandlingProsessHendelse getProduksjonstyringEventDto(EventHendelse eventHendelse, Behandling behandling) {
-        return getProduksjonstyringEventDto(eventHendelse, behandling, null);
+        return getProduksjonstyringEventDto(LocalDateTime.now(), eventHendelse, behandling, null);
     }
 
 
