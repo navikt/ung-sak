@@ -162,23 +162,24 @@ public class FeilFordelingGradertTilsynVurdererTask implements ProsessTaskHandle
     }
 
     private static List<DumpSimulertUtbetalingDiff> mapKalkulusRespons(EndretPeriodeListeRespons endretPeriodeListeRespons, OppdaterYtelsesspesifiktGrunnlagListeRequest request) {
-        return endretPeriodeListeRespons.getPerioderPrReferanse().stream().map(r ->
-            new DumpSimulertUtbetalingDiff(
-                r.getEksternReferanse(),
-                finnRequestJson(request, r.getEksternReferanse()), r.getPeriodedifferanser().stream().map(p ->
-                new DumpSimulertUtbetalingDiffPeriode(
-                    DatoIntervallEntitet.fraOgMedTilOgMed(p.getPeriode().getFom(), p.getPeriode().getTom()),
-                    p.getAndeldifferanser().stream().map(a -> new DumpSimulertUtbetalingDiffAndel(
-                        mapArbeidsgiver(a.getArbeidsgiver()),
-                        a.getGammelDagsats().intValue(),
-                        a.getNyDagsats().intValue(),
-                        a.getGammelDagsatsBruker().intValue(),
-                        a.getNyDagsatsBruker().intValue(),
-                        a.getGammelDagsatsArbeidsgiver().intValue(),
-                        a.getNyDagsatsArbeidsgiver().intValue()
+        return endretPeriodeListeRespons.getPerioderPrReferanse().stream()
+            .map(r ->
+                new DumpSimulertUtbetalingDiff(
+                    r.getEksternReferanse(),
+                    finnRequestJson(request, r.getEksternReferanse()), r.getPeriodedifferanser().stream().map(p ->
+                    new DumpSimulertUtbetalingDiffPeriode(
+                        DatoIntervallEntitet.fraOgMedTilOgMed(p.getPeriode().getFom(), p.getPeriode().getTom()),
+                        p.getAndeldifferanser().stream().map(a -> new DumpSimulertUtbetalingDiffAndel(
+                            mapArbeidsgiver(a.getArbeidsgiver()),
+                            a.getGammelDagsats().intValue(),
+                            a.getNyDagsats().intValue(),
+                            a.getGammelDagsatsBruker().intValue(),
+                            a.getNyDagsatsBruker().intValue(),
+                            a.getGammelDagsatsArbeidsgiver().intValue(),
+                            a.getNyDagsatsArbeidsgiver().intValue()
+                        )).toList()
                     )).toList()
-                )).toList()
-            )).toList();
+                )).toList();
     }
 
     private static String finnRequestJson(OppdaterYtelsesspesifiktGrunnlagListeRequest request, UUID eksternReferanse) {

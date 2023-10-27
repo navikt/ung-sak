@@ -24,7 +24,7 @@ public class DataDumpSimulertUtbetaling extends BaseEntitet {
     private Long behandlingId;
 
     @OneToMany
-    @JoinColumn(name = "dump_grunnlag_id", nullable = false, updatable = false)
+    @JoinColumn(name = "dump_grunnlag_id", nullable = true, updatable = false)
     private List<DumpSimulertUtbetalingDiff> simulertUtbetalingListe;
 
     public DataDumpSimulertUtbetaling() {
