@@ -8,7 +8,6 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BA
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.OVERSTYRING_FRISINN_OPPGITT_OPPTJENING;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +15,6 @@ import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
-import java.nio.charset.Charset;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -33,8 +31,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +60,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.core.StreamingOutput;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -588,47 +583,15 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         String path = "data_dump.csv";
 
         @SuppressWarnings("unchecked")
-        List<Tuple> results = query.getResultList();
+        Stream<Tuple> results = query.getResultStream();
 
+        var dataDump = CsvOutput.dumpResultSetToCsv(path, results);
 
-        if (results.isEmpty()) {
-            return Response.noContent().build();
-        }
-
-        var dataDump = CsvOutput.dumpResultSetToCsv(path, results)
-            .map(List::of);
-
-        var streamingOutput = dump(dataDump.orElse(List.of()));
-
-        return Response.ok(streamingOutput)
+        return dataDump.map(d -> Response.ok(d.getContent())
             .type(MediaType.APPLICATION_OCTET_STREAM)
             .header("Content-Disposition", String.format("attachment; filename=\"dump.zip\""))
-            .build();
+            .build()).orElse(Response.noContent().build());
     }
-
-    private void addToZip(ZipOutputStream zipOut, DumpOutput dump) {
-        var zipEntry = new ZipEntry("dump/" + dump.getPath());
-        try {
-            zipOut.putNextEntry(zipEntry);
-            zipOut.write(dump.getContent().getBytes(Charset.forName("UTF8")));
-            zipOut.closeEntry();
-        } catch (IOException e) {
-            throw new IllegalStateException("Kunne ikke zippe dump fra : " + dump, e);
-        }
-    }
-
-    private StreamingOutput dump(List<DumpOutput> outputs) {
-        StreamingOutput streamingOutput = outputStream -> {
-            try (ZipOutputStream zipOut = new ZipOutputStream(new BufferedOutputStream(outputStream));) {
-                outputs.forEach(dump -> addToZip(zipOut, dump));
-            } finally {
-                outputStream.flush();
-                outputStream.close();
-            }
-        };
-        return streamingOutput;
-    }
-
 
     private boolean harTomSøknadsperiode(PleipengerLivetsSluttfase pls) {
         return pls.getSøknadsperiodeList().isEmpty();
