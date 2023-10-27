@@ -1,4 +1,4 @@
-create table DUMP_SIMULERT_UTB
+create table if not exists DUMP_SIMULERT_UTB
 (
     ID            bigint                              not null PRIMARY KEY,
     BEHANDLING_ID bigint                              not null,
@@ -12,7 +12,7 @@ create table DUMP_SIMULERT_UTB
         foreign key (BEHANDLING_ID) references behandling
 );
 
-CREATE TABLE DUMP_SIMULERT_UTB_DIFF
+CREATE TABLE if not exists DUMP_SIMULERT_UTB_DIFF
 (
     ID                      bigint                              not null PRIMARY KEY,
     ekstern_referanse       bigint                              not null,
@@ -29,7 +29,7 @@ CREATE TABLE DUMP_SIMULERT_UTB_DIFF
         foreign key (dump_grunnlag_id) references DUMP_SIMULERT_UTB
 );
 
-CREATE TABLE DUMP_SIMULERT_UTB_DIFF_PERIODE
+CREATE TABLE if not exists DUMP_SIMULERT_UTB_DIFF_PERIODE
 (
     ID                                  bigint                              not null PRIMARY KEY,
     dump_simulert_utb_diff_id           bigint                              not null,
@@ -46,7 +46,7 @@ CREATE TABLE DUMP_SIMULERT_UTB_DIFF_PERIODE
         foreign key (dump_simulert_utb_diff_id) references DUMP_SIMULERT_UTB_DIFF
 );
 
-CREATE TABLE DUMP_SIMULERT_UTB_DIFF_ANDEL
+CREATE TABLE if not exists DUMP_SIMULERT_UTB_DIFF_ANDEL
 (
     ID                              bigint                              not null PRIMARY KEY,
     PERIODE_ID                      bigint,
