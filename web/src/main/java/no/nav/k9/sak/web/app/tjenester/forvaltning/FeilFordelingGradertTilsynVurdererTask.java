@@ -100,8 +100,10 @@ public class FeilFordelingGradertTilsynVurdererTask implements ProsessTaskHandle
 
     @Override
     public void doTask(ProsessTaskData pd) {
+        var query = entityManager.createQuery("Select b.fagsak.id from DataDumpGrunnlag dd inner join Behandling b on b.id = dd.behandlingId", Long.class);
+        List<Long> alleredeKjørteFagsaker = query.getResultList();
         String periode = pd.getPropertyValue(PERIODE_PROP_NAME);
-        var fagsakIdSaksnummerMap = hentFagsakIdOgSaksnummer(new Periode(periode));
+        var fagsakIdSaksnummerMap = hentFagsakIdOgSaksnummer(new Periode(periode), alleredeKjørteFagsaker);
 
 
         List<DataDumpSimulertUtbetaling> resultater = new ArrayList<>();
@@ -282,14 +284,15 @@ public class FeilFordelingGradertTilsynVurdererTask implements ProsessTaskHandle
         return aktivitetsgrad;
     }
 
-    public Map<Long, Saksnummer> hentFagsakIdOgSaksnummer(Periode periode) {
+    public Map<Long, Saksnummer> hentFagsakIdOgSaksnummer(Periode periode, List<Long> unntaksliste) {
         Query query;
 
         String sql = """
             select f.id, f.saksnummer from Fagsak f
              where f.ytelse_type = :ytelseType
                and upper(f.periode) > :fom
-               and lower(f.periode) < :tom)
+               and lower(f.periode) < :tom
+               and f.id not in :unntaksliste
               """;
 
         query = entityManager.createNativeQuery(sql); // NOSONAR
@@ -297,6 +300,7 @@ public class FeilFordelingGradertTilsynVurdererTask implements ProsessTaskHandle
         query.setParameter("ytelseType", FagsakYtelseType.PLEIEPENGER_SYKT_BARN.getKode());
         query.setParameter("fom", periode.getFom());
         query.setParameter("tom", periode.getTom());
+        query.setParameter("unntaksliste", unntaksliste);
 
         List<Object[]> result = query.getResultList();
 
