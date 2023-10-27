@@ -8,6 +8,7 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BA
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING;
 import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.OVERSTYRING_FRISINN_OPPGITT_OPPTJENING;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,6 +16,7 @@ import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,6 +33,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +48,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -59,6 +64,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.StreamingOutput;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -542,6 +548,81 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
         return Response.ok(saksnummerliste).build();
     }
+
+
+    @GET
+    @Path("/saker-med-feil5")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @Operation(description = "Henter saksnumre med feil.", summary = ("Henter saksnumre med feil."), tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    public Response hentSakerMedFeil5() {
+
+        var sql = """
+             select
+               gr.behandling_id
+                , cast(utb_diff.ekstern_referanse as varchar) ekstern_referanse
+                , utb_diff_periode.fom
+                , utb_diff_periode.tom
+                , utb_diff_periode_andel.arbeidsgiver_orgnr
+                , utb_diff_periode_andel.arbeidsgiver_aktor_id
+                , utb_diff_periode_andel
+                , utb_diff_periode_andel.dagsats_aktiv
+                , utb_diff_periode_andel.dagsats_simulert
+                , utb_diff_periode_andel.dagsats_bruker_aktiv
+                , utb_diff_periode_andel.dagsats_bruker_simulert
+                , utb_diff_periode_andel.dagsats_arbeidsgiver_aktiv
+                , utb_diff_periode_andel.dagsats_arbeidsgiver_simulert
+              from DUMP_SIMULERT_UTB gr
+                inner join DUMP_SIMULERT_UTB_DIFF utb_diff on gr.id = utb_diff.dump_grunnlag_id
+                inner join DUMP_SIMULERT_UTB_DIFF_PERIODE utb_diff_periode on utb_diff.id = utb_diff_periode.dump_simulert_utb_diff_id
+                inner join DUMP_SIMULERT_UTB_DIFF_ANDEL utb_diff_periode_andel on utb_diff_periode_andel.periode_id = utb_diff_periode.id
+            """;
+
+        var query = entityManager.createNativeQuery(sql, Tuple.class);
+        String path = "data_dump.csv";
+
+        @SuppressWarnings("unchecked")
+        List<Tuple> results = query.getResultList();
+
+
+        if (results.isEmpty()) {
+            return Response.noContent().build();
+        }
+
+        var dataDump = CsvOutput.dumpResultSetToCsv(path, results)
+            .map(List::of);
+
+        var streamingOutput = dump(dataDump.orElse(List.of()));
+
+        return Response.ok(streamingOutput)
+            .type(MediaType.APPLICATION_OCTET_STREAM)
+            .header("Content-Disposition", String.format("attachment; filename=\"dump.zip\""))
+            .build();
+    }
+
+    private void addToZip(ZipOutputStream zipOut, DumpOutput dump) {
+        var zipEntry = new ZipEntry("dump/" + dump.getPath());
+        try {
+            zipOut.putNextEntry(zipEntry);
+            zipOut.write(dump.getContent().getBytes(Charset.forName("UTF8")));
+            zipOut.closeEntry();
+        } catch (IOException e) {
+            throw new IllegalStateException("Kunne ikke zippe dump fra : " + dump, e);
+        }
+    }
+
+    private StreamingOutput dump(List<DumpOutput> outputs) {
+        StreamingOutput streamingOutput = outputStream -> {
+            try (ZipOutputStream zipOut = new ZipOutputStream(new BufferedOutputStream(outputStream));) {
+                outputs.forEach(dump -> addToZip(zipOut, dump));
+            } finally {
+                outputStream.flush();
+                outputStream.close();
+            }
+        };
+        return streamingOutput;
+    }
+
 
     private boolean harTomSøknadsperiode(PleipengerLivetsSluttfase pls) {
         return pls.getSøknadsperiodeList().isEmpty();
