@@ -26,6 +26,7 @@ import no.nav.folketrygdloven.kalkulus.kodeverk.YtelseTyperKalkulusStøtterKontr
 import no.nav.folketrygdloven.kalkulus.request.v1.forvaltning.OppdaterYtelsesspesifiktGrunnlagForRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.forvaltning.OppdaterYtelsesspesifiktGrunnlagListeRequest;
 import no.nav.folketrygdloven.kalkulus.response.v1.forvaltning.EndretPeriodeListeRespons;
+import no.nav.folketrygdloven.kalkulus.response.v1.forvaltning.PeriodeDifferanse;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
@@ -164,9 +165,8 @@ public class FeilFordelingGradertTilsynVurdererTask implements ProsessTaskHandle
     private static List<DumpSimulertUtbetalingDiff> mapKalkulusRespons(EndretPeriodeListeRespons endretPeriodeListeRespons, OppdaterYtelsesspesifiktGrunnlagListeRequest request) {
         return endretPeriodeListeRespons.getPerioderPrReferanse().stream()
             .map(r ->
-                new DumpSimulertUtbetalingDiff(
-                    r.getEksternReferanse(),
-                    finnRequestJson(request, r.getEksternReferanse()), r.getPeriodedifferanser().stream().map(p ->
+            {
+                var mappetPerioder = r.getPeriodedifferanser().stream().map(p ->
                     new DumpSimulertUtbetalingDiffPeriode(
                         DatoIntervallEntitet.fraOgMedTilOgMed(p.getPeriode().getFom(), p.getPeriode().getTom()),
                         p.getAndeldifferanser().stream().map(a -> new DumpSimulertUtbetalingDiffAndel(
@@ -177,9 +177,40 @@ public class FeilFordelingGradertTilsynVurdererTask implements ProsessTaskHandle
                             a.getNyDagsatsBruker().intValue(),
                             a.getGammelDagsatsArbeidsgiver().intValue(),
                             a.getNyDagsatsArbeidsgiver().intValue()
-                        )).toList()
-                    )).toList()
-                )).toList();
+                        )).toList(),
+                        finnTotalFeilBruker(p),
+                        finnTotalFeilArbeidsgiver(p)
+                    )).toList();
+                return new DumpSimulertUtbetalingDiff(
+                    r.getEksternReferanse(),
+                    finnRequestJson(request, r.getEksternReferanse()), mappetPerioder,
+                    mappetPerioder.stream().map(DumpSimulertUtbetalingDiffPeriode::getTotalFeilutbetalingBruker).reduce(Integer::sum).orElse(0),
+                    mappetPerioder.stream().map(DumpSimulertUtbetalingDiffPeriode::getTotalFeilutbetalingArbeidsgiver).reduce(Integer::sum).orElse(0)
+                );
+            }).toList();
+    }
+
+    private static int finnTotalFeilArbeidsgiver(PeriodeDifferanse p) {
+        var feilutbetalinger = p.getAndeldifferanser().stream().map(a -> a.getGammelDagsatsArbeidsgiver() - a.getNyDagsatsArbeidsgiver()).toList();
+        var positiveFeilutbetalinger = feilutbetalinger.stream().filter(f -> f > 0L)
+            .reduce(Long::sum)
+            .map(Long::intValue)
+            .orElse(0);
+        var negativeFeilutbetalinger = feilutbetalinger.stream().filter(f -> f < 0L)
+            .map(f -> f * -1)
+            .reduce(Long::sum)
+            .map(Long::intValue)
+            .orElse(0);
+        var feilutbetaltSats = positiveFeilutbetalinger > negativeFeilutbetalinger ? positiveFeilutbetalinger : negativeFeilutbetalinger;
+        return feilutbetaltSats * DatoIntervallEntitet.fraOgMedTilOgMed(p.getPeriode().getFom(), p.getPeriode().getTom()).antallArbeidsdager();
+    }
+
+    private static int finnTotalFeilBruker(PeriodeDifferanse p) {
+        return p.getAndeldifferanser().stream().map(a -> a.getGammelDagsatsBruker() - a.getNyDagsatsBruker())
+            .reduce(Long::sum)
+            .map(Long::intValue)
+            .map(sats -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getPeriode().getFom(), p.getPeriode().getTom()).antallArbeidsdager() * sats)
+            .orElse(0);
     }
 
     private static String finnRequestJson(OppdaterYtelsesspesifiktGrunnlagListeRequest request, UUID eksternReferanse) {

@@ -35,6 +35,12 @@ public class DumpSimulertUtbetalingDiff extends BaseEntitet {
     @JoinColumn(name = "dump_simulert_utb_diff_id", nullable = false, updatable = false)
     private List<DumpSimulertUtbetalingDiffPeriode> perioder;
 
+    @Column(name = "total_feilutbetaling_bruker", nullable = false)
+    private int totalFeilutbetalingBruker;
+
+    @Column(name = "total_feilutbetaling_arbeidsgiver", nullable = false)
+    private int totalFeilutbetalingArbeidsgiver;
+
 
     public DumpSimulertUtbetalingDiff() {
     }
@@ -43,5 +49,34 @@ public class DumpSimulertUtbetalingDiff extends BaseEntitet {
         this.eksternReferanse = eksternReferanse;
         this.kalkulusRequest = kalkulusRequest;
         this.perioder = perioder;
+    }
+
+
+    public DumpSimulertUtbetalingDiff(UUID eksternReferanse, String kalkulusRequest, List<DumpSimulertUtbetalingDiffPeriode> perioder, int totalFeilutbetalingBruker, int totalFeilutbetalingArbeidsgiver) {
+        this.eksternReferanse = eksternReferanse;
+        this.kalkulusRequest = kalkulusRequest;
+        this.perioder = perioder;
+        this.totalFeilutbetalingBruker = totalFeilutbetalingBruker;
+        this.totalFeilutbetalingArbeidsgiver = totalFeilutbetalingArbeidsgiver;
+    }
+
+    public UUID getEksternReferanse() {
+        return eksternReferanse;
+    }
+
+    public String getKalkulusRequest() {
+        return kalkulusRequest;
+    }
+
+    public List<DumpSimulertUtbetalingDiffPeriode> getPerioder() {
+        return perioder;
+    }
+
+    public int getTotalFeilutbetalingBruker() {
+        return totalFeilutbetalingBruker;
+    }
+
+    public int getTotalFeilutbetalingArbeidsgiver() {
+        return totalFeilutbetalingArbeidsgiver;
     }
 }

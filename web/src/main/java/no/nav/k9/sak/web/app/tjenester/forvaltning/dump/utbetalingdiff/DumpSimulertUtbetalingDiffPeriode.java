@@ -30,6 +30,12 @@ public class DumpSimulertUtbetalingDiffPeriode {
     @JoinColumn(name = "periode_id", nullable = false, updatable = false)
     private List<DumpSimulertUtbetalingDiffAndel> andeldiffliste;
 
+    @Column(name = "total_feilutbetaling_bruker", nullable = false)
+    private int totalFeilutbetalingBruker;
+
+    @Column(name = "total_feilutbetaling_arbeidsgiver", nullable = false)
+    private int totalFeilutbetalingArbeidsgiver;
+
 
     public DumpSimulertUtbetalingDiffPeriode() {
     }
@@ -39,7 +45,22 @@ public class DumpSimulertUtbetalingDiffPeriode {
         this.andeldiffliste = andeldiffliste;
     }
 
+    public DumpSimulertUtbetalingDiffPeriode(DatoIntervallEntitet periode, List<DumpSimulertUtbetalingDiffAndel> andeldiffliste, int totalFeilutbetalingBruker, int totalFeilutbetalingArbeidsgiver) {
+        this.periode = periode;
+        this.andeldiffliste = andeldiffliste;
+        this.totalFeilutbetalingBruker = totalFeilutbetalingBruker;
+        this.totalFeilutbetalingArbeidsgiver = totalFeilutbetalingArbeidsgiver;
+    }
+
     public DatoIntervallEntitet getPeriode() {
         return periode;
+    }
+
+    public int getTotalFeilutbetalingBruker() {
+        return totalFeilutbetalingBruker;
+    }
+
+    public int getTotalFeilutbetalingArbeidsgiver() {
+        return totalFeilutbetalingArbeidsgiver;
     }
 }

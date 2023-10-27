@@ -562,8 +562,12 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
              f.saksnummer
             , gr.behandling_id
                 , cast(utb_diff.ekstern_referanse as varchar) ekstern_referanse
+                , utb_diff.total_feilutbetaling_bruker
+                , utb_diff.total_feilutbetaling_arbeidsgiver
                 , utb_diff_periode.fom
                 , utb_diff_periode.tom
+                , utb_diff_periode.total_feilutbetaling_bruker
+                , utb_diff_periode.total_feilutbetaling_arbeidsgiver
                 , utb_diff_andel.dagsats_aktiv
                 , utb_diff_andel.dagsats_simulert
                 , utb_diff_andel.dagsats_bruker_aktiv

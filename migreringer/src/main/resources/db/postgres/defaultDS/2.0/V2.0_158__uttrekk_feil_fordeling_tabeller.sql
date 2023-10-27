@@ -16,8 +16,9 @@ CREATE TABLE DUMP_SIMULERT_UTB_DIFF
 (
     ID                      bigint                              not null PRIMARY KEY,
     ekstern_referanse       bigint                              not null,
-    skjaeringstidspunkt     DATE                                NOT NULL,
     kalkulus_request        JSONB                               NOT NULL,
+    total_feilutbetaling_bruker           BIGINT                              not null,
+    total_feilutbetaling_arbeidsgiver     BIGINT                              not null,
     dump_grunnlag_id        bigint                              not null,
     VERSJON                 bigint       default 0              not null,
     OPPRETTET_AV            VARCHAR(20)  default 'VL'           not null,
@@ -30,15 +31,17 @@ CREATE TABLE DUMP_SIMULERT_UTB_DIFF
 
 CREATE TABLE DUMP_SIMULERT_UTB_DIFF_PERIODE
 (
-    ID                          bigint                              not null PRIMARY KEY,
-    dump_simulert_utb_diff_id   bigint                              not null,
-    fom                         DATE                                not null,
-    tom                         DATE                                not null,
-    VERSJON                     bigint       default 0              not null,
-    OPPRETTET_AV                VARCHAR(20)  default 'VL'           not null,
-    OPPRETTET_TID               TIMESTAMP(3) default localtimestamp not null,
-    ENDRET_AV                   VARCHAR(20),
-    ENDRET_TID                  TIMESTAMP(3),
+    ID                                  bigint                              not null PRIMARY KEY,
+    dump_simulert_utb_diff_id           bigint                              not null,
+    fom                                 DATE                                not null,
+    tom                                 DATE                                not null,
+    total_feilutbetaling_bruker           BIGINT                              not null,
+    total_feilutbetaling_arbeidsgiver     BIGINT                              not null,
+    VERSJON                                 bigint       default 0              not null,
+    OPPRETTET_AV                        VARCHAR(20)  default 'VL'           not null,
+    OPPRETTET_TID                       TIMESTAMP(3) default localtimestamp not null,
+    ENDRET_AV                           VARCHAR(20),
+    ENDRET_TID                          TIMESTAMP(3),
     constraint FK_DUMP_SIMULERT_UTB_DIFF_PERIODE_01
         foreign key (dump_simulert_utb_diff_id) references DUMP_SIMULERT_UTB_DIFF
 );
