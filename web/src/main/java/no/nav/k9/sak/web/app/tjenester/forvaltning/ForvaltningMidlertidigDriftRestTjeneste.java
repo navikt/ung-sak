@@ -559,13 +559,11 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
         var sql = """
              select
-               gr.behandling_id
+             f.saksnummer
+            , gr.behandling_id
                 , cast(utb_diff.ekstern_referanse as varchar) ekstern_referanse
                 , utb_diff_periode.fom
                 , utb_diff_periode.tom
-                , utb_diff_andel.arbeidsgiver_orgnr
-                , utb_diff_andel.arbeidsgiver_aktor_id
-                , utb_diff_andel
                 , utb_diff_andel.dagsats_aktiv
                 , utb_diff_andel.dagsats_simulert
                 , utb_diff_andel.dagsats_bruker_aktiv
@@ -576,6 +574,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                 inner join DUMP_SIMULERT_UTB_DIFF utb_diff on gr.id = utb_diff.dump_grunnlag_id
                 inner join DUMP_SIMULERT_UTB_DIFF_PERIODE utb_diff_periode on utb_diff.id = utb_diff_periode.dump_simulert_utb_diff_id
                 inner join DUMP_SIMULERT_UTB_DIFF_ANDEL utb_diff_andel on utb_diff_andel.periode_id = utb_diff_periode.id
+                inner join BEHANDLING b on b.id = gr.behandling_id
+                inner join FAGSAK f on b.fagsak_id = f.id
                 where utb_diff_andel.dagsats_bruker_aktiv != utb_diff_andel.dagsats_bruker_simulert
                 or utb_diff_andel.dagsats_arbeidsgiver_aktiv != utb_diff_andel.dagsats_arbeidsgiver_simulert
             """;
