@@ -61,6 +61,7 @@ public class BehandlingDtoUtil {
         }
 
         dto.setFagsakId(behandling.getFagsakId());
+        dto.setSakstype(behandling.getFagsakYtelseType());
         dto.setId(behandling.getId());
         dto.setUuid(behandling.getUuid());
         dto.setVersjon(behandling.getVersjon());
