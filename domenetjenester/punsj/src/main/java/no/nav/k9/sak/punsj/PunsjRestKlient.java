@@ -71,7 +71,7 @@ public class PunsjRestKlient {
     }
 
     @Inject
-    public PunsjRestKlient(OidcRestClient restClient,
+    public PunsjRestKlient(SystemUserOidcRestClient restClient,
                            @KonfigVerdi(value = "k9.punsj.url") URI endpoint) {
         this(endpoint);
         this.restClient = restClient;
