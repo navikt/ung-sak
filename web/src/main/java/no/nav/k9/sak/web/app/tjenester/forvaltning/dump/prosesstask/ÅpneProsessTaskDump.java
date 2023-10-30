@@ -34,6 +34,7 @@ public class ÅpneProsessTaskDump implements DebugDumpFagsak {
             + "select f.saksnummer"
             + ", ft.behandling_id"
             + ", ft.gruppe_sekvensnr"
+            + ", t.id as task_id"
             + ", t.task_type "
             + ", t.status"
             + ", t.task_gruppe"
