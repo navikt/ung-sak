@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -19,6 +20,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import jakarta.persistence.criteria.CriteriaQuery;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusRestKlient;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PleiepengerSyktBarnGrunnlag;
 import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
@@ -30,6 +32,7 @@ import no.nav.folketrygdloven.kalkulus.response.v1.forvaltning.PeriodeDifferanse
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.prosesstask.api.ProsessTask;
@@ -43,6 +46,7 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRep
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Periode;
@@ -102,7 +106,7 @@ public class FeilFordelingGradertTilsynVurdererTask implements ProsessTaskHandle
     @Override
     public void doTask(ProsessTaskData pd) {
         var query = entityManager.createQuery("Select b.fagsak.id from DataDumpGrunnlag dd inner join Behandling b on b.id = dd.behandlingId", Long.class);
-        List<Long> alleredeKjørteFagsaker = query.getResultList();
+        Set<Long> alleredeKjørteFagsaker = query.getResultStream().collect(Collectors.toSet());
         String periode = pd.getPropertyValue(PERIODE_PROP_NAME);
         var fagsakIdSaksnummerMap = hentFagsakIdOgSaksnummer(new Periode(periode), alleredeKjørteFagsaker);
 
@@ -113,7 +117,7 @@ public class FeilFordelingGradertTilsynVurdererTask implements ProsessTaskHandle
             var fagsakId = fagsakIdOgSaksnummerEntry.getKey();
             var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId).orElseThrow();
             var beregningsresultatEntitet = beregningsresultatRepository.hentEndeligBeregningsresultat(sisteBehandling.getId());
-            var uttaksplan = uttakRestKlient.hentUttaksplan(sisteBehandling.getUuid(), true);
+            var uttaksplan = uttakRestKlient.hentUttaksplan(sisteBehandling.getUuid(), false);
             var perioderMedForventetEndring = finnPerioderMedForventetEndring(beregningsresultatEntitet, uttaksplan);
             if (!perioderMedForventetEndring.isEmpty()) {
                 var dataDumpGrunnlag = kallKalkulusOgMapDiff(sisteBehandling, uttaksplan, perioderMedForventetEndring);
@@ -122,6 +126,7 @@ public class FeilFordelingGradertTilsynVurdererTask implements ProsessTaskHandle
         }
 
         resultater.forEach(entityManager::persist);
+        entityManager.flush();
 
     }
 
@@ -316,7 +321,7 @@ public class FeilFordelingGradertTilsynVurdererTask implements ProsessTaskHandle
         return aktivitetsgrad;
     }
 
-    public Map<Long, Saksnummer> hentFagsakIdOgSaksnummer(Periode periode, List<Long> unntaksliste) {
+    public Map<Long, Saksnummer> hentFagsakIdOgSaksnummer(Periode periode, Set<Long> unntaksliste) {
         Query query;
 
         String sql = """
@@ -324,15 +329,23 @@ public class FeilFordelingGradertTilsynVurdererTask implements ProsessTaskHandle
              where f.ytelse_type = :ytelseType
                and upper(f.periode) > :fom
                and lower(f.periode) < :tom
-               and f.id not in :unntaksliste
               """;
+
+        if (!unntaksliste.isEmpty()) {
+            sql = sql + " and f.id not in (:unntaksliste)";
+        }
+
 
         query = entityManager.createNativeQuery(sql); // NOSONAR
 
         query.setParameter("ytelseType", FagsakYtelseType.PLEIEPENGER_SYKT_BARN.getKode());
         query.setParameter("fom", periode.getFom());
         query.setParameter("tom", periode.getTom());
-        query.setParameter("unntaksliste", unntaksliste);
+
+        if (!unntaksliste.isEmpty()) {
+            query.setParameter("unntaksliste", unntaksliste);
+        }
+
 
         List<Object[]> result = query.getResultList();
 

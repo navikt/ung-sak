@@ -561,8 +561,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                 , utb_diff.total_feilutbetaling_arbeidsgiver
                 , utb_diff_periode.fom
                 , utb_diff_periode.tom
-                , utb_diff_periode.total_feilutbetaling_bruker
-                , utb_diff_periode.total_feilutbetaling_arbeidsgiver
+                , utb_diff_periode.total_feilutbetaling_bruker as total_feilutbetaling_bruker_periode
+                , utb_diff_periode.total_feilutbetaling_arbeidsgiver as total_feilutbetaling_arbeidsgiver_periode
                 , utb_diff_andel.dagsats_aktiv
                 , utb_diff_andel.dagsats_simulert
                 , utb_diff_andel.dagsats_bruker_aktiv
@@ -589,7 +589,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
         return dataDump.map(d -> Response.ok(d.getContent())
             .type(MediaType.APPLICATION_OCTET_STREAM)
-            .header("Content-Disposition", String.format("attachment; filename=\"dump.zip\""))
+            .header("Content-Disposition", String.format("attachment; filename=\"dump.csv\""))
             .build()).orElse(Response.noContent().build());
     }
 

@@ -15,7 +15,7 @@ create table if not exists DUMP_SIMULERT_UTB
 CREATE TABLE if not exists DUMP_SIMULERT_UTB_DIFF
 (
     ID                      bigint                              not null PRIMARY KEY,
-    ekstern_referanse       bigint                              not null,
+    ekstern_referanse       uuid                              not null,
     kalkulus_request        JSONB                               NOT NULL,
     total_feilutbetaling_bruker           BIGINT                              not null,
     total_feilutbetaling_arbeidsgiver     BIGINT                              not null,

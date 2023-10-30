@@ -4,6 +4,7 @@ import java.util.List;
 
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -26,8 +27,8 @@ public class DumpSimulertUtbetalingDiffPeriode {
     @Embedded
     private DatoIntervallEntitet periode;
 
-    @OneToMany
     @JoinColumn(name = "periode_id", nullable = false, updatable = false)
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     private List<DumpSimulertUtbetalingDiffAndel> andeldiffliste;
 
     @Column(name = "total_feilutbetaling_bruker", nullable = false)

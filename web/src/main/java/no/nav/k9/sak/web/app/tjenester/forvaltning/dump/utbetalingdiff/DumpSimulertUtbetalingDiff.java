@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.hibernate.annotations.ColumnTransformer;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -31,8 +32,8 @@ public class DumpSimulertUtbetalingDiff extends BaseEntitet {
     @Column(name = "kalkulus_request", nullable = false, updatable = false)
     private String kalkulusRequest;
 
-    @OneToMany
     @JoinColumn(name = "dump_simulert_utb_diff_id", nullable = false, updatable = false)
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     private List<DumpSimulertUtbetalingDiffPeriode> perioder;
 
     @Column(name = "total_feilutbetaling_bruker", nullable = false)

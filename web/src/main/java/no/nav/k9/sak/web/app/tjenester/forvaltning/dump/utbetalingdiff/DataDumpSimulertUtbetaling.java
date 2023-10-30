@@ -1,7 +1,9 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.dump.utbetalingdiff;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -23,9 +25,9 @@ public class DataDumpSimulertUtbetaling extends BaseEntitet {
     @Column(name = "behandling_id", nullable = false, updatable = false)
     private Long behandlingId;
 
-    @OneToMany
-    @JoinColumn(name = "dump_grunnlag_id", nullable = true, updatable = false)
-    private List<DumpSimulertUtbetalingDiff> simulertUtbetalingListe;
+    @JoinColumn(name = "dump_grunnlag_id", nullable = false, updatable = false)
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
+    private List<DumpSimulertUtbetalingDiff> simulertUtbetalingListe = new ArrayList<>();
 
     public DataDumpSimulertUtbetaling() {
     }
