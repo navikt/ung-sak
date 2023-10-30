@@ -37,7 +37,6 @@ import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler.ObjectReaderResponseHandler;
-import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIderDto;
@@ -71,7 +70,7 @@ public class PunsjRestKlient {
     }
 
     @Inject
-    public PunsjRestKlient(SystemUserOidcRestClient restClient,
+    public PunsjRestKlient(OidcRestClient restClient,
                            @KonfigVerdi(value = "k9.punsj.url") URI endpoint) {
         this(endpoint);
         this.restClient = restClient;
