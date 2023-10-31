@@ -30,6 +30,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRevurderingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.mottak.Behandlingsoppretter;
 import no.nav.k9.sak.mottak.inntektsmelding.MottattInntektsmeldingException;
 
@@ -43,7 +44,9 @@ public class InnhentDokumentTjeneste {
     private final BehandlingRepository behandlingRepository;
     private final BehandlingLåsRepository behandlingLåsRepository;
     private final BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
-    private final ProsessTaskTjeneste taskRepository;
+    private final ProsessTaskTjeneste prosessTaskTjeneste;
+    private final FagsakProsessTaskRepository fagsakProsessTaskRepository;
+
 
     @Inject
     public InnhentDokumentTjeneste(@Any Instance<Dokumentmottaker> mottakere,
@@ -51,7 +54,8 @@ public class InnhentDokumentTjeneste {
                                    Behandlingsoppretter behandlingsoppretter,
                                    BehandlingRepositoryProvider repositoryProvider,
                                    BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
-                                   ProsessTaskTjeneste taskRepository) {
+                                   ProsessTaskTjeneste prosessTaskTjeneste,
+                                   FagsakProsessTaskRepository fagsakProsessTaskRepository) {
         this.mottakere = mottakere;
         this.dokumentMottakerFelles = dokumentMottakerFelles;
         this.behandlingsoppretter = behandlingsoppretter;
@@ -59,7 +63,8 @@ public class InnhentDokumentTjeneste {
         this.revurderingRepository = repositoryProvider.getBehandlingRevurderingRepository();
         this.behandlingLåsRepository = repositoryProvider.getBehandlingLåsRepository();
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
-        this.taskRepository = taskRepository;
+        this.prosessTaskTjeneste = prosessTaskTjeneste;
+        this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
     }
 
     public void mottaDokument(Fagsak fagsak, Collection<MottattDokument> mottattDokument) {
@@ -89,7 +94,7 @@ public class InnhentDokumentTjeneste {
             throw new IllegalStateException("Det er planlagt kjøringer som ikke har garantert rekkefølge. Sjekk oversikt over ventende tasker for eventuelt avbryte disse.");
         }
         // Lagrer tasks til slutt for å sikre at disse blir kjørt etter at dokumentasjon er lagret
-        taskRepository.lagre(taskGruppe);
+        prosessTaskTjeneste.lagre(taskGruppe);
     }
 
     private ProsessTaskData restartBehandling(Behandling behandling, BehandlingÅrsakType behandlingÅrsak) {
@@ -133,6 +138,7 @@ public class InnhentDokumentTjeneste {
                 }
             } else {
                 sjekkBehandlingKanHoppesTilbake(sisteBehandling);
+                sjekkBehandlingHarIkkeÅpneTasks(sisteBehandling);
                 return BehandlingMedOpprettelseResultat.eksisterendeBehandling(sisteBehandling);
             }
         }
@@ -190,6 +196,14 @@ public class InnhentDokumentTjeneste {
         }
     }
 
+    private void sjekkBehandlingHarIkkeÅpneTasks(Behandling behandling) {
+        var åpneTasks = fagsakProsessTaskRepository.finnAlleÅpneTasksForAngittSøk(behandling.getFagsakId(), behandling.getId(), null);
+        if (!åpneTasks.isEmpty()) {
+            //behandlingen har åpne tasks og mottak av dokument kan føre til parallelle prosesser som går i beina på hverandre
+            throw MottattInntektsmeldingException.FACTORY.behandlingPågårAvventerKnytteMottattDokumentTilBehandling(behandling.getId());
+        }
+    }
+
     private Dokumentmottaker getDokumentmottaker(Brevkode brevkode, Fagsak fagsak) {
         return finnMottaker(brevkode, fagsak.getYtelseType());
     }
@@ -203,8 +217,8 @@ public class InnhentDokumentTjeneste {
     }
 
     private static class BehandlingMedOpprettelseResultat {
-        private Behandling behandling;
-        private boolean nyopprettet;
+        private final Behandling behandling;
+        private final boolean nyopprettet;
 
         private BehandlingMedOpprettelseResultat(Behandling behandling, boolean nyopprettet) {
             this.behandling = behandling;
