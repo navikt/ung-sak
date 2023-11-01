@@ -40,7 +40,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <felles.version>2.0.12</felles.version>
+        <felles.version>2.0.14</felles.version>
         <swagger.version>2.2.17</swagger.version>
         <junit.version>5.10.0</junit.version>
         <k9format.version>9.0.5</k9format.version>
@@ -156,7 +156,7 @@
             <dependency>
                 <groupId>no.nav.folketrygdloven.kalkulus</groupId>
                 <artifactId>kalkulus-kontrakt-jakarta</artifactId>
-                <version>2.6.0</version>
+                <version>2.6.1</version>
             </dependency>
 
             <dependency>
@@ -485,7 +485,7 @@
             <dependency>
                 <groupId>org.glassfish.jaxb</groupId>
                 <artifactId>jaxb-runtime</artifactId>
-                <version>4.0.3</version>
+                <version>4.0.4</version>
             </dependency>
             <dependency>
                 <groupId>org.xerial.snappy</groupId>
@@ -504,7 +504,7 @@
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
-                <version>2.14.0</version>
+                <version>2.15.0</version>
             </dependency>
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->
@@ -661,7 +661,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.6.0</version>
+                    <version>3.6.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -671,7 +671,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-clean-plugin</artifactId>
-                    <version>3.3.1</version>
+                    <version>3.3.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -703,12 +703,12 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.1.2</version>
+                    <version>3.2.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>3.1.2</version>
+                    <version>3.2.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

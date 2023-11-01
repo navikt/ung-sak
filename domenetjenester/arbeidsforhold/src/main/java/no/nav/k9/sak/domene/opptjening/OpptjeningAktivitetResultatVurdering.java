@@ -1,12 +1,10 @@
-package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
+package no.nav.k9.sak.domene.opptjening;
 
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetKlassifisering;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningAktivitet;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
-import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurdering;
-import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.VurderStatusInput;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 

@@ -177,7 +177,7 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
             .crossJoin(implisttAvslås, StandardCombinators::coalesceLeftHandSide)
             .compress();
 
-        validerMuligEndring(utfallOgÅrsakForrigeBehandling, utfallOgAvslagsårsakNå);
+        validerEndringKanIverskettesMotOmsorgsdager(utfallOgÅrsakForrigeBehandling, sammenslåttUtfall);
 
         for (LocalDateSegment<UtfallOgAvslagsårsak> utfallOgÅrsak : sammenslåttUtfall) {
             vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(utfallOgÅrsak.getFom(), utfallOgÅrsak.getTom())
@@ -189,10 +189,10 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
         return OppdateringResultat.nyttResultat();
     }
 
-    private void validerMuligEndring(LocalDateTimeline<UtfallOgAvslagsårsak> utfallOgÅrsakForrigeBehandling, LocalDateTimeline<UtfallOgAvslagsårsak> utfallOgAvslagsårsakNå) {
+    private void validerEndringKanIverskettesMotOmsorgsdager(LocalDateTimeline<UtfallOgAvslagsårsak> utfallOgÅrsakForrigeBehandling, LocalDateTimeline<UtfallOgAvslagsårsak> utfallOgAvslagsårsakDenneBehandling) {
         LocalDateTimeline<Utfall> utfallFør = utfallOgÅrsakForrigeBehandling.mapValue(UtfallOgAvslagsårsak::utfall).compress();
-        LocalDateTimeline<Utfall> utfallNå = utfallOgAvslagsårsakNå.mapValue(UtfallOgAvslagsårsak::utfall).compress();
-        LocalDateTimeline<Utfall> endretUtfall = utfallNå.crossJoin(utfallFør, this::endretUtfall).compress();
+        LocalDateTimeline<Utfall> utfallNå = utfallOgAvslagsårsakDenneBehandling.mapValue(UtfallOgAvslagsårsak::utfall).compress();
+        LocalDateTimeline<Utfall> endretUtfall = utfallNå.combine(utfallFør, this::endretUtfall, LocalDateTimeline.JoinStyle.LEFT_JOIN).compress();
         if (endretUtfall.size() > 1) {
             throw new IllegalArgumentException("Bare støttet å gjøre en endring i hver behandling. Har endringer i følgende perioder: " + String.join(", ", endretUtfall.stream().map(segment -> segment.getFom() + "/" + segment.getTom()).toList()));
         }
@@ -200,7 +200,7 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
 
     private LocalDateSegment<Utfall> endretUtfall(LocalDateInterval intervall, LocalDateSegment<Utfall> nyttUtfall, LocalDateSegment<Utfall> gammeltUtfall) {
         Utfall nyVerdi = nyttUtfall.getValue();
-        Utfall gammelVerdi = gammeltUtfall != null ? gammeltUtfall.getValue() : Utfall.IKKE_OPPFYLT; //ikke-innvilget i gammel tidslinje har samme effekt som IKKE_OPPFYLT
+        Utfall gammelVerdi = gammeltUtfall != null ? gammeltUtfall.getValue() : Utfall.IKKE_OPPFYLT; //ikke-innvilget har samme effekt som IKKE_OPPFYLT
         return nyVerdi != gammelVerdi ? new LocalDateSegment<>(intervall, nyVerdi) : null;
     }
 

@@ -70,7 +70,7 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
 
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
-        if (1==1 || brukPeriodisertRammevedtak) {
+        if (brukPeriodisertRammevedtak) {
             håndterAktuellOgTilpassTidligerePerioder(prosessTaskData);
         } else {
             håndterAktuellPeriode(prosessTaskData);

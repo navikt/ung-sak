@@ -44,6 +44,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -541,6 +542,55 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         final String saksnummerliste = saksnumre.stream().reduce((a, b) -> a + ", " + b).orElse("");
 
         return Response.ok(saksnummerliste).build();
+    }
+
+
+    @GET
+    @Path("/saker-med-feil5")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @Operation(description = "Henter saksnumre med feil.", summary = ("Henter saksnumre med feil."), tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    public Response hentSakerMedFeil5() {
+
+        var sql = """
+             select
+             f.saksnummer
+            , gr.behandling_id
+                , cast(utb_diff.ekstern_referanse as varchar) ekstern_referanse
+                , utb_diff.total_feilutbetaling_bruker
+                , utb_diff.total_feilutbetaling_arbeidsgiver
+                , utb_diff_periode.fom
+                , utb_diff_periode.tom
+                , utb_diff_periode.total_feilutbetaling_bruker as total_feilutbetaling_bruker_periode
+                , utb_diff_periode.total_feilutbetaling_arbeidsgiver as total_feilutbetaling_arbeidsgiver_periode
+                , utb_diff_andel.dagsats_aktiv
+                , utb_diff_andel.dagsats_simulert
+                , utb_diff_andel.dagsats_bruker_aktiv
+                , utb_diff_andel.dagsats_bruker_simulert
+                , utb_diff_andel.dagsats_arbeidsgiver_aktiv
+                , utb_diff_andel.dagsats_arbeidsgiver_simulert
+              from DUMP_SIMULERT_UTB gr
+                inner join DUMP_SIMULERT_UTB_DIFF utb_diff on gr.id = utb_diff.dump_grunnlag_id
+                inner join DUMP_SIMULERT_UTB_DIFF_PERIODE utb_diff_periode on utb_diff.id = utb_diff_periode.dump_simulert_utb_diff_id
+                inner join DUMP_SIMULERT_UTB_DIFF_ANDEL utb_diff_andel on utb_diff_andel.periode_id = utb_diff_periode.id
+                inner join BEHANDLING b on b.id = gr.behandling_id
+                inner join FAGSAK f on b.fagsak_id = f.id
+                where utb_diff_andel.dagsats_bruker_aktiv != utb_diff_andel.dagsats_bruker_simulert
+                or utb_diff_andel.dagsats_arbeidsgiver_aktiv != utb_diff_andel.dagsats_arbeidsgiver_simulert
+            """;
+
+        var query = entityManager.createNativeQuery(sql, Tuple.class);
+        String path = "data_dump.csv";
+
+        @SuppressWarnings("unchecked")
+        Stream<Tuple> results = query.getResultStream();
+
+        var dataDump = CsvOutput.dumpResultSetToCsv(path, results);
+
+        return dataDump.map(d -> Response.ok(d.getContent())
+            .type(MediaType.APPLICATION_OCTET_STREAM)
+            .header("Content-Disposition", String.format("attachment; filename=\"dump.csv\""))
+            .build()).orElse(Response.noContent().build());
     }
 
     private boolean harTomSøknadsperiode(PleipengerLivetsSluttfase pls) {
