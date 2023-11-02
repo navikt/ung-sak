@@ -8,15 +8,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.FastsettPGIPeriodeTjeneste;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAvklaringsbehovDefinisjon;
+import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 
@@ -29,21 +41,32 @@ public class RyddOgGjenopprettBeregningTjeneste {
     private final BeregningsgrunnlagTjeneste kalkulusTjeneste;
     private final VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
     private final FastsettPGIPeriodeTjeneste fastsettPGIPeriodeTjeneste;
+    private final VilkårResultatRepository vilkårResultatRepository;
+    private final Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste;
+
+    private final boolean enableFjernPerioder;
 
     @Inject
     public RyddOgGjenopprettBeregningTjeneste(BehandlingRepository behandlingRepository,
                                               BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                               BeregningsgrunnlagTjeneste kalkulusTjeneste,
-                                              VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider, FastsettPGIPeriodeTjeneste fastsettPGIPeriodeTjeneste) {
+                                              VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider, FastsettPGIPeriodeTjeneste fastsettPGIPeriodeTjeneste,
+                                              VilkårResultatRepository vilkårResultatRepository,
+                                              @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste,
+                                              @KonfigVerdi(value = "FJERN_VILKÅRSPERIODER_BEREGNING", defaultVerdi = "false") boolean enableFjernPerioder) {
         this.behandlingRepository = behandlingRepository;
 
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
         this.fastsettPGIPeriodeTjeneste = fastsettPGIPeriodeTjeneste;
+        this.vilkårResultatRepository = vilkårResultatRepository;
+        this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
+        this.enableFjernPerioder = enableFjernPerioder;
     }
 
-    /** Resetter beregning til å vurderes på nytt
+    /**
+     * Resetter beregning til å vurderes på nytt
      *
      * @param kontekst Behandlingskontrollkontekst
      */
@@ -72,6 +95,69 @@ public class RyddOgGjenopprettBeregningTjeneste {
     public void deaktiverAvslåtteEllerFjernetPerioder(BehandlingReferanse referanse) {
         // deaktiverer grunnlag for referanser som er avslått eller inaktive (fjernet skjæringstidspunkt)
         kalkulusTjeneste.deaktiverBeregningsgrunnlagForAvslåttEllerFjernetPeriode(referanse);
+    }
+
+    /**
+     * Fjerner perioder som er avslått i definerende vilkår no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste#definerendeVilkår() og initierer perioder som er innvilget dersom de ikke eksisterer
+     * <p>
+     *
+     * @param behandlingReferanse Behandlingsreferanse
+     */
+    public void fjernEllerInitierPerioderFraDefinerendeVilkår(BehandlingReferanse behandlingReferanse) {
+        if (!enableFjernPerioder) {
+            return;
+        }
+        Vilkårene vilkårene = vilkårResultatRepository.hent(behandlingReferanse.getBehandlingId());
+        var tilVurderingTjeneste = getPerioderTilVurderingTjeneste(behandlingReferanse);
+        VilkårResultatBuilder resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene)
+            .medKantIKantVurderer(tilVurderingTjeneste.getKantIKantVurderer());
+        VilkårBuilder vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+
+        fjernAvslåtte(tilVurderingTjeneste, vilkårene, vilkårBuilder);
+        leggerTilTidligereFjernet(behandlingReferanse, tilVurderingTjeneste, vilkårene, vilkårBuilder);
+
+
+        resultatBuilder.leggTil(vilkårBuilder, true);
+        vilkårResultatRepository.lagre(behandlingReferanse.getBehandlingId(), resultatBuilder.build());
+
+    }
+
+    private static void leggerTilTidligereFjernet(BehandlingReferanse behandlingReferanse, VilkårsPerioderTilVurderingTjeneste tilVurderingTjeneste, Vilkårene vilkårene, VilkårBuilder vilkårBuilder) {
+        var innvilgetPerioder = tilVurderingTjeneste.definerendeVilkår().stream().flatMap(v -> vilkårene.getVilkår(v).stream())
+            .flatMap(v -> v.getPerioder().stream().filter(p -> p.getGjeldendeUtfall().equals(Utfall.OPPFYLT)).map(VilkårPeriode::getPeriode))
+            .collect(Collectors.toCollection(TreeSet::new));
+
+
+        var perioderPrVilkårstype = tilVurderingTjeneste.utledRådataTilUtledningAvVilkårsperioder(behandlingReferanse.getBehandlingId());
+
+        var perioderTilVurderingIBeregning = perioderPrVilkårstype.get(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+
+        var innvilgetPerioderTilVurdering = perioderTilVurderingIBeregning.stream().filter(p ->
+            innvilgetPerioder.stream().anyMatch(p::equals)).collect(Collectors.toSet());
+
+
+        var bgVilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow(() -> new IllegalStateException("Hadde ikke Beregningsgrunnlagvilkår"));
+        var bgPerioderSomGjenopprettes = bgVilkår.getPerioder().stream().map(VilkårPeriode::getPeriode)
+            .filter(p -> innvilgetPerioderTilVurdering.stream().noneMatch(p::equals))
+            .toList();
+
+        log.info("Legger til perioder for vurdering i beregning: " + bgPerioderSomGjenopprettes);
+
+        bgPerioderSomGjenopprettes.stream().map(p -> vilkårBuilder.hentBuilderFor(p).medUtfall(Utfall.IKKE_VURDERT)).forEach(vilkårBuilder::leggTil);
+    }
+
+    private static void fjernAvslåtte(VilkårsPerioderTilVurderingTjeneste tilVurderingTjeneste, Vilkårene vilkårene, VilkårBuilder vilkårBuilder) {
+        var avslåttePerioder = tilVurderingTjeneste.definerendeVilkår().stream().flatMap(v -> vilkårene.getVilkår(v).stream())
+            .flatMap(v -> v.getPerioder().stream().filter(p -> p.getGjeldendeUtfall().equals(Utfall.IKKE_OPPFYLT)).map(VilkårPeriode::getPeriode))
+            .collect(Collectors.toCollection(TreeSet::new));
+
+        var bgVilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow(() -> new IllegalStateException("Hadde ikke Beregningsgrunnlagvilkår"));
+        var bgPerioderSomFjernes = bgVilkår.getPerioder().stream().filter(p -> p.getGjeldendeUtfall().equals(Utfall.IKKE_VURDERT)).map(VilkårPeriode::getPeriode).filter(p -> avslåttePerioder.stream().anyMatch(p::overlapper))
+            .toList();
+
+        log.info("Fjerner perioder for vurdering i beregning: " + bgPerioderSomFjernes);
+
+        bgPerioderSomFjernes.forEach(vilkårBuilder::tilbakestill);
     }
 
 
@@ -114,5 +200,11 @@ public class RyddOgGjenopprettBeregningTjeneste {
             .collect(Collectors.toCollection(TreeSet::new));
         beregningsgrunnlagVilkårTjeneste.ryddVedtaksresultatOgVilkår(kontekst, alleUnntattForlengelser);
     }
+
+    private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(BehandlingReferanse ref) {
+        return BehandlingTypeRef.Lookup.find(VilkårsPerioderTilVurderingTjeneste.class, perioderTilVurderingTjeneste, ref.getFagsakYtelseType(), ref.getBehandlingType())
+            .orElseThrow(() -> new UnsupportedOperationException("VilkårsPerioderTilVurderingTjeneste ikke implementert for ytelse [" + ref.getFagsakYtelseType() + "], behandlingtype [" + ref.getBehandlingType() + "]"));
+    }
+
 
 }
