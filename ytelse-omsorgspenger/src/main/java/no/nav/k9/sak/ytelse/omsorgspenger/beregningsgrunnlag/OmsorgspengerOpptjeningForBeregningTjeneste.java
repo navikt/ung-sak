@@ -27,7 +27,7 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
-import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetResultatVurdering;
+import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetForBeregningVurdering;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
 import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderTjeneste;
@@ -88,7 +88,7 @@ public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningFo
         var yrkesaktivitetFilter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(behandlingReferanse.getAktørId()));
         var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse,
             iayGrunnlag,
-            new OpptjeningAktivitetResultatVurdering(opptjeningResultat.get()),
+            new OpptjeningAktivitetForBeregningVurdering(opptjeningResultat.get()),
             opptjening.getOpptjeningPeriode(), vilkårsperiode, yrkesaktivitetFilter);
         return aktiviteter.stream()
             .filter(oa -> filtrerForVilkårsperiode(vilkårsperiode, oa, vilkårUtfallMerknad))
