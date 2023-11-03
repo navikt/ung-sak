@@ -175,7 +175,7 @@ public class FeilFordelingGradertTilsynVurdererTask implements ProsessTaskHandle
                     new DumpSimulertUtbetalingDiffPeriode(
                         DatoIntervallEntitet.fraOgMedTilOgMed(p.getPeriode().getFom(), p.getPeriode().getTom()),
                         p.getAndeldifferanser().stream().map(a -> new DumpSimulertUtbetalingDiffAndel(
-                            mapArbeidsgiver(a.getArbeidsgiver()),
+                            a.getArbeidsgiver() != null ? mapArbeidsgiver(a.getArbeidsgiver()) : null,
                             a.getGammelDagsats().intValue(),
                             a.getNyDagsats().intValue(),
                             a.getGammelDagsatsBruker().intValue(),
