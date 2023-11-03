@@ -41,6 +41,10 @@ public record NotatDto(
         @JsonProperty("gjelderType")
         NotatGjelderType gjelderType,
 
+        @JsonProperty(value = "kanRedigere")
+        @NotNull
+        boolean kanRedigere,
+
         @JsonProperty(value = "versjon")
         @NotNull
         long versjon,
@@ -63,4 +67,5 @@ public record NotatDto(
         @Valid
         LocalDateTime endretTidspunkt
 ) {
+
 }

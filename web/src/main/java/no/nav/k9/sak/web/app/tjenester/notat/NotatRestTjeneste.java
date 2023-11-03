@@ -52,6 +52,7 @@ public class NotatRestTjeneste {
     private NotatRepository notatRepository;
     private FagsakRepository fagsakRepository;
 
+
     @Inject
     public NotatRestTjeneste(NotatRepository notatRepository, FagsakRepository fagsakRepository) {
         this.notatRepository = notatRepository;
@@ -188,7 +189,7 @@ public class NotatRestTjeneste {
                 aktørEntitet.getNotatTekst(),
                 aktørEntitet.isSkjult(),
                 NotatGjelderType.PLEIETRENGENDE,
-                aktørEntitet.getVersjon(),
+                true, aktørEntitet.getVersjon(),
                 aktørEntitet.getOpprettetAv(),
                 aktørEntitet.getOpprettetTidspunkt(),
                 aktørEntitet.getEndretAv(),
@@ -199,7 +200,7 @@ public class NotatRestTjeneste {
                 fagsakNotat.getNotatTekst(),
                 fagsakNotat.isSkjult(),
                 NotatGjelderType.FAGSAK,
-                fagsakNotat.getVersjon(),
+                true, fagsakNotat.getVersjon(),
                 fagsakNotat.getOpprettetAv(),
                 fagsakNotat.getOpprettetTidspunkt(),
                 fagsakNotat.getEndretAv(),
