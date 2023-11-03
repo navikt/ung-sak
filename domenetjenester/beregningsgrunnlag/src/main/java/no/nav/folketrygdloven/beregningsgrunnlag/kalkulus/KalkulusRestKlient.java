@@ -27,16 +27,17 @@ import no.nav.folketrygdloven.kalkulus.request.v1.BeregnListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregningsgrunnlagListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagDtoListeForGUIRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagListeRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.HentForSakRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentGrunnbeløpRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.KontrollerGrunnbeløpRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.KopierBeregningListeRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.KopierOgResettBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.forvaltning.OppdaterYtelsesspesifiktGrunnlagListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.migrerAksjonspunkt.MigrerAksjonspunktListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.regelinput.KomprimerRegelInputRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.simulerTilkommetInntekt.SimulerTilkommetInntektListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.tilkommetAktivitet.UtledTilkommetAktivitetListeRequest;
+import no.nav.folketrygdloven.kalkulus.response.v1.AktiveReferanser;
 import no.nav.folketrygdloven.kalkulus.response.v1.Grunnbeløp;
 import no.nav.folketrygdloven.kalkulus.response.v1.GrunnbeløpReguleringRespons;
 import no.nav.folketrygdloven.kalkulus.response.v1.KopiResponse;
@@ -85,6 +86,8 @@ public class KalkulusRestKlient {
     private final ObjectReader grunnbeløpReader = kalkulusMapper.readerFor(Grunnbeløp.class);
     private final ObjectReader saksnummerReader = kalkulusMapper.readerFor(no.nav.folketrygdloven.kalkulus.response.v1.regelinput.Saksnummer.class);
 
+    private final ObjectReader referanserReader = kalkulusMapper.readerFor(AktiveReferanser.class);
+
 
     private CloseableHttpClient restClient;
     private URI kalkulusEndpoint;
@@ -107,8 +110,7 @@ public class KalkulusRestKlient {
     private URI simulerFastsettMedOppdatertUttak;
 
     private URI komprimerFlereRegelinput;
-
-    private URI kopierOgResettEndpoint;
+    private URI aktiveReferanserEndpoint;
 
 
     protected KalkulusRestKlient() {
@@ -141,10 +143,10 @@ public class KalkulusRestKlient {
         this.migrerAksjonspunkter = toUri("/api/kalkulus/v1/migrerAksjonspunkter");
         this.komprimerRegelinput = toUri("/api/kalkulus/v1/komprimerRegelSporing");
         this.komprimerFlereRegelinput = toUri("/api/kalkulus/v1/komprimerAntallRegelSporinger");
-        this.kopierOgResettEndpoint = toUri("/api/kalkulus/v1//kopierOgResett/bolk");
         this.simulerTilkommetInntekt = toUri("/api/kalkulus/v1/simulerTilkommetInntektForKoblinger");
         this.utledTilkommetAktivitet = toUri("/api/kalkulus/v1/utledTilkommetAktivitetForKoblinger");
         this.simulerFastsettMedOppdatertUttak = toUri("/api/kalkulus/v1/forvaltning/simulerFastsettMedOppdatertUttak/bolk");
+        this.aktiveReferanserEndpoint = toUri("/api/kalkulus/v1/aktive-referanser");
     }
 
 
@@ -165,16 +167,6 @@ public class KalkulusRestKlient {
             return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), kopierReader);
         } catch (JsonProcessingException e) {
             throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
-        }
-    }
-
-    public void kopierOgResettBeregning(KopierOgResettBeregningListeRequest request) {
-        var endpoint = kopierOgResettEndpoint;
-
-        try {
-            utfør(endpoint, kalkulusJsonWriter.writeValueAsString(request));
-        } catch (IOException e) {
-            throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(endpoint, e.getMessage()).toException();
         }
     }
 
@@ -285,6 +277,15 @@ public class KalkulusRestKlient {
         var endpoint = komprimerFlereRegelinput;
         try {
             return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), JsonMapper.getMapper().readerFor(Integer.class));
+        } catch (IOException e) {
+            throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(endpoint, e.getMessage()).toException();
+        }
+    }
+
+    public AktiveReferanser hentAktiveReferanser(HentForSakRequest request) {
+        var endpoint = aktiveReferanserEndpoint;
+        try {
+            return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), referanserReader);
         } catch (IOException e) {
             throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(endpoint, e.getMessage()).toException();
         }

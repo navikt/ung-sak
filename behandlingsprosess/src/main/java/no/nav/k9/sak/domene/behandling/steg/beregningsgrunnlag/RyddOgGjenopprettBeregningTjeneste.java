@@ -15,6 +15,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.FastsettPGIPeriodeTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.ValiderAktiveReferanserTjeneste;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAvklaringsbehovDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -44,19 +45,22 @@ public class RyddOgGjenopprettBeregningTjeneste {
     private final BeregningsgrunnlagTjeneste kalkulusTjeneste;
     private final VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
     private final FastsettPGIPeriodeTjeneste fastsettPGIPeriodeTjeneste;
+    private final ValiderAktiveReferanserTjeneste validerAktiveReferanserTjeneste;
     private final VilkårResultatRepository vilkårResultatRepository;
     private final Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste;
-
     private final boolean enableFjernPerioder;
 
     @Inject
     public RyddOgGjenopprettBeregningTjeneste(BehandlingRepository behandlingRepository,
                                               BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                               BeregningsgrunnlagTjeneste kalkulusTjeneste,
-                                              VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider, FastsettPGIPeriodeTjeneste fastsettPGIPeriodeTjeneste,
+                                              VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
+                                              FastsettPGIPeriodeTjeneste fastsettPGIPeriodeTjeneste,
                                               VilkårResultatRepository vilkårResultatRepository,
                                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste,
-                                              @KonfigVerdi(value = "FJERN_VILKÅRSPERIODER_BEREGNING", defaultVerdi = "false") boolean enableFjernPerioder) {
+                                              ValiderAktiveReferanserTjeneste validerAktiveReferanserTjeneste,
+                                              @KonfigVerdi(value = "FJERN_VILKÅRSPERIODER_BEREGNING", defaultVerdi = "false") boolean enableFjernPerioder
+                                              ) {
         this.behandlingRepository = behandlingRepository;
 
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
@@ -66,6 +70,7 @@ public class RyddOgGjenopprettBeregningTjeneste {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.enableFjernPerioder = enableFjernPerioder;
+        this.validerAktiveReferanserTjeneste = validerAktiveReferanserTjeneste;
     }
 
     /**
@@ -98,6 +103,7 @@ public class RyddOgGjenopprettBeregningTjeneste {
     public void deaktiverAvslåtteEllerFjernetPerioder(BehandlingReferanse referanse) {
         // deaktiverer grunnlag for referanser som er avslått eller inaktive (fjernet skjæringstidspunkt)
         kalkulusTjeneste.deaktiverBeregningsgrunnlagForAvslåttEllerFjernetPeriode(referanse);
+        validerAktiveReferanserTjeneste.validerIngenLøseReferanser(referanse);
     }
 
     /**

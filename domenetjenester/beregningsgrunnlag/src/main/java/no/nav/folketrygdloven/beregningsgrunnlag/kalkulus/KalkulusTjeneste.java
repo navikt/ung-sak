@@ -45,6 +45,7 @@ import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagDtoForGU
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagDtoListeForGUIRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.HentForSakRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentGrunnbeløpRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningRequest;
@@ -53,6 +54,7 @@ import no.nav.folketrygdloven.kalkulus.request.v1.KopierBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.KopierBeregningRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.simulerTilkommetInntekt.SimulerTilkommetInntektForRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.simulerTilkommetInntekt.SimulerTilkommetInntektListeRequest;
+import no.nav.folketrygdloven.kalkulus.response.v1.EksternReferanseDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.Grunnbeløp;
 import no.nav.folketrygdloven.kalkulus.response.v1.GrunnbeløpReguleringRespons;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandListeResponse;
@@ -389,4 +391,13 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
             UtledetTilkommetAktivitetPrReferanse::getTilkommedeAktiviteter
         ));
     }
+
+    @Override
+    public Set<UUID> hentReferanserMedAktiveGrunnlag(Saksnummer saksnummer) {
+        return restTjeneste.hentAktiveReferanser(new HentForSakRequest(saksnummer.getVerdi()))
+            .getReferanser().stream()
+            .map(EksternReferanseDto::getEksternReferanse)
+            .collect(Collectors.toSet());
+    }
+
 }
