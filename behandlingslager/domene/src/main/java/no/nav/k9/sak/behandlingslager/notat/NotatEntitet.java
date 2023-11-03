@@ -1,5 +1,6 @@
 package no.nav.k9.sak.behandlingslager.notat;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.hibernate.annotations.NaturalId;
@@ -62,6 +63,13 @@ public abstract class NotatEntitet extends BaseEntitet {
 
     public void skjul(boolean skjul) {
         this.skjult = skjul;
+    }
+
+    /**
+     * Kun for test
+     */
+    void overstyrOpprettetTidspunkt(LocalDateTime tidspunkt) {
+        setOpprettetTidspunkt(tidspunkt);
     }
 
 }
