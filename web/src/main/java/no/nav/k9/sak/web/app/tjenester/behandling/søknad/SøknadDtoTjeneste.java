@@ -122,24 +122,24 @@ public class SøknadDtoTjeneste {
         ytelsetype.validerNøkkelParametere(pleietrengendeAktør, null);
 
         final Optional<Fagsak> fagsakOpt = finnSisteFagsakPå(ytelsetype, aktørId, pleietrengendeAktør);
-        return henFagsakPerioder(fagsakOpt);
+        return hentFagsakPerioder(fagsakOpt);
     }
 
-    private List<Periode> henFagsakPerioder(Optional<Fagsak> fagsakOpt) {
+    private List<Periode> hentFagsakPerioder(Optional<Fagsak> fagsakOpt) {
         return fagsakOpt
             .flatMap(fagsak -> repositoryProvider.getBehandlingRepository().hentSisteBehandlingForFagsakId(fagsak.getId()))
             .map(behandling -> {
                     final var vilkårsPerioderTilVurderingTjeneste = finnVilkårsPerioderTilVurderingTjeneste(behandling.getFagsak().getYtelseType(), behandling.getType());
                     final NavigableSet<DatoIntervallEntitet> søknadsperioder = vilkårsPerioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId());
-                    return søknadsperioder.stream().map(p -> new Periode(p.getFomDato(), p.getTomDato())).collect(Collectors.toList());
+                    return søknadsperioder != null ? søknadsperioder.stream().map(p -> new Periode(p.getFomDato(), p.getTomDato())).collect(Collectors.toList()) : new ArrayList<Periode>();
                 }
             )
             .orElse(Collections.emptyList());
     }
-    
+
     public List<Periode> hentSøknadperioderPåFagsak(Saksnummer saksnummer) {
         final Optional<Fagsak> fagsakOpt = repositoryProvider.getFagsakRepository().hentSakGittSaksnummer(saksnummer);
-        return henFagsakPerioder(fagsakOpt);
+        return hentFagsakPerioder(fagsakOpt);
     }
 
     private Optional<Fagsak> finnSisteFagsakPå(FagsakYtelseType ytelseType, AktørId bruker, AktørId pleietrengendeAktørId) {
