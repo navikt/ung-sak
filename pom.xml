@@ -558,7 +558,7 @@
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>org.wildfly.common</groupId>
                 <artifactId>wildfly-common</artifactId>
-                <version>1.6.0.Final</version>
+                <version>1.7.0.Final</version>
             </dependency>
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->
