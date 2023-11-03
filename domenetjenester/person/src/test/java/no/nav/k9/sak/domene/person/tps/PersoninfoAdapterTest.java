@@ -51,7 +51,7 @@ public class PersoninfoAdapterTest {
         when(personinfoTjeneste.hentKjerneinformasjon(AKTØR_ID_BARN, PERSONIDENT_FNR_BARN)).thenReturn(kjerneinfobarn);
         when(personinfoTjeneste.hentKjerneinformasjon(AKTØR_ID_SØKER, PERSONIDENT_FNR_SØKER)).thenReturn(kjerneinfoSøker);
 
-        testSubject = new PersoninfoAdapter(personBasisTjeneste, personinfoTjeneste, aktørTjeneste, mock(TilknytningTjeneste.class));
+        testSubject = new PersoninfoAdapter(personBasisTjeneste, personinfoTjeneste, aktørTjeneste, mock(TilknytningTjeneste.class), null);
     }
 
     @Test

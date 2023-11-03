@@ -1,36 +1,46 @@
 package no.nav.k9.sak.domene.person.pdl;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.aktør.PersoninfoArbeidsgiver;
 import no.nav.k9.sak.behandlingslager.aktør.PersoninfoBasis;
 import no.nav.k9.sak.behandlingslager.aktør.historikk.Personhistorikkinfo;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.PersonIdent;
 
 @ApplicationScoped
 public class PersoninfoAdapter {
+
+    private static final Logger log = LoggerFactory.getLogger(PersoninfoAdapter.class);
     private PersonBasisTjeneste personBasisTjeneste;
     private PersoninfoTjeneste personinfoTjeneste;
     private AktørTjeneste aktørTjeneste;
     private TilknytningTjeneste tilknytningTjeneste;
+
+    private FagsakRepository fagsakRepository;
 
     public PersoninfoAdapter() {
         // for CDI proxy
     }
 
     @Inject
-    public PersoninfoAdapter(PersonBasisTjeneste personBasisTjeneste, PersoninfoTjeneste personinfoTjeneste, AktørTjeneste aktørTjeneste, TilknytningTjeneste tilknytningTjeneste) {
+    public PersoninfoAdapter(PersonBasisTjeneste personBasisTjeneste, PersoninfoTjeneste personinfoTjeneste, AktørTjeneste aktørTjeneste, TilknytningTjeneste tilknytningTjeneste, FagsakRepository fagsakRepository) {
         this.personBasisTjeneste = personBasisTjeneste;
         this.personinfoTjeneste = personinfoTjeneste;
         this.aktørTjeneste = aktørTjeneste;
         this.tilknytningTjeneste = tilknytningTjeneste;
+        this.fagsakRepository = fagsakRepository;
     }
 
     public Personinfo hentPersoninfo(AktørId aktørId) {
@@ -109,7 +119,13 @@ public class PersoninfoAdapter {
     }
 
     private PersonIdent hentFnr(AktørId aktørId) {
-        return hentIdentForAktørId(aktørId).orElseThrow(() -> new IllegalStateException("Finner ikke FNR for angitt aktørId"));
+        var personIdent = hentIdentForAktørId(aktørId);
+        if (personIdent.isEmpty()) {
+            var fagsaker = fagsakRepository.hentForBruker(aktørId);
+            var saksnummer = fagsaker.stream().map(Fagsak::getSaksnummer).collect(Collectors.toSet());
+            log.warn("Fant ikke FNR for bruker med saksnummer " + saksnummer);
+        }
+        return personIdent.orElseThrow(() -> new IllegalStateException("Finner ikke FNR for angitt aktørId"));
     }
 
     public GeografiskTilknytning hentGeografiskTilknytning(PersonIdent personIdent) {
