@@ -197,7 +197,7 @@ public class BeregningPerioderGrunnlagRepository {
             "SELECT distinct p.ekstern_referanse, bg.aktiv " +
                 "FROM GR_BEREGNINGSGRUNNLAG bg " +
                 "INNER JOIN BG_PERIODE p on p.bg_grunnlag_id = bg.id " +
-                "WHERE bg.behandlingId=:id");
+                "WHERE bg.behandling_id=:id");
         query.setParameter("id", behandlingId);
 
         List<Object[]> resultat = query.getResultList();
