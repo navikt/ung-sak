@@ -291,7 +291,7 @@ public class FeilFordelingGradertTilsynVurdererTask implements ProsessTaskHandle
             .filter(a -> a.getArbeidsforhold().getOrganisasjonsnummer() != null)
             .map(a -> new Arbeidsforhold(a.getArbeidsforhold().getOrganisasjonsnummer(),
                 hentAktivitetsgrad(a), a.getUtbetalingsgrad()))
-            .filter(a -> a.aktivitetsgrad().compareTo(a.utbetalingsgrad()) != 0)
+            .filter(a -> a.aktivitetsgrad().subtract(BigDecimal.valueOf(100).subtract(a.utbetalingsgrad())).abs().compareTo(BigDecimal.valueOf(1)) > 0)
             .toList();
     }
 
