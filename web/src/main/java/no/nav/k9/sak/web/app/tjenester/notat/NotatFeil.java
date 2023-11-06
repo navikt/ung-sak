@@ -21,5 +21,5 @@ public interface NotatFeil extends DeklarerteFeil {
     Feil notatUtdatert(long versjon, long nyesteVersjon);
 
     @ManglerTilgangFeil(feilkode = "K9-NOTAT-100003", feilmelding = "Kun egne notater kan endres", logLevel = LogLevel.ERROR)
-    Feil eierIkkeNotat(Exception e);
+    Feil eierIkkeNotat();
 }

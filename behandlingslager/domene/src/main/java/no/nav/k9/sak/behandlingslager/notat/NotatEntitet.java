@@ -65,6 +65,10 @@ public abstract class NotatEntitet extends BaseEntitet {
         this.skjult = skjul;
     }
 
+    public boolean kanRedigere(String userId) {
+        return userId.equals(opprettetAv);
+    }
+
     /**
      * Kun for test
      */

@@ -89,7 +89,7 @@ class NotatRestTjenesteTest {
 
 
     @Test
-    void skalSkjuleNotat() {
+    void skalSkjuleNotatInklAndreSine() {
         var mor = AktørId.dummy();
         var pleietrengende = AktørId.dummy();
 
@@ -142,6 +142,7 @@ class NotatRestTjenesteTest {
         assertThat(morNotat.opprettetTidspunkt()).isNotNull();
         assertThat(morNotat.endretTidspunkt()).isNull();
         assertThat(morNotat.versjon()).isEqualTo(0);
+        assertThat(morNotat.kanRedigere()).isTrue();
 
         var endretTekst = "et endret notat";
         endreNotat(new EndreNotatDto(
@@ -155,6 +156,7 @@ class NotatRestTjenesteTest {
         assertThat(endretNotat.notatTekst()).isEqualTo(endretTekst);
         assertThat(endretNotat.opprettetAv()).isEqualTo(morNotat.opprettetAv());
         assertThat(endretNotat.endretTidspunkt()).isAfter(morNotat.opprettetTidspunkt());
+        assertThat(endretNotat.kanRedigere()).isTrue();
         assertThat(endretNotat.versjon()).isEqualTo(1);
     }
 
