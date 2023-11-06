@@ -94,6 +94,8 @@ class NotatRestTjenesteTest {
         var pleietrengende = AktørId.dummy();
 
         var saksnummer = TestScenarioBuilder.builderMedSøknad(mor).medPleietrengende(pleietrengende).lagreFagsak(repositoryProvider).getSaksnummer();
+
+        SubjectHandlerUtils.setInternBruker("saksbehandler1");
         var notatDto = new OpprettNotatDto(
                 "tekst",
                 saksnummer,
@@ -117,6 +119,16 @@ class NotatRestTjenesteTest {
         assertThat(skjultNotat.endretTidspunkt()).isNotNull();
         assertThat(skjultNotat.versjon()).isEqualTo(1);
 
+        SubjectHandlerUtils.setInternBruker("saksbehandler2");
+        skjulNotat(new SkjulNotatDto(
+                notat.notatId(),
+                false,
+                saksnummer,
+                skjultNotat.versjon()
+        ));
+
+        NotatDto fjernetSkjult = hentNotat(saksnummer, notat.notatId());
+        assertThat(fjernetSkjult.skjult()).isFalse();
     }
 
 
