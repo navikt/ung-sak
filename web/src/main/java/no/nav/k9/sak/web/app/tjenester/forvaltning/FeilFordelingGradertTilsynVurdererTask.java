@@ -20,7 +20,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
-import jakarta.persistence.criteria.CriteriaQuery;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusRestKlient;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PleiepengerSyktBarnGrunnlag;
 import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
@@ -32,7 +31,6 @@ import no.nav.folketrygdloven.kalkulus.response.v1.forvaltning.PeriodeDifferanse
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.prosesstask.api.ProsessTask;
@@ -46,7 +44,6 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRep
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
-import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Periode;
@@ -115,12 +112,15 @@ public class FeilFordelingGradertTilsynVurdererTask implements ProsessTaskHandle
 
         for (var fagsakIdOgSaksnummerEntry : fagsakIdSaksnummerMap.entrySet()) {
             var fagsakId = fagsakIdOgSaksnummerEntry.getKey();
-            var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId).orElseThrow();
-            var beregningsresultatEntitet = beregningsresultatRepository.hentEndeligBeregningsresultat(sisteBehandling.getId());
-            var uttaksplan = uttakRestKlient.hentUttaksplan(sisteBehandling.getUuid(), false);
+            var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId);
+            if (sisteBehandling.isEmpty()) {
+                continue;
+            }
+            var beregningsresultatEntitet = beregningsresultatRepository.hentEndeligBeregningsresultat(sisteBehandling.get().getId());
+            var uttaksplan = uttakRestKlient.hentUttaksplan(sisteBehandling.get().getUuid(), false);
             var perioderMedForventetEndring = finnPerioderMedForventetEndring(beregningsresultatEntitet, uttaksplan);
             if (!perioderMedForventetEndring.isEmpty()) {
-                var dataDumpGrunnlag = kallKalkulusOgMapDiff(sisteBehandling, uttaksplan, perioderMedForventetEndring);
+                var dataDumpGrunnlag = kallKalkulusOgMapDiff(sisteBehandling.get(), uttaksplan, perioderMedForventetEndring);
                 resultater.add(dataDumpGrunnlag);
             }
         }
@@ -175,7 +175,7 @@ public class FeilFordelingGradertTilsynVurdererTask implements ProsessTaskHandle
                     new DumpSimulertUtbetalingDiffPeriode(
                         DatoIntervallEntitet.fraOgMedTilOgMed(p.getPeriode().getFom(), p.getPeriode().getTom()),
                         p.getAndeldifferanser().stream().map(a -> new DumpSimulertUtbetalingDiffAndel(
-                            mapArbeidsgiver(a.getArbeidsgiver()),
+                            a.getArbeidsgiver() != null ? mapArbeidsgiver(a.getArbeidsgiver()) : null,
                             a.getGammelDagsats().intValue(),
                             a.getNyDagsats().intValue(),
                             a.getGammelDagsatsBruker().intValue(),
@@ -291,7 +291,7 @@ public class FeilFordelingGradertTilsynVurdererTask implements ProsessTaskHandle
             .filter(a -> a.getArbeidsforhold().getOrganisasjonsnummer() != null)
             .map(a -> new Arbeidsforhold(a.getArbeidsforhold().getOrganisasjonsnummer(),
                 hentAktivitetsgrad(a), a.getUtbetalingsgrad()))
-            .filter(a -> a.aktivitetsgrad().compareTo(a.utbetalingsgrad()) != 0)
+            .filter(a -> a.aktivitetsgrad().subtract(BigDecimal.valueOf(100).subtract(a.utbetalingsgrad())).abs().compareTo(BigDecimal.valueOf(1)) > 0)
             .toList();
     }
 

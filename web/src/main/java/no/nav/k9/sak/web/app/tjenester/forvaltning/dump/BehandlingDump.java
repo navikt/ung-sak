@@ -1,5 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.dump;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -121,8 +123,15 @@ public class BehandlingDump implements DebugDumpFagsak {
             for (var inst : dumpstere) {
                 for (var dumper : inst) {
                     logger.info("Dumper fra {} for behandling {}", dumper.getClass().getName(), b.getUuid());
-                    dumper.dump(b)
-                        .forEach(d -> resultat.add(new DumpOutput(path + "/" + d.getPath(), d.getContent())));
+                    try {
+                        dumper.dump(b)
+                            .forEach(d -> resultat.add(new DumpOutput(path + "/" + d.getPath(), d.getContent())));
+                    } catch (Exception e) {
+                        StringWriter sw = new StringWriter();
+                        PrintWriter pw = new PrintWriter(sw);
+                        e.printStackTrace(pw);
+                        resultat.add(new DumpOutput(dumper.getClass().getSimpleName() + "-ERROR.txt", sw.toString()));
+                    }
                 }
             }
 
