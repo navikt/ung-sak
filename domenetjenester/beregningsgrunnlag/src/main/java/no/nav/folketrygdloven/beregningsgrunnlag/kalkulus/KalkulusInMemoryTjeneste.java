@@ -133,6 +133,11 @@ public class KalkulusInMemoryTjeneste implements KalkulusApiTjeneste {
         return Collections.emptyMap();
     }
 
+    @Override
+    public Set<UUID> hentReferanserMedAktiveGrunnlag(Saksnummer saksnummer) {
+        return indeksBehandlingTilGrunnlag.keySet();
+    }
+
     private Optional<BeregningsgrunnlagGrunnlag> getAktivtInntektArbeidGrunnlag(Long behandlingId) {
         var behGrunnlag = indeksBehandlingTilGrunnlag.computeIfAbsent(UUID.randomUUID(), k -> new LinkedList<>());
         if (behGrunnlag.isEmpty()) {
