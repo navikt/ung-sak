@@ -270,6 +270,8 @@ spec:
       value: "true"
     - name: OPPTJENING_AP_VED_AKSEPTERT_MELLOMLIGGENDE_HELG
       value: "true"
+    - name: FJERN_VILKÅRSPERIODER_BEREGNING
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
