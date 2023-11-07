@@ -272,6 +272,8 @@ spec:
       value: "true"
     - name: FJERN_VILKÅRSPERIODER_BEREGNING
       value: "true"
+    - name: VALIDER_KALKULUS_REFERANSER
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

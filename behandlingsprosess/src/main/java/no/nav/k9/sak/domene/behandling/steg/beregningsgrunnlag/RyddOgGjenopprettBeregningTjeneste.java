@@ -49,6 +49,7 @@ public class RyddOgGjenopprettBeregningTjeneste {
     private final VilkårResultatRepository vilkårResultatRepository;
     private final Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste;
     private final boolean enableFjernPerioder;
+    private final boolean validerIngenLoseReferanser;
 
     @Inject
     public RyddOgGjenopprettBeregningTjeneste(BehandlingRepository behandlingRepository,
@@ -59,10 +60,10 @@ public class RyddOgGjenopprettBeregningTjeneste {
                                               VilkårResultatRepository vilkårResultatRepository,
                                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste,
                                               ValiderAktiveReferanserTjeneste validerAktiveReferanserTjeneste,
-                                              @KonfigVerdi(value = "FJERN_VILKÅRSPERIODER_BEREGNING", defaultVerdi = "false") boolean enableFjernPerioder
-                                              ) {
+                                              @KonfigVerdi(value = "FJERN_VILKÅRSPERIODER_BEREGNING", defaultVerdi = "false") boolean enableFjernPerioder,
+                                              @KonfigVerdi(value = "VALIDER_KALKULUS_REFERANSER", defaultVerdi = "false") boolean validerIngenLoseReferanser
+    ) {
         this.behandlingRepository = behandlingRepository;
-
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
@@ -71,6 +72,7 @@ public class RyddOgGjenopprettBeregningTjeneste {
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.enableFjernPerioder = enableFjernPerioder;
         this.validerAktiveReferanserTjeneste = validerAktiveReferanserTjeneste;
+        this.validerIngenLoseReferanser = validerIngenLoseReferanser;
     }
 
     /**
@@ -103,7 +105,9 @@ public class RyddOgGjenopprettBeregningTjeneste {
     public void deaktiverAvslåtteEllerFjernetPerioder(BehandlingReferanse referanse) {
         // deaktiverer grunnlag for referanser som er avslått eller inaktive (fjernet skjæringstidspunkt)
         kalkulusTjeneste.deaktiverBeregningsgrunnlagForAvslåttEllerFjernetPeriode(referanse);
-        validerAktiveReferanserTjeneste.validerIngenLøseReferanser(referanse);
+        if (validerIngenLoseReferanser) {
+            validerAktiveReferanserTjeneste.validerIngenLøseReferanser(referanse);
+        }
     }
 
     /**
