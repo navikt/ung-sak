@@ -78,7 +78,7 @@ public class RepubliserEventTask implements ProsessTaskHandler {
         final LocalDate vedtaksdato = behandlingVedtakRepository.hentBehandlingVedtakFor(behandlingUuid)
                 .map(BehandlingVedtak::getVedtaksdato).orElse(null);
 
-        final var dto = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(eventTid, EventHendelse.BEHANDLINGSKONTROLL_EVENT, behandling.get(), vedtaksdato);
+        final var dto = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(eventTid, EventHendelse.VASKEEVENT, behandling.get(), vedtaksdato);
 
         final ProsessTaskData nyProsessTask = ProsessTaskData.forProsessTask(PubliserEventTaskImpl.class);
         nyProsessTask.setCallIdFraEksisterende();
