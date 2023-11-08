@@ -88,11 +88,13 @@ public abstract class NotatEntitet extends BaseEntitet {
     }
 
     public String getNotatTekstEndretAv() {
-        return finnNotatTekst().getOpprettetAv();
+        var notatTekstEntitet = finnNotatTekst();
+        return notatTekstEntitet.erEndret() ? notatTekstEntitet.getOpprettetAv() : null;
     }
 
     public LocalDateTime getNotatTekstEndretTidspunkt() {
-        return finnNotatTekst().getOpprettetTidspunkt();
+        var notatTekstEntitet = finnNotatTekst();
+        return notatTekstEntitet.erEndret() ? notatTekstEntitet.getOpprettetTidspunkt() : null;
     }
 
     abstract List<? extends NotatTekstEntitet> getNotatTekstEntiteter();

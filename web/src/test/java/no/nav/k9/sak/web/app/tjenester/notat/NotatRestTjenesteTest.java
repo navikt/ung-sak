@@ -115,8 +115,10 @@ class NotatRestTjenesteTest {
         NotatDto skjultNotat = hentNotat(saksnummer, notat.notatId());
         assertThat(skjultNotat.notatId()).isEqualTo(notat.notatId());
         assertThat(skjultNotat.skjult()).isTrue();
+        assertThat(skjultNotat.opprettetAv()).isEqualTo("saksbehandler1");
         assertThat(skjultNotat.opprettetTidspunkt()).isEqualTo(notat.opprettetTidspunkt());
-        assertThat(skjultNotat.endretTidspunkt()).isNotNull();
+        assertThat(skjultNotat.endretTidspunkt()).isNull();
+        assertThat(skjultNotat.endretAv()).isNull();
         assertThat(skjultNotat.versjon()).isEqualTo(1);
 
         SubjectHandlerUtils.setInternBruker("saksbehandler2");
@@ -130,8 +132,9 @@ class NotatRestTjenesteTest {
         NotatDto fjernetSkjult = hentNotat(saksnummer, notat.notatId());
         assertThat(fjernetSkjult.skjult()).isFalse();
         //skjuling telles ikke som endring
-        assertThat(fjernetSkjult.endretTidspunkt()).isEqualTo(notat.endretTidspunkt());
-        assertThat(fjernetSkjult.endretAv()).isEqualTo("saksbehandler1");
+        assertThat(fjernetSkjult.endretTidspunkt()).isNull();
+        assertThat(fjernetSkjult.endretAv()).isNull();
+        assertThat(fjernetSkjult.versjon()).isEqualTo(2);
     }
 
 
