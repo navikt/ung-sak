@@ -74,8 +74,6 @@ class StønadstatistikkPeriodetidslinjebygger {
         if (beregningsgrunnlagListe.isEmpty()) {
             return LocalDateTimeline.empty();
         }
-        
-        assertSammeVerdierForSammeStp(beregningsgrunnlagListe);
 
         var stpTidslinje = toStpBeregningsgrunnlagTidslinje(beregningsgrunnlagListe);
         
