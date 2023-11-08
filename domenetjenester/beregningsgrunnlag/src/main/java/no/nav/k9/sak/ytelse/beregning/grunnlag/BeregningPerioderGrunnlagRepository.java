@@ -196,7 +196,7 @@ public class BeregningPerioderGrunnlagRepository {
         var query = entityManager.createNativeQuery(
             "SELECT distinct p.ekstern_referanse, bg.aktiv " +
                 "FROM GR_BEREGNINGSGRUNNLAG bg " +
-                "INNER JOIN BG_PERIODE p on p.bg_grunnlag_id = bg.id " +
+                "INNER JOIN BG_PERIODE p on p.bg_grunnlag_id = bg.bg_grunnlag_id " +
                 "WHERE bg.behandling_id=:id");
         query.setParameter("id", behandlingId);
 
