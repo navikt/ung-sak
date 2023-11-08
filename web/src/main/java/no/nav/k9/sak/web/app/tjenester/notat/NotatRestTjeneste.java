@@ -206,8 +206,8 @@ public class NotatRestTjeneste {
                 entitet.getVersjon(),
                 entitet.getOpprettetAv(),
                 entitet.getOpprettetTidspunkt(),
-                entitet.getEndretAv(),
-                entitet.getEndretTidspunkt());
+                entitet.getNotatTekstEndretAv(),
+                entitet.getNotatTekstEndretTidspunkt());
     }
 
     private static NotatGjelderType bestemNotatGjelder(NotatEntitet entitet) {

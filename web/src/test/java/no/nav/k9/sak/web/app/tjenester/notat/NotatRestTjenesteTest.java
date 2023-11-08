@@ -129,6 +129,9 @@ class NotatRestTjenesteTest {
 
         NotatDto fjernetSkjult = hentNotat(saksnummer, notat.notatId());
         assertThat(fjernetSkjult.skjult()).isFalse();
+        //skjuling telles ikke som endring
+        assertThat(fjernetSkjult.endretTidspunkt()).isEqualTo(notat.endretTidspunkt());
+        assertThat(fjernetSkjult.endretAv()).isEqualTo("saksbehandler1");
     }
 
 
