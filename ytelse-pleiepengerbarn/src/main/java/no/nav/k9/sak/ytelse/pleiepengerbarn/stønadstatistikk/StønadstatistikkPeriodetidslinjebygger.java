@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import jakarta.enterprise.context.Dependent;
@@ -73,8 +74,6 @@ class StønadstatistikkPeriodetidslinjebygger {
         if (beregningsgrunnlagListe.isEmpty()) {
             return LocalDateTimeline.empty();
         }
-        
-        assertSammeVerdierForSammeStp(beregningsgrunnlagListe);
 
         var stpTidslinje = toStpBeregningsgrunnlagTidslinje(beregningsgrunnlagListe);
         
@@ -98,10 +97,17 @@ class StønadstatistikkPeriodetidslinjebygger {
     private static List<LocalDateSegment<BeregningsgrunnlagPeriode>> toGjeldendeBeregningsgrunnlagPeriode(LocalDateSegment<Beregningsgrunnlag> s) {
         return s.getValue().getBeregningsgrunnlagPerioder()
             .stream()
-            .map(bp -> new LocalDateSegment<>(bp.getPeriode().getFomDato(),
-                    minDate(bp.getPeriode().getTomDato(), s.getTom()),
-                    bp)
-            )
+            .map(bp -> {
+                final LocalDate fomDato = bp.getPeriode().getFomDato();
+                final LocalDate tomDato = minDate(bp.getPeriode().getTomDato(), s.getTom());
+                
+                if (tomDato.isBefore(fomDato)) {
+                    return null;
+                }
+                
+                return new LocalDateSegment<>(fomDato, tomDato, bp);
+            })
+            .filter(Objects::nonNull)
             .toList();
     }
 

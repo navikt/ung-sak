@@ -427,6 +427,7 @@ public class BehandlingDtoTjeneste {
                 dto.leggTil(getFraMap(PleiepengerUttakRestTjeneste.GET_SKULLE_SØKT_OM_PATH, "psb-manglende-arbeidstid", uuidQueryParams));
                 dto.leggTil(getFraMap(PleiepengerUttakRestTjeneste.UTTAK_OVERSTYRT, "pleiepenger-overstyrt-uttak", uuidQueryParams));
                 dto.leggTil(post(PleiepengerUttakRestTjeneste.UTTAK_OVERSTYRBARE_AKTIVITETER, "pleiepenger-overstyrtbare-aktiviteter", new OverstyrbareAktiviteterForUttakRequest(new BehandlingUuidDto(behandling.getUuid()), behandling.getFagsak().getPeriode().getFomDato(), behandling.getFagsak().getPeriode().getTomDato())));
+                dto.leggTil(getFraMap(UtenlandsoppholdRestTjeneste.UTTAK_UTENLANDSOPPHOLD, "utenlandsopphold", uuidQueryParams));
                 dto.leggTil(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER, "beregning-koblinger", uuidQueryParams));
                 dto.leggTil(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER_TIL_VURDERING, "beregning-koblinger-til-vurdering", uuidQueryParams));
                 dto.leggTil(getFraMap(OverlapendeYtelserRestTjeneste.OVERLAPPENDE_YTELSER_PATH, "overlappende-ytelser", uuidQueryParams));

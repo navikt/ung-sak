@@ -40,13 +40,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <felles.version>2.0.13</felles.version>
+        <felles.version>2.0.14</felles.version>
         <swagger.version>2.2.17</swagger.version>
-        <junit.version>5.10.0</junit.version>
+        <junit.version>5.10.1</junit.version>
         <k9format.version>9.0.5</k9format.version>
         <jackson.version>2.15.3</jackson.version>
         <asm.version>9.6</asm.version>
-        <kotlin-stdlib.version>1.9.10</kotlin-stdlib.version>
+        <kotlin-stdlib.version>1.9.20</kotlin-stdlib.version>
         <jandex.version>3.1.5</jandex.version>
 
     </properties>
@@ -146,7 +146,7 @@
             <dependency>
                 <groupId>no.nav.k9.formidling</groupId>
                 <artifactId>eksterne-kontrakter</artifactId>
-                <version>1.0.4</version>
+                <version>1.0.5</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.foreldrepenger.abakus</groupId>
@@ -156,13 +156,13 @@
             <dependency>
                 <groupId>no.nav.folketrygdloven.kalkulus</groupId>
                 <artifactId>kalkulus-kontrakt-jakarta</artifactId>
-                <version>2.6.0</version>
+                <version>2.6.2</version>
             </dependency>
 
             <dependency>
                 <groupId>com.zaxxer</groupId>
                 <artifactId>HikariCP</artifactId>
-                <version>5.0.1</version>
+                <version>5.1.0</version>
             </dependency>
             <dependency>
                 <groupId>org.threeten</groupId>
@@ -475,7 +475,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>5.6.0</version>
+                <version>5.7.0</version>
             </dependency>
             <dependency>
                 <groupId>org.hamcrest</groupId>
@@ -485,7 +485,7 @@
             <dependency>
                 <groupId>org.glassfish.jaxb</groupId>
                 <artifactId>jaxb-runtime</artifactId>
-                <version>4.0.3</version>
+                <version>4.0.4</version>
             </dependency>
             <dependency>
                 <groupId>org.xerial.snappy</groupId>
@@ -504,7 +504,7 @@
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
-                <version>2.14.0</version>
+                <version>2.15.0</version>
             </dependency>
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->
@@ -558,7 +558,7 @@
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>org.wildfly.common</groupId>
                 <artifactId>wildfly-common</artifactId>
-                <version>1.6.0.Final</version>
+                <version>1.7.0.Final</version>
             </dependency>
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->
@@ -570,7 +570,7 @@
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>io.github.classgraph</groupId>
                 <artifactId>classgraph</artifactId>
-                <version>4.8.163</version>
+                <version>4.8.164</version>
             </dependency>
 
             <dependency>
@@ -671,7 +671,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-clean-plugin</artifactId>
-                    <version>3.3.1</version>
+                    <version>3.3.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -703,12 +703,12 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.1.2</version>
+                    <version>3.2.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>3.2.1</version>
+                    <version>3.2.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

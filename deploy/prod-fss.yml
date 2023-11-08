@@ -265,6 +265,10 @@ spec:
       value: "false"
     - name: OPPTJENING_AP_VED_AKSEPTERT_MELLOMLIGGENDE_HELG
       value: "false"
+    - name: FJERN_VILKARSPERIODER_BEREGNING
+      value: "false"
+    - name: VALIDER_KALKULUS_REFERANSER
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
