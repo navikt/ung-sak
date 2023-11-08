@@ -60,7 +60,7 @@ public class RyddOgGjenopprettBeregningTjeneste {
                                               VilkårResultatRepository vilkårResultatRepository,
                                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste,
                                               ValiderAktiveReferanserTjeneste validerAktiveReferanserTjeneste,
-                                              @KonfigVerdi(value = "FJERN_VILKÅRSPERIODER_BEREGNING", defaultVerdi = "false") boolean enableFjernPerioder,
+                                              @KonfigVerdi(value = "FJERN_VILKARSPERIODER_BEREGNING", defaultVerdi = "false") boolean enableFjernPerioder,
                                               @KonfigVerdi(value = "VALIDER_KALKULUS_REFERANSER", defaultVerdi = "false") boolean validerIngenLoseReferanser
     ) {
         this.behandlingRepository = behandlingRepository;

@@ -75,7 +75,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
                                                   VilkårResultatRepository vilkårResultatRepository,
                                                   ÅrskvantumTjeneste årskvantumTjeneste,
                                                   ProsessTriggereRepository prosessTriggereRepository,
-                                                  @KonfigVerdi(value = "FJERN_VILKÅRSPERIODER_BEREGNING", defaultVerdi = "false") boolean enableFjernPerioderBeregning) {
+                                                  @KonfigVerdi(value = "FJERN_VILKARSPERIODER_BEREGNING", defaultVerdi = "false") boolean enableFjernPerioderBeregning) {
         this.vilkårUtleder = vilkårUtleder;
         søktePerioder = new SøktePerioder(omsorgspengerGrunnlagRepository);
         nulledePerioder = new NulledePerioder(omsorgspengerGrunnlagRepository);
