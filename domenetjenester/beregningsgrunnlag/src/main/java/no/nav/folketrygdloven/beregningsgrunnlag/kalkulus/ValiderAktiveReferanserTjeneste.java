@@ -59,7 +59,7 @@ public class ValiderAktiveReferanserTjeneste {
         grunnlagRepository.hentAlleHistoriskeReferanserForBehandling(behandlingReferanse.getBehandlingId()).forEach(it -> {
             var eksisterende = referanserOpprettetIGjeldendeBehandling.stream().filter(r -> r.ref().equals(it.getElement1())).findFirst();
             var erIkkeInitiell = initielleReferanser.stream().noneMatch(ir -> ir.equals(it.getElement1()));
-            if (eksisterende.isEmpty() || !eksisterende.get().aktiv() && erIkkeInitiell) {
+            if ((eksisterende.isEmpty() || !eksisterende.get().aktiv()) && erIkkeInitiell) {
                 referanserOpprettetIGjeldendeBehandling.add(new HistoriskReferanse(it.getElement1(), it.getElement2()));
             }
         });
