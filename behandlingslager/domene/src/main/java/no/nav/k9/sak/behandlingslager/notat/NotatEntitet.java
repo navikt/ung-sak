@@ -1,5 +1,7 @@
 package no.nav.k9.sak.behandlingslager.notat;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.annotations.NaturalId;
@@ -40,7 +42,9 @@ public abstract class NotatEntitet extends BaseEntitet {
         this.uuid = UUID.randomUUID();
     }
 
-    public abstract String getNotatTekst();
+    public String getNotatTekst() {
+        return finnNotatTekst().getTekst();
+    }
 
     public abstract void nyTekst(String tekst);
 
@@ -63,5 +67,39 @@ public abstract class NotatEntitet extends BaseEntitet {
     public void skjul(boolean skjul) {
         this.skjult = skjul;
     }
+
+    public boolean kanRedigere(String userId) {
+        return userId.equals(opprettetAv);
+    }
+
+    /**
+     * Kun for test
+     */
+    void overstyrOpprettetTidspunkt(LocalDateTime tidspunkt) {
+        setOpprettetTidspunkt(tidspunkt);
+    }
+
+    NotatTekstEntitet finnNotatTekst() {
+        var aktiv = getNotatTekstEntiteter().stream().filter(NotatTekstEntitet::isAktiv).toList();
+        if (aktiv.size() != 1) {
+            throw new IllegalStateException("Utviklerfeil: forventet 1 aktiv notattekst men fant %d".formatted(aktiv.size()));
+        }
+        return aktiv.get(0);
+    }
+
+    public String getNotatTekstEndretAv() {
+        var notatTekstEntitet = finnNotatTekst();
+        return notatTekstEntitet.erEndret() ? notatTekstEntitet.getOpprettetAv() : null;
+    }
+
+    public LocalDateTime getNotatTekstEndretTidspunkt() {
+        var notatTekstEntitet = finnNotatTekst();
+        return notatTekstEntitet.erEndret() ? notatTekstEntitet.getOpprettetTidspunkt() : null;
+    }
+
+    abstract List<? extends NotatTekstEntitet> getNotatTekstEntiteter();
+
+
+
 
 }

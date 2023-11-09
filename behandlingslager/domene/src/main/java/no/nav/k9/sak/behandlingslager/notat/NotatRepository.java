@@ -1,6 +1,7 @@
 package no.nav.k9.sak.behandlingslager.notat;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -8,6 +9,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
+import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 
 @Dependent
@@ -41,6 +43,7 @@ public class NotatRepository {
             resultat.addAll(aktoerNotat.getResultList());
         }
 
+        resultat.sort(Comparator.comparing(BaseEntitet::getOpprettetTidspunkt).reversed());
         return resultat;
     }
 

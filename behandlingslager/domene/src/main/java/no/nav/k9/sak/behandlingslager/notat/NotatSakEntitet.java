@@ -51,18 +51,9 @@ public class NotatSakEntitet extends NotatEntitet {
     }
 
     @Override
-    public String getNotatTekst() {
-        return finnNotatTekst().getTekst();
+    List<NotatSakTekst> getNotatTekstEntiteter() {
+        return notatSakTekst;
     }
-
-    private NotatSakTekst finnNotatTekst() {
-        List<NotatSakTekst> aktiv = notatSakTekst.stream().filter(NotatSakTekst::isAktiv).toList();
-        if (aktiv.size() != 1) {
-            throw new IllegalStateException("Utviklerfeil: forventet 1 aktiv notattekst men fant %d".formatted(aktiv.size()));
-        }
-        return aktiv.get(0);
-    }
-
 
     @Override
     public void nyTekst(String tekst) {

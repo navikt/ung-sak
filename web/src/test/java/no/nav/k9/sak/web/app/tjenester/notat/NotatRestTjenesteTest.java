@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.k9.felles.exception.ManglerTilgangException;
 import no.nav.k9.felles.exception.TekniskException;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.felles.testutilities.sikkerhet.StaticSubjectHandler;
@@ -69,9 +70,9 @@ class NotatRestTjenesteTest {
         String tekst = "en tekst med litt notater";
 
         var notatDto = new OpprettNotatDto(
-            tekst,
-            saksnummer,
-            NotatGjelderType.FAGSAK
+                tekst,
+                saksnummer,
+                NotatGjelderType.FAGSAK
         );
 
         opprettNotat(notatDto);
@@ -87,17 +88,18 @@ class NotatRestTjenesteTest {
     }
 
 
-
     @Test
-    void skalSkjuleNotat() {
+    void skalSkjuleNotatInklAndreSine() {
         var mor = AktørId.dummy();
         var pleietrengende = AktørId.dummy();
 
         var saksnummer = TestScenarioBuilder.builderMedSøknad(mor).medPleietrengende(pleietrengende).lagreFagsak(repositoryProvider).getSaksnummer();
+
+        SubjectHandlerUtils.setInternBruker("saksbehandler1");
         var notatDto = new OpprettNotatDto(
-            "tekst",
-            saksnummer,
-            NotatGjelderType.PLEIETRENGENDE
+                "tekst",
+                saksnummer,
+                NotatGjelderType.PLEIETRENGENDE
         );
 
         opprettNotat(notatDto);
@@ -105,18 +107,34 @@ class NotatRestTjenesteTest {
         assertThat(notat.skjult()).isFalse();
 
         skjulNotat(new SkjulNotatDto(
-            notat.notatId(),
-            true,
-            saksnummer,
-            notat.versjon()
+                notat.notatId(),
+                true,
+                saksnummer,
+                notat.versjon()
         ));
         NotatDto skjultNotat = hentNotat(saksnummer, notat.notatId());
         assertThat(skjultNotat.notatId()).isEqualTo(notat.notatId());
         assertThat(skjultNotat.skjult()).isTrue();
+        assertThat(skjultNotat.opprettetAv()).isEqualTo("saksbehandler1");
         assertThat(skjultNotat.opprettetTidspunkt()).isEqualTo(notat.opprettetTidspunkt());
-        assertThat(skjultNotat.endretTidspunkt()).isNotNull();
+        assertThat(skjultNotat.endretTidspunkt()).isNull();
+        assertThat(skjultNotat.endretAv()).isNull();
         assertThat(skjultNotat.versjon()).isEqualTo(1);
 
+        SubjectHandlerUtils.setInternBruker("saksbehandler2");
+        skjulNotat(new SkjulNotatDto(
+                notat.notatId(),
+                false,
+                saksnummer,
+                skjultNotat.versjon()
+        ));
+
+        NotatDto fjernetSkjult = hentNotat(saksnummer, notat.notatId());
+        assertThat(fjernetSkjult.skjult()).isFalse();
+        //skjuling telles ikke som endring
+        assertThat(fjernetSkjult.endretTidspunkt()).isNull();
+        assertThat(fjernetSkjult.endretAv()).isNull();
+        assertThat(fjernetSkjult.versjon()).isEqualTo(2);
     }
 
 
@@ -130,9 +148,9 @@ class NotatRestTjenesteTest {
         String morTekst = "et gammelt notat ";
         var saksnummer = morSak.getSaksnummer();
         opprettNotat(new OpprettNotatDto(
-            morTekst,
-            saksnummer,
-            NotatGjelderType.FAGSAK
+                morTekst,
+                saksnummer,
+                NotatGjelderType.FAGSAK
         ));
 
         List<NotatDto> morNotater = hentForFagsak(saksnummer);
@@ -142,20 +160,52 @@ class NotatRestTjenesteTest {
         assertThat(morNotat.opprettetTidspunkt()).isNotNull();
         assertThat(morNotat.endretTidspunkt()).isNull();
         assertThat(morNotat.versjon()).isEqualTo(0);
+        assertThat(morNotat.kanRedigere()).isTrue();
 
         var endretTekst = "et endret notat";
         endreNotat(new EndreNotatDto(
-            morNotat.notatId(),
-            endretTekst,
-            saksnummer,
-            morNotat.versjon()));
+                morNotat.notatId(),
+                endretTekst,
+                saksnummer,
+                morNotat.versjon()));
 
         NotatDto endretNotat = hentNotat(saksnummer, morNotat.notatId());
         assertThat(endretNotat.gjelderType()).isEqualTo(NotatGjelderType.FAGSAK);
         assertThat(endretNotat.notatTekst()).isEqualTo(endretTekst);
         assertThat(endretNotat.opprettetAv()).isEqualTo(morNotat.opprettetAv());
         assertThat(endretNotat.endretTidspunkt()).isAfter(morNotat.opprettetTidspunkt());
+        assertThat(endretNotat.kanRedigere()).isTrue();
         assertThat(endretNotat.versjon()).isEqualTo(1);
+    }
+
+    @Test
+    void skalIkkeEndreAndreSineNotaterTekst() {
+        var mor = AktørId.dummy();
+        var pleietrengende = AktørId.dummy();
+
+        var morSak = TestScenarioBuilder.builderMedSøknad(mor).medPleietrengende(pleietrengende).lagreFagsak(repositoryProvider);
+
+        var saksnummer = morSak.getSaksnummer();
+
+        SubjectHandlerUtils.setInternBruker("saksbehandler1");
+        opprettNotat(new OpprettNotatDto(
+                "et gammelt notat ",
+                saksnummer,
+                NotatGjelderType.FAGSAK
+        ));
+
+        SubjectHandlerUtils.setInternBruker("saksbehandler2");
+        List<NotatDto> morNotater = hentForFagsak(saksnummer);
+        NotatDto morNotat = morNotater.stream().findFirst().orElseThrow();
+
+        assertThat(morNotat.kanRedigere()).isFalse();
+
+        assertThatThrownBy(() -> endreNotat(new EndreNotatDto(
+                morNotat.notatId(),
+                "et endret notat",
+                saksnummer,
+                morNotat.versjon()))).isInstanceOf(ManglerTilgangException.class);
+
     }
 
 
@@ -205,22 +255,22 @@ class NotatRestTjenesteTest {
 
         String morNotat = "notat som gjelder mor";
         opprettNotat(new OpprettNotatDto(
-            morNotat,
-            morSak,
-            NotatGjelderType.FAGSAK
+                morNotat,
+                morSak,
+                NotatGjelderType.FAGSAK
         ));
         String pleietrengedeNotat = "notat som gjelder pleietrengende";
         opprettNotat(new OpprettNotatDto(
-            pleietrengedeNotat,
-            morSak,
-            NotatGjelderType.PLEIETRENGENDE
+                pleietrengedeNotat,
+                morSak,
+                NotatGjelderType.PLEIETRENGENDE
         ));
 
         String farNotat = "notat som gjelder far";
         opprettNotat(new OpprettNotatDto(
-            farNotat,
-            farSak,
-            NotatGjelderType.FAGSAK
+                farNotat,
+                farSak,
+                NotatGjelderType.FAGSAK
         ));
 
         List<NotatDto> morNotater = hentForFagsak(morSak);
@@ -246,22 +296,22 @@ class NotatRestTjenesteTest {
 
         String morNotat = "notat som gjelder psb";
         opprettNotat(new OpprettNotatDto(
-            morNotat,
-            psbSak,
-            NotatGjelderType.FAGSAK
+                morNotat,
+                psbSak,
+                NotatGjelderType.FAGSAK
         ));
         String pleietrengedeNotat = "notat som gjelder pleietrengende";
         opprettNotat(new OpprettNotatDto(
-            pleietrengedeNotat,
-            psbSak,
-            NotatGjelderType.PLEIETRENGENDE
+                pleietrengedeNotat,
+                psbSak,
+                NotatGjelderType.PLEIETRENGENDE
         ));
 
         String farNotat = "notat som gjelder pils";
         opprettNotat(new OpprettNotatDto(
-            farNotat,
-            pilsSak,
-            NotatGjelderType.FAGSAK
+                farNotat,
+                pilsSak,
+                NotatGjelderType.FAGSAK
         ));
 
         List<NotatDto> morNotater = hentForFagsak(psbSak);
@@ -278,7 +328,7 @@ class NotatRestTjenesteTest {
     private NotatDto hentNotat(Saksnummer saksnummer, UUID uuid) {
         @SuppressWarnings("unchecked")
         var entity = (Collection<NotatDto>) notatRestTjeneste.hent(new SaksnummerDto(saksnummer), uuid)
-            .getEntity();
+                .getEntity();
         return entity.stream().findFirst().orElseThrow();
     }
 
@@ -293,7 +343,7 @@ class NotatRestTjenesteTest {
     private List<NotatDto> hentForFagsak(Saksnummer saksnummer) {
         @SuppressWarnings("unchecked")
         var entity = (List<NotatDto>) notatRestTjeneste.hent(new SaksnummerDto(saksnummer), null)
-            .getEntity();
+                .getEntity();
         return entity;
     }
 

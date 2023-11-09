@@ -74,17 +74,9 @@ public class NotatAktørEntitet extends NotatEntitet {
         this.notatAktørTekst.add(new NotatAktørTekst(tekst, aktørTekst.getVersjon() + 1));
     }
 
-    private NotatAktørTekst finnNotatTekst() {
-        List<NotatAktørTekst> aktiv = notatAktørTekst.stream().filter(NotatAktørTekst::isAktiv).toList();
-        if (aktiv.size() != 1) {
-            throw new IllegalStateException("Utviklerfeil: forventet 1 aktiv notattekst men fant %d".formatted(aktiv.size()));
-        }
-        return aktiv.get(0);
-    }
 
     @Override
-    public String getNotatTekst() {
-        return finnNotatTekst().getTekst();
+    List<NotatAktørTekst> getNotatTekstEntiteter() {
+        return notatAktørTekst;
     }
-
 }

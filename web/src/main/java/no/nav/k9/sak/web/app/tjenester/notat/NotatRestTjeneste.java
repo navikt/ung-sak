@@ -6,6 +6,7 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -42,6 +43,7 @@ import no.nav.k9.sak.kontrakt.notat.SkjulNotatDto;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @Path("")
 @ApplicationScoped
@@ -51,6 +53,7 @@ public class NotatRestTjeneste {
 
     private NotatRepository notatRepository;
     private FagsakRepository fagsakRepository;
+
 
     @Inject
     public NotatRestTjeneste(NotatRepository notatRepository, FagsakRepository fagsakRepository) {
@@ -112,6 +115,8 @@ public class NotatRestTjeneste {
     ) {
         var notat = hentNotatForEndring(endreNotatDto.saksnummer().getSaksnummer(), endreNotatDto.notatId(), endreNotatDto.versjon());
 
+        validerTilgangForEndring(notat);
+
         if (!notat.getNotatTekst().equals(endreNotatDto.notatTekst())) {
             notat.nyTekst(endreNotatDto.notatTekst());
             notatRepository.lagre(notat);
@@ -119,6 +124,16 @@ public class NotatRestTjeneste {
 
         return Response.status(Response.Status.OK).entity(mapDto(notat)).build();
 
+    }
+
+    private void validerTilgangForEndring(NotatEntitet notat) {
+        if (!notat.kanRedigere(saksbehandlerUserid())) {
+            throw NotatFeil.FACTORY.eierIkkeNotat().toException();
+        }
+    }
+
+    private static String saksbehandlerUserid() {
+        return Optional.ofNullable(SubjectHandler.getSubjectHandler().getUid()).orElseThrow();
     }
 
 
@@ -182,32 +197,28 @@ public class NotatRestTjeneste {
     }
 
     private NotatDto mapDto(NotatEntitet entitet) {
-        if (entitet instanceof NotatAktørEntitet aktørEntitet) {
-            return new NotatDto(
-                aktørEntitet.getUuid(),
-                aktørEntitet.getNotatTekst(),
-                aktørEntitet.isSkjult(),
-                NotatGjelderType.PLEIETRENGENDE,
-                aktørEntitet.getVersjon(),
-                aktørEntitet.getOpprettetAv(),
-                aktørEntitet.getOpprettetTidspunkt(),
-                aktørEntitet.getEndretAv(),
-                aktørEntitet.getEndretTidspunkt());
-        } else if (entitet instanceof NotatSakEntitet fagsakNotat) {
-            return new NotatDto(
-                fagsakNotat.getUuid(),
-                fagsakNotat.getNotatTekst(),
-                fagsakNotat.isSkjult(),
-                NotatGjelderType.FAGSAK,
-                fagsakNotat.getVersjon(),
-                fagsakNotat.getOpprettetAv(),
-                fagsakNotat.getOpprettetTidspunkt(),
-                fagsakNotat.getEndretAv(),
-                fagsakNotat.getEndretTidspunkt()
-            );
-        }
+        return new NotatDto(
+                entitet.getUuid(),
+                entitet.getNotatTekst(),
+                entitet.isSkjult(),
+                bestemNotatGjelder(entitet),
+                entitet.kanRedigere(saksbehandlerUserid()),
+                entitet.getVersjon(),
+                entitet.getOpprettetAv(),
+                entitet.getOpprettetTidspunkt(),
+                entitet.getNotatTekstEndretAv(),
+                entitet.getNotatTekstEndretTidspunkt());
+    }
 
+    private static NotatGjelderType bestemNotatGjelder(NotatEntitet entitet) {
+        if (entitet instanceof NotatAktørEntitet) {
+            return NotatGjelderType.PLEIETRENGENDE;
+        }
+        if (entitet instanceof NotatSakEntitet) {
+            return NotatGjelderType.FAGSAK;
+        }
         throw new IllegalStateException("Utviklerfeil: Støtter ikke Notat typen");
     }
+
 
 }

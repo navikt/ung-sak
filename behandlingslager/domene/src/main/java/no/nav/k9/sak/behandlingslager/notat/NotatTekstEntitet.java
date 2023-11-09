@@ -50,4 +50,8 @@ abstract class NotatTekstEntitet extends BaseEntitet {
     public long getVersjon() {
         return versjon;
     }
+
+    public boolean erEndret() {
+        return versjon > 0;
+    }
 }

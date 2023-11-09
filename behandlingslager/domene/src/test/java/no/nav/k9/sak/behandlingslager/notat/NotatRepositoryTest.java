@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
@@ -84,6 +85,7 @@ class NotatRepositoryTest {
     @Test
     void skalOppretteNotatPåAktør() {
         var fagsak = lagFagsakMedPleietrengende();
+        fagsakRepository.opprettNy(fagsak);
         String tekst = "en tekst med litt notater på aktør";
 
         NotatEntitet notat = NotatBuilder.of(fagsak, true)
@@ -106,9 +108,48 @@ class NotatRepositoryTest {
 
     }
 
+
+    @Test
+    void skalSortereNotaterPåOpprettetTidspunkt() {
+        var fagsak = lagFagsakMedPleietrengende();
+        fagsakRepository.opprettNy(fagsak);
+
+        var nå = LocalDateTime.now();
+        NotatEntitet notat4 = NotatBuilder.of(fagsak, true).notatTekst("nyeste notat").build();
+        notat4.overstyrOpprettetTidspunkt(nå);
+
+        NotatEntitet notat3 = NotatBuilder.of(fagsak, false).notatTekst("nr 3").build();
+        notat3.overstyrOpprettetTidspunkt(nå.minusSeconds(10));
+
+        NotatEntitet notat2 = NotatBuilder.of(fagsak, true).notatTekst("nr 2").build();
+        notat2.overstyrOpprettetTidspunkt(nå.minusMinutes(10));
+
+        NotatEntitet notat1 = NotatBuilder.of(fagsak, false).notatTekst("eldste notat").build();
+        notat1.overstyrOpprettetTidspunkt(nå.minusMonths(1));
+
+        notatRepository.lagre(notat2);
+        notatRepository.lagre(notat1);
+        notatRepository.lagre(notat4);
+        notatRepository.lagre(notat3);
+
+        List<NotatEntitet> notatEntitets = notatRepository.hentForSakOgAktør(fagsak);
+
+        assertThat(notatEntitets).extracting(NotatEntitet::getOpprettetTidspunkt)
+            .containsExactlyElementsOf(
+                List.of(
+                    notat4.getOpprettetTidspunkt(),
+                    notat3.getOpprettetTidspunkt(),
+                    notat2.getOpprettetTidspunkt(),
+                    notat1.getOpprettetTidspunkt()
+                )
+            );
+
+    }
+
     @Test
     void skalFeileHvisEndrerPåUtdatertVersjon() {
         var fagsak = lagFagsakMedPleietrengende();
+        fagsakRepository.opprettNy(fagsak);
         String tekst = "en tekst med litt notater på aktør";
 
         //Klient 1 lager notat
