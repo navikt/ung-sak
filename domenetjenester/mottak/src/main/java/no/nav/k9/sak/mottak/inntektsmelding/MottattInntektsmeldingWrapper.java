@@ -1,5 +1,6 @@
 package no.nav.k9.sak.mottak.inntektsmelding;
 
+import no.nav.k9.sak.mottak.dokumentmottak.MottattDokumentException;
 import no.nav.k9.sak.mottak.inntektsmelding.v2.MottattDokumentWrapperInntektsmelding;
 import no.nav.k9.sak.typer.JournalpostId;
 
@@ -22,7 +23,7 @@ public abstract class MottattInntektsmeldingWrapper<S> {
         } else if (skjema instanceof no.seres.xsd.nav.inntektsmelding_m._20181211.InntektsmeldingM) {
             return new MottattDokumentWrapperInntektsmelding(journalpostId, (no.seres.xsd.nav.inntektsmelding_m._20181211.InntektsmeldingM) skjema);
         }
-        throw MottattInntektsmeldingException.FACTORY.ukjentSkjemaType(skjema.getClass().getCanonicalName());
+        throw MottattDokumentException.FACTORY.ukjentSkjemaType(skjema.getClass().getCanonicalName());
     }
 
     public S getSkjema() {

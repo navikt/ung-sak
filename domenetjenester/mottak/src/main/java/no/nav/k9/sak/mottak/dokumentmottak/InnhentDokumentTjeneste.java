@@ -30,8 +30,8 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRevurderingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.mottak.Behandlingsoppretter;
-import no.nav.k9.sak.mottak.inntektsmelding.MottattInntektsmeldingException;
 
 @Dependent
 public class InnhentDokumentTjeneste {
@@ -43,7 +43,9 @@ public class InnhentDokumentTjeneste {
     private final BehandlingRepository behandlingRepository;
     private final BehandlingLåsRepository behandlingLåsRepository;
     private final BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
-    private final ProsessTaskTjeneste taskRepository;
+    private final ProsessTaskTjeneste prosessTaskTjeneste;
+    private final FagsakProsessTaskRepository fagsakProsessTaskRepository;
+
 
     @Inject
     public InnhentDokumentTjeneste(@Any Instance<Dokumentmottaker> mottakere,
@@ -51,7 +53,8 @@ public class InnhentDokumentTjeneste {
                                    Behandlingsoppretter behandlingsoppretter,
                                    BehandlingRepositoryProvider repositoryProvider,
                                    BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
-                                   ProsessTaskTjeneste taskRepository) {
+                                   ProsessTaskTjeneste prosessTaskTjeneste,
+                                   FagsakProsessTaskRepository fagsakProsessTaskRepository) {
         this.mottakere = mottakere;
         this.dokumentMottakerFelles = dokumentMottakerFelles;
         this.behandlingsoppretter = behandlingsoppretter;
@@ -59,7 +62,8 @@ public class InnhentDokumentTjeneste {
         this.revurderingRepository = repositoryProvider.getBehandlingRevurderingRepository();
         this.behandlingLåsRepository = repositoryProvider.getBehandlingLåsRepository();
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
-        this.taskRepository = taskRepository;
+        this.prosessTaskTjeneste = prosessTaskTjeneste;
+        this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
     }
 
     public void mottaDokument(Fagsak fagsak, Collection<MottattDokument> mottattDokument) {
@@ -89,7 +93,7 @@ public class InnhentDokumentTjeneste {
             throw new IllegalStateException("Det er planlagt kjøringer som ikke har garantert rekkefølge. Sjekk oversikt over ventende tasker for eventuelt avbryte disse.");
         }
         // Lagrer tasks til slutt for å sikre at disse blir kjørt etter at dokumentasjon er lagret
-        taskRepository.lagre(taskGruppe);
+        prosessTaskTjeneste.lagre(taskGruppe);
     }
 
     private ProsessTaskData restartBehandling(Behandling behandling, BehandlingÅrsakType behandlingÅrsak) {
@@ -133,6 +137,7 @@ public class InnhentDokumentTjeneste {
                 }
             } else {
                 sjekkBehandlingKanHoppesTilbake(sisteBehandling);
+                sjekkBehandlingHarIkkeÅpneTasks(sisteBehandling);
                 return BehandlingMedOpprettelseResultat.eksisterendeBehandling(sisteBehandling);
             }
         }
@@ -179,14 +184,22 @@ public class InnhentDokumentTjeneste {
         }
 
         // noen andre holder på siden vi ikke fikk fatt på lås, så avbryter denne gang
-        throw MottattInntektsmeldingException.FACTORY.behandlingPågårAvventerKnytteMottattDokumentTilBehandling(behandling.getId());
+        throw MottattDokumentException.FACTORY.behandlingPågårAvventerKnytteMottattDokumentTilBehandling(behandling.getId());
     }
 
     private void sjekkBehandlingKanHoppesTilbake(Behandling behandling) {
         boolean underIverksetting = behandling.getStatus() == BehandlingStatus.IVERKSETTER_VEDTAK;
         if (underIverksetting) {
             //vedtak er fattet og behandlingen kan derfor ikke oppdateres. Må vente til behandlingen er avsluttet, og det vil så opprettes ny behandling når dokumentet sendes på nytt
-            throw MottattInntektsmeldingException.FACTORY.behandlingUnderIverksettingAvventerKnytteMottattDokumentTilBehandling(behandling.getId());
+            throw MottattDokumentException.FACTORY.behandlingUnderIverksettingAvventerKnytteMottattDokumentTilBehandling(behandling.getId());
+        }
+    }
+
+    private void sjekkBehandlingHarIkkeÅpneTasks(Behandling behandling) {
+        var åpneTasks = fagsakProsessTaskRepository.finnAlleÅpneTasksForAngittSøk(behandling.getFagsakId(), behandling.getId(), null);
+        if (!åpneTasks.isEmpty()) {
+            //behandlingen har åpne tasks og mottak av dokument kan føre til parallelle prosesser som går i beina på hverandre
+            throw MottattDokumentException.FACTORY.behandlingPågårAvventerKnytteMottattDokumentTilBehandling(behandling.getId());
         }
     }
 
@@ -203,8 +216,8 @@ public class InnhentDokumentTjeneste {
     }
 
     private static class BehandlingMedOpprettelseResultat {
-        private Behandling behandling;
-        private boolean nyopprettet;
+        private final Behandling behandling;
+        private final boolean nyopprettet;
 
         private BehandlingMedOpprettelseResultat(Behandling behandling, boolean nyopprettet) {
             this.behandling = behandling;

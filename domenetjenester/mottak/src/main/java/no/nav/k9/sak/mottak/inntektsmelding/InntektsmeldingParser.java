@@ -13,6 +13,7 @@ import jakarta.enterprise.util.TypeLiteral;
 
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
+import no.nav.k9.sak.mottak.dokumentmottak.MottattDokumentException;
 import no.nav.k9.sak.mottak.inntektsmelding.xml.MottattDokumentXmlParser;
 
 @SuppressWarnings("rawtypes")
@@ -57,9 +58,9 @@ public class InntektsmeldingParser {
         var instance = CDI.current().select(new TypeLiteralMottattDokumentOversetter(), annotationLiteral);
 
         if (instance.isAmbiguous()) {
-            throw MottattInntektsmeldingException.FACTORY.flereImplementasjonerAvSkjemaType(namespace);
+            throw MottattDokumentException.FACTORY.flereImplementasjonerAvSkjemaType(namespace);
         } else if (instance.isUnsatisfied()) {
-            throw MottattInntektsmeldingException.FACTORY.ukjentSkjemaType(namespace);
+            throw MottattDokumentException.FACTORY.ukjentSkjemaType(namespace);
         }
         var minInstans = instance.get();
         if (minInstans.getClass().isAnnotationPresent(Dependent.class)) {
