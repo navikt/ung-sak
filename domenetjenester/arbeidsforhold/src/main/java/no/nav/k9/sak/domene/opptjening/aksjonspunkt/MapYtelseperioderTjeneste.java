@@ -48,7 +48,7 @@ public class MapYtelseperioderTjeneste {
         }
         LocalDate tom = ytelseAnvist.getAnvistTOM();
         if (tom != null && !Tid.TIDENES_ENDE.equals(tom)) {
-            if (Set.of(Fagsystem.INFOTRYGD, Fagsystem.K9SAK, Fagsystem.FPSAK).contains(ytelse.getKilde())
+            if (Set.of(Fagsystem.INFOTRYGD, Fagsystem.K9SAK, Fagsystem.FPSAK, Fagsystem.VLSP).contains(ytelse.getKilde())
                 && DayOfWeek.THURSDAY.getValue() < DayOfWeek.from(tom).getValue()) {
                 tom = tom.plusDays((long) DayOfWeek.SUNDAY.getValue() - DayOfWeek.from(tom).getValue());
             }
