@@ -271,7 +271,7 @@ spec:
     - name: OPPTJENING_AP_VED_AKSEPTERT_MELLOMLIGGENDE_HELG
       value: "true"
     - name: FJERN_VILKARSPERIODER_BEREGNING
-      value: "true"
+      value: "false"
     - name: VALIDER_KALKULUS_REFERANSER
       value: "true"
 
