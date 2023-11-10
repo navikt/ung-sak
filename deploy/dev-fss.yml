@@ -274,6 +274,8 @@ spec:
       value: "false"
     - name: VALIDER_KALKULUS_REFERANSER
       value: "true"
+    - name: ENABLE_OPPGITT_OPPTJENING_ENDRINGSSØKNAD_PSB
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

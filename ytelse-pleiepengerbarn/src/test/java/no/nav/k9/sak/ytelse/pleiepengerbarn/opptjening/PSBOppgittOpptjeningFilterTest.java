@@ -6,9 +6,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import no.nav.k9.kodeverk.dokument.Brevkode;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlagBuilder;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
@@ -22,7 +25,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode
 
 public class PSBOppgittOpptjeningFilterTest {
 
-    private final PSBOppgittOpptjeningFilter opptjeningFilter = new PSBOppgittOpptjeningFilter();
+    private final PSBOppgittOpptjeningFilter opptjeningFilter = new PSBOppgittOpptjeningFilter(null, null, null, null, null, true);
 
     JournalpostId jpId1 = new JournalpostId("1");
     JournalpostId jpId2 = new JournalpostId("2");
@@ -39,6 +42,8 @@ public class PSBOppgittOpptjeningFilterTest {
     Arbeidsgiver arbeidsgiver1 = Arbeidsgiver.virksomhet("123123123");
     Arbeidsgiver arbeidsgiver2 = Arbeidsgiver.virksomhet("234234234");
 
+    Long fagsakId = 1234L;
+
     @Test
     public void skal_hente_matchende_oppgitte_opptjening_for_stp() {
         // Arrange
@@ -52,8 +57,10 @@ public class PSBOppgittOpptjeningFilterTest {
         OppgittOpptjeningBuilder opptjeningBuilder = lagOpptjeningBuilderSN(kravdok1, arbeidsgiver1);
         var iayGrunnlag = byggIayGrunnlag(List.of(opptjeningBuilder));
 
+        Set<MottattDokument> mottatteDokumenter = Set.of(byggMottattDokument(fagsakId, getPayloadSøknad(), jpId1, Brevkode.PLEIEPENGER_BARN_SOKNAD));
+
         // Act
-        var resultat = opptjeningFilter.finnOppgittOpptjening(iayGrunnlag, vilkårPeriode, kravDokumenterMedFravær);
+        var resultat = opptjeningFilter.finnOppgittOpptjening(iayGrunnlag, vilkårPeriode, kravDokumenterMedFravær, mottatteDokumenter);
 
         // Assert
         assertThat(resultat).isNotEmpty();
@@ -80,8 +87,13 @@ public class PSBOppgittOpptjeningFilterTest {
         OppgittOpptjeningBuilder opptjeningBuilder2 = lagOpptjeningBuilderSN(kravdok2, arbeidsgiver2);
         var iayGrunnlag = byggIayGrunnlag(List.of(opptjeningBuilder1, opptjeningBuilder2));
 
+        Set<MottattDokument> mottatteDokumenter = Set.of(
+            byggMottattDokument(fagsakId, getPayloadSøknad(), jpId1, Brevkode.PLEIEPENGER_BARN_SOKNAD),
+            byggMottattDokument(fagsakId, getPayloadSøknad(), jpId2, Brevkode.PLEIEPENGER_BARN_SOKNAD)
+        );
+
         // Act
-        var resultat = opptjeningFilter.finnOppgittOpptjening(iayGrunnlag, vilkårPeriodeMaks, kravDokumenterMedFravær);
+        var resultat = opptjeningFilter.finnOppgittOpptjening(iayGrunnlag, vilkårPeriodeMaks, kravDokumenterMedFravær, mottatteDokumenter);
 
         // Assert
         assertThat(resultat).isPresent();
@@ -107,8 +119,13 @@ public class PSBOppgittOpptjeningFilterTest {
         OppgittOpptjeningBuilder opptjeningBuilder2 = lagOpptjeningBuilderSN(kravdok2, arbeidsgiver2);
         var iayGrunnlag = byggIayGrunnlag(List.of(opptjeningBuilder1, opptjeningBuilder2));
 
+        Set<MottattDokument> mottatteDokumenter = Set.of(
+            byggMottattDokument(fagsakId, getPayloadSøknad(), jpId1, Brevkode.PLEIEPENGER_BARN_SOKNAD),
+            byggMottattDokument(fagsakId, getPayloadSøknad(), jpId2, Brevkode.PLEIEPENGER_BARN_SOKNAD)
+        );
+
         // Act
-        var resultat = opptjeningFilter.finnOppgittOpptjening(iayGrunnlag, vilkårPeriode, kravDokumenterMedFravær);
+        var resultat = opptjeningFilter.finnOppgittOpptjening(iayGrunnlag, vilkårPeriode, kravDokumenterMedFravær, mottatteDokumenter);
 
         // Assert
         assertThat(resultat).isPresent();
@@ -138,18 +155,52 @@ public class PSBOppgittOpptjeningFilterTest {
         OppgittOpptjeningBuilder opptjeningBuilder2 = lagOpptjeningBuilderSN(kravdok2, arbeidsgiver2);
         var iayGrunnlag = byggIayGrunnlag(List.of(opptjeningBuilder1, opptjeningBuilder2));
 
+        Set<MottattDokument> mottatteDokumenter = Set.of(
+            byggMottattDokument(fagsakId, getPayloadSøknad(), jpId1, Brevkode.PLEIEPENGER_BARN_SOKNAD),
+            byggMottattDokument(fagsakId, getPayloadSøknad(), jpId2, Brevkode.PLEIEPENGER_BARN_SOKNAD),
+            byggMottattDokument(fagsakId, getPayloadSøknad(), jpId3, Brevkode.PLEIEPENGER_BARN_SOKNAD)
+        );
+
         // Act
-        var resultat = opptjeningFilter.finnOppgittOpptjening(iayGrunnlag, vilkårPeriode, kravDokumenterMedFravær);
+        var resultat = opptjeningFilter.finnOppgittOpptjening(iayGrunnlag, vilkårPeriode, kravDokumenterMedFravær, mottatteDokumenter);
 
         // Assert
         assertThat(resultat).isPresent();
         assertThat(resultat.get().getEgenNæring().get(0).getOrgnr()).isEqualTo(arbeidsgiver2.getOrgnr());
     }
 
-    private SøktPeriode<Søknadsperiode> byggSøktPeriode(LocalDate fom, LocalDate tom) {
-        var søktPeriode = new SøktPeriode<>(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), new Søknadsperiode(fom, tom));
+    @Test
+    public void skal_ikke_bruke_oppgitt_opptjening_fra_søknad_uten_søknadsperiode_psb() {
+        // Arrange
+        var fraværFom = LocalDate.now();
+        var fraværTom = LocalDate.now().plusDays(10);
 
-        return søktPeriode;
+        var vilkårPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(fraværFom, fraværTom);
+
+        Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> kravDokumenterMedFravær = Map.of(
+            kravdok1, List.of(byggSøktPeriode(fraværFom, fraværTom)),
+            kravdok2, List.of(byggSøktPeriode(fraværFom, fraværTom))
+        );
+
+        OppgittOpptjeningBuilder opptjeningBuilder1 = lagOpptjeningBuilderSN(kravdok1, arbeidsgiver1);
+        OppgittOpptjeningBuilder opptjeningBuilder2 = lagOpptjeningBuilderSN(kravdok2, arbeidsgiver2);
+        var iayGrunnlag = byggIayGrunnlag(List.of(opptjeningBuilder1, opptjeningBuilder2));
+
+        Set<MottattDokument> mottatteDokumenter = Set.of(
+            byggMottattDokument(fagsakId, getPayloadSøknad(), jpId1, Brevkode.PLEIEPENGER_BARN_SOKNAD),
+            byggMottattDokument(fagsakId, getPayloadSøknadUtenSøknadsperiode(), jpId2, Brevkode.PLEIEPENGER_BARN_SOKNAD)
+        );
+
+        // Act
+        var resultat = opptjeningFilter.finnOppgittOpptjening(iayGrunnlag, vilkårPeriode, kravDokumenterMedFravær, mottatteDokumenter);
+
+        // Assert
+        assertThat(resultat).isPresent();
+        assertThat(resultat.get().getEgenNæring().get(0).getOrgnr()).isEqualTo(arbeidsgiver1.getOrgnr());
+    }
+
+    private SøktPeriode<Søknadsperiode> byggSøktPeriode(LocalDate fom, LocalDate tom) {
+        return new SøktPeriode<>(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), new Søknadsperiode(fom, tom));
     }
 
     private OppgittOpptjeningBuilder lagOpptjeningBuilderSN(KravDokument kravdok, Arbeidsgiver arbeidsgiver) {
@@ -169,5 +220,51 @@ public class PSBOppgittOpptjeningFilterTest {
             .build();
     }
 
+    private MottattDokument byggMottattDokument(Long fagsakId, String xml, JournalpostId journalpostId, Brevkode brevkode) {
+        MottattDokument.Builder builder = new MottattDokument.Builder();
+        builder.medType(brevkode);
+        builder.medPayload(xml);
+        builder.medFagsakId(fagsakId);
+        builder.medJournalPostId(journalpostId);
+        return builder.build();
+    }
+
+    private static String getPayloadSøknad() {
+        return "{\"mottattDato\":\"2023-11-09T09:42:19.676Z\",\n" +
+            "\"språk\":\"nb\",\n" +
+            "\"søker\":{\"norskIdentitetsnummer\":\"08438035460\"},\n" +
+            "\"søknadId\":\"7ab49ff6-7994-4690-9476-5bc9285fdb1a\",\n" +
+            "\"versjon\":\"5.1.9\",\n" +
+            "\"ytelse\":{\n" +
+            "\t\"type\":\"PLEIEPENGER_SYKT_BARN\",\n" +
+            "\t\"arbeidstid\":{\n" +
+            "\t\t\"arbeidstakerList\":[],\n" +
+            "\t\t\"frilanserArbeidstidInfo\":null,\n" +
+            "\t\t\"selvstendigNæringsdrivendeArbeidstidInfo\":{\"perioder\":{\"2023-08-09/2023-10-09\":{\"faktiskArbeidTimerPerDag\":\"PT0S\",\"jobberNormaltTimerPerDag\":\"PT7H30M\"}}}\n" +
+            "\t},\n" +
+            "\t\"barn\":{\"fødselsdato\":null,\"norskIdentitetsnummer\":\"13412363366\"},\n" +
+            "\t\"lovbestemtFerie\":{\"perioder\":{}},\n" +
+            "\t\"opptjeningAktivitet\":{\"selvstendigNæringsdrivende\":[{\"organisasjonsnummer\":\"910909088\",\"perioder\":{\"2022-10-09/2023-11-09\":{\"virksomhetstyper\":[\"ANNEN\"]}},\"virksomhetNavn\":\"Bedriften\"}]},\n" +
+            "\t\"søknadsperiode\":[\"2023-08-09/2023-10-09\"],\n" +
+            "\t\"trekkKravPerioder\":[],\n" +
+            "\t\"uttak\":{\"perioder\":{\"2023-08-09/2023-10-09\":{\"timerPleieAvBarnetPerDag\":\"PT7H30M\"}}}\n" +
+            "}}";
+    }
+
+    private static String getPayloadSøknadUtenSøknadsperiode() {
+        return "{\"mottattDato\":\"2023-11-09T09:42:19.676Z\",\n" +
+            "\"språk\":\"nb\",\n" +
+            "\"søker\":{\"norskIdentitetsnummer\":\"08438035460\"},\n" +
+            "\"søknadId\":\"7ab49ff6-7994-4690-9476-5bc9285fdb1a\",\n" +
+            "\"versjon\":\"5.1.9\",\n" +
+            "\"ytelse\":{\n" +
+            "\t\"type\":\"PLEIEPENGER_SYKT_BARN\",\n" +
+            "\t\"barn\":{\"fødselsdato\":null,\"norskIdentitetsnummer\":\"13412363366\"},\n" +
+            "\t\"lovbestemtFerie\":{\"perioder\":{\"2023-08-10/2023-09-10\":{\"skalHaFerie\":true}}},\n" +
+            "\t\"søknadsperiode\":[],\n" +
+            "\t\"trekkKravPerioder\":[],\n" +
+            "\t\"uttak\":{\"perioder\":{}}}\n" +
+            "}}";
+    }
 }
 
