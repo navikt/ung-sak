@@ -163,7 +163,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.k9.felles.oidc-token</groupId>
-            <artifactId>k9-sikkerhet-azure-cc</artifactId>
+            <artifactId>k9-sikkerhet-sts</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.k9.felles</groupId>
