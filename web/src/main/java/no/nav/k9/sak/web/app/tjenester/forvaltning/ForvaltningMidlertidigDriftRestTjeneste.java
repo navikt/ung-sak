@@ -69,6 +69,7 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -185,6 +186,38 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         this.personopplysningRepository = personopplysningRepository;
         this.opprettRevurderingService = opprettRevurderingService;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
+    }
+
+
+    @GET
+    @Path("finn-ubehandlede-saker-doed")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Henter liste av saker med ubehandlede behandlinger hvor dødsfall er årsak. Resultat er tenkt brukt i enhetenes prioritering av behandlinger. Kan fjernes når ny los løser samme behov")
+    @Produces(MediaType.TEXT_PLAIN)
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    public Response finnUbehandledeDødsfallBehandlinger() {
+        String preparedStatement = """
+            select saksnummer
+            from fagsak f
+            join behandling b on f.id = b.fagsak_id
+            join behandling_arsak ba on b.id = ba.behandling_id
+            where f.ytelse_type = :ytelseType
+               and behandling_status <> :behandlingAvsluttetStatus
+               and avsluttet_dato is null
+               and behandling_arsak_type in :behandlingAarsaker
+            order by b.opprettet_tid;
+            """;
+        Query query = entityManager.createNativeQuery(preparedStatement)
+            .setParameter("behandlingType", BehandlingType.UNNTAKSBEHANDLING.getKode())
+            .setParameter("behandlingAvsluttetStatus", BehandlingStatus.AVSLUTTET.getKode())
+            .setParameter("ytelseType", FagsakYtelseType.PSB.getKode())
+            .setParameter("behandlingAarsaker", List.of(
+                BehandlingÅrsakType.RE_OPPLYSNINGER_OM_DØD.getKode(),
+                BehandlingÅrsakType.RE_HENDELSE_DØD_BARN.getKode(),
+                BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER.getKode()));
+
+        List resultat = query.getResultList();
+        return Response.ok("Saker med ubehandlede behandlinger pga dødsfall:  " + resultat).build();
     }
 
     /**
