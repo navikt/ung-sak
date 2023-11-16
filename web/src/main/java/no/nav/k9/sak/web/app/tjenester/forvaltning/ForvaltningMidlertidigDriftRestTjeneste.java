@@ -224,7 +224,6 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             order by b.opprettet_tid;
             """;
         Query query = entityManager.createNativeQuery(preparedStatement)
-            .setParameter("behandlingType", BehandlingType.UNNTAKSBEHANDLING.getKode())
             .setParameter("behandlingAvsluttetStatus", BehandlingStatus.AVSLUTTET.getKode())
             .setParameter("ytelseType", FagsakYtelseType.PSB.getKode())
             .setParameter("behandlingAarsaker", List.of(
