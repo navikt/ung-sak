@@ -261,7 +261,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             .build();
     }
 
-    static class IngenAbacAttributterSupplier implements Function<Object, AbacDataAttributter> {
+    public static class IngenAbacAttributterSupplier implements Function<Object, AbacDataAttributter> {
 
         @Override
         public AbacDataAttributter apply(Object obj) {
