@@ -211,7 +211,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     @Operation(description = "Henter liste av saker med ubehandlede behandlinger hvor dødsfall er årsak. Resultat er tenkt brukt i enhetenes prioritering av behandlinger. Kan fjernes når ny los løser samme behov. Bruk antall til å justere hvis kallet timer ut.")
     @Produces(MediaType.TEXT_PLAIN)
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
-    public Response finnUbehandledeDødsfallBehandlinger(@NotNull @QueryParam("antall") @DecimalMin(value = "1") @DecimalMax(value = "1000") @Valid Integer maxAntallSomSjekkes) {
+    public Response finnUbehandledeDødsfallBehandlinger(@NotNull @QueryParam("antall") @DecimalMin(value = "1") @DecimalMax(value = "1000") @Valid @TilpassetAbacAttributt(supplierClass = IngenAbacAttributterSupplier.class) Integer maxAntallSomSjekkes) {
         String preparedStatement = """
             select saksnummer
             from fagsak f
@@ -260,6 +260,14 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                     + ". Antall med kode7 (ikke i listen): " + tellerKode7
                     + ". Spurte om første " + maxAntallSomSjekkes + " saker, fikk " + resultat.size() + " saker")
             .build();
+    }
+
+    static class IngenAbacAttributterSupplier implements Function<Object, AbacDataAttributter> {
+
+        @Override
+        public AbacDataAttributter apply(Object obj) {
+            return AbacDataAttributter.opprett();
+        }
     }
 
     private boolean erEgenAnsatt(String saksnummer) {
