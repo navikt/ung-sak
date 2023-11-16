@@ -275,7 +275,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         //i denne konteksten er det allerede sjekket om sak er beskyttet med kode 6/7 så hvis det ikke gis tilgang, skal det være pga egen ansatt
         String jwtForInnloggetBruker = Objects.requireNonNull(SubjectHandler.getSubjectHandler().getInternSsoToken());
         AbacAttributtSamling attributter = AbacAttributtSamling.medJwtToken(jwtForInnloggetBruker)
-            .leggTil(AbacDataAttributter.opprett().leggTil(StandardAbacAttributtType.SAKSNUMMER, saksnummer));
+            .leggTil(AbacDataAttributter.opprett().leggTil(StandardAbacAttributtType.SAKSNUMMER, new Saksnummer(saksnummer)));
         Tilgangsbeslutning beslutning = pep.vurderTilgang(attributter);
         return !beslutning.fikkTilgang();
     }
