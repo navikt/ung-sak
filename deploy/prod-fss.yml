@@ -222,6 +222,8 @@ spec:
       value: https://sts.adeo.no/SecurityTokenServiceProvider/
     - name: OIDC_STS_HOST_URL
       value: https://security-token-service.nais.adeo.no
+    - name: CLIENT_SCOPE
+      value: "api://prod-fss.k9saksbehandling.k9-sak/.default"
 
     - name: ABAC_ATTRIBUTT_DRIFT
       value: "no.nav.abac.attributter.k9.drift"
