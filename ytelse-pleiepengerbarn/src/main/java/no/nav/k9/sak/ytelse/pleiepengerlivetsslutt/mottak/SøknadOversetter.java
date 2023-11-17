@@ -42,7 +42,7 @@ class SøknadOversetter {
 
 
     @Inject
-    SøknadOversetter(TpsTjeneste tpsTjeneste, SøknadPersisterer søknadPersisterer, @KonfigVerdi(value = "ENABLE_UTENLANDSOPPHOLD_PILS", defaultVerdi = "false") boolean enableUtenlandsoppholdPILS) {
+    SøknadOversetter(TpsTjeneste tpsTjeneste, SøknadPersisterer søknadPersisterer, @KonfigVerdi(value = "ENABLE_UTENLANDSOPPHOLD_PILS", defaultVerdi = "true") boolean enableUtenlandsoppholdPILS) {
         this.tpsTjeneste = tpsTjeneste;
         this.søknadPersisterer = søknadPersisterer;
         this.enableUtenlandsoppholdPILS = enableUtenlandsoppholdPILS;

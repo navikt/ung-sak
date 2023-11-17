@@ -29,7 +29,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -47,6 +49,8 @@ import jakarta.persistence.Query;
 import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.ws.rs.Consumes;
@@ -55,6 +59,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedMap;
@@ -63,17 +68,23 @@ import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.sikkerhet.abac.AbacAttributtSamling;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.AbacDto;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
+import no.nav.k9.felles.sikkerhet.abac.Pep;
+import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
+import no.nav.k9.felles.sikkerhet.abac.Tilgangsbeslutning;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
+import no.nav.k9.kodeverk.person.Diskresjonskode;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
@@ -81,9 +92,10 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
-import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.pip.PipRepository;
+import no.nav.k9.sak.domene.person.pdl.TilknytningTjeneste;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
 import no.nav.k9.sak.hendelse.stønadstatistikk.StønadstatistikkService;
@@ -107,6 +119,7 @@ import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.frisinn.mottak.FrisinnSøknadInnsending;
 import no.nav.k9.sak.ytelse.frisinn.mottak.FrisinnSøknadMottaker;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer;
@@ -145,11 +158,13 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     private StønadstatistikkService stønadstatistikkService;
 
     private DriftLesetilgangVurderer lesetilgangVurderer;
-
-    private PersonopplysningRepository personopplysningRepository;
     private OpprettRevurderingService opprettRevurderingService;
 
-    private ProsessTaskTjeneste prosessTaskTjeneste;
+    private PipRepository pipRepository;
+
+    private TilknytningTjeneste tilknytningTjeneste;
+
+    private Pep pep;
 
     public ForvaltningMidlertidigDriftRestTjeneste() {
         // For Rest-CDI
@@ -167,9 +182,10 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                                                    EntityManager entityManager,
                                                    StønadstatistikkService stønadstatistikkService,
                                                    DriftLesetilgangVurderer lesetilgangVurderer,
-                                                   PersonopplysningRepository personopplysningRepository,
                                                    OpprettRevurderingService opprettRevurderingService,
-                                                   ProsessTaskTjeneste prosessTaskTjeneste) {
+                                                   PipRepository pipRepository,
+                                                   TilknytningTjeneste tilknytningTjeneste,
+                                                   Pep pep) {
 
         this.frisinnSøknadMottaker = frisinnSøknadMottaker;
         this.tpsTjeneste = tpsTjeneste;
@@ -182,9 +198,94 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         this.entityManager = entityManager;
         this.stønadstatistikkService = stønadstatistikkService;
         this.lesetilgangVurderer = lesetilgangVurderer;
-        this.personopplysningRepository = personopplysningRepository;
         this.opprettRevurderingService = opprettRevurderingService;
-        this.prosessTaskTjeneste = prosessTaskTjeneste;
+        this.pipRepository = pipRepository;
+        this.tilknytningTjeneste = tilknytningTjeneste;
+        this.pep = pep;
+    }
+
+
+    @GET
+    @Path("finn-ubehandlede-saker-doed")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Henter liste av saker med ubehandlede behandlinger hvor dødsfall er årsak. Resultat er tenkt brukt i enhetenes prioritering av behandlinger. Kan fjernes når ny los løser samme behov. Bruk antall til å justere hvis kallet timer ut.")
+    @Produces(MediaType.TEXT_PLAIN)
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    public Response finnUbehandledeDødsfallBehandlinger(@NotNull @QueryParam("antall") @DecimalMin(value = "1") @DecimalMax(value = "1000") @Valid @TilpassetAbacAttributt(supplierClass = IngenAbacAttributterSupplier.class) Integer maxAntallSomSjekkes) {
+        String preparedStatement = """
+            select saksnummer
+            from fagsak f
+            join behandling b on f.id = b.fagsak_id
+            join behandling_arsak ba on b.id = ba.behandling_id
+            where f.ytelse_type = :ytelseType
+               and behandling_status <> :behandlingAvsluttetStatus
+               and avsluttet_dato is null
+               and behandling_arsak_type in :behandlingAarsaker
+            order by b.opprettet_tid;
+            """;
+        Query query = entityManager.createNativeQuery(preparedStatement)
+            .setParameter("behandlingAvsluttetStatus", BehandlingStatus.AVSLUTTET.getKode())
+            .setParameter("ytelseType", FagsakYtelseType.PSB.getKode())
+            .setParameter("behandlingAarsaker", List.of(
+                BehandlingÅrsakType.RE_OPPLYSNINGER_OM_DØD.getKode(),
+                BehandlingÅrsakType.RE_HENDELSE_DØD_BARN.getKode(),
+                BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER.getKode()));
+
+        int tellerKode6 = 0;
+        int tellerKode7 = 0;
+        List<String> saksnummerEgenAnsatt = new ArrayList<>();
+        List<String> saksnummerUtenDiskresjonskode = new ArrayList<>();
+
+        List resultat = query.getResultList();
+        for (int i = 0; i < resultat.size() && i < maxAntallSomSjekkes; i++) {
+            String saksnummer = (String) resultat.get(i);
+            Set<AktørId> aktører = pipRepository.hentAktørIdKnyttetTilSaksnummer(new Saksnummer(saksnummer));
+            Set<Diskresjonskode> diskresjonskoder = finnDiskresjonskoder(aktører);
+            if (diskresjonskoder.contains(Diskresjonskode.KODE6)) {
+                tellerKode6++;
+            } else if (diskresjonskoder.contains(Diskresjonskode.KODE7)) {
+                tellerKode7++;
+            } else if (erEgenAnsatt(saksnummer)) {
+                saksnummerEgenAnsatt.add(saksnummer);
+            } else {
+                saksnummerUtenDiskresjonskode.add(saksnummer);
+            }
+        }
+        return Response.ok(
+                "Saker med ubehandlede behandlinger pga dødsfall følger"
+                    + ". Uten diskresjonskode:  " + saksnummerUtenDiskresjonskode
+                    + ". Egen ansatt: " + saksnummerEgenAnsatt
+                    + ". Antall med kode6 (ikke i listen): " + tellerKode6
+                    + ". Antall med kode7 (ikke i listen): " + tellerKode7
+                    + ". Spurte om første " + maxAntallSomSjekkes + " saker, fikk " + resultat.size() + " saker")
+            .build();
+    }
+
+    public static class IngenAbacAttributterSupplier implements Function<Object, AbacDataAttributter> {
+
+        @Override
+        public AbacDataAttributter apply(Object obj) {
+            return AbacDataAttributter.opprett();
+        }
+    }
+
+    private boolean erEgenAnsatt(String saksnummer) {
+        //PRECONDITION: det SKAL sjekkes mot kode6 og kode7 før denne metoden kalles
+        //PRECONDITION: virker bare hvis innlogget bruker ikke har tilgang til egen ansatt
+        //i denne konteksten er det allerede sjekket om sak er beskyttet med kode 6/7 så hvis det ikke gis tilgang, skal det være pga egen ansatt
+        String jwtForInnloggetBruker = Objects.requireNonNull(SubjectHandler.getSubjectHandler().getInternSsoToken());
+        AbacAttributtSamling attributter = AbacAttributtSamling.medJwtToken(jwtForInnloggetBruker)
+            .leggTil(AbacDataAttributter.opprett().leggTil(StandardAbacAttributtType.SAKSNUMMER, new Saksnummer(saksnummer)))            ;
+        attributter.setActionType(BeskyttetRessursActionAttributt.READ);
+        attributter.setResource(DRIFT); //bruker samme som på REST-tjenesten
+        Tilgangsbeslutning beslutning = pep.vurderTilgang(attributter);
+        return !beslutning.fikkTilgang();
+    }
+
+    private Set<Diskresjonskode> finnDiskresjonskoder(Set<AktørId> aktører) {
+        return aktører.stream()
+            .map(aktørId -> tilknytningTjeneste.hentGeografiskTilknytning(aktørId).getDiskresjonskode())
+            .collect(Collectors.toSet());
     }
 
     /**
