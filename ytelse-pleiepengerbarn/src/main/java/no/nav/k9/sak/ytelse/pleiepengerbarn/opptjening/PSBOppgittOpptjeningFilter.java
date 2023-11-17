@@ -160,6 +160,8 @@ public class PSBOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
         final MottattDokument mottattDokument = mottatteDokumenter.stream().filter(it -> journalpostId.equals(it.getJournalpostId())).findFirst().orElseThrow();
         final Søknad søknad = JsonUtils.fromString(mottattDokument.getPayload(), Søknad.class);
         if (enableOppgittOpptjeningEndringssøknadPSB && Objects.equals(søknad.getYtelse().getType().kode(), "PLEIEPENGER_SYKT_BARN")) {
+            // Dersom søknaden ikke har søknadsperiode betyr det at den enten er fra endringsdialogen eller at den er punsjet uten.
+            // I disse tilfellene skal oppgitt opptjening fra tidligere søknad fortsatt gjelde.
             PleiepengerSyktBarn psbSøknad = søknad.getYtelse();
             return psbSøknad.getSøknadsperiodeList() != null && !psbSøknad.getSøknadsperiodeList().isEmpty();
         }
