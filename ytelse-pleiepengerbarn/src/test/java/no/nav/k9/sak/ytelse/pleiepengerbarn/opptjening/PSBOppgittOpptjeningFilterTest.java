@@ -199,6 +199,36 @@ public class PSBOppgittOpptjeningFilterTest {
         assertThat(resultat.get().getEgenNæring().get(0).getOrgnr()).isEqualTo(arbeidsgiver1.getOrgnr());
     }
 
+    @Test
+    public void skal_bruke_oppgitt_opptjening_fra_søknad_uten_søknadsperiode_psb_hvis_eldre_søknadsversjon() {
+        // Arrange
+        var fraværFom = LocalDate.now();
+        var fraværTom = LocalDate.now().plusDays(10);
+
+        var vilkårPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(fraværFom, fraværTom);
+
+        Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> kravDokumenterMedFravær = Map.of(
+            kravdok1, List.of(byggSøktPeriode(fraværFom, fraværTom)),
+            kravdok2, List.of(byggSøktPeriode(fraværFom, fraværTom))
+        );
+
+        OppgittOpptjeningBuilder opptjeningBuilder1 = lagOpptjeningBuilderSN(kravdok1, arbeidsgiver1);
+        OppgittOpptjeningBuilder opptjeningBuilder2 = lagOpptjeningBuilderSN(kravdok2, arbeidsgiver2);
+        var iayGrunnlag = byggIayGrunnlag(List.of(opptjeningBuilder1, opptjeningBuilder2));
+
+        Set<MottattDokument> mottatteDokumenter = Set.of(
+            byggMottattDokument(fagsakId, getPayloadSøknad(), jpId1, Brevkode.PLEIEPENGER_BARN_SOKNAD),
+            byggMottattDokument(fagsakId, getPayloadSøknadUtenSøknadsperiodeEldreVersjon(), jpId2, Brevkode.PLEIEPENGER_BARN_SOKNAD)
+        );
+
+        // Act
+        var resultat = opptjeningFilter.finnOppgittOpptjening(iayGrunnlag, vilkårPeriode, kravDokumenterMedFravær, mottatteDokumenter);
+
+        // Assert
+        assertThat(resultat).isPresent();
+        assertThat(resultat.get().getEgenNæring().get(0).getOrgnr()).isEqualTo(arbeidsgiver2.getOrgnr());
+    }
+
     private SøktPeriode<Søknadsperiode> byggSøktPeriode(LocalDate fom, LocalDate tom) {
         return new SøktPeriode<>(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), new Søknadsperiode(fom, tom));
     }
@@ -234,7 +264,7 @@ public class PSBOppgittOpptjeningFilterTest {
             "\"språk\":\"nb\",\n" +
             "\"søker\":{\"norskIdentitetsnummer\":\"08438035460\"},\n" +
             "\"søknadId\":\"7ab49ff6-7994-4690-9476-5bc9285fdb1a\",\n" +
-            "\"versjon\":\"5.1.9\",\n" +
+            "\"versjon\":\"1.0.1\",\n" +
             "\"ytelse\":{\n" +
             "\t\"type\":\"PLEIEPENGER_SYKT_BARN\",\n" +
             "\t\"arbeidstid\":{\n" +
@@ -256,7 +286,23 @@ public class PSBOppgittOpptjeningFilterTest {
             "\"språk\":\"nb\",\n" +
             "\"søker\":{\"norskIdentitetsnummer\":\"08438035460\"},\n" +
             "\"søknadId\":\"7ab49ff6-7994-4690-9476-5bc9285fdb1a\",\n" +
-            "\"versjon\":\"5.1.9\",\n" +
+            "\"versjon\":\"1.0.1\",\n" +
+            "\"ytelse\":{\n" +
+            "\t\"type\":\"PLEIEPENGER_SYKT_BARN\",\n" +
+            "\t\"barn\":{\"fødselsdato\":null,\"norskIdentitetsnummer\":\"13412363366\"},\n" +
+            "\t\"lovbestemtFerie\":{\"perioder\":{\"2023-08-10/2023-09-10\":{\"skalHaFerie\":true}}},\n" +
+            "\t\"søknadsperiode\":[],\n" +
+            "\t\"trekkKravPerioder\":[],\n" +
+            "\t\"uttak\":{\"perioder\":{}}}\n" +
+            "}}";
+    }
+
+    private static String getPayloadSøknadUtenSøknadsperiodeEldreVersjon() {
+        return "{\"mottattDato\":\"2023-11-09T09:42:19.676Z\",\n" +
+            "\"språk\":\"nb\",\n" +
+            "\"søker\":{\"norskIdentitetsnummer\":\"08438035460\"},\n" +
+            "\"søknadId\":\"7ab49ff6-7994-4690-9476-5bc9285fdb1a\",\n" +
+            "\"versjon\":\"1.0.0\",\n" +
             "\"ytelse\":{\n" +
             "\t\"type\":\"PLEIEPENGER_SYKT_BARN\",\n" +
             "\t\"barn\":{\"fødselsdato\":null,\"norskIdentitetsnummer\":\"13412363366\"},\n" +

@@ -41,6 +41,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.MapTil
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.Søknad;
+import no.nav.k9.søknad.felles.Versjon;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
 
 @ApplicationScoped
@@ -159,7 +160,7 @@ public class PSBOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
     private boolean brukOppgittOpptjening(JournalpostId journalpostId, Set<MottattDokument> mottatteDokumenter) {
         final MottattDokument mottattDokument = mottatteDokumenter.stream().filter(it -> journalpostId.equals(it.getJournalpostId())).findFirst().orElseThrow();
         final Søknad søknad = JsonUtils.fromString(mottattDokument.getPayload(), Søknad.class);
-        if (enableOppgittOpptjeningEndringssøknadPSB && Objects.equals(søknad.getYtelse().getType().kode(), "PLEIEPENGER_SYKT_BARN")) {
+        if (enableOppgittOpptjeningEndringssøknadPSB && Objects.equals(søknad.getYtelse().getType().kode(), "PLEIEPENGER_SYKT_BARN") && søknad.getVersjon().compareTo(Versjon.of("1.0.1")) >= 0) {
             // Dersom søknaden ikke har søknadsperiode betyr det at den enten er fra endringsdialogen eller at den er punsjet uten.
             // I disse tilfellene skal oppgitt opptjening fra tidligere søknad fortsatt gjelde.
             PleiepengerSyktBarn psbSøknad = søknad.getYtelse();
