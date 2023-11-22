@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.domene.iay.modell.PeriodeAndel;
-import no.nav.k9.sak.mottak.dokumentmottak.MottattDokumentException;
 
 public class ValiderInntektsmelding {
 
@@ -17,14 +16,14 @@ public class ValiderInntektsmelding {
 
     public BigDecimal validerRefusjonEndringMaks(String path, BigDecimal value, LocalDate endringsdato) {
         if (value != null && MAX.compareTo(value) <= 0) {
-            throw MottattDokumentException.FACTORY.inntektsmeldingSemantiskValideringFeil(String.format("Angitt [%s] %s>=%s for endringsdato [%s]", path, value, MAX, endringsdato));
+            throw MottattInntektsmeldingException.FACTORY.inntektsmeldingSemantiskValideringFeil(String.format("Angitt [%s] %s>=%s for endringsdato [%s]", path, value, MAX, endringsdato));
         }
         return value;
     }
 
     public BigDecimal validerMaksBeløp(String path, BigDecimal value) {
         if (value != null && MAX.compareTo(value) <= 0) {
-            throw MottattDokumentException.FACTORY.inntektsmeldingSemantiskValideringFeil(String.format("Angitt [%s] %s>=%s", path, value, MAX));
+            throw MottattInntektsmeldingException.FACTORY.inntektsmeldingSemantiskValideringFeil(String.format("Angitt [%s] %s>=%s", path, value, MAX));
         }
         return value;
     }
@@ -44,9 +43,9 @@ public class ValiderInntektsmelding {
 
         if (maksDato.getYear() < CUTOFF_YEAR) {
             // behandler ikke inntektsmeldinger før 2020 her, sendes infotrygd fra fordel i stedet.
-            throw MottattDokumentException.FACTORY.inntektsmeldingSemantiskValideringFeil(String.format("Inntektsmelding gjelder tidligere år: [%s, %s]", minDato, maksDato));
+            throw MottattInntektsmeldingException.FACTORY.inntektsmeldingSemantiskValideringFeil(String.format("Inntektsmelding gjelder tidligere år: [%s, %s]", minDato, maksDato));
         } else if (maksDato.isAfter(validerDato)) {
-            throw MottattDokumentException.FACTORY.inntektsmeldingSemantiskValideringFeil(String.format("Inntektsmelding oppgitt fravær frem i tid: validerDato=%s, oppgittFravær=[%s, %s]", validerDato, minDato, maksDato));
+            throw MottattInntektsmeldingException.FACTORY.inntektsmeldingSemantiskValideringFeil(String.format("Inntektsmelding oppgitt fravær frem i tid: validerDato=%s, oppgittFravær=[%s, %s]", validerDato, minDato, maksDato));
         }
 
         return perioder;
