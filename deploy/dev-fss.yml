@@ -229,7 +229,7 @@ spec:
       value: "api://dev-fss.k9saksbehandling.k9-sak/.default"
     # gjør alle disse systemkall til k9-sak?
     - name: AZURE_APP_PRE_AUTHORIZED_APPS
-      value: "k9sak, k9formidling, k9-fordel, fpabakus, saf, k9klage, k9-tilbake"
+      value: "srvk9sak, srvk9formidling, srvk9-fordel, srvfpabakus, srvsaf, srvk9klage, srvk9-tilbake"
 
     - name: SECURITYTOKENSERVICE_URL
       value: https://sts-q1.preprod.local/SecurityTokenServiceProvider/
