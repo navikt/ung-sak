@@ -70,6 +70,9 @@ public class UttakRestKlient {
     private OidcRestClient restKlient;
     private URI endpointUttaksplan;
     private URI endpointSimuleringUttaksplan;
+
+    private URI endpointNedjusterSøkersUttaksgrad;
+
     private String psbUttakToken;
 
     protected UttakRestKlient() {
@@ -83,6 +86,7 @@ public class UttakRestKlient {
         this.restKlient = restKlient;
         this.endpointUttaksplan = toUri(endpoint, "/uttaksplan");
         this.endpointSimuleringUttaksplan = toUri(endpoint, "/uttaksplan/simulering");
+        this.endpointNedjusterSøkersUttaksgrad = toUri(endpoint, "/uttaksplan/nedjusterUttaksgrad");
         this.psbUttakToken = psbUttakToken;
     }
 
@@ -120,6 +124,18 @@ public class UttakRestKlient {
             return utførOgHent(kall, null, new ObjectReaderResponseHandler<>(endpointUttaksplan, uttaksplanReader));
         } catch (IOException | URISyntaxException e) {
             throw RestTjenesteFeil.FEIL.feilKallTilUttak(behandlingUuid, e).toException();
+        }
+    }
+
+    public Uttaksplan nedjusterSøkersUttaksgrad(Uttaksgrunnlag request) {
+        URIBuilder builder = new URIBuilder(endpointNedjusterSøkersUttaksgrad);
+        try {
+            HttpPost kall = new HttpPost(builder.build());
+            var json = objectMapper.writer().writeValueAsString(request);
+            kall.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
+            return utførOgHent(kall, json, new ObjectReaderResponseHandler<>(endpointNedjusterSøkersUttaksgrad, uttaksplanReader));
+        } catch (IOException | URISyntaxException e) {
+            throw RestTjenesteFeil.FEIL.feilKallTilUttak(UUID.fromString(request.getBehandlingUUID()), e).toException();
         }
     }
 

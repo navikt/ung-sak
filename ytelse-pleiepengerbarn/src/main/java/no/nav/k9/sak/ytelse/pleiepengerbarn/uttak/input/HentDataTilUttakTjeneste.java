@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
@@ -37,6 +38,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse.FinnPerioderMedNedjustertUttaksgrad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PSBVurdererSøknadsfristTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet.Kravprioritet;
@@ -73,6 +75,9 @@ public class HentDataTilUttakTjeneste {
     private TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste;
     private UttakNyeReglerRepository uttakNyeReglerRepository;
     private OverstyrUttakRepository overstyrUttakRepository;
+
+    private FinnPerioderMedNedjustertUttaksgrad finnPerioderMedNedjustertUttaksgrad;
+
     private boolean tilkommetAktivitetEnabled;
     private boolean nyRegelEnabled;
 
@@ -97,7 +102,7 @@ public class HentDataTilUttakTjeneste {
                                     TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste,
                                     UttakNyeReglerRepository uttakNyeReglerRepository,
                                     OverstyrUttakRepository overstyrUttakRepository,
-                                    @KonfigVerdi(value = "TILKOMMET_AKTIVITET_ENABLED", required = false, defaultVerdi = "false") boolean tilkommetAktivitetEnabled,
+                                    FinnPerioderMedNedjustertUttaksgrad finnPerioderMedNedjustertUttaksgrad, @KonfigVerdi(value = "TILKOMMET_AKTIVITET_ENABLED", required = false, defaultVerdi = "false") boolean tilkommetAktivitetEnabled,
                                     @KonfigVerdi(value = "ENABLE_DATO_NY_REGEL_UTTAK", required = false, defaultVerdi = "false") boolean nyRegelEnabled
 
     ) {
@@ -121,6 +126,7 @@ public class HentDataTilUttakTjeneste {
         this.tilkommetAktivitetTjeneste = tilkommetAktivitetTjeneste;
         this.uttakNyeReglerRepository = uttakNyeReglerRepository;
         this.overstyrUttakRepository = overstyrUttakRepository;
+        this.finnPerioderMedNedjustertUttaksgrad = finnPerioderMedNedjustertUttaksgrad;
         this.tilkommetAktivitetEnabled = tilkommetAktivitetEnabled;
         this.nyRegelEnabled = nyRegelEnabled;
     }
@@ -198,6 +204,10 @@ public class HentDataTilUttakTjeneste {
         }
         LocalDateTimeline<OverstyrtUttakPeriode> overstyrtUttak = overstyrUttakRepository.hentOverstyrtUttak(behandling.getId());
 
+
+        var nedjustertUttakgradTidslinje = finnPerioderMedNedjustertUttaksgrad.finnTidslinje(referanse);
+
+
         return new InputParametere()
             .medBehandling(behandling)
             .medVilkårene(vilkårene)
@@ -222,6 +232,7 @@ public class HentDataTilUttakTjeneste {
             .medTilkommetAktivitetsperioder(tilkommetAktivitetsperioder)
             .medVirkningsdatoNyeRegler(virkningsdatoNyeRegler)
             .medOverstyrtUttak(overstyrtUttak)
+            .medNedjustertUttaksgrad(nedjustertUttakgradTidslinje)
             ;
     }
 

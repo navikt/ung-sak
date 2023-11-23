@@ -14,6 +14,9 @@ public interface UttakTjeneste {
 
     Simulering simulerUttaksplan(Uttaksgrunnlag request);
 
+    Uttaksplan nedjusterSøkersUttaksgrad(Uttaksgrunnlag request);
+
+
     void slettUttaksplan(UUID behandlingId);
 
 }

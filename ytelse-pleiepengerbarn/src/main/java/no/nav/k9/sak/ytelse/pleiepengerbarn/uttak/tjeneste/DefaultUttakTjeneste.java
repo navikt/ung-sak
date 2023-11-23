@@ -33,6 +33,11 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
     }
 
     @Override
+    public Uttaksplan nedjusterSøkersUttaksgrad(Uttaksgrunnlag request) {
+        return restKlient.nedjusterSøkersUttaksgrad(request);
+    }
+
+    @Override
     public Uttaksplan opprettUttaksplan(Uttaksgrunnlag request) {
         return restKlient.opprettUttaksplan(request);
     }

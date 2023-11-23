@@ -12,7 +12,7 @@ class FinnNyKvoteTjeneste {
     static LocalDateTimeline<BigDecimal> finnNyKvoteTidslinje(Beregningsgrunnlag beregningsgrunnlag) {
         var endretKvoteSegmenter = beregningsgrunnlag.getBeregningsgrunnlagPerioder().stream()
             .filter(p -> p.getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt() != null && p.getTotalUtbetalingsgradFraUttak() != null)
-            .filter(p -> p.getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt().compareTo(p.getTotalUtbetalingsgradFraUttak()) > 0)
+            .filter(p -> p.getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt().compareTo(p.getTotalUtbetalingsgradFraUttak()) < 0)
             .map(p -> new LocalDateSegment<>(p.getBeregningsgrunnlagPeriodeFom(), p.getBeregningsgrunnlagPeriodeTom(), p.getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt()))
             .toList();
         return new LocalDateTimeline<>(endretKvoteSegmenter);

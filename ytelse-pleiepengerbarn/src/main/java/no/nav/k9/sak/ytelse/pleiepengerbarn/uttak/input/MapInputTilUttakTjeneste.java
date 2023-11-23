@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,6 +48,7 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeid;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeidsforhold;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Barn;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
+import no.nav.pleiepengerbarn.uttak.kontrakter.NedjustertUttaksgrad;
 import no.nav.pleiepengerbarn.uttak.kontrakter.OverstyrtInput;
 import no.nav.pleiepengerbarn.uttak.kontrakter.OverstyrtUtbetalingsgradPerArbeidsforhold;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Pleiebehov;
@@ -163,6 +165,9 @@ public class MapInputTilUttakTjeneste {
 
         Map<String, String> sisteVedtatteBehandlingForAvktuellBehandling = mapSisteVedtatteBehandlingForBehandling(input.getSisteVedtatteBehandlingForBehandling());
         Map<LukketPeriode, OverstyrtInput> overstyrtUttak = map(input.getOverstyrtUttak());
+
+        var nedjustertSøkersUttaksgrad = mapNedjustertUttaksgrad(input.getNedjustertUttaksgrad());
+
         return new Uttaksgrunnlag(
             mapTilYtelseType(behandling),
             barn,
@@ -175,6 +180,7 @@ public class MapInputTilUttakTjeneste {
             pleiebehov,
             input.getVirkningsdatoNyeRegler(),
             overstyrtUttak,
+            nedjustertSøkersUttaksgrad,
             lovbestemtFerie,
             inngangsvilkår,
             tilsynsperioder,
@@ -185,6 +191,17 @@ public class MapInputTilUttakTjeneste {
             utenlandsoppholdperioder
         );
     }
+
+    private Map<LukketPeriode, NedjustertUttaksgrad> mapNedjustertUttaksgrad(LocalDateTimeline<BigDecimal> nedjustertUttaksgrad) {
+        Map<LukketPeriode, NedjustertUttaksgrad> nedjustert = new HashMap<>();
+        nedjustertUttaksgrad.stream().forEach(segment -> {
+            LukketPeriode periode = new LukketPeriode(segment.getFom(), segment.getTom());
+            nedjustert.put(periode, new NedjustertUttaksgrad(segment.getValue()));
+        });
+        return nedjustert;
+    }
+
+
 
     private Map<LukketPeriode, OverstyrtInput> map(LocalDateTimeline<OverstyrtUttakPeriode> overstyrtUttak) {
         Map<LukketPeriode, OverstyrtInput> overstyrt = new HashMap<>();
