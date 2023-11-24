@@ -69,6 +69,7 @@ public class RepubliserEventGjenoppliverTask implements ProsessTaskHandler {
             final ProsessTaskData nyProsessTask = ProsessTaskData.forProsessTask(RepubliserEventGjenoppliverTask.class);
             nyProsessTask.setCallIdFraEksisterende();
             nyProsessTask.setPrioritet(50);
+            nyProsessTask.setProperty("antall", String.valueOf(antall));
             nyProsessTask.setNesteKjøringEtter(LocalDateTime.now().plusHours(1));
 
             prosessTaskTjeneste.lagre(nyProsessTask);
