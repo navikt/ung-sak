@@ -40,21 +40,30 @@ public class RepubliserEventGjenoppliverTask implements ProsessTaskHandler {
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
+        var antallProperty = prosessTaskData.getPropertyValue("antall");
+        if (antallProperty == null) {
+            log.warn("Kan ikke starte uten property for antall tasks som skal kjøres");
+            return;
+        }
+
+        var antall = Integer.parseInt(antallProperty);
+
         var query = entityManager.createNativeQuery(
         "UPDATE prosess_task SET" +
                 "    status = 'KLAR'," +
                 "    task_payload = null," +
-                "    neste_kjoering_etter = current_timestamp at time zone 'UTC' + floor(10 + random() * 3600) * '1 second'\\:\\:interval" +
+                "    neste_kjoering_etter = current_timestamp at time zone 'UTC' + floor(random() * 3600) * '1 second'\\:\\:interval" +
                 "    WHERE id IN (SELECT id" +
                 "                 FROM prosess_task" +
                 "                 WHERE status = 'FERDIG'" +
                 "                   AND task_type = 'oppgavebehandling.RepubliserEvent'" +
                 "                   AND task_payload = 'STOPPET_MANUELT'" +
-                "                 LIMIT 3000 FOR UPDATE SKIP LOCKED" +
+                "                 LIMIT :antall FOR UPDATE SKIP LOCKED" +
                 "                 )"
         );
-
+        query.setParameter("antall", antall);
         var antallRaderPåvirket = query.executeUpdate();
+
         if (antallRaderPåvirket > 0) {
             log.info("Flyttet "+antallRaderPåvirket+" republiseringstasker tilbake til KLAR");
             final ProsessTaskData nyProsessTask = ProsessTaskData.forProsessTask(RepubliserEventGjenoppliverTask.class);
