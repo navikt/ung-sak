@@ -76,7 +76,7 @@ public class RepubliserEventGjenoppliverTask implements ProsessTaskHandler {
             nyProsessTask.setProperty("antall", String.valueOf(antall));
 
             var klokkeslettNesteKjøring = LocalTime.now().plusHours(1);
-            if (klokkeslettNesteKjøring.isAfter(LocalTime.of(6, 0, 0)) &
+            if (klokkeslettNesteKjøring.isAfter(LocalTime.of(6, 0, 0)) &&
                 klokkeslettNesteKjøring.isBefore(LocalTime.of(17, 0, 0))) {
                 nyProsessTask.setNesteKjøringEtter(LocalDateTime.of(LocalDate.now(), LocalTime.of(17, 30, 0)));
             } else {
