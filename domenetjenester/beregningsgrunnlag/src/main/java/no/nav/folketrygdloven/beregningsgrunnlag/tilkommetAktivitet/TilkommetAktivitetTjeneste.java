@@ -71,8 +71,7 @@ public class TilkommetAktivitetTjeneste {
      * Henter ut inntektsgradering for angitt fagsak.
      *
      * @param fagsakId IDen til fagsaken.
-     * @return En {@code Map} med alle tilkommede aktiviteter med tilhørende perioden den
-     * den regnes å være tilkommet i.
+     * @return En {@code LocalDateTimeline} med resultatet av gradering mot inntekt for alle perioder på fagsaken
      */
     public LocalDateTimeline<BigDecimal> finnInntektsgradering(Long fagsakId) {
         var relevantBehandling = finnRelevantBehandling(fagsakId);
@@ -141,6 +140,8 @@ public class TilkommetAktivitetTjeneste {
             }
 
             return Optional.of(behandling.orElseThrow());
+        } else {
+            return sisteBehandlingOpt;
         }
 
     }
