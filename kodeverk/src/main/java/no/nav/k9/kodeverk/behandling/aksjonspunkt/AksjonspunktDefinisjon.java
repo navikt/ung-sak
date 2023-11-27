@@ -389,6 +389,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
 
     private static final Map<String, AksjonspunktDefinisjon> KODER = new LinkedHashMap<>();
 
+
     static {
         for (var v : UTGÅTT.keySet()) {
             if (KODER.putIfAbsent(v, UNDEFINED) != null) {
@@ -744,6 +745,11 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
 
     public boolean kanOverstyreTotrinnEtterLukking() {
         return kanOverstyreTotrinnEtterLukking;
+    }
+
+    @Deprecated()
+    public void setBehandlingStegType(BehandlingStegType behandlingStegType) {
+        this.behandlingStegType = behandlingStegType;
     }
 
     @JsonProperty(value = "kodeverk", access = JsonProperty.Access.READ_ONLY)
