@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -21,6 +22,7 @@ import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -68,59 +70,17 @@ public class TilkommetAktivitetTjeneste {
     /**
      * Henter ut inntektsgradering for angitt fagsak.
      *
-     * @param fagsakId       IDen til fagsaken.
+     * @param fagsakId IDen til fagsaken.
      * @return En {@code Map} med alle tilkommede aktiviteter med tilhørende perioden den
      * den regnes å være tilkommet i.
      */
     public LocalDateTimeline<BigDecimal> finnInntektsgradering(Long fagsakId) {
-        var sisteBehandlingOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId);
-
-        if (sisteBehandlingOpt.isEmpty()) {
+        var relevantBehandling = finnRelevantBehandling(fagsakId);
+        if (relevantBehandling.isEmpty()) {
             return LocalDateTimeline.empty();
         }
-
-        var sisteBehandling = sisteBehandlingOpt.get();
-
-        if (sisteBehandling.erHenlagt()) {
-            var behandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
-            if (behandling.isEmpty()) {
-                return LocalDateTimeline.empty();
-            }
-            sisteBehandling = behandling.orElseThrow();
-        }
-
-        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(sisteBehandling.getId());
-
-        if (vilkårene.isEmpty()) {
-            return LocalDateTimeline.empty();
-        }
-
-        var vilkår = vilkårene.get().getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-
-        if (vilkår.isEmpty()) {
-            return LocalDateTimeline.empty();
-        }
-
-        var overlappendeGrunnlag = vilkår
-            .orElseThrow(() -> new IllegalStateException("Fagsaken(id=" + fagsakId + ") har ikke beregningsvilkåret knyttet til siste behandling"))
-            .getPerioder()
-            .stream()
-            .filter(it -> Utfall.OPPFYLT.equals(it.getGjeldendeUtfall()))
-            .toList();
-
-        if (overlappendeGrunnlag.isEmpty()) {
-            return LocalDateTimeline.empty();
-        }
-
-        var bg = beregningPerioderGrunnlagRepository.hentGrunnlag(sisteBehandling.getId()).orElseThrow();
-
-        Map<UUID, DatoIntervallEntitet> koblingerÅSpørreMot = new HashMap<>();
-
-        overlappendeGrunnlag.forEach(og ->
-            bg.finnGrunnlagFor(og.getSkjæringstidspunkt()).ifPresent(bgp -> koblingerÅSpørreMot.put(bgp.getEksternReferanse(), og.getPeriode())));
-
-
-        return kalkulusTjeneste.finnInntektsgradering(koblingerÅSpørreMot, BehandlingReferanse.fra(sisteBehandling));
+        var koblingerÅSpørreMot = finnRelevanteReferanser(relevantBehandling.get());
+        return kalkulusTjeneste.finnInntektsgradering(koblingerÅSpørreMot, BehandlingReferanse.fra(relevantBehandling.get()));
     }
 
 
@@ -133,56 +93,15 @@ public class TilkommetAktivitetTjeneste {
      * den regnes å være tilkommet i.
      */
     public Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> finnTilkommedeAktiviteter(Long fagsakId, LocalDateInterval aktuellPeriode) {
-        var sisteBehandlingOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId);
+        var relevantBehandling = finnRelevantBehandling(fagsakId);
 
-        if (sisteBehandlingOpt.isEmpty()) {
+        if (relevantBehandling.isEmpty()) {
             return Collections.emptyMap();
         }
 
-        var sisteBehandling = sisteBehandlingOpt.get();
+        var koblingerÅSpørreMot = finnRelevanteReferanser(relevantBehandling.get());
 
-        if (sisteBehandling.erHenlagt()) {
-            var behandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
-            if (behandling.isEmpty()) {
-                return Collections.emptyMap();
-            }
-            sisteBehandling = behandling.orElseThrow();
-        }
-
-        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(sisteBehandling.getId());
-
-        if (vilkårene.isEmpty()) {
-            return Collections.emptyMap();
-        }
-
-        var vilkår = vilkårene.get().getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-
-        if (vilkår.isEmpty()) {
-            return Collections.emptyMap();
-        }
-
-        var overlappendeGrunnlag = vilkår
-            .orElseThrow(() -> new IllegalStateException("Fagsaken(id=" + fagsakId + ") har ikke beregningsvilkåret knyttet til siste behandling"))
-            .getPerioder()
-            .stream()
-            .filter(it -> Utfall.OPPFYLT.equals(it.getGjeldendeUtfall()))
-            .toList();
-
-        if (overlappendeGrunnlag.isEmpty()) {
-            return Collections.emptyMap();
-        }
-
-        var bg = beregningPerioderGrunnlagRepository.hentGrunnlag(sisteBehandling.getId()).orElseThrow();
-
-        Map<UUID, DatoIntervallEntitet> koblingerÅSpørreMot = new HashMap<>();
-
-        overlappendeGrunnlag.forEach(og ->
-            bg.finnGrunnlagFor(og.getSkjæringstidspunkt()).ifPresent(bgp -> {
-                koblingerÅSpørreMot.put(bgp.getEksternReferanse(), og.getPeriode());
-            }));
-
-
-        final Map<UUID, List<UtledetTilkommetAktivitet>> koblingMotAktiviteter = kalkulusTjeneste.utledTilkommetAktivitet(koblingerÅSpørreMot, BehandlingReferanse.fra(sisteBehandling));
+        final Map<UUID, List<UtledetTilkommetAktivitet>> koblingMotAktiviteter = kalkulusTjeneste.utledTilkommetAktivitet(koblingerÅSpørreMot, BehandlingReferanse.fra(relevantBehandling.get()));
 
         final Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> sammenslåttResultat = new HashMap<>();
         koblingMotAktiviteter.values().stream().flatMap(Collection::stream).forEach(s -> {
@@ -204,6 +123,67 @@ public class TilkommetAktivitetTjeneste {
 
         return sammenslåttResultat;
     }
+
+
+    private Optional<Behandling> finnRelevantBehandling(Long fagsakId) {
+        var sisteBehandlingOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId);
+
+        if (sisteBehandlingOpt.isEmpty()) {
+            return Optional.empty();
+        }
+
+        var sisteBehandling = sisteBehandlingOpt.get();
+
+        if (sisteBehandling.erHenlagt()) {
+            var behandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
+            if (behandling.isEmpty()) {
+                return Optional.empty();
+            }
+
+            return Optional.of(behandling.orElseThrow());
+        }
+
+    }
+
+    private Map<UUID, DatoIntervallEntitet> finnRelevanteReferanser(Behandling behandling) {
+
+        Map<UUID, DatoIntervallEntitet> koblingerÅSpørreMot = new HashMap<>();
+        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandling.getId());
+
+        if (vilkårene.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        var vilkår = vilkårene.get().getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+
+        if (vilkår.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        var overlappendeGrunnlag = vilkår
+            .orElseThrow(() -> new IllegalStateException("Fagsaken(id=" + behandling.getFagsakId() + ") har ikke beregningsvilkåret knyttet til siste behandling"))
+            .getPerioder()
+            .stream()
+            .filter(it -> Utfall.OPPFYLT.equals(it.getGjeldendeUtfall()))
+            .toList();
+
+        if (overlappendeGrunnlag.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        var bg = beregningPerioderGrunnlagRepository.hentGrunnlag(behandling.getId()).orElseThrow();
+
+
+        overlappendeGrunnlag.forEach(og ->
+            bg.finnGrunnlagFor(og.getSkjæringstidspunkt()).ifPresent(bgp -> {
+                koblingerÅSpørreMot.put(bgp.getEksternReferanse(), og.getPeriode());
+            }));
+
+
+        return koblingerÅSpørreMot;
+
+    }
+
 
     private AktivitetstatusOgArbeidsgiver mapTilAktivitetstatusOgArbeidsgiver(UtledetTilkommetAktivitet s) {
         final UttakArbeidType uttakArbeidType = UttakArbeidType.fraKode(s.getAktivitetStatus().getKode());
