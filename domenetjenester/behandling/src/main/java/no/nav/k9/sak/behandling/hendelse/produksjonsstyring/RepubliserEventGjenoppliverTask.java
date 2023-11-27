@@ -1,6 +1,10 @@
 package no.nav.k9.sak.behandling.hendelse.produksjonsstyring;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +74,14 @@ public class RepubliserEventGjenoppliverTask implements ProsessTaskHandler {
             nyProsessTask.setCallIdFraEksisterende();
             nyProsessTask.setPrioritet(50);
             nyProsessTask.setProperty("antall", String.valueOf(antall));
-            nyProsessTask.setNesteKjøringEtter(LocalDateTime.now().plusHours(1));
+
+            var klokkeslettNesteKjøring = LocalTime.now().plusHours(1);
+            if (klokkeslettNesteKjøring.isAfter(LocalTime.of(6, 0, 0)) &
+                klokkeslettNesteKjøring.isBefore(LocalTime.of(17, 0, 0))) {
+                nyProsessTask.setNesteKjøringEtter(LocalDateTime.of(LocalDate.now(), LocalTime.of(17, 30, 0)));
+            } else {
+                nyProsessTask.setNesteKjøringEtter(LocalDateTime.now().plusHours(1));
+            }
 
             prosessTaskTjeneste.lagre(nyProsessTask);
         } else {
