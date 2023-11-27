@@ -1,5 +1,6 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.tilkommetAktivitet;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
@@ -65,10 +66,69 @@ public class TilkommetAktivitetTjeneste {
     }
 
     /**
+     * Henter ut inntektsgradering for angitt fagsak.
+     *
+     * @param fagsakId       IDen til fagsaken.
+     * @return En {@code Map} med alle tilkommede aktiviteter med tilhørende perioden den
+     * den regnes å være tilkommet i.
+     */
+    public LocalDateTimeline<BigDecimal> finnInntektsgradering(Long fagsakId) {
+        var sisteBehandlingOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId);
+
+        if (sisteBehandlingOpt.isEmpty()) {
+            return LocalDateTimeline.empty();
+        }
+
+        var sisteBehandling = sisteBehandlingOpt.get();
+
+        if (sisteBehandling.erHenlagt()) {
+            var behandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteBehandling(fagsakId);
+            if (behandling.isEmpty()) {
+                return LocalDateTimeline.empty();
+            }
+            sisteBehandling = behandling.orElseThrow();
+        }
+
+        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(sisteBehandling.getId());
+
+        if (vilkårene.isEmpty()) {
+            return LocalDateTimeline.empty();
+        }
+
+        var vilkår = vilkårene.get().getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+
+        if (vilkår.isEmpty()) {
+            return LocalDateTimeline.empty();
+        }
+
+        var overlappendeGrunnlag = vilkår
+            .orElseThrow(() -> new IllegalStateException("Fagsaken(id=" + fagsakId + ") har ikke beregningsvilkåret knyttet til siste behandling"))
+            .getPerioder()
+            .stream()
+            .filter(it -> Utfall.OPPFYLT.equals(it.getGjeldendeUtfall()))
+            .toList();
+
+        if (overlappendeGrunnlag.isEmpty()) {
+            return LocalDateTimeline.empty();
+        }
+
+        var bg = beregningPerioderGrunnlagRepository.hentGrunnlag(sisteBehandling.getId()).orElseThrow();
+
+        Map<UUID, DatoIntervallEntitet> koblingerÅSpørreMot = new HashMap<>();
+
+        overlappendeGrunnlag.forEach(og ->
+            bg.finnGrunnlagFor(og.getSkjæringstidspunkt()).ifPresent(bgp -> koblingerÅSpørreMot.put(bgp.getEksternReferanse(), og.getPeriode())));
+
+
+        return kalkulusTjeneste.finnInntektsgradering(koblingerÅSpørreMot, BehandlingReferanse.fra(sisteBehandling));
+    }
+
+
+    /**
      * Henter ut tilkommede aktiviteter for angitt fagsak.
      *
-     * @param fagsakId           IDen til fagsaken.
-     * @param aktuellPeriode  perioden det sjekkes tilkommede aktiviteter for.
+     * @param fagsakId       IDen til fagsaken.
+     * @param aktuellPeriode perioden det sjekkes tilkommede aktiviteter for.
      * @return En {@code Map} med alle tilkommede aktiviteter med tilhørende perioden den
      * den regnes å være tilkommet i.
      */

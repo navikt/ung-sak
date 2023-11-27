@@ -1,7 +1,6 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.KONTROLLER_FAKTA_BEREGNING;
-import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_REF_BERGRUNN;
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_TILKOMMET_INNTEKT;
 
 import java.util.Set;
@@ -16,7 +15,6 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
 import no.nav.folketrygdloven.kalkulus.kodeverk.StegType;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -44,22 +42,19 @@ public class KopierBeregningTjeneste {
     private final BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
     private final KalkulusStartpunktUtleder kalkulusStartpunktUtleder;
 
-    private final boolean tilkommetInntektNyttStegEnabled;
 
     @Inject
     public KopierBeregningTjeneste(BehandlingRepository behandlingRepository, @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste,
                                    BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                    BeregningsgrunnlagTjeneste kalkulusTjeneste,
                                    BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
-                                   KalkulusStartpunktUtleder kalkulusStartpunktUtleder,
-                                   @KonfigVerdi(value = "TILKOMMET_INNTEKT_NYTT_STEG", defaultVerdi = "false") boolean tilkommetInntektNyttStegEnabled) {
+                                   KalkulusStartpunktUtleder kalkulusStartpunktUtleder) {
         this.behandlingRepository = behandlingRepository;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
         this.kalkulusStartpunktUtleder = kalkulusStartpunktUtleder;
-        this.tilkommetInntektNyttStegEnabled = tilkommetInntektNyttStegEnabled;
     }
 
     public void kopierVurderinger(BehandlingskontrollKontekst kontekst) {
@@ -121,7 +116,7 @@ public class KopierBeregningTjeneste {
     private void kopierGrunnlagForForlengelseperioder(BehandlingReferanse ref) {
         var perioderPrStartpunkt = kalkulusStartpunktUtleder.utledPerioderPrStartpunkt(ref);
         if (ref.getBehandlingType().equals(BehandlingType.REVURDERING)) {
-            var startpunktVurderRefusjon = perioderPrStartpunkt.get(tilkommetInntektNyttStegEnabled ? VURDER_TILKOMMET_INNTEKT : VURDER_REF_BERGRUNN);
+            var startpunktVurderRefusjon = perioderPrStartpunkt.get(VURDER_TILKOMMET_INNTEKT);
             if (!startpunktVurderRefusjon.isEmpty()) {
                 log.info("Kopierer beregning for startpunkt vurder refusjon {}", startpunktVurderRefusjon);
                 kalkulusTjeneste.kopier(ref, startpunktVurderRefusjon, StegType.VURDER_VILKAR_BERGRUNN);

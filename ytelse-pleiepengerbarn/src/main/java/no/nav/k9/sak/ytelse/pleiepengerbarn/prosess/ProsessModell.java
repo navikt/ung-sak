@@ -2,8 +2,6 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.prosess;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
-import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -18,14 +16,8 @@ public class ProsessModell {
 
     private static final FagsakYtelseType YTELSE_TYPE = FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
-    private boolean tilkommetInntektNyttStegEnabled;
 
     public ProsessModell() {
-    }
-
-    @Inject
-    public ProsessModell(@KonfigVerdi(value = "TILKOMMET_INNTEKT_NYTT_STEG", defaultVerdi = "false") boolean tilkommetInntektNyttStegEnabled) {
-        this.tilkommetInntektNyttStegEnabled = tilkommetInntektNyttStegEnabled;
     }
 
     @FagsakYtelseTypeRef(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
@@ -61,19 +53,10 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA_BEREGNING)
             .medSteg(BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG)
             .medSteg(BehandlingStegType.FORTSETT_FORESLÅ_BEREGNINGSGRUNNLAG)
-            .medSteg(BehandlingStegType.VURDER_VILKAR_BERGRUNN);
-
-        if (tilkommetInntektNyttStegEnabled) {
-            behandlingModellBuilder
-                .medSteg(BehandlingStegType.VURDER_STARTDATO_UTTAKSREGLER, StartpunktType.UTTAKSVILKÅR_VURDERING)
-                .medSteg(BehandlingStegType.VURDER_TILKOMMET_INNTEKT)
-                .medSteg(BehandlingStegType.VURDER_UTTAK_V2);
-
-        } else {
-            behandlingModellBuilder
-                .medSteg(BehandlingStegType.VURDER_UTTAK_V2, StartpunktType.UTTAKSVILKÅR_VURDERING);
-        }
-        behandlingModellBuilder
+            .medSteg(BehandlingStegType.VURDER_VILKAR_BERGRUNN)
+            .medSteg(BehandlingStegType.VURDER_STARTDATO_UTTAKSREGLER, StartpunktType.UTTAKSVILKÅR_VURDERING)
+            .medSteg(BehandlingStegType.VURDER_TILKOMMET_INNTEKT)
+            .medSteg(BehandlingStegType.VURDER_UTTAK_V2)
             .medSteg(BehandlingStegType.VURDER_REF_BERGRUNN)
             .medSteg(BehandlingStegType.FORDEL_BEREGNINGSGRUNNLAG)
             .medSteg(BehandlingStegType.FASTSETT_BEREGNINGSGRUNNLAG)

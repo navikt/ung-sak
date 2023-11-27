@@ -53,7 +53,7 @@ public class VurderTilkommetInntektSteg implements BehandlingSteg {
     public VurderTilkommetInntektSteg(BehandlingRepository behandlingRepository,
                                       BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                       VilkårTjeneste vilkårTjeneste, BeregningStegTjeneste beregningStegTjeneste,
-                                      @KonfigVerdi(value = "TILKOMMET_INNTEKT_NYTT_STEG", defaultVerdi = "false") boolean skalKjøreSteget) {
+                                      @KonfigVerdi(value = "TILKOMMET_AKTIVITET_ENABLED", defaultVerdi = "false") boolean skalKjøreSteget) {
 
         this.behandlingRepository = behandlingRepository;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;

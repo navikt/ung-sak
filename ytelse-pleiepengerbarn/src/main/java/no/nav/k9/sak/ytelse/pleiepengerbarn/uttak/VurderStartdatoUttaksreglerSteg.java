@@ -39,7 +39,7 @@ public class VurderStartdatoUttaksreglerSteg implements BehandlingSteg {
     @Inject
     public VurderStartdatoUttaksreglerSteg(BehandlingRepository behandlingRepository,
                                            AksjonspunktUtlederNyeRegler aksjonspunktUtlederNyeRegler,
-                                           @KonfigVerdi(value = "TILKOMMET_INNTEKT_NYTT_STEG", defaultVerdi = "false") boolean skalKjøreSteget) {
+                                           @KonfigVerdi(value = "ENABLE_DATO_NY_REGEL_UTTAK", defaultVerdi = "false") boolean skalKjøreSteget) {
         this.behandlingRepository = behandlingRepository;
         this.aksjonspunktUtlederNyeRegler = aksjonspunktUtlederNyeRegler;
         this.skalKjøreSteget = skalKjøreSteget;
@@ -53,7 +53,6 @@ public class VurderStartdatoUttaksreglerSteg implements BehandlingSteg {
         var behandlingId = kontekst.getBehandlingId();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         Optional<AksjonspunktDefinisjon> aksjonspunktSetteDatoNyeRegler = aksjonspunktUtlederNyeRegler.utledAksjonspunktDatoForNyeRegler(behandling);
-        aksjonspunktSetteDatoNyeRegler.ifPresent(a -> a.setBehandlingStegType(VURDER_STARTDATO_UTTAKSREGLER));
         return aksjonspunktSetteDatoNyeRegler.map(aksjonspunktDefinisjon -> BehandleStegResultat.utførtMedAksjonspunkter(List.of(aksjonspunktDefinisjon))).orElseGet(BehandleStegResultat::utførtUtenAksjonspunkter);
     }
 

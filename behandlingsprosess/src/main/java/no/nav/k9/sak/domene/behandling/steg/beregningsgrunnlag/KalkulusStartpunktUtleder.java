@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -25,19 +24,16 @@ public class KalkulusStartpunktUtleder {
     private FinnPerioderMedStartIKontrollerFakta finnPerioderMedStartIKontrollerFakta;
     private VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
     private BeregningsgrunnlagVilkårTjeneste vilkårTjeneste;
-    private boolean tilkommetInntektNyttStegEnabled;
 
     private static final Logger log = LoggerFactory.getLogger(KalkulusStartpunktUtleder.class);
 
     @Inject
     public KalkulusStartpunktUtleder(FinnPerioderMedStartIKontrollerFakta finnPerioderMedStartIKontrollerFakta,
                                      VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
-                                     BeregningsgrunnlagVilkårTjeneste vilkårTjeneste,
-                                     @KonfigVerdi(value = "TILKOMMET_INNTEKT_NYTT_STEG", defaultVerdi = "false") boolean tilkommetInntektNyttStegEnabled) {
+                                     BeregningsgrunnlagVilkårTjeneste vilkårTjeneste) {
         this.finnPerioderMedStartIKontrollerFakta = finnPerioderMedStartIKontrollerFakta;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
         this.vilkårTjeneste = vilkårTjeneste;
-        this.tilkommetInntektNyttStegEnabled = tilkommetInntektNyttStegEnabled;
     }
 
     public KalkulusStartpunktUtleder() {
@@ -67,11 +63,7 @@ public class KalkulusStartpunktUtleder {
             if (!forlengelseperioder.isEmpty()) {
                 log.info("Perioder med start i vurder refusjon: " + forlengelseperioder);
             }
-            if (tilkommetInntektNyttStegEnabled) {
-                settStartpunkt(forlengelseperioder, periodeStartStegMap, BehandlingStegType.VURDER_TILKOMMET_INNTEKT);
-            } else {
-                settStartpunkt(forlengelseperioder, periodeStartStegMap, BehandlingStegType.VURDER_REF_BERGRUNN);
-            }
+            settStartpunkt(forlengelseperioder, periodeStartStegMap, BehandlingStegType.VURDER_TILKOMMET_INNTEKT);
             var startIKontrollerFaktaBeregning = finnPerioderMedStartIKontrollerFakta.finnPerioder(ref, utenAvslagFørBeregning, forlengelseperioder);
             if (!startIKontrollerFaktaBeregning.isEmpty()) {
                 log.info("Perioder med start i kontroller fakta beregning: " + startIKontrollerFaktaBeregning);

@@ -5,6 +5,7 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -14,6 +15,9 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.tilkommetAktivitet.TilkommetAktivitetTjeneste;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -52,9 +56,9 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
     private SamtidigUttakTjeneste samtidigUttakTjeneste;
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
 
-    private AksjonspunktUtlederNyeRegler aksjonspunktUtlederNyeRegler;
+    private TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste;
 
-    private boolean startdatoErFlyttet;
+
 
     VurderUttakIBeregningSteg() {
         // for proxy
@@ -67,16 +71,14 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
                                      EtablertTilsynTjeneste etablertTilsynTjeneste,
                                      SamtidigUttakTjeneste samtidigUttakTjeneste,
                                      UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
-                                     AksjonspunktUtlederNyeRegler aksjonspunktUtlederNyeRegler,
-                                     @KonfigVerdi(value = "TILKOMMET_INNTEKT_NYTT_STEG", defaultVerdi = "false") boolean startdatoErFlyttet) {
+                                     TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
         this.uttakTjeneste = uttakTjeneste;
         this.etablertTilsynTjeneste = etablertTilsynTjeneste;
         this.samtidigUttakTjeneste = samtidigUttakTjeneste;
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
-        this.aksjonspunktUtlederNyeRegler = aksjonspunktUtlederNyeRegler;
-        this.startdatoErFlyttet = startdatoErFlyttet;
+        this.tilkommetAktivitetTjeneste = tilkommetAktivitetTjeneste;
     }
 
     @Override
@@ -88,18 +90,7 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
         etablertTilsynTjeneste.opprettGrunnlagForTilsynstidlinje(ref);
 
         Optional<AksjonspunktDefinisjon> autopunktVentAnnenSak = håndteringAvSamtidigUttak(behandling, kontekst, ref);
-        if (autopunktVentAnnenSak.isPresent()) {
-            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(autopunktVentAnnenSak.get()));
-        }
-        if (startdatoErFlyttet) {
-            return BehandleStegResultat.utførtUtenAksjonspunkter();
-        }
-        Optional<AksjonspunktDefinisjon> aksjonspunktSetteDatoNyeRegler = aksjonspunktUtlederNyeRegler.utledAksjonspunktDatoForNyeRegler(behandling);
-        if (aksjonspunktSetteDatoNyeRegler.isPresent()) {
-            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(aksjonspunktSetteDatoNyeRegler.get()));
-        }
-
-        return BehandleStegResultat.utførtUtenAksjonspunkter();
+        return autopunktVentAnnenSak.map(aksjonspunktDefinisjon -> BehandleStegResultat.utførtMedAksjonspunkter(List.of(aksjonspunktDefinisjon))).orElseGet(BehandleStegResultat::utførtUtenAksjonspunkter);
     }
 
     private Optional<AksjonspunktDefinisjon> håndteringAvSamtidigUttak(Behandling behandling, BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
