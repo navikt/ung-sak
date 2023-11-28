@@ -1,11 +1,10 @@
-package no.nav.k9.sak.web.app.tjenester.ereg;
+package no.nav.k9.sak.web.app.tjenester.brev;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import no.nav.k9.abac.AbacAttributt;
 
 import java.util.Objects;
 
@@ -29,7 +28,6 @@ public class OrganisasjonsnrDto {
     }
 
     @NotNull
-    @AbacAttributt(NAME)
     public String getOrgnr() {
         return orgnr;
     }
@@ -41,7 +39,9 @@ public class OrganisasjonsnrDto {
 
     @Override
     public String toString() {
-        return orgnr;
+        return "OrganisasjonsnrDto{" +
+            "orgnr='" + orgnr + '\'' +
+            '}';
     }
 
     @Override

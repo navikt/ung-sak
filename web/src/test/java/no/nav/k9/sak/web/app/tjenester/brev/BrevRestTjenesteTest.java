@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import no.nav.k9.felles.integrasjon.organisasjon.OrganisasjonRestKlient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -36,12 +37,13 @@ public class BrevRestTjenesteTest {
     private final VilkårResultatRepository vilkårResultatRepository = mock(VilkårResultatRepository.class);
     private final VedtakVarselRepository vedtakVarselRepository = mock(VedtakVarselRepository.class);
     private final BehandlingVedtakRepository behandlingVedtakRepository = mock(BehandlingVedtakRepository.class);
+    private final OrganisasjonRestKlient eregRestTjenesteMock = mock(OrganisasjonRestKlient.class);
 
     @BeforeEach
     public void setUp() {
         when(behandlingRepository.hentBehandling(anyLong())).thenReturn(mock(Behandling.class));
 
-        brevRestTjeneste = new BrevRestTjeneste(vedtakVarselRepository, behandlingVedtakRepository, vilkårResultatRepository, behandlingRepository, dokumentBestillerApplikasjonTjenesteMock);
+        brevRestTjeneste = new BrevRestTjeneste(vedtakVarselRepository, behandlingVedtakRepository, vilkårResultatRepository, behandlingRepository, dokumentBestillerApplikasjonTjenesteMock, eregRestTjenesteMock);
     }
 
     @Test

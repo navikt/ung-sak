@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.brev;
 
+import static no.nav.k9.abac.BeskyttetRessursKoder.APPLIKASJON;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
@@ -7,7 +8,10 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.UP
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 
+import no.nav.k9.felles.integrasjon.organisasjon.OrganisasjonRestKlient;
+import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,12 +52,14 @@ public class BrevRestTjeneste {
 
     public static final String HENT_VEDTAKVARSEL_PATH = "/brev/vedtak";
     public static final String BREV_BESTILL_PATH = "/brev/bestill";
+    public static final String EREG_OPPSLAG_PATH = "/brev/mottaker-info/ereg";
     private static final Logger LOGGER = LoggerFactory.getLogger(BrevRestTjeneste.class);
     private VilkårResultatRepository vilkårResultatRepository;
     private BehandlingRepository behandlingRepository;
     private DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste;
     private VedtakVarselRepository vedtakVarselRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
+    private OrganisasjonRestKlient eregRestKlient;
 
     public BrevRestTjeneste() {
         // For Rest-CDI
@@ -64,12 +70,14 @@ public class BrevRestTjeneste {
                             BehandlingVedtakRepository behandlingVedtakRepository,
                             VilkårResultatRepository vilkårResultatRepository,
                             BehandlingRepository behandlingRepository,
-                            DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste) {
+                            DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste,
+                            OrganisasjonRestKlient eregRestKlient) {
         this.vedtakVarselRepository = vedtakVarselRepository;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.behandlingRepository = behandlingRepository;
         this.dokumentBestillerApplikasjonTjeneste = dokumentBestillerApplikasjonTjeneste;
+        this.eregRestKlient = eregRestKlient;
     }
 
     @POST
@@ -138,4 +146,43 @@ public class BrevRestTjeneste {
         dto.setAvslagsarsak(vilkårMedAvslagsårsaker.values().stream().flatMap(Collection::stream).findFirst().orElse(null));
     }
 
+    /**
+     * Gjere oppslag i intern ereg service (tilsvarer enhetsregisteret i Brønnøysund) og svarer tilbake ønska info om
+     * gitt organisasjon. For frontend-oppslag i forbindelse med sending av brev til tredjepart.
+     */
+    @POST
+    @Path(EREG_OPPSLAG_PATH)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+    @Operation(description = "Hent navnet til gitt organisasjonsnr for sending til tredjepart", tags = "brev")
+    @BeskyttetRessurs(action = READ, resource = APPLIKASJON)
+    public Response getOrganisasjon(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = IngenTilgangsAttributter.class) OrganisasjonsnrDto organisasjonsnrDto) {
+        var orgnr = organisasjonsnrDto.getOrgnr();
+        if (orgnr.length() != 9 || !orgnr.matches("\\d{9}")) {
+            return Response.status(400, "organisasjonsnrDto must be 9 digits").build();
+        }
+        try {
+            var org = eregRestKlient.hentOrganisasjon(orgnr);
+            final var response = new BrevMottakerinfoEregResponseDto(org.getNavn());
+            return Response.ok(response).build();
+        } catch (IllegalArgumentException e) {
+            // If org number is not found, it seems like eregRestKlient throws IllegalArgumentException
+            // with the message matched below. At least this happens in dev.
+            // For this endpoint I want to return empty json in the case when given organization
+            // number is not found, so returns that below then.
+            if (e.getMessage().equalsIgnoreCase("argument \"content\" is null")) {
+                final var emptyObject = new Object();
+                return Response.ok(emptyObject).build();
+            }
+            // If some other IllegalArgumentException happens, rethrow it.
+            throw e;
+        }
+    }
+
+    public static class IngenTilgangsAttributter implements Function<Object, AbacDataAttributter> {
+        @Override
+        public AbacDataAttributter apply(Object obj) {
+            return AbacDataAttributter.opprett();
+        }
+    }
 }
