@@ -261,7 +261,7 @@ spec:
       value: "false"
     - name: ENABLE_UTENLANDSOPPHOLD_PILS
       value: "true"
-    - name: PERIODISERT_RAMMEVEDTAK
+    - name: PERIODISERT_RAMMEVEDTAK_AO
       value: "true"
     - name: OPPTJENING_AP_VED_AKSEPTERT_MELLOMLIGGENDE_HELG
       value: "true"
