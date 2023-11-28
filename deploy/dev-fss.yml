@@ -264,7 +264,7 @@ spec:
       value: "true"
     - name: ENABLE_UTENLANDSOPPHOLD_PILS
       value: "true"
-    - name: PERIODISERT_RAMMEVEDTAK
+    - name: PERIODISERT_RAMMEVEDTAK_AO
       value: "true"
     - name: STONADSTATISTIKK_V2
       value: "true"
