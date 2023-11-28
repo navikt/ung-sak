@@ -2,11 +2,14 @@ package no.nav.k9.sak.web.app.tjenester.ereg;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.integrasjon.organisasjon.OrganisasjonRestKlient;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
 @Path("")
 @ApplicationScoped
@@ -23,11 +26,12 @@ public class EregRestTjeneste {
     }
 
     @GET
-    @Path("/ereg/organisasjon/{orgnr}/brevmottaker-info")
+    @Path("/ereg/organisasjon/{organisasjonsnr}/brevmottaker-info")
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-    public Response getOrganisasjon(@NotNull @PathParam("orgnr") String orgnr) {
+    public Response getOrganisasjon(@NotNull @PathParam(OrganisasjonsnrDto.NAME) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) OrganisasjonsnrDto organisasjonsnrDto) {
+        var orgnr = organisasjonsnrDto.getOrgnr();
         if (orgnr.length() != 9 || !orgnr.matches("\\d{9}")) {
-            return Response.status(400, "orgnr must be 9 digits").build();
+            return Response.status(400, "organisasjonsnrDto must be 9 digits").build();
         }
         try {
             var org = eregRestKlient.hentOrganisasjon(orgnr);
