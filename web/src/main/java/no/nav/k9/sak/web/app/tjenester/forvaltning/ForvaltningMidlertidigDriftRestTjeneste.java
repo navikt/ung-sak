@@ -275,7 +275,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         //i denne konteksten er det allerede sjekket om sak er beskyttet med kode 6/7 så hvis det ikke gis tilgang, skal det være pga egen ansatt
         String jwtForInnloggetBruker = Objects.requireNonNull(SubjectHandler.getSubjectHandler().getInternSsoToken());
         AbacAttributtSamling attributter = AbacAttributtSamling.medJwtToken(jwtForInnloggetBruker)
-            .leggTil(AbacDataAttributter.opprett().leggTil(StandardAbacAttributtType.SAKSNUMMER, new Saksnummer(saksnummer)))            ;
+            .leggTil(AbacDataAttributter.opprett().leggTil(StandardAbacAttributtType.SAKSNUMMER, new Saksnummer(saksnummer)));
         attributter.setActionType(BeskyttetRessursActionAttributt.READ);
         attributter.setResource(DRIFT); //bruker samme som på REST-tjenesten
         Tilgangsbeslutning beslutning = pep.vurderTilgang(attributter);
@@ -988,6 +988,25 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         }
 
     }
+
+    @POST
+    @Path("/saksnummerForBehandling")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(description = "Finner saksnummer for behandlinguuid", summary = ("Finner saksnummer for behandlinguuid"), tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    public Response hentSaksnummerForBehandling(
+        @Parameter(description = "Behandling-UUID")
+        @NotNull
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+        BehandlingIdDto behandlingIdDto) {
+        var behandlingUuid = behandlingIdDto.getBehandlingUuid();
+        var behandlingId = behandlingIdDto.getBehandlingId();
+        final var behandling = behandlingUuid != null ? behandlingRepository.hentBehandling(behandlingUuid) : behandlingRepository.hentBehandling(behandlingId);
+        return Response.ok(behandling.getFagsak().getSaksnummer().getVerdi()).build();
+    }
+
 
     private void loggForvaltningTjeneste(Fagsak fagsak, String tjeneste, String begrunnelse) {
         /*
