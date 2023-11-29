@@ -26,7 +26,7 @@ public class ProsessModell {
     @ApplicationScoped
     public BehandlingModell førstegangsbehandling() {
         var modellBuilder = BehandlingModellImpl.builder(BehandlingType.FØRSTEGANGSSØKNAD, YTELSE_TYPE);
-        var behandlingModellBuilder = modellBuilder
+        modellBuilder
             .medSteg(BehandlingStegType.START_STEG)
             .medSteg(BehandlingStegType.VURDER_UTLAND)
             .medSteg(BehandlingStegType.INIT_PERIODER, StartpunktType.INIT_PERIODER)
