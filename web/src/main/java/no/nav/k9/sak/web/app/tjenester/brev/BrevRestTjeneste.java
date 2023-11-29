@@ -156,7 +156,7 @@ public class BrevRestTjeneste {
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     @Operation(description = "Hent navnet til gitt organisasjonsnr for sending til tredjepart", tags = "brev")
     @BeskyttetRessurs(action = READ, resource = APPLIKASJON)
-    public Response getOrganisasjon(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = IngenTilgangsAttributter.class) OrganisasjonsnrDto organisasjonsnrDto) {
+    public Response getBrevMottakerinfoEreg(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = IngenTilgangsAttributter.class) OrganisasjonsnrDto organisasjonsnrDto) {
         var orgnr = organisasjonsnrDto.getOrgnr();
         if (orgnr.length() != 9 || !orgnr.matches("\\d{9}")) {
             return Response.status(400, "organisasjonsnrDto must be 9 digits").build();

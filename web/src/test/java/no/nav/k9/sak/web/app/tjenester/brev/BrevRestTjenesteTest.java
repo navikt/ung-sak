@@ -17,7 +17,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.k9.felles.integrasjon.organisasjon.OrganisasjonEReg;
 import no.nav.k9.felles.integrasjon.organisasjon.OrganisasjonRestKlient;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import jakarta.ws.rs.core.Response;
@@ -94,7 +93,7 @@ public class BrevRestTjenesteTest {
 
 
         // Act
-        Response response = brevRestTjeneste.getOrganisasjon(new OrganisasjonsnrDto(inputOrganisasjonsnr));
+        Response response = brevRestTjeneste.getBrevMottakerinfoEreg(new OrganisasjonsnrDto(inputOrganisasjonsnr));
         // Assert
         BrevMottakerinfoEregResponseDto responseDto = (BrevMottakerinfoEregResponseDto) response.getEntity();
         assertThat(response.getStatus()).isEqualTo(200);
@@ -111,7 +110,7 @@ public class BrevRestTjenesteTest {
         var inputOrganisasjonsnr = "000999000";
         when(eregRestTjenesteMock.hentOrganisasjon(inputOrganisasjonsnr)).thenThrow(new IllegalArgumentException("argument \"content\" is null"));
         // Act
-        Response response = brevRestTjeneste.getOrganisasjon(new OrganisasjonsnrDto(inputOrganisasjonsnr));
+        Response response = brevRestTjeneste.getBrevMottakerinfoEreg(new OrganisasjonsnrDto(inputOrganisasjonsnr));
         // Assert
         assertThat(response.getStatus()).isEqualTo(200);
         final var entity = response.getEntity();
