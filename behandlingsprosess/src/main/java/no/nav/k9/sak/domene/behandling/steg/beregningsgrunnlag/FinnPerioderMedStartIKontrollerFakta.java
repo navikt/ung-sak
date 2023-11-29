@@ -5,6 +5,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
@@ -19,6 +22,9 @@ import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 
 @Dependent
 public class FinnPerioderMedStartIKontrollerFakta {
+
+    private static final Logger log = LoggerFactory.getLogger(FinnPerioderMedStartIKontrollerFakta.class);
+
 
     private final VilkårResultatRepository vilkårResultatRepository;
     private final VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
@@ -59,6 +65,9 @@ public class FinnPerioderMedStartIKontrollerFakta {
         var forlengelserIOpptjening = periodeFilter.filtrerPerioder(perioder, VilkårType.OPPTJENINGSVILKÅRET).stream()
             .filter(PeriodeTilVurdering::erForlengelse)
             .collect(Collectors.toSet());
+
+        log.info("Perioder med forlengelse i opptjening: " + forlengelserIOpptjening);
+        log.info("Perioder med oppfylte perioder forrige behandling: " + oppfylteBeregningsperioderForrigeBehandling);
 
         // Filtrerer ut perioder som er forlengelse i opptjening, men ikkje beregning
         return allePerioder.stream()
