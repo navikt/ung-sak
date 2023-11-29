@@ -12,8 +12,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import no.nav.k9.felles.integrasjon.organisasjon.OrganisasjonEReg;
 import no.nav.k9.felles.integrasjon.organisasjon.OrganisasjonRestKlient;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import jakarta.ws.rs.core.Response;
@@ -76,5 +80,41 @@ public class BrevRestTjenesteTest {
         Set<String> redusertUtbetalingÅrsaker = ((VedtakVarselDto) response.getEntity()).getRedusertUtbetalingÅrsaker();
         assertThat(redusertUtbetalingÅrsaker).isEqualTo(årsaker);
 
+    }
+
+    @Test
+    public void getOrganisasjon_found() throws JsonProcessingException {
+        // Arrange
+        final var objectMapper = new ObjectMapper();
+        final var expectedOrganisasjonsnavn = "Test Organisasjon1";
+        var inputOrganisasjonsnr = "111222333";
+        final var inputOrganisasjonJson = "{\"navn\":{\"navnelinje1\":\""+ expectedOrganisasjonsnavn +"\"},\"organisasjonsnummer\":\""+ inputOrganisasjonsnr +"\"}";
+        var expectedOrganisasjon = objectMapper.readValue(inputOrganisasjonJson, OrganisasjonEReg.class);
+        when(eregRestTjenesteMock.hentOrganisasjon(inputOrganisasjonsnr)).thenReturn(expectedOrganisasjon);
+
+
+        // Act
+        Response response = brevRestTjeneste.getOrganisasjon(new OrganisasjonsnrDto(inputOrganisasjonsnr));
+        // Assert
+        BrevMottakerinfoEregResponseDto responseDto = (BrevMottakerinfoEregResponseDto) response.getEntity();
+        assertThat(response.getStatus()).isEqualTo(200);
+        assertThat(responseDto.getNavn()).isEqualTo(expectedOrganisasjonsnavn);
+    }
+
+    @Test
+    public void getOrganisasjon_not_found() throws JsonProcessingException {
+        // Når organisasjonsnr ikkje blir funne i ereg kaster klienten IllegalArgumentException ser det ut til.
+        // Denne test simulerer dette slik at vi får testa at getOrganisasjon då returnerer statuskode 200 og eit tomt
+        // json objekt som er det vi ønsker i slike tilfeller.
+
+        // Arrange
+        var inputOrganisasjonsnr = "000999000";
+        when(eregRestTjenesteMock.hentOrganisasjon(inputOrganisasjonsnr)).thenThrow(new IllegalArgumentException("argument \"content\" is null"));
+        // Act
+        Response response = brevRestTjeneste.getOrganisasjon(new OrganisasjonsnrDto(inputOrganisasjonsnr));
+        // Assert
+        assertThat(response.getStatus()).isEqualTo(200);
+        final var entity = response.getEntity();
+        assertThat(entity).isNotNull().hasOnlyFields();
     }
 }
