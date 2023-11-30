@@ -22,6 +22,7 @@ import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
@@ -44,7 +45,7 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
 
     private HistorikkTjenesteAdapter historikkAdapter;
     private BehandlingRepository behandlingRepository;
-    private boolean brukPeriodisertRammevedtak;
+    private boolean brukPeriodisertRammevedtakAleneOmsorgen;
     private VilkårResultatRepository vilkårResultatRepository;
     private SøknadRepository søknadRepository;
     private PersoninfoAdapter personinfoAdapter;
@@ -59,19 +60,21 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
                       SøknadRepository søknadRepository,
                       PersoninfoAdapter personinfoAdapter,
                       BehandlingRepository behandlingRepository,
-                      @KonfigVerdi(value = "PERIODISERT_RAMMEVEDTAK", defaultVerdi = "false") boolean brukPeriodisertRammevedtak) {
+                      @KonfigVerdi(value = "PERIODISERT_RAMMEVEDTAK_AO", defaultVerdi = "false") boolean brukPeriodisertRammevedtakAleneOmsorgen) {
         this.historikkAdapter = historikkAdapter;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.søknadRepository = søknadRepository;
         this.personinfoAdapter = personinfoAdapter;
         this.behandlingRepository = behandlingRepository;
-        this.brukPeriodisertRammevedtak = brukPeriodisertRammevedtak;
+        this.brukPeriodisertRammevedtakAleneOmsorgen = brukPeriodisertRammevedtakAleneOmsorgen;
     }
 
 
     @Override
     public OppdateringResultat oppdater(AvklarUtvidetRettDto dto, AksjonspunktOppdaterParameter param) {
-        if (brukPeriodisertRammevedtak) {
+        Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
+        boolean brukerPeriodisering = brukPeriodisertRammevedtakAleneOmsorgen && behandling.getFagsakYtelseType() == FagsakYtelseType.OMSORGSPENGER_AO;
+        if (brukerPeriodisering) {
             return oppdaterPeriodisert(dto, param);
         } else {
             return oppdaterUperiodisert(dto, param);

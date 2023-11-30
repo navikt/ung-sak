@@ -246,8 +246,6 @@ spec:
       value: "true"
     - name: IKKE_YRKESAKTIV_UTEN_SPEILING
       value: "false"
-    - name: PSB_START_I_KOFAKBER_VED_FORLENGELSE_OPPTJENING
-      value: "true"
     - name: OMP_NULL_HELG_I_KRAVPERIODER
       value: "true"
     - name: TILKOMMET_AKTIVITET_ENABLED
@@ -264,7 +262,7 @@ spec:
       value: "true"
     - name: ENABLE_UTENLANDSOPPHOLD_PILS
       value: "true"
-    - name: PERIODISERT_RAMMEVEDTAK
+    - name: PERIODISERT_RAMMEVEDTAK_AO
       value: "true"
     - name: STONADSTATISTIKK_V2
       value: "true"

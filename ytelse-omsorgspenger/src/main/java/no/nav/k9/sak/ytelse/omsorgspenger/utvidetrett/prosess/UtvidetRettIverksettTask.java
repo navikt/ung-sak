@@ -17,6 +17,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.prosesstask.api.ProsessTask;
@@ -49,7 +50,7 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
     private BehandlingRepository behandlingRepository;
     private UtvidetRettKlient utvidetRettKlient;
     private PeriodisertUtvidetRettIverksettTjeneste periodisertUtvidetRettIverksettTjeneste;
-    private boolean brukPeriodisertRammevedtak;
+    private boolean brukPeriodisertRammevedtakAleneOmsorgen;
 
 
     protected UtvidetRettIverksettTask() {
@@ -60,25 +61,27 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
                                     BehandlingRepository behandlingRepository,
                                     UtvidetRettKlient utvidetRettKlient,
                                     PeriodisertUtvidetRettIverksettTjeneste periodisertUtvidetRettIverksettTjeneste,
-                                    @KonfigVerdi(value = "PERIODISERT_RAMMEVEDTAK", defaultVerdi = "false") boolean brukPeriodisertRammevedtak) {
+                                    @KonfigVerdi(value = "PERIODISERT_RAMMEVEDTAK_AO", defaultVerdi = "false") boolean brukPeriodisertRammevedtakAleneOmsorgen) {
         this.vilkårTjeneste = vilkårTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.utvidetRettKlient = utvidetRettKlient;
         this.periodisertUtvidetRettIverksettTjeneste = periodisertUtvidetRettIverksettTjeneste;
-        this.brukPeriodisertRammevedtak = brukPeriodisertRammevedtak;
+        this.brukPeriodisertRammevedtakAleneOmsorgen = brukPeriodisertRammevedtakAleneOmsorgen;
     }
 
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
-        if (brukPeriodisertRammevedtak) {
-            håndterAktuellOgTilpassTidligerePerioder(prosessTaskData);
+        var behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
+        logContext(behandling);
+        boolean brukerPeriodisering = brukPeriodisertRammevedtakAleneOmsorgen && behandling.getFagsakYtelseType() == FagsakYtelseType.OMSORGSPENGER_AO;
+        if (brukerPeriodisering) {
+            håndterAktuellOgTilpassTidligerePerioder(behandling);
         } else {
-            håndterAktuellPeriode(prosessTaskData);
+            håndterAktuellPeriode(behandling);
         }
     }
 
-    private void håndterAktuellOgTilpassTidligerePerioder(ProsessTaskData prosessTaskData) {
-        var behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
+    private void håndterAktuellOgTilpassTidligerePerioder(Behandling behandling) {
         LocalDateTimeline<Utfall> resultat = periodisertUtvidetRettIverksettTjeneste.utfallSomErEndret(behandling);
         if (resultat.size() > 1) {
             //begrensningen kan fjernes dersom omsorgsdager får støtte for å ta imot flere perioder for samme behandling
@@ -101,11 +104,8 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
         });
     }
 
-    private void håndterAktuellPeriode(ProsessTaskData prosessTaskData) {
-        Long behandlingId = Long.valueOf(prosessTaskData.getBehandlingId());
-        var behandling = behandlingRepository.hentBehandling(behandlingId);
-        logContext(behandling);
-
+    private void håndterAktuellPeriode(Behandling behandling) {
+        Long behandlingId = behandling.getId();
         var samletVilkårsresultat = vilkårTjeneste.samletVilkårsresultat(behandlingId);
 
         var utfall = behandling.getBehandlingResultatType();
