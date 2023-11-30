@@ -157,9 +157,8 @@ public class BrevRestTjeneste {
     @Operation(description = "Hent navnet til gitt organisasjonsnr for sending til tredjepart", tags = "brev")
     @BeskyttetRessurs(action = READ, resource = APPLIKASJON)
     public Response getBrevMottakerinfoEreg(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = IngenTilgangsAttributter.class) OrganisasjonsnrDto organisasjonsnrDto) {
-        var orgnr = organisasjonsnrDto.getOrgnr();
         try {
-            var org = eregRestKlient.hentOrganisasjon(orgnr);
+            var org = eregRestKlient.hentOrganisasjon(organisasjonsnrDto.organisasjonsnr());
             final var response = new BrevMottakerinfoEregResponseDto(org.getNavn());
             return Response.ok(response).build();
         } catch (IllegalArgumentException e) {

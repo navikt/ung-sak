@@ -1,58 +1,24 @@
 package no.nav.k9.sak.web.app.tjenester.brev;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSetter;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-import java.util.Objects;
-
 /**
  * Organisasjonsnr for søk i enhetsregisteret (Brønnøysund)
  */
-public class OrganisasjonsnrDto {
-    public static final String NAME = "organisasjonsnr";
-
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
+public record OrganisasjonsnrDto(
     @JsonProperty(value = NAME, required = true)
     @Size(max = 9)
     @NotNull
     @Pattern(regexp = "^\\d{9}$", message = "[${validatedValue}] er ugyldig. Må vere 9 siffer")
-    private String orgnr;
+    String organisasjonsnr
+) {
 
-    public OrganisasjonsnrDto(String orgnr) {
-        this.orgnr = Objects.requireNonNull(orgnr, "orgnr");
-    }
-
-    protected OrganisasjonsnrDto() {
-    }
-
-    @NotNull
-    public String getOrgnr() {
-        return orgnr;
-    }
-
-    @JsonSetter(NAME)
-    public void setOrgnr(@NotNull String orgnr) {
-        this.orgnr = orgnr;
-    }
-
-    @Override
-    public String toString() {
-        return "OrganisasjonsnrDto{" +
-            "orgnr='" + orgnr + '\'' +
-            '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof OrganisasjonsnrDto that)) return false;
-        return Objects.equals(orgnr, that.orgnr);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(orgnr);
-    }
+    public static final String NAME = "organisasjonsnr";
 }
