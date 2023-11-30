@@ -67,25 +67,25 @@ public class KalkulusStartpunktUtleder {
             var forlengelseperioder = utenAvslagFørBeregning.stream().filter(PeriodeTilVurdering::erForlengelse).collect(Collectors.toCollection(TreeSet::new));
             if (!forlengelseperioder.isEmpty()) {
                 log.info("Perioder med start i vurder refusjon: " + forlengelseperioder);
-                settStartpunkt(forlengelseperioder, periodeStartStegMap, getStartpunktForlengelse(ref));
             }
+            settStartpunkt(forlengelseperioder, periodeStartStegMap, getStartpunktForlengelse(ref));
             var startIKontrollerFaktaBeregning = finnPerioderMedStartIKontrollerFakta.finnPerioder(ref, utenAvslagFørBeregning, forlengelseperioder);
             if (!startIKontrollerFaktaBeregning.isEmpty()) {
                 log.info("Perioder med start i kontroller fakta beregning: " + startIKontrollerFaktaBeregning);
-                settStartpunkt(startIKontrollerFaktaBeregning, periodeStartStegMap, BehandlingStegType.KONTROLLER_FAKTA_BEREGNING);
             }
+            settStartpunkt(startIKontrollerFaktaBeregning, periodeStartStegMap, BehandlingStegType.KONTROLLER_FAKTA_BEREGNING);
         }
 
         var perioderFraStart = finnPerioderFraStart(periodeStartStegMap, utenAvslagFørBeregning);
         if (!perioderFraStart.isEmpty()) {
             log.info("Perioder med start i fastsett skjæringstidspunkt: " + perioderFraStart);
-            settStartpunkt(perioderFraStart, periodeStartStegMap, BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING);
         }
+        settStartpunkt(perioderFraStart, periodeStartStegMap, BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING);
         return periodeStartStegMap;
 
     }
 
-    private BehandlingStegType getStartpunktForlengelse(BehandlingReferanse behandlingReferanse) {
+    public BehandlingStegType getStartpunktForlengelse(BehandlingReferanse behandlingReferanse) {
         var modell = behandlingModellRepository.getModell(behandlingReferanse.getBehandlingType(), behandlingReferanse.getFagsakYtelseType());
         var skalKjøreVurderTilkommetInntekt = modell.getAlleBehandlingStegTyper().stream().anyMatch(BehandlingStegType.VURDER_TILKOMMET_INNTEKT::equals);
         return skalKjøreVurderTilkommetInntekt ? BehandlingStegType.VURDER_TILKOMMET_INNTEKT : BehandlingStegType.VURDER_REF_BERGRUNN;
