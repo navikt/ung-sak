@@ -82,7 +82,7 @@ public class BrevRestTjenesteTest {
     }
 
     @Test
-    public void getOrganisasjon_found() throws JsonProcessingException {
+    public void getBrevMottakerinfoEreg_found() throws JsonProcessingException {
         // Arrange
         final var objectMapper = new ObjectMapper();
         final var expectedOrganisasjonsnavn = "Test Organisasjon1";
@@ -101,7 +101,7 @@ public class BrevRestTjenesteTest {
     }
 
     @Test
-    public void getOrganisasjon_not_found() throws JsonProcessingException {
+    public void getBrevMottakerinfoEreg_not_found() {
         // Når organisasjonsnr ikkje blir funne i ereg kaster klienten IllegalArgumentException ser det ut til.
         // Denne test simulerer dette slik at vi får testa at getOrganisasjon då returnerer statuskode 200 og eit tomt
         // json objekt som er det vi ønsker i slike tilfeller.
