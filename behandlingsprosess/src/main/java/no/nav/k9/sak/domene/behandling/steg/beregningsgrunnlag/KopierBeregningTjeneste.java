@@ -3,7 +3,9 @@ package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.KONTROLLER_FAKTA_BEREGNING;
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_TILKOMMET_INNTEKT;
 
+import java.util.Collections;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -116,7 +118,7 @@ public class KopierBeregningTjeneste {
     private void kopierGrunnlagForForlengelseperioder(BehandlingReferanse ref) {
         var perioderPrStartpunkt = kalkulusStartpunktUtleder.utledPerioderPrStartpunkt(ref);
         if (ref.getBehandlingType().equals(BehandlingType.REVURDERING)) {
-            var startpunktVurderRefusjon = perioderPrStartpunkt.get(VURDER_TILKOMMET_INNTEKT);
+            var startpunktVurderRefusjon = perioderPrStartpunkt.get(kalkulusStartpunktUtleder.getStartpunktForlengelse(ref));
             if (!startpunktVurderRefusjon.isEmpty()) {
                 log.info("Kopierer beregning for startpunkt vurder refusjon {}", startpunktVurderRefusjon);
                 kalkulusTjeneste.kopier(ref, startpunktVurderRefusjon, StegType.VURDER_VILKAR_BERGRUNN);
