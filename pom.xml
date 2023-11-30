@@ -46,8 +46,8 @@
         <k9format.version>9.0.6</k9format.version>
         <jackson.version>2.15.3</jackson.version>
         <asm.version>9.6</asm.version>
-        <kotlin-stdlib.version>1.9.20</kotlin-stdlib.version>
-        <jandex.version>3.1.5</jandex.version>
+        <kotlin-stdlib.version>1.9.21</kotlin-stdlib.version>
+        <jandex.version>3.1.6</jandex.version>
 
     </properties>
 
@@ -570,7 +570,7 @@
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>io.github.classgraph</groupId>
                 <artifactId>classgraph</artifactId>
-                <version>4.8.164</version>
+                <version>4.8.165</version>
             </dependency>
 
             <dependency>
@@ -651,7 +651,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>
-                    <version>3.1.0</version>
+                    <version>3.1.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>

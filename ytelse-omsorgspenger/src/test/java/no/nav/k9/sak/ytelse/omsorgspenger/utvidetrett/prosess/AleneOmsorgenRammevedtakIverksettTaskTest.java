@@ -33,11 +33,11 @@ import no.nav.k9.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.UtvidetRettKlient;
-import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.KroniskSyktBarn;
+import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.AleneOmsorg;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.klient.modell.UtvidetRett;
 
 @CdiDbAwareTest
-class UtvidetRettIverksettTaskTest {
+class AleneOmsorgenRammevedtakIverksettTaskTest {
 
     @Inject
     private VilkårTjeneste vilkårTjeneste;
@@ -75,12 +75,12 @@ class UtvidetRettIverksettTaskTest {
         List<IverksettelseHendelse> iverksettelserSendt = utvidetRettKlient.getHendelser();
         assertThat(iverksettelserSendt).hasSize(1);
         assertThat(iverksettelserSendt.get(0).innvilgelse()).isTrue();
-        KroniskSyktBarn ksb = (KroniskSyktBarn) iverksettelserSendt.get(0).hendelse();
-        assertThat(ksb.getSøker().getAktørId()).isEqualTo(søker);
-        assertThat(ksb.getBarn().getAktørId()).isEqualTo(pleietrengende);
-        assertThat(ksb.getPeriode().getFom()).isEqualTo(fom);
-        assertThat(ksb.getPeriode().getTom()).isEqualTo(tom);
-        assertThat(ksb.getBehandlingUuid()).isEqualTo(behandling.getUuid());
+        AleneOmsorg ao = (AleneOmsorg) iverksettelserSendt.get(0).hendelse();
+        assertThat(ao.getSøker().getAktørId()).isEqualTo(søker);
+        assertThat(ao.getBarn().getAktørId()).isEqualTo(pleietrengende);
+        assertThat(ao.getPeriode().getFom()).isEqualTo(fom);
+        assertThat(ao.getPeriode().getTom()).isEqualTo(tom);
+        assertThat(ao.getBehandlingUuid()).isEqualTo(behandling.getUuid());
     }
 
     @Test
@@ -108,12 +108,12 @@ class UtvidetRettIverksettTaskTest {
         assertThat(iverksettelserSendt).hasSize(1);
 
         assertThat(iverksettelserSendt.get(0).innvilgelse()).isFalse();
-        KroniskSyktBarn ksb = (KroniskSyktBarn) iverksettelserSendt.get(0).hendelse();
-        assertThat(ksb.getSøker().getAktørId()).isEqualTo(søker);
-        assertThat(ksb.getBarn().getAktørId()).isEqualTo(pleietrengende);
-        assertThat(ksb.getPeriode().getFom()).isEqualTo(tom2.plusDays(1));
-        assertThat(ksb.getPeriode().getTom()).isEqualTo(tom1);
-        assertThat(ksb.getBehandlingUuid()).isEqualTo(revurdering.getUuid());
+        AleneOmsorg ao = (AleneOmsorg) iverksettelserSendt.get(0).hendelse();
+        assertThat(ao.getSøker().getAktørId()).isEqualTo(søker);
+        assertThat(ao.getBarn().getAktørId()).isEqualTo(pleietrengende);
+        assertThat(ao.getPeriode().getFom()).isEqualTo(tom2.plusDays(1));
+        assertThat(ao.getPeriode().getTom()).isEqualTo(tom1);
+        assertThat(ao.getBehandlingUuid()).isEqualTo(revurdering.getUuid());
     }
 
     @Test
@@ -137,12 +137,12 @@ class UtvidetRettIverksettTaskTest {
         assertThat(iverksettelserSendt).hasSize(1);
 
         assertThat(iverksettelserSendt.get(0).innvilgelse()).isTrue();
-        KroniskSyktBarn ksb = (KroniskSyktBarn) iverksettelserSendt.get(0).hendelse();
-        assertThat(ksb.getSøker().getAktørId()).isEqualTo(søker);
-        assertThat(ksb.getBarn().getAktørId()).isEqualTo(pleietrengende);
-        assertThat(ksb.getPeriode().getFom()).isEqualTo(fom2);
-        assertThat(ksb.getPeriode().getTom()).isEqualTo(tom2);
-        assertThat(ksb.getBehandlingUuid()).isEqualTo(revurdering.getUuid());
+        AleneOmsorg ao = (AleneOmsorg) iverksettelserSendt.get(0).hendelse();
+        assertThat(ao.getSøker().getAktørId()).isEqualTo(søker);
+        assertThat(ao.getBarn().getAktørId()).isEqualTo(pleietrengende);
+        assertThat(ao.getPeriode().getFom()).isEqualTo(fom2);
+        assertThat(ao.getPeriode().getTom()).isEqualTo(tom2);
+        assertThat(ao.getBehandlingUuid()).isEqualTo(revurdering.getUuid());
     }
 
     @Test
@@ -193,7 +193,7 @@ class UtvidetRettIverksettTaskTest {
     }
 
     private Fagsak lagFagsak() {
-        Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER_KS).medBruker(søker).medPleietrengende(pleietrengende).build();
+        Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER_AO).medBruker(søker).medPleietrengende(pleietrengende).build();
         fagsakRepository.opprettNy(fagsak);
         return fagsak;
     }
