@@ -28,7 +28,7 @@ public class RammevedtakspesifikkForeslåVedtak implements YtelsespesifikkForesl
 
     private BehandlingRepository behandlingRepository;
     private PeriodisertUtvidetRettIverksettTjeneste periodisertUtvidetRettIverksettTjeneste;
-    private boolean brukPeriodisertRammevedtak;
+    private boolean brukPeriodisertRammevedtakAleneOmsorgen;
 
     public RammevedtakspesifikkForeslåVedtak() {
         //for CDI proxy
@@ -37,16 +37,17 @@ public class RammevedtakspesifikkForeslåVedtak implements YtelsespesifikkForesl
     @Inject
     public RammevedtakspesifikkForeslåVedtak(BehandlingRepository behandlingRepository,
                                              PeriodisertUtvidetRettIverksettTjeneste periodisertUtvidetRettIverksettTjeneste,
-                                             @KonfigVerdi(value = "PERIODISERT_RAMMEVEDTAK", defaultVerdi = "false") boolean brukPeriodisertRammevedtak) {
+                                             @KonfigVerdi(value = "PERIODISERT_RAMMEVEDTAK_AO", defaultVerdi = "false") boolean brukPeriodisertRammevedtakAleneOmsorgen) {
         this.behandlingRepository = behandlingRepository;
         this.periodisertUtvidetRettIverksettTjeneste = periodisertUtvidetRettIverksettTjeneste;
-        this.brukPeriodisertRammevedtak = brukPeriodisertRammevedtak;
+        this.brukPeriodisertRammevedtakAleneOmsorgen = brukPeriodisertRammevedtakAleneOmsorgen;
     }
 
     @Override
     public BehandleStegResultat run(BehandlingReferanse ref) {
-        if (brukPeriodisertRammevedtak) {
-            Behandling behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
+        Behandling behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
+        boolean brukerPeriodisering = brukPeriodisertRammevedtakAleneOmsorgen && behandling.getFagsakYtelseType() == OMSORGSPENGER_AO;
+        if (brukerPeriodisering) {
             LocalDateTimeline<Utfall> endringer = periodisertUtvidetRettIverksettTjeneste.utfallSomErEndret(behandling);
             if (endringer.size() > 1) {
                 throw new IllegalStateException("Det er ikke støttet i omsorgsdager å motta mer enn 1 periode med endring for hver behandling, stopper derfor her så det kan fikses. Har endringer for perioder: " + endringer);

@@ -1,9 +1,13 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
+import java.time.LocalDate;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -19,6 +23,9 @@ import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 
 @Dependent
 public class FinnPerioderMedStartIKontrollerFakta {
+
+    private static final Logger log = LoggerFactory.getLogger(FinnPerioderMedStartIKontrollerFakta.class);
+
 
     private final VilkårResultatRepository vilkårResultatRepository;
     private final VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
@@ -54,7 +61,7 @@ public class FinnPerioderMedStartIKontrollerFakta {
         }
         var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref);
         periodeFilter.ignorerAvslåttePerioder();
-        var oppfylteBeregningsperioderForrigeBehandling = finnOppfylteVilkårsperioderForrigeBehandling(ref);
+        var oppfylteStpForrigeBehandling = finnStpForOppfylteVilkårsperioderForrigeBehandling(ref);
         var perioder = allePerioder.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet());
         var forlengelserIOpptjening = periodeFilter.filtrerPerioder(perioder, VilkårType.OPPTJENINGSVILKÅRET).stream()
             .filter(PeriodeTilVurdering::erForlengelse)
@@ -64,17 +71,18 @@ public class FinnPerioderMedStartIKontrollerFakta {
         return allePerioder.stream()
             .filter(forlengelserIOpptjening::contains)
             .filter(periode -> !forlengelseperioderBeregning.contains(periode))
-            .filter(periode -> oppfylteBeregningsperioderForrigeBehandling.contains(periode.getPeriode()))
+            .filter(periode -> oppfylteStpForrigeBehandling.contains(periode.getPeriode().getFomDato()))
             .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    private Set<DatoIntervallEntitet> finnOppfylteVilkårsperioderForrigeBehandling(BehandlingReferanse ref) {
+    private Set<LocalDate> finnStpForOppfylteVilkårsperioderForrigeBehandling(BehandlingReferanse ref) {
         return vilkårResultatRepository.hentHvisEksisterer(ref.getOriginalBehandlingId().orElseThrow()).orElseThrow()
             .getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
             .stream()
             .flatMap(v -> v.getPerioder().stream())
             .filter(p -> p.getGjeldendeUtfall().equals(Utfall.OPPFYLT))
             .map(VilkårPeriode::getPeriode)
+            .map(DatoIntervallEntitet::getFomDato)
             .collect(Collectors.toSet());
     }
 
