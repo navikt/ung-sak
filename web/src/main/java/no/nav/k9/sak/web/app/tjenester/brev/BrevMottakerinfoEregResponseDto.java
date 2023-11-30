@@ -9,18 +9,9 @@ import org.jetbrains.annotations.NotNull;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class BrevMottakerinfoEregResponseDto {
-
-    public BrevMottakerinfoEregResponseDto(@NotNull String navn) {
-        this.navn = navn;
-    }
-
+public record BrevMottakerinfoEregResponseDto(
     @JsonProperty("navn")
     @NotNull
-    private final String navn;
-
-    @NotNull
-    public String getNavn() {
-        return navn;
-    }
+    String navn
+){
 }

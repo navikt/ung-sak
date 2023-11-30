@@ -97,7 +97,7 @@ public class BrevRestTjenesteTest {
         // Assert
         BrevMottakerinfoEregResponseDto responseDto = (BrevMottakerinfoEregResponseDto) response.getEntity();
         assertThat(response.getStatus()).isEqualTo(200);
-        assertThat(responseDto.getNavn()).isEqualTo(expectedOrganisasjonsnavn);
+        assertThat(responseDto.navn()).isEqualTo(expectedOrganisasjonsnavn);
     }
 
     @Test
