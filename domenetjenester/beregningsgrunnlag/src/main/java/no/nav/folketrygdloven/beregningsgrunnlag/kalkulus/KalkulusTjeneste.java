@@ -310,11 +310,17 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
 
         Map<UUID, KalkulusResultat> resultater = new LinkedHashMap<>();
         for (var tilstandResponse : response) {
-            var avklaringsbehovResultatList = tilstandResponse.getAvklaringsbehovMedTilstandDto().stream()
-                .map(dto -> BeregningAvklaringsbehovResultat.opprettMedFristFor(mapTilAvklaringsbehov(dto),
-                    dto.getVenteårsak() != null ? BeregningVenteårsak.fraKode(dto.getVenteårsak().getKode()) : null, dto.getVentefrist()))
-                .collect(Collectors.toList());
-            KalkulusResultat kalkulusResultat = new KalkulusResultat(avklaringsbehovResultatList);
+            KalkulusResultat kalkulusResultat;
+            if (tilstandResponse.getAvklaringsbehovMedTilstandDto() == null) {
+                kalkulusResultat = new KalkulusResultat(Collections.emptyList());
+
+            } else {
+                var avklaringsbehovResultatList = tilstandResponse.getAvklaringsbehovMedTilstandDto().stream()
+                    .map(dto -> BeregningAvklaringsbehovResultat.opprettMedFristFor(mapTilAvklaringsbehov(dto),
+                        dto.getVenteårsak() != null ? BeregningVenteårsak.fraKode(dto.getVenteårsak().getKode()) : null, dto.getVentefrist()))
+                    .collect(Collectors.toList());
+                kalkulusResultat = new KalkulusResultat(avklaringsbehovResultatList);
+            }
             if (tilstandResponse.getVilkarOppfylt() != null) {
                 if (tilstandResponse.getVilkårsavslagsårsak() != null && !tilstandResponse.getVilkarOppfylt()) {
                     kalkulusResultat = kalkulusResultat.medAvslåttVilkår(mapTilAvslagsårsak(tilstandResponse.getVilkårsavslagsårsak()));
