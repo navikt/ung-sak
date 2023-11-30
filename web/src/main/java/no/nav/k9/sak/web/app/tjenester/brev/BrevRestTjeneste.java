@@ -158,9 +158,6 @@ public class BrevRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = APPLIKASJON)
     public Response getBrevMottakerinfoEreg(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = IngenTilgangsAttributter.class) OrganisasjonsnrDto organisasjonsnrDto) {
         var orgnr = organisasjonsnrDto.getOrgnr();
-        if (orgnr.length() != 9 || !orgnr.matches("\\d{9}")) {
-            return Response.status(400, "organisasjonsnrDto must be 9 digits").build();
-        }
         try {
             var org = eregRestKlient.hentOrganisasjon(orgnr);
             final var response = new BrevMottakerinfoEregResponseDto(org.getNavn());
