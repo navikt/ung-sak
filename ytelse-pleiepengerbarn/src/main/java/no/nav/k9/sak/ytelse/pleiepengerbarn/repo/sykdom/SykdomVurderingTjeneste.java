@@ -243,10 +243,10 @@ public class SykdomVurderingTjeneste {
     public SykdomVurderingerOgPerioder utledPerioderPPN(Behandling behandling) {
         LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> vurderinger = hentVurderinger(SykdomVurderingType.LIVETS_SLUTTFASE, behandling);
         LocalDateTimeline<Set<Saksnummer>> behandledeSøknadsperioder = medisinskGrunnlagRepository.hentSaksnummerForSøktePerioder(behandling.getFagsak().getPleietrengendeAktørId());
+        var behandledeSøknadsperioderTidslinje = TidslinjeUtil.toBooleanTimeline(behandledeSøknadsperioder);
+        var perioderTilVurdering = TidslinjeUtil.tilDatoIntervallEntiteter(behandledeSøknadsperioderTidslinje);
 
         List<Periode> perioderKreverVurdering = behandledeSøknadsperioder.stream().map(s -> new Periode(s.getFom(), s.getTom())).toList();
-        VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = getPerioderTilVurderingTjeneste(behandling);
-        NavigableSet<DatoIntervallEntitet> perioderTilVurdering = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.I_LIVETS_SLUTTFASE);
         LocalDateTimeline<Boolean> tidslinjeKreverVurdering = utledPerioderSomKreverVurderingPPN(behandling, perioderTilVurdering);
         LocalDateTimeline<Boolean> innleggelserTidslinje = hentAlleInnleggelserTidslinje(behandling);
         LocalDateTimeline<Boolean> alleResterendeVurderingsperioder = finnResterendeVurderingsperioder(behandling, tidslinjeKreverVurdering, vurderinger);
