@@ -5,7 +5,7 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
-import java.util.Collection;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -15,9 +15,12 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.tilkommetAktivitet.TilkommetAktivitetTjeneste;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
@@ -34,10 +37,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.EtablertTilsynTj
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
-import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
-import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
-import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
 @ApplicationScoped
 @BehandlingStegRef(value = VURDER_UTTAK_V2)
@@ -56,7 +56,9 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
     private SamtidigUttakTjeneste samtidigUttakTjeneste;
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
 
-    private AksjonspunktUtlederNyeRegler aksjonspunktUtlederNyeRegler;
+    private TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste;
+
+
 
     VurderUttakIBeregningSteg() {
         // for proxy
@@ -69,14 +71,14 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
                                      EtablertTilsynTjeneste etablertTilsynTjeneste,
                                      SamtidigUttakTjeneste samtidigUttakTjeneste,
                                      UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
-                                     AksjonspunktUtlederNyeRegler aksjonspunktUtlederNyeRegler) {
+                                     TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
         this.uttakTjeneste = uttakTjeneste;
         this.etablertTilsynTjeneste = etablertTilsynTjeneste;
         this.samtidigUttakTjeneste = samtidigUttakTjeneste;
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
-        this.aksjonspunktUtlederNyeRegler = aksjonspunktUtlederNyeRegler;
+        this.tilkommetAktivitetTjeneste = tilkommetAktivitetTjeneste;
     }
 
     @Override
@@ -88,15 +90,7 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
         etablertTilsynTjeneste.opprettGrunnlagForTilsynstidlinje(ref);
 
         Optional<AksjonspunktDefinisjon> autopunktVentAnnenSak = håndteringAvSamtidigUttak(behandling, kontekst, ref);
-        if (autopunktVentAnnenSak.isPresent()) {
-            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(autopunktVentAnnenSak.get()));
-        }
-        Optional<AksjonspunktDefinisjon> aksjonspunktSetteDatoNyeRegler = aksjonspunktUtlederNyeRegler.utledAksjonspunktDatoForNyeRegler(behandling);
-        if (aksjonspunktSetteDatoNyeRegler.isPresent()) {
-            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(aksjonspunktSetteDatoNyeRegler.get()));
-        }
-
-        return BehandleStegResultat.utførtUtenAksjonspunkter();
+        return autopunktVentAnnenSak.map(aksjonspunktDefinisjon -> BehandleStegResultat.utførtMedAksjonspunkter(List.of(aksjonspunktDefinisjon))).orElseGet(BehandleStegResultat::utførtUtenAksjonspunkter);
     }
 
     private Optional<AksjonspunktDefinisjon> håndteringAvSamtidigUttak(Behandling behandling, BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
@@ -124,21 +118,6 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
             log.info("[Kjøreplan] Venter på behandling av andre fagsaker");
             return Optional.of(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK);
         }
-    }
-
-    boolean harEnAv(Uttaksplan uttaksplan, Collection<UttakArbeidType> aktivitettyper) {
-        for (UttaksperiodeInfo uttaksperiodeInfo : uttaksplan.getPerioder().values()) {
-            for (Utbetalingsgrader utbetalingsgrader : uttaksperiodeInfo.getUtbetalingsgrader()) {
-                for (UttakArbeidType aktivitettype : aktivitettyper) {
-                    if (utbetalingsgrader.getArbeidsforhold().getType().equals(aktivitettype.getKode())) {
-                        log.info("Har aktivitet IY/KY");
-                        return true;
-                    }
-                }
-            }
-        }
-        log.info("Har ikke aktivitet IY/KY");
-        return false;
     }
 
     private void avbrytAksjonspunkt(Behandling behandling, BehandlingskontrollKontekst kontekst) {

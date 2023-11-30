@@ -16,6 +16,10 @@ public class ProsessModell {
 
     private static final FagsakYtelseType YTELSE_TYPE = FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
+
+    public ProsessModell() {
+    }
+
     @FagsakYtelseTypeRef(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
     @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
     @Produces
@@ -50,7 +54,9 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG)
             .medSteg(BehandlingStegType.FORTSETT_FORESLÅ_BEREGNINGSGRUNNLAG)
             .medSteg(BehandlingStegType.VURDER_VILKAR_BERGRUNN)
-            .medSteg(BehandlingStegType.VURDER_UTTAK_V2, StartpunktType.UTTAKSVILKÅR_VURDERING)
+            .medSteg(BehandlingStegType.VURDER_STARTDATO_UTTAKSREGLER, StartpunktType.UTTAKSVILKÅR_VURDERING)
+            .medSteg(BehandlingStegType.VURDER_TILKOMMET_INNTEKT)
+            .medSteg(BehandlingStegType.VURDER_UTTAK_V2)
             .medSteg(BehandlingStegType.VURDER_REF_BERGRUNN)
             .medSteg(BehandlingStegType.FORDEL_BEREGNINGSGRUNNLAG)
             .medSteg(BehandlingStegType.FASTSETT_BEREGNINGSGRUNNLAG)

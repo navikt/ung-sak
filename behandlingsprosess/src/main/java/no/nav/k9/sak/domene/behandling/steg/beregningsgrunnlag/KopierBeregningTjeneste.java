@@ -1,7 +1,7 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.KONTROLLER_FAKTA_BEREGNING;
-import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_REF_BERGRUNN;
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_TILKOMMET_INNTEKT;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -41,6 +41,7 @@ public class KopierBeregningTjeneste {
     private final BeregningsgrunnlagTjeneste kalkulusTjeneste;
     private final BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
     private final KalkulusStartpunktUtleder kalkulusStartpunktUtleder;
+
 
     @Inject
     public KopierBeregningTjeneste(BehandlingRepository behandlingRepository, @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste,
@@ -115,7 +116,7 @@ public class KopierBeregningTjeneste {
     private void kopierGrunnlagForForlengelseperioder(BehandlingReferanse ref) {
         var perioderPrStartpunkt = kalkulusStartpunktUtleder.utledPerioderPrStartpunkt(ref);
         if (ref.getBehandlingType().equals(BehandlingType.REVURDERING)) {
-            var startpunktVurderRefusjon = perioderPrStartpunkt.get(VURDER_REF_BERGRUNN);
+            var startpunktVurderRefusjon = perioderPrStartpunkt.get(VURDER_TILKOMMET_INNTEKT);
             if (!startpunktVurderRefusjon.isEmpty()) {
                 log.info("Kopierer beregning for startpunkt vurder refusjon {}", startpunktVurderRefusjon);
                 kalkulusTjeneste.kopier(ref, startpunktVurderRefusjon, StegType.VURDER_VILKAR_BERGRUNN);

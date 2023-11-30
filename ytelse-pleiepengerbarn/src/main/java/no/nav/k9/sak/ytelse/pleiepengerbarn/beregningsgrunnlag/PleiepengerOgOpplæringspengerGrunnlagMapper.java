@@ -13,10 +13,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.AktivitetDto;
@@ -30,13 +32,23 @@ import no.nav.folketrygdloven.kalkulus.felles.v1.Aktør;
 import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
 import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Organisasjon;
+import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
 import no.nav.folketrygdloven.kalkulus.kodeverk.UttakArbeidType;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.perioder.KravDokument;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PSBVurdererSøknadsfristTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.PeriodeFraSøknadForBrukerTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidstidMappingInput;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.MapArbeid;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeidsforhold;
+import no.nav.pleiepengerbarn.uttak.kontrakter.ArbeidsforholdPeriodeInfo;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
 import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
@@ -51,29 +63,63 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
     private UttakTjeneste uttakRestKlient;
     private UttakNyeReglerRepository uttakNyeReglerRepository;
 
+    private PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste;
+
+    private PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste;
+
     public PleiepengerOgOpplæringspengerGrunnlagMapper() {
         // for proxy
     }
 
     @Inject
-    public PleiepengerOgOpplæringspengerGrunnlagMapper(UttakTjeneste uttakRestKlient, UttakNyeReglerRepository uttakNyeReglerRepository) {
+    public PleiepengerOgOpplæringspengerGrunnlagMapper(UttakTjeneste uttakRestKlient, UttakNyeReglerRepository uttakNyeReglerRepository, PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste, @Any PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste) {
         this.uttakRestKlient = uttakRestKlient;
         this.uttakNyeReglerRepository = uttakNyeReglerRepository;
+        this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
+        this.søknadsfristTjeneste = søknadsfristTjeneste;
     }
 
     @Override
     public YtelsespesifiktGrunnlagDto lagYtelsespesifiktGrunnlag(BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode) {
         var uttaksplan = uttakRestKlient.hentUttaksplan(ref.getBehandlingUuid(), false);
 
+
         List<UtbetalingsgradPrAktivitetDto> utbetalingsgrader = new ArrayList<>();
         if (uttaksplan != null) {
             utbetalingsgrader = finnUtbetalingsgrader(List.of(vilkårsperiode), uttaksplan);
+        } else {
+            var perioderFraSøknadene = periodeFraSøknadForBrukerTjeneste.hentPerioderFraSøknad(ref);
+            var kravDokumenter = søknadsfristTjeneste.vurderSøknadsfrist(ref).keySet();
+            utbetalingsgrader = finnUtbetalingsgraderFraSøknadsdata(vilkårsperiode, kravDokumenter, perioderFraSøknadene);
         }
 
         var datoForNyeRegler = uttakNyeReglerRepository.finnDatoForNyeRegler(ref.getBehandlingId());
 
 
         return mapTilYtelseSpesifikkType(ref, utbetalingsgrader, datoForNyeRegler);
+    }
+
+    private static List<UtbetalingsgradPrAktivitetDto> finnUtbetalingsgraderFraSøknadsdata(DatoIntervallEntitet vilkårsperiode, Set<KravDokument> kravDokumenter, Set<PerioderFraSøknad> perioderFraSøknadene) {
+        List<UtbetalingsgradPrAktivitetDto> utbetalingsgrader;
+        var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(vilkårsperiode.toLocalDateInterval(), true)));
+
+        var arbeidstidInput = new ArbeidstidMappingInput(kravDokumenter,
+            perioderFraSøknadene,
+            timeline,
+            null,
+            null);
+        var arbeidIPeriode = new MapArbeid().map(arbeidstidInput);
+        utbetalingsgrader = arbeidIPeriode.stream().map(a -> {
+            var perioder = a.getPerioder().entrySet().stream().map(p -> new PeriodeMedUtbetalingsgradDto(new Periode(p.getKey().getFom(), p.getKey().getTom()), BigDecimal.valueOf(100), hentAktivitetsgrad(p.getValue()))).toList();
+            Aktør aktør = null;
+            if (a.getArbeidsforhold().getOrganisasjonsnummer() != null) {
+                aktør = new Organisasjon(a.getArbeidsforhold().getOrganisasjonsnummer());
+            } else if (a.getArbeidsforhold().getAktørId() != null) {
+                aktør = new AktørIdPersonident(a.getArbeidsforhold().getAktørId());
+            }
+            return new UtbetalingsgradPrAktivitetDto(new AktivitetDto(aktør, a.getArbeidsforhold().getArbeidsforholdId() == null ? null : new InternArbeidsforholdRefDto(a.getArbeidsforhold().getArbeidsforholdId()), new UttakArbeidType(a.getArbeidsforhold().getType())), perioder);
+        }).toList();
+        return utbetalingsgrader;
     }
 
     public static List<UtbetalingsgradPrAktivitetDto> finnUtbetalingsgrader(List<DatoIntervallEntitet> gyldigePerioder, Uttaksplan uttaksplan) {
@@ -146,6 +192,33 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
 
         return aktivitetsgrad;
     }
+
+
+    private static BigDecimal hentAktivitetsgrad(ArbeidsforholdPeriodeInfo arbeidsforholdPeriodeInfo) {
+        if (arbeidsforholdPeriodeInfo.getJobberNormalt().isZero()) {
+            return BigDecimal.ZERO;
+        }
+
+        final Duration faktiskArbeidstid;
+        faktiskArbeidstid = arbeidsforholdPeriodeInfo.getJobberNå();
+
+        final BigDecimal HUNDRE_PROSENT = new BigDecimal(100);
+
+        /*
+         * XXX: Dette er samme måte å regne ut på som i uttak. På sikt bør vi nok flytte
+         *      denne logikken til pleiepenger-barn-uttak.
+         */
+        final BigDecimal aktivitetsgrad = new BigDecimal(faktiskArbeidstid.toMillis()).setScale(2, RoundingMode.HALF_DOWN)
+            .divide(new BigDecimal(arbeidsforholdPeriodeInfo.getJobberNormalt().toMillis()), 2, RoundingMode.HALF_DOWN)
+            .multiply(HUNDRE_PROSENT);
+
+        if (aktivitetsgrad.compareTo(HUNDRE_PROSENT) >= 0) {
+            return HUNDRE_PROSENT;
+        }
+
+        return aktivitetsgrad;
+    }
+
 
     private static AktivitetDto mapUtbetalingsgradArbeidsforhold(Utbetalingsgrader utbGrad) {
         Arbeidsforhold arbeidsforhold = utbGrad.getArbeidsforhold();
