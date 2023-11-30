@@ -3,7 +3,7 @@ package no.nav.k9.sak.mottak.inntektsmelding.xml;
 import java.util.HashMap;
 import java.util.Map;
 
-import no.nav.k9.sak.mottak.dokumentmottak.MottattDokumentException;
+import no.nav.k9.sak.mottak.inntektsmelding.MottattInntektsmeldingException;
 import no.nav.k9.sak.mottak.inntektsmelding.MottattInntektsmeldingWrapper;
 import no.nav.k9.sak.typer.JournalpostId;
 
@@ -31,12 +31,12 @@ public final class MottattDokumentXmlParser {
         try {
             DokumentParserKonfig dokumentParserKonfig = SCHEMA_AND_CLASSES_TIL_STRUKTURERTE_DOKUMENTER.get(namespace);
             if (dokumentParserKonfig == null) {
-                throw MottattDokumentException.FACTORY.ukjentNamespace(namespace);
+                throw MottattInntektsmeldingException.ukjentNamespace(namespace);
             }
             mottattDokument = JaxbHelper.unmarshalAndValidateXMLWithStAX(dokumentParserKonfig.jaxbClass, xml, dokumentParserKonfig.xsdLocation);
             return MottattInntektsmeldingWrapper.tilXmlWrapper(journalpostId, mottattDokument);
         } catch (Exception e) {
-            throw MottattDokumentException.FACTORY.uventetFeilVedParsingAvXml(namespace, e);
+            throw MottattInntektsmeldingException.uventetFeilVedParsingAvXml(namespace, e);
         }
     }
 
@@ -45,7 +45,7 @@ public final class MottattDokumentXmlParser {
         try {
             namespace = JaxbHelper.retrieveNameSpaceOfXML(xml);
         } catch (Exception e) {
-            throw MottattDokumentException.FACTORY.uventetFeilVedParsingAvXml("ukjent", e); //$NON-NLS-1$
+            throw MottattInntektsmeldingException.uventetFeilVedParsingAvXml("ukjent", e); //$NON-NLS-1$
         }
         return namespace;
     }
