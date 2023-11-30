@@ -109,7 +109,9 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
             null,
             null);
         var arbeidIPeriode = new MapArbeid().map(arbeidstidInput);
-        utbetalingsgrader = arbeidIPeriode.stream().map(a -> {
+        utbetalingsgrader = arbeidIPeriode.stream()
+            .filter(a -> !a.getPerioder().isEmpty())
+            .map(a -> {
             var perioder = a.getPerioder().entrySet().stream().map(p -> new PeriodeMedUtbetalingsgradDto(new Periode(p.getKey().getFom(), p.getKey().getTom()), BigDecimal.valueOf(100), hentAktivitetsgrad(p.getValue()))).toList();
             Aktør aktør = null;
             if (a.getArbeidsforhold().getOrganisasjonsnummer() != null) {
