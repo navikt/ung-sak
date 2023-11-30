@@ -242,11 +242,13 @@ public class SykdomVurderingTjeneste {
 
     public SykdomVurderingerOgPerioder utledPerioderPPN(Behandling behandling) {
         LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> vurderinger = hentVurderinger(SykdomVurderingType.LIVETS_SLUTTFASE, behandling);
-        LocalDateTimeline<Set<Saksnummer>> behandledeSøknadsperioder = medisinskGrunnlagRepository.hentSaksnummerForSøktePerioder(behandling.getFagsak().getPleietrengendeAktørId());
-        var behandledeSøknadsperioderTidslinje = TidslinjeUtil.toBooleanTimeline(behandledeSøknadsperioder);
-        var perioderTilVurdering = TidslinjeUtil.tilDatoIntervallEntiteter(behandledeSøknadsperioderTidslinje);
 
-        List<Periode> perioderKreverVurdering = behandledeSøknadsperioder.stream().map(s -> new Periode(s.getFom(), s.getTom())).toList();
+        LocalDateTimeline<Set<Saksnummer>> behandledeSøknadsperioder = medisinskGrunnlagRepository.hentSaksnummerForSøktePerioder(behandling.getFagsak().getPleietrengendeAktørId());
+        List<Periode> perioderSomKanVurderes = behandledeSøknadsperioder.stream().map(s -> new Periode(s.getFom(), s.getTom())).toList();
+
+        LocalDateTimeline<Boolean> behandledeSøknadsperioderTidslinje = TidslinjeUtil.toBooleanTimeline(behandledeSøknadsperioder);
+        NavigableSet<DatoIntervallEntitet> perioderTilVurdering = TidslinjeUtil.tilDatoIntervallEntiteter(behandledeSøknadsperioderTidslinje);
+
         LocalDateTimeline<Boolean> tidslinjeKreverVurdering = utledPerioderSomKreverVurderingPPN(behandling, perioderTilVurdering);
         LocalDateTimeline<Boolean> innleggelserTidslinje = hentAlleInnleggelserTidslinje(behandling);
         LocalDateTimeline<Boolean> alleResterendeVurderingsperioder = finnResterendeVurderingsperioder(behandling, tidslinjeKreverVurdering, vurderinger);
@@ -269,7 +271,7 @@ public class SykdomVurderingTjeneste {
         return new SykdomVurderingerOgPerioder(
             vurderinger,
             behandledeSøknadsperioder,
-            perioderKreverVurdering,
+            perioderSomKanVurderes,
             resterendeVurderingsperioder,
             resterendeValgfrieVurderingsperioder,
             nyeSøknadsperioder,
