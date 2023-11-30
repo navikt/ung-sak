@@ -55,7 +55,7 @@ jobs:
           private-key: ${{ secrets.K9SAKSBEHANDLING_PRIVATE_KEY }}
           app-id: ${{ secrets.K9SAKSBEHANDLING_APP_ID }}
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
