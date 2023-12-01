@@ -6,6 +6,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -35,6 +38,8 @@ import no.nav.k9.sak.mottak.Behandlingsoppretter;
 
 @Dependent
 public class InnhentDokumentTjeneste {
+
+    private static final Logger log = LoggerFactory.getLogger(InnhentDokumentTjeneste.class);
 
     private final Instance<Dokumentmottaker> mottakere;
     private final Behandlingsoppretter behandlingsoppretter;
@@ -196,9 +201,11 @@ public class InnhentDokumentTjeneste {
     }
 
     private void sjekkBehandlingHarIkkeÅpneTasks(Behandling behandling) {
-        var åpneTasks = fagsakProsessTaskRepository.finnAlleÅpneTasksForAngittSøk(behandling.getFagsakId(), behandling.getId(), null);
+        //merk at denne bare finner tasks med gruppesekvensnummer != null (hindrer at den finner seg selv eller andre av typen innhentsaksopplysninger.håndterMottattDokument)
+        List<ProsessTaskData> åpneTasks = fagsakProsessTaskRepository.finnAlleÅpneTasksForAngittSøk(behandling.getFagsakId(), behandling.getId(), null);
         if (!åpneTasks.isEmpty()) {
             //behandlingen har åpne tasks og mottak av dokument kan føre til parallelle prosesser som går i beina på hverandre
+            log.info("Fant følgende åpne tasks: " + åpneTasks.stream().map(Object::toString).collect(Collectors.joining(", ")));
             throw DokumentmottakMidlertidigFeil.FACTORY.behandlingPågårAvventerKnytteMottattDokumentTilBehandling(behandling.getId()).toException();
         }
     }
