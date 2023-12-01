@@ -115,6 +115,8 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
             }
             return Optional.empty();
         } else {
+            final Uttaksgrunnlag oppdatertRequests = mapInputTilUttakTjeneste.hentUtOgMapRequest(ref);
+            uttakTjeneste.opprettUttaksplan(oppdatertRequests);
             log.info("[Kjøreplan] Venter på behandling av andre fagsaker");
             return Optional.of(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK);
         }
