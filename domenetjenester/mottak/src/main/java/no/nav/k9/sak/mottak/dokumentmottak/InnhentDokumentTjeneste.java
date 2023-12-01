@@ -205,7 +205,7 @@ public class InnhentDokumentTjeneste {
         List<ProsessTaskData> åpneTasks = fagsakProsessTaskRepository.finnAlleÅpneTasksForAngittSøk(behandling.getFagsakId(), behandling.getId(), null);
         if (!åpneTasks.isEmpty()) {
             //behandlingen har åpne tasks og mottak av dokument kan føre til parallelle prosesser som går i beina på hverandre
-            log.info("Fant følgende åpne tasks: " + åpneTasks.stream().map(Object::toString).collect(Collectors.joining(", ")));
+            log.info("Fant følgende åpne tasks: [" + åpneTasks.stream().map(Object::toString).collect(Collectors.joining(", ")) + "]");
             throw DokumentmottakMidlertidigFeil.FACTORY.behandlingPågårAvventerKnytteMottattDokumentTilBehandling(behandling.getId()).toException();
         }
     }
