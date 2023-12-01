@@ -5,7 +5,6 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -15,10 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.tilkommetAktivitet.TilkommetAktivitetTjeneste;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -56,9 +51,6 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
     private SamtidigUttakTjeneste samtidigUttakTjeneste;
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
 
-    private TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste;
-
-
 
     VurderUttakIBeregningSteg() {
         // for proxy
@@ -70,15 +62,13 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
                                      UttakTjeneste uttakTjeneste,
                                      EtablertTilsynTjeneste etablertTilsynTjeneste,
                                      SamtidigUttakTjeneste samtidigUttakTjeneste,
-                                     UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
-                                     TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste) {
+                                     UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository) {
         this.behandlingRepository = behandlingRepository;
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
         this.uttakTjeneste = uttakTjeneste;
         this.etablertTilsynTjeneste = etablertTilsynTjeneste;
         this.samtidigUttakTjeneste = samtidigUttakTjeneste;
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
-        this.tilkommetAktivitetTjeneste = tilkommetAktivitetTjeneste;
     }
 
     @Override
@@ -115,8 +105,6 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
             }
             return Optional.empty();
         } else {
-            final Uttaksgrunnlag oppdatertRequests = mapInputTilUttakTjeneste.hentUtOgMapRequest(ref);
-            uttakTjeneste.opprettUttaksplan(oppdatertRequests);
             log.info("[Kjøreplan] Venter på behandling av andre fagsaker");
             return Optional.of(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK);
         }
