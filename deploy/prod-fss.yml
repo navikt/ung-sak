@@ -232,10 +232,6 @@ spec:
       value: https://security-token-service.nais.adeo.no
     - name: CLIENT_SCOPE
       value: "api://prod-fss.k9saksbehandling.k9-sak/.default"
-    # gjør alle disse systemkall til k9-sak?
-    - name: AZURE_APP_PRE_AUTHORIZED_APPS
-      value: "srvk9sak, srvk9formidling, srvk9-fordel, srvfpabakus, srvsaf, srvk9klage, srvk9-tilbake"
-
     - name: ABAC_ATTRIBUTT_DRIFT
       value: "no.nav.abac.attributter.k9.drift"
 
