@@ -71,7 +71,8 @@ public class RepubliserEventGjenoppliverTask implements ProsessTaskHandler {
                 "                 LIMIT :antall FOR UPDATE SKIP LOCKED" +
                 "                 )"
         ).setParameter("antall", antall)
-         .setParameter("antallSekunderTilNesteKjøring", antallSekunderTilNesteKjøring);
+         .setParameter("antallSekunderTilNesteKjøring", antallSekunderTilNesteKjøring)
+         .setHint("javax.persistence.query.timeout", 60 * 1000);
 
         var antallRaderPåvirket = query.executeUpdate();
         if (antallRaderPåvirket > 0) {
@@ -90,6 +91,7 @@ public class RepubliserEventGjenoppliverTask implements ProsessTaskHandler {
             }
 
             prosessTaskTjeneste.lagre(nyProsessTask);
+            log.info("Lagret ny oppgavebehandling.RepubliserEventGjenoppliver med id: "+ nyProsessTask.getId());
         } else {
             log.info("Ingen flere republiseringstasker");
         }
