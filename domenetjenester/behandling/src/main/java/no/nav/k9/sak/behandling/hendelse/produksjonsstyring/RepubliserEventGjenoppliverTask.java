@@ -55,7 +55,7 @@ public class RepubliserEventGjenoppliverTask implements ProsessTaskHandler {
         if (antallIKø() > 3000) {
             antallSekunderTilNesteKjøring = 60*10; // Vent ti minutter til neste kjøring hvis det bygger seg opp kø av ukjørte tasker
         } else {
-            antallSekunderTilNesteKjøring = 60;
+            antallSekunderTilNesteKjøring = 120;
         }
 
         var query = entityManager.createNativeQuery(
@@ -72,7 +72,7 @@ public class RepubliserEventGjenoppliverTask implements ProsessTaskHandler {
                 "                 )"
         ).setParameter("antall", antall)
          .setParameter("antallSekunderTilNesteKjøring", antallSekunderTilNesteKjøring)
-         .setHint("javax.persistence.query.timeout", 60 * 1000);
+         .setHint("javax.persistence.query.timeout", 2 * 60 * 1000);
 
         var antallRaderPåvirket = query.executeUpdate();
         if (antallRaderPåvirket > 0) {
