@@ -6,12 +6,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -24,24 +20,15 @@ import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 @Dependent
 public class FinnPerioderMedStartIKontrollerFakta {
 
-    private static final Logger log = LoggerFactory.getLogger(FinnPerioderMedStartIKontrollerFakta.class);
-
 
     private final VilkårResultatRepository vilkårResultatRepository;
     private final VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
 
-    private final boolean isEnabled;
-
-    private final Set<Long> BEHANDLING_ID_MED_FREMOVERHOPP = Set.of(1685776L);
-
-
     @Inject
     public FinnPerioderMedStartIKontrollerFakta(VilkårResultatRepository vilkårResultatRepository,
-                                                VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
-                                                @KonfigVerdi(value = "PSB_START_I_KOFAKBER_VED_FORLENGELSE_OPPTJENING", defaultVerdi = "false") boolean isEnabled) {
+                                                VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
-        this.isEnabled = isEnabled;
     }
 
     /**
@@ -56,9 +43,6 @@ public class FinnPerioderMedStartIKontrollerFakta {
     public NavigableSet<PeriodeTilVurdering> finnPerioder(BehandlingReferanse ref,
                                                           NavigableSet<PeriodeTilVurdering> allePerioder,
                                                           Set<PeriodeTilVurdering> forlengelseperioderBeregning) {
-        if (!isEnabled && !BEHANDLING_ID_MED_FREMOVERHOPP.contains(ref.getBehandlingId())) {
-            return new TreeSet<>();
-        }
         var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref);
         periodeFilter.ignorerAvslåttePerioder();
         var oppfylteStpForrigeBehandling = finnStpForOppfylteVilkårsperioderForrigeBehandling(ref);

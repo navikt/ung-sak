@@ -3,8 +3,6 @@ package no.nav.k9.sak.behandling.hendelse.produksjonsstyring;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.temporal.ChronoField;
-import java.time.temporal.ChronoUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,14 +47,22 @@ public class RepubliserEventGjenoppliverTask implements ProsessTaskHandler {
             log.warn("Kan ikke starte uten property for antall tasks som skal kjøres");
             return;
         }
-
         var antall = Integer.parseInt(antallProperty);
+
+        var klokkeslett = LocalTime.now();
+
+        int antallSekunderTilNesteKjøring;
+        if (antallIKø() > 3000) {
+            antallSekunderTilNesteKjøring = 60*10; // Vent ti minutter til neste kjøring hvis det bygger seg opp kø av ukjørte tasker
+        } else {
+            antallSekunderTilNesteKjøring = 120;
+        }
 
         var query = entityManager.createNativeQuery(
         "UPDATE prosess_task SET" +
                 "    status = 'KLAR'," +
                 "    task_payload = null," +
-                "    neste_kjoering_etter = current_timestamp at time zone 'UTC' + floor(random() * 3600) * '1 second'\\:\\:interval" +
+                "    neste_kjoering_etter = current_timestamp at time zone 'UTC' + floor(random() * :antallSekunderTilNesteKjøring) * '1 second'\\:\\:interval" +
                 "    WHERE id IN (SELECT id" +
                 "                 FROM prosess_task" +
                 "                 WHERE status = 'FERDIG'" +
@@ -64,10 +70,11 @@ public class RepubliserEventGjenoppliverTask implements ProsessTaskHandler {
                 "                   AND task_payload = 'STOPPET_MANUELT'" +
                 "                 LIMIT :antall FOR UPDATE SKIP LOCKED" +
                 "                 )"
-        );
-        query.setParameter("antall", antall);
-        var antallRaderPåvirket = query.executeUpdate();
+        ).setParameter("antall", antall)
+         .setParameter("antallSekunderTilNesteKjøring", antallSekunderTilNesteKjøring)
+         .setHint("javax.persistence.query.timeout", 2 * 60 * 1000);
 
+        var antallRaderPåvirket = query.executeUpdate();
         if (antallRaderPåvirket > 0) {
             log.info("Flyttet "+antallRaderPåvirket+" republiseringstasker tilbake til KLAR");
             final ProsessTaskData nyProsessTask = ProsessTaskData.forProsessTask(RepubliserEventGjenoppliverTask.class);
@@ -75,17 +82,27 @@ public class RepubliserEventGjenoppliverTask implements ProsessTaskHandler {
             nyProsessTask.setPrioritet(50);
             nyProsessTask.setProperty("antall", String.valueOf(antall));
 
-            var klokkeslettNesteKjøring = LocalTime.now().plusHours(1);
+            LocalTime klokkeslettNesteKjøring = klokkeslett.plusSeconds(antallSekunderTilNesteKjøring);
             if (klokkeslettNesteKjøring.isAfter(LocalTime.of(6, 0, 0)) &&
                 klokkeslettNesteKjøring.isBefore(LocalTime.of(17, 0, 0))) {
                 nyProsessTask.setNesteKjøringEtter(LocalDateTime.of(LocalDate.now(), LocalTime.of(17, 30, 0)));
             } else {
-                nyProsessTask.setNesteKjøringEtter(LocalDateTime.now().plusHours(1));
+                nyProsessTask.setNesteKjøringEtter(LocalDateTime.of(LocalDate.now(), klokkeslettNesteKjøring));
             }
 
             prosessTaskTjeneste.lagre(nyProsessTask);
+            log.info("Lagret ny oppgavebehandling.RepubliserEventGjenoppliver med id: "+ nyProsessTask.getId());
         } else {
             log.info("Ingen flere republiseringstasker");
         }
+    }
+
+    private Long antallIKø() {
+        return (Long) entityManager.createNativeQuery(
+        "SELECT COUNT(id) " +
+                "   FROM prosess_task " +
+                "   WHERE task_type = 'oppgavebehandling.RepubliserEvent' " +
+                "   AND status = 'KLAR' "
+        ).getSingleResult();
     }
 }

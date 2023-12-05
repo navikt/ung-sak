@@ -120,7 +120,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         AksjonspunktType.MANUELL, "Fordel beregningsgrunnlag", BehandlingStatus.UTREDES, BehandlingStegType.FORDEL_BEREGNINGSGRUNNLAG, VurderingspunktType.UT,
         UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_FORDELING, TOTRINN, AVVENTER_SAKSBEHANDLER),
     VURDER_NYTT_INNTEKTSFORHOLD(AksjonspunktKodeDefinisjon.VURDER_NYTT_INNTEKTSFORHOLD_KODE,
-        AksjonspunktType.MANUELL, "Fordel beregningsgrunnlag", BehandlingStatus.UTREDES, BehandlingStegType.FORDEL_BEREGNINGSGRUNNLAG, VurderingspunktType.UT,
+        AksjonspunktType.MANUELL, "Vurder nytt inntektsforhold", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_TILKOMMET_INNTEKT, VurderingspunktType.UT,
         UTEN_VILKÅR, SkjermlenkeType.FAKTA_OM_FORDELING, TOTRINN, AVVENTER_SAKSBEHANDLER),
     VURDER_REFUSJON_BERGRUNN(AksjonspunktKodeDefinisjon.VURDER_REFUSJON_BERGRUNN_KODE,
         AksjonspunktType.MANUELL, "Vurder refusjon beregningsgrunnlag", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_REF_BERGRUNN, VurderingspunktType.UT,
@@ -353,7 +353,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         "En annen sak tilknyttet barnet må behandles frem til uttak, eller besluttes, før denne saken kan behandles videre.", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_UTTAK_V2, VurderingspunktType.UT, UTEN_VILKÅR,
         UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST, AVVENTER_SAKSBEHANDLER),
     VURDER_DATO_NY_REGEL_UTTAK(AksjonspunktKodeDefinisjon.VURDER_DATO_NY_REGEL_UTTAK, AksjonspunktType.MANUELL,
-        "Vurder hvilken dato ny regel for utbetalingsgrad i uttak skal gjelde fra.", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_UTTAK_V2, VurderingspunktType.UT, UTEN_VILKÅR,
+        "Vurder hvilken dato ny regel for utbetalingsgrad i uttak skal gjelde fra.", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_STARTDATO_UTTAKSREGLER, VurderingspunktType.UT, UTEN_VILKÅR,
         SkjermlenkeType.UTTAK, ENTRINN, TILBAKE, SKAL_IKKE_AVBRYTES, AVVENTER_SAKSBEHANDLER),
 
     // Gruppe: 93xx - Opplæringspenger
@@ -388,6 +388,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         "7007", "VENT_PÅ_SCANNING");
 
     private static final Map<String, AksjonspunktDefinisjon> KODER = new LinkedHashMap<>();
+
 
     static {
         for (var v : UTGÅTT.keySet()) {

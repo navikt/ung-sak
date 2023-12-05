@@ -394,6 +394,7 @@ public class BehandlingDtoTjeneste {
                 dto.leggTil(getFraMap(PleietrengendeSykdomDokumentRestTjeneste.SYKDOM_INNLEGGELSE_PATH, "sykdom-innleggelse", uuidQueryParams));
                 dto.leggTil(getFraMap(PleietrengendeSykdomDokumentRestTjeneste.SYKDOM_DIAGNOSEKODER_PATH, "sykdom-diagnosekoder", uuidQueryParams));
                 dto.leggTil(getFraMap(PleiepengerUttakRestTjeneste.GET_UTTAKSPLAN_PATH, "pleiepenger-sykt-barn-uttaksplan", uuidQueryParams));
+                dto.leggTil(getFraMap(PleiepengerUttakRestTjeneste.SIMULER_UTTAKSPLAN_PATH, "pleiepenger-sykt-barn-simulert-uttaksplan", uuidQueryParams));
                 dto.leggTil(getFraMap(PleiepengerUttakRestTjeneste.GET_UTTAKSPLAN_MED_UTSATT_PERIODE_PATH, "pleiepenger-uttaksplan-med-utsatt", uuidQueryParams));
                 dto.leggTil(getFraMap(PleiepengerUttakRestTjeneste.GET_SKULLE_SØKT_OM_PATH, "psb-manglende-arbeidstid", uuidQueryParams));
                 dto.leggTil(getFraMap(PleiepengerUttakRestTjeneste.UTTAK_OVERSTYRT, "pleiepenger-overstyrt-uttak", uuidQueryParams));
