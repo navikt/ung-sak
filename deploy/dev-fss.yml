@@ -272,6 +272,8 @@ spec:
       value: "false"
     - name: VALIDER_KALKULUS_REFERANSER
       value: "true"
+    - name: LAGRE_SOEKNADSAKTOERER
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
