@@ -15,6 +15,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellRepository;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 
@@ -25,15 +26,19 @@ public class KalkulusStartpunktUtleder {
     private VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
     private BeregningsgrunnlagVilkårTjeneste vilkårTjeneste;
 
+    private BehandlingModellRepository behandlingModellRepository;
+
     private static final Logger log = LoggerFactory.getLogger(KalkulusStartpunktUtleder.class);
 
     @Inject
     public KalkulusStartpunktUtleder(FinnPerioderMedStartIKontrollerFakta finnPerioderMedStartIKontrollerFakta,
                                      VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
-                                     BeregningsgrunnlagVilkårTjeneste vilkårTjeneste) {
+                                     BeregningsgrunnlagVilkårTjeneste vilkårTjeneste,
+                                     BehandlingModellRepository behandlingModellRepository) {
         this.finnPerioderMedStartIKontrollerFakta = finnPerioderMedStartIKontrollerFakta;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
         this.vilkårTjeneste = vilkårTjeneste;
+        this.behandlingModellRepository = behandlingModellRepository;
     }
 
     public KalkulusStartpunktUtleder() {
@@ -63,7 +68,7 @@ public class KalkulusStartpunktUtleder {
             if (!forlengelseperioder.isEmpty()) {
                 log.info("Perioder med start i vurder refusjon: " + forlengelseperioder);
             }
-            settStartpunkt(forlengelseperioder, periodeStartStegMap, BehandlingStegType.VURDER_REF_BERGRUNN);
+            settStartpunkt(forlengelseperioder, periodeStartStegMap, getStartpunktForlengelse(ref));
             var startIKontrollerFaktaBeregning = finnPerioderMedStartIKontrollerFakta.finnPerioder(ref, utenAvslagFørBeregning, forlengelseperioder);
             if (!startIKontrollerFaktaBeregning.isEmpty()) {
                 log.info("Perioder med start i kontroller fakta beregning: " + startIKontrollerFaktaBeregning);
@@ -78,6 +83,12 @@ public class KalkulusStartpunktUtleder {
         settStartpunkt(perioderFraStart, periodeStartStegMap, BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING);
         return periodeStartStegMap;
 
+    }
+
+    public BehandlingStegType getStartpunktForlengelse(BehandlingReferanse behandlingReferanse) {
+        var modell = behandlingModellRepository.getModell(behandlingReferanse.getBehandlingType(), behandlingReferanse.getFagsakYtelseType());
+        var skalKjøreVurderTilkommetInntekt = modell.getAlleBehandlingStegTyper().stream().anyMatch(BehandlingStegType.VURDER_TILKOMMET_INNTEKT::equals);
+        return skalKjøreVurderTilkommetInntekt ? BehandlingStegType.VURDER_TILKOMMET_INNTEKT : BehandlingStegType.VURDER_REF_BERGRUNN;
     }
 
     private static NavigableSet<PeriodeTilVurdering> finnPerioderFraStart(HashMap<BehandlingStegType, NavigableSet<PeriodeTilVurdering>> periodeStartStegMap, NavigableSet<PeriodeTilVurdering> utenAvslagFørBeregning) {

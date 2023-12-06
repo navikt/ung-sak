@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.k9.felles.exception.TekniskException;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
@@ -90,7 +91,7 @@ class HåndterMottattDokumentTaskTest {
         prosessTaskData.setFagsakId(fagsak.getId());
         var håndterMottattDokumentTask = new HåndterMottattDokumentTask(behandlingRepositoryProvider, innhentDokumentTjeneste, mottatteDokumentTjeneste, dokumentValidatorProvider);
 
-        var e = assertThrows(MottattDokumentException.class, () -> håndterMottattDokumentTask.prosesser(prosessTaskData));
-        assertThat(e.getMessage()).isEqualTo("Behandling [" + behandling.getId() + "] pågår, avventer å håndtere mottatt dokument til det er prosessert");
+        var e = assertThrows(TekniskException.class, () -> håndterMottattDokumentTask.prosesser(prosessTaskData));
+        assertThat(e.getMessage()).isEqualTo("K9-653311:Behandling [" + behandling.getId() + "] pågår, avventer å håndtere mottatt dokument til det er prosessert");
     }
 }

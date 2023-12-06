@@ -23,6 +23,11 @@ public class UttakNyeReglerRepository {
         return finnUttakNyeReglerEntitet(behandlingId).map(UttakNyeRegler::getVirkningsdato);
     }
 
+
+    public Optional<LocalDate> finnForrigeDatoForNyeRegler(Long behandlingId) {
+        return finnForrigeUttakNyeReglerEntitet(behandlingId).map(UttakNyeRegler::getVirkningsdato);
+    }
+
     public void lagreDatoForNyeRegler(Long behandlingId, LocalDate datoNyeReglerUttak) {
         finnUttakNyeReglerEntitet(behandlingId).ifPresent(eksisterende -> {
             eksisterende.deaktiver();
@@ -43,6 +48,20 @@ public class UttakNyeReglerRepository {
     private Optional<UttakNyeRegler> finnUttakNyeReglerEntitet(Long behandlingId) {
         TypedQuery<UttakNyeRegler> query = entityManager.createQuery("from UttakNyeRegler where behandlingId=:behandlingId and aktiv", UttakNyeRegler.class);
         query.setParameter("behandlingId", behandlingId);
+        List<UttakNyeRegler> resultat = query.getResultList();
+        if (resultat.isEmpty()) {
+            return Optional.empty();
+        }
+        if (resultat.size() == 1) {
+            return Optional.of(resultat.get(0));
+        }
+        throw new IllegalArgumentException("Forventet 0-1 treff for UttakNyeRegler, men fikk " + resultat.size());
+    }
+
+    private Optional<UttakNyeRegler> finnForrigeUttakNyeReglerEntitet(Long behandlingId) {
+        TypedQuery<UttakNyeRegler> query = entityManager.createQuery("from UttakNyeRegler where behandlingId=:behandlingId and aktiv=false ORDER BY opprettetTidspunkt, id desc", UttakNyeRegler.class);
+        query.setParameter("behandlingId", behandlingId);
+        query.setMaxResults(1);
         List<UttakNyeRegler> resultat = query.getResultList();
         if (resultat.isEmpty()) {
             return Optional.empty();

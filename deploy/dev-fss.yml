@@ -246,8 +246,6 @@ spec:
       value: "true"
     - name: IKKE_YRKESAKTIV_UTEN_SPEILING
       value: "false"
-    - name: PSB_START_I_KOFAKBER_VED_FORLENGELSE_OPPTJENING
-      value: "true"
     - name: OMP_NULL_HELG_I_KRAVPERIODER
       value: "true"
     - name: TILKOMMET_AKTIVITET_ENABLED
@@ -273,6 +271,8 @@ spec:
     - name: FJERN_VILKARSPERIODER_BEREGNING
       value: "false"
     - name: VALIDER_KALKULUS_REFERANSER
+      value: "true"
+    - name: LAGRE_SOEKNADSAKTOERER
       value: "true"
 
     # Konfigurasjoner
