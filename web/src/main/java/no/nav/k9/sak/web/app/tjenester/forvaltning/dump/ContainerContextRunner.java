@@ -16,6 +16,7 @@ import jakarta.transaction.Transactional;
 import org.jboss.weld.context.RequestContext;
 import org.jboss.weld.context.unbound.UnboundLiteral;
 
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.felles.sikkerhet.loginmodule.ContainerLogin;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -38,10 +39,12 @@ public class ContainerContextRunner {
     });
 
     private final ContextTokenProvider tokenProvider;
+    private final String scope;
 
     @Inject
-    public ContainerContextRunner(ContextTokenProvider tokenProvider) {
+    public ContainerContextRunner(ContextTokenProvider tokenProvider, @KonfigVerdi(value = "CLIENT_SCOPE") String scope) {
         this.tokenProvider = Objects.requireNonNull(tokenProvider);
+        this.scope = scope;
     }
 
     public static ContainerContextRunner createRunner() {
@@ -50,7 +53,7 @@ public class ContainerContextRunner {
 
     @Transactional
     private <T> T submit(Callable<T> call) throws Exception {
-        var containerLogin = new ContainerLogin(tokenProvider);
+        var containerLogin = new ContainerLogin(tokenProvider, scope);
         containerLogin.login();
         var result = call.call();
         return result;
