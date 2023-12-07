@@ -72,7 +72,6 @@ public class AbakusTjeneste {
     private CloseableHttpClient restClient;
     private URI abakusEndpoint;
     private URI callbackUrl;
-    private String callbackScope;
     private URI endpointArbeidsforholdIPeriode;
     private URI endpointGrunnlag;
     private URI endpointOverstyring;
@@ -92,23 +91,21 @@ public class AbakusTjeneste {
     @Inject
     public AbakusTjeneste(OidcRestClient oidcRestClient,
                           @KonfigVerdi(value = "fpabakus.url") URI endpoint,
-                          @KonfigVerdi(value = "abakus.callback.url") URI callbackUrl,
-                          @KonfigVerdi(value = "abakus.callback.scope") String callbackScope) {
-        this(endpoint, callbackUrl, callbackScope);
+                          @KonfigVerdi(value = "abakus.callback.url") URI callbackUrl) {
+        this(endpoint, callbackUrl);
         this.restClient = oidcRestClient;
     }
 
     public AbakusTjeneste(SystemUserOidcRestClient oidcRestClient,
                           URI endpoint,
                           URI callbackUrl) {
-        this(endpoint, callbackUrl, null);
+        this(endpoint, callbackUrl);
         this.restClient = oidcRestClient;
     }
 
-    private AbakusTjeneste(URI endpoint, URI callbackUrl, String callbackScope) {
+    private AbakusTjeneste(URI endpoint, URI callbackUrl) {
         this.abakusEndpoint = endpoint;
         this.callbackUrl = callbackUrl;
-        this.callbackScope = callbackScope;
 
         this.endpointArbeidsforholdIPeriode = toUri("/api/arbeidsforhold/v1/arbeidstaker");
         this.endpointGrunnlag = toUri("/api/iay/grunnlag/v1/");
@@ -369,11 +366,6 @@ public class AbakusTjeneste {
     public String getCallbackUrl() {
         return callbackUrl.toString();
     }
-
-    public String getCallbackScope() {
-        return callbackScope;
-    }
-
 
     public void lagreOverstyrtOppgittOpptjening(OppgittOpptjeningMottattRequest request) throws IOException {
         var json = iayJsonWriter.writeValueAsString(request);
