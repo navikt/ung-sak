@@ -775,6 +775,82 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         
         return Response.ok(resultString).build();
     }
+    
+    @GET
+    @Path("/journalposter-med-fosterbarnfeil")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(description = "Henter ID til journalposter med fosterbarnfeil.", summary = ("Henter ID til journalposter med fosterbarnfeil."), tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    public Response hentJournalposterMedFosterbarnfeil2() {
+        final Query q = entityManager.createNativeQuery("SELECT id\n"
+                + "FROM mottatt_dokument d\n"
+                + "WHERE d.type IN ('SØKNAD_UTBETALING_OMS', 'SØKNAD_UTBETALING_OMS_AT', 'PAPIRSØKNAD_UTBETALING_OMS_AT')");
+
+        final SøknadParser søknadParser = new SøknadParser();
+        
+        final Set<String> journalposterBrukerdialog = new HashSet<>();
+        final Set<String> journalposterKode6 = new HashSet<>();
+        final Set<String> journalposterKode7 = new HashSet<>();
+        final Set<String> journalposterUkjentBruker = new HashSet<>();
+        final Set<String> journalposterFeil = new HashSet<>();
+        
+        @SuppressWarnings("unchecked") 
+        final List<Long> dokumenter = q.getResultList();
+        for (long dokumentId : dokumenter) {
+            try {
+                final MottattDokument dokument = mottatteDokumentRepository.hentMottattDokument(dokumentId).orElseThrow();
+                try {
+                    if (dokument.getType() == Brevkode.SØKNAD_UTBETALING_OMS
+                            && dokument.getInnsendingstidspunkt().isAfter(LocalDateTime.of(2022, 6, 13, 0, 0))) {
+                        journalposterBrukerdialog.add(dokument.getJournalpostId().getVerdi());
+                        continue;
+                    }
+                    
+                    final Søknad søknad = søknadParser.parseSøknad(dokument);
+                    final OmsorgspengerUtbetaling ou = søknad.getYtelse();
+                    
+                    if (ou.getFosterbarn() != null) {
+                        final Set<AktørId> fosterbarnAktørList = ou.getFosterbarn().stream()
+                                .map((fosterbarn) -> {
+                                    final String barnIdent = fosterbarn.getPersonIdent().getVerdi();
+                                    final Optional<AktørId> barnAktørId = personinfoAdapter.hentAktørIdForPersonIdent(new PersonIdent(barnIdent));
+                                    if (barnAktørId.isEmpty()) {
+                                        journalposterUkjentBruker.add(dokument.getJournalpostId().getVerdi());
+                                        return null;
+                                    }
+                                    return barnAktørId.get();
+                                })
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.toSet());
+                        final Set<Diskresjonskode> diskresjonskoder = finnDiskresjonskoder(fosterbarnAktørList);
+                        if (diskresjonskoder.contains(Diskresjonskode.KODE6)) {
+                            journalposterKode6.add(dokument.getJournalpostId().getVerdi());
+                        } else if (diskresjonskoder.contains(Diskresjonskode.KODE7)) {
+                            journalposterKode7.add(dokument.getJournalpostId().getVerdi());
+                        }
+                    }
+                } catch (RuntimeException e) {
+                    journalposterFeil.add(dokument.getJournalpostId().getVerdi());
+                }
+            } catch (RuntimeException e) {
+                logger.warn("Feil ved uthenting av mottatt dokument: " + dokumentId);
+            }
+        }
+        
+        final StringBuilder sb = new StringBuilder();
+        sb.append("=== Journalposter som ikke kunne sjekkes ===\n");
+        for (String s : journalposterFeil) {
+            sb.append(s);
+            sb.append("\n");
+        }
+        sb.append("\n\n=== Journalposter fra brukerdialog ===\n");
+        for (String s : journalposterBrukerdialog) {
+            sb.append(s);
+            sb.append("\n");
+        }
+        
+        return Response.ok(sb.toString()).build();
+    }
 
     private boolean harTomSøknadsperiode(PleipengerLivetsSluttfase pls) {
         return pls.getSøknadsperiodeList().isEmpty();
