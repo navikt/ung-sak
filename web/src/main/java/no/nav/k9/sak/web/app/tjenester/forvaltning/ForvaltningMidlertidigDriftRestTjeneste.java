@@ -24,6 +24,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +69,7 @@ import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.integrasjon.saf.SafTjeneste;
 import no.nav.k9.felles.sikkerhet.abac.AbacAttributtSamling;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.AbacDto;
@@ -83,6 +85,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.kodeverk.person.Diskresjonskode;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -91,10 +94,12 @@ import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.pip.PipRepository;
+import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.person.pdl.TilknytningTjeneste;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
@@ -106,6 +111,7 @@ import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto;
 import no.nav.k9.sak.kontrakt.mottak.AktørListeDto;
 import no.nav.k9.sak.kontrakt.stønadstatistikk.StønadstatistikkSerializer;
+import no.nav.k9.sak.mottak.dokumentmottak.SøknadParser;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -130,6 +136,7 @@ import no.nav.k9.søknad.frisinn.FrisinnSøknad;
 import no.nav.k9.søknad.frisinn.Inntekter;
 import no.nav.k9.søknad.frisinn.PeriodeInntekt;
 import no.nav.k9.søknad.frisinn.SelvstendigNæringsdrivende;
+import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
 import no.nav.k9.søknad.ytelse.pls.v1.PleipengerLivetsSluttfase;
 import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
 
@@ -165,6 +172,10 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     private TilknytningTjeneste tilknytningTjeneste;
 
     private Pep pep;
+    
+    private SafTjeneste safTjeneste;
+    
+    private PersoninfoAdapter personinfoAdapter;
 
     public ForvaltningMidlertidigDriftRestTjeneste() {
         // For Rest-CDI
@@ -185,7 +196,9 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                                                    OpprettRevurderingService opprettRevurderingService,
                                                    PipRepository pipRepository,
                                                    TilknytningTjeneste tilknytningTjeneste,
-                                                   Pep pep) {
+                                                   Pep pep,
+                                                   SafTjeneste safTjeneste,
+                                                   PersoninfoAdapter personinfoAdapter) {
 
         this.frisinnSøknadMottaker = frisinnSøknadMottaker;
         this.tpsTjeneste = tpsTjeneste;
@@ -202,6 +215,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         this.pipRepository = pipRepository;
         this.tilknytningTjeneste = tilknytningTjeneste;
         this.pep = pep;
+        this.safTjeneste = safTjeneste;
+        this.personinfoAdapter = personinfoAdapter;
     }
 
 
@@ -359,7 +374,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         */
         throw new IllegalStateException("Dette kallet er deaktivert.");
     }
-
+    
     @POST
     @Path("/stonadstatistikk")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -692,6 +707,149 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             .type(MediaType.APPLICATION_OCTET_STREAM)
             .header("Content-Disposition", String.format("attachment; filename=\"dump.csv\""))
             .build()).orElse(Response.noContent().build());
+    }
+    
+    @GET
+    @Path("/antall-journalposter-med-fosterbarnfeil")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(description = "Henter antall journalposter med fosterbarnfeil.", summary = ("Henter antall journalposter med fosterbarnfeil."), tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    public Response hentJournalposterMedFosterbarnfeil() {
+        final Query q = entityManager.createNativeQuery("SELECT id\n"
+                + "FROM mottatt_dokument d\n"
+                + "WHERE d.type IN ('SØKNAD_UTBETALING_OMS', 'SØKNAD_UTBETALING_OMS_AT', 'PAPIRSØKNAD_UTBETALING_OMS_AT')");
+
+        final SøknadParser søknadParser = new SøknadParser();
+        
+        int antallBrukerdialog = 0;
+        int antallKode6 = 0;
+        int antallKode7 = 0;
+        final Set<String> ukjentBruker = new HashSet<>();
+        int feil = 0;
+        
+        @SuppressWarnings("unchecked") 
+        final List<Long> dokumenter = q.getResultList();
+        for (long dokumentId : dokumenter) {
+            try {
+                final MottattDokument dokument = mottatteDokumentRepository.hentMottattDokument(dokumentId).orElseThrow();
+                if (dokument.getType() == Brevkode.SØKNAD_UTBETALING_OMS
+                        && dokument.getInnsendingstidspunkt().isAfter(LocalDateTime.of(2022, 6, 13, 0, 0))) {
+                    antallBrukerdialog++;
+                    continue;
+                }
+                
+                final Søknad søknad = søknadParser.parseSøknad(dokument);
+                final OmsorgspengerUtbetaling ou = søknad.getYtelse();
+                
+                if (ou.getFosterbarn() != null) {
+                    final Set<AktørId> fosterbarnAktørList = ou.getFosterbarn().stream()
+                            .map((fosterbarn) -> {
+                                final String barnIdent = fosterbarn.getPersonIdent().getVerdi();
+                                final Optional<AktørId> barnAktørId = personinfoAdapter.hentAktørIdForPersonIdent(new PersonIdent(barnIdent));
+                                if (barnAktørId.isEmpty()) {
+                                    ukjentBruker.add(barnIdent);
+                                    return null;
+                                }
+                                return barnAktørId.get();
+                            })
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toSet());
+                    final Set<Diskresjonskode> diskresjonskoder = finnDiskresjonskoder(fosterbarnAktørList);
+                    if (diskresjonskoder.contains(Diskresjonskode.KODE6)) {
+                        antallKode6++;
+                    } else if (diskresjonskoder.contains(Diskresjonskode.KODE7)) {
+                        antallKode7++;
+                    }
+                }
+            } catch (RuntimeException e) {
+                feil++;
+            }
+        }
+
+        final String resultString = "antallBrukerdialog=" + antallBrukerdialog + "\n"
+                + "antallKode6=" + antallKode6 + "\n"
+                + "antallKode7=" + antallKode7 + "\n"
+                + "ukjentBruker=" + ukjentBruker.size() + "\n"
+                + "feil=" + feil + "\n"
+                ;
+        
+        return Response.ok(resultString).build();
+    }
+    
+    @GET
+    @Path("/journalposter-med-fosterbarnfeil")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(description = "Henter ID til journalposter med fosterbarnfeil.", summary = ("Henter ID til journalposter med fosterbarnfeil."), tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    public Response hentJournalposterMedFosterbarnfeil2() {
+        final Query q = entityManager.createNativeQuery("SELECT id\n"
+                + "FROM mottatt_dokument d\n"
+                + "WHERE d.type IN ('SØKNAD_UTBETALING_OMS', 'SØKNAD_UTBETALING_OMS_AT', 'PAPIRSØKNAD_UTBETALING_OMS_AT')");
+
+        final SøknadParser søknadParser = new SøknadParser();
+        
+        final Set<String> journalposterBrukerdialog = new HashSet<>();
+        final Set<String> journalposterKode6 = new HashSet<>();
+        final Set<String> journalposterKode7 = new HashSet<>();
+        final Set<String> journalposterUkjentBruker = new HashSet<>();
+        final Set<String> journalposterFeil = new HashSet<>();
+        
+        @SuppressWarnings("unchecked") 
+        final List<Long> dokumenter = q.getResultList();
+        for (long dokumentId : dokumenter) {
+            try {
+                final MottattDokument dokument = mottatteDokumentRepository.hentMottattDokument(dokumentId).orElseThrow();
+                try {
+                    if (dokument.getType() == Brevkode.SØKNAD_UTBETALING_OMS
+                            && dokument.getInnsendingstidspunkt().isAfter(LocalDateTime.of(2022, 6, 13, 0, 0))) {
+                        journalposterBrukerdialog.add(dokument.getJournalpostId().getVerdi());
+                        continue;
+                    }
+                    
+                    final Søknad søknad = søknadParser.parseSøknad(dokument);
+                    final OmsorgspengerUtbetaling ou = søknad.getYtelse();
+                    
+                    if (ou.getFosterbarn() != null) {
+                        final Set<AktørId> fosterbarnAktørList = ou.getFosterbarn().stream()
+                                .map((fosterbarn) -> {
+                                    final String barnIdent = fosterbarn.getPersonIdent().getVerdi();
+                                    final Optional<AktørId> barnAktørId = personinfoAdapter.hentAktørIdForPersonIdent(new PersonIdent(barnIdent));
+                                    if (barnAktørId.isEmpty()) {
+                                        journalposterUkjentBruker.add(dokument.getJournalpostId().getVerdi());
+                                        return null;
+                                    }
+                                    return barnAktørId.get();
+                                })
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.toSet());
+                        final Set<Diskresjonskode> diskresjonskoder = finnDiskresjonskoder(fosterbarnAktørList);
+                        if (diskresjonskoder.contains(Diskresjonskode.KODE6)) {
+                            journalposterKode6.add(dokument.getJournalpostId().getVerdi());
+                        } else if (diskresjonskoder.contains(Diskresjonskode.KODE7)) {
+                            journalposterKode7.add(dokument.getJournalpostId().getVerdi());
+                        }
+                    }
+                } catch (RuntimeException e) {
+                    journalposterFeil.add(dokument.getJournalpostId().getVerdi());
+                }
+            } catch (RuntimeException e) {
+                logger.warn("Feil ved uthenting av mottatt dokument: " + dokumentId);
+            }
+        }
+        
+        final StringBuilder sb = new StringBuilder();
+        sb.append("=== Journalposter som ikke kunne sjekkes ===\n");
+        for (String s : journalposterFeil) {
+            sb.append(s);
+            sb.append("\n");
+        }
+        sb.append("\n\n=== Journalposter fra brukerdialog ===\n");
+        for (String s : journalposterBrukerdialog) {
+            sb.append(s);
+            sb.append("\n");
+        }
+        
+        return Response.ok(sb.toString()).build();
     }
 
     private boolean harTomSøknadsperiode(PleipengerLivetsSluttfase pls) {
