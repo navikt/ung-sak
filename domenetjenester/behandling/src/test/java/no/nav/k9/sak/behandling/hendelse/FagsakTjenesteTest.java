@@ -49,7 +49,7 @@ public class FagsakTjenesteTest {
 
     @BeforeEach
     public void oppsett() {
-        tjeneste = new FagsakTjeneste(new BehandlingRepositoryProvider(entityManager), null);
+        tjeneste = new FagsakTjeneste(new BehandlingRepositoryProvider(entityManager), null, null);
 
         personinfo = new Personinfo.Builder()
             .medAktørId(forelderAktørId)
