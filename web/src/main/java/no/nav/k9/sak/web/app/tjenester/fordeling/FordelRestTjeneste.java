@@ -280,6 +280,16 @@ public class FordelRestTjeneste {
     }
 
     @POST
+    @Path("/saksnummer/reserver")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(JSON_UTF8)
+    @Operation(description = "Reserver saksnummer.", summary = ("Reserver saksnummer"), tags = "fordel")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
+    public SaksnummerDto reserverSaksnummer() {
+        return new SaksnummerDto(fagsakTjeneste.genererNyttSaksnummer());
+    }
+
+    @POST
     @Path("/relatertSak")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(JSON_UTF8)
