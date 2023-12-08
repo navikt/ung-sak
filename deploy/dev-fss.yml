@@ -286,6 +286,8 @@ spec:
       value: "true"
     - name: LAGRE_SOEKNADSAKTOERER
       value: "true"
+    - name: ENABLE_AZURE_CC_SYSTEMCONTEXT
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
