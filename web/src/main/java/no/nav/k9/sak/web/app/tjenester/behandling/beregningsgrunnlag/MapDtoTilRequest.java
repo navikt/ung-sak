@@ -74,7 +74,7 @@ class MapDtoTilRequest {
             return new FastsettBeregningsgrunnlagSNNyIArbeidslivetHåndteringDto(OppdatererDtoMapper.mapFastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetDto(fastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetDto));
         }
         if (dto instanceof VurderTilkomneInntektsforholdDto inntektsforholdDto) {
-            return new VurderTilkommetInntektHåndteringDto(inntektsforholdDto.getTilkomneInntektsforholdPerioder());
+            return new VurderTilkommetInntektHåndteringDto(OppdatererDtoMapper.mapTilkomneInntektsforhold(inntektsforholdDto));
         }
         if (dto instanceof FordelBeregningsgrunnlagDto fordelBeregningsgrunnlagDto) {
             return new FaktaOmFordelingHåndteringDto(OppdatererDtoMapper.mapFordelBeregningsgrunnlagDto(fordelBeregningsgrunnlagDto));

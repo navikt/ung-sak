@@ -59,7 +59,7 @@ public class AktørId implements Serializable, Comparable<AktørId>, IndexKey {
     public String getAktørId() {
         return aktørId;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {
@@ -78,7 +78,7 @@ public class AktørId implements Serializable, Comparable<AktørId>, IndexKey {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "<" + aktørId + ">";
+        return getClass().getSimpleName() + "<" + aktørId.substring(0, Math.min(aktørId.length(), 3)) + "...>";
     }
 
     @Override

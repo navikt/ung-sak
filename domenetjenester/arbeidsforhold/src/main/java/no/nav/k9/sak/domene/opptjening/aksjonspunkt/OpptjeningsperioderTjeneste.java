@@ -21,6 +21,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
@@ -226,7 +227,7 @@ public class OpptjeningsperioderTjeneste {
 
         Collection<Yrkesaktivitet> frilansOppdrag = filter.getFrilansOppdrag();
 
-        if (aktørArbeidFraRegister.isPresent() && !frilansOppdrag.isEmpty()) {
+        if (aktørArbeidFraRegister.isPresent() && !frilansOppdrag.isEmpty() || (oppgittOpptjening != null && oppgittOpptjening.getFrilans().isPresent())) {
 
             DatoIntervallEntitet frilansPeriode = finnFrilansPeriode(oppgittOpptjening, periode, frilansOppdrag);
 
@@ -238,6 +239,7 @@ public class OpptjeningsperioderTjeneste {
                 .medPeriode(frilansPeriode)
                 .build());
         }
+
         return Optional.empty();
     }
 

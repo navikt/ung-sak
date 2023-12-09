@@ -127,7 +127,7 @@ public class BehandlingskontrollEventObserver {
 
         Optional<Behandling> behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId);
 
-        var dto = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(EventHendelse.BEHANDLINGSKONTROLL_EVENT, behandling.get(), vedtak.getVedtaksdato());
+        var dto = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(LocalDateTime.now(), EventHendelse.BEHANDLINGSKONTROLL_EVENT, behandling.get(), vedtak.getVedtaksdato());
         taskData.setPayload(JsonObjectMapper.getJson(dto));
         taskData.setProperty(PubliserEventTask.PROPERTY_KEY, behandlingId.toString());
         return taskData;

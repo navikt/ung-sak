@@ -38,6 +38,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
     private OpptjeningsaktiviteterPreconditionForBeregning opptjeningsaktiviteterPreconditionForBeregning;
 
 
+
     protected VurderPreconditionBeregningSteg() {
         // for CDI proxy
     }
@@ -70,17 +71,21 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         // 2. Avslå der opptjening er avslått
         vurderAvslagGrunnetOpptjening.vurderAvslagGrunnetAvslagIOpptjening(referanse);
 
-        // 3. Rydder fjernet eller avslått periode (må vurdere avslag mellom dei to rydde-kalla)
+        // 3. fjern eller initier perioder fra definerende vilkår
+        ryddOgGjenopprettBeregningTjeneste.fjernEllerInitierPerioderFraDefinerendeVilkår(referanse);
+
+        // 4. Rydder fjernet eller avslått periode (må vurdere avslag mellom dei to rydde-kalla)
         ryddOgGjenopprettBeregningTjeneste.deaktiverAvslåtteEllerFjernetPerioder(referanse);
 
-        // 4 Vurder inkonsistens
+        // 5 Vurder inkonsistens
         inkonsistensTjeneste.sjekkInkonsistensOgOpprettProsesstrigger(referanse);
-        opptjeningsaktiviteterPreconditionForBeregning.sjekkOpptjeningsaktiviter(referanse.getBehandlingId());
+        opptjeningsaktiviteterPreconditionForBeregning.sjekkOpptjeningsaktiviter(referanse);
 
-        // 5. Kopier
+        // 6. Kopier
         kopierBeregningTjeneste.kopierVurderinger(kontekst);
 
-        // 6. Utled aksjonspunkt
+
+        // 7. Utled aksjonspunkt
         var aksjonspunkter = finnAksjonspunkter(referanse);
 
         return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunkter);

@@ -54,4 +54,24 @@ class SkattegrunnlaginnhentingTjenesteTest {
     }
 
 
+    @Test
+    void skal_sette_første_år_til_2016_om_stp_2018() {
+        var stp_2018 = LocalDate.of(2018, 1, 1);
+        var dagensDato = SKATTEOPPGJØR_2020.minusDays(1);
+        var periode = SkattegrunnlaginnhentingTjeneste.utledSkattegrunnlagOpplysningsperiode(stp_2018, stp_2018.plusMonths(3), dagensDato);
+
+
+        assertThat(periode.getFom()).isEqualTo(LocalDate.of(2016, 1, 1));
+    }
+
+    @Test
+    void skal_sette_siste_år_til_2016_om_stp_fagsakperiode_til_2015() {
+        var stp_2015 = LocalDate.of(2015, 1, 1);
+        var dagensDato = SKATTEOPPGJØR_2020.minusDays(1);
+        var periode = SkattegrunnlaginnhentingTjeneste.utledSkattegrunnlagOpplysningsperiode(stp_2015, stp_2015.plusMonths(3), dagensDato);
+
+
+        assertThat(periode.getTom()).isEqualTo(LocalDate.of(2016, 12, 31));
+    }
+
 }

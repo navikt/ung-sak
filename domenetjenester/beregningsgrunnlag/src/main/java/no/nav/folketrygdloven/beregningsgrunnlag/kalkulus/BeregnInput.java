@@ -63,6 +63,11 @@ public class BeregnInput {
         return new BeregnInput(bgReferanse, vilkårsperiode);
     }
 
+    public static BeregnInput forTilkommetInntektUtledning(UUID bgReferanse, DatoIntervallEntitet vilkårsperiode) {
+        return new BeregnInput(bgReferanse, vilkårsperiode);
+    }
+
+
     public UUID getBgReferanse() {
         return bgReferanse;
     }

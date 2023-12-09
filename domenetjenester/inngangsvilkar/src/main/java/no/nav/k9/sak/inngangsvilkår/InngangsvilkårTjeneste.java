@@ -14,6 +14,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingskontroll.VilkårTypeRef.VilkårTypeRefLiteral;
@@ -72,7 +73,8 @@ public class InngangsvilkårTjeneste {
      * Overstyr gitt aksjonspunkt på Inngangsvilkår.
      */
     public void overstyrAksjonspunkt(Long behandlingId, VilkårType vilkårType, Utfall utfall, String avslagsårsakKode,
-                                     BehandlingskontrollKontekst kontekst, LocalDate fom, LocalDate tom, String begrunnelse) {
+                                     BehandlingskontrollKontekst kontekst, LocalDate fom, LocalDate tom, String begrunnelse,
+                                     String innvilgelseMerknadKode) {
         log.info("Overstyrer {} periode :[{}-{}] -> '{}' [{}]", vilkårType, fom, tom, utfall, avslagsårsakKode);
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
@@ -84,6 +86,7 @@ public class InngangsvilkårTjeneste {
         builder.leggTil(vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(fom, tom)
             .medUtfallOverstyrt(utfall)
             .medAvslagsårsak(Utfall.IKKE_OPPFYLT.equals(utfall) ? avslagsårsak : null)
+            .medMerknad(Utfall.OPPFYLT.equals(utfall) ? VilkårUtfallMerknad.fraKode(innvilgelseMerknadKode) : null)
             .medBegrunnelse(begrunnelse)));
 
         var oppdatertVikårResultat = builder.build();

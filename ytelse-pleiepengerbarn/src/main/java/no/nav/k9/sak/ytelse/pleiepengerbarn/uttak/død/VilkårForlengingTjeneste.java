@@ -31,21 +31,21 @@ class VilkårForlengingTjeneste {
         resultatBuilder.leggTil(vilkårBuilder);
     }
 
-    public void forlengVilkårMedPeriodeVedDødsfall(Set<VilkårType> vilkår, VilkårResultatBuilder resultatBuilder, Vilkårene vilkårene, DatoIntervallEntitet periode, LocalDate dødsdato, boolean dødsdatoIHelgFiks) {
+    public void forlengVilkårMedPeriodeVedDødsfall(Set<VilkårType> vilkår, VilkårResultatBuilder resultatBuilder, Vilkårene vilkårene, DatoIntervallEntitet periode, LocalDate dødsdato) {
         Objects.requireNonNull(dødsdato);
         for (VilkårType vilkårType : vilkår) {
             var vilkårBuilder = resultatBuilder.hentBuilderFor(vilkårType);
-            var eksisterendeResultat = finnVurderingPåDødsdato(dødsdato, vilkårene.getVilkår(vilkårType).orElseThrow(), dødsdatoIHelgFiks).orElseThrow();
+            var eksisterendeResultat = finnVurderingPåDødsdato(dødsdato, vilkårene.getVilkår(vilkårType).orElseThrow()).orElseThrow();
 
             vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode).forlengelseAv(eksisterendeResultat));
             resultatBuilder.leggTil(vilkårBuilder);
         }
     }
 
-    public Optional<VilkårPeriode> finnVurderingPåDødsdato(LocalDate dødsdato, Vilkår vilkår, boolean dødsdatoIHelgFiks) {
+    public Optional<VilkårPeriode> finnVurderingPåDødsdato(LocalDate dødsdato, Vilkår vilkår) {
         Optional<VilkårPeriode> vilkårPeriodeForDødsdato = vilkår.finnPeriodeSomInneholderDato(dødsdato);
 
-        if (vilkårPeriodeForDødsdato.isEmpty() && dødsdatoIHelgFiks) {
+        if (vilkårPeriodeForDødsdato.isEmpty()) {
             final DayOfWeek ukedag = dødsdato.getDayOfWeek();
             if (ukedag == DayOfWeek.SATURDAY) {
                 vilkårPeriodeForDødsdato = vilkår.finnPeriodeSomInneholderDato(dødsdato.plusDays(2));

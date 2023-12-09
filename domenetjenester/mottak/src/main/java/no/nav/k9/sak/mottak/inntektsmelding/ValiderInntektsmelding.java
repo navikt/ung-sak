@@ -16,14 +16,14 @@ public class ValiderInntektsmelding {
 
     public BigDecimal validerRefusjonEndringMaks(String path, BigDecimal value, LocalDate endringsdato) {
         if (value != null && MAX.compareTo(value) <= 0) {
-            throw MottattInntektsmeldingException.FACTORY.inntektsmeldingSemantiskValideringFeil(String.format("Angitt [%s] %s>=%s for endringsdato [%s]", path, value, MAX, endringsdato));
+            throw MottattInntektsmeldingException.inntektsmeldingSemantiskValideringFeil(String.format("Angitt [%s] %s>=%s for endringsdato [%s]", path, value, MAX, endringsdato));
         }
         return value;
     }
 
     public BigDecimal validerMaksBeløp(String path, BigDecimal value) {
         if (value != null && MAX.compareTo(value) <= 0) {
-            throw MottattInntektsmeldingException.FACTORY.inntektsmeldingSemantiskValideringFeil(String.format("Angitt [%s] %s>=%s", path, value, MAX));
+            throw MottattInntektsmeldingException.inntektsmeldingSemantiskValideringFeil(String.format("Angitt [%s] %s>=%s", path, value, MAX));
         }
         return value;
     }
@@ -43,9 +43,9 @@ public class ValiderInntektsmelding {
 
         if (maksDato.getYear() < CUTOFF_YEAR) {
             // behandler ikke inntektsmeldinger før 2020 her, sendes infotrygd fra fordel i stedet.
-            throw MottattInntektsmeldingException.FACTORY.inntektsmeldingSemantiskValideringFeil(String.format("Inntektsmelding gjelder tidligere år: [%s, %s]", minDato, maksDato));
+            throw MottattInntektsmeldingException.inntektsmeldingSemantiskValideringFeil(String.format("Inntektsmelding gjelder tidligere år: [%s, %s]", minDato, maksDato));
         } else if (maksDato.isAfter(validerDato)) {
-            throw MottattInntektsmeldingException.FACTORY.inntektsmeldingSemantiskValideringFeil(String.format("Inntektsmelding oppgitt fravær frem i tid: validerDato=%s, oppgittFravær=[%s, %s]", validerDato, minDato, maksDato));
+            throw MottattInntektsmeldingException.inntektsmeldingSemantiskValideringFeil(String.format("Inntektsmelding oppgitt fravær frem i tid: validerDato=%s, oppgittFravær=[%s, %s]", validerDato, minDato, maksDato));
         }
 
         return perioder;

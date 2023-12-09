@@ -46,6 +46,8 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import jakarta.persistence.Entity;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertFalse;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
@@ -66,8 +68,6 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
 
     /**
      * IKKE ignorer eller fjern denne testen, den sørger for at inputvalidering er i orden for REST-grensesnittene
-     * <p>
-     * Kontakt Team Humle hvis du trenger hjelp til å endre koden din slik at den går igjennom her
      */
     @ParameterizedTest
     @MethodSource("provideArguments")
@@ -77,7 +77,7 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
     }
 
     @SuppressWarnings("rawtypes")
-    private static final Map<Class, List<List<Class<? extends Annotation>>>> UNNTATT_FRA_VALIDERING = new HashMap<Class, List<List<Class<? extends Annotation>>>>() {
+    private static final Map<Class, List<List<Class<? extends Annotation>>>> UNNTATT_FRA_VALIDERING = new HashMap<>() {
         {
 
             put(PersonIdent.class, singletonList(emptyList()));
@@ -96,7 +96,7 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
     };
 
     @SuppressWarnings("rawtypes")
-    private static final Map<Class, List<List<Class<? extends Annotation>>>> VALIDERINGSALTERNATIVER = new HashMap<Class, List<List<Class<? extends Annotation>>>>() {
+    private static final Map<Class, List<List<Class<? extends Annotation>>>> VALIDERINGSALTERNATIVER = new HashMap<>() {
         {
             put(String.class, asList(
                 asList(Pattern.class, Size.class),
@@ -231,6 +231,23 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
                 validerRekursivt(besøkteKlasser, field.getType(), forrigeKlasse);
                 for (Class<?> klazz : genericTypes(field)) {
                     validerRekursivt(besøkteKlasser, klazz, forrigeKlasse);
+                }
+            }
+        }
+
+        sjekkModifiersPåMetoderMedAssertTrueAssertFalse(klasse);
+    }
+
+    private static void sjekkModifiersPåMetoderMedAssertTrueAssertFalse(Class<?> klasse) {
+        for (Method metode : klasse.getDeclaredMethods()) {
+            for (Class<? extends Annotation> annoteringsklasse : Set.of(AssertTrue.class, AssertFalse.class)) {
+                if (Arrays.stream(metode.getDeclaredAnnotations()).anyMatch(annotation -> annotation.annotationType().equals(annoteringsklasse))) {
+                    if (Modifier.isPrivate(metode.getModifiers())) {
+                        throw new IllegalArgumentException(klasse + " har privat metode " + metode + " med " + annoteringsklasse + ", det fungerer ikke - bytt til annet scope");
+                    }
+                    if (Modifier.isStatic(metode.getModifiers())) {
+                        throw new IllegalArgumentException(klasse + " har static metode " + metode + " med " + annoteringsklasse + ", det fungerer ikke");
+                    }
                 }
             }
         }

@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
@@ -181,7 +182,21 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
 
     private StønadstatistikkPeriode mapPeriode(LocalDateSegment<InformasjonTilStønadstatistikkHendelse> ds) {
         final UttaksperiodeInfo info = ds.getValue().getUttaksperiodeInfo();
-        final BigDecimal bruttoBeregningsgrunnlag = (ds.getValue().getBeregningsgrunnlag() != null) ? ds.getValue().getBeregningsgrunnlag().getBeregningsgrunnlagPerioder().get(0).getBruttoPrÅr() : BigDecimal.valueOf(-1);
+        final BeregningsgrunnlagPeriode beregningsgrunnlagPeriode = ds.getValue().getBeregningsgrunnlagPeriode();
+        
+        final BigDecimal bruttoBeregningsgrunnlag;
+        final BigDecimal totalUtbetalingsgradFraUttak;
+        final BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
+        if (beregningsgrunnlagPeriode != null) {
+            bruttoBeregningsgrunnlag = beregningsgrunnlagPeriode.getBruttoPrÅr();
+            totalUtbetalingsgradFraUttak = beregningsgrunnlagPeriode.getTotalUtbetalingsgradFraUttak();
+            totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt = beregningsgrunnlagPeriode.getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt();
+        } else {
+            bruttoBeregningsgrunnlag = BigDecimal.valueOf(-1);
+            totalUtbetalingsgradFraUttak = null;
+            totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt = null; 
+        }
+        
         return new StønadstatistikkPeriode(
             ds.getFom(),
             ds.getTom(),
@@ -197,7 +212,9 @@ public class PsbStønadstatistikkHendelseBygger implements StønadstatistikkHend
             mapUtfall(info.getNattevåk()),
             mapUtfall(info.getBeredskap()),
             info.getSøkersTapteTimer(),
-            bruttoBeregningsgrunnlag
+            bruttoBeregningsgrunnlag,
+            totalUtbetalingsgradFraUttak,
+            totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt
         );
     }
 

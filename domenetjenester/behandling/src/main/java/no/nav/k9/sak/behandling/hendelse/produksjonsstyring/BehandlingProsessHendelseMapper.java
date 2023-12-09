@@ -59,7 +59,7 @@ public class BehandlingProsessHendelseMapper {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
     }
 
-    public BehandlingProsessHendelse getProduksjonstyringEventDto(EventHendelse eventHendelse, Behandling behandling, LocalDate vedtaksdato) {
+    public BehandlingProsessHendelse getProduksjonstyringEventDto(LocalDateTime eventTid, EventHendelse eventHendelse, Behandling behandling, LocalDate vedtaksdato) {
         Map<String, String> aksjonspunktKoderMedStatusListe = new HashMap<>();
         var fagsak = behandling.getFagsak();
         behandling.getAksjonspunkter().forEach(aksjonspunkt -> aksjonspunktKoderMedStatusListe.put(aksjonspunkt.getAksjonspunktDefinisjon().getKode(), aksjonspunkt.getStatus().getKode()));
@@ -69,7 +69,7 @@ public class BehandlingProsessHendelseMapper {
 
         return BehandlingProsessHendelse.builder()
             .medEksternId(behandling.getUuid())
-            .medEventTid(LocalDateTime.now())
+            .medEventTid(eventTid)
             .medVedtaksdato(vedtaksdato)
             .medFagsystem(Fagsystem.K9SAK)
             .medSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi())
@@ -81,6 +81,7 @@ public class BehandlingProsessHendelseMapper {
             .medYtelseTypeKode(behandling.getFagsakYtelseType().getKode())
             .medBehandlingTypeKode(behandling.getType().getKode())
             .medOpprettetBehandling(behandling.getOpprettetDato())
+            .medEldsteDatoMedEndringFraSøker(finnEldsteMottattdato(behandling))
             .medBehandlingResultat(behandling.getBehandlingResultatType())
             .medAksjonspunktKoderMedStatusListe(aksjonspunktKoderMedStatusListe)
             .medAnsvarligSaksbehandlerForTotrinn(behandling.getAnsvarligSaksbehandler())
@@ -95,8 +96,35 @@ public class BehandlingProsessHendelseMapper {
             .build();
     }
 
+    public LocalDateTime finnEldsteMottattdato(Behandling behandling) {
+        final var behandlingRef = BehandlingReferanse.fra(behandling);
+        final var søknadsfristTjeneste = finnVurderSøknadsfristTjeneste(behandlingRef);
+        if (søknadsfristTjeneste == null) {
+            return null;
+        }
+
+        final Set<KravDokument> kravdokumenter;
+        try {
+            kravdokumenter = søknadsfristTjeneste.relevanteKravdokumentForBehandling(behandlingRef);
+        } catch (Exception e) {
+            logger.info("Innhenting av kravdokumenter feilet, " + e.getMessage());
+            return null;
+        }
+        return kravdokumenter.stream()
+            .filter(kd -> {
+                final boolean manglerInnsendingstidspunkt = (kd.getInnsendingsTidspunkt() == null);
+                if (manglerInnsendingstidspunkt) {
+                    logger.info("Mangler innsendingstidspunkt for: " + behandlingRef.getFagsakYtelseType().getKode() + " " + behandlingRef.getSaksnummer().getVerdi());
+                }
+                return !manglerInnsendingstidspunkt;
+            })
+            .min(Comparator.comparing(KravDokument::getInnsendingsTidspunkt))
+            .map(KravDokument::getInnsendingsTidspunkt)
+            .orElse(null);
+    }
+
     public BehandlingProsessHendelse getProduksjonstyringEventDto(EventHendelse eventHendelse, Behandling behandling) {
-        return getProduksjonstyringEventDto(eventHendelse, behandling, null);
+        return getProduksjonstyringEventDto(LocalDateTime.now(), eventHendelse, behandling, null);
     }
 
 

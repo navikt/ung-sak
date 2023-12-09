@@ -16,7 +16,7 @@
 		<!-- for Bean validation -->
 		<dependency>
 			<groupId>no.nav.k9.sak</groupId>
-			<artifactId>kontrakt-jakarta</artifactId>
+			<artifactId>kontrakt</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish</groupId>
@@ -37,7 +37,7 @@
 		<!-- Integrasjon avhengigheter -->
 		<dependency>
 			<groupId>no.nav.foreldrepenger.abakus</groupId>
-			<artifactId>abakus-kontrakt-jakarta</artifactId>
+			<artifactId>abakus-kontrakt</artifactId>
 		</dependency>
 
         <dependency>

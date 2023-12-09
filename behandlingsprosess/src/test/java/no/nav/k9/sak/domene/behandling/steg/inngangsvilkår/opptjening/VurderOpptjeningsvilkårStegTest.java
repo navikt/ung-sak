@@ -68,7 +68,7 @@ public class VurderOpptjeningsvilkårStegTest {
             .utførSteg(kontekst);
 
         // vurder vilkåret
-        new VurderOpptjeningsvilkårSteg(repositoryProvider, opptjeningRepository, inngangsvilkårFellesTjeneste, new UnitTestLookupInstanceImpl<>(new DefaultHåndtereAutomatiskAvslag()))
+        new VurderOpptjeningsvilkårSteg(repositoryProvider, opptjeningRepository, inngangsvilkårFellesTjeneste, new UnitTestLookupInstanceImpl<>(new DefaultHåndtereAutomatiskAvslag()), true)
             .utførSteg(kontekst);
     }
 }

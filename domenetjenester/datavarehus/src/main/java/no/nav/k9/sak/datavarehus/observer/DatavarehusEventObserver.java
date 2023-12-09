@@ -1,22 +1,17 @@
 package no.nav.k9.sak.datavarehus.observer;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
-import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 import no.nav.k9.sak.behandling.FagsakStatusEvent;
 import no.nav.k9.sak.behandling.hendelse.BehandlingEnhetEvent;
-import no.nav.k9.sak.behandlingskontroll.BehandlingStegTilstandSnapshot;
 import no.nav.k9.sak.behandlingskontroll.events.AksjonspunktStatusEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingStatusEvent;
-import no.nav.k9.sak.behandlingskontroll.events.BehandlingStegTilstandEndringEvent;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
 
@@ -35,21 +30,6 @@ public class DatavarehusEventObserver {
 
     public void observerFagsakStatus(@Observes FagsakStatusEvent event) {
         log.debug("Lagrer fagsak {} i DVH mellomalger", event.getFagsakId());//NOSONAR
-    }
-
-    public void observerBehandlingStegTilstandEndringEvent(@Observes BehandlingStegTilstandEndringEvent event) {
-        Optional<BehandlingStegTilstandSnapshot> fraTilstand = event.getFraTilstand();
-        if (fraTilstand.isPresent()) {
-            BehandlingStegTilstandSnapshot tilstand = fraTilstand.get();
-            log.debug("Lagrer behandligsteg endring fra tilstand {} i DVH datavarehus for behandling {}; behandlingStegTilstandId {}", //NOSONAR
-                tilstand.getSteg().getKode(), event.getBehandlingId(), tilstand.getId());
-        }
-        Optional<BehandlingStegTilstandSnapshot> tilTilstand = event.getTilTilstand();
-        if (tilTilstand.isPresent() && !Objects.equals(tilTilstand.orElse(null), fraTilstand.orElse(null))) {
-            BehandlingStegTilstandSnapshot tilstand = tilTilstand.get();
-            log.debug("Lagrer behandligsteg endring til tilstand {} i DVH datavarehus for behandlingId {}; behandlingStegTilstandId {}", //NOSONAR
-                tilstand.getSteg().getKode(), event.getBehandlingId(), tilstand.getId());
-        }
     }
 
     public void observerBehandlingEnhetEvent(@Observes BehandlingEnhetEvent event) {

@@ -8,6 +8,9 @@ import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.exception.IntegrasjonException;
@@ -35,6 +38,8 @@ import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingValg;
 @FagsakYtelseTypeRef
 @ApplicationScoped
 public class SimulerOppdragSteg implements BehandlingSteg {
+
+    private static final Logger logger = LoggerFactory.getLogger(SimulerOppdragSteg.class);
 
     private static final int ÅPNINGSTID = 7;
     private static final int STENGETID = 21;
@@ -69,7 +74,9 @@ public class SimulerOppdragSteg implements BehandlingSteg {
             startSimulering(behandling);
             return utledAksjonspunkt(behandling);
         } catch (IntegrasjonException e) {
-            opprettFortsettBehandlingTask(behandling);
+            LocalDateTime nesteKjøringEtter = utledNesteKjøring();
+            opprettFortsettBehandlingTask(behandling, nesteKjøringEtter);
+            logger.info("Det oppstod IntegrasjonException mot oppdragsystemet. Setter på vent til " + nesteKjøringEtter + ". Dette er normalt når oppdragssystemet har planlagt nedetid, for eksempel kveld og helg.", e);
             return BehandleStegResultat.settPåVent();
         }
     }
@@ -95,8 +102,7 @@ public class SimulerOppdragSteg implements BehandlingSteg {
         simuleringIntegrasjonTjeneste.startSimulering(behandling);
     }
 
-    private void opprettFortsettBehandlingTask(Behandling behandling) {
-        LocalDateTime nesteKjøringEtter = utledNesteKjøring();
+    private void opprettFortsettBehandlingTask(Behandling behandling, LocalDateTime nesteKjøringEtter) {
         behandlingProsesseringTjeneste.opprettTasksForFortsettBehandlingGjenopptaStegNesteKjøring(behandling,
             SIMULER_OPPDRAG, nesteKjøringEtter);
     }

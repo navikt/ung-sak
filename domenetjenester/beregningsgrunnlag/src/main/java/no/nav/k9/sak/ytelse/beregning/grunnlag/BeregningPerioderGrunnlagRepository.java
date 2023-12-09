@@ -14,6 +14,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
+import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.diff.DiffEntity;
@@ -189,6 +190,19 @@ public class BeregningPerioderGrunnlagRepository {
             .setParameter("id", behandlingId);
 
         return HibernateVerktøy.hentUniktResultat(query);
+    }
+
+    public List<Tuple<UUID, Boolean>> hentAlleHistoriskeReferanserForBehandling(Long behandlingId) {
+        var query = entityManager.createNativeQuery(
+            "SELECT distinct p.ekstern_referanse, bg.aktiv " +
+                "FROM GR_BEREGNINGSGRUNNLAG bg " +
+                "INNER JOIN BG_PERIODE p on p.bg_grunnlag_id = bg.bg_grunnlag_id " +
+                "WHERE bg.behandling_id=:id");
+        query.setParameter("id", behandlingId);
+
+        List<Object[]> resultat = query.getResultList();
+
+        return resultat.stream().map(r -> new Tuple<>((UUID) r[0], Boolean.valueOf(r[1].toString()))).toList();
     }
 
     private void lagre(BeregningsgrunnlagPerioderGrunnlagBuilder builder, Long behandlingId, boolean ryddMotVilkår) {

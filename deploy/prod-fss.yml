@@ -69,7 +69,7 @@ spec:
         - application: k9-formidling-dokumentdata
         - application: k9-punsj
         - application: fpabakus
-          namespace: teamforedrepenger
+          namespace: teamforeldrepenger
   env:
     - name: TZ
       value: "Europe/Oslo"
@@ -192,12 +192,16 @@ spec:
       value: api://prod-fss.k9saksbehandling.k9-formidling/.default
     - name: K9_PUNSJ_URL
       value: https://k9-punsj.intern.nav.no/api
+    - name: K9_PUNSJ_SCOPE
+      value: api://prod-fss.k9saksbehandling.k9-punsj/.default
     - name: INFOTRYGD_BS_BASE_URI
       value: https://k9-infotrygd.intern.nav.no
     - name: ARBEID_OG_INNTEKT_BASE_URL
       value: https://arbeid-og-inntekt.nais.adeo.no
     - name: K9_LOS_URL
       value: http://k9-los-api.k9saksbehandling/api
+    - name: K9_LOS_SCOPE
+      value: api://prod-fss.k9saksbehandling.k9-los-api/.default
 
     # Restservice OMS spesifikt
     - name: K9_OMS_AARSKVANTUM_URL
@@ -226,7 +230,8 @@ spec:
       value: https://sts.adeo.no/SecurityTokenServiceProvider/
     - name: OIDC_STS_HOST_URL
       value: https://security-token-service.nais.adeo.no
-
+    - name: CLIENT_SCOPE
+      value: "api://prod-fss.k9saksbehandling.k9-sak/.default"
     - name: ABAC_ATTRIBUTT_DRIFT
       value: "no.nav.abac.attributter.k9.drift"
 
@@ -237,8 +242,6 @@ spec:
       value: "3030"
 
     # Feature-flag
-    - name: ENABLE_BRUKERDIALOGINNSYN
-      value: "true"
     - name: PSB_UTTAK_UNNTAK_AKTIVITETER
       value: "AFMX0|2021-03-01"
     - name: OMP_VERIFISERING_TILKJENT_YTELSE
@@ -247,28 +250,39 @@ spec:
       value: "false"
     - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
       value: "2023-01-02"
-    - name: BG_FORLENGELSE_BASERT_PAA_UTTAK
-      value: "true"
     - name: ENABLE_SJEKK_TILBAKEKREVING
       value: "false"
     - name: IKKE_YRKESAKTIV_UTEN_SPEILING
       value: "false"
-    - name: PSB_START_I_KOFAKBER_VED_FORLENGELSE_OPPTJENING
-      value: "false"
     - name: OMP_NULL_HELG_I_KRAVPERIODER
       value: "false"
-    - name: OMS_ZERO_REFUSJON_ER_KRAV
+    - name: ENABLE_UTBETALINGSGRAD_OPPDRAG
       value: "false"
-    - name: FERIEPENGER_INFOTRYGD_KORRIGER
-      value: "true"
-    - name: ENABLE_ETTERKONTROLL_FORSINKET_SAKB
-      value: "true"
-    - name: PSB_DODSDATO_HELG_FLYTTE_TIL_FREDAG
+    - name: ENABLE_DATO_NY_REGEL_UTTAK
       value: "false"
-
+    - name: PSB_FILTRER_IM_PAA_BEHANDLING_ID
+      value: "false"
+    - name: ENABLE_OVERSTYR_UTTAK
+      value: "false"
+    - name: FILTRER_UGYLDIG_IM
+      value: "false"
+    - name: ENABLE_UTENLANDSOPPHOLD_PILS
+      value: "true"
+    - name: PERIODISERT_RAMMEVEDTAK_AO
+      value: "true"
+    - name: OPPTJENING_AP_VED_AKSEPTERT_MELLOMLIGGENDE_HELG
+      value: "true"
+    - name: FJERN_VILKARSPERIODER_BEREGNING
+      value: "false"
+    - name: VALIDER_KALKULUS_REFERANSER
+      value: "false"
+    - name: LAGRE_SOEKNADSAKTOERER
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
+      value: "false"
+    - name: RESTART_APP_ON_ERROR
       value: "false"
 
     # Audit logging

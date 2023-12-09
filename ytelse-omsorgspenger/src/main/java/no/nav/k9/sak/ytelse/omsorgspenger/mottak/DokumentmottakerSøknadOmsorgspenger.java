@@ -17,11 +17,13 @@ import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import no.nav.abakus.iaygrunnlag.JsonObjectMapper;
 import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
+import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -32,10 +34,14 @@ import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapRepository
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadAngittPersonEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet.Builder;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.abakus.AbakusInntektArbeidYtelseTjenesteFeil;
+import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.mottak.dokumentmottak.AsyncAbakusLagreOpptjeningTask;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
@@ -43,8 +49,10 @@ import no.nav.k9.sak.mottak.dokumentmottak.Dokumentmottaker;
 import no.nav.k9.sak.mottak.dokumentmottak.OppgittOpptjeningMapper;
 import no.nav.k9.sak.mottak.dokumentmottak.SøknadParser;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.OmsorgspengerGrunnlagRepository;
 import no.nav.k9.søknad.Søknad;
+import no.nav.k9.søknad.felles.personopplysninger.Barn;
 import no.nav.k9.søknad.felles.personopplysninger.Søker;
 import no.nav.k9.søknad.felles.type.Språk;
 import no.nav.k9.søknad.ytelse.omsorgspenger.v1.OmsorgspengerUtbetaling;
@@ -68,8 +76,12 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
     private MottatteDokumentRepository mottatteDokumentRepository;
     private SøknadOppgittFraværMapper mapper;
 
+    private PersoninfoAdapter personinfoAdapter;
 
     private SøknadUtbetalingOmsorgspengerDokumentValidator dokumentValidator;
+
+    private boolean lagreSøknadsaktørerEnabled;
+
 
     DokumentmottakerSøknadOmsorgspenger() {
         // for CDI proxy
@@ -83,7 +95,9 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
                                         SøknadParser søknadParser,
                                         MottatteDokumentRepository mottatteDokumentRepository,
                                         SøknadOppgittFraværMapper mapper,
-                                        @Any SøknadUtbetalingOmsorgspengerDokumentValidator dokumentValidator) {
+                                        PersoninfoAdapter personinfoAdapter,
+                                        @Any SøknadUtbetalingOmsorgspengerDokumentValidator dokumentValidator,
+                                        @KonfigVerdi(value = "LAGRE_SOEKNADSAKTOERER", defaultVerdi = "false") boolean lagreSøknadsaktørerEnabled) {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
@@ -93,7 +107,9 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         this.søknadParser = søknadParser;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.mapper = mapper;
+        this.personinfoAdapter = personinfoAdapter;
         this.dokumentValidator = dokumentValidator;
+        this.lagreSøknadsaktørerEnabled = lagreSøknadsaktørerEnabled;
     }
 
     @Override
@@ -181,8 +197,23 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
             .medSøknadId(søknad.getSøknadId() == null ? null : søknad.getSøknadId().getId())
             .medSpråkkode(getSpråkValg(Språk.NORSK_BOKMÅL)) //TODO: hente riktig språk
             ;
+
+        if (lagreSøknadsaktørerEnabled) {
+            leggTilFosterbarn(søknad, søknadInnhold, søknadBuilder);
+        }
+
         var søknadEntitet = søknadBuilder.build();
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);
+    }
+
+    private void leggTilFosterbarn(Søknad søknad, OmsorgspengerUtbetaling søknadInnhold, Builder søknadBuilder) {
+        if (søknadInnhold.getFosterbarn() != null) {
+            for (Barn fosterbarn : søknadInnhold.getFosterbarn()) {
+                var barnAktørId = personinfoAdapter.hentAktørIdForPersonIdent(new PersonIdent(fosterbarn.getPersonIdent().getVerdi()))
+                    .orElseThrow(() -> new IllegalArgumentException("Mangler personIdent for søknadId=" + søknad.getSøknadId()));
+                søknadBuilder.leggTilAngittPerson(new SøknadAngittPersonEntitet(barnAktørId, RelasjonsRolleType.FOSTERBARN));
+            }
+        }
     }
 
     private void lagreUttakOgUtvidPeriode(Behandling behandling, JournalpostId journalpostId, OmsorgspengerUtbetaling ytelse, Søker søker) {
@@ -198,6 +229,11 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         // Utvide fagsakperiode
         var maksPeriode = grunnlagRepository.hentMaksPeriode(behandlingId).orElseThrow();
         fagsakRepository.utvidPeriode(fagsakId, maksPeriode.getFomDato(), maksPeriode.getTomDato());
+
+        Fagsak oppdatertFagsak = fagsakRepository.hentSakGittSaksnummer(behandling.getFagsak().getSaksnummer()).orElseThrow();
+        if (oppdatertFagsak.getPeriode().getFomDato().getYear() != oppdatertFagsak.getPeriode().getTomDato().getYear()){
+            throw new IllegalStateException("Etter mottak av søknad/korrigertIM blir fagsak for omsorgspenger utvidet til å spenne over flere år (forventer kun ett år pr sak): " + maksPeriode.getFomDato().getYear() + " til " + maksPeriode.getTomDato().getYear());
+        }
     }
 
     private void lagreMedlemskapinfo(Long behandlingId, OmsorgspengerUtbetaling ytelse, LocalDate forsendelseMottatt) {
