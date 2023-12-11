@@ -1,0 +1,12 @@
+create table if not exists SAKSNUMMER_AKTOR
+(
+    SAKSNUMMER      VARCHAR(19)                             NOT NULL,
+    AKTOER_ID       VARCHAR(50)                             NOT NULL,
+    JOURNALPOST_ID  VARCHAR(50)                             NOT NULL,
+    OPPRETTET_AV    VARCHAR(20)  DEFAULT 'VL'               NOT NULL,
+    OPPRETTET_TID   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP  NOT NULL
+);
+
+create index IDX_SAKSNUMMER_AKTOR_1 on SAKSNUMMER_AKTOR (SAKSNUMMER);
+
+create unique index UIDX_SAKSNUMMER_AKTOR_1 on SAKSNUMMER_AKTOR (SAKSNUMMER, AKTOER_ID, JOURNALPOST_ID);

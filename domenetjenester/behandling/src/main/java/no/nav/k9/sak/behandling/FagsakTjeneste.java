@@ -15,7 +15,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
-import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 
@@ -24,15 +23,12 @@ public class FagsakTjeneste {
 
     private final FagsakRepository fagsakRepository;
     private final FagsakStatusEventPubliserer fagsakStatusEventPubliserer;
-    private final SaksnummerRepository saksnummerRepository;
 
     @Inject
     public FagsakTjeneste(BehandlingRepositoryProvider repositoryProvider,
-                          FagsakStatusEventPubliserer fagsakStatusEventPubliserer,
-                          SaksnummerRepository saksnummerRepository) {
+                          FagsakStatusEventPubliserer fagsakStatusEventPubliserer) {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.fagsakStatusEventPubliserer = fagsakStatusEventPubliserer;
-        this.saksnummerRepository = saksnummerRepository;
     }
 
     public void opprettFagsak(Fagsak nyFagsak) {
@@ -92,7 +88,4 @@ public class FagsakTjeneste {
         return fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
     }
 
-    public Saksnummer genererNyttSaksnummer() {
-        return new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
-    }
 }
