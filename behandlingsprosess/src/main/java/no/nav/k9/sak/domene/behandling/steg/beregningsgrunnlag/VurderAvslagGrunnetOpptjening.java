@@ -54,7 +54,8 @@ public class VurderAvslagGrunnetOpptjening {
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
     }
 
-    /** Vurderer om beregning skal avslås med årsak IKKE_TILSTREKKELIG_OPPTJENING
+    /**
+     * Vurderer om beregning skal avslås med årsak IKKE_TILSTREKKELIG_OPPTJENING
      *
      * @param referanse Behandlingreferanse
      */
@@ -110,7 +111,9 @@ public class VurderAvslagGrunnetOpptjening {
 
     private Set<DatoIntervallEntitet> vurdertePerioder(VilkårType vilkårType, BehandlingReferanse ref) {
         var tjeneste = getPerioderTilVurderingTjeneste(ref);
-        return tjeneste.utled(ref.getId(), vilkårType);
+        var perioderTilVurdering = tjeneste.utled(ref.getId(), vilkårType);
+        var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref).ignorerForlengelseperioder();
+        return periodeFilter.filtrerPerioder(perioderTilVurdering, vilkårType).stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet());
     }
 
     private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(BehandlingReferanse ref) {

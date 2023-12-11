@@ -1087,8 +1087,6 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     }
 
 
-
-
     private void loggForvaltningTjeneste(Fagsak fagsak, String tjeneste, String begrunnelse) {
         /*
          * logger at tjenesten er kalt (er en forvaltnings tjeneste)
