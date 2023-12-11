@@ -523,6 +523,7 @@ public class RegisterdataInnhenter {
 
         var innhentRegisterdataRequest = new InnhentRegisterdataRequest(saksnummer, behandlingUuid, ytelseType, periode, aktør, informasjonsElementer);
         innhentRegisterdataRequest.setCallbackUrl(abakusTjeneste.getCallbackUrl());
+        innhentRegisterdataRequest.setCallbackScope(abakusTjeneste.getCallbackScope());
 
         var opplysningsperiodeSkattegrunnlag = periodeTjeneste.utledOpplysningsperiodeSkattegrunnlag(behandling.getId());
         log.info("Opplysningsperiode skattegrunnlag: " + opplysningsperiodeSkattegrunnlag);

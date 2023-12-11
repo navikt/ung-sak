@@ -19,16 +19,20 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY, isGetterVisibility = JsonAutoDetect.Visibility.NONE)
 public class UttaksplanMedUtsattePerioder {
 
-    @JsonProperty(value = "uttaksplan", required = true)
+    @JsonProperty(value = "uttaksplan", required = false)
     @NotNull
     @Valid
     private Uttaksplan uttaksplan;
 
+    @JsonProperty(value = "simulertUttaksplan", required = false)
+    @NotNull
+    @Valid
+    private Uttaksplan simulertUttaksplan;
     @JsonProperty(value = "utsattePerioder")
     @Valid
     @Size
     private Set<LukketPeriode> utsattePerioder;
-    
+
     @JsonProperty(value = "virkningsdatoUttakNyeRegler")
     @Valid
     private LocalDate virkningsdatoUttakNyeRegler;
@@ -36,20 +40,33 @@ public class UttaksplanMedUtsattePerioder {
     public UttaksplanMedUtsattePerioder() {
     }
 
-    public UttaksplanMedUtsattePerioder(Uttaksplan uttaksplan, Set<LukketPeriode> utsattePerioder, LocalDate virkningsdatoUttakNyeRegler) {
+    public UttaksplanMedUtsattePerioder(Uttaksplan uttaksplan, Uttaksplan simulertUttaksplan, Set<LukketPeriode> utsattePerioder, LocalDate virkningsdatoUttakNyeRegler) {
         this.uttaksplan = uttaksplan;
+        this.simulertUttaksplan = simulertUttaksplan;
         this.utsattePerioder = utsattePerioder;
-        this.virkningsdatoUttakNyeRegler = virkningsdatoUttakNyeRegler; 
+        this.virkningsdatoUttakNyeRegler = virkningsdatoUttakNyeRegler;
+    }
+
+    public static UttaksplanMedUtsattePerioder medUttaksplan(Uttaksplan uttaksplan, Set<LukketPeriode> utsattePerioder, LocalDate virkningsdatoUttakNyeRegler) {
+        return new UttaksplanMedUtsattePerioder(uttaksplan, null, utsattePerioder, virkningsdatoUttakNyeRegler);
+    }
+
+    public static UttaksplanMedUtsattePerioder medSimulertUttaksplan(Uttaksplan uttaksplan, Set<LukketPeriode> utsattePerioder, LocalDate virkningsdatoUttakNyeRegler) {
+        return new UttaksplanMedUtsattePerioder(null, uttaksplan, utsattePerioder, virkningsdatoUttakNyeRegler);
     }
 
     public Uttaksplan getUttaksplan() {
         return uttaksplan;
     }
 
+    public Uttaksplan getSimulertUttaksplan() {
+        return simulertUttaksplan;
+    }
+
     public Set<LukketPeriode> getUtsattePerioder() {
         return utsattePerioder;
     }
-    
+
     public LocalDate getVirkningsdatoUttakNyeRegler() {
         return virkningsdatoUttakNyeRegler;
     }

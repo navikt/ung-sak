@@ -55,7 +55,7 @@ public class RepubliserEventGjenoppliverTask implements ProsessTaskHandler {
         if (antallIKø() > 3000) {
             antallSekunderTilNesteKjøring = 60*10; // Vent ti minutter til neste kjøring hvis det bygger seg opp kø av ukjørte tasker
         } else {
-            antallSekunderTilNesteKjøring = 60;
+            antallSekunderTilNesteKjøring = 120;
         }
 
         var query = entityManager.createNativeQuery(
@@ -71,7 +71,8 @@ public class RepubliserEventGjenoppliverTask implements ProsessTaskHandler {
                 "                 LIMIT :antall FOR UPDATE SKIP LOCKED" +
                 "                 )"
         ).setParameter("antall", antall)
-         .setParameter("antallSekunderTilNesteKjøring", antallSekunderTilNesteKjøring);
+         .setParameter("antallSekunderTilNesteKjøring", antallSekunderTilNesteKjøring)
+         .setHint("javax.persistence.query.timeout", 2 * 60 * 1000);
 
         var antallRaderPåvirket = query.executeUpdate();
         if (antallRaderPåvirket > 0) {
@@ -90,6 +91,7 @@ public class RepubliserEventGjenoppliverTask implements ProsessTaskHandler {
             }
 
             prosessTaskTjeneste.lagre(nyProsessTask);
+            log.info("Lagret ny oppgavebehandling.RepubliserEventGjenoppliver med id: "+ nyProsessTask.getId());
         } else {
             log.info("Ingen flere republiseringstasker");
         }
