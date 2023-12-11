@@ -3,6 +3,9 @@ package no.nav.k9.sak.trigger;
 import java.time.LocalDate;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.persistence.EntityManager;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 
@@ -10,6 +13,8 @@ import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
  * Kun brukt til forvaltning
  */
 public class ProsessTriggerForvaltningTjeneste {
+
+    private Logger LOG = LoggerFactory.getLogger(ProsessTriggerForvaltningTjeneste.class);
 
     private final ProsessTriggereRepository prosessTriggereRepository;
     private final EntityManager entityManager;
@@ -35,13 +40,17 @@ public class ProsessTriggerForvaltningTjeneste {
             throw new IllegalArgumentException("Fant ingen prosesstriggere");
         }
 
-        var harTriggerPåAktivtGrunnlag = prosessTriggere.stream()
+        var triggerPåAktivtGrunnlag = prosessTriggere.stream()
             .flatMap(t -> t.getTriggere().stream())
-            .anyMatch(t -> t.getÅrsak().equals(behandlingÅrsakType) && t.getPeriode().getFomDato().equals(skjæringstidspunkt));
+            .filter(t -> t.getÅrsak().equals(behandlingÅrsakType) && t.getPeriode().getFomDato().equals(skjæringstidspunkt))
+            .findFirst();
 
-        if (!harTriggerPåAktivtGrunnlag) {
+        if (triggerPåAktivtGrunnlag.isEmpty()) {
             throw new IllegalArgumentException("Hadde ikke prosesstrigger som skulle fjernes på aktivt grunnlag");
         }
+
+
+        LOG.info("Utfører fjerning av trigger for behandling med id " + behandlingId + " og følgende trigger fjernes: " + triggerPåAktivtGrunnlag);
 
         prosessTriggere.get().deaktiver();
 
