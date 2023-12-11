@@ -62,6 +62,8 @@ spec:
   accessPolicy:
     inbound:
       rules:
+        - application: k9-los
+        - application: k9-fordel
         - application: k9-sak
         - application: k9-tilbake
         - application: k9-klage
