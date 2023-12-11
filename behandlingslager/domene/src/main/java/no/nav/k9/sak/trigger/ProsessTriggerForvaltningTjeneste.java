@@ -43,16 +43,17 @@ public class ProsessTriggerForvaltningTjeneste {
         var triggerPåAktivtGrunnlag = prosessTriggere.stream()
             .flatMap(t -> t.getTriggere().stream())
             .filter(t -> t.getÅrsak().equals(behandlingÅrsakType) && t.getPeriode().getFomDato().equals(skjæringstidspunkt))
-            .findFirst();
+            .toList();
 
         if (triggerPåAktivtGrunnlag.isEmpty()) {
             throw new IllegalArgumentException("Hadde ikke prosesstrigger som skulle fjernes på aktivt grunnlag");
         }
 
 
-        LOG.info("Utfører fjerning av trigger for behandling med id " + behandlingId + " og følgende trigger fjernes: " + triggerPåAktivtGrunnlag);
+        LOG.info("Utfører fjerning av trigger for behandling med id " + behandlingId + " og følgende triggere fjernes: " + triggerPåAktivtGrunnlag);
 
         prosessTriggere.get().deaktiver();
+        entityManager.flush();
 
         var triggereSomSkalBeholdes = prosessTriggere.stream()
             .flatMap(t -> t.getTriggere().stream())
@@ -60,13 +61,15 @@ public class ProsessTriggerForvaltningTjeneste {
             .toList();
 
 
-        var oppdatert = new ProsessTriggere(behandlingId, new Triggere(triggereSomSkalBeholdes.stream()
-            .map(Trigger::new)
-            .collect(Collectors.toSet())));
+        if (!triggereSomSkalBeholdes.isEmpty()) {
+            var oppdatert = new ProsessTriggere(behandlingId, new Triggere(triggereSomSkalBeholdes.stream()
+                .map(Trigger::new)
+                .collect(Collectors.toSet())));
 
-        entityManager.persist(oppdatert.getTriggereEntity());
-        entityManager.persist(oppdatert);
-        entityManager.flush();
+            entityManager.persist(oppdatert.getTriggereEntity());
+            entityManager.persist(oppdatert);
+            entityManager.flush();
+        }
     }
 }
 
