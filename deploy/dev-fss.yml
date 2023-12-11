@@ -168,7 +168,7 @@ spec:
     - name: OPPGAVE_RS_URI
       value: https://oppgave-q1.nais.preprod.local/api/v1/oppgaver
     - name: OPPGAVE_RS_SCOPE
-      value: api://dev-fss.oppgavehandtering.oppgave/.default
+      value: api://dev-fss.oppgavehandtering.oppgave-q1/.default
     - name: MEDL2_RS_URL
       value: https://medlemskap-medl-api.dev.intern.nav.no/api/v1/medlemskapsunntak
     - name: MEDL2_RS_SCOPE
