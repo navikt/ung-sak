@@ -1007,6 +1007,87 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         return Response.ok(behandling.getFagsak().getSaksnummer().getVerdi()).build();
     }
 
+    @POST
+    @Path("/vilkar-historikk-beregning")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Henter vilkårshistorikk for beregning", summary = ("Henter vilkårshistorikk for beregning"), tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response hentVilkårhistorikkForBeregning(
+        @Parameter(description = "Behandling-UUID")
+        @NotNull
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+        BehandlingIdDto behandlingIdDto) {
+        var behandlingId = behandlingIdDto.getBehandlingId();
+
+        var query = entityManager.createNativeQuery(
+            "SELECT " +
+                "vr.aktiv as aktiv, " +
+                "vr.opprettet_tid as resultatOpprettetTid, " +
+                "vr.endret_tid as resultatEndretTid, " +
+                "v.opprettet_tid as vilkarOpprettetTid, " +
+                "v.endret_tid as vilkarEndretTid, " +
+                "p.fom as stp, " +
+                "p.utfall as utfall " +
+                "FROM RS_VILKARS_RESULTAT vr " +
+                "INNER JOIN VR_VILKAR_RESULTAT vs on vs.id = vr.vilkarene_id " +
+                "INNER JOIN VR_VILKAR v on v.vilkar_resultat_id = vs.id " +
+                "INNER JOIN VR_VILKAR_PERIODE p on p.vilkar_id = v.id " +
+                "WHERE vr.behandling_id = :behandlingId and v.vilkar_type = :vilkarType", Tuple.class);
+        query.setParameter("behandlingId", behandlingId)
+            .setParameter("vilkarType", "FP_VK_41");
+
+        List<Tuple> resultList = query.getResultList();
+
+        var dataDump = CsvOutput.dumpResultSetToCsv("vilkarhistorikk", resultList);
+
+
+        return dataDump.map(d -> Response.ok(d.getContent())
+            .type(MediaType.APPLICATION_OCTET_STREAM)
+            .header("Content-Disposition", String.format("attachment; filename=\"dump.csv\""))
+            .build()).orElse(Response.noContent().build());
+
+    }
+
+    @POST
+    @Path("/behandlingsteg-historikk")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Henter behandlingsteghistorikk", summary = ("Henter behandlingsteghistorikk"), tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response hentBehandlingHistorikk(
+        @Parameter(description = "Behandling-UUID")
+        @NotNull
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+        BehandlingIdDto behandlingIdDto) {
+        var behandlingId = behandlingIdDto.getBehandlingId();
+
+        var query = entityManager.createNativeQuery(
+            "SELECT " +
+                "opprettet_tid, " +
+                "endret_tid, " +
+                "behandling_steg,  " +
+                "behandling_steg_status " +
+                "FROM BEHANDLING_STEG_TILSTAND stegTilstand " +
+                "WHERE stegTilstand.behandling_id = :behandlingId order by opprettet_tid asc ", Tuple.class);
+        query.setParameter("behandlingId", behandlingId);
+
+        List<Tuple> resultList = query.getResultList();
+
+        var dataDump = CsvOutput.dumpResultSetToCsv("behandlingsteghistorikk", resultList);
+
+
+        return dataDump.map(d -> Response.ok(d.getContent())
+            .type(MediaType.APPLICATION_OCTET_STREAM)
+            .header("Content-Disposition", String.format("attachment; filename=\"behandlingsteghistorikk.csv\""))
+            .build()).orElse(Response.noContent().build());
+
+    }
+
+
+
 
     private void loggForvaltningTjeneste(Fagsak fagsak, String tjeneste, String begrunnelse) {
         /*

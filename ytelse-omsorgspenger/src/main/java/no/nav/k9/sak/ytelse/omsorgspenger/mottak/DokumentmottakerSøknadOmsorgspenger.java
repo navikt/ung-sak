@@ -75,13 +75,13 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
     private SøknadParser søknadParser;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private SøknadOppgittFraværMapper mapper;
-    
+
     private PersoninfoAdapter personinfoAdapter;
 
     private SøknadUtbetalingOmsorgspengerDokumentValidator dokumentValidator;
-    
+
     private boolean lagreSøknadsaktørerEnabled;
-    
+
 
     DokumentmottakerSøknadOmsorgspenger() {
         // for CDI proxy
@@ -197,20 +197,22 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
             .medSøknadId(søknad.getSøknadId() == null ? null : søknad.getSøknadId().getId())
             .medSpråkkode(getSpråkValg(Språk.NORSK_BOKMÅL)) //TODO: hente riktig språk
             ;
-        
+
         if (lagreSøknadsaktørerEnabled) {
             leggTilFosterbarn(søknad, søknadInnhold, søknadBuilder);
         }
-        
+
         var søknadEntitet = søknadBuilder.build();
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);
     }
 
     private void leggTilFosterbarn(Søknad søknad, OmsorgspengerUtbetaling søknadInnhold, Builder søknadBuilder) {
-        for (Barn fosterbarn : søknadInnhold.getFosterbarn()) {
-            var barnAktørId = personinfoAdapter.hentAktørIdForPersonIdent(new PersonIdent(fosterbarn.getPersonIdent().getVerdi()))
+        if (søknadInnhold.getFosterbarn() != null) {
+            for (Barn fosterbarn : søknadInnhold.getFosterbarn()) {
+                var barnAktørId = personinfoAdapter.hentAktørIdForPersonIdent(new PersonIdent(fosterbarn.getPersonIdent().getVerdi()))
                     .orElseThrow(() -> new IllegalArgumentException("Mangler personIdent for søknadId=" + søknad.getSøknadId()));
-            søknadBuilder.leggTilAngittPerson(new SøknadAngittPersonEntitet(barnAktørId, RelasjonsRolleType.FOSTERBARN));
+                søknadBuilder.leggTilAngittPerson(new SøknadAngittPersonEntitet(barnAktørId, RelasjonsRolleType.FOSTERBARN));
+            }
         }
     }
 
