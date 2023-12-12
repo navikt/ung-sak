@@ -89,7 +89,7 @@ public class BrevRestTjenesteTest {
         var inputOrganisasjonsnr = "111222333";
         final var inputOrganisasjonJson = "{\"navn\":{\"navnelinje1\":\""+ expectedOrganisasjonsnavn +"\"},\"organisasjonsnummer\":\""+ inputOrganisasjonsnr +"\"}";
         var expectedOrganisasjon = objectMapper.readValue(inputOrganisasjonJson, OrganisasjonEReg.class);
-        when(eregRestTjenesteMock.hentOrganisasjon(inputOrganisasjonsnr)).thenReturn(expectedOrganisasjon);
+        when(eregRestTjenesteMock.hentOrganisasjonOptional(inputOrganisasjonsnr)).thenReturn(Optional.of(expectedOrganisasjon));
 
 
         // Act
@@ -108,7 +108,7 @@ public class BrevRestTjenesteTest {
 
         // Arrange
         var inputOrganisasjonsnr = "000999000";
-        when(eregRestTjenesteMock.hentOrganisasjon(inputOrganisasjonsnr)).thenThrow(new IllegalArgumentException("argument \"content\" is null"));
+        when(eregRestTjenesteMock.hentOrganisasjonOptional(inputOrganisasjonsnr)).thenReturn(Optional.empty());
         // Act
         Response response = brevRestTjeneste.getBrevMottakerinfoEreg(new OrganisasjonsnrDto(inputOrganisasjonsnr));
         // Assert

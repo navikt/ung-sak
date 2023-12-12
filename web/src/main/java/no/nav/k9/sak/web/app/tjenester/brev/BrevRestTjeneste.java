@@ -157,22 +157,11 @@ public class BrevRestTjeneste {
     @Operation(description = "Hent navnet til gitt organisasjonsnr for sending til tredjepart", tags = "brev")
     @BeskyttetRessurs(action = READ, resource = APPLIKASJON)
     public Response getBrevMottakerinfoEreg(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = IngenTilgangsAttributter.class) OrganisasjonsnrDto organisasjonsnrDto) {
-        try {
-            var org = eregRestKlient.hentOrganisasjon(organisasjonsnrDto.organisasjonsnr());
+        return eregRestKlient.hentOrganisasjonOptional(organisasjonsnrDto.organisasjonsnr()).map(org -> {
             final var response = new BrevMottakerinfoEregResponseDto(org.getNavn());
             return Response.ok(response).build();
-        } catch (IllegalArgumentException e) {
-            // If org number is not found, it seems like eregRestKlient throws IllegalArgumentException
-            // with the message matched below. At least this happens in dev.
-            // For this endpoint I want to return empty json in the case when given organization
-            // number is not found, so returns that below then.
-            if (e.getMessage().equalsIgnoreCase("argument \"content\" is null")) {
-                final var emptyObject = new Object();
-                return Response.ok(emptyObject).build();
-            }
-            // If some other IllegalArgumentException happens, rethrow it.
-            throw e;
-        }
+        })
+            .orElse(Response.ok(new Object()).build()); // Return empty json object if organisasjon is not found.
     }
 
     public static class IngenTilgangsAttributter implements Function<Object, AbacDataAttributter> {
