@@ -97,7 +97,7 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.k9.felles.oidc-token</groupId>
-                <artifactId>k9-sikkerhet-sts</artifactId>
+                <artifactId>k9-sikkerhet-azure-cc</artifactId>
                 <version>${felles.version}</version>
             </dependency>
 
