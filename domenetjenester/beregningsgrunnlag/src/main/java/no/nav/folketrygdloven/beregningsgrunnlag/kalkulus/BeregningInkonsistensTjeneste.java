@@ -171,7 +171,7 @@ public class BeregningInkonsistensTjeneste {
     }
 
     private static boolean erKunYtelse(List<OpptjeningAktiviteter.OpptjeningPeriode> aktiviteterPåStp) {
-        return aktiviteterPåStp.stream().allMatch(a -> OpptjeningAktivitetType.YTELSE.contains(a.getType()));
+        return !aktiviteterPåStp.isEmpty() && aktiviteterPåStp.stream().allMatch(a -> OpptjeningAktivitetType.YTELSE.contains(a.getType()));
     }
 
     private boolean erMidlertidigInaktiv(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet periode) {
