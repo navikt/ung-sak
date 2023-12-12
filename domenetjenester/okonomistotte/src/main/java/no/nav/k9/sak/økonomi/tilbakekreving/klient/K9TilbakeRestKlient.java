@@ -11,12 +11,14 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
+import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.økonomi.tilbakekreving.dto.BehandlingStatusOgFeilutbetalinger;
 
 @Dependent
+@ScopedRestIntegration(scopeKey = "k9.tilbake.scope", defaultScope = "api://prod-fss.k9saksbehandling.k9-tilbake/.default")
 public class K9TilbakeRestKlient {
 
     private static final Logger log = LoggerFactory.getLogger(K9TilbakeRestKlient.class);

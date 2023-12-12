@@ -188,6 +188,8 @@ spec:
       value: api://prod-fss.k9saksbehandling.k9-oppdrag/.default
     - name: K9_TILBAKE_DIREKTE_URL
       value: http://k9-tilbake.k9saksbehandling/k9/tilbake/api
+    - name: K9_TILBAKE_SCOPE
+      value: api://prod-fss.k9saksbehandling.k9-tilbake/.default
     - name: K9_FORMIDLING_URL
       value: http://k9-formidling.k9saksbehandling/k9/formidling
     - name: K9_FORMIDLING_SCOPE
@@ -210,8 +212,6 @@ spec:
       value: http://k9-aarskvantum.k9saksbehandling
     - name: K9_OMS_AARSKVANTUM_SCOPE
       value: api://prod-fss.k9saksbehandling.k9-aarskvantum/.default
-    - name: K9_OMS_UTVIDETRETT_URL
-      value: https://omsorgsdager.intern.nav.no/api
 
     # Restservice PSB spesifikt
     - name: K9_PSB_UTTAK_URL
@@ -280,6 +280,8 @@ spec:
       value: "false"
     - name: LAGRE_SOEKNADSAKTOERER
       value: "true"
+    - name: ENABLE_AZURE_CC_SYSTEMCONTEXT
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
