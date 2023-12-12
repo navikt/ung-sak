@@ -164,7 +164,6 @@ public class FagsakRepository {
         AktørId relatertPersonAktørId,
         LocalDate fom,
         LocalDate tom) {
-        Query query;
 
         String sqlString = """
                     select f.* from Fagsak f
@@ -175,7 +174,7 @@ public class FagsakRepository {
             + (pleietrengendeAktørId == null ? "" : " and f.pleietrengende_aktoer_id = :pleietrengendeAktørId")
             + (relatertPersonAktørId == null ? "" : " and f.relatert_person_aktoer_id = :relatertPersonAktørId"); // NOSONAR (avsjekket dynamisk sql)
 
-        query = entityManager.createNativeQuery(sqlString, Fagsak.class); // NOSONAR
+        Query query = entityManager.createNativeQuery(sqlString, Fagsak.class); // NOSONAR
 
         if (brukerId == null && pleietrengendeAktørId == null && relatertPersonAktørId == null) {
             throw new IllegalArgumentException("Må minst spesifisere én aktørId for brukerId/pleietrengendeAktørId/relatertPersonAktørId");
