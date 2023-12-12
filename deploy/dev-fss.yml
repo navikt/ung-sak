@@ -62,6 +62,8 @@ spec:
   accessPolicy:
     inbound:
       rules:
+        - application: k9-los
+        - application: k9-fordel
         - application: k9-sak
         - application: k9-tilbake
         - application: k9-klage
@@ -166,7 +168,7 @@ spec:
     - name: OPPGAVE_RS_URI
       value: https://oppgave-q1.nais.preprod.local/api/v1/oppgaver
     - name: OPPGAVE_RS_SCOPE
-      value: api://dev-fss.oppgavehandtering.oppgave/.default
+      value: api://dev-fss.oppgavehandtering.oppgave-q1/.default
     - name: MEDL2_RS_URL
       value: https://medlemskap-medl-api.dev.intern.nav.no/api/v1/medlemskapsunntak
     - name: MEDL2_RS_SCOPE
@@ -187,6 +189,8 @@ spec:
       value: api://dev-fss.k9saksbehandling.k9-oppdrag/.default
     - name: K9_TILBAKE_DIREKTE_URL
       value: http://k9-tilbake.k9saksbehandling/k9/tilbake/api
+    - name: K9_TILBAKE_SCOPE
+      value: api://dev-fss.k9saksbehandling.k9-tilbake/.default
     - name: K9_FORMIDLING_URL
       value: http://k9-formidling.k9saksbehandling/k9/formidling
     - name: K9_FORMIDLING_SCOPE
@@ -209,8 +213,6 @@ spec:
       value: http://k9-aarskvantum.k9saksbehandling
     - name: K9_OMS_AARSKVANTUM_SCOPE
       value: api://dev-fss.k9saksbehandling.k9-aarskvantum/.default
-    - name: K9_OMS_UTVIDETRETT_URL
-      value: https://omsorgsdager.intern.dev.nav.no/api
 
     # Restservice PSB spesifikt
     - name: K9_PSB_UTTAK_URL
@@ -283,6 +285,8 @@ spec:
     - name: VALIDER_KALKULUS_REFERANSER
       value: "true"
     - name: LAGRE_SOEKNADSAKTOERER
+      value: "true"
+    - name: ENABLE_AZURE_CC_SYSTEMCONTEXT
       value: "true"
 
     # Konfigurasjoner
