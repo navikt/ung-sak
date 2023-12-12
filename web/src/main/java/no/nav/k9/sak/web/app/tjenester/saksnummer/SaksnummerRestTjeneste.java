@@ -12,6 +12,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -21,10 +22,12 @@ import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerAktorRepository;
+import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerAktørKoblingRepository;
+import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerAktørKoblingEntitet;
 import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.person.AktørIdDto;
+import no.nav.k9.sak.kontrakt.saksnummer.SaksnummerAktørKoblingDto;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
@@ -38,35 +41,64 @@ public class SaksnummerRestTjeneste {
     private static final Logger log = LoggerFactory.getLogger(SaksnummerRestTjeneste.class);
 
     private SaksnummerRepository saksnummerRepository;
-    private SaksnummerAktorRepository saksnummerAktorRepository;
+    private SaksnummerAktørKoblingRepository saksnummerAktørKoblingRepository;
 
     public SaksnummerRestTjeneste() {// For Rest-CDI
     }
 
     @Inject
-    public SaksnummerRestTjeneste(SaksnummerRepository saksnummerRepository, SaksnummerAktorRepository saksnummerAktorRepository) {
+    public SaksnummerRestTjeneste(SaksnummerRepository saksnummerRepository, SaksnummerAktørKoblingRepository saksnummerAktørKoblingRepository) {
         this.saksnummerRepository = saksnummerRepository;
-        this.saksnummerAktorRepository = saksnummerAktorRepository;
+        this.saksnummerAktørKoblingRepository = saksnummerAktørKoblingRepository;
     }
 
     @POST
-    @Path("/saksnummer/reserver")
+    @Path("/reserver")
     @Produces(JSON_UTF8)
-    @Operation(description = "Reserver saksnummer.", summary = ("Reserver saksnummer"), tags = "fordel")
+    @Operation(description = "Reserver saksnummer.", summary = ("Reserver saksnummer"), tags = "saksnummer")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
     public SaksnummerDto reserverSaksnummer() {
         return new SaksnummerDto(saksnummerRepository.genererNyttSaksnummer());
     }
 
     @POST
-    @Path("/saksnummer/aktor")
+    @Path("/aktor")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(description = "Kobler aktør til saksnummer.", summary = ("Kobler aktør til saksnummer"), tags = "fordel")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
+    @Operation(description = "Kobler aktør til saksnummer.", summary = ("Kobler aktør til saksnummer"), tags = "saksnummer")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.UPDATE, resource = FAGSAK)
     public Response kobleAktørPåSaksnummer(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) Saksnummer saksnummer,
                                            @NotNull @QueryParam("aktørId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) AktørIdDto aktørId,
                                            @NotNull @QueryParam("journalpostId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) JournalpostId journalpostId) {
-        saksnummerAktorRepository.lagre(saksnummer.getVerdi(), aktørId.getAktorId(), journalpostId.getVerdi());
-        return Response.noContent().build();
+        saksnummerAktørKoblingRepository.lagre(saksnummer.getVerdi(), aktørId.getAktorId(), journalpostId.getVerdi());
+        return Response.ok().build();
+    }
+
+    @GET
+    @Path("/aktor")
+    @Produces(JSON_UTF8)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Henter koblinger mellom aktør og saksnummer.", summary = ("Henter koblinger mellom aktør og saksnummer."), tags = "saksnummer")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.UPDATE, resource = FAGSAK)
+    public Response hentSaksnummerKobling(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) Saksnummer saksnummer,
+                                          @NotNull @QueryParam("aktørId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) AktørIdDto aktørId,
+                                          @NotNull @QueryParam("journalpostId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) JournalpostId journalpostId) {
+        SaksnummerAktørKoblingEntitet kobling = saksnummerAktørKoblingRepository.hent(saksnummer.getVerdi(), aktørId.getAktorId(), journalpostId.getVerdi());
+        if (kobling == null) {
+            return Response.ok().build();
+        }
+        SaksnummerAktørKoblingDto dto = new SaksnummerAktørKoblingDto(kobling.getSaksnummer(), kobling.getAktørId(), kobling.getJournalpostId());
+        return Response.ok(dto).build();
+    }
+
+    @POST
+    @Path("/aktor/slett")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Sletter kobling mellom aktør og saksnummer.", summary = ("Sletter kobling mellom aktør og saksnummer."), tags = "saksnummer")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.UPDATE, resource = FAGSAK)
+    public Response slettSaksnummerKobling(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) Saksnummer saksnummer,
+                                           @NotNull @QueryParam("aktørId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) AktørIdDto aktørId,
+                                           @NotNull @QueryParam("journalpostId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) JournalpostId journalpostId) {
+        saksnummerAktørKoblingRepository.slett(saksnummer.getVerdi(), aktørId.getAktorId(), journalpostId.getVerdi());
+        return Response.ok().build();
     }
 }
