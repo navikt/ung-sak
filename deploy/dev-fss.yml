@@ -172,7 +172,7 @@ spec:
     - name: MEDL2_RS_URL
       value: https://medlemskap-medl-api.dev.intern.nav.no/api/v1/medlemskapsunntak
     - name: MEDL2_RS_SCOPE
-      value: api://dev-fss.team-rocket.medlemskap-medl-api/.default
+      value: api://dev-fss.team-rocket.medlemskap-medl-api-q1/.default
     - name: PDL_BASE_URL
       value: http://pdl-api.pdl/graphql
     - name: PDL_SCOPE
