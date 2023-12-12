@@ -8,9 +8,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.hibernate.query.TypedParameterValue;
-import org.hibernate.type.StandardBasicTypes;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -212,25 +209,11 @@ public class FagsakRepository {
         AktørId relatertPersonAktørId,
         LocalDate fom,
         LocalDate tom) {
-        Query query;
 
-        String sql = """
-            select f.* from Fagsak f
-             where coalesce(f.pleietrengende_aktoer_id, '-1') = coalesce(:pleietrengendeAktørId, '-1')
-               and coalesce(f.relatert_person_aktoer_id, '-1') = coalesce(:relatertPersonAktørId, '-1')
-               and f.ytelse_type = :ytelseType
-               and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true
-              """;
-
-        query = entityManager.createNativeQuery(sql, Fagsak.class); // NOSONAR
-
-        query.setParameter("pleietrengendeAktørId", new TypedParameterValue<>(StandardBasicTypes.STRING, pleietrengendeAktørId == null ? null : pleietrengendeAktørId.getId()));
-        query.setParameter("relatertPersonAktørId", new TypedParameterValue<>(StandardBasicTypes.STRING, relatertPersonAktørId == null ? null : relatertPersonAktørId.getId()));
-        query.setParameter("ytelseType", Objects.requireNonNull(ytelseType, "ytelseType").getKode());
-        query.setParameter("fom", fom == null ? Tid.TIDENES_BEGYNNELSE : fom);
-        query.setParameter("tom", tom == null ? Tid.TIDENES_ENDE : tom);
-
-        return query.getResultList();
+        if (pleietrengendeAktørId == null && relatertPersonAktørId == null) {
+            throw new IllegalArgumentException("Må minst spesifisere én aktørId for pleietrengendeAktørId/relatertPersonAktørId");
+        }
+        return finnFagsakRelatertTil(ytelseType, null, pleietrengendeAktørId, relatertPersonAktørId, fom, tom);
     }
 
     /**
