@@ -38,6 +38,7 @@ public class SaksnummerAktørKoblingRepository {
         return (SaksnummerAktørKoblingEntitet) result.get(0);
     }
 
+    //TODO hva med å sjekke at aktørid/saksnummer/journalpostid er gyldig?
     public void lagre(String saksnummer, String aktørId, String journalpostId) {
         if (hent(saksnummer, aktørId, journalpostId) != null) {
             return; //Unngår exception ved duplikat

@@ -73,6 +73,7 @@ public class SaksnummerRestTjeneste {
         return Response.ok().build();
     }
 
+    //TODO hva er egentlig behovet her? Gir det verdi sånn som det står nå? Bør vi kunne slå opp med bare journalpostId?
     @GET
     @Path("/aktor")
     @Produces(JSON_UTF8)
