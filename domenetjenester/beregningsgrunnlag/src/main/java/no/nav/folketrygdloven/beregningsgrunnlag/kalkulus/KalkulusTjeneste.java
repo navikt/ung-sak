@@ -1,5 +1,8 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
+import static java.lang.Boolean.TRUE;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -64,6 +67,8 @@ import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringListeR
 import no.nav.folketrygdloven.kalkulus.response.v1.simulerTilkommetInntekt.SimulertTilkommetInntektPrReferanse;
 import no.nav.folketrygdloven.kalkulus.response.v1.tilkommetAktivitet.UtledetTilkommetAktivitet;
 import no.nav.folketrygdloven.kalkulus.response.v1.tilkommetAktivitet.UtledetTilkommetAktivitetPrReferanse;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningAvklaringsbehovDefinisjon;
@@ -305,11 +310,17 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
 
         Map<UUID, KalkulusResultat> resultater = new LinkedHashMap<>();
         for (var tilstandResponse : response) {
-            var avklaringsbehovResultatList = tilstandResponse.getAvklaringsbehovMedTilstandDto().stream()
-                .map(dto -> BeregningAvklaringsbehovResultat.opprettMedFristFor(mapTilAvklaringsbehov(dto),
-                    dto.getVenteårsak() != null ? BeregningVenteårsak.fraKode(dto.getVenteårsak().getKode()) : null, dto.getVentefrist()))
-                .collect(Collectors.toList());
-            KalkulusResultat kalkulusResultat = new KalkulusResultat(avklaringsbehovResultatList);
+            KalkulusResultat kalkulusResultat;
+            if (tilstandResponse.getAvklaringsbehovMedTilstandDto() == null) {
+                kalkulusResultat = new KalkulusResultat(Collections.emptyList());
+
+            } else {
+                var avklaringsbehovResultatList = tilstandResponse.getAvklaringsbehovMedTilstandDto().stream()
+                    .map(dto -> BeregningAvklaringsbehovResultat.opprettMedFristFor(mapTilAvklaringsbehov(dto),
+                        dto.getVenteårsak() != null ? BeregningVenteårsak.fraKode(dto.getVenteårsak().getKode()) : null, dto.getVentefrist()))
+                    .collect(Collectors.toList());
+                kalkulusResultat = new KalkulusResultat(avklaringsbehovResultatList);
+            }
             if (tilstandResponse.getVilkarOppfylt() != null) {
                 if (tilstandResponse.getVilkårsavslagsårsak() != null && !tilstandResponse.getVilkarOppfylt()) {
                     kalkulusResultat = kalkulusResultat.medAvslåttVilkår(mapTilAvslagsårsak(tilstandResponse.getVilkårsavslagsårsak()));
@@ -390,6 +401,26 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
             UtledetTilkommetAktivitetPrReferanse::getEksternReferanse,
             UtledetTilkommetAktivitetPrReferanse::getTilkommedeAktiviteter
         ));
+    }
+
+    public LocalDateTimeline<BigDecimal> finnInntektsgradering(Map<UUID, DatoIntervallEntitet> koblingerOgPeriode,
+                                                               BehandlingReferanse referanse) {
+        if (koblingerOgPeriode.isEmpty()) {
+            return LocalDateTimeline.empty();
+        }
+
+        var iayGrunnlag = iayTjeneste.hentGrunnlag(referanse.getBehandlingId());
+        var sakInntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer());
+        var beregnInput = koblingerOgPeriode.entrySet().stream().map(e -> BeregnInput.forTilkommetInntektUtledning(e.getKey(), e.getValue())).toList();
+        var request = beregnRequestTjeneste.lagForUtledningAvTilkommetInntekt(referanse, beregnInput, iayGrunnlag, sakInntektsmeldinger);
+        var respons = restTjeneste.finnUttaksgradVedInntektsgradering(request);
+        return respons.getListe().stream().map(it -> {
+                var vilkårsperiode = koblingerOgPeriode.get(it.getEksternReferanse());
+                var graderingSegmenter = it.getPerioder().stream().map(p -> new LocalDateSegment<>(p.getPeriode().getFom(), p.getPeriode().getTom(), p.getInntektgradering())).toList();
+                var vilkårstidslinje = new LocalDateTimeline<Boolean>(vilkårsperiode.getFomDato(), vilkårsperiode.getTomDato(), TRUE);
+                return new LocalDateTimeline<>(graderingSegmenter).intersection(vilkårstidslinje);
+            }).reduce(LocalDateTimeline::crossJoin)
+            .orElse(LocalDateTimeline.empty());
     }
 
     @Override

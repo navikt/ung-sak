@@ -81,6 +81,7 @@ import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.Beregningsgrunnla
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
+import no.nav.k9.sak.trigger.ProsessTriggerForvaltningTjeneste;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
@@ -111,6 +112,8 @@ public class ForvaltningBeregningRestTjeneste {
 
     private HentKalkulatorInputDump hentKalkulatorInputDump;
 
+    private ProsessTriggerForvaltningTjeneste prosessTriggerForvaltningTjeneste;
+
 
     public ForvaltningBeregningRestTjeneste() {
     }
@@ -135,6 +138,7 @@ public class ForvaltningBeregningRestTjeneste {
         this.entityManager = entityManager;
         this.fagsakTjeneste = fagsakTjeneste;
         this.hentKalkulatorInputDump = hentKalkulatorInputDump;
+        this.prosessTriggerForvaltningTjeneste = new ProsessTriggerForvaltningTjeneste(entityManager);
         this.kalkulusSystemRestKlient = new KalkulusRestKlient(systemUserOidcRestClient, endpoint);
     }
 
@@ -288,6 +292,40 @@ public class ForvaltningBeregningRestTjeneste {
             brukForrigeSkatteoppgjørDto.getSaksnummer(),
             brukForrigeSkatteoppgjørDto.getBehandlingIdForrigeSkatteoppgjør(),
             brukForrigeSkatteoppgjørDto.getSkjæringstidspunkt());
+    }
+
+
+    @POST
+    @Path("/fjern-prosesstrigger-reberegning")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Fjerner prosesstrigger for reberegning av grunnlag", summary = ("Fjerner prosesstrigger for reberegning av grunnlag"), tags = "beregning")
+    @BeskyttetRessurs(action = CREATE, resource = DRIFT)
+    public void fjernProsessTriggerForReberegning(@Parameter(description = "Saksnummer og skjæringstidspunkt (YYYY-MM-DD) på csv-format") @Valid OpprettManuellRevurderingBeregning opprettManuellRevurdering) {
+
+        var alleSaksnummerOgSkjæringstidspunkt = Objects.requireNonNull(opprettManuellRevurdering.getSaksnummerOgSkjæringstidspunkt(), "saksnummerOgSkjæringstidspunkt");
+        var saknummerOgSkjæringstidspunkt = new LinkedHashSet<>(Arrays.asList(alleSaksnummerOgSkjæringstidspunkt.split("\\s+")));
+
+        for (var s : saknummerOgSkjæringstidspunkt) {
+            var sakOgStpSplitt = s.split(",");
+            var saksnummer = new Saksnummer(sakOgStpSplitt[0]);
+            var stp = LocalDate.parse(sakOgStpSplitt[1]);
+            var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, false).orElseThrow(() -> new IllegalArgumentException("finnes ikke fagsak med saksnummer: " + saksnummer.getVerdi()));
+            loggForvaltningTjeneste(fagsak, "/fjern-prosesstrigger-reberegning", "fjerner prosesstrigger RE-ENDR-BER-GRUN for skjæringstidspunkt " + stp);
+
+            var behandling = behandlingRepository.hentSisteBehandlingForFagsakId(fagsak.getId());
+
+            if (behandling.isEmpty()) {
+                throw new IllegalArgumentException("Fant ingen behandling");
+            }
+
+            if (behandling.get().erSaksbehandlingAvsluttet()) {
+                throw new IllegalArgumentException("Behandling med id " + behandling.get().getId() + " hadde avsluttet saksbehandling.");
+            }
+
+            prosessTriggerForvaltningTjeneste.fjern(behandling.get().getId(), stp, BehandlingÅrsakType.RE_ENDRING_BEREGNINGSGRUNNLAG);
+
+        }
+
     }
 
 
