@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -340,8 +341,9 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
             .collect(Collectors.toSet());
     }
 
-    /** Deaktiverer og rydder beregningsgrunnlag i kalkulus.
-     *
+    /**
+     * Deaktiverer og rydder beregningsgrunnlag i kalkulus.
+     * <p>
      * Rydding gjøres for følgende scenario:
      * - Avslåtte perioder før første steg i beregning (grunnet opptjening eller kompletthet)
      * - Skjæringstidspunkt som ikke lenger finnes på saken (f.eks pga avslag i sykdomsvilkåret eller sammenslått med andre perioder)
@@ -370,7 +372,7 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
                                                          Vilkår vilkår,
                                                          Optional<BeregningsgrunnlagPerioderGrunnlag> initiellVersjon) {
         var grunnlagOpt = grunnlagRepository.hentGrunnlag(ref.getBehandlingId());
-        var stpMedEndretVurderingsstatus = finnReferanserSomIkkeLengerVurderes(ref, vilkår, grunnlagOpt, initiellVersjon);
+        var stpMedEndretVurderingsstatus = finnReferanserSomIkkeLengerVurderesOgUlikInitiell(ref, vilkår, grunnlagOpt, initiellVersjon);
         var avslåtteReferanser = finnAvslåttReferanser(vilkår, grunnlagOpt);
         var fjernetReferanseer = finnFjernetReferanser(vilkår, grunnlagOpt);
         var referanserSomSkalDeaktiveres = new ArrayList<BgRef>();
@@ -380,16 +382,32 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         return referanserSomSkalDeaktiveres;
     }
 
-    private List<BgRef> finnReferanserSomIkkeLengerVurderes(BehandlingReferanse ref,
-                                                            Vilkår vilkår,
-                                                            Optional<BeregningsgrunnlagPerioderGrunnlag> grunnlagOpt,
-                                                            Optional<BeregningsgrunnlagPerioderGrunnlag> initiellVersjon) {
+    private List<BgRef> finnReferanserSomIkkeLengerVurderesOgUlikInitiell(BehandlingReferanse ref,
+                                                                          Vilkår vilkår,
+                                                                          Optional<BeregningsgrunnlagPerioderGrunnlag> grunnlagOpt,
+                                                                          Optional<BeregningsgrunnlagPerioderGrunnlag> initiellVersjon) {
         var skjæringstidspunkterSomIkkeVurderes = finnSkjæringstidspunkterSomIkkeVurderes(ref, vilkår);
         return skjæringstidspunkterSomIkkeVurderes.stream()
             .flatMap(stp -> grunnlagOpt.flatMap(gr -> gr.finnGrunnlagFor(stp)).stream())
             .map(p -> new BgRef(p.getEksternReferanse(), p.getSkjæringstidspunkt()))
             .filter(r -> erIkkeInitiellVersjon(initiellVersjon, r))
             .toList();
+    }
+
+
+    private List<DatoIntervallEntitet> finnPerioderMedBehovForGjenopprettingAvVilkår(BehandlingReferanse ref,
+                                                                                     Vilkår vilkår,
+                                                                                     Optional<Vilkår> initiellVilkår) {
+        var skjæringstidspunkterSomIkkeVurderes = finnSkjæringstidspunkterSomIkkeVurderes(ref, vilkår);
+        return skjæringstidspunkterSomIkkeVurderes.stream()
+            .map(vilkår::finnPeriodeForSkjæringstidspunkt)
+            .filter(p -> erUtfallUliktInitiell(initiellVilkår.flatMap(v -> v.finnPeriodeForSkjæringstidspunktHvisFinnes(p.getSkjæringstidspunkt())), p))
+            .map(VilkårPeriode::getPeriode)
+            .toList();
+    }
+
+    private boolean erUtfallUliktInitiell(Optional<VilkårPeriode> initiellPeriode, VilkårPeriode gjeldendePeriode) {
+        return initiellPeriode.filter(vilkårPeriode -> !vilkårPeriode.getGjeldendeUtfall().equals(gjeldendePeriode.getGjeldendeUtfall())).isPresent();
     }
 
     private Set<LocalDate> finnSkjæringstidspunkterSomIkkeVurderes(BehandlingReferanse ref, Vilkår vilkår) {
@@ -427,20 +445,38 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         return avslåtteSkjæringstidspunkt.stream().anyMatch(stp -> it.getStp().equals(stp));
     }
 
-    @Override
-    public Set<DatoIntervallEntitet> gjenopprettTilInitiellDersomIkkeTilVurdering(BehandlingReferanse ref) {
+    public Set<DatoIntervallEntitet> finnPerioderForGjenopprettingAvVilkårsutfall(BehandlingReferanse ref) {
         var vilkårOptional = vilkårTjeneste.hentHvisEksisterer(ref.getBehandlingId()).flatMap(v -> v.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
         if (vilkårOptional.isPresent()) {
-            var grunnlagOpt = grunnlagRepository.hentGrunnlag(ref.getBehandlingId());
-            Optional<BeregningsgrunnlagPerioderGrunnlag> initiellVersjon = Objects.equals(ref.getBehandlingType(), BehandlingType.REVURDERING) ? grunnlagRepository.getInitiellVersjon(ref.getBehandlingId()) : Optional.empty();
-            var vilkår = vilkårOptional.get();
-            var referanserSomIkkeLengerVurderes = finnReferanserSomIkkeLengerVurderes(ref, vilkår, grunnlagOpt, initiellVersjon);
-            referanserSomIkkeLengerVurderes.forEach(r -> grunnlagRepository.gjenopprettInitiellDersomUlikInitiell(ref.getBehandlingId(), r.getStp()));
-            return vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode)
-                .filter(p -> referanserSomIkkeLengerVurderes.stream().map(BgRef::getStp).anyMatch(stp -> p.getFomDato().equals(stp)))
-                .collect(Collectors.toSet());
+            var initiellVilkår = ref.getOriginalBehandlingId().flatMap(vilkårTjeneste::hentHvisEksisterer).flatMap(v -> v.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
+            var referanserSomMåResettes = finnReferanserSomMåResettes(ref, vilkårOptional.get());
+            var perioderSomMåResetteVilkårsvurdering = new HashSet<>(finnPerioderFraBeregningsgrunnlagreferanser(vilkårOptional.get(), referanserSomMåResettes));
+            perioderSomMåResetteVilkårsvurdering.addAll(finnPerioderMedBehovForGjenopprettingAvVilkår(ref, vilkårOptional.get(), initiellVilkår));
+            return perioderSomMåResetteVilkårsvurdering;
         }
         return Collections.emptySet();
+    }
+
+    @Override
+    public void gjenopprettReferanserTilInitiellDersomIkkeTilVurdering(BehandlingReferanse ref) {
+        var vilkårOptional = vilkårTjeneste.hentHvisEksisterer(ref.getBehandlingId()).flatMap(v -> v.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
+        if (vilkårOptional.isPresent()) {
+            var referanserSomIkkeLengerVurderes = finnReferanserSomMåResettes(ref, vilkårOptional.get());
+            referanserSomIkkeLengerVurderes.forEach(r -> grunnlagRepository.gjenopprettInitiellDersomUlikInitiell(ref.getBehandlingId(), r.getStp()));
+        }
+    }
+
+    private List<BgRef> finnReferanserSomMåResettes(BehandlingReferanse ref, Vilkår vilkår) {
+        var grunnlagOpt = grunnlagRepository.hentGrunnlag(ref.getBehandlingId());
+        Optional<BeregningsgrunnlagPerioderGrunnlag> initiellVersjon = Objects.equals(ref.getBehandlingType(), BehandlingType.REVURDERING) ? grunnlagRepository.getInitiellVersjon(ref.getBehandlingId()) : Optional.empty();
+        return finnReferanserSomIkkeLengerVurderesOgUlikInitiell(ref, vilkår, grunnlagOpt, initiellVersjon);
+    }
+
+
+    private static Set<DatoIntervallEntitet> finnPerioderFraBeregningsgrunnlagreferanser(Vilkår vilkår, List<BgRef> referanserSomIkkeLengerVurderes) {
+        return vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode)
+            .filter(p -> referanserSomIkkeLengerVurderes.stream().map(BgRef::getStp).anyMatch(stp -> p.getFomDato().equals(stp)))
+            .collect(Collectors.toSet());
     }
 
     private List<LocalDate> finnSkjæringstidspunkter(Vilkår vilkår) {

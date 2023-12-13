@@ -46,6 +46,7 @@ public class RyddOgGjenopprettBeregningTjeneste {
     private final VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
     private final FastsettPGIPeriodeTjeneste fastsettPGIPeriodeTjeneste;
     private final ValiderAktiveReferanserTjeneste validerAktiveReferanserTjeneste;
+    private final GjenopprettPerioderSomIkkeVurderesTjeneste gjenopprettPerioderSomIkkeVurderesTjeneste;
     private final VilkårResultatRepository vilkårResultatRepository;
     private final Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste;
     private final boolean enableFjernPerioder;
@@ -57,7 +58,7 @@ public class RyddOgGjenopprettBeregningTjeneste {
                                               BeregningsgrunnlagTjeneste kalkulusTjeneste,
                                               VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
                                               FastsettPGIPeriodeTjeneste fastsettPGIPeriodeTjeneste,
-                                              VilkårResultatRepository vilkårResultatRepository,
+                                              GjenopprettPerioderSomIkkeVurderesTjeneste gjenopprettPerioderSomIkkeVurderesTjeneste, VilkårResultatRepository vilkårResultatRepository,
                                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste,
                                               ValiderAktiveReferanserTjeneste validerAktiveReferanserTjeneste,
                                               @KonfigVerdi(value = "FJERN_VILKARSPERIODER_BEREGNING", defaultVerdi = "false") boolean enableFjernPerioder,
@@ -68,6 +69,7 @@ public class RyddOgGjenopprettBeregningTjeneste {
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
         this.fastsettPGIPeriodeTjeneste = fastsettPGIPeriodeTjeneste;
+        this.gjenopprettPerioderSomIkkeVurderesTjeneste = gjenopprettPerioderSomIkkeVurderesTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.enableFjernPerioder = enableFjernPerioder;
@@ -88,7 +90,7 @@ public class RyddOgGjenopprettBeregningTjeneste {
         ryddVedtaksresultatForPerioderTilVurdering(kontekst, referanse);
 
         // 2. gjenoppretter beregning til initiell referanse der perioden ikke lenger vurderes (flippet vurderingsstatus)
-        gjenopprettVedEndretVurderingsstatus(kontekst, referanse);
+        gjenopprettPerioderSomIkkeVurderesTjeneste.gjenopprettVedEndretVurderingsstatus(kontekst, referanse);
 
         // 3. avbryter alle aksjonspunkt i beregning som er åpne (aksjonspunkt reutledes på nytt ved behov)
         abrytÅpneBeregningaksjonspunkter(kontekst, behandling);
@@ -173,25 +175,6 @@ public class RyddOgGjenopprettBeregningTjeneste {
         return bgVilkår.getPerioder().stream().filter(p -> p.getGjeldendeUtfall().equals(Utfall.IKKE_VURDERT))
             .map(VilkårPeriode::getPeriode).filter(p -> avslåttePerioder.stream().anyMatch(p::overlapper))
             .toList();
-    }
-
-
-    /**
-     * Resetter beregningsgrunnlagreferanser og vilkårsresultat for perioder som ikke er til vurdering lenger i denne behandlingen
-     * <p>
-     * Rydding i kalkulus gjøres av no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste#deaktiverBeregningsgrunnlagForAvslåttEllerFjernetPeriode(no.nav.k9.sak.behandling.BehandlingReferanse)
-     *
-     * @param kontekst  Behandlingskontrollkonteksts
-     * @param referanse Behandlingreferanse
-     */
-    private void gjenopprettVedEndretVurderingsstatus(BehandlingskontrollKontekst kontekst, BehandlingReferanse referanse) {
-        var gjenopprettetPeriodeListe = kalkulusTjeneste.gjenopprettTilInitiellDersomIkkeTilVurdering(referanse);
-        if (!gjenopprettetPeriodeListe.isEmpty()) {
-            log.info("Gjenoppretter initiell vurdering for perioder {}", gjenopprettetPeriodeListe);
-            beregningsgrunnlagVilkårTjeneste.kopierVilkårresultatFraForrigeBehandling(
-                kontekst.getBehandlingId(), referanse.getOriginalBehandlingId().orElseThrow(() -> new IllegalStateException("Kan ikke gjenopprette vilkårsresultat i førstegangsbehandling")),
-                gjenopprettetPeriodeListe);
-        }
     }
 
     private void abrytÅpneBeregningaksjonspunkter(BehandlingskontrollKontekst kontekst, Behandling behandling) {
