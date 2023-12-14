@@ -42,23 +42,15 @@ public class GjenopprettPerioderSomIkkeVurderesTjeneste {
      * @param referanse Behandlingreferanse
      */
     public void gjenopprettVedEndretVurderingsstatus(BehandlingskontrollKontekst kontekst, BehandlingReferanse referanse) {
-        // Gjenoppretter BG-referanser
-        beregningsgrunnlagTjeneste.gjenopprettReferanserTilInitiellDersomIkkeTilVurdering(referanse);
+        if (referanse.erRevurdering()) {
+            // Gjenoppretter BG-referanser
+            beregningsgrunnlagTjeneste.gjenopprettReferanserTilInitiellDersomIkkeTilVurdering(referanse);
 
-        // Gjenopprett vilkårsvurdering
-        gjenopprettVilkårsvurdering(kontekst, referanse);
-    }
-
-
-    private void gjenopprettVilkårsvurdering(BehandlingskontrollKontekst kontekst, BehandlingReferanse referanse) {
-        var gjenopprettetPeriodeListe = beregningsgrunnlagTjeneste.finnPerioderForGjenopprettingAvVilkårsutfall(referanse);
-        if (!gjenopprettetPeriodeListe.isEmpty()) {
-            LOGGER.info("Gjenoppretter initiell vurdering for perioder {}", gjenopprettetPeriodeListe);
-            beregningsgrunnlagVilkårTjeneste.kopierVilkårresultatFraForrigeBehandling(
-                kontekst.getBehandlingId(), referanse.getOriginalBehandlingId().orElseThrow(() -> new IllegalStateException("Kan ikke gjenopprette vilkårsresultat i førstegangsbehandling")),
-                gjenopprettetPeriodeListe);
+            // Gjenopprett vilkårsvurdering
+            beregningsgrunnlagVilkårTjeneste.gjenopprettVilkårsutfallVedBehov(kontekst, referanse);
         }
     }
+
 
 
 
