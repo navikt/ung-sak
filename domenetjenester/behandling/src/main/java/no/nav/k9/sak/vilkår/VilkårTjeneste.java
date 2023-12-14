@@ -194,6 +194,17 @@ public class VilkårTjeneste {
         return utledPerioderTilVurderingUfiltrert(ref, vilkårType);
     }
 
+    public NavigableSet<DatoIntervallEntitet> utledPerioderSomIkkeVurderes(BehandlingReferanse ref, VilkårType vilkårType) {
+        var vilkår = hentVilkårResultat(ref.getBehandlingId()).getVilkår(vilkårType);
+        var perioder = vilkår.stream().flatMap(v -> v.getPerioder().stream())
+            .collect(Collectors.toSet());
+        var vilkårsPerioder = perioder.stream().map(VilkårPeriode::getPeriode).collect(Collectors.toSet());
+        var perioderTilVurdering =  utledPerioderTilVurdering(ref, vilkårType);
+        return vilkårsPerioder.stream()
+            .filter(periode -> perioderTilVurdering.stream().noneMatch(p -> p.getFomDato().equals(periode.getFomDato()))).collect(Collectors.toCollection(TreeSet::new));
+    }
+
+
     public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref, VilkårType vilkårType,
                                                                         boolean skalIgnorereAvslåttePerioder) {
         return utledPerioderTilVurdering(ref, vilkårType, skalIgnorereAvslåttePerioder, false, false);
