@@ -1,6 +1,5 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -9,7 +8,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -29,8 +27,6 @@ public class HarEndretInntektsmeldingVurderer {
     private MottatteDokumentRepository mottatteDokumentRepository;
     private Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning;
 
-    private boolean brukIdTilInntektsmeldingfiltreringEnabled;
-
 
     public HarEndretInntektsmeldingVurderer() {
     }
@@ -38,12 +34,10 @@ public class HarEndretInntektsmeldingVurderer {
     @Inject
     public HarEndretInntektsmeldingVurderer(BehandlingRepository behandlingRepository,
                                             MottatteDokumentRepository mottatteDokumentRepository,
-                                            @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning,
-                                            @KonfigVerdi(value = "PSB_FILTRER_IM_PAA_BEHANDLING_ID", defaultVerdi = "false") boolean brukIdTilInntektsmeldingfiltreringEnabled) {
+                                            @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning) {
         this.behandlingRepository = behandlingRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
-        this.brukIdTilInntektsmeldingfiltreringEnabled = brukIdTilInntektsmeldingfiltreringEnabled;
     }
 
 
@@ -68,14 +62,8 @@ public class HarEndretInntektsmeldingVurderer {
     }
 
     private List<Inntektsmelding> finnInntektsmeldingerFraForrigeVedtak(BehandlingReferanse referanse, Behandling originalBehandling, Collection<Inntektsmelding> inntektsmeldinger, List<MottattDokument> mottatteInntektsmeldinger) {
-        if (brukIdTilInntektsmeldingfiltreringEnabled) {
-            return inntektsmeldinger.stream()
-                .filter(it -> erInntektsmeldingITidligereBehandling(it, referanse.getBehandlingId(), mottatteInntektsmeldinger))
-                .toList();
-        }
-
         return inntektsmeldinger.stream()
-            .filter(it -> finnEksaktMottattTidspunkt(it, mottatteInntektsmeldinger).isBefore(originalBehandling.getAvsluttetDato()))
+            .filter(it -> erInntektsmeldingITidligereBehandling(it, referanse.getBehandlingId(), mottatteInntektsmeldinger))
             .toList();
     }
 
@@ -88,17 +76,8 @@ public class HarEndretInntektsmeldingVurderer {
     private boolean erInntektsmeldingITidligereBehandling(Inntektsmelding inntektsmelding, Long behandlingId, List<MottattDokument> mottatteInntektsmeldinger) {
         return mottatteInntektsmeldinger.stream()
             .filter(it -> Objects.equals(it.getJournalpostId(), inntektsmelding.getJournalpostId()))
-            .anyMatch(md -> md.getBehandlingId() != behandlingId);
+            .anyMatch(md -> !Objects.equals(md.getBehandlingId(), behandlingId));
     }
-
-    private LocalDateTime finnEksaktMottattTidspunkt(Inntektsmelding inntektsmelding, List<MottattDokument> mottatteInntektsmeldinger) {
-        return mottatteInntektsmeldinger.stream()
-            .filter(it -> Objects.equals(it.getJournalpostId(), inntektsmelding.getJournalpostId()))
-            .findAny()
-            .map(MottattDokument::getMottattTidspunkt)
-            .orElse(LocalDateTime.now());
-    }
-
 
     @FunctionalInterface
     public interface InntektsmeldingerEndringsvurderer {
