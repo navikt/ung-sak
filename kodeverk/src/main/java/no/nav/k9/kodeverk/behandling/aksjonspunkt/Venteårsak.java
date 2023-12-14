@@ -112,10 +112,12 @@ public enum Venteårsak implements Kodeverdi {
     MANGLER_SØKNADOPPLYSNING_FRILANS("AVV_SOKN_FRILANS", "Avventer søknad for frilans ved direkte overgang fra infotrygd. Må spesialhåndteres.", false, AVVENTER_SAKSBEHANDLER),
 
     /*
-     * Denne koden kan ikke fjernes før vi eventuelt har ryddet vekk bruk av
-     * denne koden på eksisterende behandlinger i k9-sak.
+     * Disse kodene kan ikke fjernes før vi eventuelt har ryddet vekk bruk av
+     * kodene på eksisterende behandlinger i k9-sak.
      */
     DELVIS_TILRETTELEGGING_OG_REFUSJON_SVP("DELVIS_TILRETTELEGGING_OG_REFUSJON_SVP", "Behandlingen er satt på vent på grunn av mangel i løsningen. Det jobbes med å løse dette.", false, AVVENTER_TEKNISK_FEIL),
+    AAP_DP_SISTE_10_MND_SVP("AAP_DP_SISTE_10_MND_SVP", "Behandlingen er satt på vent på grunn av mangel i løsningen. Det jobbes med å løse dette.", false, AVVENTER_TEKNISK_FEIL),
+    FL_SN_IKKE_STOTTET_FOR_SVP("FL_SN_IKKE_STOTTET_FOR_SVP", "Behandlingen er satt på vent på grunn av mangel i løsningen. Det jobbes med å løse dette.", false, AVVENTER_TEKNISK_FEIL),
     ;
     public static final String KODEVERK = "VENT_AARSAK";
     private static final Map<String, Venteårsak> KODER = new LinkedHashMap<>();
