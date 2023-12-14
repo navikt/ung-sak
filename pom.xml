@@ -40,7 +40,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <felles.version>2.1.4</felles.version>
+        <felles.version>2.2.0</felles.version>
         <swagger.version>2.2.17</swagger.version>
         <junit.version>5.10.1</junit.version>
         <k9format.version>9.0.6</k9format.version>
@@ -97,7 +97,7 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.k9.felles.oidc-token</groupId>
-                <artifactId>k9-sikkerhet-sts</artifactId>
+                <artifactId>k9-sikkerhet-azure-cc</artifactId>
                 <version>${felles.version}</version>
             </dependency>
 
@@ -155,8 +155,8 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.folketrygdloven.kalkulus</groupId>
-                <artifactId>kalkulus-kontrakt-jakarta</artifactId>
-                <version>2.7.0</version>
+                <artifactId>kalkulus-kontrakt</artifactId>
+                <version>2.7.2</version>
             </dependency>
 
             <dependency>
