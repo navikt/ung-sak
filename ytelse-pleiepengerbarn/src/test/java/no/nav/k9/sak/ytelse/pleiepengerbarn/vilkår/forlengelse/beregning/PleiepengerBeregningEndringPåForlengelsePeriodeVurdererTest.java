@@ -10,14 +10,12 @@ import no.nav.k9.sak.typer.JournalpostId;
 
 class PleiepengerBeregningEndringPåForlengelsePeriodeVurdererTest {
 
-    private PleiepengerBeregningEndringPåForlengelsePeriodeVurderer vurderer = new PleiepengerBeregningEndringPåForlengelsePeriodeVurderer();
-
     @Test
     void skal_vurdere_set_som_like_hvis_inneholder_de_samme() {
         var imSetForrige = Set.of(new JournalpostId("1"), new JournalpostId("12"), new JournalpostId("123"), new JournalpostId("1234"));
         var imSetNå = Set.of(new JournalpostId("1"), new JournalpostId("12"), new JournalpostId("123"), new JournalpostId("1234"));
 
-        var resultat = vurderer.harEndretSeg(imSetForrige, imSetNå);
+        var resultat = PleiepengerBeregningEndringPåForlengelsePeriodeVurderer.harEndretSeg(imSetForrige, imSetNå);
 
         assertThat(resultat).isFalse();
     }
@@ -27,7 +25,7 @@ class PleiepengerBeregningEndringPåForlengelsePeriodeVurdererTest {
         var imSetForrige = Set.of(new JournalpostId("1"), new JournalpostId("12"), new JournalpostId("123"), new JournalpostId("1234"));
         var imSetNå = Set.of(new JournalpostId("123"), new JournalpostId("1234"), new JournalpostId("1"), new JournalpostId("12"));
 
-        var resultat = vurderer.harEndretSeg(imSetForrige, imSetNå);
+        var resultat = PleiepengerBeregningEndringPåForlengelsePeriodeVurderer.harEndretSeg(imSetForrige, imSetNå);
 
         assertThat(resultat).isFalse();
     }
@@ -37,7 +35,7 @@ class PleiepengerBeregningEndringPåForlengelsePeriodeVurdererTest {
         var imSetForrige = Set.of(new JournalpostId("1"));
         var imSetNå = Set.of(new JournalpostId("1"), new JournalpostId("12"));
 
-        var resultat = vurderer.harEndretSeg(imSetForrige, imSetNå);
+        var resultat = PleiepengerBeregningEndringPåForlengelsePeriodeVurderer.harEndretSeg(imSetForrige, imSetNå);
 
         assertThat(resultat).isTrue();
     }
@@ -47,7 +45,7 @@ class PleiepengerBeregningEndringPåForlengelsePeriodeVurdererTest {
         var imSetForrige = Set.of(new JournalpostId("1"));
         var imSetNå = Set.of(new JournalpostId("12"));
 
-        var resultat = vurderer.harEndretSeg(imSetForrige, imSetNå);
+        var resultat = PleiepengerBeregningEndringPåForlengelsePeriodeVurderer.harEndretSeg(imSetForrige, imSetNå);
 
         assertThat(resultat).isTrue();
     }
