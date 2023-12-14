@@ -62,7 +62,7 @@ spec:
   accessPolicy:
     inbound:
       rules:
-        - application: k9-los
+        - application: k9-los-api
         - application: k9-fordel
         - application: k9-sak
         - application: k9-tilbake
@@ -172,7 +172,7 @@ spec:
     - name: MEDL2_RS_URL
       value: https://medlemskap-medl-api.dev.intern.nav.no/api/v1/medlemskapsunntak
     - name: MEDL2_RS_SCOPE
-      value: api://dev-fss.team-rocket.medlemskap-medl-api/.default
+      value: api://dev-fss.team-rocket.medlemskap-medl-api-q1/.default
     - name: PDL_BASE_URL
       value: http://pdl-api.pdl/graphql
     - name: PDL_SCOPE
@@ -287,7 +287,7 @@ spec:
     - name: LAGRE_SOEKNADSAKTOERER
       value: "true"
     - name: ENABLE_AZURE_CC_SYSTEMCONTEXT
-      value: "false"
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
