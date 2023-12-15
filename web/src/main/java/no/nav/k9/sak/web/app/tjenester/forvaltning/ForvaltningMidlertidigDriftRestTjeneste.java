@@ -164,6 +164,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
     private TilknytningTjeneste tilknytningTjeneste;
 
+    private FeilRefusjonVedTilsynUtrekkTjeneste feilRefusjonVedTilsynUtrekkTjeneste;
+
     private Pep pep;
 
     public ForvaltningMidlertidigDriftRestTjeneste() {
@@ -185,6 +187,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                                                    OpprettRevurderingService opprettRevurderingService,
                                                    PipRepository pipRepository,
                                                    TilknytningTjeneste tilknytningTjeneste,
+                                                   FeilRefusjonVedTilsynUtrekkTjeneste feilRefusjonVedTilsynUtrekkTjeneste,
                                                    Pep pep) {
 
         this.frisinnSøknadMottaker = frisinnSøknadMottaker;
@@ -201,6 +204,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         this.opprettRevurderingService = opprettRevurderingService;
         this.pipRepository = pipRepository;
         this.tilknytningTjeneste = tilknytningTjeneste;
+        this.feilRefusjonVedTilsynUtrekkTjeneste = feilRefusjonVedTilsynUtrekkTjeneste;
         this.pep = pep;
     }
 
@@ -1053,7 +1057,9 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     @POST
     @Path("/behandlingsteg-historikk")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(description = "Henter behandlingsteghistorikk", summary = ("Henter behandlingsteghistorikk"), tags = "forvaltning")
+    @Operation(description = "Henter behandlingsteghistorikk",
+        summary = ("Henter behandlingsteghistorikk"),
+        tags = "forvaltning")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response hentBehandlingHistorikk(
@@ -1084,6 +1090,29 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             .header("Content-Disposition", String.format("attachment; filename=\"behandlingsteghistorikk.csv\""))
             .build()).orElse(Response.noContent().build());
 
+    }
+
+    @POST
+    @Path("/feil-refusjon-ved-tilsyn")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Henter uttrekk fra kalkulus vedrørende feil refusjon ved tilsyn",
+        summary = ("Henter uttrekk fra kalkulus vedrørende feil refusjon ved tilsyn"),
+        tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response finnFeilRefusjonVedTilsyn(
+        @Parameter(description = "Behandling-UUID")
+        @NotNull
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+        BehandlingIdDto behandlingIdDto) {
+        var behandlingId = behandlingIdDto.getBehandlingId();
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        var feilRequestOgRespons = feilRefusjonVedTilsynUtrekkTjeneste.finnFeilForBehandling(behandling, true);
+        return feilRequestOgRespons.map(FeilRefusjonVedTilsynUtrekkTjeneste.KalkulusDiffRequestOgRespons::respons)
+            .map(Response::ok)
+            .map(Response.ResponseBuilder::build)
+            .orElse(Response.status(Response.Status.NOT_FOUND).build());
     }
 
 
