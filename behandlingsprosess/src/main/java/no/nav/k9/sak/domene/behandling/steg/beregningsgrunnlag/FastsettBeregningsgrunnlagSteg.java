@@ -28,7 +28,6 @@ public class FastsettBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {
     private BeregningsgrunnlagVilkårTjeneste vilkårTjeneste;
     private BeregningStegTjeneste beregningStegTjeneste;
 
-
     protected FastsettBeregningsgrunnlagSteg() {
         // for CDI proxy
     }
@@ -59,7 +58,6 @@ public class FastsettBeregningsgrunnlagSteg implements BeregningsgrunnlagSteg {
         var ref = BehandlingReferanse.fra(behandling);
         var callback = new HåndterResultat();
         beregningStegTjeneste.fortsettBeregningInkludertForlengelser(ref, FASTSETT_BEREGNINGSGRUNNLAG, callback);
-
 
         return BehandleStegResultat.utførtMedAksjonspunktResultater(Collections.emptyList());
     }
