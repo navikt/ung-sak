@@ -189,10 +189,12 @@ public class AksjonspunktUtlederNyeReglerTest {
             "TEST",
             UUID.randomUUID().toString(),
             List.of(),
+
             List.of(),
             List.of(),
             Map.of(),
             null,
+            Map.of(),
             Map.of(),
             List.of(),
             Map.of(),

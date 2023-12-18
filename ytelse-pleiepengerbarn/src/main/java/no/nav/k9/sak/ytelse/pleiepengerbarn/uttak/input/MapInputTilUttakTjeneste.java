@@ -47,8 +47,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.uttak.MapUttak;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeid;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeidsforhold;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Barn;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Inntektsgradering;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
-import no.nav.pleiepengerbarn.uttak.kontrakter.NedjustertUttaksgrad;
 import no.nav.pleiepengerbarn.uttak.kontrakter.OverstyrtInput;
 import no.nav.pleiepengerbarn.uttak.kontrakter.OverstyrtUtbetalingsgradPerArbeidsforhold;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Pleiebehov;
@@ -192,15 +192,14 @@ public class MapInputTilUttakTjeneste {
         );
     }
 
-    private Map<LukketPeriode, NedjustertUttaksgrad> mapNedjustertUttaksgrad(LocalDateTimeline<BigDecimal> nedjustertUttaksgrad) {
-        Map<LukketPeriode, NedjustertUttaksgrad> nedjustert = new HashMap<>();
+    private Map<LukketPeriode, Inntektsgradering> mapNedjustertUttaksgrad(LocalDateTimeline<BigDecimal> nedjustertUttaksgrad) {
+        Map<LukketPeriode, Inntektsgradering> nedjustert = new HashMap<>();
         nedjustertUttaksgrad.stream().forEach(segment -> {
             LukketPeriode periode = new LukketPeriode(segment.getFom(), segment.getTom());
-            nedjustert.put(periode, new NedjustertUttaksgrad(segment.getValue()));
+            nedjustert.put(periode, new Inntektsgradering(segment.getValue()));
         });
         return nedjustert;
     }
-
 
 
     private Map<LukketPeriode, OverstyrtInput> map(LocalDateTimeline<OverstyrtUttakPeriode> overstyrtUttak) {

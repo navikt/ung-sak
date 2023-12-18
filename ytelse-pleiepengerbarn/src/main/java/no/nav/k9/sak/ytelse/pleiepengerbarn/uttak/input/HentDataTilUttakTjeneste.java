@@ -151,7 +151,7 @@ public class HentDataTilUttakTjeneste {
         }
 
         LocalDate virkningsdatoNyeRegler = uttakNyeReglerRepository.finnDatoForNyeRegler(referanse.getBehandlingId()).orElse(null);
-        if (virkningsdatoNyeRegler != null && !nyRegelEnabled){
+        if (virkningsdatoNyeRegler != null && !nyRegelEnabled) {
             throw new IllegalStateException("Har lagret virkningsdato for nye regler i uttak, men de nye reglene er skrudd av.");
         }
 
@@ -159,7 +159,7 @@ public class HentDataTilUttakTjeneste {
         if (tilkommetAktivitetEnabled) {
             final Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> tilkommedeAktiviteterRaw = tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(referanse.getFagsakId(), virkningsdatoNyeRegler);
             tilkommetAktivitetsperioder = tilkommedeAktiviteterRaw.entrySet().stream()
-                    .collect(Collectors.toMap(e -> new AktivitetIdentifikator(e.getKey().getAktivitetType(), e.getKey().getArbeidsgiver(), null), e -> e.getValue()));
+                .collect(Collectors.toMap(e -> new AktivitetIdentifikator(e.getKey().getAktivitetType(), e.getKey().getArbeidsgiver(), null), e -> e.getValue()));
         } else {
             tilkommetAktivitetsperioder = new HashMap<>();
         }
@@ -205,7 +205,13 @@ public class HentDataTilUttakTjeneste {
         LocalDateTimeline<OverstyrtUttakPeriode> overstyrtUttak = overstyrUttakRepository.hentOverstyrtUttak(behandling.getId());
 
 
-        var nedjustertUttakgradTidslinje = finnPerioderMedNedjustertUttaksgrad.finnTidslinje(referanse);
+        LocalDateTimeline<BigDecimal> nedjustertUttakgradTidslinje;
+
+        if (tilkommetAktivitetEnabled) {
+            nedjustertUttakgradTidslinje = finnPerioderMedNedjustertUttaksgrad.finnTidslinje(referanse);
+        } else {
+            nedjustertUttakgradTidslinje = LocalDateTimeline.empty();
+        }
 
 
         return new InputParametere()
