@@ -315,7 +315,7 @@ public class Behandling extends BaseEntitet {
     void oppdaterBehandlingStegOgStatus(BehandlingStegTilstand stegTilstand) {
         Objects.requireNonNull(stegTilstand, "behandlingStegTilstand"); //$NON-NLS-1$
 
-        getSisteBehandlingStegTilstand().ifPresent(BehandlingStegTilstand::deaktiver);
+        getBehandlingStegTilstand().ifPresent(BehandlingStegTilstand::deaktiver);
 
         // legg til ny
         this.behandlingStegTilstander.add(stegTilstand);
@@ -336,6 +336,7 @@ public class Behandling extends BaseEntitet {
 
     private void lukkBehandlingStegStatuser(Collection<BehandlingStegTilstand> stegTilstander, BehandlingStegStatus sluttStatusForSteg) {
         stegTilstander.stream()
+            .filter(BehandlingStegTilstand::isAktiv)
             .filter(t -> !BehandlingStegStatus.erSluttStatus(t.getBehandlingStegStatus()))
             .forEach(t -> t.setBehandlingStegStatus(sluttStatusForSteg));
     }
@@ -363,31 +364,19 @@ public class Behandling extends BaseEntitet {
 
     public Optional<BehandlingStegTilstand> getBehandlingStegTilstand() {
         List<BehandlingStegTilstand> tilstander = behandlingStegTilstander.stream()
+            .filter(BehandlingStegTilstand::isAktiv)
             .filter(t -> !BehandlingStegStatus.erSluttStatus(t.getBehandlingStegStatus()))
             .toList();
         if (tilstander.size() > 1) {
             throw new IllegalStateException("Utvikler-feil: Kan ikke ha flere steg samtidig åpne: " + tilstander); //$NON-NLS-1$
         }
-
         return tilstander.isEmpty() ? Optional.empty() : Optional.of(tilstander.get(0));
-    }
-
-    public Optional<BehandlingStegTilstand> getSisteBehandlingStegTilstand() {
-        // sjekk "ikke-sluttstatuser" først
-        Optional<BehandlingStegTilstand> sisteAktive = getBehandlingStegTilstand();
-
-        if (sisteAktive.isPresent()) {
-            return sisteAktive;
-        }
-
-        // tar nyeste.
-        return behandlingStegTilstander.stream().min(COMP_DESC_TID);
     }
 
     public Optional<BehandlingStegTilstand> getBehandlingStegTilstand(BehandlingStegType stegType) {
         List<BehandlingStegTilstand> tilstander = behandlingStegTilstander.stream()
-            .filter(t -> !BehandlingStegStatus.erSluttStatus(t.getBehandlingStegStatus())
-                && Objects.equals(stegType, t.getBehandlingSteg()))
+            .filter(BehandlingStegTilstand::isAktiv)
+            .filter(t -> !BehandlingStegStatus.erSluttStatus(t.getBehandlingStegStatus()) && Objects.equals(stegType, t.getBehandlingSteg()))
             .toList();
         if (tilstander.size() > 1) {
             throw new IllegalStateException(

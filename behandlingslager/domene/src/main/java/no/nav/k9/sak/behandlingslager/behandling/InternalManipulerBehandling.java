@@ -33,7 +33,7 @@ public class InternalManipulerBehandling {
             throw new IllegalStateException("Kan ikke oppdatere behandlingsteg for avsluttet behandling");
         }
         // finn riktig mapping av kodeverk slik at vi får med dette når Behandling brukes videre.
-        Optional<BehandlingStegTilstand> eksisterendeTilstand = behandling.getSisteBehandlingStegTilstand();
+        Optional<BehandlingStegTilstand> eksisterendeTilstand = behandling.getBehandlingStegTilstand();
         if (eksisterendeTilstand.isEmpty() || erUlikeSteg(stegType, eksisterendeTilstand.get())) {
             if (eksisterendeTilstand.isPresent() && !BehandlingStegStatus.erSluttStatus(eksisterendeTilstand.get().getBehandlingStegStatus())) {
                 if (!BehandlingStegStatus.erSluttStatus(ikkeFerdigStegStatus)) {
