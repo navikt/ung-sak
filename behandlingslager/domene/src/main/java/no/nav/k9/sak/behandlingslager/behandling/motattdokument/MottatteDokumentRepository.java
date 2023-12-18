@@ -39,7 +39,7 @@ public class MottatteDokumentRepository {
     public MottattDokument lagre(MottattDokument mottattDokument, DokumentStatus status) {
         if (Environment.current().isDev() && mottattDokument.getFagsakId().equals(1314451L)) {
             log.info("Lagrer mottatt dokument: " + mottattDokument.getJournalpostId());
-            var eksisterende = hentMottatteDokument(mottattDokument.getFagsakId(), List.of(mottattDokument.getJournalpostId()));
+            var eksisterende = hentMottatteDokument(mottattDokument.getFagsakId(), List.of(mottattDokument.getJournalpostId()), null);
             if (!eksisterende.isEmpty()) {
                 log.info("Hadde allerede lagret mottatt dokument: " + eksisterende.get(0));
             }
