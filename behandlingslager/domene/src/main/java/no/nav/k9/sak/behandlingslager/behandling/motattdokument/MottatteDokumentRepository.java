@@ -8,6 +8,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -15,12 +18,15 @@ import jakarta.persistence.LockModeType;
 import jakarta.persistence.TypedQuery;
 
 import no.nav.k9.felles.jpa.HibernateVerktøy;
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.typer.JournalpostId;
 
 @Dependent
 public class MottatteDokumentRepository {
+
+    private static final Logger log = LoggerFactory.getLogger(MottatteDokumentRepository.class);
 
     private final EntityManager entityManager;
 
@@ -31,6 +37,14 @@ public class MottatteDokumentRepository {
     }
 
     public MottattDokument lagre(MottattDokument mottattDokument, DokumentStatus status) {
+        if (Environment.current().isDev() && mottattDokument.getFagsakId().equals(1314451L)) {
+            log.info("Lagrer mottatt dokument: " + mottattDokument.getJournalpostId());
+            var eksisterende = hentMottatteDokument(mottattDokument.getFagsakId(), List.of(mottattDokument.getJournalpostId()));
+            if (!eksisterende.isEmpty()) {
+                log.info("Hadde allerede lagret mottatt dokument: " + eksisterende.get(0));
+            }
+        }
+
         if (!mottattDokument.getStatus().erGyldigTransisjon(status)) {
             throw new IllegalArgumentException("Ugyldig transisjon: " + mottattDokument.getStatus() + " -> " + status);
         }
