@@ -80,12 +80,6 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
     public Simulering simulerUttaksplan(Uttaksgrunnlag request) {
         throw new UnsupportedOperationException();
     }
-
-    @Override
-    public Uttaksplan nedjusterSøkersUttaksgrad(Uttaksgrunnlag request) {
-        throw new UnsupportedOperationException();
-    }
-
     @Override
     public void slettUttaksplan(UUID behandlingId) {
         uttaksplaner.remove(behandlingId);
