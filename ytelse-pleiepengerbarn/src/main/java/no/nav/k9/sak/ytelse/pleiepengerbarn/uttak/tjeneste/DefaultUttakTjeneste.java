@@ -5,7 +5,6 @@ import java.util.UUID;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
-
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.UttakRestKlient;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Simulering;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
@@ -30,11 +29,6 @@ public class DefaultUttakTjeneste implements UttakTjeneste {
     @Override
     public Simulering simulerUttaksplan(Uttaksgrunnlag request) {
         return restKlient.simulerUttaksplan(request);
-    }
-
-    @Override
-    public Uttaksplan nedjusterSøkersUttaksgrad(Uttaksgrunnlag request) {
-        return restKlient.nedjusterSøkersUttaksgrad(request);
     }
 
     @Override
