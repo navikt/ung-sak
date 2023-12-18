@@ -19,7 +19,6 @@ import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.NaturalId;
-import org.hibernate.annotations.Where;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -34,7 +33,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OrderBy;
 import jakarta.persistence.PreRemove;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.SqlResultSetMapping;
@@ -74,8 +72,8 @@ import no.nav.k9.sak.typer.AktørId;
             @ColumnResult(name = "behandligStatus"),
             @ColumnResult(name = "ansvarligSaksbehandler"),
             @ColumnResult(name = "fagsakId"),
-                        @ColumnResult(name = "fagsakStatus"),
-                        @ColumnResult(name = "saksnummer")
+            @ColumnResult(name = "fagsakStatus"),
+            @ColumnResult(name = "saksnummer")
         })
     })
 })
@@ -131,22 +129,20 @@ public class Behandling extends BaseEntitet {
     @Column(name = "behandling_status", nullable = false)
     private BehandlingStatus status = BehandlingStatus.OPPRETTET;
 
-    @OneToMany(cascade = { CascadeType.ALL }, orphanRemoval = true /* ok med orphanremoval siden behandlingårsaker er eid av denne */)
+    @OneToMany(cascade = {CascadeType.ALL})
     @JoinColumn(name = "behandling_id", nullable = false)
-    @OrderBy(value = "opprettetTidspunkt desc, endretTidspunkt desc nulls first")
-    @Where(clause = "aktiv=true")
-    private List<BehandlingStegTilstand> behandlingStegTilstander = new ArrayList<>(2);
+    private List<BehandlingStegTilstand> behandlingStegTilstander = new ArrayList<>();
 
     @Convert(converter = BehandlingTypeKodeverdiConverter.class)
     @Column(name = "behandling_type", nullable = false)
     private BehandlingType behandlingType = BehandlingType.UDEFINERT;
 
     // CascadeType.ALL + orphanRemoval=true må til for at aksjonspunkter skal bli slettet fra databasen ved fjerning fra HashSet
-    @OneToMany(cascade = { CascadeType.ALL }, orphanRemoval = true)
+    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true)
     @JoinColumn(name = "behandling_id", nullable = false)
     private Set<Aksjonspunkt> aksjonspunkter = new HashSet<>(2);
 
-    @OneToMany(cascade = { CascadeType.ALL }, orphanRemoval = true /* ok med orphanremoval siden behandlingårsaker er eid av denne */)
+    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true /* ok med orphanremoval siden behandlingårsaker er eid av denne */)
     @JoinColumn(name = "behandling_id", nullable = false)
     @BatchSize(size = 20)
     private Set<BehandlingÅrsak> behandlingÅrsaker = new HashSet<>(2);
@@ -399,15 +395,6 @@ public class Behandling extends BaseEntitet {
         }
 
         return tilstander.isEmpty() ? Optional.empty() : Optional.of(tilstander.get(0));
-    }
-
-    /**
-     * @deprecated bygg fortrinnsvis logikk rundt eksistens av stegresultater (fx vedtaksdato). Slik at man evt kan dekoble tabeller (evt behold
-     * en current her)
-     */
-    @Deprecated
-    public Stream<BehandlingStegTilstand> getBehandlingStegTilstandHistorikk() {
-        return behandlingStegTilstander.stream().sorted(COMPARATOR_OPPRETTET_TID);
     }
 
     public BehandlingStegType getAktivtBehandlingSteg() {
