@@ -6,23 +6,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Set;
-import java.util.Spliterator;
-import java.util.Spliterators;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
 
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.model.relational.Database;
 import org.hibernate.boot.model.relational.Namespace;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.jpa.boot.spi.IntegratorProvider;
-import org.hibernate.mapping.Column;
 import org.hibernate.service.spi.SessionFactoryServiceRegistry;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -30,6 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
 import no.nav.k9.sak.db.util.Databaseskjemainitialisering;
 
 /**
@@ -46,7 +41,7 @@ public class RapporterUnmappedKolonnerIDatabaseTest {
         Pattern.compile("^PROSESS_TASK.*$", Pattern.CASE_INSENSITIVE),
         Pattern.compile("^.*SCHEMA_VERSION.*$", Pattern.CASE_INSENSITIVE),
         Pattern.compile("^BEHANDLING#SIST_OPPDATERT_TIDSPUNKT.*$", Pattern.CASE_INSENSITIVE)
-        );
+    );
 
     public RapporterUnmappedKolonnerIDatabaseTest() {
     }
@@ -76,7 +71,7 @@ public class RapporterUnmappedKolonnerIDatabaseTest {
 
         var em = entityManagerFactory.createEntityManager();
         try {
-            @SuppressWarnings({ "unchecked" })
+            @SuppressWarnings({"unchecked"})
             var result = (NavigableMap<String, Set<String>>) em
                 .createNativeQuery(
                     "select table_name, column_name\n" +
@@ -103,11 +98,11 @@ public class RapporterUnmappedKolonnerIDatabaseTest {
     }
 
     private Set<String> whitelistColumns(String table, Set<String> columns) {
-       var cols = columns.stream()
-               .filter(c -> !WHITELIST.stream().anyMatch(p -> p.matcher(table + "#" + c).matches()))
-               .collect(Collectors.toSet());
+        var cols = columns.stream()
+            .filter(c -> !WHITELIST.stream().anyMatch(p -> p.matcher(table + "#" + c).matches()))
+            .collect(Collectors.toSet());
 
-       return cols;
+        return cols;
     }
 
     @Test
@@ -116,7 +111,7 @@ public class RapporterUnmappedKolonnerIDatabaseTest {
         sjekk_alle_kolonner_mappet();
     }
 
-    private void sjekk_alle_kolonner_mappet() throws Exception {
+    private void sjekk_alle_kolonner_mappet() {
         for (var namespace : MetadataExtractorIntegrator.INSTANCE
             .getDatabase()
             .getNamespaces()) {
@@ -126,18 +121,13 @@ public class RapporterUnmappedKolonnerIDatabaseTest {
             for (var table : namespace.getTables()) {
 
                 String tableName = table.getName().toUpperCase();
-                if(whitelistTable(tableName)) {
+                if (whitelistTable(tableName)) {
                     continue;
                 }
 
-                List<Column> columns = StreamSupport.stream(
-                    Spliterators.spliteratorUnknownSize(
-                        table.getColumnIterator(),
-                        Spliterator.ORDERED),
-                    false)
-                    .collect(Collectors.toList());
-
-                var columnNames = columns.stream().map(c -> c.getName().toUpperCase()).collect(Collectors.toCollection(TreeSet::new));
+                var columnNames = table.getColumns().stream()
+                    .map(c -> c.getName().toUpperCase())
+                    .collect(Collectors.toCollection(TreeSet::new));
                 if (dbColumns.containsKey(tableName)) {
                     var unmapped = new TreeSet<>(whitelistColumns(tableName, dbColumns.get(tableName)));
                     unmapped.removeAll(columnNames);
@@ -174,7 +164,7 @@ public class RapporterUnmappedKolonnerIDatabaseTest {
     }
 
     public static class MetadataExtractorIntegrator
-            implements org.hibernate.integrator.spi.Integrator {
+        implements org.hibernate.integrator.spi.Integrator {
 
         public static final MetadataExtractorIntegrator INSTANCE = new MetadataExtractorIntegrator();
 
@@ -186,17 +176,17 @@ public class RapporterUnmappedKolonnerIDatabaseTest {
 
         @Override
         public void integrate(
-                              Metadata metadata,
-                              SessionFactoryImplementor sessionFactory,
-                              SessionFactoryServiceRegistry serviceRegistry) {
+            Metadata metadata,
+            SessionFactoryImplementor sessionFactory,
+            SessionFactoryServiceRegistry serviceRegistry) {
 
             database = metadata.getDatabase();
         }
 
         @Override
         public void disintegrate(
-                                 SessionFactoryImplementor sessionFactory,
-                                 SessionFactoryServiceRegistry serviceRegistry) {
+            SessionFactoryImplementor sessionFactory,
+            SessionFactoryServiceRegistry serviceRegistry) {
         }
     }
 

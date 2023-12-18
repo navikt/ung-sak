@@ -2,9 +2,6 @@ package no.nav.k9.sak.behandlingslager.behandling;
 
 import java.util.Optional;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,14 +12,9 @@ import no.nav.k9.kodeverk.behandling.BehandlingStegType;
  * Kun for invortes bruk (Behandlingskontroll). Evt. tester. Skal ikke aksesseres direkte av andre under normal
  * operasjon.
  */
-@Dependent
 public class InternalManipulerBehandling {
 
     private static final Logger log = LoggerFactory.getLogger(InternalManipulerBehandling.class);
-
-    @Inject
-    public InternalManipulerBehandling() {
-    }
 
     /**
      * Sett til angitt steg, default steg status.
@@ -32,21 +24,17 @@ public class InternalManipulerBehandling {
     }
 
     /**
-     * Sett Behandling til angitt steg, angitt steg status, default slutt status for andre åpne steg.
-     */
-    public void forceOppdaterBehandlingSteg(Behandling behandling, BehandlingStegType stegType, BehandlingStegStatus stegStatus) {
-        forceOppdaterBehandlingSteg(behandling, stegType, stegStatus, BehandlingStegStatus.UTFØRT);
-    }
-
-    /**
      * Sett Behandling til angitt steg, angitt steg status, angitt slutt status for andre åpne steg.
      */
     public void forceOppdaterBehandlingSteg(Behandling behandling, BehandlingStegType stegType, BehandlingStegStatus nesteStegStatus,
                                             BehandlingStegStatus ikkeFerdigStegStatus) {
 
+        if (behandling.erAvsluttet()){
+            throw new IllegalStateException("Kan ikke oppdatere behandlingsteg for avsluttet behandling");
+        }
         // finn riktig mapping av kodeverk slik at vi får med dette når Behandling brukes videre.
         Optional<BehandlingStegTilstand> eksisterendeTilstand = behandling.getSisteBehandlingStegTilstand();
-        if (eksisterendeTilstand.isEmpty() || erUlikeSteg(stegType, eksisterendeTilstand)) {
+        if (eksisterendeTilstand.isEmpty() || erUlikeSteg(stegType, eksisterendeTilstand.get())) {
             if (eksisterendeTilstand.isPresent() && !BehandlingStegStatus.erSluttStatus(eksisterendeTilstand.get().getBehandlingStegStatus())) {
                 if (!BehandlingStegStatus.erSluttStatus(ikkeFerdigStegStatus)) {
                     throw new IllegalStateException("Tidligere steg må avsluttes riktig, fikk " + ikkeFerdigStegStatus + "for " + eksisterendeTilstand
@@ -63,8 +51,8 @@ public class InternalManipulerBehandling {
         }
     }
 
-    private boolean erUlikeSteg(BehandlingStegType stegType, Optional<BehandlingStegTilstand> eksisterendeTilstand) {
-        return !eksisterendeTilstand.get().getBehandlingSteg().equals(stegType);
+    private boolean erUlikeSteg(BehandlingStegType stegType, BehandlingStegTilstand eksisterendeTilstand) {
+        return !eksisterendeTilstand.getBehandlingSteg().equals(stegType);
     }
 
 }
