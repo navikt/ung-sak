@@ -110,7 +110,7 @@ class AksjonspunktUtlederNyeRegler {
     }
 
     private boolean harAktivitetIkkeYrkesaktivEllerKunYtelse(Behandling behandling) {
-        var uttaksgrunnlag = mapInputTilUttakTjeneste.hentUtOgMapRequest(BehandlingReferanse.fra(behandling));
+        var uttaksgrunnlag = mapInputTilUttakTjeneste.hentUtOgMapRequestUtenInntektsgradering(BehandlingReferanse.fra(behandling));
         return harEnAv(uttaksgrunnlag, Set.of(UttakArbeidType.KUN_YTELSE, UttakArbeidType.IKKE_YRKESAKTIV));
     }
 

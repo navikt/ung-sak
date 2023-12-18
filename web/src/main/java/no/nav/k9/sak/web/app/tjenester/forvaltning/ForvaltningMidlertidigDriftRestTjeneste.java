@@ -164,6 +164,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
     private TilknytningTjeneste tilknytningTjeneste;
 
+    private FeilRefusjonVedTilsynUtrekkTjeneste feilRefusjonVedTilsynUtrekkTjeneste;
+
     private Pep pep;
 
     public ForvaltningMidlertidigDriftRestTjeneste() {
@@ -185,6 +187,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                                                    OpprettRevurderingService opprettRevurderingService,
                                                    PipRepository pipRepository,
                                                    TilknytningTjeneste tilknytningTjeneste,
+                                                   FeilRefusjonVedTilsynUtrekkTjeneste feilRefusjonVedTilsynUtrekkTjeneste,
                                                    Pep pep) {
 
         this.frisinnSøknadMottaker = frisinnSøknadMottaker;
@@ -201,6 +204,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         this.opprettRevurderingService = opprettRevurderingService;
         this.pipRepository = pipRepository;
         this.tilknytningTjeneste = tilknytningTjeneste;
+        this.feilRefusjonVedTilsynUtrekkTjeneste = feilRefusjonVedTilsynUtrekkTjeneste;
         this.pep = pep;
     }
 
@@ -1053,7 +1057,9 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     @POST
     @Path("/behandlingsteg-historikk")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(description = "Henter behandlingsteghistorikk", summary = ("Henter behandlingsteghistorikk"), tags = "forvaltning")
+    @Operation(description = "Henter behandlingsteghistorikk",
+        summary = ("Henter behandlingsteghistorikk"),
+        tags = "forvaltning")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response hentBehandlingHistorikk(
@@ -1085,6 +1091,84 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             .build()).orElse(Response.noContent().build());
 
     }
+
+    @POST
+    @Path("/feil-refusjon-ved-tilsyn")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Henter uttrekk fra kalkulus vedrørende feil refusjon ved tilsyn",
+        summary = ("Henter uttrekk fra kalkulus vedrørende feil refusjon ved tilsyn"),
+        tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response finnFeilRefusjonVedTilsyn(
+        @Parameter(description = "Behandling-UUID")
+        @NotNull
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+        BehandlingIdDto behandlingIdDto) {
+        var behandlingId = behandlingIdDto.getBehandlingId();
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        var feilRequestOgRespons = feilRefusjonVedTilsynUtrekkTjeneste.finnFeilForBehandling(behandling, true);
+        return feilRequestOgRespons.map(FeilRefusjonVedTilsynUtrekkTjeneste.KalkulusDiffRequestOgRespons::respons)
+            .map(Response::ok)
+            .map(Response.ResponseBuilder::build)
+            .orElse(Response.status(Response.Status.NOT_FOUND).build());
+    }
+
+    @POST
+    @Path("/feil-refusjon-ved-tilsyn-fra-dump")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Henter uttrekk fra kalkulus vedrørende feil refusjon ved tilsyn",
+        summary = ("Henter uttrekk fra kalkulus vedrørende feil refusjon ved tilsyn"),
+        tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response finnFeilRefusjonVedTilsynFraDump(
+        @Parameter(description = "Behandling-UUID")
+        @NotNull
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+        BehandlingIdDto behandlingIdDto) {
+        var sql = """
+             select
+                gr.behandling_id
+                , cast(utb_diff.ekstern_referanse as varchar) ekstern_referanse
+                , utb_diff.total_feilutbetaling_bruker
+                , utb_diff.total_feilutbetaling_arbeidsgiver
+                , utb_diff_periode.fom
+                , utb_diff_periode.tom
+                , utb_diff_periode.total_feilutbetaling_bruker as total_feilutbetaling_bruker_periode
+                , utb_diff_periode.total_feilutbetaling_arbeidsgiver as total_feilutbetaling_arbeidsgiver_periode
+                , utb_diff_andel.dagsats_aktiv
+                , utb_diff_andel.dagsats_simulert
+                , utb_diff_andel.dagsats_bruker_aktiv
+                , utb_diff_andel.dagsats_bruker_simulert
+                , utb_diff_andel.dagsats_arbeidsgiver_aktiv
+                , utb_diff_andel.dagsats_arbeidsgiver_simulert
+              from DUMP_SIMULERT_UTB gr
+                inner join DUMP_SIMULERT_UTB_DIFF utb_diff on gr.id = utb_diff.dump_grunnlag_id
+                inner join DUMP_SIMULERT_UTB_DIFF_PERIODE utb_diff_periode on utb_diff.id = utb_diff_periode.dump_simulert_utb_diff_id
+                inner join DUMP_SIMULERT_UTB_DIFF_ANDEL utb_diff_andel on utb_diff_andel.periode_id = utb_diff_periode.id
+                inner join BEHANDLING b on b.id = gr.behandling_id
+                where gr.behandling_id =:behandlingId
+            """;
+
+        var query = entityManager.createNativeQuery(sql, Tuple.class);
+        query.setParameter("behandlingId", behandlingIdDto.getBehandlingId());
+        String path = "data_dump.csv";
+
+        @SuppressWarnings("unchecked")
+        Stream<Tuple> results = query.getResultStream();
+
+        var dataDump = CsvOutput.dumpResultSetToCsv(path, results);
+
+        return dataDump.map(d -> Response.ok(d.getContent())
+            .type(MediaType.APPLICATION_OCTET_STREAM)
+            .header("Content-Disposition", String.format("attachment; filename=\"dump.csv\""))
+            .build()).orElse(Response.noContent().build());
+
+    }
+
 
 
     private void loggForvaltningTjeneste(Fagsak fagsak, String tjeneste, String begrunnelse) {

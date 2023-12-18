@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
@@ -73,6 +74,7 @@ public class HentDataTilUttakTjeneste {
     private TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste;
     private UttakNyeReglerRepository uttakNyeReglerRepository;
     private OverstyrUttakRepository overstyrUttakRepository;
+
     private boolean tilkommetAktivitetEnabled;
     private boolean nyRegelEnabled;
 
@@ -125,7 +127,7 @@ public class HentDataTilUttakTjeneste {
         this.nyRegelEnabled = nyRegelEnabled;
     }
 
-    public InputParametere hentUtData(BehandlingReferanse referanse, boolean brukUbesluttedeData) {
+    public InputParametere hentUtData(BehandlingReferanse referanse, boolean brukUbesluttedeData, boolean medInntektsgradering) {
         boolean skalMappeHeleTidslinjen = brukUbesluttedeData;
 
         var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
@@ -145,7 +147,7 @@ public class HentDataTilUttakTjeneste {
         }
 
         LocalDate virkningsdatoNyeRegler = uttakNyeReglerRepository.finnDatoForNyeRegler(referanse.getBehandlingId()).orElse(null);
-        if (virkningsdatoNyeRegler != null && !nyRegelEnabled){
+        if (virkningsdatoNyeRegler != null && !nyRegelEnabled) {
             throw new IllegalStateException("Har lagret virkningsdato for nye regler i uttak, men de nye reglene er skrudd av.");
         }
 
@@ -153,7 +155,7 @@ public class HentDataTilUttakTjeneste {
         if (tilkommetAktivitetEnabled) {
             final Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> tilkommedeAktiviteterRaw = tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(referanse.getFagsakId(), virkningsdatoNyeRegler);
             tilkommetAktivitetsperioder = tilkommedeAktiviteterRaw.entrySet().stream()
-                    .collect(Collectors.toMap(e -> new AktivitetIdentifikator(e.getKey().getAktivitetType(), e.getKey().getArbeidsgiver(), null), e -> e.getValue()));
+                .collect(Collectors.toMap(e -> new AktivitetIdentifikator(e.getKey().getAktivitetType(), e.getKey().getArbeidsgiver(), null), e -> e.getValue()));
         } else {
             tilkommetAktivitetsperioder = new HashMap<>();
         }
@@ -198,6 +200,16 @@ public class HentDataTilUttakTjeneste {
         }
         LocalDateTimeline<OverstyrtUttakPeriode> overstyrtUttak = overstyrUttakRepository.hentOverstyrtUttak(behandling.getId());
 
+
+        LocalDateTimeline<BigDecimal> nedjustertUttakgradTidslinje;
+
+        if (tilkommetAktivitetEnabled && medInntektsgradering) {
+            nedjustertUttakgradTidslinje = tilkommetAktivitetTjeneste.finnInntektsgradering(referanse.getFagsakId());
+        } else {
+            nedjustertUttakgradTidslinje = LocalDateTimeline.empty();
+        }
+
+
         return new InputParametere()
             .medBehandling(behandling)
             .medVilkårene(vilkårene)
@@ -222,6 +234,7 @@ public class HentDataTilUttakTjeneste {
             .medTilkommetAktivitetsperioder(tilkommetAktivitetsperioder)
             .medVirkningsdatoNyeRegler(virkningsdatoNyeRegler)
             .medOverstyrtUttak(overstyrtUttak)
+            .medNedjustertUttaksgrad(nedjustertUttakgradTidslinje)
             ;
     }
 

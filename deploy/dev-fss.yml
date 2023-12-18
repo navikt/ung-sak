@@ -62,7 +62,7 @@ spec:
   accessPolicy:
     inbound:
       rules:
-        - application: k9-los
+        - application: k9-los-api
         - application: k9-fordel
         - application: k9-sak
         - application: k9-tilbake
@@ -265,8 +265,6 @@ spec:
     - name: ENABLE_UTBETALINGSGRAD_OPPDRAG
       value: "true"
     - name: ENABLE_DATO_NY_REGEL_UTTAK
-      value: "true"
-    - name: PSB_FILTRER_IM_PAA_BEHANDLING_ID
       value: "true"
     - name: ENABLE_OVERSTYR_UTTAK
       value: "true"

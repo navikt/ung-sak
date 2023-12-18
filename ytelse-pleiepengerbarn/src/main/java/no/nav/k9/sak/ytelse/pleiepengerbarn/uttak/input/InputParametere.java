@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -60,6 +61,9 @@ public class InputParametere {
 
     private LocalDate virkningsdatoNyeRegler;
     private LocalDateTimeline<OverstyrtUttakPeriode> overstyrtUttak ;
+
+    private LocalDateTimeline<BigDecimal> nedjustertUttaksgrad ;
+
 
     public InputParametere() {
     }
@@ -278,4 +282,15 @@ public class InputParametere {
         this.overstyrtUttak = overstyrtUttak;
         return this;
     }
+
+    public LocalDateTimeline<BigDecimal> getNedjustertUttaksgrad() {
+        return nedjustertUttaksgrad;
+    }
+
+    public InputParametere medNedjustertUttaksgrad(LocalDateTimeline<BigDecimal> nedjustertUttaksgrad) {
+        this.nedjustertUttaksgrad = nedjustertUttaksgrad;
+        return this;
+    }
+
+
 }
