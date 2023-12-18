@@ -1,10 +1,14 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.dump;
 
+import java.io.BufferedOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +21,7 @@ import jakarta.ws.rs.core.StreamingOutput;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 
 @ApplicationScoped
@@ -36,35 +41,54 @@ public class DebugDumpsters {
     }
 
     public StreamingOutput dumper(Fagsak fagsak) {
-        var ytelseType = fagsak.getYtelseType();
-        var saksnummer = fagsak.getSaksnummer();
-        var dumpsters = findDumpsters(ytelseType);
-        List<DumpOutput> allDumps = dumpOutput(fagsak, dumpsters);
+        List<Instance<DebugDumpFagsak>> dumpsters = findDumpsters(fagsak.getYtelseType());
 
-        return new ZipOutput().dump(saksnummer, allDumps);
+        return dumpFraDumpsters(fagsak, dumpsters);
     }
 
     private List<Instance<DebugDumpFagsak>> findDumpsters(FagsakYtelseType ytelseType) {
         return FagsakYtelseTypeRef.Lookup.list(DebugDumpFagsak.class, dumpere, ytelseType);
     }
 
-    private List<DumpOutput> dumpOutput(Fagsak fagsak, List<Instance<DebugDumpFagsak>> dumpsters) {
-        var dumpers = dumpsters.stream().flatMap(v -> v.stream()).collect(Collectors.toList());
-        var dumperNames = dumpers.stream().map(d -> d.getClass().getName()).collect(Collectors.toList());
+    private StreamingOutput dumpFraDumpsters(Fagsak fagsak, List<Instance<DebugDumpFagsak>> dumpsters) {
+        List<DebugDumpFagsak> dumpers = dumpsters.stream().flatMap(Instance::stream).toList();
+        List<String> dumperNames = dumpers.stream().map(d -> d.getClass().getName()).collect(Collectors.toList());
         log.info("Dumper fra: {}", dumperNames);
 
-        List<DumpOutput> allDumps = dumpers.stream().flatMap(ddp -> {
-            try {
-                log.info("Dumper fra {}", ddp.getClass().getName());
-                return ddp.dump(fagsak).stream();
-            } catch (Exception e) {
-                StringWriter sw = new StringWriter();
-                PrintWriter pw = new PrintWriter(sw);
-                e.printStackTrace(pw);
-                return Stream.of(new DumpOutput(ddp.getClass().getSimpleName() + "-ERROR.txt", sw.toString()));
+        StreamingOutput streamingOutput = outputStream -> {
+            try (ZipOutputStream zipOut = new ZipOutputStream(new BufferedOutputStream(outputStream))) {
+                for (DebugDumpFagsak dumper : dumpers) {
+                    List<DumpOutput> dumpOutputs = dumpOutput(fagsak, dumper);
+                    dumpOutputs.forEach(dumpOutput -> addToZip(fagsak.getSaksnummer(), zipOut, dumpOutput));
+                }
+            } finally {
+                outputStream.flush();
+                outputStream.close();
             }
-        }).collect(Collectors.toList());
-        return allDumps;
+        };
+        return streamingOutput;
     }
 
+    private List<DumpOutput> dumpOutput(Fagsak fagsak, DebugDumpFagsak dumpster) {
+        try {
+            log.info("Dumper fra {}", dumpster.getClass().getName());
+            return dumpster.dump(fagsak);
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            return List.of(new DumpOutput(dumpster.getClass().getSimpleName() + "-ERROR.txt", sw.toString()));
+        }
+    }
+
+    private void addToZip(Saksnummer saksnummer, ZipOutputStream zipOut, DumpOutput dump) {
+        var zipEntry = new ZipEntry(saksnummer + "/" + dump.getPath());
+        try {
+            zipOut.putNextEntry(zipEntry);
+            zipOut.write(dump.getContent().getBytes(StandardCharsets.UTF_8));
+            zipOut.closeEntry();
+        } catch (IOException e) {
+            throw new IllegalStateException("Kunne ikke zippe dump fra : " + dump, e);
+        }
+    }
 }
