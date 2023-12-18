@@ -82,11 +82,16 @@ public class MapInputTilUttakTjeneste {
 
 
     public Uttaksgrunnlag hentUtOgMapRequest(BehandlingReferanse referanse) {
-        return toRequestData(hentDataTilUttakTjeneste.hentUtData(referanse, false));
+        return toRequestData(hentDataTilUttakTjeneste.hentUtData(referanse, false, true));
     }
 
+    public Uttaksgrunnlag hentUtOgMapRequestUtenInntektsgradering(BehandlingReferanse referanse) {
+        return toRequestData(hentDataTilUttakTjeneste.hentUtData(referanse, false, false));
+    }
+
+
     public Uttaksgrunnlag hentUtUbesluttededataOgMapRequest(BehandlingReferanse referanse) {
-        return toRequestData(hentDataTilUttakTjeneste.hentUtData(referanse, true));
+        return toRequestData(hentDataTilUttakTjeneste.hentUtData(referanse, true, true));
     }
 
     private Uttaksgrunnlag toRequestData(InputParametere input) {

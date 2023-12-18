@@ -38,7 +38,6 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse.FinnPerioderMedNedjustertUttaksgrad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PSBVurdererSøknadsfristTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PleietrengendeKravprioritet.Kravprioritet;
@@ -76,8 +75,6 @@ public class HentDataTilUttakTjeneste {
     private UttakNyeReglerRepository uttakNyeReglerRepository;
     private OverstyrUttakRepository overstyrUttakRepository;
 
-    private FinnPerioderMedNedjustertUttaksgrad finnPerioderMedNedjustertUttaksgrad;
-
     private boolean tilkommetAktivitetEnabled;
     private boolean nyRegelEnabled;
 
@@ -102,7 +99,7 @@ public class HentDataTilUttakTjeneste {
                                     TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste,
                                     UttakNyeReglerRepository uttakNyeReglerRepository,
                                     OverstyrUttakRepository overstyrUttakRepository,
-                                    FinnPerioderMedNedjustertUttaksgrad finnPerioderMedNedjustertUttaksgrad, @KonfigVerdi(value = "TILKOMMET_AKTIVITET_ENABLED", required = false, defaultVerdi = "false") boolean tilkommetAktivitetEnabled,
+                                    @KonfigVerdi(value = "TILKOMMET_AKTIVITET_ENABLED", required = false, defaultVerdi = "false") boolean tilkommetAktivitetEnabled,
                                     @KonfigVerdi(value = "ENABLE_DATO_NY_REGEL_UTTAK", required = false, defaultVerdi = "false") boolean nyRegelEnabled
 
     ) {
@@ -126,12 +123,11 @@ public class HentDataTilUttakTjeneste {
         this.tilkommetAktivitetTjeneste = tilkommetAktivitetTjeneste;
         this.uttakNyeReglerRepository = uttakNyeReglerRepository;
         this.overstyrUttakRepository = overstyrUttakRepository;
-        this.finnPerioderMedNedjustertUttaksgrad = finnPerioderMedNedjustertUttaksgrad;
         this.tilkommetAktivitetEnabled = tilkommetAktivitetEnabled;
         this.nyRegelEnabled = nyRegelEnabled;
     }
 
-    public InputParametere hentUtData(BehandlingReferanse referanse, boolean brukUbesluttedeData) {
+    public InputParametere hentUtData(BehandlingReferanse referanse, boolean brukUbesluttedeData, boolean medInntektsgradering) {
         boolean skalMappeHeleTidslinjen = brukUbesluttedeData;
 
         var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
@@ -207,8 +203,8 @@ public class HentDataTilUttakTjeneste {
 
         LocalDateTimeline<BigDecimal> nedjustertUttakgradTidslinje;
 
-        if (tilkommetAktivitetEnabled) {
-            nedjustertUttakgradTidslinje = finnPerioderMedNedjustertUttaksgrad.finnTidslinje(referanse);
+        if (tilkommetAktivitetEnabled && medInntektsgradering) {
+            nedjustertUttakgradTidslinje = tilkommetAktivitetTjeneste.finnInntektsgradering(referanse.getFagsakId());
         } else {
             nedjustertUttakgradTidslinje = LocalDateTimeline.empty();
         }
