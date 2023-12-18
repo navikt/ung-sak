@@ -225,8 +225,8 @@ public class MapInputTilUttakTjeneste {
     private OverstyrtUtbetalingsgradPerArbeidsforhold map(OverstyrtUttakUtbetalingsgrad overstyrtUttakUtbetalingsgrad) {
         Arbeidsforhold arbeidsforhold = new Arbeidsforhold(
             overstyrtUttakUtbetalingsgrad.getAktivitetType().getKode(),
-            overstyrtUttakUtbetalingsgrad.getArbeidsgiverId() != null ? overstyrtUttakUtbetalingsgrad.getArbeidsgiverId().getArbeidsgiverOrgnr() : null,
-            overstyrtUttakUtbetalingsgrad.getArbeidsgiverId() != null ? overstyrtUttakUtbetalingsgrad.getArbeidsgiverId().getArbeidsgiverAktørId() : null,
+            overstyrtUttakUtbetalingsgrad.getArbeidsgiver() != null ? overstyrtUttakUtbetalingsgrad.getArbeidsgiver().getArbeidsgiverOrgnr() : null,
+            overstyrtUttakUtbetalingsgrad.getArbeidsgiver() != null ? overstyrtUttakUtbetalingsgrad.getArbeidsgiver().getArbeidsgiverAktørId() : null,
             overstyrtUttakUtbetalingsgrad.getInternArbeidsforholdRef() != null ? overstyrtUttakUtbetalingsgrad.getInternArbeidsforholdRef().getReferanse() : null
         );
 

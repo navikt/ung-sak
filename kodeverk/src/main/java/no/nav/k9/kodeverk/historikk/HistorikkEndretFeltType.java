@@ -70,6 +70,9 @@ public enum HistorikkEndretFeltType implements Kodeverdi {
 
     /** Uttak */
     UTTAK_OVERSTYRT_PERIODE("UTTAK_OVERSTYRT_PERIODE", "Aktuell uttaksperiode"),
+    UTTAK_OVERSTYRT_SØKERS_UTTAKSGRAD("UTTAK_OVERSTYRT_SØKERS_UTTAKSGRAD", "Søkers uttaksgrad"),
+    UTTAK_OVERSTYRT_UTBETALINGSGRAD("UTTAK_OVERSTYRT_UTBETALINGSGRAD", "Utbetalingsgrad"),
+
 
     /** Tilkjent ytelse */
     TILKJENT_YTELSE("TILKJENT_YTELSE", "Tilkjent ytelse"),
