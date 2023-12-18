@@ -580,7 +580,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
 
     private void leggTilPeriode(Map<LukketPeriode, UttaksperiodeInfo> uttaksperioder, List<Utbetalingsgrader> utbetalingsgrader, LocalDate fom, LocalDate tom) {
         uttaksperioder.put(new LukketPeriode(fom, tom),
-            new UttaksperiodeInfo(Utfall.OPPFYLT, BigDecimal.valueOf(100), utbetalingsgrader,
+            new UttaksperiodeInfo(Utfall.OPPFYLT, BigDecimal.valueOf(100), null, null, utbetalingsgrader,
                 null, null, Set.of(),
                 new HashMap<>(), BigDecimal.valueOf(100), null,
                 Set.of(), UUID.randomUUID().toString(),
