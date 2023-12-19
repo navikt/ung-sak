@@ -19,6 +19,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
@@ -42,14 +43,18 @@ public class SaksnummerRestTjeneste {
 
     private SaksnummerRepository saksnummerRepository;
     private SaksnummerAktørKoblingRepository saksnummerAktørKoblingRepository;
+    private boolean enableReservertSaksnummer;
 
     public SaksnummerRestTjeneste() {// For Rest-CDI
     }
 
     @Inject
-    public SaksnummerRestTjeneste(SaksnummerRepository saksnummerRepository, SaksnummerAktørKoblingRepository saksnummerAktørKoblingRepository) {
+    public SaksnummerRestTjeneste(SaksnummerRepository saksnummerRepository,
+                                  SaksnummerAktørKoblingRepository saksnummerAktørKoblingRepository,
+                                  @KonfigVerdi(value = "ENABLE_RESERVERT_SAKSNUMMER", defaultVerdi = "false") boolean enableReservertSaksnummer) {
         this.saksnummerRepository = saksnummerRepository;
         this.saksnummerAktørKoblingRepository = saksnummerAktørKoblingRepository;
+        this.enableReservertSaksnummer = enableReservertSaksnummer;
     }
 
     @POST
@@ -58,6 +63,9 @@ public class SaksnummerRestTjeneste {
     @Operation(description = "Reserver saksnummer.", summary = ("Reserver saksnummer"), tags = "saksnummer")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
     public SaksnummerDto reserverSaksnummer() {
+        if (!enableReservertSaksnummer) {
+            throw new UnsupportedOperationException("Funksjonaliteten er avskrudd");
+        }
         return new SaksnummerDto(saksnummerRepository.genererNyttSaksnummer());
     }
 
@@ -69,6 +77,9 @@ public class SaksnummerRestTjeneste {
     public Response kobleAktørPåSaksnummer(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) Saksnummer saksnummer,
                                            @NotNull @QueryParam("aktørId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) AktørIdDto aktørId,
                                            @NotNull @QueryParam("journalpostId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) JournalpostId journalpostId) {
+        if (!enableReservertSaksnummer) {
+            throw new UnsupportedOperationException("Funksjonaliteten er avskrudd");
+        }
         saksnummerAktørKoblingRepository.lagre(saksnummer.getVerdi(), aktørId.getAktorId(), journalpostId.getVerdi());
         return Response.ok().build();
     }
@@ -83,6 +94,9 @@ public class SaksnummerRestTjeneste {
     public Response hentSaksnummerKobling(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) Saksnummer saksnummer,
                                           @NotNull @QueryParam("aktørId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) AktørIdDto aktørId,
                                           @NotNull @QueryParam("journalpostId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) JournalpostId journalpostId) {
+        if (!enableReservertSaksnummer) {
+            throw new UnsupportedOperationException("Funksjonaliteten er avskrudd");
+        }
         SaksnummerAktørKoblingEntitet kobling = saksnummerAktørKoblingRepository.hent(saksnummer.getVerdi(), aktørId.getAktorId(), journalpostId.getVerdi());
         if (kobling == null) {
             return Response.ok().build();
@@ -99,6 +113,9 @@ public class SaksnummerRestTjeneste {
     public Response slettSaksnummerKobling(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) Saksnummer saksnummer,
                                            @NotNull @QueryParam("aktørId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) AktørIdDto aktørId,
                                            @NotNull @QueryParam("journalpostId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) JournalpostId journalpostId) {
+        if (!enableReservertSaksnummer) {
+            throw new UnsupportedOperationException("Funksjonaliteten er avskrudd");
+        }
         saksnummerAktørKoblingRepository.slett(saksnummer.getVerdi(), aktørId.getAktorId(), journalpostId.getVerdi());
         return Response.ok().build();
     }

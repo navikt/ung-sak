@@ -280,6 +280,8 @@ spec:
       value: "true"
     - name: ENABLE_AZURE_CC_SYSTEMCONTEXT
       value: "false"
+    - name: ENABLE_RESERVERT_SAKSNUMMER
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
