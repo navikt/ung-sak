@@ -112,20 +112,22 @@ public class UttakOverstyringshåndterer implements Overstyringshåndterer<Overs
         Historikkinnslag innslag = new Historikkinnslag();
         innslag.setAktør(HistorikkAktør.SAKSBEHANDLER);
         HistorikkInnslagTekstBuilder tekstBuilder = new HistorikkInnslagTekstBuilder().medSkjermlenke(SkjermlenkeType.UTTAK);
-        tekstBuilder.medEndretFelt(HistorikkEndretFeltType.UTTAK_OVERSTYRT_PERIODE, null, formater(di));
 
         if (etterOppdatering == null) {
             innslag.setType(OVST_UTTAK_FJERNET);
+            tekstBuilder.medTema(HistorikkEndretFeltType.OVST_UTTAK_FJERNET, formater(di));
             tekstBuilder.medHendelse(OVST_UTTAK_FJERNET);
         } else if (førOppdatering == null) {
             innslag.setType(OVST_UTTAK_NY);
             tekstBuilder.medHendelse(OVST_UTTAK_NY);
+            tekstBuilder.medEndretFelt(HistorikkEndretFeltType.UTTAK_OVERSTYRT_PERIODE, null, formater(di));
             tekstBuilder.medEndretFelt(HistorikkEndretFeltType.UTTAK_OVERSTYRT_SØKERS_UTTAKSGRAD, null, etterOppdatering.getValue().getSøkersUttaksgrad());
             leggTilUtbetalingsgradEndredeFelter(etterOppdatering, tekstBuilder);
             tekstBuilder.medBegrunnelse(etterOppdatering.getValue().getBegrunnelse());
         } else {
             innslag.setType(OVST_UTTAK_OPPDATERT);
             tekstBuilder.medHendelse(OVST_UTTAK_OPPDATERT);
+            tekstBuilder.medEndretFelt(HistorikkEndretFeltType.UTTAK_OVERSTYRT_PERIODE, null, formater(di));
             tekstBuilder.medEndretFelt(HistorikkEndretFeltType.UTTAK_OVERSTYRT_SØKERS_UTTAKSGRAD, førOppdatering.getValue().getSøkersUttaksgrad(), etterOppdatering.getValue().getSøkersUttaksgrad());
             leggTilUtbetalingsgradEndredeFelter(etterOppdatering, tekstBuilder);
             tekstBuilder.medBegrunnelse(etterOppdatering.getValue().getBegrunnelse());
