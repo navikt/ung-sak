@@ -181,7 +181,7 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
     private Uttaksplan finnUttaksplanEllerSimulering(BehandlingReferanse behandlingReferanse) {
         var uttaksplan = uttakRestKlient.hentUttaksplan(behandlingReferanse.getBehandlingUuid(), true);
         if (uttaksplan == null) {
-            return uttakRestKlient.simulerUttaksplan(mapInputTilUttakTjeneste.hentUtOgMapRequest(behandlingReferanse)).getSimulertUttaksplan();
+            return uttakRestKlient.simulerUttaksplan(mapInputTilUttakTjeneste.hentUtOgMapRequestUtenInntektsgradering(behandlingReferanse)).getSimulertUttaksplan();
         }
         return uttaksplan;
     }
