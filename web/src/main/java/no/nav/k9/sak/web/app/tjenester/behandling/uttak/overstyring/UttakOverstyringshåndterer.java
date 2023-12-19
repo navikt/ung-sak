@@ -1,5 +1,9 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.uttak.overstyring;
 
+import static no.nav.k9.kodeverk.historikk.HistorikkinnslagType.OVST_UTTAK_FJERNET;
+import static no.nav.k9.kodeverk.historikk.HistorikkinnslagType.OVST_UTTAK_NY;
+import static no.nav.k9.kodeverk.historikk.HistorikkinnslagType.OVST_UTTAK_OPPDATERT;
+
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
@@ -16,7 +20,6 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
-import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.k9.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.k9.sak.behandling.aksjonspunkt.Overstyringshåndterer;
@@ -27,6 +30,7 @@ import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrUttakRepository;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrtUttakPeriode;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrtUttakUtbetalingsgrad;
+import no.nav.k9.sak.domene.arbeidsforhold.aksjonspunkt.ArbeidsgiverHistorikkinnslag;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrUttakArbeidsforholdDto;
 import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrUttakDto;
@@ -40,6 +44,8 @@ public class UttakOverstyringshåndterer implements Overstyringshåndterer<Overs
 
     private OverstyrUttakRepository overstyrUttakRepository;
     private HistorikkRepository historikkRepository;
+
+    private ArbeidsgiverHistorikkinnslag arbeidsgiverHistorikkinnslag;
     private boolean lansert;
 
     UttakOverstyringshåndterer() {
@@ -47,9 +53,10 @@ public class UttakOverstyringshåndterer implements Overstyringshåndterer<Overs
     }
 
     @Inject
-    public UttakOverstyringshåndterer(OverstyrUttakRepository overstyrUttakRepository, HistorikkRepository historikkRepository, @KonfigVerdi(value = "ENABLE_OVERSTYR_UTTAK", defaultVerdi = "false") boolean lansert) {
+    public UttakOverstyringshåndterer(OverstyrUttakRepository overstyrUttakRepository, HistorikkRepository historikkRepository, ArbeidsgiverHistorikkinnslag arbeidsgiverHistorikkinnslag, @KonfigVerdi(value = "ENABLE_OVERSTYR_UTTAK", defaultVerdi = "false") boolean lansert) {
         this.overstyrUttakRepository = overstyrUttakRepository;
         this.historikkRepository = historikkRepository;
+        this.arbeidsgiverHistorikkinnslag = arbeidsgiverHistorikkinnslag;
         this.lansert = lansert;
     }
 
@@ -91,28 +98,58 @@ public class UttakOverstyringshåndterer implements Overstyringshåndterer<Overs
     }
 
     private void lagreHistorikkinnslagForEndringer(Long behandingId, LocalDateTimeline<OverstyrtUttakPeriode> overstyringerFørOppdatering, LocalDateTimeline<OverstyrtUttakPeriode> overstyringerEtterOppdatering) {
-        LocalDateTimeline<OverstyrtUttakPeriode> slettedeOverstyringer = overstyringerFørOppdatering.disjoint(overstyringerEtterOppdatering);
-        LocalDateTimeline<OverstyrtUttakPeriode> nyeOverstyringer = overstyringerEtterOppdatering.disjoint(overstyringerFørOppdatering);
-        LocalDateTimeline<OverstyrtUttakPeriode> oppdaterteOverstyringer = overstyringerEtterOppdatering.disjoint(nyeOverstyringer);
-
-        lagreHistorikkinnslag(behandingId, nyeOverstyringer, HistorikkinnslagType.OVST_UTTAK_NY);
-        lagreHistorikkinnslag(behandingId, slettedeOverstyringer, HistorikkinnslagType.OVST_UTTAK_FJERNET);
-        lagreHistorikkinnslag(behandingId, oppdaterteOverstyringer, HistorikkinnslagType.OVST_UTTAK_OPPDATERT);
+        lagreHistorikkinnslag(behandingId, overstyringerEtterOppdatering, overstyringerFørOppdatering);
     }
 
-    private void lagreHistorikkinnslag(Long behandlingId, LocalDateTimeline<OverstyrtUttakPeriode> overstyring, HistorikkinnslagType aksjon) {
-        overstyring.forEach(segment -> {
-            Historikkinnslag innslag = new Historikkinnslag();
-            innslag.setAktør(HistorikkAktør.SAKSBEHANDLER);
-            innslag.setBehandlingId(behandlingId);
-            innslag.setType(aksjon);
+    private void lagreHistorikkinnslag(Long behandlingId, LocalDateTimeline<OverstyrtUttakPeriode> overstyringerEtterOppdatering, LocalDateTimeline<OverstyrtUttakPeriode> overstyringerFørOppdatering) {
+        overstyringerEtterOppdatering.crossJoin(overstyringerFørOppdatering, this::lagInnslag).forEach(segment -> {
+            segment.getValue().setBehandlingId(behandlingId);
+            historikkRepository.lagre(segment.getValue());
+        });
+    }
 
-            HistorikkInnslagTekstBuilder tekstBuilder = new HistorikkInnslagTekstBuilder().medSkjermlenke(SkjermlenkeType.UTTAK);
-            tekstBuilder.medHendelse(innslag.getType());
-            tekstBuilder.medEndretFelt(HistorikkEndretFeltType.UTTAK_OVERSTYRT_PERIODE, null, formater(segment.getLocalDateInterval()));
-            tekstBuilder.medBegrunnelse(segment.getValue().getBegrunnelse());
-            tekstBuilder.build(innslag);
-            historikkRepository.lagre(innslag);
+    private LocalDateSegment<Historikkinnslag> lagInnslag(LocalDateInterval di, LocalDateSegment<OverstyrtUttakPeriode> etterOppdatering, LocalDateSegment<OverstyrtUttakPeriode> førOppdatering) {
+        Historikkinnslag innslag = new Historikkinnslag();
+        innslag.setAktør(HistorikkAktør.SAKSBEHANDLER);
+        HistorikkInnslagTekstBuilder tekstBuilder = new HistorikkInnslagTekstBuilder().medSkjermlenke(SkjermlenkeType.UTTAK);
+
+        if (etterOppdatering == null) {
+            innslag.setType(OVST_UTTAK_FJERNET);
+            tekstBuilder.medTema(HistorikkEndretFeltType.OVST_UTTAK_FJERNET, formater(di));
+            tekstBuilder.medHendelse(OVST_UTTAK_FJERNET);
+        } else if (førOppdatering == null) {
+            innslag.setType(OVST_UTTAK_NY);
+            tekstBuilder.medHendelse(OVST_UTTAK_NY);
+            tekstBuilder.medEndretFelt(HistorikkEndretFeltType.UTTAK_OVERSTYRT_PERIODE, null, formater(di));
+            tekstBuilder.medEndretFelt(HistorikkEndretFeltType.UTTAK_OVERSTYRT_SØKERS_UTTAKSGRAD, null, etterOppdatering.getValue().getSøkersUttaksgrad());
+            leggTilUtbetalingsgradEndredeFelter(etterOppdatering, tekstBuilder);
+            tekstBuilder.medBegrunnelse(etterOppdatering.getValue().getBegrunnelse());
+        } else {
+            innslag.setType(OVST_UTTAK_OPPDATERT);
+            tekstBuilder.medHendelse(OVST_UTTAK_OPPDATERT);
+            tekstBuilder.medEndretFelt(HistorikkEndretFeltType.UTTAK_OVERSTYRT_PERIODE, null, formater(di));
+            tekstBuilder.medEndretFelt(HistorikkEndretFeltType.UTTAK_OVERSTYRT_SØKERS_UTTAKSGRAD, førOppdatering.getValue().getSøkersUttaksgrad(), etterOppdatering.getValue().getSøkersUttaksgrad());
+            leggTilUtbetalingsgradEndredeFelter(etterOppdatering, tekstBuilder);
+            tekstBuilder.medBegrunnelse(etterOppdatering.getValue().getBegrunnelse());
+        }
+
+        tekstBuilder.build(innslag);
+
+        return new LocalDateSegment<>(di, innslag);
+    }
+
+    private void leggTilUtbetalingsgradEndredeFelter(LocalDateSegment<OverstyrtUttakPeriode> etterOppdatering, HistorikkInnslagTekstBuilder tekstBuilder) {
+        etterOppdatering.getValue().getOverstyrtUtbetalingsgrad().forEach(o -> {
+            if (o.getArbeidsgiver() != null) {
+                var arbeidsgiverTekst = arbeidsgiverHistorikkinnslag.lagArbeidsgiverHistorikkinnslagTekst(o.getArbeidsgiver(), o.getInternArbeidsforholdRef(), List.of());
+                tekstBuilder.medEndretFelt(HistorikkEndretFeltType.UTTAK_OVERSTYRT_UTBETALINGSGRAD,
+                    arbeidsgiverTekst,
+                    null, o.getUtbetalingsgrad());
+            } else {
+                tekstBuilder.medEndretFelt(HistorikkEndretFeltType.UTTAK_OVERSTYRT_UTBETALINGSGRAD,
+                    o.getAktivitetType().getNavn(),
+                    null, o.getUtbetalingsgrad());
+            }
         });
     }
 
@@ -133,7 +170,7 @@ public class UttakOverstyringshåndterer implements Overstyringshåndterer<Overs
         return new OverstyrtUttakUtbetalingsgrad(arbeidsforhold.getType(), orgnr, aktoerId, arbeidsforhold.getInternArbeidsforholdId(), dto.getUtbetalingsgrad());
     }
 
-    String formater(LocalDateInterval periode) {
+    static String formater(LocalDateInterval periode) {
         DateTimeFormatter format = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         return periode.getFomDato().format(format) + "-" + periode.getTomDato().format(format);
     }

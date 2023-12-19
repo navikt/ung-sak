@@ -146,7 +146,7 @@ public class OverstyrUttakRepository {
     }
 
     private OverstyrtUttakUtbetalingsgradEntitet map(OverstyrtUttakUtbetalingsgrad overstyrtUtbetalingsgrad) {
-        return new OverstyrtUttakUtbetalingsgradEntitet(overstyrtUtbetalingsgrad.getAktivitetType(), overstyrtUtbetalingsgrad.getArbeidsgiverId(), overstyrtUtbetalingsgrad.getInternArbeidsforholdRef(), overstyrtUtbetalingsgrad.getUtbetalingsgrad());
+        return new OverstyrtUttakUtbetalingsgradEntitet(overstyrtUtbetalingsgrad.getAktivitetType(), overstyrtUtbetalingsgrad.getArbeidsgiver(), overstyrtUtbetalingsgrad.getInternArbeidsforholdRef(), overstyrtUtbetalingsgrad.getUtbetalingsgrad());
     }
 
     private OverstyrtUttakUtbetalingsgrad map(OverstyrtUttakUtbetalingsgradEntitet overstyrtUtbetalingsgrad) {
