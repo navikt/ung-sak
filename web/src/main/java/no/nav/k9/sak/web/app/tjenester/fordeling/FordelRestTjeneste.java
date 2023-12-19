@@ -47,6 +47,7 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.AbacDto;
@@ -107,6 +108,7 @@ public class FordelRestTjeneste {
     private AktørTjeneste aktørTjeneste;
     private PsbPbSakRepository psbPbSakRepository;
     private ObjectWriter objectWriter = new JacksonJsonConfig().getObjectMapper().writerFor(Innsending.class);
+    private boolean enableReservertSaksnummer;
 
     public FordelRestTjeneste() {// For Rest-CDI
     }
@@ -119,7 +121,8 @@ public class FordelRestTjeneste {
                               SøknadMottakTjenesteContainer søknadMottakere,
                               PsbInfotrygdRepository psbInfotrygdRepository,
                               AktørTjeneste aktørTjeneste,
-                              PsbPbSakRepository psbPbSakRepository) {
+                              PsbPbSakRepository psbPbSakRepository,
+                              @KonfigVerdi(value = "ENABLE_RESERVERT_SAKSNUMMER", defaultVerdi = "false") boolean enableReservertSaksnummer) {
         this.dokumentmottakTjeneste = dokumentmottakTjeneste;
         this.safAdapter = safAdapter;
         this.fagsakTjeneste = fagsakTjeneste;
@@ -128,6 +131,7 @@ public class FordelRestTjeneste {
         this.psbInfotrygdRepository= psbInfotrygdRepository;
         this.aktørTjeneste = aktørTjeneste;
         this.psbPbSakRepository = psbPbSakRepository;
+        this.enableReservertSaksnummer = enableReservertSaksnummer;
     }
 
 
@@ -218,9 +222,14 @@ public class FordelRestTjeneste {
             throw new IllegalArgumentException("Kan ikke opprette fagsak uten å oppgi start av periode (fravær/uttak): " + opprettSakDto);
         }
 
+        Saksnummer saksnummer = null;
+        if (enableReservertSaksnummer && opprettSakDto.getSaksnummer() != null) {
+            saksnummer = new Saksnummer(opprettSakDto.getSaksnummer());
+        }
+
         var søknadMottaker = søknadMottakere.finnSøknadMottakerTjeneste(ytelseType);
 
-        var nyFagsak = søknadMottaker.finnEllerOpprettFagsak(ytelseType, aktørId, pleietrengendeAktørId, relatertPersonAktørId, periode.getFom(), periode.getTom());
+        var nyFagsak = søknadMottaker.finnEllerOpprettFagsak(ytelseType, aktørId, pleietrengendeAktørId, relatertPersonAktørId, periode.getFom(), periode.getTom(), saksnummer);
 
         return new SaksnummerDto(nyFagsak.getSaksnummer().getVerdi());
     }
@@ -253,9 +262,14 @@ public class FordelRestTjeneste {
             throw new IllegalArgumentException("Kan ikke opprette fagsak uten å oppgi start av periode (fravær/uttak): " + opprettSakDto);
         }
 
+        Saksnummer saksnummer = null;
+        if (enableReservertSaksnummer && opprettSakDto.getSaksnummer() != null) {
+            saksnummer = new Saksnummer(opprettSakDto.getSaksnummer());
+        }
+
         var søknadMottaker = søknadMottakere.finnSøknadMottakerTjeneste(ytelseType);
 
-        var nyFagsak = søknadMottaker.finnEllerOpprettFagsak(ytelseType, aktørId, pleietrengendeAktørId, relatertPersonAktørId, periode.getFom(), periode.getTom());
+        var nyFagsak = søknadMottaker.finnEllerOpprettFagsak(ytelseType, aktørId, pleietrengendeAktørId, relatertPersonAktørId, periode.getFom(), periode.getTom(), saksnummer);
 
         return new SaksnummerDto(nyFagsak.getSaksnummer().getVerdi());
     }
