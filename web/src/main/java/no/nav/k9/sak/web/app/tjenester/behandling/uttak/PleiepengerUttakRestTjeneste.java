@@ -343,8 +343,8 @@ public class PleiepengerUttakRestTjeneste {
     private OverstyrUttakUtbetalingsgradDto map(OverstyrtUttakUtbetalingsgrad overstyrtUtbetalingsgrad) {
         OverstyrUttakArbeidsforholdDto aktivitet = new OverstyrUttakArbeidsforholdDto(
             overstyrtUtbetalingsgrad.getAktivitetType(),
-            overstyrtUtbetalingsgrad.getArbeidsgiverId() != null && overstyrtUtbetalingsgrad.getArbeidsgiverId().getOrgnr() != null ? new OrgNummer(overstyrtUtbetalingsgrad.getArbeidsgiverId().getOrgnr()) : null,
-            overstyrtUtbetalingsgrad.getArbeidsgiverId() != null ? overstyrtUtbetalingsgrad.getArbeidsgiverId().getAktørId() : null,
+            overstyrtUtbetalingsgrad.getArbeidsgiver() != null && overstyrtUtbetalingsgrad.getArbeidsgiver().getOrgnr() != null ? new OrgNummer(overstyrtUtbetalingsgrad.getArbeidsgiver().getOrgnr()) : null,
+            overstyrtUtbetalingsgrad.getArbeidsgiver() != null ? overstyrtUtbetalingsgrad.getArbeidsgiver().getAktørId() : null,
             overstyrtUtbetalingsgrad.getInternArbeidsforholdRef());
         return new OverstyrUttakUtbetalingsgradDto(aktivitet, overstyrtUtbetalingsgrad.getUtbetalingsgrad());
     }
