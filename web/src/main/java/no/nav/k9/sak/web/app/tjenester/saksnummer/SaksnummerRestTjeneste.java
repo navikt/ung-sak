@@ -66,7 +66,9 @@ public class SaksnummerRestTjeneste {
         if (!enableReservertSaksnummer) {
             throw new UnsupportedOperationException("Funksjonaliteten er avskrudd");
         }
-        return new SaksnummerDto(saksnummerRepository.genererNyttSaksnummer());
+        final SaksnummerDto saksnummer = new SaksnummerDto(saksnummerRepository.genererNyttSaksnummer());
+        log.info("Reserverte saksnummer: " + saksnummer);
+        return saksnummer;
     }
 
     @POST
