@@ -286,7 +286,7 @@ spec:
       value: "true"
     - name: ENABLE_AZURE_CC_SYSTEMCONTEXT
       value: "false"
-    - name: 5080_UTEN_FIKTIVE
+    - name: AVKLAR_ARBEIDSFORHOLD_UTEN_FIKTIVE
       value: "true"
 
     # Konfigurasjoner

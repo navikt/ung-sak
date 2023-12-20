@@ -63,7 +63,7 @@ public class PsbManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
     public PsbManglendePåkrevdeInntektsmeldingerTjeneste(BehandlingRepository behandlingRepository,
                                                          @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
                                                          KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste,
-                                                         @KonfigVerdi(value = "5080_UTEN_FIKTIVE", defaultVerdi = "false") boolean utenFiktive) {
+                                                         @KonfigVerdi(value = "AVKLAR_ARBEIDSFORHOLD_UTEN_FIKTIVE", defaultVerdi = "false") boolean utenFiktive) {
         this.behandlingRepository = behandlingRepository;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
