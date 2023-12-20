@@ -113,6 +113,7 @@ public class BehandlingDump implements DebugDumpFagsak {
             toCsv.put("behandling_årsaker", Behandling::getBehandlingÅrsakerTyper);
             toCsv.put("behandling_frist", Behandling::getBehandlingstidFrist);
             toCsv.put("behandling_avsluttet", Behandling::getAvsluttetDato);
+            toCsv.put("manuelt_opprettet", Behandling::erManueltOpprettet);
             toCsv.put("original_behandling", Behandling::getOriginalBehandlingId);
             toCsv.put("opprettet_tid", Behandling::getOpprettetTidspunkt);
             toCsv.put("endret_tid", Behandling::getEndretTidspunkt);
