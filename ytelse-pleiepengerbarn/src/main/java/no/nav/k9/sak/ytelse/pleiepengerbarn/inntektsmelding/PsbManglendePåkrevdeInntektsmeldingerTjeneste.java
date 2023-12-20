@@ -7,8 +7,10 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BA
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -23,6 +25,7 @@ import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.AksjonspunktÅrsak;
@@ -40,6 +43,8 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
+import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
@@ -53,7 +58,9 @@ public class PsbManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
     private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
     private BehandlingRepository behandlingRepository;
 
-    private boolean utenFiktive;
+    private VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
+
+    private boolean reutledAksjonspunktVedRevurdering;
 
     PsbManglendePåkrevdeInntektsmeldingerTjeneste() {
         // CDI
@@ -63,11 +70,13 @@ public class PsbManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
     public PsbManglendePåkrevdeInntektsmeldingerTjeneste(BehandlingRepository behandlingRepository,
                                                          @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
                                                          KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste,
-                                                         @KonfigVerdi(value = "AVKLAR_ARBEIDSFORHOLD_UTEN_FIKTIVE", defaultVerdi = "false") boolean utenFiktive) {
+                                                         VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
+                                                         @KonfigVerdi(value = "AVKLAR_ARBEIDSFORHOLD_REUTLED_VED_REVURDERING", defaultVerdi = "false") boolean reutledVedRevurdering) {
         this.behandlingRepository = behandlingRepository;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
-        this.utenFiktive = utenFiktive;
+        this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
+        this.reutledAksjonspunktVedRevurdering = reutledVedRevurdering;
     }
 
     @Override
@@ -83,7 +92,14 @@ public class PsbManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
 
         var unikeInntektsmeldingerForFagsak = kompletthetForBeregningTjeneste.hentAlleUnikeInntektsmeldingerForFagsak(behandling.getFagsak().getSaksnummer());
         VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, input.getReferanse().getFagsakYtelseType(), input.getReferanse().getBehandlingType());
-        var periodeTilVurdering = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        var allePerioderTilVurdering = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+
+        NavigableSet<DatoIntervallEntitet> perioderTilVurdering;
+        if (reutledAksjonspunktVedRevurdering) {
+            perioderTilVurdering = filtrerBortForlengelser(behandlingReferanse, allePerioderTilVurdering);
+        } else {
+            perioderTilVurdering = allePerioderTilVurdering;
+        }
 
         var grunnlag = grunnlagOptional.get();
         var fagsakPeriode = behandling.getFagsak().getPeriode();
@@ -91,7 +107,7 @@ public class PsbManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
         var inntektFilter = new InntektFilter(grunnlag.getAktørInntektFraRegister(behandling.getAktørId()));
 
         Collection<Yrkesaktivitet> yrkesaktiviteter;
-        if (utenFiktive) {
+        if (reutledAksjonspunktVedRevurdering) {
             // Tar ikke med fiktive arbeidsforhold for å få opprettet aksjonspunktet på nytt ved tilbakerulling
             yrkesaktiviteter = yrkesaktivitetFilter.getYrkesaktiviteterEksklusiveFiktive();
         } else {
@@ -103,7 +119,7 @@ public class PsbManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
             .collect(Collectors.groupingBy(Yrkesaktivitet::getArbeidsgiver,
                 flatMapping(im -> Stream.of(im.getArbeidsforholdRef()), Collectors.toSet())));
 
-        for (DatoIntervallEntitet periode : periodeTilVurdering) {
+        for (DatoIntervallEntitet periode : perioderTilVurdering) {
             var arbeidsforholdSøktOmFravær = kompletthetForBeregningTjeneste.utledInntektsmeldingerSomSendesInnTilBeregningForPeriode(behandlingReferanse, unikeInntektsmeldingerForFagsak, periode)
                 .stream()
                 .map(it -> new ArbeidsgiverArbeidsforhold(it.getArbeidsgiver(), it.getArbeidsforholdRef() == null ? InternArbeidsforholdRef.nullRef() : it.getArbeidsforholdRef()))
@@ -114,7 +130,7 @@ public class PsbManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
                 var yrkArbeidsforhold = yrkArbeidsgiverArbeidsforhold.getOrDefault(imArbeidsgiver, Set.of());
                 var imArbeidsforhold = imArbeidsgiverArbeidsforhold.getArbeidsforhold();
                 if (yrkArbeidsforhold.stream().noneMatch(imArbeidsforhold::gjelderFor)) {
-                    if (IkkeTattStillingTil.vurder(imArbeidsgiver, imArbeidsforhold, grunnlag)) {
+                    if (reutledAksjonspunktVedRevurdering || IkkeTattStillingTil.vurder(imArbeidsgiver, imArbeidsforhold, grunnlag)) {
                         var imArbeidsforholdRefs = Set.of(imArbeidsforhold);
                         if (rapportertInntektFraArbeidsgiver(fagsakPeriode, imArbeidsgiver, inntektFilter, yrkesaktivitetFilter)) {
                             LeggTilResultat.leggTil(result, AksjonspunktÅrsak.INNTEKTSMELDING_UTEN_ARBEIDSFORHOLD, imArbeidsgiver, imArbeidsforholdRefs);
@@ -143,6 +159,14 @@ public class PsbManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
         }
 
         return result;
+    }
+
+    private NavigableSet<DatoIntervallEntitet> filtrerBortForlengelser(BehandlingReferanse behandlingReferanse, NavigableSet<DatoIntervallEntitet> allePerioderTilVurdering) {
+        NavigableSet<DatoIntervallEntitet> perioderTilVurdering;
+        var vilkårPeriodeFilter = vilkårPeriodeFilterProvider.getFilter(behandlingReferanse).ignorerForlengelseperioder();
+        perioderTilVurdering = vilkårPeriodeFilter.filtrerPerioder(allePerioderTilVurdering, VilkårType.BEREGNINGSGRUNNLAGVILKÅR).stream()
+            .map(PeriodeTilVurdering::getPeriode).collect(Collectors.toCollection(TreeSet::new));
+        return perioderTilVurdering;
     }
 
     private boolean rapportertInntektFraArbeidsgiver(DatoIntervallEntitet fagsakPeriode, Arbeidsgiver arbeidsgiver, InntektFilter inntektFilter, YrkesaktivitetFilter filter) {
