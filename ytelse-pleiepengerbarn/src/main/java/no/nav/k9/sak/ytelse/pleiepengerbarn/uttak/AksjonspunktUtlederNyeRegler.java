@@ -16,16 +16,15 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
-import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
-import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
-import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 
 @Dependent
 class AksjonspunktUtlederNyeRegler {
@@ -33,11 +32,12 @@ class AksjonspunktUtlederNyeRegler {
     private static final Logger log = LoggerFactory.getLogger(AksjonspunktUtlederNyeRegler.class);
 
     private BehandlingRepository behandlingRepository;
-    private UttakTjeneste uttakTjeneste;
     private UttakNyeReglerRepository uttakNyeReglerRepository;
     private TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste;
     private AksjonspunktKontrollRepository aksjonspunktKontrollRepository;
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
+
+    private MapInputTilUttakTjeneste mapInputTilUttakTjeneste;
 
     private boolean brukDatoNyRegelUttak;
 
@@ -47,18 +47,17 @@ class AksjonspunktUtlederNyeRegler {
 
     @Inject
     public AksjonspunktUtlederNyeRegler(BehandlingRepository behandlingRepository,
-                                        UttakTjeneste uttakTjeneste,
                                         UttakNyeReglerRepository uttakNyeReglerRepository,
                                         TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste,
                                         AksjonspunktKontrollRepository aksjonspunktKontrollRepository,
                                         SøknadsperiodeTjeneste søknadsperiodeTjeneste,
-                                        @KonfigVerdi(value = "ENABLE_DATO_NY_REGEL_UTTAK", defaultVerdi = "false") boolean brukDatoNyRegelUttak) {
+                                        MapInputTilUttakTjeneste mapInputTilUttakTjeneste, @KonfigVerdi(value = "ENABLE_DATO_NY_REGEL_UTTAK", defaultVerdi = "false") boolean brukDatoNyRegelUttak) {
         this.behandlingRepository = behandlingRepository;
-        this.uttakTjeneste = uttakTjeneste;
         this.uttakNyeReglerRepository = uttakNyeReglerRepository;
         this.tilkommetAktivitetTjeneste = tilkommetAktivitetTjeneste;
         this.aksjonspunktKontrollRepository = aksjonspunktKontrollRepository;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
+        this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
         this.brukDatoNyRegelUttak = brukDatoNyRegelUttak;
     }
 
@@ -111,23 +110,21 @@ class AksjonspunktUtlederNyeRegler {
     }
 
     private boolean harAktivitetIkkeYrkesaktivEllerKunYtelse(Behandling behandling) {
-        Uttaksplan uttaksplan = uttakTjeneste.hentUttaksplan(behandling.getUuid(), false);
-        return harEnAv(uttaksplan, Set.of(UttakArbeidType.KUN_YTELSE, UttakArbeidType.IKKE_YRKESAKTIV));
+        var uttaksgrunnlag = mapInputTilUttakTjeneste.hentUtOgMapRequestUtenInntektsgradering(BehandlingReferanse.fra(behandling));
+        return harEnAv(uttaksgrunnlag, Set.of(UttakArbeidType.KUN_YTELSE, UttakArbeidType.IKKE_YRKESAKTIV));
     }
 
-    private boolean harEnAv(Uttaksplan uttaksplan, Collection<UttakArbeidType> aktivitettyper) {
-        for (UttaksperiodeInfo uttaksperiodeInfo : uttaksplan.getPerioder().values()) {
-            for (Utbetalingsgrader utbetalingsgrader : uttaksperiodeInfo.getUtbetalingsgrader()) {
-                for (UttakArbeidType aktivitettype : aktivitettyper) {
-                    if (utbetalingsgrader.getArbeidsforhold().getType().equals(aktivitettype.getKode())) {
-                        log.info("Har aktivitet IY/KY");
-                        return true;
-                    }
-                }
-            }
+    private boolean harEnAv(Uttaksgrunnlag uttaksgrunnlag, Collection<UttakArbeidType> aktivitettyper) {
+        var harGittType = uttaksgrunnlag.getArbeid().stream().anyMatch(
+            a -> aktivitettyper.stream().map(UttakArbeidType::getKode)
+                .anyMatch(a.getArbeidsforhold().getType()::equals)
+        );
+        if (harGittType) {
+            log.info("Har aktivitet IY/KY");
+        } else {
+            log.info("Har ikke aktivitet IY/KY");
         }
-        log.info("Har ikke aktivitet IY/KY");
-        return false;
+        return harGittType;
     }
 
 }

@@ -46,6 +46,7 @@ public class RyddOgGjenopprettBeregningTjeneste {
     private final VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
     private final FastsettPGIPeriodeTjeneste fastsettPGIPeriodeTjeneste;
     private final ValiderAktiveReferanserTjeneste validerAktiveReferanserTjeneste;
+    private final GjenopprettPerioderSomIkkeVurderesTjeneste gjenopprettPerioderSomIkkeVurderesTjeneste;
     private final VilkårResultatRepository vilkårResultatRepository;
     private final Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste;
     private final boolean enableFjernPerioder;
@@ -57,7 +58,7 @@ public class RyddOgGjenopprettBeregningTjeneste {
                                               BeregningsgrunnlagTjeneste kalkulusTjeneste,
                                               VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
                                               FastsettPGIPeriodeTjeneste fastsettPGIPeriodeTjeneste,
-                                              VilkårResultatRepository vilkårResultatRepository,
+                                              GjenopprettPerioderSomIkkeVurderesTjeneste gjenopprettPerioderSomIkkeVurderesTjeneste, VilkårResultatRepository vilkårResultatRepository,
                                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste,
                                               ValiderAktiveReferanserTjeneste validerAktiveReferanserTjeneste,
                                               @KonfigVerdi(value = "FJERN_VILKARSPERIODER_BEREGNING", defaultVerdi = "false") boolean enableFjernPerioder,
@@ -68,6 +69,7 @@ public class RyddOgGjenopprettBeregningTjeneste {
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
         this.fastsettPGIPeriodeTjeneste = fastsettPGIPeriodeTjeneste;
+        this.gjenopprettPerioderSomIkkeVurderesTjeneste = gjenopprettPerioderSomIkkeVurderesTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.enableFjernPerioder = enableFjernPerioder;
@@ -76,7 +78,7 @@ public class RyddOgGjenopprettBeregningTjeneste {
     }
 
     /**
-     * Resetter beregning til å vurderes på nytt
+     * Resetter beregning til å vurderes på nytt. Utfører kun rydding internt i k9-sak. Rydding mot kalkulus gjøres i no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.RyddOgGjenopprettBeregningTjeneste#deaktiverAvslåtteEllerFjernetPerioder(no.nav.k9.sak.behandling.BehandlingReferanse)
      *
      * @param kontekst Behandlingskontrollkontekst
      */
@@ -84,11 +86,11 @@ public class RyddOgGjenopprettBeregningTjeneste {
         var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         var referanse = BehandlingReferanse.fra(behandling);
 
-        // 1. Setter alle perioder til vurdering
+        // 1. Setter perioder som skal vurderes i riktig tilstand (unntatt forlengelser, som håndteres separat)
         ryddVedtaksresultatForPerioderTilVurdering(kontekst, referanse);
 
         // 2. gjenoppretter beregning til initiell referanse der perioden ikke lenger vurderes (flippet vurderingsstatus)
-        gjenopprettVedEndretVurderingsstatus(kontekst, referanse);
+        gjenopprettPerioderSomIkkeVurderesTjeneste.gjenopprettVedEndretVurderingsstatus(kontekst, referanse);
 
         // 3. avbryter alle aksjonspunkt i beregning som er åpne (aksjonspunkt reutledes på nytt ved behov)
         abrytÅpneBeregningaksjonspunkter(kontekst, behandling);
@@ -175,25 +177,6 @@ public class RyddOgGjenopprettBeregningTjeneste {
             .toList();
     }
 
-
-    /**
-     * Resetter beregningsgrunnlagreferanser og vilkårsresultat for perioder som ikke er til vurdering lenger i denne behandlingen
-     * <p>
-     * Rydding i kalkulus gjøres av no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste#deaktiverBeregningsgrunnlagForAvslåttEllerFjernetPeriode(no.nav.k9.sak.behandling.BehandlingReferanse)
-     *
-     * @param kontekst  Behandlingskontrollkonteksts
-     * @param referanse Behandlingreferanse
-     */
-    private void gjenopprettVedEndretVurderingsstatus(BehandlingskontrollKontekst kontekst, BehandlingReferanse referanse) {
-        var gjenopprettetPeriodeListe = kalkulusTjeneste.gjenopprettTilInitiellDersomIkkeTilVurdering(referanse);
-        if (!gjenopprettetPeriodeListe.isEmpty()) {
-            log.info("Gjenoppretter initiell vurdering for perioder {}", gjenopprettetPeriodeListe);
-            beregningsgrunnlagVilkårTjeneste.kopierVilkårresultatFraForrigeBehandling(
-                kontekst.getBehandlingId(), referanse.getOriginalBehandlingId().orElseThrow(() -> new IllegalStateException("Kan ikke gjenopprette vilkårsresultat i førstegangsbehandling")),
-                gjenopprettetPeriodeListe);
-        }
-    }
-
     private void abrytÅpneBeregningaksjonspunkter(BehandlingskontrollKontekst kontekst, Behandling behandling) {
         behandling.getAksjonspunkter().stream()
             .filter(this::erÅpentBeregningAksjonspunkt)
@@ -206,6 +189,14 @@ public class RyddOgGjenopprettBeregningTjeneste {
     }
 
 
+    /**
+     * Setter perioder som skal vurderes i riktig tilstand.
+     * <p>
+     * Forlengelser påvirkes ikke. Disse hånteres i no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.KopierBeregningTjeneste#kopierVurderinger(no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst)
+     *
+     * @param kontekst BehandlingskontrollKontekts
+     * @param ref      behndlingsreferanser
+     */
     private void ryddVedtaksresultatForPerioderTilVurdering(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
         var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref);
         var allePerioder = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter);

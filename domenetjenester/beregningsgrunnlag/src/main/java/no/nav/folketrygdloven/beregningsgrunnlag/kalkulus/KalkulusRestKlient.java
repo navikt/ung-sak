@@ -45,6 +45,7 @@ import no.nav.folketrygdloven.kalkulus.response.v1.TilstandListeResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.BeregningsgrunnlagGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.folketrygdloven.kalkulus.response.v1.forvaltning.EndretPeriodeListeRespons;
+import no.nav.folketrygdloven.kalkulus.response.v1.gradering.InntektgraderingListe;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringListeRespons;
 import no.nav.folketrygdloven.kalkulus.response.v1.regelinput.Saksnummer;
 import no.nav.folketrygdloven.kalkulus.response.v1.simulerTilkommetInntekt.SimulertTilkommetInntektListe;
@@ -81,6 +82,8 @@ public class KalkulusRestKlient {
 
     private final ObjectReader tilkommetAktivitetReader = kalkulusMapper.readerFor(UtledetTilkommetAktivitetListe.class);
 
+    private final ObjectReader inntektsgraderingReader = kalkulusMapper.readerFor(InntektgraderingListe.class);
+
     private final ObjectReader grunnlagListReader = kalkulusMapper.readerFor(new TypeReference<List<BeregningsgrunnlagGrunnlagDto>>() {
     });
     private final ObjectReader grunnbeløpReader = kalkulusMapper.readerFor(Grunnbeløp.class);
@@ -104,6 +107,7 @@ public class KalkulusRestKlient {
     private URI simulerTilkommetInntekt;
     private URI utledTilkommetAktivitet;
 
+    private URI finnInntektsgradering;
     private URI migrerAksjonspunkter;
     private URI komprimerRegelinput;
 
@@ -147,6 +151,7 @@ public class KalkulusRestKlient {
         this.utledTilkommetAktivitet = toUri("/api/kalkulus/v1/utledTilkommetAktivitetForKoblinger");
         this.simulerFastsettMedOppdatertUttak = toUri("/api/kalkulus/v1/forvaltning/simulerFastsettMedOppdatertUttak/bolk");
         this.aktiveReferanserEndpoint = toUri("/api/kalkulus/v1/aktive-referanser");
+        this.finnInntektsgradering = toUri("/api/kalkulus/v1/finnUttaksgradVedInntektsgradering");
     }
 
 
@@ -243,6 +248,16 @@ public class KalkulusRestKlient {
             throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
         }
     }
+
+    public InntektgraderingListe finnUttaksgradVedInntektsgradering(UtledTilkommetAktivitetListeRequest request) {
+        var endpoint = finnInntektsgradering;
+        try {
+            return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), inntektsgraderingReader);
+        } catch (JsonProcessingException e) {
+            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
+        }
+    }
+
 
 
     public UtledetTilkommetAktivitetListe utledTilkommetAktivitet(UtledTilkommetAktivitetListeRequest request) {

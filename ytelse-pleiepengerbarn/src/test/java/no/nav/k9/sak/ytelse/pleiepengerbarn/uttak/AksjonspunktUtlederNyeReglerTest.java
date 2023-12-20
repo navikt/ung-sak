@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -40,8 +42,11 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
-import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Barn;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Søker;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
+import no.nav.pleiepengerbarn.uttak.kontrakter.YtelseType;
 
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
@@ -49,12 +54,13 @@ public class AksjonspunktUtlederNyeReglerTest {
 
     @Inject
     private AksjonspunktUtlederNyeRegler utleder;
-    private UttakTjeneste uttakTjeneste = mock(UttakTjeneste.class);
     private TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste = mock(TilkommetAktivitetTjeneste.class);
     @Inject
     private BehandlingRepository behandlingRepository;
     @Inject
     private FagsakRepository fagsakRepository;
+
+    private MapInputTilUttakTjeneste mapInputTilUttakTjeneste = mock(MapInputTilUttakTjeneste.class);
     private Behandling førstegangsbehandling;
     private Behandling revurdering;
     private UttakNyeReglerRepository uttakNyeReglerRepository = mock(UttakNyeReglerRepository.class);
@@ -64,7 +70,7 @@ public class AksjonspunktUtlederNyeReglerTest {
 
     @BeforeEach
     void setUp() {
-        utleder = new AksjonspunktUtlederNyeRegler(behandlingRepository, uttakTjeneste, uttakNyeReglerRepository, tilkommetAktivitetTjeneste, aksjonspunktKontrollRepository, søknadsperiodeTjeneste, true);
+        utleder = new AksjonspunktUtlederNyeRegler(behandlingRepository, uttakNyeReglerRepository, tilkommetAktivitetTjeneste, aksjonspunktKontrollRepository, søknadsperiodeTjeneste, mapInputTilUttakTjeneste, true);
 
         var fagsak = Fagsak.opprettNy(FagsakYtelseType.DAGPENGER, new AktørId(123L), new Saksnummer("987"), LocalDate.now(), LocalDate.now());
         fagsakRepository.opprettNy(fagsak);
@@ -84,7 +90,7 @@ public class AksjonspunktUtlederNyeReglerTest {
         DatoIntervallEntitet søknadsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(dag1, dag2);
         when(søknadsperiodeTjeneste.utledFullstendigPeriode(anyLong())).thenReturn(new TreeSet<>(Set.of(søknadsperiode)));
         when(tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(anyLong(), any(LocalDateInterval.class))).thenReturn(Map.of(new AktivitetstatusOgArbeidsgiver(UttakArbeidType.FRILANSER, null), LocalDateTimeline.empty()));
-        when(uttakTjeneste.hentUttaksplan(førstegangsbehandling.getUuid(), false)).thenReturn(new Uttaksplan(Map.of(), List.of()));
+        when(mapInputTilUttakTjeneste.hentUtOgMapRequestUtenInntektsgradering(BehandlingReferanse.fra(førstegangsbehandling))).thenReturn(lagUttaksgrunnlag());
 
         var aksjonspunktDefinisjon = utleder.utledAksjonspunktDatoForNyeRegler(førstegangsbehandling);
 
@@ -99,7 +105,7 @@ public class AksjonspunktUtlederNyeReglerTest {
         DatoIntervallEntitet søknadsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(dag1, dag2);
         when(søknadsperiodeTjeneste.utledFullstendigPeriode(anyLong())).thenReturn(new TreeSet<>(Set.of(søknadsperiode)));
         when(tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(anyLong(), any(LocalDateInterval.class))).thenReturn(Map.of(new AktivitetstatusOgArbeidsgiver(UttakArbeidType.FRILANSER, null), LocalDateTimeline.empty()));
-        when(uttakTjeneste.hentUttaksplan(revurdering.getUuid(), false)).thenReturn(new Uttaksplan(Map.of(), List.of()));
+        when(mapInputTilUttakTjeneste.hentUtOgMapRequestUtenInntektsgradering(BehandlingReferanse.fra(revurdering))).thenReturn(lagUttaksgrunnlag());
 
         var aksjonspunktDefinisjon = utleder.utledAksjonspunktDatoForNyeRegler(revurdering);
 
@@ -111,7 +117,7 @@ public class AksjonspunktUtlederNyeReglerTest {
     public void skal_få_ikke_få_aksjonspunkt_for_førstegangsbehandling_med_dato_satt_og_med_eksisterende_aksjonspunkt() {
 
         when(tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(anyLong(), any(LocalDateInterval.class))).thenReturn(Map.of(new AktivitetstatusOgArbeidsgiver(UttakArbeidType.FRILANSER, null), LocalDateTimeline.empty()));
-        when(uttakTjeneste.hentUttaksplan(førstegangsbehandling.getUuid(), false)).thenReturn(new Uttaksplan(Map.of(), List.of()));
+        when(mapInputTilUttakTjeneste.hentUtOgMapRequestUtenInntektsgradering(BehandlingReferanse.fra(førstegangsbehandling))).thenReturn(lagUttaksgrunnlag());
         when(uttakNyeReglerRepository.finnDatoForNyeRegler(any())).thenReturn(Optional.of(LocalDate.now()));
         aksjonspunktKontrollRepository.leggTilAksjonspunkt(førstegangsbehandling, AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK);
 
@@ -125,7 +131,7 @@ public class AksjonspunktUtlederNyeReglerTest {
     void skal_få_ikke_få_aksjonspunkt_for_revurderig_med_dato_satt_og_med_eksisterende_aksjonspunkt() {
 
         when(tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(anyLong(), any(LocalDateInterval.class))).thenReturn(Map.of(new AktivitetstatusOgArbeidsgiver(UttakArbeidType.FRILANSER, null), LocalDateTimeline.empty()));
-        when(uttakTjeneste.hentUttaksplan(revurdering.getUuid(), false)).thenReturn(new Uttaksplan(Map.of(), List.of()));
+        when(mapInputTilUttakTjeneste.hentUtOgMapRequestUtenInntektsgradering(BehandlingReferanse.fra(førstegangsbehandling))).thenReturn(lagUttaksgrunnlag());
         when(uttakNyeReglerRepository.finnDatoForNyeRegler(any())).thenReturn(Optional.of(LocalDate.now()));
         lagUtførtAksjonspunkt(førstegangsbehandling, "En fin begrunnelse", "VELDIG_ANSVARLIG_SAKSBEHANDLER");
         aksjonspunktKontrollRepository.leggTilAksjonspunkt(revurdering, AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK);
@@ -150,7 +156,7 @@ public class AksjonspunktUtlederNyeReglerTest {
     void skal_få_utført_aksjonspunkt_for_revurdering_med_dato_satt_og_uten_eksisterende_aksjonspunkt() {
 
         when(tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(anyLong(), any(LocalDateInterval.class))).thenReturn(Map.of(new AktivitetstatusOgArbeidsgiver(UttakArbeidType.FRILANSER, null), LocalDateTimeline.empty()));
-        when(uttakTjeneste.hentUttaksplan(revurdering.getUuid(), false)).thenReturn(new Uttaksplan(Map.of(), List.of()));
+        when(mapInputTilUttakTjeneste.hentUtOgMapRequestUtenInntektsgradering(BehandlingReferanse.fra(førstegangsbehandling))).thenReturn(lagUttaksgrunnlag());
         when(uttakNyeReglerRepository.finnDatoForNyeRegler(any())).thenReturn(Optional.of(LocalDate.now()));
         lagUtførtAksjonspunkt(førstegangsbehandling, "En fin begrunnelse", "VELDIG_ANSVARLIG_SAKSBEHANDLER");
 
@@ -173,6 +179,32 @@ public class AksjonspunktUtlederNyeReglerTest {
         var ap = aksjonspunktKontrollRepository.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK);
         aksjonspunktKontrollRepository.setTilUtført(ap, begrunnelse);
         ap.setAnsvarligSaksbehandler(ansvarligSaksbehandler);
+    }
+
+    private static Uttaksgrunnlag lagUttaksgrunnlag() {
+        return new Uttaksgrunnlag(
+            YtelseType.PSB,
+            new Barn(AktørId.dummy().getAktørId(), null, null),
+            new Søker(AktørId.dummy().getAktørId(), null),
+            "TEST",
+            UUID.randomUUID().toString(),
+            List.of(),
+
+            List.of(),
+            List.of(),
+            Map.of(),
+            null,
+            Map.of(),
+            Map.of(),
+            List.of(),
+            Map.of(),
+            Map.of(),
+            Map.of(),
+            Map.of(),
+            Map.of(),
+            Map.of(),
+            Map.of()
+        );
     }
 
 

@@ -1,9 +1,11 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -84,6 +86,7 @@ public class BeregningInkonsistensTjeneste {
      */
     public void sjekkInkonsistensOgOpprettProsesstrigger(BehandlingReferanse ref) {
         NavigableSet<DatoIntervallEntitet> perioderSomRevurderes = finnPerioderMedInkonsistens(ref);
+        prosessTriggereRepository.leggTil(ref.getId(), Set.of(new Trigger(BehandlingÅrsakType.RE_ENDRING_BEREGNINGSGRUNNLAG, DatoIntervallEntitet.fra(LocalDate.now(), LocalDate.now()))));
         if (!perioderSomRevurderes.isEmpty()) {
             prosessTriggereRepository.leggTil(ref.getId(), perioderSomRevurderes.stream().map(it -> new Trigger(BehandlingÅrsakType.RE_ENDRING_BEREGNINGSGRUNNLAG, it)).collect(Collectors.toSet()));
         }
@@ -168,7 +171,7 @@ public class BeregningInkonsistensTjeneste {
     }
 
     private static boolean erKunYtelse(List<OpptjeningAktiviteter.OpptjeningPeriode> aktiviteterPåStp) {
-        return aktiviteterPåStp.stream().allMatch(a -> OpptjeningAktivitetType.YTELSE.contains(a.getType()));
+        return !aktiviteterPåStp.isEmpty() && aktiviteterPåStp.stream().allMatch(a -> OpptjeningAktivitetType.YTELSE.contains(a.getType()));
     }
 
     private boolean erMidlertidigInaktiv(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet periode) {

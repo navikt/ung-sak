@@ -39,6 +39,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.prosesstask.rest.AbacEmptySupplier;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -163,8 +164,10 @@ public class PleiepengerUttakRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public UttaksplanMedUtsattePerioder uttaksplanMedUtsattePerioder(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
-        var uttaksplan = uttakTjeneste.hentUttaksplan(behandlingIdDto.getBehandlingUuid(), true);
+
         var behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
+
+
         var utsattBehandlingAvPeriode = utsattBehandlingAvPeriodeRepository.hentGrunnlag(behandling.getId());
 
         var utsattePerioderSegmenter = utsattBehandlingAvPeriode.stream()
@@ -185,7 +188,20 @@ public class PleiepengerUttakRestTjeneste {
             .collect(Collectors.toSet());
 
         final LocalDate virkningsdatoUttakNyeRegler = uttakNyeReglerRepository.finnDatoForNyeRegler(behandling.getId()).orElse(null);
-        return new UttaksplanMedUtsattePerioder(uttaksplan, utsattePerioder, virkningsdatoUttakNyeRegler);
+
+
+        var uttaksplan = uttakTjeneste.hentUttaksplan(behandlingIdDto.getBehandlingUuid(), true);
+        if (uttaksplan != null) {
+            return UttaksplanMedUtsattePerioder.medUttaksplan(uttaksplan, utsattePerioder, virkningsdatoUttakNyeRegler);
+        }
+        var harAPForVurderingAvDato = behandling.getAksjonspunkter().stream().anyMatch(a -> a.getAksjonspunktDefinisjon().equals(AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK) && !a.erAvbrutt());
+        if (harAPForVurderingAvDato || virkningsdatoUttakNyeRegler != null) {
+            final Uttaksgrunnlag uttaksgrunnlag = mapInputTilUttakTjeneste.hentUtUbesluttededataOgMapRequest(BehandlingReferanse.fra(behandling));
+            var simulerUttaksplan = uttakTjeneste.simulerUttaksplan(uttaksgrunnlag);
+            return UttaksplanMedUtsattePerioder.medSimulertUttaksplan(simulerUttaksplan.getSimulertUttaksplan(), utsattePerioder, virkningsdatoUttakNyeRegler);
+        }
+
+        return UttaksplanMedUtsattePerioder.medUttaksplan(null, utsattePerioder, null);
     }
 
     @GET
@@ -327,8 +343,8 @@ public class PleiepengerUttakRestTjeneste {
     private OverstyrUttakUtbetalingsgradDto map(OverstyrtUttakUtbetalingsgrad overstyrtUtbetalingsgrad) {
         OverstyrUttakArbeidsforholdDto aktivitet = new OverstyrUttakArbeidsforholdDto(
             overstyrtUtbetalingsgrad.getAktivitetType(),
-            overstyrtUtbetalingsgrad.getArbeidsgiverId() != null && overstyrtUtbetalingsgrad.getArbeidsgiverId().getOrgnr() != null ? new OrgNummer(overstyrtUtbetalingsgrad.getArbeidsgiverId().getOrgnr()) : null,
-            overstyrtUtbetalingsgrad.getArbeidsgiverId() != null ? overstyrtUtbetalingsgrad.getArbeidsgiverId().getAktørId() : null,
+            overstyrtUtbetalingsgrad.getArbeidsgiver() != null && overstyrtUtbetalingsgrad.getArbeidsgiver().getOrgnr() != null ? new OrgNummer(overstyrtUtbetalingsgrad.getArbeidsgiver().getOrgnr()) : null,
+            overstyrtUtbetalingsgrad.getArbeidsgiver() != null ? overstyrtUtbetalingsgrad.getArbeidsgiver().getAktørId() : null,
             overstyrtUtbetalingsgrad.getInternArbeidsforholdRef());
         return new OverstyrUttakUtbetalingsgradDto(aktivitet, overstyrtUtbetalingsgrad.getUtbetalingsgrad());
     }

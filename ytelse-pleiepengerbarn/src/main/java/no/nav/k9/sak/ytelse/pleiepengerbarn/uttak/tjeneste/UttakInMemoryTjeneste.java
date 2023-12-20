@@ -80,7 +80,6 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
     public Simulering simulerUttaksplan(Uttaksgrunnlag request) {
         throw new UnsupportedOperationException();
     }
-
     @Override
     public void slettUttaksplan(UUID behandlingId) {
         uttaksplaner.remove(behandlingId);
@@ -90,6 +89,8 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
         boolean manueltOverstyrt = false;
         return new UttaksperiodeInfo(Utfall.OPPFYLT,
             _100,
+            null,
+            null,
             mapUtbetalingsgrader(periode, input),
             _100,
             null,

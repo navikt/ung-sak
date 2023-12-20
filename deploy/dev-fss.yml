@@ -62,12 +62,17 @@ spec:
   accessPolicy:
     inbound:
       rules:
+        - application: k9-los-api
+        - application: k9-fordel
         - application: k9-sak
         - application: k9-tilbake
         - application: k9-klage
         - application: k9-formidling
         - application: k9-formidling-dokumentdata
         - application: k9-punsj
+        - application: fpabakus
+          namespace: teamforeldrepenger
+
   env:
     - name: TZ
       value: "Europe/Oslo"
@@ -152,6 +157,8 @@ spec:
       value: api://dev-fss.k9saksbehandling.ftkalkulus/.default
     - name: ABAKUS_CALLBACK_URL
       value: http://k9-sak.k9saksbehandling/k9/sak/api/registerdata/iay/callback
+    - name: ABAKUS_CALLBACK_SCOPE
+      value: api://dev-fss.k9saksbehandling.k9-sak/.default
     - name: ABAC_PDP_ENDPOINT_URL
       value: http://abac-k9.k9saksbehandling/application/authorize
     - name: K9_OPPDRAG_PROXY_URL
@@ -161,7 +168,7 @@ spec:
     - name: OPPGAVE_RS_URI
       value: https://oppgave-q1.nais.preprod.local/api/v1/oppgaver
     - name: OPPGAVE_RS_SCOPE
-      value: api://dev-fss.oppgavehandtering.oppgave/.default
+      value: api://dev-fss.oppgavehandtering.oppgave-q1/.default
     - name: MEDL2_RS_URL
       value: https://medlemskap-medl-api.dev.intern.nav.no/api/v1/medlemskapsunntak
     - name: MEDL2_RS_SCOPE
@@ -182,26 +189,30 @@ spec:
       value: api://dev-fss.k9saksbehandling.k9-oppdrag/.default
     - name: K9_TILBAKE_DIREKTE_URL
       value: http://k9-tilbake.k9saksbehandling/k9/tilbake/api
+    - name: K9_TILBAKE_SCOPE
+      value: api://dev-fss.k9saksbehandling.k9-tilbake/.default
     - name: K9_FORMIDLING_URL
       value: http://k9-formidling.k9saksbehandling/k9/formidling
     - name: K9_FORMIDLING_SCOPE
       value: api://dev-fss.k9saksbehandling.k9-formidling/.default
     - name: K9_PUNSJ_URL
       value: http://k9-punsj.k9saksbehandling/api
+    - name: K9_PUNSJ_SCOPE
+      value: api://dev-fss.k9saksbehandling.k9-punsj/.default
     - name: INFOTRYGD_BS_BASE_URI
       value: http://k9-infotrygd.k9saksbehandling
     - name: ARBEID_OG_INNTEKT_BASE_URL
       value: https://arbeid-og-inntekt.nais.preprod.local
     - name: K9_LOS_URL
       value: http://k9-los-api.k9saksbehandling/api
+    - name: K9_LOS_SCOPE
+      value: api://dev-fss.k9saksbehandling.k9-los-api/.default
 
     # Restservice OMS spesifikt
     - name: K9_OMS_AARSKVANTUM_URL
       value: http://k9-aarskvantum.k9saksbehandling
     - name: K9_OMS_AARSKVANTUM_SCOPE
       value: api://dev-fss.k9saksbehandling.k9-aarskvantum/.default
-    - name: K9_OMS_UTVIDETRETT_URL
-      value: https://omsorgsdager.intern.dev.nav.no/api
 
     # Restservice PSB spesifikt
     - name: K9_PSB_UTTAK_URL
@@ -220,7 +231,8 @@ spec:
       value: "/k9/klage,api://dev-fss.k9saksbehandling.k9-klage/.default;/k9/tilbake,api://dev-fss.k9saksbehandling.k9-tilbake/.default;/k9/oppdrag,api://dev-fss.k9saksbehandling.k9-oppdrag/.default"
     - name: OIDC_STS_HOST_URL
       value: https://security-token-service.nais.preprod.local
-
+    - name: CLIENT_SCOPE
+      value: "api://dev-fss.k9saksbehandling.k9-sak/.default"
     - name: SECURITYTOKENSERVICE_URL
       value: https://sts-q1.preprod.local/SecurityTokenServiceProvider/
     - name: ABAC_ATTRIBUTT_DRIFT
@@ -254,8 +266,6 @@ spec:
       value: "true"
     - name: ENABLE_DATO_NY_REGEL_UTTAK
       value: "true"
-    - name: PSB_FILTRER_IM_PAA_BEHANDLING_ID
-      value: "true"
     - name: ENABLE_OVERSTYR_UTTAK
       value: "true"
     - name: FILTRER_UGYLDIG_IM
@@ -272,6 +282,10 @@ spec:
       value: "false"
     - name: VALIDER_KALKULUS_REFERANSER
       value: "true"
+    - name: LAGRE_SOEKNADSAKTOERER
+      value: "true"
+    - name: ENABLE_AZURE_CC_SYSTEMCONTEXT
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

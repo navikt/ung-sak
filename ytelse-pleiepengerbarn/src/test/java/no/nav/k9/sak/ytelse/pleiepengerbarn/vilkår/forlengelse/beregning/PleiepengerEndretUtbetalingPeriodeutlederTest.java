@@ -37,6 +37,7 @@ import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
@@ -52,6 +53,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperioder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperioderHolder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.AnnenPart;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeidsforhold;
@@ -87,6 +89,9 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
 
     private UttakTjeneste uttakTjeneste = mock(UttakTjeneste.class);
 
+    private MapInputTilUttakTjeneste mapInputTilUttakTjeneste = mock(MapInputTilUttakTjeneste.class);
+
+
     private SøknadsperiodeRepository søknadsperiodeRepository;
 
     @Inject
@@ -104,7 +109,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
         søknadsperiodeRepository = new SøknadsperiodeRepository(entityManager);
         mottatteDokumentRepository = new MottatteDokumentRepository(entityManager);
         utleder = new PleiepengerEndretUtbetalingPeriodeutleder(uttakTjeneste, behandlingRepository, new UnitTestLookupInstanceImpl<>(vilkårsPerioderTilVurderingTjeneste),
-            new ProsessTriggereRepository(entityManager), søknadsperiodeTjeneste);
+            new ProsessTriggereRepository(entityManager), søknadsperiodeTjeneste, new UttakNyeReglerRepository(entityManager), mapInputTilUttakTjeneste);
         originalBehandling = opprettBehandling(SKJÆRINGSTIDSPUNKT);
         behandling = Behandling.fraTidligereBehandling(originalBehandling, BehandlingType.REVURDERING).build();
         behandlingRepository.lagre(behandling, new BehandlingLås(null));
@@ -575,7 +580,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
 
     private void leggTilPeriode(Map<LukketPeriode, UttaksperiodeInfo> uttaksperioder, List<Utbetalingsgrader> utbetalingsgrader, LocalDate fom, LocalDate tom) {
         uttaksperioder.put(new LukketPeriode(fom, tom),
-            new UttaksperiodeInfo(Utfall.OPPFYLT, BigDecimal.valueOf(100), utbetalingsgrader,
+            new UttaksperiodeInfo(Utfall.OPPFYLT, BigDecimal.valueOf(100), null, null, utbetalingsgrader,
                 null, null, Set.of(),
                 new HashMap<>(), BigDecimal.valueOf(100), null,
                 Set.of(), UUID.randomUUID().toString(),
