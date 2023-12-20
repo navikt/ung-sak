@@ -280,6 +280,8 @@ spec:
       value: "true"
     - name: ENABLE_AZURE_CC_SYSTEMCONTEXT
       value: "false"
+    - name: AVKLAR_ARBEIDSFORHOLD_UTEN_FIKTIVE
+      value: "false"
     - name: ENABLE_RESERVERT_SAKSNUMMER
       value: "false"
 
