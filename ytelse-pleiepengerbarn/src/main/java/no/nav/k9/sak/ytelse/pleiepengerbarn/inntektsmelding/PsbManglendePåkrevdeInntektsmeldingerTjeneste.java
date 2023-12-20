@@ -20,6 +20,7 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -52,6 +53,8 @@ public class PsbManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
     private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
     private BehandlingRepository behandlingRepository;
 
+    private boolean utenFiktive;
+
     PsbManglendePåkrevdeInntektsmeldingerTjeneste() {
         // CDI
     }
@@ -59,10 +62,12 @@ public class PsbManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
     @Inject
     public PsbManglendePåkrevdeInntektsmeldingerTjeneste(BehandlingRepository behandlingRepository,
                                                          @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
-                                                         KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste) {
+                                                         KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste,
+                                                         @KonfigVerdi(value = "5080_UTEN_FIKTIVE", defaultVerdi = "false") boolean utenFiktive) {
         this.behandlingRepository = behandlingRepository;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
+        this.utenFiktive = utenFiktive;
     }
 
     @Override
@@ -85,7 +90,14 @@ public class PsbManglendePåkrevdeInntektsmeldingerTjeneste implements Ytelsespe
         var yrkesaktivitetFilter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), grunnlag.getAktørArbeidFraRegister(behandlingReferanse.getAktørId()));
         var inntektFilter = new InntektFilter(grunnlag.getAktørInntektFraRegister(behandling.getAktørId()));
 
-        var yrkArbeidsgiverArbeidsforhold = yrkesaktivitetFilter.getYrkesaktiviteter()
+        Collection<Yrkesaktivitet> yrkesaktiviteter;
+        if (utenFiktive) {
+            // Tar ikke med fiktive arbeidsforhold for å få opprettet aksjonspunktet på nytt ved tilbakerulling
+            yrkesaktiviteter = yrkesaktivitetFilter.getYrkesaktiviteterEksklusiveFiktive();
+        } else {
+            yrkesaktiviteter = yrkesaktivitetFilter.getYrkesaktiviteter();
+        }
+        var yrkArbeidsgiverArbeidsforhold = yrkesaktiviteter
             .stream()
             .filter(Yrkesaktivitet::erArbeidsforhold)
             .collect(Collectors.groupingBy(Yrkesaktivitet::getArbeidsgiver,

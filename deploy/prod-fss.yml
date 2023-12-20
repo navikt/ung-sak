@@ -280,6 +280,8 @@ spec:
       value: "true"
     - name: ENABLE_AZURE_CC_SYSTEMCONTEXT
       value: "false"
+    - name: 5080_UTEN_FIKTIVE
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
