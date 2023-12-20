@@ -280,7 +280,7 @@ spec:
       value: "true"
     - name: ENABLE_AZURE_CC_SYSTEMCONTEXT
       value: "false"
-    - name: AVKLAR_ARBEIDSFORHOLD_UTEN_FIKTIVE
+    - name: AVKLAR_ARBEIDSFORHOLD_REUTLED_VED_REVURDERING
       value: "false"
 
     # Konfigurasjoner
