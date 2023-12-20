@@ -15,7 +15,9 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.hibernate.Session;
 import org.hibernate.jpa.QueryHints;
+import org.jboss.weld.interceptor.util.proxy.TargetInstanceProxy;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -61,6 +63,7 @@ public class BehandlingRepository {
      * Hent Behandling, der det ikke er gitt at behandlingId er korrekt (eks. for validering av innsendte verdier)
      */
     public Optional<Behandling> hentBehandlingHvisFinnes(Long behandlingId) {
+        skruPåAktiveBehandlingTilstanderFilter(entityManager);
         Objects.requireNonNull(behandlingId, BEHANDLING_ID); // NOSONAR
         return hentUniktResultat(lagBehandlingQuery(behandlingId));
     }
@@ -69,6 +72,7 @@ public class BehandlingRepository {
      * Hent Behandling med angitt id.
      */
     public Behandling hentBehandling(Long behandlingId) {
+        skruPåAktiveBehandlingTilstanderFilter(entityManager);
         Objects.requireNonNull(behandlingId, BEHANDLING_ID); // NOSONAR
         return hentEksaktResultat(lagBehandlingQuery(behandlingId));
     }
@@ -79,6 +83,7 @@ public class BehandlingRepository {
      * @param behandlingId må være type Long eller UUID format
      */
     public Behandling hentBehandling(String behandlingId) {
+        skruPåAktiveBehandlingTilstanderFilter(entityManager);
         Objects.requireNonNull(behandlingId, "behandlingId");
         if (DIGITS_PATTERN.matcher(behandlingId).matches()) {
             return hentBehandling(Long.parseLong(behandlingId));
@@ -91,6 +96,7 @@ public class BehandlingRepository {
      * Hent Behandling med angitt uuid.
      */
     public Behandling hentBehandling(UUID behandlingUuid) {
+        skruPåAktiveBehandlingTilstanderFilter(entityManager);
         Objects.requireNonNull(behandlingUuid, BEHANDLING_UUID); // NOSONAR
         return hentEksaktResultat(lagBehandlingQuery(behandlingUuid));
     }
@@ -99,6 +105,7 @@ public class BehandlingRepository {
      * Hent Behandling med angitt uuid hvis den finnes.
      */
     public Optional<Behandling> hentBehandlingHvisFinnes(UUID behandlingUuid) {
+        skruPåAktiveBehandlingTilstanderFilter(entityManager);
         Objects.requireNonNull(behandlingUuid, BEHANDLING_UUID); // NOSONAR
         return hentUniktResultat(lagBehandlingQuery(behandlingUuid));
     }
@@ -110,6 +117,7 @@ public class BehandlingRepository {
      * Dette er eksternt saksnummer angitt av GSAK.
      */
     public List<Behandling> hentAbsoluttAlleBehandlingerForSaksnummer(Saksnummer saksnummer) {
+        skruPåAktiveBehandlingTilstanderFilter(entityManager);
         Objects.requireNonNull(saksnummer);
         Objects.requireNonNull(saksnummer.getVerdi());
 
@@ -126,6 +134,7 @@ public class BehandlingRepository {
      * Hent alle behandlinger for angitt fagsakId.
      */
     public List<Behandling> hentAbsoluttAlleBehandlingerForFagsak(Long fagsakId) {
+        skruPåAktiveBehandlingTilstanderFilter(entityManager);
         Objects.requireNonNull(fagsakId, FAGSAK_ID);
 
         TypedQuery<Behandling> query = getEntityManager().createQuery(
@@ -160,6 +169,7 @@ public class BehandlingRepository {
      * Hent alle behandlinger som ikke er avsluttet på fagsak.
      */
     public List<Behandling> hentBehandlingerSomIkkeErAvsluttetForFagsakId(Long fagsakId) {
+        skruPåAktiveBehandlingTilstanderFilter(entityManager);
         Objects.requireNonNull(fagsakId, FAGSAK_ID);
 
         TypedQuery<Behandling> query = getEntityManager().createQuery(
@@ -175,6 +185,7 @@ public class BehandlingRepository {
      * Hent alle åpne behandlinger på fagsak.
      */
     public List<Behandling> hentÅpneBehandlingerForFagsakId(Long fagsakId, BehandlingType... behandlingTyper) {
+        skruPåAktiveBehandlingTilstanderFilter(entityManager);
         Objects.requireNonNull(fagsakId, FAGSAK_ID);
 
         List<BehandlingType> typerList = Arrays.asList(behandlingTyper == null || behandlingTyper.length == 0 ? BehandlingType.values() : behandlingTyper);
@@ -193,6 +204,7 @@ public class BehandlingRepository {
     }
 
     public List<Long> hentÅpneBehandlingerIdForFagsakId(Long fagsakId) {
+        skruPåAktiveBehandlingTilstanderFilter(entityManager);
         Objects.requireNonNull(fagsakId, FAGSAK_ID);
 
         TypedQuery<Long> query = getEntityManager().createQuery(
@@ -252,6 +264,7 @@ public class BehandlingRepository {
     }
 
     public List<Behandling> finnAlleAvsluttedeIkkeHenlagteBehandlinger(Long fagsakId) {
+        skruPåAktiveBehandlingTilstanderFilter(entityManager);
         // BehandlingResultatType = Innvilget, endret, ikke endret, avslått.
         Objects.requireNonNull(fagsakId, FAGSAK_ID); // NOSONAR
 
@@ -274,6 +287,7 @@ public class BehandlingRepository {
     }
 
     public List<Behandling> finnAlleIkkeHenlagteBehandlinger(Long fagsakId) {
+        skruPåAktiveBehandlingTilstanderFilter(entityManager);
         // BehandlingResultatType = Innvilget, endret, ikke endret, avslått.
         Objects.requireNonNull(fagsakId, FAGSAK_ID); // NOSONAR
 
@@ -295,6 +309,7 @@ public class BehandlingRepository {
     }
 
     public Optional<Behandling> finnSisteInnvilgetBehandling(Long fagsakId) {
+        skruPåAktiveBehandlingTilstanderFilter(entityManager);
         // BehandlingResultatType = Innvilget, endret.
         Objects.requireNonNull(fagsakId, FAGSAK_ID);
 
@@ -332,6 +347,7 @@ public class BehandlingRepository {
     }
 
     private Optional<Behandling> finnSisteBehandling(Long fagsakId, Set<BehandlingType> behandlingType, boolean readOnly) {
+        skruPåAktiveBehandlingTilstanderFilter(entityManager);
         Objects.requireNonNull(fagsakId, FAGSAK_ID);
         Objects.requireNonNull(behandlingType, "behandlingType");
 
@@ -347,6 +363,7 @@ public class BehandlingRepository {
     }
 
     private Optional<Behandling> finnSisteBehandling(Long fagsakId, boolean readOnly) {
+        skruPåAktiveBehandlingTilstanderFilter(entityManager);
         Objects.requireNonNull(fagsakId, FAGSAK_ID);
 
         TypedQuery<Behandling> query = getEntityManager().createQuery(
@@ -434,8 +451,17 @@ public class BehandlingRepository {
         return (Long) query.getSingleResult();
     }
 
-    public Optional<Behandling> finnSisteIkkeHenlagteBehandling(Long fagsakId) {
-        Objects.requireNonNull(fagsakId, FAGSAK_ID);
-        return optionalFirst(finnAlleIkkeHenlagteBehandlinger(fagsakId));
+    private static void skruPåAktiveBehandlingTilstanderFilter(EntityManager entityManagerProxy) {
+        EntityManager entityManager = unwrapEntityManager(entityManagerProxy);
+        Session session = entityManager.unwrap(Session.class);
+        session.enableFilter("kunAktiveBehandlingTilstander");
+    }
+
+    private static EntityManager unwrapEntityManager(EntityManager bean) {
+        if (bean instanceof TargetInstanceProxy<?> tip) {
+            return (EntityManager) tip.weld_getTargetInstance();
+        } else {
+            return bean;
+        }
     }
 }
