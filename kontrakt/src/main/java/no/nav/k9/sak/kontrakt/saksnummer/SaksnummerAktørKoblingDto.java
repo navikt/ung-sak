@@ -39,6 +39,18 @@ public class SaksnummerAktørKoblingDto {
         this.journalpostId = journalpostId;
     }
 
+    public Saksnummer getSaksnummer() {
+        return saksnummer;
+    }
+
+    public AktørId getAktørId() {
+        return aktørId;
+    }
+
+    public JournalpostId getJournalpostId() {
+        return journalpostId;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(saksnummer, aktørId, journalpostId);
