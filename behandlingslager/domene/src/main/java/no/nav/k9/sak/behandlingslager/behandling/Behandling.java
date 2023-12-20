@@ -130,7 +130,7 @@ public class Behandling extends BaseEntitet {
     @Column(name = "behandling_status", nullable = false)
     private BehandlingStatus status = BehandlingStatus.OPPRETTET;
 
-    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true /* ok med orphanremoval siden behandlingårsaker er eid av denne */)
+    @OneToMany(cascade = {CascadeType.ALL})
     @JoinColumn(name = "behandling_id", nullable = false)
     @Filter(
         name = "kunAktiveBehandlingTilstander",
