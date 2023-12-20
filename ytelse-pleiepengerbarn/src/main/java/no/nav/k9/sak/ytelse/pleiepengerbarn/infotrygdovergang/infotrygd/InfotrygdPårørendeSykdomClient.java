@@ -22,10 +22,12 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
+import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 
 @Dependent
+@ScopedRestIntegration(scopeKey = "k9.infotrygd.scope", defaultScope = "api://prod-fss.k9saksbehandling.k9-infotrygd-grunnlag-paaroerende-sykdom/.default")
 class InfotrygdPårørendeSykdomClient {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final JsonConverter jsonConverter = new JsonConverter();
