@@ -42,7 +42,7 @@ public class OverstyrUttakRepository {
         kopiListe.forEach(kopierFra -> {
                 OverstyrtUttakPeriodeEntitet nyOverstyring = new OverstyrtUttakPeriodeEntitet(
                     behandlingId,
-                    DatoIntervallEntitet.fra(kopierFra.getFom(), kopierFra.getFom()),
+                    DatoIntervallEntitet.fraOgMedTilOgMed(kopierFra.getFom(), kopierFra.getTom()),
                     kopierFra.getSøkersUttaksgrad(),
                     kopierFra.getOverstyrtUtbetalingsgrad().stream().map(OverstyrtUttakUtbetalingsgradEntitet::new).toList(),
                     kopierFra.getBegrunnelse(),

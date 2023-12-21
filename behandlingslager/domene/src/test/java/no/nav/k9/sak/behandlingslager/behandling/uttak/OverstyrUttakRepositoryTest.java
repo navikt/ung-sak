@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -64,8 +65,8 @@ class OverstyrUttakRepositoryTest {
 
     @Test
     void skal_lage_kopi_av_eksisterende() {
-        LocalDateInterval periode1 = new LocalDateInterval(dag1, dag1);
-        LocalDateInterval periode2 = new LocalDateInterval(dag2, dag2);
+        LocalDateInterval periode1 = new LocalDateInterval(LocalDate.now(), LocalDate.now().plusDays(1));
+        LocalDateInterval periode2 = new LocalDateInterval(LocalDate.now().plusDays(2), LocalDate.now().plusDays(4));
         OverstyrtUttakPeriode overstyrtUttakPeriodePeriode1 = new OverstyrtUttakPeriode(null, new BigDecimal("0.35"), Set.of(), "begrunnelse");
         OverstyrtUttakPeriode overstyrtUttakPeriodePeriode2 = new OverstyrtUttakPeriode(null, new BigDecimal("0.35"), Set.of(new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver1, arbeidsforholdRef, new BigDecimal("0.23"))), "begrunnelse");
 
