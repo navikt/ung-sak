@@ -288,6 +288,8 @@ spec:
       value: "false"
     - name: AVKLAR_ARBEIDSFORHOLD_REUTLED_VED_REVURDERING
       value: "true"
+    - name: ENABLE_RESERVERT_SAKSNUMMER
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.mottak;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -35,7 +36,7 @@ public class PPNSøknadMottaker implements SøknadMottakTjeneste<PPNSøknadInnse
     }
 
     @Override
-    public Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, LocalDate startDato, LocalDate sluttDato) {
+    public Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, LocalDate startDato, LocalDate sluttDato, Saksnummer reservertSaksnummer) {
         ytelseType.validerNøkkelParametere(pleietrengendeAktørId, relatertPersonAktørId);
 
         if (sluttDato == null) {
@@ -51,11 +52,21 @@ public class PPNSøknadMottaker implements SøknadMottakTjeneste<PPNSøknadInnse
          * Flere fagsaker kommer trolig til å komme tilbake igjen etter at alle sakene har blitt flyttet fra Infotrygd. Merk at sjekken
          * da må gjøres på tvers av alle søkere på den samme pleietrengende for at bruddet i tidslinjen skal gi mening.
          */
-        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, pleietrengendeAktørId, null, Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE);
+        final Optional<Fagsak> fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, pleietrengendeAktørId, null, Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE);
+
+        if (reservertSaksnummer != null) {
+            if (fagsak.isPresent() && !fagsak.get().getSaksnummer().equals(reservertSaksnummer)) {
+                throw new IllegalArgumentException("Har allerede en fagsak med annet saksnummer enn reservert saksnummer, saksnummer=" + fagsak.get().getSaksnummer() + ", reservertSaksnummer=" + reservertSaksnummer);
+            }
+            if (fagsak.isEmpty() && fagsakTjeneste.finnFagsakGittSaksnummer(reservertSaksnummer, false).isPresent()) {
+                throw new IllegalArgumentException("Fagsak med reservert saksnummer " + reservertSaksnummer + " eksisterer allerede");
+            }
+        }
+
         if (fagsak.isPresent()) {
             return fagsak.get();
         }
-        final Saksnummer saksnummer = new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
+        final Saksnummer saksnummer = reservertSaksnummer != null ? reservertSaksnummer : new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
         return opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, ytelseType, startDato, sluttDato);
     }
 

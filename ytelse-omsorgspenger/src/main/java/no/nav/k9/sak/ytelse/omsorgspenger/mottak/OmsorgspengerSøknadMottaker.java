@@ -40,15 +40,25 @@ public class OmsorgspengerSøknadMottaker implements SøknadMottakTjeneste<Omsor
     }
 
     @Override
-    public Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, LocalDate startDato, LocalDate sluttDato) {
+    public Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, LocalDate startDato, LocalDate sluttDato, Saksnummer reservertSaksnummer) {
         ytelseType.validerNøkkelParametere(pleietrengendeAktørId, relatertPersonAktørId);
         var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, null, null, startDato, sluttDato);
+
+        if (reservertSaksnummer != null) {
+            if (fagsak.isPresent() && !fagsak.get().getSaksnummer().equals(reservertSaksnummer)) {
+                throw new IllegalArgumentException("Har allerede en fagsak med annet saksnummer enn reservert saksnummer, saksnummer=" + fagsak.get().getSaksnummer() + ", reservertSaksnummer=" + reservertSaksnummer);
+            }
+            if (fagsak.isEmpty() && fagsakTjeneste.finnFagsakGittSaksnummer(reservertSaksnummer, false).isPresent()) {
+                throw new IllegalArgumentException("Fagsak med reservert saksnummer " + reservertSaksnummer + " eksisterer allerede");
+            }
+        }
+
         if (fagsak.isPresent()) {
             logger.info("Fant fagsak {} for periode {}/{}", fagsak.get().getSaksnummer().getVerdi(), startDato, sluttDato);
             return fagsak.get();
         }
 
-        var saksnummer = new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
+        var saksnummer = reservertSaksnummer != null ? reservertSaksnummer : new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
 
         LocalDate idag = LocalDate.now();
         var detteÅret = DatoIntervallEntitet.fraOgMedTilOgMed(idag.withDayOfYear(1), idag.withMonth(12).withDayOfMonth(31));

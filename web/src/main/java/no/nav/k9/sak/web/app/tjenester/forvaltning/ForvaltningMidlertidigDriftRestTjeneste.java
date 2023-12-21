@@ -315,7 +315,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         LocalDate fom = LocalDate.of(2020, 3, 1);
         LocalDate tom = manuellSøknadDto.getPeriode().getTilOgMed();
 
-        Fagsak fagsak = frisinnSøknadMottaker.finnEllerOpprettFagsak(FRISINN, aktørId, null, null, fom, tom);
+        Fagsak fagsak = frisinnSøknadMottaker.finnEllerOpprettFagsak(FRISINN, aktørId, null, null, fom, tom, null);
 
         loggForvaltningTjeneste(fagsak, "/frisinn/opprett-manuell-frisinn/", "kjører manuell frisinn søknad");
 
