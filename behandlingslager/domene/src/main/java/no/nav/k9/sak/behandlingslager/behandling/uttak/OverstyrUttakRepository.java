@@ -8,7 +8,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.jboss.weld.exceptions.IllegalStateException;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -50,6 +49,7 @@ public class OverstyrUttakRepository {
                 entityManager.persist(nyOverstyring);
             }
         );
+
 
         entityManager.flush();
     }
