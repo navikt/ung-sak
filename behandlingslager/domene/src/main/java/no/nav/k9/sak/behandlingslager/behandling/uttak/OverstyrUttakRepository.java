@@ -8,6 +8,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.jboss.weld.exceptions.IllegalStateException;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -31,6 +33,31 @@ public class OverstyrUttakRepository {
         return mapFraEntitetTidslinje(hentSomEntitetTidslinje(behandlingId));
     }
 
+    public void lagreKopiAvOverstyringAvUttak(Long behandlingId, Collection<OverstyrtUttakPeriodeEntitet> kopiListe) {
+
+
+        var eksisterende = finnOverstyrtePerioder(behandlingId);
+        if (!eksisterende.isEmpty()) {
+            throw new IllegalStateException("Kan ikke ta kopi når behandling har eksisterende overstyringer");
+        }
+
+        kopiListe.forEach(kopierFra -> {
+                OverstyrtUttakPeriodeEntitet nyOverstyring = new OverstyrtUttakPeriodeEntitet(
+                    behandlingId,
+                    DatoIntervallEntitet.fra(kopierFra.getFom(), kopierFra.getFom()),
+                    kopierFra.getSøkersUttaksgrad(),
+                    kopierFra.getOverstyrtUtbetalingsgrad().stream().map(OverstyrtUttakUtbetalingsgradEntitet::new).toList(),
+                    kopierFra.getBegrunnelse(),
+                    kopierFra.getSaksbehandler());
+                entityManager.persist(nyOverstyring);
+            }
+        );
+
+        entityManager.flush();
+    }
+
+
+    // TODO: Skriv om til å ikkje bruke Id for matching
     public void oppdaterOverstyringAvUttak(Long behandlingId, List<Long> slettes, LocalDateTimeline<OverstyrtUttakPeriode> oppdaterEllerLagre) {
         String saksbehandlerIdent = SubjectHandler.getSubjectHandler().getUid();
         LocalDateTimeline<OverstyrtUttakPeriodeEntitet> eksisterendeOverstyringer = hentSomEntitetTidslinje(behandlingId);
@@ -41,21 +68,23 @@ public class OverstyrUttakRepository {
         oppdaterEllerLagre.stream().forEach(segment -> {
             OverstyrtUttakPeriode nyOverstyring = segment.getValue();
             Long eksisterendeOverstyringId = nyOverstyring.getId();
-            LocalDateSegment<OverstyrtUttakPeriode> eksisterendeOverstyring = eksisterendeOverstyringId != null ? mapFraEntitet(eksisterendeOverstyringerPrId.get(eksisterendeOverstyringId)) : null;
-            boolean harEndring = !Objects.equals(nyOverstyring, eksisterendeOverstyring);
+            LocalDateSegment<OverstyrtUttakPeriode> eksisterendeOverstyring = eksisterendeOverstyringId != null ?
+                mapFraEntitet(eksisterendeOverstyringerPrId.get(eksisterendeOverstyringId)) :
+                LocalDateSegment.emptySegment(segment.getFom(), segment.getTom());
+            boolean harEndring = !Objects.equals(segment, eksisterendeOverstyring);
             if (harEndring) {
                 segmenterSomEndres.add(segment);
             }
         });
 
         fjernEksisterendeOverstyringerSomOverlapper(new LocalDateTimeline<>(segmenterSomEndres), eksisterendeOverstyringer);
-        segmenterSomEndres.stream().forEach(segment -> {
+        segmenterSomEndres.forEach(segment -> {
                 Long eksisterendeOverstyringId = segment.getValue().getId();
                 if (eksisterendeOverstyringId != null) {
                     fjernOverstyring(behandlingId, eksisterendeOverstyringId);
                 }
                 OverstyrtUttakPeriode overstyring = segment.getValue();
-            OverstyrtUttakPeriodeEntitet nyOverstyring = new OverstyrtUttakPeriodeEntitet(behandlingId, DatoIntervallEntitet.fra(segment.getLocalDateInterval()), overstyring.getSøkersUttaksgrad(), map(overstyring.getOverstyrtUtbetalingsgrad()), overstyring.getBegrunnelse(), saksbehandlerIdent);
+                OverstyrtUttakPeriodeEntitet nyOverstyring = new OverstyrtUttakPeriodeEntitet(behandlingId, DatoIntervallEntitet.fra(segment.getLocalDateInterval()), overstyring.getSøkersUttaksgrad(), map(overstyring.getOverstyrtUtbetalingsgrad()), overstyring.getBegrunnelse(), saksbehandlerIdent);
                 entityManager.persist(nyOverstyring);
             }
         );
@@ -64,9 +93,9 @@ public class OverstyrUttakRepository {
     }
 
     public void kopierGrunnlagFraEksisterendeBehandling(Long originalBehandlingId, Long nyBehandlingId) {
-        LocalDateTimeline<OverstyrtUttakPeriodeEntitet> eksisterendeOverstyringer = hentSomEntitetTidslinje(originalBehandlingId);
-        if (!eksisterendeOverstyringer.isEmpty()) {
-            oppdaterOverstyringAvUttak(nyBehandlingId, List.of(), mapFraEntitetTidslinje(eksisterendeOverstyringer));
+        var overstyrtePerioder = finnOverstyrtePerioder(originalBehandlingId);
+        if (!overstyrtePerioder.isEmpty()) {
+            lagreKopiAvOverstyringAvUttak(nyBehandlingId, overstyrtePerioder);
         }
     }
 
@@ -133,7 +162,7 @@ public class OverstyrUttakRepository {
             .toList());
     }
 
-    private Set<OverstyrtUttakUtbetalingsgrad> map(List<OverstyrtUttakUtbetalingsgradEntitet> overstyrtUtbetalingsgrad) {
+    private Set<OverstyrtUttakUtbetalingsgrad> map(Collection<OverstyrtUttakUtbetalingsgradEntitet> overstyrtUtbetalingsgrad) {
         return overstyrtUtbetalingsgrad.stream()
             .map(this::map)
             .collect(Collectors.toSet());
@@ -150,7 +179,7 @@ public class OverstyrUttakRepository {
     }
 
     private OverstyrtUttakUtbetalingsgrad map(OverstyrtUttakUtbetalingsgradEntitet overstyrtUtbetalingsgrad) {
-        return new OverstyrtUttakUtbetalingsgrad(overstyrtUtbetalingsgrad.getAktivitetType(), overstyrtUtbetalingsgrad.getArbeidsgiverId(), overstyrtUtbetalingsgrad.getInternArbeidsforholdRef(), overstyrtUtbetalingsgrad.getUtbetalingsgrad());
+        return new OverstyrtUttakUtbetalingsgrad(overstyrtUtbetalingsgrad.getAktivitetType(), overstyrtUtbetalingsgrad.getArbeidsgiver(), overstyrtUtbetalingsgrad.getInternArbeidsforholdRef(), overstyrtUtbetalingsgrad.getUtbetalingsgrad());
     }
 
 }
