@@ -34,8 +34,6 @@ public class OverstyrUttakRepository {
     }
 
     public void lagreKopiAvOverstyringAvUttak(Long behandlingId, Collection<OverstyrtUttakPeriodeEntitet> kopiListe) {
-
-
         var eksisterende = finnOverstyrtePerioder(behandlingId);
         if (!eksisterende.isEmpty()) {
             throw new IllegalStateException("Kan ikke ta kopi når behandling har eksisterende overstyringer");
