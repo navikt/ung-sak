@@ -69,6 +69,7 @@ import no.nav.k9.sak.web.app.tjenester.register.RedirectToRegisterRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.saksbehandler.InitielleLinksRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.saksbehandler.NavAnsattRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.saksbehandler.SaksbehandlerRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.saksnummer.SaksnummerAktorRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.saksnummer.SaksnummerRestTjeneste;
 import no.nav.k9.sak.web.server.abac.PipRestTjeneste;
 
@@ -132,6 +133,7 @@ public class RestImplementationClasses {
         classes.add(ReisetidRestTjeneste.class);
         classes.add(OpplæringDokumentRestTjeneste.class);
         classes.add(SaksnummerRestTjeneste.class);
+        classes.add(SaksnummerAktorRestTjeneste.class);
 
         // Forvaltningstjenester - fjernes løpende
         classes.add(ProsessTaskRestTjeneste.class);
