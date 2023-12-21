@@ -284,6 +284,8 @@ spec:
       value: "false"
     - name: ENABLE_RESERVERT_SAKSNUMMER
       value: "false"
+    - name: OMP_RELEVANT_ENDRING_UTLEDNING
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

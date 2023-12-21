@@ -63,6 +63,9 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
 
     private boolean enableFjernPerioderBeregning;
 
+
+    private OMPUttakEndringsutleder endringsutleder;
+
     OMPVilkårsPerioderTilVurderingTjeneste() {
         // CDI
     }
@@ -75,7 +78,8 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
                                                   VilkårResultatRepository vilkårResultatRepository,
                                                   ÅrskvantumTjeneste årskvantumTjeneste,
                                                   ProsessTriggereRepository prosessTriggereRepository,
-                                                  @KonfigVerdi(value = "FJERN_VILKARSPERIODER_BEREGNING", defaultVerdi = "false") boolean enableFjernPerioderBeregning) {
+                                                  @KonfigVerdi(value = "FJERN_VILKARSPERIODER_BEREGNING", defaultVerdi = "false") boolean enableFjernPerioderBeregning,
+                                                  OMPUttakEndringsutleder endringsutleder) {
         this.vilkårUtleder = vilkårUtleder;
         søktePerioder = new SøktePerioder(omsorgspengerGrunnlagRepository);
         nulledePerioder = new NulledePerioder(omsorgspengerGrunnlagRepository);
@@ -85,6 +89,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         this.årskvantumTjeneste = årskvantumTjeneste;
         this.prosessTriggereRepository = prosessTriggereRepository;
         this.enableFjernPerioderBeregning = enableFjernPerioderBeregning;
+        this.endringsutleder = endringsutleder;
     }
 
     @Override
@@ -137,12 +142,14 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         var vilkårsPerioder = vilkår.get().getPerioder().stream().map(VilkårPeriode::getPeriode)
             .collect(Collectors.toCollection(TreeSet::new));
         var fullUttaksplan = årskvantumTjeneste.hentFullUttaksplan(referanse.getSaksnummer());
+        var fullUttaksplanForrigeBehandling = referanse.getOriginalBehandlingId().map(id -> årskvantumTjeneste.hentUttaksplanForBehandling(referanse.getSaksnummer(), id));
 
         var aktivitetsperioder = fullUttaksplan.getAktiviteter()
             .stream()
             .map(Aktivitet::getUttaksperioder)
             .flatMap(Collection::stream)
             .filter(it -> Periodetype.REVURDERT.equals(it.getPeriodetype()))
+            .filter(it -> endringsutleder.harRelevantEndringFraForrige(it, fullUttaksplanForrigeBehandling))
             .map(Uttaksperiode::getPeriode)
             .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
             .filter(it -> perioder.stream().noneMatch(it::overlapper))
