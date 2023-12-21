@@ -15,7 +15,6 @@ import jakarta.ws.rs.Produces;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
-import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerAktørKoblingRepository;
 import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 
@@ -28,7 +27,6 @@ public class SaksnummerRestTjeneste {
     private static final Logger log = LoggerFactory.getLogger(SaksnummerRestTjeneste.class);
 
     private SaksnummerRepository saksnummerRepository;
-    private SaksnummerAktørKoblingRepository saksnummerAktørKoblingRepository;
     private boolean enableReservertSaksnummer;
 
     public SaksnummerRestTjeneste() {// For Rest-CDI
@@ -36,10 +34,8 @@ public class SaksnummerRestTjeneste {
 
     @Inject
     public SaksnummerRestTjeneste(SaksnummerRepository saksnummerRepository,
-                                  SaksnummerAktørKoblingRepository saksnummerAktørKoblingRepository,
                                   @KonfigVerdi(value = "ENABLE_RESERVERT_SAKSNUMMER", defaultVerdi = "false") boolean enableReservertSaksnummer) {
         this.saksnummerRepository = saksnummerRepository;
-        this.saksnummerAktørKoblingRepository = saksnummerAktørKoblingRepository;
         this.enableReservertSaksnummer = enableReservertSaksnummer;
     }
 
