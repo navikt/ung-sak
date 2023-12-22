@@ -1,11 +1,8 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.dump;
 
 import java.io.BufferedOutputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.slf4j.Logger;
@@ -19,8 +16,6 @@ import jakarta.ws.rs.core.StreamingOutput;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 
 @ApplicationScoped
 public class DebugDumpsters {
@@ -57,7 +52,7 @@ public class DebugDumpsters {
             try (ZipOutputStream zipOut = new ZipOutputStream(new BufferedOutputStream(outputStream))) {
                 final DumpMottaker dumpMottaker = new DumpMottaker(fagsak, zipOut);
                 for (DebugDumpFagsak dumper : dumpers) {
-                    dumpOutput(dumpMottaker, dumper);
+                    dump(dumpMottaker, dumper);
                 }
                 zipOut.closeEntry();
             } finally {
@@ -68,23 +63,12 @@ public class DebugDumpsters {
         return streamingOutput;
     }
 
-    private void dumpOutput(DumpMottaker dumpMottaker, DebugDumpFagsak dumpster) {
+    private void dump(DumpMottaker dumpMottaker, DebugDumpFagsak dumpster) {
+        log.info("Dumper fra {}", dumpster.getClass().getName());
         try {
-            log.info("Dumper fra {}", dumpster.getClass().getName());
             dumpster.dump(dumpMottaker);
         } catch (Exception e) {
             dumpMottaker.writeErrorFile(dumpster.getClass().getSimpleName(), e);
-        }
-    }
-
-    private void addToZip(Saksnummer saksnummer, ZipOutputStream zipOut, DumpOutput dump) {
-        var zipEntry = new ZipEntry(saksnummer + "/" + dump.getPath());
-        try {
-            zipOut.putNextEntry(zipEntry);
-            zipOut.write(dump.getContent().getBytes(StandardCharsets.UTF_8));
-            zipOut.closeEntry();
-        } catch (IOException e) {
-            throw new IllegalStateException("Kunne ikke zippe dump fra : " + dump, e);
         }
     }
 }

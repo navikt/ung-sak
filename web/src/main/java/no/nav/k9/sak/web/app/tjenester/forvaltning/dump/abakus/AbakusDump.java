@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -35,7 +34,7 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
 @FagsakYtelseTypeRef(FRISINN)
 public class AbakusDump implements DebugDumpBehandling, DebugDumpFagsak {
 
-    private final ObjectWriter iayMapper = JsonObjectMapper.getMapper().writerWithDefaultPrettyPrinter().withoutFeatures(SerializationFeature.CLOSE_CLOSEABLE);
+    private final ObjectWriter iayMapper = JsonObjectMapper.getMapper().writerWithDefaultPrettyPrinter();
     private AbakusTjenesteAdapter tjeneste;
 
     AbakusDump() {
