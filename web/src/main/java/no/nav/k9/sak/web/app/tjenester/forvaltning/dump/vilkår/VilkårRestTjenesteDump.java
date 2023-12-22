@@ -17,6 +17,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.vilkår.VilkårRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.ContainerContextRunner;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
@@ -24,8 +25,8 @@ public class VilkårRestTjenesteDump implements DebugDumpBehandling {
 
     private VilkårRestTjeneste restTjeneste;
 
-    private ObjectWriter ow = new JacksonJsonConfig().getObjectMapper().writerWithDefaultPrettyPrinter();
-    private String relativePath = "rest/vilkår";
+    private final ObjectWriter ow = new JacksonJsonConfig().getObjectMapper().writerWithDefaultPrettyPrinter();
+    private final String relativePath = "rest/vilkår";
 
     VilkårRestTjenesteDump() {
         // for proxy
@@ -48,6 +49,28 @@ public class VilkårRestTjenesteDump implements DebugDumpBehandling {
             return List.of(new DumpOutput(relativePath + "-rest-tjeneste-ERROR.txt", sw.toString()));
         }
 
+    }
+
+    @Override
+    public void dump(DumpMottaker dumpMottaker, Behandling behandling) {
+        try {
+            ContainerContextRunner.doRun(behandling, () -> dumpVilkår(dumpMottaker, behandling));
+        } catch (Exception e) {
+            dumpMottaker.writeExceptionToFile("behandling-" + behandling.getId() + "/" + relativePath + "-rest-tjeneste-ERROR.txt", e);
+        }
+    }
+
+    private int dumpVilkår(DumpMottaker dumpMottaker, Behandling behandling) {
+        try (var response = restTjeneste.getVilkårV3(new BehandlingUuidDto(behandling.getUuid()))) {
+            Object entity = response.getEntity();
+            if (entity != null) {
+                dumpMottaker.newFile("behandling-" + behandling.getId() + "/" + relativePath + ".json");
+                ow.writeValue(dumpMottaker.getOutputStream(), entity);
+            }
+        } catch (Exception e) {
+            dumpMottaker.writeExceptionToFile("behandling-" + behandling.getId() + "/" + relativePath + "-ERROR.txt", e);
+        }
+        return 1;
     }
 
     private List<DumpOutput> dumpVilkår(Behandling behandling) {

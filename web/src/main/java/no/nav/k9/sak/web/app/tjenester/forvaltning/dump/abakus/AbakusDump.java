@@ -75,7 +75,7 @@ public class AbakusDump implements DebugDumpBehandling, DebugDumpFagsak {
                 iayMapper.writeValue(dumpMottaker.getOutputStream(), im);
             }
         } catch (Exception e) {
-            dumpMottaker.writeErrorFile(relativePath, e);
+            dumpMottaker.writeExceptionToFile(relativePath + "-ERROR.txt", e);
         }
     }
 
