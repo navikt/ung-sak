@@ -10,8 +10,10 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -19,9 +21,11 @@ import no.nav.abakus.iaygrunnlag.JsonObjectMapper;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(OMSORGSPENGER)
@@ -31,7 +35,7 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
 @FagsakYtelseTypeRef(FRISINN)
 public class AbakusDump implements DebugDumpBehandling, DebugDumpFagsak {
 
-    private final ObjectWriter iayMapper = JsonObjectMapper.getMapper().writerWithDefaultPrettyPrinter();
+    private final ObjectWriter iayMapper = JsonObjectMapper.getMapper().writerWithDefaultPrettyPrinter().withoutFeatures(SerializationFeature.CLOSE_CLOSEABLE);
     private AbakusTjenesteAdapter tjeneste;
 
     AbakusDump() {
@@ -59,6 +63,21 @@ public class AbakusDump implements DebugDumpBehandling, DebugDumpFagsak {
             return List.of(new DumpOutput("abakus-iaygrunnlag-ERROR.txt", sw.toString()));
         }
 
+    }
+
+    @Override
+    public void dump(DumpMottaker dumpMottaker) {
+        String relativePath = "abakus-inntektsmeldinger";
+        try {
+            Set<Inntektsmelding> data = tjeneste.hentUnikeInntektsmeldingerForSak(dumpMottaker.getFagsak().getSaksnummer());
+            for (Inntektsmelding im : data) {
+                relativePath = "abakus-inntektsmelding-" + im.getArbeidsgiver().getIdentifikator() + "-journalpost_" + im.getJournalpostId().getVerdi();
+                dumpMottaker.newFile(relativePath);
+                iayMapper.writeValue(dumpMottaker.getOutputStream(), im);
+            }
+        } catch (Exception e) {
+            dumpMottaker.writeErrorFile(relativePath, e);
+        }
     }
 
     @Override

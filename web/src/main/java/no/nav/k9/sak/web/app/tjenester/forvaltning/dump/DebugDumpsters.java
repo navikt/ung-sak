@@ -2,8 +2,6 @@ package no.nav.k9.sak.web.app.tjenester.forvaltning.dump;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -57,10 +55,11 @@ public class DebugDumpsters {
 
         StreamingOutput streamingOutput = outputStream -> {
             try (ZipOutputStream zipOut = new ZipOutputStream(new BufferedOutputStream(outputStream))) {
+                final DumpMottaker dumpMottaker = new DumpMottaker(fagsak, zipOut);
                 for (DebugDumpFagsak dumper : dumpers) {
-                    List<DumpOutput> dumpOutputs = dumpOutput(fagsak, dumper);
-                    dumpOutputs.forEach(dumpOutput -> addToZip(fagsak.getSaksnummer(), zipOut, dumpOutput));
+                    dumpOutput(dumpMottaker, dumper);
                 }
+                zipOut.closeEntry();
             } finally {
                 outputStream.flush();
                 outputStream.close();
@@ -69,15 +68,12 @@ public class DebugDumpsters {
         return streamingOutput;
     }
 
-    private List<DumpOutput> dumpOutput(Fagsak fagsak, DebugDumpFagsak dumpster) {
+    private void dumpOutput(DumpMottaker dumpMottaker, DebugDumpFagsak dumpster) {
         try {
             log.info("Dumper fra {}", dumpster.getClass().getName());
-            return dumpster.dump(fagsak);
+            dumpster.dump(dumpMottaker);
         } catch (Exception e) {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
-            return List.of(new DumpOutput(dumpster.getClass().getSimpleName() + "-ERROR.txt", sw.toString()));
+            dumpMottaker.writeErrorFile(dumpster.getClass().getSimpleName(), e);
         }
     }
 
