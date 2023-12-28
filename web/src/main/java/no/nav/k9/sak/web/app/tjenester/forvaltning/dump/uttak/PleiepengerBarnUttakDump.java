@@ -11,9 +11,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.rest.DefaultJsonMapper;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.UttakRestKlient;
 
@@ -21,12 +19,9 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.UttakRestKlient;
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
-public class PleiepengerBarnUttakDump implements DebugDumpBehandling, DebugDumpFagsak {
+public class PleiepengerBarnUttakDump implements DebugDumpBehandling {
 
     private UttakRestKlient restKlient;
-    private BehandlingRepository behandlingRepository;
-    private final String fileNameBehandlingPrefix = "pleiepenger-uttaksplan-";
-    private final String fileNameBehandlingPosfix = ".json";
     private final ObjectWriter ow = DefaultJsonMapper.getObjectMapper().writerWithDefaultPrettyPrinter();
 
     PleiepengerBarnUttakDump() {
@@ -34,37 +29,19 @@ public class PleiepengerBarnUttakDump implements DebugDumpBehandling, DebugDumpF
     }
 
     @Inject
-    public PleiepengerBarnUttakDump(UttakRestKlient restKlient, BehandlingRepository behandlingRepository) {
+    public PleiepengerBarnUttakDump(UttakRestKlient restKlient) {
         this.restKlient = restKlient;
-        this.behandlingRepository = behandlingRepository;
     }
 
     @Override
     public void dump(DumpMottaker dumpMottaker, Behandling behandling, String basePath) {
         try {
             var uttaksplan = restKlient.hentUttaksplan(behandling.getUuid(), false);
-            dumpMottaker.newFile(basePath + "/" + fileNameBehandlingPrefix + behandling.getUuid().toString() + fileNameBehandlingPosfix);
+            dumpMottaker.newFile(basePath + "/pleiepenger-uttaksplan.json");
             ow.writeValue(dumpMottaker.getOutputStream(), uttaksplan);
         } catch (Exception e) {
-            dumpMottaker.newFile(basePath + "/" + fileNameBehandlingPrefix + "-ERROR");
+            dumpMottaker.newFile(basePath + "/pleiepenger-uttaksplan-ERROR.txt");
             dumpMottaker.write(e);
-        }
-    }
-
-    //TODO er denne unødvendig?
-    @Override
-    public void dump(DumpMottaker dumpMottaker) {
-        var behandlinger = behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(dumpMottaker.getFagsak().getId());
-        for (var behandling : behandlinger) {
-            final String dumpFileName = fileNameBehandlingPrefix + behandling.getUuid().toString() + fileNameBehandlingPosfix;
-            try {
-                var uttaksplan = restKlient.hentUttaksplan(behandling.getUuid(), false);
-                dumpMottaker.newFile(dumpFileName);
-                ow.writeValue(dumpMottaker.getOutputStream(), uttaksplan);
-            } catch (Exception e) {
-                dumpMottaker.newFile(dumpFileName + "-ERROR");
-                dumpMottaker.write(e);
-            }
         }
     }
 }
