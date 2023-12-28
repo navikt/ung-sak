@@ -21,6 +21,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.UttakRestKlient;
 
 @ApplicationScoped
@@ -60,6 +61,17 @@ public class PleiepengerBarnUttakDump implements DebugDumpBehandling, DebugDumpF
     }
 
     @Override
+    public void dump(DumpMottaker dumpMottaker, Behandling behandling) {
+        try {
+            var uttaksplan = restKlient.hentUttaksplan(behandling.getUuid(), false);
+            dumpMottaker.newFile("behandling-" + behandling.getId() + "/" + fileNameBehandlingPrefix + behandling.getUuid().toString() + fileNameBehandlingPosfix);
+            ow.writeValue(dumpMottaker.getOutputStream(), uttaksplan);
+        } catch (Exception e) {
+            dumpMottaker.writeExceptionToFile("behandling-" + behandling.getId() + "/" + fileNameBehandlingPrefix + "-ERROR", e);
+        }
+    }
+
+    @Override
     public List<DumpOutput> dump(Fagsak fagsak) {
         var behandlinger = behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(fagsak.getId());
         var outputListe = new ArrayList<DumpOutput>();
@@ -79,4 +91,19 @@ public class PleiepengerBarnUttakDump implements DebugDumpBehandling, DebugDumpF
         return outputListe;
     }
 
+    //TODO er denne unødvendig?
+    @Override
+    public void dump(DumpMottaker dumpMottaker) {
+        var behandlinger = behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(dumpMottaker.getFagsak().getId());
+        for (var behandling : behandlinger) {
+            final String dumpFileName = fileNameBehandlingPrefix + behandling.getUuid().toString() + fileNameBehandlingPosfix;
+            try {
+                var uttaksplan = restKlient.hentUttaksplan(behandling.getUuid(), false);
+                dumpMottaker.newFile(dumpFileName);
+                ow.writeValue(dumpMottaker.getOutputStream(), uttaksplan);
+            } catch (Exception e) {
+                dumpMottaker.writeExceptionToFile(dumpFileName + "-ERROR", e);
+            }
+        }
+    }
 }

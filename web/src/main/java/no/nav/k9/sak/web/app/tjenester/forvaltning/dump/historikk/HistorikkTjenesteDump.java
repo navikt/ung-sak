@@ -15,6 +15,7 @@ import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.web.app.jackson.JacksonJsonConfig;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
@@ -22,7 +23,7 @@ public class HistorikkTjenesteDump implements DebugDumpFagsak {
 
     private HistorikkTjenesteAdapter historikkTjeneste;
 
-    private ObjectWriter ow = new JacksonJsonConfig().getObjectMapper().writerWithDefaultPrettyPrinter();
+    private final ObjectWriter ow = new JacksonJsonConfig().getObjectMapper().writerWithDefaultPrettyPrinter();
 
     HistorikkTjenesteDump() {
         // for proxy
@@ -58,4 +59,19 @@ public class HistorikkTjenesteDump implements DebugDumpFagsak {
 
     }
 
+    @Override
+    public void dump(DumpMottaker dumpMottaker) {
+        var saksnummer = dumpMottaker.getFagsak().getSaksnummer();
+        var historikkInnslag = historikkTjeneste.finnHistorikkInnslag(saksnummer);
+        var dtoer = historikkTjeneste.mapTilDto(historikkInnslag, saksnummer);
+
+        if (dtoer != null && !dtoer.isEmpty()) {
+            try {
+                dumpMottaker.newFile("historikk.json");
+                ow.writeValue(dumpMottaker.getOutputStream(), dtoer);
+            } catch (Exception e) {
+                dumpMottaker.writeExceptionToFile("historikk-ERROR.txt", e);
+            }
+        }
+    }
 }

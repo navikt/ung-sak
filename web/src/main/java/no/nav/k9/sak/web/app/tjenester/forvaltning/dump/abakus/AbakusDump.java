@@ -65,6 +65,20 @@ public class AbakusDump implements DebugDumpBehandling, DebugDumpFagsak {
     }
 
     @Override
+    public void dump(DumpMottaker dumpMottaker, Behandling behandling) {
+        try {
+            var data = tjeneste.finnGrunnlag(behandling.getId());
+            if (data.isEmpty()) {
+                return;
+            }
+            dumpMottaker.newFile("behandling-" + behandling.getId() + "/" + "abakus-iaygrunnlag.json");
+            iayMapper.writeValue(dumpMottaker.getOutputStream(), data.get());
+        } catch (Exception e) {
+            dumpMottaker.writeExceptionToFile("behandling-" + behandling.getId() + "/" + "abakus-iaygrunnlag-ERROR.txt", e);
+        }
+    }
+
+    @Override
     public void dump(DumpMottaker dumpMottaker) {
         String relativePath = "abakus-inntektsmeldinger";
         try {

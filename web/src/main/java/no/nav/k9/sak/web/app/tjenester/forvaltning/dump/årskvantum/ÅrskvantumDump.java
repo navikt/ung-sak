@@ -18,6 +18,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest.ÅrskvantumRestKlient;
 
 @ApplicationScoped
@@ -25,8 +26,8 @@ import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest.ÅrskvantumRestKlient
 public class ÅrskvantumDump implements DebugDumpBehandling, DebugDumpFagsak {
 
     private ÅrskvantumRestKlient restKlient;
-    private String fileName = "årskvantum-fulluttaksplan.json";
-    private ObjectWriter ow = DefaultJsonMapper.getObjectMapper().writerWithDefaultPrettyPrinter(); // samme som ÅrskvantumRestklient bruker
+    private final String fileName = "årskvantum-fulluttaksplan.json";
+    private final ObjectWriter ow = DefaultJsonMapper.getObjectMapper().writerWithDefaultPrettyPrinter(); // samme som ÅrskvantumRestklient bruker
 
     ÅrskvantumDump() {
         // for proxy
@@ -52,6 +53,17 @@ public class ÅrskvantumDump implements DebugDumpBehandling, DebugDumpFagsak {
     }
 
     @Override
+    public void dump(DumpMottaker dumpMottaker, Behandling behandling) {
+        try {
+            var uttaksplan = restKlient.hentFullUttaksplanForBehandling(List.of(behandling.getUuid()));
+            dumpMottaker.newFile(fileName);
+            ow.writeValue(dumpMottaker.getOutputStream(), uttaksplan);
+        } catch (Exception e) {
+            dumpMottaker.writeExceptionToFile(fileName + "-ERROR", e);
+        }
+    }
+
+    @Override
     public List<DumpOutput> dump(Fagsak fagsak) {
         try {
             var uttaksplan = restKlient.hentFullUttaksplan(fagsak.getSaksnummer());
@@ -65,4 +77,14 @@ public class ÅrskvantumDump implements DebugDumpBehandling, DebugDumpFagsak {
         }
     }
 
+    @Override
+    public void dump(DumpMottaker dumpMottaker) {
+        try {
+            var uttaksplan = restKlient.hentFullUttaksplan(dumpMottaker.getFagsak().getSaksnummer());
+            dumpMottaker.newFile(fileName);
+            ow.writeValue(dumpMottaker.getOutputStream(), uttaksplan);
+        } catch (Exception e) {
+            dumpMottaker.writeExceptionToFile(fileName + "-ERROR", e);
+        }
+    }
 }
