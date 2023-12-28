@@ -52,23 +52,23 @@ public class VilkårRestTjenesteDump implements DebugDumpBehandling {
     }
 
     @Override
-    public void dump(DumpMottaker dumpMottaker, Behandling behandling) {
+    public void dump(DumpMottaker dumpMottaker, Behandling behandling, String basePath) {
         try {
-            ContainerContextRunner.doRun(behandling, () -> dumpVilkår(dumpMottaker, behandling));
+            ContainerContextRunner.doRun(behandling, () -> dumpVilkår(dumpMottaker, behandling, basePath));
         } catch (Exception e) {
-            dumpMottaker.writeExceptionToFile("behandling-" + behandling.getId() + "/" + relativePath + "-rest-tjeneste-ERROR.txt", e);
+            dumpMottaker.writeExceptionToFile(basePath + "/" + relativePath + "-rest-tjeneste-ERROR.txt", e);
         }
     }
 
-    private int dumpVilkår(DumpMottaker dumpMottaker, Behandling behandling) {
+    private int dumpVilkår(DumpMottaker dumpMottaker, Behandling behandling, String basePath) {
         try (var response = restTjeneste.getVilkårV3(new BehandlingUuidDto(behandling.getUuid()))) {
             Object entity = response.getEntity();
             if (entity != null) {
-                dumpMottaker.newFile("behandling-" + behandling.getId() + "/" + relativePath + ".json");
+                dumpMottaker.newFile(basePath + "/" + relativePath + ".json");
                 ow.writeValue(dumpMottaker.getOutputStream(), entity);
             }
         } catch (Exception e) {
-            dumpMottaker.writeExceptionToFile("behandling-" + behandling.getId() + "/" + relativePath + "-ERROR.txt", e);
+            dumpMottaker.writeExceptionToFile(basePath + "/" + relativePath + "-ERROR.txt", e);
         }
         return 1;
     }

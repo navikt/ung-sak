@@ -51,13 +51,13 @@ public class ÅrskvantumDump implements DebugDumpBehandling, DebugDumpFagsak {
     }
 
     @Override
-    public void dump(DumpMottaker dumpMottaker, Behandling behandling) {
+    public void dump(DumpMottaker dumpMottaker, Behandling behandling, String basePath) {
         try {
             var uttaksplan = restKlient.hentFullUttaksplanForBehandling(List.of(behandling.getUuid()));
-            dumpMottaker.newFile(fileName);
+            dumpMottaker.newFile(basePath + "/" + fileName);
             ow.writeValue(dumpMottaker.getOutputStream(), uttaksplan);
         } catch (Exception e) {
-            dumpMottaker.writeExceptionToFile(fileName + "-ERROR", e);
+            dumpMottaker.writeExceptionToFile(basePath + "/" + fileName + "-ERROR", e);
         }
     }
 
