@@ -49,7 +49,10 @@ public final class DumpMottaker {
         }
     }
 
-    //TODO lag writeNewFile
+    public void writeNewFile(String path, String content) {
+        newFile(path);
+        write(content);
+    }
 
     public void writeExceptionToFile(String path, Exception e) {
         newFile(path);
