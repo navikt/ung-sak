@@ -54,6 +54,7 @@ public final class DumpMottaker {
         write(content);
     }
 
+    //TODO del opp
     public void writeExceptionToFile(String path, Exception e) {
         newFile(path);
         PrintWriter pw = new PrintWriter(outputStream);

@@ -4,7 +4,7 @@ import java.util.Objects;
 
 public class DumpOutput {
 
-    private final String relativePath;
+    private final String relativePath; //TODO fjernes?
     private final String content;
 
     public DumpOutput(String relativePath, String content) {

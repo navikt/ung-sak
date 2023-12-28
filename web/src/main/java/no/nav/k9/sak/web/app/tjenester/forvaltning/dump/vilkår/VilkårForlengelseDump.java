@@ -29,6 +29,7 @@ import no.nav.k9.sak.vilkår.VilkårTjeneste;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.ContainerContextRunner;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(OMSORGSPENGER)
@@ -36,7 +37,6 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
 public class VilkårForlengelseDump implements DebugDumpBehandling {
-
 
     private final ObjectWriter objectWriter = JsonMapper.getMapper().writerWithDefaultPrettyPrinter();
     private Instance<ForlengelseTjeneste> tjeneste;
@@ -69,6 +69,19 @@ public class VilkårForlengelseDump implements DebugDumpBehandling {
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);
             return List.of(new DumpOutput("vilkår-perioder-ERROR.txt", sw.toString()));
+        }
+    }
+
+    @Override
+    public void dump(DumpMottaker dumpMottaker, Behandling behandling, String basePath) {
+        BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
+        var vilkårene = vilkårTjeneste.hentVilkårResultat(behandling.getId());
+        try {
+            var data = ContainerContextRunner.doRun(behandling, () -> utledForlengelseData(vilkårene, ref));
+            dumpMottaker.newFile(basePath + "/vilkår-perioder.json");
+            objectWriter.writeValue(dumpMottaker.getOutputStream(), data);
+        } catch (Exception e) {
+            dumpMottaker.writeExceptionToFile(basePath + "/vilkår-perioder-ERROR.txt", e);
         }
     }
 

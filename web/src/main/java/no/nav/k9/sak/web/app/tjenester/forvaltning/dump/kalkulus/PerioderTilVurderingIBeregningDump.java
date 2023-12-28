@@ -20,6 +20,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.ContainerContextRunner;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(OMSORGSPENGER)
@@ -27,7 +28,6 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
 public class PerioderTilVurderingIBeregningDump implements DebugDumpBehandling {
-
 
     private final ObjectWriter objectWriter = JsonMapper.getMapper().writerWithDefaultPrettyPrinter();
     private KalkulusTjenesteAdapter tjeneste;
@@ -56,5 +56,16 @@ public class PerioderTilVurderingIBeregningDump implements DebugDumpBehandling {
         }
     }
 
+    @Override
+    public void dump(DumpMottaker dumpMottaker, Behandling behandling, String basePath) {
+        BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
+        try {
+            var data = ContainerContextRunner.doRun(behandling, () -> tjeneste.hentKoblingerForPerioderTilVurdering(ref));
+            dumpMottaker.newFile(basePath + "/perioder-til-vurdering-beregning.json");
+            objectWriter.writeValue(dumpMottaker.getOutputStream(), data);
+        } catch (Exception e) {
+            dumpMottaker.writeExceptionToFile(basePath + "/perioder-til-vurdering-beregning-ERROR.txt", e);
+        }
+    }
 
 }
