@@ -47,10 +47,10 @@ public class AbakusDump implements DebugDumpBehandling, DebugDumpFagsak {
             if (data.isEmpty()) {
                 return;
             }
-            dumpMottaker.newFile(basePath + "/" + "abakus-iaygrunnlag.json");
+            dumpMottaker.newFile(basePath + "/abakus-iaygrunnlag.json");
             iayMapper.writeValue(dumpMottaker.getOutputStream(), data.get());
         } catch (Exception e) {
-            dumpMottaker.newFile(basePath + "/" + "abakus-iaygrunnlag-ERROR.txt");
+            dumpMottaker.newFile(basePath + "/abakus-iaygrunnlag-ERROR.txt");
             dumpMottaker.write(e);
         }
     }
