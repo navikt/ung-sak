@@ -6,15 +6,13 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import com.fasterxml.jackson.databind.ObjectWriter;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.rest.DefaultJsonMapper;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
@@ -60,20 +58,6 @@ public class ÅrskvantumDump implements DebugDumpBehandling, DebugDumpFagsak {
             ow.writeValue(dumpMottaker.getOutputStream(), uttaksplan);
         } catch (Exception e) {
             dumpMottaker.writeExceptionToFile(fileName + "-ERROR", e);
-        }
-    }
-
-    @Override
-    public List<DumpOutput> dump(Fagsak fagsak) {
-        try {
-            var uttaksplan = restKlient.hentFullUttaksplan(fagsak.getSaksnummer());
-            var content = ow.writeValueAsString(uttaksplan);
-            return List.of(new DumpOutput(fileName, content));
-        } catch (Exception e) {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
-            return List.of(new DumpOutput(fileName + "-ERROR", sw.toString()));
         }
     }
 

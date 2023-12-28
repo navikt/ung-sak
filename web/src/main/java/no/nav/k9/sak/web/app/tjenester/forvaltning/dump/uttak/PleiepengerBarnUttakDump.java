@@ -6,7 +6,6 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BA
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -17,7 +16,6 @@ import no.nav.k9.felles.integrasjon.rest.DefaultJsonMapper;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
@@ -69,26 +67,6 @@ public class PleiepengerBarnUttakDump implements DebugDumpBehandling, DebugDumpF
         } catch (Exception e) {
             dumpMottaker.writeExceptionToFile("behandling-" + behandling.getId() + "/" + fileNameBehandlingPrefix + "-ERROR", e);
         }
-    }
-
-    @Override
-    public List<DumpOutput> dump(Fagsak fagsak) {
-        var behandlinger = behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(fagsak.getId());
-        var outputListe = new ArrayList<DumpOutput>();
-        for (var behandling : behandlinger) {
-            var dumpFileName = fileNameBehandlingPrefix + behandling.getUuid().toString() + fileNameBehandlingPosfix;
-            try {
-                var uttaksplan = restKlient.hentUttaksplan(behandling.getUuid(), false);
-                var content = ow.writeValueAsString(uttaksplan);
-                outputListe.add(new DumpOutput(dumpFileName, content));
-            } catch (Exception e) {
-                StringWriter sw = new StringWriter();
-                PrintWriter pw = new PrintWriter(sw);
-                e.printStackTrace(pw);
-                outputListe.add(new DumpOutput(dumpFileName + "-ERROR", sw.toString()));
-            }
-        }
-        return outputListe;
     }
 
     //TODO er denne unødvendig?

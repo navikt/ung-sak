@@ -10,7 +10,6 @@ import jakarta.persistence.Query;
 import jakarta.persistence.Tuple;
 
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
@@ -30,33 +29,6 @@ public class DiagnostikkLoggDump implements DebugDumpFagsak {
     @Inject
     DiagnostikkLoggDump(EntityManager entityManager) {
         this.entityManager = entityManager;
-    }
-
-    @Override
-    public List<DumpOutput> dump(Fagsak fagsak) {
-        var sql = "select"
-            + "   f.saksnummer"
-            + " , d.fagsak_id"
-            + " , replace(cast(d.opprettet_tid as varchar), ' ', 'T') opprettet_tid"
-            + " , d.opprettet_av"
-            + " from diagnostikk_fagsak_logg d "
-            + "   inner join fagsak f on f.id=d.fagsak_id "
-            + " where f.saksnummer=:saksnummer "
-            + " order by d.opprettet_tid desc";
-
-        var query = entityManager.createNativeQuery(sql, Tuple.class)
-            .setParameter("saksnummer", fagsak.getSaksnummer().getVerdi());
-        String path = "diagnostikk-logg.csv";
-
-        @SuppressWarnings("unchecked")
-        List<Tuple> results = query.getResultList();
-
-        if (results.isEmpty()) {
-            return List.of();
-        }
-
-        return CsvOutput.dumpResultSetToCsv(path, results)
-            .map(v -> List.of(v)).orElse(List.of());
     }
 
     @Override
