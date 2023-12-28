@@ -68,7 +68,8 @@ public class DebugDumpsters {
         try {
             dumpster.dump(dumpMottaker);
         } catch (Exception e) {
-            dumpMottaker.writeExceptionToFile(dumpster.getClass().getSimpleName() + "-ERROR.txt", e);
+            dumpMottaker.newFile(dumpster.getClass().getSimpleName() + "-ERROR.txt");
+            dumpMottaker.write(e);
         }
     }
 }

@@ -53,7 +53,8 @@ public class KalkulusEksaktFastsattDump implements DebugDumpBehandling {
             dumpMottaker.newFile(basePath + "/kalkulus-beregningsgrunnlag-fastsatt.json");
             objectWriter.writeValue(dumpMottaker.getOutputStream(), data);
         } catch (Exception e) {
-            dumpMottaker.writeExceptionToFile(basePath + "/kalkulus-beregningsgrunnlag-fastsatt-ERROR.txt", e);
+            dumpMottaker.newFile(basePath + "/kalkulus-beregningsgrunnlag-fastsatt-ERROR.txt");
+            dumpMottaker.write(e);
         }
     }
 

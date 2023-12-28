@@ -50,7 +50,8 @@ public class AbakusDump implements DebugDumpBehandling, DebugDumpFagsak {
             dumpMottaker.newFile(basePath + "/" + "abakus-iaygrunnlag.json");
             iayMapper.writeValue(dumpMottaker.getOutputStream(), data.get());
         } catch (Exception e) {
-            dumpMottaker.writeExceptionToFile(basePath + "/" + "abakus-iaygrunnlag-ERROR.txt", e);
+            dumpMottaker.newFile(basePath + "/" + "abakus-iaygrunnlag-ERROR.txt");
+            dumpMottaker.write(e);
         }
     }
 
@@ -65,7 +66,8 @@ public class AbakusDump implements DebugDumpBehandling, DebugDumpFagsak {
                 iayMapper.writeValue(dumpMottaker.getOutputStream(), im);
             }
         } catch (Exception e) {
-            dumpMottaker.writeExceptionToFile(relativePath + "-ERROR.txt", e);
+            dumpMottaker.newFile(relativePath + "-ERROR.txt");
+            dumpMottaker.write(e);
         }
     }
 }

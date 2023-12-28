@@ -52,7 +52,8 @@ public class KalkulusForGUIDump implements DebugDumpBehandling {
             dumpMottaker.newFile(basePath + "/kalkulus-beregningsgrunnlag-for-gui.json");
             objectWriter.writeValue(dumpMottaker.getOutputStream(), data.get());
         } catch (Exception e) {
-            dumpMottaker.writeExceptionToFile(basePath + "/kalkulus-beregningsgrunnlag-for-gui-ERROR.txt", e);
+            dumpMottaker.newFile(basePath + "/kalkulus-beregningsgrunnlag-for-gui-ERROR.txt");
+            dumpMottaker.write(e);
         }
     }
 

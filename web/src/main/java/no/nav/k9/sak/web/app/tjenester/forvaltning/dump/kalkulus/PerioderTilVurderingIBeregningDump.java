@@ -44,7 +44,8 @@ public class PerioderTilVurderingIBeregningDump implements DebugDumpBehandling {
             dumpMottaker.newFile(basePath + "/perioder-til-vurdering-beregning.json");
             objectWriter.writeValue(dumpMottaker.getOutputStream(), data);
         } catch (Exception e) {
-            dumpMottaker.writeExceptionToFile(basePath + "/perioder-til-vurdering-beregning-ERROR.txt", e);
+            dumpMottaker.newFile(basePath + "/perioder-til-vurdering-beregning-ERROR.txt");
+            dumpMottaker.write(e);
         }
     }
 

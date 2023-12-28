@@ -49,14 +49,7 @@ public final class DumpMottaker {
         }
     }
 
-    public void writeNewFile(String path, String content) {
-        newFile(path);
-        write(content);
-    }
-
-    //TODO del opp
-    public void writeExceptionToFile(String path, Exception e) {
-        newFile(path);
+    public void write(Exception e) {
         PrintWriter pw = new PrintWriter(outputStream);
         e.printStackTrace(pw);
         pw.flush();

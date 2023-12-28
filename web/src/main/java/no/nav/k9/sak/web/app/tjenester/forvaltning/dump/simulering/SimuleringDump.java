@@ -59,7 +59,8 @@ public class SimuleringDump implements DebugDumpBehandling {
             dumpMottaker.newFile(basePath + "/" + fileName);
             dumpMottaker.write(content);
         } catch (Exception e) {
-            dumpMottaker.writeExceptionToFile(basePath + "/" + fileName + "-ERROR", e);
+            dumpMottaker.newFile(basePath + "/" + fileName + "-ERROR");
+            dumpMottaker.write(e);
         }
     }
 

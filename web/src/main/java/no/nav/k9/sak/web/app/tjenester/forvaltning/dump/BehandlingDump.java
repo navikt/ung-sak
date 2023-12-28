@@ -117,7 +117,8 @@ public class BehandlingDump implements DebugDumpFagsak {
                     try {
                         dumper.dump(dumpMottaker, behandling, path);
                     } catch (Exception e) {
-                        dumpMottaker.writeExceptionToFile(path + "/" + dumper.getClass().getSimpleName() + "-ERROR.txt", e);
+                        dumpMottaker.newFile(path + "/" + dumper.getClass().getSimpleName() + "-ERROR.txt");
+                        dumpMottaker.write(e);
                     }
                 }
             }

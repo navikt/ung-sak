@@ -49,7 +49,8 @@ public class KalkulusInputDump implements DebugDumpBehandling {
             dumpMottaker.newFile(basePath + "/kalkulus-input.json");
             objectWriter.writeValue(dumpMottaker.getOutputStream(), data);
         } catch (Exception e) {
-            dumpMottaker.writeExceptionToFile(basePath + "/kalkulus-input-ERROR.txt", e);
+            dumpMottaker.newFile(basePath + "/kalkulus-input-ERROR.txt");
+            dumpMottaker.write(e);
         }
     }
 

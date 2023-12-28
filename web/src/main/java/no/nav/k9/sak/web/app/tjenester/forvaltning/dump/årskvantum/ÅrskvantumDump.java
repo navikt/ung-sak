@@ -40,7 +40,8 @@ public class ÅrskvantumDump implements DebugDumpBehandling, DebugDumpFagsak {
             dumpMottaker.newFile(basePath + "/" + fileName);
             ow.writeValue(dumpMottaker.getOutputStream(), uttaksplan);
         } catch (Exception e) {
-            dumpMottaker.writeExceptionToFile(basePath + "/" + fileName + "-ERROR", e);
+            dumpMottaker.newFile(basePath + "/" + fileName + "-ERROR");
+            dumpMottaker.write(e);
         }
     }
 
@@ -51,7 +52,8 @@ public class ÅrskvantumDump implements DebugDumpBehandling, DebugDumpFagsak {
             dumpMottaker.newFile(fileName);
             ow.writeValue(dumpMottaker.getOutputStream(), uttaksplan);
         } catch (Exception e) {
-            dumpMottaker.writeExceptionToFile(fileName + "-ERROR", e);
+            dumpMottaker.newFile(fileName + "-ERROR");
+            dumpMottaker.write(e);
         }
     }
 }

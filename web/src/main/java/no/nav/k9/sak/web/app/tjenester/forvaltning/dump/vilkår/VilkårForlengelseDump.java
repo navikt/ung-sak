@@ -62,7 +62,8 @@ public class VilkårForlengelseDump implements DebugDumpBehandling {
             dumpMottaker.newFile(basePath + "/vilkår-perioder.json");
             objectWriter.writeValue(dumpMottaker.getOutputStream(), data);
         } catch (Exception e) {
-            dumpMottaker.writeExceptionToFile(basePath + "/vilkår-perioder-ERROR.txt", e);
+            dumpMottaker.newFile(basePath + "/vilkår-perioder-ERROR.txt");
+            dumpMottaker.write(e);
         }
     }
 

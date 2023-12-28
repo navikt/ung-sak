@@ -38,7 +38,8 @@ public class HistorikkTjenesteDump implements DebugDumpFagsak {
                 dumpMottaker.newFile("historikk.json");
                 ow.writeValue(dumpMottaker.getOutputStream(), dtoer);
             } catch (Exception e) {
-                dumpMottaker.writeExceptionToFile("historikk-ERROR.txt", e);
+                dumpMottaker.newFile("historikk-ERROR.txt");
+                dumpMottaker.write(e);
             }
         }
     }

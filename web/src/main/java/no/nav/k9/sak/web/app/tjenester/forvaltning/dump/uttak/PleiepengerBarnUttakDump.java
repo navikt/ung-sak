@@ -46,7 +46,8 @@ public class PleiepengerBarnUttakDump implements DebugDumpBehandling, DebugDumpF
             dumpMottaker.newFile(basePath + "/" + fileNameBehandlingPrefix + behandling.getUuid().toString() + fileNameBehandlingPosfix);
             ow.writeValue(dumpMottaker.getOutputStream(), uttaksplan);
         } catch (Exception e) {
-            dumpMottaker.writeExceptionToFile(basePath + "/" + fileNameBehandlingPrefix + "-ERROR", e);
+            dumpMottaker.newFile(basePath + "/" + fileNameBehandlingPrefix + "-ERROR");
+            dumpMottaker.write(e);
         }
     }
 
@@ -61,7 +62,8 @@ public class PleiepengerBarnUttakDump implements DebugDumpBehandling, DebugDumpF
                 dumpMottaker.newFile(dumpFileName);
                 ow.writeValue(dumpMottaker.getOutputStream(), uttaksplan);
             } catch (Exception e) {
-                dumpMottaker.writeExceptionToFile(dumpFileName + "-ERROR", e);
+                dumpMottaker.newFile(dumpFileName + "-ERROR");
+                dumpMottaker.write(e);
             }
         }
     }

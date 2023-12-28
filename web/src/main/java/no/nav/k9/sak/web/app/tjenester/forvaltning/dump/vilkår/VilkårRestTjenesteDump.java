@@ -36,7 +36,8 @@ public class VilkårRestTjenesteDump implements DebugDumpBehandling {
         try {
             ContainerContextRunner.doRun(behandling, () -> dumpVilkår(dumpMottaker, behandling, basePath));
         } catch (Exception e) {
-            dumpMottaker.writeExceptionToFile(basePath + "/" + relativePath + "-rest-tjeneste-ERROR.txt", e);
+            dumpMottaker.newFile(basePath + "/" + relativePath + "-rest-tjeneste-ERROR.txt");
+            dumpMottaker.write(e);
         }
     }
 
@@ -48,7 +49,8 @@ public class VilkårRestTjenesteDump implements DebugDumpBehandling {
                 ow.writeValue(dumpMottaker.getOutputStream(), entity);
             }
         } catch (Exception e) {
-            dumpMottaker.writeExceptionToFile(basePath + "/" + relativePath + "-ERROR.txt", e);
+            dumpMottaker.newFile(basePath + "/" + relativePath + "-ERROR.txt");
+            dumpMottaker.write(e);
         }
         return 1;
     }
