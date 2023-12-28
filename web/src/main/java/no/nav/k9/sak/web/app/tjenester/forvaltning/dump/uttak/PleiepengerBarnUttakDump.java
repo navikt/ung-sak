@@ -59,13 +59,13 @@ public class PleiepengerBarnUttakDump implements DebugDumpBehandling, DebugDumpF
     }
 
     @Override
-    public void dump(DumpMottaker dumpMottaker, Behandling behandling) {
+    public void dump(DumpMottaker dumpMottaker, Behandling behandling, String basePath) {
         try {
             var uttaksplan = restKlient.hentUttaksplan(behandling.getUuid(), false);
-            dumpMottaker.newFile("behandling-" + behandling.getId() + "/" + fileNameBehandlingPrefix + behandling.getUuid().toString() + fileNameBehandlingPosfix);
+            dumpMottaker.newFile(basePath + "/" + fileNameBehandlingPrefix + behandling.getUuid().toString() + fileNameBehandlingPosfix);
             ow.writeValue(dumpMottaker.getOutputStream(), uttaksplan);
         } catch (Exception e) {
-            dumpMottaker.writeExceptionToFile("behandling-" + behandling.getId() + "/" + fileNameBehandlingPrefix + "-ERROR", e);
+            dumpMottaker.writeExceptionToFile(basePath + "/" + fileNameBehandlingPrefix + "-ERROR", e);
         }
     }
 

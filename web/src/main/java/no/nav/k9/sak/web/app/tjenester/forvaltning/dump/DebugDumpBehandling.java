@@ -9,10 +9,10 @@ public interface DebugDumpBehandling {
 
     List<DumpOutput> dump(Behandling behandling);
 
-    default void dump(DumpMottaker dumpMottaker, Behandling behandling) { //TODO bør denne ha med base path?
+    default void dump(DumpMottaker dumpMottaker, Behandling behandling, String basePath) {
         List<DumpOutput> dumpOutputs = dump(behandling);
         for (DumpOutput dumpOutput : dumpOutputs) {
-            dumpMottaker.newFile("behandling-" + behandling.getId() + "/" + dumpOutput.getPath());
+            dumpMottaker.newFile(basePath + "/" + dumpOutput.getPath());
             dumpMottaker.write(dumpOutput.getContent());
         }
     }
