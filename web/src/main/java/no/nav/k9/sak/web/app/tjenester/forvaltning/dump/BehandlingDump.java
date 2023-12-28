@@ -18,7 +18,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
@@ -68,9 +67,9 @@ public class BehandlingDump implements DebugDumpFagsak {
         toCsv.put("status", Fagsak::getStatus);
         toCsv.put("opprettet_tid", Fagsak::getOpprettetTidspunkt);
         toCsv.put("endret_tid", Fagsak::getEndretTidspunkt);
-        DumpOutput output = CsvOutput.dumpAsCsvSingleInput(true, fagsak, "fagsak.csv", toCsv);
-        dumpMottaker.newFile(output.getPath());
-        dumpMottaker.write(output.getContent());
+        String output = CsvOutput.dumpAsCsvSingleInput(true, fagsak, toCsv);
+        dumpMottaker.newFile("fagsak.csv");
+        dumpMottaker.write(output);
     }
 
     private void dumpBehandlinger(DumpMottaker dumpMottaker) {
@@ -106,9 +105,9 @@ public class BehandlingDump implements DebugDumpFagsak {
             toCsv.put("opprettet_tid", Behandling::getOpprettetTidspunkt);
             toCsv.put("endret_tid", Behandling::getEndretTidspunkt);
 
-            DumpOutput behandlingDumpOutput = CsvOutput.dumpAsCsvSingleInput(true, behandling, path + "/behandling.csv", toCsv);
-            dumpMottaker.newFile(behandlingDumpOutput.getPath());
-            dumpMottaker.write(behandlingDumpOutput.getContent());
+            String behandlingDumpOutput = CsvOutput.dumpAsCsvSingleInput(true, behandling, toCsv);
+            dumpMottaker.newFile(path + "/behandling.csv");
+            dumpMottaker.write(behandlingDumpOutput);
 
             var behandlingDumpstere = FagsakYtelseTypeRef.Lookup.list(DebugDumpBehandling.class, behandlingDumpere, fagsak.getYtelseType());
             for (var inst : behandlingDumpstere) {

@@ -2,9 +2,10 @@ package no.nav.k9.sak.web.app.tjenester.forvaltning;
 
 import java.util.Objects;
 
+@Deprecated
 public class DumpOutput {
 
-    private final String relativePath; //TODO fjernes?
+    private final String relativePath;
     private final String content;
 
     public DumpOutput(String relativePath, String content) {

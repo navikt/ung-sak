@@ -10,7 +10,6 @@ import jakarta.persistence.Query;
 import jakarta.persistence.Tuple;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
 
@@ -65,10 +64,10 @@ public class MottattDokumentDump implements DebugDumpFagsak {
         @SuppressWarnings("unchecked")
         List<Tuple> results = query.getResultList();
 
-        Optional<DumpOutput> output = CsvOutput.dumpResultSetToCsv("mottatt_dokument.csv", results);
+        Optional<String> output = CsvOutput.dumpResultSetToCsv(results);
         if (output.isPresent()) {
-            dumpMottaker.newFile(output.get().getPath());
-            dumpMottaker.write(output.get().getContent());
+            dumpMottaker.newFile("mottatt_dokument.csv");
+            dumpMottaker.write(output.get());
         }
     }
 }

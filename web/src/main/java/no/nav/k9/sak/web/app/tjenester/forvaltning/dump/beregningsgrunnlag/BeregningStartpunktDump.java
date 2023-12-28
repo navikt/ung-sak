@@ -24,7 +24,6 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.KalkulusStartpunktUtleder;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
 
@@ -67,9 +66,8 @@ public class BeregningStartpunktDump implements DebugDumpBehandling {
         toCsv.put("erForlengelse", kolonneForlengelse);
         toCsv.put("endringIUttak", kolonneEndringUttak);
 
-        String path = "beregning-startpunkt.csv";
-        DumpOutput dumpOutput = CsvOutput.dumpAsCsv(true, lista, basePath + "/" + path, toCsv);
-        dumpMottaker.newFile(dumpOutput.getPath());
-        dumpMottaker.write(dumpOutput.getContent());
+        String dumpOutput = CsvOutput.dumpAsCsv(true, lista, toCsv);
+        dumpMottaker.newFile(basePath + "/beregning-startpunkt.csv");
+        dumpMottaker.write(dumpOutput);
     }
 }
