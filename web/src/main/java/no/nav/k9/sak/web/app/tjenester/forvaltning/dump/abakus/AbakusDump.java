@@ -6,9 +6,6 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -19,7 +16,6 @@ import no.nav.abakus.iaygrunnlag.JsonObjectMapper;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
@@ -42,24 +38,6 @@ public class AbakusDump implements DebugDumpBehandling, DebugDumpFagsak {
     @Inject
     public AbakusDump(AbakusTjenesteAdapter tjeneste) {
         this.tjeneste = tjeneste;
-    }
-
-    @Override
-    public List<DumpOutput> dump(Behandling behandling) {
-        try {
-            var data = tjeneste.finnGrunnlag(behandling.getId());
-            if (data.isEmpty()) {
-                return List.of();
-            }
-            var content = iayMapper.writeValueAsString(data.get());
-            return List.of(new DumpOutput("abakus-iaygrunnlag.json", content));
-        } catch (Exception e) {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
-            return List.of(new DumpOutput("abakus-iaygrunnlag-ERROR.txt", sw.toString()));
-        }
-
     }
 
     @Override

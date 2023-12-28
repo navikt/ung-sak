@@ -2,8 +2,6 @@ package no.nav.k9.sak.web.app.tjenester.forvaltning.dump.årskvantum;
 
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -13,7 +11,6 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.rest.DefaultJsonMapper;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
@@ -34,20 +31,6 @@ public class ÅrskvantumDump implements DebugDumpBehandling, DebugDumpFagsak {
     @Inject
     public ÅrskvantumDump(ÅrskvantumRestKlient restKlient) {
         this.restKlient = restKlient;
-    }
-
-    @Override
-    public List<DumpOutput> dump(Behandling behandling) {
-        try {
-            var uttaksplan = restKlient.hentFullUttaksplanForBehandling(List.of(behandling.getUuid()));
-            var content = ow.writeValueAsString(uttaksplan);
-            return List.of(new DumpOutput(fileName, content));
-        } catch (Exception e) {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
-            return List.of(new DumpOutput(fileName + "-ERROR", sw.toString()));
-        }
     }
 
     @Override

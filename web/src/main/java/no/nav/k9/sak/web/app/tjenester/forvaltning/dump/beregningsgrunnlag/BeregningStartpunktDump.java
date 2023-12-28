@@ -48,32 +48,6 @@ public class BeregningStartpunktDump implements DebugDumpBehandling {
     }
 
     @Override
-    public List<DumpOutput> dump(Behandling behandling) {
-        List<Tuple<BehandlingStegType, PeriodeTilVurdering>> lista = new ArrayList<>();
-
-        Map<BehandlingStegType, NavigableSet<PeriodeTilVurdering>> startpunkt = kalkulusStartpunktUtleder.utledPerioderPrStartpunkt(BehandlingReferanse.fra(behandling));
-        startpunkt.forEach((steg, perioder) -> perioder.forEach(periode -> lista.add(new Tuple<>(steg, periode))));
-
-        Function<Tuple<BehandlingStegType, PeriodeTilVurdering>, String> kolonneSteg = a -> a.getElement1().getKode();
-        Function<Tuple<BehandlingStegType, PeriodeTilVurdering>, LocalDate> kolonneFom = a -> a.getElement2().getPeriode().getFomDato();
-        Function<Tuple<BehandlingStegType, PeriodeTilVurdering>, LocalDate> kolonneTom = a -> a.getElement2().getPeriode().getTomDato();
-        Function<Tuple<BehandlingStegType, PeriodeTilVurdering>, Boolean> kolonneForlengelse = a -> a.getElement2().erForlengelse();
-        Function<Tuple<BehandlingStegType, PeriodeTilVurdering>, Boolean> kolonneEndringUttak = a -> a.getElement2().erEndringIUttak();
-
-        var toCsv = new LinkedHashMap<String, Function<Tuple<BehandlingStegType, PeriodeTilVurdering>, ?>>();
-        toCsv.put("fom", kolonneFom);
-        toCsv.put("tom", kolonneTom);
-        toCsv.put("steg", kolonneSteg);
-        toCsv.put("erForlengelse", kolonneForlengelse);
-        toCsv.put("endringIUttak", kolonneEndringUttak);
-
-        String path = "beregning-startpunkt.csv";
-        return List.of(
-            CsvOutput.dumpAsCsv(true, lista, path, toCsv)
-        );
-    }
-
-    @Override
     public void dump(DumpMottaker dumpMottaker, Behandling behandling, String basePath) {
         List<Tuple<BehandlingStegType, PeriodeTilVurdering>> lista = new ArrayList<>();
 

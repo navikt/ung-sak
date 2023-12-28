@@ -31,32 +31,6 @@ public class ProsesstriggerDump implements DebugDumpBehandling {
     }
 
     @Override
-    public List<DumpOutput> dump(Behandling behandling) {
-        var sql = "select"
-            + " pt.arsak, pt.periode "
-            + " from prosess_triggere pts "
-            + " inner join pt_trigger pt on pt.triggere_id = pts.triggere_id"
-            + " where pts.aktiv=true "
-            + " and pts.behandling_id=:behandlingid"
-            + " order by pt.arsak";
-
-
-        var query = entityManager.createNativeQuery(sql, Tuple.class)
-            .setParameter("behandlingid", behandling.getId());
-        String path = "prosesstriggere.csv";
-
-        @SuppressWarnings("unchecked")
-        List<Tuple> results = query.getResultList();
-
-        if (results.isEmpty()) {
-            return List.of();
-        }
-
-        return CsvOutput.dumpResultSetToCsv(path, results)
-            .map(List::of).orElse(List.of());
-    }
-
-    @Override
     public void dump(DumpMottaker dumpMottaker, Behandling behandling, String basePath) {
         String sql = "select"
             + " pt.arsak, pt.periode "
