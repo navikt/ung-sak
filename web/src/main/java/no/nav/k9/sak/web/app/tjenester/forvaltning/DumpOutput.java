@@ -2,7 +2,7 @@ package no.nav.k9.sak.web.app.tjenester.forvaltning;
 
 import java.util.Objects;
 
-@Deprecated
+@Deprecated //Skriv heller til fil fortløpende for å unngå OOM (se DumpMottaker)
 public class DumpOutput {
 
     private final String relativePath;
