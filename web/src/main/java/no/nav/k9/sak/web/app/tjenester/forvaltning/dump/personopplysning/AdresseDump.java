@@ -1,17 +1,18 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.dump.personopplysning;
 
 import java.util.List;
+import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import jakarta.persistence.Tuple;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.OMSORGSPENGER)
@@ -29,7 +30,7 @@ public class AdresseDump implements DebugDumpFagsak {
     }
 
     @Override
-    public List<DumpOutput> dump(Fagsak fagsak) {
+    public void dump(DumpMottaker dumpMottaker) {
         String sql = "select "
             + "  b.id as behandling_id, "
             + "  pregadr.id as pregadr_id, "
@@ -53,19 +54,16 @@ public class AdresseDump implements DebugDumpFagsak {
             + " where gr.aktiv = true "
             + "   and f.saksnummer=:saksnummer";
 
-        var query = entityManager.createNativeQuery(sql, Tuple.class)
-            .setParameter("saksnummer", fagsak.getSaksnummer().getVerdi());
-        String path = "adresser.csv";
+        Query query = entityManager.createNativeQuery(sql, Tuple.class)
+            .setParameter("saksnummer", dumpMottaker.getFagsak().getSaksnummer().getVerdi());
 
         @SuppressWarnings("unchecked")
         List<Tuple> results = query.getResultList();
 
-        if (results.isEmpty()) {
-            return List.of();
+        Optional<String> output = CsvOutput.dumpResultSetToCsv(results);
+        if (output.isPresent()) {
+            dumpMottaker.newFile("adresser.csv");
+            dumpMottaker.write(output.get());
         }
-
-        return CsvOutput.dumpResultSetToCsv(path, results)
-            .map(v -> List.of(v)).orElse(List.of());
     }
-
 }

@@ -1,10 +1,9 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.dump;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.BufferedOutputStream;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.zip.ZipOutputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +16,6 @@ import jakarta.ws.rs.core.StreamingOutput;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 
 @ApplicationScoped
 public class DebugDumpsters {
@@ -36,35 +34,42 @@ public class DebugDumpsters {
     }
 
     public StreamingOutput dumper(Fagsak fagsak) {
-        var ytelseType = fagsak.getYtelseType();
-        var saksnummer = fagsak.getSaksnummer();
-        var dumpsters = findDumpsters(ytelseType);
-        List<DumpOutput> allDumps = dumpOutput(fagsak, dumpsters);
+        List<Instance<DebugDumpFagsak>> dumpsters = findDumpsters(fagsak.getYtelseType());
 
-        return new ZipOutput().dump(saksnummer, allDumps);
+        return dumpFraDumpsters(fagsak, dumpsters);
     }
 
     private List<Instance<DebugDumpFagsak>> findDumpsters(FagsakYtelseType ytelseType) {
         return FagsakYtelseTypeRef.Lookup.list(DebugDumpFagsak.class, dumpere, ytelseType);
     }
 
-    private List<DumpOutput> dumpOutput(Fagsak fagsak, List<Instance<DebugDumpFagsak>> dumpsters) {
-        var dumpers = dumpsters.stream().flatMap(v -> v.stream()).collect(Collectors.toList());
-        var dumperNames = dumpers.stream().map(d -> d.getClass().getName()).collect(Collectors.toList());
+    private StreamingOutput dumpFraDumpsters(Fagsak fagsak, List<Instance<DebugDumpFagsak>> dumpsters) {
+        List<DebugDumpFagsak> dumpers = dumpsters.stream().flatMap(Instance::stream).toList();
+        List<String> dumperNames = dumpers.stream().map(d -> d.getClass().getName()).collect(Collectors.toList());
         log.info("Dumper fra: {}", dumperNames);
 
-        List<DumpOutput> allDumps = dumpers.stream().flatMap(ddp -> {
-            try {
-                log.info("Dumper fra {}", ddp.getClass().getName());
-                return ddp.dump(fagsak).stream();
-            } catch (Exception e) {
-                StringWriter sw = new StringWriter();
-                PrintWriter pw = new PrintWriter(sw);
-                e.printStackTrace(pw);
-                return Stream.of(new DumpOutput(ddp.getClass().getSimpleName() + "-ERROR.txt", sw.toString()));
+        StreamingOutput streamingOutput = outputStream -> {
+            try (ZipOutputStream zipOut = new ZipOutputStream(new BufferedOutputStream(outputStream))) {
+                final DumpMottaker dumpMottaker = new DumpMottaker(fagsak, zipOut);
+                for (DebugDumpFagsak dumper : dumpers) {
+                    dump(dumpMottaker, dumper);
+                }
+                zipOut.closeEntry();
+            } finally {
+                outputStream.flush();
+                outputStream.close();
             }
-        }).collect(Collectors.toList());
-        return allDumps;
+        };
+        return streamingOutput;
     }
 
+    private void dump(DumpMottaker dumpMottaker, DebugDumpFagsak dumpster) {
+        log.info("Dumper fra {}", dumpster.getClass().getName());
+        try {
+            dumpster.dump(dumpMottaker);
+        } catch (Exception e) {
+            dumpMottaker.newFile(dumpster.getClass().getSimpleName() + "-ERROR.txt");
+            dumpMottaker.write(e);
+        }
+    }
 }

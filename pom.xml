@@ -40,13 +40,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <felles.version>2.2.0</felles.version>
+        <felles.version>2.4.0</felles.version>
         <swagger.version>2.2.17</swagger.version>
         <junit.version>5.10.1</junit.version>
         <k9format.version>9.0.6</k9format.version>
-        <jackson.version>2.16.0</jackson.version>
+        <jackson.version>2.16.1</jackson.version>
         <asm.version>9.6</asm.version>
-        <kotlin-stdlib.version>1.9.21</kotlin-stdlib.version>
+        <kotlin-stdlib.version>1.9.22</kotlin-stdlib.version>
         <jandex.version>3.1.6</jandex.version>
 
     </properties>
@@ -151,7 +151,7 @@
             <dependency>
                 <groupId>no.nav.foreldrepenger.abakus</groupId>
                 <artifactId>abakus-kontrakt</artifactId>
-                <version>2.0.0</version>
+                <version>2.0.1</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.folketrygdloven.kalkulus</groupId>
@@ -579,12 +579,18 @@
                 <artifactId>jboss-logging</artifactId>
                 <version>3.5.3.Final</version>
             </dependency>
+            <dependency>
+                <!-- lagt her for å sikre dependencyConvergence -->
+                <groupId>io.smallrye</groupId>
+                <artifactId>jandex</artifactId>
+                <version>${jandex.version}</version>
+            </dependency>
 
             <!-- Java11 -->
             <dependency>
                 <groupId>org.javassist</groupId>
                 <artifactId>javassist</artifactId>
-                <version>3.29.2-GA</version>
+                <version>3.30.2-GA</version>
             </dependency>
 
             <!-- Database -->
@@ -676,7 +682,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.11.0</version>
+                    <version>3.12.1</version>
                     <configuration>
                         <source>${java.version}</source>
                         <target>${java.version}</target>

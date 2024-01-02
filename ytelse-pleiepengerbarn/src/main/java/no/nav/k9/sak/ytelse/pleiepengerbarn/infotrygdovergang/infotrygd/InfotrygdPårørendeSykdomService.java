@@ -37,7 +37,7 @@ public class InfotrygdPårørendeSykdomService {
         if (!fnrSoekere.isEmpty()) {
             log.info("Antall andre parter i infotrygd: " + fnrSoekere.size());
         }
-        var hentGrunnlagRequest = new PersonRequest(request.getFraOgMed(), request.getTilOgMed(), fnrSoekere);
+        var hentGrunnlagRequest = new PersonRequest(request.getFraOgMed(), request.getTilOgMed(), fnrSoekere, true);
         List<PårørendeSykdom> grunnlagliste = client.getGrunnlagForPleietrengende(hentGrunnlagRequest);
 
         var relevanteGrunnlagPrSøker = grunnlagliste.stream()
@@ -52,7 +52,7 @@ public class InfotrygdPårørendeSykdomService {
     }
 
     public List<Periode> hentRelevanteGrunnlagsperioderForPleietrengende(InfotrygdPårørendeSykdomRequest request, String pleietrengendeFnr) {
-        List<PårørendeSykdom> grunnlag = client.getGrunnlagForPleietrengende(new PersonRequest(request.getFraOgMed(), request.getTilOgMed(), List.of(request.getFødselsnummer())));
+        List<PårørendeSykdom> grunnlag = client.getGrunnlagForPleietrengende(new PersonRequest(request.getFraOgMed(), request.getTilOgMed(), List.of(request.getFødselsnummer()), true));
         log.info("Tema fra infotrygd: {}", grunnlag.stream().map(gr -> gr.tema().getKode()).collect(Collectors.toList()));
         log.info("Behandlingstema fra infotrygd: {}", grunnlag.stream().map(gr -> gr.behandlingstema().getKode()).collect(Collectors.toList()));
         return grunnlag.stream()
@@ -70,7 +70,7 @@ public class InfotrygdPårørendeSykdomService {
     }
 
     private List<VedtakPleietrengende> hentRelevantePleietrengendeVedtakIInfotrygd(InfotrygdPårørendeSykdomRequest request) {
-        List<VedtakPleietrengende> response = client.getVedtakForPleietrengende(new PersonRequest(request.getFraOgMed(), request.getTilOgMed(), List.of(request.getFødselsnummer())));
+        List<VedtakPleietrengende> response = client.getVedtakForPleietrengende(new PersonRequest(request.getFraOgMed(), request.getTilOgMed(), List.of(request.getFødselsnummer()), true));
 
         List<VedtakPleietrengende> vedtak = new ArrayList<>();
         for (VedtakPleietrengende vp : response) {

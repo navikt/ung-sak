@@ -315,7 +315,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         LocalDate fom = LocalDate.of(2020, 3, 1);
         LocalDate tom = manuellSøknadDto.getPeriode().getTilOgMed();
 
-        Fagsak fagsak = frisinnSøknadMottaker.finnEllerOpprettFagsak(FRISINN, aktørId, null, null, fom, tom);
+        Fagsak fagsak = frisinnSøknadMottaker.finnEllerOpprettFagsak(FRISINN, aktørId, null, null, fom, tom, null);
 
         loggForvaltningTjeneste(fagsak, "/frisinn/opprett-manuell-frisinn/", "kjører manuell frisinn søknad");
 
@@ -685,14 +685,13 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             """;
 
         var query = entityManager.createNativeQuery(sql, Tuple.class);
-        String path = "data_dump.csv";
 
         @SuppressWarnings("unchecked")
         Stream<Tuple> results = query.getResultStream();
 
-        var dataDump = CsvOutput.dumpResultSetToCsv(path, results);
+        Optional<String> dataDump = CsvOutput.dumpResultSetToCsv(results);
 
-        return dataDump.map(d -> Response.ok(d.getContent())
+        return dataDump.map(d -> Response.ok(d)
             .type(MediaType.APPLICATION_OCTET_STREAM)
             .header("Content-Disposition", String.format("attachment; filename=\"dump.csv\""))
             .build()).orElse(Response.noContent().build());
@@ -1044,10 +1043,9 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
         List<Tuple> resultList = query.getResultList();
 
-        var dataDump = CsvOutput.dumpResultSetToCsv("vilkarhistorikk", resultList);
+        Optional<String> dataDump = CsvOutput.dumpResultSetToCsv(resultList);
 
-
-        return dataDump.map(d -> Response.ok(d.getContent())
+        return dataDump.map(d -> Response.ok(d)
             .type(MediaType.APPLICATION_OCTET_STREAM)
             .header("Content-Disposition", String.format("attachment; filename=\"dump.csv\""))
             .build()).orElse(Response.noContent().build());
@@ -1082,14 +1080,12 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
         List<Tuple> resultList = query.getResultList();
 
-        var dataDump = CsvOutput.dumpResultSetToCsv("behandlingsteghistorikk", resultList);
+        Optional<String> dataDump = CsvOutput.dumpResultSetToCsv(resultList);
 
-
-        return dataDump.map(d -> Response.ok(d.getContent())
+        return dataDump.map(d -> Response.ok(d)
             .type(MediaType.APPLICATION_OCTET_STREAM)
             .header("Content-Disposition", String.format("attachment; filename=\"behandlingsteghistorikk.csv\""))
             .build()).orElse(Response.noContent().build());
-
     }
 
     @POST
@@ -1155,21 +1151,17 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
         var query = entityManager.createNativeQuery(sql, Tuple.class);
         query.setParameter("behandlingId", behandlingIdDto.getBehandlingId());
-        String path = "data_dump.csv";
 
         @SuppressWarnings("unchecked")
         Stream<Tuple> results = query.getResultStream();
 
-        var dataDump = CsvOutput.dumpResultSetToCsv(path, results);
+        Optional<String> dataDump = CsvOutput.dumpResultSetToCsv(results);
 
-        return dataDump.map(d -> Response.ok(d.getContent())
+        return dataDump.map(d -> Response.ok(d)
             .type(MediaType.APPLICATION_OCTET_STREAM)
             .header("Content-Disposition", String.format("attachment; filename=\"dump.csv\""))
             .build()).orElse(Response.noContent().build());
-
     }
-
-
 
     private void loggForvaltningTjeneste(Fagsak fagsak, String tjeneste, String begrunnelse) {
         /*

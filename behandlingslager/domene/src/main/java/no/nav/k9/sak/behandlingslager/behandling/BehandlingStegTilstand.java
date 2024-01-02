@@ -2,6 +2,8 @@ package no.nav.k9.sak.behandlingslager.behandling;
 
 import java.util.Objects;
 
+import org.hibernate.annotations.FilterDef;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -10,7 +12,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -21,6 +22,9 @@ import no.nav.k9.sak.behandlingslager.kodeverk.BehandlingStegTypeKodeverdiConver
 
 @Entity(name = "BehandlingStegTilstand")
 @Table(name = "BEHANDLING_STEG_TILSTAND")
+@FilterDef(
+    name="kunAktiveBehandlingTilstander"
+)
 public class BehandlingStegTilstand extends BaseEntitet implements IndexKey {
 
     @Id
