@@ -200,7 +200,7 @@ spec:
       value: api://prod-fss.k9saksbehandling.k9-punsj/.default
     - name: INFOTRYGD_BS_BASE_URI
       value: http://k9-infotrygd-grunnlag-paaroerende-sykdom.k9saksbehandling
-    - name: INFOTRYGD_SCOPE
+    - name: K9_INFOTRYGD_SCOPE
       value: api://prod-fss.k9saksbehandling.k9-infotrygd-grunnlag-paaroerende-sykdom/.default
     - name: ARBEID_OG_INNTEKT_BASE_URL
       value: https://arbeid-og-inntekt.nais.adeo.no
