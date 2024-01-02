@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
@@ -12,9 +13,12 @@ import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
 import no.nav.k9.aarskvantum.kontrakter.FullUttaksplanForBehandlinger;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.sak.typer.Saksnummer;
 
 @Dependent
 public class OMPUttakEndringsutleder {
+
+    private static final Set<String> ENABLE_SAKSNUMMER = Set.of("Bo8FM");
 
     private final boolean enableRelevantEndringUtledning;
 
@@ -23,9 +27,9 @@ public class OMPUttakEndringsutleder {
         this.enableRelevantEndringUtledning = enableRelevantEndringUtledning;
     }
 
-    boolean harRelevantEndringFraForrige(Uttaksperiode periode, Optional<FullUttaksplanForBehandlinger> fullUttaksplanForrigeBehandling) {
+    boolean harRelevantEndringFraForrige(Saksnummer saksnummer, Uttaksperiode periode, Optional<FullUttaksplanForBehandlinger> fullUttaksplanForrigeBehandling) {
 
-        if (!enableRelevantEndringUtledning) {
+        if (!enableRelevantEndringUtledning && !ENABLE_SAKSNUMMER.contains(saksnummer.getVerdi())) {
             return true;
         }
 
