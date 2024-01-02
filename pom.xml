@@ -579,6 +579,12 @@
                 <artifactId>jboss-logging</artifactId>
                 <version>3.5.3.Final</version>
             </dependency>
+            <dependency>
+                <!-- lagt her for å sikre dependencyConvergence -->
+                <groupId>io.smallrye</groupId>
+                <artifactId>jandex</artifactId>
+                <version>${jandex.version}</version>
+            </dependency>
 
             <!-- Java11 -->
             <dependency>
