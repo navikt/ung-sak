@@ -149,7 +149,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
             .map(Aktivitet::getUttaksperioder)
             .flatMap(Collection::stream)
             .filter(it -> Periodetype.REVURDERT.equals(it.getPeriodetype()))
-            .filter(it -> endringsutleder.harRelevantEndringFraForrige(it, fullUttaksplanForrigeBehandling))
+            .filter(it -> endringsutleder.harRelevantEndringFraForrige(referanse.getSaksnummer(), it, fullUttaksplanForrigeBehandling))
             .map(Uttaksperiode::getPeriode)
             .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
             .filter(it -> perioder.stream().noneMatch(it::overlapper))
