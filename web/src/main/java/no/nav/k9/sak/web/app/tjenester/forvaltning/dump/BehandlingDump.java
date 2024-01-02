@@ -1,9 +1,5 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.dump;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.function.Function;
@@ -16,15 +12,12 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
@@ -54,22 +47,16 @@ public class BehandlingDump implements DebugDumpFagsak {
     }
 
     @Override
-    public List<DumpOutput> dump(Fagsak fagsak) {
-        var resultat = new ArrayList<DumpOutput>();
-
-        var saksnummer = fagsak.getSaksnummer();
-        var ytelseType = fagsak.getYtelseType();
-        resultat.addAll(dumpFagsak(saksnummer));
-
-        resultat.addAll(dumpBehandlinger(ytelseType, saksnummer));
-        return Collections.unmodifiableList(resultat);
+    public void dump(DumpMottaker dumpMottaker) {
+        dumpFagsak(dumpMottaker);
+        dumpBehandlinger(dumpMottaker);
     }
 
-    private List<DumpOutput> dumpFagsak(Saksnummer saksnummer) {
-        var fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer)
-            .orElseThrow(() -> new IllegalArgumentException("Finner ikke fagsak: " + saksnummer));
+    private void dumpFagsak(DumpMottaker dumpMottaker) {
+        final Fagsak fagsak = fagsakRepository.hentSakGittSaksnummer(dumpMottaker.getFagsak().getSaksnummer())
+            .orElseThrow(() -> new IllegalArgumentException("Finner ikke fagsak: " + dumpMottaker.getFagsak().getSaksnummer()));
 
-        var toCsv = new LinkedHashMap<String, Function<Fagsak, ?>>();
+        final var toCsv = new LinkedHashMap<String, Function<Fagsak, ?>>();
         toCsv.put("id", Fagsak::getId);
         toCsv.put("saksnummer", Fagsak::getSaksnummer);
         toCsv.put("aktoer_id", Fagsak::getAktørId);
@@ -80,17 +67,18 @@ public class BehandlingDump implements DebugDumpFagsak {
         toCsv.put("status", Fagsak::getStatus);
         toCsv.put("opprettet_tid", Fagsak::getOpprettetTidspunkt);
         toCsv.put("endret_tid", Fagsak::getEndretTidspunkt);
-        return List.of(CsvOutput.dumpAsCsvSingleInput(true, fagsak, "fagsak.csv", toCsv));
+        String output = CsvOutput.dumpAsCsvSingleInput(true, fagsak, toCsv);
+        dumpMottaker.newFile("fagsak.csv");
+        dumpMottaker.write(output);
     }
 
-    private List<DumpOutput> dumpBehandlinger(FagsakYtelseType ytelseType, Saksnummer saksnummer) {
-        var behandlinger = behandlingRepository.hentAbsoluttAlleBehandlingerForSaksnummer(saksnummer);
+    private void dumpBehandlinger(DumpMottaker dumpMottaker) {
+        final Fagsak fagsak = dumpMottaker.getFagsak();
+        final List<Behandling> behandlinger = behandlingRepository.hentAbsoluttAlleBehandlingerForSaksnummer(fagsak.getSaksnummer());
 
-        var resultat = new ArrayList<DumpOutput>();
-
-        for (var b : behandlinger) {
-            var toCsv = new LinkedHashMap<String, Function<Behandling, ?>>();
-            var path = "behandling-" + b.getId();
+        for (Behandling behandling : behandlinger) {
+            final String path = "behandling-" + behandling.getId();
+            final var toCsv = new LinkedHashMap<String, Function<Behandling, ?>>();
 
             toCsv.put("id", Behandling::getId);
             toCsv.put("uuid", Behandling::getUuid);
@@ -117,27 +105,22 @@ public class BehandlingDump implements DebugDumpFagsak {
             toCsv.put("opprettet_tid", Behandling::getOpprettetTidspunkt);
             toCsv.put("endret_tid", Behandling::getEndretTidspunkt);
 
-            resultat.add(CsvOutput.dumpAsCsvSingleInput(true, b, path + "/behandling.csv", toCsv));
+            String behandlingDumpOutput = CsvOutput.dumpAsCsvSingleInput(true, behandling, toCsv);
+            dumpMottaker.newFile(path + "/behandling.csv");
+            dumpMottaker.write(behandlingDumpOutput);
 
-            var dumpstere = FagsakYtelseTypeRef.Lookup.list(DebugDumpBehandling.class, behandlingDumpere, ytelseType);
-            for (var inst : dumpstere) {
+            var behandlingDumpstere = FagsakYtelseTypeRef.Lookup.list(DebugDumpBehandling.class, behandlingDumpere, fagsak.getYtelseType());
+            for (var inst : behandlingDumpstere) {
                 for (var dumper : inst) {
-                    logger.info("Dumper fra {} for behandling {}", dumper.getClass().getName(), b.getUuid());
+                    logger.info("Dumper fra {} for behandling {}", dumper.getClass().getName(), behandling.getUuid());
                     try {
-                        dumper.dump(b)
-                            .forEach(d -> resultat.add(new DumpOutput(path + "/" + d.getPath(), d.getContent())));
+                        dumper.dump(dumpMottaker, behandling, path);
                     } catch (Exception e) {
-                        StringWriter sw = new StringWriter();
-                        PrintWriter pw = new PrintWriter(sw);
-                        e.printStackTrace(pw);
-                        resultat.add(new DumpOutput(dumper.getClass().getSimpleName() + "-ERROR.txt", sw.toString()));
+                        dumpMottaker.newFile(path + "/" + dumper.getClass().getSimpleName() + "-ERROR.txt");
+                        dumpMottaker.write(e);
                     }
                 }
             }
-
         }
-
-        return Collections.unmodifiableList(resultat);
     }
-
 }

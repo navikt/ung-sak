@@ -24,8 +24,8 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.KalkulusStartpunktUtleder;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(OMSORGSPENGER)
@@ -47,7 +47,7 @@ public class BeregningStartpunktDump implements DebugDumpBehandling {
     }
 
     @Override
-    public List<DumpOutput> dump(Behandling behandling) {
+    public void dump(DumpMottaker dumpMottaker, Behandling behandling, String basePath) {
         List<Tuple<BehandlingStegType, PeriodeTilVurdering>> lista = new ArrayList<>();
 
         Map<BehandlingStegType, NavigableSet<PeriodeTilVurdering>> startpunkt = kalkulusStartpunktUtleder.utledPerioderPrStartpunkt(BehandlingReferanse.fra(behandling));
@@ -66,10 +66,8 @@ public class BeregningStartpunktDump implements DebugDumpBehandling {
         toCsv.put("erForlengelse", kolonneForlengelse);
         toCsv.put("endringIUttak", kolonneEndringUttak);
 
-        String path = "beregning-startpunkt.csv";
-        return List.of(
-            CsvOutput.dumpAsCsv(true, lista, path, toCsv)
-        );
+        String dumpOutput = CsvOutput.dumpAsCsv(true, lista, toCsv);
+        dumpMottaker.newFile(basePath + "/beregning-startpunkt.csv");
+        dumpMottaker.write(dumpOutput);
     }
-
 }

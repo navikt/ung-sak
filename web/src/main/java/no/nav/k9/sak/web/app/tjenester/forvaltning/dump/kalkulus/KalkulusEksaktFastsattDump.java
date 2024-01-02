@@ -6,21 +6,20 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectWriter;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.kalkulus.mappers.JsonMapper;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.ContainerContextRunner;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(OMSORGSPENGER)
@@ -44,23 +43,19 @@ public class KalkulusEksaktFastsattDump implements DebugDumpBehandling {
     }
 
     @Override
-    public List<DumpOutput> dump(Behandling behandling) {
+    public void dump(DumpMottaker dumpMottaker, Behandling behandling, String basePath) {
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
         try {
-            var data = ContainerContextRunner.doRun(behandling, () -> tjeneste.hentBeregningsgrunnlagFastsatt(ref));
-
+            List<Beregningsgrunnlag> data = ContainerContextRunner.doRun(behandling, () -> tjeneste.hentBeregningsgrunnlagFastsatt(ref));
             if (data.isEmpty()) {
-                return List.of();
+                return;
             }
-            var content = objectWriter.writeValueAsString(data);
-            return List.of(new DumpOutput("kalkulus-beregningsgrunnlag-fastsatt.json", content));
+            dumpMottaker.newFile(basePath + "/kalkulus-beregningsgrunnlag-fastsatt.json");
+            objectWriter.writeValue(dumpMottaker.getOutputStream(), data);
         } catch (Exception e) {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
-            return List.of(new DumpOutput("kalkulus-beregningsgrunnlag-fastsatt-ERROR.txt", sw.toString()));
+            dumpMottaker.newFile(basePath + "/kalkulus-beregningsgrunnlag-fastsatt-ERROR.txt");
+            dumpMottaker.write(e);
         }
     }
-
 
 }
