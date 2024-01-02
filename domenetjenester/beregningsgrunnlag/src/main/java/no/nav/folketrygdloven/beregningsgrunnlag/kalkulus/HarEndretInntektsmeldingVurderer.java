@@ -8,9 +8,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -43,16 +41,13 @@ public class HarEndretInntektsmeldingVurderer {
 
     public boolean harEndringPåInntektsmeldingerTilBrukForPerioden(BehandlingReferanse referanse,
                                                                    Collection<Inntektsmelding> inntektsmeldinger,
+                                                                   List<MottattDokument> mottatteInntektsmeldinger,
                                                                    DatoIntervallEntitet periode,
                                                                    InntektsmeldingerEndringsvurderer endringsvurderer) {
 
         var originalBehandling = behandlingRepository.hentBehandling(referanse.getOriginalBehandlingId().orElseThrow());
-        var mottatteInntektsmeldinger = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(referanse.getFagsakId())
-            .stream()
-            .filter(it -> Objects.equals(Brevkode.INNTEKTSMELDING, it.getType()))
-            .toList();
 
-        var inntektsmeldingerForrigeVedtak = finnInntektsmeldingerFraForrigeVedtak(referanse, originalBehandling, inntektsmeldinger, mottatteInntektsmeldinger);
+        var inntektsmeldingerForrigeVedtak = finnInntektsmeldingerFraForrigeVedtak(referanse, inntektsmeldinger, mottatteInntektsmeldinger);
 
 
         var relevanteInntektsmeldingerForrigeVedtak = utledRelevanteForPeriode(BehandlingReferanse.fra(originalBehandling), inntektsmeldingerForrigeVedtak, periode);
@@ -61,7 +56,7 @@ public class HarEndretInntektsmeldingVurderer {
         return endringsvurderer.erEndret(relevanteInntektsmeldinger, relevanteInntektsmeldingerForrigeVedtak);
     }
 
-    private List<Inntektsmelding> finnInntektsmeldingerFraForrigeVedtak(BehandlingReferanse referanse, Behandling originalBehandling, Collection<Inntektsmelding> inntektsmeldinger, List<MottattDokument> mottatteInntektsmeldinger) {
+    private List<Inntektsmelding> finnInntektsmeldingerFraForrigeVedtak(BehandlingReferanse referanse, Collection<Inntektsmelding> inntektsmeldinger, List<MottattDokument> mottatteInntektsmeldinger) {
         return inntektsmeldinger.stream()
             .filter(it -> erInntektsmeldingITidligereBehandling(it, referanse.getBehandlingId(), mottatteInntektsmeldinger))
             .toList();
