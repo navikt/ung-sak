@@ -24,20 +24,14 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.abakus.vedtak.ytelse.Ytelse;
 import no.nav.abakus.vedtak.ytelse.v1.YtelseV1;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.vilkår.Utfall;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingskontroll.BehandlingModell;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellRepository;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
@@ -56,12 +50,7 @@ import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriode;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
 import no.nav.k9.sak.utsatt.UtsattPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse.feriepenger.FeriepengerAvvikTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
@@ -75,15 +64,11 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
     private FagsakRepository fagsakRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
-    private MedisinskGrunnlagTjeneste medisinskGrunnlagTjeneste;
-    private ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste;
-    private EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste;
-    private SamtidigUttakTjeneste samtidigUttakTjeneste;
-    private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
-    private BehandlingModellRepository behandlingModellRepository;
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
     private FeriepengerAvvikTjeneste feriepengerAvvikTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
+
+    private EndringAnnenOmsorgspersonUtleder endringAnnenOmsorgspersonUtleder;
 
     VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste() {
     }
@@ -93,27 +78,16 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
                                                                FagsakRepository fagsakRepository,
                                                                VilkårResultatRepository vilkårResultatRepository,
                                                                MedisinskGrunnlagRepository medisinskGrunnlagRepository,
-                                                               MedisinskGrunnlagTjeneste medisinskGrunnlagTjeneste,
-                                                               ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste,
-                                                               EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
-                                                               SamtidigUttakTjeneste samtidigUttakTjeneste,
-                                                               SøknadsperiodeTjeneste søknadsperiodeTjeneste,
-                                                               BehandlingModellRepository behandlingModellRepository,
                                                                UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
-                                                               FeriepengerAvvikTjeneste feriepengerAvvikTjeneste, @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
+                                                               FeriepengerAvvikTjeneste feriepengerAvvikTjeneste, @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester, EndringAnnenOmsorgspersonUtleder endringAnnenOmsorgspersonUtleder) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
-        this.medisinskGrunnlagTjeneste = medisinskGrunnlagTjeneste;
-        this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
-        this.erEndringPåEtablertTilsynTjeneste = erEndringPåEtablertTilsynTjeneste;
-        this.endringUnntakEtablertTilsynTjeneste = endringUnntakEtablertTilsynTjeneste;
-        this.samtidigUttakTjeneste = samtidigUttakTjeneste;
-        this.behandlingModellRepository = behandlingModellRepository;
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
         this.feriepengerAvvikTjeneste = feriepengerAvvikTjeneste;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
+        this.endringAnnenOmsorgspersonUtleder = endringAnnenOmsorgspersonUtleder;
     }
 
     @Override
@@ -148,33 +122,21 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
                 var sisteBehandlingPåKandidat = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(kandidatFagsak.getId()).orElseThrow();
                 var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, sisteBehandlingPåKandidat.getFagsakYtelseType(), sisteBehandlingPåKandidat.getType());
                 var kandidatBehandlingReferanse = BehandlingReferanse.fra(sisteBehandlingPåKandidat);
-                var skalRevurderesPgaSykdom = perioderMedRevurderingSykdom(pleietrengende, kandidatsaksnummer, sisteBehandlingPåKandidat);
-                var skalRevurderesPgaEtablertTilsyn = perioderMedRevurderingPgaEtablertTilsyn(kandidatBehandlingReferanse);
-                var skalRevurderesPgaNattevåkOgBeredskap = perioderMedRevurderesPgaNattevåkOgBeredskap(kandidatBehandlingReferanse);
-                var skalRevurderesPgaEndretUttak = perioderMedRevurderingPgaUttak(kandidatBehandlingReferanse)
-                    .intersection(vedtattTidslinje);
-
-                var perioderMedInnvilgetInngangsvilkår = periodermedInnvilgetInngangsvilkår(kandidatBehandlingReferanse);
-
-                var skalRevurdereYtelsePgaEndringAnnenSak = skalRevurderesPgaEtablertTilsyn
-                    .union(skalRevurderesPgaNattevåkOgBeredskap, StandardCombinators::alwaysTrueForMatch)
-                    .union(skalRevurderesPgaEndretUttak, StandardCombinators::alwaysTrueForMatch)
-                    .union(skalRevurderesPgaSykdom, StandardCombinators::alwaysTrueForMatch)
-                    .intersection(perioderMedInnvilgetInngangsvilkår);
+                var endringstidslinjer = endringAnnenOmsorgspersonUtleder.utledTidslinjerForEndringSomPåvirkerSak(kandidatsaksnummer, pleietrengende, sisteBehandlingPåKandidat, vedtattTidslinje);
                 var skalReberegneFeriepenger = perioderMedRevurderingPgaEndringFeriepenger(sisteBehandlingPåKandidat, kandidatBehandlingReferanse);
 
-                if (!skalRevurdereYtelsePgaEndringAnnenSak.isEmpty() || !skalReberegneFeriepenger.isEmpty()) {
-                    if (!skalRevurdereYtelsePgaEndringAnnenSak.isEmpty()) {
+                if (!endringstidslinjer.harEndringSomPåvirkerSakTidslinje().isEmpty() || !skalReberegneFeriepenger.isEmpty()) {
+                    if (!endringstidslinjer.harEndringSomPåvirkerSakTidslinje().isEmpty()) {
                         //Er kun støtte p.t. for å oppgi en årsak pr sak. Må velge 'endring i ytelse'-årsak da denne (i motsetning til feriepenger-årsak) gir opphav til vilkårsperioder i revurderingen. Feriepengene vil uansett blir reberegnet
-                        LocalDateTimeline<Boolean> perioderSkalRevurdereYtelse = tettHull(perioderTilVurderingTjeneste, skalRevurdereYtelsePgaEndringAnnenSak);
+                        LocalDateTimeline<Boolean> perioderSkalRevurdereYtelse = tettHull(perioderTilVurderingTjeneste, endringstidslinjer.harEndringSomPåvirkerSakTidslinje());
                         resultat.add(new SakMedPeriode(kandidatsaksnummer, kandidatFagsak.getYtelseType(), TidslinjeUtil.tilDatoIntervallEntiteter(perioderSkalRevurdereYtelse), BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON));
                     } else {
                         resultat.add(new SakMedPeriode(kandidatsaksnummer, kandidatFagsak.getYtelseType(), TidslinjeUtil.tilDatoIntervallEntiteter(skalReberegneFeriepenger), BehandlingÅrsakType.RE_FERIEPENGER_ENDRING_FRA_ANNEN_SAK));
                     }
 
-                    log.info("Sak='{}' revurderes pga => sykdom={}, etablertTilsyn={}, nattevåk&beredskap={}, uttak={}, feriepenger={}", kandidatsaksnummer, !skalRevurderesPgaSykdom.isEmpty(), !skalRevurderesPgaEtablertTilsyn.isEmpty(), !skalRevurderesPgaNattevåkOgBeredskap.isEmpty(), !skalRevurderesPgaEndretUttak.isEmpty(), skalReberegneFeriepenger);
-                    if (Environment.current().isDev() && !skalRevurderesPgaEndretUttak.isEmpty()) {
-                        log.info("Endringer i uttak: {}", skalRevurderesPgaEndretUttak);
+                    log.info("Sak='{}' revurderes pga => sykdom={}, etablertTilsyn={}, nattevåk&beredskap={}, uttak={}, feriepenger={}", kandidatsaksnummer, !endringstidslinjer.harEndretSykdomTidslinje().isEmpty(), !endringstidslinjer.harEndretEtablertTilsynTidslinje().isEmpty(), !endringstidslinjer.harEndretNattevåkOgBeredskapTidslinje().isEmpty(), !endringstidslinjer.harEndretUttakTidslinje().isEmpty(), skalReberegneFeriepenger);
+                    if (Environment.current().isDev() && !endringstidslinjer.harEndretUttakTidslinje().isEmpty()) {
+                        log.info("Endringer i uttak: {}", endringstidslinjer.harEndretUttakTidslinje());
                     }
                 }
             }
@@ -193,46 +155,6 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
     private NavigableSet<DatoIntervallEntitet> utledTrukkedePerioder(BehandlingReferanse referanse) {
         var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, referanse.getFagsakYtelseType(), referanse.getBehandlingType());
         return perioderTilVurderingTjeneste.perioderSomSkalTilbakestilles(referanse.getBehandlingId());
-    }
-
-    private LocalDateTimeline<Boolean> periodermedInnvilgetInngangsvilkår(BehandlingReferanse kandidatBehandlingReferanse) {
-        LocalDateTimeline<Boolean> result = LocalDateTimeline.empty();
-
-        if (!kandidatBehandlingReferanse.getBehandlingStatus().erFerdigbehandletStatus()) {
-            // Ved åpen behandling trenger vi ikke begrense hvilke
-            result = TidslinjeUtil.tilTidslinjeKomprimert(utledVurderingsperiode(kandidatBehandlingReferanse));
-        }
-        var vilkårene = vilkårResultatRepository.hent(kandidatBehandlingReferanse.getBehandlingId());
-        var vilkårTidslinjer = vilkårene.getVilkårene()
-            .stream()
-            .filter(vilkår -> !Objects.equals(vilkår.getVilkårType(), VilkårType.SØKNADSFRIST))
-            .map(v -> new LocalDateTimeline<>(v.getPerioder()
-                .stream()
-                .map(vp -> new LocalDateSegment<>(vp.getPeriode().toLocalDateInterval(), Objects.equals(Utfall.OPPFYLT, vp.getGjeldendeUtfall())))
-                .toList()))
-            .toList();
-
-        LocalDateTimeline<Boolean> vilkårstidslinje = LocalDateTimeline.empty();
-
-        for (LocalDateTimeline<Boolean> tidslinje : vilkårTidslinjer) {
-            vilkårstidslinje = vilkårstidslinje.combine(tidslinje, this::mergeVilkårsSegmenter, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-        }
-
-
-        return vilkårstidslinje.combine(result, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN).compress();
-    }
-
-    private LocalDateSegment<Boolean> mergeVilkårsSegmenter(LocalDateInterval localDateInterval, LocalDateSegment<Boolean> lhs, LocalDateSegment<Boolean> rhs) {
-        if (lhs == null || lhs.getValue() == null) {
-            return rhs;
-        }
-        if (rhs == null || rhs.getValue() == null) {
-            return lhs;
-        }
-        if (!rhs.getValue()) {
-            return new LocalDateSegment<>(localDateInterval, rhs.getValue());
-        }
-        return new LocalDateSegment<>(localDateInterval, lhs.getValue());
     }
 
     private boolean ytelsesSpesifiktFilter(FagsakYtelseType ytelseType, Saksnummer kandidatsaksnummer) {
@@ -254,13 +176,6 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         return skalRevurderes.crossJoin(tidslinjeHull, StandardCombinators::coalesceRightHandSide);
     }
 
-    private LocalDateTimeline<Boolean> perioderMedRevurderingPgaUttak(BehandlingReferanse referanse) {
-        if (!referanse.getBehandlingStatus().erFerdigbehandletStatus() && !samtidigUttakTjeneste.harKommetTilUttak(referanse)) {
-            return LocalDateTimeline.empty();
-        }
-        return TidslinjeUtil.tilTidslinjeKomprimert(samtidigUttakTjeneste.perioderMedEndringerMedUbesluttedeData(referanse));
-    }
-
     private LocalDateTimeline<Boolean> perioderMedRevurderingPgaEndringFeriepenger(Behandling sisteBehandlingPåKandidat, BehandlingReferanse referanse) {
         if (!sisteBehandlingPåKandidat.getStatus().erFerdigbehandletStatus() && !feriepengerAvvikTjeneste.harKommetTilTilkjentYtelse(referanse)) {
             return LocalDateTimeline.empty();
@@ -269,49 +184,6 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         return new LocalDateTimeline<>(opptjeningsårFeriepengerMåReberegnes.stream()
             .map(år -> new LocalDateSegment<>(år.atMonth(1).atDay(1), år.atMonth(12).atDay(31), true))
             .toList());
-    }
-
-    private LocalDateTimeline<Boolean> perioderMedRevurderesPgaNattevåkOgBeredskap(BehandlingReferanse referanse) {
-        if (referanse.getFagsakYtelseType() != FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
-            return LocalDateTimeline.empty();
-        }
-        return TidslinjeUtil.tilTidslinjeKomprimert(endringUnntakEtablertTilsynTjeneste.utledRelevanteEndringerSidenBehandling(referanse.getBehandlingId(), referanse.getPleietrengendeAktørId()));
-    }
-
-    private LocalDateTimeline<Boolean> perioderMedRevurderingPgaEtablertTilsyn(BehandlingReferanse referanse) {
-        if (referanse.getFagsakYtelseType() != FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
-            return LocalDateTimeline.empty();
-        }
-        return erEndringPåEtablertTilsynTjeneste.perioderMedEndringerFraEksisterendeVersjon(referanse)
-            .filterValue(Objects::nonNull);
-    }
-
-    private LocalDateTimeline<Boolean> perioderMedRevurderingSykdom(AktørId pleietrengende, Saksnummer kandidatsaksnummer, Behandling sisteBehandlingPåKandidat) {
-        if (søknadsperiodeTjeneste.utledFullstendigPeriode(sisteBehandlingPåKandidat.getId()).isEmpty()) {
-            return LocalDateTimeline.empty();
-        }
-        if (erUnderBehandlingOgIkkeKommetTilSykdom(sisteBehandlingPåKandidat)) {
-            return LocalDateTimeline.empty();
-        }
-        var kandidatSykdomBehandling = medisinskGrunnlagRepository.hentGrunnlagForBehandling(sisteBehandlingPåKandidat.getUuid()).orElseThrow();
-        var behandling = behandlingRepository.hentBehandlingHvisFinnes(kandidatSykdomBehandling.getBehandlingUuid()).orElseThrow();
-        var vurderingsperioder = utledVurderingsperiode(BehandlingReferanse.fra(behandling));
-        var manglendeOmsorgenForPerioder = medisinskGrunnlagTjeneste.hentManglendeOmsorgenForPerioder(behandling.getId());
-        var utledetGrunnlag = medisinskGrunnlagRepository.utledGrunnlag(kandidatsaksnummer, kandidatSykdomBehandling.getBehandlingUuid(), pleietrengende, vurderingsperioder, manglendeOmsorgenForPerioder);
-        final LocalDateTimeline<Boolean> endringerISøktePerioder = medisinskGrunnlagTjeneste.sammenlignGrunnlag(Optional.of(kandidatSykdomBehandling.getGrunnlagsdata()), utledetGrunnlag).getDiffPerioder();
-
-        return endringerISøktePerioder.compress()
-            .filterValue(Objects::nonNull);
-    }
-
-    private boolean erUnderBehandlingOgIkkeKommetTilSykdom(Behandling sisteBehandlingPåKandidat) {
-        return !sisteBehandlingPåKandidat.erSaksbehandlingAvsluttet() && harIkkeKommetTilSykdom(sisteBehandlingPåKandidat);
-    }
-
-    private boolean harIkkeKommetTilSykdom(Behandling sisteBehandlingPåKandidat) {
-        final BehandlingStegType steg = sisteBehandlingPåKandidat.getAktivtBehandlingSteg();
-        final BehandlingModell modell = behandlingModellRepository.getModell(sisteBehandlingPåKandidat.getType(), sisteBehandlingPåKandidat.getFagsakYtelseType());
-        return modell.erStegAFørStegB(steg, BehandlingStegType.VURDER_MEDISINSKE_VILKÅR);
     }
 
     private NavigableSet<DatoIntervallEntitet> utledVurderingsperiode(BehandlingReferanse referanse) {

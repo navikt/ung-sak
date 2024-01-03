@@ -19,7 +19,7 @@ class MedisinskGrunnlagsdataRepositoryTest {
 
     @Test
     void sjekkGyldigHqlSyntax() {
-        repo.hentSisteBehandlingMedUnntakAv(new Saksnummer("A21A"), UUID.randomUUID());
+        repo.hentSisteBehandlingFør(new Saksnummer("A21A"), UUID.randomUUID());
         repo.hentGrunnlagForBehandling(UUID.randomUUID());
     }
 }

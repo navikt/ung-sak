@@ -41,6 +41,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.søknad.SøknadRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.søknadsfrist.SøknadsfristRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.tilbakekreving.TilbakekrevingRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.tilsyn.VurderTilsynRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.uttak.ForvaltningUttakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.uttak.PleiepengerUttakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.uttak.UtenlandsoppholdRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.uttak.UttakRestTjeneste;
@@ -137,6 +138,7 @@ public class RestImplementationClasses {
         classes.add(ProsessTaskRestTjeneste.class);
         classes.add(ForvaltningAksjonspunktSammendragRestTjeneste.class);
         classes.add(ForvaltningMidlertidigDriftRestTjeneste.class);
+        classes.add(ForvaltningUttakRestTjeneste.class);
         classes.add(ForvaltningOppdragRestTjeneste.class);
         classes.add(ForvaltningBeregningRestTjeneste.class);
         classes.add(ForvaltningInfotrygMigreringRestTjeneste.class);
