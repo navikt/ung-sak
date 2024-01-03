@@ -287,7 +287,7 @@ spec:
     - name: LAGRE_SOEKNADSAKTOERER
       value: "true"
     - name: ENABLE_AZURE_CC_SYSTEMCONTEXT
-      value: "false"
+      value: "true"
     - name: AVKLAR_ARBEIDSFORHOLD_REUTLED_VED_REVURDERING
       value: "true"
     - name: ENABLE_RESERVERT_SAKSNUMMER
