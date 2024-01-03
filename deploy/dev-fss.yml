@@ -294,6 +294,8 @@ spec:
       value: "true"
     - name: OMP_RELEVANT_ENDRING_UTLEDNING
       value: "true"
+    - name: IKKE_VURDER_KOMPLETTHET_VED_FORLENGELSE
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
