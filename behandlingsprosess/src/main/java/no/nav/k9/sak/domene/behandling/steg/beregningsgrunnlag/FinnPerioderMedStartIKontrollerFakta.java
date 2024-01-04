@@ -39,7 +39,6 @@ public class FinnPerioderMedStartIKontrollerFakta {
     private final MottatteDokumentRepository mottatteDokumentRepository;
     private final BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
 
-    private final boolean skalSjekkeEndringIKompletthet;
 
 
     @Inject
@@ -48,15 +47,13 @@ public class FinnPerioderMedStartIKontrollerFakta {
                                                 HarEndretInntektsmeldingVurderer harEndretInntektsmeldingVurderer,
                                                 InntektArbeidYtelseTjeneste iayTjeneste,
                                                 MottatteDokumentRepository mottatteDokumentRepository,
-                                                BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
-                                                @KonfigVerdi(value = "ENDRING_I_KOMPLETTHET_BEREGN_FRA_START", defaultVerdi = "false") boolean skalSjekkeEndringIKompletthet) {
+                                                BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
         this.harEndretInntektsmeldingVurderer = harEndretInntektsmeldingVurderer;
         this.iayTjeneste = iayTjeneste;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
-        this.skalSjekkeEndringIKompletthet = skalSjekkeEndringIKompletthet;
     }
 
     /**
@@ -102,11 +99,6 @@ public class FinnPerioderMedStartIKontrollerFakta {
 
         if (utenEndringIInntektsmelding.isEmpty()) {
             return new TreeSet<>();
-        }
-
-
-        if (!skalSjekkeEndringIKompletthet) {
-            return utenEndringIInntektsmelding;
         }
 
         // Filtrerer ut endret kompletthetsvurdering
