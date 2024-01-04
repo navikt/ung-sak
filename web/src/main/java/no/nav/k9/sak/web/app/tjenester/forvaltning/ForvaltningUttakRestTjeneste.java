@@ -2,6 +2,7 @@ package no.nav.k9.sak.web.app.tjenester.forvaltning;
 
 import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
 
@@ -143,7 +144,7 @@ public class ForvaltningUttakRestTjeneste {
     @Path("/fjern-prosesstrigger-endring-annen-omsorgsperson")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Fjerner prosesstrigger for endring fra annen omsorgsperson", summary = ("Fjerner prosesstrigger for endring fra annen omsorgsperson"), tags = "uttak")
-    @BeskyttetRessurs(action = UPDATE, resource = FAGSAK)
+    @BeskyttetRessurs(action = CREATE, resource = DRIFT)
     public void fjernProsessTriggerForEndringFraAnnenOmsorgsperson(
         @Parameter(description = "Behandling-id")
         @NotNull
