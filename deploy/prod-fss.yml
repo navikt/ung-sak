@@ -199,7 +199,7 @@ spec:
     - name: K9_PUNSJ_SCOPE
       value: api://prod-fss.k9saksbehandling.k9-punsj/.default
     - name: INFOTRYGD_BS_BASE_URI
-      value: https://k9-infotrygd.intern.nav.no
+      value: http://k9-infotrygd-grunnlag-paaroerende-sykdom.k9saksbehandling
     - name: K9_INFOTRYGD_SCOPE
       value: api://prod-fss.k9saksbehandling.k9-infotrygd-grunnlag-paaroerende-sykdom/.default
     - name: ARBEID_OG_INNTEKT_BASE_URL
