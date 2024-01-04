@@ -111,6 +111,20 @@ public class RyddOgGjenopprettBeregningTjeneste {
         }
     }
 
+
+    /**
+     * Deaktiverer perioder før vi kaller kalkulus
+     *
+     * @param referanse Behandlingreferanse
+     */
+    public void deaktiverAlleReferanserUlikInitiell(BehandlingReferanse referanse) {
+        // deaktiverer grunnlag for referanser som er avslått eller inaktive (fjernet skjæringstidspunkt)
+        kalkulusTjeneste.deaktiverBeregningsgrunnlagPerioderUlikInitiell(referanse);
+        if (validerIngenLoseReferanser) {
+            validerAktiveReferanserTjeneste.validerIngenLøseReferanser(referanse);
+        }
+    }
+
     /**
      * Fjerner perioder som er avslått i definerende vilkår no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste#definerendeVilkår() og initierer perioder som er innvilget dersom de ikke eksisterer
      * <p>

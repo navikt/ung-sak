@@ -296,6 +296,8 @@ spec:
       value: "true"
     - name: IKKE_VURDER_KOMPLETTHET_VED_FORLENGELSE
       value: "true"
+    - name: NY_DEAKTIVERING_LOGIKK_KALKULUS
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
