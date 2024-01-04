@@ -1,6 +1,5 @@
 package no.nav.k9.sak.web.app;
 
-import static no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningUttakRestTjeneste.SaksnummerOgSkjæringstidspunktDto.SaksnummerOgSkjæringstidspunktDtoMessageBodyReader;
 
 import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
@@ -66,7 +65,6 @@ public class ApplicationConfig extends ResourceConfig {
 
         register(new OpprettManuellRevurderingMessageBodyReader());
         register(new OpprettManuellRevurderingBeregningMessageBodyReader());
-        register(new SaksnummerOgSkjæringstidspunktDtoMessageBodyReader());
         register(new PsbInfotrygdFødselsnumregMessageBodyReader());
 
         registerInstances(new LinkedHashSet<>(new KnownExceptionMappers().getExceptionMappers()));
