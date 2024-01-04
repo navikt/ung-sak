@@ -288,8 +288,6 @@ spec:
       value: "false"
     - name: OMP_RELEVANT_ENDRING_UTLEDNING
       value: "false"
-    - name: ENDRING_I_KOMPLETTHET_BEREGN_FRA_START
-      value: "false"
     - name: IKKE_VURDER_KOMPLETTHET_VED_FORLENGELSE
       value: "false"
 
