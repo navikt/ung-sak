@@ -50,6 +50,7 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
     private EtablertTilsynTjeneste etablertTilsynTjeneste;
     private SamtidigUttakTjeneste samtidigUttakTjeneste;
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
+    private SkalOverstyreUttakVurderer skalOverstyreUttakVurderer;
 
 
     VurderUttakIBeregningSteg() {
@@ -62,13 +63,14 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
                                      UttakTjeneste uttakTjeneste,
                                      EtablertTilsynTjeneste etablertTilsynTjeneste,
                                      SamtidigUttakTjeneste samtidigUttakTjeneste,
-                                     UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository) {
+                                     UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository, SkalOverstyreUttakVurderer skalOverstyreUttakVurderer) {
         this.behandlingRepository = behandlingRepository;
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
         this.uttakTjeneste = uttakTjeneste;
         this.etablertTilsynTjeneste = etablertTilsynTjeneste;
         this.samtidigUttakTjeneste = samtidigUttakTjeneste;
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
+        this.skalOverstyreUttakVurderer = skalOverstyreUttakVurderer;
     }
 
     @Override
@@ -103,6 +105,11 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
             if (behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK)) {
                 avbrytAksjonspunkt(behandling, kontekst);
             }
+
+            if (skalOverstyreUttakVurderer.skalOverstyreUttak(ref)) {
+                return Optional.of(AksjonspunktDefinisjon.OVERSTYRING_AV_UTTAK);
+            }
+
             return Optional.empty();
         } else {
             log.info("[Kjøreplan] Venter på behandling av andre fagsaker");
