@@ -7,9 +7,7 @@ import java.util.Optional;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
@@ -41,9 +39,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
 
+@ApplicationScoped
 public class EndringAnnenOmsorgspersonUtleder {
-
-    private static final Logger log = LoggerFactory.getLogger(VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste.class);
 
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -208,10 +205,10 @@ public class EndringAnnenOmsorgspersonUtleder {
     }
 
     public record Endringstidslinjer(LocalDateTimeline<Boolean> harEndretSykdomTidslinje,
-                                      LocalDateTimeline<Boolean> harEndretEtablertTilsynTidslinje,
-                                      LocalDateTimeline<Boolean> harEndretNattevåkOgBeredskapTidslinje,
-                                      LocalDateTimeline<Boolean> harEndretUttakTidslinje,
-                                      LocalDateTimeline<Boolean> harEndringSomPåvirkerSakTidslinje) {
+                                     LocalDateTimeline<Boolean> harEndretEtablertTilsynTidslinje,
+                                     LocalDateTimeline<Boolean> harEndretNattevåkOgBeredskapTidslinje,
+                                     LocalDateTimeline<Boolean> harEndretUttakTidslinje,
+                                     LocalDateTimeline<Boolean> harEndringSomPåvirkerSakTidslinje) {
     }
 
 }

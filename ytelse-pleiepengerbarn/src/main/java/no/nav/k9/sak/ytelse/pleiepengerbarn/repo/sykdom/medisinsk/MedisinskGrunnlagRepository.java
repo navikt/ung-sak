@@ -218,10 +218,11 @@ public class MedisinskGrunnlagRepository {
                 + "    From MedisinskGrunnlag as sgb2 "
                 + "    Where sgb2.saksnummer = :saksnummer "
                 + "      And sgb2.behandlingUuid <> :behandlingUuid "
-                + " And sgb2.behandlingsnummer < (Select max(sgb3.behandlingsnummer) "
+                + " And (sgb2.behandlingsnummer < (Select max(sgb3.behandlingsnummer)  "
                 + "                    From MedisinskGrunnlag as sgb3 "
                 + "                   Where sgb3.saksnummer = :saksnummer "
                 + "                   And sgb3.behandlingUuid = :behandlingUuid) "
+                + " Or not exists (Select 1  From MedisinskGrunnlag as sgb3 Where sgb3.saksnummer = :saksnummer And sgb3.behandlingUuid = :behandlingUuid))"
                 + "  )"
                 + "  And sgb.behandlingUuid <> :behandlingUuid"
             , UUID.class);
