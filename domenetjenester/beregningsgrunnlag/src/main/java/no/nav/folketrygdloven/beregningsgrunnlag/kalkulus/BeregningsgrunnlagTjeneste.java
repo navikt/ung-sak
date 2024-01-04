@@ -367,6 +367,24 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         }
     }
 
+
+    /**
+     * Deaktiverer og rydder beregningsgrunnlag i kalkulus som er ulik initiell
+     *
+     * @param ref Behandlingreferanse behandlingreferanse
+     */
+    public void deaktiverBeregningsgrunnlagPerioderUlikInitiell(BehandlingReferanse ref) {
+        Optional<BeregningsgrunnlagPerioderGrunnlag> initiellVersjon = Objects.equals(ref.getBehandlingType(), BehandlingType.REVURDERING) ? grunnlagRepository.getInitiellVersjon(ref.getBehandlingId()) : Optional.empty();
+        var referanserSomSkalDeaktiveres = finnReferanserUlikInitiell(ref, initiellVersjon);
+        if (!referanserSomSkalDeaktiveres.isEmpty()) {
+            log.info("Deaktiverer referanser {}", referanserSomSkalDeaktiveres);
+            var bgReferanser = referanserSomSkalDeaktiveres.stream()
+                .map(BgRef::getRef)
+                .collect(Collectors.toList());
+            finnTjeneste(ref.getFagsakYtelseType()).deaktiverBeregningsgrunnlag(ref.getFagsakYtelseType(), ref.getSaksnummer(), ref.getBehandlingUuid(), bgReferanser);
+        }
+    }
+
     private List<BgRef> finnReferanserSomSkalDeaktiveres(BehandlingReferanse ref,
                                                          Vilkår vilkår,
                                                          Optional<BeregningsgrunnlagPerioderGrunnlag> initiellVersjon) {
@@ -379,6 +397,15 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
         referanserSomSkalDeaktiveres.addAll(fjernetReferanseer);
         referanserSomSkalDeaktiveres.addAll(stpMedEndretVurderingsstatus);
         return referanserSomSkalDeaktiveres;
+    }
+
+    private List<BgRef> finnReferanserUlikInitiell(BehandlingReferanse ref,
+                                                   Optional<BeregningsgrunnlagPerioderGrunnlag> initiellVersjon) {
+        var grunnlagOpt = grunnlagRepository.hentGrunnlag(ref.getBehandlingId());
+        return grunnlagOpt.stream().flatMap(g -> g.getGrunnlagPerioder().stream())
+            .map(p -> new BgRef(p.getEksternReferanse(), p.getSkjæringstidspunkt()))
+            .filter(it -> erIkkeInitiellVersjon(initiellVersjon, it))
+            .toList();
     }
 
     private List<BgRef> finnReferanserSomIkkeLengerVurderesOgUlikInitiell(BehandlingReferanse ref,
