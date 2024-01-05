@@ -86,7 +86,6 @@ public class BeregningInkonsistensTjeneste {
      */
     public void sjekkInkonsistensOgOpprettProsesstrigger(BehandlingReferanse ref) {
         NavigableSet<DatoIntervallEntitet> perioderSomRevurderes = finnPerioderMedInkonsistens(ref);
-        prosessTriggereRepository.leggTil(ref.getId(), Set.of(new Trigger(BehandlingÅrsakType.RE_ENDRING_BEREGNINGSGRUNNLAG, DatoIntervallEntitet.fra(LocalDate.now(), LocalDate.now()))));
         if (!perioderSomRevurderes.isEmpty()) {
             prosessTriggereRepository.leggTil(ref.getId(), perioderSomRevurderes.stream().map(it -> new Trigger(BehandlingÅrsakType.RE_ENDRING_BEREGNINGSGRUNNLAG, it)).collect(Collectors.toSet()));
         }
