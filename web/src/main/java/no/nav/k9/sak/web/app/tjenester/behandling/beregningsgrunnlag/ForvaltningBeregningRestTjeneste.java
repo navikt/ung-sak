@@ -335,7 +335,7 @@ public class ForvaltningBeregningRestTjeneste {
     @GET
     @Path("/finn-saker-med-feil-trigger")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Operation(description = "Henter saksnumre med feil.", summary = ("Henter saksnumre med feil."), tags = "forvaltning")
+    @Operation(description = "Henter saksnumre med feil.", summary = ("Henter saksnumre med feil."), tags = "beregning")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
     public Response finnSakerMedFeilTrigger() {
         var query = entityManager.createNativeQuery(
@@ -361,7 +361,9 @@ public class ForvaltningBeregningRestTjeneste {
 
         Optional<String> dataDump = CsvOutput.dumpResultSetToCsv(results);
 
-        return dataDump.map(d -> Response.ok(d)
+        return dataDump
+            .map(s -> s.replace("\"", "")) //hack for å kunne bruke fjernProsessTriggerForReberegning direkte fra respons
+            .map(d -> Response.ok(d)
             .type(MediaType.APPLICATION_OCTET_STREAM)
             .header("Content-Disposition", String.format("attachment; filename=\"dump.csv\""))
             .build()).orElse(Response.noContent().build());
