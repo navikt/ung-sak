@@ -339,7 +339,7 @@ public class ForvaltningBeregningRestTjeneste {
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
     public Response finnSakerMedFeilTrigger() {
         var query = entityManager.createNativeQuery(
-            "SELECT distinct b.id behandlingId, f.id fagsakId, f.saksnummer saksnummer " +
+            "SELECT distinct f.saksnummer saksnummer, LOWER(t.periode) fom " +
                 "FROM PROSESS_TRIGGERE s " +
                 "INNER JOIN PT_TRIGGER t on s.triggere_id = t.triggere_id " +
                 "INNER JOIN BEHANDLING b on b.id = s.behandling_id " +
@@ -347,7 +347,11 @@ public class ForvaltningBeregningRestTjeneste {
                 "WHERE s.aktiv = true AND t.arsak = :aktuellArsak and " +
                 "UPPER(t.periode) - LOWER(t.periode) = 1 and " +
                 "t.opprettet_tid > :feilFra and " +
-                "b.behandling_status = :utredes ", Tuple.class);
+                "b.behandling_status = :utredes and " +
+                "not exists(" +
+                "select 1 from GR_BEREGNINGSGRUNNLAG gr " +
+                "inner join BG_PERIODE p on p.bg_grunnlag_id = gr.bg_grunnlag_id " +
+                "where gr.behandling_id = b.id and p.skjaeringstidspunkt = LOWER(t.periode))", Tuple.class);
 
         query.setParameter("aktuellArsak", BehandlingÅrsakType.RE_ENDRING_BEREGNINGSGRUNNLAG.getKode())
             .setParameter("feilFra", LocalDateTime.of(2023, 12, 12, 6, 55))
