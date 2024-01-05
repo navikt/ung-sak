@@ -1,0 +1,1 @@
+create index pleietrengende_sykdom_dokument_pleietrengende_sykdom_id on pleietrengende_sykdom_dokument (pleietrengende_sykdom_id);
