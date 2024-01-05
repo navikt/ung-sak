@@ -292,6 +292,9 @@ spec:
       value: "false"
     - name: NY_DEAKTIVERING_LOGIKK_KALKULUS
       value: "false"
+    - name: AKTIVER_AUTOMATISK_ETTERKONTROLL
+      value: "false"
+
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
