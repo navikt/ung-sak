@@ -144,8 +144,6 @@ spec:
       value: OMS
 
     # Restservice Generelle
-    - name: INFOTRYGD_HENDELSER_API_URL
-      value: http://infotrygd-hendelser.infotrygd/infotrygd/hendelser
     - name: FPABAKUS_URL
       value: http://fpabakus.teamforeldrepenger/fpabakus
     - name: FPABAKUS_SCOPE
