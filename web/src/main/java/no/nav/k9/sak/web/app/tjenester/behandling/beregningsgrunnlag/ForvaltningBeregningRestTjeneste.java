@@ -364,9 +364,9 @@ public class ForvaltningBeregningRestTjeneste {
         return dataDump
             .map(s -> s.replace("\"", "")) //hack for å kunne bruke fjernProsessTriggerForReberegning direkte fra respons
             .map(d -> Response.ok(d)
-            .type(MediaType.APPLICATION_OCTET_STREAM)
-            .header("Content-Disposition", String.format("attachment; filename=\"dump.csv\""))
-            .build()).orElse(Response.noContent().build());
+                .type(MediaType.APPLICATION_OCTET_STREAM)
+                .header("Content-Disposition", String.format("attachment; filename=\"dump.csv\""))
+                .build()).orElse(Response.noContent().build());
     }
 
     @GET
@@ -381,10 +381,15 @@ public class ForvaltningBeregningRestTjeneste {
                 "INNER JOIN PT_TRIGGER t on s.triggere_id = t.triggere_id " +
                 "INNER JOIN BEHANDLING b on b.id = s.behandling_id " +
                 "INNER JOIN FAGSAK f on b.fagsak_id = f.id " +
-                "WHERE s.aktiv = true AND t.arsak = :aktuellArsak and " +
-                "UPPER(t.periode) - LOWER(t.periode) = 1 and " +
-                "t.opprettet_tid > :feilFra and " +
-                "b.behandling_status = :utredes", Tuple.class);
+                "inner join GR_BEREGNINGSGRUNNLAG gr on gr.behandling_id = b.id " +
+                "inner join BG_PERIODE p on p.bg_grunnlag_id = gr.bg_grunnlag_id " +
+                "where gr.behandling_id = b.id " +
+                "and p.skjaeringstidspunkt = LOWER(t.periode)) " +
+                "AND s.aktiv = true " +
+                "AND t.arsak = :aktuellArsak " +
+                "and UPPER(t.periode) - LOWER(t.periode) = 1 " +
+                "and t.opprettet_tid > :feilFra " +
+                "and b.behandling_status = :utredes ", Tuple.class);
 
         query.setParameter("aktuellArsak", BehandlingÅrsakType.RE_ENDRING_BEREGNINGSGRUNNLAG.getKode())
             .setParameter("feilFra", LocalDateTime.of(2023, 12, 12, 6, 55))
@@ -401,7 +406,6 @@ public class ForvaltningBeregningRestTjeneste {
                 .header("Content-Disposition", String.format("attachment; filename=\"dump.csv\""))
                 .build()).orElse(Response.noContent().build());
     }
-
 
 
     public static class OpprettManuellRevurderingBeregning implements AbacDto {
