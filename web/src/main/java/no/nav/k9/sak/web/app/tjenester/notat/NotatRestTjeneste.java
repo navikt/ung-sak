@@ -10,6 +10,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -54,6 +57,7 @@ public class NotatRestTjeneste {
     private NotatRepository notatRepository;
     private FagsakRepository fagsakRepository;
 
+    private static Logger LOGGER = LoggerFactory.getLogger(NotatRestTjeneste.class);
 
     @Inject
     public NotatRestTjeneste(NotatRepository notatRepository, FagsakRepository fagsakRepository) {
@@ -100,6 +104,7 @@ public class NotatRestTjeneste {
             .notatTekst(opprettNotatDto.notatTekst())
             .build();
         notatRepository.lagre(entitet);
+        LOGGER.info("Notat opprettet");
         return Response.status(Response.Status.CREATED).entity(mapDto(entitet)).build();
 
     }
@@ -120,6 +125,9 @@ public class NotatRestTjeneste {
         if (!notat.getNotatTekst().equals(endreNotatDto.notatTekst())) {
             notat.nyTekst(endreNotatDto.notatTekst());
             notatRepository.lagre(notat);
+            LOGGER.info("Notat endret");
+        } else {
+            LOGGER.info("Notat forsøkt endret, men ingen endring");
         }
 
         return Response.status(Response.Status.OK).entity(mapDto(notat)).build();
@@ -150,7 +158,11 @@ public class NotatRestTjeneste {
         if (notat.isSkjult() != skjulNotatDto.skjul()) {
             notat.skjul(skjulNotatDto.skjul());
             notatRepository.lagre(notat);
+            LOGGER.info("Notat skjult={}", skjulNotatDto.skjul());
+        } else {
+            LOGGER.info("Notat skjuling førte til ingen endring");
         }
+
 
         return  Response.status(Response.Status.OK).entity(mapDto(notat)).build();
 

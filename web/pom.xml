@@ -24,7 +24,7 @@
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-bom</artifactId>
-                <version>11.0.18</version>
+                <version>11.0.19</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -163,7 +163,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.k9.felles.oidc-token</groupId>
-            <artifactId>k9-sikkerhet-sts</artifactId>
+            <artifactId>k9-sikkerhet-azure-cc</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.k9.felles</groupId>

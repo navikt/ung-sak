@@ -44,6 +44,7 @@ import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.KompletthetPeriode;
@@ -108,7 +109,7 @@ public class KompletthetForBeregningTjeneste {
         var perioderMedManglendeVedlegg = new HashMap<DatoIntervallEntitet, List<ManglendeVedlegg>>();
 
         // Utled vilkårsperioder
-        var vilkårsPerioder = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, false, false, skalIgnorerePerioderFraInfotrygd)
+        var vilkårsPerioder = beregningsgrunnlagVilkårTjeneste.utledPerioderForKompletthet(ref, false, false, skalIgnorerePerioderFraInfotrygd)
             .stream()
             .sorted(Comparator.comparing(DatoIntervallEntitet::getFomDato))
             .collect(Collectors.toCollection(TreeSet::new));

@@ -33,7 +33,6 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
-import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 
 @FagsakYtelseTypeRef
 @BehandlingStegRef(value = FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING)
@@ -41,7 +40,6 @@ import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 @ApplicationScoped
 public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
 
-    public static final String HASTESAK_JANUAR_2023 = "BQFSK";
     private final Logger logger = LoggerFactory.getLogger(FastsettSkjæringstidspunktSteg.class);
 
     private BeregningTjeneste kalkulusTjeneste;
@@ -49,7 +47,6 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
     private BehandlingRepository behandlingRepository;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
-    private VilkårPeriodeFilterProvider periodeFilterProvider;
     private BeregningStegPeriodeFilter beregningStegPeriodeFilter;
 
     protected FastsettSkjæringstidspunktSteg() {
@@ -62,7 +59,6 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
                                           SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                           BehandlingRepository behandlingRepository,
                                           BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
-                                          VilkårPeriodeFilterProvider periodeFilterProvider,
                                           BeregningStegPeriodeFilter beregningStegPeriodeFilter) {
 
         this.kalkulusTjeneste = kalkulusTjeneste;
@@ -70,7 +66,6 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
         this.behandlingRepository = behandlingRepository;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
-        this.periodeFilterProvider = periodeFilterProvider;
         this.beregningStegPeriodeFilter = beregningStegPeriodeFilter;
     }
 

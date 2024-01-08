@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.log.mdc.MDCOperations;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -27,21 +28,27 @@ public class AutomatiskEtterkontrollBatchTask implements ProsessTaskHandler {
     private BehandlingRepository behandlingRepository;
     private EtterkontrollRepository repository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
+    private boolean aktiverAutomatiskEtterkontrollBatch;
 
     public AutomatiskEtterkontrollBatchTask() {}
 
     @Inject
     public AutomatiskEtterkontrollBatchTask(BehandlingRepositoryProvider repositoryProvider,
                                             EtterkontrollRepository repository,
-                                            ProsessTaskTjeneste prosessTaskTjeneste
-    ) {
+                                            ProsessTaskTjeneste prosessTaskTjeneste,
+                                            @KonfigVerdi(value = "AKTIVER_AUTOMATISK_ETTERKONTROLL", defaultVerdi = "true") boolean aktiverAutomatiskEtterkontrollBatch) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.repository = repository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
+        this.aktiverAutomatiskEtterkontrollBatch = aktiverAutomatiskEtterkontrollBatch;
     }
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
+        if (!aktiverAutomatiskEtterkontrollBatch) {
+            return;
+        }
+
         var etterkontroller = repository.finnKandidaterForAutomatiskEtterkontroll();
 
         String callId = MDCOperations.getCallId();

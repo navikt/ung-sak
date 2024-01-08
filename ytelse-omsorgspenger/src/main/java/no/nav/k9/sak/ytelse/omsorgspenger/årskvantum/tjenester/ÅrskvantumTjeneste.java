@@ -16,7 +16,6 @@ import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -279,7 +278,7 @@ public class ÅrskvantumTjeneste {
             .collect(Collectors.toMap(MottattDokument::getJournalpostId, e -> e));
 
         NavigableSet<DatoIntervallEntitet> periodene = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.OMSORGEN_FOR);
-        LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje = (harOmsorgenForBlittVurdertIK9sak(fagsakPeriode.getFomDato())) ? omsorgenForTjeneste.mapGrunnlag(ref, periodene): LocalDateTimeline.empty();
+        LocalDateTimeline<OmsorgenForVilkårGrunnlag> samletOmsorgenForTidslinje = (harOmsorgenForBlittVurdertIK9sak(fagsakPeriode.getFomDato())) ? omsorgenForTjeneste.mapGrunnlag(ref, periodene) : LocalDateTimeline.empty();
 
         for (WrappedOppgittFraværPeriode wrappedOppgittFraværPeriode : fraværsPerioderMedUtfallOgPerArbeidsgiver) {
             var fraværPeriode = wrappedOppgittFraværPeriode.getPeriode();
@@ -509,6 +508,13 @@ public class ÅrskvantumTjeneste {
         var alleBehandlinger = behandlingRepository.hentAbsoluttAlleBehandlingerForSaksnummer(saksnummer);
 
         var relevantBehandling = alleBehandlinger.stream().filter(it -> it.getUuid().equals(behandlingUuid)).findAny().orElseThrow();
+        return hentUttaksplanForBehandling(saksnummer, relevantBehandling.getId());
+    }
+
+    public FullUttaksplanForBehandlinger hentUttaksplanForBehandling(Saksnummer saksnummer, Long behandlingId) {
+        var alleBehandlinger = behandlingRepository.hentAbsoluttAlleBehandlingerForSaksnummer(saksnummer);
+
+        var relevantBehandling = alleBehandlinger.stream().filter(it -> it.getId().equals(behandlingId)).findAny().orElseThrow();
 
         var relevanteBehandlinger = alleBehandlinger.stream()
             .filter(Behandling::erYtelseBehandling)
@@ -520,5 +526,6 @@ public class ÅrskvantumTjeneste {
 
         return årskvantumKlient.hentFullUttaksplanForBehandling(relevanteBehandlinger);
     }
+
 
 }

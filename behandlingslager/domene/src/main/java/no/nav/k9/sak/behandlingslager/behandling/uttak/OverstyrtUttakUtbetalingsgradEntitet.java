@@ -71,7 +71,7 @@ public class OverstyrtUttakUtbetalingsgradEntitet extends BaseEntitet {
         return aktivitetType;
     }
 
-    public Arbeidsgiver getArbeidsgiverId() {
+    public Arbeidsgiver getArbeidsgiver() {
         if (arbeidsgiverOrgNr != null) {
             return Arbeidsgiver.virksomhet(arbeidsgiverOrgNr);
         } else if (arbeidsgiverAktørId != null) {

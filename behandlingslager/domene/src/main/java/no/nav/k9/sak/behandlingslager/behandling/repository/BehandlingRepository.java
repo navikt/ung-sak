@@ -12,10 +12,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.hibernate.Session;
 import org.hibernate.jpa.QueryHints;
+import org.jboss.weld.interceptor.util.proxy.TargetInstanceProxy;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -62,7 +65,8 @@ public class BehandlingRepository {
      */
     public Optional<Behandling> hentBehandlingHvisFinnes(Long behandlingId) {
         Objects.requireNonNull(behandlingId, BEHANDLING_ID); // NOSONAR
-        return hentUniktResultat(lagBehandlingQuery(behandlingId));
+        return medAktiveBehandlingTilstanderFilter(() ->
+            hentUniktResultat(lagBehandlingQuery(behandlingId)));
     }
 
     /**
@@ -70,7 +74,8 @@ public class BehandlingRepository {
      */
     public Behandling hentBehandling(Long behandlingId) {
         Objects.requireNonNull(behandlingId, BEHANDLING_ID); // NOSONAR
-        return hentEksaktResultat(lagBehandlingQuery(behandlingId));
+        return medAktiveBehandlingTilstanderFilter(() ->
+            hentEksaktResultat(lagBehandlingQuery(behandlingId)));
     }
 
     /**
@@ -92,7 +97,8 @@ public class BehandlingRepository {
      */
     public Behandling hentBehandling(UUID behandlingUuid) {
         Objects.requireNonNull(behandlingUuid, BEHANDLING_UUID); // NOSONAR
-        return hentEksaktResultat(lagBehandlingQuery(behandlingUuid));
+        return medAktiveBehandlingTilstanderFilter( () ->
+            hentEksaktResultat(lagBehandlingQuery(behandlingUuid)));
     }
 
     /**
@@ -100,7 +106,8 @@ public class BehandlingRepository {
      */
     public Optional<Behandling> hentBehandlingHvisFinnes(UUID behandlingUuid) {
         Objects.requireNonNull(behandlingUuid, BEHANDLING_UUID); // NOSONAR
-        return hentUniktResultat(lagBehandlingQuery(behandlingUuid));
+        return medAktiveBehandlingTilstanderFilter( () ->
+            hentUniktResultat(lagBehandlingQuery(behandlingUuid)));
     }
 
     /**
@@ -117,7 +124,7 @@ public class BehandlingRepository {
             "SELECT beh from Behandling AS beh JOIN FETCH beh.fagsak WHERE beh.fagsak.saksnummer=:saksnummer",
             Behandling.class);
         query.setParameter("saksnummer", saksnummer);
-        return query.getResultList();
+        return medAktiveBehandlingTilstanderFilter(query::getResultList);
     }
 
     /**
@@ -126,13 +133,14 @@ public class BehandlingRepository {
      * Hent alle behandlinger for angitt fagsakId.
      */
     public List<Behandling> hentAbsoluttAlleBehandlingerForFagsak(Long fagsakId) {
+
         Objects.requireNonNull(fagsakId, FAGSAK_ID);
 
         TypedQuery<Behandling> query = getEntityManager().createQuery(
             "SELECT beh from Behandling AS beh JOIN FETCH beh.fagsak where beh.fagsak.id=:fagsakId",
             Behandling.class);
         query.setParameter(FAGSAK_ID, fagsakId);
-        return query.getResultList();
+        return medAktiveBehandlingTilstanderFilter(query::getResultList);
     }
 
     /**
@@ -168,7 +176,7 @@ public class BehandlingRepository {
         query.setParameter(FAGSAK_ID, fagsakId);
         query.setParameter("status", BehandlingStatus.AVSLUTTET); // NOSONAR
         query.setHint(QueryHints.HINT_READONLY, "true");
-        return query.getResultList();
+        return medAktiveBehandlingTilstanderFilter(query::getResultList);
     }
 
     /**
@@ -189,7 +197,7 @@ public class BehandlingRepository {
         query.setParameter("behandlingType", typerList);
         query.setParameter("status", BehandlingStatus.getFerdigbehandletStatuser());
         query.setHint(QueryHints.HINT_READONLY, "true");
-        return query.getResultList();
+        return medAktiveBehandlingTilstanderFilter(query::getResultList);
     }
 
     public List<Long> hentÅpneBehandlingerIdForFagsakId(Long fagsakId) {
@@ -204,7 +212,7 @@ public class BehandlingRepository {
         query.setParameter("status", BehandlingStatus.getFerdigbehandletStatuser());
         query.setHint(QueryHints.HINT_READONLY, "true");
         query.setHint(QueryHints.HINT_CACHE_MODE, "IGNORE");
-        return query.getResultList();
+        return medAktiveBehandlingTilstanderFilter(query::getResultList);
     }
 
     /**
@@ -268,7 +276,8 @@ public class BehandlingRepository {
         query.setHint(QueryHints.HINT_READONLY, true);
 
         // lukker bort henlagte
-        return query.getResultList().stream()
+        List<Behandling> behandlinger = medAktiveBehandlingTilstanderFilter(query::getResultList);
+        return behandlinger.stream()
             .filter(b -> !b.getBehandlingResultatType().erHenleggelse())
             .collect(Collectors.toList()); // NB List - må ivareta rekkefølge sortert på tid
     }
@@ -289,7 +298,8 @@ public class BehandlingRepository {
         query.setHint(QueryHints.HINT_READONLY, true);
 
         // lukker bort henlagte
-        return query.getResultList().stream()
+        List<Behandling> behandlinger = medAktiveBehandlingTilstanderFilter(query::getResultList);
+        return behandlinger.stream()
             .filter(b -> !b.getBehandlingResultatType().erHenleggelse())
             .collect(Collectors.toList()); // NB List - må ivareta rekkefølge sortert på tid
     }
@@ -311,7 +321,7 @@ public class BehandlingRepository {
         query.setParameter("avsluttetOgIverkKode", BehandlingStatus.getFerdigbehandletStatuser());
         query.setParameter("innvilgetKoder", BehandlingResultatType.getInnvilgetKoder());
 
-        return optionalFirst(query.getResultList());
+        return optionalFirst(medAktiveBehandlingTilstanderFilter(query::getResultList));
     }
 
     /**
@@ -343,7 +353,7 @@ public class BehandlingRepository {
         if (readOnly) {
             query.setHint(QueryHints.HINT_READONLY, "true");
         }
-        return optionalFirst(query.getResultList());
+        return optionalFirst(medAktiveBehandlingTilstanderFilter(query::getResultList));
     }
 
     private Optional<Behandling> finnSisteBehandling(Long fagsakId, boolean readOnly) {
@@ -357,7 +367,7 @@ public class BehandlingRepository {
         if (readOnly) {
             query.setHint(QueryHints.HINT_READONLY, "true");
         }
-        return optionalFirst(query.getResultList());
+        return optionalFirst(medAktiveBehandlingTilstanderFilter(query::getResultList));
     }
 
     private TypedQuery<Behandling> lagBehandlingQuery(Long behandlingId) {
@@ -434,8 +444,27 @@ public class BehandlingRepository {
         return (Long) query.getSingleResult();
     }
 
-    public Optional<Behandling> finnSisteIkkeHenlagteBehandling(Long fagsakId) {
-        Objects.requireNonNull(fagsakId, FAGSAK_ID);
-        return optionalFirst(finnAlleIkkeHenlagteBehandlinger(fagsakId));
+
+    private <T> T medAktiveBehandlingTilstanderFilter(Supplier<T> aksjon) {
+        EntityManager unwrappedEntityManager = unwrapEntityManager(entityManager);
+        Session session = unwrappedEntityManager.unwrap(Session.class);
+        String filternavn = "kunAktiveBehandlingTilstander";
+        if (session.getEnabledFilter(filternavn) != null) {
+            throw new IllegalArgumentException("nøstet bruk av metoden");
+        }
+        session.enableFilter(filternavn);
+        T resultat = aksjon.get();
+        session.disableFilter(filternavn);
+
+        return resultat;
+
+    }
+
+    private static EntityManager unwrapEntityManager(EntityManager bean) {
+        if (bean instanceof TargetInstanceProxy<?> tip) {
+            return (EntityManager) tip.weld_getTargetInstance();
+        } else {
+            return bean;
+        }
     }
 }
