@@ -21,6 +21,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
@@ -62,6 +64,7 @@ import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrUttakPeriodeDto;
 import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrUttakUtbetalingsgradDto;
 import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrbareUttakAktiviterDto;
 import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrtUttakDto;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
@@ -112,6 +115,8 @@ public class PleiepengerUttakRestTjeneste {
     private UttakNyeReglerRepository uttakNyeReglerRepository;
     private OverstyrUttakRepository overstyrUttakRepository;
 
+    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
+
     private EntityManager entityManager;
     private ArbeidsgiverOversiktTjeneste arbeidsgiverOversiktTjeneste;
 
@@ -128,6 +133,7 @@ public class PleiepengerUttakRestTjeneste {
                                         KjøreplanUtleder kjøreplanUtleder,
                                         UttakNyeReglerRepository uttakNyeReglerRepository,
                                         OverstyrUttakRepository overstyrUttakRepository,
+                                        @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
                                         EntityManager entityManager,
                                         ArbeidsgiverOversiktTjeneste arbeidsgiverOversiktTjeneste) {
         this.uttakTjeneste = uttakTjeneste;
@@ -138,6 +144,7 @@ public class PleiepengerUttakRestTjeneste {
         this.kjøreplanUtleder = kjøreplanUtleder;
         this.uttakNyeReglerRepository = uttakNyeReglerRepository;
         this.overstyrUttakRepository = overstyrUttakRepository;
+        this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
         this.entityManager = entityManager;
         this.arbeidsgiverOversiktTjeneste = arbeidsgiverOversiktTjeneste;
     }
@@ -164,44 +171,24 @@ public class PleiepengerUttakRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public UttaksplanMedUtsattePerioder uttaksplanMedUtsattePerioder(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
-
         var behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
-
-
-        var utsattBehandlingAvPeriode = utsattBehandlingAvPeriodeRepository.hentGrunnlag(behandling.getId());
-
-        var utsattePerioderSegmenter = utsattBehandlingAvPeriode.stream()
-            .map(UtsattBehandlingAvPeriode::getPerioder)
-            .flatMap(Collection::stream)
-            .map(UtsattPeriode::getPeriode)
-            .map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), true))
-            .collect(Collectors.toList());
-
-        var utsattePerioder = new LocalDateTimeline<>(utsattePerioderSegmenter)
-            .compress()
-            .getLocalDateIntervals()
-            .stream()
-            .map(DatoIntervallEntitet::fra)
-            .collect(Collectors.toCollection(TreeSet::new))
-            .stream()
-            .map(it -> new LukketPeriode(it.getFomDato(), it.getTomDato()))
-            .collect(Collectors.toSet());
-
+        var utsattePerioder = mapUtsattePerioder(behandling);
+        var perioderTilVurdering = mapPerioderTilVurdering(behandling);
         final LocalDate virkningsdatoUttakNyeRegler = uttakNyeReglerRepository.finnDatoForNyeRegler(behandling.getId()).orElse(null);
-
 
         var uttaksplan = uttakTjeneste.hentUttaksplan(behandlingIdDto.getBehandlingUuid(), true);
         if (uttaksplan != null) {
-            return UttaksplanMedUtsattePerioder.medUttaksplan(uttaksplan, utsattePerioder, virkningsdatoUttakNyeRegler);
+            return UttaksplanMedUtsattePerioder.medUttaksplan(uttaksplan, utsattePerioder, virkningsdatoUttakNyeRegler, perioderTilVurdering);
         }
+
         var harAPForVurderingAvDato = behandling.getAksjonspunkter().stream().anyMatch(a -> a.getAksjonspunktDefinisjon().equals(AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK) && !a.erAvbrutt());
         if (harAPForVurderingAvDato || virkningsdatoUttakNyeRegler != null) {
             final Uttaksgrunnlag uttaksgrunnlag = mapInputTilUttakTjeneste.hentUtUbesluttededataOgMapRequest(BehandlingReferanse.fra(behandling));
             var simulerUttaksplan = uttakTjeneste.simulerUttaksplan(uttaksgrunnlag);
-            return UttaksplanMedUtsattePerioder.medSimulertUttaksplan(simulerUttaksplan.getSimulertUttaksplan(), utsattePerioder, virkningsdatoUttakNyeRegler);
+            return UttaksplanMedUtsattePerioder.medSimulertUttaksplan(simulerUttaksplan.getSimulertUttaksplan(), utsattePerioder, virkningsdatoUttakNyeRegler, perioderTilVurdering);
         }
 
-        return UttaksplanMedUtsattePerioder.medUttaksplan(null, utsattePerioder, null);
+        return UttaksplanMedUtsattePerioder.medUttaksplan(null, utsattePerioder, null, perioderTilVurdering);
     }
 
     @GET
@@ -329,6 +316,35 @@ public class PleiepengerUttakRestTjeneste {
 
         ArbeidsgiverOversiktDto arbeidsgiverOversikt = arbeidsgiverOversiktTjeneste.getArbeidsgiverOpplysninger(behandlingUuid);
         return new OverstyrbareUttakAktiviterDto(new ArrayList<>(aktiviteter), arbeidsgiverOversikt);
+    }
+
+    private Set<LukketPeriode> mapPerioderTilVurdering(Behandling behandling) {
+        return VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType())
+            .utledFraDefinerendeVilkår(behandling.getId())
+            .stream()
+            .map(p -> new LukketPeriode(p.getFomDato(), p.getTomDato()))
+            .collect(Collectors.toSet());
+    }
+
+    private Set<LukketPeriode> mapUtsattePerioder(Behandling behandling) {
+        var utsattBehandlingAvPeriode = utsattBehandlingAvPeriodeRepository.hentGrunnlag(behandling.getId());
+
+        var utsattePerioderSegmenter = utsattBehandlingAvPeriode.stream()
+            .map(UtsattBehandlingAvPeriode::getPerioder)
+            .flatMap(Collection::stream)
+            .map(UtsattPeriode::getPeriode)
+            .map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), true))
+            .collect(Collectors.toList());
+
+        return new LocalDateTimeline<>(utsattePerioderSegmenter)
+            .compress()
+            .getLocalDateIntervals()
+            .stream()
+            .map(DatoIntervallEntitet::fra)
+            .collect(Collectors.toCollection(TreeSet::new))
+            .stream()
+            .map(it -> new LukketPeriode(it.getFomDato(), it.getTomDato()))
+            .collect(Collectors.toSet());
     }
 
 
