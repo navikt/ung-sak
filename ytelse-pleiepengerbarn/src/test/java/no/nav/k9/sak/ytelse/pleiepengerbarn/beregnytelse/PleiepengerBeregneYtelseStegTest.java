@@ -52,8 +52,6 @@ import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPeriode;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse.feriepenger.FinnFeriepengepåvirkendeFagsakerTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse.feriepenger.HentFeriepengeAndelerTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakInMemoryTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.AnnenPart;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
@@ -82,8 +80,6 @@ public class PleiepengerBeregneYtelseStegTest {
     @Mock
     private FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste = mock(FastsettBeregningsresultatTjeneste.class);
     private BeregnFeriepengerTjeneste beregnFeriepengerTjeneste = mock(BeregnFeriepengerTjeneste.class);
-    private FinnFeriepengepåvirkendeFagsakerTjeneste finnFeriepengepåvirkendeFagsakerTjeneste = mock(FinnFeriepengepåvirkendeFagsakerTjeneste.class);
-    private HentFeriepengeAndelerTjeneste hentAndelserSomKanGiFeriepengerTjeneste = mock(HentFeriepengeAndelerTjeneste.class);
     private BeregningTjeneste beregningTjeneste;
 
     private PleiepengerBeregneYtelseSteg steg;
@@ -96,10 +92,7 @@ public class PleiepengerBeregneYtelseStegTest {
             repositoryProvider.getVilkårResultatRepository(), bgGrunnlagRepository,
             new VilkårTjeneste(behandlingRepository,
                 null,
-                null,
-                null,
-                repositoryProvider.getVilkårResultatRepository(),
-                repositoryProvider.getFagsakRepository()),
+                repositoryProvider.getVilkårResultatRepository()),
             new VilkårPeriodeFilterProvider(
                 repositoryProvider.getFagsakRepository(),
                 repositoryProvider.getVilkårResultatRepository(),

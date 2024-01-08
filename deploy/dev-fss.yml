@@ -145,8 +145,6 @@ spec:
       value: OMS
 
     # Restservice Generelle
-    - name: INFOTRYGD_HENDELSER_API_URL
-      value: http://infotrygd-hendelse-api.infotrygd/infotrygd/hendelser
     - name: FPABAKUS_URL
       value: http://fpabakus.teamforeldrepenger/fpabakus
     - name: FPABAKUS_SCOPE
@@ -287,12 +285,16 @@ spec:
     - name: LAGRE_SOEKNADSAKTOERER
       value: "true"
     - name: ENABLE_AZURE_CC_SYSTEMCONTEXT
-      value: "false"
+      value: "true"
     - name: AVKLAR_ARBEIDSFORHOLD_REUTLED_VED_REVURDERING
       value: "true"
     - name: ENABLE_RESERVERT_SAKSNUMMER
       value: "true"
     - name: OMP_RELEVANT_ENDRING_UTLEDNING
+      value: "true"
+    - name: IKKE_VURDER_KOMPLETTHET_VED_FORLENGELSE
+      value: "true"
+    - name: NY_DEAKTIVERING_LOGIKK_KALKULUS
       value: "true"
 
     # Konfigurasjoner

@@ -33,7 +33,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 
 @Dependent
@@ -86,7 +85,7 @@ public class RyddOgGjenopprettBeregningTjeneste {
         var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         var referanse = BehandlingReferanse.fra(behandling);
 
-        // 1. Setter perioder som skal vurderes i riktig tilstand (unntatt forlengelser, som håndteres separat)
+        // 1. Setter perioder som skal vurderes i riktig tilstand
         ryddVedtaksresultatForPerioderTilVurdering(kontekst, referanse);
 
         // 2. gjenoppretter beregning til initiell referanse der perioden ikke lenger vurderes (flippet vurderingsstatus)
@@ -107,6 +106,20 @@ public class RyddOgGjenopprettBeregningTjeneste {
     public void deaktiverAvslåtteEllerFjernetPerioder(BehandlingReferanse referanse) {
         // deaktiverer grunnlag for referanser som er avslått eller inaktive (fjernet skjæringstidspunkt)
         kalkulusTjeneste.deaktiverBeregningsgrunnlagForAvslåttEllerFjernetPeriode(referanse);
+        if (validerIngenLoseReferanser) {
+            validerAktiveReferanserTjeneste.validerIngenLøseReferanser(referanse);
+        }
+    }
+
+
+    /**
+     * Deaktiverer perioder før vi kaller kalkulus
+     *
+     * @param referanse Behandlingreferanse
+     */
+    public void deaktiverAlleReferanserUlikInitiell(BehandlingReferanse referanse) {
+        // deaktiverer grunnlag for referanser som er avslått eller inaktive (fjernet skjæringstidspunkt)
+        kalkulusTjeneste.deaktiverBeregningsgrunnlagPerioderUlikInitiell(referanse);
         if (validerIngenLoseReferanser) {
             validerAktiveReferanserTjeneste.validerIngenLøseReferanser(referanse);
         }
@@ -190,21 +203,14 @@ public class RyddOgGjenopprettBeregningTjeneste {
 
 
     /**
-     * Setter perioder som skal vurderes i riktig tilstand.
-     * <p>
-     * Forlengelser påvirkes ikke. Disse hånteres i no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.KopierBeregningTjeneste#kopierVurderinger(no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst)
+     * Setter perioder som skal vurderes i riktig tilstand.*
      *
      * @param kontekst BehandlingskontrollKontekts
      * @param ref      behndlingsreferanser
      */
     private void ryddVedtaksresultatForPerioderTilVurdering(BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
-        var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref);
-        var allePerioder = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter);
-
-        var alleUnntattForlengelser = allePerioder.stream().filter(p -> !p.erForlengelse())
-            .map(PeriodeTilVurdering::getPeriode)
-            .collect(Collectors.toCollection(TreeSet::new));
-        beregningsgrunnlagVilkårTjeneste.ryddVedtaksresultatOgVilkår(kontekst, alleUnntattForlengelser);
+        var allePerioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref);
+        beregningsgrunnlagVilkårTjeneste.ryddVedtaksresultatOgVilkår(kontekst, allePerioderTilVurdering);
     }
 
     private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(BehandlingReferanse ref) {
