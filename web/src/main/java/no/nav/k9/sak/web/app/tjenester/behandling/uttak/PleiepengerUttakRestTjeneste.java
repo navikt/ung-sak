@@ -183,7 +183,7 @@ public class PleiepengerUttakRestTjeneste {
 
         var harAPForVurderingAvDato = behandling.getAksjonspunkter().stream().anyMatch(a -> a.getAksjonspunktDefinisjon().equals(AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK) && !a.erAvbrutt());
         if (harAPForVurderingAvDato || virkningsdatoUttakNyeRegler != null) {
-            final Uttaksgrunnlag uttaksgrunnlag = mapInputTilUttakTjeneste.hentUtUbesluttededataOgMapRequest(BehandlingReferanse.fra(behandling));
+            final Uttaksgrunnlag uttaksgrunnlag = mapInputTilUttakTjeneste.hentUtOgMapRequestUtenInntektsgradering(BehandlingReferanse.fra(behandling));
             var simulerUttaksplan = uttakTjeneste.simulerUttaksplan(uttaksgrunnlag);
             return UttaksplanMedUtsattePerioder.medSimulertUttaksplan(simulerUttaksplan.getSimulertUttaksplan(), utsattePerioder, virkningsdatoUttakNyeRegler, perioderTilVurdering);
         }
