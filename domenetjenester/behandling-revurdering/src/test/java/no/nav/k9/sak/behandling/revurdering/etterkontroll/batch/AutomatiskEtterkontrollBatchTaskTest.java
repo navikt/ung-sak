@@ -50,7 +50,7 @@ class AutomatiskEtterkontrollBatchTaskTest {
     @BeforeEach
     public void before() {
         BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-        task = new AutomatiskEtterkontrollBatchTask(repositoryProvider, etterkontrollRepository, prosessTaskTjeneste);
+        task = new AutomatiskEtterkontrollBatchTask(repositoryProvider, etterkontrollRepository, prosessTaskTjeneste, true);
 
     }
 

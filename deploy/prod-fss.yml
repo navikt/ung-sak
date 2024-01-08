@@ -144,8 +144,6 @@ spec:
       value: OMS
 
     # Restservice Generelle
-    - name: INFOTRYGD_HENDELSER_API_URL
-      value: http://infotrygd-hendelser.infotrygd/infotrygd/hendelser
     - name: FPABAKUS_URL
       value: http://fpabakus.teamforeldrepenger/fpabakus
     - name: FPABAKUS_SCOPE
@@ -292,6 +290,9 @@ spec:
       value: "false"
     - name: NY_DEAKTIVERING_LOGIKK_KALKULUS
       value: "false"
+    - name: AKTIVER_AUTOMATISK_ETTERKONTROLL
+      value: "false"
+
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
