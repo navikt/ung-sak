@@ -384,7 +384,7 @@ public class ForvaltningBeregningRestTjeneste {
                 "inner join GR_BEREGNINGSGRUNNLAG gr on gr.behandling_id = b.id " +
                 "inner join BG_PERIODE p on p.bg_grunnlag_id = gr.bg_grunnlag_id " +
                 "where gr.behandling_id = b.id " +
-                "and p.skjaeringstidspunkt = LOWER(t.periode)) " +
+                "and p.skjaeringstidspunkt = LOWER(t.periode) " +
                 "AND s.aktiv = true " +
                 "AND t.arsak = :aktuellArsak " +
                 "and UPPER(t.periode) - LOWER(t.periode) = 1 " +
