@@ -75,7 +75,7 @@ public class BeregningsresultatUtbetDump implements DebugDumpFagsak {
 
         Optional<String> output = CsvOutput.dumpResultSetToCsv(results);
         if (output.isPresent()) {
-            dumpMottaker.newFile("beregningsresultat-utbet.csv");
+            dumpMottaker.newFile("beregningsresultat/utbet.csv");
             dumpMottaker.write(output.get());
         }
     }
