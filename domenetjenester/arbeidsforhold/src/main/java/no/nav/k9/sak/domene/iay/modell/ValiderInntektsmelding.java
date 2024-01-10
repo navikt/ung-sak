@@ -5,17 +5,11 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 
 public class ValiderInntektsmelding {
 
     private static final Logger log = LoggerFactory.getLogger(ValiderInntektsmelding.class);
-    private final boolean zeroErKrav;
-
-    public ValiderInntektsmelding(boolean zeroErKrav) {
-        this.zeroErKrav = zeroErKrav;
-    }
 
     public void valider(InntektsmeldingBuilder builder) { // NOSONAR
         var kladd = builder.getKladd();
@@ -25,10 +19,10 @@ public class ValiderInntektsmelding {
             if (harRefusjonskrav(kladd)) {
                 if (!harFravær(kladd)) {
                     throw new IllegalArgumentException("Har refusjonskrav men ikke oppgitt fravær. Gir ikke mening. JournalpostId=" + kladd.getJournalpostId());
+                } else if (harOppgittRefusjonskravPå0Kroner(kladd)) {
+                    throw new IllegalArgumentException("Har refusjonskrav, men refusjonsbeløp er 0. Trekk av krav skal gjøres ved å oppgi fravær på 0 timer. JournalpostId=" + kladd.getJournalpostId());
                 } else if (harDelvisRefusjonskrav(kladd)) {
                     throw new IllegalArgumentException("Har refusjonskrav, men refusjonsbeløp er ikke lik månedsbeløp. JournalpostId=" + kladd.getJournalpostId());
-                } else if (!zeroErKrav && harOppgittRefusjonskravPå0Kroner(kladd)) {
-                    throw new IllegalArgumentException("Har refusjonskrav, men refusjonsbeløp er 0. Trekk av krav skal gjøres ved å oppgi fravær på 0 timer. JournalpostId=" + kladd.getJournalpostId());
                 } else {
                     // OK - vanligste forventet tilfelle - refusjonskrav med fravær
                 }
@@ -77,7 +71,7 @@ public class ValiderInntektsmelding {
     }
 
     private boolean harRefusjonskrav(Inntektsmelding kladd) {
-        return zeroErKrav ? kladd.harRefusjonskravNy() : kladd.harRefusjonskrav();
+        return kladd.harRefusjonskrav();
     }
 
     private boolean harFravær(Inntektsmelding kladd) {

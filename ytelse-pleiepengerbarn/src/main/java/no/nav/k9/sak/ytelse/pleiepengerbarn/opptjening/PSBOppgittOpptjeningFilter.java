@@ -9,17 +9,12 @@ import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -33,7 +28,6 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
-import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 
@@ -137,16 +131,8 @@ public class PSBOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
     }
     // Kode for lansering av prioriering - END
 
-    private List<OppgittOpptjening> hentOverlappendeOpptjeninger(DatoIntervallEntitet vilkårsperiode, Map<JournalpostId, LocalDateTimeline<Void>> journalpostAktivTidslinje, List<OppgittOpptjening> oppgittOpptjeninger) {
-        var overlappendeOpptjeninger = oppgittOpptjeninger.stream()
-            .filter(opptj -> overlapperVilkårsperiode(opptj, vilkårsperiode, journalpostAktivTidslinje))
-            .collect(Collectors.toList());
-        return overlappendeOpptjeninger;
-    }
-
     private DatoIntervallEntitet finnVilkårsperiodeForOpptjening(BehandlingReferanse ref, LocalDate stp) {
-        var skalIgnorereAvslåttePerioder = false;
-        var periodeTilVurdering = vilkårTjeneste.utledPerioderTilVurdering(ref, VilkårType.OPPTJENINGSVILKÅRET, skalIgnorereAvslåttePerioder)
+        var periodeTilVurdering = vilkårTjeneste.utledPerioderTilVurdering(ref, VilkårType.OPPTJENINGSVILKÅRET)
             .stream()
             .filter(di -> di.getFomDato().equals(stp))
             .findFirst();
@@ -161,50 +147,6 @@ public class PSBOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
             throw new IllegalStateException("Forventer at vilkårsperiode som matchet opptjening var ferdigvurdert");
         }
         return periodeFerdigvurdert.getPeriode();
-    }
-
-    private Map<JournalpostId, LocalDateTimeline<Void>> utledJournalpostAktivTidslinje(Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> kravDokumenterPåFagsak) {
-        return kravDokumenterPåFagsak.entrySet().stream()
-            .collect(Collectors.toMap(e -> e.getKey().getJournalpostId(), e -> slåSammenPerioder(e.getValue())));
-    }
-
-    private List<OppgittOpptjening> sorterOpptjeningerMotInnsendingstidspunkt(InntektArbeidYtelseGrunnlag iay, Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> kravdokMedFravær) {
-        var journalpostIdTilKravdok = kravdokMedFravær.keySet().stream()
-            .collect(Collectors.toMap(e -> e.getJournalpostId(), e -> e));
-
-        var oppgitteOpptjeninger = iay.getOppgittOpptjeningAggregat()
-            .map(OppgittOpptjeningAggregat::getOppgitteOpptjeninger)
-            .orElse(List.of());
-        var oppgitteOpptjeningerSortert = oppgitteOpptjeninger
-            .stream()
-            .filter(opptjening -> journalpostIdTilKravdok.containsKey(opptjening.getJournalpostId()))
-            .map(opptjening -> {
-                var dok = journalpostIdTilKravdok.get(opptjening.getJournalpostId());
-                return new WrappedOppgittOpptjening(dok.getJournalpostId(), dok.getInnsendingsTidspunkt(), opptjening);
-            })
-            // Sist mottatte sorteres først
-            .sorted(Comparator.comparing(WrappedOppgittOpptjening::getInnsendingstidspunkt, Comparator.reverseOrder()))
-            .map(WrappedOppgittOpptjening::getRaw)
-            .collect(Collectors.toList());
-        return oppgitteOpptjeningerSortert;
-    }
-
-    private boolean overlapperVilkårsperiode(OppgittOpptjening opptjening, DatoIntervallEntitet vilkårsperiode, Map<JournalpostId, LocalDateTimeline<Void>> fraværTidslinjePerJp) {
-        Objects.requireNonNull(opptjening.getJournalpostId());
-        var fraværTidslinje = fraværTidslinjePerJp.getOrDefault(opptjening.getJournalpostId(), LocalDateTimeline.empty());
-        LocalDateTimeline<?> vilkårsperiodeSomTidslinje = new LocalDateTimeline<>(vilkårsperiode.getFomDato(), vilkårsperiode.getTomDato(), null);
-        return fraværTidslinje.intersects(vilkårsperiodeSomTidslinje);
-    }
-
-    private LocalDateTimeline<Void> slåSammenPerioder(List<SøktPeriode<Søknadsperiode>> søktePerioder) {
-        var søktPeriode = søktePerioder.stream()
-            .map(it -> new LocalDateSegment<Void>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), null))
-            .collect(Collectors.toSet());
-        var mergetSøktePerioder = new LocalDateTimeline<Void>(List.of());
-        for (LocalDateSegment<Void> periode : søktPeriode) {
-            mergetSøktePerioder = mergetSøktePerioder.combine(new LocalDateTimeline<>(List.of(periode)), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-        }
-        return mergetSøktePerioder.compress();
     }
 
 

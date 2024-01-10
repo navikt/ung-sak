@@ -22,7 +22,6 @@ import no.nav.abakus.iaygrunnlag.kodeverk.Inntektskategori;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -58,7 +57,6 @@ public class FinnFeriepengepåvirkendeFagsakerTjenestePSB implements FinnFeriepe
     private InfotrygdPårørendeSykdomService infotrygdPårørendeSykdomService;
     private BehandlingRepository behandlingRepository;
     private PersonIdentTjeneste personIdentTjeneste;
-    private boolean korrigerMotInfotrygd;
 
     /**
      * periode hvor feriepenger skal samkjøres mellom k9 og infotrygd, ved at det korrigeres fra k9-siden.
@@ -75,83 +73,73 @@ public class FinnFeriepengepåvirkendeFagsakerTjenestePSB implements FinnFeriepe
                                                        InntektArbeidYtelseTjeneste iayTjeneste,
                                                        InfotrygdPårørendeSykdomService infotrygdPårørendeSykdomService,
                                                        BehandlingRepository behandlingRepository,
-                                                       PersonIdentTjeneste personIdentTjeneste,
-                                                       @KonfigVerdi(value = "FERIEPENGER_INFOTRYGD_KORRIGER", defaultVerdi = "false") boolean korrigerMotInfotrygd) {
+                                                       PersonIdentTjeneste personIdentTjeneste) {
         this.fagsakRepository = fagsakRepository;
         this.hentFeriepengeAndelerTjeneste = hentFeriepengeAndelerTjeneste;
         this.iayTjeneste = iayTjeneste;
         this.infotrygdPårørendeSykdomService = infotrygdPårørendeSykdomService;
         this.behandlingRepository = behandlingRepository;
         this.personIdentTjeneste = personIdentTjeneste;
-        this.korrigerMotInfotrygd = korrigerMotInfotrygd;
     }
 
     @Override
     public LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> finnPåvirkedeSaker(BehandlingReferanse referanse) {
         LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> påvirkendeLokaleSaker = finnPåvirkendeLokaleSaker(referanse);
-        if (korrigerMotInfotrygd) {
-            LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> påvirkendeInfotrygdsaker = finnPåvirkendeInfotrygdsaker(referanse);
-            return påvirkendeLokaleSaker.crossJoin(påvirkendeInfotrygdsaker, StandardCombinators::union);
-        } else {
-            return påvirkendeLokaleSaker;
-        }
+        LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> påvirkendeInfotrygdsaker = finnPåvirkendeInfotrygdsaker(referanse);
+        return påvirkendeLokaleSaker.crossJoin(påvirkendeInfotrygdsaker, StandardCombinators::union);
     }
 
     @Override
     public InfotrygdFeriepengegrunnlag finnInfotrygdFeriepengegrunnlag(BehandlingReferanse referanse) {
-        if (korrigerMotInfotrygd) {
-            List<InfotrygdFeriepengegrunnlag.InfotrygdFeriepengegrunnlagAndel> andeler = new ArrayList<>();
-            InntektArbeidYtelseGrunnlag iayGrunnlag = iayTjeneste.hentGrunnlag(referanse.getId());
-            List<Ytelse> ytelser = iayGrunnlag.getAktørYtelseFraRegister(referanse.getAktørId())
-                .stream()
-                .flatMap(ay -> ay.getAlleYtelser().stream())
-                .filter(ay -> ay.getKilde() == Fagsystem.INFOTRYGD)
-                .filter(ay -> ay.getYtelseType() == OPPLÆRINGSPENGER || ay.getYtelseType() == PLEIEPENGER_SYKT_BARN)
-                .toList();
+        List<InfotrygdFeriepengegrunnlag.InfotrygdFeriepengegrunnlagAndel> andeler = new ArrayList<>();
+        InntektArbeidYtelseGrunnlag iayGrunnlag = iayTjeneste.hentGrunnlag(referanse.getId());
+        List<Ytelse> ytelser = iayGrunnlag.getAktørYtelseFraRegister(referanse.getAktørId())
+            .stream()
+            .flatMap(ay -> ay.getAlleYtelser().stream())
+            .filter(ay -> ay.getKilde() == Fagsystem.INFOTRYGD)
+            .filter(ay -> ay.getYtelseType() == OPPLÆRINGSPENGER || ay.getYtelseType() == PLEIEPENGER_SYKT_BARN)
+            .toList();
 
-            Behandling behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
-            List<Periode> infotrygdVedtaksperioderForPleietrengende = infotrygdPårørendeSykdomService.hentRelevanteGrunnlagsperioderForPleietrengende(InfotrygdPårørendeSykdomRequest.builder()
-                    .fødselsnummer(personIdentTjeneste.hentFnrForAktør(behandling.getAktørId()).getIdent())
-                    .fraOgMed(SAMKJØRINGSPERIODE.getFomDato())
-                    .tilOgMed(SAMKJØRINGSPERIODE.getTomDato())
-                    .relevanteBehandlingstemaer(Set.of("PN", "OP"))
-                    .build(),
-                personIdentTjeneste.hentFnrForAktør(behandling.getFagsak().getPleietrengendeAktørId()).getIdent());
-            LocalDateTimeline<Boolean> tidslinjeInfotrygdPleietrengende = LocalDateTimeline.empty();
-            for (Periode periode : infotrygdVedtaksperioderForPleietrengende) {
-                tidslinjeInfotrygdPleietrengende = tidslinjeInfotrygdPleietrengende.crossJoin(new LocalDateTimeline<>(periode.getFom(), periode.getTom(), true));
-            }
-            tidslinjeInfotrygdPleietrengende = tidslinjeInfotrygdPleietrengende.compress();
+        Behandling behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
+        List<Periode> infotrygdVedtaksperioderForPleietrengende = infotrygdPårørendeSykdomService.hentRelevanteGrunnlagsperioderForPleietrengende(InfotrygdPårørendeSykdomRequest.builder()
+                .fødselsnummer(personIdentTjeneste.hentFnrForAktør(behandling.getAktørId()).getIdent())
+                .fraOgMed(SAMKJØRINGSPERIODE.getFomDato())
+                .tilOgMed(SAMKJØRINGSPERIODE.getTomDato())
+                .relevanteBehandlingstemaer(Set.of("PN", "OP"))
+                .build(),
+            personIdentTjeneste.hentFnrForAktør(behandling.getFagsak().getPleietrengendeAktørId()).getIdent());
+        LocalDateTimeline<Boolean> tidslinjeInfotrygdPleietrengende = LocalDateTimeline.empty();
+        for (Periode periode : infotrygdVedtaksperioderForPleietrengende) {
+            tidslinjeInfotrygdPleietrengende = tidslinjeInfotrygdPleietrengende.crossJoin(new LocalDateTimeline<>(periode.getFom(), periode.getTom(), true));
+        }
+        tidslinjeInfotrygdPleietrengende = tidslinjeInfotrygdPleietrengende.compress();
 
-            for (Ytelse ytelse : ytelser) {
-                Saksnummer saksnummer = ytelse.getSaksnummer();
-                for (YtelseAnvist anvist : ytelse.getYtelseAnvist()) {
-                    LocalDateInterval anvistPeriode = new LocalDateInterval(anvist.getAnvistFOM(), anvist.getAnvistTOM());
-                    Optional<LocalDateInterval> overlapp = anvistPeriode.overlap(SAMKJØRINGSPERIODE);
-                    if (overlapp.isEmpty()) {
-                        continue;
-                    }
-                    LocalDateTimeline<Boolean> tidslinjeAnvist = new LocalDateTimeline<>(overlapp.get(), Boolean.TRUE);
-                    if (!tidslinjeAnvist.intersects(tidslinjeInfotrygdPleietrengende)) {
-                        log.info("Tar ikke med periode: {} i feriepengegrunnlag fra infotrygd. Funnet tidslinje for pleietrengende er: {}", overlapp.get(), tidslinjeInfotrygdPleietrengende);
-                        continue;
-                        // Merk at vi ikke hensyntar evt overlappende ytelser for ulike pleietrengende her
-                    }
-                    for (YtelseAnvistAndel andel : anvist.getYtelseAnvistAndeler()) {
-                        boolean inntektskategoriMedFeriepenger = andel.getInntektskategori() == Inntektskategori.ARBEIDSTAKER || andel.getInntektskategori() == Inntektskategori.SJØMANN;
-                        if (inntektskategoriMedFeriepenger) {
-                            BigDecimal dagsatsRefusjon = andel.getDagsats().getVerdi().multiply(andel.getRefusjonsgradProsent().getVerdi()).setScale(2, RoundingMode.HALF_UP);
-                            BigDecimal dagsatsBruker = andel.getDagsats().getVerdi().subtract(dagsatsRefusjon);
-                            Arbeidsgiver arbeidsgiver = andel.getArbeidsgiver().orElse(null);
-                            andeler.add(new InfotrygdFeriepengegrunnlag.InfotrygdFeriepengegrunnlagAndel(overlapp.get(), saksnummer, arbeidsgiver, dagsatsBruker, dagsatsRefusjon));
-                        }
+        for (Ytelse ytelse : ytelser) {
+            Saksnummer saksnummer = ytelse.getSaksnummer();
+            for (YtelseAnvist anvist : ytelse.getYtelseAnvist()) {
+                LocalDateInterval anvistPeriode = new LocalDateInterval(anvist.getAnvistFOM(), anvist.getAnvistTOM());
+                Optional<LocalDateInterval> overlapp = anvistPeriode.overlap(SAMKJØRINGSPERIODE);
+                if (overlapp.isEmpty()) {
+                    continue;
+                }
+                LocalDateTimeline<Boolean> tidslinjeAnvist = new LocalDateTimeline<>(overlapp.get(), Boolean.TRUE);
+                if (!tidslinjeAnvist.intersects(tidslinjeInfotrygdPleietrengende)) {
+                    log.info("Tar ikke med periode: {} i feriepengegrunnlag fra infotrygd. Funnet tidslinje for pleietrengende er: {}", overlapp.get(), tidslinjeInfotrygdPleietrengende);
+                    continue;
+                    // Merk at vi ikke hensyntar evt overlappende ytelser for ulike pleietrengende her
+                }
+                for (YtelseAnvistAndel andel : anvist.getYtelseAnvistAndeler()) {
+                    boolean inntektskategoriMedFeriepenger = andel.getInntektskategori() == Inntektskategori.ARBEIDSTAKER || andel.getInntektskategori() == Inntektskategori.SJØMANN;
+                    if (inntektskategoriMedFeriepenger) {
+                        BigDecimal dagsatsRefusjon = andel.getDagsats().getVerdi().multiply(andel.getRefusjonsgradProsent().getVerdi()).setScale(2, RoundingMode.HALF_UP);
+                        BigDecimal dagsatsBruker = andel.getDagsats().getVerdi().subtract(dagsatsRefusjon);
+                        Arbeidsgiver arbeidsgiver = andel.getArbeidsgiver().orElse(null);
+                        andeler.add(new InfotrygdFeriepengegrunnlag.InfotrygdFeriepengegrunnlagAndel(overlapp.get(), saksnummer, arbeidsgiver, dagsatsBruker, dagsatsRefusjon));
                     }
                 }
             }
-            return new InfotrygdFeriepengegrunnlag(andeler);
-        } else {
-            return null;
         }
+        return new InfotrygdFeriepengegrunnlag(andeler);
     }
 
     private LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> finnPåvirkendeLokaleSaker(BehandlingReferanse referanse) {

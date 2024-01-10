@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,6 +23,8 @@ import no.nav.k9.kodeverk.sykdom.Resultat;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrtUttakPeriode;
+import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrtUttakUtbetalingsgrad;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -42,8 +45,12 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.tilsyn.MapTilsyn;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.utenlandsopphold.MapUtenlandsopphold;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.uttak.MapUttak;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeid;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeidsforhold;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Barn;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Inntektsgradering;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
+import no.nav.pleiepengerbarn.uttak.kontrakter.OverstyrtInput;
+import no.nav.pleiepengerbarn.uttak.kontrakter.OverstyrtUtbetalingsgradPerArbeidsforhold;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Pleiebehov;
 import no.nav.pleiepengerbarn.uttak.kontrakter.RettVedDød;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Søker;
@@ -75,11 +82,16 @@ public class MapInputTilUttakTjeneste {
 
 
     public Uttaksgrunnlag hentUtOgMapRequest(BehandlingReferanse referanse) {
-        return toRequestData(hentDataTilUttakTjeneste.hentUtData(referanse, false));
+        return toRequestData(hentDataTilUttakTjeneste.hentUtData(referanse, false, true));
     }
 
+    public Uttaksgrunnlag hentUtOgMapRequestUtenInntektsgradering(BehandlingReferanse referanse) {
+        return toRequestData(hentDataTilUttakTjeneste.hentUtData(referanse, false, false));
+    }
+
+
     public Uttaksgrunnlag hentUtUbesluttededataOgMapRequest(BehandlingReferanse referanse) {
-        return toRequestData(hentDataTilUttakTjeneste.hentUtData(referanse, true));
+        return toRequestData(hentDataTilUttakTjeneste.hentUtData(referanse, true, true));
     }
 
     private Uttaksgrunnlag toRequestData(InputParametere input) {
@@ -157,6 +169,10 @@ public class MapInputTilUttakTjeneste {
         Map<LukketPeriode, UtenlandsoppholdInfo> utenlandsoppholdperioder = MapUtenlandsopphold.map(vurderteSøknadsperioder, perioderFraSøknader, tidslinjeTilVurdering);
 
         Map<String, String> sisteVedtatteBehandlingForAvktuellBehandling = mapSisteVedtatteBehandlingForBehandling(input.getSisteVedtatteBehandlingForBehandling());
+        Map<LukketPeriode, OverstyrtInput> overstyrtUttak = map(input.getOverstyrtUttak());
+
+        var nedjustertSøkersUttaksgrad = mapNedjustertUttaksgrad(input.getNedjustertUttaksgrad());
+
         return new Uttaksgrunnlag(
             mapTilYtelseType(behandling),
             barn,
@@ -167,7 +183,9 @@ public class MapInputTilUttakTjeneste {
             perioderSomSkalTilbakestilles,
             arbeid,
             pleiebehov,
-            new HashMap<>(), // Overstyringer.
+            input.getVirkningsdatoNyeRegler(),
+            overstyrtUttak,
+            nedjustertSøkersUttaksgrad,
             lovbestemtFerie,
             inngangsvilkår,
             tilsynsperioder,
@@ -178,6 +196,43 @@ public class MapInputTilUttakTjeneste {
             utenlandsoppholdperioder
         );
     }
+
+    private Map<LukketPeriode, Inntektsgradering> mapNedjustertUttaksgrad(LocalDateTimeline<BigDecimal> nedjustertUttaksgrad) {
+        Map<LukketPeriode, Inntektsgradering> nedjustert = new HashMap<>();
+        nedjustertUttaksgrad.stream().forEach(segment -> {
+            LukketPeriode periode = new LukketPeriode(segment.getFom(), segment.getTom());
+            nedjustert.put(periode, new Inntektsgradering(segment.getValue()));
+        });
+        return nedjustert;
+    }
+
+
+    private Map<LukketPeriode, OverstyrtInput> map(LocalDateTimeline<OverstyrtUttakPeriode> overstyrtUttak) {
+        Map<LukketPeriode, OverstyrtInput> overstyrt = new HashMap<>();
+        overstyrtUttak.stream().forEach(segment -> {
+            LukketPeriode periode = new LukketPeriode(segment.getFom(), segment.getTom());
+            OverstyrtInput overstyrtInput = map(segment.getValue());
+            overstyrt.put(periode, overstyrtInput);
+        });
+        return overstyrt;
+    }
+
+    private OverstyrtInput map(OverstyrtUttakPeriode overstyrtUttakPeriode) {
+        List<OverstyrtUtbetalingsgradPerArbeidsforhold> overstyrteUtbetalingsgrader = overstyrtUttakPeriode.getOverstyrtUtbetalingsgrad().stream().map(this::map).toList();
+        return new OverstyrtInput(overstyrtUttakPeriode.getSøkersUttaksgrad(), overstyrteUtbetalingsgrader);
+    }
+
+    private OverstyrtUtbetalingsgradPerArbeidsforhold map(OverstyrtUttakUtbetalingsgrad overstyrtUttakUtbetalingsgrad) {
+        Arbeidsforhold arbeidsforhold = new Arbeidsforhold(
+            overstyrtUttakUtbetalingsgrad.getAktivitetType().getKode(),
+            overstyrtUttakUtbetalingsgrad.getArbeidsgiver() != null ? overstyrtUttakUtbetalingsgrad.getArbeidsgiver().getArbeidsgiverOrgnr() : null,
+            overstyrtUttakUtbetalingsgrad.getArbeidsgiver() != null ? overstyrtUttakUtbetalingsgrad.getArbeidsgiver().getArbeidsgiverAktørId() : null,
+            overstyrtUttakUtbetalingsgrad.getInternArbeidsforholdRef() != null ? overstyrtUttakUtbetalingsgrad.getInternArbeidsforholdRef().getReferanse() : null
+        );
+
+        return new OverstyrtUtbetalingsgradPerArbeidsforhold(overstyrtUttakUtbetalingsgrad.getUtbetalingsgrad(), arbeidsforhold);
+    }
+
 
     private Map<String, String> mapSisteVedtatteBehandlingForBehandling(Map<UUID, UUID> sisteVedtatteBehandlingForBehandling) {
         Map<String, String> behandlinger = new HashMap<>();

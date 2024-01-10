@@ -46,7 +46,7 @@
         <!-- eksterne avhengigheter -->
         <dependency>
             <groupId>no.nav.k9</groupId>
-            <artifactId>soknad-jakarta</artifactId>
+            <artifactId>soknad</artifactId>
         </dependency>
 
         <dependency>
@@ -57,7 +57,7 @@
         <dependency>
             <groupId>no.nav.k9.rapid</groupId>
             <artifactId>behov</artifactId>
-            <version>1.20230721085317-ef25e22</version>
+            <version>1.20231002100147-90c2022</version>
         </dependency>
 
 		<!-- Test avhengigheter -->

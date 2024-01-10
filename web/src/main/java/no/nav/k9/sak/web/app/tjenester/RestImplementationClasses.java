@@ -41,6 +41,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.søknad.SøknadRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.søknadsfrist.SøknadsfristRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.tilbakekreving.TilbakekrevingRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.tilsyn.VurderTilsynRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningUttakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.uttak.PleiepengerUttakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.uttak.UtenlandsoppholdRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.uttak.UttakRestTjeneste;
@@ -56,17 +57,20 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.DiagnostikkRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningInfotrygMigreringRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningMidlertidigDriftRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningOppdragRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningUnntaksløypaRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.rapportering.RapporteringRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.integrasjonstatus.IntegrasjonstatusRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.kodeverk.KodeverkRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.kravperioder.PerioderTilBehandlingMedKildeRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.los.LosRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.notat.NotatRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.opplæringsinstitusjon.GodkjentOpplæringsinstitusjonRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.punsj.PunsjRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.register.RedirectToRegisterRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.saksbehandler.InitielleLinksRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.saksbehandler.NavAnsattRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.saksbehandler.SaksbehandlerRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.saksnummer.SaksnummerRestTjeneste;
 import no.nav.k9.sak.web.server.abac.PipRestTjeneste;
 
 public class RestImplementationClasses {
@@ -128,17 +132,21 @@ public class RestImplementationClasses {
         classes.add(NødvendigOpplæringRestTjeneste.class);
         classes.add(ReisetidRestTjeneste.class);
         classes.add(OpplæringDokumentRestTjeneste.class);
+        classes.add(SaksnummerRestTjeneste.class);
 
         // Forvaltningstjenester - fjernes løpende
         classes.add(ProsessTaskRestTjeneste.class);
         classes.add(ForvaltningAksjonspunktSammendragRestTjeneste.class);
         classes.add(ForvaltningMidlertidigDriftRestTjeneste.class);
+        classes.add(ForvaltningUttakRestTjeneste.class);
         classes.add(ForvaltningOppdragRestTjeneste.class);
         classes.add(ForvaltningBeregningRestTjeneste.class);
         classes.add(ForvaltningInfotrygMigreringRestTjeneste.class);
         classes.add(ForvaltningPersonRestTjeneste.class);
+        classes.add(ForvaltningUnntaksløypaRestTjeneste.class);
         classes.add(DiagnostikkRestTjeneste.class);
         classes.add(RapporteringRestTjeneste.class);
+        classes.add(NotatRestTjeneste.class);
 
         deprecatedServicesForBrev(classes);
 

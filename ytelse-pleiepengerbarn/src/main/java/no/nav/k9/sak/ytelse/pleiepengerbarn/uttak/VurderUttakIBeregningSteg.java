@@ -6,6 +6,7 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRST�
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -49,6 +50,8 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
     private EtablertTilsynTjeneste etablertTilsynTjeneste;
     private SamtidigUttakTjeneste samtidigUttakTjeneste;
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
+    private SkalOverstyreUttakVurderer skalOverstyreUttakVurderer;
+
 
     VurderUttakIBeregningSteg() {
         // for proxy
@@ -60,13 +63,14 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
                                      UttakTjeneste uttakTjeneste,
                                      EtablertTilsynTjeneste etablertTilsynTjeneste,
                                      SamtidigUttakTjeneste samtidigUttakTjeneste,
-                                     UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository) {
+                                     UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository, SkalOverstyreUttakVurderer skalOverstyreUttakVurderer) {
         this.behandlingRepository = behandlingRepository;
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
         this.uttakTjeneste = uttakTjeneste;
         this.etablertTilsynTjeneste = etablertTilsynTjeneste;
         this.samtidigUttakTjeneste = samtidigUttakTjeneste;
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
+        this.skalOverstyreUttakVurderer = skalOverstyreUttakVurderer;
     }
 
     @Override
@@ -77,10 +81,11 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
 
         etablertTilsynTjeneste.opprettGrunnlagForTilsynstidlinje(ref);
 
-        return eksperimentærHåndteringAvSamtidigUttak(behandling, kontekst, ref);
+        Optional<AksjonspunktDefinisjon> autopunktVentAnnenSak = håndteringAvSamtidigUttak(behandling, kontekst, ref);
+        return autopunktVentAnnenSak.map(aksjonspunktDefinisjon -> BehandleStegResultat.utførtMedAksjonspunkter(List.of(aksjonspunktDefinisjon))).orElseGet(BehandleStegResultat::utførtUtenAksjonspunkter);
     }
 
-    private BehandleStegResultat eksperimentærHåndteringAvSamtidigUttak(Behandling behandling, BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
+    private Optional<AksjonspunktDefinisjon> håndteringAvSamtidigUttak(Behandling behandling, BehandlingskontrollKontekst kontekst, BehandlingReferanse ref) {
         var kjøreplan = samtidigUttakTjeneste.utledPrioriteringsrekkefølge(ref);
         log.info("[Kjøreplan] annenSakSomMåBehandlesFørst={}, Har perioder uten prio={}, Perioder med prio={}", !kjøreplan.kanAktuellFagsakFortsette(),
             kjøreplan.perioderSomIkkeKanBehandlesForAktuellFagsak(),
@@ -101,10 +106,14 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
                 avbrytAksjonspunkt(behandling, kontekst);
             }
 
-            return BehandleStegResultat.utførtUtenAksjonspunkter();
+            if (skalOverstyreUttakVurderer.skalOverstyreUttak(ref)) {
+                return Optional.of(AksjonspunktDefinisjon.OVERSTYRING_AV_UTTAK);
+            }
+
+            return Optional.empty();
         } else {
             log.info("[Kjøreplan] Venter på behandling av andre fagsaker");
-            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK));
+            return Optional.of(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK);
         }
     }
 

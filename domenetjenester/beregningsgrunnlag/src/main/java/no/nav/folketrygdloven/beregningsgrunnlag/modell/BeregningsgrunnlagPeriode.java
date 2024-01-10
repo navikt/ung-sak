@@ -5,7 +5,6 @@ import static no.nav.k9.felles.konfigurasjon.konfig.Tid.TIDENES_ENDE;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -30,6 +29,9 @@ public class BeregningsgrunnlagPeriode {
     private Long dagsats;
     private List<BeregningsgrunnlagPeriodeÅrsak> beregningsgrunnlagPeriodeÅrsaker = new ArrayList<>();
     private BigDecimal inntektGraderingsprosent;
+    private BigDecimal totalUtbetalingsgradFraUttak;
+    private BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
+    private BigDecimal reduksjonsfaktorInaktivTypeA;
     private BigDecimal graderingsfaktorTid;
     private BigDecimal graderingsfaktorInntekt;
 
@@ -45,7 +47,9 @@ public class BeregningsgrunnlagPeriode {
         this.inntektGraderingsprosent = eksisterende.inntektGraderingsprosent;
         this.graderingsfaktorInntekt = eksisterende.graderingsfaktorInntekt;
         this.graderingsfaktorTid = eksisterende.graderingsfaktorTid;
-
+        this.totalUtbetalingsgradFraUttak = eksisterende.totalUtbetalingsgradFraUttak;
+        this.totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt = eksisterende.totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
+        this.reduksjonsfaktorInaktivTypeA = eksisterende.reduksjonsfaktorInaktivTypeA;
     }
 
     public BeregningsgrunnlagPeriode() {
@@ -76,18 +80,18 @@ public class BeregningsgrunnlagPeriode {
 
     public BigDecimal getBeregnetPrÅr() {
         return beregningsgrunnlagPrStatusOgAndelList.stream()
-                .filter(bgpsa -> bgpsa.getBeregnetPrÅr() != null)
-                .map(BeregningsgrunnlagPrStatusOgAndel::getBeregnetPrÅr)
-                .reduce(BigDecimal::add)
-                .orElse(BigDecimal.ZERO);
+            .filter(bgpsa -> bgpsa.getBeregnetPrÅr() != null)
+            .map(BeregningsgrunnlagPrStatusOgAndel::getBeregnetPrÅr)
+            .reduce(BigDecimal::add)
+            .orElse(BigDecimal.ZERO);
     }
 
     void updateBruttoPrÅr() {
         bruttoPrÅr = beregningsgrunnlagPrStatusOgAndelList.stream()
-                .filter(bgpsa -> bgpsa.getBruttoPrÅr() != null)
-                .map(BeregningsgrunnlagPrStatusOgAndel::getBruttoPrÅr)
-                .reduce(BigDecimal::add)
-                .orElse(BigDecimal.ZERO);
+            .filter(bgpsa -> bgpsa.getBruttoPrÅr() != null)
+            .map(BeregningsgrunnlagPrStatusOgAndel::getBruttoPrÅr)
+            .reduce(BigDecimal::add)
+            .orElse(BigDecimal.ZERO);
     }
 
     public BigDecimal getBruttoPrÅr() {
@@ -108,6 +112,18 @@ public class BeregningsgrunnlagPeriode {
 
     public BigDecimal getInntektGraderingsprosent() {
         return inntektGraderingsprosent;
+    }
+
+    public BigDecimal getTotalUtbetalingsgradFraUttak() {
+        return totalUtbetalingsgradFraUttak;
+    }
+
+    public BigDecimal getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt() {
+        return totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
+    }
+
+    public BigDecimal getReduksjonsfaktorInaktivTypeA() {
+        return reduksjonsfaktorInaktivTypeA;
     }
 
     public BigDecimal getGraderingsfaktorTid() {
@@ -160,12 +176,12 @@ public class BeregningsgrunnlagPeriode {
         }
         BeregningsgrunnlagPeriode other = (BeregningsgrunnlagPeriode) obj;
         return Objects.equals(this.periode.getFomDato(), other.periode.getFomDato())
-                && Objects.equals(this.periode.getTomDato(), other.periode.getTomDato())
-                && Objects.equals(this.getBruttoPrÅr(), other.getBruttoPrÅr())
-                && Objects.equals(this.getAvkortetPrÅr(), other.getAvkortetPrÅr())
-                && Objects.equals(this.getRedusertPrÅr(), other.getRedusertPrÅr())
-                && Objects.equals(this.getDagsats(), other.getDagsats())
-                && Objects.equals(this.getInntektGraderingsprosent(), other.getInntektGraderingsprosent())
+            && Objects.equals(this.periode.getTomDato(), other.periode.getTomDato())
+            && Objects.equals(this.getBruttoPrÅr(), other.getBruttoPrÅr())
+            && Objects.equals(this.getAvkortetPrÅr(), other.getAvkortetPrÅr())
+            && Objects.equals(this.getRedusertPrÅr(), other.getRedusertPrÅr())
+            && Objects.equals(this.getDagsats(), other.getDagsats())
+            && Objects.equals(this.getInntektGraderingsprosent(), other.getInntektGraderingsprosent())
             ;
     }
 
@@ -177,12 +193,12 @@ public class BeregningsgrunnlagPeriode {
     @Override
     public String toString() {
         return getClass().getSimpleName() + "<" //$NON-NLS-1$
-                + "periode=" + periode + ", " // $NON-NLS-1$ //$NON-NLS-2$
-                + "bruttoPrÅr=" + bruttoPrÅr + ", " //$NON-NLS-1$ //$NON-NLS-2$
-                + "avkortetPrÅr=" + avkortetPrÅr + ", " //$NON-NLS-1$ //$NON-NLS-2$
-                + "redusertPrÅr=" + redusertPrÅr + ", " //$NON-NLS-1$ //$NON-NLS-2$
-                + "dagsats=" + dagsats + ", " //$NON-NLS-1$ //$NON-NLS-2$
-                + ">"; //$NON-NLS-1$
+            + "periode=" + periode + ", " // $NON-NLS-1$ //$NON-NLS-2$
+            + "bruttoPrÅr=" + bruttoPrÅr + ", " //$NON-NLS-1$ //$NON-NLS-2$
+            + "avkortetPrÅr=" + avkortetPrÅr + ", " //$NON-NLS-1$ //$NON-NLS-2$
+            + "redusertPrÅr=" + redusertPrÅr + ", " //$NON-NLS-1$ //$NON-NLS-2$
+            + "dagsats=" + dagsats + ", " //$NON-NLS-1$ //$NON-NLS-2$
+            + ">"; //$NON-NLS-1$
     }
 
     public static Builder builder() {
@@ -241,13 +257,29 @@ public class BeregningsgrunnlagPeriode {
             return this;
         }
 
+        public Builder medTotalUtbetalingsgradFraUttak(BigDecimal totalUtbetalingsgradFraUttak) {
+            verifiserKanModifisere();
+            kladd.totalUtbetalingsgradFraUttak = totalUtbetalingsgradFraUttak;
+            return this;
+        }
+
+        public Builder medTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt) {
+            verifiserKanModifisere();
+            kladd.totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt = totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
+            return this;
+        }
+
+        public Builder medReduksjonsfaktorInaktivTypeA(BigDecimal reduksjonsfaktorInaktivTypeA) {
+            verifiserKanModifisere();
+            kladd.reduksjonsfaktorInaktivTypeA = reduksjonsfaktorInaktivTypeA;
+            return this;
+        }
 
         public Builder medGraderingsfaktorInntekt(BigDecimal graderingsfaktorInntekt) {
             verifiserKanModifisere();
             kladd.graderingsfaktorInntekt = graderingsfaktorInntekt;
             return this;
         }
-
 
         public Builder medGraderingsfaktorTid(BigDecimal graderingsfaktorTid) {
             verifiserKanModifisere();
@@ -272,7 +304,7 @@ public class BeregningsgrunnlagPeriode {
         }
 
         private void verifiserKanModifisere() {
-            if(built) {
+            if (built) {
                 throw new IllegalStateException("Er allerede bygd, kan ikke oppdatere videre: " + this.kladd);
             }
         }

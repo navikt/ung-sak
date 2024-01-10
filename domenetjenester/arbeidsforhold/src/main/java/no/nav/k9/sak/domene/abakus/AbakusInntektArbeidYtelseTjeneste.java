@@ -30,7 +30,9 @@ import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagDto;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagSakSnapshotDto;
 import no.nav.abakus.iaygrunnlag.v1.OverstyrtInntektArbeidYtelseDto;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
@@ -55,6 +57,7 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @Dependent
@@ -68,6 +71,9 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     private MottatteDokumentRepository mottatteDokumentRepository;
     private IAYRequestCache requestCache;
     private AsyncInntektArbeidYtelseTjeneste asyncIayTjeneste;
+
+    private boolean filtrerUgyldigeInntektsmeldingerEnabled;
+
 
     /**
      * CDI ctor for proxies.
@@ -85,13 +91,15 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
                                              BehandlingRepository behandlingRepository,
                                              MottatteDokumentRepository mottatteDokumentRepository,
                                              FagsakRepository fagsakRepository,
-                                             IAYRequestCache requestCache) {
+                                             IAYRequestCache requestCache,
+                                             @KonfigVerdi(value = "FILTRER_UGYLDIG_IM", defaultVerdi = "false") boolean filtrerUgyldigeInntektsmeldingerEnabled) {
         this.behandlingRepository = Objects.requireNonNull(behandlingRepository, "behandlingRepository");
         this.abakusTjeneste = Objects.requireNonNull(abakusTjeneste, "abakusTjeneste");
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.requestCache = Objects.requireNonNull(requestCache, "requestCache");
         this.fagsakRepository = Objects.requireNonNull(fagsakRepository, "fagsakRepository");
         this.asyncIayTjeneste = asyncIayTjeneste;
+        this.filtrerUgyldigeInntektsmeldingerEnabled = filtrerUgyldigeInntektsmeldingerEnabled;
     }
 
     @Override
@@ -147,7 +155,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
 
 
     /**
-     *  Ikke bruk denne dersom du har tilgang til behandling. Skal kun benyttes i spesielle situasjoner der man må hente på grunnlagsid.
+     * Ikke bruk denne dersom du har tilgang til behandling. Skal kun benyttes i spesielle situasjoner der man må hente på grunnlagsid.
      *
      * @param fagsak                          Fagsak
      * @param inntektArbeidYtelseGrunnlagUuid grunnlag-uuid
@@ -218,7 +226,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         if (fagsakOpt.isPresent()) {
             Fagsak fagsak = fagsakOpt.get();
             // Hent grunnlag fra abakus
-            return hentOgMapAlleInntektsmeldinger(aktørId, fagsak.getSaksnummer(), ytelseType);
+            return hentOgMapAlleInntektsmeldinger(aktørId, fagsak.getSaksnummer(), fagsak.getId(), ytelseType);
 
         }
         return Set.of();
@@ -370,6 +378,8 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         } catch (IOException e) {
             throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Lagre mottatte inntektsmeldinger i abakus: " + e.getMessage(), e).toException();
         }
+
+        requestCache.invaliderInntektsmeldingerCacheForSak(inntektsmeldingerMottattRequest);
     }
 
     @Override
@@ -461,15 +471,34 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         return request;
     }
 
-    private LinkedHashSet<Inntektsmelding> hentOgMapAlleInntektsmeldinger(AktørId aktørId, Saksnummer saksnummer, FagsakYtelseType ytelseType) {
+    private LinkedHashSet<Inntektsmelding> hentOgMapAlleInntektsmeldinger(AktørId aktørId, Saksnummer saksnummer, Long fagsakId, FagsakYtelseType ytelseType) {
         var request = initInntektsmeldingerRequest(aktørId, saksnummer, ytelseType);
-        var dto = hentUnikeInntektsmeldinger(request);
-        var inntektsmeldinger = mapResult(dto).getAlleInntektsmeldinger();
+
+        List<Inntektsmelding> inntektsmeldinger;
+        if (requestCache.getInntektsmeldingerForSak(request) != null) {
+            inntektsmeldinger = requestCache.getInntektsmeldingerForSak(request);
+        } else {
+            var dto = hentUnikeInntektsmeldinger(request);
+            inntektsmeldinger = mapResult(dto).getAlleInntektsmeldinger();
+
+            if (filtrerUgyldigeInntektsmeldingerEnabled) {
+                inntektsmeldinger = filtrerBortUgyldigeDokumenter(fagsakId, inntektsmeldinger);
+            }
+
+            requestCache.leggTilInntektsmeldinger(request, inntektsmeldinger);
+        }
 
         return inntektsmeldinger.stream()
             .sorted(Inntektsmelding.COMP_REKKEFØLGE)
             .collect(Collectors.toCollection(LinkedHashSet::new));
     }
+
+    private List<Inntektsmelding> filtrerBortUgyldigeDokumenter(Long fagsakId, List<Inntektsmelding> inntektsmeldinger) {
+        var ugyldigInntektsmeldingJournalpostIder = mottatteDokumentRepository.hentMottatteDokument(fagsakId, inntektsmeldinger.stream().map(Inntektsmelding::getJournalpostId).map(JournalpostId::getVerdi).map(JournalpostId::new).toList(), DokumentStatus.UGYLDIG)
+            .stream().map(MottattDokument::getJournalpostId).map(JournalpostId::getVerdi).collect(Collectors.toSet());
+        return inntektsmeldinger.stream().filter(im -> !ugyldigInntektsmeldingJournalpostIder.contains(im.getJournalpostId().getVerdi())).toList();
+    }
+
 
     private List<InntektArbeidYtelseGrunnlag> hentOgMapAlleGrunnlag(Fagsak fagsak) {
         var request = initSnapshotRequest(fagsak, GrunnlagVersjon.ALLE);

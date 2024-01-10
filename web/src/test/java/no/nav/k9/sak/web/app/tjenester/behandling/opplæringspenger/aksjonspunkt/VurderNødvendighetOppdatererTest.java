@@ -32,7 +32,7 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokument;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokumentRepository;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæring;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertNødvendighet;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringRepository;
 
@@ -83,14 +83,14 @@ class VurderNødvendighetOppdatererTest {
         Optional<VurdertOpplæringGrunnlag> grunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId());
         assertThat(grunnlag).isPresent();
         assertThat(grunnlag.get().getVurdertInstitusjonHolder()).isNull();
-        assertThat(grunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring()).hasSize(1);
-        VurdertOpplæring vurdertOpplæring = grunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring().get(0);
-        assertThat(vurdertOpplæring.getNødvendigOpplæring()).isEqualTo(dto.isNødvendigOpplæring());
-        assertThat(vurdertOpplæring.getBegrunnelse()).isEqualTo(dto.getBegrunnelse());
-        assertThat(vurdertOpplæring.getVurdertAv()).isEqualTo(brukerId);
-        assertThat(vurdertOpplæring.getVurdertTidspunkt()).isNotNull();
-        assertThat(vurdertOpplæring.getDokumenter()).hasSize(1);
-        assertThat(vurdertOpplæring.getDokumenter().get(0)).isEqualTo(dokument);
+        assertThat(grunnlag.get().getVurdertNødvendighetHolder().getVurdertNødvendighet()).hasSize(1);
+        VurdertNødvendighet vurdertNødvendighet = grunnlag.get().getVurdertNødvendighetHolder().getVurdertNødvendighet().get(0);
+        assertThat(vurdertNødvendighet.getNødvendigOpplæring()).isEqualTo(dto.isNødvendigOpplæring());
+        assertThat(vurdertNødvendighet.getBegrunnelse()).isEqualTo(dto.getBegrunnelse());
+        assertThat(vurdertNødvendighet.getVurdertAv()).isEqualTo(brukerId);
+        assertThat(vurdertNødvendighet.getVurdertTidspunkt()).isNotNull();
+        assertThat(vurdertNødvendighet.getDokumenter()).hasSize(1);
+        assertThat(vurdertNødvendighet.getDokumenter().get(0)).isEqualTo(dokument);
     }
 
     @Test
@@ -98,7 +98,7 @@ class VurderNødvendighetOppdatererTest {
         final JournalpostIdDto journalpostIdDto = new JournalpostIdDto("1338");
         final VurderNødvendighetDto dto1 = new VurderNødvendighetDto(journalpostIdDto, false, "", Set.of(dokument.getId().toString()));
         lagreGrunnlag(dto1);
-        LocalDateTime vurdertTidspunkt1 = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId()).orElseThrow().getVurdertOpplæringHolder().getVurdertOpplæring().get(0).getVurdertTidspunkt();
+        LocalDateTime vurdertTidspunkt1 = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId()).orElseThrow().getVurdertNødvendighetHolder().getVurdertNødvendighet().get(0).getVurdertTidspunkt();
 
         var kursbeskrivelse = lagreNyttDokument(OpplæringDokumentType.DOKUMENTASJON_AV_OPPLÆRING);
         final VurderNødvendighetDto dto2 = new VurderNødvendighetDto(journalpostIdDto, true, "", Set.of(kursbeskrivelse.getId().toString()));
@@ -106,12 +106,12 @@ class VurderNødvendighetOppdatererTest {
 
         Optional<VurdertOpplæringGrunnlag> grunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId());
         assertThat(grunnlag).isPresent();
-        assertThat(grunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring()).hasSize(1);
-        var vurdertOpplæring = grunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring().get(0);
-        assertThat(vurdertOpplæring.getNødvendigOpplæring()).isEqualTo(dto2.isNødvendigOpplæring());
-        assertThat(vurdertOpplæring.getVurdertTidspunkt()).isAfter(vurdertTidspunkt1);
-        assertThat(vurdertOpplæring.getDokumenter()).hasSize(1);
-        assertThat(vurdertOpplæring.getDokumenter().get(0)).isEqualTo(kursbeskrivelse);
+        assertThat(grunnlag.get().getVurdertNødvendighetHolder().getVurdertNødvendighet()).hasSize(1);
+        var vurdertNødvendighet = grunnlag.get().getVurdertNødvendighetHolder().getVurdertNødvendighet().get(0);
+        assertThat(vurdertNødvendighet.getNødvendigOpplæring()).isEqualTo(dto2.isNødvendigOpplæring());
+        assertThat(vurdertNødvendighet.getVurdertTidspunkt()).isAfter(vurdertTidspunkt1);
+        assertThat(vurdertNødvendighet.getDokumenter()).hasSize(1);
+        assertThat(vurdertNødvendighet.getDokumenter().get(0)).isEqualTo(kursbeskrivelse);
     }
 
     @Test
@@ -126,12 +126,12 @@ class VurderNødvendighetOppdatererTest {
 
         Optional<VurdertOpplæringGrunnlag> grunnlag = vurdertOpplæringRepository.hentAktivtGrunnlagForBehandling(behandling.getId());
         assertThat(grunnlag).isPresent();
-        assertThat(grunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring()).hasSize(2);
-        var vurdertOpplæring1 = grunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring().stream().filter(vurdertOpplæring -> vurdertOpplæring.getJournalpostId().equals(journalpostIdDto1.getJournalpostId())).findFirst();
-        assertThat(vurdertOpplæring1).isPresent();
-        var vurdertOpplæring2 = grunnlag.get().getVurdertOpplæringHolder().getVurdertOpplæring().stream().filter(vurdertOpplæring -> vurdertOpplæring.getJournalpostId().equals(journalpostIdDto2.getJournalpostId())).findFirst();
-        assertThat(vurdertOpplæring2).isPresent();
-        assertThat(vurdertOpplæring1.get().getVurdertTidspunkt()).isNotEqualTo(vurdertOpplæring2.get().getVurdertTidspunkt());
+        assertThat(grunnlag.get().getVurdertNødvendighetHolder().getVurdertNødvendighet()).hasSize(2);
+        var vurdertNødvendighet1 = grunnlag.get().getVurdertNødvendighetHolder().getVurdertNødvendighet().stream().filter(vurdertOpplæring -> vurdertOpplæring.getJournalpostId().equals(journalpostIdDto1.getJournalpostId())).findFirst();
+        assertThat(vurdertNødvendighet1).isPresent();
+        var vurdertNødvendighet2 = grunnlag.get().getVurdertNødvendighetHolder().getVurdertNødvendighet().stream().filter(vurdertOpplæring -> vurdertOpplæring.getJournalpostId().equals(journalpostIdDto2.getJournalpostId())).findFirst();
+        assertThat(vurdertNødvendighet2).isPresent();
+        assertThat(vurdertNødvendighet1.get().getVurdertTidspunkt()).isNotEqualTo(vurdertNødvendighet2.get().getVurdertTidspunkt());
     }
 
     private OppdateringResultat lagreGrunnlag(VurderNødvendighetDto dto) {

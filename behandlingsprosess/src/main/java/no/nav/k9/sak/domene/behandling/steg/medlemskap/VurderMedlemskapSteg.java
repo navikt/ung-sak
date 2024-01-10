@@ -79,7 +79,7 @@ public class VurderMedlemskapSteg implements BehandlingSteg {
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
-        var stegMåRekjøres = utledPerioderSomHarBlittLagtTilVurderingPgaEndringIPerioder(kontekst);
+        boolean stegMåRekjøres = utledPerioderSomHarBlittLagtTilVurderingPgaEndringIPerioder(kontekst);
         if (stegMåRekjøres) {
             return BehandleStegResultat.tilbakeførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.AVKLAR_FORTSATT_MEDLEMSKAP));
         }
@@ -146,8 +146,12 @@ public class VurderMedlemskapSteg implements BehandlingSteg {
     private void validerAtAltErVurdert(Vilkårene nyttResultat) {
         var vilkår = nyttResultat.getVilkår(VilkårType.MEDLEMSKAPSVILKÅRET).orElseThrow();
 
-        if (vilkår.getPerioder().stream().anyMatch(periode -> Objects.equals(periode.getGjeldendeUtfall(), Utfall.IKKE_VURDERT))) {
-            throw new IllegalStateException("Har perioder som ikke er vurdert etter vurdering.");
+        var perioderUtenVurdering = vilkår.getPerioder().stream()
+            .filter(periode -> Objects.equals(periode.getGjeldendeUtfall(), Utfall.IKKE_VURDERT))
+            .map(VilkårPeriode::getPeriode)
+            .toList();
+        if (!perioderUtenVurdering.isEmpty()) {
+            throw new IllegalStateException("Har perioder som ikke er vurdert etter vurdering: " + perioderUtenVurdering);
         }
     }
 

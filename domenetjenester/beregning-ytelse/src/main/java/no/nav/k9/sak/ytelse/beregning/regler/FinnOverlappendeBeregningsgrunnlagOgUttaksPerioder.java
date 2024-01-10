@@ -104,6 +104,9 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
             BeregningsresultatPeriode resultatPeriode = new BeregningsresultatPeriode(
                 dateInterval,
                 grunnlag.getInntektGraderingsprosent(),
+                grunnlag.getTotalUtbetalingsgradFraUttak(),
+                grunnlag.getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(),
+                grunnlag.getReduksjonsfaktorInaktivTypeA(),
                 grunnlag.getGraderingsfaktorTid(),
                 grunnlag.getGraderingsfaktorInntekt());
 
@@ -116,11 +119,11 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
             grunnlag.getBeregningsgrunnlagPrStatus(AktivitetStatus.ATFL).forEach(gbps -> {
                 // for hver arbeidstaker andel: map fra grunnlag til 1-2 resultatAndel
                 List<BeregningsgrunnlagPrArbeidsforhold> arbeidsforholdList = gbps.getArbeidsforhold();
-                arbeidsforholdList.forEach(a -> uttakResultatPeriode.forEach(up -> opprettBeregningsresultatAndelerATFL(a, resultatPeriode, resultater, periodeNavn, up, skalVurdereGjelderFor)));
+                arbeidsforholdList.forEach(a -> uttakResultatPeriode.forEach(up -> opprettBeregningsresultatAndelerATFL(grunnlag, a, resultatPeriode, resultater, periodeNavn, up, skalVurdereGjelderFor)));
             });
             grunnlag.getBeregningsgrunnlagPrStatus().stream()
                 .filter(bgps -> !AktivitetStatus.ATFL.equals(bgps.getAktivitetStatus()))
-                .forEach(bgps -> uttakResultatPeriode.forEach(up -> opprettBeregningsresultatAndelerGenerell(bgps, resultatPeriode, resultater, periodeNavn, up)));
+                .forEach(bgps -> uttakResultatPeriode.forEach(up -> opprettBeregningsresultatAndelerGenerell(grunnlag, bgps, resultatPeriode, resultater, periodeNavn, up)));
 
             i[0]++;
             return new LocalDateSegment<>(dateInterval, resultatPeriode);
@@ -139,7 +142,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
         return maksUtbetalingsDato;
     }
 
-    private void opprettBeregningsresultatAndelerGenerell(BeregningsgrunnlagPrStatus beregningsgrunnlagPrStatus, BeregningsresultatPeriode resultatPeriode,
+    private void opprettBeregningsresultatAndelerGenerell(BeregningsgrunnlagPeriode grunnlag, BeregningsgrunnlagPrStatus beregningsgrunnlagPrStatus, BeregningsresultatPeriode resultatPeriode,
                                                           Map<String, Object> resultater, String periodeNavn, UttakResultatPeriode uttakResultatPeriode) {
         if (uttakResultatPeriode.getErOppholdsPeriode()) {
             return;
@@ -151,8 +154,8 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
         UttakAktivitet uttakAktivitet = uttakAktivitetOpt.get();
 
         // Fra dagsats gradert ifht utbetalingsgrad
-        Long dagsatsBruker = årsbeløpTilDagsats(beregningsgrunnlagPrStatus.getRedusertBrukersAndelPrÅr());
-
+        long dagsatsBruker = årsbeløpTilDagsats(beregningsgrunnlagPrStatus.getRedusertBrukersAndelPrÅr());
+        BigDecimal utbetalingsgradOppdrag = utbetalingsgradOppdrag(beregningsgrunnlagPrStatus.getRedusertBrukersAndelPrÅr(), grunnlag);
         resultatPeriode.addBeregningsresultatAndel(
             BeregningsresultatAndel.builder()
                 .medBrukerErMottaker(true)
@@ -161,18 +164,32 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
                 .medAktivitetStatus(beregningsgrunnlagPrStatus.getAktivitetStatus())
                 .medInntektskategori(beregningsgrunnlagPrStatus.getInntektskategori())
                 .medUtbetalingssgrad(uttakAktivitet.getUtbetalingsgrad())
+                .medUtbetalingssgradOppdrag(utbetalingsgradOppdrag)
                 .medStillingsprosent(uttakAktivitet.getStillingsgrad())
                 .build(resultatPeriode));
 
         // Regelsporing
         String beskrivelse = periodeNavn + BRUKER_ANDEL + "['" + beregningsgrunnlagPrStatus.getAktivitetStatus().name() + "']" + DAGSATS_BRUKER;
         resultater.put(beskrivelse, dagsatsBruker);
+    }
 
+    private static BigDecimal utbetalingsgradOppdrag(BigDecimal redusertBrukersAndelPrÅr, BeregningsgrunnlagPeriode grunnlag) {
+        boolean erMidlertidigInaktivTypeA = grunnlag.getReduksjonsfaktorInaktivTypeA() != null;
+        BigDecimal maksimalUtbetaling = erMidlertidigInaktivTypeA
+            ? grunnlag.getBruttoBeregningsgrunnlag().multiply(grunnlag.getReduksjonsfaktorInaktivTypeA()).setScale(0, RoundingMode.HALF_UP)
+            : grunnlag.getBruttoBeregningsgrunnlag();
+        return prosentAvMaksimal(redusertBrukersAndelPrÅr, maksimalUtbetaling);
+    }
+
+    private static BigDecimal prosentAvMaksimal(BigDecimal input, BigDecimal maks) {
+        if (maks.signum() == 0) {
+            return BigDecimal.ZERO;
+        }
+        return BigDecimal.valueOf(100).multiply(input).divide(maks, 2, RoundingMode.HALF_UP);
     }
 
     private Optional<UttakAktivitet> matchUttakAktivitetMedBeregningsgrunnlagPrStatus(BeregningsgrunnlagPrStatus beregningsgrunnlagPrStatus, List<UttakAktivitet> uttakAktiviteter) {
-
-        var match = uttakAktiviteter.stream()
+        return uttakAktiviteter.stream()
             .filter(aktivitet -> {
                 var aktivitetStatus = beregningsgrunnlagPrStatus.getAktivitetStatus();
                 if ((aktivitet.getType().equals(UttakArbeidType.ANNET))) {
@@ -183,10 +200,9 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
                 }
             })
             .findFirst();
-        return match;
     }
 
-    private void opprettBeregningsresultatAndelerATFL(BeregningsgrunnlagPrArbeidsforhold arbeidsforhold, BeregningsresultatPeriode resultatPeriode,
+    private void opprettBeregningsresultatAndelerATFL(BeregningsgrunnlagPeriode grunnlag, BeregningsgrunnlagPrArbeidsforhold arbeidsforhold, BeregningsresultatPeriode resultatPeriode,
                                                       Map<String, Object> resultater, String periodeNavn, UttakResultatPeriode uttakResultatPeriode, boolean skalVurdereGjelderFor) {
         if (uttakResultatPeriode.getErOppholdsPeriode()) {
             return;
@@ -202,12 +218,17 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
         Long dagsatsBruker = årsbeløpTilDagsats(arbeidsforhold.getRedusertBrukersAndelPrÅr());
         Long dagsatsArbeidsgiver = årsbeløpTilDagsats(arbeidsforhold.getRedusertRefusjonPrÅr());
 
+        BigDecimal utbetalingsgradOppdragBruker = utbetalingsgradOppdrag(arbeidsforhold.getRedusertBrukersAndelPrÅr(), grunnlag);
+        BigDecimal utbetalingsgradOppdragRefusjon = utbetalingsgradOppdrag(arbeidsforhold.getRedusertRefusjonPrÅr(), grunnlag);
+
+
         resultatPeriode.addBeregningsresultatAndel(
             BeregningsresultatAndel.builder()
                 .medArbeidsforhold(arbeidsforhold.getArbeidsforhold())
                 .medBrukerErMottaker(true)
                 .medStillingsprosent(uttakAktivitet.getStillingsgrad())
                 .medUtbetalingssgrad(uttakAktivitet.getUtbetalingsgrad())
+                .medUtbetalingssgradOppdrag(utbetalingsgradOppdragBruker)
                 .medDagsats(dagsatsBruker)
                 .medDagsatsFraBg(arbeidsforhold.getDagsatsBruker())
                 .medAktivitetStatus(AktivitetStatus.ATFL)
@@ -226,6 +247,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
                     .medBrukerErMottaker(false)
                     .medStillingsprosent(uttakAktivitet.getStillingsgrad())
                     .medUtbetalingssgrad(uttakAktivitet.getUtbetalingsgrad())
+                    .medUtbetalingssgradOppdrag(utbetalingsgradOppdragRefusjon)
                     .medDagsats(dagsatsArbeidsgiver)
                     .medDagsatsFraBg(arbeidsforhold.getDagsatsArbeidsgiver())
                     .medInntektskategori(arbeidsforhold.getInntektskategori())

@@ -187,7 +187,7 @@ public class MedisinskGrunnlagRepository {
     }
 
     public Optional<MedisinskGrunnlag> hentGrunnlagFraForrigeBehandling(Saksnummer saksnummer, UUID behandlingUuid) {
-        return hentSisteBehandlingMedUnntakAv(saksnummer, behandlingUuid)
+        return hentSisteBehandlingFør(saksnummer, behandlingUuid)
             .map(forrigeBehandling -> hentGrunnlagForBehandling(forrigeBehandling).orElseThrow());
     }
 
@@ -208,7 +208,7 @@ public class MedisinskGrunnlagRepository {
         return !q.getResultList().isEmpty();
     }
 
-    Optional<UUID> hentSisteBehandlingMedUnntakAv(Saksnummer saksnummer, UUID behandlingUuid) {
+    Optional<UUID> hentSisteBehandlingFør(Saksnummer saksnummer, UUID behandlingUuid) {
         final TypedQuery<UUID> q = entityManager.createQuery(
             "Select sgb.behandlingUuid "
                 + "From MedisinskGrunnlag as sgb "
@@ -218,7 +218,12 @@ public class MedisinskGrunnlagRepository {
                 + "    From MedisinskGrunnlag as sgb2 "
                 + "    Where sgb2.saksnummer = :saksnummer "
                 + "      And sgb2.behandlingUuid <> :behandlingUuid "
-                + "  ) "
+                + " And (sgb2.behandlingsnummer < (Select max(sgb3.behandlingsnummer)  "
+                + "                    From MedisinskGrunnlag as sgb3 "
+                + "                   Where sgb3.saksnummer = :saksnummer "
+                + "                   And sgb3.behandlingUuid = :behandlingUuid) "
+                + " Or not exists (Select 1  From MedisinskGrunnlag as sgb3 Where sgb3.saksnummer = :saksnummer And sgb3.behandlingUuid = :behandlingUuid))"
+                + "  )"
                 + "  And sgb.behandlingUuid <> :behandlingUuid"
             , UUID.class);
 

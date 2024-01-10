@@ -95,6 +95,15 @@ public class YrkesaktivitetFilter {
             .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
+    public Collection<Yrkesaktivitet> getYrkesaktiviteterEksklusiveFiktive() {
+        return getAlleYrkesaktiviteter()
+            .stream()
+            .filter(this::erIkkeFrilansOppdrag)
+            .filter(it -> (erArbeidsforholdOgStarterPåRettSideAvSkjæringstidspunkt(it) || !getAktivitetsAvtalerForArbeid(it).isEmpty()))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+
     public Collection<Yrkesaktivitet> getYrkesaktiviteter() {
         return getYrkesaktiviteterInklusiveFiktive()
             .stream()

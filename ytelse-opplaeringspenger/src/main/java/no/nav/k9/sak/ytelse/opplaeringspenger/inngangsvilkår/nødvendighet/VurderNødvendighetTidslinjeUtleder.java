@@ -21,7 +21,7 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.VilkårTidslinjeUtleder;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæring;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertNødvendighet;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 
@@ -71,9 +71,9 @@ class VurderNødvendighetTidslinjeUtleder {
         var opplæringGrunnlag = Optional.ofNullable(vurdertOpplæringGrunnlag);
         var tidslinje = new LocalDateTimeline<>(List.of(segment));
 
-        if (opplæringGrunnlag.isPresent() && vurdertOpplæringGrunnlag.getVurdertOpplæringHolder() != null) {
+        if (opplæringGrunnlag.isPresent() && vurdertOpplæringGrunnlag.getVurdertNødvendighetHolder() != null) {
             for (JournalpostId journalpostId : segment.getValue()) {
-                Optional<VurdertOpplæring> vurdertOpplæring = vurdertOpplæringGrunnlag.getVurdertOpplæringHolder().finnVurderingForJournalpostId(journalpostId.getJournalpostId());
+                Optional<VurdertNødvendighet> vurdertOpplæring = vurdertOpplæringGrunnlag.getVurdertNødvendighetHolder().finnVurderingForJournalpostId(journalpostId.getJournalpostId());
 
                 if (vurdertOpplæring.isPresent()) {
                     return tidslinje.mapValue(v -> vurdertOpplæring.get().getNødvendigOpplæring() ? GODKJENT : IKKE_GODKJENT);

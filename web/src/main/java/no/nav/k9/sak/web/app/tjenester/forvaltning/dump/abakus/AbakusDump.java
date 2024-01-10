@@ -6,10 +6,7 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectWriter;
 
@@ -18,10 +15,10 @@ import jakarta.inject.Inject;
 import no.nav.abakus.iaygrunnlag.JsonObjectMapper;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
+import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(OMSORGSPENGER)
@@ -44,45 +41,33 @@ public class AbakusDump implements DebugDumpBehandling, DebugDumpFagsak {
     }
 
     @Override
-    public List<DumpOutput> dump(Behandling behandling) {
+    public void dump(DumpMottaker dumpMottaker, Behandling behandling, String basePath) {
         try {
             var data = tjeneste.finnGrunnlag(behandling.getId());
             if (data.isEmpty()) {
-                return List.of();
+                return;
             }
-            var content = iayMapper.writeValueAsString(data.get());
-            return List.of(new DumpOutput("abakus-iaygrunnlag.json", content));
+            dumpMottaker.newFile(basePath + "/abakus-iaygrunnlag.json");
+            iayMapper.writeValue(dumpMottaker.getOutputStream(), data.get());
         } catch (Exception e) {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
-            return List.of(new DumpOutput("abakus-iaygrunnlag-ERROR.txt", sw.toString()));
+            dumpMottaker.newFile(basePath + "/abakus-iaygrunnlag-ERROR.txt");
+            dumpMottaker.write(e);
         }
-
     }
 
     @Override
-    public List<DumpOutput> dump(Fagsak fagsak) {
-        var resultat = new ArrayList<DumpOutput>();
-
+    public void dump(DumpMottaker dumpMottaker) {
         String relativePath = "abakus-inntektsmeldinger";
         try {
-            var data = tjeneste.hentUnikeInntektsmeldingerForSak(fagsak.getSaksnummer());
-            if (data.isEmpty()) {
-                return List.of();
-            }
-            for (var im : data) {
-                var content = iayMapper.writeValueAsString(im);
+            Set<Inntektsmelding> data = tjeneste.hentUnikeInntektsmeldingerForSak(dumpMottaker.getFagsak().getSaksnummer());
+            for (Inntektsmelding im : data) {
                 relativePath = "abakus-inntektsmelding-" + im.getArbeidsgiver().getIdentifikator() + "-journalpost_" + im.getJournalpostId().getVerdi();
-                resultat.add(new DumpOutput(relativePath + ".json", content));
+                dumpMottaker.newFile(relativePath);
+                iayMapper.writeValue(dumpMottaker.getOutputStream(), im);
             }
         } catch (Exception e) {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
-            resultat.add(new DumpOutput(relativePath + "-ERROR.txt", sw.toString()));
+            dumpMottaker.newFile(relativePath + "-ERROR.txt");
+            dumpMottaker.write(e);
         }
-        return resultat;
     }
-
 }

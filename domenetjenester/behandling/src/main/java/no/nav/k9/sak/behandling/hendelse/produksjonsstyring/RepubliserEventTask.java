@@ -1,9 +1,13 @@
 package no.nav.k9.sak.behandling.hendelse.produksjonsstyring;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +20,8 @@ import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
+import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingProsessHendelse;
@@ -32,6 +38,7 @@ public class RepubliserEventTask implements ProsessTaskHandler {
 
     private BehandlingRepository behandlingRepository;
     private BehandlingProsessHendelseMapper behandlingProsessHendelseMapper;
+    private BehandlingVedtakRepository behandlingVedtakRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
 
     RepubliserEventTask() {
@@ -41,9 +48,11 @@ public class RepubliserEventTask implements ProsessTaskHandler {
     @Inject
     public RepubliserEventTask(BehandlingRepository behandlingRepository,
                                BehandlingProsessHendelseMapper behandlingProsessHendelseMapper,
+                               BehandlingVedtakRepository behandlingVedtakRepository,
                                ProsessTaskTjeneste prosessTaskTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingProsessHendelseMapper = behandlingProsessHendelseMapper;
+        this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
@@ -60,11 +69,16 @@ public class RepubliserEventTask implements ProsessTaskHandler {
             log.error("Kunne ikke finne behandling. Kjøring avbrutt.");
             return;
         }
-        if (behandling.get().getÅpneAksjonspunkter().isEmpty()) {
-            return;
-        }
 
-        final var dto = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(EventHendelse.BEHANDLINGSKONTROLL_EVENT, behandling.get());
+        final LocalDateTime eventTid = Objects.requireNonNull(ObjectUtils.firstNonNull(
+                behandling.get().getEndretTidspunkt(),
+                behandling.get().getOpprettetTidspunkt()
+                ), "Mangler tidspunkt for endring av behandling");
+        
+        final LocalDate vedtaksdato = behandlingVedtakRepository.hentBehandlingVedtakFor(behandlingUuid)
+                .map(BehandlingVedtak::getVedtaksdato).orElse(null);
+
+        final var dto = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(eventTid, EventHendelse.VASKEEVENT, behandling.get(), vedtaksdato);
 
         final ProsessTaskData nyProsessTask = ProsessTaskData.forProsessTask(PubliserEventTaskImpl.class);
         nyProsessTask.setCallIdFraEksisterende();
@@ -75,7 +89,7 @@ public class RepubliserEventTask implements ProsessTaskHandler {
 
         prosessTaskTjeneste.lagre(nyProsessTask);
     }
-
+    
     private String toJson(final BehandlingProsessHendelse dto) {
         final String json;
         try {

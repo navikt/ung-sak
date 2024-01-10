@@ -62,12 +62,17 @@ spec:
   accessPolicy:
     inbound:
       rules:
+        - application: k9-los-api
+        - application: k9-fordel
         - application: k9-sak
         - application: k9-tilbake
         - application: k9-klage
         - application: k9-formidling
         - application: k9-formidling-dokumentdata
         - application: k9-punsj
+        - application: fpabakus
+          namespace: teamforeldrepenger
+
   env:
     - name: TZ
       value: "Europe/Oslo"
@@ -140,8 +145,6 @@ spec:
       value: OMS
 
     # Restservice Generelle
-    - name: INFOTRYGD_HENDELSER_API_URL
-      value: http://infotrygd-hendelse-api.infotrygd/infotrygd/hendelser
     - name: FPABAKUS_URL
       value: http://fpabakus.teamforeldrepenger/fpabakus
     - name: FPABAKUS_SCOPE
@@ -152,6 +155,8 @@ spec:
       value: api://dev-fss.k9saksbehandling.ftkalkulus/.default
     - name: ABAKUS_CALLBACK_URL
       value: http://k9-sak.k9saksbehandling/k9/sak/api/registerdata/iay/callback
+    - name: ABAKUS_CALLBACK_SCOPE
+      value: api://dev-fss.k9saksbehandling.k9-sak/.default
     - name: ABAC_PDP_ENDPOINT_URL
       value: http://abac-k9.k9saksbehandling/application/authorize
     - name: K9_OPPDRAG_PROXY_URL
@@ -161,7 +166,7 @@ spec:
     - name: OPPGAVE_RS_URI
       value: https://oppgave-q1.nais.preprod.local/api/v1/oppgaver
     - name: OPPGAVE_RS_SCOPE
-      value: api://dev-fss.oppgavehandtering.oppgave/.default
+      value: api://dev-fss.oppgavehandtering.oppgave-q1/.default
     - name: MEDL2_RS_URL
       value: https://medlemskap-medl-api.dev.intern.nav.no/api/v1/medlemskapsunntak
     - name: MEDL2_RS_SCOPE
@@ -182,26 +187,32 @@ spec:
       value: api://dev-fss.k9saksbehandling.k9-oppdrag/.default
     - name: K9_TILBAKE_DIREKTE_URL
       value: http://k9-tilbake.k9saksbehandling/k9/tilbake/api
+    - name: K9_TILBAKE_SCOPE
+      value: api://dev-fss.k9saksbehandling.k9-tilbake/.default
     - name: K9_FORMIDLING_URL
       value: http://k9-formidling.k9saksbehandling/k9/formidling
     - name: K9_FORMIDLING_SCOPE
       value: api://dev-fss.k9saksbehandling.k9-formidling/.default
     - name: K9_PUNSJ_URL
       value: http://k9-punsj.k9saksbehandling/api
+    - name: K9_PUNSJ_SCOPE
+      value: api://dev-fss.k9saksbehandling.k9-punsj/.default
     - name: INFOTRYGD_BS_BASE_URI
-      value: http://k9-infotrygd.k9saksbehandling
+      value: http://k9-infotrygd-grunnlag-paaroerende-sykdom.k9saksbehandling
+    - name: K9_INFOTRYGD_SCOPE
+      value: api://dev-fss.k9saksbehandling.k9-infotrygd-grunnlag-paaroerende-sykdom/.default
     - name: ARBEID_OG_INNTEKT_BASE_URL
       value: https://arbeid-og-inntekt.nais.preprod.local
     - name: K9_LOS_URL
       value: http://k9-los-api.k9saksbehandling/api
+    - name: K9_LOS_SCOPE
+      value: api://dev-fss.k9saksbehandling.k9-los-api/.default
 
     # Restservice OMS spesifikt
     - name: K9_OMS_AARSKVANTUM_URL
       value: http://k9-aarskvantum.k9saksbehandling
     - name: K9_OMS_AARSKVANTUM_SCOPE
       value: api://dev-fss.k9saksbehandling.k9-aarskvantum/.default
-    - name: K9_OMS_UTVIDETRETT_URL
-      value: https://omsorgsdager.intern.dev.nav.no/api
 
     # Restservice PSB spesifikt
     - name: K9_PSB_UTTAK_URL
@@ -220,7 +231,8 @@ spec:
       value: "/k9/klage,api://dev-fss.k9saksbehandling.k9-klage/.default;/k9/tilbake,api://dev-fss.k9saksbehandling.k9-tilbake/.default;/k9/oppdrag,api://dev-fss.k9saksbehandling.k9-oppdrag/.default"
     - name: OIDC_STS_HOST_URL
       value: https://security-token-service.nais.preprod.local
-
+    - name: CLIENT_SCOPE
+      value: "api://dev-fss.k9saksbehandling.k9-sak/.default"
     - name: SECURITYTOKENSERVICE_URL
       value: https://sts-q1.preprod.local/SecurityTokenServiceProvider/
     - name: ABAC_ATTRIBUTT_DRIFT
@@ -232,8 +244,6 @@ spec:
       value: "3030"
 
     # Feature-flag
-    - name: ENABLE_BRUKERDIALOGINNSYN
-      value: "true"
     - name: OMP_VERIFISERING_TILKJENT_YTELSE
       value: "true"
     - name: SOKNADSFRIST_BENYTT_ELDSTEKRAV_PER_PERIODE
@@ -244,28 +254,53 @@ spec:
       value: "true"
     - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
       value: "2022-08-08"
-    - name: BG_FORLENGELSE_BASERT_PAA_UTTAK
-      value: "true"
     - name: ENABLE_SJEKK_TILBAKEKREVING
       value: "true"
     - name: IKKE_YRKESAKTIV_UTEN_SPEILING
       value: "false"
-    - name: PSB_START_I_KOFAKBER_VED_FORLENGELSE_OPPTJENING
-      value: "true"
     - name: OMP_NULL_HELG_I_KRAVPERIODER
-      value: "true"
-    - name: OMS_ZERO_REFUSJON_ER_KRAV
-      value: "true"
-    - name: FERIEPENGER_INFOTRYGD_KORRIGER
       value: "true"
     - name: TILKOMMET_AKTIVITET_ENABLED
       value: "true"
-    - name: ENABLE_ETTERKONTROLL_FORSINKET_SAKB
+    - name: ENABLE_UTBETALINGSGRAD_OPPDRAG
       value: "true"
-
+    - name: ENABLE_DATO_NY_REGEL_UTTAK
+      value: "true"
+    - name: ENABLE_OVERSTYR_UTTAK
+      value: "true"
+    - name: FILTRER_UGYLDIG_IM
+      value: "true"
+    - name: ENABLE_UTENLANDSOPPHOLD_PILS
+      value: "true"
+    - name: PERIODISERT_RAMMEVEDTAK_AO
+      value: "true"
+    - name: STONADSTATISTIKK_V2
+      value: "true"
+    - name: OPPTJENING_AP_VED_AKSEPTERT_MELLOMLIGGENDE_HELG
+      value: "true"
+    - name: FJERN_VILKARSPERIODER_BEREGNING
+      value: "false"
+    - name: VALIDER_KALKULUS_REFERANSER
+      value: "true"
+    - name: LAGRE_SOEKNADSAKTOERER
+      value: "true"
+    - name: ENABLE_AZURE_CC_SYSTEMCONTEXT
+      value: "true"
+    - name: AVKLAR_ARBEIDSFORHOLD_REUTLED_VED_REVURDERING
+      value: "true"
+    - name: ENABLE_RESERVERT_SAKSNUMMER
+      value: "true"
+    - name: OMP_RELEVANT_ENDRING_UTLEDNING
+      value: "true"
+    - name: IKKE_VURDER_KOMPLETTHET_VED_FORLENGELSE
+      value: "true"
+    - name: NY_DEAKTIVERING_LOGIKK_KALKULUS
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
+      value: "true"
+    - name: RESTART_APP_ON_ERROR
       value: "true"
 
 

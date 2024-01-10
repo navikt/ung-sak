@@ -125,6 +125,9 @@ public class FraKalkulusMapper {
             .medBruttoPrÅr(beregningsgrunnlagPeriodeDto.getBruttoPrÅr())
             .medRedusertPrÅr(beregningsgrunnlagPeriodeDto.getRedusertPrÅr())
             .medInntektGraderingsprosent(beregningsgrunnlagPeriodeDto.getInntektGraderingsprosent())
+            .medTotalUtbetalingsgradFraUttak(beregningsgrunnlagPeriodeDto.getTotalUtbetalingsgradFraUttak())
+            .medTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(beregningsgrunnlagPeriodeDto.getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt())
+            .medReduksjonsfaktorInaktivTypeA(beregningsgrunnlagPeriodeDto.getReduksjonsfaktorInaktivTypeA())
             .medGraderingsfaktorTid(beregningsgrunnlagPeriodeDto.getGraderingsfaktorTid())
             .medGraderingsfaktorInntekt(beregningsgrunnlagPeriodeDto.getGraderingsfaktorInntekt());
         mapAndeler(beregningsgrunnlagPeriodeDto.getBeregningsgrunnlagPrStatusOgAndelList()).forEach(periodeBuilder::leggTilBeregningsgrunnlagPrStatusOgAndel);
@@ -179,7 +182,7 @@ public class FraKalkulusMapper {
             .medNaturalytelseTilkommetPrÅr(bgAndelArbeidsforhold.getNaturalytelseTilkommetPrÅr());
     }
 
-    private static Arbeidsgiver mapArbeidsgiver(no.nav.folketrygdloven.kalkulus.response.v1.Arbeidsgiver arbeidsgiver) {
+    public static Arbeidsgiver mapArbeidsgiver(no.nav.folketrygdloven.kalkulus.response.v1.Arbeidsgiver arbeidsgiver) {
         if (arbeidsgiver.getArbeidsgiverOrgnr() != null) {
             return Arbeidsgiver.virksomhet(arbeidsgiver.getArbeidsgiverOrgnr());
         }

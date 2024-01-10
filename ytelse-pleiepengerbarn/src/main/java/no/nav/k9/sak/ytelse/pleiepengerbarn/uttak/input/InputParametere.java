@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +16,7 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
+import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrtUttakPeriode;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -30,7 +33,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtab
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.AktivitetIdentifikator;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidstidMappingInput;
 
 public class InputParametere {
 
@@ -56,6 +58,12 @@ public class InputParametere {
     private Map<UUID, UUID> sisteVedtatteBehandlingForBehandling;
     private UtsattBehandlingAvPeriode utsattBehandlingAvPerioder;
     private Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> tilkommetAktivitetsperioder  = new HashMap<>();
+
+    private LocalDate virkningsdatoNyeRegler;
+    private LocalDateTimeline<OverstyrtUttakPeriode> overstyrtUttak ;
+
+    private LocalDateTimeline<BigDecimal> nedjustertUttaksgrad ;
+
 
     public InputParametere() {
     }
@@ -249,13 +257,40 @@ public class InputParametere {
         this.sisteVedtatteBehandlingForBehandling = sisteVedtatteBehandlingForBehandling;
         return this;
     }
-    
+
     public Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> getTilkommetAktivitetsperioder() {
         return tilkommetAktivitetsperioder;
     }
-    
+
     public InputParametere medTilkommetAktivitetsperioder(Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> tilkommetAktivitetsperioder) {
         this.tilkommetAktivitetsperioder = tilkommetAktivitetsperioder;
         return this;
     }
+    public LocalDate getVirkningsdatoNyeRegler() {
+        return virkningsdatoNyeRegler;
+    }
+    public InputParametere medVirkningsdatoNyeRegler(LocalDate virkningsdatoNyeRegler) {
+        this.virkningsdatoNyeRegler = virkningsdatoNyeRegler;
+        return this;
+    }
+
+    public LocalDateTimeline<OverstyrtUttakPeriode> getOverstyrtUttak() {
+        return overstyrtUttak;
+    }
+
+    public InputParametere medOverstyrtUttak(LocalDateTimeline<OverstyrtUttakPeriode> overstyrtUttak) {
+        this.overstyrtUttak = overstyrtUttak;
+        return this;
+    }
+
+    public LocalDateTimeline<BigDecimal> getNedjustertUttaksgrad() {
+        return nedjustertUttaksgrad;
+    }
+
+    public InputParametere medNedjustertUttaksgrad(LocalDateTimeline<BigDecimal> nedjustertUttaksgrad) {
+        this.nedjustertUttaksgrad = nedjustertUttaksgrad;
+        return this;
+    }
+
+
 }

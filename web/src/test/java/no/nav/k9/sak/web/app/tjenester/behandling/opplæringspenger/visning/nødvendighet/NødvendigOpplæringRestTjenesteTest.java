@@ -28,8 +28,8 @@ import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokument;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokumentRepository;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæring;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringHolder;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertNødvendighet;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertNødvendighetHolder;
 import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.KursPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
@@ -119,8 +119,8 @@ class NødvendigOpplæringRestTjenesteTest {
         uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), new UttakPerioderHolder(Set.of(perioderFraSøknad)));
 
         LocalDateTime nå = LocalDateTime.now();
-        var vurdertOpplæring = new VurdertOpplæring(journalpostId1, true, "fordi", "meg", nå, List.of(dokument));
-        vurdertOpplæringRepository.lagre(behandling.getId(), new VurdertOpplæringHolder(List.of(vurdertOpplæring)));
+        var vurdertOpplæring = new VurdertNødvendighet(journalpostId1, true, "fordi", "meg", nå, List.of(dokument));
+        vurdertOpplæringRepository.lagre(behandling.getId(), new VurdertNødvendighetHolder(List.of(vurdertOpplæring)));
 
         Response response = restTjeneste.hentVurdertNødvendigOpplæring(new BehandlingUuidDto(behandling.getUuid()));
         assertThat(response).isNotNull();
@@ -151,8 +151,8 @@ class NødvendigOpplæringRestTjenesteTest {
         var perioderFraSøknad2 = lagPerioderFraSøknad(journalpostId2, kursperiode2);
         uttakPerioderGrunnlagRepository.lagreRelevantePerioder(behandling.getId(), new UttakPerioderHolder(Set.of(perioderFraSøknad1, perioderFraSøknad2)));
 
-        var vurdertOpplæring = new VurdertOpplæring(journalpostId1, false, "fordi", "", LocalDateTime.now(), List.of());
-        vurdertOpplæringRepository.lagre(behandling.getId(), new VurdertOpplæringHolder(List.of(vurdertOpplæring)));
+        var vurdertOpplæring = new VurdertNødvendighet(journalpostId1, false, "fordi", "", LocalDateTime.now(), List.of());
+        vurdertOpplæringRepository.lagre(behandling.getId(), new VurdertNødvendighetHolder(List.of(vurdertOpplæring)));
 
         Response response = restTjeneste.hentVurdertNødvendigOpplæring(new BehandlingUuidDto(behandling.getUuid()));
         assertThat(response).isNotNull();

@@ -24,6 +24,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +38,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -68,6 +70,7 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.felles.util.InputValideringRegex;
+import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
@@ -81,8 +84,10 @@ import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.Beregningsgrunnla
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
+import no.nav.k9.sak.trigger.ProsessTriggerForvaltningTjeneste;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
@@ -111,6 +116,8 @@ public class ForvaltningBeregningRestTjeneste {
 
     private HentKalkulatorInputDump hentKalkulatorInputDump;
 
+    private ProsessTriggerForvaltningTjeneste prosessTriggerForvaltningTjeneste;
+
 
     public ForvaltningBeregningRestTjeneste() {
     }
@@ -135,6 +142,7 @@ public class ForvaltningBeregningRestTjeneste {
         this.entityManager = entityManager;
         this.fagsakTjeneste = fagsakTjeneste;
         this.hentKalkulatorInputDump = hentKalkulatorInputDump;
+        this.prosessTriggerForvaltningTjeneste = new ProsessTriggerForvaltningTjeneste(entityManager);
         this.kalkulusSystemRestKlient = new KalkulusRestKlient(systemUserOidcRestClient, endpoint);
     }
 
@@ -288,6 +296,115 @@ public class ForvaltningBeregningRestTjeneste {
             brukForrigeSkatteoppgjørDto.getSaksnummer(),
             brukForrigeSkatteoppgjørDto.getBehandlingIdForrigeSkatteoppgjør(),
             brukForrigeSkatteoppgjørDto.getSkjæringstidspunkt());
+    }
+
+
+    @POST
+    @Path("/fjern-prosesstrigger-reberegning")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Fjerner prosesstrigger for reberegning av grunnlag", summary = ("Fjerner prosesstrigger for reberegning av grunnlag"), tags = "beregning")
+    @BeskyttetRessurs(action = CREATE, resource = DRIFT)
+    public void fjernProsessTriggerForReberegning(@Parameter(description = "Saksnummer og skjæringstidspunkt (YYYY-MM-DD) på csv-format") @Valid OpprettManuellRevurderingBeregning opprettManuellRevurdering) {
+
+        var alleSaksnummerOgSkjæringstidspunkt = Objects.requireNonNull(opprettManuellRevurdering.getSaksnummerOgSkjæringstidspunkt(), "saksnummerOgSkjæringstidspunkt");
+        var saknummerOgSkjæringstidspunkt = new LinkedHashSet<>(Arrays.asList(alleSaksnummerOgSkjæringstidspunkt.split("\\s+")));
+
+        for (var s : saknummerOgSkjæringstidspunkt) {
+            var sakOgStpSplitt = s.split(",");
+            var saksnummer = new Saksnummer(sakOgStpSplitt[0]);
+            var stp = LocalDate.parse(sakOgStpSplitt[1]);
+            var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, false).orElseThrow(() -> new IllegalArgumentException("finnes ikke fagsak med saksnummer: " + saksnummer.getVerdi()));
+            loggForvaltningTjeneste(fagsak, "/fjern-prosesstrigger-reberegning", "fjerner prosesstrigger RE-ENDR-BER-GRUN for skjæringstidspunkt " + stp);
+
+            var behandling = behandlingRepository.hentSisteBehandlingForFagsakId(fagsak.getId());
+
+            if (behandling.isEmpty()) {
+                throw new IllegalArgumentException("Fant ingen behandling");
+            }
+
+            if (behandling.get().erSaksbehandlingAvsluttet()) {
+                throw new IllegalArgumentException("Behandling med id " + behandling.get().getId() + " hadde avsluttet saksbehandling.");
+            }
+
+            prosessTriggerForvaltningTjeneste.fjern(behandling.get().getId(), stp, BehandlingÅrsakType.RE_ENDRING_BEREGNINGSGRUNNLAG);
+
+        }
+
+    }
+
+    @GET
+    @Path("/finn-saker-med-feil-trigger")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @Operation(description = "Henter saksnumre med feil.", summary = ("Henter saksnumre med feil."), tags = "beregning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    public Response finnSakerMedFeilTrigger() {
+        var query = entityManager.createNativeQuery(
+            "SELECT distinct f.saksnummer saksnummer, LOWER(t.periode) fom " +
+                "FROM PROSESS_TRIGGERE s " +
+                "INNER JOIN PT_TRIGGER t on s.triggere_id = t.triggere_id " +
+                "INNER JOIN BEHANDLING b on b.id = s.behandling_id " +
+                "INNER JOIN FAGSAK f on b.fagsak_id = f.id " +
+                "WHERE s.aktiv = true AND t.arsak = :aktuellArsak and " +
+                "UPPER(t.periode) - LOWER(t.periode) = 1 and " +
+                "t.opprettet_tid > :feilFra and " +
+                "b.behandling_status = :utredes and " +
+                "not exists(" +
+                "select 1 from GR_BEREGNINGSGRUNNLAG gr " +
+                "inner join BG_PERIODE p on p.bg_grunnlag_id = gr.bg_grunnlag_id " +
+                "where gr.behandling_id = b.id and p.skjaeringstidspunkt = LOWER(t.periode))", Tuple.class);
+
+        query.setParameter("aktuellArsak", BehandlingÅrsakType.RE_ENDRING_BEREGNINGSGRUNNLAG.getKode())
+            .setParameter("feilFra", LocalDateTime.of(2023, 12, 12, 6, 55))
+            .setParameter("utredes", BehandlingStatus.UTREDES.getKode());
+
+        Stream<Tuple> results = query.getResultStream();
+
+        Optional<String> dataDump = CsvOutput.dumpResultSetToCsv(results);
+
+        return dataDump
+            .map(s -> s.replace("\"", "")) //hack for å kunne bruke fjernProsessTriggerForReberegning direkte fra respons
+            .map(d -> Response.ok(d)
+                .type(MediaType.APPLICATION_OCTET_STREAM)
+                .header("Content-Disposition", String.format("attachment; filename=\"dump.csv\""))
+                .build()).orElse(Response.noContent().build());
+    }
+
+    @GET
+    @Path("/finn-saker-med-feil-trigger-overlapp-stp")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @Operation(description = "Henter saksnumre med feil.", summary = ("Henter saksnumre med feil."), tags = "beregning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    public Response finnSakerMedFeilTriggerMedOverlappStp() {
+        var query = entityManager.createNativeQuery(
+            "SELECT distinct f.saksnummer saksnummer, LOWER(t.periode) fom " +
+                "FROM PROSESS_TRIGGERE s " +
+                "INNER JOIN PT_TRIGGER t on s.triggere_id = t.triggere_id " +
+                "INNER JOIN BEHANDLING b on b.id = s.behandling_id " +
+                "INNER JOIN FAGSAK f on b.fagsak_id = f.id " +
+                "inner join GR_BEREGNINGSGRUNNLAG gr on gr.behandling_id = b.id " +
+                "inner join BG_PERIODE p on p.bg_grunnlag_id = gr.bg_grunnlag_id " +
+                "where gr.behandling_id = b.id " +
+                "and p.skjaeringstidspunkt = LOWER(t.periode) " +
+                "AND s.aktiv = true " +
+                "AND t.arsak = :aktuellArsak " +
+                "and UPPER(t.periode) - LOWER(t.periode) = 1 " +
+                "and t.opprettet_tid > :feilFra " +
+                "and b.behandling_status = :utredes ", Tuple.class);
+
+        query.setParameter("aktuellArsak", BehandlingÅrsakType.RE_ENDRING_BEREGNINGSGRUNNLAG.getKode())
+            .setParameter("feilFra", LocalDateTime.of(2023, 12, 12, 6, 55))
+            .setParameter("utredes", BehandlingStatus.UTREDES.getKode());
+
+        Stream<Tuple> results = query.getResultStream();
+
+        Optional<String> dataDump = CsvOutput.dumpResultSetToCsv(results);
+
+        return dataDump
+            .map(s -> s.replace("\"", "")) //hack for å kunne bruke fjernProsessTriggerForReberegning direkte fra respons
+            .map(d -> Response.ok(d)
+                .type(MediaType.APPLICATION_OCTET_STREAM)
+                .header("Content-Disposition", String.format("attachment; filename=\"dump.csv\""))
+                .build()).orElse(Response.noContent().build());
     }
 
 

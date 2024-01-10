@@ -5,6 +5,7 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -19,6 +20,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
 import no.nav.k9.aarskvantum.kontrakter.Periodetype;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
@@ -59,6 +61,11 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     private ÅrskvantumTjeneste årskvantumTjeneste;
     private ProsessTriggereRepository prosessTriggereRepository;
 
+    private boolean enableFjernPerioderBeregning;
+
+
+    private OMPUttakEndringsutleder endringsutleder;
+
     OMPVilkårsPerioderTilVurderingTjeneste() {
         // CDI
     }
@@ -70,7 +77,9 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
                                                   TrekkUtFraværTjeneste trekkUtFraværTjeneste,
                                                   VilkårResultatRepository vilkårResultatRepository,
                                                   ÅrskvantumTjeneste årskvantumTjeneste,
-                                                  ProsessTriggereRepository prosessTriggereRepository) {
+                                                  ProsessTriggereRepository prosessTriggereRepository,
+                                                  @KonfigVerdi(value = "FJERN_VILKARSPERIODER_BEREGNING", defaultVerdi = "false") boolean enableFjernPerioderBeregning,
+                                                  OMPUttakEndringsutleder endringsutleder) {
         this.vilkårUtleder = vilkårUtleder;
         søktePerioder = new SøktePerioder(omsorgspengerGrunnlagRepository);
         nulledePerioder = new NulledePerioder(omsorgspengerGrunnlagRepository);
@@ -79,6 +88,8 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.årskvantumTjeneste = årskvantumTjeneste;
         this.prosessTriggereRepository = prosessTriggereRepository;
+        this.enableFjernPerioderBeregning = enableFjernPerioderBeregning;
+        this.endringsutleder = endringsutleder;
     }
 
     @Override
@@ -131,12 +142,14 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         var vilkårsPerioder = vilkår.get().getPerioder().stream().map(VilkårPeriode::getPeriode)
             .collect(Collectors.toCollection(TreeSet::new));
         var fullUttaksplan = årskvantumTjeneste.hentFullUttaksplan(referanse.getSaksnummer());
+        var fullUttaksplanForrigeBehandling = referanse.getOriginalBehandlingId().map(id -> årskvantumTjeneste.hentUttaksplanForBehandling(referanse.getSaksnummer(), id));
 
         var aktivitetsperioder = fullUttaksplan.getAktiviteter()
             .stream()
             .map(Aktivitet::getUttaksperioder)
             .flatMap(Collection::stream)
             .filter(it -> Periodetype.REVURDERT.equals(it.getPeriodetype()))
+            .filter(it -> endringsutleder.harRelevantEndringFraForrige(referanse.getSaksnummer(), it, fullUttaksplanForrigeBehandling))
             .map(Uttaksperiode::getPeriode)
             .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
             .filter(it -> perioder.stream().noneMatch(it::overlapper))
@@ -197,5 +210,19 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     public KantIKantVurderer getKantIKantVurderer() {
         return erKantIKantVurderer;
     }
+
+    @Override
+    public Set<VilkårType> definerendeVilkår() {
+        if (enableFjernPerioderBeregning) {
+            Set<VilkårType> vilkårIRekkefølge = new LinkedHashSet<>();
+            vilkårIRekkefølge.add(VilkårType.OMSORGEN_FOR);
+            vilkårIRekkefølge.add(VilkårType.ALDERSVILKÅR);
+            vilkårIRekkefølge.add(VilkårType.K9_VILKÅRET);
+            vilkårIRekkefølge.add(VilkårType.MEDLEMSKAPSVILKÅRET);
+            return vilkårIRekkefølge;
+        }
+        return Set.of(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+    }
+
 
 }

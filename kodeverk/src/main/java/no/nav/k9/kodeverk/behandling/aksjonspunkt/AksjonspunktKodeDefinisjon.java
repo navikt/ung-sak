@@ -51,6 +51,7 @@ public class AksjonspunktKodeDefinisjon {
     public static final String OVERSTYRING_AV_BEREGNINGSAKTIVITETER_KODE = "6014";
     public static final String OVERSTYRING_AV_BEREGNINGSGRUNNLAG_KODE = "6015";
     public static final String OVERSTYRING_AV_K9_VILKÅRET_KODE = "6016";
+    public static final String OVERSTYRING_AV_UTTAK_KODE = "6017";
     public static final String MANUELL_MARKERING_AV_UTLAND_SAKSTYPE_KODE = "6068";
 
     public static final String SØKERS_OPPLYSNINGSPLIKT_MANU_KODE = "5017";
@@ -117,6 +118,7 @@ public class AksjonspunktKodeDefinisjon {
     public static final String VURDER_RETT_ETTER_PLEIETRENGENDES_DØD = "9202";
     public static final String MANGLER_AKTIVITETER = "9203";
     public static final String VENT_ANNEN_PSB_SAK_KODE = "9290";
+    public static final String VURDER_DATO_NY_REGEL_UTTAK = "9291";
     public static final String OVERSTYR_BEREGNING_INPUT = "9005";
     public static final String AUTO_VENT_PÅ_KOMPLETT_SØKNAD_FOR_PERIODE = "9006";
     public static final String TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE = "9007";

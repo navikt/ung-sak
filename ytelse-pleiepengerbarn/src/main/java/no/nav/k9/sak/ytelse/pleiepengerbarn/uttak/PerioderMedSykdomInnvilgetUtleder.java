@@ -41,23 +41,12 @@ public class PerioderMedSykdomInnvilgetUtleder {
 
     public NavigableSet<DatoIntervallEntitet> utledInnvilgedePerioderTilVurdering(BehandlingReferanse referanse) {
         var behandlingId = referanse.getBehandlingId();
-        final var perioderVurdertISykdom = utledPerioderVurdert(behandlingId);
+        VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = finnVilkårsPerioderTjeneste(behandlingId);
+        final var perioderVurdertISykdom = perioderTilVurderingTjeneste.utledFraDefinerendeVilkår(behandlingId);
 
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
 
         return finnInnvilgedePerioder(behandlingId, vilkårene, perioderVurdertISykdom);
-    }
-
-    private NavigableSet<DatoIntervallEntitet> utledPerioderVurdert(Long behandlingId) {
-        VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = finnVilkårsPerioderTjeneste(behandlingId);
-
-        LocalDateTimeline<Boolean> tidslinje = LocalDateTimeline.empty();
-        for (VilkårType vilkårType : perioderTilVurderingTjeneste.definerendeVilkår()) {
-            NavigableSet<DatoIntervallEntitet> perioderForVilkår = perioderTilVurderingTjeneste.utled(behandlingId, vilkårType);
-            var perioderSomTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(perioderForVilkår);
-            tidslinje = tidslinje.crossJoin(perioderSomTidslinje, StandardCombinators::alwaysTrueForMatch);
-        }
-        return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje.compress());
     }
 
     private NavigableSet<DatoIntervallEntitet> finnInnvilgedePerioder(Long behandlingId, Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {

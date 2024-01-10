@@ -10,6 +10,7 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningInkonsistensTjeneste;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederInput;
@@ -37,6 +38,8 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
 
     private OpptjeningsaktiviteterPreconditionForBeregning opptjeningsaktiviteterPreconditionForBeregning;
 
+    private boolean nyDeaktiveringEnabled;
+
 
     protected VurderPreconditionBeregningSteg() {
         // for CDI proxy
@@ -49,7 +52,8 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
                                            RyddOgGjenopprettBeregningTjeneste ryddOgGjenopprettBeregningTjeneste,
                                            KopierBeregningTjeneste kopierBeregningTjeneste,
                                            BeregningInkonsistensTjeneste inkonsistensTjeneste,
-                                           OpptjeningsaktiviteterPreconditionForBeregning opptjeningsaktiviteterPreconditionForBeregning) {
+                                           OpptjeningsaktiviteterPreconditionForBeregning opptjeningsaktiviteterPreconditionForBeregning,
+                                           @KonfigVerdi(value = "NY_DEAKTIVERING_LOGIKK_KALKULUS", defaultVerdi = "false") boolean nyDeaktiveringEnabled) {
         this.behandlingRepository = behandlingRepository;
         this.aksjonspunktUtledere = aksjonspunktUtledere;
         this.vurderAvslagGrunnetOpptjening = vurderAvslagGrunnetOpptjening;
@@ -57,6 +61,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         this.kopierBeregningTjeneste = kopierBeregningTjeneste;
         this.inkonsistensTjeneste = inkonsistensTjeneste;
         this.opptjeningsaktiviteterPreconditionForBeregning = opptjeningsaktiviteterPreconditionForBeregning;
+        this.nyDeaktiveringEnabled = nyDeaktiveringEnabled;
     }
 
     @Override
@@ -70,17 +75,26 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         // 2. Avslå der opptjening er avslått
         vurderAvslagGrunnetOpptjening.vurderAvslagGrunnetAvslagIOpptjening(referanse);
 
-        // 3. Rydder fjernet eller avslått periode (må vurdere avslag mellom dei to rydde-kalla)
-        ryddOgGjenopprettBeregningTjeneste.deaktiverAvslåtteEllerFjernetPerioder(referanse);
+        // 3. fjern eller initier perioder fra definerende vilkår
+        ryddOgGjenopprettBeregningTjeneste.fjernEllerInitierPerioderFraDefinerendeVilkår(referanse);
 
-        // 4 Vurder inkonsistens
+        if (nyDeaktiveringEnabled) {
+            // 4. Rydder alle perioder ulik initiell
+            ryddOgGjenopprettBeregningTjeneste.deaktiverAlleReferanserUlikInitiell(referanse);
+        } else {
+            // 4. Rydder fjernet eller avslått periode (må vurdere avslag mellom dei to rydde-kalla)
+            ryddOgGjenopprettBeregningTjeneste.deaktiverAvslåtteEllerFjernetPerioder(referanse);
+        }
+
+        // 5 Vurder inkonsistens
         inkonsistensTjeneste.sjekkInkonsistensOgOpprettProsesstrigger(referanse);
-        opptjeningsaktiviteterPreconditionForBeregning.sjekkOpptjeningsaktiviter(referanse.getBehandlingId());
+        opptjeningsaktiviteterPreconditionForBeregning.sjekkOpptjeningsaktiviter(referanse);
 
-        // 5. Kopier
+        // 6. Kopier
         kopierBeregningTjeneste.kopierVurderinger(kontekst);
 
-        // 6. Utled aksjonspunkt
+
+        // 7. Utled aksjonspunkt
         var aksjonspunkter = finnAksjonspunkter(referanse);
 
         return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunkter);

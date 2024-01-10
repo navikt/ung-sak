@@ -9,6 +9,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import no.nav.k9.sak.web.server.jetty.JettyServer;
 import no.nav.k9.sikkerhet.oidc.config.OpenIDConfig;
 import no.nav.k9.sikkerhet.oidc.config.OpenIDConfigProvider;
 
@@ -54,7 +55,11 @@ public class HealthCheckRestService {
     @Path("/isAlive")
     public Response isAlive() {
         Response.ResponseBuilder builder;
-        builder = Response.ok("OK", MediaType.TEXT_PLAIN_TYPE);
+        if (JettyServer.KILL_APPLICATION.get()) {
+            builder = Response.serverError();
+        } else {
+            builder = Response.ok("OK", MediaType.TEXT_PLAIN_TYPE);
+        }
         builder.cacheControl(cacheControl);
         return builder.build();
     }

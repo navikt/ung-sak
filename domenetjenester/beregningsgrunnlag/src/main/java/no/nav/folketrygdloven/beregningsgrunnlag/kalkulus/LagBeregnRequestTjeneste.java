@@ -21,6 +21,8 @@ import no.nav.folketrygdloven.kalkulus.request.v1.BeregnForRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregnListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.tilkommetAktivitet.UtledTilkommetAktivitetForRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.tilkommetAktivitet.UtledTilkommetAktivitetListeRequest;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -88,6 +90,19 @@ public class LagBeregnRequestTjeneste {
             YtelseTyperKalkulusStøtterKontrakt.fraKode(referanse.getFagsakYtelseType().getKode()),
             referanse.getSaksnummer().getVerdi(),
             referanse.getBehandlingUuid());
+    }
+
+    public UtledTilkommetAktivitetListeRequest lagForUtledningAvTilkommetInntekt(BehandlingReferanse referanse,
+                                                                                 List<BeregnInput> beregnInput,
+                                                                                 InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                                                                 Collection<Inntektsmelding> sakInntektsmeldinger) {
+        var input = lagInputPrReferanse(referanse, iayGrunnlag, sakInntektsmeldinger, beregnInput);
+        var requestList = beregnInput.stream()
+            .map(i -> new UtledTilkommetAktivitetForRequest(i.getBgReferanse(), input.get(i.getBgReferanse())))
+            .toList();
+        return new UtledTilkommetAktivitetListeRequest(referanse.getSaksnummer().getVerdi(),
+            YtelseTyperKalkulusStøtterKontrakt.fraKode(referanse.getFagsakYtelseType().getKode()),
+            requestList);
     }
 
     private List<BeregnForRequest> lagRequestForReferanserMedInput(BehandlingReferanse referanse,

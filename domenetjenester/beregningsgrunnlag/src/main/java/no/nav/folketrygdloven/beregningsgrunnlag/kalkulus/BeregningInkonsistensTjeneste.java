@@ -1,9 +1,11 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -168,7 +170,7 @@ public class BeregningInkonsistensTjeneste {
     }
 
     private static boolean erKunYtelse(List<OpptjeningAktiviteter.OpptjeningPeriode> aktiviteterPåStp) {
-        return aktiviteterPåStp.stream().allMatch(a -> OpptjeningAktivitetType.YTELSE.contains(a.getType()));
+        return !aktiviteterPåStp.isEmpty() && aktiviteterPåStp.stream().allMatch(a -> OpptjeningAktivitetType.YTELSE.contains(a.getType()));
     }
 
     private boolean erMidlertidigInaktiv(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet periode) {

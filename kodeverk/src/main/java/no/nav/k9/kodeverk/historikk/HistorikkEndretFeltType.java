@@ -68,6 +68,13 @@ public enum HistorikkEndretFeltType implements Kodeverdi {
     OPPHOLDSRETT_IKKE_EOS("OPPHOLDSRETT_IKKE_EOS", "Bruker har ikke oppholdsrett i EØS"),
     UTLAND("UTLAND", "Utland"),
 
+    /** Uttak */
+    UTTAK_OVERSTYRT_PERIODE("UTTAK_OVERSTYRT_PERIODE", "Aktuell uttaksperiode"),
+    UTTAK_OVERSTYRT_SØKERS_UTTAKSGRAD("UTTAK_OVERSTYRT_SØKERS_UTTAKSGRAD", "Søkers uttaksgrad"),
+    UTTAK_OVERSTYRT_UTBETALINGSGRAD("UTTAK_OVERSTYRT_UTBETALINGSGRAD", "Utbetalingsgrad"),
+    OVST_UTTAK_FJERNET("OVST_UTTAK_FJERNET", "Overstyrt uttak er fjernet"),
+
+
     /** Tilkjent ytelse */
     TILKJENT_YTELSE("TILKJENT_YTELSE", "Tilkjent ytelse"),
 
@@ -75,6 +82,7 @@ public enum HistorikkEndretFeltType implements Kodeverdi {
     ER_SÆRLIGE_GRUNNER_TIL_REDUKSJON("ER_SÆRLIGE_GRUNNER_TIL_REDUKSJON", "Er det særlige grunner til reduksjon"),
     ER_VILKÅRENE_TILBAKEKREVING_OPPFYLT("ER_VILKÅRENE_TILBAKEKREVING_OPPFYLT", "Er vilkårene for tilbakekreving oppfylt"),
     FASTSETT_VIDERE_BEHANDLING("FASTSETT_VIDERE_BEHANDLING", "Fastsett videre behandling"),
+    VIRKNINGSDATO_UTTAK_NYE_REGLER("VIRKNINGSDATO_UTTAK_NYE_REGLER", "Virkningsdato"),
     TILBAKETREKK("TILBAKETREKK", "Tilbaketrekk"),
 
     /** Vilkår */

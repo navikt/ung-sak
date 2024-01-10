@@ -1,17 +1,17 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning.dump.dokument;
 
 import java.util.List;
+import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import jakarta.persistence.Tuple;
-
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
@@ -29,7 +29,7 @@ public class MottattDokumentDump implements DebugDumpFagsak {
     }
 
     @Override
-    public List<DumpOutput> dump(Fagsak fagsak) {
+    public void dump(DumpMottaker dumpMottaker) {
         String sql = """
                  select
                       f.saksnummer
@@ -54,22 +54,20 @@ public class MottattDokumentDump implements DebugDumpFagsak {
                    from mottatt_dokument m
                    inner join fagsak f on f.id=m.fagsak_id
                    where f.saksnummer=:saksnummer
+                   order by m.mottatt_tidspunkt
 
                 """;
 
-        var query = entityManager.createNativeQuery(sql, Tuple.class)
-            .setParameter("saksnummer", fagsak.getSaksnummer().getVerdi());
-        String path = "mottatt_dokument.csv";
+        Query query = entityManager.createNativeQuery(sql, Tuple.class)
+            .setParameter("saksnummer", dumpMottaker.getFagsak().getSaksnummer().getVerdi());
 
         @SuppressWarnings("unchecked")
         List<Tuple> results = query.getResultList();
 
-        if (results.isEmpty()) {
-            return List.of();
+        Optional<String> output = CsvOutput.dumpResultSetToCsv(results);
+        if (output.isPresent()) {
+            dumpMottaker.newFile("mottatt_dokument.csv");
+            dumpMottaker.write(output.get());
         }
-
-        return CsvOutput.dumpResultSetToCsv(path, results)
-            .map(v -> List.of(v)).orElse(List.of());
     }
-
 }

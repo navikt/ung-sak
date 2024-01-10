@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,12 +20,16 @@ import jakarta.persistence.EntityManager;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetKlassifisering;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningAktivitet;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.ReferanseType;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -51,7 +56,6 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 public class OmsorgspengerOpptjeningForBeregningTjenesteTest {
 
     public static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.now();
-    public static final LocalDate FØRSTE_UTTAKSDAG = SKJÆRINGSTIDSPUNKT.minusDays(9);
     public static final Arbeidsgiver ARBEIDSGIVER = Arbeidsgiver.virksomhet("123456789");
 
     @Inject
@@ -65,6 +69,7 @@ public class OmsorgspengerOpptjeningForBeregningTjenesteTest {
     private OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
     private OppgittOpptjeningFilter oppgittOpptjeningFilter;
     private VilkårResultatRepository vilkårResultatRepository;
+    private Behandling behandling;
 
     @BeforeEach
     public void setUp() {
@@ -77,9 +82,8 @@ public class OmsorgspengerOpptjeningForBeregningTjenesteTest {
 
         aktørId = AktørId.dummy();
         var scenario = TestScenarioBuilder.builderMedSøknad().medBruker(aktørId);
-        Behandling behandling = scenario.lagre(entityManager);
+        behandling = scenario.lagre(entityManager);
         ref = BehandlingReferanse.fra(behandling);
-        opptjeningRepository.lagreOpptjeningsperiode(behandling, FØRSTE_UTTAKSDAG.minusMonths(10), FØRSTE_UTTAKSDAG.minusDays(1), false);
         opptjeningRepository.lagreOpptjeningsperiode(behandling, SKJÆRINGSTIDSPUNKT.minusMonths(10), SKJÆRINGSTIDSPUNKT.minusDays(1), false);
 
         var opptjeningsvilkårBuilder = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET);
@@ -97,17 +101,17 @@ public class OmsorgspengerOpptjeningForBeregningTjenesteTest {
     }
 
     @Test
-    public void skal_mappe_arbeid_for_skjæringtidspunkt_etter_første_uttaksdag() {
-        InntektArbeidYtelseGrunnlag iay = lagIAYForArbeidSomSlutterOgStarterRundtFørsteUttaksdag();
+    public void skal_mappe_arbeid_for_skjæringtidspunkt() {
+        InntektArbeidYtelseGrunnlag iay = lagIAYForToArbeidsforholdIOpptjeningsperiodenOgEttPåStp();
         when(oppgittOpptjeningFilter.hentOppgittOpptjening(any(), any(), any(LocalDate.class))).thenReturn(iay.getOppgittOpptjening());
         OpptjeningAktiviteter opptjeningAktiviteter = tjeneste.hentEksaktOpptjeningForBeregning(ref, iay, DatoIntervallEntitet.fraOgMedTilOgMed(SKJÆRINGSTIDSPUNKT, SKJÆRINGSTIDSPUNKT.plusDays(10)))
             .get();
         List<OpptjeningAktiviteter.OpptjeningPeriode> opptjeningPerioder = opptjeningAktiviteter.getOpptjeningPerioder();
-        assertThat(opptjeningPerioder.size()).isEqualTo(2);
+        assertThat(opptjeningPerioder.size()).isEqualTo(1);
     }
 
     @Test
-    public void skal_mappe_arbeid_for_8_47_B_uten_arbeid_i_opptjeningsperioden() {
+    public void skal_ikke_mappe_arbeid_for_8_47_B_uten_arbeid_i_opptjeningsperioden() {
 
         var opptjeningsvilkårBuilder = new VilkårBuilder(VilkårType.OPPTJENINGSVILKÅRET);
         var vilkårPeriodeBuilder = opptjeningsvilkårBuilder.hentBuilderFor(SKJÆRINGSTIDSPUNKT, SKJÆRINGSTIDSPUNKT);
@@ -120,18 +124,28 @@ public class OmsorgspengerOpptjeningForBeregningTjenesteTest {
 
         InntektArbeidYtelseGrunnlag iay = lagIAYForArbeidStarterPåSkjæringstidspunktet();
         when(oppgittOpptjeningFilter.hentOppgittOpptjening(any(), any(), any(LocalDate.class))).thenReturn(iay.getOppgittOpptjening());
-        OpptjeningAktiviteter opptjeningAktiviteter = tjeneste.hentEksaktOpptjeningForBeregning(ref, iay, DatoIntervallEntitet.fraOgMedTilOgMed(SKJÆRINGSTIDSPUNKT, SKJÆRINGSTIDSPUNKT.plusDays(10)))
-            .get();
-        List<OpptjeningAktiviteter.OpptjeningPeriode> opptjeningPerioder = opptjeningAktiviteter.getOpptjeningPerioder();
-        assertThat(opptjeningPerioder.size()).isEqualTo(1);
+        var opptjeningAktiviteter = tjeneste.hentEksaktOpptjeningForBeregning(ref, iay, DatoIntervallEntitet.fraOgMedTilOgMed(SKJÆRINGSTIDSPUNKT, SKJÆRINGSTIDSPUNKT.plusDays(10)));
+        assertThat(opptjeningAktiviteter.isEmpty()).isTrue();
     }
 
-    private InntektArbeidYtelseGrunnlag lagIAYForArbeidSomSlutterOgStarterRundtFørsteUttaksdag() {
+    private InntektArbeidYtelseGrunnlag lagIAYForToArbeidsforholdIOpptjeningsperiodenOgEttPåStp() {
         InntektArbeidYtelseAggregatBuilder registerBuilder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
         InntektArbeidYtelseAggregatBuilder.AktørArbeidBuilder aktørArbeid = InntektArbeidYtelseAggregatBuilder.AktørArbeidBuilder.oppdatere(Optional.empty())
             .medAktørId(aktørId)
-            .leggTilYrkesaktivitet(lagArbeid(SKJÆRINGSTIDSPUNKT.minusMonths(10), FØRSTE_UTTAKSDAG.minusDays(1)))
-            .leggTilYrkesaktivitet(lagArbeid(FØRSTE_UTTAKSDAG, SKJÆRINGSTIDSPUNKT.plusDays(10)));
+            .leggTilYrkesaktivitet(lagArbeid(SKJÆRINGSTIDSPUNKT.minusMonths(10), SKJÆRINGSTIDSPUNKT.minusDays(10)))
+            .leggTilYrkesaktivitet(lagArbeid(SKJÆRINGSTIDSPUNKT.minusDays(9), SKJÆRINGSTIDSPUNKT.plusDays(10)));
+
+
+        opptjeningRepository.lagreOpptjeningResultat(behandling, SKJÆRINGSTIDSPUNKT,
+            Period.of(0, 0, 14),
+            List.of(new OpptjeningAktivitet(SKJÆRINGSTIDSPUNKT.minusMonths(10),
+                    SKJÆRINGSTIDSPUNKT.minusDays(10), OpptjeningAktivitetType.ARBEID,
+                    OpptjeningAktivitetKlassifisering.BEKREFTET_GODKJENT, ARBEIDSGIVER.getIdentifikator(), ReferanseType.ORG_NR),
+                new OpptjeningAktivitet(SKJÆRINGSTIDSPUNKT.minusDays(9),
+                    SKJÆRINGSTIDSPUNKT.plusDays(10), OpptjeningAktivitetType.ARBEID,
+                    OpptjeningAktivitetKlassifisering.BEKREFTET_GODKJENT, ARBEIDSGIVER.getIdentifikator(), ReferanseType.ORG_NR)));
+
+
         registerBuilder.leggTilAktørArbeid(aktørArbeid);
         return InntektArbeidYtelseGrunnlagBuilder.nytt()
             .medData(registerBuilder)

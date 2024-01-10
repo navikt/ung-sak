@@ -1,15 +1,22 @@
 package no.nav.k9.sak.mottak.dokumentmottak;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -18,6 +25,7 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
+import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -30,11 +38,13 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRevurderingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.mottak.Behandlingsoppretter;
-import no.nav.k9.sak.mottak.inntektsmelding.MottattInntektsmeldingException;
 
 @Dependent
 public class InnhentDokumentTjeneste {
+
+    private static final Logger log = LoggerFactory.getLogger(InnhentDokumentTjeneste.class);
 
     private final Instance<Dokumentmottaker> mottakere;
     private final Behandlingsoppretter behandlingsoppretter;
@@ -43,7 +53,9 @@ public class InnhentDokumentTjeneste {
     private final BehandlingRepository behandlingRepository;
     private final BehandlingLåsRepository behandlingLåsRepository;
     private final BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
-    private final ProsessTaskTjeneste taskRepository;
+    private final ProsessTaskTjeneste prosessTaskTjeneste;
+    private final FagsakProsessTaskRepository fagsakProsessTaskRepository;
+
 
     @Inject
     public InnhentDokumentTjeneste(@Any Instance<Dokumentmottaker> mottakere,
@@ -51,7 +63,8 @@ public class InnhentDokumentTjeneste {
                                    Behandlingsoppretter behandlingsoppretter,
                                    BehandlingRepositoryProvider repositoryProvider,
                                    BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
-                                   ProsessTaskTjeneste taskRepository) {
+                                   ProsessTaskTjeneste prosessTaskTjeneste,
+                                   FagsakProsessTaskRepository fagsakProsessTaskRepository) {
         this.mottakere = mottakere;
         this.dokumentMottakerFelles = dokumentMottakerFelles;
         this.behandlingsoppretter = behandlingsoppretter;
@@ -59,7 +72,8 @@ public class InnhentDokumentTjeneste {
         this.revurderingRepository = repositoryProvider.getBehandlingRevurderingRepository();
         this.behandlingLåsRepository = repositoryProvider.getBehandlingLåsRepository();
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
-        this.taskRepository = taskRepository;
+        this.prosessTaskTjeneste = prosessTaskTjeneste;
+        this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
     }
 
     public void mottaDokument(Fagsak fagsak, Collection<MottattDokument> mottattDokument) {
@@ -89,7 +103,7 @@ public class InnhentDokumentTjeneste {
             throw new IllegalStateException("Det er planlagt kjøringer som ikke har garantert rekkefølge. Sjekk oversikt over ventende tasker for eventuelt avbryte disse.");
         }
         // Lagrer tasks til slutt for å sikre at disse blir kjørt etter at dokumentasjon er lagret
-        taskRepository.lagre(taskGruppe);
+        prosessTaskTjeneste.lagre(taskGruppe);
     }
 
     private ProsessTaskData restartBehandling(Behandling behandling, BehandlingÅrsakType behandlingÅrsak) {
@@ -133,6 +147,7 @@ public class InnhentDokumentTjeneste {
                 }
             } else {
                 sjekkBehandlingKanHoppesTilbake(sisteBehandling);
+                sjekkBehandlingHarIkkeÅpneTasks(sisteBehandling);
                 return BehandlingMedOpprettelseResultat.eksisterendeBehandling(sisteBehandling);
             }
         }
@@ -179,14 +194,27 @@ public class InnhentDokumentTjeneste {
         }
 
         // noen andre holder på siden vi ikke fikk fatt på lås, så avbryter denne gang
-        throw MottattInntektsmeldingException.FACTORY.behandlingPågårAvventerKnytteMottattDokumentTilBehandling(behandling.getId());
+        throw DokumentmottakMidlertidigFeil.FACTORY.behandlingPågårAvventerKnytteMottattDokumentTilBehandling(behandling.getId()).toException();
     }
 
     private void sjekkBehandlingKanHoppesTilbake(Behandling behandling) {
         boolean underIverksetting = behandling.getStatus() == BehandlingStatus.IVERKSETTER_VEDTAK;
         if (underIverksetting) {
             //vedtak er fattet og behandlingen kan derfor ikke oppdateres. Må vente til behandlingen er avsluttet, og det vil så opprettes ny behandling når dokumentet sendes på nytt
-            throw MottattInntektsmeldingException.FACTORY.behandlingUnderIverksettingAvventerKnytteMottattDokumentTilBehandling(behandling.getId());
+            throw DokumentmottakMidlertidigFeil.FACTORY.behandlingUnderIverksettingAvventerKnytteMottattDokumentTilBehandling(behandling.getId()).toException();
+        }
+    }
+
+    private void sjekkBehandlingHarIkkeÅpneTasks(Behandling behandling) {
+        final Set<ProsessTaskStatus> aktuelleStatuser = EnumSet.of(ProsessTaskStatus.KLAR, ProsessTaskStatus.VENTER_SVAR, ProsessTaskStatus.VETO);
+        final LocalDateTime fom = Tid.TIDENES_BEGYNNELSE.atStartOfDay();
+        final LocalDateTime tom = Tid.TIDENES_ENDE.plusDays(1).atStartOfDay();
+        //merk at denne bare finner tasks med gruppesekvensnummer != null (hindrer at den finner seg selv eller andre av typen innhentsaksopplysninger.håndterMottattDokument)
+        final List<ProsessTaskData> åpneTasks = fagsakProsessTaskRepository.finnAlleForAngittSøk(behandling.getFagsakId(), behandling.getId().toString(), null, aktuelleStatuser, true, fom, tom);
+        if (!åpneTasks.isEmpty()) {
+            //behandlingen har åpne tasks og mottak av dokument kan føre til parallelle prosesser som går i beina på hverandre
+            log.info("Fant følgende åpne tasks: [" + åpneTasks.stream().map(Object::toString).collect(Collectors.joining(", ")) + "]");
+            throw DokumentmottakMidlertidigFeil.FACTORY.behandlingPågårAvventerKnytteMottattDokumentTilBehandling(behandling.getId()).toException();
         }
     }
 
@@ -203,8 +231,8 @@ public class InnhentDokumentTjeneste {
     }
 
     private static class BehandlingMedOpprettelseResultat {
-        private Behandling behandling;
-        private boolean nyopprettet;
+        private final Behandling behandling;
+        private final boolean nyopprettet;
 
         private BehandlingMedOpprettelseResultat(Behandling behandling, boolean nyopprettet) {
             this.behandling = behandling;
