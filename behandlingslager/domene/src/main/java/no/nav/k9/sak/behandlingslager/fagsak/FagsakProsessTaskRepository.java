@@ -250,8 +250,8 @@ public class FagsakProsessTaskRepository {
                     boolean propsMatch = true;
                     for (String propName : propNamesNy) {
                         if (!propertiesNy.getProperty(propName).equals(propertiesEksisterende.getProperty(propName))) {
+                            log.info("Task property '{}' matchet ikke, ny task: {}, eksisterende task: {}", propName, ny.getId(), eksisterende.getId());
                             propsMatch = false;
-                            break;
                         }
                     }
                     if (propsMatch) {
