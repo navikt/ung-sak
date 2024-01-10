@@ -98,19 +98,6 @@ public class RyddOgGjenopprettBeregningTjeneste {
         fastsettPGIPeriodeTjeneste.fjernPGIDersomIkkeRelevant(behandling.getId());
     }
 
-    /**
-     * Deaktiverer perioder som er avslått før vi kaller kalkulus
-     *
-     * @param referanse Behandlingreferanse
-     */
-    public void deaktiverAvslåtteEllerFjernetPerioder(BehandlingReferanse referanse) {
-        // deaktiverer grunnlag for referanser som er avslått eller inaktive (fjernet skjæringstidspunkt)
-        kalkulusTjeneste.deaktiverBeregningsgrunnlagForAvslåttEllerFjernetPeriode(referanse);
-        if (validerIngenLoseReferanser) {
-            validerAktiveReferanserTjeneste.validerIngenLøseReferanser(referanse);
-        }
-    }
-
 
     /**
      * Deaktiverer perioder før vi kaller kalkulus
