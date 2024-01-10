@@ -117,12 +117,12 @@ public class VurderMedlemskapSteg implements BehandlingSteg {
     }
 
     private void vurderingMedForlengelse(BehandlingskontrollKontekst kontekst) {
-        var behandlingId = kontekst.getBehandlingId();
+        Long behandlingId = kontekst.getBehandlingId();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var referanse = BehandlingReferanse.fra(behandling);
         var tjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjenester, referanse.getFagsakYtelseType(), referanse.getBehandlingType());
 
-        var vurderingerOgForlengelsesPerioder = vurderLøpendeMedlemskap.vurderMedlemskapOgHåndterForlengelse(behandlingId);
+        VurdertMedlemskapOgForlengelser vurderingerOgForlengelsesPerioder = vurderLøpendeMedlemskap.vurderMedlemskapOgHåndterForlengelse(behandlingId);
 
         final var vilkåreneFørVurdering = vilkårResultatRepository.hent(behandlingId);
         VilkårResultatBuilder vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkåreneFørVurdering);
@@ -131,12 +131,18 @@ public class VurderMedlemskapSteg implements BehandlingSteg {
             .medMaksMellomliggendePeriodeAvstand(tjeneste.maksMellomliggendePeriodeAvstand())
             .medKantIKantVurderer(tjeneste.getKantIKantVurderer());
 
-        var utgangspunkt = hentUtgangspunkt(referanse);
+        Optional<Vilkår> utgangspunkt = hentUtgangspunkt(referanse);
 
         mapPerioderTilVilkårsPerioderMedForlengelse(vilkårBuilder, utgangspunkt, vurderingerOgForlengelsesPerioder);
 
         vilkårResultatBuilder.leggTil(vilkårBuilder);
-        final var nyttResultat = vilkårResultatBuilder.build();
+        final Vilkårene nyttResultat = vilkårResultatBuilder.build();
+
+        //TODO revert
+        if (behandlingId == 1744679L) { // 9WKJA
+            log.info("Vurdering perioder: {}, forlengelsesperioder: {}, utgangspunkt: {}",
+                vurderingerOgForlengelsesPerioder.getVurderinger().keySet(), vurderingerOgForlengelsesPerioder.getForlengelser(), utgangspunkt.get());
+        }
 
         validerAtAltErVurdert(nyttResultat);
 
