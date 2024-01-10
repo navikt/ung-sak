@@ -61,7 +61,10 @@ public class AbakusDump implements DebugDumpBehandling, DebugDumpFagsak {
         try {
             Set<Inntektsmelding> data = tjeneste.hentUnikeInntektsmeldingerForSak(dumpMottaker.getFagsak().getSaksnummer());
             for (Inntektsmelding im : data) {
-                relativePath = "abakus-inntektsmelding-" + im.getArbeidsgiver().getIdentifikator() + "-journalpost_" + im.getJournalpostId().getVerdi();
+                relativePath = "abakus-inntektsmelding-" +
+                    im.getArbeidsgiver().getIdentifikator() +
+                    "-journalpost_" + im.getJournalpostId().getVerdi() +
+                    ".json";
                 dumpMottaker.newFile(relativePath);
                 iayMapper.writeValue(dumpMottaker.getOutputStream(), im);
             }
