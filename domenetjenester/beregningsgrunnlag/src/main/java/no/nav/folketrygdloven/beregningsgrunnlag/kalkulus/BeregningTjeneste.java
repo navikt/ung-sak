@@ -90,16 +90,6 @@ public interface BeregningTjeneste {
 
     List<BeregningsgrunnlagKobling> hentKoblingerForPerioderTilVurdering(BehandlingReferanse ref);
 
-
-    /**
-     * Deaktiverer beregningsgrunnlaget og tilhørende input. Fører til at man ikke har noen aktive beregningsgrunnlag.
-     * <p>
-     * Deaktivering skal kun kalles i første steg i beregning.
-     *
-     * @param ref Behandlingreferanse
-     */
-    void deaktiverBeregningsgrunnlagForAvslåttEllerFjernetPeriode(BehandlingReferanse ref);
-
     /**
      * Gjenoppretter til beregningsgrunnlaget fra original behandling for perioder som ikke vurderes
      *
