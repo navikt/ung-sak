@@ -37,6 +37,7 @@ public class VilkårSporingDump implements DebugDumpFagsak {
             + " ,vp.tom"
             + " ,regexp_replace(regexp_replace(convert_from(lo_get(cast(regel_input  as oid)), 'UTF8'), '\\\\n', '\\n'), '\\\\', '') as regel_input"
             + " ,regexp_replace(regexp_replace(convert_from(lo_get(cast(regel_evaluering as oid)), 'UTF8'), '\\\\n', '\\n'), '\\\\', '') as regel_evaluering"
+            + " ,vp.begrunnelse"
             + " from behandling b"
             + "  inner join fagsak f on f.id=b.fagsak_id  "
             + "  inner join rs_vilkars_resultat rv on rv.behandling_id=b.id "
@@ -52,18 +53,28 @@ public class VilkårSporingDump implements DebugDumpFagsak {
 
         @SuppressWarnings("unchecked")
         Stream<Tuple> stream = query.getResultStream();
-        stream.forEachOrdered( result -> {
+        stream.forEachOrdered(result -> {
             var behandlingId = result.get(1);
             var vilkarTypeKode = result.get(2);
             VilkårType vilkårType = VilkårType.fraKode(vilkarTypeKode);
             var fom = result.get(3);
             var tom = result.get(4);
             String input = (String) result.get(5);
+            String filPrefix = "vilkår/sporing/behandling-" + behandlingId + "/" + vilkårType + "/" + fom + "_" + tom + "-";
+            if (input != null) {
+                dumpMottaker.newFile(filPrefix + "input.json");
+                dumpMottaker.write(input);
+            }
             String evaluering = (String) result.get(6);
-            dumpMottaker.newFile("vilkår/sporing/behandling-" + behandlingId + "/" + vilkårType + "/" + fom + "_" + tom + "-input.json");
-            dumpMottaker.write(input != null ? input : "<manglet>");
-            dumpMottaker.newFile("vilkår/sporing/behandling-" + behandlingId + "/" + vilkårType + "/" + fom + "_" + tom + "-evaluering.json");
-            dumpMottaker.write(evaluering != null ? evaluering : "<manglet>");
+            if (evaluering != null) {
+                dumpMottaker.newFile(filPrefix + "evaluering.json");
+                dumpMottaker.write(evaluering);
+            }
+            String begrunnelse = (String) result.get(7);
+            if (begrunnelse != null) {
+                dumpMottaker.newFile(filPrefix + "begrunnelse.json");
+                dumpMottaker.write(begrunnelse);
+            }
         });
     }
 }
