@@ -3,7 +3,6 @@ package no.nav.k9.sak.domene.behandling.steg.avklarfakta;
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtleder;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktUtlederHolder;
@@ -16,27 +15,12 @@ import no.nav.k9.sak.domene.medlem.kontrollerfakta.AksjonspunktutlederForMedlems
 @ApplicationScoped
 public class KontrollerFaktaUtledereTjenesteImpl implements KontrollerFaktaUtledere {
 
-    @Inject
-    protected KontrollerFaktaUtledereTjenesteImpl() {
-    }
-
-    // Legg til aksjonspunktutledere som er felles for Førstegangsbehandling og Revurdering
-    protected AksjonspunktUtlederHolder leggTilFellesutledere(BehandlingReferanse ref) {
-        var utlederHolder = new AksjonspunktUtlederHolder();
-
-        // Legger til utledere som alltid skal kjøres
-        leggTilStandardUtledere(utlederHolder);
-
-        return utlederHolder;
-    }
-
     @Override
     public List<AksjonspunktUtleder> utledUtledereFor(BehandlingReferanse ref) {
-        return leggTilFellesutledere(ref).getUtledere();
+        var utlederHolder = new AksjonspunktUtlederHolder();
+        utlederHolder.leggTil(AksjonspunktutlederForMedlemskap.class);
+        utlederHolder.leggTil(AksjonspunktUtlederForTilleggsopplysninger.class);
+        return utlederHolder.getUtledere();
     }
 
-    private void leggTilStandardUtledere(AksjonspunktUtlederHolder utlederHolder) {
-        utlederHolder.leggTil(AksjonspunktutlederForMedlemskap.class)
-            .leggTil(AksjonspunktUtlederForTilleggsopplysninger.class);
-    }
 }
