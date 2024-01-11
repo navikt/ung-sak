@@ -135,15 +135,15 @@ public class VurderMedlemskapSteg implements BehandlingSteg {
 
         mapPerioderTilVilkårsPerioderMedForlengelse(vilkårBuilder, utgangspunkt, vurderingerOgForlengelsesPerioder);
 
+        vilkårResultatBuilder.leggTil(vilkårBuilder);
+        final Vilkårene nyttResultat = vilkårResultatBuilder.build();
+
         //TODO revert
         if (behandlingId == 1744679L) { // 9WKJA
             for (LocalDate key : vurderingerOgForlengelsesPerioder.getVurderinger().keySet()) {
                 log.info("dato: {}, vurderingsperiode: {}, vurdering: {}", key, vurderingerOgForlengelsesPerioder.getVurderinger().get(key).getPeriode(), vurderingerOgForlengelsesPerioder.getVurderinger().get(key).getUtfallType());
             }
         }
-
-        vilkårResultatBuilder.leggTil(vilkårBuilder);
-        final Vilkårene nyttResultat = vilkårResultatBuilder.build();
 
         validerAtAltErVurdert(nyttResultat);
 
