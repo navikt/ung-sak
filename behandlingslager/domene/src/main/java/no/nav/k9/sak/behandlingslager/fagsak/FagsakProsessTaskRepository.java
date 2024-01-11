@@ -247,14 +247,14 @@ public class FagsakProsessTaskRepository {
                 if (eksisterende.getTaskType().equals(ny.getTaskType())) {
                     var propertiesEksisterende = hentRelevanteProperties(eksisterende.getProperties());
                     if (propertiesNy.size() != propertiesEksisterende.size()) {
-                        log.info("Task properties matchet ikke, ny task: {} med properties: {}, eksisterende task: {} med properties: {}", ny.getId(), propNamesNy, eksisterende.getId(), propertiesEksisterende.stringPropertyNames());
+                        log.info("Task properties for tasktype '{}' matchet ikke eksisterende task: {}, nye task properties: {}, eksisterende task properties: {}", ny.getTaskType(), eksisterende.getId(), propNamesNy, propertiesEksisterende.stringPropertyNames());
                         continue;
                     }
 
                     boolean propsMatch = true;
                     for (String propName : propNamesNy) {
                         if (!Objects.equals(propertiesNy.getProperty(propName), propertiesEksisterende.getProperty(propName))) {
-                            log.info("Task property '{}' matchet ikke, ny task: {}, eksisterende task: {}", propName, ny.getId(), eksisterende.getId());
+                            log.info("Task property '{}' matchet ikke, tasktype: '{}', eksisterende task: {}", propName, ny.getTaskType(), eksisterende.getId());
                             propsMatch = false;
                         }
                     }
@@ -266,6 +266,7 @@ public class FagsakProsessTaskRepository {
 
             }
             if (!taskMatch) {
+                log.info("Fant ingen matchende eksisterende task for tasktype: '{}'", ny.getTaskType());
                 return false;
             }
         }
