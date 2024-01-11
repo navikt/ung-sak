@@ -220,9 +220,12 @@ public class FagsakProsessTaskRepository {
         Set<ProsessTaskData> vetoetEllerVentendeTasks = new HashSet<>(planlagteTasksBlokkertAvKjørende);
         vetoetEllerVentendeTasks.addAll(ventendeTasksIGruppeMedBlokkert);
 
-        var vetoetEllerVentendeTasksAvSammeTypeSomNy = new HashSet<>(planlagteTaskTyperBlokkertAvKjørende);
+        Set<String> vetoetEllerVentendeTasksAvSammeTypeSomNy = new HashSet<>(planlagteTaskTyperBlokkertAvKjørende);
         vetoetEllerVentendeTasksAvSammeTypeSomNy.addAll(ventendeTaskTyperIGruppeMedBlokkert);
         vetoetEllerVentendeTasksAvSammeTypeSomNy.retainAll(nyeTaskTyper);
+        if (!vetoetEllerVentendeTasksAvSammeTypeSomNy.isEmpty()) {
+            log.info("Vetoet eller ventende tasks av samme type som nye: {}", vetoetEllerVentendeTasksAvSammeTypeSomNy);
+        }
 
         if (vetoetEllerVentendeTasksAvSammeTypeSomNy.containsAll(nyeTaskTyper) && taskPropertiesMatcher(vetoetEllerVentendeTasks, nyeTasks)) {
             log.info("Skipper opprettelse av gruppe med tasks: [{}], Har allerede vetoet tasks av samme type [{}], Og ventende tasks i gruppe med vetoet [{}]",
@@ -244,6 +247,7 @@ public class FagsakProsessTaskRepository {
                 if (eksisterende.getTaskType().equals(ny.getTaskType())) {
                     var propertiesEksisterende = hentRelevanteProperties(eksisterende.getProperties());
                     if (propertiesNy.size() != propertiesEksisterende.size()) {
+                        log.info("Task properties matchet ikke, ny task: {} med properties: {}, eksisterende task: {} med properties: {}", ny.getId(), propNamesNy, eksisterende.getId(), propertiesEksisterende.stringPropertyNames());
                         continue;
                     }
 
