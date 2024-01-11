@@ -220,9 +220,12 @@ public class FagsakProsessTaskRepository {
         Set<ProsessTaskData> vetoetEllerVentendeTasks = new HashSet<>(planlagteTasksBlokkertAvKjørende);
         vetoetEllerVentendeTasks.addAll(ventendeTasksIGruppeMedBlokkert);
 
-        var vetoetEllerVentendeTasksAvSammeTypeSomNy = new HashSet<>(planlagteTaskTyperBlokkertAvKjørende);
+        Set<String> vetoetEllerVentendeTasksAvSammeTypeSomNy = new HashSet<>(planlagteTaskTyperBlokkertAvKjørende);
         vetoetEllerVentendeTasksAvSammeTypeSomNy.addAll(ventendeTaskTyperIGruppeMedBlokkert);
         vetoetEllerVentendeTasksAvSammeTypeSomNy.retainAll(nyeTaskTyper);
+        if (!vetoetEllerVentendeTasksAvSammeTypeSomNy.isEmpty()) {
+            log.info("Vetoet eller ventende tasks av samme type som nye: {}", vetoetEllerVentendeTasksAvSammeTypeSomNy);
+        }
 
         if (vetoetEllerVentendeTasksAvSammeTypeSomNy.containsAll(nyeTaskTyper) && taskPropertiesMatcher(vetoetEllerVentendeTasks, nyeTasks)) {
             log.info("Skipper opprettelse av gruppe med tasks: [{}], Har allerede vetoet tasks av samme type [{}], Og ventende tasks i gruppe med vetoet [{}]",
