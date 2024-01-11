@@ -140,8 +140,9 @@ public class VurderMedlemskapSteg implements BehandlingSteg {
 
         //TODO revert
         if (behandlingId == 1744679L) { // 9WKJA
-            log.info("Vurdering perioder: {}, forlengelsesperioder: {}, utgangspunkt: {}",
-                vurderingerOgForlengelsesPerioder.getVurderinger().keySet(), vurderingerOgForlengelsesPerioder.getForlengelser(), utgangspunkt.get());
+            for (LocalDate key : vurderingerOgForlengelsesPerioder.getVurderinger().keySet()) {
+                log.info("dato: {}, vurderingsperiode: {}, vurdering: {}", key, vurderingerOgForlengelsesPerioder.getVurderinger().get(key).getPeriode(), vurderingerOgForlengelsesPerioder.getVurderinger().get(key).getUtfallType());
+            }
         }
 
         validerAtAltErVurdert(nyttResultat);
