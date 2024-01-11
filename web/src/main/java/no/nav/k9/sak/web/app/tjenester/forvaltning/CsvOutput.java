@@ -11,13 +11,15 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jakarta.persistence.Tuple;
-
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
 public class CsvOutput {
 
+    private static final char UTF8_BOM = '\ufeff';
+
     public static <V> String dumpAsCsv(boolean includeHeader, List<V> input, Map<String, Function<V, ?>> valueMapper) {
         var sb = new StringBuilder(500);
+        sb.append(UTF8_BOM);
         if (includeHeader) {
             sb.append(csvHeader(valueMapper));
         }
@@ -29,6 +31,7 @@ public class CsvOutput {
 
     public static <V> String dumpAsCsvSingleInput(boolean includeHeader, V input, Map<String, Function<V, ?>> valueMapper) {
         var sb = new StringBuilder(500);
+        sb.append(UTF8_BOM);
         if (includeHeader) {
             sb.append(csvHeader(valueMapper));
         }
@@ -120,7 +123,7 @@ public class CsvOutput {
         if (collector.firstRow == null) {
             return Optional.empty();
         } else {
-            return Optional.of(collector.sb.toString());
+            return Optional.of(UTF8_BOM + collector.sb.toString());
         }
     }
 
@@ -155,7 +158,7 @@ public class CsvOutput {
         if (collector.firstRow == null) {
             return Optional.empty();
         } else {
-            return Optional.of(new DumpOutput(path, collector.sb.toString()));
+            return Optional.of(new DumpOutput(path, UTF8_BOM + collector.sb.toString()));
         }
     }
 
