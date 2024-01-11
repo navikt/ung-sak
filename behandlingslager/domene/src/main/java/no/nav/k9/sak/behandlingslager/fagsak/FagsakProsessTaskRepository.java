@@ -244,6 +244,7 @@ public class FagsakProsessTaskRepository {
                 if (eksisterende.getTaskType().equals(ny.getTaskType())) {
                     var propertiesEksisterende = hentRelevanteProperties(eksisterende.getProperties());
                     if (propertiesNy.size() != propertiesEksisterende.size()) {
+                        log.info("Task properties matchet ikke, ny task: {} med properties: {}, eksisterende task: {} med properties: {}", ny.getId(), propNamesNy, eksisterende.getId(), propertiesEksisterende.stringPropertyNames());
                         continue;
                     }
 
