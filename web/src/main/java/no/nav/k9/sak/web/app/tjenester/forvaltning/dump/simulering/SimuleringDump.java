@@ -47,11 +47,13 @@ public class SimuleringDump implements DebugDumpBehandling {
         if (behandling.erAvsluttet()) {
             dumpMottaker.newFile(basePath + "/" + fileName + "-NOOP");
             dumpMottaker.write("Utfører ikke dump av simulering for avsluttede behandlinger");
+            return;
         }
         BehandlingModell modell = behandlingModellRepository.getModell(behandling.getType(), behandling.getFagsakYtelseType());
         if (modell.erStegAFørStegB(behandling.getAktivtBehandlingSteg(), BehandlingStegType.SIMULER_OPPDRAG)) {
             dumpMottaker.newFile(basePath + "/" + fileName + "-NOOP");
             dumpMottaker.write("kan ikke utføre simulering enda, behandlingen er i steg " + behandling.getAktivtBehandlingSteg());
+            return;
         }
         try {
             TilkjentYtelseOppdrag tilkjentYtelseOppdrag = tilkjentYtelseTjeneste.hentTilkjentYtelseOppdrag(behandling);
