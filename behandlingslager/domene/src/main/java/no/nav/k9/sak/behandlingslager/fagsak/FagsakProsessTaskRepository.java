@@ -204,32 +204,21 @@ public class FagsakProsessTaskRepository {
         Set<ProsessTaskData> planlagteTasksBlokkertAvKjørende = eksisterendeTasks.stream()
             .filter(t -> Objects.equals(t.getStatus(), ProsessTaskStatus.VETO) && currentTaskData != null && Objects.equals(currentTaskData.getId(), t.getBlokkertAvProsessTaskId()))
             .collect(Collectors.toSet());
-        Set<String> planlagteTaskTyperBlokkertAvKjørende = planlagteTasksBlokkertAvKjørende.stream()
-            .map(ProsessTaskData::getTaskType)
-            .collect(Collectors.toSet());
         Set<String> blokkerteGrupper = planlagteTasksBlokkertAvKjørende.stream().map(ProsessTaskData::getGruppe).collect(Collectors.toSet());
         Set<ProsessTaskData> ventendeTasksIGruppeMedBlokkert = eksisterendeTasks.stream()
             .filter(t -> currentTaskData == null || !Objects.equals(t.getId(), currentTaskData.getId())) // se bort fra oss selv (hvis vi kjører i en task)
             .filter(t -> blokkerteGrupper.contains(t.getGruppe()))
             .filter(t -> Objects.equals(t.getStatus(), ProsessTaskStatus.KLAR))
             .collect(Collectors.toSet());
-        Set<String> ventendeTaskTyperIGruppeMedBlokkert = ventendeTasksIGruppeMedBlokkert.stream()
-            .map(ProsessTaskData::getTaskType)
-            .collect(Collectors.toSet());
 
         Set<ProsessTaskData> vetoetEllerVentendeTasks = new HashSet<>(planlagteTasksBlokkertAvKjørende);
         vetoetEllerVentendeTasks.addAll(ventendeTasksIGruppeMedBlokkert);
 
-        Set<String> vetoetEllerVentendeTasksAvSammeTypeSomNy = new HashSet<>(planlagteTaskTyperBlokkertAvKjørende);
-        vetoetEllerVentendeTasksAvSammeTypeSomNy.addAll(ventendeTaskTyperIGruppeMedBlokkert);
-        vetoetEllerVentendeTasksAvSammeTypeSomNy.retainAll(nyeTaskTyper);
-        if (!vetoetEllerVentendeTasksAvSammeTypeSomNy.isEmpty()) {
-            log.info("Vetoet eller ventende tasks av samme type som nye: {}", vetoetEllerVentendeTasksAvSammeTypeSomNy);
-        }
-
-        if (vetoetEllerVentendeTasksAvSammeTypeSomNy.containsAll(nyeTaskTyper) && taskPropertiesMatcher(vetoetEllerVentendeTasks, nyeTasks)) {
+        if (!vetoetEllerVentendeTasks.isEmpty() && nyeTaskerMatcherEksisterende(vetoetEllerVentendeTasks, nyeTasks)) {
             log.info("Skipper opprettelse av gruppe med tasks: [{}], Har allerede vetoet tasks av samme type [{}], Og ventende tasks i gruppe med vetoet [{}]",
-                toStringEntry(gruppe.getTasks()), planlagteTaskTyperBlokkertAvKjørende, ventendeTaskTyperIGruppeMedBlokkert);
+                toStringEntry(gruppe.getTasks()),
+                planlagteTasksBlokkertAvKjørende.stream().map(ProsessTaskData::getTaskType).collect(Collectors.toSet()),
+                ventendeTasksIGruppeMedBlokkert.stream().map(ProsessTaskData::getTaskType).collect(Collectors.toSet()));
             return blokkerteGrupper.stream().findFirst().orElse(null);
         }
 
@@ -238,7 +227,7 @@ public class FagsakProsessTaskRepository {
             + " Eksisterende tasktyper hensyntatt [" + eksisterendeTaskTyper + "]");
     }
 
-    private boolean taskPropertiesMatcher(Set<ProsessTaskData> eksisterendeTasks, List<ProsessTaskData> nyeTasks) {
+    private boolean nyeTaskerMatcherEksisterende(Set<ProsessTaskData> eksisterendeTasks, List<ProsessTaskData> nyeTasks) {
         for (ProsessTaskData ny : nyeTasks) {
             boolean taskMatch = false;
             var propertiesNy = hentRelevanteProperties(ny.getProperties());
