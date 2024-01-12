@@ -194,7 +194,7 @@ public class FagsakProsessTaskRepository {
             .filter(t -> currentTaskData == null || !Objects.equals(t.getId(), currentTaskData.getId())) // se bort fra oss selv (hvis vi kjører i en task)
             .map(ProsessTaskData::getTaskType).collect(Collectors.toSet());
 
-        var overlappNyeOgEksisterendeTaskTyper = new HashSet<>(eksisterendeTaskTyper);
+        Set<String> overlappNyeOgEksisterendeTaskTyper = new HashSet<>(eksisterendeTaskTyper);
         overlappNyeOgEksisterendeTaskTyper.retainAll(nyeTaskTyper);
 
         if (overlappNyeOgEksisterendeTaskTyper.isEmpty()) {
@@ -230,20 +230,23 @@ public class FagsakProsessTaskRepository {
     private boolean nyeTaskerMatcherEksisterende(Set<ProsessTaskData> eksisterendeTasks, List<ProsessTaskData> nyeTasks) {
         for (ProsessTaskData ny : nyeTasks) {
             boolean taskMatch = false;
-            var propertiesNy = hentRelevanteProperties(ny.getProperties());
-            var propNamesNy = propertiesNy.stringPropertyNames();
+            final var propertiesNy = hentRelevanteProperties(ny.getProperties());
+            final String taskType = ny.getTaskType();
+
             for (ProsessTaskData eksisterende : eksisterendeTasks) {
-                if (eksisterende.getTaskType().equals(ny.getTaskType())) {
-                    var propertiesEksisterende = hentRelevanteProperties(eksisterende.getProperties());
+                if (eksisterende.getTaskType().equals(taskType)) {
+                    final var propertiesEksisterende = hentRelevanteProperties(eksisterende.getProperties());
+                    håndterSpesialtilfelleFortsettBehandling(eksisterende, eksisterendeTasks, propertiesEksisterende, propertiesNy);
+
                     if (propertiesNy.size() != propertiesEksisterende.size()) {
-                        log.info("Task properties for tasktype '{}' matchet ikke eksisterende task: {}, nye task properties: {}, eksisterende task properties: {}", ny.getTaskType(), eksisterende.getId(), propNamesNy, propertiesEksisterende.stringPropertyNames());
+                        log.info("Task properties for tasktype '{}' matchet ikke eksisterende task: {}, nye task properties: {}, eksisterende task properties: {}", taskType, eksisterende.getId(), propertiesNy.stringPropertyNames(), propertiesEksisterende.stringPropertyNames());
                         continue;
                     }
 
                     boolean propsMatch = true;
-                    for (String propName : propNamesNy) {
+                    for (String propName : propertiesNy.stringPropertyNames()) {
                         if (!Objects.equals(propertiesNy.getProperty(propName), propertiesEksisterende.getProperty(propName))) {
-                            log.info("Task property '{}' matchet ikke, tasktype: '{}', eksisterende task: {}", propName, ny.getTaskType(), eksisterende.getId());
+                            log.info("Task property '{}' matchet ikke, tasktype: '{}', eksisterende task: {}", propName, taskType, eksisterende.getId());
                             propsMatch = false;
                         }
                     }
@@ -255,7 +258,7 @@ public class FagsakProsessTaskRepository {
 
             }
             if (!taskMatch) {
-                log.info("Fant ingen matchende eksisterende task for tasktype: '{}'", ny.getTaskType());
+                log.info("Fant ingen matchende eksisterende task for tasktype: '{}'", taskType);
                 return false;
             }
         }
@@ -281,12 +284,29 @@ public class FagsakProsessTaskRepository {
         return false;
     }
 
+    private void håndterSpesialtilfelleFortsettBehandling(ProsessTaskData eksisterendeTask, Set<ProsessTaskData> eksisterendeTasks, Properties propertiesEksisterende, Properties propertiesNy) {
+        if (eksisterendeTask.getTaskType().equals("behandlingskontroll.fortsettBehandling")) {
+            for (ProsessTaskData annenEksisterendeTask : eksisterendeTasks) {
+                if (annenEksisterendeTask.getTaskType().equals("grunnlag.diffOgReposisjoner")
+                    && annenEksisterendeTask.getGruppe() != null && annenEksisterendeTask.getGruppe().equals(eksisterendeTask.getGruppe())
+                    && annenEksisterendeTask.getSekvens() != null && eksisterendeTask.getSekvens() != null
+                    && Long.parseLong(annenEksisterendeTask.getSekvens()) < Long.parseLong(eksisterendeTask.getSekvens())) {
+                    // Ser bort ifra spesialproperties på fortsettBehandling dersom vi uansett skal kjøre diffOgReposisjoner først
+                    propertiesNy.remove("gjenopptaSteg");
+                    propertiesNy.remove("manuellFortsettelse");
+                    propertiesEksisterende.remove("gjenopptaSteg");
+                    propertiesEksisterende.remove("manuellFortsettelse");
+                }
+            }
+        }
+    }
+
     private String toStringTask(Collection<ProsessTaskData> tasks) {
         return tasks.stream().map(Object::toString).collect(Collectors.joining(", "));
     }
 
     private String toStringEntry(Collection<Entry> tasks) {
-        return tasks.stream().map(t -> t.getTask()).map(Object::toString).collect(Collectors.joining(", "));
+        return tasks.stream().map(Entry::getTask).map(Object::toString).collect(Collectors.joining(", "));
     }
 
     public List<ProsessTaskData> sjekkStatusProsessTasks(Long fagsakId, Long behandlingId, String gruppe) {
