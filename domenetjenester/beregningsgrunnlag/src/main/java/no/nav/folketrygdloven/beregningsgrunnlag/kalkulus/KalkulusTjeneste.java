@@ -1,22 +1,5 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
-import static java.lang.Boolean.TRUE;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Default;
@@ -27,41 +10,21 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.FraKalkulusMapper;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.TilKalkulusMapper;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlag;
-import no.nav.folketrygdloven.beregningsgrunnlag.resultat.BeregningAvklaringsbehovResultat;
-import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
-import no.nav.folketrygdloven.beregningsgrunnlag.resultat.MapEndringsresultat;
-import no.nav.folketrygdloven.beregningsgrunnlag.resultat.OppdaterBeregningsgrunnlagResultat;
-import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.*;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.AvklaringsbehovMedTilstandDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.EksternArbeidsforholdRef;
 import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.ArbeidsforholdReferanseDto;
+import no.nav.folketrygdloven.kalkulus.kodeverk.BeregningSteg;
 import no.nav.folketrygdloven.kalkulus.kodeverk.GrunnbeløpReguleringStatus;
-import no.nav.folketrygdloven.kalkulus.kodeverk.StegType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.Vilkårsavslagsårsak;
 import no.nav.folketrygdloven.kalkulus.kodeverk.YtelseTyperKalkulusStøtterKontrakt;
-import no.nav.folketrygdloven.kalkulus.request.v1.BeregningsgrunnlagListeRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.BeregningsgrunnlagRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagDtoForGUIRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagDtoListeForGUIRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagListeRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.HentForSakRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.HentGrunnbeløpRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningListeRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.KontrollerGrunnbeløpRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.KopierBeregningListeRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.KopierBeregningRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.*;
 import no.nav.folketrygdloven.kalkulus.request.v1.simulerTilkommetInntekt.SimulerTilkommetInntektForRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.simulerTilkommetInntekt.SimulerTilkommetInntektListeRequest;
-import no.nav.folketrygdloven.kalkulus.response.v1.EksternReferanseDto;
-import no.nav.folketrygdloven.kalkulus.response.v1.Grunnbeløp;
-import no.nav.folketrygdloven.kalkulus.response.v1.GrunnbeløpReguleringRespons;
-import no.nav.folketrygdloven.kalkulus.response.v1.TilstandListeResponse;
-import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
+import no.nav.folketrygdloven.kalkulus.response.v1.*;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringListeRespons;
 import no.nav.folketrygdloven.kalkulus.response.v1.simulerTilkommetInntekt.SimulertTilkommetInntektPrReferanse;
@@ -85,6 +48,13 @@ import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Saksnummer;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.lang.Boolean.TRUE;
 
 /**
  * KalkulusTjeneste sørger for at K9 kaller kalkulus på riktig format i henhold til no.nav.folketrygdloven.kalkulus.kontrakt
@@ -148,7 +118,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
-    public void kopier(BehandlingReferanse referanse, List<BeregnInput> beregningInput, StegType stegType) {
+    public void kopier(BehandlingReferanse referanse, List<BeregnInput> beregningInput, BeregningSteg stegType) {
         if (beregningInput.isEmpty()) {
             return;
         }
@@ -156,7 +126,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         restTjeneste.kopierBeregning(request);
     }
 
-    private KopierBeregningListeRequest getKopierBeregningListeRequest(BehandlingReferanse referanse, List<BeregnInput> beregningInput, StegType stegType) {
+    private KopierBeregningListeRequest getKopierBeregningListeRequest(BehandlingReferanse referanse, List<BeregnInput> beregningInput, BeregningSteg stegType) {
         return new KopierBeregningListeRequest(referanse.getSaksnummer().getVerdi(),
             referanse.getBehandlingUuid(),
             YtelseTyperKalkulusStøtterKontrakt.fraKode(referanse.getFagsakYtelseType().getKode()),

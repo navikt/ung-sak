@@ -1,22 +1,7 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Deque;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.inject.Alternative;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlag;
@@ -25,14 +10,17 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.Grunnbeløp;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.OppdaterBeregningsgrunnlagResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
+import no.nav.folketrygdloven.kalkulus.kodeverk.BeregningSteg;
 import no.nav.folketrygdloven.kalkulus.kodeverk.GrunnbeløpReguleringStatus;
-import no.nav.folketrygdloven.kalkulus.kodeverk.StegType;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.typer.Saksnummer;
+
+import java.time.LocalDate;
+import java.util.*;
 
 /**
  * In-memory - legger kun grunnlag i minne (lagrer ikke i noe lager). (Ønsker at denne kunne blitt fjernet)
@@ -63,7 +51,7 @@ public class KalkulusInMemoryTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
-    public void kopier(BehandlingReferanse referanse, List<BeregnInput> beregningInput, StegType stegType) {
+    public void kopier(BehandlingReferanse referanse, List<BeregnInput> beregningInput, BeregningSteg stegType) {
         throw new IllegalStateException("Skal ALDRI bli implementert");
     }
 
