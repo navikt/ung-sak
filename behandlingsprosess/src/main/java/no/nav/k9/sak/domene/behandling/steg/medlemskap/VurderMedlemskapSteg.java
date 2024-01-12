@@ -117,12 +117,12 @@ public class VurderMedlemskapSteg implements BehandlingSteg {
     }
 
     private void vurderingMedForlengelse(BehandlingskontrollKontekst kontekst) {
-        Long behandlingId = kontekst.getBehandlingId();
+        var behandlingId = kontekst.getBehandlingId();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var referanse = BehandlingReferanse.fra(behandling);
         var tjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjenester, referanse.getFagsakYtelseType(), referanse.getBehandlingType());
 
-        VurdertMedlemskapOgForlengelser vurderingerOgForlengelsesPerioder = vurderLøpendeMedlemskap.vurderMedlemskapOgHåndterForlengelse(behandlingId);
+        var vurderingerOgForlengelsesPerioder = vurderLøpendeMedlemskap.vurderMedlemskapOgHåndterForlengelse(behandlingId);
 
         final var vilkåreneFørVurdering = vilkårResultatRepository.hent(behandlingId);
         VilkårResultatBuilder vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkåreneFørVurdering);
@@ -131,18 +131,12 @@ public class VurderMedlemskapSteg implements BehandlingSteg {
             .medMaksMellomliggendePeriodeAvstand(tjeneste.maksMellomliggendePeriodeAvstand())
             .medKantIKantVurderer(tjeneste.getKantIKantVurderer());
 
-        Optional<Vilkår> utgangspunkt = hentUtgangspunkt(referanse);
+        var utgangspunkt = hentUtgangspunkt(referanse);
 
         mapPerioderTilVilkårsPerioderMedForlengelse(vilkårBuilder, utgangspunkt, vurderingerOgForlengelsesPerioder);
 
         vilkårResultatBuilder.leggTil(vilkårBuilder);
-        final Vilkårene nyttResultat = vilkårResultatBuilder.build();
-
-        //TODO revert
-        if (behandlingId == 1744679L) { // 9WKJA
-            log.info("Vurdering perioder: {}, forlengelsesperioder: {}, utgangspunkt: {}",
-                vurderingerOgForlengelsesPerioder.getVurderinger().keySet(), vurderingerOgForlengelsesPerioder.getForlengelser(), utgangspunkt.get());
-        }
+        final var nyttResultat = vilkårResultatBuilder.build();
 
         validerAtAltErVurdert(nyttResultat);
 
