@@ -273,11 +273,6 @@ public class VurderLøpendeMedlemskap {
 
         var grunnlagOgPerioder = lagGrunnlagMedForlengesesPerioder(behandlingId);
 
-        //TODO revert
-        if (behandlingId == 1744679L) { // 9WKJA
-            log.info("Vurderingsdatoer: {}", grunnlagOgPerioder.getGrunnlagPerVurderingsdato().keySet());
-        }
-
         return vurderPerioderMedForlengelse(grunnlagOgPerioder);
     }
 
