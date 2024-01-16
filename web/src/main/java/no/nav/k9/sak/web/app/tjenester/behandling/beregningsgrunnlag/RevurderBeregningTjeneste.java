@@ -73,7 +73,7 @@ public class RevurderBeregningTjeneste {
      * @param behandlingÅrsakType Behandlingsårsaktype
      * @param nesteKjøringEtter   Neste kjøring etter for å spre tasker
      */
-    public void revurderBeregning(Saksnummer saksnummer, LocalDate skjæringstidspunkt, BehandlingÅrsakType behandlingÅrsakType, Optional<LocalDateTime> nesteKjøringEtter) {
+    public void revurderMedÅrsak(Saksnummer saksnummer, LocalDate skjæringstidspunkt, BehandlingÅrsakType behandlingÅrsakType, Optional<LocalDateTime> nesteKjøringEtter) {
         if (!MANUELLE_BEREGNING_ÅRSAKER.contains(behandlingÅrsakType)) {
             throw new IllegalArgumentException("Ugyldig behandlingsårsak for manuell revurdering av beregning: " + behandlingÅrsakType.getKode());
         }
