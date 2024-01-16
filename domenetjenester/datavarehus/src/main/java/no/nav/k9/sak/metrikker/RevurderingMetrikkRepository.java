@@ -135,7 +135,7 @@ public class RevurderingMetrikkRepository {
         var values = stream.map(t -> SensuEvent.createSensuEvent(metricName,
                 toMap(
                     "ytelse_type", t.get(0, String.class),
-                    "aksjonspunkt", t.get(1, Long.class).toString()),
+                    "aksjonspunkt", t.get(1, String.class)),
                 Map.of(metricField, t.get(2, Long.class).toString())))
             .collect(Collectors.toList());
 
