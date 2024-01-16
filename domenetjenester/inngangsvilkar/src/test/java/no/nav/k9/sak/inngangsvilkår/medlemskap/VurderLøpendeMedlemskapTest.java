@@ -24,7 +24,7 @@ class VurderLøpendeMedlemskapTest {
             LocalDate.now().minusDays(5), lagGrunnlag(),
             LocalDate.now().minusDays(1), lagGrunnlag());
         var grunnlagOgPerioder = new GrunnlagOgPerioder(perioderTilVurdering, vurderingsperiodeMedGrunnlag, new TreeSet<>());
-        var resultat = tjeneste.vurderPerioderMedForlengelse(grunnlagOgPerioder);
+        var resultat = tjeneste.vurderPerioderMedForlengelse(grunnlagOgPerioder, 1L);
 
         assertThat(resultat.getVurderinger()).containsKeys(vurderingsperiodeMedGrunnlag.keySet().toArray(new LocalDate[0]));
     }

@@ -273,15 +273,10 @@ public class VurderLøpendeMedlemskap {
 
         var grunnlagOgPerioder = lagGrunnlagMedForlengesesPerioder(behandlingId);
 
-        //TODO revert
-        if (behandlingId == 1744679L) { // 9WKJA
-            log.info("Vurderingsdatoer: {}", grunnlagOgPerioder.getGrunnlagPerVurderingsdato().keySet());
-        }
-
-        return vurderPerioderMedForlengelse(grunnlagOgPerioder);
+        return vurderPerioderMedForlengelse(grunnlagOgPerioder, behandlingId);
     }
 
-    VurdertMedlemskapOgForlengelser vurderPerioderMedForlengelse(GrunnlagOgPerioder grunnlagOgPerioder) {
+    VurdertMedlemskapOgForlengelser vurderPerioderMedForlengelse(GrunnlagOgPerioder grunnlagOgPerioder, Long behandlingId) {
         Map<LocalDate, VilkårData> resultat = new TreeMap<>();
         for (Map.Entry<LocalDate, MedlemskapsvilkårGrunnlag> entry : grunnlagOgPerioder.getGrunnlagPerVurderingsdato().entrySet()) {
             var tilOgMedDato = utledTilOgMedDato(entry.getKey(), grunnlagOgPerioder.getGrunnlagPerVurderingsdato().keySet(), grunnlagOgPerioder);
@@ -293,7 +288,10 @@ public class VurderLøpendeMedlemskap {
                     throw new IllegalStateException("Forventer at vilkår utfall merknad er satt når vilkåret blir satt til IKKE_OPPFYLT for grunnlag:" + entry.getValue().toString());
                 }
                 resultat.put(entry.getKey(), data);
-                break;
+                //TODO revert
+                if (behandlingId != 1744679L) { // 9WKJA
+                    break;
+                }
             }
         }
         return new VurdertMedlemskapOgForlengelser(resultat, grunnlagOgPerioder.getForlengelsesPerioder());
