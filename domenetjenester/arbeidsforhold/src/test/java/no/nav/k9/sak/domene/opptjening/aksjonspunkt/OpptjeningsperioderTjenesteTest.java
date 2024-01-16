@@ -1,33 +1,10 @@
 package no.nav.k9.sak.domene.opptjening.aksjonspunkt;
 
-import static java.util.Optional.empty;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-
-import java.math.BigDecimal;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
-
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.Fagsystem;
-import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
-import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
-import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
-import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
-import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
-import no.nav.k9.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
-import no.nav.k9.kodeverk.arbeidsforhold.TemaUnderkategori;
+import no.nav.k9.kodeverk.arbeidsforhold.*;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.organisasjon.Organisasjonstype;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -44,29 +21,26 @@ import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.testutilities.behandling.IAYRepositoryProvider;
 import no.nav.k9.sak.domene.arbeidsgiver.VirksomhetTjeneste;
-import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
-import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdOverstyringBuilder;
-import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
-import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.k9.sak.domene.iay.modell.InntektspostBuilder;
-import no.nav.k9.sak.domene.iay.modell.OppgittAnnenAktivitet;
-import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
-import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
-import no.nav.k9.sak.domene.iay.modell.VersjonType;
-import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
-import no.nav.k9.sak.domene.iay.modell.YtelseAnvist;
-import no.nav.k9.sak.domene.iay.modell.YtelseBuilder;
-import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilter;
-import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
-import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurderingOpptjeningsvilkår;
-import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
-import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
+import no.nav.k9.sak.domene.iay.modell.*;
+import no.nav.k9.sak.domene.opptjening.*;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.Arbeidsgiver;
-import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.typer.Stillingsprosent;
+import no.nav.k9.sak.typer.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
+
+import java.math.BigDecimal;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import static java.util.Optional.empty;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -328,8 +302,7 @@ class OpptjeningsperioderTjenesteTest {
             .medSaksnummer(new Saksnummer("123"))
             .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), periode.getTomDato()))
             .medStatus(RelatertYtelseTilstand.LØPENDE)
-            .medYtelseType(FagsakYtelseType.DAGPENGER)
-            .medBehandlingsTema(TemaUnderkategori.UDEFINERT);
+            .medYtelseType(FagsakYtelseType.DAGPENGER);
         byggYtelserAnvist(periode.getFomDato(), periode.getTomDato(), ytelseBuilder)
             .forEach(ytelseBuilder::medYtelseAnvist);
         return ytelseBuilder;
@@ -342,8 +315,7 @@ class OpptjeningsperioderTjenesteTest {
             .medSaksnummer(new Saksnummer("123"))
             .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), periode.getTomDato()))
             .medStatus(RelatertYtelseTilstand.LØPENDE)
-            .medYtelseType(FagsakYtelseType.FORELDREPENGER)
-            .medBehandlingsTema(TemaUnderkategori.UDEFINERT);
+            .medYtelseType(FagsakYtelseType.FORELDREPENGER);
         byggHelgeKnektePerioder(periode.getFomDato(), periode.getTomDato(), ytelseBuilder)
             .forEach(ytelseBuilder::medYtelseAnvist);
         return ytelseBuilder;
@@ -355,8 +327,7 @@ class OpptjeningsperioderTjenesteTest {
             .medSaksnummer(new Saksnummer("123"))
             .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), periode.getTomDato()))
             .medStatus(RelatertYtelseTilstand.LØPENDE)
-            .medYtelseType(FagsakYtelseType.FORELDREPENGER)
-            .medBehandlingsTema(TemaUnderkategori.UDEFINERT);
+            .medYtelseType(FagsakYtelseType.FORELDREPENGER);
         byggHelgeKnektePerioderMedHull(periode.getFomDato(), t1, ytelseBuilder, hullIUke)
             .forEach(ytelseBuilder::medYtelseAnvist);
         return ytelseBuilder;

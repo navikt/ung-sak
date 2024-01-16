@@ -1,52 +1,23 @@
 package no.nav.k9.sak.domene.abakus.mapping;
 
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import no.nav.abakus.iaygrunnlag.Aktør;
-import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
-import no.nav.abakus.iaygrunnlag.Organisasjon;
 import no.nav.abakus.iaygrunnlag.Periode;
 import no.nav.abakus.iaygrunnlag.PersonIdent;
-import no.nav.abakus.iaygrunnlag.ytelse.v1.AnvisningDto;
-import no.nav.abakus.iaygrunnlag.ytelse.v1.AnvistAndelDto;
-import no.nav.abakus.iaygrunnlag.ytelse.v1.FordelingDto;
-import no.nav.abakus.iaygrunnlag.ytelse.v1.YtelseDto;
-import no.nav.abakus.iaygrunnlag.ytelse.v1.YtelseGrunnlagDto;
-import no.nav.abakus.iaygrunnlag.ytelse.v1.YtelserDto;
-import no.nav.k9.sak.domene.iay.modell.AktørYtelse;
-import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
+import no.nav.abakus.iaygrunnlag.*;
+import no.nav.abakus.iaygrunnlag.ytelse.v1.*;
+import no.nav.k9.sak.domene.iay.modell.*;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder.AktørYtelseBuilder;
-import no.nav.k9.sak.domene.iay.modell.Ytelse;
-import no.nav.k9.sak.domene.iay.modell.YtelseAnvist;
-import no.nav.k9.sak.domene.iay.modell.YtelseAnvistAndel;
-import no.nav.k9.sak.domene.iay.modell.YtelseAnvistAndelBuilder;
-import no.nav.k9.sak.domene.iay.modell.YtelseAnvistBuilder;
-import no.nav.k9.sak.domene.iay.modell.YtelseBuilder;
-import no.nav.k9.sak.domene.iay.modell.YtelseGrunnlag;
-import no.nav.k9.sak.domene.iay.modell.YtelseGrunnlagBuilder;
-import no.nav.k9.sak.domene.iay.modell.YtelseStørrelse;
-import no.nav.k9.sak.domene.iay.modell.YtelseStørrelseBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.Arbeidsgiver;
-import no.nav.k9.sak.typer.Beløp;
-import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-import no.nav.k9.sak.typer.OrgNummer;
-import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.typer.Stillingsprosent;
+import no.nav.k9.sak.typer.*;
+
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class MapAktørYtelse {
 
     private static final Comparator<YtelseDto> COMP_YTELSE = Comparator
         .comparing(YtelseDto::getSaksnummer, Comparator.nullsLast(Comparator.naturalOrder()))
         .thenComparing(dto -> dto.getYtelseType() == null ? null : dto.getYtelseType().getKode(), Comparator.nullsLast(Comparator.naturalOrder()))
-        .thenComparing(dto -> dto.getTemaUnderkategori() == null ? null : dto.getTemaUnderkategori().getKode(), Comparator.nullsLast(Comparator.naturalOrder()))
         .thenComparing(dto -> dto.getPeriode().getFom(), Comparator.nullsFirst(Comparator.naturalOrder()))
         .thenComparing(dto -> dto.getPeriode().getTom(), Comparator.nullsLast(Comparator.naturalOrder()));
 
@@ -94,11 +65,9 @@ public class MapAktørYtelse {
 
         private YtelseBuilder mapYtelse(YtelseDto ytelseDto) {
             var ytelseBuilder = YtelseBuilder.oppdatere(Optional.empty());
-            var behandlingsTema = KodeverkMapper.getTemaUnderkategori(ytelseDto.getTemaUnderkategori());
             ytelseBuilder
                 .medYtelseGrunnlag(mapYtelseGrunnlag(ytelseDto.getGrunnlag(), ytelseBuilder.getGrunnlagBuilder()))
                 .medYtelseType(KodeverkMapper.mapYtelseTypeFraDto(ytelseDto.getYtelseType()))
-                .medBehandlingsTema(behandlingsTema)
                 .medKilde(KodeverkMapper.mapFagsystemFraDto(ytelseDto.getFagsystemDto()))
                 .medPeriode(mapPeriode(ytelseDto.getPeriode()))
                 .medSaksnummer(ytelseDto.getSaksnummer() == null ? null : new Saksnummer(ytelseDto.getSaksnummer()))
@@ -215,10 +184,8 @@ public class MapAktørYtelse {
             var periode = mapPeriode(ytelse.getPeriode().getFomDato(), ytelse.getPeriode().getTomDato());
             var ytelseType = KodeverkMapper.mapYtelseTypeTilDto(ytelse.getYtelseType());
             var ytelseStatus = KodeverkMapper.getAbakusYtelseStatusForFpsakRelatertYtelseTilstand(ytelse.getStatus());
-            var temaUnderkategori = KodeverkMapper.getBehandlingsTemaUnderkategori(ytelse.getBehandlingsTema());
             var dto = new YtelseDto(fagsystem, ytelseType, periode, ytelseStatus)
-                .medSaksnummer(ytelse.getSaksnummer() == null ? null : ytelse.getSaksnummer().getVerdi())
-                .medTemaUnderkategori(temaUnderkategori);
+                .medSaksnummer(ytelse.getSaksnummer() == null ? null : ytelse.getSaksnummer().getVerdi());
 
             ytelse.getYtelseGrunnlag().map(this::mapYtelseGrunnlag).ifPresent(dto::setGrunnlag);
 

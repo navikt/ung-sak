@@ -1,47 +1,19 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
-
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.kalkulus.mappers.JsonMapper;
-import no.nav.folketrygdloven.kalkulus.request.v1.BeregnListeRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.BeregningsgrunnlagListeRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagDtoListeForGUIRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagListeRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.HentForSakRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.HentGrunnbeløpRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningListeRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.KontrollerGrunnbeløpRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.KopierBeregningListeRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.*;
 import no.nav.folketrygdloven.kalkulus.request.v1.forvaltning.OppdaterYtelsesspesifiktGrunnlagListeRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.migrerAksjonspunkt.MigrerAksjonspunktListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.regelinput.KomprimerRegelInputRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.simulerTilkommetInntekt.SimulerTilkommetInntektListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.tilkommetAktivitet.UtledTilkommetAktivitetListeRequest;
-import no.nav.folketrygdloven.kalkulus.response.v1.AktiveReferanser;
-import no.nav.folketrygdloven.kalkulus.response.v1.Grunnbeløp;
-import no.nav.folketrygdloven.kalkulus.response.v1.GrunnbeløpReguleringRespons;
-import no.nav.folketrygdloven.kalkulus.response.v1.KopiResponse;
-import no.nav.folketrygdloven.kalkulus.response.v1.TilstandListeResponse;
+import no.nav.folketrygdloven.kalkulus.response.v1.*;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.BeregningsgrunnlagGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
 import no.nav.folketrygdloven.kalkulus.response.v1.forvaltning.EndretPeriodeListeRespons;
@@ -62,6 +34,19 @@ import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler.ObjectRea
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
 
 @ApplicationScoped
 @ScopedRestIntegration(scopeKey = "ftkalkulus.scope", defaultScope = "api://prod-fss.k9saksbehandling.ftkalkulus/.default")
@@ -266,15 +251,6 @@ public class KalkulusRestKlient {
             return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), tilkommetAktivitetReader);
         } catch (JsonProcessingException e) {
             throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
-        }
-    }
-
-    public void migrerAksjonspunkter(MigrerAksjonspunktListeRequest request) {
-        var endpoint = migrerAksjonspunkter;
-        try {
-            utfør(endpoint, kalkulusJsonWriter.writeValueAsString(request));
-        } catch (IOException e) {
-            throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(endpoint, e.getMessage()).toException();
         }
     }
 

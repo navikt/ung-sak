@@ -1,22 +1,15 @@
 package no.nav.k9.sak.kontrakt.opptjening;
 
-import java.time.LocalDate;
-import java.util.Objects;
-
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
+import jakarta.validation.constraints.*;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
-import no.nav.k9.kodeverk.arbeidsforhold.YtelseType;
+
+import java.time.LocalDate;
+import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -39,10 +32,6 @@ public class InntektDto {
     /** Inntektspost - om det er vanlig LØNN, en ytelse, etc.*/
     @JsonProperty(value = "inntektspostType")
     private InntektspostType inntektspostType;
-
-    /** Hvis {@link #inntektspostType} er en YTELSE, så angir dette ytelse type. */
-    @JsonProperty(value = "ytelseType")
-    private YtelseType ytelseType;
 
     @JsonProperty(value = "belop")
     @Min(0)
@@ -141,10 +130,6 @@ public class InntektDto {
     public void setInntektspostType(InntektspostType inntektspostType) {
         this.inntektspostType = inntektspostType;
 
-    }
-
-    public void setYtelseType(YtelseType ytelseType) {
-        this.ytelseType = ytelseType;
     }
 
 }

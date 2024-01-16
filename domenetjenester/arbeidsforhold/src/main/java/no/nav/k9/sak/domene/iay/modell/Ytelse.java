@@ -1,22 +1,16 @@
 package no.nav.k9.sak.domene.iay.modell;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.api.IndexKey;
 import no.nav.k9.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
-import no.nav.k9.kodeverk.arbeidsforhold.TemaUnderkategori;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Saksnummer;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Ytelse implements IndexKey {
 
@@ -40,9 +34,6 @@ public class Ytelse implements IndexKey {
     private Fagsystem kilde;
 
     @ChangeTracked
-    private TemaUnderkategori temaUnderkategori = TemaUnderkategori.UDEFINERT;
-
-    @ChangeTracked
     private Set<YtelseAnvist> ytelseAnvist = new LinkedHashSet<>();
 
     public Ytelse() {
@@ -54,7 +45,6 @@ public class Ytelse implements IndexKey {
         this.status = ytelse.getStatus();
         this.periode = ytelse.getPeriode();
         this.saksnummer = ytelse.getSaksnummer();
-        this.temaUnderkategori = ytelse.getBehandlingsTema();
         this.kilde = ytelse.getKilde();
         ytelse.getYtelseGrunnlag().ifPresent(yg -> this.ytelseGrunnlag = new YtelseGrunnlag(yg));
         this.ytelseAnvist = ytelse.getYtelseAnvist()
@@ -75,14 +65,6 @@ public class Ytelse implements IndexKey {
 
     void setYtelseType(FagsakYtelseType relatertYtelseType) {
         this.relatertYtelseType = relatertYtelseType;
-    }
-
-    public TemaUnderkategori getBehandlingsTema() {
-        return temaUnderkategori;
-    }
-
-    void setBehandlingsTema(TemaUnderkategori behandlingsTema) {
-        this.temaUnderkategori = behandlingsTema;
     }
 
     public RelatertYtelseTilstand getStatus() {
@@ -148,7 +130,6 @@ public class Ytelse implements IndexKey {
             return false;
         Ytelse that = (Ytelse) o;
         return Objects.equals(relatertYtelseType, that.relatertYtelseType) &&
-            Objects.equals(temaUnderkategori, that.temaUnderkategori) &&
             Objects.equals(periode, that.periode) &&
             Objects.equals(saksnummer, that.saksnummer) &&
             Objects.equals(kilde, that.kilde);
@@ -156,14 +137,13 @@ public class Ytelse implements IndexKey {
 
     @Override
     public int hashCode() {
-        return Objects.hash(relatertYtelseType, temaUnderkategori, periode, saksnummer, kilde);
+        return Objects.hash(relatertYtelseType, periode, saksnummer, kilde);
     }
 
     @Override
     public String toString() {
         return "YtelseEntitet{" + //$NON-NLS-1$
             "relatertYtelseType=" + relatertYtelseType + //$NON-NLS-1$
-            ", typeUnderkategori=" + temaUnderkategori + //$NON-NLS-1$
             ", periode=" + periode + //$NON-NLS-1$
             ", relatertYtelseStatus=" + status + //$NON-NLS-1$
             ", saksNummer='" + saksnummer + '\'' + //$NON-NLS-1$

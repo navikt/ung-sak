@@ -1,17 +1,5 @@
 package no.nav.k9.sak.domene.opptjening.aksjonspunkt;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.Fagsystem;
@@ -21,14 +9,15 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
-import no.nav.k9.sak.domene.iay.modell.Ytelse;
-import no.nav.k9.sak.domene.iay.modell.YtelseAnvist;
-import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
-import no.nav.k9.sak.domene.iay.modell.YtelseGrunnlag;
-import no.nav.k9.sak.domene.iay.modell.YtelseStørrelse;
+import no.nav.k9.sak.domene.iay.modell.*;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurdering;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class MapYtelseperioderTjeneste {
 
@@ -145,8 +134,7 @@ public class MapYtelseperioderTjeneste {
     public static OpptjeningAktivitetType mapYtelseType(Ytelse ytelse) {
 
         if (!FagsakYtelseType.RELATERT_YTELSE_TYPER_FOR_SØKER.contains(ytelse.getYtelseType())) {
-            return OpptjeningAktivitetType.hentFraTemaUnderkategori()
-                .getOrDefault(ytelse.getBehandlingsTema(), Collections.singleton(UDEFINERT)).stream().findFirst().orElse(UDEFINERT);
+            return UDEFINERT;
         }
 
         if (FagsakYtelseType.SYKEPENGER.equals(ytelse.getYtelseType())) {

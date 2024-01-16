@@ -1,25 +1,17 @@
 package no.nav.k9.sak.domene.iay.modell;
 
+import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.typer.Arbeidsgiver;
+
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
-import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
-import no.nav.k9.kodeverk.arbeidsforhold.YtelseType;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.typer.Arbeidsgiver;
 
 /**
  * Filter for å hente inntekter og inntektsposter fra grunnlag. Tilbyr håndtering av skjæringstidspunkt og filtereing på inntektskilder slik
@@ -85,10 +77,6 @@ public class InntektFilter {
 
     public InntektFilter filter(Set<InntektspostType> typer) {
         return filter((inntekt, inntektspost) -> typer.contains(inntektspost.getInntektspostType()));
-    }
-
-    public InntektFilter filter(YtelseType ytelseType) {
-        return filter((inntekt, inntektspost) -> ytelseType.equals(inntektspost.getYtelseType()));
     }
 
     public InntektFilter filterBeregnetSkatt() {

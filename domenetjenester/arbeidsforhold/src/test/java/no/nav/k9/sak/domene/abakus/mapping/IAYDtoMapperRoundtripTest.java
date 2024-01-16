@@ -1,6 +1,24 @@
 package no.nav.k9.sak.domene.abakus.mapping;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import no.nav.abakus.iaygrunnlag.*;
+import no.nav.abakus.iaygrunnlag.arbeid.v1.AktivitetsAvtaleDto;
+import no.nav.abakus.iaygrunnlag.arbeid.v1.ArbeidDto;
+import no.nav.abakus.iaygrunnlag.arbeid.v1.PermisjonDto;
+import no.nav.abakus.iaygrunnlag.arbeid.v1.YrkesaktivitetDto;
+import no.nav.abakus.iaygrunnlag.inntekt.v1.InntekterDto;
+import no.nav.abakus.iaygrunnlag.inntekt.v1.UtbetalingDto;
+import no.nav.abakus.iaygrunnlag.inntekt.v1.UtbetalingsPostDto;
+import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.*;
+import no.nav.abakus.iaygrunnlag.kodeverk.*;
+import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.*;
+import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseAggregatOverstyrtDto;
+import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseAggregatRegisterDto;
+import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagDto;
+import no.nav.abakus.iaygrunnlag.ytelse.v1.*;
+import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -9,60 +27,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import org.junit.jupiter.api.Test;
-
-import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
-import no.nav.abakus.iaygrunnlag.ArbeidsforholdRefDto;
-import no.nav.abakus.iaygrunnlag.JournalpostId;
-import no.nav.abakus.iaygrunnlag.Organisasjon;
-import no.nav.abakus.iaygrunnlag.Periode;
-import no.nav.abakus.iaygrunnlag.arbeid.v1.AktivitetsAvtaleDto;
-import no.nav.abakus.iaygrunnlag.arbeid.v1.ArbeidDto;
-import no.nav.abakus.iaygrunnlag.arbeid.v1.PermisjonDto;
-import no.nav.abakus.iaygrunnlag.arbeid.v1.YrkesaktivitetDto;
-import no.nav.abakus.iaygrunnlag.inntekt.v1.InntekterDto;
-import no.nav.abakus.iaygrunnlag.inntekt.v1.UtbetalingDto;
-import no.nav.abakus.iaygrunnlag.inntekt.v1.UtbetalingsPostDto;
-import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.FraværDto;
-import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.GraderingDto;
-import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.InntektsmeldingDto;
-import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.InntektsmeldingerDto;
-import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.NaturalytelseDto;
-import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.RefusjonDto;
-import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.UtsettelsePeriodeDto;
-import no.nav.abakus.iaygrunnlag.kodeverk.ArbeidType;
-import no.nav.abakus.iaygrunnlag.kodeverk.Arbeidskategori;
-import no.nav.abakus.iaygrunnlag.kodeverk.Fagsystem;
-import no.nav.abakus.iaygrunnlag.kodeverk.InntektPeriodeType;
-import no.nav.abakus.iaygrunnlag.kodeverk.InntektsmeldingInnsendingsårsakType;
-import no.nav.abakus.iaygrunnlag.kodeverk.InntektspostType;
-import no.nav.abakus.iaygrunnlag.kodeverk.Landkode;
-import no.nav.abakus.iaygrunnlag.kodeverk.NaturalytelseType;
-import no.nav.abakus.iaygrunnlag.kodeverk.PermisjonsbeskrivelseType;
-import no.nav.abakus.iaygrunnlag.kodeverk.SkatteOgAvgiftsregelType;
-import no.nav.abakus.iaygrunnlag.kodeverk.TemaUnderkategori;
-import no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltYtelseFraOffentligeType;
-import no.nav.abakus.iaygrunnlag.kodeverk.UtsettelseÅrsakType;
-import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
-import no.nav.abakus.iaygrunnlag.kodeverk.YtelseStatus;
-import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
-import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittAnnenAktivitetDto;
-import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittArbeidsforholdDto;
-import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittEgenNæringDto;
-import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittFrilansDto;
-import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittFrilansoppdragDto;
-import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittOpptjeningDto;
-import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseAggregatOverstyrtDto;
-import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseAggregatRegisterDto;
-import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagDto;
-import no.nav.abakus.iaygrunnlag.ytelse.v1.AnvisningDto;
-import no.nav.abakus.iaygrunnlag.ytelse.v1.FordelingDto;
-import no.nav.abakus.iaygrunnlag.ytelse.v1.YtelseDto;
-import no.nav.abakus.iaygrunnlag.ytelse.v1.YtelseGrunnlagDto;
-import no.nav.abakus.iaygrunnlag.ytelse.v1.YtelserDto;
-import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class IAYDtoMapperRoundtripTest {
 
@@ -138,7 +103,7 @@ public class IAYDtoMapperRoundtripTest {
                                 .medArbeidsgiver(org)
                                 .medPoster(List.of(
                                     new UtbetalingsPostDto(periode, InntektspostType.LØNN)
-                                        .medUtbetaltYtelseType(UtbetaltYtelseFraOffentligeType.FORELDREPENGER)
+                                        .medInntektYtelseType(InntektYtelseType.FORELDREPENGER)
                                         .medBeløp(100)
                                         .medSkattAvgiftType(SkatteOgAvgiftsregelType.NETTOLØNN)))))))
                 .medYtelse(List.of(
@@ -146,7 +111,6 @@ public class IAYDtoMapperRoundtripTest {
                         .medYtelser(List.of(
                             new YtelseDto(Fagsystem.FPSAK, ytelseType, periode, YtelseStatus.LØPENDE)
                                 .medSaksnummer("1234")
-                                .medTemaUnderkategori(TemaUnderkategori.FORELDREPENGER_FODSEL)
                                 .medGrunnlag(
                                     new YtelseGrunnlagDto()
                                         .medArbeidskategoriDto(Arbeidskategori.ARBEIDSTAKER)
