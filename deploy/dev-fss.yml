@@ -49,7 +49,6 @@ spec:
         kvPath: /serviceuser/data/dev/srvssolinux
       - mountPath: /var/run/secrets/nais.io/vault
         kvPath: /kv/preprod/fss/k9-sak/k9saksbehandling
-  sidecar: true
   azure:
     application:
       enabled: true
