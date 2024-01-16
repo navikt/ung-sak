@@ -47,6 +47,7 @@ import no.nav.k9.sak.ytelse.beregning.grunnlag.KompletthetPeriode;
 public class KompletthetBeregningTjeneste {
 
     private static final Logger log = LoggerFactory.getLogger(KompletthetBeregningTjeneste.class);
+    public static final String DEBUG_SAKSNUMMER = "DK1Wo";
 
     private final BehandlingRepository behandlingRepository;
     private final BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
@@ -87,6 +88,7 @@ public class KompletthetBeregningTjeneste {
         var innvilgetSøknadsfrist = utledPerioderMedSøknadsfristInnvilget(ref, perioderTilVurdering);
 
         var inputUtenVurderinger = new VurdererInput(perioderTilVurdering, innvilgetSøknadsfrist, kompletthetsVurderinger);
+        inputUtenVurderinger.setUtvidetLogging(ref.getSaksnummer().getVerdi().equals(DEBUG_SAKSNUMMER));
         var aksjon = kompletthetUtleder.utled(inputUtenVurderinger);
 
         var grunnlag = beregningPerioderGrunnlagRepository.hentGrunnlag(ref.getBehandlingId());
