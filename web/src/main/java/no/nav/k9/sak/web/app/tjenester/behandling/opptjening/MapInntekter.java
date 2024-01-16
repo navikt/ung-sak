@@ -1,16 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.opptjening;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -23,6 +14,14 @@ import no.nav.k9.sak.kontrakt.opptjening.InntektDto;
 import no.nav.k9.sak.kontrakt.opptjening.InntekterDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Dependent
 class MapInntekter {
@@ -59,15 +58,14 @@ class MapInntekter {
         if (utbetaler != null) {
             dto.setUtbetaler(utbetaler);
         } else {
-            if (inntektspost.getYtelseType() != null) {
-                dto.setUtbetaler(inntektspost.getYtelseType().getNavn());
+            if (inntektspost.getInntektYtelseType() != null) {
+                dto.setUtbetaler(inntektspost.getInntektYtelseType().getNavn());
             }
         }
         dto.setFom(inntektspost.getPeriode().getFomDato());
         dto.setTom(inntektspost.getPeriode().getTomDato());
         dto.setYtelse(inntektspost.getInntektspostType().equals(InntektspostType.YTELSE));
         dto.setInntektspostType(inntektspost.getInntektspostType());
-        dto.setYtelseType(inntektspost.getYtelseType());
         dto.setBelop(inntektspost.getBeløp().getVerdi().intValue());
         return dto;
     }

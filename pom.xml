@@ -151,12 +151,12 @@
             <dependency>
                 <groupId>no.nav.foreldrepenger.abakus</groupId>
                 <artifactId>abakus-kontrakt</artifactId>
-                <version>2.0.1</version>
+                <version>2.0.3</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.folketrygdloven.kalkulus</groupId>
                 <artifactId>kalkulus-kontrakt</artifactId>
-                <version>2.7.5</version>
+                <version>2.7.6</version>
             </dependency>
 
             <dependency>

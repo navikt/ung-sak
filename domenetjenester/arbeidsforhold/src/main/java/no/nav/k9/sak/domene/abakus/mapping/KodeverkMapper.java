@@ -2,25 +2,7 @@ package no.nav.k9.sak.domene.abakus.mapping;
 
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseStatus;
 import no.nav.k9.kodeverk.Fagsystem;
-import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
-import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
-import no.nav.k9.kodeverk.arbeidsforhold.Arbeidskategori;
-import no.nav.k9.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;
-import no.nav.k9.kodeverk.arbeidsforhold.InntektPeriodeType;
-import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
-import no.nav.k9.kodeverk.arbeidsforhold.InntektsmeldingInnsendingsårsak;
-import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
-import no.nav.k9.kodeverk.arbeidsforhold.LønnsinntektBeskrivelse;
-import no.nav.k9.kodeverk.arbeidsforhold.NaturalYtelseType;
-import no.nav.k9.kodeverk.arbeidsforhold.NæringsinntektType;
-import no.nav.k9.kodeverk.arbeidsforhold.OffentligYtelseType;
-import no.nav.k9.kodeverk.arbeidsforhold.PensjonTrygdType;
-import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
-import no.nav.k9.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
-import no.nav.k9.kodeverk.arbeidsforhold.SkatteOgAvgiftsregelType;
-import no.nav.k9.kodeverk.arbeidsforhold.TemaUnderkategori;
-import no.nav.k9.kodeverk.arbeidsforhold.UtsettelseÅrsak;
-import no.nav.k9.kodeverk.arbeidsforhold.YtelseType;
+import no.nav.k9.kodeverk.arbeidsforhold.*;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 
 public final class KodeverkMapper {
@@ -38,28 +20,6 @@ public final class KodeverkMapper {
     private static String getFpsakYtelseTypeFraAbakus(String kode) {
         // gjør mapping for å sjekke konsistens
         return FagsakYtelseType.fraKode(kode).getKode();
-    }
-
-    /**
-     * @deprecated fjern YtelseType og eksponert abakus-kodeverk i stedet fra k9-sak
-     */
-    @Deprecated(forRemoval = true)
-    static no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltYtelseType mapYtelseTypeTilDto(no.nav.k9.kodeverk.arbeidsforhold.YtelseType ytelseType) {
-        if (ytelseType == null || "-".equals(ytelseType.getKode())) {
-            return null;
-        }
-        switch (ytelseType.getKodeverk()) {
-            case no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltYtelseFraOffentligeType.KODEVERK:
-                return no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltYtelseFraOffentligeType.fraKode(ytelseType.getKode());
-            case no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltNæringsYtelseType.KODEVERK:
-                return no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltNæringsYtelseType.fraKode(ytelseType.getKode());
-            case no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltPensjonTrygdType.KODEVERK:
-                return no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltPensjonTrygdType.fraKode(ytelseType.getKode());
-            default:
-                throw new IllegalArgumentException("Ukjent YtelseType: " + ytelseType + ", kan ikke mappes til "
-                    + no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltYtelseType.class.getName());
-        }
-
     }
 
     static RelatertYtelseTilstand getFpsakRelatertYtelseTilstandForAbakusYtelseStatus(YtelseStatus dto) {
@@ -97,32 +57,8 @@ public final class KodeverkMapper {
         }
     }
 
-    static YtelseType mapUtbetaltYtelseTypeTilGrunnlag(no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltYtelseType type) {
-        if (type == null)
-            return OffentligYtelseType.UDEFINERT;
-        String kode = type.getKode();
-        switch (type.getKodeverk()) {
-            case no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltYtelseFraOffentligeType.KODEVERK:
-                return OffentligYtelseType.fraKode(kode);
-            case no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltNæringsYtelseType.KODEVERK:
-                return NæringsinntektType.fraKode(kode);
-            case no.nav.abakus.iaygrunnlag.kodeverk.UtbetaltPensjonTrygdType.KODEVERK:
-                return PensjonTrygdType.fraKode(kode);
-            default:
-                throw new IllegalArgumentException("Ukjent UtbetaltYtelseType: " + type);
-        }
-    }
-
-    static TemaUnderkategori getTemaUnderkategori(no.nav.abakus.iaygrunnlag.kodeverk.TemaUnderkategori kode) {
-        return kode == null || "-".equals(kode.getKode())
-            ? TemaUnderkategori.UDEFINERT
-            : TemaUnderkategori.fraKode(kode.getKode());
-    }
-
-    static no.nav.abakus.iaygrunnlag.kodeverk.TemaUnderkategori getBehandlingsTemaUnderkategori(TemaUnderkategori kode) {
-        return kode == null || TemaUnderkategori.UDEFINERT.equals(kode)
-            ? null
-            : no.nav.abakus.iaygrunnlag.kodeverk.TemaUnderkategori.fraKode(kode.getKode());
+    static InntektYtelseType mapUtbetaltYtelseTypeTilGrunnlag(no.nav.abakus.iaygrunnlag.kodeverk.InntektYtelseType type) {
+        return type != null ? InntektYtelseType.valueOf(type.name()) : null;
     }
 
     static BekreftetPermisjonStatus getBekreftetPermisjonStatus(no.nav.abakus.iaygrunnlag.kodeverk.BekreftetPermisjonStatus kode) {

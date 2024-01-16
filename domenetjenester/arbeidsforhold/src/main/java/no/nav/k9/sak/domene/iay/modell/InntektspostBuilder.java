@@ -1,13 +1,13 @@
 package no.nav.k9.sak.domene.iay.modell;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-
+import no.nav.k9.kodeverk.arbeidsforhold.InntektYtelseType;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.k9.kodeverk.arbeidsforhold.LønnsinntektBeskrivelse;
 import no.nav.k9.kodeverk.arbeidsforhold.SkatteOgAvgiftsregelType;
-import no.nav.k9.kodeverk.arbeidsforhold.YtelseType;
 import no.nav.k9.sak.typer.Beløp;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
 public class InntektspostBuilder {
     private Inntektspost inntektspost;
@@ -45,8 +45,8 @@ public class InntektspostBuilder {
         return this;
     }
 
-    public InntektspostBuilder medYtelse(YtelseType offentligYtelseType) {
-        this.inntektspost.setYtelse(offentligYtelseType);
+    public InntektspostBuilder medInntektYtelse(InntektYtelseType inntektYtelseType) {
+        this.inntektspost.setInntektYtelseType(inntektYtelseType);
         return this;
     }
 
