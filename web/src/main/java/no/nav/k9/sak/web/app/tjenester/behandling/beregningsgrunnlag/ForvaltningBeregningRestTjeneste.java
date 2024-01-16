@@ -1,5 +1,29 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag;
 
+import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -9,30 +33,33 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusRestKlient;
-import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.k9.felles.sikkerhet.abac.*;
+import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
+import no.nav.k9.felles.sikkerhet.abac.AbacDto;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.felles.util.InputValideringRegex;
-import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -42,31 +69,9 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.trigger.ProsessTriggerForvaltningTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.net.URI;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 @ApplicationScoped
 @Transactional
@@ -74,16 +79,12 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 @Produces(MediaType.APPLICATION_JSON)
 public class ForvaltningBeregningRestTjeneste {
 
-    private static final Logger logger = LoggerFactory.getLogger(ForvaltningBeregningRestTjeneste.class);
     private static final MediaType JSON = MediaType.APPLICATION_JSON_TYPE;
 
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
     private BehandlingRepository behandlingRepository;
 
     private InntektArbeidYtelseTjeneste iayTjeneste;
-    private AksjonspunktRepository aksjonspunktRepository;
-    private BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
-    private KalkulusRestKlient kalkulusSystemRestKlient;
     private RevurderBeregningTjeneste revurderBeregningTjeneste;
 
     private EntityManager entityManager;
@@ -102,24 +103,17 @@ public class ForvaltningBeregningRestTjeneste {
     public ForvaltningBeregningRestTjeneste(BehandlingRepository behandlingRepository,
                                             InntektArbeidYtelseTjeneste iayTjeneste,
                                             BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
-                                            AksjonspunktRepository aksjonspunktRepository,
-                                            BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
-                                            SystemUserOidcRestClient systemUserOidcRestClient,
-                                            @KonfigVerdi(value = "ftkalkulus.url") URI endpoint,
                                             RevurderBeregningTjeneste revurderBeregningTjeneste,
                                             EntityManager entityManager, FagsakTjeneste fagsakTjeneste,
                                             HentKalkulatorInputDump hentKalkulatorInputDump) {
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
-        this.aksjonspunktRepository = aksjonspunktRepository;
-        this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
         this.revurderBeregningTjeneste = revurderBeregningTjeneste;
         this.entityManager = entityManager;
         this.fagsakTjeneste = fagsakTjeneste;
         this.hentKalkulatorInputDump = hentKalkulatorInputDump;
         this.prosessTriggerForvaltningTjeneste = new ProsessTriggerForvaltningTjeneste(entityManager);
-        this.kalkulusSystemRestKlient = new KalkulusRestKlient(systemUserOidcRestClient, endpoint);
     }
 
     @GET
@@ -278,82 +272,6 @@ public class ForvaltningBeregningRestTjeneste {
             idx++;
         }
     }
-
-    @GET
-    @Path("/finn-saker-med-feil-trigger")
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Operation(description = "Henter saksnumre med feil.", summary = ("Henter saksnumre med feil."), tags = "beregning")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
-    public Response finnSakerMedFeilTrigger() {
-        var query = entityManager.createNativeQuery(
-            "SELECT distinct f.saksnummer saksnummer, LOWER(t.periode) fom " +
-                "FROM PROSESS_TRIGGERE s " +
-                "INNER JOIN PT_TRIGGER t on s.triggere_id = t.triggere_id " +
-                "INNER JOIN BEHANDLING b on b.id = s.behandling_id " +
-                "INNER JOIN FAGSAK f on b.fagsak_id = f.id " +
-                "WHERE s.aktiv = true AND t.arsak = :aktuellArsak and " +
-                "UPPER(t.periode) - LOWER(t.periode) = 1 and " +
-                "t.opprettet_tid > :feilFra and " +
-                "b.behandling_status = :utredes and " +
-                "not exists(" +
-                "select 1 from GR_BEREGNINGSGRUNNLAG gr " +
-                "inner join BG_PERIODE p on p.bg_grunnlag_id = gr.bg_grunnlag_id " +
-                "where gr.behandling_id = b.id and p.skjaeringstidspunkt = LOWER(t.periode))", Tuple.class);
-
-        query.setParameter("aktuellArsak", BehandlingÅrsakType.RE_ENDRING_BEREGNINGSGRUNNLAG.getKode())
-            .setParameter("feilFra", LocalDateTime.of(2023, 12, 12, 6, 55))
-            .setParameter("utredes", BehandlingStatus.UTREDES.getKode());
-
-        Stream<Tuple> results = query.getResultStream();
-
-        Optional<String> dataDump = CsvOutput.dumpResultSetToCsv(results);
-
-        return dataDump
-            .map(s -> s.replace("\"", "")) //hack for å kunne bruke fjernProsessTriggerForReberegning direkte fra respons
-            .map(d -> Response.ok(d)
-                .type(MediaType.APPLICATION_OCTET_STREAM)
-                .header("Content-Disposition", String.format("attachment; filename=\"dump.csv\""))
-                .build()).orElse(Response.noContent().build());
-    }
-
-    @GET
-    @Path("/finn-saker-med-feil-trigger-overlapp-stp")
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Operation(description = "Henter saksnumre med feil.", summary = ("Henter saksnumre med feil."), tags = "beregning")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
-    public Response finnSakerMedFeilTriggerMedOverlappStp() {
-        var query = entityManager.createNativeQuery(
-            "SELECT distinct f.saksnummer saksnummer, LOWER(t.periode) fom " +
-                "FROM PROSESS_TRIGGERE s " +
-                "INNER JOIN PT_TRIGGER t on s.triggere_id = t.triggere_id " +
-                "INNER JOIN BEHANDLING b on b.id = s.behandling_id " +
-                "INNER JOIN FAGSAK f on b.fagsak_id = f.id " +
-                "inner join GR_BEREGNINGSGRUNNLAG gr on gr.behandling_id = b.id " +
-                "inner join BG_PERIODE p on p.bg_grunnlag_id = gr.bg_grunnlag_id " +
-                "where gr.behandling_id = b.id " +
-                "and p.skjaeringstidspunkt = LOWER(t.periode) " +
-                "AND s.aktiv = true " +
-                "AND t.arsak = :aktuellArsak " +
-                "and UPPER(t.periode) - LOWER(t.periode) = 1 " +
-                "and t.opprettet_tid > :feilFra " +
-                "and b.behandling_status = :utredes ", Tuple.class);
-
-        query.setParameter("aktuellArsak", BehandlingÅrsakType.RE_ENDRING_BEREGNINGSGRUNNLAG.getKode())
-            .setParameter("feilFra", LocalDateTime.of(2023, 12, 12, 6, 55))
-            .setParameter("utredes", BehandlingStatus.UTREDES.getKode());
-
-        Stream<Tuple> results = query.getResultStream();
-
-        Optional<String> dataDump = CsvOutput.dumpResultSetToCsv(results);
-
-        return dataDump
-            .map(s -> s.replace("\"", "")) //hack for å kunne bruke fjernProsessTriggerForReberegning direkte fra respons
-            .map(d -> Response.ok(d)
-                .type(MediaType.APPLICATION_OCTET_STREAM)
-                .header("Content-Disposition", String.format("attachment; filename=\"dump.csv\""))
-                .build()).orElse(Response.noContent().build());
-    }
-
 
     public static class OpprettManuellRevurderingBeregning implements AbacDto {
 

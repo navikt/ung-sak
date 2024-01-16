@@ -5,8 +5,6 @@ import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
-import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING;
-import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.OVERSTYRING_FRISINN_OPPGITT_OPPTJENING;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,8 +16,6 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,14 +28,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -88,7 +82,6 @@ import no.nav.k9.kodeverk.person.Diskresjonskode;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
-import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
@@ -99,7 +92,6 @@ import no.nav.k9.sak.domene.person.pdl.TilknytningTjeneste;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
 import no.nav.k9.sak.hendelse.stønadstatistikk.StønadstatistikkService;
-import no.nav.k9.sak.kontrakt.FeilDto;
 import no.nav.k9.sak.kontrakt.KortTekst;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
@@ -117,15 +109,10 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLo
 import no.nav.k9.sak.web.app.tjenester.forvaltning.rapportering.DriftLesetilgangVurderer;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.sak.ytelse.frisinn.mottak.FrisinnSøknadInnsending;
 import no.nav.k9.sak.ytelse.frisinn.mottak.FrisinnSøknadMottaker;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
-import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.Søknad;
-import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer;
 import no.nav.k9.søknad.felles.type.Periode;
-import no.nav.k9.søknad.felles.type.Språk;
-import no.nav.k9.søknad.felles.type.SøknadId;
 import no.nav.k9.søknad.frisinn.FrisinnSøknad;
 import no.nav.k9.søknad.frisinn.Inntekter;
 import no.nav.k9.søknad.frisinn.PeriodeInntekt;
@@ -292,57 +279,6 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             .collect(Collectors.toSet());
     }
 
-    /**
-     * @deprecated Bør fjernes når FRISINN nedlegges.
-     */
-    @Deprecated(forRemoval = true)
-    @POST
-    @Path("/frisinn/opprett-manuell-frisinn/TO_BE_REMOVED")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(description = "Opprett behandling hvor saksbehandler kan legge inn inntektsopplysninger", summary = ("Returnerer saksnummer som er tilknyttet den nye fagsaken som har blitt opprettet."), tags = "frisinn", responses = {
-        @ApiResponse(responseCode = "200", description = "Returnerer saksnummer", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SaksnummerDto.class)))
-    })
-    @Produces(MediaType.APPLICATION_JSON)
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
-    public Response opprettManuellFrisinnSøknad(@Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) ManuellSøknadDto manuellSøknadDto) {
-        PersonIdent fnr = new PersonIdent(manuellSøknadDto.getFnr());
-        AktørId aktørId = tpsTjeneste.hentAktørForFnr(fnr).orElse(null);
-        if (aktørId == null) {
-            return Response.serverError().entity(new FeilDto("Oppgitt personummer er ukjent")).build();
-        }
-
-        // Samme utledning for fagsakperiode som i k9-fordel
-        LocalDate fom = LocalDate.of(2020, 3, 1);
-        LocalDate tom = manuellSøknadDto.getPeriode().getTilOgMed();
-
-        Fagsak fagsak = frisinnSøknadMottaker.finnEllerOpprettFagsak(FRISINN, aktørId, null, null, fom, tom, null);
-
-        loggForvaltningTjeneste(fagsak, "/frisinn/opprett-manuell-frisinn/", "kjører manuell frisinn søknad");
-
-        FrisinnSøknad søknad = FrisinnSøknad.builder()
-            .språk(Språk.NORSK_BOKMÅL)
-            .søknadId(SøknadId.of("ManueltOpprettet" + fagsak.getSaksnummer().getVerdi())) // lagres ingensteds
-            .inntekter(lagDummyInntekt(manuellSøknadDto))
-            .søknadsperiode(manuellSøknadDto.getPeriode())
-            .mottattDato(ZonedDateTime.now(ZoneId.of("Europe/Paris")))
-            .søker(new no.nav.k9.søknad.felles.personopplysninger.Søker(NorskIdentitetsnummer.of(fnr.getIdent())))
-            .build();
-        var valideringsfeil = validerSøknad(fagsak, søknad);
-        if (valideringsfeil.isPresent()) {
-            return Response.serverError().entity(new FeilDto(valideringsfeil.get().getMessage())).build();
-        }
-
-        FrisinnSøknadInnsending frisinnSøknadInnsending = new FrisinnSøknadInnsending();
-        frisinnSøknadInnsending.setSøknad(søknad);
-        var behandling = frisinnSøknadMottaker.mottaSøknad(fagsak.getSaksnummer(), null, frisinnSøknadInnsending);
-
-        BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
-        // ønsker at saksbehandler må ta stilling til disse
-        behandlingskontrollTjeneste.lagreAksjonspunkterFunnet(kontekst, List.of(OVERSTYRING_FRISINN_OPPGITT_OPPTJENING, KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING));
-
-        return Response.ok(new SaksnummerDto(fagsak.getSaksnummer())).build();
-    }
-
     @POST
     @Path("/beskyttAktoerId")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -497,206 +433,6 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         return Response.ok("Lagde " + resultat + " tasker for å sjekke kandidater for revurdering av feriepenger").build();
     }
 
-    @GET
-    @Path("/saker-med-feil")
-    @Produces(MediaType.TEXT_PLAIN)
-    @Operation(description = "Henter saksnumre med feil.", summary = ("Henter saksnumre med feil."), tags = "forvaltning")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
-    public Response hentSakerMedFeil() {
-        final Query q = entityManager.createNativeQuery("SELECT DISTINCT u.saksnummer FROM (("
-            + "  SELECT f.saksnummer AS saksnummer"
-            + "  FROM TMP_FIKS_AKTIV_ET_1 t1 INNER JOIN PSB_UNNTAK_ETABLERT_TILSYN_PLEIETRENGENDE p ON ("
-            + "    t1.id = p.id"
-            + "  ) INNER JOIN PSB_GR_UNNTAK_ETABLERT_TILSYN g ON ("
-            + "    g.psb_unntak_etablert_tilsyn_pleietrengende_id = p.id"
-            + "  ) INNER JOIN BEHANDLING b ON ("
-            + "    b.id = g.behandling_id"
-            + "  ) INNER JOIN FAGSAK f ON ("
-            + "    F.id = b.fagsak_id"
-            + "  ) "
-            + ")  UNION ("
-            + "  SELECT f.saksnummer AS saksnummer"
-            + "  FROM TMP_FIKS_AKTIV_ET_2 t2 INNER JOIN PSB_GR_UNNTAK_ETABLERT_TILSYN g ON ("
-            + "    g.id = t2.id"
-            + "  ) INNER JOIN BEHANDLING b ON ("
-            + "    b.id = g.behandling_id"
-            + "  ) INNER JOIN FAGSAK f ON ("
-            + "    F.id = b.fagsak_id"
-            + "  )"
-            + ")) u");
-
-        @SuppressWarnings("unchecked") final List<String> result = q.getResultList();
-        final String saksnummerliste = result.stream().reduce((a, b) -> a + ", " + b).orElse("");
-
-        return Response.ok(saksnummerliste).build();
-    }
-
-    @GET
-    @Path("/saker-med-feil2")
-    @Produces(MediaType.TEXT_PLAIN)
-    @Operation(description = "Henter saksnumre med feil.", summary = ("Henter saksnumre med feil."), tags = "forvaltning")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
-    public Response hentSakerMedFeil2() {
-        final Query q = entityManager.createNativeQuery(
-            "SELECT convert_from(lo_get(d.payload), 'UTF-8') as payload, f.saksnummer "
-                + "FROM MOTTATT_DOKUMENT d INNER JOIN Behandling b ON ( "
-                + "  b.id = d.behandling_id "
-                + ") INNER JOIN Fagsak f ON ( "
-                + "  f.id = b.fagsak_id "
-                + ") "
-                + "WHERE d.type = 'PLEIEPENGER_SOKNAD' "
-                + "  AND d.mottatt_dato >= to_date('2022-05-01', 'YYYY-MM-DD')"
-                + "  AND d.mottatt_dato <= to_date('2022-06-03', 'YYYY-MM-DD')");
-        q.setHint("javax.persistence.query.timeout", 5 * 60 * 1000); // 5 minutter
-
-        final List<String> saksnumre = new ArrayList<>();
-
-        @SuppressWarnings("unchecked") final Stream<Object[]> resultStream = q.getResultStream();
-        resultStream.forEach(d -> {
-            try {
-                final Object[] result = (Object[]) d;
-                final String soknadJson = (String) result[0];
-                final String saksnummer = (String) result[1];
-                final Søknad soknad = JsonUtils.fromString(soknadJson, Søknad.class);
-                if (erFraBrukerdialogPsb(soknad) && harReellPeriodeMedNullNormal(soknad.getYtelse())) {
-                    saksnumre.add(saksnummer);
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-        final String saksnummerliste = saksnumre.stream().reduce((a, b) -> a + ", " + b).orElse("");
-
-        return Response.ok(saksnummerliste).build();
-    }
-
-    @GET
-    @Path("/saker-med-feil3")
-    @Produces(MediaType.TEXT_PLAIN)
-    @Operation(description = "Henter saksnumre med feil på PPN.", summary = ("Henter saksnumre med feil på PPN."), tags = "forvaltning")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
-    public Response hentSakerMedFeil3() {
-        final Query q = entityManager.createNativeQuery(
-            "SELECT convert_from(lo_get(d.payload), 'UTF-8') as payload, f.saksnummer "
-                + "FROM MOTTATT_DOKUMENT d INNER JOIN Behandling b ON ( "
-                + "  b.id = d.behandling_id "
-                + ") INNER JOIN Fagsak f ON ( "
-                + "  f.id = b.fagsak_id "
-                + ") "
-                + "WHERE d.type = 'PLEIEPENGER_LIVETS_SLUTTFASE_SOKNAD' ");
-        q.setHint("javax.persistence.query.timeout", 5 * 60 * 1000); // 5 minutter
-
-        final List<String> saksnumre = new ArrayList<>();
-
-        @SuppressWarnings("unchecked") final Stream<Object[]> resultStream = q.getResultStream();
-        resultStream.forEach(d -> {
-            try {
-                final Object[] result = (Object[]) d;
-                final String soknadJson = (String) result[0];
-                final String saksnummer = (String) result[1];
-                final Søknad soknad = JsonUtils.fromString(soknadJson, Søknad.class);
-                if (harTomSøknadsperiode(soknad.getYtelse())) {
-                    saksnumre.add(saksnummer);
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-        final String saksnummerliste = saksnumre.stream().reduce((a, b) -> a + ", " + b).orElse("");
-
-        return Response.ok(saksnummerliste).build();
-    }
-
-    @GET
-    @Path("/saker-med-feil4")
-    @Produces(MediaType.TEXT_PLAIN)
-    @Operation(description = "Henter saksnumre med feil.", summary = ("Henter saksnumre med feil."), tags = "forvaltning")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
-    public Response hentSakerMedFeil4() {
-        final Query q = entityManager.createNativeQuery(
-            "SELECT convert_from(lo_get(d.payload), 'UTF-8') as payload, f.saksnummer "
-                + "FROM MOTTATT_DOKUMENT d INNER JOIN Behandling b ON ( "
-                + "  b.id = d.behandling_id "
-                + ") INNER JOIN Fagsak f ON ( "
-                + "  f.id = b.fagsak_id "
-                + ") "
-                + "WHERE d.type = 'PLEIEPENGER_SOKNAD' "
-                + "  AND d.mottatt_dato >= to_date('2022-09-22', 'YYYY-MM-DD')"
-                + "  AND d.mottatt_dato <= to_date('2022-09-30', 'YYYY-MM-DD')");
-        q.setHint("javax.persistence.query.timeout", 5 * 60 * 1000); // 5 minutter
-
-        final List<String> saksnumre = new ArrayList<>();
-
-        @SuppressWarnings("unchecked") final Stream<Object[]> resultStream = q.getResultStream();
-        resultStream.forEach(d -> {
-            try {
-                final Object[] result = (Object[]) d;
-                final String soknadJson = (String) result[0];
-                final String saksnummer = (String) result[1];
-                final Søknad soknad = JsonUtils.fromString(soknadJson, Søknad.class);
-                if (erFraBrukerdialogPsb(soknad) && harOmsorgstilbud(soknad.getYtelse())) {
-                    saksnumre.add(saksnummer);
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-        final String saksnummerliste = saksnumre.stream().reduce((a, b) -> a + ", " + b).orElse("");
-
-        return Response.ok(saksnummerliste).build();
-    }
-
-
-    @GET
-    @Path("/saker-med-feil5")
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Operation(description = "Henter saksnumre med feil.", summary = ("Henter saksnumre med feil."), tags = "forvaltning")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
-    public Response hentSakerMedFeil5() {
-
-        var sql = """
-             select
-             f.saksnummer
-            , gr.behandling_id
-                , cast(utb_diff.ekstern_referanse as varchar) ekstern_referanse
-                , utb_diff.total_feilutbetaling_bruker
-                , utb_diff.total_feilutbetaling_arbeidsgiver
-                , utb_diff_periode.fom
-                , utb_diff_periode.tom
-                , utb_diff_periode.total_feilutbetaling_bruker as total_feilutbetaling_bruker_periode
-                , utb_diff_periode.total_feilutbetaling_arbeidsgiver as total_feilutbetaling_arbeidsgiver_periode
-                , utb_diff_andel.dagsats_aktiv
-                , utb_diff_andel.dagsats_simulert
-                , utb_diff_andel.dagsats_bruker_aktiv
-                , utb_diff_andel.dagsats_bruker_simulert
-                , utb_diff_andel.dagsats_arbeidsgiver_aktiv
-                , utb_diff_andel.dagsats_arbeidsgiver_simulert
-              from DUMP_SIMULERT_UTB gr
-                inner join DUMP_SIMULERT_UTB_DIFF utb_diff on gr.id = utb_diff.dump_grunnlag_id
-                inner join DUMP_SIMULERT_UTB_DIFF_PERIODE utb_diff_periode on utb_diff.id = utb_diff_periode.dump_simulert_utb_diff_id
-                inner join DUMP_SIMULERT_UTB_DIFF_ANDEL utb_diff_andel on utb_diff_andel.periode_id = utb_diff_periode.id
-                inner join BEHANDLING b on b.id = gr.behandling_id
-                inner join FAGSAK f on b.fagsak_id = f.id
-                where utb_diff_andel.dagsats_bruker_aktiv != utb_diff_andel.dagsats_bruker_simulert
-                or utb_diff_andel.dagsats_arbeidsgiver_aktiv != utb_diff_andel.dagsats_arbeidsgiver_simulert
-            """;
-
-        var query = entityManager.createNativeQuery(sql, Tuple.class);
-
-        @SuppressWarnings("unchecked")
-        Stream<Tuple> results = query.getResultStream();
-
-        Optional<String> dataDump = CsvOutput.dumpResultSetToCsv(results);
-
-        return dataDump.map(d -> Response.ok(d)
-            .type(MediaType.APPLICATION_OCTET_STREAM)
-            .header("Content-Disposition", String.format("attachment; filename=\"dump.csv\""))
-            .build()).orElse(Response.noContent().build());
-    }
-
     private boolean harTomSøknadsperiode(PleipengerLivetsSluttfase pls) {
         return pls.getSøknadsperiodeList().isEmpty();
     }
@@ -791,135 +527,9 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             + "  group by saksnummer, b.original_behandling_id IS NOT NULL, m.id IS NOT NULL");
 
         @SuppressWarnings("unchecked") final List<Object[]> result = q.getResultList();
-        final String restApiPath = "/aapne-psb-med-soknad";
         final String resultatString = result.stream()
             .filter(a -> lesetilgangVurderer.harTilgang(a[0].toString()))
             .map(a -> a[0].toString() + ";" + a[1].toString() + ";" + a[2].toString() + ";" + a[3].toString())
-            .reduce((a, b) -> a + "\n" + b)
-            .orElse("");
-        return Response.ok(resultatString).build();
-    }
-
-    @GET
-    @Path("/frisinn/uttrekk-antall")
-    @Produces(MediaType.TEXT_PLAIN)
-    @Operation(description = "Adhoc-uttrekk for Frisinn", summary = ("Adhoc-uttrekk for Frisinn."), tags = "forvaltning")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
-    public Response antallFrisinnsøknader() {
-
-        final Query q = entityManager.createNativeQuery("SELECT '2020' aar, (\n"
-            + "  SELECT COUNT(*)\n"
-            + "  FROM Behandling b INNER JOIN Fagsak f on (\n"
-            + "    f.id = b.fagsak_id\n"
-            + "  )\n"
-            + "  WHERE f.ytelse_type = 'FRISINN'\n"
-            + "    AND b.opprettet_tid < '2021-02-01'\n"
-            + "    AND b.behandling_status IN ('AVSLU', 'FVED', 'IVED')\n"
-            + "    AND b.ansvarlig_saksbehandler is not null\n"
-            + "    AND NOT EXISTS (\n"
-            + "      SELECT * FROM BEHANDLING_ARSAK aarsak WHERE aarsak.behandling_id = b.id AND manuelt_opprettet = true\n"
-            + "    )\n"
-            + ") AS manuell, (\n"
-            + "  SELECT COUNT(*)\n"
-            + "  FROM Behandling b INNER JOIN Fagsak f on (\n"
-            + "    f.id = b.fagsak_id\n"
-            + "  )\n"
-            + "  WHERE f.ytelse_type = 'FRISINN'\n"
-            + "    AND b.opprettet_tid < '2021-02-01'\n"
-            + "    AND b.behandling_status IN ('AVSLU', 'FVED', 'IVED')\n"
-            + "    AND b.ansvarlig_saksbehandler is null\n"
-            + "    AND NOT EXISTS (\n"
-            + "      SELECT * FROM BEHANDLING_ARSAK aarsak WHERE aarsak.behandling_id = b.id AND manuelt_opprettet = true\n"
-            + "    )\n"
-            + ") AS automatisk\n"
-            + "\n"
-            + "UNION\n"
-            + "\n"
-            + "SELECT '2021' aar, (\n"
-            + "  SELECT COUNT(*)\n"
-            + "  FROM Behandling b INNER JOIN Fagsak f on (\n"
-            + "    f.id = b.fagsak_id\n"
-            + "  )\n"
-            + "  WHERE f.ytelse_type = 'FRISINN'\n"
-            + "    AND b.opprettet_tid >= '2021-02-01'\n"
-            + "    AND b.behandling_status IN ('AVSLU', 'FVED', 'IVED')\n"
-            + "    AND b.ansvarlig_saksbehandler is not null\n"
-            + "    AND NOT EXISTS (\n"
-            + "      SELECT * FROM BEHANDLING_ARSAK aarsak WHERE aarsak.behandling_id = b.id AND manuelt_opprettet = true\n"
-            + "    )\n"
-            + ") AS manuell, (\n"
-            + "  SELECT COUNT(*)\n"
-            + "  FROM Behandling b INNER JOIN Fagsak f on (\n"
-            + "    f.id = b.fagsak_id\n"
-            + "  )\n"
-            + "  WHERE f.ytelse_type = 'FRISINN'\n"
-            + "    AND b.opprettet_tid >= '2021-02-01'\n"
-            + "    AND b.behandling_status IN ('AVSLU', 'FVED', 'IVED')\n"
-            + "    AND b.ansvarlig_saksbehandler is null\n"
-            + "    AND NOT EXISTS (\n"
-            + "      SELECT * FROM BEHANDLING_ARSAK aarsak WHERE aarsak.behandling_id = b.id AND manuelt_opprettet = true\n"
-            + "    )\n"
-            + ") AS automatisk\n"
-            + "\n"
-            + "UNION\n"
-            + "\n"
-            + "SELECT '2020-ubehandlet' aar, (\n"
-            + "  SELECT COUNT(*)\n"
-            + "  FROM Behandling b INNER JOIN Fagsak f on (\n"
-            + "    f.id = b.fagsak_id\n"
-            + "  )\n"
-            + "  WHERE f.ytelse_type = 'FRISINN'\n"
-            + "    AND b.opprettet_tid < '2021-02-01'\n"
-            + "    AND b.behandling_status NOT IN ('AVSLU', 'FVED', 'IVED')\n"
-            + "    AND b.ansvarlig_saksbehandler is not null\n"
-            + "    AND NOT EXISTS (\n"
-            + "      SELECT * FROM BEHANDLING_ARSAK aarsak WHERE aarsak.behandling_id = b.id AND manuelt_opprettet = true\n"
-            + "    )\n"
-            + ") AS manuell, (\n"
-            + "  SELECT COUNT(*)\n"
-            + "  FROM Behandling b INNER JOIN Fagsak f on (\n"
-            + "    f.id = b.fagsak_id\n"
-            + "  )\n"
-            + "  WHERE f.ytelse_type = 'FRISINN'\n"
-            + "    AND b.opprettet_tid < '2021-02-01'\n"
-            + "    AND b.behandling_status NOT IN ('AVSLU', 'FVED', 'IVED')\n"
-            + "    AND b.ansvarlig_saksbehandler is null\n"
-            + "    AND NOT EXISTS (\n"
-            + "      SELECT * FROM BEHANDLING_ARSAK aarsak WHERE aarsak.behandling_id = b.id AND manuelt_opprettet = true\n"
-            + "    )\n"
-            + ") AS automatisk\n"
-            + "\n"
-            + "UNION\n"
-            + "\n"
-            + "SELECT '2021-ubehandlet' aar, (\n"
-            + "  SELECT COUNT(*)\n"
-            + "  FROM Behandling b INNER JOIN Fagsak f on (\n"
-            + "    f.id = b.fagsak_id\n"
-            + "  )\n"
-            + "  WHERE f.ytelse_type = 'FRISINN'\n"
-            + "    AND b.opprettet_tid >= '2021-02-01'\n"
-            + "    AND b.behandling_status NOT IN ('AVSLU', 'FVED', 'IVED')\n"
-            + "    AND b.ansvarlig_saksbehandler is not null\n"
-            + "    AND NOT EXISTS (\n"
-            + "      SELECT * FROM BEHANDLING_ARSAK aarsak WHERE aarsak.behandling_id = b.id AND manuelt_opprettet = true\n"
-            + "    )\n"
-            + ") AS manuell, (\n"
-            + "  SELECT COUNT(*)\n"
-            + "  FROM Behandling b INNER JOIN Fagsak f on (\n"
-            + "    f.id = b.fagsak_id\n"
-            + "  )\n"
-            + "  WHERE f.ytelse_type = 'FRISINN'\n"
-            + "    AND b.opprettet_tid >= '2021-02-01'\n"
-            + "    AND b.behandling_status NOT IN ('AVSLU', 'FVED', 'IVED')\n"
-            + "    AND b.ansvarlig_saksbehandler is null\n"
-            + "    AND NOT EXISTS (\n"
-            + "      SELECT * FROM BEHANDLING_ARSAK aarsak WHERE aarsak.behandling_id = b.id AND manuelt_opprettet = true\n"
-            + "    )\n"
-            + ") AS automatisk");
-
-        @SuppressWarnings("unchecked") final List<Object[]> result = q.getResultList();
-        final String resultatString = result.stream()
-            .map(a -> a[0].toString() + ";" + a[1].toString() + ";" + a[2].toString())
             .reduce((a, b) -> a + "\n" + b)
             .orElse("");
         return Response.ok(resultatString).build();
@@ -1085,81 +695,6 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         return dataDump.map(d -> Response.ok(d)
             .type(MediaType.APPLICATION_OCTET_STREAM)
             .header("Content-Disposition", String.format("attachment; filename=\"behandlingsteghistorikk.csv\""))
-            .build()).orElse(Response.noContent().build());
-    }
-
-    @POST
-    @Path("/feil-refusjon-ved-tilsyn")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(description = "Henter uttrekk fra kalkulus vedrørende feil refusjon ved tilsyn",
-        summary = ("Henter uttrekk fra kalkulus vedrørende feil refusjon ved tilsyn"),
-        tags = "forvaltning")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response finnFeilRefusjonVedTilsyn(
-        @Parameter(description = "Behandling-UUID")
-        @NotNull
-        @Valid
-        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-        BehandlingIdDto behandlingIdDto) {
-        var behandlingId = behandlingIdDto.getBehandlingId();
-        var behandling = behandlingRepository.hentBehandling(behandlingId);
-        var feilRequestOgRespons = feilRefusjonVedTilsynUtrekkTjeneste.finnFeilForBehandling(behandling, true);
-        return feilRequestOgRespons.map(FeilRefusjonVedTilsynUtrekkTjeneste.KalkulusDiffRequestOgRespons::respons)
-            .map(Response::ok)
-            .map(Response.ResponseBuilder::build)
-            .orElse(Response.status(Response.Status.NOT_FOUND).build());
-    }
-
-    @POST
-    @Path("/feil-refusjon-ved-tilsyn-fra-dump")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(description = "Henter uttrekk fra kalkulus vedrørende feil refusjon ved tilsyn",
-        summary = ("Henter uttrekk fra kalkulus vedrørende feil refusjon ved tilsyn"),
-        tags = "forvaltning")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    public Response finnFeilRefusjonVedTilsynFraDump(
-        @Parameter(description = "Behandling-UUID")
-        @NotNull
-        @Valid
-        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-        BehandlingIdDto behandlingIdDto) {
-        var sql = """
-             select
-                gr.behandling_id
-                , cast(utb_diff.ekstern_referanse as varchar) ekstern_referanse
-                , utb_diff.total_feilutbetaling_bruker
-                , utb_diff.total_feilutbetaling_arbeidsgiver
-                , utb_diff_periode.fom
-                , utb_diff_periode.tom
-                , utb_diff_periode.total_feilutbetaling_bruker as total_feilutbetaling_bruker_periode
-                , utb_diff_periode.total_feilutbetaling_arbeidsgiver as total_feilutbetaling_arbeidsgiver_periode
-                , utb_diff_andel.dagsats_aktiv
-                , utb_diff_andel.dagsats_simulert
-                , utb_diff_andel.dagsats_bruker_aktiv
-                , utb_diff_andel.dagsats_bruker_simulert
-                , utb_diff_andel.dagsats_arbeidsgiver_aktiv
-                , utb_diff_andel.dagsats_arbeidsgiver_simulert
-              from DUMP_SIMULERT_UTB gr
-                inner join DUMP_SIMULERT_UTB_DIFF utb_diff on gr.id = utb_diff.dump_grunnlag_id
-                inner join DUMP_SIMULERT_UTB_DIFF_PERIODE utb_diff_periode on utb_diff.id = utb_diff_periode.dump_simulert_utb_diff_id
-                inner join DUMP_SIMULERT_UTB_DIFF_ANDEL utb_diff_andel on utb_diff_andel.periode_id = utb_diff_periode.id
-                inner join BEHANDLING b on b.id = gr.behandling_id
-                where gr.behandling_id =:behandlingId
-            """;
-
-        var query = entityManager.createNativeQuery(sql, Tuple.class);
-        query.setParameter("behandlingId", behandlingIdDto.getBehandlingId());
-
-        @SuppressWarnings("unchecked")
-        Stream<Tuple> results = query.getResultStream();
-
-        Optional<String> dataDump = CsvOutput.dumpResultSetToCsv(results);
-
-        return dataDump.map(d -> Response.ok(d)
-            .type(MediaType.APPLICATION_OCTET_STREAM)
-            .header("Content-Disposition", String.format("attachment; filename=\"dump.csv\""))
             .build()).orElse(Response.noContent().build());
     }
 
