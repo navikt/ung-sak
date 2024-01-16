@@ -34,6 +34,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler.ObjectReaderResponseHandler;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
@@ -70,7 +71,7 @@ public class PunsjRestKlient {
     }
 
     @Inject
-    public PunsjRestKlient(SystemUserOidcRestClient restClient,
+    public PunsjRestKlient(OidcRestClient restClient,
                            @KonfigVerdi(value = "k9.punsj.url") URI endpoint) {
         this(endpoint);
         this.restClient = restClient;
