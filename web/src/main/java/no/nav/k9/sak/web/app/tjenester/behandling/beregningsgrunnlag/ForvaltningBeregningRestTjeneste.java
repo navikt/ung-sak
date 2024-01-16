@@ -192,24 +192,16 @@ public class ForvaltningBeregningRestTjeneste {
     @Operation(description = "Oppretter manuell revurdering grunnet nye opplysninger om beregning.", summary = ("Oppretter manuell revurdering grunnet nye opplysninger om beregning."), tags = "beregning")
     @BeskyttetRessurs(action = CREATE, resource = DRIFT)
     public void revurderGrunnetEndretOpplysning(@Parameter(description = "Saksnummer og skjæringstidspunkt (YYYY-MM-DD) på csv-format") @Valid OpprettManuellRevurderingBeregning opprettManuellRevurdering) {
+        opprettProsesstriggerOgRevurder(opprettManuellRevurdering, "/manuell-revurdering-beregning", "kjører manuell revurdering/tilbakehopp grunnet nye opplysninger om beregningsgrunnlag", BehandlingÅrsakType.RE_OPPLYSNINGER_OM_BEREGNINGSGRUNNLAG);
+    }
 
-        var alleSaksnummerOgSkjæringstidspunkt = Objects.requireNonNull(opprettManuellRevurdering.getSaksnummerOgSkjæringstidspunkt(), "saksnummerOgSkjæringstidspunkt");
-        var saknummerOgSkjæringstidspunkt = new LinkedHashSet<>(Arrays.asList(alleSaksnummerOgSkjæringstidspunkt.split("\\s+")));
-
-        int idx = 0;
-        for (var s : saknummerOgSkjæringstidspunkt) {
-            var sakOgStpSplitt = s.split(",");
-            var saksnummer = new Saksnummer(sakOgStpSplitt[0]);
-            var stp = LocalDate.parse(sakOgStpSplitt[1]);
-            var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, false).orElseThrow(() -> new IllegalArgumentException("finnes ikke fagsak med saksnummer: " + saksnummer.getVerdi()));
-            loggForvaltningTjeneste(fagsak, "/manuell-revurdering-beregning", "kjører manuell revurdering/tilbakehopp grunnet nye opplysninger om beregningsgrunnlag");
-            var nesteKjøring = LocalDateTime.now().plus(500L * idx, ChronoUnit.MILLIS);
-
-            revurderBeregningTjeneste.revurderBeregning(saksnummer, stp, BehandlingÅrsakType.RE_OPPLYSNINGER_OM_BEREGNINGSGRUNNLAG, Optional.of(nesteKjøring));
-
-            // lagrer direkte til ProsessTaskTjeneste så vi ikke går via FagsakProsessTask (siden den bestemmer rekkefølge). Får unik callId per task
-            idx++;
-        }
+    @POST
+    @Path("/manuell-revurdering-opptjening")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Oppretter manuell revurdering grunnet nye opplysninger om opptjening.", summary = ("Oppretter manuell revurdering grunnet nye opplysninger om opptjening."), tags = "beregning")
+    @BeskyttetRessurs(action = CREATE, resource = DRIFT)
+    public void revurderGrunnetOpplysningOmOpptjening(@Parameter(description = "Saksnummer og skjæringstidspunkt (YYYY-MM-DD) på csv-format") @Valid OpprettManuellRevurderingBeregning opprettManuellRevurdering) {
+        opprettProsesstriggerOgRevurder(opprettManuellRevurdering, "/manuell-revurdering-opptjening", "kjører manuell revurdering/tilbakehopp grunnet nye opplysninger om opptjening", BehandlingÅrsakType.RE_OPPLYSNINGER_OM_OPPTJENING);
     }
 
     @POST
@@ -218,7 +210,7 @@ public class ForvaltningBeregningRestTjeneste {
     @Operation(description = "Oppretter manuell revurdering for reinnhenting av PGI.", summary = ("Oppretter manuell revurdering for reinnhenting av PGI."), tags = "beregning")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
     public void revurderOgInnhentPGI(@Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) RevurderPeriodeDto revurderPeriodeDto) {
-        revurderBeregningTjeneste.revurderBeregning(revurderPeriodeDto.getSaksnummer(), revurderPeriodeDto.getSkjæringstidspunkt(), BehandlingÅrsakType.RE_KLAGE_NY_INNH_LIGNET_INNTEKT, Optional.empty());
+        revurderBeregningTjeneste.revurderMedÅrsak(revurderPeriodeDto.getSaksnummer(), revurderPeriodeDto.getSkjæringstidspunkt(), BehandlingÅrsakType.RE_KLAGE_NY_INNH_LIGNET_INNTEKT, Optional.empty());
     }
 
     @POST
@@ -265,6 +257,26 @@ public class ForvaltningBeregningRestTjeneste {
 
         }
 
+    }
+
+    private void opprettProsesstriggerOgRevurder(OpprettManuellRevurderingBeregning opprettManuellRevurdering, String tjeneste, String begrunnelse, BehandlingÅrsakType reOpplysningerOmOpptjening) {
+        var alleSaksnummerOgSkjæringstidspunkt = Objects.requireNonNull(opprettManuellRevurdering.getSaksnummerOgSkjæringstidspunkt(), "saksnummerOgSkjæringstidspunkt");
+        var saknummerOgSkjæringstidspunkt = new LinkedHashSet<>(Arrays.asList(alleSaksnummerOgSkjæringstidspunkt.split("\\s+")));
+
+        int idx = 0;
+        for (var s : saknummerOgSkjæringstidspunkt) {
+            var sakOgStpSplitt = s.split(",");
+            var saksnummer = new Saksnummer(sakOgStpSplitt[0]);
+            var stp = LocalDate.parse(sakOgStpSplitt[1]);
+            var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, false).orElseThrow(() -> new IllegalArgumentException("finnes ikke fagsak med saksnummer: " + saksnummer.getVerdi()));
+            loggForvaltningTjeneste(fagsak, tjeneste, begrunnelse);
+            var nesteKjøring = LocalDateTime.now().plus(500L * idx, ChronoUnit.MILLIS);
+
+            revurderBeregningTjeneste.revurderMedÅrsak(saksnummer, stp, reOpplysningerOmOpptjening, Optional.of(nesteKjøring));
+
+            // lagrer direkte til ProsessTaskTjeneste så vi ikke går via FagsakProsessTask (siden den bestemmer rekkefølge). Får unik callId per task
+            idx++;
+        }
     }
 
     @GET
