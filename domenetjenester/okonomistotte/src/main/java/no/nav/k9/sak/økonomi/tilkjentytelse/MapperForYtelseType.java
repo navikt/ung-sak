@@ -15,6 +15,7 @@ class MapperForYtelseType {
 
     private static Map<FagsakYtelseType, YtelseType> genererMapping() {
         Map<FagsakYtelseType, YtelseType> map = Arrays.stream(YtelseType.values())
+            .filter(y -> !YtelseType.PÅRØRENDESYKDOM.equals(y))
             .collect(Collectors.toMap(yt -> FagsakYtelseType.fraKode(yt.getKode()), Function.identity()));
 
         Set<FagsakYtelseType> ignored = Set.of(
