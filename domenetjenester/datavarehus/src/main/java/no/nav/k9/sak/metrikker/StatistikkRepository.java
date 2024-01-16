@@ -42,10 +42,8 @@ import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskFeil;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
@@ -59,13 +57,13 @@ public class StatistikkRepository {
     private static final String UDEFINERT = "-";
 
     static final List<String> YTELSER = Stream.of(
-        FagsakYtelseType.FRISINN,
-        FagsakYtelseType.OMSORGSPENGER,
-        FagsakYtelseType.OMSORGSPENGER_KS,
-        FagsakYtelseType.OMSORGSPENGER_MA,
-        FagsakYtelseType.OMSORGSPENGER_AO,
-        FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
-        FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE)
+            FagsakYtelseType.FRISINN,
+            FagsakYtelseType.OMSORGSPENGER,
+            FagsakYtelseType.OMSORGSPENGER_KS,
+            FagsakYtelseType.OMSORGSPENGER_MA,
+            FagsakYtelseType.OMSORGSPENGER_AO,
+            FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
+            FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE)
         .map(FagsakYtelseType::getKode).collect(Collectors.toList());
 
     static final List<String> PROSESS_TASK_STATUSER = Stream.of(ProsessTaskStatus.KLAR, ProsessTaskStatus.FEILET, ProsessTaskStatus.VENTER_SVAR).map(ProsessTaskStatus::getDbKode).collect(Collectors.toList());
@@ -79,9 +77,7 @@ public class StatistikkRepository {
     static final List<String> BEHANDLING_STATUS = List.copyOf(BehandlingStatus.kodeMap().keySet());
     static final List<String> FAGSAK_STATUS = List.copyOf(FagsakStatus.kodeMap().keySet());
     static final List<String> BEHANDLING_TYPER = BehandlingType.kodeMap().values().stream().filter(p -> !BehandlingType.UDEFINERT.equals(p)).map(k -> k.getKode()).collect(Collectors.toList());
-    static final List<String> VILKÅRTYPER = VilkårType.kodeMap().values().stream().filter(p -> !VilkårType.UDEFINERT.equals(p)).map(k -> k.getKode()).collect(Collectors.toList());
     static final List<String> AVSLAGSÅRSAKER = Avslagsårsak.kodeMap().values().stream().filter(p -> !Avslagsårsak.UDEFINERT.equals(p)).map(k -> k.getKode()).collect(Collectors.toList());
-    static final List<String> VENT_ÅRSAKER = Venteårsak.kodeMap().values().stream().filter(p -> !Venteårsak.UDEFINERT.equals(p)).map(k -> k.getKode()).collect(Collectors.toList());
     static final List<String> BREVKODER = Brevkode.registrerteKoder().values().stream().filter(p -> !Brevkode.UDEFINERT.equals(p)).map(k -> k.getKode()).collect(Collectors.toList());
 
     private static final ObjectMapper OM = new ObjectMapper();
@@ -138,7 +134,7 @@ public class StatistikkRepository {
         var sensuEvents = collectionSupplier.get();
         var slutt = System.currentTimeMillis();
 
-        log.info("{} benyttet {} ms", function, (slutt-start));
+        log.info("{} benyttet {} ms", function, (slutt - start));
 
         return sensuEvents;
     }
@@ -202,14 +198,14 @@ public class StatistikkRepository {
         String metricField3 = "totalt_antall_totrinn";
 
         var values = stream.map(t -> SensuEvent.createSensuEvent(metricName,
-            toMap(
-                "ytelse_type", t.get(0, String.class),
-                "behandling_type", t.get(1, String.class),
-                "behandling_resultat_type", t.get(2, String.class)),
-            Map.of(
-                metricField1, t.get(3, Long.class),
-                metricField2, t.get(4, Long.class),
-                metricField3, t.get(5, Long.class))))
+                toMap(
+                    "ytelse_type", t.get(0, String.class),
+                    "behandling_type", t.get(1, String.class),
+                    "behandling_resultat_type", t.get(2, String.class)),
+                Map.of(
+                    metricField1, t.get(3, Long.class),
+                    metricField2, t.get(4, Long.class),
+                    metricField3, t.get(5, Long.class))))
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
         /* siden aksjonspunkt endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
@@ -245,12 +241,12 @@ public class StatistikkRepository {
         String metricField = "totalt_antall";
 
         var values = stream.map(t -> SensuEvent.createSensuEvent(metricName,
-            toMap(
-                "ytelse_type", t.get(0, String.class),
-                "behandling_type", t.get(1, String.class),
-                "behandling_status", t.get(2, String.class)),
-            Map.of(
-                metricField, t.get(3, Long.class))))
+                toMap(
+                    "ytelse_type", t.get(0, String.class),
+                    "behandling_type", t.get(1, String.class),
+                    "behandling_status", t.get(2, String.class)),
+                Map.of(
+                    metricField, t.get(3, Long.class))))
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
         /* siden behandling endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
@@ -268,7 +264,9 @@ public class StatistikkRepository {
 
     }
 
-    /** trenger ikke sette 0 verdier for kombinasjoner som ikke fins, da dette ser kun på slutt resultater (vedtatte behandlinger). */
+    /**
+     * trenger ikke sette 0 verdier for kombinasjoner som ikke fins, da dette ser kun på slutt resultater (vedtatte behandlinger).
+     */
     @SuppressWarnings("unchecked")
     Collection<SensuEvent> avslagStatistikk() {
 
@@ -291,14 +289,14 @@ public class StatistikkRepository {
         var metricName = "totalt_vilkar_resultat_v3";
         var metricField = "totalt_antall";
         var values = stream.map(t -> SensuEvent.createSensuEvent(metricName,
-            toMap(
-                "ytelse_type", t.get(0, String.class),
-                "behandling_type", t.get(1, String.class),
-                "behandling_resultat_type", t.get(2, String.class),
-                "vilkar_type", t.get(3, String.class),
-                "avslag_kode", t.get(4, String.class)),
-            Map.of(
-                metricField, t.get(5, Long.class))))
+                toMap(
+                    "ytelse_type", t.get(0, String.class),
+                    "behandling_type", t.get(1, String.class),
+                    "behandling_resultat_type", t.get(2, String.class),
+                    "vilkar_type", t.get(3, String.class),
+                    "avslag_kode", t.get(4, String.class)),
+                Map.of(
+                    metricField, t.get(5, Long.class))))
             .collect(Collectors.toList());
 
         return values;
@@ -330,26 +328,26 @@ public class StatistikkRepository {
             .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class)));
 
         var values = stream.map(t -> {
-            String ytelseType = t.get(0, String.class);
-            String saksnummer = t.get(1, String.class);
-            String behandlingId = t.get(2, Long.class).toString();
-            String behandlingType = t.get(3, String.class);
-            String behandlingResultatType = t.get(4, String.class);
-            String vilkårType = t.get(5, String.class);
-            String avslagKode = t.get(6, String.class);
-            long tidsstempel = t.get(7, Timestamp.class).getTime();
-            return SensuEvent.createSensuEvent(metricName,
-                toMap(
-                    "ytelse_type", ytelseType,
-                    "behandlingType", behandlingType,
-                    "behandlingResultatType", behandlingResultatType,
-                    "vilkårType", vilkårType,
-                    "avslagKode", avslagKode),
-                Map.of(
-                    "saksnummer", saksnummer,
-                    "behandlingId", behandlingId),
-                tidsstempel);
-        })
+                String ytelseType = t.get(0, String.class);
+                String saksnummer = t.get(1, String.class);
+                String behandlingId = t.get(2, Long.class).toString();
+                String behandlingType = t.get(3, String.class);
+                String behandlingResultatType = t.get(4, String.class);
+                String vilkårType = t.get(5, String.class);
+                String avslagKode = t.get(6, String.class);
+                long tidsstempel = t.get(7, Timestamp.class).getTime();
+                return SensuEvent.createSensuEvent(metricName,
+                    toMap(
+                        "ytelse_type", ytelseType,
+                        "behandlingType", behandlingType,
+                        "behandlingResultatType", behandlingResultatType,
+                        "vilkårType", vilkårType,
+                        "avslagKode", avslagKode),
+                    Map.of(
+                        "saksnummer", saksnummer,
+                        "behandlingId", behandlingId),
+                    tidsstempel);
+            })
             .collect(Collectors.toList());
 
         return values;
@@ -375,12 +373,12 @@ public class StatistikkRepository {
         Stream<Tuple> stream = query.getResultStream()
             .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class)));
         var values = stream.map(t -> SensuEvent.createSensuEvent(metricName,
-            toMap(
-                "ytelse_type", t.get(0, String.class),
-                "aksjonspunkt", t.get(1, String.class),
-                "aksjonspunkt_status", t.get(2, String.class)),
-            Map.of(
-                metricField, t.get(3, Number.class))))
+                toMap(
+                    "ytelse_type", t.get(0, String.class),
+                    "aksjonspunkt", t.get(1, String.class),
+                    "aksjonspunkt_status", t.get(2, String.class)),
+                Map.of(
+                    metricField, t.get(3, Number.class))))
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
         /* siden aksjonspunkt endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
@@ -419,26 +417,26 @@ public class StatistikkRepository {
             .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class)));
 
         var values = stream.map(t -> {
-            String ytelseType = t.get(0, String.class);
-            String saksnummer = t.get(1, String.class);
-            String behandlingId = t.get(2, Long.class).toString();
-            String aksjonspunktKode = t.get(3, String.class);
-            String aksjonspunktNavn = coalesce(AksjonspunktDefinisjon.kodeMap().getOrDefault(aksjonspunktKode, AksjonspunktDefinisjon.UNDEFINED).getNavn(), UDEFINERT);
-            String aksjonspunktStatus = t.get(4, String.class);
-            String venteÅrsak = coalesce(t.get(5, String.class), UDEFINERT);
-            long tidsstempel = t.get(6, Timestamp.class).getTime();
-            return SensuEvent.createSensuEvent(metricName,
-                toMap(
-                    "ytelse_type", ytelseType,
-                    "aksjonspunkt_status", aksjonspunktStatus,
-                    "vente_arsak", venteÅrsak,
-                    "aksjonspunkt", aksjonspunktKode),
-                Map.of(
-                    "aksjonspunkt_navn", aksjonspunktNavn,
-                    "saksnummer", saksnummer,
-                    "behandlingId", behandlingId),
-                tidsstempel);
-        })
+                String ytelseType = t.get(0, String.class);
+                String saksnummer = t.get(1, String.class);
+                String behandlingId = t.get(2, Long.class).toString();
+                String aksjonspunktKode = t.get(3, String.class);
+                String aksjonspunktNavn = coalesce(AksjonspunktDefinisjon.kodeMap().getOrDefault(aksjonspunktKode, AksjonspunktDefinisjon.UNDEFINED).getNavn(), UDEFINERT);
+                String aksjonspunktStatus = t.get(4, String.class);
+                String venteÅrsak = coalesce(t.get(5, String.class), UDEFINERT);
+                long tidsstempel = t.get(6, Timestamp.class).getTime();
+                return SensuEvent.createSensuEvent(metricName,
+                    toMap(
+                        "ytelse_type", ytelseType,
+                        "aksjonspunkt_status", aksjonspunktStatus,
+                        "vente_arsak", venteÅrsak,
+                        "aksjonspunkt", aksjonspunktKode),
+                    Map.of(
+                        "aksjonspunkt_navn", aksjonspunktNavn,
+                        "saksnummer", saksnummer,
+                        "behandlingId", behandlingId),
+                    tidsstempel);
+            })
             .collect(Collectors.toList());
 
         return values;
@@ -460,11 +458,11 @@ public class StatistikkRepository {
         Stream<Tuple> stream = query.getResultStream()
             .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class)));
         var values = stream.map(t -> SensuEvent.createSensuEvent(metricName,
-            toMap(
-                "ytelse_type", t.get(0, String.class),
-                "type", t.get(1, String.class)),
-            Map.of(
-                "totalt_antall", t.get(2, Long.class))))
+                toMap(
+                    "ytelse_type", t.get(0, String.class),
+                    "type", t.get(1, String.class)),
+                Map.of(
+                    "totalt_antall", t.get(2, Long.class))))
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
         /* siden fagsak endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
@@ -502,12 +500,12 @@ public class StatistikkRepository {
         Stream<Tuple> stream = query.getResultStream()
             .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class))); // forkaster dummy ytelse_type fra db
         var values = stream.map(t -> SensuEvent.createSensuEvent(metricName,
-            toMap(
-                "ytelse_type", t.get(0, String.class),
-                "prosess_task_type", t.get(1, String.class),
-                "status", t.get(2, String.class)),
-            Map.of(
-                metricField, t.get(3, Number.class))))
+                toMap(
+                    "ytelse_type", t.get(0, String.class),
+                    "prosess_task_type", t.get(1, String.class),
+                    "status", t.get(2, String.class)),
+                Map.of(
+                    metricField, t.get(3, Number.class))))
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
         /* siden aksjonspunkt endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
@@ -550,39 +548,39 @@ public class StatistikkRepository {
         long now = System.currentTimeMillis();
 
         Collection<SensuEvent> values = stream.map(t -> {
-            String ytelseType = t.get(0, String.class);
-            String saksnummer = t.get(1, String.class);
-            String taskId = t.get(2, Number.class).toString();
-            String taskType = t.get(3, String.class);
-            String status = t.get(4, String.class);
-            Timestamp sistKjørt = t.get(5, Timestamp.class);
-            long tidsstempel = sistKjørt == null ? now : sistKjørt.getTime();
+                String ytelseType = t.get(0, String.class);
+                String saksnummer = t.get(1, String.class);
+                String taskId = t.get(2, Number.class).toString();
+                String taskType = t.get(3, String.class);
+                String status = t.get(4, String.class);
+                Timestamp sistKjørt = t.get(5, Timestamp.class);
+                long tidsstempel = sistKjørt == null ? now : sistKjørt.getTime();
 
-            String sisteFeil = finnStacktraceStartFra(t.get(6, String.class), 500).orElse(UDEFINERT);
-            String taskParams = t.get(7, String.class);
+                String sisteFeil = finnStacktraceStartFra(t.get(6, String.class), 500).orElse(UDEFINERT);
+                String taskParams = t.get(7, String.class);
 
-            Number blokkertAvId = t.get(8, Number.class);
-            String blokkertAv = blokkertAvId == null ? null : blokkertAvId.toString();
+                Number blokkertAvId = t.get(8, Number.class);
+                String blokkertAv = blokkertAvId == null ? null : blokkertAvId.toString();
 
-            String opprettetTid = t.get(9, Timestamp.class).toInstant().toString();
+                String opprettetTid = t.get(9, Timestamp.class).toInstant().toString();
 
-            var gruppeSekvensnr = t.get(10, Long.class);
+                var gruppeSekvensnr = t.get(10, Long.class);
 
-            return SensuEvent.createSensuEvent(metricName,
-                toMap(
-                    "ytelseType", coalesce(ytelseType, UDEFINERT),
-                    "status", status,
-                    "prosess_task_type", taskType),
-                Map.of(
-                    "taskId", taskId,
-                    "saksnummer", coalesce(saksnummer, UDEFINERT),
-                    "siste_feil", sisteFeil,
-                    "task_parametere", coalesce(taskParams, UDEFINERT),
-                    "blokkert_av", coalesce(blokkertAv, UDEFINERT),
-                    "opprettet_tid", opprettetTid,
-                    "gruppe_sekvensnr", gruppeSekvensnr == null ? UDEFINERT : gruppeSekvensnr.toString()),
-                tidsstempel);
-        })
+                return SensuEvent.createSensuEvent(metricName,
+                    toMap(
+                        "ytelseType", coalesce(ytelseType, UDEFINERT),
+                        "status", status,
+                        "prosess_task_type", taskType),
+                    Map.of(
+                        "taskId", taskId,
+                        "saksnummer", coalesce(saksnummer, UDEFINERT),
+                        "siste_feil", sisteFeil,
+                        "task_parametere", coalesce(taskParams, UDEFINERT),
+                        "blokkert_av", coalesce(blokkertAv, UDEFINERT),
+                        "opprettet_tid", opprettetTid,
+                        "gruppe_sekvensnr", gruppeSekvensnr == null ? UDEFINERT : gruppeSekvensnr.toString()),
+                    tidsstempel);
+            })
             .collect(Collectors.toList());
 
         return values;
@@ -606,7 +604,9 @@ public class StatistikkRepository {
         return Optional.empty();
     }
 
-    /** Lager events med 0 målinger for alle kombinasjoner av oppgitte vektorer. */
+    /**
+     * Lager events med 0 målinger for alle kombinasjoner av oppgitte vektorer.
+     */
     private Collection<SensuEvent> emptyEvents(String metricName, Map<String, Collection<String>> vectors, Map<String, Object> defaultVals) {
         List<Map<String, String>> matrix = new CombineLists<String>(vectors).toMap();
         return matrix.stream()
@@ -614,7 +614,9 @@ public class StatistikkRepository {
             .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    /** Map.of() takler ikke null verdier, så vi lager vår egen variant. */
+    /**
+     * Map.of() takler ikke null verdier, så vi lager vår egen variant.
+     */
     private static Map<String, String> toMap(String... args) {
         if (args.length % 2 != 0) {
             throw new IllegalArgumentException("Må ha partall antall argumenter, fikk: " + Arrays.asList(args));
