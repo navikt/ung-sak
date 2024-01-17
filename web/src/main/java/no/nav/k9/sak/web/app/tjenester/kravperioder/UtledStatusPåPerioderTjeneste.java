@@ -315,7 +315,8 @@ public class UtledStatusPåPerioderTjeneste {
             .map(it -> new KravDokumentMedSøktePerioder(it.getKey().getJournalpostId(),
                 it.getKey().getInnsendingsTidspunkt(),
                 KravDokumentType.fraKode(it.getKey().getType().name()),
-                it.getValue().stream().map(at -> new no.nav.k9.sak.kontrakt.krav.SøktPeriode(at.getPeriode().tilPeriode(), at.getType(), at.getArbeidsgiver(), at.getArbeidsforholdRef())).collect(Collectors.toList())))
+                it.getValue().stream().map(at -> new no.nav.k9.sak.kontrakt.krav.SøktPeriode(at.getPeriode().tilPeriode(), at.getType(), at.getArbeidsgiver(), at.getArbeidsforholdRef())).collect(Collectors.toList()),
+                it.getKey().getKildesystem().getKode()))
             .toList();
 
     }

@@ -39,15 +39,20 @@ public class KravDokumentMedSøktePerioder {
     @JsonProperty("søktePerioder")
     private List<SøktPeriode> søktePerioder;
 
+    @JsonProperty("kildesystem")
+    private String kildesystem;
+
     @JsonCreator
     public KravDokumentMedSøktePerioder(@JsonProperty(value = "journalpostId", required = true) JournalpostId journalpostId,
                                         @JsonProperty("innsendingsTidspunkt") LocalDateTime innsendingsTidspunkt,
                                         @JsonProperty("type") KravDokumentType type,
-                                        @JsonProperty("søktePerioder") List<SøktPeriode> søktePerioder) {
+                                        @JsonProperty("søktePerioder") List<SøktPeriode> søktePerioder,
+                                        @JsonProperty("kildesystem") String kildesystem) {
         this.journalpostId = journalpostId;
         this.innsendingsTidspunkt = innsendingsTidspunkt;
         this.type = type;
         this.søktePerioder = søktePerioder;
+        this.kildesystem = kildesystem;
     }
 
     public JournalpostId getJournalpostId() {
@@ -64,5 +69,9 @@ public class KravDokumentMedSøktePerioder {
 
     public List<SøktPeriode> getSøktePerioder() {
         return søktePerioder;
+    }
+
+    public String getKildesystem() {
+        return kildesystem;
     }
 }
