@@ -5,6 +5,7 @@ import java.util.List;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -39,6 +40,9 @@ public class KravDokumentMedSøktePerioder {
     @JsonProperty("søktePerioder")
     private List<SøktPeriode> søktePerioder;
 
+    @Valid
+    @Size(max = 100)
+    @Pattern(regexp = "^\\p{L}+$")
     @JsonProperty("kildesystem")
     private String kildesystem;
 
