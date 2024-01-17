@@ -86,7 +86,7 @@ public class RevurderingMetrikkRepository {
             "   group by 1, 2) as statistikk_pr_behandling " +
             "group by 1, 2;";
 
-        String metricName = "revurdering_antall_aksjonspunkt_fordeling";
+        String metricName = "revurdering_antall_aksjonspunkt_fordeling_v2";
         String metricField = "antall_behandlinger";
 
         NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
@@ -121,7 +121,7 @@ public class RevurderingMetrikkRepository {
             "and b.behandling_type=:revurdering " +
             "group by 1, 2";
 
-        String metricName = "revurdering_antall_behandlinger_pr_aksjonspunkt";
+        String metricName = "revurdering_antall_behandlinger_pr_aksjonspunkt_v2";
         String metricField = "antall_behandlinger";
 
         NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
