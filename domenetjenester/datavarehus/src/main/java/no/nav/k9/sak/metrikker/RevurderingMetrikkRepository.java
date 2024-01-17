@@ -9,6 +9,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -103,7 +104,7 @@ public class RevurderingMetrikkRepository {
             "   and b.avsluttet_dato>=:startTid and b.avsluttet_dato < :sluttTid " +
             "   and b.behandling_type=:revurdering " +
             "   group by 1, 2) as statistikk_pr_behandling " +
-            "group by 1, 2) order by antall_aksjonspunkter;";
+            "group by 1, 2) statistikk_pr_behandling_og_total order by antall_aksjonspunkter;";
 
         String metricName = "revurdering_antall_aksjonspunkt_fordeling_v2";
         String metricField = "antall_behandlinger";
