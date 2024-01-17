@@ -5,11 +5,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.hibernate.QueryTimeoutException;
@@ -30,6 +32,17 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
  */
 @Dependent
 public class RevurderingMetrikkRepository {
+
+
+    static final List<String> YTELSER = Stream.of(
+            FagsakYtelseType.FRISINN,
+            FagsakYtelseType.OMSORGSPENGER,
+            FagsakYtelseType.OMSORGSPENGER_KS,
+            FagsakYtelseType.OMSORGSPENGER_MA,
+            FagsakYtelseType.OMSORGSPENGER_AO,
+            FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
+            FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE)
+        .map(FagsakYtelseType::getKode).collect(Collectors.toList());
 
     private static final Logger log = LoggerFactory.getLogger(RevurderingMetrikkRepository.class);
 
@@ -71,7 +84,12 @@ public class RevurderingMetrikkRepository {
 
     @SuppressWarnings("unchecked")
     Collection<SensuEvent> antallAksjonspunktFordelingForRevurderingSisteSyvDager(LocalDate dato) {
-        String sql = "select ytelse_type, " +
+        String sql = "select " +
+            "ytelse_type, " +
+            "antall_aksjonspunkter, " +
+            "antall_behandlinger," +
+            "antall_behandlinger/sum(antall_behandlinger) over (partition by ytelse_type)*100 as behandlinger_prosentandel " +
+            "from (select ytelse_type, " +
             "antall_aksjonspunkter, " +
             "count(*) as antall_behandlinger from (" +
             "   select f.ytelse_type, b.id, " +
@@ -80,14 +98,16 @@ public class RevurderingMetrikkRepository {
             "            inner join fagsak f on f.id=b.fagsak_id" +
             "            full outer join aksjonspunkt a on b.id = a.behandling_id " +
             "   where (a.aksjonspunkt_status is null or a.aksjonspunkt_status != 'AVBR') " +
+            "   and (vent_aarsak is null or vent_aarsak = '-') " +
             "   and b.avsluttet_dato is not null " +
             "   and b.avsluttet_dato>=:startTid and b.avsluttet_dato < :sluttTid " +
             "   and b.behandling_type=:revurdering " +
             "   group by 1, 2) as statistikk_pr_behandling " +
-            "group by 1, 2;";
+            "group by 1, 2)";
 
         String metricName = "revurdering_antall_aksjonspunkt_fordeling_v2";
         String metricField = "antall_behandlinger";
+        var metricField2 = "behandlinger_prosentandel";
 
         NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
             .setParameter("revurdering", BehandlingType.REVURDERING.getKode())
@@ -101,8 +121,22 @@ public class RevurderingMetrikkRepository {
                 toMap(
                     "ytelse_type", t.get(0, String.class),
                     "antall_aksjonspunkter", t.get(1, Long.class).toString()),
-                Map.of(metricField, t.get(2, Number.class))))
-            .collect(Collectors.toList());
+                Map.of(metricField, t.get(2, Number.class),
+                    metricField2, t.get(3, Number.class))))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+
+
+
+
+        var zeroValues = emptyEvents(metricName,
+            Map.of(
+                "ytelse_type", YTELSER,
+                "antall_aksjonspunkter", IntStream.range(0, 11).boxed().map(Object::toString).toList()), // Lager antall fra 0 til 10
+            Map.of(
+                metricField, 0L,
+                metricField2, 0L));
+
+        values.addAll(zeroValues); // NB: utnytter at Set#addAll ikke legger til verdier som ikke finnes fra før
 
         return values;
 
@@ -116,6 +150,7 @@ public class RevurderingMetrikkRepository {
             "         inner join fagsak f on f.id=b.fagsak_id" +
             "         inner join aksjonspunkt a on b.id = a.behandling_id " +
             "where a.aksjonspunkt_status != 'AVBR' " +
+            "and (vent_aarsak is null or vent_aarsak = '-') " +
             "and b.avsluttet_dato is not null " +
             "and b.avsluttet_dato>=:startTid and b.avsluttet_dato < :sluttTid " +
             "and b.behandling_type=:revurdering " +
@@ -160,4 +195,15 @@ public class RevurderingMetrikkRepository {
         }
         return map;
     }
+
+    /**
+     * Lager events med 0 målinger for alle kombinasjoner av oppgitte vektorer.
+     */
+    private Collection<SensuEvent> emptyEvents(String metricName, Map<String, Collection<String>> vectors, Map<String, Object> defaultVals) {
+        List<Map<String, String>> matrix = new CombineLists<String>(vectors).toMap();
+        return matrix.stream()
+            .map(v -> SensuEvent.createSensuEvent(metricName, v, defaultVals))
+            .collect(Collectors.toCollection(ArrayList::new));
+    }
+
 }
