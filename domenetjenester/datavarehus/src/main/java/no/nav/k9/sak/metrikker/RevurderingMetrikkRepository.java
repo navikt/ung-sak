@@ -104,9 +104,9 @@ public class RevurderingMetrikkRepository {
             "   and b.avsluttet_dato>=:startTid and b.avsluttet_dato < :sluttTid " +
             "   and b.behandling_type=:revurdering " +
             "   group by 1, 2) as statistikk_pr_behandling " +
-            "group by 1, 2) statistikk_pr_behandling_og_total order by antall_aksjonspunkter;";
+            "group by 1, 2) as statistikk_pr_behandling_og_total order by antall_aksjonspunkter;";
 
-        String metricName = "revurdering_antall_aksjonspunkt_fordeling_v2";
+        String metricName = "revurdering_antall_aksjonspunkt_fordeling_v3";
         String metricField = "antall_behandlinger";
         var metricField2 = "behandlinger_prosentandel";
 
@@ -122,11 +122,9 @@ public class RevurderingMetrikkRepository {
                 toMap(
                     "ytelse_type", t.get(0, String.class),
                     "antall_aksjonspunkter", t.get(1, Long.class).toString()),
-                Map.of(metricField, t.get(2, Number.class),
-                    metricField2, t.get(3, Number.class))))
+                Map.of(metricField, t.get(2, Long.class),
+                    metricField2, t.get(3, Long.class))))
             .collect(Collectors.toCollection(LinkedHashSet::new));
-
-
 
 
         var zeroValues = emptyEvents(metricName,
