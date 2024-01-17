@@ -101,7 +101,7 @@ public class RevurderingMetrikkRepository {
                 toMap(
                     "ytelse_type", t.get(0, String.class),
                     "antall_aksjonspunkter", t.get(1, Long.class).toString()),
-                Map.of(metricField, t.get(2, Long.class))))
+                Map.of(metricField, t.get(2, Number.class))))
             .collect(Collectors.toList());
 
         return values;
@@ -136,7 +136,7 @@ public class RevurderingMetrikkRepository {
                 toMap(
                     "ytelse_type", t.get(0, String.class),
                     "aksjonspunkt", t.get(1, String.class)),
-                Map.of(metricField, t.get(2, Long.class))))
+                Map.of(metricField, t.get(2, Number.class))))
             .collect(Collectors.toList());
 
         return values;
