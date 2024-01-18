@@ -21,8 +21,6 @@ class VurdererInput {
     private List<KompletthetPeriode> kompletthetPerioder;
     private Set<Vurdering> vurderingDetSkalTasHensynTil;
 
-    private boolean utvidetLogging;
-
     VurdererInput(NavigableSet<DatoIntervallEntitet> perioderTilVurdering,
                   NavigableSet<DatoIntervallEntitet> perioderTilVurderingMedSøknadsfristOppfylt,
                   Map<DatoIntervallEntitet, List<ManglendeVedlegg>> manglendeVedleggPerPeriode,
@@ -77,13 +75,5 @@ class VurdererInput {
 
     public boolean harIkkeFåttMulighetTilÅTaStillingPåNytt() {
         return harIkkeFåttMulighetTilÅTaStillingPåNytt;
-    }
-
-    public boolean getUtvidetLogging() {
-        return utvidetLogging;
-    }
-
-    public void setUtvidetLogging(boolean utvidetLogging) {
-        this.utvidetLogging = utvidetLogging;
     }
 }
