@@ -1,0 +1,2 @@
+create index pleietrengende_sykdom_dokument_informasjon_duplikat_id_versjon
+    on pleietrengende_sykdom_dokument_informasjon (duplikat_av_pleietrengende_sykdom_dokument_id, versjon);
