@@ -229,7 +229,7 @@ class OverstyrUttakRepositoryTest {
     }
 
     @Test
-    void skal_fjerne_periode_som_ikke_fullstendig_overlapper_vilkårsperiode() {
+    void skal_fjerne_periode_som_ikke_fullstendig_overlapper_vilkårsperiode_og_lage_ny_for_overlapp() {
         LocalDateInterval periode1 = new LocalDateInterval(dag1, dag1.plusDays(10));
         OverstyrtUttakPeriode overstyrtUttakPeriodePeriode1 = new OverstyrtUttakPeriode(null, new BigDecimal("0.35"), Set.of(), "begrunnelse");
         LocalDateTimeline<OverstyrtUttakPeriode> oppdateringer = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode1, overstyrtUttakPeriodePeriode1)));
@@ -238,8 +238,9 @@ class OverstyrUttakRepositoryTest {
 
         overstyrUttakRepository.ryddMotVilkår(originalBehandlingId, new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(dag1.minusDays(3), dag1))));
 
-
-        assertThat(overstyrUttakRepository.hentOverstyrtUttak(originalBehandlingId)).isEmpty();
+        assertThat(overstyrUttakRepository.hentOverstyrtUttak(originalBehandlingId)).isEqualTo(new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(new LocalDateInterval(dag1, dag1), overstyrtUttakPeriodePeriode1)
+        )));
     }
 
     @Test

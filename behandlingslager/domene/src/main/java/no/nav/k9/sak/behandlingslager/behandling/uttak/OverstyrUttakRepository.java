@@ -9,16 +9,15 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 
@@ -104,19 +103,11 @@ public class OverstyrUttakRepository {
     public void ryddMotVilkår(Long behandlingId, NavigableSet<DatoIntervallEntitet> definerendeVilkårsperioder) {
         var vilkårstidslinje = new LocalDateTimeline<>(definerendeVilkårsperioder.stream().map(p -> new LocalDateSegment<>(p.toLocalDateInterval(), TRUE)).collect(Collectors.toSet())).compress();
         var eksisterendePerioder = finnOverstyrtePerioder(behandlingId);
-        var sammenhengedeIntervaller = vilkårstidslinje.getLocalDateIntervals();
-        var perioderSomSkalDeaktiveres = eksisterendePerioder.stream().filter(p -> sammenhengedeIntervaller.stream().noneMatch(inneholder(p))).collect(Collectors.toSet());
-        perioderSomSkalDeaktiveres.forEach(p -> {
-            p.deaktiver();
-            entityManager.persist(p);
-        });
+        var perioderTidslinje = new LocalDateTimeline<>(eksisterendePerioder.stream().map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), p)).toList());
+        var perioderSomMåFjernes = perioderTidslinje.disjoint(vilkårstidslinje, StandardCombinators::leftOnly);
+        fjernEksisterendeOverstyringerSomOverlapper(perioderSomMåFjernes, perioderTidslinje);
         entityManager.flush();
     }
-
-    private static Predicate<LocalDateInterval> inneholder(OverstyrtUttakPeriodeEntitet p) {
-        return vp -> vp.contains(p.getFom()) && vp.contains(p.getTom());
-    }
-
 
     private void fjernEksisterendeOverstyringerSomOverlapper(LocalDateTimeline<?> perioderSomRyddes, LocalDateTimeline<OverstyrtUttakPeriodeEntitet> eksisterendeOverstyringer) {
         Set<OverstyrtUttakPeriodeEntitet> påvirkedeEksisterendeOverstyringer = eksisterendeOverstyringer.intersection(perioderSomRyddes).stream().map(LocalDateSegment::getValue).collect(Collectors.toSet());
