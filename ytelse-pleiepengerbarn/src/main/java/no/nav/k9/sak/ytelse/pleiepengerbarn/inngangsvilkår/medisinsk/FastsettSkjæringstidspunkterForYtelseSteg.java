@@ -32,6 +32,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrUttakRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
@@ -51,6 +52,8 @@ import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagReposito
 public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSteg {
 
     private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
+
+    private OverstyrUttakRepository overstyrUttakRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
     private AksjonspunktutlederForMedlemskap aksjonspunktutlederForMedlemskap;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -89,7 +92,7 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
         // Rydder bort grunnlag som ikke lenger er relevant siden perioden ikke skal vurderes
         // Disse blir da ikke lenger med til tilkjent ytelse, slik at det vedtaket blir inkosistent
         beregningPerioderGrunnlagRepository.ryddMotVilkår(behandlingId);
-
+        overstyrUttakRepository.ryddMotVilkår(behandlingId, vilkårsPerioderTilVurderingTjeneste.utledFraDefinerendeVilkår(behandlingId));
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
@@ -171,13 +174,6 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
             }
             resultatBuilder.leggTil(vilkårBuilder);
         }
-    }
-
-    private NavigableSet<DatoIntervallEntitet> compress(List<DatoIntervallEntitet> vilkårPerioder) {
-        LocalDateTimeline<Boolean> tidslinje = new LocalDateTimeline<>(vilkårPerioder.stream()
-            .map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), true))
-            .toList());
-        return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje.compress());
     }
 
 }

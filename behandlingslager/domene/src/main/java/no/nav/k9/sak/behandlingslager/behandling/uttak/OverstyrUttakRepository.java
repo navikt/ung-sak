@@ -1,18 +1,22 @@
 package no.nav.k9.sak.behandlingslager.behandling.uttak;
 
+import static java.lang.Boolean.TRUE;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -96,6 +100,23 @@ public class OverstyrUttakRepository {
             lagreKopiAvOverstyringAvUttak(nyBehandlingId, overstyrtePerioder);
         }
     }
+
+    public void ryddMotVilkår(Long behandlingId, NavigableSet<DatoIntervallEntitet> definerendeVilkårsperioder) {
+        var vilkårstidslinje = new LocalDateTimeline<>(definerendeVilkårsperioder.stream().map(p -> new LocalDateSegment<>(p.toLocalDateInterval(), TRUE)).collect(Collectors.toSet())).compress();
+        var eksisterendePerioder = finnOverstyrtePerioder(behandlingId);
+        var sammenhengedeIntervaller = vilkårstidslinje.getLocalDateIntervals();
+        var perioderSomSkalDeaktiveres = eksisterendePerioder.stream().filter(p -> sammenhengedeIntervaller.stream().noneMatch(inneholder(p))).collect(Collectors.toSet());
+        perioderSomSkalDeaktiveres.forEach(p -> {
+            p.deaktiver();
+            entityManager.persist(p);
+        });
+        entityManager.flush();
+    }
+
+    private static Predicate<LocalDateInterval> inneholder(OverstyrtUttakPeriodeEntitet p) {
+        return vp -> vp.contains(p.getFom()) && vp.contains(p.getTom());
+    }
+
 
     private void fjernEksisterendeOverstyringerSomOverlapper(LocalDateTimeline<?> perioderSomRyddes, LocalDateTimeline<OverstyrtUttakPeriodeEntitet> eksisterendeOverstyringer) {
         Set<OverstyrtUttakPeriodeEntitet> påvirkedeEksisterendeOverstyringer = eksisterendeOverstyringer.intersection(perioderSomRyddes).stream().map(LocalDateSegment::getValue).collect(Collectors.toSet());
