@@ -32,7 +32,6 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrUttakRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
@@ -42,6 +41,7 @@ import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.OverstyrUttakTjeneste;
 
 @BehandlingStegRef(value = POST_VURDER_MEDISINSKVILKÅR)
 @BehandlingTypeRef
@@ -53,7 +53,7 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
 
     private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
 
-    private OverstyrUttakRepository overstyrUttakRepository;
+    private OverstyrUttakTjeneste overstyrUttakTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
     private AksjonspunktutlederForMedlemskap aksjonspunktutlederForMedlemskap;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -66,11 +66,13 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
     @Inject
     public FastsettSkjæringstidspunkterForYtelseSteg(BehandlingRepositoryProvider repositoryProvider,
                                                      BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
+                                                     OverstyrUttakTjeneste overstyrUttakTjeneste,
                                                      @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
                                                      AksjonspunktutlederForMedlemskap aksjonspunktutlederForMedlemskap) {
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
+        this.overstyrUttakTjeneste = overstyrUttakTjeneste;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.aksjonspunktutlederForMedlemskap = aksjonspunktutlederForMedlemskap;
     }
@@ -92,7 +94,7 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
         // Rydder bort grunnlag som ikke lenger er relevant siden perioden ikke skal vurderes
         // Disse blir da ikke lenger med til tilkjent ytelse, slik at det vedtaket blir inkosistent
         beregningPerioderGrunnlagRepository.ryddMotVilkår(behandlingId);
-        overstyrUttakRepository.ryddMotVilkår(behandlingId, vilkårsPerioderTilVurderingTjeneste.utledFraDefinerendeVilkår(behandlingId));
+        overstyrUttakTjeneste.ryddMotVilkår(BehandlingReferanse.fra(behandling));
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 

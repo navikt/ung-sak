@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrUttakRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
@@ -25,12 +26,16 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.OverstyrUttakTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 
 class FastsettSkjæringstidspunkterForYtelseStegTest {
 
     private BehandlingRepositoryProvider mockProvider = mock(BehandlingRepositoryProvider.class); // Brukes ikke, men kan ikke være null
     private BeregningPerioderGrunnlagRepository mockrep = mock(BeregningPerioderGrunnlagRepository.class); // Brukes ikke, men kan ikke være null
     private AksjonspunktutlederForMedlemskap mockUtleder = mock(AksjonspunktutlederForMedlemskap.class); // Brukes ikke, men kan ikke være null
+
+    private OverstyrUttakTjeneste mockOverstyrUttakTjeneste = mock(OverstyrUttakTjeneste.class); // Brukes ikke, men kan ikke være null
     private final VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = new VilkårsPerioderTilVurderingTjeneste() {
         @Override
         public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
@@ -58,7 +63,7 @@ class FastsettSkjæringstidspunkterForYtelseStegTest {
         }
     };
     private UnitTestLookupInstanceImpl<VilkårsPerioderTilVurderingTjeneste> instance = new UnitTestLookupInstanceImpl<>(vilkårsPerioderTilVurderingTjeneste);
-    private FastsettSkjæringstidspunkterForYtelseSteg steg = new FastsettSkjæringstidspunkterForYtelseSteg(mockProvider, mockrep, instance, mockUtleder);
+    private FastsettSkjæringstidspunkterForYtelseSteg steg = new FastsettSkjæringstidspunkterForYtelseSteg(mockProvider, mockrep, mockOverstyrUttakTjeneste, instance, mockUtleder);
 
     @Test
     void skal_justere_utfall_ved_perioder_med_avslag_på_medisinsk() {
