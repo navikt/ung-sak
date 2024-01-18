@@ -134,4 +134,41 @@ class RevurderingMetrikkRepositoryTest {
             .anyMatch(v -> v.toString().contains("ytelse_type=PSB") && v.toString().contains("antall_behandlinger=1") && v.toString().contains("antall_aksjonspunkter=1"));
 
     }
+
+
+    @Test
+    void skal_finne_aksjonspuknt_med_en_behandling() {
+
+        FagsakYtelseType ytelseType = FagsakYtelseType.PSB;
+        var scenario = TestScenarioBuilder.builderUtenSøknad(ytelseType);
+        var behandling = scenario.lagre(entityManager);
+        behandling.avsluttBehandling();
+
+
+        AksjonspunktDefinisjon aksjonspunkt = AksjonspunktDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_SELVSTENDIG_NÆRINGSDRIVENDE;
+        BehandlingStegType stegType = BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG;
+
+        var scenarioBuilder = TestScenarioBuilder.builderUtenSøknad(ytelseType)
+            .medBehandlingType(BehandlingType.REVURDERING)
+            .medOriginalBehandling(behandling, BehandlingÅrsakType.RE_ENDRING_BEREGNINGSGRUNNLAG);
+
+        scenarioBuilder.leggTilAksjonspunkt(aksjonspunkt, stegType);
+
+        var revurdering = scenarioBuilder
+            .lagre(entityManager);
+
+        var ap = revurdering.getAksjonspunkter().iterator().next();
+        aksjonspunktKontrollRepository.setTilUtført(ap, "begrunnelse");
+
+        revurdering.avsluttBehandling();
+
+        entityManager.flush();
+
+        assertThat(revurderingMetrikkRepository.antallRevurderingMedAksjonspunktPrKodeSisteSyvDager(LocalDate.now().plusDays(1))).isNotEmpty()
+            .allMatch(v -> v.toString().contains("revurdering_antall_behandlinger_pr_aksjonspunkt_v2"))
+            .anyMatch(v -> v.toString().contains("ytelse_type=PSB") && v.toString().contains("antall_behandlinger=1") && v.toString().contains("aksjonspunkt=" + aksjonspunkt.getKode()) &&
+                v.toString().contains("aksjonspunkt_navn=" + aksjonspunkt.getNavn()));
+
+    }
+
 }

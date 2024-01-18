@@ -10,7 +10,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -28,6 +27,7 @@ import jakarta.persistence.Tuple;
 import no.nav.k9.felles.integrasjon.sensu.SensuEvent;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 
 /**
  * For innhenting av metrikker relatert til kvartalsmål for OKR
@@ -49,7 +49,6 @@ public class RevurderingMetrikkRepository {
     private static final Logger log = LoggerFactory.getLogger(RevurderingMetrikkRepository.class);
 
     private EntityManager entityManager;
-
 
 
     @Inject
@@ -170,12 +169,17 @@ public class RevurderingMetrikkRepository {
         var values = stream.map(t -> SensuEvent.createSensuEvent(metricName,
                 toMap(
                     "ytelse_type", t.get(0, String.class),
-                    "aksjonspunkt", t.get(1, String.class)),
+                    "aksjonspunkt", t.get(1, String.class),
+                    "aksjonspunkt_navn", coalesce(AksjonspunktDefinisjon.kodeMap().getOrDefault(t.get(1, String.class), AksjonspunktDefinisjon.UNDEFINED).getNavn(), "-")),
                 Map.of(metricField, t.get(2, Number.class))))
             .collect(Collectors.toList());
 
         return values;
 
+    }
+
+    private static String coalesce(String str, String defValue) {
+        return str != null ? str : defValue;
     }
 
     /**
