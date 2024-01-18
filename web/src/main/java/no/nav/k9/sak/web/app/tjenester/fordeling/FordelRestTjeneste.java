@@ -21,6 +21,9 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.Digits;
+import no.nav.k9.kodeverk.dokument.Brevkode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -128,7 +131,7 @@ public class FordelRestTjeneste {
         this.fagsakTjeneste = fagsakTjeneste;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.søknadMottakere = søknadMottakere;
-        this.psbInfotrygdRepository= psbInfotrygdRepository;
+        this.psbInfotrygdRepository = psbInfotrygdRepository;
         this.aktørTjeneste = aktørTjeneste;
         this.psbPbSakRepository = psbPbSakRepository;
         this.enableReservertSaksnummer = enableReservertSaksnummer;
@@ -298,20 +301,20 @@ public class FordelRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(JSON_UTF8)
     @Operation(
-            description = "Sjekker om det finnes en eksisterende fagsak med søker, pleietrengende og/eller relatert part.",
-            summary = ("Sjekker om det finnes en eksisterende fagsak med søker, pleietrengende og/eller relatert part."),
-            tags = "fordel"
+        description = "Sjekker om det finnes en eksisterende fagsak med søker, pleietrengende og/eller relatert part.",
+        summary = ("Sjekker om det finnes en eksisterende fagsak med søker, pleietrengende og/eller relatert part."),
+        tags = "fordel"
     )
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = APPLIKASJON)
     public boolean finnesEksisterendeFagsakMedEnAvAktørene(@Parameter(description = "Søkeparametere") @TilpassetAbacAttributt(supplierClass = FordelRestTjeneste.AbacDataSupplier.class) @Valid FinnSak finnSakDto) {
         return fagsakTjeneste.finnesEnFagsakForMinstEnAvAktørene(
-                finnSakDto.getYtelseType(),
-                finnSakDto.getAktørId(),
-                finnSakDto.getPleietrengendeAktørId(),
-                finnSakDto.getRelatertPersonAktørId(),
-                finnSakDto.getPeriode().getFom(),
-                finnSakDto.getPeriode().getTom()
-            );
+            finnSakDto.getYtelseType(),
+            finnSakDto.getAktørId(),
+            finnSakDto.getPleietrengendeAktørId(),
+            finnSakDto.getRelatertPersonAktørId(),
+            finnSakDto.getPeriode().getFom(),
+            finnSakDto.getPeriode().getTom()
+        );
     }
 
     private FagsakYtelseType finnYtelseType(FinnEllerOpprettSak dto) {
@@ -322,7 +325,7 @@ public class FordelRestTjeneste {
         return FagsakYtelseType.fraKode(dto.getYtelseType());
     }
 
-    @SuppressWarnings({ "unchecked" })
+    @SuppressWarnings({"unchecked"})
     @POST
     @Path("/innsending")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -382,10 +385,38 @@ public class FordelRestTjeneste {
             throw new UnsupportedOperationException("Støtter ikke mottak av journalposter av ulike ytelseTyper: " + ytelseTyper);
         }
         LOG_CONTEXT.add("ytelseType", ytelseTyper.iterator().next());
-        LOG_CONTEXT.add("journalpostId", String.join(",", mottattJournalposter.stream().map(v->v.getJournalpostId().getVerdi()).toList()));
+        LOG_CONTEXT.add("journalpostId", String.join(",", mottattJournalposter.stream().map(v -> v.getJournalpostId().getVerdi()).toList()));
         logger.info("Mottok journalposter");
 
         List<InngåendeSaksdokument> saksdokumenter = mottattJournalposter.stream()
+            .map(this::mapJournalpost)
+            .sorted(Comparator.comparing(InngåendeSaksdokument::getKanalreferanse, Comparator.nullsLast(Comparator.naturalOrder())))
+            .collect(Collectors.toList());
+
+        dokumentmottakTjeneste.dokumenterAnkommet(saksdokumenter);
+    }
+
+    @POST
+    @Path("/mottak/journalpost/sak/opprett") // TODO: Finn på et bedre navn
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(JSON_UTF8)
+    @Operation(description = "Ny journalpost skal behandles. Oppretter også ny sak.", summary = ("Varsel om en nye journalposter som skal behandles i systemet. Alle må tilhøre samme saksnummer, og være av samme type(brevkode, ytelsetype)"), tags = "fordel")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
+    public void mottaJournalpostOgOpprettSøknad(@Parameter(description = "Krever saksnummer, journalpostId og behandlingstemaOffisiellKode") @Valid List<AbacJournalpostMottakOpprettSakDto> journalpostMottakOpprettSakDtos) {
+        Set<Saksnummer> saksnummere = journalpostMottakOpprettSakDtos.stream().map(m -> m.getSaksnummer()).collect(Collectors.toSet());
+        if (saksnummere.size() > 1) {
+            throw new UnsupportedOperationException("Støtter ikke mottak av journalposter for ulike saksnummer: " + saksnummere);
+        }
+
+        Set<FagsakYtelseType> ytelseTyper = journalpostMottakOpprettSakDtos.stream().map(m -> m.getYtelseType()).collect(Collectors.toSet());
+        if (ytelseTyper.size() > 1) {
+            throw new UnsupportedOperationException("Støtter ikke mottak av journalposter av ulike ytelseTyper: " + ytelseTyper);
+        }
+        LOG_CONTEXT.add("ytelseType", ytelseTyper.iterator().next());
+        LOG_CONTEXT.add("journalpostId", String.join(",", journalpostMottakOpprettSakDtos.stream().map(v -> v.getJournalpostId().getVerdi()).toList()));
+        logger.info("Mottok journalposter");
+
+        List<InngåendeSaksdokument> saksdokumenter = journalpostMottakOpprettSakDtos.stream()
             .map(this::mapJournalpost)
             .sorted(Comparator.comparing(InngåendeSaksdokument::getKanalreferanse, Comparator.nullsLast(Comparator.naturalOrder())))
             .collect(Collectors.toList());
@@ -415,6 +446,44 @@ public class FordelRestTjeneste {
         if (payload.isPresent()) {
             builder.medPayload(payload.get()); // NOSONAR
         }
+
+        LocalDateTime mottattTidspunkt = Optional.ofNullable(mottattJournalpost.getForsendelseMottattTidspunkt())
+            .orElseThrow(() -> new IllegalArgumentException("Mangler forsendelseMottattTidspunkt"));
+        builder.medForsendelseMottatt(mottattTidspunkt); // NOSONAR
+        builder.medForsendelseMottatt(mottattJournalpost.getForsendelseMottatt().orElse(mottattTidspunkt.toLocalDate())); // NOSONAR
+
+        return builder.build();
+    }
+
+    private InngåendeSaksdokument mapJournalpost(AbacJournalpostMottakOpprettSakDto mottattJournalpost) {
+        JournalpostId journalpostId = mottattJournalpost.getJournalpostId();
+        Saksnummer saksnummer = mottattJournalpost.getSaksnummer();
+        Fagsak fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, false).orElseGet(() -> {
+            var ytelseType = mottattJournalpost.getYtelseType();
+            Periode periode = mottattJournalpost.getPeriode();
+
+            var søknadMottaker = søknadMottakere.finnSøknadMottakerTjeneste(ytelseType);
+            return søknadMottaker.finnEllerOpprettFagsak(ytelseType,
+                mottattJournalpost.getAktørId(),
+                mottattJournalpost.getRelatertPersonAktørId(),
+                mottattJournalpost.getRelatertPersonAktørId(),
+                periode.getFom(),
+                periode.getTom(),
+                saksnummer
+            );
+        });
+
+        Optional<String> payload = mottattJournalpost.getPayload();
+        InngåendeSaksdokument.Builder builder = InngåendeSaksdokument.builder()
+            .medFagsak(fagsak.getId(), fagsak.getYtelseType())
+            .medElektroniskSøknad(payload.isPresent())
+            .medType(mottattJournalpost.getType())
+            .medJournalpostId(mottattJournalpost.getJournalpostId());
+
+        builder.medKanalreferanse(mapTilKanalreferanse(mottattJournalpost.getKanalReferanse(), journalpostId));
+
+        // NOSONAR
+        payload.ifPresent(builder::medPayload);
 
         LocalDateTime mottattTidspunkt = Optional.ofNullable(mottattJournalpost.getForsendelseMottattTidspunkt())
             .orElseThrow(() -> new IllegalArgumentException("Mangler forsendelseMottattTidspunkt"));
@@ -485,6 +554,86 @@ public class FordelRestTjeneste {
         }
     }
 
+    public static class AbacJournalpostMottakOpprettSakDto extends JournalpostMottakDto implements AbacDto {
+        @JsonProperty(value = "aktørId", required = true)
+        @NotNull
+        @Digits(integer = 19, fraction = 0)
+        private String aktørId;
+
+        @JsonProperty(value = "pleietrengendeAktørId")
+        @Digits(integer = 19, fraction = 0)
+        private String pleietrengendeAktørId;
+
+        @JsonProperty(value = "relatertPersonAktørId")
+        @Digits(integer = 19, fraction = 0)
+        private String relatertPersonAktørId;
+
+        @JsonProperty(value = "periode", required = true)
+        @NotNull
+        @Valid
+        private Periode periode;
+
+        public AbacJournalpostMottakOpprettSakDto() {
+            super();
+        }
+
+        public AbacJournalpostMottakOpprettSakDto(
+            String aktørId,
+            String pleietrengendeAktørId,
+            String relatertPersonAktørId,
+            Periode periode,
+            Saksnummer saksnummer,
+            JournalpostId journalpostId,
+            FagsakYtelseType ytelseType,
+            String kanalReferanse,
+            Brevkode type,
+            LocalDateTime forsendelseMottattTidspunkt,
+            String payloadRawString
+        ) {
+            super(saksnummer, journalpostId, ytelseType, kanalReferanse, type, forsendelseMottattTidspunkt, payloadRawString);
+            this.aktørId = aktørId;
+            this.pleietrengendeAktørId = pleietrengendeAktørId;
+            this.relatertPersonAktørId = relatertPersonAktørId;
+            this.periode = periode;
+
+        }
+
+        public AktørId getAktørId() {
+            return new AktørId(aktørId);
+        }
+
+        public AktørId getPleietrengendeAktørId() {
+            return new AktørId(pleietrengendeAktørId);
+        }
+
+        public AktørId getRelatertPersonAktørId() {
+            return new AktørId(relatertPersonAktørId);
+        }
+
+        public Periode getPeriode() {
+            return periode;
+        }
+
+        static Optional<String> getPayload(String base64EncodedPayload) {
+            if (base64EncodedPayload == null) {
+                return Optional.empty();
+            }
+            byte[] bytes = Base64.getUrlDecoder().decode(base64EncodedPayload);
+            return Optional.of(new String(bytes, StandardCharsets.UTF_8));
+        }
+
+        @JsonIgnore
+        public Optional<String> getPayload() {
+            return getPayload(base64EncodedPayload);
+        }
+
+        @Override
+        public AbacDataAttributter abacAttributter() {
+            return AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.SAKSNUMMER, getSaksnummer());
+        }
+
+    }
+
     public static class PsbInfotrygdFødselsnumre implements AbacDto {
 
         @NotNull
@@ -520,10 +669,10 @@ public class FordelRestTjeneste {
 
             @Override
             public PsbInfotrygdFødselsnumre readFrom(Class<PsbInfotrygdFødselsnumre> type, Type genericType,
-                                                      Annotation[] annotations, MediaType mediaType,
-                                                      MultivaluedMap<String, String> httpHeaders,
-                                                      InputStream inputStream)
-                    throws IOException, WebApplicationException {
+                                                     Annotation[] annotations, MediaType mediaType,
+                                                     MultivaluedMap<String, String> httpHeaders,
+                                                     InputStream inputStream)
+                throws IOException, WebApplicationException {
                 var sb = new StringBuilder(200);
                 try (BufferedReader br = new BufferedReader(
                     new InputStreamReader(inputStream))) {
