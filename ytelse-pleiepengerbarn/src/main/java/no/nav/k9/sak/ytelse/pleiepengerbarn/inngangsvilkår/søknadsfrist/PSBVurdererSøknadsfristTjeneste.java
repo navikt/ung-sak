@@ -168,7 +168,7 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
 
         return mottatteDokumentRepository.hentMottatteDokumentForBehandling(referanse.getFagsakId(), referanse.getBehandlingId(), List.of(brevkode), false, DokumentStatus.GYLDIG)
             .stream()
-            .map(it -> new KravDokument(it.getJournalpostId(), it.getInnsendingstidspunkt(), KravDokumentType.SØKNAD))
+            .map(it -> new KravDokument(it.getJournalpostId(), it.getInnsendingstidspunkt(), KravDokumentType.SØKNAD, it.getKildesystem()))
             .collect(Collectors.toSet());
     }
 
