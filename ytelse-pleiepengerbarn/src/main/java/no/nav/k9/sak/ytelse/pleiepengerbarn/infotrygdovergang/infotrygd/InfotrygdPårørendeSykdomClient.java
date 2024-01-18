@@ -40,11 +40,6 @@ class InfotrygdPårørendeSykdomClient {
         this.baseUri = baseUri;
     }
 
-    public List<SakResponse> getSaker(PersonRequest request) {
-        String json = getJson("/saker", request);
-        return jsonConverter.sakResponse(json);
-    }
-
     public List<PårørendeSykdom> getGrunnlagForPleietrengende(PersonRequest request) {
         String json = getJson("/grunnlag", request);
         return jsonConverter.grunnlagBarnResponse(json);
