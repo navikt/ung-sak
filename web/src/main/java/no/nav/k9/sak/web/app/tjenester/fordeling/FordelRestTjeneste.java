@@ -21,9 +21,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.Digits;
-import no.nav.k9.kodeverk.dokument.Brevkode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,6 +69,7 @@ import no.nav.k9.sak.kontrakt.mottak.FinnEllerOpprettSak;
 import no.nav.k9.sak.kontrakt.mottak.FinnEllerOpprettSakFnr;
 import no.nav.k9.sak.kontrakt.mottak.FinnSak;
 import no.nav.k9.sak.kontrakt.mottak.JournalpostMottakDto;
+import no.nav.k9.sak.kontrakt.mottak.JournalpostMottakOpprettSakDto;
 import no.nav.k9.sak.kontrakt.søknad.innsending.Innsending;
 import no.nav.k9.sak.kontrakt.søknad.innsending.InnsendingMottatt;
 import no.nav.k9.sak.mottak.SøknadMottakTjenesteContainer;
@@ -464,9 +462,9 @@ public class FordelRestTjeneste {
 
             var søknadMottaker = søknadMottakere.finnSøknadMottakerTjeneste(ytelseType);
             return søknadMottaker.finnEllerOpprettFagsak(ytelseType,
-                mottattJournalpost.getAktørId(),
-                mottattJournalpost.getRelatertPersonAktørId(),
-                mottattJournalpost.getRelatertPersonAktørId(),
+                new AktørId(mottattJournalpost.getAktørId()),
+                new AktørId(mottattJournalpost.getRelatertPersonAktørId()),
+                new AktørId(mottattJournalpost.getRelatertPersonAktørId()),
                 periode.getFom(),
                 periode.getTom(),
                 saksnummer
@@ -554,64 +552,9 @@ public class FordelRestTjeneste {
         }
     }
 
-    public static class AbacJournalpostMottakOpprettSakDto extends JournalpostMottakDto implements AbacDto {
-        @JsonProperty(value = "aktørId", required = true)
-        @NotNull
-        @Digits(integer = 19, fraction = 0)
-        private String aktørId;
-
-        @JsonProperty(value = "pleietrengendeAktørId")
-        @Digits(integer = 19, fraction = 0)
-        private String pleietrengendeAktørId;
-
-        @JsonProperty(value = "relatertPersonAktørId")
-        @Digits(integer = 19, fraction = 0)
-        private String relatertPersonAktørId;
-
-        @JsonProperty(value = "periode", required = true)
-        @NotNull
-        @Valid
-        private Periode periode;
-
+    public static class AbacJournalpostMottakOpprettSakDto extends JournalpostMottakOpprettSakDto implements AbacDto {
         public AbacJournalpostMottakOpprettSakDto() {
             super();
-        }
-
-        public AbacJournalpostMottakOpprettSakDto(
-            String aktørId,
-            String pleietrengendeAktørId,
-            String relatertPersonAktørId,
-            Periode periode,
-            Saksnummer saksnummer,
-            JournalpostId journalpostId,
-            FagsakYtelseType ytelseType,
-            String kanalReferanse,
-            Brevkode type,
-            LocalDateTime forsendelseMottattTidspunkt,
-            String payloadRawString
-        ) {
-            super(saksnummer, journalpostId, ytelseType, kanalReferanse, type, forsendelseMottattTidspunkt, payloadRawString);
-            this.aktørId = aktørId;
-            this.pleietrengendeAktørId = pleietrengendeAktørId;
-            this.relatertPersonAktørId = relatertPersonAktørId;
-            this.periode = periode;
-
-        }
-
-        public AktørId getAktørId() {
-            return new AktørId(aktørId);
-        }
-
-        public AktørId getPleietrengendeAktørId() {
-            return new AktørId(pleietrengendeAktørId);
-        }
-
-        public AktørId getRelatertPersonAktørId() {
-            return new AktørId(relatertPersonAktørId);
-        }
-
-        public Periode getPeriode() {
-            return periode;
         }
 
         static Optional<String> getPayload(String base64EncodedPayload) {
@@ -629,7 +572,9 @@ public class FordelRestTjeneste {
 
         @Override
         public AbacDataAttributter abacAttributter() {
-            return AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.SAKSNUMMER, getSaksnummer());
+            return AbacDataAttributter.opprett()
+                .leggTil(AppAbacAttributtType.SAKSNUMMER, getSaksnummer())
+                .leggTil(AppAbacAttributtType.AKTØR_ID, getAktørId());
         }
 
     }
