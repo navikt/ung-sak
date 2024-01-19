@@ -14,6 +14,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrUttakRepository;
@@ -35,6 +36,7 @@ public class OverstyrUttakTjeneste {
     private OverstyrUttakRepository overstyrUttakRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
+    private boolean erOverstyringAvUttakLansert;
 
     public OverstyrUttakTjeneste() {
     }
@@ -43,14 +45,19 @@ public class OverstyrUttakTjeneste {
     public OverstyrUttakTjeneste(UttakTjeneste uttakTjeneste,
                                  OverstyrUttakRepository overstyrUttakRepository,
                                  @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
-                                 VilkårResultatRepository vilkårResultatRepository) {
+                                 VilkårResultatRepository vilkårResultatRepository,
+                                 @KonfigVerdi(value = "ENABLE_OVERSTYR_UTTAK", defaultVerdi = "false") boolean erOverstyringAvUttakLansert) {
         this.overstyrUttakRepository = overstyrUttakRepository;
         this.uttakTjeneste = uttakTjeneste;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
+        this.erOverstyringAvUttakLansert = erOverstyringAvUttakLansert;
     }
 
     public boolean skalOverstyreUttak(BehandlingReferanse behandlingReferanse) {
+        if (!erOverstyringAvUttakLansert) {
+            return false;
+        }
         var periodeTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjeneste, behandlingReferanse.getFagsakYtelseType(), behandlingReferanse.getBehandlingType());
         var vurderer = new SkalOverstyreUttakVurderer(overstyrUttakRepository, periodeTjeneste);
         return vurderer.skalOverstyreUttak(behandlingReferanse);
@@ -58,6 +65,9 @@ public class OverstyrUttakTjeneste {
 
 
     public void ryddMotVilkår(BehandlingReferanse behandlingReferanse) {
+        if (!erOverstyringAvUttakLansert) {
+            return;
+        }
         var periodeTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjeneste, behandlingReferanse.getFagsakYtelseType(), behandlingReferanse.getBehandlingType());
         var definerendeVilkår = periodeTjeneste.definerendeVilkår();
         var vilkårResultat = vilkårResultatRepository.hent(behandlingReferanse.getBehandlingId());
@@ -72,6 +82,9 @@ public class OverstyrUttakTjeneste {
 
 
     public void ryddMotUttaksplan(BehandlingReferanse behandlingReferanse) {
+        if (!erOverstyringAvUttakLansert) {
+            return;
+        }
         var uttaksplan = uttakTjeneste.hentUttaksplan(behandlingReferanse.getBehandlingUuid(), true);
         var overstyrtUttakTilVurdering = finnOverstyrtUttakTilVurdering(behandlingReferanse);
         var uttaksplanTidslinje = new LocalDateTimeline<>(uttaksplan.getPerioder().entrySet().stream().map(e -> new LocalDateSegment<>(e.getKey().getFom(), e.getKey().getTom(), e.getValue())).toList());

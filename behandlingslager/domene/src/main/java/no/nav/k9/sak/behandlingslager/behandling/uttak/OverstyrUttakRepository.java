@@ -100,7 +100,8 @@ public class OverstyrUttakRepository {
     }
 
     public void ryddMotVilkår(Long behandlingId, NavigableSet<DatoIntervallEntitet> definerendeVilkårsperioder) {
-        var vilkårstidslinje = TidslinjeUtil.tilTidslinjeKomprimert(definerendeVilkårsperioder);
+        var vilkårssegmenter = definerendeVilkårsperioder.stream().map(p -> new LocalDateSegment<>(p.getFomDato(), p.getTomDato(), true)).toList();
+        var vilkårstidslinje = new LocalDateTimeline<>(vilkårssegmenter, StandardCombinators::alwaysTrueForMatch).compress();
         var eksisterendePerioder = finnOverstyrtePerioder(behandlingId);
         var perioderTidslinje = new LocalDateTimeline<>(eksisterendePerioder.stream().map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), p)).toList());
         var perioderSomMåFjernes = perioderTidslinje.disjoint(vilkårstidslinje, StandardCombinators::leftOnly);
