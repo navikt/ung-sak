@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.CdiDbAwareTest;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
@@ -210,6 +212,49 @@ class OverstyrUttakRepositoryTest {
 
         //kun ny periode skal finnes
         assertThat(overstyrUttakRepository.hentOverstyrtUttak(originalBehandlingId)).isEqualTo(new LocalDateTimeline<>(periodeNy, verdier));
+    }
+
+    @Test
+    void skal_fjerne_periode_som_ligger_utenfor_vilkårsperiode() {
+        LocalDateInterval periode1 = new LocalDateInterval(dag1, dag1.plusDays(10));
+        OverstyrtUttakPeriode overstyrtUttakPeriodePeriode1 = new OverstyrtUttakPeriode(null, new BigDecimal("0.35"), Set.of(), "begrunnelse");
+        LocalDateTimeline<OverstyrtUttakPeriode> oppdateringer = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode1, overstyrtUttakPeriodePeriode1)));
+        overstyrUttakRepository.oppdaterOverstyringAvUttak(originalBehandlingId, List.of(), oppdateringer);
+
+
+        overstyrUttakRepository.ryddMotVilkår(originalBehandlingId, new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(dag1.minusDays(3), dag1.minusDays(1)))));
+
+
+        assertThat(overstyrUttakRepository.hentOverstyrtUttak(originalBehandlingId)).isEmpty();
+    }
+
+    @Test
+    void skal_fjerne_periode_som_ikke_fullstendig_overlapper_vilkårsperiode_og_lage_ny_for_overlapp() {
+        LocalDateInterval periode1 = new LocalDateInterval(dag1, dag1.plusDays(10));
+        OverstyrtUttakPeriode overstyrtUttakPeriodePeriode1 = new OverstyrtUttakPeriode(null, new BigDecimal("0.35"), Set.of(), "begrunnelse");
+        LocalDateTimeline<OverstyrtUttakPeriode> oppdateringer = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode1, overstyrtUttakPeriodePeriode1)));
+        overstyrUttakRepository.oppdaterOverstyringAvUttak(originalBehandlingId, List.of(), oppdateringer);
+
+
+        overstyrUttakRepository.ryddMotVilkår(originalBehandlingId, new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(dag1.minusDays(3), dag1))));
+
+        assertThat(overstyrUttakRepository.hentOverstyrtUttak(originalBehandlingId)).isEqualTo(new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(new LocalDateInterval(dag1, dag1), overstyrtUttakPeriodePeriode1)
+        )));
+    }
+
+    @Test
+    void skal_ikke_fjerne_periode_som_er_inneholdt_i_vilkårsperiode() {
+        LocalDateInterval periode1 = new LocalDateInterval(dag1, dag1.plusDays(10));
+        OverstyrtUttakPeriode overstyrtUttakPeriodePeriode1 = new OverstyrtUttakPeriode(null, new BigDecimal("0.35"), Set.of(), "begrunnelse");
+        LocalDateTimeline<OverstyrtUttakPeriode> oppdateringer = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode1, overstyrtUttakPeriodePeriode1)));
+        overstyrUttakRepository.oppdaterOverstyringAvUttak(originalBehandlingId, List.of(), oppdateringer);
+
+
+        overstyrUttakRepository.ryddMotVilkår(originalBehandlingId, new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(dag1.minusDays(3), dag1.plusDays(10)))));
+
+
+        assertThat(overstyrUttakRepository.hentOverstyrtUttak(originalBehandlingId).toSegments()).size().isEqualTo(1);
     }
 
     private Long lagBehandling(Fagsak fagsak) {

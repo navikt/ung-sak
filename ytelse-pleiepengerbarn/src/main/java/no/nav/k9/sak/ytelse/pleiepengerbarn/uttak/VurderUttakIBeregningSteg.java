@@ -50,7 +50,7 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
     private EtablertTilsynTjeneste etablertTilsynTjeneste;
     private SamtidigUttakTjeneste samtidigUttakTjeneste;
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
-    private SkalOverstyreUttakVurderer skalOverstyreUttakVurderer;
+    private OverstyrUttakTjeneste overstyrUttakTjeneste;
 
 
     VurderUttakIBeregningSteg() {
@@ -63,14 +63,14 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
                                      UttakTjeneste uttakTjeneste,
                                      EtablertTilsynTjeneste etablertTilsynTjeneste,
                                      SamtidigUttakTjeneste samtidigUttakTjeneste,
-                                     UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository, SkalOverstyreUttakVurderer skalOverstyreUttakVurderer) {
+                                     UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository, OverstyrUttakTjeneste overstyrUttakTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
         this.uttakTjeneste = uttakTjeneste;
         this.etablertTilsynTjeneste = etablertTilsynTjeneste;
         this.samtidigUttakTjeneste = samtidigUttakTjeneste;
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
-        this.skalOverstyreUttakVurderer = skalOverstyreUttakVurderer;
+        this.overstyrUttakTjeneste = overstyrUttakTjeneste;
     }
 
     @Override
@@ -106,7 +106,9 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
                 avbrytAksjonspunkt(behandling, kontekst);
             }
 
-            if (skalOverstyreUttakVurderer.skalOverstyreUttak(ref)) {
+            overstyrUttakTjeneste.ryddMotUttaksplan(ref);
+
+            if (overstyrUttakTjeneste.skalOverstyreUttak(ref)) {
                 return Optional.of(AksjonspunktDefinisjon.OVERSTYRING_AV_UTTAK);
             }
 

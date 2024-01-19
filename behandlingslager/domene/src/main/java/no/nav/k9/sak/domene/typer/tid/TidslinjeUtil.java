@@ -4,6 +4,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.Year;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -45,8 +46,8 @@ public class TidslinjeUtil {
     public static LocalDateTimeline<Boolean> tilTidslinjeKomprimert(List<Periode> perioder) {
         return new LocalDateTimeline<>(perioder.stream().map(periode -> new LocalDateSegment<>(periode.getFom(), periode.getTom(), true)).toList()).compress();
     }
-
-    public static LocalDateTimeline<Boolean> tilTidslinjeKomprimert(NavigableSet<DatoIntervallEntitet> datoIntervaller) {
+    
+    public static LocalDateTimeline<Boolean> tilTidslinjeKomprimert(Collection<DatoIntervallEntitet> datoIntervaller) {
         return new LocalDateTimeline<>(datoIntervaller.stream().map(datoIntervall -> new LocalDateSegment<>(datoIntervall.getFomDato(), datoIntervall.getTomDato(), true)).toList()).compress();
     }
 

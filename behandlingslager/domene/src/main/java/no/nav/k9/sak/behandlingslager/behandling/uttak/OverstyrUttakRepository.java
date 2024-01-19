@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -15,7 +15,9 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @Dependent
@@ -95,6 +97,15 @@ public class OverstyrUttakRepository {
         if (!overstyrtePerioder.isEmpty()) {
             lagreKopiAvOverstyringAvUttak(nyBehandlingId, overstyrtePerioder);
         }
+    }
+
+    public void ryddMotVilkår(Long behandlingId, NavigableSet<DatoIntervallEntitet> definerendeVilkårsperioder) {
+        var vilkårstidslinje = TidslinjeUtil.tilTidslinjeKomprimert(definerendeVilkårsperioder);
+        var eksisterendePerioder = finnOverstyrtePerioder(behandlingId);
+        var perioderTidslinje = new LocalDateTimeline<>(eksisterendePerioder.stream().map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), p)).toList());
+        var perioderSomMåFjernes = perioderTidslinje.disjoint(vilkårstidslinje, StandardCombinators::leftOnly);
+        fjernEksisterendeOverstyringerSomOverlapper(perioderSomMåFjernes, perioderTidslinje);
+        entityManager.flush();
     }
 
     private void fjernEksisterendeOverstyringerSomOverlapper(LocalDateTimeline<?> perioderSomRyddes, LocalDateTimeline<OverstyrtUttakPeriodeEntitet> eksisterendeOverstyringer) {
