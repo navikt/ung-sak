@@ -63,9 +63,6 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
 
     private boolean enableFjernPerioderBeregning;
 
-
-    private OMPUttakEndringsutleder endringsutleder;
-
     OMPVilkårsPerioderTilVurderingTjeneste() {
         // CDI
     }
@@ -78,8 +75,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
                                                   VilkårResultatRepository vilkårResultatRepository,
                                                   ÅrskvantumTjeneste årskvantumTjeneste,
                                                   ProsessTriggereRepository prosessTriggereRepository,
-                                                  @KonfigVerdi(value = "FJERN_VILKARSPERIODER_BEREGNING", defaultVerdi = "false") boolean enableFjernPerioderBeregning,
-                                                  OMPUttakEndringsutleder endringsutleder) {
+                                                  @KonfigVerdi(value = "FJERN_VILKARSPERIODER_BEREGNING", defaultVerdi = "false") boolean enableFjernPerioderBeregning) {
         this.vilkårUtleder = vilkårUtleder;
         søktePerioder = new SøktePerioder(omsorgspengerGrunnlagRepository);
         nulledePerioder = new NulledePerioder(omsorgspengerGrunnlagRepository);
@@ -89,7 +85,6 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         this.årskvantumTjeneste = årskvantumTjeneste;
         this.prosessTriggereRepository = prosessTriggereRepository;
         this.enableFjernPerioderBeregning = enableFjernPerioderBeregning;
-        this.endringsutleder = endringsutleder;
     }
 
     @Override
@@ -149,7 +144,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
             .map(Aktivitet::getUttaksperioder)
             .flatMap(Collection::stream)
             .filter(it -> Periodetype.REVURDERT.equals(it.getPeriodetype()))
-            .filter(it -> endringsutleder.harRelevantEndringFraForrige(referanse.getSaksnummer(), it, fullUttaksplanForrigeBehandling))
+            .filter(it -> OMPUttakEndringsutleder.harRelevantEndringFraForrige(it, fullUttaksplanForrigeBehandling))
             .map(Uttaksperiode::getPeriode)
             .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
             .filter(it -> perioder.stream().noneMatch(it::overlapper))
