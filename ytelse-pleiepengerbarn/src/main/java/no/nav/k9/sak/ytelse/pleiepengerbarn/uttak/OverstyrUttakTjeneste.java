@@ -85,8 +85,7 @@ public class OverstyrUttakTjeneste {
         var periodeTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjeneste, behandlingReferanse.getFagsakYtelseType(), behandlingReferanse.getBehandlingType());
         var perioderTilVurdering = new LocalDateTimeline<>(periodeTjeneste.utledFraDefinerendeVilkår(behandlingReferanse.getBehandlingId()).stream().map(p -> new LocalDateSegment<>(p.toLocalDateInterval(), Boolean.TRUE)).collect(Collectors.toSet()));
         var overstyrtUttak = overstyrUttakRepository.hentOverstyrtUttak(behandlingReferanse.getBehandlingId());
-        var overstyrtUttakTilVurdering = overstyrtUttak.intersection(perioderTilVurdering);
-        return overstyrtUttakTilVurdering;
+        return overstyrtUttak.intersection(perioderTilVurdering);
     }
 
     private LocalDateSegmentCombinator<OverstyrtUttakPeriode, UttaksperiodeInfo, OverstyrtUttakPeriode> ryddSegmenterMotUttaksplan(List<Long> sletteListe) {

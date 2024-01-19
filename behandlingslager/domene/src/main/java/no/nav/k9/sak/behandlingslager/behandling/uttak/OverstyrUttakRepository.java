@@ -1,7 +1,5 @@
 package no.nav.k9.sak.behandlingslager.behandling.uttak;
 
-import static java.lang.Boolean.TRUE;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -19,6 +17,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @Dependent
@@ -101,7 +100,7 @@ public class OverstyrUttakRepository {
     }
 
     public void ryddMotVilkår(Long behandlingId, NavigableSet<DatoIntervallEntitet> definerendeVilkårsperioder) {
-        var vilkårstidslinje = new LocalDateTimeline<>(definerendeVilkårsperioder.stream().map(p -> new LocalDateSegment<>(p.toLocalDateInterval(), TRUE)).collect(Collectors.toSet())).compress();
+        var vilkårstidslinje = TidslinjeUtil.tilTidslinjeKomprimert(definerendeVilkårsperioder);
         var eksisterendePerioder = finnOverstyrtePerioder(behandlingId);
         var perioderTidslinje = new LocalDateTimeline<>(eksisterendePerioder.stream().map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), p)).toList());
         var perioderSomMåFjernes = perioderTidslinje.disjoint(vilkårstidslinje, StandardCombinators::leftOnly);

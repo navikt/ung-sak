@@ -20,7 +20,7 @@ public class SkalOverstyreUttakVurderer {
         var overstyrtUttak = overstyrUttakRepository.hentOverstyrtUttak(behandlingReferanse.getBehandlingId());
         var perioderTilVurdering = perioderTilVurderingTjeneste.utledFraDefinerendeVilkår(behandlingReferanse.getBehandlingId());
         var tidslinjeTilVurdering = new LocalDateTimeline<>(perioderTilVurdering.stream().map(p -> new LocalDateSegment<>(p.toLocalDateInterval(), Boolean.TRUE)).toList());
-        return !overstyrtUttak.intersection(tidslinjeTilVurdering).isEmpty();
+        return overstyrtUttak.intersects(tidslinjeTilVurdering);
     }
 
 }
