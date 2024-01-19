@@ -194,7 +194,7 @@ public class FagsakProsessTaskRepository {
             .filter(t -> currentTaskData == null || !Objects.equals(t.getId(), currentTaskData.getId())) // se bort fra oss selv (hvis vi kjører i en task)
             .map(ProsessTaskData::getTaskType).collect(Collectors.toSet());
 
-        var overlappNyeOgEksisterendeTaskTyper = new HashSet<>(eksisterendeTaskTyper);
+        Set<String> overlappNyeOgEksisterendeTaskTyper = new HashSet<>(eksisterendeTaskTyper);
         overlappNyeOgEksisterendeTaskTyper.retainAll(nyeTaskTyper);
 
         if (overlappNyeOgEksisterendeTaskTyper.isEmpty()) {
@@ -204,32 +204,21 @@ public class FagsakProsessTaskRepository {
         Set<ProsessTaskData> planlagteTasksBlokkertAvKjørende = eksisterendeTasks.stream()
             .filter(t -> Objects.equals(t.getStatus(), ProsessTaskStatus.VETO) && currentTaskData != null && Objects.equals(currentTaskData.getId(), t.getBlokkertAvProsessTaskId()))
             .collect(Collectors.toSet());
-        Set<String> planlagteTaskTyperBlokkertAvKjørende = planlagteTasksBlokkertAvKjørende.stream()
-            .map(ProsessTaskData::getTaskType)
-            .collect(Collectors.toSet());
         Set<String> blokkerteGrupper = planlagteTasksBlokkertAvKjørende.stream().map(ProsessTaskData::getGruppe).collect(Collectors.toSet());
         Set<ProsessTaskData> ventendeTasksIGruppeMedBlokkert = eksisterendeTasks.stream()
             .filter(t -> currentTaskData == null || !Objects.equals(t.getId(), currentTaskData.getId())) // se bort fra oss selv (hvis vi kjører i en task)
             .filter(t -> blokkerteGrupper.contains(t.getGruppe()))
             .filter(t -> Objects.equals(t.getStatus(), ProsessTaskStatus.KLAR))
             .collect(Collectors.toSet());
-        Set<String> ventendeTaskTyperIGruppeMedBlokkert = ventendeTasksIGruppeMedBlokkert.stream()
-            .map(ProsessTaskData::getTaskType)
-            .collect(Collectors.toSet());
 
         Set<ProsessTaskData> vetoetEllerVentendeTasks = new HashSet<>(planlagteTasksBlokkertAvKjørende);
         vetoetEllerVentendeTasks.addAll(ventendeTasksIGruppeMedBlokkert);
 
-        Set<String> vetoetEllerVentendeTasksAvSammeTypeSomNy = new HashSet<>(planlagteTaskTyperBlokkertAvKjørende);
-        vetoetEllerVentendeTasksAvSammeTypeSomNy.addAll(ventendeTaskTyperIGruppeMedBlokkert);
-        vetoetEllerVentendeTasksAvSammeTypeSomNy.retainAll(nyeTaskTyper);
-        if (!vetoetEllerVentendeTasksAvSammeTypeSomNy.isEmpty()) {
-            log.info("Vetoet eller ventende tasks av samme type som nye: {}", vetoetEllerVentendeTasksAvSammeTypeSomNy);
-        }
-
-        if (vetoetEllerVentendeTasksAvSammeTypeSomNy.containsAll(nyeTaskTyper) && taskPropertiesMatcher(vetoetEllerVentendeTasks, nyeTasks)) {
+        if (!vetoetEllerVentendeTasks.isEmpty() && nyeTaskerMatcherEksisterende(vetoetEllerVentendeTasks, nyeTasks)) {
             log.info("Skipper opprettelse av gruppe med tasks: [{}], Har allerede vetoet tasks av samme type [{}], Og ventende tasks i gruppe med vetoet [{}]",
-                toStringEntry(gruppe.getTasks()), planlagteTaskTyperBlokkertAvKjørende, ventendeTaskTyperIGruppeMedBlokkert);
+                toStringEntry(gruppe.getTasks()),
+                planlagteTasksBlokkertAvKjørende.stream().map(ProsessTaskData::getTaskType).collect(Collectors.toSet()),
+                ventendeTasksIGruppeMedBlokkert.stream().map(ProsessTaskData::getTaskType).collect(Collectors.toSet()));
             return blokkerteGrupper.stream().findFirst().orElse(null);
         }
 
@@ -238,23 +227,32 @@ public class FagsakProsessTaskRepository {
             + " Eksisterende tasktyper hensyntatt [" + eksisterendeTaskTyper + "]");
     }
 
-    private boolean taskPropertiesMatcher(Set<ProsessTaskData> eksisterendeTasks, List<ProsessTaskData> nyeTasks) {
+    /**
+     * Her sjekker vi om taskene vi prøver å opprette matcher tasker som er vetoet av den kjørende tasken.
+     * Dette gjør vi for å unngå "deadlock" der kjørende task ikke får lov til opprette nye tasker, fordi det finnes tasker som den selv har vetoet.
+     * Dersom alle taskene vi prøver å opprette finnes blant de som er vetoet, så trenger vi ikke opprette de nye.
+     * Det vi vil gjøre da er å la kjørende task kjøre ferdig uten å opprette nye, slik at de som var vetoet kan kjøre.
+    */
+    private boolean nyeTaskerMatcherEksisterende(Set<ProsessTaskData> eksisterendeTasks, List<ProsessTaskData> nyeTasks) {
         for (ProsessTaskData ny : nyeTasks) {
             boolean taskMatch = false;
-            var propertiesNy = hentRelevanteProperties(ny.getProperties());
-            var propNamesNy = propertiesNy.stringPropertyNames();
+            final var propertiesNy = hentRelevanteProperties(ny.getProperties());
+            final String taskType = ny.getTaskType();
+
             for (ProsessTaskData eksisterende : eksisterendeTasks) {
-                if (eksisterende.getTaskType().equals(ny.getTaskType())) {
-                    var propertiesEksisterende = hentRelevanteProperties(eksisterende.getProperties());
+                if (eksisterende.getTaskType().equals(taskType)) {
+                    final var propertiesEksisterende = hentRelevanteProperties(eksisterende.getProperties());
+                    håndterSpesialtilfelleFortsettBehandling(eksisterende, eksisterendeTasks, propertiesEksisterende, propertiesNy);
+
                     if (propertiesNy.size() != propertiesEksisterende.size()) {
-                        log.info("Task properties for tasktype '{}' matchet ikke eksisterende task: {}, nye task properties: {}, eksisterende task properties: {}", ny.getTaskType(), eksisterende.getId(), propNamesNy, propertiesEksisterende.stringPropertyNames());
+                        log.info("Task properties for tasktype '{}' matchet ikke eksisterende task: {}, nye task properties: {}, eksisterende task properties: {}", taskType, eksisterende.getId(), propertiesNy.stringPropertyNames(), propertiesEksisterende.stringPropertyNames());
                         continue;
                     }
 
                     boolean propsMatch = true;
-                    for (String propName : propNamesNy) {
+                    for (String propName : propertiesNy.stringPropertyNames()) {
                         if (!Objects.equals(propertiesNy.getProperty(propName), propertiesEksisterende.getProperty(propName))) {
-                            log.info("Task property '{}' matchet ikke, tasktype: '{}', eksisterende task: {}", propName, ny.getTaskType(), eksisterende.getId());
+                            log.info("Task property '{}' matchet ikke, tasktype: '{}', eksisterende task: {}", propName, taskType, eksisterende.getId());
                             propsMatch = false;
                         }
                     }
@@ -266,7 +264,7 @@ public class FagsakProsessTaskRepository {
 
             }
             if (!taskMatch) {
-                log.info("Fant ingen matchende eksisterende task for tasktype: '{}'", ny.getTaskType());
+                log.info("Fant ingen matchende eksisterende task for tasktype: '{}'", taskType);
                 return false;
             }
         }
@@ -292,12 +290,29 @@ public class FagsakProsessTaskRepository {
         return false;
     }
 
+    private void håndterSpesialtilfelleFortsettBehandling(ProsessTaskData eksisterendeTask, Set<ProsessTaskData> eksisterendeTasks, Properties propertiesEksisterende, Properties propertiesNy) {
+        if (eksisterendeTask.getTaskType().equals("behandlingskontroll.fortsettBehandling")) {
+            for (ProsessTaskData annenEksisterendeTask : eksisterendeTasks) {
+                if (annenEksisterendeTask.getTaskType().equals("grunnlag.diffOgReposisjoner")
+                    && annenEksisterendeTask.getGruppe() != null && annenEksisterendeTask.getGruppe().equals(eksisterendeTask.getGruppe())
+                    && annenEksisterendeTask.getSekvens() != null && eksisterendeTask.getSekvens() != null
+                    && Long.parseLong(annenEksisterendeTask.getSekvens()) < Long.parseLong(eksisterendeTask.getSekvens())) {
+                    // Ser bort ifra spesialproperties på fortsettBehandling dersom vi uansett skal kjøre diffOgReposisjoner først
+                    propertiesNy.remove("gjenopptaSteg");
+                    propertiesNy.remove("manuellFortsettelse");
+                    propertiesEksisterende.remove("gjenopptaSteg");
+                    propertiesEksisterende.remove("manuellFortsettelse");
+                }
+            }
+        }
+    }
+
     private String toStringTask(Collection<ProsessTaskData> tasks) {
         return tasks.stream().map(Object::toString).collect(Collectors.joining(", "));
     }
 
     private String toStringEntry(Collection<Entry> tasks) {
-        return tasks.stream().map(t -> t.getTask()).map(Object::toString).collect(Collectors.joining(", "));
+        return tasks.stream().map(Entry::getTask).map(Object::toString).collect(Collectors.joining(", "));
     }
 
     public List<ProsessTaskData> sjekkStatusProsessTasks(Long fagsakId, Long behandlingId, String gruppe) {

@@ -329,4 +329,81 @@ class FagsakProsessTaskRepositoryTest {
         fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, nyGruppe);
         assertThat(nyTask.getId()).isNull();
     }
+
+    @Test
+    void skalIkkeFeileSelvOmFortsettBehandlingHarForskjelligSpesialPropertiesNårViHarVetoetDiffOgReposisjonerTask() {
+        ProsessTaskData kjørendeTask = setupKjørendeTask(taskTypeA);
+
+        ProsessTaskData vetoetTask = lagTask(new TaskType("grunnlag.diffOgReposisjoner"), ProsessTaskStatus.VETO);
+        vetoetTask.setBlokkertAvProsessTaskId(kjørendeTask.getId());
+        ProsessTaskData taskIGruppeMedVetoet = lagTask(new TaskType("behandlingskontroll.fortsettBehandling"), ProsessTaskStatus.KLAR);
+        taskIGruppeMedVetoet.setProperty("manuellFortsettelse", "true");
+        ProsessTaskGruppe eksisterendeGruppe = new ProsessTaskGruppe(vetoetTask);
+        eksisterendeGruppe.addNesteSekvensiell(taskIGruppeMedVetoet);
+        fagsakProsessTaskRepository.lagreNyGruppe(eksisterendeGruppe);
+        FagsakProsessTask fagsakProsessTask1 = new FagsakProsessTask(fagsakId, behandlingId.toString(), vetoetTask.getId(), 222L, vetoetTask.getTaskType());
+        fagsakProsessTaskRepository.lagre(fagsakProsessTask1);
+        FagsakProsessTask fagsakProsessTask2 = new FagsakProsessTask(fagsakId, behandlingId.toString(), taskIGruppeMedVetoet.getId(), 222L, taskIGruppeMedVetoet.getTaskType());
+        fagsakProsessTaskRepository.lagre(fagsakProsessTask2);
+
+        ProsessTaskData nyTask = lagTask(new TaskType("behandlingskontroll.fortsettBehandling"), ProsessTaskStatus.KLAR);
+        nyTask.setProperty("manuellFortsettelse", "false");
+        nyTask.setProperty("gjenopptaSteg", "test");
+        ProsessTaskGruppe nyGruppe = new ProsessTaskGruppe(nyTask);
+
+        fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, nyGruppe);
+        assertThat(nyTask.getId()).isNull();
+    }
+
+    @Test
+    void skalFeileNårFortsettBehandlingHarForskjelligSpesialPropertiesOgViIkkeHarVetoetDiffOgReposisjonerTask() {
+        ProsessTaskData kjørendeTask = setupKjørendeTask(taskTypeA);
+
+        ProsessTaskData vetoetTask = lagTask(new TaskType("grunnlag.diffOgReposisjoner.not"), ProsessTaskStatus.VETO);
+        vetoetTask.setBlokkertAvProsessTaskId(kjørendeTask.getId());
+        ProsessTaskData taskIGruppeMedVetoet = lagTask(new TaskType("behandlingskontroll.fortsettBehandling"), ProsessTaskStatus.KLAR);
+        taskIGruppeMedVetoet.setProperty("manuellFortsettelse", "true");
+        ProsessTaskGruppe eksisterendeGruppe = new ProsessTaskGruppe(vetoetTask);
+        eksisterendeGruppe.addNesteSekvensiell(taskIGruppeMedVetoet);
+        fagsakProsessTaskRepository.lagreNyGruppe(eksisterendeGruppe);
+        FagsakProsessTask fagsakProsessTask1 = new FagsakProsessTask(fagsakId, behandlingId.toString(), vetoetTask.getId(), 222L, vetoetTask.getTaskType());
+        fagsakProsessTaskRepository.lagre(fagsakProsessTask1);
+        FagsakProsessTask fagsakProsessTask2 = new FagsakProsessTask(fagsakId, behandlingId.toString(), taskIGruppeMedVetoet.getId(), 222L, taskIGruppeMedVetoet.getTaskType());
+        fagsakProsessTaskRepository.lagre(fagsakProsessTask2);
+
+        ProsessTaskData nyTask = lagTask(new TaskType("behandlingskontroll.fortsettBehandling"), ProsessTaskStatus.KLAR);
+        nyTask.setProperty("manuellFortsettelse", "false");
+        nyTask.setProperty("gjenopptaSteg", "test");
+        ProsessTaskGruppe nyGruppe = new ProsessTaskGruppe(nyTask);
+
+        assertThrows(IllegalStateException.class, () ->
+            fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, nyGruppe));
+    }
+
+    @Test
+    void skalFeileNårFortsettBehandlingHarForskjelligPropertiesSomIkkeErSpesialPropertiesSelvOmViHarVetoetDiffOgReposisjonerTask() {
+        ProsessTaskData kjørendeTask = setupKjørendeTask(taskTypeA);
+
+        ProsessTaskData vetoetTask = lagTask(new TaskType("grunnlag.diffOgReposisjoner"), ProsessTaskStatus.VETO);
+        vetoetTask.setBlokkertAvProsessTaskId(kjørendeTask.getId());
+        ProsessTaskData taskIGruppeMedVetoet = lagTask(new TaskType("behandlingskontroll.fortsettBehandling"), ProsessTaskStatus.KLAR);
+        taskIGruppeMedVetoet.setProperty("manuellFortsettelse", "true");
+        taskIGruppeMedVetoet.setProperty("enannenprop", "noe");
+        ProsessTaskGruppe eksisterendeGruppe = new ProsessTaskGruppe(vetoetTask);
+        eksisterendeGruppe.addNesteSekvensiell(taskIGruppeMedVetoet);
+        fagsakProsessTaskRepository.lagreNyGruppe(eksisterendeGruppe);
+        FagsakProsessTask fagsakProsessTask1 = new FagsakProsessTask(fagsakId, behandlingId.toString(), vetoetTask.getId(), 222L, vetoetTask.getTaskType());
+        fagsakProsessTaskRepository.lagre(fagsakProsessTask1);
+        FagsakProsessTask fagsakProsessTask2 = new FagsakProsessTask(fagsakId, behandlingId.toString(), taskIGruppeMedVetoet.getId(), 222L, taskIGruppeMedVetoet.getTaskType());
+        fagsakProsessTaskRepository.lagre(fagsakProsessTask2);
+
+        ProsessTaskData nyTask = lagTask(new TaskType("behandlingskontroll.fortsettBehandling"), ProsessTaskStatus.KLAR);
+        nyTask.setProperty("manuellFortsettelse", "false");
+        nyTask.setProperty("gjenopptaSteg", "test");
+        nyTask.setProperty("enannenprop", "noe annet");
+        ProsessTaskGruppe nyGruppe = new ProsessTaskGruppe(nyTask);
+
+        assertThrows(IllegalStateException.class, () ->
+            fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, nyGruppe));
+    }
 }
