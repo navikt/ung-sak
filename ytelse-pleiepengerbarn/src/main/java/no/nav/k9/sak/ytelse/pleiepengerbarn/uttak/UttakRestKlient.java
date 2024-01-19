@@ -44,6 +44,7 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.Simulering;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
+@ApplicationScoped
 @ScopedRestIntegration(scopeKey = "k9.psb.uttak.scope", defaultScope = "api://prod-fss.k9saksbehandling.pleiepenger-barn-uttak/.default")
 public class UttakRestKlient {
     private static final String TJENESTE_NAVN = "pleiepenger-barn-uttak";
