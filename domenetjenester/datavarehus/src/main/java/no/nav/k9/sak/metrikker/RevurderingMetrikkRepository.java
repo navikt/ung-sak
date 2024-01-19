@@ -69,14 +69,19 @@ public class RevurderingMetrikkRepository {
             log.warn("Uthenting av antallAksjonspunktFordelingForRevurderingSisteSyvDager feiler", e);
         }
         try {
-            metrikker.addAll(timeCall(() -> antallAksjonspunktFordelingForRevurderingUtenNyttStpSisteSyvDager(dag), "antallAksjonspunktFordelingForRevurderingSisteSyvDager"));
+            metrikker.addAll(timeCall(() -> antallAksjonspunktFordelingForRevurderingUtenNyttStpSisteSyvDager(dag), "antallAksjonspunktFordelingForRevurderingUtenNyttStpSisteSyvDager"));
         } catch (QueryTimeoutException e) {
-            log.warn("Uthenting av antallAksjonspunktFordelingForRevurderingSisteSyvDager feiler", e);
+            log.warn("Uthenting av antallAksjonspunktFordelingForRevurderingUtenNyttStpSisteSyvDager feiler", e);
         }
         try {
             metrikker.addAll(timeCall(() -> antallRevurderingMedAksjonspunktPrKodeSisteSyvDager(dag), "antallRevurderingMedAksjonspunktPrKodeSisteSyvDager"));
         } catch (QueryTimeoutException e) {
             log.warn("Uthenting av antallRevurderingMedAksjonspunktPrKodeSisteSyvDager feiler", e);
+        }
+        try {
+            metrikker.addAll(timeCall(() -> antallRevurderingUtenNyttStpMedAksjonspunktPrKodeSisteSyvDager(dag), "antallRevurderingUtenNyttStpMedAksjonspunktPrKodeSisteSyvDager"));
+        } catch (QueryTimeoutException e) {
+            log.warn("Uthenting av antallRevurderingUtenNyttStpMedAksjonspunktPrKodeSisteSyvDager feiler", e);
         }
         return metrikker;
     }
@@ -256,6 +261,55 @@ public class RevurderingMetrikkRepository {
         return values;
 
     }
+
+
+
+    @SuppressWarnings("unchecked")
+    Collection<SensuEvent> antallRevurderingUtenNyttStpMedAksjonspunktPrKodeSisteSyvDager(LocalDate dato) {
+        String sql = "select f.ytelse_type, a.aksjonspunkt_def, count(*) as antall_behandlinger " +
+            "from behandling b" +
+            "         inner join fagsak f on f.id=b.fagsak_id" +
+            "         inner join aksjonspunkt a on b.id = a.behandling_id " +
+            "where a.aksjonspunkt_status != 'AVBR' " +
+            "and (vent_aarsak is null or vent_aarsak = '-') " +
+            "and b.avsluttet_dato is not null " +
+            "and b.avsluttet_dato>=:startTid and b.avsluttet_dato < :sluttTid " +
+            "and b.behandling_type=:revurdering " +
+            " and not exists ( " +
+            " select 1 from rs_vilkars_resultat rv" +
+            " inner join vr_vilkar vv on vv.vilkar_resultat_id=rv.vilkarene_id" +
+            " inner join vr_vilkar_periode vp on vp.vilkar_id=vv.id" +
+            " inner join rs_vilkars_resultat rv_original on rv_original.behandling_id = b.original_behandling_id" +
+            " inner join vr_vilkar vv_original on vv_original.vilkar_resultat_id=rv_original.vilkarene_id" +
+            " inner join vr_vilkar_periode vp_original on vp_original.vilkar_id=vv_original.id" +
+            " where rv.aktiv=true and rv.behandling_id = b.id and vv.vilkar_type = :bg_vilkaret " +
+            " and rv_original.aktiv=true and vp_original.fom != vp.fom and vv_original.vilkar_type = :bg_vilkaret)" +
+            "group by 1, 2";
+
+        String metricName = "revurdering_uten_nytt_stp_antall_behandlinger_pr_aksjonspunkt";
+        String metricField = "antall_behandlinger";
+
+        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
+            .setParameter("revurdering", BehandlingType.REVURDERING.getKode())
+            .setParameter("bg_vilkaret", VilkårType.BEREGNINGSGRUNNLAGVILKÅR.getKode())
+            .setParameter("startTid", dato.minusDays(7).atStartOfDay())
+            .setParameter("sluttTid", dato.atStartOfDay());
+
+        Stream<Tuple> stream = query.getResultStream()
+            .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class)));
+
+        var values = stream.map(t -> SensuEvent.createSensuEvent(metricName,
+                toMap(
+                    "ytelse_type", t.get(0, String.class),
+                    "aksjonspunkt", t.get(1, String.class),
+                    "aksjonspunkt_navn", coalesce(AksjonspunktDefinisjon.kodeMap().getOrDefault(t.get(1, String.class), AksjonspunktDefinisjon.UNDEFINED).getNavn(), "-")),
+                Map.of(metricField, t.get(2, Number.class))))
+            .collect(Collectors.toList());
+
+        return values;
+
+    }
+
 
     private static String coalesce(String str, String defValue) {
         return str != null ? str : defValue;
