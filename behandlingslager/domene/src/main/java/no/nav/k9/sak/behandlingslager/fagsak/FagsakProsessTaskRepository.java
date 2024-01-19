@@ -242,9 +242,7 @@ public class FagsakProsessTaskRepository {
             for (ProsessTaskData eksisterende : eksisterendeTasks) {
                 if (eksisterende.getTaskType().equals(taskType)) {
                     final var propertiesEksisterende = hentRelevanteProperties(eksisterende.getProperties());
-                    if (taskType.equals("behandlingskontroll.fortsettBehandling")) {
-                        håndterSpesialtilfelleFortsettBehandling(eksisterende, eksisterendeTasks, propertiesEksisterende, propertiesNy);
-                    }
+                    håndterSpesialtilfelleFortsettBehandling(eksisterende, eksisterendeTasks, propertiesEksisterende, propertiesNy);
 
                     if (propertiesNy.size() != propertiesEksisterende.size()) {
                         log.info("Task properties for tasktype '{}' matchet ikke eksisterende task: {}, nye task properties: {}, eksisterende task properties: {}", taskType, eksisterende.getId(), propertiesNy.stringPropertyNames(), propertiesEksisterende.stringPropertyNames());
@@ -293,16 +291,18 @@ public class FagsakProsessTaskRepository {
     }
 
     private void håndterSpesialtilfelleFortsettBehandling(ProsessTaskData eksisterendeTask, Set<ProsessTaskData> eksisterendeTasks, Properties propertiesEksisterende, Properties propertiesNy) {
-        for (ProsessTaskData annenEksisterendeTask : eksisterendeTasks) {
-            if (annenEksisterendeTask.getTaskType().equals("grunnlag.diffOgReposisjoner")
-                && annenEksisterendeTask.getGruppe() != null && annenEksisterendeTask.getGruppe().equals(eksisterendeTask.getGruppe())
-                && annenEksisterendeTask.getSekvens() != null && eksisterendeTask.getSekvens() != null
-                && Long.parseLong(annenEksisterendeTask.getSekvens()) < Long.parseLong(eksisterendeTask.getSekvens())) {
-                // Ser bort ifra spesialproperties på fortsettBehandling dersom vi uansett skal kjøre diffOgReposisjoner først
-                propertiesNy.remove("gjenopptaSteg");
-                propertiesNy.remove("manuellFortsettelse");
-                propertiesEksisterende.remove("gjenopptaSteg");
-                propertiesEksisterende.remove("manuellFortsettelse");
+        if (eksisterendeTask.getTaskType().equals("behandlingskontroll.fortsettBehandling")) {
+            for (ProsessTaskData annenEksisterendeTask : eksisterendeTasks) {
+                if (annenEksisterendeTask.getTaskType().equals("grunnlag.diffOgReposisjoner")
+                    && annenEksisterendeTask.getGruppe() != null && annenEksisterendeTask.getGruppe().equals(eksisterendeTask.getGruppe())
+                    && annenEksisterendeTask.getSekvens() != null && eksisterendeTask.getSekvens() != null
+                    && Long.parseLong(annenEksisterendeTask.getSekvens()) < Long.parseLong(eksisterendeTask.getSekvens())) {
+                    // Ser bort ifra spesialproperties på fortsettBehandling dersom vi uansett skal kjøre diffOgReposisjoner først
+                    propertiesNy.remove("gjenopptaSteg");
+                    propertiesNy.remove("manuellFortsettelse");
+                    propertiesEksisterende.remove("gjenopptaSteg");
+                    propertiesEksisterende.remove("manuellFortsettelse");
+                }
             }
         }
     }
