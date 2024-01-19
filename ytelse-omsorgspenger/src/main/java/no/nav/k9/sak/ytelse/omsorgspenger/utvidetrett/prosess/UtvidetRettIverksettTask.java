@@ -15,7 +15,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.uttak.Tid;
@@ -60,13 +59,11 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
     public UtvidetRettIverksettTask(VilkårTjeneste vilkårTjeneste,
                                     BehandlingRepository behandlingRepository,
                                     UtvidetRettKlient utvidetRettKlient,
-                                    PeriodisertUtvidetRettIverksettTjeneste periodisertUtvidetRettIverksettTjeneste,
-                                    @KonfigVerdi(value = "PERIODISERT_RAMMEVEDTAK_AO", defaultVerdi = "false") boolean brukPeriodisertRammevedtakAleneOmsorgen) {
+                                    PeriodisertUtvidetRettIverksettTjeneste periodisertUtvidetRettIverksettTjeneste) {
         this.vilkårTjeneste = vilkårTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.utvidetRettKlient = utvidetRettKlient;
         this.periodisertUtvidetRettIverksettTjeneste = periodisertUtvidetRettIverksettTjeneste;
-        this.brukPeriodisertRammevedtakAleneOmsorgen = brukPeriodisertRammevedtakAleneOmsorgen;
     }
 
     @Override

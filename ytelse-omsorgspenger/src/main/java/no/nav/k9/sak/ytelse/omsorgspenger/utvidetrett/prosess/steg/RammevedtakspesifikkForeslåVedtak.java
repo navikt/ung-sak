@@ -9,7 +9,6 @@ import org.jboss.weld.exceptions.IllegalStateException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -28,7 +27,6 @@ public class RammevedtakspesifikkForeslåVedtak implements YtelsespesifikkForesl
 
     private BehandlingRepository behandlingRepository;
     private PeriodisertUtvidetRettIverksettTjeneste periodisertUtvidetRettIverksettTjeneste;
-    private boolean brukPeriodisertRammevedtakAleneOmsorgen;
 
     public RammevedtakspesifikkForeslåVedtak() {
         //for CDI proxy
@@ -36,17 +34,15 @@ public class RammevedtakspesifikkForeslåVedtak implements YtelsespesifikkForesl
 
     @Inject
     public RammevedtakspesifikkForeslåVedtak(BehandlingRepository behandlingRepository,
-                                             PeriodisertUtvidetRettIverksettTjeneste periodisertUtvidetRettIverksettTjeneste,
-                                             @KonfigVerdi(value = "PERIODISERT_RAMMEVEDTAK_AO", defaultVerdi = "false") boolean brukPeriodisertRammevedtakAleneOmsorgen) {
+                                             PeriodisertUtvidetRettIverksettTjeneste periodisertUtvidetRettIverksettTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.periodisertUtvidetRettIverksettTjeneste = periodisertUtvidetRettIverksettTjeneste;
-        this.brukPeriodisertRammevedtakAleneOmsorgen = brukPeriodisertRammevedtakAleneOmsorgen;
     }
 
     @Override
     public BehandleStegResultat run(BehandlingReferanse ref) {
         Behandling behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
-        boolean brukerPeriodisering = brukPeriodisertRammevedtakAleneOmsorgen && behandling.getFagsakYtelseType() == OMSORGSPENGER_AO;
+        boolean brukerPeriodisering = behandling.getFagsakYtelseType() == OMSORGSPENGER_AO;
         if (brukerPeriodisering) {
             LocalDateTimeline<Utfall> endringer = periodisertUtvidetRettIverksettTjeneste.utfallSomErEndret(behandling);
             if (endringer.size() > 1) {

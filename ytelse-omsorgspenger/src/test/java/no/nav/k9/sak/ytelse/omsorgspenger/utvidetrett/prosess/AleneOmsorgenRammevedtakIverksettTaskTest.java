@@ -56,7 +56,7 @@ class AleneOmsorgenRammevedtakIverksettTaskTest {
 
     @BeforeEach
     void setUp() {
-        PeriodisertUtvidetRettIverksettTjeneste periodisertUtvidetRettIverksettTjeneste = new PeriodisertUtvidetRettIverksettTjeneste(vilkårResultatRepository, true);
+        PeriodisertUtvidetRettIverksettTjeneste periodisertUtvidetRettIverksettTjeneste = new PeriodisertUtvidetRettIverksettTjeneste(vilkårResultatRepository);
         utvidetRettIverksettTask = new UtvidetRettIverksettTask(vilkårTjeneste, behandlingRepository, utvidetRettKlient, periodisertUtvidetRettIverksettTjeneste, true);
     }
 
