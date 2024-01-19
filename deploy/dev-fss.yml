@@ -269,8 +269,6 @@ spec:
       value: "true"
     - name: FILTRER_UGYLDIG_IM
       value: "true"
-    - name: ENABLE_UTENLANDSOPPHOLD_PILS
-      value: "true"
     - name: PERIODISERT_RAMMEVEDTAK_AO
       value: "true"
     - name: STONADSTATISTIKK_V2
