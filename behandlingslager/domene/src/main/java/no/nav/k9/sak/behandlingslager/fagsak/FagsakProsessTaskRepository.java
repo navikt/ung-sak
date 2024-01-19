@@ -227,6 +227,12 @@ public class FagsakProsessTaskRepository {
             + " Eksisterende tasktyper hensyntatt [" + eksisterendeTaskTyper + "]");
     }
 
+    /**
+     * Her sjekker vi om taskene vi prøver å opprette matcher tasker som er vetoet av den kjørende tasken.
+     * Dette gjør vi for å unngå "deadlock" der kjørende task ikke får lov til opprette nye tasker, fordi det finnes tasker som den selv har vetoet.
+     * Dersom alle taskene vi prøver å opprette finnes blant de som er vetoet, så trenger vi ikke opprette de nye.
+     * Det vi vil gjøre da er å la kjørende task kjøre ferdig uten å opprette nye, slik at de som var vetoet kan kjøre.
+    */
     private boolean nyeTaskerMatcherEksisterende(Set<ProsessTaskData> eksisterendeTasks, List<ProsessTaskData> nyeTasks) {
         for (ProsessTaskData ny : nyeTasks) {
             boolean taskMatch = false;
