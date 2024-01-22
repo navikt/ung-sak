@@ -7,8 +7,10 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -42,6 +44,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.RyddVilkårTyper;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.inngangsvilkår.VilkårData;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.EtablertPleiebehovBuilder;
@@ -96,7 +99,7 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
-        var behandlingId = kontekst.getBehandlingId();
+        final Long behandlingId = kontekst.getBehandlingId();
         final Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
         if (søknadsperiodeTjeneste.utledFullstendigPeriode(kontekst.getBehandlingId()).isEmpty()) {
@@ -108,20 +111,23 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
-        var vilkårene = vilkårResultatRepository.hent(behandlingId);
-        var perioder = perioderTilVurderingTjeneste.utled(behandlingId, VilkårType.I_LIVETS_SLUTTFASE);
+        NavigableSet<DatoIntervallEntitet> perioderTilVurdering = perioderTilVurderingTjeneste.utled(behandlingId, VilkårType.I_LIVETS_SLUTTFASE);
 
-        MedisinskGrunnlag medisinskGrunnlag = opprettGrunnlag(perioder, behandling);
+        MedisinskGrunnlag medisinskGrunnlag = opprettGrunnlag(perioderTilVurdering, behandling);
 
         boolean trengerAksjonspunkt = trengerAksjonspunkt(kontekst, behandling);
         if (trengerAksjonspunkt) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)));
         }
 
+        var vilkårene = vilkårResultatRepository.hent(behandlingId);
         var builder = Vilkårene.builderFraEksisterende(vilkårene);
         builder.medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer());
-        vurderVilkår(behandlingId, medisinskGrunnlag, builder, perioder);
-        vilkårResultatRepository.lagre(behandlingId, builder.build());
+        vurderVilkår(behandlingId, medisinskGrunnlag, builder, perioderTilVurdering);
+
+        final Vilkårene nyttResultat = builder.build();
+        Optional<Vilkårene> korrigertResultat = håndterTidligereAvslagPgaManglendeDok(behandling, perioderTilVurdering, nyttResultat);
+        vilkårResultatRepository.lagre(behandlingId, korrigertResultat.orElse(nyttResultat));
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
@@ -207,6 +213,55 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
             .forEach(builder::leggTil);
 
         resultatRepository.lagreOgFlush(behandlingId, builder);
+    }
+
+    /**
+     * Håndtering av perioder som ikke er til vurdering, men som likevel står som ikke vurdert pga tidligere avslag på manglende dok (se TSF-3839).
+     * Dersom det finnes vurdering fra tidligere behandling bruker vi denne (ikke oppfylt).
+     * Skal ikke gjøre noe med perioder som er til vurdering i denne behandlingen.
+    */
+    private Optional<Vilkårene> håndterTidligereAvslagPgaManglendeDok(Behandling behandling, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Vilkårene vilkårene) {
+        if (behandling.erRevurdering()) {
+            NavigableSet<DatoIntervallEntitet> perioderUtenVurdering = finnPerioderUtenVurdering(vilkårene);
+            if (!perioderUtenVurdering.isEmpty()) {
+                var tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering);
+                var tidslinjeUtenVurdering = TidslinjeUtil.tilTidslinjeKomprimert(perioderUtenVurdering);
+
+                Vilkårene vilkåreneOriginalBehandling = vilkårResultatRepository.hent(behandling.getOriginalBehandlingId().orElseThrow());
+                Vilkår vilkårOriginalBehandling = vilkåreneOriginalBehandling.getVilkår(VilkårType.I_LIVETS_SLUTTFASE).orElseThrow();
+
+                NavigableSet<DatoIntervallEntitet> perioderIkkeOppfyltManglendeDok = vilkårOriginalBehandling.getPerioder().stream()
+                    .filter(vilkårPeriode -> Objects.equals(vilkårPeriode.getGjeldendeUtfall(), Utfall.IKKE_OPPFYLT))
+                    .filter(vilkårPeriode -> Objects.equals(vilkårPeriode.getAvslagsårsak(), Avslagsårsak.MANGLENDE_DOKUMENTASJON))
+                    .map(VilkårPeriode::getPeriode)
+                    .collect(Collectors.toCollection(TreeSet::new));
+                var tidslinjeIkkeOppfyltManglendeDok = TidslinjeUtil.tilTidslinjeKomprimert(perioderIkkeOppfyltManglendeDok);
+
+                var tidslinjeSomSkalHåndteres = tidslinjeUtenVurdering.disjoint(tidslinjeTilVurdering).intersection(tidslinjeIkkeOppfyltManglendeDok);
+
+                if (!tidslinjeSomSkalHåndteres.isEmpty()) {
+                    var builder = Vilkårene.builderFraEksisterende(vilkårene);
+                    builder.medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer());
+                    var vilkårBuilder = builder.hentBuilderFor(VilkårType.I_LIVETS_SLUTTFASE);
+                    for (DatoIntervallEntitet periode : TidslinjeUtil.tilDatoIntervallEntiteter(tidslinjeSomSkalHåndteres)) {
+                        vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
+                            .medUtfall(Utfall.IKKE_OPPFYLT)
+                            .medAvslagsårsak(Avslagsårsak.MANGLENDE_DOKUMENTASJON));
+                    }
+                    builder.leggTil(vilkårBuilder);
+                    return Optional.of(builder.build());
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
+    private NavigableSet<DatoIntervallEntitet> finnPerioderUtenVurdering(Vilkårene resultat) {
+        Vilkår vilkåret = resultat.getVilkår(VilkårType.I_LIVETS_SLUTTFASE).orElseThrow();
+        return vilkåret.getPerioder().stream()
+            .filter(periode -> Objects.equals(periode.getGjeldendeUtfall(), Utfall.IKKE_VURDERT))
+            .map(VilkårPeriode::getPeriode)
+            .collect(Collectors.toCollection(TreeSet::new));
     }
 
     @Override
