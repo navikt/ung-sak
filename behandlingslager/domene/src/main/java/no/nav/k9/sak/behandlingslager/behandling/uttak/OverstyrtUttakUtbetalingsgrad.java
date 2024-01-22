@@ -47,7 +47,7 @@ public class OverstyrtUttakUtbetalingsgrad {
     }
 
     public InternArbeidsforholdRef getInternArbeidsforholdRef() {
-        return internArbeidsforholdRef != null ? InternArbeidsforholdRef.ref(internArbeidsforholdRef) : null;
+        return internArbeidsforholdRef != null ? InternArbeidsforholdRef.ref(internArbeidsforholdRef) : InternArbeidsforholdRef.nullRef();
     }
 
     public BigDecimal getUtbetalingsgrad() {
