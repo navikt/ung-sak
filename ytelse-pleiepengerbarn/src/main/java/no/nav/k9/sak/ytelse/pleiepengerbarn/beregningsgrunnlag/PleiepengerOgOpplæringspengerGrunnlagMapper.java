@@ -4,8 +4,18 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
-import no.nav.folketrygdloven.kalkulus.beregning.v1.*;
-import no.nav.folketrygdloven.kalkulus.felles.v1.*;
+import no.nav.folketrygdloven.kalkulus.beregning.v1.AktivitetDto;
+import no.nav.folketrygdloven.kalkulus.beregning.v1.OpplæringspengerGrunnlag;
+import no.nav.folketrygdloven.kalkulus.beregning.v1.PeriodeMedUtbetalingsgradDto;
+import no.nav.folketrygdloven.kalkulus.beregning.v1.PleiepengerNærståendeGrunnlag;
+import no.nav.folketrygdloven.kalkulus.beregning.v1.PleiepengerSyktBarnGrunnlag;
+import no.nav.folketrygdloven.kalkulus.beregning.v1.UtbetalingsgradPrAktivitetDto;
+import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
+import no.nav.folketrygdloven.kalkulus.felles.v1.Aktør;
+import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
+import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
+import no.nav.folketrygdloven.kalkulus.felles.v1.Organisasjon;
+import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
 import no.nav.folketrygdloven.kalkulus.kodeverk.UttakArbeidType;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -20,17 +30,29 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidstidMappingInput;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.MapArbeid;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
-import no.nav.pleiepengerbarn.uttak.kontrakter.*;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeidsforhold;
+import no.nav.pleiepengerbarn.uttak.kontrakter.ArbeidsforholdPeriodeInfo;
+import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
+import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.*;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)

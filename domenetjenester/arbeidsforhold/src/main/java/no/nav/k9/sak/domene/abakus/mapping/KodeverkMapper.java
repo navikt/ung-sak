@@ -2,7 +2,21 @@ package no.nav.k9.sak.domene.abakus.mapping;
 
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseStatus;
 import no.nav.k9.kodeverk.Fagsystem;
-import no.nav.k9.kodeverk.arbeidsforhold.*;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
+import no.nav.k9.kodeverk.arbeidsforhold.Arbeidskategori;
+import no.nav.k9.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektPeriodeType;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektYtelseType;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektsmeldingInnsendingsårsak;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
+import no.nav.k9.kodeverk.arbeidsforhold.LønnsinntektBeskrivelse;
+import no.nav.k9.kodeverk.arbeidsforhold.NaturalYtelseType;
+import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
+import no.nav.k9.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
+import no.nav.k9.kodeverk.arbeidsforhold.SkatteOgAvgiftsregelType;
+import no.nav.k9.kodeverk.arbeidsforhold.UtsettelseÅrsak;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 
 public final class KodeverkMapper {
