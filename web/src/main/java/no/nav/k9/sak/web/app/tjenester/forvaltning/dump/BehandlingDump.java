@@ -83,7 +83,7 @@ public class BehandlingDump implements DebugDumpFagsak {
             toCsv.put("id", Behandling::getId);
             toCsv.put("uuid", Behandling::getUuid);
             toCsv.put("fagsak_id", Behandling::getFagsakId);
-            toCsv.put("aktoer_id", Behandling::getAktørId);
+            toCsv.put("aktoer_id", it -> it.getAktørId().getAktørId());
             toCsv.put("behandling_status", Behandling::getStatus);
             toCsv.put("startpunkt", Behandling::getStartpunkt);
             toCsv.put("behandling_resultat_type", Behandling::getBehandlingResultatType);
@@ -101,6 +101,7 @@ public class BehandlingDump implements DebugDumpFagsak {
             toCsv.put("behandling_årsaker", Behandling::getBehandlingÅrsakerTyper);
             toCsv.put("behandling_frist", Behandling::getBehandlingstidFrist);
             toCsv.put("behandling_avsluttet", Behandling::getAvsluttetDato);
+            toCsv.put("behandling_type", it -> it.getType().getNavn());
             toCsv.put("manuelt_opprettet", Behandling::erManueltOpprettet);
             toCsv.put("original_behandling", Behandling::getOriginalBehandlingId);
             toCsv.put("opprettet_tid", Behandling::getOpprettetTidspunkt);
