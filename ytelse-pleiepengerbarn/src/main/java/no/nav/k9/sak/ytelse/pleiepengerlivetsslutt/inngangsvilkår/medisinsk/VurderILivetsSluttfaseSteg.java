@@ -126,7 +126,7 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
         vurderVilkår(behandlingId, medisinskGrunnlag, builder, perioderTilVurdering);
 
         final Vilkårene nyttResultat = builder.build();
-        Optional<Vilkårene> korrigertResultat = håndterTidligereAvslagPgaManglendeDok(behandling, perioderTilVurdering, nyttResultat);
+        Optional<Vilkårene> korrigertResultat = videreførTidligereAvslagPgaManglendeDok(behandling, perioderTilVurdering, nyttResultat);
         vilkårResultatRepository.lagre(behandlingId, korrigertResultat.orElse(nyttResultat));
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
@@ -220,7 +220,7 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
      * Dersom det finnes vurdering fra tidligere behandling bruker vi denne (ikke oppfylt).
      * Skal ikke gjøre noe med perioder som er til vurdering i denne behandlingen.
     */
-    private Optional<Vilkårene> håndterTidligereAvslagPgaManglendeDok(Behandling behandling, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Vilkårene vilkårene) {
+    private Optional<Vilkårene> videreførTidligereAvslagPgaManglendeDok(Behandling behandling, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Vilkårene vilkårene) {
         if (behandling.erRevurdering()) {
             NavigableSet<DatoIntervallEntitet> perioderUtenVurdering = finnPerioderUtenVurdering(vilkårene);
             if (!perioderUtenVurdering.isEmpty()) {
@@ -237,13 +237,13 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
                     .collect(Collectors.toCollection(TreeSet::new));
                 var tidslinjeIkkeOppfyltManglendeDok = TidslinjeUtil.tilTidslinjeKomprimert(perioderIkkeOppfyltManglendeDok);
 
-                var tidslinjeSomSkalHåndteres = tidslinjeUtenVurdering.disjoint(tidslinjeTilVurdering).intersection(tidslinjeIkkeOppfyltManglendeDok);
+                var tidslinjeVidereførManglendeDokumentasjon = tidslinjeUtenVurdering.disjoint(tidslinjeTilVurdering).intersection(tidslinjeIkkeOppfyltManglendeDok);
 
-                if (!tidslinjeSomSkalHåndteres.isEmpty()) {
+                if (!tidslinjeVidereførManglendeDokumentasjon.isEmpty()) {
                     var builder = Vilkårene.builderFraEksisterende(vilkårene);
                     builder.medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer());
                     var vilkårBuilder = builder.hentBuilderFor(VilkårType.I_LIVETS_SLUTTFASE);
-                    for (DatoIntervallEntitet periode : TidslinjeUtil.tilDatoIntervallEntiteter(tidslinjeSomSkalHåndteres)) {
+                    for (DatoIntervallEntitet periode : TidslinjeUtil.tilDatoIntervallEntiteter(tidslinjeVidereførManglendeDokumentasjon)) {
                         vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
                             .medUtfall(Utfall.IKKE_OPPFYLT)
                             .medAvslagsårsak(Avslagsårsak.MANGLENDE_DOKUMENTASJON));
