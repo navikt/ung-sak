@@ -49,7 +49,6 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
     private BehandlingRepository behandlingRepository;
     private UtvidetRettKlient utvidetRettKlient;
     private PeriodisertUtvidetRettIverksettTjeneste periodisertUtvidetRettIverksettTjeneste;
-    private boolean brukPeriodisertRammevedtakAleneOmsorgen;
 
 
     protected UtvidetRettIverksettTask() {
@@ -70,7 +69,7 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
     protected void prosesser(ProsessTaskData prosessTaskData) {
         var behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
         logContext(behandling);
-        boolean brukerPeriodisering = brukPeriodisertRammevedtakAleneOmsorgen && behandling.getFagsakYtelseType() == FagsakYtelseType.OMSORGSPENGER_AO;
+        boolean brukerPeriodisering = behandling.getFagsakYtelseType() == FagsakYtelseType.OMSORGSPENGER_AO;
         if (brukerPeriodisering) {
             håndterAktuellOgTilpassTidligerePerioder(behandling);
         } else {
@@ -96,7 +95,8 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
                     log.info("Iverksetter avslått rammevedtak for periode: {}", vedtakperiode);
                     utvidetRettKlient.avslått(iverksett);
                 }
-                default -> throw new IllegalArgumentException("Ikke-støttet verdi: " + segment.getValue() + " for " + segment.getLocalDateInterval());
+                default ->
+                    throw new IllegalArgumentException("Ikke-støttet verdi: " + segment.getValue() + " for " + segment.getLocalDateInterval());
             }
         });
     }
