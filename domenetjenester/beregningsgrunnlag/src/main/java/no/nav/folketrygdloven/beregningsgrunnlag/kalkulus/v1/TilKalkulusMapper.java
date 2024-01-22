@@ -157,7 +157,7 @@ public class TilKalkulusMapper {
         List<YtelseDto> ytelserDto = alleYtelser.stream().map(ytelse -> new YtelseDto(
                 mapBeløp(ytelse.getYtelseGrunnlag().flatMap(YtelseGrunnlag::getVedtaksDagsats)),
                 mapYtelseAnvist(ytelse.getYtelseAnvist()),
-                new RelatertYtelseType(ytelse.getYtelseType().getKode()),
+                YtelseType.fraKode(ytelse.getYtelseType().getKode()),
                 mapPeriode(ytelse.getPeriode()),
                 mapYtelseGrunnlag(ytelse.getYtelseGrunnlag())))
             .collect(Collectors.toList());

@@ -7,7 +7,6 @@ import jakarta.inject.Inject;
 import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
 import no.nav.folketrygdloven.kalkulus.felles.v1.KalkulatorInputDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
-import no.nav.folketrygdloven.kalkulus.kodeverk.YtelseTyperKalkulusStøtterKontrakt;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregnForRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregnListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningListeRequest;
@@ -68,7 +67,7 @@ public class LagBeregnRequestTjeneste {
             fagsak.getSaksnummer().getVerdi(),
             referanse.getBehandlingUuid(),
             aktør,
-            YtelseTyperKalkulusStøtterKontrakt.fraKode(referanse.getFagsakYtelseType().getKode()),
+            no.nav.folketrygdloven.kalkulus.kodeverk.FagsakYtelseType.fraKode(referanse.getFagsakYtelseType().getKode()),
             StegMapper.getBeregningSteg(stegType),
             lagRequestForReferanserMedInput(referanse, beregnInput, iayGrunnlag, sakInntektsmeldinger));
     }
@@ -81,7 +80,7 @@ public class LagBeregnRequestTjeneste {
         var input = lagInputPrReferanse(referanse, iayGrunnlag, sakInntektsmeldinger, beregnInput);
         return new HåndterBeregningListeRequest(requestListe,
             input,
-            YtelseTyperKalkulusStøtterKontrakt.fraKode(referanse.getFagsakYtelseType().getKode()),
+            no.nav.folketrygdloven.kalkulus.kodeverk.FagsakYtelseType.fraKode(referanse.getFagsakYtelseType().getKode()),
             referanse.getSaksnummer().getVerdi(),
             referanse.getBehandlingUuid());
     }
@@ -95,7 +94,7 @@ public class LagBeregnRequestTjeneste {
             .map(i -> new UtledTilkommetAktivitetForRequest(i.getBgReferanse(), input.get(i.getBgReferanse())))
             .toList();
         return new UtledTilkommetAktivitetListeRequest(referanse.getSaksnummer().getVerdi(),
-            YtelseTyperKalkulusStøtterKontrakt.fraKode(referanse.getFagsakYtelseType().getKode()),
+            no.nav.folketrygdloven.kalkulus.kodeverk.FagsakYtelseType.fraKode(referanse.getFagsakYtelseType().getKode()),
             requestList);
     }
 

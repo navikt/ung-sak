@@ -20,7 +20,6 @@ import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.ArbeidsforholdReferanseDto;
 import no.nav.folketrygdloven.kalkulus.kodeverk.BeregningSteg;
 import no.nav.folketrygdloven.kalkulus.kodeverk.GrunnbeløpReguleringStatus;
 import no.nav.folketrygdloven.kalkulus.kodeverk.Vilkårsavslagsårsak;
-import no.nav.folketrygdloven.kalkulus.kodeverk.YtelseTyperKalkulusStøtterKontrakt;
 import no.nav.folketrygdloven.kalkulus.request.v1.*;
 import no.nav.folketrygdloven.kalkulus.request.v1.simulerTilkommetInntekt.SimulerTilkommetInntektForRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.simulerTilkommetInntekt.SimulerTilkommetInntektListeRequest;
@@ -129,7 +128,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     private KopierBeregningListeRequest getKopierBeregningListeRequest(BehandlingReferanse referanse, List<BeregnInput> beregningInput, BeregningSteg stegType) {
         return new KopierBeregningListeRequest(referanse.getSaksnummer().getVerdi(),
             referanse.getBehandlingUuid(),
-            YtelseTyperKalkulusStøtterKontrakt.fraKode(referanse.getFagsakYtelseType().getKode()),
+            no.nav.folketrygdloven.kalkulus.kodeverk.FagsakYtelseType.fraKode(referanse.getFagsakYtelseType().getKode()),
             stegType,
             beregningInput.stream().map(i -> new KopierBeregningRequest(i.getBgReferanse(),
                 i.getOriginalReferanseMedSammeSkjæringstidspunkt().orElseThrow(() -> new IllegalStateException("Forventer å finne original referanse med samme skjæringstidspunkt ved kopiering"))
@@ -143,7 +142,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         List<HåndterBeregningRequest> requestListe = håndterberegningMap.entrySet().stream().map(e -> new HåndterBeregningRequest(e.getValue(), e.getKey())).collect(Collectors.toList());
         var oppdateringRespons = restTjeneste.oppdaterBeregningListe(new HåndterBeregningListeRequest(requestListe,
             null, // Sender null fordi inputen ligger lagret i kalkulus, settes ulik null når kalkulus svarer med trengerNyInput = true
-            YtelseTyperKalkulusStøtterKontrakt.fraKode(behandlingReferanse.getFagsakYtelseType().getKode()),
+            no.nav.folketrygdloven.kalkulus.kodeverk.FagsakYtelseType.fraKode(behandlingReferanse.getFagsakYtelseType().getKode()),
             behandlingReferanse.getSaksnummer().getVerdi(),
             behandlingReferanse.getBehandlingUuid()));
         if (oppdateringRespons.trengerNyInput()) {
@@ -205,7 +204,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     }
 
     private HentBeregningsgrunnlagDtoListeForGUIRequest lagHentBeregningsgrunnlagListeRequest(BehandlingReferanse referanse, Set<BeregningsgrunnlagReferanse> bgReferanser) {
-        YtelseTyperKalkulusStøtterKontrakt ytelseSomSkalBeregnes = YtelseTyperKalkulusStøtterKontrakt.fraKode(referanse.getFagsakYtelseType().getKode());
+        var ytelseSomSkalBeregnes = no.nav.folketrygdloven.kalkulus.kodeverk.FagsakYtelseType.fraKode(referanse.getFagsakYtelseType().getKode());
         InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag = iayTjeneste.hentGrunnlag(referanse.getBehandlingId());
         Set<ArbeidsforholdReferanseDto> referanser = inntektArbeidYtelseGrunnlag.getArbeidsforholdInformasjon()
             .stream()
@@ -234,7 +233,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         if (bgReferanser.isEmpty()) {
             return List.of();
         }
-        var ytelseSomSkalBeregnes = YtelseTyperKalkulusStøtterKontrakt.fraKode(ref.getFagsakYtelseType().getKode());
+        var ytelseSomSkalBeregnes = no.nav.folketrygdloven.kalkulus.kodeverk.FagsakYtelseType.fraKode(ref.getFagsakYtelseType().getKode());
 
         var saksnummer = ref.getSaksnummer().getVerdi();
         List<BeregningsgrunnlagGrunnlag> resultater = new ArrayList<>();
@@ -339,7 +338,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         if (koblingerOgPeriode.isEmpty()) {
             return Map.of();
         }
-        final YtelseTyperKalkulusStøtterKontrakt ytelseTypeKalkulus = YtelseTyperKalkulusStøtterKontrakt.fraKode(ytelseType.getKode());
+        final var ytelseTypeKalkulus = no.nav.folketrygdloven.kalkulus.kodeverk.FagsakYtelseType.fraKode(ytelseType.getKode());
         var request = new SimulerTilkommetInntektListeRequest(
             saksnummer.getVerdi(),
             ytelseTypeKalkulus,

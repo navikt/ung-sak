@@ -10,7 +10,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat
 import no.nav.folketrygdloven.kalkulus.beregning.v1.FrisinnGrunnlag;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PeriodeMedSøkerInfoDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
-import no.nav.folketrygdloven.kalkulus.kodeverk.YtelseTyperKalkulusStøtterKontrakt;
+import no.nav.folketrygdloven.kalkulus.kodeverk.FagsakYtelseType;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregnForRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregnListeRequest;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
@@ -106,7 +106,7 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
             ref.getSaksnummer().getVerdi(),
             ref.getBehandlingUuid(),
             new AktørIdPersonident(ref.getAktørId().getId()),
-            YtelseTyperKalkulusStøtterKontrakt.FRISINN,
+            FagsakYtelseType.FRISINN,
             StegMapper.getBeregningSteg(stegType),
             sendTilKalkulus);
         List<TilstandResponse> tilstandResponse = getKalkulusRestTjeneste().beregn(startBeregningRequest).getTilstand();
