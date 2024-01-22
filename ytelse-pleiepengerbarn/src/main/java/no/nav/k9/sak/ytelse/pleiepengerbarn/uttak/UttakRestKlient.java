@@ -73,16 +73,20 @@ public class UttakRestKlient {
     private URI endpointUttaksplan;
     private URI endpointSimuleringUttaksplan;
 
+    private String psbUttakToken;
+
     protected UttakRestKlient() {
         // for proxying
     }
 
     @Inject
     public UttakRestKlient(OidcRestClient restKlient,
+                           @KonfigVerdi(value = "NAV_PSB_UTTAK_TOKEN", defaultVerdi = "no_secret") String psbUttakToken,
                            @KonfigVerdi(value = "k9.psb.uttak.url") URI endpoint) {
         this.restKlient = restKlient;
         this.endpointUttaksplan = toUri(endpoint, "/uttaksplan");
         this.endpointSimuleringUttaksplan = toUri(endpoint, "/uttaksplan/simulering");
+        this.psbUttakToken = psbUttakToken;
     }
 
     public Uttaksplan opprettUttaksplan(Uttaksgrunnlag request) {
@@ -135,6 +139,7 @@ public class UttakRestKlient {
     }
 
     private <T> T utførOgHent(HttpUriRequest request, @SuppressWarnings("unused") String jsonInput, OidcRestClientResponseHandler<T> responseHandler) throws IOException {
+        request.setHeader("NAV_PSB_UTTAK_TOKEN", psbUttakToken);
         try (var httpResponse = restKlient.execute(request)) {
             int responseCode = httpResponse.getStatusLine().getStatusCode();
             if (isOk(responseCode)) {
