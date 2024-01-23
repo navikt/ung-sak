@@ -158,7 +158,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     private KopierBeregningListeRequest getKopierBeregningListeRequest(BehandlingReferanse referanse, List<BeregnInput> beregningInput, BeregningSteg stegType) {
         return new KopierBeregningListeRequest(referanse.getSaksnummer().getVerdi(),
             referanse.getBehandlingUuid(),
-            no.nav.folketrygdloven.kalkulus.kodeverk.FagsakYtelseType.fraKode(referanse.getFagsakYtelseType().getKode()),
+            FagsakYtelseTypeMapper.mapFagsakYtelseType(referanse.getFagsakYtelseType()),
             stegType,
             beregningInput.stream().map(i -> new KopierBeregningRequest(i.getBgReferanse(),
                 i.getOriginalReferanseMedSammeSkjæringstidspunkt().orElseThrow(() -> new IllegalStateException("Forventer å finne original referanse med samme skjæringstidspunkt ved kopiering"))
@@ -172,7 +172,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         List<HåndterBeregningRequest> requestListe = håndterberegningMap.entrySet().stream().map(e -> new HåndterBeregningRequest(e.getValue(), e.getKey())).collect(Collectors.toList());
         var oppdateringRespons = restTjeneste.oppdaterBeregningListe(new HåndterBeregningListeRequest(requestListe,
             null, // Sender null fordi inputen ligger lagret i kalkulus, settes ulik null når kalkulus svarer med trengerNyInput = true
-            no.nav.folketrygdloven.kalkulus.kodeverk.FagsakYtelseType.fraKode(behandlingReferanse.getFagsakYtelseType().getKode()),
+            FagsakYtelseTypeMapper.mapFagsakYtelseType(behandlingReferanse.getFagsakYtelseType()),
             behandlingReferanse.getSaksnummer().getVerdi(),
             behandlingReferanse.getBehandlingUuid()));
         if (oppdateringRespons.trengerNyInput()) {
@@ -234,7 +234,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     }
 
     private HentBeregningsgrunnlagDtoListeForGUIRequest lagHentBeregningsgrunnlagListeRequest(BehandlingReferanse referanse, Set<BeregningsgrunnlagReferanse> bgReferanser) {
-        var ytelseSomSkalBeregnes = no.nav.folketrygdloven.kalkulus.kodeverk.FagsakYtelseType.fraKode(referanse.getFagsakYtelseType().getKode());
+        var ytelseSomSkalBeregnes = FagsakYtelseTypeMapper.mapFagsakYtelseType(referanse.getFagsakYtelseType());
         InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag = iayTjeneste.hentGrunnlag(referanse.getBehandlingId());
         Set<ArbeidsforholdReferanseDto> referanser = inntektArbeidYtelseGrunnlag.getArbeidsforholdInformasjon()
             .stream()
@@ -263,7 +263,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         if (bgReferanser.isEmpty()) {
             return List.of();
         }
-        var ytelseSomSkalBeregnes = no.nav.folketrygdloven.kalkulus.kodeverk.FagsakYtelseType.fraKode(ref.getFagsakYtelseType().getKode());
+        var ytelseSomSkalBeregnes = FagsakYtelseTypeMapper.mapFagsakYtelseType(ref.getFagsakYtelseType());
 
         var saksnummer = ref.getSaksnummer().getVerdi();
         List<BeregningsgrunnlagGrunnlag> resultater = new ArrayList<>();
@@ -368,7 +368,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         if (koblingerOgPeriode.isEmpty()) {
             return Map.of();
         }
-        final var ytelseTypeKalkulus = no.nav.folketrygdloven.kalkulus.kodeverk.FagsakYtelseType.fraKode(ytelseType.getKode());
+        final var ytelseTypeKalkulus = FagsakYtelseTypeMapper.mapFagsakYtelseType(ytelseType);
         var request = new SimulerTilkommetInntektListeRequest(
             saksnummer.getVerdi(),
             ytelseTypeKalkulus,

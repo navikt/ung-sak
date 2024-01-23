@@ -72,7 +72,7 @@ public class LagBeregnRequestTjeneste {
             fagsak.getSaksnummer().getVerdi(),
             referanse.getBehandlingUuid(),
             aktør,
-            no.nav.folketrygdloven.kalkulus.kodeverk.FagsakYtelseType.fraKode(referanse.getFagsakYtelseType().getKode()),
+            FagsakYtelseTypeMapper.mapFagsakYtelseType(referanse.getFagsakYtelseType()),
             StegMapper.getBeregningSteg(stegType),
             lagRequestForReferanserMedInput(referanse, beregnInput, iayGrunnlag, sakInntektsmeldinger));
     }
@@ -85,7 +85,7 @@ public class LagBeregnRequestTjeneste {
         var input = lagInputPrReferanse(referanse, iayGrunnlag, sakInntektsmeldinger, beregnInput);
         return new HåndterBeregningListeRequest(requestListe,
             input,
-            no.nav.folketrygdloven.kalkulus.kodeverk.FagsakYtelseType.fraKode(referanse.getFagsakYtelseType().getKode()),
+            FagsakYtelseTypeMapper.mapFagsakYtelseType(referanse.getFagsakYtelseType()),
             referanse.getSaksnummer().getVerdi(),
             referanse.getBehandlingUuid());
     }
@@ -99,7 +99,7 @@ public class LagBeregnRequestTjeneste {
             .map(i -> new UtledTilkommetAktivitetForRequest(i.getBgReferanse(), input.get(i.getBgReferanse())))
             .toList();
         return new UtledTilkommetAktivitetListeRequest(referanse.getSaksnummer().getVerdi(),
-            no.nav.folketrygdloven.kalkulus.kodeverk.FagsakYtelseType.fraKode(referanse.getFagsakYtelseType().getKode()),
+            FagsakYtelseTypeMapper.mapFagsakYtelseType(referanse.getFagsakYtelseType()),
             requestList);
     }
 
