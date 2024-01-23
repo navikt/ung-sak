@@ -217,7 +217,7 @@ spec:
     - name: K9_PSB_UTTAK_URL
       value: http://pleiepenger-barn-uttak.k9saksbehandling/pleiepenger-barn-uttak
     - name: K9_PSB_UTTAK_SCOPE
-      value: api://dev-fss.k9saksbehandling.pleiepenger-barn.uttak/.default
+      value: api://dev-fss.k9saksbehandling.pleiepenger-barn-uttak/.default
 
     # Graphql services
     - name: SAF_BASE_URL
