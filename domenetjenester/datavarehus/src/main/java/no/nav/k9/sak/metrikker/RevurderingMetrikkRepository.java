@@ -102,6 +102,11 @@ public class RevurderingMetrikkRepository {
         } catch (QueryTimeoutException e) {
             log.warn("Uthenting av antallRevurderingUtenNyttStpMedAksjonspunktPrKodeSisteSyvDager feiler", e);
         }
+        try {
+            metrikker.addAll(timeCall(() -> antallRevurderingUtenNyttStpÅrsakStatistikk(dag), "antallRevurderingUtenNyttStpÅrsakStatistikk"));
+        } catch (QueryTimeoutException e) {
+            log.warn("Uthenting av antallRevurderingUtenNyttStpÅrsakStatistikk feiler", e);
+        }
         return metrikker;
     }
 
