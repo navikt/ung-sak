@@ -2,10 +2,14 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.beregning;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
+import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.typer.JournalpostId;
 
 class PleiepengerBeregningEndringPåForlengelsePeriodeVurdererTest {
@@ -15,7 +19,7 @@ class PleiepengerBeregningEndringPåForlengelsePeriodeVurdererTest {
         var imSetForrige = Set.of(new JournalpostId("1"), new JournalpostId("12"), new JournalpostId("123"), new JournalpostId("1234"));
         var imSetNå = Set.of(new JournalpostId("1"), new JournalpostId("12"), new JournalpostId("123"), new JournalpostId("1234"));
 
-        var resultat = PleiepengerBeregningEndringPåForlengelsePeriodeVurderer.harEndretSeg(imSetForrige, imSetNå);
+        var resultat = PleiepengerBeregningEndringPåForlengelsePeriodeVurderer.harUlikeJournalposter(imSetForrige, imSetNå);
 
         assertThat(resultat).isFalse();
     }
@@ -25,7 +29,7 @@ class PleiepengerBeregningEndringPåForlengelsePeriodeVurdererTest {
         var imSetForrige = Set.of(new JournalpostId("1"), new JournalpostId("12"), new JournalpostId("123"), new JournalpostId("1234"));
         var imSetNå = Set.of(new JournalpostId("123"), new JournalpostId("1234"), new JournalpostId("1"), new JournalpostId("12"));
 
-        var resultat = PleiepengerBeregningEndringPåForlengelsePeriodeVurderer.harEndretSeg(imSetForrige, imSetNå);
+        var resultat = PleiepengerBeregningEndringPåForlengelsePeriodeVurderer.harUlikeJournalposter(imSetForrige, imSetNå);
 
         assertThat(resultat).isFalse();
     }
@@ -35,7 +39,7 @@ class PleiepengerBeregningEndringPåForlengelsePeriodeVurdererTest {
         var imSetForrige = Set.of(new JournalpostId("1"));
         var imSetNå = Set.of(new JournalpostId("1"), new JournalpostId("12"));
 
-        var resultat = PleiepengerBeregningEndringPåForlengelsePeriodeVurderer.harEndretSeg(imSetForrige, imSetNå);
+        var resultat = PleiepengerBeregningEndringPåForlengelsePeriodeVurderer.harUlikeJournalposter(imSetForrige, imSetNå);
 
         assertThat(resultat).isTrue();
     }
@@ -45,8 +49,40 @@ class PleiepengerBeregningEndringPåForlengelsePeriodeVurdererTest {
         var imSetForrige = Set.of(new JournalpostId("1"));
         var imSetNå = Set.of(new JournalpostId("12"));
 
-        var resultat = PleiepengerBeregningEndringPåForlengelsePeriodeVurderer.harEndretSeg(imSetForrige, imSetNå);
+        var resultat = PleiepengerBeregningEndringPåForlengelsePeriodeVurderer.harUlikeJournalposter(imSetForrige, imSetNå);
 
         assertThat(resultat).isTrue();
     }
+
+
+
+    @Test
+    void skal_gi_ingen_endring_dersom_samme_inntektsmelding_brukes() {
+
+        var im = InntektsmeldingBuilder.builder()
+            .medJournalpostId("1")
+            .medKanalreferanse("kanalreferanser")
+            .medBeløp(BigDecimal.TEN)
+            .build();
+
+        var resultat = PleiepengerBeregningEndringPåForlengelsePeriodeVurderer.erEndret(List.of(im), List.of(im));
+
+        assertThat(resultat).isFalse();
+    }
+
+    @Test
+    void skal_gi_ingen_endring_dersom_samme_inntektsmelding_brukes() {
+
+        var im = InntektsmeldingBuilder.builder()
+            .medJournalpostId("1")
+            .medKanalreferanse("kanalreferanser")
+            .medBeløp(BigDecimal.TEN)
+            .build();
+
+        var resultat = PleiepengerBeregningEndringPåForlengelsePeriodeVurderer.erEndret(List.of(im), List.of(im));
+
+        assertThat(resultat).isFalse();
+    }
+
+
 }

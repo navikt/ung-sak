@@ -98,15 +98,21 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
     }
 
 
-    private static boolean erEndret(List<Inntektsmelding> relevanteInntektsmeldinger, List<Inntektsmelding> relevanteInntektsmeldingerForrigeVedtak) {
-        return harEndretSeg(relevanteInntektsmeldingerForrigeVedtak.stream()
+    static boolean erEndret(List<Inntektsmelding> relevanteInntektsmeldinger, List<Inntektsmelding> relevanteInntektsmeldingerForrigeVedtak) {
+        var erJournalposterUlike = harUlikeJournalposter(relevanteInntektsmeldingerForrigeVedtak.stream()
             .map(Inntektsmelding::getJournalpostId)
             .collect(Collectors.toSet()), relevanteInntektsmeldinger.stream()
             .map(Inntektsmelding::getJournalpostId)
             .collect(Collectors.toSet()));
+        if (!erJournalposterUlike) {
+            return false;
+        }
+
+
+        return erJournalposterUlike;
     }
 
-    static boolean harEndretSeg(Set<JournalpostId> forrigeVedtakJournalposter, Set<JournalpostId> denneBehandlingJournalposter) {
+    static boolean harUlikeJournalposter(Set<JournalpostId> forrigeVedtakJournalposter, Set<JournalpostId> denneBehandlingJournalposter) {
 
         var erLikeStore = forrigeVedtakJournalposter.size() == denneBehandlingJournalposter.size();
 
