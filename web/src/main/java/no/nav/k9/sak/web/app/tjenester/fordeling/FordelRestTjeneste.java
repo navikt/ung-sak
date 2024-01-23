@@ -400,26 +400,31 @@ public class FordelRestTjeneste {
     @Produces(JSON_UTF8)
     @Operation(description = "Ny journalpost skal behandles. Oppretter også ny sak.", summary = ("Varsel om en nye journalposter som skal behandles i systemet. Alle må tilhøre samme saksnummer, og være av samme type(brevkode, ytelsetype)"), tags = "fordel")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
-    public void mottaJournalpostOgOpprettSøknad(@Parameter(description = "Krever saksnummer, journalpostId og behandlingstemaOffisiellKode") @Valid List<AbacJournalpostMottakOpprettSakDto> journalpostMottakOpprettSakDtos) {
-        Set<Saksnummer> saksnummere = journalpostMottakOpprettSakDtos.stream().map(m -> m.getSaksnummer()).collect(Collectors.toSet());
-        if (saksnummere.size() > 1) {
-            throw new UnsupportedOperationException("Støtter ikke mottak av journalposter for ulike saksnummer: " + saksnummere);
+    public void mottaJournalpostOgOpprettSøknad(@Parameter(description = "Krever saksnummer, journalpostId og behandlingstemaOffisiellKode") @Valid AbacJournalpostMottakOpprettSakDto journalpostMottakOpprettSakDto) {
+        Saksnummer saksnummer = journalpostMottakOpprettSakDto.getSaksnummer();
+        FagsakYtelseType ytelseType = journalpostMottakOpprettSakDto.getYtelseType();
+        LOG_CONTEXT.add("ytelseType", ytelseType);
+        LOG_CONTEXT.add("journalpostId", journalpostMottakOpprettSakDto.getJournalpostId());
+        logger.info("Mottok journalpost");
+
+        AktørId pleietrengendeAktørId = null;
+        if (journalpostMottakOpprettSakDto.getPleietrengendeAktørId() != null) {
+            pleietrengendeAktørId = new AktørId(journalpostMottakOpprettSakDto.getPleietrengendeAktørId());
         }
 
-        Set<FagsakYtelseType> ytelseTyper = journalpostMottakOpprettSakDtos.stream().map(m -> m.getYtelseType()).collect(Collectors.toSet());
-        if (ytelseTyper.size() > 1) {
-            throw new UnsupportedOperationException("Støtter ikke mottak av journalposter av ulike ytelseTyper: " + ytelseTyper);
+        AktørId relatertPersonAktørId = null;
+        if (journalpostMottakOpprettSakDto.getRelatertPersonAktørId() != null) {
+            relatertPersonAktørId = new AktørId(journalpostMottakOpprettSakDto.getRelatertPersonAktørId());
         }
-        LOG_CONTEXT.add("ytelseType", ytelseTyper.iterator().next());
-        LOG_CONTEXT.add("journalpostId", String.join(",", journalpostMottakOpprettSakDtos.stream().map(v -> v.getJournalpostId().getVerdi()).toList()));
-        logger.info("Mottok journalposter");
 
-        List<InngåendeSaksdokument> saksdokumenter = journalpostMottakOpprettSakDtos.stream()
-            .map(this::mapJournalpost)
-            .sorted(Comparator.comparing(InngåendeSaksdokument::getKanalreferanse, Comparator.nullsLast(Comparator.naturalOrder())))
-            .collect(Collectors.toList());
+        ytelseType.validerNøkkelParametere(pleietrengendeAktørId, relatertPersonAktørId);
 
-        dokumentmottakTjeneste.dokumenterAnkommet(saksdokumenter);
+        Periode periode = journalpostMottakOpprettSakDto.getPeriode();
+        if (periode == null) {
+            throw new IllegalArgumentException("Kan ikke opprette fagsak uten å oppgi start av periode (fravær/uttak): " + journalpostMottakOpprettSakDto);
+        }
+
+        dokumentmottakTjeneste.dokumenterAnkommet(List.of(mapJournalpost(journalpostMottakOpprettSakDto)));
     }
 
     private InngåendeSaksdokument mapJournalpost(AbacJournalpostMottakDto mottattJournalpost) {
@@ -461,10 +466,22 @@ public class FordelRestTjeneste {
             Periode periode = mottattJournalpost.getPeriode();
 
             var søknadMottaker = søknadMottakere.finnSøknadMottakerTjeneste(ytelseType);
-            return søknadMottaker.finnEllerOpprettFagsak(ytelseType,
+
+            AktørId pleietrengendeAktørId = null;
+            if (mottattJournalpost.getPleietrengendeAktørId() != null) {
+                pleietrengendeAktørId = new AktørId(mottattJournalpost.getPleietrengendeAktørId());
+            }
+
+            AktørId relatertPersonAktørId = null;
+            if (mottattJournalpost.getRelatertPersonAktørId() != null) {
+                relatertPersonAktørId = new AktørId(mottattJournalpost.getRelatertPersonAktørId());
+            }
+
+            return søknadMottaker.finnEllerOpprettFagsak(
+                ytelseType,
                 new AktørId(mottattJournalpost.getAktørId()),
-                new AktørId(mottattJournalpost.getRelatertPersonAktørId()),
-                new AktørId(mottattJournalpost.getRelatertPersonAktørId()),
+                pleietrengendeAktørId,
+                relatertPersonAktørId,
                 periode.getFom(),
                 periode.getTom(),
                 saksnummer
