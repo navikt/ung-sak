@@ -4,10 +4,8 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
@@ -20,12 +18,10 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingskontroll.VilkårTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
-import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.EndringPåForlengelseInput;
 import no.nav.k9.sak.perioder.EndringPåForlengelsePeriodeVurderer;
 import no.nav.k9.sak.trigger.ProsessTriggereRepository;
-import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.PSBEndringPåForlengelseInput;
 
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
@@ -50,6 +46,8 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
 
     private HarEndretInntektsmeldingVurderer harEndretInntektsmeldingVurderer;
 
+    private InntektsmeldingEndringsutlederForlengelse inntektsmeldingEndringsutlederForlengelse;
+
 
     PleiepengerBeregningEndringPåForlengelsePeriodeVurderer() {
     }
@@ -59,13 +57,15 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
                                                                    MottatteDokumentRepository mottatteDokumentRepository,
                                                                    @Any Instance<EndringPåForlengelsePeriodeVurderer> endringsVurderere,
                                                                    HarEndretKompletthetVurderer harEndretKompletthetVurderer,
-                                                                   HarEndretInntektsmeldingVurderer harEndretInntektsmeldingVurderer) {
+                                                                   HarEndretInntektsmeldingVurderer harEndretInntektsmeldingVurderer,
+                                                                   InntektsmeldingEndringsutlederForlengelse inntektsmeldingEndringsutlederForlengelse) {
 
         this.prosessTriggereRepository = prosessTriggereRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.endringsVurderere = endringsVurderere;
         this.harEndretKompletthetVurderer = harEndretKompletthetVurderer;
         this.harEndretInntektsmeldingVurderer = harEndretInntektsmeldingVurderer;
+        this.inntektsmeldingEndringsutlederForlengelse = inntektsmeldingEndringsutlederForlengelse;
     }
 
     @Override
@@ -83,7 +83,7 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
             input.getBehandlingReferanse(),
             inntektsmeldinger,
             mottatteInntektsmeldinger, periode,
-            PleiepengerBeregningEndringPåForlengelsePeriodeVurderer::erEndret
+            inntektsmeldingEndringsutlederForlengelse
         )) {
             return true;
         }
@@ -95,42 +95,6 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
         var vurderer = EndringPåForlengelsePeriodeVurderer.finnVurderer(endringsVurderere, VilkårType.OPPTJENINGSVILKÅRET, input.getBehandlingReferanse().getFagsakYtelseType());
 
         return vurderer.harPeriodeEndring(input, periode);
-    }
-
-
-    static boolean erEndret(List<Inntektsmelding> relevanteInntektsmeldinger, List<Inntektsmelding> relevanteInntektsmeldingerForrigeVedtak) {
-        var erJournalposterUlike = harUlikeJournalposter(relevanteInntektsmeldingerForrigeVedtak.stream()
-            .map(Inntektsmelding::getJournalpostId)
-            .collect(Collectors.toSet()), relevanteInntektsmeldinger.stream()
-            .map(Inntektsmelding::getJournalpostId)
-            .collect(Collectors.toSet()));
-        if (!erJournalposterUlike) {
-            return false;
-        }
-
-        return relevanteInntektsmeldinger.stream().anyMatch(im -> harEndretBeløpFraForrige(relevanteInntektsmeldingerForrigeVedtak, im));
-
-    }
-
-    private static boolean harEndretBeløpFraForrige(List<Inntektsmelding> relevanteInntektsmeldingerForrigeVedtak, Inntektsmelding im) {
-        var matchendeIM = relevanteInntektsmeldingerForrigeVedtak.stream().filter(imForrige -> imForrige.getArbeidsgiver().equals(im.getArbeidsgiver()) && imForrige.getArbeidsforholdRef().equals(im.getArbeidsforholdRef()))
-            .toList();
-
-        if (matchendeIM.size() != 1) {
-            return true;
-        }
-
-        var matchFraForrige = matchendeIM.get(0);
-        return matchFraForrige.getInntektBeløp().compareTo(im.getInntektBeløp()) != 0;
-    }
-
-    static boolean harUlikeJournalposter(Set<JournalpostId> forrigeVedtakJournalposter, Set<JournalpostId> denneBehandlingJournalposter) {
-
-        var erLikeStore = forrigeVedtakJournalposter.size() == denneBehandlingJournalposter.size();
-
-        var inneholderDeSamme = denneBehandlingJournalposter.containsAll(forrigeVedtakJournalposter);
-
-        return !(erLikeStore && inneholderDeSamme);
     }
 
     private boolean harMarkertPeriodeForReberegning(EndringPåForlengelseInput input, DatoIntervallEntitet periode) {

@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.beregning;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -10,20 +11,19 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
 
-class PleiepengerBeregningEndringPåForlengelsePeriodeVurdererTest {
+class InntektsmeldingEndringsutlederForlengelseTest {
 
     @Test
     void skal_vurdere_set_som_like_hvis_inneholder_de_samme() {
         var imSetForrige = Set.of(new JournalpostId("1"), new JournalpostId("12"), new JournalpostId("123"), new JournalpostId("1234"));
         var imSetNå = Set.of(new JournalpostId("1"), new JournalpostId("12"), new JournalpostId("123"), new JournalpostId("1234"));
 
-        var resultat = PleiepengerBeregningEndringPåForlengelsePeriodeVurderer.harUlikeJournalposter(imSetForrige, imSetNå);
+        var resultat = InntektsmeldingEndringsutlederForlengelse.harUlikeJournalposter(imSetForrige, imSetNå);
 
         assertThat(resultat).isFalse();
     }
@@ -33,7 +33,7 @@ class PleiepengerBeregningEndringPåForlengelsePeriodeVurdererTest {
         var imSetForrige = Set.of(new JournalpostId("1"), new JournalpostId("12"), new JournalpostId("123"), new JournalpostId("1234"));
         var imSetNå = Set.of(new JournalpostId("123"), new JournalpostId("1234"), new JournalpostId("1"), new JournalpostId("12"));
 
-        var resultat = PleiepengerBeregningEndringPåForlengelsePeriodeVurderer.harUlikeJournalposter(imSetForrige, imSetNå);
+        var resultat = InntektsmeldingEndringsutlederForlengelse.harUlikeJournalposter(imSetForrige, imSetNå);
 
         assertThat(resultat).isFalse();
     }
@@ -43,7 +43,7 @@ class PleiepengerBeregningEndringPåForlengelsePeriodeVurdererTest {
         var imSetForrige = Set.of(new JournalpostId("1"));
         var imSetNå = Set.of(new JournalpostId("1"), new JournalpostId("12"));
 
-        var resultat = PleiepengerBeregningEndringPåForlengelsePeriodeVurderer.harUlikeJournalposter(imSetForrige, imSetNå);
+        var resultat = InntektsmeldingEndringsutlederForlengelse.harUlikeJournalposter(imSetForrige, imSetNå);
 
         assertThat(resultat).isTrue();
     }
@@ -53,7 +53,7 @@ class PleiepengerBeregningEndringPåForlengelsePeriodeVurdererTest {
         var imSetForrige = Set.of(new JournalpostId("1"));
         var imSetNå = Set.of(new JournalpostId("12"));
 
-        var resultat = PleiepengerBeregningEndringPåForlengelsePeriodeVurderer.harUlikeJournalposter(imSetForrige, imSetNå);
+        var resultat = InntektsmeldingEndringsutlederForlengelse.harUlikeJournalposter(imSetForrige, imSetNå);
 
         assertThat(resultat).isTrue();
     }
@@ -69,7 +69,7 @@ class PleiepengerBeregningEndringPåForlengelsePeriodeVurdererTest {
             .medBeløp(BigDecimal.TEN)
             .build();
 
-        var resultat = PleiepengerBeregningEndringPåForlengelsePeriodeVurderer.erEndret(List.of(im), List.of(im));
+        var resultat = new InntektsmeldingEndringsutlederForlengelse(true).erEndret(List.of(im), List.of(im));
 
         assertThat(resultat).isFalse();
     }
@@ -93,7 +93,7 @@ class PleiepengerBeregningEndringPåForlengelsePeriodeVurdererTest {
             .medBeløp(BigDecimal.TEN)
             .build();
 
-        var resultat = PleiepengerBeregningEndringPåForlengelsePeriodeVurderer.erEndret(List.of(im), List.of(im2));
+        var resultat = new InntektsmeldingEndringsutlederForlengelse(true).erEndret(List.of(im), List.of(im2));
 
         assertThat(resultat).isFalse();
     }
@@ -119,7 +119,7 @@ class PleiepengerBeregningEndringPåForlengelsePeriodeVurdererTest {
             .medBeløp(BigDecimal.TEN)
             .build();
 
-        var resultat = PleiepengerBeregningEndringPåForlengelsePeriodeVurderer.erEndret(List.of(im), List.of(im2));
+        var resultat = new InntektsmeldingEndringsutlederForlengelse(true).erEndret(List.of(im), List.of(im2));
 
         assertThat(resultat).isTrue();
     }
@@ -145,7 +145,7 @@ class PleiepengerBeregningEndringPåForlengelsePeriodeVurdererTest {
             .medBeløp(BigDecimal.TEN)
             .build();
 
-        var resultat = PleiepengerBeregningEndringPåForlengelsePeriodeVurderer.erEndret(List.of(im), List.of(im2));
+        var resultat = new InntektsmeldingEndringsutlederForlengelse(true).erEndret(List.of(im), List.of(im2));
 
         assertThat(resultat).isTrue();
     }
@@ -173,7 +173,7 @@ class PleiepengerBeregningEndringPåForlengelsePeriodeVurdererTest {
             .medBeløp(BigDecimal.TEN)
             .build();
 
-        var resultat = PleiepengerBeregningEndringPåForlengelsePeriodeVurderer.erEndret(List.of(im), List.of(im2));
+        var resultat = new InntektsmeldingEndringsutlederForlengelse(true).erEndret(List.of(im), List.of(im2));
 
         assertThat(resultat).isFalse();
     }

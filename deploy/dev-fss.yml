@@ -297,6 +297,8 @@ spec:
       value: "true"
     - name: NY_DEAKTIVERING_LOGIKK_KALKULUS
       value: "true"
+    - name: IM_SKAL_VURDERE_ENDRET_INNTEKT
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
