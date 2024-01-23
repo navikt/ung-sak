@@ -293,8 +293,6 @@ spec:
       value: "true"
     - name: OMP_RELEVANT_ENDRING_UTLEDNING
       value: "true"
-    - name: IKKE_VURDER_KOMPLETTHET_VED_FORLENGELSE
-      value: "true"
     - name: NY_DEAKTIVERING_LOGIKK_KALKULUS
       value: "true"
     - name: IM_SKAL_VURDERE_ENDRET_INNTEKT
