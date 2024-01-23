@@ -245,8 +245,6 @@ spec:
       value: "3030"
 
     # Feature-flag
-    - name: OMP_VERIFISERING_TILKJENT_YTELSE
-      value: "true"
     - name: SOKNADSFRIST_BENYTT_ELDSTEKRAV_PER_PERIODE
       value: "true"
     - name: YTELSE_OLP_AKTIVERT

@@ -40,6 +40,7 @@ import no.nav.k9.sak.domene.behandling.steg.beregnytelse.BeregneYtelseSteg;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
+import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
@@ -60,7 +61,6 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
     private Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste;
     private ÅrskvantumTjeneste årskvantumTjeneste;
     private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
-    private OmsorgspengerYtelseVerifiserer omsorgspengerYtelseVerifiserer;
 
     protected OmsorgspengerBeregneYtelseSteg() {
         // for proxy
@@ -72,8 +72,7 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
                                           ÅrskvantumTjeneste årskvantumTjeneste,
                                           FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste,
                                           @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste,
-                                          @FagsakYtelseTypeRef(OMSORGSPENGER) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
-                                          OmsorgspengerYtelseVerifiserer omsorgspengerYtelseVerifiserer
+                                          @FagsakYtelseTypeRef(OMSORGSPENGER) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste
     ) {
         this.årskvantumTjeneste = årskvantumTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
@@ -82,7 +81,6 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
         this.fastsettBeregningsresultatTjeneste = fastsettBeregningsresultatTjeneste;
         this.beregnFeriepengerTjeneste = beregnFeriepengerTjeneste;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
-        this.omsorgspengerYtelseVerifiserer = omsorgspengerYtelseVerifiserer;
     }
 
     @Override
@@ -109,7 +107,7 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
         feriepengerTjeneste.beregnFeriepenger(ref, beregningsresultat);
 
         // Verifiser beregningsresultat
-        omsorgspengerYtelseVerifiserer.verifiser(behandling, beregningsresultat);
+        BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);
         if (harUtbetalingTilBruker(beregningsresultat, vurdertePerioder)) {
             log.info("Har utbetaling til bruker: {}", beregningsresultat);
         }
