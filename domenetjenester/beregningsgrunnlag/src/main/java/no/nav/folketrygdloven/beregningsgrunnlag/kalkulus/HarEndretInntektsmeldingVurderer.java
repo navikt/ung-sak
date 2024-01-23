@@ -10,7 +10,6 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
-import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -22,7 +21,6 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 public class HarEndretInntektsmeldingVurderer {
 
     private BehandlingRepository behandlingRepository;
-    private MottatteDokumentRepository mottatteDokumentRepository;
     private Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning;
 
 
@@ -31,10 +29,8 @@ public class HarEndretInntektsmeldingVurderer {
 
     @Inject
     public HarEndretInntektsmeldingVurderer(BehandlingRepository behandlingRepository,
-                                            MottatteDokumentRepository mottatteDokumentRepository,
                                             @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning) {
         this.behandlingRepository = behandlingRepository;
-        this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
     }
 

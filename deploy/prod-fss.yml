@@ -293,6 +293,8 @@ spec:
       value: "false"
     - name: AKTIVER_AUTOMATISK_ETTERKONTROLL
       value: "false"
+    - name: IM_SKAL_VURDERE_ENDRET_INNTEKT
+      value: "false"
 
 
     # Konfigurasjoner
