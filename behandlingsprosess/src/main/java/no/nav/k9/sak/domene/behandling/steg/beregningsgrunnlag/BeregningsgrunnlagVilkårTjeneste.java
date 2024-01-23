@@ -38,8 +38,6 @@ public class BeregningsgrunnlagVilkårTjeneste {
     private VilkårResultatRepository vilkårResultatRepository;
 
     private VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
-    private boolean ikkeVurderVedForlengelseEnabled;
-
     protected BeregningsgrunnlagVilkårTjeneste() {
         // CDI Proxy
     }
@@ -47,12 +45,10 @@ public class BeregningsgrunnlagVilkårTjeneste {
     @Inject
     public BeregningsgrunnlagVilkårTjeneste(VilkårTjeneste vilkårTjeneste,
                                             VilkårResultatRepository vilkårResultatRepository,
-                                            VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
-                                            @KonfigVerdi(value = "IKKE_VURDER_KOMPLETTHET_VED_FORLENGELSE", defaultVerdi = "false") boolean ikkeVurderVedForlengelseEnabled) {
+                                            VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
         this.vilkårTjeneste = vilkårTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
-        this.ikkeVurderVedForlengelseEnabled = ikkeVurderVedForlengelseEnabled;
     }
 
     public void lagreAvslåttVilkårresultat(BehandlingskontrollKontekst kontekst,
@@ -176,9 +172,7 @@ public class BeregningsgrunnlagVilkårTjeneste {
             vilkårPeriodeFilter.ignorerPerioderFraInfotrygd();
         }
 
-        if (ikkeVurderVedForlengelseEnabled) {
-            vilkårPeriodeFilter.ignorerForlengelseperioder();
-        }
+        vilkårPeriodeFilter.ignorerForlengelseperioder();
 
         return vilkårPeriodeFilter.filtrerPerioder(perioderTilVurdering, vilkårType).stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toCollection(TreeSet::new));
     }
