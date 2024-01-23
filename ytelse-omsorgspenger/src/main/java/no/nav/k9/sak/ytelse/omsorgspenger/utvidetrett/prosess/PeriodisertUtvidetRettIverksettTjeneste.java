@@ -9,7 +9,6 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -22,19 +21,16 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 public class PeriodisertUtvidetRettIverksettTjeneste {
 
     private VilkårResultatRepository vilkårResultatRepository;
-    private boolean brukPeriodisertRammevedtakAleneOmsorgen;
 
     @Inject
-    public PeriodisertUtvidetRettIverksettTjeneste(VilkårResultatRepository vilkårResultatRepository,
-                                                   @KonfigVerdi(value = "PERIODISERT_RAMMEVEDTAK_AO", defaultVerdi = "false") boolean brukPeriodisertRammevedtakAleneOmsorgen) {
+    public PeriodisertUtvidetRettIverksettTjeneste(VilkårResultatRepository vilkårResultatRepository) {
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.brukPeriodisertRammevedtakAleneOmsorgen = brukPeriodisertRammevedtakAleneOmsorgen;
     }
 
     public LocalDateTimeline<Utfall> utfallSomErEndret(Behandling b) {
-        boolean brukerPeriodisering = brukPeriodisertRammevedtakAleneOmsorgen && b.getFagsakYtelseType() == FagsakYtelseType.OMSORGSPENGER_AO;
+        boolean brukerPeriodisering = b.getFagsakYtelseType() == FagsakYtelseType.OMSORGSPENGER_AO;
         if (!brukerPeriodisering) {
-            throw new IllegalStateException("Forventet ikke å komme her uten at PERIODISERT_RAMMEVEDTAK_AO er lansert");
+            throw new IllegalStateException("Forventet ikke å komme her uten at periodisering er lansert for ytelsen");
         }
         LocalDateTimeline<Utfall> nyttUtfall = hentUtfall(b.getId());
         LocalDateTimeline<Utfall> tidligereUtfall = b.getOriginalBehandlingId().map(this::hentUtfall).orElse(LocalDateTimeline.empty());
