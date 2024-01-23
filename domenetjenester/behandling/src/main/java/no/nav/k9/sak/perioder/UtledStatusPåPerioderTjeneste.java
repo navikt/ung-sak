@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.kravperioder;
+package no.nav.k9.sak.perioder;
 
 import no.nav.fpsak.tidsserie.*;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -7,10 +7,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
 import no.nav.k9.sak.kontrakt.krav.*;
-import no.nav.k9.sak.perioder.KravDokument;
-import no.nav.k9.sak.perioder.PeriodeMedÅrsak;
-import no.nav.k9.sak.perioder.SøktPeriode;
-import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Periode;
 import org.slf4j.Logger;
@@ -314,7 +310,7 @@ public class UtledStatusPåPerioderTjeneste {
             .filter(it -> kravDokumentTypeBrukesAvFormidling(it.getKey().getType()))
             .map(it -> new KravDokumentMedSøktePerioder(it.getKey().getJournalpostId(),
                 it.getKey().getInnsendingsTidspunkt(),
-                KravDokumentType.fraKode(it.getKey().getType().name()),
+                no.nav.k9.sak.kontrakt.krav.KravDokumentType.fraKode(it.getKey().getType().name()),
                 it.getValue().stream().map(at -> new no.nav.k9.sak.kontrakt.krav.SøktPeriode(at.getPeriode().tilPeriode(), at.getType(), at.getArbeidsgiver(), at.getArbeidsforholdRef())).collect(Collectors.toList()),
                 it.getKey().getKildesystem().getKode()))
             .toList();
@@ -322,7 +318,7 @@ public class UtledStatusPåPerioderTjeneste {
     }
 
     private boolean kravDokumentTypeBrukesAvFormidling(no.nav.k9.sak.perioder.KravDokumentType kravDokumentType) {
-        return KravDokumentType.fraKode(kravDokumentType.name()) != null;
+        return no.nav.k9.sak.kontrakt.krav.KravDokumentType.fraKode(kravDokumentType.name()) != null;
     }
 
     private LocalDateSegment<ÅrsakerTilVurdering> mergeAndreBerørtSaker(LocalDateInterval interval, LocalDateSegment<ÅrsakerTilVurdering> første, LocalDateSegment<ÅrsakerTilVurdering> siste) {

@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.søknadsfrist;
+package no.nav.k9.sak.perioder;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;

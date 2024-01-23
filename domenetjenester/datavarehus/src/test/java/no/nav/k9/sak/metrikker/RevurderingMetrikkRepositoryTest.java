@@ -2,13 +2,23 @@ package no.nav.k9.sak.metrikker;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
@@ -21,13 +31,24 @@ import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.k9.sak.db.util.JpaExtension;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.perioder.KravDokument;
+import no.nav.k9.sak.perioder.KravDokumentType;
+import no.nav.k9.sak.perioder.SøknadsfristTjeneste;
+import no.nav.k9.sak.perioder.SøknadsfristTjenesteProvider;
+import no.nav.k9.sak.perioder.SøktPeriode;
+import no.nav.k9.sak.perioder.UtledStatusPåPerioderTjeneste;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
+import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.k9.sak.trigger.ProsessTriggereRepository;
+import no.nav.k9.sak.trigger.Trigger;
+import no.nav.k9.sak.typer.JournalpostId;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -41,9 +62,18 @@ class RevurderingMetrikkRepositoryTest {
     private AksjonspunktKontrollRepository aksjonspunktKontrollRepository;
     private VilkårResultatRepository vilkårResultatRepository;
 
+
+    private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = mock(VilkårsPerioderTilVurderingTjeneste.class);
+    private VurderSøknadsfristTjeneste søknadsfristTjeneste = mock(VurderSøknadsfristTjeneste.class);
+
     @BeforeEach
     public void setup() {
-        revurderingMetrikkRepository = new RevurderingMetrikkRepository(entityManager);
+        when(søknadsfristTjeneste.hentPerioderTilVurdering(any()))
+            .thenReturn(Map.of());
+        when(søknadsfristTjeneste.relevanteKravdokumentForBehandling(any()))
+            .thenReturn(Set.of());
+        revurderingMetrikkRepository = new RevurderingMetrikkRepository(entityManager, new BehandlingRepository(entityManager),
+            new SøknadsfristTjenesteProvider(new UnitTestLookupInstanceImpl<>(søknadsfristTjeneste)), new UnitTestLookupInstanceImpl<>(vilkårsPerioderTilVurderingTjeneste));
         aksjonspunktKontrollRepository = new AksjonspunktKontrollRepository();
         vilkårResultatRepository = new VilkårResultatRepository(entityManager);
     }
@@ -337,6 +367,60 @@ class RevurderingMetrikkRepositoryTest {
         assertThat(revurderingMetrikkRepository.antallRevurderingUtenNyttStpMedAksjonspunktPrKodeSisteSyvDager(LocalDate.now().plusDays(1))).isEmpty();
 
     }
+
+    @Test
+    void skal_finne_en_behandling_uten_nytt_med_en_periode() {
+
+        FagsakYtelseType ytelseType = FagsakYtelseType.PSB;
+        var originalBuilder = TestScenarioBuilder.builderUtenSøknad(ytelseType);
+        var behandling = originalBuilder.lagre(entityManager);
+        var stp = LocalDate.now();
+        leggTilVilkårResultatForStp(stp, behandling);
+
+        behandling.avsluttBehandling();
+
+
+
+        AksjonspunktDefinisjon aksjonspunkt = AksjonspunktDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_SELVSTENDIG_NÆRINGSDRIVENDE;
+        BehandlingStegType stegType = BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG;
+
+        var revurderingBuilder = TestScenarioBuilder.builderMedSøknad(ytelseType)
+            .medBehandlingType(BehandlingType.REVURDERING)
+            .medOriginalBehandling(behandling, BehandlingÅrsakType.RE_ENDRING_BEREGNINGSGRUNNLAG);
+
+        revurderingBuilder.leggTilAksjonspunkt(aksjonspunkt, stegType);
+
+        var revurdering = revurderingBuilder
+            .lagre(entityManager);
+        leggTilVilkårResultatForStp(stp, revurdering);
+
+        when(vilkårsPerioderTilVurderingTjeneste.utled(any(), any())).thenReturn(new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(stp, stp))));
+        when(vilkårsPerioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(any())).thenReturn(new TreeSet<>());
+        when(vilkårsPerioderTilVurderingTjeneste.utledRevurderingPerioder(any())).thenReturn(new TreeSet<>());
+        when(vilkårsPerioderTilVurderingTjeneste.perioderSomSkalTilbakestilles(any())).thenReturn(new TreeSet<>());
+        when(vilkårsPerioderTilVurderingTjeneste.definerendeVilkår()).thenReturn(Set.of(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
+
+        when(søknadsfristTjeneste.hentPerioderTilVurdering(any()))
+            .thenReturn(Map.of(new KravDokument(new JournalpostId(132L), LocalDateTime.now(), KravDokumentType.SØKNAD),
+                List.of(new SøktPeriode<>(DatoIntervallEntitet.fraOgMedTilOgMed(stp, stp), "Test"))));
+        when(søknadsfristTjeneste.relevanteKravdokumentForBehandling(any()))
+            .thenReturn(Set.of(new KravDokument(new JournalpostId(132L), LocalDateTime.now(), KravDokumentType.SØKNAD)));
+
+        var ap = revurdering.getAksjonspunkter().iterator().next();
+        aksjonspunktKontrollRepository.setTilUtført(ap, "begrunnelse");
+
+        revurdering.avsluttBehandling();
+
+        entityManager.flush();
+
+        assertThat(revurderingMetrikkRepository.antallRevurderingUtenNyttStpÅrsakStatistikk(LocalDate.now().plusDays(1))).isNotEmpty()
+            .anyMatch(v -> v.toString().contains("antall_revurderinger_uten_nytt_stp_pr_antall_perioder") && v.toString().contains("ytelse_type=PSB") && v.toString().contains("antall_behandlinger=1")
+                && v.toString().contains("antall_perioder=1") && v.toString().contains("behandlinger_prosentandel=100"))
+            .anyMatch(v -> v.toString().contains("antall_revurderinger_uten_nytt_stp_pr_aarsak") && v.toString().contains("ytelse_type=PSB") && v.toString().contains("aarsak=FØRSTEGANGSVURDERING")
+                && v.toString().contains("antall_behandlinger=1") && v.toString().contains("behandlinger_prosentandel=100"));;
+
+    }
+
     private void leggTilVilkårResultatForStp(LocalDate stp, Behandling behandling) {
         var vilkårResultatBuilder = new VilkårResultatBuilder();
         var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
