@@ -39,6 +39,7 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.søknadsfrist.SøknadsfristTilstandDto;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.KravDokumentType;
+import no.nav.k9.sak.perioder.SøknadsfristTjenesteProvider;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;

@@ -80,6 +80,14 @@ public class InfotrygdMigreringTjeneste {
         this.infotrygdService = infotrygdService;
     }
 
+    /** Utleder aksjonspunkter for migrering av PSB perioder fra infotrygd.
+     *
+     * Denne delen av koden er ikke lenger i bruk i k9-sak, men beholdes inntil videre for å enklere kunne migrere opplæringspenger.
+     *
+     * Dersom det skulle være større tekniske utfordringer ved at koden blir liggende kan den fjernes
+     * @param ref Behandlingref
+     * @return aksjonspunkter knyttet til migrering fra infotrygd
+     */
     public List<AksjonspunktResultat> utledAksjonspunkter(BehandlingReferanse ref) {
 
         NavigableSet<DatoIntervallEntitet> perioderTilVurdering = perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
