@@ -101,14 +101,13 @@ public class FrisinnOpptjeningForBeregningTjeneste implements OpptjeningForBereg
     }
 
     private OpptjeningPeriode mapOpptjeningPeriode(OpptjeningsperiodeForSaksbehandling ops) {
-        var periode = new Periode(ops.getPeriode().getFomDato(), ops.getPeriode().getTomDato());
         var arbeidsgiver = ops.getArbeidsgiver();
         var orgnummer = arbeidsgiver == null ? null : arbeidsgiver.getOrgnr();
         var aktørId = arbeidsgiver == null ? null : (arbeidsgiver.getAktørId() == null ? null : arbeidsgiver.getAktørId().getId());
         var arbeidsforholdId = Optional.ofNullable(ops.getOpptjeningsnøkkel())
             .flatMap(Opptjeningsnøkkel::getArbeidsforholdRef)
             .orElse(null);
-        return OpptjeningAktiviteter.nyPeriode(ops.getOpptjeningAktivitetType(), periode, orgnummer, aktørId, arbeidsforholdId);
+        return OpptjeningAktiviteter.nyPeriode(ops.getOpptjeningAktivitetType(), ops.getPeriode(), orgnummer, aktørId, arbeidsforholdId);
     }
 
 }

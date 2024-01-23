@@ -1,6 +1,7 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Objects;
@@ -142,7 +143,7 @@ public class FinnPerioderMedStartIKontrollerFakta {
     }
 
 
-    static boolean erEndret(List<Inntektsmelding> relevanteInntektsmeldinger, List<Inntektsmelding> relevanteInntektsmeldingerForrigeVedtak) {
+    static boolean erEndret(Collection<Inntektsmelding> relevanteInntektsmeldinger, Collection<Inntektsmelding> relevanteInntektsmeldingerForrigeVedtak) {
         var unikeArbeidsforhold = finnUnikeArbeidsforholdIdentifikatorer(relevanteInntektsmeldinger);
         var unikeArbeidsforholdForrigeVedtak = finnUnikeArbeidsforholdIdentifikatorer(relevanteInntektsmeldingerForrigeVedtak);
         var erLikeStore = unikeArbeidsforhold.size() == unikeArbeidsforholdForrigeVedtak.size();
@@ -150,7 +151,7 @@ public class FinnPerioderMedStartIKontrollerFakta {
         return !(erLikeStore && inneholderDeSamme);
     }
 
-    private static Set<String> finnUnikeArbeidsforholdIdentifikatorer(List<Inntektsmelding> relevanteInntektsmeldinger) {
+    private static Set<String> finnUnikeArbeidsforholdIdentifikatorer(Collection<Inntektsmelding> relevanteInntektsmeldinger) {
         return relevanteInntektsmeldinger.stream().map(
             im -> im.getArbeidsgiver().getIdentifikator() + im.getArbeidsforholdRef().getReferanse()
         ).collect(Collectors.toSet());

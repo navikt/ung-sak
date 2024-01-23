@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.beregning;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -23,7 +24,7 @@ public class InntektsmeldingEndringsutlederForlengelse implements HarEndretInnte
     }
 
     @Override
-    public boolean erEndret(List<Inntektsmelding> relevanteInntektsmeldinger, List<Inntektsmelding> relevanteInntektsmeldingerForrigeVedtak) {
+    public boolean erEndret(Collection<Inntektsmelding> relevanteInntektsmeldinger, Collection<Inntektsmelding> relevanteInntektsmeldingerForrigeVedtak) {
         var erJournalposterUlike = harUlikeJournalposter(relevanteInntektsmeldingerForrigeVedtak.stream()
             .map(Inntektsmelding::getJournalpostId)
             .collect(Collectors.toSet()), relevanteInntektsmeldinger.stream()
@@ -43,7 +44,7 @@ public class InntektsmeldingEndringsutlederForlengelse implements HarEndretInnte
     }
 
 
-    private static boolean harEndretBeløpFraForrige(List<Inntektsmelding> relevanteInntektsmeldingerForrigeVedtak, Inntektsmelding im) {
+    private static boolean harEndretBeløpFraForrige(Collection<Inntektsmelding> relevanteInntektsmeldingerForrigeVedtak, Inntektsmelding im) {
         var matchendeIM = relevanteInntektsmeldingerForrigeVedtak.stream().filter(imForrige -> imForrige.getArbeidsgiver().equals(im.getArbeidsgiver()) && imForrige.getArbeidsforholdRef().equals(im.getArbeidsforholdRef()))
             .toList();
 
