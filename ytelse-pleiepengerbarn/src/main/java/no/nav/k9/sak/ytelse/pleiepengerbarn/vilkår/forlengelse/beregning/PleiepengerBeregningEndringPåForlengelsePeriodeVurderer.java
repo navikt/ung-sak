@@ -108,8 +108,20 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
             return false;
         }
 
+        return relevanteInntektsmeldinger.stream().anyMatch(im -> harEndretBeløpFraForrige(relevanteInntektsmeldingerForrigeVedtak, im));
 
-        return erJournalposterUlike;
+    }
+
+    private static boolean harEndretBeløpFraForrige(List<Inntektsmelding> relevanteInntektsmeldingerForrigeVedtak, Inntektsmelding im) {
+        var matchendeIM = relevanteInntektsmeldingerForrigeVedtak.stream().filter(imForrige -> imForrige.getArbeidsgiver().equals(im.getArbeidsgiver()) && imForrige.getArbeidsforholdRef().equals(im.getArbeidsforholdRef()))
+            .toList();
+
+        if (matchendeIM.size() != 1) {
+            return true;
+        }
+
+        var matchFraForrige = matchendeIM.get(0);
+        return matchFraForrige.getInntektBeløp().compareTo(im.getInntektBeløp()) != 0;
     }
 
     static boolean harUlikeJournalposter(Set<JournalpostId> forrigeVedtakJournalposter, Set<JournalpostId> denneBehandlingJournalposter) {

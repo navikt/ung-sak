@@ -3,13 +3,17 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.beregning;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
+import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
 
 class PleiepengerBeregningEndringPåForlengelsePeriodeVurdererTest {
@@ -71,18 +75,107 @@ class PleiepengerBeregningEndringPåForlengelsePeriodeVurdererTest {
     }
 
     @Test
-    void skal_gi_ingen_endring_dersom_samme_inntektsmelding_brukes() {
+    void skal_gi_ingen_endring_dersom_ulike_journalposter_men_like_beløp_og_lik_startdato() {
 
         var im = InntektsmeldingBuilder.builder()
             .medJournalpostId("1")
+            .medStartDatoPermisjon(LocalDate.now())
+            .medKanalreferanse("kanalreferanser")
+            .medArbeidsgiver(Arbeidsgiver.virksomhet("123456789"))
+            .medBeløp(BigDecimal.TEN)
+            .build();
+
+        var im2 = InntektsmeldingBuilder.builder()
+            .medJournalpostId("2")
+            .medArbeidsgiver(Arbeidsgiver.virksomhet("123456789"))
+            .medStartDatoPermisjon(LocalDate.now())
             .medKanalreferanse("kanalreferanser")
             .medBeløp(BigDecimal.TEN)
             .build();
 
-        var resultat = PleiepengerBeregningEndringPåForlengelsePeriodeVurderer.erEndret(List.of(im), List.of(im));
+        var resultat = PleiepengerBeregningEndringPåForlengelsePeriodeVurderer.erEndret(List.of(im), List.of(im2));
 
         assertThat(resultat).isFalse();
     }
 
+
+
+    @Test
+    void skal_gi_endring_dersom_ulike_journalposter_og_like_beløp_men_ulik_arbeidsgiver() {
+
+        var im = InntektsmeldingBuilder.builder()
+            .medJournalpostId("1")
+            .medStartDatoPermisjon(LocalDate.now())
+            .medKanalreferanse("kanalreferanser")
+            .medArbeidsgiver(Arbeidsgiver.virksomhet("123456789"))
+            .medBeløp(BigDecimal.TEN)
+            .build();
+
+        var im2 = InntektsmeldingBuilder.builder()
+            .medJournalpostId("2")
+            .medArbeidsgiver(Arbeidsgiver.virksomhet("123456788"))
+            .medStartDatoPermisjon(LocalDate.now())
+            .medKanalreferanse("kanalreferanser")
+            .medBeløp(BigDecimal.TEN)
+            .build();
+
+        var resultat = PleiepengerBeregningEndringPåForlengelsePeriodeVurderer.erEndret(List.of(im), List.of(im2));
+
+        assertThat(resultat).isTrue();
+    }
+
+
+    @Test
+    void skal_gi_endring_dersom_ulike_journalposter_og_like_beløp_men_ulik_arbeidsforholdID() {
+
+        var im = InntektsmeldingBuilder.builder()
+            .medJournalpostId("1")
+            .medStartDatoPermisjon(LocalDate.now())
+            .medKanalreferanse("kanalreferanser")
+            .medArbeidsgiver(Arbeidsgiver.virksomhet("123456789"))
+            .medBeløp(BigDecimal.TEN)
+            .build();
+
+        var im2 = InntektsmeldingBuilder.builder()
+            .medJournalpostId("2")
+            .medArbeidsgiver(Arbeidsgiver.virksomhet("123456789"))
+            .medArbeidsforholdId(InternArbeidsforholdRef.ref(UUID.randomUUID()))
+            .medStartDatoPermisjon(LocalDate.now())
+            .medKanalreferanse("kanalreferanser")
+            .medBeløp(BigDecimal.TEN)
+            .build();
+
+        var resultat = PleiepengerBeregningEndringPåForlengelsePeriodeVurderer.erEndret(List.of(im), List.of(im2));
+
+        assertThat(resultat).isTrue();
+    }
+
+
+    @Test
+    void skal_gi_ingen_endring_dersom_ulike_journalposter_og_like_beløp_lik_arbeidsgiver_og_ulik_stardato() {
+        var ref = InternArbeidsforholdRef.ref(UUID.randomUUID());
+
+        var im = InntektsmeldingBuilder.builder()
+            .medJournalpostId("1")
+            .medStartDatoPermisjon(LocalDate.now())
+            .medKanalreferanse("kanalreferanser")
+            .medArbeidsgiver(Arbeidsgiver.virksomhet("123456789"))
+            .medArbeidsforholdId(ref)
+            .medBeløp(BigDecimal.TEN)
+            .build();
+
+        var im2 = InntektsmeldingBuilder.builder()
+            .medJournalpostId("2")
+            .medArbeidsgiver(Arbeidsgiver.virksomhet("123456789"))
+            .medArbeidsforholdId(ref)
+            .medStartDatoPermisjon(LocalDate.now().plusDays(1))
+            .medKanalreferanse("kanalreferanser")
+            .medBeløp(BigDecimal.TEN)
+            .build();
+
+        var resultat = PleiepengerBeregningEndringPåForlengelsePeriodeVurderer.erEndret(List.of(im), List.of(im2));
+
+        assertThat(resultat).isFalse();
+    }
 
 }
