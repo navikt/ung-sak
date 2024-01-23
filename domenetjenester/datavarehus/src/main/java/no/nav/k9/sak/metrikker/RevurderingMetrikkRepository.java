@@ -339,7 +339,8 @@ public class RevurderingMetrikkRepository {
     Collection<SensuEvent> antallRevurderingUtenNyttStpÅrsakStatistikk(LocalDate dato) {
         String sql = "select f.ytelse_type, b.id " +
             "from behandling b inner join fagsak f on f.id=b.fagsak_id " +
-            "where b.avsluttet_dato is not null " +
+            "where f.ytelse_type = 'PSB' " +
+            "and b.avsluttet_dato is not null " +
             "and b.avsluttet_dato>=:startTid and b.avsluttet_dato < :sluttTid " +
             "and b.behandling_type=:revurdering " +
             "and exists(select 1 from aksjonspunkt a where a.aksjonspunkt_status != 'AVBR' and (a.vent_aarsak is null or a.vent_aarsak = '-') and a.behandling_id = b.id) " +
@@ -370,40 +371,31 @@ public class RevurderingMetrikkRepository {
                     VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType()));
             }));
 
+        var gruppertPrAntallPerioder = perioderTilVurderingPrBehandling.entrySet().stream().collect(Collectors.groupingBy(it -> it.getValue().getPerioderTilVurdering().size()));
+        var totalAntallBehandlinger = perioderTilVurderingPrBehandling.size();
 
-        var pr_ytelse = perioderTilVurderingPrBehandling.entrySet().stream()
-            .collect(Collectors.groupingByConcurrent(e -> e.getKey().get(0, String.class), Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
-
-
-        var values = pr_ytelse.entrySet().stream().flatMap(e -> {
-            var ytelseType = e.getKey();
-            var gruppertPrAntallPerioder = e.getValue().stream().collect(Collectors.groupingBy(it -> it.getPerioderTilVurdering().size()));
-            var totalAntallBehandlinger = e.getValue().size();
-            return gruppertPrAntallPerioder.entrySet().stream().map(behandlingerPrAntallPeriode -> SensuEvent.createSensuEvent(
+        var values = gruppertPrAntallPerioder.entrySet().stream().map(behandlingerPrAntallPeriode -> SensuEvent.createSensuEvent(
                 "antall_revurderinger_uten_nytt_stp_pr_antall_perioder",
                 toMap(
-                    "ytelse_type", ytelseType,
+                    "ytelse_type", FagsakYtelseType.PSB.getKode(),
                     "antall_perioder", behandlingerPrAntallPeriode.getKey().toString()),
                 Map.of("antall_behandlinger", behandlingerPrAntallPeriode.getValue().size(),
-                    "behandlinger_prosentandel", BigDecimal.valueOf(behandlingerPrAntallPeriode.getValue().size()).divide(BigDecimal.valueOf(totalAntallBehandlinger), RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100)))));
-        }).collect(Collectors.toCollection(HashSet::new));
+                    "behandlinger_prosentandel", BigDecimal.valueOf(behandlingerPrAntallPeriode.getValue().size()).divide(BigDecimal.valueOf(totalAntallBehandlinger), RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100)))))
+            .collect(Collectors.toCollection(HashSet::new));
 
 
-        pr_ytelse.entrySet().stream().flatMap(e -> {
-            var ytelseType = e.getKey();
-            var antallBehandlingerPrÅrsak = Arrays.stream(ÅrsakTilVurdering.values()).collect(Collectors.toMap(
-                Function.identity(),
-                årsak -> e.getValue().stream().filter(it -> it.getÅrsakMedPerioder().stream().anyMatch(a -> a.getÅrsak().equals(årsak) && !a.getPerioder().isEmpty())).count()
-            ));
-            var totalAntallBehandlinger = e.getValue().size();
-            return antallBehandlingerPrÅrsak.entrySet().stream().map(antallPrÅrsak -> SensuEvent.createSensuEvent(
+        var antallBehandlingerPrÅrsak = Arrays.stream(ÅrsakTilVurdering.values()).collect(Collectors.toMap(
+            Function.identity(),
+            årsak -> perioderTilVurderingPrBehandling.entrySet().stream().filter(it -> it.getValue().getÅrsakMedPerioder().stream().anyMatch(a -> a.getÅrsak().equals(årsak) && !a.getPerioder().isEmpty())).count()
+        ));
+        antallBehandlingerPrÅrsak.entrySet().stream().map(antallPrÅrsak -> SensuEvent.createSensuEvent(
                 "antall_revurderinger_uten_nytt_stp_pr_aarsak",
                 toMap(
-                    "ytelse_type", ytelseType,
+                    "ytelse_type", FagsakYtelseType.PSB.getKode(),
                     "aarsak", antallPrÅrsak.getKey().toString()),
                 Map.of("antall_behandlinger", antallPrÅrsak.getValue(),
-                    "behandlinger_prosentandel", BigDecimal.valueOf(antallPrÅrsak.getValue()).divide(BigDecimal.valueOf(totalAntallBehandlinger), RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100)))));
-        }).forEach(values::add);
+                    "behandlinger_prosentandel", BigDecimal.valueOf(antallPrÅrsak.getValue()).divide(BigDecimal.valueOf(totalAntallBehandlinger), RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100)))))
+            .forEach(values::add);
 
         return values;
 
