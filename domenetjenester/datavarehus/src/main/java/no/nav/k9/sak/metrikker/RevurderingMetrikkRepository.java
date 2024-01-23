@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -68,10 +69,10 @@ public class RevurderingMetrikkRepository {
     private final BehandlingRepository behandlingRepository;
     private final SøknadsfristTjenesteProvider søknadsfristTjenesteProvider;
     private final UtledStatusPåPerioderTjeneste statusPåPerioderTjeneste = new UtledStatusPåPerioderTjeneste(false);
-    private final Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
+    private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
 
     @Inject
-    public RevurderingMetrikkRepository(EntityManager entityManager, BehandlingRepository behandlingRepository, SøknadsfristTjenesteProvider søknadsfristTjenesteProvider, Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
+    public RevurderingMetrikkRepository(EntityManager entityManager, BehandlingRepository behandlingRepository, SøknadsfristTjenesteProvider søknadsfristTjenesteProvider, @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
         this.entityManager = entityManager;
         this.behandlingRepository = behandlingRepository;
         this.søknadsfristTjenesteProvider = søknadsfristTjenesteProvider;
@@ -356,7 +357,7 @@ public class RevurderingMetrikkRepository {
         NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
             .setParameter("revurdering", BehandlingType.REVURDERING.getKode())
             .setParameter("bg_vilkaret", VilkårType.BEREGNINGSGRUNNLAGVILKÅR.getKode())
-            .setParameter("startTid", dato.minusDays(7).atStartOfDay())
+            .setParameter("startTid", dato.minusDays(1).atStartOfDay())
             .setParameter("sluttTid", dato.atStartOfDay());
 
         Stream<Tuple> stream = query.getResultStream()
