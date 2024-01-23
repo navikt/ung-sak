@@ -287,8 +287,6 @@ spec:
       value: "false"
     - name: OMP_RELEVANT_ENDRING_UTLEDNING
       value: "false"
-    - name: IKKE_VURDER_KOMPLETTHET_VED_FORLENGELSE
-      value: "false"
     - name: AKTIVER_AUTOMATISK_ETTERKONTROLL
       value: "false"
     - name: IM_SKAL_VURDERE_ENDRET_INNTEKT
