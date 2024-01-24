@@ -236,16 +236,14 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
         if (statusForPerioderPåBehandling.getÅrsakMedPerioder().isEmpty() || statusForPerioderPåBehandling.getDokumenterTilBehandling().isEmpty()) {
             return false;
         }
-        for (var årsakMedPerioder : statusForPerioderPåBehandling.getÅrsakMedPerioder()) {
-            if (!ÅrsakTilVurdering.ENDRING_FRA_BRUKER.equals(årsakMedPerioder.getÅrsak())) {
-                return false;
-            }
-        }
-        for (var kravDokumentMedSøktePerioder : statusForPerioderPåBehandling.getDokumenterTilBehandling()) {
-            if (!Kildesystem.ENDRINGSDIALOG.getKode().equals(kravDokumentMedSøktePerioder.getKildesystem())) {
-                return false;
-            }
-        }
-        return true;
+        var harKunEndringFraBruker = statusForPerioderPåBehandling.getÅrsakMedPerioder().stream()
+        .map(ÅrsakMedPerioder::getÅrsak)
+        .allMatch(ÅrsakTilVurdering.ENDRING_FRA_BRUKER::equals);
+         var harKunKildeEndringsdialog = statusForPerioderPåBehandling.getDokumenterTilBehandling().stream()
+        .map(KravDokumentMedSøktePerioder::getKildesystem)
+        .map(Kildesystem::of)
+        .allMatch(Kildesystem.ENDRINGSDIALOG::equals);
+        return harKunEndringFraBruker && harKunKildeEndringsdialog;
+        
     }
 }
