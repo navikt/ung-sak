@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Objects;
 
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Periode;
 
@@ -124,7 +125,7 @@ public class OpptjeningAktiviteter {
                 : ", arbeidsgiverAktørId=..." + arbeidsgiverAktørId.substring(arbeidsgiverAktørId.length() - Math.min(3, arbeidsgiverAktørId.length()), arbeidsgiverAktørId.length());
 
             String virksomhetArbeidsgiver = arbeidsgiverOrgNummer == null ? "" : ", arbeidsgiverOrgNummer=" + arbeidsgiverOrgNummer;
-            
+
             return getClass().getSimpleName()
                 + "<type=" + type
                 + ", periode=" + periode
@@ -137,12 +138,13 @@ public class OpptjeningAktiviteter {
     }
 
     public static OpptjeningPeriode nyPeriode(OpptjeningAktivitetType type,
-                                              Periode periode,
+                                              DatoIntervallEntitet periode,
                                               String arbeidsgiverOrgNummer,
                                               String aktørId,
                                               InternArbeidsforholdRef arbeidsforholdId) {
-        return new OpptjeningPeriode(type, periode, arbeidsgiverOrgNummer, aktørId, arbeidsforholdId);
+        return new OpptjeningPeriode(type, new Periode(periode.getFomDato(), periode.getTomDato()), arbeidsgiverOrgNummer, aktørId, arbeidsforholdId);
     }
+
 
     public static OpptjeningPeriode nyPeriodeOrgnr(OpptjeningAktivitetType type,
                                                    Periode periode,
@@ -164,42 +166,34 @@ public class OpptjeningAktiviteter {
     }
 
     /** Lag ny opptjening periode for angitt aktivitet og med privat arbeidsgive (angitt ved aktørId). */
-    public static OpptjeningPeriode nyPeriodeAktør(OpptjeningAktivitetType type, Periode periode, String aktørId) {
+    public static OpptjeningPeriode nyPeriodeAktør(OpptjeningAktivitetType type, DatoIntervallEntitet periode, String aktørId) {
         return nyPeriode(type, periode, null, aktørId, null);
     }
 
     /** Lag ny opptjening periode for angitt aktivitet og med privat arbeidsgive (angitt ved aktørId) og arbeidsforhold ref. */
-    public static OpptjeningPeriode nyPeriodeAktør(OpptjeningAktivitetType type, Periode periode, String aktørId, InternArbeidsforholdRef arbeidsforholdRef) {
+    public static OpptjeningPeriode nyPeriodeAktør(OpptjeningAktivitetType type, DatoIntervallEntitet periode, String aktørId, InternArbeidsforholdRef arbeidsforholdRef) {
         return nyPeriode(type, periode, null, aktørId, arbeidsforholdRef);
     }
 
     /** Med enkel, registrert arbeidsgiver. ArbeidsforholdReferanse optional. */
-    public static OpptjeningAktiviteter fraOrgnr(OpptjeningAktivitetType type, Periode periode, String orgnr, InternArbeidsforholdRef arbId) {
+    public static OpptjeningAktiviteter fraOrgnr(OpptjeningAktivitetType type, DatoIntervallEntitet periode, String orgnr, InternArbeidsforholdRef arbId) {
         return new OpptjeningAktiviteter(nyPeriode(type, periode, orgnr, null, arbId));
     }
 
     /** Med enkel, registrert arbeidsgiver. Ikke arbeidsforholdReferanse. */
-    public static OpptjeningAktiviteter fraOrgnr(OpptjeningAktivitetType type, Periode periode, String orgnr) {
+    public static OpptjeningAktiviteter fraOrgnr(OpptjeningAktivitetType type, DatoIntervallEntitet periode, String orgnr) {
         return new OpptjeningAktiviteter(nyPeriode(type, periode, orgnr, null, null));
     }
 
     /** Med enkel, privat arbeidsgiver. Merk - angi arbeidsgivers aktørId, ikke søkers. */
-    public static OpptjeningAktiviteter fraAktørId(OpptjeningAktivitetType type, Periode periode, String arbeidsgiverAktørId) {
+    public static OpptjeningAktiviteter fraAktørId(OpptjeningAktivitetType type, DatoIntervallEntitet periode, String arbeidsgiverAktørId) {
         return new OpptjeningAktiviteter(nyPeriode(type, periode, null, arbeidsgiverAktørId, null));
-    }
-
-    /**
-     * Med enkel, privat arbeidsgiver. Merk - angi arbeidsgivers aktørId, ikke søkers.
-     */
-    public static OpptjeningAktiviteter fraAktørId(OpptjeningAktivitetType type, Periode periode, String arbeidsgiverAktørId,
-                                                   InternArbeidsforholdRef arbeidsforholdRef) {
-        return new OpptjeningAktiviteter(nyPeriode(type, periode, null, arbeidsgiverAktørId, arbeidsforholdRef));
     }
 
     /** Med enkel, aktivitet uten arbeidsgiver (kan ikke være {@link OpptjeningAktivitetType#ARBEID}. */
     public static OpptjeningAktiviteter fra(OpptjeningAktivitetType type, Periode periode) {
         kanIkkeVæreArbeid(type);
-        return new OpptjeningAktiviteter(nyPeriode(type, periode, null, null, null));
+        return new OpptjeningAktiviteter(nyPeriode(type, DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom()), null, null, null));
     }
 
     private static void kanIkkeVæreArbeid(OpptjeningAktivitetType type) {

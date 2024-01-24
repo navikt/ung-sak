@@ -291,6 +291,8 @@ spec:
       value: "true"
     - name: IM_SKAL_VURDERE_ENDRET_INNTEKT
       value: "true"
+    - name: BG_FORLENGELSE_FILTRER_IM_FRA_AKTIVITETER
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

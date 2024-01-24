@@ -114,7 +114,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
         opptjeningForBeregningTjeneste = mock(PSBOpptjeningForBeregningTjeneste.class);
         when(opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(any(), any(), any()))
             .thenReturn(Optional.of(new OpptjeningAktiviteter(List.of(
-                OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.PLEIEPENGER, new Periode(STP.minusMonths(1), STP),
+                OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.PLEIEPENGER, DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP),
                     null, null, null)))));
 
         beregningPerioderGrunnlagRepository = new BeregningPerioderGrunnlagRepository(entityManager, new VilkårResultatRepository(entityManager));
@@ -215,7 +215,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), Arbeidskategori.DAGPENGER, behandling);
         when(opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(any(), any(), any()))
             .thenReturn(Optional.of(new OpptjeningAktiviteter(List.of(
-                OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.PLEIEPENGER_AV_DAGPENGER, new Periode(STP, STP.plusDays(10)),
+                OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.PLEIEPENGER_AV_DAGPENGER, DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)),
                     null, null, null)))));
         fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP);
 
@@ -229,7 +229,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), Arbeidskategori.SELVSTENDIG_NÆRINGSDRIVENDE, behandling);
         when(opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(any(), any(), any()))
             .thenReturn(Optional.of(new OpptjeningAktiviteter(List.of(
-                OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.NÆRING, new Periode(STP, STP.plusDays(10)),
+                OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.NÆRING, DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)),
                     null, null, null)))));
         fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP);
 
@@ -244,7 +244,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), Arbeidskategori.SELVSTENDIG_NÆRINGSDRIVENDE, behandling);
         when(opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(any(), any(), any()))
             .thenReturn(Optional.of(new OpptjeningAktiviteter(List.of(
-                OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.NÆRING, new Periode(STP, STP.plusDays(10)),
+                OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.NÆRING, DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)),
                     null, null, null)))));
         when(oppgittOpptjeningFilter.hentOppgittOpptjening(any(), any(), any(LocalDate.class)))
             .thenReturn(Optional.of(byggOppgittOpptjeningMedNæring()));
@@ -262,7 +262,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), Arbeidskategori.FRILANSER, behandling);
         when(opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(any(), any(), any()))
             .thenReturn(Optional.of(new OpptjeningAktiviteter(List.of(
-                OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.FRILANS, new Periode(STP, STP.plusDays(10)),
+                OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.FRILANS, DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)),
                     null, null, null)))));
         fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP);
 
@@ -278,7 +278,7 @@ class PSBPreconditionBeregningAksjonspunktUtlederTest {
         lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), Arbeidskategori.FRILANSER, behandling);
         when(opptjeningForBeregningTjeneste.hentEksaktOpptjeningForBeregning(any(), any(), any()))
             .thenReturn(Optional.of(new OpptjeningAktiviteter(List.of(
-                OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.FRILANS, new Periode(STP, STP.plusDays(10)),
+                OpptjeningAktiviteter.nyPeriode(OpptjeningAktivitetType.FRILANS, DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)),
                     null, null, null)))));
         when(oppgittOpptjeningFilter.hentOppgittOpptjening(any(), any(), any(LocalDate.class)))
             .thenReturn(Optional.of(byggOppgittOpptjeningMedFrilans()));
