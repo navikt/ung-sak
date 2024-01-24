@@ -287,8 +287,6 @@ spec:
       value: "true"
     - name: OMP_RELEVANT_ENDRING_UTLEDNING
       value: "true"
-    - name: NY_DEAKTIVERING_LOGIKK_KALKULUS
-      value: "true"
     - name: IM_SKAL_VURDERE_ENDRET_INNTEKT
       value: "true"
     - name: BG_FORLENGELSE_FILTRER_IM_FRA_AKTIVITETER

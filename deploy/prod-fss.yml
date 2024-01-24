@@ -281,8 +281,6 @@ spec:
       value: "false"
     - name: OMP_RELEVANT_ENDRING_UTLEDNING
       value: "false"
-    - name: NY_DEAKTIVERING_LOGIKK_KALKULUS
-      value: "false"
     - name: AKTIVER_AUTOMATISK_ETTERKONTROLL
       value: "false"
     - name: IM_SKAL_VURDERE_ENDRET_INNTEKT
