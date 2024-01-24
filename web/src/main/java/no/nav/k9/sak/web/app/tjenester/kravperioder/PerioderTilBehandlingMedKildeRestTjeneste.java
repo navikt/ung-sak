@@ -48,9 +48,11 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.krav.KravDokumentMedSøktePerioder;
 import no.nav.k9.sak.kontrakt.krav.PeriodeMedUtfall;
 import no.nav.k9.sak.kontrakt.krav.StatusForPerioderPåBehandling;
 import no.nav.k9.sak.kontrakt.krav.StatusForPerioderPåBehandlingInkludertVilkår;
+import no.nav.k9.sak.kontrakt.krav.ÅrsakMedPerioder;
 import no.nav.k9.sak.kontrakt.krav.ÅrsakTilVurdering;
 import no.nav.k9.sak.perioder.SøknadsfristTjenesteProvider;
 import no.nav.k9.sak.perioder.UtledStatusPåPerioderTjeneste;
@@ -237,13 +239,12 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
             return false;
         }
         var harKunEndringFraBruker = statusForPerioderPåBehandling.getÅrsakMedPerioder().stream()
-        .map(ÅrsakMedPerioder::getÅrsak)
-        .allMatch(ÅrsakTilVurdering.ENDRING_FRA_BRUKER::equals);
-         var harKunKildeEndringsdialog = statusForPerioderPåBehandling.getDokumenterTilBehandling().stream()
-        .map(KravDokumentMedSøktePerioder::getKildesystem)
-        .map(Kildesystem::of)
-        .allMatch(Kildesystem.ENDRINGSDIALOG::equals);
+            .map(ÅrsakMedPerioder::getÅrsak)
+            .allMatch(ÅrsakTilVurdering.ENDRING_FRA_BRUKER::equals);
+        var harKunKildeEndringsdialog = statusForPerioderPåBehandling.getDokumenterTilBehandling().stream()
+            .map(KravDokumentMedSøktePerioder::getKildesystem)
+            .map(Kildesystem::of)
+            .allMatch(Kildesystem.ENDRINGSDIALOG::equals);
         return harKunEndringFraBruker && harKunKildeEndringsdialog;
-        
     }
 }
