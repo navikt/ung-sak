@@ -104,4 +104,15 @@ public class OverstyrtUttakPeriodeEntitet extends BaseEntitet {
     public String getSaksbehandler() {
         return saksbehandler;
     }
+
+
+    @Override
+    public String toString() {
+        return "OverstyrtUttakPeriodeEntitet{" +
+            "behandlingId=" + behandlingId +
+            ", periode=" + periode +
+            ", søkersUttaksgrad=" + søkersUttaksgrad +
+            ", overstyrtUtbetalingsgrad=" + overstyrtUtbetalingsgrad +
+            '}';
+    }
 }
