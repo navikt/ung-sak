@@ -295,7 +295,7 @@ public class RevurderingMetrikkRepository {
             "   group by 1, 2) as statistikk_pr_behandling " +
             " group by 1, 2) as statistikk_pr_behandling_og_total order by antall_aksjonspunkter;";
 
-        String metricName = "revurdering_uten_ny_soknad_antall_aksjonspunkt_fordeling";
+        String metricName = "revurdering_uten_ny_soknad_antall_aksjonspunkt_fordeling_v2";
         String metricField = "antall_behandlinger";
         var metricField2 = "behandlinger_prosentandel";
 
@@ -312,13 +312,23 @@ public class RevurderingMetrikkRepository {
 
         var values = stream.map(t -> SensuEvent.createSensuEvent(metricName,
                 toMap(
-                    "ytelse_type", t.get(0, String.class)),
+                    "ytelse_type", t.get(0, String.class),
+                    "antall_aksjonspunkter", t.get(1, Long.class).toString()),
                 Map.of(metricField, t.get(2, Number.class),
-                    metricField2, t.get(3, Number.class),
-                    "antall_aksjonspunkter", t.get(1, Long.class))
+                    metricField2, t.get(3, Number.class))
             ))
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
+
+        var zeroValues = emptyEvents(metricName,
+            Map.of(
+                "ytelse_type", YTELSER,
+                "antall_aksjonspunkter", IntStream.range(0, 11).boxed().map(Object::toString).toList()), // Lager antall fra 0 til 10
+            Map.of(
+                metricField, 0L,
+                metricField2, BigDecimal.ZERO));
+
+        values.addAll(zeroValues); // NB: utnytter at Set#addAll ikke legger til verdier som ikke finnes fra før
 
         return values;
 

@@ -241,7 +241,7 @@ class RevurderingMetrikkRepositoryTest {
         entityManager.flush();
 
         assertThat(revurderingMetrikkRepository.antallAksjonspunktFordelingForRevurderingUtenNySøknadSisteSyvDagerPSB(LocalDate.now().plusDays(1))).isNotEmpty()
-            .allMatch(v -> v.toString().contains("revurdering_uten_ny_soknad_antall_aksjonspunkt_fordeling"))
+            .allMatch(v -> v.toString().contains("revurdering_uten_ny_soknad_antall_aksjonspunkt_fordeling_v2"))
             .anyMatch(v -> v.toString().contains("ytelse_type=PSB") && v.toString().contains("antall_behandlinger=1") && v.toString().contains("antall_aksjonspunkter=1"));
 
     }
