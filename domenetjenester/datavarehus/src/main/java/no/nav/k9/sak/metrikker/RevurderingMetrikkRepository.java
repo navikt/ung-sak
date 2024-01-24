@@ -12,6 +12,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -53,6 +54,7 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 public class RevurderingMetrikkRepository {
 
 
+    public static final Set<String> PLEIEPENGE_YTELSER = Set.of(FagsakYtelseType.PSB.getKode(), FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE.getKode(), FagsakYtelseType.OPPLÆRINGSPENGER.getKode());
     static final List<String> YTELSER = Stream.of(
             FagsakYtelseType.FRISINN,
             FagsakYtelseType.OMSORGSPENGER,
@@ -107,6 +109,16 @@ public class RevurderingMetrikkRepository {
             metrikker.addAll(timeCall(() -> antallRevurderingUtenNyttStpÅrsakStatistikk(dag), "antallRevurderingUtenNyttStpÅrsakStatistikk"));
         } catch (QueryTimeoutException e) {
             log.warn("Uthenting av antallRevurderingUtenNyttStpÅrsakStatistikk feiler", e);
+        }
+        try {
+            metrikker.addAll(timeCall(() -> antallAksjonspunktFordelingForRevurderingUtenNySøknadSisteSyvDagerPSB(dag), "antallAksjonspunktFordelingForRevurderingUtenNySøknadSisteSyvDagerPSB"));
+        } catch (QueryTimeoutException e) {
+            log.warn("Uthenting av antallAksjonspunktFordelingForRevurderingUtenNySøknadSisteSyvDagerPSB feiler", e);
+        }
+        try {
+            metrikker.addAll(timeCall(() -> antallRevurderingUtenNySøknadMedAksjonspunktPrKodeSisteSyvDagerPSB(dag), "antallRevurderingUtenNySøknadMedAksjonspunktPrKodeSisteSyvDagerPSB"));
+        } catch (QueryTimeoutException e) {
+            log.warn("Uthenting av antallRevurderingUtenNySøknadMedAksjonspunktPrKodeSisteSyvDagerPSB feiler", e);
         }
         return metrikker;
     }
@@ -252,6 +264,68 @@ public class RevurderingMetrikkRepository {
 
 
     @SuppressWarnings("unchecked")
+    Collection<SensuEvent> antallAksjonspunktFordelingForRevurderingUtenNySøknadSisteSyvDagerPSB(LocalDate dato) {
+        String sql = "select " +
+            "ytelse_type, " +
+            "antall_aksjonspunkter, " +
+            "antall_behandlinger," +
+            "antall_behandlinger/sum(antall_behandlinger) over (partition by ytelse_type)*100 as behandlinger_prosentandel " +
+            "from (select ytelse_type, " +
+            "antall_aksjonspunkter, " +
+            "count(*) as antall_behandlinger from (" +
+            "   select f.ytelse_type, b.id, " +
+            "   count(a.aksjonspunkt_def) as antall_aksjonspunkter " +
+            "   from behandling b" +
+            "            inner join fagsak f on f.id=b.fagsak_id" +
+            "            left join aksjonspunkt a on b.id = a.behandling_id " +
+            "   where (a.aksjonspunkt_status is null or a.aksjonspunkt_status != :avbrutt) " +
+            "   and (vent_aarsak is null or vent_aarsak = :udefinert) " +
+            "   and b.avsluttet_dato is not null " +
+            "   and b.avsluttet_dato>=:startTid and b.avsluttet_dato < :sluttTid " +
+            "   and b.behandling_type=:revurdering " +
+            "   and f.ytelse_type in (:pleiepengeYtelser) " +
+            " and not exists ( " +
+            " select 1 from GR_SOEKNADSPERIODE gr " +
+            "inner join sp_soeknadsperioder_holder sp_holder on gr.oppgitt_soknadsperiode_id = sp_holder.id " +
+            "inner join SP_SOEKNADSPERIODER sp_perioder on sp_holder.id = sp_perioder.holder_id " +
+            "inner join GR_SOEKNADSPERIODE gr_original on gr_original.behandling_id = b.original_behandling_id " +
+            "inner join sp_soeknadsperioder_holder sp_holder_original on sp_holder_original.id = gr_original.oppgitt_soknadsperiode_id " +
+            "inner join sp_soeknadsperioder sp_perioder_original on sp_holder_original.id = sp_perioder_original.holder_id " +
+            "where gr.behandling_id = b.id and gr.aktiv = true and gr_original.aktiv = true and sp_perioder.journalpost_id != sp_perioder_original.journalpost_id)" +
+            "   group by 1, 2) as statistikk_pr_behandling " +
+            " group by 1, 2) as statistikk_pr_behandling_og_total order by antall_aksjonspunkter;";
+
+        String metricName = "revurdering_uten_ny_soknad_antall_aksjonspunkt_fordeling";
+        String metricField = "antall_behandlinger";
+        var metricField2 = "behandlinger_prosentandel";
+
+        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
+            .setParameter("revurdering", BehandlingType.REVURDERING.getKode())
+            .setParameter("avbrutt", AksjonspunktStatus.AVBRUTT.getKode())
+            .setParameter("udefinert", Venteårsak.UDEFINERT.getKode())
+            .setParameter("startTid", dato.minusDays(7).atStartOfDay())
+            .setParameter("sluttTid", dato.atStartOfDay())
+            .setParameter("pleiepengeYtelser", PLEIEPENGE_YTELSER);
+
+        Stream<Tuple> stream = query.getResultStream()
+            .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class)));
+
+        var values = stream.map(t -> SensuEvent.createSensuEvent(metricName,
+                toMap(
+                    "ytelse_type", t.get(0, String.class)),
+                Map.of(metricField, t.get(2, Number.class),
+                    metricField2, t.get(3, Number.class),
+                    "antall_aksjonspunkter", t.get(1, Long.class))
+            ))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+
+
+        return values;
+
+    }
+
+
+    @SuppressWarnings("unchecked")
     Collection<SensuEvent> antallRevurderingMedAksjonspunktPrKodeSisteSyvDager(LocalDate dato) {
         String sql = "select f.ytelse_type, a.aksjonspunkt_def, count(*) as antall_behandlinger " +
             "from behandling b" +
@@ -333,6 +407,54 @@ public class RevurderingMetrikkRepository {
         return values;
 
     }
+
+    @SuppressWarnings("unchecked")
+    Collection<SensuEvent> antallRevurderingUtenNySøknadMedAksjonspunktPrKodeSisteSyvDagerPSB(LocalDate dato) {
+        String sql = "select f.ytelse_type, a.aksjonspunkt_def, count(*) as antall_behandlinger " +
+            "from behandling b" +
+            "         inner join fagsak f on f.id=b.fagsak_id" +
+            "         inner join aksjonspunkt a on b.id = a.behandling_id " +
+            "where a.aksjonspunkt_status != 'AVBR' " +
+            "and (vent_aarsak is null or vent_aarsak = '-') " +
+            "and b.avsluttet_dato is not null " +
+            "and b.avsluttet_dato>=:startTid and b.avsluttet_dato < :sluttTid " +
+            "and b.behandling_type=:revurdering " +
+            "and f.ytelse_type in (:pleiepengeYtelser) " +
+            " and not exists ( " +
+            " select 1 from GR_SOEKNADSPERIODE gr " +
+            "inner join sp_soeknadsperioder_holder sp_holder on gr.oppgitt_soknadsperiode_id = sp_holder.id " +
+            "inner join SP_SOEKNADSPERIODER sp_perioder on sp_holder.id = sp_perioder.holder_id " +
+            "inner join GR_SOEKNADSPERIODE gr_original on gr_original.behandling_id = b.original_behandling_id " +
+            "inner join sp_soeknadsperioder_holder sp_holder_original on sp_holder_original.id = gr_original.oppgitt_soknadsperiode_id " +
+            "inner join sp_soeknadsperioder sp_perioder_original on sp_holder_original.id = sp_perioder_original.holder_id " +
+            "where gr.behandling_id = b.id and gr.aktiv = true and gr_original.aktiv = true and sp_perioder.journalpost_id != sp_perioder_original.journalpost_id)" +
+            "group by 1, 2";
+
+        String metricName = "revurdering_uten_ny_soknad_antall_behandlinger_pr_aksjonspunkt";
+        String metricField = "antall_behandlinger";
+
+        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
+            .setParameter("revurdering", BehandlingType.REVURDERING.getKode())
+            .setParameter("startTid", dato.minusDays(7).atStartOfDay())
+            .setParameter("sluttTid", dato.atStartOfDay())
+            .setParameter("pleiepengeYtelser", PLEIEPENGE_YTELSER);
+
+        Stream<Tuple> stream = query.getResultStream()
+            .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class)));
+
+        var values = stream.map(t -> SensuEvent.createSensuEvent(metricName,
+                toMap(
+                    "ytelse_type", t.get(0, String.class),
+                    "aksjonspunkt", t.get(1, String.class),
+                    "aksjonspunkt_navn", coalesce(AksjonspunktDefinisjon.kodeMap().getOrDefault(t.get(1, String.class), AksjonspunktDefinisjon.UNDEFINED).getNavn(), "-")),
+                Map.of(metricField, t.get(2, Number.class))))
+            .collect(Collectors.toList());
+
+        return values;
+
+    }
+
+
 
 
     @SuppressWarnings("unchecked")
