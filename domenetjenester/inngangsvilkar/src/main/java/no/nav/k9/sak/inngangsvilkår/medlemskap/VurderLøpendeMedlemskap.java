@@ -277,6 +277,11 @@ public class VurderLøpendeMedlemskap {
         return vurderPerioderMedForlengelse(grunnlagOgPerioder);
     }
 
+    /**
+     * Vurderer medlemskap per vurderingsdato
+     * Dersom en vurdering er ikke oppfylt skal vi ikke lagre flere vurderinger for den perioden (i tilfelle vi har flere vurderingsdatoer innenfor samme periode)
+     * Vi må lagre vurderinger for andre perioder selv om en av periodene får ikke godkjent (i tilfelle vi har flere skjæringstidspunkt)
+     */
     VurdertMedlemskapOgForlengelser vurderPerioderMedForlengelse(GrunnlagOgPerioder grunnlagOgPerioder) {
         Map<LocalDate, VilkårData> resultat = new TreeMap<>();
         Set<DatoIntervallEntitet> perioderIkkeOppfylt = new HashSet<>();
