@@ -19,6 +19,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
+import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrUttakRepository;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrtUttakPeriode;
@@ -80,6 +81,7 @@ public class OverstyrUttakTjeneste {
             .filter(Optional::isPresent)
             .map(Optional::get)
             .flatMap(v -> v.getPerioder().stream())
+            .filter(vp -> !vp.getUtfall().equals(Utfall.IKKE_OPPFYLT))
             .map(VilkårPeriode::getPeriode)
             .collect(Collectors.toCollection(TreeSet::new));
 
