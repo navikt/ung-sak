@@ -18,7 +18,11 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.typer.Saksnummer;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * KalkulusApiTjeneste sørger for at K9 kaller kalkulus på riktig format i henhold til no.nav.folketrygdloven.kalkulus.kontrakt

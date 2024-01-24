@@ -1,22 +1,11 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.Duration;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusRestKlient;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PleiepengerSyktBarnGrunnlag;
 import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
-import no.nav.folketrygdloven.kalkulus.kodeverk.YtelseTyperKalkulusStøtterKontrakt;
+import no.nav.folketrygdloven.kalkulus.kodeverk.FagsakYtelseType;
 import no.nav.folketrygdloven.kalkulus.request.v1.forvaltning.OppdaterYtelsesspesifiktGrunnlagForRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.forvaltning.OppdaterYtelsesspesifiktGrunnlagListeRequest;
 import no.nav.folketrygdloven.kalkulus.response.v1.forvaltning.EndretPeriodeListeRespons;
@@ -38,6 +27,16 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.UttakRestKlient;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
 import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Duration;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class FeilRefusjonVedTilsynUtrekkTjeneste {
@@ -117,7 +116,7 @@ public class FeilRefusjonVedTilsynUtrekkTjeneste {
         var request = new OppdaterYtelsesspesifiktGrunnlagListeRequest(sisteBehandling.getFagsak().getSaksnummer().getVerdi(),
             sisteBehandling.getUuid(),
             new AktørIdPersonident(sisteBehandling.getAktørId().getAktørId()),
-            YtelseTyperKalkulusStøtterKontrakt.PLEIEPENGER_SYKT_BARN,
+            FagsakYtelseType.PLEIEPENGER_SYKT_BARN,
             requesterPrReferanse);
 
 
