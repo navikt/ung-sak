@@ -17,8 +17,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
@@ -38,16 +36,12 @@ import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.KravDokumentType;
-import no.nav.k9.sak.perioder.SøknadsfristTjeneste;
 import no.nav.k9.sak.perioder.SøknadsfristTjenesteProvider;
 import no.nav.k9.sak.perioder.SøktPeriode;
-import no.nav.k9.sak.perioder.UtledStatusPåPerioderTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
 import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.k9.sak.trigger.ProsessTriggereRepository;
-import no.nav.k9.sak.trigger.Trigger;
 import no.nav.k9.sak.typer.JournalpostId;
 
 @ExtendWith(CdiAwareExtension.class)
@@ -214,6 +208,44 @@ class RevurderingMetrikkRepositoryTest {
 
     }
 
+    @Test
+    void skal_finne_en_behandling_uten_ny_søknad_med_ett_aksjonspunkt() {
+
+        FagsakYtelseType ytelseType = FagsakYtelseType.PSB;
+        var originalBuilder = TestScenarioBuilder.builderMedSøknad(ytelseType);
+        var behandling = originalBuilder.lagre(entityManager);
+        var stp = LocalDate.now();
+        leggTilVilkårResultatForStp(stp, behandling);
+
+        behandling.avsluttBehandling();
+
+
+        AksjonspunktDefinisjon aksjonspunkt = AksjonspunktDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_SELVSTENDIG_NÆRINGSDRIVENDE;
+        BehandlingStegType stegType = BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG;
+
+        var revurderingBuilder = TestScenarioBuilder.builderUtenSøknad(ytelseType)
+            .medBehandlingType(BehandlingType.REVURDERING)
+            .medOriginalBehandling(behandling, BehandlingÅrsakType.RE_ENDRING_BEREGNINGSGRUNNLAG);
+
+        revurderingBuilder.leggTilAksjonspunkt(aksjonspunkt, stegType);
+
+        var revurdering = revurderingBuilder
+            .lagre(entityManager);
+        leggTilVilkårResultatForStp(stp, revurdering);
+
+        var ap = revurdering.getAksjonspunkter().iterator().next();
+        aksjonspunktKontrollRepository.setTilUtført(ap, "begrunnelse");
+
+        revurdering.avsluttBehandling();
+
+        entityManager.flush();
+
+        assertThat(revurderingMetrikkRepository.antallAksjonspunktFordelingForRevurderingUtenNySøknadSisteSyvDagerPSB(LocalDate.now().plusDays(1))).isNotEmpty()
+            .allMatch(v -> v.toString().contains("revurdering_uten_ny_soknad_antall_aksjonspunkt_fordeling"))
+            .anyMatch(v -> v.toString().contains("ytelse_type=PSB") && v.toString().contains("antall_behandlinger=1") && v.toString().contains("antall_aksjonspunkter=1"));
+
+    }
+
 
 
     @Test
@@ -331,6 +363,46 @@ class RevurderingMetrikkRepositoryTest {
     }
 
     @Test
+    void skal_finne_aksjonspunkt_med_en_behandling_uten_ny_søknad() {
+
+        var stp = LocalDate.now();
+
+        FagsakYtelseType ytelseType = FagsakYtelseType.PSB;
+        var scenario = TestScenarioBuilder.builderMedSøknad(ytelseType);
+        var behandling = scenario.lagre(entityManager);
+        leggTilVilkårResultatForStp(stp, behandling);
+        behandling.avsluttBehandling();
+
+
+        AksjonspunktDefinisjon aksjonspunkt = AksjonspunktDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_SELVSTENDIG_NÆRINGSDRIVENDE;
+        BehandlingStegType stegType = BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG;
+
+        var scenarioBuilder = TestScenarioBuilder.builderUtenSøknad(ytelseType)
+            .medBehandlingType(BehandlingType.REVURDERING)
+            .medOriginalBehandling(behandling, BehandlingÅrsakType.RE_ENDRING_BEREGNINGSGRUNNLAG);
+
+        scenarioBuilder.leggTilAksjonspunkt(aksjonspunkt, stegType);
+
+        var revurdering = scenarioBuilder
+            .lagre(entityManager);
+        leggTilVilkårResultatForStp(stp, revurdering);
+
+        var ap = revurdering.getAksjonspunkter().iterator().next();
+        aksjonspunktKontrollRepository.setTilUtført(ap, "begrunnelse");
+
+        revurdering.avsluttBehandling();
+
+        entityManager.flush();
+
+        assertThat(revurderingMetrikkRepository.antallRevurderingUtenNySøknadMedAksjonspunktPrKodeSisteSyvDagerPSB(LocalDate.now().plusDays(1))).isNotEmpty()
+            .allMatch(v -> v.toString().contains("revurdering_uten_ny_soknad_antall_behandlinger_pr_aksjonspunkt"))
+            .anyMatch(v -> v.toString().contains("ytelse_type=PSB") && v.toString().contains("antall_behandlinger=1") && v.toString().contains("aksjonspunkt=" + aksjonspunkt.getKode()) &&
+                v.toString().contains("aksjonspunkt_navn=" + aksjonspunkt.getNavn()));
+
+    }
+
+
+    @Test
     void skal_ikke_finne_aksjonspuknt_for_behandling_med_nytt_stp() {
 
         var stp = LocalDate.now();
@@ -369,7 +441,7 @@ class RevurderingMetrikkRepositoryTest {
     }
 
     @Test
-    void skal_finne_en_behandling_uten_nytt_med_en_periode() {
+    void skal_finne_en_behandling_uten_nytt_stp_med_en_periode() {
 
         FagsakYtelseType ytelseType = FagsakYtelseType.PSB;
         var originalBuilder = TestScenarioBuilder.builderUtenSøknad(ytelseType);
