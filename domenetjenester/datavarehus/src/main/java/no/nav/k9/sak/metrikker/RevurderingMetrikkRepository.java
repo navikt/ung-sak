@@ -358,7 +358,7 @@ public class RevurderingMetrikkRepository {
         NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
             .setParameter("revurdering", BehandlingType.REVURDERING.getKode())
             .setParameter("bg_vilkaret", VilkårType.BEREGNINGSGRUNNLAGVILKÅR.getKode())
-            .setParameter("startTid", dato.minusDays(1).atStartOfDay())
+            .setParameter("startTid", dato.minusDays(7).atStartOfDay())
             .setParameter("sluttTid", dato.atStartOfDay());
 
         Stream<Tuple> stream = query.getResultStream()
