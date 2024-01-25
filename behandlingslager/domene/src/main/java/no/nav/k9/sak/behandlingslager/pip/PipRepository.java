@@ -24,7 +24,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 public class PipRepository {
 
     public static final String SAKSNUMMER = "saksnummer";
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
 
     @Inject
     public PipRepository(EntityManager entityManager) {
@@ -187,7 +187,24 @@ public class PipRepository {
 
         @SuppressWarnings("unchecked")
         List<String> aktørIdList = query.getResultList();
+
+        //Dersom det ikke finnes en fagsak med gitt saksnummer sjekker vi tabellen for reserverte saksnummer
+        if (aktørIdList.isEmpty()) {
+            aktørIdList = hentAktørIdKnyttetTilReservertSaksnummer(saksnummer);
+        }
+
         return aktørIdList.stream().map(AktørId::new).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    private List<String> hentAktørIdKnyttetTilReservertSaksnummer(Saksnummer saksnummer) {
+        String sql = "SELECT AKTOER_ID From SAKSNUMMER_AKTOR WHERE SAKSNUMMER = (:saksnummer) and SLETTET = false";
+
+        Query query = entityManager.createNativeQuery(sql); // NOSONAR
+        query.setParameter(SAKSNUMMER, saksnummer.getVerdi());
+
+        @SuppressWarnings("unchecked")
+        List<String> aktørIdList = query.getResultList();
+        return aktørIdList;
     }
 
     @SuppressWarnings({ "unchecked" })
