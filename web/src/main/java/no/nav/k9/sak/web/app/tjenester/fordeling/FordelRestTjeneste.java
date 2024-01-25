@@ -475,40 +475,39 @@ public class FordelRestTjeneste {
         return builder.build();
     }
 
+    //TODO fjern dupliseringen ved å bruke denne metoden alle steder der fagsak opprettes
     private Fagsak finnEllerOpprettSakGittSaksnummer(AbacJournalpostMottakOpprettSakDto journalpostMottakOpprettSakDto) {
         final Saksnummer saksnummer = journalpostMottakOpprettSakDto.getSaksnummer();
-        return fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, false).orElseGet(() -> {
-            FagsakYtelseType ytelseType = journalpostMottakOpprettSakDto.getYtelseType();
+        final FagsakYtelseType ytelseType = journalpostMottakOpprettSakDto.getYtelseType();
 
-            AktørId pleietrengendeAktørId = null;
-            if (journalpostMottakOpprettSakDto.getPleietrengendeAktørId() != null) {
-                pleietrengendeAktørId = new AktørId(journalpostMottakOpprettSakDto.getPleietrengendeAktørId());
-            }
+        AktørId pleietrengendeAktørId = null;
+        if (journalpostMottakOpprettSakDto.getPleietrengendeAktørId() != null) {
+            pleietrengendeAktørId = new AktørId(journalpostMottakOpprettSakDto.getPleietrengendeAktørId());
+        }
 
-            AktørId relatertPersonAktørId = null;
-            if (journalpostMottakOpprettSakDto.getRelatertPersonAktørId() != null) {
-                relatertPersonAktørId = new AktørId(journalpostMottakOpprettSakDto.getRelatertPersonAktørId());
-            }
+        AktørId relatertPersonAktørId = null;
+        if (journalpostMottakOpprettSakDto.getRelatertPersonAktørId() != null) {
+            relatertPersonAktørId = new AktørId(journalpostMottakOpprettSakDto.getRelatertPersonAktørId());
+        }
 
-            ytelseType.validerNøkkelParametere(pleietrengendeAktørId, relatertPersonAktørId);
+        ytelseType.validerNøkkelParametere(pleietrengendeAktørId, relatertPersonAktørId);
 
-            Periode periode = journalpostMottakOpprettSakDto.getPeriode();
-            if (periode == null) {
-                throw new IllegalArgumentException("Kan ikke opprette fagsak uten å oppgi start av periode (fravær/uttak): " + journalpostMottakOpprettSakDto);
-            }
+        Periode periode = journalpostMottakOpprettSakDto.getPeriode();
+        if (periode == null) {
+            throw new IllegalArgumentException("Kan ikke opprette fagsak uten å oppgi start av periode (fravær/uttak): " + journalpostMottakOpprettSakDto);
+        }
 
-            var søknadMottaker = søknadMottakere.finnSøknadMottakerTjeneste(ytelseType);
+        var søknadMottaker = søknadMottakere.finnSøknadMottakerTjeneste(ytelseType);
 
-            return søknadMottaker.finnEllerOpprettFagsak(
-                ytelseType,
-                new AktørId(journalpostMottakOpprettSakDto.getAktørId()),
-                pleietrengendeAktørId,
-                relatertPersonAktørId,
-                periode.getFom(),
-                periode.getTom(),
-                saksnummer
-            );
-        });
+        return søknadMottaker.finnEllerOpprettFagsak(
+            ytelseType,
+            new AktørId(journalpostMottakOpprettSakDto.getAktørId()),
+            pleietrengendeAktørId,
+            relatertPersonAktørId,
+            periode.getFom(),
+            periode.getTom(),
+            saksnummer
+        );
     }
 
     //TODO denne bør alltid brukes ved mottak av dokumenter
