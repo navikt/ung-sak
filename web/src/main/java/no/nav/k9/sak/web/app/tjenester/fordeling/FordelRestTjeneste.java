@@ -410,9 +410,9 @@ public class FordelRestTjeneste {
     @Operation(description = "Ny journalpost skal behandles. Oppretter også ny sak dersom den ikke finnes.", summary = ("Ny journalpost skal behandles. Oppretter også ny sak dersom den ikke finnes."), tags = "fordel")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
     public void mottaJournalpostOgOpprettSøknad(@Parameter(description = "Krever saksnummer, journalpostId, aktørId, periode og ytelseType") @Valid AbacJournalpostMottakOpprettSakDto journalpostMottakOpprettSakDto) {
-        FagsakYtelseType ytelseType = journalpostMottakOpprettSakDto.getYtelseType();
-        LOG_CONTEXT.add("ytelseType", ytelseType);
+        LOG_CONTEXT.add("ytelseType", journalpostMottakOpprettSakDto.getYtelseType());
         LOG_CONTEXT.add("journalpostId", journalpostMottakOpprettSakDto.getJournalpostId());
+        LOG_CONTEXT.add("saksnummer", journalpostMottakOpprettSakDto.getSaksnummer());
         logger.info("Mottok journalpost");
 
         validerAtJournalpostenErJournalført(journalpostMottakOpprettSakDto.getJournalpostId());
