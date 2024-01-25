@@ -14,9 +14,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.nare.evaluation.Evaluation;
@@ -57,8 +54,6 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 @ApplicationScoped
 public class VurderLøpendeMedlemskap {
 
-    private final Logger log = LoggerFactory.getLogger(VurderLøpendeMedlemskap.class);
-
     private BasisPersonopplysningTjeneste personopplysningTjeneste;
     private MedlemskapRepository medlemskapRepository;
     private BehandlingRepository behandlingRepository;
@@ -85,6 +80,8 @@ public class VurderLøpendeMedlemskap {
         this.utledVurderingsdatoerMedlemskap = utledVurderingsdatoerMedlemskapTjeneste;
     }
 
+    //TODO hvorfor ligger denne her fortsatt (ubrukt) og hvorfor ligger det masse tester under /resources???
+    @Deprecated
     public Map<LocalDate, VilkårData> vurderMedlemskap(Long behandlingId) {
         Map<LocalDate, VilkårData> resultat = new TreeMap<>();
 
@@ -309,8 +306,7 @@ public class VurderLøpendeMedlemskap {
     }
 
     private LocalDate utledTilOgMedDato(LocalDate key, Set<LocalDate> vurderingsdatoer, DatoIntervallEntitet perioden) {
-        var vurderingsdatoerUtenOmNøkkel = vurderingsdatoer.stream().filter(it -> !Objects.equals(key, it)).collect(Collectors.toCollection(TreeSet::new));
-
+        Set<LocalDate> vurderingsdatoerUtenOmNøkkel = vurderingsdatoer.stream().filter(it -> !Objects.equals(key, it)).collect(Collectors.toCollection(TreeSet::new));
         return vurderingsdatoerUtenOmNøkkel
             .stream()
             .filter(perioden::inkluderer)
