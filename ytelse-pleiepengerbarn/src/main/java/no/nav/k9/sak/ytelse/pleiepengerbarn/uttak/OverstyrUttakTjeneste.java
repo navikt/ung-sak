@@ -7,9 +7,6 @@ import java.util.Optional;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -35,8 +32,6 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 
 @ApplicationScoped
 public class OverstyrUttakTjeneste {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(OverstyrUttakTjeneste.class);
 
     private UttakTjeneste uttakTjeneste;
     private OverstyrUttakRepository overstyrUttakRepository;
@@ -84,8 +79,6 @@ public class OverstyrUttakTjeneste {
             .filter(vp -> !vp.getUtfall().equals(Utfall.IKKE_OPPFYLT))
             .map(VilkårPeriode::getPeriode)
             .collect(Collectors.toCollection(TreeSet::new));
-
-        LOGGER.info("Fant følgende vilkårsperioder: "  + definerendeVilkårsperioder);
 
         overstyrUttakRepository.ryddMotVilkår(behandlingReferanse.getBehandlingId(), definerendeVilkårsperioder);
     }
