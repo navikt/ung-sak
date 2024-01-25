@@ -404,12 +404,12 @@ public class FordelRestTjeneste {
     }
 
     @POST
-    @Path("/mottak/journalpost/sak/opprett") // TODO: Finn på et bedre navn
+    @Path("/journalpost/fagsak/opprett")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(JSON_UTF8)
-    @Operation(description = "Ny journalpost skal behandles. Oppretter også ny sak.", summary = ("Varsel om en nye journalposter som skal behandles i systemet. Alle må tilhøre samme saksnummer, og være av samme type(brevkode, ytelsetype)"), tags = "fordel")
+    @Operation(description = "Ny journalpost skal behandles. Oppretter også ny sak dersom den ikke finnes.", summary = ("Ny journalpost skal behandles. Oppretter også ny sak dersom den ikke finnes."), tags = "fordel")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
-    public void mottaJournalpostOgOpprettSøknad(@Parameter(description = "Krever saksnummer, journalpostId og behandlingstemaOffisiellKode") @Valid AbacJournalpostMottakOpprettSakDto journalpostMottakOpprettSakDto) {
+    public void mottaJournalpostOgOpprettSøknad(@Parameter(description = "Krever saksnummer, journalpostId, aktørId, periode og ytelseType") @Valid AbacJournalpostMottakOpprettSakDto journalpostMottakOpprettSakDto) {
         FagsakYtelseType ytelseType = journalpostMottakOpprettSakDto.getYtelseType();
         LOG_CONTEXT.add("ytelseType", ytelseType);
         LOG_CONTEXT.add("journalpostId", journalpostMottakOpprettSakDto.getJournalpostId());
