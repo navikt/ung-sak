@@ -417,24 +417,9 @@ public class FordelRestTjeneste {
 
         validerAtJournalpostenErJournalført(journalpostMottakOpprettSakDto.getJournalpostId());
 
-        AktørId pleietrengendeAktørId = null;
-        if (journalpostMottakOpprettSakDto.getPleietrengendeAktørId() != null) {
-            pleietrengendeAktørId = new AktørId(journalpostMottakOpprettSakDto.getPleietrengendeAktørId());
-        }
+        Fagsak fagsak = finnEllerOpprettSakGittSaksnummer(journalpostMottakOpprettSakDto);
 
-        AktørId relatertPersonAktørId = null;
-        if (journalpostMottakOpprettSakDto.getRelatertPersonAktørId() != null) {
-            relatertPersonAktørId = new AktørId(journalpostMottakOpprettSakDto.getRelatertPersonAktørId());
-        }
-
-        ytelseType.validerNøkkelParametere(pleietrengendeAktørId, relatertPersonAktørId);
-
-        Periode periode = journalpostMottakOpprettSakDto.getPeriode();
-        if (periode == null) {
-            throw new IllegalArgumentException("Kan ikke opprette fagsak uten å oppgi start av periode (fravær/uttak): " + journalpostMottakOpprettSakDto);
-        }
-
-        dokumentmottakTjeneste.dokumenterAnkommet(List.of(mapJournalpost(journalpostMottakOpprettSakDto)));
+        dokumentmottakTjeneste.dokumenterAnkommet(List.of(mapJournalpost(journalpostMottakOpprettSakDto, fagsak)));
     }
 
     private InngåendeSaksdokument mapJournalpost(AbacJournalpostMottakDto mottattJournalpost) {
@@ -468,35 +453,8 @@ public class FordelRestTjeneste {
         return builder.build();
     }
 
-    private InngåendeSaksdokument mapJournalpost(AbacJournalpostMottakOpprettSakDto mottattJournalpost) {
+    private InngåendeSaksdokument mapJournalpost(AbacJournalpostMottakOpprettSakDto mottattJournalpost, Fagsak fagsak) {
         JournalpostId journalpostId = mottattJournalpost.getJournalpostId();
-        Saksnummer saksnummer = mottattJournalpost.getSaksnummer();
-        Fagsak fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, false).orElseGet(() -> {
-            var ytelseType = mottattJournalpost.getYtelseType();
-            Periode periode = mottattJournalpost.getPeriode();
-
-            var søknadMottaker = søknadMottakere.finnSøknadMottakerTjeneste(ytelseType);
-
-            AktørId pleietrengendeAktørId = null;
-            if (mottattJournalpost.getPleietrengendeAktørId() != null) {
-                pleietrengendeAktørId = new AktørId(mottattJournalpost.getPleietrengendeAktørId());
-            }
-
-            AktørId relatertPersonAktørId = null;
-            if (mottattJournalpost.getRelatertPersonAktørId() != null) {
-                relatertPersonAktørId = new AktørId(mottattJournalpost.getRelatertPersonAktørId());
-            }
-
-            return søknadMottaker.finnEllerOpprettFagsak(
-                ytelseType,
-                new AktørId(mottattJournalpost.getAktørId()),
-                pleietrengendeAktørId,
-                relatertPersonAktørId,
-                periode.getFom(),
-                periode.getTom(),
-                saksnummer
-            );
-        });
 
         Optional<String> payload = mottattJournalpost.getPayload();
         InngåendeSaksdokument.Builder builder = InngåendeSaksdokument.builder()
@@ -507,7 +465,6 @@ public class FordelRestTjeneste {
 
         builder.medKanalreferanse(mapTilKanalreferanse(mottattJournalpost.getKanalReferanse(), journalpostId));
 
-        // NOSONAR
         payload.ifPresent(builder::medPayload);
 
         LocalDateTime mottattTidspunkt = Optional.ofNullable(mottattJournalpost.getForsendelseMottattTidspunkt())
@@ -516,6 +473,42 @@ public class FordelRestTjeneste {
         builder.medForsendelseMottatt(mottattJournalpost.getForsendelseMottatt().orElse(mottattTidspunkt.toLocalDate())); // NOSONAR
 
         return builder.build();
+    }
+
+    private Fagsak finnEllerOpprettSakGittSaksnummer(AbacJournalpostMottakOpprettSakDto journalpostMottakOpprettSakDto) {
+        final Saksnummer saksnummer = journalpostMottakOpprettSakDto.getSaksnummer();
+        return fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, false).orElseGet(() -> {
+            FagsakYtelseType ytelseType = journalpostMottakOpprettSakDto.getYtelseType();
+
+            AktørId pleietrengendeAktørId = null;
+            if (journalpostMottakOpprettSakDto.getPleietrengendeAktørId() != null) {
+                pleietrengendeAktørId = new AktørId(journalpostMottakOpprettSakDto.getPleietrengendeAktørId());
+            }
+
+            AktørId relatertPersonAktørId = null;
+            if (journalpostMottakOpprettSakDto.getRelatertPersonAktørId() != null) {
+                relatertPersonAktørId = new AktørId(journalpostMottakOpprettSakDto.getRelatertPersonAktørId());
+            }
+
+            ytelseType.validerNøkkelParametere(pleietrengendeAktørId, relatertPersonAktørId);
+
+            Periode periode = journalpostMottakOpprettSakDto.getPeriode();
+            if (periode == null) {
+                throw new IllegalArgumentException("Kan ikke opprette fagsak uten å oppgi start av periode (fravær/uttak): " + journalpostMottakOpprettSakDto);
+            }
+
+            var søknadMottaker = søknadMottakere.finnSøknadMottakerTjeneste(ytelseType);
+
+            return søknadMottaker.finnEllerOpprettFagsak(
+                ytelseType,
+                new AktørId(journalpostMottakOpprettSakDto.getAktørId()),
+                pleietrengendeAktørId,
+                relatertPersonAktørId,
+                periode.getFom(),
+                periode.getTom(),
+                saksnummer
+            );
+        });
     }
 
     //TODO denne bør alltid brukes ved mottak av dokumenter
@@ -615,6 +608,14 @@ public class FordelRestTjeneste {
                 .leggTil(AppAbacAttributtType.AKTØR_ID, getAktørId());
         }
 
+        @Override
+        public String toString() {
+            return getClass().getSimpleName()
+                + "<journalpostId=" + getJournalpostId()
+                + ", ytelseType=" + getYtelseType()
+                + ", periode=" + getPeriode()
+                + ">";
+        }
     }
 
     public static class PsbInfotrygdFødselsnumre implements AbacDto {
