@@ -49,7 +49,6 @@ spec:
         kvPath: /serviceuser/data/dev/srvssolinux
       - mountPath: /var/run/secrets/nais.io/vault
         kvPath: /kv/preprod/fss/k9-sak/k9saksbehandling
-  sidecar: true
   azure:
     application:
       enabled: true
@@ -145,8 +144,6 @@ spec:
       value: OMS
 
     # Restservice Generelle
-    - name: INFOTRYGD_HENDELSER_API_URL
-      value: http://infotrygd-hendelse-api.infotrygd/infotrygd/hendelser
     - name: FPABAKUS_URL
       value: http://fpabakus.teamforeldrepenger/fpabakus
     - name: FPABAKUS_SCOPE
@@ -200,7 +197,9 @@ spec:
     - name: K9_PUNSJ_SCOPE
       value: api://dev-fss.k9saksbehandling.k9-punsj/.default
     - name: INFOTRYGD_BS_BASE_URI
-      value: http://k9-infotrygd.k9saksbehandling
+      value: http://k9-infotrygd-grunnlag-paaroerende-sykdom.k9saksbehandling
+    - name: K9_INFOTRYGD_SCOPE
+      value: api://dev-fss.k9saksbehandling.k9-infotrygd-grunnlag-paaroerende-sykdom/.default
     - name: ARBEID_OG_INNTEKT_BASE_URL
       value: https://arbeid-og-inntekt.nais.preprod.local
     - name: K9_LOS_URL
@@ -217,6 +216,8 @@ spec:
     # Restservice PSB spesifikt
     - name: K9_PSB_UTTAK_URL
       value: http://pleiepenger-barn-uttak.k9saksbehandling/pleiepenger-barn-uttak
+    - name: K9_PSB_UTTAK_SCOPE
+      value: api://dev-fss.k9saksbehandling.pleiepenger-barn-uttak/.default
 
     # Graphql services
     - name: SAF_BASE_URL
@@ -244,8 +245,6 @@ spec:
       value: "3030"
 
     # Feature-flag
-    - name: OMP_VERIFISERING_TILKJENT_YTELSE
-      value: "true"
     - name: SOKNADSFRIST_BENYTT_ELDSTEKRAV_PER_PERIODE
       value: "true"
     - name: YTELSE_OLP_AKTIVERT
@@ -270,10 +269,6 @@ spec:
       value: "true"
     - name: FILTRER_UGYLDIG_IM
       value: "true"
-    - name: ENABLE_UTENLANDSOPPHOLD_PILS
-      value: "true"
-    - name: PERIODISERT_RAMMEVEDTAK_AO
-      value: "true"
     - name: STONADSTATISTIKK_V2
       value: "true"
     - name: OPPTJENING_AP_VED_AKSEPTERT_MELLOMLIGGENDE_HELG
@@ -284,11 +279,15 @@ spec:
       value: "true"
     - name: LAGRE_SOEKNADSAKTOERER
       value: "true"
-    - name: ENABLE_AZURE_CC_SYSTEMCONTEXT
-      value: "false"
     - name: AVKLAR_ARBEIDSFORHOLD_REUTLED_VED_REVURDERING
       value: "true"
     - name: ENABLE_RESERVERT_SAKSNUMMER
+      value: "true"
+    - name: OMP_RELEVANT_ENDRING_UTLEDNING
+      value: "true"
+    - name: IM_SKAL_VURDERE_ENDRET_INNTEKT
+      value: "true"
+    - name: BG_FORLENGELSE_FILTRER_IM_FRA_AKTIVITETER
       value: "true"
 
     # Konfigurasjoner

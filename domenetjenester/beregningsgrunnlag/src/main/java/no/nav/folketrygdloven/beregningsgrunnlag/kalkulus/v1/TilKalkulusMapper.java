@@ -1,16 +1,5 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.FinnPGITilgjengeligPåVedtakstidspunktet;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
@@ -46,20 +35,15 @@ import no.nav.folketrygdloven.kalkulus.kodeverk.ArbeidType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.ArbeidsforholdHandlingType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.Arbeidskategori;
 import no.nav.folketrygdloven.kalkulus.kodeverk.InntektPeriodeType;
+import no.nav.folketrygdloven.kalkulus.kodeverk.InntektYtelseType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.InntektskildeType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.InntektspostType;
-import no.nav.folketrygdloven.kalkulus.kodeverk.LønnsinntektBeskrivelse;
+import no.nav.folketrygdloven.kalkulus.kodeverk.MidlertidigInaktivType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.NaturalYtelseType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.OpptjeningAktivitetType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.PermisjonsbeskrivelseType;
-import no.nav.folketrygdloven.kalkulus.kodeverk.RelatertYtelseType;
-import no.nav.folketrygdloven.kalkulus.kodeverk.TemaUnderkategori;
-import no.nav.folketrygdloven.kalkulus.kodeverk.UtbetaltNæringsYtelseType;
-import no.nav.folketrygdloven.kalkulus.kodeverk.UtbetaltPensjonTrygdType;
-import no.nav.folketrygdloven.kalkulus.kodeverk.UtbetaltYtelseFraOffentligeType;
-import no.nav.folketrygdloven.kalkulus.kodeverk.UtbetaltYtelseType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.VirksomhetType;
-import no.nav.folketrygdloven.kalkulus.opptjening.v1.MidlertidigInaktivType;
+import no.nav.folketrygdloven.kalkulus.kodeverk.YtelseType;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittArbeidsforholdDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittEgenNæringDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittFrilansDto;
@@ -67,10 +51,6 @@ import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittFrilansInntekt;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittOpptjeningDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OpptjeningAktiviteterDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OpptjeningPeriodeDto;
-import no.nav.k9.kodeverk.arbeidsforhold.NæringsinntektType;
-import no.nav.k9.kodeverk.arbeidsforhold.OffentligYtelseType;
-import no.nav.k9.kodeverk.arbeidsforhold.PensjonTrygdType;
-import no.nav.k9.kodeverk.arbeidsforhold.YtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
@@ -98,6 +78,17 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Beløp;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Mapper fra k9-format til kalkulus-format, benytter kontrakt v1 fra kalkulus
@@ -230,9 +221,8 @@ public class TilKalkulusMapper {
         List<YtelseDto> ytelserDto = alleYtelser.stream().map(ytelse -> new YtelseDto(
                 mapBeløp(ytelse.getYtelseGrunnlag().flatMap(YtelseGrunnlag::getVedtaksDagsats)),
                 mapYtelseAnvist(ytelse.getYtelseAnvist()),
-                new RelatertYtelseType(ytelse.getYtelseType().getKode()),
+                YtelseType.fraKode(ytelse.getYtelseType().getKode()),
                 mapPeriode(ytelse.getPeriode()),
-                mapTemaUnderkategori(ytelse),
                 mapYtelseGrunnlag(ytelse.getYtelseGrunnlag())))
             .collect(Collectors.toList());
 
@@ -254,14 +244,6 @@ public class TilKalkulusMapper {
 
     private static Organisasjon mapVirksomhet(YtelseStørrelse ys) {
         return ys.getVirksomhet().map(orgNummer -> new Organisasjon(orgNummer.getOrgNummer())).orElse(null);
-    }
-
-    // TODO (OJR): Skal vi mappe dette slik eller tåler Kalkulus UNDEFINED("-")
-    private static TemaUnderkategori mapTemaUnderkategori(Ytelse ytelse) {
-        if (KODEVERDI_UNDEFINED.equals(ytelse.getBehandlingsTema().getKode())) {
-            return null;
-        }
-        return TemaUnderkategori.fraKode(ytelse.getBehandlingsTema().getKode());
     }
 
     private static BeløpDto mapBeløp(Optional<Beløp> beløp) {
@@ -323,26 +305,15 @@ public class TilKalkulusMapper {
             mapPeriode(inntektspost.getPeriode()),
             InntektspostType.fraKode(inntektspost.getInntektspostType().getKode()),
             inntektspost.getBeløp().getVerdi());
-        if (inntektspost.getYtelseType() != null) {
-            var ytelseType = inntektspost.getYtelseType();
-            utbetalingsPostDto.medUtbetaltYtelseType(mapUtbetaltYtelseTypeTilGrunnlag(ytelseType));
+        if (inntektspost.getInntektYtelseType() != null) {
+            var ytelseType = inntektspost.getInntektYtelseType();
+            utbetalingsPostDto.setInntektYtelseType(InntektYtelseType.valueOf(ytelseType.name()));
         }
         if (inntektspost.getLønnsinntektBeskrivelse() != null) {
             utbetalingsPostDto.medLønnsinntektBeskrivelse(inntektspost.getLønnsinntektBeskrivelse().getKode());
         }
         return utbetalingsPostDto;
     }
-
-    static UtbetaltYtelseType mapUtbetaltYtelseTypeTilGrunnlag(YtelseType type) {
-        String kode = type.getKode();
-        return switch (type.getKodeverk()) {
-            case OffentligYtelseType.KODEVERK -> new UtbetaltYtelseFraOffentligeType(kode);
-            case NæringsinntektType.KODEVERK -> new UtbetaltNæringsYtelseType(kode);
-            case PensjonTrygdType.KODEVERK -> new UtbetaltPensjonTrygdType(kode);
-            default -> throw new IllegalArgumentException("Ukjent UtbetaltYtelseType: " + type);
-        };
-    }
-
 
     public static ArbeidDto mapArbeidDto(Collection<Yrkesaktivitet> yrkesaktiviteterForBeregning, DatoIntervallEntitet vilkårsPeriode) {
         List<YrkesaktivitetDto> yrkesaktivitetDtoer = yrkesaktiviteterForBeregning.stream().map(ya -> TilKalkulusMapper.mapTilDto(ya, vilkårsPeriode)).collect(Collectors.toList());

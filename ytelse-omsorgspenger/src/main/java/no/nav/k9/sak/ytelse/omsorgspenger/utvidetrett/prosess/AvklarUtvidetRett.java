@@ -11,7 +11,6 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
@@ -45,7 +44,6 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
 
     private HistorikkTjenesteAdapter historikkAdapter;
     private BehandlingRepository behandlingRepository;
-    private boolean brukPeriodisertRammevedtakAleneOmsorgen;
     private VilkårResultatRepository vilkårResultatRepository;
     private SøknadRepository søknadRepository;
     private PersoninfoAdapter personinfoAdapter;
@@ -59,21 +57,19 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
                       VilkårResultatRepository vilkårResultatRepository,
                       SøknadRepository søknadRepository,
                       PersoninfoAdapter personinfoAdapter,
-                      BehandlingRepository behandlingRepository,
-                      @KonfigVerdi(value = "PERIODISERT_RAMMEVEDTAK_AO", defaultVerdi = "false") boolean brukPeriodisertRammevedtakAleneOmsorgen) {
+                      BehandlingRepository behandlingRepository) {
         this.historikkAdapter = historikkAdapter;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.søknadRepository = søknadRepository;
         this.personinfoAdapter = personinfoAdapter;
-        this.behandlingRepository = behandlingRepository;
-        this.brukPeriodisertRammevedtakAleneOmsorgen = brukPeriodisertRammevedtakAleneOmsorgen;
+        this.behandlingRepository = behandlingRepository;;
     }
 
 
     @Override
     public OppdateringResultat oppdater(AvklarUtvidetRettDto dto, AksjonspunktOppdaterParameter param) {
         Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
-        boolean brukerPeriodisering = brukPeriodisertRammevedtakAleneOmsorgen && behandling.getFagsakYtelseType() == FagsakYtelseType.OMSORGSPENGER_AO;
+        boolean brukerPeriodisering = behandling.getFagsakYtelseType() == FagsakYtelseType.OMSORGSPENGER_AO;
         if (brukerPeriodisering) {
             return oppdaterPeriodisert(dto, param);
         } else {
@@ -117,7 +113,8 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
         } else if (minMaxPerioder.erÅpenPeriode(periode)) {
             oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, minFom, maksTom, null /* avslagsårsak kan bare være null her */);
         } else {
-            LocalDate tom = periode.getTom() != null ? periode.getTom() : fagsak.getPeriode().getTomDato(); //midlertidig workaround inntil ny løsning lanseres, eller frontend støtter begge løsninger
+            boolean harSattSluttdato = periode.getTom() != null && !periode.getTom().equals(LocalDateInterval.TIDENES_ENDE);
+            LocalDate tom = harSattSluttdato ? periode.getTom() : fagsak.getPeriode().getTomDato(); //midlertidig workaround inntil ny løsning lanseres, eller frontend støtter begge løsninger
             var angittPeriode = validerAngittPeriode(fagsak, new LocalDateInterval(periode.getFom(), tom));
             oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, angittPeriode.getFomDato(), angittPeriode.getTomDato(), null /* avslagsårsak kan bare være null her */);
         }

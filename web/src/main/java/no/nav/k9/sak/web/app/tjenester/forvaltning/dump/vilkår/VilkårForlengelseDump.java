@@ -5,8 +5,6 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -26,9 +24,9 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.perioder.ForlengelseTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.ContainerContextRunner;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(OMSORGSPENGER)
@@ -36,7 +34,6 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
 public class VilkårForlengelseDump implements DebugDumpBehandling {
-
 
     private final ObjectWriter objectWriter = JsonMapper.getMapper().writerWithDefaultPrettyPrinter();
     private Instance<ForlengelseTjeneste> tjeneste;
@@ -57,18 +54,16 @@ public class VilkårForlengelseDump implements DebugDumpBehandling {
     }
 
     @Override
-    public List<DumpOutput> dump(Behandling behandling) {
+    public void dump(DumpMottaker dumpMottaker, Behandling behandling, String basePath) {
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling);
         var vilkårene = vilkårTjeneste.hentVilkårResultat(behandling.getId());
         try {
             var data = ContainerContextRunner.doRun(behandling, () -> utledForlengelseData(vilkårene, ref));
-            var content = objectWriter.writeValueAsString(data);
-            return List.of(new DumpOutput("vilkår-perioder.json", content));
+            dumpMottaker.newFile(basePath + "/vilkår-perioder.json");
+            objectWriter.writeValue(dumpMottaker.getOutputStream(), data);
         } catch (Exception e) {
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
-            return List.of(new DumpOutput("vilkår-perioder-ERROR.txt", sw.toString()));
+            dumpMottaker.newFile(basePath + "/vilkår-perioder-ERROR.txt");
+            dumpMottaker.write(e);
         }
     }
 
@@ -93,6 +88,5 @@ public class VilkårForlengelseDump implements DebugDumpBehandling {
 
         }).toList();
     }
-
 
 }

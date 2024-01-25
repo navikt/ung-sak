@@ -11,7 +11,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.net.URI;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -24,9 +23,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -54,14 +50,6 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusRestKlient;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagKobling;
-import no.nav.folketrygdloven.kalkulus.kodeverk.YtelseTyperKalkulusStøtterKontrakt;
-import no.nav.folketrygdloven.kalkulus.request.v1.migrerAksjonspunkt.MigrerAksjonspunktListeRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.migrerAksjonspunkt.MigrerAksjonspunktRequest;
-import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.AbacDto;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
@@ -72,8 +60,6 @@ import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -82,7 +68,6 @@ import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.trigger.ProsessTriggerForvaltningTjeneste;
-import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
@@ -94,16 +79,12 @@ import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 @Produces(MediaType.APPLICATION_JSON)
 public class ForvaltningBeregningRestTjeneste {
 
-    private static final Logger logger = LoggerFactory.getLogger(ForvaltningBeregningRestTjeneste.class);
     private static final MediaType JSON = MediaType.APPLICATION_JSON_TYPE;
 
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
     private BehandlingRepository behandlingRepository;
 
     private InntektArbeidYtelseTjeneste iayTjeneste;
-    private AksjonspunktRepository aksjonspunktRepository;
-    private BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
-    private KalkulusRestKlient kalkulusSystemRestKlient;
     private RevurderBeregningTjeneste revurderBeregningTjeneste;
 
     private EntityManager entityManager;
@@ -122,24 +103,17 @@ public class ForvaltningBeregningRestTjeneste {
     public ForvaltningBeregningRestTjeneste(BehandlingRepository behandlingRepository,
                                             InntektArbeidYtelseTjeneste iayTjeneste,
                                             BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
-                                            AksjonspunktRepository aksjonspunktRepository,
-                                            BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
-                                            SystemUserOidcRestClient systemUserOidcRestClient,
-                                            @KonfigVerdi(value = "ftkalkulus.url") URI endpoint,
                                             RevurderBeregningTjeneste revurderBeregningTjeneste,
                                             EntityManager entityManager, FagsakTjeneste fagsakTjeneste,
                                             HentKalkulatorInputDump hentKalkulatorInputDump) {
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
-        this.aksjonspunktRepository = aksjonspunktRepository;
-        this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
         this.revurderBeregningTjeneste = revurderBeregningTjeneste;
         this.entityManager = entityManager;
         this.fagsakTjeneste = fagsakTjeneste;
         this.hentKalkulatorInputDump = hentKalkulatorInputDump;
         this.prosessTriggerForvaltningTjeneste = new ProsessTriggerForvaltningTjeneste(entityManager);
-        this.kalkulusSystemRestKlient = new KalkulusRestKlient(systemUserOidcRestClient, endpoint);
     }
 
     @GET
@@ -207,70 +181,21 @@ public class ForvaltningBeregningRestTjeneste {
     }
 
     @POST
-    @Path("migrerAksjonspunkterKalkulus")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(description = "Migrerer aksjonspunkt til kalkulus", tags = "beregning")
-    @BeskyttetRessurs(action = CREATE, resource = DRIFT)
-    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response migrerAksjonspunkt(@Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) @Parameter(description = "migrerAksjonspunktDto") no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag.MigrerAksjonspunktRequest migrerAksjonspunktDto) { // NOSONAR
-        Periode periode = migrerAksjonspunktDto.getPeriode();
-        Map<Behandling, Aksjonspunkt> behandlingerMedAksjonspunkt = aksjonspunktRepository.hentAksjonspunkterForKodeUtenVenteÅrsak(periode.getFom(), periode.getTom(), migrerAksjonspunktDto.getAksjonspunktKode());
-        List<String> saksummer = behandlingerMedAksjonspunkt.keySet().stream()
-            .map(Behandling::getFagsak).map(Fagsak::getSaksnummer)
-            .map(Saksnummer::getVerdi)
-            .toList();
-        logger.info("Fant følgende saksnummer med aksjonspunkt " + migrerAksjonspunktDto.getAksjonspunktKode()
-            + ": " + saksummer);
-        List<MigrerAksjonspunktRequest> aksjonspunktData = behandlingerMedAksjonspunkt.entrySet().stream().map(e -> lagAksjonspunktData(e.getKey(), e.getValue())).collect(Collectors.toList());
-        MigrerAksjonspunktListeRequest migrerAksjonspunktListeRequest = new MigrerAksjonspunktListeRequest(aksjonspunktData, migrerAksjonspunktDto.getAksjonspunktKode());
-        kalkulusSystemRestKlient.migrerAksjonspunkter(migrerAksjonspunktListeRequest);
-        return Response.ok().build();
-    }
-
-    private MigrerAksjonspunktRequest lagAksjonspunktData(Behandling behandling, Aksjonspunkt aksjonspunkt) {
-        var ref = BehandlingReferanse.fra(behandling);
-        var stpTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true).stream()
-            .map(DatoIntervallEntitet::getFomDato)
-            .toList();
-        var bgReferanser = beregningsgrunnlagTjeneste.hentKoblingerForPerioder(ref)
-            .stream()
-            .filter(kobling -> stpTilVurdering.contains(kobling.getSkjæringstidspunkt()))
-            .map(BeregningsgrunnlagKobling::getReferanse)
-            .collect(Collectors.toSet());
-        return new MigrerAksjonspunktRequest(
-            ref.getSaksnummer().getVerdi(),
-            YtelseTyperKalkulusStøtterKontrakt.fraKode(ref.getFagsakYtelseType().getKode()),
-            bgReferanser,
-            aksjonspunkt.getStatus().getKode(),
-            aksjonspunkt.getBegrunnelse()
-        );
-    }
-
-
-    @POST
     @Path("/manuell-revurdering-beregning")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Oppretter manuell revurdering grunnet nye opplysninger om beregning.", summary = ("Oppretter manuell revurdering grunnet nye opplysninger om beregning."), tags = "beregning")
     @BeskyttetRessurs(action = CREATE, resource = DRIFT)
     public void revurderGrunnetEndretOpplysning(@Parameter(description = "Saksnummer og skjæringstidspunkt (YYYY-MM-DD) på csv-format") @Valid OpprettManuellRevurderingBeregning opprettManuellRevurdering) {
+        opprettProsesstriggerOgRevurder(opprettManuellRevurdering, "/manuell-revurdering-beregning", "kjører manuell revurdering/tilbakehopp grunnet nye opplysninger om beregningsgrunnlag", BehandlingÅrsakType.RE_OPPLYSNINGER_OM_BEREGNINGSGRUNNLAG);
+    }
 
-        var alleSaksnummerOgSkjæringstidspunkt = Objects.requireNonNull(opprettManuellRevurdering.getSaksnummerOgSkjæringstidspunkt(), "saksnummerOgSkjæringstidspunkt");
-        var saknummerOgSkjæringstidspunkt = new LinkedHashSet<>(Arrays.asList(alleSaksnummerOgSkjæringstidspunkt.split("\\s+")));
-
-        int idx = 0;
-        for (var s : saknummerOgSkjæringstidspunkt) {
-            var sakOgStpSplitt = s.split(",");
-            var saksnummer = new Saksnummer(sakOgStpSplitt[0]);
-            var stp = LocalDate.parse(sakOgStpSplitt[1]);
-            var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, false).orElseThrow(() -> new IllegalArgumentException("finnes ikke fagsak med saksnummer: " + saksnummer.getVerdi()));
-            loggForvaltningTjeneste(fagsak, "/manuell-revurdering-beregning", "kjører manuell revurdering/tilbakehopp grunnet nye opplysninger om beregningsgrunnlag");
-            var nesteKjøring = LocalDateTime.now().plus(500L * idx, ChronoUnit.MILLIS);
-
-            revurderBeregningTjeneste.revurderBeregning(saksnummer, stp, BehandlingÅrsakType.RE_OPPLYSNINGER_OM_BEREGNINGSGRUNNLAG, Optional.of(nesteKjøring));
-
-            // lagrer direkte til ProsessTaskTjeneste så vi ikke går via FagsakProsessTask (siden den bestemmer rekkefølge). Får unik callId per task
-            idx++;
-        }
+    @POST
+    @Path("/manuell-revurdering-opptjening")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Oppretter manuell revurdering grunnet nye opplysninger om opptjening.", summary = ("Oppretter manuell revurdering grunnet nye opplysninger om opptjening."), tags = "beregning")
+    @BeskyttetRessurs(action = CREATE, resource = DRIFT)
+    public void revurderGrunnetOpplysningOmOpptjening(@Parameter(description = "Saksnummer og skjæringstidspunkt (YYYY-MM-DD) på csv-format") @Valid OpprettManuellRevurderingBeregning opprettManuellRevurdering) {
+        opprettProsesstriggerOgRevurder(opprettManuellRevurdering, "/manuell-revurdering-opptjening", "kjører manuell revurdering/tilbakehopp grunnet nye opplysninger om opptjening", BehandlingÅrsakType.RE_OPPLYSNINGER_OM_OPPTJENING);
     }
 
     @POST
@@ -279,7 +204,7 @@ public class ForvaltningBeregningRestTjeneste {
     @Operation(description = "Oppretter manuell revurdering for reinnhenting av PGI.", summary = ("Oppretter manuell revurdering for reinnhenting av PGI."), tags = "beregning")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
     public void revurderOgInnhentPGI(@Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) RevurderPeriodeDto revurderPeriodeDto) {
-        revurderBeregningTjeneste.revurderBeregning(revurderPeriodeDto.getSaksnummer(), revurderPeriodeDto.getSkjæringstidspunkt(), BehandlingÅrsakType.RE_KLAGE_NY_INNH_LIGNET_INNTEKT, Optional.empty());
+        revurderBeregningTjeneste.revurderMedÅrsak(revurderPeriodeDto.getSaksnummer(), revurderPeriodeDto.getSkjæringstidspunkt(), BehandlingÅrsakType.RE_KLAGE_NY_INNH_LIGNET_INNTEKT, Optional.empty());
     }
 
     @POST
@@ -328,6 +253,25 @@ public class ForvaltningBeregningRestTjeneste {
 
     }
 
+    private void opprettProsesstriggerOgRevurder(OpprettManuellRevurderingBeregning opprettManuellRevurdering, String tjeneste, String begrunnelse, BehandlingÅrsakType reOpplysningerOmOpptjening) {
+        var alleSaksnummerOgSkjæringstidspunkt = Objects.requireNonNull(opprettManuellRevurdering.getSaksnummerOgSkjæringstidspunkt(), "saksnummerOgSkjæringstidspunkt");
+        var saknummerOgSkjæringstidspunkt = new LinkedHashSet<>(Arrays.asList(alleSaksnummerOgSkjæringstidspunkt.split("\\s+")));
+
+        int idx = 0;
+        for (var s : saknummerOgSkjæringstidspunkt) {
+            var sakOgStpSplitt = s.split(",");
+            var saksnummer = new Saksnummer(sakOgStpSplitt[0]);
+            var stp = LocalDate.parse(sakOgStpSplitt[1]);
+            var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, false).orElseThrow(() -> new IllegalArgumentException("finnes ikke fagsak med saksnummer: " + saksnummer.getVerdi()));
+            loggForvaltningTjeneste(fagsak, tjeneste, begrunnelse);
+            var nesteKjøring = LocalDateTime.now().plus(500L * idx, ChronoUnit.MILLIS);
+
+            revurderBeregningTjeneste.revurderMedÅrsak(saksnummer, stp, reOpplysningerOmOpptjening, Optional.of(nesteKjøring));
+
+            // lagrer direkte til ProsessTaskTjeneste så vi ikke går via FagsakProsessTask (siden den bestemmer rekkefølge). Får unik callId per task
+            idx++;
+        }
+    }
 
     public static class OpprettManuellRevurderingBeregning implements AbacDto {
 

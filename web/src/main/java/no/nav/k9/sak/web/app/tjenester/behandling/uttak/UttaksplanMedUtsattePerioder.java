@@ -32,7 +32,10 @@ public class UttaksplanMedUtsattePerioder {
     @Valid
     @Size
     private Set<LukketPeriode> utsattePerioder;
-
+    @JsonProperty(value = "perioderTilVurdering")
+    @Valid
+    @Size
+    private Set<LukketPeriode> perioderTilVurdering;
     @JsonProperty(value = "virkningsdatoUttakNyeRegler")
     @Valid
     private LocalDate virkningsdatoUttakNyeRegler;
@@ -40,19 +43,20 @@ public class UttaksplanMedUtsattePerioder {
     public UttaksplanMedUtsattePerioder() {
     }
 
-    public UttaksplanMedUtsattePerioder(Uttaksplan uttaksplan, Uttaksplan simulertUttaksplan, Set<LukketPeriode> utsattePerioder, LocalDate virkningsdatoUttakNyeRegler) {
+    public UttaksplanMedUtsattePerioder(Uttaksplan uttaksplan, Uttaksplan simulertUttaksplan, Set<LukketPeriode> utsattePerioder, LocalDate virkningsdatoUttakNyeRegler, Set<LukketPeriode> perioderTilVurdering) {
         this.uttaksplan = uttaksplan;
         this.simulertUttaksplan = simulertUttaksplan;
         this.utsattePerioder = utsattePerioder;
         this.virkningsdatoUttakNyeRegler = virkningsdatoUttakNyeRegler;
+        this.perioderTilVurdering = perioderTilVurdering;
     }
 
-    public static UttaksplanMedUtsattePerioder medUttaksplan(Uttaksplan uttaksplan, Set<LukketPeriode> utsattePerioder, LocalDate virkningsdatoUttakNyeRegler) {
-        return new UttaksplanMedUtsattePerioder(uttaksplan, null, utsattePerioder, virkningsdatoUttakNyeRegler);
+    public static UttaksplanMedUtsattePerioder medUttaksplan(Uttaksplan uttaksplan, Set<LukketPeriode> utsattePerioder, LocalDate virkningsdatoUttakNyeRegler, Set<LukketPeriode> perioderTilVurdering) {
+        return new UttaksplanMedUtsattePerioder(uttaksplan, null, utsattePerioder, virkningsdatoUttakNyeRegler, perioderTilVurdering);
     }
 
-    public static UttaksplanMedUtsattePerioder medSimulertUttaksplan(Uttaksplan uttaksplan, Set<LukketPeriode> utsattePerioder, LocalDate virkningsdatoUttakNyeRegler) {
-        return new UttaksplanMedUtsattePerioder(null, uttaksplan, utsattePerioder, virkningsdatoUttakNyeRegler);
+    public static UttaksplanMedUtsattePerioder medSimulertUttaksplan(Uttaksplan uttaksplan, Set<LukketPeriode> utsattePerioder, LocalDate virkningsdatoUttakNyeRegler, Set<LukketPeriode> perioderTilVurdering) {
+        return new UttaksplanMedUtsattePerioder(null, uttaksplan, utsattePerioder, virkningsdatoUttakNyeRegler, perioderTilVurdering);
     }
 
     public Uttaksplan getUttaksplan() {
@@ -69,5 +73,9 @@ public class UttaksplanMedUtsattePerioder {
 
     public LocalDate getVirkningsdatoUttakNyeRegler() {
         return virkningsdatoUttakNyeRegler;
+    }
+
+    public Set<LukketPeriode> getPerioderTilVurdering() {
+        return perioderTilVurdering;
     }
 }

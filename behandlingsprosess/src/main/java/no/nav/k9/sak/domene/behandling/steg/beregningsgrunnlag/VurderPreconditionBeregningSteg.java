@@ -38,7 +38,6 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
     private OpptjeningsaktiviteterPreconditionForBeregning opptjeningsaktiviteterPreconditionForBeregning;
 
 
-
     protected VurderPreconditionBeregningSteg() {
         // for CDI proxy
     }
@@ -74,8 +73,8 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         // 3. fjern eller initier perioder fra definerende vilkår
         ryddOgGjenopprettBeregningTjeneste.fjernEllerInitierPerioderFraDefinerendeVilkår(referanse);
 
-        // 4. Rydder fjernet eller avslått periode (må vurdere avslag mellom dei to rydde-kalla)
-        ryddOgGjenopprettBeregningTjeneste.deaktiverAvslåtteEllerFjernetPerioder(referanse);
+        // 4. Rydder alle perioder ulik initiell
+        ryddOgGjenopprettBeregningTjeneste.deaktiverAlleReferanserUlikInitiell(referanse);
 
         // 5 Vurder inkonsistens
         inkonsistensTjeneste.sjekkInkonsistensOgOpprettProsesstrigger(referanse);

@@ -71,7 +71,7 @@ public class OverstyrtUttakUtbetalingsgradEntitet extends BaseEntitet {
         return aktivitetType;
     }
 
-    public Arbeidsgiver getArbeidsgiverId() {
+    public Arbeidsgiver getArbeidsgiver() {
         if (arbeidsgiverOrgNr != null) {
             return Arbeidsgiver.virksomhet(arbeidsgiverOrgNr);
         } else if (arbeidsgiverAktørId != null) {
@@ -89,5 +89,13 @@ public class OverstyrtUttakUtbetalingsgradEntitet extends BaseEntitet {
         return utbetalingsgrad;
     }
 
-
+    @Override
+    public String toString() {
+        return "OverstyrtUttakUtbetalingsgradEntitet{" +
+            "aktivitetType=" + aktivitetType +
+            ", arbeidsgiver='" + getArbeidsgiver().toString() + '\'' +
+            ", internArbeidsforholdRef='" + internArbeidsforholdRef + '\'' +
+            ", utbetalingsgrad=" + utbetalingsgrad +
+            '}';
+    }
 }

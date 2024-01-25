@@ -1,19 +1,11 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
-import static no.nav.k9.kodeverk.behandling.BehandlingStegType.KONTROLLER_FAKTA_BEREGNING;
-
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
-import no.nav.folketrygdloven.kalkulus.kodeverk.StegType;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -26,6 +18,13 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.InputOverstyringPeriode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.KONTROLLER_FAKTA_BEREGNING;
 
 /**
  * Kopierer vurderinger som skal beholdes fra forrige behandling
@@ -115,20 +114,21 @@ public class KopierBeregningTjeneste {
     private void kopierGrunnlagForForlengelseperioder(BehandlingReferanse ref) {
         var perioderPrStartpunkt = kalkulusStartpunktUtleder.utledPerioderPrStartpunkt(ref);
         if (ref.getBehandlingType().equals(BehandlingType.REVURDERING)) {
-            var startpunktVurderRefusjon = perioderPrStartpunkt.get(kalkulusStartpunktUtleder.getStartpunktForlengelse(ref));
-            if (!startpunktVurderRefusjon.isEmpty()) {
-                log.info("Kopierer beregning for startpunkt vurder refusjon {}", startpunktVurderRefusjon);
-                kalkulusTjeneste.kopier(ref, startpunktVurderRefusjon, StegType.VURDER_VILKAR_BERGRUNN);
+            var startpunktForlengelse = kalkulusStartpunktUtleder.getStartpunktForlengelse(ref);
+            var perioderMedStartpunktForlengelse = perioderPrStartpunkt.get(startpunktForlengelse);
+            if (!perioderMedStartpunktForlengelse.isEmpty()) {
+                log.info("Kopierer beregning for startpunkt {} og perioder {}", startpunktForlengelse.getKode(), perioderMedStartpunktForlengelse);
+                kalkulusTjeneste.kopier(ref, perioderMedStartpunktForlengelse, BehandlingStegType.VURDER_VILKAR_BERGRUNN);
                 var originalBehandlingId = ref.getOriginalBehandlingId().orElseThrow();
                 beregningsgrunnlagVilkårTjeneste.kopierVilkårresultatFraForrigeBehandling(
                     ref.getBehandlingId(),
                     originalBehandlingId,
-                    startpunktVurderRefusjon.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet()));
+                    perioderMedStartpunktForlengelse.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet()));
             }
             var startpunktKontrollerFakta = perioderPrStartpunkt.get(KONTROLLER_FAKTA_BEREGNING);
             if (!startpunktKontrollerFakta.isEmpty()) {
                 log.info("Kopierer beregning for startpunkt kontroller fakta {}", startpunktKontrollerFakta);
-                kalkulusTjeneste.kopier(ref, startpunktKontrollerFakta, StegType.FASTSETT_STP_BER);
+                kalkulusTjeneste.kopier(ref, startpunktKontrollerFakta, BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING);
             }
         }
     }

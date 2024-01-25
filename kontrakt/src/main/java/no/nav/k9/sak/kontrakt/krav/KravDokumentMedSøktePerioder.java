@@ -5,6 +5,7 @@ import java.util.List;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -39,15 +40,23 @@ public class KravDokumentMedSøktePerioder {
     @JsonProperty("søktePerioder")
     private List<SøktPeriode> søktePerioder;
 
+    @Valid
+    @Size(max = 100)
+    @Pattern(regexp = "^\\p{L}+$")
+    @JsonProperty("kildesystem")
+    private String kildesystem;
+
     @JsonCreator
     public KravDokumentMedSøktePerioder(@JsonProperty(value = "journalpostId", required = true) JournalpostId journalpostId,
                                         @JsonProperty("innsendingsTidspunkt") LocalDateTime innsendingsTidspunkt,
                                         @JsonProperty("type") KravDokumentType type,
-                                        @JsonProperty("søktePerioder") List<SøktPeriode> søktePerioder) {
+                                        @JsonProperty("søktePerioder") List<SøktPeriode> søktePerioder,
+                                        @JsonProperty("kildesystem") String kildesystem) {
         this.journalpostId = journalpostId;
         this.innsendingsTidspunkt = innsendingsTidspunkt;
         this.type = type;
         this.søktePerioder = søktePerioder;
+        this.kildesystem = kildesystem;
     }
 
     public JournalpostId getJournalpostId() {
@@ -64,5 +73,9 @@ public class KravDokumentMedSøktePerioder {
 
     public List<SøktPeriode> getSøktePerioder() {
         return søktePerioder;
+    }
+
+    public String getKildesystem() {
+        return kildesystem;
     }
 }

@@ -12,9 +12,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
@@ -23,8 +21,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode
 @Dependent
 public class HentPerioderTilVurderingTjeneste {
 
-    private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
-    private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
+    private final SøknadsperiodeTjeneste søknadsperiodeTjeneste;
+    private final Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
 
     @Inject
     public HentPerioderTilVurderingTjeneste(
@@ -34,17 +32,16 @@ public class HentPerioderTilVurderingTjeneste {
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
     }
 
-    public NavigableSet<DatoIntervallEntitet> hentPerioderTilVurderingUtenUbesluttet(Behandling behandling) {
-        BehandlingReferanse referanse = BehandlingReferanse.fra(behandling);
-        var søknadsperioder = TidslinjeUtil.tilTidslinjeKomprimert(finnSykdomsperioder(referanse));
+    public NavigableSet<DatoIntervallEntitet> hentPerioderTilVurderingUtenUbesluttet(BehandlingReferanse referanse) {
+        VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = perioderTilVurderingTjeneste(referanse);
+        var søknadsperioder = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurderingTjeneste.utledFraDefinerendeVilkår(referanse.getId()));
 
         return fjernTrukkedePerioder(referanse, søknadsperioder);
     }
 
 
-    public NavigableSet<DatoIntervallEntitet> hentPerioderTilVurderingMedUbesluttet(Behandling behandling, Optional<DatoIntervallEntitet> utvidetPeriodeSomFølgeAvDødsfall) {
-        BehandlingReferanse referanse = BehandlingReferanse.fra(behandling);
-        var datoer = søknadsperiodeTjeneste.utledFullstendigPeriode(behandling.getId());
+    public NavigableSet<DatoIntervallEntitet> hentPerioderTilVurderingMedUbesluttet(BehandlingReferanse referanse, Optional<DatoIntervallEntitet> utvidetPeriodeSomFølgeAvDødsfall) {
+        var datoer = søknadsperiodeTjeneste.utledFullstendigPeriode(referanse.getId());
 
         var søknadsperioder = TidslinjeUtil.tilTidslinjeKomprimert(datoer);
         if (utvidetPeriodeSomFølgeAvDødsfall.isPresent()) {
@@ -67,17 +64,6 @@ public class HentPerioderTilVurderingTjeneste {
             .filter(SøknadsperiodeTjeneste.Kravperiode::isHarTrukketKrav)
             .map(SøknadsperiodeTjeneste.Kravperiode::getPeriode)
             .collect(Collectors.toCollection(TreeSet::new)));
-    }
-
-    private NavigableSet<DatoIntervallEntitet> finnSykdomsperioder(BehandlingReferanse referanse) {
-        VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = perioderTilVurderingTjeneste(referanse);
-        var definerendeVilkår = perioderTilVurderingTjeneste.definerendeVilkår();
-        LocalDateTimeline<Boolean> tidslinje = LocalDateTimeline.empty();
-        for (VilkårType vilkårType : definerendeVilkår) {
-            final var perioder = perioderTilVurderingTjeneste.utled(referanse.getBehandlingId(), vilkårType);
-            tidslinje = tidslinje.combine(TidslinjeUtil.tilTidslinjeKomprimert(new TreeSet<>(perioder)), StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-        }
-        return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje);
     }
 
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste(BehandlingReferanse behandlingReferanse) {

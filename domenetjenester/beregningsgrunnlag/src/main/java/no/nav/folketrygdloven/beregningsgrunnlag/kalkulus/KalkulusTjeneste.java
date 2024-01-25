@@ -1,22 +1,5 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
-import static java.lang.Boolean.TRUE;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Default;
@@ -38,10 +21,9 @@ import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.ArbeidsforholdReferanseDto;
+import no.nav.folketrygdloven.kalkulus.kodeverk.BeregningSteg;
 import no.nav.folketrygdloven.kalkulus.kodeverk.GrunnbeløpReguleringStatus;
-import no.nav.folketrygdloven.kalkulus.kodeverk.StegType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.Vilkårsavslagsårsak;
-import no.nav.folketrygdloven.kalkulus.kodeverk.YtelseTyperKalkulusStøtterKontrakt;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregningsgrunnlagListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregningsgrunnlagRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagDtoForGUIRequest;
@@ -85,6 +67,23 @@ import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Saksnummer;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static java.lang.Boolean.TRUE;
 
 /**
  * KalkulusTjeneste sørger for at K9 kaller kalkulus på riktig format i henhold til no.nav.folketrygdloven.kalkulus.kontrakt
@@ -148,7 +147,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
-    public void kopier(BehandlingReferanse referanse, List<BeregnInput> beregningInput, StegType stegType) {
+    public void kopier(BehandlingReferanse referanse, List<BeregnInput> beregningInput, BeregningSteg stegType) {
         if (beregningInput.isEmpty()) {
             return;
         }
@@ -156,10 +155,10 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         restTjeneste.kopierBeregning(request);
     }
 
-    private KopierBeregningListeRequest getKopierBeregningListeRequest(BehandlingReferanse referanse, List<BeregnInput> beregningInput, StegType stegType) {
+    private KopierBeregningListeRequest getKopierBeregningListeRequest(BehandlingReferanse referanse, List<BeregnInput> beregningInput, BeregningSteg stegType) {
         return new KopierBeregningListeRequest(referanse.getSaksnummer().getVerdi(),
             referanse.getBehandlingUuid(),
-            YtelseTyperKalkulusStøtterKontrakt.fraKode(referanse.getFagsakYtelseType().getKode()),
+            FagsakYtelseTypeMapper.mapFagsakYtelseType(referanse.getFagsakYtelseType()),
             stegType,
             beregningInput.stream().map(i -> new KopierBeregningRequest(i.getBgReferanse(),
                 i.getOriginalReferanseMedSammeSkjæringstidspunkt().orElseThrow(() -> new IllegalStateException("Forventer å finne original referanse med samme skjæringstidspunkt ved kopiering"))
@@ -173,7 +172,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         List<HåndterBeregningRequest> requestListe = håndterberegningMap.entrySet().stream().map(e -> new HåndterBeregningRequest(e.getValue(), e.getKey())).collect(Collectors.toList());
         var oppdateringRespons = restTjeneste.oppdaterBeregningListe(new HåndterBeregningListeRequest(requestListe,
             null, // Sender null fordi inputen ligger lagret i kalkulus, settes ulik null når kalkulus svarer med trengerNyInput = true
-            YtelseTyperKalkulusStøtterKontrakt.fraKode(behandlingReferanse.getFagsakYtelseType().getKode()),
+            FagsakYtelseTypeMapper.mapFagsakYtelseType(behandlingReferanse.getFagsakYtelseType()),
             behandlingReferanse.getSaksnummer().getVerdi(),
             behandlingReferanse.getBehandlingUuid()));
         if (oppdateringRespons.trengerNyInput()) {
@@ -235,7 +234,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     }
 
     private HentBeregningsgrunnlagDtoListeForGUIRequest lagHentBeregningsgrunnlagListeRequest(BehandlingReferanse referanse, Set<BeregningsgrunnlagReferanse> bgReferanser) {
-        YtelseTyperKalkulusStøtterKontrakt ytelseSomSkalBeregnes = YtelseTyperKalkulusStøtterKontrakt.fraKode(referanse.getFagsakYtelseType().getKode());
+        var ytelseSomSkalBeregnes = FagsakYtelseTypeMapper.mapFagsakYtelseType(referanse.getFagsakYtelseType());
         InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag = iayTjeneste.hentGrunnlag(referanse.getBehandlingId());
         Set<ArbeidsforholdReferanseDto> referanser = inntektArbeidYtelseGrunnlag.getArbeidsforholdInformasjon()
             .stream()
@@ -264,7 +263,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         if (bgReferanser.isEmpty()) {
             return List.of();
         }
-        var ytelseSomSkalBeregnes = YtelseTyperKalkulusStøtterKontrakt.fraKode(ref.getFagsakYtelseType().getKode());
+        var ytelseSomSkalBeregnes = FagsakYtelseTypeMapper.mapFagsakYtelseType(ref.getFagsakYtelseType());
 
         var saksnummer = ref.getSaksnummer().getVerdi();
         List<BeregningsgrunnlagGrunnlag> resultater = new ArrayList<>();
@@ -369,7 +368,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         if (koblingerOgPeriode.isEmpty()) {
             return Map.of();
         }
-        final YtelseTyperKalkulusStøtterKontrakt ytelseTypeKalkulus = YtelseTyperKalkulusStøtterKontrakt.fraKode(ytelseType.getKode());
+        final var ytelseTypeKalkulus = FagsakYtelseTypeMapper.mapFagsakYtelseType(ytelseType);
         var request = new SimulerTilkommetInntektListeRequest(
             saksnummer.getVerdi(),
             ytelseTypeKalkulus,

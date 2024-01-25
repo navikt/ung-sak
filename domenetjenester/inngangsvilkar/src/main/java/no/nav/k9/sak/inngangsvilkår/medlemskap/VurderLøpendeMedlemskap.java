@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -79,6 +80,8 @@ public class VurderLøpendeMedlemskap {
         this.utledVurderingsdatoerMedlemskap = utledVurderingsdatoerMedlemskapTjeneste;
     }
 
+    //TODO hvorfor ligger denne her fortsatt (ubrukt) og hvorfor ligger det masse tester under /resources???
+    @Deprecated
     public Map<LocalDate, VilkårData> vurderMedlemskap(Long behandlingId) {
         Map<LocalDate, VilkårData> resultat = new TreeMap<>();
 
@@ -103,10 +106,10 @@ public class VurderLøpendeMedlemskap {
     }
 
     private Map<LocalDate, MedlemskapsvilkårGrunnlag> lagGrunnlag(Long behandlingId) {
-        return lagGrunnlagMedForlengesesPerioder(behandlingId).getGrunnlagPerVurderingsdato();
+        return lagGrunnlagMedForlengelsesPerioder(behandlingId).getGrunnlagPerVurderingsdato();
     }
 
-    private GrunnlagOgPerioder lagGrunnlagMedForlengesesPerioder(Long behandlingId) {
+    private GrunnlagOgPerioder lagGrunnlagMedForlengelsesPerioder(Long behandlingId) {
         Optional<MedlemskapAggregat> medlemskap = medlemskapRepository.hentMedlemskap(behandlingId);
         Optional<VurdertMedlemskapPeriodeEntitet> vurdertMedlemskapPeriode = medlemskap.flatMap(MedlemskapAggregat::getVurderingLøpendeMedlemskap);
         var vurderingsdatoerMedForlengelse = utledVurderingsdatoerMedlemskap.finnVurderingsdatoerMedForlengelse(behandlingId);
@@ -266,16 +269,29 @@ public class VurderLøpendeMedlemskap {
 
     public VurdertMedlemskapOgForlengelser vurderMedlemskapOgHåndterForlengelse(Long behandlingId) {
 
-        var grunnlagOgPerioder = lagGrunnlagMedForlengesesPerioder(behandlingId);
+        var grunnlagOgPerioder = lagGrunnlagMedForlengelsesPerioder(behandlingId);
 
         return vurderPerioderMedForlengelse(grunnlagOgPerioder);
     }
 
+    /**
+     * Vurderer medlemskap per vurderingsdato
+     * Dersom en vurdering er ikke oppfylt skal vi ikke lagre flere vurderinger for den perioden (i tilfelle vi har flere vurderingsdatoer innenfor samme periode)
+     * Vi må lagre vurderinger for andre perioder selv om en av periodene får ikke godkjent (i tilfelle vi har flere skjæringstidspunkt)
+     */
     VurdertMedlemskapOgForlengelser vurderPerioderMedForlengelse(GrunnlagOgPerioder grunnlagOgPerioder) {
         Map<LocalDate, VilkårData> resultat = new TreeMap<>();
+        Set<DatoIntervallEntitet> perioderIkkeOppfylt = new HashSet<>();
+
         for (Map.Entry<LocalDate, MedlemskapsvilkårGrunnlag> entry : grunnlagOgPerioder.getGrunnlagPerVurderingsdato().entrySet()) {
-            var tilOgMedDato = utledTilOgMedDato(entry.getKey(), grunnlagOgPerioder.getGrunnlagPerVurderingsdato().keySet(), grunnlagOgPerioder);
-            VilkårData data = evaluerGrunnlag(entry.getValue(), DatoIntervallEntitet.fraOgMedTilOgMed(entry.getKey(), tilOgMedDato));
+            final DatoIntervallEntitet perioden = finnPeriodenSomOverlapper(entry.getKey(), grunnlagOgPerioder);
+            if (perioderIkkeOppfylt.contains(perioden)) {
+                continue;
+            }
+
+            final LocalDate tilOgMedDato = utledTilOgMedDato(entry.getKey(), grunnlagOgPerioder.getGrunnlagPerVurderingsdato().keySet(), perioden);
+            final VilkårData data = evaluerGrunnlag(entry.getValue(), DatoIntervallEntitet.fraOgMedTilOgMed(entry.getKey(), tilOgMedDato));
+
             if (data.getUtfallType().equals(Utfall.OPPFYLT)) {
                 resultat.put(entry.getKey(), data);
             } else if (data.getUtfallType().equals(Utfall.IKKE_OPPFYLT)) {
@@ -283,23 +299,14 @@ public class VurderLøpendeMedlemskap {
                     throw new IllegalStateException("Forventer at vilkår utfall merknad er satt når vilkåret blir satt til IKKE_OPPFYLT for grunnlag:" + entry.getValue().toString());
                 }
                 resultat.put(entry.getKey(), data);
-                break;
+                perioderIkkeOppfylt.add(perioden);
             }
         }
         return new VurdertMedlemskapOgForlengelser(resultat, grunnlagOgPerioder.getForlengelsesPerioder());
     }
 
-    private LocalDate utledTilOgMedDato(LocalDate key, Set<LocalDate> vurderingsdatoer, GrunnlagOgPerioder grunnlagOgPerioder) {
-        var vurderingsdatoerUtenOmNøkkel = vurderingsdatoer.stream().filter(it -> !Objects.equals(key, it)).collect(Collectors.toCollection(TreeSet::new));
-        var perioder = new TreeSet<>(grunnlagOgPerioder.getPerioderTilVurdering());
-        perioder.addAll(grunnlagOgPerioder.getForlengelsesPerioder());
-
-        var perioderSomOverlapper = perioder.stream().filter(it -> it.inkluderer(key)).collect(Collectors.toSet());
-        if (perioderSomOverlapper.size() != 1) {
-            throw new IllegalStateException("Vurderer dato ikke tilknyttet periode");
-        }
-        var perioden = perioderSomOverlapper.iterator().next();
-
+    private LocalDate utledTilOgMedDato(LocalDate key, Set<LocalDate> vurderingsdatoer, DatoIntervallEntitet perioden) {
+        Set<LocalDate> vurderingsdatoerUtenOmNøkkel = vurderingsdatoer.stream().filter(it -> !Objects.equals(key, it)).collect(Collectors.toCollection(TreeSet::new));
         return vurderingsdatoerUtenOmNøkkel
             .stream()
             .filter(perioden::inkluderer)
@@ -307,5 +314,16 @@ public class VurderLøpendeMedlemskap {
             .min(LocalDate::compareTo)
             .map(it -> it.minusDays(1))
             .orElse(perioden.getTomDato());
+    }
+
+    private DatoIntervallEntitet finnPeriodenSomOverlapper(LocalDate key, GrunnlagOgPerioder grunnlagOgPerioder) {
+        var perioder = new TreeSet<>(grunnlagOgPerioder.getPerioderTilVurdering());
+        perioder.addAll(grunnlagOgPerioder.getForlengelsesPerioder());
+
+        var perioderSomOverlapper = perioder.stream().filter(it -> it.inkluderer(key)).collect(Collectors.toSet());
+        if (perioderSomOverlapper.size() != 1) {
+            throw new IllegalStateException("Vurderer dato ikke tilknyttet periode");
+        }
+        return perioderSomOverlapper.iterator().next();
     }
 }

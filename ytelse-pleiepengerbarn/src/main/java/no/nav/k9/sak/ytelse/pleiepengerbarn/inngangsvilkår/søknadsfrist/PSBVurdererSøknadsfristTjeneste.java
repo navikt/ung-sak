@@ -4,7 +4,6 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.EnumSet;
@@ -109,8 +108,10 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
     }
 
     private void mapTilKravDokumentOgPeriode(Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> result, Set<MottattDokument> mottatteDokumenter, SøknadsPeriodeDokumenter dokument) {
-        var mottattTidspunkt = utledMottattTidspunkt(dokument, mottatteDokumenter);
-        var kravDokument = new KravDokument(dokument.getJournalpostId(), mottattTidspunkt, KravDokumentType.SØKNAD);
+        var mottattDokument = mottatteDokumenter.stream()
+            .filter(it -> it.getJournalpostId().equals(dokument.getJournalpostId()))
+            .findFirst().orElseThrow();
+        var kravDokument = new KravDokument(dokument.getJournalpostId(), mottattDokument.getInnsendingstidspunkt(), KravDokumentType.SØKNAD, mottattDokument.getKildesystem());
         var søktePerioder = dokument.getSøknadsperioder()
             .stream()
             .filter(it -> !it.isHarTrukketKrav()) // Denne fjerner bare søkteperioder som kun har blitt sendt inn med harTrukketKrav
@@ -118,14 +119,6 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
             .collect(Collectors.toList());
 
         result.put(kravDokument, søktePerioder);
-    }
-
-    private LocalDateTime utledMottattTidspunkt(SøknadsPeriodeDokumenter dokument, Set<MottattDokument> mottatteDokumenter) {
-        return mottatteDokumenter.stream()
-            .filter(it -> it.getJournalpostId().equals(dokument.getJournalpostId()))
-            .findFirst()
-            .map(MottattDokument::getInnsendingstidspunkt)
-            .orElseThrow();
     }
 
     @Override
@@ -168,7 +161,7 @@ public class PSBVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjen
 
         return mottatteDokumentRepository.hentMottatteDokumentForBehandling(referanse.getFagsakId(), referanse.getBehandlingId(), List.of(brevkode), false, DokumentStatus.GYLDIG)
             .stream()
-            .map(it -> new KravDokument(it.getJournalpostId(), it.getInnsendingstidspunkt(), KravDokumentType.SØKNAD))
+            .map(it -> new KravDokument(it.getJournalpostId(), it.getInnsendingstidspunkt(), KravDokumentType.SØKNAD, it.getKildesystem()))
             .collect(Collectors.toSet());
     }
 

@@ -50,6 +50,7 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
     private EtablertTilsynTjeneste etablertTilsynTjeneste;
     private SamtidigUttakTjeneste samtidigUttakTjeneste;
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
+    private OverstyrUttakTjeneste overstyrUttakTjeneste;
 
 
     VurderUttakIBeregningSteg() {
@@ -62,13 +63,14 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
                                      UttakTjeneste uttakTjeneste,
                                      EtablertTilsynTjeneste etablertTilsynTjeneste,
                                      SamtidigUttakTjeneste samtidigUttakTjeneste,
-                                     UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository) {
+                                     UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository, OverstyrUttakTjeneste overstyrUttakTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
         this.uttakTjeneste = uttakTjeneste;
         this.etablertTilsynTjeneste = etablertTilsynTjeneste;
         this.samtidigUttakTjeneste = samtidigUttakTjeneste;
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
+        this.overstyrUttakTjeneste = overstyrUttakTjeneste;
     }
 
     @Override
@@ -103,6 +105,13 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
             if (behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.VENT_ANNEN_PSB_SAK)) {
                 avbrytAksjonspunkt(behandling, kontekst);
             }
+
+            overstyrUttakTjeneste.ryddMotUttaksplan(ref);
+
+            if (overstyrUttakTjeneste.skalOverstyreUttak(ref)) {
+                return Optional.of(AksjonspunktDefinisjon.OVERSTYRING_AV_UTTAK);
+            }
+
             return Optional.empty();
         } else {
             log.info("[Kjøreplan] Venter på behandling av andre fagsaker");

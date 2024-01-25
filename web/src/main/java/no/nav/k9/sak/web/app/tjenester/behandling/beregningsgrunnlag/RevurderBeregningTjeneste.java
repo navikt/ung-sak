@@ -18,10 +18,10 @@ import no.nav.k9.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTa
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.PGIPeriode;
@@ -33,6 +33,11 @@ public class RevurderBeregningTjeneste {
         BehandlingÅrsakType.RE_OPPLYSNINGER_OM_BEREGNINGSGRUNNLAG,
         BehandlingÅrsakType.RE_KLAGE_NY_INNH_LIGNET_INNTEKT
     );
+
+    public static Set<BehandlingÅrsakType> MANUELLE_OPPTJENING_ÅRSAKER = Set.of(
+        BehandlingÅrsakType.RE_OPPLYSNINGER_OM_OPPTJENING
+    );
+
 
     private BehandlingRepository behandlingRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
@@ -72,10 +77,11 @@ public class RevurderBeregningTjeneste {
      * @param skjæringstidspunkt  Skjæringstidspunkt for aktuell periode
      * @param behandlingÅrsakType Behandlingsårsaktype
      * @param nesteKjøringEtter   Neste kjøring etter for å spre tasker
+     * @return ProsessTaskGruppeId
      */
-    public void revurderBeregning(Saksnummer saksnummer, LocalDate skjæringstidspunkt, BehandlingÅrsakType behandlingÅrsakType, Optional<LocalDateTime> nesteKjøringEtter) {
-        if (!MANUELLE_BEREGNING_ÅRSAKER.contains(behandlingÅrsakType)) {
-            throw new IllegalArgumentException("Ugyldig behandlingsårsak for manuell revurdering av beregning: " + behandlingÅrsakType.getKode());
+    public String revurderMedÅrsak(Saksnummer saksnummer, LocalDate skjæringstidspunkt, BehandlingÅrsakType behandlingÅrsakType, Optional<LocalDateTime> nesteKjøringEtter) {
+        if (!MANUELLE_BEREGNING_ÅRSAKER.contains(behandlingÅrsakType) && !MANUELLE_OPPTJENING_ÅRSAKER.contains(behandlingÅrsakType)) {
+            throw new IllegalArgumentException("Ugyldig behandlingsårsak for manuell revurdering av beregning eller opptjening: " + behandlingÅrsakType.getKode());
         }
 
         var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, false).orElseThrow(() -> new IllegalArgumentException("finnes ikke fagsak med saksnummer: " + saksnummer));
@@ -85,11 +91,11 @@ public class RevurderBeregningTjeneste {
 
         ProsessTaskData tilRevurderingTaskData = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
         tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK, behandlingÅrsakType.getKode());
-        tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_FOM, aktuellPeriode.getFom().toString());
-        tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_TOM, aktuellPeriode.getTom().toString());
+        tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_FOM, aktuellPeriode.getFomDato().toString());
+        tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_TOM, aktuellPeriode.getTomDato().toString());
         tilRevurderingTaskData.setBehandling(tilRevurdering.getFagsakId(), tilRevurdering.getId(), tilRevurdering.getAktørId().getId());
         nesteKjøringEtter.ifPresent(tilRevurderingTaskData::setNesteKjøringEtter);
-        fagsakProsessTaskRepository.lagreNyGruppe(tilRevurderingTaskData);
+        return fagsakProsessTaskRepository.lagreNyGruppe(tilRevurderingTaskData);
     }
 
 
@@ -119,8 +125,8 @@ public class RevurderBeregningTjeneste {
 
         ProsessTaskData tilRevurderingTaskData = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
         tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK, BehandlingÅrsakType.RE_OPPLYSNINGER_OM_BEREGNINGSGRUNNLAG.getKode());
-        tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_FOM, aktuellPeriode.getFom().toString());
-        tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_TOM, aktuellPeriode.getTom().toString());
+        tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_FOM, aktuellPeriode.getFomDato().toString());
+        tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_TOM, aktuellPeriode.getTomDato().toString());
         tilRevurderingTaskData.setBehandling(tilRevurdering.getFagsakId(), tilRevurdering.getId(), tilRevurdering.getAktørId().getId());
         fagsakProsessTaskRepository.lagreNyGruppe(tilRevurderingTaskData);
     }
@@ -130,16 +136,24 @@ public class RevurderBeregningTjeneste {
         return new PGIPeriode(iayGrunnlagMedRiktigSkatteoppgjør.getEksternReferanse(), skjæringstidspunkt);
     }
 
-    private VilkårPeriode finnVilkårsperiode(LocalDate skjæringstidspunkt, Behandling tilRevurdering, boolean skalValidereMot8_35) {
-        var iayGrunnlag = iayTjeneste.hentGrunnlag(tilRevurdering.getId());
-        var oppgittOpptjeningFilter = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(tilRevurdering.getId());
-        return vilkårResultatRepository.hentHvisEksisterer(tilRevurdering.getId())
+    private DatoIntervallEntitet finnVilkårsperiode(LocalDate skjæringstidspunkt, Behandling tilRevurdering, boolean skalValidereMot8_35) {
+        var vilkårPeriode = vilkårResultatRepository.hentHvisEksisterer(tilRevurdering.getId())
             .flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)).stream()
             .flatMap(v -> v.getPerioder().stream())
             .filter(p -> p.getPeriode().getFomDato().equals(skjæringstidspunkt))
-            .filter(p -> !skalValidereMot8_35 || fastsettPGIPeriodeTjeneste.omfattesAv8_35(tilRevurdering.getId(), iayGrunnlag, oppgittOpptjeningFilter, p.getSkjæringstidspunkt()))
             .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("Bruker har ingen søknadsperiode med fom-dato " + skjæringstidspunkt + " eller omfattes ikke av § 8-35 for denne perioden"));
+            .orElseThrow(() -> new IllegalArgumentException("Bruker har ingen søknadsperiode med fom-dato " + skjæringstidspunkt));
+
+        if (skalValidereMot8_35) {
+            var iayGrunnlag = iayTjeneste.hentGrunnlag(tilRevurdering.getId());
+            var oppgittOpptjeningFilter = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(tilRevurdering.getId());
+            if (!fastsettPGIPeriodeTjeneste.omfattesAv8_35(tilRevurdering.getId(), iayGrunnlag, oppgittOpptjeningFilter, vilkårPeriode.getSkjæringstidspunkt())) {
+                throw new IllegalArgumentException("Bruker har ingen søknadsperiode som omfattes av § 8-35 for denne perioden");
+            }
+
+        }
+
+        return vilkårPeriode.getPeriode();
     }
 
 

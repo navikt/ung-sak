@@ -7,6 +7,8 @@ import java.util.TreeSet;
 
 import jakarta.enterprise.inject.Instance;
 
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -15,6 +17,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.DefaultKantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 
 public interface VilkårsPerioderTilVurderingTjeneste {
 
@@ -33,6 +36,15 @@ public interface VilkårsPerioderTilVurderingTjeneste {
 
     NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType);
 
+    default NavigableSet<DatoIntervallEntitet> utledFraDefinerendeVilkår(Long behandlingId) {
+        LocalDateTimeline<Boolean> tidslinje = LocalDateTimeline.empty();
+        for (VilkårType vilkårType : this.definerendeVilkår()) {
+            NavigableSet<DatoIntervallEntitet> perioderForVilkår = this.utled(behandlingId, vilkårType);
+            var perioderSomTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(perioderForVilkår);
+            tidslinje = tidslinje.crossJoin(perioderSomTidslinje, StandardCombinators::alwaysTrueForMatch);
+        }
+        return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje.compress());
+    }
     Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(Long behandlingId);
 
     int maksMellomliggendePeriodeAvstand();

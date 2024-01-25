@@ -137,12 +137,14 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         var vilkårsPerioder = vilkår.get().getPerioder().stream().map(VilkårPeriode::getPeriode)
             .collect(Collectors.toCollection(TreeSet::new));
         var fullUttaksplan = årskvantumTjeneste.hentFullUttaksplan(referanse.getSaksnummer());
+        var fullUttaksplanForrigeBehandling = referanse.getOriginalBehandlingId().map(id -> årskvantumTjeneste.hentUttaksplanForBehandling(referanse.getSaksnummer(), id));
 
         var aktivitetsperioder = fullUttaksplan.getAktiviteter()
             .stream()
             .map(Aktivitet::getUttaksperioder)
             .flatMap(Collection::stream)
             .filter(it -> Periodetype.REVURDERT.equals(it.getPeriodetype()))
+            .filter(it -> OMPUttakEndringsutleder.harRelevantEndringFraForrige(it, fullUttaksplanForrigeBehandling))
             .map(Uttaksperiode::getPeriode)
             .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))
             .filter(it -> perioder.stream().noneMatch(it::overlapper))

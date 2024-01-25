@@ -1,6 +1,31 @@
 package no.nav.k9.sak.ytelse.frisinn.beregningsgrunnlag;
 
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregnInput;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.FinnInntektsmeldingForBeregning;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusRestKlient;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.LagBeregnRequestTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.StegMapper;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
+import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
+import no.nav.folketrygdloven.kalkulus.beregning.v1.FrisinnGrunnlag;
+import no.nav.folketrygdloven.kalkulus.beregning.v1.PeriodeMedSøkerInfoDto;
+import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
+import no.nav.folketrygdloven.kalkulus.kodeverk.FagsakYtelseType;
+import no.nav.folketrygdloven.kalkulus.request.v1.BeregnForRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.BeregnListeRequest;
+import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -14,32 +39,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
-import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregnInput;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.FinnInntektsmeldingForBeregning;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusRestKlient;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.LagBeregnRequestTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.resultat.KalkulusResultat;
-import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
-import no.nav.folketrygdloven.kalkulus.beregning.v1.FrisinnGrunnlag;
-import no.nav.folketrygdloven.kalkulus.beregning.v1.PeriodeMedSøkerInfoDto;
-import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
-import no.nav.folketrygdloven.kalkulus.kodeverk.StegType;
-import no.nav.folketrygdloven.kalkulus.kodeverk.YtelseTyperKalkulusStøtterKontrakt;
-import no.nav.folketrygdloven.kalkulus.request.v1.BeregnForRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.BeregnListeRequest;
-import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
-import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
-import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
 
 /**
  * KalkulusTjeneste sørger for at K9 kaller kalkulus på riktig format i henhold til no.nav.folketrygdloven.kalkulus.kontrakt
@@ -121,8 +121,8 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
             ref.getSaksnummer().getVerdi(),
             ref.getBehandlingUuid(),
             new AktørIdPersonident(ref.getAktørId().getId()),
-            YtelseTyperKalkulusStøtterKontrakt.FRISINN,
-            new StegType(stegType.getKode()),
+            FagsakYtelseType.FRISINN,
+            StegMapper.getBeregningSteg(stegType),
             sendTilKalkulus);
         List<TilstandResponse> tilstandResponse = getKalkulusRestTjeneste().beregn(startBeregningRequest).getTilstand();
         var fraBeregningResponse = mapFraTilstand(tilstandResponse, bgReferanser);

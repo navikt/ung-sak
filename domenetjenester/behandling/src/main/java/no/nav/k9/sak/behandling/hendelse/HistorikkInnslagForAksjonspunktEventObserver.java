@@ -26,16 +26,20 @@ public class HistorikkInnslagForAksjonspunktEventObserver {
 
     private HistorikkRepository historikkRepository;
     private String systembruker;
+    private String appName;
 
     @Inject
-    public HistorikkInnslagForAksjonspunktEventObserver(HistorikkRepository historikkRepository,
+    public HistorikkInnslagForAksjonspunktEventObserver(
+        HistorikkRepository historikkRepository,
         /*
          * FIXME property vil være satt i produksjon, men ikke i tester. Uansett er løsningen ikke er god. Kan
          * heller bruker IdentType når det fikses.
          */
-                                                        @KonfigVerdi(value = "systembruker.username", required = false) String systembruker) {
+        @KonfigVerdi(value = "systembruker.username", required = false) String systembruker,
+        @KonfigVerdi(value = "NAIS_APP_NAME", defaultVerdi = "k9-sak") String appName) {
         this.historikkRepository = historikkRepository;
         this.systembruker = systembruker;
+        this.appName = appName;
     }
 
     /**
@@ -71,13 +75,17 @@ public class HistorikkInnslagForAksjonspunktEventObserver {
             builder.medBegrunnelse(venteårsakVariant);
         }
         Historikkinnslag historikkinnslag = new Historikkinnslag();
-        String brukerident = SubjectHandler.getSubjectHandler().getUid();
-        historikkinnslag.setAktør(!Objects.equals(systembruker, brukerident) ? HistorikkAktør.SAKSBEHANDLER : HistorikkAktør.VEDTAKSLØSNINGEN);
+        historikkinnslag.setAktør(erSystembruker() ? HistorikkAktør.VEDTAKSLØSNINGEN : HistorikkAktør.SAKSBEHANDLER);
         historikkinnslag.setType(historikkinnslagType);
         historikkinnslag.setBehandlingId(behandlingId);
         historikkinnslag.setFagsakId(fagsakId);
         builder.build(historikkinnslag);
         historikkRepository.lagre(historikkinnslag);
+    }
+
+    private boolean erSystembruker() {
+        var innloggetBrukerId = SubjectHandler.getSubjectHandler().getUid();
+        return Objects.equals(systembruker, innloggetBrukerId) || Objects.equals(appName, innloggetBrukerId);
     }
 
     public void oppretteHistorikkForGjenopptattBehandling(@Observes AksjonspunktStatusEvent aksjonspunkterFunnetEvent) {

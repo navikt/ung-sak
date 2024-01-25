@@ -1,13 +1,10 @@
-package no.nav.k9.sak.web.app.tjenester.kravperioder;
+package no.nav.k9.sak.perioder;
 
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
-import java.util.TreeSet;
 
 import no.nav.k9.sak.kontrakt.krav.ÅrsakTilVurdering;
-import no.nav.k9.sak.perioder.KravDokument;
-import no.nav.k9.sak.perioder.KravDokumentType;
 
 public class ÅrsakerTilVurdering {
 
