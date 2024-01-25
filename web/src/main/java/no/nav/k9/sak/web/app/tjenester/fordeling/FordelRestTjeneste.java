@@ -47,6 +47,11 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
+import no.nav.k9.felles.integrasjon.saf.Journalpost;
+import no.nav.k9.felles.integrasjon.saf.JournalpostQueryRequest;
+import no.nav.k9.felles.integrasjon.saf.JournalpostResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.Journalstatus;
+import no.nav.k9.felles.integrasjon.saf.SafTjeneste;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
@@ -87,7 +92,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.infotrygd.PsbInfotrygdRepositor
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.infotrygd.PsbPbSakRepository;
 
 /**
- * Mottar dokumenter fra f.eks. FPFORDEL og håndterer dispatch internt for saksbehandlingsløsningen.
+ * Mottar dokumenter fra k9-fordel og k9-punsj og håndterer dispatch internt for saksbehandlingsløsningen.
  */
 @Path(FordelRestTjeneste.BASE_PATH)
 @ApplicationScoped
@@ -101,6 +106,7 @@ public class FordelRestTjeneste {
 
     private SaksbehandlingDokumentmottakTjeneste dokumentmottakTjeneste;
     private SafAdapter safAdapter;
+    private SafTjeneste safTjeneste;
     private FagsakTjeneste fagsakTjeneste;
 
     private SøknadMottakTjenesteContainer søknadMottakere;
@@ -117,6 +123,7 @@ public class FordelRestTjeneste {
     @Inject
     public FordelRestTjeneste(SaksbehandlingDokumentmottakTjeneste dokumentmottakTjeneste,
                               SafAdapter safAdapter,
+                              SafTjeneste safTjeneste,
                               FagsakTjeneste fagsakTjeneste,
                               MottatteDokumentRepository mottatteDokumentRepository,
                               SøknadMottakTjenesteContainer søknadMottakere,
@@ -126,6 +133,7 @@ public class FordelRestTjeneste {
                               @KonfigVerdi(value = "ENABLE_RESERVERT_SAKSNUMMER", defaultVerdi = "false") boolean enableReservertSaksnummer) {
         this.dokumentmottakTjeneste = dokumentmottakTjeneste;
         this.safAdapter = safAdapter;
+        this.safTjeneste = safTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.søknadMottakere = søknadMottakere;
@@ -323,6 +331,7 @@ public class FordelRestTjeneste {
         return FagsakYtelseType.fraKode(dto.getYtelseType());
     }
 
+    @Deprecated
     @SuppressWarnings({"unchecked"})
     @POST
     @Path("/innsending")
@@ -401,11 +410,12 @@ public class FordelRestTjeneste {
     @Operation(description = "Ny journalpost skal behandles. Oppretter også ny sak.", summary = ("Varsel om en nye journalposter som skal behandles i systemet. Alle må tilhøre samme saksnummer, og være av samme type(brevkode, ytelsetype)"), tags = "fordel")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
     public void mottaJournalpostOgOpprettSøknad(@Parameter(description = "Krever saksnummer, journalpostId og behandlingstemaOffisiellKode") @Valid AbacJournalpostMottakOpprettSakDto journalpostMottakOpprettSakDto) {
-        Saksnummer saksnummer = journalpostMottakOpprettSakDto.getSaksnummer();
         FagsakYtelseType ytelseType = journalpostMottakOpprettSakDto.getYtelseType();
         LOG_CONTEXT.add("ytelseType", ytelseType);
         LOG_CONTEXT.add("journalpostId", journalpostMottakOpprettSakDto.getJournalpostId());
         logger.info("Mottok journalpost");
+
+        validerAtJournalpostenErJournalført(journalpostMottakOpprettSakDto.getJournalpostId());
 
         AktørId pleietrengendeAktørId = null;
         if (journalpostMottakOpprettSakDto.getPleietrengendeAktørId() != null) {
@@ -506,6 +516,17 @@ public class FordelRestTjeneste {
         builder.medForsendelseMottatt(mottattJournalpost.getForsendelseMottatt().orElse(mottattTidspunkt.toLocalDate())); // NOSONAR
 
         return builder.build();
+    }
+
+    //TODO denne bør alltid brukes ved mottak av dokumenter
+    private void validerAtJournalpostenErJournalført(JournalpostId journalpostId) {
+        var query = new JournalpostQueryRequest();
+        query.setJournalpostId(journalpostId.getVerdi());
+        var projection = new JournalpostResponseProjection().journalstatus();
+        Journalpost journalpost = safTjeneste.hentJournalpostInfo(query, projection);
+        if (!List.of(Journalstatus.FERDIGSTILT, Journalstatus.JOURNALFOERT).contains(journalpost.getJournalstatus())) {
+            throw new IllegalArgumentException("Journalposten er ikke endelig journalført i Saf");
+        }
     }
 
     /**
