@@ -11,6 +11,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -45,14 +48,18 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.krav.KravDokumentMedSøktePerioder;
 import no.nav.k9.sak.kontrakt.krav.PeriodeMedUtfall;
 import no.nav.k9.sak.kontrakt.krav.StatusForPerioderPåBehandling;
 import no.nav.k9.sak.kontrakt.krav.StatusForPerioderPåBehandlingInkludertVilkår;
+import no.nav.k9.sak.kontrakt.krav.ÅrsakMedPerioder;
+import no.nav.k9.sak.kontrakt.krav.ÅrsakTilVurdering;
+import no.nav.k9.sak.perioder.SøknadsfristTjenesteProvider;
 import no.nav.k9.sak.perioder.UtledStatusPåPerioderTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.perioder.SøknadsfristTjenesteProvider;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
+import no.nav.k9.søknad.felles.Kildesystem;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 
@@ -61,6 +68,8 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 @Path("")
 @Produces(MediaType.APPLICATION_JSON)
 public class PerioderTilBehandlingMedKildeRestTjeneste {
+
+    private static Logger log = LoggerFactory.getLogger(PerioderTilBehandlingMedKildeRestTjeneste.class);
 
     public static final String BEHANDLING_PERIODER = "/behandling/perioder";
     public static final String BEHANDLING_PERIODER_MED_VILKÅR = "/behandling/perioder-med-vilkar";
@@ -216,6 +225,26 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
             perioderTilVurdering,
             perioderSomSkalTilbakestilles,
             revurderingPerioderFraAndreParter);
+
+        if (behandling.erRevurdering() && kunEndringFraBrukerOgKildeEndringsdialog(statusForPerioderPåBehandling)) {
+            //Kun logging for å få oversikt over saker før vi implementerer dette i formidling
+            log.info("Revurdering med årsak endring fra bruker og kildesystem endringsdialog");
+        }
+
         return statusForPerioderPåBehandling;
+    }
+
+    private boolean kunEndringFraBrukerOgKildeEndringsdialog(StatusForPerioderPåBehandling statusForPerioderPåBehandling) {
+        if (statusForPerioderPåBehandling.getÅrsakMedPerioder().isEmpty() || statusForPerioderPåBehandling.getDokumenterTilBehandling().isEmpty()) {
+            return false;
+        }
+        var harKunEndringFraBruker = statusForPerioderPåBehandling.getÅrsakMedPerioder().stream()
+            .map(ÅrsakMedPerioder::getÅrsak)
+            .allMatch(ÅrsakTilVurdering.ENDRING_FRA_BRUKER::equals);
+        var harKunKildeEndringsdialog = statusForPerioderPåBehandling.getDokumenterTilBehandling().stream()
+            .map(KravDokumentMedSøktePerioder::getKildesystem)
+            .map(Kildesystem::of)
+            .allMatch(Kildesystem.ENDRINGSDIALOG::equals);
+        return harKunEndringFraBruker && harKunKildeEndringsdialog;
     }
 }
