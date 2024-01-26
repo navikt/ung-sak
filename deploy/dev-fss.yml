@@ -245,8 +245,6 @@ spec:
       value: "3030"
 
     # Feature-flag
-    - name: SOKNADSFRIST_BENYTT_ELDSTEKRAV_PER_PERIODE
-      value: "false"
     - name: YTELSE_OLP_AKTIVERT
       value: "true"
     - name: FILTRER_TILSTOTENDE_PERIODE
