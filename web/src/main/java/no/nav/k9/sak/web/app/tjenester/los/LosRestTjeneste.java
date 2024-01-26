@@ -88,6 +88,7 @@ public class LosRestTjeneste {
                     schema = @Schema(implementation = LosOpplysningerSomManglerIKlageDto.class))
             )
         })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
     public Response hentLosdataForKlage(
             @NotNull
             @QueryParam(BehandlingUuidDto.NAME)
