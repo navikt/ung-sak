@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.los;
+package no.nav.k9.sak.kontrakt.produksjonsstyring.los;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -10,7 +10,7 @@ import no.nav.k9.sak.typer.AktørId;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
-class LosOpplysningerSomManglerIKlageDto {
+public class LosOpplysningerSomManglerIKlageDto {
 
     @Valid
     @JsonProperty(value = "pleietrengendeAktørId")
@@ -28,4 +28,11 @@ class LosOpplysningerSomManglerIKlageDto {
         this.pleietrengendeAktørId = pleietrengendeAktørId;
     }
 
+    public AktørId getPleietrengendeAktørId() {
+        return pleietrengendeAktørId;
+    }
+
+    public boolean isUtenlandstilsnitt() {
+        return utenlandstilsnitt;
+    }
 }
