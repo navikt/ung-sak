@@ -46,7 +46,7 @@ public class LosRestTjeneste {
     public static final String BASE_PATH = "/los";
     public static final String MERKNAD = "/merknad";
     public static final String BEHANDLING = "/behandling";
-    public static final String BERIK_KLAGE = "/berik-klage";
+    public static final String BERIK_KLAGE = "/klage/berik";
     public static final String MERKNAD_PATH = BASE_PATH + MERKNAD;
     public static final String BEHANDLING_PATH = BASE_PATH + BEHANDLING;
 
