@@ -121,7 +121,7 @@ public class PersoninfoAdapter {
     private PersonIdent hentFnr(AktørId aktørId) {
         var personIdent = hentIdentForAktørId(aktørId);
         if (personIdent.isEmpty()) {
-            var fagsaker = fagsakRepository.hentForBruker(aktørId);
+            var fagsaker = fagsakRepository.hentSakerHvorBrukerHarMinstEnRolle(aktørId);
             var saksnummer = fagsaker.stream().map(Fagsak::getSaksnummer).collect(Collectors.toSet());
             log.warn("Fant ikke FNR for bruker med saksnummer " + saksnummer);
         }
