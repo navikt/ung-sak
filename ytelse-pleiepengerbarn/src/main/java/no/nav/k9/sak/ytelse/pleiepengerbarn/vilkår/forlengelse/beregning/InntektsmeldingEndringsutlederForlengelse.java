@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.HarEndretInntektsmeldingVurderer;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
@@ -19,6 +20,7 @@ public class InntektsmeldingEndringsutlederForlengelse implements HarEndretInnte
     public InntektsmeldingEndringsutlederForlengelse() {
     }
 
+    @Inject
     public InntektsmeldingEndringsutlederForlengelse(@KonfigVerdi(value = "IM_SKAL_VURDERE_ENDRET_INNTEKT", defaultVerdi = "false") boolean skalVurdereEndretInntekt) {
         this.skalVurdereEndretInntekt = skalVurdereEndretInntekt;
     }
