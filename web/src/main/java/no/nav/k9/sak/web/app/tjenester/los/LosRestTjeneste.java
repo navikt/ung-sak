@@ -94,8 +94,8 @@ public class LosRestTjeneste {
             @Parameter(description = BehandlingUuidDto.DESC)
             @Valid
             @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-            BehandlingUuidDto behandlingUuid) {
-        Optional<Behandling> behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid());
+            BehandlingUuidDto påklagdBehandlingUuid) {
+        Optional<Behandling> behandling = behandlingRepository.hentBehandlingHvisFinnes(påklagdBehandlingUuid.getBehandlingUuid());
         if (behandling.isPresent()) {
             LosOpplysningerSomManglerIKlageDto dto = new LosOpplysningerSomManglerIKlageDto();
             dto.setPleietrengendeAktørId(behandling.get().getFagsak().getPleietrengendeAktørId());
