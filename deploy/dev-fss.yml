@@ -289,6 +289,8 @@ spec:
       value: "true"
     - name: BG_FORLENGELSE_FILTRER_IM_FRA_AKTIVITETER
       value: "true"
+    - name: DOKUMENTMOTTAK_VALIDER_JOURNALFORT
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
