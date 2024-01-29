@@ -36,6 +36,7 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.typer.Prosent;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PSBVurdererSøknadsfristTjeneste;
@@ -204,7 +205,7 @@ public class HentDataTilUttakTjeneste {
         LocalDateTimeline<BigDecimal> nedjustertUttakgradTidslinje;
 
         if (tilkommetAktivitetEnabled && medInntektsgradering) {
-            nedjustertUttakgradTidslinje = tilkommetAktivitetTjeneste.finnInntektsgradering(referanse.getFagsakId());
+            nedjustertUttakgradTidslinje = tilkommetAktivitetTjeneste.finnInntektsgradering(referanse.getFagsakId()).mapValue(Prosent::getVerdi);
         } else {
             nedjustertUttakgradTidslinje = LocalDateTimeline.empty();
         }

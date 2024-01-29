@@ -45,6 +45,7 @@ import no.nav.folketrygdloven.kalkulus.response.v1.GrunnbeløpReguleringRespons;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandListeResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
+import no.nav.folketrygdloven.kalkulus.response.v1.gradering.InntektGraderingPeriode;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringListeRespons;
 import no.nav.folketrygdloven.kalkulus.response.v1.simulerTilkommetInntekt.SimulertTilkommetInntektPrReferanse;
 import no.nav.folketrygdloven.kalkulus.response.v1.tilkommetAktivitet.UtledetTilkommetAktivitet;
@@ -66,6 +67,7 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.typer.Prosent;
 import no.nav.k9.sak.typer.Saksnummer;
 
 import java.math.BigDecimal;
@@ -402,7 +404,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         ));
     }
 
-    public LocalDateTimeline<BigDecimal> finnInntektsgradering(Map<UUID, DatoIntervallEntitet> koblingerOgPeriode,
+    public LocalDateTimeline<Prosent> finnInntektsgradering(Map<UUID, DatoIntervallEntitet> koblingerOgPeriode,
                                                                BehandlingReferanse referanse) {
         if (koblingerOgPeriode.isEmpty()) {
             return LocalDateTimeline.empty();
@@ -415,11 +417,15 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         var respons = restTjeneste.finnUttaksgradVedInntektsgradering(request);
         return respons.getListe().stream().map(it -> {
                 var vilkårsperiode = koblingerOgPeriode.get(it.getEksternReferanse());
-                var graderingSegmenter = it.getPerioder().stream().map(p -> new LocalDateSegment<>(p.getPeriode().getFom(), p.getPeriode().getTom(), p.getInntektgradering())).toList();
-                var vilkårstidslinje = new LocalDateTimeline<Boolean>(vilkårsperiode.getFomDato(), vilkårsperiode.getTomDato(), TRUE);
+                var graderingSegmenter = it.getPerioder().stream().map(p -> new LocalDateSegment<>(p.getPeriode().getFom(), p.getPeriode().getTom(), mapGradTilProsent(p))).toList();
+                var vilkårstidslinje = new LocalDateTimeline<>(vilkårsperiode.getFomDato(), vilkårsperiode.getTomDato(), TRUE);
                 return new LocalDateTimeline<>(graderingSegmenter).intersection(vilkårstidslinje);
             }).reduce(LocalDateTimeline::crossJoin)
             .orElse(LocalDateTimeline.empty());
+    }
+
+    private static Prosent mapGradTilProsent(InntektGraderingPeriode p) {
+        return new Prosent(p.getInntektgradering().multiply(BigDecimal.valueOf(100)));
     }
 
     @Override

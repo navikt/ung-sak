@@ -28,6 +28,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.Prosent;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 
 @ApplicationScoped
@@ -73,7 +74,7 @@ public class TilkommetAktivitetTjeneste {
      * @param fagsakId IDen til fagsaken.
      * @return En {@code LocalDateTimeline} med resultatet av gradering mot inntekt for alle perioder på fagsaken
      */
-    public LocalDateTimeline<BigDecimal> finnInntektsgradering(Long fagsakId) {
+    public LocalDateTimeline<Prosent> finnInntektsgradering(Long fagsakId) {
         var relevantBehandling = finnRelevantBehandling(fagsakId);
         if (relevantBehandling.isEmpty()) {
             return LocalDateTimeline.empty();
