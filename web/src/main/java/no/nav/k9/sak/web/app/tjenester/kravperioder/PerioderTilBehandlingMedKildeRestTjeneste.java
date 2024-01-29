@@ -246,9 +246,6 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
             .map(Kildesystem::of)
             .allMatch(Kildesystem.ENDRINGSDIALOG::equals);
 
-        if (harKunEndringFraBruker && !harKunKildeEndringsdialog) {
-            log.info("Revurdering med årsak endring fra bruker, men annet kildesystem enn endringsdialog");
-        }
         if (harKunKildeEndringsdialog && !harKunEndringFraBruker) {
             log.info("Revurdering med kildesystem endringsdialog, men andre årsaker enn endring fra bruker");
         }
