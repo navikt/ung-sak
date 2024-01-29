@@ -1,4 +1,4 @@
-package no.nav.k9.sak.behandling.revurdering.etterkontroll.saksbehandlingstid;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.saksbehandlingstid;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;

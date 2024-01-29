@@ -1,4 +1,4 @@
-package no.nav.k9.sak.behandling.revurdering.etterkontroll.saksbehandlingstid;
+package no.nav.k9.sak.ytelse.pleiepengerbarn.saksbehandlingstid;
 
 import java.time.LocalDateTime;
 import java.time.Period;
@@ -13,6 +13,7 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.sak.behandling.saksbehandlingstid.SaksbehandlingsfristUtleder;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;

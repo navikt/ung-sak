@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import no.nav.k9.sak.behandling.saksbehandlingstid.SaksbehandlingsfristUtleder;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 
