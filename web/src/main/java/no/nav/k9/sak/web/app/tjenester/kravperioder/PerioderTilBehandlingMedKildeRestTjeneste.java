@@ -245,6 +245,11 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
             .map(KravDokumentMedSøktePerioder::getKildesystem)
             .map(Kildesystem::of)
             .allMatch(Kildesystem.ENDRINGSDIALOG::equals);
+
+        if (harKunKildeEndringsdialog && !harKunEndringFraBruker) {
+            log.info("Revurdering med kildesystem endringsdialog, men andre årsaker enn endring fra bruker");
+        }
+
         return harKunEndringFraBruker && harKunKildeEndringsdialog;
     }
 }
