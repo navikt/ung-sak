@@ -91,6 +91,41 @@ public class OverstyrUttakRepository {
         entityManager.flush();
     }
 
+    /** Lagrer overstyrt uttak og beholder opprinnelig saksbehandler
+     *
+     * @param behandlingId BehandlingId
+     * @param slettes Liste for sletting
+     * @param ryddetMotUttaksplan Tidslinje med overstyrte perioder
+     */
+    public void ryddMotUttaksplan(Long behandlingId, List<Long> slettes, LocalDateTimeline<OverstyrtUttakPeriode> ryddetMotUttaksplan) {
+        LocalDateTimeline<OverstyrtUttakPeriodeEntitet> eksisterendeOverstyringer = hentSomEntitetTidslinje(behandlingId);
+        Map<Long, LocalDateSegment<OverstyrtUttakPeriodeEntitet>> eksisterendeOverstyringerPrId = eksisterendeOverstyringer.stream().collect(Collectors.toMap(segment -> segment.getValue().getId(), segment -> segment));
+        slettes.forEach(slettesId -> fjernOverstyring(behandlingId, slettesId));
+
+        List<LocalDateSegment<OverstyrtUttakPeriode>> segmenterSomEndres = new ArrayList<>();
+        ryddetMotUttaksplan.stream().forEach(segment -> {
+            OverstyrtUttakPeriode nyOverstyring = segment.getValue();
+            Long eksisterendeOverstyringId = nyOverstyring.getId();
+            LocalDateSegment<OverstyrtUttakPeriode> eksisterendeOverstyring = mapFraEntitet(eksisterendeOverstyringerPrId.get(eksisterendeOverstyringId));
+            boolean harEndring = !Objects.equals(segment, eksisterendeOverstyring);
+            if (harEndring) {
+                segmenterSomEndres.add(segment);
+            }
+        });
+
+        fjernEksisterendeOverstyringerSomOverlapper(new LocalDateTimeline<>(segmenterSomEndres), eksisterendeOverstyringer);
+        segmenterSomEndres.forEach(segment -> {
+                Long eksisterendeOverstyringId = segment.getValue().getId();
+                fjernOverstyring(behandlingId, eksisterendeOverstyringId);
+                OverstyrtUttakPeriode overstyring = segment.getValue();
+                OverstyrtUttakPeriodeEntitet nyOverstyring = new OverstyrtUttakPeriodeEntitet(behandlingId, DatoIntervallEntitet.fra(segment.getLocalDateInterval()), overstyring.getSøkersUttaksgrad(), map(overstyring.getOverstyrtUtbetalingsgrad()), overstyring.getBegrunnelse(), overstyring.getSaksbehandler());
+                entityManager.persist(nyOverstyring);
+            }
+        );
+
+        entityManager.flush();
+    }
+
     public void kopierGrunnlagFraEksisterendeBehandling(Long originalBehandlingId, Long nyBehandlingId) {
         var overstyrtePerioder = finnOverstyrtePerioder(originalBehandlingId);
         if (!overstyrtePerioder.isEmpty()) {
