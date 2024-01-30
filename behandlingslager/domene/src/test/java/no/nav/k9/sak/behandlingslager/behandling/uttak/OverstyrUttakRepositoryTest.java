@@ -231,7 +231,7 @@ class OverstyrUttakRepositoryTest {
         overstyrUttakRepository.ryddMotUttaksplan(originalBehandlingId, List.of(), ryddet);
 
         assertThat(overstyrUttakRepository.hentOverstyrtUttak(originalBehandlingId)).isEqualTo(ryddet);
-        
+
     }
 
 
