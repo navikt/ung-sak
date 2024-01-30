@@ -18,6 +18,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -28,6 +29,8 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
+import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
@@ -58,19 +61,22 @@ public class VurderMedlemskapSteg implements BehandlingSteg {
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
     private ProsessTriggereRepository prosessTriggereRepository;
     private AksjonspunktutlederForMedlemskap aksjonspunktutlederForMedlemskap;
+    private AksjonspunktKontrollRepository aksjonspunktKontrollRepository;
 
     @Inject
     public VurderMedlemskapSteg(VurderLøpendeMedlemskap vurderLøpendeMedlemskap,
                                 BehandlingRepositoryProvider provider,
                                 @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
                                 ProsessTriggereRepository prosessTriggereRepository,
-                                AksjonspunktutlederForMedlemskap aksjonspunktutlederForMedlemskap) {
+                                AksjonspunktutlederForMedlemskap aksjonspunktutlederForMedlemskap,
+                                AksjonspunktKontrollRepository aksjonspunktKontrollRepository) {
         this.vurderLøpendeMedlemskap = vurderLøpendeMedlemskap;
         this.behandlingRepository = provider.getBehandlingRepository();
         this.vilkårResultatRepository = provider.getVilkårResultatRepository();
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
         this.prosessTriggereRepository = prosessTriggereRepository;
         this.aksjonspunktutlederForMedlemskap = aksjonspunktutlederForMedlemskap;
+        this.aksjonspunktKontrollRepository = aksjonspunktKontrollRepository;
     }
 
     VurderMedlemskapSteg() {
@@ -79,6 +85,12 @@ public class VurderMedlemskapSteg implements BehandlingSteg {
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
+        if (kontekst.getBehandlingId() == 1744679L) { //9WKJA //TODO fjern
+            var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+            var aksjonspunktFor = behandling.getAksjonspunktFor(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_SØKNADSFRISTVILKÅRET_KODE);
+            aksjonspunktFor.ifPresent(this::settÅpentAksjonspunktTilUtført);
+        }
+
         boolean stegMåRekjøres = utledPerioderSomHarBlittLagtTilVurderingPgaEndringIPerioder(kontekst);
         if (stegMåRekjøres) {
             return BehandleStegResultat.tilbakeførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.AVKLAR_FORTSATT_MEDLEMSKAP));
@@ -163,6 +175,12 @@ public class VurderMedlemskapSteg implements BehandlingSteg {
             return originalBehandlingResultat.getVilkår(VilkårType.MEDLEMSKAPSVILKÅRET);
         }
         return Optional.empty();
+    }
+
+    private void settÅpentAksjonspunktTilUtført(Aksjonspunkt aksjonspunkt) {
+        if (aksjonspunkt.erÅpentAksjonspunkt()) {
+            aksjonspunktKontrollRepository.setTilUtført(aksjonspunkt, aksjonspunkt.getBegrunnelse());
+        }
     }
 
     VilkårBuilder mapPerioderTilVilkårsPerioderMedForlengelse(VilkårBuilder vilkårBuilder,
