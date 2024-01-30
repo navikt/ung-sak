@@ -93,7 +93,7 @@ public class OverstyrUttakTjeneste {
         var uttaksplanTidslinje = new LocalDateTimeline<>(uttaksplan.getPerioder().entrySet().stream().map(e -> new LocalDateSegment<>(e.getKey().getFom(), e.getKey().getTom(), e.getValue())).toList());
         var sletteListe = new ArrayList<Long>();
         var tidslinjeRyddetMotUttaksplan = overstyrtUttakTilVurdering.combine(uttaksplanTidslinje, ryddSegmenterMotUttaksplan(sletteListe), LocalDateTimeline.JoinStyle.INNER_JOIN);
-        overstyrUttakRepository.oppdaterOverstyringAvUttak(behandlingReferanse.getBehandlingId(), sletteListe, tidslinjeRyddetMotUttaksplan.filterValue(Objects::nonNull));
+        overstyrUttakRepository.ryddMotUttaksplan(behandlingReferanse.getBehandlingId(), sletteListe, tidslinjeRyddetMotUttaksplan.filterValue(Objects::nonNull));
 
     }
 
