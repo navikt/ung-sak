@@ -105,6 +105,7 @@ public class PleiepengerUttakRestTjeneste {
 
     public static final String UTTAK_OVERSTYRT = "/behandling/pleiepenger/uttak/overstyrt";
     public static final String UTTAK_OVERSTYRBARE_AKTIVITETER = "/behandling/pleiepenger/uttak/overstyrbare-aktiviteter";
+    public static final Set<UttakArbeidType> STATUSER_LÅST_FOR_OVERSTYRING = Set.of(UttakArbeidType.ARBEIDSTAKER, UttakArbeidType.FRILANSER, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE);
 
     private UttakTjeneste uttakTjeneste;
     private BehandlingRepository behandlingRepository;
@@ -307,7 +308,7 @@ public class PleiepengerUttakRestTjeneste {
             .map(Map.Entry::getValue)
             .flatMap(p -> p.getUtbetalingsgrader().stream())
             .map(Utbetalingsgrader::getArbeidsforhold)
-            .filter(arbeidsforhold -> !UttakArbeidType.fraKode(arbeidsforhold.getType()).equals(UttakArbeidType.ARBEIDSTAKER))
+            .filter(arbeidsforhold -> !STATUSER_LÅST_FOR_OVERSTYRING.contains(UttakArbeidType.fraKode(arbeidsforhold.getType())))
             .map(PleiepengerUttakRestTjeneste::map)
             .distinct()
             .toList();
