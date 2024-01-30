@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.jetbrains.annotations.NotNull;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -59,27 +57,31 @@ public class PleiepengerInntektsmeldingRelevantForBeregningVilkårsvurdering imp
     public List<Inntektsmelding> begrensInntektsmeldinger(BehandlingReferanse referanse, Collection<Inntektsmelding> inntektsmeldinger, DatoIntervallEntitet periode) {
         var relevanteImTjeneste = InntektsmeldingerRelevantForBeregning.finnTjeneste(inntektsmeldingerRelevantForBeregning, referanse.getFagsakYtelseType());
         var inntektsmeldingBegrenset = relevanteImTjeneste.begrensSakInntektsmeldinger(referanse, inntektsmeldinger, periode);
-        var inntektsmeldingForPeriode = relevanteImTjeneste.utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldingBegrenset, periode);
         if (!skalFiltrereBasertPåAktiviteter) {
-            return inntektsmeldingForPeriode;
+            return relevanteImTjeneste.utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldingBegrenset, periode);
+        } else {
+            var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(referanse.getBehandlingId());
+            var inntektsmeldingerTilBeregning = filtrerForBeregningsaktiviteter(referanse, iayGrunnlag, periode, inntektsmeldingBegrenset);
+            return relevanteImTjeneste.utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldingerTilBeregning, periode);
         }
-        var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(referanse.getBehandlingId());
-        var inntektsmeldingerTilBeregning = filtrerForBeregningsaktiviteter(referanse, iayGrunnlag, periode, inntektsmeldingForPeriode);
-        return inntektsmeldingerTilBeregning;
     }
 
-    private List<Inntektsmelding> filtrerForBeregningsaktiviteter(BehandlingReferanse referanse, InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet periode, List<Inntektsmelding> inntektsmeldingForPeriode) {
+    private List<Inntektsmelding> filtrerForBeregningsaktiviteter(BehandlingReferanse referanse, InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet periode, Collection<Inntektsmelding> inntektsmeldingForPeriode) {
         var opptjeningAktiviteter = OpptjeningForBeregningTjeneste.finnTjeneste(opptjeningForBeregningTjenester, referanse.getFagsakYtelseType()).hentEksaktOpptjeningForBeregning(referanse, iayGrunnlag, periode);
         return filtrerForAktiviteter(inntektsmeldingForPeriode, opptjeningAktiviteter);
     }
 
-    static List<Inntektsmelding> filtrerForAktiviteter(List<Inntektsmelding> inntektsmeldingForPeriode, Optional<OpptjeningAktiviteter> opptjeningAktiviteter) {
+    static List<Inntektsmelding> filtrerForAktiviteter(Collection<Inntektsmelding> inntektsmeldingForPeriode, Optional<OpptjeningAktiviteter> opptjeningAktiviteter) {
         var aktiviterForBeregning = opptjeningAktiviteter.stream().flatMap(a -> a.getOpptjeningPerioder().stream()).toList();
-        return inntektsmeldingForPeriode.stream().filter(im -> aktiviterForBeregning.stream().anyMatch(a -> harSammeArbeidsgiver(im, a))) // Foreløpig filtrerer vi kun på arbeidsgivernivå for å tillate reberegning ved endret arbeidsforholdID
+        return inntektsmeldingForPeriode.stream().filter(im -> aktiviterForBeregning.stream().anyMatch(a -> harLikArbeidsgiver(im, a) && harEksaktLikArbeidsforholdId(im, a)))
             .toList();
     }
 
-    private static boolean harSammeArbeidsgiver(Inntektsmelding im, OpptjeningAktiviteter.OpptjeningPeriode a) {
+    private static boolean harEksaktLikArbeidsforholdId(Inntektsmelding im, OpptjeningAktiviteter.OpptjeningPeriode a) {
+        return im.getArbeidsforholdRef().equals(a.getArbeidsforholdId());
+    }
+
+    private static boolean harLikArbeidsgiver(Inntektsmelding im, OpptjeningAktiviteter.OpptjeningPeriode a) {
         return Objects.equals(im.getArbeidsgiver().getArbeidsgiverOrgnr(), a.getArbeidsgiverOrgNummer()) &&
             Objects.equals(im.getArbeidsgiver().getArbeidsgiverAktørId(), a.getArbeidsgiverAktørId());
     }

@@ -65,6 +65,7 @@ class InntektsmeldingEndringsutlederForlengelseTest {
 
         var im = InntektsmeldingBuilder.builder()
             .medJournalpostId("1")
+            .medArbeidsgiver(Arbeidsgiver.virksomhet("123456789"))
             .medKanalreferanse("kanalreferanser")
             .medBeløp(BigDecimal.TEN)
             .build();
@@ -132,6 +133,7 @@ class InntektsmeldingEndringsutlederForlengelseTest {
             .medJournalpostId("1")
             .medStartDatoPermisjon(LocalDate.now())
             .medKanalreferanse("kanalreferanser")
+            .medArbeidsforholdId(InternArbeidsforholdRef.nyRef())
             .medArbeidsgiver(Arbeidsgiver.virksomhet("123456789"))
             .medBeløp(BigDecimal.TEN)
             .build();
@@ -139,7 +141,7 @@ class InntektsmeldingEndringsutlederForlengelseTest {
         var im2 = InntektsmeldingBuilder.builder()
             .medJournalpostId("2")
             .medArbeidsgiver(Arbeidsgiver.virksomhet("123456789"))
-            .medArbeidsforholdId(InternArbeidsforholdRef.ref(UUID.randomUUID()))
+            .medArbeidsforholdId(InternArbeidsforholdRef.nyRef())
             .medStartDatoPermisjon(LocalDate.now())
             .medKanalreferanse("kanalreferanser")
             .medBeløp(BigDecimal.TEN)

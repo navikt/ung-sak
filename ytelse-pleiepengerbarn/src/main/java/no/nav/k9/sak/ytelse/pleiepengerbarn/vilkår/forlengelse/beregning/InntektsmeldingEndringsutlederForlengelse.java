@@ -1,7 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.beregning;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,21 +26,16 @@ public class InntektsmeldingEndringsutlederForlengelse implements HarEndretInnte
 
     @Override
     public boolean erEndret(Collection<Inntektsmelding> relevanteInntektsmeldinger, Collection<Inntektsmelding> relevanteInntektsmeldingerForrigeVedtak) {
-        var erJournalposterUlike = harUlikeJournalposter(relevanteInntektsmeldingerForrigeVedtak.stream()
-            .map(Inntektsmelding::getJournalpostId)
-            .collect(Collectors.toSet()), relevanteInntektsmeldinger.stream()
-            .map(Inntektsmelding::getJournalpostId)
-            .collect(Collectors.toSet()));
-
-        if (!erJournalposterUlike) {
-            return false;
-        }
 
         if (!skalVurdereEndretInntekt) {
-            return true;
+            return harUlikeJournalposter(relevanteInntektsmeldingerForrigeVedtak.stream()
+                .map(Inntektsmelding::getJournalpostId)
+                .collect(Collectors.toSet()), relevanteInntektsmeldinger.stream()
+                .map(Inntektsmelding::getJournalpostId)
+                .collect(Collectors.toSet()));
+        } else {
+            return !erLikeStore(relevanteInntektsmeldinger, relevanteInntektsmeldingerForrigeVedtak) || relevanteInntektsmeldinger.stream().anyMatch(im -> harEndretBeløpFraForrige(relevanteInntektsmeldingerForrigeVedtak, im));
         }
-
-        return relevanteInntektsmeldinger.stream().anyMatch(im -> harEndretBeløpFraForrige(relevanteInntektsmeldingerForrigeVedtak, im));
 
     }
 
@@ -60,10 +54,14 @@ public class InntektsmeldingEndringsutlederForlengelse implements HarEndretInnte
 
     static boolean harUlikeJournalposter(Set<JournalpostId> forrigeVedtakJournalposter, Set<JournalpostId> denneBehandlingJournalposter) {
 
-        var erLikeStore = forrigeVedtakJournalposter.size() == denneBehandlingJournalposter.size();
+        var erLikeStore = erLikeStore(forrigeVedtakJournalposter, denneBehandlingJournalposter);
 
         var inneholderDeSamme = denneBehandlingJournalposter.containsAll(forrigeVedtakJournalposter);
 
         return !(erLikeStore && inneholderDeSamme);
+    }
+
+    private static <V> boolean erLikeStore(Collection<V> c1, Collection<V> c2) {
+        return c1.size() == c2.size();
     }
 }
