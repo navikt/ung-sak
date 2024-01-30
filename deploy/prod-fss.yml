@@ -289,6 +289,8 @@ spec:
       value: "false"
     - name: UTTAK_KLIPP_BORT_AVSLAG
       value: "false"
+    - name: SJEKK_OM_DODSHENDELSE_ER_RELEVANT
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
