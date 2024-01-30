@@ -105,6 +105,7 @@ public class PleiepengerUttakRestTjeneste {
 
     public static final String UTTAK_OVERSTYRT = "/behandling/pleiepenger/uttak/overstyrt";
     public static final String UTTAK_OVERSTYRBARE_AKTIVITETER = "/behandling/pleiepenger/uttak/overstyrbare-aktiviteter";
+    public static final Set<UttakArbeidType> STATUSER_LÅST_FOR_OVERSTYRING = Set.of(UttakArbeidType.ARBEIDSTAKER, UttakArbeidType.FRILANSER, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE);
 
     private UttakTjeneste uttakTjeneste;
     private BehandlingRepository behandlingRepository;
@@ -302,20 +303,22 @@ public class PleiepengerUttakRestTjeneste {
         no.nav.k9.sak.typer.Periode periode = new no.nav.k9.sak.typer.Periode(request.getFom(), request.getTom());
         Uttaksplan uttaksplan = uttakTjeneste.hentUttaksplan(behandlingUuid, false);
 
-        Set<OverstyrUttakArbeidsforholdDto> aktiviteter = new LinkedHashSet<>();
-
-        for (Map.Entry<LukketPeriode, UttaksperiodeInfo> entry : uttaksplan.getPerioder().entrySet()) {
-            no.nav.k9.sak.typer.Periode uttakperiode = new no.nav.k9.sak.typer.Periode(entry.getKey().getFom(), entry.getKey().getTom());
-            if (uttakperiode.overlaps(periode)) {
-                UttaksperiodeInfo periodeInfo = entry.getValue();
-                for (Utbetalingsgrader utbetalingsgrader : periodeInfo.getUtbetalingsgrader()) {
-                    aktiviteter.add(map(utbetalingsgrader.getArbeidsforhold()));
-                }
-            }
-        }
+        var aktiviteter = uttaksplan.getPerioder().entrySet().stream()
+            .filter(e -> tilPeriode(e.getKey()).overlaps(periode))
+            .map(Map.Entry::getValue)
+            .flatMap(p -> p.getUtbetalingsgrader().stream())
+            .map(Utbetalingsgrader::getArbeidsforhold)
+            .filter(arbeidsforhold -> !STATUSER_LÅST_FOR_OVERSTYRING.contains(UttakArbeidType.fraKode(arbeidsforhold.getType())))
+            .map(PleiepengerUttakRestTjeneste::map)
+            .distinct()
+            .toList();
 
         ArbeidsgiverOversiktDto arbeidsgiverOversikt = arbeidsgiverOversiktTjeneste.getArbeidsgiverOpplysninger(behandlingUuid);
-        return new OverstyrbareUttakAktiviterDto(new ArrayList<>(aktiviteter), arbeidsgiverOversikt);
+        return new OverstyrbareUttakAktiviterDto(aktiviteter, arbeidsgiverOversikt);
+    }
+
+    private static no.nav.k9.sak.typer.Periode tilPeriode(LukketPeriode lukketPeriode) {
+        return new no.nav.k9.sak.typer.Periode(lukketPeriode.getFom(), lukketPeriode.getTom());
     }
 
     private Set<LukketPeriode> mapPerioderTilVurdering(Behandling behandling) {
@@ -365,7 +368,7 @@ public class PleiepengerUttakRestTjeneste {
         return new OverstyrUttakUtbetalingsgradDto(aktivitet, overstyrtUtbetalingsgrad.getUtbetalingsgrad());
     }
 
-    private OverstyrUttakArbeidsforholdDto map(Arbeidsforhold arbeidsforhold) {
+    private static OverstyrUttakArbeidsforholdDto map(Arbeidsforhold arbeidsforhold) {
         return new OverstyrUttakArbeidsforholdDto(
             UttakArbeidType.fraKode(arbeidsforhold.getType()),
             arbeidsforhold.getOrganisasjonsnummer() != null ? new OrgNummer(arbeidsforhold.getOrganisasjonsnummer()) : null,
