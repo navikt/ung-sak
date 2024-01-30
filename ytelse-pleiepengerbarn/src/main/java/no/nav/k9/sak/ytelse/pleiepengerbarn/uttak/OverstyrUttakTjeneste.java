@@ -118,7 +118,7 @@ public class OverstyrUttakTjeneste {
                 return LocalDateSegment.emptySegment(di.getFomDato(), di.getTomDato());
             }
 
-            return new LocalDateSegment<>(di, new OverstyrtUttakPeriode(null, lhs.getValue().getSøkersUttaksgrad(), overstyrteUtbetalingsgraderMedMatch, lhs.getValue().getBegrunnelse()));
+            return new LocalDateSegment<>(di, new OverstyrtUttakPeriode(lhs.getValue().getId(), lhs.getValue().getSøkersUttaksgrad(), overstyrteUtbetalingsgraderMedMatch, lhs.getValue().getBegrunnelse()));
         };
     }
 
