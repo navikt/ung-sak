@@ -1,5 +1,6 @@
 package no.nav.k9.sak.metrikker;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -44,7 +45,8 @@ public class RevurderingMetrikkTask implements ProsessTaskHandler {
 
     @Override
     public void doTask(ProsessTaskData data) {
-        var okrMetrikker = revurderingMetrikkRepository.hentAlle();
+        var revurderingUtenSoknadTom = data.getPropertyValue("revurderingUtenSoknadTom") != null ? LocalDate.parse(data.getPropertyValue("revurderingUtenSoknadTom")) : LocalDate.now();
+        var okrMetrikker = revurderingMetrikkRepository.hentAlle(revurderingUtenSoknadTom);
         logMetrics(okrMetrikker);
         if (okrMetrikker.size() > LOG_THRESHOLD) {
             log.info("Generert {} okr-metrikker til sensu", okrMetrikker.size());

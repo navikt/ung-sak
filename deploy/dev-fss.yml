@@ -216,6 +216,8 @@ spec:
     # Restservice PSB spesifikt
     - name: K9_PSB_UTTAK_URL
       value: http://pleiepenger-barn-uttak.k9saksbehandling/pleiepenger-barn-uttak
+    - name: K9_PSB_UTTAK_SCOPE
+      value: api://dev-fss.k9saksbehandling.pleiepenger-barn-uttak/.default
 
     # Graphql services
     - name: SAF_BASE_URL
@@ -243,10 +245,8 @@ spec:
       value: "3030"
 
     # Feature-flag
-    - name: OMP_VERIFISERING_TILKJENT_YTELSE
-      value: "true"
     - name: SOKNADSFRIST_BENYTT_ELDSTEKRAV_PER_PERIODE
-      value: "true"
+      value: "false"
     - name: YTELSE_OLP_AKTIVERT
       value: "true"
     - name: FILTRER_TILSTOTENDE_PERIODE
@@ -269,10 +269,6 @@ spec:
       value: "true"
     - name: FILTRER_UGYLDIG_IM
       value: "true"
-    - name: ENABLE_UTENLANDSOPPHOLD_PILS
-      value: "true"
-    - name: PERIODISERT_RAMMEVEDTAK_AO
-      value: "true"
     - name: STONADSTATISTIKK_V2
       value: "true"
     - name: OPPTJENING_AP_VED_AKSEPTERT_MELLOMLIGGENDE_HELG
@@ -283,17 +279,19 @@ spec:
       value: "true"
     - name: LAGRE_SOEKNADSAKTOERER
       value: "true"
-    - name: ENABLE_AZURE_CC_SYSTEMCONTEXT
-      value: "true"
     - name: AVKLAR_ARBEIDSFORHOLD_REUTLED_VED_REVURDERING
       value: "true"
     - name: ENABLE_RESERVERT_SAKSNUMMER
       value: "true"
     - name: OMP_RELEVANT_ENDRING_UTLEDNING
       value: "true"
-    - name: IKKE_VURDER_KOMPLETTHET_VED_FORLENGELSE
+    - name: IM_SKAL_VURDERE_ENDRET_INNTEKT
       value: "true"
-    - name: NY_DEAKTIVERING_LOGIKK_KALKULUS
+    - name: BG_FORLENGELSE_FILTRER_IM_FRA_AKTIVITETER
+      value: "true"
+    - name: DOKUMENTMOTTAK_VALIDER_JOURNALFORT
+      value: "true"
+    - name: UTTAK_KLIPP_BORT_AVSLAG
       value: "true"
 
     # Konfigurasjoner

@@ -89,5 +89,21 @@ public class OverstyrtUttakUtbetalingsgradEntitet extends BaseEntitet {
         return utbetalingsgrad;
     }
 
+    @Override
+    public String toString() {
+        return "OverstyrtUttakUtbetalingsgradEntitet{" +
+            "aktivitetType=" + aktivitetType +
+            ", arbeidsgiverOrgNr='" + masker(arbeidsgiverOrgNr) + '\'' +
+            ", arbeidsgiverAktørId='" + masker(arbeidsgiverAktørId) + '\'' +
+            ", internArbeidsforholdRef='" + internArbeidsforholdRef + '\'' +
+            ", utbetalingsgrad=" + utbetalingsgrad +
+            '}';
+    }
 
+    private String masker(String identifikator) {
+        if (identifikator == null) {
+            return null;
+        }
+        return identifikator.substring(0, Math.min(identifikator.length(), 3)) + "...";
+    }
 }

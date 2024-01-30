@@ -1,18 +1,30 @@
 package no.nav.k9.sak.domene.abakus.mapping;
 
+import no.nav.abakus.iaygrunnlag.Aktør;
+import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
+import no.nav.abakus.iaygrunnlag.Organisasjon;
 import no.nav.abakus.iaygrunnlag.Periode;
-import no.nav.abakus.iaygrunnlag.*;
+import no.nav.abakus.iaygrunnlag.PersonIdent;
 import no.nav.abakus.iaygrunnlag.inntekt.v1.InntekterDto;
 import no.nav.abakus.iaygrunnlag.inntekt.v1.UtbetalingDto;
 import no.nav.abakus.iaygrunnlag.inntekt.v1.UtbetalingsPostDto;
 import no.nav.abakus.iaygrunnlag.kodeverk.InntektYtelseType;
-import no.nav.k9.sak.domene.iay.modell.*;
+import no.nav.k9.sak.domene.iay.modell.AktørInntekt;
+import no.nav.k9.sak.domene.iay.modell.Inntekt;
+import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder.AktørInntektBuilder;
+import no.nav.k9.sak.domene.iay.modell.InntektBuilder;
+import no.nav.k9.sak.domene.iay.modell.Inntektspost;
+import no.nav.k9.sak.domene.iay.modell.InntektspostBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.OrgNummer;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 class MapAktørInntekt {

@@ -6,8 +6,6 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
-import java.util.Set;
-
 import com.fasterxml.jackson.databind.ObjectWriter;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -16,6 +14,7 @@ import no.nav.abakus.iaygrunnlag.JsonObjectMapper;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.ContainerContextRunner;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
@@ -43,7 +42,8 @@ public class AbakusDump implements DebugDumpBehandling, DebugDumpFagsak {
     @Override
     public void dump(DumpMottaker dumpMottaker, Behandling behandling, String basePath) {
         try {
-            var data = tjeneste.finnGrunnlag(behandling.getId());
+            // For kall med systembruker og opprettelse av systemtoken
+            var data = ContainerContextRunner.doRun(behandling, () -> tjeneste.finnGrunnlag(behandling.getId()));
             if (data.isEmpty()) {
                 return;
             }
@@ -59,7 +59,8 @@ public class AbakusDump implements DebugDumpBehandling, DebugDumpFagsak {
     public void dump(DumpMottaker dumpMottaker) {
         String relativePath = "abakus-inntektsmeldinger";
         try {
-            Set<Inntektsmelding> data = tjeneste.hentUnikeInntektsmeldingerForSak(dumpMottaker.getFagsak().getSaksnummer());
+            // For kall med systembruker og opprettelse av systemtoken
+            var data = ContainerContextRunner.doRun(dumpMottaker.getFagsak(), () -> tjeneste.hentUnikeInntektsmeldingerForSak(dumpMottaker.getFagsak().getSaksnummer()));
             for (Inntektsmelding im : data) {
                 relativePath = "abakus-inntektsmelding-" +
                     im.getArbeidsgiver().getIdentifikator() +

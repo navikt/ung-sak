@@ -1,18 +1,5 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.beregningsgrunnlag;
 
-import static java.util.Comparator.comparing;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
-
-import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.jetbrains.annotations.NotNull;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
@@ -39,6 +26,18 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
+import org.jetbrains.annotations.NotNull;
+
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.Comparator.comparing;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 
 @FagsakYtelseTypeRef(OMSORGSPENGER)
 @ApplicationScoped
@@ -72,7 +71,7 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
     }
 
     private static UttakArbeidType mapType(String type) {
-        return new UttakArbeidType(type);
+        return UttakArbeidType.fraKode(type);
     }
 
     private static Periode tilKalkulusPeriode(LukketPeriode periode) {

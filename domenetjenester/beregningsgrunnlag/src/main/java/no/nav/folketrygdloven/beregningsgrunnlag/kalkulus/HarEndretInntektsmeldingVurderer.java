@@ -10,7 +10,6 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
-import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -22,8 +21,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 public class HarEndretInntektsmeldingVurderer {
 
     private BehandlingRepository behandlingRepository;
-    private MottatteDokumentRepository mottatteDokumentRepository;
-    private Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning;
+    private Instance<InntektsmeldingRelevantForBeregningVilkårsvurdering> inntektsmeldingRelevantForBeregningVilkårsvurdering;
 
 
     public HarEndretInntektsmeldingVurderer() {
@@ -31,11 +29,10 @@ public class HarEndretInntektsmeldingVurderer {
 
     @Inject
     public HarEndretInntektsmeldingVurderer(BehandlingRepository behandlingRepository,
-                                            MottatteDokumentRepository mottatteDokumentRepository,
-                                            @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning) {
+                                            @Any Instance<InntektsmeldingRelevantForBeregningVilkårsvurdering> inntektsmeldingRelevantForBeregningVilkårsvurdering) {
         this.behandlingRepository = behandlingRepository;
-        this.mottatteDokumentRepository = mottatteDokumentRepository;
-        this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
+
+        this.inntektsmeldingRelevantForBeregningVilkårsvurdering = inntektsmeldingRelevantForBeregningVilkårsvurdering;
     }
 
 
@@ -45,13 +42,15 @@ public class HarEndretInntektsmeldingVurderer {
                                                                    DatoIntervallEntitet periode,
                                                                    InntektsmeldingerEndringsvurderer endringsvurderer) {
 
+
         var originalBehandling = behandlingRepository.hentBehandling(referanse.getOriginalBehandlingId().orElseThrow());
 
         var inntektsmeldingerForrigeVedtak = finnInntektsmeldingerFraForrigeVedtak(referanse, inntektsmeldinger, mottatteInntektsmeldinger);
 
 
-        var relevanteInntektsmeldingerForrigeVedtak = utledRelevanteForPeriode(BehandlingReferanse.fra(originalBehandling), inntektsmeldingerForrigeVedtak, periode);
-        var relevanteInntektsmeldinger = utledRelevanteForPeriode(referanse, inntektsmeldinger, periode);
+        var inntektsmeldingFiltreringTjeneste = InntektsmeldingRelevantForBeregningVilkårsvurdering.finnTjeneste(inntektsmeldingRelevantForBeregningVilkårsvurdering, referanse.getFagsakYtelseType());
+        var relevanteInntektsmeldingerForrigeVedtak = inntektsmeldingFiltreringTjeneste.begrensInntektsmeldinger(BehandlingReferanse.fra(originalBehandling), inntektsmeldingerForrigeVedtak, periode);
+        var relevanteInntektsmeldinger = inntektsmeldingFiltreringTjeneste.begrensInntektsmeldinger(referanse, inntektsmeldinger, periode);
 
         return endringsvurderer.erEndret(relevanteInntektsmeldinger, relevanteInntektsmeldingerForrigeVedtak);
     }
@@ -62,11 +61,6 @@ public class HarEndretInntektsmeldingVurderer {
             .toList();
     }
 
-    private List<Inntektsmelding> utledRelevanteForPeriode(BehandlingReferanse referanse, Collection<Inntektsmelding> inntektsmeldinger, DatoIntervallEntitet periode) {
-        var relevanteImTjeneste = InntektsmeldingerRelevantForBeregning.finnTjeneste(inntektsmeldingerRelevantForBeregning, referanse.getFagsakYtelseType());
-        var inntektsmeldingBegrenset = relevanteImTjeneste.begrensSakInntektsmeldinger(referanse, inntektsmeldinger, periode);
-        return relevanteImTjeneste.utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldingBegrenset, periode);
-    }
 
     private boolean erInntektsmeldingITidligereBehandling(Inntektsmelding inntektsmelding, Long behandlingId, List<MottattDokument> mottatteInntektsmeldinger) {
         return mottatteInntektsmeldinger.stream()
@@ -77,7 +71,7 @@ public class HarEndretInntektsmeldingVurderer {
     @FunctionalInterface
     public interface InntektsmeldingerEndringsvurderer {
 
-        boolean erEndret(List<Inntektsmelding> gjeldendeInntektsmeldinger, List<Inntektsmelding> inntektsmeldingerForrigeVedtak);
+        boolean erEndret(Collection<Inntektsmelding> gjeldendeInntektsmeldinger, Collection<Inntektsmelding> inntektsmeldingerForrigeVedtak);
 
     }
 

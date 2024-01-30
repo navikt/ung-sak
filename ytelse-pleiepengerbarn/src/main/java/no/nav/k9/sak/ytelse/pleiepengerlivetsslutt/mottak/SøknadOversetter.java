@@ -12,7 +12,6 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.uttak.UtenlandsoppholdÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -38,14 +37,11 @@ class SøknadOversetter {
 
     private TpsTjeneste tpsTjeneste;
     private SøknadPersisterer søknadPersisterer;
-    private boolean enableUtenlandsoppholdPILS;
-
 
     @Inject
-    SøknadOversetter(TpsTjeneste tpsTjeneste, SøknadPersisterer søknadPersisterer, @KonfigVerdi(value = "ENABLE_UTENLANDSOPPHOLD_PILS", defaultVerdi = "true") boolean enableUtenlandsoppholdPILS) {
+    SøknadOversetter(TpsTjeneste tpsTjeneste, SøknadPersisterer søknadPersisterer) {
         this.tpsTjeneste = tpsTjeneste;
         this.søknadPersisterer = søknadPersisterer;
-        this.enableUtenlandsoppholdPILS = enableUtenlandsoppholdPILS;
     }
 
     void persister(Søknad søknad, JournalpostId journalpostId, Behandling behandling) {
@@ -62,7 +58,7 @@ class SøknadOversetter {
             uttakPerioder,
             arbeidPerioder,
             List.of(),
-            (enableUtenlandsoppholdPILS) ? mapUtenlandsopphold(ytelse.getUtenlandsopphold()) : List.of(),
+            mapUtenlandsopphold(ytelse.getUtenlandsopphold()),
             mapFerie(søknadsperioder, ytelse.getLovbestemtFerie()),
             List.of(),
             List.of());

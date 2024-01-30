@@ -16,6 +16,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
+import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrUttakRepository;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrtUttakPeriode;
@@ -75,8 +76,10 @@ public class OverstyrUttakTjeneste {
             .filter(Optional::isPresent)
             .map(Optional::get)
             .flatMap(v -> v.getPerioder().stream())
+            .filter(vp -> !vp.getUtfall().equals(Utfall.IKKE_OPPFYLT))
             .map(VilkårPeriode::getPeriode)
             .collect(Collectors.toCollection(TreeSet::new));
+
         overstyrUttakRepository.ryddMotVilkår(behandlingReferanse.getBehandlingId(), definerendeVilkårsperioder);
     }
 
@@ -90,7 +93,7 @@ public class OverstyrUttakTjeneste {
         var uttaksplanTidslinje = new LocalDateTimeline<>(uttaksplan.getPerioder().entrySet().stream().map(e -> new LocalDateSegment<>(e.getKey().getFom(), e.getKey().getTom(), e.getValue())).toList());
         var sletteListe = new ArrayList<Long>();
         var tidslinjeRyddetMotUttaksplan = overstyrtUttakTilVurdering.combine(uttaksplanTidslinje, ryddSegmenterMotUttaksplan(sletteListe), LocalDateTimeline.JoinStyle.INNER_JOIN);
-        overstyrUttakRepository.oppdaterOverstyringAvUttak(behandlingReferanse.getBehandlingId(), sletteListe, tidslinjeRyddetMotUttaksplan.filterValue(Objects::nonNull));
+        overstyrUttakRepository.ryddMotUttaksplan(behandlingReferanse.getBehandlingId(), sletteListe, tidslinjeRyddetMotUttaksplan.filterValue(Objects::nonNull));
 
     }
 
