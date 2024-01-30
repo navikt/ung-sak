@@ -11,6 +11,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
+import no.nav.k9.sak.behandling.hendelse.innsyn.BrukerdialoginnsynMeldingProducer;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
