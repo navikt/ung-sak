@@ -90,7 +90,8 @@ public class OmpStønadstatistikkHendelseBygger implements StønadstatistikkHend
             return null;
         }
 
-        final PersonIdent søker = aktørTjeneste.hentPersonIdentForAktørId(behandling.getFagsak().getAktørId()).orElseThrow();
+        final PersonIdent søker = aktørTjeneste.hentPersonIdentForAktørId(behandling.getFagsak().getAktørId())
+            .orElseThrow(() -> new IllegalStateException("Fant ikke person med oppgitt aktørId i PDL"));
 
         final LocalDateTimeline<StønadstatistikkPeriodetidslinjebygger.InformasjonTilStønadstatistikkHendelse> periodetidslinje = stønadstatistikkPeriodetidslinjebygger.lagTidslinjeFor(behandling);
 
