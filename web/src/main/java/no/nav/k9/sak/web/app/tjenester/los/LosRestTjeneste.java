@@ -88,12 +88,12 @@ public class LosRestTjeneste {
         })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     public Response hentLosdataForKlage(
-            @NotNull
-            @QueryParam(BehandlingUuidDto.NAME)
-            @Parameter(description = BehandlingUuidDto.DESC)
-            @Valid
-            @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-            BehandlingUuidDto påklagdBehandlingUuid) {
+        @NotNull
+        @QueryParam(BehandlingUuidDto.NAME)
+        @Parameter(description = BehandlingUuidDto.DESC)
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+        BehandlingUuidDto påklagdBehandlingUuid) {
         Optional<Behandling> behandling = behandlingRepository.hentBehandlingHvisFinnes(påklagdBehandlingUuid.getBehandlingUuid());
         if (behandling.isPresent()) {
             LosOpplysningerSomManglerIKlageDto dto = new LosOpplysningerSomManglerIKlageDto();
@@ -101,13 +101,10 @@ public class LosRestTjeneste {
 
             dto.setUtenlandstilsnitt(behandling.get().getAksjonspunkter()
                 .stream()
+                .filter(ap -> !ap.erAvbrutt())
                 .anyMatch(ap ->
-                    !ap.erAvbrutt()
-                 && (
                     ap.getAksjonspunktDefinisjon().getKode().equals(AksjonspunktKodeDefinisjon.AUTOMATISK_MARKERING_AV_UTENLANDSSAK_KODE)
-                 || ap.getAksjonspunktDefinisjon().getKode().equals(AksjonspunktKodeDefinisjon.MANUELL_MARKERING_AV_UTLAND_SAKSTYPE_KODE))));
-
-
+                 || ap.getAksjonspunktDefinisjon().getKode().equals(AksjonspunktKodeDefinisjon.MANUELL_MARKERING_AV_UTLAND_SAKSTYPE_KODE)));
 
             Response.ResponseBuilder responseBuilder = Response.ok().entity(dto);
             return responseBuilder.build();
