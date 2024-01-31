@@ -15,11 +15,11 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.ext.ContextResolver;
 import jakarta.ws.rs.ext.Provider;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusKodelisteSerializer;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderFaktaOmBeregningDto;
 import no.nav.k9.sak.web.app.tjenester.RestImplementationClasses;
@@ -94,7 +94,7 @@ public class JacksonJsonConfig implements ContextResolver<ObjectMapper> {
         }
         // BeregningsgrunnlagRestTjeneste eksponerer kalkulus sine kodeverdier opp til frontend.
         // For å tillate at Kalkulus serialiserer Kodeverdi som string, samtidig som beholder dagens format til frontend.
-        module.addSerializer(new KalkulusKodelisteSerializer());
+        module.addSerializer(new KalkulusKodelisteSerializer(true));
     }
 
     /**
