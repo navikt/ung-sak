@@ -293,6 +293,8 @@ spec:
       value: "true"
     - name: UTTAK_KLIPP_BORT_AVSLAG
       value: "true"
+    - name: UTVIDET_ENDRING_UTBETALING_UTLEDER
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

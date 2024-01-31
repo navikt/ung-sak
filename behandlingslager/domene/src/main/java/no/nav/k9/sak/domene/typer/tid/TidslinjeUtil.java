@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.typer.Periode;
 
 public class TidslinjeUtil {
@@ -46,7 +47,15 @@ public class TidslinjeUtil {
     public static LocalDateTimeline<Boolean> tilTidslinjeKomprimert(List<Periode> perioder) {
         return new LocalDateTimeline<>(perioder.stream().map(periode -> new LocalDateSegment<>(periode.getFom(), periode.getTom(), true)).toList()).compress();
     }
-    
+
+
+    public static LocalDateTimeline<Boolean> tilTidslinjeKomprimertMedMuligOverlapp(Collection<DatoIntervallEntitet> datoIntervaller) {
+        return new LocalDateTimeline<>(datoIntervaller.stream()
+            .map(datoIntervall -> new LocalDateSegment<>(datoIntervall.getFomDato(), datoIntervall.getTomDato(), true)).toList(),
+            StandardCombinators::alwaysTrueForMatch).compress();
+    }
+
+
     public static LocalDateTimeline<Boolean> tilTidslinjeKomprimert(Collection<DatoIntervallEntitet> datoIntervaller) {
         return new LocalDateTimeline<>(datoIntervaller.stream().map(datoIntervall -> new LocalDateSegment<>(datoIntervall.getFomDato(), datoIntervall.getTomDato(), true)).toList()).compress();
     }
