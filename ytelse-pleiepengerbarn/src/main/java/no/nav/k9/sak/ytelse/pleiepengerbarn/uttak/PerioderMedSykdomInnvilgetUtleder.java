@@ -37,7 +37,7 @@ public class PerioderMedSykdomInnvilgetUtleder {
     public PerioderMedSykdomInnvilgetUtleder(BehandlingRepository behandlingRepository,
                                              VilkårResultatRepository vilkårResultatRepository,
                                              @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
-                                             @KonfigVerdi("UTTAK_KLIPP_BORT_AVSLAG") boolean ikkeVurderVedAvslag
+                                             @KonfigVerdi(value = "UTTAK_KLIPP_BORT_AVSLAG", defaultVerdi = "false") boolean ikkeVurderVedAvslag
     ) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
