@@ -102,8 +102,10 @@ public class LosRestTjeneste {
             dto.setUtenlandstilsnitt(behandling.get().getAksjonspunkter()
                 .stream()
                 .anyMatch(ap ->
+                    !ap.erAvbrutt()
+                 && (
                     ap.getAksjonspunktDefinisjon().getKode().equals(AksjonspunktKodeDefinisjon.AUTOMATISK_MARKERING_AV_UTENLANDSSAK_KODE)
-                 || ap.getAksjonspunktDefinisjon().getKode().equals(AksjonspunktKodeDefinisjon.MANUELL_MARKERING_AV_UTLAND_SAKSTYPE_KODE)));
+                 || ap.getAksjonspunktDefinisjon().getKode().equals(AksjonspunktKodeDefinisjon.MANUELL_MARKERING_AV_UTLAND_SAKSTYPE_KODE))));
 
 
 
