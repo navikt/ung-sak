@@ -37,8 +37,6 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
     private OpptjeningRepository opptjeningRepository;
     private BehandlingRepository behandlingRepository;
 
-    private boolean triggeApVedAkseptertMellomliggendeHelg;
-
     protected VurderOpptjeningsvilkårStegFelles() {
         // CDI proxy
     }
@@ -47,14 +45,12 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
                                              OpptjeningRepository opptjeningRepository,
                                              InngangsvilkårFellesTjeneste inngangsvilkårFellesTjeneste,
                                              BehandlingStegType behandlingStegType,
-                                             Instance<HåndtereAutomatiskAvslag> automatiskAvslagHåndterer,
-                                             boolean triggeApVedAkseptertMellomliggendeHelg) {
+                                             Instance<HåndtereAutomatiskAvslag> automatiskAvslagHåndterer) {
         super(repositoryProvider, inngangsvilkårFellesTjeneste, behandlingStegType);
         this.opptjeningRepository = opptjeningRepository;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.repositoryProvider = repositoryProvider;
         this.automatiskAvslagHåndterer = automatiskAvslagHåndterer;
-        this.triggeApVedAkseptertMellomliggendeHelg = triggeApVedAkseptertMellomliggendeHelg;
     }
 
     @Override
@@ -99,7 +95,7 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
     }
 
     private void håndtereAutomatiskAvslag(Behandling behandling, RegelResultat regelResultat, DatoIntervallEntitet periode) {
-        if (regelResultat.vilkårErIkkeOppfylt(periode.getFomDato(), periode.getTomDato(), VilkårType.OPPTJENINGSVILKÅRET) || (triggeApVedAkseptertMellomliggendeHelg && harAkseptertMellomliggendePerioder(regelResultat, periode))) {
+        if (regelResultat.vilkårErIkkeOppfylt(periode.getFomDato(), periode.getTomDato(), VilkårType.OPPTJENINGSVILKÅRET) || harAkseptertMellomliggendePerioder(regelResultat, periode)) {
             // Legger til aksjonspunspunkt for å håndtere eventuelle 8-47 innvilgelser
             var håndterer = FagsakYtelseTypeRef.Lookup.find(automatiskAvslagHåndterer, behandling.getFagsakYtelseType()).orElseThrow();
             håndterer.håndter(behandling, regelResultat, periode);
