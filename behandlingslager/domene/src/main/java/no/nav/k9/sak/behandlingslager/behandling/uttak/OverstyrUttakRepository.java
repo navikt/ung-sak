@@ -94,13 +94,11 @@ public class OverstyrUttakRepository {
     /** Lagrer overstyrt uttak og beholder opprinnelig saksbehandler
      *
      * @param behandlingId BehandlingId
-     * @param slettes Liste for sletting
      * @param ryddetMotUttaksplan Tidslinje med overstyrte perioder
      */
-    public void ryddMotUttaksplan(Long behandlingId, List<Long> slettes, LocalDateTimeline<OverstyrtUttakPeriode> ryddetMotUttaksplan) {
+    public void ryddMotUttaksplan(Long behandlingId, LocalDateTimeline<OverstyrtUttakPeriode> ryddetMotUttaksplan) {
         LocalDateTimeline<OverstyrtUttakPeriodeEntitet> eksisterendeOverstyringer = hentSomEntitetTidslinje(behandlingId);
         Map<Long, LocalDateSegment<OverstyrtUttakPeriodeEntitet>> eksisterendeOverstyringerPrId = eksisterendeOverstyringer.stream().collect(Collectors.toMap(segment -> segment.getValue().getId(), segment -> segment));
-        slettes.forEach(slettesId -> fjernOverstyring(behandlingId, slettesId));
 
         List<LocalDateSegment<OverstyrtUttakPeriode>> segmenterSomEndres = new ArrayList<>();
         ryddetMotUttaksplan.stream().forEach(segment -> {
@@ -118,7 +116,12 @@ public class OverstyrUttakRepository {
                 Long eksisterendeOverstyringId = segment.getValue().getId();
                 fjernOverstyring(behandlingId, eksisterendeOverstyringId);
                 OverstyrtUttakPeriode overstyring = segment.getValue();
-                OverstyrtUttakPeriodeEntitet nyOverstyring = new OverstyrtUttakPeriodeEntitet(behandlingId, DatoIntervallEntitet.fra(segment.getLocalDateInterval()), overstyring.getSøkersUttaksgrad(), map(overstyring.getOverstyrtUtbetalingsgrad()), overstyring.getBegrunnelse(), overstyring.getSaksbehandler());
+                OverstyrtUttakPeriodeEntitet nyOverstyring = new OverstyrtUttakPeriodeEntitet(behandlingId,
+                    DatoIntervallEntitet.fra(segment.getLocalDateInterval()),
+                    overstyring.getSøkersUttaksgrad(),
+                    map(overstyring.getOverstyrtUtbetalingsgrad()),
+                    overstyring.getBegrunnelse(),
+                    eksisterendeOverstyringerPrId.get(eksisterendeOverstyringId).getValue().getSaksbehandler());
                 entityManager.persist(nyOverstyring);
             }
         );

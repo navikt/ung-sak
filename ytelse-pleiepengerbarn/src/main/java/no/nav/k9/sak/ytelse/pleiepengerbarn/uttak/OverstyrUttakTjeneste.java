@@ -1,7 +1,5 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeSet;
@@ -91,9 +89,8 @@ public class OverstyrUttakTjeneste {
         var uttaksplan = uttakTjeneste.hentUttaksplan(behandlingReferanse.getBehandlingUuid(), true);
         var overstyrtUttakTilVurdering = finnOverstyrtUttakTilVurdering(behandlingReferanse);
         var uttaksplanTidslinje = new LocalDateTimeline<>(uttaksplan.getPerioder().entrySet().stream().map(e -> new LocalDateSegment<>(e.getKey().getFom(), e.getKey().getTom(), e.getValue())).toList());
-        var sletteListe = new ArrayList<Long>();
-        var tidslinjeRyddetMotUttaksplan = overstyrtUttakTilVurdering.combine(uttaksplanTidslinje, ryddSegmenterMotUttaksplan(sletteListe), LocalDateTimeline.JoinStyle.INNER_JOIN);
-        overstyrUttakRepository.ryddMotUttaksplan(behandlingReferanse.getBehandlingId(), sletteListe, tidslinjeRyddetMotUttaksplan.filterValue(Objects::nonNull));
+        var tidslinjeRyddetMotUttaksplan = overstyrtUttakTilVurdering.combine(uttaksplanTidslinje, ryddSegmenterMotUttaksplan(), LocalDateTimeline.JoinStyle.INNER_JOIN);
+        overstyrUttakRepository.ryddMotUttaksplan(behandlingReferanse.getBehandlingId(), tidslinjeRyddetMotUttaksplan);
 
     }
 
@@ -104,20 +101,12 @@ public class OverstyrUttakTjeneste {
         return overstyrtUttak.intersection(perioderTilVurdering);
     }
 
-    private LocalDateSegmentCombinator<OverstyrtUttakPeriode, UttaksperiodeInfo, OverstyrtUttakPeriode> ryddSegmenterMotUttaksplan(List<Long> sletteListe) {
+    private LocalDateSegmentCombinator<OverstyrtUttakPeriode, UttaksperiodeInfo, OverstyrtUttakPeriode> ryddSegmenterMotUttaksplan() {
         return (di, lhs, rhs) -> {
             var utbetalingsgrader = rhs.getValue().getUtbetalingsgrader();
             var overstyrteUtbetalingsgrader = lhs.getValue().getOverstyrtUtbetalingsgrad();
             var overstyrteUtbetalingsgraderMedMatch = overstyrteUtbetalingsgrader.stream().filter(ou -> utbetalingsgrader.stream().anyMatch(u ->
                 matcherAktivitet(ou, u))).collect(Collectors.toSet());
-
-
-            if (overstyrteUtbetalingsgraderMedMatch.isEmpty()) {
-                // behold id for sletting
-                sletteListe.add(lhs.getValue().getId());
-                return LocalDateSegment.emptySegment(di.getFomDato(), di.getTomDato());
-            }
-
             return new LocalDateSegment<>(di, new OverstyrtUttakPeriode(lhs.getValue().getId(), lhs.getValue().getSøkersUttaksgrad(), overstyrteUtbetalingsgraderMedMatch, lhs.getValue().getBegrunnelse()));
         };
     }
