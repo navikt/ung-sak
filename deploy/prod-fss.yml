@@ -274,7 +274,7 @@ spec:
     - name: OMP_RELEVANT_ENDRING_UTLEDNING
       value: "false"
     - name: AKTIVER_AUTOMATISK_ETTERKONTROLL
-      value: "false"
+      value: "true"
     - name: IM_SKAL_VURDERE_ENDRET_INNTEKT
       value: "false"
     - name: BG_FORLENGELSE_FILTRER_IM_FRA_AKTIVITETER
