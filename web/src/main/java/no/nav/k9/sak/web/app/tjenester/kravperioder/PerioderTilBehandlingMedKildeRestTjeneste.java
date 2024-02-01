@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -227,7 +228,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
             perioderSomSkalTilbakestilles,
             revurderingPerioderFraAndreParter);
 
-        if (behandling.erRevurdering() && kunEndringFraBrukerOgKildeEndringsdialog(statusForPerioderPåBehandling)) {
+        if (behandling.erRevurdering() && Objects.equals(behandling.getAktivtBehandlingSteg(), BehandlingStegType.FORESLÅ_VEDTAK) && kunEndringFraBrukerOgKildeEndringsdialog(statusForPerioderPåBehandling)) {
             //Kun logging for å få oversikt over saker før vi implementerer dette i formidling
             log.info("Case 1: Revurdering med kun årsak endring fra bruker og kun kildesystem endringsdialog");
         }
