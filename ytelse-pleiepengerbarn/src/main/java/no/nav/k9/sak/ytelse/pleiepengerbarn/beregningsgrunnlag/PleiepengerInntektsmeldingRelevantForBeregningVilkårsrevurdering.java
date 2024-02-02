@@ -79,12 +79,12 @@ public class PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering i
 
     static List<Inntektsmelding> filtrerForAktiviteter(Collection<Inntektsmelding> inntektsmeldingForPeriode, Optional<OpptjeningAktiviteter> opptjeningAktiviteter) {
         var aktiviterForBeregning = opptjeningAktiviteter.stream().flatMap(a -> a.getOpptjeningPerioder().stream()).toList();
-        return inntektsmeldingForPeriode.stream().filter(im -> aktiviterForBeregning.stream().anyMatch(a -> harLikArbeidsgiver(im, a) && harEksaktLikArbeidsforholdId(im, a)))
+        return inntektsmeldingForPeriode.stream().filter(im -> aktiviterForBeregning.stream().anyMatch(a -> harLikArbeidsgiver(im, a) && gjelderForArbeidsforhold(im, a)))
             .toList();
     }
 
-    private static boolean harEksaktLikArbeidsforholdId(Inntektsmelding im, OpptjeningAktiviteter.OpptjeningPeriode a) {
-        return im.getArbeidsforholdRef().equals(a.getArbeidsforholdId());
+    private static boolean gjelderForArbeidsforhold(Inntektsmelding im, OpptjeningAktiviteter.OpptjeningPeriode a) {
+        return im.getArbeidsforholdRef().gjelderFor(a.getArbeidsforholdId());
     }
 
     private static boolean harLikArbeidsgiver(Inntektsmelding im, OpptjeningAktiviteter.OpptjeningPeriode a) {
