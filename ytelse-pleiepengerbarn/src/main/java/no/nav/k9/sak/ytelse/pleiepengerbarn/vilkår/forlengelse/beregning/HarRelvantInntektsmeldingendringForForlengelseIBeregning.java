@@ -12,15 +12,15 @@ import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.typer.JournalpostId;
 
 @ApplicationScoped
-public class InntektsmeldingEndringsutlederForlengelse implements HarEndretInntektsmeldingVurderer.InntektsmeldingerEndringsvurderer {
+public class HarRelvantInntektsmeldingendringForForlengelseIBeregning implements HarEndretInntektsmeldingVurderer.InntektsmeldingerEndringsvurderer {
 
     private boolean skalVurdereEndretInntekt;
 
-    public InntektsmeldingEndringsutlederForlengelse() {
+    public HarRelvantInntektsmeldingendringForForlengelseIBeregning() {
     }
 
     @Inject
-    public InntektsmeldingEndringsutlederForlengelse(@KonfigVerdi(value = "IM_SKAL_VURDERE_ENDRET_INNTEKT", defaultVerdi = "false") boolean skalVurdereEndretInntekt) {
+    public HarRelvantInntektsmeldingendringForForlengelseIBeregning(@KonfigVerdi(value = "IM_SKAL_VURDERE_ENDRET_INNTEKT", defaultVerdi = "false") boolean skalVurdereEndretInntekt) {
         this.skalVurdereEndretInntekt = skalVurdereEndretInntekt;
     }
 

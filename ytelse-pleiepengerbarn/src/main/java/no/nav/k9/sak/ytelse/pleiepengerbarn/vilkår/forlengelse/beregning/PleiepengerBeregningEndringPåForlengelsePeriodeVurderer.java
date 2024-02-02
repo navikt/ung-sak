@@ -46,7 +46,7 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
 
     private HarEndretInntektsmeldingVurderer harEndretInntektsmeldingVurderer;
 
-    private InntektsmeldingEndringsutlederForlengelse inntektsmeldingEndringsutlederForlengelse;
+    private HarRelvantInntektsmeldingendringForForlengelseIBeregning harRelevantEndringIInntektsmelding;
 
 
     PleiepengerBeregningEndringPåForlengelsePeriodeVurderer() {
@@ -58,14 +58,14 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
                                                                    @Any Instance<EndringPåForlengelsePeriodeVurderer> endringsVurderere,
                                                                    HarEndretKompletthetVurderer harEndretKompletthetVurderer,
                                                                    HarEndretInntektsmeldingVurderer harEndretInntektsmeldingVurderer,
-                                                                   InntektsmeldingEndringsutlederForlengelse inntektsmeldingEndringsutlederForlengelse) {
+                                                                   HarRelvantInntektsmeldingendringForForlengelseIBeregning harRelvantInntektsmeldingendringForForlengelseIBeregning) {
 
         this.prosessTriggereRepository = prosessTriggereRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.endringsVurderere = endringsVurderere;
         this.harEndretKompletthetVurderer = harEndretKompletthetVurderer;
         this.harEndretInntektsmeldingVurderer = harEndretInntektsmeldingVurderer;
-        this.inntektsmeldingEndringsutlederForlengelse = inntektsmeldingEndringsutlederForlengelse;
+        this.harRelevantEndringIInntektsmelding = harRelvantInntektsmeldingendringForForlengelseIBeregning;
     }
 
     @Override
@@ -81,9 +81,10 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
             .toList();
         if (harEndretInntektsmeldingVurderer.harEndringPåInntektsmeldingerTilBrukForPerioden(
             input.getBehandlingReferanse(),
-            inntektsmeldinger,
-            mottatteInntektsmeldinger, periode,
-            inntektsmeldingEndringsutlederForlengelse
+            VilkårType.BEREGNINGSGRUNNLAGVILKÅR,
+            periode, inntektsmeldinger,
+            mottatteInntektsmeldinger,
+            harRelevantEndringIInntektsmelding
         )) {
             return true;
         }

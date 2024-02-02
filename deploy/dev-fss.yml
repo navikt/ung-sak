@@ -281,7 +281,7 @@ spec:
       value: "true"
     - name: IM_SKAL_VURDERE_ENDRET_INNTEKT
       value: "true"
-    - name: BG_FORLENGELSE_FILTRER_IM_FRA_AKTIVITETER
+    - name: FORLENGELSE_IM_OPPTJENING_FILTER
       value: "true"
     - name: DOKUMENTMOTTAK_VALIDER_JOURNALFORT
       value: "true"

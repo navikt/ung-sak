@@ -12,13 +12,12 @@ import org.junit.jupiter.api.Test;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
-import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
-class PleiepengerInntektsmeldingRelevantForBeregningVilkårsvurderingTest {
+class PleiepengerInntektsmeldingRelevantForVilkårsrevurderingTest {
 
     @Test
     void skal_ikke_filtrere_bort_inntektsmelding_dersom_det_finnes_opptjeningsaktivitet_for_samme_arbeidsgiver() {
@@ -42,7 +41,7 @@ class PleiepengerInntektsmeldingRelevantForBeregningVilkårsvurderingTest {
             .build();
 
 
-        var filtrert = PleiepengerInntektsmeldingRelevantForBeregningVilkårsvurdering.filtrerForAktiviteter(List.of(im1, im2),
+        var filtrert = PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering.filtrerForAktiviteter(List.of(im1, im2),
             Optional.of(OpptjeningAktiviteter.fraOrgnr(OpptjeningAktivitetType.ARBEID,
                 DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), LocalDate.now().plusDays(10)),
                 orgnr1
@@ -78,7 +77,7 @@ class PleiepengerInntektsmeldingRelevantForBeregningVilkårsvurderingTest {
             .build();
 
 
-        var filtrert = PleiepengerInntektsmeldingRelevantForBeregningVilkårsvurdering.filtrerForAktiviteter(List.of(im1, im2),
+        var filtrert = PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering.filtrerForAktiviteter(List.of(im1, im2),
             Optional.of(OpptjeningAktiviteter.fraOrgnr(OpptjeningAktivitetType.ARBEID,
                 DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), LocalDate.now().plusDays(10)),
                 orgnr1,
@@ -116,7 +115,7 @@ class PleiepengerInntektsmeldingRelevantForBeregningVilkårsvurderingTest {
             .build();
 
 
-        var filtrert = PleiepengerInntektsmeldingRelevantForBeregningVilkårsvurdering.filtrerForAktiviteter(List.of(im1, im2),
+        var filtrert = PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering.filtrerForAktiviteter(List.of(im1, im2),
             Optional.of(OpptjeningAktiviteter.fraOrgnr(OpptjeningAktivitetType.ARBEID,
                 DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), LocalDate.now().plusDays(10)),
                 orgnr1,
@@ -155,7 +154,7 @@ class PleiepengerInntektsmeldingRelevantForBeregningVilkårsvurderingTest {
             .build();
 
 
-        var filtrert = PleiepengerInntektsmeldingRelevantForBeregningVilkårsvurdering.filtrerForAktiviteter(List.of(im1, im2),
+        var filtrert = PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering.filtrerForAktiviteter(List.of(im1, im2),
             Optional.of(OpptjeningAktiviteter.fraOrgnr(OpptjeningAktivitetType.ARBEID,
                 DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), LocalDate.now().plusDays(10)),
                 orgnr1,
