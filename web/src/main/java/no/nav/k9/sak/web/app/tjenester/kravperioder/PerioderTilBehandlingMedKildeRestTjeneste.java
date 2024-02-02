@@ -261,7 +261,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
             }
         } else {
             boolean harAndreDokumenterEnnKildeEndringsdialogOgIm = statusForPerioderPåBehandling.getDokumenterTilBehandling().stream()
-                .anyMatch(kravdokument -> !kravdokument.getKildesystem().equals(Kildesystem.ENDRINGSDIALOG.getKode()) && !kravdokument.getType().equals(KravDokumentType.INNTEKTSMELDING));
+                .anyMatch(kravdokument -> !Objects.equals(kravdokument.getKildesystem(), Kildesystem.ENDRINGSDIALOG.getKode()) && !Objects.equals(kravdokument.getType(), KravDokumentType.INNTEKTSMELDING));
             boolean harAndreÅrsakerEnnEndringFraBrukerOgBerørtPeriodeOgIm = årsaker.stream()
                 .anyMatch(årsak -> !List.of(ÅrsakTilVurdering.ENDRING_FRA_BRUKER, ÅrsakTilVurdering.REVURDERER_BERØRT_PERIODE, ÅrsakTilVurdering.REVURDERER_NY_INNTEKTSMELDING).contains(årsak));
             if (!harAndreDokumenterEnnKildeEndringsdialogOgIm && !harAndreÅrsakerEnnEndringFraBrukerOgBerørtPeriodeOgIm) {
