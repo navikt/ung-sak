@@ -77,8 +77,6 @@ public class OpptjeningsperioderTjeneste {
 
         var aktørId = ref.getAktørId();
         var skjæringstidspunkt = opptjeningPeriode.getTomDato().plusDays(1);
-        var oppgittOpptjeningFilter = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(ref.getBehandlingId());
-        var oppgittOpptjening = oppgittOpptjeningFilter.hentOppgittOpptjening(ref.getBehandlingId(), grunnlag, skjæringstidspunkt).orElse(null);
 
         var mapArbeidOpptjening = OpptjeningAktivitetType.hentFraArbeidTypeRelasjoner();
         var tidslinjePerYtelse = utledYtelsesTidslinjerForValideringAvPermisjoner(new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId)));
@@ -87,6 +85,8 @@ public class OpptjeningsperioderTjeneste {
             perioder.addAll(opptjeningsperioder);
         }
 
+        var oppgittOpptjeningFilter = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(ref.getBehandlingId());
+        var oppgittOpptjening = oppgittOpptjeningFilter.hentOppgittOpptjening(ref.getBehandlingId(), grunnlag, skjæringstidspunkt).orElse(null);
         perioder.addAll(mapOppgittOpptjening(mapArbeidOpptjening, oppgittOpptjening, vurderOpptjening, ref, vilkårsPeriode));
         var ytelseFilterVenstreSide = new YtelseFilter(grunnlag.getAktørYtelseFraRegister(aktørId)).før(opptjeningPeriode.getTomDato());
         perioder.addAll(mapYtelseperioderTjeneste.mapYtelsePerioder(ref, vilkårsPeriode, vurderOpptjening, true, ytelseFilterVenstreSide));
