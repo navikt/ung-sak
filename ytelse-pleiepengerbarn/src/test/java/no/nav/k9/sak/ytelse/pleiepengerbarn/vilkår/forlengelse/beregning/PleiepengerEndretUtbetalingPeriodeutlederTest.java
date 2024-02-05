@@ -14,6 +14,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -102,6 +103,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
     private MottatteDokumentRepository mottatteDokumentRepository;
 
     private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = mock();
+    private UttakNyeReglerRepository uttakNyeReglerRepository;
     private PersonopplysningTjeneste personopplysningtjeneste = mock(PersonopplysningTjeneste.class);
 
     @BeforeEach
@@ -110,8 +112,9 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
         behandlingRepository = new BehandlingRepository(entityManager);
         søknadsperiodeRepository = new SøknadsperiodeRepository(entityManager);
         mottatteDokumentRepository = new MottatteDokumentRepository(entityManager);
+        uttakNyeReglerRepository = new UttakNyeReglerRepository(entityManager);
         utleder = new PleiepengerEndretUtbetalingPeriodeutleder(uttakTjeneste, behandlingRepository, new UnitTestLookupInstanceImpl<>(vilkårsPerioderTilVurderingTjeneste),
-            new ProsessTriggereRepository(entityManager), søknadsperiodeTjeneste, new UttakNyeReglerRepository(entityManager), mapInputTilUttakTjeneste,
+            new ProsessTriggereRepository(entityManager), søknadsperiodeTjeneste, uttakNyeReglerRepository, mapInputTilUttakTjeneste,
             personopplysningtjeneste, false);
         originalBehandling = opprettBehandling(SKJÆRINGSTIDSPUNKT);
         behandling = Behandling.fraTidligereBehandling(originalBehandling, BehandlingType.REVURDERING).build();
@@ -121,6 +124,103 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
 
         when(vilkårsPerioderTilVurderingTjeneste.utled(any(), any())).thenReturn(emptyNavigableSet());
     }
+
+    @Test
+    void skal_returnere_tom_liste_dersom_nye_regler_dato_etter_periode() {
+        var fom = SKJÆRINGSTIDSPUNKT;
+        var antallDager = 10;
+
+        Uttaksplan uttaksplan = lagUttaksplanEnPeriode(fom, antallDager, List.of(fullUtbetaling(ARBEIDSFORHOLD_1)));
+
+        when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
+            .thenReturn(uttaksplan);
+        when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
+            .thenReturn(uttaksplan);
+
+
+
+        var tomDato = SKJÆRINGSTIDSPUNKT.plusDays(antallDager);
+
+        uttakNyeReglerRepository.lagreDatoForNyeRegler(behandling.getId(), tomDato.plusDays(1));
+
+        var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(SKJÆRINGSTIDSPUNKT, tomDato));
+
+        assertThat(forlengelseperioder.size()).isEqualTo(0);
+    }
+
+    @Test
+    void skal_returnere_periode_på_en_dag_dersom_dato_nye_uttaksregler_lik_tomdato() {
+        var fom = SKJÆRINGSTIDSPUNKT;
+        var antallDager = 10;
+
+        Uttaksplan uttaksplan = lagUttaksplanEnPeriode(fom, antallDager, List.of(fullUtbetaling(ARBEIDSFORHOLD_1)));
+
+        when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
+            .thenReturn(uttaksplan);
+        when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
+            .thenReturn(uttaksplan);
+
+        var tomDato = SKJÆRINGSTIDSPUNKT.plusDays(antallDager);
+
+        uttakNyeReglerRepository.lagreDatoForNyeRegler(behandling.getId(), tomDato);
+
+        var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(SKJÆRINGSTIDSPUNKT, tomDato));
+
+        assertThat(forlengelseperioder.size()).isEqualTo(1);
+        var first = forlengelseperioder.getFirst();
+        assertThat(first.getFomDato()).isEqualTo(tomDato);
+        assertThat(first.getTomDato()).isEqualTo(tomDato);
+    }
+
+    @Test
+    void skal_returnere_hele_perioden_ved_dato_for_nye_regler_før_vilkårsperiode() {
+        var fom = SKJÆRINGSTIDSPUNKT;
+        var antallDager = 10;
+
+        Uttaksplan uttaksplan = lagUttaksplanEnPeriode(fom, antallDager, List.of(fullUtbetaling(ARBEIDSFORHOLD_1)));
+
+        when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
+            .thenReturn(uttaksplan);
+        when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
+            .thenReturn(uttaksplan);
+
+        var tomDato = SKJÆRINGSTIDSPUNKT.plusDays(antallDager);
+
+        uttakNyeReglerRepository.lagreDatoForNyeRegler(behandling.getId(), SKJÆRINGSTIDSPUNKT.minusDays(1));
+
+        var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(SKJÆRINGSTIDSPUNKT, tomDato));
+
+        assertThat(forlengelseperioder.size()).isEqualTo(1);
+        var first = forlengelseperioder.getFirst();
+        assertThat(first.getFomDato()).isEqualTo(SKJÆRINGSTIDSPUNKT);
+        assertThat(first.getTomDato()).isEqualTo(tomDato);
+    }
+
+    @Test
+    void skal_returnere_perioden_mellom_endring_av_dato_for_nye_regler() {
+        var fom = SKJÆRINGSTIDSPUNKT;
+        var antallDager = 10;
+
+        Uttaksplan uttaksplan = lagUttaksplanEnPeriode(fom, antallDager, List.of(fullUtbetaling(ARBEIDSFORHOLD_1)));
+
+        when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
+            .thenReturn(uttaksplan);
+        when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
+            .thenReturn(uttaksplan);
+
+        var tomDato = SKJÆRINGSTIDSPUNKT.plusDays(antallDager);
+
+        uttakNyeReglerRepository.lagreDatoForNyeRegler(behandling.getId(), SKJÆRINGSTIDSPUNKT);
+        uttakNyeReglerRepository.lagreDatoForNyeRegler(behandling.getId(), SKJÆRINGSTIDSPUNKT.plusDays(5));
+
+        var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(SKJÆRINGSTIDSPUNKT, tomDato));
+
+        assertThat(forlengelseperioder.size()).isEqualTo(1);
+        var first = forlengelseperioder.getFirst();
+        assertThat(first.getFomDato()).isEqualTo(SKJÆRINGSTIDSPUNKT);
+        assertThat(first.getTomDato()).isEqualTo(SKJÆRINGSTIDSPUNKT.plusDays(4));
+    }
+
 
     @Test
     void skal_gi_tom_periode_ved_ingen_endring() {
