@@ -269,13 +269,9 @@ spec:
       value: "true"
     - name: STONADSTATISTIKK_V2
       value: "true"
-    - name: OPPTJENING_AP_VED_AKSEPTERT_MELLOMLIGGENDE_HELG
-      value: "true"
     - name: FJERN_VILKARSPERIODER_BEREGNING
       value: "false"
     - name: VALIDER_KALKULUS_REFERANSER
-      value: "true"
-    - name: LAGRE_SOEKNADSAKTOERER
       value: "true"
     - name: AVKLAR_ARBEIDSFORHOLD_REUTLED_VED_REVURDERING
       value: "true"
