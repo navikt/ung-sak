@@ -3,10 +3,14 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -30,7 +34,12 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.LogLevel;
@@ -39,9 +48,12 @@ import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler.ObjectReaderResponseHandler;
+import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Simulering;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
+import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
 @ApplicationScoped
@@ -75,21 +87,53 @@ public class UttakRestKlient {
 
     private String psbUttakToken;
 
+    private UttaksplanCache uttaksplanCache;
+
     protected UttakRestKlient() {
         // for proxying
     }
 
     @Inject
     public UttakRestKlient(OidcRestClient restKlient,
+                           UttaksplanCache uttaksplanCache,
                            @KonfigVerdi(value = "NAV_PSB_UTTAK_TOKEN", defaultVerdi = "no_secret") String psbUttakToken,
                            @KonfigVerdi(value = "k9.psb.uttak.url") URI endpoint) {
         this.restKlient = restKlient;
+        this.uttaksplanCache = uttaksplanCache;
         this.endpointUttaksplan = toUri(endpoint, "/uttaksplan");
         this.endpointSimuleringUttaksplan = toUri(endpoint, "/uttaksplan/simulering");
         this.psbUttakToken = psbUttakToken;
     }
 
+    @RequestScoped
+    public static class UttaksplanCache {
+
+        private static final Logger logger = LoggerFactory.getLogger(UttaksplanCache.class);
+
+        private Map<UUID, Uttaksplan> innhold = new HashMap<>();
+
+        public void clear() {
+            innhold.clear();
+        }
+
+        public Uttaksplan getUttaksplan(UUID behandlingUuid) {
+            Uttaksplan uttaksplan = innhold.get(behandlingUuid);
+            if (uttaksplan == null){
+                logger.info("Uttaksplan cache miss");
+            } else {
+                logger.info("Uttaksplan cache hit");
+            }
+            return uttaksplan;
+        }
+
+        public void put(UUID behandlingUuid, Uttaksplan uttaksplan) {
+            innhold.put(behandlingUuid, uttaksplan);
+        }
+    }
+
     public Uttaksplan opprettUttaksplan(Uttaksgrunnlag request) {
+        uttaksplanCache.clear();
+
         URIBuilder builder = new URIBuilder(endpointUttaksplan);
         try {
             HttpPost kall = new HttpPost(builder.build());
@@ -115,9 +159,57 @@ public class UttakRestKlient {
 
     public Uttaksplan hentUttaksplan(UUID behandlingUuid, boolean slåSammenLikePerioder) {
         Objects.requireNonNull(behandlingUuid);
+        Uttaksplan uttaksplan = hentUttaksplan(behandlingUuid);
+        if (slåSammenLikePerioder) {
+            return slåSammenLikePerioder(uttaksplan);
+        }
+        return uttaksplan;
+    }
+
+    private Uttaksplan slåSammenLikePerioder(Uttaksplan uttaksplan) {
+        LocalDateTimeline<UttaksperiodeInfo> uttakInfoTidslinje = new LocalDateTimeline<>(uttaksplan.getPerioder().entrySet().stream()
+            .map(e -> new LocalDateSegment<>(e.getKey().getFom(), e.getKey().getTom(), kopierUtenKnekkpunkt(e.getValue())))
+            .toList());
+        LocalDateTimeline<UttaksperiodeInfo> komprimertTidslinje = uttakInfoTidslinje.compress(LocalDateInterval::abutsWorkdays, Object::equals, StandardCombinators::leftOnly);
+        TreeMap<LukketPeriode, UttaksperiodeInfo> map = komprimertTidslinje.stream().collect(Collectors.toMap(segment -> new LukketPeriode(segment.getFom(), segment.getTom()), LocalDateSegment::getValue, (a, b) -> a, TreeMap::new));
+        return new Uttaksplan(map, uttaksplan.getTrukketUttak(), uttaksplan.getKvoteInfo(), uttaksplan.getCommitId());
+    }
+
+    private UttaksperiodeInfo kopierUtenKnekkpunkt(UttaksperiodeInfo info) {
+        return new UttaksperiodeInfo(
+            info.getUtfall(),
+            info.getUttaksgrad(),
+            info.getUttaksgradMedReduksjonGrunnetInntektsgradering(),
+            info.getUttaksgradUtenReduksjonGrunnetInntektsgradering(),
+            info.getUtbetalingsgrader(),
+            info.getSøkersTapteArbeidstid(),
+            info.getOppgittTilsyn(),
+            info.getårsaker(),
+            info.getInngangsvilkår(),
+            info.getPleiebehov(),
+            info.getGraderingMotTilsyn(),
+            Set.of(),
+            info.getKildeBehandlingUUID(),
+            info.getAnnenPart(),
+            info.getNattevåk(),
+            info.getBeredskap(),
+            info.getEndringsstatus(),
+            info.getUtenlandsoppholdUtenÅrsak(),
+            info.getUtenlandsopphold(),
+            info.getManueltOverstyrt()
+        );
+    }
+
+    public Uttaksplan hentUttaksplan(UUID behandlingUuid) {
+        Uttaksplan cachetUttaksplan = uttaksplanCache.getUttaksplan(behandlingUuid);
+        if (cachetUttaksplan != null){
+            return cachetUttaksplan;
+        }
+
+        Objects.requireNonNull(behandlingUuid);
         URIBuilder builder = new URIBuilder(endpointUttaksplan);
         builder.addParameter("behandlingUUID", behandlingUuid.toString());
-        builder.addParameter("slåSammenLikePerioder", Boolean.valueOf(slåSammenLikePerioder).toString());
+        builder.addParameter("slåSammenLikePerioder", "false");
         try {
             HttpGet kall = new HttpGet(builder.build());
             return utførOgHent(kall, null, new ObjectReaderResponseHandler<>(endpointUttaksplan, uttaksplanReader));
@@ -127,6 +219,8 @@ public class UttakRestKlient {
     }
 
     public void slettUttaksplan(UUID behandlingUuid) {
+        uttaksplanCache.clear();
+
         Objects.requireNonNull(behandlingUuid);
         var builder = new URIBuilder(endpointUttaksplan);
         builder.addParameter("behandlingUUID", behandlingUuid.toString());
