@@ -7,6 +7,7 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BA
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -15,15 +16,19 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingRelevantForVilkårsrevurdering;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetKlassifisering;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingskontroll.VilkårTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningAktivitet;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetPeriode;
 import no.nav.k9.sak.domene.opptjening.OpptjeningInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
+import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
@@ -39,6 +44,7 @@ public class PleiepengerInntektsmeldingRelevantForOpptjeningVilkårsrevurdering 
 
     private Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning;
     private OpptjeningInntektArbeidYtelseTjeneste opptjeningInntektArbeidYtelseTjeneste;
+    private OpptjeningsperioderTjeneste opptjeningsperioderTjeneste;
 
 
     public PleiepengerInntektsmeldingRelevantForOpptjeningVilkårsrevurdering() {
@@ -46,9 +52,11 @@ public class PleiepengerInntektsmeldingRelevantForOpptjeningVilkårsrevurdering 
 
     @Inject
     public PleiepengerInntektsmeldingRelevantForOpptjeningVilkårsrevurdering(@Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning,
-                                                                             OpptjeningInntektArbeidYtelseTjeneste opptjeningInntektArbeidYtelseTjeneste) {
+                                                                             OpptjeningInntektArbeidYtelseTjeneste opptjeningInntektArbeidYtelseTjeneste,
+                                                                             OpptjeningsperioderTjeneste opptjeningsperioderTjeneste) {
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
         this.opptjeningInntektArbeidYtelseTjeneste = opptjeningInntektArbeidYtelseTjeneste;
+        this.opptjeningsperioderTjeneste = opptjeningsperioderTjeneste;
     }
 
 
@@ -67,17 +75,29 @@ public class PleiepengerInntektsmeldingRelevantForOpptjeningVilkårsrevurdering 
         var opptjeningAktiviteter = opptjeningInntektArbeidYtelseTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(
             referanse, Set.of(periode)
         ).get(periode);
-        return filtrerForAktiviteter(inntektsmeldingForPeriode, opptjeningAktiviteter);
+
+
+        var opptjeningResultat = opptjeningsperioderTjeneste.hentOpptjeningHvisFinnes(referanse.getBehandlingId());
+
+        var opptjening = opptjeningResultat.flatMap(or -> or.finnOpptjening(periode.getFomDato()));
+        return filtrerForAktiviteter(inntektsmeldingForPeriode, opptjeningAktiviteter, opptjening);
     }
 
-    static List<Inntektsmelding> filtrerForAktiviteter(Collection<Inntektsmelding> inntektsmeldingForPeriode, List<OpptjeningAktivitetPeriode> opptjeningAktiviteter) {
+    static List<Inntektsmelding> filtrerForAktiviteter(Collection<Inntektsmelding> inntektsmeldingForPeriode, List<OpptjeningAktivitetPeriode> opptjeningAktiviteter, Optional<Opptjening> opptjening) {
         return inntektsmeldingForPeriode.stream().filter(im -> opptjeningAktiviteter.stream()
-                .anyMatch(a -> erIkkeUnderkjent(a) && harLikArbeidsgiver(im, a) && gjelderForArbeidsforhold(im, a)))
+                .anyMatch(a -> erIkkeUnderkjent(a, opptjening.stream().flatMap(o -> o.getOpptjeningAktivitet().stream()
+                    .filter(oa -> oa.getAktivitetReferanse().equals(a.getOpptjeningsnøkkel().getAktivitetReferanse()))).findFirst()) && harLikArbeidsgiver(im, a) && gjelderForArbeidsforhold(im, a)))
             .toList();
     }
 
-    private static boolean erIkkeUnderkjent(OpptjeningAktivitetPeriode a) {
-        return a.getVurderingsStatus().equals(VurderingsStatus.GODKJENT) || a.getVurderingsStatus().equals(VurderingsStatus.TIL_VURDERING);
+    private static boolean erIkkeUnderkjent(OpptjeningAktivitetPeriode a, Optional<OpptjeningAktivitet> opptjeningAktivitet) {
+        return harGodkjentStatusEllerTilVurdering(a, opptjeningAktivitet);
+    }
+
+    private static Boolean harGodkjentStatusEllerTilVurdering(OpptjeningAktivitetPeriode a, Optional<OpptjeningAktivitet> opptjeningAktivitet) {
+        return opptjeningAktivitet.map(o ->
+            Set.of(OpptjeningAktivitetKlassifisering.ANTATT_GODKJENT, OpptjeningAktivitetKlassifisering.BEKREFTET_GODKJENT).contains(o.getKlassifisering())).orElse(
+            Set.of(VurderingsStatus.GODKJENT, VurderingsStatus.TIL_VURDERING).contains(a.getVurderingsStatus()));
     }
 
     private static boolean gjelderForArbeidsforhold(Inntektsmelding im, OpptjeningAktivitetPeriode a) {
