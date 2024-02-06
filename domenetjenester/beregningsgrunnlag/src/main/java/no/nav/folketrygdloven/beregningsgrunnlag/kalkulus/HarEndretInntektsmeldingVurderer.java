@@ -8,6 +8,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -21,7 +22,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 public class HarEndretInntektsmeldingVurderer {
 
     private BehandlingRepository behandlingRepository;
-    private Instance<InntektsmeldingRelevantForBeregningVilkårsvurdering> inntektsmeldingRelevantForBeregningVilkårsvurdering;
+    private Instance<InntektsmeldingRelevantForVilkårsrevurdering> inntektsmeldingRelevantForBeregningVilkårsvurdering;
 
 
     public HarEndretInntektsmeldingVurderer() {
@@ -29,7 +30,7 @@ public class HarEndretInntektsmeldingVurderer {
 
     @Inject
     public HarEndretInntektsmeldingVurderer(BehandlingRepository behandlingRepository,
-                                            @Any Instance<InntektsmeldingRelevantForBeregningVilkårsvurdering> inntektsmeldingRelevantForBeregningVilkårsvurdering) {
+                                            @Any Instance<InntektsmeldingRelevantForVilkårsrevurdering> inntektsmeldingRelevantForBeregningVilkårsvurdering) {
         this.behandlingRepository = behandlingRepository;
 
         this.inntektsmeldingRelevantForBeregningVilkårsvurdering = inntektsmeldingRelevantForBeregningVilkårsvurdering;
@@ -37,18 +38,22 @@ public class HarEndretInntektsmeldingVurderer {
 
 
     public boolean harEndringPåInntektsmeldingerTilBrukForPerioden(BehandlingReferanse referanse,
+                                                                   VilkårType vilkårType,
+                                                                   DatoIntervallEntitet periode,
                                                                    Collection<Inntektsmelding> inntektsmeldinger,
                                                                    List<MottattDokument> mottatteInntektsmeldinger,
-                                                                   DatoIntervallEntitet periode,
                                                                    InntektsmeldingerEndringsvurderer endringsvurderer) {
 
 
+        if (!referanse.erRevurdering()) {
+            throw new IllegalArgumentException("Endringsutleder for inntektsmelding skal kun kjøres i kontekst av en revurdering");
+        }
         var originalBehandling = behandlingRepository.hentBehandling(referanse.getOriginalBehandlingId().orElseThrow());
 
         var inntektsmeldingerForrigeVedtak = finnInntektsmeldingerFraForrigeVedtak(referanse, inntektsmeldinger, mottatteInntektsmeldinger);
 
 
-        var inntektsmeldingFiltreringTjeneste = InntektsmeldingRelevantForBeregningVilkårsvurdering.finnTjeneste(inntektsmeldingRelevantForBeregningVilkårsvurdering, referanse.getFagsakYtelseType());
+        var inntektsmeldingFiltreringTjeneste = InntektsmeldingRelevantForVilkårsrevurdering.finnTjeneste(inntektsmeldingRelevantForBeregningVilkårsvurdering, vilkårType, referanse.getFagsakYtelseType());
         var relevanteInntektsmeldingerForrigeVedtak = inntektsmeldingFiltreringTjeneste.begrensInntektsmeldinger(BehandlingReferanse.fra(originalBehandling), inntektsmeldingerForrigeVedtak, periode);
         var relevanteInntektsmeldinger = inntektsmeldingFiltreringTjeneste.begrensInntektsmeldinger(referanse, inntektsmeldinger, periode);
 

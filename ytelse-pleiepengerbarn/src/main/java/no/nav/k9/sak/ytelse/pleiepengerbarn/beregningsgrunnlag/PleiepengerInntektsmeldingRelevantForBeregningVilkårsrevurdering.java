@@ -13,23 +13,29 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingRelevantForBeregningVilkårsvurdering;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingRelevantForVilkårsrevurdering;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningForBeregningTjeneste;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingskontroll.VilkårTypeRef;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
+/**
+ * Vurderer hvilke inntektsmeldinger som skal påvirke om beregningsvilkåret skal revurderes
+ */
 @ApplicationScoped
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
-public class PleiepengerInntektsmeldingRelevantForBeregningVilkårsvurdering implements InntektsmeldingRelevantForBeregningVilkårsvurdering {
+@VilkårTypeRef(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
+public class PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering implements InntektsmeldingRelevantForVilkårsrevurdering {
 
     private Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning;
     private Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjenester;
@@ -38,14 +44,14 @@ public class PleiepengerInntektsmeldingRelevantForBeregningVilkårsvurdering imp
     private boolean skalFiltrereBasertPåAktiviteter;
 
 
-    public PleiepengerInntektsmeldingRelevantForBeregningVilkårsvurdering() {
+    public PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering() {
     }
 
     @Inject
-    public PleiepengerInntektsmeldingRelevantForBeregningVilkårsvurdering(@Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning,
-                                                                          @Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjenester,
-                                                                          InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                                                          @KonfigVerdi(value = "BG_FORLENGELSE_FILTRER_IM_FRA_AKTIVITETER", defaultVerdi = "false") boolean skalFiltrereBasertPåAktiviteter) {
+    public PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering(@Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning,
+                                                                            @Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjenester,
+                                                                            InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
+                                                                            @KonfigVerdi(value = "FORLENGELSE_IM_OPPTJENING_FILTER", defaultVerdi = "false") boolean skalFiltrereBasertPåAktiviteter) {
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
         this.opptjeningForBeregningTjenester = opptjeningForBeregningTjenester;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
@@ -73,12 +79,12 @@ public class PleiepengerInntektsmeldingRelevantForBeregningVilkårsvurdering imp
 
     static List<Inntektsmelding> filtrerForAktiviteter(Collection<Inntektsmelding> inntektsmeldingForPeriode, Optional<OpptjeningAktiviteter> opptjeningAktiviteter) {
         var aktiviterForBeregning = opptjeningAktiviteter.stream().flatMap(a -> a.getOpptjeningPerioder().stream()).toList();
-        return inntektsmeldingForPeriode.stream().filter(im -> aktiviterForBeregning.stream().anyMatch(a -> harLikArbeidsgiver(im, a) && harEksaktLikArbeidsforholdId(im, a)))
+        return inntektsmeldingForPeriode.stream().filter(im -> aktiviterForBeregning.stream().anyMatch(a -> harLikArbeidsgiver(im, a) && gjelderForArbeidsforhold(im, a)))
             .toList();
     }
 
-    private static boolean harEksaktLikArbeidsforholdId(Inntektsmelding im, OpptjeningAktiviteter.OpptjeningPeriode a) {
-        return im.getArbeidsforholdRef().equals(a.getArbeidsforholdId());
+    private static boolean gjelderForArbeidsforhold(Inntektsmelding im, OpptjeningAktiviteter.OpptjeningPeriode a) {
+        return im.getArbeidsforholdRef().gjelderFor(a.getArbeidsforholdId());
     }
 
     private static boolean harLikArbeidsgiver(Inntektsmelding im, OpptjeningAktiviteter.OpptjeningPeriode a) {

@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.HarEndretInntektsmeldingVurderer;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -136,8 +135,9 @@ public class FinnPerioderMedStartIKontrollerFakta {
 
     private boolean erInntektsmeldingerLikForrigeVedtak(BehandlingReferanse ref, PeriodeTilVurdering p, Set<Inntektsmelding> inntektsmeldings, List<MottattDokument> mottatteInntektsmeldinger) {
         return !harEndretInntektsmeldingVurderer.harEndringPåInntektsmeldingerTilBrukForPerioden(ref,
-            inntektsmeldings,
-            mottatteInntektsmeldinger, p.getPeriode(),
+            VilkårType.BEREGNINGSGRUNNLAGVILKÅR,
+            p.getPeriode(), inntektsmeldings,
+            mottatteInntektsmeldinger,
             FinnPerioderMedStartIKontrollerFakta::erEndret
         );
     }
