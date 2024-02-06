@@ -36,6 +36,7 @@ public class UttakNyeReglerRepository {
         });
         UttakNyeRegler entitet = new UttakNyeRegler(behandlingId, datoNyeReglerUttak);
         entityManager.persist(entitet);
+        entityManager.flush();
     }
 
     public void kopierGrunnlagFraEksisterendeBehandling(Long originalBehandlingId, Long nyBehandlingId) {

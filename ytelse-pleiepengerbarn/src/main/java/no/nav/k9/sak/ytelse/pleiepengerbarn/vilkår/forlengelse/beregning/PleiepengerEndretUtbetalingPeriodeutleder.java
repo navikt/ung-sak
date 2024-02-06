@@ -185,17 +185,23 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
     }
 
     private LocalDateTimeline<Boolean> finnDatoNyeReglerTidslinje(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsperiode) {
-        LocalDateTimeline<Boolean> datoNyeReglerTidslinje = LocalDateTimeline.empty();
+        return finnTidslinjeForEndretRegelsett(behandlingReferanse, vilkårsperiode)
+            .intersection(vilkårsperiode.toLocalDateInterval());
+    }
 
+    private LocalDateTimeline<Boolean> finnTidslinjeForEndretRegelsett(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsperiode) {
         var forrigeDatoForNyeRegler = uttakNyeReglerRepository.finnForrigeDatoForNyeRegler(behandlingReferanse.getBehandlingId());
         var datoForNyeRegler = uttakNyeReglerRepository.finnDatoForNyeRegler(behandlingReferanse.getBehandlingId());
-        if (forrigeDatoForNyeRegler.isEmpty() && datoForNyeRegler.isPresent()) {
-            datoNyeReglerTidslinje = new LocalDateTimeline<>(datoForNyeRegler.get(), vilkårsperiode.getTomDato(), TRUE);
-        } else if (forrigeDatoForNyeRegler.isPresent() && datoForNyeRegler.isPresent() && !forrigeDatoForNyeRegler.get().equals(datoForNyeRegler.get())) {
+        if (forrigeDatoForNyeRegler.isEmpty() && datoForNyeRegler.isPresent() && !vilkårsperiode.getTomDato().isBefore(datoForNyeRegler.get())) {
+            return new LocalDateTimeline<>(datoForNyeRegler.get(), vilkårsperiode.getTomDato(), TRUE);
+        } else if (forrigeDatoForNyeRegler.isPresent() && datoForNyeRegler.isPresent() &&
+            !forrigeDatoForNyeRegler.get().equals(datoForNyeRegler.get())) {
             var fom = forrigeDatoForNyeRegler.get().isBefore(datoForNyeRegler.get()) ? forrigeDatoForNyeRegler.get() : datoForNyeRegler.get();
-            datoNyeReglerTidslinje = new LocalDateTimeline<>(fom, vilkårsperiode.getTomDato(), TRUE);
+            var tom = forrigeDatoForNyeRegler.get().isBefore(datoForNyeRegler.get()) ? datoForNyeRegler.get().minusDays(1) : forrigeDatoForNyeRegler.get().minusDays(1);
+            return new LocalDateTimeline<>(fom, tom, TRUE);
+
         }
-        return datoNyeReglerTidslinje;
+        return LocalDateTimeline.empty();
     }
 
     private static LocalDateTimeline<Boolean> fyllMellomromDersomKunHelg(LocalDateTimeline<Boolean> tidslinje) {
