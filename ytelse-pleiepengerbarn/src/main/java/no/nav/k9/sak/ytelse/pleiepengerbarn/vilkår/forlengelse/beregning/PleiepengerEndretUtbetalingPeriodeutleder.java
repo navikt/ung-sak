@@ -185,11 +185,11 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
     }
 
     private LocalDateTimeline<Boolean> finnDatoNyeReglerTidslinje(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsperiode) {
-        return finnFullTidslinjeForNyeUttaksregler(behandlingReferanse, vilkårsperiode)
+        return finnTidslinjeForEndretRegelsett(behandlingReferanse, vilkårsperiode)
             .intersection(vilkårsperiode.toLocalDateInterval());
     }
 
-    private LocalDateTimeline<Boolean> finnFullTidslinjeForNyeUttaksregler(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsperiode) {
+    private LocalDateTimeline<Boolean> finnTidslinjeForEndretRegelsett(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsperiode) {
         var forrigeDatoForNyeRegler = uttakNyeReglerRepository.finnForrigeDatoForNyeRegler(behandlingReferanse.getBehandlingId());
         var datoForNyeRegler = uttakNyeReglerRepository.finnDatoForNyeRegler(behandlingReferanse.getBehandlingId());
         if (forrigeDatoForNyeRegler.isEmpty() && datoForNyeRegler.isPresent() && !vilkårsperiode.getTomDato().isBefore(datoForNyeRegler.get())) {
