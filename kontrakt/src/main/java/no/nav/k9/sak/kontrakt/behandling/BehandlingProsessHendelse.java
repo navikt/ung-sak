@@ -51,7 +51,9 @@ public class BehandlingProsessHendelse {
     @JsonProperty(value = "fagsystem", required = true)
     private Fagsystem fagsystem;
 
-    /** Eventuell frist for behandlingen. */
+    /**
+     * Eventuell frist for behandlingen.
+     */
     @Valid
     @JsonProperty(value = "behandlingstidFrist", required = false)
     private LocalDate behandlingstidFrist;
@@ -63,7 +65,9 @@ public class BehandlingProsessHendelse {
     @JsonProperty(value = "saksnummer", required = true)
     private String saksnummer;
 
-    /** Brukers aktørId. */
+    /**
+     * Brukers aktørId.
+     */
     @NotNull
     @Valid
     @Pattern(regexp = "^[\\p{Alnum}\\p{L}\\p{N}\\-_.]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
@@ -80,20 +84,26 @@ public class BehandlingProsessHendelse {
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime eventTid;
 
-    /** Beskrivelse av hendelse ({@link EventHendelse}). */
+    /**
+     * Beskrivelse av hendelse ({@link EventHendelse}).
+     */
     @NotNull
     @Valid
     @JsonProperty(value = "eventHendelse", required = true)
     private EventHendelse eventHendelse;
 
-    /** Nåværende {@link BehandlingStatus} for behandling. */
+    /**
+     * Nåværende {@link BehandlingStatus} for behandling.
+     */
     @NotNull
     @Pattern(regexp = "^[\\p{Alnum}\\p{L}\\p{N}\\-_.]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     @JsonProperty(value = "behandlingStatus", required = true)
     private String behandlingStatus;
 
-    /** Hvilket {@link BehandlingStegType} behandlingen står i p.t.. */
+    /**
+     * Hvilket {@link BehandlingStegType} behandlingen står i p.t..
+     */
     @Valid
     @JsonProperty(value = "behandlingSteg", required = false)
     private String behandlingSteg;
@@ -104,14 +114,18 @@ public class BehandlingProsessHendelse {
     @JsonProperty(value = "behandlendeEnhet", required = false)
     private String behandlendeEnhet;
 
-    /** Ident for saksbehandler ansvarlig for totrinn (beslutter rolle). */
+    /**
+     * Ident for saksbehandler ansvarlig for totrinn (beslutter rolle).
+     */
     @Valid
     @Size(max = 50)
     @Pattern(regexp = "^[\\p{Alnum}\\p{L}\\p{N}\\-_.]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @JsonProperty(value = "ansvarligBeslutterForTotrinn", required = false)
     private String ansvarligBeslutterForTotrinn;
 
-    /** Ident for saksbehandler ansvarlig for totrinn (saksbehandler rolle). */
+    /**
+     * Ident for saksbehandler ansvarlig for totrinn (saksbehandler rolle).
+     */
     @Valid
     @Size(max = 50)
     @Pattern(regexp = "^[\\p{Alnum}\\p{L}\\p{N}\\-_.]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
@@ -168,17 +182,23 @@ public class BehandlingProsessHendelse {
     @JsonProperty(value = "aksjonspunktKoderMedStatusListe", required = true)
     private Map<String, String> aksjonspunktKoderMedStatusListe;
 
-    /** @NotNull produseres alltid, men er nullable for kompatiblitet med eldre versjoner */
+    /**
+     * @NotNull produseres alltid, men er nullable for kompatiblitet med eldre versjoner
+     */
     @Valid
     @JsonProperty(value = "fagsakPeriode", required = false)
     private Periode fagsakPeriode;
 
-    /** (Optional) AktørId for angitt pleietrengende (barn, eller nærstående). */
+    /**
+     * (Optional) AktørId for angitt pleietrengende (barn, eller nærstående).
+     */
     @Valid
     @JsonProperty(value = "pleietrengendeAktørId")
     private AktørId pleietrengendeAktørId;
 
-    /** (Optional) AktørId for angitt relatert annen part (eks. annen forelder. */
+    /**
+     * (Optional) AktørId for angitt relatert annen part (eks. annen forelder.
+     */
     @Valid
     @JsonProperty(value = "relatertPartAktørId", required = false)
     private AktørId relatertPartAktørId;
@@ -201,6 +221,14 @@ public class BehandlingProsessHendelse {
     @Valid
     @JsonProperty(value = "vedtaksdato", required = false)
     private LocalDate vedtaksdato;
+
+    @Valid
+    @JsonProperty(value = "behandlingsårsaker")
+    private List<String> behandlingsårsaker;
+
+    @Valid
+    @JsonProperty(value = "søknadsårsaker")
+    private List<String> søknadsårsaker;
 
     public BehandlingProsessHendelse() {
     }
@@ -231,6 +259,8 @@ public class BehandlingProsessHendelse {
         this.nyeKrav = kopierFra.nyeKrav;
         this.vedtaksdato = kopierFra.vedtaksdato;
         this.fraEndringsdialog = kopierFra.fraEndringsdialog;
+        this.behandlingsårsaker = kopierFra.behandlingsårsaker;
+        this.søknadsårsaker = kopierFra.søknadsårsaker;
     }
 
     public static Builder builder() {
@@ -315,6 +345,14 @@ public class BehandlingProsessHendelse {
 
     public boolean isFraEndringsdialog() {
         return fraEndringsdialog != null && fraEndringsdialog;
+    }
+
+    public List<String> getBehandlingsårsaker() {
+        return behandlingsårsaker;
+    }
+
+    public List<String> getSøknadsårsaker() {
+        return søknadsårsaker;
     }
 
     public LocalDate getVedtaksdato() {
@@ -450,6 +488,15 @@ public class BehandlingProsessHendelse {
 
         public Builder medFraEndringsdialog(Boolean fraEndringsdialog) {
             kladd.fraEndringsdialog = fraEndringsdialog;
+            return this;
+        }
+
+        public Builder medBehandlingsårsaker(List<String> behandlingsårsaker) {
+            kladd.behandlingsårsaker = behandlingsårsaker;
+            return this;
+        }
+        public Builder medSøknadårsaker(List<String> søknadsårsaker) {
+            kladd.søknadsårsaker = søknadsårsaker;
             return this;
         }
 
