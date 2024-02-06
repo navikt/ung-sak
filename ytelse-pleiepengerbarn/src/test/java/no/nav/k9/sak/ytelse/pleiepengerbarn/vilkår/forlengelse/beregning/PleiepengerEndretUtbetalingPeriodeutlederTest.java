@@ -41,6 +41,7 @@ import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
+import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
@@ -101,6 +102,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
     private MottatteDokumentRepository mottatteDokumentRepository;
 
     private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = mock();
+    private PersonopplysningTjeneste personopplysningtjeneste = mock(PersonopplysningTjeneste.class);
 
     @BeforeEach
     void setUp() {
@@ -109,7 +111,8 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
         søknadsperiodeRepository = new SøknadsperiodeRepository(entityManager);
         mottatteDokumentRepository = new MottatteDokumentRepository(entityManager);
         utleder = new PleiepengerEndretUtbetalingPeriodeutleder(uttakTjeneste, behandlingRepository, new UnitTestLookupInstanceImpl<>(vilkårsPerioderTilVurderingTjeneste),
-            new ProsessTriggereRepository(entityManager), søknadsperiodeTjeneste, new UttakNyeReglerRepository(entityManager), mapInputTilUttakTjeneste);
+            new ProsessTriggereRepository(entityManager), søknadsperiodeTjeneste, new UttakNyeReglerRepository(entityManager), mapInputTilUttakTjeneste,
+            personopplysningtjeneste, false);
         originalBehandling = opprettBehandling(SKJÆRINGSTIDSPUNKT);
         behandling = Behandling.fraTidligereBehandling(originalBehandling, BehandlingType.REVURDERING).build();
         behandlingRepository.lagre(behandling, new BehandlingLås(null));
