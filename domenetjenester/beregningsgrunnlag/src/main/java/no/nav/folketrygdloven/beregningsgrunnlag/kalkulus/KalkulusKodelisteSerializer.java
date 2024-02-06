@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.jackson;
+package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -12,20 +12,23 @@ public class KalkulusKodelisteSerializer extends StdSerializer<no.nav.folketrygd
     public static final String KODE = "kode";
     public static final String KODEVERK = "kodeverk";
 
-    public KalkulusKodelisteSerializer() {
+    private final boolean serialiserKalkulusSomObjekt;
+
+    public KalkulusKodelisteSerializer(boolean serialiserKalkulusSomObjekt) {
         super(no.nav.folketrygdloven.kalkulus.kodeverk.Kodeverdi.class);
+        this.serialiserKalkulusSomObjekt = serialiserKalkulusSomObjekt;
     }
 
     @Override
     public void serialize(no.nav.folketrygdloven.kalkulus.kodeverk.Kodeverdi value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
-
-        jgen.writeStartObject();
-
-        jgen.writeStringField(KODE, value.getKode());
-
-        jgen.writeStringField(KODEVERK, getKodeverkVerdi(value));
-
-        jgen.writeEndObject();
+        if (serialiserKalkulusSomObjekt) {
+            jgen.writeStartObject();
+            jgen.writeStringField(KODE, value.getKode());
+            jgen.writeStringField(KODEVERK, getKodeverkVerdi(value));
+            jgen.writeEndObject();
+        } else {
+            jgen.writeString(value.getKode());
+        }
     }
 
     private String getKodeverkVerdi(no.nav.folketrygdloven.kalkulus.kodeverk.Kodeverdi value) {

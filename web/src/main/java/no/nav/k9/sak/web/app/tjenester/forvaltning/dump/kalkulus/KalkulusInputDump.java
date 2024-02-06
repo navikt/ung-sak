@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.folketrygdloven.kalkulus.mappers.JsonMapper;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusRestKlient;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -26,7 +26,7 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
 @FagsakYtelseTypeRef(FRISINN)
 public class KalkulusInputDump implements DebugDumpBehandling {
 
-    private final ObjectWriter objectWriter = JsonMapper.getMapper().writerWithDefaultPrettyPrinter();
+    private final ObjectWriter objectWriter = KalkulusRestKlient.getMapper().writerWithDefaultPrettyPrinter();
     private KalkulusTjenesteAdapter tjeneste;
 
     KalkulusInputDump() {

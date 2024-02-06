@@ -15,10 +15,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -65,7 +67,7 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 public class KalkulusRestKlient {
 
     private static final Logger log = LoggerFactory.getLogger(KalkulusRestKlient.class);
-    private final ObjectMapper kalkulusMapper = JsonMapper.getMapper();
+    private static final ObjectMapper kalkulusMapper = JsonMapper.getMapper().copy().registerModule(createModuleWithStringSerializer());
     private final ObjectWriter kalkulusJsonWriter = kalkulusMapper.writerWithDefaultPrettyPrinter();
     private final ObjectReader tilstandReader = kalkulusMapper.readerFor(TilstandListeResponse.class);
     private final ObjectReader kopierReader = kalkulusMapper.readerFor(new TypeReference<List<KopiResponse>>() {
@@ -371,4 +373,14 @@ public class KalkulusRestKlient {
         Feil feilVedJsonParsing(String feilmelding);
     }
 
+    private static SimpleModule createModuleWithStringSerializer() {
+        SimpleModule module = new SimpleModule("KALKULUS-REST", new Version(1, 0, 0, null, null, null));
+        // Bruker kodeverdi serialisert som String mot kalkulus (innkommende rest returnerer kodeverdi som objekt)
+        module.addSerializer(new KalkulusKodelisteSerializer(false));
+        return module;
+    }
+
+    public static ObjectMapper getMapper() {
+        return kalkulusMapper;
+    }
 }
