@@ -25,7 +25,7 @@ import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.hendelse.EventHendelse;
-import no.nav.k9.kodeverk.uttak.SøknadÅrsak;
+import no.nav.k9.kodeverk.produksjonsstyring.UtvidetSøknadÅrsak;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.hendelse.produksjonsstyring.søknadsårsak.SøknadsårsakUtleder;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -72,7 +72,7 @@ public class BehandlingProsessHendelseMapper {
         final boolean nyeKrav = sjekkOmDetHarKommetNyeKrav(behandling);
         final boolean fraEndringsdialog = sjekkOmDetFinnesEndringFraEndringsdialog(behandling);
 
-        List<SøknadÅrsak> søknadsårsaker = utledSøknadÅrsaker(behandling);
+        List<UtvidetSøknadÅrsak> søknadsårsaker = utledSøknadÅrsaker(behandling);
 
         return BehandlingProsessHendelse.builder()
             .medEksternId(behandling.getUuid())
@@ -100,12 +100,12 @@ public class BehandlingProsessHendelseMapper {
             .medAksjonspunktTilstander(lagAksjonspunkttilstander(behandling.getAksjonspunkter()))
             .medNyeKrav(nyeKrav)
             .medBehandlingsårsaker(behandling.getBehandlingÅrsaker().stream().map(årsak -> årsak.getBehandlingÅrsakType().getKode()).distinct().toList())
-            .medSøknadårsaker(søknadsårsaker.stream().map(SøknadÅrsak::getKode).distinct().toList())
+            .medSøknadårsaker(søknadsårsaker.stream().map(UtvidetSøknadÅrsak::getKode).distinct().toList())
             .medFraEndringsdialog(fraEndringsdialog)
             .build();
     }
 
-    private List<SøknadÅrsak> utledSøknadÅrsaker(Behandling behandling) {
+    private List<UtvidetSøknadÅrsak> utledSøknadÅrsaker(Behandling behandling) {
         SøknadsårsakUtleder tjeneste = SøknadsårsakUtleder.finnTjeneste(søknadsårsakUtledere, behandling.getFagsakYtelseType());
         return tjeneste != null
             ? tjeneste.utledSøknadÅrsaker(behandling)
