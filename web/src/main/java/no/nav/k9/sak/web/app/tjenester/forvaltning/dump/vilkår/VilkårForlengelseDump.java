@@ -15,7 +15,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.folketrygdloven.kalkulus.mappers.JsonMapper;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusRestKlient;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -35,7 +35,7 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
 @FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
 public class VilkårForlengelseDump implements DebugDumpBehandling {
 
-    private final ObjectWriter objectWriter = JsonMapper.getMapper().writerWithDefaultPrettyPrinter();
+    private final ObjectWriter objectWriter = KalkulusRestKlient.getMapper().writerWithDefaultPrettyPrinter();
     private Instance<ForlengelseTjeneste> tjeneste;
     private VilkårTjeneste vilkårTjeneste;
 

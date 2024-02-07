@@ -228,7 +228,10 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
             perioderSomSkalTilbakestilles,
             revurderingPerioderFraAndreParter);
 
-        if (behandling.erRevurdering() && Objects.equals(behandling.getAktivtBehandlingSteg(), BehandlingStegType.FORESLÅ_VEDTAK) && kunEndringFraBrukerOgKildeEndringsdialog(statusForPerioderPåBehandling)) {
+        if (Objects.equals(behandling.getFagsakYtelseType(), FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
+            && behandling.erRevurdering()
+            && Objects.equals(behandling.getAktivtBehandlingSteg(), BehandlingStegType.FORESLÅ_VEDTAK)
+            && kunEndringFraBrukerOgKildeEndringsdialog(statusForPerioderPåBehandling)) {
             //Kun logging for å få oversikt over saker før vi implementerer dette i formidling
             log.info("Case 1: Revurdering med kun årsak endring fra bruker og kun kildesystem endringsdialog");
         }
@@ -258,14 +261,6 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
                 log.info("Case 2: Revurdering med årsak endring fra bruker og berørt periode, og kun kildesystem endringsdialog");
             } else {
                 log.info("Case 3: Revurdering med kun kildesystem endringsdialog, men andre årsaker: {}", årsaker);
-            }
-        } else {
-            boolean harAndreDokumenterEnnKildeEndringsdialogOgIm = statusForPerioderPåBehandling.getDokumenterTilBehandling().stream()
-                .anyMatch(kravdokument -> !Objects.equals(kravdokument.getKildesystem(), Kildesystem.ENDRINGSDIALOG.getKode()) && !Objects.equals(kravdokument.getType(), KravDokumentType.INNTEKTSMELDING));
-            boolean harAndreÅrsakerEnnEndringFraBrukerOgBerørtPeriodeOgIm = årsaker.stream()
-                .anyMatch(årsak -> !List.of(ÅrsakTilVurdering.ENDRING_FRA_BRUKER, ÅrsakTilVurdering.REVURDERER_BERØRT_PERIODE, ÅrsakTilVurdering.REVURDERER_NY_INNTEKTSMELDING).contains(årsak));
-            if (!harAndreDokumenterEnnKildeEndringsdialogOgIm && !harAndreÅrsakerEnnEndringFraBrukerOgBerørtPeriodeOgIm) {
-                log.info("Case 4: Revurdering med kun kildesystem endringsdialog og inntektsmelding, med årsaker: {}", årsaker);
             }
         }
 
