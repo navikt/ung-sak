@@ -1,6 +1,8 @@
 package no.nav.k9.sak.behandling.hendelse.innsyn;
 
 import java.io.IOException;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -13,17 +15,23 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.k9.innsyn.InnsynHendelse;
 import no.nav.k9.innsyn.sak.Aksjonspunkt;
 import no.nav.k9.innsyn.sak.SøknadInfo;
+import no.nav.k9.innsyn.sak.SøknadStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.dokument.Brevkode;
+import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandling.hendelse.produksjonsstyring.PubliserProduksjonsstyringHendelseTask;
 import no.nav.k9.sak.behandling.hendelse.produksjonsstyring.PubliserProduksjonsstyringHendelseTaskImpl;
 import no.nav.k9.sak.behandling.saksbehandlingstid.SaksbehandlingsfristUtleder;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingStatusEvent;
+import no.nav.k9.sak.behandlingskontroll.events.BehandlingskontrollEvent;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -64,21 +72,27 @@ public class InnsynEventObserver {
         if ((event.getGammelStatus() == BehandlingStatus.OPPRETTET || event.getGammelStatus() == null)
             && event.getNyStatus() == BehandlingStatus.UTREDES) {
             var behandling = behandlingRepository.hentBehandling(event.getBehandlingId());
-
-            Fagsak fagsak = behandling.getFagsak();
-            String saksnummer = fagsak.getSaksnummer().getVerdi();
-            var behandlingInnsyn = new no.nav.k9.innsyn.sak.Behandling(
-                    behandling.getUuid(),
-                    mapBehandingStatus(behandling),
-                    Collections.emptySet(),
-                    mapAksjonspunkter(behandling.getÅpneAksjonspunkter()),
-                    false,
-                    mapFagsak(fagsak)
-            );
-
-            String json = deserialiser(behandlingInnsyn);
-            producer.send(saksnummer, json);
+            log.info("Publiserer melding til brukerdialog for behandling startet");
+            notifyInnsyn(behandling);
         }
+    }
+
+    private no.nav.k9.innsyn.sak.Behandling notifyInnsyn(Behandling behandling) {
+        Fagsak fagsak = behandling.getFagsak();
+        String saksnummer = fagsak.getSaksnummer().getVerdi();
+        var behandlingInnsyn = new no.nav.k9.innsyn.sak.Behandling(
+            behandling.getUuid(),
+            mapBehandingStatus(behandling),
+            mapSøknader(behandling),
+            mapAksjonspunkter(behandling.getÅpneAksjonspunkter()),
+            false, //TODO utlede
+            mapFagsak(fagsak)
+        );
+
+        String json = deserialiser(new InnsynHendelse<>(ZonedDateTime.now(), behandlingInnsyn));
+
+        producer.send(saksnummer, json);
+        return behandlingInnsyn;
     }
 
     private Set<Aksjonspunkt> mapAksjonspunkter(List<no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt> åpneAksjonspunkter) {
@@ -94,8 +108,14 @@ public class InnsynEventObserver {
         return new no.nav.k9.innsyn.sak.Fagsak(fagsak.getSaksnummer(), fagsak.getAktørId(), fagsak.getPleietrengendeAktørId(), fagsak.getYtelseType());
     }
 
-    private Set<SøknadInfo> mapSøknader(Behandling it) {
-        return Collections.emptySet();
+    private Set<SøknadInfo> mapSøknader(Behandling b) {
+        List<MottattDokument> mottattDokuments = mottatteDokumentRepository.hentMottatteDokumentForBehandling(b.getFagsakId(), b.getId(), List.of(Brevkode.PLEIEPENGER_BARN_SOKNAD), false, DokumentStatus.BEHANDLER, DokumentStatus.GYLDIG, DokumentStatus.MOTTATT);
+        return mottattDokuments.stream()
+            .map(it -> new SøknadInfo(
+                SøknadStatus.MOTTATT,
+                it.getJournalpostId().getVerdi(),
+                it.getMottattTidspunkt().atZone(ZoneId.systemDefault())))
+            .collect(Collectors.toSet());
     }
 
     private no.nav.k9.innsyn.sak.BehandlingStatus mapBehandingStatus(Behandling behandling) {
@@ -105,7 +125,7 @@ public class InnsynEventObserver {
         return no.nav.k9.innsyn.sak.BehandlingStatus.UNDER_BEHANDLING;
     }
 
-    private static String deserialiser(no.nav.k9.innsyn.sak.Behandling behandling) {
+    private static String deserialiser(InnsynHendelse<?> behandling) {
         String json;
         try {
             json = JsonObjectMapperKodeverdiSerializer.getJson(behandling);
@@ -125,16 +145,16 @@ public class InnsynEventObserver {
         Fagsak fagsak = behandling.getFagsak();
 
         ProduksjonsstyringBehandlingOpprettetHendelse dto = new ProduksjonsstyringBehandlingOpprettetHendelse(
-                behandling.getUuid(),
-                behandling.getOpprettetTidspunkt(),
-                fagsak.getSaksnummer().getVerdi(),
-                behandling.getFagsakYtelseType(),
-                behandling.getType(),
-                behandling.getBehandlingstidFrist(),
-                fagsak.getPeriode().tilPeriode(),
-                fagsak.getAktørId(),
-                fagsak.getPleietrengendeAktørId(),
-                fagsak.getRelatertPersonAktørId()
+            behandling.getUuid(),
+            behandling.getOpprettetTidspunkt(),
+            fagsak.getSaksnummer().getVerdi(),
+            behandling.getFagsakYtelseType(),
+            behandling.getType(),
+            behandling.getBehandlingstidFrist(),
+            fagsak.getPeriode().tilPeriode(),
+            fagsak.getAktørId(),
+            fagsak.getPleietrengendeAktørId(),
+            fagsak.getRelatertPersonAktørId()
         );
 
         taskData.setPayload(JsonObjectMapper.getJson(dto));
@@ -149,9 +169,9 @@ public class InnsynEventObserver {
 
         Behandling behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId).orElseThrow();
         ProduksjonsstyringBehandlingAvsluttetHendelse dto = new ProduksjonsstyringBehandlingAvsluttetHendelse(
-                behandling.getUuid(),
-                behandling.getOpprettetTidspunkt(),
-                behandling.getBehandlingResultatType()
+            behandling.getUuid(),
+            behandling.getOpprettetTidspunkt(),
+            behandling.getBehandlingResultatType()
         );
 
         taskData.setPayload(JsonObjectMapper.getJson(dto));

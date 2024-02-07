@@ -1,39 +1,52 @@
 package no.nav.k9.sak.behandling.hendelse.innsyn;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Set;
 
+import org.assertj.core.data.TemporalOffset;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
+import org.mockito.ArgumentMatchers;
 
 import jakarta.enterprise.inject.Instance;
-import no.nav.k9.innsyn.sak.Aksjonspunkt;
+import no.nav.k9.innsyn.InnsynHendelse;
 import no.nav.k9.innsyn.sak.Behandling;
 import no.nav.k9.innsyn.sak.Fagsak;
 import no.nav.k9.innsyn.sak.SøknadInfo;
 import no.nav.k9.innsyn.sak.SøknadStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.dokument.Brevkode;
+import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandling.saksbehandlingstid.SaksbehandlingsfristUtleder;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingStatusEvent;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
-import no.nav.k9.sak.domene.typer.tid.JsonObjectMapperKodeverdiSerializer;
 import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.JournalpostId;
 
 class InnsynEventObserverTest {
 
@@ -52,10 +65,20 @@ class InnsynEventObserverTest {
         TestScenarioBuilder testScenarioBuilder = TestScenarioBuilder
                 .builderMedSøknad(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, mor)
                 .medPleietrengende(pleietrengende);
-
-//        testScenarioBuilder.leggTilAksjonspunkt(AksjonspunktDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT);
-
         var behandling = testScenarioBuilder.lagMocked();
+        no.nav.k9.sak.behandlingslager.fagsak.Fagsak fagsak = behandling.getFagsak();
+        var now = LocalDateTime.now();
+        var søknadJpId = "123";
+
+        //TODO egen test for mottatt, behandler og gyldig + ugyldig?
+        when(mottatteDokumentRepository.hentMottatteDokumentForBehandling(
+            anyLong(),
+            anyLong(),
+            anyList(),
+            anyBoolean(),
+            ArgumentMatchers.any(DokumentStatus[].class)))
+                .thenReturn(List.of(byggMottattDokument(fagsak.getId(), behandling.getId(), now, søknadJpId, Brevkode.PLEIEPENGER_BARN_SOKNAD)));
+
         BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(behandling.getFagsakId(), behandling.getAktørId(), new BehandlingLås(behandling.getId()));
         var event = BehandlingStatusEvent.nyEvent(kontekst, BehandlingStatus.UTREDES, BehandlingStatus.OPPRETTET);
 
@@ -68,10 +91,13 @@ class InnsynEventObserverTest {
         verify(producer).send(anyString(), captor.capture());
 
         String json = captor.getValue();
-        var b = JsonObjectMapper.fromJson(json, Behandling.class);
+        InnsynHendelse<Behandling> behandlingInnsynHendelse = JsonObjectMapper.fromJson(json, InnsynHendelse.class);
+        assertThat(behandlingInnsynHendelse.getOppdateringstidspunkt()).isNotNull();
+
+        var b = behandlingInnsynHendelse.getData();
 
         Fagsak sak = b.fagsak();
-        assertThat(sak.saksnummer().getVerdi()).isEqualTo(behandling.getFagsak().getSaksnummer().getVerdi());
+        assertThat(sak.saksnummer().getVerdi()).isEqualTo(fagsak.getSaksnummer().getVerdi());
         assertThat(sak.søkerAktørId()).isEqualTo(mor);
         assertThat(sak.ytelseType()).isEqualTo(FagsakYtelseType.PLEIEPENGER_SYKT_BARN);
         assertThat(sak.pleietrengendeAktørId()).isEqualTo(pleietrengende);
@@ -86,13 +112,27 @@ class InnsynEventObserverTest {
         Set<SøknadInfo> søknader = b.søknader();
         assertThat(søknader).hasSize(1);
         assertThat(søknader).allSatisfy(it -> {
-            assertThat(it.mottattTidspunkt()).isEqualTo(ZonedDateTime.now());
+            assertThat(it.mottattTidspunkt()).isCloseTo(now.atZone(ZoneId.systemDefault()), within(1, ChronoUnit.MILLIS));
             assertThat(it.status()).isEqualTo(SøknadStatus.MOTTATT);
-            assertThat(it.søknadId()).isEqualTo("");
+            assertThat(it.søknadId()).isEqualTo(søknadJpId);
         });
 
 
     }
+
+    public static MottattDokument byggMottattDokument(Long fagsakId, Long behandlingId, LocalDateTime mottattDato, String journalpostId, Brevkode brevkode) {
+        MottattDokument.Builder builder = new MottattDokument.Builder();
+        builder.medMottattTidspunkt(mottattDato);
+        builder.medType(brevkode);
+        builder.medPayload("payload");
+        builder.medFagsakId(fagsakId);
+        if (journalpostId != null) {
+            builder.medJournalPostId(new JournalpostId(journalpostId));
+        }
+        builder.medBehandlingId(behandlingId);
+        return builder.build();
+    }
+
 
     @Test
     void test() {
