@@ -69,7 +69,7 @@ class HarRelvantInntektsmeldingendringForForlengelseIBeregningTest {
             .medBeløp(BigDecimal.TEN)
             .build();
 
-        var resultat = new HarRelvantInntektsmeldingendringForForlengelseIBeregning(true).erEndret(List.of(im), List.of(im));
+        var resultat = new HarRelvantInntektsmeldingendringForForlengelseIBeregning().erEndret(List.of(im), List.of(im));
 
         assertThat(resultat).isFalse();
     }
@@ -93,7 +93,7 @@ class HarRelvantInntektsmeldingendringForForlengelseIBeregningTest {
             .medBeløp(BigDecimal.TEN)
             .build();
 
-        var resultat = new HarRelvantInntektsmeldingendringForForlengelseIBeregning(true).erEndret(List.of(im), List.of(im2));
+        var resultat = new HarRelvantInntektsmeldingendringForForlengelseIBeregning().erEndret(List.of(im), List.of(im2));
 
         assertThat(resultat).isFalse();
     }
@@ -119,7 +119,7 @@ class HarRelvantInntektsmeldingendringForForlengelseIBeregningTest {
             .medBeløp(BigDecimal.TEN)
             .build();
 
-        var resultat = new HarRelvantInntektsmeldingendringForForlengelseIBeregning(true).erEndret(List.of(im), List.of(im2));
+        var resultat = new HarRelvantInntektsmeldingendringForForlengelseIBeregning().erEndret(List.of(im), List.of(im2));
 
         assertThat(resultat).isTrue();
     }
@@ -146,7 +146,7 @@ class HarRelvantInntektsmeldingendringForForlengelseIBeregningTest {
             .medBeløp(BigDecimal.TEN)
             .build();
 
-        var resultat = new HarRelvantInntektsmeldingendringForForlengelseIBeregning(true).erEndret(List.of(im), List.of(im2));
+        var resultat = new HarRelvantInntektsmeldingendringForForlengelseIBeregning().erEndret(List.of(im), List.of(im2));
 
         assertThat(resultat).isTrue();
     }
@@ -174,7 +174,7 @@ class HarRelvantInntektsmeldingendringForForlengelseIBeregningTest {
             .medBeløp(BigDecimal.TEN)
             .build();
 
-        var resultat = new HarRelvantInntektsmeldingendringForForlengelseIBeregning(true).erEndret(List.of(im), List.of(im2));
+        var resultat = new HarRelvantInntektsmeldingendringForForlengelseIBeregning().erEndret(List.of(im), List.of(im2));
 
         assertThat(resultat).isFalse();
     }

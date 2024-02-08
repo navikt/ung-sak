@@ -279,8 +279,6 @@ spec:
       value: "true"
     - name: OMP_RELEVANT_ENDRING_UTLEDNING
       value: "true"
-    - name: IM_SKAL_VURDERE_ENDRET_INNTEKT
-      value: "true"
     - name: FORLENGELSE_IM_OPPTJENING_FILTER
       value: "true"
     - name: DOKUMENTMOTTAK_VALIDER_JOURNALFORT
