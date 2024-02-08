@@ -96,7 +96,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
 
         var referanse = BehandlingReferanse.fra(behandling);
         if (skalVurdereBerørtePerioderPåBarnet(behandling)) {
-            var tidslinjeMedÅrsaker = pleitrengendeRevurderingPerioderTjeneste.utledBerørtePerioderPåPleietrengende(referanse, utledFraDefinerendeVilkår(referanse.getBehandlingId()));
+            var tidslinjeMedÅrsaker = pleitrengendeRevurderingPerioderTjeneste.utledBerørtePerioderPåPleietrengende(referanse, definerendeVilkår());
             perioderTilVurdering.addAll(TidslinjeUtil.tilDatoIntervallEntiteter(tidslinjeMedÅrsaker));
             perioderTilVurdering.addAll(TidslinjeUtil.tilDatoIntervallEntiteter(uttaksendringerSidenForrigeBehandling(referanse)));
         }
@@ -197,7 +197,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
     }
 
     private NavigableSet<PeriodeMedÅrsak> finnBerørtePerioderPåPleietrengende(BehandlingReferanse referanse) {
-        var tidslinjeMedÅrsaker = pleitrengendeRevurderingPerioderTjeneste.utledBerørtePerioderPåPleietrengende(referanse, utledFraDefinerendeVilkår(referanse.getBehandlingId()));
+        var tidslinjeMedÅrsaker = pleitrengendeRevurderingPerioderTjeneste.utledBerørtePerioderPåPleietrengende(referanse, definerendeVilkår());
         var unikeÅrsaker = tidslinjeMedÅrsaker.stream().flatMap(s -> s.getValue().stream()).collect(Collectors.toSet());
         return unikeÅrsaker.stream().flatMap(årsak -> tidslinjeMedÅrsaker.filterValue(s -> s.contains(årsak))
                 .compress()

@@ -162,7 +162,7 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
     }
 
     private LocalDateTimeline<Boolean> finnBerørtePerioderPåBarnet(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsperiode) {
-        var tidslinjeMedÅrsaker = pleietrengendeRevurderingPerioderTjeneste.utledBerørtePerioderPåPleietrengende(behandlingReferanse, getPeriodeTjeneste(behandlingReferanse).utledUtvidetRevurderingPerioder(behandlingReferanse));
+        var tidslinjeMedÅrsaker = pleietrengendeRevurderingPerioderTjeneste.utledBerørtePerioderPåPleietrengende(behandlingReferanse, getPeriodeTjeneste(behandlingReferanse).definerendeVilkår());
         return tidslinjeMedÅrsaker.mapValue(årsaker -> !årsaker.isEmpty()).intersection(vilkårsperiode.toLocalDateInterval());
     }
 
