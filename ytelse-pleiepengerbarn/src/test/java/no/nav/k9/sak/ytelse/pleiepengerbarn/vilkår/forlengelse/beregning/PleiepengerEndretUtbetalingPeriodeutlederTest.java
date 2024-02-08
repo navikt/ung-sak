@@ -24,6 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
@@ -41,6 +42,10 @@ import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
+import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.ErEndringIRefusjonskravVurderer;
+import no.nav.k9.sak.domene.behandling.steg.kompletthet.KompletthetForBeregningTjeneste;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
@@ -105,6 +110,11 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
     private MottatteDokumentRepository mottatteDokumentRepository;
 
     private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = mock();
+
+    private InntektsmeldingerRelevantForBeregning inntektsmeldingerRelevantForBeregning = mock();
+
+    private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
+
     private UttakNyeReglerRepository uttakNyeReglerRepository;
     private PersonopplysningTjeneste personopplysningtjeneste = mock(PersonopplysningTjeneste.class);
 
@@ -115,14 +125,29 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
         søknadsperiodeRepository = new SøknadsperiodeRepository(entityManager);
         mottatteDokumentRepository = new MottatteDokumentRepository(entityManager);
         uttakNyeReglerRepository = new UttakNyeReglerRepository(entityManager);
-        utleder = new PleiepengerEndretUtbetalingPeriodeutleder(uttakTjeneste, behandlingRepository, new UnitTestLookupInstanceImpl<>(vilkårsPerioderTilVurderingTjeneste),
+        var kompletthetForBeregningTjeneste = new KompletthetForBeregningTjeneste(
+            new UnitTestLookupInstanceImpl<>(inntektsmeldingerRelevantForBeregning),
+            null,
+            null,
+            null,
+            null,
+            null,
+            fagsakRepository
+        );
+        var erEndringIRefusjonskravVurderer = new ErEndringIRefusjonskravVurderer(
+            behandlingRepository, kompletthetForBeregningTjeneste,
+            inntektArbeidYtelseTjeneste,
+            mottatteDokumentRepository
+        );
+        utleder = new PleiepengerEndretUtbetalingPeriodeutleder(uttakTjeneste, behandlingRepository,
+            new UnitTestLookupInstanceImpl<>(vilkårsPerioderTilVurderingTjeneste),
             new ProsessTriggereRepository(entityManager),
             søknadsperiodeTjeneste,
             uttakNyeReglerRepository,
             mapInputTilUttakTjeneste,
             personopplysningtjeneste,
             null,
-            null,
+            erEndringIRefusjonskravVurderer,
             false);
         originalBehandling = opprettBehandling(SKJÆRINGSTIDSPUNKT);
         behandling = Behandling.fraTidligereBehandling(originalBehandling, BehandlingType.REVURDERING).build();

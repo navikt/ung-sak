@@ -75,7 +75,7 @@ public class ErEndringIRefusjonskravVurderer {
 
             var erRefusjonEndretTidslinje = tidslinje.intersection(forrigeTidslinje, (di, lhs, rhs) -> new LocalDateSegment<>(di, lhs.getValue().compareTo(rhs.getValue()) != 0));
 
-            return erRefusjonEndretTidslinje.filterValue(v -> v);
+            return erRefusjonEndretTidslinje.filterValue(v -> v).intersection(vilkårsperiode.toLocalDateInterval());
 
 
         };

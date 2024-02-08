@@ -116,7 +116,9 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
             var søknadperioderForBehandlingTidslinje = finnTidslinjeForRelevanteSøknadsperioder(behandlingReferanse);
             var påvirketAvUttaksendringTidslinje = finnTidslinjePåvirketAvUttaksendring(behandlingReferanse, vilkårsperiode);
             var datoNyeReglerTidslinje = finnDatoNyeReglerTidslinje(behandlingReferanse, vilkårsperiode);
+            var endringstidslinjeRefusjonskrav = erEndringIRefusjonskravVurderer.finnEndringstidslinjeForRefusjon(behandlingReferanse, vilkårsperiode);
             var tidslinje = påvirketAvUttaksendringTidslinje
+                .crossJoin(endringstidslinjeRefusjonskrav)
                 .crossJoin(søknadperioderForBehandlingTidslinje, StandardCombinators::coalesceLeftHandSide)
                 .crossJoin(tidslinjeFraProessTriggere, StandardCombinators::coalesceLeftHandSide)
                 .crossJoin(datoNyeReglerTidslinje, StandardCombinators::coalesceLeftHandSide)
