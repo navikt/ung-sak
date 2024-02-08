@@ -31,18 +31,19 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
+import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.ErEndringIRefusjonskravVurderer;
 import no.nav.k9.sak.domene.opptjening.MellomliggendeHelgUtleder;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.EndretUtbetalingPeriodeutleder;
-import no.nav.k9.sak.perioder.PeriodeMedÅrsak;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.trigger.ProsessTriggereRepository;
 import no.nav.k9.sak.trigger.Trigger;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.PleietrengendeRevurderingPerioderTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
@@ -57,13 +58,12 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
     private BehandlingRepository behandlingRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
     private ProsessTriggereRepository prosessTriggereRepository;
-
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
-
     private UttakNyeReglerRepository uttakNyeReglerRepository;
-
     private MapInputTilUttakTjeneste mapInputTilUttakTjeneste;
     private PersonopplysningTjeneste personopplysningTjeneste;
+    private PleietrengendeRevurderingPerioderTjeneste pleietrengendeRevurderingPerioderTjeneste;
+    private ErEndringIRefusjonskravVurderer erEndringIRefusjonskravVurderer;
     private boolean utvidetUtlederEnabled;
 
     public PleiepengerEndretUtbetalingPeriodeutleder() {
@@ -78,6 +78,7 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
                                                      UttakNyeReglerRepository uttakNyeReglerRepository,
                                                      MapInputTilUttakTjeneste mapInputTilUttakTjeneste,
                                                      PersonopplysningTjeneste personopplysningTjeneste,
+                                                     PleietrengendeRevurderingPerioderTjeneste pleietrengendeRevurderingPerioderTjeneste, ErEndringIRefusjonskravVurderer erEndringIRefusjonskravVurderer,
                                                      @KonfigVerdi(value = "UTVIDET_ENDRING_UTBETALING_UTLEDER", defaultVerdi = "false") boolean utvidetUtlederEnabled) {
         this.uttakRestKlient = uttakRestKlient;
         this.behandlingRepository = behandlingRepository;
@@ -87,6 +88,8 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
         this.uttakNyeReglerRepository = uttakNyeReglerRepository;
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
         this.personopplysningTjeneste = personopplysningTjeneste;
+        this.pleietrengendeRevurderingPerioderTjeneste = pleietrengendeRevurderingPerioderTjeneste;
+        this.erEndringIRefusjonskravVurderer = erEndringIRefusjonskravVurderer;
         this.utvidetUtlederEnabled = utvidetUtlederEnabled;
     }
 
@@ -121,13 +124,14 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
             tidslinje = fyllMellomromDersomKunHelg(tidslinje).compress();
 
             return finnUttaksendringerSomOverlapperEllerErKantiKantMedPerioden(vilkårsperiode, tidslinje);
-        } else  {
-            var utvidetRevurderingPerioder = finnUtvidetRevurderingTidslinje(behandlingReferanse, vilkårsperiode);
+        } else {
+            var utvidetRevurderingPerioder = finnBerørtePerioderPåBarnet(behandlingReferanse, vilkårsperiode);
+            var endringstidslinjeRefusjonskrav = erEndringIRefusjonskravVurderer.finnEndringstidslinjeForRefusjon(behandlingReferanse, vilkårsperiode);
             var søknadperioderForBehandlingTidslinje = finnTidslinjeForRelevanteSøknadsperioder(behandlingReferanse);
             var personopplysningTidslinje = finnPersonopplysningTidslinje(behandlingReferanse, vilkårsperiode);
             var datoNyeReglerTidslinje = finnDatoNyeReglerTidslinje(behandlingReferanse, vilkårsperiode);
-
             var tidslinje = søknadperioderForBehandlingTidslinje
+                .crossJoin(endringstidslinjeRefusjonskrav, StandardCombinators::coalesceLeftHandSide)
                 .crossJoin(utvidetRevurderingPerioder, StandardCombinators::coalesceLeftHandSide)
                 .crossJoin(personopplysningTidslinje, StandardCombinators::coalesceLeftHandSide)
                 .crossJoin(datoNyeReglerTidslinje, StandardCombinators::coalesceLeftHandSide)
@@ -155,11 +159,9 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
         return resultatperioder;
     }
 
-    private LocalDateTimeline<Boolean> finnUtvidetRevurderingTidslinje(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsperiode) {
-        var perioderMedÅrsak = getPeriodeTjeneste(behandlingReferanse).utledRevurderingPerioder(behandlingReferanse);
-        var utvidetRevurderingPerioder = new LocalDateTimeline<>(perioderMedÅrsak.stream().map(PeriodeMedÅrsak::getPeriode).map(p -> new LocalDateSegment<>(p.toLocalDateInterval(), true)).toList(), StandardCombinators::alwaysTrueForMatch)
-            .intersection(vilkårsperiode.toLocalDateInterval());
-        return utvidetRevurderingPerioder;
+    private LocalDateTimeline<Boolean> finnBerørtePerioderPåBarnet(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsperiode) {
+        var tidslinjeMedÅrsaker = pleietrengendeRevurderingPerioderTjeneste.utledBerørtePerioderPåPleietrengende(behandlingReferanse, getPeriodeTjeneste(behandlingReferanse).utledUtvidetRevurderingPerioder(behandlingReferanse));
+        return tidslinjeMedÅrsaker.mapValue(årsaker -> !årsaker.isEmpty()).intersection(vilkårsperiode.toLocalDateInterval());
     }
 
     private LocalDateTimeline<Boolean> finnPersonopplysningTidslinje(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsperiode) {
@@ -181,7 +183,7 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
     }
 
     private static boolean erDødRelevantForPeriode(DatoIntervallEntitet vilkårsperiode, LocalDate pleietengendeDødsdato) {
-        return vilkårsperiode.getTomDato().isAfter(pleietengendeDødsdato);
+        return pleietengendeDødsdato != null && vilkårsperiode.getTomDato().isAfter(pleietengendeDødsdato);
     }
 
     private LocalDateTimeline<Boolean> finnDatoNyeReglerTidslinje(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsperiode) {
