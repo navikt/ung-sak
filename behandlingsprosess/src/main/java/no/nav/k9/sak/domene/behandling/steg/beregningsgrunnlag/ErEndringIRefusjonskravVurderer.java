@@ -1,15 +1,13 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
-import static no.nav.k9.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
-
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.LagTidslinjeForRefusjon;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
@@ -26,7 +24,6 @@ import no.nav.k9.sak.typer.Beløp;
 
 @ApplicationScoped
 public class ErEndringIRefusjonskravVurderer {
-
 
     private BehandlingRepository behandlingRepository;
     private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
@@ -50,16 +47,13 @@ public class ErEndringIRefusjonskravVurderer {
             throw new IllegalArgumentException("Endringsutleder for refusjon skal kun kjøres i kontekst av en revurdering");
         }
         var originalBehandling = behandlingRepository.hentBehandling(referanse.getOriginalBehandlingId().orElseThrow());
-
         var inntektsmeldinger = inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer());
         var inntektsmeldingerForrigeVedtak = FinnInntektsmeldingForrigeBehandling.finnInntektsmeldingerFraForrigeBehandling(referanse, inntektsmeldinger, finnMottatteInntektsmeldinger(referanse));
-
         var relevanteInntektsmeldinger = kompletthetForBeregningTjeneste.utledInntektsmeldingerSomSendesInnTilBeregningForPeriode(referanse, inntektsmeldinger, periode);
         var relevanteInntektsmeldingerForrigeVedtak = kompletthetForBeregningTjeneste.utledInntektsmeldingerSomSendesInnTilBeregningForPeriode(BehandlingReferanse.fra(originalBehandling), inntektsmeldingerForrigeVedtak, periode);
 
         return ErEndringIRefusjonskravVurderer.finnEndringstidslinje(periode, relevanteInntektsmeldinger, relevanteInntektsmeldingerForrigeVedtak);
     }
-
 
     public static LocalDateTimeline<Boolean> finnEndringstidslinje(DatoIntervallEntitet vilkårsperiode, Collection<Inntektsmelding> gjeldendeInntektsmeldinger, Collection<Inntektsmelding> inntektsmeldingerForrigeVedtak) {
         return gjeldendeInntektsmeldinger.stream()
@@ -74,8 +68,8 @@ public class ErEndringIRefusjonskravVurderer {
                 .filter(imForrige -> matcher(im, imForrige))
                 .findFirst();
 
-            var tidslinje = lagRefusjontidslinje(im, vilkårsperiode);
-            var forrigeTidslinje = matchendeInntektsmeldingerFraForrigeVedtak.map(imForrigeVedtak -> lagRefusjontidslinje(imForrigeVedtak, vilkårsperiode)).orElse(
+            var tidslinje = LagTidslinjeForRefusjon.lagRefusjontidslinje(im, vilkårsperiode.getFomDato());
+            var forrigeTidslinje = matchendeInntektsmeldingerFraForrigeVedtak.map(imForrigeVedtak -> LagTidslinjeForRefusjon.lagRefusjontidslinje(imForrigeVedtak, vilkårsperiode.getFomDato())).orElse(
                 new LocalDateTimeline<>(vilkårsperiode.toLocalDateInterval(), Beløp.ZERO));
 
 
@@ -85,28 +79,6 @@ public class ErEndringIRefusjonskravVurderer {
 
 
         };
-    }
-
-    private static LocalDateTimeline<Beløp> lagRefusjontidslinje(Inntektsmelding im, DatoIntervallEntitet vilkårsperiode) {
-        var tidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(vilkårsperiode.toLocalDateInterval(), im.getRefusjonBeløpPerMnd())));
-
-        if (im.getEndringerRefusjon() != null) {
-
-            tidslinje = tidslinje.intersection(lagEndringTidslinje(im), StandardCombinators::coalesceRightHandSide);
-        }
-
-        if (im.getRefusjonOpphører() != null && im.getRefusjonOpphører().isBefore(vilkårsperiode.getTomDato())) {
-            tidslinje = tidslinje.intersection(new LocalDateTimeline<>(List.of(new LocalDateSegment<>(im.getRefusjonOpphører().plusDays(1), vilkårsperiode.getTomDato(), Beløp.ZERO))));
-        }
-        return tidslinje;
-    }
-
-    private static LocalDateTimeline<Beløp> lagEndringTidslinje(Inntektsmelding im) {
-        return new LocalDateTimeline<>(im.getEndringerRefusjon()
-            .stream()
-            .map(e -> new LocalDateSegment<>(e.getFom(), TIDENES_ENDE, e.getRefusjonsbeløp()))
-            .sorted(Comparator.naturalOrder())
-            .toList(), StandardCombinators::coalesceRightHandSide);
     }
 
     private static boolean matcher(Inntektsmelding im, Inntektsmelding imForrige) {
