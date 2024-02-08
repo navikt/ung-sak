@@ -2,41 +2,18 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.beregning;
 
 import java.util.Collection;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.HarEndretInntektsmeldingVurderer;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.typer.JournalpostId;
 
 @ApplicationScoped
 public class HarRelvantInntektsmeldingendringForForlengelseIBeregning implements HarEndretInntektsmeldingVurderer.InntektsmeldingerEndringsvurderer {
 
-    private boolean skalVurdereEndretInntekt;
-
-    public HarRelvantInntektsmeldingendringForForlengelseIBeregning() {
-    }
-
-    @Inject
-    public HarRelvantInntektsmeldingendringForForlengelseIBeregning(@KonfigVerdi(value = "IM_SKAL_VURDERE_ENDRET_INNTEKT", defaultVerdi = "false") boolean skalVurdereEndretInntekt) {
-        this.skalVurdereEndretInntekt = skalVurdereEndretInntekt;
-    }
-
     @Override
     public boolean erEndret(Collection<Inntektsmelding> relevanteInntektsmeldinger, Collection<Inntektsmelding> relevanteInntektsmeldingerForrigeVedtak) {
-
-        if (!skalVurdereEndretInntekt) {
-            return harUlikeJournalposter(relevanteInntektsmeldingerForrigeVedtak.stream()
-                .map(Inntektsmelding::getJournalpostId)
-                .collect(Collectors.toSet()), relevanteInntektsmeldinger.stream()
-                .map(Inntektsmelding::getJournalpostId)
-                .collect(Collectors.toSet()));
-        } else {
-            return !erLikeStore(relevanteInntektsmeldinger, relevanteInntektsmeldingerForrigeVedtak) || relevanteInntektsmeldinger.stream().anyMatch(im -> harEndretBeløpFraForrige(relevanteInntektsmeldingerForrigeVedtak, im));
-        }
-
+        return !erLikeStore(relevanteInntektsmeldinger, relevanteInntektsmeldingerForrigeVedtak) || relevanteInntektsmeldinger.stream().anyMatch(im -> harEndretBeløpFraForrige(relevanteInntektsmeldingerForrigeVedtak, im));
     }
 
 
