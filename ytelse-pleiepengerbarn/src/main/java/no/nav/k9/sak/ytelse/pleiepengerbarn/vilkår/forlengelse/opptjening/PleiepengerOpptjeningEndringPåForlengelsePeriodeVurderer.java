@@ -4,19 +4,26 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.HarEndretInntektsmeldingVurderer;
+import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.HarEndretInntektsmeldingVurderer;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingRelevantForVilkårsrevurdering;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingskontroll.VilkårTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.EndringPåForlengelseInput;
 import no.nav.k9.sak.perioder.EndringPåForlengelsePeriodeVurderer;
@@ -35,7 +42,6 @@ public class PleiepengerOpptjeningEndringPåForlengelsePeriodeVurderer implement
 
     private ProsessTriggereRepository prosessTriggereRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
-    private HarRelvantInntektsmeldingendringForForlengelseIOpptjening harRelevantEndringIInntektsmelding;
     private HarEndretInntektsmeldingVurderer harEndretInntektsmeldingVurderer;
     private boolean skalVurdereIM;
 
@@ -45,15 +51,15 @@ public class PleiepengerOpptjeningEndringPåForlengelsePeriodeVurderer implement
 
     @Inject
     public PleiepengerOpptjeningEndringPåForlengelsePeriodeVurderer(ProsessTriggereRepository prosessTriggereRepository,
+                                                                    BehandlingRepository behandlingRepository,
                                                                     MottatteDokumentRepository mottatteDokumentRepository,
                                                                     HarRelvantInntektsmeldingendringForForlengelseIOpptjening harRelevantEndringIInntektsmelding,
-                                                                    HarEndretInntektsmeldingVurderer harEndretInntektsmeldingVurderer,
+                                                                    @Any Instance<InntektsmeldingRelevantForVilkårsrevurdering> inntektsmeldingRelevantForVilkårsrevurdering,
                                                                     @KonfigVerdi(value = "FORLENGELSE_IM_OPPTJENING_FILTER", defaultVerdi = "false") boolean skalVurdereIM) {
         this.prosessTriggereRepository = prosessTriggereRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
-        this.harRelevantEndringIInntektsmelding = harRelevantEndringIInntektsmelding;
-        this.harEndretInntektsmeldingVurderer = harEndretInntektsmeldingVurderer;
         this.skalVurdereIM = skalVurdereIM;
+        this.harEndretInntektsmeldingVurderer = new HarEndretInntektsmeldingVurderer(behandlingRepository, getInntektsmeldingFilter(inntektsmeldingRelevantForVilkårsrevurdering), harRelevantEndringIInntektsmelding);
     }
 
     @Override
@@ -66,10 +72,8 @@ public class PleiepengerOpptjeningEndringPåForlengelsePeriodeVurderer implement
                 .toList();
             if (harEndretInntektsmeldingVurderer.harEndringPåInntektsmeldingerTilBrukForPerioden(
                 input.getBehandlingReferanse(),
-                VilkårType.OPPTJENINGSVILKÅRET,
                 periode, inntektsmeldinger,
-                mottatteInntektsmeldinger,
-                harRelevantEndringIInntektsmelding
+                mottatteInntektsmeldinger
             )) {
                 return true;
             }
@@ -89,4 +93,10 @@ public class PleiepengerOpptjeningEndringPåForlengelsePeriodeVurderer implement
         }
         return false;
     }
+
+    private static HarEndretInntektsmeldingVurderer.InntektsmeldingFilter getInntektsmeldingFilter(Instance<InntektsmeldingRelevantForVilkårsrevurdering> inntektsmeldingRelevantForBeregningVilkårsvurdering) {
+        return (BehandlingReferanse referanse, Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) ->
+            InntektsmeldingRelevantForVilkårsrevurdering.finnTjeneste(inntektsmeldingRelevantForBeregningVilkårsvurdering, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, referanse.getFagsakYtelseType()).begrensInntektsmeldinger(referanse, sakInntektsmeldinger, vilkårsPeriode);
+    }
+
 }

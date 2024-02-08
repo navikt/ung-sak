@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.HarEndretInntektsmeldingVurderer;
+import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.HarEndretInntektsmeldingVurderer;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.typer.JournalpostId;
 

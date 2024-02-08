@@ -113,7 +113,7 @@ public class OverstyrInputBeregningTjeneste {
         if (inntektsmeldingerForArbeidsgiver.isEmpty()) {
             return Optional.empty();
         }
-        var refusjonTidslinje = FinnRefusjonskravTidslinje.lagTidslinje(migrertStp, inntektsmeldingerForArbeidsgiver);
+        var refusjonTidslinje = SammenstillRefusjonskravForInfotrygdmigrering.lagTidslinje(migrertStp, inntektsmeldingerForArbeidsgiver);
         var refusjonskravFraVedStart = utledRefusjonskravVedStpFraRefusjontidslinje(migrertStp, refusjonTidslinje);
         var startdatoRefusjon = utledStartdatoRefusjonFraRefusjontidslinje(refusjonTidslinje);
         var refusjonOpphører = utledOpphørRefujonFraRefusjontidslinje(refusjonTidslinje);
