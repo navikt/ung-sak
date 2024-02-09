@@ -5,6 +5,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -123,7 +124,7 @@ public class InnsynEventObserver {
                 SøknadStatus.MOTTATT,
                 it.getJournalpostId().getVerdi(),
                 it.getMottattTidspunkt().atZone(ZoneId.systemDefault()),
-                Kildesystem.of(it.getKildesystem())
+                Optional.ofNullable(it.getKildesystem()).map(Kildesystem::of).orElse(null)
                 ))
             .collect(Collectors.toSet());
     }
