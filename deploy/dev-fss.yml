@@ -287,6 +287,8 @@ spec:
       value: "true"
     - name: UTVIDET_ENDRING_UTBETALING_UTLEDER
       value: "true"
+    - name: ENABLE_INNSYN_OBSERVER
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

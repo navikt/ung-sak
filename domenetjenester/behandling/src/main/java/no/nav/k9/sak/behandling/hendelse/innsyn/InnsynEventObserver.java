@@ -15,6 +15,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.innsyn.InnsynHendelse;
 import no.nav.k9.innsyn.sak.Aksjonspunkt;
 import no.nav.k9.innsyn.sak.SøknadInfo;
@@ -49,6 +50,7 @@ public class InnsynEventObserver {
     private BrukerdialoginnsynMeldingProducer producer;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private Instance<SaksbehandlingsfristUtleder> fristUtledere;
+    private boolean enable;
 
     public InnsynEventObserver() {
     }
@@ -58,16 +60,23 @@ public class InnsynEventObserver {
                                BehandlingRepository behandlingRepository,
                                Instance<SaksbehandlingsfristUtleder> fristUtledere,
                                BrukerdialoginnsynMeldingProducer producer,
-                               MottatteDokumentRepository mottatteDokumentRepository) {
+                               MottatteDokumentRepository mottatteDokumentRepository,
+                               @KonfigVerdi(value = "ENABLE_INNSYN_OBSERVER", defaultVerdi = "false") boolean enable
+                               ) {
         this.prosessTaskRepository = prosessTaskRepository;
         this.behandlingRepository = behandlingRepository;
         this.producer = producer;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.fristUtledere = fristUtledere;
+        this.enable = enable;
     }
 
 
     public void observerBehandlingStartet(@Observes BehandlingStatusEvent event) {
+        if (!enable) {
+            return;
+        }
+
         if ((event.getGammelStatus() == BehandlingStatus.OPPRETTET || event.getGammelStatus() == null)
             && event.getNyStatus() == BehandlingStatus.UTREDES) {
             var behandling = behandlingRepository.hentBehandling(event.getBehandlingId());
