@@ -37,6 +37,7 @@ import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapperKodeverdiSerializer;
 import no.nav.k9.sak.kontrakt.produksjonsstyring.los.ProduksjonsstyringBehandlingAvsluttetHendelse;
 import no.nav.k9.sak.kontrakt.produksjonsstyring.los.ProduksjonsstyringBehandlingOpprettetHendelse;
+import no.nav.k9.søknad.felles.Kildesystem;
 
 @ApplicationScoped
 public class InnsynEventObserver {
@@ -112,7 +113,9 @@ public class InnsynEventObserver {
             .map(it -> new SøknadInfo(
                 SøknadStatus.MOTTATT,
                 it.getJournalpostId().getVerdi(),
-                it.getMottattTidspunkt().atZone(ZoneId.systemDefault())))
+                it.getMottattTidspunkt().atZone(ZoneId.systemDefault()),
+                Kildesystem.of(it.getKildesystem())
+                ))
             .collect(Collectors.toSet());
     }
 

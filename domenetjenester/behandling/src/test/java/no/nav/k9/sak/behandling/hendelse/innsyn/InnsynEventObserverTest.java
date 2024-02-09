@@ -77,8 +77,11 @@ class InnsynEventObserverTest {
         BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(behandling.getFagsakId(), behandling.getAktørId(), new BehandlingLås(behandling.getId()));
         var event = BehandlingStatusEvent.nyEvent(kontekst, BehandlingStatus.UTREDES, BehandlingStatus.OPPRETTET);
 
-        var observer = new InnsynEventObserver(prosessTaskTjeneste, testScenarioBuilder.mockBehandlingRepository(),
-                utledere, producer, mottatteDokumentRepository);
+        var observer = new InnsynEventObserver(prosessTaskTjeneste,
+            testScenarioBuilder.mockBehandlingRepository(),
+            utledere,
+            producer,
+            mottatteDokumentRepository);
 
         observer.observerBehandlingStartet(event);
 
@@ -109,7 +112,7 @@ class InnsynEventObserverTest {
         assertThat(søknader).allSatisfy(it -> {
             assertThat(it.mottattTidspunkt()).isCloseTo(now.atZone(ZoneId.systemDefault()), within(1, ChronoUnit.MILLIS));
             assertThat(it.status()).isEqualTo(SøknadStatus.MOTTATT);
-            assertThat(it.søknadId()).isEqualTo(søknadJpId);
+            assertThat(it.journalpostId()).isEqualTo(søknadJpId);
         });
 
 
