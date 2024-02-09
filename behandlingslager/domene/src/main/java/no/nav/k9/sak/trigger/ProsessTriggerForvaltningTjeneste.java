@@ -83,7 +83,7 @@ public class ProsessTriggerForvaltningTjeneste {
      * @param periode             periode som fjernes
      * @param behandlingÅrsakType Behandlingsårsak
      */
-    public void fjern(Long behandlingId, DatoIntervallEntitet periode, BehandlingÅrsakType behandlingÅrsakType) {
+    public boolean fjern(Long behandlingId, DatoIntervallEntitet periode, BehandlingÅrsakType behandlingÅrsakType) {
         var prosessTriggere = prosessTriggereRepository.hentGrunnlag(behandlingId);
 
         if (prosessTriggere.isEmpty()) {
@@ -97,7 +97,7 @@ public class ProsessTriggerForvaltningTjeneste {
 
         if (triggerPåAktivtGrunnlag.isEmpty()) {
             LOG.info("Fant ingen prosesstrigger for" + behandlingId + " med type " + behandlingÅrsakType + " og periode " + periode);
-            return;
+            return false;
         }
 
         LOG.info("Utfører fjerning av trigger for behandling med id " + behandlingId + " og følgende triggere fjernes: " + triggerPåAktivtGrunnlag);
@@ -120,6 +120,7 @@ public class ProsessTriggerForvaltningTjeneste {
             entityManager.persist(oppdatert);
             entityManager.flush();
         }
+        return true;
     }
 
     private static boolean skalFjernes(DatoIntervallEntitet periode, BehandlingÅrsakType behandlingÅrsakType, Trigger t) {
