@@ -81,7 +81,8 @@ class InnsynEventObserverTest {
             testScenarioBuilder.mockBehandlingRepository(),
             utledere,
             producer,
-            mottatteDokumentRepository);
+            mottatteDokumentRepository,
+            true);
 
         observer.observerBehandlingStartet(event);
 
