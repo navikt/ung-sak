@@ -10,7 +10,9 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
+import no.nav.k9.kodeverk.arbeidsforhold.NaturalYtelseType;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
+import no.nav.k9.sak.domene.iay.modell.NaturalYtelse;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -171,6 +173,63 @@ class HarRelvantInntektsmeldingendringForForlengelseIBeregningTest {
             .medArbeidsforholdId(ref)
             .medStartDatoPermisjon(LocalDate.now().plusDays(1))
             .medKanalreferanse("kanalreferanser")
+            .medBeløp(BigDecimal.TEN)
+            .build();
+
+        var resultat = new HarRelvantInntektsmeldingendringForForlengelseIBeregning().erEndret(List.of(im), List.of(im2));
+
+        assertThat(resultat).isFalse();
+    }
+
+    @Test
+    void skal_gi_endring_dersom_ulike_journalposter_og_like_beløp_lik_arbeidsgiver_og_ulik_stardato_og_ulike_naturalytelser() {
+        var ref = InternArbeidsforholdRef.ref(UUID.randomUUID());
+
+        var im = InntektsmeldingBuilder.builder()
+            .medJournalpostId("1")
+            .medStartDatoPermisjon(LocalDate.now())
+            .medKanalreferanse("kanalreferanser")
+            .medArbeidsgiver(Arbeidsgiver.virksomhet("123456789"))
+            .medArbeidsforholdId(ref)
+            .medBeløp(BigDecimal.TEN)
+            .build();
+
+        var im2 = InntektsmeldingBuilder.builder()
+            .medJournalpostId("2")
+            .medArbeidsgiver(Arbeidsgiver.virksomhet("123456789"))
+            .medArbeidsforholdId(ref)
+            .medStartDatoPermisjon(LocalDate.now().plusDays(1))
+            .medKanalreferanse("kanalreferanser")
+            .leggTil(new NaturalYtelse(LocalDate.now().plusDays(1), LocalDate.now().plusDays(1), BigDecimal.ONE, NaturalYtelseType.BIL))
+            .medBeløp(BigDecimal.TEN)
+            .build();
+
+        var resultat = new HarRelvantInntektsmeldingendringForForlengelseIBeregning().erEndret(List.of(im), List.of(im2));
+
+        assertThat(resultat).isTrue();
+    }
+
+    @Test
+    void skal_gi_ingen_endring_dersom_ulike_journalposter_og_like_beløp_lik_arbeidsgiver_og_ulik_stardato_og_like_naturalytelser() {
+        var ref = InternArbeidsforholdRef.ref(UUID.randomUUID());
+
+        var im = InntektsmeldingBuilder.builder()
+            .medJournalpostId("1")
+            .medStartDatoPermisjon(LocalDate.now())
+            .medKanalreferanse("kanalreferanser")
+            .medArbeidsgiver(Arbeidsgiver.virksomhet("123456789"))
+            .medArbeidsforholdId(ref)
+            .leggTil(new NaturalYtelse(LocalDate.now().plusDays(1), LocalDate.now().plusDays(1), BigDecimal.ONE, NaturalYtelseType.BIL))
+            .medBeløp(BigDecimal.TEN)
+            .build();
+
+        var im2 = InntektsmeldingBuilder.builder()
+            .medJournalpostId("2")
+            .medArbeidsgiver(Arbeidsgiver.virksomhet("123456789"))
+            .medArbeidsforholdId(ref)
+            .medStartDatoPermisjon(LocalDate.now().plusDays(1))
+            .medKanalreferanse("kanalreferanser")
+            .leggTil(new NaturalYtelse(LocalDate.now().plusDays(1), LocalDate.now().plusDays(1), BigDecimal.ONE, NaturalYtelseType.BIL))
             .medBeløp(BigDecimal.TEN)
             .build();
 
