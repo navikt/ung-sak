@@ -184,7 +184,7 @@ public class ForvaltningUttakRestTjeneste {
 
         var utdaterteEndringer = endringAnnenOmsorgspersonTidslinje.disjoint(endringstidslinjer.harEndringSomPåvirkerSakTidslinje());
 
-        var utdaterteIntervaller = utdaterteEndringer.compress().getLocalDateIntervals();
+        var utdaterteIntervaller = utdaterteEndringer.getLocalDateIntervals().stream().map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFomDato(), p.getTomDato())).collect(Collectors.toSet());
 
         var skjæringstidspunkterSomKanFjernes = perioderMedEndringAnnenOmsorgsperson.stream()
             .filter(p -> utdaterteIntervaller.stream().anyMatch(i -> i.getFomDato().equals(p.getFomDato()) && i.getTomDato().equals(p.getTomDato())))
@@ -193,9 +193,9 @@ public class ForvaltningUttakRestTjeneste {
 
         loggForvaltningTjeneste(fagsak, "/fjern-prosesstrigger-endring-annen-omsorgsperson", "fjerner prosesstrigger RE_ANNEN_SAK for skjæringstidspunkter " + skjæringstidspunkterSomKanFjernes);
 
-        skjæringstidspunkterSomKanFjernes.forEach(stp -> prosessTriggerForvaltningTjeneste.fjern(behandlingIdDto.getBehandlingId(), stp, BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON));
+        log.info("Forsøker fjerning av triggere for perioder " + utdaterteIntervaller + " for behandling " + behandling.getId());
 
-        log.info("Fjernet triggere for skjæringstidspunkter " + skjæringstidspunkterSomKanFjernes + " for behandling " + behandling.getId());
+        utdaterteIntervaller.forEach(periode -> prosessTriggerForvaltningTjeneste.fjern(behandlingIdDto.getBehandlingId(), periode, BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON));
 
         flyttTilbakeTilStart(behandling);
     }
