@@ -28,7 +28,6 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
-import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapperKodeverdiSerializer;
@@ -43,7 +42,6 @@ public class BehandlingskontrollEventObserver {
 
     private ProsessTaskTjeneste prosessTaskRepository;
     private BehandlingRepository behandlingRepository;
-    private BehandlingVedtakRepository behandlingVedtakRepository;
     private BehandlingProsessHendelseMapper behandlingProsessHendelseMapper;
     private boolean kodeverkSomStringTopics;
 
@@ -53,13 +51,11 @@ public class BehandlingskontrollEventObserver {
     @Inject
     public BehandlingskontrollEventObserver(ProsessTaskTjeneste prosessTaskRepository,
                                             BehandlingRepository behandlingRepository,
-                                            BehandlingVedtakRepository behandlingVedtakRepository,
                                             BehandlingProsessHendelseMapper behandlingProsessHendelseMapper,
                                             @KonfigVerdi(value = "KODEVERK_SOM_STRING_TOPICS", defaultVerdi = "false") boolean kodeverkSomStringTopics
     ) {
         this.prosessTaskRepository = prosessTaskRepository;
         this.behandlingRepository = behandlingRepository;
-        this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.behandlingProsessHendelseMapper = behandlingProsessHendelseMapper;
         this.kodeverkSomStringTopics = kodeverkSomStringTopics;
     }
