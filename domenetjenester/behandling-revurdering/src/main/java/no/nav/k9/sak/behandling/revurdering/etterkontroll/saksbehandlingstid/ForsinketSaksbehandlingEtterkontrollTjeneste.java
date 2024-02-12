@@ -20,6 +20,7 @@ import no.nav.k9.sak.behandling.revurdering.etterkontroll.Etterkontroll;
 import no.nav.k9.sak.behandling.revurdering.etterkontroll.EtterkontrollRef;
 import no.nav.k9.sak.behandling.revurdering.etterkontroll.KontrollType;
 import no.nav.k9.sak.behandling.revurdering.etterkontroll.tjeneste.KontrollTjeneste;
+import no.nav.k9.sak.behandling.saksbehandlingstid.SaksbehandlingsfristUtleder;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;

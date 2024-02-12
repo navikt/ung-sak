@@ -1,4 +1,4 @@
-package no.nav.k9.sak.behandling.revurdering.etterkontroll.saksbehandlingstid;
+package no.nav.k9.sak.behandling.saksbehandlingstid;
 
 import java.time.LocalDateTime;
 import java.util.Optional;

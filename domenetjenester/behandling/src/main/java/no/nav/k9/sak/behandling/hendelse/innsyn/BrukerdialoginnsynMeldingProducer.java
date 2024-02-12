@@ -1,10 +1,7 @@
-package no.nav.k9.sak.hendelse.brukerdialoginnsyn;
+package no.nav.k9.sak.behandling.hendelse.innsyn;
 
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -19,6 +16,8 @@ import org.apache.kafka.common.errors.RetriableException;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.StreamsConfig;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 @ApplicationScoped
@@ -49,7 +48,7 @@ public class BrukerdialoginnsynMeldingProducer {
         properties.put(StreamsConfig.APPLICATION_ID_CONFIG, appNamespace + "." + appName);
         properties.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SSL");
         properties.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, aivenBootstrapServers);
-        
+
         if (overrideKeystorePassword != null) {
             // TODO: Gjør at dette er mulig mot vtp:
             //properties.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, overrideKeystorePassword);
@@ -67,11 +66,11 @@ public class BrukerdialoginnsynMeldingProducer {
             properties.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, aivenCredstorePassword);
             properties.put(SslConfigs.SSL_KEY_PASSWORD_CONFIG, aivenCredstorePassword);
         }
-        
+
         this.producer = createProducer(properties);
         this.topic = topic;
     }
-    
+
     public void flushAndClose() {
         producer.flush();
         producer.close();
@@ -113,7 +112,7 @@ public class BrukerdialoginnsynMeldingProducer {
             properties.put("sasl.jaas.config", jaasCfg);
         }
     }
-    
+
     private void setSecurity(String username, Properties properties) {
         if (username != null && !username.isEmpty()) {
             properties.put("security.protocol", "SASL_SSL");
