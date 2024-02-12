@@ -283,8 +283,6 @@ spec:
       value: "true"
     - name: DOKUMENTMOTTAK_VALIDER_JOURNALFORT
       value: "true"
-    - name: UTTAK_KLIPP_BORT_AVSLAG
-      value: "true"
     - name: UTVIDET_ENDRING_UTBETALING_UTLEDER
       value: "true"
 
