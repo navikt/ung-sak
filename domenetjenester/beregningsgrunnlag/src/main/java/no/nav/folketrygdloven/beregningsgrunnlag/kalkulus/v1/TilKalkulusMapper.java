@@ -36,8 +36,10 @@ import no.nav.folketrygdloven.kalkulus.kodeverk.ArbeidsforholdHandlingType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.Arbeidskategori;
 import no.nav.folketrygdloven.kalkulus.kodeverk.InntektPeriodeType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.InntektYtelseType;
+import no.nav.folketrygdloven.kalkulus.kodeverk.Inntektskategori;
 import no.nav.folketrygdloven.kalkulus.kodeverk.InntektskildeType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.InntektspostType;
+import no.nav.folketrygdloven.kalkulus.kodeverk.LønnsinntektBeskrivelse;
 import no.nav.folketrygdloven.kalkulus.kodeverk.MidlertidigInaktivType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.NaturalYtelseType;
 import no.nav.folketrygdloven.kalkulus.kodeverk.OpptjeningAktivitetType;
@@ -278,7 +280,7 @@ public class TilKalkulusMapper {
             a.getUtbetalingsgradProsent() == null ? null : a.getUtbetalingsgradProsent().getVerdi(),
             a.getRefusjonsgradProsent() == null ? null : a.getRefusjonsgradProsent().getVerdi(),
             a.getInntektskategori() == null ?
-                no.nav.folketrygdloven.kalkulus.kodeverk.Inntektskategori.UDEFINERT : no.nav.folketrygdloven.kalkulus.kodeverk.Inntektskategori.fraKode(a.getInntektskategori().getKode())
+                Inntektskategori.UDEFINERT : Inntektskategori.fraKode(a.getInntektskategori().getKode())
         );
     }
 
@@ -310,9 +312,16 @@ public class TilKalkulusMapper {
             utbetalingsPostDto.setInntektYtelseType(InntektYtelseType.valueOf(ytelseType.name()));
         }
         if (inntektspost.getLønnsinntektBeskrivelse() != null) {
-            utbetalingsPostDto.medLønnsinntektBeskrivelse(inntektspost.getLønnsinntektBeskrivelse().getKode());
+            utbetalingsPostDto.setLønnsinntektBeskrivelse(mapLønnsinntektBeskrivelse(inntektspost));
         }
         return utbetalingsPostDto;
+    }
+
+    private static LønnsinntektBeskrivelse mapLønnsinntektBeskrivelse(Inntektspost inntektspost) {
+        return switch (inntektspost.getLønnsinntektBeskrivelse()) {
+            case KOMMUNAL_OMSORGSLOENN_OG_FOSTERHJEMSGODTGJOERELSE -> LønnsinntektBeskrivelse.KOMMUNAL_OMSORGSLOENN_OG_FOSTERHJEMSGODTGJOERELSE;
+            case UDEFINERT -> LønnsinntektBeskrivelse.UDEFINERT;
+        };
     }
 
     public static ArbeidDto mapArbeidDto(Collection<Yrkesaktivitet> yrkesaktiviteterForBeregning, DatoIntervallEntitet vilkårsPeriode) {
