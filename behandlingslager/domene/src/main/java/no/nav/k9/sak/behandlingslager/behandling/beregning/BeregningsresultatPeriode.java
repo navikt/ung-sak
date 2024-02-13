@@ -58,10 +58,8 @@ public class BeregningsresultatPeriode extends BaseEntitet {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "beregningsresultatPeriode", cascade = CascadeType.PERSIST, orphanRemoval = true)
     @OrderBy("periode, arbeidsgiver.arbeidsgiverOrgnr, arbeidsgiver.arbeidsgiverAktørId, arbeidsforholdRef, aktivitetStatus, inntektskategori")
-    private List<BeregningsresultatAndel> beregningsresultatAndelList = new ArrayList<>();
 
-    @Column(name = "gradering_inntekt_prosent")
-    private BigDecimal inntektGraderingsprosent;
+    private List<BeregningsresultatAndel> beregningsresultatAndelList = new ArrayList<>();
     @Column(name = "total_utbetalingsgrad_fra_uttak")
     private BigDecimal totalUtbetalingsgradFraUttak;
 
@@ -71,11 +69,6 @@ public class BeregningsresultatPeriode extends BaseEntitet {
     @Column(name = "reduksjonsfaktor_inaktiv_type_a")
     private BigDecimal reduksjonsfaktorInaktivTypeA;
 
-    @Column(name = "graderingsfaktor_inntekt")
-    private BigDecimal graderingsfaktorInntekt;
-
-    @Column(name = "graderingsfaktor_tid")
-    private BigDecimal graderingsfaktorTid;
 
     @Embedded
     @AttributeOverrides({
@@ -126,9 +119,6 @@ public class BeregningsresultatPeriode extends BaseEntitet {
         return beregningsresultat;
     }
 
-    public BigDecimal getInntektGraderingsprosent() {
-        return inntektGraderingsprosent;
-    }
 
     public BigDecimal getTotalUtbetalingsgradFraUttak() {
         return totalUtbetalingsgradFraUttak;
@@ -142,13 +132,7 @@ public class BeregningsresultatPeriode extends BaseEntitet {
         return reduksjonsfaktorInaktivTypeA;
     }
 
-    public BigDecimal getGraderingsfaktorInntekt() {
-        return graderingsfaktorInntekt;
-    }
 
-    public BigDecimal getGraderingsfaktorTid() {
-        return graderingsfaktorTid;
-    }
 
 
     void addBeregningsresultatAndel(BeregningsresultatAndel beregningsresultatAndel) {
@@ -181,7 +165,6 @@ public class BeregningsresultatPeriode extends BaseEntitet {
     public String toString() {
         return getClass().getSimpleName()
             + "<periode=" + periode
-            + (inntektGraderingsprosent != null ? ", inntektsgradering=" + inntektGraderingsprosent.toPlainString() : "")
             + (totalUtbetalingsgradFraUttak != null ? ", totalUtbetalingsgradFraUttak=" + totalUtbetalingsgradFraUttak.toPlainString() : "")
             + (totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt != null ? ", totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt=" + totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt.toPlainString() : "")
             + (reduksjonsfaktorInaktivTypeA != null ? ", reduksjonsfaktorInaktivTypeA=" + reduksjonsfaktorInaktivTypeA.toPlainString() : "")
@@ -209,11 +192,6 @@ public class BeregningsresultatPeriode extends BaseEntitet {
             return this;
         }
 
-        public Builder medInntektGraderingprosent(BigDecimal inntektGraderingsprosent) {
-            beregningsresultatPeriodeMal.inntektGraderingsprosent = inntektGraderingsprosent;
-            return this;
-        }
-
         public Builder medTotalUtbetalingsgradFraUttak(BigDecimal totalUtbetalingsgradFraUttak) {
             beregningsresultatPeriodeMal.totalUtbetalingsgradFraUttak = totalUtbetalingsgradFraUttak;
             return this;
@@ -228,17 +206,6 @@ public class BeregningsresultatPeriode extends BaseEntitet {
             beregningsresultatPeriodeMal.reduksjonsfaktorInaktivTypeA = reduksjonsfaktorInaktivTypeA;
             return this;
         }
-
-        public Builder medGraderingsfaktorInntekt(BigDecimal graderingsfaktorInntekt) {
-            beregningsresultatPeriodeMal.graderingsfaktorInntekt = graderingsfaktorInntekt;
-            return this;
-        }
-
-        public Builder medGraderingsfaktorTid(BigDecimal graderingsfaktorTid) {
-            beregningsresultatPeriodeMal.graderingsfaktorTid = graderingsfaktorTid;
-            return this;
-        }
-
 
         public BeregningsresultatPeriode build(BeregningsresultatEntitet beregningsresultat) {
             beregningsresultatPeriodeMal.beregningsresultat = beregningsresultat;

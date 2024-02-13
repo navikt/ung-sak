@@ -122,12 +122,9 @@ public class OMPBeregningsresultatMapper implements BeregningsresultatMapper {
 
         var dtoer = brpTimline.toSegments().stream()
             .map(seg -> BeregningsresultatPeriodeDto.build(seg.getFom(), seg.getTom())
-                .medInntektGraderingsprosent(seg.getValue().getInntektGraderingsprosent())
                 .medTotalUtbetalingsgradFraUttak(seg.getValue().getTotalUtbetalingsgradFraUttak())
                 .medTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(seg.getValue().getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt())
                 .medReduksjonsfaktorInaktivTypeA(seg.getValue().getReduksjonsfaktorInaktivTypeA())
-                .medGraderingsfaktorInntekt(seg.getValue().getGraderingsfaktorInntekt())
-                .medGraderingsfaktorTid(seg.getValue().getGraderingsfaktorTid())
                 .medDagsats(seg.getValue().getDagsats())
                 .medAndeler(lagAndeler(seg.getValue(), andelTilSisteUtbetalingsdatoMap, iayGrunnlag, uttaksplan))
                 .create())
