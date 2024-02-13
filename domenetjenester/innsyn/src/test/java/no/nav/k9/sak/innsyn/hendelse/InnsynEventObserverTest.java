@@ -1,7 +1,8 @@
-package no.nav.k9.sak.behandling.hendelse.innsyn;
+package no.nav.k9.sak.innsyn.hendelse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -16,6 +17,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Set;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
@@ -37,20 +39,27 @@ import no.nav.k9.sak.behandlingskontroll.events.BehandlingStatusEvent;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
+import no.nav.k9.sak.domene.person.personopplysning.UtlandVurdererTjeneste;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
+import no.nav.k9.sak.innsyn.BrukerdialoginnsynMeldingProducer;
 import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 
 class InnsynEventObserverTest {
-
     private final ProsessTaskTjeneste prosessTaskTjeneste = mock();
     private final SaksbehandlingsfristUtleder fristUtleder = mock();
     private final Instance<SaksbehandlingsfristUtleder> utledere = new UnitTestLookupInstanceImpl<>(fristUtleder);
     private final BrukerdialoginnsynMeldingProducer producer = mock();
     private final MottatteDokumentRepository mottatteDokumentRepository = mock();
+    private UtlandVurdererTjeneste utlandVurdererTjeneste = mock();
 
+
+    @BeforeEach
+    void setup() {
+        when(utlandVurdererTjeneste.erUtenlandssak(any())).thenReturn(false);
+    }
 
     @Test
     void nyBehandlingEvent() {
@@ -58,8 +67,8 @@ class InnsynEventObserverTest {
         var pleietrengende = AktørId.dummy();
 
         TestScenarioBuilder testScenarioBuilder = TestScenarioBuilder
-                .builderMedSøknad(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, mor)
-                .medPleietrengende(pleietrengende);
+            .builderMedSøknad(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, mor)
+            .medPleietrengende(pleietrengende);
         var behandling = testScenarioBuilder.lagMocked();
         no.nav.k9.sak.behandlingslager.fagsak.Fagsak fagsak = behandling.getFagsak();
         var now = LocalDateTime.now();
@@ -72,17 +81,18 @@ class InnsynEventObserverTest {
             anyList(),
             anyBoolean(),
             ArgumentMatchers.any(DokumentStatus[].class)))
-                .thenReturn(List.of(byggMottattDokument(fagsak.getId(), behandling.getId(), now, søknadJpId, Brevkode.PLEIEPENGER_BARN_SOKNAD)));
+            .thenReturn(List.of(byggMottattDokument(fagsak.getId(), behandling.getId(), now, søknadJpId, Brevkode.PLEIEPENGER_BARN_SOKNAD)));
 
         BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(behandling.getFagsakId(), behandling.getAktørId(), new BehandlingLås(behandling.getId()));
         var event = BehandlingStatusEvent.nyEvent(kontekst, BehandlingStatus.UTREDES, BehandlingStatus.OPPRETTET);
+
 
         var observer = new InnsynEventObserver(prosessTaskTjeneste,
             testScenarioBuilder.mockBehandlingRepository(),
             utledere,
             producer,
             mottatteDokumentRepository,
-            true);
+            true, utlandVurdererTjeneste);
 
         observer.observerBehandlingStartet(event);
 
@@ -186,6 +196,4 @@ class InnsynEventObserverTest {
     // status = fra behandling
     // event type = migrering
     // lager prosesstask(er?) for å kafka
-
 }
-

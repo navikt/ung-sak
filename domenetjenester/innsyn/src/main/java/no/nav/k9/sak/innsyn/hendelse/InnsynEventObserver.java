@@ -1,4 +1,4 @@
-package no.nav.k9.sak.behandling.hendelse.innsyn;
+package no.nav.k9.sak.innsyn.hendelse;
 
 import java.io.IOException;
 import java.time.ZoneId;
@@ -25,10 +25,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
-import no.nav.k9.sak.behandling.hendelse.produksjonsstyring.PubliserProduksjonsstyringHendelseTask;
-import no.nav.k9.sak.behandling.hendelse.produksjonsstyring.PubliserProduksjonsstyringHendelseTaskImpl;
 import no.nav.k9.sak.behandling.saksbehandlingstid.SaksbehandlingsfristUtleder;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingStatusEvent;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -36,10 +33,9 @@ import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
+import no.nav.k9.sak.domene.person.personopplysning.UtlandVurdererTjeneste;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapperKodeverdiSerializer;
-import no.nav.k9.sak.kontrakt.produksjonsstyring.los.ProduksjonsstyringBehandlingAvsluttetHendelse;
-import no.nav.k9.sak.kontrakt.produksjonsstyring.los.ProduksjonsstyringBehandlingOpprettetHendelse;
+import no.nav.k9.sak.innsyn.BrukerdialoginnsynMeldingProducer;
 import no.nav.k9.søknad.felles.Kildesystem;
 
 @ApplicationScoped
@@ -53,6 +49,7 @@ public class InnsynEventObserver {
     private MottatteDokumentRepository mottatteDokumentRepository;
     private Instance<SaksbehandlingsfristUtleder> fristUtledere;
     private boolean enable;
+    private UtlandVurdererTjeneste utlandVurdererTjeneste;
 
     public InnsynEventObserver() {
     }
@@ -63,13 +60,15 @@ public class InnsynEventObserver {
                                Instance<SaksbehandlingsfristUtleder> fristUtledere,
                                BrukerdialoginnsynMeldingProducer producer,
                                MottatteDokumentRepository mottatteDokumentRepository,
-                               @KonfigVerdi(value = "ENABLE_INNSYN_OBSERVER", defaultVerdi = "false") boolean enable) {
+                               @KonfigVerdi(value = "ENABLE_INNSYN_OBSERVER", defaultVerdi = "false") boolean enable,
+                               UtlandVurdererTjeneste utlandVurdererTjeneste) {
         this.prosessTaskRepository = prosessTaskRepository;
         this.behandlingRepository = behandlingRepository;
         this.producer = producer;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.fristUtledere = fristUtledere;
         this.enable = enable;
+        this.utlandVurdererTjeneste = utlandVurdererTjeneste;
     }
 
 
@@ -95,7 +94,7 @@ public class InnsynEventObserver {
                 mapBehandingStatus(behandling),
                 mapSøknader(behandling),
                 mapAksjonspunkter(behandling.getÅpneAksjonspunkter()),
-                false, //TODO utlede
+                utlandVurdererTjeneste.erUtenlandssak(behandling),
                 mapFagsak(fagsak)
             );
 
@@ -148,46 +147,4 @@ public class InnsynEventObserver {
     }
 
 
-    private ProsessTaskData opprettProsessTaskBehandlingOpprettetEvent(Long behandlingId) throws IOException {
-        ProsessTaskData taskData = ProsessTaskData.forProsessTask(PubliserProduksjonsstyringHendelseTaskImpl.class);
-        taskData.setCallIdFraEksisterende();
-        taskData.setPrioritet(50);
-
-        Behandling behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId).orElseThrow();
-        Fagsak fagsak = behandling.getFagsak();
-
-        ProduksjonsstyringBehandlingOpprettetHendelse dto = new ProduksjonsstyringBehandlingOpprettetHendelse(
-            behandling.getUuid(),
-            behandling.getOpprettetTidspunkt(),
-            fagsak.getSaksnummer().getVerdi(),
-            behandling.getFagsakYtelseType(),
-            behandling.getType(),
-            behandling.getBehandlingstidFrist(),
-            fagsak.getPeriode().tilPeriode(),
-            fagsak.getAktørId(),
-            fagsak.getPleietrengendeAktørId(),
-            fagsak.getRelatertPersonAktørId()
-        );
-
-        taskData.setPayload(JsonObjectMapper.getJson(dto));
-        taskData.setProperty(PubliserProduksjonsstyringHendelseTask.PROPERTY_KEY, behandlingId.toString());
-        return taskData;
-    }
-
-    private ProsessTaskData opprettProsessTaskBehandlingAvsluttetEvent(Long behandlingId) throws IOException {
-        ProsessTaskData taskData = ProsessTaskData.forProsessTask(PubliserProduksjonsstyringHendelseTaskImpl.class);
-        taskData.setCallIdFraEksisterende();
-        taskData.setPrioritet(50);
-
-        Behandling behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId).orElseThrow();
-        ProduksjonsstyringBehandlingAvsluttetHendelse dto = new ProduksjonsstyringBehandlingAvsluttetHendelse(
-            behandling.getUuid(),
-            behandling.getOpprettetTidspunkt(),
-            behandling.getBehandlingResultatType()
-        );
-
-        taskData.setPayload(JsonObjectMapper.getJson(dto));
-        taskData.setProperty(PubliserProduksjonsstyringHendelseTask.PROPERTY_KEY, behandlingId.toString());
-        return taskData;
-    }
 }
