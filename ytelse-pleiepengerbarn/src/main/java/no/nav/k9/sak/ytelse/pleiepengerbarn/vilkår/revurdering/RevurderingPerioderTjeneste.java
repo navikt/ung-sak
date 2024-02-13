@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Objects;
@@ -26,6 +27,7 @@ import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.PeriodeMedÅrsak;
@@ -114,7 +116,8 @@ public class RevurderingPerioderTjeneste {
 
         var inntektsmeldingerRelevantForBeregning = InntektsmeldingerRelevantForBeregning.finnTjeneste(inntektsmeldingerRelevantForBeregningTjenester, referanse.getFagsakYtelseType());
         for (DatoIntervallEntitet periode : datoIntervallEntitets) {
-            var relevanteInntektsmeldingerForPeriode = inntektsmeldingerRelevantForBeregning.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, periode);
+            var begrensetInntektsmeldinger = inntektsmeldingerRelevantForBeregning.begrensSakInntektsmeldinger(referanse, sakInntektsmeldinger, periode);
+            var relevanteInntektsmeldingerForPeriode = inntektsmeldingerRelevantForBeregning.utledInntektsmeldingerSomGjelderForPeriode(begrensetInntektsmeldinger, periode);
             var nyeRelevanteMottatteDokumenter = mottatteInntektsmeldinger.stream()
                 .filter(im -> relevanteInntektsmeldingerForPeriode.stream().anyMatch(at -> Objects.equals(at.getJournalpostId(), im.getJournalpostId())))
                 .toList();
