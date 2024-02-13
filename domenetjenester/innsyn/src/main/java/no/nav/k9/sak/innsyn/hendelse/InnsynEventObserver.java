@@ -19,8 +19,10 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.innsyn.InnsynHendelse;
 import no.nav.k9.innsyn.sak.Aksjonspunkt;
+import no.nav.k9.innsyn.sak.BehandlingResultat;
 import no.nav.k9.innsyn.sak.SøknadInfo;
 import no.nav.k9.innsyn.sak.SøknadStatus;
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
@@ -91,6 +93,9 @@ public class InnsynEventObserver {
             String saksnummer = fagsak.getSaksnummer().getVerdi();
             var behandlingInnsyn = new no.nav.k9.innsyn.sak.Behandling(
                 behandling.getUuid(),
+                behandling.getOpprettetDato().atZone(ZoneId.systemDefault()),
+                Optional.ofNullable(behandling.getAvsluttetDato()).map(it -> it.atZone(ZoneId.systemDefault())).orElse(null),
+                mapBehandlingResultat(behandling.getBehandlingResultatType()),
                 mapBehandingStatus(behandling),
                 mapSøknader(behandling),
                 mapAksjonspunkter(behandling.getÅpneAksjonspunkter()),
@@ -103,6 +108,8 @@ public class InnsynEventObserver {
             producer.send(saksnummer, json);
         }
     }
+
+
 
     private Set<Aksjonspunkt> mapAksjonspunkter(List<no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt> åpneAksjonspunkter) {
         //TODO for å finne ut om medisinske opplysninger mangler må
@@ -134,6 +141,26 @@ public class InnsynEventObserver {
             return no.nav.k9.innsyn.sak.BehandlingStatus.AVSLUTTET;
         }
         return no.nav.k9.innsyn.sak.BehandlingStatus.UNDER_BEHANDLING;
+    }
+    private BehandlingResultat mapBehandlingResultat(BehandlingResultatType behandlingResultatType) {
+        if (behandlingResultatType.erHenleggelse()) {
+            return BehandlingResultat.HENLAGT;
+        }
+
+        if (behandlingResultatType == BehandlingResultatType.AVSLÅTT) {
+            return BehandlingResultat.AVSLÅTT;
+        }
+
+        if (behandlingResultatType == BehandlingResultatType.INNVILGET) {
+            return BehandlingResultat.INNVILGET;
+        }
+
+
+        if (behandlingResultatType == BehandlingResultatType.DELVIS_INNVILGET) {
+            return BehandlingResultat.DELVIS_INNVILGET;
+        }
+
+        return null;
     }
 
     private static String deserialiser(InnsynHendelse<?> behandling) {

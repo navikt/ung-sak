@@ -114,6 +114,8 @@ class InnsynEventObserverTest {
         assertThat(b.behandlingsId()).isEqualTo(behandling.getUuid());
         assertThat(b.erUtenlands()).isEqualTo(false);
         assertThat(b.status()).isEqualTo(no.nav.k9.innsyn.sak.BehandlingStatus.UNDER_BEHANDLING);
+        assertThat(b.avsluttetTidspunkt()).isNull();
+        assertThat(b.opprettetTidspunkt()).isEqualTo(behandling.getOpprettetDato().atZone(ZoneId.systemDefault()));
 
         var aksjonspunkter = b.aksjonspunkter();
         assertThat(aksjonspunkter).isEmpty();
