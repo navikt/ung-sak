@@ -57,12 +57,9 @@ public class MapBeregningsresultatFeriepengerFraVLTilRegel {
         BeregningsresultatPeriode periode = new BeregningsresultatPeriode(
                 inputPeriode.getBeregningsresultatPeriodeFom(),
             inputPeriode.getBeregningsresultatPeriodeTom(),
-            inputPeriode.getInntektGraderingsprosent(),
             inputPeriode.getTotalUtbetalingsgradFraUttak(),
             inputPeriode.getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(),
-            inputPeriode.getReduksjonsfaktorInaktivTypeA(),
-            inputPeriode.getGraderingsfaktorTid(),
-            inputPeriode.getGraderingsfaktorInntekt()
+            inputPeriode.getReduksjonsfaktorInaktivTypeA()
         );
         inputPeriode.getBeregningsresultatAndelList().forEach(andel -> mapBeregningsresultatAndel(andel, periode));
         return periode;

@@ -12,39 +12,26 @@ public class BeregningsresultatPeriode {
 
     private List<BeregningsresultatAndel> beregningsresultatAndelList = new ArrayList<>();
     private LocalDateInterval periode;
-    private BigDecimal inntektGraderingsprosent;
     private BigDecimal totalUtbetalingsgradFraUttak;
     private BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
     private BigDecimal reduksjonsfaktorInaktivTypeA;
-    private BigDecimal graderingsfaktorTid;
-    private BigDecimal graderingsfaktorInntekt;
-
 
     public BeregningsresultatPeriode(LocalDateInterval periode,
-                                     BigDecimal inntektGraderingsprosent,
                                      BigDecimal totalUtbetalingsgradFraUttak,
                                      BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt,
-                                     BigDecimal reduksjonsfaktorInaktivTypeA,
-                                     BigDecimal graderingsfaktorTid,
-                                     BigDecimal graderingsfaktorInntekt) {
+                                     BigDecimal reduksjonsfaktorInaktivTypeA) {
         this.periode = periode;
-        this.inntektGraderingsprosent = inntektGraderingsprosent;
         this.totalUtbetalingsgradFraUttak = totalUtbetalingsgradFraUttak;
         this.totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt = totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
         this.reduksjonsfaktorInaktivTypeA = reduksjonsfaktorInaktivTypeA;
-        this.graderingsfaktorTid = graderingsfaktorTid;
-        this.graderingsfaktorInntekt = graderingsfaktorInntekt;
     }
 
     public BeregningsresultatPeriode(LocalDate fom,
                                      LocalDate tom,
-                                     BigDecimal inntektGraderingsprosent,
                                      BigDecimal totalUtbetalingsgradFraUttak,
                                      BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt,
-                                     BigDecimal reduksjonsfaktorInaktivTypeA,
-                                     BigDecimal graderingsfaktorTid,
-                                     BigDecimal graderingsfaktorInntekt) {
-        this(new LocalDateInterval(fom, tom), inntektGraderingsprosent, totalUtbetalingsgradFraUttak, totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt, reduksjonsfaktorInaktivTypeA, graderingsfaktorTid, graderingsfaktorInntekt);
+                                     BigDecimal reduksjonsfaktorInaktivTypeA) {
+        this(new LocalDateInterval(fom, tom), totalUtbetalingsgradFraUttak, totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt, reduksjonsfaktorInaktivTypeA);
     }
 
     public LocalDate getFom() {
@@ -59,9 +46,6 @@ public class BeregningsresultatPeriode {
         return periode;
     }
 
-    public BigDecimal getInntektGraderingsprosent() {
-        return inntektGraderingsprosent;
-    }
 
     public BigDecimal getTotalUtbetalingsgradFraUttak() {
         return totalUtbetalingsgradFraUttak;
@@ -73,14 +57,6 @@ public class BeregningsresultatPeriode {
 
     public BigDecimal getReduksjonsfaktorInaktivTypeA() {
         return reduksjonsfaktorInaktivTypeA;
-    }
-
-    public BigDecimal getGraderingsfaktorTid() {
-        return graderingsfaktorTid;
-    }
-
-    public BigDecimal getGraderingsfaktorInntekt() {
-        return graderingsfaktorInntekt;
     }
 
     public List<BeregningsresultatAndel> getBeregningsresultatAndelList() {
