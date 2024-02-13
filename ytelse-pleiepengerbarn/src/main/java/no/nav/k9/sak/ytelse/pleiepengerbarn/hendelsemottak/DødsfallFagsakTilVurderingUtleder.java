@@ -90,7 +90,7 @@ public class DødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderingU
                     }
                 }
                 for (Fagsak fagsak : fagsakRepository.finnFagsakRelatertTil(fagsakYtelseType, null, aktør, null, dødsdato, null)) {
-                    if (erNyInformasjonIHendelsen(fagsak, aktør, dødsdato, hendelseId) && erPleietrengendesDødRelevantForVedtaket(fagsak)) {
+                    if (erNyInformasjonIHendelsen(fagsak, aktør, dødsdato, hendelseId) && erPleietrengendesDødRelevantForVedtaket(fagsak, dødsdato)) {
                         fagsaker.put(fagsak, BehandlingÅrsakType.RE_HENDELSE_DØD_BARN);
                     }
                 }
@@ -101,7 +101,7 @@ public class DødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderingU
         return fagsaker;
     }
 
-    private boolean erPleietrengendesDødRelevantForVedtaket(Fagsak fagsak) {
+    private boolean erPleietrengendesDødRelevantForVedtaket(Fagsak fagsak, LocalDate dødsdato) {
         if (!skalSjekkeOmDødErRelevantForVedtak) {
             return true;
         }
@@ -120,7 +120,8 @@ public class DødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderingU
         var heleVilkårTidslinjen = vilkårresultat.getAlleIntervaller();
         var avslåttTidslinje = finnAvslåttTidslinje(vilkårresultat);
         var innvilgetTidslinje = heleVilkårTidslinjen.disjoint(avslåttTidslinje);
-        return !innvilgetTidslinje.isEmpty();
+        var innvilgelseFomDødsdato = innvilgetTidslinje.intersection(new LocalDateInterval(dødsdato, fagsak.getPeriode().getTomDato()));
+        return !innvilgelseFomDødsdato.isEmpty();
     }
 
     private static LocalDateTimeline<Boolean> finnAvslåttTidslinje(Vilkårene vilkårresultat) {
@@ -131,10 +132,6 @@ public class DødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderingU
             .map(p -> new LocalDateSegment<>(p.toLocalDateInterval(), true))
             .toList();
         return new LocalDateTimeline<>(avslåtteSegmenter, StandardCombinators::alwaysTrueForMatch);
-    }
-
-    private static boolean inn(LocalDateTimeline<Boolean> innvilgetTidslinje, LocalDate dødsdato) {
-        return innvilgetTidslinje.getSegment(new LocalDateInterval(dødsdato, dødsdato)) != null;
     }
 
     /**

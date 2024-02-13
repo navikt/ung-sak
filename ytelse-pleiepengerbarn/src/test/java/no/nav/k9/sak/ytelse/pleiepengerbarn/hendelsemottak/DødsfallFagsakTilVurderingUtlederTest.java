@@ -87,6 +87,76 @@ class DødsfallFagsakTilVurderingUtlederTest {
     }
 
     @Test
+    void skal_ikke_returnere_årsak_dersom_kun_innvilget_før_dødsdato() {
+
+        scenarioBuilder.leggTilVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, Utfall.IKKE_OPPFYLT, new Periode(STP, STP.plusDays(10)));
+        var stp2 = STP.minusMonths(1);
+        scenarioBuilder.leggTilVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, Utfall.OPPFYLT, new Periode(stp2, stp2.plusDays(1)));
+
+        var behandling = scenarioBuilder.lagre(entityManager);
+        scenarioBuilder.lagreFagsak(behandlingRepositoryProvider);
+
+        behandling.avsluttBehandling();
+        entityManager.flush();
+
+        var builder = new HendelseInfo.Builder();
+        builder.leggTilAktør(PLEIETRENGENDE_AKTØR_ID);
+        builder.medHendelseId("1");
+        builder.medOpprettet(LocalDateTime.now());
+        var fagsakBehandlingÅrsakTypeMap = utleder.finnFagsakerTilVurdering(new DødsfallHendelse(builder.build(), DØDSDATO));
+
+
+        assertThat(fagsakBehandlingÅrsakTypeMap.isEmpty()).isTrue();
+    }
+
+    @Test
+    void skal_returnere_årsak_dersom_innvilget_tom_dødsdato() {
+
+        scenarioBuilder.leggTilVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, Utfall.OPPFYLT, new Periode(STP, DØDSDATO));
+        scenarioBuilder.leggTilVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, Utfall.IKKE_OPPFYLT, new Periode(DØDSDATO.plusDays(1), DØDSDATO.plusDays(10)));
+
+        var behandling = scenarioBuilder.lagre(entityManager);
+        var fagsak = scenarioBuilder.lagreFagsak(behandlingRepositoryProvider);
+
+        behandling.avsluttBehandling();
+        entityManager.flush();
+
+        var builder = new HendelseInfo.Builder();
+        builder.leggTilAktør(PLEIETRENGENDE_AKTØR_ID);
+        builder.medHendelseId("1");
+        builder.medOpprettet(LocalDateTime.now());
+        var fagsakBehandlingÅrsakTypeMap = utleder.finnFagsakerTilVurdering(new DødsfallHendelse(builder.build(), DØDSDATO));
+
+
+
+        assertThat(fagsakBehandlingÅrsakTypeMap.isEmpty()).isFalse();
+        assertThat(fagsakBehandlingÅrsakTypeMap.get(fagsak)).isEqualTo(BehandlingÅrsakType.RE_HENDELSE_DØD_BARN);
+    }
+
+    @Test
+    void skal_returnere_årsak_dersom_innvilget_fom_dødsdato() {
+
+        scenarioBuilder.leggTilVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, Utfall.IKKE_OPPFYLT, new Periode(STP, DØDSDATO.minusDays(2)));
+        scenarioBuilder.leggTilVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, Utfall.OPPFYLT, new Periode(DØDSDATO, DØDSDATO.plusDays(10)));
+
+        var behandling = scenarioBuilder.lagre(entityManager);
+        var fagsak = scenarioBuilder.lagreFagsak(behandlingRepositoryProvider);
+
+        behandling.avsluttBehandling();
+        entityManager.flush();
+
+        var builder = new HendelseInfo.Builder();
+        builder.leggTilAktør(PLEIETRENGENDE_AKTØR_ID);
+        builder.medHendelseId("1");
+        builder.medOpprettet(LocalDateTime.now());
+        var fagsakBehandlingÅrsakTypeMap = utleder.finnFagsakerTilVurdering(new DødsfallHendelse(builder.build(), DØDSDATO));
+
+
+
+        assertThat(fagsakBehandlingÅrsakTypeMap.isEmpty()).isFalse();
+        assertThat(fagsakBehandlingÅrsakTypeMap.get(fagsak)).isEqualTo(BehandlingÅrsakType.RE_HENDELSE_DØD_BARN);
+    }
+    @Test
     void skal_returnere_årsak_dersom_alle_perioder_er_avslått_i_siste_ikke_avsluttet_behandling() {
 
         scenarioBuilder.leggTilVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, Utfall.IKKE_OPPFYLT, new Periode(STP, STP.plusDays(10)));
