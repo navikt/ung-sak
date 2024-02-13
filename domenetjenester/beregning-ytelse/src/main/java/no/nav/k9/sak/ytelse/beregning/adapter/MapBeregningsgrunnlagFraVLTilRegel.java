@@ -42,12 +42,9 @@ public class MapBeregningsgrunnlagFraVLTilRegel {
     private static BeregningsgrunnlagPeriode mapBeregningsgrunnlagPeriode(no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode vlBGPeriode) {
         final BeregningsgrunnlagPeriode.Builder regelBGPeriode = BeregningsgrunnlagPeriode.builder()
             .medPeriode(Periode.of(vlBGPeriode.getBeregningsgrunnlagPeriodeFom(), vlBGPeriode.getBeregningsgrunnlagPeriodeTom()))
-            .medInntektGraderingsprosent(vlBGPeriode.getInntektGraderingsprosent())
             .medTotalUtbetalingsgradFraUttak(vlBGPeriode.getTotalUtbetalingsgradFraUttak())
             .medTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(vlBGPeriode.getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt())
-            .medReduksjonsfaktorInaktivTypeA(vlBGPeriode.getReduksjonsfaktorInaktivTypeA())
-            .medGraderingsfaktorTid(vlBGPeriode.getGraderingsfaktorTid())
-            .medGraderingsfaktorInntekt(vlBGPeriode.getGraderingsfaktorInntekt());
+            .medReduksjonsfaktorInaktivTypeA(vlBGPeriode.getReduksjonsfaktorInaktivTypeA());
         List<BeregningsgrunnlagPrStatus> beregningsgrunnlagPrStatus = mapVLBGPrStatus(vlBGPeriode);
         beregningsgrunnlagPrStatus.forEach(regelBGPeriode::medBeregningsgrunnlagPrStatus);
         regelBGPeriode.medBruttoBeregningsgrunnlag(vlBGPeriode.getBruttoPrÅr());

@@ -12,12 +12,9 @@ public class BeregningsgrunnlagPeriode {
     @JsonManagedReference
     private List<BeregningsgrunnlagPrStatus> beregningsgrunnlagPrStatus = new ArrayList<>();
     private Periode bgPeriode;
-    private BigDecimal inntektGraderingsprosent;
     private BigDecimal totalUtbetalingsgradFraUttak;
     private BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
     private BigDecimal reduksjonsfaktorInaktivTypeA;
-    private BigDecimal graderingsfaktorTid;
-    private BigDecimal graderingsfaktorInntekt;
     private BigDecimal bruttoBeregningsgrunnlag;
 
 
@@ -44,10 +41,6 @@ public class BeregningsgrunnlagPeriode {
         return bgPeriode;
     }
 
-    public BigDecimal getInntektGraderingsprosent() {
-        return inntektGraderingsprosent;
-    }
-
     public BigDecimal getTotalUtbetalingsgradFraUttak() {
         return totalUtbetalingsgradFraUttak;
     }
@@ -58,14 +51,6 @@ public class BeregningsgrunnlagPeriode {
 
     public BigDecimal getReduksjonsfaktorInaktivTypeA() {
         return reduksjonsfaktorInaktivTypeA;
-    }
-
-    public BigDecimal getGraderingsfaktorTid() {
-        return graderingsfaktorTid;
-    }
-
-    public BigDecimal getGraderingsfaktorInntekt() {
-        return graderingsfaktorInntekt;
     }
 
     public static Builder builder() {
@@ -88,11 +73,6 @@ public class BeregningsgrunnlagPeriode {
             return this;
         }
 
-        public Builder medInntektGraderingsprosent(BigDecimal inntektGraderingsprosent) {
-            beregningsgrunnlagPeriodeMal.inntektGraderingsprosent = inntektGraderingsprosent;
-            return this;
-        }
-
         public Builder medTotalUtbetalingsgradFraUttak(BigDecimal totalUtbetalingsgradFraUttak) {
             beregningsgrunnlagPeriodeMal.totalUtbetalingsgradFraUttak = totalUtbetalingsgradFraUttak;
             return this;
@@ -105,16 +85,6 @@ public class BeregningsgrunnlagPeriode {
 
         public Builder medReduksjonsfaktorInaktivTypeA(BigDecimal reduksjonsfaktorInaktivTypeA) {
             beregningsgrunnlagPeriodeMal.reduksjonsfaktorInaktivTypeA = reduksjonsfaktorInaktivTypeA;
-            return this;
-        }
-
-        public Builder medGraderingsfaktorTid(BigDecimal graderingsfaktorTid) {
-            beregningsgrunnlagPeriodeMal.graderingsfaktorTid = graderingsfaktorTid;
-            return this;
-        }
-
-        public Builder medGraderingsfaktorInntekt(BigDecimal graderingsfaktorInntekt) {
-            beregningsgrunnlagPeriodeMal.graderingsfaktorInntekt = graderingsfaktorInntekt;
             return this;
         }
 

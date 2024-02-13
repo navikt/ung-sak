@@ -100,7 +100,7 @@ class MapBeregningsresultatFeriepengerFraRegelTilVLTest {
     }
 
     private BeregningsresultatPeriode lagPeriodeMedAndel(BigDecimal årsbeløp) {
-        BeregningsresultatPeriode periode = new BeregningsresultatPeriode(PERIODE, null, null, null, null, null, null);
+        BeregningsresultatPeriode periode = new BeregningsresultatPeriode(PERIODE, null, null, null);
         BeregningsresultatAndel andel = BeregningsresultatAndel.builder().medAktivitetStatus(AktivitetStatus.ATFL)
             .medBrukerErMottaker(true)
             .medInntektskategori(Inntektskategori.ARBEIDSTAKER)
