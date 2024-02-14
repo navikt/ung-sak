@@ -102,7 +102,9 @@ class InnsynEventObserverTest {
             utledere,
             producer,
             mottatteDokumentRepository,
-            true, utlandVurdererTjeneste);
+            true,
+            true,
+            utlandVurdererTjeneste);
 
         observer.observerBehandlingStartet(event);
 

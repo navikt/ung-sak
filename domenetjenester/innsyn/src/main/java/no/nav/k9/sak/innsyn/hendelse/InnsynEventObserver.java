@@ -53,7 +53,8 @@ public class InnsynEventObserver {
     private BrukerdialoginnsynMeldingProducer producer;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private Instance<SaksbehandlingsfristUtleder> fristUtledere;
-    private boolean enable;
+    private boolean enableStartSlutt;
+    private boolean enableEndringer;
     private UtlandVurdererTjeneste utlandVurdererTjeneste;
 
     public InnsynEventObserver() {
@@ -65,20 +66,22 @@ public class InnsynEventObserver {
                                Instance<SaksbehandlingsfristUtleder> fristUtledere,
                                BrukerdialoginnsynMeldingProducer producer,
                                MottatteDokumentRepository mottatteDokumentRepository,
-                               @KonfigVerdi(value = "ENABLE_INNSYN_OBSERVER", defaultVerdi = "false") boolean enable,
+                               @KonfigVerdi(value = "ENABLE_INNSYN_START_SLUTT_OBSERVER", defaultVerdi = "false") boolean enableBehandlingStartSlutt,
+                               @KonfigVerdi(value = "ENABLE_INNSYN_ENDRING_OBSERVER", defaultVerdi = "false") boolean enableEndringer,
                                UtlandVurdererTjeneste utlandVurdererTjeneste) {
         this.prosessTaskRepository = prosessTaskRepository;
         this.behandlingRepository = behandlingRepository;
         this.producer = producer;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.fristUtledere = fristUtledere;
-        this.enable = enable;
+        this.enableStartSlutt = enableBehandlingStartSlutt;
+        this.enableEndringer = enableEndringer;
         this.utlandVurdererTjeneste = utlandVurdererTjeneste;
     }
 
 
     public void observerBehandlingStartet(@Observes BehandlingStatusEvent event) {
-        if (!enable) {
+        if (!enableStartSlutt) {
             return;
         }
 
@@ -90,7 +93,7 @@ public class InnsynEventObserver {
     }
 
     public void observerBehandlingAvsluttetEvent(@Observes BehandlingStatusEvent.BehandlingAvsluttetEvent event)  {
-        if (!enable) {
+        if (!enableStartSlutt) {
             return;
         }
 
@@ -99,7 +102,7 @@ public class InnsynEventObserver {
     }
 
     public void observerAksjonspunkterFunnetEvent(@Observes AksjonspunktStatusEvent event) {
-        if (!enable) {
+        if (!enableEndringer) {
             return;
         }
 
