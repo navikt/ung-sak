@@ -87,11 +87,21 @@ public class InnsynEventObserver {
     }
 
     public void observerBehandlingAvsluttetEvent(@Observes BehandlingStatusEvent.BehandlingAvsluttetEvent event)  {
+        if (!enable) {
+            return;
+        }
+
         log.info("Publiserer melding til brukerdialog for behandling avsluttet");
         notifyInnsyn(event.getBehandlingId());
     }
 
     public void observerAksjonspunkterFunnetEvent(@Observes AksjonspunktStatusEvent event) {
+        if (!enable) {
+            return;
+        }
+
+        //TODO spisse sånn at det ikke sendes for mange eventer til innsyn
+        // må fange opp nye dokumenter på en eller annen måte
         log.info("Publiserer melding til brukerdialog for aksjonspunkt");
         notifyInnsyn(event.getBehandlingId());
     }
