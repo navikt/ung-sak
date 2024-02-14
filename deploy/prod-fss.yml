@@ -281,6 +281,8 @@ spec:
       value: "false"
     - name: UTVIDET_ENDRING_UTBETALING_UTLEDER
       value: "false"
+    - name: SJEKK_OM_DODSHENDELSE_ER_RELEVANT
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
