@@ -1,10 +1,8 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning;
 
 import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -21,6 +20,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -38,12 +38,14 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.kontrakt.KortTekst;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.trigger.ProsessTriggerForvaltningTjeneste;
 import no.nav.k9.sak.trigger.ProsessTriggereRepository;
 import no.nav.k9.sak.trigger.Trigger;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
+import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.iverksett.EndringAnnenOmsorgspersonUtleder;
 
@@ -76,6 +78,7 @@ public class ForvaltningUttakRestTjeneste {
         this.endringAnnenOmsorgspersonUtleder = endringAnnenOmsorgspersonUtleder;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
+
 
     @POST
     @Path("/hent-endringstidslinjer-fra-annen-omsorgsperson")
@@ -184,21 +187,59 @@ public class ForvaltningUttakRestTjeneste {
 
         var utdaterteEndringer = endringAnnenOmsorgspersonTidslinje.disjoint(endringstidslinjer.harEndringSomPåvirkerSakTidslinje());
 
-        var utdaterteIntervaller = utdaterteEndringer.compress().getLocalDateIntervals();
+        var utdaterteIntervaller = utdaterteEndringer.getLocalDateIntervals().stream().map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFomDato(), p.getTomDato())).collect(Collectors.toSet());
 
-        var skjæringstidspunkterSomKanFjernes = perioderMedEndringAnnenOmsorgsperson.stream()
-            .filter(p -> utdaterteIntervaller.stream().anyMatch(i -> i.getFomDato().equals(p.getFomDato()) && i.getTomDato().equals(p.getTomDato())))
-            .map(DatoIntervallEntitet::getFomDato)
-            .collect(Collectors.toSet());
 
-        loggForvaltningTjeneste(fagsak, "/fjern-prosesstrigger-endring-annen-omsorgsperson", "fjerner prosesstrigger RE_ANNEN_SAK for skjæringstidspunkter " + skjæringstidspunkterSomKanFjernes);
-
-        skjæringstidspunkterSomKanFjernes.forEach(stp -> prosessTriggerForvaltningTjeneste.fjern(behandlingIdDto.getBehandlingId(), stp, BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON));
-
-        log.info("Fjernet triggere for skjæringstidspunkter " + skjæringstidspunkterSomKanFjernes + " for behandling " + behandling.getId());
-
-        flyttTilbakeTilStart(behandling);
+        if (!utdaterteIntervaller.isEmpty()) {
+            loggForvaltningTjeneste(fagsak, "/fjern-prosesstrigger-endring-annen-omsorgsperson", "fjerner prosesstrigger RE_ANNEN_SAK for perioder " + utdaterteIntervaller);
+            log.info("Forsøker fjerning av triggere for perioder " + utdaterteIntervaller + " for behandling " + behandling.getId());
+            utdaterteIntervaller.forEach(periode -> prosessTriggerForvaltningTjeneste.fjern(behandlingIdDto.getBehandlingId(), periode, BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON));
+            flyttTilbakeTilStart(behandling);
+        } else {
+            log.info("Fant ingen triggere for fjerning");
+        }
     }
+
+    @POST
+    @Path("/fjern-prosesstrigger-endring-annen-omsorgsperson-gitt-periode")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(description = "Fjerner prosesstrigger for endring fra annen omsorgsperson", summary = ("Fjerner prosesstrigger for endring fra annen omsorgsperson"), tags = "uttak")
+    @BeskyttetRessurs(action = CREATE, resource = DRIFT)
+    public void fjernProsessTriggerForEndringFraAnnenOmsorgspersonMedGittPeriode(
+        @Parameter(description = "Behandling-id")
+        @FormParam("behandlingId")
+        @NotNull
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+        BehandlingIdDto behandlingIdDto,
+        @NotNull
+        @FormParam("begrunnelse")
+        @Parameter(description = "begrunnelse", allowEmptyValue = false, required = true, schema = @Schema(type = "string", maximum = "2000"))
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class)
+        KortTekst begrunnelse,
+        @NotNull @FormParam("periode")
+        @Parameter(description = "periode", required = true, example = "2020-01-01/2020-12-31")
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class)
+        Periode periode
+    ) {
+        var behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingId());
+
+        if (behandling.erSaksbehandlingAvsluttet()) {
+            throw new IllegalArgumentException("Behandling med id " + behandling.getId() + " hadde avsluttet saksbehandling.");
+        }
+
+        var fagsak = behandling.getFagsak();
+        var fjernet = prosessTriggerForvaltningTjeneste.fjern(behandlingIdDto.getBehandlingId(), DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom()), BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON);
+        if (fjernet) {
+            loggForvaltningTjeneste(fagsak, "/fjern-prosesstrigger-endring-annen-omsorgsperson-gitt-periode", "Fjerner prosesstrigger RE_ANNEN_SAK for periode " + periode + " og behandling " + behandling.getId() +
+                ". Begrunnelse: " + begrunnelse.getTekst());
+        }
+
+    }
+
 
     private void flyttTilbakeTilStart(Behandling behandling) {
         var prosessTaskData = ProsessTaskData.forProsessTask(TilbakeTilStartBehandlingTask.class);

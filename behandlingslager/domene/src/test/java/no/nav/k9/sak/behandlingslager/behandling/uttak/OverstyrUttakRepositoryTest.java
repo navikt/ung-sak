@@ -7,8 +7,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -228,7 +226,7 @@ class OverstyrUttakRepositoryTest {
 
         SubjectHandlerUtils.setInternBruker("k9-sak");
 
-        overstyrUttakRepository.ryddMotUttaksplan(originalBehandlingId, List.of(), ryddet);
+        overstyrUttakRepository.ryddMotUttaksplan(originalBehandlingId, ryddet);
 
         assertThat(overstyrUttakRepository.hentOverstyrtUttak(originalBehandlingId)).isEqualTo(ryddet);
 

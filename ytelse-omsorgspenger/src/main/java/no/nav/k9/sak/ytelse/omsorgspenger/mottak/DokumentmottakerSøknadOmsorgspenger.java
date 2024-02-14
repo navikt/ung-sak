@@ -17,7 +17,6 @@ import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import no.nav.abakus.iaygrunnlag.JsonObjectMapper;
 import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
@@ -80,8 +79,6 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
 
     private SøknadUtbetalingOmsorgspengerDokumentValidator dokumentValidator;
 
-    private boolean lagreSøknadsaktørerEnabled;
-
 
     DokumentmottakerSøknadOmsorgspenger() {
         // for CDI proxy
@@ -96,8 +93,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
                                         MottatteDokumentRepository mottatteDokumentRepository,
                                         SøknadOppgittFraværMapper mapper,
                                         PersoninfoAdapter personinfoAdapter,
-                                        @Any SøknadUtbetalingOmsorgspengerDokumentValidator dokumentValidator,
-                                        @KonfigVerdi(value = "LAGRE_SOEKNADSAKTOERER", defaultVerdi = "false") boolean lagreSøknadsaktørerEnabled) {
+                                        @Any SøknadUtbetalingOmsorgspengerDokumentValidator dokumentValidator) {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
@@ -109,7 +105,6 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
         this.mapper = mapper;
         this.personinfoAdapter = personinfoAdapter;
         this.dokumentValidator = dokumentValidator;
-        this.lagreSøknadsaktørerEnabled = lagreSøknadsaktørerEnabled;
     }
 
     @Override
@@ -198,9 +193,7 @@ public class DokumentmottakerSøknadOmsorgspenger implements Dokumentmottaker {
             .medSpråkkode(getSpråkValg(Språk.NORSK_BOKMÅL)) //TODO: hente riktig språk
             ;
 
-        if (lagreSøknadsaktørerEnabled) {
-            leggTilFosterbarn(søknad, søknadInnhold, søknadBuilder);
-        }
+        leggTilFosterbarn(søknad, søknadInnhold, søknadBuilder);
 
         var søknadEntitet = søknadBuilder.build();
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);

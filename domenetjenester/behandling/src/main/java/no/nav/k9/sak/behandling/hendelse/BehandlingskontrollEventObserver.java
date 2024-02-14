@@ -15,6 +15,7 @@ import no.nav.k9.kodeverk.hendelse.EventHendelse;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandling.hendelse.produksjonsstyring.BehandlingProsessHendelseMapper;
+import no.nav.k9.sak.behandling.hendelse.produksjonsstyring.LosTaskSekvensGenerator;
 import no.nav.k9.sak.behandling.hendelse.produksjonsstyring.PubliserEventTask;
 import no.nav.k9.sak.behandling.hendelse.produksjonsstyring.PubliserEventTaskImpl;
 import no.nav.k9.sak.behandling.hendelse.produksjonsstyring.PubliserProduksjonsstyringHendelseTask;
@@ -130,6 +131,8 @@ public class BehandlingskontrollEventObserver {
         var dto = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(LocalDateTime.now(), EventHendelse.BEHANDLINGSKONTROLL_EVENT, behandling.get(), vedtak.getVedtaksdato());
         taskData.setPayload(JsonObjectMapper.getJson(dto));
         taskData.setProperty(PubliserEventTask.PROPERTY_KEY, behandlingId.toString());
+        taskData.setGruppe(LosTaskSekvensGenerator.gruppeForBehandling(behandlingId));
+        taskData.setSekvens(LosTaskSekvensGenerator.nesteSekvens());
         return taskData;
     }
 
@@ -152,6 +155,8 @@ public class BehandlingskontrollEventObserver {
         var dto = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(eventHendelse, behandling.get());
         taskData.setPayload(JsonObjectMapper.getJson(dto));
         taskData.setProperty(PubliserEventTask.PROPERTY_KEY, behandlingId.toString());
+        taskData.setGruppe(LosTaskSekvensGenerator.gruppeForBehandling(behandlingId));
+        taskData.setSekvens(LosTaskSekvensGenerator.nesteSekvens());
         return taskData;
     }
 
@@ -179,6 +184,8 @@ public class BehandlingskontrollEventObserver {
 
         taskData.setPayload(JsonObjectMapper.getJson(dto));
         taskData.setProperty(PubliserProduksjonsstyringHendelseTask.PROPERTY_KEY, behandlingId.toString());
+        taskData.setGruppe(LosTaskSekvensGenerator.gruppeForBehandling(behandlingId));
+        taskData.setSekvens(LosTaskSekvensGenerator.nesteSekvens());
         return taskData;
     }
 
@@ -196,6 +203,8 @@ public class BehandlingskontrollEventObserver {
 
         taskData.setPayload(JsonObjectMapper.getJson(dto));
         taskData.setProperty(PubliserProduksjonsstyringHendelseTask.PROPERTY_KEY, behandlingId.toString());
+        taskData.setGruppe(LosTaskSekvensGenerator.gruppeForBehandling(behandlingId));
+        taskData.setSekvens(LosTaskSekvensGenerator.nesteSekvens());
         return taskData;
     }
 
@@ -214,6 +223,8 @@ public class BehandlingskontrollEventObserver {
 
         taskData.setPayload(JsonObjectMapper.getJson(dto));
         taskData.setProperty(PubliserProduksjonsstyringHendelseTask.PROPERTY_KEY, behandlingId.toString());
+        taskData.setGruppe(LosTaskSekvensGenerator.gruppeForBehandling(behandlingId));
+        taskData.setSekvens(LosTaskSekvensGenerator.nesteSekvens());
         return taskData;
     }
 }

@@ -79,7 +79,7 @@ public class FinnInntektsmeldingForBeregning {
             + " Fant mottatte " + alleInntektsmeldinger.size() + " inntektsmeldinger for abrbeidsgiver: "
             + alleInntektsmeldinger.stream().map(Inntektsmelding::getJournalpostId).toList());
 
-        var summertRefusjonTidslinje = FinnRefusjonskravTidslinje.lagTidslinje(stp, inntektsmeldingerForAktivitet);
+        var summertRefusjonTidslinje = SammenstillRefusjonskravForInfotrygdmigrering.lagTidslinje(stp, inntektsmeldingerForAktivitet);
 
         return mapInntektsmelding(stp, a, summertRefusjonTidslinje, alleInntektsmeldinger);
     }

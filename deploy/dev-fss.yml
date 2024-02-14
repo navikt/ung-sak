@@ -245,8 +245,6 @@ spec:
       value: "3030"
 
     # Feature-flag
-    - name: SOKNADSFRIST_BENYTT_ELDSTEKRAV_PER_PERIODE
-      value: "false"
     - name: YTELSE_OLP_AKTIVERT
       value: "true"
     - name: FILTRER_TILSTOTENDE_PERIODE
@@ -271,13 +269,9 @@ spec:
       value: "true"
     - name: STONADSTATISTIKK_V2
       value: "true"
-    - name: OPPTJENING_AP_VED_AKSEPTERT_MELLOMLIGGENDE_HELG
-      value: "true"
     - name: FJERN_VILKARSPERIODER_BEREGNING
       value: "false"
     - name: VALIDER_KALKULUS_REFERANSER
-      value: "true"
-    - name: LAGRE_SOEKNADSAKTOERER
       value: "true"
     - name: AVKLAR_ARBEIDSFORHOLD_REUTLED_VED_REVURDERING
       value: "true"
@@ -285,13 +279,13 @@ spec:
       value: "true"
     - name: OMP_RELEVANT_ENDRING_UTLEDNING
       value: "true"
-    - name: IM_SKAL_VURDERE_ENDRET_INNTEKT
-      value: "true"
-    - name: BG_FORLENGELSE_FILTRER_IM_FRA_AKTIVITETER
+    - name: FORLENGELSE_IM_OPPTJENING_FILTER
       value: "true"
     - name: DOKUMENTMOTTAK_VALIDER_JOURNALFORT
       value: "true"
-    - name: UTTAK_KLIPP_BORT_AVSLAG
+    - name: UTVIDET_ENDRING_UTBETALING_UTLEDER
+      value: "true"
+    - name: ENABLE_INNSYN_OBSERVER
       value: "true"
     - name: SJEKK_OM_DODSHENDELSE_ER_RELEVANT
       value: "true"

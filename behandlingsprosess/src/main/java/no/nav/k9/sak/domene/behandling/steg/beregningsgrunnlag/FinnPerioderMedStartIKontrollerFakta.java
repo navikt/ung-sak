@@ -10,15 +10,17 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.HarEndretInntektsmeldingVurderer;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingRelevantForVilkårsrevurdering;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -45,16 +47,26 @@ public class FinnPerioderMedStartIKontrollerFakta {
     @Inject
     public FinnPerioderMedStartIKontrollerFakta(VilkårResultatRepository vilkårResultatRepository,
                                                 VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
-                                                HarEndretInntektsmeldingVurderer harEndretInntektsmeldingVurderer,
                                                 InntektArbeidYtelseTjeneste iayTjeneste,
                                                 MottatteDokumentRepository mottatteDokumentRepository,
-                                                BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository) {
+                                                BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
+                                                BehandlingRepository behandlingRepository,
+                                                @Any Instance<InntektsmeldingRelevantForVilkårsrevurdering> inntektsmeldingRelevantForBeregningVilkårsvurdering
+                                                ) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
-        this.harEndretInntektsmeldingVurderer = harEndretInntektsmeldingVurderer;
         this.iayTjeneste = iayTjeneste;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
+        this.harEndretInntektsmeldingVurderer = new HarEndretInntektsmeldingVurderer(
+            behandlingRepository,
+            getInntektsmeldingFilter(inntektsmeldingRelevantForBeregningVilkårsvurdering),
+            FinnPerioderMedStartIKontrollerFakta::erEndret);
+    }
+
+    private static HarEndretInntektsmeldingVurderer.InntektsmeldingFilter getInntektsmeldingFilter(Instance<InntektsmeldingRelevantForVilkårsrevurdering> inntektsmeldingRelevantForBeregningVilkårsvurdering) {
+        return (BehandlingReferanse referanse, Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) ->
+            InntektsmeldingRelevantForVilkårsrevurdering.finnTjeneste(inntektsmeldingRelevantForBeregningVilkårsvurdering, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, referanse.getFagsakYtelseType()).begrensInntektsmeldinger(referanse, sakInntektsmeldinger, vilkårsPeriode);
     }
 
     /**
@@ -136,9 +148,8 @@ public class FinnPerioderMedStartIKontrollerFakta {
 
     private boolean erInntektsmeldingerLikForrigeVedtak(BehandlingReferanse ref, PeriodeTilVurdering p, Set<Inntektsmelding> inntektsmeldings, List<MottattDokument> mottatteInntektsmeldinger) {
         return !harEndretInntektsmeldingVurderer.harEndringPåInntektsmeldingerTilBrukForPerioden(ref,
-            inntektsmeldings,
-            mottatteInntektsmeldinger, p.getPeriode(),
-            FinnPerioderMedStartIKontrollerFakta::erEndret
+            p.getPeriode(), inntektsmeldings,
+            mottatteInntektsmeldinger
         );
     }
 

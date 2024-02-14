@@ -124,12 +124,9 @@ public class FraKalkulusMapper {
             .medAvkortetPrÅr(beregningsgrunnlagPeriodeDto.getAvkortetPrÅr())
             .medBruttoPrÅr(beregningsgrunnlagPeriodeDto.getBruttoPrÅr())
             .medRedusertPrÅr(beregningsgrunnlagPeriodeDto.getRedusertPrÅr())
-            .medInntektGraderingsprosent(beregningsgrunnlagPeriodeDto.getInntektGraderingsprosent())
             .medTotalUtbetalingsgradFraUttak(beregningsgrunnlagPeriodeDto.getTotalUtbetalingsgradFraUttak())
             .medTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(beregningsgrunnlagPeriodeDto.getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt())
-            .medReduksjonsfaktorInaktivTypeA(beregningsgrunnlagPeriodeDto.getReduksjonsfaktorInaktivTypeA())
-            .medGraderingsfaktorTid(beregningsgrunnlagPeriodeDto.getGraderingsfaktorTid())
-            .medGraderingsfaktorInntekt(beregningsgrunnlagPeriodeDto.getGraderingsfaktorInntekt());
+            .medReduksjonsfaktorInaktivTypeA(beregningsgrunnlagPeriodeDto.getReduksjonsfaktorInaktivTypeA());
         mapAndeler(beregningsgrunnlagPeriodeDto.getBeregningsgrunnlagPrStatusOgAndelList()).forEach(periodeBuilder::leggTilBeregningsgrunnlagPrStatusOgAndel);
         return periodeBuilder;
     }

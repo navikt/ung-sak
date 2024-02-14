@@ -30,6 +30,7 @@ public class PubliserEventTaskImpl implements PubliserEventTask {
         String key = prosessTaskData.getPropertyValue(PROPERTY_KEY);
         var eventJson = prosessTaskData.getPayloadAsString();
         kafkaProducer.sendHendelse(key, eventJson);
+        kafkaProducer.flush(); //for å sikre at ikke hendelser sniker i køen ved å bli publisert fra en annen node
     }
 
     @Override

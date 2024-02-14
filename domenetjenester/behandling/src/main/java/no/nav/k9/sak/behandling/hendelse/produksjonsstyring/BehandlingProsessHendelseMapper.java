@@ -25,7 +25,9 @@ import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.hendelse.EventHendelse;
+import no.nav.k9.kodeverk.produksjonsstyring.UtvidetSøknadÅrsak;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandling.hendelse.produksjonsstyring.søknadsårsak.SøknadsårsakUtleder;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
@@ -47,6 +49,7 @@ public class BehandlingProsessHendelseMapper {
 
     private static final Logger logger = LoggerFactory.getLogger(BehandlingProsessHendelseMapper.class);
     private Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester;
+    private Instance<SøknadsårsakUtleder> søknadsårsakUtledere;
     private MottatteDokumentRepository mottatteDokumentRepository;
 
     public BehandlingProsessHendelseMapper() {
@@ -54,8 +57,10 @@ public class BehandlingProsessHendelseMapper {
 
     @Inject
     public BehandlingProsessHendelseMapper(@Any Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester,
-            MottatteDokumentRepository mottatteDokumentRepository) {
+                                           @Any Instance<SøknadsårsakUtleder> søknadsårsakUtledere,
+                                           MottatteDokumentRepository mottatteDokumentRepository) {
         this.søknadsfristTjenester = søknadsfristTjenester;
+        this.søknadsårsakUtledere = søknadsårsakUtledere;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
     }
 
@@ -66,6 +71,8 @@ public class BehandlingProsessHendelseMapper {
 
         final boolean nyeKrav = sjekkOmDetHarKommetNyeKrav(behandling);
         final boolean fraEndringsdialog = sjekkOmDetFinnesEndringFraEndringsdialog(behandling);
+
+        List<UtvidetSøknadÅrsak> søknadsårsaker = utledSøknadÅrsaker(behandling);
 
         return BehandlingProsessHendelse.builder()
             .medEksternId(behandling.getUuid())
@@ -92,8 +99,17 @@ public class BehandlingProsessHendelseMapper {
             .medAnsvarligBeslutterForTotrinn(behandling.getAnsvarligBeslutter())
             .medAksjonspunktTilstander(lagAksjonspunkttilstander(behandling.getAksjonspunkter()))
             .medNyeKrav(nyeKrav)
+            .medBehandlingsårsaker(behandling.getBehandlingÅrsaker().stream().map(årsak -> årsak.getBehandlingÅrsakType().getKode()).distinct().toList())
+            .medSøknadårsaker(søknadsårsaker.stream().map(UtvidetSøknadÅrsak::getKode).distinct().toList())
             .medFraEndringsdialog(fraEndringsdialog)
             .build();
+    }
+
+    private List<UtvidetSøknadÅrsak> utledSøknadÅrsaker(Behandling behandling) {
+        SøknadsårsakUtleder tjeneste = SøknadsårsakUtleder.finnTjeneste(søknadsårsakUtledere, behandling.getFagsakYtelseType());
+        return tjeneste != null
+            ? tjeneste.utledSøknadÅrsaker(behandling)
+            : List.of();
     }
 
     public LocalDateTime finnEldsteMottattdato(Behandling behandling) {
@@ -134,9 +150,9 @@ public class BehandlingProsessHendelseMapper {
         }
 
         final List<MottattDokument> dokumenter = mottatteDokumentRepository.hentMottatteDokumentForBehandling(behandling.getFagsakId(),
-                behandling.getId(),
-                List.of(Brevkode.PLEIEPENGER_BARN_SOKNAD),
-                false);
+            behandling.getId(),
+            List.of(Brevkode.PLEIEPENGER_BARN_SOKNAD),
+            false);
 
         return dokumenter.stream().anyMatch(md -> {
             try {
@@ -178,25 +194,25 @@ public class BehandlingProsessHendelseMapper {
         final LocalDateTimeline<KravDokument> eldsteKravTidslinje = hentKravdokumenterMedEldsteKravFørst(behandlingRef, søknadsfristTjeneste);
 
         return eldsteKravTidslinje
-                .stream()
-                .anyMatch(it -> kravdokumenter.stream()
-                    .anyMatch(at -> at.getJournalpostId().equals(it.getValue().getJournalpostId())));
+            .stream()
+            .anyMatch(it -> kravdokumenter.stream()
+                .anyMatch(at -> at.getJournalpostId().equals(it.getValue().getJournalpostId())));
     }
 
     private LocalDateTimeline<KravDokument> hentKravdokumenterMedEldsteKravFørst(BehandlingReferanse behandlingRef,
-            VurderSøknadsfristTjeneste<SøktPeriodeData> søknadsfristTjeneste) {
+                                                                                 VurderSøknadsfristTjeneste<SøktPeriodeData> søknadsfristTjeneste) {
         final Map<KravDokument, List<SøktPeriode<SøktPeriodeData>>> kravdokumenterMedPeriode = søknadsfristTjeneste.hentPerioderTilVurdering(behandlingRef);
         final var kravdokumenterMedEldsteFørst = kravdokumenterMedPeriode.keySet()
-                .stream()
-                .sorted(Comparator.comparing(KravDokument::getInnsendingsTidspunkt))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+            .stream()
+            .sorted(Comparator.comparing(KravDokument::getInnsendingsTidspunkt))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
 
         LocalDateTimeline<KravDokument> eldsteKravTidslinje = LocalDateTimeline.empty();
         for (KravDokument kravdokument : kravdokumenterMedEldsteFørst) {
             final List<SøktPeriode<SøktPeriodeData>> perioder = kravdokumenterMedPeriode.get(kravdokument);
             final var segments = perioder.stream()
-                    .map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), kravdokument))
-                    .collect(Collectors.toList());
+                .map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), kravdokument))
+                .collect(Collectors.toList());
             final var tidslinje = new LocalDateTimeline<>(segments, StandardCombinators::coalesceLeftHandSide);
             eldsteKravTidslinje = eldsteKravTidslinje.union(tidslinje, StandardCombinators::coalesceLeftHandSide);
         }
@@ -206,8 +222,7 @@ public class BehandlingProsessHendelseMapper {
     private VurderSøknadsfristTjeneste<VurdertSøktPeriode.SøktPeriodeData> finnVurderSøknadsfristTjeneste(BehandlingReferanse ref) {
         final FagsakYtelseType ytelseType = ref.getFagsakYtelseType();
 
-        @SuppressWarnings("unchecked")
-        final var tjeneste = (VurderSøknadsfristTjeneste<VurdertSøktPeriode.SøktPeriodeData>) FagsakYtelseTypeRef.Lookup.find(søknadsfristTjenester, ytelseType).orElse(null);
+        @SuppressWarnings("unchecked") final var tjeneste = (VurderSøknadsfristTjeneste<VurdertSøktPeriode.SøktPeriodeData>) FagsakYtelseTypeRef.Lookup.find(søknadsfristTjenester, ytelseType).orElse(null);
         return tjeneste;
     }
 }
