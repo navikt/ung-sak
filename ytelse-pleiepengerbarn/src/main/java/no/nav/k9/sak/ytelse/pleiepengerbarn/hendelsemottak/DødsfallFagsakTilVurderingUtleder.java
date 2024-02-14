@@ -63,7 +63,7 @@ public class DødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderingU
                                              VilkårResultatRepository vilkårResultatRepository,
                                              PersonopplysningRepository personopplysningRepository,
                                              PersoninfoAdapter personinfoAdapter,
-                                             @KonfigVerdi("SJEKK_OM_DODSHENDELSE_ER_RELEVANT") boolean skalSjekkeOmDødErRelevantForVedtak) {
+                                             @KonfigVerdi(value = "SJEKK_OM_DODSHENDELSE_ER_RELEVANT", defaultVerdi = "false") boolean skalSjekkeOmDødErRelevantForVedtak) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
