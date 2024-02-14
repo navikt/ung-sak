@@ -1,6 +1,5 @@
 package no.nav.k9.sak.innsyn.hendelse;
 
-import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -11,12 +10,14 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.innsyn.InnsynHendelse;
+import no.nav.k9.innsyn.TempObjectMapperKodeverdi;
 import no.nav.k9.innsyn.sak.Aksjonspunkt;
 import no.nav.k9.innsyn.sak.BehandlingResultat;
 import no.nav.k9.innsyn.sak.SøknadInfo;
@@ -26,8 +27,8 @@ import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
-import no.nav.k9.sak.behandling.saksbehandlingstid.SaksbehandlingsfristUtleder;
 import no.nav.k9.sak.behandlingskontroll.events.AksjonspunktStatusEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingStatusEvent;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -36,21 +37,20 @@ import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokument
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.person.personopplysning.UtlandVurdererTjeneste;
-import no.nav.k9.sak.domene.typer.tid.JsonObjectMapperKodeverdiSerializer;
-import no.nav.k9.sak.innsyn.BrukerdialoginnsynMeldingProducer;
+import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.felles.Kildesystem;
 
 @ApplicationScoped
 public class InnsynEventObserver {
 
     protected final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final ObjectMapper KODEVERDI_OM = TempObjectMapperKodeverdi.getObjectMapper();
 
     private ProsessTaskTjeneste prosessTaskRepository;
     private BehandlingRepository behandlingRepository;
-    private BrukerdialoginnsynMeldingProducer producer;
     private MottatteDokumentRepository mottatteDokumentRepository;
-    private Instance<SaksbehandlingsfristUtleder> fristUtledere;
-    private boolean enable;
+    private boolean enableStartSlutt;
+    private boolean enableEndringer;
     private UtlandVurdererTjeneste utlandVurdererTjeneste;
 
     public InnsynEventObserver() {
@@ -59,23 +59,21 @@ public class InnsynEventObserver {
     @Inject
     public InnsynEventObserver(ProsessTaskTjeneste prosessTaskRepository,
                                BehandlingRepository behandlingRepository,
-                               Instance<SaksbehandlingsfristUtleder> fristUtledere,
-                               BrukerdialoginnsynMeldingProducer producer,
                                MottatteDokumentRepository mottatteDokumentRepository,
-                               @KonfigVerdi(value = "ENABLE_INNSYN_OBSERVER", defaultVerdi = "false") boolean enable,
+                               @KonfigVerdi(value = "ENABLE_INNSYN_START_SLUTT_OBSERVER", defaultVerdi = "true") boolean enableBehandlingStartSlutt,
+                               @KonfigVerdi(value = "ENABLE_INNSYN_ENDRING_OBSERVER", defaultVerdi = "true") boolean enableEndringer,
                                UtlandVurdererTjeneste utlandVurdererTjeneste) {
         this.prosessTaskRepository = prosessTaskRepository;
         this.behandlingRepository = behandlingRepository;
-        this.producer = producer;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
-        this.fristUtledere = fristUtledere;
-        this.enable = enable;
+        this.enableStartSlutt = enableBehandlingStartSlutt;
+        this.enableEndringer = enableEndringer;
         this.utlandVurdererTjeneste = utlandVurdererTjeneste;
     }
 
 
     public void observerBehandlingStartet(@Observes BehandlingStatusEvent event) {
-        if (!enable) {
+        if (!enableStartSlutt) {
             return;
         }
 
@@ -87,7 +85,7 @@ public class InnsynEventObserver {
     }
 
     public void observerBehandlingAvsluttetEvent(@Observes BehandlingStatusEvent.BehandlingAvsluttetEvent event)  {
-        if (!enable) {
+        if (!enableStartSlutt) {
             return;
         }
 
@@ -96,7 +94,7 @@ public class InnsynEventObserver {
     }
 
     public void observerAksjonspunkterFunnetEvent(@Observes AksjonspunktStatusEvent event) {
-        if (!enable) {
+        if (!enableEndringer) {
             return;
         }
 
@@ -105,7 +103,6 @@ public class InnsynEventObserver {
         log.info("Publiserer melding til brukerdialog for aksjonspunkt");
         notifyInnsyn(event.getBehandlingId());
     }
-
 
 
     private void debugObservasjon(AksjonspunktStatusEvent event) {
@@ -127,7 +124,6 @@ public class InnsynEventObserver {
 
 
 
-        String saksnummer = fagsak.getSaksnummer().getVerdi();
         Set<Aksjonspunkt> aksjonspunkter = mapAksjonspunkter(behandling);
         var behandlingInnsyn = new no.nav.k9.innsyn.sak.Behandling(
             behandling.getUuid(),
@@ -141,9 +137,13 @@ public class InnsynEventObserver {
             mapFagsak(fagsak)
         );
 
-        String json = deserialiser(new InnsynHendelse<>(ZonedDateTime.now(), behandlingInnsyn));
+        String json = JsonUtils.toString(new InnsynHendelse<>(ZonedDateTime.now(), behandlingInnsyn), KODEVERDI_OM);
 
-        producer.send(saksnummer, json);
+        var pd = ProsessTaskData.forProsessTask(PubliserInnsynEventTask.class);
+        pd.setBehandling(fagsak.getSaksnummer().getVerdi(), behandling.getId().toString(), behandling.getAktørId().getAktørId());
+        pd.setCallIdFraEksisterende();
+        pd.setPayload(json);
+        prosessTaskRepository.lagre(pd);
     }
 
 
@@ -223,16 +223,6 @@ public class InnsynEventObserver {
         }
 
         return null;
-    }
-
-    private static String deserialiser(InnsynHendelse<?> behandling) {
-        String json;
-        try {
-            json = JsonObjectMapperKodeverdiSerializer.getJson(behandling);
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Feilet ved deserialisering", e);
-        }
-        return json;
     }
 
 
