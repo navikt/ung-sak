@@ -23,6 +23,7 @@
         <module>dokumentbestiller</module>
         <module>hendelsemottak</module>
         <module>inngangsvilkar</module>
+        <module>innsyn</module>
         <module>arbeidsforhold</module>
         <module>medlem</module>
         <module>mottak</module>

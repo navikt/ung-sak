@@ -2,6 +2,7 @@ package no.nav.k9.sak.test.util.behandling.personopplysning;
 
 import java.time.LocalDate;
 
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.geografisk.AdresseType;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
 import no.nav.k9.kodeverk.geografisk.Region;
@@ -11,7 +12,6 @@ import no.nav.k9.kodeverk.person.RelasjonsRolleType;
 import no.nav.k9.kodeverk.person.SivilstandType;
 import no.nav.k9.sak.test.util.behandling.personopplysning.PersonInformasjon.Builder;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 
 public class Personas {
     private Builder builder;
@@ -43,6 +43,11 @@ public class Personas {
     }
 
     public Personas barn(AktørId aktørId, LocalDate fødselsdato) {
+        barn(aktørId, fødselsdato, null);
+        return this;
+    }
+
+    public Personas barn(AktørId aktørId, LocalDate fødselsdato, PersonstatusType personstatus) {
         if (this.aktørId == null) {
             this.aktørId = aktørId;
             this.fødselsdato = fødselsdato;
@@ -55,6 +60,10 @@ public class Personas {
             .brukerKjønn(NavBrukerKjønn.MANN)
             .sivilstand(SivilstandType.UOPPGITT)
             .region(Region.NORDEN));
+
+        if (personstatus!= null) {
+            builder.leggTilPersonstatus(Personstatus.builder().aktørId(aktørId).periode(fødselsdato, fødselsdato.plusYears(100)).personstatus(personstatus));
+        }
         return this;
     }
 
