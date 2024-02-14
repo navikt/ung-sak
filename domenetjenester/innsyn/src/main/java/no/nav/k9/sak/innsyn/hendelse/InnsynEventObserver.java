@@ -28,6 +28,7 @@ import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandling.saksbehandlingstid.SaksbehandlingsfristUtleder;
+import no.nav.k9.sak.behandlingskontroll.events.AksjonspunktStatusEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingStatusEvent;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
@@ -80,34 +81,60 @@ public class InnsynEventObserver {
 
         if ((event.getGammelStatus() == BehandlingStatus.OPPRETTET || event.getGammelStatus() == null)
             && event.getNyStatus() == BehandlingStatus.UTREDES) {
-            var behandling = behandlingRepository.hentBehandling(event.getBehandlingId());
-
-            Fagsak fagsak = behandling.getFagsak();
-            if (fagsak.getYtelseType() != FagsakYtelseType.PSB) {
-                return;
-            }
-
             log.info("Publiserer melding til brukerdialog for behandling startet");
-
-            String saksnummer = fagsak.getSaksnummer().getVerdi();
-            var behandlingInnsyn = new no.nav.k9.innsyn.sak.Behandling(
-                behandling.getUuid(),
-                behandling.getOpprettetDato().atZone(ZoneId.systemDefault()),
-                Optional.ofNullable(behandling.getAvsluttetDato()).map(it -> it.atZone(ZoneId.systemDefault())).orElse(null),
-                mapBehandlingResultat(behandling.getBehandlingResultatType()),
-                mapBehandingStatus(behandling),
-                mapSøknader(behandling),
-                mapAksjonspunkter(behandling),
-                utlandVurdererTjeneste.erUtenlandssak(behandling),
-                mapFagsak(fagsak)
-            );
-
-            String json = deserialiser(new InnsynHendelse<>(ZonedDateTime.now(), behandlingInnsyn));
-
-            producer.send(saksnummer, json);
+            notifyInnsyn(event.getBehandlingId());
         }
     }
 
+    public void observerBehandlingAvsluttetEvent(@Observes BehandlingStatusEvent.BehandlingAvsluttetEvent event)  {
+        log.info("Publiserer melding til brukerdialog for behandling avsluttet");
+        notifyInnsyn(event.getBehandlingId());
+    }
+
+    public void observerAksjonspunkterFunnetEvent(@Observes AksjonspunktStatusEvent event) {
+        log.info("Publiserer melding til brukerdialog for aksjonspunkt");
+        notifyInnsyn(event.getBehandlingId());
+    }
+
+
+
+    private void debugObservasjon(AksjonspunktStatusEvent event) {
+        var collect = event.getAksjonspunkter().stream()
+            .filter(it -> it.erÅpentAksjonspunkt())
+            .map(it -> it.getAksjonspunktDefinisjon().getKode() +":"+ it.getVenteårsak().getKode())
+            .collect(Collectors.toSet());
+        String join = String.join(", ", collect);
+        log.info("################ -> Steg {} aksjonspunkter {}", event.getBehandlingStegType(), join);
+    }
+
+    private void notifyInnsyn(Long behandlingId) {
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+
+        Fagsak fagsak = behandling.getFagsak();
+        if (fagsak.getYtelseType() != FagsakYtelseType.PSB) {
+            return;
+        }
+
+
+
+        String saksnummer = fagsak.getSaksnummer().getVerdi();
+        Set<Aksjonspunkt> aksjonspunkter = mapAksjonspunkter(behandling);
+        var behandlingInnsyn = new no.nav.k9.innsyn.sak.Behandling(
+            behandling.getUuid(),
+            behandling.getOpprettetDato().atZone(ZoneId.systemDefault()),
+            Optional.ofNullable(behandling.getAvsluttetDato()).map(it -> it.atZone(ZoneId.systemDefault())).orElse(null),
+            mapBehandlingResultat(behandling.getBehandlingResultatType()),
+            mapBehandingStatus(behandling, aksjonspunkter),
+            mapSøknader(behandling),
+            aksjonspunkter,
+            utlandVurdererTjeneste.erUtenlandssak(behandling),
+            mapFagsak(fagsak)
+        );
+
+        String json = deserialiser(new InnsynHendelse<>(ZonedDateTime.now(), behandlingInnsyn));
+
+        producer.send(saksnummer, json);
+    }
 
 
     private Set<Aksjonspunkt> mapAksjonspunkter(Behandling b) {
@@ -158,7 +185,10 @@ public class InnsynEventObserver {
             .collect(Collectors.toSet());
     }
 
-    private no.nav.k9.innsyn.sak.BehandlingStatus mapBehandingStatus(Behandling behandling) {
+    private no.nav.k9.innsyn.sak.BehandlingStatus mapBehandingStatus(Behandling behandling, Set<Aksjonspunkt> aksjonspunkter) {
+        if (!aksjonspunkter.isEmpty()) {
+            return no.nav.k9.innsyn.sak.BehandlingStatus.PÅ_VENT;
+        }
         if (behandling.getStatus() == BehandlingStatus.AVSLUTTET) {
             return no.nav.k9.innsyn.sak.BehandlingStatus.AVSLUTTET;
         }

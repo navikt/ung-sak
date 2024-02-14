@@ -123,7 +123,7 @@ class InnsynEventObserverTest {
 
         assertThat(b.behandlingsId()).isEqualTo(behandling.getUuid());
         assertThat(b.erUtenlands()).isEqualTo(false);
-        assertThat(b.status()).isEqualTo(no.nav.k9.innsyn.sak.BehandlingStatus.UNDER_BEHANDLING);
+        assertThat(b.status()).isEqualTo(no.nav.k9.innsyn.sak.BehandlingStatus.PÅ_VENT);
         assertThat(b.avsluttetTidspunkt()).isNull();
         assertThat(b.opprettetTidspunkt()).isEqualTo(behandling.getOpprettetDato().atZone(ZoneId.systemDefault()));
 
