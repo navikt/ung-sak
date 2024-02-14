@@ -55,7 +55,9 @@ public class ErEndringIRefusjonskravVurderer {
         return ErEndringIRefusjonskravVurderer.finnEndringstidslinje(periode, relevanteInntektsmeldinger, relevanteInntektsmeldingerForrigeVedtak);
     }
 
-    public static LocalDateTimeline<Boolean> finnEndringstidslinje(DatoIntervallEntitet vilkårsperiode, Collection<Inntektsmelding> gjeldendeInntektsmeldinger, Collection<Inntektsmelding> inntektsmeldingerForrigeVedtak) {
+    public static LocalDateTimeline<Boolean> finnEndringstidslinje(DatoIntervallEntitet vilkårsperiode,
+                                                                   Collection<Inntektsmelding> gjeldendeInntektsmeldinger,
+                                                                   Collection<Inntektsmelding> inntektsmeldingerForrigeVedtak) {
         return gjeldendeInntektsmeldinger.stream()
             .map(finnEndringIRefusjonTidslinje(vilkårsperiode, inntektsmeldingerForrigeVedtak))
             .reduce(LocalDateTimeline.empty(), (t1, t2) -> t1.crossJoin(t2, StandardCombinators::alwaysTrueForMatch));

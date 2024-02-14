@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -15,50 +14,8 @@ import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.iay.modell.NaturalYtelse;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-import no.nav.k9.sak.typer.JournalpostId;
 
-class HarRelvantInntektsmeldingendringForForlengelseIBeregningTest {
-
-    @Test
-    void skal_vurdere_set_som_like_hvis_inneholder_de_samme() {
-        var imSetForrige = Set.of(new JournalpostId("1"), new JournalpostId("12"), new JournalpostId("123"), new JournalpostId("1234"));
-        var imSetNå = Set.of(new JournalpostId("1"), new JournalpostId("12"), new JournalpostId("123"), new JournalpostId("1234"));
-
-        var resultat = HarRelvantInntektsmeldingendringForForlengelseIBeregning.harUlikeJournalposter(imSetForrige, imSetNå);
-
-        assertThat(resultat).isFalse();
-    }
-
-    @Test
-    void skal_vurdere_set_som_like_hvis_inneholder_de_samme_i_forskjellig_rekkefølge() {
-        var imSetForrige = Set.of(new JournalpostId("1"), new JournalpostId("12"), new JournalpostId("123"), new JournalpostId("1234"));
-        var imSetNå = Set.of(new JournalpostId("123"), new JournalpostId("1234"), new JournalpostId("1"), new JournalpostId("12"));
-
-        var resultat = HarRelvantInntektsmeldingendringForForlengelseIBeregning.harUlikeJournalposter(imSetForrige, imSetNå);
-
-        assertThat(resultat).isFalse();
-    }
-
-    @Test
-    void skal_vurdere_set_som_ulike_hvis_forskjellig_størrelse() {
-        var imSetForrige = Set.of(new JournalpostId("1"));
-        var imSetNå = Set.of(new JournalpostId("1"), new JournalpostId("12"));
-
-        var resultat = HarRelvantInntektsmeldingendringForForlengelseIBeregning.harUlikeJournalposter(imSetForrige, imSetNå);
-
-        assertThat(resultat).isTrue();
-    }
-
-    @Test
-    void skal_vurdere_set_som_ulike_hvis_lik_størrelse_forskjellig_innhold() {
-        var imSetForrige = Set.of(new JournalpostId("1"));
-        var imSetNå = Set.of(new JournalpostId("12"));
-
-        var resultat = HarRelvantInntektsmeldingendringForForlengelseIBeregning.harUlikeJournalposter(imSetForrige, imSetNå);
-
-        assertThat(resultat).isTrue();
-    }
-
+class HarRelevantInntektsmeldingendringForForlengelseIBeregningTest {
 
 
     @Test
@@ -71,9 +28,9 @@ class HarRelvantInntektsmeldingendringForForlengelseIBeregningTest {
             .medBeløp(BigDecimal.TEN)
             .build();
 
-        var resultat = new HarRelvantInntektsmeldingendringForForlengelseIBeregning().erEndret(List.of(im), List.of(im));
+        var resultat = new HarRelevantInntektsmeldingendringForForlengelseIBeregning().finnInntektsmeldingerMedRelevanteEndringer(List.of(im), List.of(im));
 
-        assertThat(resultat).isFalse();
+        assertThat(resultat.isEmpty()).isTrue();
     }
 
     @Test
@@ -95,9 +52,9 @@ class HarRelvantInntektsmeldingendringForForlengelseIBeregningTest {
             .medBeløp(BigDecimal.TEN)
             .build();
 
-        var resultat = new HarRelvantInntektsmeldingendringForForlengelseIBeregning().erEndret(List.of(im), List.of(im2));
+        var resultat = new HarRelevantInntektsmeldingendringForForlengelseIBeregning().finnInntektsmeldingerMedRelevanteEndringer(List.of(im), List.of(im2));
 
-        assertThat(resultat).isFalse();
+        assertThat(resultat.isEmpty()).isTrue();
     }
 
 
@@ -121,9 +78,9 @@ class HarRelvantInntektsmeldingendringForForlengelseIBeregningTest {
             .medBeløp(BigDecimal.TEN)
             .build();
 
-        var resultat = new HarRelvantInntektsmeldingendringForForlengelseIBeregning().erEndret(List.of(im), List.of(im2));
+        var resultat = new HarRelevantInntektsmeldingendringForForlengelseIBeregning().finnInntektsmeldingerMedRelevanteEndringer(List.of(im), List.of(im2));
 
-        assertThat(resultat).isTrue();
+        assertThat(resultat.isEmpty()).isFalse();
     }
 
 
@@ -148,9 +105,9 @@ class HarRelvantInntektsmeldingendringForForlengelseIBeregningTest {
             .medBeløp(BigDecimal.TEN)
             .build();
 
-        var resultat = new HarRelvantInntektsmeldingendringForForlengelseIBeregning().erEndret(List.of(im), List.of(im2));
+        var resultat = new HarRelevantInntektsmeldingendringForForlengelseIBeregning().finnInntektsmeldingerMedRelevanteEndringer(List.of(im), List.of(im2));
 
-        assertThat(resultat).isTrue();
+        assertThat(resultat.isEmpty()).isFalse();
     }
 
 
@@ -176,9 +133,9 @@ class HarRelvantInntektsmeldingendringForForlengelseIBeregningTest {
             .medBeløp(BigDecimal.TEN)
             .build();
 
-        var resultat = new HarRelvantInntektsmeldingendringForForlengelseIBeregning().erEndret(List.of(im), List.of(im2));
+        var resultat = new HarRelevantInntektsmeldingendringForForlengelseIBeregning().finnInntektsmeldingerMedRelevanteEndringer(List.of(im), List.of(im2));
 
-        assertThat(resultat).isFalse();
+        assertThat(resultat.isEmpty()).isTrue();
     }
 
     @Test
@@ -204,9 +161,9 @@ class HarRelvantInntektsmeldingendringForForlengelseIBeregningTest {
             .medBeløp(BigDecimal.TEN)
             .build();
 
-        var resultat = new HarRelvantInntektsmeldingendringForForlengelseIBeregning().erEndret(List.of(im), List.of(im2));
+        var resultat = new HarRelevantInntektsmeldingendringForForlengelseIBeregning().finnInntektsmeldingerMedRelevanteEndringer(List.of(im), List.of(im2));
 
-        assertThat(resultat).isTrue();
+        assertThat(resultat.isEmpty()).isFalse();
     }
 
     @Test
@@ -233,9 +190,9 @@ class HarRelvantInntektsmeldingendringForForlengelseIBeregningTest {
             .medBeløp(BigDecimal.TEN)
             .build();
 
-        var resultat = new HarRelvantInntektsmeldingendringForForlengelseIBeregning().erEndret(List.of(im), List.of(im2));
+        var resultat = new HarRelevantInntektsmeldingendringForForlengelseIBeregning().finnInntektsmeldingerMedRelevanteEndringer(List.of(im), List.of(im2));
 
-        assertThat(resultat).isFalse();
+        assertThat(resultat.isEmpty()).isTrue();
     }
 
 }
