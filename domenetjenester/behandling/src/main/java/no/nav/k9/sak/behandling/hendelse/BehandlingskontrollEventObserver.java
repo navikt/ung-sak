@@ -30,7 +30,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
-import no.nav.k9.sak.domene.typer.tid.JsonObjectMapperKodeverdiSerializer;
+import no.nav.k9.sak.domene.typer.tid.JsonObjectMapperKodeverdiSomStringSerializer;
 import no.nav.k9.sak.kontrakt.produksjonsstyring.los.ProduksjonsstyringAksjonspunktHendelse;
 import no.nav.k9.sak.kontrakt.produksjonsstyring.los.ProduksjonsstyringBehandlingAvsluttetHendelse;
 import no.nav.k9.sak.kontrakt.produksjonsstyring.los.ProduksjonsstyringBehandlingOpprettetHendelse;
@@ -62,7 +62,7 @@ public class BehandlingskontrollEventObserver {
 
     private String dtoTilJson(Object dto) throws IOException {
         if (kodeverkSomStringTopics) {
-            return JsonObjectMapperKodeverdiSerializer.getJson(dto);
+            return JsonObjectMapperKodeverdiSomStringSerializer.getJson(dto);
         } else {
             return JsonObjectMapper.getJson(dto);
         }

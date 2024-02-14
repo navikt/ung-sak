@@ -31,7 +31,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
-import no.nav.k9.sak.domene.typer.tid.JsonObjectMapperKodeverdiSerializer;
+import no.nav.k9.sak.domene.typer.tid.JsonObjectMapperKodeverdiSomStringSerializer;
 
 @ApplicationScoped
 @ProsessTask(DokumentbestillerKafkaTaskProperties.TASKTYPE)
@@ -139,7 +139,7 @@ public class DokumentBestillerKafkaTask implements ProsessTaskHandler {
     private String serialiser(Dokumentbestilling dto) {
         try {
             if (kodeverkSomStringTopics){
-                return JsonObjectMapperKodeverdiSerializer.getJson(dto);
+                return JsonObjectMapperKodeverdiSomStringSerializer.getJson(dto);
             } else {
                 return JsonObjectMapper.getJson(dto);
             }

@@ -25,7 +25,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
-import no.nav.k9.sak.domene.typer.tid.JsonObjectMapperKodeverdiSerializer;
+import no.nav.k9.sak.domene.typer.tid.JsonObjectMapperKodeverdiSomStringSerializer;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingProsessHendelse;
 
 /**
@@ -98,7 +98,7 @@ public class RepubliserEventTask implements ProsessTaskHandler {
     private String toJson(final BehandlingProsessHendelse dto) {
         try {
             if (kodeverkSomStringTopics){
-                return JsonObjectMapperKodeverdiSerializer.getJson(dto);
+                return JsonObjectMapperKodeverdiSomStringSerializer.getJson(dto);
             } else  {
                 return JsonObjectMapper.getJson(dto);
             }

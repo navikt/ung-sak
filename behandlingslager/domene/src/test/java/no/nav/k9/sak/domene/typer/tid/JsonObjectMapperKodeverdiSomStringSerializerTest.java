@@ -14,11 +14,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 
-class JsonObjectMapperKodeverdiSerializerTest {
+class JsonObjectMapperKodeverdiSomStringSerializerTest {
 
     @Test
     void skal_serializere_kodeverdi_til_string() throws IOException {
-        String json = JsonObjectMapperKodeverdiSerializer.getJson(new TestSerializerDto(FagsakYtelseType.PLEIEPENGER_SYKT_BARN));
+        String json = JsonObjectMapperKodeverdiSomStringSerializer.getJson(new TestSerializerDto(FagsakYtelseType.PLEIEPENGER_SYKT_BARN));
         assertThat(json).isEqualToIgnoringWhitespace("{\"sakstype\": \"PSB\"}");
     }
 
