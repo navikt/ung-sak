@@ -3,6 +3,7 @@ package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -48,9 +49,16 @@ public class ErEndringIRefusjonskravVurderer {
         }
         var originalBehandling = behandlingRepository.hentBehandling(referanse.getOriginalBehandlingId().orElseThrow());
         var inntektsmeldinger = inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer());
+        return finnEndringstidslinjeForRefusjon(referanse, BehandlingReferanse.fra(originalBehandling), periode, inntektsmeldinger);
+    }
+
+    public LocalDateTimeline<Boolean> finnEndringstidslinjeForRefusjon(BehandlingReferanse referanse,
+                                                                        BehandlingReferanse originalBehandlingreferanse,
+                                                                        DatoIntervallEntitet periode,
+                                                                        Collection<Inntektsmelding> inntektsmeldinger) {
         var inntektsmeldingerForrigeVedtak = FinnInntektsmeldingForrigeBehandling.finnInntektsmeldingerFraForrigeBehandling(referanse, inntektsmeldinger, finnMottatteInntektsmeldinger(referanse));
         var relevanteInntektsmeldinger = kompletthetForBeregningTjeneste.utledInntektsmeldingerSomSendesInnTilBeregningForPeriode(referanse, inntektsmeldinger, periode);
-        var relevanteInntektsmeldingerForrigeVedtak = kompletthetForBeregningTjeneste.utledInntektsmeldingerSomSendesInnTilBeregningForPeriode(BehandlingReferanse.fra(originalBehandling), inntektsmeldingerForrigeVedtak, periode);
+        var relevanteInntektsmeldingerForrigeVedtak = kompletthetForBeregningTjeneste.utledInntektsmeldingerSomSendesInnTilBeregningForPeriode(originalBehandlingreferanse, inntektsmeldingerForrigeVedtak, periode);
 
         return ErEndringIRefusjonskravVurderer.finnEndringstidslinje(periode, relevanteInntektsmeldinger, relevanteInntektsmeldingerForrigeVedtak);
     }

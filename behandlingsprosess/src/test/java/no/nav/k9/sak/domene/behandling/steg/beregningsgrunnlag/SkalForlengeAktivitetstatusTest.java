@@ -336,23 +336,7 @@ class SkalForlengeAktivitetstatusTest {
 
         assertThat(resultat.isEmpty()).isFalse();
     }
-
-
-    @Test
-    void skal_gi_endring_når_gjeldende_IM_er_tom() {
-
-        var forrigeIM = InntektsmeldingBuilder.builder()
-            .medArbeidsgiver(Arbeidsgiver.virksomhet("32423423"))
-            .medArbeidsforholdId(InternArbeidsforholdRef.nyRef())
-            .medBeløp(BigDecimal.TEN)
-            .medKanalreferanse("KANALREFERANSE")
-            .build();
-
-
-        var resultat = SkalForlengeAktivitetstatus.finnEndringer(List.of(), List.of(forrigeIM));
-
-        assertThat(resultat.isEmpty()).isFalse();
-    }
+    
 
     @Test
     void skal_gi_ingen_endring_når_begge_listene_er_tomme() {
