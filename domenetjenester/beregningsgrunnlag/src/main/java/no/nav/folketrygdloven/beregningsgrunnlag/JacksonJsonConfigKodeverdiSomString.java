@@ -15,7 +15,7 @@ import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.kodeverk.TempKodeverdiSerializer;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
-public class JacksonJsonConfigKodeverkSomString {
+public class JacksonJsonConfigKodeverdiSomString {
 
     private static final ObjectMapper OM = new ObjectMapper();
 
@@ -33,7 +33,7 @@ public class JacksonJsonConfigKodeverkSomString {
         OM.registerModule(m);
     }
 
-    private JacksonJsonConfigKodeverkSomString() {
+    private JacksonJsonConfigKodeverdiSomString() {
         // skjul public constructor
     }
 

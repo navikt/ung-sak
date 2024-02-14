@@ -12,7 +12,7 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import no.nav.folketrygdloven.beregningsgrunnlag.JacksonJsonConfig;
-import no.nav.folketrygdloven.beregningsgrunnlag.JacksonJsonConfigKodeverkSomString;
+import no.nav.folketrygdloven.beregningsgrunnlag.JacksonJsonConfigKodeverdiSomString;
 import no.nav.k9.felles.integrasjon.kafka.GenerellKafkaProducer;
 import no.nav.k9.felles.integrasjon.kafka.KafkaPropertiesBuilder;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
@@ -134,7 +134,7 @@ public class PubliserVedtakHendelseTask extends BehandlingProsessTask {
         }
 
         if (kodeverkSomStringTopics) {
-            return JacksonJsonConfigKodeverkSomString.toJson(vedtakHendelse, PubliserVedtakHendelseFeil.FEILFACTORY::kanIkkeSerialisere);
+            return JacksonJsonConfigKodeverdiSomString.toJson(vedtakHendelse, PubliserVedtakHendelseFeil.FEILFACTORY::kanIkkeSerialisere);
         } else {
             return JacksonJsonConfig.toJson(vedtakHendelse, PubliserVedtakHendelseFeil.FEILFACTORY::kanIkkeSerialisere);
         }
