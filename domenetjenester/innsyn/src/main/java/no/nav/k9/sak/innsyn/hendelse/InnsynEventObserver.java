@@ -3,7 +3,6 @@ package no.nav.k9.sak.innsyn.hendelse;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -98,7 +97,7 @@ public class InnsynEventObserver {
                 mapBehandlingResultat(behandling.getBehandlingResultatType()),
                 mapBehandingStatus(behandling),
                 mapSøknader(behandling),
-                mapAksjonspunkter(behandling.getÅpneAksjonspunkter()),
+                mapAksjonspunkter(behandling),
                 utlandVurdererTjeneste.erUtenlandssak(behandling),
                 mapFagsak(fagsak)
             );
@@ -111,12 +110,35 @@ public class InnsynEventObserver {
 
 
 
-    private Set<Aksjonspunkt> mapAksjonspunkter(List<no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt> åpneAksjonspunkter) {
-        //TODO for å finne ut om medisinske opplysninger mangler må
-        // PleietrengendeSykdomDokumentRepository.hentDokumenterSomErRelevanteForSykdom() brukes slik som av frontend
-        // men denne bor bare i ytelse-pleiepenger så krever omstrukturering slik at oppretting av aksjonspunkter flyttes til den pakken
-        // Avklaring: Skal man vise at dokumentet ikke mangler selv om den er ikke vurdert?
-        return Collections.emptySet();
+    private Set<Aksjonspunkt> mapAksjonspunkter(Behandling b) {
+        return b.getÅpneAksjonspunkter().stream()
+            .map(this::mapRelevanteAksjonspunkterPåVent)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .collect(Collectors.toSet());
+    }
+
+
+    private Optional<Aksjonspunkt> mapRelevanteAksjonspunkterPåVent(no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt it) {
+        var venteårsak = it.getVenteårsak();
+        if (venteårsak == null) {
+            return Optional.empty();
+        }
+
+        var frist = it.getFristTid() != null ? it.getFristTid().atZone(ZoneId.systemDefault()) : null;
+
+        return switch (venteårsak) {
+            case LEGEERKLÆRING, MEDISINSKE_OPPLYSNINGER -> lagAksjonspunktForInnsyn(frist, Aksjonspunkt.Venteårsak.MEDISINSK_DOKUMENTASJON);
+            case INNTEKTSMELDING, VENTER_PÅ_ETTERLYST_INNTEKTSMELDINGER, VENTER_PÅ_ETTERLYST_INNTEKTSMELDINGER_MED_VARSEL ->
+                lagAksjonspunktForInnsyn(frist, Aksjonspunkt.Venteårsak.INNTEKTSMELDING);
+            case FOR_TIDLIG_SOKNAD -> lagAksjonspunktForInnsyn(frist, Aksjonspunkt.Venteårsak.FOR_TIDLIG_SOKNAD);
+            case VENT_PÅ_SISTE_AAP_ELLER_DP_MELDEKORT -> lagAksjonspunktForInnsyn(frist, Aksjonspunkt.Venteårsak.MELDEKORT);
+            default -> Optional.empty();
+        };
+    }
+
+    private static Optional<Aksjonspunkt> lagAksjonspunktForInnsyn(ZonedDateTime frist, Aksjonspunkt.Venteårsak venteårsak) {
+        return Optional.of(new Aksjonspunkt(venteårsak, frist));
     }
 
 

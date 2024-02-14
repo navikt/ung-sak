@@ -30,12 +30,16 @@ import no.nav.k9.innsyn.sak.SøknadInfo;
 import no.nav.k9.innsyn.sak.SøknadStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandling.saksbehandlingstid.SaksbehandlingsfristUtleder;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingStatusEvent;
+import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
+import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
@@ -54,6 +58,7 @@ class InnsynEventObserverTest {
     private final BrukerdialoginnsynMeldingProducer producer = mock();
     private final MottatteDokumentRepository mottatteDokumentRepository = mock();
     private UtlandVurdererTjeneste utlandVurdererTjeneste = mock();
+    private final AksjonspunktTestSupport aksjonspunktTestSupport = new AksjonspunktTestSupport();
 
 
     @BeforeEach
@@ -65,14 +70,19 @@ class InnsynEventObserverTest {
     void nyBehandlingEvent() {
         var mor = AktørId.dummy();
         var pleietrengende = AktørId.dummy();
+        var now = LocalDateTime.now();
+        var søknadJpId = "123";
+        var venteFrist = now.plusWeeks(4);
 
         TestScenarioBuilder testScenarioBuilder = TestScenarioBuilder
             .builderMedSøknad(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, mor)
             .medPleietrengende(pleietrengende);
+
         var behandling = testScenarioBuilder.lagMocked();
+        Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING);
+        aksjonspunktTestSupport.setFrist(aksjonspunkt,  venteFrist, Venteårsak.MEDISINSKE_OPPLYSNINGER, null);
+
         no.nav.k9.sak.behandlingslager.fagsak.Fagsak fagsak = behandling.getFagsak();
-        var now = LocalDateTime.now();
-        var søknadJpId = "123";
 
         //TODO egen test for mottatt, behandler og gyldig + ugyldig?
         when(mottatteDokumentRepository.hentMottatteDokumentForBehandling(
@@ -118,7 +128,11 @@ class InnsynEventObserverTest {
         assertThat(b.opprettetTidspunkt()).isEqualTo(behandling.getOpprettetDato().atZone(ZoneId.systemDefault()));
 
         var aksjonspunkter = b.aksjonspunkter();
-        assertThat(aksjonspunkter).isEmpty();
+        assertThat(aksjonspunkter).hasSize(1);
+        assertThat(aksjonspunkter).allSatisfy(it -> {
+            assertThat(it.tidsfrist()).isCloseTo(venteFrist.atZone(ZoneId.systemDefault()), within(1, ChronoUnit.MILLIS));
+            assertThat(it.venteårsak()).isEqualTo(no.nav.k9.innsyn.sak.Aksjonspunkt.Venteårsak.MEDISINSK_DOKUMENTASJON);
+        });
 
         Set<SøknadInfo> søknader = b.søknader();
         assertThat(søknader).hasSize(1);
