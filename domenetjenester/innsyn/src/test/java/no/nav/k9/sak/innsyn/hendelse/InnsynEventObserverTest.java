@@ -44,12 +44,12 @@ import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.domene.person.personopplysning.UtlandVurdererTjeneste;
-import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.innsyn.BrukerdialoginnsynMeldingProducer;
 import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.søknad.JsonUtils;
 
 class InnsynEventObserverTest {
     private final ProsessTaskTjeneste prosessTaskTjeneste = mock();
@@ -110,7 +110,7 @@ class InnsynEventObserverTest {
         verify(producer).send(anyString(), captor.capture());
 
         String json = captor.getValue();
-        InnsynHendelse<Behandling> behandlingInnsynHendelse = JsonObjectMapper.fromJson(json, InnsynHendelse.class);
+        InnsynHendelse<Behandling> behandlingInnsynHendelse = JsonUtils.fromString(json, InnsynHendelse.class);
         assertThat(behandlingInnsynHendelse.getOppdateringstidspunkt()).isNotNull();
 
         var b = behandlingInnsynHendelse.getData();

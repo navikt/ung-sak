@@ -1,6 +1,5 @@
 package no.nav.k9.sak.innsyn.hendelse;
 
-import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -11,12 +10,15 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.innsyn.InnsynHendelse;
+import no.nav.k9.innsyn.TempObjectMapperKodeverdi;
 import no.nav.k9.innsyn.sak.Aksjonspunkt;
 import no.nav.k9.innsyn.sak.BehandlingResultat;
 import no.nav.k9.innsyn.sak.SøknadInfo;
@@ -36,14 +38,15 @@ import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokument
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.person.personopplysning.UtlandVurdererTjeneste;
-import no.nav.k9.sak.domene.typer.tid.JsonObjectMapperKodeverdiSerializer;
 import no.nav.k9.sak.innsyn.BrukerdialoginnsynMeldingProducer;
+import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.felles.Kildesystem;
 
 @ApplicationScoped
 public class InnsynEventObserver {
 
     protected final Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final ObjectMapper KODEVERDI_OM = TempObjectMapperKodeverdi.getObjectMapper();
 
     private ProsessTaskTjeneste prosessTaskRepository;
     private BehandlingRepository behandlingRepository;
@@ -141,7 +144,7 @@ public class InnsynEventObserver {
             mapFagsak(fagsak)
         );
 
-        String json = deserialiser(new InnsynHendelse<>(ZonedDateTime.now(), behandlingInnsyn));
+        String json = JsonUtils.toString(new InnsynHendelse<>(ZonedDateTime.now(), behandlingInnsyn), KODEVERDI_OM);
 
         producer.send(saksnummer, json);
     }
@@ -223,16 +226,6 @@ public class InnsynEventObserver {
         }
 
         return null;
-    }
-
-    private static String deserialiser(InnsynHendelse<?> behandling) {
-        String json;
-        try {
-            json = JsonObjectMapperKodeverdiSerializer.getJson(behandling);
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Feilet ved deserialisering", e);
-        }
-        return json;
     }
 
 
