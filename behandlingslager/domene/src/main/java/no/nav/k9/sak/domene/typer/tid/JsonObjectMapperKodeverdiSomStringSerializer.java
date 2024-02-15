@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import no.nav.k9.kodeverk.TempKodeverdiSerializer;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
-public class JsonObjectMapperKodeverdiSerializer {
+public class JsonObjectMapperKodeverdiSomStringSerializer {
 
     private static final ObjectMapper OM;
 

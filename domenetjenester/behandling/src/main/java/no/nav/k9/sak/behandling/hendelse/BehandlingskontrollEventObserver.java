@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.hendelse.EventHendelse;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -27,9 +28,9 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
-import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
+import no.nav.k9.sak.domene.typer.tid.JsonObjectMapperKodeverdiSomStringSerializer;
 import no.nav.k9.sak.kontrakt.produksjonsstyring.los.ProduksjonsstyringAksjonspunktHendelse;
 import no.nav.k9.sak.kontrakt.produksjonsstyring.los.ProduksjonsstyringBehandlingAvsluttetHendelse;
 import no.nav.k9.sak.kontrakt.produksjonsstyring.los.ProduksjonsstyringBehandlingOpprettetHendelse;
@@ -41,8 +42,8 @@ public class BehandlingskontrollEventObserver {
 
     private ProsessTaskTjeneste prosessTaskRepository;
     private BehandlingRepository behandlingRepository;
-    private BehandlingVedtakRepository behandlingVedtakRepository;
     private BehandlingProsessHendelseMapper behandlingProsessHendelseMapper;
+    private boolean kodeverkSomStringTopics;
 
     public BehandlingskontrollEventObserver() {
     }
@@ -50,12 +51,21 @@ public class BehandlingskontrollEventObserver {
     @Inject
     public BehandlingskontrollEventObserver(ProsessTaskTjeneste prosessTaskRepository,
                                             BehandlingRepository behandlingRepository,
-                                            BehandlingVedtakRepository behandlingVedtakRepository,
-                                            BehandlingProsessHendelseMapper behandlingProsessHendelseMapper) {
+                                            BehandlingProsessHendelseMapper behandlingProsessHendelseMapper,
+                                            @KonfigVerdi(value = "KODEVERK_SOM_STRING_TOPICS", defaultVerdi = "false") boolean kodeverkSomStringTopics
+    ) {
         this.prosessTaskRepository = prosessTaskRepository;
         this.behandlingRepository = behandlingRepository;
-        this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.behandlingProsessHendelseMapper = behandlingProsessHendelseMapper;
+        this.kodeverkSomStringTopics = kodeverkSomStringTopics;
+    }
+
+    private String dtoTilJson(Object dto) throws IOException {
+        if (kodeverkSomStringTopics) {
+            return JsonObjectMapperKodeverdiSomStringSerializer.getJson(dto);
+        } else {
+            return JsonObjectMapper.getJson(dto);
+        }
     }
 
     public void observerStoppetEvent(@Observes BehandlingskontrollEvent.StoppetEvent event) {
@@ -66,8 +76,8 @@ public class BehandlingskontrollEventObserver {
             throw new RuntimeException("Publisering av StoppetEvent feilet", ex);
         }
     }
-
     // Lytter på AksjonspunkterFunnetEvent, filtrer ut når behandling er satt manuelt på vent og legger melding på kafka
+
     public void observerAksjonspunkterFunnetEvent(@Observes AksjonspunktStatusEvent event) {
         if (event.getAksjonspunkter().stream().anyMatch(e -> e.erOpprettet() && AksjonspunktDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT.equals(e.getAksjonspunktDefinisjon()))) {
             try {
@@ -129,7 +139,7 @@ public class BehandlingskontrollEventObserver {
         Optional<Behandling> behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId);
 
         var dto = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(LocalDateTime.now(), EventHendelse.BEHANDLINGSKONTROLL_EVENT, behandling.get(), vedtak.getVedtaksdato());
-        taskData.setPayload(JsonObjectMapper.getJson(dto));
+        taskData.setPayload(dtoTilJson(dto));
         taskData.setProperty(PubliserEventTask.PROPERTY_KEY, behandlingId.toString());
         taskData.setGruppe(LosTaskSekvensGenerator.gruppeForBehandling(behandlingId));
         taskData.setSekvens(LosTaskSekvensGenerator.nesteSekvens());
@@ -153,7 +163,7 @@ public class BehandlingskontrollEventObserver {
         Optional<Behandling> behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingId);
 
         var dto = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(eventHendelse, behandling.get());
-        taskData.setPayload(JsonObjectMapper.getJson(dto));
+        taskData.setPayload(dtoTilJson(dto));
         taskData.setProperty(PubliserEventTask.PROPERTY_KEY, behandlingId.toString());
         taskData.setGruppe(LosTaskSekvensGenerator.gruppeForBehandling(behandlingId));
         taskData.setSekvens(LosTaskSekvensGenerator.nesteSekvens());
@@ -182,7 +192,7 @@ public class BehandlingskontrollEventObserver {
             fagsak.getRelatertPersonAktørId()
         );
 
-        taskData.setPayload(JsonObjectMapper.getJson(dto));
+        taskData.setPayload(dtoTilJson(dto));
         taskData.setProperty(PubliserProduksjonsstyringHendelseTask.PROPERTY_KEY, behandlingId.toString());
         taskData.setGruppe(LosTaskSekvensGenerator.gruppeForBehandling(behandlingId));
         taskData.setSekvens(LosTaskSekvensGenerator.nesteSekvens());
@@ -201,7 +211,7 @@ public class BehandlingskontrollEventObserver {
             behandling.getBehandlingResultatType()
         );
 
-        taskData.setPayload(JsonObjectMapper.getJson(dto));
+        taskData.setPayload(dtoTilJson(dto));
         taskData.setProperty(PubliserProduksjonsstyringHendelseTask.PROPERTY_KEY, behandlingId.toString());
         taskData.setGruppe(LosTaskSekvensGenerator.gruppeForBehandling(behandlingId));
         taskData.setSekvens(LosTaskSekvensGenerator.nesteSekvens());
@@ -221,7 +231,7 @@ public class BehandlingskontrollEventObserver {
             behandlingProsessHendelseMapper.lagAksjonspunkttilstander(hendelse.getAksjonspunkter())
         );
 
-        taskData.setPayload(JsonObjectMapper.getJson(dto));
+        taskData.setPayload(dtoTilJson(dto));
         taskData.setProperty(PubliserProduksjonsstyringHendelseTask.PROPERTY_KEY, behandlingId.toString());
         taskData.setGruppe(LosTaskSekvensGenerator.gruppeForBehandling(behandlingId));
         taskData.setSekvens(LosTaskSekvensGenerator.nesteSekvens());
