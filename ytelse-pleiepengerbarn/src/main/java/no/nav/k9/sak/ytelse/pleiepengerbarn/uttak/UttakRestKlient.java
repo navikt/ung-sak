@@ -3,11 +3,10 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -34,7 +33,6 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -105,32 +103,6 @@ public class UttakRestKlient {
         this.psbUttakToken = psbUttakToken;
     }
 
-    @RequestScoped
-    public static class UttaksplanCache {
-
-        private static final Logger logger = LoggerFactory.getLogger(UttaksplanCache.class);
-
-        private Map<UUID, Uttaksplan> innhold = new HashMap<>();
-
-        public void clear() {
-            innhold.clear();
-        }
-
-        public Uttaksplan getUttaksplan(UUID behandlingUuid) {
-            Uttaksplan uttaksplan = innhold.get(behandlingUuid);
-            if (uttaksplan == null){
-                logger.info("Uttaksplan cache miss");
-            } else {
-                logger.info("Uttaksplan cache hit");
-            }
-            return uttaksplan;
-        }
-
-        public void put(UUID behandlingUuid, Uttaksplan uttaksplan) {
-            innhold.put(behandlingUuid, uttaksplan);
-        }
-    }
-
     public Uttaksplan opprettUttaksplan(Uttaksgrunnlag request) {
         uttaksplanCache.clear();
 
@@ -167,11 +139,14 @@ public class UttakRestKlient {
     }
 
     private Uttaksplan slåSammenLikePerioder(Uttaksplan uttaksplan) {
+        if (uttaksplan == null){
+            return null;
+        }
         LocalDateTimeline<UttaksperiodeInfo> uttakInfoTidslinje = new LocalDateTimeline<>(uttaksplan.getPerioder().entrySet().stream()
             .map(e -> new LocalDateSegment<>(e.getKey().getFom(), e.getKey().getTom(), kopierUtenKnekkpunkt(e.getValue())))
             .toList());
         LocalDateTimeline<UttaksperiodeInfo> komprimertTidslinje = uttakInfoTidslinje.compress(LocalDateInterval::abutsWorkdays, Object::equals, StandardCombinators::leftOnly);
-        TreeMap<LukketPeriode, UttaksperiodeInfo> map = komprimertTidslinje.stream().collect(Collectors.toMap(segment -> new LukketPeriode(segment.getFom(), segment.getTom()), LocalDateSegment::getValue, (a, b) -> a, TreeMap::new));
+        Map<LukketPeriode, UttaksperiodeInfo> map = komprimertTidslinje.stream().collect(Collectors.toMap(segment -> new LukketPeriode(segment.getFom(), segment.getTom()), LocalDateSegment::getValue, (a, b) -> a, LinkedHashMap::new));
         return new Uttaksplan(map, uttaksplan.getTrukketUttak(), uttaksplan.getKvoteInfo(), uttaksplan.getCommitId());
     }
 
@@ -201,9 +176,8 @@ public class UttakRestKlient {
     }
 
     public Uttaksplan hentUttaksplan(UUID behandlingUuid) {
-        Uttaksplan cachetUttaksplan = uttaksplanCache.getUttaksplan(behandlingUuid);
-        if (cachetUttaksplan != null){
-            return cachetUttaksplan;
+        if (uttaksplanCache.erUttaksplanICache(behandlingUuid)) {
+            return uttaksplanCache.getUttaksplan(behandlingUuid);
         }
 
         Objects.requireNonNull(behandlingUuid);
@@ -212,7 +186,9 @@ public class UttakRestKlient {
         builder.addParameter("slåSammenLikePerioder", "false");
         try {
             HttpGet kall = new HttpGet(builder.build());
-            return utførOgHent(kall, null, new ObjectReaderResponseHandler<>(endpointUttaksplan, uttaksplanReader));
+            Uttaksplan uttaksplan = utførOgHent(kall, null, new ObjectReaderResponseHandler<>(endpointUttaksplan, uttaksplanReader));
+            uttaksplanCache.put(behandlingUuid, uttaksplan);
+            return uttaksplan;
         } catch (IOException | URISyntaxException e) {
             throw RestTjenesteFeil.FEIL.feilKallTilUttak(behandlingUuid, e).toException();
         }
