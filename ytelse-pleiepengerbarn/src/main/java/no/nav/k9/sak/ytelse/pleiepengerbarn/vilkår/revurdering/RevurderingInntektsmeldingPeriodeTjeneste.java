@@ -60,12 +60,12 @@ public class RevurderingInntektsmeldingPeriodeTjeneste {
                     .toList();
 
                 if (!nyeRelevanteMottatteDokumenter.isEmpty()) {
-                    inntektsmeldingEndringer.crossJoin(new LocalDateTimeline<>(periode.toLocalDateInterval(),
+                    inntektsmeldingEndringer = inntektsmeldingEndringer.crossJoin(new LocalDateTimeline<>(periode.toLocalDateInterval(),
                             Set.of(InntektsmeldingRevurderingÅrsak.REVURDERER_VILKÅR)),
                         StandardCombinators::union);
                 }
             }
-            inntektsmeldingEndringer.crossJoin(erEndringIRefusjonskravVurderer.finnEndringstidslinjeForRefusjon(referanse, originalBehandlingReferanse, periode, inntektsmeldinger).mapValue(it -> Set.of(InntektsmeldingRevurderingÅrsak.ENDRET_REFUSJONSKRAV)),
+            inntektsmeldingEndringer = inntektsmeldingEndringer.crossJoin(erEndringIRefusjonskravVurderer.finnEndringstidslinjeForRefusjon(referanse, originalBehandlingReferanse, periode, inntektsmeldinger).mapValue(it -> Set.of(InntektsmeldingRevurderingÅrsak.ENDRET_REFUSJONSKRAV)),
                 StandardCombinators::union);
         }
         return inntektsmeldingEndringer;

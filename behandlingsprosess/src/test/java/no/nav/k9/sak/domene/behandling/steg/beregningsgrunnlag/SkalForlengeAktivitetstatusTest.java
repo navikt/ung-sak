@@ -336,7 +336,7 @@ class SkalForlengeAktivitetstatusTest {
 
         assertThat(resultat.isEmpty()).isFalse();
     }
-    
+
 
     @Test
     void skal_gi_ingen_endring_når_begge_listene_er_tomme() {
