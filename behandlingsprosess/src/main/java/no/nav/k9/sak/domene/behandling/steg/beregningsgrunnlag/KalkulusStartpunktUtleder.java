@@ -69,7 +69,7 @@ public class KalkulusStartpunktUtleder {
                 log.info("Perioder med start i vurder refusjon: " + forlengelseperioder);
             }
             settStartpunkt(forlengelseperioder, periodeStartStegMap, getStartpunktForlengelse(ref));
-            var startIKontrollerFaktaBeregning = finnPerioderMedStartIKontrollerFakta.finnPerioder(ref, utenAvslagFørBeregning, forlengelseperioder);
+            var startIKontrollerFaktaBeregning = finnPerioderMedStartIKontrollerFakta.finnPerioder(ref, utenAvslagFørBeregning);
             if (!startIKontrollerFaktaBeregning.isEmpty()) {
                 log.info("Perioder med start i kontroller fakta beregning: " + startIKontrollerFaktaBeregning);
             }

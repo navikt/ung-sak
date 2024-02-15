@@ -46,9 +46,9 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
     private ProsessTriggereRepository prosessTriggereRepository;
 
     private MottatteDokumentRepository mottatteDokumentRepository;
+    private BehandlingRepository behandlingRepository;
     private Instance<EndringPåForlengelsePeriodeVurderer> endringsVurderere;
     private HarEndretKompletthetVurderer harEndretKompletthetVurderer;
-
     private HarEndretInntektsmeldingVurderer harEndretInntektsmeldingVurderer;
 
 
@@ -67,9 +67,10 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
 
         this.prosessTriggereRepository = prosessTriggereRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
+        this.behandlingRepository = behandlingRepository;
         this.endringsVurderere = endringsVurderere;
         this.harEndretKompletthetVurderer = harEndretKompletthetVurderer;
-        this.harEndretInntektsmeldingVurderer = new HarEndretInntektsmeldingVurderer(behandlingRepository, getInntektsmeldingFilter(inntektsmeldingRelevantForVilkårsrevurdering), harRelvantInntektsmeldingendringForForlengelseIBeregning);
+        this.harEndretInntektsmeldingVurderer = new HarEndretInntektsmeldingVurderer(getInntektsmeldingFilter(inntektsmeldingRelevantForVilkårsrevurdering), harRelvantInntektsmeldingendringForForlengelseIBeregning);
     }
 
     @Override
@@ -83,9 +84,10 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
             .stream()
             .filter(it -> Objects.equals(Brevkode.INNTEKTSMELDING, it.getType()))
             .toList();
+        var originalBehandling = behandlingRepository.hentBehandling(input.getBehandlingReferanse().getOriginalBehandlingId().orElseThrow());
         if (harEndretInntektsmeldingVurderer.harEndringPåInntektsmeldingerTilBrukForPerioden(
             input.getBehandlingReferanse(),
-            periode, inntektsmeldinger,
+            BehandlingReferanse.fra(originalBehandling), periode, inntektsmeldinger,
             mottatteInntektsmeldinger
         )) {
             return true;

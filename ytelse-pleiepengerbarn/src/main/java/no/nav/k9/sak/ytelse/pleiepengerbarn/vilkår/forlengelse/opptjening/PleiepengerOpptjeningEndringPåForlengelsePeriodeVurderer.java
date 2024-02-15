@@ -12,7 +12,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.HarEndretInntektsmeldingVurderer;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingRelevantForVilkårsrevurdering;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
@@ -23,6 +22,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingskontroll.VilkårTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.HarEndretInntektsmeldingVurderer;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.EndringPåForlengelseInput;
@@ -43,6 +43,7 @@ public class PleiepengerOpptjeningEndringPåForlengelsePeriodeVurderer implement
     private ProsessTriggereRepository prosessTriggereRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private HarEndretInntektsmeldingVurderer harEndretInntektsmeldingVurderer;
+    private BehandlingRepository behandlingRepository;
     private boolean skalVurdereIM;
 
 
@@ -58,8 +59,9 @@ public class PleiepengerOpptjeningEndringPåForlengelsePeriodeVurderer implement
                                                                     @KonfigVerdi(value = "FORLENGELSE_IM_OPPTJENING_FILTER", defaultVerdi = "false") boolean skalVurdereIM) {
         this.prosessTriggereRepository = prosessTriggereRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
+        this.behandlingRepository = behandlingRepository;
         this.skalVurdereIM = skalVurdereIM;
-        this.harEndretInntektsmeldingVurderer = new HarEndretInntektsmeldingVurderer(behandlingRepository, getInntektsmeldingFilter(inntektsmeldingRelevantForVilkårsrevurdering), harRelevantEndringIInntektsmelding);
+        this.harEndretInntektsmeldingVurderer = new HarEndretInntektsmeldingVurderer(getInntektsmeldingFilter(inntektsmeldingRelevantForVilkårsrevurdering), harRelevantEndringIInntektsmelding);
     }
 
     @Override
@@ -70,9 +72,10 @@ public class PleiepengerOpptjeningEndringPåForlengelsePeriodeVurderer implement
                 .stream()
                 .filter(it -> Objects.equals(Brevkode.INNTEKTSMELDING, it.getType()))
                 .toList();
+            var originalBehandling = behandlingRepository.hentBehandling(input.getBehandlingReferanse().getOriginalBehandlingId().orElseThrow());
             if (harEndretInntektsmeldingVurderer.harEndringPåInntektsmeldingerTilBrukForPerioden(
                 input.getBehandlingReferanse(),
-                periode, inntektsmeldinger,
+                BehandlingReferanse.fra(originalBehandling), periode, inntektsmeldinger,
                 mottatteInntektsmeldinger
             )) {
                 return true;
