@@ -29,10 +29,6 @@ public class StønadstatistikkSerializer {
         try {
             Writer jsonWriter = new StringWriter();
             ObjectWriter writer = objectMapper.writerWithDefaultPrettyPrinter();
-            if (System.getenv("STONADSTATISTIKK_V2") == null
-                    || !Boolean.parseBoolean(System.getenv("STONADSTATISTIKK_V2"))) {
-                writer = writer.withView(StønadstatistikkHendelse.View.V1.class);
-            }
             writer.writeValue(jsonWriter, object);
             jsonWriter.flush();
             final String json = jsonWriter.toString();
