@@ -6,6 +6,9 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -35,6 +38,7 @@ import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 @Dependent
 public class TilkjentYtelseTjeneste {
 
+    private final Logger log = LoggerFactory.getLogger(TilkjentYtelseTjeneste.class);
     private Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
     private ObjectMapper objectMapper = JsonMapper.getMapper();
     private TilkjentYtelseMaskerer maskerer = new TilkjentYtelseMaskerer(objectMapper).ikkeMaskerSats();
@@ -116,7 +120,8 @@ public class TilkjentYtelseTjeneste {
                 String input = objectMapper.writeValueAsString(maskert);
                 //avkorter input for å unngå at logginnslag brytes. Ser ut som loggen p.t. tåler ca 9000 tegn herfra, setter lavere for sikkerhets skyld
                 String avkortetInput = begrensTilAntall(input, 6000);
-                throw new IllegalArgumentException("Valideringsfeil:\"" + valideringsfeil + "\" for " + avkortetInput);
+                log.warn("Valideringsfeil:\"" + valideringsfeil + "\" for " + avkortetInput);
+                throw new IllegalArgumentException("Valideringsfeil:" + valideringsfeil);
             } catch (JsonProcessingException e) {
                 throw new IllegalArgumentException("Det var valideringsfeil, men fikk også Json-feil i håndtering av feilen", e);
             }

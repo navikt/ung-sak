@@ -12,11 +12,11 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandling.saksbehandlingstid.SaksbehandlingsfristUtleder;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
+import no.nav.k9.sak.domene.person.personopplysning.UtlandVurdererTjeneste;
 
 @FagsakYtelseTypeRef(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
 @ApplicationScoped
@@ -26,14 +26,17 @@ public class PsbSaksbehandlingsfristUtleder implements SaksbehandlingsfristUtled
 
     private SøknadRepository søknadRepository;
     private Period fristPeriode;
+    private UtlandVurdererTjeneste utlandVurdererTjeneste;
 
     @Inject
     public PsbSaksbehandlingsfristUtleder(
         SøknadRepository søknadRepository,
-        @KonfigVerdi(value = "DEFAULT_SAKSBEHANDLINGSFRIST_PERIODE", defaultVerdi = "P7W") Period fristPeriode
+        @KonfigVerdi(value = "DEFAULT_SAKSBEHANDLINGSFRIST_PERIODE", defaultVerdi = "P7W") Period fristPeriode,
+        UtlandVurdererTjeneste utlandVurdererTjeneste
     ) {
         this.søknadRepository = søknadRepository;
         this.fristPeriode = fristPeriode;
+        this.utlandVurdererTjeneste = utlandVurdererTjeneste;
     }
 
     PsbSaksbehandlingsfristUtleder() {
@@ -51,7 +54,7 @@ public class PsbSaksbehandlingsfristUtleder implements SaksbehandlingsfristUtled
             return Optional.empty();
         }
 
-        if (erUtenlandssak(behandling)) {
+        if (utlandVurdererTjeneste.erUtenlandssak(behandling)) {
             log.info("Utleder ikke frist for utenlandssak");
             return Optional.empty();
         }
@@ -60,17 +63,6 @@ public class PsbSaksbehandlingsfristUtleder implements SaksbehandlingsfristUtled
             .map(it -> it.getMottattDato().plus(fristPeriode).atStartOfDay());
     }
 
-    /**
-     * Best effort utenlandssjekk. Denne kan gi true, men likevel ikke være utenlandsk.
-     */
-    private static boolean erUtenlandssak(Behandling behandling) {
-        return erOpprettetEllerUtført(behandling, AksjonspunktDefinisjon.AUTOMATISK_MARKERING_AV_UTENLANDSSAK)
-            || erOpprettetEllerUtført(behandling, AksjonspunktDefinisjon.MANUELL_MARKERING_AV_UTLAND_SAKSTYPE);
-    }
 
-    private static boolean erOpprettetEllerUtført(Behandling behandling, AksjonspunktDefinisjon ap) {
-        return behandling.getAksjonspunktMedDefinisjonOptional(ap)
-            .map(it -> !it.erAvbrutt())
-            .isPresent();
-    }
+
 }

@@ -267,8 +267,6 @@ spec:
       value: "true"
     - name: FILTRER_UGYLDIG_IM
       value: "true"
-    - name: STONADSTATISTIKK_V2
-      value: "true"
     - name: FJERN_VILKARSPERIODER_BEREGNING
       value: "false"
     - name: VALIDER_KALKULUS_REFERANSER
@@ -285,7 +283,13 @@ spec:
       value: "true"
     - name: UTVIDET_ENDRING_UTBETALING_UTLEDER
       value: "true"
-    - name: ENABLE_INNSYN_OBSERVER
+    - name: ENABLE_INNSYN_START_SLUTT_OBSERVER
+      value: "true"
+    - name: ENABLE_INNSYN_ENDRING_OBSERVER
+      value: "false"
+    - name: SJEKK_OM_DODSHENDELSE_ER_RELEVANT
+      value: "true"
+    - name: KODEVERK_SOM_STRING_TOPICS
       value: "true"
 
     # Konfigurasjoner

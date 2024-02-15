@@ -48,6 +48,10 @@
             <groupId>no.nav.k9</groupId>
             <artifactId>inntektsmelding-v1</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.k9.sak</groupId>
+            <artifactId>innsyn</artifactId>
+        </dependency>
 
         <!-- JAXB for å parse Inntektsmelding -->
         <dependency>

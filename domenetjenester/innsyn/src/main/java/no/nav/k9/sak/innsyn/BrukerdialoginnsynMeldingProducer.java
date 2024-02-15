@@ -1,4 +1,4 @@
-package no.nav.k9.sak.behandling.hendelse.innsyn;
+package no.nav.k9.sak.innsyn;
 
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;

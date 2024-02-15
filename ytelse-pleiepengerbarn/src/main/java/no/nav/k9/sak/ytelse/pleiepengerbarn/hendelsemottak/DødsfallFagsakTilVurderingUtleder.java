@@ -14,15 +14,24 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
@@ -39,23 +48,32 @@ public class DødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderingU
     public static final Set<FagsakYtelseType> RELEVANTE_YTELSER = Set.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE);
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
+    private VilkårResultatRepository vilkårResultatRepository;
     private PersonopplysningRepository personopplysningRepository;
     private PersoninfoAdapter personinfoAdapter;
+    private boolean skalSjekkeOmDødErRelevantForVedtak;
 
     public DødsfallFagsakTilVurderingUtleder() {
         // For CDI
     }
 
     @Inject
-    public DødsfallFagsakTilVurderingUtleder(FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository, PersonopplysningRepository personopplysningRepository, PersoninfoAdapter personinfoAdapter) {
+    public DødsfallFagsakTilVurderingUtleder(FagsakRepository fagsakRepository,
+                                             BehandlingRepository behandlingRepository,
+                                             VilkårResultatRepository vilkårResultatRepository,
+                                             PersonopplysningRepository personopplysningRepository,
+                                             PersoninfoAdapter personinfoAdapter,
+                                             @KonfigVerdi(value = "SJEKK_OM_DODSHENDELSE_ER_RELEVANT", defaultVerdi = "false") boolean skalSjekkeOmDødErRelevantForVedtak) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
+        this.vilkårResultatRepository = vilkårResultatRepository;
         this.personopplysningRepository = personopplysningRepository;
         this.personinfoAdapter = personinfoAdapter;
+        this.skalSjekkeOmDødErRelevantForVedtak = skalSjekkeOmDødErRelevantForVedtak;
     }
 
     @Override
-    public Map<Fagsak, BehandlingÅrsakType> finnFagsakerTilVurdering(AktørId aktørId, Hendelse hendelse) {
+    public Map<Fagsak, BehandlingÅrsakType> finnFagsakerTilVurdering(Hendelse hendelse) {
         List<AktørId> dødsfallAktører = hendelse.getHendelseInfo().getAktørIder();
         LocalDate dødsdatoFraHendelse = hendelse.getHendelsePeriode().getFom();
         String hendelseId = hendelse.getHendelseInfo().getHendelseId();
@@ -72,7 +90,7 @@ public class DødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderingU
                     }
                 }
                 for (Fagsak fagsak : fagsakRepository.finnFagsakRelatertTil(fagsakYtelseType, null, aktør, null, dødsdato, null)) {
-                    if (erNyInformasjonIHendelsen(fagsak, aktør, dødsdato, hendelseId)) {
+                    if (erNyInformasjonIHendelsen(fagsak, aktør, dødsdato, hendelseId) && erPleietrengendesDødRelevantForVedtaket(fagsak, dødsdato)) {
                         fagsaker.put(fagsak, BehandlingÅrsakType.RE_HENDELSE_DØD_BARN);
                     }
                 }
@@ -81,6 +99,39 @@ public class DødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderingU
 
 
         return fagsaker;
+    }
+
+    private boolean erPleietrengendesDødRelevantForVedtaket(Fagsak fagsak, LocalDate dødsdato) {
+        if (!skalSjekkeOmDødErRelevantForVedtak) {
+            return true;
+        }
+
+        Optional<Behandling> behandlingOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
+        if (behandlingOpt.isEmpty()) {
+            logger.info("Det er ingen behandling på fagsak. Ignorer hendelse");
+            return false;
+        }
+
+        if (!behandlingOpt.get().erAvsluttet()) {
+            return true;
+        }
+
+        var vilkårresultat = vilkårResultatRepository.hent(behandlingOpt.get().getId());
+        var heleVilkårTidslinjen = vilkårresultat.getAlleIntervaller();
+        var avslåttTidslinje = finnAvslåttTidslinje(vilkårresultat);
+        var innvilgetTidslinje = heleVilkårTidslinjen.disjoint(avslåttTidslinje);
+        var innvilgelseFomDødsdato = innvilgetTidslinje.intersection(new LocalDateInterval(dødsdato, fagsak.getPeriode().getTomDato()));
+        return !innvilgelseFomDødsdato.isEmpty();
+    }
+
+    private static LocalDateTimeline<Boolean> finnAvslåttTidslinje(Vilkårene vilkårresultat) {
+        var avslåtteSegmenter = vilkårresultat.getVilkårene().stream()
+            .flatMap(v -> v.getPerioder().stream())
+            .filter(v -> v.getUtfall().equals(Utfall.IKKE_OPPFYLT))
+            .map(VilkårPeriode::getPeriode)
+            .map(p -> new LocalDateSegment<>(p.toLocalDateInterval(), true))
+            .toList();
+        return new LocalDateTimeline<>(avslåtteSegmenter, StandardCombinators::alwaysTrueForMatch);
     }
 
     /**

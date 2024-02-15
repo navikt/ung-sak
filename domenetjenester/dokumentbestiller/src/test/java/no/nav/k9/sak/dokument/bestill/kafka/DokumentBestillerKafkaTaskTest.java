@@ -47,7 +47,7 @@ public class DokumentBestillerKafkaTaskTest {
 
         BehandlingRepository behandlingRepository = repositoryProvider.getBehandlingRepository();
 
-        dokumentBestillerKafkaTask = new DokumentBestillerKafkaTask(dokumentbestillingProducer, behandlingRepository);
+        dokumentBestillerKafkaTask = new DokumentBestillerKafkaTask(dokumentbestillingProducer, behandlingRepository, true);
     }
 
     @Test
