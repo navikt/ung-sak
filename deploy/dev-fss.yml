@@ -284,7 +284,7 @@ spec:
     - name: UTVIDET_ENDRING_UTBETALING_UTLEDER
       value: "true"
     - name: ENABLE_INNSYN_ENDRING_OBSERVER
-      value: "false"
+      value: "true"
     - name: KODEVERK_SOM_STRING_TOPICS
       value: "true"
 
