@@ -100,7 +100,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
         HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste = HåndterePleietrengendeDødsfallTjeneste.velgTjeneste(håndterePleietrengendeDødsfallTjenester, referanse);
         håndterePleietrengendeDødsfallTjeneste.utledUtvidetPeriodeForDødsfall(referanse).ifPresent(input::medAutomatiskUtvidelseVedDødsfall);
 
-        var innvilgeteVilkårPerioder = perioderMedSykdomInnvilgetUtleder.utledInnvilgedePerioderTilVurdering(referanse);
+        var innvilgeteVilkårPerioder = perioderMedSykdomInnvilgetUtleder.utledInnvilgedePerioderTilVurdering(referanse, true);
 
         var innvilgedeSegmenter = innvilgeteVilkårPerioder.stream()
             .map(periode -> new LocalDateSegment<>(periode.getFomDato(), periode.getTomDato(), true))
