@@ -49,7 +49,6 @@ public class InnsynEventObserver {
     private ProsessTaskTjeneste prosessTaskRepository;
     private BehandlingRepository behandlingRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
-    private boolean enableStartSlutt;
     private boolean enableEndringer;
     private UtlandVurdererTjeneste utlandVurdererTjeneste;
 
@@ -60,23 +59,17 @@ public class InnsynEventObserver {
     public InnsynEventObserver(ProsessTaskTjeneste prosessTaskRepository,
                                BehandlingRepository behandlingRepository,
                                MottatteDokumentRepository mottatteDokumentRepository,
-                               @KonfigVerdi(value = "ENABLE_INNSYN_START_SLUTT_OBSERVER", defaultVerdi = "true") boolean enableBehandlingStartSlutt,
-                               @KonfigVerdi(value = "ENABLE_INNSYN_ENDRING_OBSERVER", defaultVerdi = "true") boolean enableEndringer,
+                               @KonfigVerdi(value = "ENABLE_INNSYN_ENDRING_OBSERVER", defaultVerdi = "false") boolean enableEndringer,
                                UtlandVurdererTjeneste utlandVurdererTjeneste) {
         this.prosessTaskRepository = prosessTaskRepository;
         this.behandlingRepository = behandlingRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
-        this.enableStartSlutt = enableBehandlingStartSlutt;
         this.enableEndringer = enableEndringer;
         this.utlandVurdererTjeneste = utlandVurdererTjeneste;
     }
 
 
     public void observerBehandlingStartet(@Observes BehandlingStatusEvent event) {
-        if (!enableStartSlutt) {
-            return;
-        }
-
         if ((event.getGammelStatus() == BehandlingStatus.OPPRETTET || event.getGammelStatus() == null)
             && event.getNyStatus() == BehandlingStatus.UTREDES) {
             log.info("Publiserer melding til brukerdialog for behandling startet");
@@ -85,10 +78,6 @@ public class InnsynEventObserver {
     }
 
     public void observerBehandlingAvsluttetEvent(@Observes BehandlingStatusEvent.BehandlingAvsluttetEvent event)  {
-        if (!enableStartSlutt) {
-            return;
-        }
-
         log.info("Publiserer melding til brukerdialog for behandling avsluttet");
         notifyInnsyn(event.getBehandlingId());
     }
