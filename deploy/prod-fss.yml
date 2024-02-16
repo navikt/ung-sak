@@ -289,6 +289,8 @@ spec:
       value: "false"
     - name: KODEVERK_SOM_STRING_TOPICS
       value: "false"
+    - name: KODEVERK_SOM_STRING_REST
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

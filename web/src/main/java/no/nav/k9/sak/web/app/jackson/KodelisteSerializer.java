@@ -21,37 +21,54 @@ public class KodelisteSerializer extends StdSerializer<Kodeverdi> {
     public static final String KODE = "kode";
     public static final String NAVN = "navn";
     public static final String KODEVERK = "kodeverk";
+    private final boolean serialiserKodelisteNavn;
+    private final boolean kodeverdiSomStringLansert;
     /**
      * dropper navn hvis false (trenger da ikke refreshe navn fra db.). Default false
      */
-    private boolean serialiserKodelisteNavn;
-
     private Set<String> reserverteKeys = Set.of(KODE, KODEVERK, NAVN);
-
-    public KodelisteSerializer() {
-        this(false);
-    }
 
     public KodelisteSerializer(boolean serialiserKodelisteNavn) {
         super(Kodeverdi.class);
         this.serialiserKodelisteNavn = serialiserKodelisteNavn;
+        this.kodeverdiSomStringLansert = kodeverdiSomStringLansert();
+    }
+
+    private static boolean kodeverdiSomStringLansert() {
+        String konfverdi = System.getenv("KODEVERK_SOM_STRING_REST");
+        return Boolean.parseBoolean(konfverdi);
     }
 
     @Override
     public void serialize(Kodeverdi value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+        if (kodeverdiSomStringLansert) {
+            serialisertKodeverdiSomStreng(value, jgen);
+        } else {
+            serialiserKodeverdiSomObjekt(value, jgen);
+        }
+    }
 
+    private void serialisertKodeverdiSomStreng(Kodeverdi value, JsonGenerator jgen) throws IOException {
+        if (serialiserKodelisteNavn) {
+            jgen.writeStartObject();
+            jgen.writeStringField(KODE, value.getKode());
+            jgen.writeStringField(NAVN, value.getNavn());
+            //tok bort KODEVERK, den brukes ikke av noen
+            håndtereEkstraFelter(value, jgen);
+            jgen.writeEndObject();
+        } else {
+            jgen.writeString(value.getKode());
+        }
+    }
+
+    private void serialiserKodeverdiSomObjekt(Kodeverdi value, JsonGenerator jgen) throws IOException {
         jgen.writeStartObject();
-
         jgen.writeStringField(KODE, value.getKode());
-
         if (serialiserKodelisteNavn) {
             jgen.writeStringField(NAVN, value.getNavn());
         }
-
         jgen.writeStringField(KODEVERK, value.getKodeverk());
-
         håndtereEkstraFelter(value, jgen);
-
         jgen.writeEndObject();
     }
 

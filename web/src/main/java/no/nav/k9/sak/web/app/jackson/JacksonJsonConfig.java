@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.ext.ContextResolver;
@@ -89,12 +90,26 @@ public class JacksonJsonConfig implements ContextResolver<ObjectMapper> {
     }
 
     private static void addSerializers(SimpleModule module, boolean serialiserKodelisteNavn) {
+        boolean brukKodeverSomString = kodeverdiSomStringLansert();
         if(serialiserKodelisteNavn) {
-            module.addSerializer(new KodelisteSerializer(serialiserKodelisteNavn));
-        }
+            module.addSerializer(new KodelisteSerializer(true));
+        } else if (brukKodeverSomString){
+            module.addSerializer(new KodelisteSerializer(false));
+        } //else bruk default serialisering
+
         // BeregningsgrunnlagRestTjeneste eksponerer kalkulus sine kodeverdier opp til frontend.
         // For å tillate at Kalkulus serialiserer Kodeverdi som string, samtidig som beholder dagens format til frontend.
-        module.addSerializer(new KalkulusKodelisteSerializer(true));
+
+        module.addSerializer(new KalkulusKodelisteSerializer(kodeverdiSomObjekt()));
+    }
+
+    private static boolean kodeverdiSomObjekt(){
+        return !kodeverdiSomStringLansert();
+    }
+
+    private static boolean kodeverdiSomStringLansert(){
+        String konfverdi = System.getenv("KODEVERK_SOM_STRING_REST");
+        return Boolean.parseBoolean(konfverdi);
     }
 
     /**
