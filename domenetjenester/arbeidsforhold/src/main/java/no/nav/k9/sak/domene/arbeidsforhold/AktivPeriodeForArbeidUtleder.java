@@ -19,10 +19,19 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 public class AktivPeriodeForArbeidUtleder {
 
 
-    public static LocalDateTimeline<AktivitetsAvtaleInnhold> utledAktivPeriode(Yrkesaktivitet registerAktivitet,
-                                                                               InntektArbeidYtelseGrunnlag grunnlag,
-                                                                               DatoIntervallEntitet vilkårsperiode,
-                                                                               Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse) {
+    /**
+     * Finner tidslinje der arbeidsforholdet er ansett som aktivt ut i fra ansettelsesperioder og permisjoner
+     *
+     * @param registerAktivitet  En yrkesaktivitet/arbeidsforhold
+     * @param grunnlag           Inntekt-arbeid-ytelse grunnlaget
+     * @param vilkårsperiode     Aktuell vilkårsperiode
+     * @param tidslinjePerYtelse Tidslinje pr mottatt ytelse for bruker
+     * @return Aktiv tidslinje for arbeidsforholdet
+     */
+    public static LocalDateTimeline<AktivitetsAvtaleInnhold> utledAktivTidslinje(Yrkesaktivitet registerAktivitet,
+                                                                                 InntektArbeidYtelseGrunnlag grunnlag,
+                                                                                 DatoIntervallEntitet vilkårsperiode,
+                                                                                 Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse) {
         var inaktivTidslinje = InaktivGrunnetPermisjonUtleder.utledTidslinjeForSammengengendePermisjonOver14Dager(registerAktivitet, tidslinjePerYtelse, vilkårsperiode);
         return gjeldendeAvtaler(grunnlag, vilkårsperiode.getFomDato(), registerAktivitet).stream()
             .sorted(AktivitetsAvtale.COMPARATOR).map(a ->

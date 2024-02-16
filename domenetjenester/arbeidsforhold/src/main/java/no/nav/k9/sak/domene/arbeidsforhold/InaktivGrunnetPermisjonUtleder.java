@@ -12,18 +12,26 @@ import no.nav.k9.sak.domene.opptjening.MellomliggendeHelgUtleder;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.PermisjonPerYrkesaktivitet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
-class InaktivGrunnetPermisjonUtleder {
+public class InaktivGrunnetPermisjonUtleder {
 
     private static final MellomliggendeHelgUtleder mellomliggendeHelgUtleder = new MellomliggendeHelgUtleder();
 
 
+    /**
+     * Finner tidslinje for permisjoner med varighet mer enn 14 dager.
+     * <p>
+     * Perioder der ytelse kan være opphav til permisjonen klippes bort.
+     *
+     * @param yrkesaktivitet     Yrkesaktivitet
+     * @param tidslinjePerYtelse Tidslinje pr ytelse mottatt
+     * @param vilkårsperiode     Aktuell vilkårsperiode
+     * @return Tidslinje for perioder der arbeidsforholdet er ansett som inaktivt grunnet permisjon over 14 dager
+     */
     public static LocalDateTimeline<Boolean> utledTidslinjeForSammengengendePermisjonOver14Dager(Yrkesaktivitet yrkesaktivitet,
-                                                                                          Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse,
-                                                                                          DatoIntervallEntitet vilkårsperiode) {
+                                                                                                 Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse,
+                                                                                                 DatoIntervallEntitet vilkårsperiode) {
         // Permisjoner på yrkesaktivitet
         LocalDateTimeline<Boolean> tidslinjeTilVurdering = PermisjonPerYrkesaktivitet.utledPermisjonPerYrkesaktivitet(yrkesaktivitet, tidslinjePerYtelse, vilkårsperiode);
-
-        // Vurder kun permisjonsperioder som overlapper aktivitetens lengde
 
         // Legg til mellomliggende periode dersom helg mellom permisjonsperioder
         LocalDateTimeline<Boolean> mellomliggendePerioder = mellomliggendeHelgUtleder.beregnMellomliggendeHelg(tidslinjeTilVurdering);
@@ -56,7 +64,6 @@ class InaktivGrunnetPermisjonUtleder {
         }
         return new LocalDateSegment<>(di, siste);
     }
-
 
 
 }

@@ -2,7 +2,6 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -53,6 +52,18 @@ public class RevurderingInntektsmeldingPeriodeTjeneste {
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
     }
 
+    /**
+     * Utleder tidslinje for perioder der mottatte inntektsmeldinger i behandlingen skal føre til revurdering av periode
+     * <p>
+     * Utleder tidslinje med årsak til revurdering der det skilles mellom om inntektmeldingen fører til revurdering av et vilkår
+     * eller til endring i tilkjent ytelse grunnet endring i refusjon.
+     *
+     * @param referanse                 Behandlingreferanse
+     * @param inntektsmeldinger         inntektsmeldinger
+     * @param mottatteInntektsmeldinger Mottatte dokumenter for inntektsmeldinger
+     * @param perioder                  Aktuell vilkårsperiode
+     * @return Tidslinje for perioder der inntektsmeldinger skal før til revurdering av periode, samt årsak til revurdering
+     */
     public LocalDateTimeline<Set<InntektsmeldingRevurderingÅrsak>> utledTidslinjeForVurderingFraInntektsmelding(BehandlingReferanse referanse,
                                                                                                                 Collection<Inntektsmelding> inntektsmeldinger,
                                                                                                                 List<MottattDokument> mottatteInntektsmeldinger,

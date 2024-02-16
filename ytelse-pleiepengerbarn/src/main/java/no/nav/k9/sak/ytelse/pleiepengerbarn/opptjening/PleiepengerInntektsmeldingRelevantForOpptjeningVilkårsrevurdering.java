@@ -58,28 +58,38 @@ public class PleiepengerInntektsmeldingRelevantForOpptjeningVilkårsrevurdering 
     }
 
 
+    /**
+     * Finner inntektsmeldinger som er aktuelle i vurdering av om perioden skal revurderes pga mottatt inntektsmelding
+     * <p>
+     * Finner inntektsmeldinger for arbeidsforhold som er aktive dagen før skjæringstidspunktet
+     *
+     * @param referanse         Behandlingreferanse
+     * @param inntektsmeldinger Inntektsmeldinger
+     * @param periode           Vilkårsperiode
+     * @return
+     */
     @Override
     public List<Inntektsmelding> begrensInntektsmeldinger(BehandlingReferanse referanse, Collection<Inntektsmelding> inntektsmeldinger, DatoIntervallEntitet periode) {
         var relevanteImTjeneste = InntektsmeldingerRelevantForBeregning.finnTjeneste(inntektsmeldingerRelevantForBeregning, referanse.getFagsakYtelseType());
         var inntektsmeldingBegrenset = relevanteImTjeneste.begrensSakInntektsmeldinger(referanse, inntektsmeldinger, periode);
-        var inntektsmeldingerTilBeregning = filtrerForOpptjeningsaktiviteter(referanse, periode, inntektsmeldingBegrenset);
+        var inntektsmeldingerTilBeregning = filtrerAktiveArbeidsforhold(referanse, periode, inntektsmeldingBegrenset);
         return relevanteImTjeneste.utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldingerTilBeregning, periode);
 
     }
 
-    private Collection<Inntektsmelding> filtrerForOpptjeningsaktiviteter(BehandlingReferanse referanse,
-                                                                         DatoIntervallEntitet periode, Collection<Inntektsmelding> inntektsmeldingForPeriode) {
+    private Collection<Inntektsmelding> filtrerAktiveArbeidsforhold(BehandlingReferanse referanse,
+                                                                    DatoIntervallEntitet periode, Collection<Inntektsmelding> inntektsmeldingForPeriode) {
 
         var iayGrunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(referanse.getBehandlingId());
         if (iayGrunnlag.isEmpty()) {
             return Collections.emptyList();
         }
-        return filtrerForAktiviteter(referanse, periode, inntektsmeldingForPeriode, iayGrunnlag.get());
+        return finnInntektsmeldingerForAktiveArbeidsforholdVedSkjæringstidspunktet(referanse, periode, inntektsmeldingForPeriode, iayGrunnlag.get());
     }
 
-    private List<Inntektsmelding> filtrerForAktiviteter(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsperiode,
-                                                        Collection<Inntektsmelding> inntektsmeldingForPeriode,
-                                                        InntektArbeidYtelseGrunnlag iayGrunnlag) {
+    private List<Inntektsmelding> finnInntektsmeldingerForAktiveArbeidsforholdVedSkjæringstidspunktet(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsperiode,
+                                                                                                      Collection<Inntektsmelding> inntektsmeldingForPeriode,
+                                                                                                      InntektArbeidYtelseGrunnlag iayGrunnlag) {
         var yrkesaktivitetFilter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(behandlingReferanse.getAktørId()))
             .før(vilkårsperiode.getFomDato().plusDays(1));
         var tidslinjePerYtelse = mapYtelsesstidslinjerForPermisjonvalidering.utledYtelsesTidslinjerForValideringAvPermisjoner(new YtelseFilter(iayGrunnlag.getAktørYtelseFraRegister(behandlingReferanse.getAktørId())));
@@ -97,7 +107,7 @@ public class PleiepengerInntektsmeldingRelevantForOpptjeningVilkårsrevurdering 
 
         var dagenFørStp = DatoIntervallEntitet.fraOgMedTilOgMed(vilkårsperiode.getFomDato().minusDays(1), vilkårsperiode.getFomDato().minusDays(1));
 
-        var erInaktivDagenFørStp = yrkesaktiviteter.stream().map(y -> AktivPeriodeForArbeidUtleder.utledAktivPeriode(y, grunnlag, vilkårsperiode, tidslinjePerYtelse))
+        var erInaktivDagenFørStp = yrkesaktiviteter.stream().map(y -> AktivPeriodeForArbeidUtleder.utledAktivTidslinje(y, grunnlag, vilkårsperiode, tidslinjePerYtelse))
             .reduce(LocalDateTimeline.empty(), (t1, t2) -> t1.crossJoin(t2, StandardCombinators::coalesceRightHandSide))
             .intersection(dagenFørStp.toLocalDateInterval())
             .isEmpty();
