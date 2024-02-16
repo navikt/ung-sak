@@ -39,6 +39,7 @@ public class HarRelevantInntektsmeldingendringForForlengelseIOpptjening implemen
     }
 
     private static Set<Inntektsmelding> finnNyeInntektsmeldinger(Collection<Inntektsmelding> relevanteInntektsmeldinger, Collection<Inntektsmelding> relevanteInntektsmeldingerForrigeVedtak) {
-        return relevanteInntektsmeldinger.stream().filter(im -> relevanteInntektsmeldingerForrigeVedtak.stream().noneMatch(it -> it.getJournalpostId().equals(im.getJournalpostId()))).collect(Collectors.toSet());
+        return relevanteInntektsmeldinger.stream().filter(im -> relevanteInntektsmeldingerForrigeVedtak.stream()
+            .noneMatch(it -> it.gjelderSammeArbeidsforhold(im))).collect(Collectors.toSet());
     }
 }

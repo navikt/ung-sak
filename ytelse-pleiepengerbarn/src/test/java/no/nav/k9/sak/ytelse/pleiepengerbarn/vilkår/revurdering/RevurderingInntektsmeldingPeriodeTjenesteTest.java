@@ -185,7 +185,7 @@ class RevurderingInntektsmeldingPeriodeTjenesteTest {
         entityManager.persist(mottattDokumentOriginal);
 
         var journalpostId = 123L;
-        var im = lagInntektsmelding(journalpostId, BigDecimal.TEN, new Refusjon(BigDecimal.valueOf(100), STP.plusDays(2)), "KANALREF2");
+        var im = lagInntektsmelding(journalpostId, BigDecimal.valueOf(100), new Refusjon(BigDecimal.valueOf(100), STP.plusDays(2)), "KANALREF2");
         var mottattDokument = lagMottattDokument(behandling, journalpostId);
         entityManager.persist(mottattDokument);
         entityManager.flush();
