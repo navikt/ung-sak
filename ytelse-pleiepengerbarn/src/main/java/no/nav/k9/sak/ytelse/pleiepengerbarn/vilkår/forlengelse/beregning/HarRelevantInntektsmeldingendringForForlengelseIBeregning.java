@@ -20,7 +20,7 @@ import no.nav.k9.sak.domene.iay.modell.NaturalYtelse;
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
-@VilkårTypeRef(VilkårType.OPPTJENINGSVILKÅRET)
+@VilkårTypeRef(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
 public class HarRelevantInntektsmeldingendringForForlengelseIBeregning implements InntektsmeldingerEndringsvurderer {
 
     @Override

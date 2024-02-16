@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -18,8 +19,11 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.ErEndringIRefusjonskravVurderer;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.inngangsvilkår.DefaultVilkårUtleder;
+import no.nav.k9.sak.inngangsvilkår.UtledeteVilkår;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.HarInntektsmeldingerRelevanteEndringerForPeriode;
 
 @ApplicationScoped
@@ -30,6 +34,8 @@ public class RevurderingInntektsmeldingPeriodeTjeneste {
     private ErEndringIRefusjonskravVurderer erEndringIRefusjonskravVurderer;
     private BehandlingRepository behandlingRepository;
 
+    private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
+
 
     public RevurderingInntektsmeldingPeriodeTjeneste() {
     }
@@ -38,11 +44,13 @@ public class RevurderingInntektsmeldingPeriodeTjeneste {
     public RevurderingInntektsmeldingPeriodeTjeneste(@Any Instance<VilkårUtleder> vilkårUtleder,
                                                      HarInntektsmeldingerRelevanteEndringerForPeriode harInntektsmeldingerRelevanteEndringerForPeriode,
                                                      ErEndringIRefusjonskravVurderer erEndringIRefusjonskravVurderer,
-                                                     BehandlingRepository behandlingRepository) {
+                                                     BehandlingRepository behandlingRepository,
+                                                     SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
         this.vilkårUtledere = vilkårUtleder;
         this.harInntektsmeldingerRelevanteEndringerForPeriode = harInntektsmeldingerRelevanteEndringerForPeriode;
         this.erEndringIRefusjonskravVurderer = erEndringIRefusjonskravVurderer;
         this.behandlingRepository = behandlingRepository;
+        this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
     }
 
     public LocalDateTimeline<Set<InntektsmeldingRevurderingÅrsak>> utledTidslinjeForVurderingFraInntektsmelding(BehandlingReferanse referanse,
@@ -53,23 +61,40 @@ public class RevurderingInntektsmeldingPeriodeTjeneste {
         LocalDateTimeline<Set<InntektsmeldingRevurderingÅrsak>> inntektsmeldingEndringer = LocalDateTimeline.empty();
         var originalBehandlingReferanse = finnOriginalBehandlingReferanse(referanse);
         for (var periode : perioder) {
-            for (var vilkår : utledeteVilkår.getAlleAvklarte()) {
-                var inntektsmeldingerMedRelevanteEndringer = harInntektsmeldingerRelevanteEndringerForPeriode.finnInntektsmeldingerMedRelevanteEndringerForPeriode(inntektsmeldinger, referanse, periode, vilkår);
-                var nyeRelevanteMottatteDokumenter = mottatteInntektsmeldinger.stream()
-                    .filter(im -> inntektsmeldingerMedRelevanteEndringer.stream().anyMatch(at -> Objects.equals(at.getJournalpostId(), im.getJournalpostId())))
-                    .toList();
-
-                if (!nyeRelevanteMottatteDokumenter.isEmpty()) {
-                    inntektsmeldingEndringer = inntektsmeldingEndringer.crossJoin(new LocalDateTimeline<>(periode.toLocalDateInterval(),
-                            Set.of(InntektsmeldingRevurderingÅrsak.REVURDERER_VILKÅR)),
-                        StandardCombinators::union);
-                }
-            }
-            inntektsmeldingEndringer = inntektsmeldingEndringer.crossJoin(erEndringIRefusjonskravVurderer.finnEndringstidslinjeForRefusjon(referanse, originalBehandlingReferanse, periode, inntektsmeldinger).mapValue(it -> Set.of(InntektsmeldingRevurderingÅrsak.ENDRET_REFUSJONSKRAV)),
+            inntektsmeldingEndringer = finnTidslinjerForVilkårsperioderTilVurderingGrunnetInntektsmelding(referanse, inntektsmeldinger, mottatteInntektsmeldinger, periode, utledeteVilkår, inntektsmeldingEndringer);
+            inntektsmeldingEndringer = inntektsmeldingEndringer.crossJoin(finnTidslinjeForRefusjonskravendringerIInntektsmelding(referanse, inntektsmeldinger, mottatteInntektsmeldinger, periode, originalBehandlingReferanse),
                 StandardCombinators::union);
         }
         return inntektsmeldingEndringer;
 
+    }
+
+    private LocalDateTimeline<Set<InntektsmeldingRevurderingÅrsak>> finnTidslinjeForRefusjonskravendringerIInntektsmelding(BehandlingReferanse referanse,
+                                                                                                                           Collection<Inntektsmelding> inntektsmeldinger,
+                                                                                                                           List<MottattDokument> mottatteInntektsmeldinger,
+                                                                                                                           DatoIntervallEntitet periode,
+                                                                                                                           BehandlingReferanse originalBehandlingReferanse) {
+        var alleSøknadsperioder = søknadsperiodeTjeneste.utledFullstendigPeriode(referanse.getBehandlingId());
+        return erEndringIRefusjonskravVurderer.finnEndringstidslinjeForRefusjon(referanse, originalBehandlingReferanse, periode, inntektsmeldinger, mottatteInntektsmeldinger)
+            .intersection(TidslinjeUtil.tilTidslinjeKomprimert(alleSøknadsperioder))
+            .mapValue(it -> Set.of(InntektsmeldingRevurderingÅrsak.ENDRET_REFUSJONSKRAV));
+    }
+
+    private LocalDateTimeline<Set<InntektsmeldingRevurderingÅrsak>> finnTidslinjerForVilkårsperioderTilVurderingGrunnetInntektsmelding(BehandlingReferanse referanse, Collection<Inntektsmelding> inntektsmeldinger, List<MottattDokument> mottatteInntektsmeldinger, DatoIntervallEntitet periode, UtledeteVilkår utledeteVilkår, LocalDateTimeline<Set<InntektsmeldingRevurderingÅrsak>> inntektsmeldingEndringer) {
+        for (var vilkår : utledeteVilkår.getAlleAvklarte()) {
+            var inntektsmeldingerMedRelevanteEndringer = harInntektsmeldingerRelevanteEndringerForPeriode.finnInntektsmeldingerMedRelevanteEndringerForPeriode(inntektsmeldinger, referanse, periode, vilkår);
+            var nyeRelevanteMottatteDokumenter = mottatteInntektsmeldinger.stream()
+                .filter(im -> inntektsmeldingerMedRelevanteEndringer.stream().anyMatch(at -> Objects.equals(at.getJournalpostId(), im.getJournalpostId())))
+                .filter(im -> im.getBehandlingId().equals(referanse.getBehandlingId()))
+                .toList();
+
+            if (!nyeRelevanteMottatteDokumenter.isEmpty()) {
+                inntektsmeldingEndringer = inntektsmeldingEndringer.crossJoin(new LocalDateTimeline<>(periode.toLocalDateInterval(),
+                        Set.of(InntektsmeldingRevurderingÅrsak.REVURDERER_VILKÅR)),
+                    StandardCombinators::union);
+            }
+        }
+        return inntektsmeldingEndringer;
     }
 
     private BehandlingReferanse finnOriginalBehandlingReferanse(BehandlingReferanse referanse) {
