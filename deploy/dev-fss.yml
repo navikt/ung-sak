@@ -287,10 +287,9 @@ spec:
       value: "true"
     - name: ENABLE_INNSYN_ENDRING_OBSERVER
       value: "false"
-    - name: SJEKK_OM_DODSHENDELSE_ER_RELEVANT
-      value: "true"
     - name: KODEVERK_SOM_STRING_TOPICS
       value: "true"
+
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

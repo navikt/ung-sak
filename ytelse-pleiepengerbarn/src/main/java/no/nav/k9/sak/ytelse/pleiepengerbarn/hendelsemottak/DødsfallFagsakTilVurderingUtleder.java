@@ -51,8 +51,6 @@ public class DødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderingU
     private VilkårResultatRepository vilkårResultatRepository;
     private PersonopplysningRepository personopplysningRepository;
     private PersoninfoAdapter personinfoAdapter;
-    private boolean skalSjekkeOmDødErRelevantForVedtak;
-
     public DødsfallFagsakTilVurderingUtleder() {
         // For CDI
     }
@@ -62,14 +60,12 @@ public class DødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderingU
                                              BehandlingRepository behandlingRepository,
                                              VilkårResultatRepository vilkårResultatRepository,
                                              PersonopplysningRepository personopplysningRepository,
-                                             PersoninfoAdapter personinfoAdapter,
-                                             @KonfigVerdi(value = "SJEKK_OM_DODSHENDELSE_ER_RELEVANT", defaultVerdi = "false") boolean skalSjekkeOmDødErRelevantForVedtak) {
+                                             PersoninfoAdapter personinfoAdapter) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.personopplysningRepository = personopplysningRepository;
         this.personinfoAdapter = personinfoAdapter;
-        this.skalSjekkeOmDødErRelevantForVedtak = skalSjekkeOmDødErRelevantForVedtak;
     }
 
     @Override
@@ -102,9 +98,6 @@ public class DødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderingU
     }
 
     private boolean erPleietrengendesDødRelevantForVedtaket(Fagsak fagsak, LocalDate dødsdato) {
-        if (!skalSjekkeOmDødErRelevantForVedtak) {
-            return true;
-        }
 
         Optional<Behandling> behandlingOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
         if (behandlingOpt.isEmpty()) {
@@ -121,7 +114,11 @@ public class DødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderingU
         var avslåttTidslinje = finnAvslåttTidslinje(vilkårresultat);
         var innvilgetTidslinje = heleVilkårTidslinjen.disjoint(avslåttTidslinje);
         var innvilgelseFomDødsdato = innvilgetTidslinje.intersection(new LocalDateInterval(dødsdato, fagsak.getPeriode().getTomDato()));
-        return !innvilgelseFomDødsdato.isEmpty();
+        var erRelevant = !innvilgelseFomDødsdato.isEmpty();
+        if (!erRelevant) {
+            logger.info("Mottok dødshendelse som ble vurdert som ikke relevant for fagsak " + fagsak.getId());
+        }
+        return erRelevant;
     }
 
     private static LocalDateTimeline<Boolean> finnAvslåttTidslinje(Vilkårene vilkårresultat) {
