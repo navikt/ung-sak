@@ -34,11 +34,11 @@ public class ReservertSaksnummerEntitet extends BaseEntitet {
     private FagsakYtelseType ytelseType = FagsakYtelseType.UDEFINERT;
 
     @Embedded
-    @AttributeOverrides(@AttributeOverride(name = "brukerAktørId", column = @Column(name = "bruker_aktoer_id", nullable = false, updatable = false)))
+    @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "bruker_aktoer_id", nullable = false, updatable = false)))
     private AktørId brukerAktørId;
 
     @Embedded
-    @AttributeOverrides(@AttributeOverride(name = "pleietrengendeAktørId", column = @Column(name = "pleietrengende_aktoer_id")))
+    @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "pleietrengende_aktoer_id")))
     private AktørId pleietrengendeAktørId;
 
     ReservertSaksnummerEntitet() {
