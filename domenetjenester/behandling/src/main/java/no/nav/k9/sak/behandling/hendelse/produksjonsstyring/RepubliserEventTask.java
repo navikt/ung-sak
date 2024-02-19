@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.hendelse.EventHendelse;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -24,7 +23,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
-import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapperKodeverdiSomStringSerializer;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingProsessHendelse;
 
@@ -42,7 +40,6 @@ public class RepubliserEventTask implements ProsessTaskHandler {
     private BehandlingProsessHendelseMapper behandlingProsessHendelseMapper;
     private BehandlingVedtakRepository behandlingVedtakRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
-    private boolean kodeverkSomStringTopics;
 
     RepubliserEventTask() {
         // for CDI proxy
@@ -52,13 +49,11 @@ public class RepubliserEventTask implements ProsessTaskHandler {
     public RepubliserEventTask(BehandlingRepository behandlingRepository,
                                BehandlingProsessHendelseMapper behandlingProsessHendelseMapper,
                                BehandlingVedtakRepository behandlingVedtakRepository,
-                               ProsessTaskTjeneste prosessTaskTjeneste,
-                               @KonfigVerdi(value = "KODEVERK_SOM_STRING_TOPICS", defaultVerdi = "false") boolean kodeverkSomStringTopics) {
+                               ProsessTaskTjeneste prosessTaskTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingProsessHendelseMapper = behandlingProsessHendelseMapper;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
-        this.kodeverkSomStringTopics = kodeverkSomStringTopics;
     }
 
     @Override
@@ -76,12 +71,12 @@ public class RepubliserEventTask implements ProsessTaskHandler {
         }
 
         final LocalDateTime eventTid = Objects.requireNonNull(ObjectUtils.firstNonNull(
-                behandling.get().getEndretTidspunkt(),
-                behandling.get().getOpprettetTidspunkt()
-                ), "Mangler tidspunkt for endring av behandling");
+            behandling.get().getEndretTidspunkt(),
+            behandling.get().getOpprettetTidspunkt()
+        ), "Mangler tidspunkt for endring av behandling");
 
         final LocalDate vedtaksdato = behandlingVedtakRepository.hentBehandlingVedtakFor(behandlingUuid)
-                .map(BehandlingVedtak::getVedtaksdato).orElse(null);
+            .map(BehandlingVedtak::getVedtaksdato).orElse(null);
 
         final var dto = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(eventTid, EventHendelse.VASKEEVENT, behandling.get(), vedtaksdato);
 
@@ -97,11 +92,7 @@ public class RepubliserEventTask implements ProsessTaskHandler {
 
     private String toJson(final BehandlingProsessHendelse dto) {
         try {
-            if (kodeverkSomStringTopics){
-                return JsonObjectMapperKodeverdiSomStringSerializer.getJson(dto);
-            } else  {
-                return JsonObjectMapper.getJson(dto);
-            }
+            return JsonObjectMapperKodeverdiSomStringSerializer.getJson(dto);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

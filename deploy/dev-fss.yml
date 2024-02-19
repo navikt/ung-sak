@@ -285,11 +285,8 @@ spec:
       value: "true"
     - name: ENABLE_INNSYN_ENDRING_OBSERVER
       value: "true"
-    - name: KODEVERK_SOM_STRING_TOPICS
-      value: "true"
     - name: NY_VURDERINGSLOGIKK_IM
       value: "false"
-
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
