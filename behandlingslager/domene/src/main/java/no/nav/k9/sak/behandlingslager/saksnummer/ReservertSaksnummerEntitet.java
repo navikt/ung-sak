@@ -45,7 +45,7 @@ public class ReservertSaksnummerEntitet extends BaseEntitet {
         // for hibernate
     }
 
-    public ReservertSaksnummerEntitet(String saksnummer, FagsakYtelseType ytelseType, String brukerAktørId, String pleietrengendeAktørId) {
+    ReservertSaksnummerEntitet(String saksnummer, FagsakYtelseType ytelseType, String brukerAktørId, String pleietrengendeAktørId) {
         this.saksnummer = new Saksnummer(saksnummer);
         this.ytelseType = ytelseType;
         this.brukerAktørId = new AktørId(brukerAktørId);
