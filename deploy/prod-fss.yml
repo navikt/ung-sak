@@ -283,7 +283,7 @@ spec:
       value: "false"
     - name: ENABLE_INNSYN_ENDRING_OBSERVER
       value: "false"
-    - name: SJEKK_OM_DODSHENDELSE_ER_RELEVANT
+    - name: NY_VURDERINGSLOGIKK_IM
       value: "false"
 
     # Konfigurasjoner
