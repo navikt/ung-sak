@@ -19,7 +19,7 @@ class FinnInntektsmeldingForrigeBehandling {
     private static boolean erInntektsmeldingITidligereBehandling(Inntektsmelding inntektsmelding, Long behandlingId, List<MottattDokument> mottatteInntektsmeldinger) {
         return mottatteInntektsmeldinger.stream()
             .filter(it -> Objects.equals(it.getJournalpostId(), inntektsmelding.getJournalpostId()))
-            .anyMatch(md -> !Objects.equals(md.getBehandlingId(), behandlingId));
+            .noneMatch(md -> Objects.equals(md.getBehandlingId(), behandlingId));
     }
 
 }

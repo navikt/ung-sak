@@ -59,8 +59,7 @@ class DødsfallFagsakTilVurderingUtlederTest {
 
     @BeforeEach
     void setUp() {
-        this.utleder = new DødsfallFagsakTilVurderingUtleder(new FagsakRepository(entityManager), new BehandlingRepository(entityManager), new VilkårResultatRepository(entityManager), new PersonopplysningRepository(entityManager),
-            personinfoAdapter, true);
+        this.utleder = new DødsfallFagsakTilVurderingUtleder(new FagsakRepository(entityManager), new BehandlingRepository(entityManager), new VilkårResultatRepository(entityManager), new PersonopplysningRepository(entityManager), personinfoAdapter);
         initScenarioDødsdatoPleietrengende();
 
     }
@@ -128,7 +127,6 @@ class DødsfallFagsakTilVurderingUtlederTest {
         var fagsakBehandlingÅrsakTypeMap = utleder.finnFagsakerTilVurdering(new DødsfallHendelse(builder.build(), DØDSDATO));
 
 
-
         assertThat(fagsakBehandlingÅrsakTypeMap.isEmpty()).isFalse();
         assertThat(fagsakBehandlingÅrsakTypeMap.get(fagsak)).isEqualTo(BehandlingÅrsakType.RE_HENDELSE_DØD_BARN);
     }
@@ -152,10 +150,10 @@ class DødsfallFagsakTilVurderingUtlederTest {
         var fagsakBehandlingÅrsakTypeMap = utleder.finnFagsakerTilVurdering(new DødsfallHendelse(builder.build(), DØDSDATO));
 
 
-
         assertThat(fagsakBehandlingÅrsakTypeMap.isEmpty()).isFalse();
         assertThat(fagsakBehandlingÅrsakTypeMap.get(fagsak)).isEqualTo(BehandlingÅrsakType.RE_HENDELSE_DØD_BARN);
     }
+
     @Test
     void skal_returnere_årsak_dersom_alle_perioder_er_avslått_i_siste_ikke_avsluttet_behandling() {
 

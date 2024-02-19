@@ -283,11 +283,7 @@ spec:
       value: "true"
     - name: UTVIDET_ENDRING_UTBETALING_UTLEDER
       value: "true"
-    - name: ENABLE_INNSYN_START_SLUTT_OBSERVER
-      value: "true"
     - name: ENABLE_INNSYN_ENDRING_OBSERVER
-      value: "false"
-    - name: SJEKK_OM_DODSHENDELSE_ER_RELEVANT
       value: "true"
 
     # Konfigurasjoner

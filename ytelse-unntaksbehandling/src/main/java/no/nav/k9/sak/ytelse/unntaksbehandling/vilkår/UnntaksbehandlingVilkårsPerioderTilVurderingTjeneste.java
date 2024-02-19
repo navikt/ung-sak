@@ -55,7 +55,7 @@ public class UnntaksbehandlingVilkårsPerioderTilVurderingTjeneste implements Vi
     }
 
     private VilkårUtleder getVilkårUtleder() {
-        return behandling -> new UtledeteVilkår(null, List.of(VilkårType.K9_VILKÅRET));
+        return referanse -> new UtledeteVilkår(null, List.of(VilkårType.K9_VILKÅRET));
     }
 
     @Override
