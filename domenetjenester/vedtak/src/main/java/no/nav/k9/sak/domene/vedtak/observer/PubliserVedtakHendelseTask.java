@@ -11,7 +11,6 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
-import no.nav.folketrygdloven.beregningsgrunnlag.JacksonJsonConfig;
 import no.nav.folketrygdloven.beregningsgrunnlag.JacksonJsonConfigKodeverdiSomString;
 import no.nav.k9.felles.integrasjon.kafka.GenerellKafkaProducer;
 import no.nav.k9.felles.integrasjon.kafka.KafkaPropertiesBuilder;
@@ -38,7 +37,6 @@ public class PubliserVedtakHendelseTask extends BehandlingProsessTask {
 
     private BehandlingRepository behandlingRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
-    private boolean kodeverkSomStringTopics;
     private GenerellKafkaProducer producer;
     private Validator validator;
 
@@ -60,15 +58,13 @@ public class PubliserVedtakHendelseTask extends BehandlingProsessTask {
         @KonfigVerdi(value = "KAFKA_KEYSTORE_PATH", required = false) String keyStoreLocation,
         @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String keyStorePassword,
         @KonfigVerdi("systembruker.username") String username,
-        @KonfigVerdi("systembruker.password") String password,
-        @KonfigVerdi(value = "KODEVERK_SOM_STRING_TOPICS", defaultVerdi = "false") boolean kodeverkSomStringTopics
+        @KonfigVerdi("systembruker.password") String password
 
     ) {
         super(behandlingLåsRepository);
 
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingVedtakRepository = behandlingVedtakRepository;
-        this.kodeverkSomStringTopics = kodeverkSomStringTopics;
 
         boolean aivenEnabled = !Environment.current().isLocal(); //har ikke støtte i vtp
 
@@ -133,11 +129,8 @@ public class PubliserVedtakHendelseTask extends BehandlingProsessTask {
             throw new IllegalArgumentException("Vedtakhendelse valideringsfeil \n " + allErrors);
         }
 
-        if (kodeverkSomStringTopics) {
-            return JacksonJsonConfigKodeverdiSomString.toJson(vedtakHendelse, PubliserVedtakHendelseFeil.FEILFACTORY::kanIkkeSerialisere);
-        } else {
-            return JacksonJsonConfig.toJson(vedtakHendelse, PubliserVedtakHendelseFeil.FEILFACTORY::kanIkkeSerialisere);
-        }
+        return JacksonJsonConfigKodeverdiSomString.toJson(vedtakHendelse, PubliserVedtakHendelseFeil.FEILFACTORY::kanIkkeSerialisere);
+
     }
 
     private VedtakHendelse genererVedtakHendelse(Behandling behandling, BehandlingVedtak vedtak) {
