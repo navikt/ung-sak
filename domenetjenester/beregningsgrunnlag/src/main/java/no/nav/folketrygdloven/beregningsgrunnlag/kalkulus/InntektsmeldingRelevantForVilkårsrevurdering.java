@@ -1,7 +1,6 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
 import java.util.Collection;
-import java.util.Optional;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Instance;
@@ -19,12 +18,12 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
  */
 public interface InntektsmeldingRelevantForVilkårsrevurdering {
 
-    static Optional<InntektsmeldingRelevantForVilkårsrevurdering> finnTjeneste(Instance<InntektsmeldingRelevantForVilkårsrevurdering> instances, VilkårType vilkårType, FagsakYtelseType fagsakYtelseType) {
+    static InntektsmeldingRelevantForVilkårsrevurdering finnTjeneste(Instance<InntektsmeldingRelevantForVilkårsrevurdering> instances, VilkårType vilkårType, FagsakYtelseType fagsakYtelseType) {
         Instance<InntektsmeldingRelevantForVilkårsrevurdering> selected = instances.select(new VilkårTypeRef.VilkårTypeRefLiteral(vilkårType));
         if (selected.isAmbiguous()) {
-            return FagsakYtelseTypeRef.Lookup.find(selected, fagsakYtelseType);
+            return FagsakYtelseTypeRef.Lookup.find(selected, fagsakYtelseType).orElseThrow(() -> new IllegalStateException("Har ikke InntektsmeldingRelevantForVilkårsvurdering for " + fagsakYtelseType));
         } else if (selected.isUnsatisfied()) {
-            return Optional.empty();
+            throw new IllegalArgumentException("Ingen implementasjoner funnet for vilkårtype:" + vilkårType);
         }
 
         InntektsmeldingRelevantForVilkårsrevurdering minInstans = selected.get();
@@ -32,7 +31,7 @@ public interface InntektsmeldingRelevantForVilkårsrevurdering {
             throw new IllegalStateException(
                 "Kan ikke ha @Dependent scope bean ved Instance lookup dersom en ikke også håndtere lifecycle selv: " + minInstans.getClass());
         }
-        return Optional.of(minInstans);
+        return minInstans;
     }
 
 

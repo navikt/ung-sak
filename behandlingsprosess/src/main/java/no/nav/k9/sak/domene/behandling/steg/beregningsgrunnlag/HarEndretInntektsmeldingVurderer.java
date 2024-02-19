@@ -26,17 +26,23 @@ public class HarEndretInntektsmeldingVurderer {
     }
 
 
-    public Collection<Inntektsmelding> finnInntektsmeldingerMedRelevanteEndringerForPerioden(BehandlingReferanse referanse,
-                                                                                             BehandlingReferanse referanseOriginalBehandling,
-                                                                                             DatoIntervallEntitet periode,
-                                                                                             Collection<Inntektsmelding> inntektsmeldinger,
-                                                                                             List<MottattDokument> mottatteInntektsmeldinger) {
-
-
+    public boolean harEndringPåInntektsmeldingerTilBrukForPerioden(BehandlingReferanse referanse,
+                                                                   BehandlingReferanse referanseOriginalBehandling,
+                                                                   DatoIntervallEntitet periode,
+                                                                   Collection<Inntektsmelding> inntektsmeldinger,
+                                                                   List<MottattDokument> mottatteInntektsmeldinger) {
         var inntektsmeldingerForrigeVedtak = finnInntektsmeldingerFraForrigeBehandling(referanse, inntektsmeldinger, mottatteInntektsmeldinger);
         var relevanteInntektsmeldingerForrigeVedtak = filter.filtrer(referanseOriginalBehandling, inntektsmeldingerForrigeVedtak, periode);
         var relevanteInntektsmeldinger = filter.filtrer(referanse, inntektsmeldinger, periode);
-        return endringsvurderer.finnInntektsmeldingerMedRelevanteEndringer(relevanteInntektsmeldinger, relevanteInntektsmeldingerForrigeVedtak);
+        return endringsvurderer.erEndret(relevanteInntektsmeldinger, relevanteInntektsmeldingerForrigeVedtak);
+    }
+
+
+    @FunctionalInterface
+    public interface InntektsmeldingerEndringsvurderer {
+
+        boolean erEndret(Collection<Inntektsmelding> gjeldendeInntektsmeldinger, Collection<Inntektsmelding> inntektsmeldingerForrigeVedtak);
+
     }
 
 

@@ -48,23 +48,14 @@ public class ErEndringIRefusjonskravVurderer {
         }
         var originalBehandling = behandlingRepository.hentBehandling(referanse.getOriginalBehandlingId().orElseThrow());
         var inntektsmeldinger = inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer());
-        return finnEndringstidslinjeForRefusjon(referanse, BehandlingReferanse.fra(originalBehandling), periode, inntektsmeldinger, finnMottatteInntektsmeldinger(referanse));
-    }
-
-    public LocalDateTimeline<Boolean> finnEndringstidslinjeForRefusjon(BehandlingReferanse referanse,
-                                                                       BehandlingReferanse originalBehandlingreferanse,
-                                                                       DatoIntervallEntitet periode,
-                                                                       Collection<Inntektsmelding> inntektsmeldinger, List<MottattDokument> mottatteInntektsmeldinger) {
-        var inntektsmeldingerForrigeVedtak = FinnInntektsmeldingForrigeBehandling.finnInntektsmeldingerFraForrigeBehandling(referanse, inntektsmeldinger, mottatteInntektsmeldinger);
+        var inntektsmeldingerForrigeVedtak = FinnInntektsmeldingForrigeBehandling.finnInntektsmeldingerFraForrigeBehandling(referanse, inntektsmeldinger, finnMottatteInntektsmeldinger(referanse));
         var relevanteInntektsmeldinger = kompletthetForBeregningTjeneste.utledInntektsmeldingerSomSendesInnTilBeregningForPeriode(referanse, inntektsmeldinger, periode);
-        var relevanteInntektsmeldingerForrigeVedtak = kompletthetForBeregningTjeneste.utledInntektsmeldingerSomSendesInnTilBeregningForPeriode(originalBehandlingreferanse, inntektsmeldingerForrigeVedtak, periode);
+        var relevanteInntektsmeldingerForrigeVedtak = kompletthetForBeregningTjeneste.utledInntektsmeldingerSomSendesInnTilBeregningForPeriode(BehandlingReferanse.fra(originalBehandling), inntektsmeldingerForrigeVedtak, periode);
 
         return ErEndringIRefusjonskravVurderer.finnEndringstidslinje(periode, relevanteInntektsmeldinger, relevanteInntektsmeldingerForrigeVedtak);
     }
 
-    public static LocalDateTimeline<Boolean> finnEndringstidslinje(DatoIntervallEntitet vilkårsperiode,
-                                                                   Collection<Inntektsmelding> gjeldendeInntektsmeldinger,
-                                                                   Collection<Inntektsmelding> inntektsmeldingerForrigeVedtak) {
+    public static LocalDateTimeline<Boolean> finnEndringstidslinje(DatoIntervallEntitet vilkårsperiode, Collection<Inntektsmelding> gjeldendeInntektsmeldinger, Collection<Inntektsmelding> inntektsmeldingerForrigeVedtak) {
         return gjeldendeInntektsmeldinger.stream()
             .map(finnEndringIRefusjonTidslinje(vilkårsperiode, inntektsmeldingerForrigeVedtak))
             .reduce(LocalDateTimeline.empty(), (t1, t2) -> t1.crossJoin(t2, StandardCombinators::alwaysTrueForMatch));

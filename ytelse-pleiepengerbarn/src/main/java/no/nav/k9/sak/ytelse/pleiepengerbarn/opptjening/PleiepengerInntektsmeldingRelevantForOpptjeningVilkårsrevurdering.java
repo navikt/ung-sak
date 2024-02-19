@@ -5,10 +5,10 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRST�
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
@@ -16,21 +16,21 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingRelevantForVilkårsrevurdering;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetKlassifisering;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingskontroll.VilkårTypeRef;
-import no.nav.k9.sak.domene.arbeidsforhold.AktivPeriodeForArbeidUtleder;
-import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningAktivitet;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
-import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
-import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
-import no.nav.k9.sak.domene.opptjening.aksjonspunkt.MapYtelsesstidslinjerForPermisjonvalidering;
+import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
+import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetPeriode;
+import no.nav.k9.sak.domene.opptjening.OpptjeningInntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
+import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 /**
  * Vurderer hvilke inntektsmeldinger som skal påvirke om vi skal revurdere opptjening. Denne tjenesten skal kun kalles i kontekst av en revurdering.
@@ -43,76 +43,70 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 public class PleiepengerInntektsmeldingRelevantForOpptjeningVilkårsrevurdering implements InntektsmeldingRelevantForVilkårsrevurdering {
 
     private Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning;
-    private final MapYtelsesstidslinjerForPermisjonvalidering mapYtelsesstidslinjerForPermisjonvalidering = new MapYtelsesstidslinjerForPermisjonvalidering();
+    private OpptjeningInntektArbeidYtelseTjeneste opptjeningInntektArbeidYtelseTjeneste;
+    private OpptjeningsperioderTjeneste opptjeningsperioderTjeneste;
 
-    private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
 
     public PleiepengerInntektsmeldingRelevantForOpptjeningVilkårsrevurdering() {
     }
 
     @Inject
     public PleiepengerInntektsmeldingRelevantForOpptjeningVilkårsrevurdering(@Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning,
-                                                                             InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste) {
+                                                                             OpptjeningInntektArbeidYtelseTjeneste opptjeningInntektArbeidYtelseTjeneste,
+                                                                             OpptjeningsperioderTjeneste opptjeningsperioderTjeneste) {
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
-        this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
+        this.opptjeningInntektArbeidYtelseTjeneste = opptjeningInntektArbeidYtelseTjeneste;
+        this.opptjeningsperioderTjeneste = opptjeningsperioderTjeneste;
     }
 
 
-    /**
-     * Finner inntektsmeldinger som er aktuelle i vurdering av om perioden skal revurderes pga mottatt inntektsmelding
-     * <p>
-     * Finner inntektsmeldinger for arbeidsforhold som er aktive dagen før skjæringstidspunktet
-     *
-     * @param referanse         Behandlingreferanse
-     * @param inntektsmeldinger Inntektsmeldinger
-     * @param periode           Vilkårsperiode
-     * @return
-     */
     @Override
     public List<Inntektsmelding> begrensInntektsmeldinger(BehandlingReferanse referanse, Collection<Inntektsmelding> inntektsmeldinger, DatoIntervallEntitet periode) {
         var relevanteImTjeneste = InntektsmeldingerRelevantForBeregning.finnTjeneste(inntektsmeldingerRelevantForBeregning, referanse.getFagsakYtelseType());
         var inntektsmeldingBegrenset = relevanteImTjeneste.begrensSakInntektsmeldinger(referanse, inntektsmeldinger, periode);
-        var inntektsmeldingerTilBeregning = filtrerAktiveArbeidsforhold(referanse, periode, inntektsmeldingBegrenset);
+        var inntektsmeldingerTilBeregning = filtrerForOpptjeningsaktiviteter(referanse, periode, inntektsmeldingBegrenset);
         return relevanteImTjeneste.utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldingerTilBeregning, periode);
 
     }
 
-    private Collection<Inntektsmelding> filtrerAktiveArbeidsforhold(BehandlingReferanse referanse,
-                                                                    DatoIntervallEntitet periode, Collection<Inntektsmelding> inntektsmeldingForPeriode) {
+    private List<Inntektsmelding> filtrerForOpptjeningsaktiviteter(BehandlingReferanse referanse,
+                                                                   DatoIntervallEntitet periode, Collection<Inntektsmelding> inntektsmeldingForPeriode) {
 
-        var iayGrunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(referanse.getBehandlingId());
-        if (iayGrunnlag.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return finnInntektsmeldingerForAktiveArbeidsforholdVedSkjæringstidspunktet(referanse, periode, inntektsmeldingForPeriode, iayGrunnlag.get());
+        var opptjeningAktiviteter = opptjeningInntektArbeidYtelseTjeneste.hentRelevanteOpptjeningAktiveterForVilkårVurdering(
+            referanse, Set.of(periode)
+        ).get(periode);
+
+
+        var opptjeningResultat = opptjeningsperioderTjeneste.hentOpptjeningHvisFinnes(referanse.getBehandlingId());
+
+        var opptjening = opptjeningResultat.flatMap(or -> or.finnOpptjening(periode.getFomDato()));
+        return filtrerForAktiviteter(inntektsmeldingForPeriode, opptjeningAktiviteter, opptjening);
     }
 
-    private List<Inntektsmelding> finnInntektsmeldingerForAktiveArbeidsforholdVedSkjæringstidspunktet(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsperiode,
-                                                                                                      Collection<Inntektsmelding> inntektsmeldingForPeriode,
-                                                                                                      InntektArbeidYtelseGrunnlag iayGrunnlag) {
-        var yrkesaktivitetFilter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(behandlingReferanse.getAktørId()))
-            .før(vilkårsperiode.getFomDato().plusDays(1));
-        var tidslinjePerYtelse = mapYtelsesstidslinjerForPermisjonvalidering.utledYtelsesTidslinjerForValideringAvPermisjoner(new YtelseFilter(iayGrunnlag.getAktørYtelseFraRegister(behandlingReferanse.getAktørId())));
-        return inntektsmeldingForPeriode.stream().filter(im -> erAktivVedStp(vilkårsperiode, yrkesaktivitetFilter, iayGrunnlag, tidslinjePerYtelse, im)).toList();
+    static List<Inntektsmelding> filtrerForAktiviteter(Collection<Inntektsmelding> inntektsmeldingForPeriode, List<OpptjeningAktivitetPeriode> opptjeningAktiviteter, Optional<Opptjening> opptjening) {
+        return inntektsmeldingForPeriode.stream().filter(im -> opptjeningAktiviteter.stream()
+                .anyMatch(a -> erIkkeUnderkjent(a, opptjening.stream().flatMap(o -> o.getOpptjeningAktivitet().stream()
+                    .filter(oa -> oa.getAktivitetReferanse().equals(a.getOpptjeningsnøkkel().getAktivitetReferanse()))).findFirst()) && harLikArbeidsgiver(im, a) && gjelderForArbeidsforhold(im, a)))
+            .toList();
     }
 
-    private static boolean erAktivVedStp(DatoIntervallEntitet vilkårsperiode,
-                                         YrkesaktivitetFilter yrkesaktivitetFilter,
-                                         InntektArbeidYtelseGrunnlag grunnlag,
-                                         Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse,
-                                         Inntektsmelding im) {
-        var yrkesaktiviteter = yrkesaktivitetFilter.getYrkesaktiviteter()
-            .stream().filter(ya -> ya.gjelderFor(im.getArbeidsgiver(), im.getArbeidsforholdRef()))
-            .collect(Collectors.toSet());
+    private static boolean erIkkeUnderkjent(OpptjeningAktivitetPeriode a, Optional<OpptjeningAktivitet> opptjeningAktivitet) {
+        return harGodkjentStatusEllerTilVurdering(a, opptjeningAktivitet);
+    }
 
-        var dagenFørStp = DatoIntervallEntitet.fraOgMedTilOgMed(vilkårsperiode.getFomDato().minusDays(1), vilkårsperiode.getFomDato().minusDays(1));
+    private static Boolean harGodkjentStatusEllerTilVurdering(OpptjeningAktivitetPeriode a, Optional<OpptjeningAktivitet> opptjeningAktivitet) {
+        return opptjeningAktivitet.map(o ->
+            Set.of(OpptjeningAktivitetKlassifisering.ANTATT_GODKJENT, OpptjeningAktivitetKlassifisering.BEKREFTET_GODKJENT).contains(o.getKlassifisering())).orElse(
+            Set.of(VurderingsStatus.GODKJENT, VurderingsStatus.TIL_VURDERING).contains(a.getVurderingsStatus()));
+    }
 
-        var erInaktivDagenFørStp = yrkesaktiviteter.stream().map(y -> AktivPeriodeForArbeidUtleder.utledAktivTidslinje(y, grunnlag, vilkårsperiode, tidslinjePerYtelse))
-            .reduce(LocalDateTimeline.empty(), (t1, t2) -> t1.crossJoin(t2, StandardCombinators::coalesceRightHandSide))
-            .intersection(dagenFørStp.toLocalDateInterval())
-            .isEmpty();
+    private static boolean gjelderForArbeidsforhold(Inntektsmelding im, OpptjeningAktivitetPeriode a) {
+        return im.getArbeidsforholdRef().gjelderFor(a.getOpptjeningsnøkkel().getArbeidsforholdRef().orElse(InternArbeidsforholdRef.nullRef()));
+    }
 
-        return !erInaktivDagenFørStp;
+    private static boolean harLikArbeidsgiver(Inntektsmelding im, OpptjeningAktivitetPeriode a) {
+        return Objects.equals(im.getArbeidsgiver().getArbeidsgiverOrgnr(), a.getOpptjeningsnøkkel().getForType(Opptjeningsnøkkel.Type.ORG_NUMMER)) &&
+            Objects.equals(im.getArbeidsgiver().getArbeidsgiverAktørId(), a.getOpptjeningsnøkkel().getForType(Opptjeningsnøkkel.Type.AKTØR_ID));
     }
 
 }

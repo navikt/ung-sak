@@ -56,7 +56,7 @@ public class AktivitetsAvtaleBuilder {
     }
 
     public AktivitetsAvtaleBuilder medSisteLønnsendringsdato(LocalDate sisteLønnsendringsdato) {
-        this.aktivitetsAvtale.setSisteLønnsendringsdato(sisteLønnsendringsdato);
+        this.aktivitetsAvtale.sisteLønnsendringsdato(sisteLønnsendringsdato);
         return this;
     }
 }

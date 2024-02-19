@@ -1,40 +1,22 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.beregning;
 
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
-
 import java.util.Collection;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingskontroll.VilkårTypeRef;
-import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.InntektsmeldingerEndringsvurderer;
+import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.HarEndretInntektsmeldingVurderer;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.NaturalYtelse;
+import no.nav.k9.sak.typer.JournalpostId;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
-@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
-@FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
-@VilkårTypeRef(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
-public class HarRelevantInntektsmeldingendringForForlengelseIBeregning implements InntektsmeldingerEndringsvurderer {
+public class HarRelvantInntektsmeldingendringForForlengelseIBeregning implements HarEndretInntektsmeldingVurderer.InntektsmeldingerEndringsvurderer {
 
     @Override
-    public Collection<Inntektsmelding> finnInntektsmeldingerMedRelevanteEndringer(Collection<Inntektsmelding> relevanteInntektsmeldinger, Collection<Inntektsmelding> relevanteInntektsmeldingerForrigeVedtak) {
-
-        var nyeInntektsmeldinger = finnNyeInntektsmeldinger(relevanteInntektsmeldinger, relevanteInntektsmeldingerForrigeVedtak);
-
-        return nyeInntektsmeldinger.stream().filter(im -> harEndretBeløpFraForrige(relevanteInntektsmeldingerForrigeVedtak, im) ||
-                harEndretNaturalytelserFraForrige(relevanteInntektsmeldingerForrigeVedtak, im)).collect(Collectors.toSet());
-    }
-
-
-    private static Set<Inntektsmelding> finnNyeInntektsmeldinger(Collection<Inntektsmelding> relevanteInntektsmeldinger, Collection<Inntektsmelding> relevanteInntektsmeldingerForrigeVedtak) {
-        return relevanteInntektsmeldinger.stream().filter(im -> relevanteInntektsmeldingerForrigeVedtak.stream().noneMatch(it -> it.getJournalpostId().equals(im.getJournalpostId()))).collect(Collectors.toSet());
+    public boolean erEndret(Collection<Inntektsmelding> relevanteInntektsmeldinger, Collection<Inntektsmelding> relevanteInntektsmeldingerForrigeVedtak) {
+        return !erLikeStore(relevanteInntektsmeldinger, relevanteInntektsmeldingerForrigeVedtak) ||
+            relevanteInntektsmeldinger.stream().anyMatch(im -> harEndretBeløpFraForrige(relevanteInntektsmeldingerForrigeVedtak, im) ||
+                harEndretNaturalytelserFraForrige(relevanteInntektsmeldingerForrigeVedtak, im));
     }
 
 
@@ -73,6 +55,15 @@ public class HarRelevantInntektsmeldingendringForForlengelseIBeregning implement
 
         var matchFraForrige = matchendeIM.get(0);
         return matchFraForrige.getInntektBeløp().compareTo(im.getInntektBeløp()) != 0;
+    }
+
+    static boolean harUlikeJournalposter(Set<JournalpostId> forrigeVedtakJournalposter, Set<JournalpostId> denneBehandlingJournalposter) {
+
+        var erLikeStore = erLikeStore(forrigeVedtakJournalposter, denneBehandlingJournalposter);
+
+        var inneholderDeSamme = denneBehandlingJournalposter.containsAll(forrigeVedtakJournalposter);
+
+        return !(erLikeStore && inneholderDeSamme);
     }
 
     private static <V> boolean erLikeStore(Collection<V> c1, Collection<V> c2) {
