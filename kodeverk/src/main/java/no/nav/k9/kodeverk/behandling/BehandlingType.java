@@ -42,6 +42,7 @@ public enum BehandlingType implements Kodeverdi {
                 throw new IllegalArgumentException("Duplikat : " + v.kode);
             }
         }
+
     }
 
     @JsonIgnore

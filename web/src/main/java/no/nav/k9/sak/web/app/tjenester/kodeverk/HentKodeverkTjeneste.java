@@ -31,7 +31,6 @@ import no.nav.k9.kodeverk.behandling.RevurderingVarslingÅrsak;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
-import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagAndeltype;
 import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
 import no.nav.k9.kodeverk.dokument.DokumentTypeId;
 import no.nav.k9.kodeverk.geografisk.Landkoder;
@@ -66,6 +65,7 @@ import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste
 public class HentKodeverkTjeneste {
 
     public static final Map<String, Collection<?>> KODEVERDIER_SOM_BRUKES_PÅ_KLIENT;
+
     static {
         Map<String, Collection<?>> map = new LinkedHashMap<>();
 
@@ -86,7 +86,6 @@ public class HentKodeverkTjeneste {
         map.put(OpptjeningAktivitetType.class.getSimpleName(), OpptjeningAktivitetType.kodeMap().values());
         map.put(RevurderingVarslingÅrsak.class.getSimpleName(), RevurderingVarslingÅrsak.kodeMap().values());
         map.put(Inntektskategori.class.getSimpleName(), Inntektskategori.kodeMap().values());
-        map.put(BeregningsgrunnlagAndeltype.class.getSimpleName(), BeregningsgrunnlagAndeltype.kodeMap().values());
         map.put(AktivitetStatus.class.getSimpleName(), AktivitetStatus.kodeMap().values());
         map.put(Arbeidskategori.class.getSimpleName(), Arbeidskategori.kodeMap().values());
         map.put(Fagsystem.class.getSimpleName(), Fagsystem.kodeMap().values());

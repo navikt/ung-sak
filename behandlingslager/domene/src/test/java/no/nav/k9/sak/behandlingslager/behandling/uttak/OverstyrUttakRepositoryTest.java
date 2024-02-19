@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -44,6 +43,8 @@ class OverstyrUttakRepositoryTest {
     private OverstyrUttakRepository overstyrUttakRepository;
 
     private Arbeidsgiver arbeidsgiver1 = Arbeidsgiver.virksomhet("111111111");
+    private Arbeidsgiver arbeidsgiver2 = Arbeidsgiver.virksomhet("22222222");
+
     private InternArbeidsforholdRef arbeidsforholdRef = InternArbeidsforholdRef.nyRef();
     private LocalDate dag1 = LocalDate.now();
     private LocalDate dag2 = dag1.plusDays(1);
@@ -188,6 +189,49 @@ class OverstyrUttakRepositoryTest {
         //kun periode 2 skal finnes
         assertThat(overstyrUttakRepository.hentOverstyrtUttak(originalBehandlingId)).isEqualTo(new LocalDateTimeline<>(periode2, overstyrtUttakPeriodePeriode2));
     }
+
+
+    @Test
+    void skal_lagre_plan_med_endrede_utbetalingsgrader_og_beholde_saksbehandler() {
+        assertThat(overstyrUttakRepository.hentOverstyrtUttak(originalBehandlingId)).isEqualTo(LocalDateTimeline.empty());
+
+        LocalDateInterval periode1 = new LocalDateInterval(dag1, dag1);
+        LocalDateInterval periode2 = new LocalDateInterval(dag2, dag2);
+        OverstyrtUttakPeriode overstyrtUttakPeriodePeriode1 = new OverstyrtUttakPeriode(null, new BigDecimal("0.35"), Set.of(), "begrunnelse");
+        OverstyrtUttakPeriode overstyrtUttakPeriodePeriode2 = new OverstyrtUttakPeriode(null, new BigDecimal("0.35"), Set.of(
+            new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver1, arbeidsforholdRef, new BigDecimal("0.23")),
+            new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver2, InternArbeidsforholdRef.nullRef(), new BigDecimal("0.23"))), "begrunnelse");
+        LocalDateTimeline<OverstyrtUttakPeriode> oppdateringer = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(periode1, overstyrtUttakPeriodePeriode1),
+            new LocalDateSegment<>(periode2, overstyrtUttakPeriodePeriode2))
+        );
+
+        SubjectHandlerUtils.setInternBruker("en-saksbehandler");
+
+        overstyrUttakRepository.oppdaterOverstyringAvUttak(originalBehandlingId, List.of(), oppdateringer);
+        LocalDateTimeline<OverstyrtUttakPeriode> eksisterendeOverstyringer = overstyrUttakRepository.hentOverstyrtUttak(originalBehandlingId);
+
+
+        var ryddet = eksisterendeOverstyringer.map(s -> {
+            if (s.getLocalDateInterval().equals(periode2)) {
+                return List.of(new LocalDateSegment<>(
+                    s.getLocalDateInterval(),
+                    new OverstyrtUttakPeriode(s.getValue().getId(), new BigDecimal("0.35"),
+                        Set.of(new OverstyrtUttakUtbetalingsgrad(UttakArbeidType.ARBEIDSTAKER, arbeidsgiver1, arbeidsforholdRef, new BigDecimal("0.23"))), "begrunnelse",
+                        s.getValue().getSaksbehandler())
+                ));
+            }
+            return List.of(s);
+        });
+
+        SubjectHandlerUtils.setInternBruker("k9-sak");
+
+        overstyrUttakRepository.ryddMotUttaksplan(originalBehandlingId, ryddet);
+
+        assertThat(overstyrUttakRepository.hentOverstyrtUttak(originalBehandlingId)).isEqualTo(ryddet);
+
+    }
+
 
     @Test
     void skal_oppdatere_periode_på_eksisterende_overstyring_gitt_id() {

@@ -12,15 +12,14 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
-
 import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.InntektsmeldingerDto;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
-import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittOpptjeningDto;
 import no.nav.abakus.iaygrunnlag.request.Dataset;
 import no.nav.abakus.iaygrunnlag.request.InntektArbeidYtelseGrunnlagRequest;
 import no.nav.abakus.iaygrunnlag.request.InntektsmeldingerRequest;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagDto;
+import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -39,7 +38,8 @@ import no.nav.k9.sak.typer.Saksnummer;
 
 @Dependent
 @Default
-class AbakusTjenesteAdapter {
+@ScopedRestIntegration(scopeKey = "fpabakus.scope", defaultScope = "api://prod-fss.teamforeldrepenger.fpabakus/.default")
+public class AbakusTjenesteAdapter {
 
     private AbakusTjeneste abakusTjeneste;
     private BehandlingRepository behandlingRepository;
@@ -50,11 +50,11 @@ class AbakusTjenesteAdapter {
     }
 
     @Inject
-    AbakusTjenesteAdapter(FagsakRepository fagsakRepository,
-                          BehandlingRepository behandlingRepository,
-                          SystemUserOidcRestClient restClient,
-                          @KonfigVerdi(value = "fpabakus.url") URI endpoint,
-                          @KonfigVerdi(value = "abakus.callback.url") URI callbackUrl) {
+    public AbakusTjenesteAdapter(FagsakRepository fagsakRepository,
+                                 BehandlingRepository behandlingRepository,
+                                 SystemUserOidcRestClient restClient,
+                                 @KonfigVerdi(value = "fpabakus.url") URI endpoint,
+                                 @KonfigVerdi(value = "abakus.callback.url") URI callbackUrl) {
         this.behandlingRepository = Objects.requireNonNull(behandlingRepository, "behandlingRepository");
         this.abakusTjeneste = new AbakusTjeneste(restClient, endpoint, callbackUrl);
         this.fagsakRepository = Objects.requireNonNull(fagsakRepository, "fagsakRepository");
@@ -75,12 +75,6 @@ class AbakusTjenesteAdapter {
 
         }
         return Set.of();
-    }
-
-    public Optional<OppgittOpptjeningDto> hentKunOverstyrtOppgittOpptjening(Long behandlingId) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        var request = initRequest(behandling);
-        return Optional.ofNullable(hentGrunnlag(request)).map(InntektArbeidYtelseGrunnlagDto::getOverstyrtOppgittOpptjening);
     }
 
     private InntektArbeidYtelseGrunnlagDto hentGrunnlagHvisEksisterer(Behandling behandling) {

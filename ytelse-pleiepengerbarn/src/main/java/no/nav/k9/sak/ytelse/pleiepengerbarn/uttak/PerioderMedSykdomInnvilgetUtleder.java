@@ -19,6 +19,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
@@ -26,9 +27,9 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 @Dependent
 public class PerioderMedSykdomInnvilgetUtleder {
 
-    private BehandlingRepository behandlingRepository;
-    private VilkårResultatRepository vilkårResultatRepository;
-    private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
+    private final BehandlingRepository behandlingRepository;
+    private final VilkårResultatRepository vilkårResultatRepository;
+    private final Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
 
     @Inject
     public PerioderMedSykdomInnvilgetUtleder(BehandlingRepository behandlingRepository,
@@ -49,6 +50,16 @@ public class PerioderMedSykdomInnvilgetUtleder {
         return finnInnvilgedePerioder(behandlingId, vilkårene, perioderVurdertISykdom);
     }
 
+    private static LocalDateTimeline<Boolean> finnAvslåttTidslinjeAlleVilkår(Vilkårene vilkårene) {
+        var avslåttePerioder = vilkårene.getVilkårene()
+            .stream().flatMap(v -> v.getPerioder().stream())
+            .filter(p -> p.getUtfall().equals(Utfall.IKKE_OPPFYLT))
+            .map(VilkårPeriode::getPeriode)
+            .map(p -> new LocalDateSegment<>(p.toLocalDateInterval(), true))
+            .toList();
+        return new LocalDateTimeline<>(avslåttePerioder, StandardCombinators::alwaysTrueForMatch);
+    }
+
     private NavigableSet<DatoIntervallEntitet> finnInnvilgedePerioder(Long behandlingId, Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
         VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = finnVilkårsPerioderTjeneste(behandlingId);
 
@@ -65,6 +76,8 @@ public class PerioderMedSykdomInnvilgetUtleder {
             tidslinje = tidslinje.combine(new LocalDateTimeline<>(segmenter), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
 
+        var avslåttTidslinje = finnAvslåttTidslinjeAlleVilkår(vilkårene);
+        tidslinje = tidslinje.disjoint(avslåttTidslinje);
         tidslinje = tidslinje.filterValue(it -> it);
         return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje.compress());
     }

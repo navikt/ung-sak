@@ -3,7 +3,6 @@ package no.nav.k9.sak.web.app.tjenester.forvaltning;
 import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import java.io.BufferedReader;
@@ -12,17 +11,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.math.BigDecimal;
-import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -61,7 +55,6 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.AbacAttributtSamling;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.AbacDto;
@@ -82,15 +75,12 @@ import no.nav.k9.kodeverk.person.Diskresjonskode;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
-import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.pip.PipRepository;
 import no.nav.k9.sak.domene.person.pdl.TilknytningTjeneste;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
-import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
 import no.nav.k9.sak.hendelse.stønadstatistikk.StønadstatistikkService;
 import no.nav.k9.sak.kontrakt.KortTekst;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
@@ -109,16 +99,7 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLo
 import no.nav.k9.sak.web.app.tjenester.forvaltning.rapportering.DriftLesetilgangVurderer;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.sak.ytelse.frisinn.mottak.FrisinnSøknadMottaker;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
-import no.nav.k9.søknad.Søknad;
-import no.nav.k9.søknad.felles.type.Periode;
-import no.nav.k9.søknad.frisinn.FrisinnSøknad;
-import no.nav.k9.søknad.frisinn.Inntekter;
-import no.nav.k9.søknad.frisinn.PeriodeInntekt;
-import no.nav.k9.søknad.frisinn.SelvstendigNæringsdrivende;
-import no.nav.k9.søknad.ytelse.pls.v1.PleipengerLivetsSluttfase;
-import no.nav.k9.søknad.ytelse.psb.v1.PleiepengerSyktBarn;
 
 /**
  * DENNE TJENESTEN ER BARE FOR MIDLERTIDIG BEHOV, OG SKAL AVVIKLES SÅ RASKT SOM MULIG.
@@ -130,10 +111,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
     private static final Logger logger = LoggerFactory.getLogger(ForvaltningMidlertidigDriftRestTjeneste.class);
 
-    private FrisinnSøknadMottaker frisinnSøknadMottaker;
     private TpsTjeneste tpsTjeneste;
-    private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
-
     private ProsessTaskTjeneste prosessTaskRepository;
     private FagsakTjeneste fagsakTjeneste;
     private EntityManager entityManager;
@@ -150,9 +128,6 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     private PipRepository pipRepository;
 
     private TilknytningTjeneste tilknytningTjeneste;
-
-    private FeilRefusjonVedTilsynUtrekkTjeneste feilRefusjonVedTilsynUtrekkTjeneste;
-
     private Pep pep;
 
     public ForvaltningMidlertidigDriftRestTjeneste() {
@@ -160,9 +135,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     }
 
     @Inject
-    public ForvaltningMidlertidigDriftRestTjeneste(@FagsakYtelseTypeRef(FRISINN) FrisinnSøknadMottaker frisinnSøknadMottaker,
-                                                   TpsTjeneste tpsTjeneste,
-                                                   BehandlingskontrollTjeneste behandlingskontrollTjeneste,
+    public ForvaltningMidlertidigDriftRestTjeneste(TpsTjeneste tpsTjeneste,
                                                    FagsakTjeneste fagsakTjeneste,
                                                    ProsessTaskTjeneste prosessTaskRepository,
                                                    MottatteDokumentRepository mottatteDokumentRepository,
@@ -174,12 +147,9 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                                                    OpprettRevurderingService opprettRevurderingService,
                                                    PipRepository pipRepository,
                                                    TilknytningTjeneste tilknytningTjeneste,
-                                                   FeilRefusjonVedTilsynUtrekkTjeneste feilRefusjonVedTilsynUtrekkTjeneste,
                                                    Pep pep) {
 
-        this.frisinnSøknadMottaker = frisinnSøknadMottaker;
         this.tpsTjeneste = tpsTjeneste;
-        this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.prosessTaskRepository = prosessTaskRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
@@ -191,7 +161,6 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         this.opprettRevurderingService = opprettRevurderingService;
         this.pipRepository = pipRepository;
         this.tilknytningTjeneste = tilknytningTjeneste;
-        this.feilRefusjonVedTilsynUtrekkTjeneste = feilRefusjonVedTilsynUtrekkTjeneste;
         this.pep = pep;
     }
 
@@ -433,43 +402,6 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         return Response.ok("Lagde " + resultat + " tasker for å sjekke kandidater for revurdering av feriepenger").build();
     }
 
-    private boolean harTomSøknadsperiode(PleipengerLivetsSluttfase pls) {
-        return pls.getSøknadsperiodeList().isEmpty();
-    }
-
-    private boolean erFraBrukerdialogPsb(Søknad søknad) {
-        return søknad.getJournalposter() == null || søknad.getJournalposter().isEmpty();
-    }
-
-    private boolean harOmsorgstilbud(PleiepengerSyktBarn ytelse) {
-        if (ytelse.getTilsynsordning() == null) {
-            return false;
-        }
-        if (ytelse.getTilsynsordning().getPerioder() == null) {
-            return false;
-        }
-        return ytelse.getTilsynsordning().getPerioder()
-            .entrySet()
-            .stream()
-            .anyMatch(p -> !p.getValue().getEtablertTilsynTimerPerDag().isZero());
-    }
-
-    private boolean harReellPeriodeMedNullNormal(PleiepengerSyktBarn soknad) {
-        return soknad.getArbeidstid().getArbeidstakerList().stream().anyMatch(a -> {
-            return a.getArbeidstidInfo().getPerioder().entrySet().stream().anyMatch(tid ->
-                tid.getValue().getJobberNormaltTimerPerDag() != null
-                    && tid.getValue().getJobberNormaltTimerPerDag().equals(Duration.ofSeconds(0L))
-                    && tid.getValue().getFaktiskArbeidTimerPerDag() != null
-                    && tid.getValue().getFaktiskArbeidTimerPerDag().equals(Duration.ofSeconds(0L))
-                    && erIkkeHelg(tid.getKey())
-            );
-        });
-    }
-
-    private boolean erIkkeHelg(Periode periode) {
-        LocalDateTimeline<Boolean> ukedagerTidslinje = Hjelpetidslinjer.lagUkestidslinjeForMandagTilFredag(periode.getFraOgMed(), periode.getTilOgMed());
-        return !ukedagerTidslinje.isEmpty();
-    }
 
     @GET
     @Path("/starttidspunkt-aapen-behandling")
@@ -704,37 +636,6 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
          */
         entityManager.persist(new DiagnostikkFagsakLogg(fagsak.getId(), tjeneste, begrunnelse));
         entityManager.flush();
-    }
-
-    public static class AbacDataSupplier implements Function<Object, AbacDataAttributter> {
-        @Override
-        public AbacDataAttributter apply(Object obj) {
-            return AbacDataAttributter.opprett();
-        }
-    }
-
-    @NotNull
-    private Optional<Exception> validerSøknad(Fagsak fagsak, FrisinnSøknad søknad) {
-        try {
-            frisinnSøknadMottaker.validerSøknad(fagsak, søknad);
-        } catch (Exception e) {
-            return Optional.of(e);
-        }
-        return Optional.empty();
-    }
-
-    private Inntekter lagDummyInntekt(ManuellSøknadDto manuellSøknadDto) {
-        Map<Periode, PeriodeInntekt> periodePeriodeInntektMap = new HashMap<>();
-        periodePeriodeInntektMap.put(manuellSøknadDto.getPeriode(), new PeriodeInntekt(BigDecimal.ZERO));
-        Map<Periode, PeriodeInntekt> periodeFør = new HashMap<>();
-        periodeFør.put(new Periode(LocalDate.of(2019, 1, 1), LocalDate.of(2019, 12, 31)), new PeriodeInntekt(BigDecimal.ONE));
-
-        SelvstendigNæringsdrivende selvstendigNæringsdrivende = SelvstendigNæringsdrivende.builder()
-            .inntekterSøknadsperiode(periodePeriodeInntektMap)
-            .inntekterFør(periodeFør)
-            .build();
-
-        return new Inntekter(null, selvstendigNæringsdrivende, null);
     }
 
     public static class OpprettManuellRevurdering implements AbacDto {

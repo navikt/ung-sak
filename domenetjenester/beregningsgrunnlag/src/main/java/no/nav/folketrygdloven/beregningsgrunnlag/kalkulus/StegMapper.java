@@ -12,7 +12,7 @@ public class StegMapper {
             case FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING -> BeregningSteg.FASTSETT_STP_BER;
             case KONTROLLER_FAKTA_BEREGNING -> BeregningSteg.KOFAKBER;
             case FORESLÅ_BEREGNINGSGRUNNLAG -> BeregningSteg.FORS_BERGRUNN;
-            case FORTSETT_FORESLÅ_BEREGNINGSGRUNNLAG -> BeregningSteg.FORTS_FORS_BERGRUNN;
+            case FORTSETT_FORESLÅ_BEREGNINGSGRUNNLAG -> BeregningSteg.FORS_BERGRUNN_2;
             case VURDER_VILKAR_BERGRUNN -> BeregningSteg.VURDER_VILKAR_BERGRUNN;
             case VURDER_TILKOMMET_INNTEKT -> BeregningSteg.VURDER_TILKOMMET_INNTEKT;
             case VURDER_REF_BERGRUNN -> BeregningSteg.VURDER_REF_BERGRUNN;

@@ -40,10 +40,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <felles.version>2.5.0</felles.version>
+        <felles.version>2.5.2</felles.version>
         <swagger.version>2.2.17</swagger.version>
-        <junit.version>5.10.1</junit.version>
-        <k9format.version>9.0.6</k9format.version>
+        <junit.version>5.10.2</junit.version>
+        <k9format.version>9.2.10</k9format.version>
         <jackson.version>2.16.1</jackson.version>
         <asm.version>9.6</asm.version>
         <kotlin-stdlib.version>1.9.22</kotlin-stdlib.version>
@@ -151,12 +151,12 @@
             <dependency>
                 <groupId>no.nav.foreldrepenger.abakus</groupId>
                 <artifactId>abakus-kontrakt</artifactId>
-                <version>2.0.4</version>
+                <version>2.0.5</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.folketrygdloven.kalkulus</groupId>
                 <artifactId>kalkulus-kontrakt</artifactId>
-                <version>2.7.7</version>
+                <version>2.7.10</version>
             </dependency>
 
             <dependency>
@@ -306,7 +306,11 @@
                 <artifactId>medlem</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>no.nav.k9.sak</groupId>
+                <artifactId>innsyn</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>no.nav.k9.sak</groupId>
                 <artifactId>behandling</artifactId>
@@ -437,7 +441,7 @@
             <dependency>
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
-                <version>2.12.6</version>
+                <version>2.12.7</version>
             </dependency>
             <dependency>
                 <groupId>org.jasypt</groupId>
@@ -475,7 +479,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>5.9.0</version>
+                <version>5.10.0</version>
             </dependency>
             <dependency>
                 <groupId>org.hamcrest</groupId>
@@ -510,7 +514,7 @@
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
-                <version>1.16.0</version>
+                <version>1.16.1</version>
             </dependency>
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->

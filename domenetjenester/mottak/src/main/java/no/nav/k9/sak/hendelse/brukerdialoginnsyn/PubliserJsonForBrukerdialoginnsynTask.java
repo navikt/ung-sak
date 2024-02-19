@@ -14,6 +14,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.innsyn.BrukerdialoginnsynMeldingProducer;
 
 @ApplicationScoped
 @ProsessTask(PubliserJsonForBrukerdialoginnsynTask.TASKTYPE)

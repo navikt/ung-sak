@@ -38,12 +38,9 @@ public class MapBeregningsresultatFraRegelTilVL {
     private no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode mapFraPeriode(BeregningsresultatPeriode resultatPeriode, no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet eksisterendeResultat) {
         no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode nyPeriode = no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode.builder()
             .medBeregningsresultatPeriodeFomOgTom(resultatPeriode.getFom(), resultatPeriode.getTom())
-            .medInntektGraderingprosent(resultatPeriode.getInntektGraderingsprosent())
             .medTotalUtbetalingsgradFraUttak(resultatPeriode.getTotalUtbetalingsgradFraUttak())
             .medTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(resultatPeriode.getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt())
             .medReduksjonsfaktorInaktivTypeA(resultatPeriode.getReduksjonsfaktorInaktivTypeA())
-            .medGraderingsfaktorInntekt(resultatPeriode.getGraderingsfaktorInntekt())
-            .medGraderingsfaktorTid(resultatPeriode.getGraderingsfaktorTid())
             .build(eksisterendeResultat);
         resultatPeriode.getBeregningsresultatAndelList().forEach(bra -> mapFraAndel(bra, nyPeriode, resultatPeriode.getPeriode()));
         return nyPeriode;

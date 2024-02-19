@@ -9,9 +9,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -20,13 +17,10 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @Dependent
 public class OverstyrUttakRepository {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(OverstyrUttakRepository.class);
 
     private EntityManager entityManager;
 
@@ -97,6 +91,44 @@ public class OverstyrUttakRepository {
         entityManager.flush();
     }
 
+    /** Lagrer overstyrt uttak og beholder opprinnelig saksbehandler
+     *
+     * @param behandlingId BehandlingId
+     * @param ryddetMotUttaksplan Tidslinje med overstyrte perioder
+     */
+    public void ryddMotUttaksplan(Long behandlingId, LocalDateTimeline<OverstyrtUttakPeriode> ryddetMotUttaksplan) {
+        LocalDateTimeline<OverstyrtUttakPeriodeEntitet> eksisterendeOverstyringer = hentSomEntitetTidslinje(behandlingId);
+        Map<Long, LocalDateSegment<OverstyrtUttakPeriodeEntitet>> eksisterendeOverstyringerPrId = eksisterendeOverstyringer.stream().collect(Collectors.toMap(segment -> segment.getValue().getId(), segment -> segment));
+
+        List<LocalDateSegment<OverstyrtUttakPeriode>> segmenterSomEndres = new ArrayList<>();
+        ryddetMotUttaksplan.stream().forEach(segment -> {
+            OverstyrtUttakPeriode nyOverstyring = segment.getValue();
+            Long eksisterendeOverstyringId = nyOverstyring.getId();
+            LocalDateSegment<OverstyrtUttakPeriode> eksisterendeOverstyring = mapFraEntitet(eksisterendeOverstyringerPrId.get(eksisterendeOverstyringId));
+            boolean harEndring = !Objects.equals(segment, eksisterendeOverstyring);
+            if (harEndring) {
+                segmenterSomEndres.add(segment);
+            }
+        });
+
+        fjernEksisterendeOverstyringerSomOverlapper(new LocalDateTimeline<>(segmenterSomEndres), eksisterendeOverstyringer);
+        segmenterSomEndres.forEach(segment -> {
+                Long eksisterendeOverstyringId = segment.getValue().getId();
+                fjernOverstyring(behandlingId, eksisterendeOverstyringId);
+                OverstyrtUttakPeriode overstyring = segment.getValue();
+                OverstyrtUttakPeriodeEntitet nyOverstyring = new OverstyrtUttakPeriodeEntitet(behandlingId,
+                    DatoIntervallEntitet.fra(segment.getLocalDateInterval()),
+                    overstyring.getSøkersUttaksgrad(),
+                    map(overstyring.getOverstyrtUtbetalingsgrad()),
+                    overstyring.getBegrunnelse(),
+                    eksisterendeOverstyringerPrId.get(eksisterendeOverstyringId).getValue().getSaksbehandler());
+                entityManager.persist(nyOverstyring);
+            }
+        );
+
+        entityManager.flush();
+    }
+
     public void kopierGrunnlagFraEksisterendeBehandling(Long originalBehandlingId, Long nyBehandlingId) {
         var overstyrtePerioder = finnOverstyrtePerioder(originalBehandlingId);
         if (!overstyrtePerioder.isEmpty()) {
@@ -108,14 +140,8 @@ public class OverstyrUttakRepository {
         var vilkårssegmenter = definerendeVilkårsperioder.stream().map(p -> new LocalDateSegment<>(p.getFomDato(), p.getTomDato(), true)).toList();
         var vilkårstidslinje = new LocalDateTimeline<>(vilkårssegmenter, StandardCombinators::alwaysTrueForMatch).compress();
         var eksisterendePerioder = finnOverstyrtePerioder(behandlingId);
-        LOGGER.info("Fant eksisterende overstyringer: "  + eksisterendePerioder);
-
         var perioderTidslinje = new LocalDateTimeline<>(eksisterendePerioder.stream().map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), p)).toList());
         var perioderSomMåFjernes = perioderTidslinje.disjoint(vilkårstidslinje, StandardCombinators::leftOnly);
-
-        LOGGER.info("Perioder som må fjernes"  + perioderSomMåFjernes);
-
-
         fjernEksisterendeOverstyringerSomOverlapper(perioderSomMåFjernes, perioderTidslinje);
         entityManager.flush();
     }
@@ -124,13 +150,11 @@ public class OverstyrUttakRepository {
         Set<OverstyrtUttakPeriodeEntitet> påvirkedeEksisterendeOverstyringer = eksisterendeOverstyringer.intersection(perioderSomRyddes).stream().map(LocalDateSegment::getValue).collect(Collectors.toSet());
         påvirkedeEksisterendeOverstyringer.forEach(eksisterendeOverstyring -> {
             eksisterendeOverstyring.deaktiver();
-            LOGGER.info("Deaktiverer overstyring "  + eksisterendeOverstyring);
             entityManager.persist(eksisterendeOverstyring);
         });
         LocalDateTimeline<OverstyrtUttakPeriodeEntitet> delvisBevaringsverdigeEksisterendeOverstyringer = tilTidslinje(påvirkedeEksisterendeOverstyringer).disjoint(perioderSomRyddes);
         delvisBevaringsverdigeEksisterendeOverstyringer.stream().forEach(
             segment -> {
-                LOGGER.info("Tilpasser segment for overstyring"  + segment.getValue() + "med ny periode " + DatoIntervallEntitet.fra(segment.getLocalDateInterval()));
                 OverstyrtUttakPeriodeEntitet bevaringsverdigPåvirketOverstyring = segment.getValue().kopiMedNyPeriode(DatoIntervallEntitet.fra(segment.getLocalDateInterval()));
                 entityManager.persist(bevaringsverdigPåvirketOverstyring);
             });

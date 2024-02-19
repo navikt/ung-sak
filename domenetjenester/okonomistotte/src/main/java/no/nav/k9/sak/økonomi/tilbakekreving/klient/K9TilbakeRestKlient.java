@@ -55,7 +55,7 @@ public class K9TilbakeRestKlient {
     public Optional<BehandlingStatusOgFeilutbetalinger> hentFeilutbetalingerForSisteBehandling(Saksnummer saksnummer) {
         URI uri = leggTilParameter(uriFeilutbetalingerSisteBehandling, "saksnummer", saksnummer.getVerdi());
         if (k9tilbakeAktivert) {
-            return restClient.postReturnsOptional(uri, saksnummer, BehandlingStatusOgFeilutbetalinger.class);
+            return restClient.getReturnsOptional(uri, BehandlingStatusOgFeilutbetalinger.class);
         } else {
             log.info("k9-tilbake er ikke aktivert - antar at sak {} ikke har tilbakekrevingsbehandling", saksnummer);
             return Optional.empty();

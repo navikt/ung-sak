@@ -224,7 +224,7 @@ public class KompletthetForBeregningTjeneste {
         return grunnlag.map(BeregningsgrunnlagPerioderGrunnlag::getKompletthetPerioder).orElse(List.of());
     }
 
-    public List<Inntektsmelding> utledInntektsmeldingerSomSendesInnTilBeregningForPeriode(BehandlingReferanse referanse, Set<Inntektsmelding> alleInntektsmeldingerPåSak, DatoIntervallEntitet periode) {
+    public List<Inntektsmelding> utledInntektsmeldingerSomSendesInnTilBeregningForPeriode(BehandlingReferanse referanse, Collection<Inntektsmelding> alleInntektsmeldingerPåSak, DatoIntervallEntitet periode) {
         var relevanteImTjeneste = InntektsmeldingerRelevantForBeregning.finnTjeneste(inntektsmeldingerRelevantForBeregning, referanse.getFagsakYtelseType());
         var inntektsmeldings = relevanteImTjeneste.begrensSakInntektsmeldinger(referanse, alleInntektsmeldingerPåSak, periode);
         return relevanteImTjeneste.utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldings, periode);

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -49,6 +50,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.krav.KravDokumentMedSøktePerioder;
+import no.nav.k9.sak.kontrakt.krav.KravDokumentType;
 import no.nav.k9.sak.kontrakt.krav.PeriodeMedUtfall;
 import no.nav.k9.sak.kontrakt.krav.StatusForPerioderPåBehandling;
 import no.nav.k9.sak.kontrakt.krav.StatusForPerioderPåBehandlingInkludertVilkår;
@@ -226,9 +228,12 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
             perioderSomSkalTilbakestilles,
             revurderingPerioderFraAndreParter);
 
-        if (behandling.erRevurdering() && kunEndringFraBrukerOgKildeEndringsdialog(statusForPerioderPåBehandling)) {
+        if (Objects.equals(behandling.getFagsakYtelseType(), FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
+            && behandling.erRevurdering()
+            && Objects.equals(behandling.getAktivtBehandlingSteg(), BehandlingStegType.FORESLÅ_VEDTAK)
+            && kunEndringFraBrukerOgKildeEndringsdialog(statusForPerioderPåBehandling)) {
             //Kun logging for å få oversikt over saker før vi implementerer dette i formidling
-            log.info("Revurdering med årsak endring fra bruker og kildesystem endringsdialog");
+            log.info("Case 1: Revurdering med kun årsak endring fra bruker og kun kildesystem endringsdialog");
         }
 
         return statusForPerioderPåBehandling;
@@ -238,13 +243,27 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
         if (statusForPerioderPåBehandling.getÅrsakMedPerioder().isEmpty() || statusForPerioderPåBehandling.getDokumenterTilBehandling().isEmpty()) {
             return false;
         }
-        var harKunEndringFraBruker = statusForPerioderPåBehandling.getÅrsakMedPerioder().stream()
+        Set<ÅrsakTilVurdering> årsaker = statusForPerioderPåBehandling.getÅrsakMedPerioder().stream()
             .map(ÅrsakMedPerioder::getÅrsak)
-            .allMatch(ÅrsakTilVurdering.ENDRING_FRA_BRUKER::equals);
-        var harKunKildeEndringsdialog = statusForPerioderPåBehandling.getDokumenterTilBehandling().stream()
+            .collect(Collectors.toSet());
+        boolean harKunEndringFraBruker = årsaker.stream().allMatch(ÅrsakTilVurdering.ENDRING_FRA_BRUKER::equals);
+
+        Set<String> kilder = statusForPerioderPåBehandling.getDokumenterTilBehandling().stream()
             .map(KravDokumentMedSøktePerioder::getKildesystem)
+            .collect(Collectors.toSet());
+        boolean harKunKildeEndringsdialog = kilder.stream()
             .map(Kildesystem::of)
             .allMatch(Kildesystem.ENDRINGSDIALOG::equals);
+
+        if (harKunKildeEndringsdialog && !harKunEndringFraBruker) {
+            boolean harKunEndringFraBrukerEllerBerørtPeriode = List.of(ÅrsakTilVurdering.ENDRING_FRA_BRUKER, ÅrsakTilVurdering.REVURDERER_BERØRT_PERIODE).containsAll(årsaker);
+            if (harKunEndringFraBrukerEllerBerørtPeriode) {
+                log.info("Case 2: Revurdering med årsak endring fra bruker og berørt periode, og kun kildesystem endringsdialog");
+            } else {
+                log.info("Case 3: Revurdering med kun kildesystem endringsdialog, men andre årsaker: {}", årsaker);
+            }
+        }
+
         return harKunEndringFraBruker && harKunKildeEndringsdialog;
     }
 }

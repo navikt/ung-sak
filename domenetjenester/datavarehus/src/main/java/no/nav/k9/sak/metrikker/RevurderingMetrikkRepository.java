@@ -2,6 +2,7 @@ package no.nav.k9.sak.metrikker;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -81,44 +82,60 @@ public class RevurderingMetrikkRepository {
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
     }
 
-    public List<SensuEvent> hentAlle() {
+    public List<SensuEvent> hentAlle(LocalDate revurderingUtenSøknadTomDato) {
         LocalDate dag = LocalDate.now();
 
         List<SensuEvent> metrikker = new ArrayList<>();
-        try {
-            metrikker.addAll(timeCall(() -> antallAksjonspunktFordelingForRevurderingSisteSyvDager(dag), "antallAksjonspunktFordelingForRevurderingSisteSyvDager"));
-        } catch (QueryTimeoutException e) {
-            log.warn("Uthenting av antallAksjonspunktFordelingForRevurderingSisteSyvDager feiler", e);
-        }
-        try {
-            metrikker.addAll(timeCall(() -> antallAksjonspunktFordelingForRevurderingUtenNyttStpSisteSyvDager(dag), "antallAksjonspunktFordelingForRevurderingUtenNyttStpSisteSyvDager"));
-        } catch (QueryTimeoutException e) {
-            log.warn("Uthenting av antallAksjonspunktFordelingForRevurderingUtenNyttStpSisteSyvDager feiler", e);
-        }
-        try {
-            metrikker.addAll(timeCall(() -> antallRevurderingMedAksjonspunktPrKodeSisteSyvDager(dag), "antallRevurderingMedAksjonspunktPrKodeSisteSyvDager"));
-        } catch (QueryTimeoutException e) {
-            log.warn("Uthenting av antallRevurderingMedAksjonspunktPrKodeSisteSyvDager feiler", e);
-        }
-        try {
-            metrikker.addAll(timeCall(() -> antallRevurderingUtenNyttStpMedAksjonspunktPrKodeSisteSyvDager(dag), "antallRevurderingUtenNyttStpMedAksjonspunktPrKodeSisteSyvDager"));
-        } catch (QueryTimeoutException e) {
-            log.warn("Uthenting av antallRevurderingUtenNyttStpMedAksjonspunktPrKodeSisteSyvDager feiler", e);
-        }
-        try {
-            metrikker.addAll(timeCall(() -> antallRevurderingUtenNyttStpÅrsakStatistikk(dag), "antallRevurderingUtenNyttStpÅrsakStatistikk"));
-        } catch (QueryTimeoutException e) {
-            log.warn("Uthenting av antallRevurderingUtenNyttStpÅrsakStatistikk feiler", e);
-        }
-        try {
-            metrikker.addAll(timeCall(() -> antallAksjonspunktFordelingForRevurderingUtenNySøknadSisteSyvDagerPSB(dag), "antallAksjonspunktFordelingForRevurderingUtenNySøknadSisteSyvDagerPSB"));
-        } catch (QueryTimeoutException e) {
-            log.warn("Uthenting av antallAksjonspunktFordelingForRevurderingUtenNySøknadSisteSyvDagerPSB feiler", e);
-        }
-        try {
-            metrikker.addAll(timeCall(() -> antallRevurderingUtenNySøknadMedAksjonspunktPrKodeSisteSyvDagerPSB(dag), "antallRevurderingUtenNySøknadMedAksjonspunktPrKodeSisteSyvDagerPSB"));
-        } catch (QueryTimeoutException e) {
-            log.warn("Uthenting av antallRevurderingUtenNySøknadMedAksjonspunktPrKodeSisteSyvDagerPSB feiler", e);
+
+        if (!revurderingUtenSøknadTomDato.equals(dag)) {
+            // Kjører kun innhenting av saksnummer dersom tomdato er ulik dagens dato, dette betyr at vi er utenfor schedulert kjøring
+            try {
+                metrikker.addAll(timeCall(() -> revurderingerUtenNySøknadMedAksjonspunkt(revurderingUtenSøknadTomDato), "revurderingerUtenNySøknadMedAksjonspunkt"));
+            } catch (QueryTimeoutException e) {
+                log.warn("Uthenting av revurderingerUtenNySøknadMedAksjonspunkt feiler", e);
+            }
+        } else {
+
+            try {
+                metrikker.addAll(timeCall(() -> antallAksjonspunktFordelingForRevurderingSisteSyvDager(dag), "antallAksjonspunktFordelingForRevurderingSisteSyvDager"));
+            } catch (QueryTimeoutException e) {
+                log.warn("Uthenting av antallAksjonspunktFordelingForRevurderingSisteSyvDager feiler", e);
+            }
+            try {
+                metrikker.addAll(timeCall(() -> antallAksjonspunktFordelingForRevurderingUtenNyttStpSisteSyvDager(dag), "antallAksjonspunktFordelingForRevurderingUtenNyttStpSisteSyvDager"));
+            } catch (QueryTimeoutException e) {
+                log.warn("Uthenting av antallAksjonspunktFordelingForRevurderingUtenNyttStpSisteSyvDager feiler", e);
+            }
+            try {
+                metrikker.addAll(timeCall(() -> antallRevurderingMedAksjonspunktPrKodeSisteSyvDager(dag), "antallRevurderingMedAksjonspunktPrKodeSisteSyvDager"));
+            } catch (QueryTimeoutException e) {
+                log.warn("Uthenting av antallRevurderingMedAksjonspunktPrKodeSisteSyvDager feiler", e);
+            }
+            try {
+                metrikker.addAll(timeCall(() -> antallRevurderingUtenNyttStpMedAksjonspunktPrKodeSisteSyvDager(dag), "antallRevurderingUtenNyttStpMedAksjonspunktPrKodeSisteSyvDager"));
+            } catch (QueryTimeoutException e) {
+                log.warn("Uthenting av antallRevurderingUtenNyttStpMedAksjonspunktPrKodeSisteSyvDager feiler", e);
+            }
+            try {
+                metrikker.addAll(timeCall(() -> antallRevurderingUtenNyttStpÅrsakStatistikk(dag), "antallRevurderingUtenNyttStpÅrsakStatistikk"));
+            } catch (QueryTimeoutException e) {
+                log.warn("Uthenting av antallRevurderingUtenNyttStpÅrsakStatistikk feiler", e);
+            }
+            try {
+                metrikker.addAll(timeCall(() -> antallAksjonspunktFordelingForRevurderingUtenNySøknadSisteSyvDagerPSB(dag), "antallAksjonspunktFordelingForRevurderingUtenNySøknadSisteSyvDagerPSB"));
+            } catch (QueryTimeoutException e) {
+                log.warn("Uthenting av antallAksjonspunktFordelingForRevurderingUtenNySøknadSisteSyvDagerPSB feiler", e);
+            }
+            try {
+                metrikker.addAll(timeCall(() -> antallRevurderingUtenNySøknadMedAksjonspunktPrKodeSisteSyvDagerPSB(dag), "antallRevurderingUtenNySøknadMedAksjonspunktPrKodeSisteSyvDagerPSB"));
+            } catch (QueryTimeoutException e) {
+                log.warn("Uthenting av antallRevurderingUtenNySøknadMedAksjonspunktPrKodeSisteSyvDagerPSB feiler", e);
+            }
+            try {
+                metrikker.addAll(timeCall(() -> revurderingerUtenNySøknadMedAksjonspunkt(revurderingUtenSøknadTomDato), "revurderingerUtenNySøknadMedAksjonspunkt"));
+            } catch (QueryTimeoutException e) {
+                log.warn("Uthenting av revurderingerUtenNySøknadMedAksjonspunkt feiler", e);
+            }
         }
         return metrikker;
     }
@@ -475,7 +492,6 @@ public class RevurderingMetrikkRepository {
             "and b.avsluttet_dato is not null " +
             "and b.avsluttet_dato>=:startTid and b.avsluttet_dato < :sluttTid " +
             "and b.behandling_type=:revurdering " +
-            "and exists(select 1 from aksjonspunkt a where a.aksjonspunkt_status != 'AVBR' and (a.vent_aarsak is null or a.vent_aarsak = '-') and a.behandling_id = b.id) " +
             " and not exists ( " +
             " select 1 from rs_vilkars_resultat rv" +
             " inner join vr_vilkar vv on vv.vilkar_resultat_id=rv.vilkarene_id" +
@@ -532,6 +548,64 @@ public class RevurderingMetrikkRepository {
         return values;
 
     }
+
+    @SuppressWarnings("unchecked")
+    Collection<SensuEvent> revurderingerUtenNySøknadMedAksjonspunkt(LocalDate dato) {
+        String sql = "select f.ytelse_type, f.saksnummer, b.id, a.aksjonspunkt_def, b.avsluttet_dato " +
+            "from behandling b" +
+            "         inner join fagsak f on f.id=b.fagsak_id" +
+            "         inner join aksjonspunkt a on b.id = a.behandling_id " +
+            "where a.aksjonspunkt_status != 'AVBR' " +
+            "and (vent_aarsak is null or vent_aarsak = '-') " +
+            "and b.avsluttet_dato is not null " +
+            "and b.avsluttet_dato>=:startTid and b.avsluttet_dato < :sluttTid " +
+            "and b.behandling_type=:revurdering " +
+            "and f.ytelse_type in (:pleiepengeYtelser) " +
+            " and not exists ( " +
+            " select 1 from GR_SOEKNADSPERIODE gr " +
+            "inner join sp_soeknadsperioder_holder sp_holder on gr.oppgitt_soknadsperiode_id = sp_holder.id " +
+            "inner join SP_SOEKNADSPERIODER sp_perioder on sp_holder.id = sp_perioder.holder_id " +
+            "inner join GR_SOEKNADSPERIODE gr_original on gr_original.behandling_id = b.original_behandling_id " +
+            "inner join sp_soeknadsperioder_holder sp_holder_original on sp_holder_original.id = gr_original.oppgitt_soknadsperiode_id " +
+            "inner join sp_soeknadsperioder sp_perioder_original on sp_holder_original.id = sp_perioder_original.holder_id " +
+            "where gr.behandling_id = b.id and gr.aktiv = true and gr_original.aktiv = true and sp_perioder.journalpost_id != sp_perioder_original.journalpost_id)";
+
+        String metricName = "revurdering_uten_ny_soknad";
+
+        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
+            .setParameter("revurdering", BehandlingType.REVURDERING.getKode())
+            .setParameter("startTid", dato.minusDays(1).atStartOfDay())
+            .setParameter("sluttTid", dato.atStartOfDay())
+            .setParameter("pleiepengeYtelser", PLEIEPENGE_YTELSER);
+
+        Stream<Tuple> stream = query.getResultStream()
+            .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class)));
+
+
+        var values = stream.map(t -> {
+                String ytelseType = t.get(0, String.class);
+                String saksnummer = t.get(1, String.class);
+                String behandlingId = t.get(2, Long.class).toString();
+                String aksjonspunktKode = t.get(3, String.class);
+                String aksjonspunktNavn = coalesce(AksjonspunktDefinisjon.kodeMap().getOrDefault(aksjonspunktKode, AksjonspunktDefinisjon.UNDEFINED).getNavn(), "-");
+                long tidsstempel = t.get(4, Timestamp.class).getTime();
+                return SensuEvent.createSensuEvent(metricName,
+                    toMap(
+                        "ytelse_type", ytelseType,
+                        "aksjonspunkt", aksjonspunktKode),
+                    Map.of(
+                        "aksjonspunkt_navn", aksjonspunktNavn,
+                        "saksnummer", saksnummer,
+                        "behandlingId", behandlingId),
+                    tidsstempel);
+            })
+            .collect(Collectors.toList());
+
+
+        return values;
+
+    }
+
 
 
     private static String coalesce(String str, String defValue) {

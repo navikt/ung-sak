@@ -403,6 +403,45 @@ class RevurderingMetrikkRepositoryTest {
 
 
     @Test
+    void skal_finne_en_sak_uten_ny_søknad() {
+
+        var stp = LocalDate.now();
+
+        FagsakYtelseType ytelseType = FagsakYtelseType.PSB;
+        var scenario = TestScenarioBuilder.builderMedSøknad(ytelseType);
+        var behandling = scenario.lagre(entityManager);
+        leggTilVilkårResultatForStp(stp, behandling);
+        behandling.avsluttBehandling();
+
+
+        AksjonspunktDefinisjon aksjonspunkt = AksjonspunktDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_SELVSTENDIG_NÆRINGSDRIVENDE;
+        BehandlingStegType stegType = BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG;
+
+        var scenarioBuilder = TestScenarioBuilder.builderUtenSøknad(ytelseType)
+            .medBehandlingType(BehandlingType.REVURDERING)
+            .medOriginalBehandling(behandling, BehandlingÅrsakType.RE_ENDRING_BEREGNINGSGRUNNLAG);
+
+        scenarioBuilder.leggTilAksjonspunkt(aksjonspunkt, stegType);
+
+        var revurdering = scenarioBuilder
+            .lagre(entityManager);
+        leggTilVilkårResultatForStp(stp, revurdering);
+
+        var ap = revurdering.getAksjonspunkter().iterator().next();
+        aksjonspunktKontrollRepository.setTilUtført(ap, "begrunnelse");
+
+        revurdering.avsluttBehandling();
+
+        entityManager.flush();
+
+        assertThat(revurderingMetrikkRepository.revurderingerUtenNySøknadMedAksjonspunkt(LocalDate.now().plusDays(1))).isNotEmpty()
+            .allMatch(v -> v.toString().contains("revurdering_uten_ny_soknad"))
+            .anyMatch(v -> v.toString().contains("ytelse_type=PSB") && v.toString().contains("saksnummer=" + revurdering.getFagsak().getSaksnummer()) && v.toString().contains("aksjonspunkt=" + aksjonspunkt.getKode()) &&
+                v.toString().contains("aksjonspunkt_navn=" + aksjonspunkt.getNavn()));
+
+    }
+
+    @Test
     void skal_ikke_finne_aksjonspuknt_for_behandling_med_nytt_stp() {
 
         var stp = LocalDate.now();

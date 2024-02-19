@@ -247,8 +247,6 @@ spec:
     # Feature-flag
     - name: PSB_UTTAK_UNNTAK_AKTIVITETER
       value: "AFMX0|2021-03-01"
-    - name: SOKNADSFRIST_BENYTT_ELDSTEKRAV_PER_PERIODE
-      value: "false"
     - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
       value: "2023-01-02"
     - name: ENABLE_SJEKK_TILBAKEKREVING
@@ -265,14 +263,10 @@ spec:
       value: "false"
     - name: FILTRER_UGYLDIG_IM
       value: "false"
-    - name: OPPTJENING_AP_VED_AKSEPTERT_MELLOMLIGGENDE_HELG
-      value: "true"
     - name: FJERN_VILKARSPERIODER_BEREGNING
       value: "false"
     - name: VALIDER_KALKULUS_REFERANSER
       value: "false"
-    - name: LAGRE_SOEKNADSAKTOERER
-      value: "true"
     - name: AVKLAR_ARBEIDSFORHOLD_REUTLED_VED_REVURDERING
       value: "false"
     - name: ENABLE_RESERVERT_SAKSNUMMER
@@ -280,10 +274,18 @@ spec:
     - name: OMP_RELEVANT_ENDRING_UTLEDNING
       value: "false"
     - name: AKTIVER_AUTOMATISK_ETTERKONTROLL
+      value: "true"
+    - name: FORLENGELSE_IM_OPPTJENING_FILTER
       value: "false"
-    - name: IM_SKAL_VURDERE_ENDRET_INNTEKT
+    - name: DOKUMENTMOTTAK_VALIDER_JOURNALFORT
       value: "false"
-    - name: BG_FORLENGELSE_FILTRER_IM_FRA_AKTIVITETER
+    - name: UTVIDET_ENDRING_UTBETALING_UTLEDER
+      value: "false"
+    - name: ENABLE_INNSYN_ENDRING_OBSERVER
+      value: "false"
+    - name: KODEVERK_SOM_STRING_TOPICS
+      value: "false"
+    - name: NY_VURDERINGSLOGIKK_IM
       value: "false"
 
     # Konfigurasjoner

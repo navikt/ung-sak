@@ -24,6 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
@@ -41,6 +42,11 @@ import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
+import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.ErEndringIRefusjonskravVurderer;
+import no.nav.k9.sak.domene.behandling.steg.kompletthet.KompletthetForBeregningTjeneste;
+import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
@@ -48,6 +54,7 @@ import no.nav.k9.sak.trigger.ProsessTriggereRepository;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
@@ -55,6 +62,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperioderHolder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.PleietrengendeRevurderingPerioderTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.RevurderingPerioderTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.AnnenPart;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeidsforhold;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
@@ -102,14 +111,44 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
 
     private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = mock();
 
+    private InntektsmeldingerRelevantForBeregning inntektsmeldingerRelevantForBeregning = mock();
+
+    private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
+
+    private UttakNyeReglerRepository uttakNyeReglerRepository;
+    private PersonopplysningTjeneste personopplysningtjeneste = mock(PersonopplysningTjeneste.class);
+
     @BeforeEach
     void setUp() {
         fagsakRepository = new FagsakRepository(entityManager);
         behandlingRepository = new BehandlingRepository(entityManager);
         søknadsperiodeRepository = new SøknadsperiodeRepository(entityManager);
         mottatteDokumentRepository = new MottatteDokumentRepository(entityManager);
-        utleder = new PleiepengerEndretUtbetalingPeriodeutleder(uttakTjeneste, behandlingRepository, new UnitTestLookupInstanceImpl<>(vilkårsPerioderTilVurderingTjeneste),
-            new ProsessTriggereRepository(entityManager), søknadsperiodeTjeneste, new UttakNyeReglerRepository(entityManager), mapInputTilUttakTjeneste);
+        uttakNyeReglerRepository = new UttakNyeReglerRepository(entityManager);
+        var kompletthetForBeregningTjeneste = new KompletthetForBeregningTjeneste(
+            new UnitTestLookupInstanceImpl<>(inntektsmeldingerRelevantForBeregning),
+            null,
+            null,
+            null,
+            null,
+            null,
+            fagsakRepository
+        );
+        var erEndringIRefusjonskravVurderer = new ErEndringIRefusjonskravVurderer(
+            behandlingRepository, kompletthetForBeregningTjeneste,
+            inntektArbeidYtelseTjeneste,
+            mottatteDokumentRepository
+        );
+        utleder = new PleiepengerEndretUtbetalingPeriodeutleder(uttakTjeneste, behandlingRepository,
+            new UnitTestLookupInstanceImpl<>(vilkårsPerioderTilVurderingTjeneste),
+            new ProsessTriggereRepository(entityManager),
+            søknadsperiodeTjeneste,
+            uttakNyeReglerRepository,
+            mapInputTilUttakTjeneste,
+            personopplysningtjeneste,
+            null,
+            erEndringIRefusjonskravVurderer,
+            false);
         originalBehandling = opprettBehandling(SKJÆRINGSTIDSPUNKT);
         behandling = Behandling.fraTidligereBehandling(originalBehandling, BehandlingType.REVURDERING).build();
         behandlingRepository.lagre(behandling, new BehandlingLås(null));
@@ -118,6 +157,103 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
 
         when(vilkårsPerioderTilVurderingTjeneste.utled(any(), any())).thenReturn(emptyNavigableSet());
     }
+
+    @Test
+    void skal_returnere_tom_liste_dersom_nye_regler_dato_etter_periode() {
+        var fom = SKJÆRINGSTIDSPUNKT;
+        var antallDager = 10;
+
+        Uttaksplan uttaksplan = lagUttaksplanEnPeriode(fom, antallDager, List.of(fullUtbetaling(ARBEIDSFORHOLD_1)));
+
+        when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
+            .thenReturn(uttaksplan);
+        when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
+            .thenReturn(uttaksplan);
+
+
+
+        var tomDato = SKJÆRINGSTIDSPUNKT.plusDays(antallDager);
+
+        uttakNyeReglerRepository.lagreDatoForNyeRegler(behandling.getId(), tomDato.plusDays(1));
+
+        var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(SKJÆRINGSTIDSPUNKT, tomDato));
+
+        assertThat(forlengelseperioder.size()).isEqualTo(0);
+    }
+
+    @Test
+    void skal_returnere_periode_på_en_dag_dersom_dato_nye_uttaksregler_lik_tomdato() {
+        var fom = SKJÆRINGSTIDSPUNKT;
+        var antallDager = 10;
+
+        Uttaksplan uttaksplan = lagUttaksplanEnPeriode(fom, antallDager, List.of(fullUtbetaling(ARBEIDSFORHOLD_1)));
+
+        when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
+            .thenReturn(uttaksplan);
+        when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
+            .thenReturn(uttaksplan);
+
+        var tomDato = SKJÆRINGSTIDSPUNKT.plusDays(antallDager);
+
+        uttakNyeReglerRepository.lagreDatoForNyeRegler(behandling.getId(), tomDato);
+
+        var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(SKJÆRINGSTIDSPUNKT, tomDato));
+
+        assertThat(forlengelseperioder.size()).isEqualTo(1);
+        var first = forlengelseperioder.getFirst();
+        assertThat(first.getFomDato()).isEqualTo(tomDato);
+        assertThat(first.getTomDato()).isEqualTo(tomDato);
+    }
+
+    @Test
+    void skal_returnere_hele_perioden_ved_dato_for_nye_regler_før_vilkårsperiode() {
+        var fom = SKJÆRINGSTIDSPUNKT;
+        var antallDager = 10;
+
+        Uttaksplan uttaksplan = lagUttaksplanEnPeriode(fom, antallDager, List.of(fullUtbetaling(ARBEIDSFORHOLD_1)));
+
+        when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
+            .thenReturn(uttaksplan);
+        when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
+            .thenReturn(uttaksplan);
+
+        var tomDato = SKJÆRINGSTIDSPUNKT.plusDays(antallDager);
+
+        uttakNyeReglerRepository.lagreDatoForNyeRegler(behandling.getId(), SKJÆRINGSTIDSPUNKT.minusDays(1));
+
+        var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(SKJÆRINGSTIDSPUNKT, tomDato));
+
+        assertThat(forlengelseperioder.size()).isEqualTo(1);
+        var first = forlengelseperioder.getFirst();
+        assertThat(first.getFomDato()).isEqualTo(SKJÆRINGSTIDSPUNKT);
+        assertThat(first.getTomDato()).isEqualTo(tomDato);
+    }
+
+    @Test
+    void skal_returnere_perioden_mellom_endring_av_dato_for_nye_regler() {
+        var fom = SKJÆRINGSTIDSPUNKT;
+        var antallDager = 10;
+
+        Uttaksplan uttaksplan = lagUttaksplanEnPeriode(fom, antallDager, List.of(fullUtbetaling(ARBEIDSFORHOLD_1)));
+
+        when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
+            .thenReturn(uttaksplan);
+        when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
+            .thenReturn(uttaksplan);
+
+        var tomDato = SKJÆRINGSTIDSPUNKT.plusDays(antallDager);
+
+        uttakNyeReglerRepository.lagreDatoForNyeRegler(behandling.getId(), SKJÆRINGSTIDSPUNKT);
+        uttakNyeReglerRepository.lagreDatoForNyeRegler(behandling.getId(), SKJÆRINGSTIDSPUNKT.plusDays(5));
+
+        var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(SKJÆRINGSTIDSPUNKT, tomDato));
+
+        assertThat(forlengelseperioder.size()).isEqualTo(1);
+        var first = forlengelseperioder.getFirst();
+        assertThat(first.getFomDato()).isEqualTo(SKJÆRINGSTIDSPUNKT);
+        assertThat(first.getTomDato()).isEqualTo(SKJÆRINGSTIDSPUNKT.plusDays(4));
+    }
+
 
     @Test
     void skal_gi_tom_periode_ved_ingen_endring() {
