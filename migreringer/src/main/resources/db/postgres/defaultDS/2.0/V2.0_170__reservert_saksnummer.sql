@@ -12,4 +12,4 @@ create table if not exists RESERVERT_SAKSNUMMER
 );
 create sequence if not exists SEQ_RESERVERT_SAKSNUMMER increment by 50 minvalue 1000000;
 
-create unique index UIDX_RESERVERT_SAKSNUMMER_1 on SAKSNUMMER_AKTOR (SAKSNUMMER);
+create unique index UIDX_RESERVERT_SAKSNUMMER_1 on RESERVERT_SAKSNUMMER (SAKSNUMMER);
