@@ -49,7 +49,7 @@ public class ReservertSaksnummerEntitet extends BaseEntitet {
         this.saksnummer = new Saksnummer(saksnummer);
         this.ytelseType = ytelseType;
         this.brukerAktørId = new AktørId(brukerAktørId);
-        this.pleietrengendeAktørId = new AktørId(pleietrengendeAktørId);
+        this.pleietrengendeAktørId = pleietrengendeAktørId != null ? new AktørId(pleietrengendeAktørId) : null;
     }
 
     public Saksnummer getSaksnummer() {

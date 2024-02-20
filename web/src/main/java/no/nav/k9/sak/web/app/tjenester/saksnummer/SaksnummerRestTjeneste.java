@@ -26,9 +26,11 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandlingslager.saksnummer.ReservertSaksnummerEntitet;
 import no.nav.k9.sak.behandlingslager.saksnummer.ReservertSaksnummerRepository;
 import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
+import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.mottak.HentReservertSaksnummerDto;
 import no.nav.k9.sak.kontrakt.mottak.ReserverSaksnummerDto;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
 @Path(SaksnummerRestTjeneste.BASE_PATH)
@@ -41,6 +43,7 @@ public class SaksnummerRestTjeneste {
 
     private SaksnummerRepository saksnummerRepository;
     private ReservertSaksnummerRepository reservertSaksnummerRepository;
+    private AktørTjeneste aktørTjeneste;
     private boolean enableReservertSaksnummer;
 
     public SaksnummerRestTjeneste() {// For Rest-CDI
@@ -49,9 +52,11 @@ public class SaksnummerRestTjeneste {
     @Inject
     public SaksnummerRestTjeneste(SaksnummerRepository saksnummerRepository,
                                   ReservertSaksnummerRepository reservertSaksnummerRepository,
+                                  AktørTjeneste aktørTjeneste,
                                   @KonfigVerdi(value = "ENABLE_RESERVERT_SAKSNUMMER", defaultVerdi = "false") boolean enableReservertSaksnummer) {
         this.saksnummerRepository = saksnummerRepository;
         this.reservertSaksnummerRepository = reservertSaksnummerRepository;
+        this.aktørTjeneste = aktørTjeneste;
         this.enableReservertSaksnummer = enableReservertSaksnummer;
     }
 
@@ -65,7 +70,10 @@ public class SaksnummerRestTjeneste {
         if (!enableReservertSaksnummer) {
             throw new UnsupportedOperationException("Funksjonaliteten er avskrudd");
         }
-        //TODO bør vi sjekke at aktørid er gyldig?
+        sjekkAktørIdMotPdl(dto.getBrukerAktørId());
+        if (dto.getPleietrengendeAktørId() != null) {
+            sjekkAktørIdMotPdl(dto.getPleietrengendeAktørId());
+        }
         final SaksnummerDto saksnummer = new SaksnummerDto(saksnummerRepository.genererNyttSaksnummer());
         reservertSaksnummerRepository.lagre(saksnummer.getVerdi(), dto.getYtelseType(), dto.getBrukerAktørId(), dto.getPleietrengendeAktørId());
         log.info("Reserverte saksnummer: " + saksnummer);
@@ -90,5 +98,11 @@ public class SaksnummerRestTjeneste {
             entitet.getYtelseType(),
             entitet.getBrukerAktørId().getAktørId(),
             entitet.getPleietrengendeAktørId() != null ? entitet.getPleietrengendeAktørId().getAktørId() : null);
+    }
+
+    private void sjekkAktørIdMotPdl(String aktørId) {
+        if (aktørTjeneste.hentPersonIdentForAktørId(new AktørId(aktørId)).isEmpty()) {
+            throw new IllegalArgumentException("Finner ikke oppgitt aktørId i PDL");
+        }
     }
 }
