@@ -11,11 +11,13 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
@@ -65,7 +67,7 @@ public class SaksnummerRestTjeneste {
         }
         //TODO bør vi sjekke at aktørid er gyldig?
         final SaksnummerDto saksnummer = new SaksnummerDto(saksnummerRepository.genererNyttSaksnummer());
-        reservertSaksnummerRepository.lagre(saksnummer.getVerdi().getVerdi(), dto.getYtelseType(), dto.getBrukerAktørId(), dto.getPleietrengendeAktørId());
+        reservertSaksnummerRepository.lagre(saksnummer.getVerdi(), dto.getYtelseType(), dto.getBrukerAktørId(), dto.getPleietrengendeAktørId());
         log.info("Reserverte saksnummer: " + saksnummer);
         return saksnummer;
     }
@@ -75,12 +77,12 @@ public class SaksnummerRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Hent reservert saksnummer.", summary = ("Henter reservert saksnummer med ytelse, bruker og pleietrengende"), tags = "saksnummer")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
-    public HentReservertSaksnummerDto hentReservertSaksnummer(@Parameter(description = "SaksnummerDto") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto dto) {
+    public HentReservertSaksnummerDto hentReservertSaksnummer(@NotNull @QueryParam("saksnummer") @Parameter(description = "SaksnummerDto") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto dto) {
         if (!enableReservertSaksnummer) {
             throw new UnsupportedOperationException("Funksjonaliteten er avskrudd");
         }
-        final var entitet = reservertSaksnummerRepository.hent(dto.getVerdi().getVerdi());
-        return mapTilDto(entitet);
+        final var entitet = reservertSaksnummerRepository.hent(dto.getVerdi());
+        return entitet.map(SaksnummerRestTjeneste::mapTilDto).orElse(null);
     }
 
     private static HentReservertSaksnummerDto mapTilDto(ReservertSaksnummerEntitet entitet) {
