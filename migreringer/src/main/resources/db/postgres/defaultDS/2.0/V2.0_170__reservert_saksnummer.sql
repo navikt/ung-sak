@@ -8,7 +8,8 @@ create table if not exists RESERVERT_SAKSNUMMER
     OPPRETTET_AV                VARCHAR(20)     DEFAULT 'VL'                NOT NULL,
     OPPRETTET_TID               TIMESTAMP(3)    DEFAULT CURRENT_TIMESTAMP   NOT NULL,
     ENDRET_AV                   VARCHAR(20)                                         ,
-    ENDRET_TID                  TIMESTAMP(3)
+    ENDRET_TID                  TIMESTAMP(3)                                        ,
+    SLETTET                     BOOLEAN         DEFAULT false               NOT NULL
 );
 create sequence if not exists SEQ_RESERVERT_SAKSNUMMER increment by 50 minvalue 1000000;
 

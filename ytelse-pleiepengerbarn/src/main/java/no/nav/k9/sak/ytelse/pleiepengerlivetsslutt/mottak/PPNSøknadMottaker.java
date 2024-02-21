@@ -13,6 +13,7 @@ import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.saksnummer.ReservertSaksnummerRepository;
 import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.k9.sak.mottak.SøknadMottakTjeneste;
 import no.nav.k9.sak.typer.AktørId;
@@ -23,6 +24,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 public class PPNSøknadMottaker implements SøknadMottakTjeneste<PPNSøknadInnsending> {
 
     private SaksnummerRepository saksnummerRepository;
+    private ReservertSaksnummerRepository reservertSaksnummerRepository;
     private FagsakTjeneste fagsakTjeneste;
 
     protected PPNSøknadMottaker() {
@@ -30,8 +32,9 @@ public class PPNSøknadMottaker implements SøknadMottakTjeneste<PPNSøknadInnse
     }
 
     @Inject
-    public PPNSøknadMottaker(SaksnummerRepository saksnummerRepository, FagsakTjeneste fagsakTjeneste) {
+    public PPNSøknadMottaker(SaksnummerRepository saksnummerRepository, ReservertSaksnummerRepository reservertSaksnummerRepository, FagsakTjeneste fagsakTjeneste) {
         this.saksnummerRepository = saksnummerRepository;
+        this.reservertSaksnummerRepository = reservertSaksnummerRepository;
         this.fagsakTjeneste = fagsakTjeneste;
     }
 
@@ -66,8 +69,11 @@ public class PPNSøknadMottaker implements SøknadMottakTjeneste<PPNSøknadInnse
         if (fagsak.isPresent()) {
             return fagsak.get();
         }
+
         final Saksnummer saksnummer = reservertSaksnummer != null ? reservertSaksnummer : new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
-        return opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, ytelseType, startDato, sluttDato);
+        final Fagsak nyFagsak = opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, ytelseType, startDato, sluttDato);
+        reservertSaksnummerRepository.slettHvisEksisterer(reservertSaksnummer);
+        return nyFagsak;
     }
 
 

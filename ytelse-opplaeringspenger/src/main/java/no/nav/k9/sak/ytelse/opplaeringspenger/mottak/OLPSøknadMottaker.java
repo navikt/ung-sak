@@ -10,6 +10,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.saksnummer.ReservertSaksnummerRepository;
 import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.k9.sak.mottak.SøknadMottakTjeneste;
 import no.nav.k9.sak.typer.AktørId;
@@ -20,6 +21,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 public class OLPSøknadMottaker implements SøknadMottakTjeneste<OLPSøknadInnsending> {
 
     private SaksnummerRepository saksnummerRepository;
+    private ReservertSaksnummerRepository reservertSaksnummerRepository;
     private FagsakTjeneste fagsakTjeneste;
     private boolean ytelseAktivert;
 
@@ -28,8 +30,12 @@ public class OLPSøknadMottaker implements SøknadMottakTjeneste<OLPSøknadInnse
     }
 
     @Inject
-    public OLPSøknadMottaker(SaksnummerRepository saksnummerRepository, FagsakTjeneste fagsakTjeneste, @KonfigVerdi(value = "ytelse.olp.aktivert", required = false) boolean ytelseAktivert) {
+    public OLPSøknadMottaker(SaksnummerRepository saksnummerRepository,
+                             ReservertSaksnummerRepository reservertSaksnummerRepository,
+                             FagsakTjeneste fagsakTjeneste,
+                             @KonfigVerdi(value = "ytelse.olp.aktivert", required = false) boolean ytelseAktivert) {
         this.saksnummerRepository = saksnummerRepository;
+        this.reservertSaksnummerRepository = reservertSaksnummerRepository;
         this.fagsakTjeneste = fagsakTjeneste;
         this.ytelseAktivert = ytelseAktivert;
     }
@@ -66,8 +72,11 @@ public class OLPSøknadMottaker implements SøknadMottakTjeneste<OLPSøknadInnse
         if (fagsak.isPresent()) {
             return fagsak.get();
         }
+
         final Saksnummer saksnummer = reservertSaksnummer != null ? reservertSaksnummer : new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
-        return opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, ytelseType, startDato, sluttDato);
+        final Fagsak nyFagsak = opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, ytelseType, startDato, sluttDato);
+        reservertSaksnummerRepository.slettHvisEksisterer(reservertSaksnummer);
+        return nyFagsak;
     }
 
 

@@ -23,7 +23,7 @@ public class ReservertSaksnummerRepository {
     }
 
     public Optional<ReservertSaksnummerEntitet> hent(Saksnummer saksnummer) {
-        final TypedQuery<ReservertSaksnummerEntitet> query = entityManager.createQuery("FROM ReservertSaksnummer where saksnummer=:saksnummer", ReservertSaksnummerEntitet.class);
+        final TypedQuery<ReservertSaksnummerEntitet> query = entityManager.createQuery("FROM ReservertSaksnummer where saksnummer=:saksnummer and slettet=false", ReservertSaksnummerEntitet.class);
         query.setParameter("saksnummer", saksnummer);
         return HibernateVerktøy.hentUniktResultat(query);
     }
@@ -35,5 +35,18 @@ public class ReservertSaksnummerRepository {
         final var entitet = new ReservertSaksnummerEntitet(saksnummer, ytelseType, brukerAktørid, pleietrengendeAktørId);
         entityManager.persist(entitet);
         entityManager.flush();
+    }
+
+    public void slettHvisEksisterer(Saksnummer saksnummer) {
+        if (saksnummer == null) {
+            return;
+        }
+        final var opt = hent(saksnummer);
+        if (opt.isPresent()) {
+            final var entitet = opt.get();
+            entitet.setSlettet();
+            entityManager.persist(entitet);
+            entityManager.flush();
+        }
     }
 }

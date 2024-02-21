@@ -41,6 +41,9 @@ public class ReservertSaksnummerEntitet extends BaseEntitet {
     @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "pleietrengende_aktoer_id")))
     private AktørId pleietrengendeAktørId;
 
+    @Column(name = "slettet", nullable = false)
+    private boolean slettet = false;
+
     ReservertSaksnummerEntitet() {
         // for hibernate
     }
@@ -66,5 +69,9 @@ public class ReservertSaksnummerEntitet extends BaseEntitet {
 
     public AktørId getPleietrengendeAktørId() {
         return pleietrengendeAktørId;
+    }
+
+    void setSlettet() {
+        this.slettet = true;
     }
 }
