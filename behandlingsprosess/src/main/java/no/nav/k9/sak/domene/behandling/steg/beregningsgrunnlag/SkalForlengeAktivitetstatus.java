@@ -29,7 +29,7 @@ class SkalForlengeAktivitetstatus {
     SkalForlengeAktivitetstatus(Instance<InntektsmeldingRelevantForVilkårsrevurdering> inntektsmeldingRelevantForBeregningVilkårsvurdering) {
         this.harEndretInntektsmeldingVurderer = new HarEndretInntektsmeldingVurderer(
             getInntektsmeldingFilter(inntektsmeldingRelevantForBeregningVilkårsvurdering),
-            SkalForlengeAktivitetstatus::erEndret);
+            SkalForlengeAktivitetstatus::finnEndringer);
     }
 
     NavigableSet<PeriodeTilVurdering> finnPerioderForForlengelseAvStatus(SkalForlengeStatusInput skalForlengeStatusInput) {
@@ -77,7 +77,7 @@ class SkalForlengeAktivitetstatus {
             .filter((p) -> erInntektsmeldingerLikForrigeVedtak(
                 skalForlengeStatusInput.behandlingReferanse(),
                 skalForlengeStatusInput.originalBehandlingReferanse(),
-                skalForlengeStatusInput.inntektsmeldinger(), skalForlengeStatusInput.mottatteInntektsmeldinger(), p))
+                p, skalForlengeStatusInput.inntektsmeldinger(), skalForlengeStatusInput.mottatteInntektsmeldinger()))
             .map(it -> new LocalDateTimeline<>(it.getFomDato(), it.getTomDato(), true))
             .reduce(LocalDateTimeline.empty(), (t1, t2) -> t1.crossJoin(t2, StandardCombinators::alwaysTrueForMatch));
     }
@@ -116,31 +116,29 @@ class SkalForlengeAktivitetstatus {
 
     }
 
-    private boolean erInntektsmeldingerLikForrigeVedtak(BehandlingReferanse ref,
-                                                        BehandlingReferanse originalReferanse,
-                                                        Set<Inntektsmelding> inntektsmeldings,
-                                                        List<MottattDokument> mottatteInntektsmeldinger,
-                                                        DatoIntervallEntitet periode) {
-        return !harEndretInntektsmeldingVurderer.harEndringPåInntektsmeldingerTilBrukForPerioden(ref,
-            originalReferanse, periode,
-            inntektsmeldings,
+    private boolean erInntektsmeldingerLikForrigeVedtak(BehandlingReferanse ref, BehandlingReferanse originalBehalingreferanse, DatoIntervallEntitet periode, Set<Inntektsmelding> inntektsmeldings, List<MottattDokument> mottatteInntektsmeldinger) {
+        return harEndretInntektsmeldingVurderer.finnInntektsmeldingerMedRelevanteEndringerForPerioden(ref,
+            originalBehalingreferanse,
+            periode, inntektsmeldings,
             mottatteInntektsmeldinger
-        );
+        ).isEmpty();
     }
 
 
-    static boolean erEndret(Collection<Inntektsmelding> relevanteInntektsmeldinger, Collection<Inntektsmelding> relevanteInntektsmeldingerForrigeVedtak) {
+    static Collection<Inntektsmelding> finnEndringer(Collection<Inntektsmelding> relevanteInntektsmeldinger, Collection<Inntektsmelding> relevanteInntektsmeldingerForrigeVedtak) {
         var unikeArbeidsforhold = finnUnikeArbeidsforholdIdentifikatorer(relevanteInntektsmeldinger);
         var unikeArbeidsforholdForrigeVedtak = finnUnikeArbeidsforholdIdentifikatorer(relevanteInntektsmeldingerForrigeVedtak);
-        var erLikeStore = unikeArbeidsforhold.size() == unikeArbeidsforholdForrigeVedtak.size();
-        var inneholderDeSamme = unikeArbeidsforhold.containsAll(unikeArbeidsforholdForrigeVedtak);
-        return !(erLikeStore && inneholderDeSamme);
+        var nyeArbeidsforhold = unikeArbeidsforhold.stream().filter(it -> !unikeArbeidsforholdForrigeVedtak.contains(it)).collect(Collectors.toSet());
+        return relevanteInntektsmeldinger.stream().filter(im -> nyeArbeidsforhold.contains(finnArbeidsforholdIdentifikator(im))).collect(Collectors.toSet());
     }
-
     private static Set<String> finnUnikeArbeidsforholdIdentifikatorer(Collection<Inntektsmelding> relevanteInntektsmeldinger) {
         return relevanteInntektsmeldinger.stream().map(
             im -> im.getArbeidsgiver().getIdentifikator() + im.getArbeidsforholdRef().getReferanse()
         ).collect(Collectors.toSet());
+    }
+
+    private static String finnArbeidsforholdIdentifikator(Inntektsmelding im) {
+        return im.getArbeidsgiver().getIdentifikator() + im.getArbeidsforholdRef().getReferanse();
     }
 
 
@@ -159,11 +157,10 @@ class SkalForlengeAktivitetstatus {
 
     private static HarEndretInntektsmeldingVurderer.InntektsmeldingFilter getInntektsmeldingFilter(Instance<InntektsmeldingRelevantForVilkårsrevurdering> inntektsmeldingRelevantForBeregningVilkårsvurdering) {
         return (BehandlingReferanse referanse, Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) ->
-            InntektsmeldingRelevantForVilkårsrevurdering.finnTjeneste(inntektsmeldingRelevantForBeregningVilkårsvurdering, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, referanse.getFagsakYtelseType()).begrensInntektsmeldinger(referanse, sakInntektsmeldinger, vilkårsPeriode);
+            InntektsmeldingRelevantForVilkårsrevurdering.finnTjeneste(inntektsmeldingRelevantForBeregningVilkårsvurdering, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, referanse.getFagsakYtelseType()).orElseThrow().begrensInntektsmeldinger(referanse, sakInntektsmeldinger, vilkårsPeriode);
     }
 
     record SkalForlengeStatusInput(
-
         BehandlingReferanse behandlingReferanse,
         BehandlingReferanse originalBehandlingReferanse,
         Set<Inntektsmelding> inntektsmeldinger,

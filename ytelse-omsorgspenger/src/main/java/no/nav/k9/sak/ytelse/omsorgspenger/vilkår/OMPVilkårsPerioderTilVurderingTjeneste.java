@@ -185,7 +185,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         final var vilkårPeriodeSet = new EnumMap<VilkårType, NavigableSet<DatoIntervallEntitet>>(VilkårType.class);
-        UtledeteVilkår utledeteVilkår = vilkårUtleder.utledVilkår(behandling);
+        UtledeteVilkår utledeteVilkår = vilkårUtleder.utledVilkår(BehandlingReferanse.fra(behandling));
         utledeteVilkår.getAlleAvklarte()
             .forEach(vilkår -> vilkårPeriodeSet.put(vilkår, utledPeriode(behandlingId, vilkår)));
 

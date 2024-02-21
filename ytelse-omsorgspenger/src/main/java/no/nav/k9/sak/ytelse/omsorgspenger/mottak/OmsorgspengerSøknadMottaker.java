@@ -14,6 +14,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.saksnummer.ReservertSaksnummerRepository;
 import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.mottak.SøknadMottakTjeneste;
@@ -28,21 +29,23 @@ public class OmsorgspengerSøknadMottaker implements SøknadMottakTjeneste<Omsor
     private static final int CUT_OFF_OMP = 2020;
     private FagsakTjeneste fagsakTjeneste;
     private SaksnummerRepository saksnummerRepository;
+    private ReservertSaksnummerRepository reservertSaksnummerRepository;
 
     OmsorgspengerSøknadMottaker() {
         // proxy
     }
 
     @Inject
-    public OmsorgspengerSøknadMottaker(SaksnummerRepository saksnummerRepository, FagsakTjeneste fagsakTjeneste) {
+    public OmsorgspengerSøknadMottaker(SaksnummerRepository saksnummerRepository, ReservertSaksnummerRepository reservertSaksnummerRepository, FagsakTjeneste fagsakTjeneste) {
         this.fagsakTjeneste = fagsakTjeneste;
         this.saksnummerRepository = saksnummerRepository;
+        this.reservertSaksnummerRepository = reservertSaksnummerRepository;
     }
 
     @Override
     public Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, LocalDate startDato, LocalDate sluttDato, Saksnummer reservertSaksnummer) {
         ytelseType.validerNøkkelParametere(pleietrengendeAktørId, relatertPersonAktørId);
-        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, null, null, startDato, sluttDato);
+        final var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, null, null, startDato, sluttDato);
 
         if (reservertSaksnummer != null) {
             if (fagsak.isPresent() && !fagsak.get().getSaksnummer().equals(reservertSaksnummer)) {
@@ -58,7 +61,7 @@ public class OmsorgspengerSøknadMottaker implements SøknadMottakTjeneste<Omsor
             return fagsak.get();
         }
 
-        var saksnummer = reservertSaksnummer != null ? reservertSaksnummer : new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
+        final var saksnummer = reservertSaksnummer != null ? reservertSaksnummer : new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
 
         LocalDate idag = LocalDate.now();
         var detteÅret = DatoIntervallEntitet.fraOgMedTilOgMed(idag.withDayOfYear(1), idag.withMonth(12).withDayOfMonth(31));
@@ -73,6 +76,7 @@ public class OmsorgspengerSøknadMottaker implements SøknadMottakTjeneste<Omsor
                     // ta utgangspunkt i året i år først, sjekk deretter fjoråret. Men ikke tillatt 2019 eller tidligere her
                     Fagsak nyFagsak = opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, ytelseType, p.getFomDato(), p.getTomDato());
                     logger.info("Opprettet fagsak {} med periode {}/{}. Etterspurte fagsak for periode {}/{}", nyFagsak.getSaksnummer().getVerdi(), p.getFomDato(), p.getTomDato(), startDato, sluttDato);
+                    reservertSaksnummerRepository.slettHvisEksisterer(reservertSaksnummer);
                     return nyFagsak;
                 }
             }

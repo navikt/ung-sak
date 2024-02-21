@@ -7,9 +7,9 @@ import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.inngangsvilkår.UtledeteVilkår;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 
@@ -24,7 +24,7 @@ public class AleneomsorgVilkårUtleder implements VilkårUtleder {
         VilkårType.UTVIDETRETT);
 
     @Override
-    public UtledeteVilkår utledVilkår(Behandling behandling) {
+    public UtledeteVilkår utledVilkår(BehandlingReferanse referanse) {
         return new UtledeteVilkår(null, YTELSE_VILKÅR);
     }
 
