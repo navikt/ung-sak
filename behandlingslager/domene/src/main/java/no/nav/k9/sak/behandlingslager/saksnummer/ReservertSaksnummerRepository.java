@@ -14,11 +14,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 @Dependent
 public class ReservertSaksnummerRepository {
 
-    private EntityManager entityManager;
-
-    ReservertSaksnummerRepository() {
-        // for CDI proxy
-    }
+    private final EntityManager entityManager;
 
     @Inject
     public ReservertSaksnummerRepository(EntityManager entityManager) {
@@ -36,7 +32,7 @@ public class ReservertSaksnummerRepository {
         if (hent(saksnummer).isPresent()) {
             throw new IllegalArgumentException("Saksnummer er allerede reservert");
         }
-        final var entitet = new ReservertSaksnummerEntitet(saksnummer.getVerdi(), ytelseType, brukerAktørid, pleietrengendeAktørId);
+        final var entitet = new ReservertSaksnummerEntitet(saksnummer, ytelseType, brukerAktørid, pleietrengendeAktørId);
         entityManager.persist(entitet);
         entityManager.flush();
     }

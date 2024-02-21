@@ -66,7 +66,7 @@ public class SaksnummerRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Reserver saksnummer.", summary = ("Reserver saksnummer"), tags = "saksnummer")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
-    public SaksnummerDto reserverSaksnummer(@Parameter(description = "ReserverSaksnummerDto") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) ReserverSaksnummerDto dto) {
+    public SaksnummerDto reserverSaksnummer(@NotNull @Parameter(description = "ReserverSaksnummerDto") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) ReserverSaksnummerDto dto) {
         if (!enableReservertSaksnummer) {
             throw new UnsupportedOperationException("Funksjonaliteten er avskrudd");
         }
@@ -84,7 +84,7 @@ public class SaksnummerRestTjeneste {
     @Produces(JSON_UTF8)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Hent reservert saksnummer.", summary = ("Henter reservert saksnummer med ytelse, bruker og pleietrengende"), tags = "saksnummer")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
     public HentReservertSaksnummerDto hentReservertSaksnummer(@NotNull @QueryParam("saksnummer") @Parameter(description = "SaksnummerDto") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto dto) {
         if (!enableReservertSaksnummer) {
             throw new UnsupportedOperationException("Funksjonaliteten er avskrudd");
