@@ -68,6 +68,10 @@ public class RevurderingInntektsmeldingPeriodeTjeneste {
                                                                                                                 Collection<Inntektsmelding> inntektsmeldinger,
                                                                                                                 List<MottattDokument> mottatteInntektsmeldinger,
                                                                                                                 Collection<DatoIntervallEntitet> perioder) {
+        if (mottatteInntektsmeldinger.isEmpty()) {
+            return LocalDateTimeline.empty();
+        }
+
         var utledeteVilkår = getVilkårUtleder(referanse).utledVilkår(referanse);
         LocalDateTimeline<Set<InntektsmeldingRevurderingÅrsak>> inntektsmeldingEndringer = LocalDateTimeline.empty();
         var originalBehandlingReferanse = finnOriginalBehandlingReferanse(referanse);
