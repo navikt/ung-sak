@@ -6,7 +6,7 @@ metadata:
   labels:
     team: k9saksbehandling
 spec:
-  image: {{ image }}
+  image: "{{ image }}"
   port: 8080
   liveness:
     path: /k9/sak/internal/health/isAlive
@@ -38,6 +38,7 @@ spec:
       memory: "1024Mi"
   ingresses:
     - "https://k9-sak.nais.preprod.local/"
+    - "https://k9-sak.dev-fss-pub.nais.io"
   kafka:
     pool: "nav-dev"
   vault:
