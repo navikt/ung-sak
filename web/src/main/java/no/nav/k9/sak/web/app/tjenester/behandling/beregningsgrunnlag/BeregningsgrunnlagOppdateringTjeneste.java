@@ -53,14 +53,12 @@ public class BeregningsgrunnlagOppdateringTjeneste {
         var perioderSomSkalKunneVurderes = vilkårTjeneste.utledPerioderTilVurdering(ref, filter);
         stpTilDtoMap.keySet().forEach(stp -> {
             List<DatoIntervallEntitet> vurderingsperioderSomInkludererSTP = finnPerioderSomInkludererDato(perioderSomSkalKunneVurderes, stp);
-            if (vurderingsperioderSomInkludererSTP.size() == 0) {
-                var debugFilter = vilkårPeriodeFilterProvider.getFilter(ref);
-                var debugPerioder = vilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, debugFilter);
+            if (vurderingsperioderSomInkludererSTP.isEmpty()) {
+                var debugPerioder = vilkårTjeneste.utledDetaljertPerioderTilVurdering(ref);
                 throw new IllegalStateException("Prøver å endre grunnlag med skjæringstidspunkt" + stp + " men denne er ikke i" +
                     " listen over vilkårsperioder som er til vurdering " + debugPerioder);
             } else if (vurderingsperioderSomInkludererSTP.size() >= 2) {
-                var debugFilter = vilkårPeriodeFilterProvider.getFilter(ref);
-                var debugPerioder = vilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, debugFilter);
+                var debugPerioder = vilkårTjeneste.utledDetaljertPerioderTilVurdering(ref);
                 throw new IllegalStateException("Prøver å endre grunnlag med skjæringstidspunkt" + stp + " som finnes i flere perioder som er til vurdering," +
                     " ugyldig tilstand. Perioder som er til vurdering er: " + debugPerioder);
             }

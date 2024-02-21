@@ -1,11 +1,9 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
-import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Optional;
-import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -32,10 +30,10 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.perioder.ForlengelseTjeneste;
 import no.nav.k9.sak.trigger.ProsessTriggereRepository;
 import no.nav.k9.sak.trigger.Trigger;
 import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
 
 @Dependent
@@ -44,9 +42,6 @@ public class BeregningInkonsistensTjeneste {
     private static final Logger LOG = LoggerFactory.getLogger(BeregningInkonsistensTjeneste.class);
     private final KalkulusTjeneste kalkulusTjeneste;
     private final BeregningsgrunnlagReferanserTjeneste beregningsgrunnlagReferanserTjeneste;
-
-    private final Instance<ForlengelseTjeneste> forlengelseTjeneste;
-
     private final VilkårTjeneste vilkårTjeneste;
 
     private final Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjenester;
@@ -58,14 +53,12 @@ public class BeregningInkonsistensTjeneste {
     @Inject
     public BeregningInkonsistensTjeneste(KalkulusTjeneste kalkulusTjeneste,
                                          BeregningsgrunnlagReferanserTjeneste beregningsgrunnlagReferanserTjeneste,
-                                         @Any Instance<ForlengelseTjeneste> forlengelseTjeneste,
                                          VilkårTjeneste vilkårTjeneste,
                                          @Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste,
                                          InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                          ProsessTriggereRepository prosessTriggereRepository) {
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.beregningsgrunnlagReferanserTjeneste = beregningsgrunnlagReferanserTjeneste;
-        this.forlengelseTjeneste = forlengelseTjeneste;
         this.vilkårTjeneste = vilkårTjeneste;
         this.opptjeningForBeregningTjenester = opptjeningForBeregningTjeneste;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
@@ -82,21 +75,22 @@ public class BeregningInkonsistensTjeneste {
      * <p>
      * Denne utledningen må skje før all prosessering i beregning siden den endrer på status for perioder (flipper fra forlengelse til revurdering).
      *
-     * @param ref Behandlingreferanse
+     * @param ref                  Behandlingreferanse
+     * @param perioderTilVurdering
      */
-    public void sjekkInkonsistensOgOpprettProsesstrigger(BehandlingReferanse ref) {
-        NavigableSet<DatoIntervallEntitet> perioderSomRevurderes = finnPerioderMedInkonsistens(ref);
+    public void sjekkInkonsistensOgOpprettProsesstrigger(BehandlingReferanse ref, NavigableSet<PeriodeTilVurdering> perioderTilVurdering) {
+        NavigableSet<DatoIntervallEntitet> perioderSomRevurderes = finnPerioderMedInkonsistens(ref, perioderTilVurdering);
         if (!perioderSomRevurderes.isEmpty()) {
             prosessTriggereRepository.leggTil(ref.getId(), perioderSomRevurderes.stream().map(it -> new Trigger(BehandlingÅrsakType.RE_ENDRING_BEREGNINGSGRUNNLAG, it)).collect(Collectors.toSet()));
         }
     }
 
-    private NavigableSet<DatoIntervallEntitet> finnPerioderMedInkonsistens(BehandlingReferanse ref) {
+    private NavigableSet<DatoIntervallEntitet> finnPerioderMedInkonsistens(BehandlingReferanse ref, NavigableSet<PeriodeTilVurdering> perioderTilVurdering) {
         if (!ref.getBehandlingType().equals(BehandlingType.REVURDERING)) {
             return new TreeSet<>();
         }
         var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(ref.getBehandlingId());
-        var forlengelser = finnForlengelserIBeregning(ref);
+        var forlengelser = perioderTilVurdering.stream().filter(PeriodeTilVurdering::erForlengelse).map(PeriodeTilVurdering::getPeriode).collect(Collectors.toCollection(TreeSet::new));
         var opptjeningForBeregningTjeneste = finnOpptjeningForBeregningTjeneste(ref);
         return utledPerioderMedInkonsistens(ref,
             iayGrunnlag,
@@ -130,12 +124,6 @@ public class BeregningInkonsistensTjeneste {
         return forlengelser.stream()
             .filter(periode -> skalHaBrukersAndelIBeregning(ref, opptjeningForBeregningTjeneste, iayGrunnlag, periode))
             .collect(Collectors.toCollection(TreeSet::new));
-    }
-
-    private NavigableSet<DatoIntervallEntitet> finnForlengelserIBeregning(BehandlingReferanse ref) {
-        var perioderTilVurdering = vilkårTjeneste.utledPerioderTilVurdering(ref, VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-        return ForlengelseTjeneste.finnTjeneste(forlengelseTjeneste, ref.getFagsakYtelseType(), ref.getBehandlingType())
-            .utledPerioderSomSkalBehandlesSomForlengelse(ref, perioderTilVurdering, VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
     }
 
     private List<BeregningsgrunnlagGrunnlag> finnOriginalBeregningsgrunnlagsliste(BehandlingReferanse ref, NavigableSet<DatoIntervallEntitet> perioder) {

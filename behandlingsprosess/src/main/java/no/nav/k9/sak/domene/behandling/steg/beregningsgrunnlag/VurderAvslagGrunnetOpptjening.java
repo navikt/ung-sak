@@ -1,6 +1,7 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,7 +19,6 @@ import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -27,7 +27,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 
@@ -38,33 +37,31 @@ public class VurderAvslagGrunnetOpptjening {
     private final VilkårResultatRepository vilkårResultatRepository;
     private final InntektArbeidYtelseTjeneste iayTjeneste;
     private final Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste;
-    private final Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste;
     private final VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
 
     @Inject
     public VurderAvslagGrunnetOpptjening(VilkårResultatRepository vilkårResultatRepository,
                                          InntektArbeidYtelseTjeneste iayTjeneste,
                                          @Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste,
-                                         @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste,
                                          VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.iayTjeneste = iayTjeneste;
         this.opptjeningForBeregningTjeneste = opptjeningForBeregningTjeneste;
-        this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
     }
 
     /**
      * Vurderer om beregning skal avslås med årsak IKKE_TILSTREKKELIG_OPPTJENING
      *
-     * @param referanse Behandlingreferanse
+     * @param referanse            Behandlingreferanse
+     * @param perioderTilVurdering Perioder til vurdering
      */
-    public void vurderAvslagGrunnetAvslagIOpptjening(BehandlingReferanse referanse) {
+    public void vurderAvslagGrunnetAvslagIOpptjening(BehandlingReferanse referanse, NavigableSet<PeriodeTilVurdering> perioderTilVurdering) {
         var periodeFilter = vilkårPeriodeFilterProvider.getFilter(referanse).ignorerForlengelseperioder();
         var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
         var vilkåret = vilkårene.getVilkår(VilkårType.OPPTJENINGSVILKÅRET)
             .orElseThrow();
-        var vurdertePerioderIOpptjening = vurdertePerioder(VilkårType.OPPTJENINGSVILKÅRET, referanse);
+        var vurdertePerioderIOpptjening = vurdertePerioder(VilkårType.OPPTJENINGSVILKÅRET, referanse, perioderTilVurdering);
 
         var perioderTilVurderingIBeregning = periodeFilter.filtrerPerioder(vurdertePerioderIOpptjening, VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
             .stream().map(PeriodeTilVurdering::getPeriode).toList();
@@ -109,16 +106,9 @@ public class VurderAvslagGrunnetOpptjening {
         vilkårResultatRepository.lagre(referanse.getBehandlingId(), builder.build());
     }
 
-    private Set<DatoIntervallEntitet> vurdertePerioder(VilkårType vilkårType, BehandlingReferanse ref) {
-        var tjeneste = getPerioderTilVurderingTjeneste(ref);
-        var perioderTilVurdering = tjeneste.utled(ref.getId(), vilkårType);
+    private Set<DatoIntervallEntitet> vurdertePerioder(VilkårType vilkårType, BehandlingReferanse ref, NavigableSet<PeriodeTilVurdering> perioderTilVurdering) {
         var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref).ignorerForlengelseperioder();
-        return periodeFilter.filtrerPerioder(perioderTilVurdering, vilkårType).stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet());
-    }
-
-    private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(BehandlingReferanse ref) {
-        return BehandlingTypeRef.Lookup.find(VilkårsPerioderTilVurderingTjeneste.class, perioderTilVurderingTjeneste, ref.getFagsakYtelseType(), ref.getBehandlingType())
-            .orElseThrow(() -> new UnsupportedOperationException("VilkårsPerioderTilVurderingTjeneste ikke implementert for ytelse [" + ref.getFagsakYtelseType() + "], behandlingtype [" + ref.getBehandlingType() + "]"));
+        return periodeFilter.filtrerPerioder(perioderTilVurdering.stream().map(PeriodeTilVurdering::getPeriode).toList(), vilkårType).stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet());
     }
 
     private OpptjeningForBeregningTjeneste finnOpptjeningForBeregningTjeneste(BehandlingReferanse behandlingRef) {

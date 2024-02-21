@@ -1,30 +1,27 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.KONTROLLER_FAKTA_BEREGNING;
+
+import java.util.NavigableSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.InputOverstyringPeriode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static no.nav.k9.kodeverk.behandling.BehandlingStegType.KONTROLLER_FAKTA_BEREGNING;
 
 /**
  * Kopierer vurderinger som skal beholdes fra forrige behandling
@@ -34,7 +31,6 @@ public class KopierBeregningTjeneste {
 
     private static final Logger log = LoggerFactory.getLogger(KopierBeregningTjeneste.class);
     private final BehandlingRepository behandlingRepository;
-    private final Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste;
     private final BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
     private final BeregningsgrunnlagTjeneste kalkulusTjeneste;
     private final BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
@@ -42,28 +38,27 @@ public class KopierBeregningTjeneste {
 
 
     @Inject
-    public KopierBeregningTjeneste(BehandlingRepository behandlingRepository, @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste,
+    public KopierBeregningTjeneste(BehandlingRepository behandlingRepository,
                                    BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                    BeregningsgrunnlagTjeneste kalkulusTjeneste,
                                    BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
                                    KalkulusStartpunktUtleder kalkulusStartpunktUtleder) {
         this.behandlingRepository = behandlingRepository;
-        this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
         this.kalkulusStartpunktUtleder = kalkulusStartpunktUtleder;
     }
 
-    public void kopierVurderinger(BehandlingskontrollKontekst kontekst) {
+    public void kopierVurderinger(BehandlingskontrollKontekst kontekst, NavigableSet<PeriodeTilVurdering> perioderTilVurdering) {
         var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         var referanse = BehandlingReferanse.fra(behandling);
 
         // 1. Kopierer grunnlag og vilkårsresultat for forlengelser
-        kopierGrunnlagForForlengelseperioder(referanse);
+        kopierGrunnlagForForlengelseperioder(referanse, perioderTilVurdering);
 
         // 2. kopierer input overstyringer for migrering fra infotrygd
-        kopierInputOverstyring(behandling);
+        kopierInputOverstyring(behandling, perioderTilVurdering);
 
     }
 
@@ -71,15 +66,16 @@ public class KopierBeregningTjeneste {
     /**
      * Kopierer overstyrt input i revurderinger som ikke er manuelt opprettet (se https://jira.adeo.no/browse/TSF-2658)
      *
-     * @param behandling Behandling
+     * @param behandling           Behandling
+     * @param perioderTilVurdering Perioder til vurdering
      */
-    private void kopierInputOverstyring(Behandling behandling) {
-        var perioderTilVurdering = vurdertePerioder(BehandlingReferanse.fra(behandling));
-        if (behandling.erRevurdering() && !behandling.erManueltOpprettet() && !harEksisterendeOverstyringer(behandling, perioderTilVurdering)) {
+    private void kopierInputOverstyring(Behandling behandling, NavigableSet<PeriodeTilVurdering> perioderTilVurdering) {
+        var perioder = perioderTilVurdering.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet());
+        if (behandling.erRevurdering() && !behandling.erManueltOpprettet() && !harEksisterendeOverstyringer(behandling, perioder)) {
             var kopiertInputOverstyring = behandling.getOriginalBehandlingId().flatMap(beregningPerioderGrunnlagRepository::hentGrunnlag)
                 .stream()
                 .flatMap(it -> it.getInputOverstyringPerioder().stream())
-                .filter(it -> perioderTilVurdering.stream().anyMatch(p -> p.getFomDato().equals(it.getSkjæringstidspunkt())))
+                .filter(it -> perioder.stream().anyMatch(p -> p.getFomDato().equals(it.getSkjæringstidspunkt())))
                 .map(InputOverstyringPeriode::new)
                 .toList();
             if (!kopiertInputOverstyring.isEmpty()) {
@@ -95,24 +91,14 @@ public class KopierBeregningTjeneste {
             .anyMatch(it -> perioderTilVurdering.stream().anyMatch(p -> p.getFomDato().equals(it.getSkjæringstidspunkt())));
     }
 
-
-    private Set<DatoIntervallEntitet> vurdertePerioder(BehandlingReferanse ref) {
-        var tjeneste = getPerioderTilVurderingTjeneste(ref);
-        return tjeneste.utled(ref.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-    }
-
-    private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(BehandlingReferanse ref) {
-        return BehandlingTypeRef.Lookup.find(VilkårsPerioderTilVurderingTjeneste.class, perioderTilVurderingTjeneste, ref.getFagsakYtelseType(), ref.getBehandlingType())
-            .orElseThrow(() -> new UnsupportedOperationException("VilkårsPerioderTilVurderingTjeneste ikke implementert for ytelse [" + ref.getFagsakYtelseType() + "], behandlingtype [" + ref.getBehandlingType() + "]"));
-    }
-
     /**
      * Kopierer grunnlag og vilkårsresultat for forlengelser
      *
-     * @param ref behandlingreferanse
+     * @param ref                  behandlingreferanse
+     * @param perioderTilVurdering Perioder til vurdering
      */
-    private void kopierGrunnlagForForlengelseperioder(BehandlingReferanse ref) {
-        var perioderPrStartpunkt = kalkulusStartpunktUtleder.utledPerioderPrStartpunkt(ref);
+    private void kopierGrunnlagForForlengelseperioder(BehandlingReferanse ref, NavigableSet<PeriodeTilVurdering> perioderTilVurdering) {
+        var perioderPrStartpunkt = kalkulusStartpunktUtleder.utledPerioderPrStartpunkt(ref, perioderTilVurdering);
         if (ref.getBehandlingType().equals(BehandlingType.REVURDERING)) {
             var startpunktForlengelse = kalkulusStartpunktUtleder.getStartpunktForlengelse(ref);
             var perioderMedStartpunktForlengelse = perioderPrStartpunkt.get(startpunktForlengelse);
