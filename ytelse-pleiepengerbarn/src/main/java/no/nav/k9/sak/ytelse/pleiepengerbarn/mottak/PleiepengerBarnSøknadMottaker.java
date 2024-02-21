@@ -13,6 +13,7 @@ import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.saksnummer.ReservertSaksnummerRepository;
 import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.k9.sak.mottak.SøknadMottakTjeneste;
 import no.nav.k9.sak.typer.AktørId;
@@ -23,6 +24,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 public class PleiepengerBarnSøknadMottaker implements SøknadMottakTjeneste<PleiepengerBarnSøknadInnsending> {
 
     private SaksnummerRepository saksnummerRepository;
+    private ReservertSaksnummerRepository reservertSaksnummerRepository;
     private FagsakTjeneste fagsakTjeneste;
 
 
@@ -31,8 +33,9 @@ public class PleiepengerBarnSøknadMottaker implements SøknadMottakTjeneste<Ple
     }
 
     @Inject
-    public PleiepengerBarnSøknadMottaker(SaksnummerRepository saksnummerRepository,FagsakTjeneste fagsakTjeneste) {
+    public PleiepengerBarnSøknadMottaker(SaksnummerRepository saksnummerRepository, ReservertSaksnummerRepository reservertSaksnummerRepository, FagsakTjeneste fagsakTjeneste) {
         this.saksnummerRepository = saksnummerRepository;
+        this.reservertSaksnummerRepository = reservertSaksnummerRepository;
         this.fagsakTjeneste = fagsakTjeneste;
     }
 
@@ -67,8 +70,11 @@ public class PleiepengerBarnSøknadMottaker implements SøknadMottakTjeneste<Ple
         if (fagsak.isPresent()) {
             return fagsak.get();
         }
+
         final Saksnummer saksnummer = reservertSaksnummer != null ? reservertSaksnummer : new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
-        return opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, ytelseType, startDato, sluttDato);
+        final Fagsak nyFagsak = opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, ytelseType, startDato, sluttDato);
+        reservertSaksnummerRepository.slettHvisEksisterer(reservertSaksnummer);
+        return nyFagsak;
     }
 
 
