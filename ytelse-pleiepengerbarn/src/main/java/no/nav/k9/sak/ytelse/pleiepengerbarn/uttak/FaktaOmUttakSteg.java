@@ -77,13 +77,14 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
         var referanse = BehandlingReferanse.fra(behandling);
         final var unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksistererUnntakPleietrengende(behandling.getFagsak().getPleietrengendeAktørId());
 
-        var innvilgedePerioderTilVurdering = perioderMedSykdomInnvilgetUtleder.utledInnvilgedePerioderTilVurdering(referanse);
+        var innvilgedePerioderTilVurdering = perioderMedSykdomInnvilgetUtleder.utledInnvilgedePerioderTilVurdering(referanse, true);
 
         final var aksjonspunkter = new ArrayList<AksjonspunktDefinisjon>();
         if (unntakEtablertTilsynForPleietrengende.isPresent()) {
             unntakEtablertTilsynGrunnlagRepository.lagreGrunnlag(behandlingId, unntakEtablertTilsynForPleietrengende.get());
 
-            aksjonspunkter.addAll(vurderAksjonspunktForNattevåkOgBeredskap(behandling, unntakEtablertTilsynForPleietrengende.get(), innvilgedePerioderTilVurdering));
+            var perioderMedSykdomInnvilget = perioderMedSykdomInnvilgetUtleder.utledInnvilgedePerioderTilVurdering(referanse, false);
+            aksjonspunkter.addAll(vurderAksjonspunktForNattevåkOgBeredskap(behandling, unntakEtablertTilsynForPleietrengende.get(), perioderMedSykdomInnvilget));
         }
         if (rettEtterPleietrengendesDødMåAvklares(behandlingId) && harNoenGodkjentPerioderMedSykdom(innvilgedePerioderTilVurdering)) {
             aksjonspunkter.add(AksjonspunktDefinisjon.VURDER_RETT_ETTER_PLEIETRENGENDES_DØD);
