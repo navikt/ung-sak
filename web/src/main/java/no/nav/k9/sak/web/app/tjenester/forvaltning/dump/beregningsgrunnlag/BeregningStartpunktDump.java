@@ -21,6 +21,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.KalkulusStartpunktUtleder;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput;
@@ -36,21 +37,24 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
 public class BeregningStartpunktDump implements DebugDumpBehandling {
 
     private KalkulusStartpunktUtleder kalkulusStartpunktUtleder;
+    private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
 
     BeregningStartpunktDump() {
         // for proxys
     }
 
     @Inject
-    BeregningStartpunktDump(KalkulusStartpunktUtleder kalkulusStartpunktUtleder) {
+    BeregningStartpunktDump(KalkulusStartpunktUtleder kalkulusStartpunktUtleder, BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste) {
         this.kalkulusStartpunktUtleder = kalkulusStartpunktUtleder;
+        this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
     }
 
     @Override
     public void dump(DumpMottaker dumpMottaker, Behandling behandling, String basePath) {
         List<Tuple<BehandlingStegType, PeriodeTilVurdering>> lista = new ArrayList<>();
 
-        Map<BehandlingStegType, NavigableSet<PeriodeTilVurdering>> startpunkt = kalkulusStartpunktUtleder.utledPerioderPrStartpunkt(BehandlingReferanse.fra(behandling));
+        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(BehandlingReferanse.fra(behandling));
+        Map<BehandlingStegType, NavigableSet<PeriodeTilVurdering>> startpunkt = kalkulusStartpunktUtleder.utledPerioderPrStartpunkt(BehandlingReferanse.fra(behandling), perioderTilVurdering);
         startpunkt.forEach((steg, perioder) -> perioder.forEach(periode -> lista.add(new Tuple<>(steg, periode))));
 
         Function<Tuple<BehandlingStegType, PeriodeTilVurdering>, String> kolonneSteg = a -> a.getElement1().getKode();

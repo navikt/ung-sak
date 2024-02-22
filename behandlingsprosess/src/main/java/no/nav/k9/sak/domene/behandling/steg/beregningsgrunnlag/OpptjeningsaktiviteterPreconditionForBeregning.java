@@ -9,8 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -25,7 +23,6 @@ import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
-import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 
@@ -34,31 +31,27 @@ public class OpptjeningsaktiviteterPreconditionForBeregning {
 
     private static final Logger logger = LoggerFactory.getLogger(OpptjeningsaktiviteterPreconditionForBeregning.class);
     private static final Set<VilkårUtfallMerknad> MIDLERTIDIG_INAKTIV_KODER = Set.of(VilkårUtfallMerknad.VM_7847_A, VilkårUtfallMerknad.VM_7847_B);
-
     private final VilkårResultatRepository vilkårResultatRepository;
     private final OpptjeningRepository opptjeningRepository;
-
-    private final Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste;
-
     private final VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
 
     @Inject
-    public OpptjeningsaktiviteterPreconditionForBeregning(VilkårResultatRepository vilkårResultatRepository, OpptjeningRepository opptjeningRepository,
-                                                          @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste, VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
+    public OpptjeningsaktiviteterPreconditionForBeregning(VilkårResultatRepository vilkårResultatRepository,
+                                                          OpptjeningRepository opptjeningRepository,
+                                                          VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.opptjeningRepository = opptjeningRepository;
-        this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
     }
 
-    public void sjekkOpptjeningsaktiviter(BehandlingReferanse behandlingReferanse) {
+    public void sjekkOpptjeningsaktiviter(BehandlingReferanse behandlingReferanse, NavigableSet<PeriodeTilVurdering> perioderTilVurdering) {
         Optional<OpptjeningResultat> opptjeningsresultat = opptjeningRepository.finnOpptjening(behandlingReferanse.getBehandlingId());
         if (opptjeningsresultat.isEmpty()) {
             logger.warn("Har ikke noe opptjeningsresultat");
             return;
         }
 
-        var ikkeAvslåttePerioder = finnPerioder(behandlingReferanse);
+        var ikkeAvslåttePerioder = finnPerioder(behandlingReferanse, perioderTilVurdering);
 
         Vilkår opptjeningsvilkåret = vilkårResultatRepository.hent(behandlingReferanse.getBehandlingId()).getVilkår(VilkårType.OPPTJENINGSVILKÅRET).orElseThrow();
         for (var vilkårPeriode : ikkeAvslåttePerioder) {
@@ -75,12 +68,10 @@ public class OpptjeningsaktiviteterPreconditionForBeregning {
         }
     }
 
-    private NavigableSet<PeriodeTilVurdering> finnPerioder(BehandlingReferanse behandlingReferanse) {
-        var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjeneste, behandlingReferanse.getFagsakYtelseType(), behandlingReferanse.getBehandlingType());
-        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(behandlingReferanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+    private NavigableSet<PeriodeTilVurdering> finnPerioder(BehandlingReferanse behandlingReferanse, NavigableSet<PeriodeTilVurdering> perioderTilVurdering) {
         var filter = vilkårPeriodeFilterProvider.getFilter(behandlingReferanse);
         filter.ignorerAvslåttePerioder();
-        return filter.filtrerPerioder(perioderTilVurdering, VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        return filter.filtrerPerioder(perioderTilVurdering.stream().map(PeriodeTilVurdering::getPeriode).toList(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
     }
 
 

@@ -39,7 +39,6 @@ public class PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering i
 
     private Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning;
     private Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjenester;
-
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private boolean skalFiltrereBasertPåAktiviteter;
 

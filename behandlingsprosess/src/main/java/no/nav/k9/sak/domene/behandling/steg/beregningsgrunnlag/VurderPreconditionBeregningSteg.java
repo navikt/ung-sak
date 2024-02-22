@@ -20,6 +20,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 
 @FagsakYtelseTypeRef
 @BehandlingStegRef(value = PRECONDITION_BEREGNING)
@@ -28,13 +29,12 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
 
     private BehandlingRepository behandlingRepository;
+    private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
     private Instance<PreconditionBeregningAksjonspunktUtleder> aksjonspunktUtledere;
     private VurderAvslagGrunnetOpptjening vurderAvslagGrunnetOpptjening;
     private RyddOgGjenopprettBeregningTjeneste ryddOgGjenopprettBeregningTjeneste;
     private KopierBeregningTjeneste kopierBeregningTjeneste;
-
     private BeregningInkonsistensTjeneste inkonsistensTjeneste;
-
     private OpptjeningsaktiviteterPreconditionForBeregning opptjeningsaktiviteterPreconditionForBeregning;
 
 
@@ -44,6 +44,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
 
     @Inject
     public VurderPreconditionBeregningSteg(BehandlingRepository behandlingRepository,
+                                           BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                            @Any Instance<PreconditionBeregningAksjonspunktUtleder> aksjonspunktUtledere,
                                            VurderAvslagGrunnetOpptjening vurderAvslagGrunnetOpptjening,
                                            RyddOgGjenopprettBeregningTjeneste ryddOgGjenopprettBeregningTjeneste,
@@ -51,6 +52,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
                                            BeregningInkonsistensTjeneste inkonsistensTjeneste,
                                            OpptjeningsaktiviteterPreconditionForBeregning opptjeningsaktiviteterPreconditionForBeregning) {
         this.behandlingRepository = behandlingRepository;
+        this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.aksjonspunktUtledere = aksjonspunktUtledere;
         this.vurderAvslagGrunnetOpptjening = vurderAvslagGrunnetOpptjening;
         this.ryddOgGjenopprettBeregningTjeneste = ryddOgGjenopprettBeregningTjeneste;
@@ -64,11 +66,13 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         var referanse = BehandlingReferanse.fra(behandling);
 
+        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(referanse);
+
         // 1. Rydder
-        ryddOgGjenopprettBeregningTjeneste.ryddOgGjenopprett(kontekst);
+        ryddOgGjenopprettBeregningTjeneste.ryddOgGjenopprett(kontekst, perioderTilVurdering);
 
         // 2. Avslå der opptjening er avslått
-        vurderAvslagGrunnetOpptjening.vurderAvslagGrunnetAvslagIOpptjening(referanse);
+        vurderAvslagGrunnetOpptjening.vurderAvslagGrunnetAvslagIOpptjening(referanse, perioderTilVurdering);
 
         // 3. fjern eller initier perioder fra definerende vilkår
         ryddOgGjenopprettBeregningTjeneste.fjernEllerInitierPerioderFraDefinerendeVilkår(referanse);
@@ -77,11 +81,11 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         ryddOgGjenopprettBeregningTjeneste.deaktiverAlleReferanserUlikInitiell(referanse);
 
         // 5 Vurder inkonsistens
-        inkonsistensTjeneste.sjekkInkonsistensOgOpprettProsesstrigger(referanse);
-        opptjeningsaktiviteterPreconditionForBeregning.sjekkOpptjeningsaktiviter(referanse);
+        inkonsistensTjeneste.sjekkInkonsistensOgOpprettProsesstrigger(referanse, perioderTilVurdering);
+        opptjeningsaktiviteterPreconditionForBeregning.sjekkOpptjeningsaktiviter(referanse, perioderTilVurdering);
 
         // 6. Kopier
-        kopierBeregningTjeneste.kopierVurderinger(kontekst);
+        kopierBeregningTjeneste.kopierVurderinger(kontekst, perioderTilVurdering);
 
 
         // 7. Utled aksjonspunkt
