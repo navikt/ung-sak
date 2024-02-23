@@ -144,7 +144,7 @@ public class SøknadsperiodeTjeneste {
         var utvidetPeriode = håndterePleietrengendeDødsfallTjeneste.utledUtvidetPeriodeForDødsfall(referanse);
         if (utvidetPeriode.isPresent()) {
             var periode = utvidetPeriode.get();
-            tidslinje = tidslinje.union(new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode.toLocalDateInterval(), new Kravperiode(periode, referanse.getBehandlingId(), false)))), StandardCombinators::coalesceRightHandSide);
+            tidslinje = tidslinje.union(new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode.toLocalDateInterval(), new Kravperiode(periode, referanse.getBehandlingId(), false)))), StandardCombinators::coalesceLeftHandSide);
         }
 
         return tidslinje.stream().map(s -> new Kravperiode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()), s.getValue().getBehandlingId(), s.getValue().isHarTrukketKrav())).toList();
