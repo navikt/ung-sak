@@ -41,6 +41,9 @@ public class ReservertSaksnummerEntitet extends BaseEntitet {
     @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "pleietrengende_aktoer_id")))
     private AktørId pleietrengendeAktørId;
 
+    @Column(name = "behandlingsaar")
+    private String behandlingsår;
+
     @Column(name = "slettet", nullable = false)
     private boolean slettet = false;
 
@@ -48,11 +51,12 @@ public class ReservertSaksnummerEntitet extends BaseEntitet {
         // for hibernate
     }
 
-    ReservertSaksnummerEntitet(Saksnummer saksnummer, FagsakYtelseType ytelseType, String brukerAktørId, String pleietrengendeAktørId) {
+    ReservertSaksnummerEntitet(Saksnummer saksnummer, FagsakYtelseType ytelseType, String brukerAktørId, String pleietrengendeAktørId, String behandlingsår) {
         this.saksnummer = saksnummer;
         this.ytelseType = ytelseType;
         this.brukerAktørId = new AktørId(brukerAktørId);
         this.pleietrengendeAktørId = pleietrengendeAktørId != null ? new AktørId(pleietrengendeAktørId) : null;
+        this.behandlingsår = behandlingsår;
     }
 
     public Saksnummer getSaksnummer() {
@@ -69,6 +73,10 @@ public class ReservertSaksnummerEntitet extends BaseEntitet {
 
     public AktørId getPleietrengendeAktørId() {
         return pleietrengendeAktørId;
+    }
+
+    public String getBehandlingsår() {
+        return behandlingsår;
     }
 
     void setSlettet() {

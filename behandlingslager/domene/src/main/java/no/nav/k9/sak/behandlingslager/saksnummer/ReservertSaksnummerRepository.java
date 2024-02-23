@@ -28,11 +28,11 @@ public class ReservertSaksnummerRepository {
         return HibernateVerktøy.hentUniktResultat(query);
     }
 
-    public void lagre(Saksnummer saksnummer, FagsakYtelseType ytelseType, String brukerAktørid, String pleietrengendeAktørId) {
+    public void lagre(Saksnummer saksnummer, FagsakYtelseType ytelseType, String brukerAktørId, String pleietrengendeAktørId, String behandlingsår) {
         if (hent(saksnummer).isPresent()) {
             throw new IllegalArgumentException("Saksnummer er allerede reservert");
         }
-        final var entitet = new ReservertSaksnummerEntitet(saksnummer, ytelseType, brukerAktørid, pleietrengendeAktørId);
+        final var entitet = new ReservertSaksnummerEntitet(saksnummer, ytelseType, brukerAktørId, pleietrengendeAktørId, behandlingsår);
         entityManager.persist(entitet);
         entityManager.flush();
     }

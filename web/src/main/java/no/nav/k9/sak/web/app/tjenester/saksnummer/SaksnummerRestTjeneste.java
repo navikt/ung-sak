@@ -75,7 +75,7 @@ public class SaksnummerRestTjeneste {
             sjekkAktørIdMotPdl(dto.getPleietrengendeAktørId());
         }
         final SaksnummerDto saksnummer = new SaksnummerDto(saksnummerRepository.genererNyttSaksnummer());
-        reservertSaksnummerRepository.lagre(saksnummer.getVerdi(), dto.getYtelseType(), dto.getBrukerAktørId(), dto.getPleietrengendeAktørId());
+        reservertSaksnummerRepository.lagre(saksnummer.getVerdi(), dto.getYtelseType(), dto.getBrukerAktørId(), dto.getPleietrengendeAktørId(), dto.getBehandlingsår());
         log.info("Reserverte saksnummer: " + saksnummer);
         return saksnummer;
     }
@@ -97,7 +97,8 @@ public class SaksnummerRestTjeneste {
         return new HentReservertSaksnummerDto(entitet.getSaksnummer().getVerdi(),
             entitet.getYtelseType(),
             entitet.getBrukerAktørId().getAktørId(),
-            entitet.getPleietrengendeAktørId() != null ? entitet.getPleietrengendeAktørId().getAktørId() : null);
+            entitet.getPleietrengendeAktørId() != null ? entitet.getPleietrengendeAktørId().getAktørId() : null,
+            entitet.getBehandlingsår());
     }
 
     private void sjekkAktørIdMotPdl(String aktørId) {
