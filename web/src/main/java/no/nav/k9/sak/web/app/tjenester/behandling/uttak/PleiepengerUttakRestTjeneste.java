@@ -176,7 +176,7 @@ public class PleiepengerUttakRestTjeneste {
         var perioderTilVurdering = mapPerioderTilVurdering(behandling);
 
 
-        var erFørVurderingsstegForNyeRegler = behandlingModellRepository.getModell(behandling.getType(), behandling.getFagsakYtelseType()).erStegAFørStegB(behandling.getAktivtBehandlingSteg(), BehandlingStegType.VURDER_STARTDATO_UTTAKSREGLER);
+        var erFørVurderingsstegForNyeRegler = !behandling.erAvsluttet() && behandlingModellRepository.getModell(behandling.getType(), behandling.getFagsakYtelseType()).erStegAFørStegB(behandling.getAktivtBehandlingSteg(), BehandlingStegType.VURDER_STARTDATO_UTTAKSREGLER);
 
         if (erFørVurderingsstegForNyeRegler) {
             return UttaksplanMedUtsattePerioder.medUttaksplan(null, utsattePerioder, null, perioderTilVurdering);
