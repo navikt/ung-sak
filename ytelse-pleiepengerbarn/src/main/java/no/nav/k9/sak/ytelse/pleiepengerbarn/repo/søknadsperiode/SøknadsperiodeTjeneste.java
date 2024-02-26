@@ -13,6 +13,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
@@ -144,12 +145,22 @@ public class SøknadsperiodeTjeneste {
         var utvidetPeriode = håndterePleietrengendeDødsfallTjeneste.utledUtvidetPeriodeForDødsfall(referanse);
         if (utvidetPeriode.isPresent()) {
             var periode = utvidetPeriode.get();
-            tidslinje = tidslinje.union(new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode.toLocalDateInterval(), new Kravperiode(periode, referanse.getBehandlingId(), false)))), StandardCombinators::coalesceLeftHandSide);
+            tidslinje = tidslinje.union(new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode.toLocalDateInterval(), new Kravperiode(periode, referanse.getBehandlingId(), false)))), this::mergeUtvidetPeriodeForDødsfall);
         }
 
         return tidslinje.stream().map(s -> new Kravperiode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()), s.getValue().getBehandlingId(), s.getValue().isHarTrukketKrav())).toList();
     }
 
+    private LocalDateSegment<Kravperiode> mergeUtvidetPeriodeForDødsfall(LocalDateInterval dateInterval, LocalDateSegment<Kravperiode> lhs, LocalDateSegment<Kravperiode> rhs) {
+        if (rhs == null) {
+            return new LocalDateSegment<>(dateInterval, lhs.getValue());
+        }
+        //Trukket periode skal ikke overskrives
+        if (lhs != null && lhs.getValue().isHarTrukketKrav()) {
+            return new LocalDateSegment<>(dateInterval, lhs.getValue());
+        }
+        return new LocalDateSegment<>(dateInterval, rhs.getValue());
+    }
 
     public static class Kravperiode {
         private final DatoIntervallEntitet periode;
