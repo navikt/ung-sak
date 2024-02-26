@@ -72,6 +72,9 @@ spec:
         - application: k9-punsj
         - application: fpabakus
           namespace: teamforeldrepenger
+        - application: k9-punsjbolle
+          namespace: omsorgspenger
+          cluster: prod-gcp
   env:
     - name: TZ
       value: "Europe/Oslo"
