@@ -2,6 +2,8 @@ package no.nav.k9.sak.web.app.tjenester.saksnummer;
 
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +25,7 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.saksnummer.ReservertSaksnummerEntitet;
 import no.nav.k9.sak.behandlingslager.saksnummer.ReservertSaksnummerRepository;
 import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
@@ -70,13 +73,28 @@ public class SaksnummerRestTjeneste {
         if (!enableReservertSaksnummer) {
             throw new UnsupportedOperationException("Funksjonaliteten er avskrudd");
         }
+        if (List.of(FagsakYtelseType.OMSORGSPENGER, FagsakYtelseType.OMSORGSPENGER_AO, FagsakYtelseType.OMSORGSPENGER_KS, FagsakYtelseType.OMSORGSPENGER_MA).contains(dto.getYtelseType())) {
+            if (dto.getBehandlingsår() == null) {
+                throw new IllegalArgumentException("Behandlingsår er påkrevd for omsorgspenger");
+            }
+        }
+
         sjekkAktørIdMotPdl(dto.getBrukerAktørId());
         if (dto.getPleietrengendeAktørId() != null) {
             sjekkAktørIdMotPdl(dto.getPleietrengendeAktørId());
         }
-        final SaksnummerDto saksnummer = new SaksnummerDto(saksnummerRepository.genererNyttSaksnummer());
-        reservertSaksnummerRepository.lagre(saksnummer.getVerdi(), dto.getYtelseType(), dto.getBrukerAktørId(), dto.getPleietrengendeAktørId(), dto.getBehandlingsår());
-        log.info("Reserverte saksnummer: " + saksnummer);
+
+        SaksnummerDto saksnummer;
+        var eksisterende = reservertSaksnummerRepository.hent(dto.getYtelseType(), dto.getBrukerAktørId(), dto.getPleietrengendeAktørId(), dto.getBehandlingsår());
+        if (eksisterende.isPresent()) {
+            saksnummer = new SaksnummerDto(eksisterende.get().getSaksnummer());
+            log.info("Returnerer eksisterende reservert saksnummer: " + saksnummer);
+        } else {
+            saksnummer = new SaksnummerDto(saksnummerRepository.genererNyttSaksnummer());
+            reservertSaksnummerRepository.lagre(saksnummer.getVerdi(), dto.getYtelseType(), dto.getBrukerAktørId(), dto.getPleietrengendeAktørId(), dto.getBehandlingsår());
+            log.info("Reserverte nytt saksnummer: " + saksnummer);
+        }
+
         return saksnummer;
     }
 
