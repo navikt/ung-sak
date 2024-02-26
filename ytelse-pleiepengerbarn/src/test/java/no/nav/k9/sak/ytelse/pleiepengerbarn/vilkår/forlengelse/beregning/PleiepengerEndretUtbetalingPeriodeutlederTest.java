@@ -552,7 +552,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
         var fomHull = tom1.plusDays(3);
         var tomHull = fomHull.plusDays(4);
 
-        var stp2 = tomHull.plusDays(3);
+        var stp2 = tomHull.plusDays(4);
         var tom2 = stp2.plusDays(20);
 
         var utbPeriode = List.of(fullUtbetaling(ARBEIDSFORHOLD_1));
