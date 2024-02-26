@@ -45,8 +45,12 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
     private static final Logger LOG = LoggerFactory.getLogger(AppPdpRequestBuilderImpl.class);
     public static final String ABAC_DOMAIN = "k9";
     private static final Cluster CLUSTER = Environment.current().getCluster();
-    private static final List<String> INTERNAL_CLUSTER_NAMESPACE = List.of(CLUSTER.clusterName() + ":k9saksbehandling",
-        CLUSTER.clusterName() + ":teamforeldrepenger");
+    private static final List<String> INTERNAL_CLUSTER_NAMESPACE = List.of(
+        CLUSTER.clusterName() + ":k9saksbehandling",
+        CLUSTER.clusterName() + ":teamforeldrepenger",
+        "dev-gcp:omsorgspenger",
+        "prod-gcp:omsorgspenger"
+    );
     private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess"); //$NON-NLS-1$
     private PipRepository pipRepository;
     private AktørTjeneste aktørTjeneste;
