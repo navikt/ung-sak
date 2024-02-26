@@ -19,7 +19,6 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -81,12 +80,12 @@ public class DødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderingU
             for (AktørId aktør : dødsfallAktører) {
                 LocalDate dødsdato = hentOppdatertDødsdato(aktør, dødsdatoFraHendelse, hendelseOpprettetTidspunkt, hendelseId);
                 for (Fagsak fagsak : fagsakRepository.finnFagsakRelatertTil(fagsakYtelseType, aktør, null, null, dødsdato, null)) {
-                    if (erNyInformasjonIHendelsen(fagsak, aktør, dødsdato, hendelseId)) {
+                    if (erNyInformasjonIHendelsen(fagsak, aktør, dødsdato, hendelseId) && erAktørensDødRelevantForVedtaket(fagsak, dødsdato)) {
                         fagsaker.put(fagsak, BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER);
                     }
                 }
                 for (Fagsak fagsak : fagsakRepository.finnFagsakRelatertTil(fagsakYtelseType, null, aktør, null, dødsdato, null)) {
-                    if (erNyInformasjonIHendelsen(fagsak, aktør, dødsdato, hendelseId) && erPleietrengendesDødRelevantForVedtaket(fagsak, dødsdato)) {
+                    if (erNyInformasjonIHendelsen(fagsak, aktør, dødsdato, hendelseId) && erAktørensDødRelevantForVedtaket(fagsak, dødsdato)) {
                         fagsaker.put(fagsak, BehandlingÅrsakType.RE_HENDELSE_DØD_BARN);
                     }
                 }
@@ -97,7 +96,7 @@ public class DødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderingU
         return fagsaker;
     }
 
-    private boolean erPleietrengendesDødRelevantForVedtaket(Fagsak fagsak, LocalDate dødsdato) {
+    private boolean erAktørensDødRelevantForVedtaket(Fagsak fagsak, LocalDate dødsdato) {
 
         Optional<Behandling> behandlingOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
         if (behandlingOpt.isEmpty()) {
