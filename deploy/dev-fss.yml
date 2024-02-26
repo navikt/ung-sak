@@ -72,6 +72,9 @@ spec:
         - application: k9-punsj
         - application: fpabakus
           namespace: teamforeldrepenger
+        - application: k9-punsjbolle
+          namespace: omsorgspenger
+          cluster: dev-gcp
 
   env:
     - name: TZ
