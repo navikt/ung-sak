@@ -3,7 +3,9 @@ package no.nav.k9.sak.web.app.tjenester.forvaltning;
 import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,10 +32,16 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.prosessering.task.TilbakeTilStartBehandlingTask;
+import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -48,6 +56,9 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLo
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.iverksett.EndringAnnenOmsorgspersonUtleder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleiepengerVilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.beregning.EndringsårsakUtbetaling;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.beregning.PleiepengerEndretUtbetalingPeriodeutleder;
 
 @ApplicationScoped
 @Transactional
@@ -62,6 +73,9 @@ public class ForvaltningUttakRestTjeneste {
     private ProsessTriggereRepository prosessTriggereRepository;
     private EndringAnnenOmsorgspersonUtleder endringAnnenOmsorgspersonUtleder;
     private ProsessTaskTjeneste prosessTaskTjeneste;
+    private PleiepengerEndretUtbetalingPeriodeutleder pleiepengerEndretUtbetalingPeriodeutleder;
+
+    private PleiepengerVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
 
     public ForvaltningUttakRestTjeneste() {
     }
@@ -70,13 +84,56 @@ public class ForvaltningUttakRestTjeneste {
     public ForvaltningUttakRestTjeneste(BehandlingRepository behandlingRepository,
                                         EntityManager entityManager,
                                         ProsessTriggereRepository prosessTriggereRepository,
-                                        EndringAnnenOmsorgspersonUtleder endringAnnenOmsorgspersonUtleder, ProsessTaskTjeneste prosessTaskTjeneste) {
+                                        EndringAnnenOmsorgspersonUtleder endringAnnenOmsorgspersonUtleder, ProsessTaskTjeneste prosessTaskTjeneste,
+                                        @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) @BehandlingTypeRef(BehandlingType.REVURDERING) PleiepengerEndretUtbetalingPeriodeutleder pleiepengerEndretUtbetalingPeriodeutleder,
+                                        @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) PleiepengerVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.entityManager = entityManager;
         this.prosessTriggerForvaltningTjeneste = new ProsessTriggerForvaltningTjeneste(entityManager);
         this.prosessTriggereRepository = prosessTriggereRepository;
         this.endringAnnenOmsorgspersonUtleder = endringAnnenOmsorgspersonUtleder;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
+        this.pleiepengerEndretUtbetalingPeriodeutleder = pleiepengerEndretUtbetalingPeriodeutleder;
+        this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
+    }
+
+
+    @POST
+    @Path("/hent-endret-uttak-revurdering-tidslinjer")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(description = "Henter tidslinje for revurdering av uttak", summary = ("Henter tidslinje for revurdering av uttak"), tags = "uttak")
+    @BeskyttetRessurs(action = READ, resource = DRIFT)
+    public Response hentEndringsperioderTidslinje(
+        @Parameter(description = "Behandling-id")
+        @FormParam("behandlingId")
+        @NotNull
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+        BehandlingIdDto behandlingIdDto,
+        @NotNull @FormParam("periode")
+        @Parameter(description = "periode", required = true, example = "2020-01-01/2020-12-31")
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class)
+        Periode periode) {
+        var behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingId());
+
+        var behandlingReferanse = BehandlingReferanse.fra(behandling);
+        var perioderTilVurdering = vilkårsPerioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+
+        var vilkårsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom());
+        if (!perioderTilVurdering.contains(vilkårsperiode)) {
+            throw new IllegalArgumentException("Oppgitt periode er ikke til vurdering i behandlingen. Perioder til vurdering er " + perioderTilVurdering);
+        }
+
+        var tidslinje = pleiepengerEndretUtbetalingPeriodeutleder.finnÅrsakstidslinje(behandlingReferanse, vilkårsperiode);
+        var result = new HashMap<>();
+        for (EndringsårsakUtbetaling v : EndringsårsakUtbetaling.values()) {
+            var resultTidslinje = tidslinje.filterValue(it -> it.contains(v));
+            result.put(v, resultTidslinje.getLocalDateIntervals().stream().map(di -> DatoIntervallEntitet.fraOgMedTilOgMed(di.getFomDato(), di.getTomDato())).toList());
+        }
+        return Response.ok(result).build();
+
     }
 
 

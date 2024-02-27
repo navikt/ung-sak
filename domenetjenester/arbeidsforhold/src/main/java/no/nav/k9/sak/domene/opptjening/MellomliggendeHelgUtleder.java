@@ -12,7 +12,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
  */
 public class MellomliggendeHelgUtleder {
 
-    public LocalDateTimeline<Boolean> beregnMellomliggendeHelg(LocalDateTimeline<Boolean> tidsserie) {
+    public <T> LocalDateTimeline<Boolean> beregnMellomliggendeHelg(LocalDateTimeline<T> tidsserie) {
         if (tidsserie.isEmpty()) {
             return LocalDateTimeline.empty();
         }
@@ -23,7 +23,7 @@ public class MellomliggendeHelgUtleder {
             .toList());
     }
 
-    private boolean erUtelukkendeHelg(LocalDateSegment<Boolean> segment) {
+    private <T> boolean erUtelukkendeHelg(LocalDateSegment<T> segment) {
         Set<DayOfWeek> helgedager = Set.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
         return helgedager.contains(segment.getFom().getDayOfWeek())
             && helgedager.contains(segment.getTom().getDayOfWeek())
