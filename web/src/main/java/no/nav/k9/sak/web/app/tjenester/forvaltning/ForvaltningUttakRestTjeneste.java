@@ -129,7 +129,7 @@ public class ForvaltningUttakRestTjeneste {
         var tidslinje = pleiepengerEndretUtbetalingPeriodeutleder.finnÅrsakstidslinje(behandlingReferanse, vilkårsperiode);
         var result = new HashMap<>();
         for (EndringsårsakUtbetaling v : EndringsårsakUtbetaling.values()) {
-            var resultTidslinje = tidslinje.filterValue(it -> it.contains(v)).mapValue(it -> true);
+            var resultTidslinje = tidslinje.filterValue(it -> it.contains(v));
             result.put(v, resultTidslinje.getLocalDateIntervals().stream().map(di -> DatoIntervallEntitet.fraOgMedTilOgMed(di.getFomDato(), di.getTomDato())).toList());
         }
         return Response.ok(result).build();

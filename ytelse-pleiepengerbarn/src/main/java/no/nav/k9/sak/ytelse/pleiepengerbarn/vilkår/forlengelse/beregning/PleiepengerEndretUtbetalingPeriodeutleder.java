@@ -19,8 +19,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import org.jetbrains.annotations.NotNull;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -150,10 +148,10 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
         var personopplysningTidslinje = finnPersonopplysningTidslinje(behandlingReferanse, vilkårsperiode);
         var datoNyeReglerTidslinje = finnDatoNyeReglerTidslinje(behandlingReferanse, vilkårsperiode).mapValue(it -> Set.of(ENDRING_I_DATO_NYE_UTTAK_REGLER));
         var tidslinje = søknadperioderForBehandlingTidslinje
-            .crossJoin(endringstidslinjeRefusjonskrav, StandardCombinators::coalesceLeftHandSide)
-            .crossJoin(utvidetRevurderingPerioder, StandardCombinators::coalesceLeftHandSide)
-            .crossJoin(personopplysningTidslinje, StandardCombinators::coalesceLeftHandSide)
-            .crossJoin(datoNyeReglerTidslinje, StandardCombinators::coalesceLeftHandSide)
+            .crossJoin(endringstidslinjeRefusjonskrav, StandardCombinators::union)
+            .crossJoin(utvidetRevurderingPerioder, StandardCombinators::union)
+            .crossJoin(personopplysningTidslinje, StandardCombinators::union)
+            .crossJoin(datoNyeReglerTidslinje, StandardCombinators::union)
             .compress();
 
         tidslinje = fyllMellomromDersomKunHelg(tidslinje).compress();
@@ -233,12 +231,17 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
         return (di, lhs, rhs) -> {
             if (lhs != null) {
                 return lhs;
-            } else if (rhs != null) {
-                var forrigeSegment = tidslinje.getSegment(new LocalDateInterval(di.getFomDato().minusDays(1), di.getFomDato().minusDays(1)));
-                if (forrigeSegment != null) {
-                    return new LocalDateSegment<>(di, forrigeSegment.getValue());
-                }
             }
+            var forrigeSegment = tidslinje.getSegment(new LocalDateInterval(di.getFomDato().minusDays(1), di.getFomDato().minusDays(1)));
+            if (forrigeSegment != null) {
+                return new LocalDateSegment<>(di, forrigeSegment.getValue());
+            }
+
+            var nesteSegment = tidslinje.getSegment(new LocalDateInterval(di.getTomDato().plusDays(1), di.getTomDato().plusDays(1)));
+            if (nesteSegment != null) {
+                return new LocalDateSegment<>(di, nesteSegment.getValue());
+            }
+
             return null;
         };
     }
