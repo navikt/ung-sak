@@ -24,6 +24,7 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingskontroll.VilkårTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
@@ -45,7 +46,7 @@ public class PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering i
 
     private Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
-    private OpptjeningsperioderTjeneste opptjeningsperioderTjeneste;
+    private OpptjeningRepository opptjeningRepository;
     private VilkårResultatRepository vilkårResultatRepository;
 
     private boolean skalFiltrereBasertPåAktiviteter;
@@ -57,12 +58,12 @@ public class PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering i
     @Inject
     public PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering(@Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning,
                                                                             InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                                                            OpptjeningsperioderTjeneste opptjeningsperioderTjeneste,
+                                                                            OpptjeningRepository opptjeningRepository,
                                                                             VilkårResultatRepository vilkårResultatRepository,
                                                                             @KonfigVerdi(value = "FORLENGELSE_IM_OPPTJENING_FILTER", defaultVerdi = "false") boolean skalFiltrereBasertPåAktiviteter) {
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
-        this.opptjeningsperioderTjeneste = opptjeningsperioderTjeneste;
+        this.opptjeningRepository = opptjeningRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.skalFiltrereBasertPåAktiviteter = skalFiltrereBasertPåAktiviteter;
     }
@@ -76,7 +77,7 @@ public class PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering i
             return relevanteImTjeneste.utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldingBegrenset, periode);
         } else {
 
-            var opptjeningResultat = opptjeningsperioderTjeneste.hentOpptjeningHvisFinnes(referanse.getBehandlingId());
+            var opptjeningResultat = opptjeningRepository.finnOpptjening(referanse.getBehandlingId());
             var opptjening = opptjeningResultat.flatMap(it -> it.finnOpptjening(periode.getFomDato()));
 
             if (opptjeningResultat.isEmpty() || opptjening.isEmpty()) {
@@ -96,8 +97,8 @@ public class PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering i
     }
 
     private VilkårUtfallMerknad finnOpptjeningVilkårUtfallMerknad(BehandlingReferanse referanse, DatoIntervallEntitet periode) {
-        var opptjeningsvilkår = vilkårResultatRepository.hent(referanse.getBehandlingId()).getVilkår(VilkårType.OPPTJENINGSVILKÅRET);
-        return opptjeningsvilkår.map(v -> v.finnPeriodeForSkjæringstidspunkt(periode.getFomDato()))
+        var opptjeningsvilkår = vilkårResultatRepository.hentHvisEksisterer(referanse.getBehandlingId()).flatMap(v -> v.getVilkår(VilkårType.OPPTJENINGSVILKÅRET));
+        return opptjeningsvilkår.flatMap(v -> v.finnPeriodeForSkjæringstidspunktHvisFinnes(periode.getFomDato()))
             .map(VilkårPeriode::getMerknad)
             .orElse(null);
     }

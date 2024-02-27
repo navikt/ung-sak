@@ -66,21 +66,7 @@ class FiltrerOpptjeningaktivitetForBeregning {
         return VilkårUtfallMerknad.VM_7847_B.equals(vilkårUtfallMerknad) || VilkårUtfallMerknad.VM_7847_A.equals(vilkårUtfallMerknad);
     }
 
-    private record Grupperingsnøkkel(Opptjeningsnøkkel nøkkel, OpptjeningAktivitetType type) {
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Grupperingsnøkkel that = (Grupperingsnøkkel) o;
-            return Objects.equals(nøkkel, that.nøkkel) && type == that.type;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(nøkkel, type);
-        }
-    }
+    private record Grupperingsnøkkel(Opptjeningsnøkkel nøkkel, OpptjeningAktivitetType type) { }
 
 
 }

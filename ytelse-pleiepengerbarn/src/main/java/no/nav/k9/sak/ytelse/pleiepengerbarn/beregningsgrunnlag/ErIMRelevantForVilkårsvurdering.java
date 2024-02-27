@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
 
 import static no.nav.k9.sak.domene.opptjening.aksjonspunkt.MapYrkesaktivitetTilOpptjeningsperiodeTjeneste.mapYrkesaktivitet;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -48,14 +49,20 @@ class ErIMRelevantForVilkårsvurdering {
 
 
     boolean harGodkjentAktivitet(Inntektsmelding inntektsmelding) {
-        var yrkesaktiviteter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(behandlingReferanse.getAktørId())).getAlleYrkesaktiviteter().stream().filter(y -> y.gjelderFor(inntektsmelding.getArbeidsgiver(), inntektsmelding.getArbeidsforholdRef())).collect(Collectors.toSet());
+        var alleYrkesaktiviteter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(behandlingReferanse.getAktørId())).getAlleYrkesaktiviteter();
+        var yrkesaktiviteter = alleYrkesaktiviteter.stream().filter(y -> y.gjelderFor(inntektsmelding.getArbeidsgiver(), inntektsmelding.getArbeidsforholdRef())).collect(Collectors.toSet());
         var opptjeningsperioder = yrkesaktiviteter.stream()
             .flatMap(y -> finnOpptjeningsperiodeForYrkesaktivitet(y).stream())
             .toList();
         var aktivitetTilBrukIBeregning = FiltrerOpptjeningaktivitetForBeregning.filtrerForBeregning(vilkårsperiode, opptjeningsperioder, vilkårUtfallMerknad, opptjening);
-        return !aktivitetTilBrukIBeregning.isEmpty();
+        return !aktivitetTilBrukIBeregning.isEmpty() || erInaktiv(vilkårUtfallMerknad);
 
     }
+
+    private static boolean erInaktiv(VilkårUtfallMerknad vilkårUtfallMerknad) {
+        return VilkårUtfallMerknad.VM_7847_B.equals(vilkårUtfallMerknad) || VilkårUtfallMerknad.VM_7847_A.equals(vilkårUtfallMerknad);
+    }
+
 
     private List<OpptjeningsperiodeForSaksbehandling> finnOpptjeningsperiodeForYrkesaktivitet(Yrkesaktivitet y) {
         return mapYrkesaktivitet(behandlingReferanse, y, iayGrunnlag, utfallVurderer, OpptjeningAktivitetType.hentFraArbeidTypeRelasjoner(), opptjening.getOpptjeningPeriode(), vilkårsperiode, tidslinjePrYtelse);

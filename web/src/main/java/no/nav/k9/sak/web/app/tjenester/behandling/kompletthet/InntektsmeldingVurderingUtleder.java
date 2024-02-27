@@ -13,6 +13,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.behandling.steg.kompletthet.KompletthetForBeregningTjeneste;
+import no.nav.k9.sak.domene.behandling.steg.kompletthet.RelevantPeriodeUtleder;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.kompletthet.ArbeidsgiverArbeidsforholdIdV2;
@@ -30,11 +31,15 @@ class InntektsmeldingVurderingUtleder {
     private final KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
     private final Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
 
+    private final RelevantPeriodeUtleder relevantPeriodeUtleder;
+
     @Inject
     InntektsmeldingVurderingUtleder(KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste,
-                                    @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
+                                    @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
+                                    RelevantPeriodeUtleder relevantPeriodeUtleder) {
         this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
+        this.relevantPeriodeUtleder = relevantPeriodeUtleder;
     }
 
     VurderingPerPeriode utled(BehandlingReferanse ref) {
@@ -51,8 +56,8 @@ class InntektsmeldingVurderingUtleder {
         var resultat = new ArrayList<VurderingPåPeriode>();
 
         for (DatoIntervallEntitet periode : perioderTilVurdering) {
-            var relevantPeriode = kompletthetForBeregningTjeneste.utledRelevantPeriode(ref, periode);
-            var aktuelleInntektsmeldinger = kompletthetForBeregningTjeneste.utledRelevanteInntektsmeldinger(alleInntektsmeldinger, relevantPeriode);
+            var relevantPeriode = relevantPeriodeUtleder.utledRelevantPeriode(ref, periode);
+            var aktuelleInntektsmeldinger = relevantPeriodeUtleder.utledRelevanteInntektsmeldinger(alleInntektsmeldinger, relevantPeriode);
             var inntektsmeldingerSomSendesInnTilBeregning = kompletthetForBeregningTjeneste.utledInntektsmeldingerSomSendesInnTilBeregningForPeriode(ref, alleInntektsmeldinger, periode);
 
             var utdaterteInntektsmeldinger = aktuelleInntektsmeldinger.stream()
