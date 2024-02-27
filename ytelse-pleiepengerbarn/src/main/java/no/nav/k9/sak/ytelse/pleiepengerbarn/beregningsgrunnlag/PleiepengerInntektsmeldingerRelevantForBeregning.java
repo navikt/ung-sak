@@ -21,6 +21,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelev
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.behandling.steg.kompletthet.KompletthetForBeregningTjeneste;
+import no.nav.k9.sak.domene.behandling.steg.kompletthet.RelevantPeriodeUtleder;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
@@ -30,20 +31,20 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 @FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
 public class PleiepengerInntektsmeldingerRelevantForBeregning implements InntektsmeldingerRelevantForBeregning {
 
-    private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
+    private RelevantPeriodeUtleder relevantPeriodeUtleder;
 
     public PleiepengerInntektsmeldingerRelevantForBeregning() {
     }
 
     @Inject
-    public PleiepengerInntektsmeldingerRelevantForBeregning(KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste) {
-        this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
+    public PleiepengerInntektsmeldingerRelevantForBeregning(RelevantPeriodeUtleder relevantPeriodeUtleder) {
+        this.relevantPeriodeUtleder = relevantPeriodeUtleder;
     }
 
     @Override
     public Collection<Inntektsmelding> begrensSakInntektsmeldinger(BehandlingReferanse referanse, Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
-        var relevantPeriode = kompletthetForBeregningTjeneste.utledRelevantPeriode(referanse, vilkårsPeriode);
-        return kompletthetForBeregningTjeneste.utledRelevanteInntektsmeldinger(new HashSet<>(sakInntektsmeldinger), relevantPeriode);
+        var relevantPeriode = relevantPeriodeUtleder.utledRelevantPeriode(referanse, vilkårsPeriode);
+        return relevantPeriodeUtleder.utledRelevanteInntektsmeldinger(new HashSet<>(sakInntektsmeldinger), relevantPeriode);
     }
 
     @Override

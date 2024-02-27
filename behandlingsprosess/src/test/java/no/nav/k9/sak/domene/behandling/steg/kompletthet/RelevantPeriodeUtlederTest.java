@@ -11,15 +11,16 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
-class KompletthetForBeregningTjenesteTest {
+class RelevantPeriodeUtlederTest {
 
-    private KompletthetForBeregningTjeneste sjekker = new KompletthetForBeregningTjeneste();
+    private RelevantPeriodeUtleder utleder = new RelevantPeriodeUtleder();
+
 
     @Test
     void skal_utlede_relevant_periode_ved_ingen_overlapp() {
         var tidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(LocalDate.now().minusWeeks(6), LocalDate.now().minusWeeks(5), true), new LocalDateSegment<>(LocalDate.now(), LocalDate.now().plusWeeks(1), true)));
 
-        var relevantPeriode = sjekker.utledRelevantPeriode(tidslinje, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusWeeks(1)));
+        var relevantPeriode = utleder.utledRelevantPeriode(tidslinje, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusWeeks(1)));
 
         assertThat(relevantPeriode).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusWeeks(4), LocalDate.now().plusWeeks(5)));
     }
@@ -30,7 +31,7 @@ class KompletthetForBeregningTjenesteTest {
             new LocalDateSegment<>(LocalDate.now().minusDays(90-28), LocalDate.now().minusDays(90-29-30), true),
             new LocalDateSegment<>(LocalDate.now(), LocalDate.now().plusWeeks(1), true)));
 
-        var relevantPeriode = sjekker.utledRelevantPeriode(tidslinje, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(100), LocalDate.now().minusDays(90)));
+        var relevantPeriode = utleder.utledRelevantPeriode(tidslinje, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(100), LocalDate.now().minusDays(90)));
 
         assertThat(relevantPeriode).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(100).minusWeeks(4), LocalDate.now().minusDays(90-29-30).plusWeeks(4)));
     }
@@ -39,7 +40,7 @@ class KompletthetForBeregningTjenesteTest {
     void skal_utlede_relevant_periode_ved_en_overlapp() {
         var tidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(LocalDate.now().minusWeeks(6), LocalDate.now().minusWeeks(3), true), new LocalDateSegment<>(LocalDate.now(), LocalDate.now().plusWeeks(1), true)));
 
-        var relevantPeriode = sjekker.utledRelevantPeriode(tidslinje, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusWeeks(1)));
+        var relevantPeriode = utleder.utledRelevantPeriode(tidslinje, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusWeeks(1)));
 
         assertThat(relevantPeriode).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusWeeks(10), LocalDate.now().plusWeeks(5)));
     }
@@ -53,8 +54,10 @@ class KompletthetForBeregningTjenesteTest {
             new LocalDateSegment<>(LocalDate.now().plusWeeks(4), LocalDate.now().plusWeeks(7), true),
             new LocalDateSegment<>(LocalDate.now().plusWeeks(10), LocalDate.now().plusWeeks(12), true)));
 
-        var relevantPeriode = sjekker.utledRelevantPeriode(tidslinje, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusWeeks(1)));
+        var relevantPeriode = utleder.utledRelevantPeriode(tidslinje, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusWeeks(1)));
 
         assertThat(relevantPeriode).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusWeeks(14), LocalDate.now().plusWeeks(16)));
     }
+
+
 }

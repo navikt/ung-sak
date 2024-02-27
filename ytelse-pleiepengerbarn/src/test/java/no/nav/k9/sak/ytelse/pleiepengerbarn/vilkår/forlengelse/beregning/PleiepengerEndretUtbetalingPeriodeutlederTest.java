@@ -130,9 +130,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
             null,
             null,
             null,
-            null,
-            null,
-            fagsakRepository
+            null
         );
         var erEndringIRefusjonskravVurderer = new ErEndringIRefusjonskravVurderer(
             behandlingRepository, kompletthetForBeregningTjeneste,
