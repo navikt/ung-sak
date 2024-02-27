@@ -437,7 +437,7 @@ class MapOppgittFraværOgVilkårsResultatTest {
         var aktivitetPeriodeSN = OpptjeningAktivitetPeriode.Builder.ny()
             .medOpptjeningsnøkkel(new Opptjeningsnøkkel(InternArbeidsforholdRef.nullRef(), arbeidsgiver.getArbeidsgiverOrgnr(), null))
             .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), LocalDate.now()))
-            .medVurderingsStatus(VurderingsStatus.FERDIG_VURDERT_GODKJENT)
+            .medVurderingsStatus(VurderingsStatus.GODKJENT)
             .medOpptjeningAktivitetType(OpptjeningAktivitetType.NÆRING)
             .build();
         var opptjeningAktivitetPerioder = new TreeMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>>();
@@ -471,7 +471,7 @@ class MapOppgittFraværOgVilkårsResultatTest {
         var aktivitetPeriodeFL = OpptjeningAktivitetPeriode.Builder.ny()
             .medOpptjeningsnøkkel(new Opptjeningsnøkkel(InternArbeidsforholdRef.nullRef(), null, aktørDummy.getAktørId()))
             .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), LocalDate.now()))
-            .medVurderingsStatus(VurderingsStatus.FERDIG_VURDERT_GODKJENT)
+            .medVurderingsStatus(VurderingsStatus.GODKJENT)
             .medOpptjeningAktivitetType(OpptjeningAktivitetType.FRILANS)
             .build();
         var opptjeningAktivitetPerioder = new TreeMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>>();
