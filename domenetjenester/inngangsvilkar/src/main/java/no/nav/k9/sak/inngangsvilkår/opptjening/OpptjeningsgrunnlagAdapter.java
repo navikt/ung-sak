@@ -162,19 +162,10 @@ class OpptjeningsgrunnlagAdapter {
         OpptjeningAktivitetPeriode første = førsteVersjon.getValue();
         OpptjeningAktivitetPeriode siste = sisteVersjon.getValue();
 
-        //FERDIG_VURDERT_UNDERKJENT er nederst
-        if (VurderingsStatus.FERDIG_VURDERT_UNDERKJENT.equals(første.getVurderingsStatus()) &&
-            !VurderingsStatus.FERDIG_VURDERT_UNDERKJENT.equals(siste.getVurderingsStatus())) {
-            return lagSegment(di, siste);
-        } else if (VurderingsStatus.FERDIG_VURDERT_UNDERKJENT.equals(siste.getVurderingsStatus()) &&
-            !VurderingsStatus.FERDIG_VURDERT_UNDERKJENT.equals(første.getVurderingsStatus())) {
-            return lagSegment(di, første);
-        } else if (VurderingsStatus.FERDIG_VURDERT_GODKJENT.equals(første.getVurderingsStatus())) {
-            return lagSegment(di, første);
-        } else if (VurderingsStatus.FERDIG_VURDERT_GODKJENT.equals(siste.getVurderingsStatus())) {
+        if (VurderingsStatus.TIL_VURDERING.equals(siste.getVurderingsStatus())) {
             return lagSegment(di, siste);
         } else {
-            return førsteVersjon;
+            return lagSegment(di, første);
         }
     }
 
