@@ -2,6 +2,8 @@ package no.nav.k9.sak.web.app.tjenester.saksnummer;
 
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +25,7 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.saksnummer.ReservertSaksnummerEntitet;
 import no.nav.k9.sak.behandlingslager.saksnummer.ReservertSaksnummerRepository;
 import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
@@ -30,6 +33,7 @@ import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.mottak.HentReservertSaksnummerDto;
 import no.nav.k9.sak.kontrakt.mottak.ReserverSaksnummerDto;
+import no.nav.k9.sak.kontrakt.person.AktørIdDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
@@ -70,13 +74,28 @@ public class SaksnummerRestTjeneste {
         if (!enableReservertSaksnummer) {
             throw new UnsupportedOperationException("Funksjonaliteten er avskrudd");
         }
+        if (List.of(FagsakYtelseType.OMSORGSPENGER, FagsakYtelseType.OMSORGSPENGER_AO, FagsakYtelseType.OMSORGSPENGER_KS, FagsakYtelseType.OMSORGSPENGER_MA).contains(dto.getYtelseType())) {
+            if (dto.getBehandlingsår() == null) {
+                throw new IllegalArgumentException("Behandlingsår er påkrevd for omsorgspenger");
+            }
+        }
+
         sjekkAktørIdMotPdl(dto.getBrukerAktørId());
         if (dto.getPleietrengendeAktørId() != null) {
             sjekkAktørIdMotPdl(dto.getPleietrengendeAktørId());
         }
-        final SaksnummerDto saksnummer = new SaksnummerDto(saksnummerRepository.genererNyttSaksnummer());
-        reservertSaksnummerRepository.lagre(saksnummer.getVerdi(), dto.getYtelseType(), dto.getBrukerAktørId(), dto.getPleietrengendeAktørId());
-        log.info("Reserverte saksnummer: " + saksnummer);
+
+        SaksnummerDto saksnummer;
+        var eksisterende = reservertSaksnummerRepository.hent(dto.getYtelseType(), dto.getBrukerAktørId(), dto.getPleietrengendeAktørId(), dto.getBehandlingsår());
+        if (eksisterende.isPresent()) {
+            saksnummer = new SaksnummerDto(eksisterende.get().getSaksnummer());
+            log.info("Returnerer eksisterende reservert saksnummer: " + saksnummer);
+        } else {
+            saksnummer = new SaksnummerDto(saksnummerRepository.genererNyttSaksnummer());
+            reservertSaksnummerRepository.lagre(saksnummer.getVerdi(), dto.getYtelseType(), dto.getBrukerAktørId(), dto.getPleietrengendeAktørId(), dto.getBehandlingsår());
+            log.info("Reserverte nytt saksnummer: " + saksnummer);
+        }
+
         return saksnummer;
     }
 
@@ -93,11 +112,26 @@ public class SaksnummerRestTjeneste {
         return entitet.map(SaksnummerRestTjeneste::mapTilDto).orElse(null);
     }
 
+    @GET
+    @Path("/søker")
+    @Produces(JSON_UTF8)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Hent alle reserverte saksnummer på søker.", summary = ("Henter reserverte saksnummer med ytelse, bruker og pleietrengende"), tags = "saksnummer")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
+    public List<HentReservertSaksnummerDto> hentReserverteSaksnummerPåSøker(@NotNull @QueryParam("aktørId") @Parameter(description = "AktørIdDto") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) AktørIdDto dto) {
+        if (!enableReservertSaksnummer) {
+            throw new UnsupportedOperationException("Funksjonaliteten er avskrudd");
+        }
+        final var entiteter = reservertSaksnummerRepository.hent(dto.getAktørId());
+        return entiteter.stream().map(SaksnummerRestTjeneste::mapTilDto).toList();
+    }
+
     private static HentReservertSaksnummerDto mapTilDto(ReservertSaksnummerEntitet entitet) {
         return new HentReservertSaksnummerDto(entitet.getSaksnummer().getVerdi(),
             entitet.getYtelseType(),
             entitet.getBrukerAktørId().getAktørId(),
-            entitet.getPleietrengendeAktørId() != null ? entitet.getPleietrengendeAktørId().getAktørId() : null);
+            entitet.getPleietrengendeAktørId() != null ? entitet.getPleietrengendeAktørId().getAktørId() : null,
+            entitet.getBehandlingsår());
     }
 
     private void sjekkAktørIdMotPdl(String aktørId) {
