@@ -55,10 +55,10 @@ import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 @ApplicationScoped
-@ScopedRestIntegration(scopeKey = "fpabakus.scope", defaultScope = "api://prod-fss.teamforeldrepenger.fpabakus/.default")
-public class AbakusTjeneste {
+@ScopedRestIntegration(scopeKey = "k9abakus.scope", defaultScope = "api://prod-fss.k9saksbehandling.k9abakus/.default")
+public class K9AbakusTjeneste {
 
-    private static final Logger log = LoggerFactory.getLogger(AbakusTjeneste.class);
+    private static final Logger log = LoggerFactory.getLogger(K9AbakusTjeneste.class);
     private final ObjectMapper iayMapper = JsonObjectMapper.getMapper();
     private final ObjectWriter iayJsonWriter = iayMapper.writerWithDefaultPrettyPrinter();
     private final ObjectReader iayGrunnlagReader = iayMapper.readerFor(InntektArbeidYtelseGrunnlagDto.class);
@@ -85,27 +85,27 @@ public class AbakusTjeneste {
     private URI endpointRefusjonskravdatoer;
 
 
-    AbakusTjeneste() {
+    K9AbakusTjeneste() {
         // for CDI
     }
 
     @Inject
-    public AbakusTjeneste(OidcRestClient oidcRestClient,
-                          @KonfigVerdi(value = "fpabakus.url") URI endpoint,
-                          @KonfigVerdi(value = "abakus.callback.url") URI callbackUrl,
-                          @KonfigVerdi(value = "abakus.callback.scope") String callbackScope) {
+    public K9AbakusTjeneste(OidcRestClient oidcRestClient,
+                            @KonfigVerdi(value = "k9abakus.url") URI endpoint,
+                            @KonfigVerdi(value = "abakus.callback.url") URI callbackUrl,
+                            @KonfigVerdi(value = "abakus.callback.scope") String callbackScope) {
         this(endpoint, callbackUrl, callbackScope);
         this.restClient = oidcRestClient;
     }
 
-    public AbakusTjeneste(SystemUserOidcRestClient oidcRestClient,
-                          URI endpoint,
-                          URI callbackUrl) {
+    public K9AbakusTjeneste(SystemUserOidcRestClient oidcRestClient,
+                            URI endpoint,
+                            URI callbackUrl) {
         this(endpoint, callbackUrl, null);
         this.restClient = oidcRestClient;
     }
 
-    private AbakusTjeneste(URI endpoint, URI callbackUrl, String callbackScope) {
+    private K9AbakusTjeneste(URI endpoint, URI callbackUrl, String callbackScope) {
         this.abakusEndpoint = endpoint;
         this.callbackUrl = callbackUrl;
         this.callbackScope = callbackScope;
@@ -249,9 +249,7 @@ public class AbakusTjeneste {
         }
     }
 
-    /**
-     * @deprecated bruk {@link #lagreOverstyrt(OverstyrtInntektArbeidYtelseDto)} i stedet .
-     */
+    /** @deprecated bruk {@link #lagreOverstyrt(OverstyrtInntektArbeidYtelseDto)} i stedet . */
     @Deprecated(forRemoval = true)
     public void lagreGrunnlag(InntektArbeidYtelseGrunnlagDto dto) throws IOException {
 
@@ -284,7 +282,7 @@ public class AbakusTjeneste {
         lagreInntektsmeldinger(dto.getKoblingReferanse(), json);
     }
 
-    private void lagreInntektsmeldinger(UUID referanse, String json) throws IOException, ClientProtocolException {
+    public void lagreInntektsmeldinger(UUID referanse, String json) throws IOException, ClientProtocolException {
         HttpPost httpPost = new HttpPost(endpointMottaInntektsmeldinger);
         httpPost.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
 

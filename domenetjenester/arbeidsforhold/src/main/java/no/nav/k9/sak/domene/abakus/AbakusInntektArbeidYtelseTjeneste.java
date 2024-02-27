@@ -66,6 +66,9 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
 
     private static final Logger log = LoggerFactory.getLogger(AbakusInntektArbeidYtelseTjeneste.class);
     private AbakusTjeneste abakusTjeneste;
+
+    private K9AbakusTjeneste k9abakusTjeneste;
+
     private BehandlingRepository behandlingRepository;
     private FagsakRepository fagsakRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
@@ -73,6 +76,8 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     private AsyncInntektArbeidYtelseTjeneste asyncIayTjeneste;
 
     private boolean filtrerUgyldigeInntektsmeldingerEnabled;
+
+    private boolean k9abakusEnabled;
 
 
     /**
@@ -87,12 +92,14 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
      */
     @Inject
     public AbakusInntektArbeidYtelseTjeneste(AbakusTjeneste abakusTjeneste,
-                                             AsyncInntektArbeidYtelseTjeneste asyncIayTjeneste,
+                                             K9AbakusTjeneste k9abakusTjeneste, AsyncInntektArbeidYtelseTjeneste asyncIayTjeneste,
                                              BehandlingRepository behandlingRepository,
                                              MottatteDokumentRepository mottatteDokumentRepository,
                                              FagsakRepository fagsakRepository,
                                              IAYRequestCache requestCache,
-                                             @KonfigVerdi(value = "FILTRER_UGYLDIG_IM", defaultVerdi = "false") boolean filtrerUgyldigeInntektsmeldingerEnabled) {
+                                             @KonfigVerdi(value = "FILTRER_UGYLDIG_IM", defaultVerdi = "false") boolean filtrerUgyldigeInntektsmeldingerEnabled,
+                                             @KonfigVerdi(value = "k9.abakus.enabled", defaultVerdi = "false") boolean k9abakusEnabled) {
+        this.k9abakusTjeneste = k9abakusTjeneste;
         this.behandlingRepository = Objects.requireNonNull(behandlingRepository, "behandlingRepository");
         this.abakusTjeneste = Objects.requireNonNull(abakusTjeneste, "abakusTjeneste");
         this.mottatteDokumentRepository = mottatteDokumentRepository;
@@ -100,6 +107,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         this.fagsakRepository = Objects.requireNonNull(fagsakRepository, "fagsakRepository");
         this.asyncIayTjeneste = asyncIayTjeneste;
         this.filtrerUgyldigeInntektsmeldingerEnabled = filtrerUgyldigeInntektsmeldingerEnabled;
+        this.k9abakusEnabled = k9abakusEnabled;
     }
 
     @Override
@@ -335,6 +343,13 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         var oppgittOpptjening = new IAYTilDtoMapper(behandling.getAktørId(), null, behandling.getUuid()).mapTilDto(oppgittOpptjeningBuilder);
         var request = new OppgittOpptjeningMottattRequest(saksnummer.getVerdi(), behandling.getUuid(), aktør, ytelseType, oppgittOpptjening);
 
+        if (k9abakusEnabled) {
+            try {
+                k9abakusTjeneste.lagreOverstyrtOppgittOpptjening(request);
+            } catch (Exception ignored) {
+            }
+        }
+
         try {
             abakusTjeneste.lagreOverstyrtOppgittOpptjening(request);
         } catch (IOException e) {
@@ -373,6 +388,15 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         var aktør = new AktørIdPersonident(behandling.getAktørId().getId());
         var ytelseType = YtelseType.fraKode(behandling.getFagsakYtelseType().getKode());
         var inntektsmeldingerMottattRequest = new InntektsmeldingerMottattRequest(saksnummer.getVerdi(), behandling.getUuid(), aktør, ytelseType, inntektsmeldingerDto);
+
+        if (k9abakusEnabled) {
+            try {
+                k9abakusTjeneste.lagreInntektsmeldinger(inntektsmeldingerMottattRequest);
+            } catch (Exception ignored) {
+            }
+        }
+
+
         try {
             abakusTjeneste.lagreInntektsmeldinger(inntektsmeldingerMottattRequest);
         } catch (IOException e) {
@@ -411,27 +435,56 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     }
 
     private InntektsmeldingerDto hentUnikeInntektsmeldinger(InntektsmeldingerRequest request) {
+        if (k9abakusEnabled) {
+            try {
+                return k9abakusTjeneste.hentUnikeUnntektsmeldinger(request);
+            } catch (Exception ignored) {
+
+            }
+        }
+
         try {
             return abakusTjeneste.hentUnikeUnntektsmeldinger(request);
         } catch (IOException e) {
             throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente inntektsmeldinger fra Abakus: " + e.getMessage(), e).toException();
         }
+
     }
 
     private InntektArbeidYtelseGrunnlagDto hentGrunnlag(InntektArbeidYtelseGrunnlagRequest request) {
+        if (k9abakusEnabled) {
+            try {
+                return k9abakusTjeneste.hentGrunnlag(request);
+            } catch (Exception ignored) {
+
+            }
+        }
+
         try {
             return abakusTjeneste.hentGrunnlag(request);
         } catch (IOException e) {
             throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente grunnlag fra Abakus: " + e.getMessage(), e).toException();
         }
+
     }
 
     private InntektArbeidYtelseGrunnlagSakSnapshotDto hentGrunnlagSnapshot(InntektArbeidYtelseGrunnlagRequest request) {
+
+        if (k9abakusEnabled) {
+            try {
+                return k9abakusTjeneste.hentGrunnlagSnapshot(request);
+            } catch (Exception ignored) {
+
+            }
+        }
+
         try {
             return abakusTjeneste.hentGrunnlagSnapshot(request);
         } catch (IOException e) {
             throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente grunnlag snapshot fra Abakus: " + e.getMessage(), e).toException();
         }
+
+
     }
 
     private InntektsmeldingAggregat mapResult(InntektsmeldingerDto dto) {
@@ -564,6 +617,15 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     }
 
     private UUID lagreOverstyrt(OverstyrtInntektArbeidYtelseDto dto) {
+        if (k9abakusEnabled) {
+            try {
+                k9abakusTjeneste.lagreOverstyrt(dto);
+                return dto.getGrunnlagReferanse();
+            } catch (Exception ignored) {
+
+            }
+        }
+
         try {
             abakusTjeneste.lagreOverstyrt(dto);
             return dto.getGrunnlagReferanse();
