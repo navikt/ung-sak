@@ -112,13 +112,13 @@ public class SaksnummerRestTjeneste {
         return entitet.map(SaksnummerRestTjeneste::mapTilDto).orElse(null);
     }
 
-    @GET
+    @POST
     @Path("/søker")
     @Produces(JSON_UTF8)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Hent alle reserverte saksnummer på søker.", summary = ("Henter reserverte saksnummer med ytelse, bruker og pleietrengende"), tags = "saksnummer")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
-    public List<HentReservertSaksnummerDto> hentReserverteSaksnummerPåSøker(@NotNull @QueryParam("aktørId") @Parameter(description = "AktørIdDto") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) AktørIdDto dto) {
+    public List<HentReservertSaksnummerDto> hentReserverteSaksnummerPåSøker(@NotNull @Parameter(description = "AktørIdDto") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) AktørIdDto dto) {
         if (!enableReservertSaksnummer) {
             throw new UnsupportedOperationException("Funksjonaliteten er avskrudd");
         }
