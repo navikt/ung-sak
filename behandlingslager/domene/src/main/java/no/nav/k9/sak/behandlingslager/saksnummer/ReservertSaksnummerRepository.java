@@ -1,5 +1,6 @@
 package no.nav.k9.sak.behandlingslager.saksnummer;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -27,6 +28,12 @@ public class ReservertSaksnummerRepository {
         final TypedQuery<ReservertSaksnummerEntitet> query = entityManager.createQuery("FROM ReservertSaksnummer where saksnummer=:saksnummer and slettet=false", ReservertSaksnummerEntitet.class);
         query.setParameter("saksnummer", saksnummer);
         return HibernateVerktøy.hentUniktResultat(query);
+    }
+
+    public List<ReservertSaksnummerEntitet> hent(AktørId brukerAktørId) {
+        final TypedQuery<ReservertSaksnummerEntitet> query = entityManager.createQuery("FROM ReservertSaksnummer where brukerAktørId=:brukerAktørId and slettet=false", ReservertSaksnummerEntitet.class);
+        query.setParameter("brukerAktørId", brukerAktørId);
+        return query.getResultList();
     }
 
     public Optional<ReservertSaksnummerEntitet> hent(FagsakYtelseType ytelseType, String brukerAktørId, String pleietrengendeAktørId, String behandlingsår) {

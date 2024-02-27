@@ -33,6 +33,7 @@ import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.mottak.HentReservertSaksnummerDto;
 import no.nav.k9.sak.kontrakt.mottak.ReserverSaksnummerDto;
+import no.nav.k9.sak.kontrakt.person.AktørIdDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
@@ -109,6 +110,20 @@ public class SaksnummerRestTjeneste {
         }
         final var entitet = reservertSaksnummerRepository.hent(dto.getVerdi());
         return entitet.map(SaksnummerRestTjeneste::mapTilDto).orElse(null);
+    }
+
+    @GET
+    @Path("/søker")
+    @Produces(JSON_UTF8)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Hent alle reserverte saksnummer på søker.", summary = ("Henter reserverte saksnummer med ytelse, bruker og pleietrengende"), tags = "saksnummer")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
+    public List<HentReservertSaksnummerDto> hentReserverteSaksnummerPåSøker(@NotNull @QueryParam("aktørId") @Parameter(description = "AktørIdDto") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) AktørIdDto dto) {
+        if (!enableReservertSaksnummer) {
+            throw new UnsupportedOperationException("Funksjonaliteten er avskrudd");
+        }
+        final var entiteter = reservertSaksnummerRepository.hent(dto.getAktørId());
+        return entiteter.stream().map(SaksnummerRestTjeneste::mapTilDto).toList();
     }
 
     private static HentReservertSaksnummerDto mapTilDto(ReservertSaksnummerEntitet entitet) {
