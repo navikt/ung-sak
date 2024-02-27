@@ -48,6 +48,7 @@
         <asm.version>9.6</asm.version>
         <kotlin-stdlib.version>1.9.22</kotlin-stdlib.version>
         <jandex.version>3.1.6</jandex.version>
+        <flyway.version>10.8.1</flyway.version>
 
     </properties>
 
@@ -607,6 +608,16 @@
                 <groupId>no.nav</groupId>
                 <artifactId>vault-jdbc</artifactId>
                 <version>1.3.10</version>
+            </dependency>
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-core</artifactId>
+                <version>${flyway.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-database-postgresql</artifactId>
+                <version>${flyway.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
