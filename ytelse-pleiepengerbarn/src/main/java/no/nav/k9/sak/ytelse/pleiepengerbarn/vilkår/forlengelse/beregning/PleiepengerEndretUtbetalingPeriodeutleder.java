@@ -4,6 +4,11 @@ import static java.lang.Boolean.TRUE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+import static no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.beregning.EndringsårsakUtbetaling.ENDRING_I_DATO_NYE_UTTAK_REGLER;
+import static no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.beregning.EndringsårsakUtbetaling.ENDRING_I_PERSONOPPLYSNING_PLEIETRENGENDE;
+import static no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.beregning.EndringsårsakUtbetaling.ENDRING_I_PERSONOPPLYSNING_SØKER;
+import static no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.beregning.EndringsårsakUtbetaling.ENDRING_I_REFUSJONSKRAV;
+import static no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.beregning.EndringsårsakUtbetaling.SØKNAD_FRA_BRUKER;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -14,11 +19,15 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.jetbrains.annotations.NotNull;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
@@ -127,27 +136,31 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
 
             return finnUttaksendringerSomOverlapperEllerErKantiKantMedPerioden(vilkårsperiode, tidslinje);
         } else {
-            var utvidetRevurderingPerioder = finnBerørtePerioderPåBarnet(behandlingReferanse, vilkårsperiode);
-            var endringstidslinjeRefusjonskrav = erEndringIRefusjonskravVurderer.finnEndringstidslinjeForRefusjon(behandlingReferanse, vilkårsperiode);
-            var søknadperioderForBehandlingTidslinje = finnTidslinjeForRelevanteSøknadsperioder(behandlingReferanse);
-            var personopplysningTidslinje = finnPersonopplysningTidslinje(behandlingReferanse, vilkårsperiode);
-            var datoNyeReglerTidslinje = finnDatoNyeReglerTidslinje(behandlingReferanse, vilkårsperiode);
-            var tidslinje = søknadperioderForBehandlingTidslinje
-                .crossJoin(endringstidslinjeRefusjonskrav, StandardCombinators::coalesceLeftHandSide)
-                .crossJoin(utvidetRevurderingPerioder, StandardCombinators::coalesceLeftHandSide)
-                .crossJoin(personopplysningTidslinje, StandardCombinators::coalesceLeftHandSide)
-                .crossJoin(datoNyeReglerTidslinje, StandardCombinators::coalesceLeftHandSide)
-                .compress();
-
-            tidslinje = fyllMellomromDersomKunHelg(tidslinje).compress();
-
+            var tidslinje = finnÅrsakstidslinje(behandlingReferanse, vilkårsperiode);
             return finnPerioderRelevantForAktuellVilkårsperiode(behandlingReferanse, vilkårsperiode, tidslinje);
         }
 
 
     }
 
-    private NavigableSet<DatoIntervallEntitet> finnPerioderRelevantForAktuellVilkårsperiode(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsperiode, LocalDateTimeline<Boolean> tidslinje) {
+    public LocalDateTimeline<Set<EndringsårsakUtbetaling>> finnÅrsakstidslinje(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsperiode) {
+        var utvidetRevurderingPerioder = finnBerørtePerioderPåBarnet(behandlingReferanse, vilkårsperiode);
+        var endringstidslinjeRefusjonskrav = erEndringIRefusjonskravVurderer.finnEndringstidslinjeForRefusjon(behandlingReferanse, vilkårsperiode).mapValue(it -> Set.of(ENDRING_I_REFUSJONSKRAV));
+        var søknadperioderForBehandlingTidslinje = finnTidslinjeForRelevanteSøknadsperioder(behandlingReferanse).mapValue(it -> Set.of(SØKNAD_FRA_BRUKER));
+        var personopplysningTidslinje = finnPersonopplysningTidslinje(behandlingReferanse, vilkårsperiode);
+        var datoNyeReglerTidslinje = finnDatoNyeReglerTidslinje(behandlingReferanse, vilkårsperiode).mapValue(it -> Set.of(ENDRING_I_DATO_NYE_UTTAK_REGLER));
+        var tidslinje = søknadperioderForBehandlingTidslinje
+            .crossJoin(endringstidslinjeRefusjonskrav, StandardCombinators::coalesceLeftHandSide)
+            .crossJoin(utvidetRevurderingPerioder, StandardCombinators::coalesceLeftHandSide)
+            .crossJoin(personopplysningTidslinje, StandardCombinators::coalesceLeftHandSide)
+            .crossJoin(datoNyeReglerTidslinje, StandardCombinators::coalesceLeftHandSide)
+            .compress();
+
+        tidslinje = fyllMellomromDersomKunHelg(tidslinje).compress();
+        return tidslinje;
+    }
+
+    private <T> NavigableSet<DatoIntervallEntitet> finnPerioderRelevantForAktuellVilkårsperiode(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsperiode, LocalDateTimeline<T> tidslinje) {
         var originalBehandlingId = behandlingReferanse.getOriginalBehandlingId()
             .orElseThrow(() -> new IllegalStateException("Forventer å finne original behandling"));
         var resultatperioder = new TreeSet<DatoIntervallEntitet>();
@@ -161,27 +174,27 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
         return resultatperioder;
     }
 
-    private LocalDateTimeline<Boolean> finnBerørtePerioderPåBarnet(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsperiode) {
+    private LocalDateTimeline<Set<EndringsårsakUtbetaling>> finnBerørtePerioderPåBarnet(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsperiode) {
         var tidslinjeMedÅrsaker = pleietrengendeRevurderingPerioderTjeneste.utledBerørtePerioderPåPleietrengende(behandlingReferanse, getPeriodeTjeneste(behandlingReferanse).definerendeVilkår());
-        return tidslinjeMedÅrsaker.mapValue(årsaker -> !årsaker.isEmpty()).intersection(vilkårsperiode.toLocalDateInterval());
+        return tidslinjeMedÅrsaker.filterValue(årsaker -> !årsaker.isEmpty()).intersection(vilkårsperiode.toLocalDateInterval()).mapValue(it -> Set.of(EndringsårsakUtbetaling.ENDRET_INFORMASJON_OM_PLEIETRENGENDE));
     }
 
-    private LocalDateTimeline<Boolean> finnPersonopplysningTidslinje(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsperiode) {
+    private LocalDateTimeline<Set<EndringsårsakUtbetaling>> finnPersonopplysningTidslinje(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsperiode) {
         var personopplysningerAggregat = personopplysningTjeneste.hentPersonopplysninger(behandlingReferanse, behandlingReferanse.getFagsakPeriode().getFomDato());
 
-        var personopplysningSegmenter = new ArrayList<LocalDateSegment<Boolean>>();
+        var personopplysningSegmenter = new ArrayList<LocalDateSegment<Set<EndringsårsakUtbetaling>>>();
         var søkersDødsdato = personopplysningerAggregat.getSøker().getDødsdato();
 
         if (erDødRelevantForPeriode(vilkårsperiode, søkersDødsdato)) {
-            personopplysningSegmenter.add(new LocalDateSegment<>(søkersDødsdato, vilkårsperiode.getTomDato(), true));
+            personopplysningSegmenter.add(new LocalDateSegment<>(søkersDødsdato, vilkårsperiode.getTomDato(), Set.of(ENDRING_I_PERSONOPPLYSNING_SØKER)));
         }
 
         var pleietengendeDødsdato = personopplysningerAggregat.getPersonopplysning(behandlingReferanse.getPleietrengendeAktørId()).getDødsdato();
         if (erDødRelevantForPeriode(vilkårsperiode, pleietengendeDødsdato)) {
-            personopplysningSegmenter.add(new LocalDateSegment<>(pleietengendeDødsdato, vilkårsperiode.getTomDato(), true));
+            personopplysningSegmenter.add(new LocalDateSegment<>(pleietengendeDødsdato, vilkårsperiode.getTomDato(), Set.of(ENDRING_I_PERSONOPPLYSNING_PLEIETRENGENDE)));
 
         }
-        return new LocalDateTimeline<>(personopplysningSegmenter, StandardCombinators::alwaysTrueForMatch);
+        return new LocalDateTimeline<>(personopplysningSegmenter, StandardCombinators::union);
     }
 
     private static boolean erDødRelevantForPeriode(DatoIntervallEntitet vilkårsperiode, LocalDate pleietengendeDødsdato) {
@@ -208,11 +221,26 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
         return LocalDateTimeline.empty();
     }
 
-    private static LocalDateTimeline<Boolean> fyllMellomromDersomKunHelg(LocalDateTimeline<Boolean> tidslinje) {
+    private static <T> LocalDateTimeline<T> fyllMellomromDersomKunHelg(LocalDateTimeline<T> tidslinje) {
         var mellomliggendeHelgUtleder = new MellomliggendeHelgUtleder();
         var mellomliggendePerioder = mellomliggendeHelgUtleder.beregnMellomliggendeHelg(tidslinje);
-        tidslinje = tidslinje.combine(mellomliggendePerioder, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        tidslinje = tidslinje.combine(mellomliggendePerioder,
+            kopierFraTilstøtendeVerdi(tidslinje), no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle.CROSS_JOIN);
         return tidslinje;
+    }
+
+    private static <T> LocalDateSegmentCombinator<T, Boolean, T> kopierFraTilstøtendeVerdi(LocalDateTimeline<T> tidslinje) {
+        return (di, lhs, rhs) -> {
+            if (lhs != null) {
+                return lhs;
+            } else if (rhs != null) {
+                var forrigeSegment = tidslinje.getSegment(new LocalDateInterval(di.getFomDato().minusDays(1), di.getFomDato().minusDays(1)));
+                if (forrigeSegment != null) {
+                    return new LocalDateSegment<>(di, forrigeSegment.getValue());
+                }
+            }
+            return null;
+        };
     }
 
     private LocalDateTimeline<Boolean> finnTidslinjeFraProsessTriggere(BehandlingReferanse behandlingReferanse) {
@@ -310,6 +338,5 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
 
         return new LocalDateTimeline<>(segmenter);
     }
-
 
 }
