@@ -59,14 +59,22 @@ jobs:
           ref: 'k9-sak-workflow' # Maybe just use main later
           token: ${{ steps.get-token.outputs.token }}
           path: k9-sak-typescript-client
-          fetch-depth: 0
+          fetch-depth: 1
+
+      - name: Kopier ny openapi til klient
+        shell: bash
+        working-directory: k9-sak
+        run: |
+          cp web/target/k9-sak.openapi.json ../k9-sak-typescript-client/src/
+      - name: Push ny openapi til klient repo
+        shell: bash
+        working-directory: k9-sak-typescript-client
         env:
           GIT_USER_NAME: "${{ github.actor }}"
           GIT_USER_EMAIL: "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
-        shell: bash
+          GITHUB_TOKEN: "${{ steps.get-token.outputs.token }}"
         run: |
-          cp ./k9-sak/web/target/k9-sak.openapi.json ./k9-sak-typescript-client/src/
-          cd ./k9-sak-typescript-client
+          git config --unset-all http.https://github.com/.extraheader
           git config user.email "$GIT_USER_EMAIL"
           git config user.name "$GIT_USER_NAME"
           git diff --quiet || (git add -A && git commit -m "k9-sak.openapi.json updated from k9-sak")
