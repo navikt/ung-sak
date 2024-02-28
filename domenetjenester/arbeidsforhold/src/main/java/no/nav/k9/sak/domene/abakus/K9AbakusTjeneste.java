@@ -396,13 +396,13 @@ public class K9AbakusTjeneste {
     public interface AbakusTjenesteFeil extends DeklarerteFeil {
         AbakusTjenesteFeil FEIL = FeilFactory.create(AbakusTjenesteFeil.class);
 
-        @TekniskFeil(feilkode = "FP-018669", feilmelding = "Feil ved kall til Abakus: %s", logLevel = LogLevel.ERROR)
+        @TekniskFeil(feilkode = "K9-018669", feilmelding = "Feil ved kall til k9-abakus: %s", logLevel = LogLevel.ERROR)
         Feil feilVedKallTilAbakus(String feilmelding);
 
-        @TekniskFeil(feilkode = "FP-918669", feilmelding = "Feil ved kall til Abakus: %s", logLevel = LogLevel.WARN)
+        @TekniskFeil(feilkode = "K9-918669", feilmelding = "Feil ved kall til k9-abakus: %s", logLevel = LogLevel.WARN)
         Feil feilKallTilAbakus(String feilmelding);
 
-        @TekniskFeil(feilkode = "FP-851387", feilmelding = "Feil ved kall til Abakus: %s", logLevel = LogLevel.WARN)
+        @TekniskFeil(feilkode = "K9-851387", feilmelding = "Feil ved kall til k9-abakus: %s", logLevel = LogLevel.WARN)
         Feil feilVedJsonParsing(String feilmelding);
 
     }
