@@ -47,8 +47,9 @@ jobs:
         env:
           GH_ACCESS_TOKEN: ${{ secrets.READER_TOKEN }}
         run: |
-          mvn --projects web compile exec:java -e --batch-mode --settings ./.github/.m2/settings.xml --file pom.xml
+          mvn compile -e --batch-mode --settings ./.github/.m2/settings.xml --file pom.xml
           echo "TAG=$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
+          exit 22
       - name: Sjekk ut k9-sak-typescript-client
         uses: actions/checkout@v4
         with:
