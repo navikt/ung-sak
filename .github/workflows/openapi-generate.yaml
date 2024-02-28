@@ -43,6 +43,8 @@ jobs:
       - name: Openapi generate
         shell: bash
         working-directory: k9-sak
+        env:
+          GH_ACCESS_TOKEN: ${{ secrets.READER_TOKEN }}
         run: |
           mvn --projects web compile exec:java --settings ./.github/.m2/settings.xml
           echo "TAG=$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
