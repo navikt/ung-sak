@@ -42,7 +42,7 @@ jobs:
           GH_ACCESS_TOKEN: ${{ secrets.READER_TOKEN }}
         run: |
           mvn install -e --batch-mode --settings ./.github/.m2/settings.xml -DskipTests=true
-          mvn exec:java --project web -e --batch-mode --settings ./.github/.m2/settings.xml
+          mvn exec:java --projects web -e --batch-mode --settings ./.github/.m2/settings.xml
           echo "TAG=$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
 
       - name: Cross repo token
