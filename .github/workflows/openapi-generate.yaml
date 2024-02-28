@@ -19,6 +19,7 @@ jobs:
     name: Generer og commit
     runs-on: ubuntu-latest
     permissions:
+      packages: read
       contents: read
 
     steps:
