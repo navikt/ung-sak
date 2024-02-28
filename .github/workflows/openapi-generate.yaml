@@ -25,9 +25,8 @@ jobs:
       - name: Set variables
         run: |
           echo "TIMESTAMP=$(expr $(date +%Y%m%d%H%M%S))" >> $GITHUB_ENV
-                - uses: navikt/github-app-token-generator@v1.2
-      - uses: navikt/github-app-token-generator@v1.2
-        name: Cross repo token
+      - name: Cross repo token
+        uses: navikt/github-app-token-generator@v1.2
         id: get-token
         with:
           private-key: ${{ secrets.K9SAKSBEHANDLING_PRIVATE_KEY }}
