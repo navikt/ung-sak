@@ -12,7 +12,6 @@ on:
       - 'LICENCE'
       - 'CODEOWNERS'
       - 'dev/**'
-  workflow_dispatch:
 
 jobs:
   build:
@@ -26,6 +25,7 @@ jobs:
       - name: Set variables
         run: |
           echo "TIMESTAMP=$(expr $(date +%Y%m%d%H%M%S))" >> $GITHUB_ENV
+          echo "TAG=$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
       - uses: actions/checkout@v4
         with:
           path: k9-sak
@@ -43,7 +43,6 @@ jobs:
         run: |
           mvn install -e --batch-mode --settings ./.github/.m2/settings.xml -DskipTests=true
           mvn exec:java --projects web -e --batch-mode --settings ./.github/.m2/settings.xml
-          echo "TAG=$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
 
       - name: Cross repo token
         uses: navikt/github-app-token-generator@v1.2
@@ -66,6 +65,7 @@ jobs:
         working-directory: k9-sak
         run: |
           cp web/target/k9-sak.openapi.json ../k9-sak-typescript-client/src/
+          echo "OPENAPI_VERSION=$(jq .info.version ./k9-sak.openapi.json)" >> $GITHUB_ENV
       - name: Push ny openapi til klient repo
         shell: bash
         working-directory: k9-sak-typescript-client
@@ -73,9 +73,10 @@ jobs:
           GIT_USER_NAME: "${{ github.actor }}"
           GIT_USER_EMAIL: "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
           GITHUB_TOKEN: "${{ steps.get-token.outputs.token }}"
+          VERSION_TAG: "v${{ env.OPENAPI_VERSION }}.${{ env.TAG }}"
         run: |
           git config user.email "$GIT_USER_EMAIL"
           git config user.name "$GIT_USER_NAME"
-          git diff --quiet || (git add -A && git commit -m "k9-sak.openapi.json updated from k9-sak")
-          git push
+          git diff --quiet || (git add -A && git commit -m "k9-sak.openapi.json updated from k9-sak" && git tag "${VERSION_TAG}")
+          git push origin "${VERSION_TAG}"
           
