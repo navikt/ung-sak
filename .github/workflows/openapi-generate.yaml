@@ -26,12 +26,6 @@ jobs:
       - name: Set variables
         run: |
           echo "TIMESTAMP=$(expr $(date +%Y%m%d%H%M%S))" >> $GITHUB_ENV
-      - name: Cross repo token
-        uses: navikt/github-app-token-generator@v1.2
-        id: get-token
-        with:
-          private-key: ${{ secrets.K9SAKSBEHANDLING_PRIVATE_KEY }}
-          app-id: ${{ secrets.K9SAKSBEHANDLING_APP_ID }}
       - uses: actions/checkout@v4
         with:
           path: k9-sak
@@ -47,9 +41,17 @@ jobs:
         env:
           GH_ACCESS_TOKEN: ${{ secrets.READER_TOKEN }}
         run: |
-          mvn compile -e --batch-mode --settings ./.github/.m2/settings.xml --file pom.xml
+          mvn compile -e --batch-mode --settings ./.github/.m2/settings.xml --file pom.xml -Dfile.encoding=UTF-8 -Penforcer
           echo "TAG=$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
           exit 22
+
+      - name: Cross repo token
+        uses: navikt/github-app-token-generator@v1.2
+        id: get-token
+        with:
+          private-key: ${{ secrets.K9SAKSBEHANDLING_PRIVATE_KEY }}
+          app-id: ${{ secrets.K9SAKSBEHANDLING_APP_ID }}
+
       - name: Sjekk ut k9-sak-typescript-client
         uses: actions/checkout@v4
         with:
@@ -58,6 +60,7 @@ jobs:
           token: ${{ steps.get-token.outputs.token }}
           path: k9-sak-typescript-client
           fetch-depth: 1
+
       - name: Kopier ny openapi til klient
         shell: bash
         working-directory: k9-sak
