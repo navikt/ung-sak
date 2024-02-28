@@ -41,9 +41,9 @@ jobs:
         env:
           GH_ACCESS_TOKEN: ${{ secrets.READER_TOKEN }}
         run: |
-          mvn compile -e --batch-mode --settings ./.github/.m2/settings.xml --file pom.xml -Dfile.encoding=UTF-8 -Penforcer
+          mvn install -e --batch-mode --settings ./.github/.m2/settings.xml -DskipTests=true
+          mvn exec:java --project web -e --batch-mode --settings ./.github/.m2/settings.xml
           echo "TAG=$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
-          exit 22
 
       - name: Cross repo token
         uses: navikt/github-app-token-generator@v1.2
