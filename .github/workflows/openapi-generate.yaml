@@ -44,7 +44,7 @@ jobs:
         shell: bash
         working-directory: k9-sak
         run: |
-          ./dev/generate-openapi-json.sh
+          mvn --projects web compile exec:java --settings ./.github/.m2/settings.xml
           echo "TAG=$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
       - name: Sjekk ut k9-sak-typescript-client
         uses: actions/checkout@v4
