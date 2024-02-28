@@ -14,6 +14,7 @@ import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.abakus.iaygrunnlag.request.Dataset;
 import no.nav.abakus.iaygrunnlag.request.KopierGrunnlagRequest;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -22,6 +23,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.UnderBehandlingProsessTask;
 import no.nav.k9.sak.domene.abakus.AbakusTjeneste;
+import no.nav.k9.sak.domene.abakus.K9AbakusTjeneste;
 
 @ApplicationScoped
 @ProsessTask(AsyncAbakusKopierGrunnlagTask.TASKTYPE)
@@ -37,6 +39,10 @@ class AsyncAbakusKopierGrunnlagTask extends UnderBehandlingProsessTask {
 
     private AbakusTjeneste abakusTjeneste;
 
+    private K9AbakusTjeneste k9AbakusTjeneste;
+
+    private boolean k9abakusEnabled;
+
     private BehandlingRepository behandlingRepository;
 
     AsyncAbakusKopierGrunnlagTask() {
@@ -44,10 +50,12 @@ class AsyncAbakusKopierGrunnlagTask extends UnderBehandlingProsessTask {
     }
 
     @Inject
-    AsyncAbakusKopierGrunnlagTask(BehandlingRepository behandlingRepository, BehandlingLåsRepository behandlingLåsRepository, AbakusTjeneste abakusTjeneste) {
+    AsyncAbakusKopierGrunnlagTask(BehandlingRepository behandlingRepository, BehandlingLåsRepository behandlingLåsRepository, AbakusTjeneste abakusTjeneste, @KonfigVerdi(value = "k9.abakus.enabled", defaultVerdi = "false") boolean k9abakusEnabled, K9AbakusTjeneste k9AbakusTjeneste) {
         super(behandlingRepository, behandlingLåsRepository);
         this.behandlingRepository = behandlingRepository;
         this.abakusTjeneste = abakusTjeneste;
+        this.k9AbakusTjeneste = k9AbakusTjeneste;
+        this.k9abakusEnabled = k9abakusEnabled;
     }
 
     @Override
@@ -65,6 +73,14 @@ class AsyncAbakusKopierGrunnlagTask extends UnderBehandlingProsessTask {
             YtelseType.fraKode(tilBehandling.getFagsakYtelseType().getKode()),
             new AktørIdPersonident(tilBehandling.getAktørId().getId()),
             dataset);
+
+        if (k9abakusEnabled) {
+            try {
+                k9AbakusTjeneste.kopierGrunnlag(request);
+            } catch (Exception ignored) {
+            }
+        }
+
         try {
             abakusTjeneste.kopierGrunnlag(request);
         } catch (IOException e) {

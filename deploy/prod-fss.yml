@@ -151,6 +151,10 @@ spec:
       value: http://fpabakus.teamforeldrepenger/fpabakus
     - name: FPABAKUS_SCOPE
       value: api://prod-fss.teamforeldrepenger.fpabakus/.default
+    - name: K9ABAKUS_URL
+      value: http://k9abakus.k9saksbehandling/k9/abakus
+    - name: K9ABAKUS_SCOPE
+      value: api://prod-fss.k9saksbehandling.k9-abakus/.default
     - name: FTKALKULUS_URL
       value: http://ftkalkulus.k9saksbehandling/ftkalkulus
     - name: FTKALKULUS_SCOPE
@@ -290,6 +294,8 @@ spec:
     - name: KODEVERK_SOM_STRING_TOPICS
       value: "false"
     - name: NY_VURDERINGSLOGIKK_IM
+      value: "false"
+    - name: K9_ABAKUS_ENABLED
       value: "false"
 
     # Konfigurasjoner

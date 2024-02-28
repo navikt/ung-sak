@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.abakus.iaygrunnlag.JsonObjectMapper;
 import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.prosesstask.api.ProsessTask;
@@ -25,6 +26,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.UnderBehandlingProsessTask;
 import no.nav.k9.sak.domene.abakus.AbakusTjeneste;
+import no.nav.k9.sak.domene.abakus.K9AbakusTjeneste;
 import no.nav.k9.sak.typer.JournalpostId;
 
 @ApplicationScoped
@@ -40,6 +42,10 @@ public class AsyncAbakusLagreOpptjeningTask extends UnderBehandlingProsessTask {
     public static final String BREVKODER = "opptjening.brevkoder";
 
     private AbakusTjeneste abakusTjeneste;
+
+    private K9AbakusTjeneste k9AbakusTjeneste;
+
+    private boolean k9abakusEnabled;
     private MottatteDokumentRepository mottatteDokumentRepository;
 
     AsyncAbakusLagreOpptjeningTask() {
@@ -50,10 +56,13 @@ public class AsyncAbakusLagreOpptjeningTask extends UnderBehandlingProsessTask {
     AsyncAbakusLagreOpptjeningTask(BehandlingRepository behandlingRepository,
                                    BehandlingLåsRepository behandlingLåsRepository,
                                    AbakusTjeneste abakusTjeneste,
-                                   MottatteDokumentRepository mottatteDokumentRepository) {
+                                   K9AbakusTjeneste k9AbakusTjeneste, MottatteDokumentRepository mottatteDokumentRepository,
+                                   @KonfigVerdi(value = "k9.abakus.enabled", defaultVerdi = "false") boolean k9abakusEnabled) {
         super(behandlingRepository, behandlingLåsRepository);
         this.abakusTjeneste = abakusTjeneste;
+        this.k9AbakusTjeneste = k9AbakusTjeneste;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
+        this.k9abakusEnabled = k9abakusEnabled;
     }
 
     @Override
@@ -88,6 +97,19 @@ public class AsyncAbakusLagreOpptjeningTask extends UnderBehandlingProsessTask {
 
     private void lagreOppgittOpptjening(ProsessTaskData input, boolean erFrisinn) {
         var jsonReader = JsonObjectMapper.getMapper().readerFor(OppgittOpptjeningMottattRequest.class);
+
+
+        if (k9abakusEnabled) {
+            try {
+                OppgittOpptjeningMottattRequest request = jsonReader.readValue(Objects.requireNonNull(input.getPayloadAsString(), "mangler payload"));
+                if (erFrisinn) {
+                    k9AbakusTjeneste.lagreOppgittOpptjening(request);
+                } else {
+                    k9AbakusTjeneste.lagreOppgittOpptjeningV2(request);
+                }
+            } catch (Exception ignored) {
+            }
+        }
 
         try {
             OppgittOpptjeningMottattRequest request = jsonReader.readValue(Objects.requireNonNull(input.getPayloadAsString(), "mangler payload"));
