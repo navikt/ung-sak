@@ -119,7 +119,7 @@ public class PleiepengerRelevanteIAYRegisterendringerUtleder implements Relevant
     private LocalDateTimeline<Endringstype> utledRelevantEndringstidslinje(UtledAktivitetsperiodeEndring.AktivitetsperiodeEndring aktivitetsendringer, List<UtledTilkjentYtelseEndring.EndringerForMottaker> endringerPrMottaker, Set<DatoIntervallEntitet> revurdertePerioder) {
         var tidslinjeForEndringIUtbetaling = finnTidslinjeForEndringIUtbetaling(aktivitetsendringer, endringerPrMottaker);
         var utvidet = utvidMedDagenFørStp(tidslinjeForEndringIUtbetaling, revurdertePerioder);
-        return aktivitetsendringer.endringstidslinje().intersection(utvidet, StandardCombinators::leftOnly);
+        return aktivitetsendringer.endringstidslinje().intersection(utvidet);
     }
 
     private LocalDateTimeline<Boolean> utvidMedDagenFørStp(LocalDateTimeline<Boolean> tidslinjeForEndringIUtbetaling, Set<DatoIntervallEntitet> vilkårsperioder) {
