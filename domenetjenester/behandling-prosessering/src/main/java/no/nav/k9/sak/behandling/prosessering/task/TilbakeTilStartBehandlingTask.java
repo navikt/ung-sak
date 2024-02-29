@@ -108,8 +108,10 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
             Set<FagsakYtelseType> rammevedtak_typer = Set.of(FagsakYtelseType.OMSORGSPENGER_KS, FagsakYtelseType.OMSORGSPENGER_MA, FagsakYtelseType.OMSORGSPENGER_AO);
             boolean erRammevedtak = rammevedtak_typer.contains(behandling.getFagsakYtelseType()); //rammevedtak-behandlinger oppdaterer ikke status på dokumentene
             if (harMottatteDokumenterTilBehandling(behandling) && !erRammevedtak) {
-                throw new IllegalStateException("Kan ikke hoppe tilbake når det er mottatte dokumenter som ikke har blitt behandlet ferdig.");
+                log.warn("Kan ikke hoppe tilbake når det er mottatte dokumenter som ikke har blitt behandlet ferdig.");
+                return; //ønsker ikke retry fordi premisset for opprettelse av tasken sannsynligvis ikke er gyldig lenger etter at dokumentet er ferdig mottatt
             }
+
             prosessTaskRepository.settFeiletTilSuspendert(fagsakId, behandling.getId());
 
             if (startSteg == BehandlingStegType.START_STEG) {
