@@ -1,17 +1,12 @@
 name: Openapi generate
 
 on:
-  push:
-    branches:
-      # While testing we trigger on this feature branch. Change to master when done.
-      - TSFF-236-mvn-generate-openapi
-    paths-ignore:
-      - '**.md'
-      - '**.MD'
-      - '.gitignore'
-      - 'LICENCE'
-      - 'CODEOWNERS'
-      - 'dev/**'
+  workflow_dispatch:
+    inputs:
+      buildTag:
+        description: The TAG environment variable from the master build workflow (TIMESTAMP-SHA)
+        required: true
+        type: string
 
 jobs:
   build:
@@ -22,10 +17,6 @@ jobs:
       contents: read
 
     steps:
-      - name: Set variables
-        run: |
-          echo "TIMESTAMP=$(expr $(date +%Y%m%d%H%M%S))" >> $GITHUB_ENV
-          echo "TAG=$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
       - uses: actions/checkout@v4
         with:
           path: k9-sak
@@ -81,7 +72,7 @@ jobs:
           GIT_USER_NAME: "${{ github.actor }}"
           GIT_USER_EMAIL: "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
           GITHUB_TOKEN: "${{ steps.get-token.outputs.token }}"
-          VERSION_TAG: "v${{ env.OPENAPI_VERSION }}.${{ env.TAG }}"
+          VERSION_TAG: "v${{ env.OPENAPI_VERSION }}.${{ inputs.buildTag }}"
         # git commit, tag og push ny k9-sak.openapi.json til k9-sak-typescript-client
         # NB: git diff framfor gjere at det berre blir gjort viss det faktisk er endringer i ny generert k9-sak.openapi.json
         run: |
