@@ -70,6 +70,7 @@ spec:
         - application: k9-formidling
         - application: k9-formidling-dokumentdata
         - application: k9-punsj
+        - application: k9-abakus
         - application: fpabakus
           namespace: teamforeldrepenger
         - application: k9-punsjbolle
