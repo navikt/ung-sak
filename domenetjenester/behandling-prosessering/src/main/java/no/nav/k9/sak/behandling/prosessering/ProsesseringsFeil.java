@@ -17,7 +17,4 @@ public interface ProsesseringsFeil extends DeklarerteFeil {
 
     @TekniskFeil(feilkode = "K9-858930", feilmelding = "Kan ikke kjøre fordi behandlingen er vurdert komplett men ikke klargjort med registerinnhenting: %s", logLevel = INFO)
     Feil kanIkkePlanleggeNyTaskPgaVentendeTaskerPåBehandling(Long behandlingId);
-
-    @TekniskFeil(feilkode = "K9-659041", feilmelding = "Kan ikke hoppe tilbake når det er mottatte dokumenter som ikke har blitt behandlet ferdig.", logLevel = INFO)
-    Feil kanIkkeHoppeTilbakeNårMottattDokumentIkkeBehandlet();
 }

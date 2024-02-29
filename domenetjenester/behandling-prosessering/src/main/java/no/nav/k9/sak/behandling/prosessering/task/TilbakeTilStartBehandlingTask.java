@@ -16,7 +16,6 @@ import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
-import no.nav.k9.sak.behandling.prosessering.ProsesseringsFeil;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -109,7 +108,7 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
             Set<FagsakYtelseType> rammevedtak_typer = Set.of(FagsakYtelseType.OMSORGSPENGER_KS, FagsakYtelseType.OMSORGSPENGER_MA, FagsakYtelseType.OMSORGSPENGER_AO);
             boolean erRammevedtak = rammevedtak_typer.contains(behandling.getFagsakYtelseType()); //rammevedtak-behandlinger oppdaterer ikke status på dokumentene
             if (harMottatteDokumenterTilBehandling(behandling) && !erRammevedtak) {
-                throw ProsesseringsFeil.FACTORY.kanIkkeHoppeTilbakeNårMottattDokumentIkkeBehandlet().toException();
+                throw new IllegalStateException("Kan ikke hoppe tilbake når det er mottatte dokumenter som ikke har blitt behandlet ferdig.");
             }
             prosessTaskRepository.settFeiletTilSuspendert(fagsakId, behandling.getId());
 
