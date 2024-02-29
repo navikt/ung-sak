@@ -1,5 +1,6 @@
 package no.nav.k9.sak.domene.arbeidsforhold;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -29,7 +30,7 @@ public class InaktivGrunnetPermisjonUtleder {
      */
     public static LocalDateTimeline<Boolean> utledTidslinjeForSammengengendePermisjonOver14Dager(Yrkesaktivitet yrkesaktivitet,
                                                                                                  Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse,
-                                                                                                 DatoIntervallEntitet vilkårsperiode) {
+                                                                                                 Collection<DatoIntervallEntitet> vilkårsperiode) {
         // Permisjoner på yrkesaktivitet
         LocalDateTimeline<Boolean> tidslinjeTilVurdering = PermisjonPerYrkesaktivitet.utledPermisjonPerYrkesaktivitet(yrkesaktivitet, tidslinjePerYtelse, vilkårsperiode);
 

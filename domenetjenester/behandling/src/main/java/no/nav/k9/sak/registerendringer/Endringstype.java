@@ -2,8 +2,8 @@ package no.nav.k9.sak.registerendringer;
 
 public enum Endringstype {
 
-    OPPHØRT_ARBEIDSFORHOLD,
-    FORLENGET_ARBEIDSFORHOLD,
+    FJERNET_PERIODE,
+    NY_PERIODE,
     ENDRET_INNTEKT,
     TILKOMMET_INNTEKT
 

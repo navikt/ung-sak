@@ -7,22 +7,22 @@ public class EndringerIAY {
 
     public static EndringerIAY INGEN_RELEVANTE_ENDRINGER = new EndringerIAY();
 
-    private List<ArbeidsgiverEndring> ansattforholdEndringer = new ArrayList<>();
-    private List<ArbeidsgiverEndring> inntektEndringer = new ArrayList<>();
+    private List<Aktivitetsendringer> ansattforholdEndringer = new ArrayList<>();
+    private List<Aktivitetsendringer> inntektEndringer = new ArrayList<>();
 
     private EndringerIAY() {
     }
 
-    public EndringerIAY(List<ArbeidsgiverEndring> ansattforholdEndringer, List<ArbeidsgiverEndring> inntektEndringer) {
+    public EndringerIAY(List<Aktivitetsendringer> ansattforholdEndringer, List<Aktivitetsendringer> inntektEndringer) {
         this.ansattforholdEndringer = ansattforholdEndringer;
         this.inntektEndringer = inntektEndringer;
     }
 
-    public List<ArbeidsgiverEndring> getAnsattforholdEndringer() {
+    public List<Aktivitetsendringer> getAnsattforholdEndringer() {
         return ansattforholdEndringer;
     }
 
-    public List<ArbeidsgiverEndring> getInntektEndringer() {
+    public List<Aktivitetsendringer> getInntektEndringer() {
         return inntektEndringer;
     }
 }
