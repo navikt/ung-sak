@@ -65,7 +65,7 @@ jobs:
         working-directory: k9-sak
         run: |
           cp web/target/k9-sak.openapi.json ../k9-sak-typescript-client/src/
-          echo "OPENAPI_VERSION=$(jq .info.version ./k9-sak.openapi.json)" >> $GITHUB_ENV
+          echo "OPENAPI_VERSION=$(jq .info.version ./web/target/k9-sak.openapi.json)" >> $GITHUB_ENV
       - name: Push ny openapi til klient repo
         shell: bash
         working-directory: k9-sak-typescript-client
