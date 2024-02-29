@@ -66,7 +66,7 @@ jobs:
         # Copy the generated openapi spec json to k9-sak-typescript-client, and extract its version number
         run: |
           cp web/target/k9-sak.openapi.json ../k9-sak-typescript-client/src/
-          echo "OPENAPI_VERSION=$(jq --exit-status --raw-output0 '.info.version | capture("^(?<major>\\d+)\\.(?<minor>\\d+)$") | .major + "." + .minor' ./web/target/k9-sak.openapi.json)" >> $GITHUB_ENV
+          echo "OPENAPI_VERSION=$(jq --exit-status --raw-output '.info.version | capture("^(?<major>\\d+)\\.(?<minor>\\d+)$") | .major + "." + .minor' ./web/target/k9-sak.openapi.json)" >> $GITHUB_ENV
       - name: Push ny openapi spec til klient repo
         shell: bash
         working-directory: k9-sak-typescript-client
