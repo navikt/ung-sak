@@ -4,6 +4,12 @@ inputs:
   patchVersion:
     description: The TAG environment variable from the master build workflow (TIMESTAMP-SHA)
     required: true
+  readerToken:
+    description: The secrets.READER_TOKEN allowing read of internal packages.
+    required: true
+  clientRepoToken:
+    description: A access token allowing writes to the k9-sak-typescipt-client repo
+    required: true
 
 
 runs:
@@ -22,24 +28,17 @@ runs:
       shell: bash
       working-directory: k9-sak
       env:
-        GH_ACCESS_TOKEN: ${{ secrets.READER_TOKEN }}
+        GH_ACCESS_TOKEN: ${{ inputs.readerToken }}
       run: |
         mvn install -e --batch-mode --settings ./.github/.m2/settings.xml -DskipTests=true
         mvn exec:java --projects web -e --batch-mode --settings ./.github/.m2/settings.xml
-
-    - name: Cross repo token
-      uses: navikt/github-app-token-generator@v1.2
-      id: get-token
-      with:
-        private-key: ${{ secrets.K9SAKSBEHANDLING_PRIVATE_KEY }}
-        app-id: ${{ secrets.K9SAKSBEHANDLING_APP_ID }}
 
     - name: Sjekk ut k9-sak-typescript-client
       uses: actions/checkout@v4
       with:
         repository: navikt/k9-sak-typescript-client
         ref: 'k9-sak-workflow' # Maybe just use main later
-        token: ${{ steps.get-token.outputs.token }}
+        token: ${{ inputs.clientRepoToken }}
         path: k9-sak-typescript-client
         fetch-depth: 0
 
@@ -63,7 +62,7 @@ runs:
       env:
         GIT_USER_NAME: "${{ github.actor }}"
         GIT_USER_EMAIL: "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
-        GITHUB_TOKEN: "${{ steps.get-token.outputs.token }}"
+        GITHUB_TOKEN: "${{ inputs.clientRepoToken }}"
         VERSION_TAG: "v${{ env.OPENAPI_VERSION }}.${{ inputs.patchVersion }}"
       # git commit, tag og push ny k9-sak.openapi.json til k9-sak-typescript-client
       # NB: git diff framfor gjere at det berre blir gjort viss det faktisk er endringer i ny generert k9-sak.openapi.json
