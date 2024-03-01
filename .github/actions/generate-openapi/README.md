@@ -13,6 +13,8 @@ versjon. Dette vil i neste omgang føre til at det blir publisert ny javascript 
 
 ### Inputs
 
-Nevnte _patchVersion_ er nødvendig. Dette skal settast til _TAG_ frå build workflow, altså (<TIMESTAMP>-<GIT_COMMIT_SHA>), feks _20240229124402-a2425c8_.
+- _patchVersion_ er nødvendig. Dette skal settast til _TAG_ frå build workflow, altså (<TIMESTAMP>-<GIT_COMMIT_SHA>), feks _20240229124402-a2425c8_.
+- _readerToken_: secrets.READER_TOKEN frå kallande workflow.
+- _clientRepoToken_: access token som tillater skriving til navikt/k9-sak-typescript-client repoet.
 
 
