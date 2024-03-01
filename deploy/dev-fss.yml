@@ -62,6 +62,9 @@ spec:
   accessPolicy:
     inbound:
       rules:
+        - application: k9-sak-web
+          namespace: k9saksbehandling
+          cluster: dev-gcp
         - application: k9-los-api
         - application: k9-fordel
         - application: k9-sak
