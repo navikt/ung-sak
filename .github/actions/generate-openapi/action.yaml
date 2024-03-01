@@ -69,4 +69,9 @@ runs:
       run: |
         git config user.email "$GIT_USER_EMAIL"
         git config user.name "$GIT_USER_NAME"
-        git diff --quiet || (git add -A && git commit -m "k9-sak.openapi.json updated from k9-sak" && git tag "${VERSION_TAG}" && git push origin k9-sak-workflow --tags)
+        git diff --quiet || ( \
+          git add -A && \
+          git commit -m "k9-sak.openapi.json updated from k9-sak" && \
+          git tag "${VERSION_TAG}" && \
+          git push origin k9-sak-workflow --tags \
+        )
