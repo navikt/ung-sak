@@ -6,15 +6,18 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -23,6 +26,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
@@ -104,6 +108,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraProsessTriggere(referanse));
         perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse, utledFullstendigePerioder(behandling.getId())));
         perioderTilVurdering.addAll(perioderSomSkalTilbakestilles(behandlingId));
+        perioderTilVurdering.addAll(perioderMedEndretVurderingForDefinerendeVilkår(referanse));
 
         return vilkår.getPerioder()
             .stream()
@@ -223,6 +228,38 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
             .filter(kp -> kp.isHarTrukketKrav() && kp.getBehandlingId().equals(behandlingId))
             .map(SøknadsperiodeTjeneste.Kravperiode::getPeriode)
             .collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    public NavigableSet<DatoIntervallEntitet> perioderMedEndretVurderingForDefinerendeVilkår(BehandlingReferanse behandlingReferanse) {
+        var tidslinje = finnUtfallstidslinjeForDefinerendeVilkår(vilkårResultatRepository.hent(behandlingReferanse.getBehandlingId()));
+        var originalTidslinje = behandlingReferanse.getOriginalBehandlingId().map(id -> finnUtfallstidslinjeForDefinerendeVilkår(vilkårResultatRepository.hent(id))).orElse(LocalDateTimeline.empty());
+        var endretTidslinje = tidslinje.crossJoin(originalTidslinje, PleiepengerVilkårsPerioderTilVurderingTjeneste::erEndret).filterValue(it -> it);
+        return TidslinjeUtil.tilDatoIntervallEntiteter(endretTidslinje);
+    }
+
+    private LocalDateTimeline<Boolean> finnUtfallstidslinjeForDefinerendeVilkår(Vilkårene vilkårene) {
+        LocalDateTimeline<Boolean> tidslinje = LocalDateTimeline.empty();
+
+        for (VilkårType vilkårType : definerendeVilkår()) {
+            var segmenter = vilkårene.getVilkår(vilkårType).orElseThrow()
+                .getPerioder()
+                .stream()
+                .filter(PleiepengerVilkårsPerioderTilVurderingTjeneste::erVurdert)
+                .map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), Objects.equals(Utfall.OPPFYLT, it.getGjeldendeUtfall())))
+                .collect(Collectors.toCollection(TreeSet::new));
+            tidslinje = tidslinje.combine(new LocalDateTimeline<>(segmenter), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+
+        var komprimert = tidslinje.compress();
+        return komprimert;
+    }
+
+    private static boolean erVurdert(VilkårPeriode it) {
+        return !it.getUtfall().equals(Utfall.IKKE_VURDERT) || !it.getUtfall().equals(Utfall.IKKE_RELEVANT);
+    }
+
+    private static LocalDateSegment<Boolean> erEndret(LocalDateInterval di, LocalDateSegment<Boolean> lhs, LocalDateSegment<Boolean> rhs) {
+        return new LocalDateSegment<>(di, !Objects.equals(lhs, rhs));
     }
 
     private LocalDateTimeline<Boolean> uttaksendringerSidenForrigeBehandling(BehandlingReferanse referanse) {
