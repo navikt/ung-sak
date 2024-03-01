@@ -74,6 +74,6 @@ runs:
         git diff --quiet src/k9-sak.openapi.json || ( \
           git add -A && \
           git commit -m "k9-sak.openapi.json updated from k9-sak" && \
-          git tag "${VERSION_TAG}" && \
+          git tag "v${VERSION_TAG}" && \
           git push origin k9-sak-workflow --tags \
         )
