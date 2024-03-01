@@ -68,7 +68,7 @@ runs:
       # git commit, tag og push ny k9-sak.openapi.json til k9-sak-typescript-client
       # NB: git diff framfor gjere at det berre blir gjort viss det faktisk er endringer i ny generert k9-sak.openapi.json
       run: |
-        jq --exit-status '.version = "${VERSION_TAG}"' package.json > package.json
+        jq --exit-status '.version = "${VERSION_TAG}"' package.json > package.json.new && mv package.json.new package.json
         git config user.email "$GIT_USER_EMAIL"
         git config user.name "$GIT_USER_NAME"
         git diff --quiet src/k9-sak.openapi.json || ( \
