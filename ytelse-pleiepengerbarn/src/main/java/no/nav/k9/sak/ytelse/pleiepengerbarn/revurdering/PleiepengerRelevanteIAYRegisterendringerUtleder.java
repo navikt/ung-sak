@@ -69,10 +69,10 @@ public class PleiepengerRelevanteIAYRegisterendringerUtleder implements Relevant
 
     @Override
     public EndringerIAY utledRelevanteEndringer(BehandlingReferanse behandlingReferanse) {
-        var endringerPrMottaker = utledTilkjentYtelseEndring.utledEndringer(behandlingReferanse);
+        var tilkjentYtelseEndringPrMottaker = utledTilkjentYtelseEndring.utledEndringer(behandlingReferanse);
         var aktivitetsperiodeEndringer = finnEndringerIAnsattperioder(behandlingReferanse);
         var revurdertePerioder = finnRevurdertePerioder(behandlingReferanse);
-        var endringerIAktivitetsperioder = finnRelevanteEndringerIAnsattperioderPrAktivitet(aktivitetsperiodeEndringer, endringerPrMottaker, revurdertePerioder);
+        var endringerIAktivitetsperioder = finnRelevanteEndringerIAnsattperioderPrAktivitet(aktivitetsperiodeEndringer, tilkjentYtelseEndringPrMottaker, revurdertePerioder);
         return new EndringerIAY(endringerIAktivitetsperioder, Collections.emptyList());
     }
 

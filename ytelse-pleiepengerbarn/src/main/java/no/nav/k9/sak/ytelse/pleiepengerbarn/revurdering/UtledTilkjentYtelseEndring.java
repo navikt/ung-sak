@@ -37,14 +37,13 @@ public class UtledTilkjentYtelseEndring {
     }
 
     public List<EndringerForMottaker> utledEndringer(BehandlingReferanse behandlingReferanse) {
+        var beregningsresultatEntitet = beregningsresultatRepository.hentEndeligBeregningsresultat(behandlingReferanse.getBehandlingId()).orElseThrow(() -> new IllegalStateException("Kan ikke utlede endring i tilkjent ytelse uten å ha lagret tilkjent ytelse"));
+        var originalBeregningsresultatEntitet = beregningsresultatRepository.hentEndeligBeregningsresultat(behandlingReferanse.getOriginalBehandlingId().orElseThrow(() -> new IllegalArgumentException("Kan ikke utlede tidslinjeMedEndringIYtelse dersom behandling ikke er revurdering")))
+            .orElseThrow(() -> new IllegalArgumentException("Original behandling har ikke tilkjent ytelse"));
+        return utledEndringer(beregningsresultatEntitet, originalBeregningsresultatEntitet);
+    }
 
-
-        var beregningsresultatEntitet = beregningsresultatRepository.hentEndeligBeregningsresultat(behandlingReferanse.getBehandlingId());
-        if (beregningsresultatEntitet.isEmpty()) {
-            throw new IllegalStateException("Kan ikke utlede endring i tilkjent ytelse uten å ha lagret tilkjent ytelse");
-        }
-
-        var originalBeregningsresultatEntitet = beregningsresultatRepository.hentEndeligBeregningsresultat(behandlingReferanse.getOriginalBehandlingId().orElseThrow(() -> new IllegalArgumentException("Kan ikke utlede tidslinjeMedEndringIYtelse dersom behandling ikke er revurdering")));
+    static List<EndringerForMottaker> utledEndringer(BeregningsresultatEntitet beregningsresultatEntitet, BeregningsresultatEntitet originalBeregningsresultatEntitet) {
         var utbetalingTidslinje = lagResultatTidslinje(beregningsresultatEntitet);
         var originalUtbetalingTidslinje = lagResultatTidslinje(originalBeregningsresultatEntitet);
         var endringstidslinje = utbetalingTidslinje.combine(originalUtbetalingTidslinje, UtledTilkjentYtelseEndring::finnMottakereMedEndring, LocalDateTimeline.JoinStyle.CROSS_JOIN);
@@ -152,9 +151,10 @@ public class UtledTilkjentYtelseEndring {
         return endringDagsats != 0 || endringUtbetalingsgrad.compareTo(BigDecimal.ZERO) != 0 || endringFeriepenger.compareTo(BigDecimal.ZERO) != 0;
     }
 
-    private static LocalDateTimeline<List<BeregningsresultatAndel>> lagResultatTidslinje(Optional<BeregningsresultatEntitet> beregningsresultatEntitet) {
-        var segmenter = beregningsresultatEntitet.stream()
-            .flatMap(br -> br.getBeregningsresultatPerioder().stream())
+    private static LocalDateTimeline<List<BeregningsresultatAndel>> lagResultatTidslinje(BeregningsresultatEntitet beregningsresultatEntitet) {
+        var segmenter = beregningsresultatEntitet
+            .getBeregningsresultatPerioder()
+            .stream()
             .map(p -> new LocalDateSegment<>(p.getPeriode().toLocalDateInterval(), p.getBeregningsresultatAndelList())).toList();
 
         return new LocalDateTimeline<>(segmenter);
