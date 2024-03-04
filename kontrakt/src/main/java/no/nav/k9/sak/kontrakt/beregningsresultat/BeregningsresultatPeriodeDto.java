@@ -30,13 +30,9 @@ public class BeregningsresultatPeriodeDto {
         private int dagsats;
         private LocalDate fom;
         private LocalDate tom;
-
-        private BigDecimal inntektGraderingsprosent;
         private BigDecimal totalUtbetalingsgradFraUttak;
         private BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
         private BigDecimal reduksjonsfaktorInaktivTypeA;
-        private BigDecimal graderingsfaktorInntekt;
-        private BigDecimal graderingsfaktorTid;
 
         private Builder() {
             this.andeler = new ArrayList<>();
@@ -56,11 +52,6 @@ public class BeregningsresultatPeriodeDto {
             return this;
         }
 
-        public Builder medInntektGraderingsprosent(BigDecimal inntektGraderingsprosent) {
-            this.inntektGraderingsprosent = inntektGraderingsprosent;
-            return this;
-        }
-
         public Builder medTotalUtbetalingsgradFraUttak(BigDecimal totalUtbetalingsgradFraUttak) {
             this.totalUtbetalingsgradFraUttak = totalUtbetalingsgradFraUttak;
             return this;
@@ -76,15 +67,6 @@ public class BeregningsresultatPeriodeDto {
             return this;
         }
 
-        public Builder medGraderingsfaktorInntekt(BigDecimal graderingsfaktorInntekt) {
-            this.graderingsfaktorInntekt = graderingsfaktorInntekt;
-            return this;
-        }
-
-        public Builder medGraderingsfaktorTid(BigDecimal graderingsfaktorTid) {
-            this.graderingsfaktorTid = graderingsfaktorTid;
-            return this;
-        }
 
         public Builder medFom(LocalDate fom) {
             this.fom = fom;
@@ -107,13 +89,6 @@ public class BeregningsresultatPeriodeDto {
     @Max(100000)
     private int dagsats;
 
-    @JsonProperty(value = "inntektGraderingsprosent")
-    @DecimalMin("0")
-    @DecimalMax("100")
-    @Digits(integer = 3, fraction = 2)
-    @Valid
-    private BigDecimal inntektGraderingsprosent;
-
     @JsonProperty(value = "totalUtbetalingsgradFraUttak")
     @DecimalMin("0")
     @DecimalMax("1")
@@ -135,20 +110,6 @@ public class BeregningsresultatPeriodeDto {
     @Digits(integer = 10, fraction = 4)
     private BigDecimal reduksjonsfaktorInaktivTypeA;
 
-    @JsonProperty(value = "graderingsfaktorInntekt")
-    @DecimalMin("0")
-    @DecimalMax("100")
-    @Digits(integer = 3, fraction = 2)
-    @Valid
-    private BigDecimal graderingsfaktorInntekt;
-
-    @JsonProperty(value = "graderingsfaktorTid")
-    @DecimalMin("0")
-    @DecimalMax("100")
-    @Digits(integer = 3, fraction = 2)
-    @Valid
-    private BigDecimal graderingsfaktorTid;
-
     @JsonProperty(value = "fom", required = true)
     @Valid
     private LocalDate fom;
@@ -161,12 +122,9 @@ public class BeregningsresultatPeriodeDto {
         fom = builder.fom;
         tom = builder.tom;
         dagsats = builder.dagsats;
-        inntektGraderingsprosent = builder.inntektGraderingsprosent;
         totalUtbetalingsgradFraUttak = builder.totalUtbetalingsgradFraUttak;
         totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt = builder.totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
         reduksjonsfaktorInaktivTypeA = builder.reduksjonsfaktorInaktivTypeA;
-        graderingsfaktorInntekt = builder.graderingsfaktorInntekt;
-        graderingsfaktorTid = builder.graderingsfaktorTid;
         andeler = List.copyOf(builder.andeler);
     }
 
@@ -198,9 +156,6 @@ public class BeregningsresultatPeriodeDto {
         return tom;
     }
 
-    public BigDecimal getInntektGraderingsprosent() {
-        return inntektGraderingsprosent;
-    }
 
     public BigDecimal getTotalUtbetalingsgradFraUttak() {
         return totalUtbetalingsgradFraUttak;
@@ -212,14 +167,6 @@ public class BeregningsresultatPeriodeDto {
 
     public BigDecimal getReduksjonsfaktorInaktivTypeA() {
         return reduksjonsfaktorInaktivTypeA;
-    }
-
-    public BigDecimal getGraderingsfaktorInntekt() {
-        return graderingsfaktorInntekt;
-    }
-
-    public BigDecimal getGraderingsfaktorTid() {
-        return graderingsfaktorTid;
     }
 
     public void setAndeler(List<BeregningsresultatPeriodeAndelDto> andeler) {

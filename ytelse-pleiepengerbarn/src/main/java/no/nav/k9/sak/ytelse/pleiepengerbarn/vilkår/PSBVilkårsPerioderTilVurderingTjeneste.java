@@ -16,10 +16,8 @@ import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.domene.person.personopplysning.BasisPersonopplysningTjeneste;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.PleietrengendeRevurderingPerioderTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.RevurderingPerioderTjeneste;
 
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
@@ -37,9 +35,7 @@ public class PSBVilkårsPerioderTilVurderingTjeneste extends PleiepengerVilkårs
     public PSBVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) VilkårUtleder vilkårUtleder,
                                                   VilkårResultatRepository vilkårResultatRepository,
                                                   BehandlingRepository behandlingRepository,
-                                                  MedisinskGrunnlagTjeneste medisinskGrunnlagTjeneste,
-                                                  ErEndringPåEtablertTilsynTjeneste etablertTilsynTjeneste,
-                                                  EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
+                                                  PleietrengendeRevurderingPerioderTjeneste pleietrengendeRevurderingPerioderTjeneste,
                                                   BasisPersonopplysningTjeneste basisPersonopplysningsTjeneste,
                                                   RevurderingPerioderTjeneste revurderingPerioderTjeneste,
                                                   PersoninfoAdapter personinfoAdapter,
@@ -52,14 +48,10 @@ public class PSBVilkårsPerioderTilVurderingTjeneste extends PleiepengerVilkårs
                 VilkårType.MEDISINSKEVILKÅR_18_ÅR, PleietrengendeAlderPeriode.overEllerLik18(basisPersonopplysningsTjeneste, behandlingRepository, personinfoAdapter, søknadsperiodeTjeneste, true))
             , vilkårResultatRepository
             , behandlingRepository
-            , medisinskGrunnlagTjeneste
-            , etablertTilsynTjeneste
-            , endringUnntakEtablertTilsynTjeneste
             , revurderingPerioderTjeneste
-            , søknadsperiodeTjeneste
-            , utsattBehandlingAvPeriodeRepository
-            , endringIUttakPeriodeUtleder
-        );
+            , pleietrengendeRevurderingPerioderTjeneste, søknadsperiodeTjeneste
+            , utsattBehandlingAvPeriodeRepository,
+            endringIUttakPeriodeUtleder);
     }
 
     @Override

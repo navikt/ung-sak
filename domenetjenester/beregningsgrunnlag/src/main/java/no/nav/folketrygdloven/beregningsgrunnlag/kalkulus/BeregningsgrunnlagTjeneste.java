@@ -41,6 +41,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -365,8 +366,9 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
 
     private List<BgRef> finnReferanserSomIkkeLengerVurderesOgUlikInitiell(BehandlingReferanse ref,
                                                                           Optional<BeregningsgrunnlagPerioderGrunnlag> grunnlagOpt,
-                                                                          Optional<BeregningsgrunnlagPerioderGrunnlag> initiellVersjon) {
-        var perioderSomIkkeVurderes = vilkårTjeneste.utledPerioderSomIkkeVurderes(ref, VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+                                                                          Optional<BeregningsgrunnlagPerioderGrunnlag> initiellVersjon, NavigableSet<PeriodeTilVurdering> perioderTilVurdering) {
+        var intervaller = perioderTilVurdering.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toCollection(TreeSet::new));
+        var perioderSomIkkeVurderes = vilkårTjeneste.utledPerioderSomIkkeVurderes(ref, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, intervaller);
         return perioderSomIkkeVurderes.stream()
             .flatMap(periode -> grunnlagOpt.flatMap(gr -> gr.finnGrunnlagFor(periode.getFomDato())).stream())
             .map(p -> new BgRef(p.getEksternReferanse(), p.getSkjæringstidspunkt()))
@@ -375,15 +377,15 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     }
 
     @Override
-    public void gjenopprettReferanserTilInitiellDersomIkkeTilVurdering(BehandlingReferanse ref) {
-        var referanserSomIkkeLengerVurderes = finnReferanserSomMåResettes(ref);
+    public void gjenopprettReferanserTilInitiellDersomIkkeTilVurdering(BehandlingReferanse ref, NavigableSet<PeriodeTilVurdering> perioderTilVurdering) {
+        var referanserSomIkkeLengerVurderes = finnReferanserSomMåResettes(ref, perioderTilVurdering);
         referanserSomIkkeLengerVurderes.forEach(r -> grunnlagRepository.gjenopprettInitiellDersomUlikInitiell(ref.getBehandlingId(), r.getStp()));
     }
 
-    private List<BgRef> finnReferanserSomMåResettes(BehandlingReferanse ref) {
+    private List<BgRef> finnReferanserSomMåResettes(BehandlingReferanse ref, NavigableSet<PeriodeTilVurdering> perioderTilVurdering) {
         var grunnlagOpt = grunnlagRepository.hentGrunnlag(ref.getBehandlingId());
         Optional<BeregningsgrunnlagPerioderGrunnlag> initiellVersjon = Objects.equals(ref.getBehandlingType(), BehandlingType.REVURDERING) ? grunnlagRepository.getInitiellVersjon(ref.getBehandlingId()) : Optional.empty();
-        return finnReferanserSomIkkeLengerVurderesOgUlikInitiell(ref, grunnlagOpt, initiellVersjon);
+        return finnReferanserSomIkkeLengerVurderesOgUlikInitiell(ref, grunnlagOpt, initiellVersjon, perioderTilVurdering);
     }
 
     private List<LocalDate> finnSkjæringstidspunkter(Vilkår vilkår) {

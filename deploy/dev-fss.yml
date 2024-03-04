@@ -6,7 +6,7 @@ metadata:
   labels:
     team: k9saksbehandling
 spec:
-  image: {{ image }}
+  image: "{{ image }}"
   port: 8080
   liveness:
     path: /k9/sak/internal/health/isAlive
@@ -38,6 +38,7 @@ spec:
       memory: "1024Mi"
   ingresses:
     - "https://k9-sak.nais.preprod.local/"
+    - "https://k9-sak.dev-fss-pub.nais.io"
   kafka:
     pool: "nav-dev"
   vault:
@@ -61,6 +62,9 @@ spec:
   accessPolicy:
     inbound:
       rules:
+        - application: k9-sak-web
+          namespace: k9saksbehandling
+          cluster: dev-gcp
         - application: k9-los-api
         - application: k9-fordel
         - application: k9-sak
@@ -69,8 +73,12 @@ spec:
         - application: k9-formidling
         - application: k9-formidling-dokumentdata
         - application: k9-punsj
+        - application: k9-abakus
         - application: fpabakus
           namespace: teamforeldrepenger
+        - application: k9-punsjbolle
+          namespace: omsorgspenger
+          cluster: dev-gcp
 
   env:
     - name: TZ
@@ -148,6 +156,10 @@ spec:
       value: http://fpabakus.teamforeldrepenger/fpabakus
     - name: FPABAKUS_SCOPE
       value: api://dev-fss.teamforeldrepenger.fpabakus/.default
+    - name: K9ABAKUS_URL
+      value: http://k9abakus.k9saksbehandling/k9/abakus
+    - name: K9ABAKUS_SCOPE
+      value: api://dev-fss.k9saksbehandling.k9-abakus/.default
     - name: FTKALKULUS_URL
       value: http://ftkalkulus.k9saksbehandling/ftkalkulus
     - name: FTKALKULUS_SCOPE
@@ -263,11 +275,7 @@ spec:
       value: "true"
     - name: ENABLE_DATO_NY_REGEL_UTTAK
       value: "true"
-    - name: ENABLE_OVERSTYR_UTTAK
-      value: "true"
     - name: FILTRER_UGYLDIG_IM
-      value: "true"
-    - name: STONADSTATISTIKK_V2
       value: "true"
     - name: FJERN_VILKARSPERIODER_BEREGNING
       value: "false"
@@ -279,16 +287,21 @@ spec:
       value: "true"
     - name: OMP_RELEVANT_ENDRING_UTLEDNING
       value: "true"
-    - name: IM_SKAL_VURDERE_ENDRET_INNTEKT
-      value: "true"
     - name: FORLENGELSE_IM_OPPTJENING_FILTER
       value: "true"
     - name: DOKUMENTMOTTAK_VALIDER_JOURNALFORT
       value: "true"
-    - name: UTTAK_KLIPP_BORT_AVSLAG
-      value: "true"
     - name: UTVIDET_ENDRING_UTBETALING_UTLEDER
       value: "true"
+    - name: ENABLE_INNSYN_ENDRING_OBSERVER
+      value: "true"
+    - name: KODEVERK_SOM_STRING_TOPICS
+      value: "true"
+    - name: NY_VURDERINGSLOGIKK_IM
+      value: "true"
+    - name: K9_ABAKUS_ENABLED
+      value: "true"
+
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
@@ -307,7 +320,3 @@ spec:
 
     - name: PIP_USERS
       value: "srvPDP,srvk9-tilbake,srvsaf,Z993210,Z994080,Z994692"
-
-    # Pleiepenger infotrygd migrering
-    - name: INFOTRYGD_MIGRERING_TILLATELSER
-      value: "Z990404,Z990422,Z994004,Z994337,Z994185"

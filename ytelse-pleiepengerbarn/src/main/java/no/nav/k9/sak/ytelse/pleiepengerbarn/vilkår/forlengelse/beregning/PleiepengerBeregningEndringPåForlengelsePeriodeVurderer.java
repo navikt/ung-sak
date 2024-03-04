@@ -4,25 +4,27 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
-import java.util.Objects;
+import java.util.Collection;
 import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.HarEndretInntektsmeldingVurderer;
+import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.HarEndretInntektsmeldingVurderer;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingRelevantForVilkårsrevurdering;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingskontroll.VilkårTypeRef;
-import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
+import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.EndringPåForlengelseInput;
 import no.nav.k9.sak.perioder.EndringPåForlengelsePeriodeVurderer;
 import no.nav.k9.sak.trigger.ProsessTriggereRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.PSBEndringPåForlengelseInput;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.HarInntektsmeldingerRelevanteEndringerForPeriode;
 
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
@@ -40,13 +42,10 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
 
     private ProsessTriggereRepository prosessTriggereRepository;
 
-    private MottatteDokumentRepository mottatteDokumentRepository;
     private Instance<EndringPåForlengelsePeriodeVurderer> endringsVurderere;
     private HarEndretKompletthetVurderer harEndretKompletthetVurderer;
+    private HarInntektsmeldingerRelevanteEndringerForPeriode harInntektsmeldingerRelevanteEndringerForPeriode;
 
-    private HarEndretInntektsmeldingVurderer harEndretInntektsmeldingVurderer;
-
-    private HarRelvantInntektsmeldingendringForForlengelseIBeregning harRelevantEndringIInntektsmelding;
 
 
     PleiepengerBeregningEndringPåForlengelsePeriodeVurderer() {
@@ -54,18 +53,14 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
 
     @Inject
     public PleiepengerBeregningEndringPåForlengelsePeriodeVurderer(ProsessTriggereRepository prosessTriggereRepository,
-                                                                   MottatteDokumentRepository mottatteDokumentRepository,
                                                                    @Any Instance<EndringPåForlengelsePeriodeVurderer> endringsVurderere,
                                                                    HarEndretKompletthetVurderer harEndretKompletthetVurderer,
-                                                                   HarEndretInntektsmeldingVurderer harEndretInntektsmeldingVurderer,
-                                                                   HarRelvantInntektsmeldingendringForForlengelseIBeregning harRelvantInntektsmeldingendringForForlengelseIBeregning) {
+                                                                   HarInntektsmeldingerRelevanteEndringerForPeriode harInntektsmeldingerRelevanteEndringerForPeriode) {
 
         this.prosessTriggereRepository = prosessTriggereRepository;
-        this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.endringsVurderere = endringsVurderere;
         this.harEndretKompletthetVurderer = harEndretKompletthetVurderer;
-        this.harEndretInntektsmeldingVurderer = harEndretInntektsmeldingVurderer;
-        this.harRelevantEndringIInntektsmelding = harRelvantInntektsmeldingendringForForlengelseIBeregning;
+        this.harInntektsmeldingerRelevanteEndringerForPeriode = harInntektsmeldingerRelevanteEndringerForPeriode;
     }
 
     @Override
@@ -75,17 +70,8 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
         }
 
         var inntektsmeldinger = ((PSBEndringPåForlengelseInput) input).getSakInntektsmeldinger();
-        var mottatteInntektsmeldinger = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(input.getBehandlingReferanse().getFagsakId())
-            .stream()
-            .filter(it -> Objects.equals(Brevkode.INNTEKTSMELDING, it.getType()))
-            .toList();
-        if (harEndretInntektsmeldingVurderer.harEndringPåInntektsmeldingerTilBrukForPerioden(
-            input.getBehandlingReferanse(),
-            VilkårType.BEREGNINGSGRUNNLAGVILKÅR,
-            periode, inntektsmeldinger,
-            mottatteInntektsmeldinger,
-            harRelevantEndringIInntektsmelding
-        )) {
+        var harEndringer = !harInntektsmeldingerRelevanteEndringerForPeriode.finnInntektsmeldingerMedRelevanteEndringerForPeriode(inntektsmeldinger, input.getBehandlingReferanse(), periode, VilkårType.BEREGNINGSGRUNNLAGVILKÅR).isEmpty();
+        if (harEndringer) {
             return true;
         }
 
@@ -113,4 +99,5 @@ public class PleiepengerBeregningEndringPåForlengelsePeriodeVurderer implements
         }
         return false;
     }
+
 }

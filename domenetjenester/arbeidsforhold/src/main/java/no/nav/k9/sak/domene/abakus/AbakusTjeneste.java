@@ -8,9 +8,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
@@ -28,6 +25,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.abakus.iaygrunnlag.JsonObjectMapper;
 import no.nav.abakus.iaygrunnlag.UuidDto;
 import no.nav.abakus.iaygrunnlag.arbeidsforhold.v1.ArbeidsforholdDto;
@@ -84,6 +83,7 @@ public class AbakusTjeneste {
     private URI endpointGrunnlagSnapshot;
     private URI endpointInntektsmeldinger;
     private URI endpointRefusjonskravdatoer;
+
 
     AbakusTjeneste() {
         // for CDI
@@ -181,14 +181,6 @@ public class AbakusTjeneste {
         return hentFraAbakus(new HttpPost(endpoint), responseHandler, json);// NOSONAR håndterer i responseHandler
     }
 
-    public RefusjonskravDatoerDto hentRefusjonskravDatoer(InntektsmeldingerRequest request) throws IOException {
-        var endpoint = endpointRefusjonskravdatoer;
-        var reader = refusjonskravDatoerReader;
-        var responseHandler = new ObjectReaderResponseHandler<RefusjonskravDatoerDto>(endpoint, reader);
-        var json = iayJsonWriter.writeValueAsString(request);
-        return hentFraAbakus(new HttpPost(endpoint), responseHandler, json);// NOSONAR håndterer i responseHandler
-    }
-
     public InntektArbeidYtelseGrunnlagSakSnapshotDto hentGrunnlagSnapshot(InntektArbeidYtelseGrunnlagRequest request) throws IOException {
         var endpoint = endpointGrunnlagSnapshot;
         var reader = iayGrunnlagSnapshotReader;
@@ -257,7 +249,9 @@ public class AbakusTjeneste {
         }
     }
 
-    /** @deprecated bruk {@link #lagreOverstyrt(OverstyrtInntektArbeidYtelseDto)} i stedet . */
+    /**
+     * @deprecated bruk {@link #lagreOverstyrt(OverstyrtInntektArbeidYtelseDto)} i stedet .
+     */
     @Deprecated(forRemoval = true)
     public void lagreGrunnlag(InntektArbeidYtelseGrunnlagDto dto) throws IOException {
 
@@ -290,7 +284,7 @@ public class AbakusTjeneste {
         lagreInntektsmeldinger(dto.getKoblingReferanse(), json);
     }
 
-    public void lagreInntektsmeldinger(UUID referanse, String json) throws IOException, ClientProtocolException {
+    private void lagreInntektsmeldinger(UUID referanse, String json) throws IOException, ClientProtocolException {
         HttpPost httpPost = new HttpPost(endpointMottaInntektsmeldinger);
         httpPost.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
 

@@ -26,11 +26,6 @@ import no.nav.k9.sak.typer.Saksnummer;
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class StønadstatistikkHendelse {
-    
-    public static class View {
-        public static class V1 {}
-        public static class V2 extends V1 {}
-    }
 
     @JsonProperty(value = "ytelseType", required = true)
     @JsonDeserialize(using = PlainYtelseDeserializer.class)

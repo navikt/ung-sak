@@ -12,7 +12,6 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -31,28 +30,24 @@ public class PerioderMedSykdomInnvilgetUtleder {
     private final BehandlingRepository behandlingRepository;
     private final VilkårResultatRepository vilkårResultatRepository;
     private final Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
-    private final boolean ikkeVurderVedAvslag;
 
     @Inject
     public PerioderMedSykdomInnvilgetUtleder(BehandlingRepository behandlingRepository,
                                              VilkårResultatRepository vilkårResultatRepository,
-                                             @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
-                                             @KonfigVerdi(value = "UTTAK_KLIPP_BORT_AVSLAG", defaultVerdi = "false") boolean ikkeVurderVedAvslag
-    ) {
+                                             @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
-        this.ikkeVurderVedAvslag = ikkeVurderVedAvslag;
     }
 
-    public NavigableSet<DatoIntervallEntitet> utledInnvilgedePerioderTilVurdering(BehandlingReferanse referanse) {
+    public NavigableSet<DatoIntervallEntitet> utledInnvilgedePerioderTilVurdering(BehandlingReferanse referanse, boolean klippBortAvslagAndreVilkår) {
         var behandlingId = referanse.getBehandlingId();
         VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = finnVilkårsPerioderTjeneste(behandlingId);
         final var perioderVurdertISykdom = perioderTilVurderingTjeneste.utledFraDefinerendeVilkår(behandlingId);
 
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
 
-        return finnInnvilgedePerioder(behandlingId, vilkårene, perioderVurdertISykdom);
+        return finnInnvilgedePerioder(behandlingId, vilkårene, perioderVurdertISykdom, klippBortAvslagAndreVilkår);
     }
 
     private static LocalDateTimeline<Boolean> finnAvslåttTidslinjeAlleVilkår(Vilkårene vilkårene) {
@@ -65,7 +60,7 @@ public class PerioderMedSykdomInnvilgetUtleder {
         return new LocalDateTimeline<>(avslåttePerioder, StandardCombinators::alwaysTrueForMatch);
     }
 
-    private NavigableSet<DatoIntervallEntitet> finnInnvilgedePerioder(Long behandlingId, Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
+    private NavigableSet<DatoIntervallEntitet> finnInnvilgedePerioder(Long behandlingId, Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, boolean klippBortAvslagAndreVilkår) {
         VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = finnVilkårsPerioderTjeneste(behandlingId);
 
         var definerendeVilkår = vilkårsPerioderTilVurderingTjeneste.definerendeVilkår();
@@ -81,12 +76,10 @@ public class PerioderMedSykdomInnvilgetUtleder {
             tidslinje = tidslinje.combine(new LocalDateTimeline<>(segmenter), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
 
-        if (ikkeVurderVedAvslag) {
+        if (klippBortAvslagAndreVilkår) {
             var avslåttTidslinje = finnAvslåttTidslinjeAlleVilkår(vilkårene);
             tidslinje = tidslinje.disjoint(avslåttTidslinje);
-
         }
-
         tidslinje = tidslinje.filterValue(it -> it);
         return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje.compress());
     }

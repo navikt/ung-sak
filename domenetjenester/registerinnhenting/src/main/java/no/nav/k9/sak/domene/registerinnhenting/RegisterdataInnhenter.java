@@ -22,6 +22,7 @@ import no.nav.abakus.iaygrunnlag.Periode;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.abakus.iaygrunnlag.request.InnhentRegisterdataRequest;
 import no.nav.abakus.iaygrunnlag.request.RegisterdataType;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -50,6 +51,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsReposi
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.domene.abakus.AbakusTjeneste;
+import no.nav.k9.sak.domene.abakus.K9AbakusTjeneste;
 import no.nav.k9.sak.domene.medlem.MedlemTjeneste;
 import no.nav.k9.sak.domene.medlem.api.Medlemskapsperiode;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
@@ -68,6 +70,10 @@ public class RegisterdataInnhenter {
     private BehandlingRepository behandlingRepository;
     private MedlemskapRepository medlemskapRepository;
     private AbakusTjeneste abakusTjeneste;
+
+    private K9AbakusTjeneste k9AbakusTjeneste;
+
+    private boolean k9abakusEnabled;
     private BehandlingLåsRepository behandlingLåsRepository;
     private Instance<InformasjonselementerUtleder> informasjonselementer;
     private Instance<YtelsesspesifikkRelasjonsFilter> relasjonsFiltre;
@@ -83,9 +89,10 @@ public class RegisterdataInnhenter {
                                  BehandlingRepositoryProvider repositoryProvider,
                                  MedlemskapRepository medlemskapRepository,
                                  AbakusTjeneste abakusTjeneste,
-                                 @Any Instance<InformasjonselementerUtleder> utledInformasjonselementer,
+                                 K9AbakusTjeneste k9AbakusTjeneste, @Any Instance<InformasjonselementerUtleder> utledInformasjonselementer,
                                  @Any Instance<YtelsesspesifikkRelasjonsFilter> relasjonsFiltre,
-                                 @Any Instance<OpplysningsperiodeTjeneste> opplysningsperiodeTjeneste) {
+                                 @Any Instance<OpplysningsperiodeTjeneste> opplysningsperiodeTjeneste,
+                                 @KonfigVerdi(value = "k9.abakus.enabled", defaultVerdi = "false") boolean k9abakusEnabled) {
         this.personinfoAdapter = personinfoAdapter;
         this.medlemTjeneste = medlemTjeneste;
         this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
@@ -93,9 +100,11 @@ public class RegisterdataInnhenter {
         this.behandlingLåsRepository = repositoryProvider.getBehandlingLåsRepository();
         this.medlemskapRepository = medlemskapRepository;
         this.abakusTjeneste = abakusTjeneste;
+        this.k9AbakusTjeneste = k9AbakusTjeneste;
         this.informasjonselementer = utledInformasjonselementer;
         this.relasjonsFiltre = relasjonsFiltre;
         this.opplysningsperiodeTjeneste = opplysningsperiodeTjeneste;
+        this.k9abakusEnabled = k9abakusEnabled;
     }
 
     public Personinfo innhentSaksopplysningerForSøker(AktørId søkerAktørId) {
@@ -530,6 +539,18 @@ public class RegisterdataInnhenter {
         innhentRegisterdataRequest.setOpplysningsperiodeSkattegrunnlag(new Periode(opplysningsperiodeSkattegrunnlag.getFom(), opplysningsperiodeSkattegrunnlag.getTom()));
 
         abakusTjeneste.innhentRegisterdata(innhentRegisterdataRequest);
+
+        if (k9abakusEnabled) {
+            var innhentRegisterdataRequestK9Abakus = new InnhentRegisterdataRequest(saksnummer, behandlingUuid, ytelseType, periode, aktør, informasjonsElementer);
+            innhentRegisterdataRequestK9Abakus.setCallbackUrl(k9AbakusTjeneste.getCallbackUrl());
+            innhentRegisterdataRequestK9Abakus.setCallbackScope(k9AbakusTjeneste.getCallbackScope());
+            innhentRegisterdataRequestK9Abakus.setOpplysningsperiodeSkattegrunnlag(new Periode(opplysningsperiodeSkattegrunnlag.getFom(), opplysningsperiodeSkattegrunnlag.getTom()));
+            try {
+                k9AbakusTjeneste.innhentRegisterdata(innhentRegisterdataRequestK9Abakus);
+            } catch (Exception ignored) {
+
+            }
+        }
     }
 
     private Set<RegisterdataType> utledBasertPå(BehandlingType behandlingType, FagsakYtelseType ytelseType) {

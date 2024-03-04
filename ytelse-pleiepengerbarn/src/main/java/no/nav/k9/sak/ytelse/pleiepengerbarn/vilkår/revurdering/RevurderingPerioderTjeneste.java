@@ -14,6 +14,8 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.util.LRUCache;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
@@ -39,15 +41,22 @@ public class RevurderingPerioderTjeneste {
     private ProsessTriggereRepository prosessTriggereRepository;
     private Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregningTjenester;
 
+    private RevurderingInntektsmeldingPeriodeTjeneste revurderingInntektsmeldingPeriodeTjeneste;
+    private boolean nyVurderingslogikkInntektsmelding;
+
     @Inject
     public RevurderingPerioderTjeneste(MottatteDokumentRepository mottatteDokumentRepository,
                                        InntektArbeidYtelseTjeneste iayTjeneste,
                                        ProsessTriggereRepository prosessTriggereRepository,
-                                       @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregningTjenester) {
+                                       @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregningTjenester,
+                                       RevurderingInntektsmeldingPeriodeTjeneste revurderingInntektsmeldingPeriodeTjeneste,
+                                       @KonfigVerdi(value = "NY_VURDERINGSLOGIKK_IM", defaultVerdi = "false") boolean nyVurderingslogikkInntektsmelding) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.iayTjeneste = iayTjeneste;
         this.prosessTriggereRepository = prosessTriggereRepository;
         this.inntektsmeldingerRelevantForBeregningTjenester = inntektsmeldingerRelevantForBeregningTjenester;
+        this.revurderingInntektsmeldingPeriodeTjeneste = revurderingInntektsmeldingPeriodeTjeneste;
+        this.nyVurderingslogikkInntektsmelding = nyVurderingslogikkInntektsmelding;
     }
 
     RevurderingPerioderTjeneste() {
@@ -100,28 +109,34 @@ public class RevurderingPerioderTjeneste {
 
         var sakInntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer(), referanse.getAktørId(), referanse.getFagsakYtelseType());
 
-        var relevanteNyeInntektsmeldinger = new ArrayList<InntektsmeldingMedPerioder>();
 
-        var inntektsmeldingerRelevantForBeregning = InntektsmeldingerRelevantForBeregning.finnTjeneste(inntektsmeldingerRelevantForBeregningTjenester, referanse.getFagsakYtelseType());
-        for (DatoIntervallEntitet periode : datoIntervallEntitets) {
-            var relevanteInntektsmeldingerForPeriode = inntektsmeldingerRelevantForBeregning.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, periode);
-            var nyeRelevanteMottatteDokumenter = mottatteInntektsmeldinger.stream()
-                .filter(im -> relevanteInntektsmeldingerForPeriode.stream().anyMatch(at -> Objects.equals(at.getJournalpostId(), im.getJournalpostId())))
-                .toList();
-            var nyeRelevanteInntektsmeldinger = sakInntektsmeldinger.stream()
-                .filter(im -> nyeRelevanteMottatteDokumenter.stream().anyMatch(at -> Objects.equals(at.getJournalpostId(), im.getJournalpostId())))
-                .map(im -> new InntektsmeldingMedPerioder(im.getJournalpostId(), periode))
-                .toList();
+        if (nyVurderingslogikkInntektsmelding) {
+            var påvirketTidslinje = revurderingInntektsmeldingPeriodeTjeneste.utledTidslinjeForVurderingFraInntektsmelding(referanse, sakInntektsmeldinger, mottatteInntektsmeldinger, datoIntervallEntitets);
+            return påvirketTidslinje.getLocalDateIntervals().stream().map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFomDato(), it.getTomDato()))
+                .collect(Collectors.toCollection(TreeSet::new));
+        } else {
+            var relevanteNyeInntektsmeldinger = new ArrayList<InntektsmeldingMedPerioder>();
+            var inntektsmeldingerRelevantForBeregning = InntektsmeldingerRelevantForBeregning.finnTjeneste(inntektsmeldingerRelevantForBeregningTjenester, referanse.getFagsakYtelseType());
+            for (DatoIntervallEntitet periode : datoIntervallEntitets) {
+                var relevanteInntektsmeldingerForPeriode = inntektsmeldingerRelevantForBeregning.utledInntektsmeldingerSomGjelderForPeriode(sakInntektsmeldinger, periode);
+                var nyeRelevanteMottatteDokumenter = mottatteInntektsmeldinger.stream()
+                    .filter(im -> relevanteInntektsmeldingerForPeriode.stream().anyMatch(at -> Objects.equals(at.getJournalpostId(), im.getJournalpostId())))
+                    .toList();
+                var nyeRelevanteInntektsmeldinger = sakInntektsmeldinger.stream()
+                    .filter(im -> nyeRelevanteMottatteDokumenter.stream().anyMatch(at -> Objects.equals(at.getJournalpostId(), im.getJournalpostId())))
+                    .map(im -> new InntektsmeldingMedPerioder(im.getJournalpostId(), periode))
+                    .toList();
 
-            relevanteNyeInntektsmeldinger.addAll(nyeRelevanteInntektsmeldinger);
+                relevanteNyeInntektsmeldinger.addAll(nyeRelevanteInntektsmeldinger);
+            }
+
+            cache.put(referanse.getSaksnummer(), relevanteNyeInntektsmeldinger);
+
+            return relevanteNyeInntektsmeldinger.stream()
+                .map(InntektsmeldingMedPerioder::getPeriode)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(TreeSet::new));
         }
-
-        cache.put(referanse.getSaksnummer(), relevanteNyeInntektsmeldinger);
-
-        return relevanteNyeInntektsmeldinger.stream()
-            .map(InntektsmeldingMedPerioder::getPeriode)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toCollection(TreeSet::new));
     }
 
     private boolean cacheErGood(List<InntektsmeldingMedPerioder> cacheEntries, List<MottattDokument> mottatteInntektsmeldinger) {
@@ -131,4 +146,6 @@ public class RevurderingPerioderTjeneste {
         return mottatteInntektsmeldinger.stream()
             .allMatch(it -> cacheEntries.stream().anyMatch(at -> at.getJournalpostId().equals(it.getJournalpostId())));
     }
+
+
 }

@@ -68,7 +68,7 @@ public class HendelsemottakTjeneste {
     public Map<Fagsak, BehandlingÅrsakType> finnFagsakerTilVurdering(AktørId aktørId, Hendelse hendelse) {
         var fagsakerMedBehandlingÅrsak = finnMatchendeUtledere(hendelse.getHendelseType())
             .stream()
-            .map(utleder -> utleder.finnFagsakerTilVurdering(aktørId, hendelse))
+            .map(utleder -> utleder.finnFagsakerTilVurdering(hendelse))
             .flatMap(map -> map.entrySet().stream())
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         return fagsakerMedBehandlingÅrsak;

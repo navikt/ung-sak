@@ -257,7 +257,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
             .sorted(Comparator.comparing(HentBeregningsgrunnlagDtoForGUIRequest::getVilkårsperiodeFom))
             .collect(Collectors.toList());
 
-        return new HentBeregningsgrunnlagDtoListeForGUIRequest(requestListe, referanse.getBehandlingUuid());
+        return new HentBeregningsgrunnlagDtoListeForGUIRequest(requestListe, null, referanse.getSaksnummer().getVerdi(), referanse.getBehandlingUuid());
     }
 
     @Override

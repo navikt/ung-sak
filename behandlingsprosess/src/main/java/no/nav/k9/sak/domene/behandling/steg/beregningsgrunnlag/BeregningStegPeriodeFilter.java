@@ -18,17 +18,21 @@ public class BeregningStegPeriodeFilter {
     private BehandlingModellRepository behandlingModellRepository;
     private KalkulusStartpunktUtleder kalkulusStartpunktUtleder;
 
+    private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
+
     @Inject
-    public BeregningStegPeriodeFilter(BehandlingModellRepository behandlingModellRepository, KalkulusStartpunktUtleder kalkulusStartpunktUtleder) {
+    public BeregningStegPeriodeFilter(BehandlingModellRepository behandlingModellRepository, KalkulusStartpunktUtleder kalkulusStartpunktUtleder, BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste) {
         this.behandlingModellRepository = behandlingModellRepository;
         this.kalkulusStartpunktUtleder = kalkulusStartpunktUtleder;
+        this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
     }
 
     public BeregningStegPeriodeFilter() {
     }
 
     public NavigableSet<PeriodeTilVurdering> filtrerPerioder(BehandlingReferanse behandlingReferanse, BehandlingStegType behandlingStegType) {
-        var perioderPrStartSteg = kalkulusStartpunktUtleder.utledPerioderPrStartpunkt(behandlingReferanse);
+        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(behandlingReferanse);
+        var perioderPrStartSteg = kalkulusStartpunktUtleder.utledPerioderPrStartpunkt(behandlingReferanse, perioderTilVurdering);
         var modell = behandlingModellRepository.getModell(behandlingReferanse.getBehandlingType(), behandlingReferanse.getFagsakYtelseType());
         return perioderPrStartSteg.entrySet().stream()
             .filter(e -> modell.erStegAFørStegB(e.getKey(), behandlingStegType) || e.getKey().equals(behandlingStegType))

@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.persistence.EntityManager;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 /**
  * Kun brukt til forvaltning
@@ -71,5 +72,60 @@ public class ProsessTriggerForvaltningTjeneste {
             entityManager.flush();
         }
     }
+
+
+    /**
+     * Metode for å fjerne prosesstrigger med gitt årsak og periode
+     * <p>
+     * Denne skal kun brukes i forvaltning og aldri som en del av behandling
+     *
+     * @param behandlingId        BehandlingId
+     * @param periode             periode som fjernes
+     * @param behandlingÅrsakType Behandlingsårsak
+     */
+    public boolean fjern(Long behandlingId, DatoIntervallEntitet periode, BehandlingÅrsakType behandlingÅrsakType) {
+        var prosessTriggere = prosessTriggereRepository.hentGrunnlag(behandlingId);
+
+        if (prosessTriggere.isEmpty()) {
+            throw new IllegalArgumentException("Fant ingen prosesstriggere");
+        }
+
+        var triggerPåAktivtGrunnlag = prosessTriggere.stream()
+            .flatMap(t -> t.getTriggere().stream())
+            .filter(t -> skalFjernes(periode, behandlingÅrsakType, t))
+            .toList();
+
+        if (triggerPåAktivtGrunnlag.isEmpty()) {
+            LOG.info("Fant ingen prosesstrigger for" + behandlingId + " med type " + behandlingÅrsakType + " og periode " + periode);
+            return false;
+        }
+
+        LOG.info("Utfører fjerning av trigger for behandling med id " + behandlingId + " og følgende triggere fjernes: " + triggerPåAktivtGrunnlag);
+
+        prosessTriggere.get().deaktiver();
+        entityManager.flush();
+
+        var triggereSomSkalBeholdes = prosessTriggere.stream()
+            .flatMap(t -> t.getTriggere().stream())
+            .filter(t -> !skalFjernes(periode, behandlingÅrsakType, t))
+            .toList();
+
+
+        if (!triggereSomSkalBeholdes.isEmpty()) {
+            var oppdatert = new ProsessTriggere(behandlingId, new Triggere(triggereSomSkalBeholdes.stream()
+                .map(Trigger::new)
+                .collect(Collectors.toSet())));
+
+            entityManager.persist(oppdatert.getTriggereEntity());
+            entityManager.persist(oppdatert);
+            entityManager.flush();
+        }
+        return true;
+    }
+
+    private static boolean skalFjernes(DatoIntervallEntitet periode, BehandlingÅrsakType behandlingÅrsakType, Trigger t) {
+        return t.getÅrsak().equals(behandlingÅrsakType) && t.getPeriode().equals(periode);
+    }
+
 }
 

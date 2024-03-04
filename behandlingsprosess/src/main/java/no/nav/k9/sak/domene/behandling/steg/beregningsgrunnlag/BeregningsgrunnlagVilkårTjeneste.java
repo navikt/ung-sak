@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -91,8 +90,8 @@ public class BeregningsgrunnlagVilkårTjeneste {
     }
 
 
-    public void gjenopprettVilkårsutfallVedBehov(BehandlingskontrollKontekst kontekst, BehandlingReferanse referanse) {
-        var gjenopprettetPeriodeListe = finnPerioderForGjenopprettingAvVilkårsutfall(referanse);
+    public void gjenopprettVilkårsutfallVedBehov(BehandlingskontrollKontekst kontekst, BehandlingReferanse referanse, NavigableSet<PeriodeTilVurdering> perioderTilVurdering) {
+        var gjenopprettetPeriodeListe = finnPerioderForGjenopprettingAvVilkårsutfall(referanse, perioderTilVurdering);
         if (!gjenopprettetPeriodeListe.isEmpty()) {
             LOGGER.info("Gjenoppretter initiell vurdering for perioder {}", gjenopprettetPeriodeListe);
             kopierVilkårresultatFraForrigeBehandling(
@@ -101,11 +100,11 @@ public class BeregningsgrunnlagVilkårTjeneste {
         }
     }
 
-    private Set<DatoIntervallEntitet> finnPerioderForGjenopprettingAvVilkårsutfall(BehandlingReferanse ref) {
+    private Set<DatoIntervallEntitet> finnPerioderForGjenopprettingAvVilkårsutfall(BehandlingReferanse ref, NavigableSet<PeriodeTilVurdering> perioderTilVurdering) {
         var vilkårOptional = vilkårTjeneste.hentHvisEksisterer(ref.getBehandlingId()).flatMap(v -> v.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
         if (vilkårOptional.isPresent()) {
             var initiellVilkår = ref.getOriginalBehandlingId().flatMap(vilkårTjeneste::hentHvisEksisterer).flatMap(v -> v.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
-            return finnPerioderSomIkkeVurderesOgMedDiffFraInitieltUtfall(ref, vilkårOptional.get(), initiellVilkår);
+            return finnPerioderSomIkkeVurderesOgMedDiffFraInitieltUtfall(ref, vilkårOptional.get(), initiellVilkår, perioderTilVurdering);
         }
         return Collections.emptySet();
     }
@@ -113,8 +112,10 @@ public class BeregningsgrunnlagVilkårTjeneste {
 
     private Set<DatoIntervallEntitet> finnPerioderSomIkkeVurderesOgMedDiffFraInitieltUtfall(BehandlingReferanse ref,
                                                                                             Vilkår vilkår,
-                                                                                            Optional<Vilkår> initiellVilkår) {
-        var perioderSomIkkeVurderes = vilkårTjeneste.utledPerioderSomIkkeVurderes(ref, VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+                                                                                            Optional<Vilkår> initiellVilkår,
+                                                                                            NavigableSet<PeriodeTilVurdering> perioderTilVurdering) {
+        var intervaller = perioderTilVurdering.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toCollection(TreeSet::new));
+        var perioderSomIkkeVurderes = vilkårTjeneste.utledPerioderSomIkkeVurderes(ref, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, intervaller);
         return perioderSomIkkeVurderes.stream()
             .filter(p -> erUtfallUliktInitiell(initiellVilkår.flatMap(v -> v.finnPeriodeForSkjæringstidspunktHvisFinnes(p.getFomDato())), vilkår.finnPeriodeForSkjæringstidspunkt(p.getFomDato())))
             .collect(Collectors.toSet());
@@ -180,6 +181,11 @@ public class BeregningsgrunnlagVilkårTjeneste {
     public NavigableSet<PeriodeTilVurdering> utledDetaljertPerioderTilVurdering(BehandlingReferanse ref, VilkårPeriodeFilter vilkårPeriodeFilter) {
         var allePerioder = vilkårTjeneste.utledPerioderTilVurdering(ref, vilkårType);
         return vilkårPeriodeFilter.filtrerPerioder(allePerioder, vilkårType);
+    }
+
+    public NavigableSet<PeriodeTilVurdering> utledDetaljertPerioderTilVurdering(BehandlingReferanse ref) {
+        var allePerioder = vilkårTjeneste.utledPerioderTilVurdering(ref, vilkårType);
+        return vilkårPeriodeFilterProvider.getFilter(ref).filtrerPerioder(allePerioder, vilkårType);
     }
 
     public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref, VilkårPeriodeFilter vilkårPeriodeFilter) {
