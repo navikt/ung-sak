@@ -8,13 +8,16 @@ WORK_DIR="$(dirname ${SCRIPT_DIR})"
 
 cd "${WORK_DIR}"
 
+# Get all dependencies in order
+mvn install -DskipTests=true
+
 # One can provide an argument to override the default output path of the generated json.
 if [ -z "$1" ]
 then
   # no argument provided
-  mvn --projects web compile exec:java
+  mvn --projects web exec:java
 else
-  mvn --projects web compile exec:java -Dexec.args="$1"
+  mvn --projects web exec:java -Dexec.args="$1"
 fi
 
 # Restore original working directory
