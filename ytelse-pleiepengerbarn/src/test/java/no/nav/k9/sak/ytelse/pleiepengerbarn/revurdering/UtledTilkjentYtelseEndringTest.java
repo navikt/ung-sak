@@ -72,7 +72,7 @@ class UtledTilkjentYtelseEndringTest {
         var endringerForMottakers = UtledTilkjentYtelseEndring.utledEndringer(resultat, originaltResultat);
 
         assertThat(endringerForMottakers.size()).isEqualTo(1);
-        assertThat(endringerForMottakers.get(0).nøkkel()).isEqualTo(new UtledTilkjentYtelseEndring.MottakerNøkkel(brukerErMottaker, new UtledTilkjentYtelseEndring.Aktivitetsnøkkel(arbeidsgiver, null, aktivitetStatus, inntektskategori)));
+        assertThat(endringerForMottakers.get(0).nøkkel()).isEqualTo(new UtledTilkjentYtelseEndring.MottakerNøkkel(brukerErMottaker, arbeidsgiver, null, aktivitetStatus, inntektskategori));
         var endretIntervaller = endringerForMottakers.get(0).tidslinjeMedEndringIYtelse().getLocalDateIntervals();
         assertThat(endretIntervaller.size()).isEqualTo(1);
         assertThat(endretIntervaller.contains(periode2.getPeriode().toLocalDateInterval())).isTrue();
@@ -101,12 +101,11 @@ class UtledTilkjentYtelseEndringTest {
         var endringerForMottakers = UtledTilkjentYtelseEndring.utledEndringer(resultat, originaltResultat);
 
         assertThat(endringerForMottakers.size()).isEqualTo(1);
-        assertThat(endringerForMottakers.get(0).nøkkel()).isEqualTo(new UtledTilkjentYtelseEndring.MottakerNøkkel(brukerErMottaker, new UtledTilkjentYtelseEndring.Aktivitetsnøkkel(arbeidsgiver, null, aktivitetStatus, inntektskategori)));
+        assertThat(endringerForMottakers.get(0).nøkkel()).isEqualTo(new UtledTilkjentYtelseEndring.MottakerNøkkel(brukerErMottaker, arbeidsgiver, null, aktivitetStatus, inntektskategori));
         var endretIntervaller = endringerForMottakers.get(0).tidslinjeMedEndringIYtelse().getLocalDateIntervals();
         assertThat(endretIntervaller.size()).isEqualTo(1);
         assertThat(endretIntervaller.contains(new LocalDateInterval(originalTom1.plusDays(1), tom1))).isTrue();
     }
-
 
 
     @Test
@@ -129,7 +128,7 @@ class UtledTilkjentYtelseEndringTest {
         var endringerForMottakers = UtledTilkjentYtelseEndring.utledEndringer(resultat, originaltResultat);
 
         assertThat(endringerForMottakers.size()).isEqualTo(1);
-        assertThat(endringerForMottakers.get(0).nøkkel()).isEqualTo(new UtledTilkjentYtelseEndring.MottakerNøkkel(brukerErMottaker, new UtledTilkjentYtelseEndring.Aktivitetsnøkkel(arbeidsgiver, null, aktivitetStatus, inntektskategori)));
+        assertThat(endringerForMottakers.get(0).nøkkel()).isEqualTo(new UtledTilkjentYtelseEndring.MottakerNøkkel(brukerErMottaker, arbeidsgiver, null, aktivitetStatus, inntektskategori));
         var endretIntervaller = endringerForMottakers.get(0).tidslinjeMedEndringIYtelse().getLocalDateIntervals();
         assertThat(endretIntervaller.size()).isEqualTo(1);
         assertThat(endretIntervaller.contains(periode1.getPeriode().toLocalDateInterval())).isTrue();
@@ -155,7 +154,7 @@ class UtledTilkjentYtelseEndringTest {
         var endringerForMottakers = UtledTilkjentYtelseEndring.utledEndringer(resultat, originaltResultat);
 
         assertThat(endringerForMottakers.size()).isEqualTo(1);
-        assertThat(endringerForMottakers.get(0).nøkkel()).isEqualTo(new UtledTilkjentYtelseEndring.MottakerNøkkel(brukerErMottaker, new UtledTilkjentYtelseEndring.Aktivitetsnøkkel(arbeidsgiver, null, aktivitetStatus, inntektskategori)));
+        assertThat(endringerForMottakers.get(0).nøkkel()).isEqualTo(new UtledTilkjentYtelseEndring.MottakerNøkkel(brukerErMottaker, arbeidsgiver, null, aktivitetStatus, inntektskategori));
         var endretIntervaller = endringerForMottakers.get(0).tidslinjeMedEndringIYtelse().getLocalDateIntervals();
         assertThat(endretIntervaller.size()).isEqualTo(1);
         assertThat(endretIntervaller.contains(periode1.getPeriode().toLocalDateInterval())).isTrue();
@@ -181,7 +180,7 @@ class UtledTilkjentYtelseEndringTest {
         var endringerForMottakers = UtledTilkjentYtelseEndring.utledEndringer(resultat, originaltResultat);
 
         assertThat(endringerForMottakers.size()).isEqualTo(1);
-        assertThat(endringerForMottakers.get(0).nøkkel()).isEqualTo(new UtledTilkjentYtelseEndring.MottakerNøkkel(brukerErMottaker, new UtledTilkjentYtelseEndring.Aktivitetsnøkkel(arbeidsgiver, null, aktivitetStatus, inntektskategori)));
+        assertThat(endringerForMottakers.get(0).nøkkel()).isEqualTo(new UtledTilkjentYtelseEndring.MottakerNøkkel(brukerErMottaker, arbeidsgiver, null, aktivitetStatus, inntektskategori));
         var endretIntervaller = endringerForMottakers.get(0).tidslinjeMedEndringIYtelse().getLocalDateIntervals();
         assertThat(endretIntervaller.size()).isEqualTo(1);
         assertThat(endretIntervaller.contains(periode1.getPeriode().toLocalDateInterval())).isTrue();
@@ -208,12 +207,12 @@ class UtledTilkjentYtelseEndringTest {
         var endringerForMottakers = UtledTilkjentYtelseEndring.utledEndringer(resultat, originaltResultat);
 
         assertThat(endringerForMottakers.size()).isEqualTo(2);
-        assertThat(endringerForMottakers.get(0).nøkkel()).isEqualTo(new UtledTilkjentYtelseEndring.MottakerNøkkel(brukerErMottaker, new UtledTilkjentYtelseEndring.Aktivitetsnøkkel(arbeidsgiver, null, aktivitetStatus, inntektskategori)));
+        assertThat(endringerForMottakers.get(0).nøkkel()).isEqualTo(new UtledTilkjentYtelseEndring.MottakerNøkkel(brukerErMottaker, arbeidsgiver, null, aktivitetStatus, inntektskategori));
         var endretIntervaller = endringerForMottakers.get(0).tidslinjeMedEndringIYtelse().getLocalDateIntervals();
         assertThat(endretIntervaller.size()).isEqualTo(1);
         assertThat(endretIntervaller.contains(periode1.getPeriode().toLocalDateInterval())).isTrue();
 
-        assertThat(endringerForMottakers.get(1).nøkkel()).isEqualTo(new UtledTilkjentYtelseEndring.MottakerNøkkel(brukerErMottaker, new UtledTilkjentYtelseEndring.Aktivitetsnøkkel(arbeidsgiver, null, aktivitetStatus, Inntektskategori.DAGPENGER)));
+        assertThat(endringerForMottakers.get(1).nøkkel()).isEqualTo(new UtledTilkjentYtelseEndring.MottakerNøkkel(brukerErMottaker, arbeidsgiver, null, aktivitetStatus, Inntektskategori.DAGPENGER));
         var endretIntervaller2 = endringerForMottakers.get(1).tidslinjeMedEndringIYtelse().getLocalDateIntervals();
         assertThat(endretIntervaller2.size()).isEqualTo(1);
         assertThat(endretIntervaller2.contains(periode1.getPeriode().toLocalDateInterval())).isTrue();
@@ -239,12 +238,12 @@ class UtledTilkjentYtelseEndringTest {
         var endringerForMottakers = UtledTilkjentYtelseEndring.utledEndringer(resultat, originaltResultat);
 
         assertThat(endringerForMottakers.size()).isEqualTo(2);
-        assertThat(endringerForMottakers.get(0).nøkkel()).isEqualTo(new UtledTilkjentYtelseEndring.MottakerNøkkel(brukerErMottaker, new UtledTilkjentYtelseEndring.Aktivitetsnøkkel(arbeidsgiver, null, AktivitetStatus.IKKE_YRKESAKTIV, inntektskategori)));
+        assertThat(endringerForMottakers.get(0).nøkkel()).isEqualTo(new UtledTilkjentYtelseEndring.MottakerNøkkel(brukerErMottaker, arbeidsgiver, null, AktivitetStatus.IKKE_YRKESAKTIV, inntektskategori));
         var endretIntervaller = endringerForMottakers.get(0).tidslinjeMedEndringIYtelse().getLocalDateIntervals();
         assertThat(endretIntervaller.size()).isEqualTo(1);
         assertThat(endretIntervaller.contains(periode1.getPeriode().toLocalDateInterval())).isTrue();
 
-        assertThat(endringerForMottakers.get(1).nøkkel()).isEqualTo(new UtledTilkjentYtelseEndring.MottakerNøkkel(brukerErMottaker, new UtledTilkjentYtelseEndring.Aktivitetsnøkkel(arbeidsgiver, null, aktivitetStatus, inntektskategori)));
+        assertThat(endringerForMottakers.get(1).nøkkel()).isEqualTo(new UtledTilkjentYtelseEndring.MottakerNøkkel(brukerErMottaker, arbeidsgiver, null, aktivitetStatus, inntektskategori));
         var endretIntervaller2 = endringerForMottakers.get(1).tidslinjeMedEndringIYtelse().getLocalDateIntervals();
         assertThat(endretIntervaller2.size()).isEqualTo(1);
         assertThat(endretIntervaller2.contains(periode1.getPeriode().toLocalDateInterval())).isTrue();
@@ -275,7 +274,7 @@ class UtledTilkjentYtelseEndringTest {
         var endringerForMottakers = UtledTilkjentYtelseEndring.utledEndringer(resultat, originaltResultat);
 
         assertThat(endringerForMottakers.size()).isEqualTo(1);
-        assertThat(endringerForMottakers.get(0).nøkkel()).isEqualTo(new UtledTilkjentYtelseEndring.MottakerNøkkel(brukerErMottaker, new UtledTilkjentYtelseEndring.Aktivitetsnøkkel(arbeidsgiver2, null, aktivitetStatus, inntektskategori)));
+        assertThat(endringerForMottakers.get(0).nøkkel()).isEqualTo(new UtledTilkjentYtelseEndring.MottakerNøkkel(brukerErMottaker, arbeidsgiver2, null, aktivitetStatus, inntektskategori));
         var endretIntervaller = endringerForMottakers.get(0).tidslinjeMedEndringIYtelse().getLocalDateIntervals();
         assertThat(endretIntervaller.size()).isEqualTo(1);
         assertThat(endretIntervaller.contains(periode1.getPeriode().toLocalDateInterval())).isTrue();

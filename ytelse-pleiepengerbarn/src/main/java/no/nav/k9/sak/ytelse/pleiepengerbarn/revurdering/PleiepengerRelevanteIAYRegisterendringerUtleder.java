@@ -106,13 +106,12 @@ public class PleiepengerRelevanteIAYRegisterendringerUtleder implements Relevant
     }
 
     private TreeSet<DatoIntervallEntitet> finnVilkårsperioder(BehandlingReferanse behandlingReferanse) {
-        var vilkårsperioder = vilkårTjeneste.hentVilkårResultat(behandlingReferanse.getBehandlingId())
+        return vilkårTjeneste.hentVilkårResultat(behandlingReferanse.getBehandlingId())
             .getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
             .stream()
             .flatMap(v -> v.getPerioder().stream())
             .map(VilkårPeriode::getPeriode)
             .collect(Collectors.toCollection(TreeSet::new));
-        return vilkårsperioder;
     }
 
     private LocalDateTimeline<Endringstype> utledRelevantEndringstidslinje(UtledAktivitetsperiodeEndring.AktivitetsperiodeEndring aktivitetsendringer, List<UtledTilkjentYtelseEndring.EndringerForMottaker> endringerPrMottaker, Set<DatoIntervallEntitet> revurdertePerioder) {
@@ -129,9 +128,9 @@ public class PleiepengerRelevanteIAYRegisterendringerUtleder implements Relevant
 
     private LocalDateTimeline<Boolean> finnTidslinjeForEndringIUtbetaling(UtledAktivitetsperiodeEndring.AktivitetsperiodeEndring aktivitetsendringer, List<UtledTilkjentYtelseEndring.EndringerForMottaker> endringerPrMottaker) {
         return endringerPrMottaker.stream()
-            .filter(e -> Objects.equals(e.nøkkel().aktivitetsnøkkel().arbeidsgiver(), aktivitetsendringer.identifikator().arbeidsgiver()) &&
-                e.nøkkel().aktivitetsnøkkel().arbeidsforholdRef().gjelderFor(aktivitetsendringer.identifikator().ref()) &&
-                matcherStatusOgType(e.nøkkel().aktivitetsnøkkel().aktivitetStatus(), aktivitetsendringer.identifikator().arbeidType())
+            .filter(e -> Objects.equals(e.nøkkel().arbeidsgiver(), aktivitetsendringer.identifikator().arbeidsgiver()) &&
+                e.nøkkel().arbeidsforholdRef().gjelderFor(aktivitetsendringer.identifikator().ref()) &&
+                matcherStatusOgType(e.nøkkel().aktivitetStatus(), aktivitetsendringer.identifikator().arbeidType())
             )
             .map(UtledTilkjentYtelseEndring.EndringerForMottaker::tidslinjeMedEndringIYtelse)
             .map(t -> t.mapValue(it -> true))

@@ -109,7 +109,7 @@ public class UtledTilkjentYtelseEndring {
     }
 
     private static MottakerNøkkel lagMottakerNøkkel(BeregningsresultatAndel a) {
-        return new MottakerNøkkel(a.erBrukerMottaker(), new Aktivitetsnøkkel(a.getArbeidsgiver().orElse(null), a.getArbeidsforholdRef(), a.getAktivitetStatus(), a.getInntektskategori()));
+        return new MottakerNøkkel(a.erBrukerMottaker(), a.getArbeidsgiver().orElse(null), a.getArbeidsforholdRef(), a.getAktivitetStatus(), a.getInntektskategori());
     }
 
 
@@ -161,22 +161,20 @@ public class UtledTilkjentYtelseEndring {
     }
 
     public record MottakerNøkkel(Boolean brukerErMottaker,
-                                 Aktivitetsnøkkel aktivitetsnøkkel) {
+                                 Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef,
+                                 AktivitetStatus aktivitetStatus, Inntektskategori inntektskategori) {
+
+        @Override
+        public InternArbeidsforholdRef arbeidsforholdRef() {
+            return arbeidsforholdRef == null ? InternArbeidsforholdRef.nullRef() : arbeidsforholdRef;
+        }
+
     }
 
     public record EndringerForMottaker(
         MottakerNøkkel nøkkel,
         LocalDateTimeline<Boolean> tidslinjeMedEndringIYtelse
     ) {
-    }
-
-    public record Aktivitetsnøkkel(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef,
-                                   AktivitetStatus aktivitetStatus, Inntektskategori inntektskategori) {
-
-        @Override
-        public InternArbeidsforholdRef arbeidsforholdRef() {
-            return arbeidsforholdRef == null ? InternArbeidsforholdRef.nullRef() : arbeidsforholdRef;
-        }
     }
 
 
