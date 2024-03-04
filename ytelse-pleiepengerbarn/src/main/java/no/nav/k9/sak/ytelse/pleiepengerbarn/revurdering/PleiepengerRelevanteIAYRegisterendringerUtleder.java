@@ -65,11 +65,11 @@ public class PleiepengerRelevanteIAYRegisterendringerUtleder implements Relevant
         var tilkjentYtelseEndringPrMottaker = utledTilkjentYtelseEndring.utledEndringer(behandlingReferanse);
         var aktivitetsperiodeEndringer = finnEndringerIAnsattperioder(behandlingReferanse);
         var revurdertePerioderVilkårsperioder = finnRevurdertePerioder(behandlingReferanse);
-        var endringerIAktivitetsperioder = UledRelevanteEndringerIAktivitetsperiode.finnRelevanteEndringerIAktivitetsperiode(aktivitetsperiodeEndringer, tilkjentYtelseEndringPrMottaker, revurdertePerioderVilkårsperioder);
+        var endringerIAktivitetsperioder = UtledRelevanteEndringerIAktivitetsperiode.finnRelevanteEndringerIAktivitetsperiode(aktivitetsperiodeEndringer, tilkjentYtelseEndringPrMottaker, revurdertePerioderVilkårsperioder);
         return new EndringerIAY(endringerIAktivitetsperioder, Collections.emptyList());
     }
 
-    private List<UtledAktivitetsperiodeEndring.AktivitetsperiodeEndring> finnEndringerIAnsattperioder(BehandlingReferanse behandlingReferanse) {
+    private List<AktivitetsperiodeEndring> finnEndringerIAnsattperioder(BehandlingReferanse behandlingReferanse) {
         var inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingReferanse.getBehandlingId());
         var originalIAYGrunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(behandlingReferanse.getOriginalBehandlingId().orElseThrow());
 

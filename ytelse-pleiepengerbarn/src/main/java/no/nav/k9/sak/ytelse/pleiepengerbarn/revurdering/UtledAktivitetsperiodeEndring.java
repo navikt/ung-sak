@@ -19,8 +19,6 @@ import no.nav.k9.sak.domene.opptjening.aksjonspunkt.MapYtelsesstidslinjerForPerm
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.registerendringer.Endringstype;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.Arbeidsgiver;
-import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 public class UtledAktivitetsperiodeEndring {
 
@@ -34,7 +32,7 @@ public class UtledAktivitetsperiodeEndring {
         var originalAktivitetsperiodePrIdentifikator = finnAktivitetsperioder(originaltIayGrunnlag, vilkårsperioder, søkerAktørId);
         var endringer = finnEndretArbeidsforhold(aktivitetsperiodePrIdentifikator, originalAktivitetsperiodePrIdentifikator);
         endringer.addAll(finnFjernetArbeidsforhold(originalAktivitetsperiodePrIdentifikator, aktivitetsperiodePrIdentifikator));
-        return endringer.stream().filter(a -> !a.endringstidslinje.isEmpty()).toList();
+        return endringer.stream().filter(a -> !a.endringstidslinje().isEmpty()).toList();
     }
 
     private static List<AktivitetsperiodeEndring> finnEndretArbeidsforhold(Set<Aktivitetsperiode> aktivitetsperiodePrIdentifikator, Set<Aktivitetsperiode> originalAktivitetsperiodePrIdentifikator) {
@@ -59,7 +57,6 @@ public class UtledAktivitetsperiodeEndring {
     }
 
 
-
     private static LocalDateSegment<Endringstype> finnEndringer(LocalDateInterval di, LocalDateSegment<Boolean> gjeldende, LocalDateSegment<Boolean> original) {
         if (gjeldende != null && original != null) {
             return null; // Ingen endring, filtreres bort utenfor
@@ -82,23 +79,9 @@ public class UtledAktivitetsperiodeEndring {
     }
 
 
-    public record AktivitetsIdentifikator(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef ref,
-                                          no.nav.k9.kodeverk.arbeidsforhold.ArbeidType arbeidType) {
-        @Override
-        public InternArbeidsforholdRef ref() {
-            return ref == null ? InternArbeidsforholdRef.nullRef() : ref;
-        }
+    private record Aktivitetsperiode(AktivitetsIdentifikator identifikator,
+                                     LocalDateTimeline<Boolean> aktivitettidslinje) {
     }
-
-    public record Aktivitetsperiode(AktivitetsIdentifikator identifikator,
-                                    LocalDateTimeline<Boolean> aktivitettidslinje) {
-    }
-
-    public record AktivitetsperiodeEndring(AktivitetsIdentifikator identifikator,
-                                           LocalDateTimeline<Endringstype> endringstidslinje) {
-    }
-
-
 
 
 }

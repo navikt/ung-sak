@@ -12,7 +12,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.registerendringer.Aktivitetsendringer;
 import no.nav.k9.sak.registerendringer.Endringstype;
 
-class UledRelevanteEndringerIAktivitetsperiode {
+class UtledRelevanteEndringerIAktivitetsperiode {
 
 
     /**
@@ -21,8 +21,8 @@ class UledRelevanteEndringerIAktivitetsperiode {
      * @param revurdertePerioderVilkårsperioder Utleder endringer i register som kan være årsak til endring i utbetaling
      * @return Liste med aktivitsendringer for endret periode med aktivitet og type endring
      */
-    static List<Aktivitetsendringer> finnRelevanteEndringerIAktivitetsperiode(List<UtledAktivitetsperiodeEndring.AktivitetsperiodeEndring> aktivitetsperiodeEndringer,
-                                                                              List<UtledTilkjentYtelseEndring.EndringerForMottaker> endringerPrMottaker,
+    static List<Aktivitetsendringer> finnRelevanteEndringerIAktivitetsperiode(List<AktivitetsperiodeEndring> aktivitetsperiodeEndringer,
+                                                                              List<UtbetalingsendringerForMottaker> endringerPrMottaker,
                                                                               Set<DatoIntervallEntitet> revurdertePerioderVilkårsperioder) {
         return aktivitetsperiodeEndringer.stream()
             .map(aktivitetsendringer -> {
@@ -32,8 +32,8 @@ class UledRelevanteEndringerIAktivitetsperiode {
             .toList();
     }
 
-    private static LocalDateTimeline<Endringstype> utledRelevantEndringstidslinje(UtledAktivitetsperiodeEndring.AktivitetsperiodeEndring aktivitetsendringer,
-                                                                                  List<UtledTilkjentYtelseEndring.EndringerForMottaker> endringerPrMottaker,
+    private static LocalDateTimeline<Endringstype> utledRelevantEndringstidslinje(AktivitetsperiodeEndring aktivitetsendringer,
+                                                                                  List<UtbetalingsendringerForMottaker> endringerPrMottaker,
                                                                                   Set<DatoIntervallEntitet> revurdertePerioder) {
         var tidslinjeForEndringIUtbetaling = finnTidslinjeForEndringIUtbetaling(aktivitetsendringer, endringerPrMottaker);
         var utvidet = utvidMedDagenFørStp(tidslinjeForEndringIUtbetaling, revurdertePerioder);
@@ -46,13 +46,13 @@ class UledRelevanteEndringerIAktivitetsperiode {
             .reduce(tidslinjeForEndringIUtbetaling, (t1, t2) -> t1.combine(t2, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN));
     }
 
-    private static LocalDateTimeline<Boolean> finnTidslinjeForEndringIUtbetaling(UtledAktivitetsperiodeEndring.AktivitetsperiodeEndring aktivitetsendringer, List<UtledTilkjentYtelseEndring.EndringerForMottaker> endringerPrMottaker) {
+    private static LocalDateTimeline<Boolean> finnTidslinjeForEndringIUtbetaling(AktivitetsperiodeEndring aktivitetsendringer, List<UtbetalingsendringerForMottaker> endringerPrMottaker) {
         return endringerPrMottaker.stream()
             .filter(e -> Objects.equals(e.nøkkel().arbeidsgiver(), aktivitetsendringer.identifikator().arbeidsgiver()) &&
                 e.nøkkel().arbeidsforholdRef().gjelderFor(aktivitetsendringer.identifikator().ref()) &&
                 matcherStatusOgType(e.nøkkel().aktivitetStatus(), aktivitetsendringer.identifikator().arbeidType())
             )
-            .map(UtledTilkjentYtelseEndring.EndringerForMottaker::tidslinjeMedEndringIYtelse)
+            .map(UtbetalingsendringerForMottaker::tidslinjeMedEndringIYtelse)
             .map(t -> t.mapValue(it -> true))
             .reduce(LocalDateTimeline.empty(), (t1, t2) -> t1.combine(t2, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN));
     }

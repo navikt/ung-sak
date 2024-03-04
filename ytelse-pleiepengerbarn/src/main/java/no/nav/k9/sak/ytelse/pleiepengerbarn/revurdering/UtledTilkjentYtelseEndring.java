@@ -13,14 +13,10 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
-import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
-import no.nav.k9.sak.typer.Arbeidsgiver;
-import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 @ApplicationScoped
 public class UtledTilkjentYtelseEndring {
@@ -36,19 +32,19 @@ public class UtledTilkjentYtelseEndring {
         this.beregningsresultatRepository = beregningsresultatRepository;
     }
 
-    public List<EndringerForMottaker> utledEndringer(BehandlingReferanse behandlingReferanse) {
+    public List<UtbetalingsendringerForMottaker> utledEndringer(BehandlingReferanse behandlingReferanse) {
         var beregningsresultatEntitet = beregningsresultatRepository.hentEndeligBeregningsresultat(behandlingReferanse.getBehandlingId()).orElseThrow(() -> new IllegalStateException("Kan ikke utlede endring i tilkjent ytelse uten å ha lagret tilkjent ytelse"));
         var originalBeregningsresultatEntitet = beregningsresultatRepository.hentEndeligBeregningsresultat(behandlingReferanse.getOriginalBehandlingId().orElseThrow(() -> new IllegalArgumentException("Kan ikke utlede tidslinjeMedEndringIYtelse dersom behandling ikke er revurdering")))
             .orElseThrow(() -> new IllegalArgumentException("Original behandling har ikke tilkjent ytelse"));
         return utledEndringer(beregningsresultatEntitet, originalBeregningsresultatEntitet);
     }
 
-    static List<EndringerForMottaker> utledEndringer(BeregningsresultatEntitet beregningsresultatEntitet, BeregningsresultatEntitet originalBeregningsresultatEntitet) {
+    static List<UtbetalingsendringerForMottaker> utledEndringer(BeregningsresultatEntitet beregningsresultatEntitet, BeregningsresultatEntitet originalBeregningsresultatEntitet) {
         var utbetalingTidslinje = lagResultatTidslinje(beregningsresultatEntitet);
         var originalUtbetalingTidslinje = lagResultatTidslinje(originalBeregningsresultatEntitet);
         var endringstidslinje = utbetalingTidslinje.combine(originalUtbetalingTidslinje, UtledTilkjentYtelseEndring::finnMottakereMedEndring, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         var nøkler = finnAlleUnikeNøklerMedEndring(endringstidslinje);
-        return nøkler.stream().map(n -> new EndringerForMottaker(n, finnEndringstidslinjeForNøkkel(n, endringstidslinje))).toList();
+        return nøkler.stream().map(n -> new UtbetalingsendringerForMottaker(n, finnEndringstidslinjeForNøkkel(n, endringstidslinje))).toList();
     }
 
     private static Set<MottakerNøkkel> finnAlleUnikeNøklerMedEndring(LocalDateTimeline<List<MottakerNøkkel>> mottakereMedEndringstidslinje) {
@@ -158,23 +154,6 @@ public class UtledTilkjentYtelseEndring {
             .map(p -> new LocalDateSegment<>(p.getPeriode().toLocalDateInterval(), p.getBeregningsresultatAndelList())).toList();
 
         return new LocalDateTimeline<>(segmenter);
-    }
-
-    public record MottakerNøkkel(Boolean brukerErMottaker,
-                                 Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef,
-                                 AktivitetStatus aktivitetStatus, Inntektskategori inntektskategori) {
-
-        @Override
-        public InternArbeidsforholdRef arbeidsforholdRef() {
-            return arbeidsforholdRef == null ? InternArbeidsforholdRef.nullRef() : arbeidsforholdRef;
-        }
-
-    }
-
-    public record EndringerForMottaker(
-        MottakerNøkkel nøkkel,
-        LocalDateTimeline<Boolean> tidslinjeMedEndringIYtelse
-    ) {
     }
 
 

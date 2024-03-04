@@ -4,7 +4,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -12,7 +11,6 @@ import org.junit.jupiter.api.Test;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
-import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtaleBuilder;
@@ -25,7 +23,6 @@ import no.nav.k9.sak.registerendringer.Endringstype;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.AktivitetIdentifikator;
 
 class UtledAktivitetsperiodeEndringTest {
 
@@ -67,7 +64,7 @@ class UtledAktivitetsperiodeEndringTest {
         var endringer = utleder.utledEndring(inntektArbeidYtelseGrunnlag, originalGrunnlag, Set.of(vilkårsperiode), AKTØR_ID);
 
         assertThat(endringer.size()).isEqualTo(1);
-        var forventet = new UtledAktivitetsperiodeEndring.AktivitetsIdentifikator(Arbeidsgiver.virksomhet(orgnr), ref, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
+        var forventet = new AktivitetsIdentifikator(Arbeidsgiver.virksomhet(orgnr), ref, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
         assertThat(endringer.get(0).identifikator()).isEqualTo(forventet);
         var endredeSegmenter = endringer.get(0).endringstidslinje().toSegments();
         assertThat(endredeSegmenter.size()).isEqualTo(1);
@@ -90,7 +87,7 @@ class UtledAktivitetsperiodeEndringTest {
         var endringer = utleder.utledEndring(inntektArbeidYtelseGrunnlag, originalGrunnlag, Set.of(vilkårsperiode), AKTØR_ID);
 
         assertThat(endringer.size()).isEqualTo(1);
-        var forventet = new UtledAktivitetsperiodeEndring.AktivitetsIdentifikator(Arbeidsgiver.virksomhet(orgnr), ref2, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
+        var forventet = new AktivitetsIdentifikator(Arbeidsgiver.virksomhet(orgnr), ref2, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
         assertThat(endringer.get(0).identifikator()).isEqualTo(forventet);
         var endredeSegmenter = endringer.get(0).endringstidslinje().toSegments();
         assertThat(endredeSegmenter.size()).isEqualTo(1);
@@ -113,7 +110,7 @@ class UtledAktivitetsperiodeEndringTest {
         var endringer = utleder.utledEndring(inntektArbeidYtelseGrunnlag, originalGrunnlag, Set.of(vilkårsperiode), AKTØR_ID);
 
         assertThat(endringer.size()).isEqualTo(1);
-        var forventet = new UtledAktivitetsperiodeEndring.AktivitetsIdentifikator(Arbeidsgiver.virksomhet(orgnr), ref2, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
+        var forventet = new AktivitetsIdentifikator(Arbeidsgiver.virksomhet(orgnr), ref2, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
         assertThat(endringer.get(0).identifikator()).isEqualTo(forventet);
         var endredeSegmenter = endringer.get(0).endringstidslinje().toSegments();
         assertThat(endredeSegmenter.size()).isEqualTo(1);
@@ -136,7 +133,7 @@ class UtledAktivitetsperiodeEndringTest {
         var endringer = utleder.utledEndring(inntektArbeidYtelseGrunnlag, originalGrunnlag, Set.of(vilkårsperiode), AKTØR_ID);
 
         assertThat(endringer.size()).isEqualTo(1);
-        var forventet = new UtledAktivitetsperiodeEndring.AktivitetsIdentifikator(Arbeidsgiver.virksomhet(orgnr), ref, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
+        var forventet = new AktivitetsIdentifikator(Arbeidsgiver.virksomhet(orgnr), ref, ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
         assertThat(endringer.get(0).identifikator()).isEqualTo(forventet);
         var endredeSegmenter = endringer.get(0).endringstidslinje().toSegments();
         assertThat(endredeSegmenter.size()).isEqualTo(1);
