@@ -32,6 +32,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
@@ -163,6 +164,7 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
                 .stream()
                 .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
                 .filter(vilkårBuilder::harDataPåPeriode)
+                .filter(p -> erIkkeBareKantIKantMellomrom(tidslinje, p, resultatBuilder.getKantIKantVurderer()))
                 .collect(Collectors.toCollection(TreeSet::new));
             if (!perioderSomSkalTilbakestilles.isEmpty()) {
                 vilkårBuilder = vilkårBuilder.tilbakestill(perioderSomSkalTilbakestilles);
@@ -176,6 +178,10 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
             }
             resultatBuilder.leggTil(vilkårBuilder);
         }
+    }
+
+    private static boolean erIkkeBareKantIKantMellomrom(LocalDateTimeline<Boolean> tidslinje, DatoIntervallEntitet p, KantIKantVurderer kantIKantVurderer) {
+        return Hjelpetidslinjer.utledHullSomMåTettes(tidslinje.disjoint(p.toLocalDateInterval()), kantIKantVurderer).intersection(p.toLocalDateInterval()).isEmpty();
     }
 
 }
