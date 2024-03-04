@@ -6,7 +6,6 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BA
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -15,10 +14,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
-import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -28,9 +23,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.registerendringer.Aktivitetsendringer;
 import no.nav.k9.sak.registerendringer.EndringerIAY;
-import no.nav.k9.sak.registerendringer.Endringstype;
 import no.nav.k9.sak.registerendringer.RelevanteIAYRegisterendringerUtleder;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
@@ -71,18 +64,9 @@ public class PleiepengerRelevanteIAYRegisterendringerUtleder implements Relevant
     public EndringerIAY utledRelevanteEndringer(BehandlingReferanse behandlingReferanse) {
         var tilkjentYtelseEndringPrMottaker = utledTilkjentYtelseEndring.utledEndringer(behandlingReferanse);
         var aktivitetsperiodeEndringer = finnEndringerIAnsattperioder(behandlingReferanse);
-        var revurdertePerioder = finnRevurdertePerioder(behandlingReferanse);
-        var endringerIAktivitetsperioder = finnRelevanteEndringerIAnsattperioderPrAktivitet(aktivitetsperiodeEndringer, tilkjentYtelseEndringPrMottaker, revurdertePerioder);
+        var revurdertePerioderVilkårsperioder = finnRevurdertePerioder(behandlingReferanse);
+        var endringerIAktivitetsperioder = UledRelevanteEndringerIAktivitetsperiode.finnRelevanteEndringerIAktivitetsperiode(aktivitetsperiodeEndringer, tilkjentYtelseEndringPrMottaker, revurdertePerioderVilkårsperioder);
         return new EndringerIAY(endringerIAktivitetsperioder, Collections.emptyList());
-    }
-
-    private List<Aktivitetsendringer> finnRelevanteEndringerIAnsattperioderPrAktivitet(List<UtledAktivitetsperiodeEndring.AktivitetsperiodeEndring> aktivitetsperiodeEndringer, List<UtledTilkjentYtelseEndring.EndringerForMottaker> endringerPrMottaker, Set<DatoIntervallEntitet> revurdertePerioder) {
-        return aktivitetsperiodeEndringer.stream()
-            .map(aktivitetsendringer -> {
-                var endringIRegisterOgUtbetaling = utledRelevantEndringstidslinje(aktivitetsendringer, endringerPrMottaker, revurdertePerioder);
-                return new Aktivitetsendringer(aktivitetsendringer.identifikator().arbeidsgiver(), aktivitetsendringer.identifikator().ref(), endringIRegisterOgUtbetaling);
-            })
-            .toList();
     }
 
     private List<UtledAktivitetsperiodeEndring.AktivitetsperiodeEndring> finnEndringerIAnsattperioder(BehandlingReferanse behandlingReferanse) {
@@ -112,38 +96,6 @@ public class PleiepengerRelevanteIAYRegisterendringerUtleder implements Relevant
             .flatMap(v -> v.getPerioder().stream())
             .map(VilkårPeriode::getPeriode)
             .collect(Collectors.toCollection(TreeSet::new));
-    }
-
-    private LocalDateTimeline<Endringstype> utledRelevantEndringstidslinje(UtledAktivitetsperiodeEndring.AktivitetsperiodeEndring aktivitetsendringer, List<UtledTilkjentYtelseEndring.EndringerForMottaker> endringerPrMottaker, Set<DatoIntervallEntitet> revurdertePerioder) {
-        var tidslinjeForEndringIUtbetaling = finnTidslinjeForEndringIUtbetaling(aktivitetsendringer, endringerPrMottaker);
-        var utvidet = utvidMedDagenFørStp(tidslinjeForEndringIUtbetaling, revurdertePerioder);
-        return aktivitetsendringer.endringstidslinje().intersection(utvidet);
-    }
-
-    private LocalDateTimeline<Boolean> utvidMedDagenFørStp(LocalDateTimeline<Boolean> tidslinjeForEndringIUtbetaling, Set<DatoIntervallEntitet> vilkårsperioder) {
-        return vilkårsperioder.stream().filter(p -> !tidslinjeForEndringIUtbetaling.intersection(p.toLocalDateInterval()).isEmpty())
-            .map(p -> new LocalDateTimeline<>(p.getFomDato().minusDays(1), p.getFomDato().minusDays(1), true))
-            .reduce(tidslinjeForEndringIUtbetaling, (t1, t2) -> t1.combine(t2, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN));
-    }
-
-    private LocalDateTimeline<Boolean> finnTidslinjeForEndringIUtbetaling(UtledAktivitetsperiodeEndring.AktivitetsperiodeEndring aktivitetsendringer, List<UtledTilkjentYtelseEndring.EndringerForMottaker> endringerPrMottaker) {
-        return endringerPrMottaker.stream()
-            .filter(e -> Objects.equals(e.nøkkel().arbeidsgiver(), aktivitetsendringer.identifikator().arbeidsgiver()) &&
-                e.nøkkel().arbeidsforholdRef().gjelderFor(aktivitetsendringer.identifikator().ref()) &&
-                matcherStatusOgType(e.nøkkel().aktivitetStatus(), aktivitetsendringer.identifikator().arbeidType())
-            )
-            .map(UtledTilkjentYtelseEndring.EndringerForMottaker::tidslinjeMedEndringIYtelse)
-            .map(t -> t.mapValue(it -> true))
-            .reduce(LocalDateTimeline.empty(), (t1, t2) -> t1.combine(t2, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN));
-    }
-
-    private boolean matcherStatusOgType(AktivitetStatus aktivitetStatus, ArbeidType arbeidType) {
-        if (aktivitetStatus.erFrilanser()) {
-            return arbeidType.equals(ArbeidType.FRILANSER_OPPDRAGSTAKER_MED_MER);
-        } else if (aktivitetStatus.erArbeidstaker()) {
-            return arbeidType.equals(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
-        }
-        return false;
     }
 
 
