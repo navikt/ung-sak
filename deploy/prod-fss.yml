@@ -268,8 +268,6 @@ spec:
       value: "false"
     - name: ENABLE_DATO_NY_REGEL_UTTAK
       value: "false"
-    - name: ENABLE_OVERSTYR_UTTAK
-      value: "false"
     - name: FILTRER_UGYLDIG_IM
       value: "false"
     - name: FJERN_VILKARSPERIODER_BEREGNING
