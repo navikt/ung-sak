@@ -46,25 +46,20 @@ public class UttakOverstyringshåndterer implements Overstyringshåndterer<Overs
     private HistorikkRepository historikkRepository;
 
     private ArbeidsgiverHistorikkinnslag arbeidsgiverHistorikkinnslag;
-    private boolean lansert;
 
     UttakOverstyringshåndterer() {
         //for CDI proxy
     }
 
     @Inject
-    public UttakOverstyringshåndterer(OverstyrUttakRepository overstyrUttakRepository, HistorikkRepository historikkRepository, ArbeidsgiverHistorikkinnslag arbeidsgiverHistorikkinnslag, @KonfigVerdi(value = "ENABLE_OVERSTYR_UTTAK", defaultVerdi = "false") boolean lansert) {
+    public UttakOverstyringshåndterer(OverstyrUttakRepository overstyrUttakRepository, HistorikkRepository historikkRepository, ArbeidsgiverHistorikkinnslag arbeidsgiverHistorikkinnslag) {
         this.overstyrUttakRepository = overstyrUttakRepository;
         this.historikkRepository = historikkRepository;
         this.arbeidsgiverHistorikkinnslag = arbeidsgiverHistorikkinnslag;
-        this.lansert = lansert;
     }
 
     @Override
     public OppdateringResultat håndterOverstyring(OverstyrUttakDto dto, Behandling behandling, BehandlingskontrollKontekst kontekst) {
-        if (!lansert) {
-            throw new IllegalArgumentException("Overstyring av uttak er ikke lansert.");
-        }
         LocalDateTimeline<OverstyrtUttakPeriode> overstyringerFørOppdatering = overstyrUttakRepository.hentOverstyrtUttak(behandling.getId());
 
         LocalDateTimeline<OverstyrtUttakPeriode> oppdateringer = new LocalDateTimeline<>(dto.getLagreEllerOppdater().stream().map(this::mapTilSegment).toList());
