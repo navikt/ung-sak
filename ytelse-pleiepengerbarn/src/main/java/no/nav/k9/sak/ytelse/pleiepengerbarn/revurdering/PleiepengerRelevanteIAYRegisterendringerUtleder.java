@@ -134,7 +134,7 @@ public class PleiepengerRelevanteIAYRegisterendringerUtleder implements Relevant
                 e.nøkkel().aktivitetsnøkkel().arbeidsforholdRef().gjelderFor(aktivitetsendringer.identifikator().ref()) &&
                 matcherStatusOgType(e.nøkkel().aktivitetsnøkkel().aktivitetStatus(), aktivitetsendringer.identifikator().arbeidType())
             )
-            .map(UtledTilkjentYtelseEndring.EndringerForMottaker::endringer)
+            .map(UtledTilkjentYtelseEndring.EndringerForMottaker::tidslinjeMedEndringIYtelse)
             .map(t -> t.mapValue(it -> true))
             .reduce(LocalDateTimeline.empty(), (t1, t2) -> t1.combine(t2, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN));
     }
