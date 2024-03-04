@@ -70,6 +70,7 @@ spec:
         - application: k9-formidling
         - application: k9-formidling-dokumentdata
         - application: k9-punsj
+        - application: k9-abakus
         - application: fpabakus
           namespace: teamforeldrepenger
         - application: k9-punsjbolle
@@ -267,8 +268,6 @@ spec:
       value: "false"
     - name: ENABLE_DATO_NY_REGEL_UTTAK
       value: "false"
-    - name: ENABLE_OVERSTYR_UTTAK
-      value: "false"
     - name: FILTRER_UGYLDIG_IM
       value: "false"
     - name: FJERN_VILKARSPERIODER_BEREGNING
@@ -314,7 +313,3 @@ spec:
 
     - name: PIP_USERS
       value: "srvPDP,srvk9-tilbake,srvsaf"
-
-    # Pleiepenger infotrygd migrering
-    - name: INFOTRYGD_MIGRERING_TILLATELSER
-      value: "K137924,N106674,H137477,N130802,N140249,A100265,D101758,E151154,A147438,S164910,B100673,R145708,G119972,U112286,L120563,A100265,O126651,H151541,K120680,J104442,K137924,V110938"

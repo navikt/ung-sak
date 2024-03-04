@@ -62,6 +62,9 @@ spec:
   accessPolicy:
     inbound:
       rules:
+        - application: k9-sak-web
+          namespace: k9saksbehandling
+          cluster: dev-gcp
         - application: k9-los-api
         - application: k9-fordel
         - application: k9-sak
@@ -70,6 +73,7 @@ spec:
         - application: k9-formidling
         - application: k9-formidling-dokumentdata
         - application: k9-punsj
+        - application: k9-abakus
         - application: fpabakus
           namespace: teamforeldrepenger
         - application: k9-punsjbolle
@@ -271,8 +275,6 @@ spec:
       value: "true"
     - name: ENABLE_DATO_NY_REGEL_UTTAK
       value: "true"
-    - name: ENABLE_OVERSTYR_UTTAK
-      value: "true"
     - name: FILTRER_UGYLDIG_IM
       value: "true"
     - name: FJERN_VILKARSPERIODER_BEREGNING
@@ -299,6 +301,8 @@ spec:
       value: "true"
     - name: K9_ABAKUS_ENABLED
       value: "true"
+    - name: ETTERSENDELSE_RETT_TIL_K9SAK
+      value: "true"
 
 
     # Konfigurasjoner
@@ -318,7 +322,3 @@ spec:
 
     - name: PIP_USERS
       value: "srvPDP,srvk9-tilbake,srvsaf,Z993210,Z994080,Z994692"
-
-    # Pleiepenger infotrygd migrering
-    - name: INFOTRYGD_MIGRERING_TILLATELSER
-      value: "Z990404,Z990422,Z994004,Z994337,Z994185"

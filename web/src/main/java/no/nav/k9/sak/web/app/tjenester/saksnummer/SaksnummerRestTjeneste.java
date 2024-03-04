@@ -78,6 +78,8 @@ public class SaksnummerRestTjeneste {
             if (dto.getBehandlingsår() == null) {
                 throw new IllegalArgumentException("Behandlingsår er påkrevd for omsorgspenger");
             }
+        } else if (dto.getBehandlingsår() != null) {
+            throw new IllegalArgumentException("Støtter ikke behandlingsår for " + dto.getYtelseType());
         }
 
         sjekkAktørIdMotPdl(dto.getBrukerAktørId());
