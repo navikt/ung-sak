@@ -12,13 +12,13 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
-import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.arbeidsforhold.AktivPeriodeForArbeidUtleder;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.MapYtelsesstidslinjerForPermisjonvalidering;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.registerendringer.Endringstype;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
@@ -26,13 +26,15 @@ public class UtledAktivitetsperiodeEndring {
 
     private final MapYtelsesstidslinjerForPermisjonvalidering mapYtelsesstidslinjerForPermisjonvalidering = new MapYtelsesstidslinjerForPermisjonvalidering();
 
-    public List<AktivitetsperiodeEndring> utledEndring(InntektArbeidYtelseGrunnlag iayGrunnlag, InntektArbeidYtelseGrunnlag originaltIayGrunnlag, BehandlingReferanse behandlingReferanse,
-                                                       Collection<DatoIntervallEntitet> vilkårsperioder) {
-        var aktivitetsperiodePrIdentifikator = finnAktivitetsperioder(iayGrunnlag, behandlingReferanse, vilkårsperioder);
-        var originalAktivitetsperiodePrIdentifikator = finnAktivitetsperioder(originaltIayGrunnlag, behandlingReferanse, vilkårsperioder);
+    public List<AktivitetsperiodeEndring> utledEndring(InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                                       InntektArbeidYtelseGrunnlag originaltIayGrunnlag,
+                                                       Collection<DatoIntervallEntitet> vilkårsperioder,
+                                                       AktørId søkerAktørId) {
+        var aktivitetsperiodePrIdentifikator = finnAktivitetsperioder(iayGrunnlag, vilkårsperioder, søkerAktørId);
+        var originalAktivitetsperiodePrIdentifikator = finnAktivitetsperioder(originaltIayGrunnlag, vilkårsperioder, søkerAktørId);
         var endringer = finnEndretArbeidsforhold(aktivitetsperiodePrIdentifikator, originalAktivitetsperiodePrIdentifikator);
         endringer.addAll(finnFjernetArbeidsforhold(originalAktivitetsperiodePrIdentifikator, aktivitetsperiodePrIdentifikator));
-        return endringer;
+        return endringer.stream().filter(a -> !a.endringstidslinje.isEmpty()).toList();
     }
 
     private static List<AktivitetsperiodeEndring> finnEndretArbeidsforhold(Set<Aktivitetsperiode> aktivitetsperiodePrIdentifikator, Set<Aktivitetsperiode> originalAktivitetsperiodePrIdentifikator) {
@@ -68,9 +70,9 @@ public class UtledAktivitetsperiodeEndring {
         return new LocalDateSegment<>(di, Endringstype.FJERNET_PERIODE);
     }
 
-    private Set<Aktivitetsperiode> finnAktivitetsperioder(InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag, BehandlingReferanse behandlingReferanse, Collection<DatoIntervallEntitet> vilkårsperioder) {
-        var aktørArbeidFraRegister = inntektArbeidYtelseGrunnlag.getAktørArbeidFraRegister(behandlingReferanse.getAktørId());
-        var tidslinjePrYtelse = mapYtelsesstidslinjerForPermisjonvalidering.utledYtelsesTidslinjerForValideringAvPermisjoner(new YtelseFilter(inntektArbeidYtelseGrunnlag.getAktørYtelseFraRegister(behandlingReferanse.getAktørId())));
+    private Set<Aktivitetsperiode> finnAktivitetsperioder(InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag, Collection<DatoIntervallEntitet> vilkårsperioder, AktørId aktørId) {
+        var aktørArbeidFraRegister = inntektArbeidYtelseGrunnlag.getAktørArbeidFraRegister(aktørId);
+        var tidslinjePrYtelse = mapYtelsesstidslinjerForPermisjonvalidering.utledYtelsesTidslinjerForValideringAvPermisjoner(new YtelseFilter(inntektArbeidYtelseGrunnlag.getAktørYtelseFraRegister(aktørId)));
         return aktørArbeidFraRegister.stream().flatMap(a -> a.hentAlleYrkesaktiviteter().stream())
             .filter(a -> a.getArbeidType().equals(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD) || a.getArbeidType().equals(ArbeidType.FRILANSER_OPPDRAGSTAKER_MED_MER))
             .map(ya ->

@@ -91,11 +91,10 @@ public class PleiepengerRelevanteIAYRegisterendringerUtleder implements Relevant
 
         if (originalIAYGrunnlag.isEmpty()) {
             throw new IllegalStateException("Fant ikke iay fra original behandling");
-
         }
         var vilkårsperioder = finnVilkårsperioder(behandlingReferanse);
 
-        return utledAktivitetsperiodeEndring.utledEndring(inntektArbeidYtelseGrunnlag, originalIAYGrunnlag.get(), behandlingReferanse, vilkårsperioder);
+        return utledAktivitetsperiodeEndring.utledEndring(inntektArbeidYtelseGrunnlag, originalIAYGrunnlag.get(), vilkårsperioder, behandlingReferanse.getAktørId());
     }
 
     private Set<DatoIntervallEntitet> finnRevurdertePerioder(BehandlingReferanse behandlingReferanse) {
