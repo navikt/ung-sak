@@ -37,7 +37,6 @@ runs:
       uses: actions/checkout@v4
       with:
         repository: navikt/k9-sak-typescript-client
-        ref: 'k9-sak-workflow' # Maybe just use main later
         token: ${{ inputs.clientRepoToken }}
         path: k9-sak-typescript-client
         fetch-depth: 0
