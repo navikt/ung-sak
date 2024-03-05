@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.abakus.iaygrunnlag.request.Dataset;
@@ -32,7 +31,9 @@ class AsyncAbakusKopierGrunnlagTask extends UnderBehandlingProsessTask {
 
     public static final String TASKTYPE = "abakus.async.kopiergrunnlag";
 
-    /** Angir hvilken behandling det skal kopieres fra. */
+    /**
+     * Angir hvilken behandling det skal kopieres fra.
+     */
     static final String ORIGINAL_BEHANDLING_ID = "original.behandlingId";
 
     static final String DATASET = "kopiergrunnlag.dataset";
@@ -77,14 +78,15 @@ class AsyncAbakusKopierGrunnlagTask extends UnderBehandlingProsessTask {
         if (k9abakusEnabled) {
             try {
                 k9AbakusTjeneste.kopierGrunnlag(request);
-            } catch (Exception ignored) {
+            } catch (IOException e) {
+                throw new IllegalStateException(String.format("Kunne ikke kopiere abakus grunnlag: fra [%s] til [%s], dataset: %s", fraBehandlingId, tilBehandling.getId(), dataset), e);
             }
-        }
-
-        try {
-            abakusTjeneste.kopierGrunnlag(request);
-        } catch (IOException e) {
-            throw new IllegalStateException(String.format("Kunne ikke kopiere abakus grunnlag: fra [%s] til [%s], dataset: %s", fraBehandlingId, tilBehandling.getId(), dataset), e);
+        } else {
+            try {
+                abakusTjeneste.kopierGrunnlag(request);
+            } catch (IOException e) {
+                throw new IllegalStateException(String.format("Kunne ikke kopiere abakus grunnlag: fra [%s] til [%s], dataset: %s", fraBehandlingId, tilBehandling.getId(), dataset), e);
+            }
         }
     }
 
