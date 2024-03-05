@@ -24,6 +24,7 @@ class UtledTilkjentYtelseEndringTest {
 
     @Test
     void skal_gi_ingen_endring_dersom_kun_en_periode_uten_endring() {
+        // Arrange
         var resultat = lagResultat();
         var originaltResultat = lagResultat();
 
@@ -39,8 +40,10 @@ class UtledTilkjentYtelseEndringTest {
         lagAndel(periode1, brukerErMottaker, arbeidsgiver, aktivitetStatus, inntektskategori, 1000, 100, 0);
         lagAndel(originalPeriode1, brukerErMottaker, arbeidsgiver, aktivitetStatus, inntektskategori, 1000, 100, 0);
 
-        var endringerForMottakers = UtledTilkjentYtelseEndring.utledEndringer(resultat, originaltResultat);
+        // Act
+        var endringerForMottakers = act(resultat, originaltResultat);
 
+        // Assert
         assertThat(endringerForMottakers.size()).isEqualTo(0);
     }
 
@@ -67,17 +70,18 @@ class UtledTilkjentYtelseEndringTest {
         var periode2 = lagPeriode(fom2, tom2, resultat);
         lagAndel(periode2, brukerErMottaker, arbeidsgiver, aktivitetStatus, inntektskategori, 1000, 100, 0);
 
-        var endringerForMottakers = UtledTilkjentYtelseEndring.utledEndringer(resultat, originaltResultat);
+        // Act
+        var endringerForMottakers = act(resultat, originaltResultat);
 
+        // Assert
         assertThat(endringerForMottakers.size()).isEqualTo(1);
         assertThat(endringerForMottakers.get(0).nøkkel()).isEqualTo(new MottakerNøkkel(brukerErMottaker, arbeidsgiver, null, aktivitetStatus, inntektskategori));
-        var endretIntervaller = endringerForMottakers.get(0).tidslinjeMedEndringIYtelse().getLocalDateIntervals();
-        assertThat(endretIntervaller.size()).isEqualTo(1);
-        assertThat(endretIntervaller.contains(periode2.getPeriode().toLocalDateInterval())).isTrue();
+        validerEndretTidslinje(endringerForMottakers, 0, periode2.getPeriode().toLocalDateInterval());
     }
 
     @Test
     void skal_gi_endring_dersom_endring_i_periode() {
+        // Arrange
         var resultat = lagResultat();
         var originaltResultat = lagResultat();
 
@@ -95,19 +99,19 @@ class UtledTilkjentYtelseEndringTest {
         lagAndel(periode1, brukerErMottaker, arbeidsgiver, aktivitetStatus, inntektskategori, 1000, 100, 0);
         lagAndel(originalPeriode1, brukerErMottaker, arbeidsgiver, aktivitetStatus, inntektskategori, 1000, 100, 0);
 
+        // Act
+        var endringerForMottakers = act(resultat, originaltResultat);
 
-        var endringerForMottakers = UtledTilkjentYtelseEndring.utledEndringer(resultat, originaltResultat);
-
+        // Assert
         assertThat(endringerForMottakers.size()).isEqualTo(1);
         assertThat(endringerForMottakers.get(0).nøkkel()).isEqualTo(new MottakerNøkkel(brukerErMottaker, arbeidsgiver, null, aktivitetStatus, inntektskategori));
-        var endretIntervaller = endringerForMottakers.get(0).tidslinjeMedEndringIYtelse().getLocalDateIntervals();
-        assertThat(endretIntervaller.size()).isEqualTo(1);
-        assertThat(endretIntervaller.contains(new LocalDateInterval(originalTom1.plusDays(1), tom1))).isTrue();
+        validerEndretTidslinje(endringerForMottakers, 0, new LocalDateInterval(originalTom1.plusDays(1), tom1));
     }
 
 
     @Test
     void skal_gi_endring_dersom_endret_dagsats() {
+        // Arrange
         var resultat = lagResultat();
         var originaltResultat = lagResultat();
 
@@ -123,17 +127,17 @@ class UtledTilkjentYtelseEndringTest {
         lagAndel(periode1, brukerErMottaker, arbeidsgiver, aktivitetStatus, inntektskategori, 1000, 100, 0);
         lagAndel(originalPeriode1, brukerErMottaker, arbeidsgiver, aktivitetStatus, inntektskategori, 1001, 100, 0);
 
-        var endringerForMottakers = UtledTilkjentYtelseEndring.utledEndringer(resultat, originaltResultat);
+        // Act
+        var endringerForMottakers = act(resultat, originaltResultat);
 
         assertThat(endringerForMottakers.size()).isEqualTo(1);
         assertThat(endringerForMottakers.get(0).nøkkel()).isEqualTo(new MottakerNøkkel(brukerErMottaker, arbeidsgiver, null, aktivitetStatus, inntektskategori));
-        var endretIntervaller = endringerForMottakers.get(0).tidslinjeMedEndringIYtelse().getLocalDateIntervals();
-        assertThat(endretIntervaller.size()).isEqualTo(1);
-        assertThat(endretIntervaller.contains(periode1.getPeriode().toLocalDateInterval())).isTrue();
+        validerEndretTidslinje(endringerForMottakers, 0, periode1.getPeriode().toLocalDateInterval());
     }
 
     @Test
     void skal_gi_endring_dersom_endret_utbetalingsgrad() {
+        // Arrange
         var resultat = lagResultat();
         var originaltResultat = lagResultat();
 
@@ -149,17 +153,18 @@ class UtledTilkjentYtelseEndringTest {
         lagAndel(periode1, brukerErMottaker, arbeidsgiver, aktivitetStatus, inntektskategori, 1000, 100, 0);
         lagAndel(originalPeriode1, brukerErMottaker, arbeidsgiver, aktivitetStatus, inntektskategori, 1000, 99, 0);
 
-        var endringerForMottakers = UtledTilkjentYtelseEndring.utledEndringer(resultat, originaltResultat);
+        // Act
+        var endringerForMottakers = act(resultat, originaltResultat);
 
+        // Assert
         assertThat(endringerForMottakers.size()).isEqualTo(1);
         assertThat(endringerForMottakers.get(0).nøkkel()).isEqualTo(new MottakerNøkkel(brukerErMottaker, arbeidsgiver, null, aktivitetStatus, inntektskategori));
-        var endretIntervaller = endringerForMottakers.get(0).tidslinjeMedEndringIYtelse().getLocalDateIntervals();
-        assertThat(endretIntervaller.size()).isEqualTo(1);
-        assertThat(endretIntervaller.contains(periode1.getPeriode().toLocalDateInterval())).isTrue();
+        validerEndretTidslinje(endringerForMottakers, 0, periode1.getPeriode().toLocalDateInterval());
     }
 
     @Test
     void skal_gi_endring_dersom_endret_feriepengerÅrsbeløp() {
+        // Arrange
         var resultat = lagResultat();
         var originaltResultat = lagResultat();
 
@@ -175,18 +180,18 @@ class UtledTilkjentYtelseEndringTest {
         lagAndel(periode1, brukerErMottaker, arbeidsgiver, aktivitetStatus, inntektskategori, 1000, 100, 0);
         lagAndel(originalPeriode1, brukerErMottaker, arbeidsgiver, aktivitetStatus, inntektskategori, 1000, 100, 1);
 
-        var endringerForMottakers = UtledTilkjentYtelseEndring.utledEndringer(resultat, originaltResultat);
+        // Act
+        var endringerForMottakers = act(resultat, originaltResultat);
 
         assertThat(endringerForMottakers.size()).isEqualTo(1);
         assertThat(endringerForMottakers.get(0).nøkkel()).isEqualTo(new MottakerNøkkel(brukerErMottaker, arbeidsgiver, null, aktivitetStatus, inntektskategori));
-        var endretIntervaller = endringerForMottakers.get(0).tidslinjeMedEndringIYtelse().getLocalDateIntervals();
-        assertThat(endretIntervaller.size()).isEqualTo(1);
-        assertThat(endretIntervaller.contains(periode1.getPeriode().toLocalDateInterval())).isTrue();
+        validerEndretTidslinje(endringerForMottakers, 0, periode1.getPeriode().toLocalDateInterval());
     }
 
 
     @Test
     void skal_gi_to_endringer_dersom_endret_inntektskategori_en_for_tilkommet_og_en_for_bortfalt() {
+        // Arrange
         var resultat = lagResultat();
         var originaltResultat = lagResultat();
 
@@ -202,23 +207,21 @@ class UtledTilkjentYtelseEndringTest {
         lagAndel(periode1, brukerErMottaker, arbeidsgiver, aktivitetStatus, Inntektskategori.DAGPENGER, 1000, 100, 0);
         lagAndel(originalPeriode1, brukerErMottaker, arbeidsgiver, aktivitetStatus, inntektskategori, 1000, 100, 0);
 
-        var endringerForMottakers = UtledTilkjentYtelseEndring.utledEndringer(resultat, originaltResultat);
+        // Act
+        var endringerForMottakers = act(resultat, originaltResultat);
 
         assertThat(endringerForMottakers.size()).isEqualTo(2);
         var nøkler = endringerForMottakers.stream().map(UtbetalingsendringerForMottaker::nøkkel).toList();
         assertThat(nøkler.contains(new MottakerNøkkel(brukerErMottaker, arbeidsgiver, InternArbeidsforholdRef.nullRef(), aktivitetStatus, inntektskategori))).isTrue();
-        var endretIntervaller = endringerForMottakers.get(0).tidslinjeMedEndringIYtelse().getLocalDateIntervals();
-        assertThat(endretIntervaller.size()).isEqualTo(1);
-        assertThat(endretIntervaller.contains(periode1.getPeriode().toLocalDateInterval())).isTrue();
+        validerEndretTidslinje(endringerForMottakers, 0, periode1.getPeriode().toLocalDateInterval());
 
         assertThat(nøkler.contains(new MottakerNøkkel(brukerErMottaker, arbeidsgiver, InternArbeidsforholdRef.nullRef(), aktivitetStatus, Inntektskategori.DAGPENGER))).isTrue();
-        var endretIntervaller2 = endringerForMottakers.get(1).tidslinjeMedEndringIYtelse().getLocalDateIntervals();
-        assertThat(endretIntervaller2.size()).isEqualTo(1);
-        assertThat(endretIntervaller2.contains(periode1.getPeriode().toLocalDateInterval())).isTrue();
+        validerEndretTidslinje(endringerForMottakers, 1, periode1.getPeriode().toLocalDateInterval());
     }
 
     @Test
     void skal_gi_to_endringer_dersom_endret_aktivitetstatus_en_for_tilkommet_og_en_for_bortfalt() {
+        // Arrange
         var resultat = lagResultat();
         var originaltResultat = lagResultat();
 
@@ -234,23 +237,22 @@ class UtledTilkjentYtelseEndringTest {
         lagAndel(periode1, brukerErMottaker, arbeidsgiver, AktivitetStatus.IKKE_YRKESAKTIV, inntektskategori, 1000, 100, 0);
         lagAndel(originalPeriode1, brukerErMottaker, arbeidsgiver, aktivitetStatus, inntektskategori, 1000, 100, 0);
 
-        var endringerForMottakers = UtledTilkjentYtelseEndring.utledEndringer(resultat, originaltResultat);
+        // Act
+        var endringerForMottakers = act(resultat, originaltResultat);
 
         assertThat(endringerForMottakers.size()).isEqualTo(2);
-        assertThat(endringerForMottakers.get(0).nøkkel()).isEqualTo(new MottakerNøkkel(brukerErMottaker, arbeidsgiver, null, AktivitetStatus.IKKE_YRKESAKTIV, inntektskategori));
-        var endretIntervaller = endringerForMottakers.get(0).tidslinjeMedEndringIYtelse().getLocalDateIntervals();
-        assertThat(endretIntervaller.size()).isEqualTo(1);
-        assertThat(endretIntervaller.contains(periode1.getPeriode().toLocalDateInterval())).isTrue();
+        var nøkler = endringerForMottakers.stream().map(UtbetalingsendringerForMottaker::nøkkel).toList();
+        assertThat(nøkler.contains(new MottakerNøkkel(brukerErMottaker, arbeidsgiver, null, AktivitetStatus.IKKE_YRKESAKTIV, inntektskategori))).isTrue();
+        validerEndretTidslinje(endringerForMottakers, 0, periode1.getPeriode().toLocalDateInterval());
 
-        assertThat(endringerForMottakers.get(1).nøkkel()).isEqualTo(new MottakerNøkkel(brukerErMottaker, arbeidsgiver, null, aktivitetStatus, inntektskategori));
-        var endretIntervaller2 = endringerForMottakers.get(1).tidslinjeMedEndringIYtelse().getLocalDateIntervals();
-        assertThat(endretIntervaller2.size()).isEqualTo(1);
-        assertThat(endretIntervaller2.contains(periode1.getPeriode().toLocalDateInterval())).isTrue();
+        assertThat(nøkler.contains(new MottakerNøkkel(brukerErMottaker, arbeidsgiver, null, aktivitetStatus, inntektskategori))).isTrue();
+        validerEndretTidslinje(endringerForMottakers, 1, periode1.getPeriode().toLocalDateInterval());
     }
 
 
     @Test
     void skal_gi_endring_dersom_ny_aktivitet() {
+        // Arrange
         var resultat = lagResultat();
         var originaltResultat = lagResultat();
 
@@ -270,13 +272,22 @@ class UtledTilkjentYtelseEndringTest {
 
         lagAndel(originalPeriode1, brukerErMottaker, arbeidsgiver, aktivitetStatus, inntektskategori, 1000, 100, 0);
 
-        var endringerForMottakers = UtledTilkjentYtelseEndring.utledEndringer(resultat, originaltResultat);
+        // Act
+        var endringerForMottakers = act(resultat, originaltResultat);
 
         assertThat(endringerForMottakers.size()).isEqualTo(1);
         assertThat(endringerForMottakers.get(0).nøkkel()).isEqualTo(new MottakerNøkkel(brukerErMottaker, arbeidsgiver2, null, aktivitetStatus, inntektskategori));
-        var endretIntervaller = endringerForMottakers.get(0).tidslinjeMedEndringIYtelse().getLocalDateIntervals();
-        assertThat(endretIntervaller.size()).isEqualTo(1);
-        assertThat(endretIntervaller.contains(periode1.getPeriode().toLocalDateInterval())).isTrue();
+        validerEndretTidslinje(endringerForMottakers, 0, periode1.getPeriode().toLocalDateInterval());
+    }
+
+    private static void validerEndretTidslinje(List<UtbetalingsendringerForMottaker> endringerForMottakers, int index, LocalDateInterval periode1) {
+        var endretIntervaller2 = endringerForMottakers.get(index).tidslinjeMedEndringIYtelse().getLocalDateIntervals();
+        assertThat(endretIntervaller2.size()).isEqualTo(1);
+        assertThat(endretIntervaller2.contains(periode1)).isTrue();
+    }
+
+    private static List<UtbetalingsendringerForMottaker> act(BeregningsresultatEntitet resultat, BeregningsresultatEntitet originaltResultat) {
+        return UtledTilkjentYtelseEndring.utledEndringer(resultat, originaltResultat);
     }
 
     private static BeregningsresultatEntitet lagResultat() {
