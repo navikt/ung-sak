@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
@@ -15,6 +16,7 @@ import no.nav.k9.sak.registerendringer.Aktivitetsendringer;
 import no.nav.k9.sak.registerendringer.RelevanteIAYRegisterendringerUtleder;
 import no.nav.k9.sak.typer.Periode;
 
+@ApplicationScoped
 public class UtledPerioderMedRegisterendring {
 
     private Instance<RelevanteIAYRegisterendringerUtleder> relevanteIAYRegisterendringerUtledere;
