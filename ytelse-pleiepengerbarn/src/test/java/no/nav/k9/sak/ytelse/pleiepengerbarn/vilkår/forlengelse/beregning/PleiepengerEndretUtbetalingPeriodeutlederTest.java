@@ -241,7 +241,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
 
         var tomDato = SKJÆRINGSTIDSPUNKT.plusDays(antallDager);
 
-        uttakNyeReglerRepository.lagreDatoForNyeRegler(behandling.getId(), SKJÆRINGSTIDSPUNKT);
+        uttakNyeReglerRepository.lagreDatoForNyeRegler(originalBehandling.getId(), SKJÆRINGSTIDSPUNKT);
         uttakNyeReglerRepository.lagreDatoForNyeRegler(behandling.getId(), SKJÆRINGSTIDSPUNKT.plusDays(5));
 
         var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(SKJÆRINGSTIDSPUNKT, tomDato));
