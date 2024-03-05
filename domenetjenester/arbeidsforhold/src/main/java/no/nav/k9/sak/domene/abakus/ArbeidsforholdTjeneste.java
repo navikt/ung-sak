@@ -10,7 +10,6 @@ import java.util.stream.Stream;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.Periode;
 import no.nav.abakus.iaygrunnlag.arbeidsforhold.v1.ArbeidsforholdDto;
@@ -42,21 +41,16 @@ public class ArbeidsforholdTjeneste {
         final var request = new AktørDatoRequest(new AktørIdPersonident(ident.getId()), new Periode(dato, dato), YtelseType.fraKode(ytelseType.getKode()));
 
         if (k9abakusEnabled) {
-            try {
-                return k9AbakusTjeneste.hentArbeidsforholdIPerioden(request)
-                    .stream()
-                    .collect(Collectors.groupingBy(this::mapTilArbeidsgiver,
-                        flatMapping(im -> Stream.of(EksternArbeidsforholdRef.ref(im.getArbeidsforholdId() != null ? im.getArbeidsforholdId().getEksternReferanse() : null)), Collectors.toSet())));
-            } catch (Exception ignored) {
-
-            }
+            return k9AbakusTjeneste.hentArbeidsforholdIPerioden(request)
+                .stream()
+                .collect(Collectors.groupingBy(this::mapTilArbeidsgiver,
+                    flatMapping(im -> Stream.of(EksternArbeidsforholdRef.ref(im.getArbeidsforholdId() != null ? im.getArbeidsforholdId().getEksternReferanse() : null)), Collectors.toSet())));
+        } else {
+            return abakusTjeneste.hentArbeidsforholdIPerioden(request)
+                .stream()
+                .collect(Collectors.groupingBy(this::mapTilArbeidsgiver,
+                    flatMapping(im -> Stream.of(EksternArbeidsforholdRef.ref(im.getArbeidsforholdId() != null ? im.getArbeidsforholdId().getEksternReferanse() : null)), Collectors.toSet())));
         }
-
-
-        return abakusTjeneste.hentArbeidsforholdIPerioden(request)
-            .stream()
-            .collect(Collectors.groupingBy(this::mapTilArbeidsgiver,
-                flatMapping(im -> Stream.of(EksternArbeidsforholdRef.ref(im.getArbeidsforholdId() != null ? im.getArbeidsforholdId().getEksternReferanse() : null)), Collectors.toSet())));
     }
 
     private Arbeidsgiver mapTilArbeidsgiver(ArbeidsforholdDto arbeidsforhold) {
