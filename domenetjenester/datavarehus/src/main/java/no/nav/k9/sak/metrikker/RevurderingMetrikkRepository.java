@@ -45,6 +45,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.kontrakt.krav.StatusForPerioderPåBehandling;
 import no.nav.k9.sak.kontrakt.krav.ÅrsakTilVurdering;
 import no.nav.k9.sak.perioder.SøknadsfristTjenesteProvider;
+import no.nav.k9.sak.perioder.UtledPerioderMedRegisterendring;
 import no.nav.k9.sak.perioder.UtledStatusPåPerioderTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
@@ -71,15 +72,19 @@ public class RevurderingMetrikkRepository {
     private final EntityManager entityManager;
     private final BehandlingRepository behandlingRepository;
     private final SøknadsfristTjenesteProvider søknadsfristTjenesteProvider;
-    private final UtledStatusPåPerioderTjeneste statusPåPerioderTjeneste = new UtledStatusPåPerioderTjeneste(false);
+    private final UtledStatusPåPerioderTjeneste statusPåPerioderTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
 
     @Inject
-    public RevurderingMetrikkRepository(EntityManager entityManager, BehandlingRepository behandlingRepository, SøknadsfristTjenesteProvider søknadsfristTjenesteProvider, @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
+    public RevurderingMetrikkRepository(EntityManager entityManager, BehandlingRepository behandlingRepository,
+                                        SøknadsfristTjenesteProvider søknadsfristTjenesteProvider,
+                                        UtledPerioderMedRegisterendring utledPerioderMedRegisterendring,
+                                        @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
         this.entityManager = entityManager;
         this.behandlingRepository = behandlingRepository;
         this.søknadsfristTjenesteProvider = søknadsfristTjenesteProvider;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
+        this.statusPåPerioderTjeneste = new UtledStatusPåPerioderTjeneste(false, utledPerioderMedRegisterendring);
     }
 
     public List<SensuEvent> hentAlle(LocalDate revurderingUtenSøknadTomDato) {
@@ -482,8 +487,6 @@ public class RevurderingMetrikkRepository {
     }
 
 
-
-
     @SuppressWarnings("unchecked")
     Collection<SensuEvent> antallRevurderingUtenNyttStpÅrsakStatistikk(LocalDate dato) {
         String sql = "select f.ytelse_type, b.id " +
@@ -605,7 +608,6 @@ public class RevurderingMetrikkRepository {
         return values;
 
     }
-
 
 
     private static String coalesce(String str, String defValue) {
