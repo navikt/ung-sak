@@ -346,15 +346,17 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         if (k9abakusEnabled) {
             try {
                 k9abakusTjeneste.lagreOverstyrtOppgittOpptjening(request);
-            } catch (Exception ignored) {
+            } catch (IOException e) {
+                throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Lagre oppgitt opptjening i abakus: " + e.getMessage(), e).toException();
+            }
+        } else {
+            try {
+                abakusTjeneste.lagreOverstyrtOppgittOpptjening(request);
+            } catch (IOException e) {
+                throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Lagre oppgitt opptjening i abakus: " + e.getMessage(), e).toException();
             }
         }
 
-        try {
-            abakusTjeneste.lagreOverstyrtOppgittOpptjening(request);
-        } catch (IOException e) {
-            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Lagre oppgitt opptjening i abakus: " + e.getMessage(), e).toException();
-        }
     }
 
     // FIXME: bør kalle asyncabakustjeneste internt og overføre abakus i egen task
@@ -392,15 +394,15 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         if (k9abakusEnabled) {
             try {
                 k9abakusTjeneste.lagreInntektsmeldinger(inntektsmeldingerMottattRequest);
-            } catch (Exception ignored) {
+            } catch (IOException e) {
+                throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Lagre mottatte inntektsmeldinger i abakus: " + e.getMessage(), e).toException();
             }
-        }
-
-
-        try {
-            abakusTjeneste.lagreInntektsmeldinger(inntektsmeldingerMottattRequest);
-        } catch (IOException e) {
-            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Lagre mottatte inntektsmeldinger i abakus: " + e.getMessage(), e).toException();
+        } else {
+            try {
+                abakusTjeneste.lagreInntektsmeldinger(inntektsmeldingerMottattRequest);
+            } catch (IOException e) {
+                throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Lagre mottatte inntektsmeldinger i abakus: " + e.getMessage(), e).toException();
+            }
         }
 
         requestCache.invaliderInntektsmeldingerCacheForSak(inntektsmeldingerMottattRequest);
@@ -438,34 +440,32 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         if (k9abakusEnabled) {
             try {
                 return k9abakusTjeneste.hentUnikeUnntektsmeldinger(request);
-            } catch (Exception ignored) {
-
+            } catch (IOException e) {
+                throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente inntektsmeldinger fra Abakus: " + e.getMessage(), e).toException();
+            }
+        } else {
+            try {
+                return abakusTjeneste.hentUnikeUnntektsmeldinger(request);
+            } catch (IOException e) {
+                throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente inntektsmeldinger fra Abakus: " + e.getMessage(), e).toException();
             }
         }
-
-        try {
-            return abakusTjeneste.hentUnikeUnntektsmeldinger(request);
-        } catch (IOException e) {
-            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente inntektsmeldinger fra Abakus: " + e.getMessage(), e).toException();
-        }
-
     }
 
     private InntektArbeidYtelseGrunnlagDto hentGrunnlag(InntektArbeidYtelseGrunnlagRequest request) {
         if (k9abakusEnabled) {
             try {
                 return k9abakusTjeneste.hentGrunnlag(request);
-            } catch (Exception ignored) {
-
+            } catch (IOException e) {
+                throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente grunnlag fra Abakus: " + e.getMessage(), e).toException();
+            }
+        } else {
+            try {
+                return abakusTjeneste.hentGrunnlag(request);
+            } catch (IOException e) {
+                throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente grunnlag fra Abakus: " + e.getMessage(), e).toException();
             }
         }
-
-        try {
-            return abakusTjeneste.hentGrunnlag(request);
-        } catch (IOException e) {
-            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente grunnlag fra Abakus: " + e.getMessage(), e).toException();
-        }
-
     }
 
     private InntektArbeidYtelseGrunnlagSakSnapshotDto hentGrunnlagSnapshot(InntektArbeidYtelseGrunnlagRequest request) {
@@ -473,18 +473,16 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         if (k9abakusEnabled) {
             try {
                 return k9abakusTjeneste.hentGrunnlagSnapshot(request);
-            } catch (Exception ignored) {
-
+            } catch (IOException e) {
+                throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente grunnlag snapshot fra Abakus: " + e.getMessage(), e).toException();
+            }
+        } else {
+            try {
+                return abakusTjeneste.hentGrunnlagSnapshot(request);
+            } catch (IOException e) {
+                throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente grunnlag snapshot fra Abakus: " + e.getMessage(), e).toException();
             }
         }
-
-        try {
-            return abakusTjeneste.hentGrunnlagSnapshot(request);
-        } catch (IOException e) {
-            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente grunnlag snapshot fra Abakus: " + e.getMessage(), e).toException();
-        }
-
-
     }
 
     private InntektsmeldingAggregat mapResult(InntektsmeldingerDto dto) {
@@ -621,16 +619,16 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
             try {
                 k9abakusTjeneste.lagreOverstyrt(dto);
                 return dto.getGrunnlagReferanse();
-            } catch (Exception ignored) {
-
+            } catch (IOException e) {
+                throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke lagre overstyrt arbeid i Abakus: " + e.getMessage(), e).toException();
             }
-        }
-
-        try {
-            abakusTjeneste.lagreOverstyrt(dto);
-            return dto.getGrunnlagReferanse();
-        } catch (IOException e) {
-            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke lagre overstyrt arbeid i Abakus: " + e.getMessage(), e).toException();
+        } else {
+            try {
+                abakusTjeneste.lagreOverstyrt(dto);
+                return dto.getGrunnlagReferanse();
+            } catch (IOException e) {
+                throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke lagre overstyrt arbeid i Abakus: " + e.getMessage(), e).toException();
+            }
         }
     }
 }
