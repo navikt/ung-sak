@@ -242,10 +242,10 @@ class UtledTilkjentYtelseEndringTest {
 
         assertThat(endringerForMottakers.size()).isEqualTo(2);
         var nøkler = endringerForMottakers.stream().map(UtbetalingsendringerForMottaker::nøkkel).toList();
-        assertThat(nøkler.contains(new MottakerNøkkel(brukerErMottaker, arbeidsgiver, null, AktivitetStatus.IKKE_YRKESAKTIV, inntektskategori))).isTrue();
+        assertThat(nøkler.contains(new MottakerNøkkel(brukerErMottaker, arbeidsgiver, InternArbeidsforholdRef.nullRef(), AktivitetStatus.IKKE_YRKESAKTIV, inntektskategori))).isTrue();
         validerEndretTidslinje(endringerForMottakers, 0, periode1.getPeriode().toLocalDateInterval());
 
-        assertThat(nøkler.contains(new MottakerNøkkel(brukerErMottaker, arbeidsgiver, null, aktivitetStatus, inntektskategori))).isTrue();
+        assertThat(nøkler.contains(new MottakerNøkkel(brukerErMottaker, arbeidsgiver, InternArbeidsforholdRef.nullRef(), aktivitetStatus, inntektskategori))).isTrue();
         validerEndretTidslinje(endringerForMottakers, 1, periode1.getPeriode().toLocalDateInterval());
     }
 
