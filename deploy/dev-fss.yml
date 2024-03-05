@@ -322,4 +322,4 @@ spec:
       value: "k9-sak"
 
     - name: PIP_USERS
-      value: "srvPDP,srvk9-tilbake,srvsaf,Z993210,Z994080,Z994692"
+      value: "srvPDP,srvk9-tilbake,srvsaf,srvk9-abakus,Z993210,Z994080,Z994692"
