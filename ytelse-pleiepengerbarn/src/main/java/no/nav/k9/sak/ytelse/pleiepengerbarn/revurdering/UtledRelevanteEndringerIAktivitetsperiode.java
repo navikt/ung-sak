@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
@@ -36,14 +37,32 @@ class UtledRelevanteEndringerIAktivitetsperiode {
                                                                                   List<UtbetalingsendringerForMottaker> endringerPrMottaker,
                                                                                   Set<DatoIntervallEntitet> revurdertePerioder) {
         var tidslinjeForEndringIUtbetaling = finnTidslinjeForEndringIUtbetaling(aktivitetsendringer, endringerPrMottaker);
-        var utvidet = utvidMedDagenFørStp(tidslinjeForEndringIUtbetaling, revurdertePerioder);
-        return aktivitetsendringer.endringstidslinje().intersection(utvidet);
+        var relevanteRegisterEndringerFraFørStp = finnEndringerDagenFørSkjæringstidspunktet(tidslinjeForEndringIUtbetaling, aktivitetsendringer.endringstidslinje(), revurdertePerioder);
+        var relevanteEndringerIPeriode = aktivitetsendringer.endringstidslinje().intersection(tidslinjeForEndringIUtbetaling);
+        return relevanteEndringerIPeriode.crossJoin(relevanteRegisterEndringerFraFørStp, StandardCombinators::coalesceRightHandSide); // velger endring før stp dersom endring i begge perioder
     }
 
-    private static LocalDateTimeline<Boolean> utvidMedDagenFørStp(LocalDateTimeline<Boolean> tidslinjeForEndringIUtbetaling, Set<DatoIntervallEntitet> vilkårsperioder) {
-        return vilkårsperioder.stream().filter(p -> !tidslinjeForEndringIUtbetaling.intersection(p.toLocalDateInterval()).isEmpty())
-            .map(p -> new LocalDateTimeline<>(p.getFomDato().minusDays(1), p.getFomDato().minusDays(1), true))
-            .reduce(tidslinjeForEndringIUtbetaling, (t1, t2) -> t1.combine(t2, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN));
+    private static LocalDateTimeline<Endringstype> finnEndringerDagenFørSkjæringstidspunktet(LocalDateTimeline<Boolean> tidslinjeForEndringIUtbetaling,
+                                                                                             LocalDateTimeline<Endringstype> tidslinjeForEndringIRegister,
+                                                                                             Set<DatoIntervallEntitet> vilkårsperioder) {
+        return vilkårsperioder.stream()
+            .map(p -> finnTidslinjeSomPåvirkesAvEndringerFørStp(tidslinjeForEndringIUtbetaling, tidslinjeForEndringIRegister, p))
+            .reduce(LocalDateTimeline.empty(), LocalDateTimeline::crossJoin);
+    }
+
+    private static LocalDateTimeline<Endringstype> finnTidslinjeSomPåvirkesAvEndringerFørStp(LocalDateTimeline<Boolean> tidslinjeForEndringIUtbetaling, LocalDateTimeline<Endringstype> tidslinjeForEndringIRegister, DatoIntervallEntitet p) {
+        var dagenFørStp = p.getFomDato().minusDays(1);
+        var endringerDagenFørStp = tidslinjeForEndringIRegister.intersection(new LocalDateInterval(dagenFørStp, dagenFørStp));
+        var segmenter = endringerDagenFørStp.toSegments();
+        if (segmenter.size() > 1) {
+            throw new IllegalStateException("Kan ikke ha flere enn ett segment for overlapp på en dag");
+        }
+        if (!segmenter.isEmpty()) {
+            // Mapper endring som skjer før skjæringstidspunktet til tidsrommet for endret utbetaling
+            return new LocalDateTimeline<>(p.toLocalDateInterval(), segmenter.iterator().next().getValue())
+                .intersection(tidslinjeForEndringIUtbetaling);
+        }
+        return new LocalDateTimeline<>(List.of());
     }
 
     private static LocalDateTimeline<Boolean> finnTidslinjeForEndringIUtbetaling(AktivitetsperiodeEndring aktivitetsendringer, List<UtbetalingsendringerForMottaker> endringerPrMottaker) {
