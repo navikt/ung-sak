@@ -276,8 +276,6 @@ spec:
       value: "true"
     - name: ENABLE_DATO_NY_REGEL_UTTAK
       value: "true"
-    - name: ENABLE_OVERSTYR_UTTAK
-      value: "true"
     - name: FILTRER_UGYLDIG_IM
       value: "true"
     - name: FJERN_VILKARSPERIODER_BEREGNING
@@ -303,6 +301,8 @@ spec:
     - name: NY_VURDERINGSLOGIKK_IM
       value: "true"
     - name: K9_ABAKUS_ENABLED
+      value: "true"
+    - name: ETTERSENDELSE_RETT_TIL_K9SAK
       value: "true"
 
 
