@@ -82,6 +82,8 @@ public class UttakOverstyringshåndterer implements Overstyringshåndterer<Overs
 
         validerGyldigEndring(behandling, overstyringerFørOppdatering, overstyringerEtterOppdatering);
 
+        lagreHistorikkinnslagForEndringer(behandling.getId(), overstyringerFørOppdatering, overstyringerEtterOppdatering);
+
         if (dto.gåVidere()) {
             return OppdateringResultat.builder().build();
         } else {
