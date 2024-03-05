@@ -16,7 +16,6 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -79,8 +78,8 @@ public class MapEndringsresultat {
             mapArbeidsforholdRef(r.getArbeidsforholdRef().toString()),
             mapDatoEndring(r.getFastsattRefusjonFomEndring()),
             r.getFastsattDelvisRefusjonFørDatoEndring() == null ? null :
-                new BeløpEndring(Optional.ofNullable(r.getFastsattDelvisRefusjonFørDatoEndring().getFraRefusjon()).map(Beløp::verdi).orElse(null),
-                    Optional.ofNullable(r.getFastsattDelvisRefusjonFørDatoEndring().getTilRefusjon()).map(Beløp::verdi).orElse(null))
+                new BeløpEndring(Beløp.safeVerdi(r.getFastsattDelvisRefusjonFørDatoEndring().getFraRefusjon()),
+                    Beløp.safeVerdi(r.getFastsattDelvisRefusjonFørDatoEndring().getTilRefusjon()))
         );
     }
 
@@ -215,8 +214,8 @@ public class MapEndringsresultat {
     }
 
     private static RefusjonEndring mapRefusjonEndring(no.nav.folketrygdloven.kalkulus.response.v1.håndtering.RefusjonEndring refusjonEndring) {
-        return refusjonEndring == null ? null : new RefusjonEndring(Optional.ofNullable(refusjonEndring.getFraRefusjon()).map(Beløp::verdi).orElse(null),
-            Optional.ofNullable(refusjonEndring.getTilRefusjon()).map(Beløp::verdi).orElse(null));
+        return refusjonEndring == null ? null : new RefusjonEndring(Beløp.safeVerdi(refusjonEndring.getFraRefusjon()),
+            Beløp.safeVerdi(refusjonEndring.getTilRefusjon()));
     }
 
     private static InternArbeidsforholdRef mapArbeidsforholdRef(String arbeidsforholdRef) {
@@ -238,8 +237,8 @@ public class MapEndringsresultat {
     }
 
     private static BeløpEndring mapInntektEndring(no.nav.folketrygdloven.kalkulus.response.v1.håndtering.InntektEndring inntektEndring) {
-        return inntektEndring == null ? null : new BeløpEndring(Optional.ofNullable(inntektEndring.getFraInntekt()).map(Beløp::verdi).orElse(null),
-            Optional.ofNullable(inntektEndring.getTilInntekt()).map(Beløp::verdi).orElse(null));
+        return inntektEndring == null ? null : new BeløpEndring(Beløp.safeVerdi(inntektEndring.getFraInntekt()),
+            Beløp.safeVerdi(inntektEndring.getTilInntekt()));
     }
 
 

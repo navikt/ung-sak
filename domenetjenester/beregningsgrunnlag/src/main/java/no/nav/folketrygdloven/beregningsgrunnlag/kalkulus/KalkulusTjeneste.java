@@ -16,6 +16,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.resultat.MapEndringsresultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.OppdaterBeregningsgrunnlagResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.AvklaringsbehovMedTilstandDto;
+import no.nav.folketrygdloven.kalkulus.felles.v1.Beløp;
 import no.nav.folketrygdloven.kalkulus.felles.v1.EksternArbeidsforholdRef;
 import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
@@ -299,7 +300,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
         HentGrunnbeløpRequest request = new HentGrunnbeløpRequest(dato);
         Grunnbeløp grunnbeløp = restTjeneste.hentGrunnbeløp(request);
         return new no.nav.folketrygdloven.beregningsgrunnlag.modell.Grunnbeløp(
-            grunnbeløp.getVerdi().verdi().longValue(),
+            Beløp.safeVerdi(grunnbeløp.getVerdi()).longValue(),
             DatoIntervallEntitet.fraOgMedTilOgMed(grunnbeløp.getPeriode().getFom(), grunnbeløp.getPeriode().getTom()));
     }
 
