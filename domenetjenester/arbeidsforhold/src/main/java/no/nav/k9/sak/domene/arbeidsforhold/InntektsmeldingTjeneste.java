@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
@@ -170,6 +169,13 @@ public class InntektsmeldingTjeneste {
         return iayTjeneste.finnGrunnlag(behandlingId)
             .map(iayGrunnlag -> iayGrunnlag.getInntektsmeldinger()
                 .map(InntektsmeldingAggregat::getInntektsmeldingerSomSkalBrukes).orElse(emptyList()))
+            .orElse(emptyList());
+    }
+
+    public List<Inntektsmelding> hentAbsoluttAlleInntektsmeldinger(Long behandlingId) {
+        return iayTjeneste.finnGrunnlag(behandlingId)
+            .map(iayGrunnlag -> iayGrunnlag.getInntektsmeldinger()
+                .map(InntektsmeldingAggregat::getAlleInntektsmeldinger).orElse(emptyList()))
             .orElse(emptyList());
     }
 
