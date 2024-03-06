@@ -122,13 +122,13 @@ public class AbakusTjenesteAdapter {
     private InntektArbeidYtelseGrunnlagDto hentGrunnlag(InntektArbeidYtelseGrunnlagRequest request) {
         if (k9AbakusEnabled) {
             try {
-                return abakusTjeneste.hentGrunnlag(request);
+                return k9AbakusTjeneste.hentGrunnlag(request);
             } catch (IOException e) {
                 throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente grunnlag fra Abakus: " + e.getMessage(), e).toException();
             }
         } else {
             try {
-                return k9AbakusTjeneste.hentGrunnlag(request);
+                return abakusTjeneste.hentGrunnlag(request);
             } catch (IOException e) {
                 throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente grunnlag fra Abakus: " + e.getMessage(), e).toException();
             }
