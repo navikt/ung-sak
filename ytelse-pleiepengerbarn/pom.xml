@@ -59,6 +59,10 @@
             <groupId>no.nav.k9</groupId>
             <artifactId>soknad</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.k9</groupId>
+            <artifactId>ettersendelse</artifactId>
+        </dependency>
 
         <!-- Test avhengigheter -->
         <dependency>
