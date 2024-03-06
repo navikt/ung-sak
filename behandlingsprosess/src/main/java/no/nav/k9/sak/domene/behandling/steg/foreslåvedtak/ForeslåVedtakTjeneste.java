@@ -100,8 +100,7 @@ class ForeslåVedtakTjeneste {
         aksjonspunktDefinisjoner.add(AksjonspunktDefinisjon.FORESLÅ_VEDTAK);
     }
 
-    private void håndterUtenTotrinn(Behandling behandling, BehandlingskontrollKontekst
-        kontekst, List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner) {
+    private void håndterUtenTotrinn(Behandling behandling, BehandlingskontrollKontekst kontekst, List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner) {
         behandling.nullstillToTrinnsBehandling();
         logger.info("To-trinn fjernet på behandling={}", behandling.getId());
         settForeslåOgFatterVedtakAksjonspunkterAvbrutt(behandling, kontekst);
