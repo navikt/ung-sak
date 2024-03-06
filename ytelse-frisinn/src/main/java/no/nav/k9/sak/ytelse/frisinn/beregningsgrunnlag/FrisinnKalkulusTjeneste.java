@@ -16,7 +16,6 @@ import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat
 import no.nav.folketrygdloven.kalkulus.beregning.v1.FrisinnGrunnlag;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PeriodeMedSøkerInfoDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
-import no.nav.folketrygdloven.kalkulus.felles.v1.Saksnummer;
 import no.nav.folketrygdloven.kalkulus.kodeverk.FagsakYtelseType;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregnForRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregnListeRequest;
@@ -119,7 +118,7 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
     private SamletKalkulusResultat beregnKalkulus(BehandlingReferanse ref, List<BeregnForRequest> sendTilKalkulus, Collection<BgRef> bgReferanser, BehandlingStegType stegType) {
         // samlet request til beregning
         var startBeregningRequest = new BeregnListeRequest(
-            Saksnummer.fra(ref.getSaksnummer().getVerdi()),
+            ref.getSaksnummer().getVerdi(),
             ref.getBehandlingUuid(),
             new AktørIdPersonident(ref.getAktørId().getId()),
             FagsakYtelseType.FRISINN,

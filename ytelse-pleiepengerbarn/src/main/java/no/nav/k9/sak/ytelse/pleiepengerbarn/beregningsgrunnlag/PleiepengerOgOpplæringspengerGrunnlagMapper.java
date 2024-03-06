@@ -11,13 +11,11 @@ import no.nav.folketrygdloven.kalkulus.beregning.v1.PleiepengerNærståendeGrunn
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PleiepengerSyktBarnGrunnlag;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.UtbetalingsgradPrAktivitetDto;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
-import no.nav.folketrygdloven.kalkulus.felles.v1.Aktivitetsgrad;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Aktør;
 import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
 import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Organisasjon;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
-import no.nav.folketrygdloven.kalkulus.felles.v1.Utbetalingsgrad;
 import no.nav.folketrygdloven.kalkulus.kodeverk.UttakArbeidType;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -114,7 +112,7 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
         utbetalingsgrader = arbeidIPeriode.stream()
             .filter(a -> !a.getPerioder().isEmpty())
             .map(a -> {
-            var perioder = a.getPerioder().entrySet().stream().map(p -> new PeriodeMedUtbetalingsgradDto(new Periode(p.getKey().getFom(), p.getKey().getTom()), Utbetalingsgrad.fra(100), Aktivitetsgrad.fra(hentAktivitetsgrad(p.getValue())))).toList();
+            var perioder = a.getPerioder().entrySet().stream().map(p -> new PeriodeMedUtbetalingsgradDto(new Periode(p.getKey().getFom(), p.getKey().getTom()), BigDecimal.valueOf(100), hentAktivitetsgrad(p.getValue()))).toList();
             Aktør aktør = null;
             if (a.getArbeidsforhold().getOrganisasjonsnummer() != null) {
                 aktør = new Organisasjon(a.getArbeidsforhold().getOrganisasjonsnummer());
@@ -241,7 +239,7 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
 
     private static PeriodeMedUtbetalingsgradDto lagPeriode(LukketPeriode periode, BigDecimal utbetalingsgrad, BigDecimal aktivitetsgrad) {
         var kalkulusPeriode = new no.nav.folketrygdloven.kalkulus.felles.v1.Periode(periode.getFom(), periode.getTom());
-        return new PeriodeMedUtbetalingsgradDto(kalkulusPeriode, Utbetalingsgrad.fra(utbetalingsgrad), Aktivitetsgrad.fra(aktivitetsgrad));
+        return new PeriodeMedUtbetalingsgradDto(kalkulusPeriode, utbetalingsgrad, aktivitetsgrad);
     }
 
     private static AktivitetDto lagArbeidsforhold(Arbeidsforhold arb) {

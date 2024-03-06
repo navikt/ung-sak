@@ -1,22 +1,7 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
-import no.nav.folketrygdloven.kalkulus.beregning.v1.KravperioderPrArbeidsforhold;
-import no.nav.folketrygdloven.kalkulus.beregning.v1.PerioderForKrav;
-import no.nav.folketrygdloven.kalkulus.beregning.v1.Refusjonsperiode;
-import no.nav.folketrygdloven.kalkulus.felles.v1.Beløp;
-import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
-import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
-import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.AktivitetsAvtaleDto;
-import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.ArbeidDto;
-import no.nav.folketrygdloven.kalkulus.iay.v1.InntektArbeidYtelseGrunnlagDto;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.typer.Arbeidsgiver;
-import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import static no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.TilKalkulusMapper.mapTilAktør;
+import static no.nav.k9.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -29,8 +14,22 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.TilKalkulusMapper.mapTilAktør;
-import static no.nav.k9.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
+import no.nav.folketrygdloven.kalkulus.beregning.v1.KravperioderPrArbeidsforhold;
+import no.nav.folketrygdloven.kalkulus.beregning.v1.PerioderForKrav;
+import no.nav.folketrygdloven.kalkulus.beregning.v1.Refusjonsperiode;
+import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
+import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
+import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.AktivitetsAvtaleDto;
+import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.ArbeidDto;
+import no.nav.folketrygdloven.kalkulus.iay.v1.InntektArbeidYtelseGrunnlagDto;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 public class KravperioderMapper {
 
@@ -175,7 +174,7 @@ public class KravperioderMapper {
         });
         var vilkårsperiodeTidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(vilkårsperiode.getFomDato(), vilkårsperiode.getTomDato(), true)));
         return refusjonTidslinje.intersection(vilkårsperiodeTidslinje).stream()
-            .map(r -> new Refusjonsperiode(new Periode(r.getFom(), r.getTom()), Beløp.fra(r.getValue())))
+            .map(r -> new Refusjonsperiode(new Periode(r.getFom(), r.getTom()), r.getValue()))
             .collect(Collectors.toList());
 
     }
