@@ -1,9 +1,5 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitet;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetAggregat;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningAktivitetOverstyring;
@@ -14,6 +10,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnl
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagBuilder;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
+import no.nav.folketrygdloven.kalkulus.felles.v1.Beløp;
 import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.BGAndelArbeidsforhold;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.BeregningAktivitetAggregatDto;
@@ -34,6 +31,10 @@ import no.nav.k9.sak.domene.typer.tid.ÅpenDatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class FraKalkulusMapper {
 
@@ -91,7 +92,7 @@ public class FraKalkulusMapper {
         var builder = Beregningsgrunnlag.builder()
             .medOverstyring(beregningsgrunnlagDto.isOverstyrt())
             .medSkjæringstidspunkt(beregningsgrunnlagDto.getSkjæringstidspunkt())
-            .medGrunnbeløp(beregningsgrunnlagDto.getGrunnbeløp());
+            .medGrunnbeløp(Beløp.safeVerdi(beregningsgrunnlagDto.getGrunnbeløp()));
 
 
         beregningsgrunnlagDto.getAktivitetStatuser().forEach(aktivitetStatus -> {
@@ -121,9 +122,9 @@ public class FraKalkulusMapper {
     private static BeregningsgrunnlagPeriode.Builder mapPeriode(BeregningsgrunnlagPeriodeDto beregningsgrunnlagPeriodeDto) {
         BeregningsgrunnlagPeriode.Builder periodeBuilder = BeregningsgrunnlagPeriode.builder()
             .medBeregningsgrunnlagPeriode(beregningsgrunnlagPeriodeDto.getBeregningsgrunnlagPeriodeFom(), beregningsgrunnlagPeriodeDto.getBeregningsgrunnlagPeriodeTom())
-            .medAvkortetPrÅr(beregningsgrunnlagPeriodeDto.getAvkortetPrÅr())
-            .medBruttoPrÅr(beregningsgrunnlagPeriodeDto.getBruttoPrÅr())
-            .medRedusertPrÅr(beregningsgrunnlagPeriodeDto.getRedusertPrÅr())
+            .medAvkortetPrÅr(Beløp.safeVerdi(beregningsgrunnlagPeriodeDto.getAvkortetPrÅr()))
+            .medBruttoPrÅr(Beløp.safeVerdi(beregningsgrunnlagPeriodeDto.getBruttoPrÅr()))
+            .medRedusertPrÅr(Beløp.safeVerdi(beregningsgrunnlagPeriodeDto.getRedusertPrÅr()))
             .medTotalUtbetalingsgradFraUttak(beregningsgrunnlagPeriodeDto.getTotalUtbetalingsgradFraUttak())
             .medTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(beregningsgrunnlagPeriodeDto.getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt())
             .medReduksjonsfaktorInaktivTypeA(beregningsgrunnlagPeriodeDto.getReduksjonsfaktorInaktivTypeA());
@@ -142,41 +143,44 @@ public class FraKalkulusMapper {
             .medAktivitetStatus(AktivitetStatus.fraKode(beregningsgrunnlagPrStatusOgAndelDto.getAktivitetStatus().getKode()))
             .medAndelsnr(beregningsgrunnlagPrStatusOgAndelDto.getAndelsnr())
             .medArbforholdType(OpptjeningAktivitetType.fraKode(beregningsgrunnlagPrStatusOgAndelDto.getArbeidsforholdType().getKode()))
-            .medAvkortetBrukersAndelPrÅr(beregningsgrunnlagPrStatusOgAndelDto.getAvkortetBrukersAndelPrÅr())
-            .medAvkortetPrÅr(beregningsgrunnlagPrStatusOgAndelDto.getAvkortetPrÅr())
-            .medAvkortetRefusjonPrÅr(beregningsgrunnlagPrStatusOgAndelDto.getAvkortetRefusjonPrÅr())
-            .medBeregnetPrÅr(beregningsgrunnlagPrStatusOgAndelDto.getBeregnetPrÅr())
+            .medAvkortetBrukersAndelPrÅr(Beløp.safeVerdi(beregningsgrunnlagPrStatusOgAndelDto.getAvkortetBrukersAndelPrÅr()))
+            .medAvkortetPrÅr(Beløp.safeVerdi(beregningsgrunnlagPrStatusOgAndelDto.getAvkortetPrÅr()))
+            .medAvkortetRefusjonPrÅr(Beløp.safeVerdi(beregningsgrunnlagPrStatusOgAndelDto.getAvkortetRefusjonPrÅr()))
+            .medBeregnetPrÅr(Beløp.safeVerdi(beregningsgrunnlagPrStatusOgAndelDto.getBeregnetPrÅr()))
             .medBeregningsperiode(beregningsgrunnlagPrStatusOgAndelDto.getBeregningsperiodeFom(), beregningsgrunnlagPrStatusOgAndelDto.getBeregningsperiodeTom())
             .medFastsattAvSaksbehandler(beregningsgrunnlagPrStatusOgAndelDto.getFastsattAvSaksbehandler())
-            .medFordeltPrÅr(beregningsgrunnlagPrStatusOgAndelDto.getFordeltPrÅr())
+            .medFordeltPrÅr(Beløp.safeVerdi(beregningsgrunnlagPrStatusOgAndelDto.getFordeltPrÅr()))
             .medInntektskategori(Inntektskategori.fraKode(beregningsgrunnlagPrStatusOgAndelDto.getInntektskategori().getKode()))
             .medLagtTilAvSaksbehandler(beregningsgrunnlagPrStatusOgAndelDto.getLagtTilAvSaksbehandler())
-            .medMaksimalRefusjonPrÅr(beregningsgrunnlagPrStatusOgAndelDto.getMaksimalRefusjonPrÅr())
+            .medMaksimalRefusjonPrÅr(Beløp.safeVerdi(beregningsgrunnlagPrStatusOgAndelDto.getMaksimalRefusjonPrÅr()))
             .medOrginalDagsatsFraTilstøtendeYtelse(beregningsgrunnlagPrStatusOgAndelDto.getOrginalDagsatsFraTilstøtendeYtelse())
-            .medOverstyrtPrÅr(beregningsgrunnlagPrStatusOgAndelDto.getOverstyrtPrÅr())
-            .medRedusertBrukersAndelPrÅr(beregningsgrunnlagPrStatusOgAndelDto.getRedusertBrukersAndelPrÅr())
-            .medRedusertPrÅr(beregningsgrunnlagPrStatusOgAndelDto.getRedusertPrÅr())
-            .medRedusertRefusjonPrÅr(beregningsgrunnlagPrStatusOgAndelDto.getRedusertRefusjonPrÅr())
-            .medÅrsbeløpFraTilstøtendeYtelse(beregningsgrunnlagPrStatusOgAndelDto.getÅrsbeløpFraTilstøtendeYtelse());
+            .medOverstyrtPrÅr(Beløp.safeVerdi(beregningsgrunnlagPrStatusOgAndelDto.getOverstyrtPrÅr()))
+            .medRedusertBrukersAndelPrÅr(Beløp.safeVerdi(beregningsgrunnlagPrStatusOgAndelDto.getRedusertBrukersAndelPrÅr()))
+            .medRedusertPrÅr(Beløp.safeVerdi(beregningsgrunnlagPrStatusOgAndelDto.getRedusertPrÅr()))
+            .medRedusertRefusjonPrÅr(Beløp.safeVerdi(beregningsgrunnlagPrStatusOgAndelDto.getRedusertRefusjonPrÅr()))
+            .medÅrsbeløpFraTilstøtendeYtelse(Beløp.safeVerdi(beregningsgrunnlagPrStatusOgAndelDto.getÅrsbeløpFraTilstøtendeYtelse()));
 
         if (beregningsgrunnlagPrStatusOgAndelDto.getBgAndelArbeidsforhold() != null) {
             builder.medBGAndelArbeidsforhold(FraKalkulusMapper.mapBgAndelArbeidsforhold(beregningsgrunnlagPrStatusOgAndelDto.getBgAndelArbeidsforhold()));
         }
 
         if (beregningsgrunnlagPrStatusOgAndelDto.getPgiSnitt() != null) {
-            builder.medPgi(beregningsgrunnlagPrStatusOgAndelDto.getPgiSnitt(), List.of(beregningsgrunnlagPrStatusOgAndelDto.getPgi1(), beregningsgrunnlagPrStatusOgAndelDto.getPgi2(), beregningsgrunnlagPrStatusOgAndelDto.getPgi3()));
+            builder.medPgi(Beløp.safeVerdi(beregningsgrunnlagPrStatusOgAndelDto.getPgiSnitt()),
+                List.of(Beløp.safeVerdi(beregningsgrunnlagPrStatusOgAndelDto.getPgi1()),
+                    Beløp.safeVerdi(beregningsgrunnlagPrStatusOgAndelDto.getPgi2()),
+                    Beløp.safeVerdi(beregningsgrunnlagPrStatusOgAndelDto.getPgi3())));
         }
         return builder;
     }
 
     private static no.nav.folketrygdloven.beregningsgrunnlag.modell.BGAndelArbeidsforhold.Builder mapBgAndelArbeidsforhold(BGAndelArbeidsforhold bgAndelArbeidsforhold) {
         return no.nav.folketrygdloven.beregningsgrunnlag.modell.BGAndelArbeidsforhold.builder()
-            .medArbeidsforholdRef(bgAndelArbeidsforhold.getArbeidsforholdRef())
+            .medArbeidsforholdRef(bgAndelArbeidsforhold.getArbeidsforholdRef().toString())
             .medArbeidsgiver(mapArbeidsgiver(bgAndelArbeidsforhold.getArbeidsgiver()))
             .medArbeidsperiodeFom(bgAndelArbeidsforhold.getArbeidsperiodeFom())
             .medArbeidsperiodeTom(bgAndelArbeidsforhold.getArbeidsperiodeFom())
-            .medNaturalytelseBortfaltPrÅr(bgAndelArbeidsforhold.getNaturalytelseBortfaltPrÅr())
-            .medNaturalytelseTilkommetPrÅr(bgAndelArbeidsforhold.getNaturalytelseTilkommetPrÅr());
+            .medNaturalytelseBortfaltPrÅr(Beløp.safeVerdi(bgAndelArbeidsforhold.getNaturalytelseBortfaltPrÅr()))
+            .medNaturalytelseTilkommetPrÅr(Beløp.safeVerdi(bgAndelArbeidsforhold.getNaturalytelseTilkommetPrÅr()));
     }
 
     public static Arbeidsgiver mapArbeidsgiver(no.nav.folketrygdloven.kalkulus.response.v1.Arbeidsgiver arbeidsgiver) {
