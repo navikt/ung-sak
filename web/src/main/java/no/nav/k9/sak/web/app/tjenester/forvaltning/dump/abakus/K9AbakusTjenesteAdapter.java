@@ -28,7 +28,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.abakus.AbakusInntektArbeidYtelseTjenesteFeil;
-import no.nav.k9.sak.domene.abakus.AbakusTjeneste;
 import no.nav.k9.sak.domene.abakus.K9AbakusTjeneste;
 import no.nav.k9.sak.domene.abakus.mapping.MapInntektsmeldinger;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
@@ -39,34 +38,26 @@ import no.nav.k9.sak.typer.Saksnummer;
 
 @Dependent
 @Default
-@ScopedRestIntegration(scopeKey = "fpabakus.scope", defaultScope = "api://prod-fss.teamforeldrepenger.fpabakus/.default")
-public class AbakusTjenesteAdapter {
-
-    private AbakusTjeneste abakusTjeneste;
+@ScopedRestIntegration(scopeKey = "k9abakus.scope", defaultScope = "api://prod-fss.k9saksbehandling.k9-abakus/.default")
+public class K9AbakusTjenesteAdapter {
 
     private K9AbakusTjeneste k9AbakusTjeneste;
-
-    private boolean k9AbakusEnabled;
     private BehandlingRepository behandlingRepository;
     private FagsakRepository fagsakRepository;
 
-    AbakusTjenesteAdapter() {
+    K9AbakusTjenesteAdapter() {
         // CDI proxy
     }
 
     @Inject
-    public AbakusTjenesteAdapter(FagsakRepository fagsakRepository,
-                                 BehandlingRepository behandlingRepository,
-                                 SystemUserOidcRestClient restClient,
-                                 @KonfigVerdi(value = "k9abakus.url") URI k9Abakusendpoint,
-                                 @KonfigVerdi(value = "fpabakus.url") URI endpoint,
-                                 @KonfigVerdi(value = "abakus.callback.url") URI callbackUrl,
-                                 @KonfigVerdi(value = "k9.abakus.enabled", defaultVerdi = "false") boolean k9AbakusEnabled) {
+    public K9AbakusTjenesteAdapter(FagsakRepository fagsakRepository,
+                                   BehandlingRepository behandlingRepository,
+                                   SystemUserOidcRestClient restClient,
+                                   @KonfigVerdi(value = "k9abakus.url") URI k9Abakusendpoint,
+                                   @KonfigVerdi(value = "abakus.callback.url") URI callbackUrl) {
         this.behandlingRepository = Objects.requireNonNull(behandlingRepository, "behandlingRepository");
-        this.abakusTjeneste = new AbakusTjeneste(restClient, endpoint, callbackUrl);
         this.k9AbakusTjeneste = new K9AbakusTjeneste(restClient, k9Abakusendpoint, callbackUrl);
         this.fagsakRepository = Objects.requireNonNull(fagsakRepository, "fagsakRepository");
-        this.k9AbakusEnabled = k9AbakusEnabled;
     }
 
     public Optional<InntektArbeidYtelseGrunnlagDto> finnGrunnlag(Long behandlingId) {
@@ -104,35 +95,21 @@ public class AbakusTjenesteAdapter {
     }
 
     private InntektsmeldingerDto hentUnikeInntektsmeldinger(InntektsmeldingerRequest request) {
-        if (k9AbakusEnabled) {
-            try {
-                return k9AbakusTjeneste.hentUnikeUnntektsmeldinger(request);
-            } catch (IOException e) {
-                throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente inntektsmeldinger fra Abakus: " + e.getMessage(), e).toException();
-            }
-        } else {
-            try {
-                return abakusTjeneste.hentUnikeUnntektsmeldinger(request);
-            } catch (IOException e) {
-                throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente inntektsmeldinger fra Abakus: " + e.getMessage(), e).toException();
-            }
+        try {
+            return k9AbakusTjeneste.hentUnikeUnntektsmeldinger(request);
+        } catch (IOException e) {
+            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente inntektsmeldinger fra Abakus: " + e.getMessage(), e).toException();
         }
+
     }
 
     private InntektArbeidYtelseGrunnlagDto hentGrunnlag(InntektArbeidYtelseGrunnlagRequest request) {
-        if (k9AbakusEnabled) {
-            try {
-                return k9AbakusTjeneste.hentGrunnlag(request);
-            } catch (IOException e) {
-                throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente grunnlag fra Abakus: " + e.getMessage(), e).toException();
-            }
-        } else {
-            try {
-                return abakusTjeneste.hentGrunnlag(request);
-            } catch (IOException e) {
-                throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente grunnlag fra Abakus: " + e.getMessage(), e).toException();
-            }
+        try {
+            return k9AbakusTjeneste.hentGrunnlag(request);
+        } catch (IOException e) {
+            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente grunnlag fra Abakus: " + e.getMessage(), e).toException();
         }
+
     }
 
     private InntektsmeldingAggregat mapResult(InntektsmeldingerDto dto) {
