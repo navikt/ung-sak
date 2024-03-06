@@ -16,6 +16,7 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -75,7 +76,7 @@ public class MapEndringsresultat {
     private static RefusjonoverstyringPeriodeEndring mapRefusjonPeriodeEndring(no.nav.folketrygdloven.kalkulus.response.v1.håndtering.RefusjonoverstyringPeriodeEndring r) {
         return new RefusjonoverstyringPeriodeEndring(
             mapArbeidsgiver(r.getArbeidsgiver()),
-            mapArbeidsforholdRef(r.getArbeidsforholdRef().toString()),
+            mapArbeidsforholdRef(Optional.ofNullable(r.getArbeidsforholdRef()).map(UUID::toString).orElse(null)),
             mapDatoEndring(r.getFastsattRefusjonFomEndring()),
             r.getFastsattDelvisRefusjonFørDatoEndring() == null ? null :
                 new BeløpEndring(Beløp.safeVerdi(r.getFastsattDelvisRefusjonFørDatoEndring().getFraRefusjon()),
@@ -127,7 +128,7 @@ public class MapEndringsresultat {
         return erTidsbegrensetArbeidsforholdEndring == null ? null :
             new ErTidsbegrensetArbeidsforholdEndring(
                 mapArbeidsgiver(erTidsbegrensetArbeidsforholdEndring.getArbeidsgiver()),
-                mapArbeidsforholdRef(erTidsbegrensetArbeidsforholdEndring.getArbeidsforholdRef().toString()),
+                mapArbeidsforholdRef(Optional.ofNullable(erTidsbegrensetArbeidsforholdEndring.getArbeidsforholdRef()).map(UUID::toString).orElse(null)),
                 mapTilToggle(erTidsbegrensetArbeidsforholdEndring.getErTidsbegrensetArbeidsforholdEndring())
             );
     }
@@ -145,7 +146,7 @@ public class MapEndringsresultat {
         return new ErMottattYtelseEndring(
             AktivitetStatus.fraKode(erMottattYtelseEndring.getAktivitetStatus().getKode()),
             mapArbeidsgiver(erMottattYtelseEndring.getArbeidsgiver()),
-            mapArbeidsforholdRef(erMottattYtelseEndring.getArbeidsforholdRef().toString()),
+            mapArbeidsforholdRef(Optional.ofNullable(erMottattYtelseEndring.getArbeidsforholdRef()).map(UUID::toString).orElse(null)),
             mapTilToggle(erMottattYtelseEndring.getErMottattYtelseEndring())
         );
     }
@@ -209,7 +210,7 @@ public class MapEndringsresultat {
             AktivitetStatus.fraKode(beregningsgrunnlagPrStatusOgAndelEndring.getAktivitetStatus().getKode()),
             beregningsgrunnlagPrStatusOgAndelEndring.getArbeidsforholdType() == null ? null : OpptjeningAktivitetType.fraKode(beregningsgrunnlagPrStatusOgAndelEndring.getArbeidsforholdType().getKode()),
             mapArbeidsgiver(beregningsgrunnlagPrStatusOgAndelEndring.getArbeidsgiver()),
-            mapArbeidsforholdRef(beregningsgrunnlagPrStatusOgAndelEndring.getArbeidsforholdRef().toString())
+            mapArbeidsforholdRef(Optional.ofNullable(beregningsgrunnlagPrStatusOgAndelEndring.getArbeidsforholdRef()).map(UUID::toString).orElse(null))
         );
     }
 

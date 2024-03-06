@@ -34,6 +34,7 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class FraKalkulusMapper {
@@ -175,7 +176,7 @@ public class FraKalkulusMapper {
 
     private static no.nav.folketrygdloven.beregningsgrunnlag.modell.BGAndelArbeidsforhold.Builder mapBgAndelArbeidsforhold(BGAndelArbeidsforhold bgAndelArbeidsforhold) {
         return no.nav.folketrygdloven.beregningsgrunnlag.modell.BGAndelArbeidsforhold.builder()
-            .medArbeidsforholdRef(bgAndelArbeidsforhold.getArbeidsforholdRef().toString())
+            .medArbeidsforholdRef(Optional.ofNullable(bgAndelArbeidsforhold.getArbeidsforholdRef()).map(UUID::toString).orElse(null))
             .medArbeidsgiver(mapArbeidsgiver(bgAndelArbeidsforhold.getArbeidsgiver()))
             .medArbeidsperiodeFom(bgAndelArbeidsforhold.getArbeidsperiodeFom())
             .medArbeidsperiodeTom(bgAndelArbeidsforhold.getArbeidsperiodeFom())
