@@ -361,11 +361,6 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.k9</groupId>
-                <artifactId>ettersendelse</artifactId>
-                <version>${k9format.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.k9</groupId>
                 <artifactId>innsyn</artifactId>
                 <version>${k9format.version}</version>
             </dependency>
