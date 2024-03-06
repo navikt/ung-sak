@@ -61,7 +61,7 @@ public class DokumentmottakerEttersendelse implements Dokumentmottaker {
         for (MottattDokument dokument : sorterteDokumenter) {
             Ettersendelse ettersendelse = parseDokument(dokument);
             dokument.setBehandlingId(behandling.getId());
-            dokument.setInnsendingstidspunkt(ettersendelse.getMottattDato().toLocalDateTime());
+            //dokument.setInnsendingstidspunkt(ettersendelse.getMottattDato().toLocalDateTime());
             mottatteDokumentRepository.lagre(dokument, DokumentStatus.GYLDIG);
             sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(
                 behandling,
@@ -69,7 +69,7 @@ public class DokumentmottakerEttersendelse implements Dokumentmottaker {
                 behandling.getFagsak().getPleietrengendeAktørId(),
                 dokument.getMottattDato().atStartOfDay(),
                 false,
-                true);
+                false);
         }
     }
 
@@ -86,7 +86,9 @@ public class DokumentmottakerEttersendelse implements Dokumentmottaker {
         try {
             return jsonReader.readValue(Objects.requireNonNull(payload, "mangler payload"));
         } catch (Exception e) {
-            throw new DokumentValideringException("Parsefeil i ettersendelse", e);
+            //throw new DokumentValideringException("Parsefeil i ettersendelse", e);
+            log.warn("Parsefeil i ettersendelse", e);
+            return null;
         }
     }
 
