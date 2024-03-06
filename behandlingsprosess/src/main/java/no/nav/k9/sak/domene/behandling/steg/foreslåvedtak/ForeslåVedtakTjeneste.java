@@ -131,8 +131,7 @@ class ForeslåVedtakTjeneste {
         return totrinn;
     }
 
-    private void settForeslåOgFatterVedtakAksjonspunkterAvbrutt(Behandling behandling, BehandlingskontrollKontekst
-        kontekst) {
+    private void settForeslåOgFatterVedtakAksjonspunkterAvbrutt(Behandling behandling, BehandlingskontrollKontekst kontekst) {
         // TODO: Hører ikke hjemme her. Bør bruke generisk stegresultat eller flyttes. Hva er use-case for disse tilfellene?
         // Er det grunn til å tro at disse finnes når man er i FORVED-steg - de skal utledes i steget?
         List<Aksjonspunkt> skalAvbrytes = new ArrayList<>();
