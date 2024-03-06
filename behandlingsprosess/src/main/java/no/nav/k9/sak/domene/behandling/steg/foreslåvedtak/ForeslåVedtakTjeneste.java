@@ -11,6 +11,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -34,6 +35,7 @@ class ForeslåVedtakTjeneste {
     private Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere;
 
     private SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste;
+    private boolean sjekkTilbakekrevingAksjonspunktLansert;
 
     protected ForeslåVedtakTjeneste() {
         // CDI proxy
@@ -44,12 +46,14 @@ class ForeslåVedtakTjeneste {
                           BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                           SjekkMotAndreYtelserTjeneste sjekkMotAndreYtelserTjeneste,
                           SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste,
-                          @Any Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere) {
+                          @Any Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere,
+                          @KonfigVerdi(value = "ENABLE_SJEKK_TILBAKEKREVING", defaultVerdi = "true") boolean sjekkTilbakekrevingAksjonspunktLansert) {
         this.sjekkMotAndreYtelserTjeneste = sjekkMotAndreYtelserTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.foreslåVedtakManueltUtledere = foreslåVedtakManueltUtledere;
         this.sjekkMotTilbakekrevingTjeneste = sjekkMotTilbakekrevingTjeneste;
+        this.sjekkTilbakekrevingAksjonspunktLansert = sjekkTilbakekrevingAksjonspunktLansert;
     }
 
     public BehandleStegResultat foreslåVedtak(Behandling behandling, BehandlingskontrollKontekst kontekst) {
@@ -61,7 +65,14 @@ class ForeslåVedtakTjeneste {
 
         List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = new ArrayList<>();
         aksjonspunktDefinisjoner.addAll(sjekkMotAndreYtelserTjeneste.sjekkMotGsakOppgaverOgOverlappendeYtelser(behandling.getAktørId(), behandling));
-        aksjonspunktDefinisjoner.addAll(sjekkMotTilbakekrevingTjeneste.sjekkMotÅpenIkkeoverlappendeTilbakekreving(behandling));
+
+        List<AksjonspunktDefinisjon> sjekkTilbakekrevingAP = sjekkMotTilbakekrevingTjeneste.sjekkMotÅpenIkkeoverlappendeTilbakekreving(behandling);
+        if (!sjekkTilbakekrevingAP.isEmpty()) {
+            logger.info("Kandidat for sjekk-tilbakekeving-aksjonspunkt");
+            if (sjekkTilbakekrevingAksjonspunktLansert) {
+                aksjonspunktDefinisjoner.addAll(sjekkTilbakekrevingAP);
+            }
+        }
 
         Optional<Aksjonspunkt> vedtakUtenTotrinnskontroll = behandling
             .getÅpentAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL);
@@ -89,7 +100,8 @@ class ForeslåVedtakTjeneste {
         aksjonspunktDefinisjoner.add(AksjonspunktDefinisjon.FORESLÅ_VEDTAK);
     }
 
-    private void håndterUtenTotrinn(Behandling behandling, BehandlingskontrollKontekst kontekst, List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner) {
+    private void håndterUtenTotrinn(Behandling behandling, BehandlingskontrollKontekst
+        kontekst, List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner) {
         behandling.nullstillToTrinnsBehandling();
         logger.info("To-trinn fjernet på behandling={}", behandling.getId());
         settForeslåOgFatterVedtakAksjonspunkterAvbrutt(behandling, kontekst);
@@ -120,7 +132,8 @@ class ForeslåVedtakTjeneste {
         return totrinn;
     }
 
-    private void settForeslåOgFatterVedtakAksjonspunkterAvbrutt(Behandling behandling, BehandlingskontrollKontekst kontekst) {
+    private void settForeslåOgFatterVedtakAksjonspunkterAvbrutt(Behandling behandling, BehandlingskontrollKontekst
+        kontekst) {
         // TODO: Hører ikke hjemme her. Bør bruke generisk stegresultat eller flyttes. Hva er use-case for disse tilfellene?
         // Er det grunn til å tro at disse finnes når man er i FORVED-steg - de skal utledes i steget?
         List<Aksjonspunkt> skalAvbrytes = new ArrayList<>();
