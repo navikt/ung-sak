@@ -153,7 +153,7 @@ spec:
     - name: FPABAKUS_SCOPE
       value: api://prod-fss.teamforeldrepenger.fpabakus/.default
     - name: K9ABAKUS_URL
-      value: http://k9abakus.k9saksbehandling/k9/abakus
+      value: http://k9-abakus.k9saksbehandling/k9/abakus
     - name: K9ABAKUS_SCOPE
       value: api://prod-fss.k9saksbehandling.k9-abakus/.default
     - name: FTKALKULUS_URL
@@ -312,4 +312,4 @@ spec:
       value: "k9-sak"
 
     - name: PIP_USERS
-      value: "srvPDP,srvk9-tilbake,srvsaf"
+      value: "srvPDP,srvk9-tilbake,srvsaf,srvk9-abakus"

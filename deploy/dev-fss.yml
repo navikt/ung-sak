@@ -55,7 +55,7 @@ spec:
       enabled: true
       replyURLs:
         - "https://k9.dev.intern.nav.no/k9/sak/cb"
-        - "https://k9-sak.dev-fss-pub.nais.io/k9/sak/cb"
+        - "https://k9.intern.dev.nav.no/k9/sak/cb"
       claims:
         extra:
           - "NAVident"
@@ -135,6 +135,8 @@ spec:
     # Loadbalancerconfig
     - name: LOADBALANCER_URL
       value: https://k9.dev.intern.nav.no
+    - name: LOADBALANCER_ALTERNATIVE_URL
+      value: https://k9.intern.dev.nav.no
 
     # LDAP
     - name: LDAP_URL
@@ -158,7 +160,7 @@ spec:
     - name: FPABAKUS_SCOPE
       value: api://dev-fss.teamforeldrepenger.fpabakus/.default
     - name: K9ABAKUS_URL
-      value: http://k9abakus.k9saksbehandling/k9/abakus
+      value: http://k9-abakus.k9saksbehandling/k9/abakus
     - name: K9ABAKUS_SCOPE
       value: api://dev-fss.k9saksbehandling.k9-abakus/.default
     - name: FTKALKULUS_URL
@@ -302,8 +304,6 @@ spec:
       value: "true"
     - name: K9_ABAKUS_ENABLED
       value: "true"
-    - name: ETTERSENDELSE_RETT_TIL_K9SAK
-      value: "true"
 
 
     # Konfigurasjoner
@@ -322,4 +322,4 @@ spec:
       value: "k9-sak"
 
     - name: PIP_USERS
-      value: "srvPDP,srvk9-tilbake,srvsaf,Z993210,Z994080,Z994692"
+      value: "srvPDP,srvk9-tilbake,srvsaf,srvk9-abakus,Z993210,Z994080,Z994692"
