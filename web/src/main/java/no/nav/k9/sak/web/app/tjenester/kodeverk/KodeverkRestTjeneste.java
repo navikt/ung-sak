@@ -83,7 +83,7 @@ public class KodeverkRestTjeneste {
     @Operation(description = "Henter liste over behandlende enheter", tags = "kodeverk")
     @BeskyttetRessurs(action = READ, resource = APPLIKASJON, sporingslogg = false)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public List<OrganisasjonsEnhet> hentBehandlendeEnheter(@QueryParam("ytelseType") @DefaultValue(value = "OMP") @NotNull @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) FagsakYtelseType ytelseType) {
+    public List<OrganisasjonsEnhet> hentBehandlendeEnheter(@QueryParam("ytelseType") @DefaultValue(value = "OMSORGSPENGER") @NotNull @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) FagsakYtelseType ytelseType) {
         return hentKodeverkTjeneste.hentBehandlendeEnheter(ytelseType);
     }
 
