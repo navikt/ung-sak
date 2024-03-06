@@ -530,26 +530,22 @@ public class RegisterdataInnhenter {
         var periode = new Periode(opplysningsperiode.getFom(), opplysningsperiode.getTom());
         var aktør = new AktørIdPersonident(behandling.getAktørId().getId());
 
-        var innhentRegisterdataRequest = new InnhentRegisterdataRequest(saksnummer, behandlingUuid, ytelseType, periode, aktør, informasjonsElementer);
-        innhentRegisterdataRequest.setCallbackUrl(abakusTjeneste.getCallbackUrl());
-        innhentRegisterdataRequest.setCallbackScope(abakusTjeneste.getCallbackScope());
-
         var opplysningsperiodeSkattegrunnlag = periodeTjeneste.utledOpplysningsperiodeSkattegrunnlag(behandling.getId());
         log.info("Opplysningsperiode skattegrunnlag: " + opplysningsperiodeSkattegrunnlag);
-        innhentRegisterdataRequest.setOpplysningsperiodeSkattegrunnlag(new Periode(opplysningsperiodeSkattegrunnlag.getFom(), opplysningsperiodeSkattegrunnlag.getTom()));
-
-        abakusTjeneste.innhentRegisterdata(innhentRegisterdataRequest);
 
         if (k9abakusEnabled) {
             var innhentRegisterdataRequestK9Abakus = new InnhentRegisterdataRequest(saksnummer, behandlingUuid, ytelseType, periode, aktør, informasjonsElementer);
             innhentRegisterdataRequestK9Abakus.setCallbackUrl(k9AbakusTjeneste.getCallbackUrl());
             innhentRegisterdataRequestK9Abakus.setCallbackScope(k9AbakusTjeneste.getCallbackScope());
             innhentRegisterdataRequestK9Abakus.setOpplysningsperiodeSkattegrunnlag(new Periode(opplysningsperiodeSkattegrunnlag.getFom(), opplysningsperiodeSkattegrunnlag.getTom()));
-            try {
-                k9AbakusTjeneste.innhentRegisterdata(innhentRegisterdataRequestK9Abakus);
-            } catch (Exception ignored) {
+            k9AbakusTjeneste.innhentRegisterdata(innhentRegisterdataRequestK9Abakus);
+        } else {
+            var innhentRegisterdataRequest = new InnhentRegisterdataRequest(saksnummer, behandlingUuid, ytelseType, periode, aktør, informasjonsElementer);
+            innhentRegisterdataRequest.setCallbackUrl(abakusTjeneste.getCallbackUrl());
+            innhentRegisterdataRequest.setCallbackScope(abakusTjeneste.getCallbackScope());
+            innhentRegisterdataRequest.setOpplysningsperiodeSkattegrunnlag(new Periode(opplysningsperiodeSkattegrunnlag.getFom(), opplysningsperiodeSkattegrunnlag.getTom()));
+            abakusTjeneste.innhentRegisterdata(innhentRegisterdataRequest);
 
-            }
         }
     }
 

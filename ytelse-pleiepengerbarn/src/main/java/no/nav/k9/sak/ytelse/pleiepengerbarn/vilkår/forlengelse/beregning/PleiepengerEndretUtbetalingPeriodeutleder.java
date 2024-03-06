@@ -205,14 +205,14 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
     }
 
     private LocalDateTimeline<Boolean> finnTidslinjeForEndretRegelsett(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsperiode) {
-        var forrigeDatoForNyeRegler = uttakNyeReglerRepository.finnForrigeDatoForNyeRegler(behandlingReferanse.getBehandlingId());
+        var originalDatoForNyeRegler = behandlingReferanse.getOriginalBehandlingId().flatMap(uttakNyeReglerRepository::finnDatoForNyeRegler);
         var datoForNyeRegler = uttakNyeReglerRepository.finnDatoForNyeRegler(behandlingReferanse.getBehandlingId());
-        if (forrigeDatoForNyeRegler.isEmpty() && datoForNyeRegler.isPresent() && !vilkårsperiode.getTomDato().isBefore(datoForNyeRegler.get())) {
+        if (originalDatoForNyeRegler.isEmpty() && datoForNyeRegler.isPresent() && !vilkårsperiode.getTomDato().isBefore(datoForNyeRegler.get())) {
             return new LocalDateTimeline<>(datoForNyeRegler.get(), vilkårsperiode.getTomDato(), TRUE);
-        } else if (forrigeDatoForNyeRegler.isPresent() && datoForNyeRegler.isPresent() &&
-            !forrigeDatoForNyeRegler.get().equals(datoForNyeRegler.get())) {
-            var fom = forrigeDatoForNyeRegler.get().isBefore(datoForNyeRegler.get()) ? forrigeDatoForNyeRegler.get() : datoForNyeRegler.get();
-            var tom = forrigeDatoForNyeRegler.get().isBefore(datoForNyeRegler.get()) ? datoForNyeRegler.get().minusDays(1) : forrigeDatoForNyeRegler.get().minusDays(1);
+        } else if (originalDatoForNyeRegler.isPresent() && datoForNyeRegler.isPresent() &&
+            !originalDatoForNyeRegler.get().equals(datoForNyeRegler.get())) {
+            var fom = originalDatoForNyeRegler.get().isBefore(datoForNyeRegler.get()) ? originalDatoForNyeRegler.get() : datoForNyeRegler.get();
+            var tom = originalDatoForNyeRegler.get().isBefore(datoForNyeRegler.get()) ? datoForNyeRegler.get().minusDays(1) : originalDatoForNyeRegler.get().minusDays(1);
             return new LocalDateTimeline<>(fom, tom, TRUE);
 
         }

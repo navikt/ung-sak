@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.abakus.iaygrunnlag.JsonObjectMapper;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
@@ -30,20 +31,32 @@ public class AbakusDump implements DebugDumpBehandling, DebugDumpFagsak {
     private final ObjectWriter iayMapper = JsonObjectMapper.getMapper().writerWithDefaultPrettyPrinter();
     private AbakusTjenesteAdapter tjeneste;
 
+    private K9AbakusTjenesteAdapter k9AbakusTjenesteAdapter;
+
+    private boolean k9abakusEnabled;
+
     AbakusDump() {
         // for proxy
     }
 
     @Inject
-    public AbakusDump(AbakusTjenesteAdapter tjeneste) {
+    public AbakusDump(AbakusTjenesteAdapter tjeneste, K9AbakusTjenesteAdapter k9AbakusTjenesteAdapter, @KonfigVerdi(value = "k9.abakus.enabled", defaultVerdi = "false") boolean k9abakusEnabled) {
         this.tjeneste = tjeneste;
+        this.k9AbakusTjenesteAdapter = k9AbakusTjenesteAdapter;
+        this.k9abakusEnabled = k9abakusEnabled;
     }
 
     @Override
     public void dump(DumpMottaker dumpMottaker, Behandling behandling, String basePath) {
         try {
             // For kall med systembruker og opprettelse av systemtoken
-            var data = ContainerContextRunner.doRun(behandling, () -> tjeneste.finnGrunnlag(behandling.getId()));
+            var data = ContainerContextRunner.doRun(behandling, () -> {
+                if (k9abakusEnabled) {
+                    return k9AbakusTjenesteAdapter.finnGrunnlag(behandling.getId());
+                } else {
+                    return tjeneste.finnGrunnlag(behandling.getId());
+                }
+            });
             if (data.isEmpty()) {
                 return;
             }
@@ -60,7 +73,13 @@ public class AbakusDump implements DebugDumpBehandling, DebugDumpFagsak {
         String relativePath = "abakus-inntektsmeldinger";
         try {
             // For kall med systembruker og opprettelse av systemtoken
-            var data = ContainerContextRunner.doRun(dumpMottaker.getFagsak(), () -> tjeneste.hentUnikeInntektsmeldingerForSak(dumpMottaker.getFagsak().getSaksnummer()));
+            var data = ContainerContextRunner.doRun(dumpMottaker.getFagsak(), () -> {
+                if (k9abakusEnabled) {
+                    return k9AbakusTjenesteAdapter.hentUnikeInntektsmeldingerForSak(dumpMottaker.getFagsak().getSaksnummer());
+                } else {
+                    return tjeneste.hentUnikeInntektsmeldingerForSak(dumpMottaker.getFagsak().getSaksnummer());
+                }
+            });
             for (Inntektsmelding im : data) {
                 relativePath = "abakus-inntektsmelding-" +
                     im.getArbeidsgiver().getIdentifikator() +

@@ -1,0 +1,78 @@
+name: Generate openapi
+description: Generate new openapi spec, and generate typescript from it.
+inputs:
+  patchVersion:
+    description: The TAG environment variable from the master build workflow (TIMESTAMP-SHA)
+    required: true
+  readerToken:
+    description: The secrets.READER_TOKEN allowing read of internal packages.
+    required: true
+  clientRepoToken:
+    description: A access token allowing writes to the k9-sak-typescipt-client repo
+    required: true
+
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        path: k9-sak
+    - uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '21'
+        cache: 'maven'
+
+    - name: Openapi generate
+      shell: bash
+      working-directory: k9-sak
+      env:
+        GH_ACCESS_TOKEN: ${{ inputs.readerToken }}
+      run: |
+        mvn install -e --batch-mode --settings ./.github/.m2/settings.xml -DskipTests=true
+        mvn exec:java --projects web -e --batch-mode --settings ./.github/.m2/settings.xml
+
+    - name: Sjekk ut k9-sak-typescript-client
+      uses: actions/checkout@v4
+      with:
+        repository: navikt/k9-sak-typescript-client
+        token: ${{ inputs.clientRepoToken }}
+        path: k9-sak-typescript-client
+        fetch-depth: 0
+
+    - name: Kopier ny openapi spec til klient
+      shell: bash
+      working-directory: k9-sak
+      # Copy the generated openapi spec json to k9-sak-typescript-client, and extract its version number
+      run: |
+        cp web/target/k9-sak.openapi.json ../k9-sak-typescript-client/src/
+        echo "OPENAPI_VERSION=$(jq --exit-status --raw-output '.info.version | capture("^(?<major>\\d+)\\.(?<minor>\\d+)$") | .major + "." + .minor' ./web/target/k9-sak.openapi.json || echo 'FEIL')" >> $GITHUB_ENV
+    - name: Feilsjekk OPENAPI_VERSION
+      if: "${{ env.OPENAPI_VERSION == 'FEIL'}}"
+      uses: actions/github-script@v7
+      with:
+        script: |
+          core.setFailed('fant ikkje korrekt openapi version frå k9-sak.openapi.json')
+    - name: Push ny openapi spec til klient repo
+      if: success()
+      shell: bash
+      working-directory: k9-sak-typescript-client
+      env:
+        GIT_USER_NAME: "${{ github.actor }}"
+        GIT_USER_EMAIL: "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+        GITHUB_TOKEN: "${{ inputs.clientRepoToken }}"
+        VERSION_TAG: "${{ env.OPENAPI_VERSION }}.${{ inputs.patchVersion }}"
+      # Oppdater version i package.json
+      # git commit, tag og push ny k9-sak.openapi.json til k9-sak-typescript-client
+      # NB: git diff framfor gjere at det berre blir gjort viss det faktisk er endringer i ny generert k9-sak.openapi.json
+      run: |
+        jq --exit-status --arg VERSION "${VERSION_TAG}" '.version = $VERSION' package.json > package.json.new && mv package.json.new package.json
+        git config user.email "$GIT_USER_EMAIL"
+        git config user.name "$GIT_USER_NAME"
+        git diff --quiet src/k9-sak.openapi.json || ( \
+          git add -A && \
+          git commit -m "k9-sak.openapi.json updated from k9-sak" && \
+          git tag "v${VERSION_TAG}" && \
+          git push origin k9-sak-workflow --tags \
+        )

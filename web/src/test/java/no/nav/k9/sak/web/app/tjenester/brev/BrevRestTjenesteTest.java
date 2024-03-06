@@ -93,11 +93,11 @@ public class BrevRestTjenesteTest {
 
 
         // Act
-        Response response = brevRestTjeneste.getBrevMottakerinfoEreg(new OrganisasjonsnrDto(inputOrganisasjonsnr));
+        final var maybeBrevMottakerinfoEreg = brevRestTjeneste.getBrevMottakerinfoEreg(new OrganisasjonsnrDto(inputOrganisasjonsnr));
         // Assert
-        BrevMottakerinfoEregResponseDto responseDto = (BrevMottakerinfoEregResponseDto) response.getEntity();
-        assertThat(response.getStatus()).isEqualTo(200);
-        assertThat(responseDto.navn()).isEqualTo(expectedOrganisasjonsnavn);
+        assert(maybeBrevMottakerinfoEreg.isPresent());
+        final var brevMottakerinfoEreg = maybeBrevMottakerinfoEreg.get();
+        assertThat(brevMottakerinfoEreg.navn()).isEqualTo(expectedOrganisasjonsnavn);
     }
 
     @Test
@@ -110,10 +110,8 @@ public class BrevRestTjenesteTest {
         var inputOrganisasjonsnr = "000999000";
         when(eregRestTjenesteMock.hentOrganisasjonOptional(inputOrganisasjonsnr)).thenReturn(Optional.empty());
         // Act
-        Response response = brevRestTjeneste.getBrevMottakerinfoEreg(new OrganisasjonsnrDto(inputOrganisasjonsnr));
+        final var maybeBrevMottakerinfoEreg = brevRestTjeneste.getBrevMottakerinfoEreg(new OrganisasjonsnrDto(inputOrganisasjonsnr));
         // Assert
-        assertThat(response.getStatus()).isEqualTo(200);
-        final var entity = response.getEntity();
-        assertThat(entity).isNotNull().hasOnlyFields();
+        assert(maybeBrevMottakerinfoEreg.isEmpty());
     }
 }

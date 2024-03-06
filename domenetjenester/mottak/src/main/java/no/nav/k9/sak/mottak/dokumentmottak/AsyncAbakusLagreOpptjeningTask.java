@@ -107,19 +107,21 @@ public class AsyncAbakusLagreOpptjeningTask extends UnderBehandlingProsessTask {
                 } else {
                     k9AbakusTjeneste.lagreOppgittOpptjeningV2(request);
                 }
-            } catch (Exception ignored) {
+            } catch (IOException e) {
+                throw new IllegalStateException("Kunne ikke lagre abakus oppgitt opptjening", e);
             }
-        }
+        } else {
 
-        try {
-            OppgittOpptjeningMottattRequest request = jsonReader.readValue(Objects.requireNonNull(input.getPayloadAsString(), "mangler payload"));
-            if (erFrisinn) {
-                abakusTjeneste.lagreOppgittOpptjening(request);
-            } else {
-                abakusTjeneste.lagreOppgittOpptjeningV2(request);
+            try {
+                OppgittOpptjeningMottattRequest request = jsonReader.readValue(Objects.requireNonNull(input.getPayloadAsString(), "mangler payload"));
+                if (erFrisinn) {
+                    abakusTjeneste.lagreOppgittOpptjening(request);
+                } else {
+                    abakusTjeneste.lagreOppgittOpptjeningV2(request);
+                }
+            } catch (IOException e) {
+                throw new IllegalStateException("Kunne ikke lagre abakus oppgitt opptjening", e);
             }
-        } catch (IOException e) {
-            throw new IllegalStateException("Kunne ikke lagre abakus oppgitt opptjening", e);
         }
     }
 }
