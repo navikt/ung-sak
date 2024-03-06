@@ -11,6 +11,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -34,6 +35,7 @@ class ForeslåVedtakTjeneste {
     private Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere;
 
     private SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste;
+    private boolean sjekkTilbakekrevingAksjonspunktLansert;
 
     protected ForeslåVedtakTjeneste() {
         // CDI proxy
@@ -44,12 +46,14 @@ class ForeslåVedtakTjeneste {
                           BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                           SjekkMotAndreYtelserTjeneste sjekkMotAndreYtelserTjeneste,
                           SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste,
-                          @Any Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere) {
+                          @Any Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere,
+                          @KonfigVerdi(value = "ENABLE_SJEKK_TILBAKEKREVING", defaultVerdi = "false") boolean sjekkTilbakekrevingAksjonspunktLansert) {
         this.sjekkMotAndreYtelserTjeneste = sjekkMotAndreYtelserTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.foreslåVedtakManueltUtledere = foreslåVedtakManueltUtledere;
         this.sjekkMotTilbakekrevingTjeneste = sjekkMotTilbakekrevingTjeneste;
+        this.sjekkTilbakekrevingAksjonspunktLansert = sjekkTilbakekrevingAksjonspunktLansert;
     }
 
     public BehandleStegResultat foreslåVedtak(Behandling behandling, BehandlingskontrollKontekst kontekst) {
@@ -61,7 +65,14 @@ class ForeslåVedtakTjeneste {
 
         List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = new ArrayList<>();
         aksjonspunktDefinisjoner.addAll(sjekkMotAndreYtelserTjeneste.sjekkMotGsakOppgaverOgOverlappendeYtelser(behandling.getAktørId(), behandling));
-        aksjonspunktDefinisjoner.addAll(sjekkMotTilbakekrevingTjeneste.sjekkMotÅpenIkkeoverlappendeTilbakekreving(behandling));
+
+        List<AksjonspunktDefinisjon> sjekkTilbakekrevingAP = sjekkMotTilbakekrevingTjeneste.sjekkMotÅpenIkkeoverlappendeTilbakekreving(behandling);
+        if (!sjekkTilbakekrevingAP.isEmpty()) {
+            logger.info("Kandidat for sjekk-tilbakekeving-aksjonspunkt");
+            if (sjekkTilbakekrevingAksjonspunktLansert) {
+                aksjonspunktDefinisjoner.addAll(sjekkTilbakekrevingAP);
+            }
+        }
 
         Optional<Aksjonspunkt> vedtakUtenTotrinnskontroll = behandling
             .getÅpentAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL);
