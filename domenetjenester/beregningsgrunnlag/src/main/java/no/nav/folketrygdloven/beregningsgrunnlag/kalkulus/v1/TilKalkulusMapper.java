@@ -6,11 +6,11 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter.OpptjeningPeriode;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Aktør;
 import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
+import no.nav.folketrygdloven.kalkulus.felles.v1.BeløpDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.JournalpostId;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Organisasjon;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
-import no.nav.folketrygdloven.kalkulus.iay.IayProsent;
 import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.AktivitetsAvtaleDto;
 import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.ArbeidDto;
 import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.ArbeidsforholdInformasjonDto;
@@ -154,15 +154,15 @@ public class TilKalkulusMapper {
             oppgittEgenNæring.getEndringDato(),
             oppgittEgenNæring.getNyIArbeidslivet(),
             oppgittEgenNæring.getBegrunnelse(),
-            no.nav.folketrygdloven.kalkulus.felles.v1.Beløp.fra(oppgittEgenNæring.getBruttoInntekt()));
+            oppgittEgenNæring.getBruttoInntekt());
     }
 
     public static OppgittArbeidsforholdDto mapArbeidsforhold(OppgittArbeidsforhold arb) {
-        return new OppgittArbeidsforholdDto(mapPeriode(arb.getPeriode()), no.nav.folketrygdloven.kalkulus.felles.v1.Beløp.fra(arb.getInntekt()));
+        return new OppgittArbeidsforholdDto(mapPeriode(arb.getPeriode()), arb.getInntekt());
     }
 
     public static Function<OppgittFrilansoppdrag, OppgittFrilansInntekt> mapFrilansOppdrag() {
-        return frilansoppdrag -> new OppgittFrilansInntekt(mapPeriode(frilansoppdrag.getPeriode()), no.nav.folketrygdloven.kalkulus.felles.v1.Beløp.fra(frilansoppdrag.getInntekt()));
+        return frilansoppdrag -> new OppgittFrilansInntekt(mapPeriode(frilansoppdrag.getPeriode()), frilansoppdrag.getInntekt());
     }
 
     private static InntektsmeldingerDto mapTilDto(InntektsmeldingerRelevantForBeregning imTjeneste,
@@ -176,14 +176,14 @@ public class TilKalkulusMapper {
 
         List<InntektsmeldingDto> inntektsmeldingDtoer = inntektsmeldingerForPerioden.stream().map(inntektsmelding -> {
             Aktør aktør = mapTilAktør(inntektsmelding.getArbeidsgiver());
-            var beløpDto = no.nav.folketrygdloven.kalkulus.felles.v1.Beløp.fra((inntektsmelding.getInntektBeløp().getVerdi()));
+            var beløpDto = new BeløpDto(inntektsmelding.getInntektBeløp().getVerdi());
             var naturalYtelseDtos = inntektsmelding.getNaturalYtelser().stream().map(naturalYtelse -> new NaturalYtelseDto(
                 mapPeriode(naturalYtelse.getPeriode()),
-                no.nav.folketrygdloven.kalkulus.felles.v1.Beløp.fra(naturalYtelse.getBeloepPerMnd().getVerdi()),
+                new BeløpDto(naturalYtelse.getBeloepPerMnd().getVerdi()),
                 NaturalYtelseType.fraKode(naturalYtelse.getType().getKode()))).collect(Collectors.toList());
 
             var refusjonDtos = inntektsmelding.getEndringerRefusjon().stream().map(refusjon -> new RefusjonDto(
-                no.nav.folketrygdloven.kalkulus.felles.v1.Beløp.fra(refusjon.getRefusjonsbeløp().getVerdi()),
+                new BeløpDto(refusjon.getRefusjonsbeløp().getVerdi()),
                 refusjon.getFom())).collect(Collectors.toList());
 
             var internArbeidsforholdRefDto = inntektsmelding.getArbeidsforholdRef().gjelderForSpesifiktArbeidsforhold()
@@ -191,7 +191,7 @@ public class TilKalkulusMapper {
                 : null;
             var startDato = inntektsmelding.getStartDatoPermisjon().isPresent() ? inntektsmelding.getStartDatoPermisjon().get() : null;
             var refusjon = inntektsmelding.getRefusjonOpphører();
-            var beløpDto1 = inntektsmelding.getRefusjonBeløpPerMnd() != null ? no.nav.folketrygdloven.kalkulus.felles.v1.Beløp.fra(inntektsmelding.getRefusjonBeløpPerMnd().getVerdi()) : null;
+            var beløpDto1 = inntektsmelding.getRefusjonBeløpPerMnd() != null ? new BeløpDto(inntektsmelding.getRefusjonBeløpPerMnd().getVerdi()) : null;
 
             var journalpostId = new JournalpostId(inntektsmelding.getJournalpostId().getJournalpostId().getVerdi());
             return new InntektsmeldingDto(aktør, beløpDto,
@@ -201,7 +201,8 @@ public class TilKalkulusMapper {
                 startDato,
                 refusjon,
                 beløpDto1,
-                journalpostId);
+                journalpostId,
+                inntektsmelding.getKanalreferanse());
         }).collect(Collectors.toList());
 
         return inntektsmeldingDtoer.isEmpty() ? null : new InntektsmeldingerDto(inntektsmeldingDtoer);
@@ -247,15 +248,15 @@ public class TilKalkulusMapper {
         return ys.getVirksomhet().map(orgNummer -> new Organisasjon(orgNummer.getOrgNummer())).orElse(null);
     }
 
-    private static no.nav.folketrygdloven.kalkulus.felles.v1.Beløp mapBeløp(Optional<Beløp> beløp) {
-        return beløp.map(value -> no.nav.folketrygdloven.kalkulus.felles.v1.Beløp.fra((value.getVerdi()))).orElse(null);
+    private static BeløpDto mapBeløp(Optional<Beløp> beløp) {
+        return beløp.map(value -> new BeløpDto(value.getVerdi())).orElse(null);
     }
 
     private static Set<YtelseAnvistDto> mapYtelseAnvist(Collection<YtelseAnvist> ytelseAnvist) {
         return ytelseAnvist.stream().map(ya -> {
-            var beløpDto = mapBeløp(ya.getBeløp());
-            var dagsatsDto = mapBeløp(ya.getDagsats());
-            var utbetalingsgrad = ya.getUtbetalingsgradProsent().isPresent() ? IayProsent.fra(ya.getUtbetalingsgradProsent().get().getVerdi()) : null;
+            BeløpDto beløpDto = mapBeløp(ya.getBeløp());
+            BeløpDto dagsatsDto = mapBeløp(ya.getDagsats());
+            BigDecimal utbetalingsgrad = ya.getUtbetalingsgradProsent().isPresent() ? ya.getUtbetalingsgradProsent().get().getVerdi() : null;
             return new YtelseAnvistDto(new Periode(
                 ya.getAnvistFOM(), ya.getAnvistTOM()),
                 beløpDto,
@@ -275,9 +276,9 @@ public class TilKalkulusMapper {
         return new AnvistAndel(
             a.getArbeidsgiver().map(TilKalkulusMapper::mapTilAktør).orElse(null),
             a.getArbeidsforholdRef().getReferanse() == null ? null : new InternArbeidsforholdRefDto(a.getArbeidsforholdRef().getReferanse()),
-            a.getDagsats() == null ? null : no.nav.folketrygdloven.kalkulus.felles.v1.Beløp.fra(a.getDagsats().getVerdi()),
-            a.getUtbetalingsgradProsent() == null ? null : IayProsent.fra(a.getUtbetalingsgradProsent().getVerdi()),
-            a.getRefusjonsgradProsent() == null ? null : IayProsent.fra(a.getRefusjonsgradProsent().getVerdi()),
+            a.getDagsats() == null ? null : new BeløpDto(a.getDagsats().getVerdi()),
+            a.getUtbetalingsgradProsent() == null ? null : a.getUtbetalingsgradProsent().getVerdi(),
+            a.getRefusjonsgradProsent() == null ? null : a.getRefusjonsgradProsent().getVerdi(),
             a.getInntektskategori() == null ?
                 Inntektskategori.UDEFINERT : Inntektskategori.fraKode(a.getInntektskategori().getKode())
         );
@@ -305,7 +306,7 @@ public class TilKalkulusMapper {
         var utbetalingsPostDto = new UtbetalingsPostDto(
             mapPeriode(inntektspost.getPeriode()),
             InntektspostType.fraKode(inntektspost.getInntektspostType().getKode()),
-            no.nav.folketrygdloven.kalkulus.felles.v1.Beløp.fra(inntektspost.getBeløp().getVerdi()));
+            inntektspost.getBeløp().getVerdi());
         if (inntektspost.getInntektYtelseType() != null) {
             var ytelseType = inntektspost.getInntektYtelseType();
             utbetalingsPostDto.setInntektYtelseType(InntektYtelseType.valueOf(ytelseType.name()));
@@ -334,7 +335,7 @@ public class TilKalkulusMapper {
     private static YrkesaktivitetDto mapTilDto(Yrkesaktivitet yrkesaktivitet, DatoIntervallEntitet vilkårsPeriode) {
         List<AktivitetsAvtaleDto> aktivitetsAvtaleDtos = yrkesaktivitet.getAlleAktivitetsAvtaler().stream().map(aktivitetsAvtale -> new AktivitetsAvtaleDto(mapPeriode(aktivitetsAvtale.getPeriode()),
             aktivitetsAvtale.getSisteLønnsendringsdato(),
-            aktivitetsAvtale.getProsentsats() != null ? IayProsent.fra(aktivitetsAvtale.getProsentsats().getVerdi()) : null)
+            aktivitetsAvtale.getProsentsats() != null ? aktivitetsAvtale.getProsentsats().getVerdi() : null)
         ).collect(Collectors.toList());
 
         String arbeidsforholdRef = yrkesaktivitet.getArbeidsforholdRef().getReferanse();
@@ -388,7 +389,7 @@ public class TilKalkulusMapper {
     private static PermisjonDto mapTilPermisjonDto(Permisjon permisjon) {
         return new PermisjonDto(
             new Periode(permisjon.getFraOgMed(), permisjon.getTilOgMed()),
-            IayProsent.fra(permisjon.getProsentsats().getVerdi()),
+            permisjon.getProsentsats().getVerdi(),
             PermisjonsbeskrivelseType.fraKode(permisjon.getPermisjonsbeskrivelseType().getKode())
         );
     }

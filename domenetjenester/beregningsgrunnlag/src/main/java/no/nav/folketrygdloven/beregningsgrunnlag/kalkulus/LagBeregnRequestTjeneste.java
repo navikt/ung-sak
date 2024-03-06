@@ -7,7 +7,6 @@ import jakarta.inject.Inject;
 import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
 import no.nav.folketrygdloven.kalkulus.felles.v1.KalkulatorInputDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
-import no.nav.folketrygdloven.kalkulus.felles.v1.Saksnummer;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregnForRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregnListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningListeRequest;
@@ -70,7 +69,7 @@ public class LagBeregnRequestTjeneste {
         Fagsak fagsak = fagsakRepository.finnEksaktFagsak(referanse.getFagsakId());
         AktørIdPersonident aktør = new AktørIdPersonident(fagsak.getAktørId().getId());
         return new BeregnListeRequest(
-            Saksnummer.fra(fagsak.getSaksnummer().getVerdi()),
+            fagsak.getSaksnummer().getVerdi(),
             referanse.getBehandlingUuid(),
             aktør,
             FagsakYtelseTypeMapper.mapFagsakYtelseType(referanse.getFagsakYtelseType()),
@@ -87,7 +86,7 @@ public class LagBeregnRequestTjeneste {
         return new HåndterBeregningListeRequest(requestListe,
             input,
             FagsakYtelseTypeMapper.mapFagsakYtelseType(referanse.getFagsakYtelseType()),
-            Saksnummer.fra(referanse.getSaksnummer().getVerdi()),
+            referanse.getSaksnummer().getVerdi(),
             referanse.getBehandlingUuid());
     }
 
@@ -99,7 +98,7 @@ public class LagBeregnRequestTjeneste {
         var requestList = beregnInput.stream()
             .map(i -> new UtledTilkommetAktivitetForRequest(i.getBgReferanse(), input.get(i.getBgReferanse())))
             .toList();
-        return new UtledTilkommetAktivitetListeRequest(Saksnummer.fra(referanse.getSaksnummer().getVerdi()),
+        return new UtledTilkommetAktivitetListeRequest(referanse.getSaksnummer().getVerdi(),
             FagsakYtelseTypeMapper.mapFagsakYtelseType(referanse.getFagsakYtelseType()),
             requestList);
     }
