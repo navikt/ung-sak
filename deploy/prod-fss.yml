@@ -295,7 +295,7 @@ spec:
     - name: NY_VURDERINGSLOGIKK_IM
       value: "false"
     - name: K9_ABAKUS_ENABLED
-      value: "false"
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
