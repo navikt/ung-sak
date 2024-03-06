@@ -47,7 +47,7 @@ class ForeslåVedtakTjeneste {
                           SjekkMotAndreYtelserTjeneste sjekkMotAndreYtelserTjeneste,
                           SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste,
                           @Any Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere,
-                          @KonfigVerdi(value = "ENABLE_SJEKK_TILBAKEKREVING", defaultVerdi = "true") boolean sjekkTilbakekrevingAksjonspunktLansert) {
+                          @KonfigVerdi(value = "ENABLE_SJEKK_TILBAKEKREVING", defaultVerdi = "false") boolean sjekkTilbakekrevingAksjonspunktLansert) {
         this.sjekkMotAndreYtelserTjeneste = sjekkMotAndreYtelserTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
