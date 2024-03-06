@@ -13,6 +13,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.saksnummer.ReservertSaksnummerEntitet;
 import no.nav.k9.sak.behandlingslager.saksnummer.ReservertSaksnummerRepository;
 import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -66,9 +67,15 @@ public class KroniskSykSøknadMottaker implements SøknadMottakTjeneste<Innsendi
             return fagsak.get();
         }
 
-        final var saksnummer = reservertSaksnummer != null ? reservertSaksnummer : new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
+        final Saksnummer saksnummer;
+        if (reservertSaksnummer != null) {
+            saksnummer = reservertSaksnummer;
+        } else {
+            var optReservert = reservertSaksnummerRepository.hent(OMSORGSPENGER_KS, søkerAktørId.getAktørId(), pleietrengendeAktørId.getAktørId(), Integer.toString(datoIntervall.getFomDato().getYear()));
+            saksnummer = optReservert.map(ReservertSaksnummerEntitet::getSaksnummer).orElse(new Saksnummer(saksnummerRepository.genererNyttSaksnummer()));
+        }
         final var nyFagsak = opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, ytelseType, datoIntervall.getFomDato(), datoIntervall.getTomDato());
-        reservertSaksnummerRepository.slettHvisEksisterer(reservertSaksnummer);
+        reservertSaksnummerRepository.slettHvisEksisterer(saksnummer);
         return nyFagsak;
     }
 

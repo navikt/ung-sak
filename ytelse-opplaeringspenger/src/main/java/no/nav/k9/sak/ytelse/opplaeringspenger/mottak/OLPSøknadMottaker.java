@@ -10,6 +10,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.saksnummer.ReservertSaksnummerEntitet;
 import no.nav.k9.sak.behandlingslager.saksnummer.ReservertSaksnummerRepository;
 import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.k9.sak.mottak.SøknadMottakTjeneste;
@@ -73,9 +74,15 @@ public class OLPSøknadMottaker implements SøknadMottakTjeneste<OLPSøknadInnse
             return fagsak.get();
         }
 
-        final Saksnummer saksnummer = reservertSaksnummer != null ? reservertSaksnummer : new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
+        final Saksnummer saksnummer;
+        if (reservertSaksnummer != null) {
+            saksnummer = reservertSaksnummer;
+        } else {
+            var optReservert = reservertSaksnummerRepository.hent(FagsakYtelseType.OPPLÆRINGSPENGER, søkerAktørId.getAktørId(), pleietrengendeAktørId.getAktørId(), null);
+            saksnummer = optReservert.map(ReservertSaksnummerEntitet::getSaksnummer).orElse(new Saksnummer(saksnummerRepository.genererNyttSaksnummer()));
+        }
         final Fagsak nyFagsak = opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, ytelseType, startDato, sluttDato);
-        reservertSaksnummerRepository.slettHvisEksisterer(reservertSaksnummer);
+        reservertSaksnummerRepository.slettHvisEksisterer(saksnummer);
         return nyFagsak;
     }
 
