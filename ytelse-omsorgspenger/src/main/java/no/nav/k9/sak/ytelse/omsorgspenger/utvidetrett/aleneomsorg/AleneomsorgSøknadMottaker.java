@@ -10,6 +10,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.saksnummer.ReservertSaksnummerEntitet;
 import no.nav.k9.sak.behandlingslager.saksnummer.ReservertSaksnummerRepository;
 import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -62,9 +63,9 @@ public class AleneomsorgSøknadMottaker implements SøknadMottakTjeneste<Innsend
             return fagsak.get();
         }
 
-        final var saksnummer = reservertSaksnummer != null ? reservertSaksnummer : new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
+        final var saksnummer = reservertSaksnummer != null ? reservertSaksnummer : hentReservertEllerGenererSaksnummer(søkerAktørId, pleietrengendeAktørId, datoIntervall.getFomDato().getYear());
         final var nyFagsak = opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, ytelseType, datoIntervall.getFomDato(), datoIntervall.getTomDato());
-        reservertSaksnummerRepository.slettHvisEksisterer(reservertSaksnummer);
+        reservertSaksnummerRepository.slettHvisEksisterer(saksnummer);
         return nyFagsak;
     }
 
@@ -74,4 +75,8 @@ public class AleneomsorgSøknadMottaker implements SøknadMottakTjeneste<Innsend
         return fagsak;
     }
 
+    private Saksnummer hentReservertEllerGenererSaksnummer(AktørId søkerAktørId, AktørId pleietrengendeAktørId, int behandlingsår) {
+        var optReservert = reservertSaksnummerRepository.hent(FagsakYtelseType.OMSORGSPENGER_AO, søkerAktørId.getAktørId(), pleietrengendeAktørId.getAktørId(), Integer.toString(behandlingsår));
+        return optReservert.map(ReservertSaksnummerEntitet::getSaksnummer).orElseGet(() -> new Saksnummer(saksnummerRepository.genererNyttSaksnummer()));
+    }
 }
