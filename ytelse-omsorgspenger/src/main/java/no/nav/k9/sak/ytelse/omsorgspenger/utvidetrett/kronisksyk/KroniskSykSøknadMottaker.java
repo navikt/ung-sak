@@ -67,7 +67,7 @@ public class KroniskSykSøknadMottaker implements SøknadMottakTjeneste<Innsendi
             return fagsak.get();
         }
 
-        final Saksnummer saksnummer = reservertSaksnummer != null ? reservertSaksnummer : hentReservertEllerGenererSaksnummer(søkerAktørId, pleietrengendeAktørId, datoIntervall.getFomDato().getYear());
+        final var saksnummer = reservertSaksnummer != null ? reservertSaksnummer : hentReservertEllerGenererSaksnummer(søkerAktørId, pleietrengendeAktørId, datoIntervall.getFomDato().getYear());
         final var nyFagsak = opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, ytelseType, datoIntervall.getFomDato(), datoIntervall.getTomDato());
         reservertSaksnummerRepository.slettHvisEksisterer(saksnummer);
         return nyFagsak;
