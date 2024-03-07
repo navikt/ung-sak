@@ -71,22 +71,20 @@ public class PPNSøknadMottaker implements SøknadMottakTjeneste<PPNSøknadInnse
             return fagsak.get();
         }
 
-        Saksnummer saksnummer;
-        if (reservertSaksnummer != null) {
-            saksnummer = reservertSaksnummer;
-        } else {
-            var optReservert = reservertSaksnummerRepository.hent(PLEIEPENGER_NÆRSTÅENDE, søkerAktørId.getAktørId(), pleietrengendeAktørId.getAktørId(), null);
-            saksnummer = optReservert.map(ReservertSaksnummerEntitet::getSaksnummer).orElseGet(() -> new Saksnummer(saksnummerRepository.genererNyttSaksnummer()));
-        }
+        final Saksnummer saksnummer = reservertSaksnummer != null ? reservertSaksnummer : hentReservertEllerGenererSaksnummer(søkerAktørId, pleietrengendeAktørId);
         final Fagsak nyFagsak = opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, ytelseType, startDato, sluttDato);
         reservertSaksnummerRepository.slettHvisEksisterer(saksnummer);
         return nyFagsak;
     }
 
-
     private Fagsak opprettSakFor(Saksnummer saksnummer, AktørId brukerIdent, AktørId pleietrengendeAktørId, FagsakYtelseType ytelseType, LocalDate startDato, LocalDate sluttDato) {
         final Fagsak fagsak = Fagsak.opprettNy(ytelseType, brukerIdent, pleietrengendeAktørId, null, saksnummer, startDato, sluttDato);
         fagsakTjeneste.opprettFagsak(fagsak);
         return fagsak;
+    }
+
+    private Saksnummer hentReservertEllerGenererSaksnummer(AktørId søkerAktørId, AktørId pleietrengendeAktørId) {
+        var optReservert = reservertSaksnummerRepository.hent(PLEIEPENGER_NÆRSTÅENDE, søkerAktørId.getAktørId(), pleietrengendeAktørId.getAktørId(), null);
+        return optReservert.map(ReservertSaksnummerEntitet::getSaksnummer).orElseGet(() -> new Saksnummer(saksnummerRepository.genererNyttSaksnummer()));
     }
 }
