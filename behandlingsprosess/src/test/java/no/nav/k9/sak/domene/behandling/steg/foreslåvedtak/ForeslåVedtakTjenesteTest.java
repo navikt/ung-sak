@@ -110,7 +110,7 @@ public class ForeslåVedtakTjenesteTest {
         SjekkMotAndreYtelserTjeneste sjekkMotAndreYtelserTjeneste = new SjekkMotAndreYtelserTjeneste(historikkRepository, oppgaveTjeneste, overlappendeYtelserTjeneste);
         SjekkTilbakekrevingAksjonspunktUtleder sjekkTilbakekrevingAksjonspunktUtleder = Mockito.mock(SjekkTilbakekrevingAksjonspunktUtleder.class);
         when(sjekkTilbakekrevingAksjonspunktUtleder.sjekkMotÅpenIkkeoverlappendeTilbakekreving(any())).thenReturn(List.of());
-        tjeneste = new ForeslåVedtakTjeneste(fagsakRepository, behandlingskontrollTjeneste, sjekkMotAndreYtelserTjeneste, sjekkTilbakekrevingAksjonspunktUtleder, foreslåVedtakManueltUtledere, false);
+        tjeneste = new ForeslåVedtakTjeneste(fagsakRepository, behandlingskontrollTjeneste, sjekkMotAndreYtelserTjeneste, sjekkTilbakekrevingAksjonspunktUtleder, foreslåVedtakManueltUtledere);
     }
 
     @Test

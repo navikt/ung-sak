@@ -12,6 +12,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -26,6 +27,7 @@ public class SjekkTilbakekrevingAksjonspunktUtleder {
 
     private static final Logger logger = LoggerFactory.getLogger(SjekkTilbakekrevingAksjonspunktUtleder.class);
 
+    private boolean lansert;
     private SjekkEndringUtbetalingTilBrukerTjeneste sjekkEndringUtbetalingTilBrukerTjeneste;
     private SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste;
     private K9TilbakeRestKlient k9TilbakeRestKlient;
@@ -33,9 +35,11 @@ public class SjekkTilbakekrevingAksjonspunktUtleder {
     @Inject
     public SjekkTilbakekrevingAksjonspunktUtleder(SjekkEndringUtbetalingTilBrukerTjeneste sjekkEndringUtbetalingTilBrukerTjeneste,
                                                   K9TilbakeRestKlient k9TilbakeRestKlient,
-                                                  SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste) {
+                                                  SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste,
+                                                  @KonfigVerdi(value = "ENABLE_SJEKK_TILBAKEKREVING", defaultVerdi = "true") boolean lansert) {
         this.sjekkEndringUtbetalingTilBrukerTjeneste = sjekkEndringUtbetalingTilBrukerTjeneste;
         this.k9TilbakeRestKlient = k9TilbakeRestKlient;
+        this.lansert = lansert;
         this.simuleringIntegrasjonTjeneste = simuleringIntegrasjonTjeneste;
     }
 
@@ -48,6 +52,9 @@ public class SjekkTilbakekrevingAksjonspunktUtleder {
      * Her utledes et aksjonspunkt som bryter flyten, slik at det skal være mulig å gjennomføre tilbakekrevingsbehandlingen.
      */
     public List<AksjonspunktDefinisjon> sjekkMotÅpenIkkeoverlappendeTilbakekreving(Behandling aktuellBehandling) {
+        if (!lansert) {
+            return List.of();
+        }
         return påvirkerÅpenTilbakekrevingsbehandling(aktuellBehandling)
             ? List.of(AksjonspunktDefinisjon.SJEKK_TILBAKEKREVING)
             : List.of();

@@ -36,7 +36,7 @@ class SjekkTilbakekrevingAksjonspunktUtlederTest {
         sjekkEndringUtbetalingTilBrukerTjeneste = Mockito.mock(SjekkEndringUtbetalingTilBrukerTjeneste.class);
         k9TilbakeRestKlient = Mockito.mock(K9TilbakeRestKlient.class);
         simuleringIntegrasjonTjeneste = Mockito.mock(SimuleringIntegrasjonTjeneste.class);
-        utleder = new SjekkTilbakekrevingAksjonspunktUtleder(sjekkEndringUtbetalingTilBrukerTjeneste, k9TilbakeRestKlient, simuleringIntegrasjonTjeneste);
+        utleder = new SjekkTilbakekrevingAksjonspunktUtleder(sjekkEndringUtbetalingTilBrukerTjeneste, k9TilbakeRestKlient, simuleringIntegrasjonTjeneste, true);
     }
 
     @Test
