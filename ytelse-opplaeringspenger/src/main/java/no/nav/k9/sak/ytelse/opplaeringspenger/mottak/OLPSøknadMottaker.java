@@ -79,7 +79,7 @@ public class OLPSøknadMottaker implements SøknadMottakTjeneste<OLPSøknadInnse
             saksnummer = reservertSaksnummer;
         } else {
             var optReservert = reservertSaksnummerRepository.hent(FagsakYtelseType.OPPLÆRINGSPENGER, søkerAktørId.getAktørId(), pleietrengendeAktørId.getAktørId(), null);
-            saksnummer = optReservert.map(ReservertSaksnummerEntitet::getSaksnummer).orElse(new Saksnummer(saksnummerRepository.genererNyttSaksnummer()));
+            saksnummer = optReservert.map(ReservertSaksnummerEntitet::getSaksnummer).orElseGet(() -> new Saksnummer(saksnummerRepository.genererNyttSaksnummer()));
         }
         final Fagsak nyFagsak = opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, ytelseType, startDato, sluttDato);
         reservertSaksnummerRepository.slettHvisEksisterer(saksnummer);

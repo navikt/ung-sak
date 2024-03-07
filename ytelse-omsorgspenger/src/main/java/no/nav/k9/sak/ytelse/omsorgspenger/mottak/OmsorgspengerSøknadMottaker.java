@@ -93,6 +93,6 @@ public class OmsorgspengerSøknadMottaker implements SøknadMottakTjeneste<Omsor
 
     private Saksnummer hentReservertEllerGenererSaksnummer(AktørId søkerAktørId, int behandlingsår) {
         var optReservert = reservertSaksnummerRepository.hent(OMSORGSPENGER, søkerAktørId.getAktørId(), null, Integer.toString(behandlingsår));
-        return optReservert.map(ReservertSaksnummerEntitet::getSaksnummer).orElse(new Saksnummer(saksnummerRepository.genererNyttSaksnummer()));
+        return optReservert.map(ReservertSaksnummerEntitet::getSaksnummer).orElseGet(() -> new Saksnummer(saksnummerRepository.genererNyttSaksnummer()));
     }
 }

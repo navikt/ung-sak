@@ -77,7 +77,7 @@ public class PleiepengerBarnSøknadMottaker implements SøknadMottakTjeneste<Ple
             saksnummer = reservertSaksnummer;
         } else {
             var optReservert = reservertSaksnummerRepository.hent(PLEIEPENGER_SYKT_BARN, søkerAktørId.getAktørId(), pleietrengendeAktørId.getAktørId(), null);
-            saksnummer = optReservert.map(ReservertSaksnummerEntitet::getSaksnummer).orElse(new Saksnummer(saksnummerRepository.genererNyttSaksnummer()));
+            saksnummer = optReservert.map(ReservertSaksnummerEntitet::getSaksnummer).orElseGet(() -> new Saksnummer(saksnummerRepository.genererNyttSaksnummer()));
         }
         final Fagsak nyFagsak = opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, ytelseType, startDato, sluttDato);
         reservertSaksnummerRepository.slettHvisEksisterer(saksnummer);

@@ -68,7 +68,7 @@ public class AleneomsorgSøknadMottaker implements SøknadMottakTjeneste<Innsend
             saksnummer = reservertSaksnummer;
         } else {
             var optReservert = reservertSaksnummerRepository.hent(FagsakYtelseType.OMSORGSPENGER_AO, søkerAktørId.getAktørId(), pleietrengendeAktørId.getAktørId(), Integer.toString(datoIntervall.getFomDato().getYear()));
-            saksnummer = optReservert.map(ReservertSaksnummerEntitet::getSaksnummer).orElse(new Saksnummer(saksnummerRepository.genererNyttSaksnummer()));
+            saksnummer = optReservert.map(ReservertSaksnummerEntitet::getSaksnummer).orElseGet(() -> new Saksnummer(saksnummerRepository.genererNyttSaksnummer()));
         }
         final var nyFagsak = opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, ytelseType, datoIntervall.getFomDato(), datoIntervall.getTomDato());
         reservertSaksnummerRepository.slettHvisEksisterer(saksnummer);
