@@ -13,6 +13,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.saksnummer.ReservertSaksnummerEntitet;
 import no.nav.k9.sak.behandlingslager.saksnummer.ReservertSaksnummerRepository;
 import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -65,9 +66,9 @@ public class MidlertidigAleneSøknadMottaker implements SøknadMottakTjeneste<In
             return fagsak.get();
         }
 
-        final var saksnummer = reservertSaksnummer != null ? reservertSaksnummer : new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
+        final var saksnummer = reservertSaksnummer != null ? reservertSaksnummer : hentReservertEllerGenererSaksnummer(søkerAktørId, datoIntervall.getFomDato().getYear());
         final var nyFagsak = opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, ytelseType, datoIntervall.getFomDato(), datoIntervall.getTomDato());
-        reservertSaksnummerRepository.slettHvisEksisterer(reservertSaksnummer);
+        reservertSaksnummerRepository.slettHvisEksisterer(saksnummer);
         return nyFagsak;
     }
 
@@ -77,4 +78,8 @@ public class MidlertidigAleneSøknadMottaker implements SøknadMottakTjeneste<In
         return fagsak;
     }
 
+    private Saksnummer hentReservertEllerGenererSaksnummer(AktørId søkerAktørId, int behandlingsår) {
+        var optReservert = reservertSaksnummerRepository.hent(OMSORGSPENGER_MA, søkerAktørId.getAktørId(), null, Integer.toString(behandlingsår));
+        return optReservert.map(ReservertSaksnummerEntitet::getSaksnummer).orElseGet(() -> new Saksnummer(saksnummerRepository.genererNyttSaksnummer()));
+    }
 }
