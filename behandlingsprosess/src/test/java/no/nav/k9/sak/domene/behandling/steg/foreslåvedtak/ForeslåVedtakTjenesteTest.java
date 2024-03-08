@@ -45,7 +45,6 @@ import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.vedtak.ekstern.OverlappendeYtelserTjeneste;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.Oppgaveinfo;
-import no.nav.k9.sak.punsj.PunsjRestKlient;
 import no.nav.k9.sak.test.util.Whitebox;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
@@ -82,9 +81,6 @@ public class ForeslåVedtakTjenesteTest {
 
     @Mock
     private SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekreving;
-
-    @Mock
-    private PunsjRestKlient punsjRestKlient;
 
     @Spy
     private HistorikkRepository historikkRepository;
