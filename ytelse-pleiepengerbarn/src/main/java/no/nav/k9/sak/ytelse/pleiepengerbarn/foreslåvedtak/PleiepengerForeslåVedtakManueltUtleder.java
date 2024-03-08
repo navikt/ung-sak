@@ -13,7 +13,6 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.behandling.steg.foreslåvedtak.ForeslåVedtakManueltUtleder;
 import no.nav.k9.sak.domene.behandling.steg.vurdermanueltbrev.K9FormidlingKlient;
 import no.nav.k9.sak.punsj.PunsjRestKlient;
-import no.nav.k9.sak.typer.AktørId;
 
 
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
@@ -56,9 +55,7 @@ public class PleiepengerForeslåVedtakManueltUtleder implements ForeslåVedtakMa
         if (!åpenPunsjoppgaveStopperAutomatiskVedtak) {
             return false;
         }
-        AktørId søker = behandling.getAktørId();
-        AktørId pleietrengende = behandling.getFagsak().getPleietrengendeAktørId();
-        var uferdigJournalpostIderPåAktør = punsjKlient.getUferdigJournalpostIderPåAktør(søker.getAktørId(), pleietrengende != null ? pleietrengende.getAktørId() : null);
+        var uferdigJournalpostIderPåAktør = punsjKlient.getUferdigJournalpostIderPåAktør(behandling.getAktørId().getAktørId(), behandling.getFagsak().getPleietrengendeAktørId().getAktørId());
         return uferdigJournalpostIderPåAktør.isPresent();
     }
 }
