@@ -7,8 +7,6 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BA
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
@@ -16,8 +14,6 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingRelevantForVilkårsrevurdering;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.OpptjeningAktiviteter;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -31,7 +27,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetForBeregningVurdering;
-import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 /**
@@ -49,8 +44,6 @@ public class PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering i
     private OpptjeningRepository opptjeningRepository;
     private VilkårResultatRepository vilkårResultatRepository;
 
-    private boolean skalFiltrereBasertPåAktiviteter;
-
 
     public PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering() {
     }
@@ -59,13 +52,11 @@ public class PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering i
     public PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering(@Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning,
                                                                             InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                                                             OpptjeningRepository opptjeningRepository,
-                                                                            VilkårResultatRepository vilkårResultatRepository,
-                                                                            @KonfigVerdi(value = "FORLENGELSE_IM_OPPTJENING_FILTER", defaultVerdi = "false") boolean skalFiltrereBasertPåAktiviteter) {
+                                                                            VilkårResultatRepository vilkårResultatRepository) {
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.opptjeningRepository = opptjeningRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.skalFiltrereBasertPåAktiviteter = skalFiltrereBasertPåAktiviteter;
     }
 
 
@@ -73,21 +64,17 @@ public class PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering i
     public List<Inntektsmelding> begrensInntektsmeldinger(BehandlingReferanse referanse, Collection<Inntektsmelding> inntektsmeldinger, DatoIntervallEntitet periode) {
         var relevanteImTjeneste = InntektsmeldingerRelevantForBeregning.finnTjeneste(inntektsmeldingerRelevantForBeregning, referanse.getFagsakYtelseType());
         var inntektsmeldingBegrenset = relevanteImTjeneste.begrensSakInntektsmeldinger(referanse, inntektsmeldinger, periode);
-        if (!skalFiltrereBasertPåAktiviteter) {
-            return relevanteImTjeneste.utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldingBegrenset, periode);
-        } else {
 
-            var opptjeningResultat = opptjeningRepository.finnOpptjening(referanse.getBehandlingId());
-            var opptjening = opptjeningResultat.flatMap(it -> it.finnOpptjening(periode.getFomDato()));
+        var opptjeningResultat = opptjeningRepository.finnOpptjening(referanse.getBehandlingId());
+        var opptjening = opptjeningResultat.flatMap(it -> it.finnOpptjening(periode.getFomDato()));
 
-            if (opptjeningResultat.isEmpty() || opptjening.isEmpty()) {
-                return Collections.emptyList();
-            }
-
-            var erRelevantForBeregningVurderer = lagRelevansVurderer(referanse, periode, opptjeningResultat.get(), opptjening.get());
-            var inntektsmeldingerTilBeregning = filtrerForBeregningsaktiviteter(inntektsmeldingBegrenset, erRelevantForBeregningVurderer);
-            return relevanteImTjeneste.utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldingerTilBeregning, periode);
+        if (opptjeningResultat.isEmpty() || opptjening.isEmpty()) {
+            return Collections.emptyList();
         }
+
+        var erRelevantForBeregningVurderer = lagRelevansVurderer(referanse, periode, opptjeningResultat.get(), opptjening.get());
+        var inntektsmeldingerTilBeregning = filtrerForBeregningsaktiviteter(inntektsmeldingBegrenset, erRelevantForBeregningVurderer);
+        return relevanteImTjeneste.utledInntektsmeldingerSomGjelderForPeriode(inntektsmeldingerTilBeregning, periode);
     }
 
     private ErIMRelevantForVilkårsvurdering lagRelevansVurderer(BehandlingReferanse referanse, DatoIntervallEntitet periode, OpptjeningResultat opptjeningResultat, Opptjening opptjening) {

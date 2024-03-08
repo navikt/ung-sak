@@ -4,6 +4,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -21,15 +22,19 @@ import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetKlassifisering;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningAktivitet;
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
+import no.nav.k9.sak.behandlingslager.behandling.opptjening.ReferanseType;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
-import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.ErEndringIRefusjonskravVurderer;
 import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtaleBuilder;
@@ -45,6 +50,7 @@ import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.JournalpostId;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
@@ -76,14 +82,18 @@ class RevurderingInntektsmeldingPeriodeTjenesteTest {
     @Inject
     private SøknadsperiodeRepository søknadsperiodeRepository;
 
+    private OpptjeningRepository opptjeningRepository;
+
 
     @BeforeEach
     void setUp() {
+        var behandlingRepository = new BehandlingRepository(entityManager);
+        this.opptjeningRepository = new OpptjeningRepository(entityManager, behandlingRepository, new VilkårResultatRepository(entityManager));
         tjeneste = new RevurderingInntektsmeldingPeriodeTjeneste(
             new UnitTestLookupInstanceImpl<>(new DefaultVilkårUtleder()),
             harInntektsmeldingerRelevanteEndringerForPeriode,
             erEndringIRefusjonskravVurderer,
-            new BehandlingRepository(entityManager),
+            behandlingRepository,
             søknadsperiodeTjeneste);
     }
 
@@ -96,6 +106,8 @@ class RevurderingInntektsmeldingPeriodeTjenesteTest {
         var behandling = lagRevurdering(originalBehandling);
         lagIAYMedArbeid(behandling);
         lagIAYMedArbeid(originalBehandling);
+        lagOpptjening(behandling, OpptjeningAktivitetKlassifisering.BEKREFTET_GODKJENT);
+        lagOpptjening(originalBehandling, OpptjeningAktivitetKlassifisering.BEKREFTET_GODKJENT);;
 
         var tidslinje = tjeneste.utledTidslinjeForVurderingFraInntektsmelding(BehandlingReferanse.fra(behandling), Set.of(), List.of(), List.of(VILKÅRSPERIODE));
 
@@ -112,6 +124,8 @@ class RevurderingInntektsmeldingPeriodeTjenesteTest {
         var im = lagInntektsmelding(journalpostId, BigDecimal.TEN, null, "KANALREF");
         lagIAYMedArbeid(behandling);
         lagIAYMedArbeid(originalBehandling);
+        lagOpptjening(behandling, OpptjeningAktivitetKlassifisering.BEKREFTET_GODKJENT);
+        lagOpptjening(originalBehandling, OpptjeningAktivitetKlassifisering.BEKREFTET_GODKJENT);;
 
         var tidslinje = tjeneste.utledTidslinjeForVurderingFraInntektsmelding(BehandlingReferanse.fra(behandling), Set.of(im), List.of(), List.of(VILKÅRSPERIODE));
 
@@ -132,6 +146,8 @@ class RevurderingInntektsmeldingPeriodeTjenesteTest {
 
         lagIAYMedArbeid(behandling);
         lagIAYMedArbeid(originalBehandling);
+        lagOpptjening(behandling, OpptjeningAktivitetKlassifisering.BEKREFTET_GODKJENT);
+        lagOpptjening(originalBehandling, OpptjeningAktivitetKlassifisering.BEKREFTET_GODKJENT);
 
         var tidslinje = tjeneste.utledTidslinjeForVurderingFraInntektsmelding(BehandlingReferanse.fra(behandling), Set.of(im), List.of(mottattDokument), List.of(VILKÅRSPERIODE));
 
@@ -163,6 +179,9 @@ class RevurderingInntektsmeldingPeriodeTjenesteTest {
 
         lagIAYMedArbeid(behandling);
         lagIAYMedArbeid(originalBehandling);
+        lagOpptjening(behandling, OpptjeningAktivitetKlassifisering.BEKREFTET_GODKJENT);
+        lagOpptjening(originalBehandling, OpptjeningAktivitetKlassifisering.BEKREFTET_GODKJENT);
+
 
         var tidslinje = tjeneste.utledTidslinjeForVurderingFraInntektsmelding(BehandlingReferanse.fra(behandling), Set.of(im, imOriginal), List.of(mottattDokument), List.of(VILKÅRSPERIODE));
 
@@ -192,6 +211,8 @@ class RevurderingInntektsmeldingPeriodeTjenesteTest {
 
         lagIAYMedArbeid(behandling);
         lagIAYMedArbeid(originalBehandling);
+        lagOpptjening(behandling, OpptjeningAktivitetKlassifisering.BEKREFTET_GODKJENT);
+        lagOpptjening(originalBehandling, OpptjeningAktivitetKlassifisering.BEKREFTET_GODKJENT);
 
 
         var tidslinje = tjeneste.utledTidslinjeForVurderingFraInntektsmelding(BehandlingReferanse.fra(behandling), Set.of(im, imOriginal), List.of(mottattDokument), List.of(VILKÅRSPERIODE));
@@ -212,13 +233,25 @@ class RevurderingInntektsmeldingPeriodeTjenesteTest {
     private void lagIAYMedArbeid(Behandling behandling) {
         var inntektArbeidYtelseAggregatBuilder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER)
             .leggTilAktørArbeid(InntektArbeidYtelseAggregatBuilder.AktørArbeidBuilder.oppdatere(Optional.empty())
-            .medAktørId(behandling.getAktørId())
-            .leggTilYrkesaktivitet(YrkesaktivitetBuilder.oppdatere(Optional.empty())
-                .medArbeidsgiver(ARBEIDSGIVER1)
-                .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
-                .leggTilAktivitetsAvtale(AktivitetsAvtaleBuilder.ny()
-                .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusDays(100), STP.plusDays(50))))));
+                .medAktørId(behandling.getAktørId())
+                .leggTilYrkesaktivitet(YrkesaktivitetBuilder.oppdatere(Optional.empty())
+                    .medArbeidsgiver(ARBEIDSGIVER1)
+                    .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+                    .leggTilAktivitetsAvtale(AktivitetsAvtaleBuilder.ny()
+                        .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusDays(100), STP.plusDays(50))))));
         inntektArbeidYtelseTjeneste.lagreIayAggregat(behandling.getId(), inntektArbeidYtelseAggregatBuilder);
+    }
+
+    private void lagOpptjening(Behandling behandling, OpptjeningAktivitetKlassifisering opptjeningAktivitetKlassifisering) {
+        var opptjeningFom = RevurderingInntektsmeldingPeriodeTjenesteTest.STP.minusDays(29);
+        var opptjeningTom = RevurderingInntektsmeldingPeriodeTjenesteTest.STP.minusDays(1);
+        opptjeningRepository.lagreOpptjeningsperiode(behandling, opptjeningFom, opptjeningTom, true);
+        opptjeningRepository.lagreOpptjeningResultat(behandling, RevurderingInntektsmeldingPeriodeTjenesteTest.STP, Period.of(0, 0, 28),
+            List.of(new OpptjeningAktivitet(opptjeningFom, opptjeningTom,
+                OpptjeningAktivitetType.ARBEID,
+                opptjeningAktivitetKlassifisering,
+                ARBEIDSGIVER1.getIdentifikator(),
+                ReferanseType.ORG_NR)));
     }
 
 
@@ -249,8 +282,9 @@ class RevurderingInntektsmeldingPeriodeTjenesteTest {
     private Behandling lagRevurdering(Behandling originalBehandling) {
         var revurderingBuilder = TestScenarioBuilder.builderUtenSøknad(FagsakYtelseType.PSB);
         revurderingBuilder.medBehandlingType(BehandlingType.REVURDERING);
-        revurderingBuilder.leggTilVilkår(VilkårType.OPPTJENINGSVILKÅRET, Utfall.IKKE_VURDERT);
-        revurderingBuilder.leggTilVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, Utfall.IKKE_VURDERT);
+        revurderingBuilder.leggTilVilkår(VilkårType.OPPTJENINGSVILKÅRET, Utfall.OPPFYLT, new Periode(VILKÅRSPERIODE.getFomDato(), VILKÅRSPERIODE.getTomDato()));
+        revurderingBuilder.leggTilVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, Utfall.OPPFYLT, new Periode(VILKÅRSPERIODE.getFomDato(), VILKÅRSPERIODE.getTomDato()));
+        revurderingBuilder.leggTilVilkår(VilkårType.OPPTJENINGSPERIODEVILKÅR, Utfall.OPPFYLT, new Periode(VILKÅRSPERIODE.getFomDato(), VILKÅRSPERIODE.getTomDato()));
         revurderingBuilder.medOriginalBehandling(originalBehandling, BehandlingÅrsakType.RE_OPPLYSNINGER_OM_OPPTJENING);
         var behandling = revurderingBuilder.lagre(entityManager);
         søknadsperiodeRepository.lagre(behandling.getId(), new Søknadsperioder(SØKNAD_JP, new Søknadsperiode(VILKÅRSPERIODE)));
@@ -261,9 +295,9 @@ class RevurderingInntektsmeldingPeriodeTjenesteTest {
         var scenarioBuilder = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.PSB);
         var søknadBuilder = scenarioBuilder.medSøknad();
         søknadBuilder.medSøknadsperiode(VILKÅRSPERIODE);
-        scenarioBuilder.medBehandlingType(BehandlingType.FØRSTEGANGSSØKNAD);
-        scenarioBuilder.leggTilVilkår(VilkårType.OPPTJENINGSVILKÅRET, Utfall.OPPFYLT);
-        scenarioBuilder.leggTilVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, Utfall.OPPFYLT);
+        scenarioBuilder.leggTilVilkår(VilkårType.OPPTJENINGSVILKÅRET, Utfall.OPPFYLT, new Periode(VILKÅRSPERIODE.getFomDato(), VILKÅRSPERIODE.getTomDato()));
+        scenarioBuilder.leggTilVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, Utfall.OPPFYLT, new Periode(VILKÅRSPERIODE.getFomDato(), VILKÅRSPERIODE.getTomDato()));
+        scenarioBuilder.leggTilVilkår(VilkårType.OPPTJENINGSPERIODEVILKÅR, Utfall.OPPFYLT, new Periode(VILKÅRSPERIODE.getFomDato(), VILKÅRSPERIODE.getTomDato()));
         var originalBehandling = scenarioBuilder.lagre(entityManager);
 
 
