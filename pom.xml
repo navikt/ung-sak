@@ -46,7 +46,7 @@
         <k9format.version>9.2.12</k9format.version>
         <jackson.version>2.16.1</jackson.version>
         <asm.version>9.6</asm.version>
-        <kotlin-stdlib.version>1.9.22</kotlin-stdlib.version>
+        <kotlin-stdlib.version>1.9.23</kotlin-stdlib.version>
         <jandex.version>3.1.6</jandex.version>
 
     </properties>
