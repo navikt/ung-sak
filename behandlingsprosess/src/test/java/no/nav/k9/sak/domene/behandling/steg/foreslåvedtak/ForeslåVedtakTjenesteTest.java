@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,8 +44,10 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.vedtak.ekstern.OverlappendeYtelserTjeneste;
+import no.nav.k9.sak.kontrakt.dokument.JournalpostIderDto;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.Oppgaveinfo;
+import no.nav.k9.sak.punsj.PunsjRestKlient;
 import no.nav.k9.sak.test.util.Whitebox;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
@@ -82,6 +85,9 @@ public class ForeslåVedtakTjenesteTest {
     @Mock
     private SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekreving;
 
+    @Mock
+    private PunsjRestKlient punsjRestKlient;
+
     @Spy
     private HistorikkRepository historikkRepository;
 
@@ -110,7 +116,7 @@ public class ForeslåVedtakTjenesteTest {
         SjekkMotAndreYtelserTjeneste sjekkMotAndreYtelserTjeneste = new SjekkMotAndreYtelserTjeneste(historikkRepository, oppgaveTjeneste, overlappendeYtelserTjeneste);
         SjekkTilbakekrevingAksjonspunktUtleder sjekkTilbakekrevingAksjonspunktUtleder = Mockito.mock(SjekkTilbakekrevingAksjonspunktUtleder.class);
         when(sjekkTilbakekrevingAksjonspunktUtleder.sjekkMotÅpenIkkeoverlappendeTilbakekreving(any())).thenReturn(List.of());
-        tjeneste = new ForeslåVedtakTjeneste(fagsakRepository, behandlingskontrollTjeneste, sjekkMotAndreYtelserTjeneste, sjekkTilbakekrevingAksjonspunktUtleder, foreslåVedtakManueltUtledere, false);
+        tjeneste = new ForeslåVedtakTjeneste(fagsakRepository, behandlingskontrollTjeneste, sjekkMotAndreYtelserTjeneste, sjekkTilbakekrevingAksjonspunktUtleder, foreslåVedtakManueltUtledere, punsjRestKlient, true, false);
     }
 
     @Test
@@ -322,6 +328,20 @@ public class ForeslåVedtakTjenesteTest {
         assertThat(behandling.getAksjonspunkter()).hasSize(2);
         assertThat(behandling.getAksjonspunktFor(AksjonspunktDefinisjon.FORESLÅ_VEDTAK).getStatus()).isEqualTo(AksjonspunktStatus.AVBRUTT);
         assertThat(behandling.getAksjonspunktFor(AksjonspunktDefinisjon.FATTER_VEDTAK).getStatus()).isEqualTo(AksjonspunktStatus.AVBRUTT);
+    }
+
+    @Test
+    public void utførerMedAksjonspunktForeslåVedtakManueltHvisOppgaveIPunsjOgIkkeTotrinnskontroll() {
+        // Arrange
+        when(punsjRestKlient.getUferdigJournalpostIderPåAktør(any(), any())).thenReturn(Optional.of(new JournalpostIderDto()));
+
+        // Act
+        BehandleStegResultat stegResultat = tjeneste.foreslåVedtak(behandling, kontekst);
+
+        // Assert
+        assertThat(stegResultat.getTransisjon()).isEqualTo(FellesTransisjoner.UTFØRT);
+        assertThat(stegResultat.getAksjonspunktListe()).hasSize(1);
+        assertThat(stegResultat.getAksjonspunktListe().getFirst()).isEqualTo(AksjonspunktDefinisjon.FORESLÅ_VEDTAK);
     }
 
     private Aksjonspunkt leggTilAksjonspunkt(AksjonspunktDefinisjon aksjonspunktDefinisjon) {
