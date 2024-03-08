@@ -46,7 +46,7 @@ public class PeriodeMedRegisterendring {
 
     @Override
     public String toString() {
-        return "PeriodeMedÅrsaker{" +
+        return "PeriodeMedRegisterendring{" +
             "periode=" + periode +
             '}';
     }
