@@ -2,12 +2,12 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
 
 import static no.nav.k9.sak.domene.opptjening.aksjonspunkt.MapYrkesaktivitetTilOpptjeningsperiodeTjeneste.mapYrkesaktivitet;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -52,6 +52,7 @@ class ErIMRelevantForVilkårsvurdering {
         var alleYrkesaktiviteter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(behandlingReferanse.getAktørId())).getAlleYrkesaktiviteter();
         var yrkesaktiviteter = alleYrkesaktiviteter.stream().filter(y -> y.gjelderFor(inntektsmelding.getArbeidsgiver(), inntektsmelding.getArbeidsforholdRef())).collect(Collectors.toSet());
         var opptjeningsperioder = yrkesaktiviteter.stream()
+            .filter(y -> y.getArbeidType().equals(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD))
             .flatMap(y -> finnOpptjeningsperiodeForYrkesaktivitet(y).stream())
             .toList();
         var aktivitetTilBrukIBeregning = FiltrerOpptjeningaktivitetForBeregning.filtrerForBeregning(vilkårsperiode, opptjeningsperioder, vilkårUtfallMerknad, opptjening);
