@@ -22,8 +22,6 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.punsj.PunsjRestKlient;
-import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.økonomi.tilbakekreving.samkjøring.SjekkTilbakekrevingAksjonspunktUtleder;
 
 @ApplicationScoped
@@ -36,8 +34,6 @@ class ForeslåVedtakTjeneste {
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere;
     private SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste;
-    private PunsjRestKlient punsjKlient;
-    private boolean åpenPunsjoppgaveStopperAutomatiskVedtak;
     private boolean sjekkTilbakekrevingAksjonspunktLansert;
 
     protected ForeslåVedtakTjeneste() {
@@ -50,16 +46,12 @@ class ForeslåVedtakTjeneste {
                           SjekkMotAndreYtelserTjeneste sjekkMotAndreYtelserTjeneste,
                           SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste,
                           @Any Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere,
-                          PunsjRestKlient punsjKlient,
-                          @KonfigVerdi(value = "AAPEN_PUNSJOPPGAVE_STOPPER_AUTOMATISK_VEDTAK", defaultVerdi = "false") boolean åpenPunsjoppgaveStopperAutomatiskVedtak,
                           @KonfigVerdi(value = "ENABLE_SJEKK_TILBAKEKREVING", defaultVerdi = "false") boolean sjekkTilbakekrevingAksjonspunktLansert) {
         this.sjekkMotAndreYtelserTjeneste = sjekkMotAndreYtelserTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.foreslåVedtakManueltUtledere = foreslåVedtakManueltUtledere;
         this.sjekkMotTilbakekrevingTjeneste = sjekkMotTilbakekrevingTjeneste;
-        this.punsjKlient = punsjKlient;
-        this.åpenPunsjoppgaveStopperAutomatiskVedtak = åpenPunsjoppgaveStopperAutomatiskVedtak;
         this.sjekkTilbakekrevingAksjonspunktLansert = sjekkTilbakekrevingAksjonspunktLansert;
     }
 
@@ -113,8 +105,6 @@ class ForeslåVedtakTjeneste {
         settForeslåOgFatterVedtakAksjonspunkterAvbrutt(behandling, kontekst);
         if (skalOppretteForeslåVedtakManuelt(behandling)) {
             aksjonspunktDefinisjoner.add(AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT);
-        } else if (åpenPunsjoppgaveStopperAutomatiskVedtak && behandling.getFagsakYtelseType().equals(FagsakYtelseType.PLEIEPENGER_SYKT_BARN) && harOppgaveIPunsj(behandling)) { //TODO trenger vi begrense dette til psb?
-            aksjonspunktDefinisjoner.add(AksjonspunktDefinisjon.FORESLÅ_VEDTAK);
         }
     }
 
@@ -126,13 +116,6 @@ class ForeslåVedtakTjeneste {
         FagsakYtelseType ytelseType = behandling.getFagsakYtelseType();
         return FagsakYtelseTypeRef.Lookup.find(foreslåVedtakManueltUtledere, ytelseType)
             .orElseThrow(() -> new UnsupportedOperationException("Har ikke " + ForeslåVedtakManueltUtleder.class.getSimpleName() + " for ytelseType=" + ytelseType));
-    }
-
-    private boolean harOppgaveIPunsj(Behandling behandling) {
-        AktørId søker = behandling.getAktørId();
-        AktørId pleietrengende = behandling.getFagsak().getPleietrengendeAktørId();
-        var uferdigJournalpostIderPåAktør = punsjKlient.getUferdigJournalpostIderPåAktør(søker.getAktørId(), pleietrengende != null ? pleietrengende.getAktørId() : null);
-        return uferdigJournalpostIderPåAktør.isPresent();
     }
 
     private boolean skalUtføreTotrinnsbehandling(Behandling behandling) {
