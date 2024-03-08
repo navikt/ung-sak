@@ -5,22 +5,22 @@ import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.IKKE_
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
-import no.nav.k9.sak.typer.Arbeidsgiver;
 
 public class InntektsmeldingAggregat {
 
     private static final Logger logger = LoggerFactory.getLogger(InntektsmeldingAggregat.class);
 
     @ChangeTracked
-    private List<Inntektsmelding> inntektsmeldinger = new ArrayList<>();
+    private final Set<Inntektsmelding> inntektsmeldinger = new LinkedHashSet<>();
 
     private ArbeidsforholdInformasjon arbeidsforholdInformasjon;
 
@@ -32,10 +32,7 @@ public class InntektsmeldingAggregat {
     }
 
     public InntektsmeldingAggregat(Collection<Inntektsmelding> inntektsmeldinger) {
-        this.inntektsmeldinger.addAll(inntektsmeldinger.stream().map(i -> {
-            final Inntektsmelding inntektsmelding = new Inntektsmelding(i);
-            return inntektsmelding;
-        }).collect(Collectors.toList()));
+        this.inntektsmeldinger.addAll(inntektsmeldinger.stream().map(Inntektsmelding::new).toList());
     }
 
     /**
@@ -68,16 +65,7 @@ public class InntektsmeldingAggregat {
         return (ov.getArbeidsforholdRef().equals(im.getArbeidsforholdRef()))
             && ov.getArbeidsgiver().equals(im.getArbeidsgiver())
             && (Objects.equals(IKKE_BRUK, ov.getHandling())
-                || ov.kreverIkkeInntektsmelding());
-    }
-
-    /**
-     * Alle gjeldende inntektsmeldinger for en virksomhet i behandlingen.
-     *
-     * @return Liste med {@link Inntektsmelding}
-     */
-    public List<Inntektsmelding> getInntektsmeldingerFor(Arbeidsgiver arbeidsgiver) {
-        return getInntektsmeldingerSomSkalBrukes().stream().filter(i -> i.getArbeidsgiver().equals(arbeidsgiver)).collect(Collectors.toList());
+            || ov.kreverIkkeInntektsmelding());
     }
 
     /**
@@ -89,8 +77,7 @@ public class InntektsmeldingAggregat {
         boolean fjernet = inntektsmeldinger.removeIf(it -> skalFjerneInntektsmelding(it, inntektsmelding));
 
         if (fjernet || inntektsmeldinger.stream().noneMatch(it -> it.gjelderSammeArbeidsforhold(inntektsmelding))) {
-            final Inntektsmelding entitet = inntektsmelding;
-            inntektsmeldinger.add(entitet);
+            inntektsmeldinger.add(inntektsmelding);
         }
 
         inntektsmeldinger.stream().filter(it -> it.gjelderSammeArbeidsforhold(inntektsmelding) && !fjernet).findFirst().ifPresent(
@@ -113,10 +100,8 @@ public class InntektsmeldingAggregat {
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if (o == null || !(o instanceof InntektsmeldingAggregat))
-            return false;
-        InntektsmeldingAggregat that = (InntektsmeldingAggregat) o;
-        return Objects.equals(inntektsmeldinger, that.inntektsmeldinger);
+        return o instanceof InntektsmeldingAggregat that
+            && Objects.equals(inntektsmeldinger, that.inntektsmeldinger);
     }
 
     @Override
