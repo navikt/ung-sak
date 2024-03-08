@@ -82,8 +82,7 @@ class PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurderingTest {
             new UnitTestLookupInstanceImpl(pleiepengerInntektsmeldingerRelevantForBeregning),
             iayTjeneste,
             opptjeningRepository,
-            vilkårResultatRepository,
-            true
+            vilkårResultatRepository
         );
 
         fagsak = Fagsak.opprettNy(FagsakYtelseType.DAGPENGER, new AktørId(123L), new Saksnummer("987"), STP, STP.plusDays(10));
