@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
@@ -24,7 +23,6 @@ import no.nav.k9.sak.domene.iay.modell.InntektsmeldingSomIkkeKommer;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @Dependent
@@ -76,7 +74,9 @@ public class InntektsmeldingTjeneste {
     }
 
     public List<Inntektsmelding> hentInntektsmeldinger(Long behandlingId, AktørId aktørId, LocalDate skjæringstidspunktForOpptjening) {
-        return iayTjeneste.finnGrunnlag(behandlingId).map(g -> hentInntektsmeldinger(aktørId, skjæringstidspunktForOpptjening, g)).orElse(Collections.emptyList());
+        return iayTjeneste.finnGrunnlag(behandlingId)
+            .map(g -> hentInntektsmeldinger(aktørId, skjæringstidspunktForOpptjening, g))
+            .orElse(Collections.emptyList());
     }
 
     public List<Inntektsmelding> hentInntektsmeldinger(AktørId aktørId, LocalDate skjæringstidspunktForOpptjening, InntektArbeidYtelseGrunnlag iayGrunnlag) {
@@ -100,24 +100,18 @@ public class InntektsmeldingTjeneste {
      * @param ref referanse til behandlingen
      * @return Liste med inntektsmeldinger {@link Inntektsmelding}
      */
-    public List<Inntektsmelding> hentAlleInntektsmeldingerMottattEtterGjeldendeVedtak(BehandlingReferanse ref) {
+    public List<Inntektsmelding> hentInntektsmeldingerMottattEtterGjeldendeVedtak(BehandlingReferanse ref) {
         Long behandlingId = ref.getBehandlingId();
         Long originalBehandlingId = ref.getOriginalBehandlingId()
             .orElseThrow(() -> new IllegalStateException("Utviklerfeil: Denne metoden benyttes bare for revurderinger"));
 
-        Map<String, Inntektsmelding> revurderingIM = hentIMMedIndexKey(behandlingId);
-        Map<String, Inntektsmelding> origIM = hentIMMedIndexKey(originalBehandlingId);
+        Map<String, Inntektsmelding> revurderingIM = hentInntektsmeldingerMedIndexKey(behandlingId);
+        Map<String, Inntektsmelding> origIM = hentInntektsmeldingerMedIndexKey(originalBehandlingId);
         return revurderingIM.entrySet().stream()
             .filter(imRevurderingEntry -> !origIM.containsKey(imRevurderingEntry.getKey())
                 || !Objects.equals(origIM.get(imRevurderingEntry.getKey()).getJournalpostId(), imRevurderingEntry.getValue().getJournalpostId()))
             .map(Map.Entry::getValue)
             .collect(Collectors.toList());
-    }
-
-    public Optional<Inntektsmelding> hentInntektsMeldingFor(Long behandlingId, JournalpostId journalpostId) {
-        var grunnlag = iayTjeneste.hentGrunnlag(behandlingId);
-        return grunnlag.getInntektsmeldinger().stream().flatMap(imagg -> imagg.getAlleInntektsmeldinger().stream())
-            .filter(im -> Objects.equals(im.getJournalpostId(), journalpostId)).findFirst();
     }
 
     /**
@@ -127,26 +121,15 @@ public class InntektsmeldingTjeneste {
      * @param behandlingId iden til behandlingen
      * @return Liste med inntektsmelding som ikke kommer {@link InntektsmeldingSomIkkeKommer}
      */
-    public List<InntektsmeldingSomIkkeKommer> hentAlleInntektsmeldingerSomIkkeKommer(Long behandlingId) {
+    public List<InntektsmeldingSomIkkeKommer> hentInntektsmeldingerSomIkkeKommer(Long behandlingId) {
         List<InntektsmeldingSomIkkeKommer> result = new ArrayList<>();
         Optional<InntektArbeidYtelseGrunnlag> inntektArbeidYtelseGrunnlag = iayTjeneste.finnGrunnlag(behandlingId);
         inntektArbeidYtelseGrunnlag.ifPresent(iayg -> result.addAll(iayg.getInntektsmeldingerSomIkkeKommer()));
         return result;
     }
 
-    /**
-     * Henter ut alle inntektsmeldinger koblet til angitte behandlinger
-     * <br>
-     * <b>NB!</b> Tar ikke hensyn til om inntektsmeldingen er knyttet til et inaktivt arbeidsforhold
-     *
-     * @param behandlingIder behandlingene
-     * @return Liste med inntektsmeldinger {@link Inntektsmelding}
-     */
-    public List<Inntektsmelding> hentAlleInntektsmeldingerForAngitteBehandlinger(Set<Long> behandlingIder) {
-        return hentUtAlleInntektsmeldingeneFraBehandlingene(behandlingIder);
-    }
 
-    private Map<String, Inntektsmelding> hentIMMedIndexKey(Long behandlingId) {
+    private Map<String, Inntektsmelding> hentInntektsmeldingerMedIndexKey(Long behandlingId) {
         List<Inntektsmelding> inntektsmeldinger = iayTjeneste.finnGrunnlag(behandlingId)
             .flatMap(InntektArbeidYtelseGrunnlag::getInntektsmeldinger)
             .map(InntektsmeldingAggregat::getInntektsmeldingerSomSkalBrukes)
@@ -156,23 +139,7 @@ public class InntektsmeldingTjeneste {
             .collect(Collectors.toMap(Inntektsmelding::getIndexKey, im -> im));
     }
 
-    private List<Inntektsmelding> hentUtAlleInntektsmeldingeneFraBehandlingene(Collection<Long> behandlingIder) {
-        // FIXME (FC) denne burde gått rett på datalagret istd. å iterere over åpne behandlinger
-        List<Inntektsmelding> inntektsmeldinger = new ArrayList<>();
-        for (Long behandlingId : behandlingIder) {
-            inntektsmeldinger.addAll(hentAlleInntektsmeldinger(behandlingId));
-        }
-        return inntektsmeldinger;
-    }
-
-    private List<Inntektsmelding> hentAlleInntektsmeldinger(Long behandlingId) {
-        return iayTjeneste.finnGrunnlag(behandlingId)
-            .map(iayGrunnlag -> iayGrunnlag.getInntektsmeldinger()
-                .map(InntektsmeldingAggregat::getInntektsmeldingerSomSkalBrukes).orElse(emptyList()))
-            .orElse(emptyList());
-    }
-
-    public List<Inntektsmelding> hentAbsoluttAlleInntektsmeldinger(Long behandlingId) {
+    public List<Inntektsmelding> hentAlleMottatteInntektsmeldinger(Long behandlingId) {
         return iayTjeneste.finnGrunnlag(behandlingId)
             .map(iayGrunnlag -> iayGrunnlag.getInntektsmeldinger()
                 .map(InntektsmeldingAggregat::getAlleInntektsmeldinger).orElse(emptyList()))
