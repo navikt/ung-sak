@@ -55,7 +55,7 @@ import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 @ApplicationScoped
-@ScopedRestIntegration(scopeKey = "fpabakus.scope", defaultScope = "api://prod-fss.teamforeldrepenger.fpabakus/.default")
+@ScopedRestIntegration(scopeKey = "k9abakus.scope", defaultScope = "api://prod-fss.k9saksbehandling.k9-abakus/.default")
 public class AbakusTjeneste {
 
     private static final Logger log = LoggerFactory.getLogger(AbakusTjeneste.class);
@@ -91,7 +91,7 @@ public class AbakusTjeneste {
 
     @Inject
     public AbakusTjeneste(OidcRestClient oidcRestClient,
-                          @KonfigVerdi(value = "fpabakus.url") URI endpoint,
+                          @KonfigVerdi(value = "k9abakus.url") URI endpoint,
                           @KonfigVerdi(value = "abakus.callback.url") URI callbackUrl,
                           @KonfigVerdi(value = "abakus.callback.scope") String callbackScope) {
         this(endpoint, callbackUrl, callbackScope);
