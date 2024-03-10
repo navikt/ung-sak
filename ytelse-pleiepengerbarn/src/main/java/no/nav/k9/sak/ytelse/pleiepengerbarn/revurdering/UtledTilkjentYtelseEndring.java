@@ -17,6 +17,7 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
+import no.nav.k9.sak.typer.Beløp;
 
 @ApplicationScoped
 public class UtledTilkjentYtelseEndring {
@@ -143,8 +144,12 @@ public class UtledTilkjentYtelseEndring {
     private static boolean erEndret(BeregningsresultatAndel a, BeregningsresultatAndel a2) {
         var endringDagsats = a.getDagsats() - a2.getDagsats();
         var endringUtbetalingsgrad = a.getUtbetalingsgrad().subtract(a2.getUtbetalingsgrad());
-        var endringFeriepenger = a.getFeriepengerÅrsbeløp().getVerdi().subtract(a2.getFeriepengerÅrsbeløp().getVerdi());
+        var endringFeriepenger = finnFeriepengerÅrsbeløp(a).subtract(finnFeriepengerÅrsbeløp(a2));
         return endringDagsats != 0 || endringUtbetalingsgrad.compareTo(BigDecimal.ZERO) != 0 || endringFeriepenger.compareTo(BigDecimal.ZERO) != 0;
+    }
+
+    private static BigDecimal finnFeriepengerÅrsbeløp(BeregningsresultatAndel a) {
+        return Optional.ofNullable(a.getFeriepengerÅrsbeløp()).map(Beløp::getVerdi).orElse(BigDecimal.ZERO);
     }
 
     private static LocalDateTimeline<List<BeregningsresultatAndel>> lagResultatTidslinje(BeregningsresultatEntitet beregningsresultatEntitet) {
