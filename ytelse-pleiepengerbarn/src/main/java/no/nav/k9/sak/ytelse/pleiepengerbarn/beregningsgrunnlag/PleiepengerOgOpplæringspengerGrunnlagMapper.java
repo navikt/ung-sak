@@ -44,6 +44,7 @@ import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -121,7 +122,7 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
             } else if (a.getArbeidsforhold().getAktørId() != null) {
                 aktør = new AktørIdPersonident(a.getArbeidsforhold().getAktørId());
             }
-            return new UtbetalingsgradPrAktivitetDto(new AktivitetDto(aktør, a.getArbeidsforhold().getArbeidsforholdId() == null ? null : new InternArbeidsforholdRefDto(a.getArbeidsforhold().getArbeidsforholdId()), UttakArbeidType.fraKode(a.getArbeidsforhold().getType())), perioder);
+            return new UtbetalingsgradPrAktivitetDto(new AktivitetDto(aktør, a.getArbeidsforhold().getArbeidsforholdId() == null ? null : new InternArbeidsforholdRefDto(a.getArbeidsforhold().getArbeidsforholdId()), mapUttakArbeidType(a.getArbeidsforhold().getType())), perioder);
         }).toList();
         return utbetalingsgrader;
     }
@@ -254,8 +255,17 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
         if (arb.getType().equals(no.nav.k9.kodeverk.uttak.UttakArbeidType.IKKE_YRKESAKTIV_UTEN_ERSTATNING.getKode())) {
             return UttakArbeidType.IKKE_YRKESAKTIV;
         }
-        return UttakArbeidType.fraKode(arb.getType());
+        return mapUttakArbeidType(arb.getType());
     }
+
+    // Inntil man lager en switch
+    private static UttakArbeidType mapUttakArbeidType(String kode) {
+        if (kode == null) {
+            return null;
+        }
+        return Arrays.stream(UttakArbeidType.values()).filter(v -> v.getKode().equals(kode)).findFirst().orElse(null);
+    }
+
 
     private static Aktør lagAktør(Arbeidsforhold arb) {
         if (arb.getAktørId() != null) {
