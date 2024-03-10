@@ -7,8 +7,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -20,9 +24,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
@@ -32,6 +38,7 @@ import no.nav.k9.kodeverk.geografisk.Region;
 import no.nav.k9.kodeverk.person.NavBrukerKjønn;
 import no.nav.k9.kodeverk.person.PersonstatusType;
 import no.nav.k9.kodeverk.person.SivilstandType;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
@@ -65,6 +72,10 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperioder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperioderHolder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.PleietrengendeRevurderingPerioderTjeneste;
+import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
+import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -138,6 +149,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
 
         when(vilkårsPerioderTilVurderingTjeneste.utled(any(), any())).thenReturn(emptyNavigableSet());
         when(vilkårsPerioderTilVurderingTjeneste.utledFraDefinerendeVilkår(any())).thenReturn(emptyNavigableSet());
+        when(vilkårsPerioderTilVurderingTjeneste.definerendeVilkår()).thenReturn(Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR));
 
         Long behandlingId = behandling.getId();
         PersonInformasjonBuilder informasjonBuilder = new PersonInformasjonBuilder(PersonopplysningVersjonType.REGISTRERT);
@@ -266,12 +278,127 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
         var søknadsperioder = new Søknadsperioder(new JournalpostId(JOURNALPOST_ID), søknadsperiode);
         søknadsperiodeRepository.lagre(behandling.getId(), søknadsperioder);
         søknadsperiodeRepository.lagreRelevanteSøknadsperioder(behandling.getId(), new SøknadsperioderHolder(søknadsperioder));
+
+
         var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.plusDays(antallDager)));
 
         assertThat(forlengelseperioder.size()).isEqualTo(1);
         var periode = forlengelseperioder.iterator().next();
         assertThat(periode.getFomDato()).isEqualTo(SKJÆRINGSTIDSPUNKT.plusDays(dagerEtterSTPSøknadFom));
         assertThat(periode.getTomDato()).isEqualTo(SKJÆRINGSTIDSPUNKT.plusDays(antallDager));
+    }
+
+
+    @Test
+    void skal_gi_en_periode_ved_endring_i_tilsyn_i_hele_perioden_bortsett_fra_helg() {
+        var fom = SKJÆRINGSTIDSPUNKT.with(TemporalAdjusters.next(DayOfWeek.MONDAY));
+
+
+        when(pleietrengendeRevurderingPerioderTjeneste.utledBerørtePerioderPåPleietrengende(
+            BehandlingReferanse.fra(behandling),
+            Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR)
+        )).thenReturn(
+            new LocalDateTimeline<>(List.of(
+                new LocalDateSegment<>(fom, fom.plusDays(4), Set.of(BehandlingÅrsakType.RE_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON)),
+                new LocalDateSegment<>(fom.plusDays(7), fom.plusDays(11), Set.of(BehandlingÅrsakType.RE_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON))
+            ))
+        );
+
+
+        var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.plusDays(11)));
+
+        assertThat(forlengelseperioder.size()).isEqualTo(1);
+        var periode = forlengelseperioder.iterator().next();
+        assertThat(periode.getFomDato()).isEqualTo(fom);
+        assertThat(periode.getTomDato()).isEqualTo(fom.plusDays(11));
+    }
+
+    //hull på 10 dager mellom stp1 og stp2 periodene inkl fom og tom
+        /*
+          beh1    |---|     |----|
+          ben2         |---|
+          res          |---------|
+         */
+    @Test
+    void skal_inkludere_periode_uten_endring_hvis_kant_i_kant_med_tidligere_stp() {
+        var stp1 = SKJÆRINGSTIDSPUNKT;
+        var tom1 = stp1.plusDays(5);
+
+        var fomHull = tom1.plusDays(1);
+        var tomHull = fomHull.plusDays(7);
+
+        var stp2 = tomHull.plusDays(1);
+        var tom2 = stp2.plusDays(20);
+
+
+        when(pleietrengendeRevurderingPerioderTjeneste.utledBerørtePerioderPåPleietrengende(
+            BehandlingReferanse.fra(behandling),
+            Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR)
+        )).thenReturn(
+            new LocalDateTimeline<>(List.of(
+                new LocalDateSegment<>(fomHull, tomHull, Set.of(BehandlingÅrsakType.RE_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON)),
+                new LocalDateSegment<>(stp2, tom2, Set.of(BehandlingÅrsakType.RE_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON))
+            ))
+        );
+
+
+        when(vilkårsPerioderTilVurderingTjeneste.utled(originalBehandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR))
+            .thenReturn(new TreeSet<>(List.of(
+                DatoIntervallEntitet.fraOgMedTilOgMed(stp1, tom1),
+                DatoIntervallEntitet.fraOgMedTilOgMed(stp2, tom2)
+            )));
+
+
+        var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(stp1, tom2));
+
+        assertThat(forlengelseperioder.size()).isEqualTo(1);
+        var periode = forlengelseperioder.iterator().next();
+        assertThat(periode.getFomDato()).isEqualTo(fomHull);
+        assertThat(periode.getTomDato()).isEqualTo(tom2);
+    }
+
+    //hull på 10 dager mellom stp1 og stp2 periodene inkl fom og tom
+    //men tettes bare delvis
+        /*
+          beh1        |---|           |----|
+          ben2               |---|
+          resultat           |---|
+         */
+    @Test
+    void skal_inkludere_periode_kun_med_endring_hvis_ikke_kant_i_kant_fra_tidligere_stp() {
+        var stp1 = SKJÆRINGSTIDSPUNKT;
+        var tom1 = stp1.plusDays(5);
+
+        var fomHull = tom1.plusDays(3);
+        var tomHull = fomHull.plusDays(4);
+
+        var stp2 = tomHull.plusDays(4);
+        var tom2 = stp2.plusDays(20);
+
+
+
+        when(pleietrengendeRevurderingPerioderTjeneste.utledBerørtePerioderPåPleietrengende(
+            BehandlingReferanse.fra(behandling),
+            Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR)
+        )).thenReturn(
+            new LocalDateTimeline<>(List.of(
+                new LocalDateSegment<>(fomHull, tomHull, Set.of(BehandlingÅrsakType.RE_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON))
+            ))
+        );
+
+        when(vilkårsPerioderTilVurderingTjeneste.utled(originalBehandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR))
+            .thenReturn(new TreeSet<>(List.of(
+                DatoIntervallEntitet.fraOgMedTilOgMed(stp1, tom1),
+                DatoIntervallEntitet.fraOgMedTilOgMed(stp2, tom2)
+            )));
+
+
+        var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(stp1, tom2));
+
+        assertThat(forlengelseperioder.size()).isEqualTo(1);
+        var periode = forlengelseperioder.iterator().next();
+        assertThat(periode.getFomDato()).isEqualTo(fomHull);
+        assertThat(periode.getTomDato()).isEqualTo(tomHull);
     }
 
     @Test
