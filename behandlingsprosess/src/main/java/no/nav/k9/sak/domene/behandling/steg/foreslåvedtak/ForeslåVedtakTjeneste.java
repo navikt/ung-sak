@@ -86,6 +86,11 @@ class ForeslåVedtakTjeneste {
             håndterUtenTotrinn(behandling, kontekst, aksjonspunktDefinisjoner);
         }
 
+        // Logging av automatisering av endringsmelding
+        if (aksjonspunktDefinisjoner.isEmpty() && behandling.getFagsakYtelseType().equals(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)) {
+            logger.info("Foreslår vedtak uten aksjonspunkter");
+        }
+
         return aksjonspunktDefinisjoner.isEmpty()
             ? BehandleStegResultat.utførtUtenAksjonspunkter()
             : BehandleStegResultat.utførtMedAksjonspunkter(aksjonspunktDefinisjoner);
