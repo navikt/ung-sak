@@ -33,7 +33,6 @@ class ForeslåVedtakTjeneste {
     private FagsakRepository fagsakRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere;
-
     private SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste;
     private boolean sjekkTilbakekrevingAksjonspunktLansert;
 
