@@ -20,9 +20,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.jboss.weld.exceptions.IllegalArgumentException;
+import org.jboss.weld.exceptions.IllegalStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +44,7 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
@@ -55,6 +59,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
+import no.nav.k9.abac.AbacAttributt;
 import no.nav.k9.felles.sikkerhet.abac.AbacAttributtSamling;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.AbacDto;
@@ -64,17 +69,21 @@ import no.nav.k9.felles.sikkerhet.abac.Pep;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 import no.nav.k9.felles.sikkerhet.abac.Tilgangsbeslutning;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.felles.util.InputValideringRegex;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.kodeverk.person.Diskresjonskode;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -628,6 +637,93 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             .type(MediaType.APPLICATION_OCTET_STREAM)
             .header("Content-Disposition", String.format("attachment; filename=\"behandlingsteghistorikk.csv\""))
             .build()).orElse(Response.noContent().build());
+    }
+
+
+    public static class AvbrytAksjonspunktDto {
+
+        @Valid
+        @NotNull
+        private BehandlingIdDto behandlingId;
+
+        @NotNull
+        @Size(min = 1, max = 15)
+        @Pattern(regexp = "^\\d+$")
+        private String aksjonspunktKode;
+
+        @NotNull
+        @Size(min = 1, max = 1000)
+        @Pattern(regexp = InputValideringRegex.FRITEKST)
+        private String begrunnelse;
+
+        @AbacAttributt("behandlingId")
+        public Long getBehandlingId() {
+            return behandlingId.getBehandlingId();
+        }
+
+
+        @AbacAttributt("behandlingUuid")
+        public UUID getBehandlingUuid() {
+            return behandlingId.getBehandlingUuid();
+        }
+
+        public void setBehandlingId(BehandlingIdDto behandlingId) {
+            this.behandlingId = behandlingId;
+        }
+
+        public String getAksjonspunktKode() {
+            return aksjonspunktKode;
+        }
+
+        public void setAksjonspunktKode(String aksjonspunktKode) {
+            this.aksjonspunktKode = aksjonspunktKode;
+        }
+
+        public String getBegrunnelse() {
+            return begrunnelse;
+        }
+
+        public void setBegrunnelse(String begrunnelse) {
+            this.begrunnelse = begrunnelse;
+        }
+    }
+
+    @POST
+    @Path("/avbryt-aksjonspunkt")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Avbryter feilopprettet aksjonspunkt",
+        summary = ("Avbryter feilopprettet aksjonspunkt"),
+        tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response avbrytAksjonspunkt(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) AvbrytAksjonspunktDto dto) {
+
+        List<String> aksjonspunktSomKanAvbrytesHer = List.of(AksjonspunktKodeDefinisjon.AVKLAR_FORTSATT_MEDLEMSKAP_KODE);
+        if (!aksjonspunktSomKanAvbrytesHer.contains(dto.getAksjonspunktKode())) {
+            throw new java.lang.IllegalArgumentException("Aksjonspunkt " + dto.getAksjonspunktKode() + " kan ikke avbrytes her");
+        }
+
+        Behandling behandling = dto.getBehandlingId() != null
+            ? behandlingRepository.hentBehandling(dto.getBehandlingId())
+            : behandlingRepository.hentBehandling(dto.getBehandlingUuid());
+        if (behandling.erAvsluttet()) {
+            throw new IllegalStateException("Behandling er avsluttet");
+        }
+        if (!behandling.isBehandlingPåVent()){
+            throw new IllegalStateException("Behandlingen må være på vent");
+        }
+        Aksjonspunkt aksjonspunkt = behandling.getAksjonspunktFor(dto.getAksjonspunktKode()).orElseThrow(() -> new IllegalStateException("Har ikke aksjonspunkt med kode " + dto.getAksjonspunktKode()));
+        if (!aksjonspunkt.erÅpentAksjonspunkt()) {
+            throw new IllegalStateException("Aksjonspunktet har status: " + aksjonspunkt.getStatus());
+        }
+
+
+        aksjonspunkt.avbryt();
+        entityManager.persist(aksjonspunkt);
+
+        loggForvaltningTjeneste(behandling.getFagsak(), "avbryt-aksjonspunkt:" + dto.getAksjonspunktKode(), dto.begrunnelse);
+
+        return Response.ok("Aksjonspunkt ble fjernet").build();
     }
 
     private void loggForvaltningTjeneste(Fagsak fagsak, String tjeneste, String begrunnelse) {
