@@ -3,6 +3,9 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.foreslåvedtak;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
@@ -19,6 +22,8 @@ import no.nav.k9.sak.punsj.PunsjRestKlient;
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @ApplicationScoped
 public class PleiepengerForeslåVedtakManueltUtleder implements ForeslåVedtakManueltUtleder {
+
+    private static final Logger log = LoggerFactory.getLogger(PleiepengerForeslåVedtakManueltUtleder.class);
 
     private K9FormidlingKlient formidlingKlient;
     private PunsjRestKlient punsjKlient;
@@ -56,6 +61,11 @@ public class PleiepengerForeslåVedtakManueltUtleder implements ForeslåVedtakMa
             return false;
         }
         var uferdigJournalpostIderPåAktør = punsjKlient.getUferdigJournalpostIderPåAktør(behandling.getAktørId().getAktørId(), behandling.getFagsak().getPleietrengendeAktørId().getAktørId());
-        return uferdigJournalpostIderPåAktør.isPresent();
+        boolean harPunsjoppgave = uferdigJournalpostIderPåAktør.isPresent()
+            && (!uferdigJournalpostIderPåAktør.get().getJournalpostIder().isEmpty() || !uferdigJournalpostIderPåAktør.get().getJournalpostIderBarn().isEmpty());
+        if (harPunsjoppgave) {
+            log.info("Skal opprette foreslå vedtak manuelt pga uferdig oppgave i punsj");
+        }
+        return harPunsjoppgave;
     }
 }
