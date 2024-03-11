@@ -94,7 +94,17 @@ public class HentPerioderTilVurderingTjeneste {
             søknadsperioder = søknadsperioder.combine(new LocalDateSegment<>(utvidetPeriodeSomFølgeAvDødsfall.get().toLocalDateInterval(), true), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
 
-        return fjernTrukkedePerioder(referanse, søknadsperioder);
+        if (skalVurdereKunEndretPeriodeEnabled) {
+            var endretUtbetalingPeriodeutleder = EndretUtbetalingPeriodeutleder.finnUtleder(endretUtbetalingPeriodeutledere, referanse.getFagsakYtelseType(), referanse.getBehandlingType());
+            var begrensetTidslinje = søknadsperioder.getLocalDateIntervals()
+                .stream()
+                .flatMap(p -> begrensPeriode(referanse, DatoIntervallEntitet.fraOgMedTilOgMed(p.getFomDato(), p.getTomDato()), endretUtbetalingPeriodeutleder).stream())
+                .map(p -> new LocalDateTimeline<>(p.toLocalDateInterval(), true))
+                .reduce(LocalDateTimeline.empty(), LocalDateTimeline::crossJoin);
+            return fjernTrukkedePerioder(referanse, begrensetTidslinje);
+        } else {
+            return fjernTrukkedePerioder(referanse, søknadsperioder);
+        }
     }
 
     private TreeSet<DatoIntervallEntitet> fjernTrukkedePerioder(BehandlingReferanse referanse, LocalDateTimeline<Boolean> søknadsperioder) {

@@ -1,6 +1,5 @@
 package no.nav.k9.sak.domene.arbeidsforhold;
 
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -30,17 +29,16 @@ public class AktivPeriodeForArbeidUtleder {
      */
     public static LocalDateTimeline<AktivitetsAvtaleInnhold> utledAktivTidslinje(Yrkesaktivitet registerAktivitet,
                                                                                  InntektArbeidYtelseGrunnlag grunnlag,
-                                                                                 DatoIntervallEntitet vilkårsperiode,
+                                                                                 Collection<DatoIntervallEntitet> vilkårsperiode,
                                                                                  Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse) {
         var inaktivTidslinje = InaktivGrunnetPermisjonUtleder.utledTidslinjeForSammengengendePermisjonOver14Dager(registerAktivitet, tidslinjePerYtelse, vilkårsperiode);
-        return gjeldendeAvtaler(grunnlag, vilkårsperiode.getFomDato(), registerAktivitet).stream()
+        return gjeldendeAvtaler(grunnlag, registerAktivitet).stream()
             .sorted(AktivitetsAvtale.COMPARATOR).map(a ->
                 utledPerioderEtterÅTattHensynTilPermisjoner(inaktivTidslinje, a)
             ).reduce(LocalDateTimeline.empty(), (t1, t2) -> t1.crossJoin(t2, StandardCombinators::coalesceRightHandSide));
     }
 
     private static Collection<AktivitetsAvtale> gjeldendeAvtaler(InntektArbeidYtelseGrunnlag grunnlag,
-                                                                 LocalDate skjæringstidspunktForOpptjening,
                                                                  Yrkesaktivitet registerAktivitet) {
         if (registerAktivitet.erArbeidsforhold()) {
             var filter = new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon(), registerAktivitet);
@@ -48,7 +46,6 @@ public class AktivPeriodeForArbeidUtleder {
             return filter.getAnsettelsesPerioder(registerAktivitet);
         }
         return new YrkesaktivitetFilter(grunnlag.getArbeidsforholdInformasjon().orElse(null), registerAktivitet)
-            .før(skjæringstidspunktForOpptjening)
             .getAktivitetsAvtalerForArbeid();
     }
 
