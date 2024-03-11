@@ -34,10 +34,13 @@ public class UtledTilkjentYtelseEndring {
     }
 
     public List<UtbetalingsendringerForMottaker> utledEndringer(BehandlingReferanse behandlingReferanse) {
-        var beregningsresultatEntitet = beregningsresultatRepository.hentEndeligBeregningsresultat(behandlingReferanse.getBehandlingId()).orElseThrow(() -> new IllegalStateException("Kan ikke utlede endring i tilkjent ytelse uten å ha lagret tilkjent ytelse"));
+        var beregningsresultatEntitet = beregningsresultatRepository.hentEndeligBeregningsresultat(behandlingReferanse.getBehandlingId());
+        if (beregningsresultatEntitet.isEmpty()) {
+            return Collections.emptyList();
+        }
         var originalBeregningsresultatEntitet = beregningsresultatRepository.hentEndeligBeregningsresultat(behandlingReferanse.getOriginalBehandlingId().orElseThrow(() -> new IllegalArgumentException("Kan ikke utlede tidslinjeMedEndringIYtelse dersom behandling ikke er revurdering")))
             .orElseThrow(() -> new IllegalArgumentException("Original behandling har ikke tilkjent ytelse"));
-        return utledEndringer(beregningsresultatEntitet, originalBeregningsresultatEntitet);
+        return utledEndringer(beregningsresultatEntitet.get(), originalBeregningsresultatEntitet);
     }
 
     static List<UtbetalingsendringerForMottaker> utledEndringer(BeregningsresultatEntitet beregningsresultatEntitet, BeregningsresultatEntitet originalBeregningsresultatEntitet) {
