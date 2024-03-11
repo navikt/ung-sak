@@ -64,7 +64,7 @@ public class PleiepengerForeslåVedtakManueltUtleder implements ForeslåVedtakMa
         boolean harPunsjoppgave = uferdigJournalpostIderPåAktør.isPresent()
             && (!uferdigJournalpostIderPåAktør.get().getJournalpostIder().isEmpty() || !uferdigJournalpostIderPåAktør.get().getJournalpostIderBarn().isEmpty());
         if (harPunsjoppgave) {
-            log.info("Stopper i vedtak pga uferdig oppgave i punsj");
+            log.info("Skal opprette foreslå vedtak manuelt pga uferdig oppgave i punsj");
         }
         return harPunsjoppgave;
     }
