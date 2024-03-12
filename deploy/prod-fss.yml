@@ -148,10 +148,6 @@ spec:
       value: OMS
 
     # Restservice Generelle
-    - name: FPABAKUS_URL
-      value: http://fpabakus.teamforeldrepenger/fpabakus
-    - name: FPABAKUS_SCOPE
-      value: api://prod-fss.teamforeldrepenger.fpabakus/.default
     - name: K9ABAKUS_URL
       value: http://k9-abakus.k9saksbehandling/k9/abakus
     - name: K9ABAKUS_SCOPE
