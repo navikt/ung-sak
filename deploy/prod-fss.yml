@@ -288,6 +288,8 @@ spec:
       value: "false"
     - name: K9_ABAKUS_ENABLED
       value: "true"
+    - name: OMP_NYOPPSTARTET_VED_REFUSJON
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

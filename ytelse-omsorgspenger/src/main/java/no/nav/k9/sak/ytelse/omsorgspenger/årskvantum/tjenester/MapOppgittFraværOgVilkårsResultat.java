@@ -53,6 +53,8 @@ public class MapOppgittFraværOgVilkårsResultat {
 
     private static final Logger log = LoggerFactory.getLogger(MapOppgittFraværOgVilkårsResultat.class);
 
+    private static final boolean UTLED_NYOPPSTARTET_VED_REFUSJON = Boolean.parseBoolean(System.getenv("OMP_NYOPPSTARTET_VED_REFUSJON"));
+
     Map<Aktivitet, List<WrappedOppgittFraværPeriode>> utledPerioderMedUtfall(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag, NavigableMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>> opptjeningAktivitetPerioder, Vilkårene vilkårene, DatoIntervallEntitet fagsakPeriode, Map<AktivitetTypeArbeidsgiver, LocalDateTimeline<OppgittFraværHolder>> fraværsPerioder) {
         var filter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(ref.getAktørId()));
 
@@ -97,14 +99,20 @@ public class MapOppgittFraværOgVilkårsResultat {
     private Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> leggPåVurderingAvNyoppstartetArbeidsforholdHvorAktuelt(Map<Aktivitet, LocalDateTimeline<WrappedOppgittFraværPeriode>> fraværsTidslinje, InntektArbeidYtelseGrunnlag iayGrunnlag, AktørId aktørId) {
 
         Set<SøknadÅrsak> søknadsårsaker = fraværsTidslinje.values().stream()
-            .flatMap(fraværTidslinje -> fraværTidslinje.stream())
+            .flatMap(LocalDateTimeline::stream)
             .filter(segment -> segment.getValue().getPeriode() != null)
             .map(segment -> segment.getValue().getPeriode().getSøknadÅrsak())
             .filter(Objects::nonNull)
             .collect(Collectors.toSet());
 
+        boolean harRefusjonskrav = fraværsTidslinje.values().stream()
+            .flatMap(LocalDateTimeline::stream)
+            .filter(segment -> segment.getValue().getPeriode() != null)
+            .anyMatch(segment -> segment.getValue().getSamtidigeKrav().inntektsmeldingMedRefusjonskrav() == SamtidigKravStatus.KravStatus.FINNES);
+
         log.info("Søknadsårsaker {}", søknadsårsaker);
-        boolean vilkåretErAktuelt = søknadsårsaker.contains(SøknadÅrsak.NYOPPSTARTET_HOS_ARBEIDSGIVER);
+        boolean vilkåretErAktuelt = søknadsårsaker.contains(SøknadÅrsak.NYOPPSTARTET_HOS_ARBEIDSGIVER)
+            || UTLED_NYOPPSTARTET_VED_REFUSJON && harRefusjonskrav;
         if (!vilkåretErAktuelt) {
             //ikke vits å lage strukturer for å utlede noe
             return fraværsTidslinje;
@@ -121,27 +129,45 @@ public class MapOppgittFraværOgVilkårsResultat {
                 resultat.put(aktivitetId, fraværTidslinje);
                 continue;
             }
-            log.info("Fraværsperioder:{} ", fraværsTidslinje);
-            //må vurdere perioder hvor det er søknad som gjelder, og søknadårsak er NYOPPSTARTET_HOS_ARBEIDSGIVER
-            LocalDateTimeline<Boolean> fraværsperioderSomSkalVurderes = new LocalDateTimeline<>(
-                fraværTidslinje.stream()
-                    .filter(segment -> segment.getValue().getPeriode() != null
-                        && segment.getValue().getPeriode().getSøknadÅrsak() == SøknadÅrsak.NYOPPSTARTET_HOS_ARBEIDSGIVER
-                        && segment.getValue().getSamtidigeKrav().inntektsmeldingMedRefusjonskrav() != SamtidigKravStatus.KravStatus.FINNES)
-                    .map(segment -> new LocalDateSegment<>(segment.getLocalDateInterval(), true))
-                    .toList());
+            LocalDateTimeline<Boolean> tidslinjeKunSøktSomNyoppstartet = tidslinjeKunSøktSomNyoppstartet(fraværTidslinje);
+            LocalDateTimeline<Boolean> tidslinjeRefusjonskrav = tidslinjeRefusjonskrav(fraværTidslinje);
+            LocalDateTimeline<Boolean> perioderSomTasMedVedInnvilgelse = UTLED_NYOPPSTARTET_VED_REFUSJON
+                ? tidslinjeKunSøktSomNyoppstartet.crossJoin(tidslinjeRefusjonskrav)
+                : tidslinjeKunSøktSomNyoppstartet;
+            LocalDateTimeline<Boolean> perioderSomUansettTasMed = tidslinjeKunSøktSomNyoppstartet;
 
-            log.info("Perioder som vurderes ifht nyoppstartet: {} ", fraværsperioderSomSkalVurderes);
+            log.info("Fraværsperioder:{} ", fraværsTidslinje);
+            log.info("Perioder som vurderes ifht nyoppstartet og tas med ved innvilgelse: {} ", perioderSomTasMedVedInnvilgelse);
+            log.info("Perioder som vurderes ifht nyoppstartet og tas med uansett utfall: {} ", perioderSomUansettTasMed);
 
             LocalDateTimeline<Boolean> periodeNyoppstartet = perioderNyoppstartet.getOrDefault(aktivitetId.getArbeidsgiver(), LocalDateTimeline.empty());
-            var innvilgetTidslinje = fraværsperioderSomSkalVurderes.mapValue(v -> no.nav.k9.aarskvantum.kontrakter.Utfall.INNVILGET).intersection(periodeNyoppstartet);
-            var avslåttTidslinje = fraværsperioderSomSkalVurderes.mapValue(v -> no.nav.k9.aarskvantum.kontrakter.Utfall.AVSLÅTT).disjoint(periodeNyoppstartet);
+            var innvilgetTidslinje = perioderSomTasMedVedInnvilgelse.mapValue(v -> no.nav.k9.aarskvantum.kontrakter.Utfall.INNVILGET).intersection(periodeNyoppstartet);
+            var avslåttTidslinje = perioderSomUansettTasMed.mapValue(v -> no.nav.k9.aarskvantum.kontrakter.Utfall.AVSLÅTT).disjoint(periodeNyoppstartet);
             var vurdertTidslinje = innvilgetTidslinje.crossJoin(avslåttTidslinje, StandardCombinators::coalesceLeftHandSide);
             var vurdertTidslinjeWofp = vurdertTidslinje.mapValue(WrappedOppgittFraværPeriode::new);
             var oppdatertFraværTidslinje = fraværTidslinje.crossJoin(vurdertTidslinjeWofp, this::mergePeriode);
             resultat.put(aktivitetId, oppdatertFraværTidslinje);
         }
         return resultat;
+    }
+
+    private static LocalDateTimeline<Boolean> tidslinjeRefusjonskrav(LocalDateTimeline<WrappedOppgittFraværPeriode> fraværTidslinje) {
+        return new LocalDateTimeline<>(
+            fraværTidslinje.stream()
+                .filter(segment -> segment.getValue().getPeriode() != null
+                    && segment.getValue().getSamtidigeKrav().inntektsmeldingMedRefusjonskrav() == SamtidigKravStatus.KravStatus.FINNES)
+                .map(segment -> new LocalDateSegment<>(segment.getLocalDateInterval(), true))
+                .toList());
+    }
+
+    private static LocalDateTimeline<Boolean> tidslinjeKunSøktSomNyoppstartet(LocalDateTimeline<WrappedOppgittFraværPeriode> fraværTidslinje) {
+        return new LocalDateTimeline<>(
+            fraværTidslinje.stream()
+                .filter(segment -> segment.getValue().getPeriode() != null
+                    && segment.getValue().getPeriode().getSøknadÅrsak() == SøknadÅrsak.NYOPPSTARTET_HOS_ARBEIDSGIVER
+                    && segment.getValue().getSamtidigeKrav().inntektsmeldingMedRefusjonskrav() != SamtidigKravStatus.KravStatus.FINNES)
+                .map(segment -> new LocalDateSegment<>(segment.getLocalDateInterval(), true))
+                .toList());
     }
 
     private LocalDateTimeline<WrappedOppgittFraværPeriode> mergeTidslinjer(LocalDateTimeline<WrappedOppgittFraværPeriode> wrappedOppgittFraværPeriodeLocalDateTimeline,
@@ -184,11 +210,10 @@ public class MapOppgittFraværOgVilkårsResultat {
     }
 
     private Map<Aktivitet, List<OpptjeningAktivitetPeriode>> finnOpptjeningAktivitetPerioder(OpptjeningAktivitetType opptjeningAktivitetType, UttakArbeidType uttakArbeidType, List<OpptjeningAktivitetPeriode> opptjeningPerioder, AktørId aktørId) {
-        var perioderPerAktivitet = opptjeningPerioder.stream()
+        return opptjeningPerioder.stream()
             .filter(akt -> akt.getOpptjeningAktivitetType().equals(opptjeningAktivitetType))
             .filter(akt -> List.of(VurderingsStatus.GODKJENT, VurderingsStatus.TIL_VURDERING).contains(akt.getVurderingsStatus()))
             .collect(Collectors.groupingBy(aktivitetPeriode -> tilAktivitet(aktivitetPeriode, uttakArbeidType, aktørId)));
-        return perioderPerAktivitet;
     }
 
     private Aktivitet tilAktivitet(OpptjeningAktivitetPeriode aktivitetPeriode, UttakArbeidType uttakArbeidType, AktørId aktørId) {
@@ -212,7 +237,7 @@ public class MapOppgittFraværOgVilkårsResultat {
         LocalDateTimeline<WrappedOppgittFraværPeriode> allVerdenAvTid = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE, new WrappedOppgittFraværPeriode(ArbeidStatus.AVSLUTTET))));
         var aktivPerioder = opptjeningPerioder.stream()
             .map(it -> new LocalDateSegment<>(vilkårperiode.getFomDato(), vilkårperiode.getTomDato(), new WrappedOppgittFraværPeriode(ArbeidStatus.AKTIVT)))
-            .collect(Collectors.toList());
+            .toList();
 
         LocalDateTimeline<WrappedOppgittFraværPeriode> aktivAktivitetTidslinje = allVerdenAvTid;
         for (LocalDateSegment<WrappedOppgittFraværPeriode> segment : aktivPerioder) {
@@ -246,12 +271,12 @@ public class MapOppgittFraværOgVilkårsResultat {
         LocalDateTimeline<WrappedOppgittFraværPeriode> allVerdenAvTid = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE, new WrappedOppgittFraværPeriode(ArbeidStatus.AVSLUTTET))));
         var ansettelsesPerioder = filter.getAnsettelsesPerioder(yrkesaktivitet).stream()
             .map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), new WrappedOppgittFraværPeriode(ArbeidStatus.AKTIVT)))
-            .collect(Collectors.toList());
+            .toList();
         var permisjonsPerioder = yrkesaktivitet.getPermisjon()
             .stream()
             .filter(it -> erStørreEllerLik100Prosent(it.getProsentsats()))
             .map(it -> new LocalDateSegment<>(it.getFraOgMed(), it.getTilOgMed(), new WrappedOppgittFraværPeriode(null, null, true, null, null, null, null, null)))
-            .collect(Collectors.toList());
+            .toList();
 
         LocalDateTimeline<WrappedOppgittFraværPeriode> arbeidsforholdTidslinje = allVerdenAvTid;
         for (LocalDateSegment<WrappedOppgittFraværPeriode> segment : ansettelsesPerioder) {
@@ -280,7 +305,7 @@ public class MapOppgittFraværOgVilkårsResultat {
                 .filter(it -> it.getValue() != null)
                 .filter(it -> it.getValue().getPeriode() != null)
                 .map(this::opprettHoldKonsistens)
-                .collect(Collectors.toList()));
+                .toList());
         }
 
         return result;

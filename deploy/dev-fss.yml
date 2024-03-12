@@ -296,6 +296,8 @@ spec:
       value: "true"
     - name: AAPEN_PUNSJOPPGAVE_STOPPER_AUTOMATISK_VEDTAK
       value: "true"
+    - name: OMP_NYOPPSTARTET_VED_REFUSJON
+      value: "true"
 
 
     # Konfigurasjoner
