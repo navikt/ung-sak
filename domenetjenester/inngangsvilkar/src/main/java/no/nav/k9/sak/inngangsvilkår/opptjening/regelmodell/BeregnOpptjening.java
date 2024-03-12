@@ -11,8 +11,10 @@ import no.nav.fpsak.nare.doc.RuleDocumentation;
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.specification.LeafSpecification;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 
 /**
  * Slår sammen alle gjenværende aktivitet tidslinjer og akseptert mellomliggende perioder til en samlet tidslinje for
@@ -63,7 +65,26 @@ public class BeregnOpptjening extends LeafSpecification<MellomregningOpptjenings
         data.setAntattOpptjening(new OpptjentTidslinje(antattOpptjening, antattOpptjeningTidslinje));
         // ikke sett evaluation properties for antatt før vi vet vi trenger det. (gjøre ved Sjekk av tilstrekkelig opptjening inklusiv antatt godkjent)
 
+        if (data.getGrunnlag().getAapPerioder() != null) { //null-sjekk kan fjernes når funksjonalitet er lansert
+            data.setPerioderMedKunAAPogSN(tidslinjeKunAAPogSN(data));
+        }
         return evaluation;
+    }
+
+    private LocalDateTimeline<Boolean> tidslinjeKunAAPogSN(MellomregningOpptjeningsvilkårData data) {
+        Map<Aktivitet, LocalDateTimeline<Boolean>> aktiviteter = data.getAktivitetTidslinjer(false, false);
+        LocalDateTimeline<Boolean> næringAktiviteter = aktiviteter.entrySet().stream()
+            .filter(a -> a.getKey().getAktivitetType().equals(OpptjeningAktivitetType.NÆRING.getKode()))
+            .map(Map.Entry::getValue)
+            .reduce(LocalDateTimeline.empty(), (a, b) -> a.crossJoin(b, StandardCombinators::alwaysTrueForMatch));
+        LocalDateTimeline<Boolean> andreAktiviteter = aktiviteter.entrySet().stream()
+            .filter(a -> !a.getKey().getAktivitetType().equals(OpptjeningAktivitetType.NÆRING.getKode()))
+            .map(Map.Entry::getValue)
+            .reduce(LocalDateTimeline.empty(), (a, b) -> a.crossJoin(b, StandardCombinators::alwaysTrueForMatch));
+
+        LocalDateTimeline<Boolean> kunNæring = næringAktiviteter.disjoint(andreAktiviteter);
+        LocalDateTimeline<Boolean> aapTidslinje = new LocalDateTimeline<>(data.getGrunnlag().getAapPerioder().stream().map(i -> new LocalDateSegment<>(i, true)).toList());
+        return kunNæring.intersection(aapTidslinje);
     }
 
     private LocalDateTimeline<Boolean> slåSammenTilFellesTidslinje(MellomregningOpptjeningsvilkårData data, boolean medAntattGodkjent, Collection<Aktivitet> unntak) {

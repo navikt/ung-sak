@@ -43,6 +43,8 @@ public class MellomregningOpptjeningsvilkårData {
     /** Frist for å motta opptjening opplysninger (henger sammen med Aksjonspunkt 7006 "Venter på Opptjeningsopplysninger"). */
     private LocalDate opptjeningOpplysningerFrist;
 
+    private LocalDateTimeline<Boolean> perioderMedKunAAPogSN;
+
     public MellomregningOpptjeningsvilkårData(Opptjeningsgrunnlag grunnlag) {
         this.grunnlag = grunnlag;
         LocalDateInterval maxIntervall = grunnlag.getOpptjeningPeriode();
@@ -256,4 +258,11 @@ public class MellomregningOpptjeningsvilkårData {
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
+    public LocalDateTimeline<Boolean> getPerioderMedKunAAPogSN() {
+        return perioderMedKunAAPogSN;
+    }
+
+    public void setPerioderMedKunAAPogSN(LocalDateTimeline<Boolean> perioderMedKunAAPogSN) {
+        this.perioderMedKunAAPogSN = perioderMedKunAAPogSN;
+    }
 }

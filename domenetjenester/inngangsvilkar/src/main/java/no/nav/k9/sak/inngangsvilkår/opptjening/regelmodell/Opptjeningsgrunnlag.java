@@ -3,11 +3,14 @@ package no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.fpsak.nare.doc.RuleDocumentationGrunnlag;
@@ -21,25 +24,39 @@ import no.nav.k9.sak.inngangsvilkår.VilkårGrunnlag;
 @RuleDocumentationGrunnlag
 public class Opptjeningsgrunnlag implements VilkårGrunnlag {
 
-    /** Input med aktiviteter som skal inngå i vurderingen. */
+    /**
+     * Input med aktiviteter som skal inngå i vurderingen.
+     */
     @JsonProperty("aktivitetPerioder")
     private final List<AktivitetPeriode> aktivitetPerioder = new ArrayList<>();
 
-    /** Behandlingstidspunkt - normalt dagens dato. */
+    /**
+     * Behandlingstidspunkt - normalt dagens dato.
+     */
     @JsonProperty("behandlingsDato")
     private LocalDate behandlingsDato;
 
-    /** Første dato med opptjening som teller med. (fra-og-med) */
+    /**
+     * Første dato med opptjening som teller med. (fra-og-med)
+     */
     @JsonProperty("forsteDatoOpptjening")
     private LocalDate førsteDatoOpptjening;
 
-    /** Skjæringstidspunkt (siste punkt med opptjening). (til-og-med) */
+    /**
+     * Skjæringstidspunkt (siste punkt med opptjening). (til-og-med)
+     */
     @JsonProperty("sisteDatoForOpptjening")
     private LocalDate sisteDatoForOpptjening;
 
-    /** Input med inntekter som benyttes i vurderingen for å avsjekke Arbeidsforhold (fra AAReg). */
+    /**
+     * Input med inntekter som benyttes i vurderingen for å avsjekke Arbeidsforhold (fra AAReg).
+     */
     @JsonProperty("inntektPerioder")
     private final List<InntektPeriode> inntektPerioder = new ArrayList<>();
+
+    @JsonInclude(Include.NON_NULL)
+    @JsonProperty("aapPerioder")
+    private List<LocalDateInterval> aapPerioder;
 
     /**
      * Maks periode i en mellomliggende periode for et arbeidsforhold for at den skal kunne regnes med.
@@ -73,7 +90,9 @@ public class Opptjeningsgrunnlag implements VilkårGrunnlag {
     @JsonIgnore
     private int minsteAntallMånederGodkjent = 5;
 
-    /** Minste godkjente inntekt i en periode. */
+    /**
+     * Minste godkjente inntekt i en periode.
+     */
     @JsonIgnore
     private final Long minsteInntekt = 1L; // NOSONAR
 
@@ -159,10 +178,8 @@ public class Opptjeningsgrunnlag implements VilkårGrunnlag {
     /**
      * Legg til aktivitet for en angitt intervall
      *
-     * @param datoIntervall
-     *            - intervall
-     * @param aktivitet
-     *            - aktivitet
+     * @param datoIntervall - intervall
+     * @param aktivitet     - aktivitet
      */
     public void leggTil(LocalDateInterval datoIntervall, Aktivitet aktivitet) {
         leggTil(new AktivitetPeriode(datoIntervall, aktivitet, AktivitetPeriode.VurderingsStatus.TIL_VURDERING));
@@ -213,4 +230,11 @@ public class Opptjeningsgrunnlag implements VilkårGrunnlag {
         this.skalValidereMotInntekt = skalValidereMotInntekt;
     }
 
+    public List<LocalDateInterval> getAapPerioder() {
+        return aapPerioder;
+    }
+
+    public void setAapPerioder(Collection<LocalDateInterval> aapPerioder) {
+        this.aapPerioder = new ArrayList<>(aapPerioder);
+    }
 }

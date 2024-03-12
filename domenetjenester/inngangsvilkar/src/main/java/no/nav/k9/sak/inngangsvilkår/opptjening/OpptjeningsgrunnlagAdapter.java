@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -43,6 +44,21 @@ class OpptjeningsgrunnlagAdapter {
         leggTilOpptjening(opptjeningAktiveter, opptjeningsGrunnlag);
         leggTilRapporterteInntekter(opptjeningInntekter, opptjeningsGrunnlag);
 
+        return opptjeningsGrunnlag;
+    }
+
+    Opptjeningsgrunnlag mapTilGrunnlag(Collection<OpptjeningAktivitetPeriode> opptjeningAktiveter,
+                                       Collection<OpptjeningInntektPeriode> opptjeningInntekter,
+                                       LocalDateTimeline<Boolean> aapTidslinje) {
+        Objects.requireNonNull(aapTidslinje);
+        Opptjeningsgrunnlag opptjeningsGrunnlag = new Opptjeningsgrunnlag(behandlingstidspunkt, startDato, sluttDato);
+
+        // legger til alle rapporterte inntekter og aktiviteter hentet opp. håndterer duplikater/overlapp i
+        // mellomregning.
+        leggTilOpptjening(opptjeningAktiveter, opptjeningsGrunnlag);
+        leggTilRapporterteInntekter(opptjeningInntekter, opptjeningsGrunnlag);
+        LocalDateTimeline<Boolean> aapIOpptjeningsperiode = aapTidslinje.intersection(new LocalDateTimeline<>(startDato, sluttDato, true));
+        opptjeningsGrunnlag.setAapPerioder(aapIOpptjeningsperiode.getLocalDateIntervals());
         return opptjeningsGrunnlag;
     }
 
