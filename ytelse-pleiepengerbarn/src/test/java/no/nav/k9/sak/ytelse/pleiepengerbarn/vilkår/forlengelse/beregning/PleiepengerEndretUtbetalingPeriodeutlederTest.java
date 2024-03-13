@@ -10,9 +10,7 @@ import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -72,10 +70,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperioder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperioderHolder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.PleietrengendeRevurderingPerioderTjeneste;
-import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
-import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
-import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
-import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -210,7 +204,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
     }
 
     @Test
-    void skal_returnere_perioden_mellom_endring_av_dato_for_nye_regler() {
+    void skal_returnere_perioden_fom_endring_av_dato_for_nye_regler() {
         var antallDager = 10;
         var tomDato = SKJÆRINGSTIDSPUNKT.plusDays(antallDager);
 
@@ -222,7 +216,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
         assertThat(forlengelseperioder.size()).isEqualTo(1);
         var first = forlengelseperioder.getFirst();
         assertThat(first.getFomDato()).isEqualTo(SKJÆRINGSTIDSPUNKT);
-        assertThat(first.getTomDato()).isEqualTo(SKJÆRINGSTIDSPUNKT.plusDays(4));
+        assertThat(first.getTomDato()).isEqualTo(tomDato);
     }
 
 
@@ -365,7 +359,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
           resultat           |---|
          */
     @Test
-    void skal_inkludere_periode_kun_med_endring_hvis_ikke_kant_i_kant_fra_tidligere_stp() {
+    void skal_inkludere_periode_fra_endringsdato_og_til_slutten_av_perioden_hvis_ikke_kant_i_kant_fra_tidligere_stp() {
         var stp1 = SKJÆRINGSTIDSPUNKT;
         var tom1 = stp1.plusDays(5);
 
@@ -374,7 +368,6 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
 
         var stp2 = tomHull.plusDays(4);
         var tom2 = stp2.plusDays(20);
-
 
 
         when(pleietrengendeRevurderingPerioderTjeneste.utledBerørtePerioderPåPleietrengende(
@@ -398,7 +391,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
         assertThat(forlengelseperioder.size()).isEqualTo(1);
         var periode = forlengelseperioder.iterator().next();
         assertThat(periode.getFomDato()).isEqualTo(fomHull);
-        assertThat(periode.getTomDato()).isEqualTo(tomHull);
+        assertThat(periode.getTomDato()).isEqualTo(tom2);
     }
 
     @Test
