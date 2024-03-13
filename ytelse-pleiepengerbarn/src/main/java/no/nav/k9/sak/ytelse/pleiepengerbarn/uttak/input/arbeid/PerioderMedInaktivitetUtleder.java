@@ -15,8 +15,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.jetbrains.annotations.NotNull;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BGAndelArbeidsforhold;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
@@ -59,19 +57,21 @@ public class PerioderMedInaktivitetUtleder {
             .filter(it -> ArbeidType.AA_REGISTER_TYPER.contains(it.getArbeidType()))
             .forEach(yrkesaktivitet -> mapYrkesAktivitet(mellomregning, yrkesaktivitet));
 
-        var arbeidsgivereVedStartPrSkjæringstidspunkt = input.getBeregningsgrunnlag().stream().collect(
-            Collectors.toMap(
-                Beregningsgrunnlag::getSkjæringstidspunkt,
-                bg -> bg.getBeregningsgrunnlagPerioder().get(0)
-                    .getBeregningsgrunnlagPrStatusOgAndelList()
-                    .stream()
-                    .map(BeregningsgrunnlagPrStatusOgAndel::getBgAndelArbeidsforhold)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .map(BGAndelArbeidsforhold::getArbeidsgiver)
-                    .collect(Collectors.toSet())
-            )
-        );
+        var arbeidsgivereVedStartPrSkjæringstidspunkt = input.getBeregningsgrunnlag().stream()
+            .filter(bg -> !bg.getBeregningsgrunnlagPerioder().isEmpty())
+            .collect(
+                Collectors.toMap(
+                    Beregningsgrunnlag::getSkjæringstidspunkt,
+                    bg -> bg.getBeregningsgrunnlagPerioder().get(0)
+                        .getBeregningsgrunnlagPrStatusOgAndelList()
+                        .stream()
+                        .map(BeregningsgrunnlagPrStatusOgAndel::getBgAndelArbeidsforhold)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .map(BGAndelArbeidsforhold::getArbeidsgiver)
+                        .collect(Collectors.toSet())
+                )
+            );
 
 
         return utledBortfallendeAktiviteterSomSkalFortsattKompenseres(mellomregning, antallArbeidsgivereTidslinje,
