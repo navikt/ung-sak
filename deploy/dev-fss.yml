@@ -296,7 +296,8 @@ spec:
       value: "true"
     - name: AAPEN_PUNSJOPPGAVE_STOPPER_AUTOMATISK_VEDTAK
       value: "true"
-
+    - name: IKKE_YRKESAKTIV_FRA_BG
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

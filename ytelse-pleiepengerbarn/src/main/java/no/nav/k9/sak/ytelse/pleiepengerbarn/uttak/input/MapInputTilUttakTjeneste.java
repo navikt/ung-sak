@@ -71,13 +71,18 @@ public class MapInputTilUttakTjeneste {
     private final String unntak;
     private final boolean skalKjøreNyLogikkForSpeiling;
 
+    private final boolean skalFåIkkeYrkesaktivFraBg;
+
     @Inject
     public MapInputTilUttakTjeneste(HentDataTilUttakTjeneste hentDataTilUttakTjeneste,
                                     @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak,
-                                    @KonfigVerdi(value = "IKKE_YRKESAKTIV_UTEN_SPEILING", required = false, defaultVerdi = "false") boolean skalKjøreNyLogikkForSpeiling) {
+                                    @KonfigVerdi(value = "IKKE_YRKESAKTIV_UTEN_SPEILING", required = false, defaultVerdi = "false") boolean skalKjøreNyLogikkForSpeiling,
+                                    @KonfigVerdi(value = "IKKE_YRKESAKTIV_FRA_BG", required = false, defaultVerdi = "false") boolean skalFåIkkeYrkesaktivFraBg
+                                    ) {
         this.hentDataTilUttakTjeneste = hentDataTilUttakTjeneste;
         this.unntak = unntak;
         this.skalKjøreNyLogikkForSpeiling = skalKjøreNyLogikkForSpeiling;
+        this.skalFåIkkeYrkesaktivFraBg = skalFåIkkeYrkesaktivFraBg;
     }
 
 
@@ -131,7 +136,7 @@ public class MapInputTilUttakTjeneste {
             behandling.getAktørId(),
             opptjeningTidslinje,
             input.getInntektArbeidYtelseGrunnlag(),
-            skalKjøreNyLogikkForSpeiling || behandling.getFagsak().getSaksnummer().getVerdi().equals(SPEILE_SAK_SOM_HAR_BLITT_FEIL));
+            skalKjøreNyLogikkForSpeiling || behandling.getFagsak().getSaksnummer().getVerdi().equals(SPEILE_SAK_SOM_HAR_BLITT_FEIL), skalFåIkkeYrkesaktivFraBg, input.getBeregningsgrunnlag());
         var inaktivTidslinje = new PerioderMedInaktivitetUtleder().utled(inaktivitetUtlederInput);
 
         var arbeidstidInput = new ArbeidstidMappingInput()

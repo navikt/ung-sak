@@ -10,6 +10,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -33,14 +34,19 @@ class PerioderMedInaktivitetUtlederTest {
     private PerioderMedInaktivitetUtleder utleder = new PerioderMedInaktivitetUtleder();
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
+    private List<Beregningsgrunnlag> beregningsgrunnlag;
+
+    private final boolean skalDefinereIkkeYrkesaktivFraBg = false;
+
     @BeforeEach
     public void setUp() {
         iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
+        beregningsgrunnlag = List.of(Beregningsgrunnlag.builder().medSkjæringstidspunkt(LocalDate.now()).build());
     }
 
     @Test
     void skal_utlede_tom_tidslinje_hvis_ingen_perioder_er_til_vurdering() {
-        var input = new InaktivitetUtlederInput(AktørId.dummy(), LocalDateTimeline.empty(), null, true);
+        var input = new InaktivitetUtlederInput(AktørId.dummy(), LocalDateTimeline.empty(), null, true, skalDefinereIkkeYrkesaktivFraBg, beregningsgrunnlag);
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).isEmpty();
@@ -61,7 +67,7 @@ class PerioderMedInaktivitetUtlederTest {
         var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
 
         var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, tom, true)));
-        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true);
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, beregningsgrunnlag);
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).hasSize(1);
@@ -89,7 +95,7 @@ class PerioderMedInaktivitetUtlederTest {
         var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
 
         var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, tom, true)));
-        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true);
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, beregningsgrunnlag);
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).hasSize(2);
@@ -138,7 +144,7 @@ class PerioderMedInaktivitetUtlederTest {
         var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
 
         var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, tom, true)));
-        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true);
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, beregningsgrunnlag);
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).hasSize(1);
@@ -175,7 +181,7 @@ class PerioderMedInaktivitetUtlederTest {
         var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
 
         var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, tom, true)));
-        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true);
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, beregningsgrunnlag);
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).hasSize(1);
@@ -208,7 +214,7 @@ class PerioderMedInaktivitetUtlederTest {
         var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
 
         var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, tom, true)));
-        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true);
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, beregningsgrunnlag);
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).hasSize(0);
@@ -229,7 +235,7 @@ class PerioderMedInaktivitetUtlederTest {
         var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
 
         var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, tom, true)));
-        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true);
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, beregningsgrunnlag);
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).hasSize(1);
@@ -256,7 +262,7 @@ class PerioderMedInaktivitetUtlederTest {
         var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
 
         var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, tom, true)));
-        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true);
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, beregningsgrunnlag);
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).hasSize(1);
@@ -279,7 +285,7 @@ class PerioderMedInaktivitetUtlederTest {
         var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
 
         var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom.minusDays(90), tom.minusDays(50), true), new LocalDateSegment<>(fom, tom, true)));
-        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true);
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, beregningsgrunnlag);
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).hasSize(0);
@@ -306,7 +312,7 @@ class PerioderMedInaktivitetUtlederTest {
         var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
 
         var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom.minusDays(90), tom.minusDays(50), true), new LocalDateSegment<>(fom, tom, true)));
-        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true);
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, beregningsgrunnlag);
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).hasSize(0);
@@ -341,7 +347,7 @@ class PerioderMedInaktivitetUtlederTest {
         var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
 
         var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom.minusDays(90), tom.minusDays(50), true), new LocalDateSegment<>(fom, tom, true)));
-        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true);
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, beregningsgrunnlag);
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).hasSize(0);
@@ -375,7 +381,7 @@ class PerioderMedInaktivitetUtlederTest {
         var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
 
         var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom.minusDays(90), tom.minusDays(50), true), new LocalDateSegment<>(fom, tom, true)));
-        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true);
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, beregningsgrunnlag);
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).hasSize(0);
