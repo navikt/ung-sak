@@ -188,6 +188,27 @@ public class BeregningsgrunnlagTjeneste implements BeregningTjeneste {
     }
 
     @Override
+    public List<Beregningsgrunnlag> hentForAllePerioder(BehandlingReferanse ref) {
+        var vilkårene = vilkårTjeneste.hentVilkårResultat(ref.getBehandlingId());
+        var vilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
+
+        List<LocalDate> skjæringstidspunkt = vilkår.getPerioder()
+            .stream()
+            .map(VilkårPeriode::getSkjæringstidspunkt)
+            .collect(Collectors.toList());
+
+        var grunnlag = hentGrunnlag(ref, skjæringstidspunkt);
+
+        return grunnlag
+            .stream()
+            .map(BeregningsgrunnlagGrunnlag::getBeregningsgrunnlag)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .sorted(Comparator.comparing(Beregningsgrunnlag::getSkjæringstidspunkt))
+            .collect(Collectors.toList());
+    }
+
+    @Override
     public List<Beregningsgrunnlag> hentEksaktFastsattForAllePerioder(BehandlingReferanse ref) {
         var vilkårene = vilkårTjeneste.hentVilkårResultat(ref.getBehandlingId());
         var vilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow();
