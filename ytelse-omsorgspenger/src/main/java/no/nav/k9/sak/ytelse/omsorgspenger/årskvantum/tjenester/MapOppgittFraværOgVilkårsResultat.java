@@ -134,15 +134,15 @@ public class MapOppgittFraværOgVilkårsResultat {
             LocalDateTimeline<Boolean> perioderSomTasMedVedInnvilgelse = UTLED_NYOPPSTARTET_VED_REFUSJON
                 ? tidslinjeKunSøktSomNyoppstartet.crossJoin(tidslinjeRefusjonskrav)
                 : tidslinjeKunSøktSomNyoppstartet;
-            LocalDateTimeline<Boolean> perioderSomUansettTasMed = tidslinjeKunSøktSomNyoppstartet;
+            LocalDateTimeline<Boolean> perioderSomSkalHaVilkårsresultatVedAvslag = tidslinjeKunSøktSomNyoppstartet;
 
             log.info("Fraværsperioder:{} ", fraværsTidslinje);
             log.info("Perioder som vurderes ifht nyoppstartet og tas med ved innvilgelse: {} ", perioderSomTasMedVedInnvilgelse);
-            log.info("Perioder som vurderes ifht nyoppstartet og tas med uansett utfall: {} ", perioderSomUansettTasMed);
+            log.info("Perioder som vurderes ifht nyoppstartet og tas med også ved avslag: {} ", perioderSomSkalHaVilkårsresultatVedAvslag);
 
             LocalDateTimeline<Boolean> periodeNyoppstartet = perioderNyoppstartet.getOrDefault(aktivitetId.getArbeidsgiver(), LocalDateTimeline.empty());
             var innvilgetTidslinje = perioderSomTasMedVedInnvilgelse.mapValue(v -> no.nav.k9.aarskvantum.kontrakter.Utfall.INNVILGET).intersection(periodeNyoppstartet);
-            var avslåttTidslinje = perioderSomUansettTasMed.mapValue(v -> no.nav.k9.aarskvantum.kontrakter.Utfall.AVSLÅTT).disjoint(periodeNyoppstartet);
+            var avslåttTidslinje = perioderSomSkalHaVilkårsresultatVedAvslag.mapValue(v -> no.nav.k9.aarskvantum.kontrakter.Utfall.AVSLÅTT).disjoint(periodeNyoppstartet);
             var vurdertTidslinje = innvilgetTidslinje.crossJoin(avslåttTidslinje, StandardCombinators::coalesceLeftHandSide);
             var vurdertTidslinjeWofp = vurdertTidslinje.mapValue(WrappedOppgittFraværPeriode::new);
             var oppdatertFraværTidslinje = fraværTidslinje.crossJoin(vurdertTidslinjeWofp, this::mergePeriode);
