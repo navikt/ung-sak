@@ -21,6 +21,7 @@ import no.nav.folketrygdloven.kalkulus.felles.v1.Utbetalingsgrad;
 import no.nav.folketrygdloven.kalkulus.kodeverk.UttakArbeidType;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
@@ -68,17 +69,23 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
     private PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste;
 
     private PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste;
+    private boolean skalHaInaktivVed847B;
 
     public PleiepengerOgOpplæringspengerGrunnlagMapper() {
         // for proxy
     }
 
     @Inject
-    public PleiepengerOgOpplæringspengerGrunnlagMapper(UttakTjeneste uttakRestKlient, UttakNyeReglerRepository uttakNyeReglerRepository, PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste, @Any PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste) {
+    public PleiepengerOgOpplæringspengerGrunnlagMapper(UttakTjeneste uttakRestKlient,
+                                                       UttakNyeReglerRepository uttakNyeReglerRepository,
+                                                       PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste,
+                                                       @Any PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste,
+                                                       @KonfigVerdi(value = "INAKTIV_VED_8_47_B", defaultVerdi = "false") boolean skalHaInaktivVed847B) {
         this.uttakRestKlient = uttakRestKlient;
         this.uttakNyeReglerRepository = uttakNyeReglerRepository;
         this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
+        this.skalHaInaktivVed847B = skalHaInaktivVed847B;
     }
 
     @Override
@@ -101,7 +108,7 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
         return mapTilYtelseSpesifikkType(ref, utbetalingsgrader, datoForNyeRegler);
     }
 
-    private static List<UtbetalingsgradPrAktivitetDto> finnUtbetalingsgraderFraSøknadsdata(DatoIntervallEntitet vilkårsperiode, Set<KravDokument> kravDokumenter, Set<PerioderFraSøknad> perioderFraSøknadene) {
+    private List<UtbetalingsgradPrAktivitetDto> finnUtbetalingsgraderFraSøknadsdata(DatoIntervallEntitet vilkårsperiode, Set<KravDokument> kravDokumenter, Set<PerioderFraSøknad> perioderFraSøknadene) {
         List<UtbetalingsgradPrAktivitetDto> utbetalingsgrader;
         var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(vilkårsperiode.toLocalDateInterval(), true)));
 
@@ -109,7 +116,7 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
             perioderFraSøknadene,
             timeline,
             null,
-            null);
+            null, skalHaInaktivVed847B);
         var arbeidIPeriode = new MapArbeid().map(arbeidstidInput);
         utbetalingsgrader = arbeidIPeriode.stream()
             .filter(a -> !a.getPerioder().isEmpty())
