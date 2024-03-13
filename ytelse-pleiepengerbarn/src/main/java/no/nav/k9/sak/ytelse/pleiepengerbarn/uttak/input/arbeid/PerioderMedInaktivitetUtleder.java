@@ -57,7 +57,13 @@ public class PerioderMedInaktivitetUtleder {
             .filter(it -> ArbeidType.AA_REGISTER_TYPER.contains(it.getArbeidType()))
             .forEach(yrkesaktivitet -> mapYrkesAktivitet(mellomregning, yrkesaktivitet));
 
-        var arbeidsgivereVedStartPrSkjæringstidspunkt = input.getBeregningsgrunnlag().stream()
+        var arbeidsgivereVedStartPrSkjæringstidspunkt = finnAktiveArbeidsgiverePrSkjæringstidspunktFraBeregning(input);
+        return utledBortfallendeAktiviteterSomSkalFortsattKompenseres(mellomregning, antallArbeidsgivereTidslinje,
+            ikkeAktivTidslinje, arbeidsgivereVedStartPrSkjæringstidspunkt, input.skalDefinereIkkeYrkesaktivFraBg());
+    }
+
+    private static Map<LocalDate, Set<Arbeidsgiver>> finnAktiveArbeidsgiverePrSkjæringstidspunktFraBeregning(InaktivitetUtlederInput input) {
+        return input.getBeregningsgrunnlag().stream()
             .filter(bg -> !bg.getBeregningsgrunnlagPerioder().isEmpty())
             .collect(
                 Collectors.toMap(
@@ -72,10 +78,6 @@ public class PerioderMedInaktivitetUtleder {
                         .collect(Collectors.toSet())
                 )
             );
-
-
-        return utledBortfallendeAktiviteterSomSkalFortsattKompenseres(mellomregning, antallArbeidsgivereTidslinje,
-            ikkeAktivTidslinje, arbeidsgivereVedStartPrSkjæringstidspunkt, input.skalDefinereIkkeYrkesaktivFraBg());
     }
 
 
@@ -87,7 +89,7 @@ public class PerioderMedInaktivitetUtleder {
         var resultat = new HashMap<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>>();
         for (LocalDateSegment<Boolean> periodeMedYtelse : ikkeAktivTidslinje.toSegments()) {
 
-            var filtrertEntrySet = finnFiltrertEntryset(mellomregning, arbeidsgivereVedStartPrSkjæringstidspunkt, skalDefinereIkkeYrkesaktivFraBg, periodeMedYtelse);
+            var filtrertEntrySet = finnEntriesForArbeidsgivereVedSkjæringstidspunktet(mellomregning, arbeidsgivereVedStartPrSkjæringstidspunkt, skalDefinereIkkeYrkesaktivFraBg, periodeMedYtelse);
             for (Map.Entry<AktivitetIdentifikator, LocalDateTimeline<Boolean>> aktivitet : filtrertEntrySet) {
                 var arbeidsforholdUtenStartPåStp = aktivitet.getValue()
                     .toSegments()
@@ -124,7 +126,7 @@ public class PerioderMedInaktivitetUtleder {
         return resultat;
     }
 
-    private static Set<Map.Entry<AktivitetIdentifikator, LocalDateTimeline<Boolean>>> finnFiltrertEntryset(HashMap<AktivitetIdentifikator, LocalDateTimeline<Boolean>> mellomregning, Map<LocalDate, Set<Arbeidsgiver>> arbeidsgivereVedStartPrSkjæringstidspunkt, boolean skalDefinereIkkeYrkesaktivFraBg, LocalDateSegment<Boolean> periodeMedYtelse) {
+    private static Set<Map.Entry<AktivitetIdentifikator, LocalDateTimeline<Boolean>>> finnEntriesForArbeidsgivereVedSkjæringstidspunktet(HashMap<AktivitetIdentifikator, LocalDateTimeline<Boolean>> mellomregning, Map<LocalDate, Set<Arbeidsgiver>> arbeidsgivereVedStartPrSkjæringstidspunkt, boolean skalDefinereIkkeYrkesaktivFraBg, LocalDateSegment<Boolean> periodeMedYtelse) {
         var arbeidsgivereSomInngårIBeregningsgrunnlaget = arbeidsgivereVedStartPrSkjæringstidspunkt.get(periodeMedYtelse.getFom());
         return mellomregning.entrySet()
             .stream()
