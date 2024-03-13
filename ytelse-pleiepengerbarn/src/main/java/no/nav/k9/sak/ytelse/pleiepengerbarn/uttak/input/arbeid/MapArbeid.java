@@ -119,7 +119,7 @@ public class MapArbeid {
 
         List<VilkårPeriode> midlertidigInaktivVilkårsperioder = vilkår != null ? vilkår.getPerioder().stream()
             .filter(it -> it.getPeriode().overlapper(periode))
-            .filter(it -> Objects.equals(VilkårUtfallMerknad.VM_7847_A, it.getMerknad()) || (input.skalAlltidHaInaktivVed_8_47_B() && Objects.equals(VilkårUtfallMerknad.VM_7847_B, it.getMerknad())))
+            .filter(it -> Objects.equals(VilkårUtfallMerknad.VM_7847_A, it.getMerknad()) || Objects.equals(VilkårUtfallMerknad.VM_7847_B, it.getMerknad()))
             .collect(Collectors.toList()) : List.of();
 
         mapInaktivePerioder(arbeidsforhold, midlertidigInaktivVilkårsperioder);
@@ -157,7 +157,7 @@ public class MapArbeid {
 
         List<VilkårPeriode> midlertidigInaktivVilkårsperioder = vilkår != null ? vilkår.getPerioder().stream()
             .filter(it -> it.getPeriode().overlapper(periode))
-            .filter(it -> Objects.equals(VilkårUtfallMerknad.VM_7847_A, it.getMerknad()) || Objects.equals(VilkårUtfallMerknad.VM_7847_B, it.getMerknad()))
+            .filter(it -> Objects.equals(VilkårUtfallMerknad.VM_7847_A, it.getMerknad()) || (input.skalAlltidHaInaktivVed_8_47_B() && Objects.equals(VilkårUtfallMerknad.VM_7847_B, it.getMerknad())))
             .collect(Collectors.toList()) : List.of();
 
         List<VilkårPeriode> dagpengerPåSkjæringstidspunktet = vilkår != null ? vilkår.getPerioder().stream()
