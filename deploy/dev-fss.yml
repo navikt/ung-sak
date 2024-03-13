@@ -286,8 +286,6 @@ spec:
       value: "true"
     - name: DOKUMENTMOTTAK_VALIDER_JOURNALFORT
       value: "true"
-    - name: UTVIDET_ENDRING_UTBETALING_UTLEDER
-      value: "true"
     - name: ENABLE_INNSYN_ENDRING_OBSERVER
       value: "true"
     - name: KODEVERK_SOM_STRING_TOPICS
@@ -295,10 +293,6 @@ spec:
     - name: K9_ABAKUS_ENABLED
       value: "true"
     - name: AAPEN_PUNSJOPPGAVE_STOPPER_AUTOMATISK_VEDTAK
-      value: "true"
-    - name: IKKE_YRKESAKTIV_FRA_BG
-      value: "true"
-    - name: KOFAK_UTTAK_BEGRENSET_PERIODE
       value: "true"
     - name: INAKTIV_VED_8_47_B
       value: "true"

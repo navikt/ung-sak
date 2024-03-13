@@ -10,23 +10,18 @@ import no.nav.k9.sak.typer.AktørId;
 public class InaktivitetUtlederInput {
 
     private final boolean skalKjøreNyLogikkForSpeiling;
-
-    private final boolean skalDefinereIkkeYrkesaktivFraBg;
-
     private AktørId brukerAktørId;
     private LocalDateTimeline<Boolean> tidslinjeTilVurdering;
     private InntektArbeidYtelseGrunnlag iayGrunnlag;
-
     private List<Beregningsgrunnlag> beregningsgrunnlag;
 
 
 
-    public InaktivitetUtlederInput(AktørId brukerAktørId, LocalDateTimeline<Boolean> tidslinjeTilVurdering, InntektArbeidYtelseGrunnlag iayGrunnlag, boolean skalKjøreNyLogikkForSpeiling, boolean skalDefinereIkkeYrkesaktivFraBg, List<Beregningsgrunnlag> beregningsgrunnlag) {
+    public InaktivitetUtlederInput(AktørId brukerAktørId, LocalDateTimeline<Boolean> tidslinjeTilVurdering, InntektArbeidYtelseGrunnlag iayGrunnlag, boolean skalKjøreNyLogikkForSpeiling, List<Beregningsgrunnlag> beregningsgrunnlag) {
         this.brukerAktørId = brukerAktørId;
         this.tidslinjeTilVurdering = tidslinjeTilVurdering;
         this.iayGrunnlag = iayGrunnlag;
         this.skalKjøreNyLogikkForSpeiling = skalKjøreNyLogikkForSpeiling;
-        this.skalDefinereIkkeYrkesaktivFraBg = skalDefinereIkkeYrkesaktivFraBg;
         this.beregningsgrunnlag = beregningsgrunnlag;
     }
 
@@ -50,8 +45,5 @@ public class InaktivitetUtlederInput {
         return skalKjøreNyLogikkForSpeiling;
     }
 
-    public boolean skalDefinereIkkeYrkesaktivFraBg() {
-        return skalDefinereIkkeYrkesaktivFraBg;
-    }
 
 }
