@@ -129,16 +129,20 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
                 .crossJoin(datoNyeReglerTidslinje, StandardCombinators::coalesceLeftHandSide)
                 .compress();
             tidslinje = fyllMellomromDersomKunHelg(tidslinje).compress();
-
             return finnUttaksendringerSomOverlapperEllerErKantiKantMedPerioden(vilkårsperiode, tidslinje);
         } else {
             var tidslinje = finnÅrsakstidslinje(behandlingReferanse, vilkårsperiode);
             var perioderMedRelevantEndring = finnPerioderRelevantForAktuellVilkårsperiode(behandlingReferanse, vilkårsperiode, tidslinje);
-            var fomDato = perioderMedRelevantEndring.stream().map(DatoIntervallEntitet::getFomDato)
-                .filter(fom -> fom.isBefore(vilkårsperiode.getTomDato()))
-                .min(Comparator.naturalOrder());
-            return fomDato.map(localDate -> new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(localDate, vilkårsperiode.getTomDato())))).orElseGet(TreeSet::new);
+            // Grunnet problematikk rundt flipping av status fra aktiv til ikke-yrkesaktiv (se https://jira.adeo.no/browse/TSFF-278)
+            return inkluderHelePeriodenEtterFørsteEndringsdato(vilkårsperiode, perioderMedRelevantEndring);
         }
+    }
+    
+    private static TreeSet<DatoIntervallEntitet> inkluderHelePeriodenEtterFørsteEndringsdato(DatoIntervallEntitet vilkårsperiode, NavigableSet<DatoIntervallEntitet> perioderMedRelevantEndring) {
+        var fomDato = perioderMedRelevantEndring.stream().map(DatoIntervallEntitet::getFomDato)
+            .filter(fom -> fom.isBefore(vilkårsperiode.getTomDato()))
+            .min(Comparator.naturalOrder());
+        return fomDato.map(localDate -> new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(localDate, vilkårsperiode.getTomDato())))).orElseGet(TreeSet::new);
     }
 
     public LocalDateTimeline<Set<EndringsårsakUtbetaling>> finnÅrsakstidslinje(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsperiode) {
