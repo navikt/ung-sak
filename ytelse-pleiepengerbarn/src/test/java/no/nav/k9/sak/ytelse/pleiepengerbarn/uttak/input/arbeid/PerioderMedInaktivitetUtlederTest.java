@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid;
 
+import static no.nav.k9.kodeverk.uttak.Tid.TIDENES_ENDE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
@@ -10,10 +11,14 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.BGAndelArbeidsforhold;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
@@ -34,19 +39,19 @@ class PerioderMedInaktivitetUtlederTest {
     private PerioderMedInaktivitetUtleder utleder = new PerioderMedInaktivitetUtleder();
     private InntektArbeidYtelseTjeneste iayTjeneste;
 
-    private List<Beregningsgrunnlag> beregningsgrunnlag;
+    private List<Beregningsgrunnlag> dummyBG;
 
     private final boolean skalDefinereIkkeYrkesaktivFraBg = false;
 
     @BeforeEach
     public void setUp() {
         iayTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
-        beregningsgrunnlag = List.of(Beregningsgrunnlag.builder().medSkjæringstidspunkt(LocalDate.now()).build());
+        dummyBG = List.of(Beregningsgrunnlag.builder().medSkjæringstidspunkt(LocalDate.now()).build());
     }
 
     @Test
     void skal_utlede_tom_tidslinje_hvis_ingen_perioder_er_til_vurdering() {
-        var input = new InaktivitetUtlederInput(AktørId.dummy(), LocalDateTimeline.empty(), null, true, skalDefinereIkkeYrkesaktivFraBg, beregningsgrunnlag);
+        var input = new InaktivitetUtlederInput(AktørId.dummy(), LocalDateTimeline.empty(), null, true, skalDefinereIkkeYrkesaktivFraBg, dummyBG);
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).isEmpty();
@@ -67,7 +72,7 @@ class PerioderMedInaktivitetUtlederTest {
         var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
 
         var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, tom, true)));
-        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, beregningsgrunnlag);
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, dummyBG);
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).hasSize(1);
@@ -95,7 +100,7 @@ class PerioderMedInaktivitetUtlederTest {
         var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
 
         var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, tom, true)));
-        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, beregningsgrunnlag);
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, dummyBG);
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).hasSize(2);
@@ -144,7 +149,7 @@ class PerioderMedInaktivitetUtlederTest {
         var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
 
         var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, tom, true)));
-        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, beregningsgrunnlag);
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, dummyBG);
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).hasSize(1);
@@ -181,7 +186,7 @@ class PerioderMedInaktivitetUtlederTest {
         var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
 
         var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, tom, true)));
-        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, beregningsgrunnlag);
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, dummyBG);
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).hasSize(1);
@@ -214,7 +219,7 @@ class PerioderMedInaktivitetUtlederTest {
         var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
 
         var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, tom, true)));
-        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, beregningsgrunnlag);
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, dummyBG);
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).hasSize(0);
@@ -235,7 +240,7 @@ class PerioderMedInaktivitetUtlederTest {
         var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
 
         var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, tom, true)));
-        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, beregningsgrunnlag);
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, dummyBG);
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).hasSize(1);
@@ -244,6 +249,70 @@ class PerioderMedInaktivitetUtlederTest {
         assertThat(segmenter).contains(new LocalDateInterval(fom, tom));
         assertThat(key.getAktivitetType()).isEqualTo(UttakArbeidType.IKKE_YRKESAKTIV_UTEN_ERSTATNING);
     }
+
+    @Test
+    void skal_utlede_aktivitet_hvis_ikke_aktivitet_slutter_dagen_før_stp_og_finnes_i_bg() {
+        var fom = LocalDate.now();
+        var tom = LocalDate.now().plusDays(14);
+        var builder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
+        var brukerAktørId = AktørId.dummy();
+        iayTjeneste.lagreIayAggregat(DUMMY_BEHANDLING_ID, builder.leggTilAktørArbeid(builder.getAktørArbeidBuilder(brukerAktørId)
+            .leggTilYrkesaktivitet(YrkesaktivitetBuilder.oppdatere(Optional.empty())
+                .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
+                .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+                .leggTilAktivitetsAvtale(AktivitetsAvtaleBuilder.ny()
+                    .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom.minusDays(10), fom.minusDays(1)))))));
+        var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
+
+
+        var bg = Beregningsgrunnlag.builder().medSkjæringstidspunkt(fom).build();
+        var periode = BeregningsgrunnlagPeriode.builder().medBeregningsgrunnlagPeriode(fom, TIDENES_ENDE).build(bg);
+        BeregningsgrunnlagPrStatusOgAndel.builder()
+            .medAndelsnr(1L).medBGAndelArbeidsforhold(BGAndelArbeidsforhold.builder().medArbeidsgiver(Arbeidsgiver.virksomhet("000000000")))
+            .medAktivitetStatus(AktivitetStatus.ARBEIDSTAKER)
+            .build(periode);
+
+        var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, tom, true)));
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, true, List.of(bg));
+        var utledetTidslinje = utleder.utled(input);
+
+        assertThat(utledetTidslinje).hasSize(1);
+        var key = utledetTidslinje.keySet().iterator().next();
+        var segmenter = utledetTidslinje.get(key).toSegments().stream().map(LocalDateSegment::getLocalDateInterval).toList();
+        assertThat(segmenter).contains(new LocalDateInterval(fom, tom));
+        assertThat(key.getAktivitetType()).isEqualTo(UttakArbeidType.IKKE_YRKESAKTIV_UTEN_ERSTATNING);
+    }
+
+    @Test
+    void skal_ikke_utlede_aktivitet_hvis_ikke_finnes_i_bg() {
+        var fom = LocalDate.now();
+        var tom = LocalDate.now().plusDays(14);
+        var builder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
+        var brukerAktørId = AktørId.dummy();
+        iayTjeneste.lagreIayAggregat(DUMMY_BEHANDLING_ID, builder.leggTilAktørArbeid(builder.getAktørArbeidBuilder(brukerAktørId)
+            .leggTilYrkesaktivitet(YrkesaktivitetBuilder.oppdatere(Optional.empty())
+                .medArbeidsgiver(Arbeidsgiver.virksomhet("000000000"))
+                .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
+                .leggTilAktivitetsAvtale(AktivitetsAvtaleBuilder.ny()
+                    .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fom.minusDays(10), fom.minusDays(1)))))));
+        var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
+
+
+        var bg = Beregningsgrunnlag.builder().medSkjæringstidspunkt(fom).build();
+        var periode = BeregningsgrunnlagPeriode.builder().medBeregningsgrunnlagPeriode(fom, TIDENES_ENDE).build(bg);
+        BeregningsgrunnlagPrStatusOgAndel.builder()
+            .medAndelsnr(1L).medBGAndelArbeidsforhold(BGAndelArbeidsforhold.builder().medArbeidsgiver(Arbeidsgiver.virksomhet("000000001")))
+            .medAktivitetStatus(AktivitetStatus.ARBEIDSTAKER)
+            .build(periode);
+
+        var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, tom, true)));
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, true, List.of(bg));
+        var utledetTidslinje = utleder.utled(input);
+
+        assertThat(utledetTidslinje).hasSize(0);
+    }
+
+
 
     @Test
     void skal_utlede_aktivitet_hvis_ikke_periode_med_ikke_aktiv_midt_inne_i_ytelse() {
@@ -262,7 +331,7 @@ class PerioderMedInaktivitetUtlederTest {
         var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
 
         var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, tom, true)));
-        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, beregningsgrunnlag);
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, dummyBG);
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).hasSize(1);
@@ -285,7 +354,7 @@ class PerioderMedInaktivitetUtlederTest {
         var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
 
         var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom.minusDays(90), tom.minusDays(50), true), new LocalDateSegment<>(fom, tom, true)));
-        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, beregningsgrunnlag);
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, dummyBG);
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).hasSize(0);
@@ -312,7 +381,7 @@ class PerioderMedInaktivitetUtlederTest {
         var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
 
         var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom.minusDays(90), tom.minusDays(50), true), new LocalDateSegment<>(fom, tom, true)));
-        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, beregningsgrunnlag);
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, dummyBG);
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).hasSize(0);
@@ -347,7 +416,7 @@ class PerioderMedInaktivitetUtlederTest {
         var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
 
         var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom.minusDays(90), tom.minusDays(50), true), new LocalDateSegment<>(fom, tom, true)));
-        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, beregningsgrunnlag);
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, dummyBG);
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).hasSize(0);
@@ -381,7 +450,7 @@ class PerioderMedInaktivitetUtlederTest {
         var grunnlag = iayTjeneste.hentGrunnlag(DUMMY_BEHANDLING_ID);
 
         var periodeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom.minusDays(90), tom.minusDays(50), true), new LocalDateSegment<>(fom, tom, true)));
-        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, beregningsgrunnlag);
+        var input = new InaktivitetUtlederInput(brukerAktørId, periodeTilVurdering, grunnlag, true, skalDefinereIkkeYrkesaktivFraBg, dummyBG);
         var utledetTidslinje = utleder.utled(input);
 
         assertThat(utledetTidslinje).hasSize(0);
