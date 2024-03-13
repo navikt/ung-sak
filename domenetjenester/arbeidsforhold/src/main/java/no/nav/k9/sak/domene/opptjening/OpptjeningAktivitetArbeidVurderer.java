@@ -1,5 +1,7 @@
 package no.nav.k9.sak.domene.opptjening;
 
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +26,7 @@ class OpptjeningAktivitetArbeidVurderer {
         var tidslinjePerYtelse = input.getTidslinjePerYtelse();
         var vilkårsperiode = input.getVilkårsperiode();
         // Permisjoner på yrkesaktivitet
-        LocalDateTimeline<Boolean> tidslinjeTilVurdering = PermisjonPerYrkesaktivitet.utledPermisjonPerYrkesaktivitet(yrkesaktivitet, tidslinjePerYtelse, vilkårsperiode);
+        LocalDateTimeline<Boolean> tidslinjeTilVurdering = PermisjonPerYrkesaktivitet.utledPermisjonPerYrkesaktivitet(yrkesaktivitet, tidslinjePerYtelse, Set.of(vilkårsperiode));
 
         // Vurder kun permisjonsperioder som overlapper aktivitetens lengde
 

@@ -43,6 +43,7 @@ public enum HistorikkinnslagType implements Kodeverdi {
     MANGELFULL_SØKNAD("MANGELFULL_SØKNAD", "Mangelfull søknad", HistorikkinnslagMal.MAL_TYPE_1),
     KØET_BEH_GJEN("KØET_BEH_GJEN", "Køet behandling er gjenopptatt", HistorikkinnslagMal.MAL_TYPE_1),
     SØKNADSFRIST_VURDERT("SØKNADSFRIST_VURDERT", "Søknadsfrist manuelt vurdert:", HistorikkinnslagMal.MAL_TYPE_1),
+    FORTSETT_UTEN_Å_VENTE_PÅ_TILBAKEKREVING("FORTSETT_UTEN_Å_VENTE_PÅ_TILBAKEKREVING", "Fortsetter behandlingen uten å behandle tilbakekrevingsaken først", HistorikkinnslagMal.MAL_TYPE_1),
 
     // Mal Type 2
     VEDTAK_FATTET("VEDTAK_FATTET", "Vedtak fattet", HistorikkinnslagMal.MAL_TYPE_2),

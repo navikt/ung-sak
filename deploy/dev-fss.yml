@@ -75,8 +75,6 @@ spec:
         - application: k9-formidling-dokumentdata
         - application: k9-punsj
         - application: k9-abakus
-        - application: fpabakus
-          namespace: teamforeldrepenger
         - application: k9-punsjbolle
           namespace: omsorgspenger
           cluster: dev-gcp
@@ -155,10 +153,6 @@ spec:
       value: OMS
 
     # Restservice Generelle
-    - name: FPABAKUS_URL
-      value: http://fpabakus.teamforeldrepenger/fpabakus
-    - name: FPABAKUS_SCOPE
-      value: api://dev-fss.teamforeldrepenger.fpabakus/.default
     - name: K9ABAKUS_URL
       value: http://k9-abakus.k9saksbehandling/k9/abakus
     - name: K9ABAKUS_SCOPE
@@ -299,6 +293,10 @@ spec:
     - name: KODEVERK_SOM_STRING_TOPICS
       value: "true"
     - name: K9_ABAKUS_ENABLED
+      value: "true"
+    - name: AAPEN_PUNSJOPPGAVE_STOPPER_AUTOMATISK_VEDTAK
+      value: "true"
+    - name: KOFAK_UTTAK_BEGRENSET_PERIODE
       value: "true"
 
 

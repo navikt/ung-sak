@@ -38,8 +38,10 @@ import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.KravDokumentType;
 import no.nav.k9.sak.perioder.SøknadsfristTjenesteProvider;
 import no.nav.k9.sak.perioder.SøktPeriode;
+import no.nav.k9.sak.perioder.UtledPerioderMedRegisterendring;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
+import no.nav.k9.sak.registerendringer.IngenRelevanteEndringer;
 import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -67,7 +69,9 @@ class RevurderingMetrikkRepositoryTest {
         when(søknadsfristTjeneste.relevanteKravdokumentForBehandling(any()))
             .thenReturn(Set.of());
         revurderingMetrikkRepository = new RevurderingMetrikkRepository(entityManager, new BehandlingRepository(entityManager),
-            new SøknadsfristTjenesteProvider(new UnitTestLookupInstanceImpl<>(søknadsfristTjeneste)), new UnitTestLookupInstanceImpl<>(vilkårsPerioderTilVurderingTjeneste));
+            new SøknadsfristTjenesteProvider(new UnitTestLookupInstanceImpl<>(søknadsfristTjeneste)),
+            new UtledPerioderMedRegisterendring(new UnitTestLookupInstanceImpl<>(new IngenRelevanteEndringer())),
+            new UnitTestLookupInstanceImpl<>(vilkårsPerioderTilVurderingTjeneste));
         aksjonspunktKontrollRepository = new AksjonspunktKontrollRepository();
         vilkårResultatRepository = new VilkårResultatRepository(entityManager);
     }
@@ -247,7 +251,6 @@ class RevurderingMetrikkRepositoryTest {
     }
 
 
-
     @Test
     void skal_ikke_finne_behandling_dersom_nytt_stp() {
 
@@ -284,7 +287,7 @@ class RevurderingMetrikkRepositoryTest {
 
         assertThat(revurderingMetrikkRepository.antallAksjonspunktFordelingForRevurderingUtenNyttStpSisteSyvDager(LocalDate.now().plusDays(1))).isNotEmpty()
             .allMatch(v -> v.toString().contains("revurdering_uten_nye_stp_antall_aksjonspunkt_fordeling"))
-            .allMatch(v ->v.toString().contains("antall_behandlinger=0"));
+            .allMatch(v -> v.toString().contains("antall_behandlinger=0"));
 
     }
 
@@ -491,7 +494,6 @@ class RevurderingMetrikkRepositoryTest {
         behandling.avsluttBehandling();
 
 
-
         AksjonspunktDefinisjon aksjonspunkt = AksjonspunktDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_SELVSTENDIG_NÆRINGSDRIVENDE;
         BehandlingStegType stegType = BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG;
 
@@ -528,7 +530,8 @@ class RevurderingMetrikkRepositoryTest {
             .anyMatch(v -> v.toString().contains("antall_revurderinger_uten_nytt_stp_pr_antall_perioder") && v.toString().contains("ytelse_type=PSB") && v.toString().contains("antall_behandlinger=1")
                 && v.toString().contains("antall_perioder=1") && v.toString().contains("behandlinger_prosentandel=100"))
             .anyMatch(v -> v.toString().contains("antall_revurderinger_uten_nytt_stp_pr_aarsak") && v.toString().contains("ytelse_type=PSB") && v.toString().contains("aarsak=FØRSTEGANGSVURDERING")
-                && v.toString().contains("antall_behandlinger=1") && v.toString().contains("behandlinger_prosentandel=100"));;
+                && v.toString().contains("antall_behandlinger=1") && v.toString().contains("behandlinger_prosentandel=100"));
+        ;
 
     }
 
@@ -542,7 +545,6 @@ class RevurderingMetrikkRepositoryTest {
         var vilkårene = vilkårResultatBuilder.build();
         vilkårResultatRepository.lagre(behandling.getId(), vilkårene);
     }
-
 
 
 }

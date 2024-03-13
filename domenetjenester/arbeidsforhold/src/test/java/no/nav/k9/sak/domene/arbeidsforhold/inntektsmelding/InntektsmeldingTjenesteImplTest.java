@@ -19,14 +19,14 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
@@ -83,7 +83,6 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -274,7 +273,7 @@ public class InntektsmeldingTjenesteImplTest {
         // Act+Assert
         BehandlingReferanse refRevurdering = lagReferanse(revurdering);
         List<Inntektsmelding> inntektsmeldingerEtterGjeldendeVedtak = inntektsmeldingTjeneste
-            .hentAlleInntektsmeldingerMottattEtterGjeldendeVedtak(refRevurdering);
+            .hentInntektsmeldingerMottattEtterGjeldendeVedtak(refRevurdering);
         assertThat(inntektsmeldingerEtterGjeldendeVedtak).hasSize(2);
         assertThat(erDisjonkteListerAvInntektsmeldinger(inntektsmeldingerFørGjeldendeVedtak, inntektsmeldingerEtterGjeldendeVedtak)).isTrue();
     }

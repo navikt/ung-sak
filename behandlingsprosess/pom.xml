@@ -36,6 +36,10 @@
 			<groupId>no.nav.k9.sak</groupId>
 			<artifactId>vedtak</artifactId>
 		</dependency>
+        <dependency>
+            <groupId>no.nav.k9.sak</groupId>
+            <artifactId>punsj</artifactId>
+        </dependency>
 
 		<dependency>
 			<groupId>no.nav.k9.felles.integrasjon</groupId>
