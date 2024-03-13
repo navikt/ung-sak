@@ -384,7 +384,7 @@
             <dependency>
                 <groupId>no.nav.pleiepengerbarn.uttak</groupId>
                 <artifactId>kontrakter</artifactId>
-                <version>1.4.2</version>
+                <version>1.5.0</version>
             </dependency>
 
             <dependency>
