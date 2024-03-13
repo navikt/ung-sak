@@ -137,10 +137,10 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
             return inkluderHelePeriodenEtterFørsteEndringsdato(vilkårsperiode, perioderMedRelevantEndring);
         }
     }
-    
+
     private static TreeSet<DatoIntervallEntitet> inkluderHelePeriodenEtterFørsteEndringsdato(DatoIntervallEntitet vilkårsperiode, NavigableSet<DatoIntervallEntitet> perioderMedRelevantEndring) {
         var fomDato = perioderMedRelevantEndring.stream().map(DatoIntervallEntitet::getFomDato)
-            .filter(fom -> fom.isBefore(vilkårsperiode.getTomDato()))
+            .filter(fom -> !fom.isAfter(vilkårsperiode.getTomDato()))
             .min(Comparator.naturalOrder());
         return fomDato.map(localDate -> new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(localDate, vilkårsperiode.getTomDato())))).orElseGet(TreeSet::new);
     }
