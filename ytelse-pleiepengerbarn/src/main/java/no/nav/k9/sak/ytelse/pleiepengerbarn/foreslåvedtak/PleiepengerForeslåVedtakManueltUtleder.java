@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.formidling.kontrakt.informasjonsbehov.InformasjonsbehovListeDto;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -28,18 +27,14 @@ public class PleiepengerForeslåVedtakManueltUtleder implements ForeslåVedtakMa
     private K9FormidlingKlient formidlingKlient;
     private PunsjRestKlient punsjKlient;
 
-    private boolean åpenPunsjoppgaveStopperAutomatiskVedtak;
-
     PleiepengerForeslåVedtakManueltUtleder() {
         //for CDI proxy
     }
 
     @Inject
-    public PleiepengerForeslåVedtakManueltUtleder(K9FormidlingKlient formidlingKlient, PunsjRestKlient punsjKlient,
-                                                  @KonfigVerdi(value = "AAPEN_PUNSJOPPGAVE_STOPPER_AUTOMATISK_VEDTAK", defaultVerdi = "false") boolean åpenPunsjoppgaveStopperAutomatiskVedtak) {
+    public PleiepengerForeslåVedtakManueltUtleder(K9FormidlingKlient formidlingKlient, PunsjRestKlient punsjKlient) {
         this.formidlingKlient = formidlingKlient;
         this.punsjKlient = punsjKlient;
-        this.åpenPunsjoppgaveStopperAutomatiskVedtak = åpenPunsjoppgaveStopperAutomatiskVedtak;
     }
 
     @Override
@@ -57,9 +52,6 @@ public class PleiepengerForeslåVedtakManueltUtleder implements ForeslåVedtakMa
     }
 
     private boolean harOppgaveIPunsj(Behandling behandling) {
-        if (!åpenPunsjoppgaveStopperAutomatiskVedtak) {
-            return false;
-        }
         var uferdigJournalpostIderPåAktør = punsjKlient.getUferdigJournalpostIderPåAktør(behandling.getAktørId().getAktørId(), behandling.getFagsak().getPleietrengendeAktørId().getAktørId());
         boolean harPunsjoppgave = uferdigJournalpostIderPåAktør.isPresent()
             && (!uferdigJournalpostIderPåAktør.get().getJournalpostIder().isEmpty() || !uferdigJournalpostIderPåAktør.get().getJournalpostIderBarn().isEmpty());
