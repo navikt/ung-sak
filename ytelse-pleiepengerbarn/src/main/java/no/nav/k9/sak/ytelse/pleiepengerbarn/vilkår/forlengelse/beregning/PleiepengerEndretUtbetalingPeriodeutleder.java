@@ -2,7 +2,6 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.beregning;
 
 import static java.lang.Boolean.TRUE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 import static no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.beregning.EndringsårsakUtbetaling.ENDRING_I_DATO_NYE_UTTAK_REGLER;
 import static no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.beregning.EndringsårsakUtbetaling.ENDRING_I_PERSONOPPLYSNING_PLEIETRENGENDE;
@@ -130,14 +129,20 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
                 .crossJoin(datoNyeReglerTidslinje, StandardCombinators::coalesceLeftHandSide)
                 .compress();
             tidslinje = fyllMellomromDersomKunHelg(tidslinje).compress();
-
             return finnUttaksendringerSomOverlapperEllerErKantiKantMedPerioden(vilkårsperiode, tidslinje);
         } else {
             var tidslinje = finnÅrsakstidslinje(behandlingReferanse, vilkårsperiode);
-            return finnPerioderRelevantForAktuellVilkårsperiode(behandlingReferanse, vilkårsperiode, tidslinje);
+            var perioderMedRelevantEndring = finnPerioderRelevantForAktuellVilkårsperiode(behandlingReferanse, vilkårsperiode, tidslinje);
+            // Grunnet problematikk rundt flipping av status fra aktiv til ikke-yrkesaktiv (se https://jira.adeo.no/browse/TSFF-278)
+            return inkluderHelePeriodenEtterFørsteEndringsdato(vilkårsperiode, perioderMedRelevantEndring);
         }
-
-
+    }
+    
+    private static TreeSet<DatoIntervallEntitet> inkluderHelePeriodenEtterFørsteEndringsdato(DatoIntervallEntitet vilkårsperiode, NavigableSet<DatoIntervallEntitet> perioderMedRelevantEndring) {
+        var fomDato = perioderMedRelevantEndring.stream().map(DatoIntervallEntitet::getFomDato)
+            .filter(fom -> fom.isBefore(vilkårsperiode.getTomDato()))
+            .min(Comparator.naturalOrder());
+        return fomDato.map(localDate -> new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(localDate, vilkårsperiode.getTomDato())))).orElseGet(TreeSet::new);
     }
 
     public LocalDateTimeline<Set<EndringsårsakUtbetaling>> finnÅrsakstidslinje(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsperiode) {
