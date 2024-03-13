@@ -290,6 +290,8 @@ spec:
       value: "true"
     - name: IKKE_YRKESAKTIV_FRA_BG
       value: "false"
+    - name: KOFAK_UTTAK_BEGRENSET_PERIODE
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
