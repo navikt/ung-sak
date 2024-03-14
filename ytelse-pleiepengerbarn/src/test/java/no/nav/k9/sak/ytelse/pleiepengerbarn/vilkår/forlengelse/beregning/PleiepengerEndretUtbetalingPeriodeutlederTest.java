@@ -76,7 +76,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.PleietrengendeRe
 class PleiepengerEndretUtbetalingPeriodeutlederTest {
 
     public static final String ORGANISASJONSNUMMER = "123456789";
-    public static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.now();
+    public static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.of(2024, 3, 14);
     public static final String JOURNALPOST_ID = "123567324234";
     @Inject
     private EntityManager entityManager;
@@ -278,7 +278,28 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
 
         assertThat(forlengelseperioder.size()).isEqualTo(1);
         var periode = forlengelseperioder.iterator().next();
-        assertThat(periode.getFomDato()).isEqualTo(SKJÆRINGSTIDSPUNKT.plusDays(dagerEtterSTPSøknadFom));
+        assertThat(periode.getFomDato()).isEqualTo(mandagenFør(SKJÆRINGSTIDSPUNKT.plusDays(dagerEtterSTPSøknadFom)));
+        assertThat(periode.getTomDato()).isEqualTo(SKJÆRINGSTIDSPUNKT.plusDays(antallDager));
+    }
+
+
+    @Test
+    void skal_returnere_fom_dato_lik_stp_dersom_mandagen_før_ligger_utenfor_periode() {
+        var fom = SKJÆRINGSTIDSPUNKT;
+        var dagerEtterSTPSøknadFom = 1;
+        var antallDager = 10;
+
+        var søknadsperiode = new Søknadsperiode(SKJÆRINGSTIDSPUNKT.plusDays(dagerEtterSTPSøknadFom), SKJÆRINGSTIDSPUNKT.plusDays(antallDager));
+        var søknadsperioder = new Søknadsperioder(new JournalpostId(JOURNALPOST_ID), søknadsperiode);
+        søknadsperiodeRepository.lagre(behandling.getId(), søknadsperioder);
+        søknadsperiodeRepository.lagreRelevanteSøknadsperioder(behandling.getId(), new SøknadsperioderHolder(søknadsperioder));
+
+
+        var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.plusDays(antallDager)));
+
+        assertThat(forlengelseperioder.size()).isEqualTo(1);
+        var periode = forlengelseperioder.iterator().next();
+        assertThat(periode.getFomDato()).isEqualTo(SKJÆRINGSTIDSPUNKT);
         assertThat(periode.getTomDato()).isEqualTo(SKJÆRINGSTIDSPUNKT.plusDays(antallDager));
     }
 
@@ -347,7 +368,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
 
         assertThat(forlengelseperioder.size()).isEqualTo(1);
         var periode = forlengelseperioder.iterator().next();
-        assertThat(periode.getFomDato()).isEqualTo(fomHull);
+        assertThat(periode.getFomDato()).isEqualTo(mandagenFør(fomHull));
         assertThat(periode.getTomDato()).isEqualTo(tom2);
     }
 
@@ -390,7 +411,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
 
         assertThat(forlengelseperioder.size()).isEqualTo(1);
         var periode = forlengelseperioder.iterator().next();
-        assertThat(periode.getFomDato()).isEqualTo(fomHull);
+        assertThat(periode.getFomDato()).isEqualTo(mandagenFør(fomHull));
         assertThat(periode.getTomDato()).isEqualTo(tom2);
     }
 
@@ -480,6 +501,11 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
                 .medLand("Sverige").medPostnummer("1234"))
             .leggTil(informasjonBuilder
                 .getStatsborgerskapBuilder(aktørId, DatoIntervallEntitet.fraOgMed(fødselsdato), Landkoder.NOR, Region.NORDEN));
+    }
+
+
+    private static LocalDate mandagenFør(LocalDate d) {
+        return d.minusDays(d.getDayOfWeek().getValue() - 1);
     }
 
 }
