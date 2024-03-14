@@ -286,6 +286,8 @@ spec:
       value: "false"
     - name: K9_ABAKUS_ENABLED
       value: "true"
+    - name: OMP_NYOPPSTARTET_VED_REFUSJON
+      value: "false"    
     - name: INAKTIV_VED_8_47_B
       value: "false"
 
