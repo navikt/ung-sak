@@ -45,7 +45,9 @@ public class HentPerioderTilVurderingTjeneste {
     public NavigableSet<DatoIntervallEntitet> hentPerioderTilVurderingUtenUbesluttet(BehandlingReferanse referanse) {
         var perioderMedRelevanteEndringer = finnPerioderTilVurderingMedRelevanteEndringer(referanse);
         var endretPerioderTidslinje = TidslinjeUtil.tilTidslinjeKomprimertMedMuligOverlapp(perioderMedRelevanteEndringer);
-        return fjernTrukkedePerioder(referanse, endretPerioderTidslinje);
+        return fjernTrukkedePerioder(referanse, endretPerioderTidslinje).stream()
+            .map(s -> DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
+            .collect(Collectors.toCollection(TreeSet::new));
     }
 
     private TreeSet<DatoIntervallEntitet> finnPerioderTilVurderingMedRelevanteEndringer(BehandlingReferanse referanse) {
@@ -76,13 +78,23 @@ public class HentPerioderTilVurderingTjeneste {
     }
 
 
-    public NavigableSet<DatoIntervallEntitet> hentPerioderTilVurderingMedUbesluttet(BehandlingReferanse referanse, Optional<DatoIntervallEntitet> utvidetPeriodeSomFølgeAvDødsfall) {
+    public NavigableSet<DatoIntervallEntitet> hentPerioderTilVurderingMedUbesluttet(BehandlingReferanse referanse, Optional<BehandlingReferanse> originalBehandlingReferanse, Optional<DatoIntervallEntitet> utvidetPeriodeSomFølgeAvDødsfall) {
+        var tidslinje = hentRelevantePerioderFraFullstendigSøknadsperioder(referanse);
+        tidslinje = originalBehandlingReferanse.map(this::hentRelevantePerioderFraFullstendigSøknadsperioder)
+            .orElse(LocalDateTimeline.empty())
+            .crossJoin(tidslinje);
+        if (utvidetPeriodeSomFølgeAvDødsfall.isPresent()) {
+            tidslinje = tidslinje.combine(new LocalDateSegment<>(utvidetPeriodeSomFølgeAvDødsfall.get().toLocalDateInterval(), true), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+        return tidslinje.stream()
+            .map(s -> DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
+            .collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    private LocalDateTimeline<Boolean> hentRelevantePerioderFraFullstendigSøknadsperioder(BehandlingReferanse referanse) {
         var datoer = søknadsperiodeTjeneste.utledFullstendigPeriode(referanse.getId());
 
         var søknadsperioder = TidslinjeUtil.tilTidslinjeKomprimert(datoer);
-        if (utvidetPeriodeSomFølgeAvDødsfall.isPresent()) {
-            søknadsperioder = søknadsperioder.combine(new LocalDateSegment<>(utvidetPeriodeSomFølgeAvDødsfall.get().toLocalDateInterval(), true), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-        }
         var endretUtbetalingPeriodeutleder = EndretUtbetalingPeriodeutleder.finnUtleder(endretUtbetalingPeriodeutledere, referanse.getFagsakYtelseType(), referanse.getBehandlingType());
         var begrensetTidslinje = søknadsperioder.getLocalDateIntervals()
             .stream()
@@ -92,11 +104,9 @@ public class HentPerioderTilVurderingTjeneste {
         return fjernTrukkedePerioder(referanse, begrensetTidslinje);
     }
 
-    private TreeSet<DatoIntervallEntitet> fjernTrukkedePerioder(BehandlingReferanse referanse, LocalDateTimeline<Boolean> søknadsperioder) {
+    private LocalDateTimeline<Boolean> fjernTrukkedePerioder(BehandlingReferanse referanse, LocalDateTimeline<Boolean> søknadsperioder) {
         final LocalDateTimeline<Boolean> trukkedeKrav = hentTrukkedeKravTidslinje(referanse);
-        return TidslinjeUtil.kunPerioderSomIkkeFinnesI(søknadsperioder, trukkedeKrav).stream()
-            .map(s -> DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
-            .collect(Collectors.toCollection(TreeSet::new));
+        return TidslinjeUtil.kunPerioderSomIkkeFinnesI(søknadsperioder, trukkedeKrav);
     }
 
     private LocalDateTimeline<Boolean> hentTrukkedeKravTidslinje(BehandlingReferanse referanse) {

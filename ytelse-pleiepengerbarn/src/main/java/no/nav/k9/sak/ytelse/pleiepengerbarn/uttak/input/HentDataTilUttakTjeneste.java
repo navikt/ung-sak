@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -148,7 +149,8 @@ public class HentDataTilUttakTjeneste {
         var utvidetPeriodeSomFølgeAvDødsfall = håndterePleietrengendeDødsfallTjeneste.utledUtvidetPeriodeForDødsfall(referanse);
         final NavigableSet<DatoIntervallEntitet> perioderTilVurdering;
         if (skalMappeHeleTidslinjen) {
-            perioderTilVurdering = hentPerioderTilVurderingTjeneste.hentPerioderTilVurderingMedUbesluttet(referanse, utvidetPeriodeSomFølgeAvDødsfall);
+            var originalBehandlingReferanse = referanse.getOriginalBehandlingId().map(behandlingRepository::hentBehandling).map(BehandlingReferanse::fra);
+            perioderTilVurdering = hentPerioderTilVurderingTjeneste.hentPerioderTilVurderingMedUbesluttet(referanse, originalBehandlingReferanse, utvidetPeriodeSomFølgeAvDødsfall);
         } else {
             perioderTilVurdering = hentPerioderTilVurderingTjeneste.hentPerioderTilVurderingUtenUbesluttet(referanse);
         }
