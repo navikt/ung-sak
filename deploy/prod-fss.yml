@@ -280,8 +280,6 @@ spec:
       value: "true"
     - name: DOKUMENTMOTTAK_VALIDER_JOURNALFORT
       value: "false"
-    - name: UTVIDET_ENDRING_UTBETALING_UTLEDER
-      value: "false"
     - name: ENABLE_INNSYN_ENDRING_OBSERVER
       value: "false"
     - name: KODEVERK_SOM_STRING_TOPICS
@@ -289,6 +287,8 @@ spec:
     - name: K9_ABAKUS_ENABLED
       value: "true"
     - name: OMP_NYOPPSTARTET_VED_REFUSJON
+      value: "false"    
+    - name: INAKTIV_VED_8_47_B
       value: "false"
 
     # Konfigurasjoner

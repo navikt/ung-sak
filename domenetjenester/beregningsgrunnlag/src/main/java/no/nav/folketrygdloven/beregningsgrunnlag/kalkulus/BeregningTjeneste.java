@@ -80,6 +80,8 @@ public interface BeregningTjeneste {
 
     List<Beregningsgrunnlag> hentEksaktFastsattForAllePerioderInkludertAvslag(BehandlingReferanse ref);
 
+    List<Beregningsgrunnlag> hentForAllePerioder(BehandlingReferanse ref);
+
     List<Beregningsgrunnlag> hentEksaktFastsattForAllePerioder(BehandlingReferanse ref);
 
     List<BeregningsgrunnlagDto> hentBeregningsgrunnlagDtoer(BehandlingReferanse ref);
