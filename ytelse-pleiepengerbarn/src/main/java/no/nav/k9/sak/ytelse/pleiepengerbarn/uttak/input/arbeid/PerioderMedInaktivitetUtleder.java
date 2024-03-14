@@ -59,7 +59,7 @@ public class PerioderMedInaktivitetUtleder {
 
         var arbeidsgivereVedStartPrSkjæringstidspunkt = finnAktiveArbeidsgiverePrSkjæringstidspunktFraBeregning(input);
         return utledBortfallendeAktiviteterSomSkalFortsattKompenseres(mellomregning, antallArbeidsgivereTidslinje,
-            ikkeAktivTidslinje, arbeidsgivereVedStartPrSkjæringstidspunkt, input.skalDefinereIkkeYrkesaktivFraBg());
+            ikkeAktivTidslinje, arbeidsgivereVedStartPrSkjæringstidspunkt);
     }
 
     private static Map<LocalDate, Set<Arbeidsgiver>> finnAktiveArbeidsgiverePrSkjæringstidspunktFraBeregning(InaktivitetUtlederInput input) {
@@ -84,12 +84,11 @@ public class PerioderMedInaktivitetUtleder {
     private Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> utledBortfallendeAktiviteterSomSkalFortsattKompenseres(HashMap<AktivitetIdentifikator, LocalDateTimeline<Boolean>> mellomregning,
                                                                                                                                  LocalDateTimeline<BigDecimal> antallArbeidsgivereTidslinje,
                                                                                                                                  LocalDateTimeline<Boolean> ikkeAktivTidslinje,
-                                                                                                                                 Map<LocalDate, Set<Arbeidsgiver>> arbeidsgivereVedStartPrSkjæringstidspunkt,
-                                                                                                                                 boolean skalDefinereIkkeYrkesaktivFraBg) {
+                                                                                                                                 Map<LocalDate, Set<Arbeidsgiver>> arbeidsgivereVedStartPrSkjæringstidspunkt) {
         var resultat = new HashMap<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>>();
         for (LocalDateSegment<Boolean> periodeMedYtelse : ikkeAktivTidslinje.toSegments()) {
 
-            var filtrertEntrySet = finnEntriesForArbeidsgivereVedSkjæringstidspunktet(mellomregning, arbeidsgivereVedStartPrSkjæringstidspunkt, skalDefinereIkkeYrkesaktivFraBg, periodeMedYtelse);
+            var filtrertEntrySet = finnEntriesForArbeidsgivereVedSkjæringstidspunktet(mellomregning, arbeidsgivereVedStartPrSkjæringstidspunkt, periodeMedYtelse);
             for (Map.Entry<AktivitetIdentifikator, LocalDateTimeline<Boolean>> aktivitet : filtrertEntrySet) {
                 var arbeidsforholdUtenStartPåStp = aktivitet.getValue()
                     .toSegments()
@@ -126,11 +125,14 @@ public class PerioderMedInaktivitetUtleder {
         return resultat;
     }
 
-    private static Set<Map.Entry<AktivitetIdentifikator, LocalDateTimeline<Boolean>>> finnEntriesForArbeidsgivereVedSkjæringstidspunktet(HashMap<AktivitetIdentifikator, LocalDateTimeline<Boolean>> mellomregning, Map<LocalDate, Set<Arbeidsgiver>> arbeidsgivereVedStartPrSkjæringstidspunkt, boolean skalDefinereIkkeYrkesaktivFraBg, LocalDateSegment<Boolean> periodeMedYtelse) {
-        var arbeidsgivereSomInngårIBeregningsgrunnlaget = arbeidsgivereVedStartPrSkjæringstidspunkt.get(periodeMedYtelse.getFom());
+    private static Set<Map.Entry<AktivitetIdentifikator, LocalDateTimeline<Boolean>>> finnEntriesForArbeidsgivereVedSkjæringstidspunktet(
+        HashMap<AktivitetIdentifikator, LocalDateTimeline<Boolean>> mellomregning,
+        Map<LocalDate, Set<Arbeidsgiver>> arbeidsgivereVedStartPrSkjæringstidspunkt,
+        LocalDateSegment<Boolean> periodeMedYtelse) {
+        var arbeidsgivereSomInngårIBeregningsgrunnlaget = arbeidsgivereVedStartPrSkjæringstidspunkt.getOrDefault(periodeMedYtelse.getFom(), Set.of());
         return mellomregning.entrySet()
             .stream()
-            .filter(e -> !skalDefinereIkkeYrkesaktivFraBg || arbeidsgivereSomInngårIBeregningsgrunnlaget.contains(e.getKey().getArbeidsgiver()))
+            .filter(e -> arbeidsgivereSomInngårIBeregningsgrunnlaget.contains(e.getKey().getArbeidsgiver()))
             .collect(Collectors.toSet());
     }
 
