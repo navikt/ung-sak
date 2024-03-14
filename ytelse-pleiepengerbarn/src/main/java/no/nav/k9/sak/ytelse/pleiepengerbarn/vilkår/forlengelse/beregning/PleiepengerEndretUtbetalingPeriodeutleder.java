@@ -219,7 +219,7 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
     private LocalDateTimeline<Boolean> finnTidslinjeFraProsessTriggere(BehandlingReferanse behandlingReferanse) {
         var prosessTriggere = prosessTriggereRepository.hentGrunnlag(behandlingReferanse.getBehandlingId());
         var perioderFraTriggere = prosessTriggere.stream().flatMap(it -> it.getTriggere().stream())
-            .filter(it -> it.getÅrsak().equals(BehandlingÅrsakType.RE_ENDRET_FORDELING))
+            .filter(it -> it.getÅrsak().equals(BehandlingÅrsakType.RE_ENDRET_FORDELING) || it.getÅrsak().equals(BehandlingÅrsakType.RE_GJENOPPTAR_UTSATT_BEHANDLING))
             .map(Trigger::getPeriode)
             .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), TRUE))
             .collect(Collectors.toSet());
