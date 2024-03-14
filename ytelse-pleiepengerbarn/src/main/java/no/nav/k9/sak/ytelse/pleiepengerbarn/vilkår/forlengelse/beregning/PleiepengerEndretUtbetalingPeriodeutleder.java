@@ -107,12 +107,12 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
         var fomDato = perioderMedRelevantEndring.stream().map(DatoIntervallEntitet::getFomDato)
             .filter(fom -> !fom.isAfter(vilkårsperiode.getTomDato()))
             .min(Comparator.naturalOrder())
-            .map(fom -> fom.getDayOfWeek().equals(DayOfWeek.SUNDAY) || fom.getDayOfWeek().equals(DayOfWeek.SATURDAY) || fom.getDayOfWeek().equals(DayOfWeek.MONDAY) ? fom : mandagenFør(fom))
+            .map(fom -> fom.getDayOfWeek().equals(DayOfWeek.SUNDAY) || fom.getDayOfWeek().equals(DayOfWeek.SATURDAY) ? fom : førsteDagIUken(fom))
             .map(fom -> fom.isBefore(vilkårsperiode.getFomDato()) ? vilkårsperiode.getFomDato() : fom);
         return fomDato.map(localDate -> new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(localDate, vilkårsperiode.getTomDato())))).orElseGet(TreeSet::new);
     }
 
-    private static LocalDate mandagenFør(LocalDate d) {
+    private static LocalDate førsteDagIUken(LocalDate d) {
         return d.minusDays(d.getDayOfWeek().getValue() - 1);
     }
 
