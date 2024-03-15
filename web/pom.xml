@@ -15,7 +15,7 @@
 
     <properties>
         <simple.client.version>0.16.0</simple.client.version>
-        <swagger-ui.version>5.11.8</swagger-ui.version>
+        <swagger-ui.version>5.11.10</swagger-ui.version>
     </properties>
 
 
@@ -65,6 +65,10 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -380,6 +384,30 @@
                             <mainClass>no.nav.k9.sak.web.server.jetty.JettyServer</mainClass>
                         </manifest>
                     </archive>
+                </configuration>
+            </plugin>
+            <!--
+                This plugin lets us generate the json formatted openapi specification for the project at build time
+                without starting a server instance and calling the swagger server.
+
+                The compile phase must have run before this so that the classes that defines the api has been built.
+
+                By default the plugin writes the result to the file target/k9-sak.openapi.json. One can override this
+                with an argument override from the command line.
+
+                Example of invocation from root project dir:
+
+                mvn -&dash;projects web compile exec:java -Dexec.args="/tmp/openapi.json"
+            -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>no.nav.k9.sak.web.app.util.OpenapiGenerate</mainClass>
+                    <classpathScope>compile</classpathScope>
+                    <arguments>
+                        <argument>${project.build.directory}/k9-sak.openapi.json</argument>
+                    </arguments>
                 </configuration>
             </plugin>
         </plugins>

@@ -2,6 +2,7 @@ package no.nav.k9.sak.perioder;
 
 import no.nav.fpsak.tidsserie.*;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -21,8 +22,12 @@ public class UtledStatusPåPerioderTjeneste {
     private static Logger LOGGER = LoggerFactory.getLogger(UtledStatusPåPerioderTjeneste.class);
     private Boolean filtrereUtTilstøtendePeriode;
 
-    public UtledStatusPåPerioderTjeneste(Boolean filtrereUtTilstøtendePeriode) {
+    private UtledPerioderMedRegisterendring utledPerioderMedRegisterendring;
+
+    public UtledStatusPåPerioderTjeneste(Boolean filtrereUtTilstøtendePeriode,
+                                         UtledPerioderMedRegisterendring utledPerioderMedRegisterendring) {
         this.filtrereUtTilstøtendePeriode = filtrereUtTilstøtendePeriode;
+        this.utledPerioderMedRegisterendring = utledPerioderMedRegisterendring;
     }
 
     private static Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> alleKravdokumenterForArbeidsgiver(Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> alleKravdokumenterMedPeriode, Arbeidsgiver arbeidsgiver) {
@@ -75,7 +80,12 @@ public class UtledStatusPåPerioderTjeneste {
 
         var relevanteDokumenterMedPeriode = utledKravdokumenterTilkommetIBehandlingen(kravdokumenter, kravdokumenterMedPeriode);
 
-        return new StatusForPerioderPåBehandling(perioderTilVurderingSet, perioder, årsakMedPerioder, mapKravTilDto(relevanteDokumenterMedPeriode),
+        return new StatusForPerioderPåBehandling(
+            perioderTilVurderingSet,
+            utledPerioderMedRegisterendring.utledPerioderMedRegisterendring(BehandlingReferanse.fra(behandling)),
+            perioder,
+            årsakMedPerioder,
+            mapKravTilDto(relevanteDokumenterMedPeriode),
             perioderMedÅrsakPerKravstiller.stream().toList());
     }
 

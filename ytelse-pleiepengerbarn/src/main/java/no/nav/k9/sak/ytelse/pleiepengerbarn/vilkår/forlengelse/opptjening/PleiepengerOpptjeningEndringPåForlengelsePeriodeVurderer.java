@@ -10,14 +10,13 @@ import java.util.Set;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.HarEndretInntektsmeldingVurderer;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingRelevantForVilkårsrevurdering;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingskontroll.VilkårTypeRef;
+import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.HarEndretInntektsmeldingVurderer;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.EndringPåForlengelseInput;
@@ -39,30 +38,23 @@ public class PleiepengerOpptjeningEndringPåForlengelsePeriodeVurderer implement
     private ProsessTriggereRepository prosessTriggereRepository;
     private HarInntektsmeldingerRelevanteEndringerForPeriode harInntektsmeldingerRelevanteEndringerForPeriode;
 
-    private boolean skalVurdereIM;
-
 
     PleiepengerOpptjeningEndringPåForlengelsePeriodeVurderer() {
     }
 
     @Inject
     public PleiepengerOpptjeningEndringPåForlengelsePeriodeVurderer(ProsessTriggereRepository prosessTriggereRepository,
-                                                                    HarInntektsmeldingerRelevanteEndringerForPeriode harInntektsmeldingerRelevanteEndringerForPeriode,
-                                                                    @KonfigVerdi(value = "FORLENGELSE_IM_OPPTJENING_FILTER", defaultVerdi = "false") boolean skalVurdereIM) {
+                                                                    HarInntektsmeldingerRelevanteEndringerForPeriode harInntektsmeldingerRelevanteEndringerForPeriode) {
         this.prosessTriggereRepository = prosessTriggereRepository;
         this.harInntektsmeldingerRelevanteEndringerForPeriode = harInntektsmeldingerRelevanteEndringerForPeriode;
-        this.skalVurdereIM = skalVurdereIM;
     }
 
     @Override
     public boolean harPeriodeEndring(EndringPåForlengelseInput input, DatoIntervallEntitet periode) {
-        if (skalVurdereIM) {
-            var inntektsmeldinger = ((PSBEndringPåForlengelseInput) input).getSakInntektsmeldinger();
-            var harEndringer = !harInntektsmeldingerRelevanteEndringerForPeriode.finnInntektsmeldingerMedRelevanteEndringerForPeriode(inntektsmeldinger, input.getBehandlingReferanse(), periode, VilkårType.OPPTJENINGSVILKÅRET).isEmpty();
-            if (harEndringer) {
-                return true;
-            }
-
+        var inntektsmeldinger = ((PSBEndringPåForlengelseInput) input).getSakInntektsmeldinger();
+        var harEndringer = !harInntektsmeldingerRelevanteEndringerForPeriode.finnInntektsmeldingerMedRelevanteEndringerForPeriode(inntektsmeldinger, input.getBehandlingReferanse(), periode, VilkårType.OPPTJENINGSVILKÅRET).isEmpty();
+        if (harEndringer) {
+            return true;
         }
         var prosessTriggereOpt = prosessTriggereRepository.hentGrunnlag(input.getBehandlingReferanse().getBehandlingId());
 

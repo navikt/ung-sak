@@ -25,7 +25,7 @@ public class ArbeidsforholdTjenesteMock {
 
         AbakusTjeneste arbeidsforholdConsumer = mock(AbakusTjeneste.class);
         when(arbeidsforholdConsumer.hentArbeidsforholdIPerioden(any())).thenReturn(response);
-        this.arbeidsforholdTjeneste = new no.nav.k9.sak.domene.abakus.ArbeidsforholdTjeneste(arbeidsforholdConsumer, mock(K9AbakusTjeneste.class), false);
+        this.arbeidsforholdTjeneste = new no.nav.k9.sak.domene.abakus.ArbeidsforholdTjeneste(arbeidsforholdConsumer);
     }
 
     public no.nav.k9.sak.domene.abakus.ArbeidsforholdTjeneste getMock() {

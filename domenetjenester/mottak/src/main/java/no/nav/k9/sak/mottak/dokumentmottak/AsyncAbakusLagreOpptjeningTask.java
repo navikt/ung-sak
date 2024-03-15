@@ -5,15 +5,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.abakus.iaygrunnlag.JsonObjectMapper;
 import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.prosesstask.api.ProsessTask;
@@ -26,7 +24,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.UnderBehandlingProsessTask;
 import no.nav.k9.sak.domene.abakus.AbakusTjeneste;
-import no.nav.k9.sak.domene.abakus.K9AbakusTjeneste;
 import no.nav.k9.sak.typer.JournalpostId;
 
 @ApplicationScoped
@@ -42,9 +39,6 @@ public class AsyncAbakusLagreOpptjeningTask extends UnderBehandlingProsessTask {
     public static final String BREVKODER = "opptjening.brevkoder";
 
     private AbakusTjeneste abakusTjeneste;
-
-    private K9AbakusTjeneste k9AbakusTjeneste;
-
     private boolean k9abakusEnabled;
     private MottatteDokumentRepository mottatteDokumentRepository;
 
@@ -56,13 +50,10 @@ public class AsyncAbakusLagreOpptjeningTask extends UnderBehandlingProsessTask {
     AsyncAbakusLagreOpptjeningTask(BehandlingRepository behandlingRepository,
                                    BehandlingLåsRepository behandlingLåsRepository,
                                    AbakusTjeneste abakusTjeneste,
-                                   K9AbakusTjeneste k9AbakusTjeneste, MottatteDokumentRepository mottatteDokumentRepository,
-                                   @KonfigVerdi(value = "k9.abakus.enabled", defaultVerdi = "false") boolean k9abakusEnabled) {
+                                   MottatteDokumentRepository mottatteDokumentRepository) {
         super(behandlingRepository, behandlingLåsRepository);
         this.abakusTjeneste = abakusTjeneste;
-        this.k9AbakusTjeneste = k9AbakusTjeneste;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
-        this.k9abakusEnabled = k9abakusEnabled;
     }
 
     @Override
@@ -71,7 +62,7 @@ public class AsyncAbakusLagreOpptjeningTask extends UnderBehandlingProsessTask {
         if (erFrisinn) {
             // TODO: Når Frisinn utfaset skal det ikke være valgfritt å oppgi journalpostid
             lagreOppgittOpptjening(input, true);
-        } else  {
+        } else {
             JournalpostId journalpostId = new JournalpostId(input.getPropertyValue(JOURNALPOST_ID));
             Brevkode brevkode = Brevkode.fraKode(input.getPropertyValue(BREVKODER));
 
@@ -86,7 +77,7 @@ public class AsyncAbakusLagreOpptjeningTask extends UnderBehandlingProsessTask {
             MottattDokument førsteUbehandledeDokument = ubehandledeDokumenter.stream()
                 .min(Comparator.comparing(MottattDokument::getMottattTidspunkt)).orElseThrow();
             if (!førsteUbehandledeDokument.getJournalpostId().equals(journalpostId)) {
-                throw new UnsupportedOperationException("Kan ikke lagre oppgitt opptjening. JournalpostId=" + journalpostId +" " +
+                throw new UnsupportedOperationException("Kan ikke lagre oppgitt opptjening. JournalpostId=" + journalpostId + " " +
                     "venter på behandling av tidligere journalpostId=" + førsteUbehandledeDokument.getJournalpostId());
             }
             mottatteDokumentRepository.oppdaterStatus(List.of(førsteUbehandledeDokument), DokumentStatus.GYLDIG);
@@ -97,31 +88,15 @@ public class AsyncAbakusLagreOpptjeningTask extends UnderBehandlingProsessTask {
 
     private void lagreOppgittOpptjening(ProsessTaskData input, boolean erFrisinn) {
         var jsonReader = JsonObjectMapper.getMapper().readerFor(OppgittOpptjeningMottattRequest.class);
-
-
-        if (k9abakusEnabled) {
-            try {
-                OppgittOpptjeningMottattRequest request = jsonReader.readValue(Objects.requireNonNull(input.getPayloadAsString(), "mangler payload"));
-                if (erFrisinn) {
-                    k9AbakusTjeneste.lagreOppgittOpptjening(request);
-                } else {
-                    k9AbakusTjeneste.lagreOppgittOpptjeningV2(request);
-                }
-            } catch (IOException e) {
-                throw new IllegalStateException("Kunne ikke lagre abakus oppgitt opptjening", e);
+        try {
+            OppgittOpptjeningMottattRequest request = jsonReader.readValue(Objects.requireNonNull(input.getPayloadAsString(), "mangler payload"));
+            if (erFrisinn) {
+                abakusTjeneste.lagreOppgittOpptjening(request);
+            } else {
+                abakusTjeneste.lagreOppgittOpptjeningV2(request);
             }
-        } else {
-
-            try {
-                OppgittOpptjeningMottattRequest request = jsonReader.readValue(Objects.requireNonNull(input.getPayloadAsString(), "mangler payload"));
-                if (erFrisinn) {
-                    abakusTjeneste.lagreOppgittOpptjening(request);
-                } else {
-                    abakusTjeneste.lagreOppgittOpptjeningV2(request);
-                }
-            } catch (IOException e) {
-                throw new IllegalStateException("Kunne ikke lagre abakus oppgitt opptjening", e);
-            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Kunne ikke lagre abakus oppgitt opptjening", e);
         }
     }
 }

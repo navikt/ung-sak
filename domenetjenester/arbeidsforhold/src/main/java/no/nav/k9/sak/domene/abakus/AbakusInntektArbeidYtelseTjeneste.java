@@ -66,9 +66,6 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
 
     private static final Logger log = LoggerFactory.getLogger(AbakusInntektArbeidYtelseTjeneste.class);
     private AbakusTjeneste abakusTjeneste;
-
-    private K9AbakusTjeneste k9abakusTjeneste;
-
     private BehandlingRepository behandlingRepository;
     private FagsakRepository fagsakRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
@@ -76,8 +73,6 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     private AsyncInntektArbeidYtelseTjeneste asyncIayTjeneste;
 
     private boolean filtrerUgyldigeInntektsmeldingerEnabled;
-
-    private boolean k9abakusEnabled;
 
 
     /**
@@ -92,14 +87,12 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
      */
     @Inject
     public AbakusInntektArbeidYtelseTjeneste(AbakusTjeneste abakusTjeneste,
-                                             K9AbakusTjeneste k9abakusTjeneste, AsyncInntektArbeidYtelseTjeneste asyncIayTjeneste,
+                                             AsyncInntektArbeidYtelseTjeneste asyncIayTjeneste,
                                              BehandlingRepository behandlingRepository,
                                              MottatteDokumentRepository mottatteDokumentRepository,
                                              FagsakRepository fagsakRepository,
                                              IAYRequestCache requestCache,
-                                             @KonfigVerdi(value = "FILTRER_UGYLDIG_IM", defaultVerdi = "false") boolean filtrerUgyldigeInntektsmeldingerEnabled,
-                                             @KonfigVerdi(value = "k9.abakus.enabled", defaultVerdi = "false") boolean k9abakusEnabled) {
-        this.k9abakusTjeneste = k9abakusTjeneste;
+                                             @KonfigVerdi(value = "FILTRER_UGYLDIG_IM", defaultVerdi = "false") boolean filtrerUgyldigeInntektsmeldingerEnabled) {
         this.behandlingRepository = Objects.requireNonNull(behandlingRepository, "behandlingRepository");
         this.abakusTjeneste = Objects.requireNonNull(abakusTjeneste, "abakusTjeneste");
         this.mottatteDokumentRepository = mottatteDokumentRepository;
@@ -107,7 +100,6 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         this.fagsakRepository = Objects.requireNonNull(fagsakRepository, "fagsakRepository");
         this.asyncIayTjeneste = asyncIayTjeneste;
         this.filtrerUgyldigeInntektsmeldingerEnabled = filtrerUgyldigeInntektsmeldingerEnabled;
-        this.k9abakusEnabled = k9abakusEnabled;
     }
 
     @Override
@@ -343,18 +335,10 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         var oppgittOpptjening = new IAYTilDtoMapper(behandling.getAktørId(), null, behandling.getUuid()).mapTilDto(oppgittOpptjeningBuilder);
         var request = new OppgittOpptjeningMottattRequest(saksnummer.getVerdi(), behandling.getUuid(), aktør, ytelseType, oppgittOpptjening);
 
-        if (k9abakusEnabled) {
-            try {
-                k9abakusTjeneste.lagreOverstyrtOppgittOpptjening(request);
-            } catch (IOException e) {
-                throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Lagre oppgitt opptjening i abakus: " + e.getMessage(), e).toException();
-            }
-        } else {
-            try {
-                abakusTjeneste.lagreOverstyrtOppgittOpptjening(request);
-            } catch (IOException e) {
-                throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Lagre oppgitt opptjening i abakus: " + e.getMessage(), e).toException();
-            }
+        try {
+            abakusTjeneste.lagreOverstyrtOppgittOpptjening(request);
+        } catch (IOException e) {
+            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Lagre oppgitt opptjening i abakus: " + e.getMessage(), e).toException();
         }
 
     }
@@ -391,18 +375,10 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         var ytelseType = YtelseType.fraKode(behandling.getFagsakYtelseType().getKode());
         var inntektsmeldingerMottattRequest = new InntektsmeldingerMottattRequest(saksnummer.getVerdi(), behandling.getUuid(), aktør, ytelseType, inntektsmeldingerDto);
 
-        if (k9abakusEnabled) {
-            try {
-                k9abakusTjeneste.lagreInntektsmeldinger(inntektsmeldingerMottattRequest);
-            } catch (IOException e) {
-                throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Lagre mottatte inntektsmeldinger i abakus: " + e.getMessage(), e).toException();
-            }
-        } else {
-            try {
-                abakusTjeneste.lagreInntektsmeldinger(inntektsmeldingerMottattRequest);
-            } catch (IOException e) {
-                throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Lagre mottatte inntektsmeldinger i abakus: " + e.getMessage(), e).toException();
-            }
+        try {
+            abakusTjeneste.lagreInntektsmeldinger(inntektsmeldingerMottattRequest);
+        } catch (IOException e) {
+            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Lagre mottatte inntektsmeldinger i abakus: " + e.getMessage(), e).toException();
         }
 
         requestCache.invaliderInntektsmeldingerCacheForSak(inntektsmeldingerMottattRequest);
@@ -437,51 +413,27 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     }
 
     private InntektsmeldingerDto hentUnikeInntektsmeldinger(InntektsmeldingerRequest request) {
-        if (k9abakusEnabled) {
-            try {
-                return k9abakusTjeneste.hentUnikeUnntektsmeldinger(request);
-            } catch (IOException e) {
-                throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente inntektsmeldinger fra Abakus: " + e.getMessage(), e).toException();
-            }
-        } else {
-            try {
-                return abakusTjeneste.hentUnikeUnntektsmeldinger(request);
-            } catch (IOException e) {
-                throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente inntektsmeldinger fra Abakus: " + e.getMessage(), e).toException();
-            }
+        try {
+            return abakusTjeneste.hentUnikeUnntektsmeldinger(request);
+        } catch (IOException e) {
+            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente inntektsmeldinger fra Abakus: " + e.getMessage(), e).toException();
         }
     }
 
     private InntektArbeidYtelseGrunnlagDto hentGrunnlag(InntektArbeidYtelseGrunnlagRequest request) {
-        if (k9abakusEnabled) {
-            try {
-                return k9abakusTjeneste.hentGrunnlag(request);
-            } catch (IOException e) {
-                throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente grunnlag fra Abakus: " + e.getMessage(), e).toException();
-            }
-        } else {
-            try {
-                return abakusTjeneste.hentGrunnlag(request);
-            } catch (IOException e) {
-                throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente grunnlag fra Abakus: " + e.getMessage(), e).toException();
-            }
+        try {
+            return abakusTjeneste.hentGrunnlag(request);
+        } catch (IOException e) {
+            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente grunnlag fra Abakus: " + e.getMessage(), e).toException();
         }
+
     }
 
     private InntektArbeidYtelseGrunnlagSakSnapshotDto hentGrunnlagSnapshot(InntektArbeidYtelseGrunnlagRequest request) {
-
-        if (k9abakusEnabled) {
-            try {
-                return k9abakusTjeneste.hentGrunnlagSnapshot(request);
-            } catch (IOException e) {
-                throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente grunnlag snapshot fra Abakus: " + e.getMessage(), e).toException();
-            }
-        } else {
-            try {
-                return abakusTjeneste.hentGrunnlagSnapshot(request);
-            } catch (IOException e) {
-                throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente grunnlag snapshot fra Abakus: " + e.getMessage(), e).toException();
-            }
+        try {
+            return abakusTjeneste.hentGrunnlagSnapshot(request);
+        } catch (IOException e) {
+            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente grunnlag snapshot fra Abakus: " + e.getMessage(), e).toException();
         }
     }
 
@@ -615,20 +567,11 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     }
 
     private UUID lagreOverstyrt(OverstyrtInntektArbeidYtelseDto dto) {
-        if (k9abakusEnabled) {
-            try {
-                k9abakusTjeneste.lagreOverstyrt(dto);
-                return dto.getGrunnlagReferanse();
-            } catch (IOException e) {
-                throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke lagre overstyrt arbeid i Abakus: " + e.getMessage(), e).toException();
-            }
-        } else {
-            try {
-                abakusTjeneste.lagreOverstyrt(dto);
-                return dto.getGrunnlagReferanse();
-            } catch (IOException e) {
-                throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke lagre overstyrt arbeid i Abakus: " + e.getMessage(), e).toException();
-            }
+        try {
+            abakusTjeneste.lagreOverstyrt(dto);
+            return dto.getGrunnlagReferanse();
+        } catch (IOException e) {
+            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke lagre overstyrt arbeid i Abakus: " + e.getMessage(), e).toException();
         }
     }
 }

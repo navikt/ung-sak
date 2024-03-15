@@ -11,14 +11,17 @@ import no.nav.folketrygdloven.kalkulus.beregning.v1.PleiepengerNærståendeGrunn
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PleiepengerSyktBarnGrunnlag;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.UtbetalingsgradPrAktivitetDto;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.YtelsespesifiktGrunnlagDto;
+import no.nav.folketrygdloven.kalkulus.felles.v1.Aktivitetsgrad;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Aktør;
 import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
 import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Organisasjon;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
+import no.nav.folketrygdloven.kalkulus.felles.v1.Utbetalingsgrad;
 import no.nav.folketrygdloven.kalkulus.kodeverk.UttakArbeidType;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
@@ -66,17 +69,23 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
     private PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste;
 
     private PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste;
+    private boolean skalHaInaktivVed847B;
 
     public PleiepengerOgOpplæringspengerGrunnlagMapper() {
         // for proxy
     }
 
     @Inject
-    public PleiepengerOgOpplæringspengerGrunnlagMapper(UttakTjeneste uttakRestKlient, UttakNyeReglerRepository uttakNyeReglerRepository, PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste, @Any PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste) {
+    public PleiepengerOgOpplæringspengerGrunnlagMapper(UttakTjeneste uttakRestKlient,
+                                                       UttakNyeReglerRepository uttakNyeReglerRepository,
+                                                       PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste,
+                                                       @Any PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste,
+                                                       @KonfigVerdi(value = "INAKTIV_VED_8_47_B", defaultVerdi = "false") boolean skalHaInaktivVed847B) {
         this.uttakRestKlient = uttakRestKlient;
         this.uttakNyeReglerRepository = uttakNyeReglerRepository;
         this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
+        this.skalHaInaktivVed847B = skalHaInaktivVed847B;
     }
 
     @Override
@@ -99,7 +108,7 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
         return mapTilYtelseSpesifikkType(ref, utbetalingsgrader, datoForNyeRegler);
     }
 
-    private static List<UtbetalingsgradPrAktivitetDto> finnUtbetalingsgraderFraSøknadsdata(DatoIntervallEntitet vilkårsperiode, Set<KravDokument> kravDokumenter, Set<PerioderFraSøknad> perioderFraSøknadene) {
+    private List<UtbetalingsgradPrAktivitetDto> finnUtbetalingsgraderFraSøknadsdata(DatoIntervallEntitet vilkårsperiode, Set<KravDokument> kravDokumenter, Set<PerioderFraSøknad> perioderFraSøknadene) {
         List<UtbetalingsgradPrAktivitetDto> utbetalingsgrader;
         var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(vilkårsperiode.toLocalDateInterval(), true)));
 
@@ -107,12 +116,12 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
             perioderFraSøknadene,
             timeline,
             null,
-            null);
+            null, skalHaInaktivVed847B);
         var arbeidIPeriode = new MapArbeid().map(arbeidstidInput);
         utbetalingsgrader = arbeidIPeriode.stream()
             .filter(a -> !a.getPerioder().isEmpty())
             .map(a -> {
-            var perioder = a.getPerioder().entrySet().stream().map(p -> new PeriodeMedUtbetalingsgradDto(new Periode(p.getKey().getFom(), p.getKey().getTom()), BigDecimal.valueOf(100), hentAktivitetsgrad(p.getValue()))).toList();
+            var perioder = a.getPerioder().entrySet().stream().map(p -> new PeriodeMedUtbetalingsgradDto(new Periode(p.getKey().getFom(), p.getKey().getTom()), Utbetalingsgrad.fra(100), Aktivitetsgrad.fra(hentAktivitetsgrad(p.getValue())))).toList();
             Aktør aktør = null;
             if (a.getArbeidsforhold().getOrganisasjonsnummer() != null) {
                 aktør = new Organisasjon(a.getArbeidsforhold().getOrganisasjonsnummer());
@@ -239,7 +248,7 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
 
     private static PeriodeMedUtbetalingsgradDto lagPeriode(LukketPeriode periode, BigDecimal utbetalingsgrad, BigDecimal aktivitetsgrad) {
         var kalkulusPeriode = new no.nav.folketrygdloven.kalkulus.felles.v1.Periode(periode.getFom(), periode.getTom());
-        return new PeriodeMedUtbetalingsgradDto(kalkulusPeriode, utbetalingsgrad, aktivitetsgrad);
+        return new PeriodeMedUtbetalingsgradDto(kalkulusPeriode, Utbetalingsgrad.fra(utbetalingsgrad), Aktivitetsgrad.fra(aktivitetsgrad));
     }
 
     private static AktivitetDto lagArbeidsforhold(Arbeidsforhold arb) {

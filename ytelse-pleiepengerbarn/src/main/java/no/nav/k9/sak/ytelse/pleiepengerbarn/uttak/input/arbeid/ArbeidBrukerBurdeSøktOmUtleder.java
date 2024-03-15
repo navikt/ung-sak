@@ -18,6 +18,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
@@ -42,6 +43,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.PeriodeFraSøknadForBrukerTjene
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.PerioderMedSykdomInnvilgetUtleder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.død.HåndterePleietrengendeDødsfallTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.HentPerioderTilVurderingTjeneste;
 
 @ApplicationScoped
 public class ArbeidBrukerBurdeSøktOmUtleder {
@@ -56,6 +58,8 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
     private OpptjeningRepository opptjeningRepository;
     private VilkårResultatRepository vilkårResultatRepository;
 
+    private HentPerioderTilVurderingTjeneste hentPerioderTilVurderingTjeneste;
+
     public ArbeidBrukerBurdeSøktOmUtleder() {
     }
 
@@ -67,7 +71,8 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
                                           PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder,
                                           OpptjeningRepository opptjeningRepository,
                                           VilkårResultatRepository vilkårResultatRepository,
-                                          @Any Instance<HåndterePleietrengendeDødsfallTjeneste> håndterePleietrengendeDødsfallTjenester) {
+                                          @Any Instance<HåndterePleietrengendeDødsfallTjeneste> håndterePleietrengendeDødsfallTjenester,
+                                          HentPerioderTilVurderingTjeneste hentPerioderTilVurderingTjeneste) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
@@ -76,6 +81,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.søknadsfristTjenester = søknadsfristTjenester;
         this.håndterePleietrengendeDødsfallTjenester = håndterePleietrengendeDødsfallTjenester;
+        this.hentPerioderTilVurderingTjeneste = hentPerioderTilVurderingTjeneste;
     }
 
     public Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> utledMangler(BehandlingReferanse referanse) {
@@ -84,10 +90,9 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
         var vurderteSøknadsperioder = søknadsfristTjeneste.vurderSøknadsfrist(referanse);
         var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
         var perioderFraSøknader = periodeFraSøknadForBrukerTjeneste.hentPerioderFraSøknad(referanse);
-        var perioderTilVurdering = finnSykdomsperioder(referanse);
         var opptjeningResultat = opptjeningRepository.finnOpptjening(referanse.getBehandlingId());
 
-        var tidslinjeTilVurdering = utledTidslinjeTilVurdering(perioderTilVurdering, vilkårene.getVilkår(VilkårType.OPPTJENINGSVILKÅRET));
+        var tidslinjeTilVurdering = utledTidslinjeTilVurdering(referanse);
 
         var input = new ArbeidstidMappingInput()
             .medSaksnummer(referanse.getSaksnummer())
@@ -109,22 +114,17 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
         var timelineMedYtelse = new LocalDateTimeline<>(innvilgedeSegmenter);
         // Trekke fra perioder med avslag fra
         // - Opptjening
-        var timelineMedInnvilgetYtelse = utledYtelse(vilkårene, timelineMedYtelse);
+        var timelineMedInnvilgetYtelse = utledYtelse(vilkårene, timelineMedYtelse)
+            .intersection(tidslinjeTilVurdering);
 
         var aktørArbeidFraRegister = inntektArbeidYtelseTjeneste.hentGrunnlag(referanse.getBehandlingId()).getAktørArbeidFraRegister(referanse.getAktørId());
 
         return utledFraInput(timelineMedYtelse, timelineMedInnvilgetYtelse, input, aktørArbeidFraRegister);
     }
 
-    private LocalDateTimeline<Boolean> utledTidslinjeTilVurdering(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Optional<Vilkår> vilkår) {
-        var tidslinje = new LocalDateTimeline<>(perioderTilVurdering.stream().map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), true)).collect(Collectors.toList())).compress();
-        if (vilkår.isEmpty()) {
-            return tidslinje;
-        }
+    private LocalDateTimeline<Boolean> utledTidslinjeTilVurdering(BehandlingReferanse referanse) {
+        return TidslinjeUtil.tilTidslinjeKomprimert(hentPerioderTilVurderingTjeneste.hentPerioderTilVurderingUtenUbesluttet(referanse));
 
-        var opptjeningstidslinje = new LocalDateTimeline<>(vilkår.get().getPerioder().stream().map(VilkårPeriode::getPeriode).map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), true)).collect(Collectors.toList()));
-
-        return opptjeningstidslinje.combine(tidslinje, StandardCombinators::leftOnly, LocalDateTimeline.JoinStyle.LEFT_JOIN);
     }
 
     private LocalDateTimeline<Boolean> utledYtelse(Vilkårene vilkårene, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {

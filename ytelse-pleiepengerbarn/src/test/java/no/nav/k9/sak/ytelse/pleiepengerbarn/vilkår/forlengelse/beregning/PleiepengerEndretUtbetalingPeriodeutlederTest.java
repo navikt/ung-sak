@@ -8,15 +8,12 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,17 +22,28 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
+import no.nav.k9.kodeverk.geografisk.AdresseType;
+import no.nav.k9.kodeverk.geografisk.Landkoder;
+import no.nav.k9.kodeverk.geografisk.Region;
+import no.nav.k9.kodeverk.person.NavBrukerKjønn;
+import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.k9.kodeverk.person.SivilstandType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
@@ -46,45 +54,29 @@ import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.ErEndringIRefusjonskravVurderer;
 import no.nav.k9.sak.domene.behandling.steg.kompletthet.KompletthetForBeregningTjeneste;
+import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.trigger.ProsessTriggereRepository;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperioder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperioderHolder;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.PleietrengendeRevurderingPerioderTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.RevurderingPerioderTjeneste;
-import no.nav.pleiepengerbarn.uttak.kontrakter.AnnenPart;
-import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeidsforhold;
-import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
-import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
-import no.nav.pleiepengerbarn.uttak.kontrakter.Utfall;
-import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
-import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
 class PleiepengerEndretUtbetalingPeriodeutlederTest {
 
     public static final String ORGANISASJONSNUMMER = "123456789";
-    public static final String ORGANISASJONSNUMMER2 = "123456788";
-
-    public static final Arbeidsforhold ARBEIDSFORHOLD_1 = new Arbeidsforhold(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD.getKode(),
-        ORGANISASJONSNUMMER, null, null);
-    public static final Arbeidsforhold ARBEIDSFORHOLD_2 = new Arbeidsforhold(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD.getKode(),
-        ORGANISASJONSNUMMER2, null, null);
-    public static final Duration SJU_OG_EN_HALV_TIME = Duration.ofHours(7).plusMinutes(30);
-    public static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.now();
+    public static final LocalDate SKJÆRINGSTIDSPUNKT = LocalDate.of(2024, 3, 14);
     public static final String JOURNALPOST_ID = "123567324234";
     @Inject
     private EntityManager entityManager;
@@ -95,12 +87,6 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
 
     private Behandling originalBehandling;
 
-
-    private UttakTjeneste uttakTjeneste = mock(UttakTjeneste.class);
-
-    private MapInputTilUttakTjeneste mapInputTilUttakTjeneste = mock(MapInputTilUttakTjeneste.class);
-
-
     private SøknadsperiodeRepository søknadsperiodeRepository;
 
     @Inject
@@ -109,14 +95,16 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
     private PleiepengerEndretUtbetalingPeriodeutleder utleder;
     private MottatteDokumentRepository mottatteDokumentRepository;
 
-    private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = mock();
+    private final VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = mock();
 
-    private InntektsmeldingerRelevantForBeregning inntektsmeldingerRelevantForBeregning = mock();
+    private final InntektsmeldingerRelevantForBeregning inntektsmeldingerRelevantForBeregning = (sakInntektsmeldinger, vilkårsPeriode) -> sakInntektsmeldinger.stream().toList();
 
-    private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
+    private final InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
 
     private UttakNyeReglerRepository uttakNyeReglerRepository;
-    private PersonopplysningTjeneste personopplysningtjeneste = mock(PersonopplysningTjeneste.class);
+
+    private final PleietrengendeRevurderingPerioderTjeneste pleietrengendeRevurderingPerioderTjeneste = mock(PleietrengendeRevurderingPerioderTjeneste.class);
+    private Fagsak fagsak;
 
     @BeforeEach
     void setUp() {
@@ -137,16 +125,16 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
             inntektArbeidYtelseTjeneste,
             mottatteDokumentRepository
         );
-        utleder = new PleiepengerEndretUtbetalingPeriodeutleder(uttakTjeneste, behandlingRepository,
+        var personopplysningRepository = new PersonopplysningRepository(entityManager);
+        var personopplysningTjeneste = new PersonopplysningTjeneste(personopplysningRepository);
+        utleder = new PleiepengerEndretUtbetalingPeriodeutleder(
             new UnitTestLookupInstanceImpl<>(vilkårsPerioderTilVurderingTjeneste),
             new ProsessTriggereRepository(entityManager),
             søknadsperiodeTjeneste,
             uttakNyeReglerRepository,
-            mapInputTilUttakTjeneste,
-            personopplysningtjeneste,
-            null,
-            erEndringIRefusjonskravVurderer,
-            false);
+            personopplysningTjeneste,
+            pleietrengendeRevurderingPerioderTjeneste,
+            erEndringIRefusjonskravVurderer);
         originalBehandling = opprettBehandling(SKJÆRINGSTIDSPUNKT);
         behandling = Behandling.fraTidligereBehandling(originalBehandling, BehandlingType.REVURDERING).build();
         behandlingRepository.lagre(behandling, new BehandlingLås(null));
@@ -154,20 +142,22 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
         mottatteDokumentRepository.lagre(byggMottattDokument(behandling.getFagsakId()), DokumentStatus.GYLDIG);
 
         when(vilkårsPerioderTilVurderingTjeneste.utled(any(), any())).thenReturn(emptyNavigableSet());
+        when(vilkårsPerioderTilVurderingTjeneste.utledFraDefinerendeVilkår(any())).thenReturn(emptyNavigableSet());
+        when(vilkårsPerioderTilVurderingTjeneste.definerendeVilkår()).thenReturn(Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR));
+
+        Long behandlingId = behandling.getId();
+        PersonInformasjonBuilder informasjonBuilder = new PersonInformasjonBuilder(PersonopplysningVersjonType.REGISTRERT);
+        personOpplysningSøker(informasjonBuilder);
+        pleietrengende(informasjonBuilder, Optional.empty());
+
+        personopplysningRepository.lagre(behandlingId, informasjonBuilder);
+        when(pleietrengendeRevurderingPerioderTjeneste.utledBerørtePerioderPåPleietrengende(any(), any())).thenReturn(LocalDateTimeline.empty());
     }
 
     @Test
     void skal_returnere_tom_liste_dersom_nye_regler_dato_etter_periode() {
         var fom = SKJÆRINGSTIDSPUNKT;
         var antallDager = 10;
-
-        Uttaksplan uttaksplan = lagUttaksplanEnPeriode(fom, antallDager, List.of(fullUtbetaling(ARBEIDSFORHOLD_1)));
-
-        when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
-            .thenReturn(uttaksplan);
-        when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
-            .thenReturn(uttaksplan);
-
 
 
         var tomDato = SKJÆRINGSTIDSPUNKT.plusDays(antallDager);
@@ -183,13 +173,6 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
     void skal_returnere_periode_på_en_dag_dersom_dato_nye_uttaksregler_lik_tomdato() {
         var fom = SKJÆRINGSTIDSPUNKT;
         var antallDager = 10;
-
-        Uttaksplan uttaksplan = lagUttaksplanEnPeriode(fom, antallDager, List.of(fullUtbetaling(ARBEIDSFORHOLD_1)));
-
-        when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
-            .thenReturn(uttaksplan);
-        when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
-            .thenReturn(uttaksplan);
 
         var tomDato = SKJÆRINGSTIDSPUNKT.plusDays(antallDager);
 
@@ -208,13 +191,6 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
         var fom = SKJÆRINGSTIDSPUNKT;
         var antallDager = 10;
 
-        Uttaksplan uttaksplan = lagUttaksplanEnPeriode(fom, antallDager, List.of(fullUtbetaling(ARBEIDSFORHOLD_1)));
-
-        when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
-            .thenReturn(uttaksplan);
-        when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
-            .thenReturn(uttaksplan);
-
         var tomDato = SKJÆRINGSTIDSPUNKT.plusDays(antallDager);
 
         uttakNyeReglerRepository.lagreDatoForNyeRegler(behandling.getId(), SKJÆRINGSTIDSPUNKT.minusDays(1));
@@ -228,17 +204,8 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
     }
 
     @Test
-    void skal_returnere_perioden_mellom_endring_av_dato_for_nye_regler() {
-        var fom = SKJÆRINGSTIDSPUNKT;
+    void skal_returnere_perioden_fom_endring_av_dato_for_nye_regler() {
         var antallDager = 10;
-
-        Uttaksplan uttaksplan = lagUttaksplanEnPeriode(fom, antallDager, List.of(fullUtbetaling(ARBEIDSFORHOLD_1)));
-
-        when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
-            .thenReturn(uttaksplan);
-        when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
-            .thenReturn(uttaksplan);
-
         var tomDato = SKJÆRINGSTIDSPUNKT.plusDays(antallDager);
 
         uttakNyeReglerRepository.lagreDatoForNyeRegler(originalBehandling.getId(), SKJÆRINGSTIDSPUNKT);
@@ -249,7 +216,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
         assertThat(forlengelseperioder.size()).isEqualTo(1);
         var first = forlengelseperioder.getFirst();
         assertThat(first.getFomDato()).isEqualTo(SKJÆRINGSTIDSPUNKT);
-        assertThat(first.getTomDato()).isEqualTo(SKJÆRINGSTIDSPUNKT.plusDays(4));
+        assertThat(first.getTomDato()).isEqualTo(tomDato);
     }
 
 
@@ -258,16 +225,41 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
         var fom = SKJÆRINGSTIDSPUNKT;
         var antallDager = 10;
 
-        Uttaksplan uttaksplan = lagUttaksplanEnPeriode(fom, antallDager, List.of(fullUtbetaling(ARBEIDSFORHOLD_1)));
-
-        when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
-            .thenReturn(uttaksplan);
-        when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
-            .thenReturn(uttaksplan);
-
         var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.plusDays(antallDager)));
 
         assertThat(forlengelseperioder.size()).isEqualTo(0);
+    }
+
+    @Test
+    void skal_returnere_perioder_med_endring_i_refusjon() {
+        var fom = SKJÆRINGSTIDSPUNKT;
+        var antallDager = 10;
+
+        var builder = new MottattDokument.Builder();
+        var journalPostId = new JournalpostId(1L);
+        builder.medJournalPostId(journalPostId);
+        builder.medBehandlingId(behandling.getId());
+        builder.medFagsakId(fagsak.getId());
+        builder.medType(Brevkode.INNTEKTSMELDING);
+        mottatteDokumentRepository.lagre(builder.build(), DokumentStatus.GYLDIG);
+
+        inntektArbeidYtelseTjeneste.lagreInntektsmeldinger(fagsak.getSaksnummer(), behandling.getId(), List.of(InntektsmeldingBuilder.builder()
+            .medArbeidsgiver(Arbeidsgiver.virksomhet(ORGANISASJONSNUMMER))
+            .medRefusjon(BigDecimal.TEN)
+            .medKanalreferanse("kanalref")
+            .medJournalpostId(journalPostId)
+            .medStartDatoPermisjon(SKJÆRINGSTIDSPUNKT)));
+
+
+        when(vilkårsPerioderTilVurderingTjeneste.utled(any(), any())).thenReturn(new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(SKJÆRINGSTIDSPUNKT, SKJÆRINGSTIDSPUNKT.plusDays(antallDager)))));
+        when(vilkårsPerioderTilVurderingTjeneste.utledFraDefinerendeVilkår(any())).thenReturn(new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(SKJÆRINGSTIDSPUNKT, SKJÆRINGSTIDSPUNKT.plusDays(antallDager)))));
+
+        var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.plusDays(antallDager)));
+
+        assertThat(forlengelseperioder.size()).isEqualTo(1);
+        var periode = forlengelseperioder.iterator().next();
+        assertThat(periode.getFomDato()).isEqualTo(SKJÆRINGSTIDSPUNKT);
+        assertThat(periode.getTomDato()).isEqualTo(SKJÆRINGSTIDSPUNKT.plusDays(antallDager));
     }
 
     @Test
@@ -276,205 +268,56 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
         var dagerEtterSTPSøknadFom = 5;
         var antallDager = 10;
 
-        Uttaksplan uttaksplan = lagUttaksplanEnPeriode(fom, antallDager, List.of(fullUtbetaling(ARBEIDSFORHOLD_1)));
-
-        when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
-            .thenReturn(uttaksplan);
-        when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
-            .thenReturn(uttaksplan);
-
-
         var søknadsperiode = new Søknadsperiode(SKJÆRINGSTIDSPUNKT.plusDays(dagerEtterSTPSøknadFom), SKJÆRINGSTIDSPUNKT.plusDays(antallDager));
         var søknadsperioder = new Søknadsperioder(new JournalpostId(JOURNALPOST_ID), søknadsperiode);
         søknadsperiodeRepository.lagre(behandling.getId(), søknadsperioder);
         søknadsperiodeRepository.lagreRelevanteSøknadsperioder(behandling.getId(), new SøknadsperioderHolder(søknadsperioder));
+
+
         var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.plusDays(antallDager)));
 
         assertThat(forlengelseperioder.size()).isEqualTo(1);
         var periode = forlengelseperioder.iterator().next();
-        assertThat(periode.getFomDato()).isEqualTo(SKJÆRINGSTIDSPUNKT.plusDays(dagerEtterSTPSøknadFom));
+        assertThat(periode.getFomDato()).isEqualTo(mandagenFør(SKJÆRINGSTIDSPUNKT.plusDays(dagerEtterSTPSøknadFom)));
         assertThat(periode.getTomDato()).isEqualTo(SKJÆRINGSTIDSPUNKT.plusDays(antallDager));
     }
 
+
     @Test
-    void skal_returnere_tom_liste_for_søknadsendringer_utenfor_periode() {
+    void skal_returnere_fom_dato_lik_stp_dersom_mandagen_før_ligger_utenfor_periode() {
         var fom = SKJÆRINGSTIDSPUNKT;
-        var dagerEtterSTPSøknadFom = 5;
+        var dagerEtterSTPSøknadFom = 1;
         var antallDager = 10;
-
-        Uttaksplan uttaksplan = lagUttaksplanEnPeriode(fom, antallDager, List.of(fullUtbetaling(ARBEIDSFORHOLD_1)));
-
-        when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
-            .thenReturn(uttaksplan);
-        when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
-            .thenReturn(uttaksplan);
-
 
         var søknadsperiode = new Søknadsperiode(SKJÆRINGSTIDSPUNKT.plusDays(dagerEtterSTPSøknadFom), SKJÆRINGSTIDSPUNKT.plusDays(antallDager));
         var søknadsperioder = new Søknadsperioder(new JournalpostId(JOURNALPOST_ID), søknadsperiode);
         søknadsperiodeRepository.lagre(behandling.getId(), søknadsperioder);
         søknadsperiodeRepository.lagreRelevanteSøknadsperioder(behandling.getId(), new SøknadsperioderHolder(søknadsperioder));
-        var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(SKJÆRINGSTIDSPUNKT, fom.plusDays(dagerEtterSTPSøknadFom - 4)));
 
-        assertThat(forlengelseperioder.size()).isEqualTo(0);
-    }
-
-    @Test
-    void skal_gi_en_periode_ved_endring_i_utbetalingsgrad_i_hele_perioden() {
-        var fom = SKJÆRINGSTIDSPUNKT;
-        var antallDager = 10;
-
-        Uttaksplan uttaksplan = lagUttaksplanEnPeriode(fom, antallDager, List.of(fullUtbetaling(ARBEIDSFORHOLD_1)));
-
-        Uttaksplan uttaksplan2 = lagUttaksplanEnPeriode(fom, antallDager, List.of(delvisUtbetaling(ARBEIDSFORHOLD_1, BigDecimal.valueOf(50))));
-
-        when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
-            .thenReturn(uttaksplan);
-        when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
-            .thenReturn(uttaksplan2);
 
         var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.plusDays(antallDager)));
 
         assertThat(forlengelseperioder.size()).isEqualTo(1);
         var periode = forlengelseperioder.iterator().next();
-        assertThat(periode.getFomDato()).isEqualTo(fom);
-        assertThat(periode.getTomDato()).isEqualTo(fom.plusDays(antallDager));
-    }
-
-    @Test
-    void skal_gi_en_periode_ved_endring_i_utbetalingsgrad_i_deler_av_perioden() {
-        var fom = SKJÆRINGSTIDSPUNKT;
-        var antallDager = 10;
-        var antallDagerTilEndring = 6;
-
-        Uttaksplan uttaksplanOriginalBehandling = lagUttaksplanEnPeriode(fom, antallDager, List.of(fullUtbetaling(ARBEIDSFORHOLD_1)));
-
-
-        Map<LukketPeriode, UttaksperiodeInfo> perioder2 = new HashMap<>();
-        List<Utbetalingsgrader> utbetalingsgraderPeriode1 = List.of(fullUtbetaling(ARBEIDSFORHOLD_1));
-        leggTilPeriode(perioder2, fom, utbetalingsgraderPeriode1, antallDagerTilEndring - 1);
-        List<Utbetalingsgrader> utbetalingsgraderPeriode2 = List.of(delvisUtbetaling(ARBEIDSFORHOLD_1, BigDecimal.valueOf(50)));
-        leggTilPeriode(perioder2, fom.plusDays(antallDagerTilEndring), utbetalingsgraderPeriode2, antallDager - antallDagerTilEndring);
-        Uttaksplan uttaksplanForlengelse = new Uttaksplan(perioder2, List.of());
-
-        when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
-            .thenReturn(uttaksplanForlengelse);
-        when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
-            .thenReturn(uttaksplanOriginalBehandling);
-
-        var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.plusDays(antallDager)));
-
-        assertThat(forlengelseperioder.size()).isEqualTo(1);
-        var periode = forlengelseperioder.iterator().next();
-        assertThat(periode.getFomDato()).isEqualTo(fom.plusDays(antallDagerTilEndring));
-        assertThat(periode.getTomDato()).isEqualTo(fom.plusDays(antallDager));
-    }
-
-    @Test
-    void skal_gi_en_periode_ved_fjernet_arbeidsforhold_i_deler_av_perioden() {
-        var fom = SKJÆRINGSTIDSPUNKT;
-        var antallDager = 10;
-        var antallDagerTilEndring = 6;
-
-        Uttaksplan uttaksplanOriginalBehandling = lagUttaksplanEnPeriode(fom, antallDager, List.of(fullUtbetaling(ARBEIDSFORHOLD_1), fullUtbetaling(ARBEIDSFORHOLD_2)));
-
-
-        Map<LukketPeriode, UttaksperiodeInfo> perioder2 = new HashMap<>();
-        List<Utbetalingsgrader> utbetalingsgraderPeriode1 = List.of(fullUtbetaling(ARBEIDSFORHOLD_1), fullUtbetaling(ARBEIDSFORHOLD_2));
-        leggTilPeriode(perioder2, fom, utbetalingsgraderPeriode1, antallDagerTilEndring - 1);
-        List<Utbetalingsgrader> utbetalingsgraderPeriode2 = List.of(fullUtbetaling(ARBEIDSFORHOLD_1));
-        leggTilPeriode(perioder2, fom.plusDays(antallDagerTilEndring), utbetalingsgraderPeriode2, antallDager - antallDagerTilEndring);
-        Uttaksplan uttaksplanForlengelse = new Uttaksplan(perioder2, List.of());
-
-        when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
-            .thenReturn(uttaksplanForlengelse);
-        when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
-            .thenReturn(uttaksplanOriginalBehandling);
-
-        var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.plusDays(antallDager)));
-
-        assertThat(forlengelseperioder.size()).isEqualTo(1);
-        var periode = forlengelseperioder.iterator().next();
-        assertThat(periode.getFomDato()).isEqualTo(fom.plusDays(antallDagerTilEndring));
-        assertThat(periode.getTomDato()).isEqualTo(fom.plusDays(antallDager));
-    }
-
-    @Test
-    void skal_gi_en_periode_ved_nytt_arbeidsforhold_i_deler_av_perioden() {
-        var fom = SKJÆRINGSTIDSPUNKT;
-        var antallDager = 10;
-        var antallDagerTilEndring = 6;
-
-        Uttaksplan uttaksplanOriginalBehandling = lagUttaksplanEnPeriode(fom, antallDager, List.of(fullUtbetaling(ARBEIDSFORHOLD_1)));
-
-
-        Map<LukketPeriode, UttaksperiodeInfo> perioder2 = new HashMap<>();
-        List<Utbetalingsgrader> utbetalingsgraderPeriode1 = List.of(fullUtbetaling(ARBEIDSFORHOLD_1));
-        leggTilPeriode(perioder2, fom, utbetalingsgraderPeriode1, antallDagerTilEndring - 1);
-        List<Utbetalingsgrader> utbetalingsgraderPeriode2 = List.of(fullUtbetaling(ARBEIDSFORHOLD_1), fullUtbetaling(ARBEIDSFORHOLD_2));
-        leggTilPeriode(perioder2, fom.plusDays(antallDagerTilEndring), utbetalingsgraderPeriode2, antallDager - antallDagerTilEndring);
-        Uttaksplan uttaksplanForlengelse = new Uttaksplan(perioder2, List.of());
-
-        when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
-            .thenReturn(uttaksplanForlengelse);
-        when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
-            .thenReturn(uttaksplanOriginalBehandling);
-
-        var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.plusDays(antallDager)));
-
-        assertThat(forlengelseperioder.size()).isEqualTo(1);
-        var periode = forlengelseperioder.iterator().next();
-        assertThat(periode.getFomDato()).isEqualTo(fom.plusDays(antallDagerTilEndring));
-        assertThat(periode.getTomDato()).isEqualTo(fom.plusDays(antallDager));
-    }
-
-    @Test
-    void skal_gi_en_periode_ved_trukket_periode() {
-        var fom = SKJÆRINGSTIDSPUNKT;
-
-        Uttaksplan uttaksplan = lagUttaksplanEnPeriode(fom, 15, List.of(fullUtbetaling(ARBEIDSFORHOLD_1)));
-
-        Uttaksplan uttaksplan2 = lagUttaksplanEnPeriode(fom, 10, List.of(fullUtbetaling(ARBEIDSFORHOLD_1)));
-
-        when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
-            .thenReturn(uttaksplan);
-        when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
-            .thenReturn(uttaksplan2);
-
-        var forlengelseperioder = utleder.utledPerioder(
-            BehandlingReferanse.fra(behandling),
-            DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.plusDays(10)));
-
-        assertThat(forlengelseperioder.size()).isEqualTo(1);
-        var periode = forlengelseperioder.iterator().next();
-        assertThat(periode.getFomDato()).isEqualTo(fom.plusDays(11));
-        assertThat(periode.getTomDato()).isEqualTo(fom.plusDays(15));
+        assertThat(periode.getFomDato()).isEqualTo(SKJÆRINGSTIDSPUNKT);
+        assertThat(periode.getTomDato()).isEqualTo(SKJÆRINGSTIDSPUNKT.plusDays(antallDager));
     }
 
 
     @Test
-    void skal_gi_en_periode_ved_endring_i_utbetalingsgrad_i_hele_perioden_bortsett_fra_helg() {
+    void skal_gi_en_periode_ved_endring_i_tilsyn_i_hele_perioden_bortsett_fra_helg() {
         var fom = SKJÆRINGSTIDSPUNKT.with(TemporalAdjusters.next(DayOfWeek.MONDAY));
 
-        Map<LukketPeriode, UttaksperiodeInfo> perioder = new HashMap<>();
-        List<Utbetalingsgrader> utbetalingsgraderPeriode1 = List.of(fullUtbetaling(ARBEIDSFORHOLD_1));
-        leggTilPeriode(perioder, fom, utbetalingsgraderPeriode1, 4);
-        List<Utbetalingsgrader> utbetalingsgraderPeriode2 = List.of(delvisUtbetaling(ARBEIDSFORHOLD_1, BigDecimal.valueOf(0)));
-        leggTilPeriode(perioder, fom.plusDays(5), utbetalingsgraderPeriode2, 1);
-        leggTilPeriode(perioder, fom.plusDays(7), utbetalingsgraderPeriode1, 4);
-        Uttaksplan uttaksplan = new Uttaksplan(perioder, List.of());
 
-        Map<LukketPeriode, UttaksperiodeInfo> perioder_forlengelse = new HashMap<>();
-        List<Utbetalingsgrader> utbetalingsgraderPeriode1_forlengelse = List.of(delvisUtbetaling(ARBEIDSFORHOLD_1, BigDecimal.valueOf(50)));
-        leggTilPeriode(perioder_forlengelse, fom, utbetalingsgraderPeriode1_forlengelse, 4);
-        leggTilPeriode(perioder_forlengelse, fom.plusDays(5), utbetalingsgraderPeriode2, 1);
-        leggTilPeriode(perioder_forlengelse, fom.plusDays(7), utbetalingsgraderPeriode1_forlengelse, 4);
-        Uttaksplan uttaksplan_forlengelse = new Uttaksplan(perioder_forlengelse, List.of());
-
-        when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
-            .thenReturn(uttaksplan_forlengelse);
-        when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
-            .thenReturn(uttaksplan);
+        when(pleietrengendeRevurderingPerioderTjeneste.utledBerørtePerioderPåPleietrengende(
+            BehandlingReferanse.fra(behandling),
+            Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR)
+        )).thenReturn(
+            new LocalDateTimeline<>(List.of(
+                new LocalDateSegment<>(fom, fom.plusDays(4), Set.of(BehandlingÅrsakType.RE_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON)),
+                new LocalDateSegment<>(fom.plusDays(7), fom.plusDays(11), Set.of(BehandlingÅrsakType.RE_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON))
+            ))
+        );
 
 
         var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.plusDays(11)));
@@ -492,7 +335,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
           res          |---------|
          */
     @Test
-    void skal_inkludere_uttak_uten_endring_hvis_kant_i_kant_med_tidligere_stp() {
+    void skal_inkludere_periode_uten_endring_hvis_kant_i_kant_med_tidligere_stp() {
         var stp1 = SKJÆRINGSTIDSPUNKT;
         var tom1 = stp1.plusDays(5);
 
@@ -502,23 +345,17 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
         var stp2 = tomHull.plusDays(1);
         var tom2 = stp2.plusDays(20);
 
-        var utbPeriode = List.of(fullUtbetaling(ARBEIDSFORHOLD_1));
 
-        Map<LukketPeriode, UttaksperiodeInfo> perioder = new HashMap<>();
-        leggTilPeriode(perioder, utbPeriode, stp1, tom1);
-        leggTilPeriode(perioder, utbPeriode, stp2, tom2);
-        Uttaksplan uttaksplanOriginal = new Uttaksplan(perioder, List.of());
+        when(pleietrengendeRevurderingPerioderTjeneste.utledBerørtePerioderPåPleietrengende(
+            BehandlingReferanse.fra(behandling),
+            Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR)
+        )).thenReturn(
+            new LocalDateTimeline<>(List.of(
+                new LocalDateSegment<>(fomHull, tomHull, Set.of(BehandlingÅrsakType.RE_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON)),
+                new LocalDateSegment<>(stp2, tom2, Set.of(BehandlingÅrsakType.RE_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON))
+            ))
+        );
 
-        Map<LukketPeriode, UttaksperiodeInfo> perioder_tette_hull = new HashMap<>();
-        leggTilPeriode(perioder_tette_hull, utbPeriode, stp1, tom1);
-        leggTilPeriode(perioder_tette_hull, utbPeriode, fomHull, tomHull);
-        leggTilPeriode(perioder_tette_hull, utbPeriode, stp2, tom2);
-        Uttaksplan uttaksplan_tette_hull = new Uttaksplan(perioder_tette_hull, List.of());
-
-        when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
-            .thenReturn(uttaksplan_tette_hull);
-        when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
-            .thenReturn(uttaksplanOriginal);
 
         when(vilkårsPerioderTilVurderingTjeneste.utled(originalBehandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR))
             .thenReturn(new TreeSet<>(List.of(
@@ -531,7 +368,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
 
         assertThat(forlengelseperioder.size()).isEqualTo(1);
         var periode = forlengelseperioder.iterator().next();
-        assertThat(periode.getFomDato()).isEqualTo(fomHull);
+        assertThat(periode.getFomDato()).isEqualTo(mandagenFør(fomHull));
         assertThat(periode.getTomDato()).isEqualTo(tom2);
     }
 
@@ -543,7 +380,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
           resultat           |---|
          */
     @Test
-    void skal_inkludere_uttak_kun_med_endring_hvis_ikke_kant_i_kant_fra_tidligere_stp() {
+    void skal_inkludere_periode_fra_endringsdato_og_til_slutten_av_perioden_hvis_ikke_kant_i_kant_fra_tidligere_stp() {
         var stp1 = SKJÆRINGSTIDSPUNKT;
         var tom1 = stp1.plusDays(5);
 
@@ -553,23 +390,15 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
         var stp2 = tomHull.plusDays(4);
         var tom2 = stp2.plusDays(20);
 
-        var utbPeriode = List.of(fullUtbetaling(ARBEIDSFORHOLD_1));
 
-        Map<LukketPeriode, UttaksperiodeInfo> perioder = new HashMap<>();
-        leggTilPeriode(perioder, utbPeriode, stp1, tom1);
-        leggTilPeriode(perioder, utbPeriode, stp2, tom2);
-        Uttaksplan uttaksplanOriginal = new Uttaksplan(perioder, List.of());
-
-        Map<LukketPeriode, UttaksperiodeInfo> perioder_tette_hull = new HashMap<>();
-        leggTilPeriode(perioder_tette_hull, utbPeriode, stp1, tom1);
-        leggTilPeriode(perioder_tette_hull, utbPeriode, fomHull, tomHull);
-        leggTilPeriode(perioder_tette_hull, utbPeriode, stp2, tom2);
-        Uttaksplan uttaksplan_tette_hull = new Uttaksplan(perioder_tette_hull, List.of());
-
-        when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
-            .thenReturn(uttaksplan_tette_hull);
-        when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
-            .thenReturn(uttaksplanOriginal);
+        when(pleietrengendeRevurderingPerioderTjeneste.utledBerørtePerioderPåPleietrengende(
+            BehandlingReferanse.fra(behandling),
+            Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR)
+        )).thenReturn(
+            new LocalDateTimeline<>(List.of(
+                new LocalDateSegment<>(fomHull, tomHull, Set.of(BehandlingÅrsakType.RE_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON))
+            ))
+        );
 
         when(vilkårsPerioderTilVurderingTjeneste.utled(originalBehandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR))
             .thenReturn(new TreeSet<>(List.of(
@@ -582,148 +411,30 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
 
         assertThat(forlengelseperioder.size()).isEqualTo(1);
         var periode = forlengelseperioder.iterator().next();
-        assertThat(periode.getFomDato()).isEqualTo(fomHull);
-        assertThat(periode.getTomDato()).isEqualTo(tomHull);
+        assertThat(periode.getFomDato()).isEqualTo(mandagenFør(fomHull));
+        assertThat(periode.getTomDato()).isEqualTo(tom2);
     }
 
-    /*
-    beh1                                   |------------------|
-    beh 2                         |-------|        |---|
-
-    resultat:                     |---------------------------|
-     */
     @Test
-    void skal_håndtere_kant_i_kant_stp_og_overlapp() {
-        var stp1 = SKJÆRINGSTIDSPUNKT;
-        var tom1 = stp1.plusDays(5);
+    void skal_returnere_tom_liste_for_søknadsendringer_utenfor_periode() {
+        var fom = SKJÆRINGSTIDSPUNKT;
+        var dagerEtterSTPSøknadFom = 5;
+        var antallDager = 10;
 
-        var fomHull = tom1.plusDays(1);
-        var tomHull = fomHull.plusDays(4);
+        var søknadsperiode = new Søknadsperiode(SKJÆRINGSTIDSPUNKT.plusDays(dagerEtterSTPSøknadFom), SKJÆRINGSTIDSPUNKT.plusDays(antallDager));
+        var søknadsperioder = new Søknadsperioder(new JournalpostId(JOURNALPOST_ID), søknadsperiode);
+        søknadsperiodeRepository.lagre(behandling.getId(), søknadsperioder);
+        søknadsperiodeRepository.lagreRelevanteSøknadsperioder(behandling.getId(), new SøknadsperioderHolder(søknadsperioder));
+        var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(SKJÆRINGSTIDSPUNKT, fom.plusDays(dagerEtterSTPSøknadFom - 4)));
 
-        var stp2 = tomHull.plusDays(1);
-        var tom2 = stp2.plusDays(20);
-
-        var stp0 = fomHull;
-        var tom0 = tom2.plusDays(10);
-
-        var utbPeriode = List.of(fullUtbetaling(ARBEIDSFORHOLD_1));
-
-        Map<LukketPeriode, UttaksperiodeInfo> perioder = new HashMap<>();
-        leggTilPeriode(perioder, utbPeriode, stp0, tom0);
-        Uttaksplan uttaksplanOriginal = new Uttaksplan(perioder, List.of());
-
-        Map<LukketPeriode, UttaksperiodeInfo> perioder_endring = new HashMap<>();
-        leggTilPeriode(perioder_endring, utbPeriode, stp1, tom1);
-        leggTilPeriode(perioder_endring, utbPeriode, fomHull, tomHull);
-        leggTilPeriode(perioder_endring, List.of(delvisUtbetaling(ARBEIDSFORHOLD_1, BigDecimal.valueOf(60))), stp2, tom2);
-        leggTilPeriode(perioder_endring, utbPeriode, tom2.plusDays(1), tom0);
-        Uttaksplan uttaksplan_tette_hull = new Uttaksplan(perioder_endring, List.of());
-
-        when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
-            .thenReturn(uttaksplan_tette_hull);
-        when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
-            .thenReturn(uttaksplanOriginal);
-
-        when(vilkårsPerioderTilVurderingTjeneste.utled(originalBehandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR))
-            .thenReturn(new TreeSet<>(List.of(
-                DatoIntervallEntitet.fraOgMedTilOgMed(stp0, tom0)
-            )));
-
-
-        var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(stp1, tom2));
-
-        assertThat(forlengelseperioder.size()).isEqualTo(1);
-        var periode = forlengelseperioder.iterator().next();
-        assertThat(periode.getFomDato()).isEqualTo(stp1);
-        assertThat(periode.getTomDato()).isEqualTo(tom0);
-    }
-
-    /*
-    beh1                                   |------------------|
-    beh 2                                             |----|  |---|
-    resultat                                          |----|  |---|
-     */
-    @Test
-    void skal_håndtere_endring_og_forlengelse() {
-        var stp1 = SKJÆRINGSTIDSPUNKT;
-        var tom1 = stp1.plusDays(20);
-
-        var fomEndring = stp1.plusDays(2);
-        var tomEndring = fomEndring.plusDays(4);
-
-        var fomForlengelse = tom1.plusDays(1);
-        var tomForlengelse = fomForlengelse.plusDays(20);
-
-        var original = List.of(delvisUtbetaling(ARBEIDSFORHOLD_1, BigDecimal.valueOf(60)));
-        var endring = List.of(fullUtbetaling(ARBEIDSFORHOLD_1));
-
-        Map<LukketPeriode, UttaksperiodeInfo> perioder = new HashMap<>();
-        leggTilPeriode(perioder, original, stp1, tom1);
-        Uttaksplan uttaksplanOriginal = new Uttaksplan(perioder, List.of());
-
-        Map<LukketPeriode, UttaksperiodeInfo> perioder_endring = new HashMap<>();
-        leggTilPeriode(perioder_endring, original, stp1, fomEndring.minusDays(1));
-        leggTilPeriode(perioder_endring, endring, fomEndring, tomEndring);
-        leggTilPeriode(perioder_endring, original, tomEndring.plusDays(1), tom1);
-        leggTilPeriode(perioder_endring, endring, fomForlengelse, tomForlengelse);
-        Uttaksplan uttaksplan_tette_hull = new Uttaksplan(perioder_endring, List.of());
-
-        when(uttakTjeneste.hentUttaksplan(behandling.getUuid(), true))
-            .thenReturn(uttaksplan_tette_hull);
-        when(uttakTjeneste.hentUttaksplan(originalBehandling.getUuid(), true))
-            .thenReturn(uttaksplanOriginal);
-
-        when(vilkårsPerioderTilVurderingTjeneste.utled(originalBehandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR))
-            .thenReturn(new TreeSet<>(List.of(
-                DatoIntervallEntitet.fraOgMedTilOgMed(stp1, tom1)
-            )));
-
-
-        var forlengelseperioder = utleder.utledPerioder(BehandlingReferanse.fra(behandling), DatoIntervallEntitet.fraOgMedTilOgMed(stp1, tomForlengelse));
-
-        assertThat(forlengelseperioder.size()).isEqualTo(2);
-        var iterator = forlengelseperioder.iterator();
-        var periode = iterator.next();
-        assertThat(periode.getFomDato()).isEqualTo(fomEndring);
-        assertThat(periode.getTomDato()).isEqualTo(tomEndring);
-
-        periode = iterator.next();
-        assertThat(periode.getFomDato()).isEqualTo(fomForlengelse);
-        assertThat(periode.getTomDato()).isEqualTo(tomForlengelse);
-    }
-
-
-    private Uttaksplan lagUttaksplanEnPeriode(LocalDate fom, int antallDager, List<Utbetalingsgrader> utbetalingsgrader) {
-        Map<LukketPeriode, UttaksperiodeInfo> perioder = new HashMap<>();
-        leggTilPeriode(perioder, fom, utbetalingsgrader, antallDager);
-        return new Uttaksplan(perioder, List.of());
-    }
-
-    private Utbetalingsgrader fullUtbetaling(Arbeidsforhold arbeidsforhold) {
-        return new Utbetalingsgrader(arbeidsforhold, SJU_OG_EN_HALV_TIME, Duration.ZERO, BigDecimal.valueOf(100));
-    }
-
-    private Utbetalingsgrader delvisUtbetaling(Arbeidsforhold arbeidsforhold, BigDecimal utbetalingsgrad) {
-        return new Utbetalingsgrader(arbeidsforhold, SJU_OG_EN_HALV_TIME, Duration.ZERO, utbetalingsgrad);
-    }
-
-    private void leggTilPeriode(Map<LukketPeriode, UttaksperiodeInfo> perioder, LocalDate fom, List<Utbetalingsgrader> utbetalingsgrader, int antallDager) {
-        final LukketPeriode periode = new LukketPeriode(fom, fom.plusDays(antallDager));
-        leggTilPeriode(perioder, utbetalingsgrader, periode.getFom(), periode.getTom());
-    }
-
-    private void leggTilPeriode(Map<LukketPeriode, UttaksperiodeInfo> uttaksperioder, List<Utbetalingsgrader> utbetalingsgrader, LocalDate fom, LocalDate tom) {
-        uttaksperioder.put(new LukketPeriode(fom, tom),
-            new UttaksperiodeInfo(Utfall.OPPFYLT, BigDecimal.valueOf(100), null, null, utbetalingsgrader,
-                null, null, Set.of(),
-                new HashMap<>(), BigDecimal.valueOf(100), null,
-                Set.of(), UUID.randomUUID().toString(),
-                AnnenPart.ALENE, null, null, null,
-                false, null, false));
+        assertThat(forlengelseperioder.size()).isEqualTo(0);
     }
 
     private Behandling opprettBehandling(LocalDate skjæringstidspunkt) {
-        var fagsak = Fagsak.opprettNy(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, AktørId.dummy(), new Saksnummer("SAK"), skjæringstidspunkt, skjæringstidspunkt.plusDays(3));
+        fagsak = Fagsak.opprettNy(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, AktørId.dummy(),
+            AktørId.dummy(),
+            null,
+            new Saksnummer("SAK"), skjæringstidspunkt, skjæringstidspunkt.plusDays(3));
 
         fagsakRepository.opprettNy(fagsak);
         var builder = Behandling.forFørstegangssøknad(fagsak);
@@ -741,6 +452,60 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
         builder.medFagsakId(fagsakId);
         builder.medJournalPostId(new JournalpostId(JOURNALPOST_ID));
         return builder.build();
+    }
+
+    private void pleietrengende(PersonInformasjonBuilder informasjonBuilder, Optional<LocalDate> dødsdato) {
+        var aktørId = fagsak.getPleietrengendeAktørId();
+        LocalDate fødselsdato = SKJÆRINGSTIDSPUNKT.minusYears(1);
+        var personopplysningBuilder = informasjonBuilder.getPersonopplysningBuilder(aktørId)
+            .medNavn("Navn")
+            .medKjønn(NavBrukerKjønn.KVINNE)
+            .medFødselsdato(fødselsdato)
+            .medSivilstand(SivilstandType.UGIFT)
+            .medRegion(Region.NORDEN);
+        dødsdato.ifPresent(personopplysningBuilder::medDødsdato);
+        informasjonBuilder.leggTil(personopplysningBuilder)
+            .leggTil(informasjonBuilder
+                .getPersonstatusBuilder(aktørId, DatoIntervallEntitet.fraOgMed(fødselsdato)).medPersonstatus(PersonstatusType.BOSA))
+            .leggTil(informasjonBuilder
+                .getAdresseBuilder(aktørId, DatoIntervallEntitet.fraOgMed(fødselsdato), AdresseType.BOSTEDSADRESSE)
+                .medAdresselinje1("Testadresse")
+                .medLand("NOR").medPostnummer("1234"))
+            .leggTil(informasjonBuilder
+                .getAdresseBuilder(aktørId, DatoIntervallEntitet.fraOgMed(fødselsdato), AdresseType.MIDLERTIDIG_POSTADRESSE_UTLAND)
+                .medAdresselinje1("Testadresse")
+                .medLand("Sverige").medPostnummer("1234"))
+            .leggTil(informasjonBuilder
+                .getStatsborgerskapBuilder(aktørId, DatoIntervallEntitet.fraOgMed(fødselsdato), Landkoder.NOR, Region.NORDEN));
+    }
+
+    private void personOpplysningSøker(PersonInformasjonBuilder informasjonBuilder) {
+        var aktørId = behandling.getAktørId();
+        LocalDate fødselsdato = SKJÆRINGSTIDSPUNKT.minusYears(20);
+        informasjonBuilder.leggTil(
+                informasjonBuilder.getPersonopplysningBuilder(aktørId)
+                    .medNavn("Navn")
+                    .medKjønn(NavBrukerKjønn.KVINNE)
+                    .medFødselsdato(fødselsdato)
+                    .medSivilstand(SivilstandType.GIFT)
+                    .medRegion(Region.NORDEN))
+            .leggTil(informasjonBuilder
+                .getPersonstatusBuilder(aktørId, DatoIntervallEntitet.fraOgMed(fødselsdato)).medPersonstatus(PersonstatusType.BOSA))
+            .leggTil(informasjonBuilder
+                .getAdresseBuilder(aktørId, DatoIntervallEntitet.fraOgMed(fødselsdato), AdresseType.BOSTEDSADRESSE)
+                .medAdresselinje1("Testadresse")
+                .medLand("NOR").medPostnummer("1234"))
+            .leggTil(informasjonBuilder
+                .getAdresseBuilder(aktørId, DatoIntervallEntitet.fraOgMed(fødselsdato), AdresseType.MIDLERTIDIG_POSTADRESSE_UTLAND)
+                .medAdresselinje1("Testadresse")
+                .medLand("Sverige").medPostnummer("1234"))
+            .leggTil(informasjonBuilder
+                .getStatsborgerskapBuilder(aktørId, DatoIntervallEntitet.fraOgMed(fødselsdato), Landkoder.NOR, Region.NORDEN));
+    }
+
+
+    private static LocalDate mandagenFør(LocalDate d) {
+        return d.minusDays(d.getDayOfWeek().getValue() - 1);
     }
 
 }

@@ -13,7 +13,6 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -30,32 +29,23 @@ public class HentPerioderTilVurderingTjeneste {
     private final Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
     private final Instance<ForlengelseTjeneste> forlengelseTjenester;
     private final Instance<EndretUtbetalingPeriodeutleder> endretUtbetalingPeriodeutledere;
-    private final boolean skalVurdereKunEndretPeriodeEnabled;
 
     @Inject
     public HentPerioderTilVurderingTjeneste(
         SøknadsperiodeTjeneste søknadsperiodeTjeneste,
         @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
         @Any Instance<ForlengelseTjeneste> forlengelseTjenester,
-        @Any Instance<EndretUtbetalingPeriodeutleder> endretUtbetalingPeriodeutledere,
-        @KonfigVerdi(value = "UTVIDET_ENDRING_UTBETALING_UTLEDER", defaultVerdi = "false") boolean skalVurdereKunEndretPeriodeEnabled) {
+        @Any Instance<EndretUtbetalingPeriodeutleder> endretUtbetalingPeriodeutledere) {
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.forlengelseTjenester = forlengelseTjenester;
         this.endretUtbetalingPeriodeutledere = endretUtbetalingPeriodeutledere;
-        this.skalVurdereKunEndretPeriodeEnabled = skalVurdereKunEndretPeriodeEnabled;
     }
 
     public NavigableSet<DatoIntervallEntitet> hentPerioderTilVurderingUtenUbesluttet(BehandlingReferanse referanse) {
-        if (skalVurdereKunEndretPeriodeEnabled) {
-            var perioderMedRelevanteEndringer = finnPerioderTilVurderingMedRelevanteEndringer(referanse);
-            var endretPerioderTidslinje = TidslinjeUtil.tilTidslinjeKomprimertMedMuligOverlapp(perioderMedRelevanteEndringer);
-            return fjernTrukkedePerioder(referanse, endretPerioderTidslinje);
-        } else {
-            VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = finnPerioderTilVurderingTjeneste(referanse);
-            var søknadsperioder = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurderingTjeneste.utledFraDefinerendeVilkår(referanse.getId()));
-            return fjernTrukkedePerioder(referanse, søknadsperioder);
-        }
+        var perioderMedRelevanteEndringer = finnPerioderTilVurderingMedRelevanteEndringer(referanse);
+        var endretPerioderTidslinje = TidslinjeUtil.tilTidslinjeKomprimertMedMuligOverlapp(perioderMedRelevanteEndringer);
+        return fjernTrukkedePerioder(referanse, endretPerioderTidslinje);
     }
 
     private TreeSet<DatoIntervallEntitet> finnPerioderTilVurderingMedRelevanteEndringer(BehandlingReferanse referanse) {
@@ -93,8 +83,13 @@ public class HentPerioderTilVurderingTjeneste {
         if (utvidetPeriodeSomFølgeAvDødsfall.isPresent()) {
             søknadsperioder = søknadsperioder.combine(new LocalDateSegment<>(utvidetPeriodeSomFølgeAvDødsfall.get().toLocalDateInterval(), true), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
-
-        return fjernTrukkedePerioder(referanse, søknadsperioder);
+        var endretUtbetalingPeriodeutleder = EndretUtbetalingPeriodeutleder.finnUtleder(endretUtbetalingPeriodeutledere, referanse.getFagsakYtelseType(), referanse.getBehandlingType());
+        var begrensetTidslinje = søknadsperioder.getLocalDateIntervals()
+            .stream()
+            .flatMap(p -> begrensPeriode(referanse, DatoIntervallEntitet.fraOgMedTilOgMed(p.getFomDato(), p.getTomDato()), endretUtbetalingPeriodeutleder).stream())
+            .map(p -> new LocalDateTimeline<>(p.toLocalDateInterval(), true))
+            .reduce(LocalDateTimeline.empty(), LocalDateTimeline::crossJoin);
+        return fjernTrukkedePerioder(referanse, begrensetTidslinje);
     }
 
     private TreeSet<DatoIntervallEntitet> fjernTrukkedePerioder(BehandlingReferanse referanse, LocalDateTimeline<Boolean> søknadsperioder) {

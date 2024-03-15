@@ -1,35 +1,20 @@
 package no.nav.k9.sak.web.app.tjenester.brev;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.APPLIKASJON;
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
-
-import java.util.Collection;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.function.Function;
-
-import no.nav.k9.felles.integrasjon.organisasjon.OrganisasjonRestKlient;
-import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import no.nav.k9.felles.integrasjon.organisasjon.OrganisasjonRestKlient;
+import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
@@ -44,6 +29,18 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.k9.sak.kontrakt.vedtak.VedtakVarselDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Function;
+
+import static no.nav.k9.abac.BeskyttetRessursKoder.APPLIKASJON;
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
 
 @Path("")
 @ApplicationScoped
@@ -156,12 +153,21 @@ public class BrevRestTjeneste {
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     @Operation(description = "Hent navnet til gitt organisasjonsnr for sending til tredjepart", tags = "brev")
     @BeskyttetRessurs(action = READ, resource = APPLIKASJON)
-    public Response getBrevMottakerinfoEreg(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = IngenTilgangsAttributter.class) OrganisasjonsnrDto organisasjonsnrDto) {
+    @ApiResponse(
+        responseCode = "200",
+        description = "respons fra ereg, eller null viss organisasjon ikke blir funnet",
+        content = @Content(
+            mediaType = MediaType.APPLICATION_JSON,
+            schema = @Schema(
+                nullable = true,
+                allOf = {BrevMottakerinfoEregResponseDto.class}
+            )
+        )
+    )
+    public Optional<BrevMottakerinfoEregResponseDto> getBrevMottakerinfoEreg(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = IngenTilgangsAttributter.class) OrganisasjonsnrDto organisasjonsnrDto) {
         return eregRestKlient.hentOrganisasjonOptional(organisasjonsnrDto.organisasjonsnr()).map(org -> {
-            final var response = new BrevMottakerinfoEregResponseDto(org.getNavn());
-            return Response.ok(response).build();
-        })
-            .orElse(Response.ok(new Object()).build()); // Return empty json object if organisasjon is not found.
+            return new BrevMottakerinfoEregResponseDto(org.getNavn());
+        });
     }
 
     public static class IngenTilgangsAttributter implements Function<Object, AbacDataAttributter> {

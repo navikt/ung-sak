@@ -49,6 +49,7 @@ import no.nav.k9.sak.kontrakt.krav.PeriodeMedUtfall;
 import no.nav.k9.sak.kontrakt.krav.StatusForPerioderPåBehandling;
 import no.nav.k9.sak.kontrakt.krav.StatusForPerioderPåBehandlingInkludertVilkår;
 import no.nav.k9.sak.perioder.SøknadsfristTjenesteProvider;
+import no.nav.k9.sak.perioder.UtledPerioderMedRegisterendring;
 import no.nav.k9.sak.perioder.UtledStatusPåPerioderTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
@@ -82,13 +83,14 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
                                                      UttakTjeneste uttakTjeneste,
                                                      VilkårResultatRepository vilkårResultatRepository,
                                                      SøknadsfristTjenesteProvider søknadsfristTjenesteProvider,
+                                                     UtledPerioderMedRegisterendring utledPerioderMedRegisterendring,
                                                      @KonfigVerdi(value = "filtrer.tilstotende.periode", defaultVerdi = "false") Boolean filtrereUtTilstøtendePeriode) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingModellRepository = behandlingModellRepository;
         this.uttakTjeneste = uttakTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.søknadsfristTjenesteProvider = søknadsfristTjenesteProvider;
-        this.statusPåPerioderTjeneste = new UtledStatusPåPerioderTjeneste(filtrereUtTilstøtendePeriode);
+        this.statusPåPerioderTjeneste = new UtledStatusPåPerioderTjeneste(filtrereUtTilstøtendePeriode, utledPerioderMedRegisterendring);
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
     }
 
