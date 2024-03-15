@@ -53,6 +53,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.PleietrengendeRe
 @BehandlingTypeRef(BehandlingType.REVURDERING)
 @ApplicationScoped
 public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetalingPeriodeutleder {
+    public static final Set<BehandlingÅrsakType> ENDRET_FORDELING_ÅRSAKER = Set.of(BehandlingÅrsakType.RE_ENDRET_FORDELING, BehandlingÅrsakType.RE_GJENOPPTAR_UTSATT_BEHANDLING, BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON);
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
     private ProsessTriggereRepository prosessTriggereRepository;
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
@@ -226,7 +227,7 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
     private LocalDateTimeline<Boolean> finnTidslinjeFraProsessTriggere(BehandlingReferanse behandlingReferanse) {
         var prosessTriggere = prosessTriggereRepository.hentGrunnlag(behandlingReferanse.getBehandlingId());
         var perioderFraTriggere = prosessTriggere.stream().flatMap(it -> it.getTriggere().stream())
-            .filter(it -> it.getÅrsak().equals(BehandlingÅrsakType.RE_ENDRET_FORDELING) || it.getÅrsak().equals(BehandlingÅrsakType.RE_GJENOPPTAR_UTSATT_BEHANDLING))
+            .filter(it -> ENDRET_FORDELING_ÅRSAKER.contains(it.getÅrsak()))
             .map(Trigger::getPeriode)
             .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), TRUE))
             .collect(Collectors.toSet());
