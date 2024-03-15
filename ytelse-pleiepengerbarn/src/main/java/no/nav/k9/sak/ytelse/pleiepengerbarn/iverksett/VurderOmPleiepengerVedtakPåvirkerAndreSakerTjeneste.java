@@ -6,11 +6,9 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BA
 
 import java.time.Year;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -34,9 +32,6 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
@@ -51,6 +46,7 @@ import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
 import no.nav.k9.sak.utsatt.UtsattPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse.feriepenger.FeriepengerAvvikTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.HentPerioderTilVurderingTjeneste;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
@@ -62,11 +58,12 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
 
     private BehandlingRepository behandlingRepository;
     private FagsakRepository fagsakRepository;
-    private VilkårResultatRepository vilkårResultatRepository;
     private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
     private FeriepengerAvvikTjeneste feriepengerAvvikTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
+
+    private HentPerioderTilVurderingTjeneste hentPerioderTilVurderingTjeneste;
 
     private EndringAnnenOmsorgspersonUtleder endringAnnenOmsorgspersonUtleder;
 
@@ -76,17 +73,19 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
     @Inject
     public VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste(BehandlingRepository behandlingRepository,
                                                                FagsakRepository fagsakRepository,
-                                                               VilkårResultatRepository vilkårResultatRepository,
                                                                MedisinskGrunnlagRepository medisinskGrunnlagRepository,
                                                                UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
-                                                               FeriepengerAvvikTjeneste feriepengerAvvikTjeneste, @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester, EndringAnnenOmsorgspersonUtleder endringAnnenOmsorgspersonUtleder) {
+                                                               FeriepengerAvvikTjeneste feriepengerAvvikTjeneste,
+                                                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
+                                                               HentPerioderTilVurderingTjeneste hentPerioderTilVurderingTjeneste,
+                                                               EndringAnnenOmsorgspersonUtleder endringAnnenOmsorgspersonUtleder) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
-        this.vilkårResultatRepository = vilkårResultatRepository;
         this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
         this.feriepengerAvvikTjeneste = feriepengerAvvikTjeneste;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
+        this.hentPerioderTilVurderingTjeneste = hentPerioderTilVurderingTjeneste;
         this.endringAnnenOmsorgspersonUtleder = endringAnnenOmsorgspersonUtleder;
     }
 
@@ -187,17 +186,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
     }
 
     private NavigableSet<DatoIntervallEntitet> utledVurderingsperiode(BehandlingReferanse referanse) {
-        var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, referanse.getFagsakYtelseType(), referanse.getBehandlingType());
-        var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
-
-        return perioderTilVurderingTjeneste.definerendeVilkår()
-            .stream()
-            .map(vilkårType -> vilkårene.getVilkår(vilkårType)
-                .map(Vilkår::getPerioder))
-            .flatMap(Optional::stream)
-            .flatMap(Collection::stream)
-            .map(VilkårPeriode::getPeriode)
-            .collect(Collectors.toCollection(TreeSet::new));
+        return hentPerioderTilVurderingTjeneste.hentPerioderTilVurderingUtenUbesluttet(referanse);
     }
 
 }
