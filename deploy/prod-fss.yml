@@ -264,8 +264,6 @@ spec:
       value: "false"
     - name: ENABLE_DATO_NY_REGEL_UTTAK
       value: "false"
-    - name: FILTRER_UGYLDIG_IM
-      value: "false"
     - name: FJERN_VILKARSPERIODER_BEREGNING
       value: "false"
     - name: VALIDER_KALKULUS_REFERANSER
@@ -287,7 +285,7 @@ spec:
     - name: K9_ABAKUS_ENABLED
       value: "true"
     - name: OMP_NYOPPSTARTET_VED_REFUSJON
-      value: "false"    
+      value: "false"
     - name: INAKTIV_VED_8_47_B
       value: "false"
 
