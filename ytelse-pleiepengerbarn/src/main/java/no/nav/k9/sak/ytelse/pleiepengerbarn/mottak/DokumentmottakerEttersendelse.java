@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.ettersendelse.Ettersendelse;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
@@ -21,9 +23,11 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
+import no.nav.k9.sak.domene.behandling.steg.omsorgenfor.BrukerdialoginnsynTjeneste;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentValideringException;
 import no.nav.k9.sak.mottak.dokumentmottak.Dokumentmottaker;
+import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakerFelles;
 import no.nav.k9.søknad.JsonUtils;
 
 @ApplicationScoped
@@ -35,6 +39,8 @@ public class DokumentmottakerEttersendelse implements Dokumentmottaker {
 
     private MottatteDokumentRepository mottatteDokumentRepository;
     private SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer;
+    private Instance<BrukerdialoginnsynTjeneste> brukerdialoginnsynServicer;
+    private DokumentmottakerFelles dokumentMottakerFelles;
     private boolean ettersendelseRettTilK9Sak;
 
     DokumentmottakerEttersendelse() {
@@ -44,9 +50,13 @@ public class DokumentmottakerEttersendelse implements Dokumentmottaker {
     @Inject
     public DokumentmottakerEttersendelse(MottatteDokumentRepository mottatteDokumentRepository,
                                          SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer,
+                                         @Any Instance<BrukerdialoginnsynTjeneste> brukerdialoginnsynServicer,
+                                         DokumentmottakerFelles dokumentMottakerFelles,
                                          @KonfigVerdi(value = "ETTERSENDELSE_RETT_TIL_K9SAK", defaultVerdi = "false") boolean ettersendelseRettTilK9Sak) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.sykdomsDokumentVedleggHåndterer = sykdomsDokumentVedleggHåndterer;
+        this.brukerdialoginnsynServicer = brukerdialoginnsynServicer;
+        this.dokumentMottakerFelles = dokumentMottakerFelles;
         this.ettersendelseRettTilK9Sak = ettersendelseRettTilK9Sak;
     }
 
@@ -56,10 +66,13 @@ public class DokumentmottakerEttersendelse implements Dokumentmottaker {
             throw new IllegalStateException("Funksjonaliteten er skrudd av");
         }
 
+        var brukerdialoginnsynService = BrukerdialoginnsynTjeneste.finnTjeneste(brukerdialoginnsynServicer, behandling.getFagsakYtelseType());
+
         var sorterteDokumenter = sorterSøknadsdokumenter(dokumenter);
-        log.info("antall dokumenter: {}", sorterteDokumenter.size());
+        log.info("Mottar digital ettersendelse, antall dokumenter: {}", sorterteDokumenter.size());
         for (MottattDokument dokument : sorterteDokumenter) {
             Ettersendelse ettersendelse = parseDokument(dokument);
+            brukerdialoginnsynService.publiserDokumentHendelse(behandling, dokument);
             dokument.setBehandlingId(behandling.getId());
             dokument.setInnsendingstidspunkt(ettersendelse.getMottattDato().toLocalDateTime());
             mottatteDokumentRepository.lagre(dokument, DokumentStatus.GYLDIG);
@@ -70,6 +83,7 @@ public class DokumentmottakerEttersendelse implements Dokumentmottaker {
                 dokument.getMottattDato().atStartOfDay(),
                 false,
                 true);
+            dokumentMottakerFelles.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), dokument.getJournalpostId(), dokument.getType());
         }
     }
 
