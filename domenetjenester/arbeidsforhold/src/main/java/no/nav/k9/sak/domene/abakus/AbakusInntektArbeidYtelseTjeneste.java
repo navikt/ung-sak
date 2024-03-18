@@ -490,7 +490,9 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     private List<Inntektsmelding> filtrerBortUgyldigeDokumenter(Long fagsakId, List<Inntektsmelding> inntektsmeldinger) {
         var ugyldigInntektsmeldingJournalpostIder = mottatteDokumentRepository.hentMottatteDokument(fagsakId, inntektsmeldinger.stream().map(Inntektsmelding::getJournalpostId).map(JournalpostId::getVerdi).map(JournalpostId::new).toList(), DokumentStatus.UGYLDIG)
             .stream().map(MottattDokument::getJournalpostId).map(JournalpostId::getVerdi).collect(Collectors.toSet());
-        log.info("Fjerner inntektsmeldinger som er markert ugyldig: " + ugyldigInntektsmeldingJournalpostIder);
+        if (!ugyldigInntektsmeldingJournalpostIder.isEmpty()) {
+            log.info("Fjerner inntektsmeldinger som er markert ugyldig: " + ugyldigInntektsmeldingJournalpostIder);
+        }
         return inntektsmeldinger.stream().filter(im -> !ugyldigInntektsmeldingJournalpostIder.contains(im.getJournalpostId().getVerdi())).toList();
     }
 
