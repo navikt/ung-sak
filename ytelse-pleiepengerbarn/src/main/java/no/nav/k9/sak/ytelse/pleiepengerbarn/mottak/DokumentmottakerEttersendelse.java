@@ -3,7 +3,6 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.mottak;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -25,10 +24,9 @@ import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.domene.behandling.steg.omsorgenfor.BrukerdialoginnsynTjeneste;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
-import no.nav.k9.sak.mottak.dokumentmottak.DokumentValideringException;
 import no.nav.k9.sak.mottak.dokumentmottak.Dokumentmottaker;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakerFelles;
-import no.nav.k9.søknad.JsonUtils;
+import no.nav.k9.sak.mottak.dokumentmottak.EttersendelseParser;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
@@ -73,7 +71,7 @@ public class DokumentmottakerEttersendelse implements Dokumentmottaker {
         var sorterteDokumenter = sorterSøknadsdokumenter(dokumenter);
         log.info("Mottar digital ettersendelse, antall dokumenter: {}", sorterteDokumenter.size());
         for (MottattDokument dokument : sorterteDokumenter) {
-            Ettersendelse ettersendelse = parseDokument(dokument);
+            Ettersendelse ettersendelse = EttersendelseParser.parseDokument(dokument);
             brukerdialoginnsynService.publiserDokumentHendelse(behandling, dokument);
             dokument.setBehandlingId(behandling.getId());
             dokument.setInnsendingstidspunkt(ettersendelse.getMottattDato().toLocalDateTime());
@@ -94,16 +92,6 @@ public class DokumentmottakerEttersendelse implements Dokumentmottaker {
             .stream()
             .sorted(Comparator.comparing(MottattDokument::getMottattTidspunkt))
             .collect(Collectors.toCollection(LinkedHashSet::new));
-    }
-
-    private Ettersendelse parseDokument(MottattDokument mottattDokument) {
-        var payload = mottattDokument.getPayload();
-        var jsonReader = JsonUtils.getObjectMapper().readerFor(Ettersendelse.class);
-        try {
-            return jsonReader.readValue(Objects.requireNonNull(payload, "mangler payload"));
-        } catch (Exception e) {
-            throw new DokumentValideringException("Parsefeil i ettersendelse", e);
-        }
     }
 
     @Override

@@ -1,9 +1,11 @@
 package no.nav.k9.sak.mottak.dokumentmottak;
 
 import java.util.Collection;
+import java.util.Objects;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.ettersendelse.EttersendelseValidator;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
@@ -32,9 +34,15 @@ public class EttersendelseDokumentValidator implements DokumentValidator {
     }
 
     @Override
-    public void validerDokument(MottattDokument mottatteDokumenter) {
+    public void validerDokument(MottattDokument mottattDokument) {
+        Objects.requireNonNull(mottattDokument);
+
         if (!ettersendelseRettTilK9Sak) {
             throw new IllegalStateException("Funksjonaliteten er skrudd av");
         }
+
+        var ettersendelse = EttersendelseParser.parseDokument(mottattDokument);
+
+        new EttersendelseValidator().forsikreValidert(ettersendelse);
     }
 }
