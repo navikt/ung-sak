@@ -290,8 +290,6 @@ spec:
       value: "true"
     - name: KODEVERK_SOM_STRING_TOPICS
       value: "true"
-    - name: K9_ABAKUS_ENABLED
-      value: "true"
     - name: AAPEN_PUNSJOPPGAVE_STOPPER_AUTOMATISK_VEDTAK
       value: "true"
     - name: OMP_NYOPPSTARTET_VED_REFUSJON

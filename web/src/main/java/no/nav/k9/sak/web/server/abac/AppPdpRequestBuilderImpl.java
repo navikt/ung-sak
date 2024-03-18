@@ -47,7 +47,6 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
     private static final Cluster CLUSTER = Environment.current().getCluster();
     private static final List<String> INTERNAL_CLUSTER_NAMESPACE = List.of(
         CLUSTER.clusterName() + ":k9saksbehandling",
-        CLUSTER.clusterName() + ":teamforeldrepenger",
         CLUSTER.DEV_GCP.clusterName() + ":omsorgspenger",
         CLUSTER.PROD_GCP.clusterName() + ":omsorgspenger"
     );
