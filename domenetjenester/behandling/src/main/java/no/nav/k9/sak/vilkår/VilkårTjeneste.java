@@ -232,7 +232,6 @@ public class VilkårTjeneste {
         }
         return false;
     }
-
     public LocalDateTimeline<VilkårUtfallSamlet> samletVilkårsresultat(Long behandlingId) {
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
         if (vilkårene.isEmpty()) {
@@ -262,6 +261,7 @@ public class VilkårTjeneste {
 
         return samletUtfall;
     }
+
 
     LocalDateTimeline<VilkårUtfallSamlet> samletVilkårUtfall(Map<VilkårType, LocalDateTimeline<VilkårPeriode>> timelinePerVilkår, Set<VilkårType> minimumVilkår) {
         var timeline = new LocalDateTimeline<List<VilkårUtfall>>(List.of());
