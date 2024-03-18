@@ -32,7 +32,9 @@ import no.nav.k9.søknad.JsonUtils;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE)
 @DokumentGruppeRef(Brevkode.ETTERSENDELSE_PLEIEPENGER_BARN_KODE)
+@DokumentGruppeRef(Brevkode.ETTERSENDELSE_PLEIEPENGER_LIVETS_SLUTTFASE_KODE)
 public class DokumentmottakerEttersendelse implements Dokumentmottaker {
 
     private static final Logger log = LoggerFactory.getLogger(DokumentmottakerEttersendelse.class);
