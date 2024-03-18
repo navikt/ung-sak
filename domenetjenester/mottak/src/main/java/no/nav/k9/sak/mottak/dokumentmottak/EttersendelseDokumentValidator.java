@@ -10,6 +10,7 @@ import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 
 @ApplicationScoped
 @DokumentGruppeRef(Brevkode.ETTERSENDELSE_PLEIEPENGER_BARN_KODE)
+@DokumentGruppeRef(Brevkode.ETTERSENDELSE_PLEIEPENGER_LIVETS_SLUTTFASE_KODE)
 public class EttersendelseDokumentValidator implements DokumentValidator {
 
     private boolean ettersendelseRettTilK9Sak;
