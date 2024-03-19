@@ -86,7 +86,7 @@ class InnsynEventTjenesteTest {
         var tjeneste = new InnsynEventTjeneste(prosessTaskTjeneste,
             testScenarioBuilder.mockBehandlingRepository(),
             mottatteDokumentRepository,
-            utlandVurdererTjeneste);
+            utlandVurdererTjeneste, mock());
 
         tjeneste.publiserBehandling(behandling.getId());
 

@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 import no.nav.k9.innsyn.InnsynHendelse;
 import no.nav.k9.innsyn.TempObjectMapperKodeverdi;
 import no.nav.k9.innsyn.sak.Aksjonspunkt;
@@ -24,7 +25,6 @@ import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
@@ -32,6 +32,7 @@ import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokument
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.person.personopplysning.UtlandVurdererTjeneste;
+import no.nav.k9.sak.innsyn.BrukerdialoginnsynMeldingProducer;
 import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.felles.Kildesystem;
 
@@ -44,32 +45,33 @@ public class InnsynEventTjeneste {
     private BehandlingRepository behandlingRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private UtlandVurdererTjeneste utlandVurdererTjeneste;
+    private BrukerdialoginnsynMeldingProducer producer;
 
     public InnsynEventTjeneste() {
     }
 
+    @Inject
     public InnsynEventTjeneste(
-        ProsessTaskTjeneste prosessTaskRepository,
-        BehandlingRepository behandlingRepository,
-        MottatteDokumentRepository mottatteDokumentRepository,
-        UtlandVurdererTjeneste utlandVurdererTjeneste
+            ProsessTaskTjeneste prosessTaskRepository,
+            BehandlingRepository behandlingRepository,
+            MottatteDokumentRepository mottatteDokumentRepository,
+            UtlandVurdererTjeneste utlandVurdererTjeneste, BrukerdialoginnsynMeldingProducer producer
     ) {
         this.prosessTaskRepository = prosessTaskRepository;
         this.behandlingRepository = behandlingRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.utlandVurdererTjeneste = utlandVurdererTjeneste;
+        this.producer = producer;
     }
 
 
-    void publiserBehandling(Long behandlingId) {
+    public void publiserBehandling(Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
         Fagsak fagsak = behandling.getFagsak();
         if (fagsak.getYtelseType() != FagsakYtelseType.PSB) {
             return;
         }
-
-
 
         Set<Aksjonspunkt> aksjonspunkter = mapAksjonspunkter(behandling);
         var behandlingInnsyn = new no.nav.k9.innsyn.sak.Behandling(
@@ -86,11 +88,7 @@ public class InnsynEventTjeneste {
 
         String json = JsonUtils.toString(new InnsynHendelse<>(ZonedDateTime.now(), behandlingInnsyn), KODEVERDI_OM);
 
-        var pd = ProsessTaskData.forProsessTask(PubliserInnsynEventTask.class);
-        pd.setBehandling(fagsak.getSaksnummer().getVerdi(), behandling.getId().toString(), behandling.getAktørId().getAktørId());
-        pd.setCallIdFraEksisterende();
-        pd.setPayload(json);
-        prosessTaskRepository.lagre(pd);
+        producer.send(fagsak.getSaksnummer().getVerdi(), json);
     }
 
     private Set<Aksjonspunkt> mapAksjonspunkter(Behandling b) {
