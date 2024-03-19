@@ -85,11 +85,5 @@ public class RepubliserInnsynEventTask implements ProsessTaskHandler {
 
     }
 
-    private void v2() {
-        log.info("Start");
-        repository.hentAlle().forEach(it -> innsynEventTjeneste.publiserBehandling(it));
-        log.info("Slutt");
-    }
-
 
 }
