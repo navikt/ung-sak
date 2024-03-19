@@ -13,6 +13,9 @@ import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.innsyn.BrukerdialoginnsynMeldingProducer;
 
+/**
+ * For å sende en enkel behandling til innsyn
+ */
 @ApplicationScoped
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)
 @ProsessTask(PubliserInnsynEventTask.TASKTYPE)
@@ -20,21 +23,21 @@ public class PubliserInnsynEventTask implements ProsessTaskHandler {
     private static final Logger log = LoggerFactory.getLogger(PubliserInnsynEventTask.class);
     public static final String TASKTYPE = "innsyn.PubliserInnsynEvent";
 
-    private BrukerdialoginnsynMeldingProducer producer;
+    private InnsynEventTjeneste innsynEventTjeneste;
 
     PubliserInnsynEventTask() {
         // for CDI proxy
     }
 
     @Inject
-    public PubliserInnsynEventTask(BrukerdialoginnsynMeldingProducer producer) {
-        this.producer = producer;
+    public PubliserInnsynEventTask(InnsynEventTjeneste innsynEventTjeneste, BrukerdialoginnsynMeldingProducer producer) {
+        this.innsynEventTjeneste = innsynEventTjeneste;
     }
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
-        Objects.requireNonNull(prosessTaskData.getSaksnummer());
-        producer.send(prosessTaskData.getSaksnummer(), prosessTaskData.getPayloadAsString());
+        Objects.requireNonNull(prosessTaskData.getBehandlingId());
+        innsynEventTjeneste.publiserBehandling(Long.valueOf(prosessTaskData.getBehandlingId()));
     }
 
 }

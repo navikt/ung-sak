@@ -25,7 +25,6 @@ import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
-import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
@@ -41,7 +40,6 @@ public class InnsynEventTjeneste {
     protected final Logger log = LoggerFactory.getLogger(this.getClass());
     private static final ObjectMapper KODEVERDI_OM = TempObjectMapperKodeverdi.getObjectMapper();
 
-    private ProsessTaskTjeneste prosessTaskRepository;
     private BehandlingRepository behandlingRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private UtlandVurdererTjeneste utlandVurdererTjeneste;
@@ -52,12 +50,11 @@ public class InnsynEventTjeneste {
 
     @Inject
     public InnsynEventTjeneste(
-            ProsessTaskTjeneste prosessTaskRepository,
             BehandlingRepository behandlingRepository,
             MottatteDokumentRepository mottatteDokumentRepository,
-            UtlandVurdererTjeneste utlandVurdererTjeneste, BrukerdialoginnsynMeldingProducer producer
+            UtlandVurdererTjeneste utlandVurdererTjeneste,
+            BrukerdialoginnsynMeldingProducer producer
     ) {
-        this.prosessTaskRepository = prosessTaskRepository;
         this.behandlingRepository = behandlingRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.utlandVurdererTjeneste = utlandVurdererTjeneste;

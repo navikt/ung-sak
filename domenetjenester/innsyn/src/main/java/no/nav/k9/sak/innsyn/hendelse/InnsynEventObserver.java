@@ -10,6 +10,8 @@ import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandlingskontroll.events.AksjonspunktStatusEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingStatusEvent;
 
@@ -19,16 +21,16 @@ public class InnsynEventObserver {
     protected final Logger log = LoggerFactory.getLogger(this.getClass());
 
     private boolean enableEndringer;
-    private InnsynEventTjeneste innsynEventTjeneste;
+    private ProsessTaskTjeneste prosessTaskTjeneste;
 
     public InnsynEventObserver() {
     }
 
     @Inject
     public InnsynEventObserver(@KonfigVerdi(value = "ENABLE_INNSYN_ENDRING_OBSERVER", defaultVerdi = "false") boolean enableEndringer,
-                               InnsynEventTjeneste innsynEventTjeneste) {
+                               ProsessTaskTjeneste prosessTaskTjeneste) {
         this.enableEndringer = enableEndringer;
-        this.innsynEventTjeneste = innsynEventTjeneste;
+        this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
 
@@ -36,13 +38,13 @@ public class InnsynEventObserver {
         if ((event.getGammelStatus() == BehandlingStatus.OPPRETTET || event.getGammelStatus() == null)
             && event.getNyStatus() == BehandlingStatus.UTREDES) {
             log.info("Publiserer melding til brukerdialog for behandling startet");
-            innsynEventTjeneste.publiserBehandling(event.getBehandlingId());
+            lagProsessTask(event.getFagsakId(), event.getBehandlingId());
         }
     }
 
     public void observerBehandlingAvsluttetEvent(@Observes BehandlingStatusEvent.BehandlingAvsluttetEvent event)  {
         log.info("Publiserer melding til brukerdialog for behandling avsluttet");
-        innsynEventTjeneste.publiserBehandling(event.getBehandlingId());
+        lagProsessTask(event.getFagsakId(), event.getBehandlingId());
     }
 
     public void observerAksjonspunkterFunnetEvent(@Observes AksjonspunktStatusEvent event) {
@@ -53,9 +55,14 @@ public class InnsynEventObserver {
         //TODO spisse sånn at det ikke sendes for mange eventer til innsyn
         // må fange opp nye dokumenter på en eller annen måte
         log.info("Publiserer melding til brukerdialog for aksjonspunkt");
-        innsynEventTjeneste.publiserBehandling(event.getBehandlingId());
+        lagProsessTask(event.getFagsakId(), event.getBehandlingId());
     }
 
+    private void lagProsessTask(Long fagsakId, Long behandlingId) {
+        var pd = ProsessTaskData.forProsessTask(PubliserInnsynEventTask.class);
+        pd.setBehandling(fagsakId, behandlingId);
+        prosessTaskTjeneste.lagre(pd);
+    }
 
     private void debugObservasjon(AksjonspunktStatusEvent event) {
         var collect = event.getAksjonspunkter().stream()
