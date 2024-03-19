@@ -100,27 +100,23 @@ public class PubliserInnsynRepository {
 
         logger.info("Status etter slett {}", lagRapportString(rapportQuery.getResultStream()));
         return antallSlettet;
+
     }
 
-    public Stream<Long> hentAlle() {
-        return (Stream<Long>) entityManager.createNativeQuery("select b.id from behandling b join fagsak f on b.fagsak_id = f.id where f.ytelse_type = 'PSB'", Long.class).getResultStream();
+    int kansellerAlleAktive(String endringstekst) {
+        return entityManager.createNativeQuery(
+                "update k9sak.public.publiser_innsyn_arbeidstabell set status = 'KANSELLERT', endring = :endring, endret_av = :endretAv, endret_tid = CURRENT_TIMESTAMP where status = 'NY'")
+            .setParameter("endring", endringstekst)
+            .setParameter("endretAv", SubjectHandler.getSubjectHandler().getUid())
+            .executeUpdate();
+
     }
+
 
     private record StatusCount(PubliserInnsynEntitet.Status status, Long count) {
         @Override
         public String toString() {
             return "%s:%d".formatted(status.name(), count);
         }
-    }
-
-    int kansellerAlleAktive(String endringstekst) {
-        int antall = entityManager.createNativeQuery(
-                "update k9sak.public.publiser_innsyn_arbeidstabell set status = 'KANSELLERT', endring = :endring, endret_av = :endretAv, endret_tid = CURRENT_TIMESTAMP where status = 'NY'")
-            .setParameter("endring", endringstekst)
-            .setParameter("endretAv", SubjectHandler.getSubjectHandler().getUid())
-            .executeUpdate();
-
-        return antall;
-
     }
 }
