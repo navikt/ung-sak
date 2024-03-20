@@ -68,6 +68,8 @@ public class RepubliserInnsynEventTask implements ProsessTaskHandler {
             } catch (Exception e) {
                 log.warn("Publisering til innsyn feilet for id={} behandling={} i kjøring={}", rad.getId(), rad.getBehandlingId(), kjøringId, e);
                 rad.feilet(e.getMessage());
+            } finally {
+                LOG_CONTEXT.remove("behandling");
             }
 
         }
