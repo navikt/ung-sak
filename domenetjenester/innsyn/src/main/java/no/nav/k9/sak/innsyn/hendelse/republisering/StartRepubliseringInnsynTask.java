@@ -15,7 +15,6 @@ import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
-import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 
 /**
  * Setter i gang publisering av alle behandlinger til innsyn. Kjøres ved behov f.eks. hvis nye felter skal sendes til innsyn.
@@ -33,7 +32,6 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
  */
 @ApplicationScoped
 @ProsessTask(StartRepubliseringInnsynTask.TASKTYPE)
-@FagsakProsesstaskRekkefølge(gruppeSekvens = false)
 public class StartRepubliseringInnsynTask implements ProsessTaskHandler {
     public static final String TASKTYPE = "innsyn.StartRepubliseringInnsyn";
     private PubliserInnsynRepository repository;

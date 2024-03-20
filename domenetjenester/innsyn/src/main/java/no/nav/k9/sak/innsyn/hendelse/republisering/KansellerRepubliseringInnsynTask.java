@@ -8,14 +8,12 @@ import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
-import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 
 /**
  * For å manuelt kansellere alle aktive kjøringer
  */
 @ApplicationScoped
 @ProsessTask(KansellerRepubliseringInnsynTask.TASKTYPE)
-@FagsakProsesstaskRekkefølge(gruppeSekvens = false)
 public class KansellerRepubliseringInnsynTask implements ProsessTaskHandler {
     public static final String TASKTYPE = "innsyn.KansellerRepubliseringInnsyn";
     private PubliserInnsynRepository repository;

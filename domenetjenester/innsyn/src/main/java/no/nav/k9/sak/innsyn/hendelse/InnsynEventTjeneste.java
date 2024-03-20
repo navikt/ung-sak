@@ -40,13 +40,10 @@ public class InnsynEventTjeneste {
     protected final Logger log = LoggerFactory.getLogger(this.getClass());
     private static final ObjectMapper KODEVERDI_OM = TempObjectMapperKodeverdi.getObjectMapper();
 
-    private BehandlingRepository behandlingRepository;
-    private MottatteDokumentRepository mottatteDokumentRepository;
-    private UtlandVurdererTjeneste utlandVurdererTjeneste;
-    private BrukerdialoginnsynMeldingProducer producer;
-
-    public InnsynEventTjeneste() {
-    }
+    private final BehandlingRepository behandlingRepository;
+    private final MottatteDokumentRepository mottatteDokumentRepository;
+    private final UtlandVurdererTjeneste utlandVurdererTjeneste;
+    private final BrukerdialoginnsynMeldingProducer producer;
 
     @Inject
     public InnsynEventTjeneste(

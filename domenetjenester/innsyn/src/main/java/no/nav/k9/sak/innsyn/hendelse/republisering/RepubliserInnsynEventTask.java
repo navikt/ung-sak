@@ -8,11 +8,11 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
-import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.innsyn.hendelse.InnsynEventTjeneste;
 
 /**
@@ -22,12 +22,12 @@ import no.nav.k9.sak.innsyn.hendelse.InnsynEventTjeneste;
  */
 @ApplicationScoped
 @ProsessTask(RepubliserInnsynEventTask.TASKTYPE)
-@FagsakProsesstaskRekkefølge(gruppeSekvens = false)
 public class RepubliserInnsynEventTask implements ProsessTaskHandler {
     private static final Logger log = LoggerFactory.getLogger(RepubliserInnsynEventTask.class);
     public static final String TASKTYPE = "innsyn.RepubliserInnsynEvent";
     public static final String KJØRING_ID_PROP = "kjoringId";
     public static final String ANTALL_PER_KJØRING_PROP = "antallBehandlingerPerTask";
+    private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess");
 
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private InnsynEventTjeneste innsynEventTjeneste;
@@ -63,7 +63,7 @@ public class RepubliserInnsynEventTask implements ProsessTaskHandler {
 
         for (var rad : rader) {
             try {
-                //TODO hvordan sette MDC på behandling? Egen metode for det?
+                LOG_CONTEXT.add("behandling", rad.getBehandlingId());
                 innsynEventTjeneste.publiserBehandling(rad.getBehandlingId());
                 rad.fullført();
             } catch (Exception e) {

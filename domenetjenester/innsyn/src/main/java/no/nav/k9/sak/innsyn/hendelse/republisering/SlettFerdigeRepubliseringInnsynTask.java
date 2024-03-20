@@ -8,14 +8,12 @@ import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
-import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 
 /**
  * For å manuelt slette ferdige kjøringer for å rydde i databasen
  */
 @ApplicationScoped
 @ProsessTask(SlettFerdigeRepubliseringInnsynTask.TASKTYPE)
-@FagsakProsesstaskRekkefølge(gruppeSekvens = false)
 public class SlettFerdigeRepubliseringInnsynTask implements ProsessTaskHandler {
     public static final String TASKTYPE = "innsyn.SlettFerdigeRepubliseringInnsyn";
     private PubliserInnsynRepository repository;

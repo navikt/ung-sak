@@ -57,27 +57,23 @@ class RepubliserInnsynEventTaskTest {
         pd.setProperty(RepubliserInnsynEventTask.ANTALL_PER_KJØRING_PROP, "1");
 
         task.doTask(pd);
-        entityManager.flush();
         assertThat(hentAlle(kjøreId)).extracting(PubliserInnsynEntitet::getStatus)
             .containsExactlyInAnyOrder(Status.NY, Status.NY, Status.FULLFØRT);
 
         task.doTask(pd);
-        entityManager.flush();
         assertThat(hentAlle(kjøreId)).extracting(PubliserInnsynEntitet::getStatus)
             .containsExactlyInAnyOrder(Status.NY, Status.FULLFØRT, Status.FULLFØRT);
 
         task.doTask(pd);
-        entityManager.flush();
         assertThat(hentAlle(kjøreId)).extracting(PubliserInnsynEntitet::getStatus)
             .containsExactlyInAnyOrder(Status.FULLFØRT, Status.FULLFØRT, Status.FULLFØRT);
 
         task.doTask(pd);
-        entityManager.flush();
         assertThat(hentAlle(kjøreId)).extracting(PubliserInnsynEntitet::getStatus)
             .containsExactlyInAnyOrder(Status.FULLFØRT, Status.FULLFØRT, Status.FULLFØRT);
 
         task.doTask(pd);
-        entityManager.flush();
+
         assertThat(hentAlle(kjøreId)).extracting(PubliserInnsynEntitet::getStatus)
             .containsExactlyInAnyOrder(Status.FULLFØRT, Status.FULLFØRT, Status.FULLFØRT);
 
@@ -111,22 +107,18 @@ class RepubliserInnsynEventTaskTest {
         pd.setProperty(RepubliserInnsynEventTask.ANTALL_PER_KJØRING_PROP, "1");
 
         task.doTask(pd);
-        entityManager.flush();
         assertThat(hentAlle(kjøreId)).extracting(PubliserInnsynEntitet::getStatus)
             .containsExactlyInAnyOrder(Status.NY, Status.NY, Status.FULLFØRT);
 
         task.doTask(pd);
-        entityManager.flush();
         assertThat(hentAlle(kjøreId)).extracting(PubliserInnsynEntitet::getStatus)
             .containsExactlyInAnyOrder(Status.NY, Status.FEILET, Status.FULLFØRT);
 
         task.doTask(pd);
-        entityManager.flush();
         assertThat(hentAlle(kjøreId)).extracting(PubliserInnsynEntitet::getStatus)
             .containsExactlyInAnyOrder(Status.FULLFØRT, Status.FEILET, Status.FULLFØRT);
 
         task.doTask(pd);
-        entityManager.flush();
         assertThat(hentAlle(kjøreId)).extracting(PubliserInnsynEntitet::getStatus)
             .containsExactlyInAnyOrder(Status.FULLFØRT, Status.FEILET, Status.FULLFØRT);
 
