@@ -53,6 +53,7 @@ import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittFrilansInntekt;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OppgittOpptjeningDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OpptjeningAktiviteterDto;
 import no.nav.folketrygdloven.kalkulus.opptjening.v1.OpptjeningPeriodeDto;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
@@ -222,7 +223,7 @@ public class TilKalkulusMapper {
         List<YtelseDto> ytelserDto = alleYtelser.stream().map(ytelse -> new YtelseDto(
                 mapBeløp(ytelse.getYtelseGrunnlag().flatMap(YtelseGrunnlag::getVedtaksDagsats)),
                 mapYtelseAnvist(ytelse.getYtelseAnvist()),
-                YtelseType.fraKode(ytelse.getYtelseType().getKode()),
+                mapYtelseType(ytelse.getYtelseType()),
                 mapPeriode(ytelse.getPeriode()),
                 mapYtelseGrunnlag(ytelse.getYtelseGrunnlag())))
             .collect(Collectors.toList());
@@ -233,14 +234,50 @@ public class TilKalkulusMapper {
         return null;
     }
 
+    private static YtelseType mapYtelseType(FagsakYtelseType fraYtelseType) {
+        return switch (fraYtelseType) {
+            case null -> null;
+            case DAGPENGER -> YtelseType.DAGPENGER;
+            case FRISINN -> YtelseType.FRISINN;
+            case SYKEPENGER -> YtelseType.SYKEPENGER;
+            case PLEIEPENGER_SYKT_BARN -> YtelseType.PLEIEPENGER_SYKT_BARN;
+            case PLEIEPENGER_NÆRSTÅENDE -> YtelseType.PLEIEPENGER_NÆRSTÅENDE;
+            case OMSORGSPENGER -> YtelseType.OMSORGSPENGER;
+            case OMSORGSPENGER_KS -> YtelseType.OMSORGSPENGER;
+            case OMSORGSPENGER_MA -> YtelseType.OMSORGSPENGER;
+            case OMSORGSPENGER_AO -> YtelseType.OMSORGSPENGER;
+            case OPPLÆRINGSPENGER -> YtelseType.OPPLÆRINGSPENGER;
+            case ARBEIDSAVKLARINGSPENGER -> YtelseType.ARBEIDSAVKLARINGSPENGER;
+            case ENGANGSTØNAD -> YtelseType.ENGANGSTØNAD;
+            case FORELDREPENGER -> YtelseType.FORELDREPENGER;
+            case SVANGERSKAPSPENGER -> YtelseType.SVANGERSKAPSPENGER;
+            case ENSLIG_FORSØRGER -> YtelseType.ENSLIG_FORSØRGER;
+            case OBSOLETE, UDEFINERT -> YtelseType.UDEFINERT;
+        };
+    }
+
     private static YtelseGrunnlagDto mapYtelseGrunnlag(Optional<YtelseGrunnlag> ytelseGrunnlag) {
         return ytelseGrunnlag.map(yg -> new YtelseGrunnlagDto(Arbeidskategori.fraKode(yg.getArbeidskategori().map(no.nav.k9.kodeverk.arbeidsforhold.Arbeidskategori::getKode).orElse(null)), mapYtelseFordeling(yg.getYtelseStørrelse()))).orElse(null);
     }
 
     private static List<YtelseFordelingDto> mapYtelseFordeling(List<YtelseStørrelse> ytelseStørrelse) {
         return ytelseStørrelse.stream()
-            .map(ys -> new YtelseFordelingDto(mapVirksomhet(ys), InntektPeriodeType.fraKode(ys.getHyppighet().getKode()), ys.getBeløp().getVerdi(), ys.getErRefusjon()))
+            .map(ys -> new YtelseFordelingDto(mapVirksomhet(ys), mapInntektPeriodeType(ys), ys.getBeløp().getVerdi(), ys.getErRefusjon()))
             .collect(Collectors.toList());
+    }
+
+    private static InntektPeriodeType mapInntektPeriodeType(YtelseStørrelse ytelseStørrelse) {
+        return switch (ytelseStørrelse.getHyppighet()) {
+            case null -> null;
+            case DAGLIG -> InntektPeriodeType.DAGLIG;
+            case UKENTLIG -> InntektPeriodeType.UKENTLIG;
+            case BIUKENTLIG -> InntektPeriodeType.BIUKENTLIG;
+            case MÅNEDLIG -> InntektPeriodeType.MÅNEDLIG;
+            case ÅRLIG -> InntektPeriodeType.ÅRLIG;
+            case FASTSATT25PAVVIK -> InntektPeriodeType.FASTSATT25PAVVIK;
+            case PREMIEGRUNNLAG -> InntektPeriodeType.PREMIEGRUNNLAG;
+            case UDEFINERT -> InntektPeriodeType.UDEFINERT;
+        };
     }
 
     private static Organisasjon mapVirksomhet(YtelseStørrelse ys) {
