@@ -234,6 +234,7 @@ public enum FagsakYtelseType implements Kodeverdi {
      * This makes the generated openapi spec correct when the enum is used as a query param. Without this the generated spec incorrectly
      * specifies that it is the enum name string that should be used as input.
      */
+    @Override
     public String toString() {
         return this.getKode();
     }
