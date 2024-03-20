@@ -70,8 +70,7 @@ spec:
         - application: k9-formidling
         - application: k9-formidling-dokumentdata
         - application: k9-punsj
-        - application: fpabakus
-          namespace: teamforeldrepenger
+        - application: k9-abakus
         - application: k9-punsjbolle
           namespace: omsorgspenger
           cluster: prod-gcp
@@ -147,10 +146,10 @@ spec:
       value: OMS
 
     # Restservice Generelle
-    - name: FPABAKUS_URL
-      value: http://fpabakus.teamforeldrepenger/fpabakus
-    - name: FPABAKUS_SCOPE
-      value: api://prod-fss.teamforeldrepenger.fpabakus/.default
+    - name: K9ABAKUS_URL
+      value: http://k9-abakus.k9saksbehandling/k9/abakus
+    - name: K9ABAKUS_SCOPE
+      value: api://prod-fss.k9saksbehandling.k9-abakus/.default
     - name: FTKALKULUS_URL
       value: http://ftkalkulus.k9saksbehandling/ftkalkulus
     - name: FTKALKULUS_SCOPE
@@ -263,10 +262,6 @@ spec:
       value: "false"
     - name: ENABLE_DATO_NY_REGEL_UTTAK
       value: "false"
-    - name: ENABLE_OVERSTYR_UTTAK
-      value: "false"
-    - name: FILTRER_UGYLDIG_IM
-      value: "false"
     - name: FJERN_VILKARSPERIODER_BEREGNING
       value: "false"
     - name: VALIDER_KALKULUS_REFERANSER
@@ -279,17 +274,15 @@ spec:
       value: "false"
     - name: AKTIVER_AUTOMATISK_ETTERKONTROLL
       value: "true"
-    - name: FORLENGELSE_IM_OPPTJENING_FILTER
-      value: "false"
     - name: DOKUMENTMOTTAK_VALIDER_JOURNALFORT
-      value: "false"
-    - name: UTVIDET_ENDRING_UTBETALING_UTLEDER
       value: "false"
     - name: ENABLE_INNSYN_ENDRING_OBSERVER
       value: "false"
     - name: KODEVERK_SOM_STRING_TOPICS
       value: "false"
-    - name: NY_VURDERINGSLOGIKK_IM
+    - name: OMP_NYOPPSTARTET_VED_REFUSJON
+      value: "false"
+    - name: INAKTIV_VED_8_47_B
       value: "false"
 
     # Konfigurasjoner
@@ -307,8 +300,4 @@ spec:
       value: "k9-sak"
 
     - name: PIP_USERS
-      value: "srvPDP,srvk9-tilbake,srvsaf"
-
-    # Pleiepenger infotrygd migrering
-    - name: INFOTRYGD_MIGRERING_TILLATELSER
-      value: "K137924,N106674,H137477,N130802,N140249,A100265,D101758,E151154,A147438,S164910,B100673,R145708,G119972,U112286,L120563,A100265,O126651,H151541,K120680,J104442,K137924,V110938"
+      value: "srvPDP,srvk9-tilbake,srvsaf,srvk9-abakus"

@@ -6,15 +6,19 @@ import static no.nav.k9.kodeverk.historikk.HistorikkinnslagType.OVST_UTTAK_OPPDA
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.NavigableSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
@@ -31,12 +35,15 @@ import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrUttakRepository;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrtUttakPeriode;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrtUttakUtbetalingsgrad;
 import no.nav.k9.sak.domene.arbeidsforhold.aksjonspunkt.ArbeidsgiverHistorikkinnslag;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrUttakArbeidsforholdDto;
 import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrUttakDto;
 import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrUttakPeriodeDto;
 import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrUttakSlettPeriodeDto;
 import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrUttakUtbetalingsgradDto;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = OverstyrUttakDto.class, adapter = Overstyringshåndterer.class)
@@ -44,26 +51,26 @@ public class UttakOverstyringshåndterer implements Overstyringshåndterer<Overs
 
     private OverstyrUttakRepository overstyrUttakRepository;
     private HistorikkRepository historikkRepository;
-
     private ArbeidsgiverHistorikkinnslag arbeidsgiverHistorikkinnslag;
-    private boolean lansert;
+    private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
 
     UttakOverstyringshåndterer() {
         //for CDI proxy
     }
 
     @Inject
-    public UttakOverstyringshåndterer(OverstyrUttakRepository overstyrUttakRepository, HistorikkRepository historikkRepository, ArbeidsgiverHistorikkinnslag arbeidsgiverHistorikkinnslag, @KonfigVerdi(value = "ENABLE_OVERSTYR_UTTAK", defaultVerdi = "false") boolean lansert) {
+    public UttakOverstyringshåndterer(OverstyrUttakRepository overstyrUttakRepository, HistorikkRepository historikkRepository, ArbeidsgiverHistorikkinnslag arbeidsgiverHistorikkinnslag,
+                                      @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
         this.overstyrUttakRepository = overstyrUttakRepository;
         this.historikkRepository = historikkRepository;
         this.arbeidsgiverHistorikkinnslag = arbeidsgiverHistorikkinnslag;
-        this.lansert = lansert;
+        this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
     }
 
     @Override
     public OppdateringResultat håndterOverstyring(OverstyrUttakDto dto, Behandling behandling, BehandlingskontrollKontekst kontekst) {
-        if (!lansert) {
-            throw new IllegalArgumentException("Overstyring av uttak er ikke lansert.");
+        if (!behandling.getFagsakYtelseType().equals(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)) {
+            throw new IllegalArgumentException("Overstyring av uttak er kun aktivert for PSB");
         }
         LocalDateTimeline<OverstyrtUttakPeriode> overstyringerFørOppdatering = overstyrUttakRepository.hentOverstyrtUttak(behandling.getId());
 
@@ -73,12 +80,27 @@ public class UttakOverstyringshåndterer implements Overstyringshåndterer<Overs
 
         LocalDateTimeline<OverstyrtUttakPeriode> overstyringerEtterOppdatering = overstyrUttakRepository.hentOverstyrtUttak(behandling.getId());
 
+        validerGyldigEndring(behandling, overstyringerFørOppdatering, overstyringerEtterOppdatering);
+
         lagreHistorikkinnslagForEndringer(behandling.getId(), overstyringerFørOppdatering, overstyringerEtterOppdatering);
 
         if (dto.gåVidere()) {
             return OppdateringResultat.builder().build();
         } else {
             return OppdateringResultat.builder().medEkstraAksjonspunktResultat(AksjonspunktDefinisjon.OVERSTYRING_AV_UTTAK, AksjonspunktStatus.OPPRETTET).build();
+        }
+    }
+
+    private void validerGyldigEndring(Behandling behandling, LocalDateTimeline<OverstyrtUttakPeriode> overstyringerFørOppdatering, LocalDateTimeline<OverstyrtUttakPeriode> overstyringerEtterOppdatering) {
+        var perioderTilVurdering = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType()).utledFraDefinerendeVilkår(behandling.getId());
+        var tilVurderingTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering);
+        var harEndringUtenforGyldigPeriode = !overstyringerFørOppdatering.crossJoin(overstyringerEtterOppdatering, (di, lhs, rhs) -> new LocalDateSegment<>(di, !Objects.equals(lhs, rhs)))
+            .filterValue(it -> it)
+            .disjoint(tilVurderingTidslinje)
+            .isEmpty();
+
+        if (harEndringUtenforGyldigPeriode) {
+            throw new IllegalArgumentException("Kan ikke endre på overstyring utenfor periode til vurdering");
         }
     }
 

@@ -1,5 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="JettyDevServer" type="Application" factoryName="Application" nameIsGenerated="true">
+    <option name="ALTERNATIVE_JRE_PATH" value="21" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <option name="MAIN_CLASS_NAME" value="no.nav.k9.sak.web.server.jetty.JettyDevServer" />
     <module name="web-webapp" />
     <option name="WORKING_DIRECTORY" value="%MODULE_WORKING_DIR%" />

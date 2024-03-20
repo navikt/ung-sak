@@ -55,6 +55,7 @@ spec:
       enabled: true
       replyURLs:
         - "https://k9.dev.intern.nav.no/k9/sak/cb"
+        - "https://k9.intern.dev.nav.no/k9/sak/cb"
       claims:
         extra:
           - "NAVident"
@@ -62,6 +63,9 @@ spec:
   accessPolicy:
     inbound:
       rules:
+        - application: k9-sak-web
+          namespace: k9saksbehandling
+          cluster: dev-gcp
         - application: k9-los-api
         - application: k9-fordel
         - application: k9-sak
@@ -70,8 +74,7 @@ spec:
         - application: k9-formidling
         - application: k9-formidling-dokumentdata
         - application: k9-punsj
-        - application: fpabakus
-          namespace: teamforeldrepenger
+        - application: k9-abakus
         - application: k9-punsjbolle
           namespace: omsorgspenger
           cluster: dev-gcp
@@ -129,6 +132,8 @@ spec:
 
     # Loadbalancerconfig
     - name: LOADBALANCER_URL
+      value: https://k9.intern.dev.nav.no
+    - name: LOADBALANCER_ALTERNATIVE_URL
       value: https://k9.dev.intern.nav.no
 
     # LDAP
@@ -148,10 +153,10 @@ spec:
       value: OMS
 
     # Restservice Generelle
-    - name: FPABAKUS_URL
-      value: http://fpabakus.teamforeldrepenger/fpabakus
-    - name: FPABAKUS_SCOPE
-      value: api://dev-fss.teamforeldrepenger.fpabakus/.default
+    - name: K9ABAKUS_URL
+      value: http://k9-abakus.k9saksbehandling/k9/abakus
+    - name: K9ABAKUS_SCOPE
+      value: api://dev-fss.k9saksbehandling.k9-abakus/.default
     - name: FTKALKULUS_URL
       value: http://ftkalkulus.k9saksbehandling/ftkalkulus
     - name: FTKALKULUS_SCOPE
@@ -233,7 +238,7 @@ spec:
     - name: APP_AUTH_SCHEMA_AZUREAD_ADDITIONAL_PATHS
       value: "/k9/formidling/dokumentdata,api://dev-fss.k9saksbehandling.k9-formidling-dokumentdata/.default;/k9/formidling,api://dev-fss.k9saksbehandling.k9-formidling/.default"
     - name: APP_AUTH_SCHEMA_AZUREAD_OPTIONAL_PATHS
-      value: "/k9/klage,api://dev-fss.k9saksbehandling.k9-klage/.default;/k9/tilbake,api://dev-fss.k9saksbehandling.k9-tilbake/.default;/k9/oppdrag,api://dev-fss.k9saksbehandling.k9-oppdrag/.default"
+      value: "/k9/klage,api://dev-fss.k9saksbehandling.k9-klage/.default;/k9/tilbake,api://dev-fss.k9saksbehandling.k9-tilbake/.default;/k9/oppdrag,api://dev-fss.k9saksbehandling.k9-oppdrag/.default;/k9/abakus,api://dev-fss.k9saksbehandling.k9-abakus/.default"
     - name: OIDC_STS_HOST_URL
       value: https://security-token-service.nais.preprod.local
     - name: CLIENT_SCOPE
@@ -267,10 +272,6 @@ spec:
       value: "true"
     - name: ENABLE_DATO_NY_REGEL_UTTAK
       value: "true"
-    - name: ENABLE_OVERSTYR_UTTAK
-      value: "true"
-    - name: FILTRER_UGYLDIG_IM
-      value: "true"
     - name: FJERN_VILKARSPERIODER_BEREGNING
       value: "false"
     - name: VALIDER_KALKULUS_REFERANSER
@@ -281,17 +282,17 @@ spec:
       value: "true"
     - name: OMP_RELEVANT_ENDRING_UTLEDNING
       value: "true"
-    - name: FORLENGELSE_IM_OPPTJENING_FILTER
-      value: "true"
     - name: DOKUMENTMOTTAK_VALIDER_JOURNALFORT
-      value: "true"
-    - name: UTVIDET_ENDRING_UTBETALING_UTLEDER
       value: "true"
     - name: ENABLE_INNSYN_ENDRING_OBSERVER
       value: "true"
     - name: KODEVERK_SOM_STRING_TOPICS
       value: "true"
-    - name: NY_VURDERINGSLOGIKK_IM
+    - name: AAPEN_PUNSJOPPGAVE_STOPPER_AUTOMATISK_VEDTAK
+      value: "true"
+    - name: OMP_NYOPPSTARTET_VED_REFUSJON
+      value: "true"
+    - name: INAKTIV_VED_8_47_B
       value: "true"
 
 
@@ -311,8 +312,4 @@ spec:
       value: "k9-sak"
 
     - name: PIP_USERS
-      value: "srvPDP,srvk9-tilbake,srvsaf,Z993210,Z994080,Z994692"
-
-    # Pleiepenger infotrygd migrering
-    - name: INFOTRYGD_MIGRERING_TILLATELSER
-      value: "Z990404,Z990422,Z994004,Z994337,Z994185"
+      value: "srvPDP,srvk9-tilbake,srvsaf,srvk9-abakus,Z993210,Z994080,Z994692"

@@ -92,7 +92,7 @@ public final class MapYrkesaktivitetTilOpptjeningsperiodeTjeneste {
     private static LocalDateTimeline<Boolean> utledPermisjonstidslinjeForPerioden(Yrkesaktivitet yrkesaktivitet,
                                                                                   Map<OpptjeningAktivitetType, LocalDateTimeline<Boolean>> tidslinjePerYtelse, DatoIntervallEntitet vilkårsperiode,
                                                                                   DatoIntervallEntitet opptjeningsperiode) {
-        LocalDateTimeline<Boolean> aktivPermisjonTidslinje = PermisjonPerYrkesaktivitet.utledPermisjonPerYrkesaktivitet(yrkesaktivitet, tidslinjePerYtelse, vilkårsperiode);
+        LocalDateTimeline<Boolean> aktivPermisjonTidslinje = PermisjonPerYrkesaktivitet.utledPermisjonPerYrkesaktivitet(yrkesaktivitet, tidslinjePerYtelse, Set.of(vilkårsperiode));
 
         // Vurder kun permisjonsperioder som overlapper opptjeningsperiode
         LocalDateTimeline<Boolean> tidslinjeTilVurdering = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(opptjeningsperiode.getFomDato(), opptjeningsperiode.getTomDato(), Boolean.FALSE)));

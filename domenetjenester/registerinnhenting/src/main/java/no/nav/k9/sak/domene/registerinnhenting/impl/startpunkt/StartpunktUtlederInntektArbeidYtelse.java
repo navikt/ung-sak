@@ -34,6 +34,7 @@ import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.perioder.ForlengelseTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
 
@@ -52,7 +53,6 @@ class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
     private VurderArbeidsforholdTjeneste vurderArbeidsforholdTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
     private BehandlingRepository behandlingRepository;
-
     public StartpunktUtlederInntektArbeidYtelse() {
         // For CDI
     }

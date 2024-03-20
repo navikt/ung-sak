@@ -157,7 +157,7 @@ public class MapArbeid {
 
         List<VilkårPeriode> midlertidigInaktivVilkårsperioder = vilkår != null ? vilkår.getPerioder().stream()
             .filter(it -> it.getPeriode().overlapper(periode))
-            .filter(it -> Objects.equals(VilkårUtfallMerknad.VM_7847_A, it.getMerknad()))
+            .filter(it -> Objects.equals(VilkårUtfallMerknad.VM_7847_A, it.getMerknad()) || (input.skalAlltidHaInaktivVed_8_47_B() && Objects.equals(VilkårUtfallMerknad.VM_7847_B, it.getMerknad())))
             .collect(Collectors.toList()) : List.of();
 
         List<VilkårPeriode> dagpengerPåSkjæringstidspunktet = vilkår != null ? vilkår.getPerioder().stream()
@@ -500,21 +500,21 @@ public class MapArbeid {
                 && Objects.equals(it.getKey().getArbeidsgiver(), periode.getArbeidsgiver())
             )
             .toList();
-        
+
         if (resultater.size() > 1) {
             throw new IllegalStateException("Det skal ikke være mulig med flere forekomster av samme tilkommet aktivitet.");
         }
-        
+
         if (resultater.isEmpty() || resultater.get(0).getValue().isEmpty()) {
             perioder.put(new LukketPeriode(p.getFom(), p.getTom()),
                     new ArbeidsforholdPeriodeInfo(jobberNormalt, jobberFaktisk, false));
             return;
         }
-        
+
         final var tilkommetTidslinje = resultater.get(0).getValue();
         final LocalDateTimeline<Boolean> vanligTidslinje = new LocalDateTimeline<Boolean>(p.getFom(), p.getTom(), false);
         final var justertTilkommetTidslinje = vanligTidslinje.combine(tilkommetTidslinje, StandardCombinators::coalesceRightHandSide, JoinStyle.LEFT_JOIN);
-        
+
         justertTilkommetTidslinje.toSegments().forEach(s -> {
             final boolean tilkommet = s.getValue();
             perioder.put(new LukketPeriode(s.getLocalDateInterval().getFomDato(), s.getLocalDateInterval().getTomDato()),

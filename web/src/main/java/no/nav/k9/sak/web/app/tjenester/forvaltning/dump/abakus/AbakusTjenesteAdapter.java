@@ -38,7 +38,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 
 @Dependent
 @Default
-@ScopedRestIntegration(scopeKey = "fpabakus.scope", defaultScope = "api://prod-fss.teamforeldrepenger.fpabakus/.default")
+@ScopedRestIntegration(scopeKey = "k9abakus.scope", defaultScope = "api://prod-fss.k9saksbehandling.k9-abakus/.default")
 public class AbakusTjenesteAdapter {
 
     private AbakusTjeneste abakusTjeneste;
@@ -53,7 +53,7 @@ public class AbakusTjenesteAdapter {
     public AbakusTjenesteAdapter(FagsakRepository fagsakRepository,
                                  BehandlingRepository behandlingRepository,
                                  SystemUserOidcRestClient restClient,
-                                 @KonfigVerdi(value = "fpabakus.url") URI endpoint,
+                                 @KonfigVerdi(value = "k9abakus.url") URI endpoint,
                                  @KonfigVerdi(value = "abakus.callback.url") URI callbackUrl) {
         this.behandlingRepository = Objects.requireNonNull(behandlingRepository, "behandlingRepository");
         this.abakusTjeneste = new AbakusTjeneste(restClient, endpoint, callbackUrl);

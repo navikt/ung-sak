@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.abakus.iaygrunnlag.request.Dataset;
@@ -30,13 +29,14 @@ class AsyncAbakusKopierGrunnlagTask extends UnderBehandlingProsessTask {
 
     public static final String TASKTYPE = "abakus.async.kopiergrunnlag";
 
-    /** Angir hvilken behandling det skal kopieres fra. */
+    /**
+     * Angir hvilken behandling det skal kopieres fra.
+     */
     static final String ORIGINAL_BEHANDLING_ID = "original.behandlingId";
 
     static final String DATASET = "kopiergrunnlag.dataset";
 
     private AbakusTjeneste abakusTjeneste;
-
     private BehandlingRepository behandlingRepository;
 
     AsyncAbakusKopierGrunnlagTask() {
@@ -65,6 +65,7 @@ class AsyncAbakusKopierGrunnlagTask extends UnderBehandlingProsessTask {
             YtelseType.fraKode(tilBehandling.getFagsakYtelseType().getKode()),
             new AktørIdPersonident(tilBehandling.getAktørId().getId()),
             dataset);
+
         try {
             abakusTjeneste.kopierGrunnlag(request);
         } catch (IOException e) {

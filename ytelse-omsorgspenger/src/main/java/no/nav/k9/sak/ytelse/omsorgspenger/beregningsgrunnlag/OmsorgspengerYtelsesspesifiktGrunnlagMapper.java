@@ -13,6 +13,7 @@ import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
 import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Organisasjon;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
+import no.nav.folketrygdloven.kalkulus.felles.v1.Utbetalingsgrad;
 import no.nav.folketrygdloven.kalkulus.kodeverk.UttakArbeidType;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
@@ -29,6 +30,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjene
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -70,8 +72,11 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
         }
     }
 
-    private static UttakArbeidType mapType(String type) {
-        return UttakArbeidType.fraKode(type);
+    private static UttakArbeidType mapType(String kode) {
+        if (kode == null) {
+            return null;
+        }
+        return Arrays.stream(UttakArbeidType.values()).filter(v -> v.getKode().equals(kode)).findFirst().orElse(null);
     }
 
     private static Periode tilKalkulusPeriode(LukketPeriode periode) {
@@ -156,7 +161,7 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
     private List<PeriodeMedUtbetalingsgradDto> mapUtbetalingsgradPerioder(List<Uttaksperiode> perioder) {
         return perioder.stream()
             .sorted(COMP_PERIODE) // stabil rekkefølge output
-            .map(p -> new PeriodeMedUtbetalingsgradDto(tilKalkulusPeriode(p.getPeriode()), mapUtbetalingsgrad(p)))
+            .map(p -> new PeriodeMedUtbetalingsgradDto(tilKalkulusPeriode(p.getPeriode()), Utbetalingsgrad.fra(mapUtbetalingsgrad(p))))
             .collect(Collectors.toList());
     }
 
