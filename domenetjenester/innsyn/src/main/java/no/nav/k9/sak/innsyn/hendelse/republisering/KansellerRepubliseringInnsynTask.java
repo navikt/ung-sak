@@ -30,6 +30,7 @@ public class KansellerRepubliseringInnsynTask implements ProsessTaskHandler {
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
         //Stopper kjørende
+        logger.info("Kansellering forespurt - kansellerer når lås fra arbeidstabell frigis");
         int antall = repository.kansellerAlleAktive("kansellert av bruker");
         logger.info("Kansellert alle aktive kjøringer. {} ble kansellert", antall);
 

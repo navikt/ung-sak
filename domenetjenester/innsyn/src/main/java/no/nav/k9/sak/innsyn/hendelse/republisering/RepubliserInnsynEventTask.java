@@ -56,8 +56,7 @@ public class RepubliserInnsynEventTask implements ProsessTaskHandler {
 
         if (rader.isEmpty()) {
             //Ingen flere ubehandlede elementer, lager ikke ny task.
-            String rapport = repository.kjørerapport(kjøringId);
-            log.info("Ferdig med kjøring = {}. Resultat: {}", kjøringId, rapport);
+            log.info("Ferdig med kjøring = {}. Resultat: {}", kjøringId, repository.kjørerapport(kjøringId));
             return;
         }
 

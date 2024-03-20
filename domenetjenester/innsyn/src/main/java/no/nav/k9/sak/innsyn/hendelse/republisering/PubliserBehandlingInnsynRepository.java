@@ -34,11 +34,13 @@ public class PubliserBehandlingInnsynRepository {
     void klargjørNyKjøring(UUID kjøringId) {
         entityManager.createNativeQuery(
                 "insert into publiser_behandling_arbeidstabell(id, kjøring_id, behandling_id, status, opprettet_av, kjøring_type) " +
-                "select nextval('seq_publiser_behandling_arbeidstabell'), :kjoring_id, b.id, 'NY', :opprettetAv, 'INNSYN' " +
+                "select nextval('seq_publiser_behandling_arbeidstabell'), :kjoring_id, b.id, 'NY', :opprettetAv, :kjoring_type " +
                 "from behandling b join fagsak f on b.fagsak_id = f.id where f.ytelse_type = 'PSB'")
             .setParameter("kjoring_id", kjøringId)
             .setParameter("opprettetAv", SubjectHandler.getSubjectHandler().getUid())
+            .setParameter("kjoring_type", PubliserBehandlingEntitet.KjøringType.INNSYN.name())
             .executeUpdate();
+        entityManager.flush();
     }
 
     /**
@@ -88,12 +90,16 @@ public class PubliserBehandlingInnsynRepository {
     @SuppressWarnings("unchecked")
     int slettFerdige() {
         Query rapportQuery = entityManager.createNativeQuery(
-            "select status, kjøring_type, count(*) from publiser_behandling_arbeidstabell " +
-            "group by status, kjøring_type order by status");
+            "select status, count(*) from publiser_behandling_arbeidstabell " +
+            "where kjøring_type = :kjoring_type " +
+            "group by status order by status")
+            .setParameter("kjoring_type", PubliserBehandlingEntitet.KjøringType.INNSYN.name());
 
         logger.info("Status før slett {}", lagRapportString(rapportQuery.getResultStream()));
 
-        int antallSlettet = entityManager.createNativeQuery("delete from publiser_behandling_arbeidstabell where status in ('FULLFØRT', 'KANSELLERT') and kjøring_type = 'INNSYN'")
+        int antallSlettet = entityManager.createNativeQuery(
+            "delete from publiser_behandling_arbeidstabell where status in ('FULLFØRT', 'KANSELLERT') and kjøring_type = :kjoring_type")
+            .setParameter("kjoring_type", PubliserBehandlingEntitet.KjøringType.INNSYN.name())
             .executeUpdate();
 
         logger.info("antall slettet {}", antallSlettet);
@@ -103,12 +109,17 @@ public class PubliserBehandlingInnsynRepository {
 
     }
 
+    /**
+     * Kansellerer alle aktive. Vil vente hvis noen rader er under prosessering og låst så setter en lenger timeout.
+     */
     int kansellerAlleAktive(String endringstekst) {
         return entityManager.createNativeQuery(
-                "update publiser_behandling_arbeidstabell set status = 'KANSELLERT', endring = :endring, endret_av = :endretAv, endret_tid = CURRENT_TIMESTAMP where status = 'NY' and kjøring_type = 'INNSYN'" +
-                "and kjøring_type = 'INNSYN'")
+                "update publiser_behandling_arbeidstabell set status = 'KANSELLERT', endring = :endring, endret_av = :endretAv, endret_tid = CURRENT_TIMESTAMP " +
+                "where status = 'NY' and kjøring_type = :kjoring_type")
             .setParameter("endring", endringstekst)
             .setParameter("endretAv", SubjectHandler.getSubjectHandler().getUid())
+            .setParameter("kjoring_type", PubliserBehandlingEntitet.KjøringType.INNSYN.name())
+            .setHint("javax.persistence.query.timeout", 10 * 60 * 1000) //Venter 10 min
             .executeUpdate();
 
     }

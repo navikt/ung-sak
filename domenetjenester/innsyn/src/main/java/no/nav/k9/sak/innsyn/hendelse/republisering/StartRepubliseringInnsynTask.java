@@ -36,6 +36,7 @@ public class StartRepubliseringInnsynTask implements ProsessTaskHandler {
     public static final String TASKTYPE = "innsyn.StartRepubliseringInnsyn";
     private PubliserBehandlingInnsynRepository repository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
+    private static final String KANSELLER_EKSISTERENDE_PROP = "kansellerEksisterende";
     private static final Logger logger = LoggerFactory.getLogger(StartRepubliseringInnsynTask.class);
 
     public StartRepubliseringInnsynTask() {
@@ -50,15 +51,17 @@ public class StartRepubliseringInnsynTask implements ProsessTaskHandler {
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
         var kjøringId = UUID.randomUUID();
+        logger.info("Initierer republisering med kjøringid={}", kjøringId);
 
         //Stopper kjørende - bør ikke ha flere aktive i PROD, men enklere å teste med dette
-        int endring = repository.kansellerAlleAktive("kansellert pga ny kjøring=" + kjøringId);
-        if (endring > 0) {
-            logger.warn("eksisterende kjøring kansellert! Antall rader påvirket = {}", endring);
+        if (Optional.ofNullable(prosessTaskData.getPropertyValue(KANSELLER_EKSISTERENDE_PROP))
+            .map(Boolean::valueOf)
+            .orElse(false)) {
+            kansellerEksisterende(kjøringId);
         }
 
-
         repository.klargjørNyKjøring(kjøringId);
+        logger.info("Arbeidstabell populert for kjøringid={}. ", kjøringId);
 
         var pd = ProsessTaskData.forProsessTask(RepubliserInnsynEventTask.class);
         pd.setCallIdFraEksisterende();
@@ -69,7 +72,13 @@ public class StartRepubliseringInnsynTask implements ProsessTaskHandler {
         pd.setPrioritet(150);
         prosessTaskTjeneste.lagre(pd);
 
-        logger.info("Initiert republisering med kjøringid={}", kjøringId);
 
+    }
+
+    private void kansellerEksisterende(UUID kjøringId) {
+        int endring = repository.kansellerAlleAktive("kansellert pga ny kjøring=" + kjøringId);
+        if (endring > 0) {
+            logger.warn("eksisterende kjøring kansellert! Antall rader påvirket = {}", endring);
+        }
     }
 }

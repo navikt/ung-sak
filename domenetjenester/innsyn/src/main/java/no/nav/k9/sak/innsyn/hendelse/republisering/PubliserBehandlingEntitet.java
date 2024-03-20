@@ -76,6 +76,9 @@ public class PubliserBehandlingEntitet extends BaseEntitet {
         NY, FULLFØRT, FEILET, KANSELLERT
     }
 
+    /**
+     * Ved gjenbruk av arbeidstabell så kan denne brukes for å skille på typene
+     */
     public enum KjøringType {
         INNSYN
     }
