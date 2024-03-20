@@ -67,6 +67,10 @@ public class StatusForPerioderPåBehandling {
         return perioderTilVurdering;
     }
 
+    public Set<PeriodeMedRegisterendring> getPerioderMedRegisterendring() {
+        return perioderMedRegisterendring;
+    }
+
     public List<PeriodeMedÅrsaker> getPerioderMedÅrsak() {
         return perioderMedÅrsak;
     }

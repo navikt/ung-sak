@@ -5,13 +5,19 @@ import static no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.BortfaltOg
 
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.BGAndelArbeidsforhold;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPrStatusOgAndel;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
@@ -51,17 +57,39 @@ public class PerioderMedInaktivitetUtleder {
             .filter(it -> ArbeidType.AA_REGISTER_TYPER.contains(it.getArbeidType()))
             .forEach(yrkesaktivitet -> mapYrkesAktivitet(mellomregning, yrkesaktivitet));
 
+        var arbeidsgivereVedStartPrSkjæringstidspunkt = finnAktiveArbeidsgiverePrSkjæringstidspunktFraBeregning(input);
+        return utledBortfallendeAktiviteterSomSkalFortsattKompenseres(mellomregning, antallArbeidsgivereTidslinje,
+            ikkeAktivTidslinje, arbeidsgivereVedStartPrSkjæringstidspunkt);
+    }
 
-        return utledBortfallendeAktiviteterSomSkalFortsattKompenseres(mellomregning, antallArbeidsgivereTidslinje, ikkeAktivTidslinje);
+    private static Map<LocalDate, Set<Arbeidsgiver>> finnAktiveArbeidsgiverePrSkjæringstidspunktFraBeregning(InaktivitetUtlederInput input) {
+        return input.getBeregningsgrunnlag().stream()
+            .filter(bg -> !bg.getBeregningsgrunnlagPerioder().isEmpty())
+            .collect(
+                Collectors.toMap(
+                    Beregningsgrunnlag::getSkjæringstidspunkt,
+                    bg -> bg.getBeregningsgrunnlagPerioder().get(0)
+                        .getBeregningsgrunnlagPrStatusOgAndelList()
+                        .stream()
+                        .map(BeregningsgrunnlagPrStatusOgAndel::getBgAndelArbeidsforhold)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .map(BGAndelArbeidsforhold::getArbeidsgiver)
+                        .collect(Collectors.toSet())
+                )
+            );
     }
 
 
     private Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> utledBortfallendeAktiviteterSomSkalFortsattKompenseres(HashMap<AktivitetIdentifikator, LocalDateTimeline<Boolean>> mellomregning,
                                                                                                                                  LocalDateTimeline<BigDecimal> antallArbeidsgivereTidslinje,
-                                                                                                                                 LocalDateTimeline<Boolean> ikkeAktivTidslinje) {
+                                                                                                                                 LocalDateTimeline<Boolean> ikkeAktivTidslinje,
+                                                                                                                                 Map<LocalDate, Set<Arbeidsgiver>> arbeidsgivereVedStartPrSkjæringstidspunkt) {
         var resultat = new HashMap<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>>();
         for (LocalDateSegment<Boolean> periodeMedYtelse : ikkeAktivTidslinje.toSegments()) {
-            for (Map.Entry<AktivitetIdentifikator, LocalDateTimeline<Boolean>> aktivitet : mellomregning.entrySet()) {
+
+            var filtrertEntrySet = finnEntriesForArbeidsgivereVedSkjæringstidspunktet(mellomregning, arbeidsgivereVedStartPrSkjæringstidspunkt, periodeMedYtelse);
+            for (Map.Entry<AktivitetIdentifikator, LocalDateTimeline<Boolean>> aktivitet : filtrertEntrySet) {
                 var arbeidsforholdUtenStartPåStp = aktivitet.getValue()
                     .toSegments()
                     .stream()
@@ -95,6 +123,17 @@ public class PerioderMedInaktivitetUtleder {
             }
         }
         return resultat;
+    }
+
+    private static Set<Map.Entry<AktivitetIdentifikator, LocalDateTimeline<Boolean>>> finnEntriesForArbeidsgivereVedSkjæringstidspunktet(
+        HashMap<AktivitetIdentifikator, LocalDateTimeline<Boolean>> mellomregning,
+        Map<LocalDate, Set<Arbeidsgiver>> arbeidsgivereVedStartPrSkjæringstidspunkt,
+        LocalDateSegment<Boolean> periodeMedYtelse) {
+        var arbeidsgivereSomInngårIBeregningsgrunnlaget = arbeidsgivereVedStartPrSkjæringstidspunkt.getOrDefault(periodeMedYtelse.getFom(), Set.of());
+        return mellomregning.entrySet()
+            .stream()
+            .filter(e -> arbeidsgivereSomInngårIBeregningsgrunnlaget.contains(e.getKey().getArbeidsgiver()))
+            .collect(Collectors.toSet());
     }
 
     private void uttakUtenSpeilingUtenErstattetArbeid(LocalDateTimeline<BigDecimal> antallArbeidsgivereTidslinje, HashMap<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> resultat, Map.Entry<AktivitetIdentifikator, LocalDateTimeline<Boolean>> aktivitet, LocalDateTimeline<Boolean> ikkeAktivPeriode, Arbeidsgiver arbeidsgiver) {

@@ -60,8 +60,6 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
 
     private HentPerioderTilVurderingTjeneste hentPerioderTilVurderingTjeneste;
 
-    private boolean begrensetPeriode;
-
     public ArbeidBrukerBurdeSøktOmUtleder() {
     }
 
@@ -74,8 +72,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
                                           OpptjeningRepository opptjeningRepository,
                                           VilkårResultatRepository vilkårResultatRepository,
                                           @Any Instance<HåndterePleietrengendeDødsfallTjeneste> håndterePleietrengendeDødsfallTjenester,
-                                          HentPerioderTilVurderingTjeneste hentPerioderTilVurderingTjeneste,
-                                          @KonfigVerdi(value = "KOFAK_UTTAK_BEGRENSET_PERIODE", defaultVerdi = "false") boolean begrensetPeriode) {
+                                          HentPerioderTilVurderingTjeneste hentPerioderTilVurderingTjeneste) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
@@ -85,7 +82,6 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
         this.søknadsfristTjenester = søknadsfristTjenester;
         this.håndterePleietrengendeDødsfallTjenester = håndterePleietrengendeDødsfallTjenester;
         this.hentPerioderTilVurderingTjeneste = hentPerioderTilVurderingTjeneste;
-        this.begrensetPeriode = begrensetPeriode;
     }
 
     public Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> utledMangler(BehandlingReferanse referanse) {
@@ -94,10 +90,9 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
         var vurderteSøknadsperioder = søknadsfristTjeneste.vurderSøknadsfrist(referanse);
         var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
         var perioderFraSøknader = periodeFraSøknadForBrukerTjeneste.hentPerioderFraSøknad(referanse);
-        var perioderTilVurdering = finnSykdomsperioder(referanse);
         var opptjeningResultat = opptjeningRepository.finnOpptjening(referanse.getBehandlingId());
 
-        var tidslinjeTilVurdering = utledTidslinjeTilVurdering(perioderTilVurdering, vilkårene.getVilkår(VilkårType.OPPTJENINGSVILKÅRET), referanse);
+        var tidslinjeTilVurdering = utledTidslinjeTilVurdering(referanse);
 
         var input = new ArbeidstidMappingInput()
             .medSaksnummer(referanse.getSaksnummer())
@@ -127,19 +122,9 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
         return utledFraInput(timelineMedYtelse, timelineMedInnvilgetYtelse, input, aktørArbeidFraRegister);
     }
 
-    private LocalDateTimeline<Boolean> utledTidslinjeTilVurdering(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Optional<Vilkår> vilkår, BehandlingReferanse referanse) {
-        if (begrensetPeriode) {
-            return TidslinjeUtil.tilTidslinjeKomprimert(hentPerioderTilVurderingTjeneste.hentPerioderTilVurderingUtenUbesluttet(referanse));
-        } else {
-            var tidslinje = new LocalDateTimeline<>(perioderTilVurdering.stream().map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), true)).collect(Collectors.toList())).compress();
-            if (vilkår.isEmpty()) {
-                return tidslinje;
-            }
+    private LocalDateTimeline<Boolean> utledTidslinjeTilVurdering(BehandlingReferanse referanse) {
+        return TidslinjeUtil.tilTidslinjeKomprimert(hentPerioderTilVurderingTjeneste.hentPerioderTilVurderingUtenUbesluttet(referanse));
 
-            var opptjeningstidslinje = new LocalDateTimeline<>(vilkår.get().getPerioder().stream().map(VilkårPeriode::getPeriode).map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), true)).collect(Collectors.toList()));
-
-            return opptjeningstidslinje.combine(tidslinje, StandardCombinators::leftOnly, LocalDateTimeline.JoinStyle.LEFT_JOIN);
-        }
     }
 
     private LocalDateTimeline<Boolean> utledYtelse(Vilkårene vilkårene, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {

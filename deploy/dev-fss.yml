@@ -238,7 +238,7 @@ spec:
     - name: APP_AUTH_SCHEMA_AZUREAD_ADDITIONAL_PATHS
       value: "/k9/formidling/dokumentdata,api://dev-fss.k9saksbehandling.k9-formidling-dokumentdata/.default;/k9/formidling,api://dev-fss.k9saksbehandling.k9-formidling/.default"
     - name: APP_AUTH_SCHEMA_AZUREAD_OPTIONAL_PATHS
-      value: "/k9/klage,api://dev-fss.k9saksbehandling.k9-klage/.default;/k9/tilbake,api://dev-fss.k9saksbehandling.k9-tilbake/.default;/k9/oppdrag,api://dev-fss.k9saksbehandling.k9-oppdrag/.default"
+      value: "/k9/klage,api://dev-fss.k9saksbehandling.k9-klage/.default;/k9/tilbake,api://dev-fss.k9saksbehandling.k9-tilbake/.default;/k9/oppdrag,api://dev-fss.k9saksbehandling.k9-oppdrag/.default;/k9/abakus,api://dev-fss.k9saksbehandling.k9-abakus/.default"
     - name: OIDC_STS_HOST_URL
       value: https://security-token-service.nais.preprod.local
     - name: CLIENT_SCOPE
@@ -272,8 +272,6 @@ spec:
       value: "true"
     - name: ENABLE_DATO_NY_REGEL_UTTAK
       value: "true"
-    - name: FILTRER_UGYLDIG_IM
-      value: "true"
     - name: FJERN_VILKARSPERIODER_BEREGNING
       value: "false"
     - name: VALIDER_KALKULUS_REFERANSER
@@ -286,17 +284,15 @@ spec:
       value: "true"
     - name: DOKUMENTMOTTAK_VALIDER_JOURNALFORT
       value: "true"
-    - name: UTVIDET_ENDRING_UTBETALING_UTLEDER
-      value: "true"
     - name: ENABLE_INNSYN_ENDRING_OBSERVER
       value: "true"
     - name: KODEVERK_SOM_STRING_TOPICS
       value: "true"
-    - name: K9_ABAKUS_ENABLED
-      value: "true"
     - name: AAPEN_PUNSJOPPGAVE_STOPPER_AUTOMATISK_VEDTAK
       value: "true"
-    - name: KOFAK_UTTAK_BEGRENSET_PERIODE
+    - name: OMP_NYOPPSTARTET_VED_REFUSJON
+      value: "true"
+    - name: INAKTIV_VED_8_47_B
       value: "true"
 
 

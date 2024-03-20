@@ -49,6 +49,7 @@ import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.fordeling.VurderTi
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.refusjon.VurderRefusjonAndelBeregningsgrunnlagDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.refusjon.VurderRefusjonBeregningsgrunnlagDto;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -378,7 +379,7 @@ public class OppdatererDtoMapper {
             redigerbarAndel.getArbeidsgiverId(),
             redigerbarAndel.getArbeidsforholdId().getReferanse(),
             redigerbarAndel.getNyAndel(),
-            redigerbarAndel.getKilde() == null ? AndelKilde.PROSESS_START : AndelKilde.fraKode(redigerbarAndel.getKilde().getKode())
+            redigerbarAndel.getKilde() == null ? AndelKilde.PROSESS_START : Arrays.stream(AndelKilde.values()).filter(v -> v.getKode().equals(redigerbarAndel.getKilde().getKode())).findFirst().orElse(AndelKilde.PROSESS_START)
             );
     }
 
