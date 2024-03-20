@@ -22,7 +22,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.innsyn.hendelse.InnsynEventTjeneste;
-import no.nav.k9.sak.innsyn.hendelse.republisering.PubliserInnsynEntitet.Status;
+import no.nav.k9.sak.innsyn.hendelse.republisering.PubliserBehandlingEntitet.Status;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -37,7 +37,7 @@ class RepubliserInnsynEventTaskTest {
 
     @BeforeEach
     void setup() {
-        task = new RepubliserInnsynEventTask(prosessTaskTjeneste, innsynEventTjeneste, new PubliserInnsynRepository(entityManager));
+        task = new RepubliserInnsynEventTask(prosessTaskTjeneste, innsynEventTjeneste, new PubliserBehandlingInnsynRepository(entityManager));
     }
 
     @Test
@@ -46,9 +46,9 @@ class RepubliserInnsynEventTaskTest {
 
         // lag 3 behandlinger
         var kjøreId = UUID.randomUUID();
-        entityManager.persist(new PubliserInnsynEntitet(1L, kjøreId));
-        entityManager.persist(new PubliserInnsynEntitet(2L, kjøreId));
-        entityManager.persist(new PubliserInnsynEntitet(3L, kjøreId));
+        entityManager.persist(new PubliserBehandlingEntitet(1L, kjøreId, PubliserBehandlingEntitet.KjøringType.INNSYN));
+        entityManager.persist(new PubliserBehandlingEntitet(2L, kjøreId, PubliserBehandlingEntitet.KjøringType.INNSYN));
+        entityManager.persist(new PubliserBehandlingEntitet(3L, kjøreId, PubliserBehandlingEntitet.KjøringType.INNSYN));
         entityManager.flush();
 
         // kjør task
@@ -57,24 +57,24 @@ class RepubliserInnsynEventTaskTest {
         pd.setProperty(RepubliserInnsynEventTask.ANTALL_PER_KJØRING_PROP, "1");
 
         task.doTask(pd);
-        assertThat(hentAlle(kjøreId)).extracting(PubliserInnsynEntitet::getStatus)
+        assertThat(hentAlle(kjøreId)).extracting(PubliserBehandlingEntitet::getStatus)
             .containsExactlyInAnyOrder(Status.NY, Status.NY, Status.FULLFØRT);
 
         task.doTask(pd);
-        assertThat(hentAlle(kjøreId)).extracting(PubliserInnsynEntitet::getStatus)
+        assertThat(hentAlle(kjøreId)).extracting(PubliserBehandlingEntitet::getStatus)
             .containsExactlyInAnyOrder(Status.NY, Status.FULLFØRT, Status.FULLFØRT);
 
         task.doTask(pd);
-        assertThat(hentAlle(kjøreId)).extracting(PubliserInnsynEntitet::getStatus)
+        assertThat(hentAlle(kjøreId)).extracting(PubliserBehandlingEntitet::getStatus)
             .containsExactlyInAnyOrder(Status.FULLFØRT, Status.FULLFØRT, Status.FULLFØRT);
 
         task.doTask(pd);
-        assertThat(hentAlle(kjøreId)).extracting(PubliserInnsynEntitet::getStatus)
+        assertThat(hentAlle(kjøreId)).extracting(PubliserBehandlingEntitet::getStatus)
             .containsExactlyInAnyOrder(Status.FULLFØRT, Status.FULLFØRT, Status.FULLFØRT);
 
         task.doTask(pd);
 
-        assertThat(hentAlle(kjøreId)).extracting(PubliserInnsynEntitet::getStatus)
+        assertThat(hentAlle(kjøreId)).extracting(PubliserBehandlingEntitet::getStatus)
             .containsExactlyInAnyOrder(Status.FULLFØRT, Status.FULLFØRT, Status.FULLFØRT);
 
         // verifiser prosesstask ikke lages etter siste
@@ -89,13 +89,13 @@ class RepubliserInnsynEventTaskTest {
         // lag 3 behandlinger
         var kjøreId = UUID.randomUUID();
 
-        entityManager.persist(new PubliserInnsynEntitet(1L, kjøreId));
+        entityManager.persist(new PubliserBehandlingEntitet(1L, kjøreId, PubliserBehandlingEntitet.KjøringType.INNSYN));
         doNothing().when(innsynEventTjeneste).publiserBehandling(1L);
 
-        entityManager.persist(new PubliserInnsynEntitet(2L, kjøreId));
+        entityManager.persist(new PubliserBehandlingEntitet(2L, kjøreId, PubliserBehandlingEntitet.KjøringType.INNSYN));
         doThrow(new IllegalStateException("feil fra test")).when(innsynEventTjeneste).publiserBehandling(2L);
 
-        entityManager.persist(new PubliserInnsynEntitet(3L, kjøreId));
+        entityManager.persist(new PubliserBehandlingEntitet(3L, kjøreId, PubliserBehandlingEntitet.KjøringType.INNSYN));
         doNothing().when(innsynEventTjeneste).publiserBehandling(3L);
 
         entityManager.flush();
@@ -107,19 +107,19 @@ class RepubliserInnsynEventTaskTest {
         pd.setProperty(RepubliserInnsynEventTask.ANTALL_PER_KJØRING_PROP, "1");
 
         task.doTask(pd);
-        assertThat(hentAlle(kjøreId)).extracting(PubliserInnsynEntitet::getStatus)
+        assertThat(hentAlle(kjøreId)).extracting(PubliserBehandlingEntitet::getStatus)
             .containsExactlyInAnyOrder(Status.NY, Status.NY, Status.FULLFØRT);
 
         task.doTask(pd);
-        assertThat(hentAlle(kjøreId)).extracting(PubliserInnsynEntitet::getStatus)
+        assertThat(hentAlle(kjøreId)).extracting(PubliserBehandlingEntitet::getStatus)
             .containsExactlyInAnyOrder(Status.NY, Status.FEILET, Status.FULLFØRT);
 
         task.doTask(pd);
-        assertThat(hentAlle(kjøreId)).extracting(PubliserInnsynEntitet::getStatus)
+        assertThat(hentAlle(kjøreId)).extracting(PubliserBehandlingEntitet::getStatus)
             .containsExactlyInAnyOrder(Status.FULLFØRT, Status.FEILET, Status.FULLFØRT);
 
         task.doTask(pd);
-        assertThat(hentAlle(kjøreId)).extracting(PubliserInnsynEntitet::getStatus)
+        assertThat(hentAlle(kjøreId)).extracting(PubliserBehandlingEntitet::getStatus)
             .containsExactlyInAnyOrder(Status.FULLFØRT, Status.FEILET, Status.FULLFØRT);
 
 
@@ -130,8 +130,8 @@ class RepubliserInnsynEventTaskTest {
 
     }
 
-    private List<PubliserInnsynEntitet> hentAlle(UUID kjøreId) {
-        return entityManager.createQuery("select p from PubliserInnsynEntitet p where kjøringUuid = :k", PubliserInnsynEntitet.class)
+    private List<PubliserBehandlingEntitet> hentAlle(UUID kjøreId) {
+        return entityManager.createQuery("select p from PubliserBehandlingEntitet p where kjøringUuid = :k", PubliserBehandlingEntitet.class)
             .setParameter("k", kjøreId)
             .getResultList();
     }

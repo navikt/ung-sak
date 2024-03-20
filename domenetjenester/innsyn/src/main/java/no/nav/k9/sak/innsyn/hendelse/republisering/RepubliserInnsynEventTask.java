@@ -31,7 +31,7 @@ public class RepubliserInnsynEventTask implements ProsessTaskHandler {
 
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private InnsynEventTjeneste innsynEventTjeneste;
-    private PubliserInnsynRepository repository;
+    private PubliserBehandlingInnsynRepository repository;
 
     RepubliserInnsynEventTask() {
         // for CDI proxy
@@ -40,7 +40,7 @@ public class RepubliserInnsynEventTask implements ProsessTaskHandler {
     @Inject
     public RepubliserInnsynEventTask(ProsessTaskTjeneste prosessTaskTjeneste,
                                      InnsynEventTjeneste innsynEventTjeneste,
-                                     PubliserInnsynRepository repository) {
+                                     PubliserBehandlingInnsynRepository repository) {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.innsynEventTjeneste = innsynEventTjeneste;
         this.repository = repository;

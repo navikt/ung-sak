@@ -10,6 +10,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.innsyn.BrukerdialoginnsynMeldingProducer;
 
 /**
@@ -17,6 +18,7 @@ import no.nav.k9.sak.innsyn.BrukerdialoginnsynMeldingProducer;
  */
 @ApplicationScoped
 @ProsessTask(PubliserInnsynEventTask.TASKTYPE)
+@FagsakProsesstaskRekkefølge(gruppeSekvens = false)
 public class PubliserInnsynEventTask implements ProsessTaskHandler {
     private static final Logger log = LoggerFactory.getLogger(PubliserInnsynEventTask.class);
     public static final String TASKTYPE = "innsyn.PubliserInnsynEvent";

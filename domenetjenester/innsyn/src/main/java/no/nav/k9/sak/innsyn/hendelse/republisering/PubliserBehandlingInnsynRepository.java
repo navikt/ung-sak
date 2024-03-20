@@ -15,16 +15,16 @@ import jakarta.persistence.Query;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @Dependent
-public class PubliserInnsynRepository {
-    private static final Logger logger = LoggerFactory.getLogger(PubliserInnsynRepository.class);
+public class PubliserBehandlingInnsynRepository {
+    private static final Logger logger = LoggerFactory.getLogger(PubliserBehandlingInnsynRepository.class);
     private EntityManager entityManager;
 
 
-    public PubliserInnsynRepository() {
+    public PubliserBehandlingInnsynRepository() {
     }
 
     @Inject
-    public PubliserInnsynRepository(EntityManager entityManager) {
+    public PubliserBehandlingInnsynRepository(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 
@@ -33,8 +33,8 @@ public class PubliserInnsynRepository {
      */
     void klargjørNyKjøring(UUID kjøringId) {
         entityManager.createNativeQuery(
-                "insert into publiser_innsyn_arbeidstabell(id, kjøring_id, behandling_id, status, opprettet_av) " +
-                "select nextval('seq_publiser_innsyn_arbeidstabell'), :kjoring_id, b.id, 'NY', :opprettetAv " +
+                "insert into publiser_behandling_arbeidstabell(id, kjøring_id, behandling_id, status, opprettet_av, kjøring_type) " +
+                "select nextval('seq_publiser_behandling_arbeidstabell'), :kjoring_id, b.id, 'NY', :opprettetAv, 'INNSYN' " +
                 "from behandling b join fagsak f on b.fagsak_id = f.id where f.ytelse_type = 'PSB'")
             .setParameter("kjoring_id", kjøringId)
             .setParameter("opprettetAv", SubjectHandler.getSubjectHandler().getUid())
@@ -45,21 +45,21 @@ public class PubliserInnsynRepository {
      * Henter neste for en gitt kjøring med lås slik at andre instanser av prosesstask ikke plukker den samme
      */
     @SuppressWarnings("unchecked")
-    List<PubliserInnsynEntitet> hentNesteMedLås(UUID kjøringId, int antall) {
+    List<PubliserBehandlingEntitet> hentNesteMedLås(UUID kjøringId, int antall) {
         Query nativeQuery = entityManager.createNativeQuery(
-                "select * from publiser_innsyn_arbeidstabell " +
+                "select * from publiser_behandling_arbeidstabell " +
                 "where status = 'NY' and kjøring_id = :kjoringId " +
                 "for update skip locked limit :antall",
-                PubliserInnsynEntitet.class)
+                PubliserBehandlingEntitet.class)
             .setParameter("kjoringId", kjøringId)
             .setParameter("antall", antall);
 
 
-        return (List<PubliserInnsynEntitet>) nativeQuery.getResultList();
+        return (List<PubliserBehandlingEntitet>) nativeQuery.getResultList();
 
     }
 
-    void oppdater(List<PubliserInnsynEntitet> rad) {
+    void oppdater(List<PubliserBehandlingEntitet> rad) {
         rad.forEach(it -> entityManager.merge(it));
         entityManager.flush();
     }
@@ -67,7 +67,7 @@ public class PubliserInnsynRepository {
     String kjørerapport(UUID kjøringId) {
         @SuppressWarnings("unchecked")
         Stream<Object[]> resultat = entityManager.createNativeQuery(
-                "select status, count(*) from publiser_innsyn_arbeidstabell " +
+                "select status, count(*) from publiser_behandling_arbeidstabell " +
                 "where kjøring_id = :kjoringId " +
                 "group by status order by status")
             .setParameter("kjoringId", kjøringId)
@@ -79,7 +79,7 @@ public class PubliserInnsynRepository {
     private static String lagRapportString(Stream<Object[]> resultat) {
         return resultat
             .map(it -> new StatusCount(
-                PubliserInnsynEntitet.Status.valueOf((String) it[0]),
+                PubliserBehandlingEntitet.Status.valueOf((String) it[0]),
                 (Long) it[1]))
             .map(StatusCount::toString)
             .collect(Collectors.joining(", "));
@@ -88,12 +88,12 @@ public class PubliserInnsynRepository {
     @SuppressWarnings("unchecked")
     int slettFerdige() {
         Query rapportQuery = entityManager.createNativeQuery(
-            "select status, count(*) from publiser_innsyn_arbeidstabell " +
-            "group by status order by status");
+            "select status, kjøring_type, count(*) from publiser_behandling_arbeidstabell " +
+            "group by status, kjøring_type order by status");
 
         logger.info("Status før slett {}", lagRapportString(rapportQuery.getResultStream()));
 
-        int antallSlettet = entityManager.createNativeQuery("delete from publiser_innsyn_arbeidstabell where status in ('FULLFØRT', 'KANSELLERT')")
+        int antallSlettet = entityManager.createNativeQuery("delete from publiser_behandling_arbeidstabell where status in ('FULLFØRT', 'KANSELLERT') and kjøring_type = 'INNSYN'")
             .executeUpdate();
 
         logger.info("antall slettet {}", antallSlettet);
@@ -105,7 +105,8 @@ public class PubliserInnsynRepository {
 
     int kansellerAlleAktive(String endringstekst) {
         return entityManager.createNativeQuery(
-                "update k9sak.public.publiser_innsyn_arbeidstabell set status = 'KANSELLERT', endring = :endring, endret_av = :endretAv, endret_tid = CURRENT_TIMESTAMP where status = 'NY'")
+                "update publiser_behandling_arbeidstabell set status = 'KANSELLERT', endring = :endring, endret_av = :endretAv, endret_tid = CURRENT_TIMESTAMP where status = 'NY' and kjøring_type = 'INNSYN'" +
+                "and kjøring_type = 'INNSYN'")
             .setParameter("endring", endringstekst)
             .setParameter("endretAv", SubjectHandler.getSubjectHandler().getUid())
             .executeUpdate();
@@ -113,7 +114,7 @@ public class PubliserInnsynRepository {
     }
 
 
-    private record StatusCount(PubliserInnsynEntitet.Status status, Long count) {
+    private record StatusCount(PubliserBehandlingEntitet.Status status, Long count) {
         @Override
         public String toString() {
             return "%s:%d".formatted(status.name(), count);

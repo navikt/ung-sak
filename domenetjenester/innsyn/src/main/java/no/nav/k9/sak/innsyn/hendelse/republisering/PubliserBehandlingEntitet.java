@@ -17,11 +17,11 @@ import no.nav.k9.sak.behandlingslager.BaseEntitet;
 /**
  * En rad i arbeidstabell for publisering av behandlinger til innsyn
  */
-@Entity(name = "PubliserInnsynEntitet")
-@Table(name = "publiser_innsyn_arbeidstabell")
-public class PubliserInnsynEntitet extends BaseEntitet {
+@Entity(name = "PubliserBehandlingEntitet")
+@Table(name = "publiser_behandling_arbeidstabell")
+public class PubliserBehandlingEntitet extends BaseEntitet {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_publiser_innsyn_arbeidstabell")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_publiser_behandling_arbeidstabell")
     private Long id;
 
     @Column(name = "behandling_id", updatable = false, nullable = false)
@@ -37,11 +37,16 @@ public class PubliserInnsynEntitet extends BaseEntitet {
     @Column(name = "kjøring_id", updatable = false, nullable = false)
     private UUID kjøringUuid;
 
-    public PubliserInnsynEntitet() {
+    @Enumerated(EnumType.STRING)
+    @Column(name = "kjøring_type", updatable = false, nullable = false)
+    private KjøringType kjøringType;
+
+    public PubliserBehandlingEntitet() {
     }
 
-    public PubliserInnsynEntitet(long behandlingId, UUID kjøringUuid) {
+    public PubliserBehandlingEntitet(long behandlingId, UUID kjøringUuid, KjøringType kjøringType) {
         this.behandlingId = behandlingId;
+        this.kjøringType = kjøringType;
         this.status = Status.NY;
         this.kjøringUuid = kjøringUuid;
     }
@@ -69,6 +74,10 @@ public class PubliserInnsynEntitet extends BaseEntitet {
 
     public enum Status {
         NY, FULLFØRT, FEILET, KANSELLERT
+    }
+
+    public enum KjøringType {
+        INNSYN
     }
 }
 

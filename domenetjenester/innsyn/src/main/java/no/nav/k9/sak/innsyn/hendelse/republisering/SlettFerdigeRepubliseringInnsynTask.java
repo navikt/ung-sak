@@ -16,14 +16,14 @@ import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 @ProsessTask(SlettFerdigeRepubliseringInnsynTask.TASKTYPE)
 public class SlettFerdigeRepubliseringInnsynTask implements ProsessTaskHandler {
     public static final String TASKTYPE = "innsyn.SlettFerdigeRepubliseringInnsyn";
-    private PubliserInnsynRepository repository;
+    private PubliserBehandlingInnsynRepository repository;
     private static final Logger logger = LoggerFactory.getLogger(SlettFerdigeRepubliseringInnsynTask.class);
 
     public SlettFerdigeRepubliseringInnsynTask() {
     }
 
     @Inject
-    public SlettFerdigeRepubliseringInnsynTask(PubliserInnsynRepository repository) {
+    public SlettFerdigeRepubliseringInnsynTask(PubliserBehandlingInnsynRepository repository) {
         this.repository = repository;
     }
 

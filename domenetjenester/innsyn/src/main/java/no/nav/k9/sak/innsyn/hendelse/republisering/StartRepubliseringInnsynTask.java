@@ -34,7 +34,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 @ProsessTask(StartRepubliseringInnsynTask.TASKTYPE)
 public class StartRepubliseringInnsynTask implements ProsessTaskHandler {
     public static final String TASKTYPE = "innsyn.StartRepubliseringInnsyn";
-    private PubliserInnsynRepository repository;
+    private PubliserBehandlingInnsynRepository repository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private static final Logger logger = LoggerFactory.getLogger(StartRepubliseringInnsynTask.class);
 
@@ -42,7 +42,7 @@ public class StartRepubliseringInnsynTask implements ProsessTaskHandler {
     }
 
     @Inject
-    public StartRepubliseringInnsynTask(PubliserInnsynRepository repository, ProsessTaskTjeneste prosessTaskTjeneste) {
+    public StartRepubliseringInnsynTask(PubliserBehandlingInnsynRepository repository, ProsessTaskTjeneste prosessTaskTjeneste) {
         this.repository = repository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
