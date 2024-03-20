@@ -29,7 +29,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 public class RevurderingPerioderTjeneste {
 
     private static final long CACHE_ELEMENT_LIVE_TIME_MS = TimeUnit.MILLISECONDS.convert(2, TimeUnit.HOURS);
-    private final LRUCache<Saksnummer, List<InntektsmeldingMedPerioder>> cache = new LRUCache<>(1000, CACHE_ELEMENT_LIVE_TIME_MS);
+    private final LRUCache<Saksnummer, InntektsmeldingerOgPerioderCacheEntry> cache = new LRUCache<>(1000, CACHE_ELEMENT_LIVE_TIME_MS);
     private MottatteDokumentRepository mottatteDokumentRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private ProsessTriggereRepository prosessTriggereRepository;
@@ -84,29 +84,34 @@ public class RevurderingPerioderTjeneste {
             return new TreeSet<>();
         }
 
-        var cacheEntries = cache.get(referanse.getSaksnummer());
+        var cacheEntry = cache.get(referanse.getSaksnummer());
 
         // Checke cache
         // if OK, return
-        if (cacheErGood(cacheEntries, mottatteInntektsmeldinger)) {
-            return cacheEntries.stream()
-                .map(InntektsmeldingMedPerioder::getPeriode)
+        if (cacheErGood(cacheEntry, mottatteInntektsmeldinger)) {
+            return cacheEntry.getPerioder()
+                .stream()
                 .filter(Objects::nonNull)
                 .collect(Collectors.toCollection(TreeSet::new));
         }
 
         var sakInntektsmeldinger = iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer(), referanse.getAktørId(), referanse.getFagsakYtelseType());
         var påvirketTidslinje = revurderingInntektsmeldingPeriodeTjeneste.utledTidslinjeForVurderingFraInntektsmelding(referanse, sakInntektsmeldinger, mottatteInntektsmeldinger, datoIntervallEntitets);
-        return påvirketTidslinje.getLocalDateIntervals().stream().map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFomDato(), it.getTomDato()))
+        var perioder = påvirketTidslinje.getLocalDateIntervals().stream().map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFomDato(), it.getTomDato()))
             .collect(Collectors.toCollection(TreeSet::new));
+        cache.put(referanse.getSaksnummer(), new InntektsmeldingerOgPerioderCacheEntry(
+            mottatteInntektsmeldinger.stream().map(MottattDokument::getJournalpostId).collect(Collectors.toSet()),
+            perioder
+        ));
+        return perioder;
     }
 
-    private boolean cacheErGood(List<InntektsmeldingMedPerioder> cacheEntries, List<MottattDokument> mottatteInntektsmeldinger) {
-        if (cacheEntries == null) {
+    private boolean cacheErGood(InntektsmeldingerOgPerioderCacheEntry cacheEntry, List<MottattDokument> mottatteInntektsmeldinger) {
+        if (cacheEntry == null) {
             return false;
         }
         return mottatteInntektsmeldinger.stream()
-            .allMatch(it -> cacheEntries.stream().anyMatch(at -> at.getJournalpostId().equals(it.getJournalpostId())));
+            .allMatch(it -> cacheEntry.getJournalpostIder().contains(it.getJournalpostId()));
     }
 
 
