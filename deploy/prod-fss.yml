@@ -71,8 +71,6 @@ spec:
         - application: k9-formidling-dokumentdata
         - application: k9-punsj
         - application: k9-abakus
-        - application: fpabakus
-          namespace: teamforeldrepenger
         - application: k9-punsjbolle
           namespace: omsorgspenger
           cluster: prod-gcp
@@ -264,8 +262,6 @@ spec:
       value: "false"
     - name: ENABLE_DATO_NY_REGEL_UTTAK
       value: "false"
-    - name: FILTRER_UGYLDIG_IM
-      value: "false"
     - name: FJERN_VILKARSPERIODER_BEREGNING
       value: "false"
     - name: VALIDER_KALKULUS_REFERANSER
@@ -284,10 +280,8 @@ spec:
       value: "false"
     - name: KODEVERK_SOM_STRING_TOPICS
       value: "false"
-    - name: K9_ABAKUS_ENABLED
-      value: "true"
     - name: OMP_NYOPPSTARTET_VED_REFUSJON
-      value: "false"    
+      value: "false"
     - name: INAKTIV_VED_8_47_B
       value: "false"
 

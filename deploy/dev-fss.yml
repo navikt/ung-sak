@@ -272,8 +272,6 @@ spec:
       value: "true"
     - name: ENABLE_DATO_NY_REGEL_UTTAK
       value: "true"
-    - name: FILTRER_UGYLDIG_IM
-      value: "true"
     - name: FJERN_VILKARSPERIODER_BEREGNING
       value: "false"
     - name: VALIDER_KALKULUS_REFERANSER
@@ -289,8 +287,6 @@ spec:
     - name: ENABLE_INNSYN_ENDRING_OBSERVER
       value: "true"
     - name: KODEVERK_SOM_STRING_TOPICS
-      value: "true"
-    - name: K9_ABAKUS_ENABLED
       value: "true"
     - name: AAPEN_PUNSJOPPGAVE_STOPPER_AUTOMATISK_VEDTAK
       value: "true"

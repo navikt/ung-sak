@@ -47,8 +47,8 @@
         <jackson.version>2.17.0</jackson.version>
         <asm.version>9.6</asm.version>
         <kotlin-stdlib.version>1.9.23</kotlin-stdlib.version>
-        <jandex.version>3.1.6</jandex.version>
-        <flyway.version>10.9.1</flyway.version>
+        <jandex.version>3.1.7</jandex.version>
+        <flyway.version>10.10.0</flyway.version>
 
     </properties>
 
@@ -602,7 +602,7 @@
             <dependency>
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
-                <version>42.7.2</version>
+                <version>42.7.3</version>
             </dependency>
             <dependency>
                 <groupId>no.nav</groupId>

@@ -72,8 +72,6 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     private IAYRequestCache requestCache;
     private AsyncInntektArbeidYtelseTjeneste asyncIayTjeneste;
 
-    private boolean filtrerUgyldigeInntektsmeldingerEnabled;
-
 
     /**
      * CDI ctor for proxies.
@@ -91,15 +89,13 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
                                              BehandlingRepository behandlingRepository,
                                              MottatteDokumentRepository mottatteDokumentRepository,
                                              FagsakRepository fagsakRepository,
-                                             IAYRequestCache requestCache,
-                                             @KonfigVerdi(value = "FILTRER_UGYLDIG_IM", defaultVerdi = "false") boolean filtrerUgyldigeInntektsmeldingerEnabled) {
+                                             IAYRequestCache requestCache) {
         this.behandlingRepository = Objects.requireNonNull(behandlingRepository, "behandlingRepository");
         this.abakusTjeneste = Objects.requireNonNull(abakusTjeneste, "abakusTjeneste");
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.requestCache = Objects.requireNonNull(requestCache, "requestCache");
         this.fagsakRepository = Objects.requireNonNull(fagsakRepository, "fagsakRepository");
         this.asyncIayTjeneste = asyncIayTjeneste;
-        this.filtrerUgyldigeInntektsmeldingerEnabled = filtrerUgyldigeInntektsmeldingerEnabled;
     }
 
     @Override
@@ -482,12 +478,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
             inntektsmeldinger = requestCache.getInntektsmeldingerForSak(request);
         } else {
             var dto = hentUnikeInntektsmeldinger(request);
-            inntektsmeldinger = mapResult(dto).getAlleInntektsmeldinger();
-
-            if (filtrerUgyldigeInntektsmeldingerEnabled) {
-                inntektsmeldinger = filtrerBortUgyldigeDokumenter(fagsakId, inntektsmeldinger);
-            }
-
+            inntektsmeldinger = filtrerBortUgyldigeDokumenter(fagsakId, mapResult(dto).getAlleInntektsmeldinger());
             requestCache.leggTilInntektsmeldinger(request, inntektsmeldinger);
         }
 
@@ -499,6 +490,9 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     private List<Inntektsmelding> filtrerBortUgyldigeDokumenter(Long fagsakId, List<Inntektsmelding> inntektsmeldinger) {
         var ugyldigInntektsmeldingJournalpostIder = mottatteDokumentRepository.hentMottatteDokument(fagsakId, inntektsmeldinger.stream().map(Inntektsmelding::getJournalpostId).map(JournalpostId::getVerdi).map(JournalpostId::new).toList(), DokumentStatus.UGYLDIG)
             .stream().map(MottattDokument::getJournalpostId).map(JournalpostId::getVerdi).collect(Collectors.toSet());
+        if (!ugyldigInntektsmeldingJournalpostIder.isEmpty()) {
+            log.info("Fjerner inntektsmeldinger som er markert ugyldig: " + ugyldigInntektsmeldingJournalpostIder);
+        }
         return inntektsmeldinger.stream().filter(im -> !ugyldigInntektsmeldingJournalpostIder.contains(im.getJournalpostId().getVerdi())).toList();
     }
 
