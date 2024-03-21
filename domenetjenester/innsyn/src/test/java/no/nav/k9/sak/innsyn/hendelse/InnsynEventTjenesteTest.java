@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,32 +27,27 @@ import no.nav.k9.innsyn.sak.Behandling;
 import no.nav.k9.innsyn.sak.Fagsak;
 import no.nav.k9.innsyn.sak.SøknadInfo;
 import no.nav.k9.innsyn.sak.SøknadStatus;
-import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
-import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.k9.sak.behandlingskontroll.events.BehandlingStatusEvent;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.domene.person.personopplysning.UtlandVurdererTjeneste;
+import no.nav.k9.sak.innsyn.BrukerdialoginnsynMeldingProducer;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.søknad.JsonUtils;
 
-class InnsynEventObserverTest {
-    private final ProsessTaskTjeneste prosessTaskTjeneste = mock();
+class InnsynEventTjenesteTest {
     private final MottatteDokumentRepository mottatteDokumentRepository = mock();
     private final UtlandVurdererTjeneste utlandVurdererTjeneste = mock();
     private final AksjonspunktTestSupport aksjonspunktTestSupport = new AksjonspunktTestSupport();
+    private final BrukerdialoginnsynMeldingProducer producer = mock();
 
 
     @BeforeEach
@@ -86,26 +82,18 @@ class InnsynEventObserverTest {
             ArgumentMatchers.any(DokumentStatus[].class)))
             .thenReturn(List.of(byggMottattDokument(fagsak.getId(), behandling.getId(), now, søknadJpId, Brevkode.PLEIEPENGER_BARN_SOKNAD)));
 
-        BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(behandling.getFagsakId(), behandling.getAktørId(), new BehandlingLås(behandling.getId()));
-        var event = BehandlingStatusEvent.nyEvent(kontekst, BehandlingStatus.UTREDES, BehandlingStatus.OPPRETTET);
-
-
-        var observer = new InnsynEventObserver(prosessTaskTjeneste,
+        var tjeneste = new InnsynEventTjeneste(
             testScenarioBuilder.mockBehandlingRepository(),
             mottatteDokumentRepository,
-            true,
-            utlandVurdererTjeneste);
+            utlandVurdererTjeneste,
+            producer);
 
-        observer.observerBehandlingStartet(event);
+        tjeneste.publiserBehandling(behandling.getId());
 
-        var captor = ArgumentCaptor.forClass(ProsessTaskData.class);
-        verify(prosessTaskTjeneste).lagre(captor.capture());
+        var captor = ArgumentCaptor.forClass(String.class);
+        verify(producer).send(eq(fagsak.getSaksnummer().getVerdi()), captor.capture());
 
-        ProsessTaskData pd = captor.getValue();
-        assertThat(pd.getTaskType()).isEqualTo(PubliserInnsynEventTask.TASKTYPE);
-        assertThat(pd.getSaksnummer()).isEqualTo(fagsak.getSaksnummer().getVerdi());
-
-        String json = pd.getPayloadAsString();
+        String json = captor.getValue();
         InnsynHendelse<Behandling> behandlingInnsynHendelse = JsonUtils.fromString(json, InnsynHendelse.class);
         assertThat(behandlingInnsynHendelse.getOppdateringstidspunkt()).isNotNull();
 
