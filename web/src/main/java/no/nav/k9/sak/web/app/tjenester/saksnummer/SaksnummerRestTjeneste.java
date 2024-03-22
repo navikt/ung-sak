@@ -84,17 +84,26 @@ public class SaksnummerRestTjeneste {
 
         sjekkAktørIdMotPdl(dto.getBrukerAktørId());
         if (dto.getPleietrengendeAktørId() != null) {
+            if (List.of(FagsakYtelseType.OMSORGSPENGER, FagsakYtelseType.OMSORGSPENGER_MA).contains(dto.getYtelseType())) {
+                throw new IllegalArgumentException("Støtter ikke pleietrengende for " + dto.getYtelseType());
+            }
             sjekkAktørIdMotPdl(dto.getPleietrengendeAktørId());
+        }
+        if (dto.getRelatertPersonAktørId() != null) {
+            if (!dto.getYtelseType().equals(FagsakYtelseType.OMSORGSPENGER_MA)) {
+                throw new IllegalArgumentException("Støtter ikke relatert person for " + dto.getYtelseType());
+            }
+            sjekkAktørIdMotPdl(dto.getRelatertPersonAktørId());
         }
 
         SaksnummerDto saksnummer;
-        var eksisterende = reservertSaksnummerRepository.hent(dto.getYtelseType(), dto.getBrukerAktørId(), dto.getPleietrengendeAktørId(), dto.getBehandlingsår());
+        var eksisterende = reservertSaksnummerRepository.hent(dto.getYtelseType(), dto.getBrukerAktørId(), dto.getPleietrengendeAktørId(), dto.getRelatertPersonAktørId(), dto.getBehandlingsår());
         if (eksisterende.isPresent()) {
             saksnummer = new SaksnummerDto(eksisterende.get().getSaksnummer());
             log.info("Returnerer eksisterende reservert saksnummer: " + saksnummer);
         } else {
             saksnummer = new SaksnummerDto(saksnummerRepository.genererNyttSaksnummer());
-            reservertSaksnummerRepository.lagre(saksnummer.getVerdi(), dto.getYtelseType(), dto.getBrukerAktørId(), dto.getPleietrengendeAktørId(), dto.getBehandlingsår());
+            reservertSaksnummerRepository.lagre(saksnummer.getVerdi(), dto.getYtelseType(), dto.getBrukerAktørId(), dto.getPleietrengendeAktørId(), dto.getRelatertPersonAktørId(), dto.getBehandlingsår());
             log.info("Reserverte nytt saksnummer: " + saksnummer);
         }
 
@@ -133,6 +142,7 @@ public class SaksnummerRestTjeneste {
             entitet.getYtelseType(),
             entitet.getBrukerAktørId().getAktørId(),
             entitet.getPleietrengendeAktørId() != null ? entitet.getPleietrengendeAktørId().getAktørId() : null,
+            entitet.getRelatertPersonAktørId() != null ? entitet.getRelatertPersonAktørId().getAktørId() : null,
             entitet.getBehandlingsår());
     }
 

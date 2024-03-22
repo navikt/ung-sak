@@ -36,18 +36,24 @@ public class ReservertSaksnummerRepository {
         return query.getResultList();
     }
 
-    public Optional<ReservertSaksnummerEntitet> hent(FagsakYtelseType ytelseType, String brukerAktørId, String pleietrengendeAktørId, String behandlingsår) {
+    public Optional<ReservertSaksnummerEntitet> hent(FagsakYtelseType ytelseType, String brukerAktørId, String pleietrengendeAktørId, String relatertPersonAktørId, String behandlingsår) {
         //TODO vurder refaktorering når vi får avklart hvordan null pleietrengende skal oppføre seg. Går an å lage ytelsesspesifikke tjenesteklasser.
         if (pleietrengendeAktørId == null && behandlingsår == null) {
             return Optional.empty();
         }
         if (pleietrengendeAktørId == null) {
+            if (relatertPersonAktørId != null) {
+                //OMP_MA
+                return hentMedRelatertPerson(ytelseType, brukerAktørId, relatertPersonAktørId, behandlingsår);
+            }
+            //OMP
             return hentUtenPleietrengende(ytelseType, brukerAktørId, behandlingsår);
         }
         if (behandlingsår == null) {
+            //PSB+PPN
             return hentUtenBehandlingsår(ytelseType, brukerAktørId, pleietrengendeAktørId);
         }
-
+        //OMP_KS+OMP_AO
         final TypedQuery<ReservertSaksnummerEntitet> query = entityManager.createQuery("FROM ReservertSaksnummer where ytelseType=:ytelseType and brukerAktørId=:brukerAktørId and pleietrengendeAktørId=:pleietrengendeAktørId and behandlingsår=:behandlingsår and slettet=false", ReservertSaksnummerEntitet.class);
         query.setParameter("ytelseType", ytelseType);
         query.setParameter("brukerAktørId", new AktørId(brukerAktørId));
@@ -72,11 +78,20 @@ public class ReservertSaksnummerRepository {
         return HibernateVerktøy.hentUniktResultat(query);
     }
 
-    public void lagre(Saksnummer saksnummer, FagsakYtelseType ytelseType, String brukerAktørId, String pleietrengendeAktørId, String behandlingsår) {
+    private Optional<ReservertSaksnummerEntitet> hentMedRelatertPerson(FagsakYtelseType ytelseType, String brukerAktørId, String relatertPersonAktørId, String behandlingsår) {
+        final TypedQuery<ReservertSaksnummerEntitet> query = entityManager.createQuery("FROM ReservertSaksnummer where ytelseType=:ytelseType and brukerAktørId=:brukerAktørId and pleietrengendeAktørId is null and relatertPersonAktørId=:relatertPersonAktørId and behandlingsår=:behandlingsår and slettet=false", ReservertSaksnummerEntitet.class);
+        query.setParameter("ytelseType", ytelseType);
+        query.setParameter("brukerAktørId", new AktørId(brukerAktørId));
+        query.setParameter("relatertPersonAktørId", new AktørId(relatertPersonAktørId));
+        query.setParameter("behandlingsår", behandlingsår);
+        return HibernateVerktøy.hentUniktResultat(query);
+    }
+
+    public void lagre(Saksnummer saksnummer, FagsakYtelseType ytelseType, String brukerAktørId, String pleietrengendeAktørId, String relatertPersonAktørId, String behandlingsår) {
         if (hent(saksnummer).isPresent()) {
             throw new IllegalArgumentException("Saksnummer er allerede reservert");
         }
-        final var entitet = new ReservertSaksnummerEntitet(saksnummer, ytelseType, brukerAktørId, pleietrengendeAktørId, behandlingsår);
+        final var entitet = new ReservertSaksnummerEntitet(saksnummer, ytelseType, brukerAktørId, pleietrengendeAktørId, relatertPersonAktørId, behandlingsår);
         entityManager.persist(entitet);
         entityManager.flush();
     }

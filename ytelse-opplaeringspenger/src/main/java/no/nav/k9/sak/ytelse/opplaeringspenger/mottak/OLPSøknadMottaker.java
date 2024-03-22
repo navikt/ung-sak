@@ -87,7 +87,7 @@ public class OLPSøknadMottaker implements SøknadMottakTjeneste<OLPSøknadInnse
     }
 
     private Saksnummer hentReservertEllerGenererSaksnummer(AktørId søkerAktørId, AktørId pleietrengendeAktørId) {
-        var optReservert = reservertSaksnummerRepository.hent(FagsakYtelseType.OPPLÆRINGSPENGER, søkerAktørId.getAktørId(), pleietrengendeAktørId.getAktørId(), null);
+        var optReservert = reservertSaksnummerRepository.hent(FagsakYtelseType.OPPLÆRINGSPENGER, søkerAktørId.getAktørId(), pleietrengendeAktørId.getAktørId(), null, null);
         return optReservert.map(ReservertSaksnummerEntitet::getSaksnummer).orElseGet(() -> new Saksnummer(saksnummerRepository.genererNyttSaksnummer()));
     }
 }
