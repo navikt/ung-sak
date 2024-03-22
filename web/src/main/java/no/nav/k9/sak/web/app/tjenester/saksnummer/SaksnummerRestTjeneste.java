@@ -129,7 +129,7 @@ public class SaksnummerRestTjeneste {
     private void validerReservasjon(ReserverSaksnummerDto dto) {
         if (List.of(FagsakYtelseType.OMSORGSPENGER, FagsakYtelseType.OMSORGSPENGER_AO, FagsakYtelseType.OMSORGSPENGER_KS, FagsakYtelseType.OMSORGSPENGER_MA).contains(dto.getYtelseType())) {
             if (dto.getBehandlingsår() == null) {
-                throw new IllegalArgumentException("Behandlingsår er påkrevd for omsorgspenger");
+                throw new IllegalArgumentException("Behandlingsår er påkrevd for " + dto.getYtelseType());
             }
         } else if (dto.getBehandlingsår() != null) {
             throw new IllegalArgumentException("Støtter ikke behandlingsår for " + dto.getYtelseType());
