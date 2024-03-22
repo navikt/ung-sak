@@ -46,7 +46,7 @@ public class ArbeidstidMappingInput {
         this.tidslinjeTilVurdering = tidslinjeTilVurdering;
         this.vilkår = vilkår;
         this.opptjeningResultat = opptjeningResultat;
-        skalAlltidHaInaktivVed_8_47_B = skalAlltidHaInaktivVed847B;
+        this.skalAlltidHaInaktivVed_8_47_B = skalAlltidHaInaktivVed847B;
     }
 
     public ArbeidstidMappingInput medKravDokumenter(Set<KravDokument> kravDokumenter) {
@@ -83,9 +83,13 @@ public class ArbeidstidMappingInput {
         this.opptjeningResultat = opptjeningResultat;
         return this;
     }
-
     public ArbeidstidMappingInput medVilkår(Vilkår vilkår) {
         this.vilkår = vilkår;
+        return this;
+    }
+
+    public ArbeidstidMappingInput medSkalHaInaktivVed847B(boolean skalAlltidHaInaktivVed_8_47_B) {
+        this.skalAlltidHaInaktivVed_8_47_B = skalAlltidHaInaktivVed_8_47_B;
         return this;
     }
 
