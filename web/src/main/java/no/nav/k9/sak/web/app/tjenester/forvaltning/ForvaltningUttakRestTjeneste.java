@@ -52,6 +52,7 @@ import no.nav.k9.sak.trigger.ProsessTriggerForvaltningTjeneste;
 import no.nav.k9.sak.trigger.ProsessTriggereRepository;
 import no.nav.k9.sak.trigger.Trigger;
 import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.ContainerContextRunner;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
@@ -118,7 +119,6 @@ public class ForvaltningUttakRestTjeneste {
         Periode periode) {
         var behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingId());
 
-        var behandlingReferanse = BehandlingReferanse.fra(behandling);
         var perioderTilVurdering = vilkårsPerioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
 
         var vilkårsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom());
@@ -126,7 +126,8 @@ public class ForvaltningUttakRestTjeneste {
             throw new IllegalArgumentException("Oppgitt periode er ikke til vurdering i behandlingen. Perioder til vurdering er " + perioderTilVurdering);
         }
 
-        var tidslinje = pleiepengerEndretUtbetalingPeriodeutleder.finnÅrsakstidslinje(behandlingReferanse, vilkårsperiode);
+        var tidslinje = ContainerContextRunner.doRun(behandling, () -> pleiepengerEndretUtbetalingPeriodeutleder.finnÅrsakstidslinje(BehandlingReferanse.fra(behandling), vilkårsperiode));
+
         var result = new HashMap<>();
         for (EndringsårsakUtbetaling v : EndringsårsakUtbetaling.values()) {
             var resultTidslinje = tidslinje.filterValue(it -> it.contains(v));

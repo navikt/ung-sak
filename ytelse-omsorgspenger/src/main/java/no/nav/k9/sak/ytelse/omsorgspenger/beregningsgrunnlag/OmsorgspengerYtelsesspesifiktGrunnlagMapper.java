@@ -30,6 +30,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjene
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -71,8 +72,11 @@ public class OmsorgspengerYtelsesspesifiktGrunnlagMapper implements Beregningsgr
         }
     }
 
-    private static UttakArbeidType mapType(String type) {
-        return UttakArbeidType.fraKode(type);
+    private static UttakArbeidType mapType(String kode) {
+        if (kode == null) {
+            return null;
+        }
+        return Arrays.stream(UttakArbeidType.values()).filter(v -> v.getKode().equals(kode)).findFirst().orElse(null);
     }
 
     private static Periode tilKalkulusPeriode(LukketPeriode periode) {
