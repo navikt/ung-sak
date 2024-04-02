@@ -45,7 +45,7 @@
         <junit.version>5.10.2</junit.version>
         <k9format.version>9.2.14</k9format.version>
         <jackson.version>2.17.0</jackson.version>
-        <asm.version>9.6</asm.version>
+        <asm.version>9.7</asm.version>
         <kotlin-stdlib.version>1.9.23</kotlin-stdlib.version>
         <jandex.version>3.1.7</jandex.version>
         <flyway.version>10.10.0</flyway.version>
