@@ -100,10 +100,10 @@ class InnsynEventTjenesteTest {
         var b = behandlingInnsynHendelse.getData();
 
         Fagsak sak = b.fagsak();
-        assertThat(sak.saksnummer().getVerdi()).isEqualTo(fagsak.getSaksnummer().getVerdi());
-        assertThat(sak.søkerAktørId()).isEqualTo(mor);
-        assertThat(sak.ytelseType()).isEqualTo(FagsakYtelseType.PLEIEPENGER_SYKT_BARN);
-        assertThat(sak.pleietrengendeAktørId()).isEqualTo(pleietrengende);
+        assertThat(sak.saksnummer().verdi()).isEqualTo(fagsak.getSaksnummer().getVerdi());
+        assertThat(sak.søkerAktørId().id()).isEqualTo(mor.getId());
+        assertThat(sak.ytelseType().getKode()).isEqualTo(FagsakYtelseType.PLEIEPENGER_SYKT_BARN.getKode());
+        assertThat(sak.pleietrengendeAktørId().id()).isEqualTo(pleietrengende.getId());
 
         assertThat(b.behandlingsId()).isEqualTo(behandling.getUuid());
         assertThat(b.erUtenlands()).isEqualTo(false);
