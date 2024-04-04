@@ -41,6 +41,10 @@ public class ReservertSaksnummerEntitet extends BaseEntitet {
     @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "pleietrengende_aktoer_id")))
     private AktørId pleietrengendeAktørId;
 
+    @Embedded
+    @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "relatert_person_aktoer_id")))
+    private AktørId relatertPersonAktørId;
+
     @Column(name = "behandlingsaar")
     private String behandlingsår;
 
@@ -51,11 +55,12 @@ public class ReservertSaksnummerEntitet extends BaseEntitet {
         // for hibernate
     }
 
-    ReservertSaksnummerEntitet(Saksnummer saksnummer, FagsakYtelseType ytelseType, String brukerAktørId, String pleietrengendeAktørId, String behandlingsår) {
+    ReservertSaksnummerEntitet(Saksnummer saksnummer, FagsakYtelseType ytelseType, String brukerAktørId, String pleietrengendeAktørId, String relatertPersonAktørId, String behandlingsår) {
         this.saksnummer = saksnummer;
         this.ytelseType = ytelseType;
         this.brukerAktørId = new AktørId(brukerAktørId);
         this.pleietrengendeAktørId = pleietrengendeAktørId != null ? new AktørId(pleietrengendeAktørId) : null;
+        this.relatertPersonAktørId = relatertPersonAktørId != null ? new AktørId(relatertPersonAktørId) : null;
         this.behandlingsår = behandlingsår;
     }
 
@@ -73,6 +78,10 @@ public class ReservertSaksnummerEntitet extends BaseEntitet {
 
     public AktørId getPleietrengendeAktørId() {
         return pleietrengendeAktørId;
+    }
+
+    public AktørId getRelatertPersonAktørId() {
+        return relatertPersonAktørId;
     }
 
     public String getBehandlingsår() {

@@ -74,27 +74,16 @@ public class SaksnummerRestTjeneste {
         if (!enableReservertSaksnummer) {
             throw new UnsupportedOperationException("Funksjonaliteten er avskrudd");
         }
-        if (List.of(FagsakYtelseType.OMSORGSPENGER, FagsakYtelseType.OMSORGSPENGER_AO, FagsakYtelseType.OMSORGSPENGER_KS, FagsakYtelseType.OMSORGSPENGER_MA).contains(dto.getYtelseType())) {
-            if (dto.getBehandlingsår() == null) {
-                throw new IllegalArgumentException("Behandlingsår er påkrevd for omsorgspenger");
-            }
-        } else if (dto.getBehandlingsår() != null) {
-            throw new IllegalArgumentException("Støtter ikke behandlingsår for " + dto.getYtelseType());
-        }
-
-        sjekkAktørIdMotPdl(dto.getBrukerAktørId());
-        if (dto.getPleietrengendeAktørId() != null) {
-            sjekkAktørIdMotPdl(dto.getPleietrengendeAktørId());
-        }
+        validerReservasjon(dto);
 
         SaksnummerDto saksnummer;
-        var eksisterende = reservertSaksnummerRepository.hent(dto.getYtelseType(), dto.getBrukerAktørId(), dto.getPleietrengendeAktørId(), dto.getBehandlingsår());
+        var eksisterende = reservertSaksnummerRepository.hent(dto.getYtelseType(), dto.getBrukerAktørId(), dto.getPleietrengendeAktørId(), dto.getRelatertPersonAktørId(), dto.getBehandlingsår());
         if (eksisterende.isPresent()) {
             saksnummer = new SaksnummerDto(eksisterende.get().getSaksnummer());
             log.info("Returnerer eksisterende reservert saksnummer: " + saksnummer);
         } else {
             saksnummer = new SaksnummerDto(saksnummerRepository.genererNyttSaksnummer());
-            reservertSaksnummerRepository.lagre(saksnummer.getVerdi(), dto.getYtelseType(), dto.getBrukerAktørId(), dto.getPleietrengendeAktørId(), dto.getBehandlingsår());
+            reservertSaksnummerRepository.lagre(saksnummer.getVerdi(), dto.getYtelseType(), dto.getBrukerAktørId(), dto.getPleietrengendeAktørId(), dto.getRelatertPersonAktørId(), dto.getBehandlingsår());
             log.info("Reserverte nytt saksnummer: " + saksnummer);
         }
 
@@ -133,7 +122,32 @@ public class SaksnummerRestTjeneste {
             entitet.getYtelseType(),
             entitet.getBrukerAktørId().getAktørId(),
             entitet.getPleietrengendeAktørId() != null ? entitet.getPleietrengendeAktørId().getAktørId() : null,
+            entitet.getRelatertPersonAktørId() != null ? entitet.getRelatertPersonAktørId().getAktørId() : null,
             entitet.getBehandlingsår());
+    }
+
+    private void validerReservasjon(ReserverSaksnummerDto dto) {
+        if (List.of(FagsakYtelseType.OMSORGSPENGER, FagsakYtelseType.OMSORGSPENGER_AO, FagsakYtelseType.OMSORGSPENGER_KS, FagsakYtelseType.OMSORGSPENGER_MA).contains(dto.getYtelseType())) {
+            if (dto.getBehandlingsår() == null) {
+                throw new IllegalArgumentException("Behandlingsår er påkrevd for " + dto.getYtelseType());
+            }
+        } else if (dto.getBehandlingsår() != null) {
+            throw new IllegalArgumentException("Støtter ikke behandlingsår for " + dto.getYtelseType());
+        }
+
+        sjekkAktørIdMotPdl(dto.getBrukerAktørId());
+        if (dto.getPleietrengendeAktørId() != null) {
+            if (List.of(FagsakYtelseType.OMSORGSPENGER, FagsakYtelseType.OMSORGSPENGER_MA).contains(dto.getYtelseType())) {
+                throw new IllegalArgumentException("Støtter ikke pleietrengende for " + dto.getYtelseType());
+            }
+            sjekkAktørIdMotPdl(dto.getPleietrengendeAktørId());
+        }
+        if (dto.getRelatertPersonAktørId() != null) {
+            if (!dto.getYtelseType().equals(FagsakYtelseType.OMSORGSPENGER_MA)) {
+                throw new IllegalArgumentException("Støtter ikke relatert person for " + dto.getYtelseType());
+            }
+            sjekkAktørIdMotPdl(dto.getRelatertPersonAktørId());
+        }
     }
 
     private void sjekkAktørIdMotPdl(String aktørId) {

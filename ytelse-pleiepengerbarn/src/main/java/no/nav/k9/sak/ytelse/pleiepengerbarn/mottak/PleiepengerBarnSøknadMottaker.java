@@ -85,7 +85,7 @@ public class PleiepengerBarnSøknadMottaker implements SøknadMottakTjeneste<Ple
     }
 
     private Saksnummer hentReservertEllerGenererSaksnummer(AktørId søkerAktørId, AktørId pleietrengendeAktørId) {
-        var optReservert = reservertSaksnummerRepository.hent(PLEIEPENGER_SYKT_BARN, søkerAktørId.getAktørId(), pleietrengendeAktørId.getAktørId(), null);
+        var optReservert = reservertSaksnummerRepository.hent(PLEIEPENGER_SYKT_BARN, søkerAktørId.getAktørId(), pleietrengendeAktørId.getAktørId(), null, null);
         return optReservert.map(ReservertSaksnummerEntitet::getSaksnummer).orElseGet(() -> new Saksnummer(saksnummerRepository.genererNyttSaksnummer()));
     }
 }

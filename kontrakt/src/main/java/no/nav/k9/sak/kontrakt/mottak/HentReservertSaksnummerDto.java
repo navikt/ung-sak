@@ -39,6 +39,10 @@ public class HentReservertSaksnummerDto {
     @Digits(integer = 19, fraction = 0)
     private String pleietrengendeAktørId;
 
+    @JsonProperty(value = "relatertPersonAktørId")
+    @Digits(integer = 19, fraction = 0)
+    private String relatertPersonAktørId;
+
     @JsonProperty(value = "behandlingsår")
     @Digits(integer = 4, fraction = 0)
     private String behandlingsår;
@@ -48,11 +52,13 @@ public class HentReservertSaksnummerDto {
                                       @JsonProperty(value = "ytelseType", required = true) @NotNull FagsakYtelseType ytelseType,
                                       @JsonProperty(value = "brukerAktørId", required = true) @NotNull String brukerAktørId,
                                       @JsonProperty(value = "pleietrengendeAktørId") String pleietrengendeAktørId,
+                                      @JsonProperty(value = "relatertPersonAktørId") String relatertPersonAktørId,
                                       @JsonProperty(value = "behandlingsår") String behandlingsår) {
         this.saksnummer = Objects.requireNonNull(saksnummer, "saksnummer");
         this.ytelseType = ytelseType;
         this.brukerAktørId = Objects.requireNonNull(brukerAktørId, "brukerAktørId");
         this.pleietrengendeAktørId = pleietrengendeAktørId;
+        this.relatertPersonAktørId = relatertPersonAktørId;
         this.behandlingsår = behandlingsår;
     }
 
@@ -70,6 +76,10 @@ public class HentReservertSaksnummerDto {
 
     public String getPleietrengendeAktørId() {
         return pleietrengendeAktørId;
+    }
+
+    public String getRelatertPersonAktørId() {
+        return relatertPersonAktørId;
     }
 
     public String getBehandlingsår() {
