@@ -24,6 +24,7 @@ jobs:
       build-image: ${{ github.ref_name == 'master' }}
       push-image: ${{ github.ref_name == 'master' }}
       db_schema: k9sak_unit
+      pg_version: 12
     secrets: inherit
 
   verdikjede-tester:
