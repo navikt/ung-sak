@@ -59,6 +59,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
     private VilkårResultatRepository vilkårResultatRepository;
 
     private HentPerioderTilVurderingTjeneste hentPerioderTilVurderingTjeneste;
+    private boolean skalHaInaktivVed847B;
 
     public ArbeidBrukerBurdeSøktOmUtleder() {
     }
@@ -72,7 +73,8 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
                                           OpptjeningRepository opptjeningRepository,
                                           VilkårResultatRepository vilkårResultatRepository,
                                           @Any Instance<HåndterePleietrengendeDødsfallTjeneste> håndterePleietrengendeDødsfallTjenester,
-                                          HentPerioderTilVurderingTjeneste hentPerioderTilVurderingTjeneste) {
+                                          HentPerioderTilVurderingTjeneste hentPerioderTilVurderingTjeneste,
+                                          @KonfigVerdi(value = "INAKTIV_VED_8_47_B", defaultVerdi = "false") boolean skalHaInaktivVed847B) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
@@ -82,6 +84,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
         this.søknadsfristTjenester = søknadsfristTjenester;
         this.håndterePleietrengendeDødsfallTjenester = håndterePleietrengendeDødsfallTjenester;
         this.hentPerioderTilVurderingTjeneste = hentPerioderTilVurderingTjeneste;
+        this.skalHaInaktivVed847B = skalHaInaktivVed847B;
     }
 
     public Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> utledMangler(BehandlingReferanse referanse) {
@@ -99,6 +102,7 @@ public class ArbeidBrukerBurdeSøktOmUtleder {
             .medKravDokumenter(vurderteSøknadsperioder.keySet())
             .medPerioderFraSøknader(perioderFraSøknader)
             .medTidslinjeTilVurdering(tidslinjeTilVurdering)
+            .medSkalHaInaktivVed847B(skalHaInaktivVed847B)
             .medOpptjeningsResultat(opptjeningResultat.orElse(null))
             .medVilkår(vilkårene.getVilkår(VilkårType.OPPTJENINGSVILKÅRET).orElseThrow());
 

@@ -10,14 +10,13 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.innsyn.InnsynHendelse;
-import no.nav.k9.innsyn.TempObjectMapperKodeverdi;
 import no.nav.k9.innsyn.sak.Aksjonspunkt;
+import no.nav.k9.innsyn.sak.AktørId;
 import no.nav.k9.innsyn.sak.BehandlingResultat;
+import no.nav.k9.innsyn.sak.Saksnummer;
 import no.nav.k9.innsyn.sak.SøknadInfo;
 import no.nav.k9.innsyn.sak.SøknadStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
@@ -38,7 +37,6 @@ import no.nav.k9.søknad.felles.Kildesystem;
 @Dependent
 public class InnsynEventTjeneste {
     protected final Logger log = LoggerFactory.getLogger(this.getClass());
-    private static final ObjectMapper KODEVERDI_OM = TempObjectMapperKodeverdi.getObjectMapper();
 
     private final BehandlingRepository behandlingRepository;
     private final MottatteDokumentRepository mottatteDokumentRepository;
@@ -80,7 +78,7 @@ public class InnsynEventTjeneste {
             mapFagsak(fagsak)
         );
 
-        String json = JsonUtils.toString(new InnsynHendelse<>(ZonedDateTime.now(), behandlingInnsyn), KODEVERDI_OM);
+        String json = JsonUtils.toString(new InnsynHendelse<>(ZonedDateTime.now(), behandlingInnsyn));
 
         producer.send(fagsak.getSaksnummer().getVerdi(), json);
     }
@@ -118,7 +116,7 @@ public class InnsynEventTjeneste {
 
 
     private no.nav.k9.innsyn.sak.Fagsak mapFagsak(Fagsak fagsak) {
-        return new no.nav.k9.innsyn.sak.Fagsak(fagsak.getSaksnummer(), fagsak.getAktørId(), fagsak.getPleietrengendeAktørId(), fagsak.getYtelseType());
+        return new no.nav.k9.innsyn.sak.Fagsak(new Saksnummer(fagsak.getSaksnummer().getVerdi()), new AktørId(fagsak.getAktørId().getId()), new AktørId(fagsak.getPleietrengendeAktørId().getId()), no.nav.k9.innsyn.sak.FagsakYtelseType.fraKode(fagsak.getYtelseType().getKode()));
     }
 
     private Set<SøknadInfo> mapSøknader(Behandling b) {
