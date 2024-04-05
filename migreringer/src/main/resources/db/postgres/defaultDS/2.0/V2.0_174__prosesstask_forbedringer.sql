@@ -18,4 +18,4 @@ create index idx_prosess_task_8 on prosess_task_partition_default (task_gruppe, 
     where status in ('FEILET', 'KLAR', 'VENTER_SVAR', 'SUSPENDERT', 'VETO');
 
 --hyppig endringer på tasker, bør ikke ha default fillfactor (100)
-alter table prosess_task_partition_default set (fillfactor = 70);
+alter table prosess_task_partition_default set (fillfactor = 40);
