@@ -294,6 +294,8 @@ spec:
       value: "true"
     - name: INAKTIV_VED_8_47_B
       value: "true"
+    - name: ETTERSENDELSE_RETT_TIL_K9SAK
+      value: "true"
 
 
     # Konfigurasjoner
