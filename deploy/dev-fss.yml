@@ -284,8 +284,6 @@ spec:
       value: "true"
     - name: DOKUMENTMOTTAK_VALIDER_JOURNALFORT
       value: "true"
-    - name: ENABLE_INNSYN_ENDRING_OBSERVER
-      value: "true"
     - name: KODEVERK_SOM_STRING_TOPICS
       value: "true"
     - name: AAPEN_PUNSJOPPGAVE_STOPPER_AUTOMATISK_VEDTAK

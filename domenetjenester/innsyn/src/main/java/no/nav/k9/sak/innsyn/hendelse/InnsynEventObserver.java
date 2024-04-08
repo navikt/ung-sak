@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
@@ -20,16 +19,13 @@ public class InnsynEventObserver {
 
     protected final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    private boolean enableEndringer;
     private ProsessTaskTjeneste prosessTaskTjeneste;
 
     public InnsynEventObserver() {
     }
 
     @Inject
-    public InnsynEventObserver(@KonfigVerdi(value = "ENABLE_INNSYN_ENDRING_OBSERVER", defaultVerdi = "false") boolean enableEndringer,
-                               ProsessTaskTjeneste prosessTaskTjeneste) {
-        this.enableEndringer = enableEndringer;
+    public InnsynEventObserver(ProsessTaskTjeneste prosessTaskTjeneste) {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
@@ -48,10 +44,6 @@ public class InnsynEventObserver {
     }
 
     public void observerAksjonspunkterFunnetEvent(@Observes AksjonspunktStatusEvent event) {
-        if (!enableEndringer) {
-            return;
-        }
-
         //TODO spisse sånn at det ikke sendes for mange eventer til innsyn
         // må fange opp nye dokumenter på en eller annen måte
         log.info("Publiserer melding til brukerdialog for aksjonspunkt");

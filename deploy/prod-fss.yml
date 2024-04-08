@@ -276,8 +276,6 @@ spec:
       value: "true"
     - name: DOKUMENTMOTTAK_VALIDER_JOURNALFORT
       value: "false"
-    - name: ENABLE_INNSYN_ENDRING_OBSERVER
-      value: "false"
     - name: KODEVERK_SOM_STRING_TOPICS
       value: "false"
     - name: OMP_NYOPPSTARTET_VED_REFUSJON
