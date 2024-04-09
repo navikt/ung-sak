@@ -150,9 +150,9 @@
                 <version>1.0.7</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.foreldrepenger.abakus</groupId>
+                <groupId>no.nav.k9.abakus</groupId>
                 <artifactId>abakus-kontrakt</artifactId>
-                <version>2.0.5</version>
+                <version>1.0.2</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.folketrygdloven.kalkulus</groupId>
