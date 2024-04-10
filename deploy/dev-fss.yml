@@ -260,8 +260,6 @@ spec:
       value: "true"
     - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
       value: "2022-08-08"
-    - name: ENABLE_SJEKK_TILBAKEKREVING
-      value: "true"
     - name: IKKE_YRKESAKTIV_UTEN_SPEILING
       value: "false"
     - name: OMP_NULL_HELG_I_KRAVPERIODER
