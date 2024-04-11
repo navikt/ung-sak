@@ -1,134 +1,73 @@
-name: Bygg og deploy
-
+name: "Bygg og deploy"
 on:
   push:
     branches:
-      - master
+      - '**'
     paths-ignore:
       - '**.md'
       - '**.MD'
       - '.gitignore'
-      - 'LICENCE'
+      - 'LICENSE'
       - 'CODEOWNERS'
-      - 'dev/**'
-  schedule:
-    - cron: '0 4 * * 1'
-
-env:
-  IMAGE_BASE_CR: ghcr.io/${{ github.repository }}
-  CLUSTER: dev-fss
-  NAMESPACE: default
+      - '.github/*.yml'
 
 jobs:
-  build:
-    name: Bygg
-    runs-on: ubuntu-latest
+  build-app:
+    name: Build
     permissions:
-      packages: write
       contents: read
+      packages: write
+      id-token: write
+    uses: navikt/sif-gha-workflows/.github/workflows/maven-build-app-db.yml@main
+    with:
+      java-version: 21
+      build-image: ${{ github.ref_name == 'master' }}
+      push-image: ${{ github.ref_name == 'master' }}
+      db_schema: k9sak_unit
+      pg_version: 12
+    secrets: inherit
+
+  verdikjede-tester:
+    name: Verdikjedetester
+    secrets: inherit
+    permissions:
+      id-token: write
+      contents: write
       issues: write
+      packages: read
+    uses: navikt/sif-gha-workflows/.github/workflows/verdikjede-test.yml@main
+    if: github.ref_name == 'master'
+    needs: build-app
+    with:
+      tag: ${{ needs.build-app.outputs.build-version }}
 
-    services:
-      postgres:
-        image: postgres:12
-        env:
-          POSTGRES_PASSWORD: postgres
-        ports:
-          - 5432:5432
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
-    steps:
-      - name: init postgres
-        run: |
-          export PGPASSWORD='postgres'
-          psql -h localhost -p 5432 -U 'postgres' <<EOSQL
-            CREATE DATABASE k9sak_unit;
-            CREATE USER k9sak_unit WITH PASSWORD 'k9sak_unit';
-            GRANT ALL PRIVILEGES ON DATABASE k9sak_unit TO k9sak_unit;
-            ALTER DATABASE k9sak_unit SET timezone TO 'Europe/Oslo';
-            \connect k9sak_unit;
-            create extension if not exists btree_gist;
-          EOSQL
-      - uses: navikt/github-app-token-generator@v1.2
-        id: get-token
-        with:
-          private-key: ${{ secrets.K9SAKSBEHANDLING_PRIVATE_KEY }}
-          app-id: ${{ secrets.K9SAKSBEHANDLING_APP_ID }}
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '21'
-          cache: 'maven'
+  deploy-dev:
+    name: Deploy dev
+    permissions:
+      id-token: write
+      contents: read
+    if: github.ref_name == 'master'
+    needs: [build-app, verdikjede-tester]
+    uses: navikt/sif-gha-workflows/.github/workflows/maven-deploy.yml@main
+    with:
+      gar: true
+      image: ${{ needs.build-app.outputs.build-version }}
+      cluster: dev-fss
+      naiserator_file: deploy/dev-fss.yml
+    secrets: inherit
 
-      - name: Set variables
-        run: |
-          echo "TIMESTAMP=$(expr $(date +%Y%m%d%H%M%S))" >> $GITHUB_ENV
-
-      - name: Build artifacts & deploy
-        shell: bash
-        run: |
-          mvn verify -e --batch-mode --settings ./.github/.m2/settings.xml -DtrimStackTrace=false --file pom.xml -Dfile.encoding=UTF-8 -Penforcer
-          echo "TAG=$TIMESTAMP-$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
-        env:
-          GH_ACCESS_TOKEN: ${{ secrets.READER_TOKEN }}
-          DATASOURCE_HOST: localhost
-          DATASOURCE_PORT: ${{ job.services.postgres.ports[5432] }} # get randomly assigned published port
-
-      - name: Bygg og laste opp docker-image
-        run: |
-          docker build --pull --tag ${IMAGE_BASE_CR}:${TAG} --tag ${IMAGE_BASE_CR}:latest .
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login --username "x-access-token" --password-stdin ghcr.io
-          docker push ${IMAGE_BASE_CR} --all-tags
-
-      - name: Lukk gamle issues
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            github.rest.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open',
-              labels: ['deployment']
-            }).then(response => {
-              response.data.forEach(issue => {
-                github.rest.issues.update({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: issue.number,
-                  state: 'closed'
-                });
-              });
-            });
-
-      -  name: Opprett deployment issue
-         id: createdeployissue
-         if: success()
-         uses: actions/github-script@v7
-         with:
-           github-token: ${{secrets.GITHUB_TOKEN}}
-           script: |
-               github.rest.issues.create( {
-                 owner: context.issue.owner,
-                 repo: context.issue.repo,
-                 labels: ['deployment'],
-                 body: '${{ github.sha }}',
-                 title: 'Deploy av ${{ env.TAG }}'})
-               .then(response => {
-                       core.setOutput('number', response.data.number);
-                });
-
-      - name: Trigger verdikjede test
-        shell: bash
-        run: |
-          curl -XPOST -u "x-access-token:${{ steps.get-token.outputs.token }}" \
-          -H "Accept: application/vnd.github.v3+json" \
-          https://api.github.com/repos/navikt/k9-verdikjede/actions/workflows/build.yml/dispatches \
-          -d '{"ref":"master",
-                  "inputs":{
-                      "trigger": "${{ github.repository }}",
-                      "run_id": "${{ github.run_id }}",
-                      "version": "${{ env.TAG }}",
-                      "issue_number": "${{ steps.createdeployissue.outputs.number }}"
-                  }}'
+  deploy-prod:
+    name: Deploy prod
+    permissions:
+      id-token: write
+      contents: read
+    if: github.ref_name == 'master'
+    needs: [build-app, verdikjede-tester, deploy-dev]
+    uses: navikt/sif-gha-workflows/.github/workflows/maven-deploy.yml@main
+    with:
+      gar: true
+      image: ${{ needs.build-app.outputs.build-version }}
+      cluster: prod-fss
+      naiserator_file: deploy/prod-fss.yml
+    secrets: inherit

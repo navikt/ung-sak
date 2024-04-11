@@ -117,7 +117,7 @@ public class PerioderMedInaktivitetUtleder {
                     if (!antallArbeidsgivereTidslinje.isEmpty()) {
                         uttakUtenSpeilingUtenErstattetArbeid(antallArbeidsgivereTidslinje, resultat, aktivitet, ikkeAktivPeriode, arbeidsgiver);
                     } else {
-                        resultat.put(aktivitet.getKey(), new LocalDateTimeline<>(lagIkkeYrkesaktivSegmenter(ikkeAktivPeriode, UttakArbeidType.IKKE_YRKESAKTIV, arbeidsgiver)));
+                        resultat.put(aktivitet.getKey(), new LocalDateTimeline<>(lagIkkeYrkesaktivSegmenter(ikkeAktivPeriode, UttakArbeidType.IKKE_YRKESAKTIV, arbeidsgiver)).crossJoin(resultat.getOrDefault(aktivitet.getKey(), LocalDateTimeline.empty())));
                     }
                 }
             }

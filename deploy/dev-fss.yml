@@ -260,8 +260,6 @@ spec:
       value: "true"
     - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
       value: "2022-08-08"
-    - name: ENABLE_SJEKK_TILBAKEKREVING
-      value: "true"
     - name: IKKE_YRKESAKTIV_UTEN_SPEILING
       value: "false"
     - name: OMP_NULL_HELG_I_KRAVPERIODER
@@ -284,8 +282,6 @@ spec:
       value: "true"
     - name: DOKUMENTMOTTAK_VALIDER_JOURNALFORT
       value: "true"
-    - name: ENABLE_INNSYN_ENDRING_OBSERVER
-      value: "true"
     - name: KODEVERK_SOM_STRING_TOPICS
       value: "true"
     - name: AAPEN_PUNSJOPPGAVE_STOPPER_AUTOMATISK_VEDTAK
@@ -293,6 +289,8 @@ spec:
     - name: OMP_NYOPPSTARTET_VED_REFUSJON
       value: "true"
     - name: INAKTIV_VED_8_47_B
+      value: "true"
+    - name: ETTERSENDELSE_RETT_TIL_K9SAK
       value: "true"
 
 

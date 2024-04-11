@@ -80,7 +80,7 @@ public class KroniskSykSøknadMottaker implements SøknadMottakTjeneste<Innsendi
     }
 
     private Saksnummer hentReservertEllerGenererSaksnummer(AktørId søkerAktørId, AktørId pleietrengendeAktørId, int behandlingsår) {
-        var optReservert = reservertSaksnummerRepository.hent(OMSORGSPENGER_KS, søkerAktørId.getAktørId(), pleietrengendeAktørId.getAktørId(), Integer.toString(behandlingsår));
+        var optReservert = reservertSaksnummerRepository.hent(OMSORGSPENGER_KS, søkerAktørId.getAktørId(), pleietrengendeAktørId.getAktørId(), null, Integer.toString(behandlingsår));
         return optReservert.map(ReservertSaksnummerEntitet::getSaksnummer).orElseGet(() -> new Saksnummer(saksnummerRepository.genererNyttSaksnummer()));
     }
 }
