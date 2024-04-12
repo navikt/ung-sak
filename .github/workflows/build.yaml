@@ -11,9 +11,6 @@ on:
       - 'CODEOWNERS'
       - '.github/*.yml'
 
-env:
-  k9saksbehandling-private-key: ${{ secrets.K9SAKSBEHANDLING_PRIVATE_KEY }}
-
 
 jobs:
   build-app:
@@ -43,7 +40,7 @@ jobs:
     if: github.ref_name == 'master'
     needs: build-app
     with:
-      reader-token: ${{ env.k9saksbehandling-private-key }}
+      reader-token: ${{ secrets.K9SAKSBEHANDLING_PRIVATE_KEY }}
       tag: ${{ needs.build-app.outputs.build-version }}
 
 
