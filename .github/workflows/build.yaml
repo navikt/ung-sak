@@ -40,7 +40,6 @@ jobs:
     if: github.ref_name == 'master'
     needs: build-app
     with:
-      reader-token: ${{ secrets.K9SAKSBEHANDLING_PRIVATE_KEY }}
       tag: ${{ needs.build-app.outputs.build-version }}
 
 
