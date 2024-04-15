@@ -51,21 +51,15 @@ public class DokumentmottakerEttersendelse implements Dokumentmottaker {
     public DokumentmottakerEttersendelse(MottatteDokumentRepository mottatteDokumentRepository,
                                          SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer,
                                          @Any Instance<BrukerdialoginnsynTjeneste> brukerdialoginnsynServicer,
-                                         DokumentmottakerFelles dokumentMottakerFelles,
-                                         @KonfigVerdi(value = "ETTERSENDELSE_RETT_TIL_K9SAK", defaultVerdi = "false") boolean ettersendelseRettTilK9Sak) {
+                                         DokumentmottakerFelles dokumentMottakerFelles) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.sykdomsDokumentVedleggHåndterer = sykdomsDokumentVedleggHåndterer;
         this.brukerdialoginnsynServicer = brukerdialoginnsynServicer;
         this.dokumentMottakerFelles = dokumentMottakerFelles;
-        this.ettersendelseRettTilK9Sak = ettersendelseRettTilK9Sak;
     }
 
     @Override
     public void lagreDokumentinnhold(Collection<MottattDokument> dokumenter, Behandling behandling) {
-        if (!ettersendelseRettTilK9Sak) {
-            throw new IllegalStateException("Funksjonaliteten er skrudd av");
-        }
-
         var brukerdialoginnsynService = BrukerdialoginnsynTjeneste.finnTjeneste(brukerdialoginnsynServicer, behandling.getFagsakYtelseType());
 
         var sorterteDokumenter = sorterSøknadsdokumenter(dokumenter);
