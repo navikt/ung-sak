@@ -112,14 +112,11 @@ class StønadstatistikkPeriodetidslinjebygger {
             Map<VilkårType, VilkårUtfall> k9sakVilkår = new EnumMap<>(hendelse.getVilkårFraK9sak());
             k9sakVilkår.remove(VilkårType.OMSORGEN_FOR);
             return hendelse.kopiMedVilkårFraK9sak(k9sakVilkår);
-        }
-        boolean sammeUtfall = k9årskvantumOmsorgenFor.getUtfall() == k9sakOmsorgenFor.getUtfall();
-        if (k9årskvantumOmsorgenFor.getUtfall() == Utfall.IKKE_VURDERT || sammeUtfall) {
+        } else {
             Map<Vilkår, VilkårUtfall> k9årskvantumVilkår = new EnumMap<>(hendelse.getVilkårFraÅrskvantum());
             k9årskvantumVilkår.remove(Vilkår.OMSORGSVILKÅRET);
             return hendelse.kopiMedVilkårFraÅrskvantum(k9årskvantumVilkår);
         }
-        throw new IllegalArgumentException("Kan ikke fjerne duplisert omsorgen for-vilkår, når vurdert i både k9-sak og k9-årskvantum");
     }
 
     private LocalDateTimeline<Map<VilkårType, VilkårUtfall>> lagVilkårTidslinje(Behandling behandling) {
