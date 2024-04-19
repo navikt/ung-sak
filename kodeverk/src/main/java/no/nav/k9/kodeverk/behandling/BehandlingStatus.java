@@ -30,18 +30,18 @@ public enum BehandlingStatus implements Kodeverdi {
     IVERKSETTER_VEDTAK("IVED", "Iverksetter vedtak"),
     OPPRETTET("OPPRE", "Opprettet"),
     UTREDES("UTRED", "Behandling utredes"),
-    
+
     ;
-    
+
     private static final Map<String, BehandlingStatus> KODER = new LinkedHashMap<>();
-    
+
     public static final String KODEVERK = "BEHANDLING_STATUS";
 
     private static final Set<BehandlingStatus> FERDIGBEHANDLET_STATUS = Set.of(AVSLUTTET, IVERKSETTER_VEDTAK);
 
     @JsonIgnore
     private String navn;
-    
+
     private String kode;
 
     private BehandlingStatus(String kode) {
@@ -51,6 +51,16 @@ public enum BehandlingStatus implements Kodeverdi {
     private BehandlingStatus(String kode, String navn) {
         this.kode = kode;
         this.navn = navn;
+    }
+
+    /**
+     * toString is set to output the kode value of the enum instead of the default that is the enum name.
+     * This makes the generated openapi spec correct when the enum is used as a query param. Without this the generated
+     * spec incorrectly specifies that it is the enum name string that should be used as input.
+     */
+    @Override
+    public String toString() {
+        return this.getKode();
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
@@ -69,12 +79,12 @@ public enum BehandlingStatus implements Kodeverdi {
     public static Map<String, BehandlingStatus> kodeMap() {
         return Collections.unmodifiableMap(KODER);
     }
-    
+
     @Override
     public String getNavn() {
         return navn;
     }
-    
+
     public static Set<BehandlingStatus> getFerdigbehandletStatuser() {
         return FERDIGBEHANDLET_STATUS;
     }
@@ -82,7 +92,7 @@ public enum BehandlingStatus implements Kodeverdi {
     public boolean erFerdigbehandletStatus() {
         return FERDIGBEHANDLET_STATUS.contains(this);
     }
-    
+
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
@@ -94,12 +104,12 @@ public enum BehandlingStatus implements Kodeverdi {
     public String getKode() {
         return kode;
     }
-    
+
     @Override
     public String getOffisiellKode() {
         return getKode();
     }
-    
+
     static {
         for (var v : values()) {
             if (KODER.putIfAbsent(v.kode, v) != null) {

@@ -43,7 +43,7 @@ public enum AksjonspunktType implements Kodeverdi {
     private String navn;
 
     private String kode;
-    
+
     @JsonIgnore
     private String offisiellKode;
 
@@ -52,6 +52,16 @@ public enum AksjonspunktType implements Kodeverdi {
         this.navn = navn;
         /* merkelig nok har navn blit brukt som offisiell kode bla. mot Pip/ABAC. */
         this.offisiellKode = navn;
+    }
+
+    /**
+     * toString is set to output the kode value of the enum instead of the default that is the enum name.
+     * This makes the generated openapi spec correct when the enum is used as a query param. Without this the generated
+     * spec incorrectly specifies that it is the enum name string that should be used as input.
+     */
+    @Override
+    public String toString() {
+        return this.getKode();
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
@@ -66,7 +76,7 @@ public enum AksjonspunktType implements Kodeverdi {
         }
         return ad;
     }
-    
+
     @Override
     public String getNavn() {
         return navn;
@@ -82,7 +92,7 @@ public enum AksjonspunktType implements Kodeverdi {
     public String getOffisiellKode() {
         return offisiellKode;
     }
-    
+
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {

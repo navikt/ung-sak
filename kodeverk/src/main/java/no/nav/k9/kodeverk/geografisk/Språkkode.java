@@ -33,7 +33,7 @@ public class Språkkode implements Kodeverdi {
     public static final Språkkode en = fraKode("EN");
 
     public static final Språkkode UDEFINERT = fraKode("-"); //$NON-NLS-1$
-    
+
     @JsonProperty(value = "kode")
     private String kode;
 
@@ -84,6 +84,16 @@ public class Språkkode implements Kodeverdi {
     @Override
     public int hashCode() {
         return Objects.hash(kode);
+    }
+
+    /**
+     * toString is set to output the kode value of the enum instead of the default that is the enum name.
+     * This makes the generated openapi spec correct when the enum is used as a query param. Without this the generated
+     * spec incorrectly specifies that it is the enum name string that should be used as input.
+     */
+    @Override
+    public String toString() {
+        return this.getKode();
     }
 
     @JsonCreator
