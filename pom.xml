@@ -48,7 +48,7 @@
         <asm.version>9.7</asm.version>
         <kotlin-stdlib.version>1.9.23</kotlin-stdlib.version>
         <jandex.version>3.1.7</jandex.version>
-        <flyway.version>10.11.0</flyway.version>
+        <flyway.version>10.11.1</flyway.version>
 
     </properties>
 
