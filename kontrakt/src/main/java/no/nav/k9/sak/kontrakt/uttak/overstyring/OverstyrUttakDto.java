@@ -51,8 +51,8 @@ public class OverstyrUttakDto extends OverstyringAksjonspunktDto {
         //
     }
 
-    public OverstyrUttakDto(String begrunnelse, List<OverstyrUttakPeriodeDto> lagreEllerOppdater, List<OverstyrUttakSlettPeriodeDto> slett, boolean gåVidere) {
-        super(begrunnelse);
+    public OverstyrUttakDto(Periode periode, String begrunnelse, List<OverstyrUttakPeriodeDto> lagreEllerOppdater, List<OverstyrUttakSlettPeriodeDto> slett, boolean gåVidere) {
+        super(periode, begrunnelse);
         this.lagreEllerOppdater = lagreEllerOppdater;
         this.slett = slett;
         this.gåVidere = gåVidere;

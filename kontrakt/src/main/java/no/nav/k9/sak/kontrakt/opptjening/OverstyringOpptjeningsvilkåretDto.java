@@ -44,13 +44,6 @@ public class OverstyringOpptjeningsvilkåretDto extends OverstyringAksjonspunktD
         this.innvilgelseMerknadKode = innvilgelseMerknadKode;
     }
 
-    public OverstyringOpptjeningsvilkåretDto(boolean erVilkarOk, String begrunnelse, String avslagskode, String innvilgelseMerknadKode) {
-        super(begrunnelse);
-        this.erVilkarOk = erVilkarOk;
-        this.avslagskode = avslagskode;
-        this.innvilgelseMerknadKode = innvilgelseMerknadKode;
-    }
-
     @Override
     public String getAvslagskode() {
         return avslagskode;
