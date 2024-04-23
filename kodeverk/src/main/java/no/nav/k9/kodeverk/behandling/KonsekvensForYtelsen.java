@@ -24,21 +24,31 @@ public enum KonsekvensForYtelsen implements Kodeverdi{
     ENDRING_I_BEREGNING("ENDRING_I_BEREGNING", "Endring i beregning"),
     INGEN_ENDRING("INGEN_ENDRING", "Ingen endring"),
     UDEFINERT("-", "Udefinert"),
-    
+
     ;
-    
+
     private static final Map<String, KonsekvensForYtelsen> KODER = new LinkedHashMap<>();
-    
+
     public static final String KODEVERK = "KONSEKVENS_FOR_YTELSEN";
 
     @JsonIgnore
     private String navn;
-    
+
     private String kode;
 
     private KonsekvensForYtelsen(String kode, String navn) {
         this.kode = kode;
         this.navn = navn;
+    }
+
+    /**
+     * toString is set to output the kode value of the enum instead of the default that is the enum name.
+     * This makes the generated openapi spec correct when the enum is used as a query param. Without this the generated
+     * spec incorrectly specifies that it is the enum name string that should be used as input.
+     */
+    @Override
+    public String toString() {
+        return this.getKode();
     }
 
     @JsonCreator(mode = Mode.DELEGATING)
@@ -57,7 +67,7 @@ public enum KonsekvensForYtelsen implements Kodeverdi{
     public static Map<String, KonsekvensForYtelsen> kodeMap() {
         return Collections.unmodifiableMap(KODER);
     }
-    
+
     @Override
     public String getNavn() {
         return navn;
@@ -74,12 +84,12 @@ public enum KonsekvensForYtelsen implements Kodeverdi{
     public String getKode() {
         return kode;
     }
-    
+
     @Override
     public String getOffisiellKode() {
         return getKode();
     }
-    
+
     static {
         for (var v : values()) {
             if (KODER.putIfAbsent(v.kode, v) != null) {

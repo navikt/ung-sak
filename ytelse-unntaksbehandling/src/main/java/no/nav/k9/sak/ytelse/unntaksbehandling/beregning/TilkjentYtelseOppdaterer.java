@@ -7,6 +7,7 @@ import static no.nav.k9.felles.feil.LogLevel.INFO;
 import static no.nav.k9.sak.ytelse.unntaksbehandling.beregning.TilkjentYtelseOppdaterer.InntektskategoriTilAktivitetstatusMapper.aktivitetStatusFor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;
 
@@ -186,8 +187,8 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
         @FunksjonellFeil(feilkode = "K9-951877", feilmelding = "Det er angitt overlappende perioder med tilkjent ytelse: %s", løsningsforslag = "", logLevel = INFO)
         Feil overlappendeTilkjentYtelsePerioder(String feilmelding);
 
-        @FunksjonellFeil(feilkode = "K9-951878", feilmelding = "Periode med tilkjent ytelse er ikke innenfor vilkåret", løsningsforslag = "", logLevel = INFO)
-        Feil tilkjentYtelseIkkeInnenforVilkår();
+        @FunksjonellFeil(feilkode = "K9-951878", feilmelding = "Periode med tilkjent ytelse er ikke innenfor vilkåret. Vilkår:%s %s til %s. Tilkjent ytelse %s til %s", løsningsforslag = "", logLevel = INFO)
+        Feil tilkjentYtelseIkkeInnenforVilkår(VilkårType vilkårType, LocalDate vilkårFom, LocalDate vilkårTom, LocalDate tilkjentYtelseFom, LocalDate tilkjentYtelseTom);
     }
 
     static class InntektskategoriTilAktivitetstatusMapper {
@@ -205,7 +206,7 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
 
         static AktivitetStatus aktivitetStatusFor(Inntektskategori inntektskategori) {
             return ofNullable(INNTEKTSKATEGORI_AKTIVITET_STATUS_MAP.get(inntektskategori))
-                .orElseThrow(() -> new IllegalArgumentException(format("Mangler mapping for inntektskategori: %s", inntektskategori)));
+                .orElseThrow(() -> new IllegalArgumentException(format("Mangler mapping for inntektskategori: %s", inntektskategori.name())));
         }
     }
 }

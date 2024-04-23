@@ -236,7 +236,6 @@ public class TilKalkulusMapper {
 
     private static YtelseType mapYtelseType(FagsakYtelseType fraYtelseType) {
         return switch (fraYtelseType) {
-            case null -> null;
             case DAGPENGER -> YtelseType.DAGPENGER;
             case FRISINN -> YtelseType.FRISINN;
             case SYKEPENGER -> YtelseType.SYKEPENGER;
