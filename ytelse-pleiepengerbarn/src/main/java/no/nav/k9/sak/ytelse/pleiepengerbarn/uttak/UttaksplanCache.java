@@ -41,7 +41,7 @@ public class UttaksplanCache {
     public void put(UUID behandlingUuid, Uttaksplan uttaksplan) {
         logger.info("Uttaksplan cache put");
         innhold.put(behandlingUuid, uttaksplan);
-        if (innhold.size() > 2) { //forventer at det hentes plan for inneværende og forrige behandling.
+        if (innhold.size() > 4) { //forventer at det hentes plan for inneværende og forrige behandling, samt annen part
             logger.warn("Uttaksplan-cache har {} behandlinger. Forventer lavere tall, men kan gi mening hvis behandlingene er knyttet til samme sak eller relaterte saker. Behandlinger i cache: {}", innhold.size(), innhold.keySet());
         }
     }
