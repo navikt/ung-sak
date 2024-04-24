@@ -46,6 +46,7 @@ import no.nav.k9.sak.behandlingslager.behandling.personopplysning.Personopplysni
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrUttakRepository;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
@@ -69,6 +70,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperioder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperioderHolder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.OverstyrUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.PleietrengendeRevurderingPerioderTjeneste;
 
 @ExtendWith(CdiAwareExtension.class)
@@ -127,6 +129,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
         );
         var personopplysningRepository = new PersonopplysningRepository(entityManager);
         var personopplysningTjeneste = new PersonopplysningTjeneste(personopplysningRepository);
+
         utleder = new PleiepengerEndretUtbetalingPeriodeutleder(
             new UnitTestLookupInstanceImpl<>(vilkårsPerioderTilVurderingTjeneste),
             new ProsessTriggereRepository(entityManager),
@@ -134,7 +137,8 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
             uttakNyeReglerRepository,
             personopplysningTjeneste,
             pleietrengendeRevurderingPerioderTjeneste,
-            erEndringIRefusjonskravVurderer);
+            erEndringIRefusjonskravVurderer,
+            new OverstyrUttakTjeneste(null, new OverstyrUttakRepository(entityManager), null, null));
         originalBehandling = opprettBehandling(SKJÆRINGSTIDSPUNKT);
         behandling = Behandling.fraTidligereBehandling(originalBehandling, BehandlingType.REVURDERING).build();
         behandlingRepository.lagre(behandling, new BehandlingLås(null));
