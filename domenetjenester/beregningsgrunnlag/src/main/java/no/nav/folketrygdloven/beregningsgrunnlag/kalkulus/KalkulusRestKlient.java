@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.folketrygdloven.kalkulus.felles.v1.KalkulatorInputDto;
 import no.nav.folketrygdloven.kalkulus.mappers.JsonMapper;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregnListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregningsgrunnlagListeRequest;
@@ -31,6 +32,7 @@ import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagDtoListe
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentForSakRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentGrunnbeløpRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.HentJournalpostIderRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.KontrollerGrunnbeløpRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.KopierBeregningListeRequest;
@@ -39,6 +41,7 @@ import no.nav.folketrygdloven.kalkulus.request.v1.tilkommetAktivitet.UtledTilkom
 import no.nav.folketrygdloven.kalkulus.response.v1.AktiveReferanser;
 import no.nav.folketrygdloven.kalkulus.response.v1.Grunnbeløp;
 import no.nav.folketrygdloven.kalkulus.response.v1.GrunnbeløpReguleringRespons;
+import no.nav.folketrygdloven.kalkulus.response.v1.JournalpostIderResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.KopiResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandListeResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.BeregningsgrunnlagGrunnlagDto;
@@ -75,15 +78,14 @@ public class KalkulusRestKlient {
     private final ObjectReader dtoListeReader = kalkulusMapper.readerFor(BeregningsgrunnlagListe.class);
     private final ObjectReader behovForGreguleringReader = kalkulusMapper.readerFor(GrunnbeløpReguleringRespons.class);
     private final ObjectReader tilkommetInntektReader = kalkulusMapper.readerFor(SimulertTilkommetInntektListe.class);
-
     private final ObjectReader tilkommetAktivitetReader = kalkulusMapper.readerFor(UtledetTilkommetAktivitetListe.class);
-
     private final ObjectReader inntektsgraderingReader = kalkulusMapper.readerFor(InntektgraderingListe.class);
-
     private final ObjectReader grunnlagListReader = kalkulusMapper.readerFor(new TypeReference<List<BeregningsgrunnlagGrunnlagDto>>() {
     });
     private final ObjectReader grunnbeløpReader = kalkulusMapper.readerFor(Grunnbeløp.class);
     private final ObjectReader referanserReader = kalkulusMapper.readerFor(AktiveReferanser.class);
+    private final ObjectReader journalspostIderReader = kalkulusMapper.readerFor(new TypeReference<List<JournalpostIderResponse>>() {
+    });
 
 
     private CloseableHttpClient restClient;
@@ -250,6 +252,17 @@ public class KalkulusRestKlient {
             return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), referanserReader);
         } catch (IOException e) {
             throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(endpoint, e.getMessage()).toException();
+        }
+    }
+
+
+    public List<JournalpostIderResponse> hentInntektsmeldingJournalpostIder(HentJournalpostIderRequest request) {
+        var endpoint = grunnbeløp;
+
+        try {
+            return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), journalspostIderReader);
+        } catch (JsonProcessingException e) {
+            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
         }
     }
 
