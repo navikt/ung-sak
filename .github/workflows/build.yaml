@@ -28,6 +28,13 @@ jobs:
       pg_version: 12
     secrets: inherit
 
+  build-typescript-client:
+    name: Typescript client make
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/generate-openapi/action.yaml
+
+
   verdikjede-tester:
     name: Verdikjedetester
     secrets: inherit
