@@ -19,9 +19,6 @@ public class InternalApplicationConfig extends Application {
 
     public static final String INTERNAL_URI = "/internal";
 
-    public InternalApplicationConfig() {
-    }
-
     @Override
     public Set<Class<?>> getClasses() {
         Set<Class<?>> classes = new HashSet<>();
