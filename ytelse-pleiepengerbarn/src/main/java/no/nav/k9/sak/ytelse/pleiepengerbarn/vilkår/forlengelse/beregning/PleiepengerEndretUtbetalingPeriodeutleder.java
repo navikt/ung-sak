@@ -124,7 +124,7 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
         var søknadperioderForBehandlingTidslinje = finnTidslinjeForRelevanteSøknadsperioder(behandlingReferanse).mapValue(it -> Set.of(SØKNAD_FRA_BRUKER));
         var personopplysningTidslinje = finnPersonopplysningTidslinje(behandlingReferanse, vilkårsperiode);
         var datoNyeReglerTidslinje = finnDatoNyeReglerTidslinje(behandlingReferanse, vilkårsperiode).mapValue(it -> Set.of(ENDRING_I_DATO_NYE_UTTAK_REGLER));
-        var prosesstriggerTidslinje = finnTidslinjeFraProsessTriggere(behandlingReferanse).mapValue(Set::of);
+        var prosesstriggerTidslinje = finnTidslinjeFraProsessTriggere(behandlingReferanse);
         var tidslinje = søknadperioderForBehandlingTidslinje
             .crossJoin(endringstidslinjeRefusjonskrav, StandardCombinators::union)
             .crossJoin(prosesstriggerTidslinje, StandardCombinators::union)
@@ -225,13 +225,13 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
         };
     }
 
-    private LocalDateTimeline<EndringsårsakUtbetaling> finnTidslinjeFraProsessTriggere(BehandlingReferanse behandlingReferanse) {
+    private LocalDateTimeline<Set<EndringsårsakUtbetaling>> finnTidslinjeFraProsessTriggere(BehandlingReferanse behandlingReferanse) {
         var prosessTriggere = prosessTriggereRepository.hentGrunnlag(behandlingReferanse.getBehandlingId());
         var perioderFraTriggere = prosessTriggere.stream().flatMap(it -> it.getTriggere().stream())
             .filter(it -> ENDRET_FORDELING_ÅRSAKER.contains(it.getÅrsak()))
-            .map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), mapTilÅrsak(it.getÅrsak())))
+            .map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), Set.of(mapTilÅrsak(it.getÅrsak()))))
             .collect(Collectors.toSet());
-        return new LocalDateTimeline<>(perioderFraTriggere);
+        return new LocalDateTimeline<>(perioderFraTriggere, StandardCombinators::union);
     }
 
     private EndringsårsakUtbetaling mapTilÅrsak(BehandlingÅrsakType årsak) {
@@ -239,7 +239,7 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
             case RE_ENDRET_FORDELING -> ENDRET_FORDELING_PROSESS_TRIGGER;
             case RE_ENDRING_FRA_ANNEN_OMSORGSPERSON -> ENDRING_FRA_ANNEN_OMSORGSPERSON_PROSESS_TRIGGER;
             case RE_GJENOPPTAR_UTSATT_BEHANDLING -> GJENOPPTAR_UTSATT_BEHANDLING_PROSESS_TRIGGER;
-            default -> null;
+            default -> throw new IllegalArgumentException("Fikk BehandlingÅrsakType som ikke er mappet til endringsårsak: " + årsak);
         };
     }
 
