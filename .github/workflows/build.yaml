@@ -37,7 +37,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/generate-openapi
         with:
-          readerToken: ${{ secrets.GITHUB_TOKEN }}
+          readerToken: ${{ secrets.READER_TOKEN }}
 
   verdikjede-tester:
     name: Verdikjedetester
