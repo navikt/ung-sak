@@ -33,6 +33,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.persistence.Tuple;
+import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -64,6 +67,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
+import no.nav.k9.sak.domene.behandling.steg.kompletthet.forvaltning.FinnPerioderMedEndringVedFeilInntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
@@ -83,17 +87,13 @@ public class ForvaltningBeregningRestTjeneste {
 
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
     private BehandlingRepository behandlingRepository;
-
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private RevurderBeregningTjeneste revurderBeregningTjeneste;
-
     private EntityManager entityManager;
-
     private FagsakTjeneste fagsakTjeneste;
-
     private HentKalkulatorInputDump hentKalkulatorInputDump;
-
     private ProsessTriggerForvaltningTjeneste prosessTriggerForvaltningTjeneste;
+    private FinnPerioderMedEndringVedFeilInntektsmelding finnPerioderMedEndringVedFeilInntektsmelding;
 
 
     public ForvaltningBeregningRestTjeneste() {
@@ -105,7 +105,7 @@ public class ForvaltningBeregningRestTjeneste {
                                             BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                             RevurderBeregningTjeneste revurderBeregningTjeneste,
                                             EntityManager entityManager, FagsakTjeneste fagsakTjeneste,
-                                            HentKalkulatorInputDump hentKalkulatorInputDump) {
+                                            HentKalkulatorInputDump hentKalkulatorInputDump, FinnPerioderMedEndringVedFeilInntektsmelding finnPerioderMedEndringVedFeilInntektsmelding) {
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
@@ -114,6 +114,7 @@ public class ForvaltningBeregningRestTjeneste {
         this.fagsakTjeneste = fagsakTjeneste;
         this.hentKalkulatorInputDump = hentKalkulatorInputDump;
         this.prosessTriggerForvaltningTjeneste = new ProsessTriggerForvaltningTjeneste(entityManager);
+        this.finnPerioderMedEndringVedFeilInntektsmelding = finnPerioderMedEndringVedFeilInntektsmelding;
     }
 
     @GET
@@ -139,7 +140,41 @@ public class ForvaltningBeregningRestTjeneste {
         return Response.ok(inputListe, JSON).cacheControl(cc).build();
     }
 
-    @GET
+
+    @POST
+    @Path("finn-feil-inntektsmelding-bruk")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(description = "Finner behandlinger og informasjon om perioder som er rammet av IM-feil", tags = "beregning")
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Response finnBehandlingerMedFeilIM(@Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) FinnBehandlingerMedFeilIMDto finnBehandlingerMedFeilIMDto) { // NOSONAR
+
+        Query query = entityManager.createNativeQuery(
+            "SELECT DISTINCT ON (b.fagsak_id) b.* from behandling b " +
+                "inner join fagsak f on f.id = b.fagsak_id " +
+                "where b.opprettet_tid >= :OPPRETTET_FOM " +
+                "and b.avsluttet_dato is not null " +
+                "and b.behandling_type = 'BT-004' " +
+                "and f.ytelse_type = 'PSB' " +
+                "order by b.fagsak_id, b.opprettet_tid desc",
+            Behandling.class);
+        query.setParameter("OPPRETTET_FOM", finnBehandlingerMedFeilIMDto.getFraDato().atStartOfDay());
+
+        List<Behandling> behandlinger = query.getResultList();
+
+        var relevanteEndringerPrBehandling = behandlinger.stream().flatMap(t -> {
+            var behandlingReferanse = BehandlingReferanse.fra(t);
+            var relevanteEndringer = finnPerioderMedEndringVedFeilInntektsmelding.finnPerioderForEndringDersomFeilInntektsmeldingBrukes(behandlingReferanse, finnBehandlingerMedFeilIMDto.getFraDato());
+                return relevanteEndringer.map(it -> new FeilInntektsmeldingIBrukResponse(behandlingReferanse.getBehandlingId(), it.vilkårsperioderTilRevurdering(), it.kunEndringIRefusjonListe())).stream();
+            }).toList();
+
+
+        return Response.ok(relevanteEndringerPrBehandling).build();
+    }
+
+
+    @POST
     @Path("inntektsmelding-sortering")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Sorterte inntektsmeldinger per vilkårsperiode", tags = "beregning",
