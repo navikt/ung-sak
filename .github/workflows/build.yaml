@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/generate-openapi/action.yaml
+      - uses: ./.github/actions/generate-openapi
 
 
   verdikjede-tester:
