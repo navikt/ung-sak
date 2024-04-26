@@ -30,7 +30,6 @@
     <security-constraint>
         <web-resource-collection>
             <web-resource-name>Ubeskyttet</web-resource-name>
-            <url-pattern>/metrics</url-pattern>
             <url-pattern>/cb</url-pattern>
             <url-pattern>/internal/*</url-pattern>
             <url-pattern>/api/swagger.json</url-pattern>
