@@ -32,6 +32,7 @@ jobs:
     name: Typescript client make
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/generate-openapi/action.yaml
 
 
