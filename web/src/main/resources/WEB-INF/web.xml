@@ -16,10 +16,21 @@
     <listener>
         <listener-class>org.jboss.weld.environment.servlet.Listener</listener-class>
     </listener>
+
+    <servlet>
+        <servlet-name>prometheusmetrics</servlet-name>
+        <servlet-class>io.prometheus.metrics.exporter.servlet.jakarta.PrometheusMetricsServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>prometheusmetrics</servlet-name>
+        <url-pattern>/internal/metrics/prometheus</url-pattern>
+    </servlet-mapping>
     
     <security-constraint>
         <web-resource-collection>
             <web-resource-name>Ubeskyttet</web-resource-name>
+            <url-pattern>/metrics</url-pattern>
             <url-pattern>/cb</url-pattern>
             <url-pattern>/internal/*</url-pattern>
             <url-pattern>/api/swagger.json</url-pattern>

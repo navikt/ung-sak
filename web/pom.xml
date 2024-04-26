@@ -14,7 +14,7 @@
     <name>K9SAK :: Webapp</name>
 
     <properties>
-        <simple.client.version>0.16.0</simple.client.version>
+        <prometheus.version>1.2.1</prometheus.version>
         <swagger-ui.version>5.17.0</swagger-ui.version>
     </properties>
 
@@ -252,18 +252,18 @@
         <!-- Metrics, logging, helse- og healthchecks -->
         <dependency>
             <groupId>io.prometheus</groupId>
-            <artifactId>simpleclient</artifactId>
-            <version>${simple.client.version}</version>
+            <artifactId>prometheus-metrics-core</artifactId>
+            <version>${prometheus.version}</version>
         </dependency>
         <dependency>
             <groupId>io.prometheus</groupId>
-            <artifactId>simpleclient_hotspot</artifactId>
-            <version>${simple.client.version}</version>
+            <artifactId>prometheus-metrics-instrumentation-jvm</artifactId>
+            <version>${prometheus.version}</version>
         </dependency>
         <dependency>
             <groupId>io.prometheus</groupId>
-            <artifactId>simpleclient_common</artifactId>
-            <version>${simple.client.version}</version>
+            <artifactId>prometheus-metrics-exporter-servlet-jakarta</artifactId>
+            <version>${prometheus.version}</version>
         </dependency>
 
         <dependency>
