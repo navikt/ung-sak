@@ -27,7 +27,6 @@ import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.person.personopplysning.UtlandVurdererTjeneste;
 import no.nav.k9.sak.innsyn.BrukerdialoginnsynMeldingProducer;
@@ -38,28 +37,23 @@ import no.nav.k9.søknad.felles.Kildesystem;
 public class InnsynEventTjeneste {
     protected final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    private final BehandlingRepository behandlingRepository;
     private final MottatteDokumentRepository mottatteDokumentRepository;
     private final UtlandVurdererTjeneste utlandVurdererTjeneste;
     private final BrukerdialoginnsynMeldingProducer producer;
 
     @Inject
     public InnsynEventTjeneste(
-            BehandlingRepository behandlingRepository,
             MottatteDokumentRepository mottatteDokumentRepository,
             UtlandVurdererTjeneste utlandVurdererTjeneste,
             BrukerdialoginnsynMeldingProducer producer
     ) {
-        this.behandlingRepository = behandlingRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.utlandVurdererTjeneste = utlandVurdererTjeneste;
         this.producer = producer;
     }
 
 
-    public void publiserBehandling(Long behandlingId) {
-        var behandling = behandlingRepository.hentBehandling(behandlingId);
-
+    public void publiserBehandling(Behandling behandling) {
         Fagsak fagsak = behandling.getFagsak();
         if (fagsak.getYtelseType() != FagsakYtelseType.PSB) {
             return;

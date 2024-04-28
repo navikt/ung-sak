@@ -36,6 +36,7 @@ import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.person.personopplysning.UtlandVurdererTjeneste;
 import no.nav.k9.sak.innsyn.BrukerdialoginnsynMeldingProducer;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
@@ -48,6 +49,7 @@ class InnsynEventTjenesteTest {
     private final UtlandVurdererTjeneste utlandVurdererTjeneste = mock();
     private final AksjonspunktTestSupport aksjonspunktTestSupport = new AksjonspunktTestSupport();
     private final BrukerdialoginnsynMeldingProducer producer = mock();
+    private BehandlingRepository behandlingRepository;
 
 
     @BeforeEach
@@ -67,6 +69,7 @@ class InnsynEventTjenesteTest {
             .builderMedSøknad(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, mor)
             .medPleietrengende(pleietrengende);
 
+        behandlingRepository = testScenarioBuilder.mockBehandlingRepository();
         var behandling = testScenarioBuilder.lagMocked();
         Aksjonspunkt aksjonspunkt = aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING);
         aksjonspunktTestSupport.setFrist(aksjonspunkt,  venteFrist, Venteårsak.MEDISINSKE_OPPLYSNINGER, null);
@@ -83,12 +86,11 @@ class InnsynEventTjenesteTest {
             .thenReturn(List.of(byggMottattDokument(fagsak.getId(), behandling.getId(), now, søknadJpId, Brevkode.PLEIEPENGER_BARN_SOKNAD)));
 
         var tjeneste = new InnsynEventTjeneste(
-            testScenarioBuilder.mockBehandlingRepository(),
             mottatteDokumentRepository,
             utlandVurdererTjeneste,
             producer);
 
-        tjeneste.publiserBehandling(behandling.getId());
+        tjeneste.publiserBehandling(behandlingRepository.hentBehandling(behandling.getId()));
 
         var captor = ArgumentCaptor.forClass(String.class);
         verify(producer).send(eq(fagsak.getSaksnummer().getVerdi()), captor.capture());
