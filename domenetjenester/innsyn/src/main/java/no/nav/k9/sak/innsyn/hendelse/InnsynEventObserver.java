@@ -53,6 +53,7 @@ public class InnsynEventObserver {
     private void lagProsessTask(Long fagsakId, Long behandlingId) {
         var pd = ProsessTaskData.forProsessTask(PubliserInnsynEventTask.class);
         pd.setBehandling(fagsakId, behandlingId);
+        pd.setCallIdFraEksisterende();
         prosessTaskTjeneste.lagre(pd);
     }
 
