@@ -67,7 +67,7 @@ public class PubliserSøknadForBrukerdialoginnsynTask implements ProsessTaskHand
         Søknad søknad = null;
         Ettersendelse ettersendelse = null;
 
-        if (mottattDokument.getType() == Brevkode.ETTERSENDELSE_PLEIEPENGER_SYKT_BARN){
+        if (Brevkode.ETTERSENDELSE_TYPER.contains(mottattDokument.getType())){
             ettersendelse= JsonUtils.fromString(mottattDokument.getPayload(), Ettersendelse.class);
         } else {
             søknad = JsonUtils.fromString(mottattDokument.getPayload(), Søknad.class);
