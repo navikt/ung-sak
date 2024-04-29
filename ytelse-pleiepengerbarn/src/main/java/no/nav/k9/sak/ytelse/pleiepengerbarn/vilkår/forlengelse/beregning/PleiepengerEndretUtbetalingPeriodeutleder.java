@@ -9,6 +9,7 @@ import static no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.beregning
 import static no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.beregning.EndringsårsakUtbetaling.ENDRING_I_PERSONOPPLYSNING_PLEIETRENGENDE;
 import static no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.beregning.EndringsårsakUtbetaling.ENDRING_I_PERSONOPPLYSNING_SØKER;
 import static no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.beregning.EndringsårsakUtbetaling.ENDRING_I_REFUSJONSKRAV;
+import static no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.beregning.EndringsårsakUtbetaling.ENDRING_I_UTTAK_OVERSTYRING;
 import static no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.beregning.EndringsårsakUtbetaling.GJENOPPTAR_UTSATT_BEHANDLING_PROSESS_TRIGGER;
 import static no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.forlengelse.beregning.EndringsårsakUtbetaling.SØKNAD_FRA_BRUKER;
 
@@ -47,6 +48,7 @@ import no.nav.k9.sak.perioder.EndretUtbetalingPeriodeutleder;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.trigger.ProsessTriggereRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.OverstyrUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.PleietrengendeRevurderingPerioderTjeneste;
 
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
@@ -62,6 +64,7 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
     private PersonopplysningTjeneste personopplysningTjeneste;
     private PleietrengendeRevurderingPerioderTjeneste pleietrengendeRevurderingPerioderTjeneste;
     private ErEndringIRefusjonskravVurderer erEndringIRefusjonskravVurderer;
+    private OverstyrUttakTjeneste overstyrUttakTjeneste;
 
     public PleiepengerEndretUtbetalingPeriodeutleder() {
     }
@@ -73,7 +76,8 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
                                                      UttakNyeReglerRepository uttakNyeReglerRepository,
                                                      PersonopplysningTjeneste personopplysningTjeneste,
                                                      PleietrengendeRevurderingPerioderTjeneste pleietrengendeRevurderingPerioderTjeneste,
-                                                     ErEndringIRefusjonskravVurderer erEndringIRefusjonskravVurderer) {
+                                                     ErEndringIRefusjonskravVurderer erEndringIRefusjonskravVurderer,
+                                                     OverstyrUttakTjeneste overstyrUttakTjeneste) {
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
         this.prosessTriggereRepository = prosessTriggereRepository;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
@@ -81,6 +85,7 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.pleietrengendeRevurderingPerioderTjeneste = pleietrengendeRevurderingPerioderTjeneste;
         this.erEndringIRefusjonskravVurderer = erEndringIRefusjonskravVurderer;
+        this.overstyrUttakTjeneste = overstyrUttakTjeneste;
     }
 
     @Override
@@ -124,17 +129,23 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
         var søknadperioderForBehandlingTidslinje = finnTidslinjeForRelevanteSøknadsperioder(behandlingReferanse).mapValue(it -> Set.of(SØKNAD_FRA_BRUKER));
         var personopplysningTidslinje = finnPersonopplysningTidslinje(behandlingReferanse, vilkårsperiode);
         var datoNyeReglerTidslinje = finnDatoNyeReglerTidslinje(behandlingReferanse, vilkårsperiode).mapValue(it -> Set.of(ENDRING_I_DATO_NYE_UTTAK_REGLER));
-        var prosesstriggerTidslinje = finnTidslinjeFraProsessTriggere(behandlingReferanse).mapValue(Set::of);
+        var overstyrtUttakTidslinje = finnOverstyrtUttakTidslinje(behandlingReferanse);
+        var prosesstriggerTidslinje = finnTidslinjeFraProsessTriggere(behandlingReferanse);
         var tidslinje = søknadperioderForBehandlingTidslinje
             .crossJoin(endringstidslinjeRefusjonskrav, StandardCombinators::union)
             .crossJoin(prosesstriggerTidslinje, StandardCombinators::union)
             .crossJoin(utvidetRevurderingPerioder, StandardCombinators::union)
             .crossJoin(personopplysningTidslinje, StandardCombinators::union)
             .crossJoin(datoNyeReglerTidslinje, StandardCombinators::union)
+            .crossJoin(overstyrtUttakTidslinje, StandardCombinators::union)
             .compress();
 
         tidslinje = fyllMellomromDersomKunHelg(tidslinje).compress();
         return tidslinje;
+    }
+
+    private LocalDateTimeline<Set<EndringsårsakUtbetaling>> finnOverstyrtUttakTidslinje(BehandlingReferanse behandlingReferanse) {
+        return overstyrUttakTjeneste.finnEndretTidslinjeFraOriginalBehandling(behandlingReferanse).mapValue(it -> Set.of(ENDRING_I_UTTAK_OVERSTYRING));
     }
 
     private <T> NavigableSet<DatoIntervallEntitet> finnPerioderRelevantForAktuellVilkårsperiode(BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsperiode, LocalDateTimeline<T> tidslinje) {
@@ -225,13 +236,13 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
         };
     }
 
-    private LocalDateTimeline<EndringsårsakUtbetaling> finnTidslinjeFraProsessTriggere(BehandlingReferanse behandlingReferanse) {
+    private LocalDateTimeline<Set<EndringsårsakUtbetaling>> finnTidslinjeFraProsessTriggere(BehandlingReferanse behandlingReferanse) {
         var prosessTriggere = prosessTriggereRepository.hentGrunnlag(behandlingReferanse.getBehandlingId());
         var perioderFraTriggere = prosessTriggere.stream().flatMap(it -> it.getTriggere().stream())
             .filter(it -> ENDRET_FORDELING_ÅRSAKER.contains(it.getÅrsak()))
-            .map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), mapTilÅrsak(it.getÅrsak())))
+            .map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), Set.of(mapTilÅrsak(it.getÅrsak()))))
             .collect(Collectors.toSet());
-        return new LocalDateTimeline<>(perioderFraTriggere);
+        return new LocalDateTimeline<>(perioderFraTriggere, StandardCombinators::union);
     }
 
     private EndringsårsakUtbetaling mapTilÅrsak(BehandlingÅrsakType årsak) {
@@ -239,7 +250,7 @@ public class PleiepengerEndretUtbetalingPeriodeutleder implements EndretUtbetali
             case RE_ENDRET_FORDELING -> ENDRET_FORDELING_PROSESS_TRIGGER;
             case RE_ENDRING_FRA_ANNEN_OMSORGSPERSON -> ENDRING_FRA_ANNEN_OMSORGSPERSON_PROSESS_TRIGGER;
             case RE_GJENOPPTAR_UTSATT_BEHANDLING -> GJENOPPTAR_UTSATT_BEHANDLING_PROSESS_TRIGGER;
-            default -> null;
+            default -> throw new IllegalArgumentException("Fikk BehandlingÅrsakType som ikke er mappet til endringsårsak: " + årsak);
         };
     }
 

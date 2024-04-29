@@ -102,7 +102,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         }
 
         perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraProsessTriggere(referanse));
-        perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse, utledFullstendigePerioder(behandling.getId())));
+        perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse, finnKomprimertePerioderFraKantIKantVurderer(behandling)));
         perioderTilVurdering.addAll(perioderSomSkalTilbakestilles(behandlingId));
 
         return vilkår.getPerioder()
@@ -188,12 +188,20 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
                 .map(it -> new PeriodeMedÅrsak(it.getPeriode(), BehandlingÅrsakType.RE_UTSATT_BEHANDLING))
                 .toList());
         }
-        periodeMedÅrsaks.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse, utledFullstendigePerioder(behandling.getId()))
+
+        periodeMedÅrsaks.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse, finnKomprimertePerioderFraKantIKantVurderer(behandling))
             .stream()
             .map(it -> new PeriodeMedÅrsak(it, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING))
             .collect(Collectors.toSet()));
 
         return periodeMedÅrsaks;
+    }
+
+    private NavigableSet<DatoIntervallEntitet> finnKomprimertePerioderFraKantIKantVurderer(Behandling behandling) {
+        var fullstendigePerioder = utledFullstendigePerioder(behandling.getId());
+        var periodetidslinje = TidslinjeUtil.tilTidslinjeKomprimert(fullstendigePerioder);
+        var sammenhengendeTidslinje = periodetidslinje.compress((d1, d2) -> getKantIKantVurderer().erKantIKant(DatoIntervallEntitet.fra(d1), DatoIntervallEntitet.fra(d2)), Boolean::equals, StandardCombinators::alwaysTrueForMatch);
+        return sammenhengendeTidslinje.getLocalDateIntervals().stream().map(DatoIntervallEntitet::fra).collect(Collectors.toCollection(TreeSet::new));
     }
 
     private NavigableSet<PeriodeMedÅrsak> finnBerørtePerioderPåPleietrengende(BehandlingReferanse referanse) {

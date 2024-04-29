@@ -69,7 +69,7 @@ public class StartRepubliseringInnsynTask implements ProsessTaskHandler {
         pd.setProperty(ANTALL_PER_KJØRING_PROP,
             Optional.ofNullable(prosessTaskData.getPropertyValue(ANTALL_PER_KJØRING_PROP))
                 .orElse("1000"));
-        pd.setPrioritet(150);
+        pd.setPrioritet(0);
         prosessTaskTjeneste.lagre(pd);
 
 

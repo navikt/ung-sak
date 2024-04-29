@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.log.mdc.MDCOperations;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -28,26 +27,20 @@ public class AutomatiskEtterkontrollBatchTask implements ProsessTaskHandler {
     private BehandlingRepository behandlingRepository;
     private EtterkontrollRepository repository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
-    private boolean aktiverAutomatiskEtterkontrollBatch;
 
     public AutomatiskEtterkontrollBatchTask() {}
 
     @Inject
     public AutomatiskEtterkontrollBatchTask(BehandlingRepositoryProvider repositoryProvider,
                                             EtterkontrollRepository repository,
-                                            ProsessTaskTjeneste prosessTaskTjeneste,
-                                            @KonfigVerdi(value = "AKTIVER_AUTOMATISK_ETTERKONTROLL", defaultVerdi = "true") boolean aktiverAutomatiskEtterkontrollBatch) {
+                                            ProsessTaskTjeneste prosessTaskTjeneste) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.repository = repository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
-        this.aktiverAutomatiskEtterkontrollBatch = aktiverAutomatiskEtterkontrollBatch;
     }
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
-        if (!aktiverAutomatiskEtterkontrollBatch) {
-            return;
-        }
 
         var etterkontroller = repository.finnKandidaterForAutomatiskEtterkontroll();
 
@@ -71,7 +64,7 @@ public class AutomatiskEtterkontrollBatchTask implements ProsessTaskHandler {
         var behandling = behandlingRepository.hentBehandling(kandidat.getBehandlingId());
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         prosessTaskData.setSekvens("1");
-        prosessTaskData.setPrioritet(100);
+        prosessTaskData.setPrioritet(1);
         prosessTaskData.setProperty(AutomatiskEtterkontrollTask.ETTERKONTROLL_ID, kandidat.getId().toString());
         // unik per task da det er ulike tasks for hver behandling
         prosessTaskData.setCallId(callId);

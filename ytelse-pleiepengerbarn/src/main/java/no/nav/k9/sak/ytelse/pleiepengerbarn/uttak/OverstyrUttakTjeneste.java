@@ -9,10 +9,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -82,12 +82,34 @@ public class OverstyrUttakTjeneste {
 
     }
 
+
+    /**
+     * Utleder tidslinje som angir endrede perioder i overstyring fra original behandling. Dersom behandlingen ikke er revurdering eller det aldri har blitt overstyrt før, returneres hele den overstyrte tidslinjen i denne behandlingen.
+     *
+     * @param behandlingReferanse Behandlingreferanse
+     * @return Endret tidslinje for overstyring
+     */
+    public LocalDateTimeline<Boolean> finnEndretTidslinjeFraOriginalBehandling(BehandlingReferanse behandlingReferanse) {
+        var overstyrtUttak = overstyrUttakRepository.hentOverstyrtUttak(behandlingReferanse.getBehandlingId());
+        var originalOverstyrtUttak = behandlingReferanse.getOriginalBehandlingId().map(id -> overstyrUttakRepository.hentOverstyrtUttak(id)).orElse(LocalDateTimeline.empty());
+        var erEndretOverstyringTidslinje = overstyrtUttak.combine(originalOverstyrtUttak, OverstyrUttakTjeneste::erEndret, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        return erEndretOverstyringTidslinje.filterValue(v -> v);
+    }
+
+    private static LocalDateSegment<Boolean> erEndret(LocalDateInterval di, LocalDateSegment<OverstyrtUttakPeriode> lhs, LocalDateSegment<OverstyrtUttakPeriode> rhs) {
+        if (lhs == null || rhs == null || !lhs.getValue().equals(rhs.getValue())) {
+            return new LocalDateSegment<>(di, Boolean.TRUE);
+        }
+        return new LocalDateSegment<>(di, Boolean.FALSE);
+    }
+
     private LocalDateTimeline<OverstyrtUttakPeriode> finnOverstyrtUttakTilVurdering(BehandlingReferanse behandlingReferanse) {
         var periodeTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjeneste, behandlingReferanse.getFagsakYtelseType(), behandlingReferanse.getBehandlingType());
         var perioderTilVurdering = new LocalDateTimeline<>(periodeTjeneste.utledFraDefinerendeVilkår(behandlingReferanse.getBehandlingId()).stream().map(p -> new LocalDateSegment<>(p.toLocalDateInterval(), Boolean.TRUE)).collect(Collectors.toSet()));
         var overstyrtUttak = overstyrUttakRepository.hentOverstyrtUttak(behandlingReferanse.getBehandlingId());
         return overstyrtUttak.intersection(perioderTilVurdering);
     }
+
 
     private LocalDateSegmentCombinator<OverstyrtUttakPeriode, UttaksperiodeInfo, OverstyrtUttakPeriode> ryddSegmenterMotUttaksplan() {
         return (di, lhs, rhs) -> {

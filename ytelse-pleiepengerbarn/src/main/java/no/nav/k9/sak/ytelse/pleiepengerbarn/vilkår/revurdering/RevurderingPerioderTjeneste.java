@@ -23,13 +23,12 @@ import no.nav.k9.sak.perioder.PeriodeMedÅrsak;
 import no.nav.k9.sak.trigger.ProsessTriggere;
 import no.nav.k9.sak.trigger.ProsessTriggereRepository;
 import no.nav.k9.sak.trigger.Trigger;
-import no.nav.k9.sak.typer.Saksnummer;
 
 @ApplicationScoped
 public class RevurderingPerioderTjeneste {
 
     private static final long CACHE_ELEMENT_LIVE_TIME_MS = TimeUnit.MILLISECONDS.convert(2, TimeUnit.HOURS);
-    private final LRUCache<Saksnummer, InntektsmeldingerOgPerioderCacheEntry> cache = new LRUCache<>(1000, CACHE_ELEMENT_LIVE_TIME_MS);
+    private final LRUCache<Long, InntektsmeldingerOgPerioderCacheEntry> cache = new LRUCache<>(1000, CACHE_ELEMENT_LIVE_TIME_MS);
     private MottatteDokumentRepository mottatteDokumentRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private ProsessTriggereRepository prosessTriggereRepository;
@@ -84,7 +83,7 @@ public class RevurderingPerioderTjeneste {
             return new TreeSet<>();
         }
 
-        var cacheEntry = cache.get(referanse.getSaksnummer());
+        var cacheEntry = cache.get(referanse.getBehandlingId());
 
         // Checke cache
         // if OK, return
@@ -99,7 +98,7 @@ public class RevurderingPerioderTjeneste {
         var påvirketTidslinje = revurderingInntektsmeldingPeriodeTjeneste.utledTidslinjeForVurderingFraInntektsmelding(referanse, sakInntektsmeldinger, mottatteInntektsmeldinger, datoIntervallEntitets);
         var perioder = påvirketTidslinje.getLocalDateIntervals().stream().map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFomDato(), it.getTomDato()))
             .collect(Collectors.toCollection(TreeSet::new));
-        cache.put(referanse.getSaksnummer(), new InntektsmeldingerOgPerioderCacheEntry(
+        cache.put(referanse.getBehandlingId(), new InntektsmeldingerOgPerioderCacheEntry(
             mottatteInntektsmeldinger.stream().map(MottattDokument::getJournalpostId).collect(Collectors.toSet()),
             perioder
         ));

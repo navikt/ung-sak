@@ -11,6 +11,7 @@ on:
       - 'CODEOWNERS'
       - '.github/*.yml'
 
+
 jobs:
   build-app:
     name: Build
@@ -46,7 +47,7 @@ jobs:
     name: Deploy dev
     permissions:
       id-token: write
-      contents: read
+      contents: write
     if: github.ref_name == 'master'
     needs: [build-app, verdikjede-tester]
     uses: navikt/sif-gha-workflows/.github/workflows/maven-deploy.yml@main
@@ -61,7 +62,7 @@ jobs:
     name: Deploy prod
     permissions:
       id-token: write
-      contents: read
+      contents: write
     if: github.ref_name == 'master'
     needs: [build-app, verdikjede-tester, deploy-dev]
     uses: navikt/sif-gha-workflows/.github/workflows/maven-deploy.yml@main
