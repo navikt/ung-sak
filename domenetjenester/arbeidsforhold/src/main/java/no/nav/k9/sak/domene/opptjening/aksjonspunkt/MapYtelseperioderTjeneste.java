@@ -1,5 +1,23 @@
 package no.nav.k9.sak.domene.opptjening.aksjonspunkt;
 
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
+import no.nav.k9.felles.util.Tuple;
+import no.nav.k9.kodeverk.Fagsystem;
+import no.nav.k9.kodeverk.arbeidsforhold.Arbeidskategori;
+import no.nav.k9.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
+import no.nav.k9.sak.domene.iay.modell.Ytelse;
+import no.nav.k9.sak.domene.iay.modell.YtelseAnvist;
+import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
+import no.nav.k9.sak.domene.iay.modell.YtelseGrunnlag;
+import no.nav.k9.sak.domene.iay.modell.YtelseStørrelse;
+import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurdering;
+import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -11,29 +29,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import no.nav.k9.felles.konfigurasjon.konfig.Tid;
-import no.nav.k9.felles.util.Tuple;
-import no.nav.k9.kodeverk.Fagsystem;
-import no.nav.k9.kodeverk.arbeidsforhold.Arbeidskategori;
-import no.nav.k9.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
-import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
-import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
-import no.nav.k9.sak.domene.iay.modell.Ytelse;
-import no.nav.k9.sak.domene.iay.modell.YtelseAnvist;
-import no.nav.k9.sak.domene.iay.modell.YtelseFilter;
-import no.nav.k9.sak.domene.iay.modell.YtelseGrunnlag;
-import no.nav.k9.sak.domene.iay.modell.YtelseStørrelse;
-import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurdering;
-import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
-import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.Arbeidsgiver;
 
 public class MapYtelseperioderTjeneste {
 
@@ -53,7 +48,7 @@ public class MapYtelseperioderTjeneste {
         }
         LocalDate tom = ytelseAnvist.getAnvistTOM();
         if (tom != null && !Tid.TIDENES_ENDE.equals(tom)) {
-            if (Set.of(Fagsystem.INFOTRYGD, Fagsystem.K9SAK, Fagsystem.FPSAK).contains(ytelse.getKilde())
+            if (Set.of(Fagsystem.INFOTRYGD, Fagsystem.K9SAK, Fagsystem.FPSAK, Fagsystem.VLSP).contains(ytelse.getKilde())
                 && DayOfWeek.THURSDAY.getValue() < DayOfWeek.from(tom).getValue()) {
                 tom = tom.plusDays((long) DayOfWeek.SUNDAY.getValue() - DayOfWeek.from(tom).getValue());
             }
@@ -79,7 +74,6 @@ public class MapYtelseperioderTjeneste {
                                                                        OpptjeningAktivitetVurdering vurderOpptjening,
                                                                        boolean skalIkkeTaMedEgenSak,
                                                                        YtelseFilter ytelseFilter) {
-        AktørId aktørId = behandlingReferanse.getAktørId();
         List<OpptjeningsperiodeForSaksbehandling> ytelsePerioder = new ArrayList<>();
         ytelseFilter.getFiltrertYtelser().stream()
             .filter(ytelse -> !(Fagsystem.INFOTRYGD.equals(ytelse.getKilde()) && RelatertYtelseTilstand.ÅPEN.equals(ytelse.getStatus())))
@@ -104,32 +98,32 @@ public class MapYtelseperioderTjeneste {
             .filter(Objects::nonNull)
             .toList();
 
-        var input = new VurderStatusInput(type, behandlingReferanse);
-        var vurderingsstatus = vurderForSaksbehandling.vurderStatus(input);
 
         if (!ytelse.getYtelseAnvist().isEmpty()) {
+            var ytelseAnvistAktivitetMapper = new YtelseAnvistAktivitetMapper(vurderForSaksbehandling, behandlingReferanse, vilkårsPeriode, type, ytelse);
             ytelse.getYtelseAnvist()
                 .stream()
-                .flatMap(ytelseAnvist -> mapAnvisning(ytelseAnvist, ytelse, type, orgnumre, vurderingsstatus))
+                .flatMap(ytelseAnvist -> ytelseAnvistAktivitetMapper.mapAnvisning(ytelseAnvist, orgnumre).stream())
                 .forEach(ytelserAnvist::add);
         } else if (erDagpengerIVentetiden(ytelse, vilkårsPeriode)) {
             // Dagpenger i ventetiden skal gi opptjening på lik linje med utbetalte dagpenger
             var dagpengerIVentetiden = OpptjeningsperiodeForSaksbehandling.Builder.ny()
                 .medPeriode(ytelse.getPeriode())
                 .medOpptjeningAktivitetType(type)
-                .medVurderingsStatus(vurderingsstatus);
+                .medVurderingsStatus(vurderForSaksbehandling.vurderStatus(lagInput(type, behandlingReferanse, vilkårsPeriode, ytelse.getPeriode())));
             ytelserAnvist.add(dagpengerIVentetiden.build());
         }
 
         return ytelserAnvist;
     }
 
-    /** Avgjør om ytelse gjelder dagpenger i ventetiden
-     *
+    /**
+     * Avgjør om ytelse gjelder dagpenger i ventetiden
+     * <p>
      * De tre første dagene av dagpengene kalles ventetid og gir ingen utbetaling av dagpenger.
      * Søker vil dermed ikke ha meldekort dersom oppstart av pleiepenger er i løpet av denne perioden.
      *
-     * @param ytelse Ytelse
+     * @param ytelse         Ytelse
      * @param vilkårsPeriode
      * @return Er dagpenger i ventetiden
      */
@@ -140,40 +134,18 @@ public class MapYtelseperioderTjeneste {
             DatoIntervallEntitet.fraOgMedTilOgMed(ytelse.getPeriode().getFomDato(), vilkårsPeriode.getFomDato().minusDays(1)).antallArbeidsdager() <= 3;
     }
 
-    private Stream<OpptjeningsperiodeForSaksbehandling> mapAnvisning(YtelseAnvist ytelseAnvist, Ytelse ytelse,
-                                                                     OpptjeningAktivitetType type,
-                                                                     List<String> orgnumre,
-                                                                     VurderingsStatus vurderingsstatus) {
-        if (orgnumre.isEmpty()) {
-            return mapAnvisningUtenOrgnr(ytelseAnvist, ytelse, type, vurderingsstatus);
-        } else {
-            return orgnumre.stream().map(orgnr -> mapAnvisningForOrgnr(ytelseAnvist, ytelse, type, vurderingsstatus, orgnr));
-        }
-    }
 
-    private Stream<OpptjeningsperiodeForSaksbehandling> mapAnvisningUtenOrgnr(YtelseAnvist ytelseAnvist, Ytelse ytelse, OpptjeningAktivitetType type, VurderingsStatus vurderingsstatus) {
-        OpptjeningsperiodeForSaksbehandling.Builder builder = OpptjeningsperiodeForSaksbehandling.Builder.ny()
-            .medPeriode(hentUtDatoIntervall(ytelse, ytelseAnvist))
-            .medOpptjeningAktivitetType(type)
-            .medVurderingsStatus(vurderingsstatus);
-        return Stream.of(builder.build());
-    }
-
-    private OpptjeningsperiodeForSaksbehandling mapAnvisningForOrgnr(YtelseAnvist ytelseAnvist, Ytelse ytelse, OpptjeningAktivitetType type, VurderingsStatus vurderingsstatus, String orgnr) {
-        OpptjeningsperiodeForSaksbehandling.Builder builder = OpptjeningsperiodeForSaksbehandling.Builder.ny()
-            .medPeriode(hentUtDatoIntervall(ytelse, ytelseAnvist))
-            .medOpptjeningAktivitetType(type)
-            .medArbeidsgiver(Arbeidsgiver.virksomhet(orgnr))
-            .medOpptjeningsnøkkel(Opptjeningsnøkkel.forOrgnummer(orgnr))
-            .medVurderingsStatus(vurderingsstatus);
-        return builder.build();
+    private VurderStatusInput lagInput(OpptjeningAktivitetType type, BehandlingReferanse behandlingReferanse, DatoIntervallEntitet vilkårsPeriode, DatoIntervallEntitet periode) {
+        var input = new VurderStatusInput(type, behandlingReferanse);
+        input.setVilkårsperiode(vilkårsPeriode);
+        input.setAktivitetPeriode(periode);
+        return input;
     }
 
     public static OpptjeningAktivitetType mapYtelseType(Ytelse ytelse) {
 
         if (!FagsakYtelseType.RELATERT_YTELSE_TYPER_FOR_SØKER.contains(ytelse.getYtelseType())) {
-            return OpptjeningAktivitetType.hentFraTemaUnderkategori()
-                .getOrDefault(ytelse.getBehandlingsTema(), Collections.singleton(UDEFINERT)).stream().findFirst().orElse(UDEFINERT);
+            return UDEFINERT;
         }
 
         if (FagsakYtelseType.SYKEPENGER.equals(ytelse.getYtelseType())) {
@@ -211,7 +183,7 @@ public class MapYtelseperioderTjeneste {
     }
 
     private Tuple<OpptjeningAktivitetType, String> finnYtelseDiskriminator(OpptjeningsperiodeForSaksbehandling ytelse) {
-        String retOrgnr = ytelse.getOrgnr() != null ? ytelse.getOrgnr() : UTEN_ORGNR;
+        String retOrgnr = ytelse.getArbeidsgiver() != null ? ytelse.getArbeidsgiver().getIdentifikator() : UTEN_ORGNR;
         return new Tuple<>(ytelse.getOpptjeningAktivitetType(), retOrgnr);
     }
 
@@ -229,7 +201,7 @@ public class MapYtelseperioderTjeneste {
         OpptjeningsperiodeForSaksbehandling next;
         while (iterator.hasNext()) {
             next = iterator.next();
-            if (erKantIKantPåTversAvHelg(prev.getPeriode(), next.getPeriode())) {
+            if (erKantIKantPåTversAvHelg(prev.getPeriode(), next.getPeriode()) && harSammeVurderingsstatus(prev, next)) {
                 prev = slåSammenToPerioder(prev, next);
             } else {
                 fusjonert.add(prev);
@@ -238,6 +210,10 @@ public class MapYtelseperioderTjeneste {
         }
         fusjonert.add(prev);
         return fusjonert;
+    }
+
+    private static boolean harSammeVurderingsstatus(OpptjeningsperiodeForSaksbehandling prev, OpptjeningsperiodeForSaksbehandling next) {
+        return prev.getVurderingsStatus().equals(next.getVurderingsStatus());
     }
 
     boolean erKantIKantPåTversAvHelg(DatoIntervallEntitet periode1, DatoIntervallEntitet periode2) {

@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.PersonIdent;
 
 @Dependent
@@ -36,7 +37,7 @@ public class InfotrygdPårørendeSykdomService {
         if (!fnrSoekere.isEmpty()) {
             log.info("Antall andre parter i infotrygd: " + fnrSoekere.size());
         }
-        var hentGrunnlagRequest = new PersonRequest(request.getFraOgMed(), request.getTilOgMed(), fnrSoekere);
+        var hentGrunnlagRequest = new PersonRequest(request.getFraOgMed(), request.getTilOgMed(), fnrSoekere, true);
         List<PårørendeSykdom> grunnlagliste = client.getGrunnlagForPleietrengende(hentGrunnlagRequest);
 
         var relevanteGrunnlagPrSøker = grunnlagliste.stream()
@@ -50,12 +51,26 @@ public class InfotrygdPårørendeSykdomService {
         return relevanteGrunnlagPrSøker;
     }
 
+    public List<Periode> hentRelevanteGrunnlagsperioderForPleietrengende(InfotrygdPårørendeSykdomRequest request, String pleietrengendeFnr) {
+        List<PårørendeSykdom> grunnlag = client.getGrunnlagForPleietrengende(new PersonRequest(request.getFraOgMed(), request.getTilOgMed(), List.of(request.getFødselsnummer()), true));
+        log.info("Tema fra infotrygd: {}", grunnlag.stream().map(gr -> gr.tema().getKode()).collect(Collectors.toList()));
+        log.info("Behandlingstema fra infotrygd: {}", grunnlag.stream().map(gr -> gr.behandlingstema().getKode()).collect(Collectors.toList()));
+        return grunnlag.stream()
+            .filter(gr -> erRelevant(gr, request.getRelevanteBehandlingstemaer()))
+            .filter(gr -> Objects.equals(gr.foedselsnummerPleietrengende(), pleietrengendeFnr))
+            .collect(Collectors.flatMapping(mapTilPeriode(), Collectors.toList()));
+    }
+
     private Function<PårørendeSykdom, Stream<PeriodeMedBehandlingstema>> mapTilPeriodeMedBehandlingstema() {
         return gr -> gr.vedtak().stream().map(v -> new PeriodeMedBehandlingstema(v.periode(), gr.behandlingstema().getKode()));
     }
 
+    private Function<PårørendeSykdom, Stream<Periode>> mapTilPeriode() {
+        return gr -> gr.vedtak().stream().map(VedtakPårørendeSykdomInfotrygd::periode);
+    }
+
     private List<VedtakPleietrengende> hentRelevantePleietrengendeVedtakIInfotrygd(InfotrygdPårørendeSykdomRequest request) {
-        List<VedtakPleietrengende> response = client.getVedtakForPleietrengende(new PersonRequest(request.getFraOgMed(), request.getTilOgMed(), List.of(request.getFødselsnummer())));
+        List<VedtakPleietrengende> response = client.getVedtakForPleietrengende(new PersonRequest(request.getFraOgMed(), request.getTilOgMed(), List.of(request.getFødselsnummer()), true));
 
         List<VedtakPleietrengende> vedtak = new ArrayList<>();
         for (VedtakPleietrengende vp : response) {

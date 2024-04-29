@@ -827,6 +827,14 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     }
 
     @SuppressWarnings("unchecked")
+    public S medPleietrengende(AktørId aktørId) {
+        fagsakBuilder
+            .medPleietrengende(aktørId);
+
+        return (S) this;
+    }
+
+    @SuppressWarnings("unchecked")
     public S medBehandlingStegStart(BehandlingStegType startSteg) {
         this.startSteg = startSteg;
         return (S) this;

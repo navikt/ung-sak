@@ -123,6 +123,9 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
 
         var dtoer = brpTimline.toSegments().stream()
             .map(seg -> BeregningsresultatPeriodeDto.build(seg.getFom(), seg.getTom())
+                .medTotalUtbetalingsgradFraUttak(seg.getValue().getTotalUtbetalingsgradFraUttak())
+                .medTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(seg.getValue().getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt())
+                .medReduksjonsfaktorInaktivTypeA(seg.getValue().getReduksjonsfaktorInaktivTypeA())
                 .medDagsats(seg.getValue().getDagsats())
                 .medAndeler(lagAndeler(seg.getValue(), andelTilSisteUtbetalingsdatoMap, iayGrunnlag))
                 .create())
@@ -217,6 +220,8 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
                     .medRefusjon(arbeidsgiversAndel.map(BeregningsresultatAndel::getDagsats).orElse(0))
                     .medTilSøker(brukersAndel.getDagsats())
                     .medUtbetalingsgrad(brukersAndel.getUtbetalingsgrad())
+                    .medUtbetalingsgradOppdragForBruker(brukersAndel.getUtbetalingsgradOppdrag())
+                    .medUtbetalingsgradOppdragForRefusjon(arbeidsgiversAndel.map(BeregningsresultatAndel::getUtbetalingsgradOppdrag).orElse(null))
                     .medSisteUtbetalingsdato(andelTilSisteUtbetalingsdatoMap.getOrDefault(genererAndelKey(brukersAndel), Optional.empty()).orElse(null))
                     .medAktivitetstatus(brukersAndel.getAktivitetStatus())
                     .medInntektskategori(brukersAndel.getInntektskategori())

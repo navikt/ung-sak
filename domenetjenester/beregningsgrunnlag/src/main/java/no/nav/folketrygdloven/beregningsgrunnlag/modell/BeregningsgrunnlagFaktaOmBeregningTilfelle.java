@@ -2,10 +2,13 @@ package no.nav.folketrygdloven.beregningsgrunnlag.modell;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
 
 public class BeregningsgrunnlagFaktaOmBeregningTilfelle {
 
+    @JsonBackReference
     private Beregningsgrunnlag beregningsgrunnlag;
     private FaktaOmBeregningTilfelle faktaOmBeregningTilfelle = FaktaOmBeregningTilfelle.UDEFINERT;
     public FaktaOmBeregningTilfelle getFaktaOmBeregningTilfelle() {

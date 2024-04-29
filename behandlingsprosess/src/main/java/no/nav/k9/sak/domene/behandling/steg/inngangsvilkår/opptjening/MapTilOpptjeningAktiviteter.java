@@ -14,24 +14,17 @@ import no.nav.k9.sak.inngangsvilkår.opptjening.regelmodell.Aktivitet;
 
 public class MapTilOpptjeningAktiviteter {
 
-    public MapTilOpptjeningAktiviteter() {
-    }
-
-    public List<OpptjeningAktivitet> map(Map<Aktivitet, LocalDateTimeline<Boolean>> perioder,
-            OpptjeningAktivitetKlassifisering klassifiseringType) {
+    public List<OpptjeningAktivitet> map(Map<Aktivitet, LocalDateTimeline<Boolean>> perioder, OpptjeningAktivitetKlassifisering klassifiseringType) {
         // slå opp fra kodeverk for å sikre instans fra db.
         OpptjeningAktivitetKlassifisering klassifisering = OpptjeningAktivitetKlassifisering.fraKode(klassifiseringType.getKode());
         List<OpptjeningAktivitet> opptjeningAktivitet = new ArrayList<>();
         for (Map.Entry<Aktivitet, LocalDateTimeline<Boolean>> entry : perioder.entrySet()) {
+            Aktivitet key = entry.getKey();
+            OpptjeningAktivitetType aktType = OpptjeningAktivitetType.fraKode(key.getAktivitetType());
+            String aktivitetReferanse = key.getAktivitetReferanse();
+            ReferanseType refType = getAktivitetReferanseType(aktivitetReferanse, key);
             for (LocalDateSegment<Boolean> seg : entry.getValue().toSegments()) {
-                Aktivitet key = entry.getKey();
-                OpptjeningAktivitetType aktType = OpptjeningAktivitetType.fraKode(key.getAktivitetType());
-                String aktivitetReferanse = key.getAktivitetReferanse();
-                ReferanseType refType = getAktivitetReferanseType(aktivitetReferanse, key);
-
-                OpptjeningAktivitet oppAkt = new OpptjeningAktivitet(seg.getFom(), seg.getTom(), aktType, klassifisering,
-                        aktivitetReferanse, refType);
-                opptjeningAktivitet.add(oppAkt);
+                opptjeningAktivitet.add(new OpptjeningAktivitet(seg.getFom(), seg.getTom(), aktType, klassifisering, aktivitetReferanse, refType));
             }
         }
         return opptjeningAktivitet;

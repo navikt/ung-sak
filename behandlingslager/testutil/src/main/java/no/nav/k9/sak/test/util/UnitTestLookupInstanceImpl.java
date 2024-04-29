@@ -3,6 +3,7 @@ package no.nav.k9.sak.test.util;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Set;
 
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.util.TypeLiteral;
@@ -51,6 +52,16 @@ public class UnitTestLookupInstanceImpl<T> implements Instance<T> {
 
     @Override
     public void destroy(T t) {
+    }
+
+    @Override
+    public Handle<T> getHandle() {
+        return null;
+    }
+
+    @Override
+    public Iterable<? extends Handle<T>> handles() {
+        return Set.of();
     }
 
     @Override

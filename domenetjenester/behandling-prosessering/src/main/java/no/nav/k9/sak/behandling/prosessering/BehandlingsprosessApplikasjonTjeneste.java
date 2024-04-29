@@ -96,6 +96,18 @@ public class BehandlingsprosessApplikasjonTjeneste {
     }
 
     /**
+     * Innhent registeropplysninger og kjør prosess asynkront.
+     *
+     * @return Prosess Task gruppenavn som kan brukes til å sjekke fremdrift
+     */
+    public String asynkInnhentingAvRegisteropplysningerOgKjørProsess(Behandling behandling, boolean forceInnhent) {
+        ProsessTaskGruppe gruppe = behandlingProsesseringTjeneste.lagOppdaterFortsettTasksForPolling(behandling, forceInnhent);
+        String gruppeNavn = prosesseringAsynkTjeneste.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(behandling.getFagsakId(), String.valueOf(behandling.getId()),
+            gruppe);
+        return gruppeNavn;
+    }
+
+    /**
      * Gjenoppta behandling, start innhenting av registeropplysninger på nytt og kjør prosess hvis nødvendig.
      *
      * @return gruppenavn (prosesstask) hvis noe startet asynkront.

@@ -51,7 +51,9 @@ public class BehandlingProsessHendelse {
     @JsonProperty(value = "fagsystem", required = true)
     private Fagsystem fagsystem;
 
-    /** Eventuell frist for behandlingen. */
+    /**
+     * Eventuell frist for behandlingen.
+     */
     @Valid
     @JsonProperty(value = "behandlingstidFrist", required = false)
     private LocalDate behandlingstidFrist;
@@ -63,7 +65,9 @@ public class BehandlingProsessHendelse {
     @JsonProperty(value = "saksnummer", required = true)
     private String saksnummer;
 
-    /** Brukers aktørId. */
+    /**
+     * Brukers aktørId.
+     */
     @NotNull
     @Valid
     @Pattern(regexp = "^[\\p{Alnum}\\p{L}\\p{N}\\-_.]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
@@ -80,20 +84,26 @@ public class BehandlingProsessHendelse {
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime eventTid;
 
-    /** Beskrivelse av hendelse ({@link EventHendelse}). */
+    /**
+     * Beskrivelse av hendelse ({@link EventHendelse}).
+     */
     @NotNull
     @Valid
     @JsonProperty(value = "eventHendelse", required = true)
     private EventHendelse eventHendelse;
 
-    /** Nåværende {@link BehandlingStatus} for behandling. */
+    /**
+     * Nåværende {@link BehandlingStatus} for behandling.
+     */
     @NotNull
     @Pattern(regexp = "^[\\p{Alnum}\\p{L}\\p{N}\\-_.]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     @JsonProperty(value = "behandlingStatus", required = true)
     private String behandlingStatus;
 
-    /** Hvilket {@link BehandlingStegType} behandlingen står i p.t.. */
+    /**
+     * Hvilket {@link BehandlingStegType} behandlingen står i p.t..
+     */
     @Valid
     @JsonProperty(value = "behandlingSteg", required = false)
     private String behandlingSteg;
@@ -104,14 +114,18 @@ public class BehandlingProsessHendelse {
     @JsonProperty(value = "behandlendeEnhet", required = false)
     private String behandlendeEnhet;
 
-    /** Ident for saksbehandler ansvarlig for totrinn (beslutter rolle). */
+    /**
+     * Ident for saksbehandler ansvarlig for totrinn (beslutter rolle).
+     */
     @Valid
     @Size(max = 50)
     @Pattern(regexp = "^[\\p{Alnum}\\p{L}\\p{N}\\-_.]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @JsonProperty(value = "ansvarligBeslutterForTotrinn", required = false)
     private String ansvarligBeslutterForTotrinn;
 
-    /** Ident for saksbehandler ansvarlig for totrinn (saksbehandler rolle). */
+    /**
+     * Ident for saksbehandler ansvarlig for totrinn (saksbehandler rolle).
+     */
     @Valid
     @Size(max = 50)
     @Pattern(regexp = "^[\\p{Alnum}\\p{L}\\p{N}\\-_.]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
@@ -144,6 +158,12 @@ public class BehandlingProsessHendelse {
     @JsonProperty(value = "behandlingTypeKode", required = true)
     private String behandlingTypeKode;
 
+    @JsonSerialize(using = ToStringSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @Valid
+    @JsonProperty(value = "eldsteDatoMedEndringFraSøker", required = true)
+    private LocalDateTime eldsteDatoMedEndringFraSøker;
+
     /**
      * Tidspunkt behandling ble opprettet
      */
@@ -162,17 +182,23 @@ public class BehandlingProsessHendelse {
     @JsonProperty(value = "aksjonspunktKoderMedStatusListe", required = true)
     private Map<String, String> aksjonspunktKoderMedStatusListe;
 
-    /** @NotNull produseres alltid, men er nullable for kompatiblitet med eldre versjoner */
+    /**
+     * @NotNull produseres alltid, men er nullable for kompatiblitet med eldre versjoner
+     */
     @Valid
     @JsonProperty(value = "fagsakPeriode", required = false)
     private Periode fagsakPeriode;
 
-    /** (Optional) AktørId for angitt pleietrengende (barn, eller nærstående). */
+    /**
+     * (Optional) AktørId for angitt pleietrengende (barn, eller nærstående).
+     */
     @Valid
     @JsonProperty(value = "pleietrengendeAktørId")
     private AktørId pleietrengendeAktørId;
 
-    /** (Optional) AktørId for angitt relatert annen part (eks. annen forelder. */
+    /**
+     * (Optional) AktørId for angitt relatert annen part (eks. annen forelder.
+     */
     @Valid
     @JsonProperty(value = "relatertPartAktørId", required = false)
     private AktørId relatertPartAktørId;
@@ -180,13 +206,29 @@ public class BehandlingProsessHendelse {
     @Valid
     @JsonProperty(value = "aksjonspunktTilstander", required = true)
     private List<AksjonspunktTilstandDto> aksjonspunktTilstand;
-    
+
     /**
      * {@code true} hvis det finnes minst én ny periode det er søkt om i behandlingen.
      */
     @Valid
     @JsonProperty(value = "nyeKrav", required = false)
     private Boolean nyeKrav;
+
+    @Valid
+    @JsonProperty(value = "fraEndringsdialog", required = false)
+    private Boolean fraEndringsdialog;
+
+    @Valid
+    @JsonProperty(value = "vedtaksdato", required = false)
+    private LocalDate vedtaksdato;
+
+    @Valid
+    @JsonProperty(value = "behandlingsårsaker")
+    private List<String> behandlingsårsaker;
+
+    @Valid
+    @JsonProperty(value = "søknadsårsaker")
+    private List<String> søknadsårsaker;
 
     public BehandlingProsessHendelse() {
     }
@@ -206,6 +248,7 @@ public class BehandlingProsessHendelse {
         this.resultatType = kopierFra.resultatType;
         this.behandlingTypeKode = kopierFra.behandlingTypeKode;
         this.opprettetBehandling = kopierFra.opprettetBehandling;
+        this.eldsteDatoMedEndringFraSøker = kopierFra.eldsteDatoMedEndringFraSøker;
         this.aksjonspunktKoderMedStatusListe = kopierFra.aksjonspunktKoderMedStatusListe;
         this.ansvarligSaksbehandlerForTotrinn = kopierFra.ansvarligSaksbehandlerForTotrinn;
         this.fagsakPeriode = kopierFra.fagsakPeriode;
@@ -214,6 +257,10 @@ public class BehandlingProsessHendelse {
         this.ansvarligBeslutterForTotrinn = kopierFra.ansvarligBeslutterForTotrinn;
         this.aksjonspunktTilstand = kopierFra.aksjonspunktTilstand.stream().map(AksjonspunktTilstandDto::new).toList();
         this.nyeKrav = kopierFra.nyeKrav;
+        this.vedtaksdato = kopierFra.vedtaksdato;
+        this.fraEndringsdialog = kopierFra.fraEndringsdialog;
+        this.behandlingsårsaker = kopierFra.behandlingsårsaker;
+        this.søknadsårsaker = kopierFra.søknadsårsaker;
     }
 
     public static Builder builder() {
@@ -291,9 +338,25 @@ public class BehandlingProsessHendelse {
     public List<AksjonspunktTilstandDto> getAksjonspunktTilstand() {
         return aksjonspunktTilstand;
     }
-    
+
     public boolean isNyeKrav() {
         return nyeKrav != null && nyeKrav;
+    }
+
+    public boolean isFraEndringsdialog() {
+        return fraEndringsdialog != null && fraEndringsdialog;
+    }
+
+    public List<String> getBehandlingsårsaker() {
+        return behandlingsårsaker;
+    }
+
+    public List<String> getSøknadsårsaker() {
+        return søknadsårsaker;
+    }
+
+    public LocalDate getVedtaksdato() {
+        return vedtaksdato;
     }
 
     public static class Builder {
@@ -372,6 +435,11 @@ public class BehandlingProsessHendelse {
             return this;
         }
 
+        public Builder medEldsteDatoMedEndringFraSøker(LocalDateTime eldsteDatoMedEndringFraSøker) {
+            kladd.eldsteDatoMedEndringFraSøker = eldsteDatoMedEndringFraSøker;
+            return this;
+        }
+
         public Builder medBehandlingResultat(BehandlingResultatType resultatType) {
             Objects.requireNonNull(resultatType);
             kladd.resultatType = Objects.requireNonNull(resultatType).getKode();
@@ -407,9 +475,28 @@ public class BehandlingProsessHendelse {
             kladd.aksjonspunktTilstand = aksjonspunktTilstand;
             return this;
         }
-        
+
         public Builder medNyeKrav(Boolean nyeKrav) {
             kladd.nyeKrav = nyeKrav;
+            return this;
+        }
+
+        public Builder medVedtaksdato(LocalDate vedtaksdato) {
+            kladd.vedtaksdato = vedtaksdato;
+            return this;
+        }
+
+        public Builder medFraEndringsdialog(Boolean fraEndringsdialog) {
+            kladd.fraEndringsdialog = fraEndringsdialog;
+            return this;
+        }
+
+        public Builder medBehandlingsårsaker(List<String> behandlingsårsaker) {
+            kladd.behandlingsårsaker = behandlingsårsaker;
+            return this;
+        }
+        public Builder medSøknadårsaker(List<String> søknadsårsaker) {
+            kladd.søknadsårsaker = søknadsårsaker;
             return this;
         }
 

@@ -21,7 +21,6 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
 import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
 import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -41,6 +40,7 @@ import no.nav.k9.sak.domene.behandling.steg.beregnytelse.BeregneYtelseSteg;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
+import no.nav.k9.sak.ytelse.beregning.BeregningsresultatVerifiserer;
 import no.nav.k9.sak.ytelse.beregning.FastsettBeregningsresultatTjeneste;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.UttakResultat;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
@@ -61,8 +61,6 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
     private Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste;
     private ÅrskvantumTjeneste årskvantumTjeneste;
     private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
-    private OmsorgspengerYtelseVerifiserer omsorgspengerYtelseVerifiserer;
-    private boolean enableFeriepengerPåTversAvSaker;
 
     protected OmsorgspengerBeregneYtelseSteg() {
         // for proxy
@@ -74,9 +72,7 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
                                           ÅrskvantumTjeneste årskvantumTjeneste,
                                           FastsettBeregningsresultatTjeneste fastsettBeregningsresultatTjeneste,
                                           @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste,
-                                          @FagsakYtelseTypeRef(OMSORGSPENGER) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
-                                          OmsorgspengerYtelseVerifiserer omsorgspengerYtelseVerifiserer,
-                                          @KonfigVerdi(value = "ENABLE_FERIEPENGER_PAA_TVERS_AV_SAKER_OG_PR_AAR", defaultVerdi = "true") boolean enableFeriepengerPåTversAvSaker
+                                          @FagsakYtelseTypeRef(OMSORGSPENGER) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste
     ) {
         this.årskvantumTjeneste = årskvantumTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
@@ -85,8 +81,6 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
         this.fastsettBeregningsresultatTjeneste = fastsettBeregningsresultatTjeneste;
         this.beregnFeriepengerTjeneste = beregnFeriepengerTjeneste;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
-        this.omsorgspengerYtelseVerifiserer = omsorgspengerYtelseVerifiserer;
-        this.enableFeriepengerPåTversAvSaker = enableFeriepengerPåTversAvSaker;
     }
 
     @Override
@@ -110,14 +104,10 @@ public class OmsorgspengerBeregneYtelseSteg implements BeregneYtelseSteg {
 
         // Beregn feriepenger
         var feriepengerTjeneste = FagsakYtelseTypeRef.Lookup.find(beregnFeriepengerTjeneste, ref.getFagsakYtelseType()).orElseThrow();
-        if (enableFeriepengerPåTversAvSaker) {
-            feriepengerTjeneste.beregnFeriepengerV2(beregningsresultat);
-        } else {
-            feriepengerTjeneste.beregnFeriepenger(beregningsresultat);
-        }
+        feriepengerTjeneste.beregnFeriepenger(ref, beregningsresultat);
 
         // Verifiser beregningsresultat
-        omsorgspengerYtelseVerifiserer.verifiser(behandling, beregningsresultat);
+        BeregningsresultatVerifiserer.verifiserBeregningsresultat(beregningsresultat);
         if (harUtbetalingTilBruker(beregningsresultat, vurdertePerioder)) {
             log.info("Har utbetaling til bruker: {}", beregningsresultat);
         }

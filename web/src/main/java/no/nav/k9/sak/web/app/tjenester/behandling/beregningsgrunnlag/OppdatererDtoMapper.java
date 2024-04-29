@@ -1,10 +1,8 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.fakta.FaktaOmBeregningTilfelleDto;
+import no.nav.folketrygdloven.kalkulus.håndtering.v1.fordeling.VurderTilkomneInntektsforholdPeriodeDto;
+import no.nav.folketrygdloven.kalkulus.kodeverk.AktivitetStatus;
 import no.nav.folketrygdloven.kalkulus.kodeverk.AndelKilde;
 import no.nav.folketrygdloven.kalkulus.kodeverk.Inntektskategori;
 import no.nav.k9.kodeverk.beregningsgrunnlag.FaktaOmBeregningTilfelle;
@@ -22,7 +20,6 @@ import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsatteVerdierDt
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBGTidsbegrensetArbeidsforholdDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBeregningsgrunnlagAndelDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBgKunYtelseDto;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBruttoBeregningsgrunnlagSNDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettEtterlønnSluttpakkeDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.FastsettMånedsinntektFLDto;
@@ -41,15 +38,22 @@ import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderNyoppstartet
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderSelvstendigNæringsdrivendeNyIArbeidslivetDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderTidsbegrensetArbeidsforholdDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderVarigEndring;
-import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderVarigEndringEllerNyoppstartetDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderteArbeidsforholdDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.fordeling.FordelBeregningsgrunnlagAndelDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.fordeling.FordelBeregningsgrunnlagDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.fordeling.FordelBeregningsgrunnlagPeriodeDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.fordeling.FordelFastsatteVerdierDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.fordeling.FordelRedigerbarAndelDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.fordeling.NyttInntektsforholdDto;
+import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.fordeling.VurderTilkomneInntektsforholdDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.refusjon.VurderRefusjonAndelBeregningsgrunnlagDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.refusjon.VurderRefusjonBeregningsgrunnlagDto;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 public class OppdatererDtoMapper {
@@ -66,10 +70,6 @@ public class OppdatererDtoMapper {
 
     public static no.nav.folketrygdloven.kalkulus.håndtering.v1.foreslå.FastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetDto mapFastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetDto(FastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetDto dto) {
         return new no.nav.folketrygdloven.kalkulus.håndtering.v1.foreslå.FastsettBruttoBeregningsgrunnlagSNforNyIArbeidslivetDto(dto.getBruttoBeregningsgrunnlag());
-    }
-
-    public static no.nav.folketrygdloven.kalkulus.håndtering.v1.foreslå.FastsettBruttoBeregningsgrunnlagDto mapFastsettBruttoBeregningsgrunnlagSNDto(FastsettBruttoBeregningsgrunnlagSNDto dto) {
-        return new no.nav.folketrygdloven.kalkulus.håndtering.v1.foreslå.FastsettBruttoBeregningsgrunnlagDto(dto.getBruttoBeregningsgrunnlag());
     }
 
     public static no.nav.folketrygdloven.kalkulus.håndtering.v1.fordeling.FordelBeregningsgrunnlagDto mapFordelBeregningsgrunnlagDto(FordelBeregningsgrunnlagDto dto) {
@@ -299,7 +299,7 @@ public class OppdatererDtoMapper {
 
     private static no.nav.folketrygdloven.kalkulus.håndtering.v1.avklaraktiviteter.BeregningsaktivitetLagreDto mapTilBeregningsaktivitetLagreDto(BeregningsaktivitetLagreDto beregningsaktivitetLagreDto) {
         return no.nav.folketrygdloven.kalkulus.håndtering.v1.avklaraktiviteter.BeregningsaktivitetLagreDto.builder()
-            .medArbeidsforholdRef(beregningsaktivitetLagreDto.getArbeidsforholdRef())
+            .medArbeidsforholdRef(UUID.fromString(beregningsaktivitetLagreDto.getArbeidsforholdRef()))
             .medArbeidsgiverIdentifikator(beregningsaktivitetLagreDto.getArbeidsgiverIdentifikator())
             .medFom(beregningsaktivitetLagreDto.getFom())
             .medOppdragsgiverOrg(beregningsaktivitetLagreDto.getOppdragsgiverOrg())
@@ -379,7 +379,7 @@ public class OppdatererDtoMapper {
             redigerbarAndel.getArbeidsgiverId(),
             redigerbarAndel.getArbeidsforholdId().getReferanse(),
             redigerbarAndel.getNyAndel(),
-            redigerbarAndel.getKilde() == null ? AndelKilde.PROSESS_START : AndelKilde.fraKode(redigerbarAndel.getKilde().getKode())
+            redigerbarAndel.getKilde() == null ? AndelKilde.PROSESS_START : Arrays.stream(AndelKilde.values()).filter(v -> v.getKode().equals(redigerbarAndel.getKilde().getKode())).findFirst().orElse(AndelKilde.PROSESS_START)
             );
     }
 
@@ -387,5 +387,42 @@ public class OppdatererDtoMapper {
         return new no.nav.folketrygdloven.kalkulus.håndtering.v1.fakta.RedigerbarAndelDto(
             redigerbarAndel.getAndelsnr(),
             redigerbarAndel.getLagtTilAvSaksbehandler());
+    }
+
+    public static List<VurderTilkomneInntektsforholdPeriodeDto> mapTilkomneInntektsforhold(VurderTilkomneInntektsforholdDto inntektsforholdDto) {
+        return inntektsforholdDto.getTilkomneInntektsforholdPerioder().stream().map(OppdatererDtoMapper::mapTilkommetPeriode).toList();
+    }
+
+    private static VurderTilkomneInntektsforholdPeriodeDto mapTilkommetPeriode(no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.fordeling.VurderTilkomneInntektsforholdPeriodeDto periode) {
+        var tilkomeForhold = periode.getTilkomneInntektsforhold().stream().map(OppdatererDtoMapper::mapTilkommetInntektsforhold).toList();
+        return new VurderTilkomneInntektsforholdPeriodeDto(tilkomeForhold, periode.getFom(), periode.getTom());
+    }
+
+    private static no.nav.folketrygdloven.kalkulus.håndtering.v1.fordeling.NyttInntektsforholdDto mapTilkommetInntektsforhold(NyttInntektsforholdDto forhold) {
+        return new no.nav.folketrygdloven.kalkulus.håndtering.v1.fordeling.NyttInntektsforholdDto(mapStatus(forhold.getAktivitetStatus()), forhold.getArbeidsgiverIdentifikator(),
+            forhold.getArbeidsforholdId(), forhold.getBruttoInntektPrÅr(), forhold.isSkalRedusereUtbetaling());
+    }
+
+    private static AktivitetStatus mapStatus(no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus aktivitetStatus) {
+        return switch (aktivitetStatus) {
+            case MIDLERTIDIG_INAKTIV -> AktivitetStatus.MIDLERTIDIG_INAKTIV;
+            case ARBEIDSAVKLARINGSPENGER -> AktivitetStatus.ARBEIDSAVKLARINGSPENGER;
+            case ARBEIDSTAKER, IKKE_YRKESAKTIV -> AktivitetStatus.ARBEIDSTAKER;
+            case DAGPENGER -> AktivitetStatus.DAGPENGER;
+            case SYKEPENGER_AV_DAGPENGER -> AktivitetStatus.SYKEPENGER_AV_DAGPENGER;
+            case PLEIEPENGER_AV_DAGPENGER -> AktivitetStatus.PLEIEPENGER_AV_DAGPENGER;
+            case FRILANSER -> AktivitetStatus.FRILANSER;
+            case MILITÆR_ELLER_SIVIL -> AktivitetStatus.MILITÆR_ELLER_SIVIL;
+            case SELVSTENDIG_NÆRINGSDRIVENDE -> AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE;
+            case KOMBINERT_AT_FL -> AktivitetStatus.KOMBINERT_AT_FL;
+            case KOMBINERT_AT_SN -> AktivitetStatus.KOMBINERT_AT_SN;
+            case KOMBINERT_FL_SN -> AktivitetStatus.KOMBINERT_FL_SN;
+            case KOMBINERT_AT_FL_SN -> AktivitetStatus.KOMBINERT_AT_FL_SN;
+            case BRUKERS_ANDEL -> AktivitetStatus.BRUKERS_ANDEL;
+            case KUN_YTELSE -> AktivitetStatus.KUN_YTELSE;
+            case TTLSTØTENDE_YTELSE -> AktivitetStatus.TTLSTØTENDE_YTELSE;
+            case VENTELØNN_VARTPENGER -> AktivitetStatus.VENTELØNN_VARTPENGER;
+            case UDEFINERT -> AktivitetStatus.UDEFINERT;
+        };
     }
 }

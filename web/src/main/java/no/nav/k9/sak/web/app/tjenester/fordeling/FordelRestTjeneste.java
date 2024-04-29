@@ -2,7 +2,6 @@ package no.nav.k9.sak.web.app.tjenester.fordeling;
 
 import static no.nav.k9.abac.BeskyttetRessursKoder.APPLIKASJON;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.k9.felles.feil.LogLevel.WARN;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,6 +20,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -45,10 +47,13 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
-import no.nav.k9.felles.feil.Feil;
-import no.nav.k9.felles.feil.FeilFactory;
-import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
-import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
+import no.nav.k9.felles.integrasjon.saf.Journalpost;
+import no.nav.k9.felles.integrasjon.saf.JournalpostQueryRequest;
+import no.nav.k9.felles.integrasjon.saf.JournalpostResponseProjection;
+import no.nav.k9.felles.integrasjon.saf.Journalstatus;
+import no.nav.k9.felles.integrasjon.saf.SafTjeneste;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.AbacDto;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
@@ -60,7 +65,6 @@ import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.dokument.arkiv.ArkivJournalPost;
 import no.nav.k9.sak.dokument.arkiv.journal.SafAdapter;
 import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
@@ -70,6 +74,7 @@ import no.nav.k9.sak.kontrakt.mottak.FinnEllerOpprettSak;
 import no.nav.k9.sak.kontrakt.mottak.FinnEllerOpprettSakFnr;
 import no.nav.k9.sak.kontrakt.mottak.FinnSak;
 import no.nav.k9.sak.kontrakt.mottak.JournalpostMottakDto;
+import no.nav.k9.sak.kontrakt.mottak.JournalpostMottakOpprettSakDto;
 import no.nav.k9.sak.kontrakt.søknad.innsending.Innsending;
 import no.nav.k9.sak.kontrakt.søknad.innsending.InnsendingMottatt;
 import no.nav.k9.sak.mottak.SøknadMottakTjenesteContainer;
@@ -87,7 +92,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.infotrygd.PsbInfotrygdRepositor
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.infotrygd.PsbPbSakRepository;
 
 /**
- * Mottar dokumenter fra f.eks. FPFORDEL og håndterer dispatch internt for saksbehandlingsløsningen.
+ * Mottar dokumenter fra k9-fordel og k9-punsj og håndterer dispatch internt for saksbehandlingsløsningen.
  */
 @Path(FordelRestTjeneste.BASE_PATH)
 @ApplicationScoped
@@ -96,9 +101,12 @@ public class FordelRestTjeneste {
 
     static final String BASE_PATH = "/fordel";
     private static final String JSON_UTF8 = "application/json; charset=UTF-8";
+    private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess");
+    private static final Logger logger = LoggerFactory.getLogger(FordelRestTjeneste.class);
 
     private SaksbehandlingDokumentmottakTjeneste dokumentmottakTjeneste;
     private SafAdapter safAdapter;
+    private SafTjeneste safTjeneste;
     private FagsakTjeneste fagsakTjeneste;
 
     private SøknadMottakTjenesteContainer søknadMottakere;
@@ -107,6 +115,8 @@ public class FordelRestTjeneste {
     private AktørTjeneste aktørTjeneste;
     private PsbPbSakRepository psbPbSakRepository;
     private ObjectWriter objectWriter = new JacksonJsonConfig().getObjectMapper().writerFor(Innsending.class);
+    private boolean enableReservertSaksnummer;
+    private boolean validerJournalført;
 
     public FordelRestTjeneste() {// For Rest-CDI
     }
@@ -114,20 +124,26 @@ public class FordelRestTjeneste {
     @Inject
     public FordelRestTjeneste(SaksbehandlingDokumentmottakTjeneste dokumentmottakTjeneste,
                               SafAdapter safAdapter,
+                              SafTjeneste safTjeneste,
                               FagsakTjeneste fagsakTjeneste,
                               MottatteDokumentRepository mottatteDokumentRepository,
                               SøknadMottakTjenesteContainer søknadMottakere,
                               PsbInfotrygdRepository psbInfotrygdRepository,
                               AktørTjeneste aktørTjeneste,
-                              PsbPbSakRepository psbPbSakRepository) {
+                              PsbPbSakRepository psbPbSakRepository,
+                              @KonfigVerdi(value = "ENABLE_RESERVERT_SAKSNUMMER", defaultVerdi = "false") boolean enableReservertSaksnummer,
+                              @KonfigVerdi(value = "DOKUMENTMOTTAK_VALIDER_JOURNALFORT", defaultVerdi = "false") boolean validerJournalført) {
         this.dokumentmottakTjeneste = dokumentmottakTjeneste;
         this.safAdapter = safAdapter;
+        this.safTjeneste = safTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.søknadMottakere = søknadMottakere;
-        this.psbInfotrygdRepository= psbInfotrygdRepository;
+        this.psbInfotrygdRepository = psbInfotrygdRepository;
         this.aktørTjeneste = aktørTjeneste;
         this.psbPbSakRepository = psbPbSakRepository;
+        this.enableReservertSaksnummer = enableReservertSaksnummer;
+        this.validerJournalført = validerJournalført;
     }
 
 
@@ -154,7 +170,7 @@ public class FordelRestTjeneste {
         }
         return Response.noContent().build();
     }
-    
+
     @POST
     @Path("/sett-til-pb")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -166,7 +182,7 @@ public class FordelRestTjeneste {
             throw new IllegalArgumentException("Kun PSB-fagsaker kan få PB-flagg satt.");
         }
         psbPbSakRepository.lagre(fagsakOpt.get().getId());
-        
+
         return Response.noContent().build();
     }
 
@@ -218,13 +234,18 @@ public class FordelRestTjeneste {
             throw new IllegalArgumentException("Kan ikke opprette fagsak uten å oppgi start av periode (fravær/uttak): " + opprettSakDto);
         }
 
+        Saksnummer saksnummer = null;
+        if (enableReservertSaksnummer && opprettSakDto.getSaksnummer() != null) {
+            saksnummer = new Saksnummer(opprettSakDto.getSaksnummer());
+        }
+
         var søknadMottaker = søknadMottakere.finnSøknadMottakerTjeneste(ytelseType);
 
-        var nyFagsak = søknadMottaker.finnEllerOpprettFagsak(ytelseType, aktørId, pleietrengendeAktørId, relatertPersonAktørId, periode.getFom(), periode.getTom());
+        var nyFagsak = søknadMottaker.finnEllerOpprettFagsak(ytelseType, aktørId, pleietrengendeAktørId, relatertPersonAktørId, periode.getFom(), periode.getTom(), saksnummer);
 
         return new SaksnummerDto(nyFagsak.getSaksnummer().getVerdi());
     }
-    
+
     @POST
     @Path("/fagsak/opprett/fnr")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -253,9 +274,14 @@ public class FordelRestTjeneste {
             throw new IllegalArgumentException("Kan ikke opprette fagsak uten å oppgi start av periode (fravær/uttak): " + opprettSakDto);
         }
 
+        Saksnummer saksnummer = null;
+        if (enableReservertSaksnummer && opprettSakDto.getSaksnummer() != null) {
+            saksnummer = new Saksnummer(opprettSakDto.getSaksnummer());
+        }
+
         var søknadMottaker = søknadMottakere.finnSøknadMottakerTjeneste(ytelseType);
 
-        var nyFagsak = søknadMottaker.finnEllerOpprettFagsak(ytelseType, aktørId, pleietrengendeAktørId, relatertPersonAktørId, periode.getFom(), periode.getTom());
+        var nyFagsak = søknadMottaker.finnEllerOpprettFagsak(ytelseType, aktørId, pleietrengendeAktørId, relatertPersonAktørId, periode.getFom(), periode.getTom(), saksnummer);
 
         return new SaksnummerDto(nyFagsak.getSaksnummer().getVerdi());
     }
@@ -284,31 +310,32 @@ public class FordelRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(JSON_UTF8)
     @Operation(
-            description = "Sjekker om det finnes en eksisterende fagsak med søker, pleietrengende og/eller relatert part.",
-            summary = ("Sjekker om det finnes en eksisterende fagsak med søker, pleietrengende og/eller relatert part."),
-            tags = "fordel"
+        description = "Sjekker om det finnes en eksisterende fagsak med søker, pleietrengende og/eller relatert part.",
+        summary = ("Sjekker om det finnes en eksisterende fagsak med søker, pleietrengende og/eller relatert part."),
+        tags = "fordel"
     )
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = APPLIKASJON)
     public boolean finnesEksisterendeFagsakMedEnAvAktørene(@Parameter(description = "Søkeparametere") @TilpassetAbacAttributt(supplierClass = FordelRestTjeneste.AbacDataSupplier.class) @Valid FinnSak finnSakDto) {
         return fagsakTjeneste.finnesEnFagsakForMinstEnAvAktørene(
-                finnSakDto.getYtelseType(),
-                finnSakDto.getAktørId(),
-                finnSakDto.getPleietrengendeAktørId(),
-                finnSakDto.getRelatertPersonAktørId(),
-                finnSakDto.getPeriode().getFom(),
-                finnSakDto.getPeriode().getTom()
-            );
+            finnSakDto.getYtelseType(),
+            finnSakDto.getAktørId(),
+            finnSakDto.getPleietrengendeAktørId(),
+            finnSakDto.getRelatertPersonAktørId(),
+            finnSakDto.getPeriode().getFom(),
+            finnSakDto.getPeriode().getTom()
+        );
     }
 
     private FagsakYtelseType finnYtelseType(FinnEllerOpprettSak dto) {
         return FagsakYtelseType.fraKode(dto.getYtelseType());
     }
-    
+
     private FagsakYtelseType finnYtelseType(FinnEllerOpprettSakFnr dto) {
         return FagsakYtelseType.fraKode(dto.getYtelseType());
     }
 
-    @SuppressWarnings({ "unchecked" })
+    @Deprecated
+    @SuppressWarnings({"unchecked"})
     @POST
     @Path("/innsending")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -358,7 +385,6 @@ public class FordelRestTjeneste {
     @Operation(description = "Ny journalpost skal behandles.", summary = ("Varsel om en nye journalposter som skal behandles i systemet. Alle må tilhøre samme saksnummer, og være av samme type(brevkode, ytelsetype)"), tags = "fordel")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
     public void mottaJournalposter(@Parameter(description = "Krever saksnummer, journalpostId og behandlingstemaOffisiellKode") @Valid List<AbacJournalpostMottakDto> mottattJournalposter) {
-
         Set<Saksnummer> saksnummere = mottattJournalposter.stream().map(m -> m.getSaksnummer()).collect(Collectors.toSet());
         if (saksnummere.size() > 1) {
             throw new UnsupportedOperationException("Støtter ikke mottak av journalposter for ulike saksnummer: " + saksnummere);
@@ -368,6 +394,11 @@ public class FordelRestTjeneste {
         if (ytelseTyper.size() > 1) {
             throw new UnsupportedOperationException("Støtter ikke mottak av journalposter av ulike ytelseTyper: " + ytelseTyper);
         }
+        LOG_CONTEXT.add("ytelseType", ytelseTyper.iterator().next());
+        LOG_CONTEXT.add("journalpostId", String.join(",", mottattJournalposter.stream().map(v -> v.getJournalpostId().getVerdi()).toList()));
+        logger.info("Mottok journalposter");
+
+        mottattJournalposter.stream().map(AbacJournalpostMottakDto::getJournalpostId).toList().forEach(journalpostId -> validerAtJournalpostenErJournalført(journalpostId, validerJournalført));
 
         List<InngåendeSaksdokument> saksdokumenter = mottattJournalposter.stream()
             .map(this::mapJournalpost)
@@ -375,6 +406,25 @@ public class FordelRestTjeneste {
             .collect(Collectors.toList());
 
         dokumentmottakTjeneste.dokumenterAnkommet(saksdokumenter);
+    }
+
+    @POST
+    @Path("/fagsak/opprett/journalpost")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(JSON_UTF8)
+    @Operation(description = "Finn eller opprett sak med gitt saksnummer og motta ny journalpost", summary = ("Finn eller opprett sak med gitt saksnummer og motta ny journalpost"), tags = "fordel")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
+    public void opprettSakOgMottaJournalpost(@Parameter(description = "Krever saksnummer, journalpostId, aktørId, periode og ytelseType") @Valid AbacJournalpostMottakOpprettSakDto journalpostMottakOpprettSakDto) {
+        LOG_CONTEXT.add("ytelseType", journalpostMottakOpprettSakDto.getYtelseType());
+        LOG_CONTEXT.add("journalpostId", journalpostMottakOpprettSakDto.getJournalpostId());
+        LOG_CONTEXT.add("saksnummer", journalpostMottakOpprettSakDto.getSaksnummer());
+        logger.info("Mottok journalpost");
+
+        validerAtJournalpostenErJournalført(journalpostMottakOpprettSakDto.getJournalpostId(), true);
+
+        Fagsak fagsak = finnEllerOpprettSakGittSaksnummer(journalpostMottakOpprettSakDto);
+
+        dokumentmottakTjeneste.dokumenterAnkommet(List.of(mapJournalpost(journalpostMottakOpprettSakDto, fagsak)));
     }
 
     private InngåendeSaksdokument mapJournalpost(AbacJournalpostMottakDto mottattJournalpost) {
@@ -406,6 +456,77 @@ public class FordelRestTjeneste {
         builder.medForsendelseMottatt(mottattJournalpost.getForsendelseMottatt().orElse(mottattTidspunkt.toLocalDate())); // NOSONAR
 
         return builder.build();
+    }
+
+    private InngåendeSaksdokument mapJournalpost(AbacJournalpostMottakOpprettSakDto mottattJournalpost, Fagsak fagsak) {
+        JournalpostId journalpostId = mottattJournalpost.getJournalpostId();
+
+        Optional<String> payload = mottattJournalpost.getPayload();
+        InngåendeSaksdokument.Builder builder = InngåendeSaksdokument.builder()
+            .medFagsak(fagsak.getId(), fagsak.getYtelseType())
+            .medElektroniskSøknad(payload.isPresent())
+            .medType(mottattJournalpost.getType())
+            .medJournalpostId(mottattJournalpost.getJournalpostId());
+
+        builder.medKanalreferanse(mapTilKanalreferanse(mottattJournalpost.getKanalReferanse(), journalpostId));
+
+        payload.ifPresent(builder::medPayload);
+
+        LocalDateTime mottattTidspunkt = Optional.ofNullable(mottattJournalpost.getForsendelseMottattTidspunkt())
+            .orElseThrow(() -> new IllegalArgumentException("Mangler forsendelseMottattTidspunkt"));
+        builder.medForsendelseMottatt(mottattTidspunkt); // NOSONAR
+        builder.medForsendelseMottatt(mottattJournalpost.getForsendelseMottatt().orElse(mottattTidspunkt.toLocalDate())); // NOSONAR
+
+        return builder.build();
+    }
+
+    //TODO fjern dupliseringen ved å bruke denne metoden alle steder der fagsak opprettes
+    private Fagsak finnEllerOpprettSakGittSaksnummer(AbacJournalpostMottakOpprettSakDto journalpostMottakOpprettSakDto) {
+        final Saksnummer saksnummer = journalpostMottakOpprettSakDto.getSaksnummer();
+        final FagsakYtelseType ytelseType = journalpostMottakOpprettSakDto.getYtelseType();
+
+        AktørId pleietrengendeAktørId = null;
+        if (journalpostMottakOpprettSakDto.getPleietrengendeAktørId() != null) {
+            pleietrengendeAktørId = new AktørId(journalpostMottakOpprettSakDto.getPleietrengendeAktørId());
+        }
+
+        AktørId relatertPersonAktørId = null;
+        if (journalpostMottakOpprettSakDto.getRelatertPersonAktørId() != null) {
+            relatertPersonAktørId = new AktørId(journalpostMottakOpprettSakDto.getRelatertPersonAktørId());
+        }
+
+        ytelseType.validerNøkkelParametere(pleietrengendeAktørId, relatertPersonAktørId);
+
+        Periode periode = journalpostMottakOpprettSakDto.getPeriode();
+        if (periode == null) {
+            throw new IllegalArgumentException("Kan ikke opprette fagsak uten å oppgi start av periode (fravær/uttak): " + journalpostMottakOpprettSakDto);
+        }
+
+        var søknadMottaker = søknadMottakere.finnSøknadMottakerTjeneste(ytelseType);
+
+        return søknadMottaker.finnEllerOpprettFagsak(
+            ytelseType,
+            new AktørId(journalpostMottakOpprettSakDto.getAktørId()),
+            pleietrengendeAktørId,
+            relatertPersonAktørId,
+            periode.getFom(),
+            periode.getTom(),
+            saksnummer
+        );
+    }
+
+    private void validerAtJournalpostenErJournalført(JournalpostId journalpostId, boolean togglePå) {
+        var query = new JournalpostQueryRequest();
+        query.setJournalpostId(journalpostId.getVerdi());
+        var projection = new JournalpostResponseProjection().journalstatus();
+        Journalpost journalpost = safTjeneste.hentJournalpostInfo(query, projection);
+        if (!List.of(Journalstatus.FERDIGSTILT, Journalstatus.JOURNALFOERT).contains(journalpost.getJournalstatus())) {
+            if (togglePå) {
+                throw new IllegalArgumentException(journalpostId + " er ikke endelig journalført i Saf");
+            } else {
+                logger.warn("Mottok journalpost som ikke er endelig journalført i Saf: " + journalpostId);
+            }
+        }
     }
 
     /**
@@ -450,7 +571,7 @@ public class FordelRestTjeneste {
             super();
         }
 
-        static Optional<String> getPayloadValiderLengde(String base64EncodedPayload) {
+        static Optional<String> getPayload(String base64EncodedPayload) {
             if (base64EncodedPayload == null) {
                 return Optional.empty();
             }
@@ -460,23 +581,47 @@ public class FordelRestTjeneste {
 
         @JsonIgnore
         public Optional<String> getPayload() {
-            return getPayloadValiderLengde(base64EncodedPayload);
+            return getPayload(base64EncodedPayload);
         }
 
         @Override
         public AbacDataAttributter abacAttributter() {
             return AbacDataAttributter.opprett().leggTil(AppAbacAttributtType.SAKSNUMMER, getSaksnummer());
         }
+    }
 
-        interface JournalpostMottakFeil extends DeklarerteFeil {
+    public static class AbacJournalpostMottakOpprettSakDto extends JournalpostMottakOpprettSakDto implements AbacDto {
+        public AbacJournalpostMottakOpprettSakDto() {
+            super();
+        }
 
-            JournalpostMottakFeil FACTORY = FeilFactory.create(JournalpostMottakFeil.class);
+        static Optional<String> getPayload(String base64EncodedPayload) {
+            if (base64EncodedPayload == null) {
+                return Optional.empty();
+            }
+            byte[] bytes = Base64.getUrlDecoder().decode(base64EncodedPayload);
+            return Optional.of(new String(bytes, StandardCharsets.UTF_8));
+        }
 
-            @TekniskFeil(feilkode = "F-217605", feilmelding = "Input-validering-feil: Avsender sendte payload, men oppgav ikke lengde på innhold", logLevel = WARN)
-            Feil manglerPayloadLength();
+        @JsonIgnore
+        public Optional<String> getPayload() {
+            return getPayload(base64EncodedPayload);
+        }
 
-            @TekniskFeil(feilkode = "F-483098", feilmelding = "Input-validering-feil: Avsender oppgav at lengde på innhold var %s, men lengden var egentlig %s", logLevel = WARN)
-            Feil feilPayloadLength(Integer oppgitt, Integer faktisk);
+        @Override
+        public AbacDataAttributter abacAttributter() {
+            return AbacDataAttributter.opprett()
+                .leggTil(AppAbacAttributtType.SAKSNUMMER, getSaksnummer())
+                .leggTil(AppAbacAttributtType.AKTØR_ID, getAktørId());
+        }
+
+        @Override
+        public String toString() {
+            return getClass().getSimpleName()
+                + "<journalpostId=" + getJournalpostId()
+                + ", ytelseType=" + getYtelseType()
+                + ", periode=" + getPeriode()
+                + ">";
         }
     }
 
@@ -515,10 +660,10 @@ public class FordelRestTjeneste {
 
             @Override
             public PsbInfotrygdFødselsnumre readFrom(Class<PsbInfotrygdFødselsnumre> type, Type genericType,
-                                                      Annotation[] annotations, MediaType mediaType,
-                                                      MultivaluedMap<String, String> httpHeaders,
-                                                      InputStream inputStream)
-                    throws IOException, WebApplicationException {
+                                                     Annotation[] annotations, MediaType mediaType,
+                                                     MultivaluedMap<String, String> httpHeaders,
+                                                     InputStream inputStream)
+                throws IOException, WebApplicationException {
                 var sb = new StringBuilder(200);
                 try (BufferedReader br = new BufferedReader(
                     new InputStreamReader(inputStream))) {

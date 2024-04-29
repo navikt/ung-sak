@@ -4,7 +4,6 @@ import java.time.ZonedDateTime;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.innsyn.InnsynHendelse;
 import no.nav.k9.innsyn.Omsorg;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -21,38 +20,28 @@ import no.nav.k9.søknad.JsonUtils;
 public class PSBBrukerdialoginnsynTjeneste implements BrukerdialoginnsynTjeneste {
 
     private ProsessTaskTjeneste prosessTaskRepository;
-    private boolean enableBrukerdialoginnsyn;
-
 
     public PSBBrukerdialoginnsynTjeneste() {
 
     }
 
     @Inject
-    public PSBBrukerdialoginnsynTjeneste(ProsessTaskTjeneste prosessTaskRepository,
-                                         @KonfigVerdi(value = "ENABLE_BRUKERDIALOGINNSYN", defaultVerdi = "false") boolean enableBrukerdialoginnsyn) {
+    public PSBBrukerdialoginnsynTjeneste(ProsessTaskTjeneste prosessTaskRepository) {
         this.prosessTaskRepository = prosessTaskRepository;
-        this.enableBrukerdialoginnsyn = enableBrukerdialoginnsyn;
     }
 
 
     public void publiserDokumentHendelse(Behandling behandling, MottattDokument mottattDokument) {
-        if (!enableBrukerdialoginnsyn) {
-            return;
-        }
         final ProsessTaskData pd = PubliserSøknadForBrukerdialoginnsynTask.createProsessTaskData(behandling, mottattDokument);
         prosessTaskRepository.lagre(pd);
     }
 
     public void publiserOmsorgenForHendelse(Behandling behandling, boolean harOmsorg) {
-        if (!enableBrukerdialoginnsyn) {
-            return;
-        }
 
         final InnsynHendelse<Omsorg> hendelse = new InnsynHendelse<>(ZonedDateTime.now(), new Omsorg(
-                behandling.getFagsak().getAktørId().getId(),
-                behandling.getFagsak().getPleietrengendeAktørId().getId(),
-                harOmsorg));
+            behandling.getFagsak().getAktørId().getId(),
+            behandling.getFagsak().getPleietrengendeAktørId().getId(),
+            harOmsorg));
 
         final String json = JsonUtils.toString(hendelse);
         final ProsessTaskData pd = PubliserJsonForBrukerdialoginnsynTask.createProsessTaskData(behandling, json);

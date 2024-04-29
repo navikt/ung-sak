@@ -366,7 +366,7 @@ public class BehandlingRestTjeneste {
         Fagsak fagsak = funnetFagsak.get();
         if (BehandlingType.REVURDERING.getKode().equals(behandlingType.getKode())) {
             BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.fraKode(dto.getBehandlingArsakType().getKode());
-            Behandling behandling = behandlingsoppretterTjeneste.opprettRevurdering(fagsak, behandlingÅrsakType);
+            Behandling behandling = behandlingsoppretterTjeneste.opprettManuellRevurdering(fagsak, behandlingÅrsakType);
             String gruppe = behandlingsprosessTjeneste.asynkStartBehandlingsprosess(behandling);
             return Redirect.tilBehandlingPollStatus(request, behandling.getUuid(), Optional.of(gruppe));
 

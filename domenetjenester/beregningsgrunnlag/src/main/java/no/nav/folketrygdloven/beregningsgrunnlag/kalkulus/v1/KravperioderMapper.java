@@ -1,23 +1,10 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1;
 
-import static no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.TilKalkulusMapper.mapTilAktør;
-import static no.nav.k9.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.KravperioderPrArbeidsforhold;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PerioderForKrav;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.Refusjonsperiode;
+import no.nav.folketrygdloven.kalkulus.felles.v1.Beløp;
 import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
 import no.nav.folketrygdloven.kalkulus.iay.arbeid.v1.AktivitetsAvtaleDto;
@@ -30,6 +17,20 @@ import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.v1.TilKalkulusMapper.mapTilAktør;
+import static no.nav.k9.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 
 public class KravperioderMapper {
 
@@ -174,7 +175,7 @@ public class KravperioderMapper {
         });
         var vilkårsperiodeTidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(vilkårsperiode.getFomDato(), vilkårsperiode.getTomDato(), true)));
         return refusjonTidslinje.intersection(vilkårsperiodeTidslinje).stream()
-            .map(r -> new Refusjonsperiode(new Periode(r.getFom(), r.getTom()), r.getValue()))
+            .map(r -> new Refusjonsperiode(new Periode(r.getFom(), r.getTom()), Beløp.fra(r.getValue())))
             .collect(Collectors.toList());
 
     }

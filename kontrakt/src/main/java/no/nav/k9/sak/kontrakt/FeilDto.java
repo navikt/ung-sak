@@ -3,18 +3,18 @@ package no.nav.k9.sak.kontrakt;
 import java.io.Serializable;
 import java.util.Collection;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -37,16 +37,16 @@ public class FeilDto implements Serializable {
     @Size(max = 100)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{P}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String feilkode;
-    
+
     @JsonProperty(value = "type", required = true)
     @Valid
     private FeilType type;
 
-    
+
     public FeilDto(FeilType type, String feilmelding) {
         this(type, feilmelding, null);
     }
-    
+
     public FeilDto(FeilType type, String feilmelding, String feilkode) {
         this.type = type;
         this.feilmelding = feilmelding;
@@ -58,7 +58,7 @@ public class FeilDto implements Serializable {
     }
 
     public FeilDto(String feilmelding, Collection<FeltFeilDto> feltFeil) {
-        this(feilmelding);
+        this(FeilType.VALIDERINGS_FEIL, feilmelding);
         this.feltFeil = feltFeil;
     }
 
@@ -69,7 +69,7 @@ public class FeilDto implements Serializable {
     public String getFeilmelding() {
         return feilmelding;
     }
-    
+
     public String getFeilkode() {
         return feilkode;
     }

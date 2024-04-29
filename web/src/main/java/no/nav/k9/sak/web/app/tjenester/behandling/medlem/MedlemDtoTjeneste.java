@@ -11,11 +11,9 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.medlem.VurderingsÅrsak;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
@@ -119,12 +117,9 @@ public class MedlemDtoTjeneste {
             dto.setErEosBorger(vurdertMedlemskap.getErEøsBorger());
             dto.setMedlemskapManuellVurderingType(vurdertMedlemskap.getMedlemsperiodeManuellVurdering());
             dto.setBegrunnelse(vurdertMedlemskap.getBegrunnelse());
+            dto.setVurdertAv(vurdertMedlemskap.getVurdertAv());
+            dto.setVurdertTidspunkt(vurdertMedlemskap.getVurdertTidspunkt());
         }
         return dto;
-    }
-
-    // TODO(OJR) Hack!!! kan fjernes hvis man ønsker å utføre en migrerning(kompleks) av gamle medlemskapvurdering i produksjon
-    private String hentBegrunnelseFraAksjonspuntk(Set<Aksjonspunkt> aksjonspunkter) {
-        return aksjonspunkter.stream().filter(a -> VilkårType.MEDLEMSKAPSVILKÅRET.equals(a.getAksjonspunktDefinisjon().getVilkårType())).findFirst().map(Aksjonspunkt::getBegrunnelse).orElse(null);
     }
 }

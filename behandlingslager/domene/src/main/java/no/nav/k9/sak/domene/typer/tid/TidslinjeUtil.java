@@ -4,6 +4,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.Year;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.typer.Periode;
 
 public class TidslinjeUtil {
@@ -46,7 +48,15 @@ public class TidslinjeUtil {
         return new LocalDateTimeline<>(perioder.stream().map(periode -> new LocalDateSegment<>(periode.getFom(), periode.getTom(), true)).toList()).compress();
     }
 
-    public static LocalDateTimeline<Boolean> tilTidslinjeKomprimert(NavigableSet<DatoIntervallEntitet> datoIntervaller) {
+
+    public static LocalDateTimeline<Boolean> tilTidslinjeKomprimertMedMuligOverlapp(Collection<DatoIntervallEntitet> datoIntervaller) {
+        return new LocalDateTimeline<>(datoIntervaller.stream()
+            .map(datoIntervall -> new LocalDateSegment<>(datoIntervall.getFomDato(), datoIntervall.getTomDato(), true)).toList(),
+            StandardCombinators::alwaysTrueForMatch).compress();
+    }
+
+
+    public static LocalDateTimeline<Boolean> tilTidslinjeKomprimert(Collection<DatoIntervallEntitet> datoIntervaller) {
         return new LocalDateTimeline<>(datoIntervaller.stream().map(datoIntervall -> new LocalDateSegment<>(datoIntervall.getFomDato(), datoIntervall.getTomDato(), true)).toList()).compress();
     }
 
@@ -64,7 +74,7 @@ public class TidslinjeUtil {
     }
 
     public static <T> NavigableMap<Year, LocalDateTimeline<T>> splittOgGruperPåÅrstall(LocalDateTimeline<T> tidslinje) {
-        if (tidslinje.isEmpty()){
+        if (tidslinje.isEmpty()) {
             return new TreeMap<>();
         }
         var tidsserieMedSplittedeSegmenter = tidslinje.splitAtRegular(tidslinje.getMinLocalDate().withDayOfYear(1), tidslinje.getMaxLocalDate(), Period.ofYears(1));
@@ -106,6 +116,21 @@ public class TidslinjeUtil {
             }
         }
         return new LocalDateSegment<>(dateInterval, resultat);
+    }
+
+    /**
+     * elementer som er i lhs eller rhs, men ikke i begge
+     */
+    public static <T> LocalDateSegment<Set<T>> forskjell(LocalDateInterval dateInterval, LocalDateSegment<Set<T>> lhs, LocalDateSegment<Set<T>> rhs) {
+        Set<T> lhsValues = lhs != null && lhs.getValue() != null ? lhs.getValue() : Set.of();
+        Set<T> rhsValues = rhs != null && rhs.getValue() != null ? rhs.getValue() : Set.of();
+        HashSet<T> forskjell = new HashSet<>();
+        lhsValues.stream().filter(v -> !rhsValues.contains(v)).forEach(forskjell::add);
+        rhsValues.stream().filter(v -> !lhsValues.contains(v)).forEach(forskjell::add);
+        if (forskjell.isEmpty()) {
+            return null; //fjerner segmentet
+        }
+        return new LocalDateSegment<>(dateInterval, forskjell);
     }
 
     public static <T> LocalDateTimeline<T> begrensTilAntallDager(LocalDateTimeline<T> tidslinje, int maxAntallDager, boolean tellHelg) {

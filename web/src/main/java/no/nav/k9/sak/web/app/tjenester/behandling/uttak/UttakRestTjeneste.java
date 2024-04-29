@@ -5,6 +5,11 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 
 import java.util.UUID;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -16,12 +21,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
@@ -39,6 +38,7 @@ public class UttakRestTjeneste {
 
     public static final String UTTAK_OPPGITT = BASE_PATH + "/oppgitt";
     public static final String UTTAK_FASTSATT = BASE_PATH + "/fastsatt";
+
 
     private MapUttak mapUttak;
 
@@ -82,5 +82,6 @@ public class UttakRestTjeneste {
         UUID behandlingId = behandlingIdDto.getBehandlingUuid();
         return mapUttak.mapFastsattUttak(behandlingId);
     }
+
 
 }

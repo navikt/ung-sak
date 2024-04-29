@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.frisinn.beregnytelse;
 
 import java.util.Comparator;
 import java.util.Optional;
+
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
@@ -66,6 +67,7 @@ class MapBeregningsresultat {
                 .medInntektskategori(a.getInntektskategori())
                 .medStillingsprosent(a.getStillingsprosent())
                 .medUtbetalingsgrad(a.getUtbetalingsgrad())
+                .medUtbetalingsgradOppdrag(a.getUtbetalingsgradOppdrag())
                 .medArbeidsgiver(a.getArbeidsgiver().orElse(null))
                 .medAktivitetStatus(a.getAktivitetStatus())
                 .medArbeidsforholdRef(a.getArbeidsforholdRef())

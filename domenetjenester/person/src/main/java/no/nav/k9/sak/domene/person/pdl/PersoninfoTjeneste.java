@@ -156,8 +156,6 @@ public class PersoninfoTjeneste {
     }
 
     private static String mapNavn(Navn navn) {
-        if (navn.getForkortetNavn() != null)
-            return navn.getForkortetNavn();
         return navn.getEtternavn() + " " + navn.getFornavn()
             + (navn.getMellomnavn() == null ? "" : " " + navn.getMellomnavn());
     }

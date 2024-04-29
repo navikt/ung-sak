@@ -1,6 +1,7 @@
 package no.nav.k9.sak.vilkår;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
@@ -45,6 +46,19 @@ public class PeriodeTilVurdering implements Comparable<PeriodeTilVurdering> {
             ", erForlengelse=" + erForlengelse +
             ", erEndringIUttak=" + erEndringIUttak +
             '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PeriodeTilVurdering that = (PeriodeTilVurdering) o;
+        return periode.equals(that.periode);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(periode);
     }
 
     @Override

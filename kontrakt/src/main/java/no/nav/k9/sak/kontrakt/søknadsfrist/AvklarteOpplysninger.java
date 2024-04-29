@@ -1,6 +1,7 @@
 package no.nav.k9.sak.kontrakt.søknadsfrist;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -32,13 +33,25 @@ public class AvklarteOpplysninger {
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String begrunnelse;
 
+    @JsonProperty(value = "opprettetAv")
+    @Size(max = 20)
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Valid
+    private String opprettetAv;
+
+    @JsonProperty(value = "opprettetTidspunkt")
+    @Valid
+    private LocalDateTime opprettetTidspunkt;
+
     public AvklarteOpplysninger() {
     }
 
-    public AvklarteOpplysninger(Boolean godkjent, LocalDate fraDato, String begrunnelse) {
+    public AvklarteOpplysninger(Boolean godkjent, LocalDate fraDato, String begrunnelse, String opprettetAv, LocalDateTime opprettetTidspunkt) {
         this.godkjent = godkjent;
         this.fraDato = fraDato;
         this.begrunnelse = begrunnelse;
+        this.opprettetAv = opprettetAv;
+        this.opprettetTidspunkt = opprettetTidspunkt;
     }
 
     public Boolean getGodkjent() {
@@ -51,5 +64,13 @@ public class AvklarteOpplysninger {
 
     public String getBegrunnelse() {
         return begrunnelse;
+    }
+
+    public String getOpprettetAv() {
+        return opprettetAv;
+    }
+
+    public LocalDateTime getOpprettetTidspunkt() {
+        return opprettetTidspunkt;
     }
 }

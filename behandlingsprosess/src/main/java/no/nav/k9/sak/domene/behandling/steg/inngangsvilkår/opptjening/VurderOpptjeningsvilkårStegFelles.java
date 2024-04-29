@@ -3,7 +3,9 @@ package no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.opptjening;
 import static java.util.Collections.singletonList;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 import jakarta.enterprise.inject.Instance;
 
@@ -93,11 +95,20 @@ public abstract class VurderOpptjeningsvilkårStegFelles extends Inngangsvilkår
     }
 
     private void håndtereAutomatiskAvslag(Behandling behandling, RegelResultat regelResultat, DatoIntervallEntitet periode) {
-        if (regelResultat.vilkårErIkkeOppfylt(periode.getFomDato(), periode.getTomDato(), VilkårType.OPPTJENINGSVILKÅRET)) {
+        if (regelResultat.vilkårErIkkeOppfylt(periode.getFomDato(), periode.getTomDato(), VilkårType.OPPTJENINGSVILKÅRET) || harAkseptertMellomliggendePerioder(regelResultat, periode)) {
             // Legger til aksjonspunspunkt for å håndtere eventuelle 8-47 innvilgelser
             var håndterer = FagsakYtelseTypeRef.Lookup.find(automatiskAvslagHåndterer, behandling.getFagsakYtelseType()).orElseThrow();
             håndterer.håndter(behandling, regelResultat, periode);
         }
+    }
+
+    private boolean harAkseptertMellomliggendePerioder(RegelResultat regelResultat, DatoIntervallEntitet periode) {
+        Optional<Object> optEkstraRes = regelResultat.getEkstraResultat(VilkårType.OPPTJENINGSVILKÅRET);
+        if (optEkstraRes.isPresent()) {
+            var ekstraResultat = (HashMap<DatoIntervallEntitet, OpptjeningsvilkårResultat>) optEkstraRes.get();
+            return ekstraResultat.containsKey(periode) && !ekstraResultat.get(periode).getAkseptertMellomliggendePerioder().isEmpty();
+        }
+        return false;
     }
 
     protected abstract List<OpptjeningAktivitet> mapTilOpptjeningsaktiviteter(MapTilOpptjeningAktiviteter mapper, OpptjeningsvilkårResultat oppResultat);

@@ -80,12 +80,12 @@ class MapArbeidTest {
             List.of(),
             List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         var result = mapper.map(input);
 
         assertThat(result).hasSize(1);
         assertThat(result).contains(new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, null),
-            Map.of(new LukketPeriode(arbeidsperiode.getFomDato(), arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1)))));
+            Map.of(new LukketPeriode(arbeidsperiode.getFomDato(), arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1), false))));
     }
 
     @Test
@@ -110,14 +110,14 @@ class MapArbeidTest {
         tidlinjeTilVurdering.toSegments().forEach(it -> vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(it.getFom(), it.getTom()).medMerknad(VilkårUtfallMerknad.VM_7847_A)));
         var vilkår = vilkårBuilder.build();
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, vilkår, null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, vilkår, null, true);
         var result = mapper.map(input);
 
         assertThat(result).hasSize(2);
         assertThat(result).contains(new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, null),
-                Map.of(new LukketPeriode(arbeidsperiode.getFomDato(), arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1)))),
+                Map.of(new LukketPeriode(arbeidsperiode.getFomDato(), arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1), false))),
             new Arbeid(new Arbeidsforhold(UttakArbeidType.INAKTIV.getKode(), null, null, null),
-                Map.of(new LukketPeriode(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofMinutes((long) (7.5 * 60)), Duration.ZERO))));
+                Map.of(new LukketPeriode(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofMinutes((long) (7.5 * 60)), Duration.ZERO, false))));
     }
 
     @Test
@@ -145,14 +145,14 @@ class MapArbeidTest {
         opptjening.setOpptjeningAktivitet(List.of(new OpptjeningAktivitet(fomOpptjeningPeriode, opptjeningStp, OpptjeningAktivitetType.DAGPENGER, OpptjeningAktivitetKlassifisering.BEKREFTET_GODKJENT)));
         opptjeningResultat.leggTil(opptjening);
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), opptjeningResultat.build());
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), opptjeningResultat.build(), true);
         var result = mapper.map(input);
 
         assertThat(result).hasSize(2);
         assertThat(result).contains(new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, null),
-                Map.of(new LukketPeriode(arbeidsperiode.getFomDato(), arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1)))),
+                Map.of(new LukketPeriode(arbeidsperiode.getFomDato(), arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1), false))),
             new Arbeid(new Arbeidsforhold(UttakArbeidType.DAGPENGER.getKode(), null, null, null),
-                Map.of(new LukketPeriode(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofMinutes((long) (7.5 * 60)), Duration.ZERO))));
+                Map.of(new LukketPeriode(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofMinutes((long) (7.5 * 60)), Duration.ZERO, false))));
     }
 
     @Test
@@ -178,12 +178,12 @@ class MapArbeidTest {
         opptjening.setOpptjeningAktivitet(List.of(new OpptjeningAktivitet(fomOpptjeningPeriode, opptjeningStp.plusDays(10), OpptjeningAktivitetType.FORELDREPENGER, OpptjeningAktivitetKlassifisering.BEKREFTET_GODKJENT)));
         opptjeningResultat.leggTil(opptjening);
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), opptjeningResultat.build());
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), opptjeningResultat.build(), true);
         var result = mapper.map(input);
 
         assertThat(result).hasSize(1);
         assertThat(result).contains(new Arbeid(new Arbeidsforhold(UttakArbeidType.KUN_YTELSE.getKode(), null, null, null),
-            Map.of(new LukketPeriode(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofMinutes((long) (7.5 * 60)), Duration.ZERO))));
+            Map.of(new LukketPeriode(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofMinutes((long) (7.5 * 60)), Duration.ZERO, false))));
     }
 
     @Test
@@ -210,13 +210,13 @@ class MapArbeidTest {
             List.of(),
             List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         var result = mapper.map(input);
 
         assertThat(result).hasSize(1);
         assertThat(result).contains(new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, null),
-            Map.of(new LukketPeriode(arbeidsperiode.getFomDato(), arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1)),
-                new LukketPeriode(arbeidsperiode1.getFomDato(), arbeidsperiode1.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(7)))));
+            Map.of(new LukketPeriode(arbeidsperiode.getFomDato(), arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1), false),
+                new LukketPeriode(arbeidsperiode1.getFomDato(), arbeidsperiode1.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(7), false))));
     }
 
     @Test
@@ -250,13 +250,13 @@ class MapArbeidTest {
                 List.of(),
                 List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         var result = mapper.map(input);
 
         assertThat(result).hasSize(1);
         assertThat(result).contains(new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, null),
-            Map.of(new LukketPeriode(arbeidsperiode.getFomDato(), arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1)),
-                new LukketPeriode(arbeidsperiode1.getFomDato(), arbeidsperiode1.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(7)))));
+            Map.of(new LukketPeriode(arbeidsperiode.getFomDato(), arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1), false),
+                new LukketPeriode(arbeidsperiode1.getFomDato(), arbeidsperiode1.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(7), false))));
     }
 
     @Test
@@ -290,13 +290,13 @@ class MapArbeidTest {
                 List.of(),
                 List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         var result = mapper.map(input);
 
         assertThat(result).hasSize(1);
         assertThat(result).contains(new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, null),
-            Map.of(new LukketPeriode(arbeidsperiode1.getTomDato().plusDays(1), arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1)),
-                new LukketPeriode(arbeidsperiode1.getFomDato(), arbeidsperiode1.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(7)))));
+            Map.of(new LukketPeriode(arbeidsperiode1.getTomDato().plusDays(1), arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1), false),
+                new LukketPeriode(arbeidsperiode1.getFomDato(), arbeidsperiode1.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(7), false))));
     }
 
     @Test
@@ -333,7 +333,7 @@ class MapArbeidTest {
                 List.of(),
                 List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         var result = mapper.map(input);
 
         assertThat(result).hasSize(1);
@@ -371,13 +371,13 @@ class MapArbeidTest {
                 List.of(),
                 List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         var result = mapper.map(input);
 
         assertThat(result).hasSize(1);
         assertThat(result).containsExactlyInAnyOrder(new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, InternArbeidsforholdRef.nullRef().getReferanse()),
-            Map.of(new LukketPeriode(arbeidsperiode.getFomDato(), arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1)),
-                new LukketPeriode(arbeidsperiode1.getFomDato(), arbeidsperiode1.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(7)))));
+            Map.of(new LukketPeriode(arbeidsperiode.getFomDato(), arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1), false),
+                new LukketPeriode(arbeidsperiode1.getFomDato(), arbeidsperiode1.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(7), false))));
     }
 
     @Test
@@ -411,15 +411,15 @@ class MapArbeidTest {
                 List.of(),
                 List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         input.medInaktivTidslinje(Map.of(new AktivitetIdentifikator(UttakArbeidType.IKKE_YRKESAKTIV, virksomhet, null), new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periodeTilVurdering.toLocalDateInterval(), new WrappedArbeid(new ArbeidPeriode(periodeTilVurdering, UttakArbeidType.IKKE_YRKESAKTIV, virksomhet, null, Duration.ofMinutes((long) (7.5 * 60)), Duration.ofHours(0))))))));
         var result = mapper.map(input);
 
         assertThat(result).hasSize(2);
         assertThat(result).containsExactlyInAnyOrder(new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, InternArbeidsforholdRef.nullRef().getReferanse()),
-                Map.of(new LukketPeriode(arbeidsperiode.getFomDato(), arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(7)))),
+                Map.of(new LukketPeriode(arbeidsperiode.getFomDato(), arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(7), false))),
             new Arbeid(new Arbeidsforhold(UttakArbeidType.IKKE_YRKESAKTIV.getKode(), arbeidsgiverOrgnr, null, null),
-                Map.of(new LukketPeriode(periodeTilVurdering.getFomDato(), arbeidsperiode.getFomDato().minusDays(1)), new ArbeidsforholdPeriodeInfo(Duration.ofMinutes((long) (7.5 * 60)), Duration.ofHours(0)))));
+                Map.of(new LukketPeriode(periodeTilVurdering.getFomDato(), arbeidsperiode.getFomDato().minusDays(1)), new ArbeidsforholdPeriodeInfo(Duration.ofMinutes((long) (7.5 * 60)), Duration.ofHours(0), false))));
     }
 
     @Test
@@ -455,7 +455,7 @@ class MapArbeidTest {
             List.of(),
             List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         input.medInntektArbeidYtelseGrunnlag(grunnlag)
             .medBruker(brukerAktørId)
             .medSaksnummer(new Saksnummer("asdf"));
@@ -463,7 +463,7 @@ class MapArbeidTest {
         var result = mapper.map(input);
         assertThat(result).hasSize(1);
         assertThat(result).containsExactlyInAnyOrder(new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, InternArbeidsforholdRef.nullRef().getReferanse()),
-            Map.of(new LukketPeriode(arbeidsforholdStart, arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1)))));
+            Map.of(new LukketPeriode(arbeidsforholdStart, arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1), false))));
     }
 
     @Test
@@ -505,7 +505,7 @@ class MapArbeidTest {
             List.of(),
             List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         input.medInntektArbeidYtelseGrunnlag(grunnlag)
             .medBruker(brukerAktørId)
             .medSaksnummer(new Saksnummer("asdf"));
@@ -513,7 +513,7 @@ class MapArbeidTest {
         var result = mapper.map(input);
         assertThat(result).hasSize(1);
         assertThat(result).containsExactlyInAnyOrder(new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, InternArbeidsforholdRef.nullRef().getReferanse()),
-            Map.of(new LukketPeriode(fom, arbeidsforholdStart.minusDays(1)), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1)), new LukketPeriode(arbeidsforholdStart.plusDays(3), tom), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1)))));
+            Map.of(new LukketPeriode(fom, arbeidsforholdStart.minusDays(1)), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1), false), new LukketPeriode(arbeidsforholdStart.plusDays(3), tom), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1), false))));
     }
 
     @Test
@@ -555,7 +555,7 @@ class MapArbeidTest {
             List.of(),
             List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         input.medInntektArbeidYtelseGrunnlag(grunnlag)
             .medBruker(brukerAktørId)
             .medSaksnummer(new Saksnummer("asdf"));
@@ -563,7 +563,7 @@ class MapArbeidTest {
         var result = mapper.map(input);
         assertThat(result).hasSize(1);
         assertThat(result).containsExactlyInAnyOrder(new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, InternArbeidsforholdRef.nullRef().getReferanse()),
-            Map.of(new LukketPeriode(arbeidsforholdStart.plusDays(1), tom), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1)))));
+            Map.of(new LukketPeriode(arbeidsforholdStart.plusDays(1), tom), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1), false))));
     }
 
     @Test
@@ -605,7 +605,7 @@ class MapArbeidTest {
             List.of(),
             List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         var dødsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusWeeks(6));
         input.medInntektArbeidYtelseGrunnlag(grunnlag)
             .medBruker(brukerAktørId)
@@ -615,7 +615,7 @@ class MapArbeidTest {
         var result = mapper.map(input);
         assertThat(result).hasSize(1);
         assertThat(result).containsExactlyInAnyOrder(new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, InternArbeidsforholdRef.nullRef().getReferanse()),
-            Map.of(new LukketPeriode(sisteDagMedPermisjon.plusDays(1), dødsperiode.getFomDato().minusDays(1)), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1)), new LukketPeriode(dødsperiode.getFomDato(), tom), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ZERO))));
+            Map.of(new LukketPeriode(sisteDagMedPermisjon.plusDays(1), dødsperiode.getFomDato().minusDays(1)), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1), false), new LukketPeriode(dødsperiode.getFomDato(), tom), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ZERO, false))));
     }
 
     @Test
@@ -657,7 +657,7 @@ class MapArbeidTest {
             List.of(),
             List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         var dødsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(3), LocalDate.now().minusDays(3).plusWeeks(6));
         input.medInntektArbeidYtelseGrunnlag(grunnlag)
             .medBruker(brukerAktørId)
@@ -667,7 +667,7 @@ class MapArbeidTest {
         var result = mapper.map(input);
         assertThat(result).hasSize(1);
         assertThat(result).containsExactlyInAnyOrder(new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, InternArbeidsforholdRef.nullRef().getReferanse()),
-            Map.of(new LukketPeriode(arbeidsforholdStart.plusDays(1), tom), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1)))));
+            Map.of(new LukketPeriode(arbeidsforholdStart.plusDays(1), tom), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1), false))));
     }
 
     @Test
@@ -709,7 +709,7 @@ class MapArbeidTest {
             List.of(),
             List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         var dødsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(3), LocalDate.now().minusDays(3).plusWeeks(6));
         input.medInntektArbeidYtelseGrunnlag(grunnlag)
             .medBruker(brukerAktørId)
@@ -719,7 +719,7 @@ class MapArbeidTest {
         var result = mapper.map(input);
         assertThat(result).hasSize(1);
         assertThat(result).containsExactlyInAnyOrder(new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, InternArbeidsforholdRef.nullRef().getReferanse()),
-            Map.of(new LukketPeriode(arbeidsforholdStart.plusDays(1), arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1)), new LukketPeriode(arbeidsperiode.getTomDato().plusDays(1), tom), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ZERO))));
+            Map.of(new LukketPeriode(arbeidsforholdStart.plusDays(1), arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1), false), new LukketPeriode(arbeidsperiode.getTomDato().plusDays(1), tom), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ZERO, false))));
     }
 
     @Test
@@ -762,7 +762,7 @@ class MapArbeidTest {
             List.of(),
             List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         input.medInntektArbeidYtelseGrunnlag(grunnlag)
             .medBruker(brukerAktørId)
             .medSaksnummer(new Saksnummer("asdf"))
@@ -771,7 +771,7 @@ class MapArbeidTest {
         var result = mapper.map(input);
         assertThat(result).hasSize(1);
         assertThat(result).containsExactlyInAnyOrder(new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, InternArbeidsforholdRef.nullRef().getReferanse()),
-            Map.of(new LukketPeriode(arbeidsforholdStart.plusDays(1), arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1)), new LukketPeriode(arbeidsperiode.getTomDato().plusDays(1), tom), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ZERO))));
+            Map.of(new LukketPeriode(arbeidsforholdStart.plusDays(1), arbeidsperiode.getTomDato()), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1), false), new LukketPeriode(arbeidsperiode.getTomDato().plusDays(1), tom), new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ZERO, false))));
     }
 
     @Test
@@ -822,7 +822,7 @@ class MapArbeidTest {
             List.of(),
             List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         input.medInntektArbeidYtelseGrunnlag(grunnlag)
             .medBruker(brukerAktørId)
             .medSaksnummer(new Saksnummer("asdf"))
@@ -832,9 +832,9 @@ class MapArbeidTest {
         assertThat(result).hasSize(1);
         assertThat(result).containsExactlyInAnyOrder(new Arbeid(new Arbeidsforhold(UttakArbeidType.ARBEIDSTAKER.getKode(), arbeidsgiverOrgnr, null, InternArbeidsforholdRef.nullRef().getReferanse()),
             Map.of(new LukketPeriode(arbeidsforholdStart.plusDays(1), dødsperiode.getFomDato().minusDays(1)),
-                new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1)),
+                new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(1), false),
                 new LukketPeriode(dødsperiode.getFomDato(), tom),
-                new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(5)))));
+                new ArbeidsforholdPeriodeInfo(Duration.ofHours(8), Duration.ofHours(5), false))));
     }
 
     private Vilkår opprettVilkår(LocalDateTimeline<Boolean> tidlinjeTilVurdering) {

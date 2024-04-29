@@ -8,9 +8,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
@@ -28,6 +25,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.abakus.iaygrunnlag.JsonObjectMapper;
 import no.nav.abakus.iaygrunnlag.UuidDto;
 import no.nav.abakus.iaygrunnlag.arbeidsforhold.v1.ArbeidsforholdDto;
@@ -56,7 +55,7 @@ import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 @ApplicationScoped
-@ScopedRestIntegration(scopeKey = "fpabakus.scope", defaultScope = "api://prod-fss.teamforeldrepenger.fpabakus/.default")
+@ScopedRestIntegration(scopeKey = "k9abakus.scope", defaultScope = "api://prod-fss.k9saksbehandling.k9-abakus/.default")
 public class AbakusTjeneste {
 
     private static final Logger log = LoggerFactory.getLogger(AbakusTjeneste.class);
@@ -72,6 +71,7 @@ public class AbakusTjeneste {
     private CloseableHttpClient restClient;
     private URI abakusEndpoint;
     private URI callbackUrl;
+    private String callbackScope;
     private URI endpointArbeidsforholdIPeriode;
     private URI endpointGrunnlag;
     private URI endpointOverstyring;
@@ -84,28 +84,31 @@ public class AbakusTjeneste {
     private URI endpointInntektsmeldinger;
     private URI endpointRefusjonskravdatoer;
 
+
     AbakusTjeneste() {
         // for CDI
     }
 
     @Inject
     public AbakusTjeneste(OidcRestClient oidcRestClient,
-                          @KonfigVerdi(value = "fpabakus.url") URI endpoint,
-                          @KonfigVerdi(value = "abakus.callback.url") URI callbackUrl) {
-        this(endpoint, callbackUrl);
+                          @KonfigVerdi(value = "k9abakus.url") URI endpoint,
+                          @KonfigVerdi(value = "abakus.callback.url") URI callbackUrl,
+                          @KonfigVerdi(value = "abakus.callback.scope") String callbackScope) {
+        this(endpoint, callbackUrl, callbackScope);
         this.restClient = oidcRestClient;
     }
 
     public AbakusTjeneste(SystemUserOidcRestClient oidcRestClient,
                           URI endpoint,
                           URI callbackUrl) {
-        this(endpoint, callbackUrl);
+        this(endpoint, callbackUrl, null);
         this.restClient = oidcRestClient;
     }
 
-    private AbakusTjeneste(URI endpoint, URI callbackUrl) {
+    private AbakusTjeneste(URI endpoint, URI callbackUrl, String callbackScope) {
         this.abakusEndpoint = endpoint;
         this.callbackUrl = callbackUrl;
+        this.callbackScope = callbackScope;
 
         this.endpointArbeidsforholdIPeriode = toUri("/api/arbeidsforhold/v1/arbeidstaker");
         this.endpointGrunnlag = toUri("/api/iay/grunnlag/v1/");
@@ -178,14 +181,6 @@ public class AbakusTjeneste {
         return hentFraAbakus(new HttpPost(endpoint), responseHandler, json);// NOSONAR håndterer i responseHandler
     }
 
-    public RefusjonskravDatoerDto hentRefusjonskravDatoer(InntektsmeldingerRequest request) throws IOException {
-        var endpoint = endpointRefusjonskravdatoer;
-        var reader = refusjonskravDatoerReader;
-        var responseHandler = new ObjectReaderResponseHandler<RefusjonskravDatoerDto>(endpoint, reader);
-        var json = iayJsonWriter.writeValueAsString(request);
-        return hentFraAbakus(new HttpPost(endpoint), responseHandler, json);// NOSONAR håndterer i responseHandler
-    }
-
     public InntektArbeidYtelseGrunnlagSakSnapshotDto hentGrunnlagSnapshot(InntektArbeidYtelseGrunnlagRequest request) throws IOException {
         var endpoint = endpointGrunnlagSnapshot;
         var reader = iayGrunnlagSnapshotReader;
@@ -254,7 +249,9 @@ public class AbakusTjeneste {
         }
     }
 
-    /** @deprecated bruk {@link #lagreOverstyrt(OverstyrtInntektArbeidYtelseDto)} i stedet . */
+    /**
+     * @deprecated bruk {@link #lagreOverstyrt(OverstyrtInntektArbeidYtelseDto)} i stedet .
+     */
     @Deprecated(forRemoval = true)
     public void lagreGrunnlag(InntektArbeidYtelseGrunnlagDto dto) throws IOException {
 
@@ -287,7 +284,7 @@ public class AbakusTjeneste {
         lagreInntektsmeldinger(dto.getKoblingReferanse(), json);
     }
 
-    public void lagreInntektsmeldinger(UUID referanse, String json) throws IOException, ClientProtocolException {
+    private void lagreInntektsmeldinger(UUID referanse, String json) throws IOException, ClientProtocolException {
         HttpPost httpPost = new HttpPost(endpointMottaInntektsmeldinger);
         httpPost.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
 
@@ -366,6 +363,11 @@ public class AbakusTjeneste {
     public String getCallbackUrl() {
         return callbackUrl.toString();
     }
+
+    public String getCallbackScope() {
+        return callbackScope;
+    }
+
 
     public void lagreOverstyrtOppgittOpptjening(OppgittOpptjeningMottattRequest request) throws IOException {
         var json = iayJsonWriter.writeValueAsString(request);

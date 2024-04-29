@@ -13,6 +13,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
@@ -72,7 +73,7 @@ public class SøknadsperiodeTjeneste {
         return samletTimelineForAlleSøkere;
     }
 
-    public NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
+    public NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId, boolean fjernTrukket) {
         var søknadsperioder = søknadsperiodeRepository.hentGrunnlag(behandlingId)
             .map(SøknadsperiodeGrunnlag::getRelevantSøknadsperioder);
 
@@ -82,7 +83,7 @@ public class SøknadsperiodeTjeneste {
             final var søknadsperioders = søknadsperioder.get().getPerioder();
             final var behandling = behandlingRepository.hentBehandling(behandlingId);
 
-            return utledVurderingsperioderFraSøknadsperioder(BehandlingReferanse.fra(behandling), søknadsperioders);
+            return utledVurderingsperioderFraSøknadsperioder(BehandlingReferanse.fra(behandling), søknadsperioders, fjernTrukket);
         }
     }
 
@@ -96,14 +97,14 @@ public class SøknadsperiodeTjeneste {
             final var søknadsperioders = søknadsperioder.get().getPerioder();
             final var behandling = behandlingRepository.hentBehandling(behandlingId);
 
-            return utledVurderingsperioderFraSøknadsperioder(BehandlingReferanse.fra(behandling), søknadsperioders);
+            return utledVurderingsperioderFraSøknadsperioder(BehandlingReferanse.fra(behandling), søknadsperioders, true);
         }
     }
 
-    public NavigableSet<DatoIntervallEntitet> utledVurderingsperioderFraSøknadsperioder(BehandlingReferanse referanse, Set<Søknadsperioder> søknadsperioders) {
+    public NavigableSet<DatoIntervallEntitet> utledVurderingsperioderFraSøknadsperioder(BehandlingReferanse referanse, Set<Søknadsperioder> søknadsperioders, boolean fjernTrukket) {
         return hentKravperioder(referanse, søknadsperioders)
             .stream()
-            .filter(kp -> !kp.isHarTrukketKrav())
+            .filter(kp -> !fjernTrukket || !kp.isHarTrukketKrav())
             .map(Kravperiode::getPeriode)
             .collect(Collectors.toCollection(TreeSet::new));
     }
@@ -144,12 +145,22 @@ public class SøknadsperiodeTjeneste {
         var utvidetPeriode = håndterePleietrengendeDødsfallTjeneste.utledUtvidetPeriodeForDødsfall(referanse);
         if (utvidetPeriode.isPresent()) {
             var periode = utvidetPeriode.get();
-            tidslinje = tidslinje.union(new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode.toLocalDateInterval(), new Kravperiode(periode, referanse.getBehandlingId(), false)))), StandardCombinators::coalesceRightHandSide);
+            tidslinje = tidslinje.union(new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode.toLocalDateInterval(), new Kravperiode(periode, referanse.getBehandlingId(), false)))), this::mergeUtvidetPeriodeForDødsfall);
         }
 
         return tidslinje.stream().map(s -> new Kravperiode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()), s.getValue().getBehandlingId(), s.getValue().isHarTrukketKrav())).toList();
     }
 
+    private LocalDateSegment<Kravperiode> mergeUtvidetPeriodeForDødsfall(LocalDateInterval dateInterval, LocalDateSegment<Kravperiode> lhs, LocalDateSegment<Kravperiode> rhs) {
+        if (rhs == null) {
+            return new LocalDateSegment<>(dateInterval, lhs.getValue());
+        }
+        //Trukket periode skal ikke overskrives
+        if (lhs != null && lhs.getValue().isHarTrukketKrav()) {
+            return new LocalDateSegment<>(dateInterval, lhs.getValue());
+        }
+        return new LocalDateSegment<>(dateInterval, rhs.getValue());
+    }
 
     public static class Kravperiode {
         private final DatoIntervallEntitet periode;

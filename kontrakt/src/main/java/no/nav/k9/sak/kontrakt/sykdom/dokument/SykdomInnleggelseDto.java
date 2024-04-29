@@ -4,17 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.AssertFalse;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertFalse;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import no.nav.k9.abac.AbacAttributt;
 import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.typer.Periode;
@@ -42,11 +41,11 @@ public class SykdomInnleggelseDto {
     @Size(max = 1000)
     @Valid
     private List<Periode> perioder = new ArrayList<>();
-    
+
     @JsonProperty(value = "dryRun")
     @Valid
     private boolean dryRun = false;
-    
+
     @JsonProperty(value = "links")
     @Size(max = 100)
     @Valid
@@ -85,13 +84,13 @@ public class SykdomInnleggelseDto {
     public List<Periode> getPerioder() {
         return perioder;
     }
-    
+
     public boolean isDryRun() {
         return dryRun;
     }
-    
+
     @AssertFalse(message = "Det er ikke tillatt med overlappende perioder.")
-    private boolean isOverlappendePerioder() {
+    boolean isOverlappendePerioder() {
         for (Periode p : perioder) {
             var result = perioder.stream().anyMatch(p2 -> p != p2 && p.overlaps(p2));
             if (result) {

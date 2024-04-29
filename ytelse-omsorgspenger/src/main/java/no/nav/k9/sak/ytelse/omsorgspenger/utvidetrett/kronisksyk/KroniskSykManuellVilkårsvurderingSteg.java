@@ -4,14 +4,14 @@ import static no.nav.k9.kodeverk.behandling.BehandlingStegType.MANUELL_VILKÅRSV
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS;
 
 import java.util.List;
-import java.util.Set;
+import java.util.NavigableSet;
 import java.util.TreeSet;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
@@ -22,6 +22,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
 
@@ -55,25 +56,25 @@ public class KroniskSykManuellVilkårsvurderingSteg implements BehandlingSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
-        var behandling = behandlingRepository.hentBehandling(behandlingId);
-        var fagsak = behandling.getFagsak();
 
-        var søknad = søknadRepository.hentSøknad(behandling);
-        var vilkårene = vilkårTjeneste.hentVilkårResultat(behandlingId);
-
-        var vilkårTimeline = vilkårene.getVilkårTimeline(vilkårType);
-        var søknadsperiode = søknad.getSøknadsperiode();
-        var intersectTimeline = vilkårTimeline.intersection(new LocalDateInterval(søknadsperiode.getFomDato(), fagsak.getPeriode().getTomDato()));
-
-        if (vilkårTjeneste.erNoenVilkårHeltAvslått(behandlingId, vilkårType, intersectTimeline.getMinLocalDate(), intersectTimeline.getMaxLocalDate())) {
-            vilkårTjeneste.settVilkårutfallTilIkkeVurdert(behandlingId, vilkårType,
-                new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(vilkårTimeline.getMinLocalDate(), vilkårTimeline.getMaxLocalDate()))));
+        if (erNoeInnevilgetFor(behandlingId, VilkårType.OMSORGEN_FOR)) {
+            //saksbehandler skal manuelt vurdere sykdom og sette dato for når vedtake gjelder fra
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(aksjonspunktDef));
+        } else {
+            //kan ikke innvilge når tidligere vilkår ikke er oppfylt, så saksbehandler trenger ikke å vurdere sykdom
+            var vilkårene = vilkårTjeneste.hentVilkårResultat(behandlingId);
+            NavigableSet<DatoIntervallEntitet> vilkårsperioder = new TreeSet<>(vilkårene.getVilkårTimeline(vilkårType).stream().map(segment -> DatoIntervallEntitet.fra(segment.getLocalDateInterval())).toList());
+            vilkårTjeneste.settVilkårutfallTilIkkeVurdert(behandlingId, vilkårType, vilkårsperioder);
+            var behandling = behandlingRepository.hentBehandling(behandlingId);
             behandling.getAksjonspunktMedDefinisjonOptional(aksjonspunktDef).ifPresent(Aksjonspunkt::avbryt);
             behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
+    }
 
-        return BehandleStegResultat.utførtMedAksjonspunkter(List.of(aksjonspunktDef));
-
+    boolean erNoeInnevilgetFor(Long behandlingId, VilkårType vilkårType) {
+        Vilkårene vilkårene = vilkårTjeneste.hentVilkårResultat(behandlingId);
+        return vilkårene.getVilkårTimeline(vilkårType).stream().anyMatch(segment -> segment.getValue().getUtfall() == Utfall.OPPFYLT);
     }
 }
+

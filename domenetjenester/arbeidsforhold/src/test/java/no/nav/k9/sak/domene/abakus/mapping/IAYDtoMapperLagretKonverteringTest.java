@@ -1,24 +1,14 @@
 package no.nav.k9.sak.domene.abakus.mapping;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Optional;
-import java.util.UUID;
-
-import org.junit.jupiter.api.Test;
-
 import no.nav.abakus.iaygrunnlag.JsonObjectMapper;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.k9.kodeverk.arbeidsforhold.InntektYtelseType;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
-import no.nav.k9.kodeverk.arbeidsforhold.OffentligYtelseType;
 import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
 import no.nav.k9.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
-import no.nav.k9.kodeverk.arbeidsforhold.TemaUnderkategori;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -32,6 +22,14 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.Saksnummer;
+import org.junit.jupiter.api.Test;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class IAYDtoMapperLagretKonverteringTest {
 
@@ -99,7 +97,7 @@ public class IAYDtoMapperLagretKonverteringTest {
             .medBeløp(BigDecimal.TEN)
             .medPeriode(fraOgMed, tilOgMed)
             .medInntektspostType(InntektspostType.YTELSE)
-            .medYtelse(OffentligYtelseType.UDEFINERT);
+            .medInntektYtelse(InntektYtelseType.OMSORGSPENGER);
 
         inntektBuilder
             .leggTilInntektspost(inntektspost)
@@ -136,7 +134,6 @@ public class IAYDtoMapperLagretKonverteringTest {
         ytelselseBuilder.tilbakestillAnvisteYtelser();
         return ytelselseBuilder.medKilde(Fagsystem.INFOTRYGD)
             .medYtelseType(FagsakYtelseType.FORELDREPENGER)
-            .medBehandlingsTema(TemaUnderkategori.UDEFINERT)
             .medStatus(RelatertYtelseTilstand.AVSLUTTET)
             .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(FOM_DATO, TOM_DATO))
             .medSaksnummer(sakId)

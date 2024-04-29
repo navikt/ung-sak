@@ -36,17 +36,12 @@ public class IAYTilDtoMapper {
         this.behandlingReferanse = behandlingReferanse;
     }
 
-    public InntektArbeidYtelseGrunnlagDto mapTilDto(FagsakYtelseType ytelseType, InntektArbeidYtelseGrunnlag grunnlag) {
-        return mapTilDto(YtelseType.fraKode(ytelseType.getKode()), grunnlag, true);
-    }
-
     public OverstyrtInntektArbeidYtelseDto mapTilDto(FagsakYtelseType fagsakYtelseType, InntektArbeidYtelseAggregat overstyrt, ArbeidsforholdInformasjon arbeidsforholdInformasjon) {
         var ytelseType = YtelseType.fraKode(fagsakYtelseType.getKode());
         var person = new AktørIdPersonident(aktørId.getId());
         var arbeidsforholdInformasjonDto = new MapArbeidsforholdInformasjon.MapTilDto().map(arbeidsforholdInformasjon, grunnlagReferanse, true);
         var overstyrtDto = mapSaksbehandlerOverstyrteOpplysninger(arbeidsforholdInformasjon, overstyrt);
-        var dto = new OverstyrtInntektArbeidYtelseDto(person, grunnlagReferanse, behandlingReferanse, ytelseType, arbeidsforholdInformasjonDto, overstyrtDto);
-        return dto;
+        return new OverstyrtInntektArbeidYtelseDto(person, grunnlagReferanse, behandlingReferanse, ytelseType, arbeidsforholdInformasjonDto, overstyrtDto);
     }
 
     public InntektArbeidYtelseGrunnlagDto mapTilDto(YtelseType ytelseType, InntektArbeidYtelseGrunnlag grunnlag, boolean validerArbeidsforholdId) {
@@ -88,9 +83,8 @@ public class IAYTilDtoMapper {
 
     public InntektsmeldingerDto mapTilDto(Collection<InntektsmeldingBuilder> inntektsmeldingBuildere) {
         var mapInntektsmeldinger = new MapInntektsmeldinger.MapTilDto();
-        var inntektsmeldinger = mapInntektsmeldinger.map(inntektsmeldingBuildere);
 
-        return inntektsmeldinger;
+        return mapInntektsmeldinger.map(inntektsmeldingBuildere);
     }
 
     public OppgittOpptjeningDto mapTilDto(OppgittOpptjeningBuilder builder) {

@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -14,13 +16,21 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
+import no.nav.folketrygdloven.beregningsgrunnlag.tilkommetAktivitet.AktivitetstatusOgArbeidsgiver;
+import no.nav.folketrygdloven.beregningsgrunnlag.tilkommetAktivitet.TilkommetAktivitetTjeneste;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrUttakRepository;
+import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrtUttakPeriode;
+import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
@@ -28,6 +38,7 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.typer.Prosent;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PSBVurdererSøknadsfristTjeneste;
@@ -40,6 +51,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død.RettPleiepe
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.død.HåndterePleietrengendeDødsfallTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.AktivitetIdentifikator;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.HentPerioderTilVurderingTjeneste;
 
 @Dependent
@@ -54,6 +66,8 @@ public class HentDataTilUttakTjeneste {
     private BehandlingRepository behandlingRepository;
     private PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
+
+    private BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
     private OpptjeningRepository opptjeningRepository;
     private PleietrengendeKravprioritet pleietrengendeKravprioritet;
@@ -62,6 +76,12 @@ public class HentDataTilUttakTjeneste {
     private HentPerioderTilVurderingTjeneste hentPerioderTilVurderingTjeneste;
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
     private HentEtablertTilsynTjeneste hentEtablertTilsynTjeneste;
+    private TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste;
+    private UttakNyeReglerRepository uttakNyeReglerRepository;
+    private OverstyrUttakRepository overstyrUttakRepository;
+
+    private boolean tilkommetAktivitetEnabled;
+    private boolean nyRegelEnabled;
 
     @Inject
     public HentDataTilUttakTjeneste(VilkårResultatRepository vilkårResultatRepository,
@@ -76,11 +96,19 @@ public class HentDataTilUttakTjeneste {
                                     RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository,
                                     InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                     @Any PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste,
+                                    BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
                                     @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
                                     @Any Instance<HåndterePleietrengendeDødsfallTjeneste> håndterePleietrengendeDødsfallTjenester,
                                     HentPerioderTilVurderingTjeneste hentPerioderTilVurderingTjeneste,
                                     UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
-                                    HentEtablertTilsynTjeneste hentEtablertTilsynTjeneste) {
+                                    HentEtablertTilsynTjeneste hentEtablertTilsynTjeneste,
+                                    TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste,
+                                    UttakNyeReglerRepository uttakNyeReglerRepository,
+                                    OverstyrUttakRepository overstyrUttakRepository,
+                                    @KonfigVerdi(value = "TILKOMMET_AKTIVITET_ENABLED", required = false, defaultVerdi = "false") boolean tilkommetAktivitetEnabled,
+                                    @KonfigVerdi(value = "ENABLE_DATO_NY_REGEL_UTTAK", required = false, defaultVerdi = "false") boolean nyRegelEnabled
+
+    ) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.pleiebehovResultatRepository = pleiebehovResultatRepository;
         this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
@@ -91,6 +119,7 @@ public class HentDataTilUttakTjeneste {
         this.pleietrengendeKravprioritet = pleietrengendeKravprioritet;
         this.rettPleiepengerVedDødRepository = rettPleiepengerVedDødRepository;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
+        this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
         this.opptjeningRepository = opptjeningRepository;
@@ -98,9 +127,14 @@ public class HentDataTilUttakTjeneste {
         this.hentPerioderTilVurderingTjeneste = hentPerioderTilVurderingTjeneste;
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
         this.hentEtablertTilsynTjeneste = hentEtablertTilsynTjeneste;
+        this.tilkommetAktivitetTjeneste = tilkommetAktivitetTjeneste;
+        this.uttakNyeReglerRepository = uttakNyeReglerRepository;
+        this.overstyrUttakRepository = overstyrUttakRepository;
+        this.tilkommetAktivitetEnabled = tilkommetAktivitetEnabled;
+        this.nyRegelEnabled = nyRegelEnabled;
     }
 
-    public InputParametere hentUtData(BehandlingReferanse referanse, boolean brukUbesluttedeData) {
+    public InputParametere hentUtData(BehandlingReferanse referanse, boolean brukUbesluttedeData, boolean medInntektsgradering) {
         boolean skalMappeHeleTidslinjen = brukUbesluttedeData;
 
         var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
@@ -114,9 +148,23 @@ public class HentDataTilUttakTjeneste {
         var utvidetPeriodeSomFølgeAvDødsfall = håndterePleietrengendeDødsfallTjeneste.utledUtvidetPeriodeForDødsfall(referanse);
         final NavigableSet<DatoIntervallEntitet> perioderTilVurdering;
         if (skalMappeHeleTidslinjen) {
-            perioderTilVurdering = hentPerioderTilVurderingTjeneste.hentPerioderTilVurderingMedUbesluttet(behandling, utvidetPeriodeSomFølgeAvDødsfall);
+            perioderTilVurdering = hentPerioderTilVurderingTjeneste.hentPerioderTilVurderingMedUbesluttet(referanse, utvidetPeriodeSomFølgeAvDødsfall);
         } else {
-            perioderTilVurdering = hentPerioderTilVurderingTjeneste.hentPerioderTilVurderingUtenUbesluttet(behandling);
+            perioderTilVurdering = hentPerioderTilVurderingTjeneste.hentPerioderTilVurderingUtenUbesluttet(referanse);
+        }
+
+        LocalDate virkningsdatoNyeRegler = uttakNyeReglerRepository.finnDatoForNyeRegler(referanse.getBehandlingId()).orElse(null);
+        if (virkningsdatoNyeRegler != null && !nyRegelEnabled) {
+            throw new IllegalStateException("Har lagret virkningsdato for nye regler i uttak, men de nye reglene er skrudd av.");
+        }
+
+        final Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> tilkommetAktivitetsperioder;
+        if (tilkommetAktivitetEnabled) {
+            final Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> tilkommedeAktiviteterRaw = tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(referanse.getFagsakId(), virkningsdatoNyeRegler);
+            tilkommetAktivitetsperioder = tilkommedeAktiviteterRaw.entrySet().stream()
+                .collect(Collectors.toMap(e -> new AktivitetIdentifikator(e.getKey().getAktivitetType(), e.getKey().getArbeidsgiver(), null), e -> e.getValue()));
+        } else {
+            tilkommetAktivitetsperioder = new HashMap<>();
         }
 
         var utvidetRevurderingPerioder = perioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(referanse);
@@ -134,6 +182,8 @@ public class HentDataTilUttakTjeneste {
             .collect(Collectors.toSet());
 
         var inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(referanse.getBehandlingId());
+
+        var beregningsgrunnlag = beregningsgrunnlagTjeneste.hentForAllePerioder(referanse);
 
         var unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksisterer(behandling.getId())
             .map(UnntakEtablertTilsynGrunnlag::getUnntakEtablertTilsynForPleietrengende);
@@ -157,6 +207,17 @@ public class HentDataTilUttakTjeneste {
                 sisteVedtatteBehandlinger.put(uuid, b.getOriginalBehandlingId().map(it -> behandlingRepository.hentBehandling(it)).map(Behandling::getUuid).orElse(null));
             }
         }
+        LocalDateTimeline<OverstyrtUttakPeriode> overstyrtUttak = overstyrUttakRepository.hentOverstyrtUttak(behandling.getId());
+
+
+        LocalDateTimeline<BigDecimal> nedjustertUttakgradTidslinje;
+
+        if (tilkommetAktivitetEnabled && medInntektsgradering) {
+            nedjustertUttakgradTidslinje = tilkommetAktivitetTjeneste.finnInntektsgradering(referanse.getFagsakId()).mapValue(Prosent::getVerdi);
+        } else {
+            nedjustertUttakgradTidslinje = LocalDateTimeline.empty();
+        }
+
 
         return new InputParametere()
             .medBehandling(behandling)
@@ -173,12 +234,18 @@ public class HentDataTilUttakTjeneste {
             .medEtablertTilsynPerioder(etablertTilsynPerioder)
             .medKravprioritet(kravprioritet)
             .medIAYGrunnlag(inntektArbeidYtelseGrunnlag)
+            .medBeregningsgrunnlag(beregningsgrunnlag)
             .medOpptjeningsresultat(opptjeningsresultat.orElse(null))
             .medRettPleiepengerVedDødGrunnlag(rettVedDød.orElse(null))
             .medAutomatiskUtvidelseVedDødsfall(utvidetPeriodeSomFølgeAvDødsfall.orElse(null))
             .medUnntakEtablertTilsynForPleietrengende(unntakEtablertTilsynForPleietrengende.orElse(null))
             .medUtsattePerioder(utsattePerioder.orElse(null))
-            .medSisteVedtatteBehandlingForBehandling(sisteVedtatteBehandlinger);
+            .medSisteVedtatteBehandlingForBehandling(sisteVedtatteBehandlinger)
+            .medTilkommetAktivitetsperioder(tilkommetAktivitetsperioder)
+            .medVirkningsdatoNyeRegler(virkningsdatoNyeRegler)
+            .medOverstyrtUttak(overstyrtUttak)
+            .medNedjustertUttaksgrad(nedjustertUttakgradTidslinje)
+            ;
     }
 
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste(BehandlingReferanse behandlingReferanse) {

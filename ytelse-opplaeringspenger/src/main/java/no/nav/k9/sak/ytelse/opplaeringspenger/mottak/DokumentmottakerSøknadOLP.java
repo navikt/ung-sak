@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.opplaeringspenger.mottak;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
@@ -29,6 +30,7 @@ import no.nav.k9.sak.domene.abakus.AbakusInntektArbeidYtelseTjenesteFeil;
 import no.nav.k9.sak.mottak.dokumentmottak.AsyncAbakusLagreOpptjeningTask;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.Dokumentmottaker;
+import no.nav.k9.sak.mottak.dokumentmottak.DokumentmottakerFelles;
 import no.nav.k9.sak.mottak.dokumentmottak.OppgittOpptjeningMapper;
 import no.nav.k9.sak.mottak.dokumentmottak.SøknadParser;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -49,8 +51,10 @@ class DokumentmottakerSøknadOLP implements Dokumentmottaker {
     private MottatteDokumentRepository mottatteDokumentRepository;
     private SøknadParser søknadParser;
     private SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer;
+    private OpplæringDokumentVedleggHåndterer opplæringDokumentVedleggHåndterer;
     private ProsessTaskRepository prosessTaskRepository;
     private OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste;
+    private DokumentmottakerFelles dokumentmottakerFelles;
 
     DokumentmottakerSøknadOLP() {
         // for CDI proxy
@@ -61,14 +65,18 @@ class DokumentmottakerSøknadOLP implements Dokumentmottaker {
                               SøknadParser søknadParser,
                               SøknadOversetter søknadOversetter,
                               SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer,
+                              OpplæringDokumentVedleggHåndterer opplæringDokumentVedleggHåndterer,
                               ProsessTaskRepository prosessTaskRepository,
-                              OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste) {
+                              OppgittOpptjeningMapper oppgittOpptjeningMapperTjeneste,
+                              DokumentmottakerFelles dokumentmottakerFelles) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.søknadParser = søknadParser;
         this.sykdomsDokumentVedleggHåndterer = sykdomsDokumentVedleggHåndterer;
+        this.opplæringDokumentVedleggHåndterer = opplæringDokumentVedleggHåndterer;
         this.søknadOversetter = søknadOversetter;
         this.prosessTaskRepository = prosessTaskRepository;
         this.oppgittOpptjeningMapperTjeneste = oppgittOpptjeningMapperTjeneste;
+        this.dokumentmottakerFelles = dokumentmottakerFelles;
     }
 
     @Override
@@ -80,9 +88,13 @@ class DokumentmottakerSøknadOLP implements Dokumentmottaker {
             Søknad søknad = søknadParser.parseSøknad(dokument);
             dokument.setBehandlingId(behandlingId);
             dokument.setInnsendingstidspunkt(søknad.getMottattDato().toLocalDateTime());
+            if (søknad.getKildesystem().isPresent()) {
+                dokument.setKildesystem(søknad.getKildesystem().get().getKode());
+            }
             mottatteDokumentRepository.lagre(dokument, DokumentStatus.BEHANDLER);
             // Søknadsinnhold som persisteres "lokalt" i k9-sak
             persister(søknad, behandling, dokument.getJournalpostId());
+            dokumentmottakerFelles.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), dokument.getJournalpostId(), dokument.getType());
             // Søknadsinnhold som persisteres eksternt (abakus)
             lagreOppgittOpptjeningFraSøknad(søknad, behandling, dokument);
         }
@@ -139,13 +151,8 @@ class DokumentmottakerSøknadOLP implements Dokumentmottaker {
             }
 
             try {
-                sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(
-                    behandling,
-                    new JournalpostId(journalpost.getJournalpostId()),
-                    behandling.getFagsak().getPleietrengendeAktørId(),
-                    søknad.getMottattDato().toLocalDateTime(),
-                    journalpostHarInformasjonSomIkkeKanPunsjes,
-                    journalpostHarMedisinskeOpplysninger);
+                håndterVedlegg(behandling, new JournalpostId(journalpost.getJournalpostId()), søknad.getMottattDato().toLocalDateTime(),
+                    journalpostHarInformasjonSomIkkeKanPunsjes, journalpostHarMedisinskeOpplysninger);
             } catch (RuntimeException e) {
                 logger.warn("Feil ved håndtering av forsendelse " + journalpostId.getVerdi() + " med tilknyttet journalpost " + journalpost.getJournalpostId());
                 throw e;
@@ -158,13 +165,16 @@ class DokumentmottakerSøknadOLP implements Dokumentmottaker {
             .findFirst();
 
         if (journalpost.isEmpty()) {
-            sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(behandling,
-                journalpostId,
-                behandling.getFagsak().getPleietrengendeAktørId(),
-                søknad.getMottattDato().toLocalDateTime(),
-                false,
-                true);
+            håndterVedlegg(behandling, journalpostId, søknad.getMottattDato().toLocalDateTime(), false, true);
         }
+    }
+
+    private void håndterVedlegg(Behandling behandling, JournalpostId journalpostId, LocalDateTime mottattidspunkt,
+                                boolean journalpostHarInformasjonSomIkkeKanPunsjes, boolean journalpostHarMedisinskeOpplysninger) {
+        sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(behandling, journalpostId,
+            behandling.getFagsak().getPleietrengendeAktørId(),
+            mottattidspunkt, journalpostHarInformasjonSomIkkeKanPunsjes, journalpostHarMedisinskeOpplysninger);
+        opplæringDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(behandling, journalpostId, mottattidspunkt);
     }
 
     @Override

@@ -9,6 +9,7 @@ import no.nav.k9.felles.integrasjon.saf.JournalpostQueryRequest;
 import no.nav.k9.felles.integrasjon.saf.JournalpostResponseProjection;
 import no.nav.k9.felles.integrasjon.saf.SafTjeneste;
 
+@Deprecated
 @ApplicationScoped
 public class SafAdapter {
 

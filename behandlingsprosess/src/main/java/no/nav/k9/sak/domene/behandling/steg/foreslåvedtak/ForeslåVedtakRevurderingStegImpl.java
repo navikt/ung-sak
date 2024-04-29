@@ -77,6 +77,7 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
             .map(VilkårPeriode::getSkjæringstidspunkt)
             .collect(Collectors.toCollection(TreeSet::new));
 
+        //TODO spørre Espen V om dette er fjernet, og flyttet til beregning
         var vurderUgunst = erRevurderingensBeregningsgrunnlagMindreEnnOrginal(originalRef, revurderingRef, skjæringstidspunkter);
         for (LocalDate stp : skjæringstidspunkter) {
             if (vurderUgunst.containsKey(stp) && vurderUgunst.get(stp)) {
@@ -87,6 +88,7 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
                 return BehandleStegResultat.utførtMedAksjonspunkter(aksjonspunkter);
             }
         }
+
         return behandleStegResultat;
     }
 

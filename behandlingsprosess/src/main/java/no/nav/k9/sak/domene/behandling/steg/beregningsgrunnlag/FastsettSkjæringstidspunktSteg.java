@@ -2,7 +2,6 @@ package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,7 +21,6 @@ import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
@@ -32,11 +30,9 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
-import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 
 @FagsakYtelseTypeRef
 @BehandlingStegRef(value = FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING)
@@ -51,7 +47,7 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
     private BehandlingRepository behandlingRepository;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
-    private VilkårPeriodeFilterProvider periodeFilterProvider;
+    private BeregningStegPeriodeFilter beregningStegPeriodeFilter;
 
     protected FastsettSkjæringstidspunktSteg() {
         // for CDI proxy
@@ -63,14 +59,14 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
                                           SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                           BehandlingRepository behandlingRepository,
                                           BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
-                                          VilkårPeriodeFilterProvider periodeFilterProvider) {
+                                          BeregningStegPeriodeFilter beregningStegPeriodeFilter) {
 
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
-        this.periodeFilterProvider = periodeFilterProvider;
+        this.beregningStegPeriodeFilter = beregningStegPeriodeFilter;
     }
 
     @Override
@@ -79,12 +75,8 @@ public class FastsettSkjæringstidspunktSteg implements BeregningsgrunnlagSteg {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         var skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
         var ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
-        var periodeFilter = periodeFilterProvider.getFilter(ref);
-
-        periodeFilter.ignorerAvslåttePerioder().ignorerForlengelseperioder();
         var perioderTilBeregning = new ArrayList<PeriodeTilVurdering>();
-        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter);
-
+        var perioderTilVurdering = beregningStegPeriodeFilter.filtrerPerioder(ref, FASTSETT_SKJÆRINGSTIDSPUNKT_BEREGNING);
         for (var periode : perioderTilVurdering) {
             if (periodeErUtenforFagsaksIntervall(periode.getPeriode(), behandling.getFagsak().getPeriode())) {
                 avslåVilkår(kontekst, Avslagsårsak.INGEN_BEREGNINGSREGLER_TILGJENGELIG_I_LØSNINGEN, periode.getPeriode());

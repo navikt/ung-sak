@@ -23,7 +23,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
@@ -35,30 +34,25 @@ import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriode;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
 import no.nav.k9.sak.vilkår.EndringIUttakPeriodeUtleder;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlag;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.PleietrengendeRevurderingPerioderTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.RevurderingPerioderTjeneste;
 
 public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
 
     private final PåTversAvHelgErKantIKantVurderer erKantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
-
     private Map<VilkårType, VilkårsPeriodiseringsFunksjon> vilkårsPeriodisering;
     private VilkårUtleder vilkårUtleder;
     private SøktePerioder søktePerioder;
     private VilkårResultatRepository vilkårResultatRepository;
     private BehandlingRepository behandlingRepository;
-    private MedisinskGrunnlagTjeneste medisinskGrunnlagTjeneste;
-    private ErEndringPåEtablertTilsynTjeneste etablertTilsynTjeneste;
-
-    private EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste;
     private RevurderingPerioderTjeneste revurderingPerioderTjeneste;
+    private PleietrengendeRevurderingPerioderTjeneste pleitrengendeRevurderingPerioderTjeneste;
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
+
     private EndringIUttakPeriodeUtleder endringIUttakPeriodeUtleder;
+
 
     public PleiepengerVilkårsPerioderTilVurderingTjeneste() {
     }
@@ -68,26 +62,21 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
                                                           Map<VilkårType, VilkårsPeriodiseringsFunksjon> vilkårsPeriodisering,
                                                           VilkårResultatRepository vilkårResultatRepository,
                                                           BehandlingRepository behandlingRepository,
-                                                          MedisinskGrunnlagTjeneste medisinskGrunnlagTjeneste,
-                                                          ErEndringPåEtablertTilsynTjeneste etablertTilsynTjeneste,
-                                                          EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
                                                           RevurderingPerioderTjeneste revurderingPerioderTjeneste,
+                                                          PleietrengendeRevurderingPerioderTjeneste pleitrengendeRevurderingPerioderTjeneste,
                                                           SøknadsperiodeTjeneste søknadsperiodeTjeneste,
                                                           UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
-                                                          PleiepengerEndringIUttakPeriodeUtleder endringIUttakPeriodeUtleder) {
+                                                          EndringIUttakPeriodeUtleder endringIUttakPeriodeUtleder) {
         this.vilkårUtleder = vilkårUtleder;
         this.vilkårsPeriodisering = vilkårsPeriodisering;
         this.behandlingRepository = behandlingRepository;
-        this.medisinskGrunnlagTjeneste = medisinskGrunnlagTjeneste;
-        this.etablertTilsynTjeneste = etablertTilsynTjeneste;
-        this.endringUnntakEtablertTilsynTjeneste = endringUnntakEtablertTilsynTjeneste;
         this.revurderingPerioderTjeneste = revurderingPerioderTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
+        this.pleitrengendeRevurderingPerioderTjeneste = pleitrengendeRevurderingPerioderTjeneste;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
-        this.endringIUttakPeriodeUtleder = endringIUttakPeriodeUtleder;
-
         søktePerioder = new SøktePerioder(søknadsperiodeTjeneste);
+        this.endringIUttakPeriodeUtleder = endringIUttakPeriodeUtleder;
     }
 
     @Override
@@ -107,12 +96,13 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
 
         var referanse = BehandlingReferanse.fra(behandling);
         if (skalVurdereBerørtePerioderPåBarnet(behandling)) {
-            var berørtePerioder = utledUtvidetPeriode(referanse);
-            perioderTilVurdering.addAll(berørtePerioder);
+            var tidslinjeMedÅrsaker = pleitrengendeRevurderingPerioderTjeneste.utledBerørtePerioderPåPleietrengende(referanse, definerendeVilkår());
+            perioderTilVurdering.addAll(TidslinjeUtil.tilDatoIntervallEntiteter(tidslinjeMedÅrsaker));
+            perioderTilVurdering.addAll(TidslinjeUtil.tilDatoIntervallEntiteter(uttaksendringerSidenForrigeBehandling(referanse)));
         }
 
         perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraProsessTriggere(referanse));
-        perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse, utledFullstendigePerioder(behandling.getId())));
+        perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse, finnKomprimertePerioderFraKantIKantVurderer(behandling)));
         perioderTilVurdering.addAll(perioderSomSkalTilbakestilles(behandlingId));
 
         return vilkår.getPerioder()
@@ -167,28 +157,6 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
     }
 
     @Override
-    public NavigableSet<DatoIntervallEntitet> utledUtvidetRevurderingPerioder(BehandlingReferanse referanse) {
-        final var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingUuid());
-
-        final var perioder = utled(referanse.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-        final var vurderingsperioderTimeline = TidslinjeUtil.tilTidslinjeKomprimert(perioder);
-
-        final LocalDateTimeline<Boolean> endringerISøktePerioder = medisinskGrunnlagTjeneste.utledRelevanteEndringerSidenForrigeBehandling(behandling, perioder)
-            .getDiffPerioder();
-
-        final LocalDateTimeline<Boolean> utvidedePerioder = TidslinjeUtil.kunPerioderSomIkkeFinnesI(endringerISøktePerioder, vurderingsperioderTimeline);
-
-        var ekstraPerioder = TidslinjeUtil.tilDatoIntervallEntiteter(utvidedePerioder);
-
-        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(referanse.getBehandlingId())
-            .flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
-        if (vilkårene.isPresent()) {
-            return utledVilkårsPerioderFraPerioderTilVurdering(referanse.getBehandlingId(), vilkårene.get(), ekstraPerioder);
-        }
-        return ekstraPerioder;
-    }
-
-    @Override
     public NavigableSet<DatoIntervallEntitet> utledFullstendigePerioder(Long behandlingId) {
         return søknadsperiodeTjeneste.utledFullstendigPeriode(behandlingId);
     }
@@ -207,24 +175,8 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
         var periodeMedÅrsaks = new TreeSet<PeriodeMedÅrsak>();
         if (skalVurdereBerørtePerioderPåBarnet(behandling)) {
-            periodeMedÅrsaks.addAll(utledUtvidetPeriodeForSykdom(referanse)
-                .toSegments()
-                .stream()
-                .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
-                .map(it -> new PeriodeMedÅrsak(it, BehandlingÅrsakType.RE_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON))
-                .collect(Collectors.toSet()));
-            periodeMedÅrsaks.addAll(etablertTilsynTjeneste.perioderMedEndringerFraForrigeBehandling(referanse)
-                .toSegments()
-                .stream()
-                .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
-                .map(it -> new PeriodeMedÅrsak(it, BehandlingÅrsakType.RE_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON))
-                .collect(Collectors.toSet()));
-            periodeMedÅrsaks.addAll(endringUnntakEtablertTilsynTjeneste.perioderMedEndringerSidenBehandling(referanse.getOriginalBehandlingId().orElse(null), referanse.getPleietrengendeAktørId())
-                .toSegments()
-                .stream()
-                .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
-                .map(it -> new PeriodeMedÅrsak(it, BehandlingÅrsakType.RE_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON))
-                .collect(Collectors.toSet()));
+            var berørtePerioderMedÅrsaker = finnBerørtePerioderPåPleietrengende(referanse);
+            periodeMedÅrsaks.addAll(berørtePerioderMedÅrsaker);
             // TODO: Vurder om uttak skal være med inn her
         }
         periodeMedÅrsaks.addAll(revurderingPerioderTjeneste.utledPerioderFraProsessTriggereMedÅrsak(referanse));
@@ -236,7 +188,8 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
                 .map(it -> new PeriodeMedÅrsak(it.getPeriode(), BehandlingÅrsakType.RE_UTSATT_BEHANDLING))
                 .toList());
         }
-        periodeMedÅrsaks.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse, utledFullstendigePerioder(behandling.getId()))
+
+        periodeMedÅrsaks.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse, finnKomprimertePerioderFraKantIKantVurderer(behandling))
             .stream()
             .map(it -> new PeriodeMedÅrsak(it, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING))
             .collect(Collectors.toSet()));
@@ -244,31 +197,21 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         return periodeMedÅrsaks;
     }
 
-    private NavigableSet<DatoIntervallEntitet> utledUtvidetPeriode(BehandlingReferanse referanse) {
-        LocalDateTimeline<Boolean> utvidedePerioder = utledUtvidetPeriodeForSykdom(referanse);
-        utvidedePerioder = utvidedePerioder.union(etablertTilsynTjeneste.perioderMedEndringerFraForrigeBehandling(referanse), StandardCombinators::alwaysTrueForMatch);
-        utvidedePerioder = utvidedePerioder.union(endringUnntakEtablertTilsynTjeneste.perioderMedEndringerSidenBehandling(referanse.getOriginalBehandlingId().orElse(null), referanse.getPleietrengendeAktørId()), StandardCombinators::alwaysTrueForMatch);
-        utvidedePerioder = utvidedePerioder.union(uttaksendringerSidenForrigeBehandling(referanse), StandardCombinators::alwaysTrueForMatch);
-        return TidslinjeUtil.tilDatoIntervallEntiteter(utvidedePerioder);
+    private NavigableSet<DatoIntervallEntitet> finnKomprimertePerioderFraKantIKantVurderer(Behandling behandling) {
+        var fullstendigePerioder = utledFullstendigePerioder(behandling.getId());
+        var periodetidslinje = TidslinjeUtil.tilTidslinjeKomprimert(fullstendigePerioder);
+        var sammenhengendeTidslinje = periodetidslinje.compress((d1, d2) -> getKantIKantVurderer().erKantIKant(DatoIntervallEntitet.fra(d1), DatoIntervallEntitet.fra(d2)), Boolean::equals, StandardCombinators::alwaysTrueForMatch);
+        return sammenhengendeTidslinje.getLocalDateIntervals().stream().map(DatoIntervallEntitet::fra).collect(Collectors.toCollection(TreeSet::new));
     }
 
-    private LocalDateTimeline<Boolean> uttaksendringerSidenForrigeBehandling(BehandlingReferanse referanse) {
-        var segments = endringIUttakPeriodeUtleder.utled(referanse).stream()
-            .map(p -> new LocalDateSegment<>(p.getFomDato(), p.getTomDato(), Boolean.TRUE))
-            .toList();
-        return new LocalDateTimeline<>(segments);
-    }
-
-    private LocalDateTimeline<Boolean> utledUtvidetPeriodeForSykdom(BehandlingReferanse referanse) {
-        var forrigeVedtatteBehandling = behandlingRepository.hentBehandling(referanse.getOriginalBehandlingId().orElseThrow()).getUuid();
-        var vedtattSykdomGrunnlagBehandling = medisinskGrunnlagTjeneste.hentGrunnlagHvisEksisterer(forrigeVedtatteBehandling);
-        var pleietrengende = referanse.getPleietrengendeAktørId();
-        var vilkårene = vilkårResultatRepository.hent(referanse.getId());
-        var vurderingsperioder = utledVurderingsperiode(vilkårene);
-
-        var utledetGrunnlag = medisinskGrunnlagTjeneste.utledGrunnlagMedManglendeOmsorgFjernet(referanse.getSaksnummer(), referanse.getBehandlingUuid(), referanse.getBehandlingId(), pleietrengende, vurderingsperioder);
-
-        return medisinskGrunnlagTjeneste.sammenlignGrunnlag(vedtattSykdomGrunnlagBehandling.map(MedisinskGrunnlag::getGrunnlagsdata), utledetGrunnlag).getDiffPerioder();
+    private NavigableSet<PeriodeMedÅrsak> finnBerørtePerioderPåPleietrengende(BehandlingReferanse referanse) {
+        var tidslinjeMedÅrsaker = pleitrengendeRevurderingPerioderTjeneste.utledBerørtePerioderPåPleietrengende(referanse, definerendeVilkår());
+        var unikeÅrsaker = tidslinjeMedÅrsaker.stream().flatMap(s -> s.getValue().stream()).collect(Collectors.toSet());
+        return unikeÅrsaker.stream().flatMap(årsak -> tidslinjeMedÅrsaker.filterValue(s -> s.contains(årsak))
+                .compress()
+                .getLocalDateIntervals()
+                .stream().map(p -> new PeriodeMedÅrsak(DatoIntervallEntitet.fraOgMedTilOgMed(p.getFomDato(), p.getTomDato()), årsak)))
+            .collect(Collectors.toCollection(TreeSet::new));
     }
 
     private boolean skalVurdereBerørtePerioderPåBarnet(Behandling behandling) {
@@ -290,18 +233,11 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
             .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    private NavigableSet<DatoIntervallEntitet> utledVurderingsperiode(Vilkårene vilkårene) {
-        LocalDateTimeline<Boolean> tidslinje = LocalDateTimeline.empty();
-
-        for (VilkårType vilkårType : definerendeVilkår()) {
-            var vilkår = vilkårene.getVilkår(vilkårType);
-            if (vilkår.isPresent()) {
-                var vilkårperioder = vilkår.get().getPerioder();
-                var perioder = vilkårperioder.stream().map(VilkårPeriode::getPeriode).toList();
-                tidslinje = tidslinje.combine(TidslinjeUtil.tilTidslinjeKomprimert(new TreeSet<>(perioder)), StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-            }
-        }
-
-        return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje);
+    private LocalDateTimeline<Boolean> uttaksendringerSidenForrigeBehandling(BehandlingReferanse referanse) {
+        var segments = endringIUttakPeriodeUtleder.utled(referanse).stream()
+            .map(p -> new LocalDateSegment<>(p.getFomDato(), p.getTomDato(), Boolean.TRUE))
+            .toList();
+        return new LocalDateTimeline<>(segments);
     }
+
 }

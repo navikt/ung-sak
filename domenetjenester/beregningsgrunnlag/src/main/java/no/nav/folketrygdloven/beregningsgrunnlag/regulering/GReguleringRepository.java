@@ -1,13 +1,11 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.regulering;
 
-import java.math.BigInteger;
 import java.util.Objects;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
-
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -37,7 +35,7 @@ public class GReguleringRepository {
         query.setParameter("fom", periode.getFomDato() == null ? Tid.TIDENES_BEGYNNELSE : periode.getFomDato());
         query.setParameter("tom", periode.getTomDato() == null ? Tid.TIDENES_ENDE : periode.getFomDato());
 
-        return ((BigInteger) query.getSingleResult()).longValueExact();
+        return (Long) query.getSingleResult();
     }
 
     public Long startGReguleringForPeriode(FagsakYtelseType ytelseType, DatoIntervallEntitet periode, String fomValue, String tomValue) {

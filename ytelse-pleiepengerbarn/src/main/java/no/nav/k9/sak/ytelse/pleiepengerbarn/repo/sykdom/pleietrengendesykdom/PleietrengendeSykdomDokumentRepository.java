@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
@@ -16,6 +17,7 @@ import jakarta.persistence.NonUniqueResultException;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -45,7 +47,12 @@ public class PleietrengendeSykdomDokumentRepository {
 
         List<PleietrengendeSykdomDokument> dokuments = q.getResultList();
 
-        return dokuments;
+        return utenFeilregistrerteDokumenter(dokuments);
+    }
+
+
+    private List<PleietrengendeSykdomDokument> utenFeilregistrerteDokumenter(List<PleietrengendeSykdomDokument> dokuments) {
+        return dokuments.stream().filter(erIkkeFeilregistrert()).collect(Collectors.toList());
     }
 
     public boolean isDokumentBruktIVurdering(Long dokumentId) {
@@ -67,7 +74,7 @@ public class PleietrengendeSykdomDokumentRepository {
 
         List<PleietrengendeSykdomDokument> dokuments = q.getResultList();
 
-        return dokuments;
+        return utenFeilregistrerteDokumenter(dokuments);
     }
 
     public List<PleietrengendeSykdomDokument> hentDokumenterSomErRelevanteForSykdom(AktørId pleietrengende) {
@@ -90,7 +97,7 @@ public class PleietrengendeSykdomDokumentRepository {
                 + "  )", PleietrengendeSykdomDokument.class);
 
         q.setParameter("dokumentId", dokumentId);
-        return q.getResultList();
+        return utenFeilregistrerteDokumenter(q.getResultList());
     }
 
     public List<PleietrengendeSykdomDokument> hentDokumentSomIkkeHarOppdatertEksisterendeVurderinger(AktørId pleietrengende) {
@@ -100,8 +107,13 @@ public class PleietrengendeSykdomDokumentRepository {
             .collect(Collectors.toList());
     }
 
-    public List<PleietrengendeSykdomDokument> hentGodkjenteLegeerklæringer(AktørId pleietrengende) {
-        return hentAlleDokumenterFor(pleietrengende).stream().filter(d -> d.getType() == SykdomDokumentType.LEGEERKLÆRING_SYKEHUS && d.getDuplikatAvDokument() == null).collect(Collectors.toList());
+    public List<PleietrengendeSykdomDokument> hentGodkjenteLegeerklæringer(AktørId pleietrengende, FagsakYtelseType fagsakYtelseType) {
+        List<SykdomDokumentType> godjenteDokumenttyper = new ArrayList<>(List.of(SykdomDokumentType.LEGEERKLÆRING_SYKEHUS));
+        if (fagsakYtelseType == FagsakYtelseType.OPPLÆRINGSPENGER) {
+            godjenteDokumenttyper.add(SykdomDokumentType.LEGEERKLÆRING_ANNEN);
+            godjenteDokumenttyper.add(SykdomDokumentType.LEGEERKLÆRING_MED_DOKUMENTASJON_AV_OPPLÆRING);
+        }
+        return hentAlleDokumenterFor(pleietrengende).stream().filter(d -> godjenteDokumenttyper.contains(d.getType()) && d.getDuplikatAvDokument() == null).collect(Collectors.toList());
     }
 
     public Optional<PleietrengendeSykdomDokument> hentDokument(Long dokumentId, AktørId pleietrengende) {
@@ -117,7 +129,12 @@ public class PleietrengendeSykdomDokumentRepository {
 
         Optional<PleietrengendeSykdomDokument> dokument = q.getResultList().stream().findFirst();
 
-        return dokument;
+        return dokument.filter(erIkkeFeilregistrert());
+    }
+
+
+    private static Predicate<? super PleietrengendeSykdomDokument> erIkkeFeilregistrert() {
+        return d -> d.getType() != SykdomDokumentType.FEILREGISTRERT;
     }
 
     public boolean finnesSykdomDokument(JournalpostId journalpostId, String dokumentInfoId) {
@@ -137,7 +154,7 @@ public class PleietrengendeSykdomDokumentRepository {
 
         Optional<PleietrengendeSykdomDokument> dokument = q.getResultList().stream().findFirst();
 
-        return dokument.isPresent();
+        return dokument.filter(erIkkeFeilregistrert()).isPresent();
     }
 
     public void lagre(PleietrengendeSykdomDokument dokument, AktørId pleietrengende) {

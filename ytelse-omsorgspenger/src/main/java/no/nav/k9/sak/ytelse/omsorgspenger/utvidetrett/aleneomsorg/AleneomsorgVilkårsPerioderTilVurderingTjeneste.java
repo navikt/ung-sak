@@ -11,6 +11,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -38,6 +41,8 @@ import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.UtvidetRettSøknadPerioder
 @BehandlingTypeRef
 @ApplicationScoped
 public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AleneomsorgVilkårsPerioderTilVurderingTjeneste.class);
 
     private BehandlingRepository behandlingRepository;
     private SøknadRepository søknadRepository;
@@ -100,7 +105,7 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
         return vilkårPeriodeSet;
     }
 
-    private NavigableSet<DatoIntervallEntitet> utledVilkårsperioder(Long behandlingId){
+    private NavigableSet<DatoIntervallEntitet> utledVilkårsperioder(Long behandlingId) {
         var søknadsperioder = søktePerioder.utledPeriode(behandlingId);
         var søknadsperioderEtterBarnetsFødsel = justerTilDefaultAlder(behandlingId, søknadsperioder);
         return justerForMottattTidspunkt(behandlingId, søknadsperioderEtterBarnetsFødsel);
@@ -125,6 +130,12 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
         // sett 'tom' for utvidet rett til barnet fyller 18 år by default
         var _18år = new LocalDateTimeline<>(barninfo.getFødselsdato(), barninfo.getFødselsdato().plusYears(18).withMonth(12).withDayOfMonth(31), Boolean.TRUE);
         var sammenstiltUtvidetRettTimeline = _18år.intersection(new LocalDateInterval(vilårsperiodeUtvidetRett.first().getFomDato(), vilårsperiodeUtvidetRett.last().getTomDato()));
+
+        if (sammenstiltUtvidetRettTimeline.isEmpty()) {
+            // K9-sak håndterer ikke tom vilkårsperiode, defaulter derfor til første dag slik at saksbehandler kan avslå denne
+            LOGGER.info("Ingen overlapp mellom søknadsperiode og periode der barnet er under 18 år. Setter periode til " + vilårsperiodeUtvidetRett.first().getTomDato());
+            return new TreeSet<>(Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(vilårsperiodeUtvidetRett.first().getFomDato(), vilårsperiodeUtvidetRett.first().getFomDato())));
+        }
         return TidslinjeUtil.tilDatoIntervallEntiteter(sammenstiltUtvidetRettTimeline);
     }
 

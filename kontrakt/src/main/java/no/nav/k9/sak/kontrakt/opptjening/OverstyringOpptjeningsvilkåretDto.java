@@ -28,20 +28,20 @@ public class OverstyringOpptjeningsvilkåretDto extends OverstyringAksjonspunktD
     @JsonProperty("erVilkarOk")
     private boolean erVilkarOk;
 
+    @JsonProperty(value = "innvilgelseMerknadKode")
+    @Size(min = 4, max = 5)
+    @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$")
+    private String innvilgelseMerknadKode;
+
     public OverstyringOpptjeningsvilkåretDto() {
         //
     }
 
-    public OverstyringOpptjeningsvilkåretDto(Periode periode, boolean erVilkarOk, String begrunnelse, String avslagskode) { // NOSONAR
+    public OverstyringOpptjeningsvilkåretDto(Periode periode, boolean erVilkarOk, String begrunnelse, String avslagskode, String innvilgelseMerknadKode) {
         super(periode, begrunnelse);
-        this.erVilkarOk = erVilkarOk;
         this.avslagskode = avslagskode;
-    }
-
-    public OverstyringOpptjeningsvilkåretDto(boolean erVilkarOk, String begrunnelse, String avslagskode) {
-        super(begrunnelse);
         this.erVilkarOk = erVilkarOk;
-        this.avslagskode = avslagskode;
+        this.innvilgelseMerknadKode = innvilgelseMerknadKode;
     }
 
     @Override
@@ -62,4 +62,12 @@ public class OverstyringOpptjeningsvilkåretDto extends OverstyringAksjonspunktD
         this.erVilkarOk = erVilkarOk;
     }
 
+    @Override
+    public String getInnvilgelseMerknadKode() {
+        return innvilgelseMerknadKode;
+    }
+
+    public void setInnvilgelseMerknadKode(String innvilgelseMerknadKode) {
+        this.innvilgelseMerknadKode = innvilgelseMerknadKode;
+    }
 }

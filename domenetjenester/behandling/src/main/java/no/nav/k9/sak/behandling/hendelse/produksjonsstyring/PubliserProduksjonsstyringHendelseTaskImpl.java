@@ -33,9 +33,8 @@ public class PubliserProduksjonsstyringHendelseTaskImpl implements PubliserProdu
     protected void prosesser(ProsessTaskData prosessTaskData) {
         String key = prosessTaskData.getPropertyValue(PROPERTY_KEY);
         var eventJson = prosessTaskData.getPayloadAsString();
-        String beskrivelse = prosessTaskData.getPropertyValue(BESKRIVELSE);
         kafkaProducer.sendJsonMedNøkkel(key, eventJson);
-        log.info("Publisert produksjonsstyringhendelse for behandling[{}], beskrivelse={}", key, beskrivelse);
+        kafkaProducer.flush(); //for å sikre at ikke hendelser sniker i køen ved å bli publisert fra en annen node
     }
 
     @Override

@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.kontrakt.ResourceLink;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
@@ -49,24 +48,22 @@ public class PleietrengendeSykdomDokumentOversiktMapper {
     public SykdomDokumentOversikt map(AktørId aktørId, String behandlingUuid, Collection<PleietrengendeSykdomDokument> dokumenter) {
         final List<SykdomDokumentOversiktElement> elementer = dokumenter
             .stream()
-            .map(d -> {
-                return new SykdomDokumentOversiktElement(
-                        "" + d.getId(),
-                        d.getVersjon().toString(),
-                        d.getType(),
-                        !aktørId.equals(d.getSøker().getAktørId()),
-                        d.getDatert(),
-                        d.getMottattDato(),
-                        d.getMottattTidspunkt(),
-                        d.getType() != SykdomDokumentType.UKLASSIFISERT,  // TODO: Sette riktig verdi.
-                        (d.getDuplikatAvDokument() != null) ? "" + d.getDuplikatAvDokument().getId() : null,
-                        pleietrengendeSykdomDokumentRepository.hentDuplikaterAv(d.getId()).stream().map(dup -> "" + dup.getId()).collect(Collectors.toList()),
-                        Arrays.asList(
-                            linkForGetDokumentinnhold(behandlingUuid, "" + d.getId()),
-                            linkForEndreDokument(behandlingUuid, "" + d.getId(), d.getVersjon().toString())
-                        )
-                    );
-            })
+            .map(d -> new SykdomDokumentOversiktElement(
+                    "" + d.getId(),
+                    d.getVersjon().toString(),
+                    d.getType(),
+                    !aktørId.equals(d.getSøker().getAktørId()),
+                    d.getDatert(),
+                    d.getMottattDato(),
+                    d.getMottattTidspunkt(),
+                    d.getType() != SykdomDokumentType.UKLASSIFISERT,  // TODO: Sette riktig verdi.
+                    (d.getDuplikatAvDokument() != null) ? "" + d.getDuplikatAvDokument().getId() : null,
+                    pleietrengendeSykdomDokumentRepository.hentDuplikaterAv(d.getId()).stream().map(dup -> "" + dup.getId()).collect(Collectors.toList()),
+                    Arrays.asList(
+                        linkForGetDokumentinnhold(behandlingUuid, "" + d.getId()),
+                        linkForEndreDokument(behandlingUuid, "" + d.getId(), d.getVersjon().toString())
+                    )
+                ))
             .collect(Collectors.toList())
             ;
 

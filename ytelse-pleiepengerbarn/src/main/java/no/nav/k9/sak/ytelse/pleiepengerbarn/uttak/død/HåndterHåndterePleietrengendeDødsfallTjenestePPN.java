@@ -25,7 +25,7 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 @ApplicationScoped
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 public class HåndterHåndterePleietrengendeDødsfallTjenestePPN implements HåndterePleietrengendeDødsfallTjeneste {
-    private VilkårForlengingTjeneste vilkårForlengingTjeneste = new VilkårForlengingTjeneste();
+    private final VilkårForlengingTjeneste vilkårForlengingTjeneste = new VilkårForlengingTjeneste();
     private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     private PersonopplysningTjeneste personopplysningTjeneste;
@@ -57,9 +57,12 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePPN implements Hån
         if (dødsdato == null) {
             return Optional.empty();
         }
-        var vilkårene = vilkårResultatRepository.hent(referanse.getBehandlingId());
+        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(referanse.getBehandlingId());
+        if (vilkårene.isEmpty()){
+            return Optional.empty();
+        }
 
-        if (!harGodkjentSykdomPåDødsdatoen(dødsdato, vilkårene)) {
+        if (!harGodkjentSykdomPåDødsdatoen(dødsdato, vilkårene.get())) {
             return Optional.empty();
         }
         LocalDate sisteDato = vilkårResultatRepository.hent(referanse.getBehandlingId()).getAlleIntervaller().getMaxLocalDate();
@@ -108,7 +111,7 @@ public class HåndterHåndterePleietrengendeDødsfallTjenestePPN implements Hån
     }
 
     private boolean harGodkjentSykdomPåDødsdatoen(LocalDate dødsdato, Vilkårene vilkårene) {
-        Optional<VilkårPeriode> periode = vilkårene.getVilkår(VilkårType.I_LIVETS_SLUTTFASE).orElseThrow().finnPeriodeSomInneholderDato(dødsdato);
+        Optional<VilkårPeriode> periode = vilkårene.getVilkår(VilkårType.I_LIVETS_SLUTTFASE).flatMap(it -> it.finnPeriodeSomInneholderDato(dødsdato));
         return periode.isPresent() && periode.get().getUtfall() == Utfall.OPPFYLT;
     }
 

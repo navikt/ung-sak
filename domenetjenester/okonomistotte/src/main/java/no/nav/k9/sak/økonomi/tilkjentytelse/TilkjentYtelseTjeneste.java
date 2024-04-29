@@ -6,14 +6,16 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import no.nav.k9.oppdrag.kontrakt.Saksnummer;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.InntrekkBeslutning;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelse;
@@ -24,6 +26,9 @@ import no.nav.k9.oppdrag.kontrakt.util.TilkjentYtelseMaskerer;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
@@ -33,6 +38,7 @@ import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 @Dependent
 public class TilkjentYtelseTjeneste {
 
+    private final Logger log = LoggerFactory.getLogger(TilkjentYtelseTjeneste.class);
     private Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
     private ObjectMapper objectMapper = JsonMapper.getMapper();
     private TilkjentYtelseMaskerer maskerer = new TilkjentYtelseMaskerer(objectMapper).ikkeMaskerSats();
@@ -42,6 +48,8 @@ public class TilkjentYtelseTjeneste {
     private TilbakekrevingRepository tilbakekrevingRepository;
     private BeregningsresultatRepository beregningsresultatRepository;
 
+    private PersonopplysningRepository personopplysningRepository;
+
     TilkjentYtelseTjeneste() {
         // for CDI proxy
     }
@@ -49,11 +57,15 @@ public class TilkjentYtelseTjeneste {
     @Inject
     public TilkjentYtelseTjeneste(BehandlingRepository behandlingRepository,
                                   BehandlingVedtakRepository behandlingVedtakRepository,
-                                  TilbakekrevingRepository tilbakekrevingRepository, BeregningsresultatRepository beregningsresultatRepository) {
+                                  TilbakekrevingRepository tilbakekrevingRepository,
+                                  BeregningsresultatRepository beregningsresultatRepository,
+                                  PersonopplysningRepository personopplysningRepository
+    ) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.tilbakekrevingRepository = tilbakekrevingRepository;
         this.beregningsresultatRepository = beregningsresultatRepository;
+        this.personopplysningRepository = personopplysningRepository;
     }
 
     public TilkjentYtelseBehandlingInfoV1 hentilkjentYtelseBehandlingInfo(Long behandlingId) {
@@ -61,7 +73,14 @@ public class TilkjentYtelseTjeneste {
         BehandlingVedtak vedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandlingId)
             .orElse(null);
 
-        return mapBehandlingsinfo(behandling, vedtak);
+        LocalDate dødsdato = hentBrukersDødsdato(behandling);
+        return mapBehandlingsinfo(behandling, vedtak, dødsdato);
+    }
+
+    private LocalDate hentBrukersDødsdato(Behandling behandling) {
+        PersonopplysningGrunnlagEntitet personopplysningerGrunnlag = personopplysningRepository.hentPersonopplysninger(behandling.getId());
+        PersonopplysningEntitet brukerPersonopplysninger = personopplysningerGrunnlag.getGjeldendeVersjon().getPersonopplysning(behandling.getAktørId());
+        return brukerPersonopplysninger.getDødsdato();
     }
 
     public TilkjentYtelse hentilkjentYtelse(Long behandlingId) {
@@ -98,11 +117,23 @@ public class TilkjentYtelseTjeneste {
         if (!valideringsfeil.isEmpty()) {
             try {
                 TilkjentYtelseOppdrag maskert = maskerer.masker(tilkjentYtelseOppdrag);
-                throw new IllegalArgumentException("Valideringsfeil:\"" + valideringsfeil + "\" for " + objectMapper.writeValueAsString(maskert));
+                String input = objectMapper.writeValueAsString(maskert);
+                //avkorter input for å unngå at logginnslag brytes. Ser ut som loggen p.t. tåler ca 9000 tegn herfra, setter lavere for sikkerhets skyld
+                String avkortetInput = begrensTilAntall(input, 6000);
+                log.warn("Valideringsfeil:\"" + valideringsfeil + "\" for " + avkortetInput);
+                throw new IllegalArgumentException("Valideringsfeil:" + valideringsfeil);
             } catch (JsonProcessingException e) {
                 throw new IllegalArgumentException("Det var valideringsfeil, men fikk også Json-feil i håndtering av feilen", e);
             }
         }
+    }
+
+    private static String begrensTilAntall(String uavkortet, int antallTegn) {
+        if (uavkortet == null || uavkortet.length() <= antallTegn) {
+            return uavkortet;
+        }
+        int antallFjernedeTegn = uavkortet.length() - antallTegn;
+        return uavkortet.substring(0, antallTegn - 1) + "...(fjernet " + antallFjernedeTegn + " tegn)";
     }
 
     private InntrekkBeslutning utledInntrekkBeslutning(Behandling behandling) {
@@ -111,7 +142,7 @@ public class TilkjentYtelseTjeneste {
         return new InntrekkBeslutning(!erInntrekkDeaktivert);
     }
 
-    private TilkjentYtelseBehandlingInfoV1 mapBehandlingsinfo(Behandling behandling, BehandlingVedtak vedtak) {
+    private TilkjentYtelseBehandlingInfoV1 mapBehandlingsinfo(Behandling behandling, BehandlingVedtak vedtak, LocalDate dødsdatoBruker) {
         TilkjentYtelseBehandlingInfoV1 info = new TilkjentYtelseBehandlingInfoV1();
         info.setSaksnummer(new Saksnummer(behandling.getFagsak().getSaksnummer().getVerdi()));
         info.setBehandlingId(behandling.getUuid());
@@ -120,6 +151,7 @@ public class TilkjentYtelseTjeneste {
         info.setBehandlendeEnhet(behandling.getBehandlendeEnhet());
         info.setAktørId(behandling.getAktørId().getId());
         info.setVedtaksdato(vedtak == null ? LocalDate.now() : vedtak.getVedtaksdato());
+        info.setDødsdatoBruker(dødsdatoBruker);
         behandling.getOriginalBehandlingId().ifPresent(ob -> info.setForrigeBehandlingId(behandlingRepository.hentBehandling(ob).getUuid()));
         return info;
     }

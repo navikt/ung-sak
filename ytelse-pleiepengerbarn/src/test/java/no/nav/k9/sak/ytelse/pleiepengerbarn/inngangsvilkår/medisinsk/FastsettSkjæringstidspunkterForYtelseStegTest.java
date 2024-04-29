@@ -18,6 +18,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.medlem.kontrollerfakta.AksjonspunktutlederForMedlemskap;
@@ -25,12 +26,15 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.OverstyrUttakTjeneste;
 
 class FastsettSkjæringstidspunkterForYtelseStegTest {
 
     private BehandlingRepositoryProvider mockProvider = mock(BehandlingRepositoryProvider.class); // Brukes ikke, men kan ikke være null
     private BeregningPerioderGrunnlagRepository mockrep = mock(BeregningPerioderGrunnlagRepository.class); // Brukes ikke, men kan ikke være null
     private AksjonspunktutlederForMedlemskap mockUtleder = mock(AksjonspunktutlederForMedlemskap.class); // Brukes ikke, men kan ikke være null
+
+    private OverstyrUttakTjeneste mockOverstyrUttakTjeneste = mock(OverstyrUttakTjeneste.class); // Brukes ikke, men kan ikke være null
     private final VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = new VilkårsPerioderTilVurderingTjeneste() {
         @Override
         public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
@@ -58,7 +62,60 @@ class FastsettSkjæringstidspunkterForYtelseStegTest {
         }
     };
     private UnitTestLookupInstanceImpl<VilkårsPerioderTilVurderingTjeneste> instance = new UnitTestLookupInstanceImpl<>(vilkårsPerioderTilVurderingTjeneste);
-    private FastsettSkjæringstidspunkterForYtelseSteg steg = new FastsettSkjæringstidspunkterForYtelseSteg(mockProvider, mockrep, instance, mockUtleder);
+    private FastsettSkjæringstidspunkterForYtelseSteg steg = new FastsettSkjæringstidspunkterForYtelseSteg(mockProvider, mockrep, mockOverstyrUttakTjeneste, instance, mockUtleder);
+
+    @Test
+    void skal_ikke_justere_utfall_for_andre_vilkår_ved_perioder_med_avslag_på_medisinsk_dersom_kun_helg_og_kopiert_vilkårsresultat() {
+        var builder = Vilkårene.builder();
+        var vilkårBuilder = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
+        var oppfyltPeriode1 = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 1));
+        var avslåttPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2024, 3, 2), LocalDate.of(2024, 3, 3));
+        var oppfyltPeriode2 = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2024, 3, 4), LocalDate.of(2024, 3, 4));
+        var periodeTilVurdering = DatoIntervallEntitet.fraOgMedTilOgMed(oppfyltPeriode1.getFomDato(), oppfyltPeriode2.getTomDato());
+        var perioderTilVurdering = List.of(periodeTilVurdering);
+
+        // Simulering av kopiert resultat
+        settOppfylt(builder, periodeTilVurdering, VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        settOppfylt(builder, periodeTilVurdering, VilkårType.MEDLEMSKAPSVILKÅRET);
+        settOppfylt(builder, periodeTilVurdering, VilkårType.OPPTJENINGSPERIODEVILKÅR);
+        settOppfylt(builder, periodeTilVurdering, VilkårType.OPPTJENINGSVILKÅRET);
+
+        vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(oppfyltPeriode1)
+                .medUtfall(Utfall.OPPFYLT))
+            .leggTil(vilkårBuilder.hentBuilderFor(avslåttPeriode)
+                .medUtfall(Utfall.IKKE_OPPFYLT))
+            .leggTil(vilkårBuilder.hentBuilderFor(oppfyltPeriode2)
+                .medUtfall(Utfall.OPPFYLT));
+        builder.leggTil(vilkårBuilder);
+
+        var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_18_ÅR);
+        builder.leggTil(vilkårBuilder18år);
+
+        var resultatBuilder = steg.justerVilkårsperioderEtterDefinerendeVilkår(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
+
+        var oppdaterteVilkår = resultatBuilder.build();
+
+        assertThat(oppdaterteVilkår).isNotNull();
+
+        for (Vilkår vilkår : oppdaterteVilkår.getVilkårene()) {
+            if (VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR.equals(vilkår.getVilkårType())) {
+                assertThat(vilkår.getPerioder()).hasSize(3);
+                assertThat(vilkår.getPerioder().stream().map(VilkårPeriode::getPeriode)).contains(oppfyltPeriode1, avslåttPeriode, oppfyltPeriode2);
+            } else if (VilkårType.MEDISINSKEVILKÅR_18_ÅR.equals(vilkår.getVilkårType())) {
+                assertThat(vilkår.getPerioder()).isEmpty();
+            } else {
+                assertThat(vilkår.getPerioder()).hasSize(1);
+                assertThat(vilkår.getPerioder().get(0).getPeriode()).isEqualTo(periodeTilVurdering);
+            }
+        }
+    }
+
+    private static void settOppfylt(VilkårResultatBuilder builder, DatoIntervallEntitet periodeTilVurdering, VilkårType vilkårType) {
+        var vilkårBuilder1 = builder.hentBuilderFor(vilkårType);
+        vilkårBuilder1.leggTil(vilkårBuilder1.hentBuilderFor(periodeTilVurdering)
+            .medUtfall(Utfall.OPPFYLT));
+    }
+
 
     @Test
     void skal_justere_utfall_ved_perioder_med_avslag_på_medisinsk() {
@@ -141,6 +198,7 @@ class FastsettSkjæringstidspunkterForYtelseStegTest {
             }
         }
     }
+
 
     @Test
     void skal_justere_utfall_ved_perioder_med_avslag_på_medisinsk_med_18årsvurdering_2() {

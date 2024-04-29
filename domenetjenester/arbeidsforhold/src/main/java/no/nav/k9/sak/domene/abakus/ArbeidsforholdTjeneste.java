@@ -10,7 +10,6 @@ import java.util.stream.Stream;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.Periode;
 import no.nav.abakus.iaygrunnlag.arbeidsforhold.v1.ArbeidsforholdDto;
@@ -33,7 +32,6 @@ public class ArbeidsforholdTjeneste {
 
     public Map<Arbeidsgiver, Set<EksternArbeidsforholdRef>> finnArbeidsforholdForIdentPåDag(AktørId ident, LocalDate dato, FagsakYtelseType ytelseType) {
         final var request = new AktørDatoRequest(new AktørIdPersonident(ident.getId()), new Periode(dato, dato), YtelseType.fraKode(ytelseType.getKode()));
-
         return abakusTjeneste.hentArbeidsforholdIPerioden(request)
             .stream()
             .collect(Collectors.groupingBy(this::mapTilArbeidsgiver,

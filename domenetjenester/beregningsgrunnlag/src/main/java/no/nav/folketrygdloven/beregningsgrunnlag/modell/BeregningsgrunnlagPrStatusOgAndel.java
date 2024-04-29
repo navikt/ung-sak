@@ -9,6 +9,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
@@ -20,6 +22,7 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 public class BeregningsgrunnlagPrStatusOgAndel {
 
     private Long andelsnr;
+    @JsonBackReference
     private BeregningsgrunnlagPeriode beregningsgrunnlagPeriode;
     private AktivitetStatus aktivitetStatus;
     private ÅpenDatoIntervallEntitet beregningsperiode;

@@ -26,8 +26,12 @@ public class ArbeidstidMappingInput {
     private OpptjeningResultat opptjeningResultat;
     private Map<AktivitetIdentifikator, LocalDateTimeline<WrappedArbeid>> inaktivTidslinje;
     private Map<Saksnummer, Set<LocalDate>> sakerSomMåSpesialhåndteres = new HashMap<>();
+    private Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> tilkommetAktivitetsperioder  = new HashMap<>();
     private InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag;
     private DatoIntervallEntitet utvidetPeriodeSomFølgeAvDødsfall;
+
+    private boolean skalAlltidHaInaktivVed_8_47_B;
+
 
     public ArbeidstidMappingInput() {
     }
@@ -36,12 +40,13 @@ public class ArbeidstidMappingInput {
                                   Set<PerioderFraSøknad> perioderFraSøknader,
                                   LocalDateTimeline<Boolean> tidslinjeTilVurdering,
                                   Vilkår vilkår,
-                                  OpptjeningResultat opptjeningResultat) {
+                                  OpptjeningResultat opptjeningResultat, boolean skalAlltidHaInaktivVed847B) {
         this.kravDokumenter = kravDokumenter;
         this.perioderFraSøknader = perioderFraSøknader;
         this.tidslinjeTilVurdering = tidslinjeTilVurdering;
         this.vilkår = vilkår;
         this.opptjeningResultat = opptjeningResultat;
+        this.skalAlltidHaInaktivVed_8_47_B = skalAlltidHaInaktivVed847B;
     }
 
     public ArbeidstidMappingInput medKravDokumenter(Set<KravDokument> kravDokumenter) {
@@ -78,9 +83,13 @@ public class ArbeidstidMappingInput {
         this.opptjeningResultat = opptjeningResultat;
         return this;
     }
-
     public ArbeidstidMappingInput medVilkår(Vilkår vilkår) {
         this.vilkår = vilkår;
+        return this;
+    }
+
+    public ArbeidstidMappingInput medSkalHaInaktivVed847B(boolean skalAlltidHaInaktivVed_8_47_B) {
+        this.skalAlltidHaInaktivVed_8_47_B = skalAlltidHaInaktivVed_8_47_B;
         return this;
     }
 
@@ -141,5 +150,18 @@ public class ArbeidstidMappingInput {
 
     public AktørId getBruker() {
         return bruker;
+    }
+
+    public Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> getTilkommetAktivitetsperioder() {
+        return tilkommetAktivitetsperioder;
+    }
+
+    public ArbeidstidMappingInput medTilkommetAktivitetsperioder(Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> tilkommetAktivitetsperioder) {
+        this.tilkommetAktivitetsperioder = tilkommetAktivitetsperioder;
+        return this;
+    }
+
+    public boolean skalAlltidHaInaktivVed_8_47_B() {
+        return skalAlltidHaInaktivVed_8_47_B;
     }
 }

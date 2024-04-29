@@ -9,14 +9,13 @@ import java.util.concurrent.TimeUnit;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
+import no.nav.k9.felles.integrasjon.organisasjon.OrganisasjonRestKlient;
+import no.nav.k9.felles.integrasjon.organisasjon.OrganisasjonstypeEReg;
+import no.nav.k9.felles.util.LRUCache;
 import no.nav.k9.kodeverk.organisasjon.Organisasjonstype;
 import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.OrganisasjonsNummerValidator;
-import no.nav.k9.felles.integrasjon.organisasjon.OrganisasjonRestKlient;
-import no.nav.k9.felles.integrasjon.organisasjon.OrganisasjonstypeEReg;
-import no.nav.k9.felles.util.LRUCache;
 
 @ApplicationScoped
 public class VirksomhetTjeneste {
@@ -58,7 +57,7 @@ public class VirksomhetTjeneste {
     public Optional<Virksomhet> finnOrganisasjon(String orgNummer) {
         if (orgNummer == null)
             return Optional.empty();
-        if(OrgNummer.erKunstig(orgNummer)) {
+        if (OrgNummer.erKunstig(orgNummer)) {
             return Optional.of(hent(orgNummer));
         }
         return OrganisasjonsNummerValidator.erGyldig(orgNummer) ? Optional.of(hent(orgNummer)) : Optional.empty();
@@ -68,9 +67,9 @@ public class VirksomhetTjeneste {
         if (Organisasjonstype.erKunstig(orgnr)) {
             return KUNSTIG_VIRKSOMHET;
         }
-        var response =Optional.ofNullable(cache.get(orgnr)).orElse(hentOrganisasjonRest(orgnr));
-        cache.put(orgnr, response);
-        return response;
+        var virksomhet = Optional.ofNullable(cache.get(orgnr)).orElseGet(() -> hentOrganisasjonRest(orgnr));
+        cache.put(orgnr, virksomhet);
+        return virksomhet;
     }
 
     private Virksomhet hentOrganisasjonRest(String orgNummer) {

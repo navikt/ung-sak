@@ -1,5 +1,6 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.resultat;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class ToggleEndring {
@@ -26,5 +27,18 @@ public class ToggleEndring {
 
     public Boolean getTilVerdi() {
         return tilVerdi;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ToggleEndring that = (ToggleEndring) o;
+        return Objects.equals(fraVerdi, that.fraVerdi) && Objects.equals(tilVerdi, that.tilVerdi);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(fraVerdi, tilVerdi);
     }
 }

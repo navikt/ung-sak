@@ -76,7 +76,15 @@ public class MapperForTilkjentYtelse {
 
     private TilkjentYtelseAndelV1 mapAndel(BeregningsresultatAndel andel, boolean sendArbeidsgiverIdForBrukersAndeler) {
         TilkjentYtelseAndelV1 resultat = mapAndelUtenFeriepenger(andel, sendArbeidsgiverIdForBrukersAndeler);
-        resultat.medUtbetalingsgrad(andel.getUtbetalingsgrad());
+
+        //kan fjerne sjekken og bare bruke utbetalingsgradOppdrag når
+        //ENABLE_UTBETALINGSGRAD_OPPDRAG er lansert, og alle behandlinger
+        //som kom gjennom beregn-ytelse-steget før lansering er avsluttet.
+        if (andel.getUtbetalingsgradOppdrag() != null) {
+            resultat.medUtbetalingsgrad(andel.getUtbetalingsgradOppdrag());
+        } else {
+            resultat.medUtbetalingsgrad(andel.getUtbetalingsgrad());
+        }
         var feriepenger = andel.getFeriepengerÅrsbeløp();
         if (feriepenger != null) {
             Year år = Year.from(andel.getFom());

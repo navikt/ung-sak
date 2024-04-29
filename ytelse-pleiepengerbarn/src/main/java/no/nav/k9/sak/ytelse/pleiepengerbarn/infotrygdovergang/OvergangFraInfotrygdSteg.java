@@ -44,7 +44,7 @@ public class OvergangFraInfotrygdSteg implements BehandlingSteg {
 
 
     /**
-     * Returner statuskode med ev nye aksjonspunkter funnet i dette steget.
+     * Markerer infotrygdperioder
      *
      * @param kontekst
      */
@@ -55,7 +55,7 @@ public class OvergangFraInfotrygdSteg implements BehandlingSteg {
         infotrygdMigreringTjeneste.finnOgOpprettMigrertePerioder(kontekst.getBehandlingId(), kontekst.getAktørId(), kontekst.getFagsakId());
         Skjæringstidspunkt skjæringstidspunkter = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId);
         BehandlingReferanse ref = BehandlingReferanse.fra(behandling, skjæringstidspunkter);
-        return BehandleStegResultat.utførtMedAksjonspunktResultater(infotrygdMigreringTjeneste.utledAksjonspunkter(ref));
+        return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
 

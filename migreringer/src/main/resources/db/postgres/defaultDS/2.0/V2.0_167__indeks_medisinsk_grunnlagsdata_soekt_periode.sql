@@ -1,0 +1,1 @@
+create index idx_medisinsk_grunnlagsdata_soekt_periode_01 on medisinsk_grunnlagsdata_soekt_periode (sykdom_grunnlag_id);

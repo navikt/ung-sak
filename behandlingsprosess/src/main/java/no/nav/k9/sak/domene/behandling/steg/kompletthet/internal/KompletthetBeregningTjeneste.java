@@ -82,7 +82,7 @@ public class KompletthetBeregningTjeneste {
     }
 
     public KompletthetsAksjon utledTilstand(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
-        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true, false, true);
+        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderForKompletthet(ref, true, false, true);
         var kompletthetsVurderinger = Kompletthetsjekker.finnSjekker(kompletthetsjekkere, ref.getFagsakYtelseType()).utledAlleManglendeVedleggForPerioder(ref);
         var innvilgetSøknadsfrist = utledPerioderMedSøknadsfristInnvilget(ref, perioderTilVurdering);
 
@@ -107,8 +107,8 @@ public class KompletthetBeregningTjeneste {
             avslåOgAvkortRelevanteKompletthetsvurderinger(kontekst, perioderTilVurdering, grunnlag);
         }
 
-        var redusertPerioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(ref, true, true, true);
-        var inputMedVurderinger = new VurdererInput(erManueltOpprettetRevurdering(behandling), harIkkeFåttMulighetTilÅTaStillingPåNytt(behandling),redusertPerioderTilVurdering, innvilgetSøknadsfrist, kompletthetsVurderinger, grunnlag.map(BeregningsgrunnlagPerioderGrunnlag::getKompletthetPerioder).orElse(List.of()), Set.of(Vurdering.KAN_FORTSETTE));
+        var redusertPerioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderForKompletthet(ref, true, true, true);
+        var inputMedVurderinger = new VurdererInput(erManueltOpprettetRevurdering(behandling), harIkkeFåttMulighetTilÅTaStillingPåNytt(behandling), redusertPerioderTilVurdering, innvilgetSøknadsfrist, kompletthetsVurderinger, grunnlag.map(BeregningsgrunnlagPerioderGrunnlag::getKompletthetPerioder).orElse(List.of()), Set.of(Vurdering.KAN_FORTSETTE));
         aksjon = kompletthetUtleder.utled(inputMedVurderinger);
 
         if (aksjon.kanFortsette()) {

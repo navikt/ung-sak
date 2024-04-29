@@ -85,7 +85,7 @@ public class PSBKompletthetsjekker implements Kompletthetsjekker {
     @Override
     public List<ManglendeVedlegg> utledAlleManglendeVedleggSomIkkeKommer(BehandlingReferanse ref) {
         return inntektsmeldingTjeneste
-            .hentAlleInntektsmeldingerSomIkkeKommer(ref.getBehandlingId())
+            .hentInntektsmeldingerSomIkkeKommer(ref.getBehandlingId())
             .stream()
             .map(e -> new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, e.getArbeidsgiver(), true))
             .collect(Collectors.toList());

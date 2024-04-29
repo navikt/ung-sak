@@ -15,7 +15,7 @@
         <arbeidsforhold>
             <foersteFravaersdag>2018-10-26</foersteFravaersdag>
             <beregnetInntekt>
-                <beloep>75000</beloep>
+                <beloep>50000</beloep>
             </beregnetInntekt>
         </arbeidsforhold>
         <refusjon>
@@ -24,7 +24,7 @@
             <endringIRefusjonListe>
                 <endringIRefusjon>
                     <endringsdato>2018-08-01</endringsdato>
-                    <refusjonsbeloepPrMnd>14000</refusjonsbeloepPrMnd>
+                    <refusjonsbeloepPrMnd>50000</refusjonsbeloepPrMnd>
                 </endringIRefusjon>
             </endringIRefusjonListe>
         </refusjon>

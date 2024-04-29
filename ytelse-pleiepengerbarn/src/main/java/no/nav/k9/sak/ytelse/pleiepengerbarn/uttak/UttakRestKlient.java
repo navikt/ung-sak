@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import java.util.Objects;
 import java.util.UUID;
 
+import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -44,25 +45,26 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
 @ApplicationScoped
+@ScopedRestIntegration(scopeKey = "k9.psb.uttak.scope", defaultScope = "api://prod-fss.k9saksbehandling.pleiepenger-barn-uttak/.default")
 public class UttakRestKlient {
     private static final String TJENESTE_NAVN = "pleiepenger-barn-uttak";
 
     private static final Logger log = LoggerFactory.getLogger(UttakRestKlient.class);
 
     private static final ObjectMapper objectMapper = new ObjectMapper()
-            .registerModule(new Jdk8Module())
-            .registerModule(new JavaTimeModule())
-            .setPropertyNamingStrategy(PropertyNamingStrategy.LOWER_CAMEL_CASE)
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            .disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS)
-            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-            .enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY)
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE)
-            .setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.NONE)
-            .setVisibility(PropertyAccessor.IS_GETTER, JsonAutoDetect.Visibility.NONE)
-            .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-            .setVisibility(PropertyAccessor.CREATOR, JsonAutoDetect.Visibility.ANY);
+        .registerModule(new Jdk8Module())
+        .registerModule(new JavaTimeModule())
+        .setPropertyNamingStrategy(PropertyNamingStrategy.LOWER_CAMEL_CASE)
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        .disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS)
+        .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+        .enable(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY)
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        .setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE)
+        .setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.NONE)
+        .setVisibility(PropertyAccessor.IS_GETTER, JsonAutoDetect.Visibility.NONE)
+        .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+        .setVisibility(PropertyAccessor.CREATOR, JsonAutoDetect.Visibility.ANY);
 
     private ObjectReader uttaksplanReader = objectMapper.readerFor(Uttaksplan.class);
     private ObjectReader simuleringReader = objectMapper.readerFor(Simulering.class);
@@ -70,6 +72,7 @@ public class UttakRestKlient {
     private OidcRestClient restKlient;
     private URI endpointUttaksplan;
     private URI endpointSimuleringUttaksplan;
+
     private String psbUttakToken;
 
     protected UttakRestKlient() {
@@ -78,8 +81,8 @@ public class UttakRestKlient {
 
     @Inject
     public UttakRestKlient(OidcRestClient restKlient,
-            @KonfigVerdi(value = "k9.psb.uttak.url") URI endpoint,
-            @KonfigVerdi(value = "NAV_PSB_UTTAK_TOKEN", defaultVerdi = "no_secret") String psbUttakToken) {
+                           @KonfigVerdi(value = "NAV_PSB_UTTAK_TOKEN", defaultVerdi = "no_secret") String psbUttakToken,
+                           @KonfigVerdi(value = "k9.psb.uttak.url") URI endpoint) {
         this.restKlient = restKlient;
         this.endpointUttaksplan = toUri(endpoint, "/uttaksplan");
         this.endpointSimuleringUttaksplan = toUri(endpoint, "/uttaksplan/simulering");
@@ -137,7 +140,6 @@ public class UttakRestKlient {
 
     private <T> T utførOgHent(HttpUriRequest request, @SuppressWarnings("unused") String jsonInput, OidcRestClientResponseHandler<T> responseHandler) throws IOException {
         request.setHeader("NAV_PSB_UTTAK_TOKEN", psbUttakToken);
-
         try (var httpResponse = restKlient.execute(request)) {
             int responseCode = httpResponse.getStatusLine().getStatusCode();
             if (isOk(responseCode)) {

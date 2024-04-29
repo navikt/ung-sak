@@ -30,17 +30,19 @@ import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagDto;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagSakSnapshotDto;
 import no.nav.abakus.iaygrunnlag.v1.OverstyrtInntektArbeidYtelseDto;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.diff.DiffEntity;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.abakus.async.AsyncInntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.abakus.mapping.IAYFraDtoMapper;
 import no.nav.k9.sak.domene.abakus.mapping.IAYTilDtoMapper;
 import no.nav.k9.sak.domene.abakus.mapping.MapInntektsmeldinger;
-import no.nav.k9.sak.domene.arbeidsforhold.IAYDiffsjekker;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
@@ -55,6 +57,7 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.k9.sak.domene.iay.modell.VersjonType;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 
 @Dependent
@@ -65,8 +68,10 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     private AbakusTjeneste abakusTjeneste;
     private BehandlingRepository behandlingRepository;
     private FagsakRepository fagsakRepository;
+    private MottatteDokumentRepository mottatteDokumentRepository;
     private IAYRequestCache requestCache;
     private AsyncInntektArbeidYtelseTjeneste asyncIayTjeneste;
+
 
     /**
      * CDI ctor for proxies.
@@ -82,10 +87,12 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     public AbakusInntektArbeidYtelseTjeneste(AbakusTjeneste abakusTjeneste,
                                              AsyncInntektArbeidYtelseTjeneste asyncIayTjeneste,
                                              BehandlingRepository behandlingRepository,
+                                             MottatteDokumentRepository mottatteDokumentRepository,
                                              FagsakRepository fagsakRepository,
                                              IAYRequestCache requestCache) {
         this.behandlingRepository = Objects.requireNonNull(behandlingRepository, "behandlingRepository");
         this.abakusTjeneste = Objects.requireNonNull(abakusTjeneste, "abakusTjeneste");
+        this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.requestCache = Objects.requireNonNull(requestCache, "requestCache");
         this.fagsakRepository = Objects.requireNonNull(fagsakRepository, "fagsakRepository");
         this.asyncIayTjeneste = asyncIayTjeneste;
@@ -144,7 +151,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
 
 
     /**
-     *  Ikke bruk denne dersom du har tilgang til behandling. Skal kun benyttes i spesielle situasjoner der man må hente på grunnlagsid.
+     * Ikke bruk denne dersom du har tilgang til behandling. Skal kun benyttes i spesielle situasjoner der man må hente på grunnlagsid.
      *
      * @param fagsak                          Fagsak
      * @param inntektArbeidYtelseGrunnlagUuid grunnlag-uuid
@@ -215,7 +222,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         if (fagsakOpt.isPresent()) {
             Fagsak fagsak = fagsakOpt.get();
             // Hent grunnlag fra abakus
-            return hentOgMapAlleInntektsmeldinger(aktørId, fagsak.getSaksnummer(), ytelseType);
+            return hentOgMapAlleInntektsmeldinger(aktørId, fagsak.getSaksnummer(), fagsak.getId(), ytelseType);
 
         }
         return Set.of();
@@ -267,6 +274,33 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         return sakInntektsmeldinger.hentInntektsmeldingerSidenRef(behandlingId, eksternReferanse);
     }
 
+    @Override
+    public Set<Inntektsmelding> hentInntektsmeldingerKommetTomBehandling(Saksnummer saksnummer, Long behandlingId) {
+        var sakInntektsmeldinger = hentInntektsmeldinger(saksnummer);
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        return utledUnikeInntektsmeldinger(behandling, sakInntektsmeldinger);
+    }
+
+    private Set<Inntektsmelding> utledUnikeInntektsmeldinger(Behandling behandling, SakInntektsmeldinger unikeInntektsmeldingerForFagsak) {
+        var inntektsmeldingerForFagsak = unikeInntektsmeldingerForFagsak.hentUnikeInntektsmeldinger();
+        if (behandling.erAvsluttet()) {
+            var mottattDokumenter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(behandling.getFagsakId());
+            return inntektsmeldingerForFagsak.stream()
+                .filter(it -> utledInnsendingstidspunkt(mottattDokumenter, it).isBefore(behandling.getAvsluttetDato()))
+                .sorted(Inntektsmelding.COMP_REKKEFØLGE)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        }
+        return inntektsmeldingerForFagsak;
+    }
+
+    private LocalDateTime utledInnsendingstidspunkt(List<MottattDokument> mottattDokumenter, Inntektsmelding im) {
+        return mottattDokumenter.stream()
+            .filter(it -> Objects.equals(it.getJournalpostId(), im.getJournalpostId()))
+            .findFirst()
+            .map(MottattDokument::getInnsendingstidspunkt)
+            .orElseThrow();
+    }
+
     // FIXME: : bør håndteres i egen task (kall asyncabakustjeneste internt).
     @Override
     public void lagreIayAggregat(Long behandlingId, InntektArbeidYtelseAggregatBuilder builder) {
@@ -302,6 +336,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         } catch (IOException e) {
             throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Lagre oppgitt opptjening i abakus: " + e.getMessage(), e).toException();
         }
+
     }
 
     // FIXME: bør kalle asyncabakustjeneste internt og overføre abakus i egen task
@@ -335,11 +370,14 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         var aktør = new AktørIdPersonident(behandling.getAktørId().getId());
         var ytelseType = YtelseType.fraKode(behandling.getFagsakYtelseType().getKode());
         var inntektsmeldingerMottattRequest = new InntektsmeldingerMottattRequest(saksnummer.getVerdi(), behandling.getUuid(), aktør, ytelseType, inntektsmeldingerDto);
+
         try {
             abakusTjeneste.lagreInntektsmeldinger(inntektsmeldingerMottattRequest);
         } catch (IOException e) {
             throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Lagre mottatte inntektsmeldinger i abakus: " + e.getMessage(), e).toException();
         }
+
+        requestCache.invaliderInntektsmeldingerCacheForSak(inntektsmeldingerMottattRequest);
     }
 
     @Override
@@ -384,6 +422,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         } catch (IOException e) {
             throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente grunnlag fra Abakus: " + e.getMessage(), e).toException();
         }
+
     }
 
     private InntektArbeidYtelseGrunnlagSakSnapshotDto hentGrunnlagSnapshot(InntektArbeidYtelseGrunnlagRequest request) {
@@ -431,15 +470,34 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         return request;
     }
 
-    private LinkedHashSet<Inntektsmelding> hentOgMapAlleInntektsmeldinger(AktørId aktørId, Saksnummer saksnummer, FagsakYtelseType ytelseType) {
+    private LinkedHashSet<Inntektsmelding> hentOgMapAlleInntektsmeldinger(AktørId aktørId, Saksnummer saksnummer, Long fagsakId, FagsakYtelseType ytelseType) {
         var request = initInntektsmeldingerRequest(aktørId, saksnummer, ytelseType);
-        var dto = hentUnikeInntektsmeldinger(request);
-        var inntektsmeldinger = mapResult(dto).getAlleInntektsmeldinger();
+
+        List<Inntektsmelding> inntektsmeldinger;
+        if (requestCache.getInntektsmeldingerForSak(request) != null) {
+            inntektsmeldinger = requestCache.getInntektsmeldingerForSak(request);
+        } else {
+            var dto = hentUnikeInntektsmeldinger(request);
+            inntektsmeldinger = filtrerBortUgyldigeDokumenter(fagsakId, mapResult(dto).getAlleInntektsmeldinger());
+            requestCache.leggTilInntektsmeldinger(request, inntektsmeldinger);
+        }
 
         return inntektsmeldinger.stream()
             .sorted(Inntektsmelding.COMP_REKKEFØLGE)
             .collect(Collectors.toCollection(LinkedHashSet::new));
     }
+
+    private List<Inntektsmelding> filtrerBortUgyldigeDokumenter(Long fagsakId, List<Inntektsmelding> inntektsmeldinger) {
+        var ugyldigInntektsmeldingJournalpostIder = mottatteDokumentRepository.hentMottatteDokument(fagsakId, inntektsmeldinger.stream().map(Inntektsmelding::getJournalpostId).map(JournalpostId::getVerdi).map(JournalpostId::new).toList(), DokumentStatus.UGYLDIG)
+            .stream()
+            .filter(it -> it.getStatus().equals(DokumentStatus.UGYLDIG))
+            .map(MottattDokument::getJournalpostId).map(JournalpostId::getVerdi).collect(Collectors.toSet());
+        if (!ugyldigInntektsmeldingJournalpostIder.isEmpty()) {
+            log.info("Fjerner inntektsmeldinger som er markert ugyldig: " + ugyldigInntektsmeldingJournalpostIder);
+        }
+        return inntektsmeldinger.stream().filter(im -> !ugyldigInntektsmeldingJournalpostIder.contains(im.getJournalpostId().getVerdi())).toList();
+    }
+
 
     private List<InntektArbeidYtelseGrunnlag> hentOgMapAlleGrunnlag(Fagsak fagsak) {
         var request = initSnapshotRequest(fagsak, GrunnlagVersjon.ALLE);
@@ -481,53 +539,14 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         return InntektArbeidYtelseGrunnlagBuilder.oppdatere(inntektArbeidGrunnlag);
     }
 
-    private void konverterOgLagre(Long behandlingId, InntektArbeidYtelseGrunnlag nyttGrunnlag) {
-        Objects.requireNonNull(behandlingId, "behandlingId");
-        if (nyttGrunnlag == null) {
-            return;
-        }
-
-        Optional<InntektArbeidYtelseGrunnlag> tidligereAggregat = finnGrunnlag(behandlingId);
-        if (tidligereAggregat.isPresent()) {
-            InntektArbeidYtelseGrunnlag tidligereGrunnlag = tidligereAggregat.get();
-            if (differ().diff(tidligereGrunnlag, nyttGrunnlag).isEmpty()) {
-                return;
-            }
-            lagreGrunnlag(nyttGrunnlag, behandlingId);
-        } else {
-            lagreGrunnlag(nyttGrunnlag, behandlingId);
-        }
-    }
-
     private void konverterOgLagre(Long behandlingId, InntektArbeidYtelseAggregat overstyrtArbeid, ArbeidsforholdInformasjon arbeidsforholdInformasjon) {
         Objects.requireNonNull(behandlingId, "behandlingId");
         lagreOverstyrt(overstyrtArbeid, arbeidsforholdInformasjon, behandlingId);
     }
 
-    private DiffEntity differ() {
-        return new IAYDiffsjekker(false).getDiffEntity();
-    }
-
     private UUID lagreOverstyrt(InntektArbeidYtelseAggregat overstyrtArbeid, ArbeidsforholdInformasjon arbeidsforholdInformasjon, Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         return lagreOverstyrt(konverterTilDto(behandling, overstyrtArbeid, arbeidsforholdInformasjon));
-    }
-
-    private void lagreGrunnlag(InntektArbeidYtelseGrunnlag nyttGrunnlag, Long behandlingId) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        lagreGrunnlag(konverterTilDto(behandling, nyttGrunnlag));
-    }
-
-    private InntektArbeidYtelseGrunnlagDto konverterTilDto(Behandling behandling, InntektArbeidYtelseGrunnlag gr) {
-        InntektArbeidYtelseGrunnlagDto dto;
-        try {
-            var tilDto = new IAYTilDtoMapper(behandling.getAktørId(), gr.getEksternReferanse(), behandling.getUuid());
-            dto = tilDto.mapTilDto(behandling.getFagsakYtelseType(), gr);
-        } catch (RuntimeException t) {
-            log.warn("Kunne ikke transformere til Dto: grunnlag=" + gr.getEksternReferanse() + ", behandling=" + behandling.getId(), t);
-            throw t;
-        }
-        return dto;
     }
 
     private OverstyrtInntektArbeidYtelseDto konverterTilDto(Behandling behandling, InntektArbeidYtelseAggregat overstyrt, ArbeidsforholdInformasjon arbeidsforholdInformasjon) {
@@ -541,14 +560,6 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
             throw t;
         }
         return dto;
-    }
-
-    private void lagreGrunnlag(InntektArbeidYtelseGrunnlagDto grunnlagDto) {
-        try {
-            abakusTjeneste.lagreGrunnlag(grunnlagDto);
-        } catch (IOException e) {
-            throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke lagre grunnlag i Abakus: " + e.getMessage(), e).toException();
-        }
     }
 
     private UUID lagreOverstyrt(OverstyrtInntektArbeidYtelseDto dto) {

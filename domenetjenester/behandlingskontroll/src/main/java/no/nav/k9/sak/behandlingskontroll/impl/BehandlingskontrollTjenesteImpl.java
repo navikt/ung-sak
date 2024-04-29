@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
@@ -41,7 +40,6 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingskontroll.events.AksjonspunktStatusEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingStegOvergangEvent;
-import no.nav.k9.sak.behandlingskontroll.events.BehandlingStegTilstandEndringEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingTransisjonEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingskontrollEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingskontrollEvent.AvsluttetEvent;
@@ -674,12 +672,6 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
         getEventPubliserer().fireEvent(event);
     }
 
-    private void fireEventBehandlingStegTilstandEndring(BehandlingskontrollKontekst kontekst,
-                                                        BehandlingStegTilstandSnapshot fraTilstand, BehandlingStegTilstandSnapshot tilTilstand) {
-        BehandlingStegTilstandEndringEvent event = BehandlingModellImpl.nyBehandlingStegTilstandEndring(kontekst, fraTilstand, tilTilstand);
-        getEventPubliserer().fireEvent(event);
-    }
-
     protected void oppdaterEksisterendeBehandlingStegStatusVedFramføringEllerTilbakeføring(Behandling behandling, BehandlingStegType revidertStegType,
                                                                                            BehandlingStegStatus behandlingStegStatus,
                                                                                            BehandlingStegStatus sluttStatusForAndreÅpneSteg) {
@@ -742,7 +734,6 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
         BehandlingStatus statusEtter = behandling.getStatus();
         BehandlingStegTilstandSnapshot tilTilstand = BehandlingModellImpl.tilBehandlingsStegSnapshot(behandling.getBehandlingStegTilstand());
         fireEventBehandlingStegOvergang(kontekst, behandling, fraTilstand, tilTilstand);
-        fireEventBehandlingStegTilstandEndring(kontekst, fraTilstand, tilTilstand);
         eventPubliserer.fireEvent(kontekst, statusFør, statusEtter);
     }
 

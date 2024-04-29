@@ -13,12 +13,10 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
-import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.uttak.UtfallType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
@@ -140,7 +138,6 @@ public class UnntaksbehandlingBeregningsresultatMapper implements Beregningsresu
                 BeregningsresultatPeriodeAndelDto.Builder dtoBuilder = BeregningsresultatPeriodeAndelDto.build()
                     .medRefusjon(arbeidsgiversAndel.map(BeregningsresultatAndel::getDagsats).orElse(0))
                     .medTilSøker(brukersAndel.getDagsats())
-                    .medUtbetalingsgrad(brukersAndel.getUtbetalingsgrad())
                     .medSisteUtbetalingsdato(andelTilSisteUtbetalingsdatoMap.getOrDefault(genererAndelKey(brukersAndel), Optional.empty()).orElse(null))
                     .medAktivitetstatus(brukersAndel.getAktivitetStatus())
                     .medInntektskategori(brukersAndel.getInntektskategori())
@@ -150,7 +147,9 @@ public class UnntaksbehandlingBeregningsresultatMapper implements Beregningsresu
                     .medAktørId(arbeidsgiver.filter(Arbeidsgiver::erAktørId).map(Arbeidsgiver::getAktørId).orElse(null))
                     .medArbeidsforholdType(brukersAndel.getArbeidsforholdType())
                     .medStillingsprosent(brukersAndel.getStillingsprosent())
-                    .medUtbetalingsgrad(brukersAndel.getUtbetalingsgrad());
+                    .medUtbetalingsgrad(brukersAndel.getUtbetalingsgrad())
+                    .medUtbetalingsgradOppdragForBruker(brukersAndel.getUtbetalingsgradOppdrag())
+                    .medUtbetalingsgradOppdragForRefusjon(arbeidsgiversAndel.map(BeregningsresultatAndel::getUtbetalingsgradOppdrag).orElse(null));
                 var uttakDto = new UttakDto(new Periode(brukersAndel.getFom(), brukersAndel.getTom()), UtfallType.INNVILGET, brukersAndel.getUtbetalingsgrad());
                 dtoBuilder.medUttak(List.of(uttakDto));
                 var internArbeidsforholdId = brukersAndel.getArbeidsforholdRef() != null ? brukersAndel.getArbeidsforholdRef().getReferanse() : null;
@@ -200,17 +199,17 @@ public class UnntaksbehandlingBeregningsresultatMapper implements Beregningsresu
             .collect(Collectors.groupingBy(this::genererAndelKey));
 
         return collect.values().stream().map(andeler -> {
-            BeregningsresultatAndel brukerAndel = andeler.stream()
-                .filter(BeregningsresultatAndel::erBrukerMottaker)
-                .reduce(this::slåSammenAndeler)
-                .orElseThrow(() -> new IllegalStateException("Utvilkerfeil: Mangler andel for bruker, men skal alltid ha andel for bruker her."));
+                BeregningsresultatAndel brukerAndel = andeler.stream()
+                    .filter(BeregningsresultatAndel::erBrukerMottaker)
+                    .reduce(this::slåSammenAndeler)
+                    .orElseThrow(() -> new IllegalStateException("Utvilkerfeil: Mangler andel for bruker, men skal alltid ha andel for bruker her."));
 
-            Optional<BeregningsresultatAndel> arbeidsgiverAndel = andeler.stream()
-                .filter(a -> !a.erBrukerMottaker())
-                .reduce(this::slåSammenAndeler);
+                Optional<BeregningsresultatAndel> arbeidsgiverAndel = andeler.stream()
+                    .filter(a -> !a.erBrukerMottaker())
+                    .reduce(this::slåSammenAndeler);
 
-            return new Tuple<>(brukerAndel, arbeidsgiverAndel);
-        })
+                return new Tuple<>(brukerAndel, arbeidsgiverAndel);
+            })
             .collect(Collectors.toList());
     }
 

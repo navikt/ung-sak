@@ -21,8 +21,10 @@ public class InntektsmeldingBuilder {
 
     public static final Comparator<? super InntektsmeldingBuilder> COMP_REKKEFØLGE = Comparator.comparing(InntektsmeldingBuilder::getKanalreferanse, Comparator.nullsLast(Comparator.naturalOrder()));
     private final Inntektsmelding kladd;
+
     private EksternArbeidsforholdRef eksternArbeidsforholdId;
     private boolean erBygget;
+
 
     InntektsmeldingBuilder(Inntektsmelding kladd) {
         this.kladd = kladd;

@@ -80,15 +80,17 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
     public Simulering simulerUttaksplan(Uttaksgrunnlag request) {
         throw new UnsupportedOperationException();
     }
-
     @Override
     public void slettUttaksplan(UUID behandlingId) {
         uttaksplaner.remove(behandlingId);
     }
 
     private UttaksperiodeInfo mapTilUttaksperiodeInfo(SøktUttak periode, Uttaksgrunnlag input) {
+        boolean manueltOverstyrt = false;
         return new UttaksperiodeInfo(Utfall.OPPFYLT,
             _100,
+            null,
+            null,
             mapUtbetalingsgrader(periode, input),
             _100,
             null,
@@ -103,8 +105,8 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
             null,
             null,
             false,
-            new Utenlandsopphold(null,
-            UtenlandsoppholdÅrsak.INGEN));
+            new Utenlandsopphold(null, UtenlandsoppholdÅrsak.INGEN),
+            manueltOverstyrt);
     }
 
     private Map<String, Utfall> mapInngangsvilkår(Map<String, List<Vilkårsperiode>> inngangsvilkår) {

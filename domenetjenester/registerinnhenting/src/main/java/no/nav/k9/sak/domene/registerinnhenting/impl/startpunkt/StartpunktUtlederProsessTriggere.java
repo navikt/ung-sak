@@ -67,6 +67,9 @@ class StartpunktUtlederProsessTriggere implements EndringStartpunktUtleder {
         if (BehandlingÅrsakType.RE_SATS_REGULERING.equals(it.getÅrsak())) {
             return StartpunktType.BEREGNING;
         }
+        if (BehandlingÅrsakType.RE_ENDRET_FORDELING.equals(it.getÅrsak())) {
+            return StartpunktType.BEREGNING;
+        }
         if (Set.of(BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON, BehandlingÅrsakType.RE_UTSATT_BEHANDLING).contains(it.getÅrsak())) {
             return StartpunktType.UTTAKSVILKÅR;
         }

@@ -1,6 +1,5 @@
 package no.nav.k9.sak.web.server;
 
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,9 +9,9 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import no.nav.k9.sak.web.server.jetty.JettyServer;
 import no.nav.k9.sikkerhet.oidc.config.OpenIDConfig;
 import no.nav.k9.sikkerhet.oidc.config.OpenIDConfigProvider;
-import no.nav.k9.sikkerhet.oidc.config.OpenIDProvider;
 
 @Path("/health")
 @ApplicationScoped
@@ -36,7 +35,7 @@ public class HealthCheckRestService {
         var configs = OpenIDConfigProvider.instance().getConfigs().stream().map(OpenIDConfig::getProvider).collect(Collectors.toSet());
         Response.ResponseBuilder builder;
 
-        if (configs.containsAll(Set.of(OpenIDProvider.ISSO, OpenIDProvider.STS))) {
+        if (configs.size() > 1) {
             builder = Response.ok("OK", MediaType.TEXT_PLAIN_TYPE);
         } else {
             builder = Response.serverError();
@@ -56,7 +55,11 @@ public class HealthCheckRestService {
     @Path("/isAlive")
     public Response isAlive() {
         Response.ResponseBuilder builder;
-        builder = Response.ok("OK", MediaType.TEXT_PLAIN_TYPE);
+        if (JettyServer.KILL_APPLICATION.get()) {
+            builder = Response.serverError();
+        } else {
+            builder = Response.ok("OK", MediaType.TEXT_PLAIN_TYPE);
+        }
         builder.cacheControl(cacheControl);
         return builder.build();
     }

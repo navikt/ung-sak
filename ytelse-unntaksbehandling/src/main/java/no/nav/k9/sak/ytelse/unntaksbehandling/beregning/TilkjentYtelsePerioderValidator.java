@@ -43,7 +43,7 @@ class TilkjentYtelsePerioderValidator {
             .orElseThrow(feil("Finner ikke når tilkjent ytelse fom"));
 
         if (tilkjentYtelseFom.isBefore(vilkårFom) || tilkjentYtelseTom.isAfter(vilkårTom)) {
-            throw TilkjentYtelseOppdaterer.TilkjentYtelseOppdatererFeil.FACTORY.tilkjentYtelseIkkeInnenforVilkår().toException();
+            throw TilkjentYtelseOppdaterer.TilkjentYtelseOppdatererFeil.FACTORY.tilkjentYtelseIkkeInnenforVilkår(vilkår.getVilkårType(), vilkårFom, vilkårTom, tilkjentYtelseFom, tilkjentYtelseTom).toException();
         }
     }
 

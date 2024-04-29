@@ -41,16 +41,16 @@ public enum BehandlingStegStatus implements Kodeverdi {
     FREMOVERFØRT("FREMOVERFØRT", "Fremoverført"),
     TILBAKEFØRT("TILBAKEFØRT", "Tilbakeført"),
     UDEFINERT("-", "Ikke definert"),
-    
+
     ;
     private static final Set<BehandlingStegStatus> KAN_UTFØRE_STEG = new HashSet<>(Arrays.asList(STARTET, VENTER));
     private static final Set<BehandlingStegStatus> KAN_FORTSETTE_NESTE = new HashSet<>(Arrays.asList(UTFØRT, FREMOVERFØRT));
-    
+
     // hvis oppdaterer SLUTT_STATUSER, husk Behandling.behandlingStegTilstand har en @Where annotation som matcher
     private static final Set<BehandlingStegStatus> SLUTT_STATUSER = new HashSet<>(Arrays.asList(AVBRUTT, UTFØRT, TILBAKEFØRT));
 
     private static final Map<String, BehandlingStegStatus> KODER = new LinkedHashMap<>();
-    
+
     public static final String KODEVERK = "BEHANDLING_STEG_STATUS"; //$NON-NLS-1$
 
     @JsonIgnore
@@ -67,6 +67,16 @@ public enum BehandlingStegStatus implements Kodeverdi {
         this.navn = navn;
     }
 
+    /**
+     * toString is set to output the kode value of the enum instead of the default that is the enum name.
+     * This makes the generated openapi spec correct when the enum is used as a query param. Without this the generated
+     * spec incorrectly specifies that it is the enum name string that should be used as input.
+     */
+    @Override
+    public String toString() {
+        return this.getKode();
+    }
+
     @JsonCreator(mode = Mode.DELEGATING)
     public static BehandlingStegStatus fraKode(Object node) {
         if (node == null) {
@@ -79,7 +89,7 @@ public enum BehandlingStegStatus implements Kodeverdi {
         }
         return ad;
     }
-    
+
     @Override
     public String getNavn() {
         return navn;
@@ -112,7 +122,7 @@ public enum BehandlingStegStatus implements Kodeverdi {
     public static Map<String, BehandlingStegStatus> kodeMap() {
         return Collections.unmodifiableMap(KODER);
     }
-    
+
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Override
     public String getKodeverk() {
@@ -124,12 +134,12 @@ public enum BehandlingStegStatus implements Kodeverdi {
     public String getKode() {
         return kode;
     }
-    
+
     @Override
     public String getOffisiellKode() {
         return getKode();
     }
-    
+
     static {
         for (var v : values()) {
             if (KODER.putIfAbsent(v.kode, v) != null) {

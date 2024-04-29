@@ -28,15 +28,16 @@ public class StønadstatistikkService {
 
     @Inject
     public StønadstatistikkService(@Any Instance<StønadstatistikkHendelseBygger> stønadstatistikkHendelseBygger,
-            BehandlingRepository behandlingRepository, ProsessTaskTjeneste prosessTaskRepository) {
+                                   BehandlingRepository behandlingRepository, ProsessTaskTjeneste prosessTaskRepository) {
         this.stønadstatistikkHendelseBygger = stønadstatistikkHendelseBygger;
         this.behandlingRepository = behandlingRepository;
         this.prosessTaskRepository = prosessTaskRepository;
     }
 
-
     public void publiserHendelse(Behandling behandling) {
-        if (!Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN).contains(behandling.getFagsakYtelseType())) {
+        Set<FagsakYtelseType> aktiverteForYtelsetyper = Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN, FagsakYtelseType.OMP);
+
+        if (!aktiverteForYtelsetyper.contains(behandling.getFagsakYtelseType())) {
             return;
         }
         final ProsessTaskData pd = PubliserStønadstatistikkHendelseTask.createProsessTaskData(behandling);

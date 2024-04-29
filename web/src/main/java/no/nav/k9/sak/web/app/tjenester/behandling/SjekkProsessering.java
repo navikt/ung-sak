@@ -24,6 +24,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.k9.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
+import no.nav.k9.sak.behandling.prosessering.task.OppfriskTask;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;

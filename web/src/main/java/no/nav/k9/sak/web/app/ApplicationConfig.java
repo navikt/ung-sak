@@ -1,10 +1,9 @@
 package no.nav.k9.sak.web.app;
 
+
 import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import jakarta.ws.rs.ApplicationPath;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
@@ -16,9 +15,11 @@ import io.swagger.v3.oas.integration.SwaggerConfiguration;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
+import jakarta.ws.rs.ApplicationPath;
 import no.nav.k9.sak.web.app.exceptions.KnownExceptionMappers;
 import no.nav.k9.sak.web.app.jackson.JacksonJsonConfig;
 import no.nav.k9.sak.web.app.tjenester.RestImplementationClasses;
+import no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag.ForvaltningBeregningRestTjeneste.OpprettManuellRevurderingBeregning.OpprettManuellRevurderingBeregningMessageBodyReader;
 import no.nav.k9.sak.web.app.tjenester.fordeling.FordelRestTjeneste.PsbInfotrygdFødselsnumre.PsbInfotrygdFødselsnumregMessageBodyReader;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningMidlertidigDriftRestTjeneste.OpprettManuellRevurdering.OpprettManuellRevurderingMessageBodyReader;
 
@@ -27,8 +28,7 @@ public class ApplicationConfig extends ResourceConfig {
 
     public static final String API_URI = "/api";
 
-    public ApplicationConfig() {
-
+    public static OpenAPI resolveOpenAPI() {
         OpenAPI oas = new OpenAPI();
         Info info = new Info()
             .title("K9 saksbehandling - Saksbehandling av kapittel 9 i folketrygden")
@@ -46,13 +46,17 @@ public class ApplicationConfig extends ResourceConfig {
                 .collect(Collectors.toSet()));
 
         try {
-            new JaxrsOpenApiContextBuilder<>()
+            return new JaxrsOpenApiContextBuilder<>()
                 .openApiConfiguration(oasConfig)
                 .buildContext(true)
                 .read();
         } catch (OpenApiConfigurationException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
+    }
+
+    public ApplicationConfig() {
+        ApplicationConfig.resolveOpenAPI();
 
         property(ServerProperties.BV_SEND_ERROR_IN_RESPONSE, true);
 
@@ -63,6 +67,7 @@ public class ApplicationConfig extends ResourceConfig {
         register(new JacksonJsonConfig());
 
         register(new OpprettManuellRevurderingMessageBodyReader());
+        register(new OpprettManuellRevurderingBeregningMessageBodyReader());
         register(new PsbInfotrygdFødselsnumregMessageBodyReader());
 
         registerInstances(new LinkedHashSet<>(new KnownExceptionMappers().getExceptionMappers()));

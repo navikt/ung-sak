@@ -6,9 +6,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.inject.Instance;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -48,21 +45,6 @@ public interface VurderSøknadsfristTjeneste<T extends SøktPeriodeData> {
 
     Set<KravDokument> relevanteKravdokumentForBehandling(BehandlingReferanse referanse, boolean taHensynTilManuellRevurdering);
 
-    /**
-     * Henter ut kravdokumenter med perioder som har tilkommet i denne behandlingen
-     *
-     * @param referanse referansen til behandlingen
-     * @return kravdokumenter
-     */
-    public default Map<KravDokument, List<SøktPeriode<T>>> relevanteKravdokumentMedPeriodeForBehandling(BehandlingReferanse referanse) {
-        var kravDokumentListMap = hentPerioderTilVurdering(referanse);
-        var relevanteKrav = relevanteKravdokumentForBehandling(referanse);
-        return kravDokumentListMap.entrySet()
-            .stream()
-            .filter(it -> relevanteKrav.stream().anyMatch(at -> at.getJournalpostId().equals(it.getKey().getJournalpostId())))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
 
     /**
      * Henter ut kravdokumenter med perioder som har tilkommet i denne behandlingen(tar hensyn til manuell revurdering og lister alle dokumenter)
@@ -78,23 +60,5 @@ public interface VurderSøknadsfristTjeneste<T extends SøktPeriodeData> {
             .stream()
             .filter(it -> relevanteKrav.stream().anyMatch(at -> at.getJournalpostId().equals(it.getKey().getJournalpostId())))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    public default LocalDateTimeline<List<KravDokument>> utledKravrekkefølge(BehandlingReferanse referanse) {
-        LocalDateTimeline<List<KravDokument>> timeline = LocalDateTimeline.empty();
-        var kravdokumenterMedVurdertePerioder = vurderSøknadsfrist(referanse);
-
-        for (Map.Entry<KravDokument, List<VurdertSøktPeriode<T>>> entry : kravdokumenterMedVurdertePerioder.entrySet()) {
-            var segments = entry.getValue()
-                .stream()
-                .map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), entry.getKey()))
-                .toList();
-            LocalDateTimeline<KravDokument> tidslinjeAktueltDokument = new LocalDateTimeline<>(segments, StandardCombinators::coalesceRightHandSide);
-            timeline = timeline.combine(tidslinjeAktueltDokument, StandardCombinators::allValues, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-        }
-        return timeline.mapValue(v -> v.stream()
-                .sorted()
-                .toList())
-            .compress();
     }
 }

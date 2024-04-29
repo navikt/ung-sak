@@ -20,7 +20,7 @@ import no.nav.k9.sak.typer.Periode;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 @JsonTypeName(AksjonspunktKodeDefinisjon.AVKLAR_OMSORGEN_FOR_KODE)
 public class AvklarOmsorgenForDto extends BekreftetAksjonspunktDto {
-    
+
     @JsonProperty(value = "harOmsorgenFor", required = true)
     @NotNull
     private Boolean harOmsorgenFor;

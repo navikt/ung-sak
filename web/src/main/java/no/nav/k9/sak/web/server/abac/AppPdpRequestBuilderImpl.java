@@ -12,11 +12,16 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Inject;
 
+import no.nav.k9.felles.konfigurasjon.env.Cluster;
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.sak.behandlingslager.pip.PipBehandlingsData;
 import no.nav.k9.sak.behandlingslager.pip.PipRepository;
 import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
@@ -36,10 +41,20 @@ import no.nav.k9.felles.sikkerhet.abac.PdpRequestBuilder;
 @Alternative
 @Priority(2)
 public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AppPdpRequestBuilderImpl.class);
     public static final String ABAC_DOMAIN = "k9";
+    private static final Cluster CLUSTER = Environment.current().getCluster();
+    private static final List<String> INTERNAL_CLUSTER_NAMESPACE = List.of(
+        CLUSTER.clusterName() + ":k9saksbehandling",
+        CLUSTER.DEV_GCP.clusterName() + ":omsorgspenger",
+        CLUSTER.PROD_GCP.clusterName() + ":omsorgspenger"
+    );
     private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess"); //$NON-NLS-1$
     private PipRepository pipRepository;
     private AktørTjeneste aktørTjeneste;
+
+
 
     public AppPdpRequestBuilderImpl() {
     }
@@ -76,6 +91,11 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
             LOG_CONTEXT.add("saksnummer", pipBehandlingsData.getSaksnummer());
         });
 
+        Set<Saksnummer> saksnummere = attributter.getVerdier(AppAbacAttributtType.SAKSNUMMER);
+        if (saksnummere != null && !saksnummere.isEmpty() && behandlingData.isEmpty()) {
+            LOG_CONTEXT.add("saksnummer", saksnummere.size() == 1 ? saksnummere.iterator().next().toString() : saksnummere.toString());
+        }
+
         if (!fagsakIder.isEmpty()) {
             LOG_CONTEXT.add("fagsak", fagsakIder.size() == 1 ? fagsakIder.iterator().next().toString() : fagsakIder.toString());
         }
@@ -85,6 +105,16 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
         return behandlingData.isPresent()
             ? lagPdpRequest(attributter, aktørIder, aksjonspunktType, behandlingData.get())
             : lagPdpRequest(attributter, aktørIder, aksjonspunktType);
+    }
+
+
+    @Override
+    public boolean internAzureConsumer(String azpName) {
+        var match = INTERNAL_CLUSTER_NAMESPACE.stream().anyMatch(azpName::startsWith);
+        if (!match) {
+            LOG.warn("App fra ikke-godkjent namespace har etterspurt tilgang: " + azpName);
+        }
+        return match;
     }
 
     private PdpRequest lagPdpRequest(AbacAttributtSamling attributter, Set<AktørId> aktørIder, Collection<String> aksjonspunktType) {

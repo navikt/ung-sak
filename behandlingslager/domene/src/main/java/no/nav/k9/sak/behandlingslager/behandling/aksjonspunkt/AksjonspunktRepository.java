@@ -11,17 +11,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -159,6 +159,39 @@ public class AksjonspunktRepository {
 
         return stream.map(a -> new AktørId(a)).collect(Collectors.toList());
     }
+
+
+    public List<Behandling> hentBehandlingerMedAktivtAksjonspunkt(AksjonspunktDefinisjon aksjonspunktDefinisjon) {
+        String sql = """
+             select b.*
+              from behandling b
+              inner join aksjonspunkt a on a.behandling_id=b.id
+              where a.aksjonspunkt_status = :status AND a.aksjonspunkt_def = :definisjon
+              """;
+        List<Behandling> behandlinger = em.createNativeQuery(sql, Behandling.class)
+            .setParameter("status", AksjonspunktStatus.OPPRETTET.getKode())
+            .setParameter("definisjon", aksjonspunktDefinisjon.getKode())
+            .getResultList();
+
+        return behandlinger;
+    }
+
+    public List<Behandling> hentBehandlingerPåVentMedVenteårsak(Venteårsak venteårsak) {
+        String sql = """
+             select b.*
+              from behandling b
+              inner join aksjonspunkt a on a.behandling_id=b.id
+              where a.aksjonspunkt_status = :status AND a.vent_aarsak = :venteårsak
+              """;
+        List<Behandling> behandlinger = em.createNativeQuery(sql, Behandling.class)
+            .setParameter("status", AksjonspunktStatus.OPPRETTET.getKode())
+            .setParameter("venteårsak", venteårsak.getKode())
+            .getResultList();
+
+        return behandlinger;
+    }
+
+
 
     /** Returnerer alle behandlinger med aksjonspunkt som er opprettet innenfor periode. */
     @SuppressWarnings("unchecked")

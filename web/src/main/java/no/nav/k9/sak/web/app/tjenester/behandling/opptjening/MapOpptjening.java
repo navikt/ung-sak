@@ -74,7 +74,7 @@ class MapOpptjening {
         for (var opptjening : opptjeningResultat.getOpptjeningPerioder()) {
             OpptjeningDto resultat = new OpptjeningDto();
             var vilkårsperiode = vilkåret.finnPeriodeForSkjæringstidspunkt(opptjening.getSkjæringstidspunkt()).getPeriode();
-            var yrkesaktivitetFilter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(ref.getAktørId())).før(vilkårsperiode.getFomDato());
+            var yrkesaktivitetFilter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(ref.getAktørId())).før(vilkårsperiode.getFomDato().plusDays(1));
             var relevanteOpptjeningAktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(ref, iayGrunnlag, vurderForOpptjeningsvilkår, opptjening.getOpptjeningPeriode(), vilkårsperiode, yrkesaktivitetFilter);
             List<OpptjeningAktivitet> opptjeningAktivitet = opptjening.getOpptjeningAktivitet();
             resultat.setFastsattOpptjening(new FastsattOpptjeningDto(opptjening.getFom(),

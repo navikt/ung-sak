@@ -1,12 +1,14 @@
 package no.nav.k9.sak.behandlingslager.behandling.medlemskap;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import no.nav.k9.kodeverk.medlem.MedlemskapManuellVurderingType;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 public class VurdertLøpendeMedlemskapBuilder {
-    private VurdertLøpendeMedlemskapEntitet medlemskapMal;
+    private final VurdertLøpendeMedlemskapEntitet medlemskapMal;
     private boolean oppdatering = false;
 
     private VurdertLøpendeMedlemskapBuilder(VurdertLøpendeMedlemskapEntitet medlemskap) {
@@ -53,7 +55,7 @@ public class VurdertLøpendeMedlemskapBuilder {
     }
 
     public VurdertLøpendeMedlemskapBuilder medVurderingsdato(LocalDate vurderingsdato) {
-        medlemskapMal.setVuderingsdato(vurderingsdato);
+        medlemskapMal.setVurderingsdato(vurderingsdato);
         return this;
     }
 
@@ -62,6 +64,8 @@ public class VurdertLøpendeMedlemskapBuilder {
     }
 
     public VurdertLøpendeMedlemskapEntitet build() {
+        medlemskapMal.setVurdertAv(SubjectHandler.getSubjectHandler().getUid());
+        medlemskapMal.setVurdertTidspunkt(LocalDateTime.now());
         return medlemskapMal;
     }
 }

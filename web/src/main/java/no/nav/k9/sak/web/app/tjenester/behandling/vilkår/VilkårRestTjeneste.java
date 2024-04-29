@@ -144,7 +144,7 @@ public class VilkårRestTjeneste {
     }
 
     private Set<VilkårType> utledVilkårTyperForBehandlingen(Behandling behandling) {
-        return getVilkårUtleder(behandling).utledVilkår(behandling).getAlleAvklarte();
+        return getVilkårUtleder(behandling).utledVilkår(BehandlingReferanse.fra(behandling)).getAlleAvklarte();
     }
 
     private Set<VilkårType> finnVilkårTyperPåPåBehandlingen(Vilkårene vilkårene) {

@@ -97,11 +97,15 @@ public class Vilkår extends BaseEntitet implements IndexKey {
     }
 
     public VilkårPeriode finnPeriodeForSkjæringstidspunkt(LocalDate skjæringstidspunkt) {
+        return finnPeriodeForSkjæringstidspunktHvisFinnes(skjæringstidspunkt).orElseThrow(() -> new IllegalStateException("Fant ikke vilkårsperiode for skjæringstidspunkt " + skjæringstidspunkt));
+    }
+
+    public Optional<VilkårPeriode> finnPeriodeForSkjæringstidspunktHvisFinnes(LocalDate skjæringstidspunkt) {
         return this.perioder.stream()
             .filter(it -> it.getSkjæringstidspunkt().equals(skjæringstidspunkt))
-            .findFirst()
-            .orElseThrow(() -> new IllegalStateException("Fant ikke vilkårsperiode for skjæringstidspunkt " + skjæringstidspunkt));
+            .findFirst();
     }
+
 
     public Optional<VilkårPeriode> finnPeriodeSomInneholderDato(LocalDate dato) {
         return this.perioder.stream()

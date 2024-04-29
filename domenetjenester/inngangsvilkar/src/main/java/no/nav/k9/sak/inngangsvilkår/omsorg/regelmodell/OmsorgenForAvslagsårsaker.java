@@ -3,7 +3,7 @@ package no.nav.k9.sak.inngangsvilkår.omsorg.regelmodell;
 import no.nav.fpsak.nare.evaluation.RuleReasonRef;
 import no.nav.fpsak.nare.evaluation.RuleReasonRefImpl;
 
-enum OmsorgenForAvslagsårsaker {
+public enum OmsorgenForAvslagsårsaker {
     IKKE_DOKUMENTERT_OMSORGEN_FOR("1071", "Ikke dokumentert omsorgen for.");
 
     private final String kode;
@@ -22,7 +22,7 @@ enum OmsorgenForAvslagsårsaker {
         return årsak;
     }
 
-    RuleReasonRef toRuleReason() {
+    public RuleReasonRef toRuleReason() {
         return new RuleReasonRefImpl(kode, årsak);
     }
 }

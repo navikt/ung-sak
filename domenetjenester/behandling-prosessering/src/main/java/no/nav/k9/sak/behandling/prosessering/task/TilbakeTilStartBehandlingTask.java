@@ -1,5 +1,7 @@
 package no.nav.k9.sak.behandling.prosessering.task;
 
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -7,6 +9,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
@@ -102,9 +105,13 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
                 behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
             }
 
-            if (harMottatteDokumenterTilBehandling(behandling)) {
-                throw new IllegalStateException("Kan ikke hoppe tilbake når det er mottatte dokumenter som ikke har blitt behandlet ferdig.");
+            Set<FagsakYtelseType> rammevedtak_typer = Set.of(FagsakYtelseType.OMSORGSPENGER_KS, FagsakYtelseType.OMSORGSPENGER_MA, FagsakYtelseType.OMSORGSPENGER_AO);
+            boolean erRammevedtak = rammevedtak_typer.contains(behandling.getFagsakYtelseType()); //rammevedtak-behandlinger oppdaterer ikke status på dokumentene
+            if (harMottatteDokumenterTilBehandling(behandling) && !erRammevedtak) {
+                log.warn("Kan ikke hoppe tilbake når det er mottatte dokumenter som ikke har blitt behandlet ferdig.");
+                return; //ønsker ikke retry fordi premisset for opprettelse av tasken sannsynligvis ikke er gyldig lenger etter at dokumentet er ferdig mottatt
             }
+
             prosessTaskRepository.settFeiletTilSuspendert(fagsakId, behandling.getId());
 
             if (startSteg == BehandlingStegType.START_STEG) {

@@ -77,13 +77,14 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
         var referanse = BehandlingReferanse.fra(behandling);
         final var unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksistererUnntakPleietrengende(behandling.getFagsak().getPleietrengendeAktørId());
 
-        var innvilgedePerioderTilVurdering = perioderMedSykdomInnvilgetUtleder.utledInnvilgedePerioderTilVurdering(referanse);
+        var innvilgedePerioderTilVurdering = perioderMedSykdomInnvilgetUtleder.utledInnvilgedePerioderTilVurdering(referanse, true);
 
         final var aksjonspunkter = new ArrayList<AksjonspunktDefinisjon>();
         if (unntakEtablertTilsynForPleietrengende.isPresent()) {
             unntakEtablertTilsynGrunnlagRepository.lagreGrunnlag(behandlingId, unntakEtablertTilsynForPleietrengende.get());
 
-            aksjonspunkter.addAll(vurderAksjonspunktForNattevåkOgBeredskap(behandling, unntakEtablertTilsynForPleietrengende.get(), innvilgedePerioderTilVurdering));
+            var perioderMedSykdomInnvilget = perioderMedSykdomInnvilgetUtleder.utledInnvilgedePerioderTilVurdering(referanse, false);
+            aksjonspunkter.addAll(vurderAksjonspunktForNattevåkOgBeredskap(behandling, unntakEtablertTilsynForPleietrengende.get(), perioderMedSykdomInnvilget));
         }
         if (rettEtterPleietrengendesDødMåAvklares(behandlingId) && harNoenGodkjentPerioderMedSykdom(innvilgedePerioderTilVurdering)) {
             aksjonspunkter.add(AksjonspunktDefinisjon.VURDER_RETT_ETTER_PLEIETRENGENDES_DØD);
@@ -178,14 +179,15 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
     private boolean dødDatoInnenforPleiebehov(Long behandlingId, LocalDate dødsdato) {
         var pleiebehov = pleiebehovResultatRepository.hentHvisEksisterer(behandlingId);
 
-        // Hvis dødsdato er i helg, så flytt den til mandag slik at den vil overlappe med eventuelle pleieperioder(fordi det ikke er mulig å søke i helg).
-        var flyttetDødsdato = flyttDatoTilNærmesteMandagHvisHelg(dødsdato);
+        // Hvis dødsdato er i helg, så flytt den til mandag og fredag slik at den vil overlappe med eventuelle pleieperioder(fordi det ikke er mulig å søke i helg).
+        var flyttetDødsdatoMandag = flyttDatoTilNærmesteMandagHvisHelg(dødsdato);
+        var flyttetDødsdatoFredag = flyttDatoTilNærmesteFredagHvisHelg(dødsdato);
 
         if (pleiebehov.isPresent()) {
             var overlappendePleiehov = pleiebehov.get().getPleieperioder().getPerioder()
                 .stream()
                 .filter(pleiebehovPeriode -> pleiebehovPeriode.getGrad().getProsent() > 0)
-                .filter(pleiebehovPeriode -> pleiebehovPeriode.getPeriode().inkluderer(flyttetDødsdato))
+                .filter(pleiebehovPeriode -> pleiebehovPeriode.getPeriode().inkluderer(flyttetDødsdatoMandag) || pleiebehovPeriode.getPeriode().inkluderer(flyttetDødsdatoFredag))
                 .findAny();
             return overlappendePleiehov.isPresent();
         }
@@ -197,6 +199,15 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
             return dato.plusDays(2);
         } else if (dato.getDayOfWeek() == DayOfWeek.SUNDAY) {
             return dato.plusDays(1);
+        }
+        return dato;
+    }
+
+    private LocalDate flyttDatoTilNærmesteFredagHvisHelg(LocalDate dato) {
+        if (dato.getDayOfWeek() == DayOfWeek.SATURDAY) {
+            return dato.minusDays(1);
+        } else if (dato.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            return dato.minusDays(2);
         }
         return dato;
     }

@@ -1,0 +1,7 @@
+alter table olp_vurdert_opplaering rename to olp_vurdert_noedvendighet;
+alter table olp_vurdert_opplaering_holder rename to olp_vurdert_noedvendighet_holder;
+alter sequence seq_olp_vurdert_opplaering rename to seq_olp_vurdert_noedvendighet;
+alter sequence seq_olp_vurdert_opplaering_holder rename to seq_olp_vurdert_noedvendighet_holder;
+alter table OLP_VURDERT_OPPLAERING_ANVENDT_DOKUMENT rename column VURDERT_OPPLAERING_ID to VURDERT_NOEDVENDIGHET_ID;
+alter table OLP_VURDERT_OPPLAERING_ANVENDT_DOKUMENT rename to OLP_VURDERT_NOEDVENDIGHET_ANVENDT_DOKUMENT;
+alter table gr_opplaering rename column vurdert_opplaering_holder_id to vurdert_noedvendighet_holder_id;

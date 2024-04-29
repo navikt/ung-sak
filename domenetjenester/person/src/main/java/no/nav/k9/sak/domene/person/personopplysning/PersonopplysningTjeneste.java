@@ -26,10 +26,6 @@ public class PersonopplysningTjeneste extends AbstractPersonopplysningTjenesteIm
         super(personopplysningRepository);
     }
 
-    public void aksjonspunktAvklarSaksopplysninger(Long behandlingId, AktørId aktørId, PersonopplysningAksjonspunkt adapter) {
-        new AvklarSaksopplysningerAksjonspunkt(getPersonopplysningRepository()).oppdater(behandlingId, aktørId, adapter);
-    }
-
     public EndringsresultatSnapshot finnAktivGrunnlagId(Long behandlingId) {
         Optional<Long> funnetId = getPersonopplysningRepository().hentPersonopplysningerHvisEksisterer(behandlingId).map(PersonopplysningGrunnlagEntitet::getId);
         return funnetId

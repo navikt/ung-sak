@@ -5,12 +5,13 @@ import static no.nav.k9.felles.konfigurasjon.konfig.Tid.TIDENES_ENDE;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import no.nav.k9.kodeverk.beregningsgrunnlag.PeriodeÅrsak;
 import no.nav.k9.sak.domene.typer.tid.ÅpenDatoIntervallEntitet;
@@ -18,6 +19,7 @@ import no.nav.k9.sak.typer.Beløp;
 
 public class BeregningsgrunnlagPeriode {
 
+    @JsonBackReference
     private Beregningsgrunnlag beregningsgrunnlag;
     private List<BeregningsgrunnlagPrStatusOgAndel> beregningsgrunnlagPrStatusOgAndelList = new ArrayList<>();
     private ÅpenDatoIntervallEntitet periode;
@@ -26,6 +28,9 @@ public class BeregningsgrunnlagPeriode {
     private BigDecimal redusertPrÅr;
     private Long dagsats;
     private List<BeregningsgrunnlagPeriodeÅrsak> beregningsgrunnlagPeriodeÅrsaker = new ArrayList<>();
+    private BigDecimal totalUtbetalingsgradFraUttak;
+    private BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
+    private BigDecimal reduksjonsfaktorInaktivTypeA;
 
     public BeregningsgrunnlagPeriode(BeregningsgrunnlagPeriode eksisterende) {
         this.beregningsgrunnlag = eksisterende.getBeregningsgrunnlag();
@@ -36,6 +41,9 @@ public class BeregningsgrunnlagPeriode {
         this.redusertPrÅr = eksisterende.getRedusertPrÅr();
         this.dagsats = eksisterende.getDagsats();
         this.beregningsgrunnlagPeriodeÅrsaker = eksisterende.getBeregningsgrunnlagPeriodeÅrsaker();
+        this.totalUtbetalingsgradFraUttak = eksisterende.totalUtbetalingsgradFraUttak;
+        this.totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt = eksisterende.totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
+        this.reduksjonsfaktorInaktivTypeA = eksisterende.reduksjonsfaktorInaktivTypeA;
     }
 
     public BeregningsgrunnlagPeriode() {
@@ -66,18 +74,18 @@ public class BeregningsgrunnlagPeriode {
 
     public BigDecimal getBeregnetPrÅr() {
         return beregningsgrunnlagPrStatusOgAndelList.stream()
-                .filter(bgpsa -> bgpsa.getBeregnetPrÅr() != null)
-                .map(BeregningsgrunnlagPrStatusOgAndel::getBeregnetPrÅr)
-                .reduce(BigDecimal::add)
-                .orElse(BigDecimal.ZERO);
+            .filter(bgpsa -> bgpsa.getBeregnetPrÅr() != null)
+            .map(BeregningsgrunnlagPrStatusOgAndel::getBeregnetPrÅr)
+            .reduce(BigDecimal::add)
+            .orElse(BigDecimal.ZERO);
     }
 
     void updateBruttoPrÅr() {
         bruttoPrÅr = beregningsgrunnlagPrStatusOgAndelList.stream()
-                .filter(bgpsa -> bgpsa.getBruttoPrÅr() != null)
-                .map(BeregningsgrunnlagPrStatusOgAndel::getBruttoPrÅr)
-                .reduce(BigDecimal::add)
-                .orElse(BigDecimal.ZERO);
+            .filter(bgpsa -> bgpsa.getBruttoPrÅr() != null)
+            .map(BeregningsgrunnlagPrStatusOgAndel::getBruttoPrÅr)
+            .reduce(BigDecimal::add)
+            .orElse(BigDecimal.ZERO);
     }
 
     public BigDecimal getBruttoPrÅr() {
@@ -94,6 +102,19 @@ public class BeregningsgrunnlagPeriode {
 
     public Long getDagsats() {
         return dagsats;
+    }
+
+
+    public BigDecimal getTotalUtbetalingsgradFraUttak() {
+        return totalUtbetalingsgradFraUttak;
+    }
+
+    public BigDecimal getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt() {
+        return totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
+    }
+
+    public BigDecimal getReduksjonsfaktorInaktivTypeA() {
+        return reduksjonsfaktorInaktivTypeA;
     }
 
     public List<BeregningsgrunnlagPeriodeÅrsak> getBeregningsgrunnlagPeriodeÅrsaker() {
@@ -138,11 +159,12 @@ public class BeregningsgrunnlagPeriode {
         }
         BeregningsgrunnlagPeriode other = (BeregningsgrunnlagPeriode) obj;
         return Objects.equals(this.periode.getFomDato(), other.periode.getFomDato())
-                && Objects.equals(this.periode.getTomDato(), other.periode.getTomDato())
-                && Objects.equals(this.getBruttoPrÅr(), other.getBruttoPrÅr())
-                && Objects.equals(this.getAvkortetPrÅr(), other.getAvkortetPrÅr())
-                && Objects.equals(this.getRedusertPrÅr(), other.getRedusertPrÅr())
-                && Objects.equals(this.getDagsats(), other.getDagsats());
+            && Objects.equals(this.periode.getTomDato(), other.periode.getTomDato())
+            && Objects.equals(this.getBruttoPrÅr(), other.getBruttoPrÅr())
+            && Objects.equals(this.getAvkortetPrÅr(), other.getAvkortetPrÅr())
+            && Objects.equals(this.getRedusertPrÅr(), other.getRedusertPrÅr())
+            && Objects.equals(this.getDagsats(), other.getDagsats())
+            ;
     }
 
     @Override
@@ -153,12 +175,12 @@ public class BeregningsgrunnlagPeriode {
     @Override
     public String toString() {
         return getClass().getSimpleName() + "<" //$NON-NLS-1$
-                + "periode=" + periode + ", " // $NON-NLS-1$ //$NON-NLS-2$
-                + "bruttoPrÅr=" + bruttoPrÅr + ", " //$NON-NLS-1$ //$NON-NLS-2$
-                + "avkortetPrÅr=" + avkortetPrÅr + ", " //$NON-NLS-1$ //$NON-NLS-2$
-                + "redusertPrÅr=" + redusertPrÅr + ", " //$NON-NLS-1$ //$NON-NLS-2$
-                + "dagsats=" + dagsats + ", " //$NON-NLS-1$ //$NON-NLS-2$
-                + ">"; //$NON-NLS-1$
+            + "periode=" + periode + ", " // $NON-NLS-1$ //$NON-NLS-2$
+            + "bruttoPrÅr=" + bruttoPrÅr + ", " //$NON-NLS-1$ //$NON-NLS-2$
+            + "avkortetPrÅr=" + avkortetPrÅr + ", " //$NON-NLS-1$ //$NON-NLS-2$
+            + "redusertPrÅr=" + redusertPrÅr + ", " //$NON-NLS-1$ //$NON-NLS-2$
+            + "dagsats=" + dagsats + ", " //$NON-NLS-1$ //$NON-NLS-2$
+            + ">"; //$NON-NLS-1$
     }
 
     public static Builder builder() {
@@ -181,39 +203,9 @@ public class BeregningsgrunnlagPeriode {
             kladd = eksisterendeBeregningsgrunnlagPeriod;
         }
 
-        public Builder leggTilBeregningsgrunnlagPrStatusOgAndel(BeregningsgrunnlagPrStatusOgAndel beregningsgrunnlagPrStatusOgAndel) {
-            verifiserKanModifisere();
-            kladd.beregningsgrunnlagPrStatusOgAndelList.add(beregningsgrunnlagPrStatusOgAndel);
-            return this;
-        }
-
-        public Builder fjernBeregningsgrunnlagPrStatusOgAndelerSomIkkeLiggerIListeAvAndelsnr(List<Long> listeAvAndelsnr) {
-            verifiserKanModifisere();
-            List<BeregningsgrunnlagPrStatusOgAndel> andelerSomSkalFjernes = new ArrayList<>();
-            for (BeregningsgrunnlagPrStatusOgAndel andel : kladd.getBeregningsgrunnlagPrStatusOgAndelList()) {
-                if (!listeAvAndelsnr.contains(andel.getAndelsnr()) && andel.getLagtTilAvSaksbehandler()) {
-                    andelerSomSkalFjernes.add(andel);
-                }
-            }
-            kladd.beregningsgrunnlagPrStatusOgAndelList.removeAll(andelerSomSkalFjernes);
-            return this;
-        }
-
         public Builder leggTilBeregningsgrunnlagPrStatusOgAndel(BeregningsgrunnlagPrStatusOgAndel.Builder prStatusOgAndelBuilder) {
             verifiserKanModifisere();
             prStatusOgAndelBuilder.build(kladd);
-            return this;
-        }
-
-        public Builder medBeregningsgrunnlagPrStatusOgAndel(List<BeregningsgrunnlagPrStatusOgAndel> beregningsgrunnlagPrStatusOgAndeler) {
-            verifiserKanModifisere();
-            kladd.beregningsgrunnlagPrStatusOgAndelList = beregningsgrunnlagPrStatusOgAndeler;
-            return this;
-        }
-
-        public Builder fjernBeregningsgrunnlagPrStatusOgAndel(BeregningsgrunnlagPrStatusOgAndel beregningsgrunnlagPrStatusOgAndel) {
-            verifiserKanModifisere();
-            kladd.beregningsgrunnlagPrStatusOgAndelList.remove(beregningsgrunnlagPrStatusOgAndel);
             return this;
         }
 
@@ -241,21 +233,24 @@ public class BeregningsgrunnlagPeriode {
             return this;
         }
 
-        public Builder leggTilPeriodeÅrsak(PeriodeÅrsak periodeÅrsak) {
+        public Builder medTotalUtbetalingsgradFraUttak(BigDecimal totalUtbetalingsgradFraUttak) {
             verifiserKanModifisere();
-            if (!kladd.getPeriodeÅrsaker().contains(periodeÅrsak)) {
-                BeregningsgrunnlagPeriodeÅrsak.Builder bgPeriodeÅrsakBuilder = new BeregningsgrunnlagPeriodeÅrsak.Builder();
-                bgPeriodeÅrsakBuilder.medPeriodeÅrsak(periodeÅrsak);
-                bgPeriodeÅrsakBuilder.build(kladd);
-            }
+            kladd.totalUtbetalingsgradFraUttak = totalUtbetalingsgradFraUttak;
             return this;
         }
 
-        public Builder leggTilPeriodeÅrsaker(Collection<PeriodeÅrsak> periodeÅrsaker) {
+        public Builder medTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt) {
             verifiserKanModifisere();
-            periodeÅrsaker.forEach(this::leggTilPeriodeÅrsak);
+            kladd.totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt = totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
             return this;
         }
+
+        public Builder medReduksjonsfaktorInaktivTypeA(BigDecimal reduksjonsfaktorInaktivTypeA) {
+            verifiserKanModifisere();
+            kladd.reduksjonsfaktorInaktivTypeA = reduksjonsfaktorInaktivTypeA;
+            return this;
+        }
+
 
         public BeregningsgrunnlagPeriode build(Beregningsgrunnlag beregningsgrunnlag) {
             kladd.beregningsgrunnlag = beregningsgrunnlag;
@@ -274,7 +269,7 @@ public class BeregningsgrunnlagPeriode {
         }
 
         private void verifiserKanModifisere() {
-            if(built) {
+            if (built) {
                 throw new IllegalStateException("Er allerede bygd, kan ikke oppdatere videre: " + this.kladd);
             }
         }

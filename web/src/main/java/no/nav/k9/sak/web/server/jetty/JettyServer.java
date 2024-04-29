@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.server.jetty;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.jetty.jaas.JAASLoginService;
 import org.eclipse.jetty.plus.jndi.EnvEntry;
@@ -43,9 +44,14 @@ import no.nav.k9.sak.web.server.jetty.db.EnvironmentClass;
 
 public class JettyServer {
 
+    public static final AtomicBoolean KILL_APPLICATION = new AtomicBoolean(false);
+
     private static final Environment ENV = Environment.current();
     private static final Logger log = LoggerFactory.getLogger(JettyServer.class);
     private AppKonfigurasjon appKonfigurasjon;
+
+    private static byte[] EMERGENCY_HEAP_SPACE = new byte[8192000];
+
 
     public JettyServer() {
         this(new JettyWebKonfigurasjon());
@@ -60,7 +66,9 @@ public class JettyServer {
     }
 
     public static void main(String[] args) throws Exception {
-        JettyServer jettyServer;
+
+
+        final JettyServer jettyServer;
 
         if (args.length > 0) {
             int serverPort = Integer.parseUnsignedInt(args[0]);
@@ -68,7 +76,26 @@ public class JettyServer {
         } else {
             jettyServer = new JettyServer();
         }
+
+        taNedApplikasjonVedError();
+
         jettyServer.bootStrap();
+    }
+
+    private static void taNedApplikasjonVedError() {
+        String restartAppOnError = System.getenv("RESTART_APP_ON_ERROR");
+        if (Boolean.parseBoolean(restartAppOnError)) {
+            Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+                // Frigir minne for å sikre at vi kan logge exception
+                EMERGENCY_HEAP_SPACE = null;
+                log.error("Uncaught exception for thread " + t.getId(), e);
+
+                if (e instanceof Error) {
+                    KILL_APPLICATION.set(true);
+                }
+
+            });
+        }
     }
 
     private void start(AppKonfigurasjon appKonfigurasjon) throws Exception {
@@ -95,13 +122,18 @@ public class JettyServer {
     }
 
     protected void konfigurerMiljø() {
-    }
-
-    private void konfigurerJndi() throws Exception {
         // må være << antall db connectdions. Summen av runner threads + kall fra ulike
         // løsninger bør ikke overgå antall conns (vi isåfall kunne
         // medføre connection timeouts)
         System.setProperty("task.manager.runner.threads", "7");
+
+        //øker kø-størrelse og antall task som polles om gangen, gjør at systemet oppnår bedre ytelse når det finnes mange klare tasks
+        System.setProperty("task.manager.tasks.queue.size", "20");
+        System.setProperty("task.manager.polling.tasks.size", "10");
+        System.setProperty("task.manager.polling.scrolling.select.size", "10");
+    }
+
+    private void konfigurerJndi() throws Exception {
         new EnvEntry("jdbc/defaultDS",
             DatasourceUtil.createDatasource("defaultDS", DatasourceRole.ADMIN, getEnvironmentClass(), 15));
     }
@@ -127,7 +159,8 @@ public class JettyServer {
             initSql = null;
         }
         try (HikariDataSource migreringDs = DatasourceUtil.createDatasource("defaultDS", DatasourceRole.ADMIN, environmentClass, 2)) {
-            DatabaseScript.migrate(migreringDs, initSql);
+            var flywayRepairOnFail = Boolean.valueOf(ENV.getProperty("FLYWAY_REPAIR_ON_FAIL", "false"));
+            DatabaseScript.migrate(migreringDs, initSql, flywayRepairOnFail);
         }
     }
 
@@ -176,6 +209,8 @@ public class JettyServer {
         jerseyHolder.addStartupClasses(getJaxRsApplicationClasses());
 
         webAppContext.setThrowUnavailableOnStartupException(true);
+
+
 
         return webAppContext;
     }

@@ -11,6 +11,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -21,6 +22,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.k9.sak.økonomi.tilbakekreving.samkjøring.SjekkTilbakekrevingAksjonspunktUtleder;
 
 @ApplicationScoped
 class ForeslåVedtakTjeneste {
@@ -31,6 +33,7 @@ class ForeslåVedtakTjeneste {
     private FagsakRepository fagsakRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere;
+    private SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste;
 
     protected ForeslåVedtakTjeneste() {
         // CDI proxy
@@ -40,11 +43,13 @@ class ForeslåVedtakTjeneste {
     ForeslåVedtakTjeneste(FagsakRepository fagsakRepository,
                           BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                           SjekkMotAndreYtelserTjeneste sjekkMotAndreYtelserTjeneste,
+                          SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste,
                           @Any Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere) {
         this.sjekkMotAndreYtelserTjeneste = sjekkMotAndreYtelserTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.foreslåVedtakManueltUtledere = foreslåVedtakManueltUtledere;
+        this.sjekkMotTilbakekrevingTjeneste = sjekkMotTilbakekrevingTjeneste;
     }
 
     public BehandleStegResultat foreslåVedtak(Behandling behandling, BehandlingskontrollKontekst kontekst) {
@@ -54,7 +59,9 @@ class ForeslåVedtakTjeneste {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
-        List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = new ArrayList<>(sjekkMotAndreYtelserTjeneste.sjekkMotGsakOppgaverOgOverlappendeYtelser(behandling.getAktørId(), behandling));
+        List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = new ArrayList<>();
+        aksjonspunktDefinisjoner.addAll(sjekkMotAndreYtelserTjeneste.sjekkMotGsakOppgaverOgOverlappendeYtelser(behandling.getAktørId(), behandling));
+        aksjonspunktDefinisjoner.addAll(sjekkMotTilbakekrevingTjeneste.sjekkMotÅpenIkkeoverlappendeTilbakekreving(behandling));
 
         Optional<Aksjonspunkt> vedtakUtenTotrinnskontroll = behandling
             .getÅpentAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL);
@@ -67,6 +74,14 @@ class ForeslåVedtakTjeneste {
             håndterTotrinn(behandling, aksjonspunktDefinisjoner);
         } else {
             håndterUtenTotrinn(behandling, kontekst, aksjonspunktDefinisjoner);
+        }
+
+        // Logging av automatisering av endringsmelding
+        if (aksjonspunktDefinisjoner.isEmpty()
+            && behandling.getFagsakYtelseType().equals(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
+            && behandling.erRevurdering()
+            && behandling.getBehandlingÅrsakerTyper().stream().allMatch(årsak -> årsak.equals(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER))) {
+            logger.info("Foreslår vedtak uten aksjonspunkter");
         }
 
         return aksjonspunktDefinisjoner.isEmpty()

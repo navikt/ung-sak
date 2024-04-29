@@ -1,22 +1,5 @@
 package no.nav.k9.sak.domene.opptjening.aksjonspunkt;
 
-import static java.util.Optional.empty;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-
-import java.math.BigDecimal;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
-
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
@@ -27,7 +10,6 @@ import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
 import no.nav.k9.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
-import no.nav.k9.kodeverk.arbeidsforhold.TemaUnderkategori;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.organisasjon.Organisasjonstype;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -67,6 +49,22 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.typer.Stillingsprosent;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
+
+import java.math.BigDecimal;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import static java.util.Optional.empty;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -328,8 +326,7 @@ class OpptjeningsperioderTjenesteTest {
             .medSaksnummer(new Saksnummer("123"))
             .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), periode.getTomDato()))
             .medStatus(RelatertYtelseTilstand.LØPENDE)
-            .medYtelseType(FagsakYtelseType.DAGPENGER)
-            .medBehandlingsTema(TemaUnderkategori.UDEFINERT);
+            .medYtelseType(FagsakYtelseType.DAGPENGER);
         byggYtelserAnvist(periode.getFomDato(), periode.getTomDato(), ytelseBuilder)
             .forEach(ytelseBuilder::medYtelseAnvist);
         return ytelseBuilder;
@@ -342,8 +339,7 @@ class OpptjeningsperioderTjenesteTest {
             .medSaksnummer(new Saksnummer("123"))
             .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), periode.getTomDato()))
             .medStatus(RelatertYtelseTilstand.LØPENDE)
-            .medYtelseType(FagsakYtelseType.FORELDREPENGER)
-            .medBehandlingsTema(TemaUnderkategori.UDEFINERT);
+            .medYtelseType(FagsakYtelseType.FORELDREPENGER);
         byggHelgeKnektePerioder(periode.getFomDato(), periode.getTomDato(), ytelseBuilder)
             .forEach(ytelseBuilder::medYtelseAnvist);
         return ytelseBuilder;
@@ -355,8 +351,7 @@ class OpptjeningsperioderTjenesteTest {
             .medSaksnummer(new Saksnummer("123"))
             .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), periode.getTomDato()))
             .medStatus(RelatertYtelseTilstand.LØPENDE)
-            .medYtelseType(FagsakYtelseType.FORELDREPENGER)
-            .medBehandlingsTema(TemaUnderkategori.UDEFINERT);
+            .medYtelseType(FagsakYtelseType.FORELDREPENGER);
         byggHelgeKnektePerioderMedHull(periode.getFomDato(), t1, ytelseBuilder, hullIUke)
             .forEach(ytelseBuilder::medYtelseAnvist);
         return ytelseBuilder;

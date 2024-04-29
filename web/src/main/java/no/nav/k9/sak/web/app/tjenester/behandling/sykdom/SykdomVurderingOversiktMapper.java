@@ -28,7 +28,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleietrengendeAlderPeriode;
 public class SykdomVurderingOversiktMapper {
     public SykdomVurderingOversikt mapPSB(UUID behandlingUuid, Saksnummer saksnummer, SykdomVurderingerOgPerioder sykdomVurderingerOgPerioder, LocalDate pleietrengendesFødselsdato, boolean lukketBehandling) {
         final var elements = tilSykdomVurderingOversiktElement(behandlingUuid, saksnummer, sykdomVurderingerOgPerioder);
-        
+
         return new SykdomVurderingOversikt(
                 elements,
                 lukketBehandling ? List.of() : sykdomVurderingerOgPerioder.getResterendeVurderingsperioder(),
@@ -54,6 +54,21 @@ public class SykdomVurderingOversiktMapper {
             sykdomVurderingerOgPerioder.getPerioderSomKanVurderes(),
             pleietrengendesFødselsdato,
             harPerioderDerPleietrengendeErOver18år,
+            Arrays.asList(linkForNyVurdering(behandlingUuid.toString()))
+        );
+    }
+
+    public SykdomVurderingOversikt mapOLP(UUID behandlingUuid, Saksnummer saksnummer, SykdomVurderingerOgPerioder sykdomVurderingerOgPerioder, boolean lukketBehandling) {
+        final var elements = tilSykdomVurderingOversiktElement(behandlingUuid, saksnummer, sykdomVurderingerOgPerioder);
+
+        return new SykdomVurderingOversikt(
+            elements,
+            lukketBehandling ? List.of() : sykdomVurderingerOgPerioder.getResterendeVurderingsperioder(),
+            lukketBehandling ? List.of() : sykdomVurderingerOgPerioder.getResterendeValgfrieVurderingsperioder(),
+            sykdomVurderingerOgPerioder.getNyeSøknadsperioder(),
+            sykdomVurderingerOgPerioder.getPerioderSomKanVurderes(),
+            null,
+            null,
             Arrays.asList(linkForNyVurdering(behandlingUuid.toString()))
         );
     }

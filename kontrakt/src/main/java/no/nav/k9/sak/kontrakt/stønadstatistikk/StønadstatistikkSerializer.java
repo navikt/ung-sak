@@ -6,6 +6,7 @@ import java.io.Writer;
 import java.util.Objects;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
@@ -21,14 +22,17 @@ public class StønadstatistikkSerializer {
             .setPropertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS);
-    
+
     public static String toJson(StønadstatistikkHendelse object) {
+        new StønadstatistikkHendelseValidator().valider(object);
+
         try {
             Writer jsonWriter = new StringWriter();
-            objectMapper.writerWithDefaultPrettyPrinter().writeValue(jsonWriter, object);
+            ObjectWriter writer = objectMapper.writerWithDefaultPrettyPrinter();
+            writer.writeValue(jsonWriter, object);
             jsonWriter.flush();
             final String json = jsonWriter.toString();
-            
+
             // Verifiserer at JSON er gyldig ved deserialisering:
             Objects.requireNonNull(fromJson(json), "json-deserialisert");
             return json;
@@ -36,7 +40,7 @@ public class StønadstatistikkSerializer {
             throw new IllegalStateException(e);
         }
     }
-    
+
     public static StønadstatistikkHendelse fromJson(String json) {
         try {
             return objectMapper.readerFor(StønadstatistikkHendelse.class).readValue(json);

@@ -2,11 +2,14 @@ package no.nav.folketrygdloven.beregningsgrunnlag.modell;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.beregningsgrunnlag.Hjemmel;
 
 public class BeregningsgrunnlagAktivitetStatus {
 
+    @JsonBackReference
     private Beregningsgrunnlag beregningsgrunnlag;
     private AktivitetStatus aktivitetStatus;
     private Hjemmel hjemmel;

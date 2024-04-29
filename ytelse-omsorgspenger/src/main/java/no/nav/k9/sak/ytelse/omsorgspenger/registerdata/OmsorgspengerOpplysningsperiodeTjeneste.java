@@ -5,6 +5,9 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 import java.time.LocalDate;
 import java.time.Period;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -24,7 +27,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.repo.OppgittFraværPeriode;
 @ApplicationScoped
 public class OmsorgspengerOpplysningsperiodeTjeneste implements OpplysningsperiodeTjeneste {
 
-
+    private static final Logger logger = LoggerFactory.getLogger(OmsorgspengerOpplysningsperiodeTjeneste.class);
     private BehandlingRepository behandlingRepository;
     private OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -98,6 +101,9 @@ public class OmsorgspengerOpplysningsperiodeTjeneste implements Opplysningsperio
                     if (vilkårPeriode.isPresent()) {
                         var periode = vilkårPeriode.get();
                         if (periode.getFomDato().isBefore(førsteDagIUttaket)) {
+                            //TODO Vi er rimelig sikre på at sjekk mot vilkårene kan fjernes
+                            //logging her er bare for å oppdage om vi har tenkt feil
+                            logger.info("Har vilkårsperiode som er før første søknadsperiode, bruker vilkårsperiode.");
                             return periode.getFomDato();
                         }
                     }
@@ -107,7 +113,7 @@ public class OmsorgspengerOpplysningsperiodeTjeneste implements Opplysningsperio
             return førsteDagIUttaket;
         }
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        return behandling.getOpprettetDato().toLocalDate();
+        return behandling.getFagsak().getPeriode().getFomDato();
     }
 
 

@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -159,6 +158,8 @@ public class FRISINNBeregningsresultatMapper implements BeregningsresultatMapper
                     .medRefusjon(arbeidsgiversAndel.map(BeregningsresultatAndel::getDagsats).orElse(0))
                     .medTilSøker(brukersAndel.getDagsats())
                     .medUtbetalingsgrad(brukersAndel.getUtbetalingsgrad())
+                    .medUtbetalingsgradOppdragForBruker(brukersAndel.getUtbetalingsgradOppdrag())
+                    .medUtbetalingsgradOppdragForRefusjon(arbeidsgiversAndel.map(BeregningsresultatAndel::getUtbetalingsgradOppdrag).orElse(null))
                     .medSisteUtbetalingsdato(andelTilSisteUtbetalingsdatoMap.getOrDefault(genererAndelKey(brukersAndel), Optional.empty()).orElse(null))
                     .medAktivitetstatus(brukersAndel.getAktivitetStatus())
                     .medInntektskategori(brukersAndel.getInntektskategori())

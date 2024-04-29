@@ -306,23 +306,13 @@ public class MottattDokument extends BaseEntitet {
             return this;
         }
 
-        public Builder medId(Long mottattDokumentId) {
-            mottatteDokumentMal.id = mottattDokumentId;
-            return this;
-        }
-
         public Builder medType(Brevkode type) {
             mottatteDokumentMal.type = type;
             return this;
         }
 
-        public Builder medSystemnavn(String systemnavn) {
-            mottatteDokumentMal.kildesystem=systemnavn;
-            return this;
-        }
-
-        public Builder medSystemnavn(LocalDateTime innsendingstidspunkt) {
-            mottatteDokumentMal.innsendingstidspunkt=innsendingstidspunkt;
+        public Builder medKildesystem(String kildesystem) {
+            mottatteDokumentMal.kildesystem = kildesystem;
             return this;
         }
 

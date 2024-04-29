@@ -5,7 +5,6 @@ import java.util.UUID;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
-
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.UttakRestKlient;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Simulering;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;

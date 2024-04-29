@@ -19,7 +19,7 @@
 
 		<dependency>
 			<groupId>no.nav.k9.oppdrag.kontrakt</groupId>
-			<artifactId>oppdrag-kontrakter-jakarta</artifactId>
+			<artifactId>oppdrag-kontrakter</artifactId>
 		</dependency>
 
 		<dependency>
@@ -45,6 +45,11 @@
 			<groupId>no.nav.k9.sak</groupId>
 			<artifactId>skjaeringstidspunkt</artifactId>
 		</dependency>
+
+        <dependency>
+            <groupId>no.nav.k9.sak</groupId>
+            <artifactId>behandling-prosessering</artifactId>
+        </dependency>
 
 		<dependency>
 			<groupId>no.nav.k9.sak</groupId>

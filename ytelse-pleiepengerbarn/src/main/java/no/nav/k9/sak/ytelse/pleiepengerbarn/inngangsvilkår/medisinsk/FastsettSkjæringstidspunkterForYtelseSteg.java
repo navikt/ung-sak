@@ -32,15 +32,17 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.domene.medlem.kontrollerfakta.AksjonspunktutlederForMedlemskap;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.OverstyrUttakTjeneste;
 
 @BehandlingStegRef(value = POST_VURDER_MEDISINSKVILKÅR)
 @BehandlingTypeRef
@@ -51,6 +53,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
 public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSteg {
 
     private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
+
+    private OverstyrUttakTjeneste overstyrUttakTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
     private AksjonspunktutlederForMedlemskap aksjonspunktutlederForMedlemskap;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -63,11 +67,13 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
     @Inject
     public FastsettSkjæringstidspunkterForYtelseSteg(BehandlingRepositoryProvider repositoryProvider,
                                                      BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
+                                                     OverstyrUttakTjeneste overstyrUttakTjeneste,
                                                      @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
                                                      AksjonspunktutlederForMedlemskap aksjonspunktutlederForMedlemskap) {
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
+        this.overstyrUttakTjeneste = overstyrUttakTjeneste;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.aksjonspunktutlederForMedlemskap = aksjonspunktutlederForMedlemskap;
     }
@@ -89,7 +95,7 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
         // Rydder bort grunnlag som ikke lenger er relevant siden perioden ikke skal vurderes
         // Disse blir da ikke lenger med til tilkjent ytelse, slik at det vedtaket blir inkosistent
         beregningPerioderGrunnlagRepository.ryddMotVilkår(behandlingId);
-
+        overstyrUttakTjeneste.ryddMotVilkår(BehandlingReferanse.fra(behandling));
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
@@ -158,6 +164,7 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
                 .stream()
                 .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
                 .filter(vilkårBuilder::harDataPåPeriode)
+                .filter(p -> erIkkeBareKantIKantMellomrom(tidslinje, p, resultatBuilder.getKantIKantVurderer()))
                 .collect(Collectors.toCollection(TreeSet::new));
             if (!perioderSomSkalTilbakestilles.isEmpty()) {
                 vilkårBuilder = vilkårBuilder.tilbakestill(perioderSomSkalTilbakestilles);
@@ -173,11 +180,8 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
         }
     }
 
-    private NavigableSet<DatoIntervallEntitet> compress(List<DatoIntervallEntitet> vilkårPerioder) {
-        LocalDateTimeline<Boolean> tidslinje = new LocalDateTimeline<>(vilkårPerioder.stream()
-            .map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), true))
-            .toList());
-        return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje.compress());
+    private static boolean erIkkeBareKantIKantMellomrom(LocalDateTimeline<Boolean> tidslinje, DatoIntervallEntitet p, KantIKantVurderer kantIKantVurderer) {
+        return Hjelpetidslinjer.utledHullSomMåTettes(tidslinje.disjoint(p.toLocalDateInterval()), kantIKantVurderer).intersection(p.toLocalDateInterval()).isEmpty();
     }
 
 }

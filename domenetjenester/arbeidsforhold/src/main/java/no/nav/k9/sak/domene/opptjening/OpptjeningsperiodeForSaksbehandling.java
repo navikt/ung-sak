@@ -21,6 +21,16 @@ public class OpptjeningsperiodeForSaksbehandling {
 
     public OpptjeningsperiodeForSaksbehandling() {
     }
+    public OpptjeningsperiodeForSaksbehandling(OpptjeningsperiodeForSaksbehandling fra) {
+        this.opptjeningAktivitetType = fra.getOpptjeningAktivitetType();
+        this.grupperingNøkkel = fra.grupperingNøkkel;
+        this.arbeidsgiver = fra.getArbeidsgiver();
+        this.stillingsprosent = fra.getStillingsprosent();
+        this.periode = fra.getPeriode();
+        this.vurderingsStatus = fra.getVurderingsStatus();
+        this.begrunnelse = fra.getBegrunnelse();
+        this.arbeidsgiverUtlandNavn = fra.getArbeidsgiverUtlandNavn();
+    }
 
     public DatoIntervallEntitet getPeriode() {
         return periode;
@@ -100,6 +110,10 @@ public class OpptjeningsperiodeForSaksbehandling {
 
         private Builder(OpptjeningsperiodeForSaksbehandling periode) {
             kladd = periode;
+        }
+
+        public static Builder kopi(OpptjeningsperiodeForSaksbehandling periode) {
+            return new Builder(new OpptjeningsperiodeForSaksbehandling(periode));
         }
 
         public static Builder ny() {

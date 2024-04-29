@@ -14,12 +14,10 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.utsatt.UtsattBehandlingAvPeriodeRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleiepengerEndringIUttakPeriodeUtleder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleiepengerVilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.PleietrengendeRevurderingPerioderTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.RevurderingPerioderTjeneste;
 
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
@@ -37,9 +35,7 @@ public class PPNVilkårsPerioderTilVurderingTjeneste extends PleiepengerVilkårs
     public PPNVilkårsPerioderTilVurderingTjeneste(@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE) VilkårUtleder vilkårUtleder,
                                                   VilkårResultatRepository vilkårResultatRepository,
                                                   BehandlingRepository behandlingRepository,
-                                                  MedisinskGrunnlagTjeneste medisinskGrunnlagTjeneste,
-                                                  ErEndringPåEtablertTilsynTjeneste etablertTilsynTjeneste,
-                                                  EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
+                                                  PleietrengendeRevurderingPerioderTjeneste pleietrengendeRevurderingPerioderTjeneste,
                                                   RevurderingPerioderTjeneste revurderingPerioderTjeneste,
                                                   SøknadsperiodeTjeneste søknadsperiodeTjeneste,
                                                   UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
@@ -48,14 +44,11 @@ public class PPNVilkårsPerioderTilVurderingTjeneste extends PleiepengerVilkårs
             , Map.of()
             , vilkårResultatRepository
             , behandlingRepository
-            , medisinskGrunnlagTjeneste
-            , etablertTilsynTjeneste
-            , endringUnntakEtablertTilsynTjeneste
             , revurderingPerioderTjeneste
+            , pleietrengendeRevurderingPerioderTjeneste
             , søknadsperiodeTjeneste
-            , utsattBehandlingAvPeriodeRepository
-            , endringIUttakPeriodeUtleder
-        );
+            , utsattBehandlingAvPeriodeRepository,
+            endringIUttakPeriodeUtleder);
     }
 
     @Override

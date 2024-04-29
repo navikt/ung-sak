@@ -1,13 +1,5 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.NavigableSet;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -15,24 +7,31 @@ import jakarta.inject.Inject;
 import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
 import no.nav.folketrygdloven.kalkulus.felles.v1.KalkulatorInputDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
-import no.nav.folketrygdloven.kalkulus.kodeverk.StegType;
-import no.nav.folketrygdloven.kalkulus.kodeverk.YtelseTyperKalkulusStøtterKontrakt;
+import no.nav.folketrygdloven.kalkulus.felles.v1.Saksnummer;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregnForRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregnListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.tilkommetAktivitet.UtledTilkommetAktivitetForRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.tilkommetAktivitet.UtledTilkommetAktivitetListeRequest;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingskontroll.VilkårTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.EndretUtbetalingPeriodeutleder;
+
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.NavigableSet;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class LagBeregnRequestTjeneste {
@@ -71,11 +70,11 @@ public class LagBeregnRequestTjeneste {
         Fagsak fagsak = fagsakRepository.finnEksaktFagsak(referanse.getFagsakId());
         AktørIdPersonident aktør = new AktørIdPersonident(fagsak.getAktørId().getId());
         return new BeregnListeRequest(
-            fagsak.getSaksnummer().getVerdi(),
+            Saksnummer.fra(fagsak.getSaksnummer().getVerdi()),
             referanse.getBehandlingUuid(),
             aktør,
-            YtelseTyperKalkulusStøtterKontrakt.fraKode(referanse.getFagsakYtelseType().getKode()),
-            new StegType(stegType.getKode()),
+            FagsakYtelseTypeMapper.mapFagsakYtelseType(referanse.getFagsakYtelseType()),
+            StegMapper.getBeregningSteg(stegType),
             lagRequestForReferanserMedInput(referanse, beregnInput, iayGrunnlag, sakInntektsmeldinger));
     }
 
@@ -87,9 +86,22 @@ public class LagBeregnRequestTjeneste {
         var input = lagInputPrReferanse(referanse, iayGrunnlag, sakInntektsmeldinger, beregnInput);
         return new HåndterBeregningListeRequest(requestListe,
             input,
-            YtelseTyperKalkulusStøtterKontrakt.fraKode(referanse.getFagsakYtelseType().getKode()),
-            referanse.getSaksnummer().getVerdi(),
+            FagsakYtelseTypeMapper.mapFagsakYtelseType(referanse.getFagsakYtelseType()),
+            Saksnummer.fra(referanse.getSaksnummer().getVerdi()),
             referanse.getBehandlingUuid());
+    }
+
+    public UtledTilkommetAktivitetListeRequest lagForUtledningAvTilkommetInntekt(BehandlingReferanse referanse,
+                                                                                 List<BeregnInput> beregnInput,
+                                                                                 InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                                                                 Collection<Inntektsmelding> sakInntektsmeldinger) {
+        var input = lagInputPrReferanse(referanse, iayGrunnlag, sakInntektsmeldinger, beregnInput);
+        var requestList = beregnInput.stream()
+            .map(i -> new UtledTilkommetAktivitetForRequest(i.getBgReferanse(), input.get(i.getBgReferanse())))
+            .toList();
+        return new UtledTilkommetAktivitetListeRequest(Saksnummer.fra(referanse.getSaksnummer().getVerdi()),
+            FagsakYtelseTypeMapper.mapFagsakYtelseType(referanse.getFagsakYtelseType()),
+            requestList);
     }
 
     private List<BeregnForRequest> lagRequestForReferanserMedInput(BehandlingReferanse referanse,
@@ -126,7 +138,7 @@ public class LagBeregnRequestTjeneste {
 
 
     public NavigableSet<DatoIntervallEntitet> utledForlengelseperiode(BehandlingReferanse referanse, DatoIntervallEntitet periodeTilVurdering) {
-        var utleder = EndretUtbetalingPeriodeutleder.finnUtleder(periodeUtleder, referanse.getFagsakYtelseType());
+        var utleder = EndretUtbetalingPeriodeutleder.finnUtleder(periodeUtleder, referanse.getFagsakYtelseType(), referanse.getBehandlingType());
         return utleder.utledPerioder(referanse, periodeTilVurdering);
     }
 

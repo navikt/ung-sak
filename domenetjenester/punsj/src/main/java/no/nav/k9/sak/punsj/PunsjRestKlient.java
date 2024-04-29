@@ -34,7 +34,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler.ObjectReaderResponseHandler;
+import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
@@ -42,6 +44,7 @@ import no.nav.k9.sak.kontrakt.dokument.JournalpostIderDto;
 
 
 @ApplicationScoped
+@ScopedRestIntegration(scopeKey = "k9.punsj.scope", defaultScope = "api://prod-fss.k9saksbehandling.k9-punsj/.default")
 public class PunsjRestKlient {
 
     private static final Logger log = LoggerFactory.getLogger(PunsjRestKlient.class);
@@ -68,7 +71,7 @@ public class PunsjRestKlient {
     }
 
     @Inject
-    public PunsjRestKlient(SystemUserOidcRestClient restClient,
+    public PunsjRestKlient(OidcRestClient restClient,
                            @KonfigVerdi(value = "k9.punsj.url") URI endpoint) {
         this(endpoint);
         this.restClient = restClient;

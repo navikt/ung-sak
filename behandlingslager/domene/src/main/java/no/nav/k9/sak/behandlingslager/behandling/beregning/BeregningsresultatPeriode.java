@@ -10,6 +10,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.CascadeType;
@@ -26,10 +29,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
@@ -59,12 +58,22 @@ public class BeregningsresultatPeriode extends BaseEntitet {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "beregningsresultatPeriode", cascade = CascadeType.PERSIST, orphanRemoval = true)
     @OrderBy("periode, arbeidsgiver.arbeidsgiverOrgnr, arbeidsgiver.arbeidsgiverAktørId, arbeidsforholdRef, aktivitetStatus, inntektskategori")
+
     private List<BeregningsresultatAndel> beregningsresultatAndelList = new ArrayList<>();
+    @Column(name = "total_utbetalingsgrad_fra_uttak")
+    private BigDecimal totalUtbetalingsgradFraUttak;
+
+    @Column(name = "total_utbetalingsgrad_etter_reduksjon_ved_tilkommet_inntekt")
+    private BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
+
+    @Column(name = "reduksjonsfaktor_inaktiv_type_a")
+    private BigDecimal reduksjonsfaktorInaktivTypeA;
+
 
     @Embedded
     @AttributeOverrides({
-            @AttributeOverride(name = "fomDato", column = @Column(name = "br_periode_fom")),
-            @AttributeOverride(name = "tomDato", column = @Column(name = "br_periode_tom"))
+        @AttributeOverride(name = "fomDato", column = @Column(name = "br_periode_fom")),
+        @AttributeOverride(name = "tomDato", column = @Column(name = "br_periode_tom"))
     })
     private DatoIntervallEntitet periode;
 
@@ -110,10 +119,26 @@ public class BeregningsresultatPeriode extends BaseEntitet {
         return beregningsresultat;
     }
 
+
+    public BigDecimal getTotalUtbetalingsgradFraUttak() {
+        return totalUtbetalingsgradFraUttak;
+    }
+
+    public BigDecimal getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt() {
+        return totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
+    }
+
+    public BigDecimal getReduksjonsfaktorInaktivTypeA() {
+        return reduksjonsfaktorInaktivTypeA;
+    }
+
+
+
+
     void addBeregningsresultatAndel(BeregningsresultatAndel beregningsresultatAndel) {
         Objects.requireNonNull(beregningsresultatAndel, "beregningsresultatAndel");
         if (!beregningsresultatAndelList.contains(beregningsresultatAndel)) { // NOSONAR Class defines List based fields but uses them like Sets: Ingening å tjene på å bytte til Set ettersom det er
-                                                                              // små lister
+            // små lister
             beregningsresultatAndelList.add(beregningsresultatAndel);
         }
     }
@@ -138,7 +163,12 @@ public class BeregningsresultatPeriode extends BaseEntitet {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "<periode=" + periode + ", andeler=[" + beregningsresultatAndelList.size() + "]>";
+        return getClass().getSimpleName()
+            + "<periode=" + periode
+            + (totalUtbetalingsgradFraUttak != null ? ", totalUtbetalingsgradFraUttak=" + totalUtbetalingsgradFraUttak.toPlainString() : "")
+            + (totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt != null ? ", totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt=" + totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt.toPlainString() : "")
+            + (reduksjonsfaktorInaktivTypeA != null ? ", reduksjonsfaktorInaktivTypeA=" + reduksjonsfaktorInaktivTypeA.toPlainString() : "")
+            + ", andeler=[" + beregningsresultatAndelList.size() + "]>";
     }
 
     @Override
@@ -159,6 +189,21 @@ public class BeregningsresultatPeriode extends BaseEntitet {
 
         public Builder medBeregningsresultatPeriodeFomOgTom(LocalDate beregningsresultatPeriodeFom, LocalDate beregningsresultatPeriodeTom) {
             beregningsresultatPeriodeMal.periode = DatoIntervallEntitet.fraOgMedTilOgMed(beregningsresultatPeriodeFom, beregningsresultatPeriodeTom);
+            return this;
+        }
+
+        public Builder medTotalUtbetalingsgradFraUttak(BigDecimal totalUtbetalingsgradFraUttak) {
+            beregningsresultatPeriodeMal.totalUtbetalingsgradFraUttak = totalUtbetalingsgradFraUttak;
+            return this;
+        }
+
+        public Builder medTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(BigDecimal totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt) {
+            beregningsresultatPeriodeMal.totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt = totalUtbetalingsgradEtterReduksjonVedTilkommetInntekt;
+            return this;
+        }
+
+        public Builder medReduksjonsfaktorInaktivTypeA(BigDecimal reduksjonsfaktorInaktivTypeA) {
+            beregningsresultatPeriodeMal.reduksjonsfaktorInaktivTypeA = reduksjonsfaktorInaktivTypeA;
             return this;
         }
 

@@ -15,14 +15,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 class JsonConverter {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private final ObjectMapper objectMapper = new ObjectMapper()
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .registerModule(new JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-
-    List<SakResponse> sakResponse(String json) {
-        return convert(json, new TypeReference<>() {
-        });
-    }
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        .registerModule(new JavaTimeModule())
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     List<VedtakPleietrengende> vedtakBarnResponse(String json) {
         return convert(json, new TypeReference<>() {

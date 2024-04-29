@@ -3,10 +3,13 @@ package no.nav.folketrygdloven.beregningsgrunnlag.modell;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import no.nav.k9.kodeverk.beregningsgrunnlag.PeriodeÅrsak;
 
 public class BeregningsgrunnlagPeriodeÅrsak {
 
+    @JsonBackReference
     private BeregningsgrunnlagPeriode beregningsgrunnlagPeriode;
     private PeriodeÅrsak periodeÅrsak = PeriodeÅrsak.UDEFINERT;
 

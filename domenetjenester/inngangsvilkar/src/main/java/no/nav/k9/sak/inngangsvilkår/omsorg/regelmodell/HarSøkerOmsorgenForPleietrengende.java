@@ -15,12 +15,12 @@ public class HarSøkerOmsorgenForPleietrengende extends LeafSpecification<Omsorg
 
     @Override
     public Evaluation evaluate(OmsorgenForVilkårGrunnlag grunnlag) {
-        if (grunnlag.getErOmsorgsPerson() != null && grunnlag.getErOmsorgsPerson()) {
+        if (grunnlag.getHarBlittVurdertSomOmsorgsPerson() != null && grunnlag.getHarBlittVurdertSomOmsorgsPerson()) {
             return ja();
         }
 
         final var relasjon = grunnlag.getRelasjonMellomSøkerOgPleietrengende();
-        if (relasjon != null && erMorEllerFarTilPleietrengende(relasjon) && grunnlag.getErOmsorgsPerson() == null) {
+        if (relasjon != null && erMorEllerFarTilPleietrengende(relasjon) && grunnlag.getHarBlittVurdertSomOmsorgsPerson() == null) {
             return ja();
         }
 

@@ -15,7 +15,7 @@
     <dependencies>
         <dependency>
             <groupId>no.nav.k9.sak</groupId>
-            <artifactId>kodeverk-jakarta</artifactId>
+            <artifactId>kodeverk</artifactId>
         </dependency>
 
         <dependency>

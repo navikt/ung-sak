@@ -10,7 +10,7 @@ public final class DatabaseScript {
 
     private static final String location = "classpath:/db/postgres/";
 
-    public static void migrate(final DataSource dataSource, String initSql) {
+    public static void migrate(final DataSource dataSource, String initSql, Boolean flywayRepairOnFail) {
         ClassicConfiguration conf = new ClassicConfiguration();
         conf.setDataSource(dataSource);
         conf.setLocationsAsStrings(location);
@@ -22,7 +22,16 @@ public final class DatabaseScript {
         try {
             flyway.migrate();
         } catch (FlywayException fwe) {
-            throw new IllegalStateException("Migrering feiler", fwe);
+            if (flywayRepairOnFail) {
+                try {
+                    flyway.repair();
+                    flyway.migrate();
+                } catch (FlywayException e) {
+                    throw new IllegalStateException("Migrering feiler etter repair", e);
+                }
+            } else {
+                throw new IllegalStateException("Migrering feiler", fwe);
+            }
         }
     }
 }

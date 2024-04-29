@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -33,6 +32,8 @@ public class InntektsmeldingerPerioderTjeneste {
         this.iayTjeneste = iayTjeneste;
     }
 
+    //Denne burde bare hente inntektsmeldinger fra andre behandlinger som ble ferdigstilt FØR etterspurt behandling.
+    //Dette gjør at avsluttede førstegangsvurderte behandlinger får perioder fra IM fra etterfølgende revurderinger
     public Set<Inntektsmelding> hentUtInntektsmeldingerRelevantForBehandling(BehandlingReferanse referanse) {
         Behandling behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
 

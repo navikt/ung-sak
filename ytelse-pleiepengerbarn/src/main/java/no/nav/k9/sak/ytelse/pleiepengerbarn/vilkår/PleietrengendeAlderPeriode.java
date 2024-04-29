@@ -60,7 +60,7 @@ public class PleietrengendeAlderPeriode implements VilkårsPeriodiseringsFunksjo
 
         final NavigableSet<DatoIntervallEntitet> perioder;
         if (brukRelevantPeriode && opprettetEtterNyHåndtering) {
-            perioder = søknadsperiodeTjeneste.utledPeriode(behandlingId);
+            perioder = søknadsperiodeTjeneste.utledPeriode(behandlingId, true);
         } else {
             perioder = søknadsperiodeTjeneste.utledFullstendigPeriode(behandlingId);
         }

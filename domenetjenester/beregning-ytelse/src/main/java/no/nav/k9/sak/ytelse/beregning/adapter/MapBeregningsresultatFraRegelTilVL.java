@@ -2,9 +2,9 @@ package no.nav.k9.sak.ytelse.beregning.adapter;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.folketrygdloven.beregningsgrunnlag.BeregningsgrunnlagUtil;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -15,8 +15,15 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.ReferanseTy
 @ApplicationScoped
 public class MapBeregningsresultatFraRegelTilVL {
 
-    @Inject
+    private boolean brukUtbetalingsgradOppdrag;
+
     public MapBeregningsresultatFraRegelTilVL() {
+        //for CDI proxy
+    }
+
+    @Inject
+    public MapBeregningsresultatFraRegelTilVL(@KonfigVerdi(value = "ENABLE_UTBETALINGSGRAD_OPPDRAG", defaultVerdi = "false") boolean brukUtbetalingsgradOppdrag) {
+        this.brukUtbetalingsgradOppdrag = brukUtbetalingsgradOppdrag;
     }
 
     public no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet mapFra(Beregningsresultat resultat, no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet eksisterendeResultat) {
@@ -31,6 +38,9 @@ public class MapBeregningsresultatFraRegelTilVL {
     private no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode mapFraPeriode(BeregningsresultatPeriode resultatPeriode, no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet eksisterendeResultat) {
         no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode nyPeriode = no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode.builder()
             .medBeregningsresultatPeriodeFomOgTom(resultatPeriode.getFom(), resultatPeriode.getTom())
+            .medTotalUtbetalingsgradFraUttak(resultatPeriode.getTotalUtbetalingsgradFraUttak())
+            .medTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt(resultatPeriode.getTotalUtbetalingsgradEtterReduksjonVedTilkommetInntekt())
+            .medReduksjonsfaktorInaktivTypeA(resultatPeriode.getReduksjonsfaktorInaktivTypeA())
             .build(eksisterendeResultat);
         resultatPeriode.getBeregningsresultatAndelList().forEach(bra -> mapFraAndel(bra, nyPeriode, resultatPeriode.getPeriode()));
         return nyPeriode;
@@ -46,6 +56,7 @@ public class MapBeregningsresultatFraRegelTilVL {
             .medDagsats(dagsats)
             .medStillingsprosent(bra.getStillingsprosent())
             .medUtbetalingsgrad(bra.getUtbetalingsgrad())
+            .medUtbetalingsgradOppdrag(brukUtbetalingsgradOppdrag ? bra.getUtbetalingsgradOppdrag() : null)
             .medPeriode(periode)
             .medDagsatsFraBg(dagsatsFraBg)
             .medAktivitetStatus(AktivitetStatusMapper.fraRegelTilVl(bra))

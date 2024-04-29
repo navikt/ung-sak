@@ -1,13 +1,12 @@
 package no.nav.k9.sak.hendelse.stønadstatistikk;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
@@ -42,7 +41,7 @@ public class FullPubliseringAvStønadstatistikkTask implements ProsessTaskHandle
                 + "  f.id = b.fagsak_id\n"
                 + ")\n"
                 + "WHERE b.behandling_status IN ('AVSLU', 'IVED')\n"
-                + "  AND f.ytelse_type = 'PSB'\n"
+                + "  AND f.ytelse_type = 'OMP'\n"
                 + "ORDER BY b.opprettet_dato ASC");
 
         final int antall = q.executeUpdate();

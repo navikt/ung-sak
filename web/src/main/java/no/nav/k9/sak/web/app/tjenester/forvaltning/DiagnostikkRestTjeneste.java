@@ -21,6 +21,7 @@ import jakarta.ws.rs.core.Response.Status;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.ws.rs.core.StreamingOutput;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
@@ -74,7 +75,7 @@ public class DiagnostikkRestTjeneste {
         entityManager.persist(new DiagnostikkFagsakLogg(fagsak.getId(), BASE_PATH + "/sak", begrunnelse.getTekst()));
         entityManager.flush();
 
-        var streamingOutput = dumpsters.dumper(fagsak);
+        StreamingOutput streamingOutput = dumpsters.dumper(fagsak);
 
         return Response.ok(streamingOutput)
             .type(MediaType.APPLICATION_OCTET_STREAM)

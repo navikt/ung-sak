@@ -135,10 +135,6 @@ public class KalkulatorInputTjeneste {
             finnPGITilgjengeligPåVedtakstidspunktet);
         var opptjeningAktiviteter = tjeneste.hentEksaktOpptjeningForBeregning(referanse, iayGrunnlag, vilkårsperiode);
 
-        if (opptjeningAktiviteter.isEmpty() && !erInaktiv(vilkårsMerknad)) {
-            throw new IllegalStateException("Forventer opptjening for vilkårsperiode: " + vilkårsperiode + ", iayGrunnlag.opptjening=" + oppgittOpptjening);
-        }
-
         var opptjeningAktiviteterDto = TilKalkulusMapper.mapTilDto(opptjeningAktiviteter, vilkårsMerknad);
 
         var kalkulatorInputDto = new KalkulatorInputDto(grunnlagDto, opptjeningAktiviteterDto, stp);

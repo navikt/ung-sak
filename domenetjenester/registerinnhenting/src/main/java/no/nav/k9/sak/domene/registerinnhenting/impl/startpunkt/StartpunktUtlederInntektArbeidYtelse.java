@@ -34,6 +34,7 @@ import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.perioder.ForlengelseTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
 
@@ -52,7 +53,6 @@ class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
     private VurderArbeidsforholdTjeneste vurderArbeidsforholdTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
     private BehandlingRepository behandlingRepository;
-
     public StartpunktUtlederInntektArbeidYtelse() {
         // For CDI
     }
@@ -96,24 +96,11 @@ class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
             }
         }
 
-        if (!startpunkter.isEmpty()) {
-            return startpunkter; // quick exit siden vi har allerede testet to viktigste startpunkt typer
-        }
         Saksnummer saksnummer = ref.getSaksnummer();
 
-        if (harAksjonspunkt5080(ref)) {
-            leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.KONTROLLER_ARBEIDSFORHOLD, "manuell vurdering av arbeidsforhold");
-        } else if (erPåkrevdManuelleAvklaringer(ref)) {
-            leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.KONTROLLER_ARBEIDSFORHOLD, "manuell vurdering av arbeidsforhold");
-        }
-
-        if (!startpunkter.isEmpty()) {
-            return startpunkter; // quick exit siden vi har allerede testet to viktigste startpunkt typer
-        }
 
         if (FagsakYtelseType.FRISINN.equals(ref.getFagsakYtelseType())) {
             diffForFrisinn(ref, grunnlagId1, grunnlagId2, startpunkter, diff, saksnummer);
-
         } else {
             var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType());
             var perioderTilVurdering = perioderTilVurderingTjeneste.utled(ref.getBehandlingId(), VilkårType.OPPTJENINGSVILKÅRET);
@@ -136,6 +123,15 @@ class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
                 }
             }
         }
+
+
+        if (harAksjonspunkt5080(ref)) {
+            leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.KONTROLLER_ARBEIDSFORHOLD, "manuell vurdering av arbeidsforhold");
+        } else if (erPåkrevdManuelleAvklaringer(ref)) {
+            leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.KONTROLLER_ARBEIDSFORHOLD, "manuell vurdering av arbeidsforhold");
+        }
+
+
 
         return startpunkter;
     }

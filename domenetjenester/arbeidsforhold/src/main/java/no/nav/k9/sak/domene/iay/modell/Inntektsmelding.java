@@ -15,6 +15,7 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.k9.sak.behandlingslager.virksomhet.Virksomhet;
+import no.nav.k9.sak.typer.ArbeidsforholdRef;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;

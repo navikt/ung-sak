@@ -15,33 +15,41 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.folketrygdloven.kalkulus.felles.v1.KalkulatorInputDto;
 import no.nav.folketrygdloven.kalkulus.mappers.JsonMapper;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregnListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregningsgrunnlagListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagDtoListeForGUIRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentBeregningsgrunnlagListeRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.HentForSakRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentGrunnbeløpRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.HentJournalpostIderRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.KontrollerGrunnbeløpRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.KopierBeregningListeRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.KopierOgResettBeregningListeRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.migrerAksjonspunkt.MigrerAksjonspunktListeRequest;
-import no.nav.folketrygdloven.kalkulus.request.v1.regelinput.KomprimerRegelInputRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.simulerTilkommetInntekt.SimulerTilkommetInntektListeRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.tilkommetAktivitet.UtledTilkommetAktivitetListeRequest;
+import no.nav.folketrygdloven.kalkulus.response.v1.AktiveReferanser;
 import no.nav.folketrygdloven.kalkulus.response.v1.Grunnbeløp;
 import no.nav.folketrygdloven.kalkulus.response.v1.GrunnbeløpReguleringRespons;
+import no.nav.folketrygdloven.kalkulus.response.v1.JournalpostIderResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.KopiResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.TilstandListeResponse;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.detaljert.BeregningsgrunnlagGrunnlagDto;
 import no.nav.folketrygdloven.kalkulus.response.v1.beregningsgrunnlag.gui.BeregningsgrunnlagListe;
+import no.nav.folketrygdloven.kalkulus.response.v1.gradering.InntektgraderingListe;
 import no.nav.folketrygdloven.kalkulus.response.v1.håndtering.OppdateringListeRespons;
-import no.nav.folketrygdloven.kalkulus.response.v1.regelinput.Saksnummer;
+import no.nav.folketrygdloven.kalkulus.response.v1.simulerTilkommetInntekt.SimulertTilkommetInntektListe;
+import no.nav.folketrygdloven.kalkulus.response.v1.tilkommetAktivitet.UtledetTilkommetAktivitetListe;
 import no.nav.k9.felles.exception.VLException;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
@@ -55,12 +63,13 @@ import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
+
 @ApplicationScoped
 @ScopedRestIntegration(scopeKey = "ftkalkulus.scope", defaultScope = "api://prod-fss.k9saksbehandling.ftkalkulus/.default")
 public class KalkulusRestKlient {
 
     private static final Logger log = LoggerFactory.getLogger(KalkulusRestKlient.class);
-    private final ObjectMapper kalkulusMapper = JsonMapper.getMapper();
+    private static final ObjectMapper kalkulusMapper = JsonMapper.getMapper().copy().registerModule(createModuleWithStringSerializer());
     private final ObjectWriter kalkulusJsonWriter = kalkulusMapper.writerWithDefaultPrettyPrinter();
     private final ObjectReader tilstandReader = kalkulusMapper.readerFor(TilstandListeResponse.class);
     private final ObjectReader kopierReader = kalkulusMapper.readerFor(new TypeReference<List<KopiResponse>>() {
@@ -68,10 +77,15 @@ public class KalkulusRestKlient {
     private final ObjectReader oppdaterListeReader = kalkulusMapper.readerFor(OppdateringListeRespons.class);
     private final ObjectReader dtoListeReader = kalkulusMapper.readerFor(BeregningsgrunnlagListe.class);
     private final ObjectReader behovForGreguleringReader = kalkulusMapper.readerFor(GrunnbeløpReguleringRespons.class);
+    private final ObjectReader tilkommetInntektReader = kalkulusMapper.readerFor(SimulertTilkommetInntektListe.class);
+    private final ObjectReader tilkommetAktivitetReader = kalkulusMapper.readerFor(UtledetTilkommetAktivitetListe.class);
+    private final ObjectReader inntektsgraderingReader = kalkulusMapper.readerFor(InntektgraderingListe.class);
     private final ObjectReader grunnlagListReader = kalkulusMapper.readerFor(new TypeReference<List<BeregningsgrunnlagGrunnlagDto>>() {
     });
     private final ObjectReader grunnbeløpReader = kalkulusMapper.readerFor(Grunnbeløp.class);
-    private final ObjectReader saksnummerReader = kalkulusMapper.readerFor(no.nav.folketrygdloven.kalkulus.response.v1.regelinput.Saksnummer.class);
+    private final ObjectReader referanserReader = kalkulusMapper.readerFor(AktiveReferanser.class);
+    private final ObjectReader journalspostIderReader = kalkulusMapper.readerFor(new TypeReference<List<JournalpostIderResponse>>() {
+    });
 
 
     private CloseableHttpClient restClient;
@@ -86,12 +100,12 @@ public class KalkulusRestKlient {
     private URI grunnbeløp;
 
     private URI kontrollerGrunnbeløp;
+    private URI simulerTilkommetInntekt;
+    private URI utledTilkommetAktivitet;
 
-    private URI migrerAksjonspunkter;
-    private URI komprimerRegelinput;
-    private URI komprimerFlereRegelinput;
+    private URI finnInntektsgradering;
 
-    private URI kopierOgResettEndpoint;
+    private URI aktiveReferanserEndpoint;
 
 
     protected KalkulusRestKlient() {
@@ -121,10 +135,10 @@ public class KalkulusRestKlient {
         this.beregningsgrunnlagGrunnlagBolkEndpoint = toUri("/api/kalkulus/v1/grunnlag/bolk");
         this.grunnbeløp = toUri("/api/kalkulus/v1/grunnbelop");
         this.kontrollerGrunnbeløp = toUri("/api/kalkulus/v1/kontrollerGregulering");
-        this.migrerAksjonspunkter = toUri("/api/kalkulus/v1/migrerAksjonspunkter");
-        this.komprimerRegelinput = toUri("/api/kalkulus/v1/komprimerRegelSporing");
-        this.komprimerFlereRegelinput = toUri("/api/kalkulus/v1/komprimerAntallRegelSporinger");
-        this.kopierOgResettEndpoint = toUri("/api/kalkulus/v1//kopierOgResett/bolk");
+        this.simulerTilkommetInntekt = toUri("/api/kalkulus/v1/simulerTilkommetInntektForKoblinger");
+        this.utledTilkommetAktivitet = toUri("/api/kalkulus/v1/utledTilkommetAktivitetForKoblinger");
+        this.aktiveReferanserEndpoint = toUri("/api/kalkulus/v1/aktive-referanser");
+        this.finnInntektsgradering = toUri("/api/kalkulus/v1/finnUttaksgradVedInntektsgradering");
     }
 
 
@@ -145,16 +159,6 @@ public class KalkulusRestKlient {
             return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), kopierReader);
         } catch (JsonProcessingException e) {
             throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
-        }
-    }
-
-    public void kopierOgResettBeregning(KopierOgResettBeregningListeRequest request) {
-        var endpoint = kopierOgResettEndpoint;
-
-        try {
-            utfør(endpoint, kalkulusJsonWriter.writeValueAsString(request));
-        } catch (IOException e) {
-            throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(endpoint, e.getMessage()).toException();
         }
     }
 
@@ -214,31 +218,51 @@ public class KalkulusRestKlient {
         }
     }
 
-    public void migrerAksjonspunkter(MigrerAksjonspunktListeRequest request) {
-        var endpoint = migrerAksjonspunkter;
+    public SimulertTilkommetInntektListe simulerTilkommetInntekt(SimulerTilkommetInntektListeRequest request) {
+        var endpoint = simulerTilkommetInntekt;
         try {
-            utfør(endpoint, kalkulusJsonWriter.writeValueAsString(request));
+            return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), tilkommetInntektReader);
+        } catch (JsonProcessingException e) {
+            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
+        }
+    }
+
+    public InntektgraderingListe finnUttaksgradVedInntektsgradering(UtledTilkommetAktivitetListeRequest request) {
+        var endpoint = finnInntektsgradering;
+        try {
+            return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), inntektsgraderingReader);
+        } catch (JsonProcessingException e) {
+            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
+        }
+    }
+
+
+    public UtledetTilkommetAktivitetListe utledTilkommetAktivitet(UtledTilkommetAktivitetListeRequest request) {
+        var endpoint = utledTilkommetAktivitet;
+        try {
+            return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), tilkommetAktivitetReader);
+        } catch (JsonProcessingException e) {
+            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
+        }
+    }
+
+    public AktiveReferanser hentAktiveReferanser(HentForSakRequest request) {
+        var endpoint = aktiveReferanserEndpoint;
+        try {
+            return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), referanserReader);
         } catch (IOException e) {
             throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(endpoint, e.getMessage()).toException();
         }
     }
 
-    public String komprimerRegelinput(KomprimerRegelInputRequest request) {
-        var endpoint = komprimerRegelinput;
-        try {
-            Saksnummer saksnummmer = getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), saksnummerReader);
-            return saksnummmer == null ? null : saksnummmer.getSaksnummer();
-        } catch (IOException e) {
-            throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(endpoint, e.getMessage()).toException();
-        }
-    }
 
-    public int komprimerFlereRegelinput(KomprimerRegelInputRequest request) {
-        var endpoint = komprimerFlereRegelinput;
+    public List<JournalpostIderResponse> hentInntektsmeldingJournalpostIder(HentJournalpostIderRequest request) {
+        var endpoint = grunnbeløp;
+
         try {
-            return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), JsonMapper.getMapper().readerFor(Integer.class));
-        } catch (IOException e) {
-            throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(endpoint, e.getMessage()).toException();
+            return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), journalspostIderReader);
+        } catch (JsonProcessingException e) {
+            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
         }
     }
 
@@ -348,4 +372,14 @@ public class KalkulusRestKlient {
         Feil feilVedJsonParsing(String feilmelding);
     }
 
+    private static SimpleModule createModuleWithStringSerializer() {
+        SimpleModule module = new SimpleModule("KALKULUS-REST", new Version(1, 0, 0, null, null, null));
+        // Bruker kodeverdi serialisert som String mot kalkulus (innkommende rest returnerer kodeverdi som objekt)
+        module.addSerializer(new KalkulusKodelisteSerializer(false));
+        return module;
+    }
+
+    public static ObjectMapper getMapper() {
+        return kalkulusMapper;
+    }
 }

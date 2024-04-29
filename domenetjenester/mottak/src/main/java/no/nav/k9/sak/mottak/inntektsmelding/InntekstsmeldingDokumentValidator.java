@@ -1,11 +1,13 @@
 package no.nav.k9.sak.mottak.inntektsmelding;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentValidator;
 
@@ -35,7 +37,13 @@ public class InntekstsmeldingDokumentValidator implements DokumentValidator {
     @Override
     public void validerDokument(MottattDokument mottattDokument) {
         // TODO hvorfor er ikke validering lik i validerDokument og i validerDokumenter?
-        inntektsmeldingParser.parseInntektsmeldinger(mottattDokument);
+        List<InntektsmeldingBuilder> builders = inntektsmeldingParser.parseInntektsmeldinger(mottattDokument);
+        for (InntektsmeldingBuilder builder : builders) {
+            //builder har validering
+            boolean ignorerValideringInternArbeidsforhold = true;
+            builder.build(ignorerValideringInternArbeidsforhold);
+        }
+
     }
 
 }

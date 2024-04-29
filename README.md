@@ -21,3 +21,15 @@ Kjør `no.nav.k9.sak.db.util.Databaseskjemainitialisering` for å få med skjema
    Start `JettyDevServer --vtp` 
 
 Swagger: http://localhost:8080/k9/sak/swagger
+
+### Generering av openapi spesifikasjon lokalt.
+
+Ved behov kan openapi spesifikasjon genererast med lokalt utviklingsmiljø.
+
+```bash
+dev/generate-openapi-json.sh
+```
+Kommandoen over vil generere fil _web/target/k9-sak.openapi.json_. Du kan spesifisere filsti for generert fil slik:
+```bash
+dev/generate-openapi-json.sh /tmp/openapi.json
+```

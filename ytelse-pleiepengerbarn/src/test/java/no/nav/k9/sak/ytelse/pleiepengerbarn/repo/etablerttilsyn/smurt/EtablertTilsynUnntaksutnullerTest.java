@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,11 +32,11 @@ public class EtablertTilsynUnntaksutnullerTest {
         final UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende = new UnntakEtablertTilsynForPleietrengende(
                 new AktørId("dummy"),
                 new UnntakEtablertTilsyn(List.of(
-                    new UnntakEtablertTilsynPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2022, 8, 4), LocalDate.of(2022, 8, 4)), "", Resultat.OPPFYLT, new AktørId("dummy"), 1L),
-                    new UnntakEtablertTilsynPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2022, 8, 5), LocalDate.of(2022, 8, 5)), "", Resultat.IKKE_OPPFYLT, new AktørId("dummy"), 1L)
+                    new UnntakEtablertTilsynPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2022, 8, 4), LocalDate.of(2022, 8, 4)), "", Resultat.OPPFYLT, new AktørId("dummy"), 1L, "nav", LocalDateTime.now()),
+                    new UnntakEtablertTilsynPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2022, 8, 5), LocalDate.of(2022, 8, 5)), "", Resultat.IKKE_OPPFYLT, new AktørId("dummy"), 1L, "nav", LocalDateTime.now())
                 ), List.of()),
                 new UnntakEtablertTilsyn(List.of(
-                    new UnntakEtablertTilsynPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2022, 8, 1), LocalDate.of(2022, 8, 1)), "", Resultat.OPPFYLT, new AktørId("dummy"), 1L)
+                    new UnntakEtablertTilsynPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2022, 8, 1), LocalDate.of(2022, 8, 1)), "", Resultat.OPPFYLT, new AktørId("dummy"), 1L, "nav", LocalDateTime.now())
                 ), List.of()));
 
         final LocalDateTimeline<Duration> resultat = EtablertTilsynUnntaksutnuller.ignorerEtablertTilsynVedInnleggelserOgUnntak(etablertTilsynTidslinje,

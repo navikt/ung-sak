@@ -40,6 +40,7 @@ import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.dokument.arkiv.DokumentArkivTjeneste;
@@ -392,6 +393,8 @@ public class PleietrengendeSykdomDokumentRestTjeneste {
 
         final PleietrengendeSykdomDokument duplikatAvDokument = hentSattDuplikatDokument(sykdomDokumentEndringDto, behandling, dokumentId);
 
+        verifiserEventuellFeilregistrertstatus(sykdomDokumentEndringDto, dokument);
+        
         dokument.setInformasjon(new PleietrengendeSykdomDokumentInformasjon(
             dokument,
             duplikatAvDokument,
@@ -406,7 +409,6 @@ public class PleietrengendeSykdomDokumentRestTjeneste {
 
         pleietrengendeSykdomDokumentRepository.oppdater(dokument.getInformasjon());
     }
-
 
     private PleietrengendeSykdomDokument hentSattDuplikatDokument(SykdomDokumentEndringDto sykdomDokumentEndringDto, final Behandling behandling, final Long dokumentId) {
         if (sykdomDokumentEndringDto.getDuplikatAvId() == null) {
@@ -435,13 +437,32 @@ public class PleietrengendeSykdomDokumentRestTjeneste {
             throw new FunksjonellException("K9-6704", "Kan ikke sette som duplikat siden andre dokumenter er duplikat av dette dokumentet.");
         }
     }
+    
+    private void verifiserEventuellFeilregistrertstatus(SykdomDokumentEndringDto sykdomDokumentEndringDto,
+            final PleietrengendeSykdomDokument dokument) {
+        if (sykdomDokumentEndringDto.getType() == SykdomDokumentType.FEILREGISTRERT
+                && pleietrengendeSykdomDokumentRepository.isDokumentBruktIVurdering(dokument.getId())) {
+            /*
+             * Merk: Hvis ønskelig kan denne sjekken utvides til å tillate at man setter dokumenter
+             *       som feilregistrert når dokumentet har blitt brukt i ubesluttede vurderinger.
+             *       
+             *       Man vil da trenge:
+             *       1. Vise i frontend at den ubesluttede vurderingen brukte et dokument som nå har
+             *          blitt markert som feilregistrert.
+             *       2. Fremtvinge aksjonspunkt/tilbakehopp til sykdom der saksbehandler fjerner
+             *          det feilregistrerte dokumenter og (ved behov) legger til flere dokumenter
+             *          som grunnlag for vurderingen.
+             */
+            throw new FunksjonellException("K9-6705", "Sykdomsdokumentet kan ikke settes til å være FEILREGISTRERT. Dette fordi dokumentet har blitt brukt i en vurdering. Kontakt NAV Fagpost for å sladde dokumentet fremfor å feilregistrere det.");
+        }
+    }
 
     private void verifiserKanEndreType(SykdomDokumentEndringDto sykdomDokumentEndringDto, final Behandling behandling, PleietrengendeSykdomDokumentInformasjon gmlInformasjon) {
         final boolean varGodkjentLegeerklæring = gmlInformasjon.getType() == SykdomDokumentType.LEGEERKLÆRING_SYKEHUS;
         final boolean harEndretType = gmlInformasjon.getType() != sykdomDokumentEndringDto.getType();
         final boolean harBlittSattSomDuplikat = gmlInformasjon.getDuplikatAvDokument() == null && sykdomDokumentEndringDto.getDuplikatAvId() != null;
         final boolean harBlittEndret = harEndretType || harBlittSattSomDuplikat;
-        final boolean harIngenAnnenGodkjentLegeerklæring = !harMinstEnAnnenGodkjentLegeerklæring(gmlInformasjon.getDokument(), behandling.getFagsak().getPleietrengendeAktørId());
+        final boolean harIngenAnnenGodkjentLegeerklæring = !harMinstEnAnnenGodkjentLegeerklæring(gmlInformasjon.getDokument(), behandling.getFagsak().getPleietrengendeAktørId(), behandling.getFagsakYtelseType());
         final boolean harTidligereHattRelevantGodkjentLegeerklæring = medisinskGrunnlagRepository.harHattGodkjentLegeerklæringMedUnntakAv(behandling.getFagsak().getPleietrengendeAktørId(), behandling.getUuid());
 
         if (varGodkjentLegeerklæring && harBlittEndret && harIngenAnnenGodkjentLegeerklæring && harTidligereHattRelevantGodkjentLegeerklæring) {
@@ -450,8 +471,8 @@ public class PleietrengendeSykdomDokumentRestTjeneste {
     }
 
 
-    private boolean harMinstEnAnnenGodkjentLegeerklæring(PleietrengendeSykdomDokument pleietrengendeSykdomDokument, final AktørId pleietrengende) {
-        return pleietrengendeSykdomDokumentRepository.hentGodkjenteLegeerklæringer(pleietrengende).stream().anyMatch(d -> !Objects.equals(d.getId(), pleietrengendeSykdomDokument.getId()));
+    private boolean harMinstEnAnnenGodkjentLegeerklæring(PleietrengendeSykdomDokument pleietrengendeSykdomDokument, final AktørId pleietrengende, FagsakYtelseType fagsakYtelseType) {
+        return pleietrengendeSykdomDokumentRepository.hentGodkjenteLegeerklæringer(pleietrengende, fagsakYtelseType).stream().anyMatch(d -> !Objects.equals(d.getId(), pleietrengendeSykdomDokument.getId()));
     }
 
     /**

@@ -5,12 +5,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.abakus.iaygrunnlag.JsonObjectMapper;
 import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
 import no.nav.k9.kodeverk.dokument.Brevkode;
@@ -40,6 +39,7 @@ public class AsyncAbakusLagreOpptjeningTask extends UnderBehandlingProsessTask {
     public static final String BREVKODER = "opptjening.brevkoder";
 
     private AbakusTjeneste abakusTjeneste;
+    private boolean k9abakusEnabled;
     private MottatteDokumentRepository mottatteDokumentRepository;
 
     AsyncAbakusLagreOpptjeningTask() {
@@ -62,7 +62,7 @@ public class AsyncAbakusLagreOpptjeningTask extends UnderBehandlingProsessTask {
         if (erFrisinn) {
             // TODO: Når Frisinn utfaset skal det ikke være valgfritt å oppgi journalpostid
             lagreOppgittOpptjening(input, true);
-        } else  {
+        } else {
             JournalpostId journalpostId = new JournalpostId(input.getPropertyValue(JOURNALPOST_ID));
             Brevkode brevkode = Brevkode.fraKode(input.getPropertyValue(BREVKODER));
 
@@ -77,7 +77,7 @@ public class AsyncAbakusLagreOpptjeningTask extends UnderBehandlingProsessTask {
             MottattDokument førsteUbehandledeDokument = ubehandledeDokumenter.stream()
                 .min(Comparator.comparing(MottattDokument::getMottattTidspunkt)).orElseThrow();
             if (!førsteUbehandledeDokument.getJournalpostId().equals(journalpostId)) {
-                throw new UnsupportedOperationException("Kan ikke lagre oppgitt opptjening. JournalpostId=" + journalpostId +" " +
+                throw new UnsupportedOperationException("Kan ikke lagre oppgitt opptjening. JournalpostId=" + journalpostId + " " +
                     "venter på behandling av tidligere journalpostId=" + førsteUbehandledeDokument.getJournalpostId());
             }
             mottatteDokumentRepository.oppdaterStatus(List.of(førsteUbehandledeDokument), DokumentStatus.GYLDIG);
@@ -88,7 +88,6 @@ public class AsyncAbakusLagreOpptjeningTask extends UnderBehandlingProsessTask {
 
     private void lagreOppgittOpptjening(ProsessTaskData input, boolean erFrisinn) {
         var jsonReader = JsonObjectMapper.getMapper().readerFor(OppgittOpptjeningMottattRequest.class);
-
         try {
             OppgittOpptjeningMottattRequest request = jsonReader.readValue(Objects.requireNonNull(input.getPayloadAsString(), "mangler payload"));
             if (erFrisinn) {

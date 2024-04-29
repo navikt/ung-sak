@@ -259,8 +259,13 @@ public class RegisterdataInnhenter {
     private void mapAdresser(List<AdressePeriode> adressehistorikk, PersonInformasjonBuilder informasjonBuilder, Personinfo personinfo) {
         AktørId aktørId = personinfo.getAktørId();
         for (AdressePeriode adresse : adressehistorikk) {
-            final DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(
-                brukFødselsdatoHvisEtter(adresse.getGyldighetsperiode().getFom(), personinfo.getFødselsdato()), adresse.getGyldighetsperiode().getTom());
+            LocalDate tom = adresse.getGyldighetsperiode().getTom();
+            LocalDate fom = brukFødselsdatoHvisEtter(adresse.getGyldighetsperiode().getFom(), personinfo.getFødselsdato());
+            if (tom.isBefore(personinfo.getFødselsdato())) {
+                log.warn("Ignorerer en adresse for en person på saken, da adressen opphørte før personen ble født");
+                continue;
+            }
+            final DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
             final PersonInformasjonBuilder.AdresseBuilder adresseBuilder = informasjonBuilder.getAdresseBuilder(aktørId, periode,
                 adresse.getAdresse().getAdresseType());
             adresseBuilder.medPeriode(periode)
@@ -516,13 +521,13 @@ public class RegisterdataInnhenter {
         var periode = new Periode(opplysningsperiode.getFom(), opplysningsperiode.getTom());
         var aktør = new AktørIdPersonident(behandling.getAktørId().getId());
 
-        var innhentRegisterdataRequest = new InnhentRegisterdataRequest(saksnummer, behandlingUuid, ytelseType, periode, aktør, informasjonsElementer);
-        innhentRegisterdataRequest.setCallbackUrl(abakusTjeneste.getCallbackUrl());
-
         var opplysningsperiodeSkattegrunnlag = periodeTjeneste.utledOpplysningsperiodeSkattegrunnlag(behandling.getId());
         log.info("Opplysningsperiode skattegrunnlag: " + opplysningsperiodeSkattegrunnlag);
-        innhentRegisterdataRequest.setOpplysningsperiodeSkattegrunnlag(new Periode(opplysningsperiodeSkattegrunnlag.getFom(), opplysningsperiodeSkattegrunnlag.getTom()));
 
+        var innhentRegisterdataRequest = new InnhentRegisterdataRequest(saksnummer, behandlingUuid, ytelseType, periode, aktør, informasjonsElementer);
+        innhentRegisterdataRequest.setCallbackUrl(abakusTjeneste.getCallbackUrl());
+        innhentRegisterdataRequest.setCallbackScope(abakusTjeneste.getCallbackScope());
+        innhentRegisterdataRequest.setOpplysningsperiodeSkattegrunnlag(new Periode(opplysningsperiodeSkattegrunnlag.getFom(), opplysningsperiodeSkattegrunnlag.getTom()));
         abakusTjeneste.innhentRegisterdata(innhentRegisterdataRequest);
     }
 

@@ -1,13 +1,12 @@
 package no.nav.k9.sak.behandlingskontroll.impl;
 
-import java.lang.annotation.Annotation;
 import java.util.Objects;
 import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.spi.BeanManager;
+import jakarta.enterprise.event.Event;
+import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
@@ -17,7 +16,6 @@ import no.nav.k9.sak.behandlingskontroll.events.AksjonspunktStatusEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingStatusEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingStegOvergangEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingStegStatusEvent;
-import no.nav.k9.sak.behandlingskontroll.events.BehandlingStegTilstandEndringEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingTransisjonEvent;
 import no.nav.k9.sak.behandlingskontroll.events.BehandlingskontrollEvent;
 import no.nav.k9.sak.behandlingslager.behandling.BehandlingEvent;
@@ -29,23 +27,22 @@ import no.nav.k9.sak.behandlingslager.behandling.BehandlingEvent;
 public class BehandlingskontrollEventPubliserer {
 
     public static final BehandlingskontrollEventPubliserer NULL_EVENT_PUB = new BehandlingskontrollEventPubliserer();
-
-    private BeanManager beanManager;
+    private Event<BehandlingEvent> behandlingEvent;
 
     BehandlingskontrollEventPubliserer() {
         // null ctor, publiserer ingen events
     }
 
     @Inject
-    public BehandlingskontrollEventPubliserer(BeanManager beanManager) {
-        this.beanManager = beanManager;
+    public BehandlingskontrollEventPubliserer(@Any Event<BehandlingEvent> behandlingEvent) {
+        this.behandlingEvent = behandlingEvent;
     }
 
     public void fireEvent(BehandlingStegOvergangEvent event) {
         Optional<BehandlingStegTilstandSnapshot> fraTilstand = event.getFraTilstand();
         Optional<BehandlingStegTilstandSnapshot> nyTilstand = event.getTilTilstand();
         if ((fraTilstand.isEmpty() && nyTilstand.isEmpty())
-                || (fraTilstand.isPresent() && nyTilstand.isPresent() && Objects.equals(fraTilstand.get(), nyTilstand.get()))) {
+            || (fraTilstand.isPresent() && nyTilstand.isPresent() && Objects.equals(fraTilstand.get(), nyTilstand.get()))) {
             // ikke fyr duplikate events
             return;
         }
@@ -53,12 +50,12 @@ public class BehandlingskontrollEventPubliserer {
         doFireEvent(event);
     }
 
-    public void fireEvent(BehandlingTransisjonEvent event){
+    public void fireEvent(BehandlingTransisjonEvent event) {
         doFireEvent(event);
     }
 
     public void fireEvent(BehandlingskontrollKontekst kontekst, BehandlingStegType stegType, BehandlingStegStatus forrigeStatus,
-            BehandlingStegStatus nyStatus) {
+                          BehandlingStegStatus nyStatus) {
         if (Objects.equals(forrigeStatus, nyStatus)) {
             // gjør ingenting
             return;
@@ -71,7 +68,7 @@ public class BehandlingskontrollEventPubliserer {
             // gjør ingenting
             return;
         }
-        doFireEvent(BehandlingStatusEvent.nyEvent(kontekst, nyStatus));
+        doFireEvent(BehandlingStatusEvent.nyEvent(kontekst, nyStatus, gammelStatus));
     }
 
     public void fireEvent(BehandlingskontrollEvent event) {
@@ -82,15 +79,14 @@ public class BehandlingskontrollEventPubliserer {
         doFireEvent(event);
     }
 
-    /** Fyrer event via BeanManager slik at håndtering av events som subklasser andre events blir korrekt. */
+    /**
+     * Fyrer event via BeanManager slik at håndtering av events som subklasser andre events blir korrekt.
+     */
     protected void doFireEvent(BehandlingEvent event) {
-        if (beanManager == null) {
+        if (behandlingEvent == null) {
             return;
         }
-        beanManager.fireEvent(event, new Annotation[] {});
+        behandlingEvent.fire(event);
     }
 
-    public void fireEvent(BehandlingStegTilstandEndringEvent event) {
-        doFireEvent(event);
-    }
 }

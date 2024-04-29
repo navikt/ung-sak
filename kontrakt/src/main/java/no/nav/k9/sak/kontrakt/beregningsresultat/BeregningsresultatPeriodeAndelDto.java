@@ -5,6 +5,13 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -13,14 +20,6 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-
-import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
@@ -84,6 +83,18 @@ public class BeregningsresultatPeriodeAndelDto {
     @DecimalMax("100.00")
     @Digits(integer = 3, fraction = 2)
     private BigDecimal utbetalingsgrad;
+
+    @JsonProperty(value = "utbetalingsgradOppdragForBruker")
+    @DecimalMin("0.00")
+    @DecimalMax("100.00")
+    @Digits(integer = 3, fraction = 2)
+    private BigDecimal utbetalingsgradOppdragForBruker;
+
+    @JsonProperty(value = "utbetalingsgradOppdragForRefusjon")
+    @DecimalMin("0.00")
+    @DecimalMax("100.00")
+    @Digits(integer = 3, fraction = 2)
+    private BigDecimal utbetalingsgradOppdragForRefusjon;
     @JsonProperty(value = "uttak")
     @Size(max = 100)
     @Valid
@@ -100,6 +111,8 @@ public class BeregningsresultatPeriodeAndelDto {
         this.tilSoker = builder.tilSøker;
         this.uttak = builder.uttak;
         this.utbetalingsgrad = builder.utbetalingsgrad;
+        this.utbetalingsgradOppdragForBruker = builder.utbetalingsgradOppdragForBruker;
+        this.utbetalingsgradOppdragForRefusjon = builder.utbetalingsgradOppdragForRefusjon;
         this.sisteUtbetalingsdato = builder.sisteUtbetalingsdato;
         this.aktivitetStatus = builder.aktivitetStatus;
         this.arbeidsforholdId = builder.arbeidsforholdId;
@@ -227,6 +240,22 @@ public class BeregningsresultatPeriodeAndelDto {
         this.utbetalingsgrad = utbetalingsgrad;
     }
 
+    public BigDecimal getUtbetalingsgradOppdragForBruker() {
+        return utbetalingsgradOppdragForBruker;
+    }
+
+    public void setUtbetalingsgradOppdragForBruker(BigDecimal utbetalingsgradOppdragForBruker) {
+        this.utbetalingsgradOppdragForBruker = utbetalingsgradOppdragForBruker;
+    }
+
+    public BigDecimal getUtbetalingsgradOppdragForRefusjon() {
+        return utbetalingsgradOppdragForRefusjon;
+    }
+
+    public void setUtbetalingsgradOppdragForRefusjon(BigDecimal utbetalingsgradOppdragForRefusjon) {
+        this.utbetalingsgradOppdragForRefusjon = utbetalingsgradOppdragForRefusjon;
+    }
+
     public List<UttakDto> getUttak() {
         return uttak;
     }
@@ -249,6 +278,8 @@ public class BeregningsresultatPeriodeAndelDto {
         private BigDecimal stillingsprosent;
         private Integer tilSøker;
         private BigDecimal utbetalingsgrad;
+        private BigDecimal utbetalingsgradOppdragForBruker;
+        private BigDecimal utbetalingsgradOppdragForRefusjon;
         private List<UttakDto> uttak;
         private Inntektskategori inntektskategori;
 
@@ -321,6 +352,16 @@ public class BeregningsresultatPeriodeAndelDto {
 
         public Builder medUtbetalingsgrad(BigDecimal utbetalingsgrad) {
             this.utbetalingsgrad = utbetalingsgrad;
+            return this;
+        }
+
+        public Builder medUtbetalingsgradOppdragForBruker(BigDecimal utbetalingsgradOppdragForBruker) {
+            this.utbetalingsgradOppdragForBruker = utbetalingsgradOppdragForBruker;
+            return this;
+        }
+
+        public Builder medUtbetalingsgradOppdragForRefusjon(BigDecimal utbetalingsgradOppdragForRefusjon) {
+            this.utbetalingsgradOppdragForRefusjon = utbetalingsgradOppdragForRefusjon;
             return this;
         }
 

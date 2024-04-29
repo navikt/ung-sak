@@ -37,6 +37,7 @@ public final class Databaseskjemainitialisering {
             conf.setDataSource(createDs(USER));
             conf.setLocationsAsStrings(location);
             conf.setBaselineOnMigrate(true);
+            //conf.setCleanDisabled(false);
             Flyway flyway = new Flyway(conf);
             try {
                 flyway.migrate();

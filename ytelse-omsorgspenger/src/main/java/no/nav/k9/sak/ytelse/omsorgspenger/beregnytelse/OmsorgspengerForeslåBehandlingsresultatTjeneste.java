@@ -6,14 +6,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.Set;
 import java.util.stream.Collectors;
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
@@ -32,6 +32,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.behandling.steg.foreslåresultat.ForeslåBehandlingsresultatTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.perioder.KravDokumentType;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.perioder.VurderSøknadsfristTjeneste;
@@ -108,7 +109,7 @@ public class OmsorgspengerForeslåBehandlingsresultatTjeneste extends ForeslåBe
     }
 
     private boolean harSøknad(BehandlingReferanse ref) {
-        var kravDokumenter = vurderSøknadsfristTjeneste.hentPerioderTilVurdering(ref).keySet();
+        Set<KravDokument> kravDokumenter = vurderSøknadsfristTjeneste.relevanteKravdokumentForBehandling(ref, true);
         return kravDokumenter.stream().anyMatch(dok -> KravDokumentType.SØKNAD == dok.getType());
     }
 

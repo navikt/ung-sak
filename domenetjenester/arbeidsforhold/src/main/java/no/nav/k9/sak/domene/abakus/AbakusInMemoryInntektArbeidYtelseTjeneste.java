@@ -288,6 +288,12 @@ public class AbakusInMemoryInntektArbeidYtelseTjeneste implements InntektArbeidY
     }
 
     @Override
+    public Set<Inntektsmelding> hentInntektsmeldingerKommetTomBehandling(Saksnummer saksnummer, Long behandlingId) {
+        return Set.of();
+    }
+
+
+    @Override
     public Optional<OppgittOpptjening> hentKunOverstyrtOppgittOpptjening(Long behandlingId) {
         return finnGrunnlag(behandlingId).flatMap(InntektArbeidYtelseGrunnlag::getOverstyrtOppgittOpptjening);
     }

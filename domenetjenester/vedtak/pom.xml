@@ -50,8 +50,8 @@
 
 		<!-- Kontrakter -->
         <dependency>
-			<groupId>no.nav.foreldrepenger.abakus</groupId>
-			<artifactId>abakus-kontrakt-jakarta</artifactId>
+			<groupId>no.nav.k9.abakus</groupId>
+			<artifactId>abakus-kontrakt</artifactId>
 		</dependency>
 
 		<dependency>

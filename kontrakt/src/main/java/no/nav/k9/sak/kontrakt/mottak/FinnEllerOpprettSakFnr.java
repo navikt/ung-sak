@@ -45,17 +45,24 @@ public class FinnEllerOpprettSakFnr {
     @Valid
     private Periode periode;
 
+    @JsonProperty(value = "saksnummer")
+    @Size(max = 19)
+    @Pattern(regexp = "^[a-zA-Z0-9]*$")
+    private String saksnummer;
+
     @JsonCreator
     public FinnEllerOpprettSakFnr(@JsonProperty(value = "ytelseType") @Size(max = 20) @Pattern(regexp = "^[\\p{Alnum}æøåÆØÅ_\\-\\.]*$") String ytelseType,
-                               @JsonProperty(value = "søker", required = true) @NotNull @Digits(integer = 11, fraction = 0) String søker,
-                               @JsonProperty(value = "pleietrengende") @Digits(integer = 11, fraction = 0) String pleietrengende,
-                               @JsonProperty(value = "relatertPerson") @Digits(integer = 11, fraction = 0) String relatertPerson,
-                               @JsonProperty(value = "periode", required = true) @NotNull @Valid Periode periode) {
+                                  @JsonProperty(value = "søker", required = true) @NotNull @Digits(integer = 11, fraction = 0) String søker,
+                                  @JsonProperty(value = "pleietrengende") @Digits(integer = 11, fraction = 0) String pleietrengende,
+                                  @JsonProperty(value = "relatertPerson") @Digits(integer = 11, fraction = 0) String relatertPerson,
+                                  @JsonProperty(value = "periode", required = true) @NotNull @Valid Periode periode,
+                                  @JsonProperty(value = "saksnummer") @Size(max = 19) @Pattern(regexp = "^[a-zA-Z0-9]*$") String saksnummer) {
         this.ytelseType = Objects.requireNonNull(ytelseType, "ytelseType");
         this.søker = søker;
         this.pleietrengende = pleietrengende;
         this.relatertPerson = relatertPerson;
         this.periode = periode;
+        this.saksnummer = saksnummer;
     }
 
     public String getYtelseType() {
@@ -77,6 +84,10 @@ public class FinnEllerOpprettSakFnr {
 
     public String getRelatertPerson() {
         return relatertPerson;
+    }
+
+    public String getSaksnummer() {
+        return saksnummer;
     }
 
     @Override

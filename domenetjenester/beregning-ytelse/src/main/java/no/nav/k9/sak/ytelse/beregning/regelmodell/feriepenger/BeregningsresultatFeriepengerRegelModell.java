@@ -1,6 +1,5 @@
 package no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -18,12 +17,13 @@ import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.SaksnummerOgSisteBehand
 public class BeregningsresultatFeriepengerRegelModell {
     private Set<Inntektskategori> inntektskategorier;
     private List<BeregningsresultatPeriode> beregningsresultatPerioder;
-    private LocalDateInterval feriepengerPeriode;
-    private LocalDateInterval feriepengerPeriodeRefusjon;
+    private List<FeriepengekorrigeringInfotrygd> feriepengekorrigeringInfotrygd;
     private int antallDagerFeriepenger;
     private boolean feriepengeopptjeningForHelg;
     private boolean ubegrensetFeriepengedagerVedRefusjon;
     private List<PeriodeMedSakOgBehandling> andelerSomKanGiFeriepengerForRelevaneSaker;
+
+    private InfotrygdFeriepengegrunnlag infotrygdFeriepengegrunnlag;
 
     private BeregningsresultatFeriepengerRegelModell() {
         //tom konstruktør
@@ -35,6 +35,14 @@ public class BeregningsresultatFeriepengerRegelModell {
 
     public List<BeregningsresultatPeriode> getBeregningsresultatPerioder() {
         return beregningsresultatPerioder;
+    }
+
+    public List<FeriepengekorrigeringInfotrygd> getFeriepengekorrigeringInfotrygd() {
+        return feriepengekorrigeringInfotrygd;
+    }
+
+    public void setFeriepengekorrigeringInfotrygd(List<FeriepengekorrigeringInfotrygd> feriepengekorrigeringInfotrygd) {
+        this.feriepengekorrigeringInfotrygd = feriepengekorrigeringInfotrygd;
     }
 
     @JsonIgnore
@@ -49,16 +57,13 @@ public class BeregningsresultatFeriepengerRegelModell {
         return andelerSomKanGiFeriepengerForRelevaneSaker;
     }
 
+    public InfotrygdFeriepengegrunnlag getInfotrygdFeriepengegrunnlag() {
+        return infotrygdFeriepengegrunnlag;
+    }
+
     public record PeriodeMedSakOgBehandling(LocalDateInterval periode, Set<SaksnummerOgSisteBehandling> sak) {
     }
 
-    public LocalDateInterval getFeriepengerPeriodeBruker() {
-        return feriepengerPeriode;
-    }
-
-    public LocalDateInterval getFeriepengerPeriodeRefusjon() {
-        return feriepengerPeriodeRefusjon;
-    }
 
     public int getAntallDagerFeriepenger() {
         return antallDagerFeriepenger;
@@ -108,13 +113,8 @@ public class BeregningsresultatFeriepengerRegelModell {
             return this;
         }
 
-        public Builder medFeriepengerPeriode(LocalDate feriepengePeriodeFom, LocalDate feriepengePeriodeTom) {
-            kladd.feriepengerPeriode = new LocalDateInterval(feriepengePeriodeFom, feriepengePeriodeTom);
-            return this;
-        }
-
-        public Builder medFeriepengerPeriodeRefusjon(LocalDate feriepengePeriodeFom, LocalDate feriepengePeriodeTom) {
-            kladd.feriepengerPeriodeRefusjon = new LocalDateInterval(feriepengePeriodeFom, feriepengePeriodeTom);
+        public Builder medInfotrygdFeriepengegrunnlag(InfotrygdFeriepengegrunnlag infotrygdFeriepengegrunnlag) {
+            kladd.infotrygdFeriepengegrunnlag = infotrygdFeriepengegrunnlag;
             return this;
         }
 

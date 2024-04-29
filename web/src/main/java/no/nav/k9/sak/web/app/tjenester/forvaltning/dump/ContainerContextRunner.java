@@ -16,9 +16,11 @@ import jakarta.transaction.Transactional;
 import org.jboss.weld.context.RequestContext;
 import org.jboss.weld.context.unbound.UnboundLiteral;
 
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.felles.sikkerhet.loginmodule.ContainerLogin;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sikkerhet.oidc.token.impl.ContextTokenProvider;
 
 /**
@@ -38,10 +40,12 @@ public class ContainerContextRunner {
     });
 
     private final ContextTokenProvider tokenProvider;
+    private final String scope;
 
     @Inject
-    public ContainerContextRunner(ContextTokenProvider tokenProvider) {
+    public ContainerContextRunner(ContextTokenProvider tokenProvider, @KonfigVerdi(value = "CLIENT_SCOPE") String scope) {
         this.tokenProvider = Objects.requireNonNull(tokenProvider);
+        this.scope = scope;
     }
 
     public static ContainerContextRunner createRunner() {
@@ -50,7 +54,7 @@ public class ContainerContextRunner {
 
     @Transactional
     private <T> T submit(Callable<T> call) throws Exception {
-        var containerLogin = new ContainerLogin(tokenProvider);
+        var containerLogin = new ContainerLogin(tokenProvider, scope);
         containerLogin.login();
         var result = call.call();
         return result;
@@ -74,6 +78,35 @@ public class ContainerContextRunner {
                     result = runner.submit(call);
                 } finally {
                     LOG_CONTEXT.remove("behandling");
+                    LOG_CONTEXT.remove("fagsak");
+                    LOG_CONTEXT.remove("saksnummer");
+                    CDI.current().destroy(runner);
+                    requestContext.deactivate();
+                }
+                return result;
+            }));
+
+            return future.get(20, TimeUnit.SECONDS);
+        } catch (TimeoutException | InterruptedException | ExecutionException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    public static <T> T doRun(Fagsak fagsak, Callable<T> call) {
+        final var fagsakId = fagsak.getId();
+        final var saksnummer = fagsak.getSaksnummer();
+
+        try {
+            var future = EXECUTOR.submit((() -> {
+                T result;
+                var requestContext = CDI.current().select(RequestContext.class, UnboundLiteral.INSTANCE).get();
+                requestContext.activate();
+                var runner = ContainerContextRunner.createRunner();
+                try {
+                    LOG_CONTEXT.add("fagsak", fagsakId);
+                    LOG_CONTEXT.add("saksnummer", saksnummer);
+                    result = runner.submit(call);
+                } finally {
                     LOG_CONTEXT.remove("fagsak");
                     LOG_CONTEXT.remove("saksnummer");
                     CDI.current().destroy(runner);

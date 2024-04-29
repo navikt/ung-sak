@@ -48,8 +48,10 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.krav.PeriodeMedUtfall;
 import no.nav.k9.sak.kontrakt.krav.StatusForPerioderPåBehandling;
 import no.nav.k9.sak.kontrakt.krav.StatusForPerioderPåBehandlingInkludertVilkår;
+import no.nav.k9.sak.perioder.SøknadsfristTjenesteProvider;
+import no.nav.k9.sak.perioder.UtledPerioderMedRegisterendring;
+import no.nav.k9.sak.perioder.UtledStatusPåPerioderTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.web.app.tjenester.behandling.søknadsfrist.SøknadsfristTjenesteProvider;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
@@ -81,13 +83,14 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
                                                      UttakTjeneste uttakTjeneste,
                                                      VilkårResultatRepository vilkårResultatRepository,
                                                      SøknadsfristTjenesteProvider søknadsfristTjenesteProvider,
+                                                     UtledPerioderMedRegisterendring utledPerioderMedRegisterendring,
                                                      @KonfigVerdi(value = "filtrer.tilstotende.periode", defaultVerdi = "false") Boolean filtrereUtTilstøtendePeriode) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingModellRepository = behandlingModellRepository;
         this.uttakTjeneste = uttakTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.søknadsfristTjenesteProvider = søknadsfristTjenesteProvider;
-        this.statusPåPerioderTjeneste = new UtledStatusPåPerioderTjeneste(filtrereUtTilstøtendePeriode);
+        this.statusPåPerioderTjeneste = new UtledStatusPåPerioderTjeneste(filtrereUtTilstøtendePeriode, utledPerioderMedRegisterendring);
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
     }
 
@@ -207,7 +210,14 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
         var revurderingPerioderFraAndreParter = perioderTilVurderingTjeneste.utledRevurderingPerioder(ref);
         var kantIKantVurderer = perioderTilVurderingTjeneste.getKantIKantVurderer();
 
-        var statusForPerioderPåBehandling = statusPåPerioderTjeneste.utled(behandling, kantIKantVurderer, kravdokumenter, kravdokumenterMedPeriode, perioderTilVurdering, perioderSomSkalTilbakestilles, revurderingPerioderFraAndreParter);
+        var statusForPerioderPåBehandling = statusPåPerioderTjeneste.utled(
+            behandling,
+            kantIKantVurderer,
+            kravdokumenter,
+            kravdokumenterMedPeriode,
+            perioderTilVurdering,
+            perioderSomSkalTilbakestilles,
+            revurderingPerioderFraAndreParter);
         return statusForPerioderPåBehandling;
     }
 }

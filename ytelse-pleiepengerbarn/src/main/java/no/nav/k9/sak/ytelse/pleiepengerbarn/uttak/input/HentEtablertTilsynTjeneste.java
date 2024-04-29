@@ -18,6 +18,7 @@ import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.EtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.PeriodeMedVarighet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.sak.EtablertTilsyn;
@@ -32,7 +33,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.Ple
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynForPleietrengende;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.utils.Hjelpetidslinjer;
 
 @Dependent
 public class HentEtablertTilsynTjeneste {
@@ -100,16 +100,16 @@ public class HentEtablertTilsynTjeneste {
             boolean brukUbesluttedeData) {
         return hentOgSmørEtablertTilsynPerioder(referanse, unntakEtablertTilsynForPleietrengende, brukUbesluttedeData, ukesmøringOmsorgstilbudFomDato);
     }
-    
+
     public LocalDateTimeline<Boolean> finnEndringerMellomSmurtOgUsmurt(BehandlingReferanse referanse) {
         final var etablertTilsynGrunnlag = etablertTilsynRepository.hentHvisEksisterer(referanse.getBehandlingId());
         if (etablertTilsynGrunnlag.isEmpty()) {
             return LocalDateTimeline.empty();
         }
-        
+
         final LocalDateTimeline<Duration> perioderUtenSmøring = hentOgSmørEtablertTilsynPerioder(referanse, false);
         final LocalDateTimeline<Duration> perioderMedSmøring = hentOgSmørEtablertTilsynPerioder(referanse, true);
-        
+
         final LocalDateTimeline<Boolean> endringsTidslinje = perioderMedSmøring.combine(perioderUtenSmøring, (datoInterval, datoSegment, datoSegment2) -> {
             if (datoSegment == null && datoSegment2.getValue().isZero()) {
                 return new LocalDateSegment<>(datoInterval, Boolean.FALSE);
@@ -122,30 +122,30 @@ public class HentEtablertTilsynTjeneste {
             }
             return new LocalDateSegment<>(datoInterval, !datoSegment.getValue().equals(datoSegment2.getValue()));
         }, JoinStyle.CROSS_JOIN).compress().filterValue(Boolean::booleanValue);
-        
+
         return endringsTidslinje.intersection(new LocalDateTimeline<>(ukesmøringOmsorgstilbudFomDato, Tid.TIDENES_ENDE, Boolean.TRUE));
     }
-    
+
     private LocalDateTimeline<Duration> hentOgSmørEtablertTilsynPerioder(BehandlingReferanse referanse, boolean nyLøsning) {
         final var unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksisterer(referanse.getBehandlingId())
                 .map(UnntakEtablertTilsynGrunnlag::getUnntakEtablertTilsynForPleietrengende);
         final LocalDate ukesmøringOmsorgstilbudFomDato = (nyLøsning) ? this.ukesmøringOmsorgstilbudFomDato : null;
-        
+
         final List<PeriodeMedVarighet> perioder = hentOgSmørEtablertTilsynPerioder(referanse, unntakEtablertTilsynForPleietrengende, false, ukesmøringOmsorgstilbudFomDato);
-        
+
         LocalDateTimeline<Duration> resultat = toVarighettidslinjeFraPerioderMedVarighet(perioder).compress();
         resultat = EtablertTilsynUnntaksutnuller.håndterUnntak(resultat, unntakEtablertTilsynForPleietrengende).compress();
-        
+
         if (resultat.isEmpty()) {
             return resultat;
         }
-        
+
         final LocalDateTimeline<Boolean> mandagTilFredag = Hjelpetidslinjer.lagUkestidslinjeForMandagTilFredag(resultat.getMinLocalDate(), resultat.getMaxLocalDate());
         resultat = resultat.intersection(mandagTilFredag);
-        
+
         return resultat;
     }
-    
+
     private List<PeriodeMedVarighet> hentOgSmørEtablertTilsynPerioder(BehandlingReferanse referanse,
                                                                      Optional<UnntakEtablertTilsynForPleietrengende> unntakEtablertTilsynForPleietrengende,
                                                                      boolean brukUbesluttedeData,

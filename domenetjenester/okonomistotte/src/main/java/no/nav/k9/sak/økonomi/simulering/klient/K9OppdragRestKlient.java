@@ -19,6 +19,7 @@ public class K9OppdragRestKlient {
     private OidcRestClient restClient;
     private URI uriIverksett;
     private URI uriSimulering;
+    private URI uriSimuleringDiagnostikk;
     private URI uriSimuleringResultat;
     private URI uriKansellerSimulering;
 
@@ -31,6 +32,7 @@ public class K9OppdragRestKlient {
                                @KonfigVerdi(value = "k9.oppdrag.scope", defaultVerdi = "api://prod-fss.k9saksbehandling.k9-oppdrag/.default") String k9OppdragScope) {
         this.uriIverksett = tilUri(urlK9Oppdrag, "iverksett/start");
         this.uriSimulering = tilUri(urlK9Oppdrag, "simulering/start");
+        this.uriSimuleringDiagnostikk = tilUri(urlK9Oppdrag, "diagnostikk/simulering");
         this.uriSimuleringResultat = tilUri(urlK9Oppdrag, "simulering/resultat");
         this.uriKansellerSimulering = tilUri(urlK9Oppdrag, "simulering/kanseller");
 
@@ -52,6 +54,10 @@ public class K9OppdragRestKlient {
 
     public void startSimulering(TilkjentYtelseOppdrag tilkjentYtelseOppdrag) {
         restClient.post(uriSimulering, tilkjentYtelseOppdrag);
+    }
+
+    public String utførSimuleringDiagnostikk(TilkjentYtelseOppdrag tilkjentYtelseOppdrag) {
+        return restClient.post(uriSimuleringDiagnostikk, tilkjentYtelseOppdrag);
     }
 
     public Optional<SimuleringResultatDto> hentSimuleringResultat(UUID behandlingUuid) {

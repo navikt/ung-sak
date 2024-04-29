@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import org.jetbrains.annotations.Nullable;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -35,9 +33,9 @@ import no.nav.k9.sak.domene.registerinnhenting.YtelsesspesifikkRelasjonsFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.ContainerContextRunner;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.OMSORGSPENGER)
@@ -83,18 +81,19 @@ public class PdlKallDump implements DebugDumpBehandling {
     }
 
     @Override
-    public List<DumpOutput> dump(Behandling behandling) {
-        return ContainerContextRunner.doRun(behandling, () -> doDump(behandling));
+    public void dump(DumpMottaker dumpMottaker, Behandling behandling, String basePath) {
+        ContainerContextRunner.doRun(behandling, () -> doDump(dumpMottaker, behandling, basePath));
     }
 
-    @Nullable
-    private List<DumpOutput> doDump(Behandling behandling) {
+    private int doDump(DumpMottaker dumpMottaker, Behandling behandling, String basePath) {
         List<String> dumpinnhold = new ArrayList<>();
         AktørId søkerAktørId = behandling.getAktørId();
         Personinfo søkerInfo = personinfoAdapter.hentPersoninfo(dumpinnhold, søkerAktørId);
 
         byggPersonopplysningMedRelasjoner(dumpinnhold, søkerInfo, behandling);
-        return List.of(new DumpOutput(path, String.join("\n", dumpinnhold)));
+        dumpMottaker.newFile(basePath + "/" + path);
+        dumpMottaker.write(String.join("\n", dumpinnhold));
+        return 1;
     }
 
     private PersonInformasjonBuilder byggPersonopplysningMedRelasjoner(List<String> dumpinnhold, Personinfo søkerPersonInfo, Behandling behandling) {

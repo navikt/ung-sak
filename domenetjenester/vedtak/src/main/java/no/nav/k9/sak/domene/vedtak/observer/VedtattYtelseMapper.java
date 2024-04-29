@@ -7,13 +7,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
-import no.nav.abakus.iaygrunnlag.Organisasjon;
 import no.nav.abakus.vedtak.ytelse.Desimaltall;
 import no.nav.abakus.vedtak.ytelse.Periode;
 import no.nav.abakus.vedtak.ytelse.v1.anvisning.Anvisning;
 import no.nav.abakus.vedtak.ytelse.v1.anvisning.AnvistAndel;
+import no.nav.abakus.vedtak.ytelse.v1.anvisning.ArbeidsgiverIdent;
 import no.nav.abakus.vedtak.ytelse.v1.anvisning.Inntektklasse;
+import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
@@ -26,11 +26,11 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 class VedtattYtelseMapper {
 
 
-    static List<Anvisning> mapAnvisninger(BeregningsresultatEntitet uttakResultatEntitet, List<ArbeidsforholdReferanse> arbeidsforholdReferanser) {
-        if (uttakResultatEntitet == null) {
+    static List<Anvisning> mapAnvisninger(BeregningsresultatEntitet beregningsresultatEntitet, List<ArbeidsforholdReferanse> arbeidsforholdReferanser) {
+        if (beregningsresultatEntitet == null) {
             return List.of();
         }
-        return uttakResultatEntitet.getBeregningsresultatPerioder().stream()
+        return beregningsresultatEntitet.getBeregningsresultatPerioder().stream()
             .filter(periode -> periode.getDagsats() > 0)
             .map(p -> map(p, arbeidsforholdReferanser))
             .collect(Collectors.toList());
@@ -50,7 +50,7 @@ class VedtattYtelseMapper {
 
     private static List<AnvistAndel> mapAndeler(List<BeregningsresultatAndel> beregningsresultatAndelList, List<ArbeidsforholdReferanse> arbeidsforholdReferanser) {
         Map<AnvistAndelNøkkel, List<BeregningsresultatAndel>> resultatPrNøkkkel = beregningsresultatAndelList.stream()
-            .collect(Collectors.groupingBy(a -> new AnvistAndelNøkkel(a.getArbeidsgiver().orElse(null), a.getArbeidsforholdRef(), a.getInntektskategori())));
+            .collect(Collectors.groupingBy(a -> new AnvistAndelNøkkel(a.getArbeidsgiver().orElse(null), a.getArbeidsforholdRef(), a.getInntektskategori(), a.getAktivitetStatus())));
         return resultatPrNøkkkel.entrySet().stream()
             .sorted(Map.Entry.comparingByKey())
             .map(e -> mapTilAnvistAndel(e, arbeidsforholdReferanser))
@@ -131,14 +131,8 @@ class VedtattYtelseMapper {
             .orElse(null);
     }
 
-    private static no.nav.abakus.iaygrunnlag.Aktør mapAktør(Arbeidsgiver arbeidsgiver) {
-        if (arbeidsgiver == null) {
-            return null;
-        }
-        if (arbeidsgiver.getErVirksomhet()) {
-            return new Organisasjon(arbeidsgiver.getIdentifikator());
-        }
-        return new AktørIdPersonident(arbeidsgiver.getIdentifikator());
+    private static ArbeidsgiverIdent mapAktør(Arbeidsgiver arbeidsgiver) {
+        return arbeidsgiver != null ? new ArbeidsgiverIdent(arbeidsgiver.getIdentifikator()) : null;
     }
 
     private static class AnvistAndelNøkkel implements Comparable<AnvistAndelNøkkel> {
@@ -146,10 +140,13 @@ class VedtattYtelseMapper {
         private final InternArbeidsforholdRef arbeidsforholdRef;
         private final Inntektskategori inntektskategori;
 
-        public AnvistAndelNøkkel(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, Inntektskategori inntektskategori) {
+        private final AktivitetStatus aktivitetStatus;
+
+        public AnvistAndelNøkkel(Arbeidsgiver arbeidsgiver, InternArbeidsforholdRef arbeidsforholdRef, Inntektskategori inntektskategori, AktivitetStatus aktivitetStatus) {
             this.arbeidsgiver = arbeidsgiver;
             this.arbeidsforholdRef = arbeidsforholdRef;
             this.inntektskategori = inntektskategori;
+            this.aktivitetStatus = aktivitetStatus;
         }
 
         public Arbeidsgiver getArbeidsgiver() {
@@ -164,17 +161,21 @@ class VedtattYtelseMapper {
             return inntektskategori;
         }
 
+        public AktivitetStatus getAktivitetStatus() {
+            return aktivitetStatus;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             AnvistAndelNøkkel that = (AnvistAndelNøkkel) o;
-            return Objects.equals(arbeidsgiver, that.arbeidsgiver) && Objects.equals(arbeidsforholdRef, that.arbeidsforholdRef) && inntektskategori == that.inntektskategori;
+            return Objects.equals(arbeidsgiver, that.arbeidsgiver) && Objects.equals(arbeidsforholdRef, that.arbeidsforholdRef) && inntektskategori == that.inntektskategori && aktivitetStatus == that.aktivitetStatus;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(arbeidsgiver, arbeidsforholdRef, inntektskategori);
+            return Objects.hash(arbeidsgiver, arbeidsforholdRef, inntektskategori, aktivitetStatus);
         }
 
         @Override

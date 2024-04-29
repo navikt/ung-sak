@@ -40,6 +40,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.mottak.Behandlingsoppretter;
@@ -65,7 +66,7 @@ public class InnhentDokumentTjenesteTest {
     private AksjonspunktTestSupport aksjonspunktRepository;
 
     @Mock
-    private ProsessTaskTjeneste prosessTaskRepository;
+    private ProsessTaskTjeneste prosessTaskTjeneste;
     @Mock
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
     @Mock
@@ -74,14 +75,13 @@ public class InnhentDokumentTjenesteTest {
     private HistorikkinnslagTjeneste historikkinnslagTjeneste;
     @Mock
     private Dokumentmottaker dokumentmottaker;
-
     @Mock
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
+    @Mock
+    private FagsakProsessTaskRepository fagsakProsessTaskRepository;
 
     private InnhentDokumentTjeneste innhentDokumentTjeneste;
     private DokumentmottakerFelles dokumentmottakerFelles;
-
-    private Long dummyTaskId = 1L;
 
     @BeforeEach
     public void oppsett() {
@@ -90,7 +90,7 @@ public class InnhentDokumentTjenesteTest {
         MockitoAnnotations.initMocks(this);
 
         dokumentmottakerFelles = Mockito.spy(new DokumentmottakerFelles(repositoryProvider,
-            prosessTaskRepository,
+            prosessTaskTjeneste,
             historikkinnslagTjeneste));
 
         innhentDokumentTjeneste = Mockito.spy(new InnhentDokumentTjeneste(
@@ -99,7 +99,8 @@ public class InnhentDokumentTjenesteTest {
             behandlingsoppretter,
             repositoryProvider,
             behandlingProsesseringTjeneste,
-            prosessTaskRepository));
+            prosessTaskTjeneste,
+            fagsakProsessTaskRepository));
 
         OrganisasjonsEnhet enhet = new OrganisasjonsEnhet("0312", "enhetNavn");
         when(behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(any(Fagsak.class))).thenReturn(enhet);

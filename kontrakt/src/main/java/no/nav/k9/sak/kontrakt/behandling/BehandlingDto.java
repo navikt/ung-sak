@@ -7,13 +7,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -23,9 +16,16 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.geografisk.Språkkode;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
@@ -101,6 +101,11 @@ public class BehandlingDto {
     @Min(0L)
     @Max(Long.MAX_VALUE)
     private Long fagsakId;
+
+    @JsonProperty(value = "sakstype")
+    @Valid
+    @NotNull
+    private FagsakYtelseType sakstype;
 
     @JsonInclude(value = Include.NON_NULL)
     @JsonProperty(value = "førsteÅrsak")
@@ -246,6 +251,10 @@ public class BehandlingDto {
         return fagsakId;
     }
 
+    public FagsakYtelseType getSakstype() {
+        return sakstype;
+    }
+
     public BehandlingÅrsakDto getFørsteÅrsak() {
         return førsteÅrsak;
     }
@@ -376,6 +385,10 @@ public class BehandlingDto {
 
     public void setFagsakId(Long fagsakId) {
         this.fagsakId = fagsakId;
+    }
+
+    public void setSakstype(FagsakYtelseType sakstype) {
+        this.sakstype = sakstype;
     }
 
     public void setFørsteÅrsak(BehandlingÅrsakDto førsteÅrsak) {

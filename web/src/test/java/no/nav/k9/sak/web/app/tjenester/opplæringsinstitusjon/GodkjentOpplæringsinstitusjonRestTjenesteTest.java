@@ -14,12 +14,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import jakarta.ws.rs.core.Response;
-import no.nav.k9.sak.kontrakt.opplæringspenger.GodkjentOpplæringsinstitusjonDto;
-import no.nav.k9.sak.kontrakt.opplæringspenger.GodkjentOpplæringsinstitusjonIdDto;
+import no.nav.k9.sak.kontrakt.opplæringspenger.godkjentopplaeringsinstitusjon.GodkjentOpplæringsinstitusjonDto;
+import no.nav.k9.sak.kontrakt.opplæringspenger.godkjentopplaeringsinstitusjon.GodkjentOpplæringsinstitusjonIdDto;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.ytelse.opplaeringspenger.inngangsvilkår.institusjon.GodkjentOpplæringsinstitusjonTjeneste;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.GodkjentOpplæringsinstitusjon;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.GodkjentOpplæringsinstitusjonPeriode;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.godkjentopplaeringsinstitusjon.GodkjentOpplæringsinstitusjon;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.godkjentopplaeringsinstitusjon.GodkjentOpplæringsinstitusjonPeriode;
 
 public class GodkjentOpplæringsinstitusjonRestTjenesteTest {
 

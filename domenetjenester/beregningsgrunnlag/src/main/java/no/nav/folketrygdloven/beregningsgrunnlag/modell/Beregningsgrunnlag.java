@@ -20,8 +20,6 @@ public class Beregningsgrunnlag {
     private LocalDate skjæringstidspunkt;
     private List<BeregningsgrunnlagAktivitetStatus> aktivitetStatuser = new ArrayList<>();
     private List<BeregningsgrunnlagPeriode> beregningsgrunnlagPerioder = new ArrayList<>();
-    private Sammenligningsgrunnlag sammenligningsgrunnlag;
-    private List<SammenligningsgrunnlagPrStatus> sammenligningsgrunnlagPrStatusListe = new ArrayList<>();
     private Beløp grunnbeløp;
     private List<BeregningsgrunnlagFaktaOmBeregningTilfelle> faktaOmBeregningTilfeller = new ArrayList<>();
     private boolean overstyrt = false;
@@ -39,10 +37,6 @@ public class Beregningsgrunnlag {
             .stream()
             .sorted(Comparator.comparing(BeregningsgrunnlagPeriode::getBeregningsgrunnlagPeriodeFom))
             .toList();
-    }
-
-    public Sammenligningsgrunnlag getSammenligningsgrunnlag() {
-        return sammenligningsgrunnlag;
     }
 
     public Beløp getGrunnbeløp() {
@@ -86,10 +80,6 @@ public class Beregningsgrunnlag {
             .stream()
             .map(BeregningsgrunnlagFaktaOmBeregningTilfelle::getFaktaOmBeregningTilfelle)
             .toList();
-    }
-
-    public List<SammenligningsgrunnlagPrStatus> getSammenligningsgrunnlagPrStatusListe() {
-        return sammenligningsgrunnlagPrStatusListe;
     }
 
     public boolean isOverstyrt() {
@@ -197,17 +187,6 @@ public class Beregningsgrunnlag {
             verifiserKanModifisere();
             BeregningsgrunnlagFaktaOmBeregningTilfelle b = BeregningsgrunnlagFaktaOmBeregningTilfelle.builder().medFaktaOmBeregningTilfelle(tilfelle).build(kladd);
             this.kladd.faktaOmBeregningTilfeller.add(b);
-        }
-
-        public Builder medSammenligningsgrunnlag(Sammenligningsgrunnlag sammenligningsgrunnlag) {
-            verifiserKanModifisere();
-            kladd.sammenligningsgrunnlag = sammenligningsgrunnlag;
-            return this;
-        }
-
-        public Builder leggTilSammenligningsgrunnlag(SammenligningsgrunnlagPrStatus.Builder sammenligningsgrunnlagPrStatusBuilder) { // NOSONAR
-            kladd.sammenligningsgrunnlagPrStatusListe.add(sammenligningsgrunnlagPrStatusBuilder.medBeregningsgrunnlag(kladd).build());
-            return this;
         }
 
         public Builder medOverstyring(boolean overstyrt) {

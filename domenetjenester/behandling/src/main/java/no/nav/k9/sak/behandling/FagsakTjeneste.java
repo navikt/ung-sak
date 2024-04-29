@@ -21,8 +21,8 @@ import no.nav.k9.sak.typer.Saksnummer;
 @Dependent
 public class FagsakTjeneste {
 
-    private FagsakRepository fagsakRepository;
-    private FagsakStatusEventPubliserer fagsakStatusEventPubliserer;
+    private final FagsakRepository fagsakRepository;
+    private final FagsakStatusEventPubliserer fagsakStatusEventPubliserer;
 
     @Inject
     public FagsakTjeneste(BehandlingRepositoryProvider repositoryProvider,
@@ -87,6 +87,5 @@ public class FagsakTjeneste {
     public List<SakInfotrygdMigrering> finnSakInfotrygdmigreringForFagsak(Fagsak fagsak) {
         return fagsakRepository.hentSakInfotrygdMigreringer(fagsak.getId());
     }
-
 
 }

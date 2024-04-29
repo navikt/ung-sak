@@ -57,7 +57,6 @@ import no.nav.k9.sak.kontrakt.person.AktørIdOgFnrDto;
 import no.nav.k9.sak.kontrakt.person.AktørInfoDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
 
@@ -108,10 +107,8 @@ public class ForvaltningPersonRestTjeneste {
             }
         }).toList();
 
-        String path = "";
-
-        var output = dumpResultSetToCsv(path, results).orElseThrow();
-        return Response.ok(output.getContent(), MediaType.TEXT_PLAIN_TYPE).build();
+        String output = dumpResultSetToCsv(results).orElseThrow();
+        return Response.ok(output, MediaType.TEXT_PLAIN_TYPE).build();
     }
 
 
@@ -128,14 +125,14 @@ public class ForvaltningPersonRestTjeneste {
         return fagsaker.stream().map(Fagsak::getSaksnummer).distinct().toList();
     }
 
-    private static Optional<DumpOutput> dumpResultSetToCsv(String path, List<AktørIdOgFnrDto> results) {
+    private static Optional<String> dumpResultSetToCsv(List<AktørIdOgFnrDto> results) {
         if (results.isEmpty()) {
             return Optional.empty();
         }
         var toCsv = new LinkedHashMap<String, Function<AktørIdOgFnrDto, ?>>();
         toCsv.put("aktørId", AktørIdOgFnrDto::getAktørIdString);
         toCsv.put("fnr", AktørIdOgFnrDto::getFnr);
-        return Optional.of(dumpAsCsv(true, results, path, toCsv));
+        return Optional.of(dumpAsCsv(true, results, toCsv));
     }
 
 

@@ -27,8 +27,9 @@ import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.Opptjeningsnøkkel;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetFilter;
 import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
-import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurderingBeregning;
+import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetForBeregningVurdering;
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
+import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Periode;
@@ -37,7 +38,6 @@ import no.nav.k9.sak.typer.Periode;
 @FagsakYtelseTypeRef(OMSORGSPENGER)
 public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningForBeregningTjeneste {
 
-    private final OpptjeningAktivitetVurderingBeregning vurderOpptjening = new OpptjeningAktivitetVurderingBeregning();
     private OpptjeningsperioderTjeneste opptjeningsperioderTjeneste;
     private OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -86,11 +86,15 @@ public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningFo
             .orElse(null);
         var opptjening = opptjeningResultat.flatMap(it -> it.finnOpptjening(vilkårsperiode.getFomDato())).orElseThrow(() -> new IllegalStateException("Finner ingen opptjeningsaktivitet for skjæringstidspunkt=" + vilkårsperiode));
         var yrkesaktivitetFilter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(behandlingReferanse.getAktørId()));
-        var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse, iayGrunnlag, vurderOpptjening, opptjening.getOpptjeningPeriode(), vilkårsperiode, yrkesaktivitetFilter);
+        var aktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(behandlingReferanse,
+            iayGrunnlag,
+            new OpptjeningAktivitetForBeregningVurdering(opptjeningResultat.get()),
+            opptjening.getOpptjeningPeriode(), vilkårsperiode, yrkesaktivitetFilter);
         return aktiviteter.stream()
             .filter(oa -> filtrerForVilkårsperiode(vilkårsperiode, oa, vilkårUtfallMerknad))
             .filter(oa -> !oa.getPeriode().getTomDato().isBefore(opptjening.getFom()))
             .filter(oa -> opptjeningsaktiviteter.erRelevantAktivitet(oa.getOpptjeningAktivitetType()))
+            .filter(oa -> oa.getVurderingsStatus().equals(VurderingsStatus.GODKJENT))
             .collect(Collectors.toList());
     }
 
@@ -129,13 +133,12 @@ public class OmsorgspengerOpptjeningForBeregningTjeneste implements OpptjeningFo
     }
 
     private OpptjeningPeriode mapOpptjeningPeriode(OpptjeningsperiodeForSaksbehandling ops) {
-        var periode = new Periode(ops.getPeriode().getFomDato(), ops.getPeriode().getTomDato());
         var arbeidsgiver = ops.getArbeidsgiver();
         var orgnummer = arbeidsgiver == null ? null : arbeidsgiver.getOrgnr();
         var aktørId = arbeidsgiver == null ? null : (arbeidsgiver.getAktørId() == null ? null : arbeidsgiver.getAktørId().getId());
         var arbeidsforholdId = Optional.ofNullable(ops.getOpptjeningsnøkkel())
             .flatMap(Opptjeningsnøkkel::getArbeidsforholdRef)
             .orElse(null);
-        return OpptjeningAktiviteter.nyPeriode(ops.getOpptjeningAktivitetType(), periode, orgnummer, aktørId, arbeidsforholdId);
+        return OpptjeningAktiviteter.nyPeriode(ops.getOpptjeningAktivitetType(), ops.getPeriode(), orgnummer, aktørId, arbeidsforholdId);
     }
 }

@@ -51,6 +51,7 @@ public class AksjonspunktKodeDefinisjon {
     public static final String OVERSTYRING_AV_BEREGNINGSAKTIVITETER_KODE = "6014";
     public static final String OVERSTYRING_AV_BEREGNINGSGRUNNLAG_KODE = "6015";
     public static final String OVERSTYRING_AV_K9_VILKÅRET_KODE = "6016";
+    public static final String OVERSTYRING_AV_UTTAK_KODE = "6017";
     public static final String MANUELL_MARKERING_AV_UTLAND_SAKSTYPE_KODE = "6068";
 
     public static final String SØKERS_OPPLYSNINGSPLIKT_MANU_KODE = "5017";
@@ -95,6 +96,7 @@ public class AksjonspunktKodeDefinisjon {
     public static final String VURDER_PERIODER_MED_OPPTJENING_KODE = "5051";
     public static final String VURDER_ARBEIDSFORHOLD_KODE = "5080";
     public static final String VURDER_FEILUTBETALING_KODE = "5084";
+    public static final String SJEKK_TILBAKEKREVING_KODE = "5085";
     public static final String VURDER_OPPTJENINGSVILKÅRET_KODE = "5089";
 
     public static final String AUTOMATISK_MARKERING_AV_UTENLANDSSAK_KODE = "5068";
@@ -108,6 +110,7 @@ public class AksjonspunktKodeDefinisjon {
 
     public static final String AVKLAR_OMSORGEN_FOR_KODE_V2 = "9020";
 
+
     // PSB
     public static final String KONTROLLER_LEGEERKLÆRING_KODE = "9001";
     public static final String VURDER_NATTEVÅK = "9200";
@@ -115,15 +118,18 @@ public class AksjonspunktKodeDefinisjon {
     public static final String VURDER_RETT_ETTER_PLEIETRENGENDES_DØD = "9202";
     public static final String MANGLER_AKTIVITETER = "9203";
     public static final String VENT_ANNEN_PSB_SAK_KODE = "9290";
+    public static final String VURDER_DATO_NY_REGEL_UTTAK = "9291";
     public static final String OVERSTYR_BEREGNING_INPUT = "9005";
     public static final String AUTO_VENT_PÅ_KOMPLETT_SØKNAD_FOR_PERIODE = "9006";
     public static final String TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE = "9007";
     public static final String TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE_ANNEN_PART = "9008";
 
+
     // OLP
     public static final String VURDER_INSTITUSJON = "9300";
     public static final String VURDER_NØDVENDIGHET = "9301";
     public static final String VURDER_GJENNOMGÅTT_OPPLÆRING = "9302";
+    public static final String VURDER_REISETID = "9303";
 
     // OMS
     public static final String AVKLAR_OMSORGEN_FOR_KODE = "9002";
@@ -141,6 +147,7 @@ public class AksjonspunktKodeDefinisjon {
 
     // Generelt manglende funksjonalitet.
     public static final String AUTO_VENT_FILTER_MANGLENDE_FUNKSJONALITET = "9999";
+    public static final String AUTO_VENTE_PA_OMSORGENFOR_OMS = "9099";
 
     // Kompletthet for beregning
     public static final String AVKLAR_KOMPLETT_NOK_FOR_BEREGNING_KODE = "9069";

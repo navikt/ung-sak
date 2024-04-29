@@ -12,6 +12,8 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.kodeverk.geografisk.Landkoder;
+import no.nav.k9.kodeverk.uttak.UtenlandsoppholdÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -21,8 +23,10 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.mottak.SøknadPersisterer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.ArbeidPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.FeriePeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UtenlandsoppholdPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPeriode;
 import no.nav.k9.søknad.Søknad;
+import no.nav.k9.søknad.felles.personopplysninger.Utenlandsopphold;
 import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.ytelse.pls.v1.PleipengerLivetsSluttfase;
 import no.nav.k9.søknad.ytelse.psb.v1.LovbestemtFerie;
@@ -54,7 +58,7 @@ class SøknadOversetter {
             uttakPerioder,
             arbeidPerioder,
             List.of(),
-            List.of(),
+            mapUtenlandsopphold(ytelse.getUtenlandsopphold()),
             mapFerie(søknadsperioder, ytelse.getLovbestemtFerie()),
             List.of(),
             List.of());
@@ -67,6 +71,35 @@ class SøknadOversetter {
         søknadPersisterer.lagreSøknadsperioder(søknadsperioder, ytelse.getTrekkKravPerioder(), journalpostId, behandlingId);
         søknadPersisterer.lagreUttak(perioderFraSøknad, behandlingId);
         søknadPersisterer.oppdaterFagsakperiode(maksSøknadsperiode, fagsakId);
+    }
+
+    private List<UtenlandsoppholdPeriode> mapUtenlandsopphold(Utenlandsopphold utenlandsopphold) {
+        final List<UtenlandsoppholdPeriode> utenlandsoppholdPerioder = utenlandsopphold.getPerioder()
+            .entrySet()
+            .stream()
+            .map(entry ->
+                new UtenlandsoppholdPeriode(
+                    entry.getKey().getFraOgMed(),
+                    entry.getKey().getTilOgMed(),
+                    true,
+                    Landkoder.fraKode(entry.getValue().getLand().getLandkode()),
+                    entry.getValue().getÅrsak() == null ? UtenlandsoppholdÅrsak.INGEN : UtenlandsoppholdÅrsak.fraKode(entry.getValue().getÅrsak().name())))
+            .collect(Collectors.toList());
+
+        if (utenlandsopphold.getPerioderSomSkalSlettes() != null) {
+            utenlandsoppholdPerioder.addAll(utenlandsopphold.getPerioderSomSkalSlettes()
+                .entrySet()
+                .stream()
+                .map(entry ->
+                    new UtenlandsoppholdPeriode(
+                        entry.getKey().getFraOgMed(),
+                        entry.getKey().getTilOgMed(),
+                        false,
+                        Landkoder.fraKode(entry.getValue().getLand().getLandkode()),
+                        entry.getValue().getÅrsak() == null ? UtenlandsoppholdÅrsak.INGEN : UtenlandsoppholdÅrsak.fraKode(entry.getValue().getÅrsak().name())))
+                .collect(Collectors.toList()));
+        }
+        return utenlandsoppholdPerioder;
     }
 
     private Collection<FeriePeriode> mapFerie(List<Periode> søknadsperioder, LovbestemtFerie input) {

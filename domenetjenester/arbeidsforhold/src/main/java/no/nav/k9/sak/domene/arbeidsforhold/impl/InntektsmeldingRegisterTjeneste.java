@@ -173,7 +173,7 @@ public class InntektsmeldingRegisterTjeneste {
 
         List<Inntektsmelding> inntektsmeldinger;
         if (erEndringssøknad && referanse.erRevurdering()) {
-            inntektsmeldinger = inntektsmeldingTjeneste.hentAlleInntektsmeldingerMottattEtterGjeldendeVedtak(referanse);
+            inntektsmeldinger = inntektsmeldingTjeneste.hentInntektsmeldingerMottattEtterGjeldendeVedtak(referanse);
         } else {
             inntektsmeldinger = inntektsmeldingTjeneste.hentInntektsmeldinger(referanse, vurderingsdato);
         }

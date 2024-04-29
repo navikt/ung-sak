@@ -30,6 +30,8 @@ public enum BeregningsgrunnlagTilstand implements Kodeverdi {
     FORTS_FORESLÅTT("FORESLÅTT_DEL_2", "Fortsettelse Foreslått"),
     FORTS_FORESLÅTT_UT("FORESLÅTT_DEL_2_UT", "Fortsettelse Foreslått"),
     VURDERT_VILKÅR("VURDERT_VILKÅR", "Vurder vilkår"),
+    VURDERT_TILKOMMET_INNTEKT("VURDERT_TILKOMMET_INNTEKT", "Vurder tilkommet inntekt"),
+    VURDERT_TILKOMMET_INNTEKT_UT("VURDERT_TILKOMMET_INNTEKT_UT", "Vurder tilkommet inntekt - UT"),
     VURDERT_REFUSJON("VURDERT_REFUSJON", "Vurder refusjonskrav beregning"),
     VURDERT_REFUSJON_UT("VURDERT_REFUSJON_UT", "Vurder refusjonskrav beregning - Ut"),
     OPPDATERT_MED_REFUSJON_OG_GRADERING("OPPDATERT_MED_REFUSJON_OG_GRADERING", "Tilstand for splittet periode med refusjon og gradering"),

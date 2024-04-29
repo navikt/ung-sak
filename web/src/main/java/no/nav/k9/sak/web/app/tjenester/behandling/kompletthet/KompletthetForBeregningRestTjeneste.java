@@ -198,7 +198,7 @@ public class KompletthetForBeregningRestTjeneste {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         var ref = BehandlingReferanse.fra(behandling);
         var manglendeVedleggForPeriode = kompletthetForBeregningTjeneste.utledAllePåkrevdeVedleggFraGrunnlag(ref);
-        var unikeInntektsmeldingerForFagsak = kompletthetForBeregningTjeneste.hentAlleUnikeInntektsmeldingerForFagsak(behandling.getFagsak().getSaksnummer());
+        var unikeInntektsmeldingerForFagsak = utledUnikeInntektsmeldinger(behandling);
         var kompletthetPerioder = kompletthetForBeregningTjeneste.hentKompletthetsVurderinger(ref);
         var tjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType());
         var perioderTilVurdering = tjeneste.utled(ref.getBehandlingId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);

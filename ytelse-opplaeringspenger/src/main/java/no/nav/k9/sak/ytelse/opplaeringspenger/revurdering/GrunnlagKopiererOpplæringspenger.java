@@ -8,7 +8,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.sak.behandling.revurdering.GrunnlagKopierer;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.ytelse.opplaeringspenger.repo.VurdertOpplæringRepository;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.vurdering.VurdertOpplæringRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.revurdering.GrunnlagKopiererPleiepenger;
 
 @ApplicationScoped

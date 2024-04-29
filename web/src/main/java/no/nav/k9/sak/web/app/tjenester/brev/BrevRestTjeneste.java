@@ -1,31 +1,20 @@
 package no.nav.k9.sak.web.app.tjenester.brev;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
-
-import java.util.Collection;
-import java.util.Optional;
-import java.util.UUID;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import no.nav.k9.felles.integrasjon.organisasjon.OrganisasjonRestKlient;
+import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
@@ -40,6 +29,18 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.k9.sak.kontrakt.vedtak.VedtakVarselDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Function;
+
+import static no.nav.k9.abac.BeskyttetRessursKoder.APPLIKASJON;
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
 
 @Path("")
 @ApplicationScoped
@@ -48,12 +49,14 @@ public class BrevRestTjeneste {
 
     public static final String HENT_VEDTAKVARSEL_PATH = "/brev/vedtak";
     public static final String BREV_BESTILL_PATH = "/brev/bestill";
+    public static final String EREG_OPPSLAG_PATH = "/brev/mottaker-info/ereg";
     private static final Logger LOGGER = LoggerFactory.getLogger(BrevRestTjeneste.class);
     private VilkårResultatRepository vilkårResultatRepository;
     private BehandlingRepository behandlingRepository;
     private DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste;
     private VedtakVarselRepository vedtakVarselRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
+    private OrganisasjonRestKlient eregRestKlient;
 
     public BrevRestTjeneste() {
         // For Rest-CDI
@@ -64,12 +67,14 @@ public class BrevRestTjeneste {
                             BehandlingVedtakRepository behandlingVedtakRepository,
                             VilkårResultatRepository vilkårResultatRepository,
                             BehandlingRepository behandlingRepository,
-                            DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste) {
+                            DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste,
+                            OrganisasjonRestKlient eregRestKlient) {
         this.vedtakVarselRepository = vedtakVarselRepository;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.behandlingRepository = behandlingRepository;
         this.dokumentBestillerApplikasjonTjeneste = dokumentBestillerApplikasjonTjeneste;
+        this.eregRestKlient = eregRestKlient;
     }
 
     @POST
@@ -138,4 +143,37 @@ public class BrevRestTjeneste {
         dto.setAvslagsarsak(vilkårMedAvslagsårsaker.values().stream().flatMap(Collection::stream).findFirst().orElse(null));
     }
 
+    /**
+     * Gjere oppslag i intern ereg service (tilsvarer enhetsregisteret i Brønnøysund) og svarer tilbake ønska info om
+     * gitt organisasjon. For frontend-oppslag i forbindelse med sending av brev til tredjepart.
+     */
+    @POST
+    @Path(EREG_OPPSLAG_PATH)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+    @Operation(description = "Hent navnet til gitt organisasjonsnr for sending til tredjepart", tags = "brev")
+    @BeskyttetRessurs(action = READ, resource = APPLIKASJON)
+    @ApiResponse(
+        responseCode = "200",
+        description = "respons fra ereg, eller null viss organisasjon ikke blir funnet",
+        content = @Content(
+            mediaType = MediaType.APPLICATION_JSON,
+            schema = @Schema(
+                nullable = true,
+                allOf = {BrevMottakerinfoEregResponseDto.class}
+            )
+        )
+    )
+    public Optional<BrevMottakerinfoEregResponseDto> getBrevMottakerinfoEreg(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = IngenTilgangsAttributter.class) OrganisasjonsnrDto organisasjonsnrDto) {
+        return eregRestKlient.hentOrganisasjonOptional(organisasjonsnrDto.organisasjonsnr()).map(org -> {
+            return new BrevMottakerinfoEregResponseDto(org.getNavn());
+        });
+    }
+
+    public static class IngenTilgangsAttributter implements Function<Object, AbacDataAttributter> {
+        @Override
+        public AbacDataAttributter apply(Object obj) {
+            return AbacDataAttributter.opprett();
+        }
+    }
 }
