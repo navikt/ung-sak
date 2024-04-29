@@ -15,7 +15,7 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 public class UttaksplanCache {
 
     private static final Logger logger = LoggerFactory.getLogger(UttaksplanCache.class);
-    private static long SANITY_SJEKK_CACHE_ALDER_SEKUNDER = 30;
+    private static long SANITY_SJEKK_CACHE_ALDER_SEKUNDER = 300;
     private LocalDateTime opprettet = LocalDateTime.now();
     private Map<UUID, Uttaksplan> innhold = new HashMap<>();
 
@@ -31,15 +31,15 @@ public class UttaksplanCache {
     public Uttaksplan getUttaksplan(UUID behandlingUuid) {
         sanityCheckAlderAvCache();
         if (innhold.containsKey(behandlingUuid)) {
-            logger.info("Uttaksplan cache hit");
+            logger.info("Uttaksplan cache hit for {}", behandlingUuid);
             return innhold.get(behandlingUuid);
         }
-        logger.info("Uttaksplan cache miss");
+        logger.info("Uttaksplan cache miss for {}", behandlingUuid);
         return null;
     }
 
     public void put(UUID behandlingUuid, Uttaksplan uttaksplan) {
-        logger.info("Uttaksplan cache put");
+        logger.info("Uttaksplan cache put for {}", behandlingUuid);
         innhold.put(behandlingUuid, uttaksplan);
         if (innhold.size() > 4) { //forventer at det hentes plan for inneværende og forrige behandling, samt annen part
             logger.warn("Uttaksplan-cache har {} behandlinger. Forventer lavere tall, men kan gi mening hvis behandlingene er knyttet til samme sak eller relaterte saker. Behandlinger i cache: {}", innhold.size(), innhold.keySet());
