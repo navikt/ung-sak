@@ -8,6 +8,7 @@ import java.util.Set;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
+import no.nav.k9.sak.web.server.metrics.PrometheusRestService;
 
 
 /**
@@ -22,6 +23,8 @@ public class InternalApplicationConfig extends Application {
     @Override
     public Set<Class<?>> getClasses() {
         Set<Class<?>> classes = new HashSet<>();
+
+        classes.add(PrometheusRestService.class);
         classes.add(HealthCheckRestService.class);
         return Collections.unmodifiableSet(classes);
     }

@@ -14,7 +14,6 @@
     <name>K9SAK :: Webapp</name>
 
     <properties>
-        <prometheus.version>1.2.1</prometheus.version>
         <swagger-ui.version>5.17.0</swagger-ui.version>
     </properties>
 
@@ -250,21 +249,7 @@
         </dependency>
 
         <!-- Metrics, logging, helse- og healthchecks -->
-        <dependency>
-            <groupId>io.prometheus</groupId>
-            <artifactId>prometheus-metrics-core</artifactId>
-            <version>${prometheus.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.prometheus</groupId>
-            <artifactId>prometheus-metrics-instrumentation-jvm</artifactId>
-            <version>${prometheus.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.prometheus</groupId>
-            <artifactId>prometheus-metrics-exporter-servlet-jakarta</artifactId>
-            <version>${prometheus.version}</version>
-        </dependency>
+
 
         <dependency>
             <groupId>net.logstash.logback</groupId>

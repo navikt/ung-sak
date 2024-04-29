@@ -32,7 +32,6 @@ import org.slf4j.MDC;
 
 import com.zaxxer.hikari.HikariDataSource;
 
-import io.prometheus.metrics.instrumentation.jvm.JvmMetrics;
 import jakarta.security.auth.message.config.AuthConfigFactory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -117,14 +116,9 @@ public class JettyServer {
     }
 
     private void konfigurer() throws Exception { // NOSONAR
-        konfigurerJvmMetrikker();
         konfigurerMiljø();
         konfigurerSikkerhet();
         konfigurerJndi();
-    }
-
-    private void konfigurerJvmMetrikker() {
-        JvmMetrics.builder().register();
     }
 
     protected void konfigurerMiljø() {
