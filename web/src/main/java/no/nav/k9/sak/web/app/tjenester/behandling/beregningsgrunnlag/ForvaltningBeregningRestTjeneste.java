@@ -166,7 +166,7 @@ public class ForvaltningBeregningRestTjeneste {
         var relevanteEndringerPrBehandling = behandlinger.stream().flatMap(t -> {
             var behandlingReferanse = BehandlingReferanse.fra(t);
             var relevanteEndringer = finnPerioderMedEndringVedFeilInntektsmelding.finnPerioderForEndringDersomFeilInntektsmeldingBrukes(behandlingReferanse, finnBehandlingerMedFeilIMDto.getFraDato());
-                return relevanteEndringer.map(it -> new FeilInntektsmeldingIBrukResponse(behandlingReferanse.getBehandlingId(), it.vilkårsperioderTilRevurdering(), it.kunEndringIRefusjonListe())).stream();
+                return relevanteEndringer.map(it -> new FeilInntektsmeldingIBrukResponse(behandlingReferanse.getSaksnummer(), behandlingReferanse.getBehandlingId(), it.vilkårsperioderTilRevurdering(), it.kunEndringIRefusjonListe())).stream();
             }).toList();
 
 
