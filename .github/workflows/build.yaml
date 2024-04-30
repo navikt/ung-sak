@@ -51,7 +51,7 @@ jobs:
     if: |
       ${{ github.ref_name == 'master' 
         && needs.verdikjede-tester.outputs.pleiepenger == 'success'
-        && needs.verdikjede-tester.outputs.livetslutt == 'success'
+        && needs.verdikjede-tester.outputs.livetssluttfase == 'success'
         && needs.verdikjede-tester.outputs.annet == 'success'
       }}
     needs: [build-app, verdikjede-tester]
