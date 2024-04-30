@@ -98,6 +98,8 @@ public class KalkulusRestKlient {
     private URI beregningsgrunnlagGrunnlagBolkEndpoint;
     private URI deaktiverBeregningsgrunnlag;
     private URI grunnbeløp;
+    private URI hentJournalpostIderEndpoint;
+
 
     private URI kontrollerGrunnbeløp;
     private URI simulerTilkommetInntekt;
@@ -139,6 +141,7 @@ public class KalkulusRestKlient {
         this.utledTilkommetAktivitet = toUri("/api/kalkulus/v1/utledTilkommetAktivitetForKoblinger");
         this.aktiveReferanserEndpoint = toUri("/api/kalkulus/v1/aktive-referanser");
         this.finnInntektsgradering = toUri("/api/kalkulus/v1/finnUttaksgradVedInntektsgradering");
+        this.hentJournalpostIderEndpoint = toUri("/api/kalkulus/v1/inntektsmeldingJournalposter");
     }
 
 
@@ -257,7 +260,7 @@ public class KalkulusRestKlient {
 
 
     public List<JournalpostIderResponse> hentInntektsmeldingJournalpostIder(HentJournalpostIderRequest request) {
-        var endpoint = grunnbeløp;
+        var endpoint = hentJournalpostIderEndpoint;
 
         try {
             return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), journalspostIderReader);
