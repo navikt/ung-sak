@@ -32,10 +32,10 @@ spec:
   resources:
     limits:
       cpu: "4000m"
-      memory: "4096Mi"
+      memory: "2500Mi"
     requests:
-      cpu: "500m"
-      memory: "4096Mi"
+      cpu: "1000m"
+      memory: "2500Mi"
   ingresses:
     - "https://k9-sak.nais.adeo.no/"
     - "https://k9-sak.prod-fss-pub.nais.io"
