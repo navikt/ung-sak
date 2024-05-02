@@ -25,7 +25,6 @@ jobs:
       gar: true
       image: ${{ inputs.image }}
       cluster: ${{ inputs.environment }}-fss
-      naiserator_file: .deploy/naiserator.yaml
-      input_vars_file: .deploy/${{ inputs.environment }}-fss.json
+      naiserator_file: deploy/${{ inputs.environment }}-fss
       namespace: k9saksbehandling
     secrets: inherit
