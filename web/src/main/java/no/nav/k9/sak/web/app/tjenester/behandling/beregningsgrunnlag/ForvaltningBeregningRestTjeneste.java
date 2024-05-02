@@ -146,7 +146,7 @@ public class ForvaltningBeregningRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Finner behandlinger og informasjon om perioder som er rammet av IM-feil", tags = "beregning")
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = DRIFT)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response finnBehandlingerMedFeilIM(@Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) FinnBehandlingerMedFeilIMDto finnBehandlingerMedFeilIMDto) { // NOSONAR
 

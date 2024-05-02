@@ -48,7 +48,12 @@ jobs:
     permissions:
       id-token: write
       contents: write
-    if: github.ref_name == 'master'
+    if: |
+      ${{ github.ref_name == 'master' 
+        && needs.verdikjede-tester.outputs.pleiepenger == 'success'
+        && needs.verdikjede-tester.outputs.livetssluttfase == 'success'
+        && needs.verdikjede-tester.outputs.annet == 'success'
+      }}
     needs: [build-app, verdikjede-tester]
     uses: navikt/sif-gha-workflows/.github/workflows/maven-deploy.yml@main
     with:
