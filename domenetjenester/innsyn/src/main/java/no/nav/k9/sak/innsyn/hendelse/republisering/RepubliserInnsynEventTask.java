@@ -13,6 +13,9 @@ import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.k9.sak.innsyn.hendelse.InnsynEventTjeneste;
 
 /**
@@ -32,6 +35,7 @@ public class RepubliserInnsynEventTask implements ProsessTaskHandler {
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private InnsynEventTjeneste innsynEventTjeneste;
     private PubliserBehandlingInnsynRepository repository;
+    private BehandlingRepository behandlingRepository;
 
     RepubliserInnsynEventTask() {
         // for CDI proxy
@@ -40,10 +44,12 @@ public class RepubliserInnsynEventTask implements ProsessTaskHandler {
     @Inject
     public RepubliserInnsynEventTask(ProsessTaskTjeneste prosessTaskTjeneste,
                                      InnsynEventTjeneste innsynEventTjeneste,
-                                     PubliserBehandlingInnsynRepository repository) {
+                                     PubliserBehandlingInnsynRepository repository,
+                                     BehandlingRepository behandlingRepository) {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.innsynEventTjeneste = innsynEventTjeneste;
         this.repository = repository;
+        this.behandlingRepository = behandlingRepository;
     }
 
     @Override
@@ -63,7 +69,9 @@ public class RepubliserInnsynEventTask implements ProsessTaskHandler {
         for (var rad : rader) {
             try {
                 LOG_CONTEXT.add("behandling", rad.getBehandlingId());
-                innsynEventTjeneste.publiserBehandling(rad.getBehandlingId());
+                Behandling behandling = behandlingRepository.hentBehandling(rad.getBehandlingId());
+                BehandlingProsessTask.logContext(behandling);
+                innsynEventTjeneste.publiserBehandling(behandling);
                 rad.fullført();
             } catch (Exception e) {
                 log.warn("Publisering til innsyn feilet for id={} behandling={} i kjøring={}", rad.getId(), rad.getBehandlingId(), kjøringId, e);

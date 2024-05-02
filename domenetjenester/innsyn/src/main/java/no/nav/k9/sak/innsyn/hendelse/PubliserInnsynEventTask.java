@@ -10,8 +10,10 @@ import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
-import no.nav.k9.sak.innsyn.BrukerdialoginnsynMeldingProducer;
+import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
 
 /**
  * For å sende en enkel behandling til innsyn
@@ -24,20 +26,25 @@ public class PubliserInnsynEventTask implements ProsessTaskHandler {
     public static final String TASKTYPE = "innsyn.PubliserInnsynEvent";
 
     private InnsynEventTjeneste innsynEventTjeneste;
+    private BehandlingRepository behandlingRepository;
 
     PubliserInnsynEventTask() {
         // for CDI proxy
     }
 
     @Inject
-    public PubliserInnsynEventTask(InnsynEventTjeneste innsynEventTjeneste, BrukerdialoginnsynMeldingProducer producer) {
+    public PubliserInnsynEventTask(
+            InnsynEventTjeneste innsynEventTjeneste, BehandlingRepository behandlingRepository) {
         this.innsynEventTjeneste = innsynEventTjeneste;
+        this.behandlingRepository = behandlingRepository;
     }
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
         Objects.requireNonNull(prosessTaskData.getBehandlingId());
-        innsynEventTjeneste.publiserBehandling(Long.valueOf(prosessTaskData.getBehandlingId()));
+        Behandling behandling = behandlingRepository.hentBehandling(Long.valueOf(prosessTaskData.getBehandlingId()));
+        BehandlingProsessTask.logContext(behandling);
+        innsynEventTjeneste.publiserBehandling(behandling);
     }
 
 }
