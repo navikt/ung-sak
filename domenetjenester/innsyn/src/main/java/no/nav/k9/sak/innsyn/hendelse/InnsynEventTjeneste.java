@@ -75,6 +75,7 @@ public class InnsynEventTjeneste {
         String json = JsonUtils.toString(new InnsynHendelse<>(ZonedDateTime.now(), behandlingInnsyn));
 
         producer.send(fagsak.getSaksnummer().getVerdi(), json);
+        log.info("Publisert behandling til brukerdialog");
     }
 
     private Set<Aksjonspunkt> mapAksjonspunkter(Behandling b) {

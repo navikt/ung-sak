@@ -1,7 +1,5 @@
 package no.nav.k9.sak.innsyn.hendelse;
 
-import java.util.stream.Collectors;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,20 +31,20 @@ public class InnsynEventObserver {
     public void observerBehandlingStartet(@Observes BehandlingStatusEvent event) {
         if ((event.getGammelStatus() == BehandlingStatus.OPPRETTET || event.getGammelStatus() == null)
             && event.getNyStatus() == BehandlingStatus.UTREDES) {
-            log.info("Publiserer melding til brukerdialog for behandling startet");
+            log.info("Vurderer publisering til brukerdialog for behandling startet");
             lagProsessTask(event.getFagsakId(), event.getBehandlingId());
         }
     }
 
     public void observerBehandlingAvsluttetEvent(@Observes BehandlingStatusEvent.BehandlingAvsluttetEvent event)  {
-        log.info("Publiserer melding til brukerdialog for behandling avsluttet");
+        log.info("Vurderer publisering til brukerdialog for behandling avsluttet");
         lagProsessTask(event.getFagsakId(), event.getBehandlingId());
     }
 
     public void observerAksjonspunkterFunnetEvent(@Observes AksjonspunktStatusEvent event) {
         //TODO spisse sånn at det ikke sendes for mange eventer til innsyn
         // må fange opp nye dokumenter på en eller annen måte
-        log.info("Publiserer melding til brukerdialog for aksjonspunkt");
+        log.info("Vurderer publisering til brukerdialog for aksjonspunkt");
         lagProsessTask(event.getFagsakId(), event.getBehandlingId());
     }
 
@@ -55,15 +53,6 @@ public class InnsynEventObserver {
         pd.setBehandling(fagsakId, behandlingId);
         pd.setCallIdFraEksisterende();
         prosessTaskTjeneste.lagre(pd);
-    }
-
-    private void debugObservasjon(AksjonspunktStatusEvent event) {
-        var collect = event.getAksjonspunkter().stream()
-            .filter(it -> it.erÅpentAksjonspunkt())
-            .map(it -> it.getAksjonspunktDefinisjon().getKode() +":"+ it.getVenteårsak().getKode())
-            .collect(Collectors.toSet());
-        String join = String.join(", ", collect);
-        log.info("################ -> Steg {} aksjonspunkter {}", event.getBehandlingStegType(), join);
     }
 
 
