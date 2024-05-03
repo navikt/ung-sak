@@ -2,36 +2,26 @@ package no.nav.k9.sak.ytelse.beregning.regler.feriepenger;
 
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.specification.LeafSpecification;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
-import no.nav.k9.sak.domene.typer.tid.IntervallUtil;
-import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatAndel;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatPeriode;
-import no.nav.k9.sak.ytelse.beregning.regelmodell.MottakerType;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Inntektskategori;
-import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerPrÅr;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerRegelModell;
-import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.FeriepengekorrigeringInfotrygd;
-import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.InfotrygdFeriepengegrunnlag;
+import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.DagpengerKilde;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.Period;
 import java.time.Year;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.time.temporal.TemporalAdjusters;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.NavigableMap;
-import java.util.function.Predicate;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 class BeregnFerietilleggDagpenger extends LeafSpecification<BeregningsresultatFeriepengerRegelModell> {
@@ -51,11 +41,43 @@ class BeregnFerietilleggDagpenger extends LeafSpecification<BeregningsresultatFe
     public Evaluation evaluate(BeregningsresultatFeriepengerRegelModell regelModell) {
         var tilkjentytelseSegmenter = regelModell.getBeregningsresultatPerioder().stream().map(this::lagDagpengeSegment).toList();
         var tilkjentytelseTidslinje = new LocalDateTimeline<>(tilkjentytelseSegmenter);
-        var tidslinjeSplittetPåÅr = splittPåÅr(tilkjentytelseTidslinje);
+        var tidslinjeDagpengerTilkjentYtelse = splittPåÅr(tilkjentytelseTidslinje);
+        var segmenterMedDagpengerIAndreSystemer = regelModell.getPerioderMedDagpenger().stream()
+            .map(p -> new LocalDateSegment<>(p.fom(), p.tom(), p.kilde())).toList();
+        var tidslinjeDagpengerAndreKilder = new LocalDateTimeline<>(segmenterMedDagpengerIAndreSystemer).compress();
+        Set<Integer> alleÅrMedDagpener = tidslinjeDagpengerTilkjentYtelse.stream().map(LocalDateSegment::getFom).map(LocalDate::getYear).collect(Collectors.toSet());
+        Map<Integer, Boolean> årMotOppfyltVilkårMap = new HashMap<>();
+        alleÅrMedDagpener.forEach(år -> {
+            erVilkårOppfyltForÅr(Year.of(år), tidslinjeDagpengerTilkjentYtelse, tidslinjeDagpengerAndreKilder);
+        });
+        tidslinjeDagpengerTilkjentYtelse.toSegments().forEach(segment -> {
+
+        });
 
         Map<String, Object> regelsporing = new LinkedHashMap<>();
 
         return beregnet(regelsporing);
+    }
+
+    private boolean erVilkårOppfyltForÅr(Year årSomSjekkes,
+                                      LocalDateTimeline<Long> tidslinjeTilkjentYtelseDagpenger,
+                                      LocalDateTimeline<DagpengerKilde> tidslinjeDagpengerAndreKilder) {
+
+        var førsteDagIÅr = årSomSjekkes.atDay(1);
+        var tidslinjeÅr = new LocalDateTimeline<Boolean>(førsteDagIÅr, førsteDagIÅr.with(TemporalAdjusters.lastDayOfYear()), Boolean.TRUE);
+
+
+        var antallVirkedager = tidslinjeDagpengerAndreKilder.mapValue(v -> Boolean.TRUE).crossJoin(tidslinjeTilkjentYtelseDagpenger.mapValue(v -> Boolean.TRUE), StandardCombinators::alwaysTrueForMatch)
+            .intersection(tidslinjeÅr)
+            .compress()
+            .getLocalDateIntervals()
+            .stream()
+            .map(p -> Virkedager.beregnAntallVirkedager(p.getFomDato(), p.getTomDato()))
+            .reduce(Integer::sum)
+            .orElse(0);
+
+        return antallVirkedager > 40;
+
     }
 
     private LocalDateTimeline<Long> splittPåÅr(LocalDateTimeline<Long> tilkjentytelseTidslinje) {

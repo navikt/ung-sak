@@ -6,7 +6,7 @@ package no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger;
 public enum DagpengerKilde {
     MELDEKORT,
     PLEIEPENGER_SYKT_BARN,
-    PLEIEPENGER_LIVETS_SLUTTFASE,
+    PLEIEPENGER_NÆRSTÅENDE,
     OPPLÆRINGSPENGER,
     SYKEPENGER,
     FORELDREPENGER
