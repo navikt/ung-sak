@@ -48,6 +48,7 @@ public class PleiepengerBeregnFeriepenger implements BeregnFeriepengerTjeneste {
 
     private Instance<FinnFeriepengepåvirkendeFagsakerTjeneste> feriepengepåvirkendeFagsakerTjenester;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
+    private FeriepengeBeregner feriepengeBeregner;
 
     PleiepengerBeregnFeriepenger() {
         //for CDI proxy
@@ -55,9 +56,11 @@ public class PleiepengerBeregnFeriepenger implements BeregnFeriepengerTjeneste {
 
     @Inject
     public PleiepengerBeregnFeriepenger(@Any Instance<FinnFeriepengepåvirkendeFagsakerTjeneste> feriepengepåvirkendeFagsakerTjenester,
-                                        InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste) {
+                                        InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
+                                        FeriepengeBeregner feriepengeBeregner) {
         this.feriepengepåvirkendeFagsakerTjenester = feriepengepåvirkendeFagsakerTjenester;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
+        this.feriepengeBeregner = feriepengeBeregner;
     }
 
     @Override
@@ -65,7 +68,7 @@ public class PleiepengerBeregnFeriepenger implements BeregnFeriepengerTjeneste {
         LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> påvirkendeSaker = finnPåvirkendeSaker(behandling);
         InfotrygdFeriepengegrunnlag infotrygdFeriepengegrunnlag = finnInfotrygdFeriepengegrunnlagForPåvirkendeSaker(behandling);
         BeregningsresultatFeriepengerRegelModell regelModell = MapBeregningsresultatFeriepengerFraVLTilRegel.mapFra(beregningsresultat, påvirkendeSaker, infotrygdFeriepengegrunnlag, ANTALL_DAGER_FERIPENGER, FERIEOPPTJENING_HELG, UBEGRENSET_DAGER_VED_REFUSJON, finnPerioderMedDagpenger(behandling));
-        FeriepengeBeregner.beregnFeriepenger(beregningsresultat, regelModell);
+        feriepengeBeregner.beregnFeriepenger(beregningsresultat, regelModell);
     }
 
     @Override
@@ -73,7 +76,7 @@ public class PleiepengerBeregnFeriepenger implements BeregnFeriepengerTjeneste {
         LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> påvirkendeSaker = finnPåvirkendeSaker(behandling);
         InfotrygdFeriepengegrunnlag infotrygdFeriepengegrunnlag = finnInfotrygdFeriepengegrunnlagForPåvirkendeSaker(behandling);
         BeregningsresultatFeriepengerRegelModell regelModell = MapBeregningsresultatFeriepengerFraVLTilRegel.mapFra(beregningsresultat, påvirkendeSaker, infotrygdFeriepengegrunnlag, ANTALL_DAGER_FERIPENGER, FERIEOPPTJENING_HELG, UBEGRENSET_DAGER_VED_REFUSJON, finnPerioderMedDagpenger(behandling));
-        return FeriepengeBeregner.beregnFeriepengerOppsummering(regelModell);
+        return feriepengeBeregner.beregnFeriepengerOppsummering(regelModell);
     }
 
     private List<DagpengerPeriode> finnPerioderMedDagpenger(BehandlingReferanse ref) {

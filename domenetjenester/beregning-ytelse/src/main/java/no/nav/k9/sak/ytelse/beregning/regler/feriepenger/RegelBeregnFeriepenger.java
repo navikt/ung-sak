@@ -18,6 +18,13 @@ public class RegelBeregnFeriepenger implements RuleService<BeregningsresultatFer
     public static final String ID = "";
     public static final String BESKRIVELSE = "RegelBeregnFeriepenger";
 
+    private boolean skalKjøreDagpengeRegel;
+
+    public RegelBeregnFeriepenger(boolean skalKjøreDagpengeRegel) {
+        this.skalKjøreDagpengeRegel = skalKjøreDagpengeRegel;
+    }
+
+
     @Override
     public Evaluation evaluer(BeregningsresultatFeriepengerRegelModell regelmodell) {
         return getSpecification().evaluate(regelmodell);
@@ -28,21 +35,24 @@ public class RegelBeregnFeriepenger implements RuleService<BeregningsresultatFer
     public Specification<BeregningsresultatFeriepengerRegelModell> getSpecification() {
         Ruleset<BeregningsresultatFeriepengerRegelModell> rs = new Ruleset<>();
 
-        Specification<BeregningsresultatFeriepengerRegelModell> beregnFerietilleggDagpenger =
-            rs.beregningHvisRegel(new SjekkOmBrukerHarUtbetalingForInntektskategoriDagpenger(), new BeregnFerietilleggDagpenger(), new BeregnetFeriepenger());
-
-
         // FP_BR 8.6 Beregn feriepenger (Flere kalenderår)
-        Specification<BeregningsresultatFeriepengerRegelModell> beregnFeriepenger =
+        Specification<BeregningsresultatFeriepengerRegelModell> beregnFeriepengerDagpenger =
             rs.beregningsRegel(BeregnFerietilleggDagpenger.ID, BeregnFerietilleggDagpenger.BESKRIVELSE, new BeregnFerietilleggDagpenger(), new BeregnetFeriepenger());
+
+        Specification<BeregningsresultatFeriepengerRegelModell> beregnFerietilleggDagpenger = skalKjøreDagpengeRegel
+            ? rs.beregningHvisRegel(new SjekkOmBrukerHarUtbetalingForInntektskategoriDagpenger(), beregnFeriepengerDagpenger, new BeregnetFeriepenger())
+            : new BeregnetFeriepenger();
+
+        Specification<BeregningsresultatFeriepengerRegelModell> beregnFeriepenger =
+            rs.beregningsRegel(BeregnFeriepenger.ID, BeregnFeriepenger.BESKRIVELSE, new BeregnFeriepenger(), beregnFerietilleggDagpenger);
 
         // FP_BR 8.2 Har bruker fått utbetalt ytelse i den totale stønadsperioden?
         Specification<BeregningsresultatFeriepengerRegelModell> sjekkOmBrukerHarFåttUtbetaltYtelse =
-            rs.beregningHvisRegel(new SjekkOmYtelseErTilkjent(), beregnFeriepenger, new BeregnetFeriepenger());
+            rs.beregningHvisRegel(new SjekkOmYtelseErTilkjent(), beregnFeriepenger, beregnFerietilleggDagpenger);
 
         // FP_BR 8.1 Er brukers inntektskategori arbeidstaker eller sjømann?
         Specification<BeregningsresultatFeriepengerRegelModell> sjekkInntektskatoriATellerSjømann =
-            rs.beregningHvisRegel(new SjekkOmBrukerHarInntektkategoriATellerSjømann(), sjekkOmBrukerHarFåttUtbetaltYtelse, new BeregnetFeriepenger());
+            rs.beregningHvisRegel(new SjekkOmBrukerHarInntektkategoriATellerSjømann(), sjekkOmBrukerHarFåttUtbetaltYtelse, beregnFerietilleggDagpenger);
 
         return sjekkInntektskatoriATellerSjømann;
     }

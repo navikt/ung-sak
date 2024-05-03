@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -28,6 +29,12 @@ public class OmsorgspengerBeregnFeriepenger implements BeregnFeriepengerTjeneste
     private static final int ANTALL_DAGER_FERIPENGER = 48;
     private static final boolean FERIEOPPTJENING_HELG = true;
     private static final boolean UBEGRENSET_DAGER_VED_REFUSJON = true;
+    private FeriepengeBeregner feriepengeBeregner;
+
+    @Inject
+    public OmsorgspengerBeregnFeriepenger(FeriepengeBeregner feriepengeBeregner) {
+        this.feriepengeBeregner = feriepengeBeregner;
+    }
 
     @Override
     public void beregnFeriepenger(BehandlingReferanse ref, BeregningsresultatEntitet beregningsresultat) {
@@ -39,7 +46,7 @@ public class OmsorgspengerBeregnFeriepenger implements BeregnFeriepengerTjeneste
             påvirkendeSaker, infotrygdFeriepengegrunnlag,
             ANTALL_DAGER_FERIPENGER, FERIEOPPTJENING_HELG, UBEGRENSET_DAGER_VED_REFUSJON,
             Collections.emptyList()); // Bruker mottar aldri omsorgspenger for dagpenger
-        FeriepengeBeregner.beregnFeriepenger(beregningsresultat, regelModell);
+        feriepengeBeregner.beregnFeriepenger(beregningsresultat, regelModell);
     }
 
     @Override
@@ -53,7 +60,7 @@ public class OmsorgspengerBeregnFeriepenger implements BeregnFeriepengerTjeneste
             infotrygdFeriepengegrunnlag,
             ANTALL_DAGER_FERIPENGER, FERIEOPPTJENING_HELG, UBEGRENSET_DAGER_VED_REFUSJON,
             Collections.emptyList()); // Bruker mottar aldri omsorgspenger for dagpenger
-        return FeriepengeBeregner.beregnFeriepengerOppsummering(regelModell);
+        return feriepengeBeregner.beregnFeriepengerOppsummering(regelModell);
     }
 
 
