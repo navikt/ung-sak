@@ -36,11 +36,12 @@ public class PubliserSøknadForBrukerdialoginnsynTask implements ProsessTaskHand
     private BrukerdialoginnsynMeldingProducer meldingProducer;
 
 
-    public PubliserSøknadForBrukerdialoginnsynTask() {}
+    public PubliserSøknadForBrukerdialoginnsynTask() {
+    }
 
     @Inject
     public PubliserSøknadForBrukerdialoginnsynTask(MottatteDokumentRepository mottatteDokumentRepository,
-            BrukerdialoginnsynMeldingProducer meldingProducer) {
+                                                   BrukerdialoginnsynMeldingProducer meldingProducer) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.meldingProducer = meldingProducer;
     }
@@ -67,8 +68,8 @@ public class PubliserSøknadForBrukerdialoginnsynTask implements ProsessTaskHand
         Søknad søknad = null;
         Ettersendelse ettersendelse = null;
 
-        if (Brevkode.ETTERSENDELSE_TYPER.contains(mottattDokument.getType())){
-            ettersendelse= JsonUtils.fromString(mottattDokument.getPayload(), Ettersendelse.class);
+        if (Brevkode.ETTERSENDELSE_TYPER.contains(mottattDokument.getType())) {
+            ettersendelse = JsonUtils.fromString(mottattDokument.getPayload(), Ettersendelse.class);
         } else {
             søknad = JsonUtils.fromString(mottattDokument.getPayload(), Søknad.class);
         }
@@ -77,7 +78,8 @@ public class PubliserSøknadForBrukerdialoginnsynTask implements ProsessTaskHand
         final InnsynHendelse<PsbSøknadsinnhold> hendelse = new InnsynHendelse<>(ZonedDateTime.now(), søknadsinnhold);
         final String json = JsonUtils.toString(hendelse);
 
-        logger.info("Publiserer hendelse til brukerdialoginnsyn. Key: '{}'", key);
+        logger.info("Publiserer hendelse til brukerdialoginnsyn søknad={}, ettersendelse={}, journalpostId={}, Key: '{}'",
+            søknad != null, ettersendelse != null, søknadsinnhold.getJournalpostId(), key);
 
         meldingProducer.send(key, json);
     }
@@ -87,7 +89,7 @@ public class PubliserSøknadForBrukerdialoginnsynTask implements ProsessTaskHand
         Objects.requireNonNull(behandling);
         Objects.requireNonNull(mottattDokument.getId());
 
-        final ProsessTaskData pd =  ProsessTaskData.forProsessTask(PubliserSøknadForBrukerdialoginnsynTask.class);
+        final ProsessTaskData pd = ProsessTaskData.forProsessTask(PubliserSøknadForBrukerdialoginnsynTask.class);
         final Fagsak fagsak = behandling.getFagsak();
         final String saksnummer = fagsak.getSaksnummer().getVerdi();
         final String gruppe = PubliserSøknadForBrukerdialoginnsynTask.TASKTYPE + "-" + saksnummer;
