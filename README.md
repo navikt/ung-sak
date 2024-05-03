@@ -22,14 +22,14 @@ Kjør `no.nav.k9.sak.db.util.Databaseskjemainitialisering` for å få med skjema
 
 Swagger: http://localhost:8080/k9/sak/swagger
 
-### Generering av openapi spesifikasjon lokalt.
+### Generering av openapi spesifikasjon og typescript klient lokalt.
 
-Ved behov kan openapi spesifikasjon genererast med lokalt utviklingsmiljø.
+Ved behov kan openapi spesifikasjon og typescript klient genererast med lokalt utviklingsmiljø.
 
 ```bash
-dev/generate-openapi-json.sh
+dev/generate-openapi-ts-client.sh
 ```
-Kommandoen over vil generere fil _web/target/k9-sak.openapi.json_. Du kan spesifisere filsti for generert fil slik:
-```bash
-dev/generate-openapi-json.sh /tmp/openapi.json
-```
+Kommandoen over vil generere fil _web/src/main/resources/openapi-ts-client/k9-sak.openapi.json_. Deretter vil den 
+køyre docker image for å generere typescript klient ut frå generert openapi.json fil.
+
+Generert typescript/javascript blir skrive til _web/target/ts-client_.

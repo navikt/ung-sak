@@ -1,6 +1,6 @@
 {
   "name": "@navikt/k9-sak-typescript-client",
-  "version": "0.0.8-beta",
+  "version": "0.0.8-alpha",
   "type": "module",
   "description": "Typescript client for k9-sak. Automatically generated from openapi specification",
   "keywords": [

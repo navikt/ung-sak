@@ -40,8 +40,8 @@ runs:
     - name: Typescript generate
       uses: navikt/openapi-ts-clientmaker@main
       with:
-        openapi-spec-file: web/target/k9-sak.openapi.json
-        package-json-file: web/src/main/openapi-ts-client/package.json
+        openapi-spec-file: web/src/main/resources/openapi-ts-client/k9-sak.openapi.json
+        package-json-file: web/src/main/resources/openapi-ts-client/package.json
         out-dir: web/target/ts-client
         client-name: K9SakClient
     - name: List generated files for debugging
