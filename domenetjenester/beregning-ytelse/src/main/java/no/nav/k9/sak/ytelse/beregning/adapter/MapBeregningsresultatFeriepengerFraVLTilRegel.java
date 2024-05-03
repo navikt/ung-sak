@@ -14,6 +14,7 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatPeriode;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforhold;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Inntektskategori;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerRegelModell;
+import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.DagpengerPeriode;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.InfotrygdFeriepengegrunnlag;
 import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.SaksnummerOgSisteBehandling;
 
@@ -30,7 +31,7 @@ public class MapBeregningsresultatFeriepengerFraVLTilRegel {
                                                                   int antallDagerFeriepenger,
                                                                   boolean feriepengeopptjeningForHelg,
                                                                   boolean ubegrensedeDagerVedRefusjon,
-                                                                  List<LocalDateInterval> perioderMedDagpenger) {
+                                                                  List<DagpengerPeriode> perioderMedDagpenger) {
 
         List<BeregningsresultatPeriode> beregningsresultatPerioder = mapBeregningsresultat(beregningsresultat);
         Set<Inntektskategori> inntektskategorier = mapInntektskategorier(beregningsresultat);

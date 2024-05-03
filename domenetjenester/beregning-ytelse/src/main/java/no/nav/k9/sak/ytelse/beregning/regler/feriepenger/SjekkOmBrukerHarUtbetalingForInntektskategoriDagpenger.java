@@ -17,7 +17,7 @@ class SjekkOmBrukerHarUtbetalingForInntektskategoriDagpenger extends LeafSpecifi
     @Override
     public Evaluation evaluate(BeregningsresultatFeriepengerRegelModell regelModell) {
         boolean mottarYtelseForDagpenger = regelModell.getBeregningsresultatPerioder().stream()
-            .flatMap(a ->a.getBeregningsresultatAndelList().stream())
+            .flatMap(a -> a.getBeregningsresultatAndelList().stream())
             .filter(a -> Inntektskategori.DAGPENGER.equals(a.getInntektskategori()))
             .anyMatch(a -> a.getDagsats() > 0);
         return mottarYtelseForDagpenger ? ja() : nei();
