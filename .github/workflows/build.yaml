@@ -32,7 +32,8 @@ jobs:
     name: Typescript client make
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
+      packages: write
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/generate-openapi
