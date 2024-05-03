@@ -38,6 +38,8 @@ jobs:
       - uses: ./.github/actions/generate-openapi
         with:
           readerToken: ${{ secrets.READER_TOKEN }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          forcePublish: true # Temporary, for dev testing
 
   verdikjede-tester:
     name: Verdikjedetester

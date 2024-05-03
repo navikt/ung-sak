@@ -1,16 +1,19 @@
 name: Generate openapi
 description: Generate new openapi spec, and generate typescript from it.
 inputs:
-#  patchVersion:
-#    description: The TAG environment variable from the master build workflow (TIMESTAMP-SHA)
-#    required: true
+  patchVersion:
+    description: The TAG environment variable from the master build workflow (TIMESTAMP-SHA)
+    required: true
   readerToken:
     description: The secrets.READER_TOKEN allowing read of internal packages.
     required: true
-#  clientRepoToken:
-#    description: A access token allowing writes to the k9-sak-typescipt-client repo
-#    required: true
-
+  githubToken:
+    description: The github token for the workflow, allowing read of repo, and publishing npm package to github registry.
+    required: true
+  forcePublish:
+    description: If 'true', generate new client and publish it even if there are no changes to generated openapi.json
+    default: 'false'
+    required: false
 
 runs:
   using: 'composite'
@@ -37,36 +40,34 @@ runs:
       with:
         script: |
           core.setFailed('fant ikkje korrekt openapi version frå k9-sak.openapi.json')
+    # Commit changes to k9-sak.openapi.json and create flag that signals if there actually was changes
+    - name: Commit api endringer
+      id: change-commit
+      shell: bash
+      run: |
+        git config --global user.email "action@github.com"
+        git config --global user.name "GitHub Action"
+        git add --force web/src/main/resources/openapi-ts-client/k9-sak.openapi.json
+        (git diff --quiet --staged && echo "haschanged=false" >> $GITHUB_OUTPUT) || 
+        (git commit -m "k9-sak.openapi.json updated by build pipeline" && echo "haschanged=true" >> $GITHUB_OUTPUT)
+        git push
     - name: Typescript generate
+      if: steps.change-commit.outputs.haschanged == true || inputs.forcePublish == 'true'
       uses: navikt/openapi-ts-clientmaker@main
       with:
         openapi-spec-file: web/src/main/resources/openapi-ts-client/k9-sak.openapi.json
         package-json-file: web/src/main/resources/openapi-ts-client/package.json
         out-dir: web/target/ts-client
         client-name: K9SakClient
-    - name: List generated files for debugging
-      shell: bash
-      run: ls -lR web/target/ts-client
-
-#    - name: Push ny openapi spec til klient repo
-#      if: success()
-#      shell: bash
-#      working-directory: k9-sak-typescript-client
-#      env:
-#        GIT_USER_NAME: "${{ github.actor }}"
-#        GIT_USER_EMAIL: "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
-#        GITHUB_TOKEN: "${{ inputs.clientRepoToken }}"
-#        VERSION_TAG: "${{ env.OPENAPI_VERSION }}.${{ inputs.patchVersion }}"
-      # Oppdater version i package.json
-      # git commit, tag og push ny k9-sak.openapi.json til k9-sak-typescript-client
-      # NB: git diff framfor gjere at det berre blir gjort viss det faktisk er endringer i ny generert k9-sak.openapi.json
-#      run: |
-#        jq --exit-status --arg VERSION "${VERSION_TAG}" '.version = $VERSION' package.json > package.json.new && mv package.json.new package.json
-#        git config user.email "$GIT_USER_EMAIL"
-#        git config user.name "$GIT_USER_NAME"
-#        git diff --quiet src/k9-sak.openapi.json || ( \
-#          git add -A && \
-#          git commit -m "k9-sak.openapi.json updated from k9-sak" && \
-#          git tag "v${VERSION_TAG}" && \
-#          git push origin k9-sak-workflow --tags \
-#        )
+    - name: Publish typescript client
+      if: steps.change-commit.outputs.haschanged == true || inputs.forcePublish == 'true'
+      working-directory: web/target/ts-client
+      uses: actions/setup-node@v4
+      with:
+        node-version: 21
+        registry-url: 'https://npm.pkg.github.com'
+        scope: '@navikt'
+        cache: 'yarn'
+        run: yarn npm publish
+      env:
+        NODE_AUTH_TOKEN: ${{ inputs.githubToken }}
