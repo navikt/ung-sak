@@ -34,6 +34,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
 import no.nav.k9.felles.integrasjon.sensu.SensuEvent;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
@@ -110,6 +111,11 @@ public class RevurderingMetrikkRepository {
                 metrikker.addAll(timeCall(() -> antallAksjonspunktFordelingForRevurderingUtenNyttStpSisteSyvDager(dag), "antallAksjonspunktFordelingForRevurderingUtenNyttStpSisteSyvDager"));
             } catch (QueryTimeoutException e) {
                 log.warn("Uthenting av antallAksjonspunktFordelingForRevurderingUtenNyttStpSisteSyvDager feiler", e);
+            }
+            try {
+                metrikker.addAll(timeCall(() -> antallRevurderingMedAksjonspunktOgAarsakPrKodeSisteSyvDager(dag), "antallRevurderingMedAksjonspunktOgAarsakPrKodeSisteSyvDager"));
+            } catch (QueryTimeoutException e) {
+                log.warn("Uthenting av antallRevurderingMedAksjonspunktPrKodeSisteSyvDager feiler", e);
             }
             try {
                 metrikker.addAll(timeCall(() -> antallRevurderingMedAksjonspunktPrKodeSisteSyvDager(dag), "antallRevurderingMedAksjonspunktPrKodeSisteSyvDager"));
@@ -351,6 +357,44 @@ public class RevurderingMetrikkRepository {
                 metricField2, BigDecimal.ZERO));
 
         values.addAll(zeroValues); // NB: utnytter at Set#addAll ikke legger til verdier som ikke finnes fra før
+
+        return values;
+
+    }
+
+    Collection<SensuEvent> antallRevurderingMedAksjonspunktOgAarsakPrKodeSisteSyvDager(LocalDate dato) {
+        String sql = "select f.ytelse_type, a.aksjonspunkt_def, aarsak.behandling_arsak_type, count(*) as antall_behandlinger " +
+            "from behandling b" +
+            "         inner join fagsak f on f.id=b.fagsak_id" +
+            "         inner join aksjonspunkt a on b.id = a.behandling_id " +
+            " inner join behandling_arsak aarsak on aarsak.behandling_id = b.id " +
+            "where a.aksjonspunkt_status != 'AVBR' " +
+            "and (vent_aarsak is null or vent_aarsak = '-') " +
+            "and b.avsluttet_dato is not null " +
+            "and b.avsluttet_dato>=:startTid and b.avsluttet_dato < :sluttTid " +
+            "and b.behandling_type=:revurdering " +
+            "group by 1, 2, 3";
+
+        String metricName = "revurdering_antall_behandlinger_pr_aksjonspunkt_og_aarsak";
+        String metricField = "antall_behandlinger";
+
+        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
+            .setParameter("revurdering", BehandlingType.REVURDERING.getKode())
+            .setParameter("startTid", dato.minusDays(7).atStartOfDay())
+            .setParameter("sluttTid", dato.atStartOfDay());
+
+        Stream<Tuple> stream = query.getResultStream()
+            .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class)));
+
+        var values = stream.map(t -> SensuEvent.createSensuEvent(metricName,
+                toMap(
+                    "ytelse_type", t.get(0, String.class),
+                    "aksjonspunkt", t.get(1, String.class),
+                    "aarsak", t.get(2, String.class),
+                    "aarsak_navn", coalesce(BehandlingÅrsakType.kodeMap().getOrDefault(t.get(2, String.class), BehandlingÅrsakType.UDEFINERT).getNavn(), "-"),
+                    "aksjonspunkt_navn", coalesce(AksjonspunktDefinisjon.kodeMap().getOrDefault(t.get(1, String.class), AksjonspunktDefinisjon.UNDEFINED).getNavn(), "-")),
+                Map.of(metricField, t.get(3, Number.class))))
+            .collect(Collectors.toList());
 
         return values;
 
