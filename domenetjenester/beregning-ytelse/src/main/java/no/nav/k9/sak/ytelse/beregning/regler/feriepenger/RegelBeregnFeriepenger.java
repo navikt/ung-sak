@@ -28,9 +28,13 @@ public class RegelBeregnFeriepenger implements RuleService<BeregningsresultatFer
     public Specification<BeregningsresultatFeriepengerRegelModell> getSpecification() {
         Ruleset<BeregningsresultatFeriepengerRegelModell> rs = new Ruleset<>();
 
+        Specification<BeregningsresultatFeriepengerRegelModell> beregnFerietilleggDagpenger =
+            rs.beregningHvisRegel(new SjekkOmBrukerHarUtbetalingForInntektskategoriDagpenger(), new BeregnFerietilleggDagpenger(), new BeregnetFeriepenger());
+
+
         // FP_BR 8.6 Beregn feriepenger (Flere kalenderår)
         Specification<BeregningsresultatFeriepengerRegelModell> beregnFeriepenger =
-            rs.beregningsRegel(BeregnFeriepenger.ID, BeregnFeriepenger.BESKRIVELSE, new BeregnFeriepenger(), new BeregnetFeriepenger());
+            rs.beregningsRegel(BeregnFerietilleggDagpenger.ID, BeregnFerietilleggDagpenger.BESKRIVELSE, new BeregnFerietilleggDagpenger(), new BeregnetFeriepenger());
 
         // FP_BR 8.2 Har bruker fått utbetalt ytelse i den totale stønadsperioden?
         Specification<BeregningsresultatFeriepengerRegelModell> sjekkOmBrukerHarFåttUtbetaltYtelse =

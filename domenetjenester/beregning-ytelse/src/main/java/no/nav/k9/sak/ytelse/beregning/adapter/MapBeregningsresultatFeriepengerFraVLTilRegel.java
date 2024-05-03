@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -23,7 +24,13 @@ public class MapBeregningsresultatFeriepengerFraVLTilRegel {
     }
 
 
-    public static BeregningsresultatFeriepengerRegelModell mapFra(BeregningsresultatEntitet beregningsresultat, LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> andelerSomKanGiFeriepengerForRelevaneSaker, InfotrygdFeriepengegrunnlag infotrygdFeriepengegrunnlag, int antallDagerFeriepenger, boolean feriepengeopptjeningForHelg, boolean ubegrensedeDagerVedRefusjon) {
+    public static BeregningsresultatFeriepengerRegelModell mapFra(BeregningsresultatEntitet beregningsresultat,
+                                                                  LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> andelerSomKanGiFeriepengerForRelevaneSaker,
+                                                                  InfotrygdFeriepengegrunnlag infotrygdFeriepengegrunnlag,
+                                                                  int antallDagerFeriepenger,
+                                                                  boolean feriepengeopptjeningForHelg,
+                                                                  boolean ubegrensedeDagerVedRefusjon,
+                                                                  List<LocalDateInterval> perioderMedDagpenger) {
 
         List<BeregningsresultatPeriode> beregningsresultatPerioder = mapBeregningsresultat(beregningsresultat);
         Set<Inntektskategori> inntektskategorier = mapInntektskategorier(beregningsresultat);
@@ -32,6 +39,7 @@ public class MapBeregningsresultatFeriepengerFraVLTilRegel {
             .medBeregningsresultatPerioder(beregningsresultatPerioder)
             .medAndelerSomKanGiFeriepengerForRelevaneSaker(andelerSomKanGiFeriepengerForRelevaneSaker)
             .medInfotrygdFeriepengegrunnlag(infotrygdFeriepengegrunnlag)
+            .medPerioderMedDagpenger(perioderMedDagpenger)
             .medInntektskategorier(inntektskategorier)
             .medAntallDagerFeriepenger(antallDagerFeriepenger)
             .medFeriepengeopptjeningForHelg(feriepengeopptjeningForHelg)

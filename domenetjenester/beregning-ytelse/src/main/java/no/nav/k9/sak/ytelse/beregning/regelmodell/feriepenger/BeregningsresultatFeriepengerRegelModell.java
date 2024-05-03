@@ -18,6 +18,7 @@ public class BeregningsresultatFeriepengerRegelModell {
     private Set<Inntektskategori> inntektskategorier;
     private List<BeregningsresultatPeriode> beregningsresultatPerioder;
     private List<FeriepengekorrigeringInfotrygd> feriepengekorrigeringInfotrygd;
+    private List<LocalDateInterval> perioderMedDagpenger;
     private int antallDagerFeriepenger;
     private boolean feriepengeopptjeningForHelg;
     private boolean ubegrensetFeriepengedagerVedRefusjon;
@@ -39,6 +40,10 @@ public class BeregningsresultatFeriepengerRegelModell {
 
     public List<FeriepengekorrigeringInfotrygd> getFeriepengekorrigeringInfotrygd() {
         return feriepengekorrigeringInfotrygd;
+    }
+
+    public List<LocalDateInterval> getPerioderMedDagpenger() {
+        return perioderMedDagpenger;
     }
 
     public void setFeriepengekorrigeringInfotrygd(List<FeriepengekorrigeringInfotrygd> feriepengekorrigeringInfotrygd) {
@@ -115,6 +120,11 @@ public class BeregningsresultatFeriepengerRegelModell {
 
         public Builder medInfotrygdFeriepengegrunnlag(InfotrygdFeriepengegrunnlag infotrygdFeriepengegrunnlag) {
             kladd.infotrygdFeriepengegrunnlag = infotrygdFeriepengegrunnlag;
+            return this;
+        }
+
+        public Builder medPerioderMedDagpenger(List<LocalDateInterval> perioderMedDagpenger) {
+            kladd.perioderMedDagpenger = perioderMedDagpenger;
             return this;
         }
 

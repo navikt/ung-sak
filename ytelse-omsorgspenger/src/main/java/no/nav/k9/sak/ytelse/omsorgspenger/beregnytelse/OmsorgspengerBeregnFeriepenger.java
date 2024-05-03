@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.omsorgspenger.beregnytelse;
 
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 
+import java.util.Collections;
 import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -34,7 +35,10 @@ public class OmsorgspengerBeregnFeriepenger implements BeregnFeriepengerTjeneste
         LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> påvirkendeSaker = LocalDateTimeline.empty();
         InfotrygdFeriepengegrunnlag infotrygdFeriepengegrunnlag = null;
 
-        BeregningsresultatFeriepengerRegelModell regelModell = MapBeregningsresultatFeriepengerFraVLTilRegel.mapFra(beregningsresultat, påvirkendeSaker, infotrygdFeriepengegrunnlag, ANTALL_DAGER_FERIPENGER, FERIEOPPTJENING_HELG, UBEGRENSET_DAGER_VED_REFUSJON);
+        BeregningsresultatFeriepengerRegelModell regelModell = MapBeregningsresultatFeriepengerFraVLTilRegel.mapFra(beregningsresultat,
+            påvirkendeSaker, infotrygdFeriepengegrunnlag,
+            ANTALL_DAGER_FERIPENGER, FERIEOPPTJENING_HELG, UBEGRENSET_DAGER_VED_REFUSJON,
+            Collections.emptyList()); // Bruker mottar aldri omsorgspenger for dagpenger
         FeriepengeBeregner.beregnFeriepenger(beregningsresultat, regelModell);
     }
 
@@ -44,7 +48,11 @@ public class OmsorgspengerBeregnFeriepenger implements BeregnFeriepengerTjeneste
         LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> påvirkendeSaker = LocalDateTimeline.empty();
         InfotrygdFeriepengegrunnlag infotrygdFeriepengegrunnlag = null;
 
-        BeregningsresultatFeriepengerRegelModell regelModell = MapBeregningsresultatFeriepengerFraVLTilRegel.mapFra(beregningsresultat, påvirkendeSaker, infotrygdFeriepengegrunnlag, ANTALL_DAGER_FERIPENGER, FERIEOPPTJENING_HELG, UBEGRENSET_DAGER_VED_REFUSJON);
+        BeregningsresultatFeriepengerRegelModell regelModell = MapBeregningsresultatFeriepengerFraVLTilRegel.mapFra(beregningsresultat,
+            påvirkendeSaker,
+            infotrygdFeriepengegrunnlag,
+            ANTALL_DAGER_FERIPENGER, FERIEOPPTJENING_HELG, UBEGRENSET_DAGER_VED_REFUSJON,
+            Collections.emptyList()); // Bruker mottar aldri omsorgspenger for dagpenger
         return FeriepengeBeregner.beregnFeriepengerOppsummering(regelModell);
     }
 
