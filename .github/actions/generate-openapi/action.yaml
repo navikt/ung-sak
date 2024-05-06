@@ -67,7 +67,8 @@ runs:
         corepack enable
         yarn config set npmScopes.navikt.npmRegistryServer "https://npm.pkg.github.com"
         yarn config set npmScopes.navikt.npmAlwaysAuth true
-        yarn install --immutable-cache --refresh-lockfile
+        yarn install --immutable-cache
         yarn npm publish
       env:
+        YARN_ENABLE_IMMUTABLE_INSTALLS: 'false' # yarn install must fill inn the boilerplate needed for yarn publish.
         NODE_AUTH_TOKEN: ${{ inputs.githubToken }}
