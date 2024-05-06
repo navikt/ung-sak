@@ -10713,12 +10713,12 @@
             "format" : "uuid",
             "writeOnly" : true
           },
+          "erNærRelasjon" : {
+            "type" : "boolean"
+          },
           "inntektsmeldingInnsendingsårsak" : {
             "type" : "string",
             "enum" : [ "NY", "ENDRING", "-" ]
-          },
-          "erNærRelasjon" : {
-            "type" : "boolean"
           },
           "omsorgspengerFravær" : {
             "type" : "array",
