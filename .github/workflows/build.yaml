@@ -31,6 +31,7 @@ jobs:
   build-typescript-client:
     name: Typescript client make
     runs-on: ubuntu-latest
+    needs: build-app
     permissions:
       contents: write
       packages: write
@@ -41,6 +42,7 @@ jobs:
           readerToken: ${{ secrets.READER_TOKEN }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           forcePublish: true # Temporary, for dev testing
+          patchVersion: ${{ needs.build-app.outputs.build-version }}
 
   verdikjede-tester:
     name: Verdikjedetester
