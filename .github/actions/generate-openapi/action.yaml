@@ -67,6 +67,7 @@ runs:
         corepack enable
         yarn config set npmScopes.navikt.npmRegistryServer "https://npm.pkg.github.com"
         yarn config set npmScopes.navikt.npmAlwaysAuth true
+        yarn install
         yarn npm publish
       env:
         NODE_AUTH_TOKEN: ${{ inputs.githubToken }}
