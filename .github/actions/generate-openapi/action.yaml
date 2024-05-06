@@ -59,17 +59,14 @@ runs:
         package-json-file: web/src/main/resources/openapi-ts-client/package.json
         out-dir: web/target/ts-client
         client-name: K9SakClient
-    - if: steps.change-commit.outputs.haschanged == true || inputs.forcePublish == 'true'
-      uses: actions/setup-node@v4
-      with:
-        node-version: 21
-        registry-url: 'https://npm.pkg.github.com'
-        scope: '@navikt'
-        cache: 'yarn'
     - name: Publish typescript client
       if: steps.change-commit.outputs.haschanged == true || inputs.forcePublish == 'true'
       shell: bash
       working-directory: web/target/ts-client
-      run: yarn npm publish
+      run: |
+        corepack enable
+        yarn config set npmScopes.navikt.npmRegistryServer "https://npm.pkg.github.com"
+        yarn config set npmScopes.navikt.npmAlwaysAuth true
+        yarn npm publish
       env:
         NODE_AUTH_TOKEN: ${{ inputs.githubToken }}
