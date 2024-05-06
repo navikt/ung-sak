@@ -9513,10 +9513,10 @@
         "required" : [ "inntektPrAar" ],
         "type" : "object",
         "properties" : {
-          "orgnrEllerAktørid" : {
+          "startdatoRefusjonFørOpphør" : {
             "type" : "boolean"
           },
-          "startdatoRefusjonFørOpphør" : {
+          "orgnrEllerAktørid" : {
             "type" : "boolean"
           },
           "arbeidsgiverOrgnr" : {
