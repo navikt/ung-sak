@@ -1,7 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.mottak;
 
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_AO;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_MA;
 
 import java.util.Collection;
@@ -13,7 +12,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
@@ -27,16 +25,13 @@ import no.nav.k9.søknad.ytelse.Ytelse;
 import no.nav.k9.søknad.ytelse.omsorgspenger.utvidetrett.v1.OmsorgspengerUtvidetRett;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef(OMSORGSPENGER_KS)
 @FagsakYtelseTypeRef(OMSORGSPENGER_MA)
 @FagsakYtelseTypeRef(OMSORGSPENGER_AO)
-@DokumentGruppeRef(Brevkode.SØKNAD_OMS_UTVIDETRETT_KS_KODE)
 @DokumentGruppeRef(Brevkode.SØKNAD_OMS_UTVIDETRETT_MA_KODE)
 @DokumentGruppeRef(Brevkode.SØKNAD_OMS_UTVIDETRETT_AO_KODE)
 public class SøknadDokumentValidator implements DokumentValidator {
 
     private static final Map<Ytelse.Type, Brevkode> GYLDIGE_SØKNAD_BREVKODER = Map.of(
-        Ytelse.Type.OMSORGSPENGER_UTVIDETRETT_KRONISK_SYKT_BARN, Brevkode.SØKNAD_OMS_UTVIDETRETT_KS,
         Ytelse.Type.OMSORGSPENGER_UTVIDETRETT_ALENE_OMSORG, Brevkode.SØKNAD_OMS_UTVIDETRETT_AO,
         Ytelse.Type.OMSORGSPENGER_UTVIDETRETT_MIDLERTIDIG_ALENE, Brevkode.SØKNAD_OMS_UTVIDETRETT_MA);
 

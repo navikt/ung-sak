@@ -2,17 +2,12 @@ package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.kronisksyk;
 
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS;
 
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
@@ -35,9 +30,6 @@ import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.UtvidetRettSøknadPerioder
 @BehandlingTypeRef
 @RequestScoped
 public class KroniskSykVilkårsVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
-
-    private static final Logger log = LoggerFactory.getLogger(KroniskSykVilkårsVurderingTjeneste.class);
-
     private BehandlingRepository behandlingRepository;
     private PersoninfoAdapter personinfoAdapter;
     private UtvidetRettSøknadPerioder søktePerioder;
@@ -100,25 +92,7 @@ public class KroniskSykVilkårsVurderingTjeneste implements VilkårsPerioderTilV
 
     private DatoIntervallEntitet utledMaksPeriode(NavigableSet<DatoIntervallEntitet> søktePerioder, AktørId barnAktørId) {
         var barninfo = personinfoAdapter.hentBrukerBasisForAktør(barnAktørId).orElseThrow(() -> new IllegalStateException("Mangler personinfo for pleietrengende aktørId"));
-
-        // ikke åpne fagsaken før barnets fødselsdato
-        var fødselsdato = barninfo.getFødselsdato();
-        // 1. jan minst 3 år før søknad sendt inn (spesielle særtilfeller tillater at et går an å sette tilbake it itid
-        var førsteSøktePeriode = søktePerioder.first();
-        LocalDate søknadFom = førsteSøktePeriode.getFomDato();
-        var fristFørSøknadsdato = søknadFom.minusYears(3).withMonth(1).withDayOfMonth(1);
-
-        var mindato = List.of(fødselsdato, fristFørSøknadsdato).stream().max(LocalDate::compareTo).get();
-
-        // kan ikke gå lenger enn til 18 år (kun oppfylt i årskvantum om kronisk syk også fins
-        var maksdato = barninfo.getFødselsdato().plusYears(18).withMonth(12).withDayOfMonth(31);
-
-        if (maksdato.isBefore(mindato) || søknadFom.isAfter(maksdato)) {
-            log.warn("Har ingen reell periode å vurdere. mindato {}, maksdato {}, søknadsdato {}", mindato, maksdato, søknadFom);
-            return DatoIntervallEntitet.fraOgMedTilOgMed(søknadFom, søknadFom);
-        } else {
-            return DatoIntervallEntitet.fraOgMedTilOgMed(mindato, maksdato);
-        }
+        return new KroniskSykSøknadsperiodeUtleder().utledFaktiskSøknadsperiode(søktePerioder, barninfo.getFødselsdato());
     }
 
     @Override

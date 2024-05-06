@@ -292,6 +292,8 @@ spec:
       value: "true"
     - name: FERIEPENGER_AV_DAGPENGER
       value: "true"
+    - name: OMP_KS_VALIDER_SOKANDSPERIODE_MOT_FAGSAKPERIODE
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
