@@ -1,0 +1,44 @@
+name: Generate typescript client
+description: Generate (and publish) typescript client from openapi spec.
+inputs:
+  openapiVersion:
+    description: The openapi version extracted from openapi.json
+    required: true
+  patchVersion:
+    description: The TAG environment variable from the master build workflow (TIMESTAMP-SHA)
+    required: true
+  githubToken:
+    description: The github token for the workflow, allowing read of repo, and publishing npm package to github registry.
+    required: true
+  forcePublish:
+    description: If 'true', publish client even if build is not on master branch
+    default: 'false'
+    required: false
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Typescript generate
+      uses: navikt/openapi-ts-clientmaker@main
+      with:
+        openapi-spec-file: web/src/main/resources/openapi-ts-client/k9-sak.openapi.json
+        package-json-file: web/src/main/resources/openapi-ts-client/package.json
+        package-json-version: "${{ env.PACKAGE_JSON_VERSION }}"
+        out-dir: web/target/ts-client
+        client-name: K9SakClient
+      env:
+        PACKAGE_JSON_VERSION: "${{ inputs.openapiVersion }}.${{ inputs.patchVersion }}"
+    - name: Publish typescript client
+      if: github.ref_name == 'master' || inputs.forcePublish == 'true'
+      shell: bash
+      working-directory: web/target/ts-client
+      run: |
+        corepack enable
+        yarn config set npmScopes.navikt.npmRegistryServer "https://npm.pkg.github.com"
+        yarn config set npmScopes.navikt.npmAlwaysAuth true
+        yarn config set npmScopes.navikt.npmAuthToken $NODE_AUTH_TOKEN
+        yarn install --immutable-cache
+        yarn npm publish
+      env:
+        YARN_ENABLE_IMMUTABLE_INSTALLS: 'false' # yarn install must fill inn the boilerplate needed for yarn publish.
+        NODE_AUTH_TOKEN: ${{ inputs.githubToken }}
