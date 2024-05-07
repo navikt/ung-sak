@@ -49,8 +49,7 @@ runs:
         git config --global user.name "GitHub Action"
         git add --force web/src/main/resources/openapi-ts-client/k9-sak.openapi.json
         (git diff --quiet --staged && echo "haschanged=false" >> $GITHUB_OUTPUT) || 
-        (git commit -m "k9-sak.openapi.json updated by build pipeline" && echo "haschanged=true" >> $GITHUB_OUTPUT)
-        git push
+        (git commit -m "k9-sak.openapi.json updated by build pipeline" && echo "haschanged=true" >> $GITHUB_OUTPUT && git push)
     - name: Typescript generate
       if: steps.change-commit.outputs.haschanged == true || inputs.forcePublish == 'true'
       uses: navikt/openapi-ts-clientmaker@main
