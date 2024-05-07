@@ -1,0 +1,44 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="web/generate typescript client" type="docker-deploy" factoryName="docker-image" server-name="Docker">
+    <deployment type="docker-image">
+      <settings>
+        <option name="imageTag" value="europe-north1-docker.pkg.dev/nais-management-233d/k9saksbehandling/navikt/openapi-ts-clientmaker-cli:latest" />
+        <option name="command" value="-- --openapi-spec-file in/k9-sak.openapi.json --package-json-file in/package.json --client-name K9SakClient" />
+        <option name="containerName" value="openapi-ts-clientmaker-cli" />
+        <option name="commandLineOptions" value="--rm" />
+        <option name="showCommandPreview" value="true" />
+        <option name="volumeBindings">
+          <list>
+            <DockerVolumeBindingImpl>
+              <option name="containerPath" value="/in" />
+              <option name="hostPath" value="$PROJECT_DIR$/web/src/main/resources/openapi-ts-client" />
+              <option name="readOnly" value="true" />
+            </DockerVolumeBindingImpl>
+            <DockerVolumeBindingImpl>
+              <option name="containerPath" value="/out" />
+              <option name="hostPath" value="$PROJECT_DIR$/web/target/ts-client" />
+            </DockerVolumeBindingImpl>
+          </list>
+        </option>
+      </settings>
+    </deployment>
+    <method v="2">
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="web/generate-openapi-json" run_configuration_type="MavenRunConfiguration" />
+    </method>
+  </configuration>
+  <configuration default="false" name="web/generate typescript client" type="ShConfigurationType">
+    <option name="SCRIPT_TEXT" value="" />
+    <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
+    <option name="SCRIPT_PATH" value="$PROJECT_DIR$/dev/generate-openapi-ts-client.sh" />
+    <option name="SCRIPT_OPTIONS" value="" />
+    <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
+    <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+    <option name="INDEPENDENT_INTERPRETER_PATH" value="true" />
+    <option name="INTERPRETER_PATH" value="/bin/bash" />
+    <option name="INTERPRETER_OPTIONS" value="" />
+    <option name="EXECUTE_IN_TERMINAL" value="true" />
+    <option name="EXECUTE_SCRIPT_FILE" value="true" />
+    <envs />
+    <method v="2" />
+  </configuration>
+</component>

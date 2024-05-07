@@ -27,14 +27,13 @@ IMAGE_URL="europe-north1-docker.pkg.dev/nais-management-233d/k9saksbehandling/na
 docker pull --quiet $IMAGE_URL
 docker run \
   --name="$CONTAINER_NAME" \
+  --rm \
   --mount type=bind,source="${TS_CLIENT_SRC_DIR}",target=/in \
   --mount type=bind,source="${TS_CLIENT_TARGET_DIR}",target=/out \
   $IMAGE_URL -- \
   --openapi-spec-file in/k9-sak.openapi.json \
   --package-json-file in/package.json \
   --client-name K9SakClient
-docker wait "$CONTAINER_NAME"
-docker rm "$CONTAINER_NAME"
 
 # Restore original working directory
 cd -
