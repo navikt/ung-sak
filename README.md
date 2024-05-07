@@ -22,14 +22,30 @@ Kjør `no.nav.k9.sak.db.util.Databaseskjemainitialisering` for å få med skjema
 
 Swagger: http://localhost:8080/k9/sak/swagger
 
-### Generering av openapi spesifikasjon og typescript klient lokalt.
+### Generering av openapi spesifikasjon og typescript klient.
 
-Ved behov kan openapi spesifikasjon og typescript klient genererast med lokalt utviklingsmiljø.
+I build pipeline blir det automatisk generert en k9-sak.openapi.json fil som beskriver rest apiet på samme måte som 
+swagger serveren. Denne fila blir deretter brukt til å automatisk generere et typescript klientbibliotek som kan brukes
+til å kommunisere med serveren fra nettleser.
+
+Ved behov kan openapi spesifikasjon og typescript klient genereres i lokalt utviklingsmiljø.
+
+Man kan kjøre dette script:
 
 ```bash
 dev/generate-openapi-ts-client.sh
 ```
-Kommandoen over vil generere fil _web/src/main/resources/openapi-ts-client/k9-sak.openapi.json_. Deretter vil den 
-køyre docker image for å generere typescript klient ut frå generert openapi.json fil.
 
-Generert typescript/javascript blir skrive til _web/target/ts-client_.
+Eller en av intellij run konfigurasjonene som heter `web/generate typescript client`
+
+Dette vil generere fil _web/src/main/resources/openapi-ts-client/k9-sak.openapi.json_. Deretter vil den 
+kjøre docker image for å generere typescript klient ut fra generert openapi.json fil.
+
+Generert typescript/javascript blir plassert i _web/target/ts-client_.
+
+Man kan deretter linke direkte til denne plassering fra web koden som skal bruke den, som beskrevet i 
+[k9-sak-web/.../backend/README](https://github.com/navikt/k9-sak-web/tree/master/packages/v2/backend#lokal-k9-sak-typescript-client-bruk)
+
+På denne måten kan man teste om backend endringer fører til feil i frontend før man pusher til github.
+
+Se også [openapi-ts-client/README](web/src/main/resources/openapi-ts-client/README.md) for mer teknisk info.
