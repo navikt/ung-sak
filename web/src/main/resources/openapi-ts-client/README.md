@@ -20,3 +20,24 @@ The file is also intentionally git-ignored, so that if one runs the code generat
 The package.json file in here is combined with predefined template in https://github.com/navikt/openapi-ts-clientmaker 
 source code, to create the package.json for the published npm package. Also, the package version is overridden when the 
 client is built in the GitHub pipeline. See the GitHub workflow definition for more details.
+
+## Use of published package
+
+The generated package is published as a **GitHub npm package 
+[@navikt/k9-sak-typescript-client](https://github.com/navikt/k9-sak/pkgs/npm/k9-sak-typescript-client)**.
+It can be used like this:
+
+### installation
+Install the package as usual from GitHub package registry. More info about that here: 
+ https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry
+
+### Code example
+```typescript
+import { K9SakClient } from "@navikt/k9-sak-typescript-client";
+
+const organisasjonsnr = 111222333; // input
+const k9sak = new K9SakClient();
+const mottakerinfo = await k9sak.brev.getBrevMottakerinfoEreg({organisasjonsnr})
+
+console.debug(`mottaker navn: ${mottakerinfo?.navn}`)
+```

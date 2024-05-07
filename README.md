@@ -28,6 +28,8 @@ I build pipeline blir det automatisk generert en k9-sak.openapi.json fil som bes
 swagger serveren. Denne fila blir deretter brukt til å automatisk generere et typescript klientbibliotek som kan brukes
 til å kommunisere med serveren fra nettleser.
 
+Generert typescript klient blir publisert som **GitHub npm pakke [@navikt/k9-sak-typescript-client](https://github.com/navikt/k9-sak/pkgs/npm/k9-sak-typescript-client)**
+
 Ved behov kan openapi spesifikasjon og typescript klient genereres i lokalt utviklingsmiljø.
 
 Man kan kjøre dette script:
