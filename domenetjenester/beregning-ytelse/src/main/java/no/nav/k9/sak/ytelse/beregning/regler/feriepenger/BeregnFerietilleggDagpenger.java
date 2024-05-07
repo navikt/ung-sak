@@ -2,9 +2,11 @@ package no.nav.k9.sak.ytelse.beregning.regler.feriepenger;
 
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.specification.LeafSpecification;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatAndel;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatPeriode;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.MottakerType;
@@ -31,6 +33,7 @@ class BeregnFerietilleggDagpenger extends LeafSpecification<BeregningsresultatFe
     public static final String ID = "FP_BR 8.11";
     public static final String BESKRIVELSE = "Beregn ferietillegg for dagpenger.";
     private static final BigDecimal FERIEPENGER_SATS = BigDecimal.valueOf(0.095);
+    private static final LocalDate FØRSTE_DAG_MED_OPPTJENING_AV_FERIETILLEGG = LocalDate.of(2022,1,1);
 
     BeregnFerietilleggDagpenger() {
         super(ID, BESKRIVELSE);
@@ -41,7 +44,7 @@ class BeregnFerietilleggDagpenger extends LeafSpecification<BeregningsresultatFe
         Map<String, Object> regelsporing = new LinkedHashMap<>();
         var tilkjentytelseSegmenter = regelModell.getBeregningsresultatPerioder().stream().map(this::lagDagpengeSegment).toList();
         var tilkjentytelseTidslinje = new LocalDateTimeline<>(tilkjentytelseSegmenter);
-        var tidslinjeDagpengerTilkjentYtelse = splittPåÅr(tilkjentytelseTidslinje);
+        var tidslinjeDagpengerTilkjentYtelse = splittPåÅr(tilkjentytelseTidslinje).intersection(lagTidslinjePeriodeEtterRegelendring());
         var segmenterMedDagpengerIAndreSystemer = regelModell.getPerioderMedDagpenger().stream()
             .map(p -> new LocalDateSegment<>(p.fom(), p.tom(), p.kilde())).toList();
         var tidslinjeDagpengerAndreKilder = new LocalDateTimeline<>(segmenterMedDagpengerIAndreSystemer).compress();
@@ -54,6 +57,10 @@ class BeregnFerietilleggDagpenger extends LeafSpecification<BeregningsresultatFe
         });
 
         return beregnet(regelsporing);
+    }
+
+    private LocalDateInterval lagTidslinjePeriodeEtterRegelendring() {
+        return new LocalDateInterval(FØRSTE_DAG_MED_OPPTJENING_AV_FERIETILLEGG, Tid.TIDENES_ENDE);
     }
 
     private void beregnFeriepengerForÅr(LocalDateTimeline<List<BeregningsresultatAndel>> tidslinjeDagpengerTilkjentYtelse, Year år, Map<String, Object> regelsporing) {
