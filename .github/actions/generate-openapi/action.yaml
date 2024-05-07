@@ -57,7 +57,7 @@ runs:
       with:
         openapi-spec-file: web/src/main/resources/openapi-ts-client/k9-sak.openapi.json
         package-json-file: web/src/main/resources/openapi-ts-client/package.json
-        # TODO: Activate: package-json-version: "${{ env.PACKAGE_JSON_VERSION }}"
+        package-json-version: "${{ env.PACKAGE_JSON_VERSION }}"
         out-dir: web/target/ts-client
         client-name: K9SakClient
       env:
