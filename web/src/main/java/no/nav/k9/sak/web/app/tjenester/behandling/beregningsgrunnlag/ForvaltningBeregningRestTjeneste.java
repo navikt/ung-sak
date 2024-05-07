@@ -146,7 +146,7 @@ public class ForvaltningBeregningRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Finner behandlinger og informasjon om perioder som er rammet av IM-feil", tags = "beregning")
-    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = DRIFT)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response finnBehandlingerMedFeilIM(@Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) FinnBehandlingerMedFeilIMDto finnBehandlingerMedFeilIMDto) { // NOSONAR
 
@@ -166,7 +166,7 @@ public class ForvaltningBeregningRestTjeneste {
         var relevanteEndringerPrBehandling = behandlinger.stream().flatMap(t -> {
             var behandlingReferanse = BehandlingReferanse.fra(t);
             var relevanteEndringer = finnPerioderMedEndringVedFeilInntektsmelding.finnPerioderForEndringDersomFeilInntektsmeldingBrukes(behandlingReferanse, finnBehandlingerMedFeilIMDto.getFraDato());
-                return relevanteEndringer.map(it -> new FeilInntektsmeldingIBrukResponse(behandlingReferanse.getBehandlingId(), it.vilkårsperioderTilRevurdering(), it.kunEndringIRefusjonListe())).stream();
+                return relevanteEndringer.map(it -> new FeilInntektsmeldingIBrukResponse(behandlingReferanse.getSaksnummer(), behandlingReferanse.getBehandlingId(), it.vilkårsperioderTilRevurdering(), it.kunEndringIRefusjonListe())).stream();
             }).toList();
 
 

@@ -40,15 +40,15 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <felles.version>2.5.9</felles.version>
+        <felles.version>2.6.0</felles.version>
         <swagger.version>2.2.17</swagger.version>
         <junit.version>5.10.2</junit.version>
-        <k9format.version>9.2.14</k9format.version>
-        <jackson.version>2.17.0</jackson.version>
+        <k9format.version>9.2.15</k9format.version>
+        <jackson.version>2.17.1</jackson.version>
         <asm.version>9.7</asm.version>
         <kotlin-stdlib.version>1.9.23</kotlin-stdlib.version>
         <jandex.version>3.1.7</jandex.version>
-        <flyway.version>10.11.0</flyway.version>
+        <flyway.version>10.12.0</flyway.version>
 
     </properties>
 
@@ -129,7 +129,7 @@
             <dependency>
                 <groupId>no.nav.k9.prosesstask</groupId>
                 <artifactId>prosesstask-root</artifactId>
-                <version>2.1.1</version>
+                <version>2.2.1</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -147,7 +147,7 @@
             <dependency>
                 <groupId>no.nav.k9.formidling</groupId>
                 <artifactId>eksterne-kontrakter</artifactId>
-                <version>1.0.7</version>
+                <version>1.0.11</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.k9.abakus</groupId>
@@ -157,7 +157,7 @@
             <dependency>
                 <groupId>no.nav.folketrygdloven.kalkulus</groupId>
                 <artifactId>beregning-kontrakt</artifactId>
-                <version>5.0.4</version>
+                <version>5.0.8</version>
             </dependency>
 
             <dependency>
@@ -168,7 +168,7 @@
             <dependency>
                 <groupId>org.threeten</groupId>
                 <artifactId>threeten-extra</artifactId>
-                <version>1.7.2</version>
+                <version>1.8.0</version>
             </dependency>
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>
@@ -514,13 +514,13 @@
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
-                <version>2.16.0</version>
+                <version>2.16.1</version>
             </dependency>
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
-                <version>1.16.1</version>
+                <version>1.17.0</version>
             </dependency>
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->
@@ -714,17 +714,17 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-install-plugin</artifactId>
-                    <version>3.1.1</version>
+                    <version>3.1.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
-                    <version>3.1.1</version>
+                    <version>3.1.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.3.0</version>
+                    <version>3.4.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

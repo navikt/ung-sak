@@ -278,6 +278,8 @@ spec:
       value: "false"
     - name: INAKTIV_VED_8_47_B
       value: "false"
+    - name: FERIEPENGER_AV_DAGPENGER
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
