@@ -17,6 +17,7 @@ runs:
   steps:
     - name: Set resultDir
       id: set-output
+      shell: bash
       run: echo "resultDir=web/target/ts-client" >> $GITHUB_OUTPUT
     - name: Typescript generate
       id: typescript-generate
