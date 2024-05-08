@@ -1,6 +1,9 @@
 name: Publish typescript client
 description: Publish previously built typescript client to github npm registry.
 inputs:
+  contentPath:
+    description: The path where the package content to publish exists
+    required: true
   githubToken:
     description: The github token for the workflow, allowing read of repo, and publishing npm package to github registry.
     required: true
@@ -10,6 +13,7 @@ runs:
   steps:
     - name: Publish typescript client
       shell: bash
+      working-directory: ${{ inputs.contentPath }}
       run: |
         corepack enable
         yarn config set npmScopes.navikt.npmRegistryServer "https://npm.pkg.github.com"

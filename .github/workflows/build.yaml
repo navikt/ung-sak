@@ -93,13 +93,17 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-typescript-client, deploy-dev]
     permissions:
+      contents: read
       packages: write
     steps:
+     - uses: actions/checkout@v4
      - uses: actions/download-artifact@v4
        with:
-         name: k9-sak-typescript-client
+         name: k9-sak-typescript-client-src
+         path: /tmp/k9-sak-typescript-client
      - uses: ./.github/actions/publish-typescript-client
        with:
+         contentPath: /tmp/k9-sak-typescript-client
          githubToken: ${{ secrets.GITHUB_TOKEN }}
 
   deploy-prod:

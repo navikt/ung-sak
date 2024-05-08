@@ -11,5 +11,6 @@ blir deploya til dev/prod.
 
 ### Inputs
 
+- _contentPath: filkatalog der innholdet som skal publiseres i pakke er plassert.
 - _githubToken_: secrets.GITHUB_TOKEN frå kallande workflow. Må ha lov til å publisere npm pakke.
 
