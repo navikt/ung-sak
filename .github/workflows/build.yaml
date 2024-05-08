@@ -42,12 +42,14 @@ jobs:
           readerToken: ${{ secrets.READER_TOKEN }}
       - uses: ./.github/actions/generate-typescript-client
         id: generate-typescript
+        if: ${{ steps.generate-openapi.outputs.haschanged == 'true' }}
         with:
           openapiVersion: ${{ steps.generate-openapi.outputs.openapiVersion }}
           patchVersion: ${{ needs.build-app.outputs.build-version }}
       # Upload generated typescript package, so it can be downloaded and published by later job
       - uses: actions/upload-artifact@v4
         id: upload-typescript
+        if: ${{ steps.generate-openapi.outputs.haschanged == 'true' }}
         with:
           name: k9-sak-typescript-client-src
           path: "${{ steps.generate-typescript.outputs.resultDir }}"
