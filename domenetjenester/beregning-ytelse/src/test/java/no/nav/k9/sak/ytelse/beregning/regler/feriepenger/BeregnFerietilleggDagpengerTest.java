@@ -57,6 +57,23 @@ class BeregnFerietilleggDagpengerTest {
     }
 
     @Test
+    void skal_ikke_gi_feriepenger_for_periode_før_regelendring() {
+        var tyPeriode = lagTilkjentYtelseDagpenger(LocalDate.of(2021, 6, 1), LocalDate.of(2021, 12, 31), 900L);
+
+        var regelmodell = BeregningsresultatFeriepengerRegelModell.builder()
+            .medPerioderMedDagpenger(Collections.emptyList())
+            .medBeregningsresultatPerioder(List.of(tyPeriode))
+            .build();
+        new BeregnFerietilleggDagpenger().evaluate(regelmodell);
+
+        assertThat(regelmodell).isNotNull();
+
+        var feriepengerP1 = feriepengerDagpengerFraPeriodeIndex(regelmodell, 0);
+
+        assertThat(feriepengerP1).isEmpty();
+    }
+
+    @Test
     void skal_ikke_gi_ferietillegg_når_over_8_uker_med_dagpenger_over_flere_år_fra_andre_kilder() {
         var tyPeriode = lagTilkjentYtelseDagpenger(LocalDate.of(2023,11,15), LocalDate.of(2024,2,20), 900L);
 
