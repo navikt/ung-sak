@@ -1,7 +1,5 @@
 name: Generate typescript client
 description: Generate typescript client from openapi spec.
-env:
-  RESULT_DIR: web/target/ts-client # Generated code is put here
 inputs:
   openapiVersion:
     description: The openapi version extracted from openapi.json
@@ -12,11 +10,14 @@ inputs:
 outputs:
   resultDir:
     description: Directory in which the generated typescript client package was written
-    value: ${{ env.RESULT_DIR }}
+    value: ${{ steps.set-output.outputs.resultDir }}
 
 runs:
   using: 'composite'
   steps:
+    - name: Set resultDir
+      id: set-output
+      run: echo "resultDir=web/target/ts-client" >> $GITHUB_OUTPUT
     - name: Typescript generate
       id: typescript-generate
       uses: navikt/openapi-ts-clientmaker@main
@@ -24,7 +25,7 @@ runs:
         openapi-spec-file: web/src/main/resources/openapi-ts-client/k9-sak.openapi.json
         package-json-file: web/src/main/resources/openapi-ts-client/package.json
         package-json-version: "${{ env.PACKAGE_JSON_VERSION }}"
-        out-dir: "${{ env.RESULT_DIR }}"
+        out-dir: "${{ steps.set-output.outputs.resultDir }}"
         client-name: K9SakClient
       env:
         PACKAGE_JSON_VERSION: "${{ inputs.openapiVersion }}.${{ inputs.patchVersion }}"
