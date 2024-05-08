@@ -54,6 +54,10 @@ jobs:
           name: k9-sak-typescript-client-src
           path: "${{ steps.generate-typescript.outputs.resultDir }}"
           if-no-files-found: error
+      # output flag signalling that the client was built
+      - if: ${{ steps.generate-openapi.outputs.haschanged == 'true' }}
+        shell: bash
+        run: echo "wasBuilt=true" >> $GITHUB_OUTPUT
 
   verdikjede-tester:
     name: Verdikjedetester
@@ -94,6 +98,7 @@ jobs:
     name: Publish typescript client
     runs-on: ubuntu-latest
     needs: [build-typescript-client, deploy-dev]
+    if: ${{ needs.build-typescript-client.outputs.wasBuilt == 'true' }}
     permissions:
       contents: read
       packages: write
