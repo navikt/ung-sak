@@ -1,0 +1,22 @@
+name: Publish typescript client
+description: Publish previously built typescript client to github npm registry.
+inputs:
+  githubToken:
+    description: The github token for the workflow, allowing read of repo, and publishing npm package to github registry.
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Publish typescript client
+      shell: bash
+      run: |
+        corepack enable
+        yarn config set npmScopes.navikt.npmRegistryServer "https://npm.pkg.github.com"
+        yarn config set npmScopes.navikt.npmAlwaysAuth true
+        yarn config set npmScopes.navikt.npmAuthToken $NODE_AUTH_TOKEN
+        yarn install --immutable-cache
+        yarn npm publish
+      env:
+        YARN_ENABLE_IMMUTABLE_INSTALLS: 'false' # yarn install must fill inn the boilerplate needed for yarn publish.
+        NODE_AUTH_TOKEN: ${{ inputs.githubToken }}
