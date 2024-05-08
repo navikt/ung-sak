@@ -11848,6 +11848,33 @@
         "tags" : [ "aksjonspunkt" ]
       }
     },
+    "/aktoer-info" : {
+      "get" : {
+        "description" : "Henter informasjon om en aktøer",
+        "operationId" : "getAktoerInfo",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "aktoerId",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/AktørIdDto"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AktørInfoDto"
+                }
+              }
+            },
+            "description" : "Returnerer basisinformasjon om en aktør og hvilke fagsaker vedkommede har i k9-sak."
+          }
+        },
+        "tags" : [ "aktoer" ]
+      }
+    },
     "/avbryt-aksjonspunkt" : {
       "post" : {
         "description" : "Avbryter feilopprettet aksjonspunkt",
@@ -16337,7 +16364,7 @@
     "/forvaltning/person/saksnumre-for-person" : {
       "get" : {
         "description" : "Henter saksnumre for en person. Kan for eksempel brukes for å finne ut om k9 er påvirket av 'aktør-splitt'",
-        "operationId" : "getAktoerInfo",
+        "operationId" : "getAktoerInfo_1",
         "parameters" : [ {
           "in" : "query",
           "name" : "aktoerId",
@@ -17519,7 +17546,7 @@
     "/register/redirect-to/aa-reg" : {
       "get" : {
         "description" : "Redirecter til aa-reg for arbeidstakeren",
-        "operationId" : "getAktoerInfo_1",
+        "operationId" : "getAktoerInfo_2",
         "parameters" : [ {
           "in" : "query",
           "name" : "saksnummer",
