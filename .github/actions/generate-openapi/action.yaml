@@ -5,9 +5,6 @@ inputs:
     description: The secrets.READER_TOKEN allowing read of internal packages.
     required: true
 outputs:
-  haschanged:
-    description: "true when the openapi spec has changed"
-    value: ${{ steps.change-commit.outputs.haschanged }}
   openapiVersion:
     description: "generated openapi spec version"
     value: ${{ steps.openapi-version.outputs.openapiVersion }}
@@ -40,7 +37,7 @@ runs:
       with:
         script: |
           core.setFailed('fant ikkje korrekt openapi version frå k9-sak.openapi.json')
-    # Commit changes to k9-sak.openapi.json and create flag that signals if there actually was changes
+    # Commit and push any changes to k9-sak.openapi.json
     - name: Commit api endringer
       id: change-commit
       shell: bash
@@ -48,5 +45,6 @@ runs:
         git config --global user.email "action@github.com"
         git config --global user.name "GitHub Action"
         git add --force web/src/main/resources/openapi-ts-client/k9-sak.openapi.json
-        (git diff --quiet --staged && echo "haschanged=false" >> $GITHUB_OUTPUT) || 
-        (git commit -m "k9-sak.openapi.json updated by build pipeline" && echo "haschanged=true" >> $GITHUB_OUTPUT && git push)
+        (git diff --quiet --staged) || 
+        (git commit -m "k9-sak.openapi.json updated by build pipeline" && git push)
+ 

@@ -28,6 +28,7 @@ jobs:
       pg_version: 12
     secrets: inherit
 
+
   build-typescript-client:
     name: Build typescript client
     runs-on: ubuntu-latest
@@ -42,22 +43,16 @@ jobs:
           readerToken: ${{ secrets.READER_TOKEN }}
       - uses: ./.github/actions/generate-typescript-client
         id: generate-typescript
-        if: ${{ steps.generate-openapi.outputs.haschanged == 'true' }}
         with:
           openapiVersion: ${{ steps.generate-openapi.outputs.openapiVersion }}
           patchVersion: ${{ needs.build-app.outputs.build-version }}
       # Upload generated typescript package, so it can be downloaded and published by later job
       - uses: actions/upload-artifact@v4
         id: upload-typescript
-        if: ${{ steps.generate-openapi.outputs.haschanged == 'true' }}
         with:
           name: k9-sak-typescript-client-src
           path: "${{ steps.generate-typescript.outputs.resultDir }}"
           if-no-files-found: error
-      # output flag signalling that the client was built
-      - if: ${{ steps.generate-openapi.outputs.haschanged == 'true' }}
-        shell: bash
-        run: echo "wasBuilt=true" >> $GITHUB_OUTPUT
 
   verdikjede-tester:
     name: Verdikjedetester
@@ -98,7 +93,6 @@ jobs:
     name: Publish typescript client
     runs-on: ubuntu-latest
     needs: [build-typescript-client, deploy-dev]
-    if: ${{ needs.build-typescript-client.outputs.wasBuilt == 'true' }}
     permissions:
       contents: read
       packages: write
@@ -108,7 +102,13 @@ jobs:
        with:
          name: k9-sak-typescript-client-src
          path: /tmp/k9-sak-typescript-client
+     - uses: ./.github/actions/compare-typescript-client
+       id: compare-with-published
+       with:
+         localPath: /tmp/k9-sak-typescript-client
+         githubToken: ${{ secrets.GITHUB_TOKEN }}
      - uses: ./.github/actions/publish-typescript-client
+       if: steps.compare-with-published.outputs.hasChanged == 'true'
        with:
          contentPath: /tmp/k9-sak-typescript-client
          githubToken: ${{ secrets.GITHUB_TOKEN }}

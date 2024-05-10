@@ -1,0 +1,37 @@
+name: Compare typescript client
+description: Compare typescript client src and dist in workspace with published package content
+inputs:
+  localPath:
+    description: path to directory where the locally generated src and esm are.
+    required: true
+  githubToken:
+    description: The github token for the workflow, allowing read of repo npm package registry.
+    required: true
+outputs:
+  hasChanged:
+    description: true if local version of client src is different from published version
+    value: ${{ steps.compare.outputs.hasChanged }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install and compare with local
+      id: compare
+      shell: bash
+      run: |
+        # create temp work dir for published version of package
+        mkdir published
+        cd published
+        # setup and run npm install to download the published version of package
+        npm config set @navikt:registry=https://npm.pkg.github.com
+        npm config set //npm.pkg.github.com/:_authToken=${{ inputs.githubToken}}
+        npm install --no-save @navikt/k9-sak-typescript-client
+        # move installed package to published dir
+        mv node_modules/@navikt/k9-sak-typescript-client ./
+        rm -r node_modules
+        cd ..
+        # compare local package src and published package src
+        diff -q -w -r published/k9-sak-typescript-client/src/ "${{ inputs.localPath }}/src" \
+        && echo "hasChanged=false" >> $GITHUB_OUTPUT || echo "hasChanged=true" >> $GITHUB_OUTPUT
+        # cleanup temp work dir
+        rm -rf published
