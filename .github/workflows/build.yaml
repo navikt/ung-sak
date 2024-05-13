@@ -102,7 +102,7 @@ jobs:
        with:
          name: k9-sak-typescript-client-src
          path: /tmp/k9-sak-typescript-client
-     - uses: ./.github/actions/compare-typescript-client
+     - uses: navikt/openapi-ts-clientmaker/extra/actions/compare-with-published@main
        id: compare-with-published
        with:
          localPath: /tmp/k9-sak-typescript-client
