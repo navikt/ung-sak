@@ -107,7 +107,7 @@ jobs:
        with:
          localPath: /tmp/k9-sak-typescript-client
          githubToken: ${{ secrets.GITHUB_TOKEN }}
-     - uses: navikt/openapi-ts-clientmaker/extra/actions/publish-typescript-client@publish-typescript
+     - uses: navikt/openapi-ts-clientmaker/extra/actions/publish-typescript-client@main
        if: steps.compare-with-published.outputs.hasChanged == 'true'
        with:
          contentPath: /tmp/k9-sak-typescript-client
