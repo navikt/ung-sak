@@ -106,6 +106,7 @@ jobs:
        id: compare-with-published
        with:
          localPath: /tmp/k9-sak-typescript-client
+         npmPackageName: k9-sak-typescript-client
          githubToken: ${{ secrets.GITHUB_TOKEN }}
      - uses: navikt/openapi-ts-clientmaker/extra/actions/publish-typescript-client@main
        if: steps.compare-with-published.outputs.hasChanged == 'true'
