@@ -9,6 +9,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -38,6 +41,7 @@ import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnla
 @ApplicationScoped
 public class FinnPerioderMedEndringVedFeilInntektsmelding {
 
+    private static final Logger log = LoggerFactory.getLogger(FinnPerioderMedEndringVedFeilInntektsmelding.class);
     private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private KalkulusRestKlient kalkulusRestKlient;
@@ -74,6 +78,10 @@ public class FinnPerioderMedEndringVedFeilInntektsmelding {
         }
 
         var inntektsmeldingerPrReferanse = finnInntektsmeldingerForBeregningPrEksternReferanse(behandlingReferanse, vilkårsperioder, bgPerioderGrunnlag, alleInntektsmeldinger);
+        if (inntektsmeldingerPrReferanse.keySet().isEmpty()) {
+            log.warn("Fant ingen bg-referanser for sak " + behandlingReferanse.getSaksnummer().getVerdi() + " og behandling " + behandlingReferanse.getBehandlingId());
+            return Optional.empty();
+        }
         var journalpostIderResponses = finnJournalposterSomFaktiskErBruktIBeregning(behandlingReferanse, inntektsmeldingerPrReferanse);
 
         var relevanteEndringer = finnRelevanteEndringer(
