@@ -335,7 +335,6 @@ public class PersoninfoTjeneste {
             .foedsel(new FoedselResponseProjection().foedselsdato())
             .doedsfall(new DoedsfallResponseProjection().doedsdato())
             .folkeregisterpersonstatus(new FolkeregisterpersonstatusResponseProjection().forenkletStatus().status())
-            .opphold(new OppholdResponseProjection().type().oppholdFra().oppholdTil())
             .innflyttingTilNorge(new InnflyttingTilNorgeResponseProjection().fraflyttingsland())
             .utflyttingFraNorge(new UtflyttingFraNorgeResponseProjection().tilflyttingsland())
             .kjoenn(new KjoennResponseProjection().kjoenn())
@@ -430,8 +429,6 @@ public class PersoninfoTjeneste {
                     .forenkletStatus().status()
                     .folkeregistermetadata(new FolkeregistermetadataResponseProjection()
                         .ajourholdstidspunkt().gyldighetstidspunkt().opphoerstidspunkt()))
-            .opphold(new PersonOppholdParametrizedInput().historikk(true),
-                new OppholdResponseProjection().type().oppholdFra().oppholdTil())
             .statsborgerskap(new PersonStatsborgerskapParametrizedInput().historikk(true),
                 new StatsborgerskapResponseProjection().land().gyldigFraOgMed().gyldigTilOgMed())
             .bostedsadresse(new PersonBostedsadresseParametrizedInput().historikk(true),
