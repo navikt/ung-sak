@@ -4,6 +4,9 @@ inputs:
   readerToken:
     description: The secrets.READER_TOKEN allowing read of internal packages.
     required: true
+  githubToken:
+    description: The secrets.GITHUB_TOKEN allowing commit on the repo.
+    required: true
 outputs:
   openapiVersion:
     description: "generated openapi spec version"
@@ -39,12 +42,26 @@ runs:
           core.setFailed('fant ikkje korrekt openapi version frå k9-sak.openapi.json')
     # Commit and push any changes to k9-sak.openapi.json
     - name: Commit api endringer
+      if: ${{ success() }}
       id: change-commit
       shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.githubToken }}
+        FILE_NAME: k9-sak.openapi.json
+        FILE_DIRECTORY: web/src/main/resources/openapi-ts-client
+        DESTINATION_BRANCH: ${{ github.head_ref || github.ref_name }}
       run: |
-        git config --global user.email "action@github.com"
-        git config --global user.name "GitHub Action"
-        git add --force web/src/main/resources/openapi-ts-client/k9-sak.openapi.json
-        (git diff --quiet --staged) || 
-        (git commit -m "k9-sak.openapi.json updated by build pipeline" && git push)
+        # Use git to detect changes, only commit and push if there are changes
+        git add --force ${FILE_DIRECTORY}/${FILE_NAME}
+        git diff --quiet --staged || 
+        (
+        export MESSAGE="$FILE_NAME updated by build pipeline"
+        export SHA=$( git rev-parse $DESTINATION_BRANCH:$FILE_DIRECTORY/$FILE_NAME )
+        gh api --method PUT /repos/:owner/:repo/contents/$FILE_DIRECTORY/$FILE_NAME \
+          --field message="$MESSAGE" \
+          --field content=@<( base64 -i "${FILE_DIRECTORY}/${FILE_NAME}" ) \
+          --field branch="$DESTINATION_BRANCH" \
+          --field sha="$SHA"
+        )
+        # ^-Use the REST API to commit changes, so we get automatic commit signing
  

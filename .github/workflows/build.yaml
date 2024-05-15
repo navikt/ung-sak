@@ -41,6 +41,7 @@ jobs:
         id: generate-openapi
         with:
           readerToken: ${{ secrets.READER_TOKEN }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
       - uses: ./.github/actions/generate-typescript-client
         id: generate-typescript
         with:
