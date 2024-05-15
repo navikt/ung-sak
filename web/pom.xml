@@ -391,7 +391,7 @@
                     <mainClass>no.nav.k9.sak.web.app.util.OpenapiGenerate</mainClass>
                     <classpathScope>compile</classpathScope>
                     <arguments>
-                        <argument>${project.build.directory}/k9-sak.openapi.json</argument>
+                        <argument>${project.build.sourceDirectory}/../resources/openapi-ts-client/k9-sak.openapi.json</argument>
                     </arguments>
                 </configuration>
             </plugin>
