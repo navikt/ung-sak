@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.kodeverk;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
 import no.nav.k9.kodeverk.Fagsystem;
@@ -28,6 +29,7 @@ import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
  */
 public class K9SakKodeverkWeb {
     @NotNull
+    @Valid
     public K9SakKodeverkArbeidsforhold arbeidsforhold;
     public static class K9SakKodeverkArbeidsforhold {
         @NotNull
@@ -43,6 +45,7 @@ public class K9SakKodeverkWeb {
     }
 
     @NotNull
+    @Valid
     public K9SakKodeverkBehandling behandling;
     public static class K9SakKodeverkBehandling {
         @NotNull
@@ -56,6 +59,7 @@ public class K9SakKodeverkWeb {
 
 
         @NotNull
+        @Valid
         public K9SakKodeverkBehandlingAksjonspunkt aksjonspunkt;
         public static class K9SakKodeverkBehandlingAksjonspunkt {
             @NotNull
@@ -64,19 +68,23 @@ public class K9SakKodeverkWeb {
     }
 
     @NotNull
+    @Valid
     public K9SakKodeverkHistorikk historikk;
     public static class K9SakKodeverkHistorikk {
         @NotNull
         public HistorikkBegrunnelseType historikkBegrunnelseType;
     }
 
-    @NotNull K9SakKodeverkProduksjonsstyring produksjonsstyring;
+    @NotNull
+    @Valid
+    K9SakKodeverkProduksjonsstyring produksjonsstyring;
     public static class K9SakKodeverkProduksjonsstyring {
         @NotNull
         public OppgaveÅrsak oppgaveÅrsak;
     }
 
     @NotNull
+    @Valid
     public K9SakKodeverkMedlem medlem;
     public static class K9SakKodeverkMedlem {
         @NotNull
@@ -84,6 +92,7 @@ public class K9SakKodeverkWeb {
     }
 
     @NotNull
+    @Valid
     public AbakusKodeverkIaygrunnlag iaygrunnlag;
     public static class AbakusKodeverkIaygrunnlag {
         /**
@@ -95,6 +104,7 @@ public class K9SakKodeverkWeb {
     }
 
     @NotNull
+    @Valid
     public K9SakKodeverkPerson person;
     public static class K9SakKodeverkPerson {
         @NotNull
@@ -104,6 +114,7 @@ public class K9SakKodeverkWeb {
     }
 
     @NotNull
+    @Valid
     public K9SakKodeverkOpptjening opptjening;
     public static class K9SakKodeverkOpptjening {
         @NotNull
@@ -111,6 +122,7 @@ public class K9SakKodeverkWeb {
     }
 
     @NotNull
+    @Valid
     public Fagsystem fagsystem;
 
 }
