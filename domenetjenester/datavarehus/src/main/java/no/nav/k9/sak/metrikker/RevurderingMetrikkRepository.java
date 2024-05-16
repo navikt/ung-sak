@@ -397,7 +397,7 @@ public class RevurderingMetrikkRepository {
             "       and b.avsluttet_dato >= :startTid " +
             "       and b.avsluttet_dato < :sluttTid " +
             "       and (b.behandling_type = :revurdering) " +
-            "group by 1, 2, 3, 4, 5, 6";
+            "group by 1, 2, 3, 4, 5, 6, 7";
 
         String metricName = "revurdering_antall_behandlinger_pr_aksjonspunkt_og_aarsak_og_dokument";
         String metricField = "antall_aksjonspunkt_per_behandling";
