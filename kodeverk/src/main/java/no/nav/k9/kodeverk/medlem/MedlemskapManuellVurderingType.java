@@ -24,11 +24,11 @@ public enum MedlemskapManuellVurderingType implements Kodeverdi {
     UNNTAK("UNNTAK", "Periode med unntak fra medlemskap", true),
     IKKE_RELEVANT("IKKE_RELEVANT", "Ikke relevant periode", true),
     SAKSBEHANDLER_SETTER_OPPHØR_AV_MEDL_PGA_ENDRINGER_I_TPS("OPPHOR_PGA_ENDRING_I_TPS", "Opphør av medlemskap på grunn av endringer i tps", false),
-    
+
     ;
-    
+
     private static final Map<String, MedlemskapManuellVurderingType> KODER = new LinkedHashMap<>();
-    
+
     public static final String KODEVERK = "MEDLEMSKAP_MANUELL_VURD";
 
     @JsonIgnore
@@ -48,7 +48,17 @@ public enum MedlemskapManuellVurderingType implements Kodeverdi {
         this.navn = navn;
         this.visForGui = visGui;
     }
-    
+
+    /**
+     * toString is set to output the kode value of the enum instead of the default that is the enum name.
+     * This makes the generated openapi spec correct when the enum is used as a query param. Without this the generated
+     * spec incorrectly specifies that it is the enum name string that should be used as input.
+     */
+    @Override
+    public String toString() {
+        return this.getKode();
+    }
+
     @JsonCreator(mode = Mode.DELEGATING)
     public static MedlemskapManuellVurderingType  fraKode(Object node)  {
         if (node == null) {
@@ -61,7 +71,7 @@ public enum MedlemskapManuellVurderingType implements Kodeverdi {
         }
         return ad;
     }
-    
+
     public static Map<String, MedlemskapManuellVurderingType> kodeMap() {
         return Collections.unmodifiableMap(KODER);
     }
@@ -86,12 +96,12 @@ public enum MedlemskapManuellVurderingType implements Kodeverdi {
     public String getKode() {
         return kode;
     }
-    
+
     @Override
     public String getOffisiellKode() {
         return getKode();
     }
-    
+
     static {
         for (var v : values()) {
             if (KODER.putIfAbsent(v.kode, v) != null) {
