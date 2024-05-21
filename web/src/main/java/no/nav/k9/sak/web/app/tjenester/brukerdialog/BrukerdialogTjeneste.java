@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.brukerdialog;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Comparator;
 import java.util.Optional;
 
+@ApplicationScoped
 public class BrukerdialogTjeneste {
     private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess");
 
