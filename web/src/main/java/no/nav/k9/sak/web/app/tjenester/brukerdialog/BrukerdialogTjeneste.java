@@ -1,6 +1,12 @@
 package no.nav.k9.sak.web.app.tjenester.brukerdialog;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import java.util.Comparator;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -8,13 +14,8 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.typer.AktørId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.Comparator;
-import java.util.Optional;
-
-@ApplicationScoped
+@Dependent
 public class BrukerdialogTjeneste {
     private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess");
 
@@ -35,6 +36,9 @@ public class BrukerdialogTjeneste {
     }
 
     public HarGyldigOmsorgsdagerVedtakDto harGyldigOmsorgsdagerVedtak(AktørId aktørId, AktørId pleietrengendeAktørId) {
+        //FIXME spør via k9-aarskvantum når tjenesten der er klar, for å få med Infotrygd-vedtak
+        //FIXME håndter hvis bruker har fått avslag etter innvilgelse
+        //FIXME ta med alle typer omsorgsdagervedtak eller rename metode
         Optional<Behandling> sistBehandlingMedInnvilgetVedtak =
             fagsakRepository.finnFagsakRelatertTil(
                     FagsakYtelseType.OMSORGSPENGER_KS,
