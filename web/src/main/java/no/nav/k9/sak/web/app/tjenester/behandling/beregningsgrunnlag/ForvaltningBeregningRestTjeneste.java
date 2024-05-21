@@ -51,6 +51,8 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
+import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.InntektsmeldingRestKlient;
+import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.OpprettForespørselRequest;
 import no.nav.folketrygdloven.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.FinnPerioderMedEndringVedFeilInntektsmelding;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
@@ -60,6 +62,7 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.felles.util.InputValideringRegex;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -71,6 +74,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.forvaltning.DumpFeilImRepository;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.trigger.ProsessTriggerForvaltningTjeneste;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
@@ -94,6 +98,7 @@ public class ForvaltningBeregningRestTjeneste {
     private HentKalkulatorInputDump hentKalkulatorInputDump;
     private ProsessTriggerForvaltningTjeneste prosessTriggerForvaltningTjeneste;
     private FinnPerioderMedEndringVedFeilInntektsmelding finnPerioderMedEndringVedFeilInntektsmelding;
+    private InntektsmeldingRestKlient inntektsmeldingRestKlient;
     private DumpFeilImRepository dumpFeilImRepository;
 
 
@@ -106,7 +111,7 @@ public class ForvaltningBeregningRestTjeneste {
                                             BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                             RevurderBeregningTjeneste revurderBeregningTjeneste,
                                             EntityManager entityManager, FagsakTjeneste fagsakTjeneste,
-                                            HentKalkulatorInputDump hentKalkulatorInputDump, FinnPerioderMedEndringVedFeilInntektsmelding finnPerioderMedEndringVedFeilInntektsmelding, DumpFeilImRepository dumpFeilImRepository) {
+                                            HentKalkulatorInputDump hentKalkulatorInputDump, FinnPerioderMedEndringVedFeilInntektsmelding finnPerioderMedEndringVedFeilInntektsmelding, InntektsmeldingRestKlient inntektsmeldingRestKlient, DumpFeilImRepository dumpFeilImRepository) {
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
@@ -117,6 +122,7 @@ public class ForvaltningBeregningRestTjeneste {
         this.prosessTriggerForvaltningTjeneste = new ProsessTriggerForvaltningTjeneste(entityManager);
         this.finnPerioderMedEndringVedFeilInntektsmelding = finnPerioderMedEndringVedFeilInntektsmelding;
         this.dumpFeilImRepository = dumpFeilImRepository;
+        this.inntektsmeldingRestKlient = inntektsmeldingRestKlient;
     }
 
     @GET
@@ -182,6 +188,25 @@ public class ForvaltningBeregningRestTjeneste {
         return CsvOutput.dumpResultSetToCsv(results);
 
 
+    }
+
+
+    @POST
+    @Path("opprett-dummy-foresporsel")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Opprett forespørsel for IM", tags = "beregning")
+    @BeskyttetRessurs(action = CREATE, resource = FAGSAK)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Response opprettForespørselForIM() { // NOSONAR
+        var testResquest = new OpprettForespørselRequest(
+            AktørId.dummy().getAktørId(),
+            "123456789",
+            LocalDate.now(),
+            FagsakYtelseType.PLEIEPENGER_SYKT_BARN.getKode(),
+            "SAK"
+        );
+        inntektsmeldingRestKlient.opprettForespørsel(testResquest);
+        return Response.ok().build();
     }
 
 
