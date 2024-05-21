@@ -78,6 +78,9 @@ spec:
         - application: k9-punsjbolle
           namespace: omsorgspenger
           cluster: dev-gcp
+        - application: k9-sak-innsyn-api
+          namespace: dusseldorf
+          cluster: dev-gcp
 
   env:
     - name: TZ
