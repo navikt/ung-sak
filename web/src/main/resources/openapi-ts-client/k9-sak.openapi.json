@@ -15468,6 +15468,21 @@
         "tags" : [ "beregning" ]
       }
     },
+    "/beregning/opprett-dummy-foresporsel" : {
+      "post" : {
+        "description" : "Opprett forespørsel for IM",
+        "operationId" : "opprettForespørselForIM",
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "beregning" ]
+      }
+    },
     "/beregning/revurder-bruk-forrige-skatteoppgjør" : {
       "post" : {
         "description" : "Oppretter manuell revurdering og bruker skatteoppgjør fra oppgitt behandling.",
