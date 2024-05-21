@@ -414,8 +414,6 @@ public class RevurderingMetrikkRepository {
         var values = stream.map(t -> SensuEvent.createSensuEvent(metricName,
                 toMap(
                     "ytelse_type", t.get(0, String.class),
-                    "saksnummer", t.get(1, String.class),
-                    "behandlingsID", t.get(2, String.class),
                     "aarsak", t.get(3, String.class),
                     "aarsak_navn", coalesce(BehandlingÅrsakType.kodeMap().getOrDefault(t.get(3, String.class), BehandlingÅrsakType.UDEFINERT).getNavn(), "-"),
                     "aksjonspunkt", t.get(4, String.class),
