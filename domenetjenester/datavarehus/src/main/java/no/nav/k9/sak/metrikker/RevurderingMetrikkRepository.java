@@ -113,6 +113,11 @@ public class RevurderingMetrikkRepository {
                 log.warn("Uthenting av antallAksjonspunktFordelingForRevurderingUtenNyttStpSisteSyvDager feiler", e);
             }
             try {
+                metrikker.addAll(timeCall(() -> antallRevurderingMedAksjonspunktOgAarsakOgMotattDokumentSisteSyvDager(dag), "antallRevurderingMedAksjonspunktOgAarsakOgMotattDokumentSisteSyvDager"));
+            } catch (QueryTimeoutException e) {
+                log.warn("Uthenting av antallRevurderingMedAksjonspunktOgAarsakOgMotattDokumentSisteSyvDager feiler", e);
+            }
+            try {
                 metrikker.addAll(timeCall(() -> antallRevurderingMedAksjonspunktOgAarsakPrKodeSisteSyvDager(dag), "antallRevurderingMedAksjonspunktOgAarsakPrKodeSisteSyvDager"));
             } catch (QueryTimeoutException e) {
                 log.warn("Uthenting av antallRevurderingMedAksjonspunktPrKodeSisteSyvDager feiler", e);
@@ -362,23 +367,93 @@ public class RevurderingMetrikkRepository {
 
     }
 
+
+    Collection<SensuEvent> antallRevurderingMedAksjonspunktOgAarsakOgMotattDokumentSisteSyvDager(LocalDate dato) {
+        String sql = "select " +
+            "f.ytelse_type, " +
+            "f.saksnummer, " +
+            "b.id as behandlingsID, " +
+            "aarsak.behandling_arsak_type, " +
+            "a.aksjonspunkt_def,  " +
+            "md.type as dokumentType, " +
+            "md.kildesystem as dokumentKilde, " +
+            "(select count(a.aksjonspunkt_def) " +
+            "   from aksjonspunkt a " +
+            "   where a.behandling_id = b.id " +
+            "       and a.aksjonspunkt_status != 'AVBR' " +
+            "       and (a.vent_aarsak is null or a.vent_aarsak = '-')" +
+            "   ) as antall_aksjonspunkt_per_behandling, " +
+            "(select count(md.id) " +
+            "   from mottatt_dokument md " +
+            "   where md.behandling_id = b.id) as antall_dokumenter_per_behandling " +
+            "from behandling b " +
+            "   inner join fagsak f on f.id = b.fagsak_id " +
+            "   full outer join aksjonspunkt a on a.behandling_id = b.id " +
+            "   inner join behandling_arsak aarsak on aarsak.behandling_id = b.id " +
+            "   inner join mottatt_dokument md on md.behandling_id = b.id " +
+            "   where (a.aksjonspunkt_status is null or a.aksjonspunkt_status != 'AVBR') " +
+            "       and (a.vent_aarsak is null or a.vent_aarsak = '-') " +
+            "       and b.avsluttet_dato is not null " +
+            "       and b.avsluttet_dato >= :startTid " +
+            "       and b.avsluttet_dato < :sluttTid " +
+            "       and (b.behandling_type = :revurdering) " +
+            "group by 1, 2, 3, 4, 5, 6, 7";
+
+        String metricName = "revurdering_antall_behandlinger_pr_aksjonspunkt_og_aarsak_og_dokument";
+        String metricField = "antall_aksjonspunkt_per_behandling";
+        String metricField2 = "antall_dokumenter_per_behandling";
+
+        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.  createNativeQuery(sql, Tuple.class)
+            .setParameter("revurdering", BehandlingType.REVURDERING.getKode())
+            .setParameter("startTid", dato.minusDays(7).atStartOfDay())
+            .setParameter("sluttTid", dato.atStartOfDay());
+
+        Stream<Tuple> stream = query.getResultStream()
+            .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class)));
+
+        var values = stream.map(t -> SensuEvent.createSensuEvent(metricName,
+                toMap(
+                    "ytelse_type", t.get(0, String.class),
+                    "aarsak", t.get(3, String.class),
+                    "aarsak_navn", coalesce(BehandlingÅrsakType.kodeMap().getOrDefault(t.get(3, String.class), BehandlingÅrsakType.UDEFINERT).getNavn(), "-"),
+                    "aksjonspunkt", t.get(4, String.class),
+                    "aksjonspunkt_navn", coalesce(AksjonspunktDefinisjon.kodeMap().getOrDefault(t.get(4, String.class), AksjonspunktDefinisjon.UNDEFINED).getNavn(), "-"),
+                    "dokumentType", t.get(5, String.class),
+                    "dokumentKilde", t.get(6, String.class)
+                ),
+                Map.of(
+                    metricField, t.get(7, Number.class),
+                    metricField2, t.get(8, Number.class)
+                )))
+            .collect(Collectors.toList());
+
+        return values;
+    }
+
+
     Collection<SensuEvent> antallRevurderingMedAksjonspunktOgAarsakPrKodeSisteSyvDager(LocalDate dato) {
-        String sql = "select f.ytelse_type, a.aksjonspunkt_def, aarsak.behandling_arsak_type, count(*) as antall_behandlinger " +
+        String sql = "select " +
+            "f.ytelse_type, " +
+            "a.aksjonspunkt_def, " +
+            "aarsak.behandling_arsak_type, " +
+            "count(*) as antall_behandlinger, " +
+            "count(a.aksjonspunkt_def) as antall_aksjonspunkter " +
             "from behandling b" +
-            "         inner join fagsak f on f.id=b.fagsak_id" +
-            "         inner join aksjonspunkt a on b.id = a.behandling_id " +
-            " inner join behandling_arsak aarsak on aarsak.behandling_id = b.id " +
-            "where a.aksjonspunkt_status != 'AVBR' " +
-            "and (vent_aarsak is null or vent_aarsak = '-') " +
-            "and b.avsluttet_dato is not null " +
-            "and b.avsluttet_dato>=:startTid and b.avsluttet_dato < :sluttTid " +
-            "and b.behandling_type=:revurdering " +
+            "   inner join fagsak f on f.id=b.fagsak_id" +
+            "   inner join aksjonspunkt a on b.id = a.behandling_id " +
+            "   inner join behandling_arsak aarsak on aarsak.behandling_id = b.id " +
+            "   where (a.aksjonspunkt_status != 'AVBR') " +
+            "       and (vent_aarsak is null or vent_aarsak = '-') " +
+            "       and (b.avsluttet_dato is not null) " +
+            "       and (b.avsluttet_dato>=:startTid and b.avsluttet_dato < :sluttTid) " +
+            "       and (b.behandling_type=:revurdering) " +
             "group by 1, 2, 3";
 
-        String metricName = "revurdering_antall_behandlinger_pr_aksjonspunkt_og_aarsak";
+        String metricName = "revurdering_antall_behandlinger_pr_aksjonspunkt_og_aarsak_v2";
         String metricField = "antall_behandlinger";
+        String metricField2 = "antall_aksjonspunkter";
 
-        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
+        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.  createNativeQuery(sql, Tuple.class)
             .setParameter("revurdering", BehandlingType.REVURDERING.getKode())
             .setParameter("startTid", dato.minusDays(7).atStartOfDay())
             .setParameter("sluttTid", dato.atStartOfDay());
@@ -392,12 +467,15 @@ public class RevurderingMetrikkRepository {
                     "aksjonspunkt", t.get(1, String.class),
                     "aarsak", t.get(2, String.class),
                     "aarsak_navn", coalesce(BehandlingÅrsakType.kodeMap().getOrDefault(t.get(2, String.class), BehandlingÅrsakType.UDEFINERT).getNavn(), "-"),
-                    "aksjonspunkt_navn", coalesce(AksjonspunktDefinisjon.kodeMap().getOrDefault(t.get(1, String.class), AksjonspunktDefinisjon.UNDEFINED).getNavn(), "-")),
-                Map.of(metricField, t.get(3, Number.class))))
+                    "aksjonspunkt_navn", coalesce(AksjonspunktDefinisjon.kodeMap().getOrDefault(t.get(1, String.class), AksjonspunktDefinisjon.UNDEFINED).getNavn(), "-")
+                ),
+                Map.of(
+                    metricField, t.get(3, Number.class),
+                    metricField2, t.get(4, Number.class)
+                )))
             .collect(Collectors.toList());
 
         return values;
-
     }
 
 

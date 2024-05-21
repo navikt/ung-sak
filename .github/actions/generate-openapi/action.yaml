@@ -1,78 +1,67 @@
 name: Generate openapi
 description: Generate new openapi spec, and generate typescript from it.
 inputs:
-  patchVersion:
-    description: The TAG environment variable from the master build workflow (TIMESTAMP-SHA)
-    required: true
   readerToken:
     description: The secrets.READER_TOKEN allowing read of internal packages.
     required: true
-  clientRepoToken:
-    description: A access token allowing writes to the k9-sak-typescipt-client repo
+  githubToken:
+    description: The secrets.GITHUB_TOKEN allowing commit on the repo.
     required: true
-
+outputs:
+  openapiVersion:
+    description: "generated openapi spec version"
+    value: ${{ steps.openapi-version.outputs.openapiVersion }}
 
 runs:
   using: 'composite'
   steps:
-    - uses: actions/checkout@v4
+    - name: Setup java and maven
+      uses: navikt/sif-gha-workflows/.github/actions/maven/setup-java-and-maven@main
       with:
-        path: k9-sak
-    - uses: actions/setup-java@v4
+        github-token: ${{ inputs.readerToken }}
+    - name: Maven install
+      uses: navikt/sif-gha-workflows/.github/actions/maven/test-and-build@main
       with:
-        distribution: 'temurin'
-        java-version: '21'
-        cache: 'maven'
-
+        skip-tests: true
     - name: Openapi generate
       shell: bash
-      working-directory: k9-sak
-      env:
-        GH_ACCESS_TOKEN: ${{ inputs.readerToken }}
-      run: |
-        mvn install -e --batch-mode --settings ./.github/.m2/settings.xml -DskipTests=true
-        mvn exec:java --projects web -e --batch-mode --settings ./.github/.m2/settings.xml
-
-    - name: Sjekk ut k9-sak-typescript-client
-      uses: actions/checkout@v4
-      with:
-        repository: navikt/k9-sak-typescript-client
-        token: ${{ inputs.clientRepoToken }}
-        path: k9-sak-typescript-client
-        fetch-depth: 0
-
-    - name: Kopier ny openapi spec til klient
+      run: mvn exec:java --projects web
+    - name: Openapi version
+      id: openapi-version
       shell: bash
-      working-directory: k9-sak
-      # Copy the generated openapi spec json to k9-sak-typescript-client, and extract its version number
+      # extract version number from generated openapi.json
       run: |
-        cp web/target/k9-sak.openapi.json ../k9-sak-typescript-client/src/
-        echo "OPENAPI_VERSION=$(jq --exit-status --raw-output '.info.version | capture("^(?<major>\\d+)\\.(?<minor>\\d+)$") | .major + "." + .minor' ./web/target/k9-sak.openapi.json || echo 'FEIL')" >> $GITHUB_ENV
+        echo "openapiVersion=$(jq --exit-status --raw-output '.info.version | capture("^(?<major>\\d+)\\.(?<minor>\\d+)$") | .major + "." + .minor' ./web/src/main/resources/openapi-ts-client/k9-sak.openapi.json || echo 'FEIL')" >> $GITHUB_OUTPUT
     - name: Feilsjekk OPENAPI_VERSION
       if: "${{ env.OPENAPI_VERSION == 'FEIL'}}"
+      env:
+        OPENAPI_VERSION: "${{ steps.openapi-version.outputs.openapiVersion }}"
       uses: actions/github-script@v7
       with:
         script: |
           core.setFailed('fant ikkje korrekt openapi version frå k9-sak.openapi.json')
-    - name: Push ny openapi spec til klient repo
-      if: success()
+    # Commit and push any changes to k9-sak.openapi.json
+    - name: Commit api endringer
+      if: ${{ success() }}
+      id: change-commit
       shell: bash
-      working-directory: k9-sak-typescript-client
       env:
-        GIT_USER_NAME: "${{ github.actor }}"
-        GIT_USER_EMAIL: "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
-        GITHUB_TOKEN: "${{ inputs.clientRepoToken }}"
-        VERSION_TAG: "${{ env.OPENAPI_VERSION }}.${{ inputs.patchVersion }}"
-      # Oppdater version i package.json
-      # git commit, tag og push ny k9-sak.openapi.json til k9-sak-typescript-client
-      # NB: git diff framfor gjere at det berre blir gjort viss det faktisk er endringer i ny generert k9-sak.openapi.json
+        GITHUB_TOKEN: ${{ inputs.githubToken }}
+        FILE_NAME: k9-sak.openapi.json
+        FILE_DIRECTORY: web/src/main/resources/openapi-ts-client
+        DESTINATION_BRANCH: ${{ github.head_ref || github.ref_name }}
       run: |
-        jq --exit-status --arg VERSION "${VERSION_TAG}" '.version = $VERSION' package.json > package.json.new && mv package.json.new package.json
-        git config user.email "$GIT_USER_EMAIL"
-        git config user.name "$GIT_USER_NAME"
-        git diff --quiet src/k9-sak.openapi.json || ( \
-          git add -A && \
-          git commit -m "k9-sak.openapi.json updated from k9-sak" && \
-          git tag "v${VERSION_TAG}" && \
-          git push origin k9-sak-workflow --tags \
+        # Use git to detect changes, only commit and push if there are changes
+        git add --force ${FILE_DIRECTORY}/${FILE_NAME}
+        git diff --quiet --staged || 
+        (
+        export MESSAGE="$FILE_NAME updated by build pipeline"
+        export SHA=$( git rev-parse $DESTINATION_BRANCH:$FILE_DIRECTORY/$FILE_NAME )
+        gh api --method PUT /repos/:owner/:repo/contents/$FILE_DIRECTORY/$FILE_NAME \
+          --field message="$MESSAGE" \
+          --field content=@<( base64 -i "${FILE_DIRECTORY}/${FILE_NAME}" ) \
+          --field branch="$DESTINATION_BRANCH" \
+          --field sha="$SHA"
         )
+        # ^-Use the REST API to commit changes, so we get automatic commit signing
+ 
