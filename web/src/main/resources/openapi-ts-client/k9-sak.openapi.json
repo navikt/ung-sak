@@ -4011,6 +4011,21 @@
         },
         "type" : "object"
       },
+      "HarGyldigOmsorgsdagerVedtakDto" : {
+        "properties" : {
+          "harInnvilgedeBehandlinger" : {
+            "type" : "boolean"
+          },
+          "saksnummer" : {
+            "type" : "string"
+          },
+          "vedtaksdato" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "Hendelse" : {
         "discriminator" : {
           "propertyName" : "type"
@@ -4127,6 +4142,18 @@
           }
         },
         "required" : [ "brukerAktørId", "saksnummer", "ytelseType" ],
+        "type" : "object"
+      },
+      "HentSisteGyldigeVedtakForAktørInputDto" : {
+        "properties" : {
+          "aktørId" : {
+            "type" : "string"
+          },
+          "pleietrengendeAktørId" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "aktørId", "pleietrengendeAktørId" ],
         "type" : "object"
       },
       "HentSøknadPerioderDto" : {
@@ -15623,6 +15650,35 @@
           }
         },
         "tags" : [ "vedtak" ]
+      }
+    },
+    "/brukerdialog/omsorgsdager-kronisk-sykt-barn/har-gyldig-vedtak" : {
+      "post" : {
+        "description" : "Returnerer nyeste gyldige vedtak for en gitt aktørId",
+        "operationId" : "hentSisteGyldigeVedtakForAktorId",
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/HentSisteGyldigeVedtakForAktørInputDto"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HarGyldigOmsorgsdagerVedtakDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Returnerer nyeste gyldige vedtak for en gitt aktørId",
+        "tags" : [ "brukerdialog" ]
       }
     },
     "/diagnostikk/sak" : {
