@@ -74,6 +74,9 @@ spec:
         - application: k9-punsjbolle
           namespace: omsorgspenger
           cluster: prod-gcp
+        - application: k9-sak-innsyn-api
+          namespace: dusseldorf
+          cluster: prod-gcp
   env:
     - name: TZ
       value: "Europe/Oslo"
