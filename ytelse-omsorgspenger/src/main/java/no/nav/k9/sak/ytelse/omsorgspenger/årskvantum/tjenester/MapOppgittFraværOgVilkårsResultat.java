@@ -53,8 +53,6 @@ public class MapOppgittFraværOgVilkårsResultat {
 
     private static final Logger log = LoggerFactory.getLogger(MapOppgittFraværOgVilkårsResultat.class);
 
-    private static final boolean UTLED_NYOPPSTARTET_VED_REFUSJON = Boolean.parseBoolean(System.getenv("OMP_NYOPPSTARTET_VED_REFUSJON"));
-
     Map<Aktivitet, List<WrappedOppgittFraværPeriode>> utledPerioderMedUtfall(BehandlingReferanse ref, InntektArbeidYtelseGrunnlag iayGrunnlag, NavigableMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>> opptjeningAktivitetPerioder, Vilkårene vilkårene, DatoIntervallEntitet fagsakPeriode, Map<AktivitetTypeArbeidsgiver, LocalDateTimeline<OppgittFraværHolder>> fraværsPerioder) {
         var filter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(ref.getAktørId()));
 
@@ -111,8 +109,7 @@ public class MapOppgittFraværOgVilkårsResultat {
             .anyMatch(segment -> segment.getValue().getSamtidigeKrav().inntektsmeldingMedRefusjonskrav() == SamtidigKravStatus.KravStatus.FINNES);
 
         log.info("Søknadsårsaker {}", søknadsårsaker);
-        boolean vilkåretErAktuelt = søknadsårsaker.contains(SøknadÅrsak.NYOPPSTARTET_HOS_ARBEIDSGIVER)
-            || UTLED_NYOPPSTARTET_VED_REFUSJON && harRefusjonskrav;
+        boolean vilkåretErAktuelt = søknadsårsaker.contains(SøknadÅrsak.NYOPPSTARTET_HOS_ARBEIDSGIVER) || harRefusjonskrav;
         if (!vilkåretErAktuelt) {
             //ikke vits å lage strukturer for å utlede noe
             return fraværsTidslinje;
@@ -131,9 +128,7 @@ public class MapOppgittFraværOgVilkårsResultat {
             }
             LocalDateTimeline<Boolean> tidslinjeKunSøktSomNyoppstartet = tidslinjeKunSøktSomNyoppstartet(fraværTidslinje);
             LocalDateTimeline<Boolean> tidslinjeRefusjonskrav = tidslinjeRefusjonskrav(fraværTidslinje);
-            LocalDateTimeline<Boolean> perioderSomTasMedVedInnvilgelse = UTLED_NYOPPSTARTET_VED_REFUSJON
-                ? tidslinjeKunSøktSomNyoppstartet.crossJoin(tidslinjeRefusjonskrav)
-                : tidslinjeKunSøktSomNyoppstartet;
+            LocalDateTimeline<Boolean> perioderSomTasMedVedInnvilgelse = tidslinjeKunSøktSomNyoppstartet.crossJoin(tidslinjeRefusjonskrav);
             LocalDateTimeline<Boolean> perioderSomSkalHaVilkårsresultatVedAvslag = tidslinjeKunSøktSomNyoppstartet;
 
             log.info("Fraværsperioder:{} ", fraværsTidslinje);
