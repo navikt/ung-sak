@@ -39,6 +39,11 @@ import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 @Dependent
 public class RyddOgGjenopprettBeregningTjeneste {
 
+    private static final Set<VilkårType> VILKÅR_HVOR_AVSLAG_IKKE_SKAL_FJERNES = Set.of(
+        VilkårType.OPPTJENINGSVILKÅRET,
+        VilkårType.OPPTJENINGSPERIODEVILKÅR
+    );
+
     private static final Logger log = LoggerFactory.getLogger(RyddOgGjenopprettBeregningTjeneste.class);
     private final BehandlingRepository behandlingRepository;
     private final BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
@@ -126,7 +131,7 @@ public class RyddOgGjenopprettBeregningTjeneste {
         VilkårResultatBuilder resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene)
             .medKantIKantVurderer(tilVurderingTjeneste.getKantIKantVurderer());
         VilkårBuilder vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-        fjernAvslåtte(tilVurderingTjeneste, vilkårene, vilkårBuilder);
+        fjernAvslåtte(vilkårene, vilkårBuilder);
         leggerTilTidligereFjernet(behandlingReferanse, tilVurderingTjeneste, vilkårene, vilkårBuilder);
         resultatBuilder.leggTil(vilkårBuilder, true);
         vilkårResultatRepository.lagre(behandlingReferanse.getBehandlingId(), resultatBuilder.build());
@@ -134,7 +139,7 @@ public class RyddOgGjenopprettBeregningTjeneste {
     }
 
     private static void leggerTilTidligereFjernet(BehandlingReferanse behandlingReferanse, VilkårsPerioderTilVurderingTjeneste tilVurderingTjeneste, Vilkårene vilkårene, VilkårBuilder vilkårBuilder) {
-        var perioderSomSkalVurderes = finnPerioderSomSkalVurderes(behandlingReferanse, tilVurderingTjeneste, vilkårene);
+        var perioderSomSkalVurderes = finnPerioderTilVurdering(behandlingReferanse, tilVurderingTjeneste, vilkårene);
         var bgPerioderSomMåGjenopprettes = finnPerioderSomMangler(vilkårene, perioderSomSkalVurderes);
         log.info("Legger til perioder for vurdering i beregning: " + bgPerioderSomMåGjenopprettes);
         bgPerioderSomMåGjenopprettes.stream().map(p -> vilkårBuilder.hentBuilderFor(p).medUtfall(Utfall.IKKE_VURDERT)).forEach(vilkårBuilder::leggTil);
@@ -142,17 +147,28 @@ public class RyddOgGjenopprettBeregningTjeneste {
 
     private static List<DatoIntervallEntitet> finnPerioderSomMangler(Vilkårene vilkårene, Set<DatoIntervallEntitet> innvilgetPerioderTilVurdering) {
         var bgVilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow(() -> new IllegalStateException("Hadde ikke Beregningsgrunnlagvilkår"));
-        return bgVilkår.getPerioder().stream().map(VilkårPeriode::getPeriode)
-            .filter(p -> innvilgetPerioderTilVurdering.stream().noneMatch(p::equals))
+        var vilkårsPerioderBeregning = bgVilkår.getPerioder().stream().map(VilkårPeriode::getPeriode).collect(Collectors.toSet());
+        return innvilgetPerioderTilVurdering.stream()
+            .filter(p -> vilkårsPerioderBeregning.stream().noneMatch(p::equals))
             .toList();
     }
 
-    private static Set<DatoIntervallEntitet> finnPerioderSomSkalVurderes(BehandlingReferanse behandlingReferanse, VilkårsPerioderTilVurderingTjeneste tilVurderingTjeneste, Vilkårene vilkårene) {
-        var innvilgetPerioder = finnDefinerendeVilkårsperioderMedUtfall(tilVurderingTjeneste, vilkårene, Utfall.OPPFYLT);
+    private static Set<DatoIntervallEntitet> finnPerioderTilVurdering(BehandlingReferanse behandlingReferanse, VilkårsPerioderTilVurderingTjeneste tilVurderingTjeneste, Vilkårene vilkårene) {
+        var perioderMedAvslåtteVilkår = finnPerioderMedAvslåtteVilkår(vilkårene);
+
         var perioderPrVilkårstype = tilVurderingTjeneste.utledRådataTilUtledningAvVilkårsperioder(behandlingReferanse.getBehandlingId());
         var perioderTilVurderingIBeregning = perioderPrVilkårstype.get(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
         return perioderTilVurderingIBeregning.stream().filter(p ->
-            innvilgetPerioder.stream().anyMatch(p::equals)).collect(Collectors.toSet());
+            perioderMedAvslåtteVilkår.stream().noneMatch(p::equals)).collect(Collectors.toSet());
+    }
+
+    private static Set<DatoIntervallEntitet> finnPerioderMedAvslåtteVilkår(Vilkårene vilkårene) {
+        return vilkårene.getVilkårene().stream()
+            .filter(v -> !VILKÅR_HVOR_AVSLAG_IKKE_SKAL_FJERNES.contains(v.getVilkårType()))
+            .flatMap(v -> v.getPerioder().stream())
+            .filter(p -> Utfall.IKKE_OPPFYLT.equals(p.getUtfall()))
+            .map(VilkårPeriode::getPeriode)
+            .collect(Collectors.toSet());
     }
 
     private static TreeSet<DatoIntervallEntitet> finnDefinerendeVilkårsperioderMedUtfall(VilkårsPerioderTilVurderingTjeneste tilVurderingTjeneste, Vilkårene vilkårene, Utfall utfall) {
@@ -161,18 +177,18 @@ public class RyddOgGjenopprettBeregningTjeneste {
             .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    private static void fjernAvslåtte(VilkårsPerioderTilVurderingTjeneste tilVurderingTjeneste, Vilkårene vilkårene, VilkårBuilder vilkårBuilder) {
-        var bgPerioderSomFjernes = finnPerioderSomKanFjernes(tilVurderingTjeneste, vilkårene);
+    private static void fjernAvslåtte(Vilkårene vilkårene, VilkårBuilder vilkårBuilder) {
+        var bgPerioderSomFjernes = finnPerioderSomKanFjernes(vilkårene);
         log.info("Fjerner perioder for vurdering i beregning: " + bgPerioderSomFjernes);
         bgPerioderSomFjernes.forEach(vilkårBuilder::tilbakestill);
     }
 
-    private static List<DatoIntervallEntitet> finnPerioderSomKanFjernes(VilkårsPerioderTilVurderingTjeneste tilVurderingTjeneste, Vilkårene vilkårene) {
-        var avslåttePerioder = finnDefinerendeVilkårsperioderMedUtfall(tilVurderingTjeneste, vilkårene, Utfall.IKKE_OPPFYLT);
+    private static List<DatoIntervallEntitet> finnPerioderSomKanFjernes(Vilkårene vilkårene) {
+        var perioderMedAvslåtteVilkår = finnPerioderMedAvslåtteVilkår(vilkårene);
 
         var bgVilkår = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow(() -> new IllegalStateException("Hadde ikke Beregningsgrunnlagvilkår"));
         return bgVilkår.getPerioder().stream().filter(p -> p.getGjeldendeUtfall().equals(Utfall.IKKE_VURDERT))
-            .map(VilkårPeriode::getPeriode).filter(p -> avslåttePerioder.stream().anyMatch(p::overlapper))
+            .map(VilkårPeriode::getPeriode).filter(p -> perioderMedAvslåtteVilkår.stream().anyMatch(p::overlapper))
             .toList();
     }
 
