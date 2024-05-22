@@ -16,7 +16,6 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
 import jakarta.ws.rs.ApplicationPath;
-import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.OpprettForespørselRequest;
 import no.nav.k9.sak.web.app.exceptions.KnownExceptionMappers;
 import no.nav.k9.sak.web.app.jackson.JacksonJsonConfig;
 import no.nav.k9.sak.web.app.tjenester.RestImplementationClasses;
