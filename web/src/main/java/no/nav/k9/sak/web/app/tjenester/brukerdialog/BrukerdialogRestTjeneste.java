@@ -12,7 +12,7 @@ import jakarta.ws.rs.core.MediaType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.BRUKERDIALOG;
+import static no.nav.k9.abac.BeskyttetRessursKoder.APPLIKASJON;
 
 @Path(BrukerdialogRestTjeneste.BASE_PATH)
 @ApplicationScoped
@@ -39,7 +39,7 @@ public class BrukerdialogRestTjeneste {
     @Path("/omsorgsdager-kronisk-sykt-barn/har-gyldig-vedtak")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Returnerer nyeste gyldige vedtak for en gitt aktørId", summary = "Returnerer nyeste gyldige vedtak for en gitt aktørId", tags = "brukerdialog")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = BRUKERDIALOG)
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = APPLIKASJON)
     public HarGyldigOmsorgsdagerVedtakDto hentSisteGyldigeVedtakForAktorId(
         @Valid HentSisteGyldigeVedtakForAktørInputDto inputDto
     ) {
