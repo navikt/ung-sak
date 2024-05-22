@@ -12,10 +12,8 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
-import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.APPLIKASJON;
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 
 @Path(BrukerdialogRestTjeneste.BASE_PATH)
 @ApplicationScoped
@@ -43,7 +41,8 @@ public class BrukerdialogRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Returnerer nyeste gyldige vedtak for en gitt aktørId", summary = "Returnerer nyeste gyldige vedtak for en gitt aktørId", tags = "brukerdialog")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = APPLIKASJON)
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
+    // Dette endepunktet brukes av k9-sak-innsyn-api. I k9-sak-innsyn-api hentes aktørId fra token.
     public HarGyldigOmsorgsdagerVedtakDto hentSisteGyldigeVedtakForAktorId(
         @Valid HentSisteGyldigeVedtakForAktørInputDto inputDto
     ) {
