@@ -6,6 +6,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import no.nav.k9.abac.AbacAttributt;
+import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
+import no.nav.k9.felles.sikkerhet.abac.AbacDto;
+import no.nav.k9.sak.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.k9.sak.typer.AktørId;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -21,5 +25,12 @@ public record HentSisteGyldigeVedtakForAktørInputDto(
     @Valid
     @JsonProperty("pleietrengendeAktørId")
     AktørId pleietrengendeAktørId
-) {
+) implements AbacDto {
+
+    @Override
+    public AbacDataAttributter abacAttributter() {
+        return AbacDataAttributter.opprett()
+            .leggTil(AppAbacAttributtType.AKTØR_ID, aktørId)
+            .leggTil(AppAbacAttributtType.AKTØR_ID, pleietrengendeAktørId);
+    }
 }
