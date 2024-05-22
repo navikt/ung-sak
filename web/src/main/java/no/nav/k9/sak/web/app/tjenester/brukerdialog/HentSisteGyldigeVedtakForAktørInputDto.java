@@ -29,7 +29,7 @@ public record HentSisteGyldigeVedtakForAktørInputDto(
     @Override
     public AbacDataAttributter abacAttributter() {
         return AbacDataAttributter.opprett()
-            .leggTil(AppAbacAttributtType.AKTØR_ID, aktørId)
-            .leggTil(AppAbacAttributtType.AKTØR_ID, pleietrengendeAktørId);
+            .leggTil(AppAbacAttributtType.AKTØR_ID, aktørId.getAktørId())
+            .leggTil(AppAbacAttributtType.AKTØR_ID, pleietrengendeAktørId.getAktørId());
     }
 }
