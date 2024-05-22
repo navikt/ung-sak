@@ -5,6 +5,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -12,7 +13,7 @@ import jakarta.ws.rs.core.MediaType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.BRUKERDIALOG;
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 
 @Path(BrukerdialogRestTjeneste.BASE_PATH)
 @ApplicationScoped
@@ -37,9 +38,11 @@ public class BrukerdialogRestTjeneste {
 
     @POST
     @Path("/omsorgsdager-kronisk-sykt-barn/har-gyldig-vedtak")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Returnerer nyeste gyldige vedtak for en gitt aktørId", summary = "Returnerer nyeste gyldige vedtak for en gitt aktørId", tags = "brukerdialog")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = BRUKERDIALOG)
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
+    // Dette endepunktet brukes av k9-sak-innsyn-api. I k9-sak-innsyn-api hentes aktørId fra token.
     public HarGyldigOmsorgsdagerVedtakDto hentSisteGyldigeVedtakForAktorId(
         @Valid HentSisteGyldigeVedtakForAktørInputDto inputDto
     ) {
