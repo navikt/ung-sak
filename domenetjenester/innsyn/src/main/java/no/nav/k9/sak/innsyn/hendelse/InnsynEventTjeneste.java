@@ -141,6 +141,7 @@ public class InnsynEventTjeneste {
         if (type.equals(Brevkode.ETTERSENDELSE_PLEIEPENGER_SYKT_BARN)) {
             return InnsendingType.ETTERSENDELSE;
         }
+        //Bør ikke skje da dokumentene hentes i tidligere steg.
         throw new IllegalStateException("Støtter ikke brevkode %s".formatted(type.getKode()));
     }
 
