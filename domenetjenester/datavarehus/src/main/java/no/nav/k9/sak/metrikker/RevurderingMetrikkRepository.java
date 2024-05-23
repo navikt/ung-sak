@@ -1,31 +1,5 @@
 package no.nav.k9.sak.metrikker;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
-import org.hibernate.QueryTimeoutException;
-import org.hibernate.query.NativeQuery;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -49,6 +23,21 @@ import no.nav.k9.sak.perioder.SøknadsfristTjenesteProvider;
 import no.nav.k9.sak.perioder.UtledPerioderMedRegisterendring;
 import no.nav.k9.sak.perioder.UtledStatusPåPerioderTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import org.hibernate.QueryTimeoutException;
+import org.hibernate.query.NativeQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * For innhenting av metrikker relatert til kvartalsmål for OKR
@@ -372,7 +361,7 @@ public class RevurderingMetrikkRepository {
         String sql = "select " +
             "f.ytelse_type, " +
             "f.saksnummer, " +
-            "b.id as behandlingsID, " +
+            "b.id as behandling_id, " +
             "aarsak.behandling_arsak_type, " +
             "a.aksjonspunkt_def,  " +
             "md.type as dokumentType, " +
@@ -399,11 +388,10 @@ public class RevurderingMetrikkRepository {
             "       and (b.behandling_type = :revurdering) " +
             "group by 1, 2, 3, 4, 5, 6, 7";
 
-        String metricName = "revurdering_antall_behandlinger_pr_aksjonspunkt_og_aarsak_og_dokument";
-        String metricField = "antall_aksjonspunkt_per_behandling";
-        String metricField2 = "antall_dokumenter_per_behandling";
+        String metricName = "revurdering_antall_behandlinger_pr_aksjonspunkt_og_aarsak_og_dokument_v2";
+        String metricField = "behandling_id";
 
-        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.  createNativeQuery(sql, Tuple.class)
+        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
             .setParameter("revurdering", BehandlingType.REVURDERING.getKode())
             .setParameter("startTid", dato.minusDays(7).atStartOfDay())
             .setParameter("sluttTid", dato.atStartOfDay());
@@ -418,12 +406,13 @@ public class RevurderingMetrikkRepository {
                     "aarsak_navn", coalesce(BehandlingÅrsakType.kodeMap().getOrDefault(t.get(3, String.class), BehandlingÅrsakType.UDEFINERT).getNavn(), "-"),
                     "aksjonspunkt", t.get(4, String.class),
                     "aksjonspunkt_navn", coalesce(AksjonspunktDefinisjon.kodeMap().getOrDefault(t.get(4, String.class), AksjonspunktDefinisjon.UNDEFINED).getNavn(), "-"),
-                    "dokumentType", t.get(5, String.class),
-                    "dokumentKilde", t.get(6, String.class)
+                    "dokument_type", t.get(5, String.class),
+                    "dokument_kilde", t.get(6, String.class),
+                    "antall_aksjonspunkt_per_behandling", t.get(7, Number.class).toString(),
+                    "antall_dokumenter_per_behandling", t.get(8, Number.class).toString()
                 ),
                 Map.of(
-                    metricField, t.get(7, Number.class),
-                    metricField2, t.get(8, Number.class)
+                    metricField, t.get(2, Number.class)
                 )))
             .collect(Collectors.toList());
 
@@ -453,7 +442,7 @@ public class RevurderingMetrikkRepository {
         String metricField = "antall_behandlinger";
         String metricField2 = "antall_aksjonspunkter";
 
-        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.  createNativeQuery(sql, Tuple.class)
+        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
             .setParameter("revurdering", BehandlingType.REVURDERING.getKode())
             .setParameter("startTid", dato.minusDays(7).atStartOfDay())
             .setParameter("sluttTid", dato.atStartOfDay());
