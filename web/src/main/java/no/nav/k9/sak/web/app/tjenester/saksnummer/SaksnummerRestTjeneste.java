@@ -56,8 +56,7 @@ public class SaksnummerRestTjeneste {
     @Inject
     public SaksnummerRestTjeneste(SaksnummerRepository saksnummerRepository,
                                   ReservertSaksnummerRepository reservertSaksnummerRepository,
-                                  AktørTjeneste aktørTjeneste,
-                                  @KonfigVerdi(value = "ENABLE_RESERVERT_SAKSNUMMER", defaultVerdi = "false") boolean enableReservertSaksnummer) {
+                                  AktørTjeneste aktørTjeneste) {
         this.saksnummerRepository = saksnummerRepository;
         this.reservertSaksnummerRepository = reservertSaksnummerRepository;
         this.aktørTjeneste = aktørTjeneste;
