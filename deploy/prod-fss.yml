@@ -269,8 +269,6 @@ spec:
       value: "false"
     - name: AVKLAR_ARBEIDSFORHOLD_REUTLED_VED_REVURDERING
       value: "false"
-    - name: ENABLE_RESERVERT_SAKSNUMMER
-      value: "false"
     - name: OMP_RELEVANT_ENDRING_UTLEDNING
       value: "false"
     - name: DOKUMENTMOTTAK_VALIDER_JOURNALFORT
