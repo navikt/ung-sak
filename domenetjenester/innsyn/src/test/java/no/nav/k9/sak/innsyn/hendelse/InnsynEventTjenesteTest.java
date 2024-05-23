@@ -25,8 +25,9 @@ import org.mockito.ArgumentMatchers;
 import no.nav.k9.innsyn.InnsynHendelse;
 import no.nav.k9.innsyn.sak.Behandling;
 import no.nav.k9.innsyn.sak.Fagsak;
-import no.nav.k9.innsyn.sak.SøknadInfo;
-import no.nav.k9.innsyn.sak.SøknadStatus;
+import no.nav.k9.innsyn.sak.InnsendingInfo;
+import no.nav.k9.innsyn.sak.InnsendingStatus;
+import no.nav.k9.innsyn.sak.InnsendingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
@@ -63,6 +64,7 @@ class InnsynEventTjenesteTest {
         var pleietrengende = AktørId.dummy();
         var now = LocalDateTime.now();
         var søknadJpId = "123";
+        var ettersendelseJpId = "456";
         var venteFrist = now.plusWeeks(4);
 
         TestScenarioBuilder testScenarioBuilder = TestScenarioBuilder
@@ -83,7 +85,10 @@ class InnsynEventTjenesteTest {
             anyList(),
             anyBoolean(),
             ArgumentMatchers.any(DokumentStatus[].class)))
-            .thenReturn(List.of(byggMottattDokument(fagsak.getId(), behandling.getId(), now, søknadJpId, Brevkode.PLEIEPENGER_BARN_SOKNAD)));
+            .thenReturn(List.of(
+                byggMottattDokument(fagsak.getId(), behandling.getId(), now, søknadJpId, Brevkode.PLEIEPENGER_BARN_SOKNAD),
+                byggMottattDokument(fagsak.getId(), behandling.getId(), now, ettersendelseJpId, Brevkode.ETTERSENDELSE_PLEIEPENGER_SYKT_BARN)
+                ));
 
         var tjeneste = new InnsynEventTjeneste(
             mottatteDokumentRepository,
@@ -120,13 +125,21 @@ class InnsynEventTjenesteTest {
             assertThat(it.venteårsak()).isEqualTo(no.nav.k9.innsyn.sak.Aksjonspunkt.Venteårsak.MEDISINSK_DOKUMENTASJON);
         });
 
-        Set<SøknadInfo> søknader = b.søknader();
-        assertThat(søknader).hasSize(1);
-        assertThat(søknader).allSatisfy(it -> {
+
+        Set<InnsendingInfo> innsendinger = b.innsendinger();
+        assertThat(innsendinger).hasSize(2);
+        assertThat(innsendinger).allSatisfy(it -> {
             assertThat(it.mottattTidspunkt()).isCloseTo(now.atZone(ZoneId.systemDefault()), within(1, ChronoUnit.MILLIS));
-            assertThat(it.status()).isEqualTo(SøknadStatus.MOTTATT);
-            assertThat(it.journalpostId()).isEqualTo(søknadJpId);
+            assertThat(it.status()).isEqualTo(InnsendingStatus.MOTTATT);
+            assertThat(it.kildesystem()).isNull();
+
         });
+
+        var søknadInnsending = innsendinger.stream().filter(it -> it.journalpostId().equals(søknadJpId)).findFirst().orElseThrow();
+        assertThat(søknadInnsending.type()).isEqualTo(InnsendingType.SØKNAD);
+
+        var ettersendelseInnsending = innsendinger.stream().filter(it -> it.journalpostId().equals(ettersendelseJpId)).findFirst().orElseThrow();
+        assertThat(ettersendelseInnsending.type()).isEqualTo(InnsendingType.ETTERSENDELSE);
 
 
     }

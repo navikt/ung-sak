@@ -15658,7 +15658,7 @@
         "operationId" : "hentSisteGyldigeVedtakForAktorId",
         "requestBody" : {
           "content" : {
-            "*/*" : {
+            "application/json" : {
               "schema" : {
                 "$ref" : "#/components/schemas/HentSisteGyldigeVedtakForAktørInputDto"
               }
