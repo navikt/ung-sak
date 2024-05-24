@@ -200,7 +200,7 @@ public class ForvaltningBeregningRestTjeneste {
     public Response opprettForespørselForIM() { // NOSONAR
         var testResquest = new OpprettForespørselRequest(
             AktørId.dummy().getAktørId(),
-            "123456789",
+            "974760673",
             LocalDate.now(),
             FagsakYtelseType.PLEIEPENGER_SYKT_BARN.getKode(),
             "SAK"
