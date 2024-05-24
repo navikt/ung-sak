@@ -48,7 +48,6 @@ public class SaksnummerRestTjeneste {
     private SaksnummerRepository saksnummerRepository;
     private ReservertSaksnummerRepository reservertSaksnummerRepository;
     private AktørTjeneste aktørTjeneste;
-    private boolean enableReservertSaksnummer;
 
     public SaksnummerRestTjeneste() {// For Rest-CDI
     }
