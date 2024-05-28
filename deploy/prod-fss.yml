@@ -74,9 +74,7 @@ spec:
         - application: k9-punsjbolle
           namespace: omsorgspenger
           cluster: prod-gcp
-        - application: k9-sak-innsyn-api
-          namespace: dusseldorf
-          cluster: prod-gcp
+
   env:
     - name: TZ
       value: "Europe/Oslo"
@@ -268,8 +266,6 @@ spec:
     - name: VALIDER_KALKULUS_REFERANSER
       value: "false"
     - name: AVKLAR_ARBEIDSFORHOLD_REUTLED_VED_REVURDERING
-      value: "false"
-    - name: ENABLE_RESERVERT_SAKSNUMMER
       value: "false"
     - name: OMP_RELEVANT_ENDRING_UTLEDNING
       value: "false"
