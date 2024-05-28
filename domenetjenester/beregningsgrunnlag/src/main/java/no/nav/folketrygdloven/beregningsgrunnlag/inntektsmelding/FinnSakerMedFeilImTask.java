@@ -25,6 +25,8 @@ public class FinnSakerMedFeilImTask implements ProsessTaskHandler {
     public static final String TASKTYPE = "forvaltning.feil.inntektsmelding";
     public static final String YTELSE_TYPE = "ytelseType";
     public static final String PERIODE_FOM = "fom";
+    public static final String PERIODE_TOM = "tom";
+
     private static final Logger log = LoggerFactory.getLogger(FinnSakerMedFeilImTask.class);
 
     private EntityManager entityManager;
@@ -45,6 +47,8 @@ public class FinnSakerMedFeilImTask implements ProsessTaskHandler {
         var ytelseType = FagsakYtelseType.fromString(prosessTaskData.getPropertyValue(YTELSE_TYPE));
         var fomValue = prosessTaskData.getPropertyValue(PERIODE_FOM);
         var fom = LocalDate.parse(fomValue);
+        var tomValue = prosessTaskData.getPropertyValue(PERIODE_TOM);
+        var tom = LocalDate.parse(tomValue);
 
         Query query = entityManager.createNativeQuery(
             "SELECT DISTINCT ON (b.fagsak_id) b.* from behandling b " +
@@ -60,7 +64,10 @@ public class FinnSakerMedFeilImTask implements ProsessTaskHandler {
 
         List<Behandling> behandlinger = query.getResultList();
 
-        var relevanteEndringerPrBehandling = behandlinger.stream()
+        var behandlingerOpprettetFør = behandlinger.stream().filter(b -> !b.getOpprettetTidspunkt().toLocalDate().isAfter(tom))
+            .toList();
+
+        var relevanteEndringerPrBehandling = behandlingerOpprettetFør.stream()
             .collect(Collectors.toMap(Behandling::getId, t -> {
                 var behandlingReferanse = BehandlingReferanse.fra(t);
                 return finnPerioderMedEndringVedFeilInntektsmelding.finnPerioderForEndringDersomFeilInntektsmeldingBrukes(behandlingReferanse, fom);
