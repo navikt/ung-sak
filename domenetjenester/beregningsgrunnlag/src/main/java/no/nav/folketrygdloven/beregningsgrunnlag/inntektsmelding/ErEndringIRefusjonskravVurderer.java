@@ -1,4 +1,4 @@
-package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
+package no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding;
 
 import java.util.Collection;
 import java.util.List;
@@ -7,7 +7,6 @@ import java.util.function.Function;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.LagTidslinjeForRefusjon;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
@@ -17,9 +16,9 @@ import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.behandling.steg.kompletthet.KompletthetForBeregningTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.kompletthet.KompletthetForBeregningTjeneste;
 import no.nav.k9.sak.typer.Beløp;
 
 @ApplicationScoped
