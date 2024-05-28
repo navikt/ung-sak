@@ -14,5 +14,5 @@ public interface FinnPerioderSomSkalFjernesIBeregning {
             .orElse(new DefaultFinnPerioderSomSkalFjernesIBeregning());
     }
 
-    Set<DatoIntervallEntitet> finnPerioderMedAvslåtteVilkår(VilkårBuilder vilkårBuilder, Vilkårene vilkårene, BehandlingReferanse behandlingReferanse);
+    Set<DatoIntervallEntitet> finnPerioderSomSkalFjernes(Vilkårene vilkårene, BehandlingReferanse behandlingReferanse);
 }

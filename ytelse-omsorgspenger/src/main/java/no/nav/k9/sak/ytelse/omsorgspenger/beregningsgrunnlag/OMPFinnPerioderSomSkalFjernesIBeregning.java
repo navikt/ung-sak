@@ -14,7 +14,6 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.FinnPerioderSomSkalFjernesIBeregning;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -39,13 +38,13 @@ public class OMPFinnPerioderSomSkalFjernesIBeregning implements FinnPerioderSomS
     }
 
     @Override
-    public Set<DatoIntervallEntitet> finnPerioderMedAvslåtteVilkår(VilkårBuilder vilkårBuilder, Vilkårene vilkårene, BehandlingReferanse behandlingReferanse) {
+    public Set<DatoIntervallEntitet> finnPerioderSomSkalFjernes(Vilkårene vilkårene, BehandlingReferanse behandlingReferanse) {
         var uttaksplan = årskvantumTjeneste.hentFullUttaksplan(behandlingReferanse.getSaksnummer());
         var perioderMedAvslåtteUttaksvilkår = finnPerioderMedAvslåtteUttaksvilkår(uttaksplan);
         var perioderMedAvslåtteBeregningsvilkår = finnPerioderMedAvslåtteBeregningsvilkår(vilkårene);
-        // Fjern perioder som overlapper med perioder som har avslåtte vilkår i enten uttak eller beregning
+        // Fjern perioder som overlapper med perioder som har avslåtte inngangsvilkår eller er avslått i uttak
         return vilkårene
-            .getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow(() -> new IllegalStateException("Hadde ikke beregingsGrunnlagvilkår"))
+            .getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow(() -> new IllegalStateException("Hadde ikke beregningsGrunnlagvilkår"))
             .getPerioder().stream()
             .filter(vilkårPeriode -> no.nav.k9.kodeverk.vilkår.Utfall.IKKE_VURDERT.equals(vilkårPeriode.getUtfall()))
             .map(VilkårPeriode::getPeriode)
@@ -55,7 +54,7 @@ public class OMPFinnPerioderSomSkalFjernesIBeregning implements FinnPerioderSomS
             .collect(Collectors.toSet());
     }
 
-    private static @NotNull Set<DatoIntervallEntitet> finnPerioderMedAvslåtteUttaksvilkår(FullUttaksplan uttaksplan) {
+    private static Set<DatoIntervallEntitet> finnPerioderMedAvslåtteUttaksvilkår(FullUttaksplan uttaksplan) {
         return uttaksplan.getAktiviteter().stream()
             .flatMap(aktivitet -> aktivitet.getUttaksperioder().stream())
             .filter(periode ->
@@ -69,7 +68,7 @@ public class OMPFinnPerioderSomSkalFjernesIBeregning implements FinnPerioderSomS
             .collect(Collectors.toSet());
     }
 
-    private static @NotNull Set<DatoIntervallEntitet> finnPerioderMedAvslåtteBeregningsvilkår(Vilkårene vilkårene) {
+    private static Set<DatoIntervallEntitet> finnPerioderMedAvslåtteBeregningsvilkår(Vilkårene vilkårene) {
         return vilkårene.getVilkårene().stream()
             .filter(v -> !VILKÅR_HVOR_AVSLAG_IKKE_SKAL_FJERNES.contains(v.getVilkårType()))
             .flatMap(v -> v.getPerioder().stream())

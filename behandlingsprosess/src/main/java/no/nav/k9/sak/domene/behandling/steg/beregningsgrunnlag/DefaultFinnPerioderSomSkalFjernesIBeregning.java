@@ -10,7 +10,7 @@ import java.util.Set;
 
 public class DefaultFinnPerioderSomSkalFjernesIBeregning implements FinnPerioderSomSkalFjernesIBeregning {
     @Override
-    public Set<DatoIntervallEntitet> finnPerioderMedAvslåtteVilkår(VilkårBuilder vilkårBuilder, Vilkårene vilkårene, BehandlingReferanse behandlingReferanse) {
+    public Set<DatoIntervallEntitet> finnPerioderSomSkalFjernes(VilkårBuilder vilkårBuilder, Vilkårene vilkårene, BehandlingReferanse behandlingReferanse) {
         return new HashSet<>();
     }
 }

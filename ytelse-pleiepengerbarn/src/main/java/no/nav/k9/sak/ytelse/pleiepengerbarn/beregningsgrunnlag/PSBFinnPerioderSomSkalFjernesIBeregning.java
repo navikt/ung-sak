@@ -25,11 +25,11 @@ public class PSBFinnPerioderSomSkalFjernesIBeregning implements FinnPerioderSomS
     public PSBFinnPerioderSomSkalFjernesIBeregning() {}
 
     @Override
-    public Set<DatoIntervallEntitet> finnPerioderMedAvslåtteVilkår(VilkårBuilder vilkårBuilder, Vilkårene vilkårene, BehandlingReferanse behandlingReferanse) {
+    public Set<DatoIntervallEntitet> finnPerioderSomSkalFjernes(Vilkårene vilkårene, BehandlingReferanse behandlingReferanse) {
         var perioderMedAvslåtteBeregningsvilkår = finnPerioderMedAvslåtteBeregningsvilkår(vilkårene);
-        // Fjern perioder som overlapper med perioder som har avslåtte vilkår i enten uttak eller beregning
+        // Fjern perioder som overlapper med perioder som har avslåtte inngangsvilkår
         return vilkårene
-            .getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow(() -> new IllegalStateException("Hadde ikke beregingsGrunnlagvilkår"))
+            .getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow(() -> new IllegalStateException("Hadde ikke beregningsGrunnlagvilkår"))
             .getPerioder().stream()
             .filter(vilkårPeriode -> no.nav.k9.kodeverk.vilkår.Utfall.IKKE_VURDERT.equals(vilkårPeriode.getUtfall()))
             .map(VilkårPeriode::getPeriode)
