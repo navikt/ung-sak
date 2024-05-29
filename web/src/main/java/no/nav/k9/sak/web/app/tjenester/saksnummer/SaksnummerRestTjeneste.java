@@ -48,7 +48,6 @@ public class SaksnummerRestTjeneste {
     private SaksnummerRepository saksnummerRepository;
     private ReservertSaksnummerRepository reservertSaksnummerRepository;
     private AktørTjeneste aktørTjeneste;
-    private boolean enableReservertSaksnummer;
 
     public SaksnummerRestTjeneste() {// For Rest-CDI
     }
@@ -56,12 +55,10 @@ public class SaksnummerRestTjeneste {
     @Inject
     public SaksnummerRestTjeneste(SaksnummerRepository saksnummerRepository,
                                   ReservertSaksnummerRepository reservertSaksnummerRepository,
-                                  AktørTjeneste aktørTjeneste,
-                                  @KonfigVerdi(value = "ENABLE_RESERVERT_SAKSNUMMER", defaultVerdi = "false") boolean enableReservertSaksnummer) {
+                                  AktørTjeneste aktørTjeneste) {
         this.saksnummerRepository = saksnummerRepository;
         this.reservertSaksnummerRepository = reservertSaksnummerRepository;
         this.aktørTjeneste = aktørTjeneste;
-        this.enableReservertSaksnummer = enableReservertSaksnummer;
     }
 
     @POST
@@ -71,9 +68,6 @@ public class SaksnummerRestTjeneste {
     @Operation(description = "Reserver saksnummer.", summary = ("Reserver saksnummer"), tags = "saksnummer")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
     public SaksnummerDto reserverSaksnummer(@NotNull @Parameter(description = "ReserverSaksnummerDto") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) ReserverSaksnummerDto dto) {
-        if (!enableReservertSaksnummer) {
-            throw new UnsupportedOperationException("Funksjonaliteten er avskrudd");
-        }
         validerReservasjon(dto);
 
         SaksnummerDto saksnummer;
@@ -96,9 +90,6 @@ public class SaksnummerRestTjeneste {
     @Operation(description = "Hent reservert saksnummer.", summary = ("Henter reservert saksnummer med ytelse, bruker og pleietrengende"), tags = "saksnummer")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
     public HentReservertSaksnummerDto hentReservertSaksnummer(@NotNull @QueryParam("saksnummer") @Parameter(description = "SaksnummerDto") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto dto) {
-        if (!enableReservertSaksnummer) {
-            throw new UnsupportedOperationException("Funksjonaliteten er avskrudd");
-        }
         final var entitet = reservertSaksnummerRepository.hent(dto.getVerdi());
         return entitet.map(SaksnummerRestTjeneste::mapTilDto).orElse(null);
     }
@@ -110,9 +101,6 @@ public class SaksnummerRestTjeneste {
     @Operation(description = "Hent alle reserverte saksnummer på søker.", summary = ("Henter reserverte saksnummer med ytelse, bruker og pleietrengende"), tags = "saksnummer")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
     public List<HentReservertSaksnummerDto> hentReserverteSaksnummerPåSøker(@NotNull @Parameter(description = "AktørIdDto") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) AktørIdDto dto) {
-        if (!enableReservertSaksnummer) {
-            throw new UnsupportedOperationException("Funksjonaliteten er avskrudd");
-        }
         final var entiteter = reservertSaksnummerRepository.hent(dto.getAktørId());
         return entiteter.stream().map(SaksnummerRestTjeneste::mapTilDto).toList();
     }

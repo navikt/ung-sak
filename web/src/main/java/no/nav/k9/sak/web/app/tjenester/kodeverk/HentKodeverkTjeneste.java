@@ -79,7 +79,6 @@ public class HentKodeverkTjeneste {
         map.put(BehandlingResultatType.class.getSimpleName(), BehandlingResultatType.kodeMap().values());
         map.put(VirksomhetType.class.getSimpleName(), VirksomhetType.kodeMap().values());
         map.put(PersonstatusType.class.getSimpleName(), PersonstatusType.kodeMap().values());
-        map.put(FagsakYtelseType.class.getSimpleName(), FagsakYtelseType.kodeMap().values());
         map.put(Venteårsak.class.getSimpleName(), Venteårsak.kodeMap().values());
         map.put(BehandlingType.class.getSimpleName(), BehandlingType.kodeMap().values());
         map.put(ArbeidType.class.getSimpleName(), filtrerArbeidType(ArbeidType.kodeMap().values()));

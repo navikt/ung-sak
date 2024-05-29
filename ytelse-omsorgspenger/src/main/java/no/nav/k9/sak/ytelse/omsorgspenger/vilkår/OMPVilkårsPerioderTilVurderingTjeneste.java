@@ -210,6 +210,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     public Set<VilkårType> definerendeVilkår() {
         if (enableFjernPerioderBeregning) {
             Set<VilkårType> vilkårIRekkefølge = new LinkedHashSet<>();
+            vilkårIRekkefølge.add(VilkårType.SØKNADSFRIST);
             vilkårIRekkefølge.add(VilkårType.OMSORGEN_FOR);
             vilkårIRekkefølge.add(VilkårType.ALDERSVILKÅR);
             vilkårIRekkefølge.add(VilkårType.K9_VILKÅRET);
