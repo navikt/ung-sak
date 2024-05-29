@@ -1,11 +1,10 @@
-package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
+package no.nav.k9.sak.kompletthet;
 
 import java.util.Collection;
-import java.util.Optional;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Instance;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingRelevantForVilkårsrevurdering;
+import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.DefaultInntektsmeldingEndringsvurderer;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;

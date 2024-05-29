@@ -1,11 +1,10 @@
-package no.nav.k9.sak.domene.behandling.steg.kompletthet;
+package no.nav.k9.sak.kompletthet;
 
 import jakarta.enterprise.inject.Instance;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 
 public interface KompletthetFraværFilter {
 

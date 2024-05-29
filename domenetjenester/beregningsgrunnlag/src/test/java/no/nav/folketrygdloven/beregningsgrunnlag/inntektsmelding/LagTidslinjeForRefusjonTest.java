@@ -1,4 +1,4 @@
-package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
+package no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding;
 
 import static no.nav.k9.kodeverk.uttak.Tid.TIDENES_ENDE;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -8,7 +8,6 @@ import java.time.LocalDate;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.LagTidslinjeForRefusjon;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.iay.modell.Refusjon;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;

@@ -1,4 +1,4 @@
-package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
+package no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding;
 
 import java.util.Collection;
 import java.util.List;

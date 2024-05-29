@@ -33,7 +33,7 @@ import no.nav.k9.sak.behandlingslager.behandling.etterlysning.BestiltEtterlysnin
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
-import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.kompletthet.KompletthetsAksjon;
 import no.nav.k9.sak.domene.behandling.steg.kompletthet.TidligereEtterlysning;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
