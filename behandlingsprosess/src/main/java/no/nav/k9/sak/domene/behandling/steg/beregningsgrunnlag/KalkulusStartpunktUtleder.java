@@ -25,7 +25,6 @@ public class KalkulusStartpunktUtleder {
 
     private FinnPerioderMedStartIKontrollerFakta finnPerioderMedStartIKontrollerFakta;
     private VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
-    private BeregningsgrunnlagVilkårTjeneste vilkårTjeneste;
 
     private BehandlingModellRepository behandlingModellRepository;
 
@@ -34,11 +33,9 @@ public class KalkulusStartpunktUtleder {
     @Inject
     public KalkulusStartpunktUtleder(FinnPerioderMedStartIKontrollerFakta finnPerioderMedStartIKontrollerFakta,
                                      VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
-                                     BeregningsgrunnlagVilkårTjeneste vilkårTjeneste,
                                      BehandlingModellRepository behandlingModellRepository) {
         this.finnPerioderMedStartIKontrollerFakta = finnPerioderMedStartIKontrollerFakta;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
-        this.vilkårTjeneste = vilkårTjeneste;
         this.behandlingModellRepository = behandlingModellRepository;
     }
 
@@ -51,7 +48,7 @@ public class KalkulusStartpunktUtleder {
      * Periodene pr behandlingsstegtype vil ha kopiert beregningsgrunnlag fra steget før og kjører beregning for alle steg etter (se BehandlingModell)
      *
      * @param ref                  Behandlingreferanse
-     * @param perioderTilVurdering
+     * @param perioderTilVurdering Perioder til vurdering i beregning
      * @return Map med perioder som starter i gitt behandlingssteg
      */
     public Map<BehandlingStegType, NavigableSet<PeriodeTilVurdering>> utledPerioderPrStartpunkt(BehandlingReferanse ref, NavigableSet<PeriodeTilVurdering> perioderTilVurdering) {
@@ -95,8 +92,7 @@ public class KalkulusStartpunktUtleder {
 
     private static NavigableSet<PeriodeTilVurdering> finnPerioderFraStart(HashMap<BehandlingStegType, NavigableSet<PeriodeTilVurdering>> periodeStartStegMap, NavigableSet<PeriodeTilVurdering> utenAvslagFørBeregning) {
         var allePerioderMedHopp = periodeStartStegMap.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
-        var perioderFraStart = utenAvslagFørBeregning.stream().filter(it -> !allePerioderMedHopp.contains(it)).collect(Collectors.toCollection(TreeSet::new));
-        return perioderFraStart;
+        return utenAvslagFørBeregning.stream().filter(it -> !allePerioderMedHopp.contains(it)).collect(Collectors.toCollection(TreeSet::new));
     }
 
     private static void settStartpunkt(NavigableSet<PeriodeTilVurdering> hoppTilVurderRefusjonPerioder, HashMap<BehandlingStegType, NavigableSet<PeriodeTilVurdering>> periodeStartStegMap, BehandlingStegType behandlingStegType) {
