@@ -51,6 +51,8 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
+import no.nav.folketrygdloven.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.FinnPerioderMedEndringVedFeilInntektsmelding;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.AbacDto;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
@@ -64,13 +66,13 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.FinnPerioderMedEndringVedFeilInntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.forvaltning.DumpFeilImRepository;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.trigger.ProsessTriggerForvaltningTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
@@ -92,6 +94,7 @@ public class ForvaltningBeregningRestTjeneste {
     private HentKalkulatorInputDump hentKalkulatorInputDump;
     private ProsessTriggerForvaltningTjeneste prosessTriggerForvaltningTjeneste;
     private FinnPerioderMedEndringVedFeilInntektsmelding finnPerioderMedEndringVedFeilInntektsmelding;
+    private DumpFeilImRepository dumpFeilImRepository;
 
 
     public ForvaltningBeregningRestTjeneste() {
@@ -103,7 +106,7 @@ public class ForvaltningBeregningRestTjeneste {
                                             BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                             RevurderBeregningTjeneste revurderBeregningTjeneste,
                                             EntityManager entityManager, FagsakTjeneste fagsakTjeneste,
-                                            HentKalkulatorInputDump hentKalkulatorInputDump, FinnPerioderMedEndringVedFeilInntektsmelding finnPerioderMedEndringVedFeilInntektsmelding) {
+                                            HentKalkulatorInputDump hentKalkulatorInputDump, FinnPerioderMedEndringVedFeilInntektsmelding finnPerioderMedEndringVedFeilInntektsmelding, DumpFeilImRepository dumpFeilImRepository) {
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
@@ -113,6 +116,7 @@ public class ForvaltningBeregningRestTjeneste {
         this.hentKalkulatorInputDump = hentKalkulatorInputDump;
         this.prosessTriggerForvaltningTjeneste = new ProsessTriggerForvaltningTjeneste(entityManager);
         this.finnPerioderMedEndringVedFeilInntektsmelding = finnPerioderMedEndringVedFeilInntektsmelding;
+        this.dumpFeilImRepository = dumpFeilImRepository;
     }
 
     @GET
@@ -142,33 +146,42 @@ public class ForvaltningBeregningRestTjeneste {
     @POST
     @Path("finn-feil-inntektsmelding-bruk")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Operation(description = "Finner behandlinger og informasjon om perioder som er rammet av IM-feil", tags = "beregning")
     @BeskyttetRessurs(action = READ, resource = DRIFT)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response finnBehandlingerMedFeilIM(@Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) FinnBehandlingerMedFeilIMDto finnBehandlingerMedFeilIMDto) { // NOSONAR
-
-        Query query = entityManager.createNativeQuery(
-            "SELECT DISTINCT ON (b.fagsak_id) b.* from behandling b " +
-                "inner join fagsak f on f.id = b.fagsak_id " +
-                "where b.opprettet_tid >= :OPPRETTET_FOM " +
-                "and b.avsluttet_dato is not null " +
-                "and b.behandling_type = 'BT-004' " +
-                "and f.ytelse_type = 'PSB' " +
-                "order by b.fagsak_id, b.opprettet_tid desc",
-            Behandling.class);
-        query.setParameter("OPPRETTET_FOM", finnBehandlingerMedFeilIMDto.getFraDato().atStartOfDay());
-
-        List<Behandling> behandlinger = query.getResultList();
-
-        var relevanteEndringerPrBehandling = behandlinger.stream().flatMap(t -> {
-            var behandlingReferanse = BehandlingReferanse.fra(t);
-            var relevanteEndringer = finnPerioderMedEndringVedFeilInntektsmelding.finnPerioderForEndringDersomFeilInntektsmeldingBrukes(behandlingReferanse, finnBehandlingerMedFeilIMDto.getFraDato());
-                return relevanteEndringer.map(it -> new FeilInntektsmeldingIBrukResponse(behandlingReferanse.getSaksnummer(), behandlingReferanse.getBehandlingId(), it.vilkårsperioderTilRevurdering(), it.kunEndringIRefusjonListe())).stream();
-            }).toList();
+    public Response finnBehandlingerMedFeilIM() { // NOSONAR
+        return dumpFeilIMResultat().map(d -> Response.ok(d)
+            .type(MediaType.APPLICATION_OCTET_STREAM)
+            .header("Content-Disposition", String.format("attachment; filename=\"feil_im.csv\""))
+            .build()).orElse(Response.noContent().build());
+    }
 
 
-        return Response.ok(relevanteEndringerPrBehandling).build();
+    private Optional<String> dumpFeilIMResultat() {
+        String sql = """
+            select f.saksnummer
+                 ,b.fagsak_id
+                 ,d.behandling_id
+                 ,vp.fom
+                 ,vp.tom
+                 ,fp.fom
+                 ,fp.tom
+              from dump_feil_im d
+              inner join dump_feil_im_vilkar_periode vp on vp.dump_grunnlag_id = d.id
+              inner join dump_feil_im_fordel_periode fp on fp.dump_grunnlag_id = d.id
+              inner join behandling b on b.id=d.behandling_id
+              inner join fagsak f on f.id=b.fagsak_id
+             """;
+
+        Query query = entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
+
+        @SuppressWarnings("unchecked")
+        List<jakarta.persistence.Tuple> results = query.getResultList();
+
+        return CsvOutput.dumpResultSetToCsv(results);
+
+
     }
 
 
