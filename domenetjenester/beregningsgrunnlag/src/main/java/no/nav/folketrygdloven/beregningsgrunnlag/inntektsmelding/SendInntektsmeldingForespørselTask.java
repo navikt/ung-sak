@@ -3,6 +3,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding;
 import java.time.LocalDate;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
@@ -24,7 +25,8 @@ public class SendInntektsmeldingForespørselTask implements ProsessTaskHandler {
     public SendInntektsmeldingForespørselTask() {
     }
 
-    SendInntektsmeldingForespørselTask(InntektsmeldingRestKlient inntektsmeldingRestKlient, FagsakRepository fagsakRepository) {
+    @Inject
+    public SendInntektsmeldingForespørselTask(InntektsmeldingRestKlient inntektsmeldingRestKlient, FagsakRepository fagsakRepository) {
         this.inntektsmeldingRestKlient = inntektsmeldingRestKlient;
         this.fagsakRepository = fagsakRepository;
     }
