@@ -36,12 +36,12 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
 
 @ApplicationScoped
-@ScopedRestIntegration(scopeKey = "ftinntektsmelding.scope", defaultScope = "api://prod-fss.k9saksbehandling.ftinntektsmelding/.default")
+@ScopedRestIntegration(scopeKey = "k9inntektsmelding.scope", defaultScope = "api://prod-fss.k9saksbehandling.k9-inntektsmelding/.default")
 public class InntektsmeldingRestKlient {
 
     private static final Logger log = LoggerFactory.getLogger(InntektsmeldingRestKlient.class);
-    private static final ObjectMapper ftInntektsmeldingMapper = JsonMapper.getMapper().copy().registerModule(createModuleWithStringSerializer());
-    private final ObjectWriter innteksmeldingJsonWriter = ftInntektsmeldingMapper.writerWithDefaultPrettyPrinter();
+    private static final ObjectMapper k9InntektsmeldingMapper = JsonMapper.getMapper().copy().registerModule(createModuleWithStringSerializer());
+    private final ObjectWriter innteksmeldingJsonWriter = k9InntektsmeldingMapper.writerWithDefaultPrettyPrinter();
     private CloseableHttpClient restClient;
     private URI endpoint;
     private URI opprettForespørselEndpoint;
@@ -53,7 +53,7 @@ public class InntektsmeldingRestKlient {
 
     @Inject
     public InntektsmeldingRestKlient(OidcRestClient restClient,
-                                     @KonfigVerdi(value = "ftinntektsmelding.url") URI endpoint) {
+                                     @KonfigVerdi(value = "k9inntektsmelding.url") URI endpoint) {
         this(endpoint);
         this.restClient = restClient;
     }
@@ -98,7 +98,7 @@ public class InntektsmeldingRestKlient {
                     log.warn("Kall for opprettelse opprettet ingen forespørsel");
                 } else if (responseCode != HttpStatus.SC_NO_CONTENT && responseCode != HttpStatus.SC_ACCEPTED) {
                     String responseBody = EntityUtils.toString(httpResponse.getEntity());
-                    String feilmelding = "Kunne ikke utføre kall til ftinntektsmelding,"
+                    String feilmelding = "Kunne ikke utføre kall til k9-inntektsmelding,"
                         + " endpoint=" + httpPost.getURI()
                         + ", HTTP status=" + httpResponse.getStatusLine()
                         + ". HTTP Errormessage=" + responseBody;
@@ -147,6 +147,6 @@ public class InntektsmeldingRestKlient {
     }
 
     public static ObjectMapper getMapper() {
-        return ftInntektsmeldingMapper;
+        return k9InntektsmeldingMapper;
     }
 }
