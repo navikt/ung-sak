@@ -45,6 +45,17 @@ public class TilbakekrevingRepository {
             : Optional.of(resultList.get(0));
     }
 
+    private Optional<TilbakekrevingValgEntitet> hentSisteInaktiveEntitet(long behandlingId) {
+        List<TilbakekrevingValgEntitet> resultList = entityManager
+            .createQuery("from TilbakekrevingValgEntitet where behandlingId=:behandlingId and aktiv=FALSE ORDER BY opprettetTidspunkt, id desc", TilbakekrevingValgEntitet.class)
+            .setParameter("behandlingId", behandlingId)
+            .getResultList();
+
+        return resultList.isEmpty()
+            ? Optional.empty()
+            : Optional.of(resultList.get(0));
+    }
+
     private TilbakekrevingValg map(TilbakekrevingValgEntitet entitet) {
         return new TilbakekrevingValg(entitet.erVilkarOppfylt(), entitet.erGrunnTilReduksjon(), entitet.getTilbakekrevningsVidereBehandling(),
             entitet.getVarseltekst());
@@ -74,6 +85,19 @@ public class TilbakekrevingRepository {
             entityManager.flush();
         }
     }
+
+    public void reaktiverForrigeTilbakekrevingValg(Behandling behandling) {
+        Optional<TilbakekrevingValgEntitet> eksisterende = hentEntitet(behandling.getId());
+        if (eksisterende.isEmpty()) {
+            var forrige = hentSisteInaktiveEntitet(behandling.getId());
+            if (forrige.isPresent()) {
+                forrige.get().reaktiver();
+                entityManager.persist(forrige.get());
+                entityManager.flush();
+            }
+        }
+    }
+
 
     public void lagre(Behandling behandling, boolean avslåttInntrekk) {
         Objects.requireNonNull(behandling, "behandling");

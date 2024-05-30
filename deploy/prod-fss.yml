@@ -277,6 +277,8 @@ spec:
       value: "false"
     - name: FERIEPENGER_AV_DAGPENGER
       value: "false"
+    - name: REAKTIVER_TILBAKEKREVING_VALG
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
