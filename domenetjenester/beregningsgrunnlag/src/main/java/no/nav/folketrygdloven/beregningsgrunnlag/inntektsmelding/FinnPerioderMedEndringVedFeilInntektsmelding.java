@@ -77,10 +77,6 @@ public class FinnPerioderMedEndringVedFeilInntektsmelding {
         }
 
         var inntektsmeldingerPrReferanse = finnInntektsmeldingerForBeregningPrEksternReferanse(behandlingReferanse, vilkårsperioder, bgPerioderGrunnlag, alleInntektsmeldinger, fraDato);
-        if (inntektsmeldingerPrReferanse.keySet().isEmpty()) {
-            log.warn("Fant ingen bg-referanser for sak " + behandlingReferanse.getSaksnummer().getVerdi() + " og behandling " + behandlingReferanse.getBehandlingId());
-            return Optional.empty();
-        }
         var journalpostIderResponses = finnJournalposterSomFaktiskErBruktIBeregning(behandlingReferanse, inntektsmeldingerPrReferanse);
 
         var relevanteEndringer = finnRelevanteEndringer(
@@ -101,7 +97,12 @@ public class FinnPerioderMedEndringVedFeilInntektsmelding {
 
     }
 
-    private RelevanteEndringer finnRelevanteEndringer(BehandlingReferanse behandlingReferanse, List<JournalpostIderResponse> journalpostIderResponses, Map<UUID, List<Inntektsmelding>> inntektsmeldingerPrReferanse, Set<Inntektsmelding> alleInntektsmeldinger, Optional<BeregningsgrunnlagPerioderGrunnlag> bgPerioderGrunnlag, List<DatoIntervallEntitet> vilkårsperioder) {
+    private RelevanteEndringer finnRelevanteEndringer(BehandlingReferanse behandlingReferanse,
+                                                      List<JournalpostIderResponse> journalpostIderResponses,
+                                                      Map<UUID, List<Inntektsmelding>> inntektsmeldingerPrReferanse,
+                                                      Set<Inntektsmelding> alleInntektsmeldinger,
+                                                      Optional<BeregningsgrunnlagPerioderGrunnlag> bgPerioderGrunnlag,
+                                                      List<DatoIntervallEntitet> vilkårsperioder) {
         List<DatoIntervallEntitet> vilkårsperioderForRevurdering = new ArrayList<>();
         List<DatoIntervallEntitet> kunEndringIRefusjonListe = new ArrayList<>();
 

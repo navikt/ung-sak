@@ -3124,16 +3124,6 @@
         "required" : [ "behandlingUuid" ],
         "type" : "object"
       },
-      "FinnBehandlingerMedFeilIMDto" : {
-        "properties" : {
-          "fraDato" : {
-            "format" : "date",
-            "type" : "string"
-          }
-        },
-        "required" : [ "fraDato" ],
-        "type" : "object"
-      },
       "FinnEllerOpprettSak" : {
         "properties" : {
           "aktørId" : {
@@ -15359,19 +15349,10 @@
       "post" : {
         "description" : "Finner behandlinger og informasjon om perioder som er rammet av IM-feil",
         "operationId" : "finnBehandlingerMedFeilIM",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/FinnBehandlingerMedFeilIMDto"
-              }
-            }
-          }
-        },
         "responses" : {
           "default" : {
             "content" : {
-              "application/json" : { }
+              "application/octet-stream" : { }
             },
             "description" : "default response"
           }

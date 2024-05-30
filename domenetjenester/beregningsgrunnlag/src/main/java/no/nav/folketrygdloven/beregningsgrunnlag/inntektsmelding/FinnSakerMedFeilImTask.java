@@ -1,7 +1,9 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -17,6 +19,8 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.forvaltning.DumpFeilImRepository;
 
 @ProsessTask(FinnSakerMedFeilImTask.TASKTYPE)
 @ApplicationScoped
@@ -30,6 +34,7 @@ public class FinnSakerMedFeilImTask implements ProsessTaskHandler {
     private static final Logger log = LoggerFactory.getLogger(FinnSakerMedFeilImTask.class);
 
     private EntityManager entityManager;
+    private DumpFeilImRepository dumpFeilImRepository;
     private FinnPerioderMedEndringVedFeilInntektsmelding finnPerioderMedEndringVedFeilInntektsmelding;
 
 
@@ -37,8 +42,11 @@ public class FinnSakerMedFeilImTask implements ProsessTaskHandler {
     }
 
     @Inject
-    public FinnSakerMedFeilImTask(EntityManager entityManager, FinnPerioderMedEndringVedFeilInntektsmelding finnPerioderMedEndringVedFeilInntektsmelding) {
+    public FinnSakerMedFeilImTask(EntityManager entityManager,
+                                  DumpFeilImRepository dumpFeilImRepository,
+                                  FinnPerioderMedEndringVedFeilInntektsmelding finnPerioderMedEndringVedFeilInntektsmelding) {
         this.entityManager = entityManager;
+        this.dumpFeilImRepository = dumpFeilImRepository;
         this.finnPerioderMedEndringVedFeilInntektsmelding = finnPerioderMedEndringVedFeilInntektsmelding;
     }
 
@@ -77,6 +85,10 @@ public class FinnSakerMedFeilImTask implements ProsessTaskHandler {
             .toList();
 
         log.info("Fant følgende behandlinger med feil inntektsmelding: " + behandlingerMedEndringer);
+
+        behandlingerMedEndringer.forEach(b -> dumpFeilImRepository.lagre(b.getKey(),
+            new HashSet<>(b.getValue().get().vilkårsperioderTilRevurdering()),
+            new HashSet<>(b.getValue().get().kunEndringIRefusjonListe())));
 
     }
 }
