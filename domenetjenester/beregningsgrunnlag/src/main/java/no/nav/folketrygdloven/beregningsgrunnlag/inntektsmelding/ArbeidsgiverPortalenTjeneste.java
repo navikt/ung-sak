@@ -3,14 +3,14 @@ package no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.etterlysning.BestiltEtterlysning;
 
-@ApplicationScoped
+@Dependent
 public class ArbeidsgiverPortalenTjeneste {
 
     private ProsessTaskTjeneste prosessTaskTjeneste;
