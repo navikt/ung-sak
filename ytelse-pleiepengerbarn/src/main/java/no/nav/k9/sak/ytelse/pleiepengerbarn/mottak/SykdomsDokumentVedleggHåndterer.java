@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.mottak;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
@@ -60,6 +61,30 @@ public class SykdomsDokumentVedleggHåndterer {
     }
 
     public void leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(Behandling behandling, JournalpostId journalpostId, AktørId pleietrengendeAktørId, LocalDateTime mottattidspunkt, boolean harInfoSomIkkeKanPunsjes, boolean harMedisinskeOpplysninger) {
+        Journalpost journalpost = hentJournalpost(journalpostId);
+        var brevkode = MapTilBrevkode.finnBrevkodeMapper(brevkodeMappere, behandling.getFagsakYtelseType()).getBrevkode();
+        final LocalDateTime mottattDato = utledMottattDato(journalpost);
+
+        log.info("Fant {} vedlegg på søknad", journalpost.getDokumenter().size());
+        boolean hoveddokument = true;
+        for (DokumentInfo dokumentInfo : journalpost.getDokumenter()) {
+            if (skalIgnorereDokument(journalpostId, dokumentInfo)) continue;
+
+            final boolean erDigitalPleiepengerSyktBarnSøknad = hoveddokument
+                                                               && journalpost.getKanal() == Kanal.NAV_NO
+                                                               && brevkode.getOffisiellKode().equals(dokumentInfo.getBrevkode());
+
+            final SykdomDokumentType type = (erDigitalPleiepengerSyktBarnSøknad || !harMedisinskeOpplysninger) ? SykdomDokumentType.ANNET : SykdomDokumentType.UKLASSIFISERT;
+
+            lagreDokument(behandling, journalpostId, pleietrengendeAktørId, harInfoSomIkkeKanPunsjes, dokumentInfo, type, mottattidspunkt, mottattDato);
+
+            hoveddokument = false;
+        }
+
+    }
+
+
+    private Journalpost hentJournalpost(JournalpostId journalpostId) {
         var query = new JournalpostQueryRequest();
         query.setJournalpostId(journalpostId.getVerdi());
         var projection = new JournalpostResponseProjection()
@@ -80,54 +105,47 @@ public class SykdomsDokumentVedleggHåndterer {
             .relevanteDatoer(new RelevantDatoResponseProjection()
                 .dato()
                 .datotype());
-        var journalpost = safTjeneste.hentJournalpostInfo(query, projection);
-        var brevkode = MapTilBrevkode.finnBrevkodeMapper(brevkodeMappere, behandling.getFagsakYtelseType()).getBrevkode();
-        final LocalDateTime mottattDato = utledMottattDato(journalpost);
+        return safTjeneste.hentJournalpostInfo(query, projection);
+    }
 
-        log.info("Fant {} vedlegg på søknad", journalpost.getDokumenter().size());
-        boolean hoveddokument = true;
-        for (DokumentInfo dokumentInfo : journalpost.getDokumenter()) {
-            if (dokumentInfo.getBrevkode() != null && (dokumentInfo.getBrevkode().equals("K9_PUNSJ_INNSENDING")
-                || dokumentInfo.getBrevkode().equals(Brevkode.DOKUMENTASJON_AV_OPPLÆRING_KODE))) {
-                // Oppsummerings-PDFen fra punsj skal ikke klassifiseres under sykdom.
-                // Dokumentasjon av opplæring skal ikke klassifiseres under sykdom.
-                continue;
-            }
-
-            if (pleietrengendeSykdomDokumentRepository.finnesSykdomDokument(journalpostId, dokumentInfo.getDokumentInfoId())) {
-                log.warn("Tidligere innsendt dokument har blitt sendt inn på nytt -- dette skyldes trolig feil hos avsender. Journalpost: " + journalpostId + ", DokumentInfo: " + dokumentInfo.getDokumentInfoId());
-                continue;
-            }
-
-            final boolean erDigitalPleiepengerSyktBarnSøknad = hoveddokument
-                    && journalpost.getKanal() == Kanal.NAV_NO
-                    && brevkode.getOffisiellKode().equals(dokumentInfo.getBrevkode());
-            final SykdomDokumentType type = (erDigitalPleiepengerSyktBarnSøknad || !harMedisinskeOpplysninger) ? SykdomDokumentType.ANNET : SykdomDokumentType.UKLASSIFISERT;
-            boolean skalAutodateres = erDigitalPleiepengerSyktBarnSøknad || type == SykdomDokumentType.ANNET;
-            final LocalDate datert = skalAutodateres ? mottattDato.toLocalDate() : null;
-            final PleietrengendeSykdomDokumentInformasjon informasjon = new PleietrengendeSykdomDokumentInformasjon(
-                type,
-                harInfoSomIkkeKanPunsjes,
-                datert,
-                mottattDato,
-                0L,
-                "VL",
-                mottattidspunkt);
-            final PleietrengendeSykdomDokument dokument = new PleietrengendeSykdomDokument(
-                journalpostId,
-                dokumentInfo.getDokumentInfoId(),
-                informasjon,
-                behandling.getUuid(),
-                behandling.getFagsak().getSaksnummer(),
-                personRepository.hentEllerLagrePerson(behandling.getFagsak().getAktørId()),
-                "VL",
-                mottattidspunkt);
-            pleietrengendeSykdomDokumentRepository.lagre(dokument, pleietrengendeAktørId);
-
-            hoveddokument = false;
+    private boolean skalIgnorereDokument(JournalpostId journalpostId, DokumentInfo dokumentInfo) {
+        if (dokumentInfo.getBrevkode() != null && (dokumentInfo.getBrevkode().equals("K9_PUNSJ_INNSENDING")
+                                                   || dokumentInfo.getBrevkode().equals(Brevkode.DOKUMENTASJON_AV_OPPLÆRING_KODE))) {
+            // Oppsummerings-PDFen fra punsj skal ikke klassifiseres under sykdom.
+            // Dokumentasjon av opplæring skal ikke klassifiseres under sykdom.
+            return true;
         }
 
+        if (pleietrengendeSykdomDokumentRepository.finnesSykdomDokument(journalpostId, dokumentInfo.getDokumentInfoId())) {
+            log.warn("Tidligere innsendt dokument har blitt sendt inn på nytt -- dette skyldes trolig feil hos avsender. Journalpost: " + journalpostId + ", DokumentInfo: " + dokumentInfo.getDokumentInfoId());
+            return true;
+        }
+
+        return false;
     }
+
+    private void lagreDokument(Behandling behandling, JournalpostId journalpostId, AktørId pleietrengendeAktørId, boolean harInfoSomIkkeKanPunsjes, DokumentInfo dokumentInfo, SykdomDokumentType sykdomDokumentType, LocalDateTime mottattidspunkt, LocalDateTime mottattDato) {
+        final LocalDate datert = sykdomDokumentType == SykdomDokumentType.ANNET ? mottattDato.toLocalDate() : null;
+        final PleietrengendeSykdomDokumentInformasjon informasjon = new PleietrengendeSykdomDokumentInformasjon(
+            sykdomDokumentType,
+            harInfoSomIkkeKanPunsjes,
+            datert,
+            mottattDato,
+            0L,
+            "VL",
+            mottattidspunkt);
+        final PleietrengendeSykdomDokument dokument = new PleietrengendeSykdomDokument(
+            journalpostId,
+            dokumentInfo.getDokumentInfoId(),
+            informasjon,
+            behandling.getUuid(),
+            behandling.getFagsak().getSaksnummer(),
+            personRepository.hentEllerLagrePerson(behandling.getFagsak().getAktørId()),
+            "VL",
+            mottattidspunkt);
+        pleietrengendeSykdomDokumentRepository.lagre(dokument, pleietrengendeAktørId);
+    }
+
 
     private LocalDateTime utledMottattDato(Journalpost journalpost) {
         final LocalDateTime mottattDato;
