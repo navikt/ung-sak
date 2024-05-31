@@ -15,7 +15,6 @@ import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.k9.sak.innsyn.hendelse.InnsynEventTjeneste;
 
 /**
@@ -70,14 +69,14 @@ public class RepubliserInnsynEventTask implements ProsessTaskHandler {
             try {
                 LOG_CONTEXT.add("behandling", rad.getBehandlingId());
                 Behandling behandling = behandlingRepository.hentBehandling(rad.getBehandlingId());
-                BehandlingProsessTask.logContext(behandling);
+                logContext(behandling);
                 innsynEventTjeneste.publiserBehandling(behandling);
                 rad.fullført();
             } catch (Exception e) {
                 log.warn("Publisering til innsyn feilet for id={} behandling={} i kjøring={}", rad.getId(), rad.getBehandlingId(), kjøringId, e);
                 rad.feilet(e.getMessage());
             } finally {
-                LOG_CONTEXT.remove("behandling");
+                removeLogContext();
             }
 
         }
@@ -92,6 +91,19 @@ public class RepubliserInnsynEventTask implements ProsessTaskHandler {
         pd.setPrioritet(prosessTaskData.getPriority());
         prosessTaskTjeneste.lagre(pd);
 
+    }
+
+    private static void removeLogContext() {
+        LOG_CONTEXT.remove("behandling");
+        LOG_CONTEXT.remove("saksnummer");
+        LOG_CONTEXT.remove("ytelseType");
+        LOG_CONTEXT.remove("behandling_status");
+    }
+
+    private static void logContext(Behandling behandling) {
+        LOG_CONTEXT.add("saksnummer", behandling.getFagsak().getSaksnummer());
+        LOG_CONTEXT.add("ytelseType", behandling.getFagsakYtelseType());
+        LOG_CONTEXT.add("behandling_status", behandling.getStatus());
     }
 
 
