@@ -4,14 +4,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.k9.felles.integrasjon.saf.Datotype;
 import no.nav.k9.felles.integrasjon.saf.DokumentInfo;
 import no.nav.k9.felles.integrasjon.saf.DokumentInfoResponseProjection;
@@ -47,6 +46,8 @@ public class SykdomsDokumentVedleggHåndterer {
     private SafTjeneste safTjeneste;
     private Instance<MapTilBrevkode> brevkodeMappere;
 
+    private static Set<String> ETTERSENDELSE_BREVKODER = Set.of(Brevkode.ETTERSENDELSE_PLEIEPENGER_SYKT_BARN.getOffisiellKode(), Brevkode.ETTERSENDELSE_PLEIEPENGER_LIVETS_SLUTTFASE.getOffisiellKode());
+
     @Inject
     public SykdomsDokumentVedleggHåndterer(PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository,
                                            SykdomVurderingRepository sykdomVurderingRepository,
@@ -58,6 +59,24 @@ public class SykdomsDokumentVedleggHåndterer {
         this.personRepository = personRepository;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
         this.brevkodeMappere = brevkodeMappere;
+    }
+
+    public void leggTilEttersendteVedlegg(Behandling behandling, JournalpostId journalpostId, AktørId pleietrengendeAktørId, LocalDateTime mottattidspunkt, boolean harInfoSomIkkeKanPunsjes, boolean harMedisinskeOpplysninger) {
+        Journalpost journalpost = hentJournalpost(journalpostId);
+        final LocalDateTime mottattDato = utledMottattDato(journalpost);
+
+        log.info("Fant {} vedlegg på ettersendelse", journalpost.getDokumenter().size());
+        for (DokumentInfo dokumentInfo : journalpost.getDokumenter()) {
+            if (skalIgnorereDokument(journalpostId, dokumentInfo)) continue;
+
+            final boolean erDigitalEttersendelse = journalpost.getKanal() == Kanal.NAV_NO
+                                                   && ETTERSENDELSE_BREVKODER.contains(dokumentInfo.getBrevkode());
+
+            final SykdomDokumentType type = erDigitalEttersendelse || !harMedisinskeOpplysninger ? SykdomDokumentType.ANNET : SykdomDokumentType.UKLASSIFISERT;
+            lagreDokument(behandling, journalpostId, pleietrengendeAktørId, harInfoSomIkkeKanPunsjes, dokumentInfo, type, mottattidspunkt, mottattDato);
+
+        }
+
     }
 
     public void leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(Behandling behandling, JournalpostId journalpostId, AktørId pleietrengendeAktørId, LocalDateTime mottattidspunkt, boolean harInfoSomIkkeKanPunsjes, boolean harMedisinskeOpplysninger) {
@@ -145,6 +164,8 @@ public class SykdomsDokumentVedleggHåndterer {
             mottattidspunkt);
         pleietrengendeSykdomDokumentRepository.lagre(dokument, pleietrengendeAktørId);
     }
+
+
 
 
     private LocalDateTime utledMottattDato(Journalpost journalpost) {
