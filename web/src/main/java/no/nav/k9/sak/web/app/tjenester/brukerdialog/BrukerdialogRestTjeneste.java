@@ -41,7 +41,6 @@ public class BrukerdialogRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Returnerer nyeste gyldige vedtak for en gitt aktørId", summary = "Returnerer nyeste gyldige vedtak for en gitt aktørId", tags = "brukerdialog")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = FAGSAK)
     // Dette endepunktet brukes av k9-sak-innsyn-api. I k9-sak-innsyn-api hentes aktørId fra token.
     public HarGyldigOmsorgsdagerVedtakDto hentSisteGyldigeVedtakForAktorId(
         @Valid HentSisteGyldigeVedtakForAktørInputDto inputDto
