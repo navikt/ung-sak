@@ -284,7 +284,7 @@ spec:
     - name: REAKTIVER_TILBAKEKREVING_VALG
       value: "false"
     - name: SEND_INNTEKTSMELDING_FORESPORSEL
-      value: "true"
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
