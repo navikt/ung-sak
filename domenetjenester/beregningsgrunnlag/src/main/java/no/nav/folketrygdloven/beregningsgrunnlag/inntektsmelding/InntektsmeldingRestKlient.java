@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.kontrakt.OpprettForespørselRequest;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusKodelisteSerializer;
 import no.nav.folketrygdloven.kalkulus.mappers.JsonMapper;
 import no.nav.k9.felles.exception.VLException;

@@ -4,9 +4,12 @@ import java.time.LocalDate;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.kontrakt.InntektsmeldingYtelseType;
+import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.kontrakt.OpprettForespørselRequest;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 
@@ -38,11 +41,21 @@ public class SendInntektsmeldingForespørselTask implements ProsessTaskHandler {
             fagsak.getBrukerAktørId().getAktørId(),
             prosessTaskData.getPropertyValue(ORG_NR),
             LocalDate.parse(prosessTaskData.getPropertyValue(SKJÆRINGSTIDSPUNKT)),
-            fagsak.getYtelseType().getKode(),
+            finnYtelseType(fagsak),
             fagsak.getSaksnummer().getVerdi()
 
         ));
 
 
+    }
+
+    private static InntektsmeldingYtelseType finnYtelseType(Fagsak fagsak) {
+        return switch (fagsak.getYtelseType()) {
+            case OMSORGSPENGER -> InntektsmeldingYtelseType.OMSORGSPENGER;
+            case PLEIEPENGER_NÆRSTÅENDE -> InntektsmeldingYtelseType.PLEIEPENGER_NÆRSTÅENDE;
+            case PLEIEPENGER_SYKT_BARN -> InntektsmeldingYtelseType.PLEIEPENGER_SYKT_BARN;
+            case OPPLÆRINGSPENGER -> InntektsmeldingYtelseType.OPPLÆRINGSPENGER;
+            default -> throw new IllegalStateException("Unexpected value: " + fagsak.getYtelseType());
+        };
     }
 }

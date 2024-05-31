@@ -1,4 +1,4 @@
-package no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding;
+package no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.kontrakt;
 
 import java.time.LocalDate;
 
@@ -18,11 +18,13 @@ import jakarta.validation.constraints.Pattern;
 public class OpprettForespørselRequest {
 
     @JsonProperty(value = "aktørId", required = true)
+    @Pattern(regexp = "^\\d+$", message = "AktørId [${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     @NotNull
     private String aktørId;
 
     @JsonProperty(value = "orgnummer", required = true)
+    @Pattern(regexp = "^\\d+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     @NotNull
     private String orgnummer;
@@ -35,7 +37,7 @@ public class OpprettForespørselRequest {
     @JsonProperty(value = "ytelsetype", required = true)
     @Valid
     @NotNull
-    private String ytelsetype;
+    private InntektsmeldingYtelseType ytelsetype;
 
     @JsonProperty(value = "saksnummer", required = true)
     @Valid
@@ -50,7 +52,7 @@ public class OpprettForespørselRequest {
     public OpprettForespørselRequest(String aktørId,
                                      String orgnummer,
                                      LocalDate skjæringstidspunkt,
-                                     String ytelsetype,
+                                     InntektsmeldingYtelseType ytelsetype,
                                      String saksnummer) {
         this.aktørId = aktørId;
         this.orgnummer = orgnummer;
@@ -71,7 +73,7 @@ public class OpprettForespørselRequest {
         return skjæringstidspunkt;
     }
 
-    public String getYtelsetype() {
+    public InntektsmeldingYtelseType getYtelsetype() {
         return ytelsetype;
     }
 
