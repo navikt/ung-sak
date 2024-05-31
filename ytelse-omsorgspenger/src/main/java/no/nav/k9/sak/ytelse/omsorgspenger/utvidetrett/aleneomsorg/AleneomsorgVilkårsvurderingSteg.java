@@ -4,6 +4,7 @@ import static no.nav.k9.kodeverk.behandling.BehandlingStegType.MANUELL_VILKÅRSV
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_AO;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -13,6 +14,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -21,6 +23,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
@@ -91,7 +94,10 @@ public class AleneomsorgVilkårsvurderingSteg implements BehandlingSteg {
             behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
-        if (behandling.erManueltOpprettet()){
+
+        Optional<Aksjonspunkt> omsorgenForAksjonspunkt = behandling.getAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR);
+        boolean omsorgenForManueltAvklart = omsorgenForAksjonspunkt.isPresent() && omsorgenForAksjonspunkt.get().getStatus() == AksjonspunktStatus.UTFØRT;
+        if (behandling.erManueltOpprettet() || omsorgenForManueltAvklart) {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(aksjonspunktDef));
         }
 
