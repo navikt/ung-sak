@@ -94,20 +94,22 @@ public class MedisinskGrunnlagTjeneste {
 
     public SykdomGrunnlagSammenlikningsresultat sammenlignGrunnlag(Optional<MedisinskGrunnlagsdata> forrigeGrunnlagBehandling, MedisinskGrunnlagsdata utledetGrunnlag) {
         boolean harEndretDiagnosekoder = sammenlignDiagnosekoder(forrigeGrunnlagBehandling, utledetGrunnlag);
-        boolean harEndretAntallSykdomsdokumenter = sammenlignSykdomsdokumenter(forrigeGrunnlagBehandling, utledetGrunnlag);
+        boolean harNyeUkvalifiserteDokumenter = sammenlignSykdomsdokumenter(forrigeGrunnlagBehandling, utledetGrunnlag);
         final LocalDateTimeline<Boolean> endringerISøktePerioder = sammenlignTidfestedeGrunnlagsdata(forrigeGrunnlagBehandling, utledetGrunnlag);
-        return new SykdomGrunnlagSammenlikningsresultat(endringerISøktePerioder, harEndretDiagnosekoder, harEndretAntallSykdomsdokumenter);
+        return new SykdomGrunnlagSammenlikningsresultat(endringerISøktePerioder, harEndretDiagnosekoder, harNyeUkvalifiserteDokumenter);
     }
 
-    private boolean sammenlignSykdomsdokumenter(Optional<MedisinskGrunnlagsdata> forrigeGrunnlagBehandling, MedisinskGrunnlagsdata utledetGrunnlag) {
-        if (forrigeGrunnlagBehandling.isEmpty()) {
+    private boolean sammenlignSykdomsdokumenter(Optional<MedisinskGrunnlagsdata> forrige, MedisinskGrunnlagsdata utledetGrunnlag) {
+        if (forrige.isEmpty()) {
             return true;
         }
 
-        //Gamle grunnlag har ikke satt dette feltet.
-        var forrige = Optional.ofNullable(forrigeGrunnlagBehandling.get().getAntallUklassifiserteSykdomsDokumenter())
-            .orElse(0L);
-        return !forrige.equals(utledetGrunnlag.getAntallUklassifiserteSykdomsDokumenter());
+        //Gamle grunnlag i databasen har ikke satt dette feltet, men nye skal alltid ha.
+        long forrigeAntall = Optional.ofNullable(forrige.get().getAntallUklassifiserteSykdomsDokumenter()).orElse(0L);
+        long denneAntall = Optional.ofNullable(utledetGrunnlag.getAntallUklassifiserteSykdomsDokumenter()).orElse(0L);
+
+        return denneAntall > forrigeAntall;
+
     }
 
     LocalDateTimeline<Boolean> sammenlignTidfestedeGrunnlagsdata(Optional<MedisinskGrunnlagsdata> grunnlagBehandling, MedisinskGrunnlagsdata utledetGrunnlag) {

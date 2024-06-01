@@ -299,6 +299,8 @@ spec:
       value: "true"
     - name: SEND_INNTEKTSMELDING_FORESPORSEL
       value: "true"
+    - name: ENABLE_UKLASSIFISERT_SYKDOMSDOK_SJEKK
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
