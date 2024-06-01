@@ -129,7 +129,8 @@ public class MedisinskGrunnlagRepository {
             .collect(Collectors.toList());
 
         final boolean harAndreMedisinskeDokumenter = !sykdomDokumenter.isEmpty();
-        final var antallSykdomsdokumenter = sykdomDokumenter.size();
+        final var uklassifiserteDokumenter = sykdomDokumenter.stream()
+            .filter(it -> it.getType() == SykdomDokumentType.UKLASSIFISERT).toList();
 
         return new MedisinskGrunnlagsdata(
             UUID.randomUUID(),
@@ -137,7 +138,7 @@ public class MedisinskGrunnlagRepository {
             vurderinger,
             godkjenteLegeerklæringer,
             harAndreMedisinskeDokumenter,
-            (long) antallSykdomsdokumenter,
+            (long) uklassifiserteDokumenter.size(),
             innleggelser,
             diagnosekoder,
             "VL",

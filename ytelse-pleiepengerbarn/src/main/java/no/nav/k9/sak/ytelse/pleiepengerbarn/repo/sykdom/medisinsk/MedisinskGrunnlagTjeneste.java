@@ -104,8 +104,10 @@ public class MedisinskGrunnlagTjeneste {
             return true;
         }
 
-        var forrige = forrigeGrunnlagBehandling.get().getAntallSykdomsDokumenter();
-        return !forrige.equals(utledetGrunnlag.getAntallSykdomsDokumenter());
+        //Gamle grunnlag har ikke satt dette feltet.
+        var forrige = Optional.ofNullable(forrigeGrunnlagBehandling.get().getAntallUklassifiserteSykdomsDokumenter())
+            .orElse(0L);
+        return !forrige.equals(utledetGrunnlag.getAntallUklassifiserteSykdomsDokumenter());
     }
 
     LocalDateTimeline<Boolean> sammenlignTidfestedeGrunnlagsdata(Optional<MedisinskGrunnlagsdata> grunnlagBehandling, MedisinskGrunnlagsdata utledetGrunnlag) {
