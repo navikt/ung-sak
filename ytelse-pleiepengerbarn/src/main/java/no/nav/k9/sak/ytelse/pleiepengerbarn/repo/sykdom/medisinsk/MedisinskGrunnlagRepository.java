@@ -129,6 +129,7 @@ public class MedisinskGrunnlagRepository {
             .collect(Collectors.toList());
 
         final boolean harAndreMedisinskeDokumenter = !sykdomDokumenter.isEmpty();
+        final var antallSykdomsdokumenter = sykdomDokumenter.size();
 
         return new MedisinskGrunnlagsdata(
             UUID.randomUUID(),
@@ -136,6 +137,7 @@ public class MedisinskGrunnlagRepository {
             vurderinger,
             godkjenteLegeerklæringer,
             harAndreMedisinskeDokumenter,
+            (long) antallSykdomsdokumenter,
             innleggelser,
             diagnosekoder,
             "VL",

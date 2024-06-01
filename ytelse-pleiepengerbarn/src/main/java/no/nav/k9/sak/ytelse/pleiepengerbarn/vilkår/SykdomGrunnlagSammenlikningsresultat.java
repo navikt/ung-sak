@@ -5,10 +5,12 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 public class SykdomGrunnlagSammenlikningsresultat {
     LocalDateTimeline<Boolean> diffPerioder;
     private boolean endretDiagnosekoder;
+    private final boolean harEndretAntallSykdomsdokumenter;
 
-    public SykdomGrunnlagSammenlikningsresultat(LocalDateTimeline<Boolean> diffPerioder, boolean endretDiagnosekoder) {
+    public SykdomGrunnlagSammenlikningsresultat(LocalDateTimeline<Boolean> diffPerioder, boolean endretDiagnosekoder, boolean harEndretAntallSykdomsdokumenter) {
         this.diffPerioder = diffPerioder;
         this.endretDiagnosekoder = endretDiagnosekoder;
+        this.harEndretAntallSykdomsdokumenter = harEndretAntallSykdomsdokumenter;
     }
 
     public LocalDateTimeline<Boolean> getDiffPerioder() {
@@ -19,7 +21,11 @@ public class SykdomGrunnlagSammenlikningsresultat {
         return endretDiagnosekoder;
     }
 
+    public boolean isHarEndretAntallSykdomsdokumenter() {
+        return harEndretAntallSykdomsdokumenter;
+    }
+
     public boolean harBlittEndret() {
-        return endretDiagnosekoder || !diffPerioder.isEmpty();
+        return harEndretAntallSykdomsdokumenter || endretDiagnosekoder || !diffPerioder.isEmpty();
     }
 }

@@ -61,41 +61,34 @@ public class SykdomsDokumentVedleggHåndterer {
         this.brevkodeMappere = brevkodeMappere;
     }
 
-    public void leggTilEttersendteVedlegg(Behandling behandling, JournalpostId journalpostId, AktørId pleietrengendeAktørId, LocalDateTime mottattidspunkt, boolean harInfoSomIkkeKanPunsjes, boolean harMedisinskeOpplysninger) {
+    public void leggTilDokumenterSomSkalHåndteresVedlagtSkjema(Behandling behandling, JournalpostId journalpostId, AktørId pleietrengendeAktørId, LocalDateTime mottattidspunkt, boolean harInfoSomIkkeKanPunsjes, boolean harMedisinskeOpplysninger) {
         Journalpost journalpost = hentJournalpost(journalpostId);
         final LocalDateTime mottattDato = utledMottattDato(journalpost);
 
-        log.info("Fant {} vedlegg på ettersendelse", journalpost.getDokumenter().size());
-        for (DokumentInfo dokumentInfo : journalpost.getDokumenter()) {
-            if (skalIgnorereDokument(journalpostId, dokumentInfo)) continue;
+        log.info("Fant {} vedlegg på søknad eller ettersendelse", journalpost.getDokumenter().size());
 
-            final boolean erDigitalEttersendelse = journalpost.getKanal() == Kanal.NAV_NO
-                                                   && ETTERSENDELSE_BREVKODER.contains(dokumentInfo.getBrevkode());
+        var brevkodeSøknad = MapTilBrevkode.finnBrevkodeMapper(brevkodeMappere, behandling.getFagsakYtelseType()).getBrevkode();
 
-            final SykdomDokumentType type = erDigitalEttersendelse || !harMedisinskeOpplysninger ? SykdomDokumentType.ANNET : SykdomDokumentType.UKLASSIFISERT;
-            lagreDokument(behandling, journalpostId, pleietrengendeAktørId, harInfoSomIkkeKanPunsjes, dokumentInfo, type, mottattidspunkt, mottattDato);
-
-        }
-
-    }
-
-    public void leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(Behandling behandling, JournalpostId journalpostId, AktørId pleietrengendeAktørId, LocalDateTime mottattidspunkt, boolean harInfoSomIkkeKanPunsjes, boolean harMedisinskeOpplysninger) {
-        Journalpost journalpost = hentJournalpost(journalpostId);
-        var brevkode = MapTilBrevkode.finnBrevkodeMapper(brevkodeMappere, behandling.getFagsakYtelseType()).getBrevkode();
-        final LocalDateTime mottattDato = utledMottattDato(journalpost);
-
-        log.info("Fant {} vedlegg på søknad", journalpost.getDokumenter().size());
         boolean hoveddokument = true;
         for (DokumentInfo dokumentInfo : journalpost.getDokumenter()) {
             if (skalIgnorereDokument(journalpostId, dokumentInfo)) continue;
 
-            final boolean erDigitalPleiepengerSyktBarnSøknad = hoveddokument
-                                                               && journalpost.getKanal() == Kanal.NAV_NO
-                                                               && brevkode.getOffisiellKode().equals(dokumentInfo.getBrevkode());
+            final boolean erDigitalPleiepengerSyktBarnSøknadsskjema =
+                hoveddokument
+                && journalpost.getKanal() == Kanal.NAV_NO
+                && brevkodeSøknad.getOffisiellKode().equals(dokumentInfo.getBrevkode());
 
-            final SykdomDokumentType type = (erDigitalPleiepengerSyktBarnSøknad || !harMedisinskeOpplysninger) ? SykdomDokumentType.ANNET : SykdomDokumentType.UKLASSIFISERT;
+            final boolean erDigitalEttersendelseSkjema =
+                hoveddokument
+                && journalpost.getKanal() == Kanal.NAV_NO
+                && ETTERSENDELSE_BREVKODER.contains(dokumentInfo.getBrevkode());
 
-            lagreDokument(behandling, journalpostId, pleietrengendeAktørId, harInfoSomIkkeKanPunsjes, dokumentInfo, type, mottattidspunkt, mottattDato);
+            final SykdomDokumentType type = erDigitalEttersendelseSkjema
+                                            || erDigitalPleiepengerSyktBarnSøknadsskjema
+                                            || !harMedisinskeOpplysninger ?
+                SykdomDokumentType.ANNET : SykdomDokumentType.UKLASSIFISERT;
+
+            lagreDokument(behandling, journalpostId, pleietrengendeAktørId, mottattidspunkt, harInfoSomIkkeKanPunsjes, dokumentInfo, type, mottattDato);
 
             hoveddokument = false;
         }
@@ -143,10 +136,11 @@ public class SykdomsDokumentVedleggHåndterer {
         return false;
     }
 
-    private void lagreDokument(Behandling behandling, JournalpostId journalpostId, AktørId pleietrengendeAktørId, boolean harInfoSomIkkeKanPunsjes, DokumentInfo dokumentInfo, SykdomDokumentType sykdomDokumentType, LocalDateTime mottattidspunkt, LocalDateTime mottattDato) {
-        final LocalDate datert = sykdomDokumentType == SykdomDokumentType.ANNET ? mottattDato.toLocalDate() : null;
+    private void lagreDokument(Behandling behandling, JournalpostId journalpostId, AktørId pleietrengendeAktørId, LocalDateTime mottattidspunkt, boolean harInfoSomIkkeKanPunsjes, DokumentInfo dokumentInfo, SykdomDokumentType type, LocalDateTime mottattDato) {
+        final LocalDate datert = type == SykdomDokumentType.ANNET ? mottattDato.toLocalDate() : null;
+
         final PleietrengendeSykdomDokumentInformasjon informasjon = new PleietrengendeSykdomDokumentInformasjon(
-            sykdomDokumentType,
+            type,
             harInfoSomIkkeKanPunsjes,
             datert,
             mottattDato,
@@ -164,9 +158,6 @@ public class SykdomsDokumentVedleggHåndterer {
             mottattidspunkt);
         pleietrengendeSykdomDokumentRepository.lagre(dokument, pleietrengendeAktørId);
     }
-
-
-
 
     private LocalDateTime utledMottattDato(Journalpost journalpost) {
         final LocalDateTime mottattDato;

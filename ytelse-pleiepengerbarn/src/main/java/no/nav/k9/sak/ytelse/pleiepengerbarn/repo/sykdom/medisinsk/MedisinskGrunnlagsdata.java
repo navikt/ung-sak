@@ -61,6 +61,10 @@ public class MedisinskGrunnlagsdata {
     @Column(name = "SYKDOM_HAR_ANDRE_MEDISINSKE_OPPLYSNINGER", nullable = false)
     private boolean harAndreMedisinskeOpplysninger;
 
+    //TODO gjør nullable = false
+    @Column(name = "ANTALL_SYKDOMSDOKUMENTER")
+    private Long antallSykdomsDokumenter;
+
     @OneToOne
     @JoinColumn(name = "PLEIETRENGENDE_SYKDOM_INNLEGGELSER_ID")
     private PleietrengendeSykdomInnleggelser innleggelser;
@@ -86,11 +90,13 @@ public class MedisinskGrunnlagsdata {
             List<PleietrengendeSykdomVurderingVersjon> vurderinger,
             List<PleietrengendeSykdomDokument> godkjenteLegeerklæringer,
             boolean harAndreMedisinskeOpplysninger,
+            Long antallSykdomsDokumenter,
             PleietrengendeSykdomInnleggelser innleggelser,
             PleietrengendeSykdomDiagnoser diagnoser,
             String opprettetAv,
             LocalDateTime opprettetTidspunkt) {
         this.sykdomGrunnlagUUID = sykdomGrunnlagUUID;
+        this.antallSykdomsDokumenter = antallSykdomsDokumenter;
         setSøktePerioder(søktePerioder);
         this.vurderinger = vurderinger;
         this.godkjenteLegeerklæringer = godkjenteLegeerklæringer;
@@ -135,6 +141,10 @@ public class MedisinskGrunnlagsdata {
 
     public boolean isHarAndreMedisinskeOpplysninger() {
         return harAndreMedisinskeOpplysninger;
+    }
+
+    public Long getAntallSykdomsDokumenter() {
+        return antallSykdomsDokumenter;
     }
 
     public PleietrengendeSykdomInnleggelser getInnleggelser() {

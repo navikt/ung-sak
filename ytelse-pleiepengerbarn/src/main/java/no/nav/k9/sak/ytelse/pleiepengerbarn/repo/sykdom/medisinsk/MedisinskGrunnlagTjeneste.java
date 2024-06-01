@@ -94,8 +94,18 @@ public class MedisinskGrunnlagTjeneste {
 
     public SykdomGrunnlagSammenlikningsresultat sammenlignGrunnlag(Optional<MedisinskGrunnlagsdata> forrigeGrunnlagBehandling, MedisinskGrunnlagsdata utledetGrunnlag) {
         boolean harEndretDiagnosekoder = sammenlignDiagnosekoder(forrigeGrunnlagBehandling, utledetGrunnlag);
+        boolean harEndretAntallSykdomsdokumenter = sammenlignSykdomsdokumenter(forrigeGrunnlagBehandling, utledetGrunnlag);
         final LocalDateTimeline<Boolean> endringerISøktePerioder = sammenlignTidfestedeGrunnlagsdata(forrigeGrunnlagBehandling, utledetGrunnlag);
-        return new SykdomGrunnlagSammenlikningsresultat(endringerISøktePerioder, harEndretDiagnosekoder);
+        return new SykdomGrunnlagSammenlikningsresultat(endringerISøktePerioder, harEndretDiagnosekoder, harEndretAntallSykdomsdokumenter);
+    }
+
+    private boolean sammenlignSykdomsdokumenter(Optional<MedisinskGrunnlagsdata> forrigeGrunnlagBehandling, MedisinskGrunnlagsdata utledetGrunnlag) {
+        if (forrigeGrunnlagBehandling.isEmpty()) {
+            return true;
+        }
+
+        var forrige = forrigeGrunnlagBehandling.get().getAntallSykdomsDokumenter();
+        return !forrige.equals(utledetGrunnlag.getAntallSykdomsDokumenter());
     }
 
     LocalDateTimeline<Boolean> sammenlignTidfestedeGrunnlagsdata(Optional<MedisinskGrunnlagsdata> grunnlagBehandling, MedisinskGrunnlagsdata utledetGrunnlag) {
