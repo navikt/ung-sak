@@ -82,7 +82,7 @@ public class SykdomsDokumentVedleggHåndterer {
                 && journalpost.getKanal() == Kanal.NAV_NO
                 && brevkodeSøknad.getOffisiellKode().equals(dokumentInfo.getBrevkode());
 
-            final boolean erDigitalEttersendelseSkjema = !enableUklassifisertDokSjekk && hoveddokument
+            final boolean erDigitalEttersendelseSkjema = enableUklassifisertDokSjekk && hoveddokument
                 && journalpost.getKanal() == Kanal.NAV_NO
                 && ETTERSENDELSE_BREVKODER.contains(dokumentInfo.getBrevkode());
 
