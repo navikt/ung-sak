@@ -52,7 +52,6 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
 import no.nav.folketrygdloven.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.FinnPerioderMedEndringVedFeilInntektsmelding;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.AbacDto;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
@@ -68,7 +67,6 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.forvaltning.DumpFeilImRepository;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.trigger.ProsessTriggerForvaltningTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -93,8 +91,6 @@ public class ForvaltningBeregningRestTjeneste {
     private FagsakTjeneste fagsakTjeneste;
     private HentKalkulatorInputDump hentKalkulatorInputDump;
     private ProsessTriggerForvaltningTjeneste prosessTriggerForvaltningTjeneste;
-    private FinnPerioderMedEndringVedFeilInntektsmelding finnPerioderMedEndringVedFeilInntektsmelding;
-    private DumpFeilImRepository dumpFeilImRepository;
 
 
     public ForvaltningBeregningRestTjeneste() {
@@ -106,7 +102,7 @@ public class ForvaltningBeregningRestTjeneste {
                                             BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
                                             RevurderBeregningTjeneste revurderBeregningTjeneste,
                                             EntityManager entityManager, FagsakTjeneste fagsakTjeneste,
-                                            HentKalkulatorInputDump hentKalkulatorInputDump, FinnPerioderMedEndringVedFeilInntektsmelding finnPerioderMedEndringVedFeilInntektsmelding, DumpFeilImRepository dumpFeilImRepository) {
+                                            HentKalkulatorInputDump hentKalkulatorInputDump) {
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
@@ -115,8 +111,6 @@ public class ForvaltningBeregningRestTjeneste {
         this.fagsakTjeneste = fagsakTjeneste;
         this.hentKalkulatorInputDump = hentKalkulatorInputDump;
         this.prosessTriggerForvaltningTjeneste = new ProsessTriggerForvaltningTjeneste(entityManager);
-        this.finnPerioderMedEndringVedFeilInntektsmelding = finnPerioderMedEndringVedFeilInntektsmelding;
-        this.dumpFeilImRepository = dumpFeilImRepository;
     }
 
     @GET

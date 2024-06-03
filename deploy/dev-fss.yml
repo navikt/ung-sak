@@ -218,6 +218,10 @@ spec:
       value: http://k9-los-api.k9saksbehandling/api
     - name: K9_LOS_SCOPE
       value: api://dev-fss.k9saksbehandling.k9-los-api/.default
+    - name: K9INNTEKTSMELDING_URL
+      value: https://k9-inntektsmelding.intern.dev.nav.no/k9/inntektsmelding
+    - name: K9INNTEKTSMELDING_SCOPE
+      value: api://dev-gcp.k9saksbehandling.k9-inntektsmelding/.default
 
     # Restservice OMS spesifikt
     - name: K9_OMS_AARSKVANTUM_URL
@@ -294,6 +298,8 @@ spec:
     - name: REAKTIVER_TILBAKEKREVING_VALG
       value: "true"
     - name: MANUELT_VURDER_UTVIDET_RETT
+      value: "true"
+    - name: SEND_INNTEKTSMELDING_FORESPORSEL
       value: "true"
 
     # Konfigurasjoner
