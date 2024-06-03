@@ -74,9 +74,7 @@ spec:
         - application: k9-punsjbolle
           namespace: omsorgspenger
           cluster: prod-gcp
-        - application: k9-sak-innsyn-api
-          namespace: dusseldorf
-          cluster: prod-gcp
+
   env:
     - name: TZ
       value: "Europe/Oslo"
@@ -211,6 +209,10 @@ spec:
       value: http://k9-los-api.k9saksbehandling/api
     - name: K9_LOS_SCOPE
       value: api://prod-fss.k9saksbehandling.k9-los-api/.default
+    - name: K9INNTEKTSMELDING_URL
+      value: https://k9-inntektsmelding.intern.nav.no/k9/inntektsmelding
+    - name: K9INNTEKTSMELDING_SCOPE
+      value: api://prod-gcp.k9saksbehandling.k9-inntektsmelding/.default
 
     # Restservice OMS spesifikt
     - name: K9_OMS_AARSKVANTUM_URL
@@ -269,8 +271,6 @@ spec:
       value: "false"
     - name: AVKLAR_ARBEIDSFORHOLD_REUTLED_VED_REVURDERING
       value: "false"
-    - name: ENABLE_RESERVERT_SAKSNUMMER
-      value: "false"
     - name: OMP_RELEVANT_ENDRING_UTLEDNING
       value: "false"
     - name: DOKUMENTMOTTAK_VALIDER_JOURNALFORT
@@ -280,6 +280,12 @@ spec:
     - name: INAKTIV_VED_8_47_B
       value: "false"
     - name: FERIEPENGER_AV_DAGPENGER
+      value: "false"
+    - name: REAKTIVER_TILBAKEKREVING_VALG
+      value: "false"
+    - name: MANUELT_VURDER_UTVIDET_RETT
+      value: "false"
+    - name: SEND_INNTEKTSMELDING_FORESPORSEL
       value: "false"
 
     # Konfigurasjoner

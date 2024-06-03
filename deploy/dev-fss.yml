@@ -50,6 +50,8 @@ spec:
         kvPath: /serviceuser/data/dev/srvssolinux
       - mountPath: /var/run/secrets/nais.io/vault
         kvPath: /kv/preprod/fss/k9-sak/k9saksbehandling
+  tokenx:
+    enabled: true
   azure:
     application:
       enabled: true
@@ -218,6 +220,10 @@ spec:
       value: http://k9-los-api.k9saksbehandling/api
     - name: K9_LOS_SCOPE
       value: api://dev-fss.k9saksbehandling.k9-los-api/.default
+    - name: K9INNTEKTSMELDING_URL
+      value: https://k9-inntektsmelding.intern.dev.nav.no/k9/inntektsmelding
+    - name: K9INNTEKTSMELDING_SCOPE
+      value: api://dev-gcp.k9saksbehandling.k9-inntektsmelding/.default
 
     # Restservice OMS spesifikt
     - name: K9_OMS_AARSKVANTUM_URL
@@ -279,8 +285,6 @@ spec:
       value: "true"
     - name: AVKLAR_ARBEIDSFORHOLD_REUTLED_VED_REVURDERING
       value: "true"
-    - name: ENABLE_RESERVERT_SAKSNUMMER
-      value: "true"
     - name: OMP_RELEVANT_ENDRING_UTLEDNING
       value: "true"
     - name: DOKUMENTMOTTAK_VALIDER_JOURNALFORT
@@ -292,6 +296,14 @@ spec:
     - name: INAKTIV_VED_8_47_B
       value: "true"
     - name: FERIEPENGER_AV_DAGPENGER
+      value: "true"
+    - name: REAKTIVER_TILBAKEKREVING_VALG
+      value: "true"
+    - name: MANUELT_VURDER_UTVIDET_RETT
+      value: "true"
+    - name: SEND_INNTEKTSMELDING_FORESPORSEL
+      value: "true"
+    - name: BRUKERDIALOG_REST_TJENESTE_ENABLED
       value: "true"
 
     # Konfigurasjoner

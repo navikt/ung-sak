@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.ArbeidsgiverPortalenTjeneste;
 import no.nav.k9.formidling.kontrakt.kodeverk.IdType;
 import no.nav.k9.formidling.kontrakt.kodeverk.Mottaker;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -55,6 +56,7 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
     private KompletthetBeregningTjeneste kompletthetBeregningTjeneste;
     private BestiltEtterlysningRepository bestiltEtterlysningRepository;
     private DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste;
+    private ArbeidsgiverPortalenTjeneste arbeidsgiverPortalenTjeneste;
 
     private TotrinnRepository totrinnRepository;
 
@@ -67,13 +69,15 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
                                              KompletthetBeregningTjeneste kompletthetBeregningTjeneste,
                                              BestiltEtterlysningRepository bestiltEtterlysningRepository,
                                              TotrinnRepository totrinnRepository,
-                                             DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste) {
+                                             DokumentBestillerApplikasjonTjeneste dokumentBestillerApplikasjonTjeneste,
+                                             ArbeidsgiverPortalenTjeneste arbeidsgiverPortalenTjeneste) {
 
         this.behandlingRepository = behandlingRepository;
         this.kompletthetBeregningTjeneste = kompletthetBeregningTjeneste;
         this.bestiltEtterlysningRepository = bestiltEtterlysningRepository;
         this.totrinnRepository = totrinnRepository;
         this.dokumentBestillerApplikasjonTjeneste = dokumentBestillerApplikasjonTjeneste;
+        this.arbeidsgiverPortalenTjeneste = arbeidsgiverPortalenTjeneste;
     }
 
     @Override
@@ -119,7 +123,10 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
                 .distinct()
                 .map(arbeidsgiver -> arbeidsgiver != null ? new Mottaker(arbeidsgiver.getIdentifikator(), arbeidsgiver.getErVirksomhet() ? IdType.ORGNR : IdType.AKTØRID) : new Mottaker(ref.getAktørId().getAktørId(), IdType.AKTØRID))
                 .collect(Collectors.toSet());
+            arbeidsgiverPortalenTjeneste.sendInntektsmeldingForespørsel(manglendeBestillinger);
             sendBrev(ref.getBehandlingId(), DokumentMalType.fraKode(kompletthetsAksjon.getDokumentMalType().getKode()), aktørerDetSkalEtterlysesFra);
+
+
         }
     }
 

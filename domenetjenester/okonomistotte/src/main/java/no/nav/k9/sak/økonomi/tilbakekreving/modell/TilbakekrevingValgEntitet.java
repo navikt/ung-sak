@@ -26,17 +26,17 @@ class TilbakekrevingValgEntitet extends BaseEntitet {
     @Column(name = "behandling_id", nullable = false, updatable = false)
     private Long behandlingId;
 
-    
+
     @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
 
     @Version
     @Column(name = "versjon", nullable = false)
     private Long versjon;
-    
+
     @Column(name = "tbk_vilkaar_oppfylt")
     private Boolean vilkarOppfylt = Boolean.FALSE;
-    
+
     @Column(name = "grunn_til_reduksjon")
     private Boolean grunnTilReduksjon = Boolean.FALSE;
 
@@ -69,6 +69,10 @@ class TilbakekrevingValgEntitet extends BaseEntitet {
 
     void deaktiver() {
         this.aktiv = false;
+    }
+
+    void reaktiver() {
+        this.aktiv = true;
     }
 
     public static Builder builder() {
