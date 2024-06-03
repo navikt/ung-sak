@@ -142,7 +142,6 @@ public class MedisinskGrunnlagRepository {
             vurderinger,
             godkjenteLegeerklæringer,
             harAndreMedisinskeDokumenter,
-            enableUklassifisertDokSjekk ? (long) uklassifiserteDokumenter.size() : null,
             innleggelser,
             diagnosekoder,
             "VL",

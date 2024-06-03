@@ -1,1 +1,0 @@
-alter table medisinsk_grunnlagsdata add column if not exists antall_uklassifiserte_sykdomsdokumenter bigint;

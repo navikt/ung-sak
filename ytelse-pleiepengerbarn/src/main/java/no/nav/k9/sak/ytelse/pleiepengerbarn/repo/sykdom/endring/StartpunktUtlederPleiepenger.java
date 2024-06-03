@@ -148,9 +148,8 @@ class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
         var sykdomGrunnlagSammenlikningsresultat = medisinskGrunnlagTjeneste.sammenlignGrunnlag(sykdomGrunnlag, utledGrunnlag);
 
         boolean erEndringIGrunnlag = !sykdomGrunnlagSammenlikningsresultat.getDiffPerioder().isEmpty();
-        boolean harEndretAntallSykdomsdokumenter = sykdomGrunnlagSammenlikningsresultat.isHarEndretAntallSykdomsdokumenter();
 
-        var startpunktType = erEndringIGrunnlag || harEndretAntallSykdomsdokumenter ? StartpunktType.INNGANGSVILKÅR_MEDISINSK : StartpunktType.UDEFINERT;
+        var startpunktType = erEndringIGrunnlag ? StartpunktType.INNGANGSVILKÅR_MEDISINSK : StartpunktType.UDEFINERT;
 
         return startpunktType;
     }

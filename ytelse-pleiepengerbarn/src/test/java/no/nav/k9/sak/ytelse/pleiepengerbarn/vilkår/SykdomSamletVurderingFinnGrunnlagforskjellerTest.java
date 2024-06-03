@@ -275,8 +275,7 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
             vurderinger, //vurderinger
             Collections.emptyList(), //godkjenteLegeerklæringer
             false,
-            0L,
-            innleggelser,
+                innleggelser,
             null,
             "test",
             LocalDateTime.now());

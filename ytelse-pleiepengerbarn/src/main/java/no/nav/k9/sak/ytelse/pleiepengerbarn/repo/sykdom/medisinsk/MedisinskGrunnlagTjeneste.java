@@ -96,20 +96,7 @@ public class MedisinskGrunnlagTjeneste {
         boolean harEndretDiagnosekoder = sammenlignDiagnosekoder(forrigeGrunnlagBehandling, utledetGrunnlag);
         boolean harNyeUkvalifiserteDokumenter = false;
         final LocalDateTimeline<Boolean> endringerISøktePerioder = sammenlignTidfestedeGrunnlagsdata(forrigeGrunnlagBehandling, utledetGrunnlag);
-        return new SykdomGrunnlagSammenlikningsresultat(endringerISøktePerioder, harEndretDiagnosekoder, harNyeUkvalifiserteDokumenter);
-    }
-
-    private boolean sammenlignSykdomsdokumenter(Optional<MedisinskGrunnlagsdata> forrige, MedisinskGrunnlagsdata utledetGrunnlag) {
-        if (forrige.isEmpty()) {
-            return true;
-        }
-
-        //Gamle grunnlag i databasen har ikke satt dette feltet, men nye skal alltid ha.
-        long forrigeAntall = Optional.ofNullable(forrige.get().getAntallUklassifiserteSykdomsDokumenter()).orElse(0L);
-        long denneAntall = Optional.ofNullable(utledetGrunnlag.getAntallUklassifiserteSykdomsDokumenter()).orElse(0L);
-
-        return denneAntall > forrigeAntall;
-
+        return new SykdomGrunnlagSammenlikningsresultat(endringerISøktePerioder, harEndretDiagnosekoder);
     }
 
     LocalDateTimeline<Boolean> sammenlignTidfestedeGrunnlagsdata(Optional<MedisinskGrunnlagsdata> grunnlagBehandling, MedisinskGrunnlagsdata utledetGrunnlag) {
