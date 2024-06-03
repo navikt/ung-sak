@@ -4,6 +4,7 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.NavigableSet;
@@ -139,8 +140,10 @@ class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
     private StartpunktType utledStartpunktForSykdom(BehandlingReferanse ref) {
         var pleietrengendeSykdomDokuments = pleietrengendeSykdomDokumentRepository.hentAlleDokumenterForBehandling(ref.getBehandlingId());
 
-        var uklassifiserteDokumenter = pleietrengendeSykdomDokuments.stream().filter(it -> it.getType() == SykdomDokumentType.UKLASSIFISERT).toList();
-        if (enableUklassifisertDokSjekk && !uklassifiserteDokumenter.isEmpty()) {
+        var uklassifiserteDokumenter = enableUklassifisertDokSjekk
+            ? pleietrengendeSykdomDokuments.stream().filter(it -> it.getType() == SykdomDokumentType.UKLASSIFISERT).toList()
+            : Collections.emptyList();
+        if (!uklassifiserteDokumenter.isEmpty()) {
             return StartpunktType.INNGANGSVILKÅR_MEDISINSK;
         }
 
