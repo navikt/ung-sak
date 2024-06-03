@@ -53,7 +53,7 @@ public class BrukerdialogRestTjeneste {
         if (!brukerdialogRestTjenesteEnabled) {
             throw new IllegalStateException("BrukerdialogRestTjeneste er ikke aktivert");
         }
-        return brukerdialogTjeneste.harGyldigOmsorgsdagerVedtak(inputDto.aktørId(), inputDto.pleietrengendeAktørId());
+        return brukerdialogTjeneste.harGyldigOmsorgsdagerVedtak(inputDto.pleietrengendeAktørId());
     }
 }
 

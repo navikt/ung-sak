@@ -18,12 +18,6 @@ import no.nav.k9.sak.typer.AktørId;
 public record HentSisteGyldigeVedtakForAktørInputDto(
     @NotNull
     @Valid
-    @JsonProperty("aktørId")
-    @AbacAttributt(value = "aktørId", masker = true)
-    AktørId aktørId,
-
-    @NotNull
-    @Valid
     @JsonProperty("pleietrengendeAktørId")
     @AbacAttributt(value = "pleietrengendeAktørId", masker = true)
     AktørId pleietrengendeAktørId
@@ -32,7 +26,6 @@ public record HentSisteGyldigeVedtakForAktørInputDto(
     @Override
     public AbacDataAttributter abacAttributter() {
         return AbacDataAttributter.opprett()
-            .leggTil(AppAbacAttributtType.AKTØR_ID, aktørId.getAktørId())
             .leggTil(AppAbacAttributtType.AKTØR_ID, pleietrengendeAktørId.getAktørId());
     }
 }
