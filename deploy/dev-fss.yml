@@ -299,6 +299,8 @@ spec:
       value: "true"
     - name: REAKTIVER_TILBAKEKREVING_VALG
       value: "true"
+    - name: MANUELT_VURDER_UTVIDET_RETT
+      value: "true"
     - name: SEND_INNTEKTSMELDING_FORESPORSEL
       value: "true"
     - name: BRUKERDIALOG_REST_TJENESTE_ENABLED
