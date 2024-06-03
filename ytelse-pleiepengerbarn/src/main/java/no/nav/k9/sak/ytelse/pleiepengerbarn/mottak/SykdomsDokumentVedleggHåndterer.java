@@ -56,7 +56,7 @@ public class SykdomsDokumentVedleggHåndterer {
                                            PersonRepository personRepository,
                                            SafTjeneste safTjeneste,
                                            @Any Instance<MapTilBrevkode> brevkodeMappere,
-                                           @KonfigVerdi(value = "ENABLE_UKLASSIFISERT_SYKDOMSDOK_SJEKK", defaultVerdi = "true") boolean enableUklassifisertDokSjekk) {
+                                           @KonfigVerdi(value = "ENABLE_UKLASSIFISERT_SYKDOMSDOK_SJEKK", defaultVerdi = "false") boolean enableUklassifisertDokSjekk) {
         this.safTjeneste = safTjeneste;
         this.pleietrengendeSykdomDokumentRepository = pleietrengendeSykdomDokumentRepository;
         this.personRepository = personRepository;
@@ -69,7 +69,7 @@ public class SykdomsDokumentVedleggHåndterer {
         Journalpost journalpost = hentJournalpost(journalpostId);
         final LocalDateTime mottattDato = utledMottattDato(journalpost);
 
-        log.info("Fant {} vedlegg på søknad eller ettersendelse", journalpost.getDokumenter().size());
+        log.info("Fant {} vedlegg på søknad eller ettersendelse med journalpostid={}", journalpost.getDokumenter().size(), journalpostId);
 
         var brevkodeSøknad = MapTilBrevkode.finnBrevkodeMapper(brevkodeMappere, behandling.getFagsakYtelseType()).getBrevkode();
 

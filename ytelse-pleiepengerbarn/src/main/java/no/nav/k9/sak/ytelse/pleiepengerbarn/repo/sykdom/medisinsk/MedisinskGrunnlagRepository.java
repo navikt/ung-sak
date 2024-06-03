@@ -55,7 +55,7 @@ public class MedisinskGrunnlagRepository {
         SykdomVurderingRepository sykdomVurderingRepository,
         PersonRepository personRepository,
         PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository,
-        @KonfigVerdi(value = "ENABLE_UKLASSIFISERT_SYKDOMSDOK_SJEKK", defaultVerdi = "true") boolean enableUklassifisertDokSjekk) {
+        @KonfigVerdi(value = "ENABLE_UKLASSIFISERT_SYKDOMSDOK_SJEKK", defaultVerdi = "false") boolean enableUklassifisertDokSjekk) {
         this.entityManager = Objects.requireNonNull(entityManager, "entityManager");
         this.sykdomVurderingRepository = Objects.requireNonNull(sykdomVurderingRepository, "sykdomVurderingRepository");
         this.personRepository = Objects.requireNonNull(personRepository, "personRepository");
