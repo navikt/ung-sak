@@ -279,6 +279,8 @@ spec:
       value: "false"
     - name: REAKTIVER_TILBAKEKREVING_VALG
       value: "false"
+    - name: MANUELT_VURDER_UTVIDET_RETT
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
