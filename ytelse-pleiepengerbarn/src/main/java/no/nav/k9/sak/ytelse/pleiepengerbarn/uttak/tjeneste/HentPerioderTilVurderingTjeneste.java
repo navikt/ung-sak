@@ -71,7 +71,8 @@ public class HentPerioderTilVurderingTjeneste {
     private TreeSet<DatoIntervallEntitet> finnForengelserUtenEndretSamletVilkårsresultat(BehandlingReferanse referanse, ForlengelseTjeneste forlengelseTjeneste, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
         var samletResultat = samletVilkårsresultat(referanse.getBehandlingId());
         var originalSamletResultat = referanse.getOriginalBehandlingId().map(this::samletVilkårsresultat).orElse(LocalDateTimeline.empty());
-        var endretVilkårsresultatTidslinje = samletResultat.crossJoin(originalSamletResultat, erEndretVilkårsresultat()).filterValue(it -> it);
+        var vurderteVilkårResultat = samletResultat.filterValue(it -> !it.getSamletUtfall().equals(Utfall.IKKE_VURDERT));
+        var endretVilkårsresultatTidslinje = vurderteVilkårResultat.intersection(originalSamletResultat, erEndretVilkårsresultat()).filterValue(it -> it);
         return forlengelseTjeneste.utledPerioderSomSkalBehandlesSomForlengelse(referanse, perioderTilVurdering, VilkårType.OPPTJENINGSVILKÅRET)
             .stream().filter(p -> endretVilkårsresultatTidslinje.intersection(p.toLocalDateInterval()).isEmpty())
             .collect(Collectors.toCollection(TreeSet::new));
@@ -96,9 +97,8 @@ public class HentPerioderTilVurderingTjeneste {
 
 
     private static LocalDateSegmentCombinator<VilkårUtfallSamlet, VilkårUtfallSamlet, Boolean> erEndretVilkårsresultat() {
-        return (di, lhs, rhs) -> new LocalDateSegment<>(di, (lhs == null || rhs == null) ||
-            !lhs.getValue().getSamletUtfall().equals(Utfall.OPPFYLT) ||
-            !lhs.getValue().getSamletUtfall().equals(rhs.getValue().getSamletUtfall()));
+        return (di, nyttResultat, originaltResultat) -> new LocalDateSegment<>(di,
+            nyttResultat.getValue().getSamletUtfall().equals(Utfall.IKKE_OPPFYLT) || !nyttResultat.getValue().getSamletUtfall().equals(originaltResultat.getValue().getSamletUtfall()));
     }
 
     private static NavigableSet<DatoIntervallEntitet> begrensVedForlengelse(BehandlingReferanse referanse, DatoIntervallEntitet vilkårsperiode, NavigableSet<DatoIntervallEntitet> forlengelserIOpptjening, EndretUtbetalingPeriodeutleder endretUtbetalingPeriodeutleder) {

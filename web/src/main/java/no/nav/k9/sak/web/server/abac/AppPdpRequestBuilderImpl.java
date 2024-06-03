@@ -48,7 +48,9 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
     private static final List<String> INTERNAL_CLUSTER_NAMESPACE = List.of(
         CLUSTER.clusterName() + ":k9saksbehandling",
         CLUSTER.DEV_GCP.clusterName() + ":omsorgspenger",
-        CLUSTER.PROD_GCP.clusterName() + ":omsorgspenger"
+        CLUSTER.PROD_GCP.clusterName() + ":omsorgspenger",
+        CLUSTER.DEV_GCP.clusterName() + ":dusseldorf",
+        CLUSTER.PROD_GCP.clusterName() + ":dusseldorf"
     );
     private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess"); //$NON-NLS-1$
     private PipRepository pipRepository;

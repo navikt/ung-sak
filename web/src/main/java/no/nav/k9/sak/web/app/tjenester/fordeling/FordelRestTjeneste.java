@@ -115,7 +115,6 @@ public class FordelRestTjeneste {
     private AktørTjeneste aktørTjeneste;
     private PsbPbSakRepository psbPbSakRepository;
     private ObjectWriter objectWriter = new JacksonJsonConfig().getObjectMapper().writerFor(Innsending.class);
-    private boolean enableReservertSaksnummer;
     private boolean validerJournalført;
 
     public FordelRestTjeneste() {// For Rest-CDI
@@ -131,7 +130,6 @@ public class FordelRestTjeneste {
                               PsbInfotrygdRepository psbInfotrygdRepository,
                               AktørTjeneste aktørTjeneste,
                               PsbPbSakRepository psbPbSakRepository,
-                              @KonfigVerdi(value = "ENABLE_RESERVERT_SAKSNUMMER", defaultVerdi = "false") boolean enableReservertSaksnummer,
                               @KonfigVerdi(value = "DOKUMENTMOTTAK_VALIDER_JOURNALFORT", defaultVerdi = "false") boolean validerJournalført) {
         this.dokumentmottakTjeneste = dokumentmottakTjeneste;
         this.safAdapter = safAdapter;
@@ -142,7 +140,6 @@ public class FordelRestTjeneste {
         this.psbInfotrygdRepository = psbInfotrygdRepository;
         this.aktørTjeneste = aktørTjeneste;
         this.psbPbSakRepository = psbPbSakRepository;
-        this.enableReservertSaksnummer = enableReservertSaksnummer;
         this.validerJournalført = validerJournalført;
     }
 
@@ -235,7 +232,7 @@ public class FordelRestTjeneste {
         }
 
         Saksnummer saksnummer = null;
-        if (enableReservertSaksnummer && opprettSakDto.getSaksnummer() != null) {
+        if (opprettSakDto.getSaksnummer() != null) {
             saksnummer = new Saksnummer(opprettSakDto.getSaksnummer());
         }
 
@@ -275,7 +272,7 @@ public class FordelRestTjeneste {
         }
 
         Saksnummer saksnummer = null;
-        if (enableReservertSaksnummer && opprettSakDto.getSaksnummer() != null) {
+        if (opprettSakDto.getSaksnummer() != null) {
             saksnummer = new Saksnummer(opprettSakDto.getSaksnummer());
         }
 
