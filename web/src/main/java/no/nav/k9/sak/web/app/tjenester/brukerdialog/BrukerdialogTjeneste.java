@@ -9,6 +9,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.web.app.tjenester.brukerdialog.policy.PolicyEvaluation;
 import no.nav.k9.sikkerhet.oidc.token.context.ContextAwareTokenProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,11 +17,13 @@ import org.slf4j.LoggerFactory;
 import java.util.Comparator;
 import java.util.Optional;
 
+import static no.nav.k9.sak.web.app.tjenester.brukerdialog.policy.PolicyUtils.evaluate;
+
 @Dependent
-public class BrukerdialogTjeneste {
+public class BrukerdialogTjeneste implements BrukerdialogFasade {
     private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess");
 
-    private static final Logger logger = LoggerFactory.getLogger(BrukerdialogRestTjeneste.class);
+    private static final Logger logger = LoggerFactory.getLogger(BrukerdialogTjeneste.class);
 
     private final FagsakRepository fagsakRepository;
 
@@ -45,12 +48,13 @@ public class BrukerdialogTjeneste {
 
     }
 
+    @Override
     public HarGyldigOmsorgsdagerVedtakDto harGyldigOmsorgsdagerVedtak(AktørId pleietrengendeAktørId) {
         //FIXME spør via k9-aarskvantum når tjenesten der er klar, for å få med Infotrygd-vedtak
         //FIXME håndter hvis bruker har fått avslag etter innvilgelse
         //FIXME ta med alle typer omsorgsdagervedtak eller rename metode
         var brukerident = tokenProvider.getUserId();
-        var brukerAktørId = pdlKlient.hentAktørIdForPersonIdent(brukerident).orElseThrow(()-> new IllegalStateException("Fant ikke aktørId for bruker"));
+        var brukerAktørId = pdlKlient.hentAktørIdForPersonIdent(brukerident).orElseThrow(() -> new IllegalStateException("Fant ikke aktørId for bruker"));
 
         Optional<Behandling> sistBehandlingMedInnvilgetVedtak =
             fagsakRepository.finnFagsakRelatertTil(
@@ -70,14 +74,31 @@ public class BrukerdialogTjeneste {
         if (sistBehandlingMedInnvilgetVedtak.isPresent()) {
             Behandling behandling = sistBehandlingMedInnvilgetVedtak.get();
 
-            return new HarGyldigOmsorgsdagerVedtakDto(
-                true,
-                behandling.getFagsak().getSaksnummer(),
-                behandling.getAvsluttetDato().toLocalDate()
+            return evaluate(
+                behandling.getFagsak(),
+                BrukerdialogPolicies.erPartISaken(brukerAktørId, "BrukerAktørId")
+                    .and(BrukerdialogPolicies.erPartISaken(pleietrengendeAktørId.getAktørId(), "PleietrengendeAktørId")),
+                (PolicyEvaluation evaluation) -> switch (evaluation.getDecision()) {
+                    case PERMIT -> new HarGyldigOmsorgsdagerVedtakDto(
+                        true,
+                        behandling.getFagsak().getSaksnummer(),
+                        behandling.getAvsluttetDato().toLocalDate(),
+                        evaluation
+                    );
+                    default -> new HarGyldigOmsorgsdagerVedtakDto(
+                        false,
+                        null,
+                        null,
+                        evaluation
+                    );
+                }
             );
         } else {
             return new HarGyldigOmsorgsdagerVedtakDto(
-                false, null, null
+                false,
+                null,
+                null,
+                PolicyEvaluation.notApplicable("Fant ingen behandlinger med innvilget vedtak")
             );
         }
     }

@@ -1,7 +1,9 @@
 package no.nav.k9.sak.behandlingslager.fagsak;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import org.hibernate.annotations.Type;
 
@@ -167,6 +169,10 @@ public class Fagsak extends BaseEntitet {
 
     public AktørId getRelatertPersonAktørId() {
         return relatertPersonAktørId;
+    }
+
+    public Stream<AktørId> parterISaken() {
+        return Stream.of(brukerAktørId, pleietrengendeAktørId, relatertPersonAktørId);
     }
 
     public boolean erÅpen() {
