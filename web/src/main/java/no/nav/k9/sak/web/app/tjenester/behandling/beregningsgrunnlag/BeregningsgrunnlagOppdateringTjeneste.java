@@ -12,7 +12,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.OppdaterBeregningsgrunnlagResultat;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 

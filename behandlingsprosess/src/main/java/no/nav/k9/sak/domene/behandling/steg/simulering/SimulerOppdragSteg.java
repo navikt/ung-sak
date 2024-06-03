@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.exception.IntegrasjonException;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
@@ -49,6 +50,7 @@ public class SimulerOppdragSteg implements BehandlingSteg {
     private SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste;
     private TilbakekrevingRepository tilbakekrevingRepository;
     private K9TilbakeRestKlient k9TilbakeRestKlient;
+    private boolean skalReaktivereSvar;
 
     SimulerOppdragSteg() {
         // for CDI proxy
@@ -59,12 +61,14 @@ public class SimulerOppdragSteg implements BehandlingSteg {
                               BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
                               SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste,
                               TilbakekrevingRepository tilbakekrevingRepository,
-                              K9TilbakeRestKlient k9TilbakeRestKlient) {
+                              K9TilbakeRestKlient k9TilbakeRestKlient,
+                              @KonfigVerdi(value = "REAKTIVER_TILBAKEKREVING_VALG", defaultVerdi = "false") boolean skalReaktivereValg) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
         this.simuleringIntegrasjonTjeneste = simuleringIntegrasjonTjeneste;
         this.tilbakekrevingRepository = tilbakekrevingRepository;
         this.k9TilbakeRestKlient = k9TilbakeRestKlient;
+        this.skalReaktivereSvar = skalReaktivereValg;
     }
 
     @Override
@@ -118,6 +122,9 @@ public class SimulerOppdragSteg implements BehandlingSteg {
             tilbakekrevingRepository.lagre(behandling, resultatDto.isSlåttAvInntrekk());
 
             if (resultatDto.harFeilutbetaling()) {
+                if (skalReaktivereSvar) {
+                    tilbakekrevingRepository.reaktiverForrigeTilbakekrevingValg(behandling);
+                }
                 return BehandleStegResultat.utførtMedAksjonspunkter(singletonList(AksjonspunktDefinisjon.VURDER_FEILUTBETALING));
             }
             if (resultatDto.harInntrekkmulighet()) {

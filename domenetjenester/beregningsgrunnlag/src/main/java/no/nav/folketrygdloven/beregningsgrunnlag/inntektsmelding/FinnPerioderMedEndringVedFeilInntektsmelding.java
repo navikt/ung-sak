@@ -1,4 +1,4 @@
-package no.nav.k9.sak.domene.behandling.steg.kompletthet.forvaltning;
+package no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -24,11 +24,10 @@ import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.ErEndringIRefusjonskravVurderer;
-import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.InntektsmeldingerEndringsvurderer;
-import no.nav.k9.sak.domene.behandling.steg.kompletthet.KompletthetForBeregningTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.kompletthet.InntektsmeldingerEndringsvurderer;
+import no.nav.k9.sak.kompletthet.KompletthetForBeregningTjeneste;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
@@ -77,11 +76,7 @@ public class FinnPerioderMedEndringVedFeilInntektsmelding {
             return Optional.empty();
         }
 
-        var inntektsmeldingerPrReferanse = finnInntektsmeldingerForBeregningPrEksternReferanse(behandlingReferanse, vilkårsperioder, bgPerioderGrunnlag, alleInntektsmeldinger);
-        if (inntektsmeldingerPrReferanse.keySet().isEmpty()) {
-            log.warn("Fant ingen bg-referanser for sak " + behandlingReferanse.getSaksnummer().getVerdi() + " og behandling " + behandlingReferanse.getBehandlingId());
-            return Optional.empty();
-        }
+        var inntektsmeldingerPrReferanse = finnInntektsmeldingerForBeregningPrEksternReferanse(behandlingReferanse, vilkårsperioder, bgPerioderGrunnlag, alleInntektsmeldinger, fraDato);
         var journalpostIderResponses = finnJournalposterSomFaktiskErBruktIBeregning(behandlingReferanse, inntektsmeldingerPrReferanse);
 
         var relevanteEndringer = finnRelevanteEndringer(
@@ -102,7 +97,12 @@ public class FinnPerioderMedEndringVedFeilInntektsmelding {
 
     }
 
-    private RelevanteEndringer finnRelevanteEndringer(BehandlingReferanse behandlingReferanse, List<JournalpostIderResponse> journalpostIderResponses, Map<UUID, List<Inntektsmelding>> inntektsmeldingerPrReferanse, Set<Inntektsmelding> alleInntektsmeldinger, Optional<BeregningsgrunnlagPerioderGrunnlag> bgPerioderGrunnlag, List<DatoIntervallEntitet> vilkårsperioder) {
+    private RelevanteEndringer finnRelevanteEndringer(BehandlingReferanse behandlingReferanse,
+                                                      List<JournalpostIderResponse> journalpostIderResponses,
+                                                      Map<UUID, List<Inntektsmelding>> inntektsmeldingerPrReferanse,
+                                                      Set<Inntektsmelding> alleInntektsmeldinger,
+                                                      Optional<BeregningsgrunnlagPerioderGrunnlag> bgPerioderGrunnlag,
+                                                      List<DatoIntervallEntitet> vilkårsperioder) {
         List<DatoIntervallEntitet> vilkårsperioderForRevurdering = new ArrayList<>();
         List<DatoIntervallEntitet> kunEndringIRefusjonListe = new ArrayList<>();
 
@@ -144,9 +144,10 @@ public class FinnPerioderMedEndringVedFeilInntektsmelding {
         return kalkulusRestKlient.hentInntektsmeldingJournalpostIder(new HentJournalpostIderRequest(inntektsmeldingerPrReferanse.keySet().stream().toList(), new Saksnummer(behandlingReferanse.getSaksnummer().getVerdi())));
     }
 
-    private Map<UUID, List<Inntektsmelding>> finnInntektsmeldingerForBeregningPrEksternReferanse(BehandlingReferanse behandlingReferanse, List<DatoIntervallEntitet> vilkårsperioder, Optional<BeregningsgrunnlagPerioderGrunnlag> bgPerioderGrunnlag, Set<Inntektsmelding> alleInntektsmeldinger) {
+    private Map<UUID, List<Inntektsmelding>> finnInntektsmeldingerForBeregningPrEksternReferanse(BehandlingReferanse behandlingReferanse, List<DatoIntervallEntitet> vilkårsperioder, Optional<BeregningsgrunnlagPerioderGrunnlag> bgPerioderGrunnlag, Set<Inntektsmelding> alleInntektsmeldinger, LocalDate fraDato) {
         return vilkårsperioder.stream()
             .filter(p -> bgPerioderGrunnlag.flatMap(gr -> gr.finnGrunnlagFor(p.getFomDato())).isPresent())
+            .filter(p -> kompletthetForBeregningTjeneste.utledInntektsmeldingerSomSendesInnTilBeregningForPeriode(behandlingReferanse, alleInntektsmeldinger, p).stream().anyMatch(im -> !im.getMottattDato().isBefore(fraDato)))
             .collect(Collectors.toMap(
                 p -> bgPerioderGrunnlag.flatMap(gr -> gr.finnGrunnlagFor(p.getFomDato())).map(BeregningsgrunnlagPeriode::getEksternReferanse).orElseThrow(),
                 p -> kompletthetForBeregningTjeneste.utledInntektsmeldingerSomSendesInnTilBeregningForPeriode(behandlingReferanse, alleInntektsmeldinger, p)

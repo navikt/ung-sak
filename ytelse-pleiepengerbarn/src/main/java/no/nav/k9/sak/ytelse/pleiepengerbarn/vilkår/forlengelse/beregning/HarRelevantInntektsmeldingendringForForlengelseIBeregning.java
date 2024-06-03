@@ -12,7 +12,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingskontroll.VilkårTypeRef;
-import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.InntektsmeldingerEndringsvurderer;
+import no.nav.k9.sak.kompletthet.InntektsmeldingerEndringsvurderer;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.NaturalYtelse;
 

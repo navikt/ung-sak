@@ -26,7 +26,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKa
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
-import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.PreconditionBeregningAksjonspunktUtleder;
 import no.nav.k9.sak.domene.iay.modell.AktørYtelse;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
