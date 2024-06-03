@@ -5,7 +5,6 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -36,7 +35,6 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.UtledeteVilkår;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 import no.nav.k9.sak.trigger.ProsessTriggere;
 import no.nav.k9.sak.trigger.ProsessTriggereRepository;
 import no.nav.k9.sak.ytelse.omsorgspenger.inntektsmelding.KravDokumentFravær;
@@ -51,7 +49,6 @@ import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjene
 public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
 
     private final PåTversAvHelgErKantIKantVurderer erKantIKantVurderer = new PåTversAvHelgErKantIKantVurderer();
-    private Map<VilkårType, VilkårsPeriodiseringsFunksjon> vilkårsPeriodisering = new EnumMap<>(VilkårType.class);
     private VilkårUtleder vilkårUtleder;
     private SøktePerioder søktePerioder;
     private NulledePerioder nulledePerioder;
@@ -110,7 +107,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     @Override
     public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        var perioder = utledPeriode(behandlingId, vilkårType);
+        var perioder = utledPeriode(behandlingId);
         var perioderSomSkalTilbakestilles = Collections.unmodifiableNavigableSet(nulledePerioder.utledPeriode(behandlingId)
             .stream()
             .map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFomDato(), it.getTomDato()))
@@ -187,7 +184,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         final var vilkårPeriodeSet = new EnumMap<VilkårType, NavigableSet<DatoIntervallEntitet>>(VilkårType.class);
         UtledeteVilkår utledeteVilkår = vilkårUtleder.utledVilkår(BehandlingReferanse.fra(behandling));
         utledeteVilkår.getAlleAvklarte()
-            .forEach(vilkår -> vilkårPeriodeSet.put(vilkår, utledPeriode(behandlingId, vilkår)));
+            .forEach(vilkår -> vilkårPeriodeSet.put(vilkår, utledPeriode(behandlingId)));
 
         return vilkårPeriodeSet;
     }
@@ -197,8 +194,8 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         return 0;
     }
 
-    private NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId, VilkårType vilkårType) {
-        return vilkårsPeriodisering.getOrDefault(vilkårType, søktePerioder).utledPeriode(behandlingId);
+    private NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
+        return søktePerioder.utledPeriode(behandlingId);
     }
 
     @Override
@@ -209,13 +206,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     @Override
     public Set<VilkårType> definerendeVilkår() {
         if (enableFjernPerioderBeregning) {
-            Set<VilkårType> vilkårIRekkefølge = new LinkedHashSet<>();
-            vilkårIRekkefølge.add(VilkårType.SØKNADSFRIST);
-            vilkårIRekkefølge.add(VilkårType.OMSORGEN_FOR);
-            vilkårIRekkefølge.add(VilkårType.ALDERSVILKÅR);
-            vilkårIRekkefølge.add(VilkårType.K9_VILKÅRET);
-            vilkårIRekkefølge.add(VilkårType.MEDLEMSKAPSVILKÅRET);
-            return vilkårIRekkefølge;
+            return Set.of(VilkårType.SØKNADSFRIST);
         }
         return Set.of(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
     }

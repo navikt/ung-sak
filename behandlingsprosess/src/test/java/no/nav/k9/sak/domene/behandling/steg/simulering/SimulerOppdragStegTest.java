@@ -18,7 +18,9 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
+import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.InntrekkBeslutning;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelse;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseBehandlingInfoV1;
@@ -49,14 +51,14 @@ public class SimulerOppdragStegTest {
     @Inject
     private EntityManager entityManager;
 
-    private BehandlingRepositoryProvider repositoryProvider ;
-    private TilbakekrevingRepository tilbakekrevingRepository ;
-    private BehandlingRepository behandlingRepository ;
-    private K9OppdragRestKlient k9OppdragRestKlientMock ;
-    private K9TilbakeRestKlient k9TilbakeRestKlientMock ;
-    private TilkjentYtelseTjeneste tilkjentYtelseTjenesteMock ;
+    private BehandlingRepositoryProvider repositoryProvider;
+    private TilbakekrevingRepository tilbakekrevingRepository;
+    private BehandlingRepository behandlingRepository;
+    private K9OppdragRestKlient k9OppdragRestKlientMock;
+    private K9TilbakeRestKlient k9TilbakeRestKlientMock;
+    private TilkjentYtelseTjeneste tilkjentYtelseTjenesteMock;
     private SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste;
-    private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste ;
+    private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
 
     private SimulerOppdragSteg steg;
     private Behandling behandling;
@@ -106,7 +108,7 @@ public class SimulerOppdragStegTest {
     @Test
     public void skal_kalle_kanseller_oppdrag_ved_tilbakehopp() {
         // Arrange
-        steg = new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, k9TilbakeRestKlientMock);
+        steg = new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, k9TilbakeRestKlientMock, true);
 
         // Act
         steg.vedHoppOverBakover(kontekst, null, null, null);
@@ -118,7 +120,7 @@ public class SimulerOppdragStegTest {
     @Test
     public void skal__ikke_kalle_kanseller_oppdrag_ved_tilbakehopp_tilSimulerOppdragSteget() {
         // Arrange
-        steg = new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, k9TilbakeRestKlientMock);
+        steg = new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, k9TilbakeRestKlientMock, true);
 
         // Act
         steg.vedHoppOverBakover(kontekst, null, BehandlingStegType.SIMULER_OPPDRAG, null);
@@ -145,7 +147,32 @@ public class SimulerOppdragStegTest {
         assertThat(tilbakekrevingValg.get().getVidereBehandling()).isEqualTo(TilbakekrevingVidereBehandling.TILBAKEKR_OPPDATER);
     }
 
+    @Test
+    public void skal_reaktivere_inaktiv_svar_ved_aksjonspunkt() {
+        when(k9TilbakeRestKlientMock.harÅpenTilbakekrevingsbehandling(any(Saksnummer.class))).thenReturn(false);
+        var varseltekst = "Her er en fin varseltekst";
+        tilbakekrevingRepository.lagre(behandling, TilbakekrevingValg.utenMulighetForInntrekk(TilbakekrevingVidereBehandling.OPPRETT_TILBAKEKREVING, varseltekst));
+        tilbakekrevingRepository.deaktiverEksisterendeTilbakekrevingValg(behandling);
+        when(k9OppdragRestKlientMock.hentSimuleringResultat(any())).thenReturn(Optional.of(new SimuleringResultatDto(1000L, 0L, false)));
+
+        steg = opprettSteg();
+
+        // Act
+        BehandleStegResultat resultat = steg.utførSteg(kontekst);
+        (new Repository(entityManager)).flushAndClear();
+
+        assertThat(resultat.getAksjonspunktListe().size()).isEqualTo(1);
+        assertThat(resultat.getAksjonspunktListe().getFirst()).isEqualTo(AksjonspunktDefinisjon.VURDER_FEILUTBETALING);
+
+        Optional<TilbakekrevingValg> tilbakekrevingValg = tilbakekrevingRepository.hent(behandling.getId());
+        assertThat(tilbakekrevingValg).isPresent();
+        assertThat(tilbakekrevingValg.get().getVidereBehandling()).isEqualTo(TilbakekrevingVidereBehandling.OPPRETT_TILBAKEKREVING);
+        assertThat(tilbakekrevingValg.get().getVarseltekst()).isEqualTo(varseltekst);
+
+    }
+
+
     private SimulerOppdragSteg opprettSteg() {
-        return new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, k9TilbakeRestKlientMock);
+        return new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, k9TilbakeRestKlientMock, true);
     }
 }
