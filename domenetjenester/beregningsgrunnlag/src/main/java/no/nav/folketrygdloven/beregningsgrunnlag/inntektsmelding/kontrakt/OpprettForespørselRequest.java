@@ -27,7 +27,7 @@ public class OpprettForespørselRequest {
     @Pattern(regexp = "^\\d+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     @NotNull
-    private String orgnummer;
+    private ForespørselOrganisasjonsnummerDto orgnummer;
 
     @JsonProperty(value = "skjæringstidspunkt", required = true)
     @Valid
@@ -50,7 +50,7 @@ public class OpprettForespørselRequest {
     }
 
     public OpprettForespørselRequest(String aktørId,
-                                     String orgnummer,
+                                     ForespørselOrganisasjonsnummerDto orgnummer,
                                      LocalDate skjæringstidspunkt,
                                      InntektsmeldingYtelseType ytelsetype,
                                      String saksnummer) {
@@ -65,7 +65,7 @@ public class OpprettForespørselRequest {
         return aktørId;
     }
 
-    public String getOrgnummer() {
+    public ForespørselOrganisasjonsnummerDto getOrgnummer() {
         return orgnummer;
     }
 

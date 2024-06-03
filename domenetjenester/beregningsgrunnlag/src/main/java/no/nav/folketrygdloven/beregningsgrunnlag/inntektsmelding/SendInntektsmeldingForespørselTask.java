@@ -6,6 +6,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.kontrakt.InntektsmeldingYtelseType;
 import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.kontrakt.OpprettForespørselRequest;
+import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.kontrakt.ForespørselOrganisasjonsnummerDto;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
@@ -39,7 +40,7 @@ public class SendInntektsmeldingForespørselTask implements ProsessTaskHandler {
         var fagsak = fagsakRepository.finnEksaktFagsak(prosessTaskData.getFagsakId());
         inntektsmeldingRestKlient.opprettForespørsel(new OpprettForespørselRequest(
             fagsak.getBrukerAktørId().getAktørId(),
-            prosessTaskData.getPropertyValue(ORG_NR),
+            new ForespørselOrganisasjonsnummerDto(prosessTaskData.getPropertyValue(ORG_NR)),
             LocalDate.parse(prosessTaskData.getPropertyValue(SKJÆRINGSTIDSPUNKT)),
             finnYtelseType(fagsak),
             fagsak.getSaksnummer().getVerdi()
