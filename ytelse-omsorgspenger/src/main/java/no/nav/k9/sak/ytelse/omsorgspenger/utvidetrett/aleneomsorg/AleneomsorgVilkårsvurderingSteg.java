@@ -12,6 +12,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
@@ -53,6 +54,7 @@ public class AleneomsorgVilkårsvurderingSteg implements BehandlingSteg {
     private VilkårTjeneste vilkårTjeneste;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private AleneomsorgTjeneste aleneomsorgTjeneste;
+    private boolean manueltVurderUtvidetRett;
 
     public AleneomsorgVilkårsvurderingSteg() {
         // CDO
@@ -64,13 +66,16 @@ public class AleneomsorgVilkårsvurderingSteg implements BehandlingSteg {
                                            VilkårTjeneste vilkårTjeneste,
                                            VilkårResultatRepository vilkårResultatRepository,
                                            @FagsakYtelseTypeRef(OMSORGSPENGER_AO) VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
-                                           AleneomsorgTjeneste aleneomsorgTjeneste) {
+                                           AleneomsorgTjeneste aleneomsorgTjeneste,
+                                           @KonfigVerdi(value = "MANUELT_VURDER_UTVIDET_RETT", defaultVerdi = "false") boolean manueltVurderUtvidetRett
+    ) {
         this.behandlingRepository = behandlingRepository;
         this.søknadRepository = søknadRepository;
         this.vilkårTjeneste = vilkårTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.perioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.aleneomsorgTjeneste = aleneomsorgTjeneste;
+        this.manueltVurderUtvidetRett = manueltVurderUtvidetRett;
     }
 
     @Override
@@ -97,7 +102,7 @@ public class AleneomsorgVilkårsvurderingSteg implements BehandlingSteg {
 
         Optional<Aksjonspunkt> omsorgenForAksjonspunkt = behandling.getAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.VURDER_OMSORGEN_FOR);
         boolean omsorgenForManueltAvklart = omsorgenForAksjonspunkt.isPresent() && omsorgenForAksjonspunkt.get().getStatus() == AksjonspunktStatus.UTFØRT;
-        if (behandling.erManueltOpprettet() || omsorgenForManueltAvklart) {
+        if (behandling.erManueltOpprettet() || (omsorgenForManueltAvklart && manueltVurderUtvidetRett)) {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(aksjonspunktDef));
         }
 
