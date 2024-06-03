@@ -43,7 +43,7 @@ public class OpprettForespørselRequest {
     @Valid
     @NotNull
     @Pattern(regexp = "^[a-zA-Z0-9]*$")
-    private String saksnummer;
+    private ForespørselSaksnummerDto saksnummer;
 
 
     public OpprettForespørselRequest() {
@@ -53,7 +53,7 @@ public class OpprettForespørselRequest {
                                      ForespørselOrganisasjonsnummerDto orgnummer,
                                      LocalDate skjæringstidspunkt,
                                      InntektsmeldingYtelseType ytelsetype,
-                                     String saksnummer) {
+                                     ForespørselSaksnummerDto saksnummer) {
         this.aktørId = aktørId;
         this.orgnummer = orgnummer;
         this.skjæringstidspunkt = skjæringstidspunkt;
@@ -77,7 +77,7 @@ public class OpprettForespørselRequest {
         return ytelsetype;
     }
 
-    public String getSaksnummer() {
+    public ForespørselSaksnummerDto getSaksnummer() {
         return saksnummer;
     }
 

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.kontrakt.ForespørselSaksnummerDto;
 import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.kontrakt.InntektsmeldingYtelseType;
 import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.kontrakt.OpprettForespørselRequest;
 import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.kontrakt.ForespørselOrganisasjonsnummerDto;
@@ -43,7 +44,7 @@ public class SendInntektsmeldingForespørselTask implements ProsessTaskHandler {
             new ForespørselOrganisasjonsnummerDto(prosessTaskData.getPropertyValue(ORG_NR)),
             LocalDate.parse(prosessTaskData.getPropertyValue(SKJÆRINGSTIDSPUNKT)),
             finnYtelseType(fagsak),
-            fagsak.getSaksnummer().getVerdi()
+            new ForespørselSaksnummerDto(fagsak.getSaksnummer().getVerdi())
 
         ));
 
