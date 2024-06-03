@@ -29,6 +29,6 @@ public record ForespørselOrganisasjonsnummerDto(@JsonValue @NotNull @Pattern(re
 
     @Override
     public String toString() {
-        return "Organisasjonsnummer[" + "orgnr=" + orgnr.substring(0, Math.min(orgnr.length(), 3)) + "...]";
+        return "ForespørselOrganisasjonsnummerDto[" + "orgnr=" + orgnr.substring(0, Math.min(orgnr.length(), 3)) + "...]"; // Skjuler fullt orgnr (sensitiv informasjon i kontekst av ytelse)
     }
 }

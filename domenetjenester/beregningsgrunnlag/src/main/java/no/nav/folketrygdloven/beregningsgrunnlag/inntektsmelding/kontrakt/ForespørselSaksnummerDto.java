@@ -44,6 +44,6 @@ public final class ForespørselSaksnummerDto {
 
     @Override
     public String toString() {
-        return "FagsakSaksnummer[" + "saksnr=" + saksnr + ']';
+        return "ForespørselSaksnummerDto[" + "saksnr=" + saksnr + ']';
     }
 }
