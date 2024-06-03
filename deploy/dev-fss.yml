@@ -301,6 +301,8 @@ spec:
       value: "true"
     - name: SEND_INNTEKTSMELDING_FORESPORSEL
       value: "true"
+    - name: BRUKERDIALOG_REST_TJENESTE_ENABLED
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
