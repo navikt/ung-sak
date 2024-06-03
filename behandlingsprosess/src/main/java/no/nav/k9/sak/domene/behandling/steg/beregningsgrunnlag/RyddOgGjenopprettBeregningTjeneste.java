@@ -154,7 +154,7 @@ public class RyddOgGjenopprettBeregningTjeneste {
      */
     private Set<DatoIntervallEntitet> finnPerioderSomSkalInitieres(BehandlingReferanse behandlingReferanse, Vilkårene vilkårene) {
         var vilkårsPerioderTilVurderingTjeneste = getPerioderTilVurderingTjeneste(behandlingReferanse);
-        var perioderTilVurderingIBeregning = new HashSet<>(vilkårsPerioderTilVurderingTjeneste
+        var intiellePerioder = new HashSet<>(vilkårsPerioderTilVurderingTjeneste
             .utledRådataTilUtledningAvVilkårsperioder(behandlingReferanse.getBehandlingId())
             .get(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
 
@@ -164,7 +164,7 @@ public class RyddOgGjenopprettBeregningTjeneste {
             .map(VilkårPeriode::getPeriode)
             .collect(Collectors.toSet());
 
-        return perioderTilVurderingIBeregning.stream()
+        return intiellePerioder.stream()
             .filter(periode -> vilkårsPerioderIBeregning.stream().noneMatch(periode::equals))
             .collect(Collectors.toSet());
     }
