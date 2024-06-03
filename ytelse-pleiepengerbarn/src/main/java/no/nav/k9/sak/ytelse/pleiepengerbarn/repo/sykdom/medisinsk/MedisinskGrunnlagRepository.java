@@ -43,7 +43,6 @@ public class MedisinskGrunnlagRepository {
     private SykdomVurderingRepository sykdomVurderingRepository;
     private PersonRepository personRepository;
     private PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
-    private boolean enableUklassifisertDokSjekk;
 
     MedisinskGrunnlagRepository() {
         // CDI
@@ -60,7 +59,6 @@ public class MedisinskGrunnlagRepository {
         this.sykdomVurderingRepository = Objects.requireNonNull(sykdomVurderingRepository, "sykdomVurderingRepository");
         this.personRepository = Objects.requireNonNull(personRepository, "personRepository");
         this.pleietrengendeSykdomDokumentRepository = Objects.requireNonNull(pleietrengendeSykdomDokumentRepository, "sykdomDokumentRepository");
-        this.enableUklassifisertDokSjekk = enableUklassifisertDokSjekk;
     }
 
     public List<Saksnummer> hentAlleSaksnummer(AktørId pleietrengende) {

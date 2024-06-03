@@ -18,6 +18,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -57,6 +58,7 @@ class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
     private SamtidigUttakTjeneste samtidigUttakTjeneste;
     private PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
+    private boolean enableUklassifisertDokSjekk;
 
     StartpunktUtlederPleiepenger() {
         // For CDI
@@ -70,7 +72,8 @@ class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
                                  EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
                                  SamtidigUttakTjeneste samtidigUttakTjeneste,
                                  PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository,
-                                 @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
+                                 @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
+                                 @KonfigVerdi(value = "ENABLE_UKLASSIFISERT_SYKDOMSDOK_SJEKK", defaultVerdi = "false") boolean enableUklassifisertDokSjekk) {
         this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
         this.medisinskGrunnlagTjeneste = medisinskGrunnlagTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -79,6 +82,7 @@ class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
         this.samtidigUttakTjeneste = samtidigUttakTjeneste;
         this.pleietrengendeSykdomDokumentRepository = pleietrengendeSykdomDokumentRepository;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
+        this.enableUklassifisertDokSjekk = enableUklassifisertDokSjekk;
     }
 
     @Override
@@ -136,7 +140,7 @@ class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
         var pleietrengendeSykdomDokuments = pleietrengendeSykdomDokumentRepository.hentAlleDokumenterForBehandling(ref.getBehandlingId());
 
         var uklassifiserteDokumenter = pleietrengendeSykdomDokuments.stream().filter(it -> it.getType() == SykdomDokumentType.UKLASSIFISERT).toList();
-        if (!uklassifiserteDokumenter.isEmpty()) {
+        if (enableUklassifisertDokSjekk && !uklassifiserteDokumenter.isEmpty()) {
             return StartpunktType.INNGANGSVILKÅR_MEDISINSK;
         }
 
