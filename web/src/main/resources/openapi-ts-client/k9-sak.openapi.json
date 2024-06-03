@@ -4136,14 +4136,11 @@
       },
       "HentSisteGyldigeVedtakForAktørInputDto" : {
         "properties" : {
-          "aktørId" : {
-            "type" : "string"
-          },
           "pleietrengendeAktørId" : {
             "type" : "string"
           }
         },
-        "required" : [ "aktørId", "pleietrengendeAktørId" ],
+        "required" : [ "pleietrengendeAktørId" ],
         "type" : "object"
       },
       "HentSøknadPerioderDto" : {
