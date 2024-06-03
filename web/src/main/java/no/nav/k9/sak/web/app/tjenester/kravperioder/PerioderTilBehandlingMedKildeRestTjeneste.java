@@ -70,6 +70,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     private UttakTjeneste uttakTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     private SøknadsfristTjenesteProvider søknadsfristTjenesteProvider;
+    private boolean enableFjernPerioderOmp;
     private UtledStatusPåPerioderTjeneste statusPåPerioderTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
 
@@ -84,12 +85,14 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
                                                      VilkårResultatRepository vilkårResultatRepository,
                                                      SøknadsfristTjenesteProvider søknadsfristTjenesteProvider,
                                                      UtledPerioderMedRegisterendring utledPerioderMedRegisterendring,
-                                                     @KonfigVerdi(value = "filtrer.tilstotende.periode", defaultVerdi = "false") Boolean filtrereUtTilstøtendePeriode) {
+                                                     @KonfigVerdi(value = "filtrer.tilstotende.periode", defaultVerdi = "false") Boolean filtrereUtTilstøtendePeriode,
+                                                     @KonfigVerdi(value = "FJERN_VILKARSPERIODER_BEREGNING", defaultVerdi = "false") boolean enableFjernPerioderOmp) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingModellRepository = behandlingModellRepository;
         this.uttakTjeneste = uttakTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.søknadsfristTjenesteProvider = søknadsfristTjenesteProvider;
+        this.enableFjernPerioderOmp = enableFjernPerioderOmp;
         this.statusPåPerioderTjeneste = new UtledStatusPåPerioderTjeneste(filtrereUtTilstøtendePeriode, utledPerioderMedRegisterendring);
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
     }
@@ -143,6 +146,13 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
 
     private LocalDateTimeline<Utfall> utledTidslinjeTilVurdering(Behandling behandling, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
         var definerendeVilkår = perioderTilVurderingTjeneste.definerendeVilkår();
+        if (enableFjernPerioderOmp){
+            return new LocalDateTimeline<>(definerendeVilkår.stream()
+                .map(it -> perioderTilVurderingTjeneste.utled(behandling.getId(), it))
+                .flatMap(Collection::stream)
+                .map(it -> new LocalDateSegment<>(it.toLocalDateInterval(), Utfall.IKKE_VURDERT))
+                .collect(Collectors.toSet()), StandardCombinators::coalesceLeftHandSide);
+        }
 
         return new LocalDateTimeline<>(definerendeVilkår.stream()
             .map(it -> perioderTilVurderingTjeneste.utled(behandling.getId(), it))
