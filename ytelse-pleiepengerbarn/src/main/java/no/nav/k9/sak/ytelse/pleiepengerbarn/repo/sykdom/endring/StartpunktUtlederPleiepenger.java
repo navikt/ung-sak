@@ -29,12 +29,14 @@ import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
+import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagsdata;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
 
@@ -53,6 +55,7 @@ class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
     private ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste;
     private EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste;
     private SamtidigUttakTjeneste samtidigUttakTjeneste;
+    private PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
 
     StartpunktUtlederPleiepenger() {
@@ -66,6 +69,7 @@ class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
                                  ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste,
                                  EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
                                  SamtidigUttakTjeneste samtidigUttakTjeneste,
+                                 PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository,
                                  @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
         this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
         this.medisinskGrunnlagTjeneste = medisinskGrunnlagTjeneste;
@@ -73,6 +77,7 @@ class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
         this.erEndringPåEtablertTilsynTjeneste = erEndringPåEtablertTilsynTjeneste;
         this.endringUnntakEtablertTilsynTjeneste = endringUnntakEtablertTilsynTjeneste;
         this.samtidigUttakTjeneste = samtidigUttakTjeneste;
+        this.pleietrengendeSykdomDokumentRepository = pleietrengendeSykdomDokumentRepository;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
     }
 
@@ -128,6 +133,13 @@ class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
 
 
     private StartpunktType utledStartpunktForSykdom(BehandlingReferanse ref) {
+        var pleietrengendeSykdomDokuments = pleietrengendeSykdomDokumentRepository.hentAlleDokumenterForBehandling(ref.getBehandlingId());
+
+        var uklassifiserteDokumenter = pleietrengendeSykdomDokuments.stream().filter(it -> it.getType() == SykdomDokumentType.UKLASSIFISERT).toList();
+        if (!uklassifiserteDokumenter.isEmpty()) {
+            return StartpunktType.INNGANGSVILKÅR_MEDISINSK;
+        }
+
         var sykdomGrunnlag = medisinskGrunnlagRepository.hentGrunnlagForBehandling(ref.getBehandlingUuid())
             .map(MedisinskGrunnlag::getGrunnlagsdata);
 

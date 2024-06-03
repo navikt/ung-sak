@@ -94,7 +94,7 @@ public class MedisinskGrunnlagTjeneste {
 
     public SykdomGrunnlagSammenlikningsresultat sammenlignGrunnlag(Optional<MedisinskGrunnlagsdata> forrigeGrunnlagBehandling, MedisinskGrunnlagsdata utledetGrunnlag) {
         boolean harEndretDiagnosekoder = sammenlignDiagnosekoder(forrigeGrunnlagBehandling, utledetGrunnlag);
-        boolean harNyeUkvalifiserteDokumenter = sammenlignSykdomsdokumenter(forrigeGrunnlagBehandling, utledetGrunnlag);
+        boolean harNyeUkvalifiserteDokumenter = false;
         final LocalDateTimeline<Boolean> endringerISøktePerioder = sammenlignTidfestedeGrunnlagsdata(forrigeGrunnlagBehandling, utledetGrunnlag);
         return new SykdomGrunnlagSammenlikningsresultat(endringerISøktePerioder, harEndretDiagnosekoder, harNyeUkvalifiserteDokumenter);
     }
