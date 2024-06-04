@@ -11,16 +11,23 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jakarta.inject.Inject;
-
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.dokument.Brevkode;
+import no.nav.k9.kodeverk.dokument.DokumentStatus;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
+import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 
@@ -29,6 +36,12 @@ import no.nav.k9.sak.typer.JournalpostId;
 class PleietrengendePleietrengendeSykdomDokumentRepositoryTest {
     @Inject
     private PleietrengendeSykdomDokumentRepository repo;
+
+    @Inject
+    private MottatteDokumentRepository mottatteDokumentRepository;
+
+    @Inject
+    private EntityManager entityManager;
 
 
     @Test
@@ -296,6 +309,37 @@ class PleietrengendePleietrengendeSykdomDokumentRepositoryTest {
 
         PleietrengendeSykdomInnleggelser finalInnleggelser = innleggelser;
         Assertions.assertThrows(IllegalStateException.class, () -> repo.opprettEllerOppdaterInnleggelser(finalInnleggelser, pleietrengende));
+    }
+
+    @Test
+    void hentPleietrengendeDokumentPåBehandling() {
+        final String endretAv = "saksbehandler";
+        final LocalDateTime nå = LocalDateTime.now();
+        final JournalpostId journalpostId = new JournalpostId("journalpostId");
+
+        Behandling behandling = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.PLEIEPENGER_SYKT_BARN).lagre(entityManager);
+        mottatteDokumentRepository.lagre(byggMottattDokument(behandling, journalpostId), DokumentStatus.MOTTATT);
+
+        AktørId pleietrengendeAktørId = new AktørId("lala");
+        PleietrengendeSykdomDokumentInformasjon informasjon = new PleietrengendeSykdomDokumentInformasjon(SykdomDokumentType.UKLASSIFISERT, false, nå.toLocalDate(), nå, 0L, endretAv, nå);
+        PleietrengendeSykdomDokument dokument = new PleietrengendeSykdomDokument(journalpostId, null, informasjon, null, null, null, endretAv, nå);
+        repo.lagre(dokument, pleietrengendeAktørId);
+
+        final List<PleietrengendeSykdomDokument> dokumenter = repo.hentAlleDokumenterForBehandling(behandling.getId());
+        assertThat(dokumenter.size()).isEqualTo(1);
+
+    }
+
+
+    private static MottattDokument byggMottattDokument(Behandling behandling, JournalpostId journalPostId) {
+        MottattDokument.Builder builder = new MottattDokument.Builder();
+        builder.medMottattDato(LocalDate.now());
+        builder.medType(Brevkode.PLEIEPENGER_BARN_SOKNAD);
+        builder.medPayload("payload");
+        builder.medFagsakId(behandling.getFagsakId());
+        builder.medJournalPostId(journalPostId);
+        builder.medBehandlingId(behandling.getId());
+        return builder.build();
     }
 
     private PleietrengendeSykdomDiagnoser lagDiagnosekoder(String opprettetAv, LocalDateTime nå) {
