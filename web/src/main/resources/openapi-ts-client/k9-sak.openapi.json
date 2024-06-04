@@ -4002,18 +4002,6 @@
         "type" : "object"
       },
       "HarGyldigOmsorgsdagerVedtakDto" : {
-        "properties" : {
-          "harInnvilgedeBehandlinger" : {
-            "type" : "boolean"
-          },
-          "saksnummer" : {
-            "type" : "string"
-          },
-          "vedtaksdato" : {
-            "format" : "date",
-            "type" : "string"
-          }
-        },
         "type" : "object"
       },
       "Hendelse" : {
