@@ -1,33 +1,27 @@
 package no.nav.k9.sak.web.app.tjenester.brukerdialog;
 
-import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.web.app.tjenester.brukerdialog.policy.Policy;
-import no.nav.k9.sak.web.app.tjenester.brukerdialog.policy.PolicyDecision;
 import no.nav.k9.sak.web.app.tjenester.brukerdialog.policy.PolicyEvaluation;
-
-import java.util.List;
-
-import static no.nav.k9.sak.web.app.tjenester.brukerdialog.policy.PolicyDecision.PERMIT;
 
 public class BrukerdialogPolicies {
 
-    static Policy<Fagsak> erPartISaken(String aktørId, String aktør) {
-        return new Policy<Fagsak>(
+    private BrukerdialogPolicies() {
+    }
+
+    static Policy<BehandlingContext> erPartISaken(String aktørId, String aktør) {
+        return new Policy<>(
             "sif.brukerdialog.1",
             aktør + " må være part i saken",
-            (Fagsak fagsak) -> {
-                List<AktørId> list =
-                    fagsak.parterISaken().toList();
+            (BehandlingContext context) -> {
 
-                boolean erPartISaken = fagsak.parterISaken()
+                boolean erPartISaken = context.behandling().getFagsak().parterISaken()
                     .filter(java.util.Objects::nonNull)
                     .anyMatch(a -> a.getAktørId().equals(aktørId));
 
                 if (!erPartISaken) {
-                    return new PolicyEvaluation(PolicyDecision.DENY, aktør + " er ikke part i behandlingen");
+                    return PolicyEvaluation.deny(aktør + " er ikke part i saken");
                 }
-                return new PolicyEvaluation(PERMIT, "Permit");
+                return PolicyEvaluation.permit("Permit");
             });
     }
 }

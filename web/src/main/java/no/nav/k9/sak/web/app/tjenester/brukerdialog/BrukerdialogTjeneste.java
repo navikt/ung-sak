@@ -3,7 +3,6 @@ package no.nav.k9.sak.web.app.tjenester.brukerdialog;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.pdl.Pdl;
-import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -11,18 +10,18 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.web.app.tjenester.brukerdialog.policy.PolicyEvaluation;
 import no.nav.k9.sikkerhet.oidc.token.context.ContextAwareTokenProvider;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Comparator;
 import java.util.Optional;
+import java.util.function.Function;
 
 import static no.nav.k9.sak.web.app.tjenester.brukerdialog.policy.PolicyUtils.evaluate;
 
 @Dependent
 public class BrukerdialogTjeneste implements BrukerdialogFasade {
-    private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess");
-
     private static final Logger logger = LoggerFactory.getLogger(BrukerdialogTjeneste.class);
 
     private final FagsakRepository fagsakRepository;
@@ -54,8 +53,10 @@ public class BrukerdialogTjeneste implements BrukerdialogFasade {
         //FIXME håndter hvis bruker har fått avslag etter innvilgelse
         //FIXME ta med alle typer omsorgsdagervedtak eller rename metode
         var brukerident = tokenProvider.getUserId();
+        logger.info("Henter aktørId for brukerident.");
         var brukerAktørId = pdlKlient.hentAktørIdForPersonIdent(brukerident).orElseThrow(() -> new IllegalStateException("Fant ikke aktørId for bruker"));
 
+        logger.info("Henter siste behandling med innvilget vedtak.");
         Optional<Behandling> sistBehandlingMedInnvilgetVedtak =
             fagsakRepository.finnFagsakRelatertTil(
                     FagsakYtelseType.OMSORGSPENGER_KS,
@@ -73,27 +74,20 @@ public class BrukerdialogTjeneste implements BrukerdialogFasade {
 
         if (sistBehandlingMedInnvilgetVedtak.isPresent()) {
             Behandling behandling = sistBehandlingMedInnvilgetVedtak.get();
+            logger.info("Fant siste behandling med innvilget vedtak.");
+
+            logger.info("Sjekker om bruker og pleietrengende er parter i saken.");
+
+            BehandlingContext behandlingContext = new BehandlingContext(behandling);
 
             return evaluate(
-                behandling.getFagsak(),
+                behandlingContext,
                 BrukerdialogPolicies.erPartISaken(brukerAktørId, "BrukerAktørId")
                     .and(BrukerdialogPolicies.erPartISaken(pleietrengendeAktørId.getAktørId(), "PleietrengendeAktørId")),
-                (PolicyEvaluation evaluation) -> switch (evaluation.getDecision()) {
-                    case PERMIT -> new HarGyldigOmsorgsdagerVedtakDto(
-                        true,
-                        behandling.getFagsak().getSaksnummer(),
-                        behandling.getAvsluttetDato().toLocalDate(),
-                        evaluation
-                    );
-                    default -> new HarGyldigOmsorgsdagerVedtakDto(
-                        false,
-                        null,
-                        null,
-                        evaluation
-                    );
-                }
+                evaluerOgReturner(behandlingContext)
             );
         } else {
+            logger.info("Fant ingen behandlinger med innvilget vedtak.");
             return new HarGyldigOmsorgsdagerVedtakDto(
                 false,
                 null,
@@ -101,5 +95,31 @@ public class BrukerdialogTjeneste implements BrukerdialogFasade {
                 PolicyEvaluation.notApplicable("Fant ingen behandlinger med innvilget vedtak")
             );
         }
+    }
+
+
+    @NotNull
+    private static Function<PolicyEvaluation, HarGyldigOmsorgsdagerVedtakDto> evaluerOgReturner(BehandlingContext context) {
+        return (PolicyEvaluation evaluation) -> switch (evaluation.getDecision()) {
+            case PERMIT -> {
+                logger.info("Partene er parter i saken. Returnerer gyldig vedtak.");
+                yield new HarGyldigOmsorgsdagerVedtakDto(
+                    true,
+                    context.behandling().getFagsak().getSaksnummer(),
+                    context.behandling().getAvsluttetDato().toLocalDate(),
+                    evaluation
+                );
+            }
+
+            case DENY, NOT_APPLICABLE -> {
+                logger.info("Partene er ikke parter i saken. Returnerer ingen vedtak.");
+                yield new HarGyldigOmsorgsdagerVedtakDto(
+                    false,
+                    null,
+                    null,
+                    evaluation
+                );
+            }
+        };
     }
 }

@@ -10,27 +10,24 @@ public class PolicyEvaluation {
     private final String description;
     private final String id;
     private final Operator operator;
-    private final List<PolicyEvaluation> children;
+    private final List<PolicyEvaluation> policies;
 
-    // Constructors, getters, and setters
-
-    public PolicyEvaluation(PolicyDecision decision, String reason, String description, String id, Operator operator, List<PolicyEvaluation> children) {
+    public PolicyEvaluation(PolicyDecision decision, String reason, String description, String id, Operator operator, List<PolicyEvaluation> policies) {
         this.decision = decision;
         this.reason = reason;
         this.description = description;
         this.id = id;
         this.operator = operator;
-        this.children = children != null ? children : new ArrayList<>();
+        this.policies = policies != null ? policies : new ArrayList<>();
     }
 
     public PolicyEvaluation(PolicyDecision decision, String reason) {
         this(decision, reason, "", "", Operator.NONE, Collections.emptyList());
     }
 
-    // and, or, not methods
     public PolicyEvaluation and(PolicyEvaluation other) {
-        List<PolicyEvaluation> newChildren = new ArrayList<>(this.specOrChildren());
-        newChildren.addAll(other.specOrChildren());
+        List<PolicyEvaluation> newChildren = new ArrayList<>(this.specOrPolicies());
+        newChildren.addAll(other.specOrPolicies());
         return new PolicyEvaluation(
             this.decision.and(other.decision),
             "(" + this.reason + " AND " + other.reason + ")",
@@ -42,8 +39,8 @@ public class PolicyEvaluation {
     }
 
     public PolicyEvaluation or(PolicyEvaluation other) {
-        List<PolicyEvaluation> newChildren = new ArrayList<>(this.specOrChildren());
-        newChildren.addAll(other.specOrChildren());
+        List<PolicyEvaluation> newChildren = new ArrayList<>(this.specOrPolicies());
+        newChildren.addAll(other.specOrPolicies());
         return new PolicyEvaluation(
             this.decision.or(other.decision),
             "(" + this.reason + " OR " + other.reason + ")",
@@ -81,17 +78,8 @@ public class PolicyEvaluation {
         return id;
     }
 
-    public Operator getOperator() {
-        return operator;
-    }
-
-    public List<PolicyEvaluation> getChildren() {
-        return children;
-    }
-
-    // Utility methods
-    private List<PolicyEvaluation> specOrChildren() {
-        return this.id.isEmpty() && !this.children.isEmpty() ? this.children : Collections.singletonList(this);
+    private List<PolicyEvaluation> specOrPolicies() {
+        return this.id.isEmpty() && !this.policies.isEmpty() ? this.policies : Collections.singletonList(this);
     }
 
     public static PolicyEvaluation permit(String reason) {
@@ -107,7 +95,7 @@ public class PolicyEvaluation {
     }
 
     public static PolicyEvaluation evaluate(String id, String description, PolicyEvaluation eval) {
-        return new PolicyEvaluation(eval.decision, eval.reason, description, id, eval.operator, eval.children);
+        return new PolicyEvaluation(eval.decision, eval.reason, description, id, eval.operator, eval.policies);
     }
 
     public boolean isPermit() {
