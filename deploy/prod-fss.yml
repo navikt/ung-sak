@@ -283,6 +283,8 @@ spec:
       value: "false"
     - name: REAKTIVER_TILBAKEKREVING_VALG
       value: "false"
+    - name: MANUELT_VURDER_UTVIDET_RETT
+      value: "false"
     - name: SEND_INNTEKTSMELDING_FORESPORSEL
       value: "false"
     - name: ENABLE_UKLASSIFISERT_SYKDOMSDOK_SJEKK
