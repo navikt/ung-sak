@@ -98,7 +98,6 @@ jobs:
       contents: read
       packages: write
     steps:
-     - uses: actions/checkout@v4
      - uses: actions/download-artifact@v4
        with:
          name: k9-sak-typescript-client-src
@@ -109,6 +108,22 @@ jobs:
          localPath: /tmp/k9-sak-typescript-client
          npmPackageName: k9-sak-typescript-client
          githubToken: ${{ secrets.GITHUB_TOKEN }}
+     - name: Sjekk ut k9-sak-web
+       if: steps.compare-with-published.outputs.hasChanged == 'true'
+       uses: actions/checkout@v4
+       with:
+         repository: navikt/k9-sak-web
+       # Klargjer for kompilering
+     - uses: ./.github/actions/setup-install
+       if: steps.compare-with-published.outputs.hasChanged == 'true'
+       with:
+         npmAuthToken: ${{ secrets.READER_TOKEN }}
+       # Link inn ny klient pakke
+     - run: yarn link /tmp/k9-sak-typescript-client
+       if: steps.compare-with-published.outputs.hasChanged == 'true'
+       # Køyr ts-check
+     - run: yarn ts-check
+       if: steps.compare-with-published.outputs.hasChanged == 'true'
      - uses: navikt/openapi-ts-clientmaker/extra/actions/publish-typescript-client@main
        if: steps.compare-with-published.outputs.hasChanged == 'true'
        with:
