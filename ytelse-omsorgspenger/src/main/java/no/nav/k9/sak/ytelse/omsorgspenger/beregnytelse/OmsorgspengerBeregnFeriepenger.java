@@ -31,6 +31,9 @@ public class OmsorgspengerBeregnFeriepenger implements BeregnFeriepengerTjeneste
     private static final boolean UBEGRENSET_DAGER_VED_REFUSJON = true;
     private FeriepengeBeregner feriepengeBeregner;
 
+    public OmsorgspengerBeregnFeriepenger() {
+    }
+
     @Inject
     public OmsorgspengerBeregnFeriepenger(FeriepengeBeregner feriepengeBeregner) {
         this.feriepengeBeregner = feriepengeBeregner;
