@@ -171,7 +171,7 @@ class DokumentmottakerSøknadOLP implements Dokumentmottaker {
 
     private void håndterVedlegg(Behandling behandling, JournalpostId journalpostId, LocalDateTime mottattidspunkt,
                                 boolean journalpostHarInformasjonSomIkkeKanPunsjes, boolean journalpostHarMedisinskeOpplysninger) {
-        sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(behandling, journalpostId,
+        sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSkjema(behandling, journalpostId,
             behandling.getFagsak().getPleietrengendeAktørId(),
             mottattidspunkt, journalpostHarInformasjonSomIkkeKanPunsjes, journalpostHarMedisinskeOpplysninger);
         opplæringDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(behandling, journalpostId, mottattidspunkt);
