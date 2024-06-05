@@ -3,6 +3,8 @@ package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.aleneomsorg;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_AO;
 
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjuster;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
@@ -11,6 +13,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Stream;
 
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,8 +119,8 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
 
         SøknadEntitet søknad = søknadRepository.hentSøknad(behandlingId);
         LocalDate søknadsdato = søknad.getSøknadsdato();
-        LocalDate tremånedersregelDato = søknadsdato.withDayOfMonth(1).minusMonths(3);
-        LocalDateTimeline<?> justert = søknadstidslinje.intersection(new LocalDateTimeline<>(tremånedersregelDato, LocalDate.MAX, null));
+        LocalDate startAvÅretForTremånederSidenDato = søknadsdato.withDayOfMonth(1).minusMonths(3).with(TemporalAdjusters.firstDayOfYear());
+        LocalDateTimeline<?> justert = søknadstidslinje.intersection(new LocalDateTimeline<>(startAvÅretForTremånederSidenDato, LocalDate.MAX, null));
         return TidslinjeUtil.tilDatoIntervallEntiteter(justert);
     }
 
