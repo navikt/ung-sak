@@ -5,10 +5,10 @@ import no.nav.k9.sak.web.app.tjenester.brukerdialog.policy.PolicyEvaluation;
 
 import java.util.Objects;
 
-public class BrukerdialogDto {
+public class BrukerdialogPolicyEvaluation {
     @JsonIgnore private final PolicyEvaluation evaluation;
 
-    public BrukerdialogDto(PolicyEvaluation policyEvaluation) {
+    public BrukerdialogPolicyEvaluation(PolicyEvaluation policyEvaluation) {
         Objects.requireNonNull(policyEvaluation, "policyEvaluation");
         this.evaluation = policyEvaluation;
     }
