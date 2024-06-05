@@ -1,27 +1,5 @@
 package no.nav.k9.sak.metrikker;
 
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
-import org.hibernate.QueryTimeoutException;
-import org.hibernate.query.NativeQuery;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -34,6 +12,19 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import org.hibernate.QueryTimeoutException;
+import org.hibernate.query.NativeQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * For innhenting av metrikker relatert til kvartalsmål for OKR
@@ -87,7 +78,7 @@ public class RevurderingMetrikkRepository {
                 log.warn("Uthenting av antallAksjonspunktFordelingForRevurderingUtenNyttStpSisteSyvDager feiler", e);
             }
             try {
-                metrikker.addAll(timeCall(() -> antallRevurderingMedAksjonspunktOgAarsakOgMotattDokumentSisteSyvDager(dag), "antallRevurderingMedAksjonspunktOgAarsakOgMotattDokumentSisteSyvDager"));
+                metrikker.addAll(timeCall(() -> antallAksjonspunktPrRevurderingMedEndringsopphavSisteSyvDager(dag), "antallRevurderingMedAksjonspunktOgAarsakOgMotattDokumentSisteSyvDager"));
             } catch (QueryTimeoutException e) {
                 log.warn("Uthenting av antallRevurderingMedAksjonspunktOgAarsakOgMotattDokumentSisteSyvDager feiler", e);
             }
@@ -336,40 +327,62 @@ public class RevurderingMetrikkRepository {
 
     }
 
-
-    Collection<SensuEvent> antallRevurderingMedAksjonspunktOgAarsakOgMotattDokumentSisteSyvDager(LocalDate dato) {
+    Collection<SensuEvent> antallAksjonspunktPrRevurderingMedEndringsopphavSisteSyvDager(LocalDate dato) {
         String sql = "select " +
-            "f.ytelse_type, " +
-            "f.saksnummer, " +
-            "b.id as behandling_id, " +
-            "aarsak.behandling_arsak_type, " +
-            "a.aksjonspunkt_def,  " +
-            "md.type as dokumentType, " +
-            "md.kildesystem as dokumentKilde, " +
-            "(select count(a.aksjonspunkt_def) " +
-            "   from aksjonspunkt a " +
-            "   where a.behandling_id = b.id " +
-            "       and a.aksjonspunkt_status != 'AVBR' " +
+            "ytelse_type, " +
+            "behandling_id," +
+            "behandling_teller," +
+            "antall_aksjonspunkt_per_behandling," +
+            "har_endring_fra_bruker," +
+            "har_endring_fra_inntektsmelding," +
+            "har_endring_fra_annen_sak," +
+            "har_endring_fra_endringsdialog," +
+            "behandling_teller / sum(behandling_teller) over (partition by ytelse_type) as behandlinger_prosentandel" +
+            "from (" +
+            "   select " +
+            "       f.ytelse_type," +
+            "       b.id as behandling_id," +
+            "       count(distinct b.id) as behandling_teller," +
+            "       (select count(a.aksjonspunkt_def)" +
+            "           from aksjonspunkt a" +
+            "           where a.behandling_id = b.id" +
+            "               and a.aksjonspunkt_status != 'AVBR'" +
+            "               and (a.vent_aarsak is null or a.vent_aarsak = '-')" +
+            "        ) as antall_aksjonspunkt_per_behandling," +
+            "       exists(select aarsak.behandling_arsak_type from behandling_arsak aarsak" +
+            "           where aarsak.behandling_id = b.id" +
+            "               and aarsak.behandling_arsak_type = 'RE-END-FRA-BRUKER'" +
+            "       ) as har_endring_fra_bruker," +
+            "       exists(select aarsak.behandling_arsak_type from behandling_arsak aarsak" +
+            "           where aarsak.behandling_id = b.id" +
+            "               and aarsak.behandling_arsak_type = 'RE-END-INNTEKTSMELD'" +
+            "       ) as har_endring_fra_inntektsmelding," +
+            "       exists(select aarsak.behandling_arsak_type from behandling_arsak aarsak" +
+            "           where aarsak.behandling_id = b.id" +
+            "               and aarsak.behandling_arsak_type = 'RE_ANNEN_SAK'" +
+            "       ) as har_endring_fra_annen_sak," +
+            "       exists(select md.kildesystem from mottatt_dokument md" +
+            "           where md.behandling_id = b.id" +
+            "               and md.kildesystem = 'endringsdialog'" +
+            "       ) as har_endring_fra_endringsdialog" +
+            "   from behandling b" +
+            "       inner join fagsak f on f.id = b.fagsak_id" +
+            "       full outer join aksjonspunkt a on a.behandling_id = b.id" +
+            "       inner join behandling_arsak aarsak on aarsak.behandling_id = b.id" +
+            "       inner join mottatt_dokument md on md.behandling_id = b.id" +
+            "   where (a.aksjonspunkt_status is null or a.aksjonspunkt_status != 'AVBR')" +
             "       and (a.vent_aarsak is null or a.vent_aarsak = '-')" +
-            "   ) as antall_aksjonspunkt_per_behandling, " +
-            "(select count(md.id) " +
-            "   from mottatt_dokument md " +
-            "   where md.behandling_id = b.id) as antall_dokumenter_per_behandling " +
-            "from behandling b " +
-            "   inner join fagsak f on f.id = b.fagsak_id " +
-            "   full outer join aksjonspunkt a on a.behandling_id = b.id " +
-            "   inner join behandling_arsak aarsak on aarsak.behandling_id = b.id " +
-            "   inner join mottatt_dokument md on md.behandling_id = b.id " +
-            "   where (a.aksjonspunkt_status is null or a.aksjonspunkt_status != 'AVBR') " +
-            "       and (a.vent_aarsak is null or a.vent_aarsak = '-') " +
-            "       and b.avsluttet_dato is not null " +
+            "       and b.avsluttet_dato is not null" +
             "       and b.avsluttet_dato >= :startTid " +
             "       and b.avsluttet_dato < :sluttTid " +
-            "       and (b.behandling_type = :revurdering) " +
-            "group by 1, 2, 3, 4, 5, 6, 7";
+            "       and b.behandling_type = :revurdering " +
+            "   group by f.ytelse_type, b.id, aarsak.behandling_arsak_type, a.aksjonspunkt_def, md.kildesystem) as statistikk_pr_behandling" +
+            "group by ytelse_type, behandling_id, behandling_teller, antall_aksjonspunkt_per_behandling, har_endring_fra_bruker, har_endring_fra_inntektsmelding, har_endring_fra_annen_sak, har_endring_fra_endringsdialog;";
 
-        String metricName = "revurdering_antall_behandlinger_pr_aksjonspunkt_og_aarsak_og_dokument_v2";
-        String metricField = "behandling_id";
+
+        String metricName = "revurdering_antall_aksjonspunkt_pr_behandling_og_endringsopphav_syv_dager";
+        String metricBehandlingTeller = "behandling_teller";
+        String metricBehandlingerProsentAndel = "behandlinger_prosentandel";
 
         NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
             .setParameter("revurdering", BehandlingType.REVURDERING.getKode())
@@ -380,19 +393,19 @@ public class RevurderingMetrikkRepository {
             .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class)));
 
         var values = stream.map(t -> SensuEvent.createSensuEvent(metricName,
+                // metric tags
                 toMap(
                     "ytelse_type", t.get(0, String.class),
-                    "aarsak", t.get(3, String.class),
-                    "aarsak_navn", coalesce(BehandlingÅrsakType.kodeMap().getOrDefault(t.get(3, String.class), BehandlingÅrsakType.UDEFINERT).getNavn(), "-"),
-                    "aksjonspunkt", t.get(4, String.class),
-                    "aksjonspunkt_navn", coalesce(AksjonspunktDefinisjon.kodeMap().getOrDefault(t.get(4, String.class), AksjonspunktDefinisjon.UNDEFINED).getNavn(), "-"),
-                    "dokument_type", t.get(5, String.class),
-                    "dokument_kilde", t.get(6, String.class),
-                    "antall_aksjonspunkt_per_behandling", t.get(7, Number.class).toString(),
-                    "antall_dokumenter_per_behandling", t.get(8, Number.class).toString()
+                    "antall_aksjonspunkt_per_behandling", t.get(3, Number.class).toString(),
+                    "har_endring_fra_bruker", t.get(4, Boolean.class).toString(),
+                    "har_endring_fra_inntektsmelding", t.get(5, Boolean.class).toString(),
+                    "har_endring_fra_annen_sak", t.get(6, Boolean.class).toString(),
+                    "har_endring_fra_endringsdialog", t.get(7, Boolean.class).toString()
                 ),
+                // metric fields
                 Map.of(
-                    metricField, t.get(2, Number.class)
+                    metricBehandlingTeller, t.get(2, Number.class),
+                    metricBehandlingerProsentAndel, t.get(8, Number.class)
                 )))
             .collect(Collectors.toList());
 
