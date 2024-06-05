@@ -297,8 +297,6 @@ spec:
       value: "true"
     - name: FERIEPENGER_AV_DAGPENGER
       value: "true"
-    - name: REAKTIVER_TILBAKEKREVING_VALG
-      value: "true"
     - name: MANUELT_VURDER_UTVIDET_RETT
       value: "true"
     - name: SEND_INNTEKTSMELDING_FORESPORSEL
