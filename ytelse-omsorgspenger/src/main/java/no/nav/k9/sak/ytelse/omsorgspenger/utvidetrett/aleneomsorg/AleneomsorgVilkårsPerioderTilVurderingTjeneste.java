@@ -1,19 +1,5 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.aleneomsorg;
 
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_AO;
-
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.NavigableSet;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Stream;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -36,6 +22,15 @@ import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.UtvidetRettSøknadPerioder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
+import java.util.*;
+import java.util.stream.Stream;
+
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_AO;
 
 @FagsakYtelseTypeRef(FagsakYtelseType.OMSORGSPENGER_AO)
 @BehandlingTypeRef
@@ -116,8 +111,8 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
 
         SøknadEntitet søknad = søknadRepository.hentSøknad(behandlingId);
         LocalDate søknadsdato = søknad.getSøknadsdato();
-        LocalDate tremånedersregelDato = søknadsdato.withDayOfMonth(1).minusMonths(3);
-        LocalDateTimeline<?> justert = søknadstidslinje.intersection(new LocalDateTimeline<>(tremånedersregelDato, LocalDate.MAX, null));
+        LocalDate startAvÅretForTremånederSidenDato = søknadsdato.withDayOfMonth(1).minusMonths(3).with(TemporalAdjusters.firstDayOfYear());
+        LocalDateTimeline<?> justert = søknadstidslinje.intersection(new LocalDateTimeline<>(startAvÅretForTremånederSidenDato, LocalDate.MAX, null));
         return TidslinjeUtil.tilDatoIntervallEntiteter(justert);
     }
 
