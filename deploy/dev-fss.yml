@@ -50,6 +50,8 @@ spec:
         kvPath: /serviceuser/data/dev/srvssolinux
       - mountPath: /var/run/secrets/nais.io/vault
         kvPath: /kv/preprod/fss/k9-sak/k9saksbehandling
+  tokenx:
+    enabled: true
   azure:
     application:
       enabled: true
@@ -295,9 +297,13 @@ spec:
       value: "true"
     - name: FERIEPENGER_AV_DAGPENGER
       value: "true"
-    - name: REAKTIVER_TILBAKEKREVING_VALG
+    - name: MANUELT_VURDER_UTVIDET_RETT
       value: "true"
     - name: SEND_INNTEKTSMELDING_FORESPORSEL
+      value: "true"
+    - name: ENABLE_UKLASSIFISERT_SYKDOMSDOK_SJEKK
+      value: "true"
+    - name: BRUKERDIALOG_REST_TJENESTE_ENABLED
       value: "true"
 
     # Konfigurasjoner

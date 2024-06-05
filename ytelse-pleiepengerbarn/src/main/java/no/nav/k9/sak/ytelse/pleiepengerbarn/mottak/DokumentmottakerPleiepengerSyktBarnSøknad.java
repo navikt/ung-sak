@@ -166,7 +166,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
             }
 
             try {
-                sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(
+                sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSkjema(
                     behandling,
                     new JournalpostId(journalpost.getJournalpostId()),
                     behandling.getFagsak().getPleietrengendeAktørId(),
@@ -185,7 +185,7 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
             .findFirst();
 
         if (journalpost.isEmpty()) {
-            sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(behandling,
+            sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSkjema(behandling,
                 journalpostId,
                 behandling.getFagsak().getPleietrengendeAktørId(),
                 søknad.getMottattDato().toLocalDateTime(),

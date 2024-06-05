@@ -4,6 +4,7 @@ import java.math.RoundingMode;
 import java.time.Year;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.evaluation.summary.EvaluationSerializer;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
@@ -23,6 +24,7 @@ public class FeriepengeBeregner {
     FeriepengeBeregner(){
     }
 
+    @Inject
     public FeriepengeBeregner(@KonfigVerdi(value = "FERIEPENGER_AV_DAGPENGER", defaultVerdi = "false") boolean skalKjøreDagpengeregel) {
         this.skalKjøreDagpengeregel = skalKjøreDagpengeregel;
     }

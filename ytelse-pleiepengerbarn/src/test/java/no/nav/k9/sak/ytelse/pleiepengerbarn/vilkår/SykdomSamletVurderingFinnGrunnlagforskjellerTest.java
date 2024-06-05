@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -272,11 +271,11 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
     private MedisinskGrunnlagsdata grunnlagMock(List<PleietrengendeSykdomVurderingVersjon> vurderinger, PleietrengendeSykdomInnleggelser innleggelser) {
         return new MedisinskGrunnlagsdata(
             null,
-            new ArrayList<>(), //søktePerioder
+            Collections.emptyList(), //søktePerioder
             vurderinger, //vurderinger
-            new ArrayList<>(), //godkjenteLegeerklæringer
+            Collections.emptyList(), //godkjenteLegeerklæringer
             false,
-            innleggelser,
+                innleggelser,
             null,
             "test",
             LocalDateTime.now());
