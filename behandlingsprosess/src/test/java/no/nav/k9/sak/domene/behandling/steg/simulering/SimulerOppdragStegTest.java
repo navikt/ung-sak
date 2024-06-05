@@ -108,7 +108,7 @@ public class SimulerOppdragStegTest {
     @Test
     public void skal_kalle_kanseller_oppdrag_ved_tilbakehopp() {
         // Arrange
-        steg = new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, k9TilbakeRestKlientMock, true);
+        steg = new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, k9TilbakeRestKlientMock);
 
         // Act
         steg.vedHoppOverBakover(kontekst, null, null, null);
@@ -120,7 +120,7 @@ public class SimulerOppdragStegTest {
     @Test
     public void skal__ikke_kalle_kanseller_oppdrag_ved_tilbakehopp_tilSimulerOppdragSteget() {
         // Arrange
-        steg = new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, k9TilbakeRestKlientMock, true);
+        steg = new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, k9TilbakeRestKlientMock);
 
         // Act
         steg.vedHoppOverBakover(kontekst, null, BehandlingStegType.SIMULER_OPPDRAG, null);
@@ -173,6 +173,6 @@ public class SimulerOppdragStegTest {
 
 
     private SimulerOppdragSteg opprettSteg() {
-        return new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, k9TilbakeRestKlientMock, true);
+        return new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, k9TilbakeRestKlientMock);
     }
 }

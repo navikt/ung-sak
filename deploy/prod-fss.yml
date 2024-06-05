@@ -281,8 +281,6 @@ spec:
       value: "false"
     - name: FERIEPENGER_AV_DAGPENGER
       value: "false"
-    - name: REAKTIVER_TILBAKEKREVING_VALG
-      value: "false"
     - name: MANUELT_VURDER_UTVIDET_RETT
       value: "false"
     - name: SEND_INNTEKTSMELDING_FORESPORSEL
