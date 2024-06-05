@@ -67,7 +67,7 @@ class BrukerdialogTjenesteTest {
         when(behandlingRepository.finnSisteInnvilgetBehandling(any())).thenReturn(Optional.of(behandling));
 
         var resultat = tjeneste.harGyldigOmsorgsdagerVedtak(pleietrengendeAktørId);
-        assertThat(resultat.getDecision()).isEqualTo(PolicyDecision.PERMIT);
+        assertThat(resultat.evaluation().getDecision()).isEqualTo(PolicyDecision.PERMIT);
         assertThat(resultat.harInnvilgedeBehandlinger()).isTrue();
     }
 
@@ -85,7 +85,7 @@ class BrukerdialogTjenesteTest {
         when(behandlingRepository.finnSisteInnvilgetBehandling(any())).thenReturn(Optional.empty());
 
         var resultat = tjeneste.harGyldigOmsorgsdagerVedtak(pleietrengendeAktørId);
-        assertThat(resultat.getDecision()).isEqualTo(PolicyDecision.NOT_APPLICABLE);
+        assertThat(resultat.evaluation().getDecision()).isEqualTo(PolicyDecision.NOT_APPLICABLE);
         assertThat(resultat.harInnvilgedeBehandlinger()).isFalse();
     }
 

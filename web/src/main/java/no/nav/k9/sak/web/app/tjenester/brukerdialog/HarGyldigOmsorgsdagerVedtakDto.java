@@ -7,7 +7,7 @@ import no.nav.k9.sak.web.app.tjenester.brukerdialog.policy.PolicyEvaluation;
 import java.time.LocalDate;
 import java.util.Objects;
 
-final class HarGyldigOmsorgsdagerVedtakDto extends PolicyEvaluation {
+final class HarGyldigOmsorgsdagerVedtakDto extends BrukerdialogDto {
     private final Boolean harInnvilgedeBehandlinger;
     private final @Valid Saksnummer saksnummer;
     private final LocalDate vedtaksdato;

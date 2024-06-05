@@ -1,60 +1,53 @@
 package no.nav.k9.sak.web.app.tjenester.brukerdialog.policy;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreType;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@JsonIgnoreType
 public class PolicyEvaluation {
     private final PolicyDecision decision;
     private final String reason;
     private final String description;
     private final String id;
     private final Operator operator;
-    private final List<PolicyEvaluation> policyChain;
+    private final List<PolicyEvaluation> policies;
 
-    public PolicyEvaluation(PolicyDecision decision, String reason, String description, String id, Operator operator, List<PolicyEvaluation> policyChain) {
+    public PolicyEvaluation(PolicyDecision decision, String reason, String description, String id, Operator operator, List<PolicyEvaluation> policies) {
         this.decision = decision;
         this.reason = reason;
         this.description = description;
         this.id = id;
         this.operator = operator;
-        this.policyChain = policyChain != null ? policyChain : new ArrayList<>();
+        this.policies = policies != null ? policies : new ArrayList<>();
     }
 
     public PolicyEvaluation(PolicyDecision decision, String reason) {
         this(decision, reason, "", "", Operator.NONE, Collections.emptyList());
     }
 
-    public PolicyEvaluation(PolicyEvaluation policyEvaluation) {
-        this(policyEvaluation.decision, policyEvaluation.reason, policyEvaluation.description, policyEvaluation.id, policyEvaluation.operator, policyEvaluation.policyChain);
-    }
-
     public PolicyEvaluation and(PolicyEvaluation other) {
-        List<PolicyEvaluation> policyChain = new ArrayList<>(this.specOrPolicyChain());
-        policyChain.addAll(other.specOrPolicyChain());
+        List<PolicyEvaluation> newChildren = new ArrayList<>(this.specOrPolicies());
+        newChildren.addAll(other.specOrPolicies());
         return new PolicyEvaluation(
             this.decision.and(other.decision),
             "(" + this.reason + " AND " + other.reason + ")",
             this.description,
             this.id,
             Operator.AND,
-            policyChain
+            newChildren
         );
     }
 
     public PolicyEvaluation or(PolicyEvaluation other) {
-        List<PolicyEvaluation> newPolicyChain = new ArrayList<>(this.specOrPolicyChain());
-        newPolicyChain.addAll(other.specOrPolicyChain());
+        List<PolicyEvaluation> newChildren = new ArrayList<>(this.specOrPolicies());
+        newChildren.addAll(other.specOrPolicies());
         return new PolicyEvaluation(
             this.decision.or(other.decision),
             "(" + this.reason + " OR " + other.reason + ")",
             this.description,
             this.id,
             Operator.OR,
-            newPolicyChain
+            newChildren
         );
     }
 
@@ -85,8 +78,8 @@ public class PolicyEvaluation {
         return id;
     }
 
-    private List<PolicyEvaluation> specOrPolicyChain() {
-        return this.id.isEmpty() && !this.policyChain.isEmpty() ? this.policyChain : Collections.singletonList(this);
+    private List<PolicyEvaluation> specOrPolicies() {
+        return this.id.isEmpty() && !this.policies.isEmpty() ? this.policies : Collections.singletonList(this);
     }
 
     public static PolicyEvaluation permit(String reason) {
@@ -102,7 +95,7 @@ public class PolicyEvaluation {
     }
 
     public static PolicyEvaluation evaluate(String id, String description, PolicyEvaluation eval) {
-        return new PolicyEvaluation(eval.decision, eval.reason, description, id, eval.operator, eval.policyChain);
+        return new PolicyEvaluation(eval.decision, eval.reason, description, id, eval.operator, eval.policies);
     }
 
     public boolean isPermit() {
