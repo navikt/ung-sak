@@ -81,11 +81,11 @@ public class FinnPerioderMedEndringVedFeilInntektsmelding {
         }
 
         var inntektsmeldingerPrReferanse = finnInntektsmeldingerForBeregningPrEksternReferanse(behandlingReferanse, vilkårsperioder, bgPerioderGrunnlag, alleInntektsmeldinger, fraDato);
-        var journalpostIderResponses = finnJournalposterSomFaktiskErBruktIBeregning(behandlingReferanse, inntektsmeldingerPrReferanse);
-
         if (inntektsmeldingerPrReferanse.keySet().isEmpty()) {
             return Optional.empty();
         }
+        var journalpostIderResponses = finnJournalposterSomFaktiskErBruktIBeregning(behandlingReferanse, inntektsmeldingerPrReferanse);
+
 
         var relevanteEndringer = finnRelevanteEndringer(
             behandlingReferanse,
