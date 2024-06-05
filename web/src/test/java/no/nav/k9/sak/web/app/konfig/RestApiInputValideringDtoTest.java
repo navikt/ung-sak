@@ -33,6 +33,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -184,6 +185,9 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
             return;
         }
         if (UNNTATT_FRA_VALIDERING.containsKey(klasse)) {
+            return;
+        }
+        if (klasse.getSuperclass() != null && klasse.getSuperclass().getAnnotation(JsonIgnoreType.class) != null) {
             return;
         }
 

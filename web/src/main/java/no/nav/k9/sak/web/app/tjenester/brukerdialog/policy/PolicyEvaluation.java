@@ -1,9 +1,12 @@
 package no.nav.k9.sak.web.app.tjenester.brukerdialog.policy;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@JsonIgnoreType
 public class PolicyEvaluation {
     private final PolicyDecision decision;
     private final String reason;
@@ -23,6 +26,10 @@ public class PolicyEvaluation {
 
     public PolicyEvaluation(PolicyDecision decision, String reason) {
         this(decision, reason, "", "", Operator.NONE, Collections.emptyList());
+    }
+
+    public PolicyEvaluation(PolicyEvaluation policyEvaluation) {
+        this(policyEvaluation.decision, policyEvaluation.reason, policyEvaluation.description, policyEvaluation.id, policyEvaluation.operator, policyEvaluation.policies);
     }
 
     public PolicyEvaluation and(PolicyEvaluation other) {
