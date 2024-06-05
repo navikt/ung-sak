@@ -76,8 +76,8 @@ public class FinnPerioderMedStartIKontrollerFakta {
         return skalForlengeAktivitetstatus.finnPerioderForForlengelseAvStatus(lagInput(ref, allePerioder));
     }
 
-    private SkalForlengeAktivitetstatus.SkalForlengeStatusInput lagInput(BehandlingReferanse ref, NavigableSet<PeriodeTilVurdering> perioderTilVurderingIBeregning) {
-        return new SkalForlengeAktivitetstatus.SkalForlengeStatusInput(
+    public SkalForlengeAktivitetstatusInput lagInput(BehandlingReferanse ref, NavigableSet<PeriodeTilVurdering> perioderTilVurderingIBeregning) {
+        return new SkalForlengeAktivitetstatusInput(
             ref,
             BehandlingReferanse.fra(behandlingRepository.hentBehandling(ref.getOriginalBehandlingId().orElseThrow())),
             iayTjeneste.hentUnikeInntektsmeldingerForSak(ref.getSaksnummer()),
@@ -100,8 +100,7 @@ public class FinnPerioderMedStartIKontrollerFakta {
         var intervaller = perioderTilVurdering.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet());
         var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref);
         periodeFilter.ignorerAvslåttePerioder();
-        var perioderTilVurderingIOpptjening = periodeFilter.filtrerPerioder(intervaller, VilkårType.OPPTJENINGSVILKÅRET);
-        return perioderTilVurderingIOpptjening;
+        return periodeFilter.filtrerPerioder(intervaller, VilkårType.OPPTJENINGSVILKÅRET);
     }
 
 
