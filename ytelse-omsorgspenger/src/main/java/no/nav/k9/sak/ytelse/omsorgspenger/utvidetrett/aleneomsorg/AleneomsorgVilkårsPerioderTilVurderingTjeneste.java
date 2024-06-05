@@ -118,8 +118,8 @@ public class AleneomsorgVilkårsPerioderTilVurderingTjeneste implements Vilkårs
         LocalDateTimeline<?> søknadstidslinje = new LocalDateTimeline<>(søknadsperiode.stream().map(sp -> new LocalDateSegment<>(sp.getFomDato(), sp.getTomDato(), true)).toList());
 
         SøknadEntitet søknad = søknadRepository.hentSøknad(behandlingId);
-        LocalDate søknadsdato = søknad.getSøknadsdato();
-        LocalDate startAvÅretForTremånederSidenDato = søknadsdato.withDayOfMonth(1).minusMonths(3).with(TemporalAdjusters.firstDayOfYear());
+        LocalDate mottattDato = søknad.getMottattDato();
+        LocalDate startAvÅretForTremånederSidenDato = mottattDato.withDayOfMonth(1).minusMonths(3).with(TemporalAdjusters.firstDayOfYear());
         LocalDateTimeline<?> justert = søknadstidslinje.intersection(new LocalDateTimeline<>(startAvÅretForTremånederSidenDato, LocalDate.MAX, null));
         return TidslinjeUtil.tilDatoIntervallEntiteter(justert);
     }
