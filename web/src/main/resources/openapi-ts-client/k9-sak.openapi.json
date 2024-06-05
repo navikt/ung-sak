@@ -4002,6 +4002,27 @@
         "type" : "object"
       },
       "HarGyldigOmsorgsdagerVedtakDto" : {
+        "properties" : {
+          "decision" : {
+            "enum" : [ "PERMIT", "DENY", "NOT_APPLICABLE" ],
+            "type" : "string"
+          },
+          "deny" : {
+            "type" : "boolean"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "permit" : {
+            "type" : "boolean"
+          },
+          "reason" : {
+            "type" : "string"
+          }
+        },
         "type" : "object"
       },
       "Hendelse" : {
