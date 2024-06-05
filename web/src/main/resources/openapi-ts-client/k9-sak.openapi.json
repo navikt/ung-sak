@@ -15465,6 +15465,28 @@
         "tags" : [ "beregning" ]
       }
     },
+    "/beregning/psb-aktivitetstatus-forlengelse-data" : {
+      "post" : {
+        "description" : "Data til utledning av forlengelse av aktivitetstatus",
+        "operationId" : "finnAktivitetstatusForlengelseData",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "behandlingId",
+          "schema" : {
+            "$ref" : "#/components/schemas/BehandlingIdDto"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "beregning" ]
+      }
+    },
     "/beregning/revurder-bruk-forrige-skatteoppgjør" : {
       "post" : {
         "description" : "Oppretter manuell revurdering og bruker skatteoppgjør fra oppgitt behandling.",

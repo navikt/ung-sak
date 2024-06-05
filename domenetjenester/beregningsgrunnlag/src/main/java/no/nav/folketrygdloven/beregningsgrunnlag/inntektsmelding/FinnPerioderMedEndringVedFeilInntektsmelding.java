@@ -69,6 +69,10 @@ public class FinnPerioderMedEndringVedFeilInntektsmelding {
     public Optional<RelevanteEndringer> finnPerioderForEndringDersomFeilInntektsmeldingBrukes(BehandlingReferanse behandlingReferanse, LocalDate fraDato) {
 
         var vilkårsperioder = finnBeregningVilkårsperioder(behandlingReferanse);
+
+        if (vilkårsperioder.isEmpty()) {
+            return Optional.empty();
+        }
         var bgPerioderGrunnlag = beregningPerioderGrunnlagRepository.hentGrunnlag(behandlingReferanse.getBehandlingId());
         var alleInntektsmeldinger = inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(behandlingReferanse.getSaksnummer(), behandlingReferanse.getAktørId(), behandlingReferanse.getFagsakYtelseType());
 
@@ -77,7 +81,11 @@ public class FinnPerioderMedEndringVedFeilInntektsmelding {
         }
 
         var inntektsmeldingerPrReferanse = finnInntektsmeldingerForBeregningPrEksternReferanse(behandlingReferanse, vilkårsperioder, bgPerioderGrunnlag, alleInntektsmeldinger, fraDato);
+        if (inntektsmeldingerPrReferanse.keySet().isEmpty()) {
+            return Optional.empty();
+        }
         var journalpostIderResponses = finnJournalposterSomFaktiskErBruktIBeregning(behandlingReferanse, inntektsmeldingerPrReferanse);
+
 
         var relevanteEndringer = finnRelevanteEndringer(
             behandlingReferanse,
