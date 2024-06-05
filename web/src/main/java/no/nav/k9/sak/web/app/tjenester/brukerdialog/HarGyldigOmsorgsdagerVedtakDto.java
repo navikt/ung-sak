@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.brukerdialog;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.brukerdialog.policy.PolicyEvaluation;
@@ -8,9 +9,9 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 final class HarGyldigOmsorgsdagerVedtakDto extends BrukerdialogDto {
-    private final Boolean harInnvilgedeBehandlinger;
-    private final @Valid Saksnummer saksnummer;
-    private final LocalDate vedtaksdato;
+    @JsonProperty private final Boolean harInnvilgedeBehandlinger;
+    @JsonProperty private final @Valid Saksnummer saksnummer;
+    @JsonProperty private final LocalDate vedtaksdato;
 
     HarGyldigOmsorgsdagerVedtakDto(
             Boolean harInnvilgedeBehandlinger,
