@@ -176,7 +176,7 @@ public class ForvaltningBeregningRestTjeneste {
                  ,vp.tom
                  ,fp.fom
                  ,fp.tom
-              from dump_feil_im d
+              from dump_feil_im_gr d
               left join dump_feil_im_vilkar_periode vp on vp.dump_grunnlag_id = d.id
               left join dump_feil_im_fordel_periode fp on fp.dump_grunnlag_id = d.id
               inner join behandling b on b.id=d.behandling_id
