@@ -4,7 +4,7 @@
         xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm https://jakarta.ee/xml/ns/persistence/orm/orm_3_0.xsd"
         version="3.0">
 
-    <sequence-generator name="SEQ_DUMP_FEIL_IM" allocation-size="50" sequence-name="SEQ_DUMP_FEIL_IM"/>
+    <sequence-generator name="SEQ_DUMP_FEIL_IM_GR" allocation-size="50" sequence-name="SEQ_DUMP_FEIL_IM_GR"/>
     <sequence-generator name="SEQ_DUMP_FEIL_IM_FORDEL_PERIODE" allocation-size="50" sequence-name="SEQ_DUMP_FEIL_IM_FORDEL_PERIODE"/>
     <sequence-generator name="SEQ_DUMP_FEIL_IM_VILKAR_PERIODE" allocation-size="50" sequence-name="SEQ_DUMP_FEIL_IM_VILKAR_PERIODE"/>
 
