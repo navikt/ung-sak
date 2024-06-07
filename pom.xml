@@ -142,7 +142,7 @@
             <dependency>
                 <groupId>no.nav.k9.aarskvantum</groupId>
                 <artifactId>k9-aarskvantum-kontrakt</artifactId>
-                <version>3.0.0-SNAPSHOT</version>
+                <version>2.2.1</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.k9.formidling</groupId>

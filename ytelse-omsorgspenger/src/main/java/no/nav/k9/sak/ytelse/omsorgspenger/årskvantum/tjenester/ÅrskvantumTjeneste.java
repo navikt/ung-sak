@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,6 +30,7 @@ import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
 import no.nav.k9.aarskvantum.kontrakter.ArbeidsforholdStatus;
 import no.nav.k9.aarskvantum.kontrakter.AvvikImSøknad;
 import no.nav.k9.aarskvantum.kontrakter.Barn;
+import no.nav.k9.aarskvantum.kontrakter.BarnFødselsdato;
 import no.nav.k9.aarskvantum.kontrakter.BarnType;
 import no.nav.k9.aarskvantum.kontrakter.FraværPeriode;
 import no.nav.k9.aarskvantum.kontrakter.FraværÅrsak;
@@ -307,7 +307,7 @@ public class ÅrskvantumTjeneste {
 
         if (rammevedtakSammenstillingIÅrskvantum){
             VedtatteRammevedtakTjeneste.InnvilgedeOgAvslåtteRammevedtak k9sakRammevedtak = vedtatteRammevedtakTjeneste.hentK9sakRammevedtak(søkerAktørId);
-            RammevedtakV2Request request = new RammevedtakV2Request(personIdent.toString(), barna.stream().map(this::mapBarn).toList(), periode, k9sakRammevedtak.innvilgede(), k9sakRammevedtak.avslåtte());
+            RammevedtakV2Request request = new RammevedtakV2Request(personIdent.toString(), barna.stream().map(this::mapBarnFødseldato).toList(), periode, k9sakRammevedtak.innvilgede(), k9sakRammevedtak.avslåtte());
             return årskvantumKlient.hentRammevedtak(request);
         }
 
@@ -315,19 +315,10 @@ public class ÅrskvantumTjeneste {
         return årskvantumKlient.hentRammevedtak(personIdent, alleBarnasFnr, periode);
     }
 
-    /**
-     * HAXX ukomplett mapping. Utnytter at hentRammevedtak ikke trenger komplett mapping for å fungere.
-     * Brukes i kontekst av filtrering av barn, og opplysninger om barn er ikke lagret på behandlingen enda *
-     */
-    private Barn mapBarn(Personinfo barn) {
-        return new Barn(
+    private BarnFødselsdato mapBarnFødseldato(Personinfo barn) {
+        return new BarnFødselsdato(
             barn.getPersonIdent().getIdent(),
-            barn.getFødselsdato(),
-            barn.getDødsdato(),
-            Collections.emptyList(),
-            Collections.emptyList(),
-            BarnType.VANLIG
-
+            barn.getFødselsdato()
         );
     }
 
@@ -342,14 +333,15 @@ public class ÅrskvantumTjeneste {
         var informasjonsperiode = (oppgittFravær.isEmpty()) ? DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom()) : hentInformasjonsperiode(vilkårsperioder, oppgittFravær);
         PersonopplysningerAggregat personopplysninger = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(ref.getBehandlingId(), ref.getAktørId(), informasjonsperiode).orElseThrow();
         Set<Barn> barna = hentOgMapBarn(personopplysninger, behandling);
-        var alleBarnasFnr = barna.stream().map(barn -> PersonIdent.fra(barn.getPersonIdent())).toList();
 
         if (rammevedtakSammenstillingIÅrskvantum){
             VedtatteRammevedtakTjeneste.InnvilgedeOgAvslåtteRammevedtak k9sakRammevedtak = vedtatteRammevedtakTjeneste.hentK9sakRammevedtak(søkerAktørId);
-            RammevedtakV2Request request = new RammevedtakV2Request(personIdent.toString(), barna.stream().toList(), periode, k9sakRammevedtak.innvilgede(), k9sakRammevedtak.avslåtte());
+            List<BarnFødselsdato> barnFødselsdato = barna.stream().map(b -> new BarnFødselsdato(b.getPersonIdent(), b.getFødselsdato())).toList();
+            RammevedtakV2Request request = new RammevedtakV2Request(personIdent.toString(), barnFødselsdato, periode, k9sakRammevedtak.innvilgede(), k9sakRammevedtak.avslåtte());
             return årskvantumKlient.hentRammevedtak(request);
         }
 
+        var alleBarnasFnr = barna.stream().map(barn -> PersonIdent.fra(barn.getPersonIdent())).toList();
         return årskvantumKlient.hentRammevedtak(personIdent, alleBarnasFnr, periode);
     }
 
