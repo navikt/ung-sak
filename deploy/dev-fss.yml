@@ -301,8 +301,6 @@ spec:
       value: "true"
     - name: SEND_INNTEKTSMELDING_FORESPORSEL
       value: "true"
-    - name: ENABLE_UKLASSIFISERT_SYKDOMSDOK_SJEKK
-      value: "true"
     - name: BRUKERDIALOG_REST_TJENESTE_ENABLED
       value: "true"
 
