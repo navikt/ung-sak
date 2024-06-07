@@ -75,6 +75,9 @@ public class FinnSakerMedFeilImTask implements ProsessTaskHandler {
         var behandlingerOpprettetFør = behandlinger.stream().filter(b -> !b.getOpprettetTidspunkt().toLocalDate().isAfter(tom))
             .toList();
 
+        log.info("Kjører analyse for  " + behandlingerOpprettetFør.size() + " behandlinger.");
+
+
         var relevanteEndringerPrBehandling = behandlingerOpprettetFør.stream()
             .collect(Collectors.toMap(Behandling::getId, t -> {
                 var behandlingReferanse = BehandlingReferanse.fra(t);
