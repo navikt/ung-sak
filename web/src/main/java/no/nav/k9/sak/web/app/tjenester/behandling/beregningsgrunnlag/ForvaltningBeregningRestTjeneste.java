@@ -172,10 +172,10 @@ public class ForvaltningBeregningRestTjeneste {
             select f.saksnummer
                  ,b.fagsak_id
                  ,d.behandling_id
-                 ,vp.fom
-                 ,vp.tom
-                 ,fp.fom
-                 ,fp.tom
+                 ,vp.fom vilkarperiode_fom
+                 ,vp.tom vilkarperiode_tom
+                 ,fp.fom fordelperiode_fom
+                 ,fp.tom fordelperiode_tom
               from dump_feil_im_gr d
               left join dump_feil_im_vilkar_periode vp on vp.dump_grunnlag_id = d.id
               left join dump_feil_im_fordel_periode fp on fp.dump_grunnlag_id = d.id
