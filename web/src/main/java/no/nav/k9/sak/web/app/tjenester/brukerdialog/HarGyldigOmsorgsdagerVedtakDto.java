@@ -2,13 +2,13 @@ package no.nav.k9.sak.web.app.tjenester.brukerdialog;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
+import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.web.app.tjenester.brukerdialog.policy.PolicyEvaluation;
 
 import java.time.LocalDate;
 import java.util.Objects;
 
-final class HarGyldigOmsorgsdagerVedtakDto extends BrukerdialogPolicyEvaluation {
+final class HarGyldigOmsorgsdagerVedtakDto extends BrukerdialogEvaluation {
     @JsonProperty private final Boolean harInnvilgedeBehandlinger;
     @JsonProperty private final @Valid Saksnummer saksnummer;
     @JsonProperty private final LocalDate vedtaksdato;
@@ -17,9 +17,9 @@ final class HarGyldigOmsorgsdagerVedtakDto extends BrukerdialogPolicyEvaluation 
             Boolean harInnvilgedeBehandlinger,
             @Valid Saksnummer saksnummer,
             LocalDate vedtaksdato,
-            PolicyEvaluation policyEvaluation
+            Evaluation evaluation
     ) {
-        super(policyEvaluation);
+        super(evaluation);
         this.harInnvilgedeBehandlinger = harInnvilgedeBehandlinger;
         this.saksnummer = saksnummer;
         this.vedtaksdato = vedtaksdato;

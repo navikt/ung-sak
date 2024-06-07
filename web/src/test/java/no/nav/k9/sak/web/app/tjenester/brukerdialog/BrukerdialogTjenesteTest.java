@@ -1,5 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.brukerdialog;
 
+import no.nav.fpsak.nare.evaluation.Resultat;
 import no.nav.k9.felles.integrasjon.pdl.Pdl;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
@@ -10,7 +11,6 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.web.app.tjenester.brukerdialog.policy.PolicyDecision;
 import no.nav.k9.sikkerhet.oidc.token.context.ContextAwareTokenProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,7 +67,7 @@ class BrukerdialogTjenesteTest {
         when(behandlingRepository.finnSisteInnvilgetBehandling(any())).thenReturn(Optional.of(behandling));
 
         var resultat = tjeneste.harGyldigOmsorgsdagerVedtak(pleietrengendeAktørId);
-        assertThat(resultat.evaluation().getDecision()).isEqualTo(PolicyDecision.PERMIT);
+        assertThat(resultat.evaluation().result()).isEqualTo(Resultat.JA);
         assertThat(resultat.harInnvilgedeBehandlinger()).isTrue();
     }
 
@@ -85,7 +85,7 @@ class BrukerdialogTjenesteTest {
         when(behandlingRepository.finnSisteInnvilgetBehandling(any())).thenReturn(Optional.empty());
 
         var resultat = tjeneste.harGyldigOmsorgsdagerVedtak(pleietrengendeAktørId);
-        assertThat(resultat.evaluation().getDecision()).isEqualTo(PolicyDecision.NOT_APPLICABLE);
+        assertThat(resultat.evaluation().result()).isEqualTo(Resultat.IKKE_VURDERT);
         assertThat(resultat.harInnvilgedeBehandlinger()).isFalse();
     }
 
@@ -110,6 +110,7 @@ class BrukerdialogTjenesteTest {
         when(behandlingRepository.finnSisteInnvilgetBehandling(AVSLÅTT_FAGSAK_ID)).thenReturn(Optional.empty());
 
         var resultat = tjeneste.harGyldigOmsorgsdagerVedtak(pleietrengendeAktørId);
+        assertThat(resultat.evaluation().result()).isEqualTo(Resultat.JA);
         assertThat(resultat.harInnvilgedeBehandlinger()).isTrue();
     }
 }
