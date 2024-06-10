@@ -93,7 +93,7 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
             // Enforces av UUID selv
             put(UUID.class, singletonList(emptyList()));
 
-            // Ignorerer disse klassene da de er returtyper i REST-tjenester, og ikke trenger å valderes.
+            // Ignorerer disse klassene da de er returtyper i REST-tjenester, og ikke trenger å valideres.
             put(HarGyldigOmsorgsdagerVedtakDto.class, singletonList(emptyList()));
         }
     };
