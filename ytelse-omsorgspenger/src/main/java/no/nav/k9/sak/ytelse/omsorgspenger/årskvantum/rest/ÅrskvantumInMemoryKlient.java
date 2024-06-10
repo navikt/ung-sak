@@ -6,8 +6,18 @@ import java.util.UUID;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.inject.Alternative;
-
-import no.nav.k9.aarskvantum.kontrakter.*;
+import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
+import no.nav.k9.aarskvantum.kontrakter.FullUttaksplanForBehandlinger;
+import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
+import no.nav.k9.aarskvantum.kontrakter.RammevedtakResponse;
+import no.nav.k9.aarskvantum.kontrakter.RammevedtakV2Request;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDagerV2;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlag;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlagV2;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUtbetalingGrunnlag;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUttrekk;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -20,6 +30,11 @@ public class ÅrskvantumInMemoryKlient implements ÅrskvantumKlient {
 
     @Override
     public ÅrskvantumResultat hentÅrskvantumUttak(ÅrskvantumGrunnlag årskvantumRequest) {
+        return årskvantumResultat;
+    }
+
+    @Override
+    public ÅrskvantumResultat hentÅrskvantumUttak(ÅrskvantumGrunnlagV2 årskvantumRequest) {
         return årskvantumResultat;
     }
 
@@ -44,6 +59,11 @@ public class ÅrskvantumInMemoryKlient implements ÅrskvantumKlient {
 
     @Override
     public ÅrskvantumForbrukteDager hentÅrskvantumForBehandling(UUID behandlingUUID) {
+        return null;
+    }
+
+    @Override
+    public ÅrskvantumForbrukteDagerV2 hentÅrskvantumForBehandlingV2(UUID behandlingUUID) {
         return null;
     }
 
@@ -73,7 +93,17 @@ public class ÅrskvantumInMemoryKlient implements ÅrskvantumKlient {
     }
 
     @Override
+    public ÅrskvantumUtbetalingGrunnlag hentUtbetalingGrunnlag(ÅrskvantumGrunnlagV2 årskvantumGrunnlag) {
+        return null;
+    }
+
+    @Override
     public RammevedtakResponse hentRammevedtak(PersonIdent personIdent, List<PersonIdent> barnFnr, LukketPeriode periode) {
+        return null;
+    }
+
+    @Override
+    public RammevedtakResponse hentRammevedtak(RammevedtakV2Request request) {
         return null;
     }
 

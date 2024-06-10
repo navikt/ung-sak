@@ -33,6 +33,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import no.nav.k9.sak.web.app.tjenester.brukerdialog.HarGyldigOmsorgsdagerVedtakDto;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -71,7 +72,7 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
      */
     @ParameterizedTest
     @MethodSource("provideArguments")
-    public void alle_felter_i_objekter_som_brukes_som_inputDTO_skal_enten_ha_valideringsannotering_eller_være_av_godkjent_type(Class<?> dto) throws Exception {
+    public void alle_felter_i_objekter_som_brukes_som_inputDTO_og_som_outout_skal_enten_ha_valideringsannotering_eller_være_av_godkjent_type(Class<?> dto) throws Exception {
         Set<Class<?>> validerteKlasser = new HashSet<>(); // trengs for å unngå løkker og unngå å validere samme klasse flere multipliser dobbelt
         validerRekursivt(validerteKlasser, dto, null);
     }
@@ -92,6 +93,8 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
             // Enforces av UUID selv
             put(UUID.class, singletonList(emptyList()));
 
+            // Ignorerer disse klassene da de er returtyper i REST-tjenester, og ikke trenger å valideres.
+            put(HarGyldigOmsorgsdagerVedtakDto.class, singletonList(emptyList()));
         }
     };
 
