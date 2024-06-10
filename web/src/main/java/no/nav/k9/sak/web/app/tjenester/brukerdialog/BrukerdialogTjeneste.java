@@ -3,7 +3,6 @@ package no.nav.k9.sak.web.app.tjenester.brukerdialog;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.nare.evaluation.Evaluation;
-import no.nav.fpsak.nare.evaluation.Resultat;
 import no.nav.fpsak.nare.evaluation.RuleReasonRef;
 import no.nav.fpsak.nare.evaluation.summary.EvaluationSummary;
 import no.nav.k9.felles.integrasjon.pdl.Pdl;
@@ -21,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 @Dependent
 public class BrukerdialogTjeneste implements BrukerdialogFasade {
@@ -104,7 +102,16 @@ public class BrukerdialogTjeneste implements BrukerdialogFasade {
                         .build();
             }
             case NEI -> {
-                logger.info("Partene er parter i saken. Returnerer gyldig vedtak.");
+                logger.info("Manglende parter i saken. Returnerer gyldig vedtak.");
+                return new HarGyldigOmsorgsdagerVedtakDto.Builder()
+                    .harInnvilgedeBehandlinger(false)
+                    .saksnummer(null)
+                    .vedtaksdato(null)
+                    .evaluering(evaluer)
+                    .build();
+            }
+            case IKKE_VURDERT -> {
+                logger.info("Ikke vurdert på grunn av manglende grunnlang. Returnerer ugyldig vedtak.");
                 return new HarGyldigOmsorgsdagerVedtakDto.Builder()
                     .harInnvilgedeBehandlinger(false)
                     .saksnummer(null)
