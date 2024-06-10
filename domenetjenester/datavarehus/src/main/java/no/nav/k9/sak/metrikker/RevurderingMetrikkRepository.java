@@ -349,19 +349,19 @@ public class RevurderingMetrikkRepository {
             "               and a.aksjonspunkt_status != 'AVBR'" +
             "               and (a.vent_aarsak is null or a.vent_aarsak = '-')" +
             "        ) as antall_aksjonspunkt_per_behandling," +
-            "       exists (select aarsak.behandling_arsak_type from behandling_arsak aarsak" +
+            "       exists(select aarsak.behandling_arsak_type from behandling_arsak aarsak" +
             "           where aarsak.behandling_id = b.id" +
             "               and aarsak.behandling_arsak_type = 'RE-END-FRA-BRUKER'" +
             "       ) as har_endring_fra_bruker," +
-            "       exists (select aarsak.behandling_arsak_type from behandling_arsak aarsak" +
+            "       exists(select aarsak.behandling_arsak_type from behandling_arsak aarsak" +
             "           where aarsak.behandling_id = b.id" +
             "               and aarsak.behandling_arsak_type = 'RE-END-INNTEKTSMELD'" +
             "       ) as har_endring_fra_inntektsmelding," +
-            "       exists (select aarsak.behandling_arsak_type from behandling_arsak aarsak" +
+            "       exists(select aarsak.behandling_arsak_type from behandling_arsak aarsak" +
             "           where aarsak.behandling_id = b.id" +
             "               and aarsak.behandling_arsak_type = 'RE_ANNEN_SAK'" +
             "       ) as har_endring_fra_annen_sak," +
-            "       exists (select md.kildesystem from mottatt_dokument md" +
+            "       exists(select md.kildesystem from mottatt_dokument md" +
             "           where md.behandling_id = b.id" +
             "               and md.kildesystem = 'endringsdialog'" +
             "       ) as har_endring_fra_endringsdialog" +
