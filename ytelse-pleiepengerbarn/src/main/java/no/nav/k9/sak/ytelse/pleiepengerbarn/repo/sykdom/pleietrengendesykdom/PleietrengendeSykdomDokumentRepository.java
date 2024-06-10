@@ -16,7 +16,6 @@ import jakarta.persistence.NoResultException;
 import jakarta.persistence.NonUniqueResultException;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
-
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.typer.AktørId;
@@ -44,6 +43,20 @@ public class PleietrengendeSykdomDokumentRepository {
                 + "where p.aktørId = :aktørId", PleietrengendeSykdomDokument.class);
 
         q.setParameter("aktørId", pleietrengende);
+
+        List<PleietrengendeSykdomDokument> dokuments = q.getResultList();
+
+        return utenFeilregistrerteDokumenter(dokuments);
+    }
+
+    public List<PleietrengendeSykdomDokument> hentAlleDokumenterForBehandling(Long behandlingId) {
+        final TypedQuery<PleietrengendeSykdomDokument> q = entityManager.createQuery(
+            "SELECT d From PleietrengendeSykdomDokument as d "
+            + " , MottattDokument m "
+            + "where m.journalpostId = d.journalpostId and m.behandlingId = :behandlingId ", PleietrengendeSykdomDokument.class
+        );
+
+        q.setParameter("behandlingId", behandlingId);
 
         List<PleietrengendeSykdomDokument> dokuments = q.getResultList();
 

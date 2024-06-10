@@ -280,7 +280,7 @@ spec:
     - name: ENABLE_DATO_NY_REGEL_UTTAK
       value: "true"
     - name: FJERN_VILKARSPERIODER_BEREGNING
-      value: "true"
+      value: "false"
     - name: VALIDER_KALKULUS_REFERANSER
       value: "true"
     - name: AVKLAR_ARBEIDSFORHOLD_REUTLED_VED_REVURDERING
@@ -297,13 +297,15 @@ spec:
       value: "true"
     - name: FERIEPENGER_AV_DAGPENGER
       value: "true"
-    - name: REAKTIVER_TILBAKEKREVING_VALG
-      value: "true"
     - name: MANUELT_VURDER_UTVIDET_RETT
       value: "true"
     - name: SEND_INNTEKTSMELDING_FORESPORSEL
       value: "true"
+    - name: ENABLE_UKLASSIFISERT_SYKDOMSDOK_SJEKK
+      value: "true"
     - name: BRUKERDIALOG_REST_TJENESTE_ENABLED
+      value: "true"
+    - name: OMP_RAMMEVEDTAK_SAMMENSTILLNG_AARSKVANTUM
       value: "true"
 
     # Konfigurasjoner

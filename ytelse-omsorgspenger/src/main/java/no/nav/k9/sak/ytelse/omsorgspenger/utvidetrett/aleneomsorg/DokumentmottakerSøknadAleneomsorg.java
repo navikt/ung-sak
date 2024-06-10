@@ -81,9 +81,7 @@ public class DokumentmottakerSøknadAleneomsorg implements Dokumentmottaker {
     private void lagreSøknad(Long behandlingId, JournalpostId journalpostId, Søknad søknad, OmsorgspengerAleneOmsorg innsendt) {
         var søknadsperiode = innsendt.getSøknadsperiode();
         boolean elektroniskSøknad = true;
-        DatoIntervallEntitet datoIntervall = søknadsperiode == null
-            ? DatoIntervallEntitet.fraOgMed(søknad.getMottattDato().toLocalDate())
-            : DatoIntervallEntitet.fra(søknadsperiode.getFraOgMed(), søknadsperiode.getTilOgMed());
+        DatoIntervallEntitet datoIntervall = DatoIntervallEntitet.fra(søknadsperiode.getFraOgMed(), søknadsperiode.getTilOgMed());
 
         var søknadBuilder = new SøknadEntitet.Builder()
             .medSøknadsperiode(datoIntervall)

@@ -29,9 +29,7 @@ public class DumpFeilImRepository {
         eksisterende.ifPresent(entityManager::persist);
 
         var vpEntiteter = vilkårperioder.stream().map(DumpFeilIMVilkårperiode::new).collect(Collectors.toSet());
-        vpEntiteter.forEach(entityManager::persist);
         var fpEntiteter = fordelperioder.stream().map(DumpFeilIMFordelperiode::new).collect(Collectors.toSet());
-        fpEntiteter.forEach(entityManager::persist);
         var ny = new DumpFeilIM(behandlingId,
             vpEntiteter,
             fpEntiteter);

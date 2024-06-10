@@ -9,43 +9,38 @@ import no.nav.k9.aarskvantum.kontrakter.RammevedtakResponse;
 import no.nav.k9.sak.behandlingslager.aktør.Personinfo;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 
 @ApplicationScoped
 public class OmsorgspengerRammevedtakTjeneste {
     private ÅrskvantumTjeneste årskvantumTjeneste;
     private BehandlingRepository behandlingRepository;
-    private AktørTjeneste aktørTjeneste;
 
     OmsorgspengerRammevedtakTjeneste() {
         // for CDI
     }
 
     @Inject
-    public OmsorgspengerRammevedtakTjeneste(ÅrskvantumTjeneste årskvantumTjeneste, BehandlingRepository behandlingRepository, AktørTjeneste aktørTjeneste) {
+    public OmsorgspengerRammevedtakTjeneste(ÅrskvantumTjeneste årskvantumTjeneste, BehandlingRepository behandlingRepository) {
         this.årskvantumTjeneste = årskvantumTjeneste;
         this.behandlingRepository = behandlingRepository;
-        this.aktørTjeneste = aktørTjeneste;
     }
 
     public RammevedtakResponse hentRammevedtak(BehandlingUuidDto behandlingUuid, List<Personinfo> barn) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
-        PersonIdent personIdent = aktørTjeneste.hentPersonIdentForAktørId(behandling.getAktørId()).orElseThrow();
+
 
         DatoIntervallEntitet fagsakperiode = behandling.getFagsak().getPeriode();
-        return årskvantumTjeneste.hentRammevedtak(personIdent, new LukketPeriode(fagsakperiode.getFomDato(), fagsakperiode.getTomDato()), barn);
+        return årskvantumTjeneste.hentRammevedtak(behandling.getAktørId(), new LukketPeriode(fagsakperiode.getFomDato(), fagsakperiode.getTomDato()), barn);
     }
 
     public RammevedtakResponse hentRammevedtak(BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
-        PersonIdent personIdent = aktørTjeneste.hentPersonIdentForAktørId(behandling.getAktørId()).orElseThrow();
 
         DatoIntervallEntitet fagsakperiode = behandling.getFagsak().getPeriode();
-        return årskvantumTjeneste.hentRammevedtak(personIdent, new LukketPeriode(fagsakperiode.getFomDato(), fagsakperiode.getTomDato()), behandling);
+        return årskvantumTjeneste.hentRammevedtak(new LukketPeriode(fagsakperiode.getFomDato(), fagsakperiode.getTomDato()), behandling);
     }
 
 }

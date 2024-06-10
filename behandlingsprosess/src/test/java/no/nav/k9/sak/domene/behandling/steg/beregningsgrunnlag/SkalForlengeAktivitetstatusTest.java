@@ -30,16 +30,18 @@ class SkalForlengeAktivitetstatusTest {
     private SkalForlengeAktivitetstatus skalForlengeAktivitetstatus;
     private final BehandlingReferanse behandlingReferanse = mock(BehandlingReferanse.class);
     private final BehandlingReferanse originalBehandlingreferanse = mock(BehandlingReferanse.class);
+
     @BeforeEach
     void setUp() {
-        skalForlengeAktivitetstatus = new SkalForlengeAktivitetstatus(new UnitTestLookupInstanceImpl<>((referanse, sakInntektsmeldinger, vilkårsPeriode) -> sakInntektsmeldinger) {});
+        skalForlengeAktivitetstatus = new SkalForlengeAktivitetstatus(new UnitTestLookupInstanceImpl<>((referanse, sakInntektsmeldinger, vilkårsPeriode) -> sakInntektsmeldinger) {
+        });
         when(behandlingReferanse.getBehandlingId()).thenReturn(BEHANDLING_ID);
     }
 
     @Test
     void skal_forlengele_aktivitetstatus_ved_forlengelse_i_opptjening_og_revurdering_i_beregning() {
         var vilkårsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10));
-        SkalForlengeAktivitetstatus.SkalForlengeStatusInput input = new SkalForlengeAktivitetstatus.SkalForlengeStatusInput(
+        var input = new SkalForlengeAktivitetstatusInput(
             behandlingReferanse,
             originalBehandlingreferanse,
             Set.of(),
@@ -62,7 +64,7 @@ class SkalForlengeAktivitetstatusTest {
     @Test
     void skal_ikke_forlenge_aktivitetstatus_ved_revurdering_i_opptjening_og_revurdering_i_beregning() {
         var vilkårsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10));
-        SkalForlengeAktivitetstatus.SkalForlengeStatusInput input = new SkalForlengeAktivitetstatus.SkalForlengeStatusInput(
+        var input = new SkalForlengeAktivitetstatusInput(
             behandlingReferanse,
             originalBehandlingreferanse,
             Set.of(),
@@ -83,7 +85,7 @@ class SkalForlengeAktivitetstatusTest {
     @Test
     void skal_ikke_forlenge_aktivitetstatus_ved_avslått_i_forrige_behandling() {
         var vilkårsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10));
-        SkalForlengeAktivitetstatus.SkalForlengeStatusInput input = new SkalForlengeAktivitetstatus.SkalForlengeStatusInput(
+        SkalForlengeAktivitetstatusInput input = new SkalForlengeAktivitetstatusInput(
             behandlingReferanse,
             originalBehandlingreferanse,
             Set.of(),
@@ -106,7 +108,7 @@ class SkalForlengeAktivitetstatusTest {
         var vilkårsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10));
         var vilkårsperiodeForrigeBehandling = DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(5));
 
-        SkalForlengeAktivitetstatus.SkalForlengeStatusInput input = new SkalForlengeAktivitetstatus.SkalForlengeStatusInput(
+        SkalForlengeAktivitetstatusInput input = new SkalForlengeAktivitetstatusInput(
             behandlingReferanse,
             originalBehandlingreferanse,
             Set.of(),
@@ -131,7 +133,7 @@ class SkalForlengeAktivitetstatusTest {
         var vilkårsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10));
         var vilkårsperiodeForrigeBehandling = DatoIntervallEntitet.fraOgMedTilOgMed(STP.plusDays(1), STP.plusDays(5));
 
-        SkalForlengeAktivitetstatus.SkalForlengeStatusInput input = new SkalForlengeAktivitetstatus.SkalForlengeStatusInput(
+        SkalForlengeAktivitetstatusInput input = new SkalForlengeAktivitetstatusInput(
             behandlingReferanse,
             originalBehandlingreferanse,
             Set.of(),
@@ -156,7 +158,7 @@ class SkalForlengeAktivitetstatusTest {
         var im = lagInntektsmelding("12346778", InternArbeidsforholdRef.nullRef());
         var mottattInntektsmelding = lagMottattInntektsmelding();
 
-        SkalForlengeAktivitetstatus.SkalForlengeStatusInput input = new SkalForlengeAktivitetstatus.SkalForlengeStatusInput(
+        SkalForlengeAktivitetstatusInput input = new SkalForlengeAktivitetstatusInput(
             behandlingReferanse,
             originalBehandlingreferanse,
             Set.of(im),
@@ -178,7 +180,7 @@ class SkalForlengeAktivitetstatusTest {
     void skal_ikke_forlenge_aktivitetstatus_ved_prosesstrigger_for_reberegning() {
         var vilkårsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10));
 
-        SkalForlengeAktivitetstatus.SkalForlengeStatusInput input = new SkalForlengeAktivitetstatus.SkalForlengeStatusInput(
+        SkalForlengeAktivitetstatusInput input = new SkalForlengeAktivitetstatusInput(
             behandlingReferanse,
             originalBehandlingreferanse,
             Set.of(),

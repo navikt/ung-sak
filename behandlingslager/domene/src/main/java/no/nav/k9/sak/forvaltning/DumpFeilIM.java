@@ -16,11 +16,11 @@ import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity(name = "DumpFeilIm")
-@Table(name = "DUMP_FEIL_IM")
+@Table(name = "DUMP_FEIL_IM_GR")
 public class DumpFeilIM {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_DUMP_FEIL_IM")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_DUMP_FEIL_IM_GR")
     private Long id;
 
     @Column(name = "behandling_id", nullable = false, updatable = false, unique = true)

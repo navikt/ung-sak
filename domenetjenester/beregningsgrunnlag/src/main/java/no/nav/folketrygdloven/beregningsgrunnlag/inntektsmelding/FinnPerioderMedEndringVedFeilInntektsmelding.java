@@ -2,6 +2,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -69,6 +70,10 @@ public class FinnPerioderMedEndringVedFeilInntektsmelding {
     public Optional<RelevanteEndringer> finnPerioderForEndringDersomFeilInntektsmeldingBrukes(BehandlingReferanse behandlingReferanse, LocalDate fraDato) {
 
         var vilkårsperioder = finnBeregningVilkårsperioder(behandlingReferanse);
+
+        if (vilkårsperioder.isEmpty()) {
+            return Optional.empty();
+        }
         var bgPerioderGrunnlag = beregningPerioderGrunnlagRepository.hentGrunnlag(behandlingReferanse.getBehandlingId());
         var alleInntektsmeldinger = inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(behandlingReferanse.getSaksnummer(), behandlingReferanse.getAktørId(), behandlingReferanse.getFagsakYtelseType());
 
@@ -77,7 +82,11 @@ public class FinnPerioderMedEndringVedFeilInntektsmelding {
         }
 
         var inntektsmeldingerPrReferanse = finnInntektsmeldingerForBeregningPrEksternReferanse(behandlingReferanse, vilkårsperioder, bgPerioderGrunnlag, alleInntektsmeldinger, fraDato);
+        if (inntektsmeldingerPrReferanse.keySet().isEmpty()) {
+            return Optional.empty();
+        }
         var journalpostIderResponses = finnJournalposterSomFaktiskErBruktIBeregning(behandlingReferanse, inntektsmeldingerPrReferanse);
+
 
         var relevanteEndringer = finnRelevanteEndringer(
             behandlingReferanse,
@@ -89,6 +98,7 @@ public class FinnPerioderMedEndringVedFeilInntektsmelding {
         );
 
         if (!relevanteEndringer.vilkårsperioderTilRevurdering().isEmpty() || !relevanteEndringer.kunEndringIRefusjonListe.isEmpty()) {
+            log.info("Behandling " + behandlingReferanse.getBehandlingId() + " hadde følgende journalposter som ikke ble brukt pr skjæringstidspunkt " + relevanteEndringer.journalposterSomIkkeBleBrukt);
             return Optional.of(relevanteEndringer);
         }
 
@@ -105,7 +115,7 @@ public class FinnPerioderMedEndringVedFeilInntektsmelding {
                                                       List<DatoIntervallEntitet> vilkårsperioder) {
         List<DatoIntervallEntitet> vilkårsperioderForRevurdering = new ArrayList<>();
         List<DatoIntervallEntitet> kunEndringIRefusjonListe = new ArrayList<>();
-
+        Map<LocalDate, Set<String>> journalpostIderSomIkkeBleBrukt = new HashMap<>();
         for (var jpresponse : journalpostIderResponses) {
             var eksternReferanse = jpresponse.getEksternReferanse();
             var inntektsmeldingerSomSkulleVærtBrukt = inntektsmeldingerPrReferanse.get(eksternReferanse);
@@ -124,11 +134,14 @@ public class FinnPerioderMedEndringVedFeilInntektsmelding {
                         kunEndringIRefusjonListe.addAll(perioderMedEndringIRefusjon);
                     }
                 }
+
+                journalpostIderSomIkkeBleBrukt.put(vilkårsperiode.getFomDato(), finnJournalpostIderSomIkkeBleBrukt(jpresponse, inntektsmeldingerSomSkulleVærtBrukt));
+
             }
 
         }
 
-        return new RelevanteEndringer(vilkårsperioderForRevurdering, kunEndringIRefusjonListe);
+        return new RelevanteEndringer(vilkårsperioderForRevurdering, kunEndringIRefusjonListe, journalpostIderSomIkkeBleBrukt);
     }
 
     private List<DatoIntervallEntitet> finnBeregningVilkårsperioder(BehandlingReferanse behandlingReferanse) {
@@ -160,9 +173,17 @@ public class FinnPerioderMedEndringVedFeilInntektsmelding {
     }
 
     private static boolean harEndring(JournalpostIderResponse jpresponse, List<Inntektsmelding> inntektsmeldingerSomSkulleVærtBrukt) {
+        var journalposterSomIkkeBleBrukt = finnJournalpostIderSomIkkeBleBrukt(jpresponse, inntektsmeldingerSomSkulleVærtBrukt);
+        return !journalposterSomIkkeBleBrukt.isEmpty();
+    }
+
+    private static Set<String> finnJournalpostIderSomIkkeBleBrukt(JournalpostIderResponse jpresponse, List<Inntektsmelding> inntektsmeldingerSomSkulleVærtBrukt) {
         var jounalpostIderSomSkulleVærtBrukt = inntektsmeldingerSomSkulleVærtBrukt.stream().map(Inntektsmelding::getJournalpostId).map(JournalpostId::getVerdi).collect(Collectors.toSet());
         var journalpostIderSomFaktiskErBrukt = jpresponse.getJournalpostIder().stream().map(no.nav.folketrygdloven.kalkulus.felles.v1.JournalpostId::getId).collect(Collectors.toSet());
-        return !erLike(journalpostIderSomFaktiskErBrukt, jounalpostIderSomSkulleVærtBrukt);
+
+
+        var journalposterSomIkkeBleBrukt = jounalpostIderSomSkulleVærtBrukt.stream().filter(jp -> !journalpostIderSomFaktiskErBrukt.contains(jp)).collect(Collectors.toSet());
+        return journalposterSomIkkeBleBrukt;
     }
 
     private static Set<Inntektsmelding> finnInntektsmeldingerFraJournalspostId(Set<String> journalpostIderSomFaktiskErBrukt, Set<Inntektsmelding> alleInntektsmeldinger) {
@@ -184,12 +205,9 @@ public class FinnPerioderMedEndringVedFeilInntektsmelding {
             .findFirst().orElseThrow();
     }
 
-    private static boolean erLike(Set<String> journalpostIderSomErBrukt, Set<String> jounalpostIderSomSkulleVærtBrukt) {
-        return journalpostIderSomErBrukt.size() == jounalpostIderSomSkulleVærtBrukt.size() && journalpostIderSomErBrukt.containsAll(jounalpostIderSomSkulleVærtBrukt);
-    }
-
     public record RelevanteEndringer(List<DatoIntervallEntitet> vilkårsperioderTilRevurdering,
-                                     List<DatoIntervallEntitet> kunEndringIRefusjonListe) {
+                                     List<DatoIntervallEntitet> kunEndringIRefusjonListe,
+                                     Map<LocalDate, Set<String>> journalposterSomIkkeBleBrukt) {
 
     }
 
