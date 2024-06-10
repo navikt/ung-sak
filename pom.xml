@@ -574,7 +574,7 @@
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>io.github.classgraph</groupId>
                 <artifactId>classgraph</artifactId>
-                <version>4.8.172</version>
+                <version>4.8.173</version>
             </dependency>
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->
@@ -670,7 +670,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>
-                    <version>3.2.0</version>
+                    <version>3.3.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>
