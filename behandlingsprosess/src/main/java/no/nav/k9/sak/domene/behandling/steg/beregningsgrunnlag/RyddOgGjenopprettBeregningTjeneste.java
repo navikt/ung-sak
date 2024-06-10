@@ -154,9 +154,8 @@ public class RyddOgGjenopprettBeregningTjeneste {
      */
     private Set<DatoIntervallEntitet> finnPerioderSomSkalInitieres(BehandlingReferanse behandlingReferanse, Vilkårene vilkårene) {
         var vilkårsPerioderTilVurderingTjeneste = getPerioderTilVurderingTjeneste(behandlingReferanse);
-        var intiellePerioder = new HashSet<>(vilkårsPerioderTilVurderingTjeneste
-            .utledRådataTilUtledningAvVilkårsperioder(behandlingReferanse.getBehandlingId())
-            .get(VilkårType.BEREGNINGSGRUNNLAGVILKÅR));
+        var intiellePerioder = vilkårsPerioderTilVurderingTjeneste
+            .utledFraDefinerendeVilkår(behandlingReferanse.getBehandlingId());
 
         var vilkårsPerioderIBeregning = vilkårene
             .getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow(() -> new IllegalStateException("Hadde ikke beregningsGrunnlagvilkår"))
