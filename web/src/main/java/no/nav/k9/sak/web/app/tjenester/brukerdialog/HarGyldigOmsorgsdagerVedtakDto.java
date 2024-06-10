@@ -1,7 +1,6 @@
 package no.nav.k9.sak.web.app.tjenester.brukerdialog;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.Valid;
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.k9.sak.typer.Saksnummer;
 
@@ -15,7 +14,7 @@ final class HarGyldigOmsorgsdagerVedtakDto extends BrukerdialogTilgangEvaluation
 
     HarGyldigOmsorgsdagerVedtakDto(
             Boolean harInnvilgedeBehandlinger,
-            @Valid Saksnummer saksnummer,
+            Saksnummer saksnummer,
             LocalDate vedtaksdato,
             Evaluation evaluation
     ) {
