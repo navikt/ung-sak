@@ -376,8 +376,8 @@ public class RevurderingMetrikkRepository {
             "       and b.avsluttet_dato >= :startTid " +
             "       and b.avsluttet_dato < :sluttTid " +
             "       and b.behandling_type = :revurdering " +
-            "   group by 1, 2) as statistikk_pr_behandling" +
-            "group by 1, 2, 3, 4, 5, 6, 7, 8;";
+            "   group by f.ytelse_type, b.id, aarsak.behandling_arsak_type, a.aksjonspunkt_def, md.kildesystem) as statistikk_pr_behandling" +
+            "group by ytelse_type, behandling_id, behandling_teller, antall_aksjonspunkt_per_behandling, har_endring_fra_bruker, har_endring_fra_inntektsmelding, har_endring_fra_annen_sak, har_endring_fra_endringsdialog;";
 
 
         String metricName = "revurdering_antall_aksjonspunkt_pr_behandling_og_endringsopphav_syv_dager";
