@@ -7,7 +7,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 import java.time.LocalDate;
 import java.util.Objects;
 
-final class HarGyldigOmsorgsdagerVedtakDto extends BrukerdialogTilgangEvaluation {
+public final class HarGyldigOmsorgsdagerVedtakDto extends BrukerdialogTilgangEvaluation {
     @JsonProperty private final Boolean harInnvilgedeBehandlinger;
     @JsonProperty private final Saksnummer saksnummer;
     @JsonProperty private final LocalDate vedtaksdato;
