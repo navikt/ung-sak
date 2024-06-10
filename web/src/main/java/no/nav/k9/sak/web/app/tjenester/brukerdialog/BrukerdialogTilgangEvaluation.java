@@ -5,11 +5,10 @@ import no.nav.fpsak.nare.evaluation.Evaluation;
 
 import java.util.Objects;
 
-public class BrukerdialogEvaluation {
+public class BrukerdialogTilgangEvaluation {
     @JsonIgnore private final Evaluation evaluation;
 
-    public BrukerdialogEvaluation(Evaluation evaluation) {
-        Objects.requireNonNull(evaluation, "evaluation");
+    public BrukerdialogTilgangEvaluation(Evaluation evaluation) {
         this.evaluation = evaluation;
     }
 

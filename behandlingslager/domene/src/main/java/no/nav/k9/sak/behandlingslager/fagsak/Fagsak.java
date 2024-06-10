@@ -171,8 +171,10 @@ public class Fagsak extends BaseEntitet {
         return relatertPersonAktørId;
     }
 
-    public Stream<AktørId> parterISaken() {
-        return Stream.of(brukerAktørId, pleietrengendeAktørId, relatertPersonAktørId);
+    public List<AktørId> parterISaken() {
+        return Stream.of(brukerAktørId, pleietrengendeAktørId, relatertPersonAktørId)
+            .filter(Objects::nonNull)
+            .toList();
     }
 
     public boolean erÅpen() {

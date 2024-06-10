@@ -2020,7 +2020,7 @@ comment on column BR_ANDEL.DAGSATS is 'Dagsats for tilkjent ytelse';
 comment on column BR_ANDEL.BRUKER_ER_MOTTAKER is 'Angir om bruker eller arbeidsgiver er mottaker';
 comment on column BR_ANDEL.BR_PERIODE_ID is 'Fremmednøkkel til tabell som knytter beregningsresultatandelen til en beregningsgrunnlagsperiode';
 comment on column BR_ANDEL.ARBEIDSGIVER_ORGNR is 'Organisasjonsnummer for arbeidsgivere som er virksomheter';
-comment on column BR_ANDEL.ARBEIDSGIVER_AKTOR_ID is 'Arbeidsgivers aktør id.';
+comment on column BR_ANDEL.ARBEIDSGIVER_AKTOR_ID is 'Arbeidsgivers aktørType id.';
 comment on column BR_ANDEL.ARBEIDSFORHOLD_TYPE is 'Typekode for arbeidstakeraktivitet som ikke er tilknyttet noen virksomhet';
 comment on column BR_ANDEL.ARBEIDSFORHOLD_INTERN_ID is 'Globalt unikt arbeidsforhold id generert for arbeidsgiver/arbeidsforhold. I motsetning til arbeidsforhold_ekstern_id som holder arbeidsgivers referanse';
 comment on column BR_ANDEL.AKTIVITET_STATUS is 'Aktivitetstatus for andelen';
@@ -2092,7 +2092,7 @@ comment on column BG_ANDEL_ARBEIDSFORHOLD.BG_ANDEL_ID is 'Beregningsgrunnlagande
 comment on column BG_ANDEL_ARBEIDSFORHOLD.ARBEIDSPERIODE_TOM is 'Til og med dato arbeidsperiode';
 comment on column BG_ANDEL_ARBEIDSFORHOLD.ARBEIDSPERIODE_FOM is 'Fra og med dato arbeidsperiode';
 comment on column BG_ANDEL_ARBEIDSFORHOLD.ARBEIDSGIVER_ORGNR is 'Organisasjonsnummer for arbeidsgivere som er virksomheter';
-comment on column BG_ANDEL_ARBEIDSFORHOLD.ARBEIDSGIVER_AKTOR_ID is 'Arbeidsgivers aktør id.';
+comment on column BG_ANDEL_ARBEIDSFORHOLD.ARBEIDSGIVER_AKTOR_ID is 'Arbeidsgivers aktørType id.';
 comment on column BG_ANDEL_ARBEIDSFORHOLD.ARBEIDSFORHOLD_INTERN_ID is 'Globalt unikt arbeidsforhold id generert for arbeidsgiver/arbeidsforhold. I motsetning til arbeidsforhold_ekstern_id som holder arbeidsgivers referanse';
 comment on column BG_AKTIVITETER.SKJARINGSTIDSPUNKT_OPPTJENING is 'Skjæringstidspunkt for opptjening';
 comment on column BG_AKTIVITET_STATUS.HJEMMEL is 'Hjemmel for beregningsgrunnlag';

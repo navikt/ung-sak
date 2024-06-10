@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -76,38 +77,56 @@ public class BrukerdialogTjeneste implements BrukerdialogFasade {
                 .orElse(null);
 
 
-            logger.info("Fant siste behandling med innvilget vedtak.");
-            return evaluerOgReturner(brukerAktørId, pleietrengendeAktørId, sistBehandlingMedInnvilgetVedtak);
+        logger.info("Fant siste behandling med innvilget vedtak.");
+        return evaluerOgReturner(brukerAktørId, pleietrengendeAktørId, sistBehandlingMedInnvilgetVedtak);
     }
 
     @NotNull
     private static HarGyldigOmsorgsdagerVedtakDto evaluerOgReturner(AktørId brukerAktørId, AktørId pleietrengendeAktørId, Behandling behandling) {
-        ErPartISakenGrunnlag erPartISakenGrunnlag = new ErPartISakenGrunnlag(behandling);
+        List<AktørId> parterISaken = null;
+        if (behandling != null && behandling.getFagsak() != null) {
+            parterISaken = behandling.getFagsak().parterISaken();
+        }
+
+        ErPartISakenGrunnlag erPartISakenGrunnlag = new ErPartISakenGrunnlag(parterISaken);
 
         logger.info("Sjekker om bruker og pleietrengende er parter i saken.");
         Evaluation evaluer = new ErPartISakenVilkår(brukerAktørId, pleietrengendeAktørId).evaluer(erPartISakenGrunnlag);
 
-        if (evaluer.result() == Resultat.JA) {
-            logger.info("Partene er parter i saken. Returnerer gyldig vedtak.");
-            return new HarGyldigOmsorgsdagerVedtakDto(
-                true,
-                behandling.getFagsak().getSaksnummer(),
-                behandling.getAvsluttetDato().toLocalDate(),
-                evaluer
-            );
-        } else {
-            Stream<String> reasons = new EvaluationSummary(evaluer)
-                .allOutcomes()
-                .stream()
-                .map(RuleReasonRef::getReasonTextTemplate);
-            logger.info("Partene er ikke parter i saken. Returnerer ugyldig vedtak. Grunn: {}", reasons);
+        switch (evaluer.result()) {
+            case JA -> {
+                logger.info("Partene er parter i saken. Returnerer gyldig vedtak.");
+                return new HarGyldigOmsorgsdagerVedtakDto.Builder()
+                        .harInnvilgedeBehandlinger(true)
+                        .saksnummer(behandling.getFagsak().getSaksnummer())
+                        .vedtaksdato(behandling.getAvsluttetDato().toLocalDate())
+                        .evaluering(evaluer)
+                        .build();
+            }
+            case NEI -> {
+                logger.info("Partene er parter i saken. Returnerer gyldig vedtak.");
+                return new HarGyldigOmsorgsdagerVedtakDto.Builder()
+                    .harInnvilgedeBehandlinger(false)
+                    .saksnummer(null)
+                    .vedtaksdato(null)
+                    .evaluering(evaluer)
+                    .build();
+            }
+            case null, default -> {
+                List<String> reasons = new EvaluationSummary(evaluer)
+                        .allOutcomes()
+                        .stream()
+                        .map(RuleReasonRef::getReasonTextTemplate)
+                        .toList();
+                logger.info("Partene er ikke parter i saken. Returnerer ugyldig vedtak. Grunn: {}", reasons);
 
-            return new HarGyldigOmsorgsdagerVedtakDto(
-                false,
-                null,
-                null,
-                evaluer
-            );
+                return new HarGyldigOmsorgsdagerVedtakDto.Builder()
+                        .harInnvilgedeBehandlinger(false)
+                        .saksnummer(null)
+                        .vedtaksdato(null)
+                        .evaluering(null)
+                        .build();
+            }
         }
     }
 }

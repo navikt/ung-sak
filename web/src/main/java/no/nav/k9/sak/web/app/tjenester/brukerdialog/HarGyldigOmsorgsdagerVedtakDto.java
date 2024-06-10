@@ -3,12 +3,13 @@ package no.nav.k9.sak.web.app.tjenester.brukerdialog;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import no.nav.fpsak.nare.evaluation.Evaluation;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.typer.Saksnummer;
 
 import java.time.LocalDate;
 import java.util.Objects;
 
-final class HarGyldigOmsorgsdagerVedtakDto extends BrukerdialogEvaluation {
+final class HarGyldigOmsorgsdagerVedtakDto extends BrukerdialogTilgangEvaluation {
     @JsonProperty private final Boolean harInnvilgedeBehandlinger;
     @JsonProperty private final @Valid Saksnummer saksnummer;
     @JsonProperty private final LocalDate vedtaksdato;
@@ -20,6 +21,7 @@ final class HarGyldigOmsorgsdagerVedtakDto extends BrukerdialogEvaluation {
             Evaluation evaluation
     ) {
         super(evaluation);
+        Objects.requireNonNull(harInnvilgedeBehandlinger, "harInnvilgedeBehandlinger");
         this.harInnvilgedeBehandlinger = harInnvilgedeBehandlinger;
         this.saksnummer = saksnummer;
         this.vedtaksdato = vedtaksdato;
@@ -29,7 +31,7 @@ final class HarGyldigOmsorgsdagerVedtakDto extends BrukerdialogEvaluation {
         return harInnvilgedeBehandlinger;
     }
 
-    public @Valid Saksnummer saksnummer() {
+    public Saksnummer saksnummer() {
         return saksnummer;
     }
 
@@ -60,4 +62,39 @@ final class HarGyldigOmsorgsdagerVedtakDto extends BrukerdialogEvaluation {
                 "vedtaksdato=" + vedtaksdato + ']';
     }
 
+    public static final class Builder {
+        private Boolean harInnvilgedeBehandlinger;
+        private Saksnummer saksnummer;
+        private LocalDate vedtaksdato;
+
+        private Evaluation evaluering;
+
+        public Builder() {
+        }
+
+        public Builder harInnvilgedeBehandlinger(Boolean harInnvilgedeBehandlinger) {
+            Objects.requireNonNull(harInnvilgedeBehandlinger, "harInnvilgedeBehandlinger");
+            this.harInnvilgedeBehandlinger = harInnvilgedeBehandlinger;
+            return this;
+        }
+
+        public Builder saksnummer(Saksnummer saksnummer) {
+            this.saksnummer = saksnummer;
+            return this;
+        }
+
+        public Builder vedtaksdato(LocalDate vedtaksdato) {
+            this.vedtaksdato = vedtaksdato;
+            return this;
+        }
+
+        public Builder evaluering(Evaluation evaluering) {
+            this.evaluering = evaluering;
+            return this;
+        }
+
+        public HarGyldigOmsorgsdagerVedtakDto build() {
+            return new HarGyldigOmsorgsdagerVedtakDto(harInnvilgedeBehandlinger, saksnummer, vedtaksdato, evaluering);
+        }
+    }
 }

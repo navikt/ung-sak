@@ -8,20 +8,22 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.web.app.tjenester.brukerdialog.ErPartISakenGrunnlag;
 
+import java.util.List;
+
 public class ErPartISaken extends LeafSpecification<ErPartISakenGrunnlag> {
     private static final String ID = "sif.brukerdialog.1";
 
-    public static ErPartISaken erPartISaken(AktørId aktørId, Aktør aktør) {
-        return new ErPartISaken(aktørId, aktør);
+    public static ErPartISaken erPartISaken(AktørId aktørId, AktørType aktørType) {
+        return new ErPartISaken(aktørId, aktørType);
     }
 
     private AktørId aktørId;
-    private Aktør aktør;
+    private AktørType aktørType;
 
-    public ErPartISaken(AktørId aktørId, Aktør aktør) {
+    public ErPartISaken(AktørId aktørId, AktørType aktørType) {
         super(ID);
         this.aktørId = aktørId;
-        this.aktør = aktør;
+        this.aktørType = aktørType;
     }
 
     @Override
@@ -31,22 +33,21 @@ public class ErPartISaken extends LeafSpecification<ErPartISakenGrunnlag> {
 
     @Override
     public Evaluation evaluate(ErPartISakenGrunnlag erPartISakenGrunnlag) {
-        Behandling behandling = erPartISakenGrunnlag.behandling();
-        if (behandling == null) {
+        List<AktørId> parterISaken = erPartISakenGrunnlag.parterISaken();
+        if (parterISaken == null) {
             return kanIkkeVurdere(new ErPartISakenRuleReason(ErPartISakenUtfall.IKKE_VURDERT, ID, "Behandling er null"));
         }
 
-        boolean erPartISaken = behandling.getFagsak().parterISaken()
-            .filter(java.util.Objects::nonNull)
+        boolean erPartISaken = parterISaken.stream()
             .anyMatch(a -> a.getAktørId().equals(aktørId.getAktørId()));
 
         if (!erPartISaken) {
-            return nei(new ErPartISakenRuleReason(ErPartISakenUtfall.NEI, ID, aktør + " er ikke part i saken"));
+            return nei(new ErPartISakenRuleReason(ErPartISakenUtfall.NEI, ID, aktørType + " er ikke part i saken"));
         }
-        return ja(new ErPartISakenRuleReason(ErPartISakenUtfall.JA, ID, aktør + " er part i saken"));
+        return ja(new ErPartISakenRuleReason(ErPartISakenUtfall.JA, ID, aktørType + " er part i saken"));
     }
 
-    public enum Aktør {
+    public enum AktørType {
         BRUKER_AKTØR,
         PLEIETRENGENDE_AKTØR,
     }

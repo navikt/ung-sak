@@ -1,4 +1,4 @@
--- notat aktør
+-- notat aktørType
 create table if not exists notat_aktoer
 (
     id            bigint                                 not null primary key,
@@ -18,7 +18,7 @@ create table if not exists notat_aktoer
 create index if not exists idx_notat_aktor on notat_aktoer (aktoer_id, ytelse_type) where aktiv = true;
 create sequence if not exists seq_notat_aktoer increment by 50 minvalue 1000000;
 
-comment on table notat_aktoer is 'Notat som gjelder en aktør, foreløpig bare pleietrengende';
+comment on table notat_aktoer is 'Notat som gjelder en aktørType, foreløpig bare pleietrengende';
 
 create table if not exists notat_aktoer_tekst
 (

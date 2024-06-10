@@ -76,10 +76,6 @@ class BrukerdialogTjenesteTest {
         AktørId pleietrengendeAktørId = AktørId.dummy();
 
         var fagsak = Fagsak.opprettNy(FagsakYtelseType.OMSORGSPENGER_KS, brukerAktørId, pleietrengendeAktørId, null, new Saksnummer("1234"), LocalDate.now(), LocalDate.now());
-        var behandling = Behandling.nyBehandlingFor(fagsak, BehandlingType.FØRSTEGANGSSØKNAD)
-            .medBehandlingResultatType(BehandlingResultatType.AVSLÅTT)
-            .medAvsluttetDato(LocalDateTime.now())
-            .build();
 
         when(fagsakRepository.finnFagsakRelatertTil(any(), any(), any(), any(), any(), any())).thenReturn(listOf(fagsak));
         when(behandlingRepository.finnSisteInnvilgetBehandling(any())).thenReturn(Optional.empty());

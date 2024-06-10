@@ -27,9 +27,9 @@ public class ErPartISakenVilkår implements RuleService<ErPartISakenGrunnlag> {
         Ruleset<ErPartISakenGrunnlag> behandlingContextRuleset = new Ruleset<>();
         return behandlingContextRuleset.regel(
                 "sif.brukerdialog.1",
-                "Aktør må være part i saken",
-                new ErPartISaken(this.brukerAktørId, ErPartISaken.Aktør.BRUKER_AKTØR)
-                    .og(new ErPartISaken(this.pleietrengendeAktørId, ErPartISaken.Aktør.PLEIETRENGENDE_AKTØR))
+                "AktørType må være part i saken",
+                new ErPartISaken(this.brukerAktørId, ErPartISaken.AktørType.BRUKER_AKTØR)
+                    .og(new ErPartISaken(this.pleietrengendeAktørId, ErPartISaken.AktørType.PLEIETRENGENDE_AKTØR))
         );
     }
 }
