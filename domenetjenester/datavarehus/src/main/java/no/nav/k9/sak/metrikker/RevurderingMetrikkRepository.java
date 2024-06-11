@@ -349,19 +349,19 @@ public class RevurderingMetrikkRepository {
             "               and a.aksjonspunkt_status != 'AVBR'" +
             "               and (a.vent_aarsak is null or a.vent_aarsak = '-')" +
             "        ) as antall_aksjonspunkt_per_behandling," +
-            "       exists (select aarsak.behandling_arsak_type from behandling_arsak aarsak" +
+            "       exists(select aarsak.behandling_arsak_type from behandling_arsak aarsak" +
             "           where aarsak.behandling_id = b.id" +
             "               and aarsak.behandling_arsak_type = 'RE-END-FRA-BRUKER'" +
             "       ) as har_endring_fra_bruker," +
-            "       exists (select aarsak.behandling_arsak_type from behandling_arsak aarsak" +
+            "       exists(select aarsak.behandling_arsak_type from behandling_arsak aarsak" +
             "           where aarsak.behandling_id = b.id" +
             "               and aarsak.behandling_arsak_type = 'RE-END-INNTEKTSMELD'" +
             "       ) as har_endring_fra_inntektsmelding," +
-            "       exists (select aarsak.behandling_arsak_type from behandling_arsak aarsak" +
+            "       exists(select aarsak.behandling_arsak_type from behandling_arsak aarsak" +
             "           where aarsak.behandling_id = b.id" +
             "               and aarsak.behandling_arsak_type = 'RE_ANNEN_SAK'" +
             "       ) as har_endring_fra_annen_sak," +
-            "       exists (select md.kildesystem from mottatt_dokument md" +
+            "       exists(select md.kildesystem from mottatt_dokument md" +
             "           where md.behandling_id = b.id" +
             "               and md.kildesystem = 'endringsdialog'" +
             "       ) as har_endring_fra_endringsdialog" +
@@ -376,8 +376,8 @@ public class RevurderingMetrikkRepository {
             "       and b.avsluttet_dato >= :startTid " +
             "       and b.avsluttet_dato < :sluttTid " +
             "       and b.behandling_type = :revurdering " +
-            "   group by 1, 2) as statistikk_pr_behandling" +
-            "group by 1, 2, 3, 4, 5, 6, 7, 8;";
+            "   group by f.ytelse_type, b.id, aarsak.behandling_arsak_type, a.aksjonspunkt_def, md.kildesystem) as statistikk_pr_behandling" +
+            "group by ytelse_type, behandling_id, behandling_teller, antall_aksjonspunkt_per_behandling, har_endring_fra_bruker, har_endring_fra_inntektsmelding, har_endring_fra_annen_sak, har_endring_fra_endringsdialog;";
 
 
         String metricName = "revurdering_antall_aksjonspunkt_pr_behandling_og_endringsopphav_syv_dager";
