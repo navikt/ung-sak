@@ -105,9 +105,6 @@ public class BrukerdialogTjeneste implements BrukerdialogFasade {
             }
 
             case NEI, IKKE_VURDERT -> {
-                if (evaluer.result() == Resultat.NEI) logger.info("Manglende parter i saken. Returnerer gyldig vedtak.");
-                else logger.info("Ikke vurdert. Returnerer gyldig vedtak.");
-
                 loggGrunn(evaluer);
                 return new HarGyldigOmsorgsdagerVedtakDto.Builder()
                     .harInnvilgedeBehandlinger(false)
@@ -135,6 +132,6 @@ public class BrukerdialogTjeneste implements BrukerdialogFasade {
             .stream()
             .map(RuleReasonRef::getReasonTextTemplate)
             .toList();
-        logger.info("Partene er ikke parter i saken. Returnerer ugyldig vedtak. Grunn: {}", reasons);
+        logger.info("Ikke tilgang til data. Grunn: {}", reasons);
     }
 }
