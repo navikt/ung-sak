@@ -94,6 +94,8 @@ public class FinnSakerMedFeilImTask implements ProsessTaskHandler {
 
         log.info("Fant følgende behandlinger med feil inntektsmelding: " + behandlingerMedEndringer);
 
+        dumpFeilImRepository.deaktiverAlle();
+
         behandlingerMedEndringer.forEach(b -> dumpFeilImRepository.lagre(b.getKey(),
             new HashSet<>(b.getValue().get().vilkårsperioderTilRevurdering()),
             new HashSet<>(b.getValue().get().kunEndringIRefusjonListe())));
