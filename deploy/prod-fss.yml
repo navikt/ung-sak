@@ -282,7 +282,7 @@ spec:
     - name: FERIEPENGER_AV_DAGPENGER
       value: "false"
     - name: MANUELT_VURDER_UTVIDET_RETT
-      value: "false"
+      value: "true"
     - name: SEND_INNTEKTSMELDING_FORESPORSEL
       value: "false"
     - name: ENABLE_UKLASSIFISERT_SYKDOMSDOK_SJEKK
