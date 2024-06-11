@@ -5,7 +5,6 @@ import no.nav.fpsak.nare.evaluation.RuleReasonRef;
 import no.nav.fpsak.nare.evaluation.node.SingleEvaluation;
 import no.nav.fpsak.nare.specification.LeafSpecification;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.web.app.tjenester.brukerdialog.ErPartISakenGrunnlag;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.brukerdialog;
+package no.nav.k9.sak.web.app.tjenester.brukerdialog.policy;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import no.nav.fpsak.nare.evaluation.Evaluation;

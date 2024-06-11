@@ -5,7 +5,6 @@ import no.nav.fpsak.nare.Ruleset;
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.specification.Specification;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.web.app.tjenester.brukerdialog.ErPartISakenGrunnlag;
 
 public class ErPartISakenVilkår implements RuleService<ErPartISakenGrunnlag> {
     private AktørId brukerAktørId;

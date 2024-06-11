@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.brukerdialog;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.web.app.tjenester.brukerdialog.policy.BrukerdialogTilgangEvaluation;
 
 import java.time.LocalDate;
 import java.util.Objects;
