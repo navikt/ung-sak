@@ -2,28 +2,25 @@ package no.nav.k9.sak.web.app.tjenester.brukerdialog;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.fpsak.nare.evaluation.Evaluation;
-import no.nav.fpsak.nare.evaluation.RuleReasonRef;
-import no.nav.fpsak.nare.evaluation.summary.EvaluationSummary;
 import no.nav.k9.felles.integrasjon.pdl.Pdl;
+import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.web.app.tjenester.brukerdialog.policy.erpartisaken.ErPartISakenVilkår;
 import no.nav.k9.sikkerhet.oidc.token.context.ContextAwareTokenProvider;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Comparator;
-import java.util.List;
 import java.util.Optional;
 
 @Dependent
-public class BrukerdialogTjeneste implements BrukerdialogFasade {
-    private static final Logger logger = LoggerFactory.getLogger(BrukerdialogTjeneste.class);
+public class BrukerdialogTjeneste {
+    private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess");
+
+    private static final Logger logger = LoggerFactory.getLogger(BrukerdialogRestTjeneste.class);
 
     private final FagsakRepository fagsakRepository;
 
@@ -48,20 +45,17 @@ public class BrukerdialogTjeneste implements BrukerdialogFasade {
 
     }
 
-    @Override
     public HarGyldigOmsorgsdagerVedtakDto harGyldigOmsorgsdagerVedtak(AktørId pleietrengendeAktørId) {
         //FIXME spør via k9-aarskvantum når tjenesten der er klar, for å få med Infotrygd-vedtak
         //FIXME håndter hvis bruker har fått avslag etter innvilgelse
         //FIXME ta med alle typer omsorgsdagervedtak eller rename metode
         var brukerident = tokenProvider.getUserId();
-        logger.info("Henter aktørId for brukerident.");
-        var brukerAktørId = new AktørId(pdlKlient.hentAktørIdForPersonIdent(brukerident).orElseThrow(() -> new IllegalStateException("Fant ikke aktørId for bruker")));
+        var brukerAktørId = pdlKlient.hentAktørIdForPersonIdent(brukerident).orElseThrow(()-> new IllegalStateException("Fant ikke aktørId for bruker"));
 
-        logger.info("Henter siste behandling med innvilget vedtak.");
-        Behandling sistBehandlingMedInnvilgetVedtak =
+        Optional<Behandling> sistBehandlingMedInnvilgetVedtak =
             fagsakRepository.finnFagsakRelatertTil(
                     FagsakYtelseType.OMSORGSPENGER_KS,
-                    brukerAktørId,
+                    new AktørId(brukerAktørId),
                     pleietrengendeAktørId,
                     null,
                     null,
@@ -71,69 +65,20 @@ public class BrukerdialogTjeneste implements BrukerdialogFasade {
                 .map(fagsak -> behandlingRepository.finnSisteInnvilgetBehandling(fagsak.getId()))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .max(Comparator.comparing(Behandling::getAvsluttetDato))
-                .orElse(null);
+                .max(Comparator.comparing(Behandling::getAvsluttetDato));
 
+        if (sistBehandlingMedInnvilgetVedtak.isPresent()) {
+            Behandling behandling = sistBehandlingMedInnvilgetVedtak.get();
 
-        logger.info("Fant siste behandling med innvilget vedtak.");
-        return evaluerOgReturner(brukerAktørId, pleietrengendeAktørId, sistBehandlingMedInnvilgetVedtak);
-    }
-
-    @NotNull
-    private static HarGyldigOmsorgsdagerVedtakDto evaluerOgReturner(AktørId brukerAktørId, AktørId pleietrengendeAktørId, Behandling behandling) {
-        List<AktørId> parterISaken = null;
-        if (behandling != null && behandling.getFagsak() != null) {
-            parterISaken = behandling.getFagsak().parterISaken();
-        }
-
-        ErPartISakenGrunnlag erPartISakenGrunnlag = new ErPartISakenGrunnlag(parterISaken);
-
-        logger.info("Sjekker om bruker og pleietrengende er parter i saken.");
-        Evaluation evaluer = new ErPartISakenVilkår(brukerAktørId, pleietrengendeAktørId).evaluer(erPartISakenGrunnlag);
-
-        switch (evaluer.result()) {
-            case JA -> {
-                logger.info("Partene er parter i saken. Returnerer gyldig vedtak.");
-                return new HarGyldigOmsorgsdagerVedtakDto.Builder()
-                        .harInnvilgedeBehandlinger(true)
-                        .saksnummer(behandling.getFagsak().getSaksnummer())
-                        .vedtaksdato(behandling.getAvsluttetDato().toLocalDate())
-                        .evaluering(evaluer)
-                        .build();
-            }
-            case NEI -> {
-                logger.info("Manglende parter i saken. Returnerer gyldig vedtak.");
-                return new HarGyldigOmsorgsdagerVedtakDto.Builder()
-                    .harInnvilgedeBehandlinger(false)
-                    .saksnummer(null)
-                    .vedtaksdato(null)
-                    .evaluering(evaluer)
-                    .build();
-            }
-            case IKKE_VURDERT -> {
-                logger.info("Ikke vurdert på grunn av manglende grunnlang. Returnerer ugyldig vedtak.");
-                return new HarGyldigOmsorgsdagerVedtakDto.Builder()
-                    .harInnvilgedeBehandlinger(false)
-                    .saksnummer(null)
-                    .vedtaksdato(null)
-                    .evaluering(evaluer)
-                    .build();
-            }
-            case null, default -> {
-                List<String> reasons = new EvaluationSummary(evaluer)
-                        .allOutcomes()
-                        .stream()
-                        .map(RuleReasonRef::getReasonTextTemplate)
-                        .toList();
-                logger.info("Partene er ikke parter i saken. Returnerer ugyldig vedtak. Grunn: {}", reasons);
-
-                return new HarGyldigOmsorgsdagerVedtakDto.Builder()
-                        .harInnvilgedeBehandlinger(false)
-                        .saksnummer(null)
-                        .vedtaksdato(null)
-                        .evaluering(null)
-                        .build();
-            }
+            return new HarGyldigOmsorgsdagerVedtakDto(
+                true,
+                behandling.getFagsak().getSaksnummer(),
+                behandling.getAvsluttetDato().toLocalDate()
+            );
+        } else {
+            return new HarGyldigOmsorgsdagerVedtakDto(
+                false, null, null
+            );
         }
     }
 }
