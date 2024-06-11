@@ -6119,6 +6119,9 @@
           "antallDagerArbeidsgiverDekker" : {
             "type" : "number"
           },
+          "antallDagerFraværRapporterSomNyoppstaret" : {
+            "type" : "number"
+          },
           "antallDagerInfotrygd" : {
             "type" : "number"
           },
