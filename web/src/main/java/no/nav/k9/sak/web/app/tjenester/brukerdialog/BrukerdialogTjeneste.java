@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.brukerdialog;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.nare.evaluation.Evaluation;
+import no.nav.fpsak.nare.evaluation.Resultat;
 import no.nav.fpsak.nare.evaluation.RuleReasonRef;
 import no.nav.fpsak.nare.evaluation.summary.EvaluationSummary;
 import no.nav.k9.felles.integrasjon.pdl.Pdl;
@@ -96,45 +97,44 @@ public class BrukerdialogTjeneste implements BrukerdialogFasade {
             case JA -> {
                 logger.info("Partene er parter i saken. Returnerer gyldig vedtak.");
                 return new HarGyldigOmsorgsdagerVedtakDto.Builder()
-                        .harInnvilgedeBehandlinger(true)
-                        .saksnummer(behandling.getFagsak().getSaksnummer())
-                        .vedtaksdato(behandling.getAvsluttetDato().toLocalDate())
-                        .evaluering(evaluer)
-                        .build();
-            }
-            case NEI -> {
-                logger.info("Manglende parter i saken. Returnerer gyldig vedtak.");
-                return new HarGyldigOmsorgsdagerVedtakDto.Builder()
-                    .harInnvilgedeBehandlinger(false)
-                    .saksnummer(null)
-                    .vedtaksdato(null)
+                    .harInnvilgedeBehandlinger(true)
+                    .saksnummer(behandling.getFagsak().getSaksnummer())
+                    .vedtaksdato(behandling.getAvsluttetDato().toLocalDate())
                     .evaluering(evaluer)
                     .build();
             }
-            case IKKE_VURDERT -> {
-                logger.info("Ikke vurdert på grunn av manglende grunnlang. Returnerer ugyldig vedtak.");
-                return new HarGyldigOmsorgsdagerVedtakDto.Builder()
-                    .harInnvilgedeBehandlinger(false)
-                    .saksnummer(null)
-                    .vedtaksdato(null)
-                    .evaluering(evaluer)
-                    .build();
-            }
-            case null, default -> {
-                List<String> reasons = new EvaluationSummary(evaluer)
-                        .allOutcomes()
-                        .stream()
-                        .map(RuleReasonRef::getReasonTextTemplate)
-                        .toList();
-                logger.info("Partene er ikke parter i saken. Returnerer ugyldig vedtak. Grunn: {}", reasons);
 
+            case NEI, IKKE_VURDERT -> {
+                if (evaluer.result() == Resultat.NEI) logger.info("Manglende parter i saken. Returnerer gyldig vedtak.");
+                else logger.info("Ikke vurdert. Returnerer gyldig vedtak.");
+
+                loggGrunn(evaluer);
                 return new HarGyldigOmsorgsdagerVedtakDto.Builder()
-                        .harInnvilgedeBehandlinger(false)
-                        .saksnummer(null)
-                        .vedtaksdato(null)
-                        .evaluering(null)
-                        .build();
+                    .harInnvilgedeBehandlinger(false)
+                    .saksnummer(null)
+                    .vedtaksdato(null)
+                    .evaluering(evaluer)
+                    .build();
+            }
+
+            default -> {
+                logger.info("Ukjent resultat. Returnerer ugyldig vedtak.");
+                return new HarGyldigOmsorgsdagerVedtakDto.Builder()
+                    .harInnvilgedeBehandlinger(false)
+                    .saksnummer(null)
+                    .vedtaksdato(null)
+                    .evaluering(null)
+                    .build();
             }
         }
+    }
+
+    private static void loggGrunn(Evaluation evaluer) {
+        List<String> reasons = new EvaluationSummary(evaluer)
+            .allOutcomes()
+            .stream()
+            .map(RuleReasonRef::getReasonTextTemplate)
+            .toList();
+        logger.info("Partene er ikke parter i saken. Returnerer ugyldig vedtak. Grunn: {}", reasons);
     }
 }

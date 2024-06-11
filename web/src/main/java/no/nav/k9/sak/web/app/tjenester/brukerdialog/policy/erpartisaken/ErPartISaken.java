@@ -11,10 +11,6 @@ import java.util.List;
 public class ErPartISaken extends LeafSpecification<ErPartISakenGrunnlag> {
     private static final String ID = "sif.brukerdialog.1";
 
-    public static ErPartISaken erPartISaken(AktørId aktørId, AktørType aktørType) {
-        return new ErPartISaken(aktørId, aktørType);
-    }
-
     private AktørId aktørId;
     private AktørType aktørType;
 
