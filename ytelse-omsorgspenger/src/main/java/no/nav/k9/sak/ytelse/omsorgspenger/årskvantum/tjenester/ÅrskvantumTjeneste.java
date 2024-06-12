@@ -2,10 +2,12 @@ package no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester;
 
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -19,6 +21,11 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
@@ -51,6 +58,8 @@ import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlagV2;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUtbetalingGrunnlag;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUttrekk;
+import no.nav.k9.felles.integrasjon.rest.DefaultJsonMapper;
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.person.Diskresjonskode;
 import no.nav.k9.kodeverk.person.RelasjonsRolleType;
@@ -99,6 +108,8 @@ import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.rest.ÅrskvantumRestKlient
 @ApplicationScoped
 @Default
 public class ÅrskvantumTjeneste {
+
+    private static final Logger logger = LoggerFactory.getLogger(ÅrskvantumTjeneste.class);
 
     private MapOppgittFraværOgVilkårsResultat mapOppgittFraværOgVilkårsResultat;
     private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
@@ -338,11 +349,34 @@ public class ÅrskvantumTjeneste {
             VedtatteRammevedtakTjeneste.InnvilgedeOgAvslåtteRammevedtak k9sakRammevedtak = vedtatteRammevedtakTjeneste.hentK9sakRammevedtak(søkerAktørId);
             List<BarnFødselsdato> barnFødselsdato = barna.stream().map(b -> new BarnFødselsdato(b.getPersonIdent(), b.getFødselsdato())).toList();
             RammevedtakV2Request request = new RammevedtakV2Request(personIdent.toString(), barnFødselsdato, periode, k9sakRammevedtak.innvilgede(), k9sakRammevedtak.avslåtte());
+            logRequestInDev(request); //logg request for evt. feilsøking
             return årskvantumKlient.hentRammevedtak(request);
+        } else if (Environment.current().isDev()){
+            //logg request for feilsøking
+            VedtatteRammevedtakTjeneste.InnvilgedeOgAvslåtteRammevedtak k9sakRammevedtak = vedtatteRammevedtakTjeneste.hentK9sakRammevedtak(søkerAktørId);
+            List<BarnFødselsdato> barnFødselsdato = barna.stream().map(b -> new BarnFødselsdato(b.getPersonIdent(), b.getFødselsdato())).toList();
+            RammevedtakV2Request request = new RammevedtakV2Request(personIdent.toString(), barnFødselsdato, periode, k9sakRammevedtak.innvilgede(), k9sakRammevedtak.avslåtte());
+            logRequestInDev(request);
         }
 
         var alleBarnasFnr = barna.stream().map(barn -> PersonIdent.fra(barn.getPersonIdent())).toList();
         return årskvantumKlient.hentRammevedtak(personIdent, alleBarnasFnr, periode);
+    }
+
+    private static void logRequestInDev(RammevedtakV2Request request){
+        if (Environment.current().isDev()){
+            String requestString = toJson(request);
+            String base64encoded = Base64.getEncoder().encodeToString(requestString.getBytes(StandardCharsets.UTF_8));
+            logger.info("Rammevedtak-request: {}", base64encoded);
+        }
+    }
+
+    private static String toJson(RammevedtakV2Request request){
+        try {
+            return DefaultJsonMapper.getObjectMapper().writeValueAsString(request);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private DatoIntervallEntitet hentInformasjonsperiode(Set<DatoIntervallEntitet> vilkårsperioder, Set<OppgittFraværPeriode> oppgittFravær) {
