@@ -6,11 +6,11 @@ import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.specification.Specification;
 import no.nav.k9.sak.typer.AktørId;
 
-public class ErPartISakenVilkår implements RuleService<ErPartISakenGrunnlag> {
+public class ErPartISakenTilgangVurdering implements RuleService<ErPartISakenGrunnlag> {
     private AktørId brukerAktørId;
     private AktørId pleietrengendeAktørId;
 
-    public ErPartISakenVilkår(AktørId brukerAktørId, AktørId pleietrengendeAktørId) {
+    public ErPartISakenTilgangVurdering(AktørId brukerAktørId, AktørId pleietrengendeAktørId) {
         this.brukerAktørId = brukerAktørId;
         this.pleietrengendeAktørId = pleietrengendeAktørId;
     }

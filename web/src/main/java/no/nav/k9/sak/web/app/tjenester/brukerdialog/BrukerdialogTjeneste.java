@@ -3,7 +3,6 @@ package no.nav.k9.sak.web.app.tjenester.brukerdialog;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.nare.evaluation.Evaluation;
-import no.nav.fpsak.nare.evaluation.Resultat;
 import no.nav.fpsak.nare.evaluation.RuleReasonRef;
 import no.nav.fpsak.nare.evaluation.summary.EvaluationSummary;
 import no.nav.k9.felles.integrasjon.pdl.Pdl;
@@ -13,9 +12,8 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.web.app.tjenester.brukerdialog.policy.erpartisaken.ErPartISakenGrunnlag;
-import no.nav.k9.sak.web.app.tjenester.brukerdialog.policy.erpartisaken.ErPartISakenVilkår;
+import no.nav.k9.sak.web.app.tjenester.brukerdialog.policy.erpartisaken.ErPartISakenTilgangVurdering;
 import no.nav.k9.sikkerhet.oidc.token.context.ContextAwareTokenProvider;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,7 +88,7 @@ public class BrukerdialogTjeneste implements BrukerdialogFasade {
         ErPartISakenGrunnlag erPartISakenGrunnlag = new ErPartISakenGrunnlag(parterISaken);
 
         logger.info("Sjekker om bruker og pleietrengende er parter i saken.");
-        Evaluation evaluer = new ErPartISakenVilkår(brukerAktørId, pleietrengendeAktørId).evaluer(erPartISakenGrunnlag);
+        Evaluation evaluer = new ErPartISakenTilgangVurdering(brukerAktørId, pleietrengendeAktørId).evaluer(erPartISakenGrunnlag);
 
         switch (evaluer.result()) {
             case JA -> {
