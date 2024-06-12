@@ -15472,13 +15472,28 @@
       "post" : {
         "description" : "Data til utledning av forlengelse av aktivitetstatus",
         "operationId" : "finnAktivitetstatusForlengelseData",
-        "parameters" : [ {
-          "in" : "query",
-          "name" : "behandlingId",
-          "schema" : {
-            "$ref" : "#/components/schemas/BehandlingIdDto"
+        "requestBody" : {
+          "content" : {
+            "application/x-www-form-urlencoded" : {
+              "schema" : {
+                "properties" : {
+                  "begrunnelse" : {
+                    "description" : "begrunnelse",
+                    "maximum" : 2000,
+                    "type" : "string"
+                  },
+                  "behandlingUuid" : {
+                    "description" : "behandlingUUID",
+                    "format" : "uuid",
+                    "type" : "string"
+                  }
+                },
+                "required" : [ "begrunnelse", "behandlingUuid" ],
+                "type" : "object"
+              }
+            }
           }
-        } ],
+        },
         "responses" : {
           "default" : {
             "content" : {
