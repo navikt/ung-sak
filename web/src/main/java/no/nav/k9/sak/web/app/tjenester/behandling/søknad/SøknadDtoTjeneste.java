@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -164,8 +165,13 @@ public class SøknadDtoTjeneste {
             return List.of();
         }
 
-        var identMap = angittePersoner.stream().filter(p -> p.getAktørId() != null)
-            .map(p -> new AbstractMap.SimpleEntry<>(p.getAktørId(), personinfoAdapter.hentBrukerBasisForAktør(p.getAktørId()).orElse(null)))
+        Set<AktørId> aktørIder = angittePersoner.stream()
+            .map(SøknadAngittPersonEntitet::getAktørId)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
+
+        var identMap = aktørIder.stream()
+            .map(aktørId -> new AbstractMap.SimpleEntry<>(aktørId, personinfoAdapter.hentBrukerBasisForAktør(aktørId).orElse(null)))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         return angittePersoner.stream()
@@ -185,7 +191,7 @@ public class SøknadDtoTjeneste {
                 }
                 return dto;
             })
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private List<ManglendeVedleggDto> genererManglendeVedlegg(BehandlingReferanse ref) {
