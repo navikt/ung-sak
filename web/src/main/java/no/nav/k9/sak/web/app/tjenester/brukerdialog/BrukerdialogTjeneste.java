@@ -81,7 +81,6 @@ public class BrukerdialogTjeneste implements BrukerdialogFasade {
         return evaluerOgReturner(brukerAktørId, pleietrengendeAktørId, sistBehandlingMedInnvilgetVedtak);
     }
 
-    @NotNull
     private static HarGyldigOmsorgsdagerVedtakDto evaluerOgReturner(AktørId brukerAktørId, AktørId pleietrengendeAktørId, Behandling behandling) {
         List<AktørId> parterISaken = null;
         if (behandling != null && behandling.getFagsak() != null) {
