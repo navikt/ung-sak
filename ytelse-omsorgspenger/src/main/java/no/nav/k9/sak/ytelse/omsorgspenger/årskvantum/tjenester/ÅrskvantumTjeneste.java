@@ -318,7 +318,7 @@ public class ÅrskvantumTjeneste {
 
         if (rammevedtakSammenstillingIÅrskvantum){
             VedtatteRammevedtakTjeneste.InnvilgedeOgAvslåtteRammevedtak k9sakRammevedtak = vedtatteRammevedtakTjeneste.hentK9sakRammevedtak(søkerAktørId);
-            RammevedtakV2Request request = new RammevedtakV2Request(personIdent.toString(), barna.stream().map(this::mapBarnFødseldato).toList(), periode, k9sakRammevedtak.innvilgede(), k9sakRammevedtak.avslåtte());
+            RammevedtakV2Request request = new RammevedtakV2Request(personIdent.getIdent(), barna.stream().map(this::mapBarnFødseldato).toList(), periode, k9sakRammevedtak.innvilgede(), k9sakRammevedtak.avslåtte());
             return årskvantumKlient.hentRammevedtak(request);
         }
 
@@ -348,14 +348,14 @@ public class ÅrskvantumTjeneste {
         if (rammevedtakSammenstillingIÅrskvantum){
             VedtatteRammevedtakTjeneste.InnvilgedeOgAvslåtteRammevedtak k9sakRammevedtak = vedtatteRammevedtakTjeneste.hentK9sakRammevedtak(søkerAktørId);
             List<BarnFødselsdato> barnFødselsdato = barna.stream().map(b -> new BarnFødselsdato(b.getPersonIdent(), b.getFødselsdato())).toList();
-            RammevedtakV2Request request = new RammevedtakV2Request(personIdent.toString(), barnFødselsdato, periode, k9sakRammevedtak.innvilgede(), k9sakRammevedtak.avslåtte());
+            RammevedtakV2Request request = new RammevedtakV2Request(personIdent.getIdent(), barnFødselsdato, periode, k9sakRammevedtak.innvilgede(), k9sakRammevedtak.avslåtte());
             logRequestInDev(request); //logg request for evt. feilsøking
             return årskvantumKlient.hentRammevedtak(request);
         } else if (Environment.current().isDev()){
             //logg request for feilsøking
             VedtatteRammevedtakTjeneste.InnvilgedeOgAvslåtteRammevedtak k9sakRammevedtak = vedtatteRammevedtakTjeneste.hentK9sakRammevedtak(søkerAktørId);
             List<BarnFødselsdato> barnFødselsdato = barna.stream().map(b -> new BarnFødselsdato(b.getPersonIdent(), b.getFødselsdato())).toList();
-            RammevedtakV2Request request = new RammevedtakV2Request(personIdent.toString(), barnFødselsdato, periode, k9sakRammevedtak.innvilgede(), k9sakRammevedtak.avslåtte());
+            RammevedtakV2Request request = new RammevedtakV2Request(personIdent.getIdent(), barnFødselsdato, periode, k9sakRammevedtak.innvilgede(), k9sakRammevedtak.avslåtte());
             logRequestInDev(request);
         }
 
