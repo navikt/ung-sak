@@ -8,7 +8,9 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
+import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Dependent
@@ -56,6 +58,13 @@ public class DumpFeilImRepository {
                 "WHERE s.aktiv = true", DumpFeilIM.class);
         return query.getResultList();
     }
+
+    public void deaktiverAlle() {
+        Query query = entityManager.createNativeQuery("UPDATE DUMP_FEIL_IM_GR SET aktiv = false");
+        query.executeUpdate();
+        entityManager.flush();
+    }
+
 
 
 

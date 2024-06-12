@@ -297,8 +297,6 @@ spec:
       value: "true"
     - name: FERIEPENGER_AV_DAGPENGER
       value: "true"
-    - name: MANUELT_VURDER_UTVIDET_RETT
-      value: "true"
     - name: SEND_INNTEKTSMELDING_FORESPORSEL
       value: "true"
     - name: ENABLE_UKLASSIFISERT_SYKDOMSDOK_SJEKK
@@ -306,7 +304,7 @@ spec:
     - name: BRUKERDIALOG_REST_TJENESTE_ENABLED
       value: "true"
     - name: OMP_RAMMEVEDTAK_SAMMENSTILLNG_AARSKVANTUM
-      value: "true"
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

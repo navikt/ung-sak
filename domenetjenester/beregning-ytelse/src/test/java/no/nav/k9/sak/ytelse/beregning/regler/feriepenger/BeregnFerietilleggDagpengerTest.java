@@ -1,5 +1,14 @@
 package no.nav.k9.sak.ytelse.beregning.regler.feriepenger;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatAndel;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatPeriode;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.AktivitetStatus;
@@ -8,14 +17,6 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.Beregningsresultat
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerRegelModell;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.DagpengerKilde;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.DagpengerPeriode;
-import org.junit.jupiter.api.Test;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class BeregnFerietilleggDagpengerTest {
     private static final LocalDate STP = LocalDate.of(2023,6,1);
@@ -94,6 +95,28 @@ class BeregnFerietilleggDagpengerTest {
     void skal_gi_ferietillegg_når_over_8_med_dagpenger_fra_andre_kilder() {
         var tyPeriode = lagTilkjentYtelseDagpenger(STP, etter(10), 900L);
         var dp1 = lagDPPeriode(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 1, 31));
+        var dp2 = lagDPPeriode(LocalDate.of(2023, 4, 1), LocalDate.of(2023, 4, 30));
+
+        var regelmodell = BeregningsresultatFeriepengerRegelModell.builder()
+            .medPerioderMedDagpenger(List.of(dp1, dp2))
+            .medBeregningsresultatPerioder(List.of(tyPeriode))
+            .build();
+        new BeregnFerietilleggDagpenger().evaluate(regelmodell);
+
+        assertThat(regelmodell).isNotNull();
+
+        var feriepengerP1 = feriepengerDagpengerFraPeriodeIndex(regelmodell, 0);
+
+        assertThat(feriepengerP1).hasSize(1);
+        assertThat(feriepengerP1.getFirst().getOpptjeningÅr()).isEqualTo(LocalDate.of(2023,1,1));
+        assertThat(feriepengerP1.getFirst().getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(599));
+    }
+
+
+    @Test
+    void skal_tåle_overlapp_i_periode_fra_ulike_kilder() {
+        var tyPeriode = lagTilkjentYtelseDagpenger(STP, etter(10), 900L);
+        var dp1 = lagDPPeriode(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 4, 5));
         var dp2 = lagDPPeriode(LocalDate.of(2023, 4, 1), LocalDate.of(2023, 4, 30));
 
         var regelmodell = BeregningsresultatFeriepengerRegelModell.builder()

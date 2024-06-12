@@ -61,10 +61,15 @@ public class FinnSakerMedFeilImTask implements ProsessTaskHandler {
         Query query = entityManager.createNativeQuery(
             "SELECT DISTINCT ON (b.fagsak_id) b.* from behandling b " +
                 "inner join fagsak f on f.id = b.fagsak_id " +
+                "inner join gr_beregningsgrunnlag gr_bg on gr_bg.behandling_id = b.id " +
                 "where b.opprettet_tid >= :OPPRETTET_FOM " +
-                "and b.avsluttet_dato is not null " +
                 "and b.behandling_type = 'BT-004' " +
                 "and f.ytelse_type = :YTELSE " +
+                "and gr_bg.aktiv = true " +
+                "and gr_bg.bg_grunnlag_id is not null " +
+                "and not exists (select 1 from SAK_INFOTRYGD_MIGRERING in_mig where in_mig.fagsak_id = f.id and in_mig.aktiv = true) " +
+                "and exists (select 1 from mottatt_dokument md inner join behandling b2 on md.behandling_id = b2.id where b2.fagsak_id = f.id " +
+                "and md.type = 'INNTEKTSMELDING' and md.mottatt_tidspunkt >= :OPPRETTET_FOM) " +
                 "order by b.fagsak_id, b.opprettet_tid desc",
             Behandling.class);
         query.setParameter("OPPRETTET_FOM", fom.atStartOfDay());
@@ -88,6 +93,8 @@ public class FinnSakerMedFeilImTask implements ProsessTaskHandler {
             .toList();
 
         log.info("Fant følgende behandlinger med feil inntektsmelding: " + behandlingerMedEndringer);
+
+        dumpFeilImRepository.deaktiverAlle();
 
         behandlingerMedEndringer.forEach(b -> dumpFeilImRepository.lagre(b.getKey(),
             new HashSet<>(b.getValue().get().vilkårsperioderTilRevurdering()),
