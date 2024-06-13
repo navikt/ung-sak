@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -21,6 +22,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.typer.Periode;
 
 public class TidslinjeUtil {
@@ -53,6 +55,16 @@ public class TidslinjeUtil {
         return new LocalDateTimeline<>(datoIntervaller.stream()
             .map(datoIntervall -> new LocalDateSegment<>(datoIntervall.getFomDato(), datoIntervall.getTomDato(), true)).toList(),
             StandardCombinators::alwaysTrueForMatch).compress();
+    }
+
+    public static LocalDateTimeline<Boolean> tilTidslinjeKomprimertMedMuligOverlapp(Collection<DatoIntervallEntitet> datoIntervaller, KantIKantVurderer kantIKantVurderer) {
+        return new LocalDateTimeline<>(datoIntervaller.stream()
+            .map(datoIntervall -> new LocalDateSegment<>(datoIntervall.getFomDato(), datoIntervall.getTomDato(), true)).toList(),
+            StandardCombinators::alwaysTrueForMatch).compress(
+            (di1, di2) -> kantIKantVurderer.erKantIKant(DatoIntervallEntitet.fra(di1), DatoIntervallEntitet.fra(di2)),
+            Objects::equals,
+            StandardCombinators::leftOnly
+        );
     }
 
 
