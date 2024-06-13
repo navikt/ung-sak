@@ -6,14 +6,18 @@ import java.time.LocalDate;
 import java.time.Year;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Set;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
 
 class TidslinjeUtilTest {
 
@@ -99,4 +103,66 @@ class TidslinjeUtilTest {
 
         Assertions.assertThat(new LocalDateTimeline<>(dag1, dag1, Set.of()).combine(new LocalDateTimeline<>(dag2, dag2, Set.of()), TidslinjeUtil::forskjell, LocalDateTimeline.JoinStyle.CROSS_JOIN)).isEqualTo(LocalDateTimeline.EMPTY_TIMELINE);
     }
+
+
+
+    @Test
+    void skal_komprimere_over_helg() {
+        LocalDate torsdag = LocalDate.of(2024, 6, 6);
+        LocalDate fredag = LocalDate.of(2024, 6, 7);
+        LocalDate mandag = LocalDate.of(2024, 6, 10);
+        LocalDate tirsdag = LocalDate.of(2024, 6, 11);
+
+
+        var tidslinje = TidslinjeUtil.tilTidslinjeKomprimertMedMuligOverlapp(List.of(DatoIntervallEntitet.fraOgMedTilOgMed(torsdag, fredag), DatoIntervallEntitet.fraOgMedTilOgMed(mandag, tirsdag)), new PåTversAvHelgErKantIKantVurderer());
+
+        assertThat(tidslinje.toSegments().size()).isEqualTo(1);
+        var localDateIntervals = tidslinje.getLocalDateIntervals();
+        assertThat(localDateIntervals.size()).isEqualTo(1);
+        assertThat(localDateIntervals.getFirst().getFomDato()).isEqualTo(torsdag);
+        assertThat(localDateIntervals.getFirst().getTomDato()).isEqualTo(tirsdag);
+    }
+
+    @Test
+    void skal_komprimere_over_helg_dersom_helg_finnes_i_liste() {
+        LocalDate torsdag = LocalDate.of(2024, 6, 6);
+        LocalDate fredag = LocalDate.of(2024, 6, 7);
+        LocalDate laurdag = LocalDate.of(2024, 6, 8);
+
+        LocalDate mandag = LocalDate.of(2024, 6, 10);
+        LocalDate tirsdag = LocalDate.of(2024, 6, 11);
+
+
+        var tidslinje = TidslinjeUtil.tilTidslinjeKomprimertMedMuligOverlapp(List.of(DatoIntervallEntitet.fraOgMedTilOgMed(torsdag, fredag),
+            DatoIntervallEntitet.fraOgMedTilOgMed(laurdag, laurdag),
+            DatoIntervallEntitet.fraOgMedTilOgMed(mandag, tirsdag)), new PåTversAvHelgErKantIKantVurderer());
+
+        assertThat(tidslinje.toSegments().size()).isEqualTo(1);
+        var localDateIntervals = tidslinje.getLocalDateIntervals();
+        assertThat(localDateIntervals.size()).isEqualTo(1);
+        assertThat(localDateIntervals.getFirst().getFomDato()).isEqualTo(torsdag);
+        assertThat(localDateIntervals.getFirst().getTomDato()).isEqualTo(tirsdag);
+    }
+
+    @Test
+    void skal_komprimere_over_helg_dersom_det_finnes_overlapp() {
+        LocalDate torsdag = LocalDate.of(2024, 6, 6);
+        LocalDate fredag = LocalDate.of(2024, 6, 7);
+        LocalDate laurdag = LocalDate.of(2024, 6, 8);
+
+        LocalDate mandag = LocalDate.of(2024, 6, 10);
+        LocalDate tirsdag = LocalDate.of(2024, 6, 11);
+
+
+        var tidslinje = TidslinjeUtil.tilTidslinjeKomprimertMedMuligOverlapp(List.of(DatoIntervallEntitet.fraOgMedTilOgMed(torsdag, fredag),
+            DatoIntervallEntitet.fraOgMedTilOgMed(fredag, laurdag),
+            DatoIntervallEntitet.fraOgMedTilOgMed(mandag, tirsdag)), new PåTversAvHelgErKantIKantVurderer());
+
+        assertThat(tidslinje.toSegments().size()).isEqualTo(1);
+        var localDateIntervals = tidslinje.getLocalDateIntervals();
+        assertThat(localDateIntervals.size()).isEqualTo(1);
+        assertThat(localDateIntervals.getFirst().getFomDato()).isEqualTo(torsdag);
+        assertThat(localDateIntervals.getFirst().getTomDato()).isEqualTo(tirsdag);
+    }
+
 }

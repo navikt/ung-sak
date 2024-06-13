@@ -304,11 +304,11 @@ spec:
     - name: BRUKERDIALOG_REST_TJENESTE_ENABLED
       value: "true"
     - name: OMP_RAMMEVEDTAK_SAMMENSTILLNG_AARSKVANTUM
-      value: "false"
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
-      value: "true"
+      value: "false"
     - name: RESTART_APP_ON_ERROR
       value: "true"
 

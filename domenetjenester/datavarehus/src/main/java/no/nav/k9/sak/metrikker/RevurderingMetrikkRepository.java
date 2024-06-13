@@ -337,7 +337,7 @@ public class RevurderingMetrikkRepository {
             "har_endring_fra_inntektsmelding," +
             "har_endring_fra_annen_sak," +
             "har_endring_fra_endringsdialog," +
-            "behandling_teller / sum(behandling_teller) over (partition by ytelse_type) as behandlinger_prosentandel" +
+            "behandling_teller / sum(behandling_teller) over (partition by ytelse_type) as behandlinger_prosentandel " +
             "from (" +
             "   select " +
             "       f.ytelse_type," +
@@ -376,7 +376,7 @@ public class RevurderingMetrikkRepository {
             "       and b.avsluttet_dato >= :startTid " +
             "       and b.avsluttet_dato < :sluttTid " +
             "       and b.behandling_type = :revurdering " +
-            "   group by f.ytelse_type, b.id, aarsak.behandling_arsak_type, a.aksjonspunkt_def, md.kildesystem) as statistikk_pr_behandling" +
+            "   group by f.ytelse_type, b.id, aarsak.behandling_arsak_type, a.aksjonspunkt_def, md.kildesystem) as statistikk_pr_behandling " +
             "group by ytelse_type, behandling_id, behandling_teller, antall_aksjonspunkt_per_behandling, har_endring_fra_bruker, har_endring_fra_inntektsmelding, har_endring_fra_annen_sak, har_endring_fra_endringsdialog;";
 
 
