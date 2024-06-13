@@ -297,8 +297,6 @@ spec:
       value: "true"
     - name: FERIEPENGER_AV_DAGPENGER
       value: "true"
-    - name: MANUELT_VURDER_UTVIDET_RETT
-      value: "true"
     - name: SEND_INNTEKTSMELDING_FORESPORSEL
       value: "true"
     - name: ENABLE_UKLASSIFISERT_SYKDOMSDOK_SJEKK
@@ -310,7 +308,7 @@ spec:
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
-      value: "true"
+      value: "false"
     - name: RESTART_APP_ON_ERROR
       value: "true"
 
