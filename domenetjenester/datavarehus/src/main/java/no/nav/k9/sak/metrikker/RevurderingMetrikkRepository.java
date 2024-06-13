@@ -380,8 +380,7 @@ public class RevurderingMetrikkRepository {
                 where b.avsluttet_dato >= :startTid
                     and b.avsluttet_dato < :sluttTid
                     and b.behandling_type = :revurdering
-                group by 1, 2) as statistikk_pr_behandling
-            group by 1, 2, 3, 4, 5, 6, 7, 8;
+                group by 1, 2) as statistikk_pr_behandling;
             """;
 
         String metricName = "revurdering_antall_aksjonspunkt_pr_behandling_og_endringsopphav_syv_dager";
