@@ -24,13 +24,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.k9.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.behandling.FagsakTjeneste;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIderDto;
 import no.nav.k9.sak.punsj.PunsjRestKlient;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
+
 
 @ApplicationScoped
 @Transactional
@@ -39,16 +40,16 @@ import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 public class PunsjRestTjeneste {
 
     private PunsjRestKlient klient;
-    private BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste;
+    private FagsakTjeneste fagsakTjeneste;
 
     public PunsjRestTjeneste() {
         // for CDI proxy
     }
 
     @Inject
-    public PunsjRestTjeneste(PunsjRestKlient klient, BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste) {
+    public PunsjRestTjeneste(PunsjRestKlient klient, FagsakTjeneste fagsakTjeneste) {
         this.klient = klient;
-        this.behandlingsprosessTjeneste = behandlingsprosessTjeneste;
+        this.fagsakTjeneste = fagsakTjeneste;
     }
 
     @GET
@@ -60,10 +61,10 @@ public class PunsjRestTjeneste {
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response getUferdigJournalpostIderPrAktoer(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
-        Behandling behandling = behandlingsprosessTjeneste.hentBehandling(behandlingUuid.getBehandlingUuid());
-        AktørId søker = behandling.getAktørId();
-        AktørId barnet = behandling.getFagsak().getPleietrengendeAktørId();
+    public Response getUferdigJournalpostIderPrAktoer(@NotNull @QueryParam(SaksnummerDto.NAME) @Parameter(description = SaksnummerDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummer) {
+        Optional<Fagsak> fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer.getVerdi(), false);
+        AktørId søker = fagsak.get().getAktørId();
+        AktørId barnet = fagsak.get().getPleietrengendeAktørId();
         String barnetAktørId = (barnet != null) ? barnet.getAktørId() : null;
 
         Optional<JournalpostIderDto> uferdigJournalpostIderPåAktør = klient.getUferdigJournalpostIderPåAktør(søker.getAktørId(), barnetAktørId);
