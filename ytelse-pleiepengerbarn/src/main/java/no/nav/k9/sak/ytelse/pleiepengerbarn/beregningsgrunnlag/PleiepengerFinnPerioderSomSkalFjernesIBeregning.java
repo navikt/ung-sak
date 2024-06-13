@@ -43,9 +43,7 @@ public class PleiepengerFinnPerioderSomSkalFjernesIBeregning implements FinnPeri
             .getPerioder().stream()
             .filter(vilkårPeriode -> no.nav.k9.kodeverk.vilkår.Utfall.IKKE_VURDERT.equals(vilkårPeriode.getUtfall()))
             .map(VilkårPeriode::getPeriode)
-            .filter(periode ->
-                perioderMedAvslåtteInngangsvilkår.stream().anyMatch(vp -> vp.getFomDato().isEqual(periode.getFomDato()))
-            )
+            .filter(perioderMedAvslåtteInngangsvilkår::contains)
             .collect(Collectors.toSet());
     }
 
