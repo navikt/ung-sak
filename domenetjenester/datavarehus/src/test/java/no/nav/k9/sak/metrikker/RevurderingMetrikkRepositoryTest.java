@@ -178,6 +178,13 @@ class RevurderingMetrikkRepositoryTest {
 
     }
 
+
+
+    @Test
+    void skal_sjekke_at_SQL_syntaks_er_ok() {
+        assertThat(revurderingMetrikkRepository.antallAksjonspunktPrRevurderingMedEndringsopphavSisteSyvDager(LocalDate.now())).isEmpty();
+    }
+
     @Test
     void skal_finne_en_behandling_uten_ny_søknad_med_ett_aksjonspunkt() {
 

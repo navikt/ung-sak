@@ -1,5 +1,19 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse.feriepenger;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.DAGPENGER;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FORELDREPENGER;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.SYKEPENGER;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -23,15 +37,6 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.DagpengerPeriode;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.InfotrygdFeriepengegrunnlag;
 import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.FeriepengeOppsummering;
 import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.SaksnummerOgSisteBehandling;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.*;
 
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
@@ -115,9 +120,14 @@ public class PleiepengerBeregnFeriepenger implements BeregnFeriepengerTjeneste {
     }
 
     private static List<DagpengerPeriode> finnDagpengerFraMeldekort(Collection<Ytelse> alleYtelser) {
-        var meldekortPerioder = alleYtelser.stream().filter(yt -> DAGPENGER.equals(yt.getYtelseType())).flatMap(yt -> yt.getYtelseAnvist().stream()).toList();
+        var meldekortPerioder = finnMeldekortMedUtbetaling(alleYtelser);
         var meldekortDagpengeperioder = meldekortPerioder.stream().map(mk -> new DagpengerPeriode(DagpengerKilde.MELDEKORT, mk.getAnvistFOM(), mk.getAnvistTOM())).toList();
         return meldekortDagpengeperioder;
+    }
+
+    private static List<YtelseAnvist> finnMeldekortMedUtbetaling(Collection<Ytelse> alleYtelser) {
+        return alleYtelser.stream().filter(yt -> DAGPENGER.equals(yt.getYtelseType())).flatMap(yt -> yt.getYtelseAnvist().stream())
+            .filter(ya -> ya.getUtbetalingsgradProsent().map(g -> g.getVerdi().compareTo(BigDecimal.ZERO) > 0).orElse(false)).toList();
     }
 
     private LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> finnPåvirkendeSaker(BehandlingReferanse behandling) {
