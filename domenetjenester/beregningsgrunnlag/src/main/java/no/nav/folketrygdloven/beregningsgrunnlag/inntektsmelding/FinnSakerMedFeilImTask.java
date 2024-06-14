@@ -13,11 +13,16 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.BehandlingModell;
+import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
+import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellRepository;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.forvaltning.DumpFeilImRepository;
@@ -36,6 +41,7 @@ public class FinnSakerMedFeilImTask implements ProsessTaskHandler {
     private EntityManager entityManager;
     private DumpFeilImRepository dumpFeilImRepository;
     private FinnPerioderMedEndringVedFeilInntektsmelding finnPerioderMedEndringVedFeilInntektsmelding;
+    private BehandlingModellRepository behandlingModellRepository;
 
 
     public FinnSakerMedFeilImTask() {
@@ -44,10 +50,12 @@ public class FinnSakerMedFeilImTask implements ProsessTaskHandler {
     @Inject
     public FinnSakerMedFeilImTask(EntityManager entityManager,
                                   DumpFeilImRepository dumpFeilImRepository,
-                                  FinnPerioderMedEndringVedFeilInntektsmelding finnPerioderMedEndringVedFeilInntektsmelding) {
+                                  FinnPerioderMedEndringVedFeilInntektsmelding finnPerioderMedEndringVedFeilInntektsmelding,
+                                  BehandlingModellRepository behandlingModellRepository) {
         this.entityManager = entityManager;
         this.dumpFeilImRepository = dumpFeilImRepository;
         this.finnPerioderMedEndringVedFeilInntektsmelding = finnPerioderMedEndringVedFeilInntektsmelding;
+        this.behandlingModellRepository = behandlingModellRepository;
     }
 
     @Override
@@ -75,15 +83,21 @@ public class FinnSakerMedFeilImTask implements ProsessTaskHandler {
         query.setParameter("OPPRETTET_FOM", fom.atStartOfDay());
         query.setParameter("YTELSE", ytelseType.getKode());
 
+
         List<Behandling> behandlinger = query.getResultList();
+        var behandlingmodell = behandlingModellRepository.getModell(BehandlingType.REVURDERING, ytelseType);
 
         var behandlingerOpprettetFør = behandlinger.stream().filter(b -> !b.getOpprettetTidspunkt().toLocalDate().isAfter(tom))
             .toList();
 
-        log.info("Kjører analyse for  " + behandlingerOpprettetFør.size() + " behandlinger.");
+        var behandlingerMedPassertBeregning = behandlingerOpprettetFør.stream().filter(b -> b.getAktivtBehandlingSteg() == null || behandlingmodell.erStegAFørStegB(BehandlingStegType.VURDER_VILKAR_BERGRUNN, b.getAktivtBehandlingSteg()))
+            .toList();
 
 
-        var relevanteEndringerPrBehandling = behandlingerOpprettetFør.stream()
+        log.info("Kjører analyse for  " + behandlingerMedPassertBeregning.size() + " behandlinger.");
+
+
+        var relevanteEndringerPrBehandling = behandlingerMedPassertBeregning.stream()
             .collect(Collectors.toMap(Behandling::getId, t -> {
                 var behandlingReferanse = BehandlingReferanse.fra(t);
                 return finnPerioderMedEndringVedFeilInntektsmelding.finnPerioderForEndringDersomFeilInntektsmeldingBrukes(behandlingReferanse, fom);
