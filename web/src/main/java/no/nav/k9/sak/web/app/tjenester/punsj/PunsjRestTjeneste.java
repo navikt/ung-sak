@@ -25,7 +25,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
+import no.nav.k9.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIderDto;
 import no.nav.k9.sak.punsj.PunsjRestKlient;
 import no.nav.k9.sak.typer.AktørId;
@@ -41,19 +44,46 @@ public class PunsjRestTjeneste {
 
     private PunsjRestKlient klient;
     private FagsakTjeneste fagsakTjeneste;
+    private BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste;
 
     public PunsjRestTjeneste() {
         // for CDI proxy
     }
 
     @Inject
-    public PunsjRestTjeneste(PunsjRestKlient klient, FagsakTjeneste fagsakTjeneste) {
+    public PunsjRestTjeneste(PunsjRestKlient klient, FagsakTjeneste fagsakTjeneste, BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste) {
         this.klient = klient;
         this.fagsakTjeneste = fagsakTjeneste;
+        this.behandlingsprosessTjeneste = behandlingsprosessTjeneste;
     }
+
 
     @GET
     @Path("/journalpost/uferdig")
+    @Operation(description = "Henter uferdig journalposter fra punsj for en gitt behandlingUuid", tags = "journalposter", responses = {
+        @ApiResponse(responseCode = "200", description = "Returnerer en liste med uferdig journalpostIder som ligger i punsj på gitt behandlingUuid.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                schema = @Schema(implementation = JournalpostIderDto.class)))
+    })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @Deprecated
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Response getUferdigJournalpostIderPrAktoer(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+        Behandling behandling = behandlingsprosessTjeneste.hentBehandling(behandlingUuid.getBehandlingUuid());
+        AktørId søker = behandling.getAktørId();
+        AktørId barnet = behandling.getFagsak().getPleietrengendeAktørId();
+
+        String barnetAktørId = (barnet != null) ? barnet.getAktørId() : null;
+
+        Optional<JournalpostIderDto> uferdigJournalpostIderPåAktør = klient.getUferdigJournalpostIderPåAktør(søker.getAktørId(), barnetAktørId);
+        if (uferdigJournalpostIderPåAktør.isPresent()) {
+            return Response.ok(uferdigJournalpostIderPåAktør.get()).build();
+        }
+        return Response.ok().build();
+    }
+
+    @GET
+    @Path("/journalpost/uferdig/v2")
     @Operation(description = "Henter uferdig journalposter fra punsj for en gitt behandlingUuid", tags = "journalposter", responses = {
         @ApiResponse(responseCode = "200", description = "Returnerer en liste med uferdig journalpostIder som ligger i punsj på gitt behandlingUuid.",
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
