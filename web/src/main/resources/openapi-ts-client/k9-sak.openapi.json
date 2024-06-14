@@ -17678,8 +17678,38 @@
     },
     "/punsj/journalpost/uferdig" : {
       "get" : {
+        "deprecated" : true,
         "description" : "Henter uferdig journalposter fra punsj for en gitt behandlingUuid",
         "operationId" : "getUferdigJournalpostIderPrAktoer",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/JournalpostIderDto"
+                }
+              }
+            },
+            "description" : "Returnerer en liste med uferdig journalpostIder som ligger i punsj på gitt behandlingUuid."
+          }
+        },
+        "tags" : [ "journalposter" ]
+      }
+    },
+    "/punsj/journalpost/uferdig/v2" : {
+      "get" : {
+        "description" : "Henter uferdig journalposter fra punsj for en gitt behandlingUuid",
+        "operationId" : "getUferdigJournalpostIderPrAktoer_1",
         "parameters" : [ {
           "description" : "SAKSNUMMER",
           "in" : "query",
