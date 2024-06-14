@@ -17681,13 +17681,12 @@
         "description" : "Henter uferdig journalposter fra punsj for en gitt behandlingUuid",
         "operationId" : "getUferdigJournalpostIderPrAktoer",
         "parameters" : [ {
-          "description" : "behandlingUUID",
+          "description" : "SAKSNUMMER",
           "in" : "query",
-          "name" : "behandlingUuid",
+          "name" : "saksnummer",
           "required" : true,
           "schema" : {
-            "format" : "uuid",
-            "type" : "string"
+            "$ref" : "#/components/schemas/SaksnummerDto"
           }
         } ],
         "responses" : {
