@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Optional;
@@ -94,9 +95,30 @@ public class MedisinskGrunnlagTjeneste {
 
     public SykdomGrunnlagSammenlikningsresultat sammenlignGrunnlag(Optional<MedisinskGrunnlagsdata> forrigeGrunnlagBehandling, MedisinskGrunnlagsdata utledetGrunnlag) {
         boolean harEndretDiagnosekoder = sammenlignDiagnosekoder(forrigeGrunnlagBehandling, utledetGrunnlag);
+        boolean harNyeUklassifiserteDokumenter = harNyeUklassifiserteDokumenter(forrigeGrunnlagBehandling, utledetGrunnlag);
         final LocalDateTimeline<Boolean> endringerISøktePerioder = sammenlignTidfestedeGrunnlagsdata(forrigeGrunnlagBehandling, utledetGrunnlag);
-        return new SykdomGrunnlagSammenlikningsresultat(endringerISøktePerioder, harEndretDiagnosekoder);
+        return new SykdomGrunnlagSammenlikningsresultat(endringerISøktePerioder, harEndretDiagnosekoder, harNyeUklassifiserteDokumenter);
     }
+
+    private boolean harNyeUklassifiserteDokumenter(Optional<MedisinskGrunnlagsdata> forrigeGrunnlagBehandlingOpt, MedisinskGrunnlagsdata utledetGrunnlag) {
+        if (forrigeGrunnlagBehandlingOpt.isEmpty()) return false;
+
+        record PleietrengendeDokumentID(String journalpostId, String dokumentId) {}
+
+        var forrige = forrigeGrunnlagBehandlingOpt.get().getUklassifiserteDokumenter().stream()
+            .map(it -> new PleietrengendeDokumentID(it.getJournalpostId().getVerdi(), it.getDokumentInfoId()))
+            .collect(Collectors.toSet());
+
+        var diffSet = utledetGrunnlag.getUklassifiserteDokumenter().stream()
+            .map(it -> new PleietrengendeDokumentID(it.getJournalpostId().getVerdi(), it.getDokumentInfoId()))
+            .collect(Collectors.toCollection(HashSet::new));
+
+        diffSet.removeAll(forrige);
+        return !diffSet.isEmpty();
+
+    }
+
+
 
     LocalDateTimeline<Boolean> sammenlignTidfestedeGrunnlagsdata(Optional<MedisinskGrunnlagsdata> grunnlagBehandling, MedisinskGrunnlagsdata utledetGrunnlag) {
         LocalDateTimeline<SykdomSamletVurdering> grunnlagBehandlingTidslinje;
