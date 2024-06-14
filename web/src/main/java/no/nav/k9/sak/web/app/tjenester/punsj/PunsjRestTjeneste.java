@@ -84,8 +84,8 @@ public class PunsjRestTjeneste {
 
     @GET
     @Path("/journalpost/uferdig/v2")
-    @Operation(description = "Henter uferdig journalposter fra punsj for en gitt behandlingUuid", tags = "journalposter", responses = {
-        @ApiResponse(responseCode = "200", description = "Returnerer en liste med uferdig journalpostIder som ligger i punsj på gitt behandlingUuid.",
+    @Operation(description = "Henter uferdige journalposter fra punsj for søker og pleietrengende", tags = "journalposter", responses = {
+        @ApiResponse(responseCode = "200", description = "Returnerer en liste med uferdig journalpostIder som ligger i punsj på et gitt saksnummer.",
             content = @Content(mediaType = MediaType.APPLICATION_JSON,
                 schema = @Schema(implementation = JournalpostIderDto.class)))
     })
