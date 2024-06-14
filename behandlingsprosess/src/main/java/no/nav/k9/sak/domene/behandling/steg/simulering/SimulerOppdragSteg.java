@@ -118,6 +118,7 @@ public class SimulerOppdragSteg implements BehandlingSteg {
             tilbakekrevingRepository.lagre(behandling, resultatDto.isSlåttAvInntrekk());
 
             if (resultatDto.harFeilutbetaling()) {
+                tilbakekrevingRepository.reaktiverForrigeTilbakekrevingValg(behandling);
                 return BehandleStegResultat.utførtMedAksjonspunkter(singletonList(AksjonspunktDefinisjon.VURDER_FEILUTBETALING));
             }
             if (resultatDto.harInntrekkmulighet()) {

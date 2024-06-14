@@ -97,6 +97,10 @@ public enum Avslagsårsak implements Kodeverdi {
         FagsakYtelseType.OMSORGSPENGER_MA, "9-6 3. ledd")),
     IKKE_GRUNNLAG_FOR_ALENEOMSORG("1077", "Ikke grunnlag for aleneomsorg", Map.of(
         FagsakYtelseType.OMSORGSPENGER_AO, "9-6 1. ledd")),
+    IKKE_GRUNNLAG_FOR_ALENEOMSORG_FORELDRE_BOR_SAMMEN("1078", "Foreldre bor sammen", Map.of(
+        FagsakYtelseType.OMSORGSPENGER_AO, "9-6 1. ledd")),
+    IKKE_GRUNNLAG_FOR_ALENEOMSORG_DELT_BOSTED("1079", "Avtale om delt bosted", Map.of(
+        FagsakYtelseType.OMSORGSPENGER_AO, "9-6 1. ledd")),
 
     PLEIETRENGENDE_INNLAGT_I_STEDET_FOR_HJEMME("1080", "Pleietrengende innlagt i stedet for hjemme",
         Map.of(FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "9-13")),

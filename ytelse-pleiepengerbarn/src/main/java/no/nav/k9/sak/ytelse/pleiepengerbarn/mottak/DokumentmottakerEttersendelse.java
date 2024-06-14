@@ -13,7 +13,6 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.ettersendelse.Ettersendelse;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
@@ -70,7 +69,7 @@ public class DokumentmottakerEttersendelse implements Dokumentmottaker {
             dokument.setBehandlingId(behandling.getId());
             dokument.setInnsendingstidspunkt(ettersendelse.getMottattDato().toLocalDateTime());
             mottatteDokumentRepository.lagre(dokument, DokumentStatus.GYLDIG);
-            sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(
+            sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSkjema(
                 behandling,
                 dokument.getJournalpostId(),
                 behandling.getFagsak().getPleietrengendeAktørId(),
