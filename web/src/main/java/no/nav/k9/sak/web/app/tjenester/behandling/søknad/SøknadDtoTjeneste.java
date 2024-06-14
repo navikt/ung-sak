@@ -1,15 +1,14 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.søknad;
 
 import java.time.LocalDate;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
@@ -165,14 +164,11 @@ public class SøknadDtoTjeneste {
             return List.of();
         }
 
-        Set<AktørId> aktørIder = angittePersoner.stream()
+        var identMap = angittePersoner.stream()
             .map(SøknadAngittPersonEntitet::getAktørId)
             .filter(Objects::nonNull)
-            .collect(Collectors.toSet());
-
-        var identMap = aktørIder.stream()
-            .map(aktørId -> new AbstractMap.SimpleEntry<>(aktørId, personinfoAdapter.hentBrukerBasisForAktør(aktørId).orElse(null)))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            .distinct()
+            .collect(Collectors.toMap(Function.identity(), aktørId -> personinfoAdapter.hentBrukerBasisForAktør(aktørId).orElseThrow(() -> new IllegalArgumentException("Fant ikke informasjon for person på saken"))));
 
         return angittePersoner.stream()
             .map(p -> {
