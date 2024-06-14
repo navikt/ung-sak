@@ -20,6 +20,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
+import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.SykdomGrunnlagSammenlikningsresultat;
@@ -105,11 +106,13 @@ public class MedisinskGrunnlagTjeneste {
 
         record PleietrengendeDokumentID(String journalpostId, String dokumentId) {}
 
-        var forrige = forrigeGrunnlagBehandlingOpt.get().getUklassifiserteDokumenter().stream()
+        var forrige = forrigeGrunnlagBehandlingOpt.get().getSykdomsdokumenter().stream()
+            .filter(it -> it.getType() == SykdomDokumentType.UKLASSIFISERT)
             .map(it -> new PleietrengendeDokumentID(it.getJournalpostId().getVerdi(), it.getDokumentInfoId()))
             .collect(Collectors.toSet());
 
-        var diffSet = utledetGrunnlag.getUklassifiserteDokumenter().stream()
+        var diffSet = utledetGrunnlag.getSykdomsdokumenter().stream()
+            .filter(it -> it.getType() == SykdomDokumentType.UKLASSIFISERT)
             .map(it -> new PleietrengendeDokumentID(it.getJournalpostId().getVerdi(), it.getDokumentInfoId()))
             .collect(Collectors.toCollection(HashSet::new));
 

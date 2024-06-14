@@ -130,14 +130,13 @@ public class MedisinskGrunnlagRepository {
             .collect(Collectors.toList());
 
         final var harAndreMedisinskeDokumenter = !sykdomDokumenter.isEmpty();
-        final var uklassifiserteDokumenter = sykdomDokumenter.stream().filter(it -> it.getType() == SykdomDokumentType.UKLASSIFISERT).toList();
 
         return new MedisinskGrunnlagsdata(
             UUID.randomUUID(),
             søktePerioder.stream().map(p -> new MedisinskGrunnlagsdataSøktPeriode(p.getFomDato(), p.getTomDato())).collect(Collectors.toList()),
             vurderinger,
             godkjenteLegeerklæringer,
-            enableUklassifisertDokSjekk ? uklassifiserteDokumenter : Collections.emptyList(),
+            enableUklassifisertDokSjekk ? sykdomDokumenter : Collections.emptyList(),
             harAndreMedisinskeDokumenter,
             innleggelser,
             diagnosekoder,
