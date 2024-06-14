@@ -1,12 +1,12 @@
 package no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
@@ -61,7 +62,9 @@ public class AksjonspunktRepository {
         aksjonspunkt.fjernToTrinnsFlagg();
     }
 
-    /** Returnerer aksjonspunkter for en sak. */
+    /**
+     * Returnerer aksjonspunkter for en sak.
+     */
     @SuppressWarnings("unchecked")
     public Map<Behandling, List<Aksjonspunkt>> hentAksjonspunkter(Saksnummer saksnummer, AksjonspunktStatus... statuser) {
         List<AksjonspunktStatus> statusList = Arrays.asList(statuser == null || statuser.length == 0 ? AksjonspunktStatus.values() : statuser);
@@ -88,7 +91,9 @@ public class AksjonspunktRepository {
         return map;
     }
 
-    /** Returnerer alle aksjonspunkter og tilknyttede behandlinger. */
+    /**
+     * Returnerer alle aksjonspunkter og tilknyttede behandlinger.
+     */
     @SuppressWarnings("unchecked")
     public Map<Behandling, List<Aksjonspunkt>> hentAksjonspunkter(AksjonspunktStatus... statuser) {
         List<AksjonspunktStatus> statusList = Arrays.asList(statuser == null || statuser.length == 0 ? AksjonspunktStatus.values() : statuser);
@@ -115,7 +120,9 @@ public class AksjonspunktRepository {
         return map;
     }
 
-    /** Returnerer alle aksjonspunkter og tilknyttede behandlinger som er opprettet innenfor periode. */
+    /**
+     * Returnerer alle aksjonspunkter og tilknyttede behandlinger som er opprettet innenfor periode.
+     */
     @SuppressWarnings("unchecked")
     public Map<Behandling, List<Aksjonspunkt>> hentAksjonspunkter(LocalDate fom, LocalDate tom, AksjonspunktStatus... statuser) {
         List<AksjonspunktStatus> statusList = Arrays.asList(statuser == null || statuser.length == 0 ? AksjonspunktStatus.values() : statuser);
@@ -163,11 +170,11 @@ public class AksjonspunktRepository {
 
     public List<Behandling> hentBehandlingerMedAktivtAksjonspunkt(AksjonspunktDefinisjon aksjonspunktDefinisjon) {
         String sql = """
-             select b.*
-              from behandling b
-              inner join aksjonspunkt a on a.behandling_id=b.id
-              where a.aksjonspunkt_status = :status AND a.aksjonspunkt_def = :definisjon
-              """;
+            select b.*
+             from behandling b
+             inner join aksjonspunkt a on a.behandling_id=b.id
+             where a.aksjonspunkt_status = :status AND a.aksjonspunkt_def = :definisjon
+             """;
         List<Behandling> behandlinger = em.createNativeQuery(sql, Behandling.class)
             .setParameter("status", AksjonspunktStatus.OPPRETTET.getKode())
             .setParameter("definisjon", aksjonspunktDefinisjon.getKode())
@@ -178,11 +185,11 @@ public class AksjonspunktRepository {
 
     public List<Behandling> hentBehandlingerPåVentMedVenteårsak(Venteårsak venteårsak) {
         String sql = """
-             select b.*
-              from behandling b
-              inner join aksjonspunkt a on a.behandling_id=b.id
-              where a.aksjonspunkt_status = :status AND a.vent_aarsak = :venteårsak
-              """;
+            select b.*
+             from behandling b
+             inner join aksjonspunkt a on a.behandling_id=b.id
+             where a.aksjonspunkt_status = :status AND a.vent_aarsak = :venteårsak
+             """;
         List<Behandling> behandlinger = em.createNativeQuery(sql, Behandling.class)
             .setParameter("status", AksjonspunktStatus.OPPRETTET.getKode())
             .setParameter("venteårsak", venteårsak.getKode())
@@ -192,40 +199,18 @@ public class AksjonspunktRepository {
     }
 
 
+    public void lagreAksjonspunktSporing(String kode, String payload, Long behandlingId) {
+        var query = em.createNativeQuery("""
+                insert into AKSJONSPUNKT_SPORING (ID, BEHANDLING_ID, AKSJONSPUNKT_DEF, PAYLOAD, OPPRETTET_TID)
+                values (nextval('SEQ_AKSJONSPUNKT_SPORING'), :behandlingId, :aksjonspunktDef, CAST(:payload as JSON), :opprettetTid)
+                """)
+            .setParameter("behandlingId", behandlingId)
+            .setParameter("aksjonspunktDef", kode)
+            .setParameter("payload", payload)
+            .setParameter("opprettetTid", LocalDateTime.now());
 
-    /** Returnerer alle behandlinger med aksjonspunkt som er opprettet innenfor periode. */
-    @SuppressWarnings("unchecked")
-    public Map<Behandling, Aksjonspunkt> hentAksjonspunkterForKodeUtenVenteÅrsak(LocalDate fom, LocalDate tom, String kode) {
-        String sql = "select distinct b.* from behandling b"
-            + " inner join aksjonspunkt a on a.behandling_id=b.id"
-            + " where a.aksjonspunkt_def = :def and a.opprettet_tid between :fom and :tom"
-            + " and (a.vent_aarsak is null or a.vent_aarsak = '-')"
-            + " and a.aksjonspunkt_status in (:statuser)";
-        List<Behandling> list = em
-            .createNativeQuery(sql, Behandling.class)
-            .setParameter("fom", fom)
-            .setParameter("tom", tom)
-            .setParameter("def", kode)
-            .setParameter("statuser", Set.of(AksjonspunktStatus.OPPRETTET.getKode(), AksjonspunktStatus.UTFØRT.getKode()))
-            .getResultList();
-
-        log.info("Fant " + list.size() + " behandlinger.");
-
-        Map<Behandling, Aksjonspunkt> map = new LinkedHashMap<>();
-        for (Behandling b : list) {
-            if (skipBehandling(b)) {
-                continue;
-            }
-            var aksjonspunkt = b.getAksjonspunkter()
-                .stream()
-                .filter(a -> a.getOpprettetTidspunkt().isAfter(fom.atStartOfDay())
-                    && a.getOpprettetTidspunkt().isBefore(tom.atStartOfDay()))
-                .filter(a -> Objects.equals(kode, a.getAksjonspunktDefinisjon().getKode()))
-                .findFirst();
-            aksjonspunkt.ifPresent(ap -> map.put(b, ap));
-        }
-
-        return map;
+        query.executeUpdate();
+        em.flush();
     }
 
 
