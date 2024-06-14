@@ -17708,7 +17708,7 @@
     },
     "/punsj/journalpost/uferdig/v2" : {
       "get" : {
-        "description" : "Henter uferdig journalposter fra punsj for en gitt behandlingUuid",
+        "description" : "Henter uferdige journalposter fra punsj for søker og pleietrengende",
         "operationId" : "getUferdigJournalpostIderPrAktoer_1",
         "parameters" : [ {
           "description" : "SAKSNUMMER",
@@ -17728,7 +17728,7 @@
                 }
               }
             },
-            "description" : "Returnerer en liste med uferdig journalpostIder som ligger i punsj på gitt behandlingUuid."
+            "description" : "Returnerer en liste med uferdig journalpostIder som ligger i punsj på et gitt saksnummer."
           }
         },
         "tags" : [ "journalposter" ]
