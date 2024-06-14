@@ -383,7 +383,7 @@ public class RevurderingMetrikkRepository {
                 group by 1, 2) as statistikk_pr_behandling;
             """;
 
-        String metricName = "revurdering_antall_aksjonspunkt_pr_behandling_og_endringsopphav_syv_dager";
+        String metricName = "revurdering_antall_aksjonspunkt_pr_behandling_og_endringsopphav_syv_dager_v2";
         String metricBehandlingTeller = "behandling_teller";
         String metricBehandlingerProsentAndel = "behandlinger_prosentandel";
 
