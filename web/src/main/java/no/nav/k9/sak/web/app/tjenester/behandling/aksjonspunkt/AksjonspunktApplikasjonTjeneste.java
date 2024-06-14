@@ -30,7 +30,6 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -61,7 +60,7 @@ public class AksjonspunktApplikasjonTjeneste {
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
 
     private AksjonspunktRepository aksjonspunktRepository;
-
+    private AksjonspunktSporingTjeneste aksjonspunktSporingTjeneste;
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
 
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste;
@@ -77,12 +76,13 @@ public class AksjonspunktApplikasjonTjeneste {
     @Inject
     public AksjonspunktApplikasjonTjeneste(BehandlingRepositoryProvider repositoryProvider,
                                            BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                                           AksjonspunktRepository aksjonspunktRepository,
+                                           AksjonspunktRepository aksjonspunktRepository, AksjonspunktSporingTjeneste aksjonspunktSporingTjeneste,
                                            BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste,
                                            SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                                            HistorikkTjenesteAdapter historikkTjenesteAdapter) {
 
         this.aksjonspunktRepository = aksjonspunktRepository;
+        this.aksjonspunktSporingTjeneste = aksjonspunktSporingTjeneste;
         this.behandlingsprosessApplikasjonTjeneste = behandlingsprosessApplikasjonTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
@@ -94,11 +94,10 @@ public class AksjonspunktApplikasjonTjeneste {
 
     public void bekreftAksjonspunkter(Collection<BekreftetAksjonspunktDto> bekreftedeAksjonspunktDtoer, Long behandlingId, BehandlingskontrollKontekst kontekst) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-
+        aksjonspunktSporingTjeneste.opprettSporinger(bekreftedeAksjonspunktDtoer, kontekst);
         AksjonspunktProsessResultat aksjonspunktProsessResultat = spolTilbakeOgBekreft(bekreftedeAksjonspunktDtoer, behandling, kontekst);
 
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
-
 
 
         if (skalIkkeFortsetteBehandling(behandling, aksjonspunktProsessResultat)) {
