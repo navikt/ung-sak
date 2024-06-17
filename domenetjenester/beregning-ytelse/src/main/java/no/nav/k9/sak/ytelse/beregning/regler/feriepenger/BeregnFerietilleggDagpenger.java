@@ -46,6 +46,7 @@ class BeregnFerietilleggDagpenger extends LeafSpecification<BeregningsresultatFe
         var tilkjentytelseTidslinje = new LocalDateTimeline<>(tilkjentytelseSegmenter);
         var tidslinjeDagpengerTilkjentYtelse = splittPåÅr(tilkjentytelseTidslinje).intersection(lagTidslinjePeriodeEtterRegelendring());
         var segmenterMedDagpengerIAndreSystemer = regelModell.getPerioderMedDagpenger().stream()
+            .filter(p-> p.kilde() != DagpengerKilde.FORELDREPENGER)
             .map(p -> new LocalDateSegment<>(p.fom(), p.tom(), Set.of(p.kilde()))).toList();
         var tidslinjeDagpengerAndreKilder = new LocalDateTimeline<>(segmenterMedDagpengerIAndreSystemer, StandardCombinators::union).compress();
         Set<Integer> alleÅrMedDagpenger = tidslinjeDagpengerTilkjentYtelse.stream().map(LocalDateSegment::getFom).map(LocalDate::getYear).collect(Collectors.toSet());
