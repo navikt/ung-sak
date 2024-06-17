@@ -102,9 +102,9 @@ public class MedisinskGrunnlagTjeneste {
     }
 
     private boolean harNyeUklassifiserteDokumenter(Optional<MedisinskGrunnlagsdata> forrigeGrunnlagBehandlingOpt, MedisinskGrunnlagsdata utledetGrunnlag) {
-        if (forrigeGrunnlagBehandlingOpt.isEmpty()) return false;
-
-        record PleietrengendeDokumentID(String journalpostId, String dokumentId) {}
+        if (forrigeGrunnlagBehandlingOpt.isEmpty()) {
+            return false;
+        }
 
         var forrige = forrigeGrunnlagBehandlingOpt.get().getSykdomsdokumenter().stream()
             .filter(it -> it.getType() == SykdomDokumentType.UKLASSIFISERT)
@@ -121,6 +121,7 @@ public class MedisinskGrunnlagTjeneste {
 
     }
 
+    private record PleietrengendeDokumentID(String journalpostId, String dokumentId) {}
 
 
     LocalDateTimeline<Boolean> sammenlignTidfestedeGrunnlagsdata(Optional<MedisinskGrunnlagsdata> grunnlagBehandling, MedisinskGrunnlagsdata utledetGrunnlag) {
