@@ -49,20 +49,6 @@ public class PleietrengendeSykdomDokumentRepository {
         return utenFeilregistrerteDokumenter(dokuments);
     }
 
-    public List<PleietrengendeSykdomDokument> hentAlleDokumenterForBehandling(Long behandlingId) {
-        final TypedQuery<PleietrengendeSykdomDokument> q = entityManager.createQuery(
-            "SELECT d From PleietrengendeSykdomDokument as d "
-            + " , MottattDokument m "
-            + "where m.journalpostId = d.journalpostId and m.behandlingId = :behandlingId ", PleietrengendeSykdomDokument.class
-        );
-
-        q.setParameter("behandlingId", behandlingId);
-
-        List<PleietrengendeSykdomDokument> dokuments = q.getResultList();
-
-        return utenFeilregistrerteDokumenter(dokuments);
-    }
-
 
     private List<PleietrengendeSykdomDokument> utenFeilregistrerteDokumenter(List<PleietrengendeSykdomDokument> dokuments) {
         return dokuments.stream().filter(erIkkeFeilregistrert()).collect(Collectors.toList());

@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Optional;
@@ -19,6 +20,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
+import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.SykdomGrunnlagSammenlikningsresultat;
@@ -94,9 +96,33 @@ public class MedisinskGrunnlagTjeneste {
 
     public SykdomGrunnlagSammenlikningsresultat sammenlignGrunnlag(Optional<MedisinskGrunnlagsdata> forrigeGrunnlagBehandling, MedisinskGrunnlagsdata utledetGrunnlag) {
         boolean harEndretDiagnosekoder = sammenlignDiagnosekoder(forrigeGrunnlagBehandling, utledetGrunnlag);
+        boolean harNyeUklassifiserteDokumenter = harNyeUklassifiserteDokumenter(forrigeGrunnlagBehandling, utledetGrunnlag);
         final LocalDateTimeline<Boolean> endringerISøktePerioder = sammenlignTidfestedeGrunnlagsdata(forrigeGrunnlagBehandling, utledetGrunnlag);
-        return new SykdomGrunnlagSammenlikningsresultat(endringerISøktePerioder, harEndretDiagnosekoder);
+        return new SykdomGrunnlagSammenlikningsresultat(endringerISøktePerioder, harEndretDiagnosekoder, harNyeUklassifiserteDokumenter);
     }
+
+    private boolean harNyeUklassifiserteDokumenter(Optional<MedisinskGrunnlagsdata> forrigeGrunnlagBehandlingOpt, MedisinskGrunnlagsdata utledetGrunnlag) {
+        if (forrigeGrunnlagBehandlingOpt.isEmpty()) {
+            return false;
+        }
+
+        var forrige = forrigeGrunnlagBehandlingOpt.get().getSykdomsdokumenter().stream()
+            .filter(it -> it.getType() == SykdomDokumentType.UKLASSIFISERT)
+            .map(it -> new PleietrengendeDokumentID(it.getJournalpostId().getVerdi(), it.getDokumentInfoId()))
+            .collect(Collectors.toSet());
+
+        var diffSet = utledetGrunnlag.getSykdomsdokumenter().stream()
+            .filter(it -> it.getType() == SykdomDokumentType.UKLASSIFISERT)
+            .map(it -> new PleietrengendeDokumentID(it.getJournalpostId().getVerdi(), it.getDokumentInfoId()))
+            .collect(Collectors.toCollection(HashSet::new));
+
+        diffSet.removeAll(forrige);
+        return !diffSet.isEmpty();
+
+    }
+
+    private record PleietrengendeDokumentID(String journalpostId, String dokumentId) {}
+
 
     LocalDateTimeline<Boolean> sammenlignTidfestedeGrunnlagsdata(Optional<MedisinskGrunnlagsdata> grunnlagBehandling, MedisinskGrunnlagsdata utledetGrunnlag) {
         LocalDateTimeline<SykdomSamletVurdering> grunnlagBehandlingTidslinje;

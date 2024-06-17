@@ -281,9 +281,9 @@ spec:
       value: "false"
     - name: FERIEPENGER_AV_DAGPENGER
       value: "false"
-    - name: MANUELT_VURDER_UTVIDET_RETT
-      value: "false"
     - name: SEND_INNTEKTSMELDING_FORESPORSEL
+      value: "false"
+    - name: OMP_RAMMEVEDTAK_SAMMENSTILLNG_AARSKVANTUM
       value: "false"
 
     # Konfigurasjoner

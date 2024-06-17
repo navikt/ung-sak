@@ -43,8 +43,9 @@ public class OmsorgspengerSkjæringstidspunktTjeneste implements Skjæringstidsp
                                                    BehandlingRepository behandlingRepository,
                                                    OpptjeningRepository opptjeningRepository,
                                                    OmsorgspengerGrunnlagRepository omsorgspengerGrunnlagRepository,
+                                                   OmsorgspengerOpphørtidspunktTjeneste omsorgspengerOpphørtidspunktTjeneste,
                                                    VilkårResultatRepository vilkårResultatRepository) {
-        this.opphørTidspunktTjeneste = new OmsorgspengerOpphørtidspunktTjeneste(årskvantumTjeneste);
+        this.opphørTidspunktTjeneste = omsorgspengerOpphørtidspunktTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.opptjeningRepository = opptjeningRepository;
         this.omsorgspengerGrunnlagRepository = omsorgspengerGrunnlagRepository;

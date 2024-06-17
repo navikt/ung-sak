@@ -39,6 +39,7 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.OMSORGSPENGER)
+@FagsakYtelseTypeRef(FagsakYtelseType.OMSORGSPENGER_AO)
 public class PdlKallDump implements DebugDumpBehandling {
 
     static final ObjectMapper OM = new ObjectMapper();

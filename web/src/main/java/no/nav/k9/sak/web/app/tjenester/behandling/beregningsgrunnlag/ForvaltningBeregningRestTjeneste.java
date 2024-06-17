@@ -41,6 +41,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -62,6 +63,7 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.felles.util.InputValideringRegex;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.prosesstask.rest.AbacEmptySupplier;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -75,10 +77,13 @@ import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.SkalForlengeAktiv
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.SkalForlengeAktivitetstatusInput;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.kontrakt.KortTekst;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.trigger.ProsessTriggerForvaltningTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput;
+import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.ContainerContextRunner;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
@@ -172,15 +177,16 @@ public class ForvaltningBeregningRestTjeneste {
             select f.saksnummer
                  ,b.fagsak_id
                  ,d.behandling_id
-                 ,vp.fom
-                 ,vp.tom
-                 ,fp.fom
-                 ,fp.tom
-              from dump_feil_im d
+                 ,vp.fom vilkarperiode_fom
+                 ,vp.tom vilkarperiode_tom
+                 ,fp.fom fordelperiode_fom
+                 ,fp.tom fordelperiode_tom
+              from dump_feil_im_gr d
               left join dump_feil_im_vilkar_periode vp on vp.dump_grunnlag_id = d.id
               left join dump_feil_im_fordel_periode fp on fp.dump_grunnlag_id = d.id
               inner join behandling b on b.id=d.behandling_id
               inner join fagsak f on f.id=b.fagsak_id
+              where aktiv = true
              """;
 
         Query query = entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
@@ -239,22 +245,26 @@ public class ForvaltningBeregningRestTjeneste {
     @POST
     @Path("psb-aktivitetstatus-forlengelse-data")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Operation(description = "Data til utledning av forlengelse av aktivitetstatus", tags = "beregning")
     @BeskyttetRessurs(action = READ, resource = DRIFT)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response finnAktivitetstatusForlengelseData(@QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) BehandlingIdDto behandlingIdDto) { // NOSONAR
-        var behandlingId = behandlingIdDto.getBehandlingId();
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+    public Response finnAktivitetstatusForlengelseData(@NotNull @FormParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto,
+                                                       @NotNull @FormParam("begrunnelse") @Parameter(description = "begrunnelse", allowEmptyValue = false, required = true, schema = @Schema(type = "string", maximum = "2000")) @Valid @TilpassetAbacAttributt(supplierClass = AbacEmptySupplier.class) KortTekst begrunnelse) { // NOSONAR
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
         var ref = BehandlingReferanse.fra(behandling);
         var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(ref);
-        var skalForlengeAktivitetstatusInput = finnPerioderMedStartIKontrollerFakta.lagInput(ref, perioderTilVurdering);
+
+        // Kaller i egen context for å kunne hente inntektsmeldinger fra abakus
+        var skalForlengeAktivitetstatusInput  = ContainerContextRunner.doRun(behandling, () -> finnPerioderMedStartIKontrollerFakta.lagInput(ref, perioderTilVurdering));
+
         var skalForlengeAktivitetstatus = new SkalForlengeAktivitetstatus(pleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering);
         var dataTilUtledning = skalForlengeAktivitetstatus.finnDataForUtledning(skalForlengeAktivitetstatusInput);
         var output = new SkalForlengeAktivitetstatusUtledningPerioder(
             dataTilUtledning.kravForForlengelseTidslinjer().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getLocalDateIntervals())),
             dataTilUtledning.årsakTilIngenForlengelseTidslinjer().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getLocalDateIntervals()))
         );
+        loggForvaltningTjeneste(behandling.getFagsak(), "/psb-aktivitetstatus-forlengelse-data", begrunnelse.getTekst());
         return Response.ok(output, JSON).build();
     }
 

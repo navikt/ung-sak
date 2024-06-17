@@ -4,6 +4,13 @@ import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
+import java.util.Collections;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -17,16 +24,12 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDagerV2;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUtbetalingGrunnlag;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUttrekk;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
@@ -49,14 +52,16 @@ public class ÅrskvantumRestTjeneste {
     public static final String FORBRUKTEDAGER = BASE_PATH + FORBRUKTEDAGER_PATH;
     public static final String FULL_UTTAKSPLAN = BASE_PATH + FULL_UTTAKSPLAN_PATH;
     private ÅrskvantumTjeneste årskvantumTjeneste;
+    private boolean rammevedtakSammenstillingIÅrskvantum;
 
     public ÅrskvantumRestTjeneste() {
         // for proxying
     }
 
     @Inject
-    public ÅrskvantumRestTjeneste(ÅrskvantumTjeneste årskvantumTjeneste) {
+    public ÅrskvantumRestTjeneste(ÅrskvantumTjeneste årskvantumTjeneste, @KonfigVerdi(value = "OMP_RAMMEVEDTAK_SAMMENSTILLNG_AARSKVANTUM", defaultVerdi = "false") boolean rammevedtakSammenstillingIÅrskvantum) {
         this.årskvantumTjeneste = årskvantumTjeneste;
+        this.rammevedtakSammenstillingIÅrskvantum = rammevedtakSammenstillingIÅrskvantum;
     }
 
     /**
@@ -71,6 +76,14 @@ public class ÅrskvantumRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public ÅrskvantumForbrukteDager getForbrukteDager(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
+        if (rammevedtakSammenstillingIÅrskvantum){
+            ÅrskvantumForbrukteDagerV2 resultat = årskvantumTjeneste.hentÅrskvantumForBehandlingV2(behandlingIdDto.getBehandlingUuid());
+            return new ÅrskvantumForbrukteDager(
+                resultat.getSisteUttaksplan(),
+                Collections.emptyList(), //returnerer ikke rammevedtak, blir ikke brukt av konsument (frontend)
+                Collections.emptyList()  //returnerer ikke barn, blir ikke brukt av konsument (frontend)
+            );
+        }
         return årskvantumTjeneste.hentÅrskvantumForBehandling(behandlingIdDto.getBehandlingUuid());
     }
 
@@ -108,9 +121,11 @@ public class ÅrskvantumRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response inputTilÅrskvantumsBeregning(@NotNull @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
-
+        if (rammevedtakSammenstillingIÅrskvantum){
+            var request = årskvantumTjeneste.hentInputTilBeregningV2(behandlingIdDto.getBehandlingUuid());
+            return Response.ok(request).build();
+        }
         var request = årskvantumTjeneste.hentInputTilBeregning(behandlingIdDto.getBehandlingUuid());
-
         return Response.ok(request).build();
     }
 

@@ -3,10 +3,13 @@ package no.nav.k9.sak.ytelse.omsorgspenger.beregningsgrunnlag;
 import no.nav.k9.aarskvantum.kontrakter.*;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.DefaultKantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,14 +28,17 @@ import static org.mockito.Mockito.when;
 class OMPFinnPerioderSomSkalFjernesIBeregningTest {
 
     BehandlingReferanse behandlingReferanseMock = mock(BehandlingReferanse.class);
+    VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = mock(VilkårsPerioderTilVurderingTjeneste.class);
+
     private ÅrskvantumTjeneste årskvantumTjenesteMock = mock(ÅrskvantumTjeneste.class);
-    private OMPFinnPerioderSomSkalFjernesIBeregning finnPerioderSomSkalFjernesIBeregning = new OMPFinnPerioderSomSkalFjernesIBeregning(årskvantumTjenesteMock);
+    private OMPFinnPerioderSomSkalFjernesIBeregning finnPerioderSomSkalFjernesIBeregning = new OMPFinnPerioderSomSkalFjernesIBeregning(årskvantumTjenesteMock, new UnitTestLookupInstanceImpl<>(vilkårsPerioderTilVurderingTjeneste));
 
     private static final Saksnummer saksnummer = new Saksnummer("AAAAA");
 
     @BeforeEach
     void setup() {
         when(behandlingReferanseMock.getSaksnummer()).thenReturn(saksnummer);
+        when(vilkårsPerioderTilVurderingTjeneste.getKantIKantVurderer()).thenReturn(new DefaultKantIKantVurderer());
     }
 
     @Test
