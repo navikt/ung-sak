@@ -58,6 +58,15 @@ public class MedisinskGrunnlagsdata {
     )
     private List<PleietrengendeSykdomDokument> godkjenteLegeerklæringer = new ArrayList<>();
 
+    //Liste over alle dokumenter på den pleietrengende idet grunnlaget opprettes.
+    @OneToMany()
+    @JoinTable(
+        name="MEDISINSK_GRUNNLAGSDATA_SYKDOMSDOKUMENTER",
+        joinColumns = @JoinColumn( name="MEDISINSK_GRUNNLAGSDATA_ID"),
+        inverseJoinColumns = @JoinColumn( name="PLEIETRENGENDE_SYKDOM_DOKUMENT_ID")
+    )
+    private List<PleietrengendeSykdomDokument> sykdomsdokumenter = new ArrayList<>();
+
     @Column(name = "SYKDOM_HAR_ANDRE_MEDISINSKE_OPPLYSNINGER", nullable = false)
     private boolean harAndreMedisinskeOpplysninger;
 
@@ -85,6 +94,7 @@ public class MedisinskGrunnlagsdata {
             List<MedisinskGrunnlagsdataSøktPeriode> søktePerioder,
             List<PleietrengendeSykdomVurderingVersjon> vurderinger,
             List<PleietrengendeSykdomDokument> godkjenteLegeerklæringer,
+            List<PleietrengendeSykdomDokument> sykdomsdokumenter,
             boolean harAndreMedisinskeOpplysninger,
             PleietrengendeSykdomInnleggelser innleggelser,
             PleietrengendeSykdomDiagnoser diagnoser,
@@ -94,6 +104,7 @@ public class MedisinskGrunnlagsdata {
         setSøktePerioder(søktePerioder);
         this.vurderinger = vurderinger;
         this.godkjenteLegeerklæringer = godkjenteLegeerklæringer;
+        this.sykdomsdokumenter = sykdomsdokumenter;
         this.harAndreMedisinskeOpplysninger = harAndreMedisinskeOpplysninger;
         this.innleggelser = innleggelser;
         this.diagnoser = diagnoser;
@@ -131,6 +142,10 @@ public class MedisinskGrunnlagsdata {
             return List.of();
         }
         return godkjenteLegeerklæringer;
+    }
+
+    public List<PleietrengendeSykdomDokument> getSykdomsdokumenter() {
+        return Collections.unmodifiableList(sykdomsdokumenter);
     }
 
     public boolean isHarAndreMedisinskeOpplysninger() {

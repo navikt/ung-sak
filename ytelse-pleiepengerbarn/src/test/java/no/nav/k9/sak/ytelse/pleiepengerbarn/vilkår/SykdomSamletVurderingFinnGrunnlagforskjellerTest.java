@@ -274,6 +274,7 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
             Collections.emptyList(), //søktePerioder
             vurderinger, //vurderinger
             Collections.emptyList(), //godkjenteLegeerklæringer
+            Collections.emptyList(), //uklassifiserte
             false,
                 innleggelser,
             null,

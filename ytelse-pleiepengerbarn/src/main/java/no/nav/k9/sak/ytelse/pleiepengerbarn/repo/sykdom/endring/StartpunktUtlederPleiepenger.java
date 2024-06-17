@@ -4,7 +4,6 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.NavigableSet;
@@ -19,7 +18,6 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -31,14 +29,12 @@ import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
-import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.ErEndringPåEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagsdata;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
 
@@ -57,9 +53,7 @@ class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
     private ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste;
     private EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste;
     private SamtidigUttakTjeneste samtidigUttakTjeneste;
-    private PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
-    private boolean enableUklassifisertDokSjekk;
 
     StartpunktUtlederPleiepenger() {
         // For CDI
@@ -72,18 +66,14 @@ class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
                                  ErEndringPåEtablertTilsynTjeneste erEndringPåEtablertTilsynTjeneste,
                                  EndringUnntakEtablertTilsynTjeneste endringUnntakEtablertTilsynTjeneste,
                                  SamtidigUttakTjeneste samtidigUttakTjeneste,
-                                 PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository,
-                                 @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
-                                 @KonfigVerdi(value = "ENABLE_UKLASSIFISERT_SYKDOMSDOK_SJEKK", defaultVerdi = "false") boolean enableUklassifisertDokSjekk) {
+                                 @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
         this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
         this.medisinskGrunnlagTjeneste = medisinskGrunnlagTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.erEndringPåEtablertTilsynTjeneste = erEndringPåEtablertTilsynTjeneste;
         this.endringUnntakEtablertTilsynTjeneste = endringUnntakEtablertTilsynTjeneste;
         this.samtidigUttakTjeneste = samtidigUttakTjeneste;
-        this.pleietrengendeSykdomDokumentRepository = pleietrengendeSykdomDokumentRepository;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
-        this.enableUklassifisertDokSjekk = enableUklassifisertDokSjekk;
     }
 
     @Override
@@ -138,15 +128,6 @@ class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
 
 
     private StartpunktType utledStartpunktForSykdom(BehandlingReferanse ref) {
-        var pleietrengendeSykdomDokuments = pleietrengendeSykdomDokumentRepository.hentAlleDokumenterForBehandling(ref.getBehandlingId());
-
-        var uklassifiserteDokumenter = enableUklassifisertDokSjekk
-            ? pleietrengendeSykdomDokuments.stream().filter(it -> it.getType() == SykdomDokumentType.UKLASSIFISERT).toList()
-            : Collections.emptyList();
-        if (!uklassifiserteDokumenter.isEmpty()) {
-            return StartpunktType.INNGANGSVILKÅR_MEDISINSK;
-        }
-
         var sykdomGrunnlag = medisinskGrunnlagRepository.hentGrunnlagForBehandling(ref.getBehandlingUuid())
             .map(MedisinskGrunnlag::getGrunnlagsdata);
 
@@ -155,8 +136,9 @@ class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
         var sykdomGrunnlagSammenlikningsresultat = medisinskGrunnlagTjeneste.sammenlignGrunnlag(sykdomGrunnlag, utledGrunnlag);
 
         boolean erEndringIGrunnlag = !sykdomGrunnlagSammenlikningsresultat.getDiffPerioder().isEmpty();
+        boolean harNyUklassifiserteDokumenter = sykdomGrunnlagSammenlikningsresultat.harNyeUklassifiserteDokumenter();
 
-        var startpunktType = erEndringIGrunnlag ? StartpunktType.INNGANGSVILKÅR_MEDISINSK : StartpunktType.UDEFINERT;
+        var startpunktType = erEndringIGrunnlag || harNyUklassifiserteDokumenter ? StartpunktType.INNGANGSVILKÅR_MEDISINSK : StartpunktType.UDEFINERT;
 
         return startpunktType;
     }
