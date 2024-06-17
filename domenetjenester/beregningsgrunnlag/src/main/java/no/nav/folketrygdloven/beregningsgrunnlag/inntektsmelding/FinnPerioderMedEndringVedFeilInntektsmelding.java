@@ -2,6 +2,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingRelevantForVilkårsrevurdering;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusRestKlient;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Saksnummer;
 import no.nav.folketrygdloven.kalkulus.request.v1.HentJournalpostIderRequest;
@@ -28,7 +30,6 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kompletthet.InntektsmeldingerEndringsvurderer;
-import no.nav.k9.sak.kompletthet.KompletthetForBeregningTjeneste;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
@@ -42,29 +43,29 @@ import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnla
 public class FinnPerioderMedEndringVedFeilInntektsmelding {
 
     private static final Logger log = LoggerFactory.getLogger(FinnPerioderMedEndringVedFeilInntektsmelding.class);
-    private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private KalkulusRestKlient kalkulusRestKlient;
     private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
     private VilkårTjeneste vilkårTjeneste;
     private Instance<InntektsmeldingerEndringsvurderer> inntektsmeldingerEndringsvurderer;
+    private Instance<InntektsmeldingRelevantForVilkårsrevurdering> inntektsmeldingRelevantForVilkårsrevurdering;
 
     public FinnPerioderMedEndringVedFeilInntektsmelding() {
     }
 
     @Inject
-    public FinnPerioderMedEndringVedFeilInntektsmelding(KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste,
-                                                        InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
+    public FinnPerioderMedEndringVedFeilInntektsmelding(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                                         KalkulusRestKlient kalkulusRestKlient,
                                                         BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
                                                         VilkårTjeneste vilkårTjeneste,
-                                                        @Any Instance<InntektsmeldingerEndringsvurderer> inntektsmeldingerEndringsvurderer) {
-        this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
+                                                        @Any Instance<InntektsmeldingerEndringsvurderer> inntektsmeldingerEndringsvurderer,
+                                                        @Any Instance<InntektsmeldingRelevantForVilkårsrevurdering> inntektsmeldingRelevantForVilkårsrevurdering) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.kalkulusRestKlient = kalkulusRestKlient;
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
         this.vilkårTjeneste = vilkårTjeneste;
         this.inntektsmeldingerEndringsvurderer = inntektsmeldingerEndringsvurderer;
+        this.inntektsmeldingRelevantForVilkårsrevurdering = inntektsmeldingRelevantForVilkårsrevurdering;
     }
 
     public Optional<RelevanteEndringer> finnPerioderForEndringDersomFeilInntektsmeldingBrukes(BehandlingReferanse behandlingReferanse, LocalDate fraDato) {
@@ -109,7 +110,7 @@ public class FinnPerioderMedEndringVedFeilInntektsmelding {
 
     private RelevanteEndringer finnRelevanteEndringer(BehandlingReferanse behandlingReferanse,
                                                       List<JournalpostIderResponse> journalpostIderResponses,
-                                                      Map<UUID, List<Inntektsmelding>> inntektsmeldingerPrReferanse,
+                                                      Map<UUID, Collection<Inntektsmelding>> inntektsmeldingerPrReferanse,
                                                       Set<Inntektsmelding> alleInntektsmeldinger,
                                                       Optional<BeregningsgrunnlagPerioderGrunnlag> bgPerioderGrunnlag,
                                                       List<DatoIntervallEntitet> vilkårsperioder) {
@@ -153,17 +154,18 @@ public class FinnPerioderMedEndringVedFeilInntektsmelding {
             .toList();
     }
 
-    private List<JournalpostIderResponse> finnJournalposterSomFaktiskErBruktIBeregning(BehandlingReferanse behandlingReferanse, Map<UUID, List<Inntektsmelding>> inntektsmeldingerPrReferanse) {
+    private List<JournalpostIderResponse> finnJournalposterSomFaktiskErBruktIBeregning(BehandlingReferanse behandlingReferanse, Map<UUID, Collection<Inntektsmelding>> inntektsmeldingerPrReferanse) {
         return kalkulusRestKlient.hentInntektsmeldingJournalpostIder(new HentJournalpostIderRequest(inntektsmeldingerPrReferanse.keySet().stream().toList(), new Saksnummer(behandlingReferanse.getSaksnummer().getVerdi())));
     }
 
-    private Map<UUID, List<Inntektsmelding>> finnInntektsmeldingerForBeregningPrEksternReferanse(BehandlingReferanse behandlingReferanse, List<DatoIntervallEntitet> vilkårsperioder, Optional<BeregningsgrunnlagPerioderGrunnlag> bgPerioderGrunnlag, Set<Inntektsmelding> alleInntektsmeldinger, LocalDate fraDato) {
+    private Map<UUID, Collection<Inntektsmelding>> finnInntektsmeldingerForBeregningPrEksternReferanse(BehandlingReferanse behandlingReferanse, List<DatoIntervallEntitet> vilkårsperioder, Optional<BeregningsgrunnlagPerioderGrunnlag> bgPerioderGrunnlag, Set<Inntektsmelding> alleInntektsmeldinger, LocalDate fraDato) {
+        var imFilter = InntektsmeldingRelevantForVilkårsrevurdering.finnTjeneste(inntektsmeldingRelevantForVilkårsrevurdering, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, behandlingReferanse.getFagsakYtelseType()).orElseThrow();
         return vilkårsperioder.stream()
             .filter(p -> bgPerioderGrunnlag.flatMap(gr -> gr.finnGrunnlagFor(p.getFomDato())).isPresent())
-            .filter(p -> kompletthetForBeregningTjeneste.utledInntektsmeldingerSomSendesInnTilBeregningForPeriode(behandlingReferanse, alleInntektsmeldinger, p).stream().anyMatch(im -> !im.getMottattDato().isBefore(fraDato)))
+            .filter(p -> imFilter.begrensInntektsmeldinger(behandlingReferanse, alleInntektsmeldinger, p).stream().anyMatch(im -> !im.getMottattDato().isBefore(fraDato)))
             .collect(Collectors.toMap(
                 p -> bgPerioderGrunnlag.flatMap(gr -> gr.finnGrunnlagFor(p.getFomDato())).map(BeregningsgrunnlagPeriode::getEksternReferanse).orElseThrow(),
-                p -> kompletthetForBeregningTjeneste.utledInntektsmeldingerSomSendesInnTilBeregningForPeriode(behandlingReferanse, alleInntektsmeldinger, p)
+                p -> imFilter.begrensInntektsmeldinger(behandlingReferanse, alleInntektsmeldinger, p)
             ));
     }
 
@@ -172,12 +174,12 @@ public class FinnPerioderMedEndringVedFeilInntektsmelding {
         return finnInntektsmeldingerFraJournalspostId(journalpostIderSomFaktiskErBrukt, alleInntektsmeldinger);
     }
 
-    private static boolean harEndring(JournalpostIderResponse jpresponse, List<Inntektsmelding> inntektsmeldingerSomSkulleVærtBrukt) {
+    private static boolean harEndring(JournalpostIderResponse jpresponse, Collection<Inntektsmelding> inntektsmeldingerSomSkulleVærtBrukt) {
         var journalposterSomIkkeBleBrukt = finnJournalpostIderSomIkkeBleBrukt(jpresponse, inntektsmeldingerSomSkulleVærtBrukt);
         return !journalposterSomIkkeBleBrukt.isEmpty();
     }
 
-    private static Set<String> finnJournalpostIderSomIkkeBleBrukt(JournalpostIderResponse jpresponse, List<Inntektsmelding> inntektsmeldingerSomSkulleVærtBrukt) {
+    private static Set<String> finnJournalpostIderSomIkkeBleBrukt(JournalpostIderResponse jpresponse, Collection<Inntektsmelding> inntektsmeldingerSomSkulleVærtBrukt) {
         var jounalpostIderSomSkulleVærtBrukt = inntektsmeldingerSomSkulleVærtBrukt.stream().map(Inntektsmelding::getJournalpostId).map(JournalpostId::getVerdi).collect(Collectors.toSet());
         var journalpostIderSomFaktiskErBrukt = jpresponse.getJournalpostIder().stream().map(no.nav.folketrygdloven.kalkulus.felles.v1.JournalpostId::getId).collect(Collectors.toSet());
 
@@ -192,7 +194,7 @@ public class FinnPerioderMedEndringVedFeilInntektsmelding {
             .collect(Collectors.toSet());
     }
 
-    private boolean harEndringerSomPåvirkerVilkårsvurdering(BehandlingReferanse behandlingReferanse, List<Inntektsmelding> inntektsmeldingerSomSkulleVærtBrukt, Set<Inntektsmelding> inntektsmeldingerSomFaktiskErBrukt) {
+    private boolean harEndringerSomPåvirkerVilkårsvurdering(BehandlingReferanse behandlingReferanse, Collection<Inntektsmelding> inntektsmeldingerSomSkulleVærtBrukt, Set<Inntektsmelding> inntektsmeldingerSomFaktiskErBrukt) {
         var inntektsmeldingerMedRelevanteEndringerForVilkårsvurdering = InntektsmeldingerEndringsvurderer.finnTjeneste(inntektsmeldingerEndringsvurderer, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, behandlingReferanse.getFagsakYtelseType()).finnInntektsmeldingerMedRelevanteEndringer(inntektsmeldingerSomSkulleVærtBrukt, inntektsmeldingerSomFaktiskErBrukt);
         return !inntektsmeldingerMedRelevanteEndringerForVilkårsvurdering.isEmpty();
     }

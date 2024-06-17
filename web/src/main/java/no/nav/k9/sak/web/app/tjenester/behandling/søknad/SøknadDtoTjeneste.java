@@ -1,14 +1,14 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.søknad;
 
 import java.time.LocalDate;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
@@ -164,9 +164,11 @@ public class SøknadDtoTjeneste {
             return List.of();
         }
 
-        var identMap = angittePersoner.stream().filter(p -> p.getAktørId() != null)
-            .map(p -> new AbstractMap.SimpleEntry<>(p.getAktørId(), personinfoAdapter.hentBrukerBasisForAktør(p.getAktørId()).orElse(null)))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        var identMap = angittePersoner.stream()
+            .map(SøknadAngittPersonEntitet::getAktørId)
+            .filter(Objects::nonNull)
+            .distinct()
+            .collect(Collectors.toMap(Function.identity(), aktørId -> personinfoAdapter.hentBrukerBasisForAktør(aktørId).orElseThrow(() -> new IllegalArgumentException("Fant ikke informasjon for person på saken"))));
 
         return angittePersoner.stream()
             .map(p -> {
@@ -185,7 +187,7 @@ public class SøknadDtoTjeneste {
                 }
                 return dto;
             })
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private List<ManglendeVedleggDto> genererManglendeVedlegg(BehandlingReferanse ref) {
