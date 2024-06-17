@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.hibernate.QueryTimeoutException;
+import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.jpa.QueryHints;
 import org.hibernate.query.NativeQuery;
 import org.jboss.weld.interceptor.util.proxy.TargetInstanceProxy;
@@ -122,7 +123,7 @@ public class StatistikkRepository {
         }
         try {
             metrikker.addAll(timeCall(() -> avslagStatistikkDaglig(dag), "avslagStatistikkDaglig"));
-        } catch (QueryTimeoutException e) {
+        } catch (QueryTimeoutException | GenericJDBCException e) {
             log.warn("Uthenting av avslagStatistikkDaglig feiler", e);
         }
         metrikker.addAll(timeCall(this::prosessTaskFeilStatistikk, "prosessTaskFeilStatistikk"));
