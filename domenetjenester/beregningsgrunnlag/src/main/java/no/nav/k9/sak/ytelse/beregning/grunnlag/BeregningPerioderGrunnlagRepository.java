@@ -93,6 +93,11 @@ public class BeregningPerioderGrunnlagRepository {
         }
     }
 
+    /** Legger til og fjerner pgi-perioder. Om samme perioder ligger i begge listene resulterer dette i fjerning av perioden.
+     * @param behandlingId BehandlingId
+     * @param nyePerioder Nye perioder som skal legges til
+     * @param deaktiverPerioder Perioder som skal fjernes
+     */
     public void lagreOgDeaktiverPGIPerioder(Long behandlingId, List<PGIPeriode> nyePerioder, List<PGIPeriode> deaktiverPerioder) {
         var grunnlagOptional = hentGrunnlag(behandlingId);
         var aktivtGrunnlag = grunnlagOptional.orElse(new BeregningsgrunnlagPerioderGrunnlag());
