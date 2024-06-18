@@ -2,6 +2,8 @@ package no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.kontrakt;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
@@ -9,6 +11,7 @@ public final class ForespørselSaksnummerDto {
 
     private static final String REGEXP = "^[\\p{Alnum}]+$";
 
+    @JsonProperty(value = "saksnr", required = true)
     @NotNull
     @Pattern(regexp = REGEXP, message = "Saksnummer [${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String saksnr;
