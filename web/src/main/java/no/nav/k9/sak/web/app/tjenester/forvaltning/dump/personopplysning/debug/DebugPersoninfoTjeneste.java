@@ -25,8 +25,8 @@ import no.nav.k9.felles.integrasjon.pdl.BostedsadresseResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.DeltBostedResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.Doedsfall;
 import no.nav.k9.felles.integrasjon.pdl.DoedsfallResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.Foedsel;
-import no.nav.k9.felles.integrasjon.pdl.FoedselResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.Foedselsdato;
+import no.nav.k9.felles.integrasjon.pdl.FoedselsdatoResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.FolkeregistermetadataResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.Folkeregisterpersonstatus;
 import no.nav.k9.felles.integrasjon.pdl.FolkeregisterpersonstatusResponseProjection;
@@ -332,7 +332,7 @@ public class DebugPersoninfoTjeneste {
         query.setIdent(personIdent.getIdent());
         var projection = new PersonResponseProjection()
             .navn(new NavnResponseProjection().forkortetNavn().fornavn().mellomnavn().etternavn())
-            .foedsel(new FoedselResponseProjection().foedselsdato())
+            .foedselsdato(new FoedselsdatoResponseProjection().foedselsdato())
             .doedsfall(new DoedsfallResponseProjection().doedsdato())
             .folkeregisterpersonstatus(new FolkeregisterpersonstatusResponseProjection().forenkletStatus().status())
             .opphold(new OppholdResponseProjection().type().oppholdFra().oppholdTil())
@@ -385,8 +385,8 @@ public class DebugPersoninfoTjeneste {
 
         dumpinnhold.add("pdl-kjerneinfo-svar for " + aktørId.getAktørId() + ": " + PdlKallDump.toJson(person));
 
-        var fødselsdato = personFraPdl.getFoedsel().stream()
-            .map(Foedsel::getFoedselsdato)
+        var fødselsdato = personFraPdl.getFoedselsdato().stream()
+            .map(Foedselsdato::getFoedselsdato)
             .filter(Objects::nonNull)
             .findFirst().map(d -> LocalDate.parse(d, DateTimeFormatter.ISO_LOCAL_DATE)).orElse(null);
         var dødssdato = personFraPdl.getDoedsfall().stream()
