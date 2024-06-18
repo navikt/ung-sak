@@ -76,10 +76,12 @@ public enum OpptjeningAktivitetType implements Kodeverdi {
         Set.of(),
         Set.of(FagsakYtelseType.SYKEPENGER)
     ),
+    @Deprecated(since = "2024-06-17", forRemoval = false) // Brukes for løpende saker i uttak, men skal aldri opprettes for nye vurderinger
     SYKEPENGER_AV_DAGPENGER("SYKEPENGER_AV_DAGPENGER", "Sykepenger",
         Set.of(),
         Set.of(FagsakYtelseType.SYKEPENGER)
     ),
+    @Deprecated(since = "2024-06-17", forRemoval = false) // Brukes for løpende saker i uttak, men skal aldri opprettes for nye vurderinger
     PLEIEPENGER_AV_DAGPENGER("PLEIEPENGER_AV_DAGPENGER", "Pleiepenger",
         Set.of(),
         Set.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE)
