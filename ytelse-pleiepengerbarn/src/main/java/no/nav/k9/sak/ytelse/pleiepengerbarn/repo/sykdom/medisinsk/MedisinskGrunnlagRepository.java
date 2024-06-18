@@ -28,6 +28,7 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.Person;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PersonRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurderingVersjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.SykdomVurderingRepository;
@@ -103,10 +104,10 @@ public class MedisinskGrunnlagRepository {
     public MedisinskGrunnlagsdata utledGrunnlag(Saksnummer saksnummer, UUID behandlingUuid, AktørId pleietrengendeAktørId, NavigableSet<DatoIntervallEntitet> vurderingsperioder, NavigableSet<DatoIntervallEntitet> søknadsperioderSomSkalFjernes) {
         final Optional<MedisinskGrunnlag> grunnlagFraForrigeBehandling = hentGrunnlagFraForrigeBehandling(saksnummer, behandlingUuid);
 
-        return utledGrunnlag(pleietrengendeAktørId, vurderingsperioder, søknadsperioderSomSkalFjernes, grunnlagFraForrigeBehandling);
+        return utledGrunnlag(pleietrengendeAktørId, vurderingsperioder, søknadsperioderSomSkalFjernes, grunnlagFraForrigeBehandling, behandlingUuid);
     }
 
-    private MedisinskGrunnlagsdata utledGrunnlag(AktørId pleietrengendeAktørId, NavigableSet<DatoIntervallEntitet> vurderingsperioder, NavigableSet<DatoIntervallEntitet> søknadsperioderSomSkalFjernes, Optional<MedisinskGrunnlag> grunnlagFraForrigeBehandling) {
+    private MedisinskGrunnlagsdata utledGrunnlag(AktørId pleietrengendeAktørId, NavigableSet<DatoIntervallEntitet> vurderingsperioder, NavigableSet<DatoIntervallEntitet> søknadsperioderSomSkalFjernes, Optional<MedisinskGrunnlag> grunnlagFraForrigeBehandling, UUID behandlingUuid) {
         final var opprettetTidspunkt = LocalDateTime.now();
 
         final var søktePerioderFraForrigeBehandling = TidslinjeUtil.kunPerioderSomIkkeFinnesI(hentSøktePerioderFraForrigeBehandling(grunnlagFraForrigeBehandling), TidslinjeUtil.tilTidslinjeKomprimert(new TreeSet<>(søknadsperioderSomSkalFjernes)));
@@ -127,12 +128,13 @@ public class MedisinskGrunnlagRepository {
 
         final var harAndreMedisinskeDokumenter = !sykdomDokumenter.isEmpty();
 
+        List<PleietrengendeSykdomDokument> sykdomsdokumenterPåBehandling = sykdomDokumenter.stream().filter(it -> it.getSøkersBehandlingUuid().equals(behandlingUuid)).toList();
         return new MedisinskGrunnlagsdata(
             UUID.randomUUID(),
             søktePerioder.stream().map(p -> new MedisinskGrunnlagsdataSøktPeriode(p.getFomDato(), p.getTomDato())).collect(Collectors.toList()),
             vurderinger,
             godkjenteLegeerklæringer,
-            sykdomDokumenter,
+            sykdomsdokumenterPåBehandling,
             harAndreMedisinskeDokumenter,
             innleggelser,
             diagnosekoder,
@@ -148,7 +150,7 @@ public class MedisinskGrunnlagRepository {
 
         final LocalDateTime opprettetTidspunkt = LocalDateTime.now();
 
-        final MedisinskGrunnlagsdata grunnlag = utledGrunnlag(pleietrengendeAktørId, vurderingsperioder, søknadsperioderSomSkalFjernes, grunnlagFraForrigeBehandling);
+        final MedisinskGrunnlagsdata grunnlag = utledGrunnlag(pleietrengendeAktørId, vurderingsperioder, søknadsperioderSomSkalFjernes, grunnlagFraForrigeBehandling, behandlingUuid);
 
         final Person søker = personRepository.hentEllerLagrePerson(søkerAktørId);
         final Person pleietrengende = personRepository.hentEllerLagrePerson(pleietrengendeAktørId);
