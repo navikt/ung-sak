@@ -20,7 +20,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
@@ -40,7 +39,6 @@ public class MedisinskGrunnlagRepository {
     private SykdomVurderingRepository sykdomVurderingRepository;
     private PersonRepository personRepository;
     private PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository;
-    private boolean enableUklassifisertDokSjekk;
 
     MedisinskGrunnlagRepository() {
         // CDI
@@ -51,13 +49,11 @@ public class MedisinskGrunnlagRepository {
             EntityManager entityManager,
             SykdomVurderingRepository sykdomVurderingRepository,
             PersonRepository personRepository,
-            PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository,
-            @KonfigVerdi(value = "ENABLE_UKLASSIFISERT_SYKDOMSDOK_SJEKK", defaultVerdi = "false") boolean enableUklassifisertDokSjekk) {
+            PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository) {
         this.entityManager = Objects.requireNonNull(entityManager, "entityManager");
         this.sykdomVurderingRepository = Objects.requireNonNull(sykdomVurderingRepository, "sykdomVurderingRepository");
         this.personRepository = Objects.requireNonNull(personRepository, "personRepository");
         this.pleietrengendeSykdomDokumentRepository = Objects.requireNonNull(pleietrengendeSykdomDokumentRepository, "sykdomDokumentRepository");
-        this.enableUklassifisertDokSjekk = enableUklassifisertDokSjekk;
     }
 
     public List<Saksnummer> hentAlleSaksnummer(AktørId pleietrengende) {
@@ -136,7 +132,7 @@ public class MedisinskGrunnlagRepository {
             søktePerioder.stream().map(p -> new MedisinskGrunnlagsdataSøktPeriode(p.getFomDato(), p.getTomDato())).collect(Collectors.toList()),
             vurderinger,
             godkjenteLegeerklæringer,
-            enableUklassifisertDokSjekk ? sykdomDokumenter : Collections.emptyList(),
+            sykdomDokumenter,
             harAndreMedisinskeDokumenter,
             innleggelser,
             diagnosekoder,

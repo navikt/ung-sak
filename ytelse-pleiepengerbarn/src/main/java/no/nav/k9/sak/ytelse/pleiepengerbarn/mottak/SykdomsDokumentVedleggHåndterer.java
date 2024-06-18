@@ -23,7 +23,6 @@ import no.nav.k9.felles.integrasjon.saf.Kanal;
 import no.nav.k9.felles.integrasjon.saf.LogiskVedleggResponseProjection;
 import no.nav.k9.felles.integrasjon.saf.RelevantDatoResponseProjection;
 import no.nav.k9.felles.integrasjon.saf.SafTjeneste;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
@@ -46,7 +45,6 @@ public class SykdomsDokumentVedleggHåndterer {
     private PersonRepository personRepository;
     private SafTjeneste safTjeneste;
     private Instance<MapTilBrevkode> brevkodeMappere;
-    private boolean enableUklassifisertDokSjekk;
 
     private static Set<String> ETTERSENDELSE_BREVKODER = Set.of(Brevkode.ETTERSENDELSE_PLEIEPENGER_SYKT_BARN.getOffisiellKode(), Brevkode.ETTERSENDELSE_PLEIEPENGER_LIVETS_SLUTTFASE.getOffisiellKode());
 
@@ -55,14 +53,12 @@ public class SykdomsDokumentVedleggHåndterer {
                                            SykdomVurderingRepository sykdomVurderingRepository,
                                            PersonRepository personRepository,
                                            SafTjeneste safTjeneste,
-                                           @Any Instance<MapTilBrevkode> brevkodeMappere,
-                                           @KonfigVerdi(value = "ENABLE_UKLASSIFISERT_SYKDOMSDOK_SJEKK", defaultVerdi = "false") boolean enableUklassifisertDokSjekk) {
+                                           @Any Instance<MapTilBrevkode> brevkodeMappere) {
         this.safTjeneste = safTjeneste;
         this.pleietrengendeSykdomDokumentRepository = pleietrengendeSykdomDokumentRepository;
         this.personRepository = personRepository;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
         this.brevkodeMappere = brevkodeMappere;
-        this.enableUklassifisertDokSjekk = enableUklassifisertDokSjekk;
     }
 
     public void leggTilDokumenterSomSkalHåndteresVedlagtSkjema(Behandling behandling, JournalpostId journalpostId, AktørId pleietrengendeAktørId, LocalDateTime mottattidspunkt, boolean harInfoSomIkkeKanPunsjes, boolean harMedisinskeOpplysninger) {
@@ -82,7 +78,7 @@ public class SykdomsDokumentVedleggHåndterer {
                 && journalpost.getKanal() == Kanal.NAV_NO
                 && brevkodeSøknad.getOffisiellKode().equals(dokumentInfo.getBrevkode());
 
-            final boolean erDigitalEttersendelseSkjema = enableUklassifisertDokSjekk && hoveddokument
+            final boolean erDigitalEttersendelseSkjema = hoveddokument
                 && journalpost.getKanal() == Kanal.NAV_NO
                 && ETTERSENDELSE_BREVKODER.contains(dokumentInfo.getBrevkode());
 

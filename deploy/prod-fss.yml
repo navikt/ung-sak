@@ -283,8 +283,6 @@ spec:
       value: "false"
     - name: SEND_INNTEKTSMELDING_FORESPORSEL
       value: "false"
-    - name: ENABLE_UKLASSIFISERT_SYKDOMSDOK_SJEKK
-      value: "false"
     - name: OMP_RAMMEVEDTAK_SAMMENSTILLNG_AARSKVANTUM
       value: "false"
 
