@@ -143,6 +143,7 @@ class FastsettPGIPeriodeTjenesteTest {
         var pgiPerioder = beregningsgrunnlagPerioderGrunnlag.get().getPGIPerioder();
         assertThat(pgiPerioder.size()).isEqualTo(1);
         assertThat(pgiPerioder.get(0)).isEqualTo(initiellPeriode);
+        assertThat(pgiPerioder.get(0).getId().equals(initiellPeriode.getId())).isFalse();
     }
 
 
@@ -161,6 +162,7 @@ class FastsettPGIPeriodeTjenesteTest {
         var pgiPerioder = beregningsgrunnlagPerioderGrunnlag.get().getPGIPerioder();
         assertThat(pgiPerioder.size()).isEqualTo(1);
         assertThat(pgiPerioder.get(0)).isEqualTo(initiellPeriode);
+        assertThat(pgiPerioder.get(0).getId().equals(initiellPeriode.getId())).isFalse();
     }
 
 
