@@ -116,8 +116,11 @@ public class FastsettPGIPeriodeTjeneste {
 
     private List<PGIPeriode> finnInitiellPGIPerioder(Long behandlingId) {
         var grunnlagOpt = grunnlagRepository.getInitiellVersjon(behandlingId);
-        return grunnlagOpt.map(BeregningsgrunnlagPerioderGrunnlag::getPGIPerioder)
-            .orElse(Collections.emptyList());
+        return grunnlagOpt
+            .stream()
+            .flatMap(bg -> bg.getPGIPerioder().stream())
+            .map(PGIPeriode::new) // lager kopi for å ikkje endre på eksisterende perioder som kan vere en del av grunnlag i andre behandlinger
+            .toList();
     }
 
     private List<PGIPeriode> finnEksisterendePGIPerioder(Long behandlingId) {
