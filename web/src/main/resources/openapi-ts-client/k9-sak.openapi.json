@@ -6122,6 +6122,9 @@
           "antallDagerFraværRapporterSomNyoppstaret" : {
             "type" : "number"
           },
+          "antallDagerFraværRapportertSomNyoppstartet" : {
+            "type" : "number"
+          },
           "antallDagerInfotrygd" : {
             "type" : "number"
           },
