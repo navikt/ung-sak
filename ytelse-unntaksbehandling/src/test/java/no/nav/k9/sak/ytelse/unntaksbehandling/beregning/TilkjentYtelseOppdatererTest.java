@@ -70,8 +70,7 @@ public class TilkjentYtelseOppdatererTest {
         HistorikkInnslagTekstBuilder historikkInnslagTekstBuilder = new HistorikkInnslagTekstBuilder();
         when(historikkAdapter.tekstBuilder()).thenReturn(historikkInnslagTekstBuilder);
 
-        boolean enableUtbetalingsgradOppdrag = true;
-        oppdaterer = new TilkjentYtelseOppdaterer(repositoryProvider, new UnitTestLookupInstanceImpl<>(beregnFeriepengerTjeneste), arbeidsgiverValidator, historikkAdapter, enableUtbetalingsgradOppdrag);
+        oppdaterer = new TilkjentYtelseOppdaterer(repositoryProvider, new UnitTestLookupInstanceImpl<>(beregnFeriepengerTjeneste), arbeidsgiverValidator, historikkAdapter);
 
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagre(repositoryProvider);
