@@ -28,7 +28,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.SykdomGrunnlagSammenliknings
 class MedisinskGrunnlagTjenesteTest {
 
     private MedisinskGrunnlagTjeneste medisinskGrunnlagTjeneste =
-        new MedisinskGrunnlagTjeneste(null, new BehandlingRepositoryProvider(mock()));
+        new MedisinskGrunnlagTjeneste(null, new BehandlingRepositoryProvider(mock()), false);
 
     @Test
     void testHarNyeUklassifiserteDokumenter_NyeDokumenter() {

@@ -301,6 +301,8 @@ spec:
       value: "true"
     - name: OMP_RAMMEVEDTAK_SAMMENSTILLNG_AARSKVANTUM
       value: "true"
+    - name: SYKDOM_DOKUMENTER_I_VURDERING_DIFF
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

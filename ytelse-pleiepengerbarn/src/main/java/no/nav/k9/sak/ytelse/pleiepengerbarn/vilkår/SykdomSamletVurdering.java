@@ -2,13 +2,17 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagsdata;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomInnleggelser;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurderingVersjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeTidslinjeUtils;
@@ -86,7 +90,7 @@ public class SykdomSamletVurdering {
         return tidslinje;
     }
 
-    public static LocalDateTimeline<Boolean> finnGrunnlagsforskjeller(LocalDateTimeline<SykdomSamletVurdering> forrigeTidslinje, LocalDateTimeline<SykdomSamletVurdering> nyTidslinje) {
+    public static LocalDateTimeline<Boolean> finnGrunnlagsforskjeller(LocalDateTimeline<SykdomSamletVurdering> forrigeTidslinje, LocalDateTimeline<SykdomSamletVurdering> nyTidslinje, boolean dokumenterIVurderingDiff) {
         return nyTidslinje.combine(forrigeTidslinje, new LocalDateSegmentCombinator<SykdomSamletVurdering, SykdomSamletVurdering, Boolean>() {
             @Override
             public LocalDateSegment<Boolean> combine(LocalDateInterval localDateInterval, LocalDateSegment<SykdomSamletVurdering> left, LocalDateSegment<SykdomSamletVurdering> right) {
@@ -114,7 +118,7 @@ public class SykdomSamletVurdering {
                 if (ktp1 == null && ktp2 != null || ktp1 != null && ktp2 == null) {
                     return new LocalDateSegment<>(localDateInterval, true);
                 } else if (ktp1 != null && ktp2 != null) {
-                    if (ktp1.getResultat() != ktp2.getResultat()) {
+                    if (ktp1.getResultat() != ktp2.getResultat() || (dokumenterIVurderingDiff && !finnjournalposterBruktIVurdering(ktp1).equals(finnjournalposterBruktIVurdering(ktp2)))) {
                         return new LocalDateSegment<>(localDateInterval, true);
                     }
                 }
@@ -131,6 +135,10 @@ public class SykdomSamletVurdering {
                 return null;
             }
         }, LocalDateTimeline.JoinStyle.CROSS_JOIN).compress();
+    }
+
+    private static Set<JournalpostId> finnjournalposterBruktIVurdering(PleietrengendeSykdomVurderingVersjon ktp1) {
+        return ktp1.getDokumenter().stream().map(PleietrengendeSykdomDokument::getJournalpostId).collect(Collectors.toSet());
     }
 
     public PleietrengendeSykdomVurderingVersjon getKtp() {

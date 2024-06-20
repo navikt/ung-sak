@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -30,6 +31,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.SykdomSamletVurdering;
 public class MedisinskGrunnlagTjeneste {
 
     private VilkårResultatRepository vilkårResultatRepository;
+    private boolean dokumenterIVurderingDiff;
     private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
 
 
@@ -38,9 +40,11 @@ public class MedisinskGrunnlagTjeneste {
     }
 
     @Inject
-    public MedisinskGrunnlagTjeneste(MedisinskGrunnlagRepository medisinskGrunnlagRepository, BehandlingRepositoryProvider repositoryProvider) {
+    public MedisinskGrunnlagTjeneste(MedisinskGrunnlagRepository medisinskGrunnlagRepository, BehandlingRepositoryProvider repositoryProvider,
+                                     @KonfigVerdi(value = "SYKDOM_DOKUMENTER_I_VURDERING_DIFF", defaultVerdi = "false") boolean dokumenterIVurderingDiff) {
         this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
+        this.dokumenterIVurderingDiff = dokumenterIVurderingDiff;
     }
 
     public MedisinskGrunnlag hentGrunnlag(UUID behandlingUuid) {
@@ -136,7 +140,7 @@ public class MedisinskGrunnlagTjeneste {
         final LocalDateTimeline<SykdomSamletVurdering> forrigeGrunnlagTidslinje = grunnlagBehandlingTidslinje;
 
         final LocalDateTimeline<SykdomSamletVurdering> nyBehandlingTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(utledetGrunnlag);
-        final LocalDateTimeline<Boolean> endringerSidenForrigeBehandling = SykdomSamletVurdering.finnGrunnlagsforskjeller(forrigeGrunnlagTidslinje, nyBehandlingTidslinje);
+        final LocalDateTimeline<Boolean> endringerSidenForrigeBehandling = SykdomSamletVurdering.finnGrunnlagsforskjeller(forrigeGrunnlagTidslinje, nyBehandlingTidslinje, dokumenterIVurderingDiff);
 
         final LocalDateTimeline<Boolean> søktePerioderTimeline = TidslinjeUtil.tilTidslinjeKomprimert(utledetGrunnlag.getSøktePerioder().stream().map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFom(), p.getTom())).collect(Collectors.toCollection(TreeSet::new)));
         return endringerSidenForrigeBehandling.intersection(søktePerioderTimeline);
