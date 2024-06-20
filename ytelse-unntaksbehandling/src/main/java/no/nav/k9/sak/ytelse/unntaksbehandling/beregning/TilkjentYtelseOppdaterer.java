@@ -19,7 +19,6 @@ import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.FunksjonellFeil;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -63,7 +62,6 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
     private VilkårResultatRepository vilkårResultatRepository;
     private ArbeidsgiverValidator arbeidsgiverValidator;
     private HistorikkTjenesteAdapter historikkAdapter;
-    private boolean brukUtbetalingsgradOppdrag;
 
     TilkjentYtelseOppdaterer() {
         // for CDI proxy
@@ -72,8 +70,7 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
     @Inject
     public TilkjentYtelseOppdaterer(BehandlingRepositoryProvider repositoryProvider,
                                     @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste,
-                                    ArbeidsgiverValidator arbeidsgiverValidator, HistorikkTjenesteAdapter historikkAdapter,
-                                    @KonfigVerdi(value = "ENABLE_UTBETALINGSGRAD_OPPDRAG", defaultVerdi = "false") boolean brukUtbetalingsgradOppdrag
+                                    ArbeidsgiverValidator arbeidsgiverValidator, HistorikkTjenesteAdapter historikkAdapter
     ) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
@@ -81,7 +78,6 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.arbeidsgiverValidator = arbeidsgiverValidator;
         this.historikkAdapter = historikkAdapter;
-        this.brukUtbetalingsgradOppdrag = brukUtbetalingsgradOppdrag;
     }
 
     @Override
@@ -138,7 +134,7 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
             .medDagsats(dagsats)
             .medDagsatsFraBg(0) // Settes kun senere dersom aksjonspunkt for vurdering av tilbaketrekk
             .medUtbetalingsgrad(utbetalingsgrad)
-            .medUtbetalingsgradOppdrag(brukUtbetalingsgradOppdrag ? utbetalingsgrad : null) //kontekst er unntaksløypa, forventer ikke at saksbehandler skiller utbetalingsgradene
+            .medUtbetalingsgradOppdrag(utbetalingsgrad) //kontekst er unntaksløypa, forventer ikke at saksbehandler skiller utbetalingsgradene
             .medArbeidsgiver(arbeidsgiver)
             .medArbeidsforholdRef(InternArbeidsforholdRef.nullRef())
             .medAktivitetStatus(aktivitetStatusFor(tyAndel.getInntektskategori()))

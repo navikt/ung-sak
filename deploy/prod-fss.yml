@@ -261,8 +261,6 @@ spec:
       value: "false"
     - name: OMP_NULL_HELG_I_KRAVPERIODER
       value: "false"
-    - name: ENABLE_UTBETALINGSGRAD_OPPDRAG
-      value: "false"
     - name: ENABLE_DATO_NY_REGEL_UTTAK
       value: "false"
     - name: FJERN_VILKARSPERIODER_BEREGNING
