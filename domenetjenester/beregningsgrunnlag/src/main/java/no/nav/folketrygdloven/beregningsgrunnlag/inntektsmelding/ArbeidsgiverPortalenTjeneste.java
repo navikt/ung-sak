@@ -5,6 +5,7 @@ import java.util.Set;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.k9inntektsmelding.SendInntektsmeldingForespørselTask;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
