@@ -10,7 +10,6 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 
@@ -25,19 +24,16 @@ public class BrukerdialogRestTjeneste {
     private static final String JSON_UTF8 = "application/json; charset=UTF-8";
 
     private BrukerdialogTjeneste brukerdialogTjeneste;
-    private boolean brukerdialogRestTjenesteEnabled;
 
     public BrukerdialogRestTjeneste() {// For Rest-CDI
     }
 
     @Inject
     public BrukerdialogRestTjeneste(
-        BrukerdialogTjeneste brukerdialogTjeneste,
-        @KonfigVerdi(value = "BRUKERDIALOG_REST_TJENESTE_ENABLED", required = false, defaultVerdi = "false") boolean brukerdialogRestTjenesteEnabled
+        BrukerdialogTjeneste brukerdialogTjeneste
 
     ) {
         this.brukerdialogTjeneste = brukerdialogTjeneste;
-        this.brukerdialogRestTjenesteEnabled = brukerdialogRestTjenesteEnabled;
     }
 
     @POST
@@ -50,9 +46,6 @@ public class BrukerdialogRestTjeneste {
     public HarGyldigOmsorgsdagerVedtakDto hentSisteGyldigeVedtakForAktorId(
         @Valid HentSisteGyldigeVedtakForAktørInputDto inputDto
     ) {
-        if (!brukerdialogRestTjenesteEnabled) {
-            throw new IllegalStateException("BrukerdialogRestTjeneste er ikke aktivert");
-        }
         return brukerdialogTjeneste.harGyldigOmsorgsdagerVedtak(inputDto.pleietrengendeAktørId());
     }
 }
