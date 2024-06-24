@@ -78,9 +78,9 @@ public class RevurderingMetrikkRepository {
                 log.warn("Uthenting av antallAksjonspunktFordelingForRevurderingUtenNyttStpSisteSyvDager feiler", e);
             }
             try {
-                metrikker.addAll(timeCall(() -> antallAksjonspunktPrRevurderingMedEndringsopphavSisteSyvDager(dag), "antallRevurderingMedAksjonspunktOgAarsakOgMotattDokumentSisteSyvDager"));
+                metrikker.addAll(timeCall(() -> antallAksjonspunktPrRevurderingMedEndringsopphavSisteSyvDager(dag), "antallAksjonspunktPrRevurderingMedEndringsopphavSisteSyvDager"));
             } catch (QueryTimeoutException e) {
-                log.warn("Uthenting av antallRevurderingMedAksjonspunktOgAarsakOgMotattDokumentSisteSyvDager feiler", e);
+                log.warn("Uthenting av antallAksjonspunktPrRevurderingMedEndringsopphavSisteSyvDager feiler", e);
             }
             try {
                 metrikker.addAll(timeCall(() -> antallRevurderingMedAksjonspunktOgAarsakPrKodeSisteSyvDager(dag), "antallRevurderingMedAksjonspunktOgAarsakPrKodeSisteSyvDager"));
