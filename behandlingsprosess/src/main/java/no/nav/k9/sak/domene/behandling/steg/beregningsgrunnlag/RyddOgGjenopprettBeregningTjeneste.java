@@ -163,8 +163,9 @@ public class RyddOgGjenopprettBeregningTjeneste {
             .map(VilkårPeriode::getPeriode)
             .collect(Collectors.toSet());
 
+        // Matcher kun skjæringstidspunkt her, siden definerende vilkår ikkje alltid vil matche eksakt (f.eks avslått deler av perioden i sykdom for psb)
         return intiellePerioder.stream()
-            .filter(periode -> vilkårsPerioderIBeregning.stream().noneMatch(periode::equals))
+            .filter(periode -> vilkårsPerioderIBeregning.stream().noneMatch(vp -> vp.getFomDato().isEqual(periode.getFomDato())))
             .collect(Collectors.toSet());
     }
 

@@ -59,7 +59,7 @@ public class OMPFinnPerioderSomSkalFjernesIBeregning implements FinnPerioderSomS
             .getPerioder().stream()
             .filter(vilkårPeriode -> no.nav.k9.kodeverk.vilkår.Utfall.IKKE_VURDERT.equals(vilkårPeriode.getUtfall()))
             .map(VilkårPeriode::getPeriode)
-            .filter(p -> avslåttTidslinje.getLocalDateIntervals().stream().anyMatch(di -> di.contains(new LocalDateInterval(p.getFomDato(), p.getTomDato()))))
+            .filter(p -> avslåttTidslinje.getLocalDateIntervals().stream().anyMatch(di -> di.equals(new LocalDateInterval(p.getFomDato(), p.getTomDato()))))
             .collect(Collectors.toSet());
     }
 
