@@ -140,10 +140,8 @@ public class RevurderingMetrikkRepository {
             "   count(a.aksjonspunkt_def) as antall_aksjonspunkter " +
             "   from behandling b" +
             "            inner join fagsak f on f.id=b.fagsak_id" +
-            "            full outer join aksjonspunkt a on b.id = a.behandling_id " +
-            "   where (a.aksjonspunkt_status is null or a.aksjonspunkt_status != 'AVBR') " +
-            "   and (vent_aarsak is null or vent_aarsak = '-') " +
-            "   and b.avsluttet_dato is not null " +
+            "            full outer join aksjonspunkt a on b.id = a.behandling_id and (a.aksjonspunkt_status != 'AVBR') and (vent_aarsak is null or vent_aarsak = '-') " +
+            "   where b.avsluttet_dato is not null " +
             "   and b.avsluttet_dato>=:startTid and b.avsluttet_dato < :sluttTid " +
             "   and b.behandling_type=:revurdering " +
             "   group by 1, 2) as statistikk_pr_behandling " +
