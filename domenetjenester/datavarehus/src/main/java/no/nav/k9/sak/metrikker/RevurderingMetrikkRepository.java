@@ -82,6 +82,11 @@ public class RevurderingMetrikkRepository {
                 log.warn("Uthenting av antallAksjonspunktPrRevurderingMedEndringsopphav feiler", e);
             }
             try {
+                metrikker.addAll(timeCall(() -> antallRevurderingerPrAksjonspunktOgEndringsopphav(dag), "antallRevurderingerPrAksjonspunktOgEndringsopphav"));
+            } catch (QueryTimeoutException e) {
+                log.warn("Uthenting av antallRevurderingerPrAksjonspunktOgEndringsopphav feiler", e);
+            }
+            try {
                 metrikker.addAll(timeCall(() -> antallRevurderingMedAksjonspunktPrKodeSisteSyvDager(dag), "antallRevurderingMedAksjonspunktPrKodeSisteSyvDager"));
             } catch (QueryTimeoutException e) {
                 log.warn("Uthenting av antallRevurderingMedAksjonspunktPrKodeSisteSyvDager feiler", e);
@@ -401,6 +406,95 @@ public class RevurderingMetrikkRepository {
                 Map.of(
                     metricBehandlingTeller, t.get(2, Number.class),
                     metricBehandlingerProsentAndel, t.get(8, Number.class)
+                )))
+            .collect(Collectors.toList());
+
+        return values;
+    }
+
+    Collection<SensuEvent> antallRevurderingerPrAksjonspunktOgEndringsopphav(LocalDate dato) {
+        String sql = """
+            select
+                ytelse_type,
+                antall_aksjonspunkt_per_behandling,
+                har_endring_fra_bruker,
+                har_endring_fra_inntektsmelding,
+                har_endring_fra_annen_sak,
+                har_endring_fra_endringsdialog,
+                sum(behandling_teller) over (partition by ytelse_type, har_endring_fra_bruker, antall_aksjonspunkt_per_behandling) as antall_endringer_fra_bruker,
+                sum(behandling_teller) over (partition by ytelse_type, har_endring_fra_inntektsmelding, antall_aksjonspunkt_per_behandling) as antall_endringer_fra_inntektsmelding,
+                sum(behandling_teller) over (partition by ytelse_type, har_endring_fra_annen_sak, antall_aksjonspunkt_per_behandling) as antall_endringer_fra_annen_sak,
+                sum(behandling_teller) over (partition by ytelse_type, har_endring_fra_endringsdialog, antall_aksjonspunkt_per_behandling) as antall_endringer_fra_endringsdialog,
+                sum(behandling_teller) over (partition by ytelse_type, antall_aksjonspunkt_per_behandling) as antall_behandlinger
+            from (
+                select
+                    f.ytelse_type,
+                    b.id as behandling_id,
+                    count(distinct b.id) as behandling_teller,
+
+                    (select count(a.aksjonspunkt_def)
+                    from aksjonspunkt a where a.behandling_id = b.id
+                        and a.aksjonspunkt_status != 'AVBR'
+                        and (a.vent_aarsak is null or a.vent_aarsak = '-')
+                    ) as antall_aksjonspunkt_per_behandling,
+
+                    exists (select aarsak.behandling_arsak_type from behandling_arsak aarsak
+                        where aarsak.behandling_id = b.id
+                            and aarsak.behandling_arsak_type = 'RE-END-FRA-BRUKER'
+                    ) as har_endring_fra_bruker,
+
+                    exists (select aarsak.behandling_arsak_type from behandling_arsak aarsak
+                        where aarsak.behandling_id = b.id
+                            and aarsak.behandling_arsak_type = 'RE-END-INNTEKTSMELD'
+                    ) as har_endring_fra_inntektsmelding,
+
+                    exists (select aarsak.behandling_arsak_type from behandling_arsak aarsak
+                        where aarsak.behandling_id = b.id
+                            and aarsak.behandling_arsak_type = 'RE_ANNEN_SAK'
+                    ) as har_endring_fra_annen_sak,
+
+                    exists (select md.kildesystem from mottatt_dokument md
+                        where md.behandling_id = b.id
+                            and md.kildesystem = 'endringsdialog'
+                    ) as har_endring_fra_endringsdialog
+
+                from behandling b
+                    inner join fagsak f on f.id = b.fagsak_id
+                where b.avsluttet_dato >= :startTid
+                    and b.avsluttet_dato < :sluttTid
+                    and b.behandling_type = :revurdering
+                group by ytelse_type, behandling_id ) as statistikk_pr_behandling
+            group by ytelse_type, antall_aksjonspunkt_per_behandling, har_endring_fra_bruker, har_endring_fra_inntektsmelding, har_endring_fra_annen_sak, har_endring_fra_endringsdialog, behandling_teller;
+
+            """;
+
+        String metricName = "antall_revurderinger_pr_aksjonspunkt_og_endringsopphav";
+
+        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
+            .setParameter("revurdering", BehandlingType.REVURDERING.getKode())
+            .setParameter("startTid", dato.minusDays(1).atStartOfDay())
+            .setParameter("sluttTid", dato.atStartOfDay());
+
+        Stream<Tuple> stream = query.getResultStream()
+            .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class)));
+
+        var values = stream.map(t -> SensuEvent.createSensuEvent(metricName,
+                // metric tags
+                toMap(
+                    "ytelse_type", t.get(0, String.class),
+                    "antall_aksjonspunkt_per_behandling", t.get(1, Number.class).toString(),
+                    "har_endring_fra_bruker", t.get(2, Boolean.class).toString(),
+                    "har_endring_fra_inntektsmelding", t.get(3, Boolean.class).toString(),
+                    "har_endring_fra_annen_sak", t.get(4, Boolean.class).toString(),
+                    "har_endring_fra_endringsdialog", t.get(5, Boolean.class).toString()
+                ),
+                // metric fields
+                Map.of(
+                    "antall_endringer_fra_bruker", t.get(6, Number.class),
+                    "antall_endringer_fra_inntektsmelding", t.get(7, Number.class),
+                    "antall_endringer_fra_annen_sak", t.get(8, Number.class),
+                    "antall_endringer_fra_endringsdialog", t.get(9, Number.class),
+                    "antall_behandlinger", t.get(10, Number.class)
                 )))
             .collect(Collectors.toList());
 

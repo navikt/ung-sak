@@ -298,6 +298,49 @@ class RevurderingMetrikkRepositoryTest {
 
 
     @Test
+    void skal_finne_antall_revurderinger_pr_aksjonspunkt_og_endringsopphav() {
+        FagsakYtelseType ytelseType = FagsakYtelseType.PSB;
+        var scenario = TestScenarioBuilder.builderUtenSøknad(ytelseType);
+        var behandling = scenario.lagre(entityManager);
+        behandling.avsluttBehandling();
+
+        AksjonspunktDefinisjon aksjonspunkt = AksjonspunktDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_SELVSTENDIG_NÆRINGSDRIVENDE;
+        BehandlingStegType stegType = BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG;
+
+        var scenarioBuilder = TestScenarioBuilder.builderUtenSøknad(ytelseType)
+            .medBehandlingType(BehandlingType.REVURDERING)
+            .medOriginalBehandling(behandling, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
+
+        scenarioBuilder.leggTilAksjonspunkt(aksjonspunkt, stegType);
+
+        var revurdering = scenarioBuilder
+            .lagre(entityManager);
+
+        var ap = revurdering.getAksjonspunkter().iterator().next();
+        aksjonspunktKontrollRepository.setTilUtført(ap, "begrunnelse");
+
+        revurdering.avsluttBehandling();
+
+        entityManager.flush();
+
+        assertThat(revurderingMetrikkRepository.antallRevurderingerPrAksjonspunktOgEndringsopphav(LocalDate.now().plusDays(1))).isNotEmpty()
+            .allMatch(v -> v.toString().contains("antall_revurderinger_pr_aksjonspunkt_og_endringsopphav"))
+            .anyMatch(v -> v.toString().contains("ytelse_type=PSB") &&
+                v.toString().contains("antall_aksjonspunkt_per_behandling=1") &&
+                v.toString().contains("har_endring_fra_bruker=false") &&
+                v.toString().contains("har_endring_fra_inntektsmelding=true") &&
+                v.toString().contains("har_endring_fra_annen_sak=false") &&
+                v.toString().contains("har_endring_fra_endringsdialog=false") &&
+                v.toString().contains("antall_endringer_fra_bruker=1") &&
+                v.toString().contains("antall_endringer_fra_inntektsmelding=1") &&
+                v.toString().contains("antall_endringer_fra_annen_sak=1") &&
+                v.toString().contains("antall_endringer_fra_endringsdialog=1") &&
+                v.toString().contains("antall_behandlinger=1")
+            );
+    }
+
+
+    @Test
     void skal_finne_aksjonspunkt_med_en_behandling() {
 
         FagsakYtelseType ytelseType = FagsakYtelseType.PSB;
