@@ -42,7 +42,7 @@ public enum Region implements Kodeverdi {
                 "DEU", "DNK",
                 "ESP", "EST",
                 "FIN", "FRA", "FRO",
-                "GBR", "GRC", "GRL",
+                "GRC", "GRL",
                 "HRV", "HUN",
                 "IRL", "ISL", "ITA",
                 "LIE", "LTU", "LUX", "LVA",
