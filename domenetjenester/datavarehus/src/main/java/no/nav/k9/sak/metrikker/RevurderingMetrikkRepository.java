@@ -78,9 +78,9 @@ public class RevurderingMetrikkRepository {
                 log.warn("Uthenting av antallAksjonspunktFordelingForRevurderingUtenNyttStpSisteSyvDager feiler", e);
             }
             try {
-                metrikker.addAll(timeCall(() -> antallAksjonspunktPrRevurderingMedEndringsopphavSisteSyvDager(dag), "antallAksjonspunktPrRevurderingMedEndringsopphavSisteSyvDager"));
+                metrikker.addAll(timeCall(() -> antallAksjonspunktPrRevurderingMedEndringsopphav(dag), "antallAksjonspunktPrRevurderingMedEndringsopphav"));
             } catch (QueryTimeoutException e) {
-                log.warn("Uthenting av antallAksjonspunktPrRevurderingMedEndringsopphavSisteSyvDager feiler", e);
+                log.warn("Uthenting av antallAksjonspunktPrRevurderingMedEndringsopphav feiler", e);
             }
             try {
                 metrikker.addAll(timeCall(() -> antallRevurderingMedAksjonspunktOgAarsakPrKodeSisteSyvDager(dag), "antallRevurderingMedAksjonspunktOgAarsakPrKodeSisteSyvDager"));
@@ -325,7 +325,7 @@ public class RevurderingMetrikkRepository {
 
     }
 
-    Collection<SensuEvent> antallAksjonspunktPrRevurderingMedEndringsopphavSisteSyvDager(LocalDate dato) {
+    Collection<SensuEvent> antallAksjonspunktPrRevurderingMedEndringsopphav(LocalDate dato) {
         String sql = """
             select
                 ytelse_type,
@@ -381,13 +381,13 @@ public class RevurderingMetrikkRepository {
                 group by 1, 2) as statistikk_pr_behandling;
             """;
 
-        String metricName = "revurdering_antall_aksjonspunkt_pr_behandling_og_endringsopphav_syv_dager_v2";
+        String metricName = "revurdering_antall_aksjonspunkt_pr_behandling_og_endringsopphav";
         String metricBehandlingTeller = "behandling_teller";
         String metricBehandlingerProsentAndel = "behandlinger_prosentandel";
 
         NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
             .setParameter("revurdering", BehandlingType.REVURDERING.getKode())
-            .setParameter("startTid", dato.minusDays(7).atStartOfDay())
+            .setParameter("startTid", dato.minusDays(1).atStartOfDay())
             .setParameter("sluttTid", dato.atStartOfDay());
 
         Stream<Tuple> stream = query.getResultStream()

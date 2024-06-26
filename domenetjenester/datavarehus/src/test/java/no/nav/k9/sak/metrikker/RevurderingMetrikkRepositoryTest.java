@@ -179,12 +179,6 @@ class RevurderingMetrikkRepositoryTest {
     }
 
 
-
-    @Test
-    void skal_sjekke_at_SQL_syntaks_er_ok() {
-        assertThat(revurderingMetrikkRepository.antallAksjonspunktPrRevurderingMedEndringsopphavSisteSyvDager(LocalDate.now())).isEmpty();
-    }
-
     @Test
     void skal_finne_en_behandling_uten_ny_søknad_med_ett_aksjonspunkt() {
 
@@ -290,8 +284,8 @@ class RevurderingMetrikkRepositoryTest {
 
         entityManager.flush();
 
-        assertThat(revurderingMetrikkRepository.antallAksjonspunktPrRevurderingMedEndringsopphavSisteSyvDager(LocalDate.now().plusDays(1))).isNotEmpty()
-            .allMatch(v -> v.toString().contains("revurdering_antall_aksjonspunkt_pr_behandling_og_endringsopphav_syv_dager_v2"))
+        assertThat(revurderingMetrikkRepository.antallAksjonspunktPrRevurderingMedEndringsopphav(LocalDate.now().plusDays(1))).isNotEmpty()
+            .allMatch(v -> v.toString().contains("revurdering_antall_aksjonspunkt_pr_behandling_og_endringsopphav"))
             .anyMatch(v -> v.toString().contains("ytelse_type=PSB") &&
                 v.toString().contains("behandling_teller=1") &&
                 v.toString().contains("behandlinger_prosentandel=100") &&
