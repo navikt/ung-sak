@@ -92,9 +92,9 @@ public enum Avslagsårsak implements Kodeverdi {
         FagsakYtelseType.OMSORGSPENGER_KS, "9-6 2. ledd")),
     IKKE_MIDLERTIDIG_ALENE_VARIGHET_UNDER_SEKS_MÅN("1075", "Varigheten er mindre enn seks måneder", Map.of(
         FagsakYtelseType.OMSORGSPENGER_MA, "9-6 3. ledd")),
-    IKKE_MIDLERTIDIG_ALENE_REGNES_IKKE_SOM_Å_HA_ALENEOMSORG("1076", "Søker regnes ikke som å ha aleneomsorg", Map.of(
+    IKKE_MIDLERTIDIG_ALENE_REGNES_IKKE_SOM_Å_HA_ALENEOMSORG("1076", "Søker oppfyller ikke kravene til midlertidig alene", Map.of(
         FagsakYtelseType.OMSORGSPENGER_MA, "9-6 3. ledd")),
-    IKKE_MIDLERTIDIG_ALENE_ANNET("1171", "Søker regnes ikke som å ha aleneomsorg", Map.of(
+    IKKE_MIDLERTIDIG_ALENE("1093", "Søker oppfyller ikke midlertidig alene-vilkåret av andre grunner", Map.of(
         FagsakYtelseType.OMSORGSPENGER_MA, "9-6 3. ledd")),
     IKKE_GRUNNLAG_FOR_ALENEOMSORG("1077", "Ikke grunnlag for aleneomsorg", Map.of(
         FagsakYtelseType.OMSORGSPENGER_AO, "9-6 1. ledd")),

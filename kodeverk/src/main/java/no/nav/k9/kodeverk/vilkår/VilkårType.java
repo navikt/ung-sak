@@ -166,7 +166,7 @@ public enum VilkårType implements Kodeverdi {
         Avslagsårsak.IKKE_UTVIDETRETT_IKKE_ØKT_RISIKO_FRAVÆR,
         Avslagsårsak.IKKE_MIDLERTIDIG_ALENE_REGNES_IKKE_SOM_Å_HA_ALENEOMSORG,
         Avslagsårsak.IKKE_MIDLERTIDIG_ALENE_VARIGHET_UNDER_SEKS_MÅN,
-        Avslagsårsak.IKKE_MIDLERTIDIG_ALENE_ANNET,
+        Avslagsårsak.IKKE_MIDLERTIDIG_ALENE,
         Avslagsårsak.MANGLENDE_DOKUMENTASJON,
         Avslagsårsak.IKKE_GRUNNLAG_FOR_ALENEOMSORG,
         Avslagsårsak.IKKE_GRUNNLAG_FOR_ALENEOMSORG_FORELDRE_BOR_SAMMEN,
