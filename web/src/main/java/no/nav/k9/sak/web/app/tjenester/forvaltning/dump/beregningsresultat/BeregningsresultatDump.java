@@ -54,6 +54,7 @@ public class BeregningsresultatDump implements DebugDumpFagsak {
                       ,ba.inntektskategori
                       ,ba.stillingsprosent
                       ,ba.utbetalingsgrad
+                      ,ba.utbetalingsgrad_oppdrag
                       ,ba.arbeidsforhold_type
                       ,ba.bruker_er_mottaker
                       ,ba.arbeidsgiver_aktor_id
