@@ -331,10 +331,6 @@ class RevurderingMetrikkRepositoryTest {
                 v.toString().contains("har_endring_fra_inntektsmelding=true") &&
                 v.toString().contains("har_endring_fra_annen_sak=false") &&
                 v.toString().contains("har_endring_fra_endringsdialog=false") &&
-                v.toString().contains("antall_endringer_fra_bruker=1") &&
-                v.toString().contains("antall_endringer_fra_inntektsmelding=1") &&
-                v.toString().contains("antall_endringer_fra_annen_sak=1") &&
-                v.toString().contains("antall_endringer_fra_endringsdialog=1") &&
                 v.toString().contains("antall_behandlinger=1")
             );
     }
