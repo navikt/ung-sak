@@ -9861,7 +9861,7 @@
             "type" : "boolean"
           },
           "varseltekst" : {
-            "maxLength" : 4000,
+            "maxLength" : 12000,
             "minLength" : 0,
             "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{P}\\p{N}]+$",
             "type" : "string"
