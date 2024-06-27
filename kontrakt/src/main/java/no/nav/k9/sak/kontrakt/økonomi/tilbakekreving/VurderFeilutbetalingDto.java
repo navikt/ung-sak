@@ -22,7 +22,7 @@ import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 public class VurderFeilutbetalingDto extends BekreftetAksjonspunktDto {
 
     @JsonProperty(value = "varseltekst")
-    @Size(max = 6000)
+    @Size(max = 12000)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String varseltekst;
 
