@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -17,6 +18,7 @@ import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.SaksnummerOgSisteBehand
 public class BeregningsresultatFeriepengerRegelModell {
     private Set<Inntektskategori> inntektskategorier;
     private List<BeregningsresultatPeriode> beregningsresultatPerioder;
+    private Set<LocalDate> skjæringstidspunkter;
     private List<FeriepengekorrigeringInfotrygd> feriepengekorrigeringInfotrygd;
     private List<DagpengerPeriode> perioderMedDagpenger;
     private int antallDagerFeriepenger;
@@ -36,6 +38,10 @@ public class BeregningsresultatFeriepengerRegelModell {
 
     public List<BeregningsresultatPeriode> getBeregningsresultatPerioder() {
         return beregningsresultatPerioder;
+    }
+
+    public Set<LocalDate> getSkjæringstidspunkter() {
+        return skjæringstidspunkter;
     }
 
     public List<FeriepengekorrigeringInfotrygd> getFeriepengekorrigeringInfotrygd() {
@@ -108,6 +114,11 @@ public class BeregningsresultatFeriepengerRegelModell {
 
         public Builder medBeregningsresultatPerioder(List<BeregningsresultatPeriode> beregningsresultatPerioder) {
             kladd.beregningsresultatPerioder = beregningsresultatPerioder;
+            return this;
+        }
+
+        public Builder medSkjæringstidspunkt(Set<LocalDate> skjæringstidspunkt) {
+            kladd.skjæringstidspunkter = skjæringstidspunkt;
             return this;
         }
 
