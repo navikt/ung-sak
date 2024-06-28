@@ -8,13 +8,11 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BA
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.SYKEPENGER;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
@@ -23,17 +21,13 @@ import jakarta.inject.Inject;
 import no.nav.abakus.iaygrunnlag.kodeverk.Inntektskategori;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.AktørYtelse;
 import no.nav.k9.sak.domene.iay.modell.Ytelse;
 import no.nav.k9.sak.domene.iay.modell.YtelseAnvist;
-import no.nav.k9.sak.vilkår.VilkårTjeneste;
 import no.nav.k9.sak.ytelse.beregning.BeregnFeriepengerTjeneste;
 import no.nav.k9.sak.ytelse.beregning.FeriepengeBeregner;
 import no.nav.k9.sak.ytelse.beregning.adapter.MapBeregningsresultatFeriepengerFraVLTilRegel;
@@ -59,7 +53,6 @@ public class PleiepengerBeregnFeriepenger implements BeregnFeriepengerTjeneste {
 
     private Instance<FinnFeriepengepåvirkendeFagsakerTjeneste> feriepengepåvirkendeFagsakerTjenester;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
-    private VilkårTjeneste vilkårTjeneste;
     private FeriepengeBeregner feriepengeBeregner;
 
     PleiepengerBeregnFeriepenger() {
@@ -69,11 +62,9 @@ public class PleiepengerBeregnFeriepenger implements BeregnFeriepengerTjeneste {
     @Inject
     public PleiepengerBeregnFeriepenger(@Any Instance<FinnFeriepengepåvirkendeFagsakerTjeneste> feriepengepåvirkendeFagsakerTjenester,
                                         InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                        VilkårTjeneste vilkårTjeneste,
                                         FeriepengeBeregner feriepengeBeregner) {
         this.feriepengepåvirkendeFagsakerTjenester = feriepengepåvirkendeFagsakerTjenester;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
-        this.vilkårTjeneste = vilkårTjeneste;
         this.feriepengeBeregner = feriepengeBeregner;
     }
 
@@ -81,15 +72,7 @@ public class PleiepengerBeregnFeriepenger implements BeregnFeriepengerTjeneste {
     public void beregnFeriepenger(BehandlingReferanse behandling, BeregningsresultatEntitet beregningsresultat) {
         LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> påvirkendeSaker = finnPåvirkendeSaker(behandling);
         InfotrygdFeriepengegrunnlag infotrygdFeriepengegrunnlag = finnInfotrygdFeriepengegrunnlagForPåvirkendeSaker(behandling);
-        BeregningsresultatFeriepengerRegelModell regelModell = MapBeregningsresultatFeriepengerFraVLTilRegel.mapFra(
-            beregningsresultat,
-            påvirkendeSaker,
-            infotrygdFeriepengegrunnlag,
-            ANTALL_DAGER_FERIPENGER,
-            FERIEOPPTJENING_HELG,
-            UBEGRENSET_DAGER_VED_REFUSJON,
-            finnPerioderMedDagpenger(behandling),
-            finnSkjæringstidspunkter(behandling));
+        BeregningsresultatFeriepengerRegelModell regelModell = MapBeregningsresultatFeriepengerFraVLTilRegel.mapFra(beregningsresultat, påvirkendeSaker, infotrygdFeriepengegrunnlag, ANTALL_DAGER_FERIPENGER, FERIEOPPTJENING_HELG, UBEGRENSET_DAGER_VED_REFUSJON, finnPerioderMedDagpenger(behandling));
         feriepengeBeregner.beregnFeriepenger(beregningsresultat, regelModell);
     }
 
@@ -97,26 +80,8 @@ public class PleiepengerBeregnFeriepenger implements BeregnFeriepengerTjeneste {
     public FeriepengeOppsummering beregnFeriepengerOppsummering(BehandlingReferanse behandling, BeregningsresultatEntitet beregningsresultat) {
         LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> påvirkendeSaker = finnPåvirkendeSaker(behandling);
         InfotrygdFeriepengegrunnlag infotrygdFeriepengegrunnlag = finnInfotrygdFeriepengegrunnlagForPåvirkendeSaker(behandling);
-        BeregningsresultatFeriepengerRegelModell regelModell = MapBeregningsresultatFeriepengerFraVLTilRegel.mapFra(
-            beregningsresultat,
-            påvirkendeSaker,
-            infotrygdFeriepengegrunnlag,
-            ANTALL_DAGER_FERIPENGER,
-            FERIEOPPTJENING_HELG,
-            UBEGRENSET_DAGER_VED_REFUSJON,
-            finnPerioderMedDagpenger(behandling),
-            finnSkjæringstidspunkter(behandling));
+        BeregningsresultatFeriepengerRegelModell regelModell = MapBeregningsresultatFeriepengerFraVLTilRegel.mapFra(beregningsresultat, påvirkendeSaker, infotrygdFeriepengegrunnlag, ANTALL_DAGER_FERIPENGER, FERIEOPPTJENING_HELG, UBEGRENSET_DAGER_VED_REFUSJON, finnPerioderMedDagpenger(behandling));
         return feriepengeBeregner.beregnFeriepengerOppsummering(regelModell);
-    }
-
-    private Set<LocalDate> finnSkjæringstidspunkter(BehandlingReferanse behandling) {
-        var vilkårene = vilkårTjeneste.hentVilkårResultat(behandling.getBehandlingId());
-        var bgVilkåret = vilkårene.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-        return bgVilkåret.map(Vilkår::getPerioder)
-            .stream()
-            .flatMap(Collection::stream)
-            .map(VilkårPeriode::getFom)
-            .collect(Collectors.toSet());
     }
 
     private List<DagpengerPeriode> finnPerioderMedDagpenger(BehandlingReferanse ref) {

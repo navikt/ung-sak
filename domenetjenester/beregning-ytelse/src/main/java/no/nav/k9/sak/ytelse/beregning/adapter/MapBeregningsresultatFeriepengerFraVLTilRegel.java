@@ -1,10 +1,10 @@
 package no.nav.k9.sak.ytelse.beregning.adapter;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -31,15 +31,13 @@ public class MapBeregningsresultatFeriepengerFraVLTilRegel {
                                                                   int antallDagerFeriepenger,
                                                                   boolean feriepengeopptjeningForHelg,
                                                                   boolean ubegrensedeDagerVedRefusjon,
-                                                                  List<DagpengerPeriode> perioderMedDagpenger,
-                                                                  Set<LocalDate> skjæringstidspunkter) {
+                                                                  List<DagpengerPeriode> perioderMedDagpenger) {
 
         List<BeregningsresultatPeriode> beregningsresultatPerioder = mapBeregningsresultat(beregningsresultat);
         Set<Inntektskategori> inntektskategorier = mapInntektskategorier(beregningsresultat);
 
         return BeregningsresultatFeriepengerRegelModell.builder()
             .medBeregningsresultatPerioder(beregningsresultatPerioder)
-            .medSkjæringstidspunkt(skjæringstidspunkter)
             .medAndelerSomKanGiFeriepengerForRelevaneSaker(andelerSomKanGiFeriepengerForRelevaneSaker)
             .medInfotrygdFeriepengegrunnlag(infotrygdFeriepengegrunnlag)
             .medPerioderMedDagpenger(perioderMedDagpenger)
