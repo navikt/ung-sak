@@ -6,7 +6,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
@@ -23,12 +22,28 @@ class BeregnFerietilleggDagpengerTest {
     private static final LocalDate STP = LocalDate.of(2023,6,1);
 
     @Test
-    void skal_gi_ferietillegg_når_8_uker_dagpenger_før_skjæringstidspunktet() {
+    void skal_ikke_gi_ferietillegg_når_under_8_uker_dagpenger() {
+        var tyPeriode = lagTilkjentYtelseDagpenger(STP, etter(10), 900L);
+
+        var regelmodell = BeregningsresultatFeriepengerRegelModell.builder()
+            .medPerioderMedDagpenger(Collections.emptyList())
+            .medBeregningsresultatPerioder(List.of(tyPeriode))
+            .build();
+        new BeregnFerietilleggDagpenger().evaluate(regelmodell);
+
+        assertThat(regelmodell).isNotNull();
+
+        var feriepengerP1 = feriepengerDagpengerFraPeriodeIndex(regelmodell, 0);
+
+        assertThat(feriepengerP1).isEmpty();
+    }
+
+    @Test
+    void skal_gi_ferietillegg_når_over_8_uker_dagpenger() {
         var tyPeriode = lagTilkjentYtelseDagpenger(STP, etter(100), 900L);
 
         var regelmodell = BeregningsresultatFeriepengerRegelModell.builder()
-            .medSkjæringstidspunkt(Set.of(STP))
-            .medPerioderMedDagpenger(List.of(new DagpengerPeriode(DagpengerKilde.MELDEKORT, STP.minusDays(57), STP.minusDays(1))))
+            .medPerioderMedDagpenger(Collections.emptyList())
             .medBeregningsresultatPerioder(List.of(tyPeriode))
             .build();
         new BeregnFerietilleggDagpenger().evaluate(regelmodell);
@@ -43,47 +58,10 @@ class BeregnFerietilleggDagpengerTest {
     }
 
     @Test
-    void skal_ikke_gi_ferietillegg_når_under_8_uker_dagpenger() {
-        var tyPeriode = lagTilkjentYtelseDagpenger(STP, etter(10), 900L);
-
-        var regelmodell = BeregningsresultatFeriepengerRegelModell.builder()
-            .medSkjæringstidspunkt(Set.of(STP))
-            .medPerioderMedDagpenger(List.of(new DagpengerPeriode(DagpengerKilde.MELDEKORT, STP.minusDays(56), STP.minusDays(1))))
-            .medBeregningsresultatPerioder(List.of(tyPeriode))
-            .build();
-        new BeregnFerietilleggDagpenger().evaluate(regelmodell);
-
-        assertThat(regelmodell).isNotNull();
-
-        var feriepengerP1 = feriepengerDagpengerFraPeriodeIndex(regelmodell, 0);
-
-        assertThat(feriepengerP1).isEmpty();
-    }
-
-    @Test
-    void skal_ikke_gi_ferietillegg_når_ingen_dagpenger_før_stp() {
-        var tyPeriode = lagTilkjentYtelseDagpenger(STP, etter(100), 900L);
-
-        var regelmodell = BeregningsresultatFeriepengerRegelModell.builder()
-            .medSkjæringstidspunkt(Set.of(STP))
-            .medPerioderMedDagpenger(Collections.emptyList())
-            .medBeregningsresultatPerioder(List.of(tyPeriode))
-            .build();
-        new BeregnFerietilleggDagpenger().evaluate(regelmodell);
-
-        assertThat(regelmodell).isNotNull();
-
-        var feriepengerP1 = feriepengerDagpengerFraPeriodeIndex(regelmodell, 0);
-
-        assertThat(feriepengerP1).isEmpty();
-    }
-
-    @Test
     void skal_ikke_gi_feriepenger_for_periode_før_regelendring() {
         var tyPeriode = lagTilkjentYtelseDagpenger(LocalDate.of(2021, 6, 1), LocalDate.of(2021, 12, 31), 900L);
 
         var regelmodell = BeregningsresultatFeriepengerRegelModell.builder()
-            .medSkjæringstidspunkt(Set.of(STP))
             .medPerioderMedDagpenger(Collections.emptyList())
             .medBeregningsresultatPerioder(List.of(tyPeriode))
             .build();
@@ -101,7 +79,6 @@ class BeregnFerietilleggDagpengerTest {
         var tyPeriode = lagTilkjentYtelseDagpenger(LocalDate.of(2023,11,15), LocalDate.of(2024,2,20), 900L);
 
         var regelmodell = BeregningsresultatFeriepengerRegelModell.builder()
-            .medSkjæringstidspunkt(Set.of(STP))
             .medPerioderMedDagpenger(List.of())
             .medBeregningsresultatPerioder(List.of(tyPeriode))
             .build();
@@ -121,7 +98,6 @@ class BeregnFerietilleggDagpengerTest {
         var dp2 = lagDPPeriode(LocalDate.of(2023, 4, 1), LocalDate.of(2023, 4, 30));
 
         var regelmodell = BeregningsresultatFeriepengerRegelModell.builder()
-            .medSkjæringstidspunkt(Set.of(STP))
             .medPerioderMedDagpenger(List.of(dp1, dp2))
             .medBeregningsresultatPerioder(List.of(tyPeriode))
             .build();
@@ -143,7 +119,6 @@ class BeregnFerietilleggDagpengerTest {
         var dp2 = new DagpengerPeriode(DagpengerKilde.FORELDREPENGER, LocalDate.of(2023, 4, 1), LocalDate.of(2023, 4, 30));
 
         var regelmodell = BeregningsresultatFeriepengerRegelModell.builder()
-            .medSkjæringstidspunkt(Set.of(STP))
             .medPerioderMedDagpenger(List.of(dp1, dp2))
             .medBeregningsresultatPerioder(List.of(tyPeriode))
             .build();
@@ -164,7 +139,6 @@ class BeregnFerietilleggDagpengerTest {
         var dp2 = lagDPPeriode(LocalDate.of(2023, 4, 1), LocalDate.of(2023, 4, 30));
 
         var regelmodell = BeregningsresultatFeriepengerRegelModell.builder()
-            .medSkjæringstidspunkt(Set.of(STP))
             .medPerioderMedDagpenger(List.of(dp1, dp2))
             .medBeregningsresultatPerioder(List.of(tyPeriode))
             .build();
@@ -187,7 +161,6 @@ class BeregnFerietilleggDagpengerTest {
         var dp2 = lagDPPeriode(LocalDate.of(2023, 4, 1), LocalDate.of(2023, 4, 30));
 
         var regelmodell = BeregningsresultatFeriepengerRegelModell.builder()
-            .medSkjæringstidspunkt(Set.of(STP))
             .medPerioderMedDagpenger(List.of(dp1, dp2))
             .medBeregningsresultatPerioder(List.of(tyPeriode))
             .build();
@@ -214,7 +187,6 @@ class BeregnFerietilleggDagpengerTest {
         var dp2 = lagDPPeriode(LocalDate.of(2023, 4, 1), LocalDate.of(2023, 4, 30));
 
         var regelmodell = BeregningsresultatFeriepengerRegelModell.builder()
-            .medSkjæringstidspunkt(Set.of(STP))
             .medPerioderMedDagpenger(List.of(dp1, dp2))
             .medBeregningsresultatPerioder(List.of(tyPeriode, tyPeriode2, tyPeriode3, tyPeriode4))
             .build();
@@ -250,113 +222,13 @@ class BeregnFerietilleggDagpengerTest {
         assertThat(((BigDecimal) sporing.get("Feriepenger.avrunding.BRUKER.DP i perioden [2023-06-05, 2023-06-05]")).compareTo(BigDecimal.valueOf(0.405))).isEqualTo(0);
     }
 
-
-    @Test
-    void skal_gi_ferietillegg_for_skjæringstidspunkt_etter_dagpengeperiode() {
-        var stpFørDagpenger = STP.minusMonths(4);
-        BeregningsresultatPeriode periodeFørDagpenger = new BeregningsresultatPeriode(stpFørDagpenger, stpFørDagpenger.plusDays(10), null,null, null);
-        periodeFørDagpenger.addBeregningsresultatAndel(BeregningsresultatAndel.builder().medAktivitetStatus(AktivitetStatus.DP)
-            .medDagsats(900L)
-            .medInntektskategori(Inntektskategori.DAGPENGER)
-            .medDagsatsFraBg(900L)
-            .medBrukerErMottaker(true)
-            .build(periodeFørDagpenger));
-        var periodeEtterDagpenger = lagTilkjentYtelseDagpenger(STP, etter(100), 900L);
-
-        var regelmodell = BeregningsresultatFeriepengerRegelModell.builder()
-            .medSkjæringstidspunkt(Set.of(stpFørDagpenger, STP))
-            .medPerioderMedDagpenger(List.of(new DagpengerPeriode(DagpengerKilde.MELDEKORT, STP.minusDays(57), STP.minusDays(1))))
-            .medBeregningsresultatPerioder(List.of(periodeFørDagpenger, periodeEtterDagpenger))
-            .build();
-        new BeregnFerietilleggDagpenger().evaluate(regelmodell);
-
-        assertThat(regelmodell).isNotNull();
-
-
-        var feriepengerFørDagpenger = finnFeriepenger(periodeFørDagpenger);
-        assertThat(feriepengerFørDagpenger).isEmpty();
-
-        var feriepengerEtterDagpenger = finnFeriepenger(periodeEtterDagpenger);
-        assertThat(feriepengerEtterDagpenger).hasSize(1);
-        assertThat(feriepengerEtterDagpenger.getFirst().getOpptjeningÅr()).isEqualTo(LocalDate.of(2023,1,1));
-        assertThat(feriepengerEtterDagpenger.getFirst().getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(6156));
-    }
-
-
-    @Test
-    void skal_gi_ferietillegg_for_skjæringstidspunkt_etter_dagpengeperiode_og_telle_med_ytelseperiode_fra_skjæringstidspunkt_i_samme_år() {
-        var stpFørDagpenger = STP.minusMonths(4);
-        BeregningsresultatPeriode periodeFørDagpenger = new BeregningsresultatPeriode(stpFørDagpenger, stpFørDagpenger.plusDays(10), null,null, null);
-        periodeFørDagpenger.addBeregningsresultatAndel(BeregningsresultatAndel.builder().medAktivitetStatus(AktivitetStatus.DP)
-            .medDagsats(900L)
-            .medInntektskategori(Inntektskategori.DAGPENGER)
-            .medDagsatsFraBg(900L)
-            .medBrukerErMottaker(true)
-            .build(periodeFørDagpenger));
-        var periodeEtterDagpenger = lagTilkjentYtelseDagpenger(STP, etter(100), 900L);
-
-        var regelmodell = BeregningsresultatFeriepengerRegelModell.builder()
-            .medSkjæringstidspunkt(Set.of(stpFørDagpenger, STP))
-            .medPerioderMedDagpenger(List.of(new DagpengerPeriode(DagpengerKilde.MELDEKORT, STP.minusDays(47), STP.minusDays(1))))
-            .medBeregningsresultatPerioder(List.of(periodeFørDagpenger, periodeEtterDagpenger))
-            .build();
-        new BeregnFerietilleggDagpenger().evaluate(regelmodell);
-
-        assertThat(regelmodell).isNotNull();
-
-
-        var feriepengerFørDagpenger = finnFeriepenger(periodeFørDagpenger);
-        assertThat(feriepengerFørDagpenger).isEmpty();
-
-        var feriepengerEtterDagpenger = finnFeriepenger(periodeEtterDagpenger);
-        assertThat(feriepengerEtterDagpenger).hasSize(1);
-        assertThat(feriepengerEtterDagpenger.getFirst().getOpptjeningÅr()).isEqualTo(LocalDate.of(2023,1,1));
-        assertThat(feriepengerEtterDagpenger.getFirst().getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(6156));
-    }
-
-    @Test
-    void skal_gi_ferietillegg_for_skjæringstidspunkt_etter_dagpengeperiode_og_telle_med_ytelseperiode_i_samme_år_fra_skjæringstidspunkt_i_tidligere_år() {
-        var stpFørDagpenger = STP.minusYears(1);
-        BeregningsresultatPeriode periodeFørDagpenger = new BeregningsresultatPeriode(stpFørDagpenger, STP.withDayOfYear(1).plusDays(10), null,null, null);
-        periodeFørDagpenger.addBeregningsresultatAndel(BeregningsresultatAndel.builder().medAktivitetStatus(AktivitetStatus.DP)
-            .medDagsats(900L)
-            .medInntektskategori(Inntektskategori.DAGPENGER)
-            .medDagsatsFraBg(900L)
-            .medBrukerErMottaker(true)
-            .build(periodeFørDagpenger));
-        var periodeEtterDagpenger = lagTilkjentYtelseDagpenger(STP, etter(100), 900L);
-
-        var regelmodell = BeregningsresultatFeriepengerRegelModell.builder()
-            .medSkjæringstidspunkt(Set.of(stpFørDagpenger, STP))
-            .medPerioderMedDagpenger(List.of(new DagpengerPeriode(DagpengerKilde.MELDEKORT, STP.minusDays(47), STP.minusDays(1))))
-            .medBeregningsresultatPerioder(List.of(periodeFørDagpenger, periodeEtterDagpenger))
-            .build();
-        new BeregnFerietilleggDagpenger().evaluate(regelmodell);
-
-        assertThat(regelmodell).isNotNull();
-
-
-        var feriepengerFørDagpenger = finnFeriepenger(periodeFørDagpenger);
-        assertThat(feriepengerFørDagpenger).isEmpty();
-
-        var feriepengerEtterDagpenger = finnFeriepenger(periodeEtterDagpenger);
-        assertThat(feriepengerEtterDagpenger).hasSize(1);
-        assertThat(feriepengerEtterDagpenger.getFirst().getOpptjeningÅr()).isEqualTo(LocalDate.of(2023,1,1));
-        assertThat(feriepengerEtterDagpenger.getFirst().getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(6156));
-    }
-
     private DagpengerPeriode lagDPPeriode(LocalDate fom, LocalDate tom) {
         return new DagpengerPeriode(DagpengerKilde.MELDEKORT, fom, tom);
     }
 
     private static List<BeregningsresultatFeriepengerPrÅr> feriepengerDagpengerFraPeriodeIndex(BeregningsresultatFeriepengerRegelModell regelmodell, int index) {
-        var periode = regelmodell.getBeregningsresultatPerioder()
-            .get(index);
-        return finnFeriepenger(periode);
-    }
-
-    private static List<BeregningsresultatFeriepengerPrÅr> finnFeriepenger(BeregningsresultatPeriode periode) {
-        return periode
+        return regelmodell.getBeregningsresultatPerioder()
+            .get(index)
             .getBeregningsresultatAndelList().stream()
             .filter(a -> a.getInntektskategori().equals(Inntektskategori.DAGPENGER))
             .flatMap(a -> a.getBeregningsresultatFeriepengerPrÅrListe().stream())
