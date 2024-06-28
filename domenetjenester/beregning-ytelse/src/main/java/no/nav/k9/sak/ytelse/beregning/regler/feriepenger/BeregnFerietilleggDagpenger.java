@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.beregning.regler.feriepenger;
 
+import static no.nav.k9.sak.ytelse.beregning.regler.feriepenger.Virkedager.beregnAntallVirkedager;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -8,10 +10,12 @@ import java.time.Year;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -59,8 +63,7 @@ class BeregnFerietilleggDagpenger extends LeafSpecification<BeregningsresultatFe
         var tidslinjeDagpengerAndreKilder = new LocalDateTimeline<>(segmenterMedDagpengerIAndreSystemer, StandardCombinators::union).compress();
         Set<Integer> alleÅrMedDagpenger = tidslinjeDagpengerTilkjentYtelse.stream().map(LocalDateSegment::getFom).map(LocalDate::getYear).collect(Collectors.toSet());
         alleÅrMedDagpenger.forEach(år -> {
-            var skjæringstidspunkterIÅr = regelModell.getSkjæringstidspunkter().stream().filter(stp -> stp.getYear() == år).collect(Collectors.toSet());
-            var oppfyltVilkårTidslinje = finnTidslinjeMedGodkjentVilkårForÅr(Year.of(år), tidslinjeDagpengerTilkjentYtelse, tidslinjeDagpengerAndreKilder, skjæringstidspunkterIÅr);
+            var oppfyltVilkårTidslinje = finnTidslinjeMedGodkjentVilkårForÅr(Year.of(år), tidslinjeDagpengerTilkjentYtelse, tidslinjeDagpengerAndreKilder, regelModell.getSkjæringstidspunkter());
             if (!oppfyltVilkårTidslinje.isEmpty()) {
                 beregnFeriepengerForÅr(oppfyltVilkårTidslinje, Year.of(år), regelsporing);
             }
@@ -78,7 +81,7 @@ class BeregnFerietilleggDagpenger extends LeafSpecification<BeregningsresultatFe
         tidslinjeDagpengerTilkjentYtelse.intersection(lagÅrstidslinje(år)).toSegments()
             .forEach(s ->
                 {
-                    var antallFeriepengerDager = BigDecimal.valueOf(Virkedager.beregnAntallVirkedager(s.getFom(), s.getTom()));
+                    var antallFeriepengerDager = BigDecimal.valueOf(beregnAntallVirkedager(s.getFom(), s.getTom()));
                     String periodeNavn = "perioden " + s.getLocalDateInterval();
                     regelsporing.put("Antall feriepengedager i " + periodeNavn, antallFeriepengerDager);
                     regelsporing.put("Opptjeningsår i " + periodeNavn, år.getValue());
@@ -125,46 +128,45 @@ class BeregnFerietilleggDagpenger extends LeafSpecification<BeregningsresultatFe
                                                                                                  LocalDateTimeline<Set<DagpengerKilde>> tidslinjeDagpengerAndreKilder,
                                                                                                  Set<LocalDate> skjæringstidspunkter) {
         // Det er kun skjæringstidspunkter i samme år og etter 8 uker som er kandidater for ferietillegg
-        var aktuelleSkjæringstidspunkterForFeriepenger = skjæringstidspunkter.stream().filter(stp -> stp.getYear() == årSomSjekkes.getValue()
-            && stp.isAfter(årSomSjekkes.atDay(ANTALL_UKER_MED_DAGPENGEOPPTJENING_NEDRE_GRENSE *7))).sorted().collect(Collectors.toCollection(LinkedHashSet::new));
+        var aktuelleSkjæringstidspunkterForFeriepenger = skjæringstidspunkter.stream().filter(stp -> stp.getYear() == årSomSjekkes.getValue()).sorted().collect(Collectors.toCollection(LinkedHashSet::new));
 
         if (aktuelleSkjæringstidspunkterForFeriepenger.isEmpty()) {
             return LocalDateTimeline.empty();
         }
 
         var tidslinjeÅr = lagÅrstidslinje(årSomSjekkes);
-        var dagpengetidslinjeForÅr = tidslinjeDagpengerAndreKilder.filterValue(it -> !it.isEmpty()).mapValue(v -> Boolean.TRUE).crossJoin(tidslinjeTilkjentYtelseDagpenger.mapValue(v -> Boolean.TRUE), StandardCombinators::alwaysTrueForMatch)
-            .intersection(tidslinjeÅr)
-            .compress();
+        var antallVirkedagerTilkjentYtelse = finnAntallVirkedager(tidslinjeTilkjentYtelseDagpenger.intersection(tidslinjeÅr).getLocalDateIntervals());
 
-        var splittetPåVirkedager = splittPåUkedagerOgFjernHelg(dagpengetidslinjeForÅr, tidslinjeÅr, aktuelleSkjæringstidspunkterForFeriepenger);
-        var virkedager = splittetPåVirkedager.toSegments().stream().toList();
-
-        if (virkedager.size() <= ANTALL_VIRKEDAGER_MED_DAGPENGEOPPTJENING_NEDRE_GRENSE) {
-            return LocalDateTimeline.empty();
+        if (antallVirkedagerTilkjentYtelse > ANTALL_VIRKEDAGER_MED_DAGPENGEOPPTJENING_NEDRE_GRENSE) {
+            // Dersom vi alene har over 8 uker med ytelse etter 8-49 skal alle perioder godkjennes
+            return tidslinjeTilkjentYtelseDagpenger.intersection(tidslinjeÅr);
         }
 
-        var førsteMuligeGodkjenteDag = virkedager.get(ANTALL_VIRKEDAGER_MED_DAGPENGEOPPTJENING_NEDRE_GRENSE).getFom().plusDays(1);
-        var førsteGodkjenteSkjæringstidspunkt = skjæringstidspunkter.stream().filter(stp -> !stp.isBefore(førsteMuligeGodkjenteDag))
-            .min(Comparator.naturalOrder());
+        var liste = aktuelleSkjæringstidspunkterForFeriepenger.stream().toList();
 
-        if (førsteGodkjenteSkjæringstidspunkt.isEmpty()) {
-            return LocalDateTimeline.empty();
+        for (int i = 0; i < aktuelleSkjæringstidspunkterForFeriepenger.size(); i++) {
+            var stp = liste.get(i);
+            var tom = i < liste.size() - 1 ? liste.get(i + 1).minusDays(1) : tidslinjeÅr.getMaxLocalDate();
+            var tilkjentYtelseForVilkårsperiode = tidslinjeTilkjentYtelseDagpenger.intersection(new LocalDateInterval(stp, tom)).mapValue(it -> Boolean.TRUE);
+            var dagpengerAndreKilderFørStp = tidslinjeDagpengerAndreKilder.intersection(new LocalDateInterval(tidslinjeÅr.getMinLocalDate(), stp.minusDays(1))).mapValue(it -> Boolean.TRUE);
+            var dagpengeOpptjeningForStp = tilkjentYtelseForVilkårsperiode.crossJoin(dagpengerAndreKilderFørStp).getLocalDateIntervals();
+            var antallVirkedager = finnAntallVirkedager(dagpengeOpptjeningForStp);
+            if (antallVirkedager > ANTALL_VIRKEDAGER_MED_DAGPENGEOPPTJENING_NEDRE_GRENSE) {
+                return tidslinjeTilkjentYtelseDagpenger.intersection(new LocalDateInterval(stp, tidslinjeÅr.getMaxLocalDate()));
+            }
         }
 
-        return tidslinjeTilkjentYtelseDagpenger.intersection(new LocalDateTimeline<>(førsteGodkjenteSkjæringstidspunkt.get(), tidslinjeÅr.getMaxLocalDate(), Boolean.TRUE));
+        return LocalDateTimeline.empty();
 
     }
 
-    private static LocalDateTimeline<Boolean> splittPåUkedagerOgFjernHelg(LocalDateTimeline<Boolean> dagpengetidslinjeForÅr, LocalDateTimeline<Boolean> tidslinjeÅr, LinkedHashSet<LocalDate> aktuelleSkjæringstidspunkterForFeriepenger) {
-        var dagpengetidslinjeForÅrUtenHelger = Hjelpetidslinjer.fjernHelger(dagpengetidslinjeForÅr);
-        return dagpengetidslinjeForÅrUtenHelger.splitAtRegular(tidslinjeÅr.getMinLocalDate(), aktuelleSkjæringstidspunkterForFeriepenger.getLast().minusDays(1), Period.ofDays(1));
+    private static Integer finnAntallVirkedager(NavigableSet<LocalDateInterval> dagpengeOpptjeningForStp) {
+        return dagpengeOpptjeningForStp.stream().map(it -> beregnAntallVirkedager(it.getFomDato(), it.getTomDato())).reduce(Integer::sum).orElse(0);
     }
 
     private static LocalDateTimeline<Boolean> lagÅrstidslinje(Year årSomSjekkes) {
         var førsteDagIÅr = årSomSjekkes.atDay(1);
-        var tidslinjeÅr = new LocalDateTimeline<>(førsteDagIÅr, førsteDagIÅr.with(TemporalAdjusters.lastDayOfYear()), Boolean.TRUE);
-        return tidslinjeÅr;
+        return new LocalDateTimeline<>(førsteDagIÅr, førsteDagIÅr.with(TemporalAdjusters.lastDayOfYear()), Boolean.TRUE);
     }
 
     private <T> LocalDateTimeline<T> splittPåÅr(LocalDateTimeline<T> tilkjentytelseTidslinje) {
