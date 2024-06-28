@@ -284,15 +284,15 @@ class RevurderingMetrikkRepositoryTest {
 
         entityManager.flush();
 
-        assertThat(revurderingMetrikkRepository.antallAksjonspunktPrRevurderingMedEndringsopphav(LocalDate.now().plusDays(1))).isNotEmpty()
-            .allMatch(v -> v.toString().contains("revurdering_antall_aksjonspunkt_pr_behandling_og_endringsopphav"))
+        assertThat(revurderingMetrikkRepository.antallRevurderingerPrAksjonspunktOgEndringsopphavEnDag(LocalDate.now().plusDays(1))).isNotEmpty()
+            .allMatch(v -> v.toString().contains("antall_revurderinger_pr_aksjonspunkt_og_endringsopphav"))
             .anyMatch(v -> v.toString().contains("ytelse_type=PSB") &&
-                v.toString().contains("behandling_teller=1") &&
-                v.toString().contains("behandlinger_prosentandel=100") &&
+                v.toString().contains("antall_aksjonspunkt_per_behandling=1") &&
                 v.toString().contains("har_endring_fra_bruker=false") &&
                 v.toString().contains("har_endring_fra_inntektsmelding=true") &&
                 v.toString().contains("har_endring_fra_annen_sak=false") &&
-                v.toString().contains("har_endring_fra_endringsdialog=false")
+                v.toString().contains("har_endring_fra_endringsdialog=false") &&
+                v.toString().contains("antall_behandlinger=1")
             );
     }
 
@@ -323,7 +323,7 @@ class RevurderingMetrikkRepositoryTest {
 
         entityManager.flush();
 
-        assertThat(revurderingMetrikkRepository.antallRevurderingerPrAksjonspunktOgEndringsopphav(LocalDate.now().plusDays(1))).isNotEmpty()
+        assertThat(revurderingMetrikkRepository.antallRevurderingerPrAksjonspunktOgEndringsopphavSisteSyvDager(LocalDate.now().plusDays(1))).isNotEmpty()
             .allMatch(v -> v.toString().contains("antall_revurderinger_pr_aksjonspunkt_og_endringsopphav"))
             .anyMatch(v -> v.toString().contains("ytelse_type=PSB") &&
                 v.toString().contains("antall_aksjonspunkt_per_behandling=1") &&

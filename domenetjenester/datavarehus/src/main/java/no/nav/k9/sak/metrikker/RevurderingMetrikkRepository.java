@@ -77,14 +77,14 @@ public class RevurderingMetrikkRepository {
                 log.warn("Uthenting av antallAksjonspunktFordelingForRevurderingUtenNyttStpSisteSyvDager feiler", e);
             }
             try {
-                metrikker.addAll(timeCall(() -> antallAksjonspunktPrRevurderingMedEndringsopphav(dag), "antallAksjonspunktPrRevurderingMedEndringsopphav"));
+                metrikker.addAll(timeCall(() -> antallRevurderingerPrAksjonspunktOgEndringsopphavEnDag(dag), "antallRevurderingerPrAksjonspunktOgEndringsopphavEnDag"));
             } catch (QueryTimeoutException e) {
-                log.warn("Uthenting av antallAksjonspunktPrRevurderingMedEndringsopphav feiler", e);
+                log.warn("Uthenting av antallRevurderingerPrAksjonspunktOgEndringsopphavEnDag feiler", e);
             }
             try {
-                metrikker.addAll(timeCall(() -> antallRevurderingerPrAksjonspunktOgEndringsopphav(dag), "antallRevurderingerPrAksjonspunktOgEndringsopphav"));
+                metrikker.addAll(timeCall(() -> antallRevurderingerPrAksjonspunktOgEndringsopphavSisteSyvDager(dag), "antallRevurderingerPrAksjonspunktOgEndringsopphavSisteSyvDager"));
             } catch (QueryTimeoutException e) {
-                log.warn("Uthenting av antallRevurderingerPrAksjonspunktOgEndringsopphav feiler", e);
+                log.warn("Uthenting av antallRevurderingerPrAksjonspunktOgEndringsopphavSisteSyvDager feiler", e);
             }
             try {
                 metrikker.addAll(timeCall(() -> antallRevurderingMedAksjonspunktPrKodeSisteSyvDager(dag), "antallRevurderingMedAksjonspunktPrKodeSisteSyvDager"));
@@ -324,50 +324,43 @@ public class RevurderingMetrikkRepository {
 
     }
 
-    Collection<SensuEvent> antallAksjonspunktPrRevurderingMedEndringsopphav(LocalDate dato) {
+    Collection<SensuEvent> antallRevurderingerPrAksjonspunktOgEndringsopphavEnDag(LocalDate dato) {
         String sql = """
             select
                 ytelse_type,
-                behandling_id,
-                behandling_teller,
                 antall_aksjonspunkt_per_behandling,
                 har_endring_fra_bruker,
                 har_endring_fra_inntektsmelding,
                 har_endring_fra_annen_sak,
                 har_endring_fra_endringsdialog,
-                behandling_teller * 100 / sum(behandling_teller) over (partition by ytelse_type) as behandlinger_prosentandel
+                count(distinct behandling_id) as antall_behandlinger
             from (
                 select
                     f.ytelse_type,
                     b.id as behandling_id,
-                    count(distinct b.id) as behandling_teller,
 
                     (select count(a.aksjonspunkt_def)
-                    from aksjonspunkt a where a.behandling_id = b.id
+                     from aksjonspunkt a where a.behandling_id = b.id
                         and a.aksjonspunkt_status != 'AVBR'
                         and (a.vent_aarsak is null or a.vent_aarsak = '-')
                     ) as antall_aksjonspunkt_per_behandling,
 
-                    exists (
-                        select aarsak.behandling_arsak_type from behandling_arsak aarsak
+                    exists (select aarsak.behandling_arsak_type from behandling_arsak aarsak
                         where aarsak.behandling_id = b.id
                             and aarsak.behandling_arsak_type = 'RE-END-FRA-BRUKER'
                     ) as har_endring_fra_bruker,
 
-                    exists (
-                        select aarsak.behandling_arsak_type from behandling_arsak aarsak
+                    exists (select aarsak.behandling_arsak_type from behandling_arsak aarsak
                         where aarsak.behandling_id = b.id
                             and aarsak.behandling_arsak_type = 'RE-END-INNTEKTSMELD'
                     ) as har_endring_fra_inntektsmelding,
 
-                    exists (
-                        select aarsak.behandling_arsak_type from behandling_arsak aarsak
+                    exists (select aarsak.behandling_arsak_type from behandling_arsak aarsak
                         where aarsak.behandling_id = b.id
                             and aarsak.behandling_arsak_type = 'RE_ANNEN_SAK'
                     ) as har_endring_fra_annen_sak,
 
-                    exists (
-                        select md.kildesystem from mottatt_dokument md
+                    exists (select md.kildesystem from mottatt_dokument md
                         where md.behandling_id = b.id
                             and md.kildesystem = 'endringsdialog'
                     ) as har_endring_fra_endringsdialog
@@ -377,12 +370,11 @@ public class RevurderingMetrikkRepository {
                 where b.avsluttet_dato >= :startTid
                     and b.avsluttet_dato < :sluttTid
                     and b.behandling_type = :revurdering
-                group by 1, 2) as statistikk_pr_behandling;
+                group by ytelse_type, behandling_id ) as statistikk_pr_behandling
+            group by ytelse_type, antall_aksjonspunkt_per_behandling, har_endring_fra_bruker, har_endring_fra_inntektsmelding, har_endring_fra_annen_sak, har_endring_fra_endringsdialog;
             """;
 
-        String metricName = "revurdering_antall_aksjonspunkt_pr_behandling_og_endringsopphav";
-        String metricBehandlingTeller = "behandling_teller";
-        String metricBehandlingerProsentAndel = "behandlinger_prosentandel";
+        String metricName = "antall_revurderinger_pr_aksjonspunkt_og_endringsopphav_en_dag";
 
         NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
             .setParameter("revurdering", BehandlingType.REVURDERING.getKode())
@@ -396,23 +388,22 @@ public class RevurderingMetrikkRepository {
                 // metric tags
                 toMap(
                     "ytelse_type", t.get(0, String.class),
-                    "antall_aksjonspunkt_per_behandling", t.get(3, Number.class).toString(),
-                    "har_endring_fra_bruker", t.get(4, Boolean.class).toString(),
-                    "har_endring_fra_inntektsmelding", t.get(5, Boolean.class).toString(),
-                    "har_endring_fra_annen_sak", t.get(6, Boolean.class).toString(),
-                    "har_endring_fra_endringsdialog", t.get(7, Boolean.class).toString()
+                    "antall_aksjonspunkt_per_behandling", t.get(1, Number.class).toString(),
+                    "har_endring_fra_bruker", t.get(2, Boolean.class).toString(),
+                    "har_endring_fra_inntektsmelding", t.get(3, Boolean.class).toString(),
+                    "har_endring_fra_annen_sak", t.get(4, Boolean.class).toString(),
+                    "har_endring_fra_endringsdialog", t.get(5, Boolean.class).toString()
                 ),
                 // metric fields
                 Map.of(
-                    metricBehandlingTeller, t.get(2, Number.class),
-                    metricBehandlingerProsentAndel, t.get(8, Number.class)
+                    "antall_behandlinger", t.get(6, Number.class)
                 )))
             .collect(Collectors.toList());
 
         return values;
     }
 
-    Collection<SensuEvent> antallRevurderingerPrAksjonspunktOgEndringsopphav(LocalDate dato) {
+    Collection<SensuEvent> antallRevurderingerPrAksjonspunktOgEndringsopphavSisteSyvDager(LocalDate dato) {
         String sql = """
             select
                 ytelse_type,
