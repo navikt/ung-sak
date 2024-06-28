@@ -29,7 +29,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.SykdomVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.SykdomGrunnlagSammenlikningsresultat;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarMedisinskeOpplysningerDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -73,18 +72,10 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
         final Behandling behandling = behandlingRepository.hentBehandling(param.getRef().getBehandlingId());
         VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = perioderTilVurderingTjeneste(behandling);
 
-        boolean skalHaToTrinn;
-
-        final var perioder = vilkårsPerioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-        SykdomGrunnlagSammenlikningsresultat sammenlikningsresultat = medisinskGrunnlagTjeneste.utledRelevanteEndringerSidenForrigeBehandling(behandling, perioder);
-
         final boolean harTidligereHattRelevantGodkjentLegeerklæring = medisinskGrunnlagRepository.harHattGodkjentLegeerklæringMedUnntakAv(behandling.getFagsak().getPleietrengendeAktørId(), behandling.getUuid());
         final boolean harGodkjentLegeerklæring = !pleietrengendeSykdomDokumentRepository.hentGodkjenteLegeerklæringer(behandling.getFagsak().getPleietrengendeAktørId(), behandling.getFagsakYtelseType()).isEmpty();
 
         final var harFåttFørsteLegeerklæring = !harTidligereHattRelevantGodkjentLegeerklæring && harGodkjentLegeerklæring;
-        final var harEndringer = !sammenlikningsresultat.getDiffPerioder().isEmpty();
-
-        skalHaToTrinn = harEndringer || harFåttFørsteLegeerklæring;
 
         if (dto.isIkkeVentPåGodkjentLegeerklæring()) {
             final SykdomAksjonspunkt sykdomAksjonspunkt = sykdomVurderingTjeneste.vurderAksjonspunkt(behandling);
@@ -98,7 +89,7 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
             /*
              * Vanligvis viser vi begrunnelsen fra saksbehandler som en del av historikkinnslaget, men dette
              * er ikke aktuelt for sykdom. Grunnen til dette er at vurderingene på sykdom gjøres på barnet.
-             * 
+             *
              * Saksbehandler løser sykdomsaksjonspunktet i frontend ved å bare trykke "Fortsett", og det som
              * da skjer er at vi lager et grunnlag med opplysninger i saken. Dette er fint å dokumentere
              * gjennom et historikkinnslag, men det er da ingen begrunnelse for løsingen av aksjonspunktet.
@@ -127,7 +118,7 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
 
         lagHistorikkinnslag(param, "Sykdom manuelt behandlet.");
 
-        final OppdateringResultat resultat = OppdateringResultat.builder().medTotrinnHvis(skalHaToTrinn).build();
+        final OppdateringResultat resultat = OppdateringResultat.builder().medTotrinnHvis(harFåttFørsteLegeerklæring).build();
         resultat.rekjørSteg();
         resultat.setSteg(BehandlingStegType.VURDER_MEDISINSKE_VILKÅR);
 
