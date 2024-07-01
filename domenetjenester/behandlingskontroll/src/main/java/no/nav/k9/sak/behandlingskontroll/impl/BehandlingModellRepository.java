@@ -34,6 +34,10 @@ public class BehandlingModellRepository implements AutoCloseable {
         return cachedModell.get(key);
     }
 
+    public boolean harModell(BehandlingType behandlingType, FagsakYtelseType ytelseType) {
+        return BehandlingTypeRef.Lookup.find(BehandlingModell.class, ytelseType, behandlingType).isPresent();
+    }
+
     protected Object cacheKey(BehandlingType behandlingType, FagsakYtelseType fagsakYtelseType) {
         // lager en key av flere sammensatte elementer.
         return Arrays.asList(behandlingType, fagsakYtelseType);
