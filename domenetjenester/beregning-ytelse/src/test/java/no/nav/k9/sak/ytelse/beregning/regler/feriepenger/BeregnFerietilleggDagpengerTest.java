@@ -39,6 +39,24 @@ class BeregnFerietilleggDagpengerTest {
     }
 
     @Test
+    void skal_ikke_gi_ferietillegg_for_dagpenger_etter_siste_dag_med_ytelse() {
+        var tyPeriode = lagTilkjentYtelseDagpenger(STP, etter(10), 900L);
+
+        var regelmodell = BeregningsresultatFeriepengerRegelModell.builder()
+            .medPerioderMedDagpenger(List.of(lagDPPeriode(etter(11), etter(100))))
+            .medBeregningsresultatPerioder(List.of(tyPeriode))
+            .build();
+        new BeregnFerietilleggDagpenger().evaluate(regelmodell);
+
+        assertThat(regelmodell).isNotNull();
+
+        var feriepengerP1 = feriepengerDagpengerFraPeriodeIndex(regelmodell, 0);
+
+        assertThat(feriepengerP1).isEmpty();
+    }
+
+
+    @Test
     void skal_gi_ferietillegg_når_over_8_uker_dagpenger() {
         var tyPeriode = lagTilkjentYtelseDagpenger(STP, etter(100), 900L);
 
