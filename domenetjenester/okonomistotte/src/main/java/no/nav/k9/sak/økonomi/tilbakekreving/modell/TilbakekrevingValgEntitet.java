@@ -2,14 +2,7 @@ package no.nav.k9.sak.økonomi.tilbakekreving.modell;
 
 import java.util.Objects;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Version;
+import jakarta.persistence.*;
 
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
@@ -42,6 +35,9 @@ class TilbakekrevingValgEntitet extends BaseEntitet {
 
     @Column(name = "varseltekst")
     private String varseltekst;
+
+    @Column(name = "utvidet_varseltekst")
+    private String utivdetVarseltekst;
 
     @Convert(converter = TilbakekrevingVidereBehandlingKodeverdiConverter.class)
     @Column(name="videre_behandling")
@@ -104,6 +100,7 @@ class TilbakekrevingValgEntitet extends BaseEntitet {
 
         public Builder medVarseltekst(String varseltekst) {
             kladd.varseltekst = varseltekst;
+            kladd.utivdetVarseltekst = varseltekst;
             return this;
         }
 
