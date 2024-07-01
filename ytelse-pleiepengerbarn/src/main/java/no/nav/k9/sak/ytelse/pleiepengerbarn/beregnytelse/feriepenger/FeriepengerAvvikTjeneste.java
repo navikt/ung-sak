@@ -75,7 +75,7 @@ public class FeriepengerAvvikTjeneste {
                 if (fomYear != tomYear) {
                     throw new IllegalArgumentException("Har BeregningsresultatPeriode som både har feriepenger og krysser år, skal ikke forekomme");
                 }
-                feriepengeOppsummeringBuilder.leggTil(Year.of(fomYear), brAndel.erBrukerMottaker() ? MottakerType.BRUKER : MottakerType.ARBEIDSGIVER, brAndel.erBrukerMottaker() ? null : brAndel.getArbeidsforholdIdentifikator(), beløp);
+                feriepengeOppsummeringBuilder.leggTil(Year.of(fomYear), brAndel.erBrukerMottaker() ? MottakerType.BRUKER : MottakerType.ARBEIDSGIVER, brAndel.getInntektskategori(), brAndel.erBrukerMottaker() ? null : brAndel.getArbeidsforholdIdentifikator(), beløp);
             }
         }
         return feriepengeOppsummeringBuilder.build();
