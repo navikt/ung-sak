@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.forvaltning;
 import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import java.io.BufferedReader;
@@ -364,8 +365,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         for (var saksnummer : saksnumrene) {
             try {
                 Fagsak fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(new Saksnummer(saksnummer), false).orElseThrow(() -> new IllegalArgumentException("Finner ikke sak " + saksnummer));
-                if (fagsak.getYtelseType() != PLEIEPENGER_SYKT_BARN) {
-                    throw new IllegalArgumentException("Fagsak " + saksnummer + " var ikke PSB-sak");
+                if (fagsak.getYtelseType() != PLEIEPENGER_SYKT_BARN && fagsak.getYtelseType() != PLEIEPENGER_NÆRSTÅENDE) {
+                    throw new IllegalArgumentException("Fagsak " + saksnummer + " var ikke PSB eller PPN");
                 }
                 opprettRevurderingService.opprettAutomatiskRevurdering(new Saksnummer(saksnummer),
                     BehandlingÅrsakType.RE_REBEREGN_FERIEPENGER,
