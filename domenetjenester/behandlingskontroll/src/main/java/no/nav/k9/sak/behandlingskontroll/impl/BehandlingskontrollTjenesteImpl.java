@@ -208,7 +208,7 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
         BehandlingModell modell = getModell(behandlingType, ytelseType);
         return modell.erStegAFørStegB(stegA, stegB) ? -1
             : modell.erStegAFørStegB(stegB, stegA) ? 1
-                : 0;
+            : 0;
     }
 
     @Override
@@ -511,11 +511,17 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
 
         Optional<BehandlingStegTilstand> stegTilstandFør = doHenleggBehandling(kontekst, årsak);
 
-        // FIXME (MAUR): Bør løses via FellesTransisjoner og unngå hardkoding av BehandlingStegType her.
-        // må fremoverføres for å trigge riktig events for opprydding
-        behandlingFramføringTilSenereBehandlingSteg(kontekst, BehandlingStegType.IVERKSETT_VEDTAK);
+        var behandling = hentBehandling(kontekst);
+        // Sjekker på om vi har en modell som kan håndtere fremoverføring, ellers vil det ikke være mulig å fremoverføre
+        // Er dette ok? Har vi andre alternativ enn å avslutte?
+        if (behandlingModellRepository.harModell(behandling.getType(), behandling.getFagsakYtelseType())) {
+            // FIXME (MAUR): Bør løses via FellesTransisjoner og unngå hardkoding av BehandlingStegType her.
+            // må fremoverføres for å trigge riktig events for opprydding
+            behandlingFramføringTilSenereBehandlingSteg(kontekst, BehandlingStegType.IVERKSETT_VEDTAK);
 
-        publiserFremhoppTransisjonHenleggelse(kontekst, stegTilstandFør, BehandlingStegType.IVERKSETT_VEDTAK);
+            publiserFremhoppTransisjonHenleggelse(kontekst, stegTilstandFør, BehandlingStegType.IVERKSETT_VEDTAK);
+        }
+
 
         // sett Avsluttet og fyr status
         avsluttBehandling(kontekst);
@@ -571,7 +577,7 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
         BehandlingModell modell = getModell(behandlingType, ytelseType);
         BehandlingStegType behandlingSteg = finnBehandlingSteg(startpunkt, ytelseType, behandlingType);
         BehandlingStegType apLøsesteg = Optional.ofNullable(modell
-            .finnTidligsteStegForAksjonspunktDefinisjon(singletonList(apDef.getKode())))
+                .finnTidligsteStegForAksjonspunktDefinisjon(singletonList(apDef.getKode())))
             .map(BehandlingStegModell::getBehandlingStegType)
             .orElse(null);
         if (apLøsesteg == null) {
@@ -642,7 +648,7 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
             Optional<BehandlingStegStatus> stegStatus = modell.finnStegStatusFor(bst, oppdaterteAksjonspunkter);
             if (stegStatus.isPresent()
                 && !(Objects.equals(stegStatus.get(), behandling.getBehandlingStegStatus())
-                    && Objects.equals(bst, behandling.getAktivtBehandlingSteg()))) {
+                && Objects.equals(bst, behandling.getAktivtBehandlingSteg()))) {
                 // er på starten av steg med endret aksjonspunkt. Ikke kjør steget her, kun oppdater
                 oppdaterEksisterendeBehandlingStegStatusVedFramføringEllerTilbakeføring(behandling, bst, stegStatus.get(),
                     BehandlingStegStatus.TILBAKEFØRT);

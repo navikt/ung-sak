@@ -45,7 +45,7 @@ public class RegelBeregnFeriepengerTest {
             .medAndelerSomKanGiFeriepengerForRelevaneSaker(LocalDateTimeline.empty())
             .build();
 
-        RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger(false);
+        RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger();
         Evaluation evaluation = regel.evaluer(regelModell);
         String sporing = EvaluationSerializer.asJson(evaluation);
 
@@ -86,7 +86,7 @@ public class RegelBeregnFeriepengerTest {
             .medAndelerSomKanGiFeriepengerForRelevaneSaker(LocalDateTimeline.empty())
             .build();
 
-        RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger(false);
+        RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger();
         Evaluation evaluation = regel.evaluer(regelModell);
         String sporing = EvaluationSerializer.asJson(evaluation);
 
@@ -137,7 +137,7 @@ public class RegelBeregnFeriepengerTest {
             .medAndelerSomKanGiFeriepengerForRelevaneSaker(LocalDateTimeline.empty())
             .build();
 
-        RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger(false);
+        RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger();
         Evaluation evaluation = regel.evaluer(regelModell);
         String sporing = EvaluationSerializer.asJson(evaluation);
 
@@ -181,7 +181,7 @@ public class RegelBeregnFeriepengerTest {
             .medAndelerSomKanGiFeriepengerForRelevaneSaker(LocalDateTimeline.empty())
             .build();
 
-        RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger(false);
+        RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger();
         Evaluation evaluation = regel.evaluer(regelModell);
         String sporing = EvaluationSerializer.asJson(evaluation);
 
@@ -227,7 +227,7 @@ public class RegelBeregnFeriepengerTest {
             .medAndelerSomKanGiFeriepengerForRelevaneSaker(LocalDateTimeline.empty())
             .build();
 
-        RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger(false);
+        RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger();
         Evaluation evaluation = regel.evaluer(regelModell);
         String sporing = EvaluationSerializer.asJson(evaluation);
 
@@ -263,7 +263,7 @@ public class RegelBeregnFeriepengerTest {
             .medAndelerSomKanGiFeriepengerForRelevaneSaker(LocalDateTimeline.empty())
             .build();
 
-        RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger(false);
+        RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger();
         Evaluation evaluation = regel.evaluer(regelModell);
         String sporing = EvaluationSerializer.asJson(evaluation);
 
@@ -301,7 +301,7 @@ public class RegelBeregnFeriepengerTest {
             .medAndelerSomKanGiFeriepengerForRelevaneSaker(LocalDateTimeline.empty())
             .build();
 
-        RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger(false);
+        RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger();
         Evaluation evaluation = regel.evaluer(regelModell);
         String sporing = EvaluationSerializer.asJson(evaluation);
 
@@ -333,7 +333,7 @@ public class RegelBeregnFeriepengerTest {
             .medAndelerSomKanGiFeriepengerForRelevaneSaker(LocalDateTimeline.empty())
             .build();
 
-        RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger(false);
+        RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger();
         Evaluation evaluation = regel.evaluer(regelModell);
         String sporing = EvaluationSerializer.asJson(evaluation);
 
@@ -362,7 +362,7 @@ public class RegelBeregnFeriepengerTest {
             .medAndelerSomKanGiFeriepengerForRelevaneSaker(LocalDateTimeline.empty())
             .build();
 
-        RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger(false);
+        RegelBeregnFeriepenger regel = new RegelBeregnFeriepenger();
         Evaluation evaluation = regel.evaluer(regelModell);
         String sporing = EvaluationSerializer.asJson(evaluation);
 

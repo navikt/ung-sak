@@ -77,7 +77,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
     private LocalDateTimeline<BeregningsresultatPeriode> intersectTimelines(LocalDateTimeline<BeregningsgrunnlagPeriode> grunnlagTimeline, LocalDateTimeline<List<UttakResultatPeriode>> uttakTimeline,
                                                                             Map<String, Object> resultater, boolean skalVurdereGjelderFor) {
 
-        if (grunnlagTimeline.isEmpty() || uttakTimeline.isEmpty()) {
+        if (grunnlagTimeline.intersection(uttakTimeline).isEmpty()) {
             return LocalDateTimeline.empty();
         }
 
