@@ -179,12 +179,6 @@ class RevurderingMetrikkRepositoryTest {
     }
 
 
-
-    @Test
-    void skal_sjekke_at_SQL_syntaks_er_ok() {
-        assertThat(revurderingMetrikkRepository.antallAksjonspunktPrRevurderingMedEndringsopphavSisteSyvDager(LocalDate.now())).isEmpty();
-    }
-
     @Test
     void skal_finne_en_behandling_uten_ny_søknad_med_ett_aksjonspunkt() {
 
@@ -290,33 +284,32 @@ class RevurderingMetrikkRepositoryTest {
 
         entityManager.flush();
 
-        assertThat(revurderingMetrikkRepository.antallAksjonspunktPrRevurderingMedEndringsopphavSisteSyvDager(LocalDate.now().plusDays(1))).isNotEmpty()
-            .allMatch(v -> v.toString().contains("revurdering_antall_aksjonspunkt_pr_behandling_og_endringsopphav_syv_dager_v2"))
+        assertThat(revurderingMetrikkRepository.antallRevurderingerPrAksjonspunktOgEndringsopphavEnDag(LocalDate.now().plusDays(1))).isNotEmpty()
+            .allMatch(v -> v.toString().contains("antall_revurderinger_pr_aksjonspunkt_og_endringsopphav"))
             .anyMatch(v -> v.toString().contains("ytelse_type=PSB") &&
-                v.toString().contains("behandling_teller=1") &&
-                v.toString().contains("behandlinger_prosentandel=100") &&
+                v.toString().contains("antall_aksjonspunkt_per_behandling=1") &&
                 v.toString().contains("har_endring_fra_bruker=false") &&
                 v.toString().contains("har_endring_fra_inntektsmelding=true") &&
                 v.toString().contains("har_endring_fra_annen_sak=false") &&
-                v.toString().contains("har_endring_fra_endringsdialog=false")
+                v.toString().contains("har_endring_fra_endringsdialog=false") &&
+                v.toString().contains("antall_behandlinger=1")
             );
     }
 
-    @Test
-    void skal_finne_aksjonspunkt_med_en_behandling_og_en_aarsak() {
 
+    @Test
+    void skal_finne_antall_revurderinger_pr_aksjonspunkt_og_endringsopphav() {
         FagsakYtelseType ytelseType = FagsakYtelseType.PSB;
         var scenario = TestScenarioBuilder.builderUtenSøknad(ytelseType);
         var behandling = scenario.lagre(entityManager);
         behandling.avsluttBehandling();
-
 
         AksjonspunktDefinisjon aksjonspunkt = AksjonspunktDefinisjon.FASTSETT_BEREGNINGSGRUNNLAG_SELVSTENDIG_NÆRINGSDRIVENDE;
         BehandlingStegType stegType = BehandlingStegType.FORESLÅ_BEREGNINGSGRUNNLAG;
 
         var scenarioBuilder = TestScenarioBuilder.builderUtenSøknad(ytelseType)
             .medBehandlingType(BehandlingType.REVURDERING)
-            .medOriginalBehandling(behandling, BehandlingÅrsakType.RE_ENDRING_BEREGNINGSGRUNNLAG);
+            .medOriginalBehandling(behandling, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING);
 
         scenarioBuilder.leggTilAksjonspunkt(aksjonspunkt, stegType);
 
@@ -330,14 +323,16 @@ class RevurderingMetrikkRepositoryTest {
 
         entityManager.flush();
 
-        assertThat(revurderingMetrikkRepository.antallRevurderingMedAksjonspunktOgAarsakPrKodeSisteSyvDager(LocalDate.now().plusDays(1))).isNotEmpty()
-            .allMatch(v -> v.toString().contains("revurdering_antall_behandlinger_pr_aksjonspunkt_og_aarsak"))
-            .anyMatch(v -> v.toString().contains("ytelse_type=PSB") && v.toString().contains("antall_behandlinger=1") &&
-                v.toString().contains("aksjonspunkt=" + aksjonspunkt.getKode()) &&
-                v.toString().contains("aarsak=" + BehandlingÅrsakType.RE_ENDRING_BEREGNINGSGRUNNLAG.getKode()) &&
-                v.toString().contains("aarsak_navn=" + BehandlingÅrsakType.RE_ENDRING_BEREGNINGSGRUNNLAG.getNavn()) &&
-                v.toString().contains("aksjonspunkt_navn=" + aksjonspunkt.getNavn()));
-
+        assertThat(revurderingMetrikkRepository.antallRevurderingerPrAksjonspunktOgEndringsopphavSisteSyvDager(LocalDate.now().plusDays(1))).isNotEmpty()
+            .allMatch(v -> v.toString().contains("antall_revurderinger_pr_aksjonspunkt_og_endringsopphav"))
+            .anyMatch(v -> v.toString().contains("ytelse_type=PSB") &&
+                v.toString().contains("antall_aksjonspunkt_per_behandling=1") &&
+                v.toString().contains("har_endring_fra_bruker=false") &&
+                v.toString().contains("har_endring_fra_inntektsmelding=true") &&
+                v.toString().contains("har_endring_fra_annen_sak=false") &&
+                v.toString().contains("har_endring_fra_endringsdialog=false") &&
+                v.toString().contains("antall_behandlinger=1")
+            );
     }
 
 
