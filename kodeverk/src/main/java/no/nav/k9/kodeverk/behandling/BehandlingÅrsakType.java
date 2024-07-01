@@ -64,6 +64,7 @@ public enum BehandlingÅrsakType implements Kodeverdi {
     RE_TILSTØTENDE_YTELSE_INNVILGET("RE-TILST-YT-INNVIL", "Tilstøtende ytelse innvilget"),
     RE_ENDRING_BEREGNINGSGRUNNLAG("RE-ENDR-BER-GRUN", "Nye opplysninger som kan påvirke beregningsgrunnlaget"),
     RE_TILSTØTENDE_YTELSE_OPPHØRT("RE-TILST-YT-OPPH", "Tilstøtende ytelse opphørt"),
+    RE_REBEREGN_FERIEPENGER("RE_REBEREGN_FP", "Reberegning av feriepenger"),
 
     RE_ENDRING_FRA_ANNEN_OMSORGSPERSON("RE_ANNEN_SAK", "Nye opplysninger fra annen omsorgsperson"),
     RE_UTSATT_BEHANDLING("RE_UTSATT_BEHANDLING", "Utsatt behandling av periode på grunn av avhengighet til annen omsorgspersons uttak"),
@@ -98,7 +99,7 @@ public enum BehandlingÅrsakType implements Kodeverdi {
         RE_SYKDOM_ETABLERT_TILSYN_NATTVÅK_ENDRING_FRA_ANNEN_OMSORGSPERSON);
 
     public static final boolean medførerVilkårsperioder(BehandlingÅrsakType behandlingÅrsakType) {
-        return behandlingÅrsakType != RE_FERIEPENGER_ENDRING_FRA_ANNEN_SAK;
+        return behandlingÅrsakType != RE_FERIEPENGER_ENDRING_FRA_ANNEN_SAK && behandlingÅrsakType != RE_REBEREGN_FERIEPENGER;
     }
 
     @JsonIgnore
