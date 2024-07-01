@@ -6,7 +6,6 @@ import java.util.concurrent.ConcurrentMap;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingModell;
@@ -32,10 +31,6 @@ public class BehandlingModellRepository implements AutoCloseable {
         Object key = cacheKey(behandlingType, fagsakYtelseType);
         cachedModell.computeIfAbsent(key, (kode) -> byggModell(behandlingType, fagsakYtelseType));
         return cachedModell.get(key);
-    }
-
-    public boolean harModell(BehandlingType behandlingType, FagsakYtelseType ytelseType) {
-        return BehandlingTypeRef.Lookup.find(BehandlingModell.class, ytelseType, behandlingType).isPresent();
     }
 
     protected Object cacheKey(BehandlingType behandlingType, FagsakYtelseType fagsakYtelseType) {
