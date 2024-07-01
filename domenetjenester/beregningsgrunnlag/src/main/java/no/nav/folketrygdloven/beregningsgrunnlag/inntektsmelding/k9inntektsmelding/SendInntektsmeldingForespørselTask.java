@@ -1,13 +1,9 @@
-package no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding;
+package no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.k9inntektsmelding;
 
 import java.time.LocalDate;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.kontrakt.ForespørselSaksnummerDto;
-import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.kontrakt.InntektsmeldingYtelseType;
-import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.kontrakt.OpprettForespørselRequest;
-import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.kontrakt.ForespørselOrganisasjonsnummerDto;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
@@ -40,23 +36,23 @@ public class SendInntektsmeldingForespørselTask implements ProsessTaskHandler {
     public void doTask(ProsessTaskData prosessTaskData) {
         var fagsak = fagsakRepository.finnEksaktFagsak(prosessTaskData.getFagsakId());
         inntektsmeldingRestKlient.opprettForespørsel(new OpprettForespørselRequest(
-            fagsak.getBrukerAktørId().getAktørId(),
-            new ForespørselOrganisasjonsnummerDto(prosessTaskData.getPropertyValue(ORG_NR)),
+            new OpprettForespørselRequest.AktørIdDto(fagsak.getBrukerAktørId().getAktørId()),
+            new OpprettForespørselRequest.OrganisasjonsnummerDto(prosessTaskData.getPropertyValue(ORG_NR)),
             LocalDate.parse(prosessTaskData.getPropertyValue(SKJÆRINGSTIDSPUNKT)),
             finnYtelseType(fagsak),
-            new ForespørselSaksnummerDto(fagsak.getSaksnummer().getVerdi())
+            new OpprettForespørselRequest.SaksnummerDto(fagsak.getSaksnummer().getVerdi())
 
         ));
 
 
     }
 
-    private static InntektsmeldingYtelseType finnYtelseType(Fagsak fagsak) {
+    private static OpprettForespørselRequest.YtelseType finnYtelseType(Fagsak fagsak) {
         return switch (fagsak.getYtelseType()) {
-            case OMSORGSPENGER -> InntektsmeldingYtelseType.OMSORGSPENGER;
-            case PLEIEPENGER_NÆRSTÅENDE -> InntektsmeldingYtelseType.PLEIEPENGER_NÆRSTÅENDE;
-            case PLEIEPENGER_SYKT_BARN -> InntektsmeldingYtelseType.PLEIEPENGER_SYKT_BARN;
-            case OPPLÆRINGSPENGER -> InntektsmeldingYtelseType.OPPLÆRINGSPENGER;
+            case OMSORGSPENGER -> OpprettForespørselRequest.YtelseType.OMSORGSPENGER;
+            case PLEIEPENGER_NÆRSTÅENDE -> OpprettForespørselRequest.YtelseType.PLEIEPENGER_NÆRSTÅENDE;
+            case PLEIEPENGER_SYKT_BARN -> OpprettForespørselRequest.YtelseType.PLEIEPENGER_SYKT_BARN;
+            case OPPLÆRINGSPENGER -> OpprettForespørselRequest.YtelseType.OPPLÆRINGSPENGER;
             default -> throw new IllegalStateException("Unexpected value: " + fagsak.getYtelseType());
         };
     }

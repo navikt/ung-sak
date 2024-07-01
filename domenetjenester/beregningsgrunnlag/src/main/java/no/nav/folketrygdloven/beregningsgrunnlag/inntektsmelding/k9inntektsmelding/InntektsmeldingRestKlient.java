@@ -1,4 +1,4 @@
-package no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding;
+package no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.k9inntektsmelding;
 
 import java.io.IOException;
 import java.net.URI;
@@ -14,15 +14,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.kontrakt.OpprettForespørselRequest;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusKodelisteSerializer;
 import no.nav.folketrygdloven.kalkulus.mappers.JsonMapper;
 import no.nav.k9.felles.exception.VLException;
 import no.nav.k9.felles.feil.Feil;
@@ -41,7 +37,7 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 public class InntektsmeldingRestKlient {
 
     private static final Logger log = LoggerFactory.getLogger(InntektsmeldingRestKlient.class);
-    private static final ObjectMapper k9InntektsmeldingMapper = JsonMapper.getMapper().copy().registerModule(createModuleWithStringSerializer());
+    private static final ObjectMapper k9InntektsmeldingMapper = JsonMapper.getMapper();
     private final ObjectWriter innteksmeldingJsonWriter = k9InntektsmeldingMapper.writerWithDefaultPrettyPrinter();
     private CloseableHttpClient restClient;
     private URI endpoint;
@@ -138,13 +134,6 @@ public class InntektsmeldingRestKlient {
 
         @TekniskFeil(feilkode = "F-FT-IM-1000002", feilmelding = "Feil ved kall til ft-inntektsmelding: %s", logLevel = LogLevel.WARN)
         Feil feilVedJsonParsing(String feilmelding);
-    }
-
-    private static SimpleModule createModuleWithStringSerializer() {
-        SimpleModule module = new SimpleModule("KALKULUS-REST", new Version(1, 0, 0, null, null, null));
-        // Bruker kodeverdi serialisert som String mot kalkulus (innkommende rest returnerer kodeverdi som objekt)
-        module.addSerializer(new KalkulusKodelisteSerializer(false));
-        return module;
     }
 
     public static ObjectMapper getMapper() {

@@ -74,6 +74,9 @@ spec:
         - application: k9-punsjbolle
           namespace: omsorgspenger
           cluster: prod-gcp
+        - application: k9-sak-innsyn-api
+          namespace: dusseldorf
+          cluster: prod-gcp
 
   env:
     - name: TZ
@@ -276,8 +279,6 @@ spec:
     - name: KODEVERK_SOM_STRING_TOPICS
       value: "false"
     - name: INAKTIV_VED_8_47_B
-      value: "false"
-    - name: FERIEPENGER_AV_DAGPENGER
       value: "false"
     - name: SEND_INNTEKTSMELDING_FORESPORSEL
       value: "false"

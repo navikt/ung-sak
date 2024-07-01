@@ -116,8 +116,7 @@ public class BehandlingsoppretterTjeneste {
 
     private boolean kanOppretteUnntaksbehandling(Long fagsakId) {
         var fagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
-        return FagsakYtelseTypeRef.Lookup.find(UnntaksbehandlingOppretter.class, fagsak.getYtelseType()).orElseThrow()
-            .kanNyBehandlingOpprettes(fagsak);
+        return FagsakYtelseTypeRef.Lookup.find(UnntaksbehandlingOppretter.class, fagsak.getYtelseType()).map(it -> it.kanNyBehandlingOpprettes(fagsak)).orElse(false);
     }
 
     private UnntaksbehandlingOppretter getUnntaksbehandlingOppretterTjeneste(FagsakYtelseType ytelseType) {
