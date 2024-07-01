@@ -280,8 +280,6 @@ spec:
       value: "false"
     - name: INAKTIV_VED_8_47_B
       value: "false"
-    - name: FERIEPENGER_AV_DAGPENGER
-      value: "false"
     - name: SEND_INNTEKTSMELDING_FORESPORSEL
       value: "false"
     - name: OMP_RAMMEVEDTAK_SAMMENSTILLNG_AARSKVANTUM

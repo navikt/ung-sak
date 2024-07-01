@@ -20,20 +20,10 @@ import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.RegelBeregnFeriepenger;
 @ApplicationScoped
 public class FeriepengeBeregner {
 
-    private boolean skalKjøreDagpengeregel;
-
-    FeriepengeBeregner(){
-    }
-
-    @Inject
-    public FeriepengeBeregner(@KonfigVerdi(value = "FERIEPENGER_AV_DAGPENGER", defaultVerdi = "false") boolean skalKjøreDagpengeregel) {
-        this.skalKjøreDagpengeregel = skalKjøreDagpengeregel;
-    }
-
-    public void beregnFeriepenger(BeregningsresultatEntitet beregningsresultat, BeregningsresultatFeriepengerRegelModell regelModell) {
+    public static void beregnFeriepenger(BeregningsresultatEntitet beregningsresultat, BeregningsresultatFeriepengerRegelModell regelModell) {
         String regelInput = JacksonJsonConfig.toJson(regelModell);
 
-        RegelBeregnFeriepenger regelBeregnFeriepenger = new RegelBeregnFeriepenger(skalKjøreDagpengeregel);
+        RegelBeregnFeriepenger regelBeregnFeriepenger = new RegelBeregnFeriepenger();
         Evaluation evaluation = regelBeregnFeriepenger.evaluer(regelModell);
         String sporing = EvaluationSerializer.asJson(evaluation);
 
@@ -43,8 +33,8 @@ public class FeriepengeBeregner {
         MapBeregningsresultatFeriepengerFraRegelTilVL.mapTilResultatFraRegelModell(beregningsresultat, regelModell);
     }
 
-    public FeriepengeOppsummering beregnFeriepengerOppsummering(BeregningsresultatFeriepengerRegelModell regelModell) {
-        RegelBeregnFeriepenger regelBeregnFeriepenger = new RegelBeregnFeriepenger(skalKjøreDagpengeregel);
+    public static FeriepengeOppsummering beregnFeriepengerOppsummering(BeregningsresultatFeriepengerRegelModell regelModell) {
+        RegelBeregnFeriepenger regelBeregnFeriepenger = new RegelBeregnFeriepenger();
         regelBeregnFeriepenger.evaluer(regelModell);
 
         FeriepengeOppsummering.Builder feriepengeoppsummeringBuilder = new FeriepengeOppsummering.Builder();
