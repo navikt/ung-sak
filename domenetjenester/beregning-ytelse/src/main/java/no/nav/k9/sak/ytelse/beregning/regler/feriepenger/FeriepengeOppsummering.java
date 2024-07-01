@@ -62,6 +62,10 @@ public class FeriepengeOppsummering {
             .collect(Collectors.toSet());
     }
 
+    public boolean harFerietillegg() {
+        return this.tilkjentPrMottakerOgÅr.entrySet().stream().anyMatch(e -> e.getKey().inntektskategori().equals(Inntektskategori.DAGPENGER) && e.getValue() > 0L);
+    }
+
     /** Filtrerer bort ferietillegg siden dette ikke skal påvirke andre saker ved diff
      * @param nøkler Opptjeningsnøkler
      * @return Liste uten ferietillegg
