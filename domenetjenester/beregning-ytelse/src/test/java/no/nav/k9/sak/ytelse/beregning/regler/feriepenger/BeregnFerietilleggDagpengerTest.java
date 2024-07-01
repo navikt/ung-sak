@@ -39,6 +39,24 @@ class BeregnFerietilleggDagpengerTest {
     }
 
     @Test
+    void skal_ikke_gi_ferietillegg_for_dagpenger_etter_siste_dag_med_ytelse() {
+        var tyPeriode = lagTilkjentYtelseDagpenger(STP, etter(10), 900L);
+
+        var regelmodell = BeregningsresultatFeriepengerRegelModell.builder()
+            .medPerioderMedDagpenger(List.of(lagDPPeriode(etter(11), etter(100))))
+            .medBeregningsresultatPerioder(List.of(tyPeriode))
+            .build();
+        new BeregnFerietilleggDagpenger().evaluate(regelmodell);
+
+        assertThat(regelmodell).isNotNull();
+
+        var feriepengerP1 = feriepengerDagpengerFraPeriodeIndex(regelmodell, 0);
+
+        assertThat(feriepengerP1).isEmpty();
+    }
+
+
+    @Test
     void skal_gi_ferietillegg_når_over_8_uker_dagpenger() {
         var tyPeriode = lagTilkjentYtelseDagpenger(STP, etter(100), 900L);
 
@@ -110,6 +128,25 @@ class BeregnFerietilleggDagpengerTest {
         assertThat(feriepengerP1).hasSize(1);
         assertThat(feriepengerP1.getFirst().getOpptjeningÅr()).isEqualTo(LocalDate.of(2023,1,1));
         assertThat(feriepengerP1.getFirst().getÅrsbeløp()).isEqualByComparingTo(BigDecimal.valueOf(599));
+    }
+
+    @Test
+    void skal_ikke_ta_med_foreldrepenger_av_dagpenger_når_sjekker_om_over_8_uker_med_dagpenger() {
+        var tyPeriode = lagTilkjentYtelseDagpenger(STP, etter(10), 900L);
+        var dp1 = new DagpengerPeriode(DagpengerKilde.MELDEKORT, LocalDate.of(2023, 1, 1), LocalDate.of(2023, 1, 31));
+        var dp2 = new DagpengerPeriode(DagpengerKilde.FORELDREPENGER, LocalDate.of(2023, 4, 1), LocalDate.of(2023, 4, 30));
+
+        var regelmodell = BeregningsresultatFeriepengerRegelModell.builder()
+            .medPerioderMedDagpenger(List.of(dp1, dp2))
+            .medBeregningsresultatPerioder(List.of(tyPeriode))
+            .build();
+        new BeregnFerietilleggDagpenger().evaluate(regelmodell);
+
+        assertThat(regelmodell).isNotNull();
+
+        var feriepengerP1 = feriepengerDagpengerFraPeriodeIndex(regelmodell, 0);
+
+        assertThat(feriepengerP1).isEmpty();
     }
 
 

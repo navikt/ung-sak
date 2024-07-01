@@ -74,6 +74,9 @@ spec:
         - application: k9-punsjbolle
           namespace: omsorgspenger
           cluster: prod-gcp
+        - application: k9-sak-innsyn-api
+          namespace: dusseldorf
+          cluster: prod-gcp
 
   env:
     - name: TZ
@@ -261,8 +264,6 @@ spec:
       value: "false"
     - name: OMP_NULL_HELG_I_KRAVPERIODER
       value: "false"
-    - name: ENABLE_UTBETALINGSGRAD_OPPDRAG
-      value: "false"
     - name: ENABLE_DATO_NY_REGEL_UTTAK
       value: "false"
     - name: FJERN_VILKARSPERIODER_BEREGNING
@@ -279,11 +280,7 @@ spec:
       value: "false"
     - name: INAKTIV_VED_8_47_B
       value: "false"
-    - name: FERIEPENGER_AV_DAGPENGER
-      value: "false"
     - name: SEND_INNTEKTSMELDING_FORESPORSEL
-      value: "false"
-    - name: ENABLE_UKLASSIFISERT_SYKDOMSDOK_SJEKK
       value: "false"
     - name: OMP_RAMMEVEDTAK_SAMMENSTILLNG_AARSKVANTUM
       value: "false"

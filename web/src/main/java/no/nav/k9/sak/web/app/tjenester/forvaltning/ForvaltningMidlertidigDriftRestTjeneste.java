@@ -338,7 +338,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                 for (Fagsak f : fagsaker) {
                     if (f.getYtelseType() == FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
                         opprettRevurderingService.opprettAutomatiskRevurdering(f.getSaksnummer(),
-                            BehandlingÅrsakType.RE_FERIEPENGER_ENDRING_FRA_ANNEN_SAK,
+                            BehandlingÅrsakType.RE_REBEREGN_FERIEPENGER,
                             BehandlingStegType.START_STEG);
                     }
                 }
@@ -368,7 +368,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                     throw new IllegalArgumentException("Fagsak " + saksnummer + " var ikke PSB-sak");
                 }
                 opprettRevurderingService.opprettAutomatiskRevurdering(new Saksnummer(saksnummer),
-                    BehandlingÅrsakType.RE_FERIEPENGER_ENDRING_FRA_ANNEN_SAK,
+                    BehandlingÅrsakType.RE_REBEREGN_FERIEPENGER,
                     BehandlingStegType.START_STEG);
             } catch (RuntimeException e) {
                 sb.append(saksnummer + "\n");

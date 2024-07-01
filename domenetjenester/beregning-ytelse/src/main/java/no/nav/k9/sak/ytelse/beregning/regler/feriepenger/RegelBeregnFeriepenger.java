@@ -18,13 +18,6 @@ public class RegelBeregnFeriepenger implements RuleService<BeregningsresultatFer
     public static final String ID = "";
     public static final String BESKRIVELSE = "RegelBeregnFeriepenger";
 
-    private boolean skalKjøreDagpengeRegel;
-
-    public RegelBeregnFeriepenger(boolean skalKjøreDagpengeRegel) {
-        this.skalKjøreDagpengeRegel = skalKjøreDagpengeRegel;
-    }
-
-
     @Override
     public Evaluation evaluer(BeregningsresultatFeriepengerRegelModell regelmodell) {
         return getSpecification().evaluate(regelmodell);
@@ -39,9 +32,7 @@ public class RegelBeregnFeriepenger implements RuleService<BeregningsresultatFer
         Specification<BeregningsresultatFeriepengerRegelModell> beregnFeriepengerDagpenger =
             rs.beregningsRegel(BeregnFerietilleggDagpenger.ID, BeregnFerietilleggDagpenger.BESKRIVELSE, new BeregnFerietilleggDagpenger(), new BeregnetFeriepenger());
 
-        Specification<BeregningsresultatFeriepengerRegelModell> beregnFerietilleggDagpenger = skalKjøreDagpengeRegel
-            ? rs.beregningHvisRegel(new SjekkOmBrukerHarUtbetalingForInntektskategoriDagpenger(), beregnFeriepengerDagpenger, new BeregnetFeriepenger())
-            : new BeregnetFeriepenger();
+        Specification<BeregningsresultatFeriepengerRegelModell> beregnFerietilleggDagpenger = rs.beregningHvisRegel(new SjekkOmBrukerHarUtbetalingForInntektskategoriDagpenger(), beregnFeriepengerDagpenger, new BeregnetFeriepenger());
 
         Specification<BeregningsresultatFeriepengerRegelModell> beregnFeriepenger =
             rs.beregningsRegel(BeregnFeriepenger.ID, BeregnFeriepenger.BESKRIVELSE, new BeregnFeriepenger(), beregnFerietilleggDagpenger);

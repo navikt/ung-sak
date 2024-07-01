@@ -281,7 +281,7 @@ public class StatistikkRepository {
             " group by 1, 2, 3, 4, 5";
 
         NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
-            .setHint(QueryHints.JAKARTA_SPEC_HINT_TIMEOUT, 30000)
+            .setHint(QueryHints.JAKARTA_SPEC_HINT_TIMEOUT, 40000)
             .setParameter("behStatuser", Set.of(BehandlingStatus.IVERKSETTER_VEDTAK.getKode(), BehandlingStatus.AVSLUTTET.getKode())); // kun ta med behandlinger som avsluttes (iverksettes, avsluttet)
         Stream<Tuple> stream = query.getResultStream()
             .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class)));

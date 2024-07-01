@@ -253,10 +253,12 @@ public class ForvaltningBeregningRestTjeneste {
                                                        @NotNull @FormParam("begrunnelse") @Parameter(description = "begrunnelse", allowEmptyValue = false, required = true, schema = @Schema(type = "string", maximum = "2000")) @Valid @TilpassetAbacAttributt(supplierClass = AbacEmptySupplier.class) KortTekst begrunnelse) { // NOSONAR
         Behandling behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
         var ref = BehandlingReferanse.fra(behandling);
-        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(ref);
 
         // Kaller i egen context for å kunne hente inntektsmeldinger fra abakus
-        var skalForlengeAktivitetstatusInput  = ContainerContextRunner.doRun(behandling, () -> finnPerioderMedStartIKontrollerFakta.lagInput(ref, perioderTilVurdering));
+        var skalForlengeAktivitetstatusInput  = ContainerContextRunner.doRun(behandling, () -> {
+            var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(ref);
+            return finnPerioderMedStartIKontrollerFakta.lagInput(ref, perioderTilVurdering);
+        });
 
         var skalForlengeAktivitetstatus = new SkalForlengeAktivitetstatus(pleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering);
         var dataTilUtledning = skalForlengeAktivitetstatus.finnDataForUtledning(skalForlengeAktivitetstatusInput);
