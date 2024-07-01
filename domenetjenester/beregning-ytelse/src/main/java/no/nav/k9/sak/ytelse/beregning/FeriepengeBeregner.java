@@ -9,6 +9,7 @@ import no.nav.fpsak.nare.evaluation.Evaluation;
 import no.nav.fpsak.nare.evaluation.summary.EvaluationSerializer;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
+import no.nav.k9.sak.ytelse.beregning.adapter.InntektskategoriMapper;
 import no.nav.k9.sak.ytelse.beregning.adapter.MapBeregningsresultatFeriepengerFraRegelTilVL;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.MottakerType;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerPrÅr;
@@ -19,20 +20,10 @@ import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.RegelBeregnFeriepenger;
 @ApplicationScoped
 public class FeriepengeBeregner {
 
-    private boolean skalKjøreDagpengeregel;
-
-    FeriepengeBeregner(){
-    }
-
-    @Inject
-    public FeriepengeBeregner(@KonfigVerdi(value = "FERIEPENGER_AV_DAGPENGER", defaultVerdi = "false") boolean skalKjøreDagpengeregel) {
-        this.skalKjøreDagpengeregel = skalKjøreDagpengeregel;
-    }
-
-    public void beregnFeriepenger(BeregningsresultatEntitet beregningsresultat, BeregningsresultatFeriepengerRegelModell regelModell) {
+    public static void beregnFeriepenger(BeregningsresultatEntitet beregningsresultat, BeregningsresultatFeriepengerRegelModell regelModell) {
         String regelInput = JacksonJsonConfig.toJson(regelModell);
 
-        RegelBeregnFeriepenger regelBeregnFeriepenger = new RegelBeregnFeriepenger(skalKjøreDagpengeregel);
+        RegelBeregnFeriepenger regelBeregnFeriepenger = new RegelBeregnFeriepenger();
         Evaluation evaluation = regelBeregnFeriepenger.evaluer(regelModell);
         String sporing = EvaluationSerializer.asJson(evaluation);
 
@@ -42,8 +33,8 @@ public class FeriepengeBeregner {
         MapBeregningsresultatFeriepengerFraRegelTilVL.mapTilResultatFraRegelModell(beregningsresultat, regelModell);
     }
 
-    public FeriepengeOppsummering beregnFeriepengerOppsummering(BeregningsresultatFeriepengerRegelModell regelModell) {
-        RegelBeregnFeriepenger regelBeregnFeriepenger = new RegelBeregnFeriepenger(skalKjøreDagpengeregel);
+    public static FeriepengeOppsummering beregnFeriepengerOppsummering(BeregningsresultatFeriepengerRegelModell regelModell) {
+        RegelBeregnFeriepenger regelBeregnFeriepenger = new RegelBeregnFeriepenger();
         regelBeregnFeriepenger.evaluer(regelModell);
 
         FeriepengeOppsummering.Builder feriepengeoppsummeringBuilder = new FeriepengeOppsummering.Builder();
@@ -51,7 +42,7 @@ public class FeriepengeBeregner {
         for (var brPeriode : regelModell.getBeregningsresultatPerioder()) {
             for (var brAndel : brPeriode.getBeregningsresultatAndelList()) {
                 for (BeregningsresultatFeriepengerPrÅr feriepengerPrÅr : brAndel.getBeregningsresultatFeriepengerPrÅrListe()) {
-                    feriepengeoppsummeringBuilder.leggTil(Year.of(feriepengerPrÅr.getOpptjeningÅr().getYear()), brAndel.getMottakerType(), brAndel.getMottakerType() == MottakerType.ARBEIDSGIVER ? brAndel.getArbeidsgiverId() : null, feriepengerPrÅr.getÅrsbeløp().setScale(0, RoundingMode.UNNECESSARY).longValue());
+                    feriepengeoppsummeringBuilder.leggTil(Year.of(feriepengerPrÅr.getOpptjeningÅr().getYear()), brAndel.getMottakerType(), InntektskategoriMapper.fraRegelTilVL(brAndel.getInntektskategori()), brAndel.getMottakerType() == MottakerType.ARBEIDSGIVER ? brAndel.getArbeidsgiverId() : null, feriepengerPrÅr.getÅrsbeløp().setScale(0, RoundingMode.UNNECESSARY).longValue());
                 }
             }
         }

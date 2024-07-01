@@ -29,14 +29,8 @@ public class OmsorgspengerBeregnFeriepenger implements BeregnFeriepengerTjeneste
     private static final int ANTALL_DAGER_FERIPENGER = 48;
     private static final boolean FERIEOPPTJENING_HELG = true;
     private static final boolean UBEGRENSET_DAGER_VED_REFUSJON = true;
-    private FeriepengeBeregner feriepengeBeregner;
 
     public OmsorgspengerBeregnFeriepenger() {
-    }
-
-    @Inject
-    public OmsorgspengerBeregnFeriepenger(FeriepengeBeregner feriepengeBeregner) {
-        this.feriepengeBeregner = feriepengeBeregner;
     }
 
     @Override
@@ -49,7 +43,7 @@ public class OmsorgspengerBeregnFeriepenger implements BeregnFeriepengerTjeneste
             påvirkendeSaker, infotrygdFeriepengegrunnlag,
             ANTALL_DAGER_FERIPENGER, FERIEOPPTJENING_HELG, UBEGRENSET_DAGER_VED_REFUSJON,
             Collections.emptyList()); // Bruker mottar aldri omsorgspenger for dagpenger
-        feriepengeBeregner.beregnFeriepenger(beregningsresultat, regelModell);
+        FeriepengeBeregner.beregnFeriepenger(beregningsresultat, regelModell);
     }
 
     @Override
@@ -63,7 +57,7 @@ public class OmsorgspengerBeregnFeriepenger implements BeregnFeriepengerTjeneste
             infotrygdFeriepengegrunnlag,
             ANTALL_DAGER_FERIPENGER, FERIEOPPTJENING_HELG, UBEGRENSET_DAGER_VED_REFUSJON,
             Collections.emptyList()); // Bruker mottar aldri omsorgspenger for dagpenger
-        return feriepengeBeregner.beregnFeriepengerOppsummering(regelModell);
+        return FeriepengeBeregner.beregnFeriepengerOppsummering(regelModell);
     }
 
 
