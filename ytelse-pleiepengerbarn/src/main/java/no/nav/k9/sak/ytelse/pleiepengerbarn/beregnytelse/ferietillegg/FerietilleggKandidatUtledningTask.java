@@ -13,6 +13,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.util.Tuple;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -23,6 +24,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregnytelse.feriepenger.PleiepengerBeregnFeriepenger;
@@ -41,6 +43,7 @@ public class FerietilleggKandidatUtledningTask implements ProsessTaskHandler {
     private BeregningsresultatRepository beregningsresultatRepository;
     private PleiepengerBeregnFeriepenger beregnFeriepengerTjeneste;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
+    private BehandlingRepository behandlingRepository;
 
 
     FerietilleggKandidatUtledningTask() {
@@ -50,10 +53,11 @@ public class FerietilleggKandidatUtledningTask implements ProsessTaskHandler {
     @Inject
     public FerietilleggKandidatUtledningTask(BeregningsresultatRepository beregningsresultatRepository,
                                              @FagsakYtelseTypeRef(FagsakYtelseType.PLEIEPENGER_SYKT_BARN) PleiepengerBeregnFeriepenger beregnFeriepengerTjeneste,
-                                             BehandlingskontrollTjeneste behandlingskontrollTjeneste) {
+                                             BehandlingskontrollTjeneste behandlingskontrollTjeneste, BehandlingRepository behandlingRepository) {
         this.beregningsresultatRepository = beregningsresultatRepository;
         this.beregnFeriepengerTjeneste = beregnFeriepengerTjeneste;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
+        this.behandlingRepository = behandlingRepository;
     }
 
     @Override
@@ -72,9 +76,11 @@ public class FerietilleggKandidatUtledningTask implements ProsessTaskHandler {
         var behandlinger = beregningsresultatRepository.hentSisteBehandlingerMedUtbetalingForDagpenger(ytelseType, fom, tom);
 
         var medBeregnetFerietillegg = behandlinger.stream().filter(r -> {
-            if (!r.erAvsluttet() && !behandlingskontrollTjeneste.erStegPassert(r.getId(), BEREGN_YTELSE)) {
+            var åpneRevurderinger = behandlingRepository.hentÅpneBehandlingerForFagsakId(r.getFagsakId(), BehandlingType.REVURDERING);
+            if (!åpneRevurderinger.isEmpty() && !behandlingskontrollTjeneste.erStegPassert(åpneRevurderinger.getFirst(), BEREGN_YTELSE)) {
                 return false;
-            };
+            }
+
             var resultat = beregningsresultatRepository.hentBgBeregningsresultat(r.getId());
             if (resultat.isEmpty()) {
                 return false;
