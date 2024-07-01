@@ -511,16 +511,11 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
 
         Optional<BehandlingStegTilstand> stegTilstandFør = doHenleggBehandling(kontekst, årsak);
 
-        var behandling = hentBehandling(kontekst);
-        // Sjekker på om vi har en modell som kan håndtere fremoverføring, ellers vil det ikke være mulig å fremoverføre
-        // Er dette ok? Har vi andre alternativ enn å avslutte?
-        if (behandlingModellRepository.harModell(behandling.getType(), behandling.getFagsakYtelseType())) {
-            // FIXME (MAUR): Bør løses via FellesTransisjoner og unngå hardkoding av BehandlingStegType her.
-            // må fremoverføres for å trigge riktig events for opprydding
-            behandlingFramføringTilSenereBehandlingSteg(kontekst, BehandlingStegType.IVERKSETT_VEDTAK);
+        // FIXME (MAUR): Bør løses via FellesTransisjoner og unngå hardkoding av BehandlingStegType her.
+        // må fremoverføres for å trigge riktig events for opprydding
+        behandlingFramføringTilSenereBehandlingSteg(kontekst, BehandlingStegType.IVERKSETT_VEDTAK);
 
-            publiserFremhoppTransisjonHenleggelse(kontekst, stegTilstandFør, BehandlingStegType.IVERKSETT_VEDTAK);
-        }
+        publiserFremhoppTransisjonHenleggelse(kontekst, stegTilstandFør, BehandlingStegType.IVERKSETT_VEDTAK);
 
 
         // sett Avsluttet og fyr status
