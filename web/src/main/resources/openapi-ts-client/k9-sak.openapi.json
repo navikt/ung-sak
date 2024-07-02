@@ -4881,16 +4881,12 @@
             "enum" : [ "FISKER", "ARBEIDSTAKER", "SELVSTENDIG_NÆRINGSDRIVENDE", "KOMBINASJON_ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE", "SJØMANN", "JORDBRUKER", "DAGPENGER", "INAKTIV", "KOMBINASJON_ARBEIDSTAKER_OG_JORDBRUKER", "KOMBINASJON_ARBEIDSTAKER_OG_FISKER", "FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_DAGPENGER", "DAGMAMMA", "UGYLDIG", "-" ],
             "type" : "string"
           },
-          "inntektskategori" : {
-            "enum" : [ "ARBEIDSTAKER", "FRILANSER", "SELVSTENDIG_NÆRINGSDRIVENDE", "DAGPENGER", "ARBEIDSAVKLARINGSPENGER", "SJØMANN", "DAGMAMMA", "JORDBRUKER", "FISKER", "ARBEIDSTAKER_UTEN_FERIEPENGER", "-" ],
-            "type" : "string"
-          },
           "relatertYtelseTilstand" : {
             "enum" : [ "ÅPEN", "LØPENDE", "AVSLUTTET", "IKKESTARTET" ],
             "type" : "string"
           }
         },
-        "required" : [ "aktivitetStatus", "arbeidType", "arbeidskategori", "inntektskategori", "relatertYtelseTilstand" ],
+        "required" : [ "aktivitetStatus", "arbeidType", "arbeidskategori", "relatertYtelseTilstand" ],
         "type" : "object"
       },
       "K9SakKodeverkBehandling" : {
