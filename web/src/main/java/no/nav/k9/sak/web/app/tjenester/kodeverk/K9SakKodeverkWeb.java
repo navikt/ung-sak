@@ -37,8 +37,6 @@ public class K9SakKodeverkWeb {
         @NotNull
         public ArbeidType arbeidType;
         @NotNull
-        public Inntektskategori inntektskategori;
-        @NotNull
         public AktivitetStatus aktivitetStatus;
         @NotNull
         public Arbeidskategori arbeidskategori;
