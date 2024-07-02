@@ -1,14 +1,5 @@
 package no.nav.k9.sak.metrikker;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.sensu.SensuEvent;
@@ -16,9 +7,17 @@ import no.nav.k9.felles.integrasjon.sensu.SensuKlient;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
-@ProsessTask(value = RevurderingMetrikkTask.TASKTYPE, cronExpression = "0 0 8 * * *", maxFailedRuns = 20, firstDelay = 60)
+@ProsessTask(value = RevurderingMetrikkTask.TASKTYPE, cronExpression = "0 0 6 * * *", maxFailedRuns = 20, firstDelay = 60)
 public class RevurderingMetrikkTask implements ProsessTaskHandler {
 
     private static final int CHUNK_EVENT_SIZE = 1000;
