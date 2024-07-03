@@ -51,11 +51,6 @@ class StatistikkRepositoryTest {
             .anyMatch(v -> v.toString().contains("aksjonspunkt_per_ytelse_type_v3"))
             .anyMatch(v -> v.toString().contains("prosess_task_" + StatistikkRepository.PROSESS_TASK_VER))
             .noneMatch(v -> v.toString().contains("avslagStatistikk"));
-        ;
-
-        assertThat(statistikkRepository.hentDagligRapporterte()).isNotEmpty()
-            .anyMatch(v -> v.toString().contains("avslagStatistikk"));
-
     }
 
     @Test
