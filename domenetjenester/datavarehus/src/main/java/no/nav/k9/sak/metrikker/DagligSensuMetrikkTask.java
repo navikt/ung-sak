@@ -18,27 +18,27 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 
 @ApplicationScoped
-@ProsessTask(value = SensuMetrikkTask.TASKTYPE, cronExpression = "0 */5 * * * *", maxFailedRuns = 20, firstDelay = 60)
-public class SensuMetrikkTask implements ProsessTaskHandler {
+@ProsessTask(value = DagligSensuMetrikkTask.TASKTYPE, cronExpression = "0 0 23 * * *", maxFailedRuns = 20, firstDelay = 60)
+public class DagligSensuMetrikkTask implements ProsessTaskHandler {
 
     private static final int CHUNK_EVENT_SIZE = 1000;
 
     private static final int LOG_THRESHOLD = 5000;
 
-    static final String TASKTYPE = "sensu.metrikk.task";
+    static final String TASKTYPE = "daglig.sensu.metrikk.task";
 
-    private static final Logger log = LoggerFactory.getLogger(SensuMetrikkTask.class);
+    private static final Logger log = LoggerFactory.getLogger(DagligSensuMetrikkTask.class);
 
     private SensuKlient sensuKlient;
 
     private StatistikkRepository statistikkRepository;
 
-    SensuMetrikkTask() {
-        // for proxyd
+    DagligSensuMetrikkTask() {
+        // for proxy
     }
 
     @Inject
-    public SensuMetrikkTask(SensuKlient sensuKlient, StatistikkRepository statistikkRepository) {
+    public DagligSensuMetrikkTask(SensuKlient sensuKlient, StatistikkRepository statistikkRepository) {
         this.sensuKlient = sensuKlient;
         this.statistikkRepository = statistikkRepository;
     }
@@ -48,7 +48,7 @@ public class SensuMetrikkTask implements ProsessTaskHandler {
         long startTime = System.nanoTime();
 
         try {
-            var metrikker = statistikkRepository.hentHyppigRapporterte();
+            var metrikker = statistikkRepository.hentDagligRapporterte();
 
             logMetrics(metrikker);
 
