@@ -18,7 +18,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 
 @ApplicationScoped
-@ProsessTask(value = DagligSensuMetrikkTask.TASKTYPE, cronExpression = "0 0 23 * * *", maxFailedRuns = 20, firstDelay = 60)
+@ProsessTask(value = DagligSensuMetrikkTask.TASKTYPE, cronExpression = "0 1 23 * * *", maxFailedRuns = 20, firstDelay = 60)
 public class DagligSensuMetrikkTask implements ProsessTaskHandler {
 
     private static final int CHUNK_EVENT_SIZE = 1000;
