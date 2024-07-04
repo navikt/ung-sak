@@ -45,7 +45,7 @@ class MedisinskGrunnlagTjenesteTest {
 
         // Act
         SykdomGrunnlagSammenlikningsresultat resultat = medisinskGrunnlagTjeneste
-            .sammenlignGrunnlag(Optional.of(forrigeGrunnlag), nyGrunnlag, true);
+            .sammenlignGrunnlag(Optional.of(forrigeGrunnlag), nyGrunnlag);
 
         // Assert
         assertThat(resultat.harNyeUklassifiserteDokumenter()).isTrue();
@@ -65,7 +65,7 @@ class MedisinskGrunnlagTjenesteTest {
         ));
 
         // Act
-        SykdomGrunnlagSammenlikningsresultat resultat = medisinskGrunnlagTjeneste.sammenlignGrunnlag(Optional.of(forrigeGrunnlag), nyGrunnlag, true);
+        SykdomGrunnlagSammenlikningsresultat resultat = medisinskGrunnlagTjeneste.sammenlignGrunnlag(Optional.of(forrigeGrunnlag), nyGrunnlag);
 
         // Assert
         assertThat(resultat.harNyeUklassifiserteDokumenter()).isFalse();
@@ -79,7 +79,7 @@ class MedisinskGrunnlagTjenesteTest {
             createUklassifiserteDokumenter("1", "doc2")
         ));
 
-        SykdomGrunnlagSammenlikningsresultat resultat = medisinskGrunnlagTjeneste.sammenlignGrunnlag(Optional.of(forrigeGrunnlag), nyGrunnlag, true);
+        SykdomGrunnlagSammenlikningsresultat resultat = medisinskGrunnlagTjeneste.sammenlignGrunnlag(Optional.of(forrigeGrunnlag), nyGrunnlag);
 
         assertThat(resultat.harNyeUklassifiserteDokumenter()).isTrue();
     }
@@ -89,7 +89,7 @@ class MedisinskGrunnlagTjenesteTest {
         MedisinskGrunnlagsdata forrigeGrunnlag = createMedisinskGrunnlagsdata(Collections.emptyList());
         MedisinskGrunnlagsdata nyGrunnlag = createMedisinskGrunnlagsdata(Collections.emptyList());
 
-        SykdomGrunnlagSammenlikningsresultat resultat = medisinskGrunnlagTjeneste.sammenlignGrunnlag(Optional.of(forrigeGrunnlag), nyGrunnlag, true);
+        SykdomGrunnlagSammenlikningsresultat resultat = medisinskGrunnlagTjeneste.sammenlignGrunnlag(Optional.of(forrigeGrunnlag), nyGrunnlag);
 
         assertThat(resultat.harNyeUklassifiserteDokumenter()).isFalse();
     }
@@ -106,7 +106,7 @@ class MedisinskGrunnlagTjenesteTest {
             )
         );
 
-        SykdomGrunnlagSammenlikningsresultat resultat = medisinskGrunnlagTjeneste.sammenlignGrunnlag(Optional.of(forrigeGrunnlag), nyGrunnlag, true);
+        SykdomGrunnlagSammenlikningsresultat resultat = medisinskGrunnlagTjeneste.sammenlignGrunnlag(Optional.of(forrigeGrunnlag), nyGrunnlag);
 
         assertThat(resultat.harNyeUklassifiserteDokumenter()).isFalse();
     }

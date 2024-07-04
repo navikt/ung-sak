@@ -131,7 +131,7 @@ class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
 
         NavigableSet<DatoIntervallEntitet> nyeVurderingsperioder = utledVurderingsperiode(ref);
         var utledGrunnlag = medisinskGrunnlagTjeneste.utledGrunnlagMedManglendeOmsorgFjernet(ref.getSaksnummer(), ref.getBehandlingUuid(), ref.getBehandlingId(), ref.getPleietrengendeAktørId(), nyeVurderingsperioder);
-        var sykdomGrunnlagSammenlikningsresultat = medisinskGrunnlagTjeneste.sammenlignGrunnlag(sykdomGrunnlag, utledGrunnlag, true);
+        var sykdomGrunnlagSammenlikningsresultat = medisinskGrunnlagTjeneste.sammenlignGrunnlag(sykdomGrunnlag, utledGrunnlag);
 
         boolean erEndringIGrunnlag = !sykdomGrunnlagSammenlikningsresultat.getDiffPerioder().isEmpty();
         boolean harNyUklassifiserteDokumenter = sykdomGrunnlagSammenlikningsresultat.harNyeUklassifiserteDokumenter();
