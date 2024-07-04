@@ -41,7 +41,8 @@ public class ReservertSaksnummerRepository {
             case PLEIEPENGER_SYKT_BARN, PLEIEPENGER_NÆRSTÅENDE, OPPLÆRINGSPENGER -> hentForPleiepenger(ytelseType, brukerAktørId, pleietrengendeAktørId);
             case OMSORGSPENGER -> hentForOMP(ytelseType, brukerAktørId, behandlingsår);
             case OMSORGSPENGER_MA -> hentForOMPMA(ytelseType, brukerAktørId, relatertPersonAktørId, behandlingsår);
-            case OMSORGSPENGER_KS, OMSORGSPENGER_AO -> hentForOMPKSAO(ytelseType, brukerAktørId, pleietrengendeAktørId, behandlingsår);
+            case OMSORGSPENGER_AO -> hentForOMPAO(ytelseType, brukerAktørId, pleietrengendeAktørId, behandlingsår);
+            case OMSORGSPENGER_KS -> hentForOMPKS(ytelseType, brukerAktørId, pleietrengendeAktørId);
             default -> throw new IllegalArgumentException("Ikke støttet ytelsetype: " + ytelseType);
         };
     }
@@ -80,7 +81,7 @@ public class ReservertSaksnummerRepository {
         return HibernateVerktøy.hentUniktResultat(query);
     }
 
-    private Optional<ReservertSaksnummerEntitet> hentForOMPKSAO(FagsakYtelseType ytelseType, String brukerAktørId, String pleietrengendeAktørId, String behandlingsår) {
+    private Optional<ReservertSaksnummerEntitet> hentForOMPAO(FagsakYtelseType ytelseType, String brukerAktørId, String pleietrengendeAktørId, String behandlingsår) {
         if (pleietrengendeAktørId == null || behandlingsår == null) {
             return Optional.empty();
         }
@@ -89,6 +90,17 @@ public class ReservertSaksnummerRepository {
         query.setParameter("brukerAktørId", new AktørId(brukerAktørId));
         query.setParameter("pleietrengendeAktørId", new AktørId(pleietrengendeAktørId));
         query.setParameter("behandlingsår", behandlingsår);
+        return HibernateVerktøy.hentUniktResultat(query);
+    }
+
+    private Optional<ReservertSaksnummerEntitet> hentForOMPKS(FagsakYtelseType ytelseType, String brukerAktørId, String pleietrengendeAktørId) {
+        if (pleietrengendeAktørId == null) {
+            return Optional.empty();
+        }
+        final TypedQuery<ReservertSaksnummerEntitet> query = entityManager.createQuery("FROM ReservertSaksnummer where ytelseType=:ytelseType and brukerAktørId=:brukerAktørId and pleietrengendeAktørId=:pleietrengendeAktørId and slettet=false", ReservertSaksnummerEntitet.class);
+        query.setParameter("ytelseType", ytelseType);
+        query.setParameter("brukerAktørId", new AktørId(brukerAktørId));
+        query.setParameter("pleietrengendeAktørId", new AktørId(pleietrengendeAktørId));
         return HibernateVerktøy.hentUniktResultat(query);
     }
 
