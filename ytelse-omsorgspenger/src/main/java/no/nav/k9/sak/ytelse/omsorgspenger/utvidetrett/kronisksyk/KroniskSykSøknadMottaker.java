@@ -67,7 +67,7 @@ public class KroniskSykSøknadMottaker implements SøknadMottakTjeneste<Innsendi
             return fagsak.get();
         }
 
-        final var saksnummer = reservertSaksnummer != null ? reservertSaksnummer : hentReservertEllerGenererSaksnummer(søkerAktørId, pleietrengendeAktørId, datoIntervall.getFomDato().getYear());
+        final var saksnummer = reservertSaksnummer != null ? reservertSaksnummer : hentReservertEllerGenererSaksnummer(søkerAktørId, pleietrengendeAktørId);
         final var nyFagsak = opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, ytelseType, datoIntervall.getFomDato(), datoIntervall.getTomDato());
         reservertSaksnummerRepository.slettHvisEksisterer(saksnummer);
         return nyFagsak;
@@ -79,8 +79,8 @@ public class KroniskSykSøknadMottaker implements SøknadMottakTjeneste<Innsendi
         return fagsak;
     }
 
-    private Saksnummer hentReservertEllerGenererSaksnummer(AktørId søkerAktørId, AktørId pleietrengendeAktørId, int behandlingsår) {
-        var optReservert = reservertSaksnummerRepository.hent(OMSORGSPENGER_KS, søkerAktørId.getAktørId(), pleietrengendeAktørId.getAktørId(), null, Integer.toString(behandlingsår));
+    private Saksnummer hentReservertEllerGenererSaksnummer(AktørId søkerAktørId, AktørId pleietrengendeAktørId) {
+        var optReservert = reservertSaksnummerRepository.hent(OMSORGSPENGER_KS, søkerAktørId.getAktørId(), pleietrengendeAktørId.getAktørId(), null, null);
         return optReservert.map(ReservertSaksnummerEntitet::getSaksnummer).orElseGet(() -> new Saksnummer(saksnummerRepository.genererNyttSaksnummer()));
     }
 }
