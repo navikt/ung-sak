@@ -76,15 +76,15 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
         boolean skalHaToTrinn;
 
         final var perioder = vilkårsPerioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-        SykdomGrunnlagSammenlikningsresultat sammenlikningsresultat = medisinskGrunnlagTjeneste.utledRelevanteEndringerSidenForrigeBehandling(behandling, perioder);
+        SykdomGrunnlagSammenlikningsresultat sammenlikningsresultatUtenInnleggelser = medisinskGrunnlagTjeneste.utledRelevanteEndringerSidenForrigeBehandling(behandling, perioder);
 
         final boolean harTidligereHattRelevantGodkjentLegeerklæring = medisinskGrunnlagRepository.harHattGodkjentLegeerklæringMedUnntakAv(behandling.getFagsak().getPleietrengendeAktørId(), behandling.getUuid());
         final boolean harGodkjentLegeerklæring = !pleietrengendeSykdomDokumentRepository.hentGodkjenteLegeerklæringer(behandling.getFagsak().getPleietrengendeAktørId(), behandling.getFagsakYtelseType()).isEmpty();
 
         final var harFåttFørsteLegeerklæring = !harTidligereHattRelevantGodkjentLegeerklæring && harGodkjentLegeerklæring;
-        final var harEndringer = !sammenlikningsresultat.getDiffPerioder().isEmpty();
+        final var harEndringerIPeriodeUtenomInnleggelser = !sammenlikningsresultatUtenInnleggelser.getDiffPerioder().isEmpty();
 
-        skalHaToTrinn = harEndringer || harFåttFørsteLegeerklæring;
+        skalHaToTrinn = harEndringerIPeriodeUtenomInnleggelser || harFåttFørsteLegeerklæring;
 
         if (dto.isIkkeVentPåGodkjentLegeerklæring()) {
             final SykdomAksjonspunkt sykdomAksjonspunkt = sykdomVurderingTjeneste.vurderAksjonspunkt(behandling);
@@ -98,7 +98,7 @@ public class AvklarMedisinskeOpplysninger implements AksjonspunktOppdaterer<Avkl
             /*
              * Vanligvis viser vi begrunnelsen fra saksbehandler som en del av historikkinnslaget, men dette
              * er ikke aktuelt for sykdom. Grunnen til dette er at vurderingene på sykdom gjøres på barnet.
-             * 
+             *
              * Saksbehandler løser sykdomsaksjonspunktet i frontend ved å bare trykke "Fortsett", og det som
              * da skjer er at vi lager et grunnlag med opplysninger i saken. Dette er fint å dokumentere
              * gjennom et historikkinnslag, men det er da ingen begrunnelse for løsingen av aksjonspunktet.

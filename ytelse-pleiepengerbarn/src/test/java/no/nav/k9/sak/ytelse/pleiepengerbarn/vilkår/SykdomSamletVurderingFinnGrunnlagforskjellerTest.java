@@ -9,9 +9,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.sykdom.Resultat;
@@ -22,6 +19,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.Ple
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomInnleggelser;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurdering;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurderingVersjon;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
 
@@ -31,12 +30,12 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.IKKE_OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 15))));
-        LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, null));
+        LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, null), true);
         List<PleietrengendeSykdomVurderingVersjon> nyVurderinger = Arrays.asList(vurderingVersjonMock(
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.IKKE_OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 15))));
-        LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(nyVurderinger, null));
+        LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(nyVurderinger, null), true);
 
 
         LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjeller(gmlTidslinje, nyTidslinje);
@@ -50,12 +49,12 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.IKKE_OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 15))));
-        LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, null));
+        LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, null), true);
         List<PleietrengendeSykdomVurderingVersjon> nyVurderinger = Arrays.asList(vurderingVersjonMock(
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 15))));
-        LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(nyVurderinger, null));
+        LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(nyVurderinger, null), true);
 
 
         LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjeller(gmlTidslinje, nyTidslinje);
@@ -83,12 +82,12 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
             )
         );
 
-        LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, null));
+        LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, null), true);
         List<PleietrengendeSykdomVurderingVersjon> nyVurderinger = Arrays.asList(vurderingVersjonMock(
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 15))));
-        LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(nyVurderinger, null));
+        LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(nyVurderinger, null), true);
 
 
         LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjeller(gmlTidslinje, nyTidslinje);
@@ -105,12 +104,12 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.IKKE_OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 15))));
-        LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, null));
+        LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, null), true);
         List<PleietrengendeSykdomVurderingVersjon> nyVurderinger = Arrays.asList(vurderingVersjonMock(
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 10))));
-        LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(nyVurderinger, null));
+        LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(nyVurderinger, null), true);
 
 
         LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjeller(gmlTidslinje, nyTidslinje);
@@ -127,12 +126,12 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.IKKE_OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 15))));
-        LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, null));
+        LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, null), true);
         List<PleietrengendeSykdomVurderingVersjon> nyVurderinger = Arrays.asList(vurderingVersjonMock(
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 16), LocalDate.of(2021, 1, 20))));
-        LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(nyVurderinger, null));
+        LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(nyVurderinger, null), true);
 
 
         LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjeller(gmlTidslinje, nyTidslinje);
@@ -149,12 +148,12 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.IKKE_OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 10))));
-        LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, null));
+        LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, null), true);
         List<PleietrengendeSykdomVurderingVersjon> nyVurderinger = Arrays.asList(vurderingVersjonMock(
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 15), LocalDate.of(2021, 1, 20))));
-        LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(nyVurderinger, null));
+        LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(nyVurderinger, null), true);
 
 
         LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjeller(gmlTidslinje, nyTidslinje);
@@ -174,13 +173,13 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 15))));
-        LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, null));
+        LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, null), true);
         List<PleietrengendeSykdomVurderingVersjon> nyVurderinger = Arrays.asList(vurderingVersjonMock(
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 15))));
         PleietrengendeSykdomInnleggelser innleggelser = innleggelserMock(new Periode(LocalDate.of(2021, 1, 15), LocalDate.of(2021, 1, 20)));
-        LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(nyVurderinger, innleggelser));
+        LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(nyVurderinger, innleggelser), true);
 
 
         LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjeller(gmlTidslinje, nyTidslinje);
@@ -198,8 +197,8 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
             Resultat.OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 15))));
         PleietrengendeSykdomInnleggelser innleggelser = innleggelserMock(new Periode(LocalDate.of(2021, 1, 15), LocalDate.of(2021, 1, 20)));
-        LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, innleggelser));
-        LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(Collections.emptyList(), innleggelser));
+        LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, innleggelser), true);
+        LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(Collections.emptyList(), innleggelser), true);
 
 
         LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjeller(gmlTidslinje, nyTidslinje);
@@ -216,7 +215,7 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
             SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
             Resultat.OPPFYLT,
             new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 15))));
-        LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, null));
+        LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, null), true);
         List<PleietrengendeSykdomVurderingVersjon> nyVurderinger = Arrays.asList(
             vurderingVersjonMock(
                 SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
@@ -226,7 +225,7 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
                 SykdomVurderingType.TO_OMSORGSPERSONER,
                 Resultat.OPPFYLT,
                 new Periode(LocalDate.of(2021, 1, 10), LocalDate.of(2021, 1, 15))));
-        LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(nyVurderinger, null));
+        LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(nyVurderinger, null), true);
 
 
         LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjeller(gmlTidslinje, nyTidslinje);
@@ -247,7 +246,7 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
                 SykdomVurderingType.TO_OMSORGSPERSONER,
                 Resultat.IKKE_OPPFYLT,
                 new Periode(LocalDate.of(2021, 1, 9), LocalDate.of(2021, 1, 15))));
-        LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, null));
+        LocalDateTimeline<SykdomSamletVurdering> gmlTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(gmlVurderinger, null), true);
         List<PleietrengendeSykdomVurderingVersjon> nyVurderinger = Arrays.asList(
             vurderingVersjonMock(
                 SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE,
@@ -257,7 +256,7 @@ class SykdomSamletVurderingFinnGrunnlagforskjellerTest {
                 SykdomVurderingType.TO_OMSORGSPERSONER,
                 Resultat.OPPFYLT,
                 new Periode(LocalDate.of(2021, 1, 10), LocalDate.of(2021, 1, 15))));
-        LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(nyVurderinger, null));
+        LocalDateTimeline<SykdomSamletVurdering> nyTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(grunnlagMock(nyVurderinger, null), true);
 
 
         LocalDateTimeline<Boolean> timeline = SykdomSamletVurdering.finnGrunnlagsforskjeller(gmlTidslinje, nyTidslinje);

@@ -83,7 +83,7 @@ public class PleietrengendeRevurderingPerioderTjeneste {
         var pleietrengende = referanse.getPleietrengendeAktørId();
         var vurderingsperioder = utledVurderingsperiode(vilkårResultatRepository.hent(referanse.getBehandlingId()), definerendeVilkår);
         var utledetGrunnlag = medisinskGrunnlagTjeneste.utledGrunnlagMedManglendeOmsorgFjernet(referanse.getSaksnummer(), referanse.getBehandlingUuid(), referanse.getBehandlingId(), pleietrengende, vurderingsperioder);
-        var diffPerioder = medisinskGrunnlagTjeneste.sammenlignGrunnlag(vedtattSykdomGrunnlagBehandling.map(MedisinskGrunnlag::getGrunnlagsdata), utledetGrunnlag).getDiffPerioder();
+        var diffPerioder = medisinskGrunnlagTjeneste.sammenlignGrunnlag(vedtattSykdomGrunnlagBehandling.map(MedisinskGrunnlag::getGrunnlagsdata), utledetGrunnlag, true).getDiffPerioder();
         return diffPerioder.map(s -> List.of(new LocalDateSegment<>(s.getLocalDateInterval(), Set.of(BehandlingÅrsakType.RE_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON))));
     }
 

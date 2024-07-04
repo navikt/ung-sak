@@ -78,7 +78,7 @@ public class MedisinskGrunnlagTjeneste {
             søknadsperioderSomSkalFjernes
             );
 
-        return sammenlignGrunnlag(grunnlagBehandling.map(MedisinskGrunnlag::getGrunnlagsdata), utledetGrunnlag);
+        return sammenlignGrunnlag(grunnlagBehandling.map(MedisinskGrunnlag::getGrunnlagsdata), utledetGrunnlag, true);
     }
 
     public SykdomGrunnlagSammenlikningsresultat utledRelevanteEndringerSidenForrigeBehandling(Behandling behandling, NavigableSet<DatoIntervallEntitet> nyeVurderingsperioder) {
@@ -86,7 +86,7 @@ public class MedisinskGrunnlagTjeneste {
         final NavigableSet<DatoIntervallEntitet> søknadsperioderSomSkalFjernes = hentManglendeOmsorgenForPerioder(behandling.getId());
         final MedisinskGrunnlagsdata utledetGrunnlag = medisinskGrunnlagRepository.utledGrunnlag(behandling.getFagsak().getSaksnummer(), behandling.getUuid(), behandling.getFagsak().getPleietrengendeAktørId(), nyeVurderingsperioder, søknadsperioderSomSkalFjernes);
 
-        return sammenlignGrunnlag(forrigeGrunnlagBehandling.map(MedisinskGrunnlag::getGrunnlagsdata), utledetGrunnlag);
+        return sammenlignGrunnlag(forrigeGrunnlagBehandling.map(MedisinskGrunnlag::getGrunnlagsdata), utledetGrunnlag, false);
     }
 
     public MedisinskGrunnlagsdata utledGrunnlagMedManglendeOmsorgFjernet(Saksnummer saksnummer, UUID behandlingUuid, Long behandlingId, AktørId pleietrengende, NavigableSet<DatoIntervallEntitet> vurderingsperioder) {
@@ -94,10 +94,10 @@ public class MedisinskGrunnlagTjeneste {
         return medisinskGrunnlagRepository.utledGrunnlag(saksnummer, behandlingUuid, pleietrengende, vurderingsperioder, søknadsperioderSomSkalFjernes);
     }
 
-    public SykdomGrunnlagSammenlikningsresultat sammenlignGrunnlag(Optional<MedisinskGrunnlagsdata> forrigeGrunnlagBehandling, MedisinskGrunnlagsdata utledetGrunnlag) {
+    public SykdomGrunnlagSammenlikningsresultat sammenlignGrunnlag(Optional<MedisinskGrunnlagsdata> forrigeGrunnlagBehandling, MedisinskGrunnlagsdata utledetGrunnlag, boolean skalBrukeInnleggelse) {
         boolean harEndretDiagnosekoder = sammenlignDiagnosekoder(forrigeGrunnlagBehandling, utledetGrunnlag);
         boolean harNyeUklassifiserteDokumenter = harNyeUklassifiserteDokumenter(forrigeGrunnlagBehandling, utledetGrunnlag);
-        final LocalDateTimeline<Boolean> endringerISøktePerioder = sammenlignTidfestedeGrunnlagsdata(forrigeGrunnlagBehandling, utledetGrunnlag);
+        final LocalDateTimeline<Boolean> endringerISøktePerioder = sammenlignTidfestedeGrunnlagsdata(forrigeGrunnlagBehandling, utledetGrunnlag, skalBrukeInnleggelse);
         return new SykdomGrunnlagSammenlikningsresultat(endringerISøktePerioder, harEndretDiagnosekoder, harNyeUklassifiserteDokumenter);
     }
 
@@ -124,18 +124,18 @@ public class MedisinskGrunnlagTjeneste {
     private record PleietrengendeDokumentID(String journalpostId, String dokumentId) {}
 
 
-    LocalDateTimeline<Boolean> sammenlignTidfestedeGrunnlagsdata(Optional<MedisinskGrunnlagsdata> grunnlagBehandling, MedisinskGrunnlagsdata utledetGrunnlag) {
+    LocalDateTimeline<Boolean> sammenlignTidfestedeGrunnlagsdata(Optional<MedisinskGrunnlagsdata> grunnlagBehandling, MedisinskGrunnlagsdata utledetGrunnlag, boolean skalBrukeInnleggelse) {
         LocalDateTimeline<SykdomSamletVurdering> grunnlagBehandlingTidslinje;
 
         if (grunnlagBehandling.isPresent()) {
             final MedisinskGrunnlagsdata forrigeGrunnlag = grunnlagBehandling.get();
-            grunnlagBehandlingTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(forrigeGrunnlag);
+            grunnlagBehandlingTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(forrigeGrunnlag, skalBrukeInnleggelse);
         } else {
             grunnlagBehandlingTidslinje = LocalDateTimeline.empty();
         }
         final LocalDateTimeline<SykdomSamletVurdering> forrigeGrunnlagTidslinje = grunnlagBehandlingTidslinje;
 
-        final LocalDateTimeline<SykdomSamletVurdering> nyBehandlingTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(utledetGrunnlag);
+        final LocalDateTimeline<SykdomSamletVurdering> nyBehandlingTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(utledetGrunnlag, skalBrukeInnleggelse);
         final LocalDateTimeline<Boolean> endringerSidenForrigeBehandling = SykdomSamletVurdering.finnGrunnlagsforskjeller(forrigeGrunnlagTidslinje, nyBehandlingTidslinje);
 
         final LocalDateTimeline<Boolean> søktePerioderTimeline = TidslinjeUtil.tilTidslinjeKomprimert(utledetGrunnlag.getSøktePerioder().stream().map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFom(), p.getTom())).collect(Collectors.toCollection(TreeSet::new)));

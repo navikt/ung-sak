@@ -45,7 +45,7 @@ public class SykdomSamletVurdering {
         return ny;
     }
 
-    public static LocalDateTimeline<SykdomSamletVurdering> grunnlagTilTidslinje(MedisinskGrunnlagsdata grunnlag) {
+    public static LocalDateTimeline<SykdomSamletVurdering> grunnlagTilTidslinje(MedisinskGrunnlagsdata grunnlag, boolean skalBrukeInnleggelse) {
         final Collection<LocalDateSegment<SykdomSamletVurdering>> segments = new ArrayList<>();
 
         PleietrengendeTidslinjeUtils.tilTidslinjeForType(grunnlag.getVurderinger(), SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE).forEach(s -> {
@@ -66,7 +66,7 @@ public class SykdomSamletVurdering {
             segments.add(new LocalDateSegment<>(s.getFom(), s.getTom(), samletVurdering));
         });
 
-        if (grunnlag.getInnleggelser() != null) {
+        if (skalBrukeInnleggelse && grunnlag.getInnleggelser() != null) {
             grunnlag.getInnleggelser().getPerioder().forEach(p -> {
                 SykdomSamletVurdering samletVurdering = new SykdomSamletVurdering();
                 samletVurdering.setInnleggelser(p.getInnleggelser());

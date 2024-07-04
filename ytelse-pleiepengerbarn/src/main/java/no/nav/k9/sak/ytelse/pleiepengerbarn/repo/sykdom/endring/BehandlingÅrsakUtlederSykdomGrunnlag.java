@@ -125,7 +125,7 @@ class BehandlingÅrsakUtlederSykdomGrunnlag implements BehandlingÅrsakUtleder {
 
         NavigableSet<DatoIntervallEntitet> nyeVurderingsperioder = utledVurderingsperiode(ref);
         var utledGrunnlag = medisinskGrunnlagTjeneste.utledGrunnlagMedManglendeOmsorgFjernet(ref.getSaksnummer(), ref.getBehandlingUuid(), ref.getBehandlingId(), ref.getPleietrengendeAktørId(), nyeVurderingsperioder);
-        var sykdomGrunnlagSammenlikningsresultat = medisinskGrunnlagTjeneste.sammenlignGrunnlag(sykdomGrunnlag, utledGrunnlag);
+        var sykdomGrunnlagSammenlikningsresultat = medisinskGrunnlagTjeneste.sammenlignGrunnlag(sykdomGrunnlag, utledGrunnlag, true);
 
         return !sykdomGrunnlagSammenlikningsresultat.getDiffPerioder().isEmpty() && skalGiÅrsak(ref, BehandlingStegType.VURDER_MEDISINSKE_VILKÅR);
     }
