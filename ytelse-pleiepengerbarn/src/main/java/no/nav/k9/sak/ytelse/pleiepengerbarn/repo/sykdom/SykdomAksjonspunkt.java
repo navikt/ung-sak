@@ -11,6 +11,7 @@ public class SykdomAksjonspunkt {
     private final boolean harDataSomIkkeHarBlittTattMedIBehandling;
     private final boolean nyttDokumentHarIkkekontrollertEksisterendeVurderinger;
     private final boolean manglerVurderingAvLangvarigSykdom;
+    private final boolean ikkeSammenMedBarnet;
 
     public SykdomAksjonspunkt(boolean harUklassifiserteDokumenter,
                               boolean manglerDiagnosekode,
@@ -20,7 +21,9 @@ public class SykdomAksjonspunkt {
                               boolean manglerVurderingAvILivetsSluttfase,
                               boolean harDataSomIkkeHarBlittTattMedIBehandling,
                               boolean nyttDokumentHarIkkekontrollertEksisterendeVurderinger,
-                              boolean manglerVurderingAvLangvarigSykdom) {
+                              boolean manglerVurderingAvLangvarigSykdom,
+                              boolean ikkeSammenMedBarnet
+    ) {
         this.harUklassifiserteDokumenter = harUklassifiserteDokumenter;
         this.manglerDiagnosekode = manglerDiagnosekode;
         this.manglerGodkjentLegeerklæring = manglerGodkjentLegeerklæring;
@@ -30,6 +33,7 @@ public class SykdomAksjonspunkt {
         this.harDataSomIkkeHarBlittTattMedIBehandling = harDataSomIkkeHarBlittTattMedIBehandling;
         this.nyttDokumentHarIkkekontrollertEksisterendeVurderinger = nyttDokumentHarIkkekontrollertEksisterendeVurderinger;
         this.manglerVurderingAvLangvarigSykdom = manglerVurderingAvLangvarigSykdom;
+        this.ikkeSammenMedBarnet = ikkeSammenMedBarnet;
     }
 
     public boolean isKanLøseAksjonspunkt() {
@@ -83,6 +87,10 @@ public class SykdomAksjonspunkt {
         return manglerVurderingAvLangvarigSykdom;
     }
 
+    public boolean isIkkeSammenMedBarnet() {
+        return ikkeSammenMedBarnet;
+    }
+
     public static SykdomAksjonspunkt bareFalse() {
         return new SykdomAksjonspunkt(
             false,
@@ -93,6 +101,8 @@ public class SykdomAksjonspunkt {
             false,
             false,
             false,
-            false);
+            false,
+            false
+        );
     }
 }

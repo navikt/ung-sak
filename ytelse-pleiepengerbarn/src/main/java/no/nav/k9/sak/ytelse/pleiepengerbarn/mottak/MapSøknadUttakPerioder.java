@@ -229,8 +229,11 @@ public class MapSøknadUttakPerioder {
                     entry.getKey().getTilOgMed(),
                     true,
                     Landkoder.fraKode(entry.getValue().getLand().getLandkode()),
-                    entry.getValue().getÅrsak() == null ? UtenlandsoppholdÅrsak.INGEN : UtenlandsoppholdÅrsak.fraKode(entry.getValue().getÅrsak().name())))
-                .collect(Collectors.toList());
+                    entry.getValue().getÅrsak() == null ? UtenlandsoppholdÅrsak.INGEN : UtenlandsoppholdÅrsak.fraKode(entry.getValue().getÅrsak().name()),
+                    entry.getValue().getErSammenMedBarnet()
+                )
+            )
+            .toList();
 
         if (utenlandsopphold.getPerioderSomSkalSlettes() != null) {
             utenlandsoppholdPerioder.addAll(utenlandsopphold.getPerioderSomSkalSlettes()
@@ -242,8 +245,11 @@ public class MapSøknadUttakPerioder {
                         entry.getKey().getTilOgMed(),
                         false,
                         Landkoder.fraKode(entry.getValue().getLand().getLandkode()),
-                        entry.getValue().getÅrsak() == null ? UtenlandsoppholdÅrsak.INGEN : UtenlandsoppholdÅrsak.fraKode(entry.getValue().getÅrsak().name())))
-                .collect(Collectors.toList()));
+                        entry.getValue().getÅrsak() == null ? UtenlandsoppholdÅrsak.INGEN : UtenlandsoppholdÅrsak.fraKode(entry.getValue().getÅrsak().name()),
+                        entry.getValue().getErSammenMedBarnet()
+                    )
+                )
+                .toList());
         }
         return utenlandsoppholdPerioder;
     }
@@ -257,7 +263,6 @@ public class MapSøknadUttakPerioder {
             .stream()
             .map(it -> new UttakPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getKey().getFraOgMed(), it.getKey().getTilOgMed()), it.getValue().getTimerPleieAvBarnetPerDag())).collect(Collectors.toList());
     }
-
 
 
 }
