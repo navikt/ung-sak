@@ -407,6 +407,10 @@ public class BeregningsresultatAndel extends BaseEntitet {
             mal = eksisterendeBeregningsresultatAndel;
         }
 
+        public Integer getDagsats() {
+            return dagsats;
+        }
+
         public Builder medBrukerErMottaker(boolean brukerErMottaker) {
             mal.brukerErMottaker = brukerErMottaker;
             return this;
