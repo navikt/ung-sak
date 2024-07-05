@@ -109,16 +109,16 @@ public class HindreTilbaketrekkNårAlleredeUtbetaltTest {
         // Arrange
         LocalDate utbetaltTom = LocalDate.of(2019, Month.FEBRUARY, 4);
         BeregningsresultatPeriode forrigeBrp = lagBeregningsresultatPeriode();
-        lagAndel(forrigeBrp, ARBEIDSGIVER1, true, 0);
-        lagAndel(forrigeBrp, ARBEIDSGIVER1, false, 1500);
-        lagAndel(forrigeBrp, ARBEIDSGIVER2, true, 600);
+        lagAndel(forrigeBrp, ARBEIDSGIVER1, true, 0, null);
+        lagAndel(forrigeBrp, ARBEIDSGIVER1, false, 1500, null);
+        lagAndel(forrigeBrp, ARBEIDSGIVER2, true, 600, null);
         BeregningsresultatEntitet forrigeTY = forrigeBrp.getBeregningsresultat();
 
         BeregningsresultatPeriode beregningsgrunnlagBrp = lagBeregningsresultatPeriode();
-        lagAndel(beregningsgrunnlagBrp, ARBEIDSGIVER1, true, 0);
-        lagAndel(beregningsgrunnlagBrp, ARBEIDSGIVER1, false, 1050);
-        lagAndel(beregningsgrunnlagBrp, ARBEIDSGIVER2, true, 0);
-        lagAndel(beregningsgrunnlagBrp, ARBEIDSGIVER2, false, 1050);
+        lagAndel(beregningsgrunnlagBrp, ARBEIDSGIVER1, true, 0, BigDecimal.ZERO);
+        lagAndel(beregningsgrunnlagBrp, ARBEIDSGIVER1, false, 1050, BigDecimal.valueOf(35));
+        lagAndel(beregningsgrunnlagBrp, ARBEIDSGIVER2, true, 0, BigDecimal.ZERO);
+        lagAndel(beregningsgrunnlagBrp, ARBEIDSGIVER2, false, 1050, BigDecimal.valueOf(35));
         BeregningsresultatEntitet beregningsgrunnlagTY = beregningsgrunnlagBrp.getBeregningsresultat();
 
         // Act
@@ -139,21 +139,25 @@ public class HindreTilbaketrekkNårAlleredeUtbetaltTest {
             assertThat(andel.erBrukerMottaker()).as("erBrukerMottaker").isTrue();
             assertThat(andel.getArbeidsgiver().get()).isSameAs(ARBEIDSGIVER1);
             assertThat(andel.getDagsats()).as("dagsats").isEqualTo(0);
+            assertThat(andel.getUtbetalingsgradOppdrag().compareTo(BigDecimal.ZERO)).isEqualTo(0);
         });
         assertThat(p0andeler.get(1)).satisfies(andel -> {
             assertThat(andel.erBrukerMottaker()).as("erBrukerMottaker").isFalse();
             assertThat(andel.getArbeidsgiver().get()).isSameAs(ARBEIDSGIVER1);
             assertThat(andel.getDagsats()).as("dagsats").isEqualTo(1050);
+            assertThat(andel.getUtbetalingsgradOppdrag().compareTo(BigDecimal.valueOf(35))).isEqualTo(0);
         });
         assertThat(p0andeler.get(2)).satisfies(andel -> {
             assertThat(andel.erBrukerMottaker()).as("erBrukerMottaker").isTrue();
             assertThat(andel.getArbeidsgiver().get()).isSameAs(ARBEIDSGIVER2);
             assertThat(andel.getDagsats()).as("dagsats").isEqualTo(600);
+            assertThat(andel.getUtbetalingsgradOppdrag().compareTo(BigDecimal.valueOf(20))).isEqualTo(0);
         });
         assertThat(p0andeler.get(3)).satisfies(andel -> {
             assertThat(andel.erBrukerMottaker()).as("erBrukerMottaker").isFalse();
             assertThat(andel.getArbeidsgiver().get()).isSameAs(ARBEIDSGIVER2);
             assertThat(andel.getDagsats()).as("dagsats").isEqualTo(450);
+            assertThat(andel.getUtbetalingsgradOppdrag().compareTo(BigDecimal.valueOf(15))).isEqualTo(0);
         });
 
         var p1 = beregningsresultatPerioder.get(1);
@@ -165,21 +169,26 @@ public class HindreTilbaketrekkNårAlleredeUtbetaltTest {
             assertThat(andel.erBrukerMottaker()).as("erBrukerMottaker").isTrue();
             assertThat(andel.getArbeidsgiver().get()).isSameAs(ARBEIDSGIVER1);
             assertThat(andel.getDagsats()).as("dagsats").isEqualTo(0);
+            assertThat(andel.getUtbetalingsgradOppdrag().compareTo(BigDecimal.ZERO)).isEqualTo(0);
         });
         assertThat(p1andeler.get(1)).satisfies(andel -> {
             assertThat(andel.erBrukerMottaker()).as("erBrukerMottaker").isFalse();
             assertThat(andel.getArbeidsgiver().get()).isSameAs(ARBEIDSGIVER1);
             assertThat(andel.getDagsats()).as("dagsats").isEqualTo(1050);
+            assertThat(andel.getUtbetalingsgradOppdrag().compareTo(BigDecimal.valueOf(35))).isEqualTo(0);
+
         });
         assertThat(p1andeler.get(2)).satisfies(andel -> {
             assertThat(andel.erBrukerMottaker()).as("erBrukerMottaker").isTrue();
             assertThat(andel.getArbeidsgiver().get()).isSameAs(ARBEIDSGIVER2);
             assertThat(andel.getDagsats()).as("dagsats").isEqualTo(0);
+            assertThat(andel.getUtbetalingsgradOppdrag().compareTo(BigDecimal.ZERO)).isEqualTo(0);
         });
         assertThat(p1andeler.get(3)).satisfies(andel -> {
             assertThat(andel.erBrukerMottaker()).as("erBrukerMottaker").isFalse();
             assertThat(andel.getArbeidsgiver().get()).isSameAs(ARBEIDSGIVER2);
             assertThat(andel.getDagsats()).as("dagsats").isEqualTo(1050);
+            assertThat(andel.getUtbetalingsgradOppdrag().compareTo(BigDecimal.valueOf(35))).isEqualTo(0);
         });
     }
 
@@ -205,19 +214,19 @@ public class HindreTilbaketrekkNårAlleredeUtbetaltTest {
         // Arrange
         LocalDate utbetaltTom = LocalDate.of(2019, Month.FEBRUARY, 4);
         BeregningsresultatPeriode forrigeBrp = lagBeregningsresultatPeriode();
-        lagAndel(forrigeBrp, ARBEIDSGIVER1, true, 0);
-        lagAndel(forrigeBrp, ARBEIDSGIVER1, false, 1500);
-        lagAndel(forrigeBrp, ARBEIDSGIVER2, true, 240);
-        lagAndel(forrigeBrp, ARBEIDSGIVER3, true, 360);
+        lagAndel(forrigeBrp, ARBEIDSGIVER1, true, 0, null);
+        lagAndel(forrigeBrp, ARBEIDSGIVER1, false, 1500, null);
+        lagAndel(forrigeBrp, ARBEIDSGIVER2, true, 240, null);
+        lagAndel(forrigeBrp, ARBEIDSGIVER3, true, 360, null);
         BeregningsresultatEntitet forrigeTY = forrigeBrp.getBeregningsresultat();
 
         BeregningsresultatPeriode beregningsgrunnlagBrp = lagBeregningsresultatPeriode();
-        lagAndel(beregningsgrunnlagBrp, ARBEIDSGIVER1, true, 0);
-        lagAndel(beregningsgrunnlagBrp, ARBEIDSGIVER1, false, 600);
-        lagAndel(beregningsgrunnlagBrp, ARBEIDSGIVER2, true, 0);
-        lagAndel(beregningsgrunnlagBrp, ARBEIDSGIVER2, false, 600);
-        lagAndel(beregningsgrunnlagBrp, ARBEIDSGIVER3, true, 0);
-        lagAndel(beregningsgrunnlagBrp, ARBEIDSGIVER3, false, 900);
+        lagAndel(beregningsgrunnlagBrp, ARBEIDSGIVER1, true, 0, null);
+        lagAndel(beregningsgrunnlagBrp, ARBEIDSGIVER1, false, 600, null);
+        lagAndel(beregningsgrunnlagBrp, ARBEIDSGIVER2, true, 0, null);
+        lagAndel(beregningsgrunnlagBrp, ARBEIDSGIVER2, false, 600, null);
+        lagAndel(beregningsgrunnlagBrp, ARBEIDSGIVER3, true, 0, null);
+        lagAndel(beregningsgrunnlagBrp, ARBEIDSGIVER3, false, 900, null);
         BeregningsresultatEntitet beregningsgrunnlagTY = beregningsgrunnlagBrp.getBeregningsresultat();
 
         // Act
@@ -305,9 +314,9 @@ public class HindreTilbaketrekkNårAlleredeUtbetaltTest {
     private BeregningsresultatEntitet lagBeregningsresultatFP(boolean brukerErMottaker, int dagsats) {
         BeregningsresultatPeriode brp = lagBeregningsresultatPeriode();
         if (!brukerErMottaker) {
-            lagAndel(brp, ARBEIDSGIVER1, true, 0);
+            lagAndel(brp, ARBEIDSGIVER1, true, 0, null);
         }
-        lagAndel(brp, ARBEIDSGIVER1, brukerErMottaker, dagsats);
+        lagAndel(brp, ARBEIDSGIVER1, brukerErMottaker, dagsats, null);
         return brp.getBeregningsresultat();
     }
 
@@ -321,12 +330,13 @@ public class HindreTilbaketrekkNårAlleredeUtbetaltTest {
             .build(br);
     }
 
-    private BeregningsresultatAndel lagAndel(BeregningsresultatPeriode brp, Arbeidsgiver arbeidsgiver, boolean brukerErMottaker, int dagsats) {
+    private BeregningsresultatAndel lagAndel(BeregningsresultatPeriode brp, Arbeidsgiver arbeidsgiver, boolean brukerErMottaker, int dagsats, BigDecimal utbetalingsgradOppdrag) {
         return BeregningsresultatAndel.builder()
             .medBrukerErMottaker(brukerErMottaker)
             .medArbeidsgiver(arbeidsgiver)
             .medStillingsprosent(new BigDecimal(100))
             .medUtbetalingsgrad(new BigDecimal(100))
+            .medUtbetalingsgradOppdrag(utbetalingsgradOppdrag)
             .medAktivitetStatus(AktivitetStatus.ARBEIDSTAKER)
             .medInntektskategori(Inntektskategori.ARBEIDSTAKER)
             .medDagsats(dagsats)
