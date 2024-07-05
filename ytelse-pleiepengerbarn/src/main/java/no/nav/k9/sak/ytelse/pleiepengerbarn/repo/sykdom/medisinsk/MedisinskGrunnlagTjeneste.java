@@ -81,7 +81,7 @@ public class MedisinskGrunnlagTjeneste {
         return sammenlignGrunnlag(grunnlagBehandling.map(MedisinskGrunnlag::getGrunnlagsdata), utledetGrunnlag);
     }
 
-    public SykdomGrunnlagSammenlikningsresultat utledRelevanteEndringerSidenForrigeBehandling(Behandling behandling, NavigableSet<DatoIntervallEntitet> nyeVurderingsperioder) {
+    public SykdomGrunnlagSammenlikningsresultat utledRelevanteEndringerForTotrinn(Behandling behandling, NavigableSet<DatoIntervallEntitet> nyeVurderingsperioder) {
         final Optional<MedisinskGrunnlag> forrigeGrunnlagBehandling = medisinskGrunnlagRepository.hentGrunnlagFraForrigeBehandling(behandling.getFagsak().getSaksnummer(), behandling.getUuid());
         final NavigableSet<DatoIntervallEntitet> søknadsperioderSomSkalFjernes = hentManglendeOmsorgenForPerioder(behandling.getId());
         final MedisinskGrunnlagsdata utledetGrunnlag = medisinskGrunnlagRepository.utledGrunnlag(behandling.getFagsak().getSaksnummer(), behandling.getUuid(), behandling.getFagsak().getPleietrengendeAktørId(), nyeVurderingsperioder, søknadsperioderSomSkalFjernes);
