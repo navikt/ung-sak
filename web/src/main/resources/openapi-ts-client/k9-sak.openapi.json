@@ -9011,6 +9011,9 @@
           "harUklassifiserteDokumenter" : {
             "type" : "boolean"
           },
+          "ikkeSammenMedBarnet" : {
+            "type" : "boolean"
+          },
           "kanLøseAksjonspunkt" : {
             "type" : "boolean"
           },
