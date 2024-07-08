@@ -116,7 +116,7 @@ class SøknadOversetter {
                     entry.getValue().getErSammenMedBarnet()
                 )
             )
-            .toList();
+            .collect(Collectors.toList());
 
         if (utenlandsopphold.getPerioderSomSkalSlettes() != null) {
             utenlandsoppholdPerioder.addAll(utenlandsopphold.getPerioderSomSkalSlettes()
