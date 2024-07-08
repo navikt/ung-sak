@@ -53,6 +53,9 @@ public class UtenlandsoppholdPeriode extends BaseEntitet implements IndexKey {
     @Column(name = "aarsak")
     private UtenlandsoppholdÅrsak årsak;
 
+    @Column(name = "er_sammen_med_barnet")
+    private boolean erSammenMedBarnet = true;
+
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
@@ -60,19 +63,20 @@ public class UtenlandsoppholdPeriode extends BaseEntitet implements IndexKey {
     UtenlandsoppholdPeriode() {
     }
 
-    public UtenlandsoppholdPeriode(DatoIntervallEntitet periode, boolean aktiv, Landkoder land, UtenlandsoppholdÅrsak årsak) {
+    public UtenlandsoppholdPeriode(DatoIntervallEntitet periode, boolean aktiv, Landkoder land, UtenlandsoppholdÅrsak årsak, boolean erSammenMedBarnet) {
         this.periode = periode;
         this.aktiv = aktiv;
         this.land = land;
         this.årsak = årsak;
+        this.erSammenMedBarnet = erSammenMedBarnet;
     }
 
-    public UtenlandsoppholdPeriode(LocalDate fom, LocalDate tom, boolean aktiv, Landkoder land, UtenlandsoppholdÅrsak årsak) {
-        this(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), aktiv, land, årsak);
+    public UtenlandsoppholdPeriode(LocalDate fom, LocalDate tom, boolean aktiv, Landkoder land, UtenlandsoppholdÅrsak årsak, boolean erSammenMedBarnet) {
+        this(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), aktiv, land, årsak, erSammenMedBarnet);
     }
 
     public UtenlandsoppholdPeriode(UtenlandsoppholdPeriode utenlandsoppholdPeriode) {
-        this(utenlandsoppholdPeriode.periode, utenlandsoppholdPeriode.aktiv, utenlandsoppholdPeriode.land, utenlandsoppholdPeriode.årsak);
+        this(utenlandsoppholdPeriode.periode, utenlandsoppholdPeriode.aktiv, utenlandsoppholdPeriode.land, utenlandsoppholdPeriode.årsak, utenlandsoppholdPeriode.erSammenMedBarnet);
     }
 
     public DatoIntervallEntitet getPeriode() {
@@ -89,6 +93,10 @@ public class UtenlandsoppholdPeriode extends BaseEntitet implements IndexKey {
 
     public boolean isAktiv() {
         return aktiv;
+    }
+
+    public boolean isErSammenMedBarnet() {
+        return erSammenMedBarnet;
     }
 
     @Override
