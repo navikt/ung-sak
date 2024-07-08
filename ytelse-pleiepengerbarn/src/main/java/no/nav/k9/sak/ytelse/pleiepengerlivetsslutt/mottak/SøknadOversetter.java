@@ -103,7 +103,7 @@ class SøknadOversetter {
                         entry.getValue().getErSammenMedBarnet()
                     )
                 )
-                .toList());
+                .collect(Collectors.toList()));
         }
         return utenlandsoppholdPerioder;
     }
