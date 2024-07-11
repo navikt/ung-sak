@@ -22,7 +22,7 @@ mvn --projects web exec:java
 # Use docker to make the typescript client from the generated k9-sak.openapi.json
 mkdir -p "${TS_CLIENT_TARGET_DIR}"
 CONTAINER_NAME="openapi-ts-clientmaker-cli"
-IMAGE_URL="europe-north1-docker.pkg.dev/nais-management-233d/k9saksbehandling/navikt/${CONTAINER_NAME}:latest"
+IMAGE_URL="europe-north1-docker.pkg.dev/nais-management-233d/k9saksbehandling/navikt/${CONTAINER_NAME}:v0"
 # If docker pull fails because of missing authorization, run `gcloud auth login` and try again.
 docker pull --quiet $IMAGE_URL
 docker run \
