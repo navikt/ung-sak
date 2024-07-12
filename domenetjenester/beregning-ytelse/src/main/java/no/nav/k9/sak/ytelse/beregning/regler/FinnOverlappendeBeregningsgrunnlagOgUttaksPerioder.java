@@ -113,8 +113,7 @@ class FinnOverlappendeBeregningsgrunnlagOgUttaksPerioder extends LeafSpecificati
             resultater.put(periodeNavn + ".fom", dateInterval.getFomDato());
             resultater.put(periodeNavn + ".tom", dateInterval.getTomDato());
 
-
-            var utbetalingsgradOppdragBeregner = new UtbetalingsgradOppdragBeregner(grunnlag.getReduksjonsfaktorInaktivTypeA(), grunnlag.getBruttoBeregningsgrunnlag());
+            var utbetalingsgradOppdragBeregner = new UtbetalingsgradOppdragBeregner(grunnlag.getReduksjonsfaktorInaktivTypeA(), grunnlag.getBruttoBeregningsgrunnlag(), grunnlag.getBeregningsgrunnlagPrStatus());
             grunnlag.getBeregningsgrunnlagPrStatus(AktivitetStatus.ATFL).forEach(gbps -> {
                 // for hver arbeidstaker andel: map fra grunnlag til 1-2 resultatAndel
                 List<BeregningsgrunnlagPrArbeidsforhold> arbeidsforholdList = gbps.getArbeidsforhold();
