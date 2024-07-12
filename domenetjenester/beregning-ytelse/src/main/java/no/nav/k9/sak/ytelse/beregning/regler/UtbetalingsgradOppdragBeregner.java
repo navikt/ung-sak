@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.util.Collection;
 import java.util.Objects;
 
+import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.BeregningsgrunnlagPrArbeidsforhold;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.BeregningsgrunnlagPrStatus;
 
 public class UtbetalingsgradOppdragBeregner {
@@ -16,7 +17,12 @@ public class UtbetalingsgradOppdragBeregner {
     public UtbetalingsgradOppdragBeregner(BigDecimal reduksjonsfaktorInaktivTypeA, BigDecimal bruttoBeregningsgrunnlag, Collection<BeregningsgrunnlagPrStatus> beregningsgrunnlagPrStatus) {
         this.reduksjonsfaktorInaktivTypeA = reduksjonsfaktorInaktivTypeA;
         this.bruttoBeregningsgrunnlag = bruttoBeregningsgrunnlag;
-        this.brukersAndelPrÅr = beregningsgrunnlagPrStatus.stream().map(BeregningsgrunnlagPrStatus::getRedusertBrukersAndelPrÅr).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add);;
+        this.brukersAndelPrÅr = beregningsgrunnlagPrStatus.stream()
+            .filter(it->it.getArbeidsforhold() != null)
+            .flatMap(it->it.getArbeidsforhold().stream())
+            .map(BeregningsgrunnlagPrArbeidsforhold::getRedusertBrukersAndelPrÅr)
+            .filter(Objects::nonNull)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     public static BigDecimal finnDagsatsfaktorFraUtbetalingsgrad(BigDecimal utbetalingsgradOppdrag, BigDecimal dagsats) {
