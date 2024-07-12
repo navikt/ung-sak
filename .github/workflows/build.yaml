@@ -103,7 +103,7 @@ jobs:
         with:
           name: k9-sak-typescript-client-src
           path: /tmp/k9-sak-typescript-client
-      - uses: navikt/openapi-ts-clientmaker/extra/actions/compare-with-published@v0
+      - uses: navikt/openapi-ts-clientmaker/extra/actions/compare-with-published@v1
         id: compare-with-published
         with:
           localPath: /tmp/k9-sak-typescript-client
@@ -128,7 +128,7 @@ jobs:
        with:
          name: k9-sak-typescript-client-src
          path: /tmp/k9-sak-typescript-client
-     - uses: navikt/openapi-ts-clientmaker/extra/actions/publish-typescript-client@v0
+     - uses: navikt/openapi-ts-clientmaker/extra/actions/publish-typescript-client@v1
        with:
          contentPath: /tmp/k9-sak-typescript-client
          githubToken: ${{ secrets.GITHUB_TOKEN }}
