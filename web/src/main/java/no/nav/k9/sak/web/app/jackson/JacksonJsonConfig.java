@@ -15,11 +15,13 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.ext.ContextResolver;
 import jakarta.ws.rs.ext.Provider;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusKodelisteSerializer;
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderFaktaOmBeregningDto;
 import no.nav.k9.sak.web.app.tjenester.RestImplementationClasses;
@@ -41,7 +43,8 @@ public class JacksonJsonConfig implements ContextResolver<ObjectMapper> {
     }
 
     public JacksonJsonConfig(boolean serialiserKodelisteNavn) {
-        objectMapper = createObjectMapper(createModule(serialiserKodelisteNavn));
+        var aktiverKalkulusKodeverkString = Environment.current().getProperty("KODEVERK_AKTIVER_KALKULUS_STRING", Boolean.class, false);
+        objectMapper = createObjectMapper(createModule(serialiserKodelisteNavn, !aktiverKalkulusKodeverkString));
     }
 
     private ObjectMapper createObjectMapper(SimpleModule simpleModule) {
@@ -80,21 +83,21 @@ public class JacksonJsonConfig implements ContextResolver<ObjectMapper> {
         return om;
     }
 
-    private static SimpleModule createModule(boolean serialiserKodelisteNavn) {
+    private static SimpleModule createModule(boolean serialiserKodelisteNavn, boolean serialiserKalkulusSomObjekt) {
         SimpleModule module = new SimpleModule("VL-REST", new Version(1, 0, 0, null, null, null));
 
-        addSerializers(module, serialiserKodelisteNavn);
+        addSerializers(module, serialiserKodelisteNavn, serialiserKalkulusSomObjekt);
 
         return module;
     }
 
-    private static void addSerializers(SimpleModule module, boolean serialiserKodelisteNavn) {
+    private static void addSerializers(SimpleModule module, boolean serialiserKodelisteNavn, boolean serialiserKalkulusSomObjekt) {
         if(serialiserKodelisteNavn) {
             module.addSerializer(new KodelisteSerializer(serialiserKodelisteNavn));
         }
         // BeregningsgrunnlagRestTjeneste eksponerer kalkulus sine kodeverdier opp til frontend.
         // For å tillate at Kalkulus serialiserer Kodeverdi som string, samtidig som beholder dagens format til frontend.
-        module.addSerializer(new KalkulusKodelisteSerializer(true));
+        module.addSerializer(new KalkulusKodelisteSerializer(serialiserKalkulusSomObjekt));
     }
 
     /**

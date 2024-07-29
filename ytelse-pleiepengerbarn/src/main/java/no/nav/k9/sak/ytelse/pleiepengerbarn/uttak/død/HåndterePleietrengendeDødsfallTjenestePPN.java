@@ -24,20 +24,20 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
-public class HåndterHåndterePleietrengendeDødsfallTjenestePPN implements HåndterePleietrengendeDødsfallTjeneste {
+public class HåndterePleietrengendeDødsfallTjenestePPN implements HåndterePleietrengendeDødsfallTjeneste {
     private final VilkårForlengingTjeneste vilkårForlengingTjeneste = new VilkårForlengingTjeneste();
     private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     private PersonopplysningTjeneste personopplysningTjeneste;
 
-    HåndterHåndterePleietrengendeDødsfallTjenestePPN() {
+    HåndterePleietrengendeDødsfallTjenestePPN() {
         // CDI
     }
 
     @Inject
-    public HåndterHåndterePleietrengendeDødsfallTjenestePPN(VilkårResultatRepository vilkårResultatRepository,
-                                                            @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
-                                                            PersonopplysningTjeneste personopplysningTjeneste) {
+    public HåndterePleietrengendeDødsfallTjenestePPN(VilkårResultatRepository vilkårResultatRepository,
+                                                     @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE) @BehandlingTypeRef VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
+                                                     PersonopplysningTjeneste personopplysningTjeneste) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
