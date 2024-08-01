@@ -2,16 +2,27 @@ package no.nav.k9.sak.ytelse.beregning.regler;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Collection;
+import java.util.Objects;
+
+import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.BeregningsgrunnlagPrArbeidsforhold;
+import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.BeregningsgrunnlagPrStatus;
 
 public class UtbetalingsgradOppdragBeregner {
 
-    public static final int VIRKEDAGER_I_ET_ÅR = 260;
     private final BigDecimal reduksjonsfaktorInaktivTypeA;
     private final BigDecimal bruttoBeregningsgrunnlag;
+    private final BigDecimal brukersAndelPrÅr; //HAXX utnytter at denne inkluderer naturalytelser. TODO bedre å ta inn naturalytelser spesifikt og legge til bruttoBeregningsgrunnlag
 
-    public UtbetalingsgradOppdragBeregner(BigDecimal reduksjonsfaktorInaktivTypeA, BigDecimal bruttoBeregningsgrunnlag) {
+    public UtbetalingsgradOppdragBeregner(BigDecimal reduksjonsfaktorInaktivTypeA, BigDecimal bruttoBeregningsgrunnlag, Collection<BeregningsgrunnlagPrStatus> beregningsgrunnlagPrStatus) {
         this.reduksjonsfaktorInaktivTypeA = reduksjonsfaktorInaktivTypeA;
         this.bruttoBeregningsgrunnlag = bruttoBeregningsgrunnlag;
+        this.brukersAndelPrÅr = beregningsgrunnlagPrStatus.stream()
+            .filter(it->it.getArbeidsforhold() != null)
+            .flatMap(it->it.getArbeidsforhold().stream())
+            .map(BeregningsgrunnlagPrArbeidsforhold::getRedusertBrukersAndelPrÅr)
+            .filter(Objects::nonNull)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     public static BigDecimal finnDagsatsfaktorFraUtbetalingsgrad(BigDecimal utbetalingsgradOppdrag, BigDecimal dagsats) {
@@ -20,9 +31,10 @@ public class UtbetalingsgradOppdragBeregner {
 
     public BigDecimal beregnUtbetalingsgradOppdrag(BigDecimal årssats) {
         boolean erMidlertidigInaktivTypeA = reduksjonsfaktorInaktivTypeA != null;
+        BigDecimal grunnlagInklBortfaltNaturalytelse = bruttoBeregningsgrunnlag.compareTo(brukersAndelPrÅr) >= 0 ? bruttoBeregningsgrunnlag : brukersAndelPrÅr;
         BigDecimal maksimalUtbetaling = erMidlertidigInaktivTypeA
-            ? bruttoBeregningsgrunnlag.multiply(reduksjonsfaktorInaktivTypeA).setScale(0, RoundingMode.HALF_UP)
-            : bruttoBeregningsgrunnlag;
+            ? grunnlagInklBortfaltNaturalytelse.multiply(reduksjonsfaktorInaktivTypeA).setScale(0, RoundingMode.HALF_UP)
+            : grunnlagInklBortfaltNaturalytelse;
         return prosentAvMaksimal(årssats, maksimalUtbetaling);
     }
 
