@@ -187,7 +187,7 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
             var overlappendePleiehov = pleiebehov.get().getPleieperioder().getPerioder()
                 .stream()
                 .filter(pleiebehovPeriode -> pleiebehovPeriode.getGrad().getProsent() > 0)
-                .filter(pleiebehovPeriode -> pleiebehovPeriode.getPeriode().inkluderer(flyttetDødsdatoMandag) || pleiebehovPeriode.getPeriode().inkluderer(flyttetDødsdatoFredag))
+                .filter(pleiebehovPeriode -> pleiebehovPeriode.getPeriode().inkluderer(dødsdato) || pleiebehovPeriode.getPeriode().inkluderer(flyttetDødsdatoMandag) || pleiebehovPeriode.getPeriode().inkluderer(flyttetDødsdatoFredag))
                 .findAny();
             return overlappendePleiehov.isPresent();
         }
