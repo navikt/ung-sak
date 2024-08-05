@@ -135,7 +135,6 @@ public class RestImplementationClasses {
         classes.add(ReisetidRestTjeneste.class);
         classes.add(OpplæringDokumentRestTjeneste.class);
         classes.add(SaksnummerRestTjeneste.class);
-        classes.add(SaksnummerAktorRestTjeneste.class);
         classes.add(BrukerdialogRestTjeneste.class);
         classes.add(SaksnummerAktorRestTjeneste.class);
 
