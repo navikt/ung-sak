@@ -88,6 +88,9 @@ class DokumentmottakerSøknadOLP implements Dokumentmottaker {
             Søknad søknad = søknadParser.parseSøknad(dokument);
             dokument.setBehandlingId(behandlingId);
             dokument.setInnsendingstidspunkt(søknad.getMottattDato().toLocalDateTime());
+            if (søknad.getKildesystem().isPresent()) {
+                dokument.setKildesystem(søknad.getKildesystem().get().getKode());
+            }
             mottatteDokumentRepository.lagre(dokument, DokumentStatus.BEHANDLER);
             // Søknadsinnhold som persisteres "lokalt" i k9-sak
             persister(søknad, behandling, dokument.getJournalpostId());
@@ -168,7 +171,7 @@ class DokumentmottakerSøknadOLP implements Dokumentmottaker {
 
     private void håndterVedlegg(Behandling behandling, JournalpostId journalpostId, LocalDateTime mottattidspunkt,
                                 boolean journalpostHarInformasjonSomIkkeKanPunsjes, boolean journalpostHarMedisinskeOpplysninger) {
-        sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(behandling, journalpostId,
+        sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSkjema(behandling, journalpostId,
             behandling.getFagsak().getPleietrengendeAktørId(),
             mottattidspunkt, journalpostHarInformasjonSomIkkeKanPunsjes, journalpostHarMedisinskeOpplysninger);
         opplæringDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(behandling, journalpostId, mottattidspunkt);

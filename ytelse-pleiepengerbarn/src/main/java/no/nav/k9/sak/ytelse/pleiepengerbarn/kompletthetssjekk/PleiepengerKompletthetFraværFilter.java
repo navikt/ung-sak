@@ -13,10 +13,11 @@ import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.domene.behandling.steg.kompletthet.KompletthetFraværFilter;
+import no.nav.k9.sak.kompletthet.KompletthetFraværFilter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.typer.AktørId;
@@ -38,15 +39,19 @@ public class PleiepengerKompletthetFraværFilter implements KompletthetFraværFi
     private PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste;
     private PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste;
 
+    private boolean skalHaInaktivVed_8_47_B;
+
     PleiepengerKompletthetFraværFilter() {
         // CDI
     }
 
     @Inject
     public PleiepengerKompletthetFraværFilter(@Any PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste,
-                                              PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste) {
+                                              PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste,
+                                              @KonfigVerdi(value = "INAKTIV_VED_8_47_B", defaultVerdi = "false") boolean skalHaInaktivVed847B) {
         this.søknadsfristTjeneste = søknadsfristTjeneste;
         this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
+        this.skalHaInaktivVed_8_47_B = skalHaInaktivVed847B;
     }
 
     @Override
@@ -62,7 +67,7 @@ public class PleiepengerKompletthetFraværFilter implements KompletthetFraværFi
             perioderFraSøknadene,
             timeline,
             null,
-            null);
+            null, skalHaInaktivVed_8_47_B);
         var arbeidIPeriode = new MapArbeid().map(arbeidstidInput);
 
         var harFraværFraArbeidsgiverIPerioden = harFraværFraArbeidsgiverIPerioden(arbeidIPeriode, manglendeVedlegg);

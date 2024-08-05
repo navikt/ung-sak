@@ -60,7 +60,7 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
         håndterePleietrengendeDødsfallTjeneste.utvidPerioderVedDødsfall(referanse);
 
         // TODO PLS: Avklare om dette er funksjonelt ønskelig
-        var innvilgedePerioderTilVurdering = perioderMedSykdomInnvilgetUtleder.utledInnvilgedePerioderTilVurdering(referanse);
+        var innvilgedePerioderTilVurdering = perioderMedSykdomInnvilgetUtleder.utledInnvilgedePerioderTilVurdering(referanse, true);
         var manglendeAktiviteter = arbeidBrukerBurdeSøktOmUtleder.utledMangler(referanse);
         if (manglendeAktiviteter.entrySet().stream().anyMatch(it -> !it.getValue().isEmpty()) && harNoenGodkjentPerioderMedSykdom(innvilgedePerioderTilVurdering)) {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.MANGLER_AKTIVITETER));

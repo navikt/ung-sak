@@ -11,6 +11,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
@@ -32,7 +33,6 @@ class ForeslåVedtakTjeneste {
     private FagsakRepository fagsakRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private Instance<ForeslåVedtakManueltUtleder> foreslåVedtakManueltUtledere;
-
     private SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste;
 
     protected ForeslåVedtakTjeneste() {
@@ -74,6 +74,14 @@ class ForeslåVedtakTjeneste {
             håndterTotrinn(behandling, aksjonspunktDefinisjoner);
         } else {
             håndterUtenTotrinn(behandling, kontekst, aksjonspunktDefinisjoner);
+        }
+
+        // Logging av automatisering av endringsmelding
+        if (aksjonspunktDefinisjoner.isEmpty()
+            && behandling.getFagsakYtelseType().equals(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
+            && behandling.erRevurdering()
+            && behandling.getBehandlingÅrsakerTyper().stream().allMatch(årsak -> årsak.equals(BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER))) {
+            logger.info("Foreslår vedtak uten aksjonspunkter");
         }
 
         return aksjonspunktDefinisjoner.isEmpty()

@@ -15,7 +15,7 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.ErEndringIRefusjonskravVurderer;
+import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.ErEndringIRefusjonskravVurderer;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
@@ -68,6 +68,10 @@ public class RevurderingInntektsmeldingPeriodeTjeneste {
                                                                                                                 Collection<Inntektsmelding> inntektsmeldinger,
                                                                                                                 List<MottattDokument> mottatteInntektsmeldinger,
                                                                                                                 Collection<DatoIntervallEntitet> perioder) {
+        if (mottatteInntektsmeldinger.isEmpty()) {
+            return LocalDateTimeline.empty();
+        }
+
         var utledeteVilkår = getVilkårUtleder(referanse).utledVilkår(referanse);
         LocalDateTimeline<Set<InntektsmeldingRevurderingÅrsak>> inntektsmeldingEndringer = LocalDateTimeline.empty();
         var originalBehandlingReferanse = finnOriginalBehandlingReferanse(referanse);

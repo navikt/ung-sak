@@ -62,6 +62,9 @@ public class DokumentmottakerSøknadAleneomsorg implements Dokumentmottaker {
             Søknad søknad = JsonUtils.fromString(dokument.getPayload(), Søknad.class);
             dokument.setBehandlingId(behandlingId);
             dokument.setInnsendingstidspunkt(søknad.getMottattDato().toLocalDateTime());
+            if (søknad.getKildesystem().isPresent()) {
+                dokument.setKildesystem(søknad.getKildesystem().get().getKode());
+            }
             mottatteDokumentRepository.lagre(dokument, DokumentStatus.BEHANDLER);
             // Søknadsinnhold som persisteres "lokalt" i k9-sak
             persister(dokument.getJournalpostId(), søknad, behandling);
@@ -78,9 +81,7 @@ public class DokumentmottakerSøknadAleneomsorg implements Dokumentmottaker {
     private void lagreSøknad(Long behandlingId, JournalpostId journalpostId, Søknad søknad, OmsorgspengerAleneOmsorg innsendt) {
         var søknadsperiode = innsendt.getSøknadsperiode();
         boolean elektroniskSøknad = true;
-        DatoIntervallEntitet datoIntervall = søknadsperiode == null
-            ? DatoIntervallEntitet.fraOgMed(søknad.getMottattDato().toLocalDate())
-            : DatoIntervallEntitet.fra(søknadsperiode.getFraOgMed(), søknadsperiode.getTilOgMed());
+        DatoIntervallEntitet datoIntervall = DatoIntervallEntitet.fra(søknadsperiode.getFraOgMed(), søknadsperiode.getTilOgMed());
 
         var søknadBuilder = new SøknadEntitet.Builder()
             .medSøknadsperiode(datoIntervall)

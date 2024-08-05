@@ -41,7 +41,7 @@ class MapUtenlandsoppholdTest {
             List.of(new UttakPeriode(periodeTilVurdering, Duration.ZERO)),
             List.of(),
             List.of(),
-            List.of(new UtenlandsoppholdPeriode(periodeTilVurdering, true, Landkoder.USA, UtenlandsoppholdÅrsak.BARNET_INNLAGT_I_HELSEINSTITUSJON_DEKKET_ETTER_AVTALE_MED_ET_ANNET_LAND_OM_TRYGD)),
+            List.of(new UtenlandsoppholdPeriode(periodeTilVurdering, true, Landkoder.USA, UtenlandsoppholdÅrsak.BARNET_INNLAGT_I_HELSEINSTITUSJON_DEKKET_ETTER_AVTALE_MED_ET_ANNET_LAND_OM_TRYGD, true)),
             List.of(),
             List.of(),
             List.of()));
@@ -72,7 +72,7 @@ class MapUtenlandsoppholdTest {
                 List.of(new UttakPeriode(periodeDel1, Duration.ZERO)),
                 List.of(),
                 List.of(),
-                List.of(new UtenlandsoppholdPeriode(utenlandsperiode, true, Landkoder.USA, UtenlandsoppholdÅrsak.BARNET_INNLAGT_I_HELSEINSTITUSJON_FOR_NORSK_OFFENTLIG_REGNING )),
+                List.of(new UtenlandsoppholdPeriode(utenlandsperiode, true, Landkoder.USA, UtenlandsoppholdÅrsak.BARNET_INNLAGT_I_HELSEINSTITUSJON_FOR_NORSK_OFFENTLIG_REGNING, true)),
                 List.of(),
                 List.of(),
                 List.of()),

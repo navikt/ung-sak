@@ -44,10 +44,6 @@ public abstract class OverstyringAksjonspunktDto implements AksjonspunktKode, Ov
         this.begrunnelse = begrunnelse;
     }
 
-    public OverstyringAksjonspunktDto(String begrunnelse) {
-        this.begrunnelse = begrunnelse;
-    }
-
     @Override
     public String getBegrunnelse() {
         return begrunnelse;

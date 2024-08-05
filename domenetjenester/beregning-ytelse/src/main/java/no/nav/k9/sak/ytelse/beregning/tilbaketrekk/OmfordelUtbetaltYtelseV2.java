@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.beregning.tilbaketrekk;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -9,6 +11,7 @@ import java.util.stream.Collectors;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAktivitetsnøkkelV2;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.k9.sak.ytelse.beregning.regler.UtbetalingsgradOppdragBeregner;
 
 class OmfordelUtbetaltYtelseV2 {
     private OmfordelUtbetaltYtelseV2() {
@@ -31,7 +34,19 @@ class OmfordelUtbetaltYtelseV2 {
                 list.addAll(byggAndelerForTilkommetNøkkel(revurderingNøkkelMedAndeler));
             }
         }
+
+        settNyUtbetalingsgradOppdrag(revurderingAndeler, list);
+
         return list;
+    }
+
+    private static void settNyUtbetalingsgradOppdrag(List<BeregningsresultatAndel> revurderingAndeler, List<BeregningsresultatAndel.Builder> list) {
+        var andelMedUtbetaling = revurderingAndeler.stream().filter(a -> a.getDagsatsFraBg() > 0 && a.getUtbetalingsgradOppdrag() != null).findFirst();
+        if (andelMedUtbetaling.isEmpty()) {
+            return;
+        }
+        var dagsatsfaktorUtbetalingsgradOppdrag = UtbetalingsgradOppdragBeregner.finnDagsatsfaktorFraUtbetalingsgrad(andelMedUtbetaling.get().getUtbetalingsgradOppdrag(), new BigDecimal(andelMedUtbetaling.get().getDagsatsFraBg()));
+        list.stream().forEach(b -> b.medUtbetalingsgradOppdrag(new BigDecimal(b.getDagsats()).multiply(dagsatsfaktorUtbetalingsgradOppdrag).setScale(2, RoundingMode.HALF_UP)));
     }
 
     private static List<BeregningsresultatAndel.Builder> byggAndelerForTilkommetNøkkel(BRNøkkelMedAndeler revurderingNøkkelMedAndeler) {

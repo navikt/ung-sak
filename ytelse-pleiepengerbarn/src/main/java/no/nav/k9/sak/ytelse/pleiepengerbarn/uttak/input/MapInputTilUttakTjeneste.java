@@ -70,14 +70,18 @@ public class MapInputTilUttakTjeneste {
     private final HentDataTilUttakTjeneste hentDataTilUttakTjeneste;
     private final String unntak;
     private final boolean skalKjøreNyLogikkForSpeiling;
+    private final boolean skalHaInaktivVed847B;
 
     @Inject
     public MapInputTilUttakTjeneste(HentDataTilUttakTjeneste hentDataTilUttakTjeneste,
                                     @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak,
-                                    @KonfigVerdi(value = "IKKE_YRKESAKTIV_UTEN_SPEILING", required = false, defaultVerdi = "false") boolean skalKjøreNyLogikkForSpeiling) {
+                                    @KonfigVerdi(value = "IKKE_YRKESAKTIV_UTEN_SPEILING", required = false, defaultVerdi = "false") boolean skalKjøreNyLogikkForSpeiling,
+                                    @KonfigVerdi(value = "INAKTIV_VED_8_47_B", defaultVerdi = "false") boolean skalHaInaktivVed847B
+                                    ) {
         this.hentDataTilUttakTjeneste = hentDataTilUttakTjeneste;
         this.unntak = unntak;
         this.skalKjøreNyLogikkForSpeiling = skalKjøreNyLogikkForSpeiling;
+        this.skalHaInaktivVed847B = skalHaInaktivVed847B;
     }
 
 
@@ -131,7 +135,8 @@ public class MapInputTilUttakTjeneste {
             behandling.getAktørId(),
             opptjeningTidslinje,
             input.getInntektArbeidYtelseGrunnlag(),
-            skalKjøreNyLogikkForSpeiling || behandling.getFagsak().getSaksnummer().getVerdi().equals(SPEILE_SAK_SOM_HAR_BLITT_FEIL));
+            skalKjøreNyLogikkForSpeiling || behandling.getFagsak().getSaksnummer().getVerdi().equals(SPEILE_SAK_SOM_HAR_BLITT_FEIL),
+            input.getBeregningsgrunnlag());
         var inaktivTidslinje = new PerioderMedInaktivitetUtleder().utled(inaktivitetUtlederInput);
 
         var arbeidstidInput = new ArbeidstidMappingInput()
@@ -140,6 +145,7 @@ public class MapInputTilUttakTjeneste {
             .medPerioderFraSøknader(perioderFraSøknader)
             .medTidslinjeTilVurdering(tidslinjeTilVurdering)
             .medVilkår(input.getVilkårene().getVilkår(VilkårType.OPPTJENINGSVILKÅRET).orElseThrow())
+            .medSkalHaInaktivVed847B(skalHaInaktivVed847B)
             .medOpptjeningsResultat(input.getOpptjeningResultat().orElse(null))
             .medInaktivTidslinje(inaktivTidslinje)
             .medInntektArbeidYtelseGrunnlag(input.getInntektArbeidYtelseGrunnlag())

@@ -25,8 +25,11 @@ import no.nav.k9.aarskvantum.kontrakter.ManuellVurderingRequest;
 import no.nav.k9.aarskvantum.kontrakter.MinMaxRequest;
 import no.nav.k9.aarskvantum.kontrakter.RammevedtakRequest;
 import no.nav.k9.aarskvantum.kontrakter.RammevedtakResponse;
+import no.nav.k9.aarskvantum.kontrakter.RammevedtakV2Request;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDagerV2;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlag;
+import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlagV2;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUtbetalingGrunnlag;
 import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUttrekk;
@@ -70,6 +73,27 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
 
         try {
             var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum");
+            var result = restKlient.post(endpoint, grunnlag, ÅrskvantumResultat.class);
+            var constraints = VALIDATOR.validate(result);
+            if (!constraints.isEmpty()) {
+                throw new IllegalStateException("Ugyldig response fra " + endpoint + ", ref=" + grunnlag.getBehandlingUUID() + ": " + constraints);
+            }
+            return result;
+        } catch (IllegalStateException e) {
+            throw e; // rethrow
+        } catch (Exception e) {
+            throw RestTjenesteFeil.FEIL.feilKallTilÅrskvantum(e.getMessage(), e).toException();
+        }
+    }
+
+    @Override
+    public ÅrskvantumResultat hentÅrskvantumUttak(ÅrskvantumGrunnlagV2 grunnlag) {
+        if (grunnlag.getUttakperioder().isEmpty()) {
+            throw new IllegalArgumentException("Har ikke fraværsperioder for " + grunnlag.getBehandlingUUID());
+        }
+
+        try {
+            var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/v2");
             var result = restKlient.post(endpoint, grunnlag, ÅrskvantumResultat.class);
             var constraints = VALIDATOR.validate(result);
             if (!constraints.isEmpty()) {
@@ -142,6 +166,23 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
     }
 
     @Override
+    public ÅrskvantumForbrukteDagerV2 hentÅrskvantumForBehandlingV2(UUID behandlingUUID) {
+        try {
+            var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/forbruktedager/v2?behandlingUUID=" + behandlingUUID.toString());
+            var result = restKlient.get(endpoint, ÅrskvantumForbrukteDagerV2.class);
+            var constraints = VALIDATOR.validate(result);
+            if (!constraints.isEmpty()) {
+                throw new IllegalStateException("Ugyldig response fra " + endpoint + ", behandlingUUID=" + behandlingUUID + ": " + constraints);
+            }
+            return result;
+        } catch (IllegalStateException e) {
+            throw e; // rethrow
+        } catch (Exception e) {
+            throw RestTjenesteFeil.FEIL.feilKallTilhentÅrskvantumForBehandling(e.getMessage(), e).toException();
+        }
+    }
+
+    @Override
     public Periode hentPeriodeForFagsak(Saksnummer saksnummer) {
         try {
             var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/minmax");
@@ -200,11 +241,30 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
     }
 
     @Override
+    public ÅrskvantumUtbetalingGrunnlag hentUtbetalingGrunnlag(ÅrskvantumGrunnlagV2 årskvantumGrunnlag) {
+        try {
+            var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/hentUtbetalingGrunnlag/v2");
+            return restKlient.post(endpoint, årskvantumGrunnlag, ÅrskvantumUtbetalingGrunnlag.class);
+        } catch (Exception e) {
+            throw RestTjenesteFeil.FEIL.feilKallHentUtbetalingGrunnlag(e.getMessage(), e).toException();
+        }
+    }
+
+    @Override
     public RammevedtakResponse hentRammevedtak(PersonIdent personIdent, List<PersonIdent> barnFnr, LukketPeriode periode) {
         try {
             var barnasFnr = barnFnr.stream().map(barn -> barn.getIdent()).toList();
             var request = new RammevedtakRequest(personIdent.getIdent(), barnasFnr, periode);
             var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/hentRammevedtak");
+            return restKlient.post(endpoint, request, RammevedtakResponse.class);
+        } catch (Exception e) {
+            throw new IllegalStateException("Feil ved kall til rammevedtakstjeneste på årskvantum", e);
+        }
+    }
+    @Override
+    public RammevedtakResponse hentRammevedtak(RammevedtakV2Request request) {
+        try {
+            var endpoint = URI.create(endpointUttaksplan.toString() + "/aarskvantum/hentRammevedtak/v2");
             return restKlient.post(endpoint, request, RammevedtakResponse.class);
         } catch (Exception e) {
             throw new IllegalStateException("Feil ved kall til rammevedtakstjeneste på årskvantum", e);

@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -52,6 +53,7 @@ public class InputParametere {
     private OpptjeningResultat opptjeningResultat;
     private RettPleiepengerVedDødGrunnlag rettPleiepengerVedDødGrunnlag;
     private InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag;
+    private List<Beregningsgrunnlag> beregningsgrunnlag;
     private UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende;
     private Set<PerioderFraSøknad> perioderFraSøknad;
     private DatoIntervallEntitet utvidetPeriodeSomFølgeAvDødsfall;
@@ -220,6 +222,17 @@ public class InputParametere {
     public InntektArbeidYtelseGrunnlag getInntektArbeidYtelseGrunnlag() {
         return inntektArbeidYtelseGrunnlag;
     }
+
+
+    public InputParametere medBeregningsgrunnlag(List<Beregningsgrunnlag> beregningsgrunnlag) {
+        this.beregningsgrunnlag = beregningsgrunnlag;
+        return this;
+    }
+
+    public List<Beregningsgrunnlag> getBeregningsgrunnlag() {
+        return beregningsgrunnlag;
+    }
+
 
     public InputParametere medUnntakEtablertTilsynForPleietrengende(UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende) {
         this.unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynForPleietrengende;

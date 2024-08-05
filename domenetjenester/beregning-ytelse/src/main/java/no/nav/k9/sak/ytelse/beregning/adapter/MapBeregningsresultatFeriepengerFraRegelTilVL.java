@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 
-import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
@@ -33,13 +32,16 @@ public class MapBeregningsresultatFeriepengerFraRegelTilVL {
         if (regelAndel.getBeregningsresultatFeriepengerPrÅrListe().isEmpty()) {
             return;
         }
-        AktivitetStatus regelAndelAktivitetStatus = AktivitetStatusMapper.fraRegelTilVl(regelAndel);
+        var regelAndelAktivitetStatus = AktivitetStatusMapper.fraRegelTilVl(regelAndel);
+        var regelAndelInntektskategori = InntektskategoriMapper.fraRegelTilVL(regelAndel.getInntektskategori());
+
         String regelArbeidsgiverId = regelAndel.getArbeidsforhold() == null ? null : regelAndel.getArbeidsgiverId();
         String regelArbeidsforholdId = regelAndel.getArbeidsforhold() != null ? regelAndel.getArbeidsforhold().getArbeidsforholdId() : null;
         BeregningsresultatAndel andel = vlBeregningsresultatPeriode.getBeregningsresultatAndelList().stream()
             .filter(vlAndel -> {
                 String vlArbeidsforholdRef = vlAndel.getArbeidsforholdRef() == null ? null : vlAndel.getArbeidsforholdRef().getReferanse();
                 return Objects.equals(vlAndel.getAktivitetStatus(), regelAndelAktivitetStatus)
+                    && Objects.equals(vlAndel.getInntektskategori(), regelAndelInntektskategori)
                     && Objects.equals(vlAndel.getArbeidsgiver().map(Arbeidsgiver::getIdentifikator).orElse(null), regelArbeidsgiverId)
                     && Objects.equals(vlArbeidsforholdRef, regelArbeidsforholdId)
                     && Objects.equals(vlAndel.erBrukerMottaker(), regelAndel.erBrukerMottaker());

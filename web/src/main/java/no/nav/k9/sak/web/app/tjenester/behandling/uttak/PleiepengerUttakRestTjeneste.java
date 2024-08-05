@@ -5,9 +5,7 @@ import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,10 +39,12 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.prosesstask.rest.AbacEmptySupplier;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellRepository;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrUttakRepository;
@@ -86,7 +86,6 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Simulering;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
-import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
 @ApplicationScoped
@@ -115,9 +114,8 @@ public class PleiepengerUttakRestTjeneste {
     private KjøreplanUtleder kjøreplanUtleder;
     private UttakNyeReglerRepository uttakNyeReglerRepository;
     private OverstyrUttakRepository overstyrUttakRepository;
-
+    private BehandlingModellRepository behandlingModellRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
-
     private EntityManager entityManager;
     private ArbeidsgiverOversiktTjeneste arbeidsgiverOversiktTjeneste;
 
@@ -134,7 +132,7 @@ public class PleiepengerUttakRestTjeneste {
                                         KjøreplanUtleder kjøreplanUtleder,
                                         UttakNyeReglerRepository uttakNyeReglerRepository,
                                         OverstyrUttakRepository overstyrUttakRepository,
-                                        @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
+                                        BehandlingModellRepository behandlingModellRepository, @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
                                         EntityManager entityManager,
                                         ArbeidsgiverOversiktTjeneste arbeidsgiverOversiktTjeneste) {
         this.uttakTjeneste = uttakTjeneste;
@@ -145,6 +143,7 @@ public class PleiepengerUttakRestTjeneste {
         this.kjøreplanUtleder = kjøreplanUtleder;
         this.uttakNyeReglerRepository = uttakNyeReglerRepository;
         this.overstyrUttakRepository = overstyrUttakRepository;
+        this.behandlingModellRepository = behandlingModellRepository;
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
         this.entityManager = entityManager;
         this.arbeidsgiverOversiktTjeneste = arbeidsgiverOversiktTjeneste;
@@ -175,6 +174,15 @@ public class PleiepengerUttakRestTjeneste {
         var behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
         var utsattePerioder = mapUtsattePerioder(behandling);
         var perioderTilVurdering = mapPerioderTilVurdering(behandling);
+
+
+        var erFørVurderingsstegForNyeRegler = !behandling.erAvsluttet() && behandlingModellRepository.getModell(behandling.getType(), behandling.getFagsakYtelseType()).erStegAFørStegB(behandling.getAktivtBehandlingSteg(), BehandlingStegType.VURDER_STARTDATO_UTTAKSREGLER);
+
+        if (erFørVurderingsstegForNyeRegler) {
+            return UttaksplanMedUtsattePerioder.medUttaksplan(null, utsattePerioder, null, perioderTilVurdering);
+        }
+
+
         final LocalDate virkningsdatoUttakNyeRegler = uttakNyeReglerRepository.finnDatoForNyeRegler(behandling.getId()).orElse(null);
 
         var uttaksplan = uttakTjeneste.hentUttaksplan(behandlingIdDto.getBehandlingUuid(), true);

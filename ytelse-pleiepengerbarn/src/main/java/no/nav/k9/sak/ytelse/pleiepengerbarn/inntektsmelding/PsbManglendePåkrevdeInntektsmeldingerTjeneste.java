@@ -34,7 +34,7 @@ import no.nav.k9.sak.domene.arbeidsforhold.impl.IkkeTattStillingTil;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.InntektsmeldingVurderingInput;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.LeggTilResultat;
 import no.nav.k9.sak.domene.arbeidsforhold.impl.YtelsespesifikkeInntektsmeldingTjeneste;
-import no.nav.k9.sak.domene.behandling.steg.kompletthet.KompletthetForBeregningTjeneste;
+import no.nav.k9.sak.kompletthet.KompletthetForBeregningTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntekt;
 import no.nav.k9.sak.domene.iay.modell.InntektFilter;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;

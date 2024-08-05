@@ -1,8 +1,18 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
+import static no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.SkalForlengeAktivitetstatus.ForlengetAktivitetstatusKravType.FORLENGELSE_OPPTJENING;
+import static no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.SkalForlengeAktivitetstatus.ForlengetAktivitetstatusKravType.INGEN_KOMPLETTHET_ENDRING;
+import static no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.SkalForlengeAktivitetstatus.ForlengetAktivitetstatusKravType.INGEN_RELEVANT_IM_ENDRING;
+import static no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.SkalForlengeAktivitetstatus.ForlengetAktivitetstatusKravType.OPPFYLT_FORRIGE_BEHANDLING;
+import static no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.SkalForlengeAktivitetstatus.ForlengetAktivitetstatusKravType.TIL_VURDERING;
+import static no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.SkalForlengeAktivitetstatus.IngenForlengetAktivitetstatusÅrsak.FORLENGELSE_BEREGNING;
+import static no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.SkalForlengeAktivitetstatus.IngenForlengetAktivitetstatusÅrsak.PROSESSTRIGGER_REVURDERING;
+
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Set;
@@ -10,6 +20,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.inject.Instance;
+import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.HarEndretInntektsmeldingVurderer;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingRelevantForVilkårsrevurdering;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
@@ -22,17 +33,44 @@ import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.KompletthetPeriode;
 
-class SkalForlengeAktivitetstatus {
+public class SkalForlengeAktivitetstatus {
 
     private final HarEndretInntektsmeldingVurderer harEndretInntektsmeldingVurderer;
 
-    SkalForlengeAktivitetstatus(Instance<InntektsmeldingRelevantForVilkårsrevurdering> inntektsmeldingRelevantForBeregningVilkårsvurdering) {
+    public SkalForlengeAktivitetstatus(Instance<InntektsmeldingRelevantForVilkårsrevurdering> inntektsmeldingRelevantForBeregningVilkårsvurdering) {
         this.harEndretInntektsmeldingVurderer = new HarEndretInntektsmeldingVurderer(
             getInntektsmeldingFilter(inntektsmeldingRelevantForBeregningVilkårsvurdering),
             SkalForlengeAktivitetstatus::finnEndringer);
     }
 
-    NavigableSet<PeriodeTilVurdering> finnPerioderForForlengelseAvStatus(SkalForlengeStatusInput skalForlengeStatusInput) {
+    public SkalForlengeAktivitetstatus(InntektsmeldingRelevantForVilkårsrevurdering inntektsmeldingRelevantForBeregningVilkårsvurdering) {
+        this.harEndretInntektsmeldingVurderer = new HarEndretInntektsmeldingVurderer(
+            inntektsmeldingRelevantForBeregningVilkårsvurdering::begrensInntektsmeldinger,
+            SkalForlengeAktivitetstatus::finnEndringer);
+    }
+
+    NavigableSet<PeriodeTilVurdering> finnPerioderForForlengelseAvStatus(SkalForlengeAktivitetstatusInput skalForlengeStatusInput) {
+        var dataTilUtledning = finnDataForUtledning(skalForlengeStatusInput);
+
+        var forlengetStatusTidslinje = dataTilUtledning.kravForForlengelseTidslinjer
+            .values()
+            .stream()
+            .reduce(LocalDateTimeline::intersection)
+            .orElse(LocalDateTimeline.empty())
+            .disjoint(dataTilUtledning.årsakTilIngenForlengelseTidslinjer
+                .values()
+                .stream()
+                .reduce(LocalDateTimeline.empty(), LocalDateTimeline::crossJoin));
+
+        var forlengeletStatusPerioder = TidslinjeUtil.tilDatoIntervallEntiteter(forlengetStatusTidslinje);
+        return skalForlengeStatusInput.perioderTilVurderingIBeregning().stream()
+            .filter(p -> forlengeletStatusPerioder.stream().anyMatch(it -> it.overlapper(p.getPeriode())))
+            .collect(Collectors.toCollection(TreeSet::new));
+    }
+
+
+
+    public ForlengelseAktivitetstatusTidslinjer finnDataForUtledning(SkalForlengeAktivitetstatusInput skalForlengeStatusInput) {
         var oppfyltePerioderForrigeBehandlingTidslinje = finnOppfylteVilkårsperioderForrigeBehandlingTidslinje(skalForlengeStatusInput);
         var forlengelserIOpptjeningTidslinje = finnForlengelserIOpptjeningTidslinje(skalForlengeStatusInput);
         var prosesstriggerTidslinje = finnProsesstriggerTidslinje(skalForlengeStatusInput);
@@ -44,21 +82,18 @@ class SkalForlengeAktivitetstatus {
             .stream().map(PeriodeTilVurdering::getPeriode)
             .collect(Collectors.toSet());
 
-        var forlengetStatusTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(intervaller)
-            .intersection(forlengelserIOpptjeningTidslinje)
-            .intersection(oppfyltePerioderForrigeBehandlingTidslinje)
-            .intersection(utenEndringIInntektsmeldingTidslinje)
-            .intersection(ingenEndringIKompletthetTidslinje)
-            .disjoint(forlengelserIBeregningTidslinje)
-            .disjoint(prosesstriggerTidslinje);
-
-        var forlengeletStatusPerioder = TidslinjeUtil.tilDatoIntervallEntiteter(forlengetStatusTidslinje);
-        return skalForlengeStatusInput.perioderTilVurderingIBeregning().stream()
-            .filter(p -> forlengeletStatusPerioder.stream().anyMatch(it -> it.overlapper(p.getPeriode())))
-            .collect(Collectors.toCollection(TreeSet::new));
+        var dataTilUtledning = new ForlengelseAktivitetstatusTidslinjer(new HashMap<>(), new HashMap<>());
+        dataTilUtledning.kravForForlengelseTidslinjer.put(TIL_VURDERING, TidslinjeUtil.tilTidslinjeKomprimert(intervaller));
+        dataTilUtledning.kravForForlengelseTidslinjer.put(OPPFYLT_FORRIGE_BEHANDLING, oppfyltePerioderForrigeBehandlingTidslinje);
+        dataTilUtledning.kravForForlengelseTidslinjer.put(FORLENGELSE_OPPTJENING, forlengelserIOpptjeningTidslinje);
+        dataTilUtledning.kravForForlengelseTidslinjer.put(INGEN_RELEVANT_IM_ENDRING, utenEndringIInntektsmeldingTidslinje);
+        dataTilUtledning.kravForForlengelseTidslinjer.put(INGEN_KOMPLETTHET_ENDRING, ingenEndringIKompletthetTidslinje);
+        dataTilUtledning.årsakTilIngenForlengelseTidslinjer.put(FORLENGELSE_BEREGNING, forlengelserIBeregningTidslinje);
+        dataTilUtledning.årsakTilIngenForlengelseTidslinjer.put(PROSESSTRIGGER_REVURDERING, prosesstriggerTidslinje);
+        return dataTilUtledning;
     }
 
-    private LocalDateTimeline<Boolean> finnTidslinjeForKompletthetUtenEndring(SkalForlengeStatusInput skalForlengeStatusInput) {
+    private LocalDateTimeline<Boolean> finnTidslinjeForKompletthetUtenEndring(SkalForlengeAktivitetstatusInput skalForlengeStatusInput) {
         return skalForlengeStatusInput.perioderTilVurderingIBeregning()
             .stream()
             .map(PeriodeTilVurdering::getPeriode)
@@ -70,7 +105,7 @@ class SkalForlengeAktivitetstatus {
             .reduce(LocalDateTimeline.empty(), (t1, t2) -> t1.crossJoin(t2, StandardCombinators::alwaysTrueForMatch));
     }
 
-    private LocalDateTimeline<Boolean> finnTidslinjeForInntektsmeldingUtenEndring(SkalForlengeStatusInput skalForlengeStatusInput) {
+    private LocalDateTimeline<Boolean> finnTidslinjeForInntektsmeldingUtenEndring(SkalForlengeAktivitetstatusInput skalForlengeStatusInput) {
         return skalForlengeStatusInput.perioderTilVurderingIBeregning()
             .stream()
             .map(PeriodeTilVurdering::getPeriode)
@@ -82,14 +117,14 @@ class SkalForlengeAktivitetstatus {
             .reduce(LocalDateTimeline.empty(), (t1, t2) -> t1.crossJoin(t2, StandardCombinators::alwaysTrueForMatch));
     }
 
-    private static LocalDateTimeline<Boolean> finnForlengelserIBeregningTidslinje(SkalForlengeStatusInput skalForlengeStatusInput) {
+    private static LocalDateTimeline<Boolean> finnForlengelserIBeregningTidslinje(SkalForlengeAktivitetstatusInput skalForlengeStatusInput) {
         return skalForlengeStatusInput.perioderTilVurderingIBeregning().stream().filter(PeriodeTilVurdering::erForlengelse)
             .map(PeriodeTilVurdering::getPeriode)
             .map(it -> new LocalDateTimeline<>(it.getFomDato(), it.getTomDato(), true))
             .reduce(LocalDateTimeline.empty(), (t1, t2) -> t1.crossJoin(t2, StandardCombinators::alwaysTrueForMatch));
     }
 
-    private LocalDateTimeline<Boolean> finnForlengelserIOpptjeningTidslinje(SkalForlengeStatusInput skalForlengeStatusInput) {
+    private LocalDateTimeline<Boolean> finnForlengelserIOpptjeningTidslinje(SkalForlengeAktivitetstatusInput skalForlengeStatusInput) {
         return skalForlengeStatusInput.perioderTilVurderingIOpptjening().stream()
             .filter(PeriodeTilVurdering::erForlengelse)
             .map(PeriodeTilVurdering::getPeriode)
@@ -97,7 +132,7 @@ class SkalForlengeAktivitetstatus {
             .reduce(LocalDateTimeline.empty(), (t1, t2) -> t1.crossJoin(t2, StandardCombinators::alwaysTrueForMatch));
     }
 
-    private LocalDateTimeline<Boolean> finnProsesstriggerTidslinje(SkalForlengeStatusInput skalForlengeStatusInput) {
+    private LocalDateTimeline<Boolean> finnProsesstriggerTidslinje(SkalForlengeAktivitetstatusInput skalForlengeStatusInput) {
         return skalForlengeStatusInput.perioderForRevurderingAvBeregningFraProsesstrigger().stream()
             .map(it -> new LocalDateTimeline<>(it.getFomDato(), it.getTomDato(), true))
             .reduce(LocalDateTimeline.empty(), (t1, t2) -> t1.crossJoin(t2, StandardCombinators::alwaysTrueForMatch));
@@ -131,6 +166,7 @@ class SkalForlengeAktivitetstatus {
         var nyeArbeidsforhold = unikeArbeidsforhold.stream().filter(it -> !unikeArbeidsforholdForrigeVedtak.contains(it)).collect(Collectors.toSet());
         return relevanteInntektsmeldinger.stream().filter(im -> nyeArbeidsforhold.contains(finnArbeidsforholdIdentifikator(im))).collect(Collectors.toSet());
     }
+
     private static Set<String> finnUnikeArbeidsforholdIdentifikatorer(Collection<Inntektsmelding> relevanteInntektsmeldinger) {
         return relevanteInntektsmeldinger.stream().map(
             im -> im.getArbeidsgiver().getIdentifikator() + im.getArbeidsforholdRef().getReferanse()
@@ -142,7 +178,7 @@ class SkalForlengeAktivitetstatus {
     }
 
 
-    private LocalDateTimeline<Boolean> finnOppfylteVilkårsperioderForrigeBehandlingTidslinje(SkalForlengeStatusInput skalForlengeStatusInput) {
+    private LocalDateTimeline<Boolean> finnOppfylteVilkårsperioderForrigeBehandlingTidslinje(SkalForlengeAktivitetstatusInput skalForlengeStatusInput) {
         return skalForlengeStatusInput.innvilgedePerioderForrigeBehandling().stream()
             .map(p -> finnPeriodeIDenneBehandlingen(skalForlengeStatusInput.perioderTilVurderingIBeregning(), p))
             .filter(Optional::isPresent)
@@ -160,19 +196,23 @@ class SkalForlengeAktivitetstatus {
             InntektsmeldingRelevantForVilkårsrevurdering.finnTjeneste(inntektsmeldingRelevantForBeregningVilkårsvurdering, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, referanse.getFagsakYtelseType()).orElseThrow().begrensInntektsmeldinger(referanse, sakInntektsmeldinger, vilkårsPeriode);
     }
 
-    record SkalForlengeStatusInput(
-        BehandlingReferanse behandlingReferanse,
-        BehandlingReferanse originalBehandlingReferanse,
-        Set<Inntektsmelding> inntektsmeldinger,
-        List<MottattDokument> mottatteInntektsmeldinger,
-        NavigableSet<DatoIntervallEntitet> perioderForRevurderingAvBeregningFraProsesstrigger,
-        NavigableSet<PeriodeTilVurdering> perioderTilVurderingIOpptjening,
-        NavigableSet<PeriodeTilVurdering> perioderTilVurderingIBeregning,
-        NavigableSet<DatoIntervallEntitet> innvilgedePerioderForrigeBehandling,
-        Set<KompletthetPeriode> gjeldendeKompletthetsvurdering,
-        Set<KompletthetPeriode> forrigeKompletthetsvurdering
+    public record ForlengelseAktivitetstatusTidslinjer(
+        Map<ForlengetAktivitetstatusKravType, LocalDateTimeline<Boolean>> kravForForlengelseTidslinjer,
+        Map<IngenForlengetAktivitetstatusÅrsak, LocalDateTimeline<Boolean>> årsakTilIngenForlengelseTidslinjer
     ) {
+    }
 
+    public enum ForlengetAktivitetstatusKravType {
+        TIL_VURDERING,
+        OPPFYLT_FORRIGE_BEHANDLING,
+        FORLENGELSE_OPPTJENING,
+        INGEN_RELEVANT_IM_ENDRING,
+        INGEN_KOMPLETTHET_ENDRING,
+    }
+
+    public enum IngenForlengetAktivitetstatusÅrsak {
+        FORLENGELSE_BEREGNING,
+        PROSESSTRIGGER_REVURDERING
     }
 
 }

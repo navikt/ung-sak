@@ -521,14 +521,13 @@ public class RegisterdataInnhenter {
         var periode = new Periode(opplysningsperiode.getFom(), opplysningsperiode.getTom());
         var aktør = new AktørIdPersonident(behandling.getAktørId().getId());
 
+        var opplysningsperiodeSkattegrunnlag = periodeTjeneste.utledOpplysningsperiodeSkattegrunnlag(behandling.getId());
+        log.info("Opplysningsperiode skattegrunnlag: " + opplysningsperiodeSkattegrunnlag);
+
         var innhentRegisterdataRequest = new InnhentRegisterdataRequest(saksnummer, behandlingUuid, ytelseType, periode, aktør, informasjonsElementer);
         innhentRegisterdataRequest.setCallbackUrl(abakusTjeneste.getCallbackUrl());
         innhentRegisterdataRequest.setCallbackScope(abakusTjeneste.getCallbackScope());
-
-        var opplysningsperiodeSkattegrunnlag = periodeTjeneste.utledOpplysningsperiodeSkattegrunnlag(behandling.getId());
-        log.info("Opplysningsperiode skattegrunnlag: " + opplysningsperiodeSkattegrunnlag);
         innhentRegisterdataRequest.setOpplysningsperiodeSkattegrunnlag(new Periode(opplysningsperiodeSkattegrunnlag.getFom(), opplysningsperiodeSkattegrunnlag.getTom()));
-
         abakusTjeneste.innhentRegisterdata(innhentRegisterdataRequest);
     }
 

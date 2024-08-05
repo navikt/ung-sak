@@ -3,6 +3,7 @@ package no.nav.k9.sak.behandlingslager.behandling.beregning;
 import static no.nav.k9.felles.jpa.HibernateVerktøy.hentUniktResultat;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -11,6 +12,9 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 
+import no.nav.k9.felles.util.Tuple;
+import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
@@ -51,6 +55,30 @@ public class BeregningsresultatRepository {
         query.setParameter("behandlingId", behandlingId); //$NON-NLS-1$
         return hentUniktResultat(query);
     }
+
+    @SuppressWarnings("unchecked")
+    public List<Behandling> hentSisteBehandlingerMedUtbetalingForDagpenger(FagsakYtelseType ytelseType, LocalDate fom, LocalDate tom) {
+        String sql = """
+            select DISTINCT ON (behandling.fagsak_id) behandling.* from BR_RESULTAT_BEHANDLING gr_br
+            inner join BR_BEREGNINGSRESULTAT br on gr_br.bg_beregningsresultat_fp_id = br.id
+            inner join BR_ANDEL andel on br.id = andel.BEREGNINGSRESULTAT_ID
+            inner join BEHANDLING behandling on gr_br.behandling_id = behandling.id
+            inner join FAGSAK fagsak on fagsak.id = behandling.fagsak_id
+            where gr_br.aktiv = true
+            and andel.inntektskategori = 'DAGPENGER'
+            and andel.dagsats > 0
+            and fagsak.ytelse_type = :ytelseType
+            and andel.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true
+            order by behandling.fagsak_id, behandling.opprettet_tid desc
+              """;
+
+        var query = entityManager.createNativeQuery(sql, Behandling.class); //$NON-NLS-1$
+        query.setParameter("ytelseType", ytelseType.getKode());
+        query.setParameter("fom", fom);
+        query.setParameter("tom", tom);
+        return query.getResultList();
+    }
+
 
     public void lagre(Behandling behandling, BeregningsresultatEntitet beregningsresultat) {
         BehandlingBeregningsresultatBuilder builder = opprettResultatBuilderFor(behandling.getId());

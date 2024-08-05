@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunktDto;
+import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -30,8 +31,8 @@ public class OverstyrtSøknadsfristDto extends OverstyringAksjonspunktDto {
     public OverstyrtSøknadsfristDto() {
     }
 
-    public OverstyrtSøknadsfristDto(String begrunnelse, List<AvklartKravDto> avklarteKrav) {
-        super(begrunnelse);
+    public OverstyrtSøknadsfristDto(Periode periode, String begrunnelse, List<AvklartKravDto> avklarteKrav) {
+        super(periode, begrunnelse);
         this.avklarteKrav = avklarteKrav;
     }
 

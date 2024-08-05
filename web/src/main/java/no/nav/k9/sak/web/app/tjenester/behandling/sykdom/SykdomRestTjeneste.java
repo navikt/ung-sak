@@ -20,6 +20,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomAksjonspunktDto;
@@ -67,14 +68,15 @@ public class SykdomRestTjeneste {
                                                         @Valid
                                                         @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
                                                             BehandlingUuidDto behandlingUuid) {
-        final var behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).get();
-        final var aksjonspunkt = sykdomVurderingTjeneste.vurderAksjonspunkt(behandling);
+        final Behandling behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).get();
+        final SykdomAksjonspunkt aksjonspunkt = sykdomVurderingTjeneste.vurderAksjonspunkt(behandling);
 
         return toSykdomAksjonspunktDto(aksjonspunkt);
     }
 
     private SykdomAksjonspunktDto toSykdomAksjonspunktDto(final SykdomAksjonspunkt aksjonspunkt) {
-        return new SykdomAksjonspunktDto(aksjonspunkt.isKanLøseAksjonspunkt(),
+        return new SykdomAksjonspunktDto(
+            aksjonspunkt.isKanLøseAksjonspunkt(),
             aksjonspunkt.isHarUklassifiserteDokumenter(),
             aksjonspunkt.isManglerDiagnosekode(),
             aksjonspunkt.isManglerGodkjentLegeerklæring(),
@@ -83,6 +85,8 @@ public class SykdomRestTjeneste {
             aksjonspunkt.isManglerVurderingAvILivetsSluttfase(),
             aksjonspunkt.isHarDataSomIkkeHarBlittTattMedIBehandling(),
             aksjonspunkt.isNyttDokumentHarIkkekontrollertEksisterendeVurderinger(),
-            aksjonspunkt.isManglerVurderingAvLangvarigSykdom());
+            aksjonspunkt.isManglerVurderingAvLangvarigSykdom(),
+            aksjonspunkt.isIkkeSammenMedBarnet()
+        );
     }
 }

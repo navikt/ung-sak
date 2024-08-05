@@ -79,6 +79,17 @@ updates:
       - ft-kalkulus
       - fp-nare
       - fp-tidsserie
+    groups:
+      nav-deps:
+        patterns:
+          - "*no.nav*"
+      annet-deps:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "*no.nav*"
+          - "*jersey-bom*"
+          - "*jetty-bom*"
   - package-ecosystem: github-actions
     directory: "/"
     schedule:

@@ -6,7 +6,7 @@ metadata:
   labels:
     team: k9saksbehandling
 spec:
-  image: {{ image }}
+  image: "{{ image }}"
   port: 8080
   liveness:
     path: /k9/sak/internal/health/isAlive
@@ -38,6 +38,7 @@ spec:
       memory: "4096Mi"
   ingresses:
     - "https://k9-sak.nais.adeo.no/"
+    - "https://k9-sak.prod-fss-pub.nais.io"
   kafka:
     pool: "nav-prod"
   vault:
@@ -69,8 +70,14 @@ spec:
         - application: k9-formidling
         - application: k9-formidling-dokumentdata
         - application: k9-punsj
-        - application: fpabakus
-          namespace: teamforeldrepenger
+        - application: k9-abakus
+        - application: k9-punsjbolle
+          namespace: omsorgspenger
+          cluster: prod-gcp
+        - application: k9-sak-innsyn-api
+          namespace: dusseldorf
+          cluster: prod-gcp
+
   env:
     - name: TZ
       value: "Europe/Oslo"
@@ -143,10 +150,10 @@ spec:
       value: OMS
 
     # Restservice Generelle
-    - name: FPABAKUS_URL
-      value: http://fpabakus.teamforeldrepenger/fpabakus
-    - name: FPABAKUS_SCOPE
-      value: api://prod-fss.teamforeldrepenger.fpabakus/.default
+    - name: K9ABAKUS_URL
+      value: http://k9-abakus.k9saksbehandling/k9/abakus
+    - name: K9ABAKUS_SCOPE
+      value: api://prod-fss.k9saksbehandling.k9-abakus/.default
     - name: FTKALKULUS_URL
       value: http://ftkalkulus.k9saksbehandling/ftkalkulus
     - name: FTKALKULUS_SCOPE
@@ -205,6 +212,10 @@ spec:
       value: http://k9-los-api.k9saksbehandling/api
     - name: K9_LOS_SCOPE
       value: api://prod-fss.k9saksbehandling.k9-los-api/.default
+    - name: K9INNTEKTSMELDING_URL
+      value: https://k9-inntektsmelding.intern.nav.no/k9/inntektsmelding
+    - name: K9INNTEKTSMELDING_SCOPE
+      value: api://prod-gcp.k9saksbehandling.k9-inntektsmelding/.default
 
     # Restservice OMS spesifikt
     - name: K9_OMS_AARSKVANTUM_URL
@@ -249,19 +260,11 @@ spec:
       value: "AFMX0|2021-03-01"
     - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
       value: "2023-01-02"
-    - name: ENABLE_SJEKK_TILBAKEKREVING
-      value: "false"
     - name: IKKE_YRKESAKTIV_UTEN_SPEILING
       value: "false"
     - name: OMP_NULL_HELG_I_KRAVPERIODER
       value: "false"
-    - name: ENABLE_UTBETALINGSGRAD_OPPDRAG
-      value: "false"
     - name: ENABLE_DATO_NY_REGEL_UTTAK
-      value: "false"
-    - name: ENABLE_OVERSTYR_UTTAK
-      value: "false"
-    - name: FILTRER_UGYLDIG_IM
       value: "false"
     - name: FJERN_VILKARSPERIODER_BEREGNING
       value: "false"
@@ -269,23 +272,19 @@ spec:
       value: "false"
     - name: AVKLAR_ARBEIDSFORHOLD_REUTLED_VED_REVURDERING
       value: "false"
-    - name: ENABLE_RESERVERT_SAKSNUMMER
-      value: "false"
     - name: OMP_RELEVANT_ENDRING_UTLEDNING
-      value: "false"
-    - name: AKTIVER_AUTOMATISK_ETTERKONTROLL
-      value: "true"
-    - name: FORLENGELSE_IM_OPPTJENING_FILTER
       value: "false"
     - name: DOKUMENTMOTTAK_VALIDER_JOURNALFORT
       value: "false"
-    - name: UTVIDET_ENDRING_UTBETALING_UTLEDER
-      value: "false"
-    - name: ENABLE_INNSYN_ENDRING_OBSERVER
-      value: "false"
     - name: KODEVERK_SOM_STRING_TOPICS
       value: "false"
-    - name: NY_VURDERINGSLOGIKK_IM
+    - name: KODEVERK_AKTIVER_KALKULUS_STRING
+      value: "false"
+    - name: INAKTIV_VED_8_47_B
+      value: "false"
+    - name: SEND_INNTEKTSMELDING_FORESPORSEL
+      value: "false"
+    - name: OMP_RAMMEVEDTAK_SAMMENSTILLNG_AARSKVANTUM
       value: "false"
 
     # Konfigurasjoner
@@ -303,8 +302,4 @@ spec:
       value: "k9-sak"
 
     - name: PIP_USERS
-      value: "srvPDP,srvk9-tilbake,srvsaf"
-
-    # Pleiepenger infotrygd migrering
-    - name: INFOTRYGD_MIGRERING_TILLATELSER
-      value: "K137924,N106674,H137477,N130802,N140249,A100265,D101758,E151154,A147438,S164910,B100673,R145708,G119972,U112286,L120563,A100265,O126651,H151541,K120680,J104442,K137924,V110938"
+      value: "srvPDP,srvk9-tilbake,srvsaf,srvk9-abakus"

@@ -28,8 +28,7 @@ public class ApplicationConfig extends ResourceConfig {
 
     public static final String API_URI = "/api";
 
-    public ApplicationConfig() {
-
+    public static OpenAPI resolveOpenAPI() {
         OpenAPI oas = new OpenAPI();
         Info info = new Info()
             .title("K9 saksbehandling - Saksbehandling av kapittel 9 i folketrygden")
@@ -47,13 +46,17 @@ public class ApplicationConfig extends ResourceConfig {
                 .collect(Collectors.toSet()));
 
         try {
-            new JaxrsOpenApiContextBuilder<>()
+            return new JaxrsOpenApiContextBuilder<>()
                 .openApiConfiguration(oasConfig)
                 .buildContext(true)
                 .read();
         } catch (OpenApiConfigurationException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
+    }
+
+    public ApplicationConfig() {
+        ApplicationConfig.resolveOpenAPI();
 
         property(ServerProperties.BV_SEND_ERROR_IN_RESPONSE, true);
 

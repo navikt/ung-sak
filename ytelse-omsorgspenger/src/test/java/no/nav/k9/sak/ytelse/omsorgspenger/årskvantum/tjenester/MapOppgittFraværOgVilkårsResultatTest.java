@@ -190,8 +190,8 @@ class MapOppgittFraværOgVilkårsResultatTest {
         iayBuilder.leggTilAktørArbeid(aktørArbeidBuilder
             .leggTilYrkesaktivitet(yaBuilder
                 .medArbeidsgiver(virksomhet1)
-                .leggTilAktivitetsAvtale(yaBuilder.getAktivitetsAvtaleBuilder(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(30), LocalDate.now().minusDays(20)), true))
-                .leggTilAktivitetsAvtale(yaBuilder.getAktivitetsAvtaleBuilder(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(30), LocalDate.now().minusDays(20)), false)
+                .leggTilAktivitetsAvtale(yaBuilder.getAktivitetsAvtaleBuilder(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(60), LocalDate.now().minusDays(20)), true))
+                .leggTilAktivitetsAvtale(yaBuilder.getAktivitetsAvtaleBuilder(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(60), LocalDate.now().minusDays(20)), false)
                     .medProsentsats(Stillingsprosent.HUNDRED)
                     .medBeskrivelse("asd")
                     .medSisteLønnsendringsdato(LocalDate.now().minusDays(30)))));
@@ -253,7 +253,6 @@ class MapOppgittFraværOgVilkårsResultatTest {
     void skal_ta_hensyn_til_permisjon() {
         var vilkårResultatBuilder = new VilkårResultatBuilder();
         var aktørDummy = AktørId.dummy();
-        var jpDummy = new JournalpostId(123L);
 
         var vilkårene = vilkårResultatBuilder.build();
 
@@ -271,8 +270,8 @@ class MapOppgittFraværOgVilkårsResultatTest {
                     .medProsentsats(BigDecimal.valueOf(100L))
                     .medPeriode(LocalDate.now().minusDays(10), LocalDate.now())
                     .build())
-                .leggTilAktivitetsAvtale(yaBuilder.getAktivitetsAvtaleBuilder(DatoIntervallEntitet.fraOgMed(LocalDate.now().minusDays(30)), true))
-                .leggTilAktivitetsAvtale(yaBuilder.getAktivitetsAvtaleBuilder(DatoIntervallEntitet.fraOgMed(LocalDate.now().minusDays(30)), false)
+                .leggTilAktivitetsAvtale(yaBuilder.getAktivitetsAvtaleBuilder(DatoIntervallEntitet.fraOgMed(LocalDate.now().minusDays(60)), true))
+                .leggTilAktivitetsAvtale(yaBuilder.getAktivitetsAvtaleBuilder(DatoIntervallEntitet.fraOgMed(LocalDate.now().minusDays(60)), false)
                     .medProsentsats(Stillingsprosent.HUNDRED)
                     .medBeskrivelse("asd")
                     .medSisteLønnsendringsdato(LocalDate.now().minusDays(30)))));
@@ -296,7 +295,6 @@ class MapOppgittFraværOgVilkårsResultatTest {
     void skal_ta_hensyn_til_permisjon_under_100_prosent() {
         var vilkårResultatBuilder = new VilkårResultatBuilder();
         var dummy = AktørId.dummy();
-        var jpDummy = new JournalpostId(123L);
 
         var vilkårene = vilkårResultatBuilder.build();
 
@@ -313,8 +311,8 @@ class MapOppgittFraværOgVilkårsResultatTest {
                     .medProsentsats(BigDecimal.valueOf(99L))
                     .medPeriode(LocalDate.now().minusDays(10), LocalDate.now())
                     .build())
-                .leggTilAktivitetsAvtale(yaBuilder.getAktivitetsAvtaleBuilder(DatoIntervallEntitet.fraOgMed(LocalDate.now().minusDays(30)), true))
-                .leggTilAktivitetsAvtale(yaBuilder.getAktivitetsAvtaleBuilder(DatoIntervallEntitet.fraOgMed(LocalDate.now().minusDays(30)), false)
+                .leggTilAktivitetsAvtale(yaBuilder.getAktivitetsAvtaleBuilder(DatoIntervallEntitet.fraOgMed(LocalDate.now().minusDays(60)), true))
+                .leggTilAktivitetsAvtale(yaBuilder.getAktivitetsAvtaleBuilder(DatoIntervallEntitet.fraOgMed(LocalDate.now().minusDays(60)), false)
                     .medProsentsats(Stillingsprosent.HUNDRED)
                     .medBeskrivelse("asd")
                     .medSisteLønnsendringsdato(LocalDate.now().minusDays(30)))));
@@ -437,7 +435,7 @@ class MapOppgittFraværOgVilkårsResultatTest {
         var aktivitetPeriodeSN = OpptjeningAktivitetPeriode.Builder.ny()
             .medOpptjeningsnøkkel(new Opptjeningsnøkkel(InternArbeidsforholdRef.nullRef(), arbeidsgiver.getArbeidsgiverOrgnr(), null))
             .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), LocalDate.now()))
-            .medVurderingsStatus(VurderingsStatus.FERDIG_VURDERT_GODKJENT)
+            .medVurderingsStatus(VurderingsStatus.GODKJENT)
             .medOpptjeningAktivitetType(OpptjeningAktivitetType.NÆRING)
             .build();
         var opptjeningAktivitetPerioder = new TreeMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>>();
@@ -471,7 +469,7 @@ class MapOppgittFraværOgVilkårsResultatTest {
         var aktivitetPeriodeFL = OpptjeningAktivitetPeriode.Builder.ny()
             .medOpptjeningsnøkkel(new Opptjeningsnøkkel(InternArbeidsforholdRef.nullRef(), null, aktørDummy.getAktørId()))
             .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(10), LocalDate.now()))
-            .medVurderingsStatus(VurderingsStatus.FERDIG_VURDERT_GODKJENT)
+            .medVurderingsStatus(VurderingsStatus.GODKJENT)
             .medOpptjeningAktivitetType(OpptjeningAktivitetType.FRILANS)
             .build();
         var opptjeningAktivitetPerioder = new TreeMap<DatoIntervallEntitet, List<OpptjeningAktivitetPeriode>>();

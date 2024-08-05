@@ -90,12 +90,17 @@ public enum Avslagsårsak implements Kodeverdi {
         FagsakYtelseType.OMSORGSPENGER_KS, "9-6 2. ledd")),
     IKKE_UTVIDETRETT_IKKE_ØKT_RISIKO_FRAVÆR("1074", "Ikke økt risiko for fravær", Map.of(
         FagsakYtelseType.OMSORGSPENGER_KS, "9-6 2. ledd")),
-    IKKE_UTVIDETRETT_VARIGHET_UNDER_SEKS_MÅN("1075", "Varigheten er mindre enn seks måneder", Map.of(
+    IKKE_MIDLERTIDIG_ALENE_VARIGHET_UNDER_SEKS_MÅN("1075", "Varigheten er mindre enn seks måneder", Map.of(
         FagsakYtelseType.OMSORGSPENGER_MA, "9-6 3. ledd")),
-    IKKE_UTVIDETRETT_REGNES_IKKE_SOM_Å_HA_ALENEOMSORG("1076", "Søker regnes ikke som å ha aleneomsorg", Map.of(
-        FagsakYtelseType.OMSORGSPENGER_AO, "9-6 1. ledd",
+    IKKE_MIDLERTIDIG_ALENE_REGNES_IKKE_SOM_Å_HA_ALENEOMSORG("1076", "Søker oppfyller ikke kravene til midlertidig alene", Map.of(
+        FagsakYtelseType.OMSORGSPENGER_MA, "9-6 3. ledd")),
+    IKKE_MIDLERTIDIG_ALENE("1093", "Søker oppfyller ikke midlertidig alene-vilkåret av andre grunner", Map.of(
         FagsakYtelseType.OMSORGSPENGER_MA, "9-6 3. ledd")),
     IKKE_GRUNNLAG_FOR_ALENEOMSORG("1077", "Ikke grunnlag for aleneomsorg", Map.of(
+        FagsakYtelseType.OMSORGSPENGER_AO, "9-6 1. ledd")),
+    IKKE_GRUNNLAG_FOR_ALENEOMSORG_FORELDRE_BOR_SAMMEN("1078", "Foreldre bor sammen", Map.of(
+        FagsakYtelseType.OMSORGSPENGER_AO, "9-6 1. ledd")),
+    IKKE_GRUNNLAG_FOR_ALENEOMSORG_DELT_BOSTED("1079", "Avtale om delt bosted", Map.of(
         FagsakYtelseType.OMSORGSPENGER_AO, "9-6 1. ledd")),
 
     PLEIETRENGENDE_INNLAGT_I_STEDET_FOR_HJEMME("1080", "Pleietrengende innlagt i stedet for hjemme",

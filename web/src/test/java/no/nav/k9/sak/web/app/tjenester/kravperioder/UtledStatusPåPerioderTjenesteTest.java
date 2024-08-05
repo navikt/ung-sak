@@ -10,6 +10,8 @@ import no.nav.k9.sak.kontrakt.krav.*;
 import no.nav.k9.sak.perioder.KravDokumentType;
 import no.nav.k9.sak.perioder.SøktPeriode;
 import no.nav.k9.sak.perioder.*;
+import no.nav.k9.sak.registerendringer.IngenRelevanteEndringer;
+import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
@@ -27,7 +29,7 @@ import static org.assertj.core.api.Assertions.tuple;
 class UtledStatusPåPerioderTjenesteTest {
 
 
-    private final UtledStatusPåPerioderTjeneste utledStatusPåPerioderTjeneste = new UtledStatusPåPerioderTjeneste(false);
+    private final UtledStatusPåPerioderTjeneste utledStatusPåPerioderTjeneste = new UtledStatusPåPerioderTjeneste(false, new UtledPerioderMedRegisterendring(new UnitTestLookupInstanceImpl<>(new IngenRelevanteEndringer())));
     private final LocalDate IDAG = LocalDate.now();
     private final LocalDateTime NÅ = LocalDateTime.now();
     private final Arbeidsgiver ARBEIDSGIVER1 = Arbeidsgiver.virksomhet("000000000");

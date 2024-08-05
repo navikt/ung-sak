@@ -1,0 +1,1 @@
+create index idx_pleietrengende_sykdom_vurdering_versjon_1 on PLEIETRENGENDE_SYKDOM_VURDERING_VERSJON_PERIODE (PLEIETRENGENDE_SYKDOM_VURDERING_VERSJON_ID);

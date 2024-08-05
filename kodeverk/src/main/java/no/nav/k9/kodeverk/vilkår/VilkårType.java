@@ -161,8 +161,17 @@ public enum VilkårType implements Kodeverdi {
         Map.of(FagsakYtelseType.OMSORGSPENGER_AO, "§ 9-6 1. ledd",
             FagsakYtelseType.OMSORGSPENGER_KS, "§ 9-6 2. ledd",
             FagsakYtelseType.OMSORGSPENGER_MA, "§ 9-6 3. ledd"),
-        Avslagsårsak.IKKE_UTVIDETRETT, Avslagsårsak.IKKE_UTVIDETRETT_IKKE_KRONISK_SYK, Avslagsårsak.IKKE_UTVIDETRETT_IKKE_ØKT_RISIKO_FRAVÆR, Avslagsårsak.IKKE_UTVIDETRETT_REGNES_IKKE_SOM_Å_HA_ALENEOMSORG,
-        Avslagsårsak.IKKE_UTVIDETRETT_VARIGHET_UNDER_SEKS_MÅN, Avslagsårsak.MANGLENDE_DOKUMENTASJON),
+        Avslagsårsak.IKKE_UTVIDETRETT,
+        Avslagsårsak.IKKE_UTVIDETRETT_IKKE_KRONISK_SYK,
+        Avslagsårsak.IKKE_UTVIDETRETT_IKKE_ØKT_RISIKO_FRAVÆR,
+        Avslagsårsak.IKKE_MIDLERTIDIG_ALENE_REGNES_IKKE_SOM_Å_HA_ALENEOMSORG,
+        Avslagsårsak.IKKE_MIDLERTIDIG_ALENE_VARIGHET_UNDER_SEKS_MÅN,
+        Avslagsårsak.IKKE_MIDLERTIDIG_ALENE,
+        Avslagsårsak.MANGLENDE_DOKUMENTASJON,
+        Avslagsårsak.IKKE_GRUNNLAG_FOR_ALENEOMSORG,
+        Avslagsårsak.IKKE_GRUNNLAG_FOR_ALENEOMSORG_FORELDRE_BOR_SAMMEN,
+        Avslagsårsak.IKKE_GRUNNLAG_FOR_ALENEOMSORG_DELT_BOSTED
+    ),
     /**
      * Brukes i stedet for null der det er optional.
      */

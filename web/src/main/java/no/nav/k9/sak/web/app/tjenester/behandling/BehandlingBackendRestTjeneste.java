@@ -98,15 +98,11 @@ public class BehandlingBackendRestTjeneste {
     @BeskyttetRessurs(action = UPDATE, resource = BeskyttetRessursKoder.REFRESH_BEHANDLING_REGISTERDATA)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response oppfriskSaker(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = BehandlingBackendRestTjeneste.AbacDataSupplier.class) BehandlingIdListe behandlinger) {
-
+        if (behandlinger.getBehandlinger().size() > 100) {
+            throw new IllegalArgumentException("Støtter ikke å refreshe mer enn 100 behandlinger om gangen, fikk " + behandlinger.getBehandlinger().size() + " i listen");
+        }
         List<BehandlingStatusListe.StatusDto> result = new ArrayList<>();
-        int max = 100;
         for (var id : new LinkedHashSet<>(behandlinger.getBehandlinger())) {
-            max--;
-            if (max < 0) {
-                // sjekker maks antall, og returnerer de
-                break;
-            }
             UUID behandlingUuid = id.getBehandlingUuid();
             var behandling = behandlingsprosessTjeneste.hentBehandling(behandlingUuid);
             if (behandling.erStatusFerdigbehandlet()) {

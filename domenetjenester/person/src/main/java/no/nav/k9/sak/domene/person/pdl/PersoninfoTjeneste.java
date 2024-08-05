@@ -25,8 +25,8 @@ import no.nav.k9.felles.integrasjon.pdl.BostedsadresseResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.DeltBostedResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.Doedsfall;
 import no.nav.k9.felles.integrasjon.pdl.DoedsfallResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.Foedsel;
-import no.nav.k9.felles.integrasjon.pdl.FoedselResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.Foedselsdato;
+import no.nav.k9.felles.integrasjon.pdl.FoedselsdatoResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.FolkeregistermetadataResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.Folkeregisterpersonstatus;
 import no.nav.k9.felles.integrasjon.pdl.FolkeregisterpersonstatusResponseProjection;
@@ -43,7 +43,6 @@ import no.nav.k9.felles.integrasjon.pdl.Matrikkeladresse;
 import no.nav.k9.felles.integrasjon.pdl.MatrikkeladresseResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.Navn;
 import no.nav.k9.felles.integrasjon.pdl.NavnResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.OppholdResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.Oppholdsadresse;
 import no.nav.k9.felles.integrasjon.pdl.OppholdsadresseResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.PdlKlient;
@@ -51,7 +50,6 @@ import no.nav.k9.felles.integrasjon.pdl.Person;
 import no.nav.k9.felles.integrasjon.pdl.PersonBostedsadresseParametrizedInput;
 import no.nav.k9.felles.integrasjon.pdl.PersonFolkeregisterpersonstatusParametrizedInput;
 import no.nav.k9.felles.integrasjon.pdl.PersonKontaktadresseParametrizedInput;
-import no.nav.k9.felles.integrasjon.pdl.PersonOppholdParametrizedInput;
 import no.nav.k9.felles.integrasjon.pdl.PersonOppholdsadresseParametrizedInput;
 import no.nav.k9.felles.integrasjon.pdl.PersonResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.PersonStatsborgerskapParametrizedInput;
@@ -332,10 +330,9 @@ public class PersoninfoTjeneste {
         query.setIdent(personIdent.getIdent());
         var projection = new PersonResponseProjection()
             .navn(new NavnResponseProjection().forkortetNavn().fornavn().mellomnavn().etternavn())
-            .foedsel(new FoedselResponseProjection().foedselsdato())
+            .foedselsdato(new FoedselsdatoResponseProjection().foedselsdato())
             .doedsfall(new DoedsfallResponseProjection().doedsdato())
             .folkeregisterpersonstatus(new FolkeregisterpersonstatusResponseProjection().forenkletStatus().status())
-            .opphold(new OppholdResponseProjection().type().oppholdFra().oppholdTil())
             .innflyttingTilNorge(new InnflyttingTilNorgeResponseProjection().fraflyttingsland())
             .utflyttingFraNorge(new UtflyttingFraNorgeResponseProjection().tilflyttingsland())
             .kjoenn(new KjoennResponseProjection().kjoenn())
@@ -378,8 +375,8 @@ public class PersoninfoTjeneste {
 
         var personFraPdl = pdlKlient.hentPerson(query, projection);
 
-        var fødselsdato = personFraPdl.getFoedsel().stream()
-            .map(Foedsel::getFoedselsdato)
+        var fødselsdato = personFraPdl.getFoedselsdato().stream()
+            .map(Foedselsdato::getFoedselsdato)
             .filter(Objects::nonNull)
             .findFirst().map(d -> LocalDate.parse(d, DateTimeFormatter.ISO_LOCAL_DATE)).orElse(null);
         var dødssdato = personFraPdl.getDoedsfall().stream()
@@ -430,8 +427,6 @@ public class PersoninfoTjeneste {
                     .forenkletStatus().status()
                     .folkeregistermetadata(new FolkeregistermetadataResponseProjection()
                         .ajourholdstidspunkt().gyldighetstidspunkt().opphoerstidspunkt()))
-            .opphold(new PersonOppholdParametrizedInput().historikk(true),
-                new OppholdResponseProjection().type().oppholdFra().oppholdTil())
             .statsborgerskap(new PersonStatsborgerskapParametrizedInput().historikk(true),
                 new StatsborgerskapResponseProjection().land().gyldigFraOgMed().gyldigTilOgMed())
             .bostedsadresse(new PersonBostedsadresseParametrizedInput().historikk(true),

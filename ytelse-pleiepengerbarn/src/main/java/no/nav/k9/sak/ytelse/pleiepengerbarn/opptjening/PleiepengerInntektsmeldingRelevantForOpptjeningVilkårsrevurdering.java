@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -107,7 +108,7 @@ public class PleiepengerInntektsmeldingRelevantForOpptjeningVilkårsrevurdering 
 
         var dagenFørStp = DatoIntervallEntitet.fraOgMedTilOgMed(vilkårsperiode.getFomDato().minusDays(1), vilkårsperiode.getFomDato().minusDays(1));
 
-        var erInaktivDagenFørStp = yrkesaktiviteter.stream().map(y -> AktivPeriodeForArbeidUtleder.utledAktivTidslinje(y, grunnlag, vilkårsperiode, tidslinjePerYtelse))
+        var erInaktivDagenFørStp = yrkesaktiviteter.stream().map(y -> AktivPeriodeForArbeidUtleder.utledAktivTidslinje(y, grunnlag, Set.of(vilkårsperiode), tidslinjePerYtelse))
             .reduce(LocalDateTimeline.empty(), (t1, t2) -> t1.crossJoin(t2, StandardCombinators::coalesceRightHandSide))
             .intersection(dagenFørStp.toLocalDateInterval())
             .isEmpty();

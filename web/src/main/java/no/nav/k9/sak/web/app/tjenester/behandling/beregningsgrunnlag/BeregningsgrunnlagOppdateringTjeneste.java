@@ -12,7 +12,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.OppdaterBeregningsgrunnlagResultat;
 import no.nav.folketrygdloven.kalkulus.håndtering.v1.HåndterBeregningDto;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.vilkår.VilkårPeriodeFilterProvider;
 
@@ -53,14 +53,12 @@ public class BeregningsgrunnlagOppdateringTjeneste {
         var perioderSomSkalKunneVurderes = vilkårTjeneste.utledPerioderTilVurdering(ref, filter);
         stpTilDtoMap.keySet().forEach(stp -> {
             List<DatoIntervallEntitet> vurderingsperioderSomInkludererSTP = finnPerioderSomInkludererDato(perioderSomSkalKunneVurderes, stp);
-            if (vurderingsperioderSomInkludererSTP.size() == 0) {
-                var debugFilter = vilkårPeriodeFilterProvider.getFilter(ref);
-                var debugPerioder = vilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, debugFilter);
+            if (vurderingsperioderSomInkludererSTP.isEmpty()) {
+                var debugPerioder = vilkårTjeneste.utledDetaljertPerioderTilVurdering(ref);
                 throw new IllegalStateException("Prøver å endre grunnlag med skjæringstidspunkt" + stp + " men denne er ikke i" +
                     " listen over vilkårsperioder som er til vurdering " + debugPerioder);
             } else if (vurderingsperioderSomInkludererSTP.size() >= 2) {
-                var debugFilter = vilkårPeriodeFilterProvider.getFilter(ref);
-                var debugPerioder = vilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, debugFilter);
+                var debugPerioder = vilkårTjeneste.utledDetaljertPerioderTilVurdering(ref);
                 throw new IllegalStateException("Prøver å endre grunnlag med skjæringstidspunkt" + stp + " som finnes i flere perioder som er til vurdering," +
                     " ugyldig tilstand. Perioder som er til vurdering er: " + debugPerioder);
             }

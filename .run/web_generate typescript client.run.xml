@@ -1,0 +1,30 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="web/generate typescript client" type="docker-deploy" factoryName="docker-image" server-name="Docker">
+    <deployment type="docker-image">
+      <settings>
+        <option name="imageTag" value="europe-north1-docker.pkg.dev/nais-management-233d/k9saksbehandling/navikt/openapi-ts-clientmaker-cli:v0" />
+        <option name="command" value="-- --openapi-spec-file in/k9-sak.openapi.json --package-json-file in/package.json --client-name K9SakClient" />
+        <option name="containerName" value="openapi-ts-clientmaker-cli" />
+        <option name="commandLineOptions" value="--rm" />
+        <option name="showCommandPreview" value="true" />
+        <option name="volumeBindings">
+          <list>
+            <DockerVolumeBindingImpl>
+              <option name="containerPath" value="/in" />
+              <option name="hostPath" value="$PROJECT_DIR$/web/src/main/resources/openapi-ts-client" />
+              <option name="readOnly" value="true" />
+            </DockerVolumeBindingImpl>
+            <DockerVolumeBindingImpl>
+              <option name="containerPath" value="/out" />
+              <option name="hostPath" value="$PROJECT_DIR$/web/target/ts-client" />
+            </DockerVolumeBindingImpl>
+          </list>
+        </option>
+      </settings>
+    </deployment>
+    <method v="2">
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="web/generate-openapi-json" run_configuration_type="MavenRunConfiguration" />
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="web/pull-openapi-ts-clientmaker-cli" run_configuration_type="ShConfigurationType" />
+    </method>
+  </configuration>
+</component>

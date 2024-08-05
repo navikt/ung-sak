@@ -79,6 +79,23 @@ public class KodeverkRestTjeneste {
     }
 
     @GET
+    @Path("/k9sak/kodeverk/typer")
+    @Operation(description = "Ikkje reell implementasjon for bruk. Kun for openapi type generering av k9-sak kodeverkstyper", tags="kodeverk")
+    @BeskyttetRessurs(action = READ, resource = APPLIKASJON, sporingslogg = false)
+    public K9SakKodeverkWeb getK9SakKodeverkTyper() {
+        return new K9SakKodeverkWeb();
+    }
+
+    @GET
+    @Path("/k9formidling/kodeverk/typer")
+    @Operation(description = "Ikkje reell implementasjon for bruk. Kun for openapi type generering av k9-formidling kodeverkstyper", tags="kodeverk")
+    @BeskyttetRessurs(action = READ, resource = APPLIKASJON, sporingslogg = false)
+    public K9FormidlingKodeverkWeb getK9FormidlingKodeverkTyper() {
+        return new K9FormidlingKodeverkWeb();
+    }
+
+
+    @GET
     @Path("/behandlende-enheter")
     @Operation(description = "Henter liste over behandlende enheter", tags = "kodeverk")
     @BeskyttetRessurs(action = READ, resource = APPLIKASJON, sporingslogg = false)
