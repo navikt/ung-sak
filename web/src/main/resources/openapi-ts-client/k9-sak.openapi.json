@@ -17954,6 +17954,118 @@
         "tags" : [ "saksnummer" ]
       }
     },
+    "/saksnummer/aktor" : {
+      "get" : {
+        "description" : "Henter koblinger mellom aktør og saksnummer.",
+        "operationId" : "hentSaksnummerKobling",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "saksnummer",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "aktørId",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/AktørIdDto"
+          }
+        }, {
+          "in" : "query",
+          "name" : "journalpostId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json; charset=UTF-8" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Henter koblinger mellom aktør og saksnummer.",
+        "tags" : [ "saksnummer" ]
+      },
+      "post" : {
+        "description" : "Kobler aktør til saksnummer.",
+        "operationId" : "kobleAktørPåSaksnummer",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "saksnummer",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "aktørId",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/AktørIdDto"
+          }
+        }, {
+          "in" : "query",
+          "name" : "journalpostId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Kobler aktør til saksnummer",
+        "tags" : [ "saksnummer" ]
+      }
+    },
+    "/saksnummer/aktor/slett" : {
+      "post" : {
+        "description" : "Sletter kobling mellom aktør og saksnummer.",
+        "operationId" : "slettSaksnummerKobling",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "saksnummer",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "aktørId",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/AktørIdDto"
+          }
+        }, {
+          "in" : "query",
+          "name" : "journalpostId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Sletter kobling mellom aktør og saksnummer.",
+        "tags" : [ "saksnummer" ]
+      }
+    },
     "/saksnummer/reserver" : {
       "post" : {
         "description" : "Reserver saksnummer.",
