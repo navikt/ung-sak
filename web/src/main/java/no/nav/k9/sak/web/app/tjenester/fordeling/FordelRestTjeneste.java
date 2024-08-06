@@ -52,7 +52,6 @@ import no.nav.k9.felles.integrasjon.saf.JournalpostQueryRequest;
 import no.nav.k9.felles.integrasjon.saf.JournalpostResponseProjection;
 import no.nav.k9.felles.integrasjon.saf.Journalstatus;
 import no.nav.k9.felles.integrasjon.saf.SafTjeneste;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.AbacDto;
@@ -115,7 +114,6 @@ public class FordelRestTjeneste {
     private AktørTjeneste aktørTjeneste;
     private PsbPbSakRepository psbPbSakRepository;
     private ObjectWriter objectWriter = new JacksonJsonConfig().getObjectMapper().writerFor(Innsending.class);
-    private boolean validerJournalført;
 
     public FordelRestTjeneste() {// For Rest-CDI
     }
@@ -129,8 +127,7 @@ public class FordelRestTjeneste {
                               SøknadMottakTjenesteContainer søknadMottakere,
                               PsbInfotrygdRepository psbInfotrygdRepository,
                               AktørTjeneste aktørTjeneste,
-                              PsbPbSakRepository psbPbSakRepository,
-                              @KonfigVerdi(value = "DOKUMENTMOTTAK_VALIDER_JOURNALFORT", defaultVerdi = "false") boolean validerJournalført) {
+                              PsbPbSakRepository psbPbSakRepository) {
         this.dokumentmottakTjeneste = dokumentmottakTjeneste;
         this.safAdapter = safAdapter;
         this.safTjeneste = safTjeneste;
@@ -140,7 +137,6 @@ public class FordelRestTjeneste {
         this.psbInfotrygdRepository = psbInfotrygdRepository;
         this.aktørTjeneste = aktørTjeneste;
         this.psbPbSakRepository = psbPbSakRepository;
-        this.validerJournalført = validerJournalført;
     }
 
 
@@ -395,7 +391,7 @@ public class FordelRestTjeneste {
         LOG_CONTEXT.add("journalpostId", String.join(",", mottattJournalposter.stream().map(v -> v.getJournalpostId().getVerdi()).toList()));
         logger.info("Mottok journalposter");
 
-        mottattJournalposter.stream().map(AbacJournalpostMottakDto::getJournalpostId).toList().forEach(journalpostId -> validerAtJournalpostenErJournalført(journalpostId, validerJournalført));
+        mottattJournalposter.stream().map(AbacJournalpostMottakDto::getJournalpostId).toList().forEach(this::validerAtJournalpostenErJournalført);
 
         List<InngåendeSaksdokument> saksdokumenter = mottattJournalposter.stream()
             .map(this::mapJournalpost)
@@ -417,7 +413,7 @@ public class FordelRestTjeneste {
         LOG_CONTEXT.add("saksnummer", journalpostMottakOpprettSakDto.getSaksnummer());
         logger.info("Mottok journalpost");
 
-        validerAtJournalpostenErJournalført(journalpostMottakOpprettSakDto.getJournalpostId(), true);
+        validerAtJournalpostenErJournalført(journalpostMottakOpprettSakDto.getJournalpostId());
 
         Fagsak fagsak = finnEllerOpprettSakGittSaksnummer(journalpostMottakOpprettSakDto);
 
@@ -512,17 +508,13 @@ public class FordelRestTjeneste {
         );
     }
 
-    private void validerAtJournalpostenErJournalført(JournalpostId journalpostId, boolean togglePå) {
+    private void validerAtJournalpostenErJournalført(JournalpostId journalpostId) {
         var query = new JournalpostQueryRequest();
         query.setJournalpostId(journalpostId.getVerdi());
         var projection = new JournalpostResponseProjection().journalstatus();
         Journalpost journalpost = safTjeneste.hentJournalpostInfo(query, projection);
         if (!List.of(Journalstatus.FERDIGSTILT, Journalstatus.JOURNALFOERT).contains(journalpost.getJournalstatus())) {
-            if (togglePå) {
-                throw new IllegalArgumentException(journalpostId + " er ikke endelig journalført i Saf");
-            } else {
-                logger.warn("Mottok journalpost som ikke er endelig journalført i Saf: " + journalpostId);
-            }
+            throw new IllegalArgumentException(journalpostId + " er ikke endelig journalført i Saf");
         }
     }
 
