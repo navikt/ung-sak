@@ -6439,6 +6439,24 @@
         "required" : [ "utbetalingsgradPrAktivitet" ],
         "type" : "object"
       },
+      "OppdaterAktørIdDto" : {
+        "properties" : {
+          "aktørId" : {
+            "type" : "string"
+          },
+          "begrunnelse" : {
+            "maxLength" : 1000,
+            "minLength" : 0,
+            "pattern" : "^[0-9a-zA-ZæøåÆØÅAaÁáBbCcČčDdĐđEeFfGgHhIiJjKkLlMmNnŊŋOoPpRrSsŠšTtŦŧUuVvZzŽžéôèÉöüäÖÜÄ .'\\-/\n%§\\!?@_()+:;,=\"&]*$",
+            "type" : "string"
+          },
+          "saksnummer" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "aktørId", "begrunnelse", "saksnummer" ],
+        "type" : "object"
+      },
       "OppgaveIdDto" : {
         "properties" : {
           "verdi" : {
@@ -16596,6 +16614,31 @@
               "text/plain" : { }
             },
             "description" : "Hent fnr for aktørid"
+          }
+        },
+        "tags" : [ "forvaltning - person" ]
+      }
+    },
+    "/forvaltning/person/oppdater-aktoer-bruker" : {
+      "post" : {
+        "description" : "Oppdater aktørId for bruker på sak med ugyldig aktørId pga aktørSplitt/merge",
+        "operationId" : "oppdaterAktørIdBruker",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/OppdaterAktørIdDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "text/plain" : { }
+            },
+            "description" : "Fiks ugyldig aktørId"
           }
         },
         "tags" : [ "forvaltning - person" ]
