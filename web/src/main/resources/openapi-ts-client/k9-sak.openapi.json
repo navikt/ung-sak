@@ -6441,20 +6441,23 @@
       },
       "OppdaterAktørIdDto" : {
         "properties" : {
-          "aktørId" : {
-            "type" : "string"
-          },
           "begrunnelse" : {
             "maxLength" : 1000,
             "minLength" : 0,
             "pattern" : "^[0-9a-zA-ZæøåÆØÅAaÁáBbCcČčDdĐđEeFfGgHhIiJjKkLlMmNnŊŋOoPpRrSsŠšTtŦŧUuVvZzŽžéôèÉöüäÖÜÄ .'\\-/\n%§\\!?@_()+:;,=\"&]*$",
             "type" : "string"
           },
+          "gyldigAktørId" : {
+            "type" : "string"
+          },
           "saksnummer" : {
+            "type" : "string"
+          },
+          "utgåttAktørId" : {
             "type" : "string"
           }
         },
-        "required" : [ "aktørId", "begrunnelse", "saksnummer" ],
+        "required" : [ "begrunnelse", "gyldigAktørId", "saksnummer", "utgåttAktørId" ],
         "type" : "object"
       },
       "OppgaveIdDto" : {
