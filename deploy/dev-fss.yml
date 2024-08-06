@@ -285,8 +285,6 @@ spec:
       value: "true"
     - name: OMP_RELEVANT_ENDRING_UTLEDNING
       value: "true"
-    - name: DOKUMENTMOTTAK_VALIDER_JOURNALFORT
-      value: "true"
     - name: KODEVERK_SOM_STRING_TOPICS
       value: "true"
     - name: KODEVERK_AKTIVER_KALKULUS_STRING
