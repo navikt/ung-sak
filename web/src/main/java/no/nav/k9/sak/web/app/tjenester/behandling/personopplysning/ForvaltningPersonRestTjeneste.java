@@ -46,6 +46,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
 import no.nav.k9.felles.exception.ManglerTilgangException;
+import no.nav.k9.felles.sikkerhet.abac.AbacAttributtType;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.AbacDto;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
@@ -129,7 +130,7 @@ public class ForvaltningPersonRestTjeneste {
     @BeskyttetRessurs(action = UPDATE, resource = DRIFT)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response oppdaterAktørIdBruker(@Valid @NotNull OppdaterAktørIdDto dto) {
-        aktørIdSplittTjeneste.patchBrukerAktørId(dto.getAktørId(), dto.getSaksnummer(), dto.getBegrunnelse(), "/forvaltning/person/oppdater-aktoer-bruker");
+        aktørIdSplittTjeneste.patchBrukerAktørId(dto.getGyldigAktørId(), dto.getUtgåttAktørId(), dto.getBegrunnelse(), "/forvaltning/person/oppdater-aktoer-bruker");
         return Response.ok().build();
     }
 
@@ -140,7 +141,11 @@ public class ForvaltningPersonRestTjeneste {
         private Saksnummer saksnummer;
         @Valid
         @NotNull
-        private AktørId aktørId;
+        private AktørId gyldigAktørId;
+
+        @Valid
+        @NotNull
+        private AktørId utgåttAktørId;
 
         @Valid
         @NotNull
@@ -156,12 +161,12 @@ public class ForvaltningPersonRestTjeneste {
             this.saksnummer = saksnummer;
         }
 
-        public AktørId getAktørId() {
-            return aktørId;
+        public AktørId getGyldigAktørId() {
+            return gyldigAktørId;
         }
 
-        public void setAktørId(AktørId aktørId) {
-            this.aktørId = aktørId;
+        public void setGyldigAktørId(AktørId gyldigAktørId) {
+            this.gyldigAktørId = gyldigAktørId;
         }
 
         public String getBegrunnelse() {
@@ -172,10 +177,18 @@ public class ForvaltningPersonRestTjeneste {
             this.begrunnelse = begrunnelse;
         }
 
+        public AktørId getUtgåttAktørId() {
+            return utgåttAktørId;
+        }
+
+        public void setUtgåttAktørId(AktørId utgåttAktørId) {
+            this.utgåttAktørId = utgåttAktørId;
+        }
+
         @Override
         public AbacDataAttributter abacAttributter() {
             //ikke mulig med reell tilgangskontroll, siden aktørId på saken er ugyldig
-            return AbacDataAttributter.opprett();
+            return AbacDataAttributter.opprett().leggTil(StandardAbacAttributtType.AKTØR_ID, gyldigAktørId);
         }
     }
 
