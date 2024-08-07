@@ -21,6 +21,11 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import org.apache.kafka.common.protocol.types.Field;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -47,6 +52,7 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
+import no.nav.k9.abac.AbacAttributt;
 import no.nav.k9.felles.exception.ManglerTilgangException;
 import no.nav.k9.felles.sikkerhet.abac.AbacAttributtType;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
@@ -160,38 +166,37 @@ public class ForvaltningPersonRestTjeneste {
         return Response.ok().build();
     }
 
-    static class OppdaterAktørIdDto implements AbacDto {
+    public static class OppdaterAktørIdDto implements AbacDto {
 
+        @JsonProperty("gyldigAktørId")
         @Valid
         @NotNull
-        private Saksnummer saksnummer;
+        private AktørIdDto gyldigAktørId;
+
+        @JsonProperty("utgåttAktørId")
         @Valid
         @NotNull
-        private AktørId gyldigAktørId;
+        private AktørIdDto utgåttAktørId;
 
-        @Valid
-        @NotNull
-        private AktørId utgåttAktørId;
-
+        @JsonProperty("begrunnelse")
         @Valid
         @NotNull
         @Size(max = 1000)
         @Pattern(regexp = InputValideringRegex.FRITEKST)
         private String begrunnelse;
 
-        public Saksnummer getSaksnummer() {
-            return saksnummer;
-        }
-
-        public void setSaksnummer(Saksnummer saksnummer) {
-            this.saksnummer = saksnummer;
+        @JsonCreator
+        public OppdaterAktørIdDto(@JsonProperty("gyldigAktørId") @NotNull @Valid String gyldigAktørId, @JsonProperty("utgåttAktørId") @NotNull @Valid String utgåttAktørId, @JsonProperty("begrunnelse") @NotNull @Valid  String begrunnelse) {
+            this.gyldigAktørId = new AktørIdDto(gyldigAktørId);
+            this.utgåttAktørId = new AktørIdDto(utgåttAktørId);
+            this.begrunnelse = begrunnelse;
         }
 
         public AktørId getGyldigAktørId() {
-            return gyldigAktørId;
+            return gyldigAktørId.getAktørId();
         }
 
-        public void setGyldigAktørId(AktørId gyldigAktørId) {
+        public void setGyldigAktørId(AktørIdDto gyldigAktørId) {
             this.gyldigAktørId = gyldigAktørId;
         }
 
@@ -204,17 +209,17 @@ public class ForvaltningPersonRestTjeneste {
         }
 
         public AktørId getUtgåttAktørId() {
-            return utgåttAktørId;
+            return utgåttAktørId.getAktørId();
         }
 
-        public void setUtgåttAktørId(AktørId utgåttAktørId) {
+        public void setUtgåttAktørId(AktørIdDto utgåttAktørId) {
             this.utgåttAktørId = utgåttAktørId;
         }
 
         @Override
         public AbacDataAttributter abacAttributter() {
             //ikke mulig med reell tilgangskontroll, siden aktørId på saken er ugyldig
-            return AbacDataAttributter.opprett().leggTil(StandardAbacAttributtType.AKTØR_ID, gyldigAktørId);
+            return AbacDataAttributter.opprett().leggTil(StandardAbacAttributtType.AKTØR_ID, gyldigAktørId.getAktorId());
         }
     }
 

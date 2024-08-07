@@ -104,14 +104,6 @@ public class AktørIdSplittTjeneste {
             .setParameter(GJELDENDE, nyAktørId.getAktørId())
             .setParameter(GAMMEL, gammelAktørId.getAktørId())
             .executeUpdate();
-        entityManager.createNativeQuery("update SO_SOEKNAD_ANGITT_PERSON set RELATERT_PERSON_AKTOER_ID = :ny_aktoer_id where RELATERT_PERSON_AKTOER_ID = :gammel_aktoer_id")
-            .setParameter(GJELDENDE, nyAktørId.getAktørId())
-            .setParameter(GAMMEL, gammelAktørId.getAktørId())
-            .executeUpdate();
-        entityManager.createNativeQuery("update SO_SOEKNAD_ANGITT_PERSON set RELATERT_PERSON_AKTOER_ID = :ny_aktoer_id where RELATERT_PERSON_AKTOER_ID = :gammel_aktoer_id")
-            .setParameter(GJELDENDE, nyAktørId.getAktørId())
-            .setParameter(GAMMEL, gammelAktørId.getAktørId())
-            .executeUpdate();
 
         // Rapportering, sletter fra ident-lager
         entityManager.createNativeQuery("delete from tmp_aktoer_id where aktoer_id = :gammel_aktoer_id")
@@ -125,9 +117,9 @@ public class AktørIdSplittTjeneste {
     }
 
     private List<Long> oppdaterFagsakForRelatertPerson(AktørId nyAktørId, AktørId gammelAktørId) {
-        var fagsakRelatertPersonQuery = entityManager.createQuery("from fagsak where relatert_person_aktoer_id = :gammel_aktoer_id", Fagsak.class)
+        var fagsakRelatertPersonQuery = entityManager.createNativeQuery("select * from fagsak where relatert_person_aktoer_id = :gammel_aktoer_id", Fagsak.class)
             .setParameter(GAMMEL, gammelAktørId.getAktørId());
-        var relatertPersonFagsaker = fagsakRelatertPersonQuery.getResultList();
+        List<Fagsak> relatertPersonFagsaker = fagsakRelatertPersonQuery.getResultList();
         int antallRaderRelatertPersonFagsak = entityManager.createNativeQuery("update fagsak set relatert_person_aktoer_id = :ny_aktoer_id, endret_av='bytte ' || :gammel_aktoer_id, endret_tid=current_timestamp  where relatert_person_aktoer_id = :gammel_aktoer_id")
             .setParameter(GJELDENDE, nyAktørId.getAktørId())
             .setParameter(GAMMEL, gammelAktørId.getAktørId())
@@ -141,9 +133,9 @@ public class AktørIdSplittTjeneste {
 
 
     private List<Long> oppdaterFagsakForPleietrengende(AktørId nyAktørId, AktørId gammelAktørId) {
-        var fagsakPleietrengendeQuery = entityManager.createQuery("from fagsak where pleietrengende_aktoer_id = :gammel_aktoer_id", Fagsak.class)
+        var fagsakPleietrengendeQuery = entityManager.createNativeQuery("select * from fagsak where pleietrengende_aktoer_id = :gammel_aktoer_id", Fagsak.class)
             .setParameter(GAMMEL, gammelAktørId.getAktørId());
-        var pleietrengendeFagsaker = fagsakPleietrengendeQuery.getResultList();
+        List<Fagsak> pleietrengendeFagsaker = fagsakPleietrengendeQuery.getResultList();
         int antallRaderPleietrengendeFagsak = entityManager.createNativeQuery("update fagsak set pleietrengende_aktoer_id = :ny_aktoer_id, endret_av='bytte ' || :gammel_aktoer_id, endret_tid=current_timestamp where pleietrengende_aktoer_id = :gammel_aktoer_id")
             .setParameter(GJELDENDE, nyAktørId.getAktørId())
             .setParameter(GAMMEL, gammelAktørId.getAktørId())
@@ -157,9 +149,9 @@ public class AktørIdSplittTjeneste {
     }
 
     private List<Long> oppdaterFagsakForBruker(AktørId nyAktørId, AktørId gammelAktørId) {
-        var fagsakBrukerQuery = entityManager.createQuery("from fagsak where bruker_aktoer_id = :gammel_aktoer_id", Fagsak.class)
+        var fagsakBrukerQuery = entityManager.createNativeQuery("select * from fagsak where bruker_aktoer_id = :gammel_aktoer_id", Fagsak.class)
             .setParameter(GAMMEL, gammelAktørId.getAktørId());
-        var brukerFagsaker = fagsakBrukerQuery.getResultList();
+        List<Fagsak> brukerFagsaker = fagsakBrukerQuery.getResultList();
         int antallRaderBrukerFagsak = entityManager.createNativeQuery("update fagsak set bruker_aktoer_id = :ny_aktoer_id, endret_av='bytte ' || :gammel_aktoer_id, endret_tid=current_timestamp where bruker_aktoer_id = :gammel_aktoer_id")
             .setParameter(GJELDENDE, nyAktørId.getAktørId())
             .setParameter(GAMMEL, gammelAktørId.getAktørId())
