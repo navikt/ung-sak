@@ -18,6 +18,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -68,6 +69,7 @@ import no.nav.k9.sak.kontrakt.person.AktørIdDto;
 import no.nav.k9.sak.kontrakt.person.AktørIdOgFnrDto;
 import no.nav.k9.sak.kontrakt.person.AktørInfoDto;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
@@ -162,7 +164,11 @@ public class ForvaltningPersonRestTjeneste {
     @BeskyttetRessurs(action = UPDATE, resource = DRIFT)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response oppdaterAktørIdBruker(@Valid @NotNull OppdaterAktørIdDto dto) {
-        aktørIdSplittTjeneste.patchBrukerAktørId(dto.getGyldigAktørId(), dto.getUtgåttAktørId(), dto.getBegrunnelse(), "/forvaltning/person/oppdater-aktoer-bruker");
+        aktørIdSplittTjeneste.patchBrukerAktørId(dto.getGyldigAktørId(),
+            dto.getUtgåttAktørId(),
+            Optional.ofNullable(dto.getAktørIdForIdenterSomSkalByttes()),
+            dto.getBegrunnelse(),
+            "/forvaltning/person/oppdater-aktoer-bruker");
         return Response.ok().build();
     }
 
@@ -178,6 +184,14 @@ public class ForvaltningPersonRestTjeneste {
         @NotNull
         private AktørIdDto utgåttAktørId;
 
+        /**
+         * AktørID for som holder personidenter som skal byttes ut med personident til gyldigAktørId
+         * For splitt vil dette vere den andre delen av aktørsplitten
+         */
+        @JsonProperty("aktørIdForIdenterSomSkalByttes")
+        @Valid
+        private AktørIdDto aktørIdForIdenterSomSkalByttes;
+
         @JsonProperty("begrunnelse")
         @Valid
         @NotNull
@@ -186,9 +200,13 @@ public class ForvaltningPersonRestTjeneste {
         private String begrunnelse;
 
         @JsonCreator
-        public OppdaterAktørIdDto(@JsonProperty("gyldigAktørId") @NotNull @Valid String gyldigAktørId, @JsonProperty("utgåttAktørId") @NotNull @Valid String utgåttAktørId, @JsonProperty("begrunnelse") @NotNull @Valid  String begrunnelse) {
+        public OppdaterAktørIdDto(@JsonProperty("gyldigAktørId") @NotNull @Valid String gyldigAktørId,
+                                  @JsonProperty("utgåttAktørId") @NotNull @Valid String utgåttAktørId,
+                                  @JsonProperty("aktørIdForIdenterSomSkalByttes") @Valid String aktørIdForIdenterSomSkalByttes,
+                                  @JsonProperty("begrunnelse") @NotNull @Valid  String begrunnelse) {
             this.gyldigAktørId = new AktørIdDto(gyldigAktørId);
             this.utgåttAktørId = new AktørIdDto(utgåttAktørId);
+            this.aktørIdForIdenterSomSkalByttes = aktørIdForIdenterSomSkalByttes != null ? new AktørIdDto(aktørIdForIdenterSomSkalByttes) : null;
             this.begrunnelse = begrunnelse;
         }
 
@@ -214,6 +232,10 @@ public class ForvaltningPersonRestTjeneste {
 
         public void setUtgåttAktørId(AktørIdDto utgåttAktørId) {
             this.utgåttAktørId = utgåttAktørId;
+        }
+
+        public AktørId getAktørIdForIdenterSomSkalByttes() {
+            return aktørIdForIdenterSomSkalByttes.getAktørId();
         }
 
         @Override

@@ -1,6 +1,9 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.personopplysning;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,8 +14,11 @@ import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
+import no.nav.k9.sak.kontrakt.person.AktørIdDto;
 import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
+import no.nav.k9.sak.økonomi.simulering.klient.K9OppdragRestKlient;
 
 @Dependent
 public class AktørIdSplittTjeneste {
@@ -23,14 +29,20 @@ public class AktørIdSplittTjeneste {
 
     private final AktørTjeneste aktørTjeneste;
     private final EntityManager entityManager;
+    private final K9OppdragRestKlient oppdragRestKlient;
 
     @Inject
-    public AktørIdSplittTjeneste(AktørTjeneste aktørTjeneste, EntityManager entityManager) {
+    public AktørIdSplittTjeneste(AktørTjeneste aktørTjeneste, EntityManager entityManager, K9OppdragRestKlient oppdragRestKlient) {
         this.aktørTjeneste = aktørTjeneste;
         this.entityManager = entityManager;
+        this.oppdragRestKlient = oppdragRestKlient;
     }
 
-    public void patchBrukerAktørId(AktørId nyAktørId, AktørId gammelAktørId, String begrunnelse, String tjeneste) {
+    public void patchBrukerAktørId(AktørId nyAktørId,
+                                   AktørId gammelAktørId,
+                                   Optional<AktørId> aktørIdForIdenterSomSkalByttes,
+                                   String begrunnelse,
+                                   String tjeneste) {
         if (aktørTjeneste.hentPersonIdentForAktørId(gammelAktørId).isPresent()) {
             if (Environment.current().isDev() || Environment.current().isLocal()) {//ignorerer sjekk i dev for testbarhet
                 logger.warn("Patcher fagsak som har gyldig aktørId.");
@@ -48,8 +60,69 @@ public class AktørIdSplittTjeneste {
         var relatertPersonOppdaterteFagsakIder = oppdaterFagsakForRelatertPerson(nyAktørId, gammelAktørId);
 
         oppdaterPoAggregat(nyAktørId, gammelAktørId);
+        oppdaterPSBGrunnlag(nyAktørId, gammelAktørId);
+        oppdaterOMPGrunnlag(nyAktørId, gammelAktørId);
+        oppdaterNotatISak(nyAktørId, gammelAktørId);
+        oppdaterReservertSaksnummer(nyAktørId, gammelAktørId);
+        oppdaterSøknadGrunnlag(nyAktørId, gammelAktørId);
+        slettIdentFraAktørCache(gammelAktørId);
 
-        // Oppdater PSB grunnlag
+
+        var personidenterSomSkalByttesUt = aktørIdForIdenterSomSkalByttes.map(aktørTjeneste::hentHistoriskePersonIdenterForAktørId)
+            .orElse(Collections.emptySet());
+
+        oppdragRestKlient.utførAktørbytte(nyAktørId, gammelAktørId, personidenterSomSkalByttesUt);
+
+
+
+        brukerOppdaterteFagsakIder.forEach(id -> entityManager.persist(new DiagnostikkFagsakLogg(id, "Oppdatert aktørid for bruker via " + tjeneste, begrunnelse)));
+        pleietrengedeOppdaterteFagsakIder.forEach(id -> entityManager.persist(new DiagnostikkFagsakLogg(id, "Oppdatert aktørid for pleietrengende via " + tjeneste, begrunnelse)));
+        relatertPersonOppdaterteFagsakIder.forEach(id -> entityManager.persist(new DiagnostikkFagsakLogg(id, "Oppdatert aktørid for relatert person via " + tjeneste, begrunnelse)));
+    }
+
+    private void slettIdentFraAktørCache(AktørId gammelAktørId) {
+        entityManager.createNativeQuery("delete from tmp_aktoer_id where aktoer_id = :gammel_aktoer_id")
+            .setParameter(GAMMEL, gammelAktørId.getAktørId())
+            .executeUpdate();
+    }
+
+    private void oppdaterSøknadGrunnlag(AktørId nyAktørId, AktørId gammelAktørId) {
+        entityManager.createNativeQuery("update SO_SOEKNAD_ANGITT_PERSON set AKTOER_ID = :ny_aktoer_id where AKTOER_ID = :gammel_aktoer_id")
+            .setParameter(GJELDENDE, nyAktørId.getAktørId())
+            .setParameter(GAMMEL, gammelAktørId.getAktørId())
+            .executeUpdate();
+    }
+
+    private void oppdaterReservertSaksnummer(AktørId nyAktørId, AktørId gammelAktørId) {
+        entityManager.createNativeQuery("update reservert_saksnummer set BRUKER_AKTOER_ID = :ny_aktoer_id where BRUKER_AKTOER_ID = :gammel_aktoer_id")
+            .setParameter(GJELDENDE, nyAktørId.getAktørId())
+            .setParameter(GAMMEL, gammelAktørId.getAktørId())
+            .executeUpdate();
+        entityManager.createNativeQuery("update reservert_saksnummer set PLEIETRENGENDE_AKTOER_ID = :ny_aktoer_id where PLEIETRENGENDE_AKTOER_ID = :gammel_aktoer_id")
+            .setParameter(GJELDENDE, nyAktørId.getAktørId())
+            .setParameter(GAMMEL, gammelAktørId.getAktørId())
+            .executeUpdate();
+        entityManager.createNativeQuery("update reservert_saksnummer set relatert_person_aktoer_id = :ny_aktoer_id where relatert_person_aktoer_id = :gammel_aktoer_id")
+            .setParameter(GJELDENDE, nyAktørId.getAktørId())
+            .setParameter(GAMMEL, gammelAktørId.getAktørId())
+            .executeUpdate();
+    }
+
+    private void oppdaterNotatISak(AktørId nyAktørId, AktørId gammelAktørId) {
+        entityManager.createNativeQuery("update notat_aktoer set aktoer_id = :ny_aktoer_id where aktoer_id = :gammel_aktoer_id")
+            .setParameter(GJELDENDE, nyAktørId.getAktørId())
+            .setParameter(GAMMEL, gammelAktørId.getAktørId())
+            .executeUpdate();
+    }
+
+    private void oppdaterOMPGrunnlag(AktørId nyAktørId, AktørId gammelAktørId) {
+        entityManager.createNativeQuery("update OMP_FOSTERBARN set aktoer_id = :ny_aktoer_id where aktoer_id = :gammel_aktoer_id")
+            .setParameter(GJELDENDE, nyAktørId.getAktørId())
+            .setParameter(GAMMEL, gammelAktørId.getAktørId())
+            .executeUpdate();
+    }
+
+    private void oppdaterPSBGrunnlag(AktørId nyAktørId, AktørId gammelAktørId) {
         entityManager.createNativeQuery("update person set aktoer_id = :ny_aktoer_id where aktoer_id = :gammel_aktoer_id")
             .setParameter(GJELDENDE, nyAktørId.getAktørId())
             .setParameter(GAMMEL, gammelAktørId.getAktørId())
@@ -70,50 +143,6 @@ public class AktørIdSplittTjeneste {
             .setParameter(GJELDENDE, nyAktørId.getAktørId())
             .setParameter(GAMMEL, gammelAktørId.getAktørId())
             .executeUpdate();
-
-
-        // Oppdater OMP grunnlag
-        entityManager.createNativeQuery("update OMP_FOSTERBARN set aktoer_id = :ny_aktoer_id where aktoer_id = :gammel_aktoer_id")
-            .setParameter(GJELDENDE, nyAktørId.getAktørId())
-            .setParameter(GAMMEL, gammelAktørId.getAktørId())
-            .executeUpdate();
-
-
-        // Notat i sak
-        entityManager.createNativeQuery("update notat_aktoer set aktoer_id = :ny_aktoer_id where aktoer_id = :gammel_aktoer_id")
-            .setParameter(GJELDENDE, nyAktørId.getAktørId())
-            .setParameter(GAMMEL, gammelAktørId.getAktørId())
-            .executeUpdate();
-
-        // Reservert saksnummer
-        entityManager.createNativeQuery("update reservert_saksnummer set BRUKER_AKTOER_ID = :ny_aktoer_id where BRUKER_AKTOER_ID = :gammel_aktoer_id")
-            .setParameter(GJELDENDE, nyAktørId.getAktørId())
-            .setParameter(GAMMEL, gammelAktørId.getAktørId())
-            .executeUpdate();
-        entityManager.createNativeQuery("update reservert_saksnummer set PLEIETRENGENDE_AKTOER_ID = :ny_aktoer_id where PLEIETRENGENDE_AKTOER_ID = :gammel_aktoer_id")
-            .setParameter(GJELDENDE, nyAktørId.getAktørId())
-            .setParameter(GAMMEL, gammelAktørId.getAktørId())
-            .executeUpdate();
-        entityManager.createNativeQuery("update reservert_saksnummer set relatert_person_aktoer_id = :ny_aktoer_id where relatert_person_aktoer_id = :gammel_aktoer_id")
-            .setParameter(GJELDENDE, nyAktørId.getAktørId())
-            .setParameter(GAMMEL, gammelAktørId.getAktørId())
-            .executeUpdate();
-
-        // Søknad
-        entityManager.createNativeQuery("update SO_SOEKNAD_ANGITT_PERSON set AKTOER_ID = :ny_aktoer_id where AKTOER_ID = :gammel_aktoer_id")
-            .setParameter(GJELDENDE, nyAktørId.getAktørId())
-            .setParameter(GAMMEL, gammelAktørId.getAktørId())
-            .executeUpdate();
-
-        // Rapportering, sletter fra ident-lager
-        entityManager.createNativeQuery("delete from tmp_aktoer_id where aktoer_id = :gammel_aktoer_id")
-            .setParameter(GAMMEL, gammelAktørId.getAktørId())
-            .executeUpdate();
-
-
-        brukerOppdaterteFagsakIder.forEach(id -> entityManager.persist(new DiagnostikkFagsakLogg(id, "Oppdatert aktørid for bruker via " + tjeneste, begrunnelse)));
-        pleietrengedeOppdaterteFagsakIder.forEach(id -> entityManager.persist(new DiagnostikkFagsakLogg(id, "Oppdatert aktørid for pleietrengende via " + tjeneste, begrunnelse)));
-        relatertPersonOppdaterteFagsakIder.forEach(id -> entityManager.persist(new DiagnostikkFagsakLogg(id, "Oppdatert aktørid for relatert person via " + tjeneste, begrunnelse)));
     }
 
     private List<Long> oppdaterFagsakForRelatertPerson(AktørId nyAktørId, AktørId gammelAktørId) {
