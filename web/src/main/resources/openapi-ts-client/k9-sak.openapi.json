@@ -16597,6 +16597,31 @@
         "tags" : [ "fordel" ]
       }
     },
+    "/forvaltning/person/finnAktørerKobletTilSammeSakSomAktør" : {
+      "post" : {
+        "description" : "Henter aktører pr sak relatert til oppgitt aktørid",
+        "operationId" : "finnAktørerKobletTilSammeSakSomAktør",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AktørIdDto"
+              }
+            }
+          },
+          "description" : "AktørId"
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : { }
+            },
+            "description" : "Aktører for pr sak"
+          }
+        },
+        "tags" : [ "forvaltning - person" ]
+      }
+    },
     "/forvaltning/person/hentFnr" : {
       "post" : {
         "description" : "Hent fnr for aktørid",
