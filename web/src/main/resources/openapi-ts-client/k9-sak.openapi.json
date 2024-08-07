@@ -6450,14 +6450,11 @@
           "gyldigAktørId" : {
             "type" : "string"
           },
-          "saksnummer" : {
-            "type" : "string"
-          },
           "utgåttAktørId" : {
             "type" : "string"
           }
         },
-        "required" : [ "begrunnelse", "gyldigAktørId", "saksnummer", "utgåttAktørId" ],
+        "required" : [ "begrunnelse", "gyldigAktørId", "utgåttAktørId" ],
         "type" : "object"
       },
       "OppgaveIdDto" : {
