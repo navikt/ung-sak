@@ -28,6 +28,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -72,17 +74,41 @@ public class ForvaltningPersonRestTjeneste {
     private AktørIdSplittTjeneste aktørIdSplittTjeneste;
     private TpsTjeneste tpsTjeneste;
     private FagsakRepository fagsakRepository;
+    private FinnUnikeAktører finnUnikeAktører;
+    private EntityManager entityManager;
 
     public ForvaltningPersonRestTjeneste() {
         // for CDI proxy
     }
 
     @Inject
-    public ForvaltningPersonRestTjeneste(AktørIdSplittTjeneste aktørIdSplittTjeneste, TpsTjeneste tpsTjeneste, FagsakRepository fagsakRepository) {
+    public ForvaltningPersonRestTjeneste(AktørIdSplittTjeneste aktørIdSplittTjeneste, TpsTjeneste tpsTjeneste, FagsakRepository fagsakRepository, FinnUnikeAktører finnUnikeAktører, EntityManager entityManager) {
         this.aktørIdSplittTjeneste = aktørIdSplittTjeneste;
         this.tpsTjeneste = tpsTjeneste;
         this.fagsakRepository = fagsakRepository;
+        this.finnUnikeAktører = finnUnikeAktører;
+        this.entityManager = entityManager;
     }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/finnAktørerKobletTilSammeSakSomAktør")
+    @Operation(description = "Henter aktører pr sak relatert til oppgitt aktørid", tags = "forvaltning - person", responses = {
+        @ApiResponse(responseCode = "200",
+            description = "Aktører for pr sak",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Response finnAktørerKobletTilSammeSakSomAktør(@Parameter(description = "AktørId") @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) @Valid AktørIdDto aktørId) {
+        var fagsakQuery = entityManager.createNativeQuery("select * from fagsak where bruker_aktoer_id = :aktørId", Fagsak.class)
+            .setParameter("aktørId", aktørId.getAktorId());
+        List<Fagsak>  fagsaker = fagsakQuery.getResultList();
+        var aktørerForSak = fagsaker.stream().map(finnUnikeAktører::finnUnikeAktørerMedDokumenter).toList();
+        return Response.ok(aktørerForSak, MediaType.APPLICATION_JSON).build();
+    }
+
 
     @POST
     @Produces(MediaType.TEXT_PLAIN)
