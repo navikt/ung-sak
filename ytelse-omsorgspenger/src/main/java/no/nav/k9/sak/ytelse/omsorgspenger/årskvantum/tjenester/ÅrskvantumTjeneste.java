@@ -190,6 +190,10 @@ public class ÅrskvantumTjeneste {
         return hentForRefV2(ref);
     }
 
+    public void oppdaterPersonident(PersonIdent nyPersonident, Set<PersonIdent> gamlePersonidenter) {
+        årskvantumKlient.oppdaterPersonident(nyPersonident, gamlePersonidenter.stream().toList());
+    }
+
     private ÅrskvantumGrunnlag hentForRef(BehandlingReferanse ref) {
         var oppgittFravær = grunnlagRepository.hentSammenslåtteFraværPerioder(ref.getBehandlingId());
         var vilkårene = vilkårResultatRepository.hent(ref.getBehandlingId());

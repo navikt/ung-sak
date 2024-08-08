@@ -13,6 +13,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.abakus.AbakusTjeneste;
 import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
@@ -20,6 +21,7 @@ import no.nav.k9.sak.kontrakt.person.AktørIdDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
+import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 import no.nav.k9.sak.økonomi.simulering.klient.K9OppdragRestKlient;
 
 @Dependent
@@ -34,18 +36,24 @@ public class AktørIdSplittTjeneste {
     private final K9OppdragRestKlient oppdragRestKlient;
     private final AbakusTjeneste abakusTjeneste;
     private final KalkulusTjeneste kalkulusTjeneste;
+    private final AktørBytteFordelKlient fordelKlient;
+    private final ÅrskvantumTjeneste årskvantumTjeneste;
 
     @Inject
     public AktørIdSplittTjeneste(AktørTjeneste aktørTjeneste,
                                  EntityManager entityManager,
                                  K9OppdragRestKlient oppdragRestKlient,
                                  AbakusTjeneste abakusTjeneste,
-                                 KalkulusTjeneste kalkulusTjeneste) {
+                                 KalkulusTjeneste kalkulusTjeneste,
+                                 AktørBytteFordelKlient fordelKlient,
+                                 ÅrskvantumTjeneste årskvantumTjeneste) {
         this.aktørTjeneste = aktørTjeneste;
         this.entityManager = entityManager;
         this.oppdragRestKlient = oppdragRestKlient;
         this.abakusTjeneste = abakusTjeneste;
         this.kalkulusTjeneste = kalkulusTjeneste;
+        this.fordelKlient = fordelKlient;
+        this.årskvantumTjeneste = årskvantumTjeneste;
     }
 
     public void patchBrukerAktørId(AktørId nyAktørId,
@@ -60,12 +68,13 @@ public class AktørIdSplittTjeneste {
                 throw new IllegalStateException("Fagsaken har gyldig aktørId for bruker - kan ikke patche");
             }
         }
-        if (aktørTjeneste.hentPersonIdentForAktørId(nyAktørId).isEmpty()) {
+        var nyPersonident = aktørTjeneste.hentPersonIdentForAktørId(nyAktørId);
+        if (nyPersonident.isEmpty()) {
             throw new IllegalArgumentException("Ny aktørId er ugyldig - kan ikke patche");
         }
 
 
-        var brukerOppdaterteFagsakIder = oppdaterFagsakForBruker(nyAktørId, gammelAktørId);
+        var brukerOppdaterteFagsaker = oppdaterFagsakForBruker(nyAktørId, gammelAktørId);
         var pleietrengedeOppdaterteFagsakIder = oppdaterFagsakForPleietrengende(nyAktørId, gammelAktørId);
         var relatertPersonOppdaterteFagsakIder = oppdaterFagsakForRelatertPerson(nyAktørId, gammelAktørId);
 
@@ -84,9 +93,14 @@ public class AktørIdSplittTjeneste {
         oppdragRestKlient.utførAktørbytte(nyAktørId, gammelAktørId, personidenterSomSkalByttesUt);
         abakusTjeneste.endreAktørId(nyAktørId, gammelAktørId);
         kalkulusTjeneste.opppdaterAktørId(nyAktørId, gammelAktørId);
+        fordelKlient.oppdaterAktørId(nyAktørId, gammelAktørId);
+        if (brukerOppdaterteFagsaker.stream().map(Fagsak::getYtelseType).anyMatch(FagsakYtelseType.OMSORGSPENGER::equals) && !personidenterSomSkalByttesUt.isEmpty()) {
+            årskvantumTjeneste.oppdaterPersonident(nyPersonident.get(), personidenterSomSkalByttesUt);
+        }
 
 
-        brukerOppdaterteFagsakIder.forEach(id -> entityManager.persist(new DiagnostikkFagsakLogg(id, "Oppdatert aktørid for bruker via " + tjeneste, begrunnelse)));
+
+        brukerOppdaterteFagsaker.forEach(fagsak -> entityManager.persist(new DiagnostikkFagsakLogg(fagsak.getId(), "Oppdatert aktørid for bruker via " + tjeneste, begrunnelse)));
         pleietrengedeOppdaterteFagsakIder.forEach(id -> entityManager.persist(new DiagnostikkFagsakLogg(id, "Oppdatert aktørid for pleietrengende via " + tjeneste, begrunnelse)));
         relatertPersonOppdaterteFagsakIder.forEach(id -> entityManager.persist(new DiagnostikkFagsakLogg(id, "Oppdatert aktørid for relatert person via " + tjeneste, begrunnelse)));
     }
@@ -188,7 +202,7 @@ public class AktørIdSplittTjeneste {
 
     }
 
-    private List<Long> oppdaterFagsakForBruker(AktørId nyAktørId, AktørId gammelAktørId) {
+    private List<Fagsak> oppdaterFagsakForBruker(AktørId nyAktørId, AktørId gammelAktørId) {
         var fagsakBrukerQuery = entityManager.createNativeQuery("select * from fagsak where bruker_aktoer_id = :gammel_aktoer_id", Fagsak.class)
             .setParameter(GAMMEL, gammelAktørId.getAktørId());
         List<Fagsak> brukerFagsaker = fagsakBrukerQuery.getResultList();
@@ -200,7 +214,7 @@ public class AktørIdSplittTjeneste {
             throw new IllegalStateException("Forventet å oppdatere " + brukerFagsaker.size() + " rader, men " + antallRaderBrukerFagsak + " ble forsøkt endret.");
         }
         logger.info("oppdaterte følgende saker der gitt aktørid var bruker: {}", brukerFagsaker.stream().map(Fagsak::getSaksnummer).toList());
-        return brukerFagsaker.stream().map(Fagsak::getId).toList();
+        return brukerFagsaker;
     }
 
     private void oppdaterPoAggregat(AktørId nyAktørId, AktørId gammelAktørId) {

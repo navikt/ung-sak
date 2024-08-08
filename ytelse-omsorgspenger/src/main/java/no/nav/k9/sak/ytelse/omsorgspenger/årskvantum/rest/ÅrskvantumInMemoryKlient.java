@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.apache.commons.lang3.NotImplementedException;
+
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.inject.Alternative;
 import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
@@ -110,5 +112,10 @@ public class ÅrskvantumInMemoryKlient implements ÅrskvantumKlient {
     @Override
     public ÅrskvantumUttrekk hentUttrekk() {
         return null;
+    }
+
+    @Override
+    public void oppdaterPersonident(PersonIdent nyPersonident, List<PersonIdent> gamlePersonidenter) {
+        throw new NotImplementedException("Ikke implementert");
     }
 }

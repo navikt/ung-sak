@@ -17,6 +17,7 @@ import jakarta.inject.Inject;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.ws.rs.core.HttpHeaders;
+import no.nav.k9.aarskvantum.kontrakter.AktørBytte;
 import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
 import no.nav.k9.aarskvantum.kontrakter.FullUttaksplanForBehandlinger;
 import no.nav.k9.aarskvantum.kontrakter.FullUttaksplanRequest;
@@ -41,6 +42,7 @@ import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -281,6 +283,17 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
         }
     }
 
+    @Override
+    public void oppdaterPersonident(PersonIdent nyPersonident, List<PersonIdent> gamlePersonidenter) {
+        try {
+            var request = new AktørBytte(gamlePersonidenter.stream().map(PersonIdent::getIdent).toList(), nyPersonident.getIdent());
+            var endpoint = URI.create(endpointUttaksplan.toString() + "/oppdaterPersonident");
+            restKlient.post(endpoint, request);
+        } catch (Exception e) {
+            throw RestTjenesteFeil.FEIL.feilKallTilOppdaterPersonident(e.getMessage(), e).toException();
+        }
+    }
+
     private URI toUri(URI baseUri, String relativeUri) {
         String uri = baseUri.toString() + relativeUri;
         try {
@@ -304,6 +317,9 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
 
         @TekniskFeil(feilkode = "K9SAK-AK-1000092", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke beregne uttaksplan for årskvantum: %s", logLevel = LogLevel.WARN)
         Feil feilKallTilÅrskvantum(String feilmelding, Throwable t);
+
+        @TekniskFeil(feilkode = "K9SAK-AK-1000092", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke oppdatere personident: %s", logLevel = LogLevel.WARN)
+        Feil feilKallTilOppdaterPersonident(String feilmelding, Throwable t);
 
         @TekniskFeil(feilkode = "K9SAK-AK-1000093", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke settUttaksplanTilManueltBekreftet: %s", logLevel = LogLevel.WARN)
         Feil feilKallTilsettUttaksplanTilManueltBekreftet(String feilmelding, Throwable t);
