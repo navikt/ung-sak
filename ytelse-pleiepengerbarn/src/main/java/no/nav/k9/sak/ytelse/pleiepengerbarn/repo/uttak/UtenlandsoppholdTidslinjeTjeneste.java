@@ -24,10 +24,11 @@ public class UtenlandsoppholdTidslinjeTjeneste {
                 .collect(Collectors.toSet());
             if (dokumenter.size() == 1) {
                 var perioderFraSøknad = dokumenter.iterator().next();
-                if (perioderFraSøknad.getUtenlandsopphold().isEmpty()) {
+                if (perioderFraSøknad.getUtenlandsopphold().isEmpty() && !perioderFraSøknad.getUttakPerioder().isEmpty()) {
+                    var søktPeriode = perioderFraSøknad.utledSøktPeriode();
                     LocalDateTimeline<UtledetUtenlandsopphold> timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(
-                        perioderFraSøknad.utledSøktPeriode().getFomDato(),
-                        perioderFraSøknad.utledSøktPeriode().getTomDato(),
+                        søktPeriode.getFomDato(),
+                        søktPeriode.getTomDato(),
                         null
                     )));
                     resultatTimeline = resultatTimeline.disjoint(timeline);
