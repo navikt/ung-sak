@@ -45,7 +45,7 @@ public class SykdomSamletVurdering {
         return ny;
     }
 
-    public static LocalDateTimeline<SykdomSamletVurdering> grunnlagTilTidslinje(MedisinskGrunnlagsdata grunnlag, boolean skalBrukeInnleggelse) {
+    public static LocalDateTimeline<SykdomSamletVurdering> grunnlagTilTidslinje(MedisinskGrunnlagsdata grunnlag) {
         final Collection<LocalDateSegment<SykdomSamletVurdering>> segments = new ArrayList<>();
 
         PleietrengendeTidslinjeUtils.tilTidslinjeForType(grunnlag.getVurderinger(), SykdomVurderingType.KONTINUERLIG_TILSYN_OG_PLEIE).forEach(s -> {
@@ -66,7 +66,7 @@ public class SykdomSamletVurdering {
             segments.add(new LocalDateSegment<>(s.getFom(), s.getTom(), samletVurdering));
         });
 
-        if (skalBrukeInnleggelse && grunnlag.getInnleggelser() != null) {
+        if (grunnlag.getInnleggelser() != null) {
             grunnlag.getInnleggelser().getPerioder().forEach(p -> {
                 SykdomSamletVurdering samletVurdering = new SykdomSamletVurdering();
                 samletVurdering.setInnleggelser(p.getInnleggelser());
@@ -84,53 +84,6 @@ public class SykdomSamletVurdering {
 
         tidslinje.compress();
         return tidslinje;
-    }
-
-    public static LocalDateTimeline<Boolean> finnGrunnlagsforskjeller(LocalDateTimeline<SykdomSamletVurdering> forrigeTidslinje, LocalDateTimeline<SykdomSamletVurdering> nyTidslinje) {
-        return nyTidslinje.combine(forrigeTidslinje, new LocalDateSegmentCombinator<SykdomSamletVurdering, SykdomSamletVurdering, Boolean>() {
-            @Override
-            public LocalDateSegment<Boolean> combine(LocalDateInterval localDateInterval, LocalDateSegment<SykdomSamletVurdering> left, LocalDateSegment<SykdomSamletVurdering> right) {
-                if (right == null || left == null) {
-                    return new LocalDateSegment<>(localDateInterval, true);
-                }
-                PleietrengendeSykdomInnleggelser innleggelser1 = left.getValue().getInnleggelser();
-                PleietrengendeSykdomInnleggelser innleggelser2 = right.getValue().getInnleggelser();
-                if (innleggelser1 == null && innleggelser2 != null || innleggelser1 != null && innleggelser2 == null) {
-                    return new LocalDateSegment<>(localDateInterval, true);
-                }
-
-                PleietrengendeSykdomVurderingVersjon toOp1 = left.getValue().getToOp();
-                PleietrengendeSykdomVurderingVersjon toOp2 = right.getValue().getToOp();
-                if (toOp1 == null && toOp2 != null || toOp1 != null && toOp2 == null) {
-                    return new LocalDateSegment<>(localDateInterval, true);
-                } else if (toOp1 != null && toOp2 != null) {
-                    if (toOp1.getResultat() != toOp2.getResultat()) {
-                        return new LocalDateSegment<>(localDateInterval, true);
-                    }
-                }
-
-                PleietrengendeSykdomVurderingVersjon ktp1 = left.getValue().getKtp();
-                PleietrengendeSykdomVurderingVersjon ktp2 = right.getValue().getKtp();
-                if (ktp1 == null && ktp2 != null || ktp1 != null && ktp2 == null) {
-                    return new LocalDateSegment<>(localDateInterval, true);
-                } else if (ktp1 != null && ktp2 != null) {
-                    if (ktp1.getResultat() != ktp2.getResultat()) {
-                        return new LocalDateSegment<>(localDateInterval, true);
-                    }
-                }
-
-                PleietrengendeSykdomVurderingVersjon slu1 = left.getValue().getSlu();
-                PleietrengendeSykdomVurderingVersjon slu2 = right.getValue().getSlu();
-                if (slu1 == null && slu2 != null || slu1 != null && slu2 == null) {
-                    return new LocalDateSegment<>(localDateInterval, true);
-                } else if (slu1 != null && slu2 != null) {
-                    if (slu1.getResultat() != slu2.getResultat()) {
-                        return new LocalDateSegment<>(localDateInterval, true);
-                    }
-                }
-                return null;
-            }
-        }, LocalDateTimeline.JoinStyle.CROSS_JOIN).compress();
     }
 
     public PleietrengendeSykdomVurderingVersjon getKtp() {

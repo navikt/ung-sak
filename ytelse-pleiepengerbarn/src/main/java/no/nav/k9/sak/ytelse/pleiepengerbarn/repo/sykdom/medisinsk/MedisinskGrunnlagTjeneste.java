@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -24,7 +25,7 @@ import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentType;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.SykdomGrunnlagSammenlikningsresultat;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.SykdomSamletVurdering;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.SykdomSamletVurderingSammenligner;
 
 @Dependent
 public class MedisinskGrunnlagTjeneste {
@@ -95,16 +96,18 @@ public class MedisinskGrunnlagTjeneste {
     }
 
     public SykdomGrunnlagSammenlikningsresultat sammenlignGrunnlag(Optional<MedisinskGrunnlagsdata> forrigeGrunnlagBehandling, MedisinskGrunnlagsdata utledetGrunnlag) {
+        SykdomSamletVurderingSammenligner sammenligner = new SykdomSamletVurderingSammenligner(true);
         boolean harEndretDiagnosekoder = sammenlignDiagnosekoder(forrigeGrunnlagBehandling, utledetGrunnlag);
         boolean harNyeUklassifiserteDokumenter = harNyeUklassifiserteDokumenter(forrigeGrunnlagBehandling, utledetGrunnlag);
-        final LocalDateTimeline<Boolean> endringerISøktePerioder = sammenlignTidfestedeGrunnlagsdata(forrigeGrunnlagBehandling, utledetGrunnlag, true);
+        final LocalDateTimeline<Boolean> endringerISøktePerioder = sammenligner.finnEndringerISøktePerioder(forrigeGrunnlagBehandling, utledetGrunnlag);
         return new SykdomGrunnlagSammenlikningsresultat(endringerISøktePerioder, harEndretDiagnosekoder, harNyeUklassifiserteDokumenter);
     }
 
     public SykdomGrunnlagSammenlikningsresultat sammenlignGrunnlagUtenInnleggelsesPerioder(Optional<MedisinskGrunnlagsdata> forrigeGrunnlagBehandling, MedisinskGrunnlagsdata utledetGrunnlag) {
+        SykdomSamletVurderingSammenligner sammenligner = new SykdomSamletVurderingSammenligner(false);
         boolean harEndretDiagnosekoder = sammenlignDiagnosekoder(forrigeGrunnlagBehandling, utledetGrunnlag);
         boolean harNyeUklassifiserteDokumenter = harNyeUklassifiserteDokumenter(forrigeGrunnlagBehandling, utledetGrunnlag);
-        final LocalDateTimeline<Boolean> endringerISøktePerioder = sammenlignTidfestedeGrunnlagsdata(forrigeGrunnlagBehandling, utledetGrunnlag, false);
+        final LocalDateTimeline<Boolean> endringerISøktePerioder = sammenligner.finnEndringerISøktePerioder(forrigeGrunnlagBehandling, utledetGrunnlag);
         return new SykdomGrunnlagSammenlikningsresultat(endringerISøktePerioder, harEndretDiagnosekoder, harNyeUklassifiserteDokumenter);
     }
 
@@ -129,25 +132,6 @@ public class MedisinskGrunnlagTjeneste {
     }
 
     private record PleietrengendeDokumentID(String journalpostId, String dokumentId) {}
-
-
-    LocalDateTimeline<Boolean> sammenlignTidfestedeGrunnlagsdata(Optional<MedisinskGrunnlagsdata> grunnlagBehandling, MedisinskGrunnlagsdata utledetGrunnlag, boolean skalBrukeInnleggelse) {
-        LocalDateTimeline<SykdomSamletVurdering> grunnlagBehandlingTidslinje;
-
-        if (grunnlagBehandling.isPresent()) {
-            final MedisinskGrunnlagsdata forrigeGrunnlag = grunnlagBehandling.get();
-            grunnlagBehandlingTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(forrigeGrunnlag, skalBrukeInnleggelse);
-        } else {
-            grunnlagBehandlingTidslinje = LocalDateTimeline.empty();
-        }
-        final LocalDateTimeline<SykdomSamletVurdering> forrigeGrunnlagTidslinje = grunnlagBehandlingTidslinje;
-
-        final LocalDateTimeline<SykdomSamletVurdering> nyBehandlingTidslinje = SykdomSamletVurdering.grunnlagTilTidslinje(utledetGrunnlag, skalBrukeInnleggelse);
-        final LocalDateTimeline<Boolean> endringerSidenForrigeBehandling = SykdomSamletVurdering.finnGrunnlagsforskjeller(forrigeGrunnlagTidslinje, nyBehandlingTidslinje);
-
-        final LocalDateTimeline<Boolean> søktePerioderTimeline = TidslinjeUtil.tilTidslinjeKomprimert(utledetGrunnlag.getSøktePerioder().stream().map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFom(), p.getTom())).collect(Collectors.toCollection(TreeSet::new)));
-        return endringerSidenForrigeBehandling.intersection(søktePerioderTimeline);
-    }
 
     private boolean sammenlignDiagnosekoder(Optional<MedisinskGrunnlagsdata> grunnlagBehandling, MedisinskGrunnlagsdata utledetGrunnlag) {
         List<String> forrigeDiagnosekoder;
