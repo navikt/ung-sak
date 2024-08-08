@@ -17,6 +17,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 
 import java.time.LocalDate;
@@ -32,6 +33,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+
+import org.apache.commons.lang3.NotImplementedException;
 
 /**
  * In-memory - legger kun grunnlag i minne (lagrer ikke i noe lager). (Ønsker at denne kunne blitt fjernet)
@@ -135,6 +138,11 @@ public class KalkulusInMemoryTjeneste implements KalkulusApiTjeneste {
     @Override
     public Set<UUID> hentReferanserMedAktiveGrunnlag(Saksnummer saksnummer) {
         return indeksBehandlingTilGrunnlag.keySet();
+    }
+
+    @Override
+    public void opppdaterAktørId(AktørId gyldigAktørId, AktørId utgåttAktørId) {
+        throw new NotImplementedException("Ikke implementert");
     }
 
     private Optional<BeregningsgrunnlagGrunnlag> getAktivtInntektArbeidGrunnlag(Long behandlingId) {

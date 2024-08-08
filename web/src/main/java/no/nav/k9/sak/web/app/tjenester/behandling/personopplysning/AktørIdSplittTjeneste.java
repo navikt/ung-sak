@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.abakus.AbakusTjeneste;
@@ -32,13 +33,19 @@ public class AktørIdSplittTjeneste {
     private final EntityManager entityManager;
     private final K9OppdragRestKlient oppdragRestKlient;
     private final AbakusTjeneste abakusTjeneste;
+    private final KalkulusTjeneste kalkulusTjeneste;
 
     @Inject
-    public AktørIdSplittTjeneste(AktørTjeneste aktørTjeneste, EntityManager entityManager, K9OppdragRestKlient oppdragRestKlient, AbakusTjeneste abakusTjeneste) {
+    public AktørIdSplittTjeneste(AktørTjeneste aktørTjeneste,
+                                 EntityManager entityManager,
+                                 K9OppdragRestKlient oppdragRestKlient,
+                                 AbakusTjeneste abakusTjeneste,
+                                 KalkulusTjeneste kalkulusTjeneste) {
         this.aktørTjeneste = aktørTjeneste;
         this.entityManager = entityManager;
         this.oppdragRestKlient = oppdragRestKlient;
         this.abakusTjeneste = abakusTjeneste;
+        this.kalkulusTjeneste = kalkulusTjeneste;
     }
 
     public void patchBrukerAktørId(AktørId nyAktørId,
@@ -76,6 +83,7 @@ public class AktørIdSplittTjeneste {
 
         oppdragRestKlient.utførAktørbytte(nyAktørId, gammelAktørId, personidenterSomSkalByttesUt);
         abakusTjeneste.endreAktørId(nyAktørId, gammelAktørId);
+        kalkulusTjeneste.opppdaterAktørId(nyAktørId, gammelAktørId);
 
 
         brukerOppdaterteFagsakIder.forEach(id -> entityManager.persist(new DiagnostikkFagsakLogg(id, "Oppdatert aktørid for bruker via " + tjeneste, begrunnelse)));

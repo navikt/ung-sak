@@ -15,6 +15,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.beregningsgrunnlag.BeregningsgrunnlagTilstand;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 
 import java.time.LocalDate;
@@ -98,4 +99,5 @@ public interface KalkulusApiTjeneste {
     Set<UUID> hentReferanserMedAktiveGrunnlag(Saksnummer saksnummer);
 
 
+    void opppdaterAktørId(AktørId gyldigAktørId, AktørId utgåttAktørId);
 }

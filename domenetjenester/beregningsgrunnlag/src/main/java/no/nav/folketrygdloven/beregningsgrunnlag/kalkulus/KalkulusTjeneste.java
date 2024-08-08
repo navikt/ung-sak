@@ -1,5 +1,22 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
+import static java.lang.Boolean.TRUE;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Default;
@@ -16,6 +33,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.resultat.MapEndringsresultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.OppdaterBeregningsgrunnlagResultat;
 import no.nav.folketrygdloven.beregningsgrunnlag.resultat.SamletKalkulusResultat;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.AvklaringsbehovMedTilstandDto;
+import no.nav.folketrygdloven.kalkulus.felles.v1.AktørIdPersonident;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Beløp;
 import no.nav.folketrygdloven.kalkulus.felles.v1.EksternArbeidsforholdRef;
 import no.nav.folketrygdloven.kalkulus.felles.v1.InternArbeidsforholdRefDto;
@@ -38,6 +56,7 @@ import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.KontrollerGrunnbeløpRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.KopierBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.KopierBeregningRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.aktørbytte.ByttAktørRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.simulerTilkommetInntekt.SimulerTilkommetInntektForRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.simulerTilkommetInntekt.SimulerTilkommetInntektListeRequest;
 import no.nav.folketrygdloven.kalkulus.response.v1.EksternReferanseDto;
@@ -68,25 +87,9 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Prosent;
 import no.nav.k9.sak.typer.Saksnummer;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import static java.lang.Boolean.TRUE;
 
 /**
  * KalkulusTjeneste sørger for at K9 kaller kalkulus på riktig format i henhold til no.nav.folketrygdloven.kalkulus.kontrakt
@@ -406,7 +409,7 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     }
 
     public LocalDateTimeline<Prosent> finnInntektsgradering(Map<UUID, DatoIntervallEntitet> koblingerOgPeriode,
-                                                               BehandlingReferanse referanse) {
+                                                            BehandlingReferanse referanse) {
         if (koblingerOgPeriode.isEmpty()) {
             return LocalDateTimeline.empty();
         }
@@ -436,5 +439,11 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
             .map(EksternReferanseDto::getEksternReferanse)
             .collect(Collectors.toSet());
     }
+
+    @Override
+    public void opppdaterAktørId(AktørId gyldigAktørId, AktørId utgåttAktørId) {
+        restTjeneste.oppdaterAktørId(new ByttAktørRequest(new AktørIdPersonident(utgåttAktørId.getAktørId()), new AktørIdPersonident(gyldigAktørId.getAktørId())));
+    }
+
 
 }
