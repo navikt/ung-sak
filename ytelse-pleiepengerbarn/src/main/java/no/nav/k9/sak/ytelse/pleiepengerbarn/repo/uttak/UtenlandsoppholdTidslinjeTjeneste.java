@@ -24,16 +24,25 @@ public class UtenlandsoppholdTidslinjeTjeneste {
                 .collect(Collectors.toSet());
             if (dokumenter.size() == 1) {
                 var perioderFraSøknad = dokumenter.iterator().next();
-                for (UtenlandsoppholdPeriode utenlandsoppholdPeriode : perioderFraSøknad.getUtenlandsopphold()) {
-                    var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(
-                        utenlandsoppholdPeriode.getPeriode().getFomDato(),
-                        utenlandsoppholdPeriode.getPeriode().getTomDato(),
-                        new UtledetUtenlandsopphold(utenlandsoppholdPeriode.getLand(), utenlandsoppholdPeriode.getÅrsak())
+                if (perioderFraSøknad.getUtenlandsopphold().isEmpty()) {
+                    LocalDateTimeline<UtledetUtenlandsopphold> timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(
+                        perioderFraSøknad.utledSøktPeriode().getFomDato(),
+                        perioderFraSøknad.utledSøktPeriode().getTomDato(),
+                        null
                     )));
-                    if (utenlandsoppholdPeriode.isAktiv()) {
-                        resultatTimeline = resultatTimeline.combine(timeline, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
-                    } else {
-                        resultatTimeline = resultatTimeline.disjoint(timeline);
+                    resultatTimeline = resultatTimeline.disjoint(timeline);
+                } else {
+                    for (UtenlandsoppholdPeriode utenlandsoppholdPeriode : perioderFraSøknad.getUtenlandsopphold()) {
+                        LocalDateTimeline<UtledetUtenlandsopphold> timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(
+                            utenlandsoppholdPeriode.getPeriode().getFomDato(),
+                            utenlandsoppholdPeriode.getPeriode().getTomDato(),
+                            new UtledetUtenlandsopphold(utenlandsoppholdPeriode.getLand(), utenlandsoppholdPeriode.getÅrsak())
+                        )));
+                        if (utenlandsoppholdPeriode.isAktiv()) {
+                            resultatTimeline = resultatTimeline.combine(timeline, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+                        } else {
+                            resultatTimeline = resultatTimeline.disjoint(timeline);
+                        }
                     }
                 }
             } else {
