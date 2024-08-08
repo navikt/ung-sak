@@ -235,7 +235,7 @@ public class ForvaltningPersonRestTjeneste {
         }
 
         public AktørId getAktørIdForIdenterSomSkalByttes() {
-            return aktørIdForIdenterSomSkalByttes.getAktørId();
+            return aktørIdForIdenterSomSkalByttes == null ? null : aktørIdForIdenterSomSkalByttes.getAktørId();
         }
 
         @Override
