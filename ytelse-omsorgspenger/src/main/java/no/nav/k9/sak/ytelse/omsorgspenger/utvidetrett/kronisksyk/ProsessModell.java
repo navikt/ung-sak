@@ -4,6 +4,8 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -17,6 +19,14 @@ import no.nav.k9.sak.behandlingslager.hendelser.StartpunktType;
 public class ProsessModell {
 
     private static final FagsakYtelseType YTELSE_TYPE = OMSORGSPENGER_KS;
+    private boolean aldersvilkårIKroniskSyk;
+
+    @Inject
+    public ProsessModell(
+        @KonfigVerdi(value = "ALDERSVILKÅR_I_KRONISK_SYK", defaultVerdi = "false") boolean aldersvilkårIKroniskSyk
+    ) {
+        this.aldersvilkårIKroniskSyk = aldersvilkårIKroniskSyk;
+    }
 
     @FagsakYtelseTypeRef(OMSORGSPENGER_KS)
     @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
@@ -29,7 +39,12 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.VURDER_KOMPLETTHET)
             .medSteg(BehandlingStegType.INIT_PERIODER, StartpunktType.INIT_PERIODER)
             .medSteg(BehandlingStegType.INIT_VILKÅR)
-            .medSteg(BehandlingStegType.INNHENT_REGISTEROPP)
+            .medSteg(BehandlingStegType.INNHENT_REGISTEROPP);
+        if(aldersvilkårIKroniskSyk) {
+            modellBuilder
+                .medSteg(BehandlingStegType.VURDER_ALDERSVILKÅR_BARN);
+        }
+        modellBuilder
             .medSteg(BehandlingStegType.VURDER_OMSORG_FOR)
             .medSteg(BehandlingStegType.MANUELL_VILKÅRSVURDERING)
             .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
@@ -52,6 +67,7 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.INIT_PERIODER, StartpunktType.INIT_PERIODER)
             .medSteg(BehandlingStegType.INIT_VILKÅR)
             .medSteg(BehandlingStegType.INNHENT_REGISTEROPP)
+            .medSteg(BehandlingStegType.VURDER_ALDERSVILKÅR_BARN)
             .medSteg(BehandlingStegType.VURDER_OMSORG_FOR)
             .medSteg(BehandlingStegType.MANUELL_VILKÅRSVURDERING)
             .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)

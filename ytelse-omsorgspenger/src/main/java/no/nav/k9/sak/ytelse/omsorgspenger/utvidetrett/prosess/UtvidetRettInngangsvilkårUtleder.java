@@ -1,7 +1,6 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess;
 
 import static java.util.Arrays.asList;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_MA;
 
 import java.util.List;
@@ -14,7 +13,6 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.inngangsvilkår.UtledeteVilkår;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 
-@FagsakYtelseTypeRef(OMSORGSPENGER_KS)
 @FagsakYtelseTypeRef(OMSORGSPENGER_MA)
 @BehandlingTypeRef
 @ApplicationScoped

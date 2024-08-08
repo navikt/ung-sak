@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess.steg;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_ALDERSVILKÅR_BARN;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_AO;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER_KS;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,7 @@ import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.aldersvilkår.Aldersvilkå
 import no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.aldersvilkår.regelmodell.AldersvilkårBarnVilkårGrunnlag;
 
 @FagsakYtelseTypeRef(OMSORGSPENGER_AO)
+@FagsakYtelseTypeRef(OMSORGSPENGER_KS)
 @BehandlingStegRef(value = VURDER_ALDERSVILKÅR_BARN)
 @BehandlingTypeRef
 @ApplicationScoped
