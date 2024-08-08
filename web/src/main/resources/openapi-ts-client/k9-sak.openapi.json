@@ -6441,6 +6441,9 @@
       },
       "OppdaterAktørIdDto" : {
         "properties" : {
+          "aktørIdForIdenterSomSkalByttes" : {
+            "type" : "string"
+          },
           "begrunnelse" : {
             "maxLength" : 1000,
             "minLength" : 0,
@@ -9943,7 +9946,7 @@
           },
           "satsBeloep" : {
             "format" : "int64",
-            "maximum" : 3290,
+            "maximum" : 3440,
             "minimum" : 1,
             "type" : "integer"
           },
