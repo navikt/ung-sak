@@ -8,12 +8,15 @@ import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.økonomi.tilbakekreving.dto.BehandlingStatusOgFeilutbetalinger;
 
@@ -26,6 +29,7 @@ public class K9TilbakeRestKlient {
     private OidcRestClient restClient;
     private URI uriHarÅpenTilbakekrevingsbehandling;
     private URI uriFeilutbetalingerSisteBehandling;
+    private URI uriOppdaterAktørId;
     private boolean k9tilbakeAktivert;
 
     K9TilbakeRestKlient() {
@@ -39,6 +43,7 @@ public class K9TilbakeRestKlient {
         this.restClient = restClient;
         this.uriHarÅpenTilbakekrevingsbehandling = tilUri(urlK9Tilbake, "behandlinger/tilbakekreving/aapen");
         this.uriFeilutbetalingerSisteBehandling = tilUri(urlK9Tilbake, "feilutbetaling/siste-behandling");
+        this.uriOppdaterAktørId = tilUri(urlK9Tilbake, "forvaltning/aktør/oppdaterAktoerId");
         this.k9tilbakeAktivert = !Environment.current().isLocal(); //i proaksis mocker bort k9-tilbake ved kjøring lokalt og i verdikjedetester.
     }
 
@@ -62,6 +67,10 @@ public class K9TilbakeRestKlient {
         }
     }
 
+    public void oppdaterAktørId(AktørId gyldigAktørId, AktørId utgåttAktørId) {
+        restClient.post(uriOppdaterAktørId, new ByttAktørRequest(utgåttAktørId.getAktørId(), gyldigAktørId.getAktørId()));
+    }
+
     private static URI leggTilParameter(URI uri, String parameterNavn, String parameterVerdi) {
         try {
             return new URIBuilder(uri).addParameter(parameterNavn, parameterVerdi).build();
@@ -77,5 +86,12 @@ public class K9TilbakeRestKlient {
             throw new IllegalArgumentException("Ugyldig konfigurasjon for URL_K9TILBAKE", e);
         }
     }
+
+    private record ByttAktørRequest(
+        @JsonProperty(value = "utgatt", required = true) String utgåttAktør,
+        @JsonProperty(value = "gyldig", required = true) String gyldigAktør
+    ) {
+    }
+
 
 }
