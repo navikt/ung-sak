@@ -32,6 +32,7 @@ public class UtenlandsoppholdTidslinjeTjeneste {
             }
             var perioderFraSøknad = perioderFraSøknaderForKravdokument.iterator().next();
             if (perioderFraSøknad.getUtenlandsopphold().isEmpty() && kravDokument.getKildesystem() == Kildesystem.SØKNADSDIALOG) {
+                //TODO Denne løsningen funker bare når hele utenlandsoppholdet skal slettes. Trenger en løsning for å slette deler av perioden (se TODO nedenfor).
                 LocalDateTimeline<UtledetUtenlandsopphold> tidslinjeSomSkalSlettes =
                     new LocalDateTimeline<>(perioderFraSøknad.getUttakPerioder().stream()
                         .map(UttakPeriode::getPeriode)
