@@ -23,7 +23,7 @@ public class KroniskSykVilkårUtleder implements VilkårUtleder {
 
     @Inject
     public KroniskSykVilkårUtleder(
-        @KonfigVerdi(value = "ALDERSVILKÅR_I_KRONISK_SYK", defaultVerdi = "false") boolean aldersvilkårIKroniskSyk
+        @KonfigVerdi(value = "ALDERSVILKAR_I_KRONISK_SYK", defaultVerdi = "false") boolean aldersvilkårIKroniskSyk
     ) {
         this.aldersvilkårIKroniskSyk = aldersvilkårIKroniskSyk;
     }

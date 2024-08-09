@@ -297,7 +297,7 @@ spec:
       value: "true"
     - name: OMP_RAMMEVEDTAK_SAMMENSTILLNG_AARSKVANTUM
       value: "true"
-    - name: ALDERSVILKÅR_I_KRONISK_SYK
+    - name: ALDERSVILKAR_I_KRONISK_SYK
       value: "true"
 
     # Konfigurasjoner
