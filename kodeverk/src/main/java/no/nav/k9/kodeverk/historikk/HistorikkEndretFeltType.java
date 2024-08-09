@@ -94,6 +94,7 @@ public enum HistorikkEndretFeltType implements Kodeverdi {
     /** Refusjonskrav. */
     NYTT_REFUSJONSKRAV("NYTT_REFUSJONSKRAV", "Nytt refusjonskrav"),
     NY_REFUSJONSFRIST("NY_REFUSJONSFRIST", "Ny refusjonsfrist"),
+    OPPHØR_REFUSJON("OPPHOER_REFUSJON", "Dato for opphør av refusjon"),
 
     /** Rammevedtak */
     UTVIDETRETT("UTVIDETRETT", "Utvidet rett"),

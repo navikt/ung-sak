@@ -32,7 +32,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
@@ -62,10 +61,14 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.felles.util.InputValideringRegex;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.rest.AbacEmptySupplier;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
+import no.nav.k9.sak.behandling.prosessering.task.TilbakeTilStartBeregningTask;
+import no.nav.k9.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingskontroll.VilkårTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -74,12 +77,14 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.FinnPerioderMedStartIKontrollerFakta;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.SkalForlengeAktivitetstatus;
-import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.SkalForlengeAktivitetstatusInput;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.KortTekst;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.beregninginput.OverstyrBeregningInputPeriode;
+import no.nav.k9.sak.kontrakt.beregninginput.OverstyrInputForBeregningDto;
 import no.nav.k9.sak.trigger.ProsessTriggerForvaltningTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput;
@@ -87,6 +92,8 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.ContainerContextRunner;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.beregninginput.BeregningInputHistorikkTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.beregninginput.BeregningInputLagreTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering;
 
 @ApplicationScoped
@@ -107,6 +114,7 @@ public class ForvaltningBeregningRestTjeneste {
     private ProsessTriggerForvaltningTjeneste prosessTriggerForvaltningTjeneste;
     private PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering pleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering;
     private FinnPerioderMedStartIKontrollerFakta finnPerioderMedStartIKontrollerFakta;
+    private ForvaltningOverstyrInputBeregning forvaltningOverstyrInputBeregning;
 
 
     public ForvaltningBeregningRestTjeneste() {
@@ -120,7 +128,8 @@ public class ForvaltningBeregningRestTjeneste {
                                             EntityManager entityManager, FagsakTjeneste fagsakTjeneste,
                                             HentKalkulatorInputDump hentKalkulatorInputDump,
                                             @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) @VilkårTypeRef(VilkårType.BEREGNINGSGRUNNLAGVILKÅR) PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering pleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering,
-                                            FinnPerioderMedStartIKontrollerFakta finnPerioderMedStartIKontrollerFakta) {
+                                            FinnPerioderMedStartIKontrollerFakta finnPerioderMedStartIKontrollerFakta,
+                                            ForvaltningOverstyrInputBeregning forvaltningOverstyrInputBeregning) {
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
@@ -131,6 +140,7 @@ public class ForvaltningBeregningRestTjeneste {
         this.prosessTriggerForvaltningTjeneste = new ProsessTriggerForvaltningTjeneste(entityManager);
         this.pleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering = pleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering;
         this.finnPerioderMedStartIKontrollerFakta = finnPerioderMedStartIKontrollerFakta;
+        this.forvaltningOverstyrInputBeregning = forvaltningOverstyrInputBeregning;
     }
 
     @GET
@@ -255,7 +265,7 @@ public class ForvaltningBeregningRestTjeneste {
         var ref = BehandlingReferanse.fra(behandling);
 
         // Kaller i egen context for å kunne hente inntektsmeldinger fra abakus
-        var skalForlengeAktivitetstatusInput  = ContainerContextRunner.doRun(behandling, () -> {
+        var skalForlengeAktivitetstatusInput = ContainerContextRunner.doRun(behandling, () -> {
             var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(ref);
             return finnPerioderMedStartIKontrollerFakta.lagInput(ref, perioderTilVurdering);
         });
@@ -342,6 +352,18 @@ public class ForvaltningBeregningRestTjeneste {
 
         }
 
+    }
+
+    @POST
+    @Path("/overstyr-innntektsmelding")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Overstyrer felter i inntektsmelding for angitt skjæringstidspunkt og aktivitet", summary = ("Overstyrer inntektsmelding"), tags = "beregning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
+    public void overstyrInntektsmelding(
+        @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) BehandlingIdDto behandlingIdDto,
+        @Valid OverstyrBeregningInputPeriode periode) {
+        var behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingId());
+        forvaltningOverstyrInputBeregning.overstyrInntektsmelding(behandling, periode);
     }
 
     private void opprettProsesstriggerOgRevurder(OpprettManuellRevurderingBeregning opprettManuellRevurdering, String tjeneste, String begrunnelse, BehandlingÅrsakType reOpplysningerOmOpptjening) {
