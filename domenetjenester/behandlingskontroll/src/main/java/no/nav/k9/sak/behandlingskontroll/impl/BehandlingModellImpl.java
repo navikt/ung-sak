@@ -543,17 +543,6 @@ public class BehandlingModellImpl implements AutoCloseable, BehandlingModell {
             }
             return this;
         }
-
-        public BehandlingModellBuilder medBetingetSteg(BehandlingStegType stegType, boolean betingelse, StartpunktType... startpunkter) {
-            if(!betingelse) {
-                return this;
-            }
-            modell.leggTil(stegType);
-            for (StartpunktType startpunkt : startpunkter) {
-                modell.leggTilStartpunkt(startpunkt, stegType);
-            }
-            return this;
-        }
     }
 
     public boolean harStartpunkt() {

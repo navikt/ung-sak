@@ -23,7 +23,7 @@ public class ProsessModell {
 
     @Inject
     public ProsessModell(
-        @KonfigVerdi(value = "ALDERSVILKAR_I_KRONISK_SYK", defaultVerdi = "false") boolean aldersvilkårIKroniskSyk
+        @KonfigVerdi(value = "ALDERSVILKÅR_I_KRONISK_SYK", defaultVerdi = "false") boolean aldersvilkårIKroniskSyk
     ) {
         this.aldersvilkårIKroniskSyk = aldersvilkårIKroniskSyk;
     }
@@ -39,8 +39,12 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.VURDER_KOMPLETTHET)
             .medSteg(BehandlingStegType.INIT_PERIODER, StartpunktType.INIT_PERIODER)
             .medSteg(BehandlingStegType.INIT_VILKÅR)
-            .medSteg(BehandlingStegType.INNHENT_REGISTEROPP)
-            .medBetingetSteg(BehandlingStegType.VURDER_ALDERSVILKÅR_BARN, aldersvilkårIKroniskSyk)
+            .medSteg(BehandlingStegType.INNHENT_REGISTEROPP);
+        if(aldersvilkårIKroniskSyk) {
+            modellBuilder
+                .medSteg(BehandlingStegType.VURDER_ALDERSVILKÅR_BARN);
+        }
+        modellBuilder
             .medSteg(BehandlingStegType.VURDER_OMSORG_FOR)
             .medSteg(BehandlingStegType.MANUELL_VILKÅRSVURDERING)
             .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
