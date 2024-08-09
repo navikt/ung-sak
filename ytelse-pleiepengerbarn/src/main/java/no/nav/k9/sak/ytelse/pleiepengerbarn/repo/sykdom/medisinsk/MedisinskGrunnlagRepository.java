@@ -191,7 +191,7 @@ public class MedisinskGrunnlagRepository {
             .map(forrigeBehandling -> hentGrunnlagForBehandling(forrigeBehandling).orElseThrow());
     }
 
-    public boolean harHattGodkjentLegeerklæringMedUnntakAv(AktørId pleietrengende, UUID behandlingUuid) {
+    public boolean harHattGodkjentLegeerklæringFraTidligereBehandling(AktørId pleietrengende, UUID behandlingUuid) {
         final TypedQuery<Long> q = entityManager.createQuery(
             "select l.id "
                 + "from MedisinskGrunnlag as sgb "
