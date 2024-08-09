@@ -318,9 +318,6 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
         @TekniskFeil(feilkode = "K9SAK-AK-1000092", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke beregne uttaksplan for årskvantum: %s", logLevel = LogLevel.WARN)
         Feil feilKallTilÅrskvantum(String feilmelding, Throwable t);
 
-        @TekniskFeil(feilkode = "K9SAK-AK-1000092", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke oppdatere personident: %s", logLevel = LogLevel.WARN)
-        Feil feilKallTilOppdaterPersonident(String feilmelding, Throwable t);
-
         @TekniskFeil(feilkode = "K9SAK-AK-1000093", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke settUttaksplanTilManueltBekreftet: %s", logLevel = LogLevel.WARN)
         Feil feilKallTilsettUttaksplanTilManueltBekreftet(String feilmelding, Throwable t);
 
@@ -335,6 +332,10 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
 
         @TekniskFeil(feilkode = "K9SAK-AK-1000097", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke settUttaksplanTilManueltBekreftet: %s", logLevel = LogLevel.WARN)
         Feil feilKallTilInnvilgeEllerAvslåPeriodeneManuelt(String feilmelding, Throwable t);
+
+        @TekniskFeil(feilkode = "K9SAK-AK-1000098", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke oppdatere personident: %s", logLevel = LogLevel.WARN)
+        Feil feilKallTilOppdaterPersonident(String feilmelding, Throwable t);
+
     }
 
 }
