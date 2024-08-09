@@ -171,7 +171,8 @@ public class FinnInntektsmeldingForBeregning {
         if (a.getOpphørRefusjon() != null) {
             return a.getOpphørRefusjon();
         }
-        return summertRefusjonTidslinje.filterValue(r -> r.compareTo(BigDecimal.ZERO) > 0)
+        var refusjonTidslinje = summertRefusjonTidslinje.filterValue(r -> r.compareTo(BigDecimal.ZERO) > 0);
+        return refusjonTidslinje.isEmpty() ? null : refusjonTidslinje
             .getMaxLocalDate();
     }
 
