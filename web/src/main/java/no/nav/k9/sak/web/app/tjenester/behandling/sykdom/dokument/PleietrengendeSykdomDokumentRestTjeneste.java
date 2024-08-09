@@ -61,16 +61,16 @@ import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomProsessDriver;
 import no.nav.k9.sak.web.app.tjenester.dokument.DokumentRestTjenesteFeil;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PersonRepository;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDiagnoser;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentHarOppdatertVurderinger;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentInformasjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDokumentRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PersonRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomInnleggelser;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurderingVersjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.SykdomVurderingRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurderingVersjon;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @Produces(MediaType.APPLICATION_JSON)
@@ -394,7 +394,7 @@ public class PleietrengendeSykdomDokumentRestTjeneste {
         final PleietrengendeSykdomDokument duplikatAvDokument = hentSattDuplikatDokument(sykdomDokumentEndringDto, behandling, dokumentId);
 
         verifiserEventuellFeilregistrertstatus(sykdomDokumentEndringDto, dokument);
-
+        
         dokument.setInformasjon(new PleietrengendeSykdomDokumentInformasjon(
             dokument,
             duplikatAvDokument,
@@ -437,7 +437,7 @@ public class PleietrengendeSykdomDokumentRestTjeneste {
             throw new FunksjonellException("K9-6704", "Kan ikke sette som duplikat siden andre dokumenter er duplikat av dette dokumentet.");
         }
     }
-
+    
     private void verifiserEventuellFeilregistrertstatus(SykdomDokumentEndringDto sykdomDokumentEndringDto,
             final PleietrengendeSykdomDokument dokument) {
         if (sykdomDokumentEndringDto.getType() == SykdomDokumentType.FEILREGISTRERT
@@ -445,7 +445,7 @@ public class PleietrengendeSykdomDokumentRestTjeneste {
             /*
              * Merk: Hvis ønskelig kan denne sjekken utvides til å tillate at man setter dokumenter
              *       som feilregistrert når dokumentet har blitt brukt i ubesluttede vurderinger.
-             *
+             *       
              *       Man vil da trenge:
              *       1. Vise i frontend at den ubesluttede vurderingen brukte et dokument som nå har
              *          blitt markert som feilregistrert.
@@ -463,7 +463,7 @@ public class PleietrengendeSykdomDokumentRestTjeneste {
         final boolean harBlittSattSomDuplikat = gmlInformasjon.getDuplikatAvDokument() == null && sykdomDokumentEndringDto.getDuplikatAvId() != null;
         final boolean harBlittEndret = harEndretType || harBlittSattSomDuplikat;
         final boolean harIngenAnnenGodkjentLegeerklæring = !harMinstEnAnnenGodkjentLegeerklæring(gmlInformasjon.getDokument(), behandling.getFagsak().getPleietrengendeAktørId(), behandling.getFagsakYtelseType());
-        final boolean harTidligereHattRelevantGodkjentLegeerklæring = medisinskGrunnlagRepository.harHattGodkjentLegeerklæringFraTidligereBehandling(behandling.getFagsak().getPleietrengendeAktørId(), behandling.getUuid());
+        final boolean harTidligereHattRelevantGodkjentLegeerklæring = medisinskGrunnlagRepository.harHattGodkjentLegeerklæringMedUnntakAv(behandling.getFagsak().getPleietrengendeAktørId(), behandling.getUuid());
 
         if (varGodkjentLegeerklæring && harBlittEndret && harIngenAnnenGodkjentLegeerklæring && harTidligereHattRelevantGodkjentLegeerklæring) {
             throw new IllegalStateException("Det må minst være én godkjent legeerklæring på barnet når dette var tilfellet for en tidligere behandling.");
