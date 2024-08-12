@@ -9,16 +9,12 @@ import java.util.HashSet;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -37,6 +33,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunn
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagsdata;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.EndringUnntakEtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
 @GrunnlagRef(MedisinskGrunnlagsdata.class)
@@ -83,7 +81,7 @@ class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
         result.add(sykdomStartpunk);
         log.info("Kjører diff av sykdom, funnet følgende resultat = {}", sykdomStartpunk);
 
-        if (ref.getFagsakYtelseType() == FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
+        if (ref.getFagsakYtelseType() == PLEIEPENGER_SYKT_BARN) {
             StartpunktType tilsynStartpunkt = utledStartpunktForEtablertTilsyn(ref);
             result.add(tilsynStartpunkt);
             log.info("Kjører diff av etablertTilsyn, funnet følgende resultat = {}", tilsynStartpunkt);
@@ -93,7 +91,7 @@ class StartpunktUtlederPleiepenger implements EndringStartpunktUtleder {
         log.info("Kjører diff av uttak, funnet følgende resultat = {}", uttakStartpunkt);
         result.add(uttakStartpunkt);
 
-        if (ref.getFagsakYtelseType() == FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
+        if (ref.getFagsakYtelseType() == PLEIEPENGER_SYKT_BARN) {
             StartpunktType nattevåkBeredskapStartpunkt = utledStartpunktForNattevåkOgBeredskap(ref);
             result.add(nattevåkBeredskapStartpunkt);
             log.info("Kjører diff av nattevåk & beredskap, funnet følgende resultat = {}", nattevåkBeredskapStartpunkt);
