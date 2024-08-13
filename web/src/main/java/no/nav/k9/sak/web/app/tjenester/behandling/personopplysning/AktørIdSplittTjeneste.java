@@ -16,6 +16,7 @@ import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.abakus.AbakusTjeneste;
+import no.nav.k9.sak.domene.behandling.steg.vurdermanueltbrev.K9FormidlingKlient;
 import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.kontrakt.person.AktørIdDto;
 import no.nav.k9.sak.typer.AktørId;
@@ -40,6 +41,7 @@ public class AktørIdSplittTjeneste {
     private final AktørBytteFordelKlient fordelKlient;
     private final ÅrskvantumTjeneste årskvantumTjeneste;
     private final K9TilbakeRestKlient k9TilbakeRestKlient;
+    private final K9FormidlingKlient k9FormidlingKlient;
 
     @Inject
     public AktørIdSplittTjeneste(AktørTjeneste aktørTjeneste,
@@ -48,7 +50,7 @@ public class AktørIdSplittTjeneste {
                                  AbakusTjeneste abakusTjeneste,
                                  KalkulusTjeneste kalkulusTjeneste,
                                  AktørBytteFordelKlient fordelKlient,
-                                 ÅrskvantumTjeneste årskvantumTjeneste, K9TilbakeRestKlient k9TilbakeRestKlient) {
+                                 ÅrskvantumTjeneste årskvantumTjeneste, K9TilbakeRestKlient k9TilbakeRestKlient, K9FormidlingKlient k9FormidlingKlient) {
         this.aktørTjeneste = aktørTjeneste;
         this.entityManager = entityManager;
         this.oppdragRestKlient = oppdragRestKlient;
@@ -57,6 +59,7 @@ public class AktørIdSplittTjeneste {
         this.fordelKlient = fordelKlient;
         this.årskvantumTjeneste = årskvantumTjeneste;
         this.k9TilbakeRestKlient = k9TilbakeRestKlient;
+        this.k9FormidlingKlient = k9FormidlingKlient;
     }
 
     public void patchBrukerAktørId(AktørId nyAktørId,
@@ -101,7 +104,7 @@ public class AktørIdSplittTjeneste {
             årskvantumTjeneste.oppdaterPersonident(nyPersonident.get(), personidenterSomSkalByttesUt);
         }
         k9TilbakeRestKlient.oppdaterAktørId(nyAktørId, gammelAktørId);
-
+        k9FormidlingKlient.oppdaterAktørId(nyAktørId, gammelAktørId);
 
         brukerOppdaterteFagsaker.forEach(fagsak -> entityManager.persist(new DiagnostikkFagsakLogg(fagsak.getId(), "Oppdatert aktørid for bruker via " + tjeneste, begrunnelse)));
         pleietrengedeOppdaterteFagsakIder.forEach(id -> entityManager.persist(new DiagnostikkFagsakLogg(id, "Oppdatert aktørid for pleietrengende via " + tjeneste, begrunnelse)));

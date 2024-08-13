@@ -147,7 +147,7 @@
             <dependency>
                 <groupId>no.nav.k9.formidling</groupId>
                 <artifactId>eksterne-kontrakter</artifactId>
-                <version>1.0.13</version>
+                <version>10.1.0</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.k9.abakus</groupId>
