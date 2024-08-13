@@ -44,7 +44,7 @@ public class AktørBytteFordelKlient {
         this.aktørbytteEndpoint = toUri("/forvaltning/oppdaterAktoerId");
     }
 
-    public void oppdaterAktørId(AktørId gyldig, AktørId utgått) {
+    public int utførAktørbytte(AktørId gyldig, AktørId utgått) {
         var httpPost = new HttpPost(aktørbytteEndpoint);
         String json = null;
         try {
@@ -65,9 +65,9 @@ public class AktørBytteFordelKlient {
                     throw RestTjenesteFeil.FEIL.feilVedKallTilFordel(endpoint, feilmelding).toException();
                 }
             }
+            return Integer.parseInt(EntityUtils.toString(httpResponse.getEntity()));
         } catch (IOException e) {
             throw RestTjenesteFeil.FEIL.feilVedKallTilFordel(endpoint, e.getMessage()).toException();
-
         }
     }
     private boolean isOk(int responseCode) {

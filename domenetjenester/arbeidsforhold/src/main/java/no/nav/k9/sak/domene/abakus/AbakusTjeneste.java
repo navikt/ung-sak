@@ -11,7 +11,6 @@ import java.util.UUID;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
@@ -195,11 +194,11 @@ public class AbakusTjeneste {
         return hentFraAbakus(new HttpPost(endpoint), responseHandler, json);// NOSONAR håndterer i responseHandler
     }
 
-    public void endreAktørId(AktørId gyldigAktørid, AktørId utgåttAktørId) {
+    public int utførAktørbytte(AktørId gyldigAktørid, AktørId utgåttAktørId) {
         try {
 
             String json = iayJsonWriter.writeValueAsString(new ByttAktørRequest(getAktør(utgåttAktørId), getAktør(gyldigAktørid)));
-            endreAktørId(json);
+            return utførAktørbytte(json);
         } catch (IOException e) {
             throw AbakusTjenesteFeil.FEIL.feilVedKallTilAbakus(e.getMessage()).toException();
         }
@@ -417,7 +416,7 @@ public class AbakusTjeneste {
         }
     }
 
-    private void endreAktørId(String json) throws IOException {
+    private int utførAktørbytte(String json) throws IOException {
         HttpPost httpPost = new HttpPost(endpointOppdaterAktørId);
         httpPost.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
         try (var httpResponse = restClient.execute(httpPost)) {
@@ -433,6 +432,7 @@ public class AbakusTjeneste {
                     throw AbakusTjenesteFeil.FEIL.feilVedKallTilAbakus(feilmelding).toException();
                 }
             }
+            return Integer.parseInt(EntityUtils.toString(httpResponse.getEntity()));
         }
     }
 

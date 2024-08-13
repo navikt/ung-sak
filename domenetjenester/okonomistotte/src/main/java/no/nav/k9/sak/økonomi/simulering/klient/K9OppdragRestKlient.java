@@ -6,7 +6,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -78,12 +77,12 @@ public class K9OppdragRestKlient {
         restClient.post(uriKansellerSimulering, behandlingreferanse);
     }
 
-    public void utførAktørbytte(AktørId gyldigAktørId, AktørId utgåttAktørId, Set<PersonIdent> utgåttPersonident) {
+    public Integer utførAktørbytte(AktørId gyldigAktørId, AktørId utgåttAktørId, Set<PersonIdent> utgåttPersonident) {
         var identer = utgåttPersonident.stream().map(PersonIdent::getIdent)
             .map(ByttAktørRequest.PersonIdent::new)
             .collect(Collectors.toSet());
         var request = new ByttAktørRequest(gyldigAktørId.getAktørId(), utgåttAktørId.getAktørId(), identer);
-        restClient.post(uriAktørBytte, request);
+        return restClient.post(uriAktørBytte, request, Integer.class);
     }
 
 

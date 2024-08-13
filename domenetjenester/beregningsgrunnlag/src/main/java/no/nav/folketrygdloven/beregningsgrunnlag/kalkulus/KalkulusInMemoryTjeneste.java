@@ -141,7 +141,7 @@ public class KalkulusInMemoryTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
-    public void opppdaterAktørId(AktørId gyldigAktørId, AktørId utgåttAktørId) {
+    public Integer utførAktørbytte(AktørId gyldigAktørId, AktørId utgåttAktørId) {
         throw new NotImplementedException("Ikke implementert");
     }
 

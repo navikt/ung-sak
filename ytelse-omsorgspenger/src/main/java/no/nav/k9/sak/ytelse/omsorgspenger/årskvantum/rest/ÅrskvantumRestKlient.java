@@ -42,7 +42,6 @@ import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -284,11 +283,11 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
     }
 
     @Override
-    public void oppdaterPersonident(PersonIdent nyPersonident, List<PersonIdent> gamlePersonidenter) {
+    public Integer oppdaterPersonident(PersonIdent nyPersonident, List<PersonIdent> gamlePersonidenter) {
         try {
             var request = new AktørBytte(gamlePersonidenter.stream().map(PersonIdent::getIdent).toList(), nyPersonident.getIdent());
             var endpoint = URI.create(endpointUttaksplan.toString() + "/oppdaterPersonident");
-            restKlient.post(endpoint, request);
+            return restKlient.post(endpoint, request, Integer.class);
         } catch (Exception e) {
             throw RestTjenesteFeil.FEIL.feilKallTilOppdaterPersonident(e.getMessage(), e).toException();
         }

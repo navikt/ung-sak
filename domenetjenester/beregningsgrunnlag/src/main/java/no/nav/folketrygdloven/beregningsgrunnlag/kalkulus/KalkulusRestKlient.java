@@ -267,14 +267,12 @@ public class KalkulusRestKlient {
     }
 
 
-    public void oppdaterAktørId(ByttAktørRequest request) {
+    public Integer oppdaterAktørId(ByttAktørRequest request) {
         var endpoint = oppdaterAktørIdEndpoint;
         try {
-            utfør(endpoint, kalkulusJsonWriter.writeValueAsString(request));
+            return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), kalkulusMapper.readerFor(Integer.class));
         } catch (JsonProcessingException e) {
             throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
-        } catch (IOException e) {
-            throw RestTjenesteFeil.FEIL.feilVedKallTilKalkulus(endpoint, e.getMessage()).toException();
         }
     }
 

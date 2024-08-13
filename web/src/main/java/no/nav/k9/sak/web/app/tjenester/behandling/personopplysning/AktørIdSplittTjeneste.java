@@ -3,7 +3,6 @@ package no.nav.k9.sak.web.app.tjenester.behandling.personopplysning;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,9 +17,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.abakus.AbakusTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.vurdermanueltbrev.K9FormidlingKlient;
 import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
-import no.nav.k9.sak.kontrakt.person.AktørIdDto;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
 import no.nav.k9.sak.ytelse.omsorgspenger.årskvantum.tjenester.ÅrskvantumTjeneste;
 import no.nav.k9.sak.økonomi.simulering.klient.K9OppdragRestKlient;
@@ -96,15 +93,28 @@ public class AktørIdSplittTjeneste {
         var personidenterSomSkalByttesUt = aktørIdForIdenterSomSkalByttes.map(aktørTjeneste::hentHistoriskePersonIdenterForAktørId)
             .orElse(Collections.emptySet());
 
-        oppdragRestKlient.utførAktørbytte(nyAktørId, gammelAktørId, personidenterSomSkalByttesUt);
-        abakusTjeneste.endreAktørId(nyAktørId, gammelAktørId);
-        kalkulusTjeneste.opppdaterAktørId(nyAktørId, gammelAktørId);
-        fordelKlient.oppdaterAktørId(nyAktørId, gammelAktørId);
+        var antallRaderEndretIOppdrag = oppdragRestKlient.utførAktørbytte(nyAktørId, gammelAktørId, personidenterSomSkalByttesUt);
+        logger.info("Oppdaterte {} rader i oppdrag", antallRaderEndretIOppdrag);
+
+        var antallRaderEndretAbakus = abakusTjeneste.utførAktørbytte(nyAktørId, gammelAktørId);
+        logger.info("Oppdaterte {} rader i abakus", antallRaderEndretAbakus);
+
+        var antallRaderEndretKalkulus = kalkulusTjeneste.utførAktørbytte(nyAktørId, gammelAktørId);
+        logger.info("Oppdaterte {} rader i kalkulus", antallRaderEndretKalkulus);
+
+        var antallRaderEndretFordel = fordelKlient.utførAktørbytte(nyAktørId, gammelAktørId);
+        logger.info("Oppdaterte {} rader i fordel", antallRaderEndretFordel);
+
         if (brukerOppdaterteFagsaker.stream().map(Fagsak::getYtelseType).anyMatch(FagsakYtelseType.OMSORGSPENGER::equals) && !personidenterSomSkalByttesUt.isEmpty()) {
-            årskvantumTjeneste.oppdaterPersonident(nyPersonident.get(), personidenterSomSkalByttesUt);
+            var antallRaderEndretÅrskvantum = årskvantumTjeneste.utførAktørbytte(nyPersonident.get(), personidenterSomSkalByttesUt);
+            logger.info("Oppdaterte {} rader i årskvantum", antallRaderEndretÅrskvantum);
+
         }
-        k9TilbakeRestKlient.oppdaterAktørId(nyAktørId, gammelAktørId);
-        k9FormidlingKlient.oppdaterAktørId(nyAktørId, gammelAktørId);
+        var antallRaderEndretTilbake = k9TilbakeRestKlient.utførAktørbytte(nyAktørId, gammelAktørId);
+        logger.info("Oppdaterte {} rader i k9-tilbake", antallRaderEndretTilbake);
+
+        var antallRaderEndretFormidling = k9FormidlingKlient.oppdaterAktørId(nyAktørId, gammelAktørId);
+        logger.info("Oppdaterte {} rader i formidling", antallRaderEndretFormidling);
 
         brukerOppdaterteFagsaker.forEach(fagsak -> entityManager.persist(new DiagnostikkFagsakLogg(fagsak.getId(), "Oppdatert aktørid for bruker via " + tjeneste, begrunnelse)));
         pleietrengedeOppdaterteFagsakIder.forEach(id -> entityManager.persist(new DiagnostikkFagsakLogg(id, "Oppdatert aktørid for pleietrengende via " + tjeneste, begrunnelse)));

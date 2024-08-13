@@ -67,8 +67,8 @@ public class K9TilbakeRestKlient {
         }
     }
 
-    public void oppdaterAktørId(AktørId gyldigAktørId, AktørId utgåttAktørId) {
-        restClient.post(uriOppdaterAktørId, new ByttAktørRequest(utgåttAktørId.getAktørId(), gyldigAktørId.getAktørId()));
+    public Integer utførAktørbytte(AktørId gyldigAktørId, AktørId utgåttAktørId) {
+        return restClient.post(uriOppdaterAktørId, new ByttAktørRequest(utgåttAktørId.getAktørId(), gyldigAktørId.getAktørId()), Integer.class);
     }
 
     private static URI leggTilParameter(URI uri, String parameterNavn, String parameterVerdi) {

@@ -190,8 +190,8 @@ public class ÅrskvantumTjeneste {
         return hentForRefV2(ref);
     }
 
-    public void oppdaterPersonident(PersonIdent nyPersonident, Set<PersonIdent> gamlePersonidenter) {
-        årskvantumKlient.oppdaterPersonident(nyPersonident, gamlePersonidenter.stream().toList());
+    public Integer utførAktørbytte(PersonIdent nyPersonident, Set<PersonIdent> gamlePersonidenter) {
+        return årskvantumKlient.oppdaterPersonident(nyPersonident, gamlePersonidenter.stream().toList());
     }
 
     private ÅrskvantumGrunnlag hentForRef(BehandlingReferanse ref) {

@@ -11,6 +11,7 @@ import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.formidling.kontrakt.forvaltning.aktør.ByttAktørRequest;
+import no.nav.k9.formidling.kontrakt.forvaltning.aktør.ByttAktørResponse;
 import no.nav.k9.formidling.kontrakt.informasjonsbehov.InformasjonsbehovListeDto;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.typer.AktørId;
@@ -46,8 +47,9 @@ public class K9FormidlingKlient {
         return restClient.get(uri, InformasjonsbehovListeDto.class);
     }
 
-    public void oppdaterAktørId(AktørId gyldigAktørId, AktørId utgåttAktørId) {
-        restClient.post(UriBuilder.fromUri(uriOppdaterAktørId).build(), new ByttAktørRequest(utgåttAktørId.getAktørId(), gyldigAktørId.getAktørId()));
+    public Long oppdaterAktørId(AktørId gyldigAktørId, AktørId utgåttAktørId) {
+        var response = restClient.post(UriBuilder.fromUri(uriOppdaterAktørId).build(), new ByttAktørRequest(utgåttAktørId.getAktørId(), gyldigAktørId.getAktørId()), ByttAktørResponse.class);
+        return response.antallEndret();
     }
 
 

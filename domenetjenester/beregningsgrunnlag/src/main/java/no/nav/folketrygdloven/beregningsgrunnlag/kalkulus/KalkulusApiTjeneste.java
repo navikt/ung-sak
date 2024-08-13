@@ -99,5 +99,5 @@ public interface KalkulusApiTjeneste {
     Set<UUID> hentReferanserMedAktiveGrunnlag(Saksnummer saksnummer);
 
 
-    void opppdaterAktørId(AktørId gyldigAktørId, AktørId utgåttAktørId);
+    Integer utførAktørbytte(AktørId gyldigAktørId, AktørId utgåttAktørId);
 }

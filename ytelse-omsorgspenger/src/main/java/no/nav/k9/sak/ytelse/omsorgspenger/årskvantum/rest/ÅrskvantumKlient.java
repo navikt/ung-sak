@@ -61,5 +61,5 @@ public interface ÅrskvantumKlient {
 
     ÅrskvantumUttrekk hentUttrekk();
 
-    void oppdaterPersonident(PersonIdent nyPersonident, List<PersonIdent> gamlePersonidenter);
+    Integer oppdaterPersonident(PersonIdent nyPersonident, List<PersonIdent> gamlePersonidenter);
 }

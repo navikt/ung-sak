@@ -115,7 +115,7 @@ public class ÅrskvantumInMemoryKlient implements ÅrskvantumKlient {
     }
 
     @Override
-    public void oppdaterPersonident(PersonIdent nyPersonident, List<PersonIdent> gamlePersonidenter) {
+    public Integer oppdaterPersonident(PersonIdent nyPersonident, List<PersonIdent> gamlePersonidenter) {
         throw new NotImplementedException("Ikke implementert");
     }
 }

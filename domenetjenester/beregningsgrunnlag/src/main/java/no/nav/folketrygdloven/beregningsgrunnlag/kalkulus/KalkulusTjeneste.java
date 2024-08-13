@@ -441,8 +441,8 @@ public class KalkulusTjeneste implements KalkulusApiTjeneste {
     }
 
     @Override
-    public void opppdaterAktørId(AktørId gyldigAktørId, AktørId utgåttAktørId) {
-        restTjeneste.oppdaterAktørId(new ByttAktørRequest(new AktørIdPersonident(utgåttAktørId.getAktørId()), new AktørIdPersonident(gyldigAktørId.getAktørId())));
+    public Integer utførAktørbytte(AktørId gyldigAktørId, AktørId utgåttAktørId) {
+        return restTjeneste.oppdaterAktørId(new ByttAktørRequest(new AktørIdPersonident(utgåttAktørId.getAktørId()), new AktørIdPersonident(gyldigAktørId.getAktørId())));
     }
 
 
