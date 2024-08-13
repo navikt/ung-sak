@@ -48,7 +48,7 @@
         <asm.version>9.7</asm.version>
         <kotlin-stdlib.version>2.0.10</kotlin-stdlib.version>
         <jandex.version>3.2.2</jandex.version>
-        <flyway.version>10.17.0</flyway.version>
+        <flyway.version>10.17.1</flyway.version>
 
     </properties>
 
@@ -670,7 +670,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>
-                    <version>3.4.0</version>
+                    <version>3.4.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>
