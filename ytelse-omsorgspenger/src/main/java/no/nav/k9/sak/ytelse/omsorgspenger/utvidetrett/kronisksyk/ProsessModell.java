@@ -66,8 +66,12 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.VURDER_KOMPLETTHET)
             .medSteg(BehandlingStegType.INIT_PERIODER, StartpunktType.INIT_PERIODER)
             .medSteg(BehandlingStegType.INIT_VILKÅR)
-            .medSteg(BehandlingStegType.INNHENT_REGISTEROPP)
-            .medSteg(BehandlingStegType.VURDER_ALDERSVILKÅR_BARN)
+            .medSteg(BehandlingStegType.INNHENT_REGISTEROPP);
+        if(aldersvilkårIKroniskSyk) {
+            modellBuilder
+                .medSteg(BehandlingStegType.VURDER_ALDERSVILKÅR_BARN);
+        }
+        modellBuilder
             .medSteg(BehandlingStegType.VURDER_OMSORG_FOR)
             .medSteg(BehandlingStegType.MANUELL_VILKÅRSVURDERING)
             .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
