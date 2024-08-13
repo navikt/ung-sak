@@ -33,6 +33,7 @@ import no.nav.abakus.iaygrunnlag.arbeidsforhold.v1.ArbeidsforholdDto;
 import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.InntektsmeldingerDto;
 import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.RefusjonskravDatoerDto;
 import no.nav.abakus.iaygrunnlag.request.AktørDatoRequest;
+import no.nav.abakus.iaygrunnlag.request.ByttAktørRequest;
 import no.nav.abakus.iaygrunnlag.request.InnhentRegisterdataRequest;
 import no.nav.abakus.iaygrunnlag.request.InntektArbeidYtelseGrunnlagRequest;
 import no.nav.abakus.iaygrunnlag.request.InntektsmeldingerMottattRequest;
@@ -42,6 +43,7 @@ import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagDto;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagSakSnapshotDto;
 import no.nav.abakus.iaygrunnlag.v1.OverstyrtInntektArbeidYtelseDto;
+import no.nav.abakus.vedtak.ytelse.Aktør;
 import no.nav.k9.felles.exception.VLException;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
@@ -53,6 +55,7 @@ import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler.ObjectRea
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.sak.typer.AktørId;
 
 @ApplicationScoped
 @ScopedRestIntegration(scopeKey = "k9abakus.scope", defaultScope = "api://prod-fss.k9saksbehandling.k9-abakus/.default")
@@ -82,6 +85,7 @@ public class AbakusTjeneste {
     private URI endpointKopierGrunnlag;
     private URI endpointGrunnlagSnapshot;
     private URI endpointInntektsmeldinger;
+    private URI endpointOppdaterAktørId;
     private URI endpointRefusjonskravdatoer;
 
 
@@ -122,6 +126,7 @@ public class AbakusTjeneste {
         this.innhentRegisterdata = toUri("/api/registerdata/v1/innhent/async");
         this.endpointInntektsmeldinger = toUri("/api/iay/inntektsmeldinger/v1/hentAlle");
         this.endpointRefusjonskravdatoer = toUri("/api/iay/inntektsmeldinger/v1/hentRefusjonskravDatoer");
+        this.endpointOppdaterAktørId = toUri("/api/forvaltning/oppdaterAktoerId");
     }
 
     private URI toUri(String relativeUri) {
@@ -187,6 +192,22 @@ public class AbakusTjeneste {
         var responseHandler = new ObjectReaderResponseHandler<InntektArbeidYtelseGrunnlagSakSnapshotDto>(endpoint, reader);
         var json = iayJsonWriter.writeValueAsString(request);
         return hentFraAbakus(new HttpPost(endpoint), responseHandler, json);// NOSONAR håndterer i responseHandler
+    }
+
+    public int utførAktørbytte(AktørId gyldigAktørid, AktørId utgåttAktørId) {
+        try {
+
+            String json = iayJsonWriter.writeValueAsString(new ByttAktørRequest(getAktør(utgåttAktørId), getAktør(gyldigAktørid)));
+            return utførAktørbytte(json);
+        } catch (IOException e) {
+            throw AbakusTjenesteFeil.FEIL.feilVedKallTilAbakus(e.getMessage()).toException();
+        }
+    }
+
+    private static Aktør getAktør(AktørId utgåttAktørId) {
+        var utgåttAktør = new Aktør();
+        utgåttAktør.setVerdi(utgåttAktørId.getId());
+        return utgåttAktør;
     }
 
     private <T> T hentFraAbakus(HttpEntityEnclosingRequestBase httpKall, ObjectReaderResponseHandler<T> responseHandler, String json) throws IOException {
@@ -392,6 +413,26 @@ public class AbakusTjeneste {
                     throw AbakusTjenesteFeil.FEIL.feilVedKallTilAbakus(feilmelding).toException();
                 }
             }
+        }
+    }
+
+    private int utførAktørbytte(String json) throws IOException {
+        HttpPost httpPost = new HttpPost(endpointOppdaterAktørId);
+        httpPost.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
+        try (var httpResponse = restClient.execute(httpPost)) {
+            int responseCode = httpResponse.getStatusLine().getStatusCode();
+            if (responseCode != HttpStatus.SC_OK) {
+                String responseBody = EntityUtils.toString(httpResponse.getEntity());
+                String feilmelding = "Kunne ikke oppdatere aktørid" + httpPost.getURI()
+                    + ", HTTP status=" + httpResponse.getStatusLine() + ". HTTP Errormessage=" + responseBody;
+
+                if (responseCode == HttpStatus.SC_BAD_REQUEST) {
+                    throw AbakusTjenesteFeil.FEIL.feilKallTilAbakus(feilmelding).toException();
+                } else {
+                    throw AbakusTjenesteFeil.FEIL.feilVedKallTilAbakus(feilmelding).toException();
+                }
+            }
+            return Integer.parseInt(EntityUtils.toString(httpResponse.getEntity()));
         }
     }
 

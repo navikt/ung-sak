@@ -5,9 +5,6 @@ import java.util.Objects;
 
 import org.hibernate.annotations.Type;
 
-import no.nav.k9.sak.behandlingslager.PostgreSQLRangeType;
-import no.nav.k9.sak.behandlingslager.Range;
-
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
@@ -24,6 +21,8 @@ import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
+import no.nav.k9.sak.behandlingslager.PostgreSQLRangeType;
+import no.nav.k9.sak.behandlingslager.Range;
 import no.nav.k9.sak.behandlingslager.kodeverk.FagsakStatusKodeverdiConverter;
 import no.nav.k9.sak.behandlingslager.kodeverk.FagsakYtelseTypeKodeverdiConverter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -93,13 +92,17 @@ public class Fagsak extends BaseEntitet {
         setPeriode(fom, tom);
     }
 
-    /** Oppretter en default fagsak, med startdato fra i dag. */
+    /**
+     * Oppretter en default fagsak, med startdato fra i dag.
+     */
     @Deprecated(forRemoval = true)
     public static Fagsak opprettNy(FagsakYtelseType ytelseType, AktørId bruker) {
         return new Fagsak(ytelseType, bruker, null, null, null, LocalDate.now(), null);
     }
 
-    /** Oppretter en default fagsak, med startdato fra i dag. */
+    /**
+     * Oppretter en default fagsak, med startdato fra i dag.
+     */
     @Deprecated(forRemoval = true)
     public static Fagsak opprettNy(FagsakYtelseType ytelseType, AktørId bruker, Saksnummer saksnummer) {
         return new Fagsak(ytelseType, bruker, null, null, saksnummer, LocalDate.now(), null);

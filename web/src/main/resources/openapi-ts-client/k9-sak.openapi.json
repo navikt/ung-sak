@@ -6439,6 +6439,27 @@
         "required" : [ "utbetalingsgradPrAktivitet" ],
         "type" : "object"
       },
+      "OppdaterAktørIdDto" : {
+        "properties" : {
+          "aktørIdForIdenterSomSkalByttes" : {
+            "type" : "string"
+          },
+          "begrunnelse" : {
+            "maxLength" : 1000,
+            "minLength" : 0,
+            "pattern" : "^[0-9a-zA-ZæøåÆØÅAaÁáBbCcČčDdĐđEeFfGgHhIiJjKkLlMmNnŊŋOoPpRrSsŠšTtŦŧUuVvZzŽžéôèÉöüäÖÜÄ .'\\-/\n%§\\!?@_()+:;,=\"&]*$",
+            "type" : "string"
+          },
+          "gyldigAktørId" : {
+            "type" : "string"
+          },
+          "utgåttAktørId" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "begrunnelse", "gyldigAktørId", "utgåttAktørId" ],
+        "type" : "object"
+      },
       "OppgaveIdDto" : {
         "properties" : {
           "verdi" : {
@@ -9925,7 +9946,7 @@
           },
           "satsBeloep" : {
             "format" : "int64",
-            "maximum" : 3290,
+            "maximum" : 3440,
             "minimum" : 1,
             "type" : "integer"
           },
@@ -16576,6 +16597,31 @@
         "tags" : [ "fordel" ]
       }
     },
+    "/forvaltning/person/finnAktørerKobletTilSammeSakSomAktør" : {
+      "post" : {
+        "description" : "Henter aktører pr sak relatert til oppgitt aktørid",
+        "operationId" : "finnAktørerKobletTilSammeSakSomAktør",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/AktørIdDto"
+              }
+            }
+          },
+          "description" : "AktørId"
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : { }
+            },
+            "description" : "Aktører for pr sak"
+          }
+        },
+        "tags" : [ "forvaltning - person" ]
+      }
+    },
     "/forvaltning/person/hentFnr" : {
       "post" : {
         "description" : "Hent fnr for aktørid",
@@ -16596,6 +16642,31 @@
               "text/plain" : { }
             },
             "description" : "Hent fnr for aktørid"
+          }
+        },
+        "tags" : [ "forvaltning - person" ]
+      }
+    },
+    "/forvaltning/person/oppdater-aktoer-bruker" : {
+      "post" : {
+        "description" : "Oppdater aktørId for bruker på sak med ugyldig aktørId pga aktørSplitt/merge",
+        "operationId" : "oppdaterAktørIdBruker",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/OppdaterAktørIdDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "text/plain" : { }
+            },
+            "description" : "Fiks ugyldig aktørId"
           }
         },
         "tags" : [ "forvaltning - person" ]

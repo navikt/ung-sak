@@ -60,4 +60,6 @@ public interface ÅrskvantumKlient {
     RammevedtakResponse hentRammevedtak(RammevedtakV2Request request);
 
     ÅrskvantumUttrekk hentUttrekk();
+
+    Integer oppdaterPersonident(PersonIdent nyPersonident, List<PersonIdent> gamlePersonidenter);
 }
