@@ -462,6 +462,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     @JsonIgnore
     private boolean skalAvbrytesVedTilbakeføring = true;
 
+    @JsonIgnore
     private Ventekategori defaultVentekategori;
 
     AksjonspunktDefinisjon() {
