@@ -120,7 +120,7 @@ public enum BehandlingResultatType implements Kodeverdi {
         return navn;
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonIgnore
     public boolean erHenleggelse() {
         return erHenleggelse;
     }
