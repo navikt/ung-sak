@@ -231,25 +231,6 @@ class PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurderingTest {
 
 
 
-    private void lagIAY(List<String> orgnr, List<InternArbeidsforholdRef> arbeidsforholdrefs, List<DatoIntervallEntitet> periode) {
-        var aktørArbeidBuilder = InntektArbeidYtelseAggregatBuilder.AktørArbeidBuilder.oppdatere(Optional.empty());
-        aktørArbeidBuilder.medAktørId(behandling.getAktørId());
-        var index = 0;
-        for (String it : orgnr) {
-            aktørArbeidBuilder.leggTilYrkesaktivitet(YrkesaktivitetBuilder.oppdatere(Optional.empty())
-                .medArbeidsgiver(Arbeidsgiver.virksomhet(it))
-                .medArbeidsforholdId(arbeidsforholdrefs.get(index))
-                .medArbeidType(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD)
-                .leggTilAktivitetsAvtale(AktivitetsAvtaleBuilder.ny()
-                    .medPeriode(periode.get(index))));
-            index++;
-        }
-
-        iayTjeneste.lagreIayAggregat(behandling.getId(), InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER)
-            .leggTilAktørArbeid(aktørArbeidBuilder));
-    }
-
-
     private static Inntektsmelding lagInntektsmelding(String orgnr, InternArbeidsforholdRef arbeidsforholdId, LocalDate startdato) {
         return InntektsmeldingBuilder.builder()
             .medArbeidsgiver(Arbeidsgiver.virksomhet(orgnr))

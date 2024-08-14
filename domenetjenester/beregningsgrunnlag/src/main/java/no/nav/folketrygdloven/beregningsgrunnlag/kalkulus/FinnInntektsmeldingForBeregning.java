@@ -47,7 +47,7 @@ public class FinnInntektsmeldingForBeregning {
         this.finnForOverstyringTjeneste = finnForOverstyringTjeneste;
     }
 
-    Set<Inntektsmelding> finnInntektsmeldinger(BehandlingReferanse referanse, List<BeregnInput> beregnInput) {
+    public Set<Inntektsmelding> finnInntektsmeldinger(BehandlingReferanse referanse, List<BeregnInput> beregnInput) {
         var inntektsmeldingerForSak = iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer());
         Set<Inntektsmelding> overstyrteInntektsmeldinger = finnOverstyrteInntektsmeldinger(referanse, beregnInput, inntektsmeldingerForSak);
         var inntektsmeldinger = new HashSet<Inntektsmelding>();

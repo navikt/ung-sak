@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -83,9 +84,13 @@ import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.KortTekst;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.beregninginput.OverstyrBeregningAktivitet;
 import no.nav.k9.sak.kontrakt.beregninginput.OverstyrBeregningInputPeriode;
 import no.nav.k9.sak.kontrakt.beregninginput.OverstyrInputForBeregningDto;
+import no.nav.k9.sak.kontrakt.beregninginput.OverstyrOpphørsdatoRefusjon;
 import no.nav.k9.sak.trigger.ProsessTriggerForvaltningTjeneste;
+import no.nav.k9.sak.typer.OrgNummer;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.ContainerContextRunner;
@@ -355,15 +360,46 @@ public class ForvaltningBeregningRestTjeneste {
     }
 
     @POST
-    @Path("/overstyr-innntektsmelding")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(description = "Overstyrer felter i inntektsmelding for angitt skjæringstidspunkt og aktivitet", summary = ("Overstyrer inntektsmelding"), tags = "beregning")
+    @Path("/overstyr-opphør-refusjon")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Operation(description = "Setter opphørsdato for refusjon for alle eksisterende og fremtidige inntektsmeldinger for virksomhet", summary = ("Overstyrer opphør av refusjon"), tags = "beregning")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
     public void overstyrInntektsmelding(
-        @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) BehandlingIdDto behandlingIdDto,
-        @Valid OverstyrBeregningInputPeriode periode) {
+        @Parameter(description = "Behandling-id", required = true)
+        @FormParam("behandlingId")
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+        BehandlingIdDto behandlingIdDto,
+        @NotNull @FormParam("opphørsdatoRefusjon")
+        @Parameter(description = "Opphørsdato for refusjon", required = true, example = "2020-01-01")
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class)
+        OverstyrOpphørsdatoRefusjon opphørsdatoRefusjon,
+        @NotNull @FormParam("orgNummer")
+        @Parameter(description = "Organisasjonsnummer for virksomhet", required = true, example = "123456789")
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class)
+        OrgNummer orgNummer,
+        @NotNull
+        @FormParam("begrunnelse")
+        @Parameter(description = "Begrunnelse for opphør av refusjon. Vil dukke opp i historikkinnslag og må derfor være selvforklarende.", allowEmptyValue = false, required = true, schema = @Schema(type = "string", maximum = "2000"))
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class)
+        KortTekst begrunnelse) {
         var behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingId());
-        forvaltningOverstyrInputBeregning.overstyrInntektsmelding(behandling, periode);
+        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(BehandlingReferanse.fra(behandling));
+        var overlappendePeriode = perioderTilVurdering.stream().filter(p -> p.overlapper(opphørsdatoRefusjon.getOpphørRefusjon().minusDays(1), opphørsdatoRefusjon.getOpphørRefusjon().minusDays(1)))
+            .findFirst();
+        if (overlappendePeriode.isEmpty()) {
+            throw new IllegalArgumentException("Fant ingen overlappende periode med opphørdato");
+        }
+        var periode = new OverstyrBeregningInputPeriode(overlappendePeriode.get().getFomDato(),
+            List.of(new OverstyrBeregningAktivitet(orgNummer, null, null, null, null, opphørsdatoRefusjon.getOpphørRefusjon(), true)));
+        loggForvaltningTjeneste(behandling.getFagsak(), "/overstyr-opphør-refusjon", begrunnelse.getTekst());
+        forvaltningOverstyrInputBeregning.overstyrInntektsmelding(behandling,
+            overlappendePeriode.get(),
+            periode,
+            begrunnelse.getTekst());
     }
 
     private void opprettProsesstriggerOgRevurder(OpprettManuellRevurderingBeregning opprettManuellRevurdering, String tjeneste, String begrunnelse, BehandlingÅrsakType reOpplysningerOmOpptjening) {

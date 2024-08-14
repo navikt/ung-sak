@@ -20,7 +20,6 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -44,31 +43,24 @@ public class BeregningInputLagreTjeneste {
 
     private final BeregningPerioderGrunnlagRepository grunnlagRepository;
     private final Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste;
-    private final InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
-    private final Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste;
     private final FiltrerInntektsmeldingForBeregningInputOverstyring filtrerInntektsmeldinger;
 
     @Inject
     public BeregningInputLagreTjeneste(BeregningPerioderGrunnlagRepository grunnlagRepository,
-                                       InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                        @Any Instance<OpptjeningForBeregningTjeneste> opptjeningForBeregningTjeneste,
-                                       @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste,
                                        FiltrerInntektsmeldingForBeregningInputOverstyring filtrerInntektsmeldinger) {
         this.grunnlagRepository = grunnlagRepository;
         this.opptjeningForBeregningTjeneste = opptjeningForBeregningTjeneste;
-        this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
-        this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.filtrerInntektsmeldinger = filtrerInntektsmeldinger;
     }
 
 
-    public void lagreInputOverstyringer(BehandlingReferanse ref, OverstyrInputForBeregningDto dto) {
+    public void lagreInputOverstyringer(BehandlingReferanse ref,
+                                        OverstyrInputForBeregningDto dto,
+                                        InntektArbeidYtelseGrunnlag iayGrunnlag,
+                                        Set<Inntektsmelding> inntektsmeldingerForSak,
+                                        NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
         Long behandlingId = ref.getBehandlingId();
-        InntektArbeidYtelseGrunnlag iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandlingId);
-        FagsakYtelseType fagsakYtelseType = ref.getFagsakYtelseType();
-        NavigableSet<DatoIntervallEntitet> perioderTilVurdering = getPerioderTilVurderingTjeneste(fagsakYtelseType, ref.getBehandlingType())
-            .utled(behandlingId, VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
-        var inntektsmeldingerForSak = inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(ref.getSaksnummer());
         var overstyrtePerioder = dto.getPerioder().stream()
             .filter(it -> !it.getAktivitetliste().isEmpty())
             .map(it -> mapPeriode(ref, iayGrunnlag, perioderTilVurdering, it, inntektsmeldingerForSak))
@@ -174,10 +166,6 @@ public class BeregningInputLagreTjeneste {
         return filtrerInntektsmeldinger.finnGyldighetstidslinjeForInntektsmeldinger(behandlingReferanse, inntektsmeldingerForSak, vilkårsperiode);
     }
 
-    private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(FagsakYtelseType fagsakYtelseType, BehandlingType type) {
-        return BehandlingTypeRef.Lookup.find(VilkårsPerioderTilVurderingTjeneste.class, perioderTilVurderingTjeneste, fagsakYtelseType, type)
-            .orElseThrow(() -> new UnsupportedOperationException("VilkårsPerioderTilVurderingTjeneste ikke implementert for ytelse [" + fagsakYtelseType + "]"));
-    }
 
     private OpptjeningForBeregningTjeneste finnOpptjeningForBeregningTjeneste(FagsakYtelseType ytelseType) {
         return FagsakYtelseTypeRef.Lookup.find(opptjeningForBeregningTjeneste, ytelseType)

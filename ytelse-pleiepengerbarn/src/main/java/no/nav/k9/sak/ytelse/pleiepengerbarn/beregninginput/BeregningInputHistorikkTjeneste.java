@@ -37,7 +37,7 @@ public class BeregningInputHistorikkTjeneste {
     }
 
 
-    public void lagHistorikk(Long behandlingId) {
+    public void lagHistorikk(Long behandlingId, String begrunnelse) {
         HistorikkInnslagTekstBuilder tekstBuilder = historikkTjenesteAdapter.tekstBuilder();
         var inputOverstyringPerioder = grunnlagRepository.hentForrigeGrunnlag(behandlingId)
             .map(BeregningsgrunnlagPerioderGrunnlag::getInputOverstyringPerioder)
@@ -46,6 +46,7 @@ public class BeregningInputHistorikkTjeneste {
             .map(BeregningsgrunnlagPerioderGrunnlag::getInputOverstyringPerioder)
             .orElse(Collections.emptyList());
         tekstBuilder.medSkjermlenke(SkjermlenkeType.OVERSTYR_INPUT_BEREGNING);
+        tekstBuilder.medBegrunnelse(begrunnelse);
         overstyrtePerioder.forEach(p -> lagHistorikk(p, tekstBuilder, inputOverstyringPerioder));
     }
 

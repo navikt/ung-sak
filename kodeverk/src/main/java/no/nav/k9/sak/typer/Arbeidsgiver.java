@@ -152,12 +152,16 @@ public class Arbeidsgiver implements IndexKey {
     private static String toString(Arbeidsgiver arb) {
         // litt maskering for feilsøking nå
         if (arb.getErVirksomhet()) {
-            return "Virksomhet<" + arb.getIdentifikator().substring(0, Math.min(arb.getIdentifikator().length(), 3))
-                    + "...>";
+            return "Virksomhet<" + masker(arb.getIdentifikator()) + ">";
         } else {
             return "PersonligArbeidsgiver<"
                     + arb.getIdentifikator().substring(0, Math.min(arb.getIdentifikator().length(), 3)) + "...>";
         }
+    }
+
+    private static String masker(String identifikator) {
+        return identifikator.substring(0, Math.min(identifikator.length(), 3))
+            + "...";
     }
 
     public static Arbeidsgiver fra(Arbeidsgiver arbeidsgiver) {
