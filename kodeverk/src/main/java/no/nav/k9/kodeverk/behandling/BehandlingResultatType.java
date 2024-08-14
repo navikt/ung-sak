@@ -154,18 +154,22 @@ public enum BehandlingResultatType implements Kodeverdi {
         return INNVILGET_KODER;
     }
 
+    @JsonIgnore
     public boolean isBehandlingHenlagt() {
         return BehandlingResultatType.getAlleHenleggelseskoder().contains(this);
     }
 
+    @JsonIgnore
     public boolean isBehandlingsresultatHenlagt() {
         return BehandlingResultatType.getHenleggelseskoderForSøknad().contains(this);
     }
 
+    @JsonIgnore
     public boolean isBehandlingsresultatOpphørt() {
         return BehandlingResultatType.OPPHØR.equals(this);
     }
 
+    @JsonIgnore
     public boolean isBehandlingsresultatIkkeEndret() {
         return BehandlingResultatType.INGEN_ENDRING.equals(this);
     }
