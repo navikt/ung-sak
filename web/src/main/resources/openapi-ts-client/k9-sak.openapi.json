@@ -2360,6 +2360,10 @@
         "properties" : {
           "navn" : {
             "type" : "string"
+          },
+          "utilgjengeligÅrsak" : {
+            "enum" : [ "PERSON_DØD", "ORG_OPPHØRT" ],
+            "type" : "string"
           }
         },
         "type" : "object"

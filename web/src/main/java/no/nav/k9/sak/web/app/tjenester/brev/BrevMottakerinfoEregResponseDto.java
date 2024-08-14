@@ -12,6 +12,9 @@ import org.jetbrains.annotations.NotNull;
 public record BrevMottakerinfoEregResponseDto(
     @JsonProperty("navn")
     @NotNull
-    String navn
-){
+    String navn,
+
+    @JsonProperty("utilgjengeligÅrsak")
+    UtilgjengeligÅrsak utilgjengeligÅrsak
+) {
 }

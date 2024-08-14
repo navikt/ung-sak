@@ -8,18 +8,20 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.k9.felles.integrasjon.organisasjon.OrganisasjonEReg;
-import no.nav.k9.felles.integrasjon.organisasjon.OrganisasjonRestKlient;
+import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import jakarta.ws.rs.core.Response;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import no.nav.k9.felles.integrasjon.organisasjon.OrganisasjonEReg;
+import no.nav.k9.felles.integrasjon.organisasjon.OrganisasjonRestKlient;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -98,6 +100,29 @@ public class BrevRestTjenesteTest {
         assert(maybeBrevMottakerinfoEreg.isPresent());
         final var brevMottakerinfoEreg = maybeBrevMottakerinfoEreg.get();
         assertThat(brevMottakerinfoEreg.navn()).isEqualTo(expectedOrganisasjonsnavn);
+        assertThat(brevMottakerinfoEreg.utilgjengeligÅrsak()).isNull();
+    }
+
+    @Test
+    public void getBrevMottakerinfoEregOpphørtOrg_found() throws JsonProcessingException {
+        // Arrange
+        final var objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        final var expectedOrganisasjonsnavn = "Test Organisasjon1";
+        var inputOrganisasjonsnr = "111222333";
+        LocalDate yesterday = LocalDate.now().minusDays(1);
+        final var inputOrganisasjonJson = "{\"navn\":{\"navnelinje1\":\""+ expectedOrganisasjonsnavn +"\"},\"organisasjonsnummer\":\""+ inputOrganisasjonsnr +"\", \"organisasjonDetaljer\": { \"opphoersdato\": \"" + yesterday + "  \" } }";
+        var expectedOrganisasjon = objectMapper.readValue(inputOrganisasjonJson, OrganisasjonEReg.class);
+        when(eregRestTjenesteMock.hentOrganisasjonOptional(inputOrganisasjonsnr)).thenReturn(Optional.of(expectedOrganisasjon));
+
+
+        // Act
+        final var maybeBrevMottakerinfoEreg = brevRestTjeneste.getBrevMottakerinfoEreg(new OrganisasjonsnrDto(inputOrganisasjonsnr));
+        // Assert
+        assert(maybeBrevMottakerinfoEreg.isPresent());
+        final var brevMottakerinfoEreg = maybeBrevMottakerinfoEreg.get();
+        assertThat(brevMottakerinfoEreg.navn()).isEqualTo(expectedOrganisasjonsnavn);
+        assertThat(brevMottakerinfoEreg.utilgjengeligÅrsak()).isEqualTo(UtilgjengeligÅrsak.ORG_OPPHØRT);
     }
 
     @Test
