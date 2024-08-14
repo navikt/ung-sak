@@ -104,7 +104,7 @@ public class VedtatteRammevedtakTjeneste {
         Map<VilkårType, LocalDateTimeline<VilkårPeriode>> vilkårTidslinjer = vilkårResultatRepository.hent(behandlingId).getVilkårTidslinjer(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.MIN, LocalDate.MAX));
         LocalDateTimeline<Boolean> tidlinjeNoeInnvilget = harVilkårMedUtfall(VilkårType.UTVIDETRETT, vilkårTidslinjer, Utfall.OPPFYLT);
         LocalDateTimeline<Boolean> tidlinjeNoeAvslått = harMinstEtVilkårMedUtfall(vilkårTidslinjer, Utfall.IKKE_OPPFYLT);
-        //samlet resultat er OPPFYLT hvis minst ett vilkår er OPPFYLT og ingen vilkår er IKKE_OPPFYLT.
+        //samlet resultat er OPPFYLT hvis UTVIDETRETT er  OPPFYLT og ingen vilkår er IKKE_OPPFYLT.
         return tidlinjeNoeInnvilget.mapValue(v -> Utfall.OPPFYLT).crossJoin(tidlinjeNoeAvslått.mapValue(v -> Utfall.IKKE_OPPFYLT), StandardCombinators::coalesceRightHandSide);
     }
 
