@@ -2,7 +2,7 @@ FROM ghcr.io/navikt/baseimages/temurin:21-appdynamics
 
 LABEL org.opencontainers.image.source=https://github.com/navikt/k9-sak
 
-RUN curl -L -O https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/2.6.0/download/opentelemetry-javaagent.jar
+RUN curl -L -O https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.6.0/opentelemetry-javaagent.jar
 
 RUN mkdir /app/lib
 RUN mkdir /app/conf
