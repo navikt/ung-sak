@@ -10,9 +10,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,9 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregnInput;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.FiltrerInntektsmeldingForBeregningInputOverstyring;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.FinnInntektsmeldingForBeregning;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
@@ -32,7 +28,6 @@ import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetKlassifisering;
 import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
-import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellRepository;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -70,8 +65,6 @@ import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
-import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
-import no.nav.k9.sak.ytelse.beregning.grunnlag.InputOverstyringPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregninginput.BeregningInputHistorikkTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregninginput.BeregningInputLagreTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.PSBOpptjeningForBeregningTjeneste;
@@ -194,10 +187,11 @@ class ForvaltningOverstyrInputBeregningTest {
     }
 
     private void overstyrOpphørsdatoRefusjon(DatoIntervallEntitet vilkårsperiode, LocalDate opphørRefusjon) {
-        forvaltningOverstyrInputBeregning.overstyrInntektsmelding(
+        forvaltningOverstyrInputBeregning.overstyrOpphørRefusjon(
             behandling,
             vilkårsperiode,
-            new OverstyrBeregningInputPeriode(STP, List.of(new OverstyrBeregningAktivitet(new OrgNummer(ORG_NUMMER), null, null, null, null, opphørRefusjon, true)), false, false),
+            Arbeidsgiver.virksomhet(ORG_NUMMER),
+            opphørRefusjon,
             "begrunnelse"
         );
     }

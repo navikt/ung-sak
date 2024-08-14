@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.NavigableSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -62,14 +61,10 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.felles.util.InputValideringRegex;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.rest.AbacEmptySupplier;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
-import no.nav.k9.sak.behandling.prosessering.task.TilbakeTilStartBeregningTask;
-import no.nav.k9.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingskontroll.VilkårTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -80,25 +75,21 @@ import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.FinnPerioderMedSt
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.SkalForlengeAktivitetstatus;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.KortTekst;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.beregninginput.OverstyrBeregningAktivitet;
 import no.nav.k9.sak.kontrakt.beregninginput.OverstyrBeregningInputPeriode;
-import no.nav.k9.sak.kontrakt.beregninginput.OverstyrInputForBeregningDto;
 import no.nav.k9.sak.kontrakt.beregninginput.OverstyrOpphørsdatoRefusjon;
 import no.nav.k9.sak.trigger.ProsessTriggerForvaltningTjeneste;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.OrgNummer;
-import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.ContainerContextRunner;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.beregninginput.BeregningInputHistorikkTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.beregninginput.BeregningInputLagreTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering;
 
 @ApplicationScoped
@@ -396,9 +387,10 @@ public class ForvaltningBeregningRestTjeneste {
         var periode = new OverstyrBeregningInputPeriode(overlappendePeriode.get().getFomDato(),
             List.of(new OverstyrBeregningAktivitet(orgNummer, null, null, null, null, opphørsdatoRefusjon.getOpphørRefusjon(), true)));
         loggForvaltningTjeneste(behandling.getFagsak(), "/overstyr-opphør-refusjon", begrunnelse.getTekst());
-        forvaltningOverstyrInputBeregning.overstyrInntektsmelding(behandling,
+        forvaltningOverstyrInputBeregning.overstyrOpphørRefusjon(behandling,
             overlappendePeriode.get(),
-            periode,
+            Arbeidsgiver.virksomhet(orgNummer.getId()),
+            opphørsdatoRefusjon.getOpphørRefusjon(),
             begrunnelse.getTekst());
     }
 

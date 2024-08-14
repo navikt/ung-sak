@@ -1,6 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag;
 
-import java.util.HashSet;
+import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -13,7 +14,6 @@ import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.InntektsmeldingerRelevantForBeregning;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.prosessering.task.TilbakeTilStartBeregningTask;
@@ -21,14 +21,17 @@ import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellRepository;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
+import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtale;
+import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
+import no.nav.k9.sak.kontrakt.beregninginput.OverstyrBeregningAktivitet;
 import no.nav.k9.sak.kontrakt.beregninginput.OverstyrBeregningInputPeriode;
 import no.nav.k9.sak.kontrakt.beregninginput.OverstyrInputForBeregningDto;
 import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
-import no.nav.k9.sak.ytelse.beregning.grunnlag.InputAktivitetOverstyring;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregninginput.BeregningInputHistorikkTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregninginput.BeregningInputLagreTjeneste;
 
@@ -68,24 +71,35 @@ public class ForvaltningOverstyrInputBeregning {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
     }
 
-    public void overstyrInntektsmelding(
+    public void overstyrOpphørRefusjon(
         Behandling behandling,
         DatoIntervallEntitet vilkårsperiode,
-        OverstyrBeregningInputPeriode overstyrtPeriodeDto,
+        Arbeidsgiver arbeidsgiver,
+        LocalDate opphørsdato,
         String begrunnelse) {
         if (behandling.erStatusFerdigbehandlet()) {
             throw new IllegalArgumentException("Kan ikke utføre overstyring for behandling som er ferdigbehandlet");
         }
         var behandlingReferanse = BehandlingReferanse.fra(behandling);
-        var dto = new OverstyrInputForBeregningDto(begrunnelse, List.of(overstyrtPeriodeDto));
 
         // Validering
         var inntektsmeldingerForSak = inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(behandlingReferanse.getSaksnummer());
-        valider(behandling, overstyrtPeriodeDto, vilkårsperiode, inntektsmeldingerForSak);
+        var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandling.getId());
+        valider(behandling,
+            arbeidsgiver,
+            opphørsdato,
+            vilkårsperiode,
+            inntektsmeldingerForSak,
+            iayGrunnlag);
 
         // Lagring
-        var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(behandling.getId());
-        beregningInputLagreTjeneste.lagreInputOverstyringer(behandlingReferanse, dto, iayGrunnlag, inntektsmeldingerForSak, new TreeSet<>(Set.of(vilkårsperiode)));
+        oppdaterRefusjonOpphør(vilkårsperiode,
+            arbeidsgiver,
+            opphørsdato,
+            begrunnelse,
+            behandlingReferanse,
+            iayGrunnlag,
+            inntektsmeldingerForSak);
 
         // Historikk
         beregningInputHistorikkTjeneste.lagHistorikk(behandlingReferanse.getId(), begrunnelse);
@@ -100,39 +114,60 @@ public class ForvaltningOverstyrInputBeregning {
         }
     }
 
-    private void valider(Behandling behandling, OverstyrBeregningInputPeriode periode, DatoIntervallEntitet vilkårsperiode, Set<Inntektsmelding> inntektsmeldingerForSak) {
+    private void oppdaterRefusjonOpphør(DatoIntervallEntitet vilkårsperiode, Arbeidsgiver arbeidsgiver, LocalDate opphørsdato, String begrunnelse, BehandlingReferanse behandlingReferanse, InntektArbeidYtelseGrunnlag iayGrunnlag, Set<Inntektsmelding> inntektsmeldingerForSak) {
+        var periode = new OverstyrBeregningInputPeriode(vilkårsperiode.getFomDato(),
+            List.of(new OverstyrBeregningAktivitet(new OrgNummer(arbeidsgiver.getArbeidsgiverOrgnr()), null, null, null, null, opphørsdato, true)));
+        var dto = new OverstyrInputForBeregningDto(begrunnelse, List.of(periode));
+        beregningInputLagreTjeneste.lagreInputOverstyringer(behandlingReferanse, dto, iayGrunnlag, inntektsmeldingerForSak, new TreeSet<>(Set.of(vilkårsperiode)));
+    }
+
+    private void valider(Behandling behandling,
+                         Arbeidsgiver arbeidsgiver,
+                         LocalDate opphørsdato, DatoIntervallEntitet vilkårsperiode,
+                         Set<Inntektsmelding> inntektsmeldingerForSak,
+                         InntektArbeidYtelseGrunnlag iayGrunnlag) {
         var aktivtGrunnlag = grunnlagRepository.hentGrunnlag(behandling.getId());
         var ekisterendeOverstyrteAktiviteter = aktivtGrunnlag.stream().flatMap(gr -> gr.getInputOverstyringPerioder().stream())
-            .filter(p -> p.getSkjæringstidspunkt().equals(periode.getSkjaeringstidspunkt()))
+            .filter(p -> p.getSkjæringstidspunkt().equals(vilkårsperiode.getFomDato()))
             .findFirst()
             .stream()
             .flatMap(p -> p.getAktivitetOverstyringer().stream())
             .toList();
 
+        var harEksisterendeOverstyringAvAnnenInfo = ekisterendeOverstyrteAktiviteter.stream()
+            .anyMatch(o -> !o.getArbeidsgiver().equals(arbeidsgiver) ||
+                o.getInntektPrÅr() != null ||
+                o.getRefusjonPrÅr() != null);
 
-        var eksisterendeOverstyrteArbeidsgivere = ekisterendeOverstyrteAktiviteter.stream().map(InputAktivitetOverstyring::getArbeidsgiver)
-            .map(Arbeidsgiver::getIdentifikator).collect(Collectors.toSet());
-        var overstyrteArbeidsgivere = periode.getAktivitetliste()
-            .stream().map(a -> a.getArbeidsgiverAktørId() != null ? a.getArbeidsgiverAktørId().getId() : a.getArbeidsgiverOrgnr().getId())
-            .collect(Collectors.toSet());
 
-        var harFjernetOverstyringForArbeidsgiver = eksisterendeOverstyrteArbeidsgivere.stream().anyMatch(it -> !overstyrteArbeidsgivere.contains(it));
-
-        if (ekisterendeOverstyrteAktiviteter.size() > periode.getAktivitetliste().size() || harFjernetOverstyringForArbeidsgiver) {
+        if (harEksisterendeOverstyringAvAnnenInfo) {
             throw new IllegalArgumentException("Det finnes allerede overstyrte arbeidsgivere i periode. Det støttes ikke å fjerne overstyringer.");
         }
 
         var inntektsmeldingerForPeriode = InntektsmeldingerRelevantForBeregning.finnTjeneste(inntektsmeldingerRelevantForBeregning, behandling.getFagsakYtelseType())
             .begrensSakInntektsmeldinger(BehandlingReferanse.fra(behandling), inntektsmeldingerForSak, vilkårsperiode);
 
-        var arbeidsgivereMedInntektsmelding = inntektsmeldingerForPeriode.stream().map(Inntektsmelding::getArbeidsgiver).map(Arbeidsgiver::getArbeidsgiverOrgnr).collect(Collectors.toSet());
+        var arbeidsgivereMedInntektsmelding = inntektsmeldingerForPeriode.stream().map(Inntektsmelding::getArbeidsgiver).collect(Collectors.toSet());
 
-        var overstyrtArbeidsgiverUtenIM = overstyrteArbeidsgivere.stream().filter(o -> !arbeidsgivereMedInntektsmelding.contains(o)).findFirst();
+        var harOverstyrtArbeidsgiverInntektsmelding =  arbeidsgivereMedInntektsmelding.contains(arbeidsgiver);
 
-        if (overstyrtArbeidsgiverUtenIM.isPresent()) {
+        if (!harOverstyrtArbeidsgiverInntektsmelding) {
             throw new IllegalArgumentException("Overstyrt arbeidsgiver hadde ikke inntektsmelding til bruk for periode " + vilkårsperiode);
         }
 
+
+        var avsluttningsdatoArbeidsgiver = iayGrunnlag.getAktørArbeidFraRegister(behandling.getAktørId())
+            .stream()
+            .flatMap(it -> it.hentAlleYrkesaktiviteter().stream())
+            .filter(ya -> ya.getArbeidsgiver().equals(arbeidsgiver))
+            .flatMap(ya -> ya.getAnsettelsesPeriode().stream())
+            .map(AktivitetsAvtale::getPeriode)
+            .map(DatoIntervallEntitet::getTomDato)
+            .max(Comparator.naturalOrder());
+
+        if (avsluttningsdatoArbeidsgiver.isPresent() && avsluttningsdatoArbeidsgiver.get().isAfter(opphørsdato)) {
+            throw new IllegalArgumentException("Kan ikke opphøre refusjon for en arbeidsgiver med aktiv ansettelsesperiode på opphørsdato.");
+        }
 
     }
 
