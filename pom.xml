@@ -157,7 +157,7 @@
             <dependency>
                 <groupId>no.nav.folketrygdloven.kalkulus</groupId>
                 <artifactId>beregning-kontrakt</artifactId>
-                <version>5.2.0</version>
+                <version>5.3.2</version>
             </dependency>
 
             <dependency>
