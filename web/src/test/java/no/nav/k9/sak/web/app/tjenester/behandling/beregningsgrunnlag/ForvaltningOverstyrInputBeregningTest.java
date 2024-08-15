@@ -56,13 +56,10 @@ import no.nav.k9.sak.domene.iay.modell.VersjonType;
 import no.nav.k9.sak.domene.iay.modell.YrkesaktivitetBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
-import no.nav.k9.sak.kontrakt.beregninginput.OverstyrBeregningAktivitet;
-import no.nav.k9.sak.kontrakt.beregninginput.OverstyrBeregningInputPeriode;
 import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregninginput.BeregningInputHistorikkTjeneste;
@@ -75,7 +72,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.PleiepengerInntek
 class ForvaltningOverstyrInputBeregningTest {
 
 
-    private static final LocalDate STP = LocalDate.now();
+    private static final LocalDate STP = LocalDate.now().minusDays(10);
     public static final String ORG_NUMMER = "972674818";
 
     @Inject
@@ -98,6 +95,7 @@ class ForvaltningOverstyrInputBeregningTest {
 
     private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
     private OpptjeningRepository opptjeningRepository;
+    private final VirksomhetTjeneste virksomhetTjeneste = mock(VirksomhetTjeneste.class);
 
     private AbakusInMemoryInntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
 
@@ -112,8 +110,7 @@ class ForvaltningOverstyrInputBeregningTest {
         inntektArbeidYtelseTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
 
 
-        var virksomhetTjeneste = mock(VirksomhetTjeneste.class);
-        when(virksomhetTjeneste.hentOrganisasjon(any())).thenReturn(Virksomhet.getBuilder().medNavn("Virksomheten").medOrgnr(ORG_NUMMER).build());
+        when(virksomhetTjeneste.hentOrganisasjon(any())).thenReturn(Virksomhet.getBuilder().medNavn("Virksomheten").medOrgnr(ORG_NUMMER).medAvsluttet(LocalDate.now().minusDays(1)).build());
         ArbeidsgiverTjeneste arbeidsgiverTjeneste = new ArbeidsgiverTjeneste(null, virksomhetTjeneste);
         var arbeidsgiverHistorikkinnslagTjeneste = new ArbeidsgiverHistorikkinnslag(arbeidsgiverTjeneste);
 
@@ -130,7 +127,8 @@ class ForvaltningOverstyrInputBeregningTest {
             behandlingModellRepository,
             beregningPerioderGrunnlagRepository,
             inntektsmeldingerRelevantForBeregning,
-            inntektArbeidYtelseTjeneste
+            inntektArbeidYtelseTjeneste,
+            virksomhetTjeneste
         );
 
         fagsak = Fagsak.opprettNy(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, new AktørId(123L), new Saksnummer("987"), STP, STP.plusDays(10));
@@ -146,11 +144,11 @@ class ForvaltningOverstyrInputBeregningTest {
         var vilkårsperiode = DatoIntervallEntitet.fra(STP, STP.plusDays(10));
 
         initVilkår(vilkårsperiode);
-        lagIAY(ORG_NUMMER, STP);
+        var opphørRefusjon = STP.plusDays(2);
+        lagIAY(ORG_NUMMER, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusYears(1), opphørRefusjon));
         lagOpptjening(STP, ORG_NUMMER, OpptjeningAktivitetKlassifisering.BEKREFTET_GODKJENT);
         lagreInntektsmelding(ORG_NUMMER);
 
-        var opphørRefusjon = STP.plusDays(2);
 
         overstyrOpphørsdatoRefusjon(vilkårsperiode, opphørRefusjon);
 
@@ -170,14 +168,30 @@ class ForvaltningOverstyrInputBeregningTest {
     }
 
     @Test
+    void skal_ikke_kunne_overstyre_refusjon_opphør_dersom_virksomheten_ikke_er_avsluttet() {
+        var vilkårsperiode = DatoIntervallEntitet.fra(STP, STP.plusDays(10));
+
+        initVilkår(vilkårsperiode);
+        var opphørRefusjon = STP.plusDays(2);
+        lagIAY(ORG_NUMMER, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusYears(1), LocalDate.now().minusDays(1)));
+        lagOpptjening(STP, ORG_NUMMER, OpptjeningAktivitetKlassifisering.BEKREFTET_GODKJENT);
+        lagreInntektsmelding(ORG_NUMMER);
+        when(virksomhetTjeneste.hentOrganisasjon(any())).thenReturn(Virksomhet.getBuilder().medNavn("Virksomheten").medOrgnr(ORG_NUMMER).build());
+
+        var exception = assertThrows(IllegalArgumentException.class,
+            () -> overstyrOpphørsdatoRefusjon(vilkårsperiode, opphørRefusjon));
+
+        assertThat(exception.getMessage()).isEqualTo("Kan ikke opphøre refusjon for en virksomhet som ikke er avsluttet.");
+    }
+
+    @Test
     void skal_ikke_kunne_overstyre_refusjon_opphør_uten_inntektsmelding() {
         var vilkårsperiode = DatoIntervallEntitet.fra(STP, STP.plusDays(10));
 
         initVilkår(vilkårsperiode);
-        lagIAY(ORG_NUMMER, STP);
-        lagOpptjening(STP, ORG_NUMMER, OpptjeningAktivitetKlassifisering.BEKREFTET_GODKJENT);
-
         var opphørRefusjon = STP.plusDays(2);
+        lagIAY(ORG_NUMMER, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusYears(1), opphørRefusjon.minusDays(1)));
+        lagOpptjening(STP, ORG_NUMMER, OpptjeningAktivitetKlassifisering.BEKREFTET_GODKJENT);
 
 
         var exception = assertThrows(IllegalArgumentException.class,
@@ -229,16 +243,8 @@ class ForvaltningOverstyrInputBeregningTest {
             List.of(new OpptjeningAktivitet(opptjeningFom, opptjeningTom, OpptjeningAktivitetType.ARBEID, opptjeningAktivitetKlassifisering, orgnr, ReferanseType.ORG_NR)));
     }
 
-    private void lagOpptjeningMidlertidigInaktiv(LocalDate stp, String orgnr, OpptjeningAktivitetKlassifisering opptjeningAktivitetKlassifisering) {
-        var opptjeningFom = stp.minusDays(29);
-        var opptjeningTom = stp.minusDays(1);
-        opptjeningRepository.lagreOpptjeningsperiode(behandling, opptjeningFom, opptjeningTom, true);
-        opptjeningRepository.lagreOpptjeningResultat(behandling, stp, Period.of(0, 0, 0),
-            List.of(new OpptjeningAktivitet(stp, stp.plusDays(10), OpptjeningAktivitetType.ARBEID, opptjeningAktivitetKlassifisering, orgnr, ReferanseType.ORG_NR)));
-    }
-
-    private void lagIAY(String orgnr, LocalDate stp) {
-        lagIAY(List.of(orgnr), List.of(InternArbeidsforholdRef.nyRef()), DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusYears(1), stp.plusDays(10)));
+    private void lagIAY(String orgnr, DatoIntervallEntitet periode) {
+        lagIAY(List.of(orgnr), List.of(InternArbeidsforholdRef.nyRef()), periode);
     }
 
     private void lagIAY(List<String> orgnr, List<InternArbeidsforholdRef> arbeidsforholdrefs, DatoIntervallEntitet periode) {
