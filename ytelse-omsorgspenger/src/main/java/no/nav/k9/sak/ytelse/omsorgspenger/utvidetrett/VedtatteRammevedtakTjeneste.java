@@ -102,14 +102,24 @@ public class VedtatteRammevedtakTjeneste {
 
     private LocalDateTimeline<Utfall> hentUtfall(Long behandlingId) {
         Map<VilkårType, LocalDateTimeline<VilkårPeriode>> vilkårTidslinjer = vilkårResultatRepository.hent(behandlingId).getVilkårTidslinjer(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.MIN, LocalDate.MAX));
-        LocalDateTimeline<Boolean> tidlinjeNoeInnvilget = harMinstEtVilkårMedUtfall(vilkårTidslinjer, Utfall.OPPFYLT);
+        LocalDateTimeline<Boolean> tidlinjeNoeInnvilget = harVilkårMedUtfall(VilkårType.UTVIDETRETT, vilkårTidslinjer, Utfall.OPPFYLT);
         LocalDateTimeline<Boolean> tidlinjeNoeAvslått = harMinstEtVilkårMedUtfall(vilkårTidslinjer, Utfall.IKKE_OPPFYLT);
-        //samlet resultat er OPPFYLT hvis minst ett vilkår er OPPFYLT og ingen vilkår er IKKE_OPPFYLT.
+        //samlet resultat er OPPFYLT hvis UTVIDETRETT er  OPPFYLT og ingen vilkår er IKKE_OPPFYLT.
         return tidlinjeNoeInnvilget.mapValue(v -> Utfall.OPPFYLT).crossJoin(tidlinjeNoeAvslått.mapValue(v -> Utfall.IKKE_OPPFYLT), StandardCombinators::coalesceRightHandSide);
     }
 
     private LocalDateTimeline<Boolean> harMinstEtVilkårMedUtfall(Map<VilkårType, LocalDateTimeline<VilkårPeriode>> vilkårTidslinjer, Utfall ønsketUtfall) {
         return vilkårTidslinjer.values().stream()
+            .map(tidslinje -> tidslinje.filterValue(v -> v.getUtfall() == ønsketUtfall))
+            .map(tidslinje -> tidslinje.mapValue(v -> true))
+            .reduce((a, b) -> a.crossJoin(b, StandardCombinators::alwaysTrueForMatch))
+            .orElse(LocalDateTimeline.empty());
+    }
+
+    private LocalDateTimeline<Boolean> harVilkårMedUtfall(VilkårType aktueltVilkår, Map<VilkårType, LocalDateTimeline<VilkårPeriode>> vilkårTidslinjer, Utfall ønsketUtfall) {
+        return vilkårTidslinjer.entrySet().stream()
+            .filter(e->e.getKey() == aktueltVilkår)
+            .map(Map.Entry::getValue)
             .map(tidslinje -> tidslinje.filterValue(v -> v.getUtfall() == ønsketUtfall))
             .map(tidslinje -> tidslinje.mapValue(v -> true))
             .reduce((a, b) -> a.crossJoin(b, StandardCombinators::alwaysTrueForMatch))
