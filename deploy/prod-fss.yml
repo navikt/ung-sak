@@ -90,7 +90,7 @@ spec:
       value: jdbc:postgresql://A01DBVL012.adeo.no:5432/k9-sak
 
     # Appdynamics
-    - name: ENV APPD_ENABLED
+    - name: APPD_ENABLED
       value: true
     - name: APPDYNAMICS_CONTROLLER_HOST_NAME
       value: appdynamics.adeo.no
