@@ -43,7 +43,7 @@
         <felles.version>3.0.7</felles.version>
         <swagger.version>2.2.17</swagger.version>
         <junit.version>5.11.0</junit.version>
-        <k9format.version>9.5.0</k9format.version>
+        <k9format.version>9.5.1</k9format.version>
         <jackson.version>2.17.2</jackson.version>
         <asm.version>9.7</asm.version>
         <kotlin-stdlib.version>2.0.10</kotlin-stdlib.version>
@@ -157,7 +157,7 @@
             <dependency>
                 <groupId>no.nav.folketrygdloven.kalkulus</groupId>
                 <artifactId>beregning-kontrakt</artifactId>
-                <version>5.2.0</version>
+                <version>5.3.2</version>
             </dependency>
 
             <dependency>
