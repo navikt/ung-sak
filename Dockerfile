@@ -1,7 +1,8 @@
 FROM ghcr.io/navikt/baseimages/temurin:21-appdynamics
-ENV APPD_ENABLED=true
 
 LABEL org.opencontainers.image.source=https://github.com/navikt/k9-sak
+
+RUN curl -L -O https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.6.0/opentelemetry-javaagent.jar
 
 RUN mkdir /app/lib
 RUN mkdir /app/conf
