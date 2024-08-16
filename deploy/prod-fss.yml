@@ -102,11 +102,16 @@ spec:
       value: PROD
 
       # open telemetry, kommenter inn og fjern appdynamics-config (og fra Dockerfile) når testet ut nok i dev
-      #- name: "OTEL_EXPORTER_OTLP_ENDPOINT"
-      #  value: "https://elastic-apm.adeo.no"
-      #- name: "OTEL_METRICS_EXPORTER"
-      #  value: "otlp"
-
+#    - name: "OTEL_EXPORTER_OTLP_ENDPOINT"
+#      value: "https://elastic-apm.adeo.no"
+#    - name: "OTEL_METRICS_EXPORTER"
+#      value: "otlp"
+#    - name: "OTEL_LOGS_EXPORTER"
+#      value: "none"
+#    - name: "OTEL_RESOURCE_ATTRIBUTES"
+#      value: "service.name=k9-sak,service.version=k9-sak,deployment.environment=p"
+#    - name: "OTEL_TRACES_EXPORTER"
+#      value: "otlp"
 
     # Integrasjoner (Kafka)
     - name: KAFKA_AKSJONSPUNKTHENDELSE_TOPIC
