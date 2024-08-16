@@ -24,6 +24,7 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.k9.sak.domene.iay.modell.Refusjon;
+import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.InputAktivitetOverstyring;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.InputOverstyringPeriode;
@@ -46,7 +47,7 @@ public class FinnInntektsmeldingForBeregning {
         this.finnForOverstyringTjeneste = finnForOverstyringTjeneste;
     }
 
-    Set<Inntektsmelding> finnInntektsmeldinger(BehandlingReferanse referanse, List<BeregnInput> beregnInput) {
+    public Set<Inntektsmelding> finnInntektsmeldinger(BehandlingReferanse referanse, List<BeregnInput> beregnInput) {
         var inntektsmeldingerForSak = iayTjeneste.hentUnikeInntektsmeldingerForSak(referanse.getSaksnummer());
         Set<Inntektsmelding> overstyrteInntektsmeldinger = finnOverstyrteInntektsmeldinger(referanse, beregnInput, inntektsmeldingerForSak);
         var inntektsmeldinger = new HashSet<Inntektsmelding>();
@@ -95,7 +96,9 @@ public class FinnInntektsmeldingForBeregning {
     }
 
 
-    private static Inntektsmelding mapInntektsmelding(LocalDate stp, InputAktivitetOverstyring a, LocalDateTimeline<BigDecimal> summertRefusjonTidslinje, Collection<Inntektsmelding> inntektsmeldingerForAktivitet) {
+    private static Inntektsmelding mapInntektsmelding(LocalDate stp, InputAktivitetOverstyring a,
+                                                      LocalDateTimeline<BigDecimal> summertRefusjonTidslinje,
+                                                      Collection<Inntektsmelding> inntektsmeldingerForAktivitet) {
         var opphører = finnOpphør(a, summertRefusjonTidslinje);
         var startDato = a.getStartdatoRefusjon().filter(d -> !d.isBefore(stp)).orElse(stp);
 
@@ -106,13 +109,24 @@ public class FinnInntektsmeldingForBeregning {
             .medArbeidsgiver(a.getArbeidsgiver())
             .medStartDatoPermisjon(stp)
             .medRefusjon(finnRefusjonVedStp(stp, summertRefusjonTidslinje, a, startDato), opphører)
-            .medBeløp(a.getInntektPrÅr().getVerdi().divide(BigDecimal.valueOf(12), RoundingMode.HALF_UP))
+            .medBeløp(finnInntektsbeløp(a, inntektsmeldingerForAktivitet))
             .medArbeidsforholdId(InternArbeidsforholdRef.nullRef())
-            .medJournalpostId("OVERSTYRT_FOR_INFOTRYGDMIGRERING" + stp)
-            .medKanalreferanse(kanalReferansePrefiks + "OVERSTYRT_FOR_INFOTRYGDMIGRERING" + stp);
+            .medJournalpostId("OVERSTYRT_" + stp)
+            .medKanalreferanse(kanalReferansePrefiks + "_OVERSTYRT_" + stp);
         mapEndringer(stp, summertRefusjonTidslinje, startDato, opphører, inntektsmeldingBuilder);
         return inntektsmeldingBuilder
             .build();
+    }
+
+    private static BigDecimal finnInntektsbeløp(InputAktivitetOverstyring a, Collection<Inntektsmelding> inntektsmeldingerForAktivitet) {
+        if (a.getInntektPrÅr() != null) {
+            return a.getInntektPrÅr().getVerdi().divide(BigDecimal.valueOf(12), RoundingMode.HALF_UP);
+        }
+        return inntektsmeldingerForAktivitet.stream()
+            .map(Inntektsmelding::getInntektBeløp)
+            .reduce(Beløp::adder)
+            .map(Beløp::getVerdi)
+            .orElseThrow(() -> new IllegalStateException("Fant ingen inntektsmelding for aktivitet"));
     }
 
     /**
@@ -154,10 +168,11 @@ public class FinnInntektsmeldingForBeregning {
     }
 
     private static LocalDate finnOpphør(InputAktivitetOverstyring a, LocalDateTimeline<BigDecimal> summertRefusjonTidslinje) {
-        if (summertRefusjonTidslinje.filterValue(r -> r.compareTo(BigDecimal.ZERO) > 0).isEmpty()) {
+        if (a.getOpphørRefusjon() != null) {
             return a.getOpphørRefusjon();
         }
-        return summertRefusjonTidslinje.filterValue(r -> r.compareTo(BigDecimal.ZERO) > 0)
+        var refusjonTidslinje = summertRefusjonTidslinje.filterValue(r -> r.compareTo(BigDecimal.ZERO) > 0);
+        return refusjonTidslinje.isEmpty() ? null : refusjonTidslinje
             .getMaxLocalDate();
     }
 

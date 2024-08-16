@@ -9,12 +9,14 @@ import jakarta.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 import no.nav.k9.abac.AbacAttributt;
 
@@ -23,7 +25,7 @@ import no.nav.k9.abac.AbacAttributt;
  * Enten {@link #id} eller {@link #behandlingUuid} vil være satt.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+@JsonFormat(shape = JsonFormat.Shape.STRING)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.PUBLIC_ONLY, fieldVisibility = Visibility.ANY)
 @JsonInclude(Include.NON_NULL)
 public class BehandlingIdDto {
@@ -31,6 +33,7 @@ public class BehandlingIdDto {
     public static final String NAME = "behandlingId";
 
     @JsonProperty(value = NAME, required = true)
+    @JsonValue
     @Size(max = 50)
     @NotNull
     @Pattern(regexp = "^[\\p{Alnum}-]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
