@@ -47,6 +47,10 @@
             <groupId>no.nav.k9.felles.integrasjon</groupId>
             <artifactId>k9-kafka-klient</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.opentelemetry.instrumentation</groupId>
+            <artifactId>opentelemetry-instrumentation-annotations</artifactId>
+        </dependency>
         <!-- Test avhengigheter -->
         <dependency>
             <groupId>no.nav.k9.sak</groupId>

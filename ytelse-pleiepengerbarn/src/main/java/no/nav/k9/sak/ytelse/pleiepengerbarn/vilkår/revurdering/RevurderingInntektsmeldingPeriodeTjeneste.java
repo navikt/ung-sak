@@ -5,17 +5,18 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.ErEndringIRefusjonskravVurderer;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.ErEndringIRefusjonskravVurderer;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
@@ -64,6 +65,7 @@ public class RevurderingInntektsmeldingPeriodeTjeneste {
      * @param perioder                  Aktuell vilkårsperiode
      * @return Tidslinje for perioder der inntektsmeldinger skal før til revurdering av periode, samt årsak til revurdering
      */
+    @WithSpan
     public LocalDateTimeline<Set<InntektsmeldingRevurderingÅrsak>> utledTidslinjeForVurderingFraInntektsmelding(BehandlingReferanse referanse,
                                                                                                                 Collection<Inntektsmelding> inntektsmeldinger,
                                                                                                                 List<MottattDokument> mottatteInntektsmeldinger,

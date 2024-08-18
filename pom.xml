@@ -180,6 +180,11 @@
                 <artifactId>swagger-core-jakarta</artifactId>
                 <version>${swagger.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.opentelemetry.instrumentation</groupId>
+                <artifactId>opentelemetry-instrumentation-annotations</artifactId>
+                <version>2.6.0</version>
+            </dependency>
 
             <!-- Prosjektets egne biblioteker -->
             <dependency>
