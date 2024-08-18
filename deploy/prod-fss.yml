@@ -91,7 +91,7 @@ spec:
 
     # Appdynamics
     - name: APPD_ENABLED
-      value: true
+      value: "true"
     - name: APPDYNAMICS_CONTROLLER_HOST_NAME
       value: appdynamics.adeo.no
     - name: APPDYNAMICS_CONTROLLER_PORT
