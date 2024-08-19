@@ -99,6 +99,7 @@ import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto;
 import no.nav.k9.sak.kontrakt.mottak.AktørListeDto;
 import no.nav.k9.sak.kontrakt.stønadstatistikk.StønadstatistikkSerializer;
+import no.nav.k9.sak.mottak.dokumentmottak.DokumentValidatorProvider;
 import no.nav.k9.sak.mottak.dokumentmottak.HåndterMottattDokumentTask;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
@@ -142,6 +143,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     private TilknytningTjeneste tilknytningTjeneste;
     private Pep pep;
 
+    private DokumentValidatorProvider dokumentValidatorProvider;
+
     public ForvaltningMidlertidigDriftRestTjeneste() {
         // For Rest-CDI
     }
@@ -159,7 +162,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                                                    OpprettRevurderingService opprettRevurderingService,
                                                    PipRepository pipRepository,
                                                    TilknytningTjeneste tilknytningTjeneste,
-                                                   Pep pep) {
+                                                   Pep pep,
+                                                   DokumentValidatorProvider dokumentValidatorProvider) {
 
         this.tpsTjeneste = tpsTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
@@ -174,6 +178,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         this.pipRepository = pipRepository;
         this.tilknytningTjeneste = tilknytningTjeneste;
         this.pep = pep;
+        this.dokumentValidatorProvider = dokumentValidatorProvider;
     }
 
 
@@ -538,11 +543,20 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             return Response.status(Status.NOT_FOUND.getStatusCode(), "Fant ingen ugyldige dokumenter for angitt saksnummer/journalpost").build();
         }
 
+        var dokument = dokumenter.getFirst();
+
+        var dokumentValidator = dokumentValidatorProvider.finnValidator(dokument.getType());
+        try {
+            dokumentValidator.validerDokument(dokument);
+        } catch (Exception e) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Validering av dokumentet feilet med: " + e.getMessage()).build();
+        }
+
         mottatteDokumentRepository.oppdaterStatus(dokumenter, DokumentStatus.MOTTATT);
 
         var prosessTaskData = ProsessTaskData.forProsessTask(HåndterMottattDokumentTask.class);
         prosessTaskData.setFagsakId(fagsak.getId());
-        prosessTaskData.setProperty(HåndterMottattDokumentTask.MOTTATT_DOKUMENT_ID_KEY, dokumenter.getFirst().getId().toString());
+        prosessTaskData.setProperty(HåndterMottattDokumentTask.MOTTATT_DOKUMENT_ID_KEY, dokument.getId().toString());
         prosessTaskData.setCallIdFraEksisterende();
         prosessTaskRepository.lagre(prosessTaskData);
 
