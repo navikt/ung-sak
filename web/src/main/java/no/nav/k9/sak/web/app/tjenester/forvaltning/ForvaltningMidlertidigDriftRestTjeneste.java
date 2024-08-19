@@ -545,6 +545,10 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
         var dokument = dokumenter.getFirst();
 
+        if (dokument.getBehandlingId() != null) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Kan ikke motta dokumentet fordi behandlingId er satt").build();
+        }
+
         var dokumentValidator = dokumentValidatorProvider.finnValidator(dokument.getType());
         try {
             dokumentValidator.validerDokument(dokument);
@@ -560,7 +564,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         prosessTaskData.setCallIdFraEksisterende();
         prosessTaskRepository.lagre(prosessTaskData);
 
-        return Response.ok().build();
+        return Response.ok(prosessTaskData.getId()).build();
     }
 
     @POST
