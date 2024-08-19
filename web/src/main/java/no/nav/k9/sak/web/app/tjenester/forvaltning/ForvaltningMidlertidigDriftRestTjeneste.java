@@ -560,7 +560,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         prosessTaskData.setCallIdFraEksisterende();
         prosessTaskRepository.lagre(prosessTaskData);
 
-        return Response.ok().build();
+        return Response.ok(prosessTaskData.getId()).build();
     }
 
     @POST
