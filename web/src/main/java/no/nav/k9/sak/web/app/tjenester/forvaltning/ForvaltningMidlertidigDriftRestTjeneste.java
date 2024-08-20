@@ -553,6 +553,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         try {
             dokumentValidator.validerDokument(dokument);
         } catch (Exception e) {
+            logger.warn("Validering av dokumentet feilet", e);
             return Response.status(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Validering av dokumentet feilet med: " + e.getMessage()).build();
         }
 
