@@ -31,17 +31,21 @@ public class UtenlandsoppholdTidslinjeTjeneste {
                 throw new IllegalStateException("Forventet ett sett perioder fra søknad per kravdokument. Fant " + perioderFraSøknaderForKravdokument.size() + " for " + kravDokument.getJournalpostId());
             }
             var perioderFraSøknad = perioderFraSøknaderForKravdokument.iterator().next();
-            if (perioderFraSøknad.getUtenlandsopphold().isEmpty() && kravDokument.getKildesystem() == Kildesystem.SØKNADSDIALOG) {
-                //TODO Denne løsningen funker bare når hele utenlandsoppholdet skal slettes. Trenger en løsning for å slette deler av perioden (se TODO nedenfor).
-                LocalDateTimeline<UtledetUtenlandsopphold> tidslinjeSomSkalSlettes =
-                    new LocalDateTimeline<>(perioderFraSøknad.getUttakPerioder().stream()
-                        .map(UttakPeriode::getPeriode)
-                        .map(periode -> new LocalDateSegment<>(periode.getFomDato(), periode.getTomDato(), (UtledetUtenlandsopphold) null))
-                        .toList());
-                resultatTimeline = resultatTimeline.disjoint(tidslinjeSomSkalSlettes);
+
+            if (kravDokument.getKildesystem() == Kildesystem.SØKNADSDIALOG) {
+                //Legg til det som er oppgitt
+                var tidslinjeMedUtenlandsopphold = byggTidslinjeMedUtenlandsopphold(perioderFraSøknad);
+                resultatTimeline = resultatTimeline.combine(tidslinjeMedUtenlandsopphold, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+                //Trekk fra det som ikke er oppgitt
+                var søknadstidslinje = new LocalDateTimeline<>(perioderFraSøknad.getUttakPerioder().stream()
+                    .map(UttakPeriode::getPeriode)
+                    .map(periode -> new LocalDateSegment<>(periode.getFomDato(), periode.getTomDato(), (UtledetUtenlandsopphold) null))
+                    .toList());
+                LocalDateTimeline<UtledetUtenlandsopphold> tidslinjeUtenOppgittUtenlandsopphold = søknadstidslinje.disjoint(tidslinjeMedUtenlandsopphold);
+                resultatTimeline = resultatTimeline.disjoint(tidslinjeUtenOppgittUtenlandsopphold);
             } else {
                 for (UtenlandsoppholdPeriode utenlandsoppholdPeriode : perioderFraSøknad.getUtenlandsopphold()) {
-                    LocalDateTimeline<UtledetUtenlandsopphold> timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(
+                    var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(
                         utenlandsoppholdPeriode.getPeriode().getFomDato(),
                         utenlandsoppholdPeriode.getPeriode().getTomDato(),
                         new UtledetUtenlandsopphold(utenlandsoppholdPeriode.getLand(), utenlandsoppholdPeriode.getÅrsak())
@@ -49,12 +53,27 @@ public class UtenlandsoppholdTidslinjeTjeneste {
                     if (utenlandsoppholdPeriode.isAktiv()) {
                         resultatTimeline = resultatTimeline.combine(timeline, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
                     } else {
-                        //TODO Det ser ut til at denne koden er død fordi feltet "perioderSomSkalSlettes" under utenlandsopphold i søknaden ikke er i bruk. Bør finne en annen løsning for å slette perioder.
+                        //Det ser ut til at denne koden er død fordi feltet "perioderSomSkalSlettes" under utenlandsopphold i søknaden ikke er i bruk.
                         resultatTimeline = resultatTimeline.disjoint(timeline);
                     }
                 }
             }
         }
         return resultatTimeline;
+    }
+
+    private static LocalDateTimeline<UtledetUtenlandsopphold> byggTidslinjeMedUtenlandsopphold(PerioderFraSøknad perioderFraSøknad) {
+        var tidslinjeMedUtenlandsopphold = new LocalDateTimeline<UtledetUtenlandsopphold>(List.of());
+        for (UtenlandsoppholdPeriode utenlandsoppholdPeriode : perioderFraSøknad.getUtenlandsopphold()) {
+            var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(
+                utenlandsoppholdPeriode.getPeriode().getFomDato(),
+                utenlandsoppholdPeriode.getPeriode().getTomDato(),
+                new UtledetUtenlandsopphold(utenlandsoppholdPeriode.getLand(), utenlandsoppholdPeriode.getÅrsak())
+            )));
+            if (utenlandsoppholdPeriode.isAktiv()) {
+                tidslinjeMedUtenlandsopphold = tidslinjeMedUtenlandsopphold.combine(timeline, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            }
+        }
+        return tidslinjeMedUtenlandsopphold;
     }
 }
