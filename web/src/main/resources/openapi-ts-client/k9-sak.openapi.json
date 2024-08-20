@@ -2351,6 +2351,9 @@
           "navn" : {
             "type" : "string"
           },
+          "test" : {
+            "type" : "string"
+          },
           "utilgjengeligÅrsak" : {
             "enum" : [ "PERSON_DØD", "ORG_OPPHØRT" ],
             "type" : "string"
