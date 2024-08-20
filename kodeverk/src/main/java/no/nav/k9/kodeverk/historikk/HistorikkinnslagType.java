@@ -95,6 +95,7 @@ public enum HistorikkinnslagType implements Kodeverdi {
     UDEFINERT("-", "Ikke definert", null),
     ;
 
+    @JsonIgnore
     private String mal;
 
     private static final Map<String, HistorikkinnslagType> KODER = new LinkedHashMap<>();

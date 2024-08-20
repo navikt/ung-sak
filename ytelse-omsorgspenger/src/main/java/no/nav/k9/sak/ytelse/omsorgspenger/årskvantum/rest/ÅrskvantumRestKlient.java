@@ -17,6 +17,7 @@ import jakarta.inject.Inject;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.ws.rs.core.HttpHeaders;
+import no.nav.k9.aarskvantum.kontrakter.AktørBytte;
 import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
 import no.nav.k9.aarskvantum.kontrakter.FullUttaksplanForBehandlinger;
 import no.nav.k9.aarskvantum.kontrakter.FullUttaksplanRequest;
@@ -281,6 +282,17 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
         }
     }
 
+    @Override
+    public Integer oppdaterPersonident(PersonIdent nyPersonident, List<PersonIdent> gamlePersonidenter) {
+        try {
+            var request = new AktørBytte(gamlePersonidenter.stream().map(PersonIdent::getIdent).toList(), nyPersonident.getIdent());
+            var endpoint = URI.create(endpointUttaksplan.toString() + "/oppdaterPersonident");
+            return restKlient.post(endpoint, request, Integer.class);
+        } catch (Exception e) {
+            throw RestTjenesteFeil.FEIL.feilKallTilOppdaterPersonident(e.getMessage(), e).toException();
+        }
+    }
+
     private URI toUri(URI baseUri, String relativeUri) {
         String uri = baseUri.toString() + relativeUri;
         try {
@@ -319,6 +331,10 @@ public class ÅrskvantumRestKlient implements ÅrskvantumKlient {
 
         @TekniskFeil(feilkode = "K9SAK-AK-1000097", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke settUttaksplanTilManueltBekreftet: %s", logLevel = LogLevel.WARN)
         Feil feilKallTilInnvilgeEllerAvslåPeriodeneManuelt(String feilmelding, Throwable t);
+
+        @TekniskFeil(feilkode = "K9SAK-AK-1000098", feilmelding = "Feil ved kall til K9-AARSKVANTUM: Kunne ikke oppdatere personident: %s", logLevel = LogLevel.WARN)
+        Feil feilKallTilOppdaterPersonident(String feilmelding, Throwable t);
+
     }
 
 }

@@ -4,14 +4,31 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NavigableSet;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
 
 public class HjelpetidslinjerTest {
+
+    @Test
+    public void skal_utlede_helg_som_må_tettes() {
+        final LocalDate fredag = LocalDate.of(2022, 8, 5);
+        final LocalDate mandag = LocalDate.of(2022, 8, 8);
+        var tidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fredag, fredag, true),
+            new LocalDateSegment<>(mandag, mandag, true))
+        );
+        var hullSomMåTettes = Hjelpetidslinjer.utledHullSomMåTettes(tidslinje, new PåTversAvHelgErKantIKantVurderer());
+        var segmenter = hullSomMåTettes.toSegments();
+        Assertions.assertThat(segmenter.size()).isEqualTo(1);
+        Assertions.assertThat(segmenter.getFirst().getFom()).isEqualTo(fredag.plusDays(1));
+        Assertions.assertThat(segmenter.getFirst().getTom()).isEqualTo(mandag.minusDays(1));
+    }
 
     @Test
     public void helgelinjeTom() {

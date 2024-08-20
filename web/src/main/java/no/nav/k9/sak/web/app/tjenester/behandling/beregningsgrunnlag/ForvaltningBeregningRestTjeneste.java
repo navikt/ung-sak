@@ -32,7 +32,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
@@ -74,13 +73,17 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.FinnPerioderMedStartIKontrollerFakta;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.SkalForlengeAktivitetstatus;
-import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.SkalForlengeAktivitetstatusInput;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.KortTekst;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.beregninginput.OverstyrBeregningAktivitet;
+import no.nav.k9.sak.kontrakt.beregninginput.OverstyrBeregningInputPeriode;
+import no.nav.k9.sak.kontrakt.beregninginput.OverstyrOpphørsdatoRefusjon;
 import no.nav.k9.sak.trigger.ProsessTriggerForvaltningTjeneste;
+import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.OrgNummer;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.ContainerContextRunner;
@@ -107,6 +110,7 @@ public class ForvaltningBeregningRestTjeneste {
     private ProsessTriggerForvaltningTjeneste prosessTriggerForvaltningTjeneste;
     private PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering pleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering;
     private FinnPerioderMedStartIKontrollerFakta finnPerioderMedStartIKontrollerFakta;
+    private ForvaltningOverstyrInputBeregning forvaltningOverstyrInputBeregning;
 
 
     public ForvaltningBeregningRestTjeneste() {
@@ -120,7 +124,8 @@ public class ForvaltningBeregningRestTjeneste {
                                             EntityManager entityManager, FagsakTjeneste fagsakTjeneste,
                                             HentKalkulatorInputDump hentKalkulatorInputDump,
                                             @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) @VilkårTypeRef(VilkårType.BEREGNINGSGRUNNLAGVILKÅR) PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering pleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering,
-                                            FinnPerioderMedStartIKontrollerFakta finnPerioderMedStartIKontrollerFakta) {
+                                            FinnPerioderMedStartIKontrollerFakta finnPerioderMedStartIKontrollerFakta,
+                                            ForvaltningOverstyrInputBeregning forvaltningOverstyrInputBeregning) {
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
@@ -131,6 +136,7 @@ public class ForvaltningBeregningRestTjeneste {
         this.prosessTriggerForvaltningTjeneste = new ProsessTriggerForvaltningTjeneste(entityManager);
         this.pleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering = pleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering;
         this.finnPerioderMedStartIKontrollerFakta = finnPerioderMedStartIKontrollerFakta;
+        this.forvaltningOverstyrInputBeregning = forvaltningOverstyrInputBeregning;
     }
 
     @GET
@@ -255,7 +261,7 @@ public class ForvaltningBeregningRestTjeneste {
         var ref = BehandlingReferanse.fra(behandling);
 
         // Kaller i egen context for å kunne hente inntektsmeldinger fra abakus
-        var skalForlengeAktivitetstatusInput  = ContainerContextRunner.doRun(behandling, () -> {
+        var skalForlengeAktivitetstatusInput = ContainerContextRunner.doRun(behandling, () -> {
             var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledDetaljertPerioderTilVurdering(ref);
             return finnPerioderMedStartIKontrollerFakta.lagInput(ref, perioderTilVurdering);
         });
@@ -342,6 +348,50 @@ public class ForvaltningBeregningRestTjeneste {
 
         }
 
+    }
+
+    @POST
+    @Path("/overstyr-opphør-refusjon")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Operation(description = "Setter opphørsdato for refusjon for alle eksisterende og fremtidige inntektsmeldinger for virksomhet", summary = ("Overstyrer opphør av refusjon"), tags = "beregning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
+    public void overstyrInntektsmelding(
+        @Parameter(description = "Behandling-id", required = true)
+        @FormParam("behandlingId")
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+        BehandlingIdDto behandlingIdDto,
+        @NotNull @FormParam("opphørsdatoRefusjon")
+        @Parameter(description = "Opphørsdato for refusjon", required = true, example = "2020-01-01")
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class)
+        OverstyrOpphørsdatoRefusjon opphørsdatoRefusjon,
+        @NotNull @FormParam("orgNummer")
+        @Parameter(description = "Organisasjonsnummer for virksomhet", required = true, example = "123456789")
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class)
+        OrgNummer orgNummer,
+        @NotNull
+        @FormParam("begrunnelse")
+        @Parameter(description = "Begrunnelse for opphør av refusjon. Vil dukke opp i historikkinnslag og må derfor være selvforklarende.", allowEmptyValue = false, required = true, schema = @Schema(type = "string", maximum = "2000"))
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class)
+        KortTekst begrunnelse) {
+        var behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingId());
+        var perioderTilVurdering = beregningsgrunnlagVilkårTjeneste.utledPerioderTilVurdering(BehandlingReferanse.fra(behandling));
+        var overlappendePeriode = perioderTilVurdering.stream().filter(p -> p.overlapper(opphørsdatoRefusjon.getOpphørRefusjon().minusDays(1), opphørsdatoRefusjon.getOpphørRefusjon().minusDays(1)))
+            .findFirst();
+        if (overlappendePeriode.isEmpty()) {
+            throw new IllegalArgumentException("Fant ingen overlappende periode med opphørdato");
+        }
+        var periode = new OverstyrBeregningInputPeriode(overlappendePeriode.get().getFomDato(),
+            List.of(new OverstyrBeregningAktivitet(orgNummer, null, null, null, null, opphørsdatoRefusjon.getOpphørRefusjon(), true)));
+        loggForvaltningTjeneste(behandling.getFagsak(), "/overstyr-opphør-refusjon", begrunnelse.getTekst());
+        forvaltningOverstyrInputBeregning.overstyrOpphørRefusjon(behandling,
+            overlappendePeriode.get(),
+            Arbeidsgiver.virksomhet(orgNummer.getId()),
+            opphørsdatoRefusjon.getOpphørRefusjon(),
+            begrunnelse.getTekst());
     }
 
     private void opprettProsesstriggerOgRevurder(OpprettManuellRevurderingBeregning opprettManuellRevurdering, String tjeneste, String begrunnelse, BehandlingÅrsakType reOpplysningerOmOpptjening) {

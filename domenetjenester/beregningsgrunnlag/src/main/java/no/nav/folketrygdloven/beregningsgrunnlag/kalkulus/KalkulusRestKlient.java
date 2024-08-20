@@ -24,7 +24,6 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.folketrygdloven.kalkulus.felles.v1.KalkulatorInputDto;
 import no.nav.folketrygdloven.kalkulus.mappers.JsonMapper;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregnListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.BeregningsgrunnlagListeRequest;
@@ -36,6 +35,7 @@ import no.nav.folketrygdloven.kalkulus.request.v1.HentJournalpostIderRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.HåndterBeregningListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.KontrollerGrunnbeløpRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.KopierBeregningListeRequest;
+import no.nav.folketrygdloven.kalkulus.request.v1.aktørbytte.ByttAktørRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.simulerTilkommetInntekt.SimulerTilkommetInntektListeRequest;
 import no.nav.folketrygdloven.kalkulus.request.v1.tilkommetAktivitet.UtledTilkommetAktivitetListeRequest;
 import no.nav.folketrygdloven.kalkulus.response.v1.AktiveReferanser;
@@ -94,20 +94,16 @@ public class KalkulusRestKlient {
     private URI beregnEndpoint;
     private URI oppdaterListeEndpoint;
     private URI beregningsgrunnlagListeDtoEndpoint;
-
     private URI beregningsgrunnlagGrunnlagBolkEndpoint;
     private URI deaktiverBeregningsgrunnlag;
     private URI grunnbeløp;
     private URI hentJournalpostIderEndpoint;
-
-
     private URI kontrollerGrunnbeløp;
     private URI simulerTilkommetInntekt;
     private URI utledTilkommetAktivitet;
-
     private URI finnInntektsgradering;
-
     private URI aktiveReferanserEndpoint;
+    private URI oppdaterAktørIdEndpoint;
 
 
     protected KalkulusRestKlient() {
@@ -142,6 +138,7 @@ public class KalkulusRestKlient {
         this.aktiveReferanserEndpoint = toUri("/api/kalkulus/v1/aktive-referanser");
         this.finnInntektsgradering = toUri("/api/kalkulus/v1/finnUttaksgradVedInntektsgradering");
         this.hentJournalpostIderEndpoint = toUri("/api/kalkulus/v1/inntektsmeldingJournalposter");
+        this.oppdaterAktørIdEndpoint = toUri("/api/kalkulus/v1/oppdaterAktoerId");
     }
 
 
@@ -264,6 +261,16 @@ public class KalkulusRestKlient {
 
         try {
             return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), journalspostIderReader);
+        } catch (JsonProcessingException e) {
+            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
+        }
+    }
+
+
+    public Integer oppdaterAktørId(ByttAktørRequest request) {
+        var endpoint = oppdaterAktørIdEndpoint;
+        try {
+            return getResponse(endpoint, kalkulusJsonWriter.writeValueAsString(request), kalkulusMapper.readerFor(Integer.class));
         } catch (JsonProcessingException e) {
             throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
         }

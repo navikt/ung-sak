@@ -90,6 +90,8 @@ spec:
       value: jdbc:postgresql://A01DBVL012.adeo.no:5432/k9-sak
 
     # Appdynamics
+    - name: APPD_ENABLED
+      value: "true"
     - name: APPDYNAMICS_CONTROLLER_HOST_NAME
       value: appdynamics.adeo.no
     - name: APPDYNAMICS_CONTROLLER_PORT
@@ -98,6 +100,18 @@ spec:
       value: "true"
     - name: APPDYNAMICS_AGENT_ACCOUNT_NAME
       value: PROD
+
+      # open telemetry, kommenter inn og fjern appdynamics-config (og fra Dockerfile) når testet ut nok i dev
+#    - name: "OTEL_EXPORTER_OTLP_ENDPOINT"
+#      value: "https://elastic-apm.adeo.no"
+#    - name: "OTEL_METRICS_EXPORTER"
+#      value: "otlp"
+#    - name: "OTEL_LOGS_EXPORTER"
+#      value: "none"
+#    - name: "OTEL_RESOURCE_ATTRIBUTES"
+#      value: "service.name=k9-sak,service.version=k9-sak,deployment.environment=p"
+#    - name: "OTEL_TRACES_EXPORTER"
+#      value: "otlp"
 
     # Integrasjoner (Kafka)
     - name: KAFKA_AKSJONSPUNKTHENDELSE_TOPIC
@@ -216,6 +230,10 @@ spec:
       value: https://k9-inntektsmelding.intern.nav.no/k9/inntektsmelding
     - name: K9INNTEKTSMELDING_SCOPE
       value: api://prod-gcp.k9saksbehandling.k9-inntektsmelding/.default
+    - name: K9FORDEL_URL
+      value: http://k9-fordel.k9saksbehandling/k9/fordel/api
+    - name: K9FORDEL_SCOPE
+      value: api://prod-fss.k9saksbehandling.k9-fordel/.default
 
     # Restservice OMS spesifikt
     - name: K9_OMS_AARSKVANTUM_URL
@@ -283,6 +301,8 @@ spec:
     - name: SEND_INNTEKTSMELDING_FORESPORSEL
       value: "false"
     - name: OMP_RAMMEVEDTAK_SAMMENSTILLNG_AARSKVANTUM
+      value: "false"
+    - name: ALDERSVILKAR_I_KRONISK_SYK
       value: "false"
 
     # Konfigurasjoner

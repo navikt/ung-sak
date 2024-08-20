@@ -20,12 +20,11 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.felles.exception.VLException;
 import no.nav.k9.felles.integrasjon.pdl.HentIdenterBolkQueryRequest;
 import no.nav.k9.felles.integrasjon.pdl.HentIdenterBolkResult;
@@ -96,7 +95,14 @@ public class AktørTjeneste {
         return personIdent;
     }
 
-    /** returnerer map av aktørId->personident (null dersom ikke funnet). */
+    public Set<PersonIdent> hentHistoriskePersonIdenterForAktørId(AktørId aktørId) {
+        var personIdenter = hentHistoriskePersonIdenterFraPDL(aktørId.getId());
+        return personIdenter;
+    }
+
+    /**
+     * returnerer map av aktørId->personident (null dersom ikke funnet).
+     */
     public Map<AktørId, PersonIdent> hentPersonIdentForAktørIder(Set<AktørId> aktørIder) {
         var query = new HentIdenterBolkQueryRequest();
         query.setIdenter(aktørIder.stream().map(AktørId::getId).collect(toList()));
@@ -144,9 +150,9 @@ public class AktørTjeneste {
                 .flatMap(Optional::stream),
             personIdentIkkeICache.isEmpty() ? empty()
                 : hentBolkMedAktørId(personIdentIkkeICache)
-                    .peek(aktørInfo -> cacheIdentTilAktørId.put(aktørInfo.getElement1(), aktørInfo.getElement2()))
-                    .map(Tuple::getElement2))
-                        .collect(toSet());
+                .peek(aktørInfo -> cacheIdentTilAktørId.put(aktørInfo.getElement1(), aktørInfo.getElement2()))
+                .map(Tuple::getElement2))
+            .collect(toSet());
     }
 
     private Stream<Tuple<PersonIdent, AktørId>> hentBolkMedAktørId(List<PersonIdent> personIdents) {
@@ -180,8 +186,15 @@ public class AktørTjeneste {
 
     private Optional<PersonIdent> hentPersonIdentFraPDL(String aktørId) {
         return identerFor(aktørId, IdentGruppe.FOLKEREGISTERIDENT).map(IdentInformasjon::getIdent).map(PersonIdent::new);
+    }
+
+    private Set<PersonIdent> hentHistoriskePersonIdenterFraPDL(String aktørId) {
+        return historiskeIdenterFor(aktørId, IdentGruppe.FOLKEREGISTERIDENT).stream()
+            .map(IdentInformasjon::getIdent).map(PersonIdent::new)
+            .collect(toSet());
 
     }
+
 
     private Optional<IdentInformasjon> identerFor(String ident, IdentGruppe identGruppe) {
         var request = new HentIdenterQueryRequest();
@@ -211,5 +224,20 @@ public class AktørTjeneste {
             }
             throw e;
         }
+    }
+
+    private List<IdentInformasjon> historiskeIdenterFor(String ident, IdentGruppe identGruppe) {
+        var request = new HentIdenterQueryRequest();
+        request.setIdent(ident);
+        request.setGrupper(List.of(identGruppe));
+        request.setHistorikk(Boolean.FALSE);
+
+        IdentlisteResponseProjection projeksjon = new IdentlisteResponseProjection()
+            .identer(
+                new IdentInformasjonResponseProjection()
+                    .historisk()
+                    .ident());
+
+        return pdlKlient.hentIdenter(request, projeksjon).getIdenter();
     }
 }

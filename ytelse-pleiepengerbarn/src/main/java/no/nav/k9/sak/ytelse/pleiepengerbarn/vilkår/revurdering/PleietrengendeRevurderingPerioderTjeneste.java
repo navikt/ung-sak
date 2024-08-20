@@ -5,6 +5,7 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -58,6 +59,7 @@ public class PleietrengendeRevurderingPerioderTjeneste {
      * @param definerendeVilkår Definerende vilkår for ytelsen
      * @return Tidslinje med årsaker
      */
+    @WithSpan
     public LocalDateTimeline<Set<BehandlingÅrsakType>> utledBerørtePerioderPåPleietrengende(BehandlingReferanse referanse,
                                                                                             Set<VilkårType> definerendeVilkår) {
         LocalDateTimeline<Set<BehandlingÅrsakType>> utvidedePerioder = utledUtvidetPeriodeForSykdom(referanse, definerendeVilkår);

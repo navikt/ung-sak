@@ -127,7 +127,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
                 if (!endringstidslinjer.harEndringSomPåvirkerSakTidslinje().isEmpty() || !skalReberegneFeriepenger.isEmpty()) {
                     if (!endringstidslinjer.harEndringSomPåvirkerSakTidslinje().isEmpty()) {
                         //Er kun støtte p.t. for å oppgi en årsak pr sak. Må velge 'endring i ytelse'-årsak da denne (i motsetning til feriepenger-årsak) gir opphav til vilkårsperioder i revurderingen. Feriepengene vil uansett blir reberegnet
-                        LocalDateTimeline<Boolean> perioderSkalRevurdereYtelse = tettHull(perioderTilVurderingTjeneste, endringstidslinjer.harEndringSomPåvirkerSakTidslinje());
+                        LocalDateTimeline<Boolean> perioderSkalRevurdereYtelse = tettHullOgKomprimer(perioderTilVurderingTjeneste, endringstidslinjer.harEndringSomPåvirkerSakTidslinje());
                         resultat.add(new SakMedPeriode(kandidatsaksnummer, kandidatFagsak.getYtelseType(), TidslinjeUtil.tilDatoIntervallEntiteter(perioderSkalRevurdereYtelse), BehandlingÅrsakType.RE_ENDRING_FRA_ANNEN_OMSORGSPERSON));
                     } else {
                         resultat.add(new SakMedPeriode(kandidatsaksnummer, kandidatFagsak.getYtelseType(), TidslinjeUtil.tilDatoIntervallEntiteter(skalReberegneFeriepenger), BehandlingÅrsakType.RE_FERIEPENGER_ENDRING_FRA_ANNEN_SAK));
@@ -169,10 +169,10 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         return true;
     }
 
-    private LocalDateTimeline<Boolean> tettHull(VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste, LocalDateTimeline<Boolean> skalRevurderes) {
+    private LocalDateTimeline<Boolean> tettHullOgKomprimer(VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste, LocalDateTimeline<Boolean> skalRevurderes) {
         var kantIKantVurderer = perioderTilVurderingTjeneste.getKantIKantVurderer();
         var tidslinjeHull = Hjelpetidslinjer.utledHullSomMåTettes(skalRevurderes, kantIKantVurderer);
-        return skalRevurderes.crossJoin(tidslinjeHull, StandardCombinators::coalesceRightHandSide);
+        return skalRevurderes.crossJoin(tidslinjeHull, StandardCombinators::coalesceRightHandSide).compress();
     }
 
     private LocalDateTimeline<Boolean> perioderMedRevurderingPgaEndringFeriepenger(Behandling sisteBehandlingPåKandidat, BehandlingReferanse referanse) {

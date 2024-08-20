@@ -69,7 +69,6 @@ public class ApplicationConfig extends ResourceConfig {
         register(new OpprettManuellRevurderingMessageBodyReader());
         register(new OpprettManuellRevurderingBeregningMessageBodyReader());
         register(new PsbInfotrygdFødselsnumregMessageBodyReader());
-
         registerInstances(new LinkedHashSet<>(new KnownExceptionMappers().getExceptionMappers()));
 
         property(org.glassfish.jersey.server.ServerProperties.PROCESSING_RESPONSE_ERRORS_ENABLED, true);
