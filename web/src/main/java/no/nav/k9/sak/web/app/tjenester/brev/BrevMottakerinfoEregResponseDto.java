@@ -15,6 +15,9 @@ public record BrevMottakerinfoEregResponseDto(
     String navn,
 
     @JsonProperty("utilgjengeligÅrsak")
-    UtilgjengeligÅrsak utilgjengeligÅrsak
+    UtilgjengeligÅrsak utilgjengeligÅrsak,
+
+    @JsonProperty("t3st")
+    String t3st
 ) {
 }

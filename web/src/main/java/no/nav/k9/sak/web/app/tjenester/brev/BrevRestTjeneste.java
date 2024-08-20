@@ -176,7 +176,7 @@ public class BrevRestTjeneste {
         return eregRestKlient.hentOrganisasjonOptional(organisasjonsnrDto.organisasjonsnr()).map(org -> {
             var utilgjengeligÅrsak = org.getOpphørsdato() != null ? UtilgjengeligÅrsak.ORG_OPPHØRT : null;
 
-            return new BrevMottakerinfoEregResponseDto(org.getNavn(), utilgjengeligÅrsak);
+            return new BrevMottakerinfoEregResponseDto(org.getNavn(), utilgjengeligÅrsak, "TEST");
         });
     }
 
