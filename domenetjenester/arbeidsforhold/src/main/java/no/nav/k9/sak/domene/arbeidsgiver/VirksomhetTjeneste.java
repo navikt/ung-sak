@@ -74,11 +74,12 @@ public class VirksomhetTjeneste {
 
     private Virksomhet hentOrganisasjonRest(String orgNummer) {
         Objects.requireNonNull(orgNummer, "orgNummer"); // NOSONAR
-        var org = eregRestKlient.hentOrganisasjon(orgNummer);
+        var org = eregRestKlient.hentOrganisasjonOptional(orgNummer).orElseThrow(() -> new IllegalArgumentException("Org " + orgNummer.substring(0, 3) + "..." + " not found"));
         var builder = Virksomhet.getBuilder()
             .medNavn(trim(org.getNavn()))
             .medRegistrert(org.getRegistreringsdato())
-            .medOrgnr(org.getOrganisasjonsnummer());
+            .medOrgnr(org.getOrganisasjonsnummer())
+            .medAvsluttet(org.getOpphørsdato());
         if (OrganisasjonstypeEReg.VIRKSOMHET.equals(org.getType())) {
             builder.medOrganisasjonstype(Organisasjonstype.VIRKSOMHET)
                 .medOppstart(org.getOppstartsdato())
