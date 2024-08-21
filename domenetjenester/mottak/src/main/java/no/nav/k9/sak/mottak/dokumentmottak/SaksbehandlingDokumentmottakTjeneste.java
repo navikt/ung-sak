@@ -89,26 +89,23 @@ public class SaksbehandlingDokumentmottakTjeneste {
             prosessTaskData.setProperty(HåndterMottattDokumentTask.MOTTATT_DOKUMENT_ID_KEY, String.join(",", mottattDokumentIder));
             prosessTaskData.setCallIdFraEksisterende();
             taskTjeneste.lagre(prosessTaskData);
-        } else if (antallOk > 0 && antallOk < antall) {
-            // blanda drops
-            throw new IllegalArgumentException("Fikk noe gyldig [" + antallOk + "] og noen ugyldige [" + (antall - antallOk) + "] meldinger, av totalt [" + antall + "]. Kan ikke behandle videre.");
+        } else {
+            //Hvis noe er ugyldig skal det feile i systemet som sender inn (fordel eller punsj)
+            throw new IllegalArgumentException("Fikk [" + (antall - antallOk) + "] ugyldige meldinger, av totalt [" + antall + "]. Kan ikke behandle videre.");
         }
     }
 
     private boolean valider(MottattDokument m) {
-        boolean valid = true;
         DokumentValidator dokumentValidator = dokumentValidatorProvider.finnValidator(m.getType());
         try {
             dokumentValidator.validerDokument(m);
         } catch (DokumentValideringException e) {
             String feilmelding = toFeilmelding(e);
-            // skriver på feilmelding
-            m.setFeilmelding(feilmelding);
+            m.setFeilmeldingOgOppdaterStatus(feilmelding);
             log.warn(e.getMessageWithoutLinebreaks(), e);
-            valid = false;
+            return false;
         }
-
-        return valid;
+        return true;
     }
 
     private String toFeilmelding(DokumentValideringException e) {

@@ -228,7 +228,7 @@ public class MottattDokument extends BaseEntitet {
         this.kanalreferanse = kanalreferanse;
     }
 
-    public void setFeilmelding(String feilmelding) {
+    public void setFeilmeldingOgOppdaterStatus(String feilmelding) {
         this.feilmelding = feilmelding;
         setStatus(feilmelding == null ? DokumentStatus.GYLDIG : DokumentStatus.UGYLDIG);
     }
@@ -287,7 +287,7 @@ public class MottattDokument extends BaseEntitet {
         }
 
         public Builder medFeilmelding(String feilmelding) {
-            mottatteDokumentMal.setFeilmelding(feilmelding);
+            mottatteDokumentMal.setFeilmeldingOgOppdaterStatus(feilmelding);
             return this;
         }
 
