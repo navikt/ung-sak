@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import io.opentelemetry.instrumentation.annotations.SpanAttribute;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -80,7 +82,8 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
     }
 
     @Override
-    public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
+    @WithSpan
+    public NavigableSet<DatoIntervallEntitet> utled(@SpanAttribute("behandlingId") Long behandlingId, @SpanAttribute("vilkarType") VilkårType vilkårType) {
         var perioder = utledPeriode(behandlingId, vilkårType);
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId).flatMap(it -> it.getVilkår(vilkårType));
         if (vilkårene.isPresent()) {
@@ -156,8 +159,9 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         return vilkårPeriodeSet;
     }
 
+    @WithSpan
     @Override
-    public NavigableSet<DatoIntervallEntitet> utledFullstendigePerioder(Long behandlingId) {
+    public NavigableSet<DatoIntervallEntitet> utledFullstendigePerioder(@SpanAttribute("behandlingId") Long behandlingId) {
         return søknadsperiodeTjeneste.utledFullstendigPeriode(behandlingId);
     }
 
@@ -170,6 +174,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         return vilkårsPeriodisering.getOrDefault(vilkår, søktePerioder).utledPeriode(behandlingId);
     }
 
+    @WithSpan
     @Override
     public NavigableSet<PeriodeMedÅrsak> utledRevurderingPerioder(BehandlingReferanse referanse) {
         var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
@@ -223,6 +228,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         return erKantIKantVurderer;
     }
 
+    @WithSpan
     @Override
     public NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles(Long behandlingId) {
         final var behandling = behandlingRepository.hentBehandling(behandlingId);

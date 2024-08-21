@@ -91,7 +91,7 @@ spec:
 
     # Appdynamics
     - name: APPD_ENABLED
-      value: true
+      value: "true"
     - name: APPDYNAMICS_CONTROLLER_HOST_NAME
       value: appdynamics.adeo.no
     - name: APPDYNAMICS_CONTROLLER_PORT
@@ -230,6 +230,10 @@ spec:
       value: https://k9-inntektsmelding.intern.nav.no/k9/inntektsmelding
     - name: K9INNTEKTSMELDING_SCOPE
       value: api://prod-gcp.k9saksbehandling.k9-inntektsmelding/.default
+    - name: K9FORDEL_URL
+      value: http://k9-fordel.k9saksbehandling/k9/fordel/api
+    - name: K9FORDEL_SCOPE
+      value: api://prod-fss.k9saksbehandling.k9-fordel/.default
 
     # Restservice OMS spesifikt
     - name: K9_OMS_AARSKVANTUM_URL

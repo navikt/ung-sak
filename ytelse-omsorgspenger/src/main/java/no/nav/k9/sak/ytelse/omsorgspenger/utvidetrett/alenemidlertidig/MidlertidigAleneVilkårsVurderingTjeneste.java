@@ -9,6 +9,8 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
 
+import io.opentelemetry.instrumentation.annotations.SpanAttribute;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
@@ -51,15 +53,17 @@ public class MidlertidigAleneVilkårsVurderingTjeneste implements VilkårsPeriod
         return new TreeSet<>();
     }
 
+    @WithSpan
     @Override
-    public NavigableSet<DatoIntervallEntitet> utledFullstendigePerioder(Long behandlingId) {
+    public NavigableSet<DatoIntervallEntitet> utledFullstendigePerioder(@SpanAttribute("behandlingId") Long behandlingId) {
         var søknadsperioder = søktePerioder.utledPeriode(behandlingId);
         var maksPeriode = utledMaksPeriode(søknadsperioder);
         return Collections.unmodifiableNavigableSet(new TreeSet<>(Set.of(maksPeriode)));
     }
 
+    @WithSpan
     @Override
-    public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
+    public NavigableSet<DatoIntervallEntitet> utled(@SpanAttribute("behandlingId") Long behandlingId, @SpanAttribute("vilkarType") VilkårType vilkårType) {
         var optVilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
         if (optVilkårene.isPresent()) {
             var vilkårTidslinje = optVilkårene.get().getVilkårTimeline(vilkårType);
@@ -73,8 +77,9 @@ public class MidlertidigAleneVilkårsVurderingTjeneste implements VilkårsPeriod
         }
     }
 
+    @WithSpan
     @Override
-    public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(Long behandlingId) {
+    public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(@SpanAttribute("behandlingId") Long behandlingId) {
         final var vilkårPeriodeSet = new EnumMap<VilkårType, NavigableSet<DatoIntervallEntitet>>(VilkårType.class);
         UtledeteVilkår utledeteVilkår = vilkårUtleder.utledVilkår(null);
         utledeteVilkår.getAlleAvklarte()

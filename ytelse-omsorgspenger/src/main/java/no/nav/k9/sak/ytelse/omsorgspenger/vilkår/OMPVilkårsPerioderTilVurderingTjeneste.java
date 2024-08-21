@@ -14,6 +14,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import io.opentelemetry.instrumentation.annotations.SpanAttribute;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
@@ -84,8 +86,9 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         this.enableFjernPerioderBeregning = enableFjernPerioderBeregning;
     }
 
+    @WithSpan
     @Override
-    public NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles(Long behandlingId) {
+    public NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles(@SpanAttribute("behandlingId") Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         var fraværPåSak = trekkUtFraværTjeneste.alleFraværsperioderPåFagsak(behandling);
         List<OppgittFraværPeriode> fraværsperioderSak = KravDokumentFravær.mapTilOppgittFraværPeriode(fraværPåSak);
@@ -94,18 +97,17 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         return this.nulledePerioder.utledPeriode(behandlingId, fraværsperioderSak);
     }
 
-
+    @WithSpan
     @Override
-    public NavigableSet<DatoIntervallEntitet> utledFullstendigePerioder(Long behandlingId) {
+    public NavigableSet<DatoIntervallEntitet> utledFullstendigePerioder(@SpanAttribute("behandlingId") Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         var fraværPåSak = trekkUtFraværTjeneste.alleFraværsperioderPåFagsak(behandling);
         List<OppgittFraværPeriode> fraværsperioderSak = KravDokumentFravær.mapTilOppgittFraværPeriode(fraværPåSak);
 
         return søktePerioder.utledPeriodeFraSøknadsPerioder(fraværsperioderSak);
     }
-
-    @Override
-    public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
+    @WithSpan
+    public NavigableSet<DatoIntervallEntitet> utled(@SpanAttribute("behandlingId") Long behandlingId, @SpanAttribute("vilkarType") VilkårType vilkårType) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         var perioder = utledPeriode(behandlingId);
         var perioderSomSkalTilbakestilles = Collections.unmodifiableNavigableSet(nulledePerioder.utledPeriode(behandlingId)
@@ -119,6 +121,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         return perioder;
     }
 
+    @WithSpan
     @Override
     public NavigableSet<DatoIntervallEntitet> utledUtvidetRevurderingPerioder(BehandlingReferanse referanse) {
         var vilkårType = VilkårType.BEREGNINGSGRUNNLAGVILKÅR;

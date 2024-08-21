@@ -85,6 +85,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
@@ -98,6 +99,8 @@ import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto;
 import no.nav.k9.sak.kontrakt.mottak.AktørListeDto;
 import no.nav.k9.sak.kontrakt.stønadstatistikk.StønadstatistikkSerializer;
+import no.nav.k9.sak.mottak.dokumentmottak.DokumentValidatorProvider;
+import no.nav.k9.sak.mottak.dokumentmottak.HåndterMottattDokumentTask;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -140,6 +143,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     private TilknytningTjeneste tilknytningTjeneste;
     private Pep pep;
 
+    private DokumentValidatorProvider dokumentValidatorProvider;
+
     public ForvaltningMidlertidigDriftRestTjeneste() {
         // For Rest-CDI
     }
@@ -157,7 +162,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                                                    OpprettRevurderingService opprettRevurderingService,
                                                    PipRepository pipRepository,
                                                    TilknytningTjeneste tilknytningTjeneste,
-                                                   Pep pep) {
+                                                   Pep pep,
+                                                   DokumentValidatorProvider dokumentValidatorProvider) {
 
         this.tpsTjeneste = tpsTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
@@ -172,6 +178,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         this.pipRepository = pipRepository;
         this.tilknytningTjeneste = tilknytningTjeneste;
         this.pep = pep;
+        this.dokumentValidatorProvider = dokumentValidatorProvider;
     }
 
 
@@ -508,6 +515,57 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
         return Response.ok().build();
 
+    }
+
+    @POST
+    @Path("/motta-ugyldig")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Operation(description = "Mottar et dokument som er markert ugyldig", summary = ("Mottar et dokument som er markert ugyldig"), tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = DRIFT)
+    public Response mottaUgyldigDokument(@NotNull @FormParam("saksnummer") @Parameter(description = "saksnummer", required = true, schema = @Schema(type = "string", maximum = "10")) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto,
+                                         @NotNull @FormParam("journalpost") @Parameter(description = "journalpost", required = true, schema = @Schema(type = "string", maximum = "20")) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) JournalpostIdDto journalpostDto,
+                                         @NotNull @FormParam("begrunnelse") @Parameter(description = "begrunnelse", required = true, schema = @Schema(type = "string", maximum = "2000")) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) KortTekst begrunnelse) {
+
+        var saksnummer = Objects.requireNonNull(saksnummerDto.getVerdi());
+        var fagsakOpt = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true);
+
+        if (fagsakOpt.isEmpty()) {
+            return Response.status(Status.BAD_REQUEST.getStatusCode(), "Fant ikke fagsak for angitt saksnummer").build();
+        }
+        var fagsak = fagsakOpt.get();
+        loggForvaltningTjeneste(fagsak, "/motta-ugyldig", begrunnelse.getTekst());
+
+        List<MottattDokument> dokumenter = mottatteDokumentRepository.hentMottatteDokument(fagsak.getId(), List.of(journalpostDto.getJournalpostId()), DokumentStatus.UGYLDIG);
+        if (dokumenter.size() > 1) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Fant flere dokumenter for angitt saksnummer/journalpost - " + dokumenter.size()).build();
+        }
+        if (dokumenter.isEmpty()) {
+            return Response.status(Status.NOT_FOUND.getStatusCode(), "Fant ingen ugyldige dokumenter for angitt saksnummer/journalpost").build();
+        }
+
+        var dokument = dokumenter.getFirst();
+
+        if (dokument.getBehandlingId() != null) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Kan ikke motta dokumentet fordi behandlingId er satt").build();
+        }
+
+        var dokumentValidator = dokumentValidatorProvider.finnValidator(dokument.getType());
+        try {
+            dokumentValidator.validerDokument(dokument);
+        } catch (Exception e) {
+            logger.warn("Validering av dokumentet feilet", e);
+            return Response.status(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Validering av dokumentet feilet med: " + e.getMessage()).build();
+        }
+
+        mottatteDokumentRepository.oppdaterStatus(dokumenter, DokumentStatus.MOTTATT);
+
+        var prosessTaskData = ProsessTaskData.forProsessTask(HåndterMottattDokumentTask.class);
+        prosessTaskData.setFagsakId(fagsak.getId());
+        prosessTaskData.setProperty(HåndterMottattDokumentTask.MOTTATT_DOKUMENT_ID_KEY, dokument.getId().toString());
+        prosessTaskData.setCallIdFraEksisterende();
+        prosessTaskRepository.lagre(prosessTaskData);
+
+        return Response.ok(prosessTaskData.getId()).build();
     }
 
     @POST

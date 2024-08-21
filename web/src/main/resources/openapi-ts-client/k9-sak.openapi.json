@@ -17273,6 +17273,49 @@
         "tags" : [ "forvaltning" ]
       }
     },
+    "/motta-ugyldig" : {
+      "post" : {
+        "description" : "Mottar et dokument som er markert ugyldig",
+        "operationId" : "mottaUgyldigDokument",
+        "requestBody" : {
+          "content" : {
+            "application/x-www-form-urlencoded" : {
+              "schema" : {
+                "properties" : {
+                  "begrunnelse" : {
+                    "description" : "begrunnelse",
+                    "maximum" : 2000,
+                    "type" : "string"
+                  },
+                  "journalpost" : {
+                    "description" : "journalpost",
+                    "maximum" : 20,
+                    "type" : "string"
+                  },
+                  "saksnummer" : {
+                    "description" : "saksnummer",
+                    "maximum" : 10,
+                    "type" : "string"
+                  }
+                },
+                "required" : [ "begrunnelse", "journalpost", "saksnummer" ],
+                "type" : "object"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Mottar et dokument som er markert ugyldig",
+        "tags" : [ "forvaltning" ]
+      }
+    },
     "/nav-ansatt" : {
       "get" : {
         "description" : "Returnerer fullt navn for ident",

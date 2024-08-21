@@ -17,6 +17,8 @@ import no.nav.k9.kodeverk.uttak.Tid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.opentelemetry.instrumentation.annotations.SpanAttribute;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -71,8 +73,9 @@ public class KroniskSykVilkårsVurderingTjeneste implements VilkårsPerioderTilV
         return new TreeSet<>();
     }
 
+    @WithSpan
     @Override
-    public NavigableSet<DatoIntervallEntitet> utledFullstendigePerioder(Long behandlingId) {
+    public NavigableSet<DatoIntervallEntitet> utledFullstendigePerioder(@SpanAttribute("behandlingId") Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var fagsak = behandling.getFagsak();
         AktørId barnAktørId = fagsak.getPleietrengendeAktørId();
@@ -81,8 +84,9 @@ public class KroniskSykVilkårsVurderingTjeneste implements VilkårsPerioderTilV
         return Collections.unmodifiableNavigableSet(new TreeSet<>(Set.of(maksPeriode)));
     }
 
+    @WithSpan
     @Override
-    public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
+    public NavigableSet<DatoIntervallEntitet> utled(@SpanAttribute("behandlingId") Long behandlingId, @SpanAttribute("vilkarType") VilkårType vilkårType) {
         var optVilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
         if (optVilkårene.isPresent()) {
             var vilkårTidslinje = optVilkårene.get().getVilkårTimeline(vilkårType);
@@ -92,8 +96,9 @@ public class KroniskSykVilkårsVurderingTjeneste implements VilkårsPerioderTilV
         }
     }
 
+    @WithSpan
     @Override
-    public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(Long behandlingId) {
+    public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(@SpanAttribute("behandlingId") Long behandlingId) {
         final var vilkårPeriodeSet = new EnumMap<VilkårType, NavigableSet<DatoIntervallEntitet>>(VilkårType.class);
         UtledeteVilkår utledeteVilkår = vilkårUtleder.utledVilkår(null);
         utledeteVilkår.getAlleAvklarte()
