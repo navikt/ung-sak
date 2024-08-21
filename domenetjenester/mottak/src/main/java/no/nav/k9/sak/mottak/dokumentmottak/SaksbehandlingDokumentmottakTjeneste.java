@@ -54,6 +54,7 @@ public class SaksbehandlingDokumentmottakTjeneste {
         var fagsakId = fagsakIder.iterator().next();
 
         Set<String> mottattDokumentIder = new LinkedHashSet<>();
+        Set<String> feilmeldinger = new LinkedHashSet<>();
 
         for (var saksdokument : saksdokumenter) {
             antall++;
@@ -77,6 +78,8 @@ public class SaksbehandlingDokumentmottakTjeneste {
             boolean ok = valider(mottattDokument);
             if (ok) {
                 antallOk++;
+            } else {
+                feilmeldinger.add(mottattDokument.getFeilmelding());
             }
 
             Long mottattDokumentId = mottatteDokumentTjeneste.lagreMottattDokumentPåFagsak(mottattDokument);
@@ -91,7 +94,11 @@ public class SaksbehandlingDokumentmottakTjeneste {
             taskTjeneste.lagre(prosessTaskData);
         } else {
             //Hvis noe er ugyldig skal det feile i systemet som sender inn (fordel eller punsj)
-            throw new IllegalArgumentException("Fikk [" + (antall - antallOk) + "] ugyldige meldinger, av totalt [" + antall + "]. Kan ikke behandle videre.");
+            String melding = "Fikk [" + (antall - antallOk) + "] ugyldige dokumenter, av totalt [" + antall + "]. Kan ikke behandle videre.";
+            if (feilmeldinger.size() == 1) {
+                melding = melding + " Feilmelding: " + feilmeldinger.iterator().next();
+            }
+            throw new IllegalArgumentException(melding);
         }
     }
 
