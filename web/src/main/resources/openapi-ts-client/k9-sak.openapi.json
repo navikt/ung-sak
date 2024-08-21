@@ -6444,14 +6444,20 @@
             "pattern" : "^[0-9a-zA-ZæøåÆØÅAaÁáBbCcČčDdĐđEeFfGgHhIiJjKkLlMmNnŊŋOoPpRrSsŠšTtŦŧUuVvZzŽžéôèÉöüäÖÜÄ .'\\-/\n%§\\!?@_()+:;,=\"&]*$",
             "type" : "string"
           },
+          "gjelderBruker" : {
+            "type" : "boolean"
+          },
           "gyldigAktørId" : {
             "type" : "string"
           },
           "utgåttAktørId" : {
             "type" : "string"
+          },
+          "validerUtgåttAktør" : {
+            "type" : "boolean"
           }
         },
-        "required" : [ "begrunnelse", "gyldigAktørId", "utgåttAktørId" ],
+        "required" : [ "begrunnelse", "gjelderBruker", "gyldigAktørId", "utgåttAktørId", "validerUtgåttAktør" ],
         "type" : "object"
       },
       "OppgaveIdDto" : {
