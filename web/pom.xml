@@ -23,7 +23,7 @@
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-bom</artifactId>
-                <version>11.0.22</version>
+                <version>11.0.23</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
