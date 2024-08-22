@@ -4,6 +4,7 @@ import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.k9.sak.web.app.tjenester.los.LosRestTjeneste.BASE_PATH;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,6 +37,7 @@ import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.produksjonsstyring.los.BehandlingMedFagsakDto;
 import no.nav.k9.sak.kontrakt.produksjonsstyring.los.LosOpplysningerSomManglerIKlageDto;
+import no.nav.k9.sak.web.app.tjenester.los.dto.MerknadDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 
@@ -147,14 +149,14 @@ public class LosRestTjeneste {
     @Path(MERKNAD)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Henter merknad på behandling", tags = "los", responses = {
-        @ApiResponse(responseCode = "200", description = "Returnerer merknader", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BehandlingMerknad.class))),
+        @ApiResponse(responseCode = "200", description = "Returnerer merknader", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = MerknadDto.class))),
         @ApiResponse(responseCode = "204", description = "Var ingen merknader")
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response getMerknad(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         var merknad = losMerknadTjeneste.hertMerknader(behandlingUuid.getBehandlingUuid());
-        var response = merknad.isEmpty()? Response.noContent() : Response.ok(merknad.get());
+        var response = merknad.isEmpty()? Response.noContent() : Response.ok(map(merknad.get()));
         return response.build();
     }
 
@@ -170,5 +172,9 @@ public class LosRestTjeneste {
 
     private static String getCurrentUserId() {
         return SubjectHandler.getSubjectHandler().getUid();
+    }
+
+    private static MerknadDto map(BehandlingMerknad behandlingMerknad) {
+        return new MerknadDto(new ArrayList<>(behandlingMerknad.merknadTyper()), behandlingMerknad.fritekst());
     }
 }
