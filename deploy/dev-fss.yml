@@ -305,6 +305,8 @@ spec:
       value: "true"
     - name: ALDERSVILKAR_I_KRONISK_SYK
       value: "true"
+    - name: HASTEMERKNAD_LOS_KAFKA_ENABLED
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
