@@ -1387,6 +1387,22 @@
         "required" : [ "eldsteDatoMedEndringFraSøker", "sakstype" ],
         "type" : "object"
       },
+      "BehandlingMerknad" : {
+        "properties" : {
+          "fritekst" : {
+            "type" : "string"
+          },
+          "merknadTyper" : {
+            "items" : {
+              "enum" : [ "HASTESAK" ],
+              "type" : "string"
+            },
+            "type" : "array",
+            "uniqueItems" : true
+          }
+        },
+        "type" : "object"
+      },
       "BehandlingOperasjonerDto" : {
         "properties" : {
           "behandlingFraBeslutter" : {
@@ -5762,6 +5778,7 @@
           },
           "merknadKoder" : {
             "items" : {
+              "enum" : [ "HASTESAK" ],
               "maxLength" : 10,
               "minLength" : 0,
               "type" : "string"
@@ -17158,7 +17175,7 @@
     },
     "/los/merknad" : {
       "get" : {
-        "description" : "Henter merknad på oppgave i los",
+        "description" : "Henter merknad på behandling",
         "operationId" : "getMerknad",
         "parameters" : [ {
           "description" : "behandlingUUID",
@@ -17171,17 +17188,24 @@
           }
         } ],
         "responses" : {
-          "default" : {
+          "200" : {
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BehandlingMerknad"
+                }
+              }
             },
-            "description" : "default response"
+            "description" : "Returnerer merknader"
+          },
+          "204" : {
+            "description" : "Var ingen merknader"
           }
         },
         "tags" : [ "los" ]
       },
       "post" : {
-        "description" : "Lagrer merknad på oppgave i los",
+        "description" : "Lagrer merknad på behandling",
         "operationId" : "postMerknad",
         "requestBody" : {
           "content" : {
