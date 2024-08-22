@@ -29,6 +29,7 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.sak.behandling.hendelse.produksjonsstyring.BehandlingProsessHendelseMapper;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.merknad.BehandlingMerknad;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
@@ -145,27 +146,26 @@ public class LosRestTjeneste {
     @GET
     @Path(MERKNAD)
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(description = "Henter merknad på oppgave i los", tags = "los")
+    @Operation(description = "Henter merknad på behandling", tags = "los", responses = {
+        @ApiResponse(responseCode = "200", description = "Returnerer merknader", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BehandlingMerknad.class))),
+        @ApiResponse(responseCode = "204", description = "Var ingen merknader")
+    })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response getMerknad(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
-        var merknad = losMerknadTjeneste.hentMerknad(behandlingUuid.getBehandlingUuid());
-        var response = (merknad == null) ? Response.noContent() : Response.ok(merknad);
+        var merknad = losMerknadTjeneste.hertMerknader(behandlingUuid.getBehandlingUuid());
+        var response = merknad.isEmpty()? Response.noContent() : Response.ok(merknad.get());
         return response.build();
     }
 
     @POST
     @Path(MERKNAD)
-    @Operation(description = "Lagrer merknad på oppgave i los", tags = "los")
+    @Operation(description = "Lagrer merknad på behandling", tags = "los")
     @BeskyttetRessurs(action = READ, resource = FAGSAK) // Står som read så veileder har tilgang
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response postMerknad(@Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) MerknadEndretDto merknadEndret) {
-        var merknad = losMerknadTjeneste.lagreMerknad(merknadEndret.overstyrSaksbehandlerIdent(getCurrentUserId()));
-        if (merknad == null) {
-            return Response.noContent().build();
-        } else {
-            return Response.ok(merknad).build();
-        }
+        losMerknadTjeneste.lagreMerknad(merknadEndret.overstyrSaksbehandlerIdent(getCurrentUserId()));
+        return Response.ok().build();
     }
 
     private static String getCurrentUserId() {

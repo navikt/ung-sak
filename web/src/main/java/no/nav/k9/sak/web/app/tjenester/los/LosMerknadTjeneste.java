@@ -1,6 +1,8 @@
 package no.nav.k9.sak.web.app.tjenester.los;
 
 import java.io.IOException;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import jakarta.enterprise.context.Dependent;
@@ -12,6 +14,9 @@ import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.sak.behandling.hendelse.produksjonsstyring.BehandlingProsessHendelseMapper;
 import no.nav.k9.sak.behandling.hendelse.produksjonsstyring.ProsessEventKafkaProducer;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.merknad.BehandlingMerknad;
+import no.nav.k9.sak.behandlingslager.behandling.merknad.BehandlingMerknadRepository;
+import no.nav.k9.sak.behandlingslager.behandling.merknad.BehandlingMerknadType;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.domene.typer.tid.JsonObjectMapperKodeverdiSomStringSerializer;
@@ -22,7 +27,7 @@ import no.nav.k9.sak.kontrakt.behandling.BehandlingProsessHendelse;
 public class LosMerknadTjeneste {
 
     private BehandlingRepository behandlingRepository;
-    private LosSystemUserKlient losKlient;
+    private BehandlingMerknadRepository behandlingMerknadRepository;
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
     private BehandlingProsessHendelseMapper behandlingProsessHendelseMapper;
     private final boolean kodeverkSomStringTopics;
@@ -31,48 +36,62 @@ public class LosMerknadTjeneste {
 
     @Inject
     public LosMerknadTjeneste(BehandlingRepository behandlingRepository,
-                              LosSystemUserKlient losKlient,
+                              BehandlingMerknadRepository behandlingMerknadRepository,
                               HistorikkTjenesteAdapter historikkTjenesteAdapter,
                               BehandlingProsessHendelseMapper behandlingProsessHendelseMapper,
-                              @KonfigVerdi(value = "KODEVERK_SOM_STRING_TOPICS",defaultVerdi = "false") boolean kodeverkSomStringTopics,
-                              @KonfigVerdi(value = "HASTEMERKNAD_LOS_KAFKA_ENABLED",defaultVerdi = "false") boolean hastemerknadOverKafka
+                              ProsessEventKafkaProducer kafkaProducer,
+                              @KonfigVerdi(value = "KODEVERK_SOM_STRING_TOPICS", defaultVerdi = "false") boolean kodeverkSomStringTopics,
+                              @KonfigVerdi(value = "HASTEMERKNAD_LOS_KAFKA_ENABLED", defaultVerdi = "false") boolean hastemerknadOverKafka
     ) {
         this.behandlingRepository = behandlingRepository;
-        this.losKlient = losKlient;
+        this.behandlingMerknadRepository = behandlingMerknadRepository;
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
         this.behandlingProsessHendelseMapper = behandlingProsessHendelseMapper;
+        this.kafkaProducer = kafkaProducer;
         this.kodeverkSomStringTopics = kodeverkSomStringTopics;
         this.hastemerknadOverKafka = hastemerknadOverKafka;
     }
 
 
-    public String hentMerknad(UUID behandlingUUID) {
-        return losKlient.hentMerknad(behandlingUUID);
+    public Optional<BehandlingMerknad> hertMerknader(UUID behandlingUUID) {
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingUUID);
+        return behandlingMerknadRepository.hentBehandlingMerknad(behandling.getId());
     }
 
-    public String lagreMerknad(MerknadEndretDto merknadEndret) {
+    public void lagreMerknad(MerknadEndretDto merknadEndret) {
         Behandling behandling = behandlingRepository.hentBehandling(merknadEndret.behandlingUuid());
-        var merknad = losKlient.lagreMerknad(merknadEndret);
-        boolean merknadFjernet = merknad == null;
-        var historikkType = merknadFjernet ? HistorikkinnslagType.MERKNAD_FJERNET : HistorikkinnslagType.MERKNAD_NY;
-        var hendelseType = merknadFjernet ? EventHendelse.HASTESAK_MERKNAD_FJERNET : EventHendelse.HASTESAK_MERKNAD_NY;
+        Set<BehandlingMerknadType> merknaderFør = behandlingMerknadRepository.hentMerknadTyper(behandling.getId());
+        behandlingMerknadRepository.registrerMerknadtyper(behandling.getId(), merknadEndret.merknadKoder(), merknadEndret.fritekst());
+        Set<BehandlingMerknadType> merknaderEtter = behandlingMerknadRepository.hentMerknadTyper(behandling.getId());
 
-        lagHistorikkinnslag(merknadEndret, historikkType);
-
-        if (hastemerknadOverKafka) {
-            BehandlingProsessHendelse event = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(hendelseType, behandling);
-            kafkaProducer.sendHendelse(behandling.getId().toString(), dtoTilJsonRuntimeExceptionOnly(event));
-            kafkaProducer.flush();
+        if (!merknaderFør.containsAll(merknaderEtter)) {
+            lagHistorikkinnslag(merknadEndret, HistorikkinnslagType.MERKNAD_NY);
+        }
+        if (!merknaderEtter.containsAll(merknaderFør)) {
+            lagHistorikkinnslag(merknadEndret, HistorikkinnslagType.MERKNAD_FJERNET);
         }
 
-        return merknad;
-
+        if (hastemerknadOverKafka) {
+            EventHendelse hastesakEventHendelse;
+            if (merknaderEtter.contains(BehandlingMerknadType.HASTESAK) && !merknaderFør.contains(BehandlingMerknadType.HASTESAK)) {
+                hastesakEventHendelse = EventHendelse.HASTESAK_MERKNAD_NY;
+            } else if (!merknaderEtter.contains(BehandlingMerknadType.HASTESAK) && merknaderFør.contains(BehandlingMerknadType.HASTESAK)) {
+                hastesakEventHendelse = EventHendelse.HASTESAK_MERKNAD_FJERNET;
+            } else {
+                hastesakEventHendelse = null;
+            }
+            if (hastesakEventHendelse != null) {
+                BehandlingProsessHendelse event = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(hastesakEventHendelse, behandling);
+                kafkaProducer.sendHendelse(behandling.getId().toString(), dtoTilJsonRuntimeExceptionOnly(event));
+                kafkaProducer.flush();
+            }
+        }
     }
 
     private void lagHistorikkinnslag(MerknadEndretDto merknad, HistorikkinnslagType historikkinnslagType) {
         historikkTjenesteAdapter.tekstBuilder()
             .medSkjermlenke(SkjermlenkeType.UDEFINERT)
-            .medHendelse(historikkinnslagType, String.join(",", merknad.merknadKoder()))
+            .medHendelse(historikkinnslagType, String.join(",", merknad.merknadKoder().stream().map(Enum::name).toList()))
             .medBegrunnelse(merknad.fritekst());
 
         Long behandlingId = behandlingRepository.hentBehandling(merknad.behandlingUuid()).getId();
