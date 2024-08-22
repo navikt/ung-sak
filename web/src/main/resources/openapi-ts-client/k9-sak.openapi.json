@@ -1387,22 +1387,6 @@
         "required" : [ "eldsteDatoMedEndringFraSøker", "sakstype" ],
         "type" : "object"
       },
-      "BehandlingMerknad" : {
-        "properties" : {
-          "fritekst" : {
-            "type" : "string"
-          },
-          "merknadTyper" : {
-            "items" : {
-              "enum" : [ "HASTESAK" ],
-              "type" : "string"
-            },
-            "type" : "array",
-            "uniqueItems" : true
-          }
-        },
-        "type" : "object"
-      },
       "BehandlingOperasjonerDto" : {
         "properties" : {
           "behandlingFraBeslutter" : {
@@ -5762,6 +5746,21 @@
           }
         },
         "required" : [ "dekningType", "fom", "kildeType", "medlemskapType", "tom" ],
+        "type" : "object"
+      },
+      "MerknadDto" : {
+        "properties" : {
+          "fritekst" : {
+            "type" : "string"
+          },
+          "merknadKoder" : {
+            "items" : {
+              "enum" : [ "HASTESAK" ],
+              "type" : "string"
+            },
+            "type" : "array"
+          }
+        },
         "type" : "object"
       },
       "MerknadEndretDto" : {
@@ -17198,7 +17197,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/BehandlingMerknad"
+                  "$ref" : "#/components/schemas/MerknadDto"
                 }
               }
             },
