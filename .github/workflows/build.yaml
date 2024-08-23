@@ -1,5 +1,6 @@
 name: "Bygg og deploy"
 on:
+  merge_group:
   push:
     branches:
       - '**'
