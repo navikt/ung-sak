@@ -51,6 +51,3 @@ Man kan deretter linke direkte til denne plassering fra web koden som skal bruke
 På denne måten kan man teste om backend endringer fører til feil i frontend før man pusher til github.
 
 Se også [openapi-ts-client/README](web/src/main/resources/openapi-ts-client/README.md) for mer teknisk info.
-
-
-
