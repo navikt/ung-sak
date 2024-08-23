@@ -46,9 +46,9 @@
         <k9format.version>9.5.1</k9format.version>
         <jackson.version>2.17.2</jackson.version>
         <asm.version>9.7</asm.version>
-        <kotlin-stdlib.version>2.0.10</kotlin-stdlib.version>
+        <kotlin-stdlib.version>2.0.20</kotlin-stdlib.version>
         <jandex.version>3.2.2</jandex.version>
-        <flyway.version>10.17.1</flyway.version>
+        <flyway.version>10.17.2</flyway.version>
 
     </properties>
 
@@ -605,7 +605,7 @@
             <dependency>
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
-                <version>42.7.3</version>
+                <version>42.7.4</version>
             </dependency>
             <dependency>
                 <groupId>no.nav</groupId>
@@ -685,7 +685,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.7.1</version>
+                    <version>3.8.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
