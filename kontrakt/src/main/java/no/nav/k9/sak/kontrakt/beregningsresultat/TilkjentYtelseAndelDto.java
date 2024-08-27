@@ -18,7 +18,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
+import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.OrgNummer;
+import no.nav.k9.sak.typer.PersonIdent;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -32,6 +34,9 @@ public class TilkjentYtelseAndelDto {
     @JsonProperty(value = "arbeidsgiverOrgnr")
     @Valid
     private OrgNummer arbeidsgiverOrgnr;
+    @JsonProperty(value = "arbeidsgiverAktorId")
+    @Valid
+    private PersonIdent arbeidsgiverPersonIdent;
     @JsonProperty(value = "refusjon")
     @Min(0)
     @Max(1000000)
@@ -64,6 +69,10 @@ public class TilkjentYtelseAndelDto {
 
     public OrgNummer getArbeidsgiverOrgNr() {
         return arbeidsgiverOrgnr;
+    }
+
+    public PersonIdent getArbeidsgiverPersonIdent() {
+        return arbeidsgiverPersonIdent;
     }
 
     public Inntektskategori getInntektskategori() {

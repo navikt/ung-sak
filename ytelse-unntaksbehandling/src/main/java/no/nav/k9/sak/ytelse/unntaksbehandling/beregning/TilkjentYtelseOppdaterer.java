@@ -40,6 +40,7 @@ import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRep
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BekreftTilkjentYtelseDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelseAndelDto;
@@ -62,6 +63,7 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
     private VilkårResultatRepository vilkårResultatRepository;
     private ArbeidsgiverValidator arbeidsgiverValidator;
     private HistorikkTjenesteAdapter historikkAdapter;
+    private AktørTjeneste aktørTjeneste;
 
     TilkjentYtelseOppdaterer() {
         // for CDI proxy
@@ -70,7 +72,8 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
     @Inject
     public TilkjentYtelseOppdaterer(BehandlingRepositoryProvider repositoryProvider,
                                     @Any Instance<BeregnFeriepengerTjeneste> beregnFeriepengerTjeneste,
-                                    ArbeidsgiverValidator arbeidsgiverValidator, HistorikkTjenesteAdapter historikkAdapter
+                                    ArbeidsgiverValidator arbeidsgiverValidator, HistorikkTjenesteAdapter historikkAdapter,
+                                    AktørTjeneste aktørTjeneste
     ) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.beregningsresultatRepository = repositoryProvider.getBeregningsresultatRepository();
@@ -78,6 +81,7 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.arbeidsgiverValidator = arbeidsgiverValidator;
         this.historikkAdapter = historikkAdapter;
+        this.aktørTjeneste = aktørTjeneste;
     }
 
     @Override
@@ -146,6 +150,12 @@ public class TilkjentYtelseOppdaterer implements AksjonspunktOppdaterer<BekreftT
     private Arbeidsgiver hentArbeidsgiver(TilkjentYtelseAndelDto tyAndel) {
         if (tyAndel.getArbeidsgiverOrgNr() != null) {
             return Arbeidsgiver.virksomhet(tyAndel.getArbeidsgiverOrgNr());
+        } else if(tyAndel.getArbeidsgiverPersonIdent() != null) {
+            var aktørId = aktørTjeneste.hentAktørIdForPersonIdent(tyAndel.getArbeidsgiverPersonIdent());
+            if(aktørId.isEmpty()) {
+                throw new IllegalArgumentException("Ugylding personident");
+            }
+            return Arbeidsgiver.fra(aktørId.get());
         }
         return null;
     }

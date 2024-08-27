@@ -21,6 +21,7 @@ import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelseAndelDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.TilkjentYtelsePeriodeDto;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.OrgNummer;
+import no.nav.k9.sak.typer.PersonIdent;
 
 @Dependent
 class ArbeidsgiverValidator {
@@ -51,7 +52,6 @@ class ArbeidsgiverValidator {
             .forEach(this::validerAndelUtenArbeidsgiver);
         andeler.stream()
             .filter(andel -> !INNTEKTKATEGORI_UTEN_ARBEIDSGIVER.contains(andel.getInntektskategori()))
-            .map(TilkjentYtelseAndelDto::getArbeidsgiverOrgNr)
             .forEach(this::validerArbeidsgiver);
     }
 
@@ -63,11 +63,15 @@ class ArbeidsgiverValidator {
 
     }
 
-    void validerArbeidsgiver(OrgNummer orgNummer) {
-        if (orgNummer == null || orgNummer.getOrgNummer() == null) {
-            throw new IllegalArgumentException("Mangler id for arbeidsgiver");
+    void validerArbeidsgiver(TilkjentYtelseAndelDto andel) {
+        var orgNr = andel.getArbeidsgiverOrgNr();
+        var personIdent = andel.getArbeidsgiverPersonIdent();
+        if((orgNr == null || orgNr.getOrgNummer() == null) && personIdent == null) {
+           throw new IllegalArgumentException("Mangler id for arbeidsgiver");
         }
-        validerOrgnummer(orgNummer.getOrgNummer());
+        if (orgNr != null) {
+            validerOrgnummer(orgNr.getOrgNummer());
+        }
     }
 
     private void validerOrgnummer(String identifikator) {
