@@ -6466,14 +6466,14 @@
           "gyldigAktørId" : {
             "type" : "string"
           },
+          "skalValidereUtgåttAktør" : {
+            "type" : "boolean"
+          },
           "utgåttAktørId" : {
             "type" : "string"
-          },
-          "validerUtgåttAktør" : {
-            "type" : "boolean"
           }
         },
-        "required" : [ "begrunnelse", "gjelderBruker", "gyldigAktørId", "utgåttAktørId", "validerUtgåttAktør" ],
+        "required" : [ "begrunnelse", "gjelderBruker", "gyldigAktørId", "skalValidereUtgåttAktør", "utgåttAktørId" ],
         "type" : "object"
       },
       "OppgaveIdDto" : {
