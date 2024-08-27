@@ -37,9 +37,9 @@ public class ArbeidsgiverValidatorTest {
         when(arbeidsgiverTjeneste.hent(eq(Arbeidsgiver.virksomhet(UKJENT_ORGNR)))).thenReturn(null);
         when(arbeidsgiverTjeneste.hent(eq(Arbeidsgiver.virksomhet(ORGNR_VIRKSOMHETSTJENESTE_FEILER)))).thenThrow(new RuntimeException("Oppslag mot virksomhetstjeneste feilet"));
 
-        assertDoesNotThrow(() -> arbeidsgiverValidator.validerArbeidsgiver(GYLDIG_ORGNR));
-        assertThrows(FunksjonellException.class, () -> arbeidsgiverValidator.validerArbeidsgiver(UKJENT_ORGNR));
-        assertThrows(FunksjonellException.class, () -> arbeidsgiverValidator.validerArbeidsgiver(ORGNR_VIRKSOMHETSTJENESTE_FEILER));
+        assertDoesNotThrow(() -> arbeidsgiverValidator.validerOrgnummer(GYLDIG_ORGNR.getOrgNummer()));
+        assertThrows(FunksjonellException.class, () -> arbeidsgiverValidator.validerOrgnummer(UKJENT_ORGNR.getOrgNummer()));
+        assertThrows(FunksjonellException.class, () -> arbeidsgiverValidator.validerOrgnummer(ORGNR_VIRKSOMHETSTJENESTE_FEILER.getOrgNummer()));
     }
 
 }

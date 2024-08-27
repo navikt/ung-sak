@@ -74,7 +74,7 @@ class ArbeidsgiverValidator {
         }
     }
 
-    private void validerOrgnummer(String identifikator) {
+    void validerOrgnummer(String identifikator) {
         if (!OrgNummer.erGyldigOrgnr(identifikator)) {
             throw FACTORY.ugyldigOrgnummer().toException();
         }
