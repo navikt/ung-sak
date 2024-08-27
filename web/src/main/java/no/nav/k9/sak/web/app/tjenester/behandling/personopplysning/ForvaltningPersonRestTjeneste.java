@@ -183,7 +183,7 @@ public class ForvaltningPersonRestTjeneste {
         @NotNull
         private boolean gjelderBruker;
 
-        @JsonProperty("validerUtgåttAktør")
+        @JsonProperty("skalValidereUtgåttAktør")
         @Valid
         @NotNull
         private boolean skalValidereUtgåttAktør;
@@ -207,7 +207,7 @@ public class ForvaltningPersonRestTjeneste {
         public OppdaterAktørIdDto(@JsonProperty("gyldigAktørId") @NotNull @Valid String gyldigAktørId,
                                   @JsonProperty("utgåttAktørId") @NotNull @Valid String utgåttAktørId,
                                   @JsonProperty("gjelderBruker") @NotNull @Valid boolean gjelderBruker,
-                                  @JsonProperty("gjelderBruker") @NotNull @Valid boolean skalValidereUtgåttAktør,
+                                  @JsonProperty("skalValidereUtgåttAktør") @NotNull @Valid boolean skalValidereUtgåttAktør,
                                   @JsonProperty("aktørIdForIdenterSomSkalByttes") @Valid String aktørIdForIdenterSomSkalByttes,
                                   @JsonProperty("begrunnelse") @NotNull @Valid String begrunnelse) {
             this.gyldigAktørId = new AktørIdDto(gyldigAktørId);
@@ -246,6 +246,14 @@ public class ForvaltningPersonRestTjeneste {
             return aktørIdForIdenterSomSkalByttes == null ? null : aktørIdForIdenterSomSkalByttes.getAktørId();
         }
 
+        public boolean getSkalValidereUtgåttAktør() {
+            return skalValidereUtgåttAktør;
+        }
+
+        public void setSkalValidereUtgåttAktør(boolean skalValidereUtgåttAktør) {
+            this.skalValidereUtgåttAktør = skalValidereUtgåttAktør;
+        }
+
         public boolean getGjelderBruker() {
             return gjelderBruker;
         }
@@ -258,10 +266,6 @@ public class ForvaltningPersonRestTjeneste {
         public AbacDataAttributter abacAttributter() {
             //ikke mulig med reell tilgangskontroll, siden aktørId på saken er ugyldig
             return AbacDataAttributter.opprett().leggTil(StandardAbacAttributtType.AKTØR_ID, gyldigAktørId.getAktorId());
-        }
-
-        public boolean getSkalValidereUtgåttAktør() {
-            return skalValidereUtgåttAktør;
         }
     }
 
