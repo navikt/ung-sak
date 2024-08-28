@@ -92,6 +92,7 @@ public class AktørIdSplittTjeneste {
     private void oppdaterForPleietrengendeEllerRelatertPerson(AktørId nyAktørId, AktørId gammelAktørId, String begrunnelse, String tjeneste) {
         var pleietrengedeOppdaterteFagsakIder = oppdaterFagsakForPleietrengende(nyAktørId, gammelAktørId);
         var relatertPersonOppdaterteFagsakIder = oppdaterFagsakForRelatertPerson(nyAktørId, gammelAktørId);
+        oppdaterPoAggregat(nyAktørId, gammelAktørId);
         oppdaterPSBGrunnlagForPleietrengende(nyAktørId, gammelAktørId);
         oppdaterReservertSaksnummerForAndrePersoner(nyAktørId, gammelAktørId);
         pleietrengedeOppdaterteFagsakIder.forEach(id -> entityManager.persist(new DiagnostikkFagsakLogg(id, "Oppdatert aktørid for pleietrengende via " + tjeneste, begrunnelse)));
@@ -186,6 +187,14 @@ public class AktørIdSplittTjeneste {
     }
 
     private void oppdaterPSBGrunnlagForPleietrengende(AktørId nyAktørId, AktørId gammelAktørId) {
+        entityManager.createNativeQuery("update person set aktoer_id = :ny_aktoer_id where aktoer_id = :gammel_aktoer_id")
+            .setParameter(GJELDENDE, nyAktørId.getAktørId())
+            .setParameter(GAMMEL, gammelAktørId.getAktørId())
+            .executeUpdate();
+        entityManager.createNativeQuery("update PSB_INFOTRYGD_PERSON set aktoer_id = :ny_aktoer_id where aktoer_id = :gammel_aktoer_id")
+            .setParameter(GJELDENDE, nyAktørId.getAktørId())
+            .setParameter(GAMMEL, gammelAktørId.getAktørId())
+            .executeUpdate();
         entityManager.createNativeQuery("update psb_unntak_etablert_tilsyn_pleietrengende set pleietrengende_aktoer_id = :ny_aktoer_id where pleietrengende_aktoer_id = :gammel_aktoer_id")
             .setParameter(GJELDENDE, nyAktørId.getAktørId())
             .setParameter(GAMMEL, gammelAktørId.getAktørId())
