@@ -303,7 +303,7 @@ spec:
     - name: OMP_RAMMEVEDTAK_SAMMENSTILLNG_AARSKVANTUM
       value: "false"
     - name: ALDERSVILKAR_I_KRONISK_SYK
-      value: "false"
+      value: "true"
     - name: HASTEMERKNAD_LOS_KAFKA_ENABLED
       value: "false"
 
