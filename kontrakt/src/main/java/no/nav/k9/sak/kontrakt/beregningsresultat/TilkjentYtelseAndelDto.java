@@ -34,7 +34,7 @@ public class TilkjentYtelseAndelDto {
     @JsonProperty(value = "arbeidsgiverOrgnr")
     @Valid
     private OrgNummer arbeidsgiverOrgnr;
-    @JsonProperty(value = "arbeidsgiverAktorId")
+    @JsonProperty(value = "arbeidsgiverPersonIdent")
     @Valid
     private PersonIdent arbeidsgiverPersonIdent;
     @JsonProperty(value = "refusjon")
