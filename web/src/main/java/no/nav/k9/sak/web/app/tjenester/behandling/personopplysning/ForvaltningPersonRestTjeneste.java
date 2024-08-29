@@ -2,8 +2,8 @@ package no.nav.k9.sak.web.app.tjenester.behandling.personopplysning;
 
 import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
 import static no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput.dumpAsCsv;
 
 import java.io.BufferedReader;
@@ -18,11 +18,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
-
-import org.apache.kafka.common.protocol.types.Field;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -35,7 +32,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -53,9 +49,7 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
-import no.nav.k9.abac.AbacAttributt;
 import no.nav.k9.felles.exception.ManglerTilgangException;
-import no.nav.k9.felles.sikkerhet.abac.AbacAttributtType;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.AbacDto;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
@@ -69,7 +63,6 @@ import no.nav.k9.sak.kontrakt.person.AktørIdDto;
 import no.nav.k9.sak.kontrakt.person.AktørIdOgFnrDto;
 import no.nav.k9.sak.kontrakt.person.AktørInfoDto;
 import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
@@ -112,7 +105,7 @@ public class ForvaltningPersonRestTjeneste {
     public Response finnAktørerKobletTilSammeSakSomAktør(@Parameter(description = "AktørId") @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) @Valid AktørIdDto aktørId) {
         var fagsakQuery = entityManager.createNativeQuery("select * from fagsak where bruker_aktoer_id = :aktørId", Fagsak.class)
             .setParameter("aktørId", aktørId.getAktorId());
-        List<Fagsak>  fagsaker = fagsakQuery.getResultList();
+        List<Fagsak> fagsaker = fagsakQuery.getResultList();
         var aktørerForSak = fagsaker.stream().map(finnUnikeAktører::finnUnikeAktørerMedDokumenter).toList();
         return Response.ok(aktørerForSak, MediaType.APPLICATION_JSON).build();
     }
@@ -161,14 +154,15 @@ public class ForvaltningPersonRestTjeneste {
             description = "Fiks ugyldig aktørId",
             content = @Content(mediaType = MediaType.TEXT_PLAIN))
     })
-    @BeskyttetRessurs(action = UPDATE, resource = DRIFT)
+    @BeskyttetRessurs(action = CREATE, resource = DRIFT)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response oppdaterAktørIdBruker(@Valid @NotNull OppdaterAktørIdDto dto) {
         aktørIdSplittTjeneste.patchBrukerAktørId(dto.getGyldigAktørId(),
             dto.getUtgåttAktørId(),
             Optional.ofNullable(dto.getAktørIdForIdenterSomSkalByttes()),
+            dto.getGjelderBruker(),
             dto.getBegrunnelse(),
-            "/forvaltning/person/oppdater-aktoer-bruker");
+            "/forvaltning/person/oppdater-aktoer-bruker", dto.getSkalValidereUtgåttAktør());
         return Response.ok().build();
     }
 
@@ -183,6 +177,16 @@ public class ForvaltningPersonRestTjeneste {
         @Valid
         @NotNull
         private AktørIdDto utgåttAktørId;
+
+        @JsonProperty("gjelderBruker")
+        @Valid
+        @NotNull
+        private boolean gjelderBruker;
+
+        @JsonProperty("skalValidereUtgåttAktør")
+        @Valid
+        @NotNull
+        private boolean skalValidereUtgåttAktør;
 
         /**
          * AktørID for som holder personidenter som skal byttes ut med personident til gyldigAktørId
@@ -202,10 +206,14 @@ public class ForvaltningPersonRestTjeneste {
         @JsonCreator
         public OppdaterAktørIdDto(@JsonProperty("gyldigAktørId") @NotNull @Valid String gyldigAktørId,
                                   @JsonProperty("utgåttAktørId") @NotNull @Valid String utgåttAktørId,
+                                  @JsonProperty("gjelderBruker") @NotNull @Valid boolean gjelderBruker,
+                                  @JsonProperty("skalValidereUtgåttAktør") @NotNull @Valid boolean skalValidereUtgåttAktør,
                                   @JsonProperty("aktørIdForIdenterSomSkalByttes") @Valid String aktørIdForIdenterSomSkalByttes,
-                                  @JsonProperty("begrunnelse") @NotNull @Valid  String begrunnelse) {
+                                  @JsonProperty("begrunnelse") @NotNull @Valid String begrunnelse) {
             this.gyldigAktørId = new AktørIdDto(gyldigAktørId);
             this.utgåttAktørId = new AktørIdDto(utgåttAktørId);
+            this.gjelderBruker = gjelderBruker;
+            this.skalValidereUtgåttAktør = skalValidereUtgåttAktør;
             this.aktørIdForIdenterSomSkalByttes = aktørIdForIdenterSomSkalByttes != null ? new AktørIdDto(aktørIdForIdenterSomSkalByttes) : null;
             this.begrunnelse = begrunnelse;
         }
@@ -236,6 +244,22 @@ public class ForvaltningPersonRestTjeneste {
 
         public AktørId getAktørIdForIdenterSomSkalByttes() {
             return aktørIdForIdenterSomSkalByttes == null ? null : aktørIdForIdenterSomSkalByttes.getAktørId();
+        }
+
+        public boolean getSkalValidereUtgåttAktør() {
+            return skalValidereUtgåttAktør;
+        }
+
+        public void setSkalValidereUtgåttAktør(boolean skalValidereUtgåttAktør) {
+            this.skalValidereUtgåttAktør = skalValidereUtgåttAktør;
+        }
+
+        public boolean getGjelderBruker() {
+            return gjelderBruker;
+        }
+
+        public void setGjelderBruker(boolean gjelderBruker) {
+            this.gjelderBruker = gjelderBruker;
         }
 
         @Override

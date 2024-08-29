@@ -30,7 +30,6 @@ public class OverstyrBeregningAktivitet {
     private AktørId arbeidsgiverAktørId;
 
     @JsonProperty(value = "inntektPrAar")
-    @NotNull
     @Min(0)
     @Max(100000000)
     private Integer inntektPrAar;

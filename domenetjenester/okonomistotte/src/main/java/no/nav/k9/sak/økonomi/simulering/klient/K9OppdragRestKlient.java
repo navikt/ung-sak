@@ -81,7 +81,7 @@ public class K9OppdragRestKlient {
         var identer = utgåttPersonident.stream().map(PersonIdent::getIdent)
             .map(ByttAktørRequest.PersonIdent::new)
             .collect(Collectors.toSet());
-        var request = new ByttAktørRequest(gyldigAktørId.getAktørId(), utgåttAktørId.getAktørId(), identer);
+        var request = new ByttAktørRequest(utgåttAktørId.getAktørId(), gyldigAktørId.getAktørId(), identer);
         return restClient.post(uriAktørBytte, request, Integer.class);
     }
 

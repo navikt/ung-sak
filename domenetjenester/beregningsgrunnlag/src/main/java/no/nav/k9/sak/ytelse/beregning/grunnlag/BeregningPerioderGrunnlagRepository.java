@@ -197,6 +197,21 @@ public class BeregningPerioderGrunnlagRepository {
         return HibernateVerktøy.hentUniktResultat(query);
     }
 
+    public Optional<BeregningsgrunnlagPerioderGrunnlag> hentForrigeGrunnlag(Long behandlingId) {
+        var query = entityManager.createQuery(
+                "SELECT bg " +
+                    "FROM BeregningsgrunnlagPerioderGrunnlag bg " +
+                    "WHERE bg.behandlingId=:id " +
+                    "AND bg.aktiv = false " +
+                    "ORDER BY bg.opprettetTidspunkt desc, bg.id desc",
+                BeregningsgrunnlagPerioderGrunnlag.class)
+            .setParameter("id", behandlingId)
+            .setMaxResults(1); // $NON-NLS-1$;
+
+        return HibernateVerktøy.hentUniktResultat(query);
+    }
+
+
     public List<Tuple<UUID, Boolean>> hentAlleHistoriskeReferanserForBehandling(Long behandlingId) {
         var query = entityManager.createNativeQuery(
             "SELECT distinct p.ekstern_referanse, bg.aktiv " +

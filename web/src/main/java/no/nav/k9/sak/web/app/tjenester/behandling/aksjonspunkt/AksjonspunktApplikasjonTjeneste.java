@@ -8,12 +8,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
+import io.opentelemetry.api.trace.SpanBuilder;
+import io.opentelemetry.api.trace.SpanKind;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.log.trace.OpentelemetrySpanWrapper;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
@@ -48,6 +52,8 @@ import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @Dependent
 public class AksjonspunktApplikasjonTjeneste {
+
+    private static final OpentelemetrySpanWrapper SPAN_WRAPPER = OpentelemetrySpanWrapper.forApplikasjon();
 
     private static final Set<AksjonspunktDefinisjon> EKSTRARESULTAT_AP_SPERR_TOTRINN = Set.of(
         AksjonspunktDefinisjon.FORESLÅ_VEDTAK,
@@ -304,7 +310,7 @@ public class AksjonspunktApplikasjonTjeneste {
         VilkårResultatBuilder vilkårBuilder = vilkåreneOptional.map(Vilkårene::builderFraEksisterende).orElse(Vilkårene.builder());
 
         bekreftedeAksjonspunktDtoer
-            .forEach(dto -> bekreftAksjonspunkt(kontekst, behandling, skjæringstidspunkter, vilkårBuilder, aksjonspunktProsessResultat, dto));
+            .forEach(dto -> SPAN_WRAPPER.span("AP bekreft " + dto.getKode(), aksjonspunktAttributter(dto, behandling), () -> bekreftAksjonspunkt(kontekst, behandling, skjæringstidspunkter, vilkårBuilder, aksjonspunktProsessResultat, dto)));
 
         Vilkårene vilkårene = vilkårBuilder.build();
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
@@ -329,7 +335,7 @@ public class AksjonspunktApplikasjonTjeneste {
 
         AksjonspunktOppdaterer<BekreftetAksjonspunktDto> oppdaterer = finnAksjonspunktOppdaterer(dto.getClass(), dto.getKode());
         AksjonspunktOppdaterParameter param = new AksjonspunktOppdaterParameter(behandling, Optional.of(aksjonspunkt), skjæringstidspunkter, vilkårBuilder, dto);
-        OppdateringResultat delresultat = oppdaterer.oppdater(dto, param);
+        OppdateringResultat delresultat = SPAN_WRAPPER.span("AP oppdater " + dto.getKode(), aksjonspunktAttributter(dto, behandling), () -> oppdaterer.oppdater(dto, param));
 
         if (aksjonspunkt.tilbakehoppVedGjenopptakelse()) {
             delresultat.rekjørSteg();
@@ -343,6 +349,14 @@ public class AksjonspunktApplikasjonTjeneste {
         if (!aksjonspunkt.erAvbrutt()) {
             behandlingskontrollTjeneste.lagreAksjonspunkterUtført(kontekst, behandling.getAktivtBehandlingSteg(), aksjonspunkt, dto.getBegrunnelse());
         }
+    }
+
+    public static UnaryOperator<SpanBuilder> aksjonspunktAttributter(BekreftetAksjonspunktDto dto, Behandling behandling) {
+        return spanBuilder -> spanBuilder
+            .setAttribute("aksjonspunktKode", dto.getKode())
+            .setAttribute("ytelseType", behandling.getFagsakYtelseType().getKode())
+            .setAttribute("behandlingId", behandling.getId())
+            .setSpanKind(SpanKind.INTERNAL);
     }
 
     @SuppressWarnings("unchecked")

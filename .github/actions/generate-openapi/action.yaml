@@ -55,7 +55,10 @@ runs:
         git add --force ${FILE_DIRECTORY}/${FILE_NAME}
         git diff --quiet --staged || 
         (
-        export MESSAGE="$FILE_NAME updated by build pipeline [skip ci]"
+        export MESSAGE="$FILE_NAME updated by build pipeline 
+        
+        
+        skip-checks:true"
         export SHA=$( git rev-parse $DESTINATION_BRANCH:$FILE_DIRECTORY/$FILE_NAME )
         gh api --method PUT /repos/:owner/:repo/contents/$FILE_DIRECTORY/$FILE_NAME \
           --field message="$MESSAGE" \
@@ -65,4 +68,5 @@ runs:
         )
       # ^-Use the REST API to commit changes, so we get automatic commit signing
       # Use [skip ci] to prevent blocking PRs because of generated openapi.json
+      # This fails when a change is generated during pipeline run on master.
  

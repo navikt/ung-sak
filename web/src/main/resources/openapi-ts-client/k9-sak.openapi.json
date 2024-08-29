@@ -1353,23 +1353,13 @@
         "required" : [ "opprettet", "sakstype", "status", "type", "uuid", "versjon" ],
         "type" : "object"
       },
-      "BehandlingIdDto" : {
-        "properties" : {
-          "behandlingId" : {
-            "maxLength" : 50,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Alnum}-]+$",
-            "type" : "string"
-          }
-        },
-        "required" : [ "behandlingId" ],
-        "type" : "object"
-      },
       "BehandlingIdListe" : {
         "properties" : {
           "behandlinger" : {
             "items" : {
-              "$ref" : "#/components/schemas/BehandlingIdDto"
+              "maxLength" : 1000,
+              "minLength" : 1,
+              "type" : "string"
             },
             "maxItems" : 1000,
             "minItems" : 1,
@@ -1507,7 +1497,7 @@
       "BekreftedeAksjonspunkterDto" : {
         "properties" : {
           "behandlingId" : {
-            "$ref" : "#/components/schemas/BehandlingIdDto"
+            "type" : "string"
           },
           "behandlingVersjon" : {
             "format" : "int64",
@@ -1541,7 +1531,7 @@
       "BekreftetOgOverstyrteAksjonspunkterDto" : {
         "properties" : {
           "behandlingId" : {
-            "$ref" : "#/components/schemas/BehandlingIdDto"
+            "type" : "string"
           },
           "behandlingVersjon" : {
             "format" : "int64",
@@ -2465,7 +2455,7 @@
       "DeaktiverSkjæringstidspunktDto" : {
         "properties" : {
           "behandlingId" : {
-            "$ref" : "#/components/schemas/BehandlingIdDto"
+            "type" : "string"
           },
           "skjæringstidspunkt" : {
             "format" : "date",
@@ -5758,6 +5748,21 @@
         "required" : [ "dekningType", "fom", "kildeType", "medlemskapType", "tom" ],
         "type" : "object"
       },
+      "MerknadDto" : {
+        "properties" : {
+          "fritekst" : {
+            "type" : "string"
+          },
+          "merknadKoder" : {
+            "items" : {
+              "enum" : [ "HASTESAK" ],
+              "type" : "string"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
       "MerknadEndretDto" : {
         "properties" : {
           "behandlingUuid" : {
@@ -5772,6 +5777,7 @@
           },
           "merknadKoder" : {
             "items" : {
+              "enum" : [ "HASTESAK" ],
               "maxLength" : 10,
               "minLength" : 0,
               "type" : "string"
@@ -6454,14 +6460,20 @@
             "pattern" : "^[0-9a-zA-ZæøåÆØÅAaÁáBbCcČčDdĐđEeFfGgHhIiJjKkLlMmNnŊŋOoPpRrSsŠšTtŦŧUuVvZzŽžéôèÉöüäÖÜÄ .'\\-/\n%§\\!?@_()+:;,=\"&]*$",
             "type" : "string"
           },
+          "gjelderBruker" : {
+            "type" : "boolean"
+          },
           "gyldigAktørId" : {
             "type" : "string"
+          },
+          "skalValidereUtgåttAktør" : {
+            "type" : "boolean"
           },
           "utgåttAktørId" : {
             "type" : "string"
           }
         },
-        "required" : [ "begrunnelse", "gyldigAktørId", "utgåttAktørId" ],
+        "required" : [ "begrunnelse", "gjelderBruker", "gyldigAktørId", "skalValidereUtgåttAktør", "utgåttAktørId" ],
         "type" : "object"
       },
       "OppgaveIdDto" : {
@@ -7227,7 +7239,6 @@
             "type" : "boolean"
           }
         },
-        "required" : [ "inntektPrAar" ],
         "type" : "object"
       },
       "OverstyrBeregningInputPeriode" : {
@@ -12278,7 +12289,7 @@
           "name" : "behandlingId",
           "required" : true,
           "schema" : {
-            "$ref" : "#/components/schemas/BehandlingIdDto"
+            "type" : "string"
           }
         } ],
         "responses" : {
@@ -14915,7 +14926,7 @@
           "name" : "behandlingId",
           "required" : true,
           "schema" : {
-            "$ref" : "#/components/schemas/BehandlingIdDto"
+            "type" : "string"
           }
         } ],
         "responses" : {
@@ -14940,7 +14951,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/BehandlingIdDto"
+                "type" : "string"
               }
             }
           },
@@ -15191,7 +15202,7 @@
           "name" : "behandlingId",
           "required" : true,
           "schema" : {
-            "$ref" : "#/components/schemas/BehandlingIdDto"
+            "type" : "string"
           }
         } ],
         "responses" : {
@@ -15244,7 +15255,7 @@
           "name" : "behandlingId",
           "required" : true,
           "schema" : {
-            "$ref" : "#/components/schemas/BehandlingIdDto"
+            "type" : "string"
           }
         }, {
           "in" : "query",
@@ -15327,7 +15338,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/BehandlingIdDto"
+                "type" : "string"
               }
             }
           },
@@ -15354,7 +15365,7 @@
           "in" : "query",
           "name" : "behandlingId",
           "schema" : {
-            "$ref" : "#/components/schemas/BehandlingIdDto"
+            "type" : "string"
           }
         } ],
         "responses" : {
@@ -15425,7 +15436,7 @@
           "in" : "query",
           "name" : "behandlingId",
           "schema" : {
-            "$ref" : "#/components/schemas/BehandlingIdDto"
+            "type" : "string"
           }
         } ],
         "responses" : {
@@ -15496,6 +15507,52 @@
           }
         },
         "summary" : "Oppretter manuell revurdering grunnet nye opplysninger om opptjening.",
+        "tags" : [ "beregning" ]
+      }
+    },
+    "/beregning/overstyr-opphør-refusjon" : {
+      "post" : {
+        "description" : "Setter opphørsdato for refusjon for alle eksisterende og fremtidige inntektsmeldinger for virksomhet",
+        "operationId" : "overstyrInntektsmelding",
+        "requestBody" : {
+          "content" : {
+            "application/x-www-form-urlencoded" : {
+              "schema" : {
+                "properties" : {
+                  "begrunnelse" : {
+                    "description" : "Begrunnelse for opphør av refusjon. Vil dukke opp i historikkinnslag og må derfor være selvforklarende.",
+                    "maximum" : 2000,
+                    "type" : "string"
+                  },
+                  "behandlingId" : {
+                    "description" : "Behandling-id",
+                    "type" : "string"
+                  },
+                  "opphørsdatoRefusjon" : {
+                    "description" : "Opphørsdato for refusjon",
+                    "format" : "date",
+                    "type" : "string"
+                  },
+                  "orgNummer" : {
+                    "description" : "Organisasjonsnummer for virksomhet",
+                    "type" : "string"
+                  }
+                },
+                "required" : [ "begrunnelse", "behandlingId", "opphørsdatoRefusjon", "orgNummer" ],
+                "type" : "object"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Overstyrer opphør av refusjon",
         "tags" : [ "beregning" ]
       }
     },
@@ -17123,7 +17180,7 @@
     },
     "/los/merknad" : {
       "get" : {
-        "description" : "Henter merknad på oppgave i los",
+        "description" : "Henter merknad på behandling",
         "operationId" : "getMerknad",
         "parameters" : [ {
           "description" : "behandlingUUID",
@@ -17136,17 +17193,24 @@
           }
         } ],
         "responses" : {
-          "default" : {
+          "200" : {
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MerknadDto"
+                }
+              }
             },
-            "description" : "default response"
+            "description" : "Returnerer merknader"
+          },
+          "204" : {
+            "description" : "Var ingen merknader"
           }
         },
         "tags" : [ "los" ]
       },
       "post" : {
-        "description" : "Lagrer merknad på oppgave i los",
+        "description" : "Lagrer merknad på behandling",
         "operationId" : "postMerknad",
         "requestBody" : {
           "content" : {
@@ -17235,6 +17299,49 @@
           }
         },
         "summary" : "Markerer angitt dokument som ugyldig",
+        "tags" : [ "forvaltning" ]
+      }
+    },
+    "/motta-ugyldig" : {
+      "post" : {
+        "description" : "Mottar et dokument som er markert ugyldig",
+        "operationId" : "mottaUgyldigDokument",
+        "requestBody" : {
+          "content" : {
+            "application/x-www-form-urlencoded" : {
+              "schema" : {
+                "properties" : {
+                  "begrunnelse" : {
+                    "description" : "begrunnelse",
+                    "maximum" : 2000,
+                    "type" : "string"
+                  },
+                  "journalpost" : {
+                    "description" : "journalpost",
+                    "maximum" : 20,
+                    "type" : "string"
+                  },
+                  "saksnummer" : {
+                    "description" : "saksnummer",
+                    "maximum" : 10,
+                    "type" : "string"
+                  }
+                },
+                "required" : [ "begrunnelse", "journalpost", "saksnummer" ],
+                "type" : "object"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Mottar et dokument som er markert ugyldig",
         "tags" : [ "forvaltning" ]
       }
     },
@@ -17375,7 +17482,7 @@
           "name" : "behandlingId",
           "required" : true,
           "schema" : {
-            "$ref" : "#/components/schemas/BehandlingIdDto"
+            "type" : "string"
           }
         } ],
         "responses" : {
@@ -17595,7 +17702,7 @@
           "name" : "behandlingUuid",
           "required" : true,
           "schema" : {
-            "$ref" : "#/components/schemas/BehandlingIdDto"
+            "type" : "string"
           }
         } ],
         "responses" : {
@@ -18102,7 +18209,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/BehandlingIdDto"
+                "type" : "string"
               }
             }
           },
@@ -18145,7 +18252,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/BehandlingIdDto"
+                "type" : "string"
               }
             }
           },
@@ -18186,7 +18293,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/BehandlingIdDto"
+                "type" : "string"
               }
             }
           },
@@ -18220,7 +18327,8 @@
                     "type" : "string"
                   },
                   "behandlingId" : {
-                    "$ref" : "#/components/schemas/BehandlingIdDto"
+                    "description" : "Behandling-id",
+                    "type" : "string"
                   },
                   "periode" : {
                     "$ref" : "#/components/schemas/Periode"
@@ -18254,7 +18362,8 @@
               "schema" : {
                 "properties" : {
                   "behandlingId" : {
-                    "$ref" : "#/components/schemas/BehandlingIdDto"
+                    "description" : "Behandling-id",
+                    "type" : "string"
                   },
                   "periode" : {
                     "$ref" : "#/components/schemas/Periode"
@@ -18286,7 +18395,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/BehandlingIdDto"
+                "type" : "string"
               }
             }
           },
@@ -18313,7 +18422,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/BehandlingIdDto"
+                "type" : "string"
               }
             }
           },

@@ -8,6 +8,7 @@ import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.util.LRUCache;
@@ -71,6 +72,7 @@ public class RevurderingPerioderTjeneste {
             .collect(Collectors.toSet());
     }
 
+    @WithSpan
     public NavigableSet<DatoIntervallEntitet> utledPerioderFraInntektsmeldinger(BehandlingReferanse referanse, NavigableSet<DatoIntervallEntitet> datoIntervallEntitets) {
         if (!referanse.erRevurdering()) {
             return new TreeSet<>();

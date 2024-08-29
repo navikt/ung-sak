@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.Month;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -63,7 +64,7 @@ public class VilkårJsonObjectMapper {
             throw new IllegalArgumentException("Kunne ikke deserialiser fra json til [" + targetClass.getName() + "]: " + src, e);
         }
     }
-    
+
     public <T> T readValue(URL resource, Class<T> targetClass) {
         try {
             return OM.readerFor(targetClass).readValue(resource);

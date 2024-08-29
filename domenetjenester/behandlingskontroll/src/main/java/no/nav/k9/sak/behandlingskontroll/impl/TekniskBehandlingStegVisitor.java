@@ -1,5 +1,12 @@
 package no.nav.k9.sak.behandlingskontroll.impl;
 
+import java.util.function.UnaryOperator;
+
+import io.opentelemetry.api.trace.SpanBuilder;
+import io.opentelemetry.api.trace.SpanKind;
+import no.nav.k9.felles.jpa.savepoint.Work;
+import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
+import no.nav.k9.felles.log.trace.OpentelemetrySpanWrapper;
 import no.nav.k9.sak.behandlingskontroll.BehandlingModellVisitor;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegTilstandSnapshot;
@@ -7,8 +14,6 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.StegProsesseringResultat;
 import no.nav.k9.sak.behandlingskontroll.spi.BehandlingskontrollServiceProvider;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.felles.jpa.savepoint.Work;
-import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 
 /**
  * Tekniske oppsett ved kjøring av et steg:<br>
@@ -20,6 +25,7 @@ import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 public class TekniskBehandlingStegVisitor implements BehandlingModellVisitor {
 
     private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess"); //$NON-NLS-1$
+    private static final OpentelemetrySpanWrapper SPAN_WRAPPER = OpentelemetrySpanWrapper.forApplikasjon();
 
     private final BehandlingskontrollKontekst kontekst;
 
@@ -43,7 +49,9 @@ public class TekniskBehandlingStegVisitor implements BehandlingModellVisitor {
         // kjøres utenfor savepoint. Ellers står vi nakne, med kun utførte steg
         stegVisitor.markerOvergangTilNyttSteg(steg.getBehandlingStegType(), forrigeTilstand);
 
-        StegProsesseringResultat resultat = prosesserStegISavepoint(behandling, stegVisitor);
+        StegProsesseringResultat resultat = SPAN_WRAPPER.span("STEG " + steg.getBehandlingStegType().getKode(), stegAttributter(steg, behandling),
+            () -> prosesserStegISavepoint(behandling, stegVisitor)
+        );
 
         /*
          * NB: nullstiller her og ikke i finally block, siden det da fjernes før vi får logget det sammen exceptions.
@@ -53,6 +61,14 @@ public class TekniskBehandlingStegVisitor implements BehandlingModellVisitor {
         LOG_CONTEXT.remove("steg"); // NOSONAR //$NON-NLS-1$
 
         return resultat;
+    }
+
+    public static UnaryOperator<SpanBuilder> stegAttributter(BehandlingStegModell steg, Behandling behandling) {
+        return spanBuilder -> spanBuilder
+            .setAttribute("ytelsetype", behandling.getFagsakYtelseType().getKode())
+            .setAttribute("behandlingtype", behandling.getType().getKode())
+            .setAttribute("stegtype", steg.getBehandlingStegType().getKode())
+            .setSpanKind(SpanKind.INTERNAL);
     }
 
     protected StegProsesseringResultat prosesserStegISavepoint(Behandling behandling, BehandlingStegVisitor stegVisitor) {
