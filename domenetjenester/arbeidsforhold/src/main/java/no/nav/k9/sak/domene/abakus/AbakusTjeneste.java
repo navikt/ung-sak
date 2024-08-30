@@ -31,7 +31,6 @@ import no.nav.abakus.iaygrunnlag.JsonObjectMapper;
 import no.nav.abakus.iaygrunnlag.UuidDto;
 import no.nav.abakus.iaygrunnlag.arbeidsforhold.v1.ArbeidsforholdDto;
 import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.InntektsmeldingerDto;
-import no.nav.abakus.iaygrunnlag.inntektsmelding.v1.RefusjonskravDatoerDto;
 import no.nav.abakus.iaygrunnlag.request.AktørDatoRequest;
 import no.nav.abakus.iaygrunnlag.request.ByttAktørRequest;
 import no.nav.abakus.iaygrunnlag.request.InnhentRegisterdataRequest;
@@ -69,7 +68,6 @@ public class AbakusTjeneste {
     private final ObjectReader uuidReader = iayMapper.readerFor(UuidDto.class);
     private final ObjectReader iayGrunnlagSnapshotReader = iayMapper.readerFor(InntektArbeidYtelseGrunnlagSakSnapshotDto.class);
     private final ObjectReader inntektsmeldingerReader = iayMapper.readerFor(InntektsmeldingerDto.class);
-    private final ObjectReader refusjonskravDatoerReader = iayMapper.readerFor(RefusjonskravDatoerDto.class);
     private URI innhentRegisterdata;
     private CloseableHttpClient restClient;
     private URI abakusEndpoint;
@@ -86,7 +84,6 @@ public class AbakusTjeneste {
     private URI endpointGrunnlagSnapshot;
     private URI endpointInntektsmeldinger;
     private URI endpointOppdaterAktørId;
-    private URI endpointRefusjonskravdatoer;
 
 
     AbakusTjeneste() {
@@ -125,7 +122,6 @@ public class AbakusTjeneste {
         this.endpointKopierGrunnlag = toUri("/api/iay/grunnlag/v1/kopier");
         this.innhentRegisterdata = toUri("/api/registerdata/v1/innhent/async");
         this.endpointInntektsmeldinger = toUri("/api/iay/inntektsmeldinger/v1/hentAlle");
-        this.endpointRefusjonskravdatoer = toUri("/api/iay/inntektsmeldinger/v1/hentRefusjonskravDatoer");
         this.endpointOppdaterAktørId = toUri("/api/forvaltning/oppdaterAktoerId");
     }
 
