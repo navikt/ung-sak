@@ -88,6 +88,10 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
     @DiffIgnore
     private Clob regelEvaluering;
 
+    @Column(name = "regel_evaluering_text", columnDefinition="TEXT")
+    @DiffIgnore
+    private String regelEvalueringTekst;
+
     @Transient
     private transient AtomicReference<String> regelEvalueringCached = new AtomicReference<>();
 
@@ -95,6 +99,10 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
     @Column(name = "regel_input")
     @DiffIgnore
     private Clob regelInput;
+
+    @Column(name = "regel_input_text", columnDefinition="TEXT")
+    @DiffIgnore
+    private String regelInputTekst;
 
     @Transient
     private transient AtomicReference<String> regelInputCached = new AtomicReference<>();
@@ -120,6 +128,8 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
         this.regelInputCached = vilkårPeriode.regelInputCached;
         this.regelEvaluering = vilkårPeriode.regelEvaluering;
         this.regelEvalueringCached = vilkårPeriode.regelEvalueringCached;
+        this.regelInputTekst = vilkårPeriode.regelInputTekst;
+        this.regelEvalueringTekst = vilkårPeriode.regelEvalueringTekst;
 
         this.begrunnelse = vilkårPeriode.begrunnelse;
     }
@@ -270,6 +280,9 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
     }
 
     public String getRegelEvaluering() {
+        if (regelEvalueringTekst != null) {
+            return regelEvalueringTekst;
+        }
         return getPayload(regelEvaluering, regelEvalueringCached);
     }
 
@@ -277,10 +290,14 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
         if (this.id != null && this.regelEvaluering != null) {
             throw new IllegalStateException("Kan ikke overskrive regelEvaluering for VilkårPeriode: " + this.id);
         }
+        this.regelEvalueringTekst = regelEvaluering;
         this.regelEvaluering = regelEvaluering == null || regelEvaluering.isEmpty() ? null : ClobProxy.generateProxy(regelEvaluering);
     }
 
     public String getRegelInput() {
+        if (regelInputTekst != null) {
+            return regelInputTekst;
+        }
         return getPayload(regelInput, regelInputCached);
     }
 
@@ -288,6 +305,7 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
         if (this.id != null && this.regelInput != null) {
             throw new IllegalStateException("Kan ikke overskrive regelInput for VilkårPeriode: " + this.id);
         }
+        this.regelInputTekst = regelInput;
         this.regelInput = regelInput == null || regelInput.isEmpty() ? null : ClobProxy.generateProxy(regelInput);
     }
 
