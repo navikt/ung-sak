@@ -8,7 +8,7 @@ import java.util.Set;
 
 public class DefaultFinnPerioderSomSkalFjernesIBeregning implements FinnPerioderSomSkalFjernesIBeregning {
     @Override
-    public Set<DatoIntervallEntitet> finnPerioderSomSkalFjernes(Vilkårene vilkårene, BehandlingReferanse behandlingReferanse) {
+    public Set<DatoIntervallEntitet> finnPerioderSomSkalFjernes(Vilkårene vilkårene, BehandlingReferanse behandlingReferanse, Set<DatoIntervallEntitet> vilkårperioder) {
         return Set.of();
     }
 }

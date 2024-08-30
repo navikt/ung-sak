@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -61,7 +62,7 @@ class OMPFinnPerioderSomSkalFjernesIBeregningTest {
             .leggTilIkkeVurderteVilkår(List.of(DatoIntervallEntitet.fra(fom, tom)), List.of(VilkårType.BEREGNINGSGRUNNLAGVILKÅR))
             .build();
 
-        var perioder = finnPerioderSomSkalFjernesIBeregning.finnPerioderSomSkalFjernes(vilkårene, behandlingReferanseMock);
+        var perioder = finnPerioderSomSkalFjernesIBeregning.finnPerioderSomSkalFjernes(vilkårene, behandlingReferanseMock, Set.of(DatoIntervallEntitet.fra(fom, tom)));
 
         assertThat(perioder).isNotEmpty();
     }
@@ -86,7 +87,7 @@ class OMPFinnPerioderSomSkalFjernesIBeregningTest {
             .leggTil(avslåttVilkårBuilder)
             .build();
 
-        var perioderSomSkalFjernes = finnPerioderSomSkalFjernesIBeregning.finnPerioderSomSkalFjernes(vilkårene, behandlingReferanseMock);
+        var perioderSomSkalFjernes = finnPerioderSomSkalFjernesIBeregning.finnPerioderSomSkalFjernes(vilkårene, behandlingReferanseMock, Set.of(DatoIntervallEntitet.fra(fom, tom)));
         assertThat(perioderSomSkalFjernes).isNotEmpty();
     }
 
@@ -108,7 +109,7 @@ class OMPFinnPerioderSomSkalFjernesIBeregningTest {
             .leggTilIkkeVurderteVilkår(List.of(DatoIntervallEntitet.fra(fom, tom)), List.of(VilkårType.BEREGNINGSGRUNNLAGVILKÅR))
             .build();
 
-        var perioder = finnPerioderSomSkalFjernesIBeregning.finnPerioderSomSkalFjernes(vilkårene, behandlingReferanseMock);
+        var perioder = finnPerioderSomSkalFjernesIBeregning.finnPerioderSomSkalFjernes(vilkårene, behandlingReferanseMock, Set.of(DatoIntervallEntitet.fra(fom, tom)));
 
         assertThat(perioder).isEmpty();
     }

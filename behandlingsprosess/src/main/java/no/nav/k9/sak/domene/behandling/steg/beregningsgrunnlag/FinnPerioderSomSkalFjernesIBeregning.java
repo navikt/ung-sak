@@ -2,7 +2,6 @@ package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
@@ -14,5 +13,5 @@ public interface FinnPerioderSomSkalFjernesIBeregning {
             .orElse(new DefaultFinnPerioderSomSkalFjernesIBeregning());
     }
 
-    Set<DatoIntervallEntitet> finnPerioderSomSkalFjernes(Vilkårene vilkårene, BehandlingReferanse behandlingReferanse);
+    Set<DatoIntervallEntitet> finnPerioderSomSkalFjernes(Vilkårene vilkårene, BehandlingReferanse behandlingReferanse, Set<DatoIntervallEntitet> vilkårperioder);
 }

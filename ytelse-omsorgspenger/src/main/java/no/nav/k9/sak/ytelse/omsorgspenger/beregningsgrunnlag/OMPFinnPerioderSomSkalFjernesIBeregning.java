@@ -12,12 +12,10 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
 import no.nav.k9.aarskvantum.kontrakter.Utfall;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.FinnPerioderSomSkalFjernesIBeregning;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
@@ -46,7 +44,7 @@ public class OMPFinnPerioderSomSkalFjernesIBeregning implements FinnPerioderSomS
     }
 
     @Override
-    public Set<DatoIntervallEntitet> finnPerioderSomSkalFjernes(Vilkårene vilkårene, BehandlingReferanse behandlingReferanse) {
+    public Set<DatoIntervallEntitet> finnPerioderSomSkalFjernes(Vilkårene vilkårene, BehandlingReferanse behandlingReferanse, Set<DatoIntervallEntitet> aktuelleVilkårsperioder) {
         var uttaksplan = årskvantumTjeneste.hentFullUttaksplan(behandlingReferanse.getSaksnummer());
         var perioderMedAvslåtteUttaksvilkår = finnPerioderMedAvslåtteUttaksvilkår(uttaksplan);
         var perioderMedAvslåtteBeregningsvilkår = FinnPerioderMedAvslåtteInngangsvilkårForBeregning.finnPerioderMedAvslåtteInngangsvilkår(vilkårene, finnKantIKantVurderer(behandlingReferanse));
@@ -54,11 +52,8 @@ public class OMPFinnPerioderSomSkalFjernesIBeregning implements FinnPerioderSomS
         alleAvslåttePeriode.addAll(perioderMedAvslåtteUttaksvilkår);
         var avslåttTidslinje = TidslinjeUtil.tilTidslinjeKomprimertMedMuligOverlapp(alleAvslåttePeriode, finnKantIKantVurderer(behandlingReferanse));
         // Fjern perioder som overlapper med perioder som har avslåtte inngangsvilkår eller er avslått i uttak
-        return vilkårene
-            .getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow(() -> new IllegalStateException("Hadde ikke beregningsGrunnlagvilkår"))
-            .getPerioder().stream()
-            .filter(vilkårPeriode -> no.nav.k9.kodeverk.vilkår.Utfall.IKKE_VURDERT.equals(vilkårPeriode.getUtfall()))
-            .map(VilkårPeriode::getPeriode)
+        return aktuelleVilkårsperioder
+            .stream()
             .filter(p -> avslåttTidslinje.getLocalDateIntervals().stream().anyMatch(di -> di.equals(new LocalDateInterval(p.getFomDato(), p.getTomDato()))))
             .collect(Collectors.toSet());
     }
