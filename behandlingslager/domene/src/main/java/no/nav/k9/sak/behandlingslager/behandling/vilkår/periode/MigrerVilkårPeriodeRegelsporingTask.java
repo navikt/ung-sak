@@ -41,8 +41,8 @@ public class MigrerVilkårPeriodeRegelsporingTask implements ProsessTaskHandler 
                 "    regel_evaluering_oid = regel_evaluering::oid " +
                 "    WHERE id IN (SELECT id" +
                 "                 FROM vr_vilkar_periode" +
-                "                 WHERE regel_evaluering is not null and " +
-                " regel_evaluering_oid is null " +
+                "                 WHERE (regel_evaluering is not null OR regel_input is not null) AND " +
+                " (regel_evaluering_oid is null AND regel_input_oid is null) " +
                 "                 LIMIT :antall FOR UPDATE SKIP LOCKED" +
                 "                 )"
         ).setParameter("antall", maksAntallPerioder);
