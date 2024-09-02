@@ -16754,7 +16754,11 @@
         "responses" : {
           "default" : {
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "type" : "void"
+                }
+              }
             },
             "description" : "default response"
           }
@@ -16779,7 +16783,11 @@
         "responses" : {
           "default" : {
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "type" : "void"
+                }
+              }
             },
             "description" : "default response"
           }
@@ -16831,7 +16839,11 @@
         "responses" : {
           "default" : {
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "type" : "void"
+                }
+              }
             },
             "description" : "default response"
           }
@@ -16940,7 +16952,11 @@
         "responses" : {
           "default" : {
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "type" : "void"
+                }
+              }
             },
             "description" : "default response"
           }
@@ -17121,7 +17137,11 @@
         "responses" : {
           "default" : {
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "type" : "void"
+                }
+              }
             },
             "description" : "default response"
           }
@@ -17177,7 +17197,11 @@
         "responses" : {
           "default" : {
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "type" : "void"
+                }
+              }
             },
             "description" : "default response"
           }
@@ -17203,7 +17227,11 @@
         "responses" : {
           "default" : {
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "type" : "void"
+                }
+              }
             },
             "description" : "default response"
           }
@@ -17249,7 +17277,11 @@
         "responses" : {
           "default" : {
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "type" : "void"
+                }
+              }
             },
             "description" : "default response"
           }
@@ -17311,7 +17343,11 @@
         "responses" : {
           "default" : {
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "type" : "void"
+                }
+              }
             },
             "description" : "default response"
           }
@@ -17336,7 +17372,11 @@
         "responses" : {
           "default" : {
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "type" : "void"
+                }
+              }
             },
             "description" : "default response"
           }
@@ -17388,16 +17428,6 @@
           "description" : "Inneholder kode til brevmal og data som skal flettes inn i brevet"
         },
         "responses" : {
-          "200" : {
-            "content" : {
-              "*/*" : {
-                "schema" : {
-                  "type" : "void"
-                }
-              }
-            },
-            "description" : "Bestilling ok"
-          },
           "400" : {
             "content" : {
               "*/*" : {
@@ -17426,9 +17456,9 @@
           "required" : true
         },
         "responses" : {
-          "200" : {
+          "default" : {
             "content" : {
-              "application/json" : {
+              "application/json;charset=utf-8" : {
                 "schema" : {
                   "allOf" : [ {
                     "$ref" : "#/components/schemas/BrevMottakerinfoEregResponseDto"
@@ -17437,7 +17467,7 @@
                 }
               }
             },
-            "description" : "respons fra ereg, eller null viss organisasjon ikke blir funnet"
+            "description" : "default response"
           }
         },
         "tags" : [ "brev" ]
@@ -18135,7 +18165,11 @@
         "responses" : {
           "default" : {
             "content" : {
-              "application/json; charset=UTF-8" : { }
+              "application/json; charset=UTF-8" : {
+                "schema" : {
+                  "type" : "void"
+                }
+              }
             },
             "description" : "default response"
           }
@@ -18224,7 +18258,11 @@
         "responses" : {
           "default" : {
             "content" : {
-              "application/json; charset=UTF-8" : { }
+              "application/json; charset=UTF-8" : {
+                "schema" : {
+                  "type" : "void"
+                }
+              }
             },
             "description" : "default response"
           }
@@ -20014,7 +20052,11 @@
         "responses" : {
           "default" : {
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "type" : "void"
+                }
+              }
             },
             "description" : "default response"
           }
@@ -20054,7 +20096,11 @@
         "responses" : {
           "default" : {
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "type" : "void"
+                }
+              }
             },
             "description" : "default response"
           }
