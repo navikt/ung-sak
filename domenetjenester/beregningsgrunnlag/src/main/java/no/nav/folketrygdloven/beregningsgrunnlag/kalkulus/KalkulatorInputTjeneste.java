@@ -151,11 +151,6 @@ public class KalkulatorInputTjeneste {
         return kalkulatorInputDto;
     }
 
-    private boolean erInaktiv(VilkårUtfallMerknad vilkårsMerknad) {
-        return vilkårsMerknad.equals(VilkårUtfallMerknad.VM_7847_B) || vilkårsMerknad.equals(VilkårUtfallMerknad.VM_7847_A);
-    }
-
-
     protected InntektArbeidYtelseGrunnlagDto mapIAYTilKalkulus(BehandlingReferanse referanse,
                                                                DatoIntervallEntitet vilkårsperiode,
                                                                InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag,
