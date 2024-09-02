@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -41,6 +42,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
+import no.nav.k9.sak.kontrakt.FeilDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.k9.sak.kontrakt.vedtak.VedtakVarselDto;
@@ -90,7 +92,10 @@ public class BrevRestTjeneste {
     @BeskyttetRessurs(action = UPDATE, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     // To make the openapi spec correct for void methods, schema type must be set manually to void
-    @ApiResponse(responseCode = "200", description = "Bestilling ok", content = @Content(schema = @Schema(type = "void")))
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Bestilling ok", content = @Content(schema = @Schema(type = "void"))),
+        @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = FeilDto.class))),
+    })
     public void bestillDokument(@Parameter(description = "Inneholder kode til brevmal og data som skal flettes inn i brevet") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BestillBrevDto bestillBrevDto) { // NOSONAR
         // FIXME: bør støttes behandlingUuid i formidling
         LOGGER.info("Brev med brevmalkode={} bestilt på behandlingId={}", bestillBrevDto.getBrevmalkode(), bestillBrevDto.getBehandlingId());
