@@ -22,13 +22,13 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.k9.sak.kontrakt.uttak.FastsattUttakDto;
 import no.nav.k9.sak.kontrakt.uttak.UtenlandsoppholdDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PSBVurdererSøknadsfristTjeneste;
@@ -50,6 +50,8 @@ public class UtenlandsoppholdRestTjeneste {
     private PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste;
     private PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste;
 
+    private boolean nyUtledningAvUtenlandsopphold;
+
     public UtenlandsoppholdRestTjeneste() {
     }
 
@@ -57,10 +59,12 @@ public class UtenlandsoppholdRestTjeneste {
     public UtenlandsoppholdRestTjeneste(
             BehandlingRepository behandlingRepository,
             @Any PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste,
-            PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste) {
+            PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste,
+            @KonfigVerdi(value = "ENABLE_NY_UTLEDNING_AV_UTENLANDSOPPHOLD", defaultVerdi = "false") boolean nyUtledningAvUtenlandsopphold) {
         this.behandlingRepository = behandlingRepository;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
         this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
+        this.nyUtledningAvUtenlandsopphold = nyUtledningAvUtenlandsopphold;
     }
 
     @GET
@@ -85,7 +89,7 @@ public class UtenlandsoppholdRestTjeneste {
         var vurderteSøknadsperioder = søknadsfristTjeneste.vurderSøknadsfrist(behandlingReferanse);
         var perioderFraSøknad = periodeFraSøknadForBrukerTjeneste.hentPerioderFraSøknad(behandlingReferanse);
 
-        LocalDateTimeline<UtledetUtenlandsopphold> utenlandsoppholdTidslinje = UtenlandsoppholdTidslinjeTjeneste.byggTidslinje(vurderteSøknadsperioder, perioderFraSøknad);
+        LocalDateTimeline<UtledetUtenlandsopphold> utenlandsoppholdTidslinje = UtenlandsoppholdTidslinjeTjeneste.byggTidslinje(vurderteSøknadsperioder, perioderFraSøknad, nyUtledningAvUtenlandsopphold);
         UtenlandsoppholdDto dto = new UtenlandsoppholdDto();
 
         for (LocalDateSegment<UtledetUtenlandsopphold> s : utenlandsoppholdTidslinje.toSegments()) {

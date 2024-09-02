@@ -19,10 +19,11 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.UtenlandsoppholdÅrsak;
 public class MapUtenlandsopphold {
 
     public static Map<LukketPeriode, UtenlandsoppholdInfo> map(Map<KravDokument, List<VurdertSøktPeriode<Søknadsperiode>>> kravDokumenter,
-                                                        Set<PerioderFraSøknad> perioderFraSøknader,
-                                                        LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
+                                                               Set<PerioderFraSøknad> perioderFraSøknader,
+                                                               LocalDateTimeline<Boolean> tidslinjeTilVurdering,
+                                                               boolean nyUtledningAvUtenlandsopphold) {
 
-        LocalDateTimeline<UtledetUtenlandsopphold> utenlandsoppholdTidslinje = UtenlandsoppholdTidslinjeTjeneste.byggTidslinje(kravDokumenter, perioderFraSøknader);
+        LocalDateTimeline<UtledetUtenlandsopphold> utenlandsoppholdTidslinje = UtenlandsoppholdTidslinjeTjeneste.byggTidslinje(kravDokumenter, perioderFraSøknader, nyUtledningAvUtenlandsopphold);
         LocalDateTimeline<UtenlandsoppholdInfo> resultatTimeline = utenlandsoppholdTidslinje.mapValue(v -> new UtenlandsoppholdInfo(mapÅrsak(v.getÅrsak()), v.getLandkode().getKode()));
 
         var utenlandsperioder = new HashMap<LukketPeriode, UtenlandsoppholdInfo>();

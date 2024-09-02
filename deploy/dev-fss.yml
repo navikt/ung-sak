@@ -307,6 +307,8 @@ spec:
       value: "true"
     - name: HASTEMERKNAD_LOS_KAFKA_ENABLED
       value: "true"
+    - name: ENABLE_NY_UTLEDNING_AV_UTENLANDSOPPHOLD
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

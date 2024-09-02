@@ -46,7 +46,7 @@ class MapUtenlandsoppholdTest {
             List.of(),
             List.of()));
 
-        var result = MapUtenlandsopphold.map(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering);
+        var result = MapUtenlandsopphold.map(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, true);
 
         assertThat(result).hasSize(1);
         var utenlandsopphold = result.get(new LukketPeriode(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato()));
@@ -85,7 +85,7 @@ class MapUtenlandsoppholdTest {
                 List.of(),
                 List.of()));
 
-        var result = MapUtenlandsopphold.map(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering);
+        var result = MapUtenlandsopphold.map(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, true);
 
         assertThat(result).hasSize(1);
         var utenlandsopphold = result.get(new LukketPeriode(utenlandsperiode.getFomDato(), utenlandsperiode.getTomDato()));
