@@ -1,5 +1,8 @@
 package no.nav.k9.sak.behandlingslager.behandling.vilkår.periode;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -15,6 +18,8 @@ public class MigrerVilkårPeriodeRegelsporingTask implements ProsessTaskHandler 
     public static final String TASKTYPE = "forvaltning.migrerregelsporing";
     public static final String ANTALL_PERIODER = "antallPerioder";
     public static final String SKAL_KJORE_REKURSIVT = "skalKjoreRekursivt";
+
+    private static final Logger log = LoggerFactory.getLogger(MigrerVilkårPeriodeRegelsporingTask.class);
 
 
     private EntityManager entityManager;
@@ -49,6 +54,8 @@ public class MigrerVilkårPeriodeRegelsporingTask implements ProsessTaskHandler 
 
 
         var antallRaderPåvirket = query.executeUpdate();
+
+        log.info("Antall rader oppdatert: "  + antallRaderPåvirket);
 
         if (skalKjoreRekursivt && maksAntallPerioder == antallRaderPåvirket) {
             var nyTask = ProsessTaskData.forProsessTask(MigrerVilkårPeriodeRegelsporingTask.class);
