@@ -43,7 +43,7 @@ public class ApplicationConfig extends ResourceConfig {
         SwaggerConfiguration oasConfig = new SwaggerConfiguration()
             .openAPI(oas)
             .prettyPrint(true)
-            .readerClass(OptionalResponseReader.class.getCanonicalName())
+            .readerClass(CustomResponseTypeAdjustingReader.class.getCanonicalName())
             .scannerClass("io.swagger.v3.jaxrs2.integration.JaxrsAnnotationScanner")
             .resourcePackages(Stream.of("no.nav.k9.", "no.nav.k9.sak", "no.nav.k9")
                 .collect(Collectors.toSet()));
