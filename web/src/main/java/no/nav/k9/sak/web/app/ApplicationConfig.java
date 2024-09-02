@@ -1,13 +1,7 @@
 package no.nav.k9.sak.web.app;
 
 
-import java.util.LinkedHashSet;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.server.ServerProperties;
-
+import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.jaxrs2.integration.JaxrsOpenApiContextBuilder;
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import io.swagger.v3.oas.integration.OpenApiConfigurationException;
@@ -22,6 +16,12 @@ import no.nav.k9.sak.web.app.tjenester.RestImplementationClasses;
 import no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag.ForvaltningBeregningRestTjeneste.OpprettManuellRevurderingBeregning.OpprettManuellRevurderingBeregningMessageBodyReader;
 import no.nav.k9.sak.web.app.tjenester.fordeling.FordelRestTjeneste.PsbInfotrygdFødselsnumre.PsbInfotrygdFødselsnumregMessageBodyReader;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningMidlertidigDriftRestTjeneste.OpprettManuellRevurdering.OpprettManuellRevurderingMessageBodyReader;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.server.ServerProperties;
+
+import java.util.LinkedHashSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @ApplicationPath(ApplicationConfig.API_URI)
 public class ApplicationConfig extends ResourceConfig {
@@ -38,6 +38,8 @@ public class ApplicationConfig extends ResourceConfig {
         oas.info(info)
             .addServersItem(new Server()
                 .url("/k9/sak"));
+        // Alle properties som kan vere null skal ha nullable satt
+        ModelConverters.getInstance().addConverter(new NullablePropertyConverter());
         SwaggerConfiguration oasConfig = new SwaggerConfiguration()
             .openAPI(oas)
             .prettyPrint(true)
