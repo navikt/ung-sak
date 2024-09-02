@@ -305,6 +305,8 @@ spec:
       value: "true"
     - name: ALDERSVILKAR_I_KRONISK_SYK
       value: "true"
+    - name: HASTEMERKNAD_LOS_KAFKA_ENABLED
+      value: "true"
     - name: ENABLE_NY_UTLEDNING_AV_UTENLANDSOPPHOLD
       value: "true"
 

@@ -7,6 +7,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.feil.Feil;
@@ -36,6 +39,7 @@ import no.nav.k9.sikkerhet.context.SubjectHandler;
 @Dependent
 public class SjekkProsessering {
 
+    private static final Logger logger = LoggerFactory.getLogger(SjekkProsessering.class);
     private static final ProsesseringFeil FEIL = FeilFactory.create(ProsesseringFeil.class);
 
     private ProsesseringAsynkTjeneste asynkTjeneste;
@@ -122,6 +126,7 @@ public class SjekkProsessering {
 
         final ProsessTaskData oppfriskTaskData = OppfriskTask.create(behandling, forceInnhent);
         prosessTaskRepository.lagre(oppfriskTaskData);
+        logger.info("Opprettet oppfriskingtask for behandligng {}", behandling.getUuid());
         return true;
     }
 

@@ -138,7 +138,7 @@ public class RyddOgGjenopprettBeregningTjeneste {
             .getFinnPerioderSkalIgnoreresIBeregning(behandlingReferanse);
 
         finnPerioderSomSkalFjernesIBeregning
-            .finnPerioderSomSkalFjernes(vilkårene, behandlingReferanse)
+            .finnPerioderSomSkalFjernes(vilkårene, behandlingReferanse, perioderSomSkalInitieres)
             .forEach(vilkårBuilder::tilbakestill);
 
         resultatBuilder.leggTil(vilkårBuilder, true);

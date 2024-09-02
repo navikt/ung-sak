@@ -104,7 +104,7 @@ public class StatistikkRepository {
         }
     }
 
-    public List<SensuEvent> hentAlle() {
+    public List<SensuEvent> hentHyppigRapporterte() {
         LocalDate dag = LocalDate.now();
 
         List<SensuEvent> metrikker = new ArrayList<>();
@@ -116,16 +116,21 @@ public class StatistikkRepository {
         metrikker.addAll(timeCall(this::aksjonspunktStatistikk, "aksjonspunktStatistikk"));
         metrikker.addAll(timeCall(() -> aksjonspunktStatistikkDaglig(dag), "aksjonspunktStatistikkDaglig"));
         try {
-            metrikker.addAll(timeCall(this::avslagStatistikk, "avslagStatistikk"));
-        } catch (QueryTimeoutException e) {
-            log.warn("Uthenting av avslagsStatistikk feiler", e);
-        }
-        try {
             metrikker.addAll(timeCall(() -> avslagStatistikkDaglig(dag), "avslagStatistikkDaglig"));
         } catch (QueryTimeoutException e) {
             log.warn("Uthenting av avslagStatistikkDaglig feiler", e);
         }
         metrikker.addAll(timeCall(this::prosessTaskFeilStatistikk, "prosessTaskFeilStatistikk"));
+        return metrikker;
+    }
+
+    public List<SensuEvent> hentDagligRapporterte() {
+        List<SensuEvent> metrikker = new ArrayList<>();
+        try {
+            metrikker.addAll(timeCall(this::avslagStatistikk, "avslagStatistikk"));
+        } catch (QueryTimeoutException e) {
+            log.warn("Uthenting av avslagsStatistikk feiler", e);
+        }
         return metrikker;
     }
 

@@ -25,7 +25,7 @@ public class GraderingMotInntektKandidatUtledningTask implements ProsessTaskHand
     public static final String YTELSE = "ytelse";
 
     private static final Logger log = LoggerFactory.getLogger(GraderingMotInntektKandidatUtledningTask.class);
-    public static final LocalDate FOM_DATO_INNTEKT_GRADERING = LocalDate.of(2023, 11, 6);
+    public static final LocalDate FOM_DATO_INNTEKT_GRADERING = LocalDate.of(2024, 11, 4);
     private InntektGraderingRepository inntektGraderingRepository;
     private KandidaterForInntektgraderingTjeneste kandidaterForInntektgraderingTjeneste;
 

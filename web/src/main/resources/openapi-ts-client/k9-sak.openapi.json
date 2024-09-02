@@ -5748,6 +5748,21 @@
         "required" : [ "dekningType", "fom", "kildeType", "medlemskapType", "tom" ],
         "type" : "object"
       },
+      "MerknadDto" : {
+        "properties" : {
+          "fritekst" : {
+            "type" : "string"
+          },
+          "merknadKoder" : {
+            "items" : {
+              "enum" : [ "HASTESAK" ],
+              "type" : "string"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
       "MerknadEndretDto" : {
         "properties" : {
           "behandlingUuid" : {
@@ -5762,6 +5777,7 @@
           },
           "merknadKoder" : {
             "items" : {
+              "enum" : [ "HASTESAK" ],
               "maxLength" : 10,
               "minLength" : 0,
               "type" : "string"
@@ -6444,14 +6460,20 @@
             "pattern" : "^[0-9a-zA-ZæøåÆØÅAaÁáBbCcČčDdĐđEeFfGgHhIiJjKkLlMmNnŊŋOoPpRrSsŠšTtŦŧUuVvZzŽžéôèÉöüäÖÜÄ .'\\-/\n%§\\!?@_()+:;,=\"&]*$",
             "type" : "string"
           },
+          "gjelderBruker" : {
+            "type" : "boolean"
+          },
           "gyldigAktørId" : {
             "type" : "string"
+          },
+          "skalValidereUtgåttAktør" : {
+            "type" : "boolean"
           },
           "utgåttAktørId" : {
             "type" : "string"
           }
         },
-        "required" : [ "begrunnelse", "gyldigAktørId", "utgåttAktørId" ],
+        "required" : [ "begrunnelse", "gjelderBruker", "gyldigAktørId", "skalValidereUtgåttAktør", "utgåttAktørId" ],
         "type" : "object"
       },
       "OppgaveIdDto" : {
@@ -17158,7 +17180,7 @@
     },
     "/los/merknad" : {
       "get" : {
-        "description" : "Henter merknad på oppgave i los",
+        "description" : "Henter merknad på behandling",
         "operationId" : "getMerknad",
         "parameters" : [ {
           "description" : "behandlingUUID",
@@ -17171,17 +17193,24 @@
           }
         } ],
         "responses" : {
-          "default" : {
+          "200" : {
             "content" : {
-              "application/json" : { }
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MerknadDto"
+                }
+              }
             },
-            "description" : "default response"
+            "description" : "Returnerer merknader"
+          },
+          "204" : {
+            "description" : "Var ingen merknader"
           }
         },
         "tags" : [ "los" ]
       },
       "post" : {
-        "description" : "Lagrer merknad på oppgave i los",
+        "description" : "Lagrer merknad på behandling",
         "operationId" : "postMerknad",
         "requestBody" : {
           "content" : {
