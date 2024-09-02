@@ -93,7 +93,6 @@ public class BrevRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     // To make the openapi spec correct for void methods, schema type must be set manually to void
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Bestilling ok", content = @Content(schema = @Schema(type = "void"))),
         @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = FeilDto.class))),
     })
     public void bestillDokument(@Parameter(description = "Inneholder kode til brevmal og data som skal flettes inn i brevet") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BestillBrevDto bestillBrevDto) { // NOSONAR
@@ -166,17 +165,6 @@ public class BrevRestTjeneste {
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     @Operation(description = "Hent navnet til gitt organisasjonsnr for sending til tredjepart", tags = "brev")
     @BeskyttetRessurs(action = READ, resource = APPLIKASJON)
-    @ApiResponse(
-        responseCode = "200",
-        description = "respons fra ereg, eller null viss organisasjon ikke blir funnet",
-        content = @Content(
-            mediaType = MediaType.APPLICATION_JSON,
-            schema = @Schema(
-                nullable = true,
-                allOf = {BrevMottakerinfoEregResponseDto.class}
-            )
-        )
-    )
     public Optional<BrevMottakerinfoEregResponseDto> getBrevMottakerinfoEreg(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = IngenTilgangsAttributter.class) OrganisasjonsnrDto organisasjonsnrDto) {
         return eregRestKlient.hentOrganisasjonOptional(organisasjonsnrDto.organisasjonsnr()).map(org -> {
             var utilgjengeligÅrsak = org.getOpphørsdato() != null ? UtilgjengeligÅrsak.ORG_OPPHØRT : null;
