@@ -159,7 +159,6 @@
         "type" : "object"
       },
       "AksjonspunktDto" : {
-        "nullable" : true,
         "properties" : {
           "aksjonspunktType" : {
             "enum" : [ "AUTO", "MANU", "OVST", "SAOV", "-" ],
@@ -253,7 +252,6 @@
         "type" : "object"
       },
       "Aktivitet" : {
-        "nullable" : true,
         "properties" : {
           "arbeidsforhold" : {
             "$ref" : "#/components/schemas/Arbeidsforhold"
@@ -285,7 +283,6 @@
         "type" : "object"
       },
       "AktivitetGraderingDto" : {
-        "nullable" : true,
         "properties" : {
           "andelGraderingDto" : {
             "items" : {
@@ -318,7 +315,6 @@
         "type" : "object"
       },
       "AktivitetsAvtaleDto" : {
-        "nullable" : true,
         "properties" : {
           "periode" : {
             "$ref" : "#/components/schemas/Periode"
@@ -340,7 +336,6 @@
         "discriminator" : {
           "propertyName" : "identType"
         },
-        "nullable" : true,
         "properties" : {
           "identType" : {
             "type" : "string"
@@ -430,7 +425,6 @@
               "type" : "string"
             },
             "lengde" : {
-              "nullable" : true,
               "properties" : {
                 "nano" : {
                   "format" : "int32",
@@ -452,14 +446,12 @@
                 },
                 "units" : {
                   "items" : {
-                    "nullable" : true,
                     "properties" : {
                       "dateBased" : {
                         "nullable" : true,
                         "type" : "boolean"
                       },
                       "duration" : {
-                        "nullable" : true,
                         "properties" : {
                           "nano" : {
                             "format" : "int32",
@@ -563,7 +555,6 @@
         "type" : "object"
       },
       "AndelGraderingDto" : {
-        "nullable" : true,
         "properties" : {
           "aktivitetStatus" : {
             "enum" : [ "MIDL_INAKTIV", "AAP", "AT", "DP", "SP_AV_DP", "PSB_AV_DP", "FL", "MS", "SN", "AT_FL", "AT_SN", "FL_SN", "AT_FL_SN", "BA", "KUN_YTELSE", "TY", "VENTELØNN_VARTPENGER", "-" ],
@@ -684,7 +675,6 @@
         "type" : "object"
       },
       "AnvistAndel" : {
-        "nullable" : true,
         "properties" : {
           "arbeidsforholdId" : {
             "$ref" : "#/components/schemas/InternArbeidsforholdRefDto"
@@ -713,7 +703,6 @@
         "type" : "object"
       },
       "ArbeidDto" : {
-        "nullable" : true,
         "properties" : {
           "yrkesaktiviteter" : {
             "items" : {
@@ -788,7 +777,6 @@
         "type" : "object"
       },
       "ArbeidsforholdInformasjonDto" : {
-        "nullable" : true,
         "properties" : {
           "overstyringer" : {
             "items" : {
@@ -813,7 +801,6 @@
         "type" : "object"
       },
       "ArbeidsforholdOverstyringDto" : {
-        "nullable" : true,
         "properties" : {
           "arbeidsforholdRefDto" : {
             "$ref" : "#/components/schemas/InternArbeidsforholdRefDto"
@@ -831,7 +818,6 @@
         "type" : "object"
       },
       "ArbeidsforholdReferanseDto" : {
-        "nullable" : true,
         "properties" : {
           "arbeidsgiver" : {
             "$ref" : "#/components/schemas/Aktør"
@@ -1011,7 +997,6 @@
             "additionalProperties" : {
               "$ref" : "#/components/schemas/ArbeidsgiverOpplysningerDto"
             },
-            "nullable" : true,
             "type" : "object"
           }
         },
@@ -1198,7 +1183,6 @@
         "type" : "object"
       },
       "AvklartPersonstatus" : {
-        "nullable" : true,
         "properties" : {
           "orginalPersonstatus" : {
             "enum" : [ "ABNR", "ADNR", "BOSA", "DØD", "DØDD", "FOSV", "FØDR", "UFUL", "UREG", "UTAN", "UTPE", "UTVA", "-" ],
@@ -1568,7 +1552,6 @@
         "type" : "object"
       },
       "BehandlingOperasjonerDto" : {
-        "nullable" : true,
         "properties" : {
           "behandlingFraBeslutter" : {
             "nullable" : true,
@@ -1611,7 +1594,6 @@
         "type" : "object"
       },
       "BehandlingOpprettingDto" : {
-        "nullable" : true,
         "properties" : {
           "behandlingType" : {
             "enum" : [ "BT-002", "BT-004", "BT-010", "-" ],
@@ -1626,7 +1608,6 @@
         "type" : "object"
       },
       "BehandlingStegTilstandDto" : {
-        "nullable" : true,
         "properties" : {
           "stegStatus" : {
             "enum" : [ "STARTET", "INNGANG", "UTGANG", "VENTER", "AVBRUTT", "UTFØRT", "FREMOVERFØRT", "TILBAKEFØRT", "-" ],
@@ -1648,7 +1629,6 @@
         "type" : "object"
       },
       "BehandlingsresultatDto" : {
-        "nullable" : true,
         "properties" : {
           "erRevurderingMedUendretUtfall" : {
             "nullable" : true,
@@ -1672,7 +1652,6 @@
               "type" : "array",
               "uniqueItems" : true
             },
-            "nullable" : true,
             "type" : "object"
           }
         },
@@ -1680,7 +1659,6 @@
         "type" : "object"
       },
       "BehandlingÅrsakDto" : {
-        "nullable" : true,
         "properties" : {
           "behandlingArsakType" : {
             "enum" : [ "RE-MF", "RE-MFIP", "RE-AVAB", "RE-LOV", "RE-RGLF", "RE-FEFAKTA", "RE-PRSSL", "RE-END-FRA-BRUKER", "RE-FRAVÆRKORR-SAKSB", "RE-END-INNTEKTSMELD", "BERØRT-BEHANDLING", "RE-ANNET", "RE-SATS-REGULERING", "RE-ENDRET-FORDELING", "INFOBREV_BEHANDLING", "INFOBREV_OPPHOLD", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-MDL", "RE-OPTJ", "RE-FRDLING", "RE-INNTK", "RE-DØD", "RE-SRTB", "RE-FRIST", "RE-BER-GRUN", "RE-KLAG-INNH-PGI", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-DØDFØD", "RE-REGISTEROPPL", "RE-YTELSE", "RE-TILST-YT-INNVIL", "RE-ENDR-BER-GRUN", "RE-TILST-YT-OPPH", "RE_REBEREGN_FP", "RE_ANNEN_SAK", "RE_UTSATT_BEHANDLING", "RE_GJENOPPTAR_UTSATT_BEHANDLING", "RE_ANNEN_SAK_ET", "RE_ANNEN_SAK_NB", "RE_ANNEN_SAK_S", "RE_ANNEN_SAK_NB_ET", "RE_ANNEN_SAK_S_ET", "RE_ANNEN_SAK_S_NB", "RE_ANNEN_SAK_S_ET_NB", "RE_ANNEN_SAK_FP", "UNNT_GENERELL", "REVURDERER_BERØRT_PERIODE", "-" ],
@@ -1770,7 +1748,6 @@
         "type" : "object"
       },
       "Beløp" : {
-        "nullable" : true,
         "properties" : {
           "verdi" : {
             "exclusiveMaximum" : false,
@@ -1784,7 +1761,6 @@
         "type" : "object"
       },
       "BeredskapDto" : {
-        "nullable" : true,
         "properties" : {
           "beskrivelser" : {
             "items" : {
@@ -2530,7 +2506,6 @@
         "type" : "object"
       },
       "BeskrivelseDto" : {
-        "nullable" : true,
         "properties" : {
           "kilde" : {
             "enum" : [ "SØKER", "ANDRE" ],
@@ -2556,7 +2531,6 @@
         "type" : "object"
       },
       "BesteberegningInntektDto" : {
-        "nullable" : true,
         "properties" : {
           "arbeidsforholdId" : {
             "nullable" : true,
@@ -2585,7 +2559,6 @@
         "type" : "object"
       },
       "BesteberegningMånedGrunnlagDto" : {
-        "nullable" : true,
         "properties" : {
           "fom" : {
             "format" : "date",
@@ -2609,7 +2582,6 @@
         "type" : "object"
       },
       "BesteberegninggrunnlagDto" : {
-        "nullable" : true,
         "properties" : {
           "avvik" : {
             "nullable" : true,
@@ -2770,7 +2742,6 @@
         "type" : "object"
       },
       "DatoIntervallEntitet" : {
-        "nullable" : true,
         "properties" : {
           "fomDato" : {
             "format" : "date",
@@ -2818,7 +2789,6 @@
               "type" : "string"
             },
             "lengde" : {
-              "nullable" : true,
               "properties" : {
                 "nano" : {
                   "format" : "int32",
@@ -2840,14 +2810,12 @@
                 },
                 "units" : {
                   "items" : {
-                    "nullable" : true,
                     "properties" : {
                       "dateBased" : {
                         "nullable" : true,
                         "type" : "boolean"
                       },
                       "duration" : {
-                        "nullable" : true,
                         "properties" : {
                           "nano" : {
                             "format" : "int32",
@@ -3027,7 +2995,6 @@
         "type" : "object"
       },
       "EgenNæringDto" : {
-        "nullable" : true,
         "properties" : {
           "begrunnelse" : {
             "nullable" : true,
@@ -3098,7 +3065,6 @@
         "type" : "object"
       },
       "EksternArbeidsforholdRef" : {
-        "nullable" : true,
         "properties" : {
           "referanse" : {
             "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$",
@@ -3163,7 +3129,6 @@
         "type" : "object"
       },
       "EtablertTilsynPeriodeDto" : {
-        "nullable" : true,
         "properties" : {
           "kilde" : {
             "enum" : [ "SØKER", "ANDRE" ],
@@ -3174,7 +3139,6 @@
             "$ref" : "#/components/schemas/Periode"
           },
           "tidPerDag" : {
-            "nullable" : true,
             "properties" : {
               "nano" : {
                 "format" : "int32",
@@ -3196,14 +3160,12 @@
               },
               "units" : {
                 "items" : {
-                  "nullable" : true,
                   "properties" : {
                     "dateBased" : {
                       "nullable" : true,
                       "type" : "boolean"
                     },
                     "duration" : {
-                      "nullable" : true,
                       "properties" : {
                         "nano" : {
                           "format" : "int32",
@@ -3585,7 +3547,6 @@
         "type" : "object"
       },
       "FeltFeilDto" : {
-        "nullable" : true,
         "properties" : {
           "melding" : {
             "maxLength" : 2000,
@@ -3938,7 +3899,6 @@
               "type" : "string"
             },
             "lengde" : {
-              "nullable" : true,
               "properties" : {
                 "nano" : {
                   "format" : "int32",
@@ -3960,14 +3920,12 @@
                 },
                 "units" : {
                   "items" : {
-                    "nullable" : true,
                     "properties" : {
                       "dateBased" : {
                         "nullable" : true,
                         "type" : "boolean"
                       },
                       "duration" : {
-                        "nullable" : true,
                         "properties" : {
                           "nano" : {
                             "format" : "int32",
@@ -4041,7 +3999,6 @@
               "type" : "string"
             },
             "lengde" : {
-              "nullable" : true,
               "properties" : {
                 "nano" : {
                   "format" : "int32",
@@ -4063,14 +4020,12 @@
                 },
                 "units" : {
                   "items" : {
-                    "nullable" : true,
                     "properties" : {
                       "dateBased" : {
                         "nullable" : true,
                         "type" : "boolean"
                       },
                       "duration" : {
-                        "nullable" : true,
                         "properties" : {
                           "nano" : {
                             "format" : "int32",
@@ -4198,7 +4153,6 @@
               "type" : "string"
             },
             "lengde" : {
-              "nullable" : true,
               "properties" : {
                 "nano" : {
                   "format" : "int32",
@@ -4220,14 +4174,12 @@
                 },
                 "units" : {
                   "items" : {
-                    "nullable" : true,
                     "properties" : {
                       "dateBased" : {
                         "nullable" : true,
                         "type" : "boolean"
                       },
                       "duration" : {
-                        "nullable" : true,
                         "properties" : {
                           "nano" : {
                             "format" : "int32",
@@ -4557,7 +4509,6 @@
         "type" : "object"
       },
       "Gradering" : {
-        "nullable" : true,
         "properties" : {
           "arbeidstidProsent" : {
             "nullable" : true,
@@ -4574,7 +4525,6 @@
         "type" : "object"
       },
       "GraderingDto" : {
-        "nullable" : true,
         "properties" : {
           "arbeidstidProsent" : {
             "type" : "number"
@@ -5313,7 +5263,6 @@
         "type" : "object"
       },
       "InntektsmeldingDto" : {
-        "nullable" : true,
         "properties" : {
           "arbeidsforholdRef" : {
             "$ref" : "#/components/schemas/InternArbeidsforholdRefDto"
@@ -5404,7 +5353,6 @@
         "type" : "object"
       },
       "InntektsmeldingerDto" : {
-        "nullable" : true,
         "properties" : {
           "inntektsmeldinger" : {
             "items" : {
@@ -5509,7 +5457,6 @@
         "type" : "object"
       },
       "InternArbeidsforholdRefDto" : {
-        "nullable" : true,
         "properties" : {
           "abakusReferanse" : {
             "pattern" : "^[\\p{L}\\p{N}_\\.\\-]+$",
@@ -5520,7 +5467,6 @@
         "type" : "object"
       },
       "JournalpostIdDto" : {
-        "nullable" : true,
         "properties" : {
           "journalpostId" : {
             "type" : "string"
@@ -5699,7 +5645,6 @@
         "type" : "object"
       },
       "KalkulatorInputDto" : {
-        "nullable" : true,
         "properties" : {
           "iayGrunnlag" : {
             "$ref" : "#/components/schemas/InntektArbeidYtelseGrunnlagDto"
@@ -5860,7 +5805,6 @@
               "type" : "string"
             },
             "lengde" : {
-              "nullable" : true,
               "properties" : {
                 "nano" : {
                   "format" : "int32",
@@ -5882,14 +5826,12 @@
                 },
                 "units" : {
                   "items" : {
-                    "nullable" : true,
                     "properties" : {
                       "dateBased" : {
                         "nullable" : true,
                         "type" : "boolean"
                       },
                       "duration" : {
-                        "nullable" : true,
                         "properties" : {
                           "nano" : {
                             "format" : "int32",
@@ -5963,7 +5905,6 @@
               "type" : "string"
             },
             "lengde" : {
-              "nullable" : true,
               "properties" : {
                 "nano" : {
                   "format" : "int32",
@@ -5985,14 +5926,12 @@
                 },
                 "units" : {
                   "items" : {
-                    "nullable" : true,
                     "properties" : {
                       "dateBased" : {
                         "nullable" : true,
                         "type" : "boolean"
                       },
                       "duration" : {
-                        "nullable" : true,
                         "properties" : {
                           "nano" : {
                             "format" : "int32",
@@ -6172,7 +6111,6 @@
         "type" : "object"
       },
       "KravperioderPrArbeidsforhold" : {
-        "nullable" : true,
         "properties" : {
           "alleSøktePerioder" : {
             "items" : {
@@ -6251,7 +6189,6 @@
         "type" : "object"
       },
       "LocalDateInterval" : {
-        "nullable" : true,
         "properties" : {
           "closedInterval" : {
             "nullable" : true,
@@ -6279,7 +6216,6 @@
         "type" : "object"
       },
       "LocalDateTimelineVilkårUtfallSamlet" : {
-        "nullable" : true,
         "properties" : {
           "continuous" : {
             "nullable" : true,
@@ -6627,7 +6563,6 @@
               "type" : "string"
             },
             "lengde" : {
-              "nullable" : true,
               "properties" : {
                 "nano" : {
                   "format" : "int32",
@@ -6649,14 +6584,12 @@
                 },
                 "units" : {
                   "items" : {
-                    "nullable" : true,
                     "properties" : {
                       "dateBased" : {
                         "nullable" : true,
                         "type" : "boolean"
                       },
                       "duration" : {
-                        "nullable" : true,
                         "properties" : {
                           "nano" : {
                             "format" : "int32",
@@ -6784,7 +6717,6 @@
         "type" : "object"
       },
       "NattevåkDto" : {
-        "nullable" : true,
         "properties" : {
           "beskrivelser" : {
             "items" : {
@@ -6808,7 +6740,6 @@
         "type" : "object"
       },
       "NaturalYtelse" : {
-        "nullable" : true,
         "properties" : {
           "beloepPerMnd" : {
             "$ref" : "#/components/schemas/Beløp"
@@ -6829,7 +6760,6 @@
         "type" : "object"
       },
       "NaturalYtelseDto" : {
-        "nullable" : true,
         "properties" : {
           "beløp" : {
             "nullable" : true,
@@ -7008,7 +6938,6 @@
             "type" : "number"
           },
           "forbruktTid" : {
-            "nullable" : true,
             "properties" : {
               "nano" : {
                 "format" : "int32",
@@ -7030,14 +6959,12 @@
               },
               "units" : {
                 "items" : {
-                  "nullable" : true,
                   "properties" : {
                     "dateBased" : {
                       "nullable" : true,
                       "type" : "boolean"
                     },
                     "duration" : {
-                      "nullable" : true,
                       "properties" : {
                         "nano" : {
                           "format" : "int32",
@@ -7090,7 +7017,6 @@
             "type" : "boolean"
           },
           "restTid" : {
-            "nullable" : true,
             "properties" : {
               "nano" : {
                 "format" : "int32",
@@ -7112,14 +7038,12 @@
               },
               "units" : {
                 "items" : {
-                  "nullable" : true,
                   "properties" : {
                     "dateBased" : {
                       "nullable" : true,
                       "type" : "boolean"
                     },
                     "duration" : {
-                      "nullable" : true,
                       "properties" : {
                         "nano" : {
                           "format" : "int32",
@@ -7168,7 +7092,6 @@
             "type" : "object"
           },
           "smittevernTid" : {
-            "nullable" : true,
             "properties" : {
               "nano" : {
                 "format" : "int32",
@@ -7190,14 +7113,12 @@
               },
               "units" : {
                 "items" : {
-                  "nullable" : true,
                   "properties" : {
                     "dateBased" : {
                       "nullable" : true,
                       "type" : "boolean"
                     },
                     "duration" : {
-                      "nullable" : true,
                       "properties" : {
                         "nano" : {
                           "format" : "int32",
@@ -7423,7 +7344,6 @@
         "type" : "object"
       },
       "OppgittArbeidsforholdDto" : {
-        "nullable" : true,
         "properties" : {
           "inntekt" : {
             "type" : "number"
@@ -7436,7 +7356,6 @@
         "type" : "object"
       },
       "OppgittEgenNæringDto" : {
-        "nullable" : true,
         "properties" : {
           "aktør" : {
             "$ref" : "#/components/schemas/Aktør"
@@ -7479,7 +7398,6 @@
         "type" : "object"
       },
       "OppgittFrilansDto" : {
-        "nullable" : true,
         "properties" : {
           "erNyoppstartet" : {
             "type" : "boolean"
@@ -7498,7 +7416,6 @@
         "type" : "object"
       },
       "OppgittFrilansInntekt" : {
-        "nullable" : true,
         "properties" : {
           "inntekt" : {
             "type" : "number"
@@ -7523,7 +7440,6 @@
         "type" : "object"
       },
       "OppgittOpptjeningDto" : {
-        "nullable" : true,
         "properties" : {
           "egenNæring" : {
             "items" : {
@@ -7640,7 +7556,6 @@
         "type" : "object"
       },
       "OpplæringVurderingDto" : {
-        "nullable" : true,
         "properties" : {
           "begrunnelse" : {
             "maxLength" : 4000,
@@ -7999,7 +7914,6 @@
               "type" : "string"
             },
             "lengde" : {
-              "nullable" : true,
               "properties" : {
                 "nano" : {
                   "format" : "int32",
@@ -8021,14 +7935,12 @@
                 },
                 "units" : {
                   "items" : {
-                    "nullable" : true,
                     "properties" : {
                       "dateBased" : {
                         "nullable" : true,
                         "type" : "boolean"
                       },
                       "duration" : {
-                        "nullable" : true,
                         "properties" : {
                           "nano" : {
                             "format" : "int32",
@@ -8102,7 +8014,6 @@
               "type" : "string"
             },
             "lengde" : {
-              "nullable" : true,
               "properties" : {
                 "nano" : {
                   "format" : "int32",
@@ -8124,14 +8035,12 @@
                 },
                 "units" : {
                   "items" : {
-                    "nullable" : true,
                     "properties" : {
                       "dateBased" : {
                         "nullable" : true,
                         "type" : "boolean"
                       },
                       "duration" : {
-                        "nullable" : true,
                         "properties" : {
                           "nano" : {
                             "format" : "int32",
@@ -8504,7 +8413,6 @@
         "type" : "object"
       },
       "Periode" : {
-        "nullable" : true,
         "properties" : {
           "fom" : {
             "format" : "date",
@@ -8521,13 +8429,11 @@
         "type" : "object"
       },
       "PeriodeAndel" : {
-        "nullable" : true,
         "properties" : {
           "periode" : {
             "$ref" : "#/components/schemas/Periode"
           },
           "varighetPerDag" : {
-            "nullable" : true,
             "properties" : {
               "nano" : {
                 "format" : "int32",
@@ -8549,14 +8455,12 @@
               },
               "units" : {
                 "items" : {
-                  "nullable" : true,
                   "properties" : {
                     "dateBased" : {
                       "nullable" : true,
                       "type" : "boolean"
                     },
                     "duration" : {
-                      "nullable" : true,
                       "properties" : {
                         "nano" : {
                           "format" : "int32",
@@ -8650,7 +8554,6 @@
         "type" : "object"
       },
       "PeriodeMedSøkerInfoDto" : {
-        "nullable" : true,
         "properties" : {
           "periode" : {
             "$ref" : "#/components/schemas/Periode"
@@ -8761,7 +8664,6 @@
         "type" : "object"
       },
       "PermisjonDto" : {
-        "nullable" : true,
         "properties" : {
           "periode" : {
             "$ref" : "#/components/schemas/Periode"
@@ -8824,7 +8726,6 @@
         "type" : "object"
       },
       "PersonadresseDto" : {
-        "nullable" : true,
         "properties" : {
           "adresseType" : {
             "enum" : [ "BOSTEDSADRESSE", "DELT_BOSTEDSADRESSE", "POSTADRESSE", "POSTADRESSE_UTLAND", "MIDLERTIDIG_POSTADRESSE_NORGE", "MIDLERTIDIG_POSTADRESSE_UTLAND", "UKJENT_ADRESSE" ],
@@ -9029,7 +8930,6 @@
         "type" : "object"
       },
       "PgiDto" : {
-        "nullable" : true,
         "properties" : {
           "beløp" : {
             "nullable" : true,
@@ -9371,7 +9271,6 @@
         "type" : "object"
       },
       "Refusjon" : {
-        "nullable" : true,
         "properties" : {
           "fom" : {
             "format" : "date",
@@ -9448,7 +9347,6 @@
         "type" : "object"
       },
       "RefusjonDto" : {
-        "nullable" : true,
         "properties" : {
           "fom" : {
             "format" : "date",
@@ -9477,7 +9375,6 @@
         "type" : "object"
       },
       "RefusjonskravDatoDto" : {
-        "nullable" : true,
         "properties" : {
           "arbeidsgiver" : {
             "$ref" : "#/components/schemas/Aktør"
@@ -9548,7 +9445,6 @@
         "type" : "object"
       },
       "ReisetidPeriodeDto" : {
-        "nullable" : true,
         "properties" : {
           "beskrivelseFraSoekerHjem" : {
             "maxLength" : 4000,
@@ -9578,7 +9474,6 @@
         "type" : "object"
       },
       "ReisetidPeriodeVurderingDto" : {
-        "nullable" : true,
         "properties" : {
           "begrunnelse" : {
             "maxLength" : 4000,
@@ -9611,7 +9506,6 @@
         "type" : "object"
       },
       "ReisetidVurderingDto" : {
-        "nullable" : true,
         "properties" : {
           "opplæringPeriode" : {
             "$ref" : "#/components/schemas/Periode"
@@ -9710,7 +9604,6 @@
             "type" : "string"
           },
           "requestPayload" : {
-            "nullable" : true,
             "type" : "object"
           },
           "type" : {
@@ -9791,7 +9684,6 @@
               "nullable" : true,
               "type" : "string"
             },
-            "nullable" : true,
             "type" : "object"
           }
         },
@@ -9973,7 +9865,6 @@
               "type" : "string"
             },
             "lengde" : {
-              "nullable" : true,
               "properties" : {
                 "nano" : {
                   "format" : "int32",
@@ -9995,14 +9886,12 @@
                 },
                 "units" : {
                   "items" : {
-                    "nullable" : true,
                     "properties" : {
                       "dateBased" : {
                         "nullable" : true,
                         "type" : "boolean"
                       },
                       "duration" : {
-                        "nullable" : true,
                         "properties" : {
                           "nano" : {
                             "format" : "int32",
@@ -10061,13 +9950,11 @@
         "type" : "object"
       },
       "SmørtEtablertTilsyn" : {
-        "nullable" : true,
         "properties" : {
           "periode" : {
             "$ref" : "#/components/schemas/Periode"
           },
           "tidPerDag" : {
-            "nullable" : true,
             "properties" : {
               "nano" : {
                 "format" : "int32",
@@ -10089,14 +9976,12 @@
               },
               "units" : {
                 "items" : {
-                  "nullable" : true,
                   "properties" : {
                     "dateBased" : {
                       "nullable" : true,
                       "type" : "boolean"
                     },
                     "duration" : {
-                      "nullable" : true,
                       "properties" : {
                         "nano" : {
                           "format" : "int32",
@@ -11175,7 +11060,6 @@
         "type" : "object"
       },
       "SøknadsopplysningerDto" : {
-        "nullable" : true,
         "properties" : {
           "erNyoppstartet" : {
             "nullable" : true,
@@ -11647,7 +11531,6 @@
         "type" : "object"
       },
       "UtbetalingDto" : {
-        "nullable" : true,
         "properties" : {
           "arbeidsgiver" : {
             "$ref" : "#/components/schemas/Aktør"
@@ -11701,7 +11584,6 @@
         "type" : "object"
       },
       "UtbetalingsgradPrAktivitetDto" : {
-        "nullable" : true,
         "properties" : {
           "periodeMedUtbetalingsgrad" : {
             "items" : {
@@ -11724,7 +11606,6 @@
             "$ref" : "#/components/schemas/Arbeidsforhold"
           },
           "faktiskArbeidstid" : {
-            "nullable" : true,
             "properties" : {
               "nano" : {
                 "format" : "int32",
@@ -11746,14 +11627,12 @@
               },
               "units" : {
                 "items" : {
-                  "nullable" : true,
                   "properties" : {
                     "dateBased" : {
                       "nullable" : true,
                       "type" : "boolean"
                     },
                     "duration" : {
-                      "nullable" : true,
                       "properties" : {
                         "nano" : {
                           "format" : "int32",
@@ -11802,7 +11681,6 @@
             "type" : "object"
           },
           "normalArbeidstid" : {
-            "nullable" : true,
             "properties" : {
               "nano" : {
                 "format" : "int32",
@@ -11824,14 +11702,12 @@
               },
               "units" : {
                 "items" : {
-                  "nullable" : true,
                   "properties" : {
                     "dateBased" : {
                       "nullable" : true,
                       "type" : "boolean"
                     },
                     "duration" : {
-                      "nullable" : true,
                       "properties" : {
                         "nano" : {
                           "format" : "int32",
@@ -11915,7 +11791,6 @@
               "type" : "string"
             },
             "lengde" : {
-              "nullable" : true,
               "properties" : {
                 "nano" : {
                   "format" : "int32",
@@ -11937,14 +11812,12 @@
                 },
                 "units" : {
                   "items" : {
-                    "nullable" : true,
                     "properties" : {
                       "dateBased" : {
                         "nullable" : true,
                         "type" : "boolean"
                       },
                       "duration" : {
-                        "nullable" : true,
                         "properties" : {
                           "nano" : {
                             "format" : "int32",
@@ -12079,7 +11952,6 @@
         "type" : "object"
       },
       "UtsettelsePeriode" : {
-        "nullable" : true,
         "properties" : {
           "indexKey" : {
             "nullable" : true,
@@ -12170,7 +12042,6 @@
             "type" : "string"
           },
           "delvisFravær" : {
-            "nullable" : true,
             "properties" : {
               "nano" : {
                 "format" : "int32",
@@ -12192,14 +12063,12 @@
               },
               "units" : {
                 "items" : {
-                  "nullable" : true,
                   "properties" : {
                     "dateBased" : {
                       "nullable" : true,
                       "type" : "boolean"
                     },
                     "duration" : {
-                      "nullable" : true,
                       "properties" : {
                         "nano" : {
                           "format" : "int32",
@@ -12337,7 +12206,6 @@
               "nullable" : true,
               "type" : "string"
             },
-            "nullable" : true,
             "type" : "object"
           },
           "kildeBehandlingUUID" : {
@@ -12364,7 +12232,6 @@
             "type" : "string"
           },
           "oppgittTilsyn" : {
-            "nullable" : true,
             "properties" : {
               "nano" : {
                 "format" : "int32",
@@ -12386,14 +12253,12 @@
               },
               "units" : {
                 "items" : {
-                  "nullable" : true,
                   "properties" : {
                     "dateBased" : {
                       "nullable" : true,
                       "type" : "boolean"
                     },
                     "duration" : {
-                      "nullable" : true,
                       "properties" : {
                         "nano" : {
                           "format" : "int32",
@@ -12450,7 +12315,6 @@
             "type" : "number"
           },
           "søkersTapteTimer" : {
-            "nullable" : true,
             "properties" : {
               "nano" : {
                 "format" : "int32",
@@ -12472,14 +12336,12 @@
               },
               "units" : {
                 "items" : {
-                  "nullable" : true,
                   "properties" : {
                     "dateBased" : {
                       "nullable" : true,
                       "type" : "boolean"
                     },
                     "duration" : {
-                      "nullable" : true,
                       "properties" : {
                         "nano" : {
                           "format" : "int32",
@@ -12584,7 +12446,6 @@
             "additionalProperties" : {
               "$ref" : "#/components/schemas/UttaksperiodeInfo"
             },
-            "nullable" : true,
             "type" : "object"
           },
           "trukketUttak" : {
@@ -12682,7 +12543,6 @@
               "type" : "string"
             },
             "lengde" : {
-              "nullable" : true,
               "properties" : {
                 "nano" : {
                   "format" : "int32",
@@ -12704,14 +12564,12 @@
                 },
                 "units" : {
                   "items" : {
-                    "nullable" : true,
                     "properties" : {
                       "dateBased" : {
                         "nullable" : true,
                         "type" : "boolean"
                       },
                       "duration" : {
-                        "nullable" : true,
                         "properties" : {
                           "nano" : {
                             "format" : "int32",
@@ -12822,7 +12680,6 @@
               "nullable" : true,
               "type" : "string"
             },
-            "nullable" : true,
             "type" : "object"
           },
           "overstyrbar" : {
@@ -12870,7 +12727,6 @@
         "type" : "object"
       },
       "VilkårPeriodeDto" : {
-        "nullable" : true,
         "properties" : {
           "avslagKode" : {
             "nullable" : true,
@@ -12912,7 +12768,6 @@
               "nullable" : true,
               "type" : "string"
             },
-            "nullable" : true,
             "type" : "object"
           },
           "periode" : {
@@ -12943,7 +12798,6 @@
         "type" : "object"
       },
       "VilkårResultatDto" : {
-        "nullable" : true,
         "properties" : {
           "avslagsårsak" : {
             "enum" : [ "SØKT_FOR_SENT", "MANGLENDE_DOKUMENTASJON", "SØKER_ER_IKKE_MEDLEM", "SØKER_ER_UTVANDRET", "SØKER_HAR_IKKE_LOVLIG_OPPHOLD", "SØKER_HAR_IKKE_OPPHOLDSRETT", "SØKER_ER_IKKE_BOSATT", "IKKE_TILSTREKKELIG_OPPTJENING", "FYLLER_IKKE_ORDINÆRE_OPPTJENINGSREGLER", "FOR_LAVT_BEREGNINGSGRUNNLAG", "MANGLENDE_INNTEKTSGRUNNLAG", "FOR_LAVT_BEREGNINGSGRUNNLAG_8_47", "SØKT_FRILANS_UTEN_FRILANS_INNTEKT", "AVKORTET_GRUNNET_ANNEN_INNTEKT", "INGEN_STØNADSDAGER_I_SØKNADSPERIODEN", "IKKE_DOKUMENTERT_SYKDOM_SKADE_ELLER_LYTE", "DOKUMENTASJON_IKKE_FRA_RETT_ORGAN", "IKKE_BEHOV_FOR_KONTINUERLIG_TILSYN_OG_PLEIE_PÅ_BAKGRUNN_AV_SYKDOM", "IKKE_DOKUMENTERT_OMSORGEN_FOR", "IKKE_UTVIDETRETT", "IKKE_UTVIDETRETT_IKKE_KRONISK_SYK", "IKKE_UTVIDETRETT_IKKE_ØKT_RISIKO_FRAVÆR", "IKKE_MIDLERTIDIG_ALENE_VARIGHET_UNDER_SEKS_MÅN", "IKKE_MIDLERTIDIG_ALENE_REGNES_IKKE_SOM_Å_HA_ALENEOMSORG", "IKKE_MIDLERTIDIG_ALENE", "IKKE_GRUNNLAG_FOR_ALENEOMSORG", "IKKE_GRUNNLAG_FOR_ALENEOMSORG_FORELDRE_BOR_SAMMEN", "IKKE_GRUNNLAG_FOR_ALENEOMSORG_DELT_BOSTED", "PLEIETRENGENDE_INNLAGT_I_STEDET_FOR_HJEMME", "IKKE_I_LIVETS_SLUTTFASE", "IKKE_NØDVENDIG_OPPLÆRING", "IKKE_GODKJENT_INSTITUSJON", "IKKE_GJENNOMGÅTT_OPPLÆRING", "IKKE_PÅ_REISE", "SØKER_OVER_HØYESTE_ALDER", "SØKER_HAR_AVGÅTT_MED_DØDEN", "BARN_OVER_HØYESTE_ALDER", "INGEN_BEREGNINGSREGLER_TILGJENGELIG_I_LØSNINGEN", "UDEFINERT" ],
@@ -13064,7 +12918,6 @@
         "type" : "object"
       },
       "VurderingDto" : {
-        "nullable" : true,
         "properties" : {
           "begrunnelse" : {
             "maxLength" : 4000,
@@ -13171,14 +13024,12 @@
               "nullable" : true,
               "type" : "string"
             },
-            "nullable" : true,
             "type" : "object"
           }
         },
         "type" : "object"
       },
       "YrkesaktivitetDto" : {
-        "nullable" : true,
         "properties" : {
           "abakusReferanse" : {
             "$ref" : "#/components/schemas/InternArbeidsforholdRefDto"
@@ -13213,7 +13064,6 @@
         "type" : "object"
       },
       "YtelseAnvistDto" : {
-        "nullable" : true,
         "properties" : {
           "anvistPeriode" : {
             "$ref" : "#/components/schemas/Periode"
@@ -13243,7 +13093,6 @@
         "type" : "object"
       },
       "YtelseDto" : {
-        "nullable" : true,
         "properties" : {
           "periode" : {
             "$ref" : "#/components/schemas/Periode"
@@ -13274,7 +13123,6 @@
         "type" : "object"
       },
       "YtelseFordelingDto" : {
-        "nullable" : true,
         "properties" : {
           "arbeidsgiver" : {
             "$ref" : "#/components/schemas/Aktør"
@@ -13300,7 +13148,6 @@
         "type" : "object"
       },
       "YtelseGrunnlagDto" : {
-        "nullable" : true,
         "properties" : {
           "arbeidskategori" : {
             "enum" : [ "FISKER", "ARBEIDSTAKER", "SELVSTENDIG_NÆRINGSDRIVENDE", "KOMBINASJON_ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE", "SJØMANN", "JORDBRUKER", "DAGPENGER", "INAKTIV", "KOMBINASJON_ARBEIDSTAKER_OG_JORDBRUKER", "KOMBINASJON_ARBEIDSTAKER_OG_FISKER", "FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_DAGPENGER", "DAGMAMMA", "UGYLDIG", "-" ],
@@ -13345,7 +13192,6 @@
         "type" : "object"
       },
       "Ytelsegrunnlag" : {
-        "nullable" : true,
         "properties" : {
           "perioder" : {
             "items" : {
@@ -13377,7 +13223,6 @@
         "type" : "object"
       },
       "YtelserDto" : {
-        "nullable" : true,
         "properties" : {
           "ytelser" : {
             "items" : {
@@ -13395,7 +13240,6 @@
         "discriminator" : {
           "propertyName" : "ytelseType"
         },
-        "nullable" : true,
         "properties" : {
           "ytelseType" : {
             "type" : "string"
@@ -13453,7 +13297,6 @@
             "additionalProperties" : {
               "$ref" : "#/components/schemas/ÅrskvantumFraværsinformasjon"
             },
-            "nullable" : true,
             "type" : "object"
           }
         },
@@ -13462,7 +13305,6 @@
       "ÅrskvantumFraværsinformasjon" : {
         "properties" : {
           "delvisFravær" : {
-            "nullable" : true,
             "properties" : {
               "nano" : {
                 "format" : "int32",
@@ -13484,14 +13326,12 @@
               },
               "units" : {
                 "items" : {
-                  "nullable" : true,
                   "properties" : {
                     "dateBased" : {
                       "nullable" : true,
                       "type" : "boolean"
                     },
                     "duration" : {
-                      "nullable" : true,
                       "properties" : {
                         "nano" : {
                           "format" : "int32",

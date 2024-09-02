@@ -22,7 +22,8 @@ public class NullablePropertyConverter implements ModelConverter {
             if(type.isSchemaProperty()) {
                 final var result = chain.next().resolve(type, context, chain);
                 final var hasNotNull = Arrays.stream(type.getCtxAnnotations()).anyMatch(ann -> ann.annotationType().equals(NotNull.class));
-                if(!hasNotNull) {
+                final boolean isObj = result.getType() != null && result.getType().equalsIgnoreCase("object");
+                if(!isObj && !hasNotNull) {
                     result.setNullable(true);
                 }
                 return result;
