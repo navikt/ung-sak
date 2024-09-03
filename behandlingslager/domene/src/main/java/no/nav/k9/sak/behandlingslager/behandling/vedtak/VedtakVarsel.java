@@ -4,6 +4,9 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -15,10 +18,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-
 import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 
@@ -53,6 +52,10 @@ public class VedtakVarsel extends BaseEntitet {
     @Lob
     @Column(name = "fritekstbrev")
     private String fritekstbrev;
+
+    @Lob
+    @Column(name = "fritekstbrev_oid")
+    private String fritekstbrevNy;
 
     @Column(name = "sendt_varsel_om_revurdering")
     private Boolean harSendtVarselOmRevurdering;
@@ -91,14 +94,19 @@ public class VedtakVarsel extends BaseEntitet {
     }
 
     public String getFritekstbrev() {
+        if (fritekstbrevNy != null) {
+            return fritekstbrevNy;
+        }
         return fritekstbrev;
     }
+
 
     public void setOverskrift(String overskrift) {
         this.overskrift = overskrift;
     }
 
     public void setFritekstbrev(String fritekstbrev) {
+        this.fritekstbrevNy = fritekstbrev;
         this.fritekstbrev = fritekstbrev;
     }
 
