@@ -91,7 +91,6 @@ public class BrevRestTjeneste {
     @Operation(description = "Bestiller generering og sending av brevet", tags = "brev")
     @BeskyttetRessurs(action = UPDATE, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    // To make the openapi spec correct for void methods, schema type must be set manually to void
     @ApiResponses(value = {
         @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = FeilDto.class))),
     })
