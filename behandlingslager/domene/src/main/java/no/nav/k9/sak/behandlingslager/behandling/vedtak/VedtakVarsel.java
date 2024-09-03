@@ -1,5 +1,9 @@
 package no.nav.k9.sak.behandlingslager.behandling.vedtak;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.sql.Clob;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
@@ -13,11 +17,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
+import jakarta.persistence.PersistenceException;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
 
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.engine.jdbc.ClobProxy;
 
 import no.nav.k9.kodeverk.vedtak.Vedtaksbrev;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
@@ -53,6 +60,13 @@ public class VedtakVarsel extends BaseEntitet {
     @Lob
     @Column(name = "fritekstbrev")
     private String fritekstbrev;
+
+    @Transient
+    private String fritekstbrevString;
+
+    @Lob
+    @Column(name = "fritekstbrev_oid")
+    private Clob fritekstbrevNy;
 
     @Column(name = "sendt_varsel_om_revurdering")
     private Boolean harSendtVarselOmRevurdering;
@@ -91,7 +105,34 @@ public class VedtakVarsel extends BaseEntitet {
     }
 
     public String getFritekstbrev() {
+        if (fritekstbrevNy != null) {
+            getFritekstbrevString();
+        }
         return fritekstbrev;
+    }
+
+    public String getFritekstbrevString() {
+        if (fritekstbrevString != null && !fritekstbrevString.isEmpty()) {
+            return fritekstbrevString; // quick return, deserialisert tidligere
+        }
+        if (fritekstbrevNy == null || (fritekstbrevString != null && fritekstbrevString.isEmpty())) {
+            return null; // quick return, har ikke eller er tom
+        }
+
+        fritekstbrevString = ""; // dummy value for å signalisere at er allerede deserialisert
+
+        try {
+            BufferedReader in = new BufferedReader(fritekstbrevNy.getCharacterStream());
+            String line;
+            StringBuilder sb = new StringBuilder(2048);
+            while ((line = in.readLine()) != null) {
+                sb.append(line);
+            }
+            fritekstbrevString = sb.toString();
+        } catch (SQLException | IOException e) {
+            throw new PersistenceException("Kunne ikke lese payload: ", e);
+        }
+        return fritekstbrevString;
     }
 
     public void setOverskrift(String overskrift) {
@@ -99,6 +140,7 @@ public class VedtakVarsel extends BaseEntitet {
     }
 
     public void setFritekstbrev(String fritekstbrev) {
+        this.fritekstbrevNy = fritekstbrev == null ? null : ClobProxy.generateProxy(fritekstbrev);
         this.fritekstbrev = fritekstbrev;
     }
 
