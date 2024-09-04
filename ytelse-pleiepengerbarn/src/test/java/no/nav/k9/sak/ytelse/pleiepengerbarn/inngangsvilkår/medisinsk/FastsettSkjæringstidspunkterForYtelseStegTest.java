@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
@@ -33,6 +34,7 @@ class FastsettSkjæringstidspunkterForYtelseStegTest {
     private BehandlingRepositoryProvider mockProvider = mock(BehandlingRepositoryProvider.class); // Brukes ikke, men kan ikke være null
     private BeregningPerioderGrunnlagRepository mockrep = mock(BeregningPerioderGrunnlagRepository.class); // Brukes ikke, men kan ikke være null
     private AksjonspunktutlederForMedlemskap mockUtleder = mock(AksjonspunktutlederForMedlemskap.class); // Brukes ikke, men kan ikke være null
+    private Behandling behandling = null;
 
     private OverstyrUttakTjeneste mockOverstyrUttakTjeneste = mock(OverstyrUttakTjeneste.class); // Brukes ikke, men kan ikke være null
     private final VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = new VilkårsPerioderTilVurderingTjeneste() {
@@ -62,7 +64,7 @@ class FastsettSkjæringstidspunkterForYtelseStegTest {
         }
     };
     private UnitTestLookupInstanceImpl<VilkårsPerioderTilVurderingTjeneste> instance = new UnitTestLookupInstanceImpl<>(vilkårsPerioderTilVurderingTjeneste);
-    private FastsettSkjæringstidspunkterForYtelseSteg steg = new FastsettSkjæringstidspunkterForYtelseSteg(mockProvider, mockrep, mockOverstyrUttakTjeneste, instance, mockUtleder);
+    private FastsettSkjæringstidspunkterForYtelseSteg steg = new FastsettSkjæringstidspunkterForYtelseSteg(mockProvider, mockrep, mockOverstyrUttakTjeneste, instance, mockUtleder, null);
 
     @Test
     void skal_ikke_justere_utfall_for_andre_vilkår_ved_perioder_med_avslag_på_medisinsk_dersom_kun_helg_og_kopiert_vilkårsresultat() {
@@ -91,7 +93,7 @@ class FastsettSkjæringstidspunkterForYtelseStegTest {
         var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_18_ÅR);
         builder.leggTil(vilkårBuilder18år);
 
-        var resultatBuilder = steg.justerVilkårsperioderEtterDefinerendeVilkår(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
+        var resultatBuilder = steg.justerVilkårsperioderEtterDefinerendeVilkår(behandling, builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
 
         var oppdaterteVilkår = resultatBuilder.build();
 
@@ -139,7 +141,7 @@ class FastsettSkjæringstidspunkterForYtelseStegTest {
         var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_18_ÅR);
         builder.leggTil(vilkårBuilder18år);
 
-        var resultatBuilder = steg.justerVilkårsperioderEtterDefinerendeVilkår(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
+        var resultatBuilder = steg.justerVilkårsperioderEtterDefinerendeVilkår(behandling, builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
 
         var oppdaterteVilkår = resultatBuilder.build();
 
@@ -180,7 +182,7 @@ class FastsettSkjæringstidspunkterForYtelseStegTest {
         var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
         builder.leggTil(vilkårBuilder18år);
 
-        var resultatBuilder = steg.justerVilkårsperioderEtterDefinerendeVilkår(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
+        var resultatBuilder = steg.justerVilkårsperioderEtterDefinerendeVilkår(behandling, builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
 
         var oppdaterteVilkår = resultatBuilder.build();
 
@@ -225,7 +227,7 @@ class FastsettSkjæringstidspunkterForYtelseStegTest {
             .medUtfall(Utfall.IKKE_OPPFYLT));
         builder.leggTil(vilkårBuilder18år);
 
-        var resultatBuilder = steg.justerVilkårsperioderEtterDefinerendeVilkår(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
+        var resultatBuilder = steg.justerVilkårsperioderEtterDefinerendeVilkår(behandling, builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
 
         var oppdaterteVilkår = resultatBuilder.build();
 
@@ -265,7 +267,7 @@ class FastsettSkjæringstidspunkterForYtelseStegTest {
         var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR);
         builder.leggTil(vilkårBuilder18år);
 
-        var resultatBuilder = steg.justerVilkårsperioderEtterDefinerendeVilkår(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
+        var resultatBuilder = steg.justerVilkårsperioderEtterDefinerendeVilkår(behandling, builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
 
         var oppdaterteVilkår = resultatBuilder.build();
 
@@ -304,7 +306,7 @@ class FastsettSkjæringstidspunkterForYtelseStegTest {
         var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_18_ÅR);
         builder.leggTil(vilkårBuilder18år);
 
-        var resultatBuilder = steg.justerVilkårsperioderEtterDefinerendeVilkår(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
+        var resultatBuilder = steg.justerVilkårsperioderEtterDefinerendeVilkår(behandling, builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
 
         var oppdaterteVilkår = resultatBuilder.build();
 
@@ -342,7 +344,7 @@ class FastsettSkjæringstidspunkterForYtelseStegTest {
         var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_18_ÅR);
         builder.leggTil(vilkårBuilder18år);
 
-        var resultatBuilder = steg.justerVilkårsperioderEtterDefinerendeVilkår(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
+        var resultatBuilder = steg.justerVilkårsperioderEtterDefinerendeVilkår(behandling, builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
 
         var oppdaterteVilkår = resultatBuilder.build();
 
@@ -384,7 +386,7 @@ class FastsettSkjæringstidspunkterForYtelseStegTest {
         var vilkårBuilder18år = builder.hentBuilderFor(VilkårType.MEDISINSKEVILKÅR_18_ÅR);
         builder.leggTil(vilkårBuilder18år);
 
-        var resultatBuilder = steg.justerVilkårsperioderEtterDefinerendeVilkår(builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
+        var resultatBuilder = steg.justerVilkårsperioderEtterDefinerendeVilkår(behandling, builder.build(), new TreeSet<>(perioderTilVurdering), vilkårsPerioderTilVurderingTjeneste);
 
         var oppdaterteVilkår = resultatBuilder.build();
 

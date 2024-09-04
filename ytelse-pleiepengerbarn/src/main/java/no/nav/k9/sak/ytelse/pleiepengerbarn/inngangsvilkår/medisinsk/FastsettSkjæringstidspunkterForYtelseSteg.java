@@ -30,6 +30,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
@@ -41,6 +42,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.k9.sak.vilkår.VilkårTjeneste;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.OverstyrUttakTjeneste;
 
@@ -58,6 +60,7 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
     private AksjonspunktutlederForMedlemskap aksjonspunktutlederForMedlemskap;
     private VilkårResultatRepository vilkårResultatRepository;
+    private VilkårTjeneste vilkårTjeneste;
     private BehandlingRepository behandlingRepository;
 
     FastsettSkjæringstidspunkterForYtelseSteg() {
@@ -69,13 +72,14 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
                                                      BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
                                                      OverstyrUttakTjeneste overstyrUttakTjeneste,
                                                      @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
-                                                     AksjonspunktutlederForMedlemskap aksjonspunktutlederForMedlemskap) {
+                                                     AksjonspunktutlederForMedlemskap aksjonspunktutlederForMedlemskap, VilkårTjeneste vilkårTjeneste) {
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
         this.overstyrUttakTjeneste = overstyrUttakTjeneste;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.aksjonspunktutlederForMedlemskap = aksjonspunktutlederForMedlemskap;
+        this.vilkårTjeneste = vilkårTjeneste;
     }
 
     @Override
@@ -87,9 +91,12 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
         final var perioderVurdertISykdom = utledPerioderVurdert(behandlingId, vilkårsPerioderTilVurderingTjeneste);
 
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
-        var oppdatertResultatBuilder = justerVilkårsperioderEtterDefinerendeVilkår(vilkårene, perioderVurdertISykdom, vilkårsPerioderTilVurderingTjeneste);
+        var oppdatertResultatBuilder = justerVilkårsperioderEtterDefinerendeVilkår(behandling, vilkårene, perioderVurdertISykdom, vilkårsPerioderTilVurderingTjeneste);
 
         vilkårResultatRepository.lagre(behandlingId, oppdatertResultatBuilder.build());
+
+
+        var perioder = vilkårsPerioderTilVurderingTjeneste.utled(behandlingId, VilkårType.OPPTJENINGSVILKÅRET);
 
         reutledAksjonspunktForMedlemskap(kontekst);
         // Rydder bort grunnlag som ikke lenger er relevant siden perioden ikke skal vurderes
@@ -127,14 +134,14 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
         return TidslinjeUtil.tilDatoIntervallEntiteter(timeline.compress());
     }
 
-    VilkårResultatBuilder justerVilkårsperioderEtterDefinerendeVilkår(Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
+    VilkårResultatBuilder justerVilkårsperioderEtterDefinerendeVilkår(Behandling behandling, Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
         var innvilgedePerioder = finnPerioderMedUtfall(vilkårene, perioderTilVurdering, perioderTilVurderingTjeneste);
 
         var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene)
             .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer())
             .medMaksMellomliggendePeriodeAvstand(perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand());
 
-        justerPeriodeForAndreVilkår(innvilgedePerioder, resultatBuilder);
+        justerPeriodeForAndreVilkår(behandling, innvilgedePerioder, resultatBuilder, perioderTilVurdering);
 
         return resultatBuilder;
     }
@@ -157,7 +164,7 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
         return tidslinje.compress();
     }
 
-    private void justerPeriodeForAndreVilkår(LocalDateTimeline<Boolean> tidslinje, VilkårResultatBuilder resultatBuilder) {
+    private void justerPeriodeForAndreVilkår(Behandling behandling, LocalDateTimeline<Boolean> tidslinje, VilkårResultatBuilder resultatBuilder, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
         for (VilkårType vilkårType : Set.of(VilkårType.OPPTJENINGSPERIODEVILKÅR, VilkårType.OPPTJENINGSVILKÅRET, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, VilkårType.MEDLEMSKAPSVILKÅRET)) {
             var vilkårBuilder = resultatBuilder.hentBuilderFor(vilkårType);
             var perioderSomSkalTilbakestilles = tidslinje.filterValue(it -> !it)
@@ -176,6 +183,15 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
                 vilkårBuilder = vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(innvilgetPeriode)
                     .medPeriode(innvilgetPeriode));
             }
+
+
+            if (behandling.getOriginalBehandlingId().isPresent()) {
+                var allePerioder = vilkårBuilder.getVilkårTidslinje().getLocalDateIntervals().stream()
+                    .map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFomDato(), p.getTomDato())).collect(Collectors.toSet());
+                var perioderSomIkkeVurderes = allePerioder.stream().filter(p -> perioderTilVurdering.stream().noneMatch(tilVurdering -> tilVurdering.overlapper(p.getFomDato(), p.getTomDato()))).collect(Collectors.toSet());
+                vilkårTjeneste.kopierOriginaltVilkårresultat(behandling.getOriginalBehandlingId().get(), perioderSomIkkeVurderes, vilkårType, vilkårBuilder);
+            }
+
             resultatBuilder.leggTil(vilkårBuilder);
         }
     }

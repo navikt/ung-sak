@@ -59,6 +59,10 @@ public class VilkårBuilder {
             .collect(Collectors.toList()));
     }
 
+    public LocalDateTimeline<WrappedVilkårPeriode> getVilkårTidslinje() {
+        return vilkårTidslinje;
+    }
+
     private LocalDateSegment<WrappedVilkårPeriode> toSegment(VilkårPeriode a, LocalDateInterval boundry) {
         var vilkårDatoInterval = a.getPeriode().toLocalDateInterval();
 
