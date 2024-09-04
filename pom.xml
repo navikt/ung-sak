@@ -49,6 +49,8 @@
         <kotlin-stdlib.version>2.0.20</kotlin-stdlib.version>
         <jandex.version>3.2.2</jandex.version>
         <flyway.version>10.17.2</flyway.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
 
     </properties>
 
@@ -129,7 +131,7 @@
             <dependency>
                 <groupId>no.nav.k9.prosesstask</groupId>
                 <artifactId>prosesstask-root</artifactId>
-                <version>2.3.4</version>
+                <version>2.3.5</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
