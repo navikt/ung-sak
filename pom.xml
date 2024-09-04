@@ -49,8 +49,6 @@
         <kotlin-stdlib.version>2.0.20</kotlin-stdlib.version>
         <jandex.version>3.2.2</jandex.version>
         <flyway.version>10.17.2</flyway.version>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
 
     </properties>
 
