@@ -45,7 +45,6 @@ public class ForvaltningOverstyrInputBeregning {
     private BeregningPerioderGrunnlagRepository grunnlagRepository;
     private Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
-    private VirksomhetTjeneste virksomhetTjeneste;
 
     public ForvaltningOverstyrInputBeregning() {
     }
@@ -59,7 +58,7 @@ public class ForvaltningOverstyrInputBeregning {
         BehandlingModellRepository behandlingModellRepository,
         BeregningPerioderGrunnlagRepository grunnlagRepository,
         @Any Instance<InntektsmeldingerRelevantForBeregning> inntektsmeldingerRelevantForBeregning,
-        InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste, VirksomhetTjeneste virksomhetTjeneste) {
+        InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste) {
 
         this.historikkTjenesteAdapter = historikkTjenesteAdapter;
         this.beregningInputHistorikkTjeneste = beregningInputHistorikkTjeneste;
@@ -69,7 +68,6 @@ public class ForvaltningOverstyrInputBeregning {
         this.grunnlagRepository = grunnlagRepository;
         this.inntektsmeldingerRelevantForBeregning = inntektsmeldingerRelevantForBeregning;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
-        this.virksomhetTjeneste = virksomhetTjeneste;
     }
 
     public void overstyrOpphørRefusjon(
@@ -159,13 +157,6 @@ public class ForvaltningOverstyrInputBeregning {
 
         if (!harOverstyrtArbeidsgiverInntektsmelding) {
             throw new IllegalArgumentException("Overstyrt arbeidsgiver hadde ikke inntektsmelding til bruk for periode " + vilkårsperiode);
-        }
-
-
-        var virksomhet = virksomhetTjeneste.hentOrganisasjon(arbeidsgiver.getArbeidsgiverOrgnr());
-        var idag = LocalDate.now();
-        if (virksomhet.getAvslutt() == null || virksomhet.getAvslutt().isAfter(idag)) {
-            throw new IllegalArgumentException("Kan ikke opphøre refusjon for en virksomhet som ikke er avsluttet.");
         }
 
     }
