@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
+import no.nav.k9.sak.domene.typer.tid.AbstractLocalDateInterval;
 import no.nav.k9.sak.hendelsemottak.tjenester.FagsakerTilVurderingUtleder;
 import no.nav.k9.sak.hendelsemottak.tjenester.HendelseTypeRef;
 import no.nav.k9.sak.kontrakt.hendelser.Hendelse;
@@ -50,6 +52,7 @@ public class DødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderingU
     private VilkårResultatRepository vilkårResultatRepository;
     private PersonopplysningRepository personopplysningRepository;
     private PersoninfoAdapter personinfoAdapter;
+
     public DødsfallFagsakTilVurderingUtleder() {
         // For CDI
     }
@@ -76,15 +79,20 @@ public class DødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderingU
 
         var fagsaker = new HashMap<Fagsak, BehandlingÅrsakType>();
 
-        for (FagsakYtelseType fagsakYtelseType : RELEVANTE_YTELSER) {
-            for (AktørId aktør : dødsfallAktører) {
+        for (AktørId aktør : dødsfallAktører) {
+            var fagsakerForBruker = fagsakRepository.hentForBruker(aktør);
+            var fagsakerForPleietrengende = fagsakRepository.hentForPleietrengende(aktør);
+            if (fagsakerForBruker.isEmpty() && fagsakerForPleietrengende.isEmpty()) {
+                continue;
+            }
+            for (FagsakYtelseType fagsakYtelseType : RELEVANTE_YTELSER) {
                 LocalDate dødsdato = hentOppdatertDødsdato(aktør, dødsdatoFraHendelse, hendelseOpprettetTidspunkt, hendelseId);
-                for (Fagsak fagsak : fagsakRepository.finnFagsakRelatertTil(fagsakYtelseType, aktør, null, null, dødsdato, null)) {
+                for (Fagsak fagsak : finnOverlappendeFagsaker(fagsakerForBruker, dødsdato, fagsakYtelseType)) {
                     if (erNyInformasjonIHendelsen(fagsak, aktør, dødsdato, hendelseId) && erAktørensDødRelevantForVedtaket(fagsak, dødsdato)) {
                         fagsaker.put(fagsak, BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER);
                     }
                 }
-                for (Fagsak fagsak : fagsakRepository.finnFagsakRelatertTil(fagsakYtelseType, null, aktør, null, dødsdato, null)) {
+                for (Fagsak fagsak : finnOverlappendeFagsaker(fagsakerForPleietrengende, dødsdato, fagsakYtelseType)) {
                     if (erNyInformasjonIHendelsen(fagsak, aktør, dødsdato, hendelseId) && erAktørensDødRelevantForVedtaket(fagsak, dødsdato)) {
                         fagsaker.put(fagsak, BehandlingÅrsakType.RE_HENDELSE_DØD_BARN);
                     }
@@ -94,6 +102,12 @@ public class DødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderingU
 
 
         return fagsaker;
+    }
+
+    private static Set<Fagsak> finnOverlappendeFagsaker(List<Fagsak> fagsakerForSøker, LocalDate dødsdato, FagsakYtelseType fagsakYtelseType) {
+        return fagsakerForSøker.stream()
+            .filter(fagsak -> fagsak.getYtelseType().equals(fagsakYtelseType))
+            .filter(f -> f.getPeriode().overlapper(dødsdato, AbstractLocalDateInterval.TIDENES_ENDE)).collect(Collectors.toSet());
     }
 
     private boolean erAktørensDødRelevantForVedtaket(Fagsak fagsak, LocalDate dødsdato) {
