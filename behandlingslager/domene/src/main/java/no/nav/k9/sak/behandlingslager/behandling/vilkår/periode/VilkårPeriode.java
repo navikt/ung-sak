@@ -270,7 +270,7 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
         if (getGjeldendeUtfall().equals(Utfall.IKKE_OPPFYLT)) {
             return avslagsårsak;
         }
-        return null;
+        return Avslagsårsak.UDEFINERT;
     }
 
     void setAvslagsårsak(Avslagsårsak avslagsårsak) {
