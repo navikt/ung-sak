@@ -59,10 +59,6 @@ public class VilkårBuilder {
             .collect(Collectors.toList()));
     }
 
-    public LocalDateTimeline<WrappedVilkårPeriode> getVilkårTidslinje() {
-        return vilkårTidslinje;
-    }
-
     private LocalDateSegment<WrappedVilkårPeriode> toSegment(VilkårPeriode a, LocalDateInterval boundry) {
         var vilkårDatoInterval = a.getPeriode().toLocalDateInterval();
 
@@ -96,13 +92,6 @@ public class VilkårBuilder {
         return this;
     }
 
-    public LocalDate getMaxDatoTilVurdering() {
-        return vilkåret.getPerioder().stream()
-            .map(VilkårPeriode::getPeriode)
-            .map(DatoIntervallEntitet::getTomDato)
-            .max(LocalDate::compareTo)
-            .orElse(Tid.TIDENES_ENDE);
-    }
 
     /**
      * Markerer at denne ikke skal legges til i settet med vilkår
