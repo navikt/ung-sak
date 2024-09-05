@@ -54,6 +54,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.OverstyrUttakTjeneste;
 @ApplicationScoped
 public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSteg {
 
+    public static final Set<VilkårType> AVHENGIGE_VILKÅR = Set.of(VilkårType.OPPTJENINGSPERIODEVILKÅR, VilkårType.OPPTJENINGSVILKÅRET, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, VilkårType.MEDLEMSKAPSVILKÅRET);
     private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
 
     private OverstyrUttakTjeneste overstyrUttakTjeneste;
@@ -91,7 +92,7 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
         final var perioderVurdertISykdom = utledPerioderVurdert(behandlingId, vilkårsPerioderTilVurderingTjeneste);
 
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
-        var oppdatertResultatBuilder = justerVilkårsperioderEtterDefinerendeVilkår(behandling, vilkårene, perioderVurdertISykdom, vilkårsPerioderTilVurderingTjeneste);
+        var oppdatertResultatBuilder = justerVilkårsperioderEtterDefinerendeVilkår(vilkårene, perioderVurdertISykdom, vilkårsPerioderTilVurderingTjeneste);
 
         vilkårResultatRepository.lagre(behandlingId, oppdatertResultatBuilder.build());
 
@@ -99,6 +100,7 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
         // Rydder bort grunnlag som ikke lenger er relevant siden perioden ikke skal vurderes
         // Disse blir da ikke lenger med til tilkjent ytelse, slik at det vedtaket blir inkosistent
         beregningPerioderGrunnlagRepository.ryddMotVilkår(behandlingId);
+        ryddVilkårsperioderSomIkkeLengerVurderes(behandling, finnAllePerioderMedUtfall(vilkårene, vilkårsPerioderTilVurderingTjeneste), perioderVurdertISykdom);
         overstyrUttakTjeneste.ryddMotVilkår(BehandlingReferanse.fra(behandling));
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
@@ -131,20 +133,20 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
         return TidslinjeUtil.tilDatoIntervallEntiteter(timeline.compress());
     }
 
-    VilkårResultatBuilder justerVilkårsperioderEtterDefinerendeVilkår(Behandling behandling, Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
-        var innvilgedePerioder = finnPerioderMedUtfall(vilkårene, perioderTilVurdering, perioderTilVurderingTjeneste);
+    VilkårResultatBuilder justerVilkårsperioderEtterDefinerendeVilkår(Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
+        var innvilgedePerioder = finnVurdertePerioderMedUtfall(vilkårene, perioderTilVurdering, perioderTilVurderingTjeneste);
 
         var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene)
             .medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer())
             .medMaksMellomliggendePeriodeAvstand(perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand());
 
-        justerPeriodeForAndreVilkår(behandling, innvilgedePerioder, resultatBuilder, perioderTilVurdering);
+        justerPeriodeForAndreVilkår(innvilgedePerioder, resultatBuilder);
 
         return resultatBuilder;
     }
 
-    private LocalDateTimeline<Boolean> finnPerioderMedUtfall(Vilkårene vilkårene,
-                                                             NavigableSet<DatoIntervallEntitet> perioderTilVurdering, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
+    private LocalDateTimeline<Boolean> finnVurdertePerioderMedUtfall(Vilkårene vilkårene,
+                                                                     NavigableSet<DatoIntervallEntitet> perioderTilVurdering, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
         var definerendeVilkår = perioderTilVurderingTjeneste.definerendeVilkår();
         LocalDateTimeline<Boolean> tidslinje = LocalDateTimeline.empty();
 
@@ -161,8 +163,8 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
         return tidslinje.compress();
     }
 
-    private void justerPeriodeForAndreVilkår(Behandling behandling, LocalDateTimeline<Boolean> tidslinje, VilkårResultatBuilder resultatBuilder, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
-        for (VilkårType vilkårType : Set.of(VilkårType.OPPTJENINGSPERIODEVILKÅR, VilkårType.OPPTJENINGSVILKÅRET, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, VilkårType.MEDLEMSKAPSVILKÅRET)) {
+    private void justerPeriodeForAndreVilkår(LocalDateTimeline<Boolean> tidslinje, VilkårResultatBuilder resultatBuilder) {
+        for (VilkårType vilkårType : AVHENGIGE_VILKÅR) {
             var vilkårBuilder = resultatBuilder.hentBuilderFor(vilkårType);
 
             // Fjerner avslåtte perioder
@@ -185,23 +187,40 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
                     .medPeriode(innvilgetPeriode));
             }
 
-            // Kopierer originalt vilkårsresultat for perioder som ikke lenger vurderes i behandlingen
-            // Dersom periodene ikke fantes originalt klippes de bort
-            // TODO: Det ligger også en håndtering av dette i PreconditionBeregningSteg (se GjenopprettPerioderSomIkkeVurderesTjeneste) for bg-vilkårt. Optimalt sett burde denne vurderingen ligge så nærme som mulig vurdering av vilkåret, og bruke ein felles funksjonalitet.
-            if (behandling.getOriginalBehandlingId().isPresent()) {
-                var allePerioder = vilkårBuilder.getVilkårTidslinje().getLocalDateIntervals().stream()
-                    .map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFomDato(), p.getTomDato())).collect(Collectors.toSet());
-                var perioderSomIkkeVurderes = allePerioder.stream().filter(p -> perioderTilVurdering.stream().noneMatch(tilVurdering -> tilVurdering.overlapper(p.getFomDato(), p.getTomDato()))).collect(Collectors.toSet());
-                var resultat = vilkårTjeneste.kopierOriginaltVilkårresultatEllerKlippBort(behandling.getOriginalBehandlingId().get(), perioderSomIkkeVurderes, vilkårType, vilkårBuilder);
+            resultatBuilder.leggTil(vilkårBuilder);
+        }
+    }
+
+    // Kopierer originalt vilkårsresultat for perioder som ikke lenger vurderes i behandlingen
+    // Dersom periodene ikke fantes originalt klippes de bort
+    // TODO: Det ligger også en håndtering av dette i PreconditionBeregningSteg (se GjenopprettPerioderSomIkkeVurderesTjeneste) for bg-vilkårt. Optimalt sett burde denne vurderingen ligge så nærme som mulig vurdering av vilkåret, og bruke ein felles funksjonalitet.
+    private void ryddVilkårsperioderSomIkkeLengerVurderes(Behandling behandling, LocalDateTimeline<Boolean> tidslinje, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
+        if (behandling.getOriginalBehandlingId().isPresent()) {
+            for (VilkårType vilkårType : AVHENGIGE_VILKÅR) {
+                var resultat = vilkårTjeneste.gjenopprettVilkårsutfallForPerioderSomIkkeVurderes(BehandlingReferanse.fra(behandling), vilkårType, perioderTilVurdering, true);
                 var fjernetPerioder = resultat.fjernetPerioder();
                 var intersects = tidslinje.filterValue(it -> it).intersects(TidslinjeUtil.tilTidslinjeKomprimert(fjernetPerioder));
                 if (intersects) {
                     throw new IllegalStateException("Kan ikke fjerne innvilget periode");
                 }
             }
-
-            resultatBuilder.leggTil(vilkårBuilder);
         }
+    }
+
+    private LocalDateTimeline<Boolean> finnAllePerioderMedUtfall(Vilkårene vilkårene, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
+        var definerendeVilkår = perioderTilVurderingTjeneste.definerendeVilkår();
+        LocalDateTimeline<Boolean> tidslinje = LocalDateTimeline.empty();
+
+        for (VilkårType vilkårType : definerendeVilkår) {
+            var segmenter = vilkårene.getVilkår(vilkårType).orElseThrow()
+                .getPerioder()
+                .stream()
+                .map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), Objects.equals(Utfall.OPPFYLT, it.getGjeldendeUtfall())))
+                .collect(Collectors.toCollection(TreeSet::new));
+            tidslinje = tidslinje.combine(new LocalDateTimeline<>(segmenter), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+
+        return tidslinje.compress();
     }
 
     private static boolean erIkkeBareKantIKantMellomrom(LocalDateTimeline<Boolean> tidslinje, DatoIntervallEntitet p, KantIKantVurderer kantIKantVurderer) {

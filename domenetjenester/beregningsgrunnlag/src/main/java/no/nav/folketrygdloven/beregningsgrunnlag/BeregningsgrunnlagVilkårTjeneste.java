@@ -66,7 +66,7 @@ public class BeregningsgrunnlagVilkårTjeneste {
     }
 
     public void gjenopprettVilkårsutfallVedBehov(BehandlingReferanse referanse, Collection<DatoIntervallEntitet> perioderTilVurdering) {
-        vilkårTjeneste.gjenopprettVilkårsutfallForPerioderSomIkkeVurderes(referanse, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, perioderTilVurdering);
+        vilkårTjeneste.gjenopprettVilkårsutfallForPerioderSomIkkeVurderes(referanse, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, perioderTilVurdering, false);
     }
 
     public void ryddVedtaksresultatOgVilkår(BehandlingskontrollKontekst kontekst, DatoIntervallEntitet vilkårsPeriode) {

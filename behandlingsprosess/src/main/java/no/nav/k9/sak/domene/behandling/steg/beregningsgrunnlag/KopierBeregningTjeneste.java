@@ -109,11 +109,13 @@ public class KopierBeregningTjeneste {
                 log.info("Kopierer beregning for startpunkt {} og perioder {}", startpunktForlengelse.getKode(), perioderMedStartpunktForlengelse);
                 kalkulusTjeneste.kopier(ref, perioderMedStartpunktForlengelse, BehandlingStegType.VURDER_VILKAR_BERGRUNN);
                 var originalBehandlingId = ref.getOriginalBehandlingId().orElseThrow();
-                vilkårTjeneste.kopierOriginaltVilkårresultatEllerKlippBort(
+                var forlengelseperioder = perioderMedStartpunktForlengelse.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet());
+                vilkårTjeneste.kopierOriginaltVilkårresultat(
                     ref.getBehandlingId(),
                     originalBehandlingId,
-                    perioderMedStartpunktForlengelse.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet()),
-                    VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+                    forlengelseperioder,
+                    VilkårType.BEREGNINGSGRUNNLAGVILKÅR, false);
+
             }
             var startpunktKontrollerFakta = perioderPrStartpunkt.get(KONTROLLER_FAKTA_BEREGNING);
             if (!startpunktKontrollerFakta.isEmpty()) {
