@@ -260,7 +260,7 @@ public class VilkårResultatTest {
         assertThat(vilkår.getVilkårType()).isEqualTo(VilkårType.OPPTJENINGSVILKÅRET);
         assertThat(vilkår.getPerioder()).hasSize(1);
         final var vilkårPeriode = vilkår.getPerioder().get(0);
-        assertThat(vilkårPeriode.getAvslagsårsak()).isEqualTo(null);
+        assertThat(vilkårPeriode.getAvslagsårsak()).isEqualTo(Avslagsårsak.UDEFINERT);
         assertThat(vilkårPeriode.getGjeldendeUtfall()).isEqualTo(Utfall.OPPFYLT);
     }
 
@@ -310,7 +310,7 @@ public class VilkårResultatTest {
         assertThat(vilkår.getPerioder()).hasSize(1);
         final var vilkårPeriode1 = vilkår.getPerioder().get(0);
         assertThat(vilkårPeriode1.getGjeldendeUtfall()).isEqualTo(Utfall.OPPFYLT);
-        assertThat(vilkårPeriode1.getAvslagsårsak()).isEqualTo(null);
+        assertThat(vilkårPeriode1.getAvslagsårsak()).isEqualTo(Avslagsårsak.UDEFINERT);
         assertThat(vilkårPeriode1.getErOverstyrt()).isTrue();
         assertThat(vilkårPeriode1.getErManueltVurdert()).isFalse();
     }
