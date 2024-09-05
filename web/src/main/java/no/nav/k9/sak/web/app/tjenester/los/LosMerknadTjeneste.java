@@ -60,6 +60,10 @@ public class LosMerknadTjeneste {
 
     public void lagreMerknad(MerknadEndretDto merknadEndret) {
         Behandling behandling = behandlingRepository.hentBehandling(merknadEndret.behandlingUuid());
+        if (behandling.erSaksbehandlingAvsluttet()){
+            throw new IllegalStateException("Kan ikke sette merknad på behandling hvor saksbehandlingen er avsluttet");
+        }
+
         Set<BehandlingMerknadType> merknaderFør = behandlingMerknadRepository.hentMerknadTyper(behandling.getId());
         behandlingMerknadRepository.registrerMerknadtyper(behandling.getId(), merknadEndret.merknadKoder(), merknadEndret.fritekst());
         Set<BehandlingMerknadType> merknaderEtter = behandlingMerknadRepository.hentMerknadTyper(behandling.getId());
