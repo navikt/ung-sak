@@ -95,9 +95,6 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
 
         vilkårResultatRepository.lagre(behandlingId, oppdatertResultatBuilder.build());
 
-
-        var perioder = vilkårsPerioderTilVurderingTjeneste.utled(behandlingId, VilkårType.OPPTJENINGSVILKÅRET);
-
         reutledAksjonspunktForMedlemskap(kontekst);
         // Rydder bort grunnlag som ikke lenger er relevant siden perioden ikke skal vurderes
         // Disse blir da ikke lenger med til tilkjent ytelse, slik at det vedtaket blir inkosistent
@@ -167,6 +164,8 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
     private void justerPeriodeForAndreVilkår(Behandling behandling, LocalDateTimeline<Boolean> tidslinje, VilkårResultatBuilder resultatBuilder, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
         for (VilkårType vilkårType : Set.of(VilkårType.OPPTJENINGSPERIODEVILKÅR, VilkårType.OPPTJENINGSVILKÅRET, VilkårType.BEREGNINGSGRUNNLAGVILKÅR, VilkårType.MEDLEMSKAPSVILKÅRET)) {
             var vilkårBuilder = resultatBuilder.hentBuilderFor(vilkårType);
+
+            // Fjerner avslåtte perioder
             var perioderSomSkalTilbakestilles = tidslinje.filterValue(it -> !it)
                 .stream()
                 .map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval()))
@@ -176,6 +175,8 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
             if (!perioderSomSkalTilbakestilles.isEmpty()) {
                 vilkårBuilder = vilkårBuilder.tilbakestill(perioderSomSkalTilbakestilles);
             }
+
+            // Legger til innvilgede perioder
             var innvilgetTidslinje = tidslinje.filterValue(it -> it);
             var innvilgendePerioder = innvilgetTidslinje.combine(Hjelpetidslinjer.utledHullSomMåTettes(innvilgetTidslinje, resultatBuilder.getKantIKantVurderer()), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN)
                 .stream().map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval())).collect(Collectors.toCollection(TreeSet::new));
@@ -184,12 +185,19 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
                     .medPeriode(innvilgetPeriode));
             }
 
-
+            // Kopierer originalt vilkårsresultat for perioder som ikke lenger vurderes i behandlingen
+            // Dersom periodene ikke fantes originalt klippes de bort
+            // TODO: Det ligger også en håndtering av dette i PreconditionBeregningSteg (se GjenopprettPerioderSomIkkeVurderesTjeneste) for bg-vilkårt. Optimalt sett burde denne vurderingen ligge så nærme som mulig vurdering av vilkåret, og bruke ein felles funksjonalitet.
             if (behandling.getOriginalBehandlingId().isPresent()) {
                 var allePerioder = vilkårBuilder.getVilkårTidslinje().getLocalDateIntervals().stream()
                     .map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFomDato(), p.getTomDato())).collect(Collectors.toSet());
                 var perioderSomIkkeVurderes = allePerioder.stream().filter(p -> perioderTilVurdering.stream().noneMatch(tilVurdering -> tilVurdering.overlapper(p.getFomDato(), p.getTomDato()))).collect(Collectors.toSet());
-                vilkårTjeneste.kopierOriginaltVilkårresultat(behandling.getOriginalBehandlingId().get(), perioderSomIkkeVurderes, vilkårType, vilkårBuilder);
+                var resultat = vilkårTjeneste.kopierOriginaltVilkårresultatEllerKlippBort(behandling.getOriginalBehandlingId().get(), perioderSomIkkeVurderes, vilkårType, vilkårBuilder);
+                var fjernetPerioder = resultat.fjernetPerioder();
+                var intersects = tidslinje.filterValue(it -> it).intersects(TidslinjeUtil.tilTidslinjeKomprimert(fjernetPerioder));
+                if (intersects) {
+                    throw new IllegalStateException("Kan ikke fjerne innvilget periode");
+                }
             }
 
             resultatBuilder.leggTil(vilkårBuilder);

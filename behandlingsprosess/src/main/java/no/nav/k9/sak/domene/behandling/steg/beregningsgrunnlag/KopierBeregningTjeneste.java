@@ -109,7 +109,7 @@ public class KopierBeregningTjeneste {
                 log.info("Kopierer beregning for startpunkt {} og perioder {}", startpunktForlengelse.getKode(), perioderMedStartpunktForlengelse);
                 kalkulusTjeneste.kopier(ref, perioderMedStartpunktForlengelse, BehandlingStegType.VURDER_VILKAR_BERGRUNN);
                 var originalBehandlingId = ref.getOriginalBehandlingId().orElseThrow();
-                vilkårTjeneste.kopierOriginaltVilkårresultat(
+                vilkårTjeneste.kopierOriginaltVilkårresultatEllerKlippBort(
                     ref.getBehandlingId(),
                     originalBehandlingId,
                     perioderMedStartpunktForlengelse.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet()),
