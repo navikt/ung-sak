@@ -8,11 +8,11 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.kontrakt.vedtak.TotrinnsArbeidsforholdDto;
 import no.nav.k9.sak.kontrakt.vedtak.TotrinnsBeregningDto;
 import no.nav.k9.sak.kontrakt.vedtak.TotrinnskontrollAksjonspunkterDto;
-import no.nav.k9.sak.kontrakt.vedtak.TotrinnskontrollVurderÅrsak;
 import no.nav.k9.sak.produksjonsstyring.totrinn.BeregningsgrunnlagToTrinn;
 import no.nav.k9.sak.produksjonsstyring.totrinn.Totrinnresultatgrunnlag;
 import no.nav.k9.sak.produksjonsstyring.totrinn.Totrinnsvurdering;
@@ -56,10 +56,9 @@ public class TotrinnsaksjonspunktDtoTjeneste {
             .build();
     }
 
-    private Set<TotrinnskontrollVurderÅrsak> hentVurderPåNyttÅrsaker(Totrinnsvurdering aksjonspunkt) {
+    private Set<VurderÅrsak> hentVurderPåNyttÅrsaker(Totrinnsvurdering aksjonspunkt) {
         return aksjonspunkt.getVurderPåNyttÅrsaker().stream()
             .map(VurderÅrsakTotrinnsvurdering::getÅrsaksType)
-            .map(arsakType -> new TotrinnskontrollVurderÅrsak(arsakType))
             .collect(Collectors.toSet());
     }
 }
