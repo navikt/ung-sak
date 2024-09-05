@@ -36,7 +36,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode
 @ApplicationScoped
 public class PleiepengerForlengelseTjeneste implements ForlengelseTjeneste {
 
-    public static final long HASTESAK_SEPT_2024 = 1820868L;
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
@@ -64,7 +63,7 @@ public class PleiepengerForlengelseTjeneste implements ForlengelseTjeneste {
         var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
         var resultat = new TreeSet<DatoIntervallEntitet>();
 
-        if (behandling.erManueltOpprettet() && !behandling.getId().equals(HASTESAK_SEPT_2024)) {
+        if (behandling.erManueltOpprettet()) {
             return resultat;
         }
 
