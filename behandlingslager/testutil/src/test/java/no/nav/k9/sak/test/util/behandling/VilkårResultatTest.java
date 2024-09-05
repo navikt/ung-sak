@@ -6,13 +6,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
@@ -105,10 +104,10 @@ public class VilkårResultatTest {
         // legg til et nytt vilkårsresultat
         final var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(getVilkårene(behandling2));
         final var vilkårResultat = vilkårResultatBuilder.leggTil(vilkårResultatBuilder.hentBuilderFor(VilkårType.MEDLEMSKAPSVILKÅRET)
-            .leggTil(new VilkårPeriodeBuilder()
-                .medUtfall(Utfall.OPPFYLT)
-                .medMerknad(VilkårUtfallMerknad.VM_1001)
-                .medPeriode(LocalDate.now(), Tid.TIDENES_ENDE)))
+                .leggTil(new VilkårPeriodeBuilder()
+                    .medUtfall(Utfall.OPPFYLT)
+                    .medMerknad(VilkårUtfallMerknad.VM_1001)
+                    .medPeriode(LocalDate.now(), Tid.TIDENES_ENDE)))
             .build();
         vilkårResultatRepository.lagre(behandling2.getId(), vilkårResultat);
 
@@ -187,9 +186,9 @@ public class VilkårResultatTest {
         // Act
         final var oppdatertResultatBuilder = Vilkårene.builderFraEksisterende(vilkårResultat);
         final var oppdatertVilkårResultat = oppdatertResultatBuilder.leggTil(oppdatertResultatBuilder.hentBuilderFor(VilkårType.OPPTJENINGSVILKÅRET)
-            .leggTil(new VilkårPeriodeBuilder()
-                .medUtfall(Utfall.IKKE_VURDERT)
-                .medPeriode(LocalDate.now(), Tid.TIDENES_ENDE)))
+                .leggTil(new VilkårPeriodeBuilder()
+                    .medUtfall(Utfall.IKKE_VURDERT)
+                    .medPeriode(LocalDate.now(), Tid.TIDENES_ENDE)))
             .build();
 
         // Assert
@@ -241,17 +240,17 @@ public class VilkårResultatTest {
         // Arrange
         VilkårResultatBuilder vilkårResultatBuilder = Vilkårene.builder();
         final var opprinneligVilkårResultat = vilkårResultatBuilder.leggTil(vilkårResultatBuilder.hentBuilderFor(VilkårType.OPPTJENINGSVILKÅRET)
-            .leggTil(new VilkårPeriodeBuilder()
-                .medUtfall(Utfall.IKKE_OPPFYLT)
-                .medPeriode(LocalDate.now(), Tid.TIDENES_ENDE)))
+                .leggTil(new VilkårPeriodeBuilder()
+                    .medUtfall(Utfall.IKKE_OPPFYLT)
+                    .medPeriode(LocalDate.now(), Tid.TIDENES_ENDE)))
             .build();
 
         // Act
         VilkårResultatBuilder oppdatertVilkårResultatBuilder = Vilkårene.builderFraEksisterende(opprinneligVilkårResultat);
         final var vilkårBuilder = oppdatertVilkårResultatBuilder.hentBuilderFor(VilkårType.OPPTJENINGSVILKÅRET);
         final var oppdatertVilkårResultat = oppdatertVilkårResultatBuilder.leggTil(vilkårBuilder
-            .leggTil(vilkårBuilder.hentBuilderFor(LocalDate.now(), Tid.TIDENES_ENDE)
-                .medUtfall(Utfall.OPPFYLT)))
+                .leggTil(vilkårBuilder.hentBuilderFor(LocalDate.now(), Tid.TIDENES_ENDE)
+                    .medUtfall(Utfall.OPPFYLT)))
             .build();
 
         // Assert
@@ -260,7 +259,7 @@ public class VilkårResultatTest {
         assertThat(vilkår.getVilkårType()).isEqualTo(VilkårType.OPPTJENINGSVILKÅRET);
         assertThat(vilkår.getPerioder()).hasSize(1);
         final var vilkårPeriode = vilkår.getPerioder().get(0);
-        assertThat(vilkårPeriode.getAvslagsårsak()).isEqualTo(Avslagsårsak.UDEFINERT);
+        assertThat(vilkårPeriode.getAvslagsårsak()).isNull();
         assertThat(vilkårPeriode.getGjeldendeUtfall()).isEqualTo(Utfall.OPPFYLT);
     }
 
@@ -270,17 +269,17 @@ public class VilkårResultatTest {
         VilkårResultatBuilder vilkårResultatBuilder = Vilkårene.builder();
         final var vilkårBuilder2 = vilkårResultatBuilder.hentBuilderFor(VilkårType.MEDLEMSKAPSVILKÅRET);
         final var opprinneligVilkårResultat = vilkårResultatBuilder.leggTil(vilkårBuilder2
-            .leggTil(vilkårBuilder2.hentBuilderFor(LocalDate.now(), Tid.TIDENES_ENDE)
-                .medUtfall(Utfall.OPPFYLT)))
+                .leggTil(vilkårBuilder2.hentBuilderFor(LocalDate.now(), Tid.TIDENES_ENDE)
+                    .medUtfall(Utfall.OPPFYLT)))
             .build();
 
         // Act 1: Ikke oppfylt (overstyrt)
         VilkårResultatBuilder oppdatertVilkårResultatBuilder = Vilkårene.builderFraEksisterende(opprinneligVilkårResultat);
         final var vilkårBuilder1 = oppdatertVilkårResultatBuilder.hentBuilderFor(VilkårType.MEDLEMSKAPSVILKÅRET);
         var oppdatertVilkårResultat = oppdatertVilkårResultatBuilder.leggTil(vilkårBuilder1
-            .leggTil(vilkårBuilder1.hentBuilderFor(LocalDate.now(), Tid.TIDENES_ENDE)
-                .medUtfallOverstyrt(Utfall.IKKE_OPPFYLT)
-                .medAvslagsårsak(Avslagsårsak.SØKER_ER_UTVANDRET)))
+                .leggTil(vilkårBuilder1.hentBuilderFor(LocalDate.now(), Tid.TIDENES_ENDE)
+                    .medUtfallOverstyrt(Utfall.IKKE_OPPFYLT)
+                    .medAvslagsårsak(Avslagsårsak.SØKER_ER_UTVANDRET)))
             .build();
 
         // Assert
@@ -310,7 +309,7 @@ public class VilkårResultatTest {
         assertThat(vilkår.getPerioder()).hasSize(1);
         final var vilkårPeriode1 = vilkår.getPerioder().get(0);
         assertThat(vilkårPeriode1.getGjeldendeUtfall()).isEqualTo(Utfall.OPPFYLT);
-        assertThat(vilkårPeriode1.getAvslagsårsak()).isEqualTo(Avslagsårsak.UDEFINERT);
+        assertThat(vilkårPeriode1.getAvslagsårsak()).isNull();
         assertThat(vilkårPeriode1.getErOverstyrt()).isTrue();
         assertThat(vilkårPeriode1.getErManueltVurdert()).isFalse();
     }
