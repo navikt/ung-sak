@@ -52,7 +52,6 @@ public enum BehandlingÅrsakType implements Kodeverdi {
     RE_OPPLYSNINGER_OM_BEREGNINGSGRUNNLAG("RE-BER-GRUN", "Nye opplysninger som kan påvirke beregningsgrunnlaget"),
     RE_KLAGE_NY_INNH_LIGNET_INNTEKT("RE-KLAG-INNH-PGI", "Klage/ankebehandling med ny innhenting av lignet inntekt"),
     RE_KLAGE_NATTEVÅKBEREDSKAP("RE-NB", "Nye opplysninger om nattevåk/beredskap etter klage"),
-
     ETTER_KLAGE("ETTER_KLAGE", "Ny behandling eller revurdering etter klage eller anke"),
 
     RE_HENDELSE_FØDSEL("RE-HENDELSE-FØDSEL", "Melding om registrert fødsel i folkeregisteret"),
