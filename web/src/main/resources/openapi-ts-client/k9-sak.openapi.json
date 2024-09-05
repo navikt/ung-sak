@@ -11451,7 +11451,11 @@
           },
           "vurderPaNyttArsaker" : {
             "items" : {
-              "$ref" : "#/components/schemas/TotrinnskontrollVurderÅrsak"
+              "enum" : [ "FEIL_FAKTA", "FEIL_LOV", "FEIL_REGEL", "ANNET", "-" ],
+              "maxLength" : 100,
+              "minLength" : 0,
+              "nullable" : true,
+              "type" : "string"
             },
             "maxItems" : 100,
             "minItems" : 0,
@@ -11481,24 +11485,6 @@
           }
         },
         "required" : [ "skjermlenkeType" ],
-        "type" : "object"
-      },
-      "TotrinnskontrollVurderÅrsak" : {
-        "properties" : {
-          "kode" : {
-            "maxLength" : 10,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Alnum}]+$",
-            "type" : "string"
-          },
-          "navn" : {
-            "maxLength" : 10,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}\\p{P}\\p{M}\\p{Sc}]+$",
-            "type" : "string"
-          }
-        },
-        "required" : [ "kode", "navn" ],
         "type" : "object"
       },
       "UidentifisertRammevedtak" : {
