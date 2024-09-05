@@ -127,8 +127,7 @@ class ForvaltningOverstyrInputBeregningTest {
             behandlingModellRepository,
             beregningPerioderGrunnlagRepository,
             inntektsmeldingerRelevantForBeregning,
-            inntektArbeidYtelseTjeneste,
-            virksomhetTjeneste
+            inntektArbeidYtelseTjeneste
         );
 
         fagsak = Fagsak.opprettNy(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, new AktørId(123L), new Saksnummer("987"), STP, STP.plusDays(10));
@@ -165,23 +164,6 @@ class ForvaltningOverstyrInputBeregningTest {
         assertThat(inputOverstyring.getAktivitetOverstyringer().getFirst().getInntektPrÅr()).isNull();
         assertThat(inputOverstyring.getAktivitetOverstyringer().getFirst().getArbeidsgiver().getIdentifikator()).isEqualTo(ORG_NUMMER);
         assertThat(inputOverstyring.getAktivitetOverstyringer().getFirst().getOpphørRefusjon()).isEqualTo(opphørRefusjon);
-    }
-
-    @Test
-    void skal_ikke_kunne_overstyre_refusjon_opphør_dersom_virksomheten_ikke_er_avsluttet() {
-        var vilkårsperiode = DatoIntervallEntitet.fra(STP, STP.plusDays(10));
-
-        initVilkår(vilkårsperiode);
-        var opphørRefusjon = STP.plusDays(2);
-        lagIAY(ORG_NUMMER, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusYears(1), LocalDate.now().minusDays(1)));
-        lagOpptjening(STP, ORG_NUMMER, OpptjeningAktivitetKlassifisering.BEKREFTET_GODKJENT);
-        lagreInntektsmelding(ORG_NUMMER);
-        when(virksomhetTjeneste.hentOrganisasjon(any())).thenReturn(Virksomhet.getBuilder().medNavn("Virksomheten").medOrgnr(ORG_NUMMER).build());
-
-        var exception = assertThrows(IllegalArgumentException.class,
-            () -> overstyrOpphørsdatoRefusjon(vilkårsperiode, opphørRefusjon));
-
-        assertThat(exception.getMessage()).isEqualTo("Kan ikke opphøre refusjon for en virksomhet som ikke er avsluttet.");
     }
 
     @Test
