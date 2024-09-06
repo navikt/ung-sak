@@ -1,5 +1,23 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
@@ -39,24 +57,6 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
 import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.Duration;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
@@ -122,15 +122,18 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
         utbetalingsgrader = arbeidIPeriode.stream()
             .filter(a -> !a.getPerioder().isEmpty())
             .map(a -> {
-            var perioder = a.getPerioder().entrySet().stream().map(p -> new PeriodeMedUtbetalingsgradDto(new Periode(p.getKey().getFom(), p.getKey().getTom()), Utbetalingsgrad.fra(100), Aktivitetsgrad.fra(hentAktivitetsgrad(p.getValue())))).toList();
-            Aktør aktør = null;
-            if (a.getArbeidsforhold().getOrganisasjonsnummer() != null) {
-                aktør = new Organisasjon(a.getArbeidsforhold().getOrganisasjonsnummer());
-            } else if (a.getArbeidsforhold().getAktørId() != null) {
-                aktør = new AktørIdPersonident(a.getArbeidsforhold().getAktørId());
-            }
-            return new UtbetalingsgradPrAktivitetDto(new AktivitetDto(aktør, a.getArbeidsforhold().getArbeidsforholdId() == null ? null : new InternArbeidsforholdRefDto(a.getArbeidsforhold().getArbeidsforholdId()), mapUttakArbeidType(a.getArbeidsforhold().getType())), perioder);
-        }).toList();
+                var perioder = a.getPerioder().entrySet().stream().map(p -> new PeriodeMedUtbetalingsgradDto(
+                    new Periode(p.getKey().getFom(), p.getKey().getTom()),
+                    Utbetalingsgrad.fra(100),
+                    Aktivitetsgrad.fra(FinnAktivitetsgrad.finnAktivitetsgrad(p.getValue())))).toList();
+                Aktør aktør = null;
+                if (a.getArbeidsforhold().getOrganisasjonsnummer() != null) {
+                    aktør = new Organisasjon(a.getArbeidsforhold().getOrganisasjonsnummer());
+                } else if (a.getArbeidsforhold().getAktørId() != null) {
+                    aktør = new AktørIdPersonident(a.getArbeidsforhold().getAktørId());
+                }
+                return new UtbetalingsgradPrAktivitetDto(new AktivitetDto(aktør, a.getArbeidsforhold().getArbeidsforholdId() == null ? null : new InternArbeidsforholdRefDto(a.getArbeidsforhold().getArbeidsforholdId()), mapUttakArbeidType(a.getArbeidsforhold().getType())), perioder);
+            }).toList();
         return utbetalingsgrader;
     }
 
@@ -169,68 +172,12 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
         Map<AktivitetDto, PeriodeMedUtbetalingsgradDto> res = new HashMap<>();
         for (var entry : perArbeidsforhold.entrySet()) {
             var utbetalingsgrader = entry.getValue();
-            var aktivitetsgrad = hentAktivitetsgrad(utbetalingsgrader);
+            var aktivitetsgrad = FinnAktivitetsgrad.finnAktivitetsgrad(utbetalingsgrader);
             var utbetalingsgradPeriode = lagPeriode(periode, utbetalingsgrader.getUtbetalingsgrad(), aktivitetsgrad);
             res.put(entry.getKey(), utbetalingsgradPeriode);
         }
         return res;
     }
-
-    private static BigDecimal hentAktivitetsgrad(Utbetalingsgrader utbetalingsgrader) {
-        if (utbetalingsgrader.getNormalArbeidstid().isZero()) {
-            return new BigDecimal(100).subtract(utbetalingsgrader.getUtbetalingsgrad());
-        }
-
-        final Duration faktiskArbeidstid;
-        if (utbetalingsgrader.getFaktiskArbeidstid() != null) {
-            faktiskArbeidstid = utbetalingsgrader.getFaktiskArbeidstid();
-        } else {
-            faktiskArbeidstid = Duration.ofHours(0L);
-        }
-
-        final BigDecimal HUNDRE_PROSENT = new BigDecimal(100);
-
-        /*
-         * XXX: Dette er samme måte å regne ut på som i uttak. På sikt bør vi nok flytte
-         *      denne logikken til pleiepenger-barn-uttak.
-         */
-        final BigDecimal aktivitetsgrad = new BigDecimal(faktiskArbeidstid.toMillis()).setScale(2, RoundingMode.HALF_DOWN)
-            .divide(new BigDecimal(utbetalingsgrader.getNormalArbeidstid().toMillis()), 2, RoundingMode.HALF_DOWN)
-            .multiply(HUNDRE_PROSENT);
-
-        if (aktivitetsgrad.compareTo(HUNDRE_PROSENT) >= 0) {
-            return HUNDRE_PROSENT;
-        }
-
-        return aktivitetsgrad;
-    }
-
-
-    private static BigDecimal hentAktivitetsgrad(ArbeidsforholdPeriodeInfo arbeidsforholdPeriodeInfo) {
-        if (arbeidsforholdPeriodeInfo.getJobberNormalt().isZero()) {
-            return BigDecimal.ZERO;
-        }
-
-        final Duration faktiskArbeidstid;
-        faktiskArbeidstid = arbeidsforholdPeriodeInfo.getJobberNå();
-
-        final BigDecimal HUNDRE_PROSENT = new BigDecimal(100);
-
-        /*
-         * XXX: Dette er samme måte å regne ut på som i uttak. På sikt bør vi nok flytte
-         *      denne logikken til pleiepenger-barn-uttak.
-         */
-        final BigDecimal aktivitetsgrad = new BigDecimal(faktiskArbeidstid.toMillis()).setScale(2, RoundingMode.HALF_DOWN)
-            .divide(new BigDecimal(arbeidsforholdPeriodeInfo.getJobberNormalt().toMillis()), 2, RoundingMode.HALF_DOWN)
-            .multiply(HUNDRE_PROSENT);
-
-        if (aktivitetsgrad.compareTo(HUNDRE_PROSENT) >= 0) {
-            return HUNDRE_PROSENT;
-        }
-
-        return aktivitetsgrad;
-    }
-
 
     private static AktivitetDto mapUtbetalingsgradArbeidsforhold(Utbetalingsgrader utbGrad) {
         Arbeidsforhold arbeidsforhold = utbGrad.getArbeidsforhold();
