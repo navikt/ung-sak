@@ -19439,6 +19439,33 @@
         "tags" : [ "prosesstask" ]
       }
     },
+    "/psb-endret-sykdom-perioder" : {
+      "post" : {
+        "description" : "Henter perioder til vurdering pga endret sykdom",
+        "operationId" : "hentEndretSykdomPerioder",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          },
+          "description" : "Behandling-UUID",
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Henter perioder til vurdering pga endret sykdom",
+        "tags" : [ "forvaltning" ]
+      }
+    },
     "/punsj/journalpost/uferdig" : {
       "get" : {
         "deprecated" : true,

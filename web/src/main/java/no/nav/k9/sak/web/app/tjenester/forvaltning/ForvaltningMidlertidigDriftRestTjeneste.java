@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -80,8 +81,10 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.kodeverk.person.Diskresjonskode;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
@@ -92,6 +95,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.pip.PipRepository;
 import no.nav.k9.sak.domene.person.pdl.TilknytningTjeneste;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.hendelse.stønadstatistikk.StønadstatistikkService;
 import no.nav.k9.sak.kontrakt.KortTekst;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
@@ -112,6 +116,7 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLo
 import no.nav.k9.sak.web.app.tjenester.forvaltning.rapportering.DriftLesetilgangVurderer;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.PleietrengendeRevurderingPerioderTjeneste;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 /**
@@ -145,6 +150,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
 
     private DokumentValidatorProvider dokumentValidatorProvider;
 
+    private PleietrengendeRevurderingPerioderTjeneste pleietrengendeRevurderingPerioderTjeneste;
+
     public ForvaltningMidlertidigDriftRestTjeneste() {
         // For Rest-CDI
     }
@@ -163,7 +170,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                                                    PipRepository pipRepository,
                                                    TilknytningTjeneste tilknytningTjeneste,
                                                    Pep pep,
-                                                   DokumentValidatorProvider dokumentValidatorProvider) {
+                                                   DokumentValidatorProvider dokumentValidatorProvider, PleietrengendeRevurderingPerioderTjeneste pleietrengendeRevurderingPerioderTjeneste) {
 
         this.tpsTjeneste = tpsTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
@@ -179,6 +186,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         this.tilknytningTjeneste = tilknytningTjeneste;
         this.pep = pep;
         this.dokumentValidatorProvider = dokumentValidatorProvider;
+        this.pleietrengendeRevurderingPerioderTjeneste = pleietrengendeRevurderingPerioderTjeneste;
     }
 
 
@@ -699,6 +707,34 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     }
 
 
+    @POST
+    @Path("/psb-endret-sykdom-perioder")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Henter perioder til vurdering pga endret sykdom",
+        summary = ("Henter perioder til vurdering pga endret sykdom"),
+        tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response hentEndretSykdomPerioder(
+        @Parameter(description = "Behandling-UUID")
+        @NotNull
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+        BehandlingIdDto behandlingIdDto) {
+        var behandlingId = behandlingIdDto.getBehandlingId();
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        var tidslinje = pleietrengendeRevurderingPerioderTjeneste.utledBerørtePerioderPåPleietrengende(BehandlingReferanse.fra(behandling), Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR));
+
+        var result = new HashMap<>();
+        for (BehandlingÅrsakType v : BehandlingÅrsakType.values()) {
+            var resultTidslinje = tidslinje.filterValue(it -> it.contains(v));
+            if (!resultTidslinje.isEmpty()) {
+                result.put(v, resultTidslinje.getLocalDateIntervals().stream().map(di -> DatoIntervallEntitet.fraOgMedTilOgMed(di.getFomDato(), di.getTomDato())).toList());
+            }
+        }
+        return Response.ok(result).build();
+    }
+
     public static class AvbrytAksjonspunktDto {
 
         @Valid
@@ -768,7 +804,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         if (behandling.erAvsluttet()) {
             throw new IllegalStateException("Behandling er avsluttet");
         }
-        if (!behandling.isBehandlingPåVent()){
+        if (!behandling.isBehandlingPåVent()) {
             throw new IllegalStateException("Behandlingen må være på vent");
         }
         Aksjonspunkt aksjonspunkt = behandling.getAksjonspunktFor(dto.getAksjonspunktKode()).orElseThrow(() -> new IllegalStateException("Har ikke aksjonspunkt med kode " + dto.getAksjonspunktKode()));
