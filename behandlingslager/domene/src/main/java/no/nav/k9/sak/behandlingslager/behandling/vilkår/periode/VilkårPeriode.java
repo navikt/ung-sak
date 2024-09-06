@@ -274,7 +274,7 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
     }
 
     void setAvslagsårsak(Avslagsårsak avslagsårsak) {
-        this.avslagsårsak = avslagsårsak;
+        this.avslagsårsak = avslagsårsak == null ? Avslagsårsak.UDEFINERT : avslagsårsak;
     }
 
     void setManueltVurdert(boolean manueltVurdert) {

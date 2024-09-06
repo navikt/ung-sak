@@ -92,13 +92,6 @@ public class VilkårBuilder {
         return this;
     }
 
-    public LocalDate getMaxDatoTilVurdering() {
-        return vilkåret.getPerioder().stream()
-            .map(VilkårPeriode::getPeriode)
-            .map(DatoIntervallEntitet::getTomDato)
-            .max(LocalDate::compareTo)
-            .orElse(Tid.TIDENES_ENDE);
-    }
 
     /**
      * Markerer at denne ikke skal legges til i settet med vilkår
