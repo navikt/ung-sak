@@ -194,12 +194,12 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
     // Kopierer originalt vilkårsresultat for perioder som ikke lenger vurderes i behandlingen
     // Dersom periodene ikke fantes originalt klippes de bort
     // TODO: Det ligger også en håndtering av dette i PreconditionBeregningSteg (se GjenopprettPerioderSomIkkeVurderesTjeneste) for bg-vilkårt. Optimalt sett burde denne vurderingen ligge så nærme som mulig vurdering av vilkåret, og bruke ein felles funksjonalitet.
-    private void ryddVilkårsperioderSomIkkeLengerVurderes(Behandling behandling, LocalDateTimeline<Boolean> tidslinje, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
+    private void ryddVilkårsperioderSomIkkeLengerVurderes(Behandling behandling, LocalDateTimeline<Utfall> vilkårutfallTidslinje, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
         if (behandling.getOriginalBehandlingId().isPresent()) {
             for (VilkårType vilkårType : AVHENGIGE_VILKÅR) {
                 var resultat = vilkårTjeneste.gjenopprettVilkårsutfallForPerioderSomIkkeVurderes(BehandlingReferanse.fra(behandling), vilkårType, perioderTilVurdering, true);
                 var fjernetPerioder = resultat.fjernetPerioder();
-                var intersects = tidslinje.filterValue(it -> it).intersects(TidslinjeUtil.tilTidslinjeKomprimert(fjernetPerioder));
+                var intersects = vilkårutfallTidslinje.filterValue(it -> it.equals(Utfall.OPPFYLT)).intersects(TidslinjeUtil.tilTidslinjeKomprimert(fjernetPerioder));
                 if (intersects) {
                     throw new IllegalStateException("Kan ikke fjerne innvilget periode");
                 }
@@ -207,15 +207,15 @@ public class FastsettSkjæringstidspunkterForYtelseSteg implements BehandlingSte
         }
     }
 
-    private LocalDateTimeline<Boolean> finnAllePerioderMedUtfall(Vilkårene vilkårene, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
+    private LocalDateTimeline<Utfall> finnAllePerioderMedUtfall(Vilkårene vilkårene, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste) {
         var definerendeVilkår = perioderTilVurderingTjeneste.definerendeVilkår();
-        LocalDateTimeline<Boolean> tidslinje = LocalDateTimeline.empty();
+        LocalDateTimeline<Utfall> tidslinje = LocalDateTimeline.empty();
 
         for (VilkårType vilkårType : definerendeVilkår) {
             var segmenter = vilkårene.getVilkår(vilkårType).orElseThrow()
                 .getPerioder()
                 .stream()
-                .map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), Objects.equals(Utfall.OPPFYLT, it.getGjeldendeUtfall())))
+                .map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), it.getGjeldendeUtfall()))
                 .collect(Collectors.toCollection(TreeSet::new));
             tidslinje = tidslinje.combine(new LocalDateTimeline<>(segmenter), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
