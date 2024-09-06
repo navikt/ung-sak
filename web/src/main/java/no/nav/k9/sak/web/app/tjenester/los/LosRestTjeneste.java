@@ -1,5 +1,12 @@
 package no.nav.k9.sak.web.app.tjenester.los;
 
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import static no.nav.k9.sak.web.app.tjenester.los.LosRestTjeneste.BASE_PATH;
+
+import java.util.ArrayList;
+import java.util.Optional;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -10,7 +17,12 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
@@ -28,13 +40,6 @@ import no.nav.k9.sak.kontrakt.produksjonsstyring.los.LosOpplysningerSomManglerIK
 import no.nav.k9.sak.web.app.tjenester.los.dto.MerknadDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
-
-import java.util.ArrayList;
-import java.util.Optional;
-
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.k9.sak.web.app.tjenester.los.LosRestTjeneste.BASE_PATH;
 
 @ApplicationScoped
 @Path(BASE_PATH)
@@ -157,7 +162,6 @@ public class LosRestTjeneste {
 
     @POST
     @Path(MERKNAD)
-    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Lagrer merknad på behandling", tags = "los")
     @BeskyttetRessurs(action = READ, resource = FAGSAK) // Står som read så veileder har tilgang
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
