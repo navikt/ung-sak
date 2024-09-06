@@ -45,6 +45,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.opplæringspenger.dokument.OpplæringDokumentType;
 import no.nav.k9.sak.kontrakt.sykdom.SykdomVurderingType;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDiagnosekoderDto;
 import no.nav.k9.sak.kontrakt.sykdom.dokument.SykdomDokumentDto;
@@ -61,6 +62,8 @@ import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.web.app.tjenester.behandling.sykdom.SykdomProsessDriver;
 import no.nav.k9.sak.web.app.tjenester.dokument.DokumentRestTjenesteFeil;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokument;
+import no.nav.k9.sak.ytelse.opplaeringspenger.repo.dokument.OpplæringDokumentRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.PersonRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomDiagnoser;
@@ -97,6 +100,7 @@ public class PleietrengendeSykdomDokumentRestTjeneste {
     public static final String DOKUMENTER_SOM_IKKE_HAR_OPPDATERT_EKSISTERENDE_VURDERINGER_PATH = BASE_PATH + "/eksisterendevurderinger";
 
     private boolean enableNyttDokument;
+    private boolean olpAktivert;
 
     private BehandlingRepository behandlingRepository;
     private PleietrengendeSykdomDokumentOversiktMapper pleietrengendeSykdomDokumentOversiktMapper;
@@ -105,6 +109,7 @@ public class PleietrengendeSykdomDokumentRestTjeneste {
     private SykdomVurderingRepository sykdomVurderingRepository;
     private MedisinskGrunnlagRepository medisinskGrunnlagRepository;
     private DokumentArkivTjeneste dokumentArkivTjeneste;
+    private OpplæringDokumentRepository opplæringDokumentRepository;
 
     private SykdomProsessDriver prosessDriver;
 
@@ -122,7 +127,10 @@ public class PleietrengendeSykdomDokumentRestTjeneste {
         SykdomVurderingRepository sykdomVurderingRepository,
         DokumentArkivTjeneste dokumentArkivTjeneste,
         MedisinskGrunnlagRepository medisinskGrunnlagRepository,
-        @KonfigVerdi(value = "TEST_NYTT_DOKUMENT", defaultVerdi = "false") boolean enableNyttDokument, SykdomProsessDriver prosessDriver) {
+        OpplæringDokumentRepository opplæringDokumentRepository,
+        @KonfigVerdi(value = "YTELSE_OLP_AKTIVERT", defaultVerdi = "false") boolean olpAktivert,
+        @KonfigVerdi(value = "TEST_NYTT_DOKUMENT", defaultVerdi = "false") boolean enableNyttDokument,
+        SykdomProsessDriver prosessDriver) {
         this.pleietrengendeSykdomDokumentOversiktMapper = pleietrengendeSykdomDokumentOversiktMapper;
         this.behandlingRepository = behandlingRepository;
         this.pleietrengendeSykdomDokumentRepository = pleietrengendeSykdomDokumentRepository;
@@ -132,6 +140,8 @@ public class PleietrengendeSykdomDokumentRestTjeneste {
         this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
         this.enableNyttDokument = enableNyttDokument;
         this.prosessDriver = prosessDriver;
+        this.opplæringDokumentRepository = opplæringDokumentRepository;
+        this.olpAktivert = olpAktivert;
     }
 
     @GET
@@ -408,6 +418,13 @@ public class PleietrengendeSykdomDokumentRestTjeneste {
         ));
 
         pleietrengendeSykdomDokumentRepository.oppdater(dokument.getInformasjon());
+
+        //TODO dette er en midlertidig løsning for å muliggjøre testing. Må endres!!!
+        if (olpAktivert && dokument.getInformasjon().getType().equals(SykdomDokumentType.LEGEERKLÆRING_MED_DOKUMENTASJON_AV_OPPLÆRING)) {
+            if (!opplæringDokumentRepository.finnesDokument(dokument.getJournalpostId(), dokument.getDokumentInfoId())) {
+                opplæringDokumentRepository.lagre(new OpplæringDokument(dokument.getJournalpostId(), dokument.getDokumentInfoId(), OpplæringDokumentType.LEGEERKLÆRING_MED_DOKUMENTASJON_AV_OPPLÆRING, dokument.getSøkersBehandlingUuid(), dokument.getDatert(), dokument.getMottattTidspunkt()));
+            }
+        }
     }
 
     private PleietrengendeSykdomDokument hentSattDuplikatDokument(SykdomDokumentEndringDto sykdomDokumentEndringDto, final Behandling behandling, final Long dokumentId) {
