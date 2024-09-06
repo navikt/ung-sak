@@ -20,10 +20,9 @@ public class MapUtenlandsopphold {
 
     public static Map<LukketPeriode, UtenlandsoppholdInfo> map(Map<KravDokument, List<VurdertSøktPeriode<Søknadsperiode>>> kravDokumenter,
                                                                Set<PerioderFraSøknad> perioderFraSøknader,
-                                                               LocalDateTimeline<Boolean> tidslinjeTilVurdering,
-                                                               boolean nyUtledningAvUtenlandsopphold) {
+                                                               LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
 
-        LocalDateTimeline<UtledetUtenlandsopphold> utenlandsoppholdTidslinje = UtenlandsoppholdTidslinjeTjeneste.byggTidslinje(kravDokumenter, perioderFraSøknader, nyUtledningAvUtenlandsopphold);
+        LocalDateTimeline<UtledetUtenlandsopphold> utenlandsoppholdTidslinje = UtenlandsoppholdTidslinjeTjeneste.byggTidslinje(kravDokumenter, perioderFraSøknader);
         LocalDateTimeline<UtenlandsoppholdInfo> resultatTimeline = utenlandsoppholdTidslinje.mapValue(v -> new UtenlandsoppholdInfo(mapÅrsak(v.getÅrsak()), v.getLandkode().getKode()));
 
         var utenlandsperioder = new HashMap<LukketPeriode, UtenlandsoppholdInfo>();

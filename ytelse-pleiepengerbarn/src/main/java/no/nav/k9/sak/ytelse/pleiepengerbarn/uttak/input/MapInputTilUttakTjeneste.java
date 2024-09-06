@@ -71,19 +71,16 @@ public class MapInputTilUttakTjeneste {
     private final String unntak;
     private final boolean skalKjøreNyLogikkForSpeiling;
     private final boolean skalHaInaktivVed847B;
-    private final boolean nyUtledningAvUtenlandsopphold;
 
     @Inject
     public MapInputTilUttakTjeneste(HentDataTilUttakTjeneste hentDataTilUttakTjeneste,
                                     @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak,
                                     @KonfigVerdi(value = "IKKE_YRKESAKTIV_UTEN_SPEILING", required = false, defaultVerdi = "false") boolean skalKjøreNyLogikkForSpeiling,
-                                    @KonfigVerdi(value = "INAKTIV_VED_8_47_B", defaultVerdi = "false") boolean skalHaInaktivVed847B,
-                                    @KonfigVerdi(value = "ENABLE_NY_UTLEDNING_AV_UTENLANDSOPPHOLD", defaultVerdi = "false") boolean nyUtledningAvUtenlandsopphold) {
+                                    @KonfigVerdi(value = "INAKTIV_VED_8_47_B", defaultVerdi = "false") boolean skalHaInaktivVed847B) {
         this.hentDataTilUttakTjeneste = hentDataTilUttakTjeneste;
         this.unntak = unntak;
         this.skalKjøreNyLogikkForSpeiling = skalKjøreNyLogikkForSpeiling;
         this.skalHaInaktivVed847B = skalHaInaktivVed847B;
-        this.nyUtledningAvUtenlandsopphold = nyUtledningAvUtenlandsopphold;
     }
 
 
@@ -174,7 +171,7 @@ public class MapInputTilUttakTjeneste {
         var nattevåksperioder = tilNattevåk(unntakEtablertTilsynForPleietrengende, innvilgedePerioderMedSykdom);
         final Map<LukketPeriode, List<String>> kravprioritet = mapKravprioritetsliste(input.getKravprioritet());
         final List<LukketPeriode> perioderSomSkalTilbakestilles = input.getPerioderSomSkalTilbakestilles().stream().map(p -> new LukketPeriode(p.getFomDato(), p.getTomDato())).toList();
-        Map<LukketPeriode, UtenlandsoppholdInfo> utenlandsoppholdperioder = MapUtenlandsopphold.map(vurderteSøknadsperioder, perioderFraSøknader, tidslinjeTilVurdering, nyUtledningAvUtenlandsopphold);
+        Map<LukketPeriode, UtenlandsoppholdInfo> utenlandsoppholdperioder = MapUtenlandsopphold.map(vurderteSøknadsperioder, perioderFraSøknader, tidslinjeTilVurdering);
 
         Map<String, String> sisteVedtatteBehandlingForAvktuellBehandling = mapSisteVedtatteBehandlingForBehandling(input.getSisteVedtatteBehandlingForBehandling());
         Map<LukketPeriode, OverstyrtInput> overstyrtUttak = map(input.getOverstyrtUttak());
