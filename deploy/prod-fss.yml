@@ -29,6 +29,13 @@ spec:
   prometheus:
     enabled: true
     path: /k9/sak/internal/metrics/prometheus
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+      destinations:
+        - id: "grafana-lgtm"
+        - id: "elastic-apm"
   resources:
     limits:
       cpu: "4000m"
@@ -89,29 +96,9 @@ spec:
     - name: DEFAULTDS_URL
       value: jdbc:postgresql://A01DBVL012.adeo.no:5432/k9-sak
 
-    # Appdynamics
-    - name: APPD_ENABLED
-      value: "true"
-    - name: APPDYNAMICS_CONTROLLER_HOST_NAME
-      value: appdynamics.adeo.no
-    - name: APPDYNAMICS_CONTROLLER_PORT
-      value: "443"
-    - name: APPDYNAMICS_CONTROLLER_SSL_ENABLED
-      value: "true"
-    - name: APPDYNAMICS_AGENT_ACCOUNT_NAME
-      value: PROD
-
-      # open telemetry, kommenter inn og fjern appdynamics-config (og fra Dockerfile) når testet ut nok i dev
-#    - name: "OTEL_EXPORTER_OTLP_ENDPOINT"
-#      value: "https://elastic-apm.adeo.no"
-#    - name: "OTEL_METRICS_EXPORTER"
-#      value: "otlp"
-#    - name: "OTEL_LOGS_EXPORTER"
-#      value: "none"
-#    - name: "OTEL_RESOURCE_ATTRIBUTES"
-#      value: "service.name=k9-sak,service.version=k9-sak,deployment.environment=p"
-#    - name: "OTEL_TRACES_EXPORTER"
-#      value: "otlp"
+    # open telemetry
+    - name: OTEL_RESOURCE_ATTRIBUTES
+      value: "service.name=k9-sak,service.namespace=k9saksbehandling,deployment.environment=p,nais.backend=elastic-apm;grafana-lgtm"
 
     # Integrasjoner (Kafka)
     - name: KAFKA_AKSJONSPUNKTHENDELSE_TOPIC
