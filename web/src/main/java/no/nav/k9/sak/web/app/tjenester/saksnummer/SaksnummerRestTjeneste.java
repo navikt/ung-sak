@@ -2,6 +2,7 @@ package no.nav.k9.sak.web.app.tjenester.saksnummer;
 
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -21,7 +22,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
@@ -74,11 +74,11 @@ public class SaksnummerRestTjeneste {
         var eksisterende = reservertSaksnummerRepository.hent(dto.getYtelseType(), dto.getBrukerAktørId(), dto.getPleietrengendeAktørId(), dto.getRelatertPersonAktørId(), dto.getBehandlingsår());
         if (eksisterende.isPresent()) {
             saksnummer = new SaksnummerDto(eksisterende.get().getSaksnummer());
-            log.info("Returnerer eksisterende reservert saksnummer: " + saksnummer);
+            log.info("Returnerer eksisterende reservert saksnummer: {}", saksnummer);
         } else {
             saksnummer = new SaksnummerDto(saksnummerRepository.genererNyttSaksnummer());
-            reservertSaksnummerRepository.lagre(saksnummer.getVerdi(), dto.getYtelseType(), dto.getBrukerAktørId(), dto.getPleietrengendeAktørId(), dto.getRelatertPersonAktørId(), dto.getBehandlingsår());
-            log.info("Reserverte nytt saksnummer: " + saksnummer);
+            reservertSaksnummerRepository.lagre(saksnummer.getVerdi(), dto.getYtelseType(), dto.getBrukerAktørId(), dto.getPleietrengendeAktørId(), dto.getRelatertPersonAktørId(), dto.getBehandlingsår(), dto.getBarnAktørIder() != null ? dto.getBarnAktørIder() : List.of());
+            log.info("Reserverte nytt saksnummer: {}", saksnummer);
         }
 
         return saksnummer;
@@ -135,6 +135,12 @@ public class SaksnummerRestTjeneste {
                 throw new IllegalArgumentException("Støtter ikke relatert person for " + dto.getYtelseType());
             }
             sjekkAktørIdMotPdl(dto.getRelatertPersonAktørId());
+        }
+        if (dto.getBarnAktørIder() != null && !dto.getBarnAktørIder().isEmpty()) {
+            if (!List.of(FagsakYtelseType.OMSORGSPENGER, FagsakYtelseType.OMSORGSPENGER_MA).contains(dto.getYtelseType())) {
+                throw new IllegalArgumentException("Støtter ikke barn for " + dto.getYtelseType());
+            }
+            dto.getBarnAktørIder().forEach(this::sjekkAktørIdMotPdl);
         }
     }
 

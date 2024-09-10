@@ -24,6 +24,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Journalpost;
+import no.nav.k9.sak.behandlingslager.saksnummer.ReservertSaksnummerRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
@@ -44,13 +45,14 @@ public class PipRepositoryTest {
     private PipRepository pipRepository ;
     private FagsakRepository fagsakRepository ;
     private BasicBehandlingBuilder behandlingBuilder ;
-
+    private ReservertSaksnummerRepository reservertSaksnummerRepository;
 
     @BeforeEach
     public void setup() {
         repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         behandlingRepository = repositoryProvider.getBehandlingRepository();
-        pipRepository = new PipRepository(entityManager);
+        reservertSaksnummerRepository = new ReservertSaksnummerRepository(entityManager);
+        pipRepository = new PipRepository(entityManager, reservertSaksnummerRepository);
         fagsakRepository = new FagsakRepository(entityManager);
         behandlingBuilder = new BasicBehandlingBuilder(entityManager);
     }
