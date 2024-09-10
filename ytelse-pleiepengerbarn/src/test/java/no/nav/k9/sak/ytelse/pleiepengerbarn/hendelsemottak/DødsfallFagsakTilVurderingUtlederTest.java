@@ -65,6 +65,21 @@ class DødsfallFagsakTilVurderingUtlederTest {
     }
 
     @Test
+    void skal_ikke_returnere_årsak_ingen_fagsaker_for_ugyldig_aktør() {
+        AktørId bruker_med_npid = AktørId.dummy();
+        when(personinfoAdapter.hentPersoninfo(bruker_med_npid))
+            .thenThrow(new IllegalStateException("Ugyldig aktør"));
+
+        var builder = new HendelseInfo.Builder();
+        builder.leggTilAktør(bruker_med_npid);
+        builder.medHendelseId("1");
+        builder.medOpprettet(LocalDateTime.now());
+        var fagsakBehandlingÅrsakTypeMap = utleder.finnFagsakerTilVurdering(new DødsfallHendelse(builder.build(), DØDSDATO));
+
+        assertThat(fagsakBehandlingÅrsakTypeMap.isEmpty()).isTrue();
+    }
+
+    @Test
     void skal_ikke_returnere_årsak_dersom_alle_perioder_er_avslått_i_siste_avsluttet_behandling() {
 
         scenarioBuilder.leggTilVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR, Utfall.IKKE_OPPFYLT, new Periode(STP, STP.plusDays(10)));

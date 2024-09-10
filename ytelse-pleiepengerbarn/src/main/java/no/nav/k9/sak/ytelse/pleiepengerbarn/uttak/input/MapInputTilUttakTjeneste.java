@@ -76,8 +76,7 @@ public class MapInputTilUttakTjeneste {
     public MapInputTilUttakTjeneste(HentDataTilUttakTjeneste hentDataTilUttakTjeneste,
                                     @KonfigVerdi(value = "psb.uttak.unntak.aktiviteter", required = false, defaultVerdi = "") String unntak,
                                     @KonfigVerdi(value = "IKKE_YRKESAKTIV_UTEN_SPEILING", required = false, defaultVerdi = "false") boolean skalKjøreNyLogikkForSpeiling,
-                                    @KonfigVerdi(value = "INAKTIV_VED_8_47_B", defaultVerdi = "false") boolean skalHaInaktivVed847B
-                                    ) {
+                                    @KonfigVerdi(value = "INAKTIV_VED_8_47_B", defaultVerdi = "false") boolean skalHaInaktivVed847B) {
         this.hentDataTilUttakTjeneste = hentDataTilUttakTjeneste;
         this.unntak = unntak;
         this.skalKjøreNyLogikkForSpeiling = skalKjøreNyLogikkForSpeiling;

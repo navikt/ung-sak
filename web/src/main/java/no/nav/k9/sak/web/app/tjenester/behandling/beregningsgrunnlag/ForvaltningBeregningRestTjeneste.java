@@ -384,8 +384,6 @@ public class ForvaltningBeregningRestTjeneste {
         if (overlappendePeriode.isEmpty()) {
             throw new IllegalArgumentException("Fant ingen overlappende periode med opphørdato");
         }
-        var periode = new OverstyrBeregningInputPeriode(overlappendePeriode.get().getFomDato(),
-            List.of(new OverstyrBeregningAktivitet(orgNummer, null, null, null, null, opphørsdatoRefusjon.getOpphørRefusjon(), true)));
         loggForvaltningTjeneste(behandling.getFagsak(), "/overstyr-opphør-refusjon", begrunnelse.getTekst());
         forvaltningOverstyrInputBeregning.overstyrOpphørRefusjon(behandling,
             overlappendePeriode.get(),

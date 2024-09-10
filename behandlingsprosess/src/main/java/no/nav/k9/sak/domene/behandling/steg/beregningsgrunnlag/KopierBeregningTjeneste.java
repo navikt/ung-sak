@@ -15,12 +15,14 @@ import no.nav.folketrygdloven.beregningsgrunnlag.BeregningsgrunnlagVilkårTjenes
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
+import no.nav.k9.sak.vilkår.VilkårTjeneste;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.InputOverstyringPeriode;
 
@@ -32,7 +34,7 @@ public class KopierBeregningTjeneste {
 
     private static final Logger log = LoggerFactory.getLogger(KopierBeregningTjeneste.class);
     private final BehandlingRepository behandlingRepository;
-    private final BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
+    private final VilkårTjeneste vilkårTjeneste;
     private final BeregningsgrunnlagTjeneste kalkulusTjeneste;
     private final BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
     private final KalkulusStartpunktUtleder kalkulusStartpunktUtleder;
@@ -40,12 +42,12 @@ public class KopierBeregningTjeneste {
 
     @Inject
     public KopierBeregningTjeneste(BehandlingRepository behandlingRepository,
-                                   BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
+                                   BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste, VilkårTjeneste vilkårTjeneste,
                                    BeregningsgrunnlagTjeneste kalkulusTjeneste,
                                    BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
                                    KalkulusStartpunktUtleder kalkulusStartpunktUtleder) {
         this.behandlingRepository = behandlingRepository;
-        this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
+        this.vilkårTjeneste = vilkårTjeneste;
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
         this.kalkulusStartpunktUtleder = kalkulusStartpunktUtleder;
@@ -107,10 +109,13 @@ public class KopierBeregningTjeneste {
                 log.info("Kopierer beregning for startpunkt {} og perioder {}", startpunktForlengelse.getKode(), perioderMedStartpunktForlengelse);
                 kalkulusTjeneste.kopier(ref, perioderMedStartpunktForlengelse, BehandlingStegType.VURDER_VILKAR_BERGRUNN);
                 var originalBehandlingId = ref.getOriginalBehandlingId().orElseThrow();
-                beregningsgrunnlagVilkårTjeneste.kopierVilkårresultatFraForrigeBehandling(
+                var forlengelseperioder = perioderMedStartpunktForlengelse.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet());
+                vilkårTjeneste.kopierOriginaltVilkårresultat(
                     ref.getBehandlingId(),
                     originalBehandlingId,
-                    perioderMedStartpunktForlengelse.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet()));
+                    forlengelseperioder,
+                    VilkårType.BEREGNINGSGRUNNLAGVILKÅR, false);
+
             }
             var startpunktKontrollerFakta = perioderPrStartpunkt.get(KONTROLLER_FAKTA_BEREGNING);
             if (!startpunktKontrollerFakta.isEmpty()) {

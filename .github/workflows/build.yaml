@@ -21,8 +21,9 @@ jobs:
     uses: navikt/sif-gha-workflows/.github/workflows/maven-build-app-db.yml@main
     with:
       java-version: 21
-      build-image: ${{ github.ref_name == 'master' }}
-      push-image: ${{ github.ref_name == 'master' }}
+      build-image: ${{ github.actor != 'dependabot[bot]' }}
+      push-image: ${{ github.ref_name == github.event.repository.default_branch}}
+      upload-image: ${{ github.ref_name != github.event.repository.default_branch }}
       db_schema: k9sak_unit
       pg_version: 12
     secrets: inherit
@@ -59,14 +60,16 @@ jobs:
     secrets: inherit
     permissions:
       id-token: write
-      contents: write
-      issues: write
+      contents: read
       packages: read
-    uses: navikt/sif-gha-workflows/.github/workflows/verdikjede-test.yml@main
-    if: github.ref_name == 'master'
+    uses: navikt/sif-gha-workflows/.github/workflows/verdikjede-test-v2.yml@main
+    if: ${{github.actor != 'dependabot[bot]'}}
     needs: build-app
     with:
       tag: ${{ needs.build-app.outputs.build-version }}
+      suites: "pleiepenger,livetssluttfase,annet,frontend"
+      override_image_artifact_name: ${{ github.ref_name != github.event.repository.default_branch && needs.build-app.outputs.image-artifact-name || null }}
+      image_version: ${{ needs.build-app.outputs.build-version }}
 
 
   deploy-dev:
@@ -74,12 +77,12 @@ jobs:
     permissions:
       id-token: write
       contents: write
+    # Multiline if condition with pipe must be defined without using ${{ }} around the expressions
     if: |
-      ${{ github.ref_name == 'master' 
+      github.ref_name == 'master'
         && needs.verdikjede-tester.outputs.pleiepenger == 'success'
         && needs.verdikjede-tester.outputs.livetssluttfase == 'success'
         && needs.verdikjede-tester.outputs.annet == 'success'
-      }}
     needs: [build-app, verdikjede-tester]
     uses: navikt/sif-gha-workflows/.github/workflows/maven-deploy.yml@main
     with:

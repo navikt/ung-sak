@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
@@ -52,6 +55,7 @@ public class BehandlingBackendRestTjeneste {
 
     static final String BASE_PATH = "/behandling";
     private static final String BACKEND_ROOT_PATH = BASE_PATH + "/backend-root";
+    private static final Logger log = LoggerFactory.getLogger(BehandlingBackendRestTjeneste.class);
 
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste;
 
@@ -107,10 +111,13 @@ public class BehandlingBackendRestTjeneste {
             var behandling = behandlingsprosessTjeneste.hentBehandling(behandlingUuid);
             if (behandling.erStatusFerdigbehandlet()) {
                 result.add(new BehandlingStatusListe.StatusDto(behandlingUuid, null, behandling.getStatus()));
+                log.info("Refreshet ikke behandling {} siden den er ferdigbehandlet", behandlingUuid);
             } else if (!behandling.isBehandlingPåVent() && !sjekkProsessering.opprettTaskForOppfrisking(behandling, false)) {
                 result.add(new BehandlingStatusListe.StatusDto(behandlingUuid, null, behandling.getStatus()));
+                log.info("Refreshet ikke behandling {} siden den har pågaående eller feilet task", behandlingUuid);
             } else {
                 var taskStatus = sjekkProsessering.sjekkProsessTaskPågårForBehandling(behandling, null);
+                log.info("Taskstatus for behandling er {}", taskStatus.isEmpty() ? "null" : taskStatus.get().getStatus());
                 result.add(new BehandlingStatusListe.StatusDto(behandlingUuid, taskStatus.orElse(null), behandling.getStatus()));
             }
 
