@@ -56,17 +56,7 @@ public class SykdomAksjonspunktDto {
     @Valid
     private boolean ikkeSammenMedBarnet;
 
-    public SykdomAksjonspunktDto(boolean kanLøseAksjonspunkt,
-                                 boolean harUklassifiserteDokumenter,
-                                 boolean manglerDiagnosekode,
-                                 boolean manglerGodkjentLegeerklæring,
-                                 boolean manglerVurderingAvKontinuerligTilsynOgPleie,
-                                 boolean manglerVurderingAvToOmsorgspersoner,
-                                 boolean manglerVurderingAvILivetsSluttfase,
-                                 boolean harDataSomIkkeHarBlittTattMedIBehandling,
-                                 boolean nyttDokumentHarIkkekontrollertEksisterendeVurderinger,
-                                 boolean manglerVurderingAvLangvarigSykdom
-    ) {
+    public SykdomAksjonspunktDto() {
     }
 
     public SykdomAksjonspunktDto(boolean kanLøseAksjonspunkt,
