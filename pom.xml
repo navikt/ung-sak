@@ -585,7 +585,7 @@
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>org.jboss.logging</groupId>
                 <artifactId>jboss-logging</artifactId>
-                <version>3.6.0.Final</version>
+                <version>3.6.1.Final</version>
             </dependency>
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->
