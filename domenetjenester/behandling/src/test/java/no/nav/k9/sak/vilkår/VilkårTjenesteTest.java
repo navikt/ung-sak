@@ -175,6 +175,44 @@ class VilkårTjenesteTest {
         assertThat(nyPeriode.isPresent()).isFalse();
     }
 
+    @Test
+    void skal_ikke_kopiere_resultat_fra_forrige_behandling_dersom_perioden_er_inkludert_i_periode_til_vurdering() {
+        // Arrange
+        var vilkårBuilder = new VilkårBuilder(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        var fom = LocalDate.now();
+        var tom = LocalDate.now().plusDays(10);
+
+        vilkårBuilder.leggTil(lagVilkårperiode(vilkårBuilder, fom, tom, Utfall.OPPFYLT,
+            "En regelinput", "En regelevaluering"));
+        var vilkårResultatBuilder = Vilkårene.builder().leggTil(vilkårBuilder);
+        vilkårResultatRepository.lagre(behandling.getId(), vilkårResultatBuilder.build());
+
+        var vilkårBuilder2 = new VilkårBuilder(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        vilkårBuilder2.leggTil(lagVilkårperiode(vilkårBuilder2, fom.plusDays(5), tom, Utfall.IKKE_VURDERT,
+            null,
+            null));
+        var vilkårResultatBuilder2 = Vilkårene.builder().leggTil(vilkårBuilder2);
+        vilkårResultatRepository.lagre(revurdering.getId(), vilkårResultatBuilder2.build());
+
+        // Act
+        var resultat = vilkårTjeneste.gjenopprettVilkårsutfallForPerioderSomIkkeVurderes(
+            BehandlingReferanse.fra(revurdering),
+            VilkårType.BEREGNINGSGRUNNLAGVILKÅR,
+            List.of(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom)), true);
+
+        // Assert
+        assertThat(resultat.gjenopprettetPerioder().size()).isEqualTo(0);
+        assertThat(resultat.fjernetPerioder().size()).isEqualTo(0);
+        var nyttVilkårResultat = vilkårResultatRepository.hentHvisEksisterer(revurdering.getId());
+        var nyPeriode = nyttVilkårResultat.get().getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
+            .get()
+            .finnPeriodeForSkjæringstidspunkt(fom.plusDays(5));
+        assertThat(nyPeriode.getUtfall()).isEqualTo(Utfall.IKKE_VURDERT);
+        assertThat(nyPeriode.getRegelInput()).isNull();
+        assertThat(nyPeriode.getRegelEvaluering()).isNull();
+    }
+
+
 
     private static VilkårPeriodeBuilder lagVilkårperiode(VilkårBuilder vilkårBuilder, LocalDate fom, LocalDate tom, Utfall utfall, String regelinput, String regelevaluering) {
         var periodeBuilder = vilkårBuilder.hentBuilderFor(fom, tom);
