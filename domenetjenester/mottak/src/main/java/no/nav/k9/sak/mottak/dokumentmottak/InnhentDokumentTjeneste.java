@@ -28,7 +28,6 @@ import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
-import no.nav.k9.sak.behandling.prosessering.task.TilbakeTilStartBehandlingTask;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
@@ -99,7 +98,6 @@ public class InnhentDokumentTjeneste {
             taskGruppe = behandlingProsesseringTjeneste.opprettTaskGruppeForGjenopptaOppdaterFortsett(resultat.behandling, false, false);
         }
         lagreDokumenter(brevkodeMap, resultat.behandling);
-        håndterTilbakeTilStartMedUbehandletDokument(fagsak.getId(), resultat.behandling.getId(), taskGruppe);
 
         if (taskGruppe == null) {
             throw new IllegalStateException("Det er planlagt kjøringer som ikke har garantert rekkefølge. Sjekk oversikt over ventende tasker for eventuelt avbryte disse.");
@@ -152,24 +150,6 @@ public class InnhentDokumentTjeneste {
                 sjekkBehandlingHarIkkeÅpneTasks(sisteBehandling);
                 return BehandlingMedOpprettelseResultat.eksisterendeBehandling(sisteBehandling);
             }
-        }
-    }
-
-    private void håndterTilbakeTilStartMedUbehandletDokument(Long fagsakId, Long behandlingId, ProsessTaskGruppe taskGruppe) {
-        var tilbakeTilStartTask = taskGruppe.getTasks()
-            .stream()
-            .map(ProsessTaskGruppe.Entry::getTask).filter(t -> t.getTaskType().equals(TilbakeTilStartBehandlingTask.TASKTYPE)).findFirst();
-        if (tilbakeTilStartTask.isEmpty()) {
-            return;
-        }
-        //Tilbake til start tasken kan ikke kjøre når vi har dokumenter som ikke er behandlet ferdig. Derfor må den vente til lagre opptjening tasken har kjørt (dokumenter settes til GYLDIG der).
-        var lagreOpptjeningTask = fagsakProsessTaskRepository.finnAlleForAngittSøk(
-            fagsakId, behandlingId.toString(), null, List.of(ProsessTaskStatus.KLAR, ProsessTaskStatus.VENTER_SVAR, ProsessTaskStatus.VETO), false, Tid.TIDENES_BEGYNNELSE.atStartOfDay(), Tid.TIDENES_ENDE.atStartOfDay())
-            .stream()
-            .filter(task -> task.getTaskType().equals(AsyncAbakusLagreOpptjeningTask.TASKTYPE)).findFirst();
-        if (lagreOpptjeningTask.isPresent()) {
-            tilbakeTilStartTask.get().setStatus(ProsessTaskStatus.VETO);
-            tilbakeTilStartTask.get().setBlokkertAvProsessTaskId(lagreOpptjeningTask.get().getId());
         }
     }
 
