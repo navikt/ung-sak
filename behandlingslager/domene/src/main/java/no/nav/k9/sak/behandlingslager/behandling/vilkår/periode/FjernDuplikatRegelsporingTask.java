@@ -42,7 +42,7 @@ public class FjernDuplikatRegelsporingTask implements ProsessTaskHandler {
 
         // Regel evaluering
         var query = entityManager.createNativeQuery(
-            "select id from vr_vilkar_periode where regel_evaluering is not null and regel_evaluering::oid != regel_evaluering_oid limit :antall SKIP LOCKED"
+            "select id from vr_vilkar_periode where regel_evaluering is not null and regel_evaluering::oid != regel_evaluering_oid limit :antall FOR UPDATE SKIP LOCKED"
         ).setParameter("antall", maksAntallPerioder);
         var regelEvalueringider = query.getResultList();
 
@@ -63,7 +63,7 @@ public class FjernDuplikatRegelsporingTask implements ProsessTaskHandler {
 
         // Regel input
         var regelInputQuery = entityManager.createNativeQuery(
-            "select id from vr_vilkar_periode where regel_input is not null and regel_input::oid != regel_input_oid limit :antall SKIP LOCKED"
+            "select id from vr_vilkar_periode where regel_input is not null and regel_input::oid != regel_input_oid limit :antall FOR UPDATE SKIP LOCKED"
         ).setParameter("antall", maksAntallPerioder);
         var regelInputider = regelInputQuery.getResultList();
 
