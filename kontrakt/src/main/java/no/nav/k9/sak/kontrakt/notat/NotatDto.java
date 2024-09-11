@@ -13,7 +13,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import no.nav.k9.kodeverk.notat.NotatGjelderType;
-import no.nav.k9.sak.kontrakt.dokument.TekstValideringRegex;
+import no.nav.k9.sak.kontrakt.Patterns;
 
 /**
  * Dto for notat entiteter. Brukes bare til serialisering.
@@ -30,7 +30,7 @@ public record NotatDto(
 
         @JsonProperty(value = "notatTekst")
         @Size(max = 4000)
-        @Pattern(regexp = TekstValideringRegex.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+        @Pattern(regexp = Patterns.FRITEKSTBREV, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
         @NotNull
         String notatTekst,
 

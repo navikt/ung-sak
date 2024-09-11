@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import no.nav.k9.sak.kontrakt.Patterns;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -23,8 +24,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
     fieldVisibility = JsonAutoDetect.Visibility.ANY
 )
 public record FritekstbrevinnholdDto(
-    @Valid @NotNull @Size(max = 200) @Pattern(regexp = TekstValideringRegex.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String overskrift,
-    @Valid @NotNull @Size(max = 100000) @Pattern(regexp = TekstValideringRegex.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String brødtekst) {
+    @Valid @NotNull @Size(max = 200) @Pattern(regexp = Patterns.FRITEKSTBREV, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String overskrift,
+    @Valid @NotNull @Size(max = 100000) @Pattern(regexp = Patterns.FRITEKSTBREV, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String brødtekst) {
 
     @JsonCreator
     public FritekstbrevinnholdDto(@JsonProperty("overskrift") String overskrift, @JsonProperty("brødtekst") String brødtekst) {
