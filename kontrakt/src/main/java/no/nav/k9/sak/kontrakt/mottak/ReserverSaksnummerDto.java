@@ -43,7 +43,7 @@ public class ReserverSaksnummerDto {
     private String behandlingsår;
 
     //Barn eller fosterbarn for OMP_MA og OMP_UT
-    @JsonProperty(value = "barn")
+    @JsonProperty(value = "barnAktørIder")
     @Size(max = 100)
     @Valid
     private List<String> barnAktørIder;

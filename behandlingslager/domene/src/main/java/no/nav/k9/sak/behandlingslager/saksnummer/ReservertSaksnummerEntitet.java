@@ -57,7 +57,7 @@ public class ReservertSaksnummerEntitet extends BaseEntitet {
     private String behandlingsår;
 
     @OneToMany(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "reservert_saksnummer_id")
+    @JoinColumn(name = "reservert_saksnummer_id", nullable = false)
     private Set<ReservertSaksnummerAktørEntitet> barn;
 
     @Column(name = "slettet", nullable = false)

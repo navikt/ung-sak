@@ -32,7 +32,7 @@ public class ReservertSaksnummerAktørEntitet extends BaseEntitet {
     }
 
     ReservertSaksnummerAktørEntitet(AktørId aktørId) {
-        this.aktørId = aktørId;
+        this.aktørId = Objects.requireNonNull(aktørId);
     }
 
     public AktørId getAktørId() {
