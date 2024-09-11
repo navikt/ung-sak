@@ -9571,6 +9571,15 @@
         "properties" : {
           "barn" : {
             "items" : {
+              "nullable" : true,
+              "type" : "string"
+            },
+            "nullable" : true,
+            "type" : "array",
+            "writeOnly" : true
+          },
+          "barnAktørIder" : {
+            "items" : {
               "maxLength" : 100,
               "minLength" : 0,
               "nullable" : true,
