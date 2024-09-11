@@ -2631,7 +2631,7 @@
             "maxLength" : 4000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Pd}\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]*$",
+            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
             "type" : "string"
           },
           "fritekstbrev" : {
@@ -3085,7 +3085,7 @@
             "maxLength" : 4000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Pd}\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]*$",
+            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
             "type" : "string"
           },
           "saksnummer" : {
@@ -4398,13 +4398,13 @@
           "brødtekst" : {
             "maxLength" : 100000,
             "minLength" : 0,
-            "pattern" : "^[\\p{Pd}\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]*$",
+            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
             "type" : "string"
           },
           "overskrift" : {
             "maxLength" : 200,
             "minLength" : 0,
-            "pattern" : "^[\\p{Pd}\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]*$",
+            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
             "type" : "string"
           }
         },
@@ -6520,7 +6520,7 @@
             "maxLength" : 500,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Pd}\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]*$",
+            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
             "type" : "string"
           },
           "merknadKoder" : {
@@ -7648,7 +7648,7 @@
           "notatTekst" : {
             "maxLength" : 4000,
             "minLength" : 0,
-            "pattern" : "^[\\p{Pd}\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]*$",
+            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
             "type" : "string"
           },
           "saksnummer" : {
