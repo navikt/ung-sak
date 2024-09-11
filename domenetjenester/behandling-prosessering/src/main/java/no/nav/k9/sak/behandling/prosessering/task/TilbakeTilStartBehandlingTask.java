@@ -1,5 +1,6 @@
 package no.nav.k9.sak.behandling.prosessering.task;
 
+import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -7,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -15,6 +17,7 @@ import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 import no.nav.k9.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
@@ -44,6 +47,7 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
     public static final String TASKTYPE = "behandlingskontroll.tilbakeTilStart";
     public static final String PROPERTY_MANUELT_OPPRETTET = "manueltOpprettet";
     public static final String PROPERTY_START_STEG = "startSteg";
+    private static final String LAGRE_OPPTJENING_TASKTYPE = "abakus.async.lagreopptjening";
     private static final Logger log = LoggerFactory.getLogger(TilbakeTilStartBehandlingTask.class);
     private BehandlingRepository behandlingRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
@@ -108,8 +112,21 @@ public class TilbakeTilStartBehandlingTask extends BehandlingProsessTask {
             Set<FagsakYtelseType> rammevedtak_typer = Set.of(FagsakYtelseType.OMSORGSPENGER_KS, FagsakYtelseType.OMSORGSPENGER_MA, FagsakYtelseType.OMSORGSPENGER_AO);
             boolean erRammevedtak = rammevedtak_typer.contains(behandling.getFagsakYtelseType()); //rammevedtak-behandlinger oppdaterer ikke status på dokumentene
             if (harMottatteDokumenterTilBehandling(behandling) && !erRammevedtak) {
-                log.warn("Kan ikke hoppe tilbake når det er mottatte dokumenter som ikke har blitt behandlet ferdig.");
-                return; //ønsker ikke retry fordi premisset for opprettelse av tasken sannsynligvis ikke er gyldig lenger etter at dokumentet er ferdig mottatt
+                var lagreOpptjeningTask = prosessTaskRepository.finnAlleForAngittSøk(
+                    fagsakId, behandlingId, null, List.of(ProsessTaskStatus.KLAR, ProsessTaskStatus.VENTER_SVAR, ProsessTaskStatus.VETO), false, Tid.TIDENES_BEGYNNELSE.atStartOfDay(), Tid.TIDENES_ENDE.atStartOfDay())
+                    .stream()
+                    .filter(task -> task.getTaskType().equals(LAGRE_OPPTJENING_TASKTYPE)).findFirst();
+                if (lagreOpptjeningTask.isPresent()) {
+                    var nyTaskMedVeto = ProsessTaskData.forProsessTask(TilbakeTilStartBehandlingTask.class);
+                    nyTaskMedVeto.setProperties(prosessTaskData.getProperties());
+                    nyTaskMedVeto.setStatus(ProsessTaskStatus.VETO);
+                    nyTaskMedVeto.setBlokkertAvProsessTaskId(lagreOpptjeningTask.get().getId());
+                    prosessTaskRepository.lagreNyGruppe(nyTaskMedVeto);
+                    log.info("Kan ikke hoppe tilbake nå. Må vente på task for å lagre opptjening. Avbryter denne og lagrer ny task [{}] som venter på [{}].", nyTaskMedVeto.getId(), nyTaskMedVeto.getBlokkertAvProsessTaskId());
+                } else {
+                    log.warn("Kan ikke hoppe tilbake når det er mottatte dokumenter som ikke har blitt behandlet ferdig."); //ønsker ikke retry fordi premisset for opprettelse av tasken sannsynligvis ikke er gyldig lenger etter at dokumentet er ferdig mottatt
+                }
+                return;
             }
 
             prosessTaskRepository.settFeiletTilSuspendert(fagsakId, behandling.getId());
