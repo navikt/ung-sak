@@ -9569,6 +9569,27 @@
       },
       "ReserverSaksnummerDto" : {
         "properties" : {
+          "barn" : {
+            "items" : {
+              "nullable" : true,
+              "type" : "string"
+            },
+            "nullable" : true,
+            "type" : "array",
+            "writeOnly" : true
+          },
+          "barnAktørIder" : {
+            "items" : {
+              "maxLength" : 100,
+              "minLength" : 0,
+              "nullable" : true,
+              "type" : "string"
+            },
+            "maxItems" : 100,
+            "minItems" : 0,
+            "nullable" : true,
+            "type" : "array"
+          },
           "behandlingsår" : {
             "nullable" : true,
             "type" : "string"
