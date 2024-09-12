@@ -4673,6 +4673,16 @@
       },
       "HentReservertSaksnummerDto" : {
         "properties" : {
+          "barnAktørIder" : {
+            "items" : {
+              "maxLength" : 100,
+              "minLength" : 0,
+              "type" : "string"
+            },
+            "maxItems" : 100,
+            "minItems" : 0,
+            "type" : "array"
+          },
           "behandlingsår" : {
             "nullable" : true,
             "type" : "string"
@@ -4699,7 +4709,7 @@
             "type" : "string"
           }
         },
-        "required" : [ "brukerAktørId", "saksnummer", "ytelseType" ],
+        "required" : [ "barnAktørIder", "brukerAktørId", "saksnummer", "ytelseType" ],
         "type" : "object"
       },
       "HentSisteGyldigeVedtakForAktørInputDto" : {
@@ -9607,7 +9617,6 @@
           },
           "ytelseType" : {
             "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "OBSOLETE", "-" ],
-            "nullable" : true,
             "type" : "string"
           }
         },

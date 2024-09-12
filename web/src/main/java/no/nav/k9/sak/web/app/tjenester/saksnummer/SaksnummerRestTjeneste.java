@@ -2,8 +2,8 @@ package no.nav.k9.sak.web.app.tjenester.saksnummer;
 
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,7 +111,8 @@ public class SaksnummerRestTjeneste {
             entitet.getBrukerAktørId().getAktørId(),
             entitet.getPleietrengendeAktørId() != null ? entitet.getPleietrengendeAktørId().getAktørId() : null,
             entitet.getRelatertPersonAktørId() != null ? entitet.getRelatertPersonAktørId().getAktørId() : null,
-            entitet.getBehandlingsår());
+            entitet.getBehandlingsår(),
+            entitet.getBarn().stream().map(barn -> barn.getAktørId().getAktørId()).collect(Collectors.toList()));
     }
 
     private void validerReservasjon(ReserverSaksnummerDto dto) {
