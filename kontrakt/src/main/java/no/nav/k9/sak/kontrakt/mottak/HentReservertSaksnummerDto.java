@@ -61,14 +61,14 @@ public class HentReservertSaksnummerDto {
                                       @JsonProperty(value = "pleietrengendeAktørId") String pleietrengendeAktørId,
                                       @JsonProperty(value = "relatertPersonAktørId") String relatertPersonAktørId,
                                       @JsonProperty(value = "behandlingsår") String behandlingsår,
-                                      @JsonProperty(value = "barnAktørIder") List<String> barnAktørIder) {
+                                      @JsonProperty(value = "barnAktørIder") @NotNull List<String> barnAktørIder) {
         this.saksnummer = Objects.requireNonNull(saksnummer, "saksnummer");
         this.ytelseType = ytelseType;
         this.brukerAktørId = Objects.requireNonNull(brukerAktørId, "brukerAktørId");
         this.pleietrengendeAktørId = pleietrengendeAktørId;
         this.relatertPersonAktørId = relatertPersonAktørId;
         this.behandlingsår = behandlingsår;
-        this.barnAktørIder = new ArrayList<>(Objects.requireNonNull(barnAktørIder, "barnAktørIder"));
+        this.barnAktørIder = new ArrayList<>(barnAktørIder);
     }
 
     public String getSaksnummer() {
