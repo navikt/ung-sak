@@ -4677,12 +4677,10 @@
             "items" : {
               "maxLength" : 100,
               "minLength" : 0,
-              "nullable" : true,
               "type" : "string"
             },
             "maxItems" : 100,
             "minItems" : 0,
-            "nullable" : true,
             "type" : "array"
           },
           "behandlingsår" : {
@@ -4711,7 +4709,7 @@
             "type" : "string"
           }
         },
-        "required" : [ "brukerAktørId", "saksnummer", "ytelseType" ],
+        "required" : [ "barnAktørIder", "brukerAktørId", "saksnummer", "ytelseType" ],
         "type" : "object"
       },
       "HentSisteGyldigeVedtakForAktørInputDto" : {
@@ -9619,7 +9617,6 @@
           },
           "ytelseType" : {
             "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "OBSOLETE", "-" ],
-            "nullable" : true,
             "type" : "string"
           }
         },
