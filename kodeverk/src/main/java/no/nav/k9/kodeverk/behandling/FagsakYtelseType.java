@@ -131,6 +131,11 @@ public enum FagsakYtelseType implements Kodeverdi {
     /** Folketrygdloven K15 ytelser. */
     ENSLIG_FORSØRGER("EF", "Enslig forsørger", null, null),
 
+    /** Folketrygdloven ?? ytelser. */
+    UNG("UNG", "Ungdomsytelse", null, null),
+
+
+
     OBSOLETE("OBSOLETE", "Kun brukt for å markere noen som utgått - ikke en gyldig type i seg selv", null, null),
     UDEFINERT("-", "Ikke definert", null, null),
     ;
