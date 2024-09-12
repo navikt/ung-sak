@@ -51,7 +51,7 @@ public enum BehandlingÅrsakType implements Kodeverdi {
     RE_OPPLYSNINGER_OM_SØKNAD_FRIST("RE-FRIST", "Nye opplysninger som kan påvirke vurderingen av søknadsfristen"),
     RE_OPPLYSNINGER_OM_BEREGNINGSGRUNNLAG("RE-BER-GRUN", "Nye opplysninger som kan påvirke beregningsgrunnlaget"),
     RE_KLAGE_NY_INNH_LIGNET_INNTEKT("RE-KLAG-INNH-PGI", "Klage/ankebehandling med ny innhenting av lignet inntekt"),
-
+    RE_KLAGE_NATTEVÅKBEREDSKAP("RE-NB", "Nye opplysninger om nattevåk/beredskap etter klage"),
     ETTER_KLAGE("ETTER_KLAGE", "Ny behandling eller revurdering etter klage eller anke"),
 
     RE_HENDELSE_FØDSEL("RE-HENDELSE-FØDSEL", "Melding om registrert fødsel i folkeregisteret"),
@@ -70,7 +70,7 @@ public enum BehandlingÅrsakType implements Kodeverdi {
     RE_UTSATT_BEHANDLING("RE_UTSATT_BEHANDLING", "Utsatt behandling av periode på grunn av avhengighet til annen omsorgspersons uttak"),
     RE_GJENOPPTAR_UTSATT_BEHANDLING("RE_GJENOPPTAR_UTSATT_BEHANDLING", "Gjenopptar utsatt behandling av periode fra forrige behandling"),
     RE_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON("RE_ANNEN_SAK_ET", "Nye opplysninger om etablert tilsyn"),
-    RE_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON("RE_ANNEN_SAK_NB", "Nye opplysninger om nattevåk/beredskap"),
+    RE_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON("RE_ANNEN_SAK_NB", "Nye opplysninger om nattevåk/beredskap fra annen omsorgsperson"),
     RE_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON("RE_ANNEN_SAK_S", "Nye opplysninger om sykdom"),
     RE_NATTEVÅKBEREDSKAP_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON("RE_ANNEN_SAK_NB_ET", "Nye opplysninger om etablert tilsyn og nattevåk/beredskap"),
     RE_SYKDOM_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON("RE_ANNEN_SAK_S_ET", "Nye opplysninger om sykdom og etablert tilsyn"),

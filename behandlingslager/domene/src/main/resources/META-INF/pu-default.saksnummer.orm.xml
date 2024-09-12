@@ -5,9 +5,11 @@
                  version="3.0">
 
     <sequence-generator name="SEQ_RESERVERT_SAKSNUMMER" allocation-size="50" sequence-name="SEQ_RESERVERT_SAKSNUMMER"/>
+    <sequence-generator name="SEQ_RESERVERT_SAKSNUMMER_AKTOR" allocation-size="50" sequence-name="SEQ_RESERVERT_SAKSNUMMER_AKTOR"/>
 
 
     <entity class="no.nav.k9.sak.behandlingslager.saksnummer.ReservertSaksnummerEntitet"/>
+    <entity class="no.nav.k9.sak.behandlingslager.saksnummer.ReservertSaksnummerAktørEntitet"/>
 
 
 </entity-mappings>

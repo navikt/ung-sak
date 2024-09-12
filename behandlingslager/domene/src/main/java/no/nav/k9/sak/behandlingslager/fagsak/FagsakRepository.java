@@ -71,27 +71,40 @@ public class FagsakRepository {
             .createQuery("""
                     from Fagsak f
                       where f.brukerAktørId=:aktørId
-                       and f.skalTilInfotrygd=:ikkestengt
+                       and f.skalTilInfotrygd=false
                        and f.ytelseType in (:ytelseTyper)
                     """,
                 Fagsak.class);
         query.setParameter("aktørId", aktørId); // NOSONAR
-        query.setParameter("ikkestengt", false); // NOSONAR
         query.setParameter("ytelseTyper", FagsakYtelseType.kodeMap().values()); // søk bare opp støtte ytelsetyper
         return query.getResultList();
     }
+
+    public List<Fagsak> hentForPleietrengende(AktørId aktørId) {
+        TypedQuery<Fagsak> query = entityManager
+            .createQuery("""
+                    from Fagsak f
+                      where f.pleietrengendeAktørId=:aktørId
+                       and f.skalTilInfotrygd=false
+                       and f.ytelseType in (:ytelseTyper)
+                    """,
+                Fagsak.class);
+        query.setParameter("aktørId", aktørId); // NOSONAR
+        query.setParameter("ytelseTyper", FagsakYtelseType.kodeMap().values()); // søk bare opp støtte ytelsetyper
+        return query.getResultList();
+    }
+
 
     public List<Fagsak> hentSakerHvorBrukerHarMinstEnRolle(AktørId aktørId) {
         TypedQuery<Fagsak> query = entityManager
             .createQuery("""
                     from Fagsak f
                       where (f.brukerAktørId=:aktørId or pleietrengendeAktørId=:aktørId or relatertPersonAktørId=:aktørId)
-                       and f.skalTilInfotrygd=:ikkestengt
+                       and f.skalTilInfotrygd=false
                        and f.ytelseType in (:ytelseTyper)
                     """,
                 Fagsak.class);
         query.setParameter("aktørId", aktørId); // NOSONAR
-        query.setParameter("ikkestengt", false); // NOSONAR
         query.setParameter("ytelseTyper", FagsakYtelseType.kodeMap().values()); // søk bare opp støtte ytelsetyper
         return query.getResultList();
     }

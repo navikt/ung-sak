@@ -20,7 +20,7 @@ import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-public class StatistikkRepositoryTest {
+class StatistikkRepositoryTest {
 
     @Inject
     private EntityManager entityManager;
@@ -31,30 +31,30 @@ public class StatistikkRepositoryTest {
     private @Any Instance<ProsessTaskHandler> handlers;
 
     @BeforeEach
-    public void setup(){
+    void setup(){
         statistikkRepository = new StatistikkRepository(entityManager, handlers);
     }
 
 
     @Test
-    public void skal_kunne_hente_statistikk() throws Exception {
+    void skal_kunne_hente_statistikk()  {
 
         assertThat(statistikkRepository.prosessTaskStatistikk()).isNotEmpty().allMatch(v -> v.toString().contains("prosess_task_" + StatistikkRepository.PROSESS_TASK_VER));
 
         assertThat(statistikkRepository.behandlingResultatStatistikk()).isNotEmpty().allMatch(v -> v.toString().contains("behandling_resultat_v1"));
 
-        assertThat(statistikkRepository.hentAlle()).isNotEmpty()
+        assertThat(statistikkRepository.hentHyppigRapporterte()).isNotEmpty()
             .anyMatch(v -> v.toString().contains("mottatt_dokument_v1"))
             .anyMatch(v -> v.toString().contains("behandling_resultat_v1"))
             .anyMatch(v -> v.toString().contains("behandling_status_v2"))
             .anyMatch(v -> v.toString().contains("fagsak_status_v2"))
             .anyMatch(v -> v.toString().contains("aksjonspunkt_per_ytelse_type_v3"))
-            .anyMatch(v -> v.toString().contains("prosess_task_" + StatistikkRepository.PROSESS_TASK_VER));
-
+            .anyMatch(v -> v.toString().contains("prosess_task_" + StatistikkRepository.PROSESS_TASK_VER))
+            .noneMatch(v -> v.toString().contains("avslagStatistikk"));
     }
 
     @Test
-    public void skal_kunne_hente_statistikk_aksjonspunkt() throws Exception {
+    void skal_kunne_hente_statistikk_aksjonspunkt()  {
         AksjonspunktDefinisjon aksjonspunkt = AksjonspunktDefinisjon.AUTO_VENT_FRISINN_BEREGNING;
         BehandlingStegType stegType = BehandlingStegType.FASTSETT_BEREGNINGSGRUNNLAG;
         FagsakYtelseType ytelseType = FagsakYtelseType.FRISINN;

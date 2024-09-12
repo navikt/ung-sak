@@ -34,6 +34,7 @@ class FastsettSkjæringstidspunkterForYtelseStegTest {
     private BeregningPerioderGrunnlagRepository mockrep = mock(BeregningPerioderGrunnlagRepository.class); // Brukes ikke, men kan ikke være null
     private AksjonspunktutlederForMedlemskap mockUtleder = mock(AksjonspunktutlederForMedlemskap.class); // Brukes ikke, men kan ikke være null
 
+
     private OverstyrUttakTjeneste mockOverstyrUttakTjeneste = mock(OverstyrUttakTjeneste.class); // Brukes ikke, men kan ikke være null
     private final VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = new VilkårsPerioderTilVurderingTjeneste() {
         @Override
@@ -62,7 +63,7 @@ class FastsettSkjæringstidspunkterForYtelseStegTest {
         }
     };
     private UnitTestLookupInstanceImpl<VilkårsPerioderTilVurderingTjeneste> instance = new UnitTestLookupInstanceImpl<>(vilkårsPerioderTilVurderingTjeneste);
-    private FastsettSkjæringstidspunkterForYtelseSteg steg = new FastsettSkjæringstidspunkterForYtelseSteg(mockProvider, mockrep, mockOverstyrUttakTjeneste, instance, mockUtleder);
+    private FastsettSkjæringstidspunkterForYtelseSteg steg = new FastsettSkjæringstidspunkterForYtelseSteg(mockProvider, mockrep, mockOverstyrUttakTjeneste, instance, mockUtleder, null);
 
     @Test
     void skal_ikke_justere_utfall_for_andre_vilkår_ved_perioder_med_avslag_på_medisinsk_dersom_kun_helg_og_kopiert_vilkårsresultat() {

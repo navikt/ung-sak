@@ -90,7 +90,7 @@ public class RyddOgGjenopprettBeregningTjeneste {
         ryddVedtaksresultatForPerioderTilVurdering(kontekst, perioderTilVurdering);
 
         // 2. gjenoppretter beregning til initiell referanse der perioden ikke lenger vurderes (flippet vurderingsstatus)
-        gjenopprettPerioderSomIkkeVurderesTjeneste.gjenopprettVedEndretVurderingsstatus(kontekst, referanse, perioderTilVurdering);
+        gjenopprettPerioderSomIkkeVurderesTjeneste.gjenopprettVedEndretVurderingsstatus(referanse, perioderTilVurdering);
 
         // 3. avbryter alle aksjonspunkt i beregning som er åpne (aksjonspunkt reutledes på nytt ved behov)
         abrytÅpneBeregningaksjonspunkter(kontekst, behandling);
@@ -138,7 +138,7 @@ public class RyddOgGjenopprettBeregningTjeneste {
             .getFinnPerioderSkalIgnoreresIBeregning(behandlingReferanse);
 
         finnPerioderSomSkalFjernesIBeregning
-            .finnPerioderSomSkalFjernes(vilkårene, behandlingReferanse)
+            .finnPerioderSomSkalFjernes(vilkårene, behandlingReferanse, perioderSomSkalInitieres)
             .forEach(vilkårBuilder::tilbakestill);
 
         resultatBuilder.leggTil(vilkårBuilder, true);

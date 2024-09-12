@@ -84,7 +84,7 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
     private String begrunnelse;
 
     @Lob
-    @Column(name = "regel_evaluering")
+    @Column(name = "regel_evaluering_oid")
     @DiffIgnore
     private Clob regelEvaluering;
 
@@ -92,7 +92,7 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
     private transient AtomicReference<String> regelEvalueringCached = new AtomicReference<>();
 
     @Lob
-    @Column(name = "regel_input")
+    @Column(name = "regel_input_oid")
     @DiffIgnore
     private Clob regelInput;
 
@@ -115,11 +115,10 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
         this.merknadParametere = vilkårPeriode.merknadParametere;
         this.avslagsårsak = vilkårPeriode.avslagsårsak;
         this.utfallMerknad = vilkårPeriode.utfallMerknad;
-
-        this.regelInput = vilkårPeriode.regelInput;
         this.regelInputCached = vilkårPeriode.regelInputCached;
-        this.regelEvaluering = vilkårPeriode.regelEvaluering;
         this.regelEvalueringCached = vilkårPeriode.regelEvalueringCached;
+        this.regelInput = vilkårPeriode.regelInput;
+        this.regelEvaluering = vilkårPeriode.regelEvaluering;
 
         this.begrunnelse = vilkårPeriode.begrunnelse;
     }
@@ -262,7 +261,7 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
     }
 
     void setAvslagsårsak(Avslagsårsak avslagsårsak) {
-        this.avslagsårsak = avslagsårsak;
+        this.avslagsårsak = avslagsårsak == null ? Avslagsårsak.UDEFINERT : avslagsårsak;
     }
 
     void setManueltVurdert(boolean manueltVurdert) {
@@ -271,6 +270,7 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
 
     public String getRegelEvaluering() {
         return getPayload(regelEvaluering, regelEvalueringCached);
+
     }
 
     void setRegelEvaluering(String regelEvaluering) {

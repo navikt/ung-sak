@@ -1,5 +1,6 @@
 package no.nav.k9.sak.behandlingslager.pip;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -16,6 +17,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.sak.behandlingslager.saksnummer.ReservertSaksnummerEntitet;
+import no.nav.k9.sak.behandlingslager.saksnummer.ReservertSaksnummerRepository;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -24,11 +27,13 @@ import no.nav.k9.sak.typer.Saksnummer;
 public class PipRepository {
 
     public static final String SAKSNUMMER = "saksnummer";
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
+    private final ReservertSaksnummerRepository reservertSaksnummerRepository;
 
     @Inject
-    public PipRepository(EntityManager entityManager) {
+    public PipRepository(EntityManager entityManager, ReservertSaksnummerRepository reservertSaksnummerRepository) {
         this.entityManager = entityManager;
+        this.reservertSaksnummerRepository = reservertSaksnummerRepository;
     }
 
     public Optional<PipBehandlingsData> hentDataForBehandling(Long behandlingId) {
@@ -187,7 +192,31 @@ public class PipRepository {
 
         @SuppressWarnings("unchecked")
         List<String> aktørIdList = query.getResultList();
+
+        //Dersom det ikke finnes en fagsak med gitt saksnummer sjekker vi tabellen for reserverte saksnummer
+        if (aktørIdList.isEmpty()) {
+            aktørIdList = hentAktørIderKnyttetTilReservertSaksnummer(saksnummer);
+        }
+
         return aktørIdList.stream().map(AktørId::new).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    private List<String> hentAktørIderKnyttetTilReservertSaksnummer(Saksnummer saksnummer) {
+        List<String> aktørIder = new ArrayList<>();
+        Optional<ReservertSaksnummerEntitet> reservertSaksnummer = reservertSaksnummerRepository.hent(saksnummer);
+        if (reservertSaksnummer.isPresent()) {
+            aktørIder.add(reservertSaksnummer.get().getBrukerAktørId().getAktørId());
+            if (reservertSaksnummer.get().getPleietrengendeAktørId() != null) {
+                aktørIder.add(reservertSaksnummer.get().getPleietrengendeAktørId().getAktørId());
+            }
+            if (reservertSaksnummer.get().getRelatertPersonAktørId() != null) {
+                aktørIder.add(reservertSaksnummer.get().getRelatertPersonAktørId().getAktørId());
+            }
+            if (reservertSaksnummer.get().getBarn() != null) {
+                reservertSaksnummer.get().getBarn().forEach(barn -> aktørIder.add(barn.getAktørId().getAktørId()));
+            }
+        }
+        return aktørIder;
     }
 
     @SuppressWarnings({ "unchecked" })

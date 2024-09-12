@@ -54,6 +54,7 @@ public class SaksbehandlingDokumentmottakTjeneste {
         var fagsakId = fagsakIder.iterator().next();
 
         Set<String> mottattDokumentIder = new LinkedHashSet<>();
+        Set<String> feilmeldinger = new LinkedHashSet<>();
 
         for (var saksdokument : saksdokumenter) {
             antall++;
@@ -77,6 +78,8 @@ public class SaksbehandlingDokumentmottakTjeneste {
             boolean ok = valider(mottattDokument);
             if (ok) {
                 antallOk++;
+            } else {
+                feilmeldinger.add(mottattDokument.getFeilmelding());
             }
 
             Long mottattDokumentId = mottatteDokumentTjeneste.lagreMottattDokumentPåFagsak(mottattDokument);
@@ -89,26 +92,27 @@ public class SaksbehandlingDokumentmottakTjeneste {
             prosessTaskData.setProperty(HåndterMottattDokumentTask.MOTTATT_DOKUMENT_ID_KEY, String.join(",", mottattDokumentIder));
             prosessTaskData.setCallIdFraEksisterende();
             taskTjeneste.lagre(prosessTaskData);
-        } else if (antallOk > 0 && antallOk < antall) {
-            // blanda drops
-            throw new IllegalArgumentException("Fikk noe gyldig [" + antallOk + "] og noen ugyldige [" + (antall - antallOk) + "] meldinger, av totalt [" + antall + "]. Kan ikke behandle videre.");
+        } else {
+            //Hvis noe er ugyldig skal det feile i systemet som sender inn (fordel eller punsj)
+            String melding = "Fikk [" + (antall - antallOk) + "] ugyldige dokumenter, av totalt [" + antall + "]. Kan ikke behandle videre.";
+            if (feilmeldinger.size() == 1) {
+                melding = melding + " Feilmelding: " + feilmeldinger.iterator().next();
+            }
+            throw new IllegalArgumentException(melding);
         }
     }
 
     private boolean valider(MottattDokument m) {
-        boolean valid = true;
         DokumentValidator dokumentValidator = dokumentValidatorProvider.finnValidator(m.getType());
         try {
             dokumentValidator.validerDokument(m);
         } catch (DokumentValideringException e) {
             String feilmelding = toFeilmelding(e);
-            // skriver på feilmelding
-            m.setFeilmelding(feilmelding);
+            m.setFeilmeldingOgOppdaterStatus(feilmelding);
             log.warn(e.getMessageWithoutLinebreaks(), e);
-            valid = false;
+            return false;
         }
-
-        return valid;
+        return true;
     }
 
     private String toFeilmelding(DokumentValideringException e) {
