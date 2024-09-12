@@ -23,6 +23,7 @@ public class ReserverSaksnummerDto {
 
     @JsonProperty(value = "ytelseType", required = true)
     @Valid
+    @NotNull
     private FagsakYtelseType ytelseType;
 
     @JsonProperty(value = "brukerAktørId", required = true)
@@ -49,13 +50,13 @@ public class ReserverSaksnummerDto {
     private List<String> barnAktørIder;
 
     @JsonCreator
-    public ReserverSaksnummerDto(@JsonProperty(value = "ytelseType") FagsakYtelseType ytelseType,
+    public ReserverSaksnummerDto(@JsonProperty(value = "ytelseType", required = true) @NotNull FagsakYtelseType ytelseType,
                                  @JsonProperty(value = "brukerAktørId", required = true) @NotNull String brukerAktørId,
                                  @JsonProperty(value = "pleietrengendeAktørId") String pleietrengendeAktørId,
                                  @JsonProperty(value = "relatertPersonAktørId") String relatertPersonAktørId,
                                  @JsonProperty(value = "behandlingsår") String behandlingsår,
                                  @JsonProperty(value = "barn") List<String> barnAktørIder) {
-        this.ytelseType = ytelseType != null ? ytelseType : FagsakYtelseType.UDEFINERT;
+        this.ytelseType = Objects.requireNonNull(ytelseType, "ytelseType");
         this.brukerAktørId = Objects.requireNonNull(brukerAktørId, "aktørId");
         this.pleietrengendeAktørId = pleietrengendeAktørId;
         this.relatertPersonAktørId = relatertPersonAktørId;
