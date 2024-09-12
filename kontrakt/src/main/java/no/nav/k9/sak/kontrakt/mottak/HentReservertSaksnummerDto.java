@@ -52,6 +52,7 @@ public class HentReservertSaksnummerDto {
     @JsonProperty(value = "barnAktørIder")
     @Size(max = 100)
     @Valid
+    @NotNull
     private List<String> barnAktørIder;
 
     @JsonCreator
