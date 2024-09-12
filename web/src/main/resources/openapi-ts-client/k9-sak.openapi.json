@@ -6466,6 +6466,12 @@
             "nullable" : true,
             "type" : "array",
             "uniqueItems" : true
+          },
+          "personopplysninger" : {
+            "additionalProperties" : {
+              "$ref" : "#/components/schemas/PersonopplysningDto"
+            },
+            "type" : "object"
           }
         },
         "type" : "object"
