@@ -24,8 +24,6 @@ public class ProsessModell {
         var modellBuilder = BehandlingModellImpl.builder(BehandlingType.FØRSTEGANGSSØKNAD, FagsakYtelseType.UNG);
         modellBuilder
             .medSteg(BehandlingStegType.START_STEG)
-            .medSteg(BehandlingStegType.INIT_VILKÅR)
-            .medSteg(BehandlingStegType.INNHENT_REGISTEROPP)
             .medSteg(BehandlingStegType.FORESLÅ_VEDTAK)
             .medSteg(BehandlingStegType.FATTE_VEDTAK)
             .medSteg(BehandlingStegType.IVERKSETT_VEDTAK);
@@ -37,11 +35,9 @@ public class ProsessModell {
     @Produces
     @ApplicationScoped
     public BehandlingModell revurdering() {
-        var modellBuilder = BehandlingModellImpl.builder(BehandlingType.UNNTAKSBEHANDLING, FagsakYtelseType.UNG);
+        var modellBuilder = BehandlingModellImpl.builder(BehandlingType.REVURDERING, FagsakYtelseType.UNG);
         modellBuilder
             .medSteg(BehandlingStegType.START_STEG)
-            .medSteg(BehandlingStegType.INIT_VILKÅR)
-            .medSteg(BehandlingStegType.INNHENT_REGISTEROPP)
             .medSteg(BehandlingStegType.FORESLÅ_VEDTAK)
             .medSteg(BehandlingStegType.FATTE_VEDTAK)
             .medSteg(BehandlingStegType.IVERKSETT_VEDTAK);

@@ -85,6 +85,12 @@ public class Brevkode implements Kodeverdi {
     public static final String LEGEERKLÆRING_MED_DOKUMENTASJON_AV_OPPLÆRING_KODE = "LEGEERKLÆRING_MED_DOKUMENTASJON_AV_OPPLÆRING";
     public static final Brevkode DOKUMENTASJON_AV_OPPLÆRING = new Brevkode(DOKUMENTASJON_AV_OPPLÆRING_KODE, DOKUMENTASJON_AV_OPPLÆRING_KODE, VEDLEGG_RANGERING);
     public static final Brevkode LEGEERKLÆRING_MED_DOKUMENTASJON_AV_OPPLÆRING = new Brevkode(LEGEERKLÆRING_MED_DOKUMENTASJON_AV_OPPLÆRING_KODE, LEGEERKLÆRING_MED_DOKUMENTASJON_AV_OPPLÆRING_KODE, VEDLEGG_RANGERING);
+
+    /**
+     * Ung brevkoder.
+     */
+    public static final String UNG_SOKNAD_KODE = "UNG_SOKNAD";
+
     // Default
     public static final Brevkode UDEFINERT = new Brevkode("-", null, VEDLEGG_RANGERING);
     public static final String KODEVERK = "DOKUMENT_TYPE_ID";
