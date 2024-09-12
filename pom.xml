@@ -23,6 +23,7 @@
         <module>ytelse-opplaeringspenger</module>
         <module>ytelse-frisinn</module>
         <module>ytelse-unntaksbehandling</module>
+        <module>ytelse-ung</module>
 
         <!-- Web klient og server -->
         <module>web</module>

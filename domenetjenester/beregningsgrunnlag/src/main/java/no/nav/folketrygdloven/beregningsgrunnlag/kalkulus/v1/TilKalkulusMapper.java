@@ -251,7 +251,7 @@ public class TilKalkulusMapper {
             case FORELDREPENGER -> YtelseType.FORELDREPENGER;
             case SVANGERSKAPSPENGER -> YtelseType.SVANGERSKAPSPENGER;
             case ENSLIG_FORSØRGER -> YtelseType.ENSLIG_FORSØRGER;
-            case OBSOLETE, UDEFINERT -> YtelseType.UDEFINERT;
+            case OBSOLETE, UDEFINERT, UNG -> YtelseType.UDEFINERT;
         };
     }
 
