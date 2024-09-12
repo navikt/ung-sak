@@ -1,5 +1,6 @@
 package no.nav.k9.sak.behandlingslager.saksnummer;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -58,7 +59,7 @@ public class ReservertSaksnummerEntitet extends BaseEntitet {
 
     @OneToMany(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "reservert_saksnummer_id", nullable = false)
-    private Set<ReservertSaksnummerAktørEntitet> barn;
+    private Set<ReservertSaksnummerAktørEntitet> barn = new HashSet<>();
 
     @Column(name = "slettet", nullable = false)
     private boolean slettet = false;
@@ -68,13 +69,13 @@ public class ReservertSaksnummerEntitet extends BaseEntitet {
     }
 
     ReservertSaksnummerEntitet(Saksnummer saksnummer, FagsakYtelseType ytelseType, String brukerAktørId, String pleietrengendeAktørId, String relatertPersonAktørId, String behandlingsår, List<String> barnAktørIder) {
-        this.saksnummer = Objects.requireNonNull(saksnummer);
-        this.ytelseType = Objects.requireNonNull(ytelseType);
-        this.brukerAktørId = new AktørId(Objects.requireNonNull(brukerAktørId));
+        this.saksnummer = Objects.requireNonNull(saksnummer, "saksnummer");
+        this.ytelseType = Objects.requireNonNull(ytelseType, "ytelseType");
+        this.brukerAktørId = new AktørId(brukerAktørId);
         this.pleietrengendeAktørId = pleietrengendeAktørId != null ? new AktørId(pleietrengendeAktørId) : null;
         this.relatertPersonAktørId = relatertPersonAktørId != null ? new AktørId(relatertPersonAktørId) : null;
         this.behandlingsår = behandlingsår;
-        this.barn = Objects.requireNonNull(barnAktørIder).stream().map(AktørId::new).map(ReservertSaksnummerAktørEntitet::new).collect(Collectors.toSet());
+        this.barn = Objects.requireNonNull(barnAktørIder, "barnAktørIder").stream().map(AktørId::new).map(ReservertSaksnummerAktørEntitet::new).collect(Collectors.toSet());
     }
 
     public Saksnummer getSaksnummer() {
