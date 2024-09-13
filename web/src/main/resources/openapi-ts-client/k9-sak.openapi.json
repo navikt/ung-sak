@@ -169,14 +169,14 @@
             "maxLength" : 5000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "besluttersBegrunnelse" : {
             "maxLength" : 5000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "definisjon" : {
@@ -226,7 +226,7 @@
             "maxLength" : 5000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "vilkarType" : {
@@ -643,7 +643,7 @@
             "maxLength" : 4000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "personIdent" : {
@@ -668,7 +668,7 @@
             "maxLength" : 4000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           }
         },
@@ -1203,7 +1203,7 @@
             "maxLength" : 4000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "fraDato" : {
@@ -1705,7 +1705,7 @@
             "maxLength" : 4000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           }
         },
@@ -2524,7 +2524,7 @@
             "maxLength" : 4000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           }
         },
@@ -2631,7 +2631,7 @@
             "maxLength" : 4000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
             "type" : "string"
           },
           "fritekstbrev" : {
@@ -2685,7 +2685,7 @@
           "begrunnelse" : {
             "maxLength" : 4000,
             "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "behandlingId" : {
@@ -3085,7 +3085,7 @@
             "maxLength" : 4000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
             "type" : "string"
           },
           "saksnummer" : {
@@ -4398,13 +4398,13 @@
           "brødtekst" : {
             "maxLength" : 100000,
             "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
             "type" : "string"
           },
           "overskrift" : {
             "maxLength" : 200,
             "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
             "type" : "string"
           }
         },
@@ -4636,7 +4636,7 @@
           "begrunnelse" : {
             "maxLength" : 4000,
             "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "behandlingId" : {
@@ -4885,7 +4885,7 @@
             "maxLength" : 400,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "handlingType" : {
@@ -4942,7 +4942,7 @@
             "maxLength" : 400,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           }
         },
@@ -5380,7 +5380,7 @@
           "institusjon" : {
             "maxLength" : 100,
             "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "journalpostId" : {
@@ -5399,7 +5399,7 @@
             "maxLength" : 4000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "journalpostId" : {
@@ -5699,7 +5699,7 @@
             "maxLength" : 4000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "periode" : {
@@ -5731,7 +5731,7 @@
             "maxLength" : 4000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "periode" : {
@@ -6410,7 +6410,7 @@
             "maxLength" : 20,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "vurdertTidspunkt" : {
@@ -6520,7 +6520,7 @@
             "maxLength" : 500,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
             "type" : "string"
           },
           "merknadKoder" : {
@@ -6698,7 +6698,7 @@
             "maxLength" : 400,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "journalpostId" : {
@@ -6864,7 +6864,7 @@
             "maxLength" : 4000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "journalpostId" : {
@@ -7179,7 +7179,7 @@
             "maxLength" : 4000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "periode" : {
@@ -7198,7 +7198,7 @@
             "maxLength" : 4000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "resultat" : {
@@ -7215,7 +7215,7 @@
             "maxLength" : 20,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "vurdertTidspunkt" : {
@@ -7561,7 +7561,7 @@
             "maxLength" : 4000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "opplæring" : {
@@ -7648,7 +7648,7 @@
           "notatTekst" : {
             "maxLength" : 4000,
             "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
             "type" : "string"
           },
           "saksnummer" : {
@@ -8248,7 +8248,7 @@
           "begrunnelse" : {
             "maxLength" : 4000,
             "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "id" : {
@@ -8350,7 +8350,7 @@
             "maxLength" : 4000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "periode" : {
@@ -9479,7 +9479,7 @@
             "maxLength" : 4000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "periode" : {
@@ -10651,7 +10651,7 @@
             "maxLength" : 4000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "tilknyttedeDokumenter" : {
@@ -10733,7 +10733,7 @@
             "maxLength" : 4000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "tilknyttedeDokumenter" : {
@@ -10911,7 +10911,7 @@
             "maxLength" : 4000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "versjon" : {
@@ -10987,7 +10987,7 @@
             "maxLength" : 5000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "manglendeVedlegg" : {
@@ -11024,7 +11024,7 @@
             "maxLength" : 5000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           }
         },
@@ -11442,7 +11442,7 @@
             "maxLength" : 4000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "totrinnskontrollGodkjent" : {
@@ -12723,7 +12723,7 @@
             "maxLength" : 4000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "evaluering" : {
@@ -12909,7 +12909,7 @@
             "maxLength" : 4000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "id" : {
@@ -12984,7 +12984,7 @@
             "maxLength" : 4000,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
           "rettVedDødType" : {
@@ -12996,7 +12996,7 @@
             "maxLength" : 4096,
             "minLength" : 0,
             "nullable" : true,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           }
         },
