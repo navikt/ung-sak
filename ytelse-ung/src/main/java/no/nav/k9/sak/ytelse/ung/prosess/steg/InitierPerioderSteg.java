@@ -1,10 +1,10 @@
-package no.nav.k9.sak.ytelse.ung.steg;
+package no.nav.k9.sak.ytelse.ung.prosess.steg;
 
-import static no.nav.k9.kodeverk.behandling.BehandlingStegType.KONTROLLER_FAKTA;
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.INIT_PERIODER;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
@@ -12,16 +12,14 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 
-@FagsakYtelseTypeRef
-@BehandlingStegRef(value = KONTROLLER_FAKTA)
-@BehandlingTypeRef(BehandlingType.UNNTAKSBEHANDLING)
 @ApplicationScoped
-public class KontrollerFaktaUnntaksbehandlingSteg implements BehandlingSteg {
-
-    // Dummy-steg - for å støtte tilbakehopp ved registeroppdateringer
+@BehandlingStegRef(value = INIT_PERIODER)
+@BehandlingTypeRef
+@FagsakYtelseTypeRef(UNGDOMSYTELSE)
+public class InitierPerioderSteg implements BehandlingSteg {
 
     @Inject
-    public KontrollerFaktaUnntaksbehandlingSteg() {
+    public InitierPerioderSteg() {
     }
 
     @Override

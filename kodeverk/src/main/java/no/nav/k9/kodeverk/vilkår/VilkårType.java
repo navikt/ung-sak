@@ -57,7 +57,8 @@ public enum VilkårType implements Kodeverdi {
             FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "§ 9-3 første ledd",
             FagsakYtelseType.OMSORGSPENGER_AO, "§ 9-3 første ledd",
             FagsakYtelseType.OMSORGSPENGER_KS, "§ 9-3 første ledd",
-            FagsakYtelseType.OMSORGSPENGER_MA, "§ 9-3 første ledd"),
+            FagsakYtelseType.OMSORGSPENGER_MA, "§ 9-3 første ledd",
+            FagsakYtelseType.UNGDOMSYTELSE, ""), // TODO: Finn riktig paragraf
         Avslagsårsak.SØKER_OVER_HØYESTE_ALDER),
     ALDERSVILKÅR_BARN("K9_VK_5_3", "Aldersvilkår for barn",
         Map.of(
