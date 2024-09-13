@@ -13,17 +13,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: nais/deploy/actions/deploy@v1
+      - uses: nais/deploy/actions/deploy@v2
         env:
           APIKEY: ${{ secrets.DEPLOY_KEY }}
           CLUSTER: dev-gcp
           RESOURCE: deploy/kafka/aapen-k9-stonadstatistikk-v1-dev.yml
-      - uses: nais/deploy/actions/deploy@v1
+      - uses: nais/deploy/actions/deploy@v2
         env:
           APIKEY: ${{ secrets.DEPLOY_KEY }}
           CLUSTER: dev-gcp
           RESOURCE: deploy/kafka/aksjonspunkthendelse-dev.yml
-      - uses: nais/deploy/actions/deploy@v1
+      - uses: nais/deploy/actions/deploy@v2
         env:
           APIKEY: ${{ secrets.DEPLOY_KEY }}
           CLUSTER: dev-gcp
@@ -35,17 +35,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: nais/deploy/actions/deploy@v1
+      - uses: nais/deploy/actions/deploy@v2
         env:
           APIKEY: ${{ secrets.DEPLOY_KEY }}
           CLUSTER: prod-gcp
           RESOURCE: deploy/kafka/aapen-k9-stonadstatistikk-v1-prod.yml
-      - uses: nais/deploy/actions/deploy@v1
+      - uses: nais/deploy/actions/deploy@v2
         env:
           APIKEY: ${{ secrets.DEPLOY_KEY }}
           CLUSTER: prod-gcp
           RESOURCE: deploy/kafka/aksjonspunkthendelse-prod.yml
-      - uses: nais/deploy/actions/deploy@v1
+      - uses: nais/deploy/actions/deploy@v2
         env:
           APIKEY: ${{ secrets.DEPLOY_KEY }}
           CLUSTER: prod-gcp
