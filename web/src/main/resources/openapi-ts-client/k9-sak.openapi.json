@@ -16967,21 +16967,6 @@
         "tags" : [ "beregning" ]
       }
     },
-    "/beregning/finn-feil-inntektsmelding-bruk" : {
-      "post" : {
-        "description" : "Finner behandlinger og informasjon om perioder som er rammet av IM-feil",
-        "operationId" : "finnBehandlingerMedFeilIM",
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/octet-stream" : { }
-            },
-            "description" : "default response"
-          }
-        },
-        "tags" : [ "beregning" ]
-      }
-    },
     "/beregning/fjern-prosesstrigger-reberegning" : {
       "post" : {
         "description" : "Fjerner prosesstrigger for reberegning av grunnlag",
