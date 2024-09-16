@@ -1,4 +1,6 @@
-package no.nav.k9.sak.domene.iverksett;
+package no.nav.k9.sak.ytelse.ung.iverksett;
+
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -6,44 +8,37 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
-import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedService;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.TaskType;
+import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
-import no.nav.k9.sak.domene.vedtak.ekstern.VurderOppgaveArenaTask;
-import no.nav.k9.sak.domene.vedtak.ekstern.VurderOverlappendeInfotrygdYtelserTask;
+import no.nav.k9.sak.domene.iverksett.OpprettProsessTaskIverksett;
 import no.nav.k9.sak.domene.vedtak.intern.AvsluttBehandlingTask;
-import no.nav.k9.sak.domene.vedtak.intern.FastsettPGIPerioderTask;
 import no.nav.k9.sak.domene.vedtak.intern.SendVedtaksbrevTask;
 import no.nav.k9.sak.hendelse.stønadstatistikk.StønadstatistikkService;
-import no.nav.k9.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.k9.sak.økonomi.SendØkonomiOppdragTask;
 import no.nav.k9.sak.økonomi.task.VurderOppgaveTilbakekrevingTask;
 
-public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements OpprettProsessTaskIverksett {
+@ApplicationScoped
+@FagsakYtelseTypeRef(UNGDOMSYTELSE)
+public class UngdomsytelseOpprettProsessTaskIverksett implements OpprettProsessTaskIverksett {
 
     protected FagsakProsessTaskRepository fagsakProsessTaskRepository;
-    protected OppgaveTjeneste oppgaveTjeneste;
-    protected InfotrygdFeedService infotrygdFeedService;
     private StønadstatistikkService stønadstatistikkService;
 
-    protected OpprettProsessTaskIverksettTilkjentYtelseFelles() {
+    protected UngdomsytelseOpprettProsessTaskIverksett() {
         // for CDI proxy
     }
 
-    public OpprettProsessTaskIverksettTilkjentYtelseFelles(FagsakProsessTaskRepository fagsakProsessTaskRepository,
-                                                           OppgaveTjeneste oppgaveTjeneste,
-                                                           InfotrygdFeedService infotrygdFeedService,
-                                                           StønadstatistikkService stønadstatistikkService) {
+    @Inject
+    public UngdomsytelseOpprettProsessTaskIverksett(FagsakProsessTaskRepository fagsakProsessTaskRepository,
+                                                    StønadstatistikkService stønadstatistikkService) {
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
-        this.oppgaveTjeneste = oppgaveTjeneste;
-        this.infotrygdFeedService = infotrygdFeedService;
         this.stønadstatistikkService = stønadstatistikkService;
     }
 
@@ -54,8 +49,6 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
 
     @Override
     public void opprettIverksettingstasker(Behandling behandling, Optional<String> initiellTaskNavn) {
-        Optional<ProsessTaskData> avsluttOppgave = oppgaveTjeneste.opprettTaskAvsluttOppgave(behandling,
-            behandling.erRevurdering() ? OppgaveÅrsak.REVURDER_VL : OppgaveÅrsak.BEHANDLE_SAK_VL, false);
         Optional<ProsessTaskData> initiellTask = Optional.empty();
         if (initiellTaskNavn.isPresent()) {
             initiellTask = Optional.of(ProsessTaskData.forTaskType(new TaskType(initiellTaskNavn.get())));
@@ -66,27 +59,9 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
         List<ProsessTaskData> parallelle = new ArrayList<>();
         parallelle.add(ProsessTaskData.forProsessTask(SendVedtaksbrevTask.class));
         parallelle.add(opprettTaskSendTilØkonomi());
-        avsluttOppgave.ifPresent(parallelle::add);
 
         taskData.addNesteParallell(parallelle);
-
-        // FIXME: Antar at denne er dekket av opprettTaskSendTilØkonomi() ?
-        // Da denne sender tilkjent ytelse til fp.oppdrag via kafka
-        // taskData.addNesteSekvensiell( ProsessTaskData.forProsessTask(SendTilkjentYtelseTask.TASKTYPE));
-
-        if (behandling.getFagsakYtelseType().omfattesAvK8()) {
-            taskData.addNesteSekvensiell(ProsessTaskData.forProsessTask(FastsettPGIPerioderTask.class));
-        }
-
-        taskData.addNesteSekvensiell(ProsessTaskData.forProsessTask(VurderOverlappendeInfotrygdYtelserTask.class));
-        if (skalVurdereOppgaveTilArena(behandling)) {
-            taskData.addNesteSekvensiell(ProsessTaskData.forProsessTask(VurderOppgaveArenaTask.class));
-        }
-
         taskData.addNesteSekvensiell(ProsessTaskData.forProsessTask(AvsluttBehandlingTask.class));
-
-        opprettYtelsesSpesifikkeTasks(behandling).ifPresent(taskData::addNesteSekvensiell);
-
         taskData.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
 
         taskData.setCallIdFraEksisterende();
@@ -98,18 +73,9 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
         // Opprettes som egen task da den er uavhengig av de andre
         fagsakProsessTaskRepository.lagreNyGruppe(opprettTaskVurderOppgaveTilbakekreving(behandling));
 
-        infotrygdFeedService.publiserHendelse(behandling);
         stønadstatistikkService.publiserHendelse(behandling);
     }
 
-    private boolean skalVurdereOppgaveTilArena(Behandling behandling) {
-
-
-        // varsle Arena for andre ytelser enn FRISINN
-        // FIXME K9: varsler heller ikke Arena dersom Omsorgspenger (ennå sålenge) - til VARIANT FILTERT åpnes.
-        var skipYtelser = Set.of(FagsakYtelseType.FRISINN, FagsakYtelseType.OMSORGSPENGER);
-        return !(skipYtelser.contains(behandling.getFagsakYtelseType()));
-    }
 
     private ProsessTaskData opprettTaskSendTilØkonomi() {
         ProsessTaskData taskdata = ProsessTaskData.forProsessTask(SendØkonomiOppdragTask.class);
