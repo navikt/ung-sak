@@ -1,5 +1,13 @@
 package no.nav.k9.sak.ytelse.ung.periode;
 
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.NavigableSet;
+import java.util.Set;
+import java.util.TreeSet;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -13,12 +21,8 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.UtledeteVilkår;
-import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.k9.sak.perioder.VilkårsPeriodiseringsFunksjon;
 import no.nav.k9.sak.ytelse.ung.inngangsvilkår.InngangsvilkårUtleder;
-
-import java.util.*;
 
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
 @BehandlingTypeRef
@@ -35,8 +39,7 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
     @Inject
     public UngdomsytelseVilkårsperioderTilVurderingTjeneste(
         BehandlingRepository behandlingRepository,
-        InngangsvilkårUtleder inngangsvilkårUtleder) {
-
+        @FagsakYtelseTypeRef(UNGDOMSYTELSE) InngangsvilkårUtleder inngangsvilkårUtleder) {
         this.behandlingRepository = behandlingRepository;
         this.inngangsvilkårUtleder = inngangsvilkårUtleder;
     }
