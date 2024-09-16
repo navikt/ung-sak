@@ -107,7 +107,7 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
 
         // varsle Arena for andre ytelser enn FRISINN
         // FIXME K9: varsler heller ikke Arena dersom Omsorgspenger (ennå sålenge) - til VARIANT FILTERT åpnes.
-        var skipYtelser = Set.of(FagsakYtelseType.FRISINN, FagsakYtelseType.OMSORGSPENGER);
+        var skipYtelser = Set.of(FagsakYtelseType.FRISINN, FagsakYtelseType.OMSORGSPENGER, FagsakYtelseType.UNGDOMSYTELSE);
         return !(skipYtelser.contains(behandling.getFagsakYtelseType()));
     }
 
