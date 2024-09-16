@@ -11,7 +11,7 @@ import java.util.NavigableSet;
 public class VurderAldersVilkårTjeneste {
 
     public void vurderPerioder(VilkårBuilder vilkårBuilder, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, LocalDate fødselsdato) {
-        var maksdato = fødselsdato.plusYears(18).minusDays(1);
+        var maksdato = fødselsdato.plusYears(29).minusDays(1);
         var regelInput = "{ 'fødselsdato': '" + fødselsdato + "', ', 'maksdato': '" + maksdato + "' }";
 
         for (DatoIntervallEntitet periode : perioderTilVurdering) {

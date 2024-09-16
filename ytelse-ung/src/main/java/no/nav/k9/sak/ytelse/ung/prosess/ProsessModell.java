@@ -29,6 +29,7 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.VURDER_UNGDOMSPROGRAMVILKÅR)
             .medSteg(BehandlingStegType.ALDERSVILKÅRET)
             .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
+            .medSteg(BehandlingStegType.BEREGN_YTELSE)
             .medSteg(BehandlingStegType.FORESLÅ_VEDTAK)
             .medSteg(BehandlingStegType.FATTE_VEDTAK)
             .medSteg(BehandlingStegType.IVERKSETT_VEDTAK);
@@ -45,6 +46,7 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.START_STEG)
             .medSteg(BehandlingStegType.INIT_PERIODER, StartpunktType.INIT_PERIODER)
             .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
+            .medSteg(BehandlingStegType.BEREGN_YTELSE)
             .medSteg(BehandlingStegType.FORESLÅ_VEDTAK)
             .medSteg(BehandlingStegType.FATTE_VEDTAK)
             .medSteg(BehandlingStegType.IVERKSETT_VEDTAK);

@@ -133,7 +133,7 @@ public enum FagsakYtelseType implements Kodeverdi {
     ENSLIG_FORSØRGER("EF", "Enslig forsørger", null, null),
 
     /** Folketrygdloven ?? ytelser. */
-    UNGDOMSYTELSE("UNG", "Ungdomsytelse", null, "UNG"){
+    UNGDOMSYTELSE("UNG", "Ungdomsytelse", null, "OMS"){
         @Override
         public void validerNøkkelParametere(String pleietrengendeAktørId, String relatertPersonAktørId) {
         }
