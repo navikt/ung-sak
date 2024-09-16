@@ -90,7 +90,7 @@ public enum BehandlingStegType implements Kodeverdi {
     MANUELL_VILKÅRSVURDERING("MANUELL_VILKÅRSVURDERING", "Manuell vilkårsvurdering", UTREDES),
     MANUELL_TILKJENNING_YTELSE("MANUELL_TILKJENNING_YTELSE", "Manuell tilkjenning av ytelse", UTREDES),
     OVERGANG_FRA_INFOTRYGD("OVERGANG_FRA_INFOTRYGD", "Direkte overgang fra infotrygd", UTREDES),
-    ;
+    VURDER_UNGDOMSPROGRAMVILKÅR("VURDER_UNGDOMSPROGRAMVILKÅR", "Vurder deltakelse i ungdomsprogrammet", UTREDES);
 
     private static final Map<String, BehandlingStegType> KODER = new LinkedHashMap<>();
 

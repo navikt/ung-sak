@@ -58,7 +58,7 @@ public enum VilkårType implements Kodeverdi {
             FagsakYtelseType.OMSORGSPENGER_AO, "§ 9-3 første ledd",
             FagsakYtelseType.OMSORGSPENGER_KS, "§ 9-3 første ledd",
             FagsakYtelseType.OMSORGSPENGER_MA, "§ 9-3 første ledd",
-            FagsakYtelseType.UNGDOMSYTELSE, ""), // TODO: Finn riktig paragraf
+            FagsakYtelseType.UNGDOMSYTELSE, ""), // TODO: Finn riktig paragraf. Vurder å trekke ut til egen VilkårsType.
         Avslagsårsak.SØKER_OVER_HØYESTE_ALDER),
     ALDERSVILKÅR_BARN("K9_VK_5_3", "Aldersvilkår for barn",
         Map.of(
@@ -163,6 +163,12 @@ public enum VilkårType implements Kodeverdi {
         Avslagsårsak.IKKE_GRUNNLAG_FOR_ALENEOMSORG,
         Avslagsårsak.IKKE_GRUNNLAG_FOR_ALENEOMSORG_FORELDRE_BOR_SAMMEN,
         Avslagsårsak.IKKE_GRUNNLAG_FOR_ALENEOMSORG_DELT_BOSTED
+    ),
+    // TODO: Gå over dette før lansering
+    UNGDOMSPROGRAMVILKÅRET(
+        "UNG_VK_XXX",
+        "Deltar i ungdomsprogrammet",
+        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "§ xxx")
     ),
     /**
      * Brukes i stedet for null der det er optional.

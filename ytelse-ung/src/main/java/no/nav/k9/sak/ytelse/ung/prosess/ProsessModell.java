@@ -25,6 +25,9 @@ public class ProsessModell {
         modellBuilder
             .medSteg(BehandlingStegType.START_STEG)
             .medSteg(BehandlingStegType.INIT_PERIODER, StartpunktType.INIT_PERIODER)
+            .medSteg(BehandlingStegType.INIT_VILKÅR)
+            .medSteg(BehandlingStegType.VURDER_UNGDOMSPROGRAMVILKÅR)
+            .medSteg(BehandlingStegType.ALDERSVILKÅRET)
             .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
             .medSteg(BehandlingStegType.FORESLÅ_VEDTAK)
             .medSteg(BehandlingStegType.FATTE_VEDTAK)

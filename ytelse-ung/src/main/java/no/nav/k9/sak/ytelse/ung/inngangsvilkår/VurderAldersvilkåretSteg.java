@@ -1,6 +1,4 @@
-package no.nav.k9.sak.domene.behandling.steg.inngangsvilkår;
-
-import static no.nav.k9.kodeverk.behandling.BehandlingStegType.ALDERSVILKÅRET;
+package no.nav.k9.sak.ytelse.ung.inngangsvilkår;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
@@ -8,26 +6,20 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
-import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
-import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
-import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
-import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
-import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingskontroll.*;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.k9.sak.domene.behandling.steg.inngangsvilkår.alder.VurderAldersVilkårTjeneste;
 import no.nav.k9.sak.domene.person.personopplysning.BasisPersonopplysningTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+
+import static no.nav.k9.kodeverk.behandling.BehandlingStegType.ALDERSVILKÅRET;
 
 @ApplicationScoped
 @BehandlingStegRef(value = ALDERSVILKÅRET)
 @BehandlingTypeRef
-@FagsakYtelseTypeRef(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
-@FagsakYtelseTypeRef(FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE)
-@FagsakYtelseTypeRef(FagsakYtelseType.OPPLÆRINGSPENGER)
+@FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
 public class VurderAldersvilkåretSteg implements BehandlingSteg {
 
     private final VurderAldersVilkårTjeneste vurderAldersVilkårTjeneste = new VurderAldersVilkårTjeneste();
