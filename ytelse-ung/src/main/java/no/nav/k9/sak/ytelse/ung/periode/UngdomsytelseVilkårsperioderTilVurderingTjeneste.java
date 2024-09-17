@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -14,11 +15,10 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
+import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.DefaultKantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
-import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.UtledeteVilkår;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
@@ -29,8 +29,8 @@ import no.nav.k9.sak.ytelse.ung.inngangsvilkår.InngangsvilkårUtleder;
 @ApplicationScoped
 public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
 
-    private BehandlingRepository behandlingRepository;
     private InngangsvilkårUtleder inngangsvilkårUtleder;
+    private SøknadRepository søknadRepository;
 
     UngdomsytelseVilkårsperioderTilVurderingTjeneste() {
         // CDI
@@ -38,10 +38,9 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
 
     @Inject
     public UngdomsytelseVilkårsperioderTilVurderingTjeneste(
-        BehandlingRepository behandlingRepository,
-        @FagsakYtelseTypeRef(UNGDOMSYTELSE) InngangsvilkårUtleder inngangsvilkårUtleder) {
-        this.behandlingRepository = behandlingRepository;
+        @FagsakYtelseTypeRef(UNGDOMSYTELSE) InngangsvilkårUtleder inngangsvilkårUtleder, SøknadRepository søknadRepository) {
         this.inngangsvilkårUtleder = inngangsvilkårUtleder;
+        this.søknadRepository = søknadRepository;
     }
 
 
@@ -52,7 +51,7 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
 
     @Override
     public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
-        return utledPeriode(behandlingId, vilkårType);
+        return utledPeriode(behandlingId);
     }
 
     @Override
@@ -60,7 +59,7 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
         final var vilkårPeriodeSet = new HashMap<VilkårType, NavigableSet<DatoIntervallEntitet>>();
         UtledeteVilkår utledeteVilkår = inngangsvilkårUtleder.utledVilkår(null);
         utledeteVilkår.getAlleAvklarte()
-            .forEach(vilkår -> vilkårPeriodeSet.put(vilkår, utledPeriode(behandlingId, vilkår)));
+            .forEach(vilkår -> vilkårPeriodeSet.put(vilkår, utledPeriode(behandlingId)));
 
         return vilkårPeriodeSet;
     }
@@ -75,10 +74,9 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
         return Set.of(VilkårType.UNGDOMSPROGRAMVILKÅRET);
     }
 
-    private TreeSet<DatoIntervallEntitet> utledPeriode(Long behandlingId, VilkårType vilkårType) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        Fagsak fagsak = behandling.getFagsak();
-        DatoIntervallEntitet periode = fagsak.getPeriode();
-        return new TreeSet<>(Set.of(periode));
+    private TreeSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
+        var søknadEntitet = søknadRepository.hentSøknadHvisEksisterer(behandlingId);
+        return søknadEntitet.stream().map(SøknadEntitet::getSøknadsperiode)
+            .collect(Collectors.toCollection(TreeSet::new));
     }
 }
