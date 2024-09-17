@@ -63,13 +63,13 @@ public class AvklarÅrskvantumKvote implements AksjonspunktOppdaterer<AvklarÅrs
 
         if (fortsettBehandling) {
             //Bekreft uttaksplan og fortsett behandling
-            opprettHistorikkInnslag(dto, behandlingId, HistorikkinnslagType.FASTSATT_UTTAK, "Fortsett uten endring, avslåtte perioder er korrekt");
             if(innvilgePeriodene != null) {
                 var manuellVurderingString = innvilgePeriodene ? "innvilget" : "avslått";
                 opprettHistorikkInnslag(dto, behandlingId, HistorikkinnslagType.FASTSATT_UTTAK, "Uavklarte perioder er " + manuellVurderingString);
                 årskvantumTjeneste.innvilgeEllerAvslåPeriodeneManuelt(behandlingId, innvilgePeriodene, antallDager);
             } else {
                 //Bekreft uttaksplan og fortsett behandling
+                opprettHistorikkInnslag(dto, behandlingId, HistorikkinnslagType.FASTSATT_UTTAK, "Fortsett uten endring, avslåtte perioder er korrekt");
                 årskvantumTjeneste.bekreftUttaksplan(behandlingId);
             }
         } else if (dto.getFosterbarn() != null) {
