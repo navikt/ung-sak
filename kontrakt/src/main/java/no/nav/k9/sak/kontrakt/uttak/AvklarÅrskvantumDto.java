@@ -29,8 +29,7 @@ public class AvklarÅrskvantumDto extends BekreftetAksjonspunktDto {
     @NotNull
     private Boolean fortsettBehandling;
 
-    @JsonProperty(value = "innvilgePeriodene", required = true)
-    @NotNull
+    @JsonProperty(value = "innvilgePeriodene")
     private Boolean innvilgePeriodene;
 
     @JsonProperty(value = "antallDager")
@@ -45,7 +44,7 @@ public class AvklarÅrskvantumDto extends BekreftetAksjonspunktDto {
 
     @JsonCreator
     public AvklarÅrskvantumDto(@JsonProperty(value = "begrunnelse", required = true) String begrunnelse,
-                               @JsonProperty(value = "innvilgePeriodene", required = true) @NotNull Boolean innvilgePeriodene,
+                               @JsonProperty(value = "innvilgePeriodene") @NotNull Boolean innvilgePeriodene,
                                @JsonProperty(value = "antallDager") Integer antallDager,
                                @JsonProperty(value = "fortsettBehandling", required = true) Boolean fortsettBehandling,
                                @JsonProperty(value = "fosterbarn") List<NorskIdentDto> fosterbarn) {
