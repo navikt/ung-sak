@@ -6466,6 +6466,12 @@
             "nullable" : true,
             "type" : "array",
             "uniqueItems" : true
+          },
+          "personopplysninger" : {
+            "additionalProperties" : {
+              "$ref" : "#/components/schemas/PersonopplysningDto"
+            },
+            "type" : "object"
           }
         },
         "type" : "object"
@@ -16956,21 +16962,6 @@
               }
             },
             "description" : "Returnerer kalkulatorinput på JSON format"
-          }
-        },
-        "tags" : [ "beregning" ]
-      }
-    },
-    "/beregning/finn-feil-inntektsmelding-bruk" : {
-      "post" : {
-        "description" : "Finner behandlinger og informasjon om perioder som er rammet av IM-feil",
-        "operationId" : "finnBehandlingerMedFeilIM",
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/octet-stream" : { }
-            },
-            "description" : "default response"
           }
         },
         "tags" : [ "beregning" ]
