@@ -53,7 +53,10 @@ public class AvklarÅrskvantumKvote implements AksjonspunktOppdaterer<AvklarÅrs
     @Override
     public OppdateringResultat oppdater(AvklarÅrskvantumDto dto, AksjonspunktOppdaterParameter param) {
         var fortsettBehandling = dto.getfortsettBehandling();
+        var innvilgePeriodene = dto.getinnvilgePeriodene();
+        var antallDager = dto.getAntallDager();
         Long behandlingId = param.getBehandlingId();
+        var manuellVurderingString = innvilgePeriodene ? "innvilget" : "avslått";
 
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
@@ -72,16 +75,22 @@ public class AvklarÅrskvantumKvote implements AksjonspunktOppdaterer<AvklarÅrs
                     .map(aktørId -> new Fosterbarn(aktørId))
                     .collect(Collectors.toSet());
                 fosterbarnRepository.lagreOgFlush(param.getBehandlingId(), new Fosterbarna(fosterbarn));
+
+                // kjør steget på nytt, aka hent nye rammevedtak fra infotrygd
+                opprettHistorikkInnslag(dto, behandlingId, HistorikkinnslagType.FAKTA_ENDRET, "Rammemelding er endret eller lagt til");
+
+                OppdateringResultat resultat = OppdateringResultat.nyttResultat();
+                resultat.rekjørSteg();
+                //må til innhent registeropplysninger for å få med barn over 12 år når hvis det er lag til kronisk syk-rammevedtak
+                resultat.setSteg(BehandlingStegType.INNHENT_REGISTEROPP);
+                return resultat;
             }
 
-            // kjør steget på nytt, aka hent nye rammevedtak fra infotrygd
-            opprettHistorikkInnslag(dto, behandlingId, HistorikkinnslagType.FAKTA_ENDRET, "Rammemelding er endret eller lagt til");
+            //Bekreft uttaksplan og fortsett behandling
+            opprettHistorikkInnslag(dto, behandlingId, HistorikkinnslagType.FASTSATT_UTTAK, "Uavklarte perioder er " + manuellVurderingString);
+            årskvantumTjeneste.innvilgeEllerAvslåPeriodeneManuelt(behandlingId, innvilgePeriodene, antallDager);
 
-            OppdateringResultat resultat = OppdateringResultat.nyttResultat();
-            resultat.rekjørSteg();
-            //må til innhent registeropplysninger for å få med barn over 12 år når hvis det er lag til kronisk syk-rammevedtak
-            resultat.setSteg(BehandlingStegType.INNHENT_REGISTEROPP);
-            return resultat;
+            return OppdateringResultat.nyttResultat();
         }
 
     }
