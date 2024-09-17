@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.ung.inngangsvilkår;
+package no.nav.k9.sak.ytelse.ung.inngangsvilkår.alder;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;

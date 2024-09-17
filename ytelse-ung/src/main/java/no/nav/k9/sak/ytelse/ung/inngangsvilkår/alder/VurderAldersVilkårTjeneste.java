@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.ung.inngangsvilkår;
+package no.nav.k9.sak.ytelse.ung.inngangsvilkår.alder;
 
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;

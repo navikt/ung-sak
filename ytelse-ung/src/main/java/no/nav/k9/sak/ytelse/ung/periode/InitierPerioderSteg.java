@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.ung.prosess.steg;
+package no.nav.k9.sak.ytelse.ung.periode;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.INIT_PERIODER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;

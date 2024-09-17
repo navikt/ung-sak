@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.ung.inngangsvilkår;
+package no.nav.k9.sak.ytelse.ung.inngangsvilkår.ungdomsprogram;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_UNGDOMSPROGRAMVILKÅR;
 
