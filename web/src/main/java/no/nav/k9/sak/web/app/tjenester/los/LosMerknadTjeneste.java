@@ -1,10 +1,5 @@
 package no.nav.k9.sak.web.app.tjenester.los;
 
-import java.io.IOException;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
@@ -23,6 +18,11 @@ import no.nav.k9.sak.domene.typer.tid.JsonObjectMapperKodeverdiSomStringSerializ
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingProsessHendelse;
 
+import java.io.IOException;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+
 @Dependent
 public class LosMerknadTjeneste {
 
@@ -31,7 +31,6 @@ public class LosMerknadTjeneste {
     private HistorikkTjenesteAdapter historikkTjenesteAdapter;
     private BehandlingProsessHendelseMapper behandlingProsessHendelseMapper;
     private final boolean kodeverkSomStringTopics;
-    private final boolean hastemerknadOverKafka;
     private ProsessEventKafkaProducer kafkaProducer;
 
     @Inject
@@ -40,8 +39,7 @@ public class LosMerknadTjeneste {
                               HistorikkTjenesteAdapter historikkTjenesteAdapter,
                               BehandlingProsessHendelseMapper behandlingProsessHendelseMapper,
                               ProsessEventKafkaProducer kafkaProducer,
-                              @KonfigVerdi(value = "KODEVERK_SOM_STRING_TOPICS", defaultVerdi = "false") boolean kodeverkSomStringTopics,
-                              @KonfigVerdi(value = "HASTEMERKNAD_LOS_KAFKA_ENABLED", defaultVerdi = "false") boolean hastemerknadOverKafka
+                              @KonfigVerdi(value = "KODEVERK_SOM_STRING_TOPICS", defaultVerdi = "false") boolean kodeverkSomStringTopics
     ) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingMerknadRepository = behandlingMerknadRepository;
@@ -49,7 +47,6 @@ public class LosMerknadTjeneste {
         this.behandlingProsessHendelseMapper = behandlingProsessHendelseMapper;
         this.kafkaProducer = kafkaProducer;
         this.kodeverkSomStringTopics = kodeverkSomStringTopics;
-        this.hastemerknadOverKafka = hastemerknadOverKafka;
     }
 
 
@@ -60,7 +57,7 @@ public class LosMerknadTjeneste {
 
     public void lagreMerknad(MerknadEndretDto merknadEndret) {
         Behandling behandling = behandlingRepository.hentBehandling(merknadEndret.behandlingUuid());
-        if (behandling.erSaksbehandlingAvsluttet()){
+        if (behandling.erSaksbehandlingAvsluttet()) {
             throw new IllegalStateException("Kan ikke sette merknad på behandling hvor saksbehandlingen er avsluttet");
         }
 
@@ -75,20 +72,18 @@ public class LosMerknadTjeneste {
             lagHistorikkinnslag(merknadEndret, HistorikkinnslagType.MERKNAD_FJERNET);
         }
 
-        if (hastemerknadOverKafka) {
-            EventHendelse hastesakEventHendelse;
-            if (merknaderEtter.contains(BehandlingMerknadType.HASTESAK) && !merknaderFør.contains(BehandlingMerknadType.HASTESAK)) {
-                hastesakEventHendelse = EventHendelse.HASTESAK_MERKNAD_NY;
-            } else if (!merknaderEtter.contains(BehandlingMerknadType.HASTESAK) && merknaderFør.contains(BehandlingMerknadType.HASTESAK)) {
-                hastesakEventHendelse = EventHendelse.HASTESAK_MERKNAD_FJERNET;
-            } else {
-                hastesakEventHendelse = null;
-            }
-            if (hastesakEventHendelse != null) {
-                BehandlingProsessHendelse event = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(hastesakEventHendelse, behandling);
-                kafkaProducer.sendHendelse(behandling.getId().toString(), dtoTilJsonRuntimeExceptionOnly(event));
-                kafkaProducer.flush();
-            }
+        EventHendelse hastesakEventHendelse;
+        if (merknaderEtter.contains(BehandlingMerknadType.HASTESAK) && !merknaderFør.contains(BehandlingMerknadType.HASTESAK)) {
+            hastesakEventHendelse = EventHendelse.HASTESAK_MERKNAD_NY;
+        } else if (!merknaderEtter.contains(BehandlingMerknadType.HASTESAK) && merknaderFør.contains(BehandlingMerknadType.HASTESAK)) {
+            hastesakEventHendelse = EventHendelse.HASTESAK_MERKNAD_FJERNET;
+        } else {
+            hastesakEventHendelse = null;
+        }
+        if (hastesakEventHendelse != null) {
+            BehandlingProsessHendelse event = behandlingProsessHendelseMapper.getProduksjonstyringEventDto(hastesakEventHendelse, behandling);
+            kafkaProducer.sendHendelse(behandling.getId().toString(), dtoTilJsonRuntimeExceptionOnly(event));
+            kafkaProducer.flush();
         }
     }
 
@@ -117,5 +112,6 @@ public class LosMerknadTjeneste {
             return JsonObjectMapper.getJson(dto);
         }
     }
+
 
 }
