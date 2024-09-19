@@ -16,7 +16,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -52,6 +51,7 @@ public enum BehandlingStegType implements Kodeverdi {
     KONTROLLER_FAKTA("KOFAK", "Kontroller Fakta", UTREDES),
     KONTROLLER_FAKTA_ARBEIDSFORHOLD("KOARB", "Kontroller arbeidsforhold", UTREDES),
     VURDER_KOMPLETTHET_BEREGNING("KOMPLETT_FOR_BEREGNING", "Opplysninger til beregning", UTREDES),
+    INNHENT_INNTEKTSMELDING("INNINN", "Innhent inntektsmelding", UTREDES),
     KONTROLLER_FAKTA_BEREGNING("KOFAKBER", "Kontroller fakta for beregning", UTREDES),
     KONTROLLER_FAKTA_UTTAK("KOFAKUT", "Kontroller fakta for uttak", UTREDES),
     KONTROLLER_LØPENDE_MEDLEMSKAP("KOFAK_LOP_MEDL", "Kontroller løpende medlemskap", UTREDES),
