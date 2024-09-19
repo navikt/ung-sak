@@ -10,6 +10,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.k9.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.k9.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
@@ -74,7 +75,7 @@ public class AvklarSøknadsfristOppdaterer implements AksjonspunktOppdaterer<Avk
     private void lagHistorikkInnslag(AksjonspunktOppdaterParameter param, Set<AvklartKravDokument> avklaringer) {
         for (AvklartKravDokument avklaring : avklaringer) {
             historikkAdapter.tekstBuilder()
-                .medHendelse(HistorikkinnslagType.SØKNADSFRIST_VURDERT, avklaring.getUtfall() + " fra " + avklaring.getFraDato() )
+                .medHendelse(HistorikkinnslagType.SØKNADSFRIST_VURDERT, avklaring.getUtfall() + (avklaring.getUtfall() == Utfall.OPPFYLT ? " fra " : " før ") + avklaring.getFraDato() )
                 .medBegrunnelse(avklaring.getBegrunnelse(), param.erBegrunnelseEndret())
                 .medSkjermlenke(SkjermlenkeType.SOEKNADSFRIST);
         }
