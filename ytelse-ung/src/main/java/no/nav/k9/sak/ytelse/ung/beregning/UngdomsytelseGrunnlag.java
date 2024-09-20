@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.ung.beregning;
 
+import java.util.List;
+
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -12,6 +14,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
 
 @Entity(name = "UngdomsytelseGrunnlag")
@@ -41,7 +45,7 @@ public class UngdomsytelseGrunnlag {
 
     public UngdomsytelseGrunnlag(UngdomsytelseGrunnlag eksisterende) {
         behandlingId = eksisterende.behandlingId;
-        satsPerioder = new UngdomsytelseSatsPerioder(satsPerioder);
+        satsPerioder = satsPerioder != null ? new UngdomsytelseSatsPerioder(satsPerioder) : null;
     }
 
     public UngdomsytelseGrunnlag() {
@@ -49,6 +53,12 @@ public class UngdomsytelseGrunnlag {
 
     public UngdomsytelseSatsPerioder getSatsPerioder() {
         return satsPerioder;
+    }
+
+    public LocalDateTimeline<UngdomsytelseSatser> getSatsTidslinje() {
+        var segmenter = satsPerioder.getPerioder().stream().map(p -> new LocalDateSegment<>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(),
+            new UngdomsytelseSatser(p.getDagsats(), p.getGrunnbeløp(), p.getGrunnbeløpFaktor()))).toList();
+        return new LocalDateTimeline<>(segmenter);
     }
 
 

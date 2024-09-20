@@ -6,7 +6,6 @@ import java.util.List;
 import org.hibernate.annotations.Immutable;
 
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,7 +13,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 
 @Entity(name = "UngdomsytelseSatsPerioder")
@@ -31,12 +29,8 @@ public class UngdomsytelseSatsPerioder extends BaseEntitet {
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     private List<UngdomsytelseSatsPeriode> satsPerioder = new ArrayList<>();
 
-    @Version
-    @Column(name = "versjon", nullable = false)
-    private long versjon;
-
     public UngdomsytelseSatsPerioder(List<UngdomsytelseSatsPeriode> satsPerioder) {
-        this.satsPerioder = satsPerioder.stream().map(UngdomsytelseSatsPeriode::new).toList();
+        this.satsPerioder = satsPerioder != null ? satsPerioder.stream().map(UngdomsytelseSatsPeriode::new).toList() : null;
     }
 
     public UngdomsytelseSatsPerioder(UngdomsytelseSatsPerioder satsPerioder) {
@@ -47,9 +41,8 @@ public class UngdomsytelseSatsPerioder extends BaseEntitet {
     public UngdomsytelseSatsPerioder() {
     }
 
-    public List<UngdomsytelseSatsPeriode> getSatsPerioder() {
+    public List<UngdomsytelseSatsPeriode> getPerioder() {
         return satsPerioder;
     }
-
 
 }

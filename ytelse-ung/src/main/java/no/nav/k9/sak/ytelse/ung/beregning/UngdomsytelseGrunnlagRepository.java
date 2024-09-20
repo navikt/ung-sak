@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.diff.DiffEntity;
 import no.nav.k9.sak.behandlingslager.diff.TraverseEntityGraphFactory;
 import no.nav.k9.sak.behandlingslager.diff.TraverseGraph;
@@ -32,7 +32,7 @@ public class UngdomsytelseGrunnlagRepository {
         var aktivtGrunnlag = grunnlagOptional.orElse(new UngdomsytelseGrunnlag());
 
         var builder = new UngdomsytelseGrunnlagBuilder(aktivtGrunnlag);
-        builder.medSatsPerioder(perioder);
+        builder.leggTilPerioder(perioder);
 
         var differ = differ();
 
