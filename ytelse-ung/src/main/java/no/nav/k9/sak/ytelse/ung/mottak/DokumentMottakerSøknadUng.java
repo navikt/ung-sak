@@ -33,7 +33,7 @@ public class DokumentMottakerSøknadUng implements Dokumentmottaker {
     }
 
     @Inject
-    public DokumentMottakerSøknadUng(SøknadParser søknadParser, MottatteDokumentRepository mottatteDokumentRepository, @KonfigVerdi(value = "UNGDOMSYTELSE_ENABLED") boolean enabled) {
+    public DokumentMottakerSøknadUng(SøknadParser søknadParser, MottatteDokumentRepository mottatteDokumentRepository, @KonfigVerdi(value = "UNGDOMSYTELSE_ENABLED", defaultVerdi = "false") boolean enabled) {
         this.søknadParser = søknadParser;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.enabled = enabled;
