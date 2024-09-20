@@ -23,6 +23,7 @@ import no.nav.k9.sak.vilkår.VilkårTjeneste;
 
 @ApplicationScoped
 @BehandlingStegRef(BehandlingStegType.UNGDOMSYTELSE_BEREGNING)
+@FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
 @BehandlingTypeRef
 public class UngdomsytelseBeregningSteg implements BehandlingSteg {
 
