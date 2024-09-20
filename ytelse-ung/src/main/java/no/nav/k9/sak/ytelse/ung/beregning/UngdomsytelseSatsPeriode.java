@@ -11,6 +11,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.PostgreSQLRangeType;
 import no.nav.k9.sak.behandlingslager.Range;
@@ -54,6 +55,13 @@ public class UngdomsytelseSatsPeriode extends BaseEntitet {
         this.grunnbeløpFaktor = grunnbeløpFaktor;
     }
 
+    public UngdomsytelseSatsPeriode(LocalDateInterval periode, UngdomsytelseSatser satser) {
+        this.periode = DatoIntervallEntitet.fra(periode).toRange();
+        this.dagsats = satser.dagsats();
+        this.grunnbeløp = satser.grunnbeløp();
+        this.grunnbeløpFaktor = satser.grunnbeløpFaktor();
+    }
+
     public BigDecimal getDagsats() {
         return dagsats;
     }
@@ -68,5 +76,9 @@ public class UngdomsytelseSatsPeriode extends BaseEntitet {
 
     public BigDecimal getGrunnbeløpFaktor() {
         return grunnbeløpFaktor;
+    }
+
+    public UngdomsytelseSatser satser(){
+        return new UngdomsytelseSatser(dagsats, grunnbeløp, grunnbeløpFaktor);
     }
 }

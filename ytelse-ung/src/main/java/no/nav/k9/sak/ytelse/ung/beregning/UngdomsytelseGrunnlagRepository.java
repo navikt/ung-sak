@@ -27,7 +27,7 @@ public class UngdomsytelseGrunnlagRepository {
         this.entityManager = entityManager;
     }
 
-    public void lagre(Long behandlingId, UngdomsytelseSatsPerioder perioder) {
+    public void lagre(Long behandlingId, LocalDateTimeline<UngdomsytelseSatser> perioder) {
         var grunnlagOptional = hentGrunnlag(behandlingId);
         var aktivtGrunnlag = grunnlagOptional.orElse(new UngdomsytelseGrunnlag());
 
@@ -56,12 +56,7 @@ public class UngdomsytelseGrunnlagRepository {
     }
 
     public Optional<UngdomsytelseGrunnlag> hentGrunnlag(Long behandlingId) {
-        var query = entityManager.createQuery(
-                "SELECT bg " +
-                    "FROM UngdomsytelseGrunnlag bg " +
-                    "WHERE bg.behandlingId=:id " +
-                    "AND bg.aktiv = true",
-                UngdomsytelseGrunnlag.class)
+        var query = entityManager.createQuery("SELECT bg FROM UngdomsytelseGrunnlag bg WHERE bg.behandlingId=:id AND bg.aktiv = true",UngdomsytelseGrunnlag.class)
             .setParameter("id", behandlingId);
 
         return HibernateVerktøy.hentUniktResultat(query);
@@ -71,10 +66,7 @@ public class UngdomsytelseGrunnlagRepository {
         var oppdatertGrunnlag = builder.build();
         oppdatertGrunnlag.setBehandlingId(behandlingId);
 
-        if (oppdatertGrunnlag.getSatsPerioder() != null) {
-            entityManager.persist(oppdatertGrunnlag.getSatsPerioder());
-        }
-
+        entityManager.persist(oppdatertGrunnlag.getSatsPerioder());
         entityManager.persist(oppdatertGrunnlag);
         entityManager.flush();
     }

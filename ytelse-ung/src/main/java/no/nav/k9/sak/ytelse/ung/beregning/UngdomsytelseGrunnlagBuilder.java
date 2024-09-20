@@ -35,6 +35,13 @@ class UngdomsytelseGrunnlagBuilder {
 
     }
 
+    UngdomsytelseGrunnlagBuilder leggTilPerioder(LocalDateTimeline<UngdomsytelseSatser> nyePerioder){
+        this.perioder = this.perioder
+            .union(nyePerioder, StandardCombinators::coalesceRightHandSide)
+            .compress();
+        return this;
+    }
+
     UngdomsytelseGrunnlagBuilder fjernPeriode(LocalDateInterval periode){
         this.perioder = this.perioder.disjoint(periode);
         return this;
@@ -57,7 +64,7 @@ class UngdomsytelseGrunnlagBuilder {
     }
 
     boolean erForskjellig(UngdomsytelseGrunnlag grunnlag, DiffEntity differ) {
-        return differ.areDifferent(grunnlag, kladd);
+        return differ.areDifferent(grunnlag, repeatableBuild());
     }
 
     private void validerState() {
