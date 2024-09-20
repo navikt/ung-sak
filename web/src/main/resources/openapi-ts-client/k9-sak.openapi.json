@@ -85,7 +85,7 @@
             "type" : "string"
           },
           "ytelseType" : {
-            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "OBSOLETE", "-" ],
+            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
             "type" : "string"
           }
         },
@@ -141,7 +141,7 @@
             "type" : "string"
           },
           "ytelseType" : {
-            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "OBSOLETE", "-" ],
+            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
             "type" : "string"
           }
         },
@@ -230,7 +230,7 @@
             "type" : "string"
           },
           "vilkarType" : {
-            "enum" : [ "K9_VILKÅRET", "MEDLEMSKAPSVILKÅRET", "OMSORGEN_FOR", "ALDERSVILKÅR", "ALDERSVILKÅR_BARN", "MEDISINSKEVILKÅR_UNDER_18_ÅR", "MEDISINSKEVILKÅR_18_ÅR", "SØKNADSFRIST", "SØKERSOPPLYSNINGSPLIKT", "OPPTJENINGSPERIODEVILKÅR", "OPPTJENINGSVILKÅRET", "BEREGNINGSGRUNNLAGVILKÅR", "I_LIVETS_SLUTTFASE", "NØDVENDIG_OPPLÆRING", "GODKJENT_OPPLÆRINGSINSTITUSJON", "GJENNOMGÅ_OPPLÆRING", "LANGVARIG_SYKDOM", "UTVIDETRETT", "UDEFINERT" ],
+            "enum" : [ "K9_VILKÅRET", "MEDLEMSKAPSVILKÅRET", "OMSORGEN_FOR", "ALDERSVILKÅR", "ALDERSVILKÅR_BARN", "MEDISINSKEVILKÅR_UNDER_18_ÅR", "MEDISINSKEVILKÅR_18_ÅR", "SØKNADSFRIST", "SØKERSOPPLYSNINGSPLIKT", "OPPTJENINGSPERIODEVILKÅR", "OPPTJENINGSVILKÅRET", "BEREGNINGSGRUNNLAGVILKÅR", "I_LIVETS_SLUTTFASE", "NØDVENDIG_OPPLÆRING", "GODKJENT_OPPLÆRINGSINSTITUSJON", "GJENNOMGÅ_OPPLÆRING", "LANGVARIG_SYKDOM", "UTVIDETRETT", "UNGDOMSPROGRAMVILKÅRET", "UDEFINERT" ],
             "nullable" : true,
             "type" : "string"
           },
@@ -1322,7 +1322,7 @@
             "type" : "string"
           },
           "ytelseType" : {
-            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "OBSOLETE", "-" ],
+            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
             "nullable" : true,
             "type" : "string"
           }
@@ -1462,7 +1462,7 @@
             "type" : "string"
           },
           "sakstype" : {
-            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "OBSOLETE", "-" ],
+            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
             "type" : "string"
           },
           "sprakkode" : {
@@ -1544,7 +1544,7 @@
             "type" : "string"
           },
           "sakstype" : {
-            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "OBSOLETE", "-" ],
+            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
             "type" : "string"
           }
         },
@@ -1615,7 +1615,7 @@
             "type" : "string"
           },
           "stegType" : {
-            "enum" : [ "BERYT", "PRECONDITION_BERGRUNN", "FAST_BERGRUNN", "VURDER_OPPTJ_PERIODE", "FASTSETT_STP_BER", "FVEDSTEG", "VURDER_VILKAR_BERGRUNN", "VURDER_REF_BERGRUNN", "FORDEL_BERGRUNN", "FORBRES", "FORS_BERGRUNN", "FORS_BERGRUNN_2", "VURDER_MANUELT_BREV", "FORVEDSTEG", "BERYT_OPPDRAG", "VURDER_SØKNADSFRIST", "INIT_PERIODER", "INIT_VILKÅR", "INPER", "INREG", "INSØK", "INREG_AVSL", "IVEDSTEG", "KOFAK", "KOARB", "KOMPLETT_FOR_BEREGNING", "KOFAKBER", "KOFAKUT", "KOFAK_LOP_MEDL", "VURDEROP", "SIMOPP", "START", "VRSLREV", "VULOMED", "VURDER_FARESIGNALER", "VURDINNSYN", "VURDERKOMPLETT", "VURDER_STARTDATO_UTTAKSREGLER", "VURDER_TILKOMMET_INNTEKT", "POSTCONDITION_KOMPLETTHET", "VARIANT_FILTER", "VURDER_MEDISINSK", "VURDER_NODVENDIGHET", "VURDER_INSTITUSJON", "VURDER_GJENNOMGATT_OPPLAERING", "POST_MEDISINSK", "VURDERMV", "VURDER_OMSORG_FOR", "VURDER_ALDER", "VURDER_ALDER_BARN", "VURDER_OPPTJ_FAKTA", "VURDER_OPPTJ", "VURDER_TILBAKETREKK", "VURDER_UTLAND", "VURDER_UTTAK", "VURDER_UTTAK_V2", "BEKREFT_UTTAK", "MANUELL_VILKÅRSVURDERING", "MANUELL_TILKJENNING_YTELSE", "OVERGANG_FRA_INFOTRYGD" ],
+            "enum" : [ "BERYT", "PRECONDITION_BERGRUNN", "FAST_BERGRUNN", "VURDER_OPPTJ_PERIODE", "FASTSETT_STP_BER", "FVEDSTEG", "VURDER_VILKAR_BERGRUNN", "VURDER_REF_BERGRUNN", "FORDEL_BERGRUNN", "FORBRES", "FORS_BERGRUNN", "FORS_BERGRUNN_2", "VURDER_MANUELT_BREV", "FORVEDSTEG", "BERYT_OPPDRAG", "VURDER_SØKNADSFRIST", "INIT_PERIODER", "INIT_VILKÅR", "INPER", "INREG", "INSØK", "INREG_AVSL", "IVEDSTEG", "KOFAK", "KOARB", "KOMPLETT_FOR_BEREGNING", "KOFAKBER", "KOFAKUT", "KOFAK_LOP_MEDL", "VURDEROP", "SIMOPP", "START", "VRSLREV", "VULOMED", "VURDER_FARESIGNALER", "VURDINNSYN", "VURDERKOMPLETT", "VURDER_STARTDATO_UTTAKSREGLER", "VURDER_TILKOMMET_INNTEKT", "POSTCONDITION_KOMPLETTHET", "VARIANT_FILTER", "VURDER_MEDISINSK", "VURDER_NODVENDIGHET", "VURDER_INSTITUSJON", "VURDER_GJENNOMGATT_OPPLAERING", "POST_MEDISINSK", "VURDERMV", "VURDER_OMSORG_FOR", "VURDER_ALDER", "VURDER_ALDER_BARN", "VURDER_OPPTJ_FAKTA", "VURDER_OPPTJ", "VURDER_TILBAKETREKK", "VURDER_UTLAND", "VURDER_UTTAK", "VURDER_UTTAK_V2", "BEKREFT_UTTAK", "MANUELL_VILKÅRSVURDERING", "MANUELL_TILKJENNING_YTELSE", "OVERGANG_FRA_INFOTRYGD", "VURDER_UNGDOMSPROGRAMVILKÅR", "UNGDOMSYTELSE_BEREGNING" ],
             "nullable" : true,
             "type" : "string"
           },
@@ -3254,7 +3254,7 @@
             "type" : "string"
           },
           "sakstype" : {
-            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "OBSOLETE", "-" ],
+            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
             "type" : "string"
           },
           "skalBehandlesAvInfotrygd" : {
@@ -3656,7 +3656,7 @@
             "type" : "string"
           },
           "ytelseType" : {
-            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "OBSOLETE", "-" ],
+            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
             "type" : "string"
           }
         },
@@ -4705,7 +4705,7 @@
             "type" : "string"
           },
           "ytelseType" : {
-            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "OBSOLETE", "-" ],
+            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
             "type" : "string"
           }
         },
@@ -4732,7 +4732,7 @@
             "type" : "string"
           },
           "ytelseType" : {
-            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "OBSOLETE", "-" ],
+            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
             "type" : "string"
           }
         },
@@ -4857,7 +4857,7 @@
         },
         "properties" : {
           "ytelseType" : {
-            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "OBSOLETE", "-" ],
+            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
             "type" : "string"
           }
         },
@@ -5177,7 +5177,7 @@
             "type" : "boolean"
           },
           "fagsakYtelseType" : {
-            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "OBSOLETE", "-" ],
+            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
             "nullable" : true,
             "type" : "string"
           },
@@ -6358,7 +6358,7 @@
             "type" : "array"
           },
           "ytelseType" : {
-            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "OBSOLETE", "-" ],
+            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
             "type" : "string"
           }
         },
@@ -8138,7 +8138,7 @@
             "type" : "string"
           },
           "ytelseType" : {
-            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "OBSOLETE", "-" ],
+            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
             "type" : "string"
           }
         },
@@ -9622,7 +9622,7 @@
             "type" : "string"
           },
           "ytelseType" : {
-            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "OBSOLETE", "-" ],
+            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
             "type" : "string"
           }
         },
@@ -11320,7 +11320,7 @@
             "type" : "string"
           },
           "ytelseType" : {
-            "enum" : [ "DAG", "SP", "FRISINN", "PSB", "PPN", "OMP", "OLP", "PS", "AAP", "ES", "FP", "SVP", "EF", "-" ],
+            "enum" : [ "DAG", "SP", "FRISINN", "PSB", "PPN", "OMP", "OLP", "PS", "AAP", "ES", "FP", "SVP", "EF", "UNG", "-" ],
             "type" : "string"
           }
         },
@@ -12713,7 +12713,7 @@
             "type" : "string"
           },
           "vilkarType" : {
-            "enum" : [ "K9_VILKÅRET", "MEDLEMSKAPSVILKÅRET", "OMSORGEN_FOR", "ALDERSVILKÅR", "ALDERSVILKÅR_BARN", "MEDISINSKEVILKÅR_UNDER_18_ÅR", "MEDISINSKEVILKÅR_18_ÅR", "SØKNADSFRIST", "SØKERSOPPLYSNINGSPLIKT", "OPPTJENINGSPERIODEVILKÅR", "OPPTJENINGSVILKÅRET", "BEREGNINGSGRUNNLAGVILKÅR", "I_LIVETS_SLUTTFASE", "NØDVENDIG_OPPLÆRING", "GODKJENT_OPPLÆRINGSINSTITUSJON", "GJENNOMGÅ_OPPLÆRING", "LANGVARIG_SYKDOM", "UTVIDETRETT", "UDEFINERT" ],
+            "enum" : [ "K9_VILKÅRET", "MEDLEMSKAPSVILKÅRET", "OMSORGEN_FOR", "ALDERSVILKÅR", "ALDERSVILKÅR_BARN", "MEDISINSKEVILKÅR_UNDER_18_ÅR", "MEDISINSKEVILKÅR_18_ÅR", "SØKNADSFRIST", "SØKERSOPPLYSNINGSPLIKT", "OPPTJENINGSPERIODEVILKÅR", "OPPTJENINGSVILKÅRET", "BEREGNINGSGRUNNLAGVILKÅR", "I_LIVETS_SLUTTFASE", "NØDVENDIG_OPPLÆRING", "GODKJENT_OPPLÆRINGSINSTITUSJON", "GJENNOMGÅ_OPPLÆRING", "LANGVARIG_SYKDOM", "UTVIDETRETT", "UNGDOMSPROGRAMVILKÅRET", "UDEFINERT" ],
             "type" : "string"
           }
         },
@@ -12741,7 +12741,7 @@
             "type" : "array"
           },
           "vilkarType" : {
-            "enum" : [ "K9_VILKÅRET", "MEDLEMSKAPSVILKÅRET", "OMSORGEN_FOR", "ALDERSVILKÅR", "ALDERSVILKÅR_BARN", "MEDISINSKEVILKÅR_UNDER_18_ÅR", "MEDISINSKEVILKÅR_18_ÅR", "SØKNADSFRIST", "SØKERSOPPLYSNINGSPLIKT", "OPPTJENINGSPERIODEVILKÅR", "OPPTJENINGSVILKÅRET", "BEREGNINGSGRUNNLAGVILKÅR", "I_LIVETS_SLUTTFASE", "NØDVENDIG_OPPLÆRING", "GODKJENT_OPPLÆRINGSINSTITUSJON", "GJENNOMGÅ_OPPLÆRING", "LANGVARIG_SYKDOM", "UTVIDETRETT", "UDEFINERT" ],
+            "enum" : [ "K9_VILKÅRET", "MEDLEMSKAPSVILKÅRET", "OMSORGEN_FOR", "ALDERSVILKÅR", "ALDERSVILKÅR_BARN", "MEDISINSKEVILKÅR_UNDER_18_ÅR", "MEDISINSKEVILKÅR_18_ÅR", "SØKNADSFRIST", "SØKERSOPPLYSNINGSPLIKT", "OPPTJENINGSPERIODEVILKÅR", "OPPTJENINGSVILKÅRET", "BEREGNINGSGRUNNLAGVILKÅR", "I_LIVETS_SLUTTFASE", "NØDVENDIG_OPPLÆRING", "GODKJENT_OPPLÆRINGSINSTITUSJON", "GJENNOMGÅ_OPPLÆRING", "LANGVARIG_SYKDOM", "UTVIDETRETT", "UNGDOMSPROGRAMVILKÅRET", "UDEFINERT" ],
             "type" : "string"
           }
         },
@@ -18628,7 +18628,7 @@
           "required" : true,
           "schema" : {
             "default" : "OMP",
-            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "OBSOLETE", "-" ],
+            "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
             "type" : "string"
           }
         } ],
