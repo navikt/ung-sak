@@ -22,7 +22,6 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -50,8 +49,6 @@ public class UtenlandsoppholdRestTjeneste {
     private PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste;
     private PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste;
 
-    private boolean nyUtledningAvUtenlandsopphold;
-
     public UtenlandsoppholdRestTjeneste() {
     }
 
@@ -59,12 +56,10 @@ public class UtenlandsoppholdRestTjeneste {
     public UtenlandsoppholdRestTjeneste(
             BehandlingRepository behandlingRepository,
             @Any PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste,
-            PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste,
-            @KonfigVerdi(value = "ENABLE_NY_UTLEDNING_AV_UTENLANDSOPPHOLD", defaultVerdi = "false") boolean nyUtledningAvUtenlandsopphold) {
+            PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
         this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
-        this.nyUtledningAvUtenlandsopphold = nyUtledningAvUtenlandsopphold;
     }
 
     @GET
@@ -89,7 +84,7 @@ public class UtenlandsoppholdRestTjeneste {
         var vurderteSøknadsperioder = søknadsfristTjeneste.vurderSøknadsfrist(behandlingReferanse);
         var perioderFraSøknad = periodeFraSøknadForBrukerTjeneste.hentPerioderFraSøknad(behandlingReferanse);
 
-        LocalDateTimeline<UtledetUtenlandsopphold> utenlandsoppholdTidslinje = UtenlandsoppholdTidslinjeTjeneste.byggTidslinje(vurderteSøknadsperioder, perioderFraSøknad, nyUtledningAvUtenlandsopphold);
+        LocalDateTimeline<UtledetUtenlandsopphold> utenlandsoppholdTidslinje = UtenlandsoppholdTidslinjeTjeneste.byggTidslinje(vurderteSøknadsperioder, perioderFraSøknad);
         UtenlandsoppholdDto dto = new UtenlandsoppholdDto();
 
         for (LocalDateSegment<UtledetUtenlandsopphold> s : utenlandsoppholdTidslinje.toSegments()) {

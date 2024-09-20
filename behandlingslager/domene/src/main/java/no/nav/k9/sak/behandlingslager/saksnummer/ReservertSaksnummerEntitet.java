@@ -1,7 +1,14 @@
 package no.nav.k9.sak.behandlingslager.saksnummer;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Embedded;
@@ -9,6 +16,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
@@ -48,6 +57,10 @@ public class ReservertSaksnummerEntitet extends BaseEntitet {
     @Column(name = "behandlingsaar")
     private String behandlingsår;
 
+    @OneToMany(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "reservert_saksnummer_id", nullable = false)
+    private Set<ReservertSaksnummerAktørEntitet> barn = new HashSet<>();
+
     @Column(name = "slettet", nullable = false)
     private boolean slettet = false;
 
@@ -55,13 +68,14 @@ public class ReservertSaksnummerEntitet extends BaseEntitet {
         // for hibernate
     }
 
-    ReservertSaksnummerEntitet(Saksnummer saksnummer, FagsakYtelseType ytelseType, String brukerAktørId, String pleietrengendeAktørId, String relatertPersonAktørId, String behandlingsår) {
-        this.saksnummer = saksnummer;
-        this.ytelseType = ytelseType;
+    ReservertSaksnummerEntitet(Saksnummer saksnummer, FagsakYtelseType ytelseType, String brukerAktørId, String pleietrengendeAktørId, String relatertPersonAktørId, String behandlingsår, List<String> barnAktørIder) {
+        this.saksnummer = Objects.requireNonNull(saksnummer, "saksnummer");
+        this.ytelseType = Objects.requireNonNull(ytelseType, "ytelseType");
         this.brukerAktørId = new AktørId(brukerAktørId);
         this.pleietrengendeAktørId = pleietrengendeAktørId != null ? new AktørId(pleietrengendeAktørId) : null;
         this.relatertPersonAktørId = relatertPersonAktørId != null ? new AktørId(relatertPersonAktørId) : null;
         this.behandlingsår = behandlingsår;
+        this.barn = Objects.requireNonNull(barnAktørIder, "barnAktørIder").stream().map(AktørId::new).map(ReservertSaksnummerAktørEntitet::new).collect(Collectors.toSet());
     }
 
     public Saksnummer getSaksnummer() {
@@ -86,6 +100,10 @@ public class ReservertSaksnummerEntitet extends BaseEntitet {
 
     public String getBehandlingsår() {
         return behandlingsår;
+    }
+
+    public Set<ReservertSaksnummerAktørEntitet> getBarn() {
+        return barn;
     }
 
     void setSlettet() {

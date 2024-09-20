@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,6 +58,8 @@ public class TilkjentYtelseOppdatererTest {
     private Behandling behandling;
     private HistorikkTjenesteAdapter historikkAdapter;
 
+    private AktørTjeneste aktørTjeneste;
+
     @BeforeEach
     public void setUp() {
 
@@ -70,7 +73,9 @@ public class TilkjentYtelseOppdatererTest {
         HistorikkInnslagTekstBuilder historikkInnslagTekstBuilder = new HistorikkInnslagTekstBuilder();
         when(historikkAdapter.tekstBuilder()).thenReturn(historikkInnslagTekstBuilder);
 
-        oppdaterer = new TilkjentYtelseOppdaterer(repositoryProvider, new UnitTestLookupInstanceImpl<>(beregnFeriepengerTjeneste), arbeidsgiverValidator, historikkAdapter);
+        aktørTjeneste = mock(AktørTjeneste.class);
+
+        oppdaterer = new TilkjentYtelseOppdaterer(repositoryProvider, new UnitTestLookupInstanceImpl<>(beregnFeriepengerTjeneste), arbeidsgiverValidator, historikkAdapter, aktørTjeneste);
 
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagre(repositoryProvider);

@@ -19,8 +19,7 @@ public class UtenlandsoppholdTidslinjeTjeneste {
 
     public static LocalDateTimeline<UtledetUtenlandsopphold> byggTidslinje(
             Map<KravDokument, List<VurdertSøktPeriode<Søknadsperiode>>> kravDokumenter,
-            Set<PerioderFraSøknad> perioderFraSøknader,
-            boolean nyUtledningAvUtenlandsopphold) {
+            Set<PerioderFraSøknad> perioderFraSøknader) {
         Set<KravDokument> kravDokumenterSorted = kravDokumenter.keySet().stream().sorted(KravDokument::compareTo).collect(Collectors.toCollection(LinkedHashSet::new));
         LocalDateTimeline<UtledetUtenlandsopphold> resultatTimeline = new LocalDateTimeline<>(List.of());
 
@@ -33,7 +32,7 @@ public class UtenlandsoppholdTidslinjeTjeneste {
             }
             var perioderFraSøknad = perioderFraSøknaderForKravdokument.iterator().next();
 
-            if (kravDokument.getKildesystem() == Kildesystem.SØKNADSDIALOG && nyUtledningAvUtenlandsopphold) {
+            if (kravDokument.getKildesystem() == Kildesystem.SØKNADSDIALOG) {
                 //Legg til det som er oppgitt
                 var tidslinjeMedUtenlandsopphold = byggTidslinjeMedUtenlandsopphold(perioderFraSøknad);
                 resultatTimeline = resultatTimeline.combine(tidslinjeMedUtenlandsopphold, StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);

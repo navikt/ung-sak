@@ -23,9 +23,10 @@ public class GraderingMotInntektKandidatUtledningTask implements ProsessTaskHand
     public static final String DRYRUN = "dryrun";
     public static final String KALKULUS_UTLEDNING = "kalkulusUtledning";
     public static final String YTELSE = "ytelse";
+    public static final String FOM_DATO = "fom";
 
     private static final Logger log = LoggerFactory.getLogger(GraderingMotInntektKandidatUtledningTask.class);
-    public static final LocalDate FOM_DATO_INNTEKT_GRADERING = LocalDate.of(2024, 11, 4);
+    public static final LocalDate FOM_DATO_INNTEKT_GRADERING = LocalDate.of(2025, 1, 1);
     private InntektGraderingRepository inntektGraderingRepository;
     private KandidaterForInntektgraderingTjeneste kandidaterForInntektgraderingTjeneste;
 
@@ -49,12 +50,13 @@ public class GraderingMotInntektKandidatUtledningTask implements ProsessTaskHand
         FagsakYtelseType fagsakYtelseType = ytelseType != null ? FagsakYtelseType.fraKode(ytelseType) : FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
         var dryRun = Boolean.parseBoolean(dryRunValue);
         if (dryRun) {
-            var fagsaker = inntektGraderingRepository.hentFagsakIdOgSaksnummer(fagsakYtelseType, FOM_DATO_INNTEKT_GRADERING);
+            var fom = prosessTaskData.getPropertyValue(FOM_DATO) == null ? FOM_DATO_INNTEKT_GRADERING : LocalDate.parse(prosessTaskData.getPropertyValue(FOM_DATO));
+            var fagsaker = inntektGraderingRepository.hentFagsakIdOgSaksnummer(fagsakYtelseType, fom);
             log.info("DRYRUN - Fant {} kandidater til gradering mot inntekt.", fagsaker.size());
             if (kalkulusUtledning) {
                 List<String> saksnummerMedAksjonspunkt = fagsaker.entrySet().stream()
                     .filter(f -> {
-                        var vurderingsperioder = kandidaterForInntektgraderingTjeneste.finnGraderingMotInntektPerioder(f.getKey(), FOM_DATO_INNTEKT_GRADERING);
+                        var vurderingsperioder = kandidaterForInntektgraderingTjeneste.finnGraderingMotInntektPerioder(f.getKey(), fom);
                         return !vurderingsperioder.isEmpty();
                     })
                     .map(Map.Entry::getValue)

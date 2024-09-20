@@ -164,49 +164,6 @@ public class ForvaltningBeregningRestTjeneste {
 
 
     @POST
-    @Path("finn-feil-inntektsmelding-bruk")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @Operation(description = "Finner behandlinger og informasjon om perioder som er rammet av IM-feil", tags = "beregning")
-    @BeskyttetRessurs(action = READ, resource = DRIFT)
-    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Response finnBehandlingerMedFeilIM() { // NOSONAR
-        return dumpFeilIMResultat().map(d -> Response.ok(d)
-            .type(MediaType.APPLICATION_OCTET_STREAM)
-            .header("Content-Disposition", String.format("attachment; filename=\"feil_im.csv\""))
-            .build()).orElse(Response.noContent().build());
-    }
-
-
-    private Optional<String> dumpFeilIMResultat() {
-        String sql = """
-            select f.saksnummer
-                 ,b.fagsak_id
-                 ,d.behandling_id
-                 ,vp.fom vilkarperiode_fom
-                 ,vp.tom vilkarperiode_tom
-                 ,fp.fom fordelperiode_fom
-                 ,fp.tom fordelperiode_tom
-              from dump_feil_im_gr d
-              left join dump_feil_im_vilkar_periode vp on vp.dump_grunnlag_id = d.id
-              left join dump_feil_im_fordel_periode fp on fp.dump_grunnlag_id = d.id
-              inner join behandling b on b.id=d.behandling_id
-              inner join fagsak f on f.id=b.fagsak_id
-              where aktiv = true
-             """;
-
-        Query query = entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
-
-        @SuppressWarnings("unchecked")
-        List<jakarta.persistence.Tuple> results = query.getResultList();
-
-        return CsvOutput.dumpResultSetToCsv(results);
-
-
-    }
-
-
-    @POST
     @Path("inntektsmelding-sortering")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Sorterte inntektsmeldinger per vilkårsperiode", tags = "beregning",

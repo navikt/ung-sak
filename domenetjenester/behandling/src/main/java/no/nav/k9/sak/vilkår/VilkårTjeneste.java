@@ -283,7 +283,8 @@ public class VilkårTjeneste {
             .collect(Collectors.toSet());
         var vilkårsPerioder = perioder.stream().map(VilkårPeriode::getPeriode).collect(Collectors.toSet());
         return vilkårsPerioder.stream()
-            .filter(periode -> perioderTilVurdering.stream().noneMatch(p -> p.getFomDato().equals(periode.getFomDato()))).collect(Collectors.toCollection(TreeSet::new));
+            .filter(vilkårsperiode -> perioderTilVurdering.stream()
+                .noneMatch(tilVurdering -> tilVurdering.inkluderer(vilkårsperiode.getFomDato()))).collect(Collectors.toCollection(TreeSet::new));
     }
 
     public TreeSet<DatoIntervallEntitet> utledPerioderTilVurderingUfiltrert(BehandlingReferanse ref, VilkårType vilkårType) {
