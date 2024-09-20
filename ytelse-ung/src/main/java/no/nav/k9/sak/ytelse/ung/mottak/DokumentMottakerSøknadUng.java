@@ -6,6 +6,7 @@ import java.util.Collection;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
@@ -25,19 +26,24 @@ public class DokumentMottakerSøknadUng implements Dokumentmottaker {
 
     private SøknadParser søknadParser;
     private MottatteDokumentRepository mottatteDokumentRepository;
+    private boolean enabled;
 
 
     public DokumentMottakerSøknadUng() {
     }
 
     @Inject
-    public DokumentMottakerSøknadUng(SøknadParser søknadParser, MottatteDokumentRepository mottatteDokumentRepository) {
+    public DokumentMottakerSøknadUng(SøknadParser søknadParser, MottatteDokumentRepository mottatteDokumentRepository, @KonfigVerdi(value = "UNGDOMSYTELSE_ENABLED") boolean enabled) {
         this.søknadParser = søknadParser;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
+        this.enabled = enabled;
     }
 
     @Override
     public void lagreDokumentinnhold(Collection<MottattDokument> mottattDokument, Behandling behandling) {
+        if (!enabled) {
+            throw new IllegalStateException("Ytelsen er ikke skrudd på");
+        }
         var behandlingId = behandling.getId();
         for (MottattDokument dokument : mottattDokument) {
             var søknad = søknadParser.parseSøknad(dokument);
