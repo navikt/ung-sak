@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import org.jboss.weld.exceptions.IllegalStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -176,21 +177,21 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
     }
 
     static Periode periodeForVedtak(LocalDateTimeline<VilkårUtfallSamlet> samletVilkårsresultat, Boolean innvilget) {
-        var oppfyltePerioder = perioderMedUtfall(samletVilkårsresultat, Utfall.OPPFYLT);
+        var oppfyltePerioderUtvidetRett = perioderMedUtfallUtvidetRett(samletVilkårsresultat, Utfall.OPPFYLT);
         var ikkeOppfyltePerioder = perioderMedUtfall(samletVilkårsresultat, Utfall.IKKE_OPPFYLT);
 
-        List<Periode> oppfyltKomprimert = komprimer(oppfyltePerioder);
+        List<Periode> oppfyltKomprimert = komprimer(oppfyltePerioderUtvidetRett);
         List<Periode> ikkeOppfyltKomprimert = komprimer(ikkeOppfyltePerioder);
         if (innvilget && oppfyltKomprimert.size() == 1) {
             return oppfyltKomprimert.get(0);
-        } else if (!innvilget && ikkeOppfyltKomprimert.size() == 1 && oppfyltePerioder.isEmpty()) {
+        } else if (!innvilget && ikkeOppfyltKomprimert.size() == 1 && oppfyltePerioderUtvidetRett.isEmpty()) {
             return ikkeOppfyltKomprimert.get(0);
         } else {
             throw new IllegalStateException(
                 String.format("Uventet samlet vilkårsresultat. Innvilget=[%s], %sOppfyltePerioder=%s, %sIkkeOppfyltePerioder=%s; samletVilkårResultat=%s",
                     innvilget,
-                    oppfyltKomprimert.size() != oppfyltePerioder.size() && !oppfyltKomprimert.isEmpty() ? "OppfyltePerioder/KOMPRIMERT=" + oppfyltKomprimert + ", " : "",
-                    oppfyltePerioder,
+                    oppfyltKomprimert.size() != oppfyltePerioderUtvidetRett.size() && !oppfyltKomprimert.isEmpty() ? "OppfyltePerioder/KOMPRIMERT=" + oppfyltKomprimert + ", " : "",
+                    oppfyltePerioderUtvidetRett,
                     ikkeOppfyltKomprimert.size() != ikkeOppfyltePerioder.size() && !ikkeOppfyltKomprimert.isEmpty() ? "IkkeOppfyltePerioder/KOMPRIMERT=" + ikkeOppfyltKomprimert + ", " : "",
                     ikkeOppfyltePerioder,
                     samletVilkårsresultat));
@@ -209,6 +210,18 @@ public class UtvidetRettIverksettTask extends BehandlingProsessTask {
         List<Periode> perioder = samletVilkårsresultat
             .stream()
             .filter(sv -> sv.getValue().getSamletUtfall() == utfall)
+            .map(seg -> gyldigPeriode(seg.getFom(), seg.getTom()))
+            .collect(Collectors.toList());
+        return perioder;
+    }
+
+    private static List<Periode> perioderMedUtfallUtvidetRett(LocalDateTimeline<VilkårUtfallSamlet> samletVilkårsresultat, Utfall utfall) {
+        List<Periode> perioder = samletVilkårsresultat
+            .stream()
+            .filter(sv ->
+                sv.getValue().getSamletUtfall() == utfall &&
+                sv.getValue().getUnderliggendeVilkårUtfall().stream().anyMatch(underliggendeVilkår -> underliggendeVilkår.getVilkårType().equals(VilkårType.UTVIDETRETT))
+            )
             .map(seg -> gyldigPeriode(seg.getFom(), seg.getTom()))
             .collect(Collectors.toList());
         return perioder;
