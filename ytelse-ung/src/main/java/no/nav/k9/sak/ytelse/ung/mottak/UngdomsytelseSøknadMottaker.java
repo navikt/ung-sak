@@ -54,10 +54,6 @@ public class UngdomsytelseSøknadMottaker implements SøknadMottakTjeneste<Ungdo
             throw new IllegalArgumentException("Fagsak kan ikke være mer enn 5 år inn i fremtiden.");
         }
 
-        /*
-         * Flere fagsaker kommer trolig til å komme tilbake igjen etter at alle sakene har blitt flyttet fra Infotrygd. Merk at sjekken
-         * da må gjøres på tvers av alle søkere på den samme pleietrengende for at bruddet i tidslinjen skal gi mening.
-         */
         final Optional<Fagsak> fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, null, null, Tid.TIDENES_BEGYNNELSE, Tid.TIDENES_ENDE);
 
 
