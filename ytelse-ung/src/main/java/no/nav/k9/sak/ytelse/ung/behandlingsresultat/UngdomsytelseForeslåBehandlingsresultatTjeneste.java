@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.ung.behandlingsresultat;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -31,6 +32,7 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 public class UngdomsytelseForeslåBehandlingsresultatTjeneste extends ForeslåBehandlingsresultatTjeneste {
 
     private BehandlingRepository behandlingRepository;
+    private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
 
     UngdomsytelseForeslåBehandlingsresultatTjeneste() {
         // for proxy
@@ -39,19 +41,41 @@ public class UngdomsytelseForeslåBehandlingsresultatTjeneste extends ForeslåBe
     @Inject
     public UngdomsytelseForeslåBehandlingsresultatTjeneste(BehandlingRepositoryProvider repositoryProvider,
                                                            VedtakVarselRepository vedtakVarselRepository,
-                                                           @FagsakYtelseTypeRef RevurderingBehandlingsresultatutleder revurderingBehandlingsresultatutleder) {
+                                                           @FagsakYtelseTypeRef RevurderingBehandlingsresultatutleder revurderingBehandlingsresultatutleder,
+                                                           @FagsakYtelseTypeRef(UNGDOMSYTELSE) VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste) {
         super(repositoryProvider, vedtakVarselRepository, revurderingBehandlingsresultatutleder);
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
+        this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
     }
 
     @Override
     protected DatoIntervallEntitet getMaksPeriode(Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        return behandling.getFagsak().getPeriode();
+        var definerendeVilkår = vilkårsPerioderTilVurderingTjeneste.definerendeVilkår();
+        var timeline = new LocalDateTimeline<Boolean>(List.of());
+
+        for (VilkårType vilkårType : definerendeVilkår) {
+            timeline = timeline.combine(new LocalDateTimeline<>(vilkårsPerioderTilVurderingTjeneste.utled(behandlingId, vilkårType)
+                .stream()
+                .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
+                .toList()), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+        if (timeline.isEmpty()) {
+            return behandling.getFagsak().getPeriode();
+        }
+        return DatoIntervallEntitet.fraOgMedTilOgMed(timeline.getMinLocalDate(), timeline.getMaxLocalDate());
     }
 
     @Override
     protected boolean skalBehandlingenSettesTilAvslått(BehandlingReferanse ref, Vilkårene vilkårene) {
-        return false;
+        var maksPeriode = getMaksPeriode(ref.getBehandlingId());
+        var vilkårTidslinjer = vilkårene.getVilkårTidslinjer(maksPeriode);
+        return vilkårTidslinjer.entrySet().stream()
+            .anyMatch(e -> harAvslåtteVilkårsPerioder(e.getValue())
+                && harIngenOppfylteVilkårsPerioder(e.getValue())
+            );
     }
+
+
+
 }

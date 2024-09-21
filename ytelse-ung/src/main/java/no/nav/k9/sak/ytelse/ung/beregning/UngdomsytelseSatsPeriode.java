@@ -38,6 +38,9 @@ public class UngdomsytelseSatsPeriode extends BaseEntitet {
     @Column(name = "grunnbeløp_faktor", nullable = false)
     private BigDecimal grunnbeløpFaktor;
 
+    public UngdomsytelseSatsPeriode() {
+    }
+
     public UngdomsytelseSatsPeriode(UngdomsytelseSatsPeriode ungdomsytelseSatsPeriode) {
         this.dagsats = ungdomsytelseSatsPeriode.getDagsats();
         this.periode = ungdomsytelseSatsPeriode.getPeriode().toRange();

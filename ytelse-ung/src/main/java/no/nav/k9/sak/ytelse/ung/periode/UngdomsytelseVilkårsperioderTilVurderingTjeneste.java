@@ -5,6 +5,7 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -30,7 +31,7 @@ import no.nav.k9.sak.ytelse.ung.inngangsvilkår.InngangsvilkårUtleder;
 public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
 
     private InngangsvilkårUtleder inngangsvilkårUtleder;
-    private SøknadRepository søknadRepository;
+    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
 
     UngdomsytelseVilkårsperioderTilVurderingTjeneste() {
         // CDI
@@ -38,9 +39,9 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
 
     @Inject
     public UngdomsytelseVilkårsperioderTilVurderingTjeneste(
-        @FagsakYtelseTypeRef(UNGDOMSYTELSE) InngangsvilkårUtleder inngangsvilkårUtleder, SøknadRepository søknadRepository) {
+        @FagsakYtelseTypeRef(UNGDOMSYTELSE) InngangsvilkårUtleder inngangsvilkårUtleder, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
         this.inngangsvilkårUtleder = inngangsvilkårUtleder;
-        this.søknadRepository = søknadRepository;
+        this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
     }
 
 
@@ -75,8 +76,9 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
     }
 
     private TreeSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
-        var søknadEntitet = søknadRepository.hentSøknadHvisEksisterer(behandlingId);
-        return søknadEntitet.stream().map(SøknadEntitet::getSøknadsperiode)
+        var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId);
+        return ungdomsprogramPeriodeGrunnlag.stream().flatMap(gr -> gr.getUngdomsprogramPerioder().getPerioder().stream())
+            .map(UngdomsprogramPeriode::getPeriode)
             .collect(Collectors.toCollection(TreeSet::new));
     }
 }

@@ -19,6 +19,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
@@ -59,6 +60,8 @@ public class VurderUngdomsprogramVilkårSteg implements BehandlingSteg {
         var perioderTilVurdering = vilkårsPerioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.UNGDOMSPROGRAMVILKÅRET);
         var builders = vurderPerioder(perioderTilVurdering, vilkårBuilder);
         builders.forEach(vilkårBuilder::leggTil);
+        resultatBuilder.leggTil(vilkårBuilder);
+        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), resultatBuilder.build());
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 

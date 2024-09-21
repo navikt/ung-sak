@@ -27,6 +27,7 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.domene.behandling.steg.beregnytelse.BeregneYtelseSteg;
 import no.nav.k9.sak.ytelse.ung.beregning.UngdomsytelseGrunnlag;
 import no.nav.k9.sak.ytelse.ung.beregning.UngdomsytelseGrunnlagRepository;
+import no.nav.k9.sak.ytelse.ung.beregning.UngdomsytelseSatser;
 
 @FagsakYtelseTypeRef(UNGDOMSYTELSE)
 @BehandlingStegRef(value = BEREGN_YTELSE)
@@ -57,31 +58,35 @@ public class UngdomsytelseBeregneYtelseSteg implements BeregneYtelseSteg {
         var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandlingId);
         var satsTidslinje = ungdomsytelseGrunnlag.map(UngdomsytelseGrunnlag::getSatsTidslinje).orElse(LocalDateTimeline.empty());
 
-        if (!satsTidslinje.isEmpty()) {
 
-            var beregningsresultatEntitet = BeregningsresultatEntitet.builder()
-                .medRegelInput("")
-                .medRegelSporing("")
-                .build();
+        var beregningsresultatEntitet = BeregningsresultatEntitet.builder()
+            .medRegelInput(mapTilRegelInput(satsTidslinje))
+            .medRegelSporing(mapTilRegelInput(satsTidslinje))
+            .build();
 
-            satsTidslinje.toSegments().forEach(p -> {
-                var resultatPeriode = BeregningsresultatPeriode.builder()
-                    .medBeregningsresultatPeriodeFomOgTom(p.getFom(), p.getTom())
-                    .build(beregningsresultatEntitet);
-                BeregningsresultatAndel.builder()
-                    .medDagsats(p.getValue().dagsats().setScale(0, RoundingMode.HALF_UP).intValue())
-                    .medInntektskategori(Inntektskategori.ARBEIDSTAKER_UTEN_FERIEPENGER)
-                    .medUtbetalingsgradOppdrag(BigDecimal.valueOf(100))
-                    .medUtbetalingsgrad(BigDecimal.valueOf(100))
-                    .medBrukerErMottaker(true)
-                    .buildFor(resultatPeriode);
-            });
+        satsTidslinje.toSegments().forEach(p -> {
+            var resultatPeriode = BeregningsresultatPeriode.builder()
+                .medBeregningsresultatPeriodeFomOgTom(p.getFom(), p.getTom())
+                .build(beregningsresultatEntitet);
+            BeregningsresultatAndel.builder()
+                .medDagsats(p.getValue().dagsats().setScale(0, RoundingMode.HALF_UP).intValue())
+                .medDagsatsFraBg(p.getValue().dagsats().setScale(0, RoundingMode.HALF_UP).intValue()) // TODO: Denne er ikkje nødvendig for UNG, men er påkrevd
+                .medInntektskategori(Inntektskategori.ARBEIDSTAKER_UTEN_FERIEPENGER)
+                .medUtbetalingsgradOppdrag(BigDecimal.valueOf(100))
+                .medUtbetalingsgrad(BigDecimal.valueOf(100))
+                .medStillingsprosent(BigDecimal.ZERO) // TODO: Denne var påkrevd i resultatandel, men gir ikkje meining for UNG-ytelsen
+                .medBrukerErMottaker(true)
+                .buildFor(resultatPeriode);
+        });
 
-            beregningsresultatRepository.lagre(behandling, beregningsresultatEntitet);
+        beregningsresultatRepository.lagre(behandling, beregningsresultatEntitet);
 
-        }
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    private String mapTilRegelInput(LocalDateTimeline<UngdomsytelseSatser> satsTidslinje) {
+        return satsTidslinje.toString();
     }
 
 

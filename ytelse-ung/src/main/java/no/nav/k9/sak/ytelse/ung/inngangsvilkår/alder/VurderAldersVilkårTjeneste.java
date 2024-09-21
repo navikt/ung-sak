@@ -1,17 +1,18 @@
 package no.nav.k9.sak.ytelse.ung.inngangsvilkår.alder;
 
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
+import java.util.NavigableSet;
+
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
-import java.time.LocalDate;
-import java.util.NavigableSet;
-
 public class VurderAldersVilkårTjeneste {
 
     public void vurderPerioder(VilkårBuilder vilkårBuilder, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, LocalDate fødselsdato) {
-        var maksdato = fødselsdato.plusYears(29).plusMonths(1).withDayOfMonth(1).minusDays(1);
+        var maksdato = fødselsdato.plusYears(29).with(TemporalAdjusters.lastDayOfMonth());
         var regelInput = "{ 'fødselsdato': '" + fødselsdato + "', ', 'maksdato': '" + maksdato + "' }";
 
         for (DatoIntervallEntitet periode : perioderTilVurdering) {
