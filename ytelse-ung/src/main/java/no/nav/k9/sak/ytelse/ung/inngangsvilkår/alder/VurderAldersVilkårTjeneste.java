@@ -20,15 +20,16 @@ public class VurderAldersVilkårTjeneste {
         }
     }
 
-    private void vurderPeriode(VilkårBuilder vilkårBuilder, LocalDate maksdato, String regelInput, DatoIntervallEntitet periode) {
-        if (periode.inkluderer(maksdato) && !periode.getFomDato().equals(maksdato)) {
-            var builder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), maksdato));
+    private void vurderPeriode(VilkårBuilder vilkårBuilder, LocalDate sisteDagMedGodkjentAlder, String regelInput, DatoIntervallEntitet periode) {
+        var førsteDagMedForHøyAlder = sisteDagMedGodkjentAlder.plusDays(1);
+        if (periode.inkluderer(førsteDagMedForHøyAlder) && !periode.getFomDato().equals(førsteDagMedForHøyAlder)) {
+            var builder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), sisteDagMedGodkjentAlder));
             builder.medUtfall(Utfall.OPPFYLT)
                 .medRegelInput(regelInput);
 
             vilkårBuilder.leggTil(builder);
 
-            builder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(maksdato.plusDays(1), periode.getTomDato()));
+            builder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(førsteDagMedForHøyAlder, periode.getTomDato()));
             builder.medUtfall(Utfall.IKKE_OPPFYLT)
                 .medAvslagsårsak(Avslagsårsak.SØKER_OVER_HØYESTE_ALDER)
                 .medRegelInput(regelInput);
@@ -37,7 +38,7 @@ public class VurderAldersVilkårTjeneste {
 
         } else {
             var builder = vilkårBuilder.hentBuilderFor(periode);
-            if (periode.getFomDato().isAfter(maksdato) || periode.getFomDato().isEqual(maksdato)) {
+            if (periode.getFomDato().isAfter(sisteDagMedGodkjentAlder) || periode.getFomDato().isEqual(sisteDagMedGodkjentAlder)) {
                 builder.medUtfall(Utfall.IKKE_OPPFYLT)
                     .medAvslagsårsak(Avslagsårsak.SØKER_OVER_HØYESTE_ALDER)
                     .medRegelInput(regelInput);
