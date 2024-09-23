@@ -22,7 +22,6 @@ import no.nav.k9.sak.domene.vedtak.intern.AvsluttBehandlingTask;
 import no.nav.k9.sak.domene.vedtak.intern.SendVedtaksbrevTask;
 import no.nav.k9.sak.hendelse.stønadstatistikk.StønadstatistikkService;
 import no.nav.k9.sak.økonomi.SendØkonomiOppdragTask;
-import no.nav.k9.sak.økonomi.task.VurderOppgaveTilbakekrevingTask;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(UNGDOMSYTELSE)
@@ -70,9 +69,6 @@ public class UngdomsytelseOpprettProsessTaskIverksett implements OpprettProsessT
         var behandlingId = behandling.getId();
         fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId.toString(), taskData);
 
-        // Opprettes som egen task da den er uavhengig av de andre
-        fagsakProsessTaskRepository.lagreNyGruppe(opprettTaskVurderOppgaveTilbakekreving(behandling));
-
         stønadstatistikkService.publiserHendelse(behandling);
     }
 
@@ -84,10 +80,5 @@ public class UngdomsytelseOpprettProsessTaskIverksett implements OpprettProsessT
         return taskdata;
     }
 
-    private ProsessTaskData opprettTaskVurderOppgaveTilbakekreving(Behandling behandling) {
-        ProsessTaskData vurderOppgaveTilbakekreving = ProsessTaskData.forProsessTask(VurderOppgaveTilbakekrevingTask.class);
-        vurderOppgaveTilbakekreving.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-        vurderOppgaveTilbakekreving.setCallIdFraEksisterende();
-        return vurderOppgaveTilbakekreving;
-    }
+
 }
