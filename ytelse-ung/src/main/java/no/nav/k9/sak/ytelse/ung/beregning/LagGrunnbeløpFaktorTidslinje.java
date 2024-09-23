@@ -12,11 +12,6 @@ import no.nav.k9.felles.util.Tuple;
 
 public class LagGrunnbeløpFaktorTidslinje {
 
-    private Map<Tuple<Period, Period>, BigDecimal> satser = Map.of(
-        new Tuple<>(Period.ofYears(18), Period.ofYears(25)), new BigDecimal("1.3333333"),
-        new Tuple<>(Period.ofYears(25), Period.ofYears(30)), new BigDecimal("2"));
-
-
     static LocalDateTimeline<BigDecimal> lagGrunnbelpFaktorTidslinje(LocalDate fødselsdato) {
         var datoForEndringAvSats = fødselsdato.plusYears(25);
         return new LocalDateTimeline<>(
