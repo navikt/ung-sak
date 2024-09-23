@@ -84,7 +84,7 @@ public class DokumentMottakerSøknadUng implements Dokumentmottaker {
 
     @Override
     public BehandlingÅrsakType getBehandlingÅrsakType(Brevkode brevkode) {
-        return BehandlingÅrsakType.RE_ANNET;
+        return BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER;
     }
 
 }
