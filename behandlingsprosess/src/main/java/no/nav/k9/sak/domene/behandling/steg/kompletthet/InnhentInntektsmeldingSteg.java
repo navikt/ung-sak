@@ -68,31 +68,31 @@ public class InnhentInntektsmeldingSteg implements BehandlingSteg {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         var ref = BehandlingReferanse.fra(behandling);
 
-        Map<DatoIntervallEntitet, List<ManglendeVedlegg>> manglendeVedleggPerPeriode = kompletthetForBeregningTjeneste.utledAlleManglendeVedleggFraGrunnlag(ref);
-        var etterlysninger = lagEtterlysning(manglendeVedleggPerPeriode, behandling);
+        var manglendeVedleggPerPeriode = kompletthetForBeregningTjeneste.utledAlleManglendeVedleggFraGrunnlag(ref);
+        var etterlysninger = lagEtterlysninger(manglendeVedleggPerPeriode, behandling);
 
         arbeidsgiverPortalenTjeneste.sendInntektsmeldingForespørsel(etterlysninger);
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private Set<BestiltEtterlysning> lagEtterlysning(Map<DatoIntervallEntitet, List<ManglendeVedlegg>> manglendeVedleggPerPeriode, Behandling behandling) {
-        Set<BestiltEtterlysning> etterlysning = new HashSet<>();
+    private Set<BestiltEtterlysning> lagEtterlysninger(Map<DatoIntervallEntitet, List<ManglendeVedlegg>> manglendeVedleggPerPeriode, Behandling behandling) {
+        Set<BestiltEtterlysning> etterlysninger = new HashSet<>();
 
         var bestilteEtterlysninger = bestiltEtterlysningRepository.hentFor(behandling.getFagsakId());
 
         manglendeVedleggPerPeriode.forEach((periode, mangler) ->
             mangler.forEach(magel -> {
-                var etterLysning = new BestiltEtterlysning(behandling.getFagsakId(), behandling.getId(), periode, magel.getArbeidsgiver(), DokumentMalType.ETTERLYS_INNTEKTSMELDING_DOK.getKode());
+                var nyEtterLysning = new BestiltEtterlysning(behandling.getFagsakId(), behandling.getId(), periode, magel.getArbeidsgiver(), DokumentMalType.ETTERLYS_INNTEKTSMELDING_DOK.getKode());
 
-                if (bestilteEtterlysninger.stream().noneMatch(at -> at.erTilsvarendeBestiltTidligere(etterLysning))) {
-                    etterlysning.add(etterLysning);
+                if (bestilteEtterlysninger.stream().noneMatch(tidligereEtterlysning -> tidligereEtterlysning.erTilsvarendeBestiltTidligere(nyEtterLysning))) {
+                    etterlysninger.add(nyEtterLysning);
                 }
             })
         );
 
-        bestiltEtterlysningRepository.lagre(etterlysning);
+        bestiltEtterlysningRepository.lagre(etterlysninger);
 
-        return etterlysning;
+        return etterlysninger;
     }
 }
