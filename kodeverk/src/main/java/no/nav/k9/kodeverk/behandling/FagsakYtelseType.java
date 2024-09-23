@@ -136,6 +136,8 @@ public enum FagsakYtelseType implements Kodeverdi {
     UNGDOMSYTELSE("UNG", "Ungdomsytelse", null, "OMS"){
         @Override
         public void validerNøkkelParametere(String pleietrengendeAktørId, String relatertPersonAktørId) {
+            requireNull(pleietrengendeAktørId, "pleietrengende");
+            requireNull(relatertPersonAktørId, "relatertPerson");
         }
 
         @Override
