@@ -116,6 +116,7 @@ public class VedtattYtelseTjeneste {
             case OMSORGSPENGER -> Ytelser.OMSORGSPENGER;
             case OPPLÆRINGSPENGER -> Ytelser.OPPLÆRINGSPENGER;
             case FRISINN -> Ytelser.FRISINN;
+            case UNGDOMSYTELSE -> Ytelser.UNGDOMSYTELSE;
             default -> throw new IllegalStateException("Ukjent ytelsestype " + type);
         };
     }

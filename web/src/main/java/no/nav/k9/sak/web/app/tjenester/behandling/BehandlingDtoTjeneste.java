@@ -472,6 +472,8 @@ public class BehandlingDtoTjeneste {
                 dto.leggTil(getFraMap(OpplæringDokumentRestTjeneste.DOKUMENT_LISTE_PATH, "opplæring-dokument-liste", uuidQueryParams));
                 leggTilUttakEndepunkt(behandling, dto);
             }
+            case UNGDOMSYTELSE -> {
+            }
             default -> throw new UnsupportedOperationException("Støtter ikke ytelse " + ytelseType);
         }
 

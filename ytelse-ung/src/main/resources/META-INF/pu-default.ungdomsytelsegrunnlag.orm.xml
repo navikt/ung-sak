@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="https://jakarta.ee/xml/ns/persistence/orm"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm https://jakarta.ee/xml/ns/persistence/orm/orm_3_0.xsd"
+                 version="3.0">
+
+    <sequence-generator name="SEQ_UNG_GR" allocation-size="50" sequence-name="SEQ_UNG_GR"/>
+    <sequence-generator name="SEQ_UNG_SATS_PERIODER" allocation-size="50" sequence-name="SEQ_UNG_SATS_PERIODER"/>
+    <sequence-generator name="SEQ_UNG_SATS_PERIODE" allocation-size="50" sequence-name="SEQ_UNG_SATS_PERIODE"/>
+
+    <entity class="no.nav.k9.sak.ytelse.ung.beregning.UngdomsytelseGrunnlag"/>
+    <entity class="no.nav.k9.sak.ytelse.ung.beregning.UngdomsytelseSatsPerioder"/>
+    <entity class="no.nav.k9.sak.ytelse.ung.beregning.UngdomsytelseSatsPeriode"/>
+
+</entity-mappings>
