@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.prosess;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
+
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -37,6 +38,7 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.INREG_AVSL)
             .medSteg(BehandlingStegType.OVERGANG_FRA_INFOTRYGD)
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA_ARBEIDSFORHOLD, StartpunktType.KONTROLLER_ARBEIDSFORHOLD)
+            .medSteg(BehandlingStegType.INNHENT_INNTEKTSMELDING)
             .medSteg(BehandlingStegType.KONTROLLER_FAKTA, StartpunktType.KONTROLLER_FAKTA)
             .medSteg(BehandlingStegType.ALDERSVILKÅRET)
             .medSteg(BehandlingStegType.VURDER_OMSORG_FOR, StartpunktType.INNGANGSVILKÅR_OMSORGENFOR)
