@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -122,6 +123,10 @@ public class BeregningsgrunnlagPerioderGrunnlag extends BaseEntitet {
 
     public Optional<BeregningsgrunnlagPeriode> finnGrunnlagFor(LocalDate skjæringstidspunkt) {
         return getGrunnlagPerioder().stream().filter(it -> it.getSkjæringstidspunkt().equals(skjæringstidspunkt)).findFirst();
+    }
+
+    public Optional<BeregningsgrunnlagPeriode> finnGrunnlagFor(UUID eksternReferanse) {
+        return getGrunnlagPerioder().stream().filter(it -> it.getEksternReferanse().equals(eksternReferanse)).findFirst();
     }
 
     void deaktiver(LocalDate skjæringstidspunkt) {
