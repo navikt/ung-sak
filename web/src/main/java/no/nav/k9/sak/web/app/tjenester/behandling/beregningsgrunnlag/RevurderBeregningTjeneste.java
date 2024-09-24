@@ -1,12 +1,5 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.FastsettPGIPeriodeTjeneste;
@@ -25,6 +18,13 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.PGIPeriode;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @ApplicationScoped
 public class RevurderBeregningTjeneste {
@@ -88,14 +88,36 @@ public class RevurderBeregningTjeneste {
         var tilRevurdering = behandlingRepository.hentSisteBehandlingForFagsakId(fagsak.getId()).orElseThrow();
         var aktuellPeriode = finnVilkårsperiode(skjæringstidspunkt, tilRevurdering, behandlingÅrsakType.equals(BehandlingÅrsakType.RE_KLAGE_NY_INNH_LIGNET_INNTEKT));
 
+        LocalDate fomDato = aktuellPeriode.getFomDato();
+        LocalDate tomDato = aktuellPeriode.getTomDato();
 
+        return revurder(behandlingÅrsakType, nesteKjøringEtter, fomDato, tomDato, tilRevurdering);
+    }
+
+    private String revurder(BehandlingÅrsakType behandlingÅrsakType, Optional<LocalDateTime> nesteKjøringEtter, LocalDate fomDato, LocalDate tomDato, Behandling tilRevurdering) {
         ProsessTaskData tilRevurderingTaskData = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
         tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK, behandlingÅrsakType.getKode());
-        tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_FOM, aktuellPeriode.getFomDato().toString());
-        tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_TOM, aktuellPeriode.getTomDato().toString());
+        tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_FOM, fomDato.toString());
+        tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_TOM, tomDato.toString());
         tilRevurderingTaskData.setBehandling(tilRevurdering.getFagsakId(), tilRevurdering.getId(), tilRevurdering.getAktørId().getId());
         nesteKjøringEtter.ifPresent(tilRevurderingTaskData::setNesteKjøringEtter);
         return fagsakProsessTaskRepository.lagreNyGruppe(tilRevurderingTaskData);
+    }
+
+
+    /**
+     * Revurder en enkeltperiode fra et gitt steg
+     *
+     * @param fom Når perioden som skal revurderes starter
+     * @param tom Når perioden som skal revurderes slutter
+     * @param fagsakId IDen til fagsaken
+     * @param steg Hvilket steg man skal hoppe tilbake til
+     */
+    public String revurderEnkeltperiodeFraGittSteg(LocalDate fom, LocalDate tom, Long fagsakId, ManuellRevurderingSteg steg) {
+        var fagsak = fagsakTjeneste.finnFagsakGittFagsakId(fagsakId).orElseThrow(() -> new IllegalArgumentException("finnes ikke fagsak med fagsakId: " + fagsakId));
+        var tilRevurdering = behandlingRepository.hentSisteBehandlingForFagsakId(fagsak.getId()).orElseThrow(() -> new IllegalArgumentException("finnes ingen behandlinger på fagsak med id: " + fagsakId));
+
+        return revurder(steg.getType(), Optional.empty(), fom, tom, tilRevurdering);
     }
 
 
@@ -155,6 +177,5 @@ public class RevurderBeregningTjeneste {
 
         return vilkårPeriode.getPeriode();
     }
-
 
 }
