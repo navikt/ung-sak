@@ -81,7 +81,7 @@ public class ÅrskvantumRestTjeneste {
             return new ÅrskvantumForbrukteDager(
                 resultat.getSisteUttaksplan(),
                 Collections.emptyList(), //returnerer ikke rammevedtak, blir ikke brukt av konsument (frontend)
-                Collections.emptyList()  //returnerer ikke barn, blir ikke brukt av konsument (frontend)
+                resultat.getBarna()
             );
         }
         return årskvantumTjeneste.hentÅrskvantumForBehandling(behandlingIdDto.getBehandlingUuid());
