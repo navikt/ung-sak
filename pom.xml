@@ -49,7 +49,7 @@
         <asm.version>9.7</asm.version>
         <kotlin-stdlib.version>2.0.20</kotlin-stdlib.version>
         <jandex.version>3.2.2</jandex.version>
-        <flyway.version>10.18.0</flyway.version>
+        <flyway.version>10.18.1</flyway.version>
 
     </properties>
 
@@ -164,7 +164,7 @@
             <dependency>
                 <groupId>com.zaxxer</groupId>
                 <artifactId>HikariCP</artifactId>
-                <version>5.1.0</version>
+                <version>6.0.0</version>
             </dependency>
             <dependency>
                 <groupId>org.threeten</groupId>
