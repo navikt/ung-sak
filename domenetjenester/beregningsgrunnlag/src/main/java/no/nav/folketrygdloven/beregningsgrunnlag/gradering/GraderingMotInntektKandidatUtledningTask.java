@@ -3,6 +3,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.gradering;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,7 @@ public class GraderingMotInntektKandidatUtledningTask implements ProsessTaskHand
     public static final String KALKULUS_UTLEDNING = "kalkulusUtledning";
     public static final String YTELSE = "ytelse";
     public static final String FOM_DATO = "fom";
+    public static final String INNEHOLDER_DATO = "inneholderDato";
 
     private static final Logger log = LoggerFactory.getLogger(GraderingMotInntektKandidatUtledningTask.class);
     public static final LocalDate FOM_DATO_INNTEKT_GRADERING = LocalDate.of(2025, 1, 1);
@@ -51,7 +53,11 @@ public class GraderingMotInntektKandidatUtledningTask implements ProsessTaskHand
         var dryRun = Boolean.parseBoolean(dryRunValue);
         if (dryRun) {
             var fom = prosessTaskData.getPropertyValue(FOM_DATO) == null ? FOM_DATO_INNTEKT_GRADERING : LocalDate.parse(prosessTaskData.getPropertyValue(FOM_DATO));
-            var fagsaker = inntektGraderingRepository.hentFagsakIdOgSaksnummer(fagsakYtelseType, fom);
+            var inneholderDato = Optional.ofNullable(prosessTaskData.getPropertyValue(INNEHOLDER_DATO)).map(LocalDate::parse);
+            if (inneholderDato.isPresent() && inneholderDato.get().isBefore(fom)) {
+                throw new IllegalStateException("Inneholder dato kan ikke være før fom dato");
+            }
+            var fagsaker = inntektGraderingRepository.hentFagsakIdOgSaksnummer(fagsakYtelseType, fom, inneholderDato);
             log.info("DRYRUN - Fant {} kandidater til gradering mot inntekt.", fagsaker.size());
             if (kalkulusUtledning) {
                 List<String> saksnummerMedAksjonspunkt = fagsaker.entrySet().stream()

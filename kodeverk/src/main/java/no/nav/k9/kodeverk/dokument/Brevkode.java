@@ -90,8 +90,7 @@ public class Brevkode implements Kodeverdi {
      * Ung brevkoder.
      */
     public static final String UNGDOMSYTELSE_SOKNAD_KODE = "UNGDOMSYTELSE_SOKNAD";
-    public static final Brevkode UNGDOMSYTELSE_SOKNAD = new Brevkode(UNGDOMSYTELSE_SOKNAD_KODE, UNGDOMSYTELSE_SOKNAD_KODE, SØKNAD_RANGERING);
-
+    public static final Brevkode UNGDOMSYTELSE_SOKNAD = new Brevkode(UNGDOMSYTELSE_SOKNAD_KODE, "UNG Søknad", SØKNAD_RANGERING);
 
 
     // Default

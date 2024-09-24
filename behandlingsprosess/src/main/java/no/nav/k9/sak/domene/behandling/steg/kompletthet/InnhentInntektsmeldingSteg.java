@@ -7,6 +7,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -41,6 +45,8 @@ public class InnhentInntektsmeldingSteg implements BehandlingSteg {
     private BestiltEtterlysningRepository bestiltEtterlysningRepository;
     private boolean enableSteg;
 
+    private static final Logger log = LoggerFactory.getLogger(InnhentInntektsmeldingSteg.class);
+
     InnhentInntektsmeldingSteg() {
         // for CDI proxy
     }
@@ -72,6 +78,7 @@ public class InnhentInntektsmeldingSteg implements BehandlingSteg {
         var etterlysninger = lagEtterlysninger(manglendeVedleggPerPeriode, behandling);
 
         arbeidsgiverPortalenTjeneste.sendInntektsmeldingForespørsel(etterlysninger);
+        log.info("Sendte forespørsel om inntektsmelding til arbeidsgiverportalen for følgende perioder: {}", etterlysninger.stream().map(BestiltEtterlysning::getPeriode).collect(Collectors.toList()));
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
@@ -91,7 +98,8 @@ public class InnhentInntektsmeldingSteg implements BehandlingSteg {
             })
         );
 
-        bestiltEtterlysningRepository.lagre(etterlysninger);
+        //TODO fix..
+        //bestiltEtterlysningRepository.lagre(etterlysninger);
 
         return etterlysninger;
     }
