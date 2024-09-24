@@ -98,7 +98,8 @@ public class InnhentInntektsmeldingSteg implements BehandlingSteg {
             })
         );
 
-        bestiltEtterlysningRepository.lagre(etterlysninger);
+        //TODO fix..
+        //bestiltEtterlysningRepository.lagre(etterlysninger);
 
         return etterlysninger;
     }
