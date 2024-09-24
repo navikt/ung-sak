@@ -302,8 +302,6 @@ spec:
       value: "true"
     - name: ALDERSVILKAR_I_KRONISK_SYK
       value: "true"
-    - name: MEDLEMSKAP_V2_PERSONOPPLYSNINGER
-      value: "true"
     - name: UNGDOMSYTELSE_ENABLED
       value: "true"
 

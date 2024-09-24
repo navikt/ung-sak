@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.medlem.VurderingsÅrsak;
@@ -41,22 +40,19 @@ public class MedlemDtoTjeneste {
     private BehandlingRepository behandlingRepository;
     private MedlemTjeneste medlemTjeneste;
     private PersonopplysningDtoTjeneste personopplysningDtoTjeneste;
-    private boolean medlemskapV2Person;
 
     @Inject
     public MedlemDtoTjeneste(MedlemskapRepository medlemskapRepository,
                              BehandlingRepository behandlingRepository,
                              SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
                              MedlemTjeneste medlemTjeneste,
-                             PersonopplysningDtoTjeneste personopplysningDtoTjeneste,
-                             @KonfigVerdi(value = "MEDLEMSKAP_V2_PERSONOPPLYSNINGER", defaultVerdi = "false") boolean medlemskapV2Person) {
+                             PersonopplysningDtoTjeneste personopplysningDtoTjeneste) {
 
         this.medlemskapRepository = medlemskapRepository;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.medlemTjeneste = medlemTjeneste;
         this.personopplysningDtoTjeneste = personopplysningDtoTjeneste;
-        this.medlemskapV2Person = medlemskapV2Person;
     }
 
     MedlemDtoTjeneste() {
@@ -86,9 +82,8 @@ public class MedlemDtoTjeneste {
         if (behandling.getAksjonspunkter().stream().map(Aksjonspunkt::getAksjonspunktDefinisjon).toList().contains(AksjonspunktDefinisjon.AVKLAR_FORTSATT_MEDLEMSKAP)) {
             mapAndrePerioder(dto, medlemskapOpt.flatMap(MedlemskapAggregat::getVurderingLøpendeMedlemskap).map(VurdertMedlemskapPeriodeEntitet::getPerioder).orElse(Collections.emptySet()), ref);
         }
-        if (medlemskapV2Person) {
-            mapPersonopplysninger(dto, behandlingId);
-        }
+
+        mapPersonopplysninger(dto, behandlingId);
 
         return Optional.of(dto);
     }
