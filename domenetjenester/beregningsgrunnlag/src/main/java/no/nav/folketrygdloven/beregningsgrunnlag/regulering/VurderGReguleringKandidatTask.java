@@ -1,6 +1,8 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.regulering;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +27,7 @@ public class VurderGReguleringKandidatTask extends FagsakProsessTask {
     public static final String TASKTYPE = "gregulering.kandidatUtprøving";
     public static final String PERIODE_FOM = "fom";
     public static final String PERIODE_TOM = "tom";
+    public static final String PERIODER = "perioder";
     public static final String BEHANDLINGSKONTROLL_OPPRETT_REVURDERING_ELLER_DIFF_TASK = "behandlingskontroll.opprettRevurderingEllerDiff";
     public static final String BEHANDLING_ARSAK = "behandlingArsak";
     private static final Logger log = LoggerFactory.getLogger(VurderGReguleringKandidatTask.class);
@@ -50,19 +53,25 @@ public class VurderGReguleringKandidatTask extends FagsakProsessTask {
         var tom = LocalDate.parse(prosessTaskData.getPropertyValue(PERIODE_TOM));
         var periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
 
-        var skalGReguleres = kandidaterForGReguleringTjeneste.skalGReguleres(prosessTaskData.getFagsakId(), periode);
+        var perioderSomSkalGReguleres = kandidaterForGReguleringTjeneste.skalGReguleres(prosessTaskData.getFagsakId(), periode);
 
-        if (skalGReguleres) {
-            log.info("Fagsaken skal g-reguleres");
+        if (!perioderSomSkalGReguleres.isEmpty()) {
+            log.info("Fagsaken skal g-reguleres for følgende perioder " + perioderSomSkalGReguleres);
             var data =  ProsessTaskData.forTaskType(new TaskType(BEHANDLINGSKONTROLL_OPPRETT_REVURDERING_ELLER_DIFF_TASK));
             data.setFagsakId(prosessTaskData.getFagsakId());
             data.setProperty(BEHANDLING_ARSAK, BehandlingÅrsakType.RE_SATS_REGULERING.getKode());
-            data.setProperty(PERIODE_FOM, prosessTaskData.getPropertyValue(PERIODE_FOM));
-            data.setProperty(PERIODE_TOM, prosessTaskData.getPropertyValue(PERIODE_TOM));
-
+            var periodeString = lagPeriodeString(perioderSomSkalGReguleres);
+            data.setProperty(PERIODER, periodeString);
             taskRepository.lagre(data);
         } else {
             log.info("Fagsaken trenger IKKE g-reguleres");
         }
+    }
+
+    private static String lagPeriodeString(List<DatoIntervallEntitet> perioderSomSkalGReguleres) {
+        return perioderSomSkalGReguleres.stream()
+            .map(p -> p.getFomDato().format(DateTimeFormatter.ISO_DATE) + "/" + p.getTomDato().format(DateTimeFormatter.ISO_DATE))
+            .reduce((s1, s2) -> s1 + "|" + s2)
+            .orElse("");
     }
 }
