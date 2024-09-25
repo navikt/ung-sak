@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
+import no.nav.k9.sak.kontrakt.Patterns;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 import no.nav.k9.sak.kontrakt.kompletthet.aksjonspunkt.KompletthetsPeriode;
 
@@ -34,7 +35,7 @@ public class OverstyrInputForBeregningDto extends BekreftetAksjonspunktDto {
     }
 
     @JsonCreator
-    public OverstyrInputForBeregningDto(@JsonProperty("begrunnelse") @Size(max = 4000) @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String begrunnelse,
+    public OverstyrInputForBeregningDto(@JsonProperty("begrunnelse") @Size(max = 4000) @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String begrunnelse,
                                         @Valid @JsonProperty(value = "perioder", required = true) @Size(min = 1) List<OverstyrBeregningInputPeriode> perioder) {
         super(begrunnelse);
         this.perioder = perioder;

@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
+import no.nav.k9.sak.kontrakt.Patterns;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -33,7 +34,7 @@ public class AvklarArbeidsforhold extends BekreftetAksjonspunktDto {
     }
 
     @JsonCreator
-    public AvklarArbeidsforhold(@JsonProperty("begrunnelse") @Size(max = 4000) @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String begrunnelse,
+    public AvklarArbeidsforhold(@JsonProperty("begrunnelse") @Size(max = 4000) @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String begrunnelse,
                                 @JsonProperty(value = "arbeidsforhold", required = true) @Valid @Size(max = 1000) List<AvklarArbeidsforholdDto> arbeidsforhold) {
         super(begrunnelse);
         this.arbeidsforhold = arbeidsforhold;

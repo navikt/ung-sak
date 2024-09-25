@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
+import no.nav.k9.sak.kontrakt.Patterns;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -23,7 +24,7 @@ public class VurderFeilutbetalingDto extends BekreftetAksjonspunktDto {
 
     @JsonProperty(value = "varseltekst")
     @Size(max = 12000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String varseltekst;
 
     @JsonProperty(value = "videreBehandling", required = true)
