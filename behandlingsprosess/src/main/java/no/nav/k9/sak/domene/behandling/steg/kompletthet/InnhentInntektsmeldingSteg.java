@@ -23,7 +23,6 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.etterlysning.BestiltEtterlysningRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kompletthet.KompletthetForBeregningTjeneste;
@@ -39,7 +38,6 @@ public class InnhentInntektsmeldingSteg implements BehandlingSteg {
     private BehandlingRepository behandlingRepository;
     private KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste;
     private ArbeidsgiverPortalenTjeneste arbeidsgiverPortalenTjeneste;
-    private BestiltEtterlysningRepository bestiltEtterlysningRepository;
     private boolean enableSteg;
 
     private static final Logger log = LoggerFactory.getLogger(InnhentInntektsmeldingSteg.class);
@@ -52,12 +50,10 @@ public class InnhentInntektsmeldingSteg implements BehandlingSteg {
     public InnhentInntektsmeldingSteg(BehandlingRepository behandlingRepository,
                                       KompletthetForBeregningTjeneste kompletthetForBeregningTjeneste,
                                       ArbeidsgiverPortalenTjeneste arbeidsgiverPortalenTjeneste,
-                                      BestiltEtterlysningRepository bestiltEtterlysningRepository,
                                       @KonfigVerdi(value = "ENABLE_INNHENT_INNTEKTSMELDING_STEG", defaultVerdi = "false") boolean enableSteg) {
         this.behandlingRepository = behandlingRepository;
         this.kompletthetForBeregningTjeneste = kompletthetForBeregningTjeneste;
         this.arbeidsgiverPortalenTjeneste = arbeidsgiverPortalenTjeneste;
-        this.bestiltEtterlysningRepository = bestiltEtterlysningRepository;
         this.enableSteg = enableSteg;
     }
 
