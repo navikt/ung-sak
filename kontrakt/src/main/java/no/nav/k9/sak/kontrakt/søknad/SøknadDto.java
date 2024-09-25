@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.kodeverk.geografisk.Språkkode;
+import no.nav.k9.sak.kontrakt.Patterns;
 import no.nav.k9.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -27,7 +28,7 @@ public class SøknadDto {
 
     @JsonProperty(value = "begrunnelseForSenInnsending")
     @Size(max = 5000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String begrunnelseForSenInnsending;
 
     @JsonProperty(value = "manglendeVedlegg")
@@ -71,7 +72,7 @@ public class SøknadDto {
 
     @JsonProperty(value = "tilleggsopplysninger")
     @Size(max = 5000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String tilleggsopplysninger;
 
     @JsonProperty(value = "søknadsperiode")

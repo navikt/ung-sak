@@ -14,6 +14,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import no.nav.k9.abac.AbacAttributt;
 import no.nav.k9.kodeverk.dokument.DokumentMalType;
+import no.nav.k9.sak.kontrakt.Patterns;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -27,7 +28,7 @@ public class BestillBrevDto {
 
     @JsonProperty(value = "fritekst")
     @Size(max = 4000)
-    @Pattern(regexp = TekstValideringRegex.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKSTBREV, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     public String fritekst;
 
     @JsonProperty(value = "behandlingId", required = true)

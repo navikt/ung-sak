@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.kodeverk.medlem.MedlemskapManuellVurderingType;
 import no.nav.k9.kodeverk.medlem.VurderingsÅrsak;
+import no.nav.k9.sak.kontrakt.Patterns;
 import no.nav.k9.sak.kontrakt.person.PersonopplysningDto;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -66,7 +67,7 @@ public class MedlemPeriodeDto {
 
     @JsonProperty(value = "vurdertAv")
     @Size(max = 20)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     private String vurdertAv;
 

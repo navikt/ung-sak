@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.k9.sak.kontrakt.Patterns;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -27,7 +28,7 @@ public abstract class VarselRevurderingDto extends BekreftetAksjonspunktDto {
     @JsonProperty(value = "fritekst", required = true)
     @NotNull
     @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String fritekst;
 
     @JsonProperty(value = "sendVarsel", required = true)

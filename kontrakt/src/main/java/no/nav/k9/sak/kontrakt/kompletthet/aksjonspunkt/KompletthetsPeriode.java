@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.k9.sak.kontrakt.Patterns;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 
 
@@ -30,7 +31,7 @@ public class KompletthetsPeriode {
 
     @JsonProperty("begrunnelse")
     @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String begrunnelse;
 
     @JsonCreator
@@ -38,7 +39,7 @@ public class KompletthetsPeriode {
                                @NotNull @JsonProperty(value = "fortsett", required = true) Boolean kanFortsette,
                                @JsonProperty("begrunnelse")
                                @Size(max = 4000)
-                               @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String begrunnelse) {
+                               @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String begrunnelse) {
         this.periode = periode;
         this.kanFortsette = kanFortsette;
         this.begrunnelse = begrunnelse;

@@ -14,6 +14,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
+import no.nav.k9.sak.kontrakt.Patterns;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -32,7 +33,7 @@ public class EndeligAvklaringKompletthetForBeregningDto extends BekreftetAksjons
     }
 
     @JsonCreator
-    public EndeligAvklaringKompletthetForBeregningDto(@JsonProperty("begrunnelse") @Size(max = 4000) @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String begrunnelse,
+    public EndeligAvklaringKompletthetForBeregningDto(@JsonProperty("begrunnelse") @Size(max = 4000) @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String begrunnelse,
                                                       @Valid @JsonProperty(value = "perioder", required = true) @Size(min = 1) List<KompletthetsPeriode> perioder) {
         super(begrunnelse);
         this.perioder = perioder;

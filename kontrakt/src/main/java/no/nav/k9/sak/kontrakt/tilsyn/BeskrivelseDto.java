@@ -3,6 +3,8 @@ package no.nav.k9.sak.kontrakt.tilsyn;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import no.nav.k9.sak.kontrakt.Patterns;
 import no.nav.k9.sak.typer.Periode;
 
 import jakarta.validation.Valid;
@@ -21,7 +23,7 @@ public class BeskrivelseDto {
 
     @JsonProperty(value = "tekst")
     @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     private String tekst;
 
