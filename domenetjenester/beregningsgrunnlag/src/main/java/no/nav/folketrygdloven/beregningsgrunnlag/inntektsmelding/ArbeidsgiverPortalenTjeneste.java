@@ -7,7 +7,6 @@ import java.util.Set;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.k9inntektsmelding.InntektsmeldingRestKlient;
 import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.k9inntektsmelding.OppdaterForespørslerISakMapper;
 import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.k9inntektsmelding.OppdaterForespørslerISakTask;
 import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.k9inntektsmelding.SendInntektsmeldingForespørselTask;
@@ -23,7 +22,6 @@ import no.nav.k9.sak.typer.Arbeidsgiver;
 public class ArbeidsgiverPortalenTjeneste {
 
     private ProsessTaskTjeneste prosessTaskTjeneste;
-    private InntektsmeldingRestKlient inntektsmeldingRestKlient;
     private boolean skalSendeForesporsel;
 
     public ArbeidsgiverPortalenTjeneste() {
@@ -31,10 +29,8 @@ public class ArbeidsgiverPortalenTjeneste {
 
     @Inject
     public ArbeidsgiverPortalenTjeneste(ProsessTaskTjeneste prosessTaskTjeneste,
-                                        InntektsmeldingRestKlient inntektsmeldingRestKlient,
                                         @KonfigVerdi(value = "SEND_INNTEKTSMELDING_FORESPORSEL", defaultVerdi = "false") boolean skalSendeForesporsel) {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
-        this.inntektsmeldingRestKlient = inntektsmeldingRestKlient;
         this.skalSendeForesporsel = skalSendeForesporsel;
     }
 
