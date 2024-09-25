@@ -156,6 +156,7 @@ public class UttakRestKlient {
             info.getUttaksgrad(),
             info.getUttaksgradMedReduksjonGrunnetInntektsgradering(),
             info.getUttaksgradUtenReduksjonGrunnetInntektsgradering(),
+            info.getGraderingMotEgetTilsyn(),
             info.getUtbetalingsgrader(),
             info.getSøkersTapteArbeidstid(),
             info.getOppgittTilsyn(),

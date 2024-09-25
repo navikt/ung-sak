@@ -170,6 +170,8 @@ public class MapInputTilUttakTjeneste {
         var beredskapsperioder = tilBeredskap(unntakEtablertTilsynForPleietrengende, innvilgedePerioderMedSykdom);
         var nattevåksperioder = tilNattevåk(unntakEtablertTilsynForPleietrengende, innvilgedePerioderMedSykdom);
         final Map<LukketPeriode, List<String>> kravprioritet = mapKravprioritetsliste(input.getKravprioritet());
+        final Map<LukketPeriode, List<String>> kravprioritetEgneSaker = mapKravprioritetsliste(input.getKravprioritetEgneSaker());
+
         final List<LukketPeriode> perioderSomSkalTilbakestilles = input.getPerioderSomSkalTilbakestilles().stream().map(p -> new LukketPeriode(p.getFomDato(), p.getTomDato())).toList();
         Map<LukketPeriode, UtenlandsoppholdInfo> utenlandsoppholdperioder = MapUtenlandsopphold.map(vurderteSøknadsperioder, perioderFraSøknader, tidslinjeTilVurdering);
 
@@ -197,6 +199,7 @@ public class MapInputTilUttakTjeneste {
             beredskapsperioder,
             nattevåksperioder,
             kravprioritet,
+            kravprioritetEgneSaker,
             sisteVedtatteBehandlingForAvktuellBehandling,
             utenlandsoppholdperioder
         );

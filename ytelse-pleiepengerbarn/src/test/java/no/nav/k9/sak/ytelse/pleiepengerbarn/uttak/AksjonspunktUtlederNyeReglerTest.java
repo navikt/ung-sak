@@ -203,6 +203,7 @@ public class AksjonspunktUtlederNyeReglerTest {
             Map.of(),
             Map.of(),
             Map.of(),
+            Map.of(),
             Map.of()
         );
     }

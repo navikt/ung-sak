@@ -17,7 +17,6 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.tilkommetAktivitet.AktivitetstatusOgArbeidsgiver;
 import no.nav.folketrygdloven.beregningsgrunnlag.tilkommetAktivitet.TilkommetAktivitetTjeneste;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -191,6 +190,8 @@ public class HentDataTilUttakTjeneste {
         final List<PeriodeMedVarighet> etablertTilsynPerioder = hentEtablertTilsynTjeneste.hentOgSmørEtablertTilsynPerioder(referanse, unntakEtablertTilsynForPleietrengende, brukUbesluttedeData);
 
         final LocalDateTimeline<List<Kravprioritet>> kravprioritet = pleietrengendeKravprioritet.vurderKravprioritet(referanse.getFagsakId(), referanse.getPleietrengendeAktørId(), brukUbesluttedeData);
+        final LocalDateTimeline<List<Kravprioritet>> kravprioritetEgneSaker = pleietrengendeKravprioritet.vurderKravprioritetEgneSaker(referanse.getFagsakId(), referanse.getPleietrengendeAktørId(), brukUbesluttedeData);
+
         var rettVedDød = rettPleiepengerVedDødRepository.hentHvisEksisterer(referanse.getBehandlingId());
 
         var perioderFraSøknad = periodeFraSøknadForBrukerTjeneste.hentPerioderFraSøknad(referanse);
@@ -233,6 +234,7 @@ public class HentDataTilUttakTjeneste {
             .medPerioderFraSøknad(perioderFraSøknad)
             .medEtablertTilsynPerioder(etablertTilsynPerioder)
             .medKravprioritet(kravprioritet)
+            .medKravprioritetEgneSaker(kravprioritetEgneSaker)
             .medIAYGrunnlag(inntektArbeidYtelseGrunnlag)
             .medBeregningsgrunnlag(beregningsgrunnlag)
             .medOpptjeningsresultat(opptjeningsresultat.orElse(null))

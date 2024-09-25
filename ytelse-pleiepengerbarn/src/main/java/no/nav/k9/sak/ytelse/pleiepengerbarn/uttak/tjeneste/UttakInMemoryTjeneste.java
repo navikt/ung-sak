@@ -91,6 +91,7 @@ public class UttakInMemoryTjeneste implements UttakTjeneste {
             _100,
             null,
             null,
+            BigDecimal.ZERO,
             mapUtbetalingsgrader(periode, input),
             _100,
             null,

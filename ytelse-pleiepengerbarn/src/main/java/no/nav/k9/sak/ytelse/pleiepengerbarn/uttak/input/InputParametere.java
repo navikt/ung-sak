@@ -50,6 +50,7 @@ public class InputParametere {
     private NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles;
     private List<PeriodeMedVarighet> etablertTilsynPerioder;
     private LocalDateTimeline<List<Kravprioritet>> kravprioritet;
+    private LocalDateTimeline<List<Kravprioritet>> kravprioritetEgneSaker;
     private OpptjeningResultat opptjeningResultat;
     private RettPleiepengerVedDødGrunnlag rettPleiepengerVedDødGrunnlag;
     private InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag;
@@ -199,6 +200,15 @@ public class InputParametere {
 
     public LocalDateTimeline<List<Kravprioritet>> getKravprioritet() {
         return kravprioritet;
+    }
+
+    public InputParametere medKravprioritetEgneSaker(LocalDateTimeline<List<Kravprioritet>> kravprioritet) {
+        this.kravprioritetEgneSaker = kravprioritet;
+        return this;
+    }
+
+    public LocalDateTimeline<List<Kravprioritet>> getKravprioritetEgneSaker() {
+        return kravprioritetEgneSaker;
     }
 
     public Optional<RettPleiepengerVedDødGrunnlag> getRettPleiepengerVedDødGrunnlag() {
