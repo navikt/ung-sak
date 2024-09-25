@@ -11,7 +11,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import no.nav.k9.abac.AbacAttributt;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -36,7 +35,6 @@ public class GodkjentOpplæringsinstitusjonIdDto {
         //
     }
 
-    @AbacAttributt(value = "uuid", masker = true)
     public UUID getUuid() {
         return godkjentOpplæringsinstitusjonUuid;
     }
