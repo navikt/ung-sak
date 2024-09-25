@@ -1,7 +1,6 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.regulering;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +21,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
+import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPeriode;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
 
 @ApplicationScoped
@@ -75,7 +75,7 @@ public class KandidaterForGReguleringTjeneste {
             return Collections.emptyList();
         }
 
-        var overlappendeGrunnlag = vilkår
+        var overlappendeVilkårsperioder = vilkår
             .orElseThrow(() -> new IllegalStateException("Fagsaken(id=" + fagsakId + ") har ikke beregnignsvilkåret knyttet til siste behandling"))
             .getPerioder()
             .stream()
@@ -83,50 +83,49 @@ public class KandidaterForGReguleringTjeneste {
             .filter(it -> periode.overlapper(it.getPeriode().getFomDato(), it.getFom()))
             .toList(); // FOM må være i perioden
 
-        if (overlappendeGrunnlag.isEmpty()) {
+        if (overlappendeVilkårsperioder.isEmpty()) {
             return Collections.emptyList();
         }
 
-        var intervallerSomSkalGReguleres = finnPerioderForGregulering(sisteBehandling, overlappendeGrunnlag);
+        var intervallerSomSkalGReguleres = finnPerioderForGregulering(sisteBehandling, overlappendeVilkårsperioder);
 
         return intervallerSomSkalGReguleres;
     }
 
-    private List<DatoIntervallEntitet> finnPerioderForGregulering(Behandling sisteBehandling, List<VilkårPeriode> overlappendeGrunnlag) {
+    private List<DatoIntervallEntitet> finnPerioderForGregulering(Behandling sisteBehandling, List<VilkårPeriode> vilkårsperioder) {
         Saksnummer saksnummer = sisteBehandling.getFagsak().getSaksnummer();
         var bg = beregningPerioderGrunnlagRepository.hentGrunnlag(sisteBehandling.getId()).orElseThrow();
-
-        List<UUID> koblingerÅSpørreMot = new ArrayList<>();
-
-        overlappendeGrunnlag.forEach(og ->
-            bg.finnGrunnlagFor(og.getSkjæringstidspunkt()).ifPresent(bgp -> koblingerÅSpørreMot.add(bgp.getEksternReferanse())));
-
-        var koblingerMedBehovForGRegulering = finnKoblingerMedBehovForGRegulering(koblingerÅSpørreMot, saksnummer);
-
-        var skjæringstidspunkterMedBehovForGregulering = finnSkjæringstidspunkterFraEksternReferasne(koblingerMedBehovForGRegulering, bg);
-
-        var intervallerSomSkalGReguleres = finnVilkårsperioderFraSkjæringstidspunkt(overlappendeGrunnlag, skjæringstidspunkterMedBehovForGregulering);
+        var eksternReferanser = finnEksternreferanser(vilkårsperioder, bg);
+        var eksternReferanserMedBehovForGRegulering = finnEksternReferanserForBgMedBehovForGRegulering(eksternReferanser, saksnummer);
+        var stpMedBehovForGregulering = finnSkjæringstidspunkterFraEksternReferanse(eksternReferanserMedBehovForGRegulering, bg);
+        var intervallerSomSkalGReguleres = finnVilkårsperioderFraSkjæringstidspunkt(vilkårsperioder, stpMedBehovForGregulering);
         return intervallerSomSkalGReguleres;
     }
 
-    private List<UUID> finnKoblingerMedBehovForGRegulering(List<UUID> koblingerÅSpørreMot, Saksnummer saksnummer) {
-        Map<UUID, GrunnbeløpReguleringStatus> koblingMotVurderingsmap = kalkulusTjeneste.kontrollerBehovForGregulering(koblingerÅSpørreMot, saksnummer);
+    private static List<UUID> finnEksternreferanser(List<VilkårPeriode> vilkårsperioder, BeregningsgrunnlagPerioderGrunnlag bg) {
+        return vilkårsperioder.stream()
+            .flatMap(og -> bg.finnGrunnlagFor(og.getSkjæringstidspunkt()).stream())
+            .map(BeregningsgrunnlagPeriode::getEksternReferanse)
+            .toList();
+    }
 
-        var koblingerMedBehovForGRegulering = koblingMotVurderingsmap.entrySet()
+    private List<UUID> finnEksternReferanserForBgMedBehovForGRegulering(List<UUID> eksternReferanser, Saksnummer saksnummer) {
+        Map<UUID, GrunnbeløpReguleringStatus> referanseMotVurderingsmap = kalkulusTjeneste.kontrollerBehovForGregulering(eksternReferanser, saksnummer);
+        var eksternReferanserMedBehovForGRegulering = referanseMotVurderingsmap.entrySet()
             .stream()
             .filter(v -> v.getValue().equals(GrunnbeløpReguleringStatus.NØDVENDIG))
             .map(Map.Entry::getKey)
             .toList();
-        return koblingerMedBehovForGRegulering;
+        return eksternReferanserMedBehovForGRegulering;
     }
 
-    private static List<DatoIntervallEntitet> finnVilkårsperioderFraSkjæringstidspunkt(List<VilkårPeriode> overlappendeGrunnlag, Set<LocalDate> skjæringstidspunkterMedBehovForGregulering) {
-        return overlappendeGrunnlag.stream().filter(g -> skjæringstidspunkterMedBehovForGregulering.contains(g.getSkjæringstidspunkt()))
+    private static List<DatoIntervallEntitet> finnVilkårsperioderFraSkjæringstidspunkt(List<VilkårPeriode> vilkårsperioder, Set<LocalDate> skjæringstidspunkter) {
+        return vilkårsperioder.stream().filter(g -> skjæringstidspunkter.contains(g.getSkjæringstidspunkt()))
             .map(VilkårPeriode::getPeriode)
             .toList();
     }
 
-    private static Set<LocalDate> finnSkjæringstidspunkterFraEksternReferasne(List<UUID> koblingerMedBehovForGRegulering, BeregningsgrunnlagPerioderGrunnlag bg) {
+    private static Set<LocalDate> finnSkjæringstidspunkterFraEksternReferanse(List<UUID> koblingerMedBehovForGRegulering, BeregningsgrunnlagPerioderGrunnlag bg) {
         return koblingerMedBehovForGRegulering.stream()
             .flatMap(k -> bg.finnGrunnlagFor(k).stream())
             .map(p -> p.getSkjæringstidspunkt())
