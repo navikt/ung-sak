@@ -133,6 +133,7 @@ public enum SkjermlenkeType implements Kodeverdi {
         return getKode();
     }
 
+    @JsonProperty
     @Override
     public String getKodeverk() {
         return KODEVERK;
