@@ -1,6 +1,7 @@
 package no.nav.k9.sak.domene.behandling.steg.kompletthet;
 
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.INNHENT_INNTEKTSMELDING;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import java.util.List;
@@ -29,6 +30,7 @@ import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @BehandlingStegRef(value = INNHENT_INNTEKTSMELDING)
 @BehandlingTypeRef
 @ApplicationScoped
