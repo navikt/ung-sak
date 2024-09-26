@@ -260,7 +260,7 @@ public class ForvaltningBeregningRestTjeneste {
 revurderBeregningTjeneste.revurderEnkeltperiodeFraGittSteg(
     revurderEnkeltperiodeFraStegDto.getFom(),
     revurderEnkeltperiodeFraStegDto.getTom(),
-    revurderEnkeltperiodeFraStegDto.getFagsakId(),
+    revurderEnkeltperiodeFraStegDto.getSaksnummer(),
     revurderEnkeltperiodeFraStegDto.getSteg()
 );
     }

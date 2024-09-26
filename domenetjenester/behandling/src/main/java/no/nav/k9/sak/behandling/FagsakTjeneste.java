@@ -48,10 +48,6 @@ public class FagsakTjeneste {
         return fagsakRepository.hentSakGittSaksnummer(saksnummer, taSkriveLås);
     }
 
-    public Optional<Fagsak> finnFagsakGittFagsakId(Long fagsakId) {
-        return fagsakRepository.finnUnikFagsak(fagsakId);
-    }
-
     public List<Fagsak> finnFagsakerForAktør(AktørId aktørId) {
         return fagsakRepository.hentForBruker(aktørId);
     }

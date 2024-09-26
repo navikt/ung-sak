@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import no.nav.k9.abac.AbacAttributt;
+import no.nav.k9.sak.typer.Saksnummer;
 
 import java.time.LocalDate;
 
@@ -24,9 +25,9 @@ public class RevurderEnkeltperiodeFraStegDto {
     @Valid
     private LocalDate tom;
 
-    @JsonProperty(value = "fagsakId", required = true)
+    @JsonProperty(value = "saksnummer", required = true)
     @NotNull
-    private Long fagsakId;
+    private Saksnummer saksnummer;
 
     @JsonProperty(value = "steg", required = true)
     @NotNull
@@ -35,10 +36,10 @@ public class RevurderEnkeltperiodeFraStegDto {
     public RevurderEnkeltperiodeFraStegDto() {
     }
 
-    public RevurderEnkeltperiodeFraStegDto(LocalDate fom, LocalDate tom, Long fagsakId, ManuellRevurderingSteg steg) {
+    public RevurderEnkeltperiodeFraStegDto(LocalDate fom, LocalDate tom, Saksnummer saksnummer, ManuellRevurderingSteg steg) {
         this.fom = fom;
         this.tom = tom;
-        this.fagsakId = fagsakId;
+        this.saksnummer = saksnummer;
         this.steg = steg;
     }
 
@@ -50,9 +51,9 @@ public class RevurderEnkeltperiodeFraStegDto {
         return tom;
     }
 
-    @AbacAttributt("fagsakId")
-    public Long getFagsakId() {
-        return fagsakId;
+    @AbacAttributt("saksnummer")
+    public Saksnummer getSaksnummer() {
+        return saksnummer;
     }
 
     public ManuellRevurderingSteg getSteg() {

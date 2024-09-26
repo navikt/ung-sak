@@ -110,12 +110,12 @@ public class RevurderBeregningTjeneste {
      *
      * @param fom Når perioden som skal revurderes starter
      * @param tom Når perioden som skal revurderes slutter
-     * @param fagsakId IDen til fagsaken
+     * @param saksnummer Fagsakens saksnummer
      * @param steg Hvilket steg man skal hoppe tilbake til
      */
-    public String revurderEnkeltperiodeFraGittSteg(LocalDate fom, LocalDate tom, Long fagsakId, ManuellRevurderingSteg steg) {
-        var fagsak = fagsakTjeneste.finnFagsakGittFagsakId(fagsakId).orElseThrow(() -> new IllegalArgumentException("finnes ikke fagsak med fagsakId: " + fagsakId));
-        var tilRevurdering = behandlingRepository.hentSisteBehandlingForFagsakId(fagsak.getId()).orElseThrow(() -> new IllegalArgumentException("finnes ingen behandlinger på fagsak med id: " + fagsakId));
+    public String revurderEnkeltperiodeFraGittSteg(LocalDate fom, LocalDate tom, Saksnummer saksnummer, ManuellRevurderingSteg steg) {
+        var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true).orElseThrow(() -> new IllegalArgumentException("finnes ikke fagsak med saksnummer: " + saksnummer));
+        var tilRevurdering = behandlingRepository.hentSisteBehandlingForFagsakId(fagsak.getId()).orElseThrow(() -> new IllegalArgumentException("finnes ingen behandlinger på fagsak med saksnummer: " + saksnummer));
 
         return revurder(steg.getType(), Optional.empty(), fom, tom, tilRevurdering);
     }
