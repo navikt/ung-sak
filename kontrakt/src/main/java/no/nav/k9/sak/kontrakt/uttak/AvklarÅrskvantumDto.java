@@ -37,14 +37,14 @@ public class AvklarÅrskvantumDto extends BekreftetAksjonspunktDto {
     @Max(Integer.MAX_VALUE)
     private Integer antallDager;
 
-    @JsonProperty(value = "fosterbarn")
+    @JsonProperty(value = "fosterbarn", required = true)
     @Valid
     @Size(max = 100)
     private List<NorskIdentDto> fosterbarn;
 
     @JsonCreator
     public AvklarÅrskvantumDto(@JsonProperty(value = "begrunnelse", required = true) String begrunnelse,
-                               @JsonProperty(value = "innvilgePeriodene") Boolean innvilgePeriodene,
+                               @JsonProperty(value = "innvilgePeriodene") @NotNull Boolean innvilgePeriodene,
                                @JsonProperty(value = "antallDager") Integer antallDager,
                                @JsonProperty(value = "fortsettBehandling", required = true) Boolean fortsettBehandling,
                                @JsonProperty(value = "fosterbarn") List<NorskIdentDto> fosterbarn) {
