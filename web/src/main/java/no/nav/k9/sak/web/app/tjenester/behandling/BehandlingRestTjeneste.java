@@ -52,7 +52,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.rest.Redirect;
 import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.BehandlingsutredningApplikasjonTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag.RevurderBeregningTjeneste;
-import no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag.RevurderEnkeltperiodeFraStegDto;
+import no.nav.k9.sak.web.app.tjenester.behandling.revurdering.RevurderPeriodeFraStegDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.net.URISyntaxException;
@@ -374,12 +374,12 @@ public class BehandlingRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Oppretter manuell revurdering for en enkeltperiode fra et gitt steg i prosessen")
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
-    public void revurderEnkeltperiodeFraSteg(@Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) RevurderEnkeltperiodeFraStegDto revurderEnkeltperiodeFraStegDto) {
+    public void revurderEnkeltperiodeFraSteg(@Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) RevurderPeriodeFraStegDto revurderPeriodeFraStegDto) {
         revurderBeregningTjeneste.revurderEnkeltperiodeFraGittSteg(
-            revurderEnkeltperiodeFraStegDto.getFom(),
-            revurderEnkeltperiodeFraStegDto.getTom(),
-            revurderEnkeltperiodeFraStegDto.getSaksnummer(),
-            revurderEnkeltperiodeFraStegDto.getSteg()
+            revurderPeriodeFraStegDto.getFom(),
+            revurderPeriodeFraStegDto.getTom(),
+            revurderPeriodeFraStegDto.getSaksnummer(),
+            revurderPeriodeFraStegDto.getSteg()
         );
     }
 

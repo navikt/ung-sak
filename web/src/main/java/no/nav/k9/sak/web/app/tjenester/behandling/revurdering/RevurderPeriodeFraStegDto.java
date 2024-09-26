@@ -1,4 +1,4 @@
-package no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag;
+package no.nav.k9.sak.web.app.tjenester.behandling.revurdering;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_ABSENT, content = JsonInclude.Include.NON_EMPTY)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
-public class RevurderEnkeltperiodeFraStegDto {
+public class RevurderPeriodeFraStegDto {
     @JsonProperty(value = "fom", required = true)
     @NotNull
     @Valid
@@ -34,10 +34,10 @@ public class RevurderEnkeltperiodeFraStegDto {
     @NotNull
     private BehandlingÅrsakType steg;
 
-    public RevurderEnkeltperiodeFraStegDto() {
+    public RevurderPeriodeFraStegDto() {
     }
 
-    public RevurderEnkeltperiodeFraStegDto(LocalDate fom, LocalDate tom, Saksnummer saksnummer, BehandlingÅrsakType steg) {
+    public RevurderPeriodeFraStegDto(LocalDate fom, LocalDate tom, Saksnummer saksnummer, BehandlingÅrsakType steg) {
         this.fom = fom;
         this.tom = tom;
         this.saksnummer = saksnummer;
