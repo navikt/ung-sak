@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import no.nav.k9.abac.AbacAttributt;
+import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.typer.Saksnummer;
 
 import java.time.LocalDate;
@@ -31,12 +32,12 @@ public class RevurderEnkeltperiodeFraStegDto {
 
     @JsonProperty(value = "steg", required = true)
     @NotNull
-    private ManuellRevurderingSteg steg;
+    private BehandlingÅrsakType steg;
 
     public RevurderEnkeltperiodeFraStegDto() {
     }
 
-    public RevurderEnkeltperiodeFraStegDto(LocalDate fom, LocalDate tom, Saksnummer saksnummer, ManuellRevurderingSteg steg) {
+    public RevurderEnkeltperiodeFraStegDto(LocalDate fom, LocalDate tom, Saksnummer saksnummer, BehandlingÅrsakType steg) {
         this.fom = fom;
         this.tom = tom;
         this.saksnummer = saksnummer;
@@ -56,7 +57,7 @@ public class RevurderEnkeltperiodeFraStegDto {
         return saksnummer;
     }
 
-    public ManuellRevurderingSteg getSteg() {
+    public BehandlingÅrsakType getSteg() {
         return steg;
     }
 }

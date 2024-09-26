@@ -120,14 +120,19 @@ public class RevurderBeregningTjeneste {
      * @param saksnummer Fagsakens saksnummer
      * @param steg       Hvilket steg man skal hoppe tilbake til
      */
-    public String revurderEnkeltperiodeFraGittSteg(LocalDate fom, LocalDate tom, Saksnummer saksnummer, ManuellRevurderingSteg steg) {
+    public String revurderEnkeltperiodeFraGittSteg(LocalDate fom, LocalDate tom, Saksnummer saksnummer, BehandlingÅrsakType steg) {
         var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true).orElseThrow(() -> new IllegalArgumentException("Finnes ikke fagsak med saksnummer: " + saksnummer));
         var behandling = behandlingRepository.hentSisteBehandlingForFagsakId(fagsak.getId()).orElseThrow(() -> new IllegalArgumentException("Finnes ingen behandlinger på fagsak med saksnummer: " + saksnummer));
+        var periode = new Periode(fom, tom);
+
+        if (!steg.equals(BehandlingÅrsakType.RE_ENDRET_FORDELING)) {
+            throw new IllegalArgumentException("Prøvde å revurdere til et ikke-støttet steg ("+ steg +").");
+        }
+
         if (!behandling.erAvsluttet()) {
             throw new IllegalStateException("Prøvde å revurdere en fagsak med saksnummer " + saksnummer + ", som ikke er avsluttet.");
         }
 
-        var periode = new Periode(fom, tom);
         if (!periode.isOk()) {
             throw new IllegalArgumentException("Perioden man ønsker å revurdere er potensielt i feil rekkefølge. (fom=" + fom + ", tom=" + tom + ")");
         }
@@ -136,7 +141,7 @@ public class RevurderBeregningTjeneste {
             throw new IllegalArgumentException("Perioden man ønsker å revurdere overlapper ikke med noen godkjente vilkårsperioder.");
         }
 
-        return revurder(steg.getType(), Optional.empty(), fom, tom, behandling);
+        return revurder(steg, Optional.empty(), fom, tom, behandling);
     }
 
 
