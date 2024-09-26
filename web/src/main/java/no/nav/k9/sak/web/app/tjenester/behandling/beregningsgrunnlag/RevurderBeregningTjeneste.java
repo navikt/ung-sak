@@ -11,13 +11,17 @@ import no.nav.k9.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTa
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.PGIPeriode;
+import org.jboss.weld.exceptions.IllegalArgumentException;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,6 +29,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
+
+import static no.nav.k9.kodeverk.uttak.UtfallType.INNVILGET;
 
 @ApplicationScoped
 public class RevurderBeregningTjeneste {
@@ -108,16 +115,25 @@ public class RevurderBeregningTjeneste {
     /**
      * Revurder en enkeltperiode fra et gitt steg
      *
-     * @param fom Når perioden som skal revurderes starter
-     * @param tom Når perioden som skal revurderes slutter
+     * @param fom        Når perioden som skal revurderes starter
+     * @param tom        Når perioden som skal revurderes slutter
      * @param saksnummer Fagsakens saksnummer
-     * @param steg Hvilket steg man skal hoppe tilbake til
+     * @param steg       Hvilket steg man skal hoppe tilbake til
      */
     public String revurderEnkeltperiodeFraGittSteg(LocalDate fom, LocalDate tom, Saksnummer saksnummer, ManuellRevurderingSteg steg) {
         var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true).orElseThrow(() -> new IllegalArgumentException("Finnes ikke fagsak med saksnummer: " + saksnummer));
         var behandling = behandlingRepository.hentSisteBehandlingForFagsakId(fagsak.getId()).orElseThrow(() -> new IllegalArgumentException("Finnes ingen behandlinger på fagsak med saksnummer: " + saksnummer));
         if (!behandling.erAvsluttet()) {
-            throw new IllegalStateException("Prøvde å revurdere en fagsak med saksnummer "+ saksnummer + ", som ikke er avsluttet.");
+            throw new IllegalStateException("Prøvde å revurdere en fagsak med saksnummer " + saksnummer + ", som ikke er avsluttet.");
+        }
+
+        var periode = new Periode(fom, tom);
+        if (!periode.isOk()) {
+            throw new IllegalArgumentException("Perioden man ønsker å revurdere er potensielt i feil rekkefølge. (fom=" + fom + ", tom=" + tom + ")");
+        }
+
+        if (!overlapperPeriodeMedMinstEnGodkjentVilkårsperiode(behandling, periode)) {
+            throw new IllegalArgumentException("Perioden man ønsker å revurdere overlapper ikke med noen godkjente vilkårsperioder.");
         }
 
         return revurder(steg.getType(), Optional.empty(), fom, tom, behandling);
@@ -162,9 +178,7 @@ public class RevurderBeregningTjeneste {
     }
 
     private DatoIntervallEntitet finnVilkårsperiode(LocalDate skjæringstidspunkt, Behandling tilRevurdering, boolean skalValidereMot8_35) {
-        var vilkårPeriode = vilkårResultatRepository.hentHvisEksisterer(tilRevurdering.getId())
-            .flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)).stream()
-            .flatMap(v -> v.getPerioder().stream())
+        var vilkårPeriode = getVilkårsperioder(tilRevurdering)
             .filter(p -> p.getPeriode().getFomDato().equals(skjæringstidspunkt))
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("Bruker har ingen søknadsperiode med fom-dato " + skjæringstidspunkt));
@@ -179,6 +193,22 @@ public class RevurderBeregningTjeneste {
         }
 
         return vilkårPeriode.getPeriode();
+    }
+
+    private boolean overlapperPeriodeMedMinstEnGodkjentVilkårsperiode(Behandling behandling, Periode periode) {
+        return getVilkårsperioder(behandling)
+            .filter(vilkårPeriode -> vilkårPeriode.getGjeldendeUtfall().getKode().equals(INNVILGET.getKode()))
+            .anyMatch(vilkårPeriode -> periode.overlaps(tilPeriode(vilkårPeriode)));
+    }
+
+    private static @NotNull Periode tilPeriode(VilkårPeriode vilkårPeriode) {
+        return new Periode(vilkårPeriode.getPeriode().getFomDato(), vilkårPeriode.getPeriode().getTomDato());
+    }
+
+    private @NotNull Stream<VilkårPeriode> getVilkårsperioder(Behandling behandling) {
+        return vilkårResultatRepository.hentHvisEksisterer(behandling.getId())
+            .flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)).stream()
+            .flatMap(v -> v.getPerioder().stream());
     }
 
 }
