@@ -31,6 +31,7 @@ import no.nav.k9.sak.typer.ArbeidsforholdRef;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
@@ -75,18 +76,23 @@ public class KompletthetForBeregningTjeneste {
         var finnArbeidsforholdForIdentPåDagFunction = new UtledManglendeInntektsmeldingerFraGrunnlagFunction(iayTjeneste,
             new FinnEksternReferanse(iayTjeneste, ref.getBehandlingId()));
 
-        return utledAlleManglendeVedlegg(ref, finnArbeidsforholdForIdentPåDagFunction, true, false);
+        return utledAlleManglendeVedlegg(ref, finnArbeidsforholdForIdentPåDagFunction, true, false, Set.of());
     }
 
     public Map<DatoIntervallEntitet, List<ManglendeVedlegg>> utledAlleManglendeVedleggFraGrunnlag(BehandlingReferanse ref) {
+        return utledAlleManglendeVedleggFraGrunnlag(ref, Set.of());
+    }
+
+    public Map<DatoIntervallEntitet, List<ManglendeVedlegg>> utledAlleManglendeVedleggFraGrunnlag(BehandlingReferanse ref, Set<JournalpostId> ignorerteInntektsmeldinger) {
         var finnArbeidsforholdForIdentPåDagFunction = new UtledManglendeInntektsmeldingerFraGrunnlagFunction(iayTjeneste,
             new FinnEksternReferanse(iayTjeneste, ref.getBehandlingId()));
 
-        return utledAlleManglendeVedlegg(ref, finnArbeidsforholdForIdentPåDagFunction, false, true);
+        return utledAlleManglendeVedlegg(ref, finnArbeidsforholdForIdentPåDagFunction, false, true, ignorerteInntektsmeldinger);
     }
 
     Map<DatoIntervallEntitet, List<ManglendeVedlegg>> utledAlleManglendeVedlegg(BehandlingReferanse ref,
-                                                                                BiFunction<BehandlingReferanse, LocalDate, Map<Arbeidsgiver, Set<EksternArbeidsforholdRef>>> finnArbeidsforholdForIdentPåDagFunction, boolean skipVurderingMotArbeid, boolean skalIgnorerePerioderFraInfotrygd) {
+                                                                                BiFunction<BehandlingReferanse, LocalDate, Map<Arbeidsgiver, Set<EksternArbeidsforholdRef>>> finnArbeidsforholdForIdentPåDagFunction, boolean skipVurderingMotArbeid, boolean skalIgnorerePerioderFraInfotrygd,
+                                                                                Set<JournalpostId> ignorerteInntektsmeldinger) {
         var perioderMedManglendeVedlegg = new HashMap<DatoIntervallEntitet, List<ManglendeVedlegg>>();
 
         // Utled vilkårsperioder
@@ -100,6 +106,7 @@ public class KompletthetForBeregningTjeneste {
         }
 
         var inntektsmeldinger = iayTjeneste.hentInntektsmeldingerKommetTomBehandling(ref.getSaksnummer(), ref.getBehandlingId());
+        inntektsmeldinger = inntektsmeldinger.stream().filter(im -> !ignorerteInntektsmeldinger.contains(im.getJournalpostId())).collect(Collectors.toSet());
         var journalpostIds = inntektsmeldinger.stream().map(Inntektsmelding::getJournalpostId).toList();
         LOGGER.info("Tar hensyn til inntektsmeldinger i kompletthetvurdering: " + journalpostIds);
 

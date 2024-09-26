@@ -5,6 +5,7 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BA
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -67,7 +68,7 @@ public class InnhentInntektsmeldingSteg implements BehandlingSteg {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         var ref = BehandlingReferanse.fra(behandling);
 
-        var manglendeVedleggPerPeriode = kompletthetForBeregningTjeneste.utledAlleManglendeVedleggFraGrunnlag(ref);
+        var manglendeVedleggPerPeriode = kompletthetForBeregningTjeneste.utledAlleManglendeVedleggFraGrunnlag(ref, Set.of()); //TODO
         var forespørsler = mapTilForespørsler(manglendeVedleggPerPeriode);
 
         arbeidsgiverPortalenTjeneste.oppdaterInntektsmeldingforespørslerISak(forespørsler, behandling);
