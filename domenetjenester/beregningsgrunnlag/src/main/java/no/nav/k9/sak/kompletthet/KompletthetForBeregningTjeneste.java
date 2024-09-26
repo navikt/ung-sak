@@ -31,7 +31,6 @@ import no.nav.k9.sak.typer.ArbeidsforholdRef;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
-import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
@@ -76,23 +75,25 @@ public class KompletthetForBeregningTjeneste {
         var finnArbeidsforholdForIdentPåDagFunction = new UtledManglendeInntektsmeldingerFraGrunnlagFunction(iayTjeneste,
             new FinnEksternReferanse(iayTjeneste, ref.getBehandlingId()));
 
-        return utledAlleManglendeVedlegg(ref, finnArbeidsforholdForIdentPåDagFunction, true, false, Set.of());
+        return utledAlleManglendeVedlegg(ref, finnArbeidsforholdForIdentPåDagFunction, true, false, false);
     }
 
     public Map<DatoIntervallEntitet, List<ManglendeVedlegg>> utledAlleManglendeVedleggFraGrunnlag(BehandlingReferanse ref) {
-        return utledAlleManglendeVedleggFraGrunnlag(ref, Set.of());
+        return utledAlleManglendeVedleggFraGrunnlag(ref, false);
     }
 
-    public Map<DatoIntervallEntitet, List<ManglendeVedlegg>> utledAlleManglendeVedleggFraGrunnlag(BehandlingReferanse ref, Set<JournalpostId> ignorerteInntektsmeldinger) {
+    public Map<DatoIntervallEntitet, List<ManglendeVedlegg>> utledAlleManglendeVedleggFraGrunnlag(BehandlingReferanse ref, boolean skalIgnorereInntektsmeldingUtenStp) {
         var finnArbeidsforholdForIdentPåDagFunction = new UtledManglendeInntektsmeldingerFraGrunnlagFunction(iayTjeneste,
             new FinnEksternReferanse(iayTjeneste, ref.getBehandlingId()));
 
-        return utledAlleManglendeVedlegg(ref, finnArbeidsforholdForIdentPåDagFunction, false, true, ignorerteInntektsmeldinger);
+        return utledAlleManglendeVedlegg(ref, finnArbeidsforholdForIdentPåDagFunction, false, true, skalIgnorereInntektsmeldingUtenStp);
     }
 
     Map<DatoIntervallEntitet, List<ManglendeVedlegg>> utledAlleManglendeVedlegg(BehandlingReferanse ref,
-                                                                                BiFunction<BehandlingReferanse, LocalDate, Map<Arbeidsgiver, Set<EksternArbeidsforholdRef>>> finnArbeidsforholdForIdentPåDagFunction, boolean skipVurderingMotArbeid, boolean skalIgnorerePerioderFraInfotrygd,
-                                                                                Set<JournalpostId> ignorerteInntektsmeldinger) {
+                                                                                BiFunction<BehandlingReferanse, LocalDate, Map<Arbeidsgiver, Set<EksternArbeidsforholdRef>>> finnArbeidsforholdForIdentPåDagFunction,
+                                                                                boolean skipVurderingMotArbeid,
+                                                                                boolean skalIgnorerePerioderFraInfotrygd,
+                                                                                boolean skalIgnorereInntektsmeldingUtenStp) {
         var perioderMedManglendeVedlegg = new HashMap<DatoIntervallEntitet, List<ManglendeVedlegg>>();
 
         // Utled vilkårsperioder
@@ -106,7 +107,16 @@ public class KompletthetForBeregningTjeneste {
         }
 
         var inntektsmeldinger = iayTjeneste.hentInntektsmeldingerKommetTomBehandling(ref.getSaksnummer(), ref.getBehandlingId());
-        inntektsmeldinger = inntektsmeldinger.stream().filter(im -> !ignorerteInntektsmeldinger.contains(im.getJournalpostId())).collect(Collectors.toSet());
+
+        if (skalIgnorereInntektsmeldingUtenStp) {
+            var stp = vilkårsPerioder.stream().map(DatoIntervallEntitet::getFomDato).toList();
+            var ignorerteInntektsmeldinger = inntektsmeldinger.stream()
+                .filter(im -> im.getStartDatoPermisjon().isPresent() && !stp.contains(im.getStartDatoPermisjon().get()))
+                .map(Inntektsmelding::getJournalpostId).collect(Collectors.toSet());
+
+            inntektsmeldinger = inntektsmeldinger.stream().filter(im -> !ignorerteInntektsmeldinger.contains(im.getJournalpostId())).collect(Collectors.toSet());
+        }
+
         var journalpostIds = inntektsmeldinger.stream().map(Inntektsmelding::getJournalpostId).toList();
         LOGGER.info("Tar hensyn til inntektsmeldinger i kompletthetvurdering: " + journalpostIds);
 
