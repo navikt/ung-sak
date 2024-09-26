@@ -1,19 +1,5 @@
 package no.nav.k9.sak.web.app.tjenester.behandling;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.k9.abac.BeskyttetRessursKoder.VENTEFRIST;
-import static no.nav.k9.felles.feil.LogLevel.ERROR;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.UPDATE;
-
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
@@ -28,13 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
@@ -48,6 +28,7 @@ import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.k9.felles.jpa.TomtResultatException;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
@@ -64,23 +45,25 @@ import no.nav.k9.sak.behandlingslager.fagsak.SakInfotrygdMigrering;
 import no.nav.k9.sak.domene.behandling.steg.iverksettevedtak.HenleggBehandlingTjeneste;
 import no.nav.k9.sak.kontrakt.AsyncPollingStatus;
 import no.nav.k9.sak.kontrakt.ProsessTaskGruppeIdDto;
-import no.nav.k9.sak.kontrakt.behandling.BehandlingDto;
-import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
-import no.nav.k9.sak.kontrakt.behandling.BehandlingOperasjonerDto;
-import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.k9.sak.kontrakt.behandling.ByttBehandlendeEnhetDto;
-import no.nav.k9.sak.kontrakt.behandling.GjenopptaBehandlingDto;
-import no.nav.k9.sak.kontrakt.behandling.HenleggBehandlingDto;
-import no.nav.k9.sak.kontrakt.behandling.NyBehandlingDto;
-import no.nav.k9.sak.kontrakt.behandling.ReåpneBehandlingDto;
-import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
-import no.nav.k9.sak.kontrakt.behandling.SettBehandlingPaVentDto;
+import no.nav.k9.sak.kontrakt.behandling.*;
 import no.nav.k9.sak.kontrakt.infotrygd.DirekteOvergangDto;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.app.rest.Redirect;
 import no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt.BehandlingsutredningApplikasjonTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag.RevurderBeregningTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag.RevurderEnkeltperiodeFraStegDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static no.nav.k9.abac.BeskyttetRessursKoder.*;
+import static no.nav.k9.felles.feil.LogLevel.ERROR;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.*;
 
 @ApplicationScoped
 @Transactional
@@ -91,6 +74,7 @@ public class BehandlingRestTjeneste {
     public static final String BEHANDLING_PATH = "/behandling";
     public static final String BEHANDLINGER_ALLE = "/behandlinger/alle";
     public static final String BEHANDLINGER_PATH = "/behandlinger";
+    public static final String REVURDER_PERIODE_FRA_STEG_PATH = "/behandlinger/revurder-periode-fra-steg";
     public static final String BEHANDLINGER_UNNTAK_PATH = "/behandlinger/unntak";
     public static final String BEHANDLINGER_STATUS = "/behandlinger/status";
     public static final String FAGSAK_BEHANDLING_PATH = "/fagsak/behandling";
@@ -113,6 +97,7 @@ public class BehandlingRestTjeneste {
     private BehandlingDtoTjeneste behandlingDtoTjeneste;
     private SjekkProsessering sjekkProsessering;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
+    private RevurderBeregningTjeneste revurderBeregningTjeneste;
 
 
     BehandlingRestTjeneste() {
@@ -127,7 +112,8 @@ public class BehandlingRestTjeneste {
                                   HenleggBehandlingTjeneste henleggBehandlingTjeneste,
                                   BehandlingDtoTjeneste behandlingDtoTjeneste,
                                   SjekkProsessering sjekkProsessering,
-                                  @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester) {
+                                  @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
+                                  RevurderBeregningTjeneste revurderBeregningTjeneste) {
         this.behandlingsutredningApplikasjonTjeneste = behandlingsutredningApplikasjonTjeneste;
         this.behandlingsprosessTjeneste = behandlingsprosessTjeneste;
         this.behandlingsoppretterTjeneste = behandlingsoppretterTjeneste;
@@ -136,6 +122,7 @@ public class BehandlingRestTjeneste {
         this.behandlingDtoTjeneste = behandlingDtoTjeneste;
         this.sjekkProsessering = sjekkProsessering;
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
+        this.revurderBeregningTjeneste = revurderBeregningTjeneste;
     }
 
     @POST
@@ -380,6 +367,20 @@ public class BehandlingRestTjeneste {
             throw new IllegalArgumentException("Støtter ikke opprette ny behandling for behandlingType:" + behandlingType);
         }
 
+    }
+
+    @POST
+    @Path(REVURDER_PERIODE_FRA_STEG_PATH)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Oppretter manuell revurdering for en enkeltperiode fra et gitt steg i prosessen")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
+    public void revurderEnkeltperiodeFraSteg(@Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) RevurderEnkeltperiodeFraStegDto revurderEnkeltperiodeFraStegDto) {
+        revurderBeregningTjeneste.revurderEnkeltperiodeFraGittSteg(
+            revurderEnkeltperiodeFraStegDto.getFom(),
+            revurderEnkeltperiodeFraStegDto.getTom(),
+            revurderEnkeltperiodeFraStegDto.getSaksnummer(),
+            revurderEnkeltperiodeFraStegDto.getSteg()
+        );
     }
 
     @PUT

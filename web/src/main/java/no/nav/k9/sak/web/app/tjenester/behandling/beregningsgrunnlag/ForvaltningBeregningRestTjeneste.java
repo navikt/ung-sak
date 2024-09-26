@@ -252,21 +252,6 @@ public class ForvaltningBeregningRestTjeneste {
     }
 
     @POST
-    @Path("/revurder-enkeltperiode-fra-steg")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(description = "Oppretter manuell revurdering for en enkeltperiode fra et gitt steg i prosessen")
-    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
-    public void revurderEnkeltperiodeFraSteg(@Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) RevurderEnkeltperiodeFraStegDto revurderEnkeltperiodeFraStegDto) {
-revurderBeregningTjeneste.revurderEnkeltperiodeFraGittSteg(
-    revurderEnkeltperiodeFraStegDto.getFom(),
-    revurderEnkeltperiodeFraStegDto.getTom(),
-    revurderEnkeltperiodeFraStegDto.getSaksnummer(),
-    revurderEnkeltperiodeFraStegDto.getSteg()
-);
-    }
-
-
-    @POST
     @Path("/fjern-prosesstrigger-reberegning")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Fjerner prosesstrigger for reberegning av grunnlag", summary = ("Fjerner prosesstrigger for reberegning av grunnlag"), tags = "beregning")
