@@ -22,6 +22,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import no.nav.k9.aarskvantum.kontrakter.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,31 +34,6 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.aarskvantum.kontrakter.Arbeidsforhold;
-import no.nav.k9.aarskvantum.kontrakter.ArbeidsforholdStatus;
-import no.nav.k9.aarskvantum.kontrakter.AvvikImSøknad;
-import no.nav.k9.aarskvantum.kontrakter.Barn;
-import no.nav.k9.aarskvantum.kontrakter.BarnFødselsdato;
-import no.nav.k9.aarskvantum.kontrakter.BarnType;
-import no.nav.k9.aarskvantum.kontrakter.FraværPeriode;
-import no.nav.k9.aarskvantum.kontrakter.FraværÅrsak;
-import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
-import no.nav.k9.aarskvantum.kontrakter.FullUttaksplanForBehandlinger;
-import no.nav.k9.aarskvantum.kontrakter.LukketPeriode;
-import no.nav.k9.aarskvantum.kontrakter.RammevedtakResponse;
-import no.nav.k9.aarskvantum.kontrakter.RammevedtakV2Request;
-import no.nav.k9.aarskvantum.kontrakter.SøknadÅrsak;
-import no.nav.k9.aarskvantum.kontrakter.Utfall;
-import no.nav.k9.aarskvantum.kontrakter.Uttaksplan;
-import no.nav.k9.aarskvantum.kontrakter.Vilkår;
-import no.nav.k9.aarskvantum.kontrakter.VurderteVilkår;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDagerV2;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlag;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumGrunnlagV2;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumResultat;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUtbetalingGrunnlag;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUttrekk;
 import no.nav.k9.felles.integrasjon.rest.DefaultJsonMapper;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
@@ -640,8 +616,22 @@ public class ÅrskvantumTjeneste {
         return årskvantumKlient.hentÅrskvantumForBehandling(behandlingUuid);
     }
 
-    public ÅrskvantumForbrukteDagerV2 hentÅrskvantumForBehandlingV2(UUID behandlingUuid) {
-        return årskvantumKlient.hentÅrskvantumForBehandlingV2(behandlingUuid);
+    public ÅrskvantumForbrukteDager hentÅrskvantumForBehandlingV2(UUID behandlingUuid) {
+        var behandling = behandlingRepository.hentBehandling(behandlingUuid);
+
+        var fagsakPeriode = behandling.getFagsak().getPeriode();
+        var rammevedtak = hentRammevedtak(
+            new LukketPeriode(fagsakPeriode.getFomDato(), fagsakPeriode.getTomDato()),
+            behandling
+        );
+
+        var årskvantumV2 = årskvantumKlient.hentÅrskvantumForBehandlingV2(behandlingUuid);
+
+        return new ÅrskvantumForbrukteDager(
+            årskvantumV2.getSisteUttaksplan(),
+            rammevedtak.getRammevedtak(),
+            årskvantumV2.getBarna()
+        );
     }
 
     public FullUttaksplan hentFullUttaksplan(Saksnummer saksnummer) {
