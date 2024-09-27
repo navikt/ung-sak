@@ -23,7 +23,8 @@ public class VurderInstitusjonOppdaterer implements AksjonspunktOppdaterer<Vurde
 
     private VurdertOpplæringRepository vurdertOpplæringRepository;
 
-    public VurderInstitusjonOppdaterer() {
+    VurderInstitusjonOppdaterer() {
+        //For CDI
     }
 
     @Inject

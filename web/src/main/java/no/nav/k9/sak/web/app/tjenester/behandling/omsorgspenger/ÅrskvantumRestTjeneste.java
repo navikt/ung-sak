@@ -5,6 +5,7 @@ import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import java.util.Collections;
+import java.util.List;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -24,11 +25,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import no.nav.k9.aarskvantum.kontrakter.FullUttaksplan;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDager;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumForbrukteDagerV2;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUtbetalingGrunnlag;
-import no.nav.k9.aarskvantum.kontrakter.ÅrskvantumUttrekk;
+import no.nav.k9.aarskvantum.kontrakter.*;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
@@ -77,12 +74,7 @@ public class ÅrskvantumRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public ÅrskvantumForbrukteDager getForbrukteDager(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
         if (rammevedtakSammenstillingIÅrskvantum){
-            ÅrskvantumForbrukteDagerV2 resultat = årskvantumTjeneste.hentÅrskvantumForBehandlingV2(behandlingIdDto.getBehandlingUuid());
-            return new ÅrskvantumForbrukteDager(
-                resultat.getSisteUttaksplan(),
-                Collections.emptyList(), //returnerer ikke rammevedtak, blir ikke brukt av konsument (frontend)
-                Collections.emptyList()  //returnerer ikke barn, blir ikke brukt av konsument (frontend)
-            );
+            return årskvantumTjeneste.hentÅrskvantumForBehandlingV2(behandlingIdDto.getBehandlingUuid());
         }
         return årskvantumTjeneste.hentÅrskvantumForBehandling(behandlingIdDto.getBehandlingUuid());
     }

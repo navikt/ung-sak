@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
@@ -23,13 +24,14 @@ public class InntektGraderingRepository {
         this.entityManager = entityManager;
     }
 
-    public Map<Long, Saksnummer> hentFagsakIdOgSaksnummer(FagsakYtelseType ytelseType, LocalDate fom) {
+    public Map<Long, Saksnummer> hentFagsakIdOgSaksnummer(FagsakYtelseType ytelseType, LocalDate fom, Optional<LocalDate> inneholderDato) {
         Query query;
 
         String sql = """
             select f.id, f.saksnummer from Fagsak f
              where f.ytelse_type = :ytelseType
                and upper(f.periode) > :fom
+               and upper(f.periode) > :inneholder
                and not exists(select 1 from Behandling b inner join
                Aksjonspunkt a on a.behandling_id = b.id
                where b.fagsak_id = f.id and a.aksjonspunkt_def = '5067')
@@ -39,6 +41,7 @@ public class InntektGraderingRepository {
 
         query.setParameter("ytelseType", Objects.requireNonNull(ytelseType, "ytelseType").getKode());
         query.setParameter("fom", fom);
+        query.setParameter("inneholder", inneholderDato.orElse(fom));
 
         List<Object[]> result = query.getResultList();
 
