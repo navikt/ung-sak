@@ -23,7 +23,7 @@ public class SaksnummerDto {
 
     @JsonProperty(value = "saksnummer", required = true)
     @NotNull
-    @Size(max = 19)
+    @Size(min = 5, max = 19)
     @Pattern(regexp = "^[a-zA-Z0-9]*$")
     private final String saksnummer;
 
