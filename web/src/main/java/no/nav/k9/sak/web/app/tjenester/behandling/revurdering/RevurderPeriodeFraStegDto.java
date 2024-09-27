@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import no.nav.k9.abac.AbacAttributt;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -28,10 +30,14 @@ public class RevurderPeriodeFraStegDto {
 
     @JsonProperty(value = "saksnummer", required = true)
     @NotNull
+    @Size(max = 19)
+    @Pattern(regexp = "^[a-zA-Z0-9]*$")
+    @Valid
     private Saksnummer saksnummer;
 
     @JsonProperty(value = "steg", required = true)
     @NotNull
+    @Valid
     private BehandlingÅrsakType steg;
 
     public RevurderPeriodeFraStegDto() {
