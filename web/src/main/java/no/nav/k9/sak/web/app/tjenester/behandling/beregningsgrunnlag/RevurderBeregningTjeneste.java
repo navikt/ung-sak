@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.FastsettPGIPeriodeTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
@@ -11,6 +12,7 @@ import no.nav.k9.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTa
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
@@ -21,6 +23,8 @@ import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.PGIPeriode;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -34,6 +38,8 @@ import static no.nav.k9.kodeverk.uttak.UtfallType.INNVILGET;
 
 @ApplicationScoped
 public class RevurderBeregningTjeneste {
+
+    private static final Logger LOG = LoggerFactory.getLogger(RevurderBeregningTjeneste.class);
 
     public static Set<BehandlingÅrsakType> MANUELLE_BEREGNING_ÅRSAKER = Set.of(
         BehandlingÅrsakType.RE_OPPLYSNINGER_OM_BEREGNINGSGRUNNLAG,
@@ -200,8 +206,9 @@ public class RevurderBeregningTjeneste {
     }
 
     private boolean overlapperPeriodeMedMinstEnGodkjentVilkårsperiode(Behandling behandling, Periode periode) {
-        return getVilkårsperioder(behandling)
-            .filter(vilkårPeriode -> vilkårPeriode.getGjeldendeUtfall().getKode().equals(INNVILGET.getKode()))
+        var perioder = getVilkårsperioder(behandling);
+        return perioder
+            .filter(vilkårPeriode -> vilkårPeriode.getGjeldendeUtfall().getKode().equals(Utfall.OPPFYLT.getKode()))
             .anyMatch(vilkårPeriode -> periode.overlaps(tilPeriode(vilkårPeriode)));
     }
 
@@ -210,7 +217,8 @@ public class RevurderBeregningTjeneste {
     }
 
     private @NotNull Stream<VilkårPeriode> getVilkårsperioder(Behandling behandling) {
-        return vilkårResultatRepository.hentHvisEksisterer(behandling.getId())
+        Optional<Vilkårene> vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandling.getId());
+        return vilkårene
             .flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)).stream()
             .flatMap(v -> v.getPerioder().stream());
     }

@@ -22,6 +22,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.CdiDbAwareTest;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -79,11 +81,9 @@ class RevurderBeregningTjenesteTest {
     @Test
     void revurder_enkeltperiode_fra_gitt_steg_happy_case() {
         var fagsak = lagFagsak();
-        var behandling = lagBehandling(fagsak);
-        initierVilkår(behandling);
         lagFagsakMedInnvilgedeBehandlinger(fagsak);
-        var fom = STP.minusDays(60);
-        var tom = STP;
+        var fom = STP.minusDays(10);
+        var tom = STP.minusDays(4);
 
         var gruppeId = revurderBeregningTjeneste.revurderEnkeltperiodeFraGittSteg(fom, tom, SAKSNUMMER, BehandlingÅrsakType.RE_ENDRET_FORDELING);
 
@@ -93,8 +93,6 @@ class RevurderBeregningTjenesteTest {
     @Test
     void revurder_enkeltperiode_feiler_om_dato_er_i_feil_rekkefølge() {
         var fagsak = lagFagsak();
-        var behandling = lagBehandling(fagsak);
-        initierVilkår(behandling);
         lagFagsakMedInnvilgedeBehandlinger(fagsak);
         var iDag = STP;
         var enUkeSiden = STP.minusDays(7);
@@ -105,8 +103,6 @@ class RevurderBeregningTjenesteTest {
     @Test
     void revurder_enkeltperiode_feiler_om_steg_ikke_er_re_endret_fordeling() {
         var fagsak = lagFagsak();
-        var behandling = lagBehandling(fagsak);
-        initierVilkår(behandling);
         lagFagsakMedInnvilgedeBehandlinger(fagsak);
         var iDag = STP;
         var enUkeSiden = STP.minusDays(7);
@@ -117,8 +113,6 @@ class RevurderBeregningTjenesteTest {
     @Test
     void revurder_enkeltperiode_feiler_om_behandling_ikke_er_avsluttet() {
         var fagsak = lagFagsak();
-        var behandling = lagBehandling(fagsak);
-        initierVilkår(behandling);
         lagFagsakMedBehandlingMedStatus(fagsak, BehandlingStatus.UTREDES);
 
         var iDag = STP;
@@ -130,7 +124,6 @@ class RevurderBeregningTjenesteTest {
     @Test
     void revurder_enkeltperiode_feiler_om_perioden_man_vil_revurdere_ikke_overlapper_med_noen_innvilgede_perioder() {
         var fagsak = lagFagsak();
-        var behandling = lagBehandling(fagsak);
         lagFagsakMedInnvilgedeBehandlinger(fagsak);
 
         var iDag = STP;
@@ -145,6 +138,19 @@ class RevurderBeregningTjenesteTest {
         var vilkårPeriodeBuilder = vilkårBuilder.hentBuilderFor(STP, STP);
         vilkårPeriodeBuilder.medUtfall(Utfall.IKKE_VURDERT);
         vilkårBuilder.leggTil(vilkårPeriodeBuilder);
+        vilkårResultatRepository.lagre(behandling.getId(), vilkårResultatBuilder.leggTil(vilkårBuilder).build());
+    }
+
+    private void initierVilkårMedPerioder(Behandling behandling, List<DatoIntervallEntitet> perioder) {
+        VilkårResultatBuilder vilkårResultatBuilder = new VilkårResultatBuilder();
+        var vilkårBuilder = new VilkårBuilder(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+
+        for (DatoIntervallEntitet periode : perioder) {
+            var vilkårPeriodeBuilder = vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato());
+            vilkårPeriodeBuilder.medUtfall(Utfall.OPPFYLT);
+            vilkårBuilder.leggTil(vilkårPeriodeBuilder);
+        }
+
         vilkårResultatRepository.lagre(behandling.getId(), vilkårResultatBuilder.leggTil(vilkårBuilder).build());
     }
 
@@ -171,14 +177,6 @@ class RevurderBeregningTjenesteTest {
     }
 
     private void lagFagsakMedInnvilgedeBehandlinger(Fagsak fagsak) {
-        var førsteBehandling = Behandling.forFørstegangssøknad(fagsak)
-            .medBehandlingStatus(BehandlingStatus.AVSLUTTET)
-            .medOpprettetDato(STP.minusDays(100).atStartOfDay())
-            .medAvsluttetDato(STP.minusDays(60).atStartOfDay())
-            .medBehandlingResultatType(BehandlingResultatType.INNVILGET)
-            .build();
-        behandlingRepository.lagre(førsteBehandling, behandlingRepository.taSkriveLås(førsteBehandling));
-
         var sisteBehandling = Behandling.forFørstegangssøknad(fagsak)
             .medBehandlingStatus(BehandlingStatus.AVSLUTTET)
             .medOpprettetDato(STP.minusDays(30).atStartOfDay())
@@ -186,5 +184,16 @@ class RevurderBeregningTjenesteTest {
             .medBehandlingResultatType(BehandlingResultatType.INNVILGET)
             .build();
         behandlingRepository.lagre(sisteBehandling, behandlingRepository.taSkriveLås(sisteBehandling));
+        initierVilkårMedPerioder(
+            sisteBehandling,
+            List.of(
+                DatoIntervallEntitet.fraOgMedTilOgMed(
+                    STP.minusDays(30),
+                    STP.minusDays(3)
+                )
+            )
+        );
+
+
     }
 }
