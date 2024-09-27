@@ -9729,7 +9729,7 @@
         "properties" : {
           "saksnummer" : {
             "maxLength" : 19,
-            "minLength" : 0,
+            "minLength" : 5,
             "pattern" : "^[a-zA-Z0-9]*$",
             "type" : "string"
           }
