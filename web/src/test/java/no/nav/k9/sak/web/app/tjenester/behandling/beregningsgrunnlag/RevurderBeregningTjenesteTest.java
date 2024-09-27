@@ -24,7 +24,6 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.CdiDbAwareTest;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
-import org.jboss.weld.exceptions.IllegalArgumentException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -83,7 +82,7 @@ class RevurderBeregningTjenesteTest {
         var behandling = lagBehandling(fagsak);
         initierVilkår(behandling);
         lagFagsakMedInnvilgedeBehandlinger(fagsak);
-        var enUkeSiden = STP.minusDays(7);
+        var enUkeSiden = STP.minusDays(60);
         var iDag = STP;
 
         var gruppeId = revurderBeregningTjeneste.revurderEnkeltperiodeFraGittSteg(enUkeSiden, iDag, SAKSNUMMER, BehandlingÅrsakType.RE_ENDRET_FORDELING);
@@ -125,7 +124,7 @@ class RevurderBeregningTjenesteTest {
         var iDag = STP;
         var enUkeSiden = STP.minusDays(7);
 
-        assertThatThrownBy(() -> revurderBeregningTjeneste.revurderEnkeltperiodeFraGittSteg(enUkeSiden, iDag, SAKSNUMMER, BehandlingÅrsakType.RE_ANNET)).isInstanceOf(java.lang.IllegalStateException.class);
+        assertThatThrownBy(() -> revurderBeregningTjeneste.revurderEnkeltperiodeFraGittSteg(enUkeSiden, iDag, SAKSNUMMER, BehandlingÅrsakType.RE_ENDRET_FORDELING)).isInstanceOf(java.lang.IllegalStateException.class);
     }
 
     @Test

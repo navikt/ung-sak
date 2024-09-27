@@ -20,7 +20,6 @@ import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.PGIPeriode;
-import org.jboss.weld.exceptions.IllegalArgumentException;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDate;
