@@ -82,10 +82,10 @@ class RevurderBeregningTjenesteTest {
         var behandling = lagBehandling(fagsak);
         initierVilkår(behandling);
         lagFagsakMedInnvilgedeBehandlinger(fagsak);
-        var enUkeSiden = STP.minusDays(60);
-        var iDag = STP;
+        var fom = STP.minusDays(60);
+        var tom = STP;
 
-        var gruppeId = revurderBeregningTjeneste.revurderEnkeltperiodeFraGittSteg(enUkeSiden, iDag, SAKSNUMMER, BehandlingÅrsakType.RE_ENDRET_FORDELING);
+        var gruppeId = revurderBeregningTjeneste.revurderEnkeltperiodeFraGittSteg(fom, tom, SAKSNUMMER, BehandlingÅrsakType.RE_ENDRET_FORDELING);
 
         assertThat(gruppeId).isNotNull();
     }
