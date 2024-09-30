@@ -4,6 +4,9 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -34,6 +37,8 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 @FagsakYtelseTypeRef
 @ApplicationScoped
 public class InitierVilkårSteg implements BehandlingSteg {
+
+    private static final Logger log = LoggerFactory.getLogger(InitierVilkårSteg.class);
 
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -77,9 +82,9 @@ public class InitierVilkårSteg implements BehandlingSteg {
         }
 
         var perioderTilVurderingTjeneste = getPerioderTilVurderingTjeneste(behandling);
-        var utledetAvstand = perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand();
+        int utledetAvstand = perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand();
         var fullstendigePerioder = perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId());
-        var fullstendigTidslinje = fullstendigTidslinje(utledetAvstand, perioderTilVurderingTjeneste.getKantIKantVurderer(), fullstendigePerioder);
+        VilkårBuilder fullstendigTidslinje = fullstendigTidslinje(utledetAvstand, perioderTilVurderingTjeneste.getKantIKantVurderer(), fullstendigePerioder);
         var vilkårPeriodeMap = perioderTilVurderingTjeneste.utledRådataTilUtledningAvVilkårsperioder(behandling.getId());
         var perioderSomSkalTilbakestilles = perioderTilVurderingTjeneste.perioderSomSkalTilbakestilles(behandling.getId());
 
@@ -90,6 +95,12 @@ public class InitierVilkårSteg implements BehandlingSteg {
         var vilkårResultat = vilkårBuilder.build();
 
         validerResultat(vilkårResultat, vilkårPeriodeMap);
+
+        if (behandling.getId() == 1828755L) { //EAWVS
+            log.info("fullstendigePerioder: {}", fullstendigePerioder);
+            log.info("vilkårPeriodeMap: {}", vilkårPeriodeMap.get(VilkårType.I_LIVETS_SLUTTFASE));
+            log.info("vilkårResultat: {}", vilkårResultat.getVilkår(VilkårType.I_LIVETS_SLUTTFASE).get().getPerioder());
+        }
 
         vilkårResultatRepository.lagre(behandling.getId(), vilkårResultat, behandling.getFagsak().getPeriode());
     }
