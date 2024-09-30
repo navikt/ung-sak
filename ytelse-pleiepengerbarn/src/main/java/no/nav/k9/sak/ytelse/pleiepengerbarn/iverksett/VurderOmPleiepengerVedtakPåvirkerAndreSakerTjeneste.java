@@ -32,6 +32,7 @@ import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
@@ -98,9 +99,15 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         List<Saksnummer> alleSaksnummer = medisinskGrunnlagRepository.hentAlleSaksnummer(pleietrengende)
             .stream()
             .filter(it -> ytelsesSpesifiktFilter(fagsak.getYtelseType(), it))
-            .toList(); // Denne henter på tvers av saker, og kan trigge
+            .collect(Collectors.toCollection(ArrayList::new)); // Denne henter på tvers av saker, og kan trigge
         // Bør her filtrere ut PPN for OLP / PSB
         // Bør her filtrere ut OLP + PSB for PPN
+
+        alleSaksnummer.addAll(fagsakRepository.finnFagsakRelatertTil(fagsak.getYtelseType(), fagsak.getBrukerAktørId(), null, null, null, null)
+            .stream()
+                .filter(it -> !it.getId().equals(fagsak.getId()))
+            .map(Fagsak::getSaksnummer)
+            .toList());
 
         List<SakMedPeriode> resultat = new ArrayList<>();
 

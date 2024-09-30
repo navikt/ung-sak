@@ -34,6 +34,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtab
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttaksPerioderGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.AktivitetIdentifikator;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.søskensak.PleietrengendeUttaksprioritetMotAndrePleietrengende.Uttakprioritet;
 
 public class InputParametere {
 
@@ -50,7 +51,7 @@ public class InputParametere {
     private NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles;
     private List<PeriodeMedVarighet> etablertTilsynPerioder;
     private LocalDateTimeline<List<Kravprioritet>> kravprioritet;
-    private LocalDateTimeline<List<Kravprioritet>> kravprioritetEgneSaker;
+    private LocalDateTimeline<List<Uttakprioritet>> uttakprioritetEgneSaker;
     private OpptjeningResultat opptjeningResultat;
     private RettPleiepengerVedDødGrunnlag rettPleiepengerVedDødGrunnlag;
     private InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag;
@@ -202,13 +203,13 @@ public class InputParametere {
         return kravprioritet;
     }
 
-    public InputParametere medKravprioritetEgneSaker(LocalDateTimeline<List<Kravprioritet>> kravprioritet) {
-        this.kravprioritetEgneSaker = kravprioritet;
+    public InputParametere medKravprioritetEgneSaker(LocalDateTimeline<List<Uttakprioritet>> kravprioritet) {
+        this.uttakprioritetEgneSaker = kravprioritet;
         return this;
     }
 
-    public LocalDateTimeline<List<Kravprioritet>> getKravprioritetEgneSaker() {
-        return kravprioritetEgneSaker;
+    public LocalDateTimeline<List<Uttakprioritet>> getUttakprioritetEgneSaker() {
+        return uttakprioritetEgneSaker;
     }
 
     public Optional<RettPleiepengerVedDødGrunnlag> getRettPleiepengerVedDødGrunnlag() {

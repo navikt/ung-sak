@@ -59,13 +59,6 @@ public class PleietrengendeKravprioritet {
         return vurderKravprioritetFraFagsaker(fagsakId, brukUbesluttedeData, fagsaker);
     }
 
-    public LocalDateTimeline<List<Kravprioritet>> vurderKravprioritetEgneSaker(Long fagsakId, AktørId pleietrengende, boolean brukUbesluttedeData) {
-        Fagsak aktuellFagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
-        final List<Fagsak> fagsaker = utledFagsakerRelevantForKravprioEgneSaker(pleietrengende, aktuellFagsak);
-
-        return vurderKravprioritetFraFagsaker(fagsakId, brukUbesluttedeData, fagsaker);
-    }
-
     private LocalDateTimeline<List<Kravprioritet>> vurderKravprioritetFraFagsaker(Long fagsakId, boolean brukUbesluttedeData, List<Fagsak> fagsaker) {
         LocalDateTimeline<List<Kravprioritet>> kravprioritetstidslinje = LocalDateTimeline.empty();
         for (Fagsak fagsak : fagsaker) {
@@ -83,17 +76,6 @@ public class PleietrengendeKravprioritet {
         }
         return fagsakRepository.finnFagsakRelatertTil(aktuellFagsak.getYtelseType(), pleietrengende, null, null, null);
     }
-
-    private List<Fagsak> utledFagsakerRelevantForKravprioEgneSaker(AktørId pleietrengende, Fagsak aktuellFagsak) {
-        if (Objects.equals(FagsakYtelseType.OPPLÆRINGSPENGER, aktuellFagsak.getYtelseType())) {
-            return List.of(aktuellFagsak);
-        }
-        return fagsakRepository.finnFagsakRelatertTil(aktuellFagsak.getYtelseType(), aktuellFagsak.getBrukerAktørId(), null, null, null, null).stream()
-            .filter(f -> !f.getPleietrengendeAktørId().equals(pleietrengende))
-            .toList();
-    }
-
-
 
     private LocalDateTimeline<Kravprioritet> finnEldsteKravTidslinjeForFagsak(Fagsak fagsak, boolean brukAvsluttetBehandling) {
         LocalDateTimeline<Kravprioritet> fagsakTidslinje = LocalDateTimeline.empty();

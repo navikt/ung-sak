@@ -1,9 +1,12 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input;
 
+import static no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.søskensak.PleietrengendeUttaksprioritetMotAndrePleietrengende.*;
+
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +47,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.ferie.MapFerie;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.tilsyn.MapTilsyn;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.utenlandsopphold.MapUtenlandsopphold;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.uttak.MapUttak;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.søskensak.PleietrengendeUttaksprioritetMotAndrePleietrengende;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeid;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeidsforhold;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Barn;
@@ -170,7 +174,7 @@ public class MapInputTilUttakTjeneste {
         var beredskapsperioder = tilBeredskap(unntakEtablertTilsynForPleietrengende, innvilgedePerioderMedSykdom);
         var nattevåksperioder = tilNattevåk(unntakEtablertTilsynForPleietrengende, innvilgedePerioderMedSykdom);
         final Map<LukketPeriode, List<String>> kravprioritet = mapKravprioritetsliste(input.getKravprioritet());
-        final Map<LukketPeriode, List<String>> kravprioritetEgneSaker = mapKravprioritetsliste(input.getKravprioritetEgneSaker());
+        final Map<LukketPeriode, List<String>> kravprioritetEgneSaker = mapUttakprioritetsliste(input.getUttakprioritetEgneSaker());
 
         final List<LukketPeriode> perioderSomSkalTilbakestilles = input.getPerioderSomSkalTilbakestilles().stream().map(p -> new LukketPeriode(p.getFomDato(), p.getTomDato())).toList();
         Map<LukketPeriode, UtenlandsoppholdInfo> utenlandsoppholdperioder = MapUtenlandsopphold.map(vurderteSøknadsperioder, perioderFraSøknader, tidslinjeTilVurdering);
@@ -290,6 +294,15 @@ public class MapInputTilUttakTjeneste {
         final Map<LukketPeriode, List<String>> resultat = new HashMap<>();
         kravprioritet.forEach(s -> {
             resultat.put(new LukketPeriode(s.getFom(), s.getTom()), s.getValue().stream().map(kp -> kp.getAktuellBehandlingUuid().toString()).collect(Collectors.toList()));
+        });
+        return resultat;
+    }
+
+    public Map<LukketPeriode, List<String>> mapUttakprioritetsliste(LocalDateTimeline<List<Uttakprioritet>> uttakprioritet) {
+        final Map<LukketPeriode, List<String>> resultat = new HashMap<>();
+        uttakprioritet.forEach(s -> {
+            resultat.put(new LukketPeriode(s.getFom(), s.getTom()), s.getValue().stream()
+                .map(kp -> kp.getAktuellBehandlingUuid().toString()).collect(Collectors.toList()));
         });
         return resultat;
     }

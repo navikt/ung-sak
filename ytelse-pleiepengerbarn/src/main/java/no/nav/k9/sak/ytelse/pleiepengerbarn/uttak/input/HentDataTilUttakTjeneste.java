@@ -1,5 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input;
 
+import static no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.søskensak.PleietrengendeUttaksprioritetMotAndrePleietrengende.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -51,6 +53,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtab
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.død.HåndterePleietrengendeDødsfallTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.AktivitetIdentifikator;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.søskensak.PleietrengendeUttaksprioritetMotAndrePleietrengende;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.HentPerioderTilVurderingTjeneste;
 
 @Dependent
@@ -70,6 +73,7 @@ public class HentDataTilUttakTjeneste {
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
     private OpptjeningRepository opptjeningRepository;
     private PleietrengendeKravprioritet pleietrengendeKravprioritet;
+    private PleietrengendeUttaksprioritetMotAndrePleietrengende pleietrengendeUttaksprioritet;
     private RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository;
     private Instance<HåndterePleietrengendeDødsfallTjeneste> håndterePleietrengendeDødsfallTjenester;
     private HentPerioderTilVurderingTjeneste hentPerioderTilVurderingTjeneste;
@@ -96,7 +100,7 @@ public class HentDataTilUttakTjeneste {
                                     InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                     @Any PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste,
                                     BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
-                                    @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
+                                    @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester, PleietrengendeUttaksprioritetMotAndrePleietrengende pleietrengendeUttaksprioritet,
                                     @Any Instance<HåndterePleietrengendeDødsfallTjeneste> håndterePleietrengendeDødsfallTjenester,
                                     HentPerioderTilVurderingTjeneste hentPerioderTilVurderingTjeneste,
                                     UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
@@ -122,6 +126,7 @@ public class HentDataTilUttakTjeneste {
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
         this.opptjeningRepository = opptjeningRepository;
+        this.pleietrengendeUttaksprioritet = pleietrengendeUttaksprioritet;
         this.håndterePleietrengendeDødsfallTjenester = håndterePleietrengendeDødsfallTjenester;
         this.hentPerioderTilVurderingTjeneste = hentPerioderTilVurderingTjeneste;
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
@@ -190,7 +195,7 @@ public class HentDataTilUttakTjeneste {
         final List<PeriodeMedVarighet> etablertTilsynPerioder = hentEtablertTilsynTjeneste.hentOgSmørEtablertTilsynPerioder(referanse, unntakEtablertTilsynForPleietrengende, brukUbesluttedeData);
 
         final LocalDateTimeline<List<Kravprioritet>> kravprioritet = pleietrengendeKravprioritet.vurderKravprioritet(referanse.getFagsakId(), referanse.getPleietrengendeAktørId(), brukUbesluttedeData);
-        final LocalDateTimeline<List<Kravprioritet>> kravprioritetEgneSaker = pleietrengendeKravprioritet.vurderKravprioritetEgneSaker(referanse.getFagsakId(), referanse.getPleietrengendeAktørId(), brukUbesluttedeData);
+        final LocalDateTimeline<List<Uttakprioritet>> kravprioritetEgneSaker = pleietrengendeUttaksprioritet.vurderUttakprioritetEgneSaker(referanse.getFagsakId(), brukUbesluttedeData);
 
         var rettVedDød = rettPleiepengerVedDødRepository.hentHvisEksisterer(referanse.getBehandlingId());
 
