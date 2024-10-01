@@ -131,7 +131,7 @@ public class RevurderBeregningTjeneste {
         }
 
         if (!behandling.erAvsluttet()) {
-            throw new IllegalStateException("Prøvde å revurdere en fagsak med saksnummer " + saksnummer + ", som ikke er avsluttet.");
+            throw new IllegalStateException("Prøvde å opprette revurdering på saksnummer " + saksnummer + ", men saken har allerede en åpen behandling");
         }
 
         if (!periode.isOk()) {
