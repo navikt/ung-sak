@@ -22,7 +22,6 @@ import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.PGIPeriode;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,9 +31,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
-
-import static no.nav.k9.kodeverk.uttak.UtfallType.INNVILGET;
 
 @ApplicationScoped
 public class RevurderBeregningTjeneste {
@@ -125,7 +121,7 @@ public class RevurderBeregningTjeneste {
      * @param saksnummer Fagsakens saksnummer
      * @param steg       Hvilket steg man skal hoppe tilbake til
      */
-    public String revurderEnkeltperiodeFraGittSteg(LocalDate fom, LocalDate tom, Saksnummer saksnummer, @NotNull BehandlingÅrsakType steg) {
+    public String revurderEnkeltperiodeFraGittSteg(LocalDate fom, LocalDate tom, Saksnummer saksnummer, BehandlingÅrsakType steg) {
         var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true).orElseThrow(() -> new IllegalArgumentException("Finnes ikke fagsak med saksnummer: " + saksnummer));
         var behandling = behandlingRepository.hentSisteBehandlingForFagsakId(fagsak.getId()).orElseThrow(() -> new IllegalArgumentException("Finnes ingen behandlinger på fagsak med saksnummer: " + saksnummer));
         var periode = new Periode(fom, tom);
@@ -189,6 +185,7 @@ public class RevurderBeregningTjeneste {
 
     private DatoIntervallEntitet finnVilkårsperiode(LocalDate skjæringstidspunkt, Behandling tilRevurdering, boolean skalValidereMot8_35) {
         var vilkårPeriode = getVilkårsperioder(tilRevurdering)
+            .stream()
             .filter(p -> p.getPeriode().getFomDato().equals(skjæringstidspunkt))
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("Bruker har ingen søknadsperiode med fom-dato " + skjæringstidspunkt));
@@ -208,19 +205,21 @@ public class RevurderBeregningTjeneste {
     private boolean overlapperPeriodeMedMinstEnGodkjentVilkårsperiode(Behandling behandling, Periode periode) {
         var perioder = getVilkårsperioder(behandling);
         return perioder
+            .stream()
             .filter(vilkårPeriode -> vilkårPeriode.getGjeldendeUtfall().getKode().equals(Utfall.OPPFYLT.getKode()))
             .anyMatch(vilkårPeriode -> periode.overlaps(tilPeriode(vilkårPeriode)));
     }
 
-    private static @NotNull Periode tilPeriode(VilkårPeriode vilkårPeriode) {
+    private static Periode tilPeriode(VilkårPeriode vilkårPeriode) {
         return new Periode(vilkårPeriode.getPeriode().getFomDato(), vilkårPeriode.getPeriode().getTomDato());
     }
 
-    private @NotNull Stream<VilkårPeriode> getVilkårsperioder(Behandling behandling) {
+    private List<VilkårPeriode> getVilkårsperioder(Behandling behandling) {
         Optional<Vilkårene> vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandling.getId());
         return vilkårene
             .flatMap(it -> it.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)).stream()
-            .flatMap(v -> v.getPerioder().stream());
+            .flatMap(v -> v.getPerioder().stream())
+            .toList();
     }
 
 }
