@@ -26,6 +26,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -67,6 +68,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
     private HentPerioderTilVurderingTjeneste hentPerioderTilVurderingTjeneste;
 
     private EndringAnnenOmsorgspersonUtleder endringAnnenOmsorgspersonUtleder;
+    private boolean søskensakPrioriteringEnabled;
 
     VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste() {
     }
@@ -79,7 +81,8 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
                                                                FeriepengerAvvikTjeneste feriepengerAvvikTjeneste,
                                                                @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
                                                                HentPerioderTilVurderingTjeneste hentPerioderTilVurderingTjeneste,
-                                                               EndringAnnenOmsorgspersonUtleder endringAnnenOmsorgspersonUtleder) {
+                                                               EndringAnnenOmsorgspersonUtleder endringAnnenOmsorgspersonUtleder,
+                                                               @KonfigVerdi(value = "SOKSENSAK_PRIORITERING_ENABLED", defaultVerdi = "false") boolean søskensakPrioriteringEnabled) {
         this.behandlingRepository = behandlingRepository;
         this.fagsakRepository = fagsakRepository;
         this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
@@ -88,6 +91,7 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.hentPerioderTilVurderingTjeneste = hentPerioderTilVurderingTjeneste;
         this.endringAnnenOmsorgspersonUtleder = endringAnnenOmsorgspersonUtleder;
+        this.søskensakPrioriteringEnabled = søskensakPrioriteringEnabled;
     }
 
     @Override
@@ -103,11 +107,13 @@ public class VurderOmPleiepengerVedtakPåvirkerAndreSakerTjeneste implements Vur
         // Bør her filtrere ut PPN for OLP / PSB
         // Bør her filtrere ut OLP + PSB for PPN
 
-        alleSaksnummer.addAll(fagsakRepository.finnFagsakRelatertTil(fagsak.getYtelseType(), fagsak.getBrukerAktørId(), null, null, null, null)
-            .stream()
+        if (søskensakPrioriteringEnabled) {
+            alleSaksnummer.addAll(fagsakRepository.finnFagsakRelatertTil(fagsak.getYtelseType(), fagsak.getBrukerAktørId(), null, null, null, null)
+                .stream()
                 .filter(it -> !it.getId().equals(fagsak.getId()))
-            .map(Fagsak::getSaksnummer)
-            .toList());
+                .map(Fagsak::getSaksnummer)
+                .toList());
+        }
 
         List<SakMedPeriode> resultat = new ArrayList<>();
 
