@@ -67,7 +67,7 @@ jobs:
     needs: build-app
     with:
       tag: ${{ needs.build-app.outputs.build-version }}
-      suites: "pleiepenger,livetssluttfase,annet,frontend"
+      suites: "pleiepenger,livetssluttfase,annet,frontend,ung"
       override_image_artifact_name: ${{ github.ref_name != github.event.repository.default_branch && needs.build-app.outputs.image-artifact-name || null }}
       image_version: ${{ needs.build-app.outputs.build-version }}
 
@@ -78,11 +78,14 @@ jobs:
       id-token: write
       contents: write
     # Multiline if condition with pipe must be defined without using ${{ }} around the expressions
+    # bruker always() for å tvinge if'en til å kjøre selv om verdikjedetest feiler pga needs - dette fordi noen av verdikjede suitene er ikke påkrevd for deploy
     if: |
       github.ref_name == 'master'
+        && always() 
         && needs.verdikjede-tester.outputs.pleiepenger == 'success'
         && needs.verdikjede-tester.outputs.livetssluttfase == 'success'
         && needs.verdikjede-tester.outputs.annet == 'success'
+        && needs.verdikjede-tester.outputs.frontend == 'success'
     needs: [build-app, verdikjede-tester]
     uses: navikt/sif-gha-workflows/.github/workflows/maven-deploy.yml@main
     with:
