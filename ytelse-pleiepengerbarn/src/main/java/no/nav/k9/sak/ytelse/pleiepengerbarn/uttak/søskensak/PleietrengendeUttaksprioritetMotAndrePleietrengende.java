@@ -18,6 +18,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -34,19 +35,26 @@ public class PleietrengendeUttaksprioritetMotAndrePleietrengende {
     private final BehandlingRepository behandlingRepository;
     private KalkulusTjeneste kalkulusTjeneste;
     private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
+    private boolean søskensakPrioriteringEnabled;
 
     @Inject
     public PleietrengendeUttaksprioritetMotAndrePleietrengende(FagsakRepository fagsakRepository,
                                                                BehandlingRepository behandlingRepository,
                                                                KalkulusTjeneste kalkulusTjeneste,
-                                                               BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository) {
+                                                               BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
+                                                               @KonfigVerdi(value = "SOKSENSAK_PRIORITERING_ENABLED", defaultVerdi = "false") boolean søskensakPrioriteringEnabled) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
+        this.søskensakPrioriteringEnabled = søskensakPrioriteringEnabled;
     }
 
     public LocalDateTimeline<List<Uttakprioritet>> vurderUttakprioritetEgneSaker(Long fagsakId, boolean brukUbesluttedeData) {
+        if (!søskensakPrioriteringEnabled) {
+            return LocalDateTimeline.empty();
+        }
+
         Fagsak aktuellFagsak = fagsakRepository.finnEksaktFagsak(fagsakId);
         final List<Fagsak> fagsaker = utledFagsakerRelevantForKravprioEgneSaker(aktuellFagsak);
 
