@@ -306,6 +306,26 @@ public class ÅrskvantumTjeneste {
         return årskvantumKlient.hentRammevedtak(personIdent, alleBarnasFnr, periode);
     }
 
+    public RammevedtakV2Request lagRammevedtakV2Request(Behandling behandling){
+        DatoIntervallEntitet fagsakperiode = behandling.getFagsak().getPeriode();
+        var periode = new LukketPeriode(fagsakperiode.getFomDato(), fagsakperiode.getTomDato());
+
+        var ref = BehandlingReferanse.fra(behandling);
+        AktørId søkerAktørId = behandling.getAktørId();
+        PersonIdent personIdent = aktørTjeneste.hentPersonIdentForAktørId(søkerAktørId).orElseThrow();
+
+        var vilkårsperioder = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.OPPTJENINGSVILKÅRET);
+        var oppgittFravær = grunnlagRepository.hentSammenslåtteFraværPerioder(ref.getBehandlingId());
+
+        var informasjonsperiode = (oppgittFravær.isEmpty()) ? DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom()) : hentInformasjonsperiode(vilkårsperioder, oppgittFravær);
+        PersonopplysningerAggregat personopplysninger = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(ref.getBehandlingId(), ref.getAktørId(), informasjonsperiode).orElseThrow();
+        Set<Barn> barna = hentOgMapBarn(personopplysninger, behandling);
+
+        VedtatteRammevedtakTjeneste.InnvilgedeOgAvslåtteRammevedtak k9sakRammevedtak = vedtatteRammevedtakTjeneste.hentK9sakRammevedtak(søkerAktørId);
+        List<BarnFødselsdato> barnFødselsdato = barna.stream().map(b -> new BarnFødselsdato(b.getPersonIdent(), b.getFødselsdato())).toList();
+        return new RammevedtakV2Request(personIdent.getIdent(), barnFødselsdato, periode, k9sakRammevedtak.innvilgede(), k9sakRammevedtak.avslåtte());
+    }
+
     private BarnFødselsdato mapBarnFødseldato(Personinfo barn) {
         return new BarnFødselsdato(
             barn.getPersonIdent().getIdent(),
