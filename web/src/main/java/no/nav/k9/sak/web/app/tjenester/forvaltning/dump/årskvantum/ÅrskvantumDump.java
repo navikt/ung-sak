@@ -64,10 +64,7 @@ public class ÅrskvantumDump implements DebugDumpBehandling, DebugDumpFagsak {
                 dumpMottaker.newFile(basePath + "/" + fileNameRequestV2);
                 ow.writeValue(dumpMottaker.getOutputStream(), request);
             } catch (Exception e) {
-                dumpMottaker.newFile(basePath + "/" + fileNameRequestV2 + "-ERROR");                
-                ow.writeValue(dumpMottaker.getOutputStream(), request);
-            } catch (Exception e) {
-                dumpMottaker.newFile(basePath + "/" + fileNameRequest + "-ERROR");
+                dumpMottaker.newFile(basePath + "/" + fileNameRequestV2 + "-ERROR");
                 dumpMottaker.write(e);
             }
         }
