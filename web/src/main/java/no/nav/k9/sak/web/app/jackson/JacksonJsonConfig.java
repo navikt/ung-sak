@@ -46,8 +46,7 @@ public class JacksonJsonConfig implements ContextResolver<ObjectMapper> {
     }
 
     public JacksonJsonConfig(boolean serialiserKodelisteNavn) {
-        var aktiverKalkulusKodeverkString = Environment.current().getProperty("KODEVERK_AKTIVER_KALKULUS_STRING", Boolean.class, false);
-        objectMapper = createObjectMapper(createModule(serialiserKodelisteNavn, !aktiverKalkulusKodeverkString));
+        objectMapper = createObjectMapper(createModule(serialiserKodelisteNavn));
     }
 
     private ObjectMapper createObjectMapper(SimpleModule simpleModule) {
@@ -86,15 +85,15 @@ public class JacksonJsonConfig implements ContextResolver<ObjectMapper> {
         return om;
     }
 
-    private static SimpleModule createModule(boolean serialiserKodelisteNavn, boolean serialiserKalkulusSomObjekt) {
+    private static SimpleModule createModule(boolean serialiserKodelisteNavn) {
         SimpleModule module = new SimpleModule("VL-REST", new Version(1, 0, 0, null, null, null));
 
-        addSerializers(module, serialiserKodelisteNavn, serialiserKalkulusSomObjekt);
+        addSerializers(module, serialiserKodelisteNavn);
 
         return module;
     }
 
-    private static void addSerializers(SimpleModule module, boolean serialiserKodelisteNavn, boolean serialiserKalkulusSomObjekt) {
+    private static void addSerializers(SimpleModule module, boolean serialiserKodelisteNavn) {
         boolean brukKodeverSomString = kodeverdiSomStringLansert();
         if(serialiserKodelisteNavn) {
             module.addSerializer(new KodelisteSerializer(true));
@@ -105,7 +104,7 @@ public class JacksonJsonConfig implements ContextResolver<ObjectMapper> {
         // BeregningsgrunnlagRestTjeneste eksponerer kalkulus sine kodeverdier opp til frontend.
         // For å tillate at Kalkulus serialiserer Kodeverdi som string, samtidig som beholder dagens format til frontend.
 
-        module.addSerializer(new KalkulusKodelisteSerializer(/* TODO serialiserKalkulusSomObjekt ? */ kodeverdiSomObjekt()));
+        module.addSerializer(new KalkulusKodelisteSerializer(kodeverdiSomObjekt()));
     }
 
     private static boolean kodeverdiSomObjekt(){

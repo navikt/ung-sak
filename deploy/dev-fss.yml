@@ -288,8 +288,6 @@ spec:
       value: "true"
     - name: KODEVERK_SOM_STRING_TOPICS
       value: "true"
-    - name: KODEVERK_AKTIVER_KALKULUS_STRING
-      value: "false"
     - name: AAPEN_PUNSJOPPGAVE_STOPPER_AUTOMATISK_VEDTAK
       value: "true"
     - name: INAKTIV_VED_8_47_B
