@@ -149,20 +149,10 @@ public class MapYtelseperioderTjeneste {
         }
 
         if (FagsakYtelseType.SYKEPENGER.equals(ytelse.getYtelseType())) {
-            boolean harSPBasertPåDP = ytelse.getYtelseGrunnlag().flatMap(YtelseGrunnlag::getArbeidskategori)
-                .stream().anyMatch(a -> Arbeidskategori.DAGPENGER.equals(a) || Arbeidskategori.KOMBINASJON_ARBEIDSTAKER_OG_DAGPENGER.equals(a));
-            if (harSPBasertPåDP) {
-                return OpptjeningAktivitetType.SYKEPENGER_AV_DAGPENGER;
-            }
             return OpptjeningAktivitetType.SYKEPENGER;
         }
 
         if (Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN).contains(ytelse.getYtelseType())) {
-            boolean harPSBBasertPåDP = ytelse.getYtelseGrunnlag().flatMap(YtelseGrunnlag::getArbeidskategori)
-                .stream().anyMatch(a -> Arbeidskategori.DAGPENGER.equals(a) || Arbeidskategori.KOMBINASJON_ARBEIDSTAKER_OG_DAGPENGER.equals(a));
-            if (harPSBBasertPåDP) {
-                return OpptjeningAktivitetType.PLEIEPENGER_AV_DAGPENGER;
-            }
             return OpptjeningAktivitetType.PLEIEPENGER;
         }
 

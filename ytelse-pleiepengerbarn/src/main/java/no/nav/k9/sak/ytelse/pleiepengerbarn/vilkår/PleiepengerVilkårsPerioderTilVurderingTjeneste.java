@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import io.opentelemetry.instrumentation.annotations.SpanAttribute;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -80,7 +82,8 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
     }
 
     @Override
-    public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
+    @WithSpan
+    public NavigableSet<DatoIntervallEntitet> utled(@SpanAttribute("behandlingId") Long behandlingId, @SpanAttribute("vilkarType") VilkårType vilkårType) {
         var perioder = utledPeriode(behandlingId, vilkårType);
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId).flatMap(it -> it.getVilkår(vilkårType));
         if (vilkårene.isPresent()) {
@@ -102,7 +105,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         }
 
         perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraProsessTriggere(referanse));
-        perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse, utledFullstendigePerioder(behandling.getId())));
+        perioderTilVurdering.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse, finnKomprimertePerioderFraKantIKantVurderer(behandling)));
         perioderTilVurdering.addAll(perioderSomSkalTilbakestilles(behandlingId));
 
         return vilkår.getPerioder()
@@ -156,8 +159,9 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         return vilkårPeriodeSet;
     }
 
+    @WithSpan
     @Override
-    public NavigableSet<DatoIntervallEntitet> utledFullstendigePerioder(Long behandlingId) {
+    public NavigableSet<DatoIntervallEntitet> utledFullstendigePerioder(@SpanAttribute("behandlingId") Long behandlingId) {
         return søknadsperiodeTjeneste.utledFullstendigPeriode(behandlingId);
     }
 
@@ -170,6 +174,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         return vilkårsPeriodisering.getOrDefault(vilkår, søktePerioder).utledPeriode(behandlingId);
     }
 
+    @WithSpan
     @Override
     public NavigableSet<PeriodeMedÅrsak> utledRevurderingPerioder(BehandlingReferanse referanse) {
         var behandling = behandlingRepository.hentBehandling(referanse.getBehandlingId());
@@ -188,12 +193,20 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
                 .map(it -> new PeriodeMedÅrsak(it.getPeriode(), BehandlingÅrsakType.RE_UTSATT_BEHANDLING))
                 .toList());
         }
-        periodeMedÅrsaks.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse, utledFullstendigePerioder(behandling.getId()))
+
+        periodeMedÅrsaks.addAll(revurderingPerioderTjeneste.utledPerioderFraInntektsmeldinger(referanse, finnKomprimertePerioderFraKantIKantVurderer(behandling))
             .stream()
             .map(it -> new PeriodeMedÅrsak(it, BehandlingÅrsakType.RE_ENDRET_INNTEKTSMELDING))
             .collect(Collectors.toSet()));
 
         return periodeMedÅrsaks;
+    }
+
+    private NavigableSet<DatoIntervallEntitet> finnKomprimertePerioderFraKantIKantVurderer(Behandling behandling) {
+        var fullstendigePerioder = utledFullstendigePerioder(behandling.getId());
+        var periodetidslinje = TidslinjeUtil.tilTidslinjeKomprimert(fullstendigePerioder);
+        var sammenhengendeTidslinje = periodetidslinje.compress((d1, d2) -> getKantIKantVurderer().erKantIKant(DatoIntervallEntitet.fra(d1), DatoIntervallEntitet.fra(d2)), Boolean::equals, StandardCombinators::alwaysTrueForMatch);
+        return sammenhengendeTidslinje.getLocalDateIntervals().stream().map(DatoIntervallEntitet::fra).collect(Collectors.toCollection(TreeSet::new));
     }
 
     private NavigableSet<PeriodeMedÅrsak> finnBerørtePerioderPåPleietrengende(BehandlingReferanse referanse) {
@@ -215,6 +228,7 @@ public abstract class PleiepengerVilkårsPerioderTilVurderingTjeneste implements
         return erKantIKantVurderer;
     }
 
+    @WithSpan
     @Override
     public NavigableSet<DatoIntervallEntitet> perioderSomSkalTilbakestilles(Long behandlingId) {
         final var behandling = behandlingRepository.hentBehandling(behandlingId);

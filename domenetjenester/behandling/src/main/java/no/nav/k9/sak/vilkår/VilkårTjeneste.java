@@ -1,6 +1,9 @@
 package no.nav.k9.sak.vilkår;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -12,6 +15,8 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 
+import io.opentelemetry.instrumentation.annotations.SpanAttribute;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -30,6 +35,8 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
@@ -98,6 +105,108 @@ public class VilkårTjeneste {
         vilkårResultatRepository.lagre(kontekst.getBehandlingId(), vilkårResultatBuilder.build());
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
     }
+
+
+    /**
+     * Gjenoppretter vilkårsutfall for perioder som ikke lenger vurderes i behandlingen
+     *
+     * @param referanse            Behandlingreferanse
+     * @param vilkårType           Vilkårtype som skal gjenopprettes
+     * @param perioderTilVurdering Perioder som vurderes i behandlingen
+     * @param tillatFjerning       Tillater fjerning av vilkårsperioder
+     * @return Resultat for hvilke perioder som ble kopiert og hvilke som eventuelt ble fjernet
+     */
+    public GjenopprettPerioderResultat gjenopprettVilkårsutfallForPerioderSomIkkeVurderes(BehandlingReferanse referanse, VilkårType vilkårType, Collection<DatoIntervallEntitet> perioderTilVurdering, boolean tillatFjerning) {
+        if (referanse.getOriginalBehandlingId().isEmpty()) {
+            return new GjenopprettPerioderResultat(Collections.emptyList(), Collections.emptyList());
+        }
+        var gjenopprettetPeriodeListe = finnPerioderForGjenopprettingAvVilkårsutfall(referanse, vilkårType, perioderTilVurdering);
+        if (!gjenopprettetPeriodeListe.isEmpty()) {
+            log.info("Gjenoppretter initiell vurdering for perioder {}", gjenopprettetPeriodeListe);
+            return kopierOriginaltVilkårresultat(
+                referanse.getBehandlingId(), referanse.getOriginalBehandlingId().get(),
+                gjenopprettetPeriodeListe, vilkårType, tillatFjerning);
+        }
+        return new GjenopprettPerioderResultat(Collections.emptyList(), Collections.emptyList());
+    }
+
+
+    /**
+     * Kopierer vilkårsresultat fra forrige behandling for gitt vilkår og perioder
+     *
+     * @param behandlingId         BehandlingId
+     * @param originalBehandlingId BehandlingId for original behandling
+     * @param perioder             Perioder som skal kopieres
+     * @param vilkårType           Vilkårtype for periode som skal kopieres
+     * @param tillatFjerning       Tillater fjerning av vilkårsperioder
+     * @return Resultat for hvilke perioder som ble kopiert og hvilke som eventuelt ble fjernet
+     */
+    public GjenopprettPerioderResultat kopierOriginaltVilkårresultat(Long behandlingId,
+                                                                     Long originalBehandlingId,
+                                                                     Set<DatoIntervallEntitet> perioder,
+                                                                     VilkårType vilkårType, boolean tillatFjerning) {
+        var vilkårResultat = hentVilkårResultat(behandlingId);
+        var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkårResultat);
+        var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(vilkårType);
+        var resultat = kopierOriginaltVilkårresultat(originalBehandlingId, perioder, vilkårType, vilkårBuilder, tillatFjerning);
+        vilkårResultatBuilder.leggTil(vilkårBuilder);
+        vilkårResultatRepository.lagre(behandlingId, vilkårResultatBuilder.build());
+        return resultat;
+    }
+
+    private GjenopprettPerioderResultat kopierOriginaltVilkårresultat(Long originalBehandlingId, Set<DatoIntervallEntitet> perioder, VilkårType vilkårType, VilkårBuilder vilkårBuilder, boolean tillatFjerning) {
+        var vedtattUtfallPåVilkåret = hentHvisEksisterer(originalBehandlingId)
+            .orElseThrow()
+            .getVilkår(vilkårType)
+            .orElseThrow();
+
+        var gjenopprettetPerioder = new ArrayList<DatoIntervallEntitet>();
+        var fjernetPerioder = new ArrayList<DatoIntervallEntitet>();
+        for (var periode : perioder) {
+            var eksisteredeVurdering = finnVilkårsresultatForKopi(periode, vedtattUtfallPåVilkåret, vilkårType);
+            if (eksisteredeVurdering.isPresent()) {
+                var vilkårPeriodeBuilder = vilkårBuilder.hentBuilderFor(periode).forlengelseAv(eksisteredeVurdering.get());
+                vilkårBuilder.leggTil(vilkårPeriodeBuilder);
+                gjenopprettetPerioder.add(periode);
+            } else if (tillatFjerning) {
+                vilkårBuilder.tilbakestill(periode);
+                fjernetPerioder.add(periode);
+                log.info("Fjerner periode {}", periode);
+            } else {
+                throw new IllegalStateException("Fant ikke periode " + periode + " i forrige behandling for vilkår " + vilkårType);
+            }
+        }
+        return new GjenopprettPerioderResultat(gjenopprettetPerioder, fjernetPerioder);
+    }
+
+    private static Optional<VilkårPeriode> finnVilkårsresultatForKopi(DatoIntervallEntitet periode, Vilkår vedtattUtfallPåVilkåret, VilkårType vilkårType) {
+        var vilkårPeriodeForSkjæringstidspunkt = vedtattUtfallPåVilkåret.finnPeriodeForSkjæringstidspunktHvisFinnes(periode.getFomDato());
+        if (vilkårPeriodeForSkjæringstidspunkt.isEmpty() && erLøpendeVilkår(vilkårType)) {
+            // Tidligere slo vi sammen medlemskapsperioder for ulike vilkårsperioder til en sammenhengende periode
+            // Dersom vi ikkje finner ein eksakt match på stp ser vi etter periode som overlapper for vilkår som vurderes løpende
+            // Vilkår som vurderes løpende vurderes ikkje kun ved stp, men kan få endret status avhengig av endringer i registerdata
+            return vedtattUtfallPåVilkåret.finnPeriodeSomInneholderDato(periode.getFomDato());
+        }
+        return vilkårPeriodeForSkjæringstidspunkt;
+    }
+
+    private static boolean erLøpendeVilkår(VilkårType vilkårType) {
+        return VilkårType.MEDLEMSKAPSVILKÅRET.equals(vilkårType);
+    }
+
+    private Set<DatoIntervallEntitet> finnPerioderForGjenopprettingAvVilkårsutfall(BehandlingReferanse ref, VilkårType vilkårType, Collection<DatoIntervallEntitet> perioderTilVurdering) {
+        var vilkårOptional = hentHvisEksisterer(ref.getBehandlingId()).flatMap(v -> v.getVilkår(vilkårType));
+        if (vilkårOptional.isPresent()) {
+            return finnPerioderSomIkkeVurderes(ref, vilkårType, perioderTilVurdering);
+        }
+        return Collections.emptySet();
+    }
+
+    private Set<DatoIntervallEntitet> finnPerioderSomIkkeVurderes(BehandlingReferanse ref,
+                                                                  VilkårType vilkårType, Collection<DatoIntervallEntitet> perioderTilVurdering) {
+        return utledPerioderSomIkkeVurderes(ref, vilkårType, perioderTilVurdering);
+    }
+
 
     private VilkårResultatBuilder opprettAvslåttVilkårsResultat(Behandling behandling,
                                                                 VilkårType vilkårType,
@@ -179,18 +288,19 @@ public class VilkårTjeneste {
         return behandlingRepository.hentBehandling(behandlingId);
     }
 
-    public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref, VilkårType vilkårType) {
+    @WithSpan
+    public NavigableSet<DatoIntervallEntitet> utledPerioderTilVurdering(BehandlingReferanse ref, @SpanAttribute("vilkarType") VilkårType vilkårType) {
         return utledPerioderTilVurderingUfiltrert(ref, vilkårType);
     }
 
-    public NavigableSet<DatoIntervallEntitet> utledPerioderSomIkkeVurderes(BehandlingReferanse ref, VilkårType vilkårType) {
+    public TreeSet<DatoIntervallEntitet> utledPerioderSomIkkeVurderes(BehandlingReferanse ref, VilkårType vilkårType, Collection<DatoIntervallEntitet> perioderTilVurdering) {
         var vilkår = hentVilkårResultat(ref.getBehandlingId()).getVilkår(vilkårType);
         var perioder = vilkår.stream().flatMap(v -> v.getPerioder().stream())
             .collect(Collectors.toSet());
         var vilkårsPerioder = perioder.stream().map(VilkårPeriode::getPeriode).collect(Collectors.toSet());
-        var perioderTilVurdering = utledPerioderTilVurdering(ref, vilkårType);
         return vilkårsPerioder.stream()
-            .filter(periode -> perioderTilVurdering.stream().noneMatch(p -> p.getFomDato().equals(periode.getFomDato()))).collect(Collectors.toCollection(TreeSet::new));
+            .filter(vilkårsperiode -> perioderTilVurdering.stream()
+                .noneMatch(tilVurdering -> tilVurdering.inkluderer(vilkårsperiode.getFomDato()))).collect(Collectors.toCollection(TreeSet::new));
     }
 
     public TreeSet<DatoIntervallEntitet> utledPerioderTilVurderingUfiltrert(BehandlingReferanse ref, VilkårType vilkårType) {
@@ -264,6 +374,7 @@ public class VilkårTjeneste {
         return samletUtfall;
     }
 
+
     LocalDateTimeline<VilkårUtfallSamlet> samletVilkårUtfall(Map<VilkårType, LocalDateTimeline<VilkårPeriode>> timelinePerVilkår, Set<VilkårType> minimumVilkår) {
         var timeline = new LocalDateTimeline<List<VilkårUtfall>>(List.of());
 
@@ -275,6 +386,10 @@ public class VilkårTjeneste {
         var resultat = timeline.mapValue(VilkårUtfallSamlet::fra)
             .filterValue(v -> v.getUnderliggendeVilkårUtfall().stream().map(VilkårUtfall::getVilkårType).collect(Collectors.toSet()).containsAll(minimumVilkår));
         return resultat;
+    }
+
+    public record GjenopprettPerioderResultat(Collection<DatoIntervallEntitet> gjenopprettetPerioder,
+                                              Collection<DatoIntervallEntitet> fjernetPerioder) {
     }
 
 }

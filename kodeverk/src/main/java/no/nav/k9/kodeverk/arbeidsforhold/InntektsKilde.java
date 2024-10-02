@@ -57,6 +57,16 @@ public enum InntektsKilde implements Kodeverdi {
         this.offisiellKode = offisiellKode;
     }
 
+    /**
+     * toString is set to output the kode value of the enum instead of the default that is the enum name.
+     * This makes the generated openapi spec correct when the enum is used as a query param. Without this the generated
+     * spec incorrectly specifies that it is the enum name string that should be used as input.
+     */
+    @Override
+    public String toString() {
+        return this.getKode();
+    }
+
     @JsonCreator(mode = Mode.DELEGATING)
     public static InntektsKilde fraKode(Object node) {
         if (node == null) {

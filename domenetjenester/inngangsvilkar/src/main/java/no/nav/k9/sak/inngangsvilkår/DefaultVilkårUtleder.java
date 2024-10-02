@@ -12,9 +12,9 @@ import java.util.List;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 
 @FagsakYtelseTypeRef
 @BehandlingTypeRef
@@ -32,7 +32,7 @@ public class DefaultVilkårUtleder implements VilkårUtleder {
     }
 
     @Override
-    public UtledeteVilkår utledVilkår(Behandling behandling) {
+    public UtledeteVilkår utledVilkår(BehandlingReferanse referanse) {
         return new UtledeteVilkår(null, STANDARDVILKÅR);
     }
 

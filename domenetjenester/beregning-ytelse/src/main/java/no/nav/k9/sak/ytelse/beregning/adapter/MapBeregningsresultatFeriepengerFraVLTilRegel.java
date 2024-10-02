@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -13,6 +14,7 @@ import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatPeriode;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Arbeidsforhold;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.Inntektskategori;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.BeregningsresultatFeriepengerRegelModell;
+import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.DagpengerPeriode;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.feriepenger.InfotrygdFeriepengegrunnlag;
 import no.nav.k9.sak.ytelse.beregning.regler.feriepenger.SaksnummerOgSisteBehandling;
 
@@ -23,7 +25,13 @@ public class MapBeregningsresultatFeriepengerFraVLTilRegel {
     }
 
 
-    public static BeregningsresultatFeriepengerRegelModell mapFra(BeregningsresultatEntitet beregningsresultat, LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> andelerSomKanGiFeriepengerForRelevaneSaker, InfotrygdFeriepengegrunnlag infotrygdFeriepengegrunnlag, int antallDagerFeriepenger, boolean feriepengeopptjeningForHelg, boolean ubegrensedeDagerVedRefusjon) {
+    public static BeregningsresultatFeriepengerRegelModell mapFra(BeregningsresultatEntitet beregningsresultat,
+                                                                  LocalDateTimeline<Set<SaksnummerOgSisteBehandling>> andelerSomKanGiFeriepengerForRelevaneSaker,
+                                                                  InfotrygdFeriepengegrunnlag infotrygdFeriepengegrunnlag,
+                                                                  int antallDagerFeriepenger,
+                                                                  boolean feriepengeopptjeningForHelg,
+                                                                  boolean ubegrensedeDagerVedRefusjon,
+                                                                  List<DagpengerPeriode> perioderMedDagpenger) {
 
         List<BeregningsresultatPeriode> beregningsresultatPerioder = mapBeregningsresultat(beregningsresultat);
         Set<Inntektskategori> inntektskategorier = mapInntektskategorier(beregningsresultat);
@@ -32,6 +40,7 @@ public class MapBeregningsresultatFeriepengerFraVLTilRegel {
             .medBeregningsresultatPerioder(beregningsresultatPerioder)
             .medAndelerSomKanGiFeriepengerForRelevaneSaker(andelerSomKanGiFeriepengerForRelevaneSaker)
             .medInfotrygdFeriepengegrunnlag(infotrygdFeriepengegrunnlag)
+            .medPerioderMedDagpenger(perioderMedDagpenger)
             .medInntektskategorier(inntektskategorier)
             .medAntallDagerFeriepenger(antallDagerFeriepenger)
             .medFeriepengeopptjeningForHelg(feriepengeopptjeningForHelg)

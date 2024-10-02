@@ -19,6 +19,8 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
+import no.nav.k9.sak.kontrakt.Patterns;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -62,7 +64,7 @@ public class TotrinnskontrollAksjonspunkterDto {
             return this;
         }
 
-        public Builder medVurderPaNyttArsaker(Set<TotrinnskontrollVurderÅrsak> vurderPaNyttArsaker) {
+        public Builder medVurderPaNyttArsaker(Set<VurderÅrsak> vurderPaNyttArsaker) {
             kladd.vurderPaNyttArsaker = vurderPaNyttArsaker;
             return this;
         }
@@ -91,7 +93,7 @@ public class TotrinnskontrollAksjonspunkterDto {
     @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "besluttersBegrunnelse")
     @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String besluttersBegrunnelse;
 
     @JsonProperty(value = "totrinnskontrollGodkjent")
@@ -100,7 +102,7 @@ public class TotrinnskontrollAksjonspunkterDto {
     @JsonProperty(value = "vurderPaNyttArsaker")
     @Size(max = 100)
     @Valid
-    private Set<TotrinnskontrollVurderÅrsak> vurderPaNyttArsaker = new HashSet<>();
+    private Set<VurderÅrsak> vurderPaNyttArsaker = new HashSet<>();
 
     public TotrinnskontrollAksjonspunkterDto() {
         //
@@ -130,7 +132,7 @@ public class TotrinnskontrollAksjonspunkterDto {
         return totrinnskontrollGodkjent;
     }
 
-    public Set<TotrinnskontrollVurderÅrsak> getVurderPaNyttArsaker() {
+    public Set<VurderÅrsak> getVurderPaNyttArsaker() {
         return Collections.unmodifiableSet(vurderPaNyttArsaker);
     }
 
@@ -154,7 +156,7 @@ public class TotrinnskontrollAksjonspunkterDto {
         this.totrinnskontrollGodkjent = totrinnskontrollGodkjent;
     }
 
-    public void setVurderPaNyttArsaker(Set<TotrinnskontrollVurderÅrsak> vurderPaNyttArsaker) {
+    public void setVurderPaNyttArsaker(Set<VurderÅrsak> vurderPaNyttArsaker) {
         this.vurderPaNyttArsaker = vurderPaNyttArsaker;
     }
 }

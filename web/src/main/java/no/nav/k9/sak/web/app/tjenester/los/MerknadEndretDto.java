@@ -13,7 +13,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import no.nav.k9.abac.AbacAttributt;
-import no.nav.k9.sak.kontrakt.dokument.TekstValideringRegex;
+import no.nav.k9.sak.behandlingslager.behandling.merknad.BehandlingMerknadType;
+import no.nav.k9.sak.kontrakt.Patterns;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -28,11 +29,11 @@ public record MerknadEndretDto(
     @JsonInclude(value = JsonInclude.Include.NON_NULL)
     @Size(max = 10)
     @Valid
-    List<String> merknadKoder,
+    List<BehandlingMerknadType> merknadKoder,
 
     @JsonProperty(value = "fritekst")
     @Size(max = 500)
-    @Pattern(regexp = TekstValideringRegex.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKSTBREV, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     String fritekst,
 

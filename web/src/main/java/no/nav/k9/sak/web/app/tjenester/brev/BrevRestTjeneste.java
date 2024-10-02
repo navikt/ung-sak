@@ -10,13 +10,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
-import no.nav.k9.felles.integrasjon.organisasjon.OrganisasjonRestKlient;
-import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -30,6 +24,14 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import no.nav.k9.felles.integrasjon.organisasjon.OrganisasjonRestKlient;
+import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
@@ -40,10 +42,13 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.VedtakVarselRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
+import no.nav.k9.sak.kontrakt.FeilDto;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.k9.sak.kontrakt.vedtak.VedtakVarselDto;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Path("")
 @ApplicationScoped
@@ -86,6 +91,9 @@ public class BrevRestTjeneste {
     @Operation(description = "Bestiller generering og sending av brevet", tags = "brev")
     @BeskyttetRessurs(action = UPDATE, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = FeilDto.class))),
+    })
     public void bestillDokument(@Parameter(description = "Inneholder kode til brevmal og data som skal flettes inn i brevet") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BestillBrevDto bestillBrevDto) { // NOSONAR
         // FIXME: bør støttes behandlingUuid i formidling
         LOGGER.info("Brev med brevmalkode={} bestilt på behandlingId={}", bestillBrevDto.getBrevmalkode(), bestillBrevDto.getBehandlingId());
@@ -156,12 +164,12 @@ public class BrevRestTjeneste {
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     @Operation(description = "Hent navnet til gitt organisasjonsnr for sending til tredjepart", tags = "brev")
     @BeskyttetRessurs(action = READ, resource = APPLIKASJON)
-    public Response getBrevMottakerinfoEreg(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = IngenTilgangsAttributter.class) OrganisasjonsnrDto organisasjonsnrDto) {
+    public Optional<BrevMottakerinfoEregResponseDto> getBrevMottakerinfoEreg(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = IngenTilgangsAttributter.class) OrganisasjonsnrDto organisasjonsnrDto) {
         return eregRestKlient.hentOrganisasjonOptional(organisasjonsnrDto.organisasjonsnr()).map(org -> {
-            final var response = new BrevMottakerinfoEregResponseDto(org.getNavn());
-            return Response.ok(response).build();
-        })
-            .orElse(Response.ok(new Object()).build()); // Return empty json object if organisasjon is not found.
+            var utilgjengeligÅrsak = org.getOpphørsdato() != null ? UtilgjengeligÅrsak.ORG_OPPHØRT : null;
+
+            return new BrevMottakerinfoEregResponseDto(org.getNavn(), utilgjengeligÅrsak);
+        });
     }
 
     public static class IngenTilgangsAttributter implements Function<Object, AbacDataAttributter> {

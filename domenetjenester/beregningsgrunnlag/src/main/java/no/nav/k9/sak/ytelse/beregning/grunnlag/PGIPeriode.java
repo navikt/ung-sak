@@ -38,7 +38,7 @@ public class PGIPeriode extends BaseEntitet {
     public PGIPeriode() {
     }
 
-    PGIPeriode(PGIPeriode grunnlagPeriode) {
+    public PGIPeriode(PGIPeriode grunnlagPeriode) {
         this.skjæringstidspunkt = grunnlagPeriode.skjæringstidspunkt;
         this.iayReferanse = grunnlagPeriode.iayReferanse;
     }

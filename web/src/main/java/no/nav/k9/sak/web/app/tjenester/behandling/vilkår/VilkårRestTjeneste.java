@@ -6,7 +6,6 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -43,7 +42,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.VilkårUtleder;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
@@ -144,7 +143,7 @@ public class VilkårRestTjeneste {
     }
 
     private Set<VilkårType> utledVilkårTyperForBehandlingen(Behandling behandling) {
-        return getVilkårUtleder(behandling).utledVilkår(behandling).getAlleAvklarte();
+        return getVilkårUtleder(behandling).utledVilkår(BehandlingReferanse.fra(behandling)).getAlleAvklarte();
     }
 
     private Set<VilkårType> finnVilkårTyperPåPåBehandlingen(Vilkårene vilkårene) {

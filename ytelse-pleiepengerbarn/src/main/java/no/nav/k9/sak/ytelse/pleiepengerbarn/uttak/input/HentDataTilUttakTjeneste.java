@@ -16,6 +16,8 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.tilkommetAktivitet.AktivitetstatusOgArbeidsgiver;
 import no.nav.folketrygdloven.beregningsgrunnlag.tilkommetAktivitet.TilkommetAktivitetTjeneste;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -64,6 +66,8 @@ public class HentDataTilUttakTjeneste {
     private BehandlingRepository behandlingRepository;
     private PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
+
+    private BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
     private OpptjeningRepository opptjeningRepository;
     private PleietrengendeKravprioritet pleietrengendeKravprioritet;
@@ -92,6 +96,7 @@ public class HentDataTilUttakTjeneste {
                                     RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository,
                                     InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                     @Any PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste,
+                                    BeregningsgrunnlagTjeneste beregningsgrunnlagTjeneste,
                                     @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
                                     @Any Instance<HåndterePleietrengendeDødsfallTjeneste> håndterePleietrengendeDødsfallTjenester,
                                     HentPerioderTilVurderingTjeneste hentPerioderTilVurderingTjeneste,
@@ -114,6 +119,7 @@ public class HentDataTilUttakTjeneste {
         this.pleietrengendeKravprioritet = pleietrengendeKravprioritet;
         this.rettPleiepengerVedDødRepository = rettPleiepengerVedDødRepository;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
+        this.beregningsgrunnlagTjeneste = beregningsgrunnlagTjeneste;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
         this.opptjeningRepository = opptjeningRepository;
@@ -177,6 +183,8 @@ public class HentDataTilUttakTjeneste {
 
         var inntektArbeidYtelseGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(referanse.getBehandlingId());
 
+        var beregningsgrunnlag = beregningsgrunnlagTjeneste.hentForAllePerioder(referanse);
+
         var unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksisterer(behandling.getId())
             .map(UnntakEtablertTilsynGrunnlag::getUnntakEtablertTilsynForPleietrengende);
 
@@ -226,6 +234,7 @@ public class HentDataTilUttakTjeneste {
             .medEtablertTilsynPerioder(etablertTilsynPerioder)
             .medKravprioritet(kravprioritet)
             .medIAYGrunnlag(inntektArbeidYtelseGrunnlag)
+            .medBeregningsgrunnlag(beregningsgrunnlag)
             .medOpptjeningsresultat(opptjeningsresultat.orElse(null))
             .medRettPleiepengerVedDødGrunnlag(rettVedDød.orElse(null))
             .medAutomatiskUtvidelseVedDødsfall(utvidetPeriodeSomFølgeAvDødsfall.orElse(null))

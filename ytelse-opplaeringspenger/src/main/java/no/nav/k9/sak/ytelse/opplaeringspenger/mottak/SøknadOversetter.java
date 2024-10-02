@@ -112,7 +112,10 @@ class SøknadOversetter {
                     entry.getKey().getTilOgMed(),
                     true,
                     Landkoder.fraKode(entry.getValue().getLand().getLandkode()),
-                    entry.getValue().getÅrsak() == null ? UtenlandsoppholdÅrsak.INGEN : UtenlandsoppholdÅrsak.fraKode(entry.getValue().getÅrsak().name())))
+                    entry.getValue().getÅrsak() == null ? UtenlandsoppholdÅrsak.INGEN : UtenlandsoppholdÅrsak.fraKode(entry.getValue().getÅrsak().name()),
+                    entry.getValue().getErSammenMedBarnet()
+                )
+            )
             .collect(Collectors.toList());
 
         if (utenlandsopphold.getPerioderSomSkalSlettes() != null) {
@@ -125,8 +128,11 @@ class SøknadOversetter {
                         entry.getKey().getTilOgMed(),
                         false,
                         Landkoder.fraKode(entry.getValue().getLand().getLandkode()),
-                        entry.getValue().getÅrsak() == null ? UtenlandsoppholdÅrsak.INGEN : UtenlandsoppholdÅrsak.fraKode(entry.getValue().getÅrsak().name())))
-                .toList());
+                        entry.getValue().getÅrsak() == null ? UtenlandsoppholdÅrsak.INGEN : UtenlandsoppholdÅrsak.fraKode(entry.getValue().getÅrsak().name()),
+                        entry.getValue().getErSammenMedBarnet()
+                    )
+                )
+                .collect(Collectors.toList()));
         }
         return utenlandsoppholdPerioder;
     }

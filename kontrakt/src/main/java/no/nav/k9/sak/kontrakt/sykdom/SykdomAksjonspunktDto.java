@@ -52,6 +52,10 @@ public class SykdomAksjonspunktDto {
     @Valid
     private boolean manglerVurderingAvLangvarigSykdom;
 
+    @JsonProperty(value = "ikkeSammenMedBarnet")
+    @Valid
+    private boolean ikkeSammenMedBarnet;
+
     public SykdomAksjonspunktDto() {
     }
 
@@ -64,7 +68,9 @@ public class SykdomAksjonspunktDto {
                                  boolean manglerVurderingAvILivetsSluttfase,
                                  boolean harDataSomIkkeHarBlittTattMedIBehandling,
                                  boolean nyttDokumentHarIkkekontrollertEksisterendeVurderinger,
-                                 boolean manglerVurderingAvLangvarigSykdom) {
+                                 boolean manglerVurderingAvLangvarigSykdom,
+                                 boolean ikkeSammenMedBarnet
+    ) {
         this.kanLøseAksjonspunkt = kanLøseAksjonspunkt;
         this.harUklassifiserteDokumenter = harUklassifiserteDokumenter;
         this.manglerDiagnosekode = manglerDiagnosekode;
@@ -75,6 +81,7 @@ public class SykdomAksjonspunktDto {
         this.harDataSomIkkeHarBlittTattMedIBehandling = harDataSomIkkeHarBlittTattMedIBehandling;
         this.nyttDokumentHarIkkekontrollertEksisterendeVurderinger = nyttDokumentHarIkkekontrollertEksisterendeVurderinger;
         this.manglerVurderingAvLangvarigSykdom = manglerVurderingAvLangvarigSykdom;
+        this.ikkeSammenMedBarnet = ikkeSammenMedBarnet;
     }
 
     public boolean isKanLøseAksjonspunkt() {
@@ -111,5 +118,9 @@ public class SykdomAksjonspunktDto {
 
     public boolean isManglerVurderingAvLangvarigSykdom() {
         return manglerVurderingAvLangvarigSykdom;
+    }
+
+    public boolean isIkkeSammenMedBarnet() {
+        return ikkeSammenMedBarnet;
     }
 }

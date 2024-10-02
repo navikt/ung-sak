@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Optional;
 
 /**
@@ -79,6 +80,8 @@ public interface BeregningTjeneste {
 
     List<Beregningsgrunnlag> hentEksaktFastsattForAllePerioderInkludertAvslag(BehandlingReferanse ref);
 
+    List<Beregningsgrunnlag> hentForAllePerioder(BehandlingReferanse ref);
+
     List<Beregningsgrunnlag> hentEksaktFastsattForAllePerioder(BehandlingReferanse ref);
 
     List<BeregningsgrunnlagDto> hentBeregningsgrunnlagDtoer(BehandlingReferanse ref);
@@ -92,9 +95,10 @@ public interface BeregningTjeneste {
     /**
      * Gjenoppretter til beregningsgrunnlaget fra original behandling for perioder som ikke vurderes
      *
-     * @param ref Behandlingreferanse
+     * @param ref                  Behandlingreferanse
+     * @param perioderTilVurdering
      */
-    void gjenopprettReferanserTilInitiellDersomIkkeTilVurdering(BehandlingReferanse ref);
+    void gjenopprettReferanserTilInitiellDersomIkkeTilVurdering(BehandlingReferanse ref, NavigableSet<PeriodeTilVurdering> perioderTilVurdering);
 
     /**
      * Samlet beregningsgrunnlag for visning i GUI bla.

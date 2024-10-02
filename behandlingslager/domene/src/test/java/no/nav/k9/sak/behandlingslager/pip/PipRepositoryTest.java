@@ -20,15 +20,16 @@ import no.nav.k9.sak.behandlingslager.behandling.BasicBehandlingBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Journalpost;
+import no.nav.k9.sak.behandlingslager.saksnummer.ReservertSaksnummerRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.sak.db.util.Repository;
+import no.nav.k9.sak.typer.Saksnummer;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -39,23 +40,20 @@ public class PipRepositoryTest {
     @Inject
     private EntityManager entityManager;
 
-    private BehandlingRepositoryProvider repositoryProvider ;
     private BehandlingRepository behandlingRepository ;
     private PipRepository pipRepository ;
     private FagsakRepository fagsakRepository ;
     private BasicBehandlingBuilder behandlingBuilder ;
-
+    private ReservertSaksnummerRepository reservertSaksnummerRepository;
 
     @BeforeEach
     public void setup() {
-        repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-        behandlingRepository = repositoryProvider.getBehandlingRepository();
-        pipRepository = new PipRepository(entityManager);
+        behandlingRepository = new BehandlingRepository(entityManager);
+        reservertSaksnummerRepository = new ReservertSaksnummerRepository(entityManager);
+        pipRepository = new PipRepository(entityManager, reservertSaksnummerRepository);
         fagsakRepository = new FagsakRepository(entityManager);
         behandlingBuilder = new BasicBehandlingBuilder(entityManager);
     }
-
-    private Behandling behandling;
 
     private void lagreBehandling(Behandling behandling) {
         BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
@@ -63,24 +61,24 @@ public class PipRepositoryTest {
     }
 
     @Test
-    public void skal_finne_behandligstatus_og_sakstatus_for_behandling() throws Exception {
-        this.behandling = behandlingBuilder.opprettOgLagreFørstegangssøknad(FagsakYtelseType.FORELDREPENGER);
+    public void skal_finne_behandligstatus_og_sakstatus_for_behandling() {
+        Behandling behandling = behandlingBuilder.opprettOgLagreFørstegangssøknad(FagsakYtelseType.FORELDREPENGER);
         lagreBehandling(behandling);
 
         Optional<PipBehandlingsData> pipBehandlingsData = pipRepository.hentDataForBehandling(behandling.getId());
-        assertThat(pipBehandlingsData.get()).isNotNull();
+        assertThat(pipBehandlingsData).isPresent();
         assertThat(pipBehandlingsData.get().getBehandligStatus()).isEqualTo(behandling.getStatus().getKode());
         assertThat(pipBehandlingsData.get().getFagsakStatus()).isEqualTo(behandling.getFagsak().getStatus().getKode());
     }
 
     @Test
-    public void skal_returne_tomt_resultat_når_det_søkes_etter_behandling_id_som_ikke_finnes() throws Exception {
+    public void skal_returne_tomt_resultat_når_det_søkes_etter_behandling_id_som_ikke_finnes() {
         Optional<PipBehandlingsData> pipBehandlingsData = pipRepository.hentDataForBehandling(1241L);
         assertThat(pipBehandlingsData).isNotPresent();
     }
 
     @Test
-    public void skal_finne_alle_fagsaker_for_en_søker() throws Exception {
+    public void skal_finne_alle_fagsaker_for_en_søker() {
         Fagsak fagsak1 = behandlingBuilder.opprettFagsak(FagsakYtelseType.FORELDREPENGER);
         AktørId aktørId1 = fagsak1.getAktørId();
         Fagsak fagsak2 = behandlingBuilder.opprettFagsak(FagsakYtelseType.SVANGERSKAPSPENGER, aktørId1);
@@ -92,7 +90,8 @@ public class PipRepositoryTest {
         assertThat(resultat).containsOnly(fagsak1.getId(), fagsak2.getId());
     }
 
-    public void skal_finne_aktoerId_for_fagsak() throws Exception {
+    @Test
+    public void skal_finne_aktoerId_for_fagsak() {
         AktørId aktørId1 = AktørId.dummy();
         var fagsak = behandlingBuilder.opprettFagsak(FagsakYtelseType.FORELDREPENGER, aktørId1);
 
@@ -101,7 +100,7 @@ public class PipRepositoryTest {
     }
 
     @Test
-    public void skal_finne_fagsakId_knyttet_til_journalpostId() throws Exception {
+    public void skal_finne_fagsakId_knyttet_til_journalpostId() {
         Fagsak fagsak1 = behandlingBuilder.opprettFagsak(FagsakYtelseType.FORELDREPENGER);
         @SuppressWarnings("unused")
         Fagsak fagsak2 = behandlingBuilder.opprettFagsak(FagsakYtelseType.FORELDREPENGER);
@@ -116,7 +115,7 @@ public class PipRepositoryTest {
     }
 
     @Test
-    public void skal_finne_aksjonspunktTyper_for_aksjonspunktKoder() throws Exception {
+    public void skal_finne_aksjonspunktTyper_for_aksjonspunktKoder() {
         Set<String> resultat1 = pipRepository.hentAksjonspunktTypeForAksjonspunktKoder(Collections.singletonList(AksjonspunktDefinisjon.OVERSTYRING_AV_BEREGNING.getKode()));
         assertThat(resultat1).containsOnly("Overstyring");
 
@@ -124,4 +123,20 @@ public class PipRepositoryTest {
         assertThat(resultat2).containsOnly("Overstyring", "Manuell");
     }
 
+    @Test
+    public void skal_finne_aktørIder_fra_reservert_saksnummer() {
+        Saksnummer saksnummer = new Saksnummer("QWERTY");
+        reservertSaksnummerRepository.lagre(saksnummer, FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "1234", "5678", "9012", null, List.of("1337"));
+        Set<AktørId> aktørIder = pipRepository.hentAktørIdKnyttetTilSaksnummer(saksnummer);
+        assertThat(aktørIder).containsOnly(new AktørId("1234"), new AktørId("5678"), new AktørId("9012"), new AktørId("1337"));
+    }
+
+    @Test
+    public void skal_ikke_finne_aktørIder_fra_reservert_saksnummer_hvis_sak_finnes() {
+        AktørId søker = AktørId.dummy();
+        Fagsak fagsak = behandlingBuilder.opprettFagsak(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, søker);
+        reservertSaksnummerRepository.lagre(fagsak.getSaksnummer(), FagsakYtelseType.PLEIEPENGER_SYKT_BARN, søker.getAktørId(), "5678", "9012", null, List.of("1337"));
+        Set<AktørId> aktørIder = pipRepository.hentAktørIdKnyttetTilSaksnummer(fagsak.getSaksnummer());
+        assertThat(aktørIder).containsOnly(søker);
+    }
 }

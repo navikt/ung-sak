@@ -97,11 +97,12 @@ public class FastsettPGIPeriodeTjeneste {
             var oppgittOpptjeningFilter = oppgittOpptjeningFilterProvider.finnOpptjeningFilter(behandlingId);
             var skjæringstidspunkter = finnSkjæringstidspunkter(vilkår.get());
             var sigruninntektPerioder = finnEksisterendePGIPerioder(behandlingId);
+            var initiellSigrunInntektPerioder = finnInitiellPGIPerioder(behandlingId);
             var perioderSomSkalFjernes = finnPerioderSomSkalFjernes(behandlingId, iayGrunnlag, oppgittOpptjeningFilter, skjæringstidspunkter, sigruninntektPerioder);
             if (!perioderSomSkalFjernes.isEmpty()) {
                 log.info("Fjerner PGI-perioder " + perioderSomSkalFjernes);
             }
-            grunnlagRepository.lagreOgDeaktiverPGIPerioder(behandlingId, Collections.emptyList(), perioderSomSkalFjernes);
+            grunnlagRepository.lagreOgDeaktiverPGIPerioder(behandlingId, initiellSigrunInntektPerioder, perioderSomSkalFjernes);
         }
     }
 
@@ -111,6 +112,15 @@ public class FastsettPGIPeriodeTjeneste {
             .filter(stp -> PGIPerioder.stream().noneMatch(p -> p.getSkjæringstidspunkt().equals(stp)))
             .map(stp -> new PGIPeriode(iayGrunnlag.getEksternReferanse(), stp))
             .collect(Collectors.toList());
+    }
+
+    private List<PGIPeriode> finnInitiellPGIPerioder(Long behandlingId) {
+        var grunnlagOpt = grunnlagRepository.getInitiellVersjon(behandlingId);
+        return grunnlagOpt
+            .stream()
+            .flatMap(bg -> bg.getPGIPerioder().stream())
+            .map(PGIPeriode::new) // lager kopi for å ikkje endre på eksisterende perioder som kan vere en del av grunnlag i andre behandlinger
+            .toList();
     }
 
     private List<PGIPeriode> finnEksisterendePGIPerioder(Long behandlingId) {

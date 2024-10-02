@@ -19,9 +19,15 @@ import jakarta.annotation.Priority;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Inject;
-
+import no.nav.k9.abac.BeskyttetRessursKoder;
+import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.konfigurasjon.env.Cluster;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
+import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
+import no.nav.k9.felles.sikkerhet.abac.AbacAttributtSamling;
+import no.nav.k9.felles.sikkerhet.abac.PdpKlient;
+import no.nav.k9.felles.sikkerhet.abac.PdpRequest;
+import no.nav.k9.felles.sikkerhet.abac.PdpRequestBuilder;
 import no.nav.k9.sak.behandlingslager.pip.PipBehandlingsData;
 import no.nav.k9.sak.behandlingslager.pip.PipRepository;
 import no.nav.k9.sak.domene.person.pdl.AktørTjeneste;
@@ -30,12 +36,6 @@ import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.felles.feil.FeilFactory;
-import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
-import no.nav.k9.felles.sikkerhet.abac.AbacAttributtSamling;
-import no.nav.k9.felles.sikkerhet.abac.PdpKlient;
-import no.nav.k9.felles.sikkerhet.abac.PdpRequest;
-import no.nav.k9.felles.sikkerhet.abac.PdpRequestBuilder;
 
 @Dependent
 @Alternative
@@ -45,8 +45,13 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
     private static final Logger LOG = LoggerFactory.getLogger(AppPdpRequestBuilderImpl.class);
     public static final String ABAC_DOMAIN = "k9";
     private static final Cluster CLUSTER = Environment.current().getCluster();
-    private static final List<String> INTERNAL_CLUSTER_NAMESPACE = List.of(CLUSTER.clusterName() + ":k9saksbehandling",
-        CLUSTER.clusterName() + ":teamforeldrepenger");
+    private static final List<String> INTERNAL_CLUSTER_NAMESPACE = List.of(
+        CLUSTER.clusterName() + ":k9saksbehandling",
+        CLUSTER.DEV_GCP.clusterName() + ":omsorgspenger",
+        CLUSTER.PROD_GCP.clusterName() + ":omsorgspenger",
+        CLUSTER.DEV_GCP.clusterName() + ":dusseldorf",
+        CLUSTER.PROD_GCP.clusterName() + ":dusseldorf"
+    );
     private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess"); //$NON-NLS-1$
     private PipRepository pipRepository;
     private AktørTjeneste aktørTjeneste;
@@ -74,6 +79,14 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
 
     @Override
     public PdpRequest lagPdpRequest(AbacAttributtSamling attributter) {
+        if (BeskyttetRessursKoder.PIP.equals(attributter.getResource())) {
+            //lager dummy PDP request, siden
+            // 1. det er unødvendig å lage en ordentlig, da det uansett ikke kan gjøres sjekk i PDP for request mot PIP-tjenesten (siden den brukes fra PDP-en) (se også PepImpl) tilgang istedet er styrt med tilgangslister i applikasjonen
+            // 2. PDP requesten brukes også til logging, men ikke for servicebrukere (og det er kun servicebrukere som får kalle PIP-tjenesten)
+            // 3. å lage en ekte PDP-request tar tid siden det gjør oppslag mot databasen for å hente ut data
+            return lagPdpRequest(attributter, Collections.emptySet(), Collections.emptySet());
+        }
+
         Optional<Long> behandlingId = utledBehandlingIder(attributter);
         Optional<PipBehandlingsData> behandlingData = behandlingId.isPresent()
             ? pipRepository.hentDataForBehandling(behandlingId.get())

@@ -65,4 +65,8 @@ public class GReguleringRepository {
 
         return Integer.toUnsignedLong(query.executeUpdate());
     }
+
+
+
+
 }

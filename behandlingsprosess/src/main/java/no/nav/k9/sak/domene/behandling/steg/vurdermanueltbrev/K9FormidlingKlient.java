@@ -10,19 +10,25 @@ import jakarta.ws.rs.core.UriBuilder;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.formidling.kontrakt.forvaltning.aktør.ByttAktørRequest;
+import no.nav.k9.formidling.kontrakt.forvaltning.aktør.ByttAktørResponse;
 import no.nav.k9.formidling.kontrakt.informasjonsbehov.InformasjonsbehovListeDto;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.sak.typer.AktørId;
 
 @Dependent
 @ScopedRestIntegration(scopeKey = "k9.formidling.scope", defaultScope = "api://prod-fss.k9saksbehandling.k9-formidling/.default")
 public class K9FormidlingKlient {
     private OidcRestClient restClient;
     private URI uriInformasjonsbehov;
+    private URI uriOppdaterAktørId;
+
 
     @Inject
     public K9FormidlingKlient(OidcRestClient restClient, @KonfigVerdi(value = "k9.formidling.url", defaultVerdi = "http://k9-formidling/k9/formidling") String urlK9Formidling) {
         this.restClient = restClient;
         this.uriInformasjonsbehov = tilUri(urlK9Formidling, "api/brev/informasjonsbehov");
+        this.uriOppdaterAktørId = tilUri(urlK9Formidling, "api/forvaltning/oppdaterAktoerId");
     }
 
     private static URI tilUri(String baseUrl, String path) {
@@ -40,5 +46,11 @@ public class K9FormidlingKlient {
             .build();
         return restClient.get(uri, InformasjonsbehovListeDto.class);
     }
+
+    public Long oppdaterAktørId(AktørId gyldigAktørId, AktørId utgåttAktørId) {
+        var response = restClient.post(UriBuilder.fromUri(uriOppdaterAktørId).build(), new ByttAktørRequest(utgåttAktørId.getAktørId(), gyldigAktørId.getAktørId()), ByttAktørResponse.class);
+        return response.antallEndret();
+    }
+
 
 }

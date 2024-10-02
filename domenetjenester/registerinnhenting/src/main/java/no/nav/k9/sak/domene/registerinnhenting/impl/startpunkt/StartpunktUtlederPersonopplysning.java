@@ -5,6 +5,7 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -35,6 +36,7 @@ import no.nav.k9.sak.typer.AktørId;
 @FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
 @FagsakYtelseTypeRef(OMSORGSPENGER)
 @FagsakYtelseTypeRef(FRISINN)
+@FagsakYtelseTypeRef(UNGDOMSYTELSE)
 class StartpunktUtlederPersonopplysning implements EndringStartpunktUtleder {
 
     private final String source = this.getClass().getSimpleName();

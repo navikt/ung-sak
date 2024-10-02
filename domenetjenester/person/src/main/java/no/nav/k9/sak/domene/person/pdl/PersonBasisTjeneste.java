@@ -11,8 +11,8 @@ import no.nav.k9.felles.integrasjon.pdl.AdressebeskyttelseGradering;
 import no.nav.k9.felles.integrasjon.pdl.AdressebeskyttelseResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.Doedsfall;
 import no.nav.k9.felles.integrasjon.pdl.DoedsfallResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.Foedsel;
-import no.nav.k9.felles.integrasjon.pdl.FoedselResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.Foedselsdato;
+import no.nav.k9.felles.integrasjon.pdl.FoedselsdatoResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.Folkeregisterpersonstatus;
 import no.nav.k9.felles.integrasjon.pdl.FolkeregisterpersonstatusResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.HentPersonQueryRequest;
@@ -57,7 +57,7 @@ public class PersonBasisTjeneste {
         query.setIdent(aktørId.getId());
         var projection = new PersonResponseProjection()
             .navn(new NavnResponseProjection().forkortetNavn().fornavn().mellomnavn().etternavn())
-            .foedsel(new FoedselResponseProjection().foedselsdato())
+            .foedselsdato(new FoedselsdatoResponseProjection().foedselsdato())
             .doedsfall(new DoedsfallResponseProjection().doedsdato())
             .folkeregisterpersonstatus(new FolkeregisterpersonstatusResponseProjection().status())
             .kjoenn(new KjoennResponseProjection().kjoenn())
@@ -65,8 +65,8 @@ public class PersonBasisTjeneste {
 
         var person = pdlKlient.hentPerson(query, projection);
 
-        var fødselsdato = person.getFoedsel().stream()
-            .map(Foedsel::getFoedselsdato)
+        var fødselsdato = person.getFoedselsdato().stream()
+            .map(Foedselsdato::getFoedselsdato)
             .filter(Objects::nonNull)
             .findFirst().map(d -> LocalDate.parse(d, DateTimeFormatter.ISO_LOCAL_DATE)).orElseGet(() -> isProd ? null : LocalDate.now().minusDays(1));
         var dødsdato = person.getDoedsfall().stream()
@@ -111,11 +111,11 @@ public class PersonBasisTjeneste {
         query.setIdent(aktørId.getId());
         var projection = new PersonResponseProjection()
             .navn(new NavnResponseProjection().forkortetNavn().fornavn().mellomnavn().etternavn())
-            .foedsel(new FoedselResponseProjection().foedselsdato());
+            .foedselsdato(new FoedselsdatoResponseProjection().foedselsdato());
         var personFraPDL = pdlKlient.hentPerson(query, projection);
 
-        var fødselsdato = personFraPDL.getFoedsel().stream()
-            .map(Foedsel::getFoedselsdato)
+        var fødselsdato = personFraPDL.getFoedselsdato().stream()
+            .map(Foedselsdato::getFoedselsdato)
             .filter(Objects::nonNull)
             .findFirst()
             .map(d -> LocalDate.parse(d, DateTimeFormatter.ISO_LOCAL_DATE)).orElse(null);

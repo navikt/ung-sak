@@ -14,18 +14,13 @@ import no.nav.k9.sak.typer.Stillingsprosent;
 public class AktivitetsAvtale implements IndexKey {
 
     public static final Comparator<AktivitetsAvtale> COMPARATOR = Comparator.comparing(AktivitetsAvtale::getPeriode)
-        .thenComparing(Comparator.comparing(AktivitetsAvtale::getSisteLønnsendringsdato, Comparator.nullsFirst(Comparator.naturalOrder())));
-
+        .thenComparing(AktivitetsAvtale::getSisteLønnsendringsdato, Comparator.nullsFirst(Comparator.naturalOrder()));
     @ChangeTracked
-    private Stillingsprosent prosentsats;
+    private AktivitetsAvtaleInnhold aktivitetsAvtaleInnhold = new AktivitetsAvtaleInnhold();
 
-    private String beskrivelse;
 
     @ChangeTracked
     private DatoIntervallEntitet periode;
-
-    @ChangeTracked
-    private LocalDate sisteLønnsendringsdato;
 
     /**
      * Setter en periode brukt til overstyring av angitt periode (avledet fra saksbehandlers vurderinger). Benyttes kun transient (ved
@@ -40,9 +35,7 @@ public class AktivitetsAvtale implements IndexKey {
      * Deep copy ctor
      */
     AktivitetsAvtale(AktivitetsAvtale aktivitetsAvtale) {
-        this.prosentsats = aktivitetsAvtale.getProsentsats();
-        this.beskrivelse = aktivitetsAvtale.getBeskrivelse();
-        this.sisteLønnsendringsdato = aktivitetsAvtale.getSisteLønnsendringsdato();
+        this.aktivitetsAvtaleInnhold = new AktivitetsAvtaleInnhold(aktivitetsAvtale.aktivitetsAvtaleInnhold);
         this.periode = aktivitetsAvtale.getPeriodeUtenOverstyring();
     }
 
@@ -53,7 +46,7 @@ public class AktivitetsAvtale implements IndexKey {
 
     @Override
     public String getIndexKey() {
-        Object[] keyParts = { periode, sisteLønnsendringsdato };
+        Object[] keyParts = { periode, aktivitetsAvtaleInnhold.getSisteLønnsendringsdato() };
         return IndexKeyComposer.createKey(keyParts);
     }
 
@@ -64,11 +57,11 @@ public class AktivitetsAvtale implements IndexKey {
      */
 
     public Stillingsprosent getProsentsats() {
-        return prosentsats;
+        return aktivitetsAvtaleInnhold.getProsentsats();
     }
 
     void setProsentsats(Stillingsprosent prosentsats) {
-        this.prosentsats = prosentsats;
+        this.aktivitetsAvtaleInnhold.setProsentsats(prosentsats);
     }
 
     /**
@@ -105,7 +98,7 @@ public class AktivitetsAvtale implements IndexKey {
     }
 
     public LocalDate getSisteLønnsendringsdato() {
-        return sisteLønnsendringsdato;
+        return aktivitetsAvtaleInnhold.getSisteLønnsendringsdato();
     }
 
     public boolean matcherPeriode(DatoIntervallEntitet aktivitetsAvtale) {
@@ -122,15 +115,19 @@ public class AktivitetsAvtale implements IndexKey {
     }
 
     public String getBeskrivelse() {
-        return beskrivelse;
+        return aktivitetsAvtaleInnhold.getBeskrivelse();
     }
 
     void setBeskrivelse(String beskrivelse) {
-        this.beskrivelse = beskrivelse;
+        this.aktivitetsAvtaleInnhold.setBeskrivelse(beskrivelse);
     }
 
-    void sisteLønnsendringsdato(LocalDate sisteLønnsendringsdato) {
-        this.sisteLønnsendringsdato = sisteLønnsendringsdato;
+    void setSisteLønnsendringsdato(LocalDate sisteLønnsendringsdato) {
+        this.aktivitetsAvtaleInnhold.setSisteLønnsendringsdato(sisteLønnsendringsdato);
+    }
+
+    public AktivitetsAvtaleInnhold getAktivitetsAvtaleInnhold() {
+        return aktivitetsAvtaleInnhold;
     }
 
     @Override
@@ -141,15 +138,13 @@ public class AktivitetsAvtale implements IndexKey {
             return false;
 
         var that = (AktivitetsAvtale) o;
-        return Objects.equals(beskrivelse, that.beskrivelse) &&
-            Objects.equals(prosentsats, that.prosentsats) &&
-            Objects.equals(periode, that.periode) &&
-            Objects.equals(sisteLønnsendringsdato, that.sisteLønnsendringsdato);
+        return Objects.equals(aktivitetsAvtaleInnhold, that.aktivitetsAvtaleInnhold) &&
+            Objects.equals(periode, that.periode);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(beskrivelse, prosentsats, periode, sisteLønnsendringsdato);
+        return Objects.hash(periode, aktivitetsAvtaleInnhold);
     }
 
     @Override
@@ -157,20 +152,18 @@ public class AktivitetsAvtale implements IndexKey {
         return getClass().getSimpleName() + "<" + //$NON-NLS-1$
             "periode=" + periode + //$NON-NLS-1$
             (overstyrtPeriode == null ? "" : ", overstyrtPeriode=" + overstyrtPeriode) + //$NON-NLS-1$
-            (prosentsats == null ? "" : ", prosentsats=" + prosentsats) + //$NON-NLS-1$
-            (beskrivelse == null ? "" : ", beskrivelse=" + beskrivelse) + //$NON-NLS-1$
-            (sisteLønnsendringsdato == null ? "" : ", sisteLønnsendringsdato=" + sisteLønnsendringsdato) + //$NON-NLS-1$
+            (aktivitetsAvtaleInnhold == null ? "" : ", aktivitetsAvtaleInnhold=" + aktivitetsAvtaleInnhold) + //$NON-NLS-1$
             ", erAnsettelsesPeriode=" + erAnsettelsesPeriode() +
             '>';
     }
 
     boolean hasValues() {
-        return prosentsats != null || periode != null;
+        return aktivitetsAvtaleInnhold.getProsentsats() != null || periode != null;
     }
 
     public boolean erAnsettelsesPeriode() {
-        return (prosentsats == null || prosentsats.erNulltall())
-            && sisteLønnsendringsdato == null;
+        return aktivitetsAvtaleInnhold == null || ((aktivitetsAvtaleInnhold.getProsentsats() == null || aktivitetsAvtaleInnhold.getProsentsats().erNulltall())
+            && aktivitetsAvtaleInnhold.getSisteLønnsendringsdato() == null);
     }
 
 }

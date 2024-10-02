@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.sak.typer.Beløp;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatAndel;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.BeregningsresultatPeriode;
 import no.nav.k9.sak.ytelse.beregning.regelmodell.beregningsgrunnlag.AktivitetStatus;
@@ -74,6 +75,77 @@ class MapBeregningsresultatFeriepengerFraRegelTilVLTest {
                 assertThat(b.getFeriepengerÅrsbeløp()).isNull();
             });
         });
+    }
+
+    @Test
+    public void skal_velge_riktig_andel_basert_på_aktivitetstatus_og_inntektskategori() {
+        // Arrange
+        BeregningsresultatPeriode periode = new BeregningsresultatPeriode(PERIODE, null, null, null);
+        BeregningsresultatAndel andel = BeregningsresultatAndel.builder().medAktivitetStatus(AktivitetStatus.ATFL)
+            .medBrukerErMottaker(false)
+            .medInntektskategori(Inntektskategori.ARBEIDSTAKER)
+            .medArbeidsforhold(ARBEIDSFORHOLD)
+            .medDagsats(DAGSATS)
+            .medDagsatsFraBg(DAGSATS_FRA_BG)
+            .medUtbetalingssgrad(UTBETALINGSGRAD)
+            .build(periode);
+        BeregningsresultatFeriepengerPrÅr.builder().medÅrsbeløp(BigDecimal.valueOf(1000))
+            .medOpptjeningÅr(LocalDate.now()).build(andel);
+
+        BeregningsresultatAndel andel2 = BeregningsresultatAndel.builder().medAktivitetStatus(AktivitetStatus.ATFL)
+            .medBrukerErMottaker(false)
+            .medInntektskategori(Inntektskategori.DAGPENGER)
+            .medArbeidsforhold(ARBEIDSFORHOLD)
+            .medDagsats(DAGSATS)
+            .medDagsatsFraBg(DAGSATS_FRA_BG)
+            .medUtbetalingssgrad(UTBETALINGSGRAD)
+            .build(periode);
+        BeregningsresultatFeriepengerPrÅr.builder().medÅrsbeløp(BigDecimal.valueOf(2000))
+            .medOpptjeningÅr(LocalDate.now()).build(andel2);
+
+        var beregningsresultat = no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet.builder()
+            .medRegelInput("Regelinput")
+            .medRegelSporing("Regelsporing")
+            .build();
+        var vlBeregningsresultatPeriode = no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode
+            .builder()
+            .medBeregningsresultatPeriodeFomOgTom(PERIODE.getFomDato(), PERIODE.getTomDato())
+            .build(beregningsresultat);
+
+        var fraArbeid = no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel
+            .builder()
+            .medBrukerErMottaker(false)
+            .medDagsats((int) DAGSATS)
+            .medDagsatsFraBg((int) DAGSATS_FRA_BG)
+            .medInntektskategori(no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori.ARBEIDSTAKER)
+            .medUtbetalingsgrad(UTBETALINGSGRAD)
+            .medAktivitetStatus(no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.ARBEIDSTAKER)
+            .medArbeidsgiver(Arbeidsgiver.virksomhet(ORGNR))
+            .medStillingsprosent(BigDecimal.valueOf(100)).buildFor(vlBeregningsresultatPeriode);
+
+
+        var fraDagpenger = no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel
+            .builder()
+            .medBrukerErMottaker(false)
+            .medDagsats((int) DAGSATS)
+            .medDagsatsFraBg((int) DAGSATS_FRA_BG)
+            .medInntektskategori(no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori.DAGPENGER)
+            .medUtbetalingsgrad(UTBETALINGSGRAD)
+            .medAktivitetStatus(no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus.ARBEIDSTAKER)
+            .medArbeidsgiver(Arbeidsgiver.virksomhet(ORGNR))
+            .medStillingsprosent(BigDecimal.valueOf(100)).buildFor(vlBeregningsresultatPeriode);
+
+
+        BeregningsresultatFeriepengerRegelModell regelmodell = BeregningsresultatFeriepengerRegelModell.builder()
+            .medBeregningsresultatPerioder(List.of(periode))
+            .build();
+
+        // Act
+        MapBeregningsresultatFeriepengerFraRegelTilVL.mapTilResultatFraRegelModell(beregningsresultat, regelmodell);
+
+        // Assert
+        assertThat(fraArbeid.getFeriepengerÅrsbeløp().compareTo(new Beløp(1000))).isEqualTo(0);
+        assertThat(fraDagpenger.getFeriepengerÅrsbeløp().compareTo(new Beløp(2000))).isEqualTo(0);
     }
 
     private no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet lagVlBeregningsresultat() {

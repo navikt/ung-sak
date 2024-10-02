@@ -1,12 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-import java.util.NavigableSet;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
@@ -37,6 +32,7 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.PeriodeFraSøknadForBrukerTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.medisinsk.MedisinskGrunnlagTjeneste;
@@ -45,6 +41,8 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.Ple
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.PleietrengendeSykdomVurderingVersjon;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.SykdomVurderingRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UtenlandsoppholdPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.PleietrengendeAlderPeriode;
 
 @Dependent
@@ -59,13 +57,17 @@ public class SykdomVurderingTjeneste {
     private final BasisPersonopplysningTjeneste personopplysningTjeneste;
     private final SøknadsperiodeTjeneste søknadsperiodeTjeneste;
 
+    private PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste;
+
     @Inject
     public SykdomVurderingTjeneste(@Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
                                    SykdomVurderingRepository sykdomVurderingRepository,
                                    PleietrengendeSykdomDokumentRepository pleietrengendeSykdomDokumentRepository,
                                    MedisinskGrunnlagTjeneste medisinskGrunnlagTjeneste,
                                    MedisinskGrunnlagRepository medisinskGrunnlagRepository, BasisPersonopplysningTjeneste personopplysningTjeneste,
-                                   SøknadsperiodeTjeneste søknadsperiodeTjeneste) {
+                                   SøknadsperiodeTjeneste søknadsperiodeTjeneste,
+                                   PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste
+    ) {
 
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
         this.sykdomVurderingRepository = sykdomVurderingRepository;
@@ -74,6 +76,7 @@ public class SykdomVurderingTjeneste {
         this.medisinskGrunnlagRepository = medisinskGrunnlagRepository;
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
+        this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
     }
 
     private static <T> NavigableSet<T> union(NavigableSet<T> s1, NavigableSet<T> s2) {
@@ -105,6 +108,7 @@ public class SykdomVurderingTjeneste {
         boolean manglerVurderingAvToOmsorgspersoner;
         boolean manglerVurderingAvILivetsSluttfase;
         boolean manglerVurderingAvLangvarigSykdom;
+        boolean ikkeSammenMedBarnet = false;
 
         switch (behandling.getFagsakYtelseType()) {
             case PLEIEPENGER_SYKT_BARN -> {
@@ -122,6 +126,12 @@ public class SykdomVurderingTjeneste {
 
                 if (!manglerDiagnosekode && !harUbesluttedeVurderinger && !harUklassifiserteDokumenter && !dokumenterUtenUtkvittering && !manglerVurderingAvKontinuerligTilsynOgPleie && !manglerVurderingAvToOmsorgspersoner) {
                     return SykdomAksjonspunkt.bareFalse();
+                }
+
+                Set<UtenlandsoppholdPeriode> utenlandsoppholdSøkerIkkeSammenMedBarnet = hentUtenlandsoppholdSøkerIkkeSammenMedBarnet(behandling);
+                // TODO: Burde dette svaret være per periode eller totalt?
+                if (!utenlandsoppholdSøkerIkkeSammenMedBarnet.isEmpty()) {
+                    ikkeSammenMedBarnet = true;
                 }
             }
             case PLEIEPENGER_NÆRSTÅENDE -> {
@@ -151,7 +161,18 @@ public class SykdomVurderingTjeneste {
             manglerVurderingAvILivetsSluttfase,
             harDataSomIkkeHarBlittTattMedIBehandling,
             nyttDokumentHarIkkekontrollertEksisterendeVurderinger,
-            manglerVurderingAvLangvarigSykdom);
+            manglerVurderingAvLangvarigSykdom,
+            ikkeSammenMedBarnet
+        );
+    }
+
+    private Set<UtenlandsoppholdPeriode> hentUtenlandsoppholdSøkerIkkeSammenMedBarnet(Behandling behandling) {
+        var behandlingReferanse = BehandlingReferanse.fra(behandling);
+        Set<PerioderFraSøknad> perioderFraSøknad = periodeFraSøknadForBrukerTjeneste.hentPerioderFraSøknad(behandlingReferanse);
+
+        return perioderFraSøknad.stream()
+            .flatMap(p -> p.getUtenlandsopphold().stream())
+            .filter(utenlandsoppholdPeriode -> !utenlandsoppholdPeriode.isErSammenMedBarnet()).collect(Collectors.toSet());
     }
 
     private boolean harUbesluttedeVurderinger(Behandling behandling) {
@@ -218,7 +239,7 @@ public class SykdomVurderingTjeneste {
     }
 
     private LocalDateTimeline<Boolean> tilPsbOppfyltePerioderTidslinje(PleietrengendeSykdomInnleggelser innleggelse,
-            LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> ktpVurderinger) {
+                                                                       LocalDateTimeline<PleietrengendeSykdomVurderingVersjon> ktpVurderinger) {
         final var innleggelseSegments = innleggelse
             .getPerioder()
             .stream()

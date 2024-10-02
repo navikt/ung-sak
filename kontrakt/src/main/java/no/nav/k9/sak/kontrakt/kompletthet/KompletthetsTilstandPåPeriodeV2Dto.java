@@ -13,6 +13,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import no.nav.k9.kodeverk.beregningsgrunnlag.kompletthet.Vurdering;
+import no.nav.k9.sak.kontrakt.Patterns;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -42,7 +43,7 @@ public class KompletthetsTilstandPåPeriodeV2Dto {
 
     @JsonProperty("begrunnelse")
     @Size(max = 4000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String begrunnelse;
 
     @JsonCreator
@@ -51,7 +52,7 @@ public class KompletthetsTilstandPåPeriodeV2Dto {
                                               @Valid @JsonProperty("vurdering") Vurdering vurdering,
                                               @Valid @NotNull @JsonProperty("tilVurdering") Boolean tilVurdering,
                                               @JsonProperty("begrunnelse") @Size(max = 4000)
-                                              @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String begrunnelse) {
+                                              @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String begrunnelse) {
         this.periode = periode;
         this.status = status;
         this.vurdering = vurdering;

@@ -20,6 +20,7 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.kontrakt.Patterns;
 
 /** Informasjon om aksjonspunkt i behandlingen. */
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -33,12 +34,12 @@ public class AksjonspunktDto {
 
     @JsonProperty(value = "begrunnelse")
     @Size(max = 5000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String begrunnelse;
 
     @JsonProperty(value = "besluttersBegrunnelse")
     @Size(max = 5000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String besluttersBegrunnelse;
 
     @JsonProperty(value = "definisjon")
@@ -78,7 +79,7 @@ public class AksjonspunktDto {
 
     @JsonProperty(value = "venteårsakVariant")
     @Size(max = 5000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String venteårsakVariant;
 
     @JsonProperty(value = "opprettetAv")

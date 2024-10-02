@@ -2,6 +2,7 @@ package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.folketrygdloven.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagReferanserTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
@@ -98,9 +99,9 @@ public class VurderRefusjonBeregningsgrunnlagSteg implements BeregningsgrunnlagS
             if (!nyePerioder.isEmpty()) {
                 beregningsgrunnlagTjeneste.kopier(ref, nyePerioder, BehandlingStegType.VURDER_VILKAR_BERGRUNN);
                 var originalBehandlingId = ref.getOriginalBehandlingId().orElseThrow();
-                beregningsgrunnlagVilkårTjeneste.kopierVilkårresultatFraForrigeBehandling(
+                vilkårTjeneste.kopierOriginaltVilkårresultat(
                     kontekst.getBehandlingId(), originalBehandlingId,
-                    nyePerioder.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet()));
+                    nyePerioder.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toSet()), VilkårType.BEREGNINGSGRUNNLAGVILKÅR, false);
             }
         }
     }

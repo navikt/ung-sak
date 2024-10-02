@@ -30,16 +30,18 @@ class SkalForlengeAktivitetstatusTest {
     private SkalForlengeAktivitetstatus skalForlengeAktivitetstatus;
     private final BehandlingReferanse behandlingReferanse = mock(BehandlingReferanse.class);
     private final BehandlingReferanse originalBehandlingreferanse = mock(BehandlingReferanse.class);
+
     @BeforeEach
     void setUp() {
-        skalForlengeAktivitetstatus = new SkalForlengeAktivitetstatus(new UnitTestLookupInstanceImpl<>((referanse, sakInntektsmeldinger, vilkårsPeriode) -> sakInntektsmeldinger) {});
+        skalForlengeAktivitetstatus = new SkalForlengeAktivitetstatus(new UnitTestLookupInstanceImpl<>((referanse, sakInntektsmeldinger, vilkårsPeriode) -> sakInntektsmeldinger) {
+        });
         when(behandlingReferanse.getBehandlingId()).thenReturn(BEHANDLING_ID);
     }
 
     @Test
     void skal_forlengele_aktivitetstatus_ved_forlengelse_i_opptjening_og_revurdering_i_beregning() {
         var vilkårsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10));
-        SkalForlengeAktivitetstatus.SkalForlengeStatusInput input = new SkalForlengeAktivitetstatus.SkalForlengeStatusInput(
+        var input = new SkalForlengeAktivitetstatusInput(
             behandlingReferanse,
             originalBehandlingreferanse,
             Set.of(),
@@ -62,7 +64,7 @@ class SkalForlengeAktivitetstatusTest {
     @Test
     void skal_ikke_forlenge_aktivitetstatus_ved_revurdering_i_opptjening_og_revurdering_i_beregning() {
         var vilkårsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10));
-        SkalForlengeAktivitetstatus.SkalForlengeStatusInput input = new SkalForlengeAktivitetstatus.SkalForlengeStatusInput(
+        var input = new SkalForlengeAktivitetstatusInput(
             behandlingReferanse,
             originalBehandlingreferanse,
             Set.of(),
@@ -83,7 +85,7 @@ class SkalForlengeAktivitetstatusTest {
     @Test
     void skal_ikke_forlenge_aktivitetstatus_ved_avslått_i_forrige_behandling() {
         var vilkårsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10));
-        SkalForlengeAktivitetstatus.SkalForlengeStatusInput input = new SkalForlengeAktivitetstatus.SkalForlengeStatusInput(
+        SkalForlengeAktivitetstatusInput input = new SkalForlengeAktivitetstatusInput(
             behandlingReferanse,
             originalBehandlingreferanse,
             Set.of(),
@@ -106,7 +108,7 @@ class SkalForlengeAktivitetstatusTest {
         var vilkårsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10));
         var vilkårsperiodeForrigeBehandling = DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(5));
 
-        SkalForlengeAktivitetstatus.SkalForlengeStatusInput input = new SkalForlengeAktivitetstatus.SkalForlengeStatusInput(
+        SkalForlengeAktivitetstatusInput input = new SkalForlengeAktivitetstatusInput(
             behandlingReferanse,
             originalBehandlingreferanse,
             Set.of(),
@@ -131,7 +133,7 @@ class SkalForlengeAktivitetstatusTest {
         var vilkårsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10));
         var vilkårsperiodeForrigeBehandling = DatoIntervallEntitet.fraOgMedTilOgMed(STP.plusDays(1), STP.plusDays(5));
 
-        SkalForlengeAktivitetstatus.SkalForlengeStatusInput input = new SkalForlengeAktivitetstatus.SkalForlengeStatusInput(
+        SkalForlengeAktivitetstatusInput input = new SkalForlengeAktivitetstatusInput(
             behandlingReferanse,
             originalBehandlingreferanse,
             Set.of(),
@@ -156,7 +158,7 @@ class SkalForlengeAktivitetstatusTest {
         var im = lagInntektsmelding("12346778", InternArbeidsforholdRef.nullRef());
         var mottattInntektsmelding = lagMottattInntektsmelding();
 
-        SkalForlengeAktivitetstatus.SkalForlengeStatusInput input = new SkalForlengeAktivitetstatus.SkalForlengeStatusInput(
+        SkalForlengeAktivitetstatusInput input = new SkalForlengeAktivitetstatusInput(
             behandlingReferanse,
             originalBehandlingreferanse,
             Set.of(im),
@@ -178,7 +180,7 @@ class SkalForlengeAktivitetstatusTest {
     void skal_ikke_forlenge_aktivitetstatus_ved_prosesstrigger_for_reberegning() {
         var vilkårsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10));
 
-        SkalForlengeAktivitetstatus.SkalForlengeStatusInput input = new SkalForlengeAktivitetstatus.SkalForlengeStatusInput(
+        SkalForlengeAktivitetstatusInput input = new SkalForlengeAktivitetstatusInput(
             behandlingReferanse,
             originalBehandlingreferanse,
             Set.of(),
@@ -220,96 +222,130 @@ class SkalForlengeAktivitetstatusTest {
         return periodeTilVurdering;
     }
 
+
     @Test
     void skal_gi_ingen_endring_ved_en_IM_uten_referanse() {
 
-        var gjeldendeIM = lagInntektsmelding("12346778", InternArbeidsforholdRef.nullRef());
+        var gjeldendeIM = InntektsmeldingBuilder.builder()
+            .medArbeidsgiver(Arbeidsgiver.virksomhet("12346778"))
+            .medArbeidsforholdId(InternArbeidsforholdRef.nullRef())
+            .medBeløp(BigDecimal.TEN)
+            .medKanalreferanse("KANALREFERANSE")
+            .build();
 
-        var erEndret = SkalForlengeAktivitetstatus.erEndret(List.of(gjeldendeIM), List.of(gjeldendeIM));
+        var resultat = SkalForlengeAktivitetstatus.finnEndringer(List.of(gjeldendeIM), List.of(gjeldendeIM));
 
-        assertThat(erEndret).isFalse();
+        assertThat(resultat.isEmpty()).isTrue();
 
     }
 
     @Test
     void skal_gi_ingen_endring_ved_en_IM_med_referanse() {
 
-        var gjeldendeIM = lagInntektsmelding("12346778", InternArbeidsforholdRef.nyRef());
+        var gjeldendeIM = InntektsmeldingBuilder.builder()
+            .medArbeidsgiver(Arbeidsgiver.virksomhet("12346778"))
+            .medArbeidsforholdId(InternArbeidsforholdRef.nyRef())
+            .medBeløp(BigDecimal.TEN)
+            .medKanalreferanse("KANALREFERANSE")
+            .build();
 
-        var erEndret = SkalForlengeAktivitetstatus.erEndret(List.of(gjeldendeIM), List.of(gjeldendeIM));
+        var resultat = SkalForlengeAktivitetstatus.finnEndringer(List.of(gjeldendeIM), List.of(gjeldendeIM));
 
-        assertThat(erEndret).isFalse();
+        assertThat(resultat.isEmpty()).isTrue();
 
     }
 
     @Test
     void skal_gi_endring_når_ulike_arbeidsgivere_likt_antall_IM() {
 
-        var gjeldendeIM = lagInntektsmelding("12346778", InternArbeidsforholdRef.nullRef());
+        var gjeldendeIM = InntektsmeldingBuilder.builder()
+            .medArbeidsgiver(Arbeidsgiver.virksomhet("12346778"))
+            .medArbeidsforholdId(InternArbeidsforholdRef.nullRef())
+            .medBeløp(BigDecimal.TEN)
+            .medKanalreferanse("KANALREFERANSE")
+            .build();
 
-        var forrigeIM = lagInntektsmelding("2442323", InternArbeidsforholdRef.nullRef());
+        var forrigeIM = InntektsmeldingBuilder.builder()
+            .medArbeidsgiver(Arbeidsgiver.virksomhet("2442323"))
+            .medArbeidsforholdId(InternArbeidsforholdRef.nullRef())
+            .medBeløp(BigDecimal.TEN)
+            .medKanalreferanse("KANALREFERANSE")
+            .build();
 
-        var erEndret = SkalForlengeAktivitetstatus.erEndret(List.of(gjeldendeIM), List.of(forrigeIM));
+        var resultat = SkalForlengeAktivitetstatus.finnEndringer(List.of(gjeldendeIM), List.of(forrigeIM));
 
-        assertThat(erEndret).isTrue();
+        assertThat(resultat.isEmpty()).isFalse();
 
     }
 
     @Test
     void skal_gi_endring_når_tilkommet_inntektsmelding_for_samme_AG() {
 
-        var gjeldendeIM = lagInntektsmelding("12346778", InternArbeidsforholdRef.nyRef());
+        var gjeldendeIM = InntektsmeldingBuilder.builder()
+            .medArbeidsgiver(Arbeidsgiver.virksomhet("12346778"))
+            .medArbeidsforholdId(InternArbeidsforholdRef.nyRef())
+            .medBeløp(BigDecimal.TEN)
+            .medKanalreferanse("KANALREFERANSE")
+            .build();
 
-        var forrigeIM = lagInntektsmelding("12346778", InternArbeidsforholdRef.nyRef());
+        var forrigeIM = InntektsmeldingBuilder.builder()
+            .medArbeidsgiver(Arbeidsgiver.virksomhet("12346778"))
+            .medArbeidsforholdId(InternArbeidsforholdRef.nyRef())
+            .medBeløp(BigDecimal.TEN)
+            .medKanalreferanse("KANALREFERANSE")
+            .build();
 
-        var erEndret = SkalForlengeAktivitetstatus.erEndret(List.of(gjeldendeIM, forrigeIM), List.of(forrigeIM));
+        var resultat = SkalForlengeAktivitetstatus.finnEndringer(List.of(gjeldendeIM, forrigeIM), List.of(forrigeIM));
 
-        assertThat(erEndret).isTrue();
+        assertThat(resultat.isEmpty()).isFalse();
 
     }
 
     @Test
     void skal_gi_endring_når_tilkommet_inntektsmelding_for_ny_AG() {
 
-        var gjeldendeIM = lagInntektsmelding("12346778", InternArbeidsforholdRef.nyRef());
+        var gjeldendeIM = InntektsmeldingBuilder.builder()
+            .medArbeidsgiver(Arbeidsgiver.virksomhet("12346778"))
+            .medArbeidsforholdId(InternArbeidsforholdRef.nyRef())
+            .medBeløp(BigDecimal.TEN)
+            .medKanalreferanse("KANALREFERANSE")
+            .build();
 
-        var forrigeIM = lagInntektsmelding("32423423", InternArbeidsforholdRef.nyRef());
+        var forrigeIM = InntektsmeldingBuilder.builder()
+            .medArbeidsgiver(Arbeidsgiver.virksomhet("32423423"))
+            .medArbeidsforholdId(InternArbeidsforholdRef.nyRef())
+            .medBeløp(BigDecimal.TEN)
+            .medKanalreferanse("KANALREFERANSE")
+            .build();
 
-        var erEndret = SkalForlengeAktivitetstatus.erEndret(List.of(gjeldendeIM, forrigeIM), List.of(forrigeIM));
+        var resultat = SkalForlengeAktivitetstatus.finnEndringer(List.of(gjeldendeIM, forrigeIM), List.of(forrigeIM));
 
-        assertThat(erEndret).isTrue();
+        assertThat(resultat.isEmpty()).isFalse();
     }
 
     @Test
     void skal_gi_endring_når_forrige_IM_var_tom() {
 
-        var gjeldendeIM = lagInntektsmelding("12346778", InternArbeidsforholdRef.nyRef());
+        var gjeldendeIM = InntektsmeldingBuilder.builder()
+            .medArbeidsgiver(Arbeidsgiver.virksomhet("12346778"))
+            .medArbeidsforholdId(InternArbeidsforholdRef.nyRef())
+            .medBeløp(BigDecimal.TEN)
+            .medKanalreferanse("KANALREFERANSE")
+            .build();
 
 
-        var erEndret = SkalForlengeAktivitetstatus.erEndret(List.of(gjeldendeIM), List.of());
+        var resultat = SkalForlengeAktivitetstatus.finnEndringer(List.of(gjeldendeIM), List.of());
 
-        assertThat(erEndret).isTrue();
+        assertThat(resultat.isEmpty()).isFalse();
     }
 
-
-    @Test
-    void skal_gi_endring_når_gjeldende_IM_er_tom() {
-
-        var forrigeIM = lagInntektsmelding("32423423", InternArbeidsforholdRef.nyRef());
-
-
-        var erEndret = SkalForlengeAktivitetstatus.erEndret(List.of(), List.of(forrigeIM));
-
-        assertThat(erEndret).isTrue();
-    }
 
     @Test
     void skal_gi_ingen_endring_når_begge_listene_er_tomme() {
 
-        var erEndret = SkalForlengeAktivitetstatus.erEndret(List.of(), List.of());
+        var resultat = SkalForlengeAktivitetstatus.finnEndringer(List.of(), List.of());
 
-        assertThat(erEndret).isFalse();
+        assertThat(resultat.isEmpty()).isTrue();
     }
-
 
 }

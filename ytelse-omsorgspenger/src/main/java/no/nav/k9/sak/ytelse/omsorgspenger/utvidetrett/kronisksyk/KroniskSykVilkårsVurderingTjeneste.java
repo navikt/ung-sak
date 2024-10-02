@@ -11,9 +11,14 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
 
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.kodeverk.uttak.Tid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.opentelemetry.instrumentation.annotations.SpanAttribute;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
@@ -39,6 +44,7 @@ public class KroniskSykVilkårsVurderingTjeneste implements VilkårsPerioderTilV
     private static final Logger log = LoggerFactory.getLogger(KroniskSykVilkårsVurderingTjeneste.class);
 
     private BehandlingRepository behandlingRepository;
+    private SøknadRepository søknadRepository;
     private PersoninfoAdapter personinfoAdapter;
     private UtvidetRettSøknadPerioder søktePerioder;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -55,6 +61,7 @@ public class KroniskSykVilkårsVurderingTjeneste implements VilkårsPerioderTilV
                                               PersoninfoAdapter personinfoAdapter,
                                               SøknadRepository søknadRepository) {
         this.behandlingRepository = behandlingRepository;
+        this.søknadRepository = søknadRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.personinfoAdapter = personinfoAdapter;
         this.søktePerioder = new UtvidetRettSøknadPerioder(søknadRepository);
@@ -66,8 +73,9 @@ public class KroniskSykVilkårsVurderingTjeneste implements VilkårsPerioderTilV
         return new TreeSet<>();
     }
 
+    @WithSpan
     @Override
-    public NavigableSet<DatoIntervallEntitet> utledFullstendigePerioder(Long behandlingId) {
+    public NavigableSet<DatoIntervallEntitet> utledFullstendigePerioder(@SpanAttribute("behandlingId") Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var fagsak = behandling.getFagsak();
         AktørId barnAktørId = fagsak.getPleietrengendeAktørId();
@@ -76,26 +84,41 @@ public class KroniskSykVilkårsVurderingTjeneste implements VilkårsPerioderTilV
         return Collections.unmodifiableNavigableSet(new TreeSet<>(Set.of(maksPeriode)));
     }
 
+    @WithSpan
     @Override
-    public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
+    public NavigableSet<DatoIntervallEntitet> utled(@SpanAttribute("behandlingId") Long behandlingId, @SpanAttribute("vilkarType") VilkårType vilkårType) {
         var optVilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId);
         if (optVilkårene.isPresent()) {
             var vilkårTidslinje = optVilkårene.get().getVilkårTimeline(vilkårType);
             return TidslinjeUtil.tilDatoIntervallEntiteter(vilkårTidslinje);
         } else {
-            // default til 'fullstedige' perioder hvis vilkår ikke angitt.
-            return utledFullstendigePerioder(behandlingId);
+            return utledVilkårsPerioder(behandlingId);
         }
     }
 
+    @WithSpan
     @Override
-    public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(Long behandlingId) {
+    public Map<VilkårType, NavigableSet<DatoIntervallEntitet>> utledRådataTilUtledningAvVilkårsperioder(@SpanAttribute("behandlingId") Long behandlingId) {
         final var vilkårPeriodeSet = new EnumMap<VilkårType, NavigableSet<DatoIntervallEntitet>>(VilkårType.class);
         UtledeteVilkår utledeteVilkår = vilkårUtleder.utledVilkår(null);
         utledeteVilkår.getAlleAvklarte()
-            .forEach(vilkår -> vilkårPeriodeSet.put(vilkår, utledFullstendigePerioder(behandlingId)));
+            .forEach(vilkår -> vilkårPeriodeSet.put(vilkår, utledVilkårsPerioder(behandlingId)));
 
         return vilkårPeriodeSet;
+    }
+
+    private NavigableSet<DatoIntervallEntitet> utledVilkårsPerioder(Long behandlingId) {
+        var søknadsperioder = søktePerioder.utledPeriode(behandlingId);
+        return justerForMottattTidspunkt(behandlingId, søknadsperioder);
+    }
+
+    private NavigableSet<DatoIntervallEntitet> justerForMottattTidspunkt(Long behandlingId, Set<DatoIntervallEntitet> søktePerioder) {
+        var søknadstidslinje = new LocalDateTimeline<>(søktePerioder.stream().map(sp -> new LocalDateSegment<>(sp.getFomDato(), sp.getTomDato(), true)).toList());
+        var søknad = søknadRepository.hentSøknad(behandlingId);
+
+        LocalDate treMånederFørSøknadDato = søknad.getMottattDato().minusMonths(3).withDayOfMonth(1);
+        var justert = søknadstidslinje.intersection(new LocalDateTimeline<>(treMånederFørSøknadDato, Tid.TIDENES_ENDE, null));
+        return TidslinjeUtil.tilDatoIntervallEntiteter(justert);
     }
 
     private DatoIntervallEntitet utledMaksPeriode(NavigableSet<DatoIntervallEntitet> søktePerioder, AktørId barnAktørId) {
@@ -110,8 +133,8 @@ public class KroniskSykVilkårsVurderingTjeneste implements VilkårsPerioderTilV
 
         var mindato = List.of(fødselsdato, fristFørSøknadsdato).stream().max(LocalDate::compareTo).get();
 
-        // kan ikke gå lenger enn til 18 år (kun oppfylt i årskvantum om kronisk syk også fins
-        var maksdato = barninfo.getFødselsdato().plusYears(18).withMonth(12).withDayOfMonth(31);
+        // kan ikke gå lenger enn til 18 år. Tre ekstra år buffer
+        var maksdato = barninfo.getFødselsdato().plusYears(21).withMonth(12).withDayOfMonth(31);
 
         if (maksdato.isBefore(mindato) || søknadFom.isAfter(maksdato)) {
             log.warn("Har ingen reell periode å vurdere. mindato {}, maksdato {}, søknadsdato {}", mindato, maksdato, søknadFom);

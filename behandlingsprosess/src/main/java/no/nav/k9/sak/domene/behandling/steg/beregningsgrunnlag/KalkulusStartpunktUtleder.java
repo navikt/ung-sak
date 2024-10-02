@@ -12,8 +12,10 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.folketrygdloven.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.impl.BehandlingModellRepository;
 import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
@@ -24,7 +26,6 @@ public class KalkulusStartpunktUtleder {
 
     private FinnPerioderMedStartIKontrollerFakta finnPerioderMedStartIKontrollerFakta;
     private VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
-    private BeregningsgrunnlagVilkårTjeneste vilkårTjeneste;
 
     private BehandlingModellRepository behandlingModellRepository;
 
@@ -33,11 +34,9 @@ public class KalkulusStartpunktUtleder {
     @Inject
     public KalkulusStartpunktUtleder(FinnPerioderMedStartIKontrollerFakta finnPerioderMedStartIKontrollerFakta,
                                      VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider,
-                                     BeregningsgrunnlagVilkårTjeneste vilkårTjeneste,
                                      BehandlingModellRepository behandlingModellRepository) {
         this.finnPerioderMedStartIKontrollerFakta = finnPerioderMedStartIKontrollerFakta;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
-        this.vilkårTjeneste = vilkårTjeneste;
         this.behandlingModellRepository = behandlingModellRepository;
     }
 
@@ -49,14 +48,15 @@ public class KalkulusStartpunktUtleder {
      * <p>
      * Periodene pr behandlingsstegtype vil ha kopiert beregningsgrunnlag fra steget før og kjører beregning for alle steg etter (se BehandlingModell)
      *
-     * @param ref Behandlingreferanse
+     * @param ref                  Behandlingreferanse
+     * @param perioderTilVurdering Perioder til vurdering i beregning
      * @return Map med perioder som starter i gitt behandlingssteg
      */
-    public Map<BehandlingStegType, NavigableSet<PeriodeTilVurdering>> utledPerioderPrStartpunkt(BehandlingReferanse ref) {
+    public Map<BehandlingStegType, NavigableSet<PeriodeTilVurdering>> utledPerioderPrStartpunkt(BehandlingReferanse ref, NavigableSet<PeriodeTilVurdering> perioderTilVurdering) {
         var periodeStartStegMap = new HashMap<BehandlingStegType, NavigableSet<PeriodeTilVurdering>>();
         var periodeFilter = vilkårPeriodeFilterProvider.getFilter(ref);
         periodeFilter.ignorerAvslåtteUnntattForLavtBeregningsgrunnlag();
-        var utenAvslagFørBeregning = vilkårTjeneste.utledDetaljertPerioderTilVurdering(ref, periodeFilter);
+        var utenAvslagFørBeregning = periodeFilter.filtrerPerioder(perioderTilVurdering.stream().map(PeriodeTilVurdering::getPeriode).toList(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
 
         if (!utenAvslagFørBeregning.isEmpty()) {
             log.info("Perioder som skal vurderes i beregning: " + utenAvslagFørBeregning);
@@ -93,8 +93,7 @@ public class KalkulusStartpunktUtleder {
 
     private static NavigableSet<PeriodeTilVurdering> finnPerioderFraStart(HashMap<BehandlingStegType, NavigableSet<PeriodeTilVurdering>> periodeStartStegMap, NavigableSet<PeriodeTilVurdering> utenAvslagFørBeregning) {
         var allePerioderMedHopp = periodeStartStegMap.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
-        var perioderFraStart = utenAvslagFørBeregning.stream().filter(it -> !allePerioderMedHopp.contains(it)).collect(Collectors.toCollection(TreeSet::new));
-        return perioderFraStart;
+        return utenAvslagFørBeregning.stream().filter(it -> !allePerioderMedHopp.contains(it)).collect(Collectors.toCollection(TreeSet::new));
     }
 
     private static void settStartpunkt(NavigableSet<PeriodeTilVurdering> hoppTilVurderRefusjonPerioder, HashMap<BehandlingStegType, NavigableSet<PeriodeTilVurdering>> periodeStartStegMap, BehandlingStegType behandlingStegType) {

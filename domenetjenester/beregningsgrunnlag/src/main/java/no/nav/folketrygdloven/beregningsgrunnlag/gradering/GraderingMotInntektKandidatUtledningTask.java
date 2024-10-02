@@ -3,6 +3,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.gradering;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +24,11 @@ public class GraderingMotInntektKandidatUtledningTask implements ProsessTaskHand
     public static final String DRYRUN = "dryrun";
     public static final String KALKULUS_UTLEDNING = "kalkulusUtledning";
     public static final String YTELSE = "ytelse";
+    public static final String FOM_DATO = "fom";
+    public static final String INNEHOLDER_DATO = "inneholderDato";
 
     private static final Logger log = LoggerFactory.getLogger(GraderingMotInntektKandidatUtledningTask.class);
-    public static final LocalDate FOM_DATO_INNTEKT_GRADERING = LocalDate.of(2023, 11, 6);
+    public static final LocalDate FOM_DATO_INNTEKT_GRADERING = LocalDate.of(2025, 1, 1);
     private InntektGraderingRepository inntektGraderingRepository;
     private KandidaterForInntektgraderingTjeneste kandidaterForInntektgraderingTjeneste;
 
@@ -49,12 +52,17 @@ public class GraderingMotInntektKandidatUtledningTask implements ProsessTaskHand
         FagsakYtelseType fagsakYtelseType = ytelseType != null ? FagsakYtelseType.fraKode(ytelseType) : FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
         var dryRun = Boolean.parseBoolean(dryRunValue);
         if (dryRun) {
-            var fagsaker = inntektGraderingRepository.hentFagsakIdOgSaksnummer(fagsakYtelseType, FOM_DATO_INNTEKT_GRADERING);
+            var fom = prosessTaskData.getPropertyValue(FOM_DATO) == null ? FOM_DATO_INNTEKT_GRADERING : LocalDate.parse(prosessTaskData.getPropertyValue(FOM_DATO));
+            var inneholderDato = Optional.ofNullable(prosessTaskData.getPropertyValue(INNEHOLDER_DATO)).map(LocalDate::parse);
+            if (inneholderDato.isPresent() && inneholderDato.get().isBefore(fom)) {
+                throw new IllegalStateException("Inneholder dato kan ikke være før fom dato");
+            }
+            var fagsaker = inntektGraderingRepository.hentFagsakIdOgSaksnummer(fagsakYtelseType, fom, inneholderDato);
             log.info("DRYRUN - Fant {} kandidater til gradering mot inntekt.", fagsaker.size());
             if (kalkulusUtledning) {
                 List<String> saksnummerMedAksjonspunkt = fagsaker.entrySet().stream()
                     .filter(f -> {
-                        var vurderingsperioder = kandidaterForInntektgraderingTjeneste.finnGraderingMotInntektPerioder(f.getKey(), FOM_DATO_INNTEKT_GRADERING);
+                        var vurderingsperioder = kandidaterForInntektgraderingTjeneste.finnGraderingMotInntektPerioder(f.getKey(), fom);
                         return !vurderingsperioder.isEmpty();
                     })
                     .map(Map.Entry::getValue)

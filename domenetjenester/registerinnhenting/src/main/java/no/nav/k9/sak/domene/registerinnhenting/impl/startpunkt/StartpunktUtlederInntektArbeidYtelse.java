@@ -5,6 +5,7 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 import no.nav.k9.sak.domene.registerinnhenting.GrunnlagRef;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.perioder.ForlengelseTjeneste;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Saksnummer;
 
@@ -44,6 +46,7 @@ import no.nav.k9.sak.typer.Saksnummer;
 @FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
 @FagsakYtelseTypeRef(OMSORGSPENGER)
 @FagsakYtelseTypeRef(FRISINN)
+@FagsakYtelseTypeRef(UNGDOMSYTELSE)
 class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
 
     private String klassenavn = this.getClass().getSimpleName();
@@ -52,7 +55,6 @@ class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
     private VurderArbeidsforholdTjeneste vurderArbeidsforholdTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
     private BehandlingRepository behandlingRepository;
-
     public StartpunktUtlederInntektArbeidYtelse() {
         // For CDI
     }

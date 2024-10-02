@@ -17,7 +17,7 @@ import no.nav.k9.kodeverk.api.IndexKey;
 /**
  * Id som genereres fra NAV Aktør Register. Denne iden benyttes til interne forhold i Nav og vil ikke endres f.eks. dersom bruker går fra
  * DNR til FNR i Folkeregisteret. Tilsvarende vil den kunne referere personer som har ident fra et utenlandsk system.
- * 
+ *
  * Støtter også kunstige orgnummer (internt definert konstant i fp - orgnummer=342352362)
  */
 @JsonFormat(shape = JsonFormat.Shape.STRING)
@@ -71,10 +71,15 @@ public class OrgNummer implements Comparable<OrgNummer>, IndexKey {
         return Objects.equals(orgNummer, other.orgNummer);
     }
 
+    private static String masker(String identifikator) {
+        return identifikator.substring(0, Math.min(identifikator.length(), 3))
+            + "...";
+    }
+
     public String getId() {
         return orgNummer;
     }
-    
+
     public String getOrgNummer() {
         return orgNummer;
     }
@@ -91,7 +96,7 @@ public class OrgNummer implements Comparable<OrgNummer>, IndexKey {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "<" + orgNummer + ">";
+        return getClass().getSimpleName() + "<" + masker(orgNummer) + ">";
     }
 
     /** @return false hvis ikke gyldig orgnr. */

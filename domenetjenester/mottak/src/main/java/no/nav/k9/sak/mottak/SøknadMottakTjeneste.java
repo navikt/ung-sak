@@ -16,5 +16,6 @@ public interface SøknadMottakTjeneste<V extends InnsendingInnhold> {
         throw new IllegalArgumentException("Dette endepunktet er deprecated for alle andre ytelser enn Frisinn: Bruk /fordel/journalposter istedenfor.");
     }
 
-    Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, LocalDate startDato, LocalDate sluttDato, Saksnummer saksnummer);
+    Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, LocalDate startDato, LocalDate sluttDato,
+                                  Saksnummer saksnummer);
 }

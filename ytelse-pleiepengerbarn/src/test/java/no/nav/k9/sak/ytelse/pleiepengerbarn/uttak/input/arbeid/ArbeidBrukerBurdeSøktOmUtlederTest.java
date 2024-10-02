@@ -76,7 +76,7 @@ class ArbeidBrukerBurdeSøktOmUtlederTest {
             List.of(),
             List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, timeline, opprettVilkår(timeline), new OpptjeningResultatBuilder(null).build());
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, timeline, opprettVilkår(timeline), new OpptjeningResultatBuilder(null).build(), true);
 
         var builder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
         var brukerAktørId = AktørId.dummy();
@@ -141,7 +141,7 @@ class ArbeidBrukerBurdeSøktOmUtlederTest {
         opptjening.setOpptjeningAktivitet(Set.of(AT, SN));
         opptjeningResultatBuilder.leggTil(opptjening);
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, timeline, opprettVilkår(timeline), opptjeningResultatBuilder.build());
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, timeline, opprettVilkår(timeline), opptjeningResultatBuilder.build(), true);
 
         var builder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
         var brukerAktørId = AktørId.dummy();
@@ -190,7 +190,7 @@ class ArbeidBrukerBurdeSøktOmUtlederTest {
             List.of(),
             List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, timeline, opprettVilkår(timeline), new OpptjeningResultatBuilder(null).build());
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, timeline, opprettVilkår(timeline), new OpptjeningResultatBuilder(null).build(), true);
 
         var builder = InntektArbeidYtelseAggregatBuilder.oppdatere(Optional.empty(), VersjonType.REGISTER);
         var brukerAktørId = AktørId.dummy();

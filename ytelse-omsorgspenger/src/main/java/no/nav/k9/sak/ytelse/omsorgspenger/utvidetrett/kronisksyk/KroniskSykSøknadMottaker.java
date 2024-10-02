@@ -13,6 +13,8 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.saksnummer.ReservertSaksnummerEntitet;
+import no.nav.k9.sak.behandlingslager.saksnummer.ReservertSaksnummerRepository;
 import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.søknad.innsending.InnsendingInnhold;
@@ -26,7 +28,7 @@ public class KroniskSykSøknadMottaker implements SøknadMottakTjeneste<Innsendi
 
     private FagsakTjeneste fagsakTjeneste;
     private SaksnummerRepository saksnummerRepository;
-
+    private ReservertSaksnummerRepository reservertSaksnummerRepository;
     private KroniskSykVilkårsVurderingTjeneste vilkårsVurderingTjeneste;
 
     KroniskSykSøknadMottaker() {
@@ -35,10 +37,12 @@ public class KroniskSykSøknadMottaker implements SøknadMottakTjeneste<Innsendi
 
     @Inject
     public KroniskSykSøknadMottaker(SaksnummerRepository saksnummerRepository,
+                                    ReservertSaksnummerRepository reservertSaksnummerRepository,
                                     FagsakTjeneste fagsakTjeneste,
                                     @Any KroniskSykVilkårsVurderingTjeneste vilkårsVurderingTjeneste) {
         this.fagsakTjeneste = fagsakTjeneste;
         this.saksnummerRepository = saksnummerRepository;
+        this.reservertSaksnummerRepository = reservertSaksnummerRepository;
         this.vilkårsVurderingTjeneste = vilkårsVurderingTjeneste;
     }
 
@@ -47,8 +51,8 @@ public class KroniskSykSøknadMottaker implements SøknadMottakTjeneste<Innsendi
         ytelseType.validerNøkkelParametere(pleietrengendeAktørId, relatertPersonAktørId);
         Objects.requireNonNull(startDato);
         Objects.requireNonNull(pleietrengendeAktørId);
-        var datoIntervall = vilkårsVurderingTjeneste.utledMaksPeriode(DatoIntervallEntitet.fra(startDato, sluttDato), pleietrengendeAktørId);
-        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, datoIntervall.getFomDato(), datoIntervall.getTomDato());
+        final var datoIntervall = vilkårsVurderingTjeneste.utledMaksPeriode(DatoIntervallEntitet.fra(startDato, sluttDato), pleietrengendeAktørId);
+        final var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, datoIntervall.getFomDato(), datoIntervall.getTomDato());
 
         if (reservertSaksnummer != null) {
             if (fagsak.isPresent() && !fagsak.get().getSaksnummer().equals(reservertSaksnummer)) {
@@ -63,9 +67,10 @@ public class KroniskSykSøknadMottaker implements SøknadMottakTjeneste<Innsendi
             return fagsak.get();
         }
 
-        var saksnummer = reservertSaksnummer != null ? reservertSaksnummer : new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
-
-        return opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, ytelseType, datoIntervall.getFomDato(), datoIntervall.getTomDato());
+        final var saksnummer = reservertSaksnummer != null ? reservertSaksnummer : hentReservertEllerGenererSaksnummer(søkerAktørId, pleietrengendeAktørId);
+        final var nyFagsak = opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, ytelseType, datoIntervall.getFomDato(), datoIntervall.getTomDato());
+        reservertSaksnummerRepository.slettHvisEksisterer(saksnummer);
+        return nyFagsak;
     }
 
     private Fagsak opprettSakFor(Saksnummer saksnummer, AktørId brukerIdent, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, FagsakYtelseType ytelseType, LocalDate fom, LocalDate tom) {
@@ -74,4 +79,8 @@ public class KroniskSykSøknadMottaker implements SøknadMottakTjeneste<Innsendi
         return fagsak;
     }
 
+    private Saksnummer hentReservertEllerGenererSaksnummer(AktørId søkerAktørId, AktørId pleietrengendeAktørId) {
+        var optReservert = reservertSaksnummerRepository.hent(OMSORGSPENGER_KS, søkerAktørId.getAktørId(), pleietrengendeAktørId.getAktørId(), null, null);
+        return optReservert.map(ReservertSaksnummerEntitet::getSaksnummer).orElseGet(() -> new Saksnummer(saksnummerRepository.genererNyttSaksnummer()));
+    }
 }

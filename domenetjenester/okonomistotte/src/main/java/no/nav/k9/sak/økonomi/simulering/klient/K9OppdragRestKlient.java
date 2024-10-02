@@ -3,15 +3,20 @@ package no.nav.k9.sak.økonomi.simulering.klient;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.oppdrag.kontrakt.BehandlingReferanse;
+import no.nav.k9.oppdrag.kontrakt.aktørbytte.ByttAktørRequest;
 import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
+import no.nav.k9.sak.typer.AktørId;
+import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sikkerhet.oidc.token.impl.ContextTokenProvider;
 
 @Dependent
@@ -19,6 +24,7 @@ public class K9OppdragRestKlient {
     private OidcRestClient restClient;
     private URI uriIverksett;
     private URI uriSimulering;
+    private URI uriAktørBytte;
     private URI uriSimuleringDiagnostikk;
     private URI uriSimuleringResultat;
     private URI uriKansellerSimulering;
@@ -32,6 +38,7 @@ public class K9OppdragRestKlient {
                                @KonfigVerdi(value = "k9.oppdrag.scope", defaultVerdi = "api://prod-fss.k9saksbehandling.k9-oppdrag/.default") String k9OppdragScope) {
         this.uriIverksett = tilUri(urlK9Oppdrag, "iverksett/start");
         this.uriSimulering = tilUri(urlK9Oppdrag, "simulering/start");
+        this.uriAktørBytte = tilUri(urlK9Oppdrag, "forvaltning/oppdaterAktoerId");
         this.uriSimuleringDiagnostikk = tilUri(urlK9Oppdrag, "diagnostikk/simulering");
         this.uriSimuleringResultat = tilUri(urlK9Oppdrag, "simulering/resultat");
         this.uriKansellerSimulering = tilUri(urlK9Oppdrag, "simulering/kanseller");
@@ -69,5 +76,14 @@ public class K9OppdragRestKlient {
         BehandlingReferanse behandlingreferanse = new BehandlingReferanse(behandlingUuid);
         restClient.post(uriKansellerSimulering, behandlingreferanse);
     }
+
+    public Integer utførAktørbytte(AktørId gyldigAktørId, AktørId utgåttAktørId, Set<PersonIdent> utgåttPersonident) {
+        var identer = utgåttPersonident.stream().map(PersonIdent::getIdent)
+            .map(ByttAktørRequest.PersonIdent::new)
+            .collect(Collectors.toSet());
+        var request = new ByttAktørRequest(utgåttAktørId.getAktørId(), gyldigAktørId.getAktørId(), identer);
+        return restClient.post(uriAktørBytte, request, Integer.class);
+    }
+
 
 }

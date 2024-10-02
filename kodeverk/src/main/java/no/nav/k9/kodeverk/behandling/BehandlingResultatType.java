@@ -88,6 +88,16 @@ public enum BehandlingResultatType implements Kodeverdi {
         this.erHenleggelse = erHenleggelse;
     }
 
+    /**
+     * toString is set to output the kode value of the enum instead of the default that is the enum name.
+     * This makes the generated openapi spec correct when the enum is used as a query param. Without this the generated
+     * spec incorrectly specifies that it is the enum name string that should be used as input.
+     */
+    @Override
+    public String toString() {
+        return this.getKode();
+    }
+
     @JsonCreator(mode = Mode.DELEGATING)
     public static BehandlingResultatType fraKode(Object node) {
         if (node == null) {
@@ -110,7 +120,7 @@ public enum BehandlingResultatType implements Kodeverdi {
         return navn;
     }
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonIgnore
     public boolean erHenleggelse() {
         return erHenleggelse;
     }
@@ -144,18 +154,22 @@ public enum BehandlingResultatType implements Kodeverdi {
         return INNVILGET_KODER;
     }
 
+    @JsonIgnore
     public boolean isBehandlingHenlagt() {
         return BehandlingResultatType.getAlleHenleggelseskoder().contains(this);
     }
 
+    @JsonIgnore
     public boolean isBehandlingsresultatHenlagt() {
         return BehandlingResultatType.getHenleggelseskoderForSøknad().contains(this);
     }
 
+    @JsonIgnore
     public boolean isBehandlingsresultatOpphørt() {
         return BehandlingResultatType.OPPHØR.equals(this);
     }
 
+    @JsonIgnore
     public boolean isBehandlingsresultatIkkeEndret() {
         return BehandlingResultatType.INGEN_ENDRING.equals(this);
     }

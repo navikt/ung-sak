@@ -17,7 +17,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.abakus.iaygrunnlag.JsonObjectMapper;
 import no.nav.abakus.iaygrunnlag.request.OppgittOpptjeningMottattRequest;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.dokument.Brevkode;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
@@ -82,6 +81,9 @@ class DokumentmottakerSøknadPPN implements Dokumentmottaker {
             Søknad søknad = søknadParser.parseSøknad(dokument);
             dokument.setBehandlingId(behandlingId);
             dokument.setInnsendingstidspunkt(søknad.getMottattDato().toLocalDateTime());
+            if (søknad.getKildesystem().isPresent()) {
+                dokument.setKildesystem(søknad.getKildesystem().get().getKode());
+            }
             mottatteDokumentRepository.lagre(dokument, DokumentStatus.BEHANDLER);
             // Søknadsinnhold som persisteres "lokalt" i k9-sak
             persister(søknad, behandling, dokument.getJournalpostId());
@@ -140,7 +142,7 @@ class DokumentmottakerSøknadPPN implements Dokumentmottaker {
             }
 
             try {
-                sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(
+                sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSkjema(
                     behandling,
                     new JournalpostId(journalpost.getJournalpostId()),
                     behandling.getFagsak().getPleietrengendeAktørId(),
@@ -159,7 +161,7 @@ class DokumentmottakerSøknadPPN implements Dokumentmottaker {
             .findFirst();
 
         if (journalpost.isEmpty()) {
-            sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSøknaden(behandling,
+            sykdomsDokumentVedleggHåndterer.leggTilDokumenterSomSkalHåndteresVedlagtSkjema(behandling,
                 journalpostId,
                 behandling.getFagsak().getPleietrengendeAktørId(),
                 søknad.getMottattDato().toLocalDateTime(),

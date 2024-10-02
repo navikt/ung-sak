@@ -40,14 +40,14 @@ public class PerioderMedSykdomInnvilgetUtleder {
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
     }
 
-    public NavigableSet<DatoIntervallEntitet> utledInnvilgedePerioderTilVurdering(BehandlingReferanse referanse) {
+    public NavigableSet<DatoIntervallEntitet> utledInnvilgedePerioderTilVurdering(BehandlingReferanse referanse, boolean klippBortAvslagAndreVilkår) {
         var behandlingId = referanse.getBehandlingId();
         VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste = finnVilkårsPerioderTjeneste(behandlingId);
         final var perioderVurdertISykdom = perioderTilVurderingTjeneste.utledFraDefinerendeVilkår(behandlingId);
 
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
 
-        return finnInnvilgedePerioder(behandlingId, vilkårene, perioderVurdertISykdom);
+        return finnInnvilgedePerioder(behandlingId, vilkårene, perioderVurdertISykdom, klippBortAvslagAndreVilkår);
     }
 
     private static LocalDateTimeline<Boolean> finnAvslåttTidslinjeAlleVilkår(Vilkårene vilkårene) {
@@ -60,7 +60,7 @@ public class PerioderMedSykdomInnvilgetUtleder {
         return new LocalDateTimeline<>(avslåttePerioder, StandardCombinators::alwaysTrueForMatch);
     }
 
-    private NavigableSet<DatoIntervallEntitet> finnInnvilgedePerioder(Long behandlingId, Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
+    private NavigableSet<DatoIntervallEntitet> finnInnvilgedePerioder(Long behandlingId, Vilkårene vilkårene, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, boolean klippBortAvslagAndreVilkår) {
         VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = finnVilkårsPerioderTjeneste(behandlingId);
 
         var definerendeVilkår = vilkårsPerioderTilVurderingTjeneste.definerendeVilkår();
@@ -76,8 +76,10 @@ public class PerioderMedSykdomInnvilgetUtleder {
             tidslinje = tidslinje.combine(new LocalDateTimeline<>(segmenter), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
         }
 
-        var avslåttTidslinje = finnAvslåttTidslinjeAlleVilkår(vilkårene);
-        tidslinje = tidslinje.disjoint(avslåttTidslinje);
+        if (klippBortAvslagAndreVilkår) {
+            var avslåttTidslinje = finnAvslåttTidslinjeAlleVilkår(vilkårene);
+            tidslinje = tidslinje.disjoint(avslåttTidslinje);
+        }
         tidslinje = tidslinje.filterValue(it -> it);
         return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje.compress());
     }

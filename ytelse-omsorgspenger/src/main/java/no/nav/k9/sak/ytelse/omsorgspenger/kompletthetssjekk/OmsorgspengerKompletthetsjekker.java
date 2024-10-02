@@ -22,7 +22,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektsmeldingTjeneste;
-import no.nav.k9.sak.domene.behandling.steg.kompletthet.KompletthetForBeregningTjeneste;
+import no.nav.k9.sak.kompletthet.KompletthetForBeregningTjeneste;
 import no.nav.k9.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kompletthet.KompletthetResultat;
@@ -122,7 +122,7 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
     }
 
     private boolean harRefusjonskravFraMottatteInntektsmeldinger(BehandlingReferanse ref) {
-        List<Inntektsmelding> inntektsmeldinger = inntektsmeldingTjeneste.hentInntektsmeldinger(ref, ref.getUtledetSkjæringstidspunkt());
+        List<Inntektsmelding> inntektsmeldinger = inntektsmeldingTjeneste.hentAlleMottatteInntektsmeldinger(ref.getBehandlingId());
         return inntektsmeldinger.stream()
             .anyMatch(Inntektsmelding::harRefusjonskrav);
     }
@@ -145,7 +145,7 @@ public class OmsorgspengerKompletthetsjekker implements Kompletthetsjekker {
     @Override
     public List<ManglendeVedlegg> utledAlleManglendeVedleggSomIkkeKommer(BehandlingReferanse ref) {
         return inntektsmeldingTjeneste
-            .hentAlleInntektsmeldingerSomIkkeKommer(ref.getBehandlingId())
+            .hentInntektsmeldingerSomIkkeKommer(ref.getBehandlingId())
             .stream()
             .map(e -> new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, e.getArbeidsgiver(), true))
             .collect(Collectors.toList());

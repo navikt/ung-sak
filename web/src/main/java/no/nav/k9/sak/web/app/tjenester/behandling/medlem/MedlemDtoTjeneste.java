@@ -2,6 +2,7 @@ package no.nav.k9.sak.web.app.tjenester.behandling.medlem;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ import no.nav.k9.sak.domene.medlem.VurderMedlemskap;
 import no.nav.k9.sak.kontrakt.medlem.MedlemPeriodeDto;
 import no.nav.k9.sak.kontrakt.medlem.MedlemV2Dto;
 import no.nav.k9.sak.kontrakt.medlem.MedlemskapPerioderDto;
+import no.nav.k9.sak.kontrakt.person.PersonopplysningDto;
 import no.nav.k9.sak.skjæringstidspunkt.SkjæringstidspunktTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.personopplysning.PersonopplysningDtoTjeneste;
 
@@ -80,6 +82,9 @@ public class MedlemDtoTjeneste {
         if (behandling.getAksjonspunkter().stream().map(Aksjonspunkt::getAksjonspunktDefinisjon).toList().contains(AksjonspunktDefinisjon.AVKLAR_FORTSATT_MEDLEMSKAP)) {
             mapAndrePerioder(dto, medlemskapOpt.flatMap(MedlemskapAggregat::getVurderingLøpendeMedlemskap).map(VurdertMedlemskapPeriodeEntitet::getPerioder).orElse(Collections.emptySet()), ref);
         }
+
+        mapPersonopplysninger(dto, behandlingId);
+
         return Optional.of(dto);
     }
 
@@ -121,5 +126,17 @@ public class MedlemDtoTjeneste {
             dto.setVurdertTidspunkt(vurdertMedlemskap.getVurdertTidspunkt());
         }
         return dto;
+    }
+
+    private void mapPersonopplysninger(MedlemV2Dto dto, Long behandlingId) {
+        Map<LocalDate, PersonopplysningDto> personopplysninger = new HashMap<>();
+        Optional<LocalDate> stp = skjæringstidspunktTjeneste.getSkjæringstidspunkter(behandlingId).getSkjæringstidspunktHvisUtledet();
+        if (stp.isPresent()) {
+            Optional<PersonopplysningDto> personopplysning = personopplysningDtoTjeneste.lagPersonopplysningDto(behandlingId, stp.get());
+            if (personopplysning.isPresent()) {
+                personopplysninger.put(stp.get(), personopplysning.get());
+            }
+        }
+        dto.setPersonopplysninger(personopplysninger);
     }
 }

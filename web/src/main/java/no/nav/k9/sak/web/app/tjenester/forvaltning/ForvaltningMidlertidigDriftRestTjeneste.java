@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.forvaltning;
 import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import java.io.BufferedReader;
@@ -15,14 +16,18 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.jboss.weld.exceptions.IllegalArgumentException;
+import org.jboss.weld.exceptions.IllegalStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +46,7 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
@@ -55,6 +61,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
+import no.nav.k9.abac.AbacAttributt;
 import no.nav.k9.felles.sikkerhet.abac.AbacAttributtSamling;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.AbacDto;
@@ -64,23 +71,31 @@ import no.nav.k9.felles.sikkerhet.abac.Pep;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 import no.nav.k9.felles.sikkerhet.abac.Tilgangsbeslutning;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.felles.util.InputValideringRegex;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.kodeverk.person.Diskresjonskode;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
+import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.pip.PipRepository;
 import no.nav.k9.sak.domene.person.pdl.TilknytningTjeneste;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.hendelse.stønadstatistikk.StønadstatistikkService;
 import no.nav.k9.sak.kontrakt.KortTekst;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingIdDto;
@@ -88,6 +103,8 @@ import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.dokument.JournalpostIdDto;
 import no.nav.k9.sak.kontrakt.mottak.AktørListeDto;
 import no.nav.k9.sak.kontrakt.stønadstatistikk.StønadstatistikkSerializer;
+import no.nav.k9.sak.mottak.dokumentmottak.DokumentValidatorProvider;
+import no.nav.k9.sak.mottak.dokumentmottak.HåndterMottattDokumentTask;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
@@ -99,6 +116,7 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLo
 import no.nav.k9.sak.web.app.tjenester.forvaltning.rapportering.DriftLesetilgangVurderer;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår.revurdering.PleietrengendeRevurderingPerioderTjeneste;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 /**
@@ -130,6 +148,10 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     private TilknytningTjeneste tilknytningTjeneste;
     private Pep pep;
 
+    private DokumentValidatorProvider dokumentValidatorProvider;
+
+    private PleietrengendeRevurderingPerioderTjeneste pleietrengendeRevurderingPerioderTjeneste;
+
     public ForvaltningMidlertidigDriftRestTjeneste() {
         // For Rest-CDI
     }
@@ -147,7 +169,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                                                    OpprettRevurderingService opprettRevurderingService,
                                                    PipRepository pipRepository,
                                                    TilknytningTjeneste tilknytningTjeneste,
-                                                   Pep pep) {
+                                                   Pep pep,
+                                                   DokumentValidatorProvider dokumentValidatorProvider, PleietrengendeRevurderingPerioderTjeneste pleietrengendeRevurderingPerioderTjeneste) {
 
         this.tpsTjeneste = tpsTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
@@ -162,6 +185,8 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         this.pipRepository = pipRepository;
         this.tilknytningTjeneste = tilknytningTjeneste;
         this.pep = pep;
+        this.dokumentValidatorProvider = dokumentValidatorProvider;
+        this.pleietrengendeRevurderingPerioderTjeneste = pleietrengendeRevurderingPerioderTjeneste;
     }
 
 
@@ -329,7 +354,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
                 for (Fagsak f : fagsaker) {
                     if (f.getYtelseType() == FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
                         opprettRevurderingService.opprettAutomatiskRevurdering(f.getSaksnummer(),
-                            BehandlingÅrsakType.RE_FERIEPENGER_ENDRING_FRA_ANNEN_SAK,
+                            BehandlingÅrsakType.RE_REBEREGN_FERIEPENGER,
                             BehandlingStegType.START_STEG);
                     }
                 }
@@ -355,11 +380,11 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         for (var saksnummer : saksnumrene) {
             try {
                 Fagsak fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(new Saksnummer(saksnummer), false).orElseThrow(() -> new IllegalArgumentException("Finner ikke sak " + saksnummer));
-                if (fagsak.getYtelseType() != PLEIEPENGER_SYKT_BARN) {
-                    throw new IllegalArgumentException("Fagsak " + saksnummer + " var ikke PSB-sak");
+                if (fagsak.getYtelseType() != PLEIEPENGER_SYKT_BARN && fagsak.getYtelseType() != PLEIEPENGER_NÆRSTÅENDE) {
+                    throw new IllegalArgumentException("Fagsak " + saksnummer + " var ikke PSB eller PPN");
                 }
                 opprettRevurderingService.opprettAutomatiskRevurdering(new Saksnummer(saksnummer),
-                    BehandlingÅrsakType.RE_FERIEPENGER_ENDRING_FRA_ANNEN_SAK,
+                    BehandlingÅrsakType.RE_REBEREGN_FERIEPENGER,
                     BehandlingStegType.START_STEG);
             } catch (RuntimeException e) {
                 sb.append(saksnummer + "\n");
@@ -501,6 +526,57 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
     }
 
     @POST
+    @Path("/motta-ugyldig")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Operation(description = "Mottar et dokument som er markert ugyldig", summary = ("Mottar et dokument som er markert ugyldig"), tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = DRIFT)
+    public Response mottaUgyldigDokument(@NotNull @FormParam("saksnummer") @Parameter(description = "saksnummer", required = true, schema = @Schema(type = "string", maximum = "10")) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto,
+                                         @NotNull @FormParam("journalpost") @Parameter(description = "journalpost", required = true, schema = @Schema(type = "string", maximum = "20")) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) JournalpostIdDto journalpostDto,
+                                         @NotNull @FormParam("begrunnelse") @Parameter(description = "begrunnelse", required = true, schema = @Schema(type = "string", maximum = "2000")) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) KortTekst begrunnelse) {
+
+        var saksnummer = Objects.requireNonNull(saksnummerDto.getVerdi());
+        var fagsakOpt = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true);
+
+        if (fagsakOpt.isEmpty()) {
+            return Response.status(Status.BAD_REQUEST.getStatusCode(), "Fant ikke fagsak for angitt saksnummer").build();
+        }
+        var fagsak = fagsakOpt.get();
+        loggForvaltningTjeneste(fagsak, "/motta-ugyldig", begrunnelse.getTekst());
+
+        List<MottattDokument> dokumenter = mottatteDokumentRepository.hentMottatteDokument(fagsak.getId(), List.of(journalpostDto.getJournalpostId()), DokumentStatus.UGYLDIG);
+        if (dokumenter.size() > 1) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Fant flere dokumenter for angitt saksnummer/journalpost - " + dokumenter.size()).build();
+        }
+        if (dokumenter.isEmpty()) {
+            return Response.status(Status.NOT_FOUND.getStatusCode(), "Fant ingen ugyldige dokumenter for angitt saksnummer/journalpost").build();
+        }
+
+        var dokument = dokumenter.getFirst();
+
+        if (dokument.getBehandlingId() != null) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Kan ikke motta dokumentet fordi behandlingId er satt").build();
+        }
+
+        var dokumentValidator = dokumentValidatorProvider.finnValidator(dokument.getType());
+        try {
+            dokumentValidator.validerDokument(dokument);
+        } catch (Exception e) {
+            logger.warn("Validering av dokumentet feilet", e);
+            return Response.status(Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Validering av dokumentet feilet med: " + e.getMessage()).build();
+        }
+
+        mottatteDokumentRepository.oppdaterStatus(dokumenter, DokumentStatus.MOTTATT);
+
+        var prosessTaskData = ProsessTaskData.forProsessTask(HåndterMottattDokumentTask.class);
+        prosessTaskData.setFagsakId(fagsak.getId());
+        prosessTaskData.setProperty(HåndterMottattDokumentTask.MOTTATT_DOKUMENT_ID_KEY, dokument.getId().toString());
+        prosessTaskData.setCallIdFraEksisterende();
+        prosessTaskRepository.lagre(prosessTaskData);
+
+        return Response.ok(prosessTaskData.getId()).build();
+    }
+
+    @POST
     @Path("/innhent-registerdata")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Operation(description = "Innhent registerdata på nytt", summary = ("Innhent registerdata på nytt"), tags = "forvaltning")
@@ -628,6 +704,121 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
             .type(MediaType.APPLICATION_OCTET_STREAM)
             .header("Content-Disposition", String.format("attachment; filename=\"behandlingsteghistorikk.csv\""))
             .build()).orElse(Response.noContent().build());
+    }
+
+
+    @POST
+    @Path("/psb-endret-sykdom-perioder")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Henter perioder til vurdering pga endret sykdom",
+        summary = ("Henter perioder til vurdering pga endret sykdom"),
+        tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response hentEndretSykdomPerioder(
+        @Parameter(description = "Behandling-UUID")
+        @NotNull
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+        BehandlingIdDto behandlingIdDto) {
+        var behandlingId = behandlingIdDto.getBehandlingId();
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        var tidslinje = pleietrengendeRevurderingPerioderTjeneste.utledBerørtePerioderPåPleietrengende(BehandlingReferanse.fra(behandling), Set.of(VilkårType.MEDISINSKEVILKÅR_UNDER_18_ÅR, VilkårType.MEDISINSKEVILKÅR_18_ÅR));
+
+        var result = new HashMap<>();
+        for (BehandlingÅrsakType v : BehandlingÅrsakType.values()) {
+            var resultTidslinje = tidslinje.filterValue(it -> it.contains(v));
+            if (!resultTidslinje.isEmpty()) {
+                result.put(v, resultTidslinje.getLocalDateIntervals().stream().map(di -> DatoIntervallEntitet.fraOgMedTilOgMed(di.getFomDato(), di.getTomDato())).toList());
+            }
+        }
+        return Response.ok(result).build();
+    }
+
+    public static class AvbrytAksjonspunktDto {
+
+        @Valid
+        @NotNull
+        private BehandlingIdDto behandlingId;
+
+        @NotNull
+        @Size(min = 1, max = 15)
+        @Pattern(regexp = "^\\d+$")
+        private String aksjonspunktKode;
+
+        @NotNull
+        @Size(min = 1, max = 1000)
+        @Pattern(regexp = InputValideringRegex.FRITEKST)
+        private String begrunnelse;
+
+        @AbacAttributt("behandlingId")
+        public Long getBehandlingId() {
+            return behandlingId.getBehandlingId();
+        }
+
+
+        @AbacAttributt("behandlingUuid")
+        public UUID getBehandlingUuid() {
+            return behandlingId.getBehandlingUuid();
+        }
+
+        public void setBehandlingId(BehandlingIdDto behandlingId) {
+            this.behandlingId = behandlingId;
+        }
+
+        public String getAksjonspunktKode() {
+            return aksjonspunktKode;
+        }
+
+        public void setAksjonspunktKode(String aksjonspunktKode) {
+            this.aksjonspunktKode = aksjonspunktKode;
+        }
+
+        public String getBegrunnelse() {
+            return begrunnelse;
+        }
+
+        public void setBegrunnelse(String begrunnelse) {
+            this.begrunnelse = begrunnelse;
+        }
+    }
+
+    @POST
+    @Path("/avbryt-aksjonspunkt")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Avbryter feilopprettet aksjonspunkt",
+        summary = ("Avbryter feilopprettet aksjonspunkt"),
+        tags = "forvaltning")
+    @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.READ, resource = DRIFT)
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response avbrytAksjonspunkt(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) AvbrytAksjonspunktDto dto) {
+
+        List<String> aksjonspunktSomKanAvbrytesHer = List.of(AksjonspunktKodeDefinisjon.AVKLAR_FORTSATT_MEDLEMSKAP_KODE);
+        if (!aksjonspunktSomKanAvbrytesHer.contains(dto.getAksjonspunktKode())) {
+            throw new java.lang.IllegalArgumentException("Aksjonspunkt " + dto.getAksjonspunktKode() + " kan ikke avbrytes her");
+        }
+
+        Behandling behandling = dto.getBehandlingId() != null
+            ? behandlingRepository.hentBehandling(dto.getBehandlingId())
+            : behandlingRepository.hentBehandling(dto.getBehandlingUuid());
+        if (behandling.erAvsluttet()) {
+            throw new IllegalStateException("Behandling er avsluttet");
+        }
+        if (!behandling.isBehandlingPåVent()) {
+            throw new IllegalStateException("Behandlingen må være på vent");
+        }
+        Aksjonspunkt aksjonspunkt = behandling.getAksjonspunktFor(dto.getAksjonspunktKode()).orElseThrow(() -> new IllegalStateException("Har ikke aksjonspunkt med kode " + dto.getAksjonspunktKode()));
+        if (!aksjonspunkt.erÅpentAksjonspunkt()) {
+            throw new IllegalStateException("Aksjonspunktet har status: " + aksjonspunkt.getStatus());
+        }
+
+
+        aksjonspunkt.avbryt();
+        entityManager.persist(aksjonspunkt);
+
+        loggForvaltningTjeneste(behandling.getFagsak(), "avbryt-aksjonspunkt:" + dto.getAksjonspunktKode(), dto.begrunnelse);
+
+        return Response.ok("Aksjonspunkt ble fjernet").build();
     }
 
     private void loggForvaltningTjeneste(Fagsak fagsak, String tjeneste, String begrunnelse) {

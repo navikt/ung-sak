@@ -13,6 +13,8 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.k9.sak.behandlingslager.saksnummer.ReservertSaksnummerEntitet;
+import no.nav.k9.sak.behandlingslager.saksnummer.ReservertSaksnummerRepository;
 import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.søknad.innsending.InnsendingInnhold;
@@ -26,6 +28,7 @@ public class MidlertidigAleneSøknadMottaker implements SøknadMottakTjeneste<In
 
     private FagsakTjeneste fagsakTjeneste;
     private SaksnummerRepository saksnummerRepository;
+    private ReservertSaksnummerRepository reservertSaksnummerRepository;
     private MidlertidigAleneVilkårsVurderingTjeneste vilkårsVurderingTjeneste;
 
     MidlertidigAleneSøknadMottaker() {
@@ -34,19 +37,21 @@ public class MidlertidigAleneSøknadMottaker implements SøknadMottakTjeneste<In
 
     @Inject
     public MidlertidigAleneSøknadMottaker(SaksnummerRepository saksnummerRepository,
+                                          ReservertSaksnummerRepository reservertSaksnummerRepository,
                                           @Any MidlertidigAleneVilkårsVurderingTjeneste vilkårsVurderingTjeneste,
                                           FagsakTjeneste fagsakTjeneste) {
         this.vilkårsVurderingTjeneste = vilkårsVurderingTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.saksnummerRepository = saksnummerRepository;
+        this.reservertSaksnummerRepository = reservertSaksnummerRepository;
     }
 
     @Override
     public Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, LocalDate startDato, LocalDate sluttDato, Saksnummer reservertSaksnummer) {
         ytelseType.validerNøkkelParametere(pleietrengendeAktørId, relatertPersonAktørId);
         Objects.requireNonNull(startDato);
-        var datoIntervall = vilkårsVurderingTjeneste.utledMaksPeriode(DatoIntervallEntitet.fra(startDato, sluttDato));
-        var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, datoIntervall.getFomDato(), datoIntervall.getTomDato());
+        final var datoIntervall = vilkårsVurderingTjeneste.utledMaksPeriode(DatoIntervallEntitet.fra(startDato, sluttDato));
+        final var fagsak = fagsakTjeneste.finnesEnFagsakSomOverlapper(ytelseType, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, datoIntervall.getFomDato(), datoIntervall.getTomDato());
 
         if (reservertSaksnummer != null) {
             if (fagsak.isPresent() && !fagsak.get().getSaksnummer().equals(reservertSaksnummer)) {
@@ -61,9 +66,10 @@ public class MidlertidigAleneSøknadMottaker implements SøknadMottakTjeneste<In
             return fagsak.get();
         }
 
-        var saksnummer = reservertSaksnummer != null ? reservertSaksnummer : new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
-
-        return opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, ytelseType, datoIntervall.getFomDato(), datoIntervall.getTomDato());
+        final var saksnummer = reservertSaksnummer != null ? reservertSaksnummer : hentReservertEllerGenererSaksnummer(søkerAktørId, relatertPersonAktørId, datoIntervall.getFomDato().getYear());
+        final var nyFagsak = opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, relatertPersonAktørId, ytelseType, datoIntervall.getFomDato(), datoIntervall.getTomDato());
+        reservertSaksnummerRepository.slettHvisEksisterer(saksnummer);
+        return nyFagsak;
     }
 
     private Fagsak opprettSakFor(Saksnummer saksnummer, AktørId brukerIdent, AktørId pleietrengendeAktørId, AktørId relatertPersonAktørId, FagsakYtelseType ytelseType, LocalDate fom, LocalDate tom) {
@@ -72,4 +78,8 @@ public class MidlertidigAleneSøknadMottaker implements SøknadMottakTjeneste<In
         return fagsak;
     }
 
+    private Saksnummer hentReservertEllerGenererSaksnummer(AktørId søkerAktørId, AktørId relatertPersonAktørId, int behandlingsår) {
+        var optReservert = reservertSaksnummerRepository.hent(OMSORGSPENGER_MA, søkerAktørId.getAktørId(), null, relatertPersonAktørId.getAktørId(), Integer.toString(behandlingsår));
+        return optReservert.map(ReservertSaksnummerEntitet::getSaksnummer).orElseGet(() -> new Saksnummer(saksnummerRepository.genererNyttSaksnummer()));
+    }
 }

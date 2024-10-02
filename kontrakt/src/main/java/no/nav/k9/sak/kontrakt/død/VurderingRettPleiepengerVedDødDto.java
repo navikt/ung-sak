@@ -3,6 +3,7 @@ package no.nav.k9.sak.kontrakt.død;
 import com.fasterxml.jackson.annotation.*;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.kodeverk.uttak.RettVedDødType;
+import no.nav.k9.sak.kontrakt.Patterns;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 
 import jakarta.validation.Valid;
@@ -17,7 +18,7 @@ public class VurderingRettPleiepengerVedDødDto extends BekreftetAksjonspunktDto
 
     @JsonProperty(value = "vurdering")
     @Size(max = 4096)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     private String vurdering;
 

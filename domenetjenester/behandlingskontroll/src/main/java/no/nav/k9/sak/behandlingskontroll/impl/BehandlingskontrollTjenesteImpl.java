@@ -208,7 +208,7 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
         BehandlingModell modell = getModell(behandlingType, ytelseType);
         return modell.erStegAFørStegB(stegA, stegB) ? -1
             : modell.erStegAFørStegB(stegB, stegA) ? 1
-                : 0;
+            : 0;
     }
 
     @Override
@@ -517,6 +517,7 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
 
         publiserFremhoppTransisjonHenleggelse(kontekst, stegTilstandFør, BehandlingStegType.IVERKSETT_VEDTAK);
 
+
         // sett Avsluttet og fyr status
         avsluttBehandling(kontekst);
     }
@@ -571,7 +572,7 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
         BehandlingModell modell = getModell(behandlingType, ytelseType);
         BehandlingStegType behandlingSteg = finnBehandlingSteg(startpunkt, ytelseType, behandlingType);
         BehandlingStegType apLøsesteg = Optional.ofNullable(modell
-            .finnTidligsteStegForAksjonspunktDefinisjon(singletonList(apDef.getKode())))
+                .finnTidligsteStegForAksjonspunktDefinisjon(singletonList(apDef.getKode())))
             .map(BehandlingStegModell::getBehandlingStegType)
             .orElse(null);
         if (apLøsesteg == null) {
@@ -642,7 +643,7 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
             Optional<BehandlingStegStatus> stegStatus = modell.finnStegStatusFor(bst, oppdaterteAksjonspunkter);
             if (stegStatus.isPresent()
                 && !(Objects.equals(stegStatus.get(), behandling.getBehandlingStegStatus())
-                    && Objects.equals(bst, behandling.getAktivtBehandlingSteg()))) {
+                && Objects.equals(bst, behandling.getAktivtBehandlingSteg()))) {
                 // er på starten av steg med endret aksjonspunkt. Ikke kjør steget her, kun oppdater
                 oppdaterEksisterendeBehandlingStegStatusVedFramføringEllerTilbakeføring(behandling, bst, stegStatus.get(),
                     BehandlingStegStatus.TILBAKEFØRT);

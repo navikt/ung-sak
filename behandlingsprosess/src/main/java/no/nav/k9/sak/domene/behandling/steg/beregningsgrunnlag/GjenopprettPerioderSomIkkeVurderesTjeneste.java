@@ -1,13 +1,19 @@
 package no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag;
 
+import java.util.NavigableSet;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.nav.folketrygdloven.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
-import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.vilkår.PeriodeTilVurdering;
 
 /**
  * Tjenesten har som hensikt å reinitialisere perioder som har endret vurderingstatus fra "til-vurdering" til "ikke-til-vurdering".
@@ -38,16 +44,17 @@ public class GjenopprettPerioderSomIkkeVurderesTjeneste {
      * <p>
      * Rydding i kalkulus gjøres av no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste#deaktiverBeregningsgrunnlagForAvslåttEllerFjernetPeriode(no.nav.k9.sak.behandling.BehandlingReferanse)
      *
-     * @param kontekst  Behandlingskontrollkonteksts
-     * @param referanse Behandlingreferanse
+     * @param referanse            Behandlingreferanse
+     * @param perioderTilVurdering Perioder til vurdering
      */
-    public void gjenopprettVedEndretVurderingsstatus(BehandlingskontrollKontekst kontekst, BehandlingReferanse referanse) {
+    public void gjenopprettVedEndretVurderingsstatus(BehandlingReferanse referanse, NavigableSet<PeriodeTilVurdering> perioderTilVurdering) {
         if (referanse.erRevurdering()) {
             // Gjenoppretter BG-referanser
-            beregningsgrunnlagTjeneste.gjenopprettReferanserTilInitiellDersomIkkeTilVurdering(referanse);
+            beregningsgrunnlagTjeneste.gjenopprettReferanserTilInitiellDersomIkkeTilVurdering(referanse, perioderTilVurdering);
 
             // Gjenopprett vilkårsvurdering
-            beregningsgrunnlagVilkårTjeneste.gjenopprettVilkårsutfallVedBehov(kontekst, referanse);
+            var intervallerTilVurdering = perioderTilVurdering.stream().map(PeriodeTilVurdering::getPeriode).collect(Collectors.toCollection(TreeSet::new));
+            beregningsgrunnlagVilkårTjeneste.gjenopprettVilkårsutfallVedBehov(referanse, intervallerTilVurdering);
         }
     }
 

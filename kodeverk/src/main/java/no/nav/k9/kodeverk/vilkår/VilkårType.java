@@ -1,29 +1,20 @@
 package no.nav.k9.kodeverk.vilkår;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonCreator.Mode;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-
 import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType.Serializer;
+
+import java.io.IOException;
+import java.util.*;
 
 @JsonSerialize(contentUsing = Serializer.class)
 @JsonFormat(shape = Shape.OBJECT)
@@ -31,18 +22,18 @@ import no.nav.k9.kodeverk.vilkår.VilkårType.Serializer;
 public enum VilkårType implements Kodeverdi {
     K9_VILKÅRET("FP_VK_0",
         "K9-vilkåret", // for unntaksbehandling
-        Map.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 8",
-            FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "§ 8",
-            FagsakYtelseType.OPPLÆRINGSPENGER, "§ 8",
-            FagsakYtelseType.OMP, "§ 8",
+        Map.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "Kapittel 8",
+            FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "Kapittel 8",
+            FagsakYtelseType.OPPLÆRINGSPENGER, "Kapittel 8",
+            FagsakYtelseType.OMP, "Kapittel 8",
             FagsakYtelseType.FRISINN, "koronaloven § 1-3"),
         Avslagsårsak.UDEFINERT),
     MEDLEMSKAPSVILKÅRET("FP_VK_2",
         "Medlemskapsvilkåret",
-        Map.of(FagsakYtelseType.OMSORGSPENGER, "Kap. 2",
-            FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "Kap. 2",
-            FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "Kap. 2",
-            FagsakYtelseType.OPPLÆRINGSPENGER, "Kap. 2"),
+        Map.of(FagsakYtelseType.OMSORGSPENGER, "Kapittel 2",
+            FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "Kapittel 2",
+            FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "Kapittel 2",
+            FagsakYtelseType.OPPLÆRINGSPENGER, "Kapittel 2"),
         Avslagsårsak.SØKER_ER_IKKE_MEDLEM,
         Avslagsårsak.SØKER_ER_UTVANDRET,
         Avslagsårsak.SØKER_HAR_IKKE_LOVLIG_OPPHOLD,
@@ -66,7 +57,8 @@ public enum VilkårType implements Kodeverdi {
             FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "§ 9-3 første ledd",
             FagsakYtelseType.OMSORGSPENGER_AO, "§ 9-3 første ledd",
             FagsakYtelseType.OMSORGSPENGER_KS, "§ 9-3 første ledd",
-            FagsakYtelseType.OMSORGSPENGER_MA, "§ 9-3 første ledd"),
+            FagsakYtelseType.OMSORGSPENGER_MA, "§ 9-3 første ledd",
+            FagsakYtelseType.UNGDOMSYTELSE, ""), // TODO: Finn riktig paragraf. Vurder å trekke ut til egen VilkårsType.
         Avslagsårsak.SØKER_OVER_HØYESTE_ALDER),
     ALDERSVILKÅR_BARN("K9_VK_5_3", "Aldersvilkår for barn",
         Map.of(
@@ -92,10 +84,10 @@ public enum VilkårType implements Kodeverdi {
         Avslagsårsak.MANGLENDE_DOKUMENTASJON),
     SØKNADSFRIST("FP_VK_3",
         "Søknadsfristvilkåret",
-        Map.of(FagsakYtelseType.OMSORGSPENGER, "§ 22-13, 3. ledd",
-            FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 22-13, 3. ledd",
-            FagsakYtelseType.OPPLÆRINGSPENGER, "§ 22-13, 3. ledd",
-            FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "§ 22-13, 3. ledd"),
+        Map.of(FagsakYtelseType.OMSORGSPENGER, "§ 22-13 tredje ledd",
+            FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 22-13 tredje ledd",
+            FagsakYtelseType.OPPLÆRINGSPENGER, "§ 22-13 tredje ledd",
+            FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "§ 22-13 tredje ledd"),
         Avslagsårsak.SØKT_FOR_SENT),
     SØKERSOPPLYSNINGSPLIKT("FP_VK_34",
         "Søkers opplysningsplikt",
@@ -120,10 +112,10 @@ public enum VilkårType implements Kodeverdi {
         Avslagsårsak.FYLLER_IKKE_ORDINÆRE_OPPTJENINGSREGLER),
     BEREGNINGSGRUNNLAGVILKÅR("FP_VK_41",
         "Beregning",
-        Map.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "§ 8",
-            FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "§ 8",
-            FagsakYtelseType.OPPLÆRINGSPENGER, "§ 8",
-            FagsakYtelseType.OMP, "§ 8",
+        Map.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, "Kapittel 8",
+            FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE, "Kapittel 8",
+            FagsakYtelseType.OPPLÆRINGSPENGER, "Kapittel 8",
+            FagsakYtelseType.OMP, "Kapittel 8",
             FagsakYtelseType.FRISINN, "koronaloven § 1-3"),
         Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG,
         Avslagsårsak.FOR_LAVT_BEREGNINGSGRUNNLAG_8_47,
@@ -158,11 +150,26 @@ public enum VilkårType implements Kodeverdi {
         Avslagsårsak.MANGLENDE_DOKUMENTASJON
     ),
     UTVIDETRETT("K9_VK_9_6", "Utvidet rett",
-        Map.of(FagsakYtelseType.OMSORGSPENGER_AO, "§ 9-6 1. ledd",
-            FagsakYtelseType.OMSORGSPENGER_KS, "§ 9-6 2. ledd",
-            FagsakYtelseType.OMSORGSPENGER_MA, "§ 9-6 3. ledd"),
-        Avslagsårsak.IKKE_UTVIDETRETT, Avslagsårsak.IKKE_UTVIDETRETT_IKKE_KRONISK_SYK, Avslagsårsak.IKKE_UTVIDETRETT_IKKE_ØKT_RISIKO_FRAVÆR, Avslagsårsak.IKKE_UTVIDETRETT_REGNES_IKKE_SOM_Å_HA_ALENEOMSORG,
-        Avslagsårsak.IKKE_UTVIDETRETT_VARIGHET_UNDER_SEKS_MÅN, Avslagsårsak.MANGLENDE_DOKUMENTASJON),
+        Map.of(FagsakYtelseType.OMSORGSPENGER_AO, "§ 9-6 første ledd",
+            FagsakYtelseType.OMSORGSPENGER_KS, "§ 9-6 andre ledd",
+            FagsakYtelseType.OMSORGSPENGER_MA, "§ 9-6 tredje ledd"),
+        Avslagsårsak.IKKE_UTVIDETRETT,
+        Avslagsårsak.IKKE_UTVIDETRETT_IKKE_KRONISK_SYK,
+        Avslagsårsak.IKKE_UTVIDETRETT_IKKE_ØKT_RISIKO_FRAVÆR,
+        Avslagsårsak.IKKE_MIDLERTIDIG_ALENE_REGNES_IKKE_SOM_Å_HA_ALENEOMSORG,
+        Avslagsårsak.IKKE_MIDLERTIDIG_ALENE_VARIGHET_UNDER_SEKS_MÅN,
+        Avslagsårsak.IKKE_MIDLERTIDIG_ALENE,
+        Avslagsårsak.MANGLENDE_DOKUMENTASJON,
+        Avslagsårsak.IKKE_GRUNNLAG_FOR_ALENEOMSORG,
+        Avslagsårsak.IKKE_GRUNNLAG_FOR_ALENEOMSORG_FORELDRE_BOR_SAMMEN,
+        Avslagsårsak.IKKE_GRUNNLAG_FOR_ALENEOMSORG_DELT_BOSTED
+    ),
+    // TODO: Gå over dette før lansering
+    UNGDOMSPROGRAMVILKÅRET(
+        "UNG_VK_XXX",
+        "Deltar i ungdomsprogrammet",
+        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "§ xxx")
+    ),
     /**
      * Brukes i stedet for null der det er optional.
      */

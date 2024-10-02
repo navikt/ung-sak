@@ -11,6 +11,7 @@ import java.util.NavigableSet;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.sykdom.Resultat;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -24,6 +25,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.trigger.ProsessTriggereRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleiebehov.PleiebehovResultatRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død.RettPleiepengerVedDødRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynForPleietrengende;
@@ -41,6 +43,7 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
     private RettPleiepengerVedDødRepository rettPleiepengerVedDødRepository;
     private PleiebehovResultatRepository pleiebehovResultatRepository;
     private BehandlingRepository behandlingRepository;
+    private ProsessTriggereRepository prosessTriggereRepository;
     private PersonopplysningTjeneste personopplysningTjeneste;
     private ArbeidBrukerBurdeSøktOmUtleder arbeidBrukerBurdeSøktOmUtleder;
     private HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste;
@@ -58,7 +61,8 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
                             PersonopplysningTjeneste personopplysningTjeneste,
                             ArbeidBrukerBurdeSøktOmUtleder arbeidBrukerBurdeSøktOmUtleder,
                             @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste,
-                            PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder) {
+                            PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder,
+                            ProsessTriggereRepository prosessTriggereRepository) {
         this.unntakEtablertTilsynGrunnlagRepository = unntakEtablertTilsynGrunnlagRepository;
         this.rettPleiepengerVedDødRepository = rettPleiepengerVedDødRepository;
         this.pleiebehovResultatRepository = pleiebehovResultatRepository;
@@ -67,6 +71,7 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
         this.arbeidBrukerBurdeSøktOmUtleder = arbeidBrukerBurdeSøktOmUtleder;
         this.håndterePleietrengendeDødsfallTjeneste = håndterePleietrengendeDødsfallTjeneste;
         this.perioderMedSykdomInnvilgetUtleder = perioderMedSykdomInnvilgetUtleder;
+        this.prosessTriggereRepository = prosessTriggereRepository;
     }
 
     @SuppressWarnings("unused")
@@ -77,13 +82,14 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
         var referanse = BehandlingReferanse.fra(behandling);
         final var unntakEtablertTilsynForPleietrengende = unntakEtablertTilsynGrunnlagRepository.hentHvisEksistererUnntakPleietrengende(behandling.getFagsak().getPleietrengendeAktørId());
 
-        var innvilgedePerioderTilVurdering = perioderMedSykdomInnvilgetUtleder.utledInnvilgedePerioderTilVurdering(referanse);
+        var innvilgedePerioderTilVurdering = perioderMedSykdomInnvilgetUtleder.utledInnvilgedePerioderTilVurdering(referanse, true);
 
         final var aksjonspunkter = new ArrayList<AksjonspunktDefinisjon>();
         if (unntakEtablertTilsynForPleietrengende.isPresent()) {
             unntakEtablertTilsynGrunnlagRepository.lagreGrunnlag(behandlingId, unntakEtablertTilsynForPleietrengende.get());
 
-            aksjonspunkter.addAll(vurderAksjonspunktForNattevåkOgBeredskap(behandling, unntakEtablertTilsynForPleietrengende.get(), innvilgedePerioderTilVurdering));
+            var perioderMedSykdomInnvilget = perioderMedSykdomInnvilgetUtleder.utledInnvilgedePerioderTilVurdering(referanse, false);
+            aksjonspunkter.addAll(vurderAksjonspunktForNattevåkOgBeredskap(behandling, unntakEtablertTilsynForPleietrengende.get(), perioderMedSykdomInnvilget));
         }
         if (rettEtterPleietrengendesDødMåAvklares(behandlingId) && harNoenGodkjentPerioderMedSykdom(innvilgedePerioderTilVurdering)) {
             aksjonspunkter.add(AksjonspunktDefinisjon.VURDER_RETT_ETTER_PLEIETRENGENDES_DØD);
@@ -101,24 +107,47 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
         return BehandleStegResultat.utførtMedAksjonspunkter(aksjonspunkter);
     }
 
-    private List<AksjonspunktDefinisjon> vurderAksjonspunktForNattevåkOgBeredskap(Behandling behandling, UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende, NavigableSet<DatoIntervallEntitet> innvilgedePerioderTilVurdering) {
+    private List<AksjonspunktDefinisjon> vurderAksjonspunktForNattevåkOgBeredskap(Behandling behandling,
+                                                                                  UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende,
+                                                                                  NavigableSet<DatoIntervallEntitet> innvilgedePerioderTilVurdering) {
         var aksjonspunkter = new ArrayList<AksjonspunktDefinisjon>();
         if (søktOmNattevåk(unntakEtablertTilsynForPleietrengende) && harNoenGodkjentPerioderMedSykdom(innvilgedePerioderTilVurdering)) {
             if (harNattevåkPerioderSomIkkeErVurdert(unntakEtablertTilsynForPleietrengende)) {
                 aksjonspunkter.add(AksjonspunktDefinisjon.VURDER_NATTEVÅK);
-            } else if (behandling.erManueltOpprettet() && behandling.getAksjonspunktFor(AksjonspunktDefinisjon.VURDER_NATTEVÅK.getKode()).isEmpty()) {
+            } else if (skalRevurdere(behandling, innvilgedePerioderTilVurdering) && behandling.getAksjonspunktFor(AksjonspunktDefinisjon.VURDER_NATTEVÅK.getKode()).isEmpty()) {
                 aksjonspunkter.add(AksjonspunktDefinisjon.VURDER_NATTEVÅK);
             }
         }
         if (søktOmBeredskap(unntakEtablertTilsynForPleietrengende) && harNoenGodkjentPerioderMedSykdom(innvilgedePerioderTilVurdering)) {
             if (harBeredskapPerioderSomIkkeErVurdert(unntakEtablertTilsynForPleietrengende)) {
                 aksjonspunkter.add(AksjonspunktDefinisjon.VURDER_BEREDSKAP);
-            } else if (behandling.erManueltOpprettet() && behandling.getAksjonspunktFor(AksjonspunktDefinisjon.VURDER_BEREDSKAP.getKode()).isEmpty()) {
+            } else if (skalRevurdere(behandling, innvilgedePerioderTilVurdering) && behandling.getAksjonspunktFor(AksjonspunktDefinisjon.VURDER_BEREDSKAP.getKode()).isEmpty()) {
                 aksjonspunkter.add(AksjonspunktDefinisjon.VURDER_BEREDSKAP);
             }
         }
         return aksjonspunkter;
     }
+
+    private boolean skalRevurdere(Behandling behandling, NavigableSet<DatoIntervallEntitet> innvilgedePerioderTilVurdering) {
+        return behandling.erManueltOpprettet() || harMarkertPeriodeForRevurdering(behandling.getId(), innvilgedePerioderTilVurdering);
+    }
+
+    private boolean harMarkertPeriodeForRevurdering(Long behandlingId, NavigableSet<DatoIntervallEntitet> innvilgedePerioderTilVurdering) {
+        var prosessTriggereOpt = prosessTriggereRepository.hentGrunnlag(behandlingId);
+
+        if (prosessTriggereOpt.isPresent()) {
+            var aktuelleTriggere = prosessTriggereOpt.get()
+                .getTriggere()
+                .stream()
+                .filter(it -> innvilgedePerioderTilVurdering.stream().anyMatch(periode -> it.getPeriode().overlapper(periode)))
+                .filter(it -> BehandlingÅrsakType.RE_KLAGE_NATTEVÅKBEREDSKAP.equals(it.getÅrsak()))
+                .toList();
+
+            return !aktuelleTriggere.isEmpty();
+        }
+        return false;
+    }
+
 
     private boolean harBeredskapPerioderSomIkkeErVurdert(UnntakEtablertTilsynForPleietrengende unntakEtablertTilsynForPleietrengende) {
         final var beredskap = unntakEtablertTilsynForPleietrengende.getBeredskap();
@@ -186,7 +215,7 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
             var overlappendePleiehov = pleiebehov.get().getPleieperioder().getPerioder()
                 .stream()
                 .filter(pleiebehovPeriode -> pleiebehovPeriode.getGrad().getProsent() > 0)
-                .filter(pleiebehovPeriode -> pleiebehovPeriode.getPeriode().inkluderer(flyttetDødsdatoMandag) || pleiebehovPeriode.getPeriode().inkluderer(flyttetDødsdatoFredag))
+                .filter(pleiebehovPeriode -> pleiebehovPeriode.getPeriode().inkluderer(dødsdato) || pleiebehovPeriode.getPeriode().inkluderer(flyttetDødsdatoMandag) || pleiebehovPeriode.getPeriode().inkluderer(flyttetDødsdatoFredag))
                 .findAny();
             return overlappendePleiehov.isPresent();
         }

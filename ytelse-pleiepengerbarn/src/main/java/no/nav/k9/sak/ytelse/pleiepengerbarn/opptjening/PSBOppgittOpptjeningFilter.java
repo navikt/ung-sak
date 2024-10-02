@@ -15,11 +15,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.k9.sak.domene.iay.modell.OppgittOpptjeningAggregat;
@@ -60,11 +60,10 @@ public class PSBOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
     @Override
     public Optional<OppgittOpptjening> hentOppgittOpptjening(Long behandlingId, InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDate stp) {
         var ref = BehandlingReferanse.fra(behandlingRepository.hentBehandling(behandlingId));
-        var vilkårsperiode = finnVilkårsperiodeForOpptjening(ref, stp);
         var tjeneste = FagsakYtelseTypeRef.Lookup.find(søknadsfristTjenester, ref.getFagsakYtelseType())
             .orElseThrow(() -> new IllegalStateException("Har ikke " + getClass().getSimpleName() + " for ytelse=" + ref.getFagsakYtelseType()));
         Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> kravdokMedFravær = tjeneste.hentPerioderTilVurdering(ref);
-        return finnOppgittOpptjening(iayGrunnlag, vilkårsperiode, kravdokMedFravær);
+        return finnOppgittOpptjening(iayGrunnlag, kravdokMedFravær, stp);
     }
 
     /**
@@ -76,12 +75,11 @@ public class PSBOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
         var tjeneste = FagsakYtelseTypeRef.Lookup.find(søknadsfristTjenester, ref.getFagsakYtelseType())
             .orElseThrow(() -> new IllegalStateException("Har ikke " + getClass().getSimpleName() + " for ytelse=" + ref.getFagsakYtelseType()));
         Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> kravdokMedFravær = tjeneste.hentPerioderTilVurdering(ref);
-        return finnOppgittOpptjening(iayGrunnlag, vilkårsperiode, kravdokMedFravær);
+        return finnOppgittOpptjening(iayGrunnlag, kravdokMedFravær, vilkårsperiode.getFomDato());
     }
 
     // Kode for lansering av ny prioriering - START
-    Optional<OppgittOpptjening> finnOppgittOpptjening(InntektArbeidYtelseGrunnlag iayGrunnlag, DatoIntervallEntitet vilkårsperiode, Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> kravDokumenterMedFravær) {
-        var stp = vilkårsperiode.getFomDato();
+    Optional<OppgittOpptjening> finnOppgittOpptjening(InntektArbeidYtelseGrunnlag iayGrunnlag, Map<KravDokument, List<SøktPeriode<Søknadsperiode>>> kravDokumenterMedFravær, LocalDate stp) {
         var oppgitteOpptjeninger = iayGrunnlag.getOppgittOpptjeningAggregat()
             .map(OppgittOpptjeningAggregat::getOppgitteOpptjeninger)
             .orElse(List.of());
@@ -130,24 +128,6 @@ public class PSBOppgittOpptjeningFilter implements OppgittOpptjeningFilter {
             .orElseThrow();
     }
     // Kode for lansering av prioriering - END
-
-    private DatoIntervallEntitet finnVilkårsperiodeForOpptjening(BehandlingReferanse ref, LocalDate stp) {
-        var periodeTilVurdering = vilkårTjeneste.utledPerioderTilVurdering(ref, VilkårType.OPPTJENINGSVILKÅRET)
-            .stream()
-            .filter(di -> di.getFomDato().equals(stp))
-            .findFirst();
-        if (periodeTilVurdering.isPresent()) {
-            return periodeTilVurdering.get();
-        }
-
-        // Ingen match for stp mot perioder under vurdering -> må da forvente at den matcher vilkårsperiode som er ferdigvurdert
-        var vilkår = vilkårTjeneste.hentVilkårResultat(ref.getBehandlingId()).getVilkår(VilkårType.OPPTJENINGSVILKÅRET).orElseThrow();
-        var periodeFerdigvurdert = vilkår.finnPeriodeForSkjæringstidspunkt(stp);
-        if (periodeFerdigvurdert.getGjeldendeUtfall().equals(Utfall.IKKE_VURDERT)) {
-            throw new IllegalStateException("Forventer at vilkårsperiode som matchet opptjening var ferdigvurdert");
-        }
-        return periodeFerdigvurdert.getPeriode();
-    }
 
 
 }

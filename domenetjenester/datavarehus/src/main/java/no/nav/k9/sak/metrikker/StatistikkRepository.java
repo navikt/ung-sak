@@ -104,7 +104,7 @@ public class StatistikkRepository {
         }
     }
 
-    public List<SensuEvent> hentAlle() {
+    public List<SensuEvent> hentHyppigRapporterte() {
         LocalDate dag = LocalDate.now();
 
         List<SensuEvent> metrikker = new ArrayList<>();
@@ -116,16 +116,21 @@ public class StatistikkRepository {
         metrikker.addAll(timeCall(this::aksjonspunktStatistikk, "aksjonspunktStatistikk"));
         metrikker.addAll(timeCall(() -> aksjonspunktStatistikkDaglig(dag), "aksjonspunktStatistikkDaglig"));
         try {
-            metrikker.addAll(timeCall(this::avslagStatistikk, "avslagStatistikk"));
-        } catch (QueryTimeoutException e) {
-            log.warn("Uthenting av avslagsStatistikk feiler", e);
-        }
-        try {
             metrikker.addAll(timeCall(() -> avslagStatistikkDaglig(dag), "avslagStatistikkDaglig"));
         } catch (QueryTimeoutException e) {
             log.warn("Uthenting av avslagStatistikkDaglig feiler", e);
         }
         metrikker.addAll(timeCall(this::prosessTaskFeilStatistikk, "prosessTaskFeilStatistikk"));
+        return metrikker;
+    }
+
+    public List<SensuEvent> hentDagligRapporterte() {
+        List<SensuEvent> metrikker = new ArrayList<>();
+        try {
+            metrikker.addAll(timeCall(this::avslagStatistikk, "avslagStatistikk"));
+        } catch (QueryTimeoutException e) {
+            log.warn("Uthenting av avslagsStatistikk feiler", e);
+        }
         return metrikker;
     }
 
@@ -281,7 +286,7 @@ public class StatistikkRepository {
             " group by 1, 2, 3, 4, 5";
 
         NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class)
-            .setHint(QueryHints.JAKARTA_SPEC_HINT_TIMEOUT, 30000)
+            .setHint(QueryHints.JAKARTA_SPEC_HINT_TIMEOUT, 40000)
             .setParameter("behStatuser", Set.of(BehandlingStatus.IVERKSETTER_VEDTAK.getKode(), BehandlingStatus.AVSLUTTET.getKode())); // kun ta med behandlinger som avsluttes (iverksettes, avsluttet)
         Stream<Tuple> stream = query.getResultStream()
             .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class)));

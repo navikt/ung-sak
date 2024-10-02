@@ -80,7 +80,7 @@ class MapArbeidTest {
             List.of(),
             List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         var result = mapper.map(input);
 
         assertThat(result).hasSize(1);
@@ -110,7 +110,7 @@ class MapArbeidTest {
         tidlinjeTilVurdering.toSegments().forEach(it -> vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(it.getFom(), it.getTom()).medMerknad(VilkårUtfallMerknad.VM_7847_A)));
         var vilkår = vilkårBuilder.build();
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, vilkår, null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, vilkår, null, true);
         var result = mapper.map(input);
 
         assertThat(result).hasSize(2);
@@ -145,7 +145,7 @@ class MapArbeidTest {
         opptjening.setOpptjeningAktivitet(List.of(new OpptjeningAktivitet(fomOpptjeningPeriode, opptjeningStp, OpptjeningAktivitetType.DAGPENGER, OpptjeningAktivitetKlassifisering.BEKREFTET_GODKJENT)));
         opptjeningResultat.leggTil(opptjening);
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), opptjeningResultat.build());
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), opptjeningResultat.build(), true);
         var result = mapper.map(input);
 
         assertThat(result).hasSize(2);
@@ -178,7 +178,7 @@ class MapArbeidTest {
         opptjening.setOpptjeningAktivitet(List.of(new OpptjeningAktivitet(fomOpptjeningPeriode, opptjeningStp.plusDays(10), OpptjeningAktivitetType.FORELDREPENGER, OpptjeningAktivitetKlassifisering.BEKREFTET_GODKJENT)));
         opptjeningResultat.leggTil(opptjening);
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), opptjeningResultat.build());
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), opptjeningResultat.build(), true);
         var result = mapper.map(input);
 
         assertThat(result).hasSize(1);
@@ -210,7 +210,7 @@ class MapArbeidTest {
             List.of(),
             List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         var result = mapper.map(input);
 
         assertThat(result).hasSize(1);
@@ -250,7 +250,7 @@ class MapArbeidTest {
                 List.of(),
                 List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         var result = mapper.map(input);
 
         assertThat(result).hasSize(1);
@@ -290,7 +290,7 @@ class MapArbeidTest {
                 List.of(),
                 List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         var result = mapper.map(input);
 
         assertThat(result).hasSize(1);
@@ -333,7 +333,7 @@ class MapArbeidTest {
                 List.of(),
                 List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         var result = mapper.map(input);
 
         assertThat(result).hasSize(1);
@@ -371,7 +371,7 @@ class MapArbeidTest {
                 List.of(),
                 List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         var result = mapper.map(input);
 
         assertThat(result).hasSize(1);
@@ -411,7 +411,7 @@ class MapArbeidTest {
                 List.of(),
                 List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         input.medInaktivTidslinje(Map.of(new AktivitetIdentifikator(UttakArbeidType.IKKE_YRKESAKTIV, virksomhet, null), new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periodeTilVurdering.toLocalDateInterval(), new WrappedArbeid(new ArbeidPeriode(periodeTilVurdering, UttakArbeidType.IKKE_YRKESAKTIV, virksomhet, null, Duration.ofMinutes((long) (7.5 * 60)), Duration.ofHours(0))))))));
         var result = mapper.map(input);
 
@@ -455,7 +455,7 @@ class MapArbeidTest {
             List.of(),
             List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         input.medInntektArbeidYtelseGrunnlag(grunnlag)
             .medBruker(brukerAktørId)
             .medSaksnummer(new Saksnummer("asdf"));
@@ -505,7 +505,7 @@ class MapArbeidTest {
             List.of(),
             List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         input.medInntektArbeidYtelseGrunnlag(grunnlag)
             .medBruker(brukerAktørId)
             .medSaksnummer(new Saksnummer("asdf"));
@@ -555,7 +555,7 @@ class MapArbeidTest {
             List.of(),
             List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         input.medInntektArbeidYtelseGrunnlag(grunnlag)
             .medBruker(brukerAktørId)
             .medSaksnummer(new Saksnummer("asdf"));
@@ -605,7 +605,7 @@ class MapArbeidTest {
             List.of(),
             List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         var dødsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now().plusWeeks(6));
         input.medInntektArbeidYtelseGrunnlag(grunnlag)
             .medBruker(brukerAktørId)
@@ -657,7 +657,7 @@ class MapArbeidTest {
             List.of(),
             List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         var dødsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(3), LocalDate.now().minusDays(3).plusWeeks(6));
         input.medInntektArbeidYtelseGrunnlag(grunnlag)
             .medBruker(brukerAktørId)
@@ -709,7 +709,7 @@ class MapArbeidTest {
             List.of(),
             List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         var dødsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusDays(3), LocalDate.now().minusDays(3).plusWeeks(6));
         input.medInntektArbeidYtelseGrunnlag(grunnlag)
             .medBruker(brukerAktørId)
@@ -762,7 +762,7 @@ class MapArbeidTest {
             List.of(),
             List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         input.medInntektArbeidYtelseGrunnlag(grunnlag)
             .medBruker(brukerAktørId)
             .medSaksnummer(new Saksnummer("asdf"))
@@ -822,7 +822,7 @@ class MapArbeidTest {
             List.of(),
             List.of()));
 
-        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null);
+        var input = new ArbeidstidMappingInput(kravDokumenter, perioderFraSøknader, tidlinjeTilVurdering, opprettVilkår(tidlinjeTilVurdering), null, true);
         input.medInntektArbeidYtelseGrunnlag(grunnlag)
             .medBruker(brukerAktørId)
             .medSaksnummer(new Saksnummer("asdf"))

@@ -204,7 +204,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     OVERSTYRING_AV_MEDLEMSKAPSVILKÅRET(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_MEDLEMSKAPSVILKÅRET_KODE, AksjonspunktType.OVERSTYRING, "Overstyring av medlemskapsvilkåret",
         BehandlingStatus.UTREDES, BehandlingStegType.VURDER_MEDLEMSKAPVILKÅR, VurderingspunktType.UT, VilkårType.MEDLEMSKAPSVILKÅRET,
         SkjermlenkeType.FAKTA_OM_MEDLEMSKAP, TOTRINN, AVVENTER_SAKSBEHANDLER),
-    OVERSTYRING_AV_SØKNADSFRISTVILKÅRET(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_SØKNADSFRISTVILKÅRET_KODE, AksjonspunktType.OVERSTYRING, "Overstyring av Søknadsfrist",
+    OVERSTYRING_AV_SØKNADSFRISTVILKÅRET(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_SØKNADSFRISTVILKÅRET_KODE, AksjonspunktType.SAKSBEHANDLEROVERSTYRING, "Overstyring av Søknadsfrist",
         BehandlingStatus.UTREDES, BehandlingStegType.VURDER_SØKNADSFRIST, VurderingspunktType.UT, VilkårType.SØKNADSFRIST,
         SkjermlenkeType.SOEKNADSFRIST, TOTRINN, AVVENTER_SAKSBEHANDLER),
     OVERSTYRING_AV_MEDISINSKESVILKÅRET_UNDER_18(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_MEDISINSKVILKÅR_UNDER_18_KODE, AksjonspunktType.OVERSTYRING,
@@ -459,8 +459,10 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     @JsonIgnore
     private Set<BehandlingStatus> behandlingStatus;
 
+    @JsonIgnore
     private boolean skalAvbrytesVedTilbakeføring = true;
 
+    @JsonIgnore
     private Ventekategori defaultVentekategori;
 
     AksjonspunktDefinisjon() {
@@ -760,9 +762,14 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         return erUtgått;
     }
 
+    /**
+     * toString is set to output the kode value of the enum instead of the default that is the enum name.
+     * This makes the generated openapi spec correct when the enum is used as a query param. Without this the generated
+     * spec incorrectly specifies that it is the enum name string that should be used as input.
+     */
     @Override
     public String toString() {
-        return super.toString() + "('" + getKode() + "')";
+        return this.getKode();
     }
 
 }

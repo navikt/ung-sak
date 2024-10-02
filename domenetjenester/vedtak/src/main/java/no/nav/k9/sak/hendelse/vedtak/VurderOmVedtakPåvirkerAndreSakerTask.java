@@ -96,6 +96,7 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
             case ENGANGSTØNAD -> FagsakYtelseType.ENGANGSTØNAD;
             case FORELDREPENGER -> FagsakYtelseType.FORELDREPENGER;
             case SVANGERSKAPSPENGER -> FagsakYtelseType.SVANGERSKAPSPENGER;
+            case UNGDOMSYTELSE -> FagsakYtelseType.UNGDOMSYTELSE;
         };
     }
 }

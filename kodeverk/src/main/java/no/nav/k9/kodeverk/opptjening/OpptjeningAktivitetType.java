@@ -76,10 +76,12 @@ public enum OpptjeningAktivitetType implements Kodeverdi {
         Set.of(),
         Set.of(FagsakYtelseType.SYKEPENGER)
     ),
+    @Deprecated(since = "2024-06-17", forRemoval = false) // Brukes for løpende saker i uttak, men skal aldri opprettes for nye vurderinger
     SYKEPENGER_AV_DAGPENGER("SYKEPENGER_AV_DAGPENGER", "Sykepenger",
         Set.of(),
         Set.of(FagsakYtelseType.SYKEPENGER)
     ),
+    @Deprecated(since = "2024-06-17", forRemoval = false) // Brukes for løpende saker i uttak, men skal aldri opprettes for nye vurderinger
     PLEIEPENGER_AV_DAGPENGER("PLEIEPENGER_AV_DAGPENGER", "Pleiepenger",
         Set.of(),
         Set.of(FagsakYtelseType.PLEIEPENGER_SYKT_BARN, FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE)
@@ -168,6 +170,16 @@ public enum OpptjeningAktivitetType implements Kodeverdi {
             throw new IllegalArgumentException("Ukjent OpptjeningAktivitetType: " + kode);
         }
         return ad;
+    }
+
+    /**
+     * toString is set to output the kode value of the enum instead of the default that is the enum name.
+     * This makes the generated openapi spec correct when the enum is used as a query param. Without this the generated
+     * spec incorrectly specifies that it is the enum name string that should be used as input.
+     */
+    @Override
+    public String toString() {
+        return this.getKode();
     }
 
     public static Map<String, OpptjeningAktivitetType> kodeMap() {

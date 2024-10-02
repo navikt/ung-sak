@@ -50,7 +50,7 @@
 
 		<!-- Kontrakter -->
         <dependency>
-			<groupId>no.nav.foreldrepenger.abakus</groupId>
+			<groupId>no.nav.k9.abakus</groupId>
 			<artifactId>abakus-kontrakt</artifactId>
 		</dependency>
 

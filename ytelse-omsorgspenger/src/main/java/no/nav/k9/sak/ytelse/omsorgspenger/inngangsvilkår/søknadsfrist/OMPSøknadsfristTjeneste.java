@@ -150,7 +150,7 @@ public class OMPSøknadsfristTjeneste implements SøknadsfristTjeneste {
     private LocalDateSegment<Utfall> sjekkKonsistensInnenforKravDok(LocalDateInterval di, LocalDateSegment<Utfall> lhs, LocalDateSegment<Utfall> rhs) {
         if (lhs != null && rhs != null && lhs.getValue() != rhs.getValue()) {
             throw new IllegalArgumentException("Skal ha samme utfall av søknadsvilkåret for overlappende perioder " +
-                "i samme kravdokument, fikk lhs=" + lhs + ", rhs=" + rhs);
+                "i samme kravdokument, fikk lhs=" + lhs + ", rhs=" + rhs + ". Sjekk om konsistens gjelder krav for ulike arbeidsgivere. Dette kan håndteres i unntaksløypen.");
         }
         var konsistentUtfall = lhs != null ? lhs.getValue() : rhs.getValue();
         return new LocalDateSegment<>(di, konsistentUtfall);

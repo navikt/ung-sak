@@ -195,8 +195,7 @@ public class OmsorgspengerForeslåBehandlingsresultatTjeneste extends ForeslåBe
     }
 
     private boolean skalAvslåsBasertPåAvslåtteUttaksperioder(BehandlingReferanse ref) {
-        var årskvantumForbrukteDager = årskvantumTjeneste.hentÅrskvantumForBehandling(ref.getBehandlingUuid());
-        var sisteUttaksplan = årskvantumForbrukteDager.getSisteUttaksplan();
+        var sisteUttaksplan = årskvantumTjeneste.getSisteUttaksplan(ref.getBehandlingUuid());
         if (sisteUttaksplan == null) {
             log.info("Avslår behandling. Har ingen uttaksplan for behandlingUuid={}", ref.getBehandlingUuid());
             return true;

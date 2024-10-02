@@ -6,6 +6,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
@@ -24,7 +25,9 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 @ApplicationScoped
 @BehandlingStegRef(value = ALDERSVILKÅRET)
 @BehandlingTypeRef
-@FagsakYtelseTypeRef
+@FagsakYtelseTypeRef(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
+@FagsakYtelseTypeRef(FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE)
+@FagsakYtelseTypeRef(FagsakYtelseType.OPPLÆRINGSPENGER)
 public class VurderAldersvilkåretSteg implements BehandlingSteg {
 
     private final VurderAldersVilkårTjeneste vurderAldersVilkårTjeneste = new VurderAldersVilkårTjeneste();

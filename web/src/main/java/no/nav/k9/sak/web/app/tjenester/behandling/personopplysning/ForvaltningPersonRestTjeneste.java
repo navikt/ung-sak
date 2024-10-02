@@ -2,6 +2,7 @@ package no.nav.k9.sak.web.app.tjenester.behandling.personopplysning;
 
 import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
 import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.k9.sak.web.app.tjenester.forvaltning.CsvOutput.dumpAsCsv;
 
@@ -20,6 +21,9 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,10 +31,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -49,6 +55,7 @@ import no.nav.k9.felles.sikkerhet.abac.AbacDto;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.felles.util.InputValideringRegex;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
@@ -65,18 +72,44 @@ import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 @Path("/forvaltning/person")
 public class ForvaltningPersonRestTjeneste {
 
+    private AktørIdSplittTjeneste aktørIdSplittTjeneste;
     private TpsTjeneste tpsTjeneste;
     private FagsakRepository fagsakRepository;
+    private FinnUnikeAktører finnUnikeAktører;
+    private EntityManager entityManager;
 
     public ForvaltningPersonRestTjeneste() {
         // for CDI proxy
     }
 
     @Inject
-    public ForvaltningPersonRestTjeneste(TpsTjeneste tpsTjeneste, FagsakRepository fagsakRepository) {
+    public ForvaltningPersonRestTjeneste(AktørIdSplittTjeneste aktørIdSplittTjeneste, TpsTjeneste tpsTjeneste, FagsakRepository fagsakRepository, FinnUnikeAktører finnUnikeAktører, EntityManager entityManager) {
+        this.aktørIdSplittTjeneste = aktørIdSplittTjeneste;
         this.tpsTjeneste = tpsTjeneste;
         this.fagsakRepository = fagsakRepository;
+        this.finnUnikeAktører = finnUnikeAktører;
+        this.entityManager = entityManager;
     }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/finnAktørerKobletTilSammeSakSomAktør")
+    @Operation(description = "Henter aktører pr sak relatert til oppgitt aktørid", tags = "forvaltning - person", responses = {
+        @ApiResponse(responseCode = "200",
+            description = "Aktører for pr sak",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON))
+    })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Response finnAktørerKobletTilSammeSakSomAktør(@Parameter(description = "AktørId") @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) @Valid AktørIdDto aktørId) {
+        var fagsakQuery = entityManager.createNativeQuery("select * from fagsak where bruker_aktoer_id = :aktørId", Fagsak.class)
+            .setParameter("aktørId", aktørId.getAktorId());
+        List<Fagsak> fagsaker = fagsakQuery.getResultList();
+        var aktørerForSak = fagsaker.stream().map(finnUnikeAktører::finnUnikeAktørerMedDokumenter).toList();
+        return Response.ok(aktørerForSak, MediaType.APPLICATION_JSON).build();
+    }
+
 
     @POST
     @Produces(MediaType.TEXT_PLAIN)
@@ -111,6 +144,130 @@ public class ForvaltningPersonRestTjeneste {
         return Response.ok(output, MediaType.TEXT_PLAIN_TYPE).build();
     }
 
+
+    @POST
+    @Produces(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/oppdater-aktoer-bruker")
+    @Operation(description = "Oppdater aktørId for bruker på sak med ugyldig aktørId pga aktørSplitt/merge", tags = "forvaltning - person", responses = {
+        @ApiResponse(responseCode = "200",
+            description = "Fiks ugyldig aktørId",
+            content = @Content(mediaType = MediaType.TEXT_PLAIN))
+    })
+    @BeskyttetRessurs(action = CREATE, resource = DRIFT)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Response oppdaterAktørIdBruker(@Valid @NotNull OppdaterAktørIdDto dto) {
+        aktørIdSplittTjeneste.patchBrukerAktørId(dto.getGyldigAktørId(),
+            dto.getUtgåttAktørId(),
+            Optional.ofNullable(dto.getAktørIdForIdenterSomSkalByttes()),
+            dto.getGjelderBruker(),
+            dto.getBegrunnelse(),
+            "/forvaltning/person/oppdater-aktoer-bruker", dto.getSkalValidereUtgåttAktør());
+        return Response.ok().build();
+    }
+
+    public static class OppdaterAktørIdDto implements AbacDto {
+
+        @JsonProperty("gyldigAktørId")
+        @Valid
+        @NotNull
+        private AktørIdDto gyldigAktørId;
+
+        @JsonProperty("utgåttAktørId")
+        @Valid
+        @NotNull
+        private AktørIdDto utgåttAktørId;
+
+        @JsonProperty("gjelderBruker")
+        @Valid
+        @NotNull
+        private boolean gjelderBruker;
+
+        @JsonProperty("skalValidereUtgåttAktør")
+        @Valid
+        @NotNull
+        private boolean skalValidereUtgåttAktør;
+
+        /**
+         * AktørID for som holder personidenter som skal byttes ut med personident til gyldigAktørId
+         * For splitt vil dette vere den andre delen av aktørsplitten
+         */
+        @JsonProperty("aktørIdForIdenterSomSkalByttes")
+        @Valid
+        private AktørIdDto aktørIdForIdenterSomSkalByttes;
+
+        @JsonProperty("begrunnelse")
+        @Valid
+        @NotNull
+        @Size(max = 1000)
+        @Pattern(regexp = InputValideringRegex.FRITEKST)
+        private String begrunnelse;
+
+        @JsonCreator
+        public OppdaterAktørIdDto(@JsonProperty("gyldigAktørId") @NotNull @Valid String gyldigAktørId,
+                                  @JsonProperty("utgåttAktørId") @NotNull @Valid String utgåttAktørId,
+                                  @JsonProperty("gjelderBruker") @NotNull @Valid boolean gjelderBruker,
+                                  @JsonProperty("skalValidereUtgåttAktør") @NotNull @Valid boolean skalValidereUtgåttAktør,
+                                  @JsonProperty("aktørIdForIdenterSomSkalByttes") @Valid String aktørIdForIdenterSomSkalByttes,
+                                  @JsonProperty("begrunnelse") @NotNull @Valid String begrunnelse) {
+            this.gyldigAktørId = new AktørIdDto(gyldigAktørId);
+            this.utgåttAktørId = new AktørIdDto(utgåttAktørId);
+            this.gjelderBruker = gjelderBruker;
+            this.skalValidereUtgåttAktør = skalValidereUtgåttAktør;
+            this.aktørIdForIdenterSomSkalByttes = aktørIdForIdenterSomSkalByttes != null ? new AktørIdDto(aktørIdForIdenterSomSkalByttes) : null;
+            this.begrunnelse = begrunnelse;
+        }
+
+        public AktørId getGyldigAktørId() {
+            return gyldigAktørId.getAktørId();
+        }
+
+        public void setGyldigAktørId(AktørIdDto gyldigAktørId) {
+            this.gyldigAktørId = gyldigAktørId;
+        }
+
+        public String getBegrunnelse() {
+            return begrunnelse;
+        }
+
+        public void setBegrunnelse(String begrunnelse) {
+            this.begrunnelse = begrunnelse;
+        }
+
+        public AktørId getUtgåttAktørId() {
+            return utgåttAktørId.getAktørId();
+        }
+
+        public void setUtgåttAktørId(AktørIdDto utgåttAktørId) {
+            this.utgåttAktørId = utgåttAktørId;
+        }
+
+        public AktørId getAktørIdForIdenterSomSkalByttes() {
+            return aktørIdForIdenterSomSkalByttes == null ? null : aktørIdForIdenterSomSkalByttes.getAktørId();
+        }
+
+        public boolean getSkalValidereUtgåttAktør() {
+            return skalValidereUtgåttAktør;
+        }
+
+        public void setSkalValidereUtgåttAktør(boolean skalValidereUtgåttAktør) {
+            this.skalValidereUtgåttAktør = skalValidereUtgåttAktør;
+        }
+
+        public boolean getGjelderBruker() {
+            return gjelderBruker;
+        }
+
+        public void setGjelderBruker(boolean gjelderBruker) {
+            this.gjelderBruker = gjelderBruker;
+        }
+
+        @Override
+        public AbacDataAttributter abacAttributter() {
+            //ikke mulig med reell tilgangskontroll, siden aktørId på saken er ugyldig
+            return AbacDataAttributter.opprett().leggTil(StandardAbacAttributtType.AKTØR_ID, gyldigAktørId.getAktorId());
+        }
+    }
 
     @GET
     @Operation(description = "Henter saksnumre for en person. Kan for eksempel brukes for å finne ut om k9 er påvirket av 'aktør-splitt'", tags = "aktoer", responses = {
