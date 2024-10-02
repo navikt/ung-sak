@@ -9,5 +9,5 @@ public record OpprettForespørselRequest(@NotNull @Valid AktørIdDto aktørId,
                                         @NotNull @Valid OrganisasjonsnummerDto orgnummer,
                                         @NotNull LocalDate skjæringstidspunkt,
                                         @NotNull YtelseType ytelsetype,
-                                        @NotNull @Valid SaksnummerDto saksnummer) {
+                                        @NotNull @Valid SaksnummerDto fagsakSaksnummer) {
 }
