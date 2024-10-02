@@ -363,6 +363,44 @@ public class ÅrskvantumTjeneste {
         return årskvantumKlient.hentRammevedtak(personIdent, alleBarnasFnr, periode);
     }
 
+    public RammevedtakResponse hentRammevedtakV1(LukketPeriode periode, Behandling behandling) {
+        var ref = BehandlingReferanse.fra(behandling);
+        AktørId søkerAktørId = behandling.getAktørId();
+        PersonIdent personIdent = aktørTjeneste.hentPersonIdentForAktørId(søkerAktørId).orElseThrow();
+
+        var vilkårsperioder = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.OPPTJENINGSVILKÅRET);
+        var oppgittFravær = grunnlagRepository.hentSammenslåtteFraværPerioder(ref.getBehandlingId());
+
+        var informasjonsperiode = (oppgittFravær.isEmpty()) ? DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom()) : hentInformasjonsperiode(vilkårsperioder, oppgittFravær);
+        PersonopplysningerAggregat personopplysninger = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(ref.getBehandlingId(), ref.getAktørId(), informasjonsperiode).orElseThrow();
+        Set<Barn> barna = hentOgMapBarn(personopplysninger, behandling);
+
+        var alleBarnasFnr = barna.stream().map(barn -> PersonIdent.fra(barn.getPersonIdent())).toList();
+        return årskvantumKlient.hentRammevedtak(personIdent, alleBarnasFnr, periode);
+    }
+
+    public RammevedtakRequest lagRammevedtakV1Request(Behandling behandling) {
+        DatoIntervallEntitet fagsakperiode = behandling.getFagsak().getPeriode();
+        var periode = new LukketPeriode(fagsakperiode.getFomDato(), fagsakperiode.getTomDato());
+        var ref = BehandlingReferanse.fra(behandling);
+        AktørId søkerAktørId = behandling.getAktørId();
+        PersonIdent personIdent = aktørTjeneste.hentPersonIdentForAktørId(søkerAktørId).orElseThrow();
+
+        var vilkårsperioder = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.OPPTJENINGSVILKÅRET);
+        var oppgittFravær = grunnlagRepository.hentSammenslåtteFraværPerioder(ref.getBehandlingId());
+
+        var informasjonsperiode = (oppgittFravær.isEmpty()) ? DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom()) : hentInformasjonsperiode(vilkårsperioder, oppgittFravær);
+        PersonopplysningerAggregat personopplysninger = personopplysningTjeneste.hentGjeldendePersoninformasjonForPeriodeHvisEksisterer(ref.getBehandlingId(), ref.getAktørId(), informasjonsperiode).orElseThrow();
+        Set<Barn> barna = hentOgMapBarn(personopplysninger, behandling);
+
+        var alleBarnasFnr = barna.stream().map(barn -> PersonIdent.fra(barn.getPersonIdent())).toList();
+        var barnasFnr = alleBarnasFnr.stream().map(barn -> barn.getIdent()).toList();
+        return new RammevedtakRequest(personIdent.getIdent(), barnasFnr, periode);
+
+    }
+
+
+
     private static void logRequestInDev(RammevedtakV2Request request){
         if (Environment.current().isDev()){
             String requestString = toJson(request);
