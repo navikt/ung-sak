@@ -24,7 +24,8 @@ public class ÅrskvantumDump implements DebugDumpBehandling, DebugDumpFagsak {
     private ÅrskvantumRestKlient restKlient;
     private ÅrskvantumTjeneste årskvantumTjeneste;
     private final String fileNameUttaksplan = "årskvantum-fulluttaksplan.json";
-    private final String fileNameRequest = "årskvantum-rammevedtak-request.json";
+    private final String fileNameRequestV1 = "årskvantum-rammevedtak-request-v1.json";
+    private final String fileNameRequestV2 = "årskvantum-rammevedtak-request-v2.json";
     private final ObjectWriter ow = DefaultJsonMapper.getObjectMapper().writerWithDefaultPrettyPrinter(); // samme som ÅrskvantumRestklient bruker
 
     ÅrskvantumDump() {
@@ -49,11 +50,19 @@ public class ÅrskvantumDump implements DebugDumpBehandling, DebugDumpFagsak {
         }
         if (!behandling.erAvsluttet()) {
             try {
-                var request = årskvantumTjeneste.lagRammevedtakV2Request(behandling);
-                dumpMottaker.newFile(basePath + "/" + fileNameRequest);
+                var request = årskvantumTjeneste.lagRammevedtakV1Request(behandling);
+                dumpMottaker.newFile(basePath + "/" + fileNameRequestV1);
                 ow.writeValue(dumpMottaker.getOutputStream(), request);
             } catch (Exception e) {
-                dumpMottaker.newFile(basePath + "/" + fileNameRequest + "-ERROR");
+                dumpMottaker.newFile(basePath + "/" + fileNameRequestV1 + "-ERROR");
+                dumpMottaker.write(e);
+            }
+            try {
+                var request = årskvantumTjeneste.lagRammevedtakV2Request(behandling);
+                dumpMottaker.newFile(basePath + "/" + fileNameRequestV2);
+                ow.writeValue(dumpMottaker.getOutputStream(), request);
+            } catch (Exception e) {
+                dumpMottaker.newFile(basePath + "/" + fileNameRequestV2 + "-ERROR");
                 dumpMottaker.write(e);
             }
         }
