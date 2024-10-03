@@ -4,6 +4,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
@@ -19,14 +20,24 @@ class GjennomgåttOpplæringTidslinjeUtleder {
         Objects.requireNonNull(perioderFraSøknad, "Perioder fra søknad må være satt");
         Objects.requireNonNull(tidslinjeTilVurdering, "Tidslinje til vurdering må være satt");
 
+        var manglendePerioder = lagTidslinjeMedMangledePerioderFraTidligereVilkår(vilkårene, tidslinjeTilVurdering);
+        var oppdatertTidslinjeTilVurdering = tidslinjeTilVurdering.combine(manglendePerioder, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+
         var tidslinjeIkkeGodkjentTidligereVilkår = lagTidslinjeMedIkkeGodkjentTidligereVilkår(vilkårene);
-        var tidslinjeTilVurderingEtterJusteringMotVilkår = tidslinjeTilVurdering.disjoint(tidslinjeIkkeGodkjentTidligereVilkår);
+        var tidslinjeTilVurderingEtterJusteringMotVilkår = oppdatertTidslinjeTilVurdering.disjoint(tidslinjeIkkeGodkjentTidligereVilkår);
 
         LocalDateTimeline<OpplæringGodkjenningStatus> tidslinjeMedGjennomgåttOpplæring = lagTidslinjeGjennomgåttOpplæring(vurdertOpplæringGrunnlag, tidslinjeTilVurderingEtterJusteringMotVilkår);
 
         LocalDateTimeline<OpplæringGodkjenningStatus> tidslinjeReisetid = lagTidslinjeReisetid(perioderFraSøknad, vurdertOpplæringGrunnlag, tidslinjeTilVurderingEtterJusteringMotVilkår);
 
         return tidslinjeMedGjennomgåttOpplæring.crossJoin(tidslinjeReisetid).crossJoin(Hjelpetidslinjer.fjernHelger(tidslinjeTilVurderingEtterJusteringMotVilkår).mapValue(value -> OpplæringGodkjenningStatus.MANGLER_VURDERING_OPPLÆRING));
+    }
+
+    private LocalDateTimeline<Boolean> lagTidslinjeMedMangledePerioderFraTidligereVilkår(Vilkårene vilkårene, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
+        var godkjentePerioderForGjennomførtOpplæring = VilkårTidslinjeUtleder.utledOppfylt(vilkårene, VilkårType.LANGVARIG_SYKDOM);
+
+        return godkjentePerioderForGjennomførtOpplæring
+            .disjoint(tidslinjeTilVurdering);
     }
 
     private LocalDateTimeline<Boolean> lagTidslinjeMedIkkeGodkjentTidligereVilkår(Vilkårene vilkårene) {
