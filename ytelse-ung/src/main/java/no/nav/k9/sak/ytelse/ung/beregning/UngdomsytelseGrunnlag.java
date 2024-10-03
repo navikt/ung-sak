@@ -1,6 +1,6 @@
 package no.nav.k9.sak.ytelse.ung.beregning;
 
-import java.util.List;
+import java.math.BigDecimal;
 
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -17,6 +17,7 @@ import jakarta.persistence.Version;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
+import no.nav.k9.sak.ytelse.ung.uttak.UngdomsytelseUttakPerioder;
 
 @Entity(name = "UngdomsytelseGrunnlag")
 @Table(name = "UNG_GR")
@@ -35,6 +36,11 @@ public class UngdomsytelseGrunnlag {
     @ManyToOne
     @JoinColumn(name = "ung_sats_perioder_id", nullable = false, updatable = false)
     private UngdomsytelseSatsPerioder satsPerioder;
+
+    @ChangeTracked
+    @ManyToOne
+    @JoinColumn(name = "ung_uttak_perioder_id", nullable = false, updatable = false)
+    private UngdomsytelseUttakPerioder uttakPerioder;
 
     @Column(name = "aktiv", nullable = false, updatable = true)
     private boolean aktiv = true;
@@ -61,6 +67,20 @@ public class UngdomsytelseGrunnlag {
         return new LocalDateTimeline<>(segmenter);
     }
 
+    public LocalDateTimeline<BigDecimal> getUtbetalingsgradTidslinje() {
+        var segmenter = uttakPerioder.getPerioder().stream().map(p ->
+            new LocalDateSegment<>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), p.getUtbetalingsgrad()
+            )).toList();
+        return new LocalDateTimeline<>(segmenter);
+    }
+
+    public UngdomsytelseUttakPerioder getUttakPerioder() {
+        return uttakPerioder;
+    }
+
+    void setUttakPerioder(UngdomsytelseUttakPerioder uttakPerioder) {
+        this.uttakPerioder = uttakPerioder;
+    }
 
     public void setSatsPerioder(UngdomsytelseSatsPerioder satsPerioder) {
         this.satsPerioder = satsPerioder;

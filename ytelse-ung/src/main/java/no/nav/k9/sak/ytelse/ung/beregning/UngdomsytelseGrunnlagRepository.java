@@ -14,6 +14,7 @@ import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.k9.sak.behandlingslager.diff.DiffEntity;
 import no.nav.k9.sak.behandlingslager.diff.TraverseEntityGraphFactory;
 import no.nav.k9.sak.behandlingslager.diff.TraverseGraph;
+import no.nav.k9.sak.ytelse.ung.uttak.UngdomsytelseUttakPerioder;
 
 @Dependent
 public class UngdomsytelseGrunnlagRepository {
@@ -33,6 +34,23 @@ public class UngdomsytelseGrunnlagRepository {
 
         var builder = new UngdomsytelseGrunnlagBuilder(aktivtGrunnlag);
         builder.leggTilPerioder(perioder);
+
+        var differ = differ();
+
+        if (builder.erForskjellig(aktivtGrunnlag, differ)) {
+            grunnlagOptional.ifPresent(this::deaktiverEksisterende);
+            lagre(builder, behandlingId);
+        } else {
+            log.info("[behandlingId={}] Forkaster lagring nytt resultat da dette er identisk med eksisterende resultat.", behandlingId);
+        }
+    }
+
+    public void lagre(Long behandlingId, UngdomsytelseUttakPerioder uttakperioder) {
+        var grunnlagOptional = hentGrunnlag(behandlingId);
+        var aktivtGrunnlag = grunnlagOptional.orElse(new UngdomsytelseGrunnlag());
+
+        var builder = new UngdomsytelseGrunnlagBuilder(aktivtGrunnlag);
+        builder.medUttakPerioder(uttakperioder);
 
         var differ = differ();
 
