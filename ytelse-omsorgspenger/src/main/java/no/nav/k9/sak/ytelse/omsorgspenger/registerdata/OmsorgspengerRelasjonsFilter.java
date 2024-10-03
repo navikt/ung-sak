@@ -24,10 +24,14 @@ import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.ytelse.omsorgspenger.rammevedtak.OmsorgspengerRammevedtakTjeneste;
 import no.nav.k9.sak.ytelse.omsorgspenger.repo.FosterbarnRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @FagsakYtelseTypeRef(OMSORGSPENGER)
 @ApplicationScoped
 public class OmsorgspengerRelasjonsFilter implements YtelsesspesifikkRelasjonsFilter {
+
+    private final static Logger logger = LoggerFactory.getLogger(OmsorgspengerRelasjonsFilter.class);
 
     private OmsorgspengerRammevedtakTjeneste omsorgspengerRammevedtakTjeneste;
     private FosterbarnRepository fosterbarnRepository;
@@ -71,12 +75,15 @@ public class OmsorgspengerRelasjonsFilter implements YtelsesspesifikkRelasjonsFi
     public List<Personinfo> relasjonsFiltreringBarn(Behandling behandling, List<Personinfo> barn, Periode opplysningsperioden) {
         if (barn.stream().allMatch(barnet -> barnetRelevantForSakenPgaAlderUnder12(barnet, opplysningsperioden))) {
             //snarvei for å unngå å hente rammevedtak
+            logger.info("Filtrerer ikke bort noen barn");
             return barn;
         }
         List<Rammevedtak> rammevedtak = omsorgspengerRammevedtakTjeneste.hentRammevedtak(new BehandlingUuidDto(behandling.getUuid()), barn).getRammevedtak();
-        return barn.stream()
+        List<Personinfo> barnRelevantForSaken = barn.stream()
             .filter(barnet -> barnetRelevantForSaken(opplysningsperioden, rammevedtak, barnet))
             .toList();
+        logger.info("Fant {} av {} barn relevant for saken etter å ha filtrert mot {} rammevedtak", barnRelevantForSaken.size(), barn.size(), rammevedtak.size());
+        return barnRelevantForSaken;
     }
 
     private boolean barnetRelevantForSaken(Periode opplysningsperioden, List<Rammevedtak> rammevedtak, Personinfo barnet) {
