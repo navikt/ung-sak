@@ -26,7 +26,6 @@ class VurderAntallDagerTjenesteTest {
         assertThat(ungdomsytelseUttakPerioder).isEmpty();
     }
 
-
     @Test
     void skal_returnere_resultat_med_en_virkedag_godkjent() {
 
@@ -212,6 +211,53 @@ class VurderAntallDagerTjenesteTest {
         assertThat(ikkeNokDager.getPeriode().getFomDato()).isEqualTo(tom2);
         assertThat(ikkeNokDager.getPeriode().getTomDato()).isEqualTo(tom2);
         assertThat(ikkeNokDager.getUtbetalingsgrad().compareTo(BigDecimal.ZERO)).isEqualTo(0);
+    }
+
+
+
+    @Test
+    void skal_gi_to_oppfylt_og_to_avslått_dersom_godkjent_periode_er_splittet_i_tre_med_en_uke_mellomrom_mellom_hver_og_270_virkedager_til_sammen() {
+
+        var fom1 = LocalDate.of(2024, 10, 3);
+        var tom1 = fom1.plusWeeks(40);
+        var fom2 = tom1.plusDays(7);
+        var tom2 = fom2.plusWeeks(12).minusDays(1);
+
+        var fom3 = tom2.plusDays(7);
+        var tom3 = fom3.plusWeeks(1).minusDays(1);
+
+
+        var ungdomsytelseUttakPerioder = VurderAntallDagerTjeneste.vurderAntallDagerOgLagUttaksperioder(new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom1, tom1, true),
+            new LocalDateSegment<>(fom2, tom2, true),
+            new LocalDateSegment<>(fom3, tom3, true)
+
+        )));
+
+        assertThat(ungdomsytelseUttakPerioder).isPresent();
+
+        assertThat(ungdomsytelseUttakPerioder.get().getPerioder().size()).isEqualTo(4);
+        var iterator = ungdomsytelseUttakPerioder.get().getPerioder().iterator();
+        var nokDagerPeriode1 = iterator.next();;
+        assertThat(nokDagerPeriode1.getPeriode().getFomDato()).isEqualTo(fom1);
+        assertThat(nokDagerPeriode1.getPeriode().getTomDato()).isEqualTo(tom1);
+        assertThat(nokDagerPeriode1.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(100))).isEqualTo(0);
+
+        var nokDagerPeriode2 = iterator.next();;
+        assertThat(nokDagerPeriode2.getPeriode().getFomDato()).isEqualTo(fom2);
+        assertThat(nokDagerPeriode2.getPeriode().getTomDato()).isEqualTo(tom2.minusDays(1));
+        assertThat(nokDagerPeriode2.getUtbetalingsgrad().compareTo(BigDecimal.valueOf(100))).isEqualTo(0);
+
+        var ikkeNokDager = iterator.next();;
+        assertThat(ikkeNokDager.getPeriode().getFomDato()).isEqualTo(tom2);
+        assertThat(ikkeNokDager.getPeriode().getTomDato()).isEqualTo(tom2);
+        assertThat(ikkeNokDager.getUtbetalingsgrad().compareTo(BigDecimal.ZERO)).isEqualTo(0);
+
+
+        var ikkeNokDager2 = iterator.next();;
+        assertThat(ikkeNokDager2.getPeriode().getFomDato()).isEqualTo(fom3);
+        assertThat(ikkeNokDager2.getPeriode().getTomDato()).isEqualTo(tom3);
+        assertThat(ikkeNokDager2.getUtbetalingsgrad().compareTo(BigDecimal.ZERO)).isEqualTo(0);
     }
 
 
