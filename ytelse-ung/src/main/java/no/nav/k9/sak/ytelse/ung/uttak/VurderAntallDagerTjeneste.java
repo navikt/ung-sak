@@ -6,11 +6,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
+import no.nav.k9.sak.ytelse.ung.kodeverk.UngdomsytelseUttakAvslagsårsak;
 
 class VurderAntallDagerTjeneste {
 
@@ -30,7 +32,7 @@ class VurderAntallDagerTjeneste {
             .collect(Collectors.toCollection(ArrayList::new));
 
         // Perioder etter kvote er brukt opp får 0% utbetaling
-        uttakPerioder.addAll(perioderEtterOppbrukteDager.getLocalDateIntervals().stream().map(p -> new UngdomsytelseUttakPeriode(BigDecimal.ZERO, DatoIntervallEntitet.fraOgMedTilOgMed(p.getFomDato(), p.getTomDato())))
+        uttakPerioder.addAll(perioderEtterOppbrukteDager.getLocalDateIntervals().stream().map(p -> new UngdomsytelseUttakPeriode(UngdomsytelseUttakAvslagsårsak.IKKE_NOK_DAGER, DatoIntervallEntitet.fraOgMedTilOgMed(p.getFomDato(), p.getTomDato())))
             .collect(Collectors.toCollection(ArrayList::new)));
 
 
@@ -55,8 +57,6 @@ class VurderAntallDagerTjeneste {
     }
 
 
-
-
     private static VurderAntallDagerResultet finnPerioderMedNokDager(LocalDateTimeline<Boolean> godkjentePerioder) {
 
         var helger = Hjelpetidslinjer.lagTidslinjeMedKunHelger(godkjentePerioder);
@@ -72,7 +72,7 @@ class VurderAntallDagerTjeneste {
             }
             if (antallDagerISegment + antallDager < MAKS_ANTALL_DAGER) {
                 resultatTidslinje = resultatTidslinje.crossJoin(new LocalDateTimeline<>(List.of(virkedagSegment)));
-                antallDager +=  antallDagerISegment;
+                antallDager += antallDagerISegment;
             } else {
                 resultatTidslinje = innvilgDelerAvSegment(virkedagSegment, antallDager, resultatTidslinje);
                 break;
@@ -104,18 +104,23 @@ class VurderAntallDagerTjeneste {
     }
 
     private static LocalDateTimeline<Boolean> leggTilManglendeHelger(LocalDateTimeline<Boolean> resultatTidslinje, LocalDateTimeline<Boolean> helgerSomBleFjernet) {
-        var mellomliggendeHelgSomBleFjernet = Hjelpetidslinjer.utledHullSomMåTettes(resultatTidslinje, new PåTversAvHelgErKantIKantVurderer()).intersection(helgerSomBleFjernet);
-        var medTettetMellomliggendeHelg = resultatTidslinje.crossJoin(mellomliggendeHelgSomBleFjernet);
+        var medTettetMellomliggendeHelg = tettMellomrom(resultatTidslinje);
+        return leggTilbakeHelgerIHverEndeAvSegmenter(helgerSomBleFjernet, medTettetMellomliggendeHelg);
+    }
 
+    private static LocalDateTimeline<Boolean> tettMellomrom(LocalDateTimeline<Boolean> resultatTidslinje) {
+        var medTettetMellomliggendeHelg = resultatTidslinje.compress(LocalDateInterval::abutsWorkdays, Boolean::equals, StandardCombinators::leftOnly);
+        return medTettetMellomliggendeHelg;
+    }
+
+    private static LocalDateTimeline<Boolean> leggTilbakeHelgerIHverEndeAvSegmenter(LocalDateTimeline<Boolean> helgerSomBleFjernet, LocalDateTimeline<Boolean> medTettetMellomliggendeHelg) {
         var intervaller = medTettetMellomliggendeHelg.compress().getLocalDateIntervals();
-
-
         var tilstøtendeHelger = helgerSomBleFjernet.toSegments().stream().filter(helg -> intervaller.stream().anyMatch(periode -> helg.getLocalDateInterval().abuts(periode))).toList();
-
         // Legger tilbake helger i endene som ble fjernet
         return medTettetMellomliggendeHelg.crossJoin(new LocalDateTimeline<>(tilstøtendeHelger)).compress();
     }
 
-    record VurderAntallDagerResultet(LocalDateTimeline<Boolean> tidslinjeNokDager, long innvilgetDager){}
+    record VurderAntallDagerResultet(LocalDateTimeline<Boolean> tidslinjeNokDager, long innvilgetDager) {
+    }
 
 }

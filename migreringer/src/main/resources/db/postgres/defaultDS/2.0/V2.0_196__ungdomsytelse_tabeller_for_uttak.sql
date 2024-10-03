@@ -15,6 +15,7 @@ create table if not exists UNG_UTTAK_PERIODE
     ung_uttak_perioder_id       BIGINT                                      not null,
     periode                     daterange                                   not null,
     utbetalingsgrad             numeric(19, 4)                              not null,
+    avslag_aarsak               VARCHAR(100),
     OPPRETTET_AV                VARCHAR(20)     DEFAULT 'VL'                NOT NULL,
     OPPRETTET_TID               TIMESTAMP(3)    DEFAULT CURRENT_TIMESTAMP   NOT NULL,
     ENDRET_AV                   VARCHAR(20)                                         ,

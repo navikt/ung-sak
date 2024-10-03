@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import org.hibernate.annotations.Type;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,7 +15,10 @@ import jakarta.persistence.Table;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.PostgreSQLRangeType;
 import no.nav.k9.sak.behandlingslager.Range;
+import no.nav.k9.sak.behandlingslager.kodeverk.BehandlingStegTypeKodeverdiConverter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.ytelse.ung.kodeverk.UngdomsytelseUttakAvslagsårsak;
+import no.nav.k9.sak.ytelse.ung.kodeverk.UngdomsytelseUttakAvslagsårsakKodeverdiConverter;
 
 @Entity(name = "UngdomsytelseUttakPeriode")
 @Table(name = "UNG_UTTAK_PERIODE")
@@ -31,6 +35,10 @@ public class UngdomsytelseUttakPeriode extends BaseEntitet {
     @Column(name = "utbetalingsgrad", nullable = false)
     private BigDecimal utbetalingsgrad;
 
+    @Convert(converter = UngdomsytelseUttakAvslagsårsakKodeverdiConverter.class)
+    @Column(name = "avslag_aarsak")
+    private UngdomsytelseUttakAvslagsårsak avslagsårsak;
+
     public UngdomsytelseUttakPeriode() {
     }
 
@@ -45,6 +53,12 @@ public class UngdomsytelseUttakPeriode extends BaseEntitet {
         this.periode = periode.toRange();
     }
 
+    public UngdomsytelseUttakPeriode(UngdomsytelseUttakAvslagsårsak avslagsårsak,
+                                     DatoIntervallEntitet periode) {
+        this.utbetalingsgrad = BigDecimal.ZERO;
+        this.periode = periode.toRange();
+        this.avslagsårsak = avslagsårsak;
+    }
 
 
     public DatoIntervallEntitet getPeriode() {
@@ -53,5 +67,9 @@ public class UngdomsytelseUttakPeriode extends BaseEntitet {
 
     public BigDecimal getUtbetalingsgrad() {
         return utbetalingsgrad;
+    }
+
+    public UngdomsytelseUttakAvslagsårsak getAvslagsårsak() {
+        return avslagsårsak;
     }
 }
