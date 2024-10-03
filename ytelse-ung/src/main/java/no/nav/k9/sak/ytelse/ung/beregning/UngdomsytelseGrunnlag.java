@@ -39,7 +39,7 @@ public class UngdomsytelseGrunnlag {
 
     @ChangeTracked
     @ManyToOne
-    @JoinColumn(name = "ung_uttak_perioder_id", nullable = false, updatable = false)
+    @JoinColumn(name = "ung_uttak_perioder_id", updatable = false)
     private UngdomsytelseUttakPerioder uttakPerioder;
 
     @Column(name = "aktiv", nullable = false, updatable = true)
