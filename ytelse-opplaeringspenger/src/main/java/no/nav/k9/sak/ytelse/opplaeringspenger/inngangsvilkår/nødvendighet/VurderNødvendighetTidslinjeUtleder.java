@@ -33,10 +33,20 @@ class VurderNødvendighetTidslinjeUtleder {
         Objects.requireNonNull(tidslinjeTilVurdering);
 
         var perioderSomSkalAvslås = lagTidslinjeMedIkkeGodkjentTidligereVilkår(vilkårene, tidslinjeTilVurdering);
+        var mangledePerioder = lagTidslinjeMedMangledePerioderFraTidligereVilkår(vilkårene, tidslinjeTilVurdering);
 
-        LocalDateTimeline<NødvendighetGodkjenningStatus> tidslinjeMedNødvendighetsgodkjenning = lagTidslinjeMedNødvendighetsGodkjenning(perioderFraSøknad, vurdertOpplæringGrunnlag);
+        var oppdatertTidslinjeTilVurdering = tidslinjeTilVurdering.combine(mangledePerioder, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
-        return tidslinjeMedNødvendighetsgodkjenning.intersection(tidslinjeTilVurdering.disjoint(perioderSomSkalAvslås));
+        LocalDateTimeline<NødvendighetGodkjenningStatus> tidslinjeMedNødvendighetsgodkjenning = lagTidslinjeMedNødvendighetsGodkjenning(perioderFraSøknad, vurdertOpplæringGrunnlag, mangledePerioder);
+
+        return tidslinjeMedNødvendighetsgodkjenning.intersection(oppdatertTidslinjeTilVurdering.disjoint(perioderSomSkalAvslås));
+    }
+
+    private LocalDateTimeline<Boolean> lagTidslinjeMedMangledePerioderFraTidligereVilkår(Vilkårene vilkårene, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
+        var godkjentePerioderForGjennomførtOpplæring = VilkårTidslinjeUtleder.utledOppfylt(vilkårene, VilkårType.GJENNOMGÅ_OPPLÆRING);
+
+        return godkjentePerioderForGjennomførtOpplæring
+            .disjoint(tidslinjeTilVurdering);
     }
 
     private LocalDateTimeline<Boolean> lagTidslinjeMedIkkeGodkjentTidligereVilkår(Vilkårene vilkårene, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
@@ -48,7 +58,7 @@ class VurderNødvendighetTidslinjeUtleder {
             .combine(tidslinjeUtenGjennomførtOpplæring, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN).intersection(tidslinjeTilVurdering);
     }
 
-    private LocalDateTimeline<NødvendighetGodkjenningStatus> lagTidslinjeMedNødvendighetsGodkjenning(Set<PerioderFraSøknad> perioderFraSøknad, VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag) {
+    private LocalDateTimeline<NødvendighetGodkjenningStatus> lagTidslinjeMedNødvendighetsGodkjenning(Set<PerioderFraSøknad> perioderFraSøknad, VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag, LocalDateTimeline<Boolean> mangledePerioder) {
 
         LocalDateTimeline<List<JournalpostId>> tidslinjeMedJournalpostId = hentTidslinjeMedJournalpostIdFraSøknad(perioderFraSøknad);
 
