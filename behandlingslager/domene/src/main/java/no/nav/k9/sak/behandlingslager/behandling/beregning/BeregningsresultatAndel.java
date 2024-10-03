@@ -235,14 +235,6 @@ public class BeregningsresultatAndel extends BaseEntitet {
         return id;
     }
 
-    /**
-     * @deprecated bruk fom/tom i stedet.
-     */
-    @Deprecated(forRemoval = true)
-    public BeregningsresultatPeriode getBeregningsresultatPeriode() {
-        return beregningsresultatPeriode;
-    }
-
     public boolean erBrukerMottaker() {
         return brukerErMottaker;
     }
@@ -499,7 +491,7 @@ public class BeregningsresultatAndel extends BaseEntitet {
             mal.periode = beregningsresultatPeriode.getPeriode().toRange();
             mal.beregningsresultat = beregningsresultatPeriode.getBeregningsresultat();
             verifyStateForBuild();
-            mal.getBeregningsresultatPeriode().addBeregningsresultatAndel(mal);
+            mal.beregningsresultatPeriode.addBeregningsresultatAndel(mal);
             return mal;
         }
 
