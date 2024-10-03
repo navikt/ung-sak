@@ -40,7 +40,6 @@ public class DokumentmottakerEttersendelse implements Dokumentmottaker {
     private SykdomsDokumentVedleggHåndterer sykdomsDokumentVedleggHåndterer;
     private Instance<BrukerdialoginnsynTjeneste> brukerdialoginnsynServicer;
     private DokumentmottakerFelles dokumentMottakerFelles;
-    private boolean ettersendelseRettTilK9Sak;
 
     DokumentmottakerEttersendelse() {
         // for CDI proxy
