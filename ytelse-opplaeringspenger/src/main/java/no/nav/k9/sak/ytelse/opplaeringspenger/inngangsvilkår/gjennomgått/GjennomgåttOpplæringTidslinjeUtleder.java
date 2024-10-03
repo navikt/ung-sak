@@ -20,8 +20,8 @@ class GjennomgåttOpplæringTidslinjeUtleder {
         Objects.requireNonNull(perioderFraSøknad, "Perioder fra søknad må være satt");
         Objects.requireNonNull(tidslinjeTilVurdering, "Tidslinje til vurdering må være satt");
 
-        var mangledePerioder = lagTidslinjeMedMangledePerioderFraTidligereVilkår(vilkårene, tidslinjeTilVurdering);
-        var oppdatertTidslinjeTilVurdering = tidslinjeTilVurdering.combine(mangledePerioder, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        var manglendePerioder = lagTidslinjeMedMangledePerioderFraTidligereVilkår(vilkårene, tidslinjeTilVurdering);
+        var oppdatertTidslinjeTilVurdering = tidslinjeTilVurdering.combine(manglendePerioder, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
         var tidslinjeIkkeGodkjentTidligereVilkår = lagTidslinjeMedIkkeGodkjentTidligereVilkår(vilkårene);
         var tidslinjeTilVurderingEtterJusteringMotVilkår = oppdatertTidslinjeTilVurdering.disjoint(tidslinjeIkkeGodkjentTidligereVilkår);

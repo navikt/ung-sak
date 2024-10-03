@@ -33,11 +33,11 @@ class VurderNødvendighetTidslinjeUtleder {
         Objects.requireNonNull(tidslinjeTilVurdering);
 
         var perioderSomSkalAvslås = lagTidslinjeMedIkkeGodkjentTidligereVilkår(vilkårene, tidslinjeTilVurdering);
-        var mangledePerioder = lagTidslinjeMedMangledePerioderFraTidligereVilkår(vilkårene, tidslinjeTilVurdering);
+        var manglendePerioder = lagTidslinjeMedMangledePerioderFraTidligereVilkår(vilkårene, tidslinjeTilVurdering);
 
-        var oppdatertTidslinjeTilVurdering = tidslinjeTilVurdering.combine(mangledePerioder, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        var oppdatertTidslinjeTilVurdering = tidslinjeTilVurdering.combine(manglendePerioder, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
-        LocalDateTimeline<NødvendighetGodkjenningStatus> tidslinjeMedNødvendighetsgodkjenning = lagTidslinjeMedNødvendighetsGodkjenning(perioderFraSøknad, vurdertOpplæringGrunnlag, mangledePerioder);
+        LocalDateTimeline<NødvendighetGodkjenningStatus> tidslinjeMedNødvendighetsgodkjenning = lagTidslinjeMedNødvendighetsGodkjenning(perioderFraSøknad, vurdertOpplæringGrunnlag);
 
         return tidslinjeMedNødvendighetsgodkjenning.intersection(oppdatertTidslinjeTilVurdering.disjoint(perioderSomSkalAvslås));
     }
@@ -58,7 +58,7 @@ class VurderNødvendighetTidslinjeUtleder {
             .combine(tidslinjeUtenGjennomførtOpplæring, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN).intersection(tidslinjeTilVurdering);
     }
 
-    private LocalDateTimeline<NødvendighetGodkjenningStatus> lagTidslinjeMedNødvendighetsGodkjenning(Set<PerioderFraSøknad> perioderFraSøknad, VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag, LocalDateTimeline<Boolean> mangledePerioder) {
+    private LocalDateTimeline<NødvendighetGodkjenningStatus> lagTidslinjeMedNødvendighetsGodkjenning(Set<PerioderFraSøknad> perioderFraSøknad, VurdertOpplæringGrunnlag vurdertOpplæringGrunnlag) {
 
         LocalDateTimeline<List<JournalpostId>> tidslinjeMedJournalpostId = hentTidslinjeMedJournalpostIdFraSøknad(perioderFraSøknad);
 
