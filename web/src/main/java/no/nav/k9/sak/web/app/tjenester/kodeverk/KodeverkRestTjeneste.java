@@ -47,7 +47,7 @@ public class KodeverkRestTjeneste {
     public static final String ENHETER_PATH = KODERVERK_PATH + "/behandlende-enheter";
 
     private static final long CACHE_ELEMENT_LIVE_TIME_MS = TimeUnit.MILLISECONDS.convert(60, TimeUnit.MINUTES);
-    private final JacksonJsonConfig jsonMapper = new JacksonJsonConfig(true); // generere kodeverk med navn
+    private final JacksonJsonConfig jsonMapper = new JacksonJsonConfig(true, false); // generere kodeverk som objekt med navn
 
     private final ObjectMapper objectMapper = jsonMapper.getObjectMapper();
     private HentKodeverkTjeneste hentKodeverkTjeneste; // NOSONAR

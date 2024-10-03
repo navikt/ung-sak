@@ -2,7 +2,6 @@ package no.nav.k9.sak.web.app.jackson;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -16,15 +15,12 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.ext.ContextResolver;
 import jakarta.ws.rs.ext.Provider;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusKodelisteSerializer;
-import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderFaktaOmBeregningDto;
 import no.nav.k9.sak.web.app.tjenester.RestImplementationClasses;
@@ -40,13 +36,16 @@ public class JacksonJsonConfig implements ContextResolver<ObjectMapper> {
 
     private final ObjectMapper objectMapper;
 
-    /** Default instance for Jax-rs application. Genererer ikke navn som del av output for kodeverk. */
+    /** Default instance for Jax-rs application.
+     * Serialiserer Kodeverk instanser som rein string når serialiserKodeverkSomString feature flag er aktivert.
+     * Serialiserer ellers Kodeverk som objekt uten navn property inkludert.
+     */
     public JacksonJsonConfig() {
-        this(false);
+        this(false, serialiserKodeverkSomString());
     }
 
-    public JacksonJsonConfig(boolean serialiserKodelisteNavn) {
-        objectMapper = createObjectMapper(createModule(serialiserKodelisteNavn));
+    public JacksonJsonConfig(final boolean serialiserKodelisteNavn, final boolean serialiserKodeverkSomString) {
+        objectMapper = createObjectMapper(createModule(serialiserKodelisteNavn, serialiserKodeverkSomString));
     }
 
     private ObjectMapper createObjectMapper(SimpleModule simpleModule) {
@@ -85,33 +84,24 @@ public class JacksonJsonConfig implements ContextResolver<ObjectMapper> {
         return om;
     }
 
-    private static SimpleModule createModule(boolean serialiserKodelisteNavn) {
+    private static SimpleModule createModule(boolean serialiserKodelisteNavn, final boolean serialiserKodeverkSomString) {
         SimpleModule module = new SimpleModule("VL-REST", new Version(1, 0, 0, null, null, null));
 
-        addSerializers(module, serialiserKodelisteNavn);
+        addSerializers(module, serialiserKodelisteNavn, serialiserKodeverkSomString);
 
         return module;
     }
 
-    private static void addSerializers(SimpleModule module, boolean serialiserKodelisteNavn) {
-        boolean brukKodeverSomString = kodeverdiSomStringLansert();
-        if(serialiserKodelisteNavn) {
-            module.addSerializer(new KodelisteSerializer(true));
-        } else if (brukKodeverSomString){
-            module.addSerializer(new KodelisteSerializer(false));
-        } //else bruk default serialisering
+    private static void addSerializers(SimpleModule module, boolean serialiserKodelisteNavn, final boolean serialiserKodeverkSomString) {
+        module.addSerializer(new KodelisteSerializer(serialiserKodelisteNavn, serialiserKodeverkSomString));
+        //else bruk default serialisering
 
         // BeregningsgrunnlagRestTjeneste eksponerer kalkulus sine kodeverdier opp til frontend.
         // For å tillate at Kalkulus serialiserer Kodeverdi som string, samtidig som beholder dagens format til frontend.
-
-        module.addSerializer(new KalkulusKodelisteSerializer(kodeverdiSomObjekt()));
+        module.addSerializer(new KalkulusKodelisteSerializer(!serialiserKodeverkSomString));
     }
 
-    private static boolean kodeverdiSomObjekt(){
-        return !kodeverdiSomStringLansert();
-    }
-
-    private static boolean kodeverdiSomStringLansert(){
+    public static boolean serialiserKodeverkSomString(){
         String konfverdi = System.getenv("KODEVERK_SOM_STRING_REST");
         return Boolean.parseBoolean(konfverdi);
     }

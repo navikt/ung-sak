@@ -22,26 +22,25 @@ public class KodelisteSerializer extends StdSerializer<Kodeverdi> {
     public static final String NAVN = "navn";
     public static final String KODEVERK = "kodeverk";
     private final boolean serialiserKodelisteNavn;
-    private final boolean kodeverdiSomStringLansert;
+    private final boolean serialiserSomString;
+
     /**
      * dropper navn hvis false (trenger da ikke refreshe navn fra db.). Default false
      */
     private Set<String> reserverteKeys = Set.of(KODE, KODEVERK, NAVN);
 
-    public KodelisteSerializer(boolean serialiserKodelisteNavn) {
+    public KodelisteSerializer(final boolean serialiserKodelisteNavn, final boolean serialiserSomString) {
         super(Kodeverdi.class);
+        if(serialiserKodelisteNavn && serialiserSomString) {
+            throw new IllegalArgumentException("serialiserKodelisteNavn kan ikke vere true når serialiserSomString er true. Må serialisere kodeverk som objekt for å kunne inkludere navn.");
+        }
         this.serialiserKodelisteNavn = serialiserKodelisteNavn;
-        this.kodeverdiSomStringLansert = kodeverdiSomStringLansert();
-    }
-
-    private static boolean kodeverdiSomStringLansert() {
-        String konfverdi = System.getenv("KODEVERK_SOM_STRING_REST");
-        return Boolean.parseBoolean(konfverdi);
+        this.serialiserSomString = serialiserSomString;
     }
 
     @Override
     public void serialize(Kodeverdi value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
-        if (kodeverdiSomStringLansert) {
+        if (serialiserSomString) {
             serialisertKodeverdiSomStreng(value, jgen);
         } else {
             serialiserKodeverdiSomObjekt(value, jgen);
@@ -49,16 +48,7 @@ public class KodelisteSerializer extends StdSerializer<Kodeverdi> {
     }
 
     private void serialisertKodeverdiSomStreng(Kodeverdi value, JsonGenerator jgen) throws IOException {
-        if (serialiserKodelisteNavn) {
-            jgen.writeStartObject();
-            jgen.writeStringField(KODE, value.getKode());
-            jgen.writeStringField(NAVN, value.getNavn());
-            //tok bort KODEVERK, den brukes ikke av noen
-            håndtereEkstraFelter(value, jgen);
-            jgen.writeEndObject();
-        } else {
-            jgen.writeString(value.getKode());
-        }
+        jgen.writeString(value.getKode());
     }
 
     private void serialiserKodeverdiSomObjekt(Kodeverdi value, JsonGenerator jgen) throws IOException {
