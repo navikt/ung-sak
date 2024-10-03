@@ -16345,6 +16345,35 @@
         "tags" : [ "behandling - utvidet rett" ]
       }
     },
+    "/behandling/utvidetRett/rammevedtak-v1" : {
+      "get" : {
+        "description" : "Hent rammevedtak v1",
+        "operationId" : "hentRammevedtakV1",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RammevedtakResponse"
+                }
+              }
+            },
+            "description" : "Returnerer relevante rammevedtak for en behandling om utvidet rett"
+          }
+        },
+        "tags" : [ "behandling - utvidet rett" ]
+      }
+    },
     "/behandling/vedtak/fritekstdokumenter" : {
       "get" : {
         "description" : "Hent liste over dokumenter flagget med at de inneholder informasjon som ikke er/kan bli punsjet",
