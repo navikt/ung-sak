@@ -25,7 +25,7 @@ create table if not exists UNG_UTTAK_PERIODE
     );
 
 alter table UNG_GR add column ung_uttak_perioder_id BIGINT;
-alter table UNG_GR add constraint FK_UNG_GR_UNG_UTTAK_PERIODER foreign key (ung_uttak_perioder_id) references UNG_UTTAK_PERIODER,
+alter table UNG_GR add constraint FK_UNG_GR_UNG_UTTAK_PERIODER foreign key (ung_uttak_perioder_id) references UNG_UTTAK_PERIODER;
 
 create sequence if not exists SEQ_UNG_UTTAK_PERIODE increment by 50 minvalue 1000000;
 create sequence if not exists SEQ_UNG_UTTAK_PERIODER increment by 50 minvalue 1000000;
