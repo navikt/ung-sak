@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.søskensak;
 import static no.nav.k9.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,7 +26,6 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 
 @Dependent
@@ -114,7 +114,7 @@ public class PleietrengendeUttaksprioritetMotAndrePleietrengende {
             .map(p -> new LocalDateSegment<>(
                 p.getBeregningsgrunnlagPeriodeFom(),
                 p.getBeregningsgrunnlagPeriodeTom(),
-                new Uttakprioritet(fagsak, behandlingOpt.get(), p.getBruttoPrÅr())))
+                new Uttakprioritet(behandlingOpt.get(), p.getBruttoPrÅr(), p.getBeregningsgrunnlag().getSkjæringstidspunkt())))
             .toList();
         return new LocalDateTimeline<>(bgSegmenter);
     }
@@ -137,32 +137,20 @@ public class PleietrengendeUttaksprioritetMotAndrePleietrengende {
     }
 
     public static final class Uttakprioritet implements Comparable<Uttakprioritet> {
-        private final Fagsak fagsak;
-        private final Behandling aktuellBehandling;
-        private BigDecimal bruttoBeregningsgrunnlag;
-
-        public Uttakprioritet(Fagsak fagsak, Behandling aktuellBehandling, BigDecimal bruttoBeregningsgrunnlag) {
-            this.fagsak = fagsak;
-            this.aktuellBehandling = aktuellBehandling;
-            this.bruttoBeregningsgrunnlag = bruttoBeregningsgrunnlag;
-        }
-
-        public Saksnummer getSaksnummer() {
-            return fagsak.getSaksnummer();
-        }
-
-        public Fagsak getFagsak() {
-            return fagsak;
-        }
-
         /**
          * Gir siste gjeldende behandling der kravet inngår.
          * <p>
          * Dette er den åpne behandlingen for søker, og siste besluttede
          * behandling for andre søkere.
          */
-        public Behandling getAktuellBehandling() {
-            return aktuellBehandling;
+        private final Behandling aktuellBehandling;
+        private final BigDecimal bruttoBeregningsgrunnlag;
+        private final LocalDate skjæringstidspunkt;
+
+        public Uttakprioritet(Behandling aktuellBehandling, BigDecimal bruttoBeregningsgrunnlag, LocalDate skjæringstidspunkt) {
+            this.aktuellBehandling = aktuellBehandling;
+            this.bruttoBeregningsgrunnlag = bruttoBeregningsgrunnlag;
+            this.skjæringstidspunkt = skjæringstidspunkt;
         }
 
         public UUID getAktuellBehandlingUuid() {
@@ -177,9 +165,21 @@ public class PleietrengendeUttaksprioritetMotAndrePleietrengende {
         public int compareTo(Uttakprioritet other) {
             final int result = other.bruttoBeregningsgrunnlag.compareTo(bruttoBeregningsgrunnlag); // Største først
             if (result == 0) {
-                return fagsak.getSaksnummer().compareTo(other.getFagsak().getSaksnummer());
+                return skjæringstidspunkt.compareTo(other.skjæringstidspunkt);
             }
             return result;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof Uttakprioritet that)) return false;
+            return Objects.equals(aktuellBehandling, that.aktuellBehandling) && Objects.equals(bruttoBeregningsgrunnlag, that.bruttoBeregningsgrunnlag);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(aktuellBehandling, bruttoBeregningsgrunnlag);
         }
     }
 
