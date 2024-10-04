@@ -31,6 +31,7 @@ import no.nav.k9.sak.typer.ArbeidsforholdRef;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.EksternArbeidsforholdRef;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
+import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
@@ -106,12 +107,13 @@ public class KompletthetForBeregningTjeneste {
             return perioderMedManglendeVedlegg;
         }
 
-        var inntektsmeldinger = iayTjeneste.hentInntektsmeldingerKommetTomBehandling(ref.getSaksnummer(), ref.getBehandlingId());
+        Set<Inntektsmelding> inntektsmeldinger = iayTjeneste.hentInntektsmeldingerKommetTomBehandling(ref.getSaksnummer(), ref.getBehandlingId());
 
         if (skalIgnorereInntektsmeldingUtenStp) {
-            var stp = vilkårsPerioder.stream().map(DatoIntervallEntitet::getFomDato).toList();
-            var ignorerteInntektsmeldinger = inntektsmeldinger.stream()
+            List<LocalDate> stp = vilkårsPerioder.stream().map(DatoIntervallEntitet::getFomDato).toList();
+            Set<JournalpostId> ignorerteInntektsmeldinger = inntektsmeldinger.stream()
                 .filter(im -> im.getStartDatoPermisjon().isPresent() && !stp.contains(im.getStartDatoPermisjon().get()))
+                .filter(im -> im.getKildesystem() != null && im.getKildesystem().equals("ARBEIDSGIVERPORTAL"))
                 .map(Inntektsmelding::getJournalpostId).collect(Collectors.toSet());
 
             inntektsmeldinger = inntektsmeldinger.stream().filter(im -> !ignorerteInntektsmeldinger.contains(im.getJournalpostId())).collect(Collectors.toSet());
