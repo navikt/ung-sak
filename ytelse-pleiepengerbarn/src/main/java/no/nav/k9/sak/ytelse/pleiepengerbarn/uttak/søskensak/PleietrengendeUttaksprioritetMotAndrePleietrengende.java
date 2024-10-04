@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.nav.folketrygdloven.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -21,9 +22,13 @@ import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
@@ -36,18 +41,21 @@ public class PleietrengendeUttaksprioritetMotAndrePleietrengende {
     private KalkulusTjeneste kalkulusTjeneste;
     private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
     private boolean søskensakPrioriteringEnabled;
+    private VilkårResultatRepository vilkårResultatRepository;
 
     @Inject
     public PleietrengendeUttaksprioritetMotAndrePleietrengende(FagsakRepository fagsakRepository,
                                                                BehandlingRepository behandlingRepository,
                                                                KalkulusTjeneste kalkulusTjeneste,
                                                                BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
-                                                               @KonfigVerdi(value = "SOKSENSAK_PRIORITERING_ENABLED", defaultVerdi = "false") boolean søskensakPrioriteringEnabled) {
+                                                               @KonfigVerdi(value = "SOKSENSAK_PRIORITERING_ENABLED", defaultVerdi = "false") boolean søskensakPrioriteringEnabled,
+                                                               VilkårResultatRepository vilkårResultatRepository) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.kalkulusTjeneste = kalkulusTjeneste;
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
         this.søskensakPrioriteringEnabled = søskensakPrioriteringEnabled;
+        this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
     public LocalDateTimeline<List<Uttakprioritet>> vurderUttakprioritetEgneSaker(Long fagsakId, boolean brukUbesluttedeData) {
@@ -96,6 +104,14 @@ public class PleietrengendeUttaksprioritetMotAndrePleietrengende {
             return fagsakTidslinje;
         }
 
+        var bgVilkårTidslinje = vilkårResultatRepository.hent(behandlingOpt.get().getId())
+            .getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
+            .stream()
+            .flatMap(v -> v.getPerioder().stream())
+            .filter(p -> Utfall.OPPFYLT.equals(p.getUtfall()))
+            .map(p -> new LocalDateTimeline<>(p.getFom(), p.getTom(), Boolean.TRUE))
+            .reduce(LocalDateTimeline.empty(), LocalDateTimeline::crossJoin);
+
         var beregningsgrunnlagPerioderGrunnlag = beregningPerioderGrunnlagRepository.hentGrunnlag(behandlingOpt.get().getId());
 
         var alleReferanser = beregningsgrunnlagPerioderGrunnlag.stream()
@@ -116,7 +132,7 @@ public class PleietrengendeUttaksprioritetMotAndrePleietrengende {
                 p.getBeregningsgrunnlagPeriodeTom(),
                 new Uttakprioritet(behandlingOpt.get(), p.getBruttoPrÅr(), p.getBeregningsgrunnlag().getSkjæringstidspunkt())))
             .toList();
-        return new LocalDateTimeline<>(bgSegmenter);
+        return new LocalDateTimeline<>(bgSegmenter).intersection(bgVilkårTidslinje);
     }
 
     private LocalDateSegmentCombinator<List<Uttakprioritet>, Uttakprioritet, List<Uttakprioritet>> sortertMedStørsteBgFørst() {
