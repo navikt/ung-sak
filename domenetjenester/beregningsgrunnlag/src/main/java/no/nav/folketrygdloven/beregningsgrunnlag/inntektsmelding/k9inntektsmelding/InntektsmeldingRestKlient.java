@@ -42,7 +42,7 @@ public class InntektsmeldingRestKlient {
     private CloseableHttpClient restClient;
     private URI endpoint;
     private URI opprettForespørselEndpoint;
-
+    private URI oppdaterSakEndpoint;
 
     protected InntektsmeldingRestKlient() {
         // cdi
@@ -64,20 +64,29 @@ public class InntektsmeldingRestKlient {
     private InntektsmeldingRestKlient(URI endpoint) {
         this.endpoint = endpoint;
         this.opprettForespørselEndpoint = toUri("/api/foresporsel/opprett");
+        this.oppdaterSakEndpoint = toUri("/api/foresporsel/oppdater-sak");
     }
 
 
     public void opprettForespørsel(OpprettForespørselRequest request) {
         var endpoint = opprettForespørselEndpoint;
         try {
-            opprett(endpoint, innteksmeldingJsonWriter.writeValueAsString(request));
+            utførKall(endpoint, innteksmeldingJsonWriter.writeValueAsString(request));
         } catch (JsonProcessingException e) {
             throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
         }
     }
 
+    public void oppdaterSak(OppdaterForespørslerISakRequest request) {
+        var endpoint = oppdaterSakEndpoint;
+        try {
+            utførKall(endpoint, innteksmeldingJsonWriter.writeValueAsString(request));
+        } catch (JsonProcessingException e) {
+            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
+        }
+    }
 
-    private void opprett(URI endpoint, String json) {
+    private void utførKall(URI endpoint, String json) {
         try {
             utfør(endpoint, json);
         } catch (IOException e) {
@@ -92,7 +101,7 @@ public class InntektsmeldingRestKlient {
             int responseCode = httpResponse.getStatusLine().getStatusCode();
             if (!isOk(responseCode)) {
                 if (responseCode == HttpStatus.SC_NOT_MODIFIED) {
-                    log.warn("Kall for opprettelse opprettet ingen forespørsel");
+                    log.warn("Kall til k9-inntektsmelding opprettet ingen forespørsel");
                 } else if (responseCode != HttpStatus.SC_NO_CONTENT && responseCode != HttpStatus.SC_ACCEPTED) {
                     String responseBody = EntityUtils.toString(httpResponse.getEntity());
                     String feilmelding = "Kunne ikke utføre kall til k9-inntektsmelding,"
