@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -23,10 +24,10 @@ import jakarta.persistence.EntityManager;
 import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagGrunnlagBuilder;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -47,7 +48,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeB
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
-import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
@@ -120,6 +121,47 @@ class PleietrengendeUttaksprioritetMotAndrePleietrengendeTest {
         assertThat(segmenter.getFirst().getValue().getFirst().getAktuellBehandlingUuid()).isEqualTo(behandlingBarn2.getUuid());
         assertThat(segmenter.getFirst().getFom()).isEqualTo(stp);
         assertThat(segmenter.getFirst().getTom()).isEqualTo(vilkårPeriodeTom);
+    }
+
+    @Test
+    void skal_returnere_en_sak_dersom_annen_fagsak_ikke_har_beregningsgrunnlag_og_denne_har_to_perioder() {
+        var stp1 = LocalDate.now().minusDays(20);
+        var vilkårPeriodeTom1 = stp1.plusDays(7);
+        var eksternReferanse1 = UUID.randomUUID();
+
+        var stp2 = LocalDate.now();
+        var vilkårPeriodeTom2 = stp2.plusDays(7);
+        var eksternReferanse2 = UUID.randomUUID();
+
+        initVilkår(
+            List.of(
+                DatoIntervallEntitet.fraOgMedTilOgMed(stp1, vilkårPeriodeTom1),
+                DatoIntervallEntitet.fraOgMedTilOgMed(stp2, vilkårPeriodeTom2)),
+            behandlingBarn2);
+
+
+        opprettBG(List.of(new BGInput(eksternReferanse1, stp1, BigDecimal.TEN),
+            new BGInput(eksternReferanse2, stp2, BigDecimal.valueOf(20))), behandlingBarn2);
+
+        var prio = uttaksprioritet.vurderUttakprioritetEgneSaker(fagsakBarn2.getId(), false);
+
+
+        var segmenter = prio.toSegments();
+        assertThat(segmenter.size()).isEqualTo(2);
+        var segmentIterator = segmenter.iterator();
+        var førsteSegment = segmentIterator.next();
+        assertThat(førsteSegment.getValue().size()).isEqualTo(1);
+        assertThat(førsteSegment.getValue().getFirst().getAktuellBehandlingUuid()).isEqualTo(behandlingBarn2.getUuid());
+        assertThat(førsteSegment.getValue().getFirst().getBruttoBeregningsgrunnlag().compareTo(BigDecimal.TEN)).isEqualTo(0);
+        assertThat(førsteSegment.getFom()).isEqualTo(stp1);
+        assertThat(førsteSegment.getTom()).isEqualTo(vilkårPeriodeTom1);
+
+        var andreSegment = segmentIterator.next();
+        assertThat(andreSegment.getValue().size()).isEqualTo(1);
+        assertThat(andreSegment.getValue().getFirst().getAktuellBehandlingUuid()).isEqualTo(behandlingBarn2.getUuid());
+        assertThat(andreSegment.getValue().getFirst().getBruttoBeregningsgrunnlag().compareTo(BigDecimal.valueOf(20))).isEqualTo(0);
+        assertThat(andreSegment.getFom()).isEqualTo(stp2);
+        assertThat(andreSegment.getTom()).isEqualTo(vilkårPeriodeTom2);
     }
 
     @Test
@@ -273,27 +315,43 @@ class PleietrengendeUttaksprioritetMotAndrePleietrengendeTest {
 
 
     private void opprettBG(UUID eksternReferanse, LocalDate stp, BigDecimal bruttoBg, Behandling behandling) {
-        beregningPerioderGrunnlagRepository.lagre(behandling.getId(), new BeregningsgrunnlagPeriode(eksternReferanse, stp));
-        var beregningsgrunnlag = Beregningsgrunnlag.builder().medSkjæringstidspunkt(stp)
-            .leggTilBeregningsgrunnlagPeriode(no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode.builder()
-                .medBeregningsgrunnlagPeriode(stp, TIDENES_ENDE)
-                .medBruttoPrÅr(bruttoBg))
-            .build();
-        var beregningsgrunnlagGrunnlagBuilder = BeregningsgrunnlagGrunnlagBuilder.oppdatere(Optional.empty()).medBeregningsgrunnlag(
-            beregningsgrunnlag
-        );
+        opprettBG(List.of(new BGInput(eksternReferanse, stp, bruttoBg)), behandling);
+    }
+
+    private void opprettBG(List<BGInput> input, Behandling behandling) {
+        List<BeregningsgrunnlagGrunnlag> grunnlag = new ArrayList<>();
+        input.forEach(bgInput -> {
+            beregningPerioderGrunnlagRepository.lagre(behandling.getId(), new BeregningsgrunnlagPeriode(bgInput.referanse(), bgInput.skjæringstidspunkt()));
+            var beregningsgrunnlag = Beregningsgrunnlag.builder().medSkjæringstidspunkt(bgInput.skjæringstidspunkt())
+                .leggTilBeregningsgrunnlagPeriode(no.nav.folketrygdloven.beregningsgrunnlag.modell.BeregningsgrunnlagPeriode.builder()
+                    .medBeregningsgrunnlagPeriode(bgInput.skjæringstidspunkt(), TIDENES_ENDE)
+                    .medBruttoPrÅr(bgInput.bruttoBg()))
+                .build();
+            var beregningsgrunnlagGrunnlagBuilder = BeregningsgrunnlagGrunnlagBuilder.oppdatere(Optional.empty()).medBeregningsgrunnlag(
+                beregningsgrunnlag
+            );
+            grunnlag.add(beregningsgrunnlagGrunnlagBuilder.build(BeregningsgrunnlagTilstand.VURDERT_VILKÅR));
+        });
+
         when(kalkulusTjeneste.hentGrunnlag(ArgumentMatchers.eq(BehandlingReferanse.fra(behandling)),
-            ArgumentMatchers.argThat(a -> a.contains(new BgRef(eksternReferanse, stp))))).thenReturn(
-            List.of(beregningsgrunnlagGrunnlagBuilder.build(BeregningsgrunnlagTilstand.VURDERT_VILKÅR))
-        );
+            ArgumentMatchers.argThat(a -> a.stream().map(BgRef::getRef).allMatch(r -> input.stream().anyMatch(i -> i.referanse().equals(r))))))
+            .thenReturn(
+                grunnlag
+            );
     }
 
     private void initVilkår(LocalDate stp, LocalDate vilkårPeriodeTom, Behandling behandling) {
+        initVilkår(List.of(DatoIntervallEntitet.fraOgMedTilOgMed(stp, vilkårPeriodeTom)), behandling);
+    }
+
+    private void initVilkår(List<DatoIntervallEntitet> perioder, Behandling behandling) {
         VilkårResultatBuilder vilkårResultatBuilder = Vilkårene.builder();
-        vilkårResultatBuilder.leggTil(vilkårResultatBuilder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
+        var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        perioder.forEach(periode -> vilkårBuilder
             .leggTil(new VilkårPeriodeBuilder()
                 .medUtfall(Utfall.OPPFYLT)
-                .medPeriode(stp, vilkårPeriodeTom)));
+                .medPeriode(periode.getFomDato(), periode.getTomDato())));
+        vilkårResultatBuilder.leggTil(vilkårBuilder);
         vilkårResultatRepository.lagre(behandling.getId(), vilkårResultatBuilder.build());
     }
 
@@ -304,6 +362,9 @@ class PleietrengendeUttaksprioritetMotAndrePleietrengendeTest {
             .medIverksettingStatus(IverksettingStatus.IVERKSATT)
             .build();
         return behandlingVedtak;
+    }
+
+    private record BGInput(UUID referanse, LocalDate skjæringstidspunkt, BigDecimal bruttoBg) {
     }
 
 }

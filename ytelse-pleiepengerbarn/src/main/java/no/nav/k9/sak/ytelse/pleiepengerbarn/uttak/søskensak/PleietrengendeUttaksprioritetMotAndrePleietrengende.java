@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -17,9 +18,11 @@ import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.BgRef;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
+import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -104,9 +107,9 @@ public class PleietrengendeUttaksprioritetMotAndrePleietrengende {
             return fagsakTidslinje;
         }
 
-        var bgVilkårTidslinje = vilkårResultatRepository.hent(behandlingOpt.get().getId())
-            .getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR)
+        var bgVilkårTidslinje = vilkårResultatRepository.hentHvisEksisterer(behandlingOpt.get().getId())
             .stream()
+            .flatMap(v -> v.getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).stream())
             .flatMap(v -> v.getPerioder().stream())
             .filter(p -> Utfall.OPPFYLT.equals(p.getUtfall()))
             .map(p -> new LocalDateTimeline<>(p.getFom(), p.getTom(), Boolean.TRUE))
@@ -123,16 +126,14 @@ public class PleietrengendeUttaksprioritetMotAndrePleietrengende {
 
         var bgSegmenter = alleBeregningsgrunnlag.stream()
             .flatMap(bg -> bg.getBeregningsgrunnlag().stream())
-            .flatMap(bg -> bg.getBeregningsgrunnlagPerioder()
-                .stream()
-                .filter(p -> p.getPeriode().getFomDato().isEqual(bg.getSkjæringstidspunkt()) ||
-                    !p.getPeriode().getTomDato().isEqual(TIDENES_ENDE)))
+            .sorted(Comparator.comparing(Beregningsgrunnlag::getSkjæringstidspunkt))
+            .flatMap(bg -> bg.getBeregningsgrunnlagPerioder().stream())
             .map(p -> new LocalDateSegment<>(
                 p.getBeregningsgrunnlagPeriodeFom(),
                 p.getBeregningsgrunnlagPeriodeTom(),
                 new Uttakprioritet(behandlingOpt.get(), p.getBruttoPrÅr(), p.getBeregningsgrunnlag().getSkjæringstidspunkt())))
             .toList();
-        return new LocalDateTimeline<>(bgSegmenter).intersection(bgVilkårTidslinje);
+        return new LocalDateTimeline<>(bgSegmenter, StandardCombinators::coalesceRightHandSide).intersection(bgVilkårTidslinje);
     }
 
     private LocalDateSegmentCombinator<List<Uttakprioritet>, Uttakprioritet, List<Uttakprioritet>> sortertMedStørsteBgFørst() {
