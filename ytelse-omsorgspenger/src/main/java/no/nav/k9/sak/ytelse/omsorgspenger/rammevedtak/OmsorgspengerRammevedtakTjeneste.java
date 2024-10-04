@@ -43,4 +43,11 @@ public class OmsorgspengerRammevedtakTjeneste {
         return årskvantumTjeneste.hentRammevedtak(new LukketPeriode(fagsakperiode.getFomDato(), fagsakperiode.getTomDato()), behandling);
     }
 
+    public RammevedtakResponse hentRammevedtakV1(BehandlingUuidDto behandlingUuid) {
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
+
+        DatoIntervallEntitet fagsakperiode = behandling.getFagsak().getPeriode();
+        return årskvantumTjeneste.hentRammevedtakV1(new LukketPeriode(fagsakperiode.getFomDato(), fagsakperiode.getTomDato()), behandling);
+    }
+
 }

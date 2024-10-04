@@ -33,10 +33,20 @@ class VurderNødvendighetTidslinjeUtleder {
         Objects.requireNonNull(tidslinjeTilVurdering);
 
         var perioderSomSkalAvslås = lagTidslinjeMedIkkeGodkjentTidligereVilkår(vilkårene, tidslinjeTilVurdering);
+        var manglendePerioder = lagTidslinjeMedMangledePerioderFraTidligereVilkår(vilkårene, tidslinjeTilVurdering);
+
+        var oppdatertTidslinjeTilVurdering = tidslinjeTilVurdering.combine(manglendePerioder, StandardCombinators::alwaysTrueForMatch, LocalDateTimeline.JoinStyle.CROSS_JOIN);
 
         LocalDateTimeline<NødvendighetGodkjenningStatus> tidslinjeMedNødvendighetsgodkjenning = lagTidslinjeMedNødvendighetsGodkjenning(perioderFraSøknad, vurdertOpplæringGrunnlag);
 
-        return tidslinjeMedNødvendighetsgodkjenning.intersection(tidslinjeTilVurdering.disjoint(perioderSomSkalAvslås));
+        return tidslinjeMedNødvendighetsgodkjenning.intersection(oppdatertTidslinjeTilVurdering.disjoint(perioderSomSkalAvslås));
+    }
+
+    private LocalDateTimeline<Boolean> lagTidslinjeMedMangledePerioderFraTidligereVilkår(Vilkårene vilkårene, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
+        var godkjentePerioderForGjennomførtOpplæring = VilkårTidslinjeUtleder.utledOppfylt(vilkårene, VilkårType.GJENNOMGÅ_OPPLÆRING);
+
+        return godkjentePerioderForGjennomførtOpplæring
+            .disjoint(tidslinjeTilVurdering);
     }
 
     private LocalDateTimeline<Boolean> lagTidslinjeMedIkkeGodkjentTidligereVilkår(Vilkårene vilkårene, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {

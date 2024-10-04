@@ -261,7 +261,7 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
 
     private Map<Tuple<AktivitetStatus, Optional<String>>, Optional<LocalDate>> finnSisteUtbetalingdatoForAlleAndeler(List<BeregningsresultatPeriode> beregningsresultatPerioder) {
         Collector<BeregningsresultatAndel, ?, Optional<LocalDate>> maxTomDatoCollector = Collectors.mapping(
-            andel -> andel.getBeregningsresultatPeriode().getBeregningsresultatPeriodeTom(),
+            BeregningsresultatAndel::getTom,
             Collectors.maxBy(Comparator.naturalOrder()));
         return beregningsresultatPerioder.stream()
             .flatMap(brp -> brp.getBeregningsresultatAndelList().stream())
@@ -312,7 +312,7 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
         if (harUlikeArbeidsforholdIder
             || a.getUtbetalingsgrad().compareTo(b.getUtbetalingsgrad()) != 0
             || a.getStillingsprosent().compareTo(b.getStillingsprosent()) != 0
-            || !a.getBeregningsresultatPeriode().equals(b.getBeregningsresultatPeriode())) {
+            || !a.getPeriode().equals(b.getPeriode())) {
             throw new IllegalStateException(
                 "Utviklerfeil: Andeler som slås sammen skal ikke ha ulikt arbeidsforhold, periode, stillingsprosent eller utbetalingsgrad");
         }

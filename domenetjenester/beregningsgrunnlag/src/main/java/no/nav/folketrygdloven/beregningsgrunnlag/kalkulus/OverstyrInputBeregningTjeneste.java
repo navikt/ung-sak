@@ -2,6 +2,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.kalkulus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NavigableSet;
@@ -290,7 +291,7 @@ public class OverstyrInputBeregningTjeneste {
     }
 
     private static Integer finnInntektFraInntektsmeldingtidslinje(LocalDate migrertStp, LocalDateTimeline<Set<Inntektsmelding>> inntektsmeldingerForArbeidsgiver) {
-        var inntektsmeldingerVedStart = inntektsmeldingerForArbeidsgiver.intersection(new LocalDateInterval(migrertStp, migrertStp)).toSegments().iterator().next().getValue();
+        var inntektsmeldingerVedStart = finnInntektsmeldingerVedStpForMigrering(migrertStp, inntektsmeldingerForArbeidsgiver);
         var inntekt = inntektsmeldingerVedStart.stream()
             .map(Inntektsmelding::getInntektBeløp)
             .map(Beløp::getVerdi)
@@ -299,6 +300,20 @@ public class OverstyrInputBeregningTjeneste {
             .map(BigDecimal::intValue)
             .orElse(0);
         return inntekt;
+    }
+
+    private static Set<Inntektsmelding> finnInntektsmeldingerVedStpForMigrering(LocalDate migrertStp, LocalDateTimeline<Set<Inntektsmelding>> inntektsmeldingerForArbeidsgiver) {
+        var overlappendeSegmenter = inntektsmeldingerForArbeidsgiver.intersection(new LocalDateInterval(migrertStp, migrertStp)).toSegments();
+
+        if (overlappendeSegmenter.size() > 1) {
+            throw new IllegalStateException("Forventer maks ett segment overlappende med en dato");
+        }
+
+        if (overlappendeSegmenter.isEmpty()) {
+            return Collections.emptySet();
+        }
+
+        return overlappendeSegmenter.getFirst().getValue();
     }
 
     private static LocalDate utledOpphørRefujonFraRefusjontidslinje(LocalDateTimeline<BigDecimal> refusjonTidslinje) {
