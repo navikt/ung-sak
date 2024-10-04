@@ -297,7 +297,7 @@ spec:
     - name: SEND_INNTEKTSMELDING_FORESPORSEL
       value: "true"
     - name: ENABLE_INNHENT_INNTEKTSMELDING_STEG
-      value: "true"
+      value: "false"
     - name: OMP_RAMMEVEDTAK_SAMMENSTILLNG_AARSKVANTUM
       value: "true"
     - name: ALDERSVILKAR_I_KRONISK_SYK
