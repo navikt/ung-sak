@@ -45,11 +45,11 @@
         <swagger.version>2.2.17</swagger.version>
         <junit.version>5.11.1</junit.version>
         <k9format.version>9.6.0</k9format.version>
-        <jackson.version>2.17.2</jackson.version>
+        <jackson.version>2.18.0</jackson.version>
         <asm.version>9.7</asm.version>
         <kotlin-stdlib.version>2.0.20</kotlin-stdlib.version>
         <jandex.version>3.2.2</jandex.version>
-        <flyway.version>10.18.2</flyway.version>
+        <flyway.version>10.19.0</flyway.version>
 
     </properties>
 
@@ -496,7 +496,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>5.13.0</version>
+                <version>5.14.1</version>
             </dependency>
             <dependency>
                 <groupId>org.hamcrest</groupId>
@@ -585,7 +585,7 @@
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>io.github.classgraph</groupId>
                 <artifactId>classgraph</artifactId>
-                <version>4.8.176</version>
+                <version>4.8.177</version>
             </dependency>
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->
