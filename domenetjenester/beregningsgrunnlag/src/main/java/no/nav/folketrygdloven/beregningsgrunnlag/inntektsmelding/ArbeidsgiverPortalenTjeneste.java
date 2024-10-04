@@ -1,15 +1,22 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding;
 
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.k9inntektsmelding.OppdaterForespørslerISakMapper;
+import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.k9inntektsmelding.OppdaterForespørslerISakTask;
 import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.k9inntektsmelding.SendInntektsmeldingForespørselTask;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.etterlysning.BestiltEtterlysning;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 
 @Dependent
 public class ArbeidsgiverPortalenTjeneste {
@@ -21,7 +28,8 @@ public class ArbeidsgiverPortalenTjeneste {
     }
 
     @Inject
-    public ArbeidsgiverPortalenTjeneste(ProsessTaskTjeneste prosessTaskTjeneste, @KonfigVerdi(value = "SEND_INNTEKTSMELDING_FORESPORSEL", defaultVerdi = "false") boolean skalSendeForesporsel) {
+    public ArbeidsgiverPortalenTjeneste(ProsessTaskTjeneste prosessTaskTjeneste,
+                                        @KonfigVerdi(value = "SEND_INNTEKTSMELDING_FORESPORSEL", defaultVerdi = "false") boolean skalSendeForesporsel) {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.skalSendeForesporsel = skalSendeForesporsel;
     }
@@ -42,4 +50,16 @@ public class ArbeidsgiverPortalenTjeneste {
             });
     }
 
+    public void oppdaterInntektsmeldingforespørslerISak(Map<DatoIntervallEntitet, List<Arbeidsgiver>> forespørselMap, Behandling behandling) {
+        if (!skalSendeForesporsel) {
+            return;
+        }
+
+        var request = OppdaterForespørslerISakMapper.mapTilRequest(forespørselMap, behandling);
+        var prosessTaskData = ProsessTaskData.forProsessTask(OppdaterForespørslerISakTask.class);
+        prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId());
+        prosessTaskData.setPayload(request.toString());
+        prosessTaskData.setCallIdFraEksisterende();
+        prosessTaskTjeneste.lagre(prosessTaskData);
+    }
 }
