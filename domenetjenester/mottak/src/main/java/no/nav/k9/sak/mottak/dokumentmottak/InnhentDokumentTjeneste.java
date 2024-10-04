@@ -3,6 +3,7 @@ package no.nav.k9.sak.mottak.dokumentmottak;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -39,7 +40,11 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRevurderingRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.mottak.Behandlingsoppretter;
+import no.nav.k9.sak.trigger.ProsessTriggereRepository;
+import no.nav.k9.sak.trigger.Trigger;
+import no.nav.k9.søknad.felles.type.Periode;
 
 @Dependent
 public class InnhentDokumentTjeneste {
@@ -55,6 +60,7 @@ public class InnhentDokumentTjeneste {
     private final BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
     private final ProsessTaskTjeneste prosessTaskTjeneste;
     private final FagsakProsessTaskRepository fagsakProsessTaskRepository;
+    private final ProsessTriggereRepository prosessTriggereRepository;
 
 
     @Inject
@@ -64,7 +70,7 @@ public class InnhentDokumentTjeneste {
                                    BehandlingRepositoryProvider repositoryProvider,
                                    BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
                                    ProsessTaskTjeneste prosessTaskTjeneste,
-                                   FagsakProsessTaskRepository fagsakProsessTaskRepository) {
+                                   FagsakProsessTaskRepository fagsakProsessTaskRepository, ProsessTriggereRepository prosessTriggereRepository) {
         this.mottakere = mottakere;
         this.dokumentMottakerFelles = dokumentMottakerFelles;
         this.behandlingsoppretter = behandlingsoppretter;
@@ -74,6 +80,7 @@ public class InnhentDokumentTjeneste {
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
+        this.prosessTriggereRepository = prosessTriggereRepository;
     }
 
     public void mottaDokument(Fagsak fagsak, Collection<MottattDokument> mottattDokument) {
@@ -92,11 +99,15 @@ public class InnhentDokumentTjeneste {
         ProsessTaskGruppe taskGruppe = new ProsessTaskGruppe();
         if (resultat.nyopprettet) {
             taskGruppe.addNesteSekvensiell(asynkStartBehandling(resultat.behandling));
-        } else if (prosessenStårStillePåAksjonspunktForSøknadsfrist(resultat.behandling)) {
-            taskGruppe.addNesteSekvensiell(restartBehandling(resultat.behandling, behandlingÅrsak));
         } else {
             taskGruppe = behandlingProsesseringTjeneste.opprettTaskGruppeForGjenopptaOppdaterFortsett(resultat.behandling, false, false);
         }
+
+        // Må kjøres etter opprettTaskGruppeForGjenopptaOppdaterFortsett for å få diff
+        if (prosessenStårStillePåAksjonspunktForSøknadsfrist(resultat.behandling)) {
+            opprettTrigger(brevkodeMap, resultat.behandling);
+        }
+
         lagreDokumenter(brevkodeMap, resultat.behandling);
 
         if (taskGruppe == null) {
@@ -104,6 +115,41 @@ public class InnhentDokumentTjeneste {
         }
         // Lagrer tasks til slutt for å sikre at disse blir kjørt etter at dokumentasjon er lagret
         prosessTaskTjeneste.lagre(taskGruppe);
+    }
+
+    private void opprettTrigger(Map<Brevkode, List<MottattDokument>> brevkodeMap, Behandling behandling) {
+        var res = hentÅrsakOgPerioder(brevkodeMap, behandling);
+        var triggere = res.entrySet().stream().flatMap(e -> e.getValue().stream()
+            .map(v -> opprettTrigger(e, v))).collect(Collectors.toSet());
+        prosessTriggereRepository.leggTil(behandling.getId(), triggere);
+    }
+
+    private static Trigger opprettTrigger(Map.Entry<BehandlingÅrsakType, Set<Periode>> e, Periode v) {
+        return new Trigger(e.getKey(), DatoIntervallEntitet.fraOgMedTilOgMed(v.getFraOgMed(), v.getTilOgMed()));
+    }
+
+    private Map<BehandlingÅrsakType, Set<Periode>> hentÅrsakOgPerioder(Map<Brevkode, List<MottattDokument>> brevkodeMap, Behandling behandling) {
+        Map<BehandlingÅrsakType, Set<Periode>> res = new HashMap<>();
+        brevkodeMap.keySet()
+            .stream()
+            .sorted(Brevkode.COMP_REKKEFØLGE)
+            .forEach(key -> {
+                Dokumentmottaker dokumentmottaker = getDokumentmottaker(key, behandling.getFagsak());
+                var perioderMedÅrsak = dokumentmottaker.hentPerioderMedÅrsak(brevkodeMap.get(key), behandling);
+                leggTil(perioderMedÅrsak, res);
+            });
+        return res;
+    }
+
+    private static void leggTil(Map<BehandlingÅrsakType, Set<Periode>> behandlingÅrsakTypeSetMap, Map<BehandlingÅrsakType, Set<Periode>> res) {
+        behandlingÅrsakTypeSetMap.entrySet().forEach(entry -> {
+            if (res.containsKey(entry.getKey())) {
+                var eksisterende = res.get(entry.getKey());
+                eksisterende.addAll(entry.getValue());
+            } else {
+                res.put(entry.getKey(), entry.getValue());
+            }
+        });
     }
 
     private ProsessTaskData restartBehandling(Behandling behandling, BehandlingÅrsakType behandlingÅrsak) {

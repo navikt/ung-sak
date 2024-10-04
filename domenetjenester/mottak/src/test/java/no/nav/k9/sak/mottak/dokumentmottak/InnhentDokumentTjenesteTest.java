@@ -47,6 +47,7 @@ import no.nav.k9.sak.mottak.Behandlingsoppretter;
 import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.k9.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.k9.sak.trigger.ProsessTriggereRepository;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 
@@ -79,6 +80,8 @@ public class InnhentDokumentTjenesteTest {
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
     @Mock
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
+    @Mock
+    private ProsessTriggereRepository prosessTriggereRepository;
 
     private InnhentDokumentTjeneste innhentDokumentTjeneste;
     private DokumentmottakerFelles dokumentmottakerFelles;
@@ -100,7 +103,8 @@ public class InnhentDokumentTjenesteTest {
             repositoryProvider,
             behandlingProsesseringTjeneste,
             prosessTaskTjeneste,
-            fagsakProsessTaskRepository));
+            fagsakProsessTaskRepository,
+            prosessTriggereRepository));
 
         OrganisasjonsEnhet enhet = new OrganisasjonsEnhet("0312", "enhetNavn");
         when(behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(any(Fagsak.class))).thenReturn(enhet);

@@ -77,7 +77,7 @@ class SøknadOversetter {
         return Optional.of(new Periode(fom, tom));
     }
 
-    private List<Periode> hentAlleSøknadsperioder(PleiepengerSyktBarn ytelse) {
+    public List<Periode> hentAlleSøknadsperioder(PleiepengerSyktBarn ytelse) {
         final LocalDateTimeline<Boolean> kompletteSøknadsperioderTidslinje = tilTidslinje(ytelse.getSøknadsperiodeList());
         final var endringsperioder = ytelse.getEndringsperiode();
         final LocalDateTimeline<Boolean> endringssøknadsperioderTidslinje = tilTidslinje(endringsperioder);
@@ -93,7 +93,7 @@ class SøknadOversetter {
         ).compress();
     }
 
-    private PerioderFraSøknad getPerioderFraSøknad(PleiepengerSyktBarn ytelse, JournalpostId journalpostId) {
+    public PerioderFraSøknad getPerioderFraSøknad(PleiepengerSyktBarn ytelse, JournalpostId journalpostId) {
         var mapper = new MapSøknadUttakPerioder(tpsTjeneste);
         return new PerioderFraSøknad(journalpostId,
             mapper.mapUttak(ytelse.getUttak()),

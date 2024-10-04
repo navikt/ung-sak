@@ -5,9 +5,13 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BA
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -110,6 +114,19 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
         }
     }
 
+    @Override
+    public Map<BehandlingÅrsakType, Set<Periode>> hentPerioderMedÅrsak(Collection<MottattDokument> mottattDokument, Behandling behandling) {
+        var resultat = new HashMap<BehandlingÅrsakType, Set<Periode>>();
+        for (MottattDokument dokument : mottattDokument) {
+            Søknad søknad = søknadParser.parseSøknad(dokument);
+            var perioder = pleiepengerBarnSoknadOversetter.hentAlleSøknadsperioder(søknad.getYtelse());
+            var eksisterendePerioder = resultat.getOrDefault(getBehandlingÅrsakType(), new HashSet<>());
+            eksisterendePerioder.addAll(perioder);
+            resultat.put(getBehandlingÅrsakType(), eksisterendePerioder);
+        }
+        return resultat;
+    }
+
     private LinkedHashSet<MottattDokument> sorterSøknadsdokumenter(Collection<MottattDokument> dokumenter) {
         return dokumenter
             .stream()
@@ -196,6 +213,10 @@ class DokumentmottakerPleiepengerSyktBarnSøknad implements Dokumentmottaker {
 
     @Override
     public BehandlingÅrsakType getBehandlingÅrsakType(Brevkode brevkode) {
+        return getBehandlingÅrsakType();
+    }
+
+    private static BehandlingÅrsakType getBehandlingÅrsakType() {
         return BehandlingÅrsakType.RE_ENDRING_FRA_BRUKER;
     }
 }
