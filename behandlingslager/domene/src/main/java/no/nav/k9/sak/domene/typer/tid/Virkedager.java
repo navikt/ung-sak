@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.beregning.regler.feriepenger;
+package no.nav.k9.sak.domene.typer.tid;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;

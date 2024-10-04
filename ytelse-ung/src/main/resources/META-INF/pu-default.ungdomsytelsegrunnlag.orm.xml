@@ -7,9 +7,13 @@
     <sequence-generator name="SEQ_UNG_GR" allocation-size="50" sequence-name="SEQ_UNG_GR"/>
     <sequence-generator name="SEQ_UNG_SATS_PERIODER" allocation-size="50" sequence-name="SEQ_UNG_SATS_PERIODER"/>
     <sequence-generator name="SEQ_UNG_SATS_PERIODE" allocation-size="50" sequence-name="SEQ_UNG_SATS_PERIODE"/>
+    <sequence-generator name="SEQ_UNG_UTTAK_PERIODER" allocation-size="50" sequence-name="SEQ_UNG_UTTAK_PERIODER"/>
+    <sequence-generator name="SEQ_UNG_UTTAK_PERIODE" allocation-size="50" sequence-name="SEQ_UNG_UTTAK_PERIODE"/>
 
     <entity class="no.nav.k9.sak.ytelse.ung.beregning.UngdomsytelseGrunnlag"/>
     <entity class="no.nav.k9.sak.ytelse.ung.beregning.UngdomsytelseSatsPerioder"/>
     <entity class="no.nav.k9.sak.ytelse.ung.beregning.UngdomsytelseSatsPeriode"/>
+    <entity class="no.nav.k9.sak.ytelse.ung.uttak.UngdomsytelseUttakPerioder"/>
+    <entity class="no.nav.k9.sak.ytelse.ung.uttak.UngdomsytelseUttakPeriode"/>
 
 </entity-mappings>
