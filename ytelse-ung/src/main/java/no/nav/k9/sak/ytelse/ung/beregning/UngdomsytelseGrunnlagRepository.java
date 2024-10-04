@@ -85,6 +85,9 @@ public class UngdomsytelseGrunnlagRepository {
         oppdatertGrunnlag.setBehandlingId(behandlingId);
 
         entityManager.persist(oppdatertGrunnlag.getSatsPerioder());
+        if (oppdatertGrunnlag.getUttakPerioder() != null) {
+            entityManager.persist(oppdatertGrunnlag.getUttakPerioder());
+        }
         entityManager.persist(oppdatertGrunnlag);
         entityManager.flush();
     }

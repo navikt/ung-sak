@@ -5,7 +5,9 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Period;
 import java.util.List;
+import java.util.stream.Stream;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -63,6 +65,13 @@ public class UngdomsytelseBeregneYtelseSteg implements BeregneYtelseSteg {
         var utbetalingsgradTidslinje = ungdomsytelseGrunnlag.map(UngdomsytelseGrunnlag::getUtbetalingsgradTidslinje).orElse(LocalDateTimeline.empty());
 
         var resultatTidslinje = satsTidslinje.intersection(utbetalingsgradTidslinje, sammenstillSatsOgGradering());
+
+
+        // stopper periodisering her for å unngå 'evigvarende' ekspansjon -
+        // tar første av potensielle maks datoer som berører intersection av de to tidslinjene.
+        var minsteMaksDato = Stream.of(satsTidslinje.getMaxLocalDate(), utbetalingsgradTidslinje.getMaxLocalDate()).sorted().findFirst().orElseThrow();
+        // Splitter på år, pga chk_br_andel_samme_aar constraint i database
+        resultatTidslinje = resultatTidslinje.splitAtRegular(utbetalingsgradTidslinje.getMinLocalDate().withDayOfYear(1), minsteMaksDato, Period.ofYears(1));
 
         var beregningsresultatEntitet = BeregningsresultatEntitet.builder()
             .medRegelInput(mapTilRegelInput(satsTidslinje, utbetalingsgradTidslinje))
