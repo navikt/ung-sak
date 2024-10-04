@@ -50,7 +50,6 @@ public class RyddOgGjenopprettBeregningTjeneste {
     private final GjenopprettPerioderSomIkkeVurderesTjeneste gjenopprettPerioderSomIkkeVurderesTjeneste;
     private final VilkårResultatRepository vilkårResultatRepository;
     private final Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste;
-    private final boolean enableFjernPerioder;
     private final boolean validerIngenLoseReferanser;
 
     @Inject
@@ -61,7 +60,6 @@ public class RyddOgGjenopprettBeregningTjeneste {
                                               GjenopprettPerioderSomIkkeVurderesTjeneste gjenopprettPerioderSomIkkeVurderesTjeneste, VilkårResultatRepository vilkårResultatRepository,
                                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste,
                                               ValiderAktiveReferanserTjeneste validerAktiveReferanserTjeneste,
-                                              @KonfigVerdi(value = "FJERN_VILKARSPERIODER_BEREGNING", defaultVerdi = "false") boolean enableFjernPerioder,
                                               @KonfigVerdi(value = "VALIDER_KALKULUS_REFERANSER", defaultVerdi = "false") boolean validerIngenLoseReferanser
     ) {
         this.behandlingRepository = behandlingRepository;
@@ -71,7 +69,6 @@ public class RyddOgGjenopprettBeregningTjeneste {
         this.gjenopprettPerioderSomIkkeVurderesTjeneste = gjenopprettPerioderSomIkkeVurderesTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
-        this.enableFjernPerioder = enableFjernPerioder;
         this.validerAktiveReferanserTjeneste = validerAktiveReferanserTjeneste;
         this.validerIngenLoseReferanser = validerIngenLoseReferanser;
     }
@@ -114,15 +111,12 @@ public class RyddOgGjenopprettBeregningTjeneste {
     }
 
     /**
-     * Fjerner perioder som er avslått i definerende vilkår no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste#definerendeVilkår() og initierer perioder som er innvilget dersom de ikke eksisterer
+     * Fjerner perioder som er avslått og initierer perioder som er innvilget dersom de ikke eksisterer
      * <p>
      *
      * @param behandlingReferanse Behandlingsreferanse
      */
-    public void fjernEllerInitierPerioderFraDefinerendeVilkår(BehandlingReferanse behandlingReferanse) {
-        if (!enableFjernPerioder) {
-            return;
-        }
+    public void fjernEllerInitierPerioder(BehandlingReferanse behandlingReferanse) {
         Vilkårene vilkårene = vilkårResultatRepository.hent(behandlingReferanse.getBehandlingId());
         var tilVurderingTjeneste = getPerioderTilVurderingTjeneste(behandlingReferanse);
         VilkårResultatBuilder resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene)
