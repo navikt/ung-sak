@@ -16,9 +16,10 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.sykdom.pleietrengendesykdom.Ple
 public class SykdomSamletVurdering {
 
 
-    private PleietrengendeSykdomVurderingVersjon ktp;
-    private PleietrengendeSykdomVurderingVersjon toOp;
-    private PleietrengendeSykdomVurderingVersjon slu;
+    private PleietrengendeSykdomVurderingVersjon ktp; // kontinuerlig tilsyn og pleie
+    private PleietrengendeSykdomVurderingVersjon toOp; // to omsorgspersoner
+    private PleietrengendeSykdomVurderingVersjon slu; // livets sluttfase
+    private PleietrengendeSykdomVurderingVersjon lsy; // langvarig sykdom
     private PleietrengendeSykdomInnleggelser innleggelser;
 
     public SykdomSamletVurdering kombinerForSammeTidslinje(SykdomSamletVurdering annet) {
@@ -35,12 +36,17 @@ public class SykdomSamletVurdering {
             throw new IllegalStateException("Uventet overlapp mellom vurderinger");
         }
 
+        if (this.getLsy() != null && annet.getLsy() != null && !this.getLsy().equals(annet.getLsy())) {
+            throw new IllegalStateException("Uventet overlapp mellom vurderinger");
+        }
+
         if (this.getInnleggelser() != null && annet.getInnleggelser() != null && !this.getInnleggelser().equals(annet.getInnleggelser())) {
             throw new IllegalStateException("Uventet overlapp mellom innleggelser");
         }
         ny.setKtp(this.getKtp() != null ? this.getKtp() : annet.getKtp());
         ny.setToOp(this.getToOp() != null ? this.getToOp() : annet.getToOp());
         ny.setSlu(this.getSlu() != null ? this.getSlu() : annet.getSlu());
+        ny.setLsy(this.getLsy() != null ? this.getLsy() : annet.getLsy());
         ny.setInnleggelser(this.getInnleggelser() != null ? this.getInnleggelser() : annet.getInnleggelser());
         return ny;
     }
@@ -63,6 +69,12 @@ public class SykdomSamletVurdering {
         PleietrengendeTidslinjeUtils.tilTidslinjeForType(grunnlag.getVurderinger(), SykdomVurderingType.LIVETS_SLUTTFASE).forEach(s -> {
             SykdomSamletVurdering samletVurdering = new SykdomSamletVurdering();
             samletVurdering.setSlu(s.getValue());
+            segments.add(new LocalDateSegment<>(s.getFom(), s.getTom(), samletVurdering));
+        });
+
+        PleietrengendeTidslinjeUtils.tilTidslinjeForType(grunnlag.getVurderinger(), SykdomVurderingType.LANGVARIG_SYKDOM).forEach(s -> {
+            SykdomSamletVurdering samletVurdering = new SykdomSamletVurdering();
+            samletVurdering.setLsy(s.getValue());
             segments.add(new LocalDateSegment<>(s.getFom(), s.getTom(), samletVurdering));
         });
 
@@ -116,6 +128,14 @@ public class SykdomSamletVurdering {
 
     public void setInnleggelser(PleietrengendeSykdomInnleggelser innleggelser) {
         this.innleggelser = innleggelser;
+    }
+
+    public PleietrengendeSykdomVurderingVersjon getLsy() {
+        return lsy;
+    }
+
+    public void setLsy(PleietrengendeSykdomVurderingVersjon lsy) {
+        this.lsy = lsy;
     }
 }
 

@@ -35,6 +35,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -162,7 +163,7 @@ public class VilkårTjeneste {
         var gjenopprettetPerioder = new ArrayList<DatoIntervallEntitet>();
         var fjernetPerioder = new ArrayList<DatoIntervallEntitet>();
         for (var periode : perioder) {
-            var eksisteredeVurdering = vedtattUtfallPåVilkåret.finnPeriodeForSkjæringstidspunktHvisFinnes(periode.getFomDato());
+            var eksisteredeVurdering = finnVilkårsresultatForKopi(periode, vedtattUtfallPåVilkåret, vilkårType);
             if (eksisteredeVurdering.isPresent()) {
                 var vilkårPeriodeBuilder = vilkårBuilder.hentBuilderFor(periode).forlengelseAv(eksisteredeVurdering.get());
                 vilkårBuilder.leggTil(vilkårPeriodeBuilder);
@@ -176,6 +177,21 @@ public class VilkårTjeneste {
             }
         }
         return new GjenopprettPerioderResultat(gjenopprettetPerioder, fjernetPerioder);
+    }
+
+    private static Optional<VilkårPeriode> finnVilkårsresultatForKopi(DatoIntervallEntitet periode, Vilkår vedtattUtfallPåVilkåret, VilkårType vilkårType) {
+        var vilkårPeriodeForSkjæringstidspunkt = vedtattUtfallPåVilkåret.finnPeriodeForSkjæringstidspunktHvisFinnes(periode.getFomDato());
+        if (vilkårPeriodeForSkjæringstidspunkt.isEmpty() && erLøpendeVilkår(vilkårType)) {
+            // Tidligere slo vi sammen medlemskapsperioder for ulike vilkårsperioder til en sammenhengende periode
+            // Dersom vi ikkje finner ein eksakt match på stp ser vi etter periode som overlapper for vilkår som vurderes løpende
+            // Vilkår som vurderes løpende vurderes ikkje kun ved stp, men kan få endret status avhengig av endringer i registerdata
+            return vedtattUtfallPåVilkåret.finnPeriodeSomInneholderDato(periode.getFomDato());
+        }
+        return vilkårPeriodeForSkjæringstidspunkt;
+    }
+
+    private static boolean erLøpendeVilkår(VilkårType vilkårType) {
+        return VilkårType.MEDLEMSKAPSVILKÅRET.equals(vilkårType);
     }
 
     private Set<DatoIntervallEntitet> finnPerioderForGjenopprettingAvVilkårsutfall(BehandlingReferanse ref, VilkårType vilkårType, Collection<DatoIntervallEntitet> perioderTilVurdering) {
