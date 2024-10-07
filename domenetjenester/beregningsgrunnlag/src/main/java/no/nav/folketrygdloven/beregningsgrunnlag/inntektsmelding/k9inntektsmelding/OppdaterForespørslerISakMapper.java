@@ -32,7 +32,7 @@ public class OppdaterForespørslerISakMapper {
             case PLEIEPENGER_NÆRSTÅENDE -> YtelseType.PLEIEPENGER_NÆRSTÅENDE;
             case PLEIEPENGER_SYKT_BARN -> YtelseType.PLEIEPENGER_SYKT_BARN;
             case OPPLÆRINGSPENGER -> YtelseType.OPPLÆRINGSPENGER;
-            default -> throw new IllegalStateException("Unexpected value: " + fagsak.getYtelseType());
+            default -> throw new IllegalStateException("Ikke støttet ytelsetype: " + fagsak.getYtelseType());
         };
     }
 }
