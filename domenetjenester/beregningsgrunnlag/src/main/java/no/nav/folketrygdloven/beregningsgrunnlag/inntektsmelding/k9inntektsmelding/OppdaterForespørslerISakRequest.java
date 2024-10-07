@@ -8,7 +8,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 public record OppdaterForespørslerISakRequest(@NotNull @Valid AktørIdDto aktørId,
-                                              @NotNull @Valid Map<LocalDate, List<OrganisasjonsnummerDto>> skjæringstidspunkterPerOrganisasjon,
+                                              @NotNull @Valid Map<LocalDate, List<OrganisasjonsnummerDto>> organisasjonerPerSkjæringstidspunkt,
                                               @NotNull YtelseType ytelsetype,
                                               @NotNull @Valid SaksnummerDto fagsakSaksnummer) {
 }

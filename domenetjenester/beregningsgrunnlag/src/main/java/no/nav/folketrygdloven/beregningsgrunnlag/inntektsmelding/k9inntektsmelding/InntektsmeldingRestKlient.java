@@ -64,7 +64,7 @@ public class InntektsmeldingRestKlient {
     private InntektsmeldingRestKlient(URI endpoint) {
         this.endpoint = endpoint;
         this.opprettForespørselEndpoint = toUri("/api/foresporsel/opprett");
-        this.oppdaterSakEndpoint = toUri("/api/foresporsel/oppdater-sak");
+        this.oppdaterSakEndpoint = toUri("/api/foresporsel/oppdater");
     }
 
 
