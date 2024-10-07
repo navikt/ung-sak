@@ -9679,6 +9679,30 @@
         "required" : [ "saksnummer", "skjæringstidspunkt" ],
         "type" : "object"
       },
+      "RevurderPeriodeFraStegDto" : {
+        "properties" : {
+          "fom" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "saksnummer" : {
+            "maxLength" : 19,
+            "minLength" : 0,
+            "pattern" : "^[a-zA-Z0-9]*$",
+            "type" : "string"
+          },
+          "steg" : {
+            "enum" : [ "RE-MF", "RE-MFIP", "RE-AVAB", "RE-LOV", "RE-RGLF", "RE-FEFAKTA", "RE-PRSSL", "RE-END-FRA-BRUKER", "RE-FRAVÆRKORR-SAKSB", "RE-END-INNTEKTSMELD", "BERØRT-BEHANDLING", "RE-ANNET", "RE-SATS-REGULERING", "RE-ENDRET-FORDELING", "INFOBREV_BEHANDLING", "INFOBREV_OPPHOLD", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-MDL", "RE-OPTJ", "RE-FRDLING", "RE-INNTK", "RE-DØD", "RE-SRTB", "RE-FRIST", "RE-BER-GRUN", "RE-KLAG-INNH-PGI", "RE-NB", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-DØDFØD", "RE-REGISTEROPPL", "RE-YTELSE", "RE-TILST-YT-INNVIL", "RE-ENDR-BER-GRUN", "RE-TILST-YT-OPPH", "RE_REBEREGN_FP", "RE_ANNEN_SAK", "RE_UTSATT_BEHANDLING", "RE_GJENOPPTAR_UTSATT_BEHANDLING", "RE_ANNEN_SAK_ET", "RE_ANNEN_SAK_NB", "RE_ANNEN_SAK_S", "RE_ANNEN_SAK_NB_ET", "RE_ANNEN_SAK_S_ET", "RE_ANNEN_SAK_S_NB", "RE_ANNEN_SAK_S_ET_NB", "RE_ANNEN_SAK_FP", "UNNT_GENERELL", "REVURDERER_BERØRT_PERIODE", "-" ],
+            "type" : "string"
+          },
+          "tom" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "fom", "saksnummer", "steg", "tom" ],
+        "type" : "object"
+      },
       "ReåpneBehandlingDto" : {
         "properties" : {
           "behandlingId" : {
@@ -16809,6 +16833,33 @@
           }
         },
         "tags" : [ "behandlinger" ]
+      }
+    },
+    "/behandlinger/revurder-periode-fra-steg" : {
+      "post" : {
+        "description" : "Oppretter manuell revurdering for en enkeltperiode fra et gitt steg i prosessen",
+        "operationId" : "revurderEnkeltperiodeFraSteg",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RevurderPeriodeFraStegDto"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "void"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        }
       }
     },
     "/behandlinger/revurdering-original" : {
