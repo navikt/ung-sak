@@ -32,7 +32,7 @@ public class OppdaterForespørslerISakTask implements ProsessTaskHandler {
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
         var request = JsonUtils.fromString(prosessTaskData.getPayloadAsString(), OppdaterForespørslerISakRequest.class);
-        log.info("Oppdaterer inntektsmeldingforespørsler for sak {} med skjæringstidspunkt: {}", request.fagsakSaksnummer().saksnr(), request.skjæringstidspunkterPerOrganisasjon().keySet());
+        log.info("Oppdaterer inntektsmeldingforespørsler for sak {} med skjæringstidspunkt: {}", request.fagsakSaksnummer().saksnr(), request.organisasjonerPerSkjæringstidspunkt().keySet());
         inntektsmeldingRestKlient.oppdaterSak(request);
     }
 }
