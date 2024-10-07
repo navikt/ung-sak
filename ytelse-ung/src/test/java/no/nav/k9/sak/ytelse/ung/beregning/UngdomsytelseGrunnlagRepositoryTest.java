@@ -21,6 +21,8 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.k9.sak.ytelse.ung.uttak.UngdomsytelseUttakPeriode;
+import no.nav.k9.sak.ytelse.ung.uttak.UngdomsytelseUttakPerioder;
 
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
@@ -47,9 +49,7 @@ class UngdomsytelseGrunnlagRepositoryTest {
         var dagsats = BigDecimal.TEN;
         var grunnbeløp = BigDecimal.valueOf(50);
         var grunnbeløpFaktor = BigDecimal.valueOf(2);
-        repository.lagre(behandling.getId(), new LocalDateTimeline<>(List.of(
-            lagSegment(periode1, dagsats, grunnbeløp, grunnbeløpFaktor)
-        )));
+        lagreBeregning(periode1, dagsats, grunnbeløp, grunnbeløpFaktor);
 
         var ungdomsytelseGrunnlag = repository.hentGrunnlag(behandling.getId());
         assertThat(ungdomsytelseGrunnlag.isPresent()).isTrue();
@@ -60,6 +60,45 @@ class UngdomsytelseGrunnlagRepositoryTest {
         assertThat(perioder.get(0).getGrunnbeløp().compareTo(grunnbeløp)).isEqualTo(0);
         assertThat(perioder.get(0).getGrunnbeløpFaktor().compareTo(grunnbeløpFaktor)).isEqualTo(0);
 
+    }
+
+    @Test
+    void skal_kunne_lagre_ned_uttak_og_hente_opp_grunnlag() {
+
+        var periode1 = new LocalDateInterval(LocalDate.now(), LocalDate.now());
+        var dagsats = BigDecimal.TEN;
+        var grunnbeløp = BigDecimal.valueOf(50);
+        var grunnbeløpFaktor = BigDecimal.valueOf(2);
+        lagreBeregning(periode1, dagsats, grunnbeløp, grunnbeløpFaktor);
+
+        var utbetalingsgrad = BigDecimal.TEN;
+        var uttakperioder1 = new UngdomsytelseUttakPerioder(List.of(new UngdomsytelseUttakPeriode(
+            utbetalingsgrad, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now())
+        )));
+        uttakperioder1.setRegelInput("En input");
+        uttakperioder1.setRegelSporing("En sporing");
+        repository.lagre(behandling.getId(), uttakperioder1);
+
+        var ungdomsytelseGrunnlag = repository.hentGrunnlag(behandling.getId());
+        assertThat(ungdomsytelseGrunnlag.isPresent()).isTrue();
+        var perioder = ungdomsytelseGrunnlag.get().getSatsPerioder().getPerioder();
+        assertThat(perioder.size()).isEqualTo(1);
+        assertThat(perioder.get(0).getDagsats().compareTo(dagsats)).isEqualTo(0);
+        assertThat(perioder.get(0).getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()));
+        assertThat(perioder.get(0).getGrunnbeløp().compareTo(grunnbeløp)).isEqualTo(0);
+        assertThat(perioder.get(0).getGrunnbeløpFaktor().compareTo(grunnbeløpFaktor)).isEqualTo(0);
+
+
+        var uttakperioder = ungdomsytelseGrunnlag.get().getUttakPerioder().getPerioder();
+        assertThat(uttakperioder.size()).isEqualTo(1);
+        assertThat(uttakperioder.get(0).getUtbetalingsgrad().compareTo(utbetalingsgrad)).isEqualTo(0);
+        assertThat(uttakperioder.get(0).getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()));
+    }
+
+    private void lagreBeregning(LocalDateInterval periode1, BigDecimal dagsats, BigDecimal grunnbeløp, BigDecimal grunnbeløpFaktor) {
+        repository.lagre(behandling.getId(), new LocalDateTimeline<>(List.of(
+            lagSegment(periode1, dagsats, grunnbeløp, grunnbeløpFaktor)
+        )));
     }
 
     private static LocalDateSegment lagSegment(LocalDateInterval datoInterval, BigDecimal dagsats, BigDecimal grunnbeløp, BigDecimal grunnbeløpFaktor) {

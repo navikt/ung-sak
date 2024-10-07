@@ -77,9 +77,9 @@ public class InitierVilkårSteg implements BehandlingSteg {
         }
 
         var perioderTilVurderingTjeneste = getPerioderTilVurderingTjeneste(behandling);
-        var utledetAvstand = perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand();
+        int utledetAvstand = perioderTilVurderingTjeneste.maksMellomliggendePeriodeAvstand();
         var fullstendigePerioder = perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId());
-        var fullstendigTidslinje = fullstendigTidslinje(utledetAvstand, perioderTilVurderingTjeneste.getKantIKantVurderer(), fullstendigePerioder);
+        VilkårBuilder fullstendigTidslinje = fullstendigTidslinje(utledetAvstand, perioderTilVurderingTjeneste.getKantIKantVurderer(), fullstendigePerioder);
         var vilkårPeriodeMap = perioderTilVurderingTjeneste.utledRådataTilUtledningAvVilkårsperioder(behandling.getId());
         var perioderSomSkalTilbakestilles = perioderTilVurderingTjeneste.perioderSomSkalTilbakestilles(behandling.getId());
 

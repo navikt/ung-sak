@@ -61,4 +61,22 @@ public class RammevedtakRestTjeneste {
                 BehandlingUuidDto behandlingUuid) {
         return omsorgspengerRammevedtakTjeneste.hentRammevedtak(behandlingUuid);
     }
+
+    @GET
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("rammevedtak-v1")
+    @Operation(description = "Hent rammevedtak v1", tags = "behandling - utvidet rett", responses = {
+        @ApiResponse(responseCode = "200", description = "Returnerer relevante rammevedtak for en behandling om utvidet rett", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RammevedtakResponse.class)))
+    })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public RammevedtakResponse hentRammevedtakV1(
+        @QueryParam(BehandlingUuidDto.NAME)
+        @Parameter(description = BehandlingUuidDto.DESC)
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+        @NotNull
+        @Valid
+        BehandlingUuidDto behandlingUuid) {
+        return omsorgspengerRammevedtakTjeneste.hentRammevedtakV1(behandlingUuid);
+    }
 }

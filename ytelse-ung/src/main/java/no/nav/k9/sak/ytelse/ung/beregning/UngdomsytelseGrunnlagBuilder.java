@@ -1,7 +1,6 @@
 package no.nav.k9.sak.ytelse.ung.beregning;
 
 import java.util.List;
-import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,19 +10,21 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.behandlingslager.diff.DiffEntity;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.ytelse.ung.uttak.UngdomsytelseUttakPerioder;
 
 class UngdomsytelseGrunnlagBuilder {
 
     private static final Logger log = LoggerFactory.getLogger(UngdomsytelseGrunnlagBuilder.class);
 
     private LocalDateTimeline<UngdomsytelseSatser> perioder = LocalDateTimeline.empty();
+    private UngdomsytelseUttakPerioder uttakPerioder;
 
     private boolean built = false;
 
     UngdomsytelseGrunnlagBuilder(UngdomsytelseGrunnlag kladd) {
         if (kladd != null && kladd.getSatsPerioder() != null) {
             this.leggTilPerioder(kladd.getSatsPerioder().getPerioder());
+            this.uttakPerioder = kladd.getUttakPerioder();
         }
     }
 
@@ -42,6 +43,12 @@ class UngdomsytelseGrunnlagBuilder {
         return this;
     }
 
+    UngdomsytelseGrunnlagBuilder medUttakPerioder(UngdomsytelseUttakPerioder uttakPerioder){
+        this.uttakPerioder = uttakPerioder;
+        return this;
+    }
+
+
     UngdomsytelseGrunnlagBuilder fjernPeriode(LocalDateInterval periode){
         this.perioder = this.perioder.disjoint(periode);
         return this;
@@ -56,6 +63,7 @@ class UngdomsytelseGrunnlagBuilder {
     private UngdomsytelseGrunnlag repeatableBuild() {
         UngdomsytelseGrunnlag resultat = new UngdomsytelseGrunnlag();
         resultat.setSatsPerioder(new UngdomsytelseSatsPerioder(perioder.toSegments().stream().map(UngdomsytelseGrunnlagBuilder::mapTilPeriode).toList()));
+        resultat.setUttakPerioder(uttakPerioder);
         return resultat;
     }
 
