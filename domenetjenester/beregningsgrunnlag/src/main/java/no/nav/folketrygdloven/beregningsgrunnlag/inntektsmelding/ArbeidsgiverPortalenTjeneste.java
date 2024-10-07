@@ -17,6 +17,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.etterlysning.BestiltEtterlysning;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
+import no.nav.k9.søknad.JsonUtils;
 
 @Dependent
 public class ArbeidsgiverPortalenTjeneste {
@@ -58,7 +59,7 @@ public class ArbeidsgiverPortalenTjeneste {
         var request = OppdaterForespørslerISakMapper.mapTilRequest(forespørselMap, behandling);
         var prosessTaskData = ProsessTaskData.forProsessTask(OppdaterForespørslerISakTask.class);
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId());
-        prosessTaskData.setPayload(request.toString());
+        prosessTaskData.setPayload(JsonUtils.toString(request));
         prosessTaskData.setCallIdFraEksisterende();
         prosessTaskTjeneste.lagre(prosessTaskData);
     }
