@@ -59,7 +59,6 @@ public class ArbeidsgiverPortalenTjeneste {
         var request = OppdaterForespørslerISakMapper.mapTilRequest(forespørselMap, behandling);
         var prosessTaskData = ProsessTaskData.forProsessTask(OppdaterForespørslerISakTask.class);
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId());
-        prosessTaskData.setSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
         prosessTaskData.setPayload(JsonUtils.toString(request));
         prosessTaskData.setCallIdFraEksisterende();
         prosessTaskTjeneste.lagre(prosessTaskData);
