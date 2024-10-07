@@ -11565,6 +11565,59 @@
         } ],
         "type" : "object"
       },
+      "UngdomsytelseSatsPeriodeDto" : {
+        "properties" : {
+          "dagsats" : {
+            "nullable" : true,
+            "type" : "number"
+          },
+          "fom" : {
+            "format" : "date",
+            "nullable" : true,
+            "type" : "string"
+          },
+          "grunnbeløp" : {
+            "nullable" : true,
+            "type" : "number"
+          },
+          "grunnbeløpFaktor" : {
+            "nullable" : true,
+            "type" : "number"
+          },
+          "tom" : {
+            "format" : "date",
+            "nullable" : true,
+            "type" : "string"
+          }
+        },
+        "required" : [ "dagsats", "fom", "grunnbeløp", "grunnbeløpFaktor", "tom" ],
+        "type" : "object"
+      },
+      "UngdomsytelseUttakPeriodeDto" : {
+        "properties" : {
+          "avslagsårsak" : {
+            "enum" : [ "IKKE_NOK_DAGER" ],
+            "nullable" : true,
+            "type" : "string"
+          },
+          "fom" : {
+            "format" : "date",
+            "nullable" : true,
+            "type" : "string"
+          },
+          "tom" : {
+            "format" : "date",
+            "nullable" : true,
+            "type" : "string"
+          },
+          "utbetalingsgrad" : {
+            "nullable" : true,
+            "type" : "number"
+          }
+        },
+        "required" : [ "fom", "tom", "utbetalingsgrad" ],
+        "type" : "object"
+      },
       "UtbetalingDto" : {
         "properties" : {
           "arbeidsgiver" : {
@@ -19934,6 +19987,70 @@
         },
         "summary" : "Henter ut stønadstatistikk-JSON.",
         "tags" : [ "forvaltning" ]
+      }
+    },
+    "/ungdomsytelse/satser" : {
+      "get" : {
+        "description" : "Henter innvilgede satser for en ungdomsytelsebehandling",
+        "operationId" : "getUngdomsytelseInnvilgetSats",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/UngdomsytelseSatsPeriodeDto"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "ung" ]
+      }
+    },
+    "/ungdomsytelse/uttak" : {
+      "get" : {
+        "description" : "Henter uttaksperioder for en ungdomsytelsebehandling",
+        "operationId" : "getUngdomsytelseUttak",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/UngdomsytelseUttakPeriodeDto"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "ung" ]
       }
     },
     "/unntaksbehandling/forvaltning/finn-ubehandlede" : {
