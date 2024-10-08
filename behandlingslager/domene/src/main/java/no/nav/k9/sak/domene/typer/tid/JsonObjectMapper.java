@@ -3,9 +3,11 @@ package no.nav.k9.sak.domene.typer.tid;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.function.Function;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,6 +50,14 @@ public class JsonObjectMapper {
         OM.writerWithDefaultPrettyPrinter().writeValue(jsonWriter, object);
         jsonWriter.flush();
         return jsonWriter.toString();
+    }
+
+    public static String toJson(Object object, Function<JsonProcessingException, Feil> feilFactory) {
+        try {
+            return OM.writerWithDefaultPrettyPrinter().writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            throw feilFactory.apply(e).toException();
+        }
     }
 
     public String readKey(String data, String... keys) throws IOException {
