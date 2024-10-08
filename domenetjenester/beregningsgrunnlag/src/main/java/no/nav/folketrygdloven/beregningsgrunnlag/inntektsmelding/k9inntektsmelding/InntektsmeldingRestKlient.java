@@ -43,6 +43,7 @@ public class InntektsmeldingRestKlient {
     private URI endpoint;
     private URI opprettForespørselEndpoint;
     private URI oppdaterSakEndpoint;
+    private URI utgåttEndpoint;
 
     protected InntektsmeldingRestKlient() {
         // cdi
@@ -65,6 +66,7 @@ public class InntektsmeldingRestKlient {
         this.endpoint = endpoint;
         this.opprettForespørselEndpoint = toUri("/api/foresporsel/opprett");
         this.oppdaterSakEndpoint = toUri("/api/foresporsel/oppdater");
+        this.oppdaterSakEndpoint = toUri("/api/foresporsel/utgatt");
     }
 
 
@@ -79,6 +81,15 @@ public class InntektsmeldingRestKlient {
 
     public void oppdaterSak(OppdaterForespørslerISakRequest request) {
         var endpoint = oppdaterSakEndpoint;
+        try {
+            utførKall(endpoint, innteksmeldingJsonWriter.writeValueAsString(request));
+        } catch (JsonProcessingException e) {
+            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
+        }
+    }
+
+    public void settAlleForespørslerTilUtgått(SettAlleForespørslerTilUtgåttRequest request) {
+        var endpoint = utgåttEndpoint;
         try {
             utførKall(endpoint, innteksmeldingJsonWriter.writeValueAsString(request));
         } catch (JsonProcessingException e) {
