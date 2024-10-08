@@ -22,8 +22,8 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.k9.sak.økonomi.simulering.klient.K9OppdragRestKlient;
-import no.nav.k9.sak.økonomi.tilkjentytelse.JsonMapper;
 import no.nav.k9.sak.økonomi.tilkjentytelse.TilkjentYtelseTjeneste;
+import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 
 @ApplicationScoped
 @ProsessTask(SendØkonomiOppdragTask.TASKTYPE)
@@ -33,7 +33,7 @@ public class SendØkonomiOppdragTask extends BehandlingProsessTask {
     public static final Logger logger = LoggerFactory.getLogger(SendØkonomiOppdragTask.class);
     public static final String TASKTYPE = "iverksetteVedtak.oppdragTilØkonomi";
 
-    private ObjectMapper objectMapper = JsonMapper.getMapper();
+    private ObjectMapper objectMapper = JsonObjectMapper.getMapper();
     private TilkjentYtelseMaskerer maskerer = new TilkjentYtelseMaskerer(objectMapper).ikkeMaskerSats();
 
     private K9OppdragRestKlient restKlient;

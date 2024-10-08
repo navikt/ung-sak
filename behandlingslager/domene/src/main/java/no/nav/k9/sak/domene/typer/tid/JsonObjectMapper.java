@@ -84,4 +84,8 @@ public class JsonObjectMapper {
         @TekniskFeil(feilkode = "F-713321", feilmelding = "Fikk IO exception ved parsing av JSON", logLevel = LogLevel.WARN)
         Feil ioExceptionVedLesing(IOException cause);
     }
+
+    public static ObjectMapper getMapper() {
+        return OM;
+    }
 }
