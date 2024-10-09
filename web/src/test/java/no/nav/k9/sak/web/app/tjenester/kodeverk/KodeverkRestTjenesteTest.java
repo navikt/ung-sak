@@ -66,6 +66,7 @@ public class KodeverkRestTjenesteTest {
 
     @Test
     public void serialize_kodeverdi_enums() throws Exception {
+        // TODO Dette er ein ganske verdilaus test. Fjern eller erstatt med noko nyttig.
         JacksonJsonConfig jsonConfig = new JacksonJsonConfig();
 
         ObjectMapper om = jsonConfig.getObjectMapper();
