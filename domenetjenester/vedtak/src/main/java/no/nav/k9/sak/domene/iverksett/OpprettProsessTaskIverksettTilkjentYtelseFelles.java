@@ -10,7 +10,6 @@ import java.util.Set;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.k9inntektsmelding.LukkAlleÅpneImForespørslerISakTask;
 import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedService;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -44,12 +43,12 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
                                                            OppgaveTjeneste oppgaveTjeneste,
                                                            InfotrygdFeedService infotrygdFeedService,
                                                            StønadstatistikkService stønadstatistikkService,
-                                                           @KonfigVerdi(value = "SEND_INNTEKTSMELDING_FORESPORSEL", defaultVerdi = "false") boolean skalSendeForesporsel) {
+                                                           boolean skalLukkeImForesporsel) {
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
         this.oppgaveTjeneste = oppgaveTjeneste;
         this.infotrygdFeedService = infotrygdFeedService;
         this.stønadstatistikkService = stønadstatistikkService;
-        this.skalLukkeImForesporsel = skalSendeForesporsel;
+        this.skalLukkeImForesporsel = skalLukkeImForesporsel;
     }
 
     @Override
