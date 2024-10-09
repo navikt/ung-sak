@@ -53,8 +53,6 @@ public class AvklarÅrskvantumKvote implements AksjonspunktOppdaterer<AvklarÅrs
     @Override
     public OppdateringResultat oppdater(AvklarÅrskvantumDto dto, AksjonspunktOppdaterParameter param) {
         var fortsettBehandling = dto.getfortsettBehandling();
-        var innvilgePeriodene = dto.getinnvilgePeriodene();
-        var antallDager = dto.getAntallDager();
         Long behandlingId = param.getBehandlingId();
 
         var behandling = behandlingRepository.hentBehandling(behandlingId);
@@ -63,23 +61,18 @@ public class AvklarÅrskvantumKvote implements AksjonspunktOppdaterer<AvklarÅrs
 
         if (fortsettBehandling) {
             //Bekreft uttaksplan og fortsett behandling
-            if(innvilgePeriodene != null) {
-                var manuellVurderingString = innvilgePeriodene ? "innvilget" : "avslått";
-                opprettHistorikkInnslag(dto, behandlingId, HistorikkinnslagType.FASTSATT_UTTAK, "Uavklarte perioder er " + manuellVurderingString);
-                årskvantumTjeneste.innvilgeEllerAvslåPeriodeneManuelt(behandlingId, innvilgePeriodene, antallDager);
-            } else {
-                //Bekreft uttaksplan og fortsett behandling
-                opprettHistorikkInnslag(dto, behandlingId, HistorikkinnslagType.FASTSATT_UTTAK, "Fortsett uten endring, avslåtte perioder er korrekt");
-                årskvantumTjeneste.bekreftUttaksplan(behandlingId);
-            }
-        } else if (dto.getFosterbarn() != null) {
+            opprettHistorikkInnslag(dto, behandlingId, HistorikkinnslagType.FASTSATT_UTTAK, "Fortsett uten endring, avslåtte perioder er korrekt");
+            årskvantumTjeneste.bekreftUttaksplan(behandlingId);
+            return OppdateringResultat.nyttResultat(); //skulle her ønske å overstyre Aksjonspunktets tilbakehopp
+        } else {
             // Oppretter fosterbarn kun dersom eksplisitt angitt av GUI
-
-            var fosterbarn = dto.getFosterbarn().stream()
-                .map(barn -> tpsTjeneste.hentAktørForFnr(new PersonIdent(barn.getFnr())).orElseThrow(() -> new IllegalArgumentException("Finner ikke fnr")))
-                .map(aktørId -> new Fosterbarn(aktørId))
-                .collect(Collectors.toSet());
-            fosterbarnRepository.lagreOgFlush(param.getBehandlingId(), new Fosterbarna(fosterbarn));
+            if (dto.getFosterbarn() != null) {
+                var fosterbarn = dto.getFosterbarn().stream()
+                    .map(barn -> tpsTjeneste.hentAktørForFnr(new PersonIdent(barn.getFnr())).orElseThrow(() -> new IllegalArgumentException("Finner ikke fnr")))
+                    .map(aktørId -> new Fosterbarn(aktørId))
+                    .collect(Collectors.toSet());
+                fosterbarnRepository.lagreOgFlush(param.getBehandlingId(), new Fosterbarna(fosterbarn));
+            }
 
             // kjør steget på nytt, aka hent nye rammevedtak fra infotrygd
             opprettHistorikkInnslag(dto, behandlingId, HistorikkinnslagType.FAKTA_ENDRET, "Rammemelding er endret eller lagt til");
@@ -90,7 +83,7 @@ public class AvklarÅrskvantumKvote implements AksjonspunktOppdaterer<AvklarÅrs
             resultat.setSteg(BehandlingStegType.INNHENT_REGISTEROPP);
             return resultat;
         }
-        return OppdateringResultat.nyttResultat(); //skulle her ønske å overstyre Aksjonspunktets tilbakehopp
+
     }
 
     private void validerTilstand(Behandling behandling) {
