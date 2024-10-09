@@ -261,6 +261,7 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         return opprettTaskGruppeForGjenopptaOppdaterFortsett(behandling, nyCallId, skalUtledeÅrsaker, true);
     }
 
+    @Override
     public ProsessTaskGruppe opprettTaskGruppeForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId, boolean skalUtledeÅrsaker, boolean forceInnhentingAvRegisterdata) {
         Long fagsakId = behandling.getFagsakId();
         Long behandlingId = behandling.getId();
