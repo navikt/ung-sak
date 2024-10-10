@@ -12,6 +12,9 @@ import java.util.Optional;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -37,7 +40,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
@@ -64,6 +66,8 @@ import no.nav.k9.sak.ytelse.pleiepengerlivetsslutt.inngangsvilkår.medisinsk.reg
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @ApplicationScoped
 public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
+
+    private static final Logger log = LoggerFactory.getLogger(VurderILivetsSluttfaseSteg.class);
 
     private final MedisinskVilkårTjeneste medisinskVilkårTjeneste = new MedisinskVilkårTjeneste();
     private BehandlingRepositoryProvider repositoryProvider;
@@ -111,23 +115,30 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
-        NavigableSet<DatoIntervallEntitet> perioderTilVurdering = perioderTilVurderingTjeneste.utled(behandlingId, VilkårType.I_LIVETS_SLUTTFASE);
+        final NavigableSet<DatoIntervallEntitet> perioderTilVurdering = perioderTilVurderingTjeneste.utled(behandlingId, VilkårType.I_LIVETS_SLUTTFASE);
+        final MedisinskGrunnlag medisinskGrunnlag = opprettGrunnlag(perioderTilVurdering, behandling);
 
-        MedisinskGrunnlag medisinskGrunnlag = opprettGrunnlag(perioderTilVurdering, behandling);
-
-        boolean trengerAksjonspunkt = trengerAksjonspunkt(kontekst, behandling);
-        if (trengerAksjonspunkt) {
+        if (trengerAksjonspunkt(kontekst, behandling)) {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)));
         }
 
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
-        var builder = Vilkårene.builderFraEksisterende(vilkårene);
-        builder.medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer());
-        vurderVilkår(behandlingId, medisinskGrunnlag, builder, perioderTilVurdering);
+        Vilkårene resultat = vurderVilkår(behandlingId, medisinskGrunnlag, vilkårene, perioderTilVurdering);
 
-        final Vilkårene nyttResultat = builder.build();
-        Optional<Vilkårene> korrigertResultat = videreførTidligereAvslagPgaManglendeDok(behandling, perioderTilVurdering, nyttResultat);
-        vilkårResultatRepository.lagre(behandlingId, korrigertResultat.orElse(nyttResultat));
+        Optional<Vilkårene> korrigertResultat = videreførTidligereAvslagPgaManglendeDok(behandling, perioderTilVurdering, resultat);
+        if (korrigertResultat.isPresent()) {
+            resultat = korrigertResultat.get();
+        }
+
+        var perioderUtenVurdering = finnPerioderUtenVurdering(resultat);
+        if (!perioderUtenVurdering.isEmpty()) {
+            log.warn("Hadde perioder uten vurdering etter vurdering av perioder til vurdering: {}", perioderUtenVurdering);
+            if (behandling.getId() == 1828755L) { //EAWVS //TODO fjern når vi ser om det funker for denne behandlingen
+                resultat = vurderVilkår(behandlingId, medisinskGrunnlag, resultat, perioderUtenVurdering);
+            }
+        }
+
+        vilkårResultatRepository.lagre(behandlingId, resultat);
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
@@ -150,11 +161,13 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
         );
     }
 
-    private void vurderVilkår(Long behandlingId,
-                              MedisinskGrunnlag medisinskGrunnlag,
-                              VilkårResultatBuilder builder,
-                              NavigableSet<DatoIntervallEntitet> perioder) {
+    private Vilkårene vurderVilkår(Long behandlingId,
+                                   MedisinskGrunnlag medisinskGrunnlag,
+                                   Vilkårene vilkårene,
+                                   NavigableSet<DatoIntervallEntitet> perioder) {
 
+        var builder = Vilkårene.builderFraEksisterende(vilkårene);
+        builder.medKantIKantVurderer(perioderTilVurderingTjeneste.getKantIKantVurderer());
         var vilkårBuilder = builder.hentBuilderFor(VilkårType.I_LIVETS_SLUTTFASE);
         for (DatoIntervallEntitet periode : perioder) {
             final var vilkårData = medisinskVilkårTjeneste.vurderPerioder(VilkårType.I_LIVETS_SLUTTFASE, periode, medisinskGrunnlag);
@@ -162,6 +175,7 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
             oppdaterPleiebehovResultat(behandlingId, periode, vilkårData);
         }
         builder.leggTil(vilkårBuilder);
+        return builder.build();
     }
 
     private void oppdaterBehandlingMedVilkårresultat(VilkårData vilkårData, VilkårBuilder vilkårBuilder) {
