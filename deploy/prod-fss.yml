@@ -277,6 +277,8 @@ spec:
       value: "false"
     - name: KODEVERK_SOM_STRING_TOPICS
       value: "false"
+    - name: KODEVERK_AKTIVER_KALKULUS_STRING
+      value: "false"
     - name: INAKTIV_VED_8_47_B
       value: "false"
     - name: SEND_INNTEKTSMELDING_FORESPORSEL

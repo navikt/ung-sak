@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
 
+import no.nav.k9.sak.web.app.jackson.ObjectMapperFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -23,7 +24,6 @@ import no.nav.k9.kodeverk.geografisk.Region;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.db.util.JpaExtension;
-import no.nav.k9.sak.web.app.jackson.JacksonJsonConfig;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)
@@ -44,7 +44,7 @@ public class KodeverkRestTjenesteTest {
         String rawJson = (String) response.getEntity();
         assertThat(rawJson).isNotNull();
 
-        Map<String, Object> gruppertKodeliste = new JacksonJsonConfig().getObjectMapper().readValue(rawJson, Map.class);
+        Map<String, Object> gruppertKodeliste = ObjectMapperFactory.createBaseObjectMapper().readValue(rawJson, Map.class);
 
         assertThat(gruppertKodeliste.keySet())
             .contains(FagsakStatus.class.getSimpleName(), Avslagsårsak.class.getSimpleName(), Landkoder.class.getSimpleName(), Region.class.getSimpleName());
@@ -67,9 +67,7 @@ public class KodeverkRestTjenesteTest {
     @Test
     public void serialize_kodeverdi_enums() throws Exception {
         // TODO Dette er ein ganske verdilaus test. Fjern eller erstatt med noko nyttig.
-        JacksonJsonConfig jsonConfig = new JacksonJsonConfig();
-
-        ObjectMapper om = jsonConfig.getObjectMapper();
+        ObjectMapper om = ObjectMapperFactory.createBaseObjectMapper();
 
         String json = om.writer().withDefaultPrettyPrinter().writeValueAsString(AksjonspunktDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT);
 
