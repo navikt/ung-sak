@@ -9,8 +9,7 @@
           },
           "andelIArbeid" : {
             "items" : {
-              "maximum" : 100,
-              "minimum" : 0,
+              "nullable" : true,
               "type" : "number"
             },
             "maxItems" : 100,
@@ -237,8 +236,6 @@
           "vurderPaNyttArsaker" : {
             "items" : {
               "enum" : [ "FEIL_FAKTA", "FEIL_LOV", "FEIL_REGEL", "ANNET", "-" ],
-              "maxLength" : 100,
-              "minLength" : 0,
               "nullable" : true,
               "type" : "string"
             },
@@ -393,8 +390,7 @@
         "properties" : {
           "aktører" : {
             "items" : {
-              "maxLength" : 10000,
-              "minLength" : 0,
+              "nullable" : true,
               "type" : "string"
             },
             "maxItems" : 10000,
@@ -587,8 +583,7 @@
           },
           "andelIArbeid" : {
             "items" : {
-              "maximum" : 100,
-              "minimum" : 0,
+              "nullable" : true,
               "type" : "number"
             },
             "maxItems" : 100,
@@ -957,8 +952,6 @@
           },
           "manglendePerioder" : {
             "items" : {
-              "maxLength" : 2147483647,
-              "minLength" : 0,
               "nullable" : true,
               "type" : "string"
             },
@@ -1023,8 +1016,7 @@
           },
           "andelIArbeid" : {
             "items" : {
-              "maximum" : 100,
-              "minimum" : 0,
+              "nullable" : true,
               "type" : "number"
             },
             "maxItems" : 100,
@@ -1530,8 +1522,6 @@
         "properties" : {
           "behandlinger" : {
             "items" : {
-              "maxLength" : 1000,
-              "minLength" : 1,
               "nullable" : true,
               "type" : "string"
             },
@@ -1628,7 +1618,7 @@
             "type" : "string"
           },
           "stegType" : {
-            "enum" : [ "BERYT", "PRECONDITION_BERGRUNN", "FAST_BERGRUNN", "VURDER_OPPTJ_PERIODE", "FASTSETT_STP_BER", "FVEDSTEG", "VURDER_VILKAR_BERGRUNN", "VURDER_REF_BERGRUNN", "FORDEL_BERGRUNN", "FORBRES", "FORS_BERGRUNN", "FORS_BERGRUNN_2", "VURDER_MANUELT_BREV", "FORVEDSTEG", "BERYT_OPPDRAG", "VURDER_SØKNADSFRIST", "INIT_PERIODER", "INIT_VILKÅR", "INPER", "INREG", "INSØK", "INREG_AVSL", "IVEDSTEG", "KOFAK", "KOARB", "KOMPLETT_FOR_BEREGNING", "INNINN", "KOFAKBER", "KOFAKUT", "KOFAK_LOP_MEDL", "VURDEROP", "SIMOPP", "START", "VRSLREV", "VULOMED", "VURDER_FARESIGNALER", "VURDINNSYN", "VURDERKOMPLETT", "VURDER_STARTDATO_UTTAKSREGLER", "VURDER_TILKOMMET_INNTEKT", "POSTCONDITION_KOMPLETTHET", "VARIANT_FILTER", "VURDER_MEDISINSK", "VURDER_NODVENDIGHET", "VURDER_INSTITUSJON", "VURDER_GJENNOMGATT_OPPLAERING", "POST_MEDISINSK", "VURDERMV", "VURDER_OMSORG_FOR", "VURDER_ALDER", "VURDER_ALDER_BARN", "VURDER_OPPTJ_FAKTA", "VURDER_OPPTJ", "VURDER_TILBAKETREKK", "VURDER_UTLAND", "VURDER_UTTAK", "VURDER_UTTAK_V2", "BEKREFT_UTTAK", "MANUELL_VILKÅRSVURDERING", "MANUELL_TILKJENNING_YTELSE", "OVERGANG_FRA_INFOTRYGD", "VURDER_UNGDOMSPROGRAMVILKÅR", "UNGDOMSYTELSE_BEREGNING" ],
+            "enum" : [ "BERYT", "PRECONDITION_BERGRUNN", "FAST_BERGRUNN", "VURDER_OPPTJ_PERIODE", "FASTSETT_STP_BER", "FVEDSTEG", "VURDER_VILKAR_BERGRUNN", "VURDER_REF_BERGRUNN", "FORDEL_BERGRUNN", "FORBRES", "FORS_BERGRUNN", "FORS_BERGRUNN_2", "VURDER_MANUELT_BREV", "FORVEDSTEG", "BERYT_OPPDRAG", "VURDER_SØKNADSFRIST", "INIT_PERIODER", "INIT_VILKÅR", "INPER", "INREG", "INSØK", "INREG_AVSL", "IVEDSTEG", "KOFAK", "KOARB", "KOMPLETT_FOR_BEREGNING", "INNINN", "KOFAKBER", "KOFAKUT", "KOFAK_LOP_MEDL", "VURDEROP", "SIMOPP", "START", "VRSLREV", "VULOMED", "VURDER_FARESIGNALER", "VURDINNSYN", "VURDERKOMPLETT", "VURDER_STARTDATO_UTTAKSREGLER", "VURDER_TILKOMMET_INNTEKT", "POSTCONDITION_KOMPLETTHET", "VARIANT_FILTER", "VURDER_MEDISINSK", "VURDER_NODVENDIGHET", "VURDER_INSTITUSJON", "VURDER_GJENNOMGATT_OPPLAERING", "POST_MEDISINSK", "VURDERMV", "VURDER_OMSORG_FOR", "VURDER_ALDER", "VURDER_ALDER_BARN", "VURDER_OPPTJ_FAKTA", "VURDER_OPPTJ", "VURDER_TILBAKETREKK", "VURDER_UTLAND", "VURDER_UTTAK", "VURDER_UTTAK_V2", "BEKREFT_UTTAK", "MANUELL_VILKÅRSVURDERING", "MANUELL_TILKJENNING_YTELSE", "OVERGANG_FRA_INFOTRYGD", "VURDER_UNGDOMSPROGRAMVILKÅR", "UNGDOMSYTELSE_BEREGNING", "VURDER_ANTALL_DAGER" ],
             "nullable" : true,
             "type" : "string"
           },
@@ -1894,8 +1884,6 @@
           "aktivitetStatus" : {
             "items" : {
               "enum" : [ "MIDL_INAKTIV", "AAP", "AT", "DP", "SP_AV_DP", "PSB_AV_DP", "FL", "MS", "SN", "AT_FL", "AT_SN", "FL_SN", "AT_FL_SN", "BA", "KUN_YTELSE", "TY", "VENTELØNN_VARTPENGER", "-" ],
-              "maxLength" : 2147483647,
-              "minLength" : 1,
               "nullable" : true,
               "type" : "string"
             },
@@ -2061,15 +2049,17 @@
             "type" : "number"
           },
           "dagsats" : {
+            "exclusiveMaximum" : false,
+            "exclusiveMinimum" : false,
             "format" : "int64",
+            "maximum" : 10000000.00,
+            "minimum" : 0.00,
             "nullable" : true,
             "type" : "integer"
           },
           "periodeAarsaker" : {
             "items" : {
               "enum" : [ "NATURALYTELSE_BORTFALT", "ARBEIDSFORHOLD_AVSLUTTET", "NATURALYTELSE_TILKOMMER", "ENDRING_I_REFUSJONSKRAV", "REFUSJON_OPPHØRER", "GRADERING", "GRADERING_OPPHØRER", "ENDRING_I_AKTIVITETER_SØKT_FOR", "TILKOMMET_INNTEKT", "TILKOMMET_INNTEKT_MANUELT", "TILKOMMET_INNTEKT_AVSLUTTET", "REFUSJON_AVSLÅTT", "REPRESENTERER_STORTINGET", "REPRESENTERER_STORTINGET_AVSLUTTET", "-" ],
-              "maxLength" : 2147483647,
-              "minLength" : 0,
               "nullable" : true,
               "type" : "string"
             },
@@ -2891,6 +2881,7 @@
           "skjæringstidspunkter" : {
             "items" : {
               "format" : "date",
+              "nullable" : true,
               "type" : "string"
             },
             "maxItems" : 2147483647,
@@ -3328,8 +3319,7 @@
           },
           "andelIArbeid" : {
             "items" : {
-              "maximum" : 100,
-              "minimum" : 0,
+              "nullable" : true,
               "type" : "number"
             },
             "maxItems" : 100,
@@ -3400,8 +3390,6 @@
           "faktaOmBeregningTilfeller" : {
             "items" : {
               "enum" : [ "VURDER_TIDSBEGRENSET_ARBEIDSFORHOLD", "VURDER_SN_NY_I_ARBEIDSLIVET", "VURDER_NYOPPSTARTET_FL", "FASTSETT_MAANEDSINNTEKT_FL", "FASTSETT_BG_ARBEIDSTAKER_UTEN_INNTEKTSMELDING", "VURDER_LØNNSENDRING", "FASTSETT_MÅNEDSLØNN_ARBEIDSTAKER_UTEN_INNTEKTSMELDING", "VURDER_AT_OG_FL_I_SAMME_ORGANISASJON", "FASTSETT_BESTEBEREGNING_FØDENDE_KVINNE", "VURDER_ETTERLØNN_SLUTTPAKKE", "FASTSETT_ETTERLØNN_SLUTTPAKKE", "VURDER_MOTTAR_YTELSE", "VURDER_BESTEBEREGNING", "VURDER_MILITÆR_SIVILTJENESTE", "VURDER_REFUSJONSKRAV_SOM_HAR_KOMMET_FOR_SENT", "FASTSETT_BG_KUN_YTELSE", "TILSTØTENDE_YTELSE", "FASTSETT_ENDRET_BEREGNINGSGRUNNLAG", "-" ],
-              "maxLength" : 15,
-              "minLength" : 0,
               "nullable" : true,
               "type" : "string"
             },
@@ -3684,8 +3672,7 @@
           },
           "andelIArbeid" : {
             "items" : {
-              "maximum" : 100,
-              "minimum" : 0,
+              "nullable" : true,
               "type" : "number"
             },
             "maxItems" : 100,
@@ -4621,8 +4608,7 @@
         "properties" : {
           "aktørIder" : {
             "items" : {
-              "maxLength" : 100,
-              "minLength" : 0,
+              "nullable" : true,
               "type" : "string"
             },
             "maxItems" : 100,
@@ -4688,8 +4674,7 @@
         "properties" : {
           "barnAktørIder" : {
             "items" : {
-              "maxLength" : 100,
-              "minLength" : 0,
+              "nullable" : true,
               "type" : "string"
             },
             "maxItems" : 100,
@@ -4931,6 +4916,7 @@
           "kilde" : {
             "items" : {
               "enum" : [ "AA-Registeret", "A-Inntekt", "Inntektsmelding", "Saksbehandler" ],
+              "nullable" : true,
               "type" : "string"
             },
             "type" : "array",
@@ -5347,8 +5333,7 @@
           },
           "erstattetAv" : {
             "items" : {
-              "maxLength" : 2147483647,
-              "minLength" : 0,
+              "nullable" : true,
               "type" : "string"
             },
             "maxItems" : 2147483647,
@@ -6024,8 +6009,7 @@
           },
           "andelIArbeid" : {
             "items" : {
-              "maximum" : 100,
-              "minimum" : 0,
+              "nullable" : true,
               "type" : "number"
             },
             "maxItems" : 100,
@@ -6348,8 +6332,6 @@
           },
           "pleietrengendeIdenter" : {
             "items" : {
-              "maxLength" : 20,
-              "minLength" : 0,
               "nullable" : true,
               "type" : "string"
             },
@@ -6360,8 +6342,6 @@
           },
           "relatertPersonIdenter" : {
             "items" : {
-              "maxLength" : 20,
-              "minLength" : 0,
               "nullable" : true,
               "type" : "string"
             },
@@ -6382,8 +6362,6 @@
         "properties" : {
           "aksjonspunkter" : {
             "items" : {
-              "maxLength" : 10,
-              "minLength" : 0,
               "nullable" : true,
               "type" : "string"
             },
@@ -6444,8 +6422,6 @@
           "årsaker" : {
             "items" : {
               "enum" : [ "SKJÆRINGSTIDSPUNKT", "STATSBORGERSKAP", "ADRESSE", "PERSONSTATUS", "MEDL_PERIODE", "BORTFALL_INNTEKT", "ENDRING_I_REGISTERDATA" ],
-              "maxLength" : 10,
-              "minLength" : 0,
               "nullable" : true,
               "type" : "string"
             },
@@ -6555,8 +6531,6 @@
           "merknadKoder" : {
             "items" : {
               "enum" : [ "HASTESAK" ],
-              "maxLength" : 10,
-              "minLength" : 0,
               "nullable" : true,
               "type" : "string"
             },
@@ -6914,8 +6888,6 @@
           },
           "tilknyttedeDokumenter" : {
             "items" : {
-              "maxLength" : 100,
-              "minLength" : 0,
               "nullable" : true,
               "type" : "string"
             },
@@ -7602,8 +7574,6 @@
           },
           "tilknyttedeDokumenter" : {
             "items" : {
-              "maxLength" : 100,
-              "minLength" : 0,
               "nullable" : true,
               "type" : "string"
             },
@@ -8637,8 +8607,6 @@
           "årsaker" : {
             "items" : {
               "enum" : [ "MANUELT_REVURDERER_PERIODE", "REVURDERER_BERØRT_PERIODE", "ENDRING_FRA_BRUKER", "TRUKKET_KRAV", "REVURDERER_NY_INNTEKTSMELDING", "REVURDERER_ENDRING_FRA_ANNEN_PART", "REVURDERER_ENDRING_FERIEPENGER_ANNEN_SAK", "UTSATT_BEHANDLING", "GJENOPPTAR_UTSATT_BEHANDLING", "REVURDERER_SYKDOM_ENDRING_FRA_ANNEN_OMSORGSPERSON", "REVURDERER_ETABLERT_TILSYN_ENDRING_FRA_ANNEN_OMSORGSPERSON", "REVURDERER_NATTEVÅKBEREDSKAP_ENDRING_FRA_ANNEN_OMSORGSPERSON", "HENDELSE_DØD_BRUKER", "HENDELSE_DØD_PLEIETRENGENDE", "G_REGULERING", "REVURDERER_BEREGNING", "ENDRING_I_FORDELING", "FØRSTEGANGSVURDERING", "REVURDERER_LIGNET_INNTEKT" ],
-              "maxLength" : 2147483647,
-              "minLength" : 0,
               "nullable" : true,
               "type" : "string"
             },
@@ -8926,8 +8894,6 @@
         "properties" : {
           "diagnosekoder" : {
             "items" : {
-              "maxLength" : 100,
-              "minLength" : 0,
               "nullable" : true,
               "type" : "string"
             },
@@ -8978,8 +8944,6 @@
         "properties" : {
           "aktørIder" : {
             "items" : {
-              "maxLength" : 50,
-              "minLength" : 0,
               "nullable" : true,
               "type" : "string"
             },
@@ -9129,8 +9093,7 @@
         "properties" : {
           "taskParametre" : {
             "additionalProperties" : {
-              "maxLength" : 100,
-              "minLength" : 0,
+              "nullable" : true,
               "type" : "string"
             },
             "type" : "object"
@@ -9609,8 +9572,6 @@
           },
           "barnAktørIder" : {
             "items" : {
-              "maxLength" : 100,
-              "minLength" : 0,
               "nullable" : true,
               "type" : "string"
             },
@@ -9679,6 +9640,30 @@
         "required" : [ "saksnummer", "skjæringstidspunkt" ],
         "type" : "object"
       },
+      "RevurderPeriodeFraStegDto" : {
+        "properties" : {
+          "fom" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "saksnummer" : {
+            "maxLength" : 19,
+            "minLength" : 0,
+            "pattern" : "^[a-zA-Z0-9]*$",
+            "type" : "string"
+          },
+          "steg" : {
+            "enum" : [ "RE-MF", "RE-MFIP", "RE-AVAB", "RE-LOV", "RE-RGLF", "RE-FEFAKTA", "RE-PRSSL", "RE-END-FRA-BRUKER", "RE-FRAVÆRKORR-SAKSB", "RE-END-INNTEKTSMELD", "BERØRT-BEHANDLING", "RE-ANNET", "RE-SATS-REGULERING", "RE-ENDRET-FORDELING", "INFOBREV_BEHANDLING", "INFOBREV_OPPHOLD", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-MDL", "RE-OPTJ", "RE-FRDLING", "RE-INNTK", "RE-DØD", "RE-SRTB", "RE-FRIST", "RE-BER-GRUN", "RE-KLAG-INNH-PGI", "RE-NB", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-DØDFØD", "RE-REGISTEROPPL", "RE-YTELSE", "RE-TILST-YT-INNVIL", "RE-ENDR-BER-GRUN", "RE-TILST-YT-OPPH", "RE_REBEREGN_FP", "RE_ANNEN_SAK", "RE_UTSATT_BEHANDLING", "RE_GJENOPPTAR_UTSATT_BEHANDLING", "RE_ANNEN_SAK_ET", "RE_ANNEN_SAK_NB", "RE_ANNEN_SAK_S", "RE_ANNEN_SAK_NB_ET", "RE_ANNEN_SAK_S_ET", "RE_ANNEN_SAK_S_NB", "RE_ANNEN_SAK_S_ET_NB", "RE_ANNEN_SAK_FP", "UNNT_GENERELL", "REVURDERER_BERØRT_PERIODE", "-" ],
+            "type" : "string"
+          },
+          "tom" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "fom", "saksnummer", "steg", "tom" ],
+        "type" : "object"
+      },
       "ReåpneBehandlingDto" : {
         "properties" : {
           "behandlingId" : {
@@ -9728,8 +9713,6 @@
         "properties" : {
           "saksbehandlere" : {
             "additionalProperties" : {
-              "maxLength" : 2147483647,
-              "minLength" : 0,
               "nullable" : true,
               "type" : "string"
             },
@@ -10286,8 +10269,6 @@
           },
           "diagnosekoder" : {
             "items" : {
-              "maxLength" : 1000,
-              "minLength" : 0,
               "nullable" : true,
               "type" : "string"
             },
@@ -10477,8 +10458,6 @@
           },
           "duplikater" : {
             "items" : {
-              "maxLength" : 1000,
-              "minLength" : 0,
               "nullable" : true,
               "type" : "string"
             },
@@ -10535,8 +10514,6 @@
           },
           "dokumenterSomSkalUtkvitteres" : {
             "items" : {
-              "maxLength" : 100,
-              "minLength" : 0,
               "nullable" : true,
               "type" : "string"
             },
@@ -10705,8 +10682,6 @@
           },
           "tilknyttedeDokumenter" : {
             "items" : {
-              "maxLength" : 100,
-              "minLength" : 0,
               "nullable" : true,
               "type" : "string"
             },
@@ -10787,8 +10762,6 @@
           },
           "tilknyttedeDokumenter" : {
             "items" : {
-              "maxLength" : 100,
-              "minLength" : 0,
               "nullable" : true,
               "type" : "string"
             },
@@ -11433,8 +11406,6 @@
           "faktaOmBeregningTilfeller" : {
             "items" : {
               "enum" : [ "VURDER_TIDSBEGRENSET_ARBEIDSFORHOLD", "VURDER_SN_NY_I_ARBEIDSLIVET", "VURDER_NYOPPSTARTET_FL", "FASTSETT_MAANEDSINNTEKT_FL", "FASTSETT_BG_ARBEIDSTAKER_UTEN_INNTEKTSMELDING", "VURDER_LØNNSENDRING", "FASTSETT_MÅNEDSLØNN_ARBEIDSTAKER_UTEN_INNTEKTSMELDING", "VURDER_AT_OG_FL_I_SAMME_ORGANISASJON", "FASTSETT_BESTEBEREGNING_FØDENDE_KVINNE", "VURDER_ETTERLØNN_SLUTTPAKKE", "FASTSETT_ETTERLØNN_SLUTTPAKKE", "VURDER_MOTTAR_YTELSE", "VURDER_BESTEBEREGNING", "VURDER_MILITÆR_SIVILTJENESTE", "VURDER_REFUSJONSKRAV_SOM_HAR_KOMMET_FOR_SENT", "FASTSETT_BG_KUN_YTELSE", "TILSTØTENDE_YTELSE", "FASTSETT_ENDRET_BEREGNINGSGRUNNLAG", "UDEFINERT" ],
-              "maxLength" : 100,
-              "minLength" : 0,
               "nullable" : true,
               "type" : "string"
             },
@@ -11501,8 +11472,6 @@
           "vurderPaNyttArsaker" : {
             "items" : {
               "enum" : [ "FEIL_FAKTA", "FEIL_LOV", "FEIL_REGEL", "ANNET", "-" ],
-              "maxLength" : 100,
-              "minLength" : 0,
               "nullable" : true,
               "type" : "string"
             },
@@ -12498,8 +12467,6 @@
         "properties" : {
           "perioderTilVurdering" : {
             "items" : {
-              "maxLength" : 2147483647,
-              "minLength" : 0,
               "nullable" : true,
               "type" : "string"
             },
@@ -12514,8 +12481,6 @@
           },
           "utsattePerioder" : {
             "items" : {
-              "maxLength" : 2147483647,
-              "minLength" : 0,
               "nullable" : true,
               "type" : "string"
             },
@@ -12710,8 +12675,6 @@
           },
           "merknadParametere" : {
             "additionalProperties" : {
-              "maxLength" : 20,
-              "minLength" : 0,
               "nullable" : true,
               "type" : "string"
             },
@@ -12798,8 +12761,6 @@
           },
           "merknadParametere" : {
             "additionalProperties" : {
-              "maxLength" : 20,
-              "minLength" : 0,
               "nullable" : true,
               "type" : "string"
             },
@@ -16345,6 +16306,35 @@
         "tags" : [ "behandling - utvidet rett" ]
       }
     },
+    "/behandling/utvidetRett/rammevedtak-v1" : {
+      "get" : {
+        "description" : "Hent rammevedtak v1",
+        "operationId" : "hentRammevedtakV1",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RammevedtakResponse"
+                }
+              }
+            },
+            "description" : "Returnerer relevante rammevedtak for en behandling om utvidet rett"
+          }
+        },
+        "tags" : [ "behandling - utvidet rett" ]
+      }
+    },
     "/behandling/vedtak/fritekstdokumenter" : {
       "get" : {
         "description" : "Hent liste over dokumenter flagget med at de inneholder informasjon som ikke er/kan bli punsjet",
@@ -16780,6 +16770,33 @@
           }
         },
         "tags" : [ "behandlinger" ]
+      }
+    },
+    "/behandlinger/revurder-periode-fra-steg" : {
+      "post" : {
+        "description" : "Oppretter manuell revurdering for en enkeltperiode fra et gitt steg i prosessen",
+        "operationId" : "revurderEnkeltperiodeFraSteg",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RevurderPeriodeFraStegDto"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "void"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        }
       }
     },
     "/behandlinger/revurdering-original" : {
@@ -17933,7 +17950,11 @@
           "name" : "antall",
           "required" : true,
           "schema" : {
+            "exclusiveMaximum" : false,
+            "exclusiveMinimum" : false,
             "format" : "int32",
+            "maximum" : 1000,
+            "minimum" : 1,
             "type" : "integer"
           }
         } ],

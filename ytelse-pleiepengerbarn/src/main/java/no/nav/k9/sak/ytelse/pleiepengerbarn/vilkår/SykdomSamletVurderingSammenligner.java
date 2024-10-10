@@ -87,6 +87,16 @@ public class SykdomSamletVurderingSammenligner {
                         return new LocalDateSegment<Boolean>(localDateInterval, true);
                     }
                 }
+
+                PleietrengendeSykdomVurderingVersjon lsy1 = left.getValue().getLsy();
+                PleietrengendeSykdomVurderingVersjon lsy2 = right.getValue().getLsy();
+                if (lsy1 == null && lsy2 != null || lsy1 != null && lsy2 == null) {
+                    return new LocalDateSegment<Boolean>(localDateInterval, true);
+                } else if (lsy1 != null && lsy2 != null) {
+                    if (lsy1.getResultat() != lsy2.getResultat()) {
+                        return new LocalDateSegment<Boolean>(localDateInterval, true);
+                    }
+                }
                 return null;
             }
         }, LocalDateTimeline.JoinStyle.CROSS_JOIN).compress();

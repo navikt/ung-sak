@@ -36,23 +36,23 @@ public class SendInntektsmeldingForespørselTask implements ProsessTaskHandler {
     public void doTask(ProsessTaskData prosessTaskData) {
         var fagsak = fagsakRepository.finnEksaktFagsak(prosessTaskData.getFagsakId());
         inntektsmeldingRestKlient.opprettForespørsel(new OpprettForespørselRequest(
-            new OpprettForespørselRequest.AktørIdDto(fagsak.getBrukerAktørId().getAktørId()),
-            new OpprettForespørselRequest.OrganisasjonsnummerDto(prosessTaskData.getPropertyValue(ORG_NR)),
+            new AktørIdDto(fagsak.getBrukerAktørId().getAktørId()),
+            new OrganisasjonsnummerDto(prosessTaskData.getPropertyValue(ORG_NR)),
             LocalDate.parse(prosessTaskData.getPropertyValue(SKJÆRINGSTIDSPUNKT)),
             finnYtelseType(fagsak),
-            new OpprettForespørselRequest.SaksnummerDto(fagsak.getSaksnummer().getVerdi())
+            new SaksnummerDto(fagsak.getSaksnummer().getVerdi())
 
         ));
 
 
     }
 
-    private static OpprettForespørselRequest.YtelseType finnYtelseType(Fagsak fagsak) {
+    private static YtelseType finnYtelseType(Fagsak fagsak) {
         return switch (fagsak.getYtelseType()) {
-            case OMSORGSPENGER -> OpprettForespørselRequest.YtelseType.OMSORGSPENGER;
-            case PLEIEPENGER_NÆRSTÅENDE -> OpprettForespørselRequest.YtelseType.PLEIEPENGER_NÆRSTÅENDE;
-            case PLEIEPENGER_SYKT_BARN -> OpprettForespørselRequest.YtelseType.PLEIEPENGER_SYKT_BARN;
-            case OPPLÆRINGSPENGER -> OpprettForespørselRequest.YtelseType.OPPLÆRINGSPENGER;
+            case OMSORGSPENGER -> YtelseType.OMSORGSPENGER;
+            case PLEIEPENGER_NÆRSTÅENDE -> YtelseType.PLEIEPENGER_NÆRSTÅENDE;
+            case PLEIEPENGER_SYKT_BARN -> YtelseType.PLEIEPENGER_SYKT_BARN;
+            case OPPLÆRINGSPENGER -> YtelseType.OPPLÆRINGSPENGER;
             default -> throw new IllegalStateException("Unexpected value: " + fagsak.getYtelseType());
         };
     }
