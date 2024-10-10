@@ -66,18 +66,18 @@ public class VurderAldersvilkåretSteg implements BehandlingSteg {
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
-        final var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-        final var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
+        var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
 
-        final var perioderTilVurderingTjeneste = getPerioderTilVurderingTjeneste(behandling);
-        final var perioderTilVurdering = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.ALDERSVILKÅR);
+        var perioderTilVurderingTjeneste = getPerioderTilVurderingTjeneste(behandling);
+        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.ALDERSVILKÅR);
 
-        final var personopplysningerAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonPåTidspunkt(behandling.getId(), behandling.getAktørId(), behandling.getFagsak().getPeriode().getFomDato());
-        final LocalDate fødselsdato = personopplysningerAggregat.getSøker().getFødselsdato();
+        var personopplysningerAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonPåTidspunkt(behandling.getId(), behandling.getAktørId(), behandling.getFagsak().getPeriode().getFomDato());
+        LocalDate fødselsdato = personopplysningerAggregat.getSøker().getFødselsdato();
 
         Vilkårene resultat = vurderVilkår(behandling, vilkårene, perioderTilVurdering, fødselsdato);
 
-        final var perioderUtenVurdering = finnPerioderUtenVurdering(resultat);
+        var perioderUtenVurdering = finnPerioderUtenVurdering(resultat);
         if (!perioderUtenVurdering.isEmpty()) {
             log.warn("Hadde perioder uten vurdering etter vurdering av perioder til vurdering: {}", perioderUtenVurdering);
             if (behandling.getId() == 1828755L) { //EAWVS //TODO fjern når vi ser om det funker for denne behandlingen
@@ -104,11 +104,11 @@ public class VurderAldersvilkåretSteg implements BehandlingSteg {
     }
 
     private Vilkårene vurderVilkår(Behandling behandling, Vilkårene eksisterende, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, LocalDate fødselsdato) {
-        final var resultatBuilder = Vilkårene.builderFraEksisterende(eksisterende);
-        final var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.ALDERSVILKÅR);
+        var resultatBuilder = Vilkårene.builderFraEksisterende(eksisterende);
+        var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.ALDERSVILKÅR);
         vurderAldersVilkårTjeneste.vurderPerioder(vilkårBuilder, perioderTilVurdering, fødselsdato);
         resultatBuilder.leggTil(vilkårBuilder);
-        final var resultat = resultatBuilder.build();
+        var resultat = resultatBuilder.build();
         vilkårResultatRepository.lagre(behandling.getId(), resultat);
         return resultat;
     }

@@ -122,7 +122,7 @@ public class VurderILivetsSluttfaseSteg implements BehandlingSteg {
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(AksjonspunktResultat.opprettForAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING)));
         }
 
-        final var vilkårene = vilkårResultatRepository.hent(behandlingId);
+        var vilkårene = vilkårResultatRepository.hent(behandlingId);
         Vilkårene resultat = vurderVilkår(behandlingId, medisinskGrunnlag, vilkårene, perioderTilVurdering);
 
         Optional<Vilkårene> korrigertResultat = videreførTidligereAvslagPgaManglendeDok(behandling, perioderTilVurdering, resultat);
