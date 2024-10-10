@@ -2376,6 +2376,10 @@
             "nullable" : true,
             "type" : "string"
           },
+          "arbeidsgiverPersonIdent" : {
+            "nullable" : true,
+            "type" : "string"
+          },
           "eksternArbeidsforholdId" : {
             "maxLength" : 100,
             "minLength" : 0,
