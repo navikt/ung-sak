@@ -30,6 +30,7 @@ import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.k9.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
+import no.nav.k9.sak.domene.person.tps.TpsTjeneste;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatDto;
 import no.nav.k9.sak.kontrakt.beregningsresultat.BeregningsresultatMedUtbetaltePeriodeDto;
@@ -51,6 +52,7 @@ public class UnntaksbehandlingBeregningsresultatMapper implements Beregningsresu
     private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private SkjæringstidspunktTjeneste skjæringstidspunktTjeneste;
+    private TpsTjeneste tpsTjeneste;
 
     UnntaksbehandlingBeregningsresultatMapper() {
         // For inject
@@ -174,6 +176,8 @@ public class UnntaksbehandlingBeregningsresultatMapper implements Beregningsresu
             dtoBuilder.medArbeidsgiverNavn(opplysninger.getNavn());
             if (!arb.erAktørId()) {
                 dtoBuilder.medArbeidsgiverOrgnr(new OrgNummer(arb.getOrgnr()));
+            } else {
+                dtoBuilder.medArbeidsgiverPersonIdent(tpsTjeneste.hentFnrForAktør(arb.getAktørId()));
             }
         } else {
             throw new IllegalStateException("Finner ikke arbeidsgivers identifikator");
