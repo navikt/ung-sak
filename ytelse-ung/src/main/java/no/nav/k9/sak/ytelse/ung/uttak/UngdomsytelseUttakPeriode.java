@@ -15,9 +15,8 @@ import jakarta.persistence.Table;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.PostgreSQLRangeType;
 import no.nav.k9.sak.behandlingslager.Range;
-import no.nav.k9.sak.behandlingslager.kodeverk.BehandlingStegTypeKodeverdiConverter;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.ytelse.ung.kodeverk.UngdomsytelseUttakAvslagsårsak;
+import no.nav.k9.kodeverk.ungdomsytelse.uttak.UngdomsytelseUttakAvslagsårsak;
 import no.nav.k9.sak.ytelse.ung.kodeverk.UngdomsytelseUttakAvslagsårsakKodeverdiConverter;
 
 @Entity(name = "UngdomsytelseUttakPeriode")

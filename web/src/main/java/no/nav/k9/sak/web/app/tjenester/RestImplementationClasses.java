@@ -72,6 +72,7 @@ import no.nav.k9.sak.web.app.tjenester.saksbehandler.InitielleLinksRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.saksbehandler.NavAnsattRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.saksbehandler.SaksbehandlerRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.saksnummer.SaksnummerRestTjeneste;
+import no.nav.k9.sak.web.app.ungdomsytelse.UngdomsytelseRestTjeneste;
 import no.nav.k9.sak.web.server.abac.PipRestTjeneste;
 
 public class RestImplementationClasses {
@@ -135,6 +136,8 @@ public class RestImplementationClasses {
         classes.add(OpplæringDokumentRestTjeneste.class);
         classes.add(SaksnummerRestTjeneste.class);
         classes.add(BrukerdialogRestTjeneste.class);
+
+        classes.add(UngdomsytelseRestTjeneste.class);
 
         // Forvaltningstjenester - fjernes løpende
         classes.add(ProsessTaskRestTjeneste.class);
