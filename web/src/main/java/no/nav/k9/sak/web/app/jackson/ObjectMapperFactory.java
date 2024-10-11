@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusKodelisteSerializer;
+import no.nav.k9.kodeverk.OpenapiEnumSerializer;
 import no.nav.k9.kodeverk.KodeverdiSomStringSerializer;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
@@ -31,26 +32,32 @@ public class ObjectMapperFactory {
     /**
      * Oppretter overstyrande Serializer for k9-sak Kodeverdi. Enten til objekt eller til string.
      */
-    public static StdSerializer<Kodeverdi> resolveSakKodeverdiSerializer(final SakKodeverkSerialiseringsvalg sakKodeverkSerialiseringsvalg) {
-        if(sakKodeverkSerialiseringsvalg == SakKodeverkSerialiseringsvalg.STANDARD) {
+    public static StdSerializer<Kodeverdi> resolveSakKodeverdiSerializer(final SakKodeverkOverstyringSerialisering sakKodeverkOverstyringSerialisering) {
+        if(sakKodeverkOverstyringSerialisering == SakKodeverkOverstyringSerialisering.INGEN) {
             throw new IllegalArgumentException("Det skal ikke opprettes egen StdSerializer når serialiseringsvalg er STANDARD");
         }
-        return sakKodeverkSerialiseringsvalg == SakKodeverkSerialiseringsvalg.KODE_STRING ?
+        return sakKodeverkOverstyringSerialisering == SakKodeverkOverstyringSerialisering.KODE_STRING ?
             new KodeverdiSomStringSerializer() :
-            new KodeverdiSomObjektSerializer(sakKodeverkSerialiseringsvalg == SakKodeverkSerialiseringsvalg.OBJEKT_MED_NAVN);
+            new KodeverdiSomObjektSerializer(sakKodeverkOverstyringSerialisering == SakKodeverkOverstyringSerialisering.OBJEKT_MED_NAVN);
     }
 
-    public static SimpleModule createOverstyrendeKodeverdiSerializerModule(final SakKodeverkSerialiseringsvalg sakKodeverkSerialiseringsvalg, final boolean serialiserKalkulusKodeverkSomObjekt) {
+    public static SimpleModule createOverstyrendeKodeverdiSerializerModule(final SakKodeverkOverstyringSerialisering sakKodeverkOverstyringSerialisering, final boolean serialiserKalkulusKodeverkSomObjekt) {
         final SimpleModule module = new SimpleModule("KodeverdiSerialisering", new Version(1, 0, 0, null, null, null));
 
-        if(sakKodeverkSerialiseringsvalg != SakKodeverkSerialiseringsvalg.STANDARD) {
+        if(sakKodeverkOverstyringSerialisering != SakKodeverkOverstyringSerialisering.INGEN) {
             // Legger til overstyring av serialisering av k9.kodeverk.api.Kodeverdi, enten til objekt eller string.
-            module.addSerializer(resolveSakKodeverdiSerializer(sakKodeverkSerialiseringsvalg));
+            module.addSerializer(resolveSakKodeverdiSerializer(sakKodeverkOverstyringSerialisering));
         }
         // BeregningsgrunnlagRestTjeneste eksponerer kalkulus sine kodeverdier opp til frontend.
         // Legger her til overstyring av serialisering av folketrygdloven.kalkulus.kodeverk.Kodeverdi. Enten til objekt
         // (Legacy), eller string. Overstyring til string kan sannsynlegvis fjernast, sjå TODO i KalkulusKodelisteSerializer.
         module.addSerializer(new KalkulusKodelisteSerializer(serialiserKalkulusKodeverkSomObjekt));
+        return module;
+    }
+
+    public static SimpleModule createOpenapiCompatSerializerModule(final ObjectMapper baseObjectMapper) {
+        final SimpleModule module = new SimpleModule("OpenapiSerialisering");
+        module.addSerializer(new OpenapiEnumSerializer(baseObjectMapper));
         return module;
     }
 

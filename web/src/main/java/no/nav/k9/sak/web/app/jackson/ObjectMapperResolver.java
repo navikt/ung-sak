@@ -18,10 +18,10 @@ public class ObjectMapperResolver implements ContextResolver<ObjectMapper> {
     private HttpHeaders headers;
 
     private final ObjectMapper baseObjektMapper;
-    private final ObjectMapper kodeverdiAlltidSomObjektMapper;
-    private final ObjectMapper kodeverdiAlltidSomStringMapper;
-    private final ObjectMapper sakKodeverdiStandardKalkulusKodeverdiStringMapper;
+    private final ObjectMapper overstyrKodeverdiAlltidSomStringMapper;
+    private final ObjectMapper overstyrKalkulusKodeverdiSomStringMapper;
     private final ObjectMapper defaultObjektMapper;
+    private final ObjectMapper openapiObjektMapper;
 
 
     /**
@@ -29,13 +29,14 @@ public class ObjectMapperResolver implements ContextResolver<ObjectMapper> {
      */
     public ObjectMapperResolver(final boolean featureFlagKodeverkAktiverKalkulusString) {
         this.baseObjektMapper = ObjectMapperFactory.createBaseObjectMapper();
-        this.kodeverdiAlltidSomObjektMapper = this.baseObjektMapper.copy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkSerialiseringsvalg.OBJEKT_UTEN_NAVN,  true));
-        this.kodeverdiAlltidSomStringMapper = this.baseObjektMapper.copy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkSerialiseringsvalg.KODE_STRING, false));
-        this.sakKodeverdiStandardKalkulusKodeverdiStringMapper = this.baseObjektMapper.copy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkSerialiseringsvalg.STANDARD, false));
-        // Bestemmer kva ObjectMapper som skal brukast når input header ikkje bestemmer det.
-        // Bruker samme logikk som har vore pr no. Skal endrast til ønska framtidig standard når alle klienter har blitt
-        // oppdatert til å handtere det.
-        this.defaultObjektMapper = this.baseObjektMapper.copy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkSerialiseringsvalg.STANDARD, !featureFlagKodeverkAktiverKalkulusString));
+        this.overstyrKodeverdiAlltidSomStringMapper = this.baseObjektMapper.copy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkOverstyringSerialisering.KODE_STRING, false));
+        this.overstyrKalkulusKodeverdiSomStringMapper = this.baseObjektMapper.copy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkOverstyringSerialisering.INGEN, false));
+        // defaultObjektMapper brukast når input header for overstyring ikkje er satt.
+        // Bruker samme logikk som har vore pr no. Det vil seie overstyring av Kalkulus Kodeverdi serialisering til objekt, så lenge ikkje feature flagg for string serialisering er aktivt.
+        // Når alle klienter kan handtere at Kalkulus Kodeverdi kjem som string kan denne sannsynlegvis settast lik baseObjektMapper.
+        this.defaultObjektMapper = this.baseObjektMapper.copy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkOverstyringSerialisering.INGEN, !featureFlagKodeverkAktiverKalkulusString));
+        // openaapiObjektMapper bør brukast viss ein ønsker at enums skal bli serialisert slik openapi spesifikasjon tilseier.
+        this.openapiObjektMapper = this.baseObjektMapper.copy().registerModule(ObjectMapperFactory.createOpenapiCompatSerializerModule(this.baseObjektMapper));
     }
 
     public ObjectMapperResolver() {
@@ -71,10 +72,10 @@ public class ObjectMapperResolver implements ContextResolver<ObjectMapper> {
         final String serializerOption = this.getJsonSerializerOptionHeaderValue();
         return switch (serializerOption) {
             // Kompatibilitet for verdikjede test klient, istadenfor feature flag på server:
-            case "kodeverk-sak-standard-kalkulus-string" -> this.sakKodeverdiStandardKalkulusKodeverdiStringMapper;
-            case "kodeverdi-string" -> this.kodeverdiAlltidSomStringMapper;
-            case "kodeverdi-object" -> this.kodeverdiAlltidSomObjektMapper;
+            case "kodeverdi-kalkulus-string" -> this.overstyrKalkulusKodeverdiSomStringMapper;
+            case "kodeverdi-sak-string" -> this.overstyrKodeverdiAlltidSomStringMapper;
             case "base" -> this.baseObjektMapper;
+            case "openapi-compat" -> this.openapiObjektMapper;
             // Viss ingen gyldig header verdi, gjer det samme som før basert på feature flag.
             default -> this.defaultObjektMapper;
         };

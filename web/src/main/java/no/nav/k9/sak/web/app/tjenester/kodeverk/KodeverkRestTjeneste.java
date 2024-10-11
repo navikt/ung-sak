@@ -32,7 +32,7 @@ import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.web.app.jackson.ObjectMapperFactory;
-import no.nav.k9.sak.web.app.jackson.SakKodeverkSerialiseringsvalg;
+import no.nav.k9.sak.web.app.jackson.SakKodeverkOverstyringSerialisering;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
@@ -49,7 +49,7 @@ public class KodeverkRestTjeneste {
 
     private static final long CACHE_ELEMENT_LIVE_TIME_MS = TimeUnit.MILLISECONDS.convert(60, TimeUnit.MINUTES);
 
-    private final ObjectMapper objectMapper = ObjectMapperFactory.createBaseObjectMapper().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkSerialiseringsvalg.OBJEKT_MED_NAVN, true));
+    private final ObjectMapper objectMapper = ObjectMapperFactory.createBaseObjectMapper().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkOverstyringSerialisering.OBJEKT_MED_NAVN, true));
     private HentKodeverkTjeneste hentKodeverkTjeneste; // NOSONAR
     private LRUCache<String, String> kodelisteCache = new LRUCache<>(10, CACHE_ELEMENT_LIVE_TIME_MS);
 
