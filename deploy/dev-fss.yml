@@ -304,8 +304,6 @@ spec:
       value: "true"
     - name: UNGDOMSYTELSE_ENABLED
       value: "true"
-    - name: KODEVERK_SOM_STRING_REST
-      value: "false"
 
 
     # Konfigurasjoner

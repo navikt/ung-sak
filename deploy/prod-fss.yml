@@ -289,8 +289,6 @@ spec:
       value: "true"
     - name: UNGDOMSYTELSE_ENABLED
       value: "false"
-    - name: KODEVERK_SOM_STRING_REST
-      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
