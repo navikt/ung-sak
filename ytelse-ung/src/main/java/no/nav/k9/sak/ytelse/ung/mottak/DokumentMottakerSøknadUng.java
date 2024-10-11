@@ -64,6 +64,7 @@ public class DokumentMottakerSøknadUng implements Dokumentmottaker {
             mottatteDokumentRepository.lagre(dokument, DokumentStatus.BEHANDLER);
 
 
+            //TODO slett
             lagreSøknadsperioderSomUngdomsprogram(søknad, behandlingId);
 
         }
