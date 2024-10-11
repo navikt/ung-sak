@@ -1,4 +1,4 @@
-package no.nav.k9.sak.ytelse.ung.kodeverk;
+package no.nav.k9.kodeverk.ungdomsytelse.uttak;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

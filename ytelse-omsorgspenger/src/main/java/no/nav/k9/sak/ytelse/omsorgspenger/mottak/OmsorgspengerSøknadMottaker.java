@@ -3,7 +3,6 @@ package no.nav.k9.sak.ytelse.omsorgspenger.mottak;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
 
 import java.time.LocalDate;
-import java.util.Arrays;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,23 +61,16 @@ public class OmsorgspengerSøknadMottaker implements SøknadMottakTjeneste<Omsor
             return fagsak.get();
         }
 
-        LocalDate idag = LocalDate.now();
-        var detteÅret = DatoIntervallEntitet.fraOgMedTilOgMed(idag.withDayOfYear(1), idag.withMonth(12).withDayOfMonth(31));
-        var ettÅrTilbake = DatoIntervallEntitet.fraOgMedTilOgMed(idag.minusYears(1).withDayOfYear(1), idag.minusYears(1).withMonth(12).withDayOfMonth(31));
-        var toÅrTilbake = DatoIntervallEntitet.fraOgMedTilOgMed(idag.minusYears(2).withDayOfYear(1), idag.minusYears(2).withMonth(12).withDayOfMonth(31));
-        var treÅrTilbake = DatoIntervallEntitet.fraOgMedTilOgMed(idag.minusYears(3).withDayOfYear(1), idag.minusYears(3).withMonth(12).withDayOfMonth(31));
-        var angittPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(startDato, sluttDato);
+        final var angittPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(startDato, sluttDato);
 
-        for (var p : Arrays.asList(detteÅret, ettÅrTilbake, toÅrTilbake, treÅrTilbake)) {
-            if (p.overlapper(angittPeriode)) {
-                if (p.getFomDato().getYear() >= CUT_OFF_OMP) {
-                    // ta utgangspunkt i året i år først, sjekk deretter fjoråret. Men ikke tillatt 2019 eller tidligere her
-                    final Saksnummer saksnummer = reservertSaksnummer != null ? reservertSaksnummer : hentReservertEllerGenererSaksnummer(søkerAktørId, p.getFomDato().getYear());
-                    final Fagsak nyFagsak = opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, ytelseType, p.getFomDato(), p.getTomDato());
-                    logger.info("Opprettet fagsak {} med periode {}/{}. Etterspurte fagsak for periode {}/{}", nyFagsak.getSaksnummer().getVerdi(), p.getFomDato(), p.getTomDato(), startDato, sluttDato);
-                    reservertSaksnummerRepository.slettHvisEksisterer(saksnummer);
-                    return nyFagsak;
-                }
+        for (int årstall = LocalDate.now().getYear(); årstall >= CUT_OFF_OMP; årstall--) {
+            var heleÅret = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(årstall, 1, 1), LocalDate.of(årstall, 12, 31));
+            if (heleÅret.overlapper(angittPeriode)) {
+                final Saksnummer saksnummer = reservertSaksnummer != null ? reservertSaksnummer : hentReservertEllerGenererSaksnummer(søkerAktørId, årstall);
+                final Fagsak nyFagsak = opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, ytelseType, heleÅret.getFomDato(), heleÅret.getTomDato());
+                logger.info("Opprettet fagsak {} med periode {}/{}. Etterspurte fagsak for periode {}/{}", nyFagsak.getSaksnummer().getVerdi(), heleÅret.getFomDato(), heleÅret.getTomDato(), startDato, sluttDato);
+                reservertSaksnummerRepository.slettHvisEksisterer(saksnummer);
+                return nyFagsak;
             }
         }
 

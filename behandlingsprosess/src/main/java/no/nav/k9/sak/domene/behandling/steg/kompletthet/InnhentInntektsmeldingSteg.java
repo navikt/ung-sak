@@ -72,7 +72,7 @@ public class InnhentInntektsmeldingSteg implements BehandlingSteg {
         var forespørsler = mapTilForespørsler(manglendeVedleggPerPeriode);
 
         arbeidsgiverPortalenTjeneste.oppdaterInntektsmeldingforespørslerISak(forespørsler, behandling);
-        log.info("Sendte forespørsel om inntektsmelding til arbeidsgiverportalen for følgende perioder: {}", forespørsler.keySet());
+        log.info("Oppdaterer forespørsler om inntektsmelding i arbeidsgiverportalen med følgende perioder: {}", forespørsler.keySet());
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
