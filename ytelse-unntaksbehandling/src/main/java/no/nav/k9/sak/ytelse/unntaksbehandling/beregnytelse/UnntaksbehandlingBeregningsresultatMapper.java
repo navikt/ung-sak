@@ -61,10 +61,12 @@ public class UnntaksbehandlingBeregningsresultatMapper implements Beregningsresu
     @Inject
     public UnntaksbehandlingBeregningsresultatMapper(ArbeidsgiverTjeneste arbeidsgiverTjeneste,
                                                      InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                                     SkjæringstidspunktTjeneste skjæringstidspunktTjeneste) {
+                                                     SkjæringstidspunktTjeneste skjæringstidspunktTjeneste,
+                                                     TpsTjeneste tpsTjeneste) {
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.skjæringstidspunktTjeneste = skjæringstidspunktTjeneste;
+        this.tpsTjeneste = tpsTjeneste;
     }
 
     @Override
