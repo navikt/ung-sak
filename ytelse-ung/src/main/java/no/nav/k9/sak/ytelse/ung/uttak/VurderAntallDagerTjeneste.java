@@ -12,7 +12,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
-import no.nav.k9.sak.ytelse.ung.kodeverk.UngdomsytelseUttakAvslagsårsak;
+import no.nav.k9.kodeverk.ungdomsytelse.uttak.UngdomsytelseUttakAvslagsårsak;
 
 class VurderAntallDagerTjeneste {
 
