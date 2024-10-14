@@ -9651,9 +9651,6 @@
             "type" : "string"
           },
           "saksnummer" : {
-            "maxLength" : 19,
-            "minLength" : 0,
-            "pattern" : "^[a-zA-Z0-9]*$",
             "type" : "string"
           },
           "steg" : {
