@@ -90,6 +90,9 @@ spec:
         - application: k9-sak-innsyn-api
           namespace: dusseldorf
           cluster: dev-gcp
+        - application: ung-deltakelse-opplyser
+          namespace: k9saksbehandling
+          cluster: dev-gcp
 
   env:
     - name: TZ
