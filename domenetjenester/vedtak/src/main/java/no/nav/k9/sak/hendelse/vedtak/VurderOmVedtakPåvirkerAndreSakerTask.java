@@ -74,6 +74,7 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
             taskData.setBehandling(tilRevurdering.getFagsakId(), tilRevurdering.getId(),
                 tilRevurdering.getAktørId().getId());
 
+            behandlingRepository.taSkriveLås(tilRevurdering.getId());
             fagsakProsessTaskRepository.lagreNyGruppe(taskData);
         }
     }
