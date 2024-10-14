@@ -178,7 +178,10 @@ public class KompletthetForBeregningRestTjeneste {
             mapStatusPåInntektsmeldinger(it, unikeInntektsmeldingerForFagsak, ref, kompletthetsvurdering, erInfotrygdMigrering, yrkesaktivitetFilter),
             kompletthetsvurdering.map(KompletthetPeriode::getVurdering).orElse(Vurdering.UDEFINERT),
             utledVurdering(it, perioderTilVurdering, erInfotrygdMigrering, innvilgetSøknadsfrist),
-            kompletthetsvurdering.map(KompletthetPeriode::getBegrunnelse).orElse(null));
+            kompletthetsvurdering.map(KompletthetPeriode::getBegrunnelse).orElse(null),
+            kompletthetsvurdering.map(KompletthetPeriode::getEndretAv)
+                .orElseGet(() -> kompletthetsvurdering.map(KompletthetPeriode::getOpprettetAv).orElse(null))
+        );
     }
 
     private Boolean utledVurdering(Map.Entry<DatoIntervallEntitet, List<ManglendeVedlegg>> it, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, boolean erInfotrygdMigrering, NavigableSet<DatoIntervallEntitet> innvilgetSøknadsfrist) {

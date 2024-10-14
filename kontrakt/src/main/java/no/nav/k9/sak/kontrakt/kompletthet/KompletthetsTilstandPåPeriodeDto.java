@@ -47,18 +47,23 @@ public class KompletthetsTilstandPåPeriodeDto {
     @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String begrunnelse;
 
+    @JsonProperty("vurdertAv")
+    private String vurdertAv;
+
     @JsonCreator
     public KompletthetsTilstandPåPeriodeDto(@JsonProperty("periode") Periode periode,
                                             @JsonProperty("status") List<ArbeidsgiverArbeidsforholdStatus> status,
                                             @Valid @JsonProperty("vurdering") Vurdering vurdering,
                                             @Valid @NotNull @JsonProperty("tilVurdering") Boolean tilVurdering,
                                             @JsonProperty("begrunnelse") @Size(max = 4000)
-                                            @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String begrunnelse) {
+                                            @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String begrunnelse,
+                                            @JsonProperty("vurdertAv") String vurdertAv) {
         this.periode = periode;
         this.status = status;
         this.vurdering = vurdering;
         this.tilVurdering = tilVurdering;
         this.begrunnelse = begrunnelse;
+        this.vurdertAv = vurdertAv;
     }
 
     public Boolean getTilVurdering() {
