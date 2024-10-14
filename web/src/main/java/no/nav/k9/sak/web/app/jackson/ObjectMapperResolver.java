@@ -73,7 +73,7 @@ public class ObjectMapperResolver implements ContextResolver<ObjectMapper> {
         return switch (serializerOption) {
             // Kompatibilitet for verdikjede test klient, istadenfor feature flag på server:
             case "kodeverdi-kalkulus-string" -> this.overstyrKalkulusKodeverdiSomStringMapper;
-            case "kodeverdi-sak-string" -> this.overstyrKodeverdiAlltidSomStringMapper;
+            case "kodeverdi-string" -> this.overstyrKodeverdiAlltidSomStringMapper;
             case "base" -> this.baseObjektMapper;
             case "openapi-compat" -> this.openapiObjektMapper;
             // Viss ingen gyldig header verdi, gjer det samme som før basert på feature flag.
