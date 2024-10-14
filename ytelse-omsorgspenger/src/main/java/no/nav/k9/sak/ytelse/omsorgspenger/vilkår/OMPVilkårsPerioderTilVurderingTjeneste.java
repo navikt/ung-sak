@@ -21,7 +21,6 @@ import jakarta.inject.Inject;
 import no.nav.k9.aarskvantum.kontrakter.Aktivitet;
 import no.nav.k9.aarskvantum.kontrakter.Periodetype;
 import no.nav.k9.aarskvantum.kontrakter.Uttaksperiode;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
@@ -60,8 +59,6 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
     private ÅrskvantumTjeneste årskvantumTjeneste;
     private ProsessTriggereRepository prosessTriggereRepository;
 
-    private boolean enableFjernPerioderBeregning;
-
     OMPVilkårsPerioderTilVurderingTjeneste() {
         // CDI
     }
@@ -73,8 +70,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
                                                   TrekkUtFraværTjeneste trekkUtFraværTjeneste,
                                                   VilkårResultatRepository vilkårResultatRepository,
                                                   ÅrskvantumTjeneste årskvantumTjeneste,
-                                                  ProsessTriggereRepository prosessTriggereRepository,
-                                                  @KonfigVerdi(value = "FJERN_VILKARSPERIODER_BEREGNING", defaultVerdi = "false") boolean enableFjernPerioderBeregning) {
+                                                  ProsessTriggereRepository prosessTriggereRepository) {
         this.vilkårUtleder = vilkårUtleder;
         søktePerioder = new SøktePerioder(omsorgspengerGrunnlagRepository);
         nulledePerioder = new NulledePerioder(omsorgspengerGrunnlagRepository);
@@ -83,7 +79,6 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.årskvantumTjeneste = årskvantumTjeneste;
         this.prosessTriggereRepository = prosessTriggereRepository;
-        this.enableFjernPerioderBeregning = enableFjernPerioderBeregning;
     }
 
     @WithSpan
@@ -106,6 +101,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
 
         return søktePerioder.utledPeriodeFraSøknadsPerioder(fraværsperioderSak);
     }
+
     @WithSpan
     public NavigableSet<DatoIntervallEntitet> utled(@SpanAttribute("behandlingId") Long behandlingId, @SpanAttribute("vilkarType") VilkårType vilkårType) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
@@ -208,11 +204,7 @@ public class OMPVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioder
 
     @Override
     public Set<VilkårType> definerendeVilkår() {
-        if (enableFjernPerioderBeregning) {
-            return Set.of(VilkårType.SØKNADSFRIST);
-        }
-        return Set.of(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        return Set.of(VilkårType.SØKNADSFRIST);
     }
-
 
 }

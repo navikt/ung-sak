@@ -75,7 +75,7 @@ public class VurderPreconditionBeregningSteg implements BeregningsgrunnlagSteg {
         vurderAvslagGrunnetOpptjening.vurderAvslagGrunnetAvslagIOpptjening(referanse, perioderTilVurdering);
 
         // 3. fjern eller initier perioder fra definerende vilkår
-        ryddOgGjenopprettBeregningTjeneste.fjernEllerInitierPerioderFraDefinerendeVilkår(referanse);
+        ryddOgGjenopprettBeregningTjeneste.fjernEllerInitierPerioder(referanse);
 
         // 4. Rydder alle perioder ulik initiell
         ryddOgGjenopprettBeregningTjeneste.deaktiverAlleReferanserUlikInitiell(referanse);
