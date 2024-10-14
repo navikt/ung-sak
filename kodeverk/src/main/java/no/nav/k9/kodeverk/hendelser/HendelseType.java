@@ -19,6 +19,7 @@ public enum HendelseType implements Kodeverdi {
     PDL_DØDFØDSEL("PDL_DØDFØDSEL"),
     PDL_FØDSEL("PDL_FØDSEL"),
     PDL_DØDSFALL("PDL_DØDSFALL"),
+    UNGDOMSPROGRAM_OPPHØR("UNG_OPPHØR"),
 
     UDEFINERT("-"),
     ;

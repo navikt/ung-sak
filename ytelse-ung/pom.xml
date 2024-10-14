@@ -51,6 +51,10 @@
 			<artifactId>behandlingslager-testutilities</artifactId>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>no.nav.k9.sak</groupId>
+            <artifactId>hendelsemottak</artifactId>
+        </dependency>
+    </dependencies>
 
 </project>

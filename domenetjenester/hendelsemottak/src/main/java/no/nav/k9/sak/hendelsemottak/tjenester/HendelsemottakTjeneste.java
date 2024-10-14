@@ -23,7 +23,6 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.kontrakt.hendelser.Hendelse;
-import no.nav.k9.sak.typer.AktørId;
 
 @ApplicationScoped
 public class HendelsemottakTjeneste {
@@ -65,7 +64,7 @@ public class HendelsemottakTjeneste {
         return new ArrayList<>(matchendeUtledere);
     }
 
-    public Map<Fagsak, BehandlingÅrsakType> finnFagsakerTilVurdering(AktørId aktørId, Hendelse hendelse) {
+    public Map<Fagsak, BehandlingÅrsakType> finnFagsakerTilVurdering(Hendelse hendelse) {
         var fagsakerMedBehandlingÅrsak = finnMatchendeUtledere(hendelse.getHendelseType())
             .stream()
             .map(utleder -> utleder.finnFagsakerTilVurdering(hendelse))
@@ -74,8 +73,8 @@ public class HendelsemottakTjeneste {
         return fagsakerMedBehandlingÅrsak;
     }
 
-    public Map<Fagsak, BehandlingÅrsakType> mottaHendelse(AktørId aktørId, Hendelse payload) {
-        var kandidaterTilRevurdering = finnFagsakerTilVurdering(aktørId, payload);
+    public Map<Fagsak, BehandlingÅrsakType> mottaHendelse(Hendelse payload) {
+        var kandidaterTilRevurdering = finnFagsakerTilVurdering(payload);
 
         List<String> saksnumre = kandidaterTilRevurdering.keySet().stream().map(f -> f.getSaksnummer().getVerdi()).toList();
         log.info("Mottok hendelse '{}', fant {} relevante fagsaker: {}", payload.getHendelseType(), saksnumre.size(), saksnumre);
