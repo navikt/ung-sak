@@ -1,11 +1,5 @@
 package no.nav.k9.sak.ytelse.ung.mottak;
 
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
@@ -23,9 +17,13 @@ import no.nav.k9.sak.mottak.dokumentmottak.SøknadParser;
 import no.nav.k9.sak.ytelse.ung.periode.UngdomsprogramPeriode;
 import no.nav.k9.sak.ytelse.ung.periode.UngdomsprogramPeriodeRepository;
 import no.nav.k9.søknad.Søknad;
-import no.nav.k9.søknad.felles.type.Periode;
-import no.nav.k9.søknad.ytelse.olp.v1.Opplæringspenger;
 import no.nav.k9.søknad.ytelse.ung.v1.Ungdomsytelse;
+
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
+
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 
 @ApplicationScoped
@@ -79,7 +77,13 @@ public class DokumentMottakerSøknadUng implements Dokumentmottaker {
     private void lagreSøknadsperioderSomUngdomsprogram(Søknad søknad, Long behandlingId) {
         Ungdomsytelse ytelse = søknad.getYtelse();
         var søknadsperiode = ytelse.getSøknadsperiode();
-        ungdomsprogramPeriodeRepository.lagre(behandlingId, List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiode.getFraOgMed(), søknadsperiode.getTilOgMed()))));
+
+        LocalDate fraOgMed = søknadsperiode.getFraOgMed();
+        LocalDate tilOgMed = søknadsperiode.getTilOgMed();
+        if (tilOgMed == null) {
+            tilOgMed = fraOgMed.plusDays(260);
+        }
+        ungdomsprogramPeriodeRepository.lagre(behandlingId, List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fraOgMed, tilOgMed))));
     }
 
     @Override
