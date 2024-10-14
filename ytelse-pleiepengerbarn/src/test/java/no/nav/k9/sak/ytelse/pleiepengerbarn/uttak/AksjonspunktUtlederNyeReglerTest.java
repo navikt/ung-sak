@@ -70,7 +70,7 @@ public class AksjonspunktUtlederNyeReglerTest {
 
     @BeforeEach
     void setUp() {
-        utleder = new AksjonspunktUtlederNyeRegler(behandlingRepository, uttakNyeReglerRepository, tilkommetAktivitetTjeneste, aksjonspunktKontrollRepository, søknadsperiodeTjeneste, mapInputTilUttakTjeneste, true);
+        utleder = new AksjonspunktUtlederNyeRegler(behandlingRepository, uttakNyeReglerRepository, tilkommetAktivitetTjeneste, aksjonspunktKontrollRepository, søknadsperiodeTjeneste, mapInputTilUttakTjeneste);
 
         var fagsak = Fagsak.opprettNy(FagsakYtelseType.DAGPENGER, new AktørId(123L), new Saksnummer("987"), LocalDate.now(), LocalDate.now());
         fagsakRepository.opprettNy(fagsak);

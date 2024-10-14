@@ -39,8 +39,6 @@ class AksjonspunktUtlederNyeRegler {
 
     private MapInputTilUttakTjeneste mapInputTilUttakTjeneste;
 
-    private boolean brukDatoNyRegelUttak;
-
     AksjonspunktUtlederNyeRegler() {
         // for proxy
     }
@@ -51,22 +49,17 @@ class AksjonspunktUtlederNyeRegler {
                                         TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste,
                                         AksjonspunktKontrollRepository aksjonspunktKontrollRepository,
                                         SøknadsperiodeTjeneste søknadsperiodeTjeneste,
-                                        MapInputTilUttakTjeneste mapInputTilUttakTjeneste, @KonfigVerdi(value = "ENABLE_DATO_NY_REGEL_UTTAK", defaultVerdi = "false") boolean brukDatoNyRegelUttak) {
+                                        MapInputTilUttakTjeneste mapInputTilUttakTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.uttakNyeReglerRepository = uttakNyeReglerRepository;
         this.tilkommetAktivitetTjeneste = tilkommetAktivitetTjeneste;
         this.aksjonspunktKontrollRepository = aksjonspunktKontrollRepository;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
-        this.brukDatoNyRegelUttak = brukDatoNyRegelUttak;
     }
 
 
     public Optional<AksjonspunktDefinisjon> utledAksjonspunktDatoForNyeRegler(Behandling behandling) {
-        if (!brukDatoNyRegelUttak) {
-            return Optional.empty();
-        }
-
         final boolean datoHarBlittSatt = uttakNyeReglerRepository.finnDatoForNyeRegler(behandling.getId()).isPresent();
         var eksisterendeAksjonspunkt = behandling.getAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK);
 

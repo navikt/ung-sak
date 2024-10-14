@@ -43,7 +43,6 @@ public class VurderTilkommetInntektSteg implements BehandlingSteg {
     private BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste;
     private VilkårTjeneste vilkårTjeneste;
     private BeregningStegTjeneste beregningStegTjeneste;
-    private boolean skalKjøreSteget;
 
     protected VurderTilkommetInntektSteg() {
         // CDI Proxy
@@ -52,21 +51,16 @@ public class VurderTilkommetInntektSteg implements BehandlingSteg {
     @Inject
     public VurderTilkommetInntektSteg(BehandlingRepository behandlingRepository,
                                       BeregningsgrunnlagVilkårTjeneste beregningsgrunnlagVilkårTjeneste,
-                                      VilkårTjeneste vilkårTjeneste, BeregningStegTjeneste beregningStegTjeneste,
-                                      @KonfigVerdi(value = "TILKOMMET_AKTIVITET_ENABLED", defaultVerdi = "false") boolean skalKjøreSteget) {
+                                      VilkårTjeneste vilkårTjeneste, BeregningStegTjeneste beregningStegTjeneste) {
 
         this.behandlingRepository = behandlingRepository;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
         this.vilkårTjeneste = vilkårTjeneste;
         this.beregningStegTjeneste = beregningStegTjeneste;
-        this.skalKjøreSteget = skalKjøreSteget;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
-        if (!skalKjøreSteget) {
-            return BehandleStegResultat.utførtUtenAksjonspunkter();
-        }
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         var ref = BehandlingReferanse.fra(behandling);
         validerVurdertVilkår(ref);

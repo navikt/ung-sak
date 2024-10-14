@@ -30,7 +30,6 @@ public class ArbeidstidMappingInput {
     private InntektArbeidYtelseGrunnlag inntektArbeidYtelseGrunnlag;
     private DatoIntervallEntitet utvidetPeriodeSomFølgeAvDødsfall;
 
-    private boolean skalAlltidHaInaktivVed_8_47_B;
 
 
     public ArbeidstidMappingInput() {
@@ -40,13 +39,12 @@ public class ArbeidstidMappingInput {
                                   Set<PerioderFraSøknad> perioderFraSøknader,
                                   LocalDateTimeline<Boolean> tidslinjeTilVurdering,
                                   Vilkår vilkår,
-                                  OpptjeningResultat opptjeningResultat, boolean skalAlltidHaInaktivVed847B) {
+                                  OpptjeningResultat opptjeningResultat) {
         this.kravDokumenter = kravDokumenter;
         this.perioderFraSøknader = perioderFraSøknader;
         this.tidslinjeTilVurdering = tidslinjeTilVurdering;
         this.vilkår = vilkår;
         this.opptjeningResultat = opptjeningResultat;
-        this.skalAlltidHaInaktivVed_8_47_B = skalAlltidHaInaktivVed847B;
     }
 
     public ArbeidstidMappingInput medKravDokumenter(Set<KravDokument> kravDokumenter) {
@@ -85,11 +83,6 @@ public class ArbeidstidMappingInput {
     }
     public ArbeidstidMappingInput medVilkår(Vilkår vilkår) {
         this.vilkår = vilkår;
-        return this;
-    }
-
-    public ArbeidstidMappingInput medSkalHaInaktivVed847B(boolean skalAlltidHaInaktivVed_8_47_B) {
-        this.skalAlltidHaInaktivVed_8_47_B = skalAlltidHaInaktivVed_8_47_B;
         return this;
     }
 
@@ -161,7 +154,4 @@ public class ArbeidstidMappingInput {
         return this;
     }
 
-    public boolean skalAlltidHaInaktivVed_8_47_B() {
-        return skalAlltidHaInaktivVed_8_47_B;
-    }
 }

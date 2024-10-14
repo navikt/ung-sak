@@ -39,19 +39,15 @@ public class PleiepengerKompletthetFraværFilter implements KompletthetFraværFi
     private PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste;
     private PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste;
 
-    private boolean skalHaInaktivVed_8_47_B;
-
     PleiepengerKompletthetFraværFilter() {
         // CDI
     }
 
     @Inject
     public PleiepengerKompletthetFraværFilter(@Any PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste,
-                                              PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste,
-                                              @KonfigVerdi(value = "INAKTIV_VED_8_47_B", defaultVerdi = "false") boolean skalHaInaktivVed847B) {
+                                              PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste) {
         this.søknadsfristTjeneste = søknadsfristTjeneste;
         this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
-        this.skalHaInaktivVed_8_47_B = skalHaInaktivVed847B;
     }
 
     @Override
@@ -67,7 +63,7 @@ public class PleiepengerKompletthetFraværFilter implements KompletthetFraværFi
             perioderFraSøknadene,
             timeline,
             null,
-            null, skalHaInaktivVed_8_47_B);
+            null);
         var arbeidIPeriode = new MapArbeid().map(arbeidstidInput);
 
         var harFraværFraArbeidsgiverIPerioden = harFraværFraArbeidsgiverIPerioden(arbeidIPeriode, manglendeVedlegg);
