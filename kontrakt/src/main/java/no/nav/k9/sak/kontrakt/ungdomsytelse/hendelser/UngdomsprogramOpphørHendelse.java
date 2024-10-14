@@ -54,8 +54,8 @@ public class UngdomsprogramOpphørHendelse implements Hendelse {
             return this;
         }
 
-        public Builder medDødsdato(LocalDate dødsdato) {
-            mal.opphørsdato = dødsdato;
+        public Builder medOpphørsdato(LocalDate opphørsdato) {
+            mal.opphørsdato = opphørsdato;
             return this;
         }
 
