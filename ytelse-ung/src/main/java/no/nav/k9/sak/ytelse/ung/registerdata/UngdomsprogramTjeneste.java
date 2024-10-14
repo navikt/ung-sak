@@ -5,6 +5,8 @@ import java.util.Collection;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.ytelse.ung.periode.UngdomsprogramPeriode;
@@ -35,11 +37,21 @@ public class UngdomsprogramTjeneste {
             throw new IllegalStateException("Fant ingen opplysninger om ungdomsprogrammet for aktør. ");
         }
 
-        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), mapPerioder(registerOpplysninger));
+
+        var timeline = lagTimeline(registerOpplysninger);
+
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), mapPerioder(timeline));
     }
 
-    private static Collection<UngdomsprogramPeriode> mapPerioder(UngdomsprogramRegisterKlient.DeltakerOpplysningerDTO dto) {
-        return dto.opplysninger().stream().map(it -> new UngdomsprogramPeriode(it.fraOgMed(), it.tilOgMed())).toList();
+    private static LocalDateTimeline<Boolean> lagTimeline(UngdomsprogramRegisterKlient.DeltakerOpplysningerDTO registerOpplysninger) {
+        var segmenter = registerOpplysninger.opplysninger().stream().map(it -> new LocalDateSegment<>(it.fraOgMed(), it.tilOgMed(), true)).toList();
+        var timeline = new LocalDateTimeline<>(segmenter);
+        timeline.compress();
+        return timeline;
+    }
+
+    private static Collection<UngdomsprogramPeriode> mapPerioder(LocalDateTimeline<Boolean> dto) {
+        return dto.stream().map(it -> new UngdomsprogramPeriode(it.getFom(), it.getTom())).toList();
     }
 
 }
