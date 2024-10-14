@@ -44,6 +44,7 @@ public class ObjectMapperResolver implements ContextResolver<ObjectMapper> {
     }
 
     private String getJsonSerializerOptionHeaderValue() {
+        // Denne verdi er også hardkoda i k9-sak-web jsonSerializerOption.ts
         final var headerValues = headers.getRequestHeader("X-Json-Serializer-Option");
         if(headerValues != null) {
             final var firstValue = headerValues.getFirst();
@@ -75,7 +76,7 @@ public class ObjectMapperResolver implements ContextResolver<ObjectMapper> {
             case "kodeverdi-kalkulus-string" -> this.overstyrKalkulusKodeverdiSomStringMapper;
             case "kodeverdi-string" -> this.overstyrKodeverdiAlltidSomStringMapper;
             case "base" -> this.baseObjektMapper;
-            case "openapi-compat" -> this.openapiObjektMapper;
+            case "openapi-compat" -> this.openapiObjektMapper; // <- Også hardkoda i k9-sak-web jsonSerializerOption.ts
             // Viss ingen gyldig header verdi, gjer det samme som før basert på feature flag.
             default -> this.defaultObjektMapper;
         };
