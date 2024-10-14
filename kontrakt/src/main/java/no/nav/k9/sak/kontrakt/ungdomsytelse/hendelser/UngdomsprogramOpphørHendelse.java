@@ -42,28 +42,6 @@ public class UngdomsprogramOpphørHendelse implements Hendelse {
         this.opphørsdato = opphørsdato;
     }
 
-    public static class Builder {
-        private UngdomsprogramOpphørHendelse mal;
-
-        public Builder() {
-            this.mal = new UngdomsprogramOpphørHendelse();
-        }
-
-        public Builder medHendelseInfo(HendelseInfo hendelseInfo) {
-            mal.hendelseInfo = hendelseInfo;
-            return this;
-        }
-
-        public Builder medOpphørsdato(LocalDate opphørsdato) {
-            mal.opphørsdato = opphørsdato;
-            return this;
-        }
-
-        public UngdomsprogramOpphørHendelse build() {
-            return mal;
-        }
-    }
-
     @Override
     public HendelseInfo getHendelseInfo() {
         return hendelseInfo;
