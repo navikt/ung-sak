@@ -30,7 +30,6 @@ public class VurderStartdatoUttaksreglerSteg implements BehandlingSteg {
 
     private BehandlingRepository behandlingRepository;
     private AksjonspunktUtlederNyeRegler aksjonspunktUtlederNyeRegler;
-    private boolean skalKjøreSteget;
 
     VurderStartdatoUttaksreglerSteg() {
         // for proxy
@@ -38,18 +37,13 @@ public class VurderStartdatoUttaksreglerSteg implements BehandlingSteg {
 
     @Inject
     public VurderStartdatoUttaksreglerSteg(BehandlingRepository behandlingRepository,
-                                           AksjonspunktUtlederNyeRegler aksjonspunktUtlederNyeRegler,
-                                           @KonfigVerdi(value = "ENABLE_DATO_NY_REGEL_UTTAK", defaultVerdi = "false") boolean skalKjøreSteget) {
+                                           AksjonspunktUtlederNyeRegler aksjonspunktUtlederNyeRegler) {
         this.behandlingRepository = behandlingRepository;
         this.aksjonspunktUtlederNyeRegler = aksjonspunktUtlederNyeRegler;
-        this.skalKjøreSteget = skalKjøreSteget;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
-        if (!skalKjøreSteget) {
-            return BehandleStegResultat.utførtUtenAksjonspunkter();
-        }
         var behandlingId = kontekst.getBehandlingId();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         Optional<AksjonspunktDefinisjon> aksjonspunktSetteDatoNyeRegler = aksjonspunktUtlederNyeRegler.utledAksjonspunktDatoForNyeRegler(behandling);
