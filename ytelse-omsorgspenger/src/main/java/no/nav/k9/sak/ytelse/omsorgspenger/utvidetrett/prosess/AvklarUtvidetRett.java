@@ -115,7 +115,16 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
         } else {
             boolean harSattSluttdato = periode.getTom() != null && !periode.getTom().equals(LocalDateInterval.TIDENES_ENDE);
             LocalDate tom = harSattSluttdato ? periode.getTom() : fagsak.getPeriode().getTomDato(); //midlertidig workaround inntil ny løsning lanseres, eller frontend støtter begge løsninger
-            var angittPeriode = validerAngittPeriode(fagsak, new LocalDateInterval(periode.getFom(), tom));
+
+            var brukerbasis = personinfoAdapter.hentBrukerBasisForAktør(fagsak.getPleietrengendeAktørId());
+            var årBarnFyller18 = brukerbasis.get().getFødselsdato().plusYears(18).withMonth(12).withDayOfMonth(31);
+
+            var maksInnvilgetDato = Stream.of(
+                tom,
+                årBarnFyller18
+            ).min(Comparator.naturalOrder()).get();
+
+            var angittPeriode = validerAngittPeriode(fagsak, new LocalDateInterval(periode.getFom(), maksInnvilgetDato));
             oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, angittPeriode.getFomDato(), angittPeriode.getTomDato(), null /* avslagsårsak kan bare være null her */);
         }
 
