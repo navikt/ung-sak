@@ -2,15 +2,14 @@ package no.nav.k9.sak.kontrakt.hendelser;
 
 import java.time.LocalDate;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import no.nav.k9.kodeverk.hendelser.HendelseType;
 import no.nav.k9.sak.kontrakt.uttak.Periode;
 

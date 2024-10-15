@@ -33,6 +33,11 @@ public class UngdomsprogramPeriodeRepository {
         persister(eksisterendeGrunnlag, nyttGrunnlag);
     }
 
+    public void kopier(Long eksisterendeBehandlingId, Long nyBehandlingId) {
+        var eksisterendeGrunnlag = hentEksisterendeGrunnlag(eksisterendeBehandlingId);
+        var nyttGrunnlag = eksisterendeGrunnlag.map(it -> new UngdomsprogramPeriodeGrunnlag(nyBehandlingId, it));
+        nyttGrunnlag.ifPresent(gr -> persister(Optional.empty(), gr));
+    }
 
     private void persister(Optional<UngdomsprogramPeriodeGrunnlag> eksisterendeGrunnlag, UngdomsprogramPeriodeGrunnlag nyttGrunnlag) {
         eksisterendeGrunnlag.ifPresent(this::deaktiverEksisterende);
