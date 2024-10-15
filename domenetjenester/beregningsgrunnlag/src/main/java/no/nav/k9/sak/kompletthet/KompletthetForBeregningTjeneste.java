@@ -113,7 +113,7 @@ public class KompletthetForBeregningTjeneste {
             List<LocalDate> stp = vilkårsPerioder.stream().map(DatoIntervallEntitet::getFomDato).toList();
             Set<JournalpostId> ignorerteInntektsmeldinger = inntektsmeldinger.stream()
                 .filter(im -> im.getStartDatoPermisjon().isPresent() && !stp.contains(im.getStartDatoPermisjon().get()))
-                .filter(im -> im.getKildesystem() != null && im.getKildesystem().equals("ARBEIDSGIVERPORTAL"))
+                .filter(im -> im.getKildesystem() != null && im.getKildesystem().equals("NAV_NO"))
                 .map(Inntektsmelding::getJournalpostId).collect(Collectors.toSet());
 
             inntektsmeldinger = inntektsmeldinger.stream().filter(im -> !ignorerteInntektsmeldinger.contains(im.getJournalpostId())).collect(Collectors.toSet());
