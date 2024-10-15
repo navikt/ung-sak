@@ -60,25 +60,33 @@ public class ObjectMapperResolver implements ContextResolver<ObjectMapper> {
     }
 
     /**
+     * Denne blir brukt for å bevare spesialtilfelle som har vore i koden.
+     * Kan forhåpentlegvis unngå å bruke den ved overgang til ny serialisering (etter testing).
+     */
+    private ObjectMapper overrideMapperForSøknad(Class<?> type, final ObjectMapper resolved) {
+        // TODO Dette bør gjøres bedre slik at registrering av ObjectMapper gjøres lokalt i Rest-tjenesten.
+        if (type.isAssignableFrom(Søknad.class)) {
+            return JsonUtils.getObjectMapper();
+        }
+        return resolved;
+    }
+
+    /**
      * Resolver kva ObjectMapper som skal brukast for gitt type.
      * Denne er i tillegg dynamisk basert på header frå innkommande request. For at dette skal fungere må ein bruke
      * CustomJacksonJsonProvider som skrur av caching av resolved ObjectMapper.
      */
     @Override
     public ObjectMapper getContext(Class<?> type) {
-        // TODO Dette bør gjøres bedre slik at registrering av ObjectMapper gjøres lokalt i Rest-tjenesten.
-        if (type.isAssignableFrom(Søknad.class)) {
-            return JsonUtils.getObjectMapper();
-        }
         final String serializerOption = this.getJsonSerializerOptionHeaderValue();
         return switch (serializerOption) {
             // Kompatibilitet for verdikjede test klient, istadenfor feature flag på server:
-            case "kodeverdi-kalkulus-string" -> this.overstyrKalkulusKodeverdiSomStringMapper;
-            case "kodeverdi-string" -> this.overstyrKodeverdiAlltidSomStringMapper;
+            case "kodeverdi-kalkulus-string" -> this.overrideMapperForSøknad(type, this.overstyrKalkulusKodeverdiSomStringMapper);
+            case "kodeverdi-string" -> this.overrideMapperForSøknad(type, this.overstyrKodeverdiAlltidSomStringMapper);
             case "base" -> this.baseObjektMapper;
             case "openapi-compat" -> this.openapiObjektMapper; // <- Også hardkoda i k9-sak-web jsonSerializerOption.ts
             // Viss ingen gyldig header verdi, gjer det samme som før basert på feature flag.
-            default -> this.defaultObjektMapper;
+            default ->  this.overrideMapperForSøknad(type, this.defaultObjektMapper);
         };
     }
 
