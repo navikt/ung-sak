@@ -168,7 +168,7 @@ spec:
     - name: K9_OPPDRAG_PROXY_URL
       value: /k9/oppdrag/api
     - name: ARBEIDSFORDELING_RS_URL
-      value: https://app.adeo.no/norg2/api/v1/arbeidsfordeling/enheter
+      value: https://norg2.intern.nav.no/norg2/api/v1/arbeidsfordeling/enheter
     - name: OPPGAVE_RS_URI
       value: https://oppgave.nais.adeo.no/api/v1/oppgaver
     - name: OPPGAVE_RS_SCOPE
@@ -265,8 +265,6 @@ spec:
       value: "false"
     - name: OMP_NULL_HELG_I_KRAVPERIODER
       value: "false"
-    - name: ENABLE_DATO_NY_REGEL_UTTAK
-      value: "false"
     - name: FJERN_VILKARSPERIODER_BEREGNING
       value: "false"
     - name: VALIDER_KALKULUS_REFERANSER
@@ -278,8 +276,6 @@ spec:
     - name: KODEVERK_SOM_STRING_TOPICS
       value: "false"
     - name: KODEVERK_AKTIVER_KALKULUS_STRING
-      value: "false"
-    - name: INAKTIV_VED_8_47_B
       value: "false"
     - name: SEND_INNTEKTSMELDING_FORESPORSEL
       value: "false"

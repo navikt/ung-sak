@@ -89,7 +89,7 @@ class InfotrygdMigreringTjenesteTest {
             .thenReturn(new PåTversAvHelgErKantIKantVurderer());
 
         lagreVilkårPeriode(List.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))));
-        tjeneste = new InfotrygdMigreringTjeneste(iayTjeneste, perioderTilVurderingTjeneste, vilkårResultatRepository, fagsakRepository, behandlingRepository, infotrygdService);
+        tjeneste = new InfotrygdMigreringTjeneste(iayTjeneste, perioderTilVurderingTjeneste, vilkårResultatRepository, fagsakRepository);
     }
 
     private void lagreVilkårPeriode(List<DatoIntervallEntitet> perioder) {
@@ -298,118 +298,6 @@ class InfotrygdMigreringTjenesteTest {
         assertThat(sakInfotrygdMigrering.size()).isEqualTo(1);
         assertThat(sakInfotrygdMigrering.get(0).getSkjæringstidspunkt()).isEqualTo(STP);
     }
-
-
-    @Test
-    void skal_returnere_aksjonspunkt_for_periode_i_2023() {
-        var stp_2023 = LocalDate.of(2023, 2, 1);
-
-        var fagsak2 = Fagsak.opprettNy(FagsakYtelseType.PSB, new AktørId(1234L), new Saksnummer("9879"), stp_2023, stp_2023.plusDays(10));
-        fagsakRepository.opprettNy(fagsak2);
-        var behandling2 = Behandling.forFørstegangssøknad(fagsak2).medBehandlingStatus(BehandlingStatus.UTREDES).build();
-        behandlingRepository.lagre(behandling2, behandlingRepository.taSkriveLås(behandling2));
-
-        when(perioderTilVurderingTjeneste.utled(behandling2.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR))
-            .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(stp_2023, stp_2023.plusDays(10))))));
-        when(perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling2.getId()))
-            .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(stp_2023, stp_2023.plusDays(10))))));
-
-        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed( LocalDate.of(2023, 1, 1),  LocalDate.of(2023, 1, 10)), behandling2.getId(), fagsak2.getAktørId());
-
-        var aksjonspunkter = tjeneste.utledAksjonspunkter(BehandlingReferanse.fra(behandling2, stp_2023));
-
-        assertThat(aksjonspunkter.size()).isEqualTo(1);
-        assertThat(aksjonspunkter.get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE);
-    }
-
-    @Test
-    void skal_returnere_aksjonspunkt_for_stp_i_2023_og_manglende_periode_i_2022() {
-        var stp_2023 = LocalDate.of(2023, 1, 1);
-
-        var fagsak2 = Fagsak.opprettNy(FagsakYtelseType.PSB, new AktørId(1234L), new Saksnummer("9879"), stp_2023, stp_2023.plusDays(10));
-        fagsakRepository.opprettNy(fagsak2);
-        var behandling2 = Behandling.forFørstegangssøknad(fagsak2).medBehandlingStatus(BehandlingStatus.UTREDES).build();
-        behandlingRepository.lagre(behandling2, behandlingRepository.taSkriveLås(behandling2));
-
-        when(perioderTilVurderingTjeneste.utled(behandling2.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR))
-            .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(stp_2023, stp_2023.plusDays(10))))));
-        when(perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling2.getId()))
-            .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(stp_2023, stp_2023.plusDays(10))))));
-
-        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed( LocalDate.of(2022, 1, 1),  LocalDate.of(2022, 12, 31)), behandling2.getId(), fagsak2.getAktørId());
-
-        var aksjonspunkter = tjeneste.utledAksjonspunkter(BehandlingReferanse.fra(behandling2, stp_2023));
-
-        assertThat(aksjonspunkter.size()).isEqualTo(1);
-        assertThat(aksjonspunkter.get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE);
-    }
-
-    @Test
-    void skal_returnere_aksjonspunkt_når_periode_i_samme_år_som_ikke_er_søkt_for() {
-        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(1), STP.minusMonths(1).plusDays(10)), behandling.getId(), fagsak.getAktørId());
-        fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP);
-
-        var aksjonspunkter = tjeneste.utledAksjonspunkter(BehandlingReferanse.fra(behandling, STP));
-
-        assertThat(aksjonspunkter.size()).isEqualTo(1);
-        assertThat(aksjonspunkter.get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE);
-    }
-
-
-    @Test
-    void skal_ikke_returnere_aksjonspunkt_når_periode_i_forrige_år_som_ikke_er_søkt_for() {
-        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP.minusMonths(3), STP.minusMonths(1).plusDays(10)), behandling.getId(), fagsak.getAktørId());
-        when(perioderTilVurderingTjeneste.utledFullstendigePerioder(behandling.getId()))
-            .thenReturn(new TreeSet<>((Set.of(
-                DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2022, 1, 3), STP.minusMonths(1).plusDays(10)),
-                DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))
-            ))));
-        lagreVilkårPeriode(List.of(
-            DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2022, 1, 3), STP.minusMonths(1).plusDays(10)),
-            DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))
-        ));
-        fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP);
-
-        var aksjonspunkter = tjeneste.utledAksjonspunkter(BehandlingReferanse.fra(behandling, STP));
-
-        assertThat(aksjonspunkter.size()).isEqualTo(0);
-    }
-
-
-    @Test
-    void skal_returnere_aksjonspunkt_når_annen_part_har_overlappende_periode_i_infotrygd() {
-        lagInfotrygdPsbYtelse(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), behandling.getId(), fagsak.getAktørId());
-        fagsakRepository.opprettInfotrygdmigrering(fagsak.getId(), STP);
-
-        when(infotrygdService.finnGrunnlagsperioderForAndreAktører(any(), any(), any(), any()))
-            .thenReturn(Map.of(AktørId.dummy(),
-                List.of(new IntervallMedBehandlingstema(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), "PN"))));
-
-        var aksjonspunkter = tjeneste.utledAksjonspunkter(BehandlingReferanse.fra(behandling, STP));
-
-        assertThat(aksjonspunkter.size()).isEqualTo(1);
-        assertThat(aksjonspunkter.get(0).getAksjonspunktDefinisjon()).isEqualTo(AksjonspunktDefinisjon.TRENGER_SØKNAD_FOR_INFOTRYGD_PERIODE_ANNEN_PART);
-    }
-
-    @Test
-    void skal_ikke_gi_aksjonspunt_når_annen_part_har_overlappende_periode_i_infotrygd_som_er_søkt_om() {
-        lagUtenInfotrygdPsbYtelse();
-        var annenPartAktørId = new AktørId(345L);
-        when(infotrygdService.finnGrunnlagsperioderForAndreAktører(any(), any(), any(), any()))
-            .thenReturn(Map.of(annenPartAktørId,
-                List.of(new IntervallMedBehandlingstema(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10)), "PN"))));
-        var annenPartfagsak = Fagsak.opprettNy(FagsakYtelseType.PSB, annenPartAktørId, new Saksnummer("456"), STP, STP.plusDays(10));
-        fagsakRepository.opprettNy(annenPartfagsak);
-        var annenPartbehandling = Behandling.forFørstegangssøknad(annenPartfagsak).medBehandlingStatus(BehandlingStatus.UTREDES).build();
-        behandlingRepository.lagre(annenPartbehandling, behandlingRepository.taSkriveLås(annenPartbehandling));
-        when(perioderTilVurderingTjeneste.utledFullstendigePerioder(annenPartbehandling.getId()))
-            .thenReturn(new TreeSet<>((Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(STP, STP.plusDays(10))))));
-
-
-        var aksjonspunkter = tjeneste.utledAksjonspunkter(BehandlingReferanse.fra(behandling, STP));
-        assertThat(aksjonspunkter.size()).isEqualTo(0);
-    }
-
 
     @Test
     void skal_opprette_ved_overlapp_eksisterende_overlapp_og_søknad_for_annen_periode() {

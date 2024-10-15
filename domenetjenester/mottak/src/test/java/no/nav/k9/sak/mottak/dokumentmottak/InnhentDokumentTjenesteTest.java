@@ -89,7 +89,7 @@ public class InnhentDokumentTjenesteTest {
 
         MockitoAnnotations.initMocks(this);
 
-        dokumentmottakerFelles = Mockito.spy(new DokumentmottakerFelles(repositoryProvider,
+        dokumentmottakerFelles = Mockito.spy(new DokumentmottakerFelles(
             prosessTaskTjeneste,
             historikkinnslagTjeneste));
 

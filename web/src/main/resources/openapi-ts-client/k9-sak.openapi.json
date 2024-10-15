@@ -1664,7 +1664,7 @@
       "BehandlingÅrsakDto" : {
         "properties" : {
           "behandlingArsakType" : {
-            "enum" : [ "RE-MF", "RE-MFIP", "RE-AVAB", "RE-LOV", "RE-RGLF", "RE-FEFAKTA", "RE-PRSSL", "RE-END-FRA-BRUKER", "RE-FRAVÆRKORR-SAKSB", "RE-END-INNTEKTSMELD", "BERØRT-BEHANDLING", "RE-ANNET", "RE-SATS-REGULERING", "RE-ENDRET-FORDELING", "INFOBREV_BEHANDLING", "INFOBREV_OPPHOLD", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-MDL", "RE-OPTJ", "RE-FRDLING", "RE-INNTK", "RE-DØD", "RE-SRTB", "RE-FRIST", "RE-BER-GRUN", "RE-KLAG-INNH-PGI", "RE-NB", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-DØDFØD", "RE-REGISTEROPPL", "RE-YTELSE", "RE-TILST-YT-INNVIL", "RE-ENDR-BER-GRUN", "RE-TILST-YT-OPPH", "RE_REBEREGN_FP", "RE_ANNEN_SAK", "RE_UTSATT_BEHANDLING", "RE_GJENOPPTAR_UTSATT_BEHANDLING", "RE_ANNEN_SAK_ET", "RE_ANNEN_SAK_NB", "RE_ANNEN_SAK_S", "RE_ANNEN_SAK_NB_ET", "RE_ANNEN_SAK_S_ET", "RE_ANNEN_SAK_S_NB", "RE_ANNEN_SAK_S_ET_NB", "RE_ANNEN_SAK_FP", "UNNT_GENERELL", "REVURDERER_BERØRT_PERIODE", "-" ],
+            "enum" : [ "RE-MF", "RE-MFIP", "RE-AVAB", "RE-LOV", "RE-RGLF", "RE-FEFAKTA", "RE-PRSSL", "RE-END-FRA-BRUKER", "RE-FRAVÆRKORR-SAKSB", "RE-END-INNTEKTSMELD", "BERØRT-BEHANDLING", "RE-ANNET", "RE-SATS-REGULERING", "RE-ENDRET-FORDELING", "INFOBREV_BEHANDLING", "INFOBREV_OPPHOLD", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-MDL", "RE-OPTJ", "RE-FRDLING", "RE-INNTK", "RE-DØD", "RE-SRTB", "RE-FRIST", "RE-BER-GRUN", "RE-KLAG-INNH-PGI", "RE-NB", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-DØDFØD", "RE-HENDELSE-OPPHØR-UNG", "RE-REGISTEROPPL", "RE-YTELSE", "RE-TILST-YT-INNVIL", "RE-ENDR-BER-GRUN", "RE-TILST-YT-OPPH", "RE_REBEREGN_FP", "RE_ANNEN_SAK", "RE_UTSATT_BEHANDLING", "RE_GJENOPPTAR_UTSATT_BEHANDLING", "RE_ANNEN_SAK_ET", "RE_ANNEN_SAK_NB", "RE_ANNEN_SAK_S", "RE_ANNEN_SAK_NB_ET", "RE_ANNEN_SAK_S_ET", "RE_ANNEN_SAK_S_NB", "RE_ANNEN_SAK_S_ET_NB", "RE_ANNEN_SAK_FP", "UNNT_GENERELL", "REVURDERER_BERØRT_PERIODE", "-" ],
             "nullable" : true,
             "type" : "string"
           },
@@ -2373,6 +2373,10 @@
             "type" : "string"
           },
           "arbeidsgiverOrgnr" : {
+            "nullable" : true,
+            "type" : "string"
+          },
+          "arbeidsgiverPersonIdent" : {
             "nullable" : true,
             "type" : "string"
           },
@@ -5556,7 +5560,7 @@
             "type" : "string"
           },
           "behandlingÅrsakType" : {
-            "enum" : [ "RE-MF", "RE-MFIP", "RE-AVAB", "RE-LOV", "RE-RGLF", "RE-FEFAKTA", "RE-PRSSL", "RE-END-FRA-BRUKER", "RE-FRAVÆRKORR-SAKSB", "RE-END-INNTEKTSMELD", "BERØRT-BEHANDLING", "RE-ANNET", "RE-SATS-REGULERING", "RE-ENDRET-FORDELING", "INFOBREV_BEHANDLING", "INFOBREV_OPPHOLD", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-MDL", "RE-OPTJ", "RE-FRDLING", "RE-INNTK", "RE-DØD", "RE-SRTB", "RE-FRIST", "RE-BER-GRUN", "RE-KLAG-INNH-PGI", "RE-NB", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-DØDFØD", "RE-REGISTEROPPL", "RE-YTELSE", "RE-TILST-YT-INNVIL", "RE-ENDR-BER-GRUN", "RE-TILST-YT-OPPH", "RE_REBEREGN_FP", "RE_ANNEN_SAK", "RE_UTSATT_BEHANDLING", "RE_GJENOPPTAR_UTSATT_BEHANDLING", "RE_ANNEN_SAK_ET", "RE_ANNEN_SAK_NB", "RE_ANNEN_SAK_S", "RE_ANNEN_SAK_NB_ET", "RE_ANNEN_SAK_S_ET", "RE_ANNEN_SAK_S_NB", "RE_ANNEN_SAK_S_ET_NB", "RE_ANNEN_SAK_FP", "UNNT_GENERELL", "REVURDERER_BERØRT_PERIODE", "-" ],
+            "enum" : [ "RE-MF", "RE-MFIP", "RE-AVAB", "RE-LOV", "RE-RGLF", "RE-FEFAKTA", "RE-PRSSL", "RE-END-FRA-BRUKER", "RE-FRAVÆRKORR-SAKSB", "RE-END-INNTEKTSMELD", "BERØRT-BEHANDLING", "RE-ANNET", "RE-SATS-REGULERING", "RE-ENDRET-FORDELING", "INFOBREV_BEHANDLING", "INFOBREV_OPPHOLD", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-MDL", "RE-OPTJ", "RE-FRDLING", "RE-INNTK", "RE-DØD", "RE-SRTB", "RE-FRIST", "RE-BER-GRUN", "RE-KLAG-INNH-PGI", "RE-NB", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-DØDFØD", "RE-HENDELSE-OPPHØR-UNG", "RE-REGISTEROPPL", "RE-YTELSE", "RE-TILST-YT-INNVIL", "RE-ENDR-BER-GRUN", "RE-TILST-YT-OPPH", "RE_REBEREGN_FP", "RE_ANNEN_SAK", "RE_UTSATT_BEHANDLING", "RE_GJENOPPTAR_UTSATT_BEHANDLING", "RE_ANNEN_SAK_ET", "RE_ANNEN_SAK_NB", "RE_ANNEN_SAK_S", "RE_ANNEN_SAK_NB_ET", "RE_ANNEN_SAK_S_ET", "RE_ANNEN_SAK_S_NB", "RE_ANNEN_SAK_S_ET_NB", "RE_ANNEN_SAK_FP", "UNNT_GENERELL", "REVURDERER_BERØRT_PERIODE", "-" ],
             "type" : "string"
           },
           "revurderingVarslingÅrsak" : {
@@ -6782,7 +6786,7 @@
       "NyBehandlingDto" : {
         "properties" : {
           "behandlingArsakType" : {
-            "enum" : [ "RE-MF", "RE-MFIP", "RE-AVAB", "RE-LOV", "RE-RGLF", "RE-FEFAKTA", "RE-PRSSL", "RE-END-FRA-BRUKER", "RE-FRAVÆRKORR-SAKSB", "RE-END-INNTEKTSMELD", "BERØRT-BEHANDLING", "RE-ANNET", "RE-SATS-REGULERING", "RE-ENDRET-FORDELING", "INFOBREV_BEHANDLING", "INFOBREV_OPPHOLD", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-MDL", "RE-OPTJ", "RE-FRDLING", "RE-INNTK", "RE-DØD", "RE-SRTB", "RE-FRIST", "RE-BER-GRUN", "RE-KLAG-INNH-PGI", "RE-NB", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-DØDFØD", "RE-REGISTEROPPL", "RE-YTELSE", "RE-TILST-YT-INNVIL", "RE-ENDR-BER-GRUN", "RE-TILST-YT-OPPH", "RE_REBEREGN_FP", "RE_ANNEN_SAK", "RE_UTSATT_BEHANDLING", "RE_GJENOPPTAR_UTSATT_BEHANDLING", "RE_ANNEN_SAK_ET", "RE_ANNEN_SAK_NB", "RE_ANNEN_SAK_S", "RE_ANNEN_SAK_NB_ET", "RE_ANNEN_SAK_S_ET", "RE_ANNEN_SAK_S_NB", "RE_ANNEN_SAK_S_ET_NB", "RE_ANNEN_SAK_FP", "UNNT_GENERELL", "REVURDERER_BERØRT_PERIODE", "-" ],
+            "enum" : [ "RE-MF", "RE-MFIP", "RE-AVAB", "RE-LOV", "RE-RGLF", "RE-FEFAKTA", "RE-PRSSL", "RE-END-FRA-BRUKER", "RE-FRAVÆRKORR-SAKSB", "RE-END-INNTEKTSMELD", "BERØRT-BEHANDLING", "RE-ANNET", "RE-SATS-REGULERING", "RE-ENDRET-FORDELING", "INFOBREV_BEHANDLING", "INFOBREV_OPPHOLD", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-MDL", "RE-OPTJ", "RE-FRDLING", "RE-INNTK", "RE-DØD", "RE-SRTB", "RE-FRIST", "RE-BER-GRUN", "RE-KLAG-INNH-PGI", "RE-NB", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-DØDFØD", "RE-HENDELSE-OPPHØR-UNG", "RE-REGISTEROPPL", "RE-YTELSE", "RE-TILST-YT-INNVIL", "RE-ENDR-BER-GRUN", "RE-TILST-YT-OPPH", "RE_REBEREGN_FP", "RE_ANNEN_SAK", "RE_UTSATT_BEHANDLING", "RE_GJENOPPTAR_UTSATT_BEHANDLING", "RE_ANNEN_SAK_ET", "RE_ANNEN_SAK_NB", "RE_ANNEN_SAK_S", "RE_ANNEN_SAK_NB_ET", "RE_ANNEN_SAK_S_ET", "RE_ANNEN_SAK_S_NB", "RE_ANNEN_SAK_S_ET_NB", "RE_ANNEN_SAK_FP", "UNNT_GENERELL", "REVURDERER_BERØRT_PERIODE", "-" ],
             "type" : "string"
           },
           "behandlingType" : {
@@ -9647,13 +9651,10 @@
             "type" : "string"
           },
           "saksnummer" : {
-            "maxLength" : 19,
-            "minLength" : 0,
-            "pattern" : "^[a-zA-Z0-9]*$",
             "type" : "string"
           },
           "steg" : {
-            "enum" : [ "RE-MF", "RE-MFIP", "RE-AVAB", "RE-LOV", "RE-RGLF", "RE-FEFAKTA", "RE-PRSSL", "RE-END-FRA-BRUKER", "RE-FRAVÆRKORR-SAKSB", "RE-END-INNTEKTSMELD", "BERØRT-BEHANDLING", "RE-ANNET", "RE-SATS-REGULERING", "RE-ENDRET-FORDELING", "INFOBREV_BEHANDLING", "INFOBREV_OPPHOLD", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-MDL", "RE-OPTJ", "RE-FRDLING", "RE-INNTK", "RE-DØD", "RE-SRTB", "RE-FRIST", "RE-BER-GRUN", "RE-KLAG-INNH-PGI", "RE-NB", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-DØDFØD", "RE-REGISTEROPPL", "RE-YTELSE", "RE-TILST-YT-INNVIL", "RE-ENDR-BER-GRUN", "RE-TILST-YT-OPPH", "RE_REBEREGN_FP", "RE_ANNEN_SAK", "RE_UTSATT_BEHANDLING", "RE_GJENOPPTAR_UTSATT_BEHANDLING", "RE_ANNEN_SAK_ET", "RE_ANNEN_SAK_NB", "RE_ANNEN_SAK_S", "RE_ANNEN_SAK_NB_ET", "RE_ANNEN_SAK_S_ET", "RE_ANNEN_SAK_S_NB", "RE_ANNEN_SAK_S_ET_NB", "RE_ANNEN_SAK_FP", "UNNT_GENERELL", "REVURDERER_BERØRT_PERIODE", "-" ],
+            "enum" : [ "RE-MF", "RE-MFIP", "RE-AVAB", "RE-LOV", "RE-RGLF", "RE-FEFAKTA", "RE-PRSSL", "RE-END-FRA-BRUKER", "RE-FRAVÆRKORR-SAKSB", "RE-END-INNTEKTSMELD", "BERØRT-BEHANDLING", "RE-ANNET", "RE-SATS-REGULERING", "RE-ENDRET-FORDELING", "INFOBREV_BEHANDLING", "INFOBREV_OPPHOLD", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-MDL", "RE-OPTJ", "RE-FRDLING", "RE-INNTK", "RE-DØD", "RE-SRTB", "RE-FRIST", "RE-BER-GRUN", "RE-KLAG-INNH-PGI", "RE-NB", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-DØDFØD", "RE-HENDELSE-OPPHØR-UNG", "RE-REGISTEROPPL", "RE-YTELSE", "RE-TILST-YT-INNVIL", "RE-ENDR-BER-GRUN", "RE-TILST-YT-OPPH", "RE_REBEREGN_FP", "RE_ANNEN_SAK", "RE_UTSATT_BEHANDLING", "RE_GJENOPPTAR_UTSATT_BEHANDLING", "RE_ANNEN_SAK_ET", "RE_ANNEN_SAK_NB", "RE_ANNEN_SAK_S", "RE_ANNEN_SAK_NB_ET", "RE_ANNEN_SAK_S_ET", "RE_ANNEN_SAK_S_NB", "RE_ANNEN_SAK_S_ET_NB", "RE_ANNEN_SAK_FP", "UNNT_GENERELL", "REVURDERER_BERØRT_PERIODE", "-" ],
             "type" : "string"
           },
           "tom" : {
@@ -9725,7 +9726,7 @@
         "properties" : {
           "saksnummer" : {
             "maxLength" : 19,
-            "minLength" : 0,
+            "minLength" : 5,
             "pattern" : "^[a-zA-Z0-9]*$",
             "type" : "string"
           }
@@ -11532,6 +11533,77 @@
           },
           "type" : "object"
         } ],
+        "type" : "object"
+      },
+      "UngdomsprogramOpphørHendelse" : {
+        "allOf" : [ {
+          "$ref" : "#/components/schemas/Hendelse"
+        }, {
+          "properties" : {
+            "hendelseInfo" : {
+              "$ref" : "#/components/schemas/HendelseInfo"
+            },
+            "opphørsdato" : {
+              "format" : "date",
+              "type" : "string"
+            }
+          },
+          "type" : "object"
+        } ],
+        "required" : [ "hendelseInfo", "opphørsdato" ],
+        "type" : "object"
+      },
+      "UngdomsytelseSatsPeriodeDto" : {
+        "properties" : {
+          "dagsats" : {
+            "nullable" : true,
+            "type" : "number"
+          },
+          "fom" : {
+            "format" : "date",
+            "nullable" : true,
+            "type" : "string"
+          },
+          "grunnbeløp" : {
+            "nullable" : true,
+            "type" : "number"
+          },
+          "grunnbeløpFaktor" : {
+            "nullable" : true,
+            "type" : "number"
+          },
+          "tom" : {
+            "format" : "date",
+            "nullable" : true,
+            "type" : "string"
+          }
+        },
+        "required" : [ "dagsats", "fom", "grunnbeløp", "grunnbeløpFaktor", "tom" ],
+        "type" : "object"
+      },
+      "UngdomsytelseUttakPeriodeDto" : {
+        "properties" : {
+          "avslagsårsak" : {
+            "enum" : [ "IKKE_NOK_DAGER" ],
+            "nullable" : true,
+            "type" : "string"
+          },
+          "fom" : {
+            "format" : "date",
+            "nullable" : true,
+            "type" : "string"
+          },
+          "tom" : {
+            "format" : "date",
+            "nullable" : true,
+            "type" : "string"
+          },
+          "utbetalingsgrad" : {
+            "nullable" : true,
+            "type" : "number"
+          }
+        },
+        "required" : [ "fom", "tom", "utbetalingsgrad" ],
         "type" : "object"
       },
       "UtbetalingDto" : {
@@ -19926,6 +19998,70 @@
         },
         "summary" : "Henter ut stønadstatistikk-JSON.",
         "tags" : [ "forvaltning" ]
+      }
+    },
+    "/ungdomsytelse/satser" : {
+      "get" : {
+        "description" : "Henter innvilgede satser for en ungdomsytelsebehandling",
+        "operationId" : "getUngdomsytelseInnvilgetSats",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/UngdomsytelseSatsPeriodeDto"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "ung" ]
+      }
+    },
+    "/ungdomsytelse/uttak" : {
+      "get" : {
+        "description" : "Henter uttaksperioder for en ungdomsytelsebehandling",
+        "operationId" : "getUngdomsytelseUttak",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/UngdomsytelseUttakPeriodeDto"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "ung" ]
       }
     },
     "/unntaksbehandling/forvaltning/finn-ubehandlede" : {

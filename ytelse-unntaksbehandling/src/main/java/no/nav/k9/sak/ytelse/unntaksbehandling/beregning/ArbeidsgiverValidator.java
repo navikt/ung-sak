@@ -69,7 +69,7 @@ class ArbeidsgiverValidator {
         if((orgNr == null || orgNr.getOrgNummer() == null) && personIdent == null) {
            throw new IllegalArgumentException("Mangler id for arbeidsgiver");
         }
-        if (orgNr != null) {
+        if (orgNr != null && orgNr.getOrgNummer() != null) {
             validerOrgnummer(orgNr.getOrgNummer());
         }
     }

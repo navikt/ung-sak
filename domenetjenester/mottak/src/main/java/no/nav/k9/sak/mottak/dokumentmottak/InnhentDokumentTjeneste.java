@@ -93,7 +93,7 @@ public class InnhentDokumentTjeneste {
         if (resultat.nyopprettet) {
             taskGruppe.addNesteSekvensiell(asynkStartBehandling(resultat.behandling));
         } else if (prosessenStårStillePåAksjonspunktForSøknadsfrist(resultat.behandling)) {
-            taskGruppe.addNesteSekvensiell(restartBehandling(resultat.behandling, behandlingÅrsak));
+            taskGruppe = behandlingProsesseringTjeneste.opprettTaskGruppeForGjenopptaOppdaterFortsett(resultat.behandling, false, false, false);
         } else {
             taskGruppe = behandlingProsesseringTjeneste.opprettTaskGruppeForGjenopptaOppdaterFortsett(resultat.behandling, false, false);
         }
@@ -104,12 +104,6 @@ public class InnhentDokumentTjeneste {
         }
         // Lagrer tasks til slutt for å sikre at disse blir kjørt etter at dokumentasjon er lagret
         prosessTaskTjeneste.lagre(taskGruppe);
-    }
-
-    private ProsessTaskData restartBehandling(Behandling behandling, BehandlingÅrsakType behandlingÅrsak) {
-        dokumentMottakerFelles.leggTilBehandlingsårsak(behandling, behandlingÅrsak);
-        dokumentMottakerFelles.opprettHistorikkinnslagForBehandlingOppdatertMedNyInntektsmelding(behandling, behandlingÅrsak);
-        return dokumentMottakerFelles.opprettTaskForÅSpoleTilbakeTilStartOgStartePåNytt(behandling);
     }
 
     private boolean prosessenStårStillePåAksjonspunktForSøknadsfrist(Behandling behandling) {

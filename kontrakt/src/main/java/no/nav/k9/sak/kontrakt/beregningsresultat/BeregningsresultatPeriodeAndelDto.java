@@ -26,6 +26,7 @@ import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.ArbeidsgiverDto;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.OrgNummer;
+import no.nav.k9.sak.typer.PersonIdent;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -59,6 +60,9 @@ public class BeregningsresultatPeriodeAndelDto {
     @JsonProperty(value = "arbeidsgiverOrgnr")
     @Valid
     private OrgNummer arbeidsgiverOrgnr;
+    @JsonProperty(value = "arbeidsgiverPersonIdent")
+    @Valid
+    private PersonIdent arbeidsgiverPersonIdent;
     @JsonProperty(value = "eksternArbeidsforholdId")
     @Size(max = 100)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{P}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
@@ -107,6 +111,7 @@ public class BeregningsresultatPeriodeAndelDto {
     private BeregningsresultatPeriodeAndelDto(Builder builder) {
         this.arbeidsgiverNavn = builder.arbeidsgiverNavn;
         this.arbeidsgiverOrgnr = builder.arbeidsgiverOrgnr;
+        this.arbeidsgiverPersonIdent = builder.arbeidsgiverPersonIdent;
         this.refusjon = builder.refusjon;
         this.tilSoker = builder.tilSøker;
         this.uttak = builder.uttak;
@@ -272,6 +277,7 @@ public class BeregningsresultatPeriodeAndelDto {
         private ArbeidsgiverDto arbeidsgiver;
         private String arbeidsgiverNavn;
         private OrgNummer arbeidsgiverOrgnr;
+        private PersonIdent arbeidsgiverPersonIdent;
         private String eksternArbeidsforholdId;
         private Integer refusjon;
         private LocalDate sisteUtbetalingsdato;
@@ -322,6 +328,11 @@ public class BeregningsresultatPeriodeAndelDto {
 
         public Builder medArbeidsgiverOrgnr(OrgNummer arbeidsgiverOrgnr) {
             this.arbeidsgiverOrgnr = arbeidsgiverOrgnr;
+            return this;
+        }
+
+        public Builder medArbeidsgiverPersonIdent(PersonIdent arbeidsgiverPersonIdent) {
+            this.arbeidsgiverPersonIdent = arbeidsgiverPersonIdent;
             return this;
         }
 
