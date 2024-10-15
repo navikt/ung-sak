@@ -61,6 +61,8 @@ public interface BehandlingProsesseringTjeneste {
 
     ProsessTaskGruppe opprettTaskGruppeForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId, boolean skalUtledeÅrsaker);
 
+    ProsessTaskGruppe opprettTaskGruppeForGjenopptaOppdaterFortsett(Behandling behandling, boolean nyCallId, boolean skalUtledeÅrsaker, boolean forceregisterinnhenting);
+
     void opprettTasksForInitiellRegisterInnhenting(Behandling behandling);
 
     List<String> utledRegisterinnhentingTaskTyper(Behandling behandling);
