@@ -1,7 +1,7 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 
-import java.time.LocalDate;
 import java.util.Collection;
+import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -9,21 +9,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.tilkommetAktivitet.TilkommetAktivitetTjeneste;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
-import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeid;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 
 @Dependent
@@ -36,8 +38,8 @@ class AksjonspunktUtlederNyeRegler {
     private TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste;
     private AksjonspunktKontrollRepository aksjonspunktKontrollRepository;
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
-
     private MapInputTilUttakTjeneste mapInputTilUttakTjeneste;
+    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
 
     AksjonspunktUtlederNyeRegler() {
         // for proxy
@@ -49,13 +51,15 @@ class AksjonspunktUtlederNyeRegler {
                                         TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste,
                                         AksjonspunktKontrollRepository aksjonspunktKontrollRepository,
                                         SøknadsperiodeTjeneste søknadsperiodeTjeneste,
-                                        MapInputTilUttakTjeneste mapInputTilUttakTjeneste) {
+                                        MapInputTilUttakTjeneste mapInputTilUttakTjeneste,
+                                        @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester) {
         this.behandlingRepository = behandlingRepository;
         this.uttakNyeReglerRepository = uttakNyeReglerRepository;
         this.tilkommetAktivitetTjeneste = tilkommetAktivitetTjeneste;
         this.aksjonspunktKontrollRepository = aksjonspunktKontrollRepository;
         this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
+        this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
     }
 
 
@@ -73,8 +77,11 @@ class AksjonspunktUtlederNyeRegler {
             return Optional.empty();
         }
 
+        var periodeTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
+        var perioderTilVurdering = periodeTjeneste.utled(behandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
 
-        var skalHaAksjonspunkt = harAktivitetIkkeYrkesaktivEllerKunYtelse(behandling) || harTilkommmetAktivitet(behandling);
+
+        var skalHaAksjonspunkt = harAktivitetIkkeYrkesaktivEllerKunYtelse(behandling, perioderTilVurdering) || harTilkommmetAktivitet(behandling, perioderTilVurdering);
 
         return skalHaAksjonspunkt
             ? Optional.of(AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK)
@@ -90,27 +97,25 @@ class AksjonspunktUtlederNyeRegler {
         nyttAksjonspunkt.setAnsvarligSaksbehandler(originalAksjonspunkt.getAnsvarligSaksbehandler());
     }
 
-    private boolean harTilkommmetAktivitet(Behandling behandling) {
-        //tilkommet aktivitet etter søknadsperiodene påvirker ikke behandlingen
-        LocalDateTimeline<Boolean> søknadsperioder = TidslinjeUtil.tilTidslinjeKomprimert(søknadsperiodeTjeneste.utledFullstendigPeriode(behandling.getId()));
-        if (søknadsperioder.isEmpty()) {
+    private boolean harTilkommmetAktivitet(Behandling behandling, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
+        if (perioderTilVurdering.isEmpty()) {
             return false;
         }
-        LocalDateInterval aktuellPeriode = new LocalDateInterval(LocalDate.MIN, søknadsperioder.getMaxLocalDate());
-        boolean harTilkommetAktivitet = !tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(behandling.getFagsakId(), aktuellPeriode).isEmpty();
+        boolean harTilkommetAktivitet = !tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(behandling.getFagsakId(), perioderTilVurdering).isEmpty();
         log.info("Har {} tilkommet aktivitet", (harTilkommetAktivitet ? "" : "ikke"));
         return harTilkommetAktivitet;
     }
 
-    private boolean harAktivitetIkkeYrkesaktivEllerKunYtelse(Behandling behandling) {
+    private boolean harAktivitetIkkeYrkesaktivEllerKunYtelse(Behandling behandling, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
         var uttaksgrunnlag = mapInputTilUttakTjeneste.hentUtOgMapRequestUtenInntektsgradering(BehandlingReferanse.fra(behandling));
-        return harEnAv(uttaksgrunnlag, Set.of(UttakArbeidType.KUN_YTELSE, UttakArbeidType.IKKE_YRKESAKTIV));
+        return harEnAv(uttaksgrunnlag, Set.of(UttakArbeidType.KUN_YTELSE, UttakArbeidType.IKKE_YRKESAKTIV), perioderTilVurdering);
     }
 
-    private boolean harEnAv(Uttaksgrunnlag uttaksgrunnlag, Collection<UttakArbeidType> aktivitettyper) {
+    private boolean harEnAv(Uttaksgrunnlag uttaksgrunnlag, Collection<UttakArbeidType> aktivitettyper, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
         var harGittType = uttaksgrunnlag.getArbeid().stream().anyMatch(
-            a -> aktivitettyper.stream().map(UttakArbeidType::getKode)
-                .anyMatch(a.getArbeidsforhold().getType()::equals)
+            a -> overlapperPeriodeMedPeriodeTilVurdering(perioderTilVurdering, a) &&
+                aktivitettyper.stream().map(UttakArbeidType::getKode)
+                    .anyMatch(a.getArbeidsforhold().getType()::equals)
         );
         if (harGittType) {
             log.info("Har aktivitet IY/KY");
@@ -118,6 +123,11 @@ class AksjonspunktUtlederNyeRegler {
             log.info("Har ikke aktivitet IY/KY");
         }
         return harGittType;
+    }
+
+    private static boolean overlapperPeriodeMedPeriodeTilVurdering(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Arbeid a) {
+        return a.getPerioder().keySet().stream()
+            .anyMatch(arbeidsperiode -> perioderTilVurdering.stream().anyMatch(tilVurdering -> DatoIntervallEntitet.fraOgMedTilOgMed(arbeidsperiode.getFom(), arbeidsperiode.getTom()).overlapper(tilVurdering)));
     }
 
 }

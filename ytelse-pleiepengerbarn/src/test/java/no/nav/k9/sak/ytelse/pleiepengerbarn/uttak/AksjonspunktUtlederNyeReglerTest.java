@@ -24,6 +24,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.tilkommetAktivitet.TilkommetAkt
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -39,6 +40,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
@@ -67,10 +69,13 @@ public class AksjonspunktUtlederNyeReglerTest {
     @Inject
     private AksjonspunktKontrollRepository aksjonspunktKontrollRepository;
     private SøknadsperiodeTjeneste søknadsperiodeTjeneste = mock(SøknadsperiodeTjeneste.class);
+    private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = mock(VilkårsPerioderTilVurderingTjeneste.class);
+
 
     @BeforeEach
     void setUp() {
-        utleder = new AksjonspunktUtlederNyeRegler(behandlingRepository, uttakNyeReglerRepository, tilkommetAktivitetTjeneste, aksjonspunktKontrollRepository, søknadsperiodeTjeneste, mapInputTilUttakTjeneste);
+        utleder = new AksjonspunktUtlederNyeRegler(behandlingRepository, uttakNyeReglerRepository, tilkommetAktivitetTjeneste, aksjonspunktKontrollRepository, søknadsperiodeTjeneste, mapInputTilUttakTjeneste,
+            new UnitTestLookupInstanceImpl<>(vilkårsPerioderTilVurderingTjeneste));
 
         var fagsak = Fagsak.opprettNy(FagsakYtelseType.DAGPENGER, new AktørId(123L), new Saksnummer("987"), LocalDate.now(), LocalDate.now());
         fagsakRepository.opprettNy(fagsak);
@@ -88,8 +93,8 @@ public class AksjonspunktUtlederNyeReglerTest {
         LocalDate dag1 = LocalDate.now();
         LocalDate dag2 = dag1.plusDays(1);
         DatoIntervallEntitet søknadsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(dag1, dag2);
-        when(søknadsperiodeTjeneste.utledFullstendigPeriode(anyLong())).thenReturn(new TreeSet<>(Set.of(søknadsperiode)));
-        when(tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(anyLong(), any(LocalDateInterval.class))).thenReturn(Map.of(new AktivitetstatusOgArbeidsgiver(UttakArbeidType.FRILANSER, null), LocalDateTimeline.empty()));
+        when(vilkårsPerioderTilVurderingTjeneste.utled(anyLong(), any())).thenReturn(new TreeSet<>(Set.of(søknadsperiode)));
+        when(tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(anyLong(), any())).thenReturn(Map.of(new AktivitetstatusOgArbeidsgiver(UttakArbeidType.FRILANSER, null), LocalDateTimeline.empty()));
         when(mapInputTilUttakTjeneste.hentUtOgMapRequestUtenInntektsgradering(BehandlingReferanse.fra(førstegangsbehandling))).thenReturn(lagUttaksgrunnlag());
 
         var aksjonspunktDefinisjon = utleder.utledAksjonspunktDatoForNyeRegler(førstegangsbehandling);
@@ -103,8 +108,8 @@ public class AksjonspunktUtlederNyeReglerTest {
         LocalDate dag1 = LocalDate.now();
         LocalDate dag2 = dag1.plusDays(1);
         DatoIntervallEntitet søknadsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(dag1, dag2);
-        when(søknadsperiodeTjeneste.utledFullstendigPeriode(anyLong())).thenReturn(new TreeSet<>(Set.of(søknadsperiode)));
-        when(tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(anyLong(), any(LocalDateInterval.class))).thenReturn(Map.of(new AktivitetstatusOgArbeidsgiver(UttakArbeidType.FRILANSER, null), LocalDateTimeline.empty()));
+        when(vilkårsPerioderTilVurderingTjeneste.utled(anyLong(), any())).thenReturn(new TreeSet<>(Set.of(søknadsperiode)));
+        when(tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(anyLong(), any())).thenReturn(Map.of(new AktivitetstatusOgArbeidsgiver(UttakArbeidType.FRILANSER, null), LocalDateTimeline.empty()));
         when(mapInputTilUttakTjeneste.hentUtOgMapRequestUtenInntektsgradering(BehandlingReferanse.fra(revurdering))).thenReturn(lagUttaksgrunnlag());
 
         var aksjonspunktDefinisjon = utleder.utledAksjonspunktDatoForNyeRegler(revurdering);
@@ -115,8 +120,11 @@ public class AksjonspunktUtlederNyeReglerTest {
 
     @Test
     public void skal_få_ikke_få_aksjonspunkt_for_førstegangsbehandling_med_dato_satt_og_med_eksisterende_aksjonspunkt() {
-
-        when(tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(anyLong(), any(LocalDateInterval.class))).thenReturn(Map.of(new AktivitetstatusOgArbeidsgiver(UttakArbeidType.FRILANSER, null), LocalDateTimeline.empty()));
+        LocalDate dag1 = LocalDate.now();
+        LocalDate dag2 = dag1.plusDays(1);
+        DatoIntervallEntitet søknadsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(dag1, dag2);
+        when(vilkårsPerioderTilVurderingTjeneste.utled(anyLong(), any())).thenReturn(new TreeSet<>(Set.of(søknadsperiode)));
+        when(tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(anyLong(), any())).thenReturn(Map.of(new AktivitetstatusOgArbeidsgiver(UttakArbeidType.FRILANSER, null), LocalDateTimeline.empty()));
         when(mapInputTilUttakTjeneste.hentUtOgMapRequestUtenInntektsgradering(BehandlingReferanse.fra(førstegangsbehandling))).thenReturn(lagUttaksgrunnlag());
         when(uttakNyeReglerRepository.finnDatoForNyeRegler(any())).thenReturn(Optional.of(LocalDate.now()));
         aksjonspunktKontrollRepository.leggTilAksjonspunkt(førstegangsbehandling, AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK);
@@ -129,8 +137,11 @@ public class AksjonspunktUtlederNyeReglerTest {
 
     @Test
     void skal_få_ikke_få_aksjonspunkt_for_revurderig_med_dato_satt_og_med_eksisterende_aksjonspunkt() {
-
-        when(tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(anyLong(), any(LocalDateInterval.class))).thenReturn(Map.of(new AktivitetstatusOgArbeidsgiver(UttakArbeidType.FRILANSER, null), LocalDateTimeline.empty()));
+        LocalDate dag1 = LocalDate.now();
+        LocalDate dag2 = dag1.plusDays(1);
+        DatoIntervallEntitet søknadsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(dag1, dag2);
+        when(vilkårsPerioderTilVurderingTjeneste.utled(anyLong(), any())).thenReturn(new TreeSet<>(Set.of(søknadsperiode)));
+        when(tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(anyLong(), any())).thenReturn(Map.of(new AktivitetstatusOgArbeidsgiver(UttakArbeidType.FRILANSER, null), LocalDateTimeline.empty()));
         when(mapInputTilUttakTjeneste.hentUtOgMapRequestUtenInntektsgradering(BehandlingReferanse.fra(førstegangsbehandling))).thenReturn(lagUttaksgrunnlag());
         when(uttakNyeReglerRepository.finnDatoForNyeRegler(any())).thenReturn(Optional.of(LocalDate.now()));
         lagUtførtAksjonspunkt(førstegangsbehandling, "En fin begrunnelse", "VELDIG_ANSVARLIG_SAKSBEHANDLER");
@@ -154,8 +165,11 @@ public class AksjonspunktUtlederNyeReglerTest {
 
     @Test
     void skal_få_utført_aksjonspunkt_for_revurdering_med_dato_satt_og_uten_eksisterende_aksjonspunkt() {
-
-        when(tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(anyLong(), any(LocalDateInterval.class))).thenReturn(Map.of(new AktivitetstatusOgArbeidsgiver(UttakArbeidType.FRILANSER, null), LocalDateTimeline.empty()));
+        LocalDate dag1 = LocalDate.now();
+        LocalDate dag2 = dag1.plusDays(1);
+        DatoIntervallEntitet søknadsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(dag1, dag2);
+        when(vilkårsPerioderTilVurderingTjeneste.utled(anyLong(), any())).thenReturn(new TreeSet<>(Set.of(søknadsperiode)));
+        when(tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(anyLong(), any())).thenReturn(Map.of(new AktivitetstatusOgArbeidsgiver(UttakArbeidType.FRILANSER, null), LocalDateTimeline.empty()));
         when(mapInputTilUttakTjeneste.hentUtOgMapRequestUtenInntektsgradering(BehandlingReferanse.fra(førstegangsbehandling))).thenReturn(lagUttaksgrunnlag());
         when(uttakNyeReglerRepository.finnDatoForNyeRegler(any())).thenReturn(Optional.of(LocalDate.now()));
         lagUtførtAksjonspunkt(førstegangsbehandling, "En fin begrunnelse", "VELDIG_ANSVARLIG_SAKSBEHANDLER");
