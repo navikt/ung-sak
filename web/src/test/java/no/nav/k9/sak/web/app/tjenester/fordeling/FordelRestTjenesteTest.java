@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import jakarta.inject.Inject;
 
+import no.nav.k9.sak.web.app.jackson.ObjectMapperFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -15,7 +16,6 @@ import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.kontrakt.søknad.innsending.InnsendingInnhold;
 import no.nav.k9.sak.mottak.SøknadMottakTjeneste;
 import no.nav.k9.sak.mottak.SøknadMottakTjenesteContainer;
-import no.nav.k9.sak.web.app.jackson.JacksonJsonConfig;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.mottak.PleiepengerBarnSøknadInnsending;
 
 @ExtendWith(CdiAwareExtension.class)
@@ -49,7 +49,7 @@ public class FordelRestTjenesteTest {
     @Test
     public void deserialiser_pleiepengersøknad() throws Exception {
 
-        ObjectMapper mapper = new JacksonJsonConfig().getObjectMapper();
+        ObjectMapper mapper = ObjectMapperFactory.createBaseObjectMapper();
         var json = mapper.writeValueAsString(new PleiepengerBarnSøknadInnsending());
         System.out.println(json);
         var dto = mapper.readValue(json, InnsendingInnhold.class);

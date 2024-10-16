@@ -1,27 +1,13 @@
 package no.nav.k9.sak.økonomi.tilkjentytelse;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.util.List;
-import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import no.nav.k9.oppdrag.kontrakt.Saksnummer;
-import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.InntrekkBeslutning;
-import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelse;
-import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseBehandlingInfoV1;
-import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
-import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelsePeriodeV1;
+import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.*;
 import no.nav.k9.oppdrag.kontrakt.util.TilkjentYtelseMaskerer;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
@@ -32,15 +18,24 @@ import no.nav.k9.sak.behandlingslager.behandling.personopplysning.Personopplysni
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
+import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingInntrekkEntitet;
 import no.nav.k9.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.util.List;
+import java.util.Optional;
 
 @Dependent
 public class TilkjentYtelseTjeneste {
 
     private final Logger log = LoggerFactory.getLogger(TilkjentYtelseTjeneste.class);
     private Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-    private ObjectMapper objectMapper = JsonMapper.getMapper();
+    private ObjectMapper objectMapper = JsonObjectMapper.getMapper();
     private TilkjentYtelseMaskerer maskerer = new TilkjentYtelseMaskerer(objectMapper).ikkeMaskerSats();
 
     private BehandlingRepository behandlingRepository;

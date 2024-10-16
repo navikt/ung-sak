@@ -6,7 +6,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
-import no.nav.k9.sak.web.app.jackson.JacksonJsonConfig;
+import no.nav.k9.sak.web.app.jackson.ObjectMapperFactory;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
 
@@ -16,7 +16,7 @@ public class HistorikkTjenesteDump implements DebugDumpFagsak {
 
     private HistorikkTjenesteAdapter historikkTjeneste;
 
-    private final ObjectWriter ow = new JacksonJsonConfig().getObjectMapper().writerWithDefaultPrettyPrinter();
+    private final ObjectWriter ow = ObjectMapperFactory.createBaseObjectMapper().writerWithDefaultPrettyPrinter();
 
     HistorikkTjenesteDump() {
         // for proxy

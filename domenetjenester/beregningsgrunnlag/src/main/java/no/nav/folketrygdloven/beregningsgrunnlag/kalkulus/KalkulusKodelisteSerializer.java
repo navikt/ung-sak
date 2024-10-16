@@ -14,6 +14,8 @@ public class KalkulusKodelisteSerializer extends StdSerializer<no.nav.folketrygd
 
     private final boolean serialiserKalkulusSomObjekt;
 
+    // TODO Skriv om denne til å alltid serialisere som objekt, og fjern bruken av den når ein vil ha serialisert som string.
+    // Meiner alle Kodeverdi typer i Kalkulus serialiserer korrekt til string av seg sjølv.
     public KalkulusKodelisteSerializer(boolean serialiserKalkulusSomObjekt) {
         super(no.nav.folketrygdloven.kalkulus.kodeverk.Kodeverdi.class);
         this.serialiserKalkulusSomObjekt = serialiserKalkulusSomObjekt;
