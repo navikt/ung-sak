@@ -1,13 +1,8 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.aksjonspunkt;
 
-import java.util.Collection;
-import java.util.List;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.folketrygdloven.beregningsgrunnlag.JacksonJsonConfig;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.LogLevel;
@@ -15,7 +10,10 @@ import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
+import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.k9.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
+
+import java.util.Collection;
 
 /**
  * Lagrer data som ble brukt i utførelse av aksjonspunktet i json-format. Brukes utelukkende til diagnostikkformål for enklere feilsøking.
@@ -36,7 +34,7 @@ public class AksjonspunktSporingTjeneste {
     void opprettSporinger(Collection<BekreftetAksjonspunktDto> dtoer, BehandlingskontrollKontekst kontekst) {
         // Ok å kjøre i loop her siden vi sjelden løser flere aksjonspunkter samtidig
         dtoer.forEach(
-            a -> aksjonspunktRepository.lagreAksjonspunktSporing(a.getKode(), JacksonJsonConfig.toJson(a, JsonMappingFeil.FACTORY::jsonMappingFeil), kontekst.getBehandlingId())
+            a -> aksjonspunktRepository.lagreAksjonspunktSporing(a.getKode(), JsonObjectMapper.toJson(a, JsonMappingFeil.FACTORY::jsonMappingFeil), kontekst.getBehandlingId())
         );
     }
 

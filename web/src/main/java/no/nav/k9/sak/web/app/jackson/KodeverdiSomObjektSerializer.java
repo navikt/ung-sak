@@ -13,48 +13,44 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
 /**
- * Enkel serialisering av KodeverkTabell klasser, uten at disse trenger @JsonIgnore eller lignende. Deserialisering går
- * av seg selv normalt (får null for andre felter).
+ * Denne brukes til å overstyre standard serialisering av Kodeverdi instanser til å alltid returnere json objekt.
+ * Er planlagt utfasa. Alternativ overstyring er KodeverdiSomStringSerializer klassen.
  */
-public class KodelisteSerializer extends StdSerializer<Kodeverdi> {
+public class KodeverdiSomObjektSerializer extends StdSerializer<Kodeverdi> {
 
     public static final String KODE = "kode";
     public static final String NAVN = "navn";
     public static final String KODEVERK = "kodeverk";
-    /**
-     * dropper navn hvis false (trenger da ikke refreshe navn fra db.). Default false
-     */
-    private boolean serialiserKodelisteNavn;
+    private final boolean serialiserKodelisteNavn;
 
     private Set<String> reserverteKeys = Set.of(KODE, KODEVERK, NAVN);
 
-    public KodelisteSerializer() {
-        this(false);
-    }
-
-    public KodelisteSerializer(boolean serialiserKodelisteNavn) {
+    /**
+     *
+     * @param serialiserKodelisteNavn Utelater navn fra serialisering viss denne er false. Standard er false.
+     */
+    public KodeverdiSomObjektSerializer(final boolean serialiserKodelisteNavn) {
         super(Kodeverdi.class);
         this.serialiserKodelisteNavn = serialiserKodelisteNavn;
     }
 
     @Override
     public void serialize(Kodeverdi value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
+        serialiserKodeverdiSomObjekt(value, jgen);
+    }
 
+    private void serialiserKodeverdiSomObjekt(Kodeverdi value, JsonGenerator jgen) throws IOException {
         jgen.writeStartObject();
-
         jgen.writeStringField(KODE, value.getKode());
-
         if (serialiserKodelisteNavn) {
             jgen.writeStringField(NAVN, value.getNavn());
         }
-
         jgen.writeStringField(KODEVERK, value.getKodeverk());
-
         håndtereEkstraFelter(value, jgen);
-
         jgen.writeEndObject();
     }
 
+    // TODO Forsøk å skrive om så denne kan fjernast. Kun brukt av Venteårsak klasse.
     private void håndtereEkstraFelter(Kodeverdi value, JsonGenerator jgen) throws IOException {
         var ekstraFelterMap = value.getEkstraFelter();
         if (ekstraFelterMap == null || ekstraFelterMap.isEmpty()) {

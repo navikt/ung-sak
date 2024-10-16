@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
 
 /**
  * Håndterer serialisering/deserialisering av data strukturre til json for vilkår.
@@ -30,19 +31,9 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
  */
 public class VilkårJsonObjectMapper {
 
-    private static final ObjectMapper OM;
+    private static final ObjectMapper OM = JsonObjectMapper.getMapper().copy();
 
     static {
-        OM = new ObjectMapper();
-        OM.registerModule(new JavaTimeModule());
-        OM.registerModule(new Jdk8Module());
-        OM.setVisibility(PropertyAccessor.GETTER, Visibility.NONE);
-        OM.setVisibility(PropertyAccessor.SETTER, Visibility.NONE);
-        OM.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
-        OM.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        OM.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        OM.setVisibility(PropertyAccessor.CREATOR, Visibility.ANY);
-
         // Legacy support for gamle åpne behandlinger fra Fundamentet. Fjernes når disse er vedtatt og ferdig
         SimpleModule module = new SimpleModule();
         module.addDeserializer(LocalDate.class, new OldLocalDateDeserializer());
