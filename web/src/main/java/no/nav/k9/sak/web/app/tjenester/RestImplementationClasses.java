@@ -41,6 +41,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.søknad.SøknadRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.søknadsfrist.SøknadsfristRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.tilbakekreving.TilbakekrevingRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.tilsyn.VurderTilsynRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.uttak.EgneOverlappendeSakerRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.brukerdialog.BrukerdialogRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningUttakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.uttak.PleiepengerUttakRestTjeneste;
@@ -120,6 +121,7 @@ public class RestImplementationClasses {
         classes.add(IAYRegisterdataCallbackRestTjeneste.class);
         classes.add(UttakRestTjeneste.class);
         classes.add(PleiepengerUttakRestTjeneste.class);
+        classes.add(EgneOverlappendeSakerRestTjeneste.class);
         classes.add(UtenlandsoppholdRestTjeneste.class);
         classes.add(VurderTilsynRestTjeneste.class);
         classes.add(RettVedDødRestTjeneste.class);
