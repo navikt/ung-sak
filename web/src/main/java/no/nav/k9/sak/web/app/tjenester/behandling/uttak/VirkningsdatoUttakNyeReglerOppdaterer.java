@@ -25,7 +25,6 @@ public class VirkningsdatoUttakNyeReglerOppdaterer implements AksjonspunktOppdat
 
     private UttakNyeReglerRepository uttakNyeReglerRepository;
     private HistorikkRepository historikkRepository;
-    private boolean nyRegelEnabled;
 
     VirkningsdatoUttakNyeReglerOppdaterer() {
         //for CDI proxy
@@ -33,19 +32,13 @@ public class VirkningsdatoUttakNyeReglerOppdaterer implements AksjonspunktOppdat
 
     @Inject
     public VirkningsdatoUttakNyeReglerOppdaterer(UttakNyeReglerRepository uttakNyeReglerRepository,
-                                                 HistorikkRepository historikkRepository,
-                                                 @KonfigVerdi(value = "ENABLE_DATO_NY_REGEL_UTTAK", required = false, defaultVerdi = "false") boolean nyRegelEnabled) {
+                                                 HistorikkRepository historikkRepository) {
         this.uttakNyeReglerRepository = uttakNyeReglerRepository;
         this.historikkRepository = historikkRepository;
-        this.nyRegelEnabled = nyRegelEnabled;
     }
 
     @Override
     public OppdateringResultat oppdater(VurderVirkningsdatoUttakNyeReglerDto dto, AksjonspunktOppdaterParameter param) {
-        if (!nyRegelEnabled){
-            throw new IllegalStateException("Mulighet for å sette virkningsdato for nye regler for uttak er ikke lansert.");
-        }
-
         LocalDate eksisterendeDato = uttakNyeReglerRepository.finnDatoForNyeRegler(param.getBehandlingId()).orElse(null);
         uttakNyeReglerRepository.lagreDatoForNyeRegler(param.getBehandlingId(), dto.getVirkningsdato());
         opprettHistorikkInnslag(param.getBehandlingId(), dto.getVirkningsdato(), eksisterendeDato, dto.getBegrunnelse());

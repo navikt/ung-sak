@@ -5,8 +5,6 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRST�
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,7 +37,6 @@ import no.nav.folketrygdloven.kalkulus.felles.v1.Utbetalingsgrad;
 import no.nav.folketrygdloven.kalkulus.kodeverk.UttakArbeidType;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
@@ -52,7 +49,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidstidMapping
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.MapArbeid;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeidsforhold;
-import no.nav.pleiepengerbarn.uttak.kontrakter.ArbeidsforholdPeriodeInfo;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
 import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
@@ -70,7 +66,6 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
     private PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste;
 
     private PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste;
-    private boolean skalHaInaktivVed847B;
 
     public PleiepengerOgOpplæringspengerGrunnlagMapper() {
         // for proxy
@@ -80,13 +75,11 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
     public PleiepengerOgOpplæringspengerGrunnlagMapper(UttakTjeneste uttakRestKlient,
                                                        UttakNyeReglerRepository uttakNyeReglerRepository,
                                                        PeriodeFraSøknadForBrukerTjeneste periodeFraSøknadForBrukerTjeneste,
-                                                       @Any PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste,
-                                                       @KonfigVerdi(value = "INAKTIV_VED_8_47_B", defaultVerdi = "false") boolean skalHaInaktivVed847B) {
+                                                       @Any PSBVurdererSøknadsfristTjeneste søknadsfristTjeneste) {
         this.uttakRestKlient = uttakRestKlient;
         this.uttakNyeReglerRepository = uttakNyeReglerRepository;
         this.periodeFraSøknadForBrukerTjeneste = periodeFraSøknadForBrukerTjeneste;
         this.søknadsfristTjeneste = søknadsfristTjeneste;
-        this.skalHaInaktivVed847B = skalHaInaktivVed847B;
     }
 
     @Override
@@ -117,7 +110,7 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
             perioderFraSøknadene,
             timeline,
             null,
-            null, skalHaInaktivVed847B);
+            null);
         var arbeidIPeriode = new MapArbeid().map(arbeidstidInput);
         utbetalingsgrader = arbeidIPeriode.stream()
             .filter(a -> !a.getPerioder().isEmpty())

@@ -3,6 +3,7 @@ package no.nav.k9.sak.mottak.dokumentmottak;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -89,6 +90,15 @@ public class MottatteDokumentTjeneste {
     }
 
     Long lagreMottattDokumentPåFagsak(MottattDokument dokument) {
+        var eksisterende = mottatteDokumentRepository.hentMottatteDokument(dokument.getFagsakId(), dokument.getJournalpostId() != null ? List.of(dokument.getJournalpostId()) : List.of())
+            .stream()
+            .filter(it -> Objects.equals(it.getType(), dokument.getType()))
+            .findFirst();
+        if (eksisterende.isPresent()) {
+            logger.info("Dokument med journalpostId {} er allerede lagret på fagsak.", dokument.getJournalpostId());
+            return eksisterende.get().getId();
+        }
+
         DokumentStatus nyStatus = DokumentStatus.MOTTATT;
         if (dokument.getStatus() == DokumentStatus.UGYLDIG) {
             logger.info("Mottok ugyldig dokument med jounalpostId={} på fagsak={}", dokument.getJournalpostId().getVerdi(), dokument.getFagsakId());

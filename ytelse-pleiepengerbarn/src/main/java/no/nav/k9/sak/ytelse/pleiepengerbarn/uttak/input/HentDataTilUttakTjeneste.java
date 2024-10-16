@@ -17,12 +17,10 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagTjeneste;
-import no.nav.folketrygdloven.beregningsgrunnlag.modell.Beregningsgrunnlag;
 import no.nav.folketrygdloven.beregningsgrunnlag.tilkommetAktivitet.AktivitetstatusOgArbeidsgiver;
 import no.nav.folketrygdloven.beregningsgrunnlag.tilkommetAktivitet.TilkommetAktivitetTjeneste;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -80,8 +78,6 @@ public class HentDataTilUttakTjeneste {
     private UttakNyeReglerRepository uttakNyeReglerRepository;
     private OverstyrUttakRepository overstyrUttakRepository;
 
-    private boolean tilkommetAktivitetEnabled;
-    private boolean nyRegelEnabled;
 
     @Inject
     public HentDataTilUttakTjeneste(VilkårResultatRepository vilkårResultatRepository,
@@ -104,10 +100,7 @@ public class HentDataTilUttakTjeneste {
                                     HentEtablertTilsynTjeneste hentEtablertTilsynTjeneste,
                                     TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste,
                                     UttakNyeReglerRepository uttakNyeReglerRepository,
-                                    OverstyrUttakRepository overstyrUttakRepository,
-                                    @KonfigVerdi(value = "TILKOMMET_AKTIVITET_ENABLED", required = false, defaultVerdi = "false") boolean tilkommetAktivitetEnabled,
-                                    @KonfigVerdi(value = "ENABLE_DATO_NY_REGEL_UTTAK", required = false, defaultVerdi = "false") boolean nyRegelEnabled
-
+                                    OverstyrUttakRepository overstyrUttakRepository
     ) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.pleiebehovResultatRepository = pleiebehovResultatRepository;
@@ -130,8 +123,6 @@ public class HentDataTilUttakTjeneste {
         this.tilkommetAktivitetTjeneste = tilkommetAktivitetTjeneste;
         this.uttakNyeReglerRepository = uttakNyeReglerRepository;
         this.overstyrUttakRepository = overstyrUttakRepository;
-        this.tilkommetAktivitetEnabled = tilkommetAktivitetEnabled;
-        this.nyRegelEnabled = nyRegelEnabled;
     }
 
     public InputParametere hentUtData(BehandlingReferanse referanse, boolean brukUbesluttedeData, boolean medInntektsgradering) {
@@ -154,18 +145,11 @@ public class HentDataTilUttakTjeneste {
         }
 
         LocalDate virkningsdatoNyeRegler = uttakNyeReglerRepository.finnDatoForNyeRegler(referanse.getBehandlingId()).orElse(null);
-        if (virkningsdatoNyeRegler != null && !nyRegelEnabled) {
-            throw new IllegalStateException("Har lagret virkningsdato for nye regler i uttak, men de nye reglene er skrudd av.");
-        }
 
-        final Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> tilkommetAktivitetsperioder;
-        if (tilkommetAktivitetEnabled) {
-            final Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> tilkommedeAktiviteterRaw = tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(referanse.getFagsakId(), virkningsdatoNyeRegler);
-            tilkommetAktivitetsperioder = tilkommedeAktiviteterRaw.entrySet().stream()
-                .collect(Collectors.toMap(e -> new AktivitetIdentifikator(e.getKey().getAktivitetType(), e.getKey().getArbeidsgiver(), null), e -> e.getValue()));
-        } else {
-            tilkommetAktivitetsperioder = new HashMap<>();
-        }
+        final Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> tilkommedeAktiviteterRaw = tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(referanse.getFagsakId(), virkningsdatoNyeRegler, perioderTilVurdering);
+        final Map<AktivitetIdentifikator, LocalDateTimeline<Boolean>> tilkommetAktivitetsperioder = tilkommedeAktiviteterRaw.entrySet().stream()
+            .collect(Collectors.toMap(e -> new AktivitetIdentifikator(e.getKey().getAktivitetType(), e.getKey().getArbeidsgiver(), null), Map.Entry::getValue));
+
 
         var utvidetRevurderingPerioder = perioderTilVurderingTjeneste.utledUtvidetRevurderingPerioder(referanse);
         var vurderteSøknadsperioder = søknadsfristTjeneste.vurderSøknadsfrist(referanse);
@@ -212,7 +196,7 @@ public class HentDataTilUttakTjeneste {
 
         LocalDateTimeline<BigDecimal> nedjustertUttakgradTidslinje;
 
-        if (tilkommetAktivitetEnabled && medInntektsgradering) {
+        if (medInntektsgradering) {
             nedjustertUttakgradTidslinje = tilkommetAktivitetTjeneste.finnInntektsgradering(referanse.getFagsakId()).mapValue(Prosent::getVerdi);
         } else {
             nedjustertUttakgradTidslinje = LocalDateTimeline.empty();

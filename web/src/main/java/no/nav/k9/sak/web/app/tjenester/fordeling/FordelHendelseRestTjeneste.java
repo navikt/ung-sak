@@ -56,7 +56,7 @@ public class FordelHendelseRestTjeneste {
         var aktørId = dto.getAktørId();
         var hendelse = dto.getHendelse();
 
-        var fagsaker = hendelsemottakTjeneste.finnFagsakerTilVurdering(aktørId, hendelse).keySet();
+        var fagsaker = hendelsemottakTjeneste.finnFagsakerTilVurdering(hendelse).keySet();
 
         var saksnummere = fagsaker.stream().map(it -> new SaksnummerDto(it.getSaksnummer())).collect(Collectors.toList());
         return new PåvirkedeSaker(saksnummere);
@@ -72,7 +72,7 @@ public class FordelHendelseRestTjeneste {
         var aktørId = dto.getAktørId();
         var hendelse = dto.getHendelse();
 
-        var fagsaker = hendelsemottakTjeneste.mottaHendelse(aktørId, hendelse).keySet();
+        var fagsaker = hendelsemottakTjeneste.mottaHendelse(hendelse).keySet();
 
         var saksnummere = fagsaker.stream().map(it -> new SaksnummerDto(it.getSaksnummer())).collect(Collectors.toList());
         return new PåvirkedeSaker(saksnummere);
