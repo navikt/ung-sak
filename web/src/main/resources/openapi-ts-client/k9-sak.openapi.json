@@ -3072,6 +3072,20 @@
         },
         "type" : "object"
       },
+      "EgneOverlappendeSakerDto" : {
+        "properties" : {
+          "perioderMedOverlapp" : {
+            "items" : {
+              "$ref" : "#/components/schemas/PeriodeMedOverlapp"
+            },
+            "maxItems" : 1000,
+            "minItems" : 0,
+            "type" : "array"
+          }
+        },
+        "required" : [ "perioderMedOverlapp" ],
+        "type" : "object"
+      },
       "EksternArbeidsforholdRef" : {
         "properties" : {
           "referanse" : {
@@ -8527,6 +8541,32 @@
           }
         },
         "required" : [ "fom", "tom" ],
+        "type" : "object"
+      },
+      "PeriodeMedOverlapp" : {
+        "properties" : {
+          "fastsattUttaksgrad" : {
+            "exclusiveMaximum" : false,
+            "exclusiveMinimum" : false,
+            "maximum" : 100,
+            "minimum" : 0,
+            "type" : "number"
+          },
+          "periode" : {
+            "$ref" : "#/components/schemas/Periode"
+          },
+          "saksnummer" : {
+            "items" : {
+              "nullable" : true,
+              "type" : "string"
+            },
+            "maxItems" : 10,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          }
+        },
+        "required" : [ "fastsattUttaksgrad", "periode", "saksnummer" ],
         "type" : "object"
       },
       "PeriodeMedRegisterendring" : {
@@ -15219,6 +15259,36 @@
           }
         },
         "tags" : [ "behandling - pleiepenger/uttak" ]
+      }
+    },
+    "/behandling/pleiepenger/uttak/egne-overlappende-saker" : {
+      "post" : {
+        "description" : "Hent egne overlappende saker for perioder til behandling",
+        "operationId" : "hentEgneOverlappendeSaker",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "format" : "uuid",
+                "type" : "string"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EgneOverlappendeSakerDto"
+                }
+              }
+            },
+            "description" : "Returnerer egne overlappende saker"
+          }
+        },
+        "tags" : [ "behandling - uttak" ]
       }
     },
     "/behandling/pleiepenger/uttak/overstyrbare-aktiviteter" : {
