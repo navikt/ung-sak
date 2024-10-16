@@ -42,10 +42,6 @@ public class TidslinjeUtil {
         return tidslinje.stream().map(segment -> new Periode(segment.getFom(), segment.getTom())).toList();
     }
 
-    public static List<Periode> tilPerioder(NavigableSet<DatoIntervallEntitet> datoIntervaller) {
-        return datoIntervaller.stream().map(datoIntervall -> new Periode(datoIntervall.getFomDato(), datoIntervall.getTomDato())).toList();
-    }
-
     public static LocalDateTimeline<Boolean> tilTidslinjeKomprimert(List<Periode> perioder) {
         return new LocalDateTimeline<>(perioder.stream().map(periode -> new LocalDateSegment<>(periode.getFom(), periode.getTom(), true)).toList()).compress();
     }
