@@ -6,7 +6,6 @@ import static no.nav.k9.kodeverk.historikk.HistorikkinnslagType.OVST_UTTAK_OPPDA
 
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,7 +31,6 @@ import no.nav.k9.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrUttakRepository;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrtUttakPeriode;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrtUttakUtbetalingsgrad;
-import no.nav.k9.sak.domene.arbeidsforhold.aksjonspunkt.ArbeidsgiverHistorikkinnslag;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.historikk.HistorikkInnslagTekstBuilder;
 import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrUttakArbeidsforholdDto;
@@ -47,7 +45,6 @@ public class VurderSøskensakerOppdaterer implements AksjonspunktOppdaterer<Vurd
 
     private OverstyrUttakRepository overstyrUttakRepository;
     private HistorikkRepository historikkRepository;
-    private ArbeidsgiverHistorikkinnslag arbeidsgiverHistorikkinnslag;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
     private boolean søskensakApEnabled;
 
@@ -58,12 +55,10 @@ public class VurderSøskensakerOppdaterer implements AksjonspunktOppdaterer<Vurd
     @Inject
     public VurderSøskensakerOppdaterer(OverstyrUttakRepository overstyrUttakRepository,
                                        HistorikkRepository historikkRepository,
-                                       ArbeidsgiverHistorikkinnslag arbeidsgiverHistorikkinnslag,
                                        @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
                                        @KonfigVerdi(value = "SOSKENSAK_UTTAK_OVERSTYRING", defaultVerdi = "false") boolean søskensakApEnabled) {
         this.overstyrUttakRepository = overstyrUttakRepository;
         this.historikkRepository = historikkRepository;
-        this.arbeidsgiverHistorikkinnslag = arbeidsgiverHistorikkinnslag;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.søskensakApEnabled = søskensakApEnabled;
     }
@@ -129,14 +124,12 @@ public class VurderSøskensakerOppdaterer implements AksjonspunktOppdaterer<Vurd
             tekstBuilder.medHendelse(OVST_UTTAK_NY);
             tekstBuilder.medEndretFelt(HistorikkEndretFeltType.UTTAK_OVERSTYRT_PERIODE, null, formater(di));
             tekstBuilder.medEndretFelt(HistorikkEndretFeltType.UTTAK_OVERSTYRT_SØKERS_UTTAKSGRAD, null, etterOppdatering.getValue().getSøkersUttaksgrad());
-            leggTilUtbetalingsgradEndredeFelter(etterOppdatering, tekstBuilder);
             tekstBuilder.medBegrunnelse(etterOppdatering.getValue().getBegrunnelse());
         } else {
             innslag.setType(OVST_UTTAK_OPPDATERT);
             tekstBuilder.medHendelse(OVST_UTTAK_OPPDATERT);
             tekstBuilder.medEndretFelt(HistorikkEndretFeltType.UTTAK_OVERSTYRT_PERIODE, null, formater(di));
             tekstBuilder.medEndretFelt(HistorikkEndretFeltType.UTTAK_OVERSTYRT_SØKERS_UTTAKSGRAD, førOppdatering.getValue().getSøkersUttaksgrad(), etterOppdatering.getValue().getSøkersUttaksgrad());
-            leggTilUtbetalingsgradEndredeFelter(etterOppdatering, tekstBuilder);
             tekstBuilder.medBegrunnelse(etterOppdatering.getValue().getBegrunnelse());
         }
 
@@ -145,20 +138,6 @@ public class VurderSøskensakerOppdaterer implements AksjonspunktOppdaterer<Vurd
         return new LocalDateSegment<>(di, innslag);
     }
 
-    private void leggTilUtbetalingsgradEndredeFelter(LocalDateSegment<OverstyrtUttakPeriode> etterOppdatering, HistorikkInnslagTekstBuilder tekstBuilder) {
-        etterOppdatering.getValue().getOverstyrtUtbetalingsgrad().forEach(o -> {
-            if (o.getArbeidsgiver() != null) {
-                var arbeidsgiverTekst = arbeidsgiverHistorikkinnslag.lagArbeidsgiverHistorikkinnslagTekst(o.getArbeidsgiver(), o.getInternArbeidsforholdRef(), List.of());
-                tekstBuilder.medEndretFelt(HistorikkEndretFeltType.UTTAK_OVERSTYRT_UTBETALINGSGRAD,
-                    arbeidsgiverTekst,
-                    null, o.getUtbetalingsgrad());
-            } else {
-                tekstBuilder.medEndretFelt(HistorikkEndretFeltType.UTTAK_OVERSTYRT_UTBETALINGSGRAD,
-                    o.getAktivitetType().getNavn(),
-                    null, o.getUtbetalingsgrad());
-            }
-        });
-    }
 
     private LocalDateSegment<OverstyrtUttakPeriode> mapTilSegment(OverstyrUttakPeriodeDto periodeDto) {
         return new LocalDateSegment<>(periodeDto.getPeriode().getFom(), periodeDto.getPeriode().getTom(), map(periodeDto));
