@@ -26,6 +26,7 @@ import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeid;
+import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 
 @Dependent
@@ -127,8 +128,17 @@ class AksjonspunktUtlederNyeRegler {
     }
 
     private static boolean overlapperPeriodeMedPeriodeTilVurdering(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Arbeid a) {
-        return a.getPerioder().keySet().stream()
-            .anyMatch(arbeidsperiode -> perioderTilVurdering.stream().anyMatch(tilVurdering -> DatoIntervallEntitet.fraOgMedTilOgMed(arbeidsperiode.getFom(), arbeidsperiode.getTom()).overlapper(tilVurdering)));
+        return a.getPerioder().keySet()
+            .stream()
+            .anyMatch(arbeidsperiode -> finnesOverlapp(perioderTilVurdering, arbeidsperiode));
+    }
+
+    private static boolean finnesOverlapp(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, LukketPeriode arbeidsperiode) {
+        return perioderTilVurdering.stream().anyMatch(tilVurdering -> overlapper(arbeidsperiode, tilVurdering));
+    }
+
+    private static boolean overlapper(LukketPeriode arbeidsperiode, DatoIntervallEntitet tilVurdering) {
+        return DatoIntervallEntitet.fraOgMedTilOgMed(arbeidsperiode.getFom(), arbeidsperiode.getTom()).overlapper(tilVurdering);
     }
 
 }
