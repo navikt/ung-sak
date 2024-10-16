@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import no.nav.k9.sak.web.app.jackson.ObjectMapperFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,7 +86,6 @@ import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.PersonIdent;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.web.app.jackson.JacksonJsonConfig;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.infotrygd.PsbInfotrygdRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.infotrygd.PsbPbSakRepository;
@@ -113,7 +113,7 @@ public class FordelRestTjeneste {
     private PsbInfotrygdRepository psbInfotrygdRepository;
     private AktørTjeneste aktørTjeneste;
     private PsbPbSakRepository psbPbSakRepository;
-    private ObjectWriter objectWriter = new JacksonJsonConfig().getObjectMapper().writerFor(Innsending.class);
+    private ObjectWriter objectWriter = ObjectMapperFactory.createBaseObjectMapper().writerFor(Innsending.class);
 
     public FordelRestTjeneste() {// For Rest-CDI
     }

@@ -1,12 +1,12 @@
 package no.nav.folketrygdloven.beregningsgrunnlag.tilkommetAktivitet;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -26,6 +26,7 @@ import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Arbeidsgiver;
 import no.nav.k9.sak.typer.Prosent;
@@ -58,14 +59,16 @@ public class TilkommetAktivitetTjeneste {
     /**
      * Henter ut tilkommede aktiviteter for angitt fagsak.
      *
-     * @param fagsakId           IDen til fagsaken.
-     * @param virkningstidspunkt Fra-og-med-datoen man skal få tilkommede aktiviteter for.
+     * @param fagsakId             IDen til fagsaken.
+     * @param virkningstidspunkt   Fra-og-med-datoen man skal få tilkommede aktiviteter for.
+     * @param perioderTilVurdering
      * @return En {@code Map} med alle tilkommede aktiviteter med tilhørende perioden den
      * den regnes å være tilkommet i.
      */
-    public Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> finnTilkommedeAktiviteter(Long fagsakId, LocalDate virkningstidspunkt) {
-        LocalDateInterval aktuellPeriode = virkningstidspunkt != null ? new LocalDateInterval(virkningstidspunkt, LocalDateInterval.TIDENES_ENDE) : null;
-        return finnTilkommedeAktiviteter(fagsakId, aktuellPeriode);
+    public Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> finnTilkommedeAktiviteter(Long fagsakId, LocalDate virkningstidspunkt, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
+        var startDato = virkningstidspunkt != null ? virkningstidspunkt : LocalDateInterval.TIDENES_BEGYNNELSE;
+        var aktuellTidslinje = new LocalDateTimeline<>(startDato, LocalDateInterval.TIDENES_ENDE, Boolean.TRUE).intersection(TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering));
+        return finnTilkommedeAktiviteter(fagsakId, TidslinjeUtil.tilDatoIntervallEntiteter(aktuellTidslinje));
     }
 
     /**
@@ -87,12 +90,13 @@ public class TilkommetAktivitetTjeneste {
     /**
      * Henter ut tilkommede aktiviteter for angitt fagsak.
      *
-     * @param fagsakId       IDen til fagsaken.
-     * @param aktuellPeriode perioden det sjekkes tilkommede aktiviteter for.
+     * @param fagsakId         IDen til fagsaken.
+     * @param aktuellePerioder Perioder det skal sjekkes tilkommet aktiviteter for
      * @return En {@code Map} med alle tilkommede aktiviteter med tilhørende perioden den
      * den regnes å være tilkommet i.
      */
-    public Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> finnTilkommedeAktiviteter(Long fagsakId, LocalDateInterval aktuellPeriode) {
+    public Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> finnTilkommedeAktiviteter(Long fagsakId,
+                                                                                                    NavigableSet<DatoIntervallEntitet> aktuellePerioder) {
         var relevantBehandling = finnRelevantBehandling(fagsakId);
 
         if (relevantBehandling.isEmpty()) {
@@ -113,9 +117,7 @@ public class TilkommetAktivitetTjeneste {
                 .collect(Collectors.toList())
             );
             LocalDateTimeline<Boolean> sammenslått = periodetidslinje.crossJoin(nyePerioder);
-            if (aktuellPeriode != null) {
-                sammenslått = sammenslått.intersection(aktuellPeriode);
-            }
+            sammenslått = sammenslått.intersection(TidslinjeUtil.tilTidslinjeKomprimert(aktuellePerioder));
             if (!sammenslått.isEmpty()) {
                 sammenslåttResultat.put(aktivitetstatusOgArbeidsgiver, sammenslått);
             }

@@ -1,25 +1,11 @@
 package no.nav.k9.sak.domene.vedtak.observer;
 
-import static no.nav.k9.sak.domene.vedtak.observer.VedtattYtelseMapper.mapAnvisninger;
-
-import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.abakus.vedtak.ytelse.Aktør;
-import no.nav.abakus.vedtak.ytelse.Kildesystem;
-import no.nav.abakus.vedtak.ytelse.Periode;
-import no.nav.abakus.vedtak.ytelse.Status;
-import no.nav.abakus.vedtak.ytelse.Ytelse;
-import no.nav.abakus.vedtak.ytelse.Ytelser;
+import no.nav.abakus.vedtak.ytelse.*;
 import no.nav.abakus.vedtak.ytelse.v1.YtelseV1;
-import no.nav.folketrygdloven.beregningsgrunnlag.JacksonJsonConfig;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.kodeverk.behandling.FagsakStatus;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -32,6 +18,15 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.iay.modell.ArbeidsforholdReferanse;
+import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
+
+import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static no.nav.k9.sak.domene.vedtak.observer.VedtattYtelseMapper.mapAnvisninger;
 
 @ApplicationScoped
 public class VedtattYtelseTjeneste {
@@ -73,7 +68,7 @@ public class VedtattYtelseTjeneste {
         ytelse.setYtelse(mapYtelser(behandling.getFagsakYtelseType()));
         ytelse.setYtelseStatus(mapStatus(behandling.getFagsak().getStatus()));
         finnTjeneste(behandling.getFagsakYtelseType())
-            .ifPresent(it -> ytelse.setTilleggsopplysninger(JacksonJsonConfig.toJson(it.generer(behandling),
+            .ifPresent(it -> ytelse.setTilleggsopplysninger(JsonObjectMapper.toJson(it.generer(behandling),
                 PubliserVedtakHendelseFeil.FEILFACTORY::kanIkkeSerialisere)));
 
         ytelse.setPeriode(utledPeriode(vedtak, berResultat.orElse(null)));

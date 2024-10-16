@@ -304,6 +304,7 @@ spec:
     - name: SOSKENSAK_UTTAK_OVERSTYRING
       value: "true"
 
+
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
       value: "false"
