@@ -11,6 +11,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.sak.kontrakt.person.AktørIdDto;
 
 @Dependent
 @ScopedRestIntegration(scopeKey = "ungdomsprogramregister.scope", defaultScope = "api://prod-gcp.k9saksbehandling.ung-deltakelse-opplyser/.default")
@@ -23,13 +24,13 @@ public class UngdomsprogramRegisterKlient {
         OidcRestClient restClient,
         @KonfigVerdi(value = "ungdomsprogramregister.url", defaultVerdi = "http://ung-deltakelse-opplyser.k9saksbehandling") String url) {
         this.restClient = restClient;
-        hentUri = tilUri(url, "k9sak/register/hent/alle");
+        hentUri = tilUri(url, "/register/hent/alle");
 
     }
 
     public DeltakerOpplysningerDTO hentForAktørId(String aktørId) {
         try {
-            return restClient.post(hentUri, new DeltakerOpplysningDTO(aktørId), DeltakerOpplysningerDTO.class);
+            return restClient.post(hentUri, new AktørIdDto(aktørId), DeltakerOpplysningerDTO.class);
         } catch (Exception e) {
             throw UngdomsprogramRegisterFeil.FACTORY.feilVedKallTilUngRegister(e).toException();
         }
@@ -43,9 +44,6 @@ public class UngdomsprogramRegisterKlient {
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("Ugyldig konfigurasjon for ungdomsprogram.register.url", e);
         }
-    }
-
-    public record DeltakerOpplysningDTO(String deltagerIdent) {
     }
 
     public record DeltakerOpplysningerDTO(List<DeltakerProgramOpplysningDTO> opplysninger) {
