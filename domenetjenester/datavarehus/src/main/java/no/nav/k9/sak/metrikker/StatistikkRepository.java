@@ -489,7 +489,7 @@ public class StatistikkRepository {
     Collection<SensuEvent> mottattDokumentMedKildesystemStatistikk() {
 
         String sql = """
-            select f.ytelse_type, m.type, m.kildesystem count(*)
+            select f.ytelse_type, m.type, m.kildesystem, count(*)
             from mottatt_dokument m
                 inner join fagsak f on f.id = m.fagsak_id
             group by 1, 2,3;
