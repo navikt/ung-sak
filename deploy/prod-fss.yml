@@ -218,9 +218,9 @@ spec:
     - name: K9FORDEL_SCOPE
       value: api://prod-fss.k9saksbehandling.k9-fordel/.default
     - name: UNGDOMSPROGRAMREGISTER_URL
-      value: api://prod-gcp.k9saksbehandling.ung-deltakelse-opplyser/.default
+      value: https://ung-deltakelse-opplyser.intern.nav.no
     - name: UNGDOMSPROGRAMREGISTER_SCOPE
-      value: http://ung-deltakelse-opplyser.k9saksbehandling
+      value: api://prod-gcp.k9saksbehandling.ung-deltakelse-opplyser/.default
 
     # Restservice OMS spesifikt
     - name: K9_OMS_AARSKVANTUM_URL
