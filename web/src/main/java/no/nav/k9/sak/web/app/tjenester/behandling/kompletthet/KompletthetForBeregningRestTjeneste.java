@@ -180,7 +180,7 @@ public class KompletthetForBeregningRestTjeneste {
             utledVurdering(it, perioderTilVurdering, erInfotrygdMigrering, innvilgetSøknadsfrist),
             kompletthetsvurdering.map(KompletthetPeriode::getBegrunnelse).orElse(null),
             kompletthetsvurdering.map(KompletthetPeriode::getVurdertAv).orElse(null),
-            kompletthetsvurdering.map(KompletthetPeriode::getVurdertTidspunkt).map(LocalDateTime::toString).orElse(null)
+            kompletthetsvurdering.map(KompletthetPeriode::getVurdertTidspunkt).orElse(null)
         );
     }
 

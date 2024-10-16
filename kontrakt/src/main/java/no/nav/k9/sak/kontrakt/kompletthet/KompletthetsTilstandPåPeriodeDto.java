@@ -1,5 +1,6 @@
 package no.nav.k9.sak.kontrakt.kompletthet;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import jakarta.validation.Valid;
@@ -48,10 +49,13 @@ public class KompletthetsTilstandPåPeriodeDto {
     private String begrunnelse;
 
     @JsonProperty("vurdertAv")
+    @Size(max = 20)
+    @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String vurdertAv;
 
     @JsonProperty("vurdertTidspunkt")
-    private String vurdertTidspunkt;
+    @Valid
+    private LocalDateTime vurdertTidspunkt;
 
     @JsonCreator
     public KompletthetsTilstandPåPeriodeDto(@JsonProperty("periode") Periode periode,
@@ -61,7 +65,7 @@ public class KompletthetsTilstandPåPeriodeDto {
                                             @JsonProperty("begrunnelse") @Size(max = 4000)
                                             @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String begrunnelse,
                                             @JsonProperty("vurdertAv") String vurdertAv,
-                                            @JsonProperty("vurdertTidspunkt") String vurdertTidspunkt) {
+                                            @JsonProperty("vurdertTidspunkt") LocalDateTime vurdertTidspunkt) {
         this.periode = periode;
         this.status = status;
         this.vurdering = vurdering;
