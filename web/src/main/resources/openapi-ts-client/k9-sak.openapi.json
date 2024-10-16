@@ -5732,6 +5732,18 @@
             "enum" : [ "UDEFINERT", "KAN_FORTSETTE", "MANGLENDE_GRUNNLAG", "UAVKLART" ],
             "nullable" : true,
             "type" : "string"
+          },
+          "vurdertAv" : {
+            "maxLength" : 20,
+            "minLength" : 0,
+            "nullable" : true,
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "type" : "string"
+          },
+          "vurdertTidspunkt" : {
+            "format" : "date-time",
+            "nullable" : true,
+            "type" : "string"
           }
         },
         "required" : [ "periode", "status", "tilVurdering" ],
