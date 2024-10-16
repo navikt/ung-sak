@@ -50,6 +50,9 @@ public class KompletthetsTilstandPåPeriodeDto {
     @JsonProperty("vurdertAv")
     private String vurdertAv;
 
+    @JsonProperty("vurdertTidspunkt")
+    private String vurdertTidspunkt;
+
     @JsonCreator
     public KompletthetsTilstandPåPeriodeDto(@JsonProperty("periode") Periode periode,
                                             @JsonProperty("status") List<ArbeidsgiverArbeidsforholdStatus> status,
@@ -57,13 +60,15 @@ public class KompletthetsTilstandPåPeriodeDto {
                                             @Valid @NotNull @JsonProperty("tilVurdering") Boolean tilVurdering,
                                             @JsonProperty("begrunnelse") @Size(max = 4000)
                                             @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String begrunnelse,
-                                            @JsonProperty("vurdertAv") String vurdertAv) {
+                                            @JsonProperty("vurdertAv") String vurdertAv,
+                                            @JsonProperty("vurdertTidspunkt") String vurdertTidspunkt) {
         this.periode = periode;
         this.status = status;
         this.vurdering = vurdering;
         this.tilVurdering = tilVurdering;
         this.begrunnelse = begrunnelse;
         this.vurdertAv = vurdertAv;
+        this.vurdertTidspunkt = vurdertTidspunkt;
     }
 
     public Boolean getTilVurdering() {

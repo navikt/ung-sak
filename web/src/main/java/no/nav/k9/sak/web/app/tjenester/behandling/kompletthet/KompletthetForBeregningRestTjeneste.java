@@ -179,8 +179,8 @@ public class KompletthetForBeregningRestTjeneste {
             kompletthetsvurdering.map(KompletthetPeriode::getVurdering).orElse(Vurdering.UDEFINERT),
             utledVurdering(it, perioderTilVurdering, erInfotrygdMigrering, innvilgetSøknadsfrist),
             kompletthetsvurdering.map(KompletthetPeriode::getBegrunnelse).orElse(null),
-            kompletthetsvurdering.map(KompletthetPeriode::getEndretAv)
-                .orElseGet(() -> kompletthetsvurdering.map(KompletthetPeriode::getOpprettetAv).orElse(null))
+            kompletthetsvurdering.map(KompletthetPeriode::getVurdertAv).orElse(null),
+            kompletthetsvurdering.map(KompletthetPeriode::getVurdertTidspunkt).map(LocalDateTime::toString).orElse(null)
         );
     }
 

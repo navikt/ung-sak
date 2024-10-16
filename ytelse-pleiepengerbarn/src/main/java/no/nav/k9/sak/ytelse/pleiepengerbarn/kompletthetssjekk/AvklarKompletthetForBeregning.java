@@ -1,11 +1,13 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,9 +103,9 @@ public class AvklarKompletthetForBeregning implements AksjonspunktOppdaterer<Avk
             .collect(Collectors.toList());
 
         lagHistorikkinnslag(param, perioder);
-
+        String brukerident = SubjectHandler.getSubjectHandler().getUid();
         var kompletthetVurderinger = perioder.stream()
-            .map(it -> new KompletthetPeriode(utledVurderingstype(it), it.getPeriode().getFom(), getBegrunnelse(dto, it)))
+            .map(it -> new KompletthetPeriode(utledVurderingstype(it), it.getPeriode().getFom(), getBegrunnelse(dto, it), brukerident, LocalDateTime.now()))
             .collect(Collectors.toList());
 
         log.info("Lagrer {} vurderinger.", kompletthetVurderinger.size());

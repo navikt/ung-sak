@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.beregning.grunnlag;
 
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 import jakarta.persistence.Column;
@@ -42,6 +43,12 @@ public class KompletthetPeriode extends BaseEntitet {
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
+    @Column(name = "vurdert_av", nullable = false)
+    private String vurdertAv;
+
+    @Column(name = "vurdert_tidspunkt", nullable = false)
+    private LocalDateTime vurdertTidspunkt;
+
     public KompletthetPeriode() {
     }
 
@@ -55,6 +62,14 @@ public class KompletthetPeriode extends BaseEntitet {
         this.skjæringstidspunkt = Objects.requireNonNull(skjæringstidspunkt);
         this.vurdering = Objects.requireNonNull(vurdering);
         this.begrunnelse = Objects.equals(Vurdering.UDEFINERT, vurdering) ? begrunnelse : Objects.requireNonNull(begrunnelse);
+    }
+
+    public KompletthetPeriode(Vurdering vurdering, LocalDate skjæringstidspunkt, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt) {
+        this.skjæringstidspunkt = Objects.requireNonNull(skjæringstidspunkt);
+        this.vurdering = Objects.requireNonNull(vurdering);
+        this.begrunnelse = Objects.equals(Vurdering.UDEFINERT, vurdering) ? begrunnelse : Objects.requireNonNull(begrunnelse);
+        this.vurdertAv = Objects.requireNonNull(vurdertAv);
+        this.vurdertTidspunkt = Objects.requireNonNull(vurdertTidspunkt);
     }
 
     public Long getId() {
@@ -72,6 +87,14 @@ public class KompletthetPeriode extends BaseEntitet {
 
     public String getBegrunnelse() {
         return begrunnelse;
+    }
+
+    public String getVurdertAv() {
+        return vurdertAv;
+    }
+
+    public LocalDateTime getVurdertTidspunkt() {
+        return vurdertTidspunkt;
     }
 
     @Override
