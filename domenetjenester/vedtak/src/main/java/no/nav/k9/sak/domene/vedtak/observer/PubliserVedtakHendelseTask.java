@@ -11,8 +11,6 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
-import no.nav.folketrygdloven.beregningsgrunnlag.JacksonJsonConfig;
-import no.nav.folketrygdloven.beregningsgrunnlag.JacksonJsonConfigKodeverdiSomString;
 import no.nav.k9.felles.integrasjon.kafka.GenerellKafkaProducer;
 import no.nav.k9.felles.integrasjon.kafka.KafkaPropertiesBuilder;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
@@ -27,6 +25,8 @@ import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.BehandlingProsessTask;
+import no.nav.k9.sak.domene.typer.tid.JsonObjectMapper;
+import no.nav.k9.sak.domene.typer.tid.JsonObjectMapperKodeverdiSomStringSerializer;
 import no.nav.k9.sak.kontrakt.vedtak.VedtakHendelse;
 
 @ApplicationScoped
@@ -134,9 +134,9 @@ public class PubliserVedtakHendelseTask extends BehandlingProsessTask {
         }
 
         if (kodeverkSomStringTopics) {
-            return JacksonJsonConfigKodeverdiSomString.toJson(vedtakHendelse, PubliserVedtakHendelseFeil.FEILFACTORY::kanIkkeSerialisere);
+            return JsonObjectMapperKodeverdiSomStringSerializer.toJson(vedtakHendelse, PubliserVedtakHendelseFeil.FEILFACTORY::kanIkkeSerialisere);
         } else {
-            return JacksonJsonConfig.toJson(vedtakHendelse, PubliserVedtakHendelseFeil.FEILFACTORY::kanIkkeSerialisere);
+            return JsonObjectMapper.toJson(vedtakHendelse, PubliserVedtakHendelseFeil.FEILFACTORY::kanIkkeSerialisere);
         }
     }
 

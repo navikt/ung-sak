@@ -307,6 +307,7 @@ spec:
     - name: UNGDOMSYTELSE_ENABLED
       value: "true"
 
+
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
       value: "false"
