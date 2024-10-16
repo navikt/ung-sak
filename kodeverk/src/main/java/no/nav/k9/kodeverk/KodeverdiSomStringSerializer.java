@@ -1,20 +1,19 @@
 package no.nav.k9.kodeverk;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-
 import no.nav.k9.kodeverk.api.Kodeverdi;
+
+import java.io.IOException;
 
 /**
  * For migrering til kodeverk på nytt format kan denne brukes for å override serialisering av Kodeverdi til object.
  * Denne vil da serialisere til String. Må legges på objectmapper der det er ønskelig
  */
-public class TempKodeverdiSerializer extends StdSerializer<Kodeverdi> {
+public class KodeverdiSomStringSerializer extends StdSerializer<Kodeverdi> {
 
-    public TempKodeverdiSerializer(){
+    public KodeverdiSomStringSerializer(){
         super(Kodeverdi.class);
     }
 

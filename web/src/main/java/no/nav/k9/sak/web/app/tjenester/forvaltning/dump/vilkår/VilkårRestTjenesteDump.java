@@ -7,7 +7,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.k9.sak.web.app.jackson.JacksonJsonConfig;
+import no.nav.k9.sak.web.app.jackson.ObjectMapperFactory;
 import no.nav.k9.sak.web.app.tjenester.behandling.vilkår.VilkårRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.ContainerContextRunner;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.DebugDumpBehandling;
@@ -19,7 +19,7 @@ public class VilkårRestTjenesteDump implements DebugDumpBehandling {
 
     private VilkårRestTjeneste restTjeneste;
 
-    private final ObjectWriter ow = new JacksonJsonConfig().getObjectMapper().writerWithDefaultPrettyPrinter();
+    private final ObjectWriter ow = ObjectMapperFactory.createBaseObjectMapper().writerWithDefaultPrettyPrinter();
     private final String relativePath = "rest/vilkår";
 
     VilkårRestTjenesteDump() {

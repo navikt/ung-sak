@@ -3,9 +3,11 @@ package no.nav.k9.sak.domene.typer.tid;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.function.Function;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,6 +52,14 @@ public class JsonObjectMapper {
         return jsonWriter.toString();
     }
 
+    public static String toJson(Object object, Function<JsonProcessingException, Feil> feilFactory) {
+        try {
+            return OM.writerWithDefaultPrettyPrinter().writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            throw feilFactory.apply(e).toException();
+        }
+    }
+
     public String readKey(String data, String... keys) throws IOException {
         JsonNode jsonNode = OM.readTree(data);
         for (String key : keys) {
@@ -73,5 +83,9 @@ public class JsonObjectMapper {
 
         @TekniskFeil(feilkode = "F-713321", feilmelding = "Fikk IO exception ved parsing av JSON", logLevel = LogLevel.WARN)
         Feil ioExceptionVedLesing(IOException cause);
+    }
+
+    public static ObjectMapper getMapper() {
+        return OM;
     }
 }
