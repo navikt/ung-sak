@@ -25,12 +25,10 @@ public class UngdomsprogramPeriodeRepository {
     }
 
     public void lagre(Long behandlingId, Collection<UngdomsprogramPeriode> ungdomsprogramPerioder) {
-        var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
-        var nyttGrunnlag = eksisterendeGrunnlag.map(it -> new UngdomsprogramPeriodeGrunnlag(behandlingId, it))
-            .orElse(new UngdomsprogramPeriodeGrunnlag(behandlingId));
+        var nyttGrunnlag = new UngdomsprogramPeriodeGrunnlag(behandlingId);
         nyttGrunnlag.leggTil(ungdomsprogramPerioder);
 
-        persister(eksisterendeGrunnlag, nyttGrunnlag);
+        persister(hentEksisterendeGrunnlag(behandlingId), nyttGrunnlag);
     }
 
     public void kopier(Long eksisterendeBehandlingId, Long nyBehandlingId) {
