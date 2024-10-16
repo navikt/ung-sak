@@ -21,8 +21,8 @@ public class FinnTidslinjeForOverlappendeSøskensaker {
     public static final AktørId ALLE_RELATERTE_PERSONER = null;
     public static final LocalDate ALLE_FAGSAK_FOM_DATOER = null;
     public static final LocalDate ALLE_FAGSAK_TOM_DATOER = null;
-    private FagsakRepository fagsakRepository;
-    private FinnAktuellTidslinjeForFagsak finnAktuellTidslinjeForFagsak;
+    private final FagsakRepository fagsakRepository;
+    private final FinnAktuellTidslinjeForFagsak finnAktuellTidslinjeForFagsak;
 
     @Inject
     public FinnTidslinjeForOverlappendeSøskensaker(FagsakRepository fagsakRepository,

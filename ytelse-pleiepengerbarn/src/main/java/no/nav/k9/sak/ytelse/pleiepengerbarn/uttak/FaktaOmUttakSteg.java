@@ -32,6 +32,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtab
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.unntaketablerttilsyn.UnntakEtablertTilsynGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.død.HåndterePleietrengendeDødsfallTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidBrukerBurdeSøktOmUtleder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.søsken.AksjonspunktutlederSøskensak;
 
 @ApplicationScoped
 @BehandlingStegRef(value = KONTROLLER_FAKTA_UTTAK)
@@ -48,6 +49,7 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
     private ArbeidBrukerBurdeSøktOmUtleder arbeidBrukerBurdeSøktOmUtleder;
     private HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste;
     private PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder;
+    private AksjonspunktutlederSøskensak aksjonspunktutlederSøskensak;
 
     protected FaktaOmUttakSteg() {
         // for proxy
@@ -62,7 +64,8 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
                             ArbeidBrukerBurdeSøktOmUtleder arbeidBrukerBurdeSøktOmUtleder,
                             @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) HåndterePleietrengendeDødsfallTjeneste håndterePleietrengendeDødsfallTjeneste,
                             PerioderMedSykdomInnvilgetUtleder perioderMedSykdomInnvilgetUtleder,
-                            ProsessTriggereRepository prosessTriggereRepository) {
+                            ProsessTriggereRepository prosessTriggereRepository,
+                            AksjonspunktutlederSøskensak aksjonspunktutlederSøskensak) {
         this.unntakEtablertTilsynGrunnlagRepository = unntakEtablertTilsynGrunnlagRepository;
         this.rettPleiepengerVedDødRepository = rettPleiepengerVedDødRepository;
         this.pleiebehovResultatRepository = pleiebehovResultatRepository;
@@ -72,6 +75,7 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
         this.håndterePleietrengendeDødsfallTjeneste = håndterePleietrengendeDødsfallTjeneste;
         this.perioderMedSykdomInnvilgetUtleder = perioderMedSykdomInnvilgetUtleder;
         this.prosessTriggereRepository = prosessTriggereRepository;
+        this.aksjonspunktutlederSøskensak = aksjonspunktutlederSøskensak;
     }
 
     @SuppressWarnings("unused")
@@ -98,6 +102,10 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
         var manglendeAktiviteter = arbeidBrukerBurdeSøktOmUtleder.utledMangler(referanse);
         if (manglendeAktiviteter.entrySet().stream().anyMatch(it -> !it.getValue().isEmpty()) && harNoenGodkjentPerioderMedSykdom(innvilgedePerioderTilVurdering)) {
             aksjonspunkter.add(AksjonspunktDefinisjon.MANGLER_AKTIVITETER);
+        }
+
+        if (aksjonspunktutlederSøskensak.skalHaAksjonspunktForSøskensak(referanse)) {
+            aksjonspunkter.add(AksjonspunktDefinisjon.VURDER_OVERLAPPENDE_SØSKENSAKER);
         }
 
         håndterePleietrengendeDødsfallTjeneste.utvidPerioderVedDødsfall(referanse);

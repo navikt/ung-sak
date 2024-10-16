@@ -7,6 +7,7 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
@@ -17,15 +18,21 @@ public class AksjonspunktutlederSøskensak {
 
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
     private FinnTidslinjeForOverlappendeSøskensaker finnTidslinjeForOverlappendeSøskensaker;
+    private boolean søskensakApEnabled;
 
     @Inject
     public AksjonspunktutlederSøskensak(@Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
-                                        FinnTidslinjeForOverlappendeSøskensaker finnTidslinjeForOverlappendeSøskensaker) {
+                                        FinnTidslinjeForOverlappendeSøskensaker finnTidslinjeForOverlappendeSøskensaker,
+                                        @KonfigVerdi(value = "SOSKENSAK_UTTAK_OVERSTYRING", defaultVerdi = "false") boolean søskensakApEnabled) {
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
         this.finnTidslinjeForOverlappendeSøskensaker = finnTidslinjeForOverlappendeSøskensaker;
+        this.søskensakApEnabled = søskensakApEnabled;
     }
 
     public boolean skalHaAksjonspunktForSøskensak(BehandlingReferanse behandlingReferanse) {
+        if (!søskensakApEnabled) {
+            return false;
+        }
         return !finnTidslinjeForOverlapp(behandlingReferanse).isEmpty();
     }
 

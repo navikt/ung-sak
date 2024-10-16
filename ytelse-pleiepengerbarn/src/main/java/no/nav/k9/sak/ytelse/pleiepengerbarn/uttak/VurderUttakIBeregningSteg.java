@@ -31,7 +31,6 @@ import no.nav.k9.sak.utsatt.UtsattPeriode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.etablerttilsyn.EtablertTilsynTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.SamtidigUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.søsken.AksjonspunktutlederSøskensak;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 
@@ -52,7 +51,6 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
     private SamtidigUttakTjeneste samtidigUttakTjeneste;
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
     private OverstyrUttakTjeneste overstyrUttakTjeneste;
-    private AksjonspunktutlederSøskensak aksjonspunktutlederSøskensak;
 
     VurderUttakIBeregningSteg() {
         // for proxy
@@ -65,8 +63,7 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
                                      EtablertTilsynTjeneste etablertTilsynTjeneste,
                                      SamtidigUttakTjeneste samtidigUttakTjeneste,
                                      UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
-                                     OverstyrUttakTjeneste overstyrUttakTjeneste,
-                                     AksjonspunktutlederSøskensak aksjonspunktutlederSøskensak) {
+                                     OverstyrUttakTjeneste overstyrUttakTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
         this.uttakTjeneste = uttakTjeneste;
@@ -74,7 +71,6 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
         this.samtidigUttakTjeneste = samtidigUttakTjeneste;
         this.utsattBehandlingAvPeriodeRepository = utsattBehandlingAvPeriodeRepository;
         this.overstyrUttakTjeneste = overstyrUttakTjeneste;
-        this.aksjonspunktutlederSøskensak = aksjonspunktutlederSøskensak;
     }
 
     @Override
@@ -115,11 +111,6 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
             if (overstyrUttakTjeneste.skalOverstyreUttak(ref)) {
                 return Optional.of(AksjonspunktDefinisjon.OVERSTYRING_AV_UTTAK);
             }
-
-            if (aksjonspunktutlederSøskensak.skalHaAksjonspunktForSøskensak(ref)) {
-                return Optional.of(AksjonspunktDefinisjon.VURDER_OVERLAPPENDE_SØSKENSAKER);
-            }
-
 
             return Optional.empty();
         } else {

@@ -1,0 +1,107 @@
+package no.nav.k9.sak.web.app.tjenester.behandling.uttak;
+
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+
+import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrUttakRepository;
+import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.k9.sak.kontrakt.uttak.søskensaker.EgneOverlappendeSakerDto;
+import no.nav.k9.sak.kontrakt.uttak.søskensaker.PeriodeMedOverlapp;
+import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.søsken.FinnTidslinjeForOverlappendeSøskensaker;
+
+@ApplicationScoped
+@Transactional
+@Path("")
+@Produces(MediaType.APPLICATION_JSON)
+public class EgneOverlappendeSakerRestTjeneste {
+
+    public static final String EGNE_OVERLAPPENDE_SAKER = "/behandling/pleiepenger/uttak/egne-overlappende-saker";
+
+    private BehandlingRepository behandlingRepository;
+    private OverstyrUttakRepository overstyrUttakRepository;
+    private FinnTidslinjeForOverlappendeSøskensaker finnTidslinjeForOverlappendeSøskensaker;
+
+    public EgneOverlappendeSakerRestTjeneste() {
+        // for proxying
+    }
+
+    @Inject
+    public EgneOverlappendeSakerRestTjeneste(BehandlingRepository behandlingRepository,
+                                             OverstyrUttakRepository overstyrUttakRepository,
+                                             FinnTidslinjeForOverlappendeSøskensaker finnTidslinjeForOverlappendeSøskensaker) {
+        this.behandlingRepository = behandlingRepository;
+        this.overstyrUttakRepository = overstyrUttakRepository;
+        this.finnTidslinjeForOverlappendeSøskensaker = finnTidslinjeForOverlappendeSøskensaker;
+    }
+
+
+    @POST
+    @Path(EGNE_OVERLAPPENDE_SAKER)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Hent egne overlappende saker for perioder til behandling", tags = "behandling - uttak", responses = {
+        @ApiResponse(responseCode = "200", description = "Returnerer egne overlappende saker", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = EgneOverlappendeSakerDto.class)))
+    })
+    @BeskyttetRessurs(action = READ, resource = FAGSAK)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public EgneOverlappendeSakerDto hentEgneOverlappendeSaker(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
+        UUID behandlingUuid = behandlingIdDto.getBehandlingUuid();
+        var behandling = behandlingRepository.hentBehandling(behandlingUuid);
+        var overlappendeSaker = finnTidslinjeForOverlappendeSøskensaker.finnTidslinje(behandling.getAktørId(), behandling.getFagsakYtelseType());
+        var saksnummer = behandling.getFagsak().getSaksnummer();
+        var overlapperMedDenneSaken = overlappendeSaker.filterValue(v -> v.contains(saksnummer))
+            .mapValue(v -> {
+                var ny = new HashSet<>(v);
+                ny.remove(saksnummer);
+                return ny;
+            });
+
+        var overstyrtUttak = overstyrUttakRepository.hentOverstyrtUttak(behandling.getId());
+
+        var kombinertMedFastsattUttaksgrad = overlapperMedDenneSaken.crossJoin(overstyrtUttak, (di, lhs, rhs) -> {
+            if (lhs != null && rhs != null) {
+                return new LocalDateSegment<>(di, new OverlappData(rhs.getValue().getSøkersUttaksgrad(), lhs.getValue()));
+            } else if (lhs != null) {
+                return new LocalDateSegment<>(di, new OverlappData(null, lhs.getValue()));
+            }
+            return new LocalDateSegment<>(di, new OverlappData(rhs.getValue().getSøkersUttaksgrad(), Set.of()));
+        });
+
+        var overlappendePerioder = kombinertMedFastsattUttaksgrad.toSegments().stream().map(s -> new PeriodeMedOverlapp(new Periode(s.getFom(), s.getTom()), s.getValue().fastsattUttaksgrad(), s.getValue().saksnummer())).toList();
+        return new EgneOverlappendeSakerDto(overlappendePerioder);
+    }
+
+
+    public record OverlappData(
+        BigDecimal fastsattUttaksgrad,
+        Set<Saksnummer> saksnummer
+    ) {
+    }
+
+
+}
