@@ -113,6 +113,7 @@ public class StatistikkRepository {
         metrikker.addAll(timeCall(this::behandlingResultatStatistikk, "behandlingResultatStatistikk"));
         metrikker.addAll(timeCall(this::prosessTaskStatistikk, "prosessTaskStatistikk"));
         metrikker.addAll(timeCall(this::mottattDokumentStatistikk, "mottattDokumentStatistikk"));
+        metrikker.addAll(timeCall(this::mottattDokumentMedKildesystemStatistikk, "mottattDokumentMedKildesystemStatistikk"));
         metrikker.addAll(timeCall(this::aksjonspunktStatistikk, "aksjonspunktStatistikk"));
         metrikker.addAll(timeCall(() -> aksjonspunktStatistikkDaglig(dag), "aksjonspunktStatistikkDaglig"));
         try {
@@ -482,6 +483,43 @@ public class StatistikkRepository {
 
         return values;
 
+    }
+
+    @SuppressWarnings("unchecked")
+    Collection<SensuEvent> mottattDokumentMedKildesystemStatistikk() {
+
+        String sql = """
+            select f.ytelse_type, m.type, m.kildesystem count(*)
+            from mottatt_dokument m
+                inner join fagsak f on f.id = m.fagsak_id
+            group by 1, 2,3;
+            """;
+        String metricName = "mottatt_dokument_med_kilde_v1";
+        String metricField = "totalt_antall";
+
+        NativeQuery<Tuple> query = (NativeQuery<Tuple>) entityManager.createNativeQuery(sql, Tuple.class);
+        Stream<Tuple> stream = query.getResultStream()
+            .filter(t -> !Objects.equals(FagsakYtelseType.OBSOLETE.getKode(), t.get(0, String.class)));
+        var values = stream.map(t -> SensuEvent.createSensuEvent(metricName,
+                toMap(
+                    "ytelse_type", t.get(0, String.class),
+                    "type", t.get(1, String.class),
+                    "kildesystem", t.get(2, String.class)),
+                Map.of(
+                    "totalt_antall", t.get(2, Long.class))))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        /* siden fagsak endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
+        var zeroValues = emptyEvents(metricName,
+            Map.of(
+                "ytelse_type", YTELSER,
+                "type", BREVKODER),
+            Map.of(
+                metricField, 0L));
+
+        values.addAll(zeroValues); // NB: utnytter at Set#addAll ikke legger til verdier som ikke finnes fra før
+
+        return values;
     }
 
     @SuppressWarnings("unchecked")
