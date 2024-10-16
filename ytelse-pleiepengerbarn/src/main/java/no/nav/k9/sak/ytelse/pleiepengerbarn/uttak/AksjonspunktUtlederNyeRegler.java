@@ -78,6 +78,7 @@ class AksjonspunktUtlederNyeRegler {
         }
 
         var periodeTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
+        // Vi sjekker Beregningsgrunnlagsvilkåret siden gradering mot ny inntekt kun endres/settes dersom vi vurderer beregning på nytt
         var perioderTilVurdering = periodeTjeneste.utled(behandling.getId(), VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
 
 
