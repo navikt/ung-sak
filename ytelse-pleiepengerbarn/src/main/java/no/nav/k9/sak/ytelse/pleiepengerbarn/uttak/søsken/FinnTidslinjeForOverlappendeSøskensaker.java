@@ -17,10 +17,10 @@ import no.nav.k9.sak.typer.Saksnummer;
 @Dependent
 public class FinnTidslinjeForOverlappendeSøskensaker {
 
-    public static final AktørId ALLE_PLEIETRENGENDE = null;
-    public static final AktørId ALLE_RELATERTE_PERSONER = null;
-    public static final LocalDate ALLE_FAGSAK_FOM_DATOER = null;
-    public static final LocalDate ALLE_FAGSAK_TOM_DATOER = null;
+    private static final AktørId ALLE_PLEIETRENGENDE = null;
+    private static final AktørId ALLE_RELATERTE_PERSONER = null;
+    private static final LocalDate ALLE_FAGSAK_FOM_DATOER = null;
+    private static final LocalDate ALLE_FAGSAK_TOM_DATOER = null;
     private final FagsakRepository fagsakRepository;
     private final FinnAktuellTidslinjeForFagsak finnAktuellTidslinjeForFagsak;
 
@@ -33,8 +33,8 @@ public class FinnTidslinjeForOverlappendeSøskensaker {
 
     public LocalDateTimeline<Set<Saksnummer>> finnTidslinje(AktørId aktørId, FagsakYtelseType fagsakYtelseType) {
         var aktuelleOverlappendeFagsaker = finnAktuelleFagsakerForBruker(aktørId, fagsakYtelseType);
-        var tidslinjeAndreFagsaker = finnTidslinjeForFagsaker(aktuelleOverlappendeFagsaker);
-        return tidslinjeAndreFagsaker.filterValue(v -> v.size() > 1);
+        var tidslinjeForFagsaker = finnTidslinjeForFagsaker(aktuelleOverlappendeFagsaker);
+        return tidslinjeForFagsaker.filterValue(v -> v.size() > 1);
     }
 
     private List<Fagsak> finnAktuelleFagsakerForBruker(AktørId aktørId, FagsakYtelseType fagsakYtelseType) {
@@ -42,12 +42,12 @@ public class FinnTidslinjeForOverlappendeSøskensaker {
     }
 
     private LocalDateTimeline<Set<Saksnummer>> finnTidslinjeForFagsaker(List<Fagsak> aktuelleOverlappendeFagsaker) {
-        LocalDateTimeline<Set<Saksnummer>> tidslinjeAndreFagsaker = LocalDateTimeline.empty();
+        LocalDateTimeline<Set<Saksnummer>> tidslinjeForFagsaker = LocalDateTimeline.empty();
         for (var fagsak : aktuelleOverlappendeFagsaker) {
             var tidslinjeForFagsak = finnAktuellTidslinjeForFagsak.finnTidslinje(fagsak);
-            tidslinjeAndreFagsaker = tidslinjeAndreFagsaker.crossJoin(tidslinjeForFagsak.mapValue(v -> Set.of(fagsak.getSaksnummer())), StandardCombinators::union);
+            tidslinjeForFagsaker = tidslinjeForFagsaker.crossJoin(tidslinjeForFagsak.mapValue(v -> Set.of(fagsak.getSaksnummer())), StandardCombinators::union);
         }
-        return tidslinjeAndreFagsaker;
+        return tidslinjeForFagsaker;
     }
 
 

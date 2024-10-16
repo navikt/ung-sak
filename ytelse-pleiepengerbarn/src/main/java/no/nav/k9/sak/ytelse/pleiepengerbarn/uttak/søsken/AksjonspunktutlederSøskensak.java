@@ -16,9 +16,9 @@ import no.nav.k9.sak.typer.Saksnummer;
 @Dependent
 public class AksjonspunktutlederSøskensak {
 
-    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
-    private FinnTidslinjeForOverlappendeSøskensaker finnTidslinjeForOverlappendeSøskensaker;
-    private boolean søskensakApEnabled;
+    private final Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
+    private final FinnTidslinjeForOverlappendeSøskensaker finnTidslinjeForOverlappendeSøskensaker;
+    private final boolean søskensakApEnabled;
 
     @Inject
     public AksjonspunktutlederSøskensak(@Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
