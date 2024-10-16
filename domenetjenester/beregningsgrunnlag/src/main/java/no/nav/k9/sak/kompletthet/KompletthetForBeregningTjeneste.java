@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.BiFunction;
@@ -113,7 +114,7 @@ public class KompletthetForBeregningTjeneste {
             List<LocalDate> stp = vilkårsPerioder.stream().map(DatoIntervallEntitet::getFomDato).toList();
             Set<JournalpostId> ignorerteInntektsmeldinger = inntektsmeldinger.stream()
                 .filter(im -> im.getStartDatoPermisjon().isPresent() && !stp.contains(im.getStartDatoPermisjon().get()))
-                .filter(im -> im.getKildesystem() != null && im.getKildesystem().equals("NAV_NO"))
+                .filter(im -> Objects.equals(im.getKildesystem(), "NAV_NO"))
                 .map(Inntektsmelding::getJournalpostId).collect(Collectors.toSet());
 
             inntektsmeldinger = inntektsmeldinger.stream().filter(im -> !ignorerteInntektsmeldinger.contains(im.getJournalpostId())).collect(Collectors.toSet());
