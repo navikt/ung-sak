@@ -24,7 +24,7 @@ public class UngdomsprogramRegisterKlient {
         OidcRestClient restClient,
         @KonfigVerdi(value = "ungdomsprogramregister.url", defaultVerdi = "http://ung-deltakelse-opplyser.k9saksbehandling") String url) {
         this.restClient = restClient;
-        hentUri = tilUri(url, "/register/hent/alle");
+        hentUri = tilUri(url, "register/hent/alle");
 
     }
 
