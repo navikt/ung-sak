@@ -159,11 +159,11 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
             var avslagFom = søknadsperiode == null ? minFom : søknadsperiode.getFomDato();
             var avslagTom = søknadsperiode == null ? maksTom : søknadsperiode.getTomDato();
             oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, avslagFom, avslagTom, dto.getAvslagsårsak());
-        } else if (minMaxPerioder.erÅpenPeriode(periode)) {
-            oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, minFom, maksTom, null /* avslagsårsak kan bare være null her */);
         } else {
-            boolean harSattSluttdato = periode.getTom() != null && !periode.getTom().equals(LocalDateInterval.TIDENES_ENDE);
-            LocalDate tom = harSattSluttdato ? periode.getTom() : fagsak.getPeriode().getTomDato(); //midlertidig workaround inntil ny løsning lanseres, eller frontend støtter begge løsninger
+            boolean harStartdato = periode != null && periode.getFom() != null && !periode.getFom().equals(LocalDateInterval.TIDENES_BEGYNNELSE);
+            LocalDate fom = harStartdato ? periode.getFom() : minFom;
+            boolean harSattSluttdato = periode != null && periode.getTom() != null && !periode.getTom().equals(LocalDateInterval.TIDENES_ENDE);
+            LocalDate tom = harSattSluttdato ? periode.getTom() : maksTom; //midlertidig workaround inntil ny løsning lanseres, eller frontend støtter begge løsninger
 
             var brukerbasis = personinfoAdapter.hentBrukerBasisForAktør(fagsak.getPleietrengendeAktørId());
             var årBarnFyller18 = brukerbasis.get().getFødselsdato().plusYears(18).withMonth(12).withDayOfMonth(31);
@@ -173,7 +173,7 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
                 årBarnFyller18
             ).min(Comparator.naturalOrder()).get();
 
-            var angittPeriode = validerAngittPeriode(fagsak, new LocalDateInterval(periode.getFom(), maksInnvilgetDato));
+            var angittPeriode = validerAngittPeriode(fagsak, new LocalDateInterval(fom, maksInnvilgetDato));
             oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, angittPeriode.getFomDato(), angittPeriode.getTomDato(), null /* avslagsårsak kan bare være null her */);
         }
 
