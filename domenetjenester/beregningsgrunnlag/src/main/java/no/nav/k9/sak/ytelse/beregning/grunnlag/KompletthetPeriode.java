@@ -43,10 +43,10 @@ public class KompletthetPeriode extends BaseEntitet {
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    @Column(name = "vurdert_av", nullable = false)
+    @Column(name = "vurdert_av")
     private String vurdertAv;
 
-    @Column(name = "vurdert_tidspunkt", nullable = false)
+    @Column(name = "vurdert_tidspunkt")
     private LocalDateTime vurdertTidspunkt;
 
     public KompletthetPeriode() {
@@ -56,12 +56,8 @@ public class KompletthetPeriode extends BaseEntitet {
         this.skjæringstidspunkt = grunnlagPeriode.skjæringstidspunkt;
         this.vurdering = grunnlagPeriode.vurdering;
         this.begrunnelse = grunnlagPeriode.begrunnelse;
-    }
-
-    public KompletthetPeriode(Vurdering vurdering, LocalDate skjæringstidspunkt, String begrunnelse) {
-        this.skjæringstidspunkt = Objects.requireNonNull(skjæringstidspunkt);
-        this.vurdering = Objects.requireNonNull(vurdering);
-        this.begrunnelse = Objects.equals(Vurdering.UDEFINERT, vurdering) ? begrunnelse : Objects.requireNonNull(begrunnelse);
+        this.vurdertAv = grunnlagPeriode.getVurdertAv();
+        this.vurdertTidspunkt = grunnlagPeriode.getVurdertTidspunkt();
     }
 
     public KompletthetPeriode(Vurdering vurdering, LocalDate skjæringstidspunkt, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt) {
