@@ -516,7 +516,7 @@ public class StatistikkRepository {
                     "type", t.get(1, String.class),
                     "kildesystem", t.get(2, String.class)),
                 Map.of(
-                    "totalt_antall", t.get(2, Long.class))))
+                    "totalt_antall", t.get(3, Long.class))))
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
         /* siden fagsak endrer status må vi ta hensyn til at noen verdier vil gå til 0, ellers vises siste verdi i stedet. */
