@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.kompletthetssjekk;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -26,6 +27,7 @@ import no.nav.k9.sak.kontrakt.kompletthet.aksjonspunkt.KompletthetsPeriode;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningsgrunnlagPerioderGrunnlag;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.KompletthetPeriode;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = EndeligAvklaringKompletthetForBeregningDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -71,8 +73,9 @@ public class EndeligAvklaringKompletthetForBeregning implements AksjonspunktOppd
 
         lagHistorikkinnslag(param, perioder);
 
+        String brukerident = SubjectHandler.getSubjectHandler().getUid();
         var kompletthetVurderinger = perioder.stream()
-            .map(it -> new KompletthetPeriode(utledVurderingstype(it), it.getPeriode().getFom(), it.getBegrunnelse()))
+            .map(it -> new KompletthetPeriode(utledVurderingstype(it), it.getPeriode().getFom(), it.getBegrunnelse(), brukerident, LocalDateTime.now()))
             .collect(Collectors.toList());
 
         grunnlagRepository.lagre(param.getBehandlingId(), kompletthetVurderinger);
