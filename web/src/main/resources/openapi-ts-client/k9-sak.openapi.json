@@ -6797,6 +6797,32 @@
         },
         "type" : "object"
       },
+      "NyAktivitetPrVilkårperiodeDto" : {
+        "properties" : {
+          "aktiviteter" : {
+            "items" : {
+              "$ref" : "#/components/schemas/UtledetTilkommetAktivitet"
+            },
+            "maxItems" : 100,
+            "minItems" : 0,
+            "nullable" : true,
+            "type" : "array"
+          },
+          "kalkulatorInput" : {
+            "items" : {
+              "$ref" : "#/components/schemas/UtledetTilkommetAktivitet"
+            },
+            "nullable" : true,
+            "type" : "array",
+            "writeOnly" : true
+          },
+          "vilkårPeriode" : {
+            "$ref" : "#/components/schemas/DatoIntervallEntitet"
+          }
+        },
+        "required" : [ "aktiviteter", "vilkårPeriode" ],
+        "type" : "object"
+      },
       "NyBehandlingDto" : {
         "properties" : {
           "behandlingArsakType" : {
@@ -12067,6 +12093,26 @@
         "required" : [ "fom", "landNavn", "tom" ],
         "type" : "object"
       },
+      "UtledetTilkommetAktivitet" : {
+        "properties" : {
+          "aktivitetStatus" : {
+            "enum" : [ "MIDL_INAKTIV", "AAP", "AT", "DP", "SP_AV_DP", "PSB_AV_DP", "FL", "MS", "SN", "AT_FL", "AT_SN", "FL_SN", "AT_FL_SN", "BA", "KUN_YTELSE", "TY", "VENTELØNN_VARTPENGER", "-" ],
+            "nullable" : true,
+            "type" : "string"
+          },
+          "arbeidsgiver" : {
+            "$ref" : "#/components/schemas/Arbeidsgiver"
+          },
+          "perioder" : {
+            "items" : {
+              "$ref" : "#/components/schemas/Periode"
+            },
+            "nullable" : true,
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
       "UtsettelsePeriode" : {
         "properties" : {
           "indexKey" : {
@@ -17256,6 +17302,50 @@
           }
         },
         "summary" : "Oppretter manuell revurdering grunnet nye opplysninger om opptjening.",
+        "tags" : [ "beregning" ]
+      }
+    },
+    "/beregning/ny-aktivitet-diagnostikk" : {
+      "post" : {
+        "description" : "Finner utledet ny aktivitet pr vilkårsperiode",
+        "operationId" : "finnTilkommetAktivitet",
+        "requestBody" : {
+          "content" : {
+            "application/x-www-form-urlencoded" : {
+              "schema" : {
+                "properties" : {
+                  "begrunnelse" : {
+                    "description" : "begrunnelse",
+                    "maximum" : 2000,
+                    "type" : "string"
+                  },
+                  "behandlingId" : {
+                    "description" : "behandlingId",
+                    "type" : "string"
+                  }
+                },
+                "required" : [ "begrunnelse", "behandlingId" ],
+                "type" : "object"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/NyAktivitetPrVilkårperiodeDto"
+                  },
+                  "type" : "array",
+                  "uniqueItems" : true
+                }
+              }
+            },
+            "description" : "Returnerer nye aktiviter pr periode på JSON format"
+          }
+        },
         "tags" : [ "beregning" ]
       }
     },
