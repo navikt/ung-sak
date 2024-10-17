@@ -52,7 +52,6 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
     private UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository;
     private OverstyrUttakTjeneste overstyrUttakTjeneste;
 
-
     VurderUttakIBeregningSteg() {
         // for proxy
     }
@@ -63,7 +62,8 @@ public class VurderUttakIBeregningSteg implements BehandlingSteg {
                                      UttakTjeneste uttakTjeneste,
                                      EtablertTilsynTjeneste etablertTilsynTjeneste,
                                      SamtidigUttakTjeneste samtidigUttakTjeneste,
-                                     UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository, OverstyrUttakTjeneste overstyrUttakTjeneste) {
+                                     UtsattBehandlingAvPeriodeRepository utsattBehandlingAvPeriodeRepository,
+                                     OverstyrUttakTjeneste overstyrUttakTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
         this.uttakTjeneste = uttakTjeneste;
