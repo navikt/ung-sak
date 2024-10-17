@@ -59,7 +59,7 @@ class HarEndretKompletthetVurdererTest {
     @Test
     void skal_gi_ingen_endring_ved_kun_initiell_versjon() {
         var STP = LocalDate.now();
-        List<KompletthetPeriode> kompletthetPerioder = List.of(new KompletthetPeriode(Vurdering.KAN_FORTSETTE, STP, "begrunnelse"));
+        List<KompletthetPeriode> kompletthetPerioder = List.of(new KompletthetPeriode(Vurdering.KAN_FORTSETTE, STP, "begrunnelse", null, null));
         beregningPerioderGrunnlagRepository.lagre(behandling.getId(), kompletthetPerioder);
 
         var input = new PSBEndringPåForlengelseInput(BehandlingReferanse.fra(behandling));
@@ -73,11 +73,11 @@ class HarEndretKompletthetVurdererTest {
     @Test
     void skal_gi_ingen_endring_ved_initiell_versjon_lik_aktivt() {
         var STP = LocalDate.now();
-        List<KompletthetPeriode> kompletthetPerioder = List.of(new KompletthetPeriode(Vurdering.KAN_FORTSETTE, STP, "begrunnelse"));
+        List<KompletthetPeriode> kompletthetPerioder = List.of(new KompletthetPeriode(Vurdering.KAN_FORTSETTE, STP, "begrunnelse", null, null));
         beregningPerioderGrunnlagRepository.lagre(behandling.getId(), kompletthetPerioder);
 
 
-        List<KompletthetPeriode> kompletthetPerioder2 = List.of(new KompletthetPeriode(Vurdering.KAN_FORTSETTE, STP, "begrunnelse2"));
+        List<KompletthetPeriode> kompletthetPerioder2 = List.of(new KompletthetPeriode(Vurdering.KAN_FORTSETTE, STP, "begrunnelse2", null, null));
         beregningPerioderGrunnlagRepository.lagre(behandling.getId(), kompletthetPerioder2);
 
 
@@ -92,11 +92,11 @@ class HarEndretKompletthetVurdererTest {
     @Test
     void skal_gi_endring_ved_initiell_versjon_ulik_aktivt() {
         var STP = LocalDate.now();
-        List<KompletthetPeriode> kompletthetPerioder = List.of(new KompletthetPeriode(Vurdering.KAN_FORTSETTE, STP, "begrunnelse"));
+        List<KompletthetPeriode> kompletthetPerioder = List.of(new KompletthetPeriode(Vurdering.KAN_FORTSETTE, STP, "begrunnelse", null, null));
         beregningPerioderGrunnlagRepository.lagre(behandling.getId(), kompletthetPerioder);
 
 
-        List<KompletthetPeriode> kompletthetPerioder2 = List.of(new KompletthetPeriode(Vurdering.MANGLENDE_GRUNNLAG, STP, "begrunnelse2"));
+        List<KompletthetPeriode> kompletthetPerioder2 = List.of(new KompletthetPeriode(Vurdering.MANGLENDE_GRUNNLAG, STP, "begrunnelse2", null, null));
         beregningPerioderGrunnlagRepository.lagre(behandling.getId(), kompletthetPerioder2);
 
 
@@ -111,13 +111,13 @@ class HarEndretKompletthetVurdererTest {
     @Test
     void skal_gi_ingen_endring_ved_initiell_versjon_lik_aktivt_endret_fram_og_tilbake() {
         var STP = LocalDate.now();
-        List<KompletthetPeriode> kompletthetPerioder = List.of(new KompletthetPeriode(Vurdering.KAN_FORTSETTE, STP, "begrunnelse"));
+        List<KompletthetPeriode> kompletthetPerioder = List.of(new KompletthetPeriode(Vurdering.KAN_FORTSETTE, STP, "begrunnelse", null, null));
         beregningPerioderGrunnlagRepository.lagre(behandling.getId(), kompletthetPerioder);
-        
-        List<KompletthetPeriode> kompletthetPerioder2 = List.of(new KompletthetPeriode(Vurdering.MANGLENDE_GRUNNLAG, STP, "begrunnelse2"));
+
+        List<KompletthetPeriode> kompletthetPerioder2 = List.of(new KompletthetPeriode(Vurdering.MANGLENDE_GRUNNLAG, STP, "begrunnelse2", null, null));
         beregningPerioderGrunnlagRepository.lagre(behandling.getId(), kompletthetPerioder2);
 
-        List<KompletthetPeriode> kompletthetPerioder3 = List.of(new KompletthetPeriode(Vurdering.KAN_FORTSETTE, STP, "begrunnelse3"));
+        List<KompletthetPeriode> kompletthetPerioder3 = List.of(new KompletthetPeriode(Vurdering.KAN_FORTSETTE, STP, "begrunnelse3", null, null));
         beregningPerioderGrunnlagRepository.lagre(behandling.getId(), kompletthetPerioder3);
 
 

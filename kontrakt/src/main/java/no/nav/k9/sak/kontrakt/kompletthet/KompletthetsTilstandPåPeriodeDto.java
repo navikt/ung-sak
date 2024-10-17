@@ -1,5 +1,6 @@
 package no.nav.k9.sak.kontrakt.kompletthet;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import jakarta.validation.Valid;
@@ -47,18 +48,31 @@ public class KompletthetsTilstandPåPeriodeDto {
     @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String begrunnelse;
 
+    @JsonProperty("vurdertAv")
+    @Size(max = 20)
+    @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    private String vurdertAv;
+
+    @JsonProperty("vurdertTidspunkt")
+    @Valid
+    private LocalDateTime vurdertTidspunkt;
+
     @JsonCreator
     public KompletthetsTilstandPåPeriodeDto(@JsonProperty("periode") Periode periode,
                                             @JsonProperty("status") List<ArbeidsgiverArbeidsforholdStatus> status,
                                             @Valid @JsonProperty("vurdering") Vurdering vurdering,
                                             @Valid @NotNull @JsonProperty("tilVurdering") Boolean tilVurdering,
                                             @JsonProperty("begrunnelse") @Size(max = 4000)
-                                            @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String begrunnelse) {
+                                            @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String begrunnelse,
+                                            @JsonProperty("vurdertAv") String vurdertAv,
+                                            @JsonProperty("vurdertTidspunkt") LocalDateTime vurdertTidspunkt) {
         this.periode = periode;
         this.status = status;
         this.vurdering = vurdering;
         this.tilVurdering = tilVurdering;
         this.begrunnelse = begrunnelse;
+        this.vurdertAv = vurdertAv;
+        this.vurdertTidspunkt = vurdertTidspunkt;
     }
 
     public Boolean getTilVurdering() {
