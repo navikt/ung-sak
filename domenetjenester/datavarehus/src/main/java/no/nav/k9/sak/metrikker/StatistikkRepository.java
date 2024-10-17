@@ -449,6 +449,16 @@ public class StatistikkRepository {
 
     }
 
+    /**
+     * Denne har ikke info om kildesystem. Bruk {@link #mottattDokumentMedKildesystemStatistikk()} i stedet.
+     * Siden metrikkene går ett år tilbake i tid, venter vi med å fjerne den til mottattDokumentMedKildesystemStatistikk
+     * har mer data.
+     *
+     * Kan fjernes etter 17-10-2025.
+     *
+     * @deprecated bruk {@link #mottattDokumentMedKildesystemStatistikk()} i stedet.
+     */
+    @Deprecated
     @SuppressWarnings("unchecked")
     Collection<SensuEvent> mottattDokumentStatistikk() {
 
