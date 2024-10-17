@@ -79,6 +79,7 @@ import no.nav.k9.sak.web.app.tjenester.behandling.søknad.SøknadRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.søknadsfrist.SøknadsfristRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.tilbakekreving.TilbakekrevingRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.tilsyn.VurderTilsynRestTjeneste;
+import no.nav.k9.sak.web.app.tjenester.behandling.uttak.EgneOverlappendeSakerRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.uttak.PleiepengerUttakRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.uttak.UtenlandsoppholdRestTjeneste;
 import no.nav.k9.sak.web.app.tjenester.behandling.uttak.UttakRestTjeneste;
@@ -401,6 +402,7 @@ public class BehandlingDtoTjeneste {
                 dto.leggTil(getFraMap(PleiepengerUttakRestTjeneste.GET_SKULLE_SØKT_OM_PATH, "psb-manglende-arbeidstid", uuidQueryParams));
                 dto.leggTil(getFraMap(PleiepengerUttakRestTjeneste.UTTAK_OVERSTYRT, "pleiepenger-overstyrt-uttak", uuidQueryParams));
                 dto.leggTil(post(PleiepengerUttakRestTjeneste.UTTAK_OVERSTYRBARE_AKTIVITETER, "pleiepenger-overstyrtbare-aktiviteter", new OverstyrbareAktiviteterForUttakRequest(new BehandlingUuidDto(behandling.getUuid()), behandling.getFagsak().getPeriode().getFomDato(), behandling.getFagsak().getPeriode().getTomDato())));
+                dto.leggTil(post(EgneOverlappendeSakerRestTjeneste.EGNE_OVERLAPPENDE_SAKER, "egne-overlappende-saker", uuidQueryParams));
                 dto.leggTil(getFraMap(UtenlandsoppholdRestTjeneste.UTTAK_UTENLANDSOPPHOLD, "utenlandsopphold", uuidQueryParams));
                 dto.leggTil(getFraMap(OmsorgenForRestTjeneste.OMSORGEN_FOR_OPPLYSNINGER_PATH, "omsorgen-for", uuidQueryParams));
                 dto.leggTil(getFraMap(BeregningsgrunnlagRestTjeneste.PATH_KOBLINGER, "beregning-koblinger", uuidQueryParams));
