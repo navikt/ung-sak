@@ -69,9 +69,10 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
     @Override
     public OppdateringResultat oppdater(AvklarUtvidetRettDto dto, AksjonspunktOppdaterParameter param) {
         Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
-        boolean brukerPeriodisering = behandling.getFagsakYtelseType() == FagsakYtelseType.OMSORGSPENGER_AO;
-        if (brukerPeriodisering) {
-            return oppdaterPeriodisert(dto, param);
+        if (behandling.getFagsakYtelseType() == FagsakYtelseType.OMSORGSPENGER_AO) {
+            return oppdaterAleneomsorg(dto, param);
+        } else if(behandling.getFagsakYtelseType() == FagsakYtelseType.OMSORGSPENGER_KS) {
+            return oppdaterKroniskSyk(dto, param);
         } else {
             return oppdaterUperiodisert(dto, param);
         }
@@ -115,6 +116,7 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
         } else {
             boolean harSattSluttdato = periode.getTom() != null && !periode.getTom().equals(LocalDateInterval.TIDENES_ENDE);
             LocalDate tom = harSattSluttdato ? periode.getTom() : fagsak.getPeriode().getTomDato(); //midlertidig workaround inntil ny løsning lanseres, eller frontend støtter begge løsninger
+
             var angittPeriode = validerAngittPeriode(fagsak, new LocalDateInterval(periode.getFom(), tom));
             oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, angittPeriode.getFomDato(), angittPeriode.getTomDato(), null /* avslagsårsak kan bare være null her */);
         }
@@ -124,7 +126,61 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
         return OppdateringResultat.nyttResultat();
     }
 
-    public OppdateringResultat oppdaterPeriodisert(AvklarUtvidetRettDto dto, AksjonspunktOppdaterParameter param) {
+    public OppdateringResultat oppdaterKroniskSyk(AvklarUtvidetRettDto dto, AksjonspunktOppdaterParameter param) {
+        var behandlingId = param.getBehandlingId();
+        var behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
+        var fagsak = behandling.getFagsak();
+        var ytelseType = fagsak.getYtelseType();
+
+        Utfall nyttUtfall = dto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
+        var vilkårResultatBuilder = param.getVilkårResultatBuilder();
+        var periode = dto.getPeriode();
+
+        lagHistorikkInnslag(param, ytelseType, nyttUtfall, dto.getBegrunnelse());
+
+        var vilkårene = vilkårResultatRepository.hent(behandlingId);
+        var originalVilkårTidslinje = vilkårene.getVilkårTimeline(vilkårType);
+
+        // TODO (Revurdering): håndter delvis avslag fra en angitt dato ( eks. dersom tidligere innvilget, så innvilges på ny fra en nyere dato)?
+
+        boolean erAvslag = dto.getAvslagsårsak() != null;
+
+        var minMaxPerioder = new MinMaxPerioder(null, periode, originalVilkårTidslinje);
+
+        vilkårResultatBuilder.slettVilkårPerioder(vilkårType, minMaxPerioder.tilDatoIntervall());
+        var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(vilkårType);
+
+        LocalDate minFom = minMaxPerioder.minFom();
+        LocalDate maksTom = minMaxPerioder.maxTom(); // siste dato vi trenger å overskrive til
+
+        if (erAvslag) {
+            // overskriver per nå hele søknadsperioden
+            oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, minFom, maksTom, dto.getAvslagsårsak());
+        } else {
+            boolean harStartdato = periode != null && periode.getFom() != null && !periode.getFom().equals(LocalDateInterval.TIDENES_BEGYNNELSE);
+            LocalDate fom = harStartdato ? periode.getFom() : minFom;
+            boolean harSattSluttdato = periode != null && periode.getTom() != null && !periode.getTom().equals(LocalDateInterval.TIDENES_ENDE);
+            LocalDate tom = harSattSluttdato ? periode.getTom() : maksTom; //midlertidig workaround inntil ny løsning lanseres, eller frontend støtter begge løsninger
+
+            var brukerbasis = personinfoAdapter.hentBrukerBasisForAktør(fagsak.getPleietrengendeAktørId());
+            var årBarnFyller18 = brukerbasis.get().getFødselsdato().plusYears(18).withMonth(12).withDayOfMonth(31);
+
+            var maksInnvilgetDato = Stream.of(
+                tom,
+                årBarnFyller18
+            ).min(Comparator.naturalOrder()).get();
+
+            var angittPeriode = validerAngittPeriode(fagsak, new LocalDateInterval(fom, maksInnvilgetDato));
+            oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, angittPeriode.getFomDato(), angittPeriode.getTomDato(), null /* avslagsårsak kan bare være null her */);
+        }
+
+        vilkårResultatBuilder.leggTil(vilkårBuilder); // lagres utenfor
+
+        return OppdateringResultat.nyttResultat();
+    }
+
+
+    public OppdateringResultat oppdaterAleneomsorg(AvklarUtvidetRettDto dto, AksjonspunktOppdaterParameter param) {
         var behandlingId = param.getBehandlingId();
         var behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
         var fagsak = behandling.getFagsak();
