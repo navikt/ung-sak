@@ -144,9 +144,8 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
         // TODO (Revurdering): håndter delvis avslag fra en angitt dato ( eks. dersom tidligere innvilget, så innvilges på ny fra en nyere dato)?
 
         boolean erAvslag = dto.getAvslagsårsak() != null;
-        var søknadsperiode = søknadRepository.hentSøknad(behandlingId).getSøknadsperiode();
 
-        var minMaxPerioder = new MinMaxPerioder(søknadsperiode, periode, originalVilkårTidslinje);
+        var minMaxPerioder = new MinMaxPerioder(null, periode, originalVilkårTidslinje);
 
         vilkårResultatBuilder.slettVilkårPerioder(vilkårType, minMaxPerioder.tilDatoIntervall());
         var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(vilkårType);
@@ -156,9 +155,7 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
 
         if (erAvslag) {
             // overskriver per nå hele søknadsperioden
-            var avslagFom = søknadsperiode == null ? minFom : søknadsperiode.getFomDato();
-            var avslagTom = søknadsperiode == null ? maksTom : søknadsperiode.getTomDato();
-            oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, avslagFom, avslagTom, dto.getAvslagsårsak());
+            oppdaterUtfallOgLagre(vilkårBuilder, nyttUtfall, minFom, maksTom, dto.getAvslagsårsak());
         } else {
             boolean harStartdato = periode != null && periode.getFom() != null && !periode.getFom().equals(LocalDateInterval.TIDENES_BEGYNNELSE);
             LocalDate fom = harStartdato ? periode.getFom() : minFom;
