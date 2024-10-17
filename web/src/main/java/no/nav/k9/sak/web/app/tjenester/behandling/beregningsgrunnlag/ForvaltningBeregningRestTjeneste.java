@@ -1,5 +1,31 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag;
 
+import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -13,7 +39,14 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedMap;
@@ -21,9 +54,15 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.MessageBodyReader;
 import jakarta.ws.rs.ext.Provider;
 import no.nav.folketrygdloven.beregningsgrunnlag.BeregningsgrunnlagVilkårTjeneste;
-import no.nav.k9.felles.sikkerhet.abac.*;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
+import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
+import no.nav.k9.felles.sikkerhet.abac.AbacDto;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.felles.util.InputValideringRegex;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.prosesstask.rest.AbacEmptySupplier;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -32,6 +71,7 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingskontroll.VilkårTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.FinnPerioderMedStartIKontrollerFakta;
@@ -50,25 +90,8 @@ import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.ContainerContextRunner;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 @ApplicationScoped
 @Transactional
@@ -89,6 +112,9 @@ public class ForvaltningBeregningRestTjeneste {
     private PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering pleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering;
     private FinnPerioderMedStartIKontrollerFakta finnPerioderMedStartIKontrollerFakta;
     private ForvaltningOverstyrInputBeregning forvaltningOverstyrInputBeregning;
+    private KalkulusTjeneste kalkulusTjeneste;
+    private VilkårResultatRepository vilkårResultatRepository;
+    private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
 
 
     public ForvaltningBeregningRestTjeneste() {
@@ -103,7 +129,8 @@ public class ForvaltningBeregningRestTjeneste {
                                             HentKalkulatorInputDump hentKalkulatorInputDump,
                                             @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) @VilkårTypeRef(VilkårType.BEREGNINGSGRUNNLAGVILKÅR) PleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering pleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering,
                                             FinnPerioderMedStartIKontrollerFakta finnPerioderMedStartIKontrollerFakta,
-                                            ForvaltningOverstyrInputBeregning forvaltningOverstyrInputBeregning) {
+                                            ForvaltningOverstyrInputBeregning forvaltningOverstyrInputBeregning,
+                                            KalkulusTjeneste kalkulusTjeneste, VilkårResultatRepository vilkårResultatRepository, BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository) {
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
         this.beregningsgrunnlagVilkårTjeneste = beregningsgrunnlagVilkårTjeneste;
@@ -115,6 +142,9 @@ public class ForvaltningBeregningRestTjeneste {
         this.pleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering = pleiepengerInntektsmeldingRelevantForBeregningVilkårsrevurdering;
         this.finnPerioderMedStartIKontrollerFakta = finnPerioderMedStartIKontrollerFakta;
         this.forvaltningOverstyrInputBeregning = forvaltningOverstyrInputBeregning;
+        this.kalkulusTjeneste = kalkulusTjeneste;
+        this.vilkårResultatRepository = vilkårResultatRepository;
+        this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
     }
 
     @GET
@@ -138,6 +168,54 @@ public class ForvaltningBeregningRestTjeneste {
         cc.setPrivate(true);
 
         return Response.ok(inputListe, JSON).cacheControl(cc).build();
+    }
+
+
+    @POST
+    @Path("ny-aktivitet-diagnostikk")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Operation(description = "Finner utledet ny aktivitet pr vilkårsperiode", tags = "beregning",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Returnerer nye aktiviter pr periode på JSON format", content = @Content(array = @ArraySchema(uniqueItems = true, arraySchema = @Schema(implementation = List.class), schema = @Schema(implementation = NyAktivitetPrVilkårperiodeDto.class)), mediaType = MediaType.APPLICATION_JSON)),
+        })
+    @BeskyttetRessurs(action = READ, resource = DRIFT)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Response finnTilkommetAktivitet(@NotNull @FormParam(BehandlingIdDto.NAME) @Parameter(description = BehandlingIdDto.NAME) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto,
+                                           @NotNull @FormParam("begrunnelse") @Parameter(description = "begrunnelse", allowEmptyValue = false, required = true, schema = @Schema(type = "string", maximum = "2000")) @Valid @TilpassetAbacAttributt(supplierClass = AbacEmptySupplier.class) KortTekst begrunnelse) { // NOSONAR
+        var behandlingId = behandlingIdDto.getBehandlingId();
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        loggForvaltningTjeneste(behandling.getFagsak(), "ny-aktivitet-diagnostikk", begrunnelse.getTekst());
+        var ref = BehandlingReferanse.fra(behandling);
+        var koblingerÅSpørreMot = finnEksternReferanserMedOppfyltVilkår(behandlingId, behandling);
+        var eksternReferanserMedNyeAktiviteter = kalkulusTjeneste.utledTilkommetAktivitet(koblingerÅSpørreMot, ref);
+        var resultat = eksternReferanserMedNyeAktiviteter.entrySet()
+            .stream().map(e -> new NyAktivitetPrVilkårperiodeDto(koblingerÅSpørreMot.get(e.getKey()), e.getValue()))
+            .toList();
+        CacheControl cc = new CacheControl();
+        cc.setNoCache(true);
+        cc.setNoStore(true);
+        cc.setMaxAge(0);
+        cc.setPrivate(true);
+        return Response.ok(resultat, JSON).cacheControl(cc).build();
+    }
+
+    private Map<UUID, DatoIntervallEntitet> finnEksternReferanserMedOppfyltVilkår(Long behandlingId, Behandling behandling) {
+        var vilkår = vilkårResultatRepository.hent(behandlingId)
+            .getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR);
+        var overlappendeGrunnlag = vilkår
+            .orElseThrow(() -> new IllegalStateException("Fagsaken(id=" + behandling.getFagsakId() + ") har ikke beregningsvilkåret knyttet til siste behandling"))
+            .getPerioder()
+            .stream()
+            .filter(it -> Utfall.OPPFYLT.equals(it.getGjeldendeUtfall()))
+            .toList();
+        var bg = beregningPerioderGrunnlagRepository.hentGrunnlag(behandling.getId()).orElseThrow();
+        Map<UUID, DatoIntervallEntitet> koblingerÅSpørreMot = new HashMap<>();
+        overlappendeGrunnlag.forEach(og ->
+            bg.finnGrunnlagFor(og.getSkjæringstidspunkt()).ifPresent(bgp -> {
+                koblingerÅSpørreMot.put(bgp.getEksternReferanse(), og.getPeriode());
+            }));
+        return koblingerÅSpørreMot;
     }
 
 
