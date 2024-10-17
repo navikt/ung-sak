@@ -8576,9 +8576,12 @@
             "minItems" : 1,
             "type" : "array",
             "uniqueItems" : true
+          },
+          "skalVurderes" : {
+            "type" : "boolean"
           }
         },
-        "required" : [ "fastsattUttaksgrad", "periode", "saksnummer" ],
+        "required" : [ "fastsattUttaksgrad", "periode", "saksnummer", "skalVurderes" ],
         "type" : "object"
       },
       "PeriodeMedRegisterendring" : {
