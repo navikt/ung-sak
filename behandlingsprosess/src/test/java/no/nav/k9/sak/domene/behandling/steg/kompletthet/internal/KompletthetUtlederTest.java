@@ -59,7 +59,7 @@ class KompletthetUtlederTest {
         Map<DatoIntervallEntitet, List<ManglendeVedlegg>> manglendeVedleggPerPeriode = Map.of(periode, List.of(new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, Arbeidsgiver.virksomhet("000000000"))));
         var vurderingDetSkalTasHensynTil = Set.of(Vurdering.KAN_FORTSETTE);
 
-        var input = new VurdererInput(perioderTilVurdering, perioderTilVurdering, manglendeVedleggPerPeriode, List.of(new KompletthetPeriode(Vurdering.KAN_FORTSETTE, periode.getFomDato(), "asdf")), vurderingDetSkalTasHensynTil);
+        var input = new VurdererInput(perioderTilVurdering, perioderTilVurdering, manglendeVedleggPerPeriode, List.of(new KompletthetPeriode(Vurdering.KAN_FORTSETTE, periode.getFomDato(), "asdf", null, null)), vurderingDetSkalTasHensynTil);
 
         var aksjon = utleder.utled(input);
 
@@ -75,7 +75,7 @@ class KompletthetUtlederTest {
         Map<DatoIntervallEntitet, List<ManglendeVedlegg>> manglendeVedleggPerPeriode = Map.of(periode, List.of(new ManglendeVedlegg(DokumentTypeId.INNTEKTSMELDING, Arbeidsgiver.virksomhet("000000000"))));
         var vurderingDetSkalTasHensynTil = Set.of(Vurdering.KAN_FORTSETTE);
 
-        var input = new VurdererInput(true, true,perioderTilVurdering, perioderTilVurdering, manglendeVedleggPerPeriode, List.of(new KompletthetPeriode(Vurdering.KAN_FORTSETTE, periode.getFomDato(), "asdf")), vurderingDetSkalTasHensynTil);
+        var input = new VurdererInput(true, true, perioderTilVurdering, perioderTilVurdering, manglendeVedleggPerPeriode, List.of(new KompletthetPeriode(Vurdering.KAN_FORTSETTE, periode.getFomDato(), "asdf", null, null)), vurderingDetSkalTasHensynTil);
 
         var aksjon = utleder.utled(input);
 
