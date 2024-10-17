@@ -5,6 +5,7 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 
 import java.math.BigDecimal;
 import java.util.HashSet;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -13,6 +14,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -23,13 +26,20 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrUttakRepository;
+import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrtUttakPeriode;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.uttak.søskensaker.EgneOverlappendeSakerDto;
 import no.nav.k9.sak.kontrakt.uttak.søskensaker.PeriodeMedOverlapp;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
 import no.nav.k9.sak.web.server.abac.AbacAttributtSupplier;
@@ -46,6 +56,7 @@ public class EgneOverlappendeSakerRestTjeneste {
     private BehandlingRepository behandlingRepository;
     private OverstyrUttakRepository overstyrUttakRepository;
     private FinnTidslinjeForOverlappendeSøskensaker finnTidslinjeForOverlappendeSøskensaker;
+    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
 
     public EgneOverlappendeSakerRestTjeneste() {
         // for proxying
@@ -54,10 +65,12 @@ public class EgneOverlappendeSakerRestTjeneste {
     @Inject
     public EgneOverlappendeSakerRestTjeneste(BehandlingRepository behandlingRepository,
                                              OverstyrUttakRepository overstyrUttakRepository,
-                                             FinnTidslinjeForOverlappendeSøskensaker finnTidslinjeForOverlappendeSøskensaker) {
+                                             FinnTidslinjeForOverlappendeSøskensaker finnTidslinjeForOverlappendeSøskensaker,
+                                             @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester) {
         this.behandlingRepository = behandlingRepository;
         this.overstyrUttakRepository = overstyrUttakRepository;
         this.finnTidslinjeForOverlappendeSøskensaker = finnTidslinjeForOverlappendeSøskensaker;
+        this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
     }
 
 
@@ -82,22 +95,37 @@ public class EgneOverlappendeSakerRestTjeneste {
             });
 
         var overstyrtUttak = overstyrUttakRepository.hentOverstyrtUttak(behandling.getId());
-
-        var kombinertMedFastsattUttaksgrad = overlapperMedDenneSaken.crossJoin(overstyrtUttak, (di, lhs, rhs) -> {
-            if (lhs != null && rhs != null) {
-                return new LocalDateSegment<>(di, new OverlappData(rhs.getValue().getSøkersUttaksgrad(), lhs.getValue()));
-            } else if (lhs != null) {
-                return new LocalDateSegment<>(di, new OverlappData(null, lhs.getValue()));
-            }
-            return new LocalDateSegment<>(di, new OverlappData(rhs.getValue().getSøkersUttaksgrad(), Set.of()));
-        });
-
-        var overlappendePerioder = kombinertMedFastsattUttaksgrad.toSegments().stream().map(s -> new PeriodeMedOverlapp(new Periode(s.getFom(), s.getTom()), s.getValue().fastsattUttaksgrad(), s.getValue().saksnummer())).toList();
+        var tidslinjeTilVurdering = finnTidslinjeTilVurdering(behandling);
+        var kombinertMedFastsattUttaksgrad = finnKombinertTidslinje(overlapperMedDenneSaken, overstyrtUttak, tidslinjeTilVurdering);
+        var overlappendePerioder = kombinertMedFastsattUttaksgrad.toSegments().stream().map(s -> new PeriodeMedOverlapp(new Periode(s.getFom(), s.getTom()),
+            s.getValue().tilVurdering(),
+            s.getValue().fastsattUttaksgrad(),
+            s.getValue().saksnummer())).toList();
         return new EgneOverlappendeSakerDto(overlappendePerioder);
+    }
+
+    private static LocalDateTimeline<OverlappData> finnKombinertTidslinje(LocalDateTimeline<HashSet<Saksnummer>> overlapperMedDenneSaken, LocalDateTimeline<OverstyrtUttakPeriode> overstyrtUttak, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
+        return overlapperMedDenneSaken.crossJoin(overstyrtUttak, (di, lhs, rhs) -> {
+            var erTilVurdering = !tidslinjeTilVurdering.intersection(di).isEmpty();
+            if (lhs != null && rhs != null) {
+                return new LocalDateSegment<>(di, new OverlappData(erTilVurdering, rhs.getValue().getSøkersUttaksgrad(), lhs.getValue()));
+            } else if (lhs != null) {
+                return new LocalDateSegment<>(di, new OverlappData(erTilVurdering, null, lhs.getValue()));
+            }
+            return new LocalDateSegment<>(di, new OverlappData(erTilVurdering, rhs.getValue().getSøkersUttaksgrad(), Set.of()));
+        });
+    }
+
+    private LocalDateTimeline<Boolean> finnTidslinjeTilVurdering(Behandling behandling) {
+        var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
+        // Henter alle perioder til vurdering
+        var perioderTilVurdering = perioderTilVurderingTjeneste.utledFraDefinerendeVilkår(behandling.getId());
+        return TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering);
     }
 
 
     public record OverlappData(
+        Boolean tilVurdering,
         BigDecimal fastsattUttaksgrad,
         Set<Saksnummer> saksnummer
     ) {

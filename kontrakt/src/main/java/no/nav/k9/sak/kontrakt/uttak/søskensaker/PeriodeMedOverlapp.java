@@ -26,6 +26,10 @@ public record PeriodeMedOverlapp(
         @NotNull
         Periode periode,
         @Valid
+        @JsonProperty(value = "skalVurderes")
+        @NotNull
+        boolean skalVurderes,
+        @Valid
         @JsonProperty(value = "fastsattUttaksgrad")
         @NotNull @DecimalMin("0")
         @DecimalMax("100")
