@@ -56,16 +56,16 @@ public class KompletthetPeriode extends BaseEntitet {
         this.skjæringstidspunkt = grunnlagPeriode.skjæringstidspunkt;
         this.vurdering = grunnlagPeriode.vurdering;
         this.begrunnelse = grunnlagPeriode.begrunnelse;
-        this.vurdertAv = grunnlagPeriode.getVurdertAv();
-        this.vurdertTidspunkt = grunnlagPeriode.getVurdertTidspunkt();
+        this.vurdertAv = grunnlagPeriode.vurdertAv;
+        this.vurdertTidspunkt = grunnlagPeriode.vurdertTidspunkt;
     }
 
     public KompletthetPeriode(Vurdering vurdering, LocalDate skjæringstidspunkt, String begrunnelse, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         this.skjæringstidspunkt = Objects.requireNonNull(skjæringstidspunkt);
         this.vurdering = Objects.requireNonNull(vurdering);
         this.begrunnelse = Objects.equals(Vurdering.UDEFINERT, vurdering) ? begrunnelse : Objects.requireNonNull(begrunnelse);
-        this.vurdertAv = Objects.requireNonNull(vurdertAv);
-        this.vurdertTidspunkt = Objects.requireNonNull(vurdertTidspunkt);
+        this.vurdertAv = vurdertAv;
+        this.vurdertTidspunkt = vurdertTidspunkt;
     }
 
     public Long getId() {
