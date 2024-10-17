@@ -64,6 +64,7 @@ import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrUttakPeriodeDto;
 import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrUttakUtbetalingsgradDto;
 import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrbareUttakAktiviterDto;
 import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrtUttakDto;
+import no.nav.k9.sak.kontrakt.uttak.søskensaker.EgneOverlappendeSakerDto;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
@@ -80,6 +81,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.kjøreplan.KjøreplanUtle
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.MapInputTilUttakTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.AktivitetIdentifikator;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidBrukerBurdeSøktOmUtleder;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.søsken.FinnTidslinjeForOverlappendeSøskensaker;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeidsforhold;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
@@ -104,6 +106,7 @@ public class PleiepengerUttakRestTjeneste {
 
     public static final String UTTAK_OVERSTYRT = "/behandling/pleiepenger/uttak/overstyrt";
     public static final String UTTAK_OVERSTYRBARE_AKTIVITETER = "/behandling/pleiepenger/uttak/overstyrbare-aktiviteter";
+
     public static final Set<UttakArbeidType> STATUSER_LÅST_FOR_OVERSTYRING = Set.of(UttakArbeidType.ARBEIDSTAKER, UttakArbeidType.FRILANSER, UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE);
 
     private UttakTjeneste uttakTjeneste;
@@ -118,6 +121,7 @@ public class PleiepengerUttakRestTjeneste {
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
     private EntityManager entityManager;
     private ArbeidsgiverOversiktTjeneste arbeidsgiverOversiktTjeneste;
+    private FinnTidslinjeForOverlappendeSøskensaker finnTidslinjeForOverlappendeSøskensaker;
 
     public PleiepengerUttakRestTjeneste() {
         // for proxying
@@ -134,7 +138,7 @@ public class PleiepengerUttakRestTjeneste {
                                         OverstyrUttakRepository overstyrUttakRepository,
                                         BehandlingModellRepository behandlingModellRepository, @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
                                         EntityManager entityManager,
-                                        ArbeidsgiverOversiktTjeneste arbeidsgiverOversiktTjeneste) {
+                                        ArbeidsgiverOversiktTjeneste arbeidsgiverOversiktTjeneste, FinnTidslinjeForOverlappendeSøskensaker finnTidslinjeForOverlappendeSøskensaker) {
         this.uttakTjeneste = uttakTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.manglendeArbeidstidUtleder = manglendeArbeidstidUtleder;
@@ -147,6 +151,7 @@ public class PleiepengerUttakRestTjeneste {
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
         this.entityManager = entityManager;
         this.arbeidsgiverOversiktTjeneste = arbeidsgiverOversiktTjeneste;
+        this.finnTidslinjeForOverlappendeSøskensaker = finnTidslinjeForOverlappendeSøskensaker;
     }
 
     @GET

@@ -11,6 +11,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.ytelse.ung.registerdata.UngdomsprogramTjeneste;
 
 @ApplicationScoped
 @BehandlingStegRef(value = INIT_PERIODER)
@@ -18,12 +19,20 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 @FagsakYtelseTypeRef(UNGDOMSYTELSE)
 public class InitierPerioderSteg implements BehandlingSteg {
 
+    private UngdomsprogramTjeneste ungdomsprogramTjeneste;
+
     @Inject
+    public InitierPerioderSteg(UngdomsprogramTjeneste ungdomsprogramTjeneste) {
+        this.ungdomsprogramTjeneste = ungdomsprogramTjeneste;
+    }
+
     public InitierPerioderSteg() {
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
+        ungdomsprogramTjeneste.innhentOpplysninger(kontekst);
+
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 

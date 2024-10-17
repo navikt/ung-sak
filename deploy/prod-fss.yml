@@ -217,6 +217,10 @@ spec:
       value: http://k9-fordel.k9saksbehandling/k9/fordel/api
     - name: K9FORDEL_SCOPE
       value: api://prod-fss.k9saksbehandling.k9-fordel/.default
+    - name: UNGDOMSPROGRAMREGISTER_URL
+      value: https://ung-deltakelse-opplyser.intern.nav.no
+    - name: UNGDOMSPROGRAMREGISTER_SCOPE
+      value: api://prod-gcp.k9saksbehandling.ung-deltakelse-opplyser/.default
 
     # Restservice OMS spesifikt
     - name: K9_OMS_AARSKVANTUM_URL
@@ -284,6 +288,8 @@ spec:
     - name: ALDERSVILKAR_I_KRONISK_SYK
       value: "true"
     - name: UNGDOMSYTELSE_ENABLED
+      value: "false"
+    - name: SOSKENSAK_UTTAK_OVERSTYRING
       value: "false"
 
     # Konfigurasjoner

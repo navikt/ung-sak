@@ -2,10 +2,10 @@ package no.nav.k9.sak.ytelse.ung.periode;
 
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
+import java.time.Period;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -16,10 +16,9 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadEntitet;
-import no.nav.k9.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.DefaultKantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
+import no.nav.k9.sak.domene.typer.tid.AbstractLocalDateInterval;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.inngangsvilkår.UtledeteVilkår;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
@@ -32,6 +31,7 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
 
     private InngangsvilkårUtleder inngangsvilkårUtleder;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
+    private final Period MAKS_TOM = Period.parse("P1Y");
 
     UngdomsytelseVilkårsperioderTilVurderingTjeneste() {
         // CDI
@@ -77,8 +77,24 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
 
     private TreeSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
         var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId);
-        return ungdomsprogramPeriodeGrunnlag.stream().flatMap(gr -> gr.getUngdomsprogramPerioder().getPerioder().stream())
-            .map(UngdomsprogramPeriode::getPeriode)
+        TreeSet<DatoIntervallEntitet> periode = ungdomsprogramPeriodeGrunnlag.stream()
+            .flatMap(gr -> gr.getUngdomsprogramPerioder().getPerioder().stream())
+            .map(this::bestemPeriode)
             .collect(Collectors.toCollection(TreeSet::new));
+
+
+        return periode;
+    }
+
+    private DatoIntervallEntitet bestemPeriode(UngdomsprogramPeriode it) {
+        DatoIntervallEntitet periode = it.getPeriode();
+        // TOM dato fra register kan være null som mapper til tidenes ende. Men vi lar likevel vilkåret ha en enkel
+        // maksgrense foreløpig
+        if (periode.getTomDato().equals(AbstractLocalDateInterval.TIDENES_ENDE)) {
+            return DatoIntervallEntitet.fraOgMedTilOgMed(
+                periode.getFomDato(), periode.getFomDato().plus(MAKS_TOM));
+        }
+
+        return periode;
     }
 }

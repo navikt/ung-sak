@@ -42,7 +42,7 @@ public class UngdomsprogramPeriode extends BaseEntitet {
     }
 
     public UngdomsprogramPeriode(LocalDate fom, LocalDate tom) {
-        this(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
+        this(DatoIntervallEntitet.fra(fom, tom));
     }
 
     public UngdomsprogramPeriode(UngdomsprogramPeriode it) {
