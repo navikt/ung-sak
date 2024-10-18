@@ -12,7 +12,6 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
-import no.nav.k9.kodeverk.dokument.DokumentStatus;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -25,8 +24,6 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
-import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
-import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.AvklartSøknadsfristRepository;
 import no.nav.k9.sak.behandlingslager.behandling.søknadsfrist.AvklartSøknadsfristResultat;
@@ -47,7 +44,6 @@ public class VurderSøknadsfristSteg implements BehandlingSteg {
     private Instance<SøknadsfristTjeneste> vurderSøknadsfristTjenester;
     private VilkårResultatRepository vilkårResultatRepository;
     private AvklartSøknadsfristRepository avklartSøknadsfristRepository;
-    private MottatteDokumentRepository mottatteDokumentRepository;
 
     VurderSøknadsfristSteg() {
         // CDI
@@ -58,14 +54,12 @@ public class VurderSøknadsfristSteg implements BehandlingSteg {
                                   VilkårResultatRepository vilkårResultatRepository,
                                   AksjonspunktKontrollRepository kontrollRepository,
                                   @Any Instance<SøknadsfristTjeneste> vurderSøknadsfristTjenester,
-                                  AvklartSøknadsfristRepository avklartSøknadsfristRepository,
-                                  MottatteDokumentRepository mottatteDokumentRepository) {
+                                  AvklartSøknadsfristRepository avklartSøknadsfristRepository) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.kontrollRepository = kontrollRepository;
         this.vurderSøknadsfristTjenester = vurderSøknadsfristTjenester;
         this.avklartSøknadsfristRepository = avklartSøknadsfristRepository;
-        this.mottatteDokumentRepository = mottatteDokumentRepository;
     }
 
     @Override
@@ -81,12 +75,6 @@ public class VurderSøknadsfristSteg implements BehandlingSteg {
 
         // Henter søkte perioder
         var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkårene.orElse(null));
-
-        var mottatteDokumenterTilBehandling = hentMottatteDokumenterTilBehandling(behandling);
-        if (!mottatteDokumenterTilBehandling.isEmpty()) {
-            throw new IllegalStateException("Kan ikke vurdere søknadsfrist når det er mottatte dokumenter som ikke har blitt behandlet ferdig. Gjelder journalposter: " + mottatteDokumenterTilBehandling.stream().map(MottattDokument::getJournalpostId).toList());
-        }
-
         var resultatBuilder = tjeneste.vurderSøknadsfrist(referanse, vilkårResultatBuilder);
 
         Vilkårene oppdatertVilkår = resultatBuilder.build();
@@ -127,9 +115,5 @@ public class VurderSøknadsfristSteg implements BehandlingSteg {
     private SøknadsfristTjeneste hentVurderingsTjeneste(Behandling behandling) {
         return FagsakYtelseTypeRef.Lookup.find(SøknadsfristTjeneste.class, vurderSøknadsfristTjenester, behandling.getFagsakYtelseType())
             .orElseThrow(() -> new UnsupportedOperationException("VurderSøknadsfristTjeneste ikke implementert for ytelse [" + behandling.getFagsakYtelseType() + "], behandlingtype [" + behandling.getType() + "]"));
-    }
-
-    private List<MottattDokument> hentMottatteDokumenterTilBehandling(Behandling behandling) {
-        return mottatteDokumentRepository.hentMottatteDokumentMedFagsakId(behandling.getFagsakId(), DokumentStatus.BEHANDLER, DokumentStatus.MOTTATT);
     }
 }
