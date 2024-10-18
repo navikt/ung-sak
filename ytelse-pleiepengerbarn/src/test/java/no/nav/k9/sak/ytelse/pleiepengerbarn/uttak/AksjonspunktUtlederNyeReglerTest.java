@@ -33,6 +33,7 @@ import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
@@ -119,7 +120,7 @@ public class AksjonspunktUtlederNyeReglerTest {
     }
 
     @Test
-    public void skal_få_ikke_få_aksjonspunkt_for_førstegangsbehandling_med_dato_satt_og_med_eksisterende_aksjonspunkt() {
+    public void skal_få_aksjonspunkt_for_førstegangsbehandling_med_dato_satt_og_med_eksisterende_aksjonspunkt() {
         LocalDate dag1 = LocalDate.now();
         LocalDate dag2 = dag1.plusDays(1);
         DatoIntervallEntitet søknadsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(dag1, dag2);
@@ -127,16 +128,17 @@ public class AksjonspunktUtlederNyeReglerTest {
         when(tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(anyLong(), any())).thenReturn(Map.of(new AktivitetstatusOgArbeidsgiver(UttakArbeidType.FRILANSER, null), LocalDateTimeline.empty()));
         when(mapInputTilUttakTjeneste.hentUtOgMapRequestUtenInntektsgradering(BehandlingReferanse.fra(førstegangsbehandling))).thenReturn(lagUttaksgrunnlag());
         when(uttakNyeReglerRepository.finnDatoForNyeRegler(any())).thenReturn(Optional.of(LocalDate.now()));
-        aksjonspunktKontrollRepository.leggTilAksjonspunkt(førstegangsbehandling, AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK);
-
+        var aksjonspunkt = aksjonspunktKontrollRepository.leggTilAksjonspunkt(førstegangsbehandling, AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK);
+        aksjonspunktKontrollRepository.setTilAvbrutt(aksjonspunkt);
 
         var aksjonspunktDefinisjon = utleder.utledAksjonspunktDatoForNyeRegler(førstegangsbehandling);
 
-        assertThat(aksjonspunktDefinisjon).isEmpty();
+        assertThat(aksjonspunktDefinisjon).isPresent();
+        assertThat(aksjonspunktDefinisjon.get()).isEqualTo(AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK);
     }
 
     @Test
-    void skal_få_ikke_få_aksjonspunkt_for_revurderig_med_dato_satt_og_med_eksisterende_aksjonspunkt() {
+    void skal_få_aksjonspunkt_for_revurderig_med_dato_satt_og_med_eksisterende_aksjonspunkt() {
         LocalDate dag1 = LocalDate.now();
         LocalDate dag2 = dag1.plusDays(1);
         DatoIntervallEntitet søknadsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(dag1, dag2);

@@ -18,6 +18,7 @@ import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.k9.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
@@ -73,8 +74,13 @@ class AksjonspunktUtlederNyeRegler {
             return Optional.empty();
         }
 
-        if (datoHarBlittSatt && eksisterendeAksjonspunkt.isPresent()) {
-            // Her har vi aksjonspunkt og dato, ønsker å gi saksbehandler mulighet til å endre dersom premisset for aksjonspuntet har endret seg
+        if (datoHarBlittSatt && harUtførtAksjonspunkt(eksisterendeAksjonspunkt)) {
+            // Her har vi utført aksjonspunkt og dato, ingenting trengs å endres
+            return Optional.empty();
+        }
+
+        if (datoHarBlittSatt && harAvbruttAksjonspunkt(eksisterendeAksjonspunkt)) {
+            // Her har vi avbrutt aksjonspunkt og dato, ønsker å gi saksbehandler mulighet til å endre dersom premisset for aksjonspuntet har endret seg
             return Optional.of(AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK);
         }
 
@@ -88,6 +94,14 @@ class AksjonspunktUtlederNyeRegler {
         return skalHaAksjonspunkt
             ? Optional.of(AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK)
             : Optional.empty();
+    }
+
+    private static boolean harAvbruttAksjonspunkt(Optional<Aksjonspunkt> eksisterendeAksjonspunkt) {
+        return eksisterendeAksjonspunkt.isPresent() && eksisterendeAksjonspunkt.get().erAvbrutt();
+    }
+
+    private static boolean harUtførtAksjonspunkt(Optional<Aksjonspunkt> eksisterendeAksjonspunkt) {
+        return eksisterendeAksjonspunkt.isPresent() && eksisterendeAksjonspunkt.get().erUtført();
     }
 
     private void kopierVurderingFraOriginalBehandling(Behandling behandling) {
