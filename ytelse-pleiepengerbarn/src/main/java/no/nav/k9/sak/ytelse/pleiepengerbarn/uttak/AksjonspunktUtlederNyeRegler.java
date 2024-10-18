@@ -74,8 +74,8 @@ class AksjonspunktUtlederNyeRegler {
         }
 
         if (datoHarBlittSatt && eksisterendeAksjonspunkt.isPresent()) {
-            // Her har vi aksjonspunkt og dato, trenger ikkje å endre noko
-            return Optional.empty();
+            // Her har vi aksjonspunkt og dato, ønsker å gi saksbehandler mulighet til å endre dersom premisset for aksjonspuntet har endret seg
+            return Optional.of(AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK);
         }
 
         var periodeTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
