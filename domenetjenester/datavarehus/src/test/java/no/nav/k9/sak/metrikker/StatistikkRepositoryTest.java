@@ -45,6 +45,7 @@ class StatistikkRepositoryTest {
 
         assertThat(statistikkRepository.hentHyppigRapporterte()).isNotEmpty()
             .anyMatch(v -> v.toString().contains("mottatt_dokument_v1"))
+            .anyMatch(v -> v.toString().contains("mottatt_dokument_med_kilde_v1"))
             .anyMatch(v -> v.toString().contains("behandling_resultat_v1"))
             .anyMatch(v -> v.toString().contains("behandling_status_v2"))
             .anyMatch(v -> v.toString().contains("fagsak_status_v2"))
