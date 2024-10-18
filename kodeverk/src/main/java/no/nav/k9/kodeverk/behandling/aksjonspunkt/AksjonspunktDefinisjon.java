@@ -356,7 +356,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         UTEN_SKJERMLENKE, ENTRINN, TILBAKE, UTEN_FRIST, AVVENTER_SAKSBEHANDLER),
     VURDER_DATO_NY_REGEL_UTTAK(AksjonspunktKodeDefinisjon.VURDER_DATO_NY_REGEL_UTTAK, AksjonspunktType.MANUELL,
         "Vurder hvilken dato ny regel for utbetalingsgrad i uttak skal gjelde fra.", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_STARTDATO_UTTAKSREGLER, VurderingspunktType.UT, UTEN_VILKÅR,
-        SkjermlenkeType.UTTAK, ENTRINN, TILBAKE, SKAL_IKKE_AVBRYTES, AVVENTER_SAKSBEHANDLER),
+        SkjermlenkeType.UTTAK, ENTRINN, TILBAKE, AVBRYTES, AVVENTER_SAKSBEHANDLER),
     VURDER_OVERLAPPENDE_SØSKENSAKER(AksjonspunktKodeDefinisjon.VURDER_OVERLAPPENDE_SØSKENSAK_KODE, AksjonspunktType.MANUELL,
         "Vurder overlappende søskensaker.", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_UTTAK_V2, VurderingspunktType.UT, UTEN_VILKÅR,
         SkjermlenkeType.UTTAK, TOTRINN, AVVENTER_SAKSBEHANDLER),
