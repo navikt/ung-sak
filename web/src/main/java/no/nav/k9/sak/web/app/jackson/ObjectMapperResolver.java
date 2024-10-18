@@ -27,20 +27,16 @@ public class ObjectMapperResolver implements ContextResolver<ObjectMapper> {
     /**
      * Oppretter ulike varianter av ObjectMapper. Klient kan deretter velge hvilken som skal brukast ved å sette header i request.
      */
-    public ObjectMapperResolver(final boolean featureFlagKodeverkAktiverKalkulusString) {
+    public ObjectMapperResolver() {
         this.baseObjektMapper = ObjectMapperFactory.createBaseObjectMapper();
         this.overstyrKodeverdiAlltidSomStringMapper = this.baseObjektMapper.copy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkOverstyringSerialisering.KODE_STRING, false));
         this.overstyrKalkulusKodeverdiSomStringMapper = this.baseObjektMapper.copy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkOverstyringSerialisering.INGEN, false));
         // defaultObjektMapper brukast når input header for overstyring ikkje er satt.
         // Bruker samme logikk som har vore pr no. Det vil seie overstyring av Kalkulus Kodeverdi serialisering til objekt, så lenge ikkje feature flagg for string serialisering er aktivt.
         // Når alle klienter kan handtere at Kalkulus Kodeverdi kjem som string kan denne sannsynlegvis settast lik baseObjektMapper.
-        this.defaultObjektMapper = this.baseObjektMapper.copy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkOverstyringSerialisering.INGEN, !featureFlagKodeverkAktiverKalkulusString));
+        this.defaultObjektMapper = this.baseObjektMapper.copy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkOverstyringSerialisering.INGEN, true));
         // openaapiObjektMapper bør brukast viss ein ønsker at enums skal bli serialisert slik openapi spesifikasjon tilseier.
         this.openapiObjektMapper = this.baseObjektMapper.copy().registerModule(ObjectMapperFactory.createOpenapiCompatSerializerModule(this.baseObjektMapper));
-    }
-
-    public ObjectMapperResolver() {
-        this(getFeatureFlagKodeverkAktiverKalkulusString());
     }
 
     private String getJsonSerializerOptionHeaderValue() {
@@ -53,10 +49,6 @@ public class ObjectMapperResolver implements ContextResolver<ObjectMapper> {
             }
         }
         return "";
-    }
-
-    public static boolean getFeatureFlagKodeverkAktiverKalkulusString() {
-        return Environment.current().getProperty("KODEVERK_AKTIVER_KALKULUS_STRING", Boolean.class, false);
     }
 
     /**
