@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -103,27 +104,15 @@ public class TilkommetAktivitetTjeneste {
             return Collections.emptyMap();
         }
 
-        var koblingerÅSpørreMot = finnRelevanteReferanser(relevantBehandling.get());
+        var vilkårsperiodePrEksternreferanse = finnRelevanteReferanser(relevantBehandling.get());
 
-        final Map<UUID, List<UtledetTilkommetAktivitet>> koblingMotAktiviteter = kalkulusTjeneste.utledTilkommetAktivitet(koblingerÅSpørreMot, BehandlingReferanse.fra(relevantBehandling.get()));
+        final Map<UUID, List<UtledetTilkommetAktivitet>> nyeAktiviteterPrEksternreferanse = kalkulusTjeneste.utledTilkommetAktivitet(vilkårsperiodePrEksternreferanse, BehandlingReferanse.fra(relevantBehandling.get()));
 
-        final Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> sammenslåttResultat = new HashMap<>();
-        koblingMotAktiviteter.values().stream().flatMap(Collection::stream).forEach(s -> {
-            final AktivitetstatusOgArbeidsgiver aktivitetstatusOgArbeidsgiver = mapTilAktivitetstatusOgArbeidsgiver(s);
-            LocalDateTimeline<Boolean> periodetidslinje = sammenslåttResultat.getOrDefault(aktivitetstatusOgArbeidsgiver, LocalDateTimeline.empty());
-            LocalDateTimeline<Boolean> nyePerioder = new LocalDateTimeline<>(s.getPerioder()
-                .stream()
-                .map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), true))
-                .collect(Collectors.toList())
-            );
-            LocalDateTimeline<Boolean> sammenslått = periodetidslinje.crossJoin(nyePerioder);
-            sammenslått = sammenslått.intersection(TidslinjeUtil.tilTidslinjeKomprimert(aktuellePerioder));
-            if (!sammenslått.isEmpty()) {
-                sammenslåttResultat.put(aktivitetstatusOgArbeidsgiver, sammenslått);
-            }
-        });
+        return LagTidslinjePrAktivitet.lagTidslinjePrNyAktivitet(
+            aktuellePerioder,
+            nyeAktiviteterPrEksternreferanse,
+            vilkårsperiodePrEksternreferanse);
 
-        return sammenslåttResultat;
     }
 
 
@@ -188,20 +177,4 @@ public class TilkommetAktivitetTjeneste {
 
     }
 
-
-    private AktivitetstatusOgArbeidsgiver mapTilAktivitetstatusOgArbeidsgiver(UtledetTilkommetAktivitet s) {
-        final UttakArbeidType uttakArbeidType = UttakArbeidType.fraKode(s.getAktivitetStatus().getKode());
-        final Arbeidsgiver arbeidsgiver;
-        if (s.getArbeidsgiver() != null) {
-            if (s.getArbeidsgiver().getArbeidsgiverAktørId() != null) {
-                arbeidsgiver = Arbeidsgiver.person(new AktørId(s.getArbeidsgiver().getArbeidsgiverAktørId()));
-            } else {
-                arbeidsgiver = Arbeidsgiver.virksomhet(s.getArbeidsgiver().getArbeidsgiverOrgnr());
-            }
-        } else {
-            arbeidsgiver = null;
-        }
-        final AktivitetstatusOgArbeidsgiver aktivitetstatusOgArbeidsgiver = new AktivitetstatusOgArbeidsgiver(uttakArbeidType, arbeidsgiver);
-        return aktivitetstatusOgArbeidsgiver;
-    }
 }
