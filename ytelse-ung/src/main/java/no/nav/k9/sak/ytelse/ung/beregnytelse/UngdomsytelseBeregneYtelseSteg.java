@@ -6,7 +6,6 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Period;
-import java.util.List;
 import java.util.stream.Stream;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -66,6 +65,9 @@ public class UngdomsytelseBeregneYtelseSteg implements BeregneYtelseSteg {
 
         var resultatTidslinje = satsTidslinje.intersection(utbetalingsgradTidslinje, sammenstillSatsOgGradering());
 
+        if (resultatTidslinje.isEmpty()) {
+            return BehandleStegResultat.utførtUtenAksjonspunkter();
+        }
 
         // stopper periodisering her for å unngå 'evigvarende' ekspansjon -
         // tar første av potensielle maks datoer som berører intersection av de to tidslinjene.
