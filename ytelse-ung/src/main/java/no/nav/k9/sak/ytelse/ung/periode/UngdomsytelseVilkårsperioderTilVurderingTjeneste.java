@@ -2,7 +2,6 @@ package no.nav.k9.sak.ytelse.ung.periode;
 
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
-import java.time.Period;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -31,7 +30,6 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
 
     private InngangsvilkårUtleder inngangsvilkårUtleder;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
-    private final Period MAKS_TOM = Period.parse("P1Y");
 
     UngdomsytelseVilkårsperioderTilVurderingTjeneste() {
         // CDI
@@ -92,7 +90,7 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
         // maksgrense foreløpig
         if (periode.getTomDato().equals(AbstractLocalDateInterval.TIDENES_ENDE)) {
             return DatoIntervallEntitet.fraOgMedTilOgMed(
-                periode.getFomDato(), periode.getFomDato().plus(MAKS_TOM));
+                periode.getFomDato(), periode.getFomDato().plus(PeriodeKonstanter.MAKS_PERIODE));
         }
 
         return periode;
