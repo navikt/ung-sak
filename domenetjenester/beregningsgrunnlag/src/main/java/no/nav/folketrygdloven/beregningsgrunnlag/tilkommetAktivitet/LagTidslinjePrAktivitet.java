@@ -55,7 +55,12 @@ class LagTidslinjePrAktivitet {
                                                                                         Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> map2) {
         // Merger en entry fra map2 inn i map1. Ved konflikt brukes crossjoin for å slå sammen tidslinjer
         map2.forEach((key, value) -> {
-            map1.merge(key, value, LocalDateTimeline::crossJoin);
+            map1.merge(key, value, (t1, t2) -> {
+                if (!t1.intersection(t2).isEmpty()) {
+                    throw new IllegalStateException("Forventer ikke overlapp mellom map for ulike vilkårsperioder");
+                }
+                return t1.crossJoin(t2);
+            });
         });
         return map1;
     }
