@@ -31,7 +31,7 @@ class UngdomsytelseBeregnDagsats {
 
         var satsTidslinje = perioder
             .intersection(grunnbeløpFaktorTidslinje, StandardCombinators::rightOnly)
-            .mapValue(faktor -> new UngdomsytelseSatser(null, null, faktor))
+            .mapValue(sats -> new UngdomsytelseSatser(null, null, sats.getGrunnbeløpFaktor(), sats.getSatsType()))
             .intersection(grunnbeløpTidslinje, UngdomsytelseBeregnDagsats::multiplyCombinator);
         return satsTidslinje;
     }
@@ -40,7 +40,7 @@ class UngdomsytelseBeregnDagsats {
         var grunnbeløp = rhs.getValue();
         var dagsats = lhs.getValue().grunnbeløpFaktor().multiply(grunnbeløp)
             .divide(BigDecimal.valueOf(VIRKEDAGER_I_ET_ÅR), 2, RoundingMode.HALF_UP);
-        return new LocalDateSegment<>(di, new UngdomsytelseSatser(dagsats, grunnbeløp, lhs.getValue().grunnbeløpFaktor()));
+        return new LocalDateSegment<>(di, new UngdomsytelseSatser(dagsats, grunnbeløp, lhs.getValue().grunnbeløpFaktor(), lhs.getValue().satsType()));
     }
 
 }

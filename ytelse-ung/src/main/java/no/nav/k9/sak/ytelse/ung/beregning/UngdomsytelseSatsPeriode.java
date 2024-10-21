@@ -12,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.k9.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.PostgreSQLRangeType;
 import no.nav.k9.sak.behandlingslager.Range;
@@ -38,6 +39,9 @@ public class UngdomsytelseSatsPeriode extends BaseEntitet {
     @Column(name = "grunnbeløp_faktor", nullable = false)
     private BigDecimal grunnbeløpFaktor;
 
+    @Column(name = "sats_type", nullable = false)
+    private UngdomsytelseSatsType satsType;
+
     public UngdomsytelseSatsPeriode() {
     }
 
@@ -46,16 +50,7 @@ public class UngdomsytelseSatsPeriode extends BaseEntitet {
         this.periode = ungdomsytelseSatsPeriode.getPeriode().toRange();
         this.grunnbeløp = ungdomsytelseSatsPeriode.getGrunnbeløp();
         this.grunnbeløpFaktor = ungdomsytelseSatsPeriode.getGrunnbeløpFaktor();
-    }
-
-    public UngdomsytelseSatsPeriode(BigDecimal dagsats,
-                                    DatoIntervallEntitet periode,
-                                    BigDecimal grunnbeløp,
-                                    BigDecimal grunnbeløpFaktor) {
-        this.dagsats = dagsats;
-        this.periode = periode.toRange();
-        this.grunnbeløp = grunnbeløp;
-        this.grunnbeløpFaktor = grunnbeløpFaktor;
+        this.satsType = ungdomsytelseSatsPeriode.getSatsType();
     }
 
     public UngdomsytelseSatsPeriode(LocalDateInterval periode, UngdomsytelseSatser satser) {
@@ -63,6 +58,7 @@ public class UngdomsytelseSatsPeriode extends BaseEntitet {
         this.dagsats = satser.dagsats();
         this.grunnbeløp = satser.grunnbeløp();
         this.grunnbeløpFaktor = satser.grunnbeløpFaktor();
+        this.satsType = satser.satsType();
     }
 
     public BigDecimal getDagsats() {
@@ -81,7 +77,11 @@ public class UngdomsytelseSatsPeriode extends BaseEntitet {
         return grunnbeløpFaktor;
     }
 
+    public UngdomsytelseSatsType getSatsType() {
+        return satsType;
+    }
+
     public UngdomsytelseSatser satser(){
-        return new UngdomsytelseSatser(dagsats, grunnbeløp, grunnbeløpFaktor);
+        return new UngdomsytelseSatser(dagsats, grunnbeløp, grunnbeløpFaktor, satsType);
     }
 }

@@ -63,7 +63,7 @@ public class UngdomsytelseGrunnlag {
 
     public LocalDateTimeline<UngdomsytelseSatser> getSatsTidslinje() {
         var segmenter = satsPerioder.getPerioder().stream().map(p -> new LocalDateSegment<>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(),
-            new UngdomsytelseSatser(p.getDagsats(), p.getGrunnbeløp(), p.getGrunnbeløpFaktor()))).toList();
+            new UngdomsytelseSatser(p.getDagsats(), p.getGrunnbeløp(), p.getGrunnbeløpFaktor(), p.getSatsType()))).toList();
         return new LocalDateTimeline<>(segmenter);
     }
 
