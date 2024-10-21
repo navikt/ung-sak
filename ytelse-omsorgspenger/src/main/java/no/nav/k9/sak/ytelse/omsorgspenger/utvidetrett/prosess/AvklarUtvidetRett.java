@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -33,6 +34,7 @@ import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.omsorgspenger.AvklarUtvidetRettDto;
 import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarUtvidetRettDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -62,7 +64,7 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.søknadRepository = søknadRepository;
         this.personinfoAdapter = personinfoAdapter;
-        this.behandlingRepository = behandlingRepository;;
+        this.behandlingRepository = behandlingRepository;
     }
 
 
@@ -71,7 +73,7 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
         Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
         if (behandling.getFagsakYtelseType() == FagsakYtelseType.OMSORGSPENGER_AO) {
             return oppdaterAleneomsorg(dto, param);
-        } else if(behandling.getFagsakYtelseType() == FagsakYtelseType.OMSORGSPENGER_KS) {
+        } else if (behandling.getFagsakYtelseType() == FagsakYtelseType.OMSORGSPENGER_KS) {
             return oppdaterKroniskSyk(dto, param);
         } else {
             return oppdaterUperiodisert(dto, param);
@@ -239,7 +241,9 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
         for (LocalDateSegment<UtfallOgAvslagsårsak> utfallOgÅrsak : sammenslåttUtfall) {
             vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(utfallOgÅrsak.getFom(), utfallOgÅrsak.getTom())
                 .medUtfallManuell(utfallOgÅrsak.getValue().utfall())
-                .medAvslagsårsak(utfallOgÅrsak.getValue().avslagsårsak()));
+                .medAvslagsårsak(utfallOgÅrsak.getValue().avslagsårsak())
+                .medVurdertAv(SubjectHandler.getSubjectHandler().getUid())
+                .medVurdertTidspunkt(LocalDateTime.now()));
         }
         vilkårResultatBuilder.leggTil(vilkårBuilder); // lagres utenfor
 
@@ -291,8 +295,9 @@ public class AvklarUtvidetRett implements AksjonspunktOppdaterer<AvklarUtvidetRe
         Avslagsårsak settAvslagsårsak = !utfallType.equals(Utfall.OPPFYLT) ? (avslagsårsak == null ? defaultAvslagsårsak : avslagsårsak) : null;
         builder.leggTil(builder.hentBuilderFor(fom, tom)
             .medUtfallManuell(utfallType)
-            .medAvslagsårsak(settAvslagsårsak));
-
+            .medAvslagsårsak(settAvslagsårsak)
+            .medVurdertAv(SubjectHandler.getSubjectHandler().getUid())
+            .medVurdertTidspunkt(LocalDateTime.now()));
     }
 
     private void lagHistorikkInnslag(AksjonspunktOppdaterParameter param, FagsakYtelseType ytelseType, Utfall nyVerdi, String begrunnelse) {

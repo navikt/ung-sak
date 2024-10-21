@@ -1,6 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.omsorg;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -22,6 +23,7 @@ import no.nav.k9.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.omsorgspenger.AvklarOmsorgenForDto;
 import no.nav.k9.sak.typer.Periode;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarOmsorgenForDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -99,7 +101,9 @@ public class AvklarOmsorgenFor implements AksjonspunktOppdaterer<AvklarOmsorgenF
         Avslagsårsak settAvslagsårsak = !utfallType.equals(Utfall.OPPFYLT) ? (avslagsårsak == null ? defaultAvslagsårsak : avslagsårsak) : null;
         vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(fom, tom)
             .medUtfallManuell(utfallType)
-            .medAvslagsårsak(settAvslagsårsak));
+            .medAvslagsårsak(settAvslagsårsak)
+            .medVurdertAv(SubjectHandler.getSubjectHandler().getUid())
+            .medVurdertTidspunkt(LocalDateTime.now()));
         builder.leggTil(vilkårBuilder);
     }
 

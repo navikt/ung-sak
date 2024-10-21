@@ -1,6 +1,7 @@
 package no.nav.k9.sak.behandlingslager.behandling.vilkår.periode;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -85,6 +86,16 @@ public class VilkårPeriodeBuilder {
         return this;
     }
 
+    public VilkårPeriodeBuilder medVurdertAv(String vurdertAv) {
+        this.entitet.setVurdertAv(vurdertAv);
+        return this;
+    }
+
+    public VilkårPeriodeBuilder medVurdertTidspunkt(LocalDateTime vurdertTidspunkt) {
+        this.entitet.setVurdertTidspunkt(vurdertTidspunkt);
+        return this;
+    }
+
     public VilkårPeriodeBuilder forlengelseAv(VilkårPeriode eksisteredeVurdering) {
         this.entitet.setManueltVurdert(eksisteredeVurdering.getErManueltVurdert());
         this.entitet.setAvslagsårsak(eksisteredeVurdering.getAvslagsårsak());
@@ -95,6 +106,8 @@ public class VilkårPeriodeBuilder {
         this.entitet.setOverstyrtUtfall(eksisteredeVurdering.getOverstyrtUtfall());
         this.entitet.setBegrunnelse(eksisteredeVurdering.getBegrunnelse());
         this.entitet.setUtfallMerknad(eksisteredeVurdering.getMerknad());
+        this.entitet.setVurdertAv(eksisteredeVurdering.getVurdertAv());
+        this.entitet.setVurdertTidspunkt(eksisteredeVurdering.getVurdertTidspunkt());
         return this;
     }
 
