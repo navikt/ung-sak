@@ -34,7 +34,7 @@ public enum UngdomsytelseSatsType implements Kodeverdi {
         }
         var ad = KODER.get(kode);
         if (ad == null) {
-            throw new IllegalArgumentException("Ukjent UngdomsytelseUttakAvslagsårsak: " + kode);
+            throw new IllegalArgumentException("Ukjent UngdomsytelseSatsType: " + kode);
         }
         return ad;
     }
@@ -52,7 +52,7 @@ public enum UngdomsytelseSatsType implements Kodeverdi {
 
     @Override
     public String getKodeverk() {
-        return "UNG_UTTAK_AVSLAGSÅRSAK";
+        return "UNG_SATSTYPE";
     }
 
     @Override
