@@ -1,12 +1,17 @@
 package no.nav.k9.sak.web.app.tjenester.forvaltning;
 
 import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -28,13 +33,15 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import no.nav.folketrygdloven.beregningsgrunnlag.tilkommetAktivitet.AktivitetstatusOgArbeidsgiver;
+import no.nav.folketrygdloven.beregningsgrunnlag.tilkommetAktivitet.TilkommetAktivitetTjeneste;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
@@ -44,6 +51,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kontrakt.KortTekst;
@@ -78,6 +86,9 @@ public class ForvaltningUttakRestTjeneste {
 
     private PleiepengerVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
 
+    private TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste;
+    private UttakNyeReglerRepository uttakNyeReglerRepository;
+
     public ForvaltningUttakRestTjeneste() {
     }
 
@@ -87,7 +98,7 @@ public class ForvaltningUttakRestTjeneste {
                                         ProsessTriggereRepository prosessTriggereRepository,
                                         EndringAnnenOmsorgspersonUtleder endringAnnenOmsorgspersonUtleder, ProsessTaskTjeneste prosessTaskTjeneste,
                                         @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) @BehandlingTypeRef(BehandlingType.REVURDERING) PleiepengerEndretUtbetalingPeriodeutleder pleiepengerEndretUtbetalingPeriodeutleder,
-                                        @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) PleiepengerVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste) {
+                                        @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN) PleiepengerVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste, TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste, UttakNyeReglerRepository uttakNyeReglerRepository) {
         this.behandlingRepository = behandlingRepository;
         this.entityManager = entityManager;
         this.prosessTriggerForvaltningTjeneste = new ProsessTriggerForvaltningTjeneste(entityManager);
@@ -96,6 +107,8 @@ public class ForvaltningUttakRestTjeneste {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.pleiepengerEndretUtbetalingPeriodeutleder = pleiepengerEndretUtbetalingPeriodeutleder;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
+        this.tilkommetAktivitetTjeneste = tilkommetAktivitetTjeneste;
+        this.uttakNyeReglerRepository = uttakNyeReglerRepository;
     }
 
 
@@ -299,7 +312,65 @@ public class ForvaltningUttakRestTjeneste {
     }
 
 
+    @POST
+    @Path("/fjern-dato-nye-regler")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(description = "Fjerner dato for nye uttaksregler", summary = ("Fjerner dato for nye uttaksregler"), tags = "uttak")
+    @BeskyttetRessurs(action = CREATE, resource = FAGSAK)
+    public void fjernDatoNyeRegler(
+        @Parameter(description = "Behandling-id")
+        @FormParam("behandlingId")
+        @NotNull
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+        BehandlingIdDto behandlingIdDto,
+        @NotNull
+        @FormParam("begrunnelse")
+        @Parameter(description = "begrunnelse", allowEmptyValue = false, required = true, schema = @Schema(type = "string", maximum = "2000"))
+        @Valid
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class)
+        KortTekst begrunnelse
+    ) {
+        var behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingId());
+
+        if (behandling.erSaksbehandlingAvsluttet()) {
+            throw new IllegalArgumentException("Behandling med id " + behandling.getId() + " hadde avsluttet saksbehandling.");
+        }
+
+        var fagsak = behandling.getFagsak();
+        var allePerioder = vilkårsPerioderTilVurderingTjeneste.utledFullstendigePerioder(behandlingIdDto.getBehandlingId());
+        Map<AktivitetstatusOgArbeidsgiver, LocalDateTimeline<Boolean>> tilkommetAktivitetTidslinjer = tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(fagsak.getId(), allePerioder);
+        var datoForNyeRegler = uttakNyeReglerRepository.finnDatoForNyeRegler(behandlingIdDto.getBehandlingId());
+
+        if (datoForNyeRegler.isEmpty()) {
+            throw new IllegalArgumentException("Behandling med id " + behandling.getId() + " hadde ikke dato for nye regler");
+
+        }
+
+        var harTilkommetEtterDato = !tilkommetAktivitetTidslinjer.values().stream().reduce(LocalDateTimeline::crossJoin).orElse(LocalDateTimeline.empty())
+            .intersection(new LocalDateInterval(datoForNyeRegler.get(), LocalDateInterval.TIDENES_ENDE)).isEmpty();
+
+        if (harTilkommetEtterDato) {
+            throw new IllegalArgumentException("Fagsaken med id " + fagsak.getId() + " hadde tilkommet aktivitet etter dato som ble forsøkt fjernet: " + datoForNyeRegler.get());
+        }
+
+        uttakNyeReglerRepository.fjernDatoForNyeRegler(behandlingIdDto.getBehandlingId());
+        var originalDatoNyeRegler = behandling.getOriginalBehandlingId().flatMap(uttakNyeReglerRepository::finnDatoForNyeRegler);
+        var sisteTomDato = allePerioder.stream().map(DatoIntervallEntitet::getTomDato).max(Comparator.naturalOrder()).orElseThrow();
+        flyttTilbakeMedRevurderingIFordeling(behandling, originalDatoNyeRegler.map(originalDato -> DatoIntervallEntitet.fraOgMedTilOgMed(originalDato, sisteTomDato)));
+        loggForvaltningTjeneste(fagsak, "/fjern-dato-nye-regler", begrunnelse.getTekst());
+    }
+
+
     private void flyttTilbakeTilStart(Behandling behandling) {
+        var prosessTaskData = ProsessTaskData.forProsessTask(TilbakeTilStartBehandlingTask.class);
+        prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId());
+        prosessTaskTjeneste.lagre(prosessTaskData);
+    }
+
+    private void flyttTilbakeMedRevurderingIFordeling(Behandling behandling, Optional<DatoIntervallEntitet> periode) {
+        periode.ifPresent(p -> prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.RE_ENDRET_FORDELING, p))));
         var prosessTaskData = ProsessTaskData.forProsessTask(TilbakeTilStartBehandlingTask.class);
         prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId());
         prosessTaskTjeneste.lagre(prosessTaskData);
