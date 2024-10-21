@@ -11653,13 +11653,18 @@
             "nullable" : true,
             "type" : "number"
           },
+          "satsType" : {
+            "enum" : [ "LAV", "HØY" ],
+            "nullable" : true,
+            "type" : "string"
+          },
           "tom" : {
             "format" : "date",
             "nullable" : true,
             "type" : "string"
           }
         },
-        "required" : [ "dagsats", "fom", "grunnbeløp", "grunnbeløpFaktor", "tom" ],
+        "required" : [ "dagsats", "fom", "grunnbeløp", "grunnbeløpFaktor", "satsType", "tom" ],
         "type" : "object"
       },
       "UngdomsytelseUttakPeriodeDto" : {

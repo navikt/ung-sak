@@ -49,7 +49,7 @@ class UngdomsytelseGrunnlagRepositoryTest {
         var dagsats = BigDecimal.TEN;
         var grunnbeløp = BigDecimal.valueOf(50);
         var grunnbeløpFaktor = BigDecimal.valueOf(2);
-        lagreBeregning(periode1, dagsats, grunnbeløp, grunnbeløpFaktor);
+        lagreBeregning(periode1, dagsats, grunnbeløp, Sats.HØY);
 
         var ungdomsytelseGrunnlag = repository.hentGrunnlag(behandling.getId());
         assertThat(ungdomsytelseGrunnlag.isPresent()).isTrue();
@@ -69,7 +69,7 @@ class UngdomsytelseGrunnlagRepositoryTest {
         var dagsats = BigDecimal.TEN;
         var grunnbeløp = BigDecimal.valueOf(50);
         var grunnbeløpFaktor = BigDecimal.valueOf(2);
-        lagreBeregning(periode1, dagsats, grunnbeløp, grunnbeløpFaktor);
+        lagreBeregning(periode1, dagsats, grunnbeløp, Sats.HØY);
 
         var utbetalingsgrad = BigDecimal.TEN;
         var uttakperioder1 = new UngdomsytelseUttakPerioder(List.of(new UngdomsytelseUttakPeriode(
@@ -95,18 +95,18 @@ class UngdomsytelseGrunnlagRepositoryTest {
         assertThat(uttakperioder.get(0).getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()));
     }
 
-    private void lagreBeregning(LocalDateInterval periode1, BigDecimal dagsats, BigDecimal grunnbeløp, BigDecimal grunnbeløpFaktor) {
+    private void lagreBeregning(LocalDateInterval periode1, BigDecimal dagsats, BigDecimal grunnbeløp, Sats sats) {
         repository.lagre(behandling.getId(), new LocalDateTimeline<>(List.of(
-            lagSegment(periode1, dagsats, grunnbeløp, grunnbeløpFaktor)
+            lagSegment(periode1, dagsats, grunnbeløp, sats)
         )));
     }
 
-    private static LocalDateSegment lagSegment(LocalDateInterval datoInterval, BigDecimal dagsats, BigDecimal grunnbeløp, BigDecimal grunnbeløpFaktor) {
+    private static LocalDateSegment lagSegment(LocalDateInterval datoInterval, BigDecimal dagsats, BigDecimal grunnbeløp, Sats sats) {
         return new LocalDateSegment(
             datoInterval,
             new UngdomsytelseSatser(
                 dagsats,
                 grunnbeløp,
-                grunnbeløpFaktor));
+                sats.getGrunnbeløpFaktor(), sats.getSatsType()));
     }
 }
