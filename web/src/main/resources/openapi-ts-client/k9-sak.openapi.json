@@ -12953,6 +12953,16 @@
           "vurdersIBehandlingen" : {
             "nullable" : true,
             "type" : "boolean"
+          },
+          "vurdertAv" : {
+            "nullable" : true,
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "type" : "string"
+          },
+          "vurdertTidspunkt" : {
+            "format" : "date-time",
+            "nullable" : true,
+            "type" : "string"
           }
         },
         "required" : [ "periode", "vilkarStatus" ],
