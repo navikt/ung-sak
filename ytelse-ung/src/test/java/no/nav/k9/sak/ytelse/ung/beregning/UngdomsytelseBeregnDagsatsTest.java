@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Iterator;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -37,7 +38,8 @@ class UngdomsytelseBeregnDagsatsTest {
         var fom = LocalDate.of(2024, 3, 1);
         var tom = LocalDate.of(2024, 4, 15);
         var perioder = new LocalDateTimeline<>(fom, tom, Boolean.TRUE);
-        var dagsatsTidslinje = tjeneste.beregnDagsats(perioder, fom.minusYears(18));
+        var fødselsdag = fom.minusYears(18).minusDays(1);
+        var dagsatsTidslinje = tjeneste.beregnDagsats(perioder, fødselsdag);
 
         var segmenter = dagsatsTidslinje.toSegments();
         assertThat(segmenter.size()).isEqualTo(1);
@@ -52,11 +54,12 @@ class UngdomsytelseBeregnDagsatsTest {
 
 
     @Test
-    void skal_beregne_dagsats_for_en_periode_med_start_i_mars_2024_og_slutt_i_mai_2024_og_bruker_18_år_ved_start() {
+    void skal_beregne_dagsats_for_en_periode_med_start_i_mars_2024_og_slutt_i_mai_2024_og_bruker_blir_18_år_måneden_før_start() {
         var fom = LocalDate.of(2024, 3, 1);
         var tom = LocalDate.of(2024, 5, 15);
         var perioder = new LocalDateTimeline<>(fom, tom, Boolean.TRUE);
-        var dagsatsTidslinje = tjeneste.beregnDagsats(perioder, fom.minusYears(18));
+        var fødselsdag = fom.minusYears(18).minusDays(1);
+        var dagsatsTidslinje = tjeneste.beregnDagsats(perioder, fødselsdag);
 
         var segmenter = dagsatsTidslinje.toSegments();
         assertThat(segmenter.size()).isEqualTo(2);
@@ -78,42 +81,7 @@ class UngdomsytelseBeregnDagsatsTest {
     }
 
     @Test
-    void skal_beregne_dagsats_for_en_periode_med_start_i_mars_2024_og_slutt_i_mai_2024_og_bruker_blir_25_år_i_april() {
-        var fom = LocalDate.of(2024, 3, 1);
-        var tom = LocalDate.of(2024, 5, 15);
-        var perioder = new LocalDateTimeline<>(fom, tom, Boolean.TRUE);
-        var tjuefemårsdag = LocalDate.of(2024, 4, 15);
-        var fødselsdato = tjuefemårsdag.minusYears(25);
-        var dagsatsTidslinje = tjeneste.beregnDagsats(perioder, fødselsdato);
-
-        var segmenter = dagsatsTidslinje.toSegments();
-        assertThat(segmenter.size()).isEqualTo(3);
-
-        var iterator = segmenter.iterator();
-        var first = iterator.next();
-        assertThat(first.getFom()).isEqualTo(fom);
-        assertThat(first.getTom()).isEqualTo(tjuefemårsdag.minusDays(1));
-        assertThat(first.getValue().grunnbeløpFaktor().compareTo(BigDecimal.valueOf(1.33333))).isEqualTo(0);
-        assertThat(first.getValue().grunnbeløp().compareTo(BigDecimal.valueOf(100000))).isEqualTo(0);
-        assertThat(first.getValue().dagsats().compareTo(BigDecimal.valueOf(512.82))).isEqualTo(0);
-
-        var second = iterator.next();
-        assertThat(second.getFom()).isEqualTo(tjuefemårsdag);
-        assertThat(second.getTom()).isEqualTo(LocalDate.of(2024,4, 30));
-        assertThat(second.getValue().grunnbeløpFaktor().compareTo(BigDecimal.valueOf(2))).isEqualTo(0);
-        assertThat(second.getValue().grunnbeløp().compareTo(BigDecimal.valueOf(100000))).isEqualTo(0);
-        assertThat(second.getValue().dagsats().compareTo(BigDecimal.valueOf(769.23))).isEqualTo(0);
-
-        var third = iterator.next();
-        assertThat(third.getFom()).isEqualTo(LocalDate.of(2024,5, 1));
-        assertThat(third.getTom()).isEqualTo(tom);
-        assertThat(third.getValue().grunnbeløpFaktor().compareTo(BigDecimal.valueOf(2))).isEqualTo(0);
-        assertThat(third.getValue().grunnbeløp().compareTo(BigDecimal.valueOf(124028))).isEqualTo(0);
-        assertThat(third.getValue().dagsats().compareTo(BigDecimal.valueOf(954.06))).isEqualTo(0);
-    }
-
-    @Test
-    void skal_beregne_dagsats_for_en_periode_med_start_i_mars_2024_og_slutt_i_mai_2024_og_bruker_blir_25_år_siste_dagen_i_april() {
+    void skal_beregne_dagsats_for_en_periode_med_start_i_mars_2024_og_slutt_i_mai_2024_og_bruker_blir_25_år_midt_i_april() {
         var fom = LocalDate.of(2024, 3, 1);
         var tom = LocalDate.of(2024, 5, 30);
         var perioder = new LocalDateTimeline<>(fom, tom, Boolean.TRUE);
@@ -122,38 +90,32 @@ class UngdomsytelseBeregnDagsatsTest {
         var dagsatsTidslinje = tjeneste.beregnDagsats(perioder, fødselsdato);
 
         var segmenter = dagsatsTidslinje.toSegments();
-        assertThat(segmenter.size()).isEqualTo(3);
+        assertThat(segmenter.size()).isEqualTo(2);
 
         var iterator = segmenter.iterator();
         var first = iterator.next();
+        var førsteDagMedHøySats = LocalDate.of(2024, 5, 1);
         assertThat(first.getFom()).isEqualTo(fom);
-        assertThat(first.getTom()).isEqualTo(tjuefemårsdag.minusDays(1));
+        assertThat(first.getTom()).isEqualTo(førsteDagMedHøySats.minusDays(1));
         assertThat(first.getValue().grunnbeløpFaktor().compareTo(BigDecimal.valueOf(1.33333))).isEqualTo(0);
         assertThat(first.getValue().grunnbeløp().compareTo(BigDecimal.valueOf(100000))).isEqualTo(0);
         assertThat(first.getValue().dagsats().compareTo(BigDecimal.valueOf(512.82))).isEqualTo(0);
 
         var second = iterator.next();
-        assertThat(second.getFom()).isEqualTo(tjuefemårsdag);
-        assertThat(second.getTom()).isEqualTo(LocalDate.of(2024,4, 30));
+        assertThat(second.getFom()).isEqualTo(førsteDagMedHøySats);
+        assertThat(second.getTom()).isEqualTo(tom);
         assertThat(second.getValue().grunnbeløpFaktor().compareTo(BigDecimal.valueOf(2))).isEqualTo(0);
-        assertThat(second.getValue().grunnbeløp().compareTo(BigDecimal.valueOf(100000))).isEqualTo(0);
-        assertThat(second.getValue().dagsats().compareTo(BigDecimal.valueOf(769.23))).isEqualTo(0);
-
-        var third = iterator.next();
-        assertThat(third.getFom()).isEqualTo(LocalDate.of(2024,5, 1));
-        assertThat(third.getTom()).isEqualTo(tom);
-        assertThat(third.getValue().grunnbeløpFaktor().compareTo(BigDecimal.valueOf(2))).isEqualTo(0);
-        assertThat(third.getValue().grunnbeløp().compareTo(BigDecimal.valueOf(124028))).isEqualTo(0);
-        assertThat(third.getValue().dagsats().compareTo(BigDecimal.valueOf(954.06))).isEqualTo(0);
+        assertThat(second.getValue().grunnbeløp().compareTo(BigDecimal.valueOf(124028))).isEqualTo(0);
+        assertThat(second.getValue().dagsats().compareTo(BigDecimal.valueOf(954.06))).isEqualTo(0);
     }
 
 
     @Test
-    void skal_beregne_dagsats_for_en_periode_med_start_i_mars_2024_og_slutt_i_mai_2024_og_bruker_blir_25_år_første_mars() {
+    void skal_beregne_dagsats_for_en_periode_med_start_i_mars_2024_og_slutt_i_mai_2024_og_bruker_blir_25_år_første_april() {
         var fom = LocalDate.of(2024, 3, 1);
         var tom = LocalDate.of(2024, 5, 30);
         var perioder = new LocalDateTimeline<>(fom, tom, Boolean.TRUE);
-        var tjuefemårsdag = LocalDate.of(2024, 5, 1);
+        var tjuefemårsdag = LocalDate.of(2024, 4, 1);
         var fødselsdato = tjuefemårsdag.minusYears(25);
         var dagsatsTidslinje = tjeneste.beregnDagsats(perioder, fødselsdato);
 
@@ -163,13 +125,14 @@ class UngdomsytelseBeregnDagsatsTest {
         var iterator = segmenter.iterator();
         var first = iterator.next();
         assertThat(first.getFom()).isEqualTo(fom);
-        assertThat(first.getTom()).isEqualTo(tjuefemårsdag.minusDays(1));
+        var sisteDagMedLavSats = tjuefemårsdag.with(TemporalAdjusters.lastDayOfMonth());
+        assertThat(first.getTom()).isEqualTo(sisteDagMedLavSats);
         assertThat(first.getValue().grunnbeløpFaktor().compareTo(BigDecimal.valueOf(1.33333))).isEqualTo(0);
         assertThat(first.getValue().grunnbeløp().compareTo(BigDecimal.valueOf(100000))).isEqualTo(0);
         assertThat(first.getValue().dagsats().compareTo(BigDecimal.valueOf(512.82))).isEqualTo(0);
 
         var second = iterator.next();
-        assertThat(second.getFom()).isEqualTo(LocalDate.of(2024,5, 1));
+        assertThat(second.getFom()).isEqualTo(sisteDagMedLavSats.plusDays(1));
         assertThat(second.getTom()).isEqualTo(tom);
         assertThat(second.getValue().grunnbeløpFaktor().compareTo(BigDecimal.valueOf(2))).isEqualTo(0);
         assertThat(second.getValue().grunnbeløp().compareTo(BigDecimal.valueOf(124028))).isEqualTo(0);
