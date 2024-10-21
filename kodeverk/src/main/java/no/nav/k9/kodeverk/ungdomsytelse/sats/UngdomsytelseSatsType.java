@@ -8,7 +8,7 @@ import no.nav.k9.kodeverk.api.Kodeverdi;
 public enum UngdomsytelseSatsType implements Kodeverdi {
 
     LAV("LAV", "Lav"),
-    HØY("HOEY", "Høy");
+    HØY("HOY", "Høy");
 
     private static final Map<String, UngdomsytelseSatsType> KODER = new LinkedHashMap<>();
 
