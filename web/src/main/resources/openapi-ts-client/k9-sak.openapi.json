@@ -20253,6 +20253,47 @@
         }
       }
     },
+    "/uttak/fjern-dato-nye-regler" : {
+      "post" : {
+        "description" : "Fjerner dato for nye uttaksregler",
+        "operationId" : "fjernDatoNyeRegler",
+        "requestBody" : {
+          "content" : {
+            "application/x-www-form-urlencoded" : {
+              "schema" : {
+                "properties" : {
+                  "begrunnelse" : {
+                    "description" : "begrunnelse",
+                    "maximum" : 2000,
+                    "type" : "string"
+                  },
+                  "behandlingId" : {
+                    "description" : "Behandling-id",
+                    "type" : "string"
+                  }
+                },
+                "required" : [ "begrunnelse", "behandlingId" ],
+                "type" : "object"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "void"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Fjerner dato for nye uttaksregler",
+        "tags" : [ "uttak" ]
+      }
+    },
     "/uttak/fjern-prosesstrigger-endring-annen-omsorgsperson" : {
       "post" : {
         "description" : "Fjerner prosesstrigger for endring fra annen omsorgsperson",

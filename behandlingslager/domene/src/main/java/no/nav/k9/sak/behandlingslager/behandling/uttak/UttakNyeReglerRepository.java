@@ -28,14 +28,20 @@ public class UttakNyeReglerRepository {
         return finnForrigeUttakNyeReglerEntitet(behandlingId).map(UttakNyeRegler::getVirkningsdato);
     }
 
+    public void fjernDatoForNyeRegler(Long behandlingId) {
+        finnUttakNyeReglerEntitet(behandlingId).ifPresent(this::deaktiver);
+    }
+
     public void lagreDatoForNyeRegler(Long behandlingId, LocalDate datoNyeReglerUttak) {
-        finnUttakNyeReglerEntitet(behandlingId).ifPresent(eksisterende -> {
-            eksisterende.deaktiver();
-            entityManager.persist(eksisterende);
-            entityManager.flush();
-        });
+        finnUttakNyeReglerEntitet(behandlingId).ifPresent(this::deaktiver);
         UttakNyeRegler entitet = new UttakNyeRegler(behandlingId, datoNyeReglerUttak);
         entityManager.persist(entitet);
+        entityManager.flush();
+    }
+
+    private void deaktiver(UttakNyeRegler eksisterende) {
+        eksisterende.deaktiver();
+        entityManager.persist(eksisterende);
         entityManager.flush();
     }
 
