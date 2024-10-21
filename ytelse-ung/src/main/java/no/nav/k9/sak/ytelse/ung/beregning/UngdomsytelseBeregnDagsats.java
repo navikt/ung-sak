@@ -10,7 +10,6 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 
 @Dependent
 class UngdomsytelseBeregnDagsats {
@@ -27,7 +26,7 @@ class UngdomsytelseBeregnDagsats {
 
     LocalDateTimeline<UngdomsytelseSatser> beregnDagsats(LocalDateTimeline<Boolean> perioder, LocalDate fødselsdato) {
         var grunnbeløpTidslinje = lagGrunnbeløpTidslinjeTjeneste.lagGrunnbeløpTidslinjeForPeriode(perioder);
-        var grunnbeløpFaktorTidslinje = LagGrunnbeløpFaktorTidslinje.lagGrunnbelpFaktorTidslinje(fødselsdato);
+        var grunnbeløpFaktorTidslinje = LagGrunnbeløpFaktorTidslinje.lagGrunnbeløpFaktorTidslinje(fødselsdato);
 
 
         var satsTidslinje = perioder
