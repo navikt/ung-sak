@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.ung.mottak;
 
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
+import java.time.LocalDate;
 import java.util.Collection;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -18,6 +19,7 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.Dokumentmottaker;
 import no.nav.k9.sak.mottak.dokumentmottak.SøknadParser;
+import no.nav.k9.sak.ytelse.ung.periode.UtledSluttdato;
 import no.nav.k9.søknad.ytelse.ung.v1.Ungdomsytelse;
 
 
@@ -60,7 +62,9 @@ public class DokumentMottakerSøknadUng implements Dokumentmottaker {
             mottatteDokumentRepository.lagre(dokument, DokumentStatus.BEHANDLER);
 
             var ytelse = søknad.getYtelse();
-            fagsakRepository.utvidPeriode(behandling.getFagsakId(), ytelse.getSøknadsperiode().getFraOgMed(), ytelse.getSøknadsperiode().getTilOgMed());
+            var fom = ytelse.getSøknadsperiode().getFraOgMed();
+            var tom = UtledSluttdato.utledSluttdato(fom, ytelse.getSøknadsperiode().getTilOgMed());
+            fagsakRepository.utvidPeriode(behandling.getFagsakId(), fom, tom);
         }
     }
 
