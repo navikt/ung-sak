@@ -3,8 +3,6 @@ package no.nav.k9.sak.ytelse.ung.mottak;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -16,18 +14,11 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.k9.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
+import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.Dokumentmottaker;
 import no.nav.k9.sak.mottak.dokumentmottak.SøknadParser;
-import no.nav.k9.sak.ytelse.ung.periode.UngdomsprogramPeriodeRepository;
-import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.ytelse.ung.v1.Ungdomsytelse;
-
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
-
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 
 @ApplicationScoped
@@ -37,7 +28,7 @@ public class DokumentMottakerSøknadUng implements Dokumentmottaker {
 
     private SøknadParser søknadParser;
     private MottatteDokumentRepository mottatteDokumentRepository;
-    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
+    private FagsakRepository fagsakRepository;
     private boolean enabled;
 
 
@@ -45,10 +36,11 @@ public class DokumentMottakerSøknadUng implements Dokumentmottaker {
     }
 
     @Inject
-    public DokumentMottakerSøknadUng(SøknadParser søknadParser, MottatteDokumentRepository mottatteDokumentRepository, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository, @KonfigVerdi(value = "UNGDOMSYTELSE_ENABLED", defaultVerdi = "false") boolean enabled) {
+    public DokumentMottakerSøknadUng(SøknadParser søknadParser, MottatteDokumentRepository mottatteDokumentRepository, FagsakRepository fagsakRepository,
+                                     @KonfigVerdi(value = "UNGDOMSYTELSE_ENABLED", defaultVerdi = "false") boolean enabled) {
         this.søknadParser = søknadParser;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
-        this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
+        this.fagsakRepository = fagsakRepository;
         this.enabled = enabled;
     }
 
@@ -67,6 +59,8 @@ public class DokumentMottakerSøknadUng implements Dokumentmottaker {
             }
             mottatteDokumentRepository.lagre(dokument, DokumentStatus.BEHANDLER);
 
+            var ytelse = søknad.getYtelse();
+            fagsakRepository.utvidPeriode(behandling.getFagsakId(), ytelse.getSøknadsperiode().getFraOgMed(), ytelse.getSøknadsperiode().getTilOgMed());
         }
     }
 
