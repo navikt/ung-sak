@@ -29,6 +29,7 @@ public class VurderingRettPleiepengerVedDødDto extends BekreftetAksjonspunktDto
     private RettVedDødType rettVedDødType;
 
     @JsonProperty(value = "vurdertAv")
+    @Pattern(regexp = Patterns.BOKSTAVER_OG_TALL, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String vurdertAv;
 
     @JsonProperty(value = "vurdertTidspunkt")
