@@ -4,6 +4,8 @@ import no.nav.k9.kodeverk.uttak.RettVedDødType;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 
 import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity(name = "RettVedPleietrengendeDød")
@@ -21,6 +23,12 @@ public class RettPleiepengerVedDød extends BaseEntitet {
     @Column(name = "rett_ved_doed_type")
     private RettVedDødType rettVedDødType;
 
+    @Column(name = "vurdert_av")
+    private String vurdertAv;
+
+    @Column(name = "vurdert_tidspunkt")
+    private LocalDateTime vurdertTidspunkt;
+
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
@@ -29,9 +37,11 @@ public class RettPleiepengerVedDød extends BaseEntitet {
         // Hibernate
     }
 
-    public RettPleiepengerVedDød(String vurdering, RettVedDødType rettVedDødType) {
+    public RettPleiepengerVedDød(String vurdering, RettVedDødType rettVedDødType, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         this.vurdering = vurdering;
         this.rettVedDødType = rettVedDødType;
+        this.vurdertAv = vurdertAv;
+        this.vurdertTidspunkt = vurdertTidspunkt;
     }
 
     public Long getId() {
@@ -40,6 +50,14 @@ public class RettPleiepengerVedDød extends BaseEntitet {
 
     public String getVurdering() {
         return vurdering;
+    }
+
+    public String getVurdertAv() {
+        return vurdertAv;
+    }
+
+    public LocalDateTime getVurdertTidspunkt() {
+        return vurdertTidspunkt;
     }
 
     public RettVedDødType getRettVedDødType() {
@@ -62,9 +80,6 @@ public class RettPleiepengerVedDød extends BaseEntitet {
 
     @Override
     public String toString() {
-        return "RettVedPleietrengendeDød{" +
-            "id=" + id +
-            ", rettVedDødType=" + rettVedDødType +
-            '}';
+        return "RettVedPleietrengendeDød{" + "id=" + id + ", rettVedDødType=" + rettVedDødType + '}';
     }
 }

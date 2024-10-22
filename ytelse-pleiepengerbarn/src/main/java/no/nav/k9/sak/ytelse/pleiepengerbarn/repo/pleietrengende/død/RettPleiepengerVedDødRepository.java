@@ -6,6 +6,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
+
 import java.util.Objects;
 import java.util.Optional;
 
@@ -68,7 +69,9 @@ public class RettPleiepengerVedDødRepository {
         Optional<RettPleiepengerVedDødGrunnlag> grunnnlag = hentEksisterendeGrunnlag(gammelBehandlingId);
         grunnnlag.ifPresent(entitet -> lagreOgFlush(nyBehandlingId, new RettPleiepengerVedDød(
             entitet.getRettVedPleietrengendeDød().getVurdering(),
-            entitet.getRettVedPleietrengendeDød().getRettVedDødType()
+            entitet.getRettVedPleietrengendeDød().getRettVedDødType(),
+            entitet.getRettVedPleietrengendeDød().getVurdertAv(),
+            entitet.getRettVedPleietrengendeDød().getVurdertTidspunkt()
         )));
     }
 }

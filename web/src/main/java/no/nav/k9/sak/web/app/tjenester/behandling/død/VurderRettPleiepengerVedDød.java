@@ -10,6 +10,9 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død.RettPleiepe
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
+
+import java.time.LocalDateTime;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = VurderingRettPleiepengerVedDødDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -28,7 +31,8 @@ public class VurderRettPleiepengerVedDød implements AksjonspunktOppdaterer<Vurd
 
     @Override
     public OppdateringResultat oppdater(VurderingRettPleiepengerVedDødDto dto, AksjonspunktOppdaterParameter param) {
-        rettPleiepengerVedDødRepository.lagreOgFlush(param.getBehandlingId(), new RettPleiepengerVedDød(dto.getVurdering(), dto.getRettVedDødType()));
+        String saksbehandlerIdent = SubjectHandler.getSubjectHandler().getUid();
+        rettPleiepengerVedDødRepository.lagreOgFlush(param.getBehandlingId(), new RettPleiepengerVedDød(dto.getVurdering(), dto.getRettVedDødType(), saksbehandlerIdent, LocalDateTime.now()));
         return OppdateringResultat.nyttResultat();
     }
 

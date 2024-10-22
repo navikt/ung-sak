@@ -77,13 +77,13 @@ public class RettVedDødRestTjeneste {
         @Parameter(description = BehandlingUuidDto.DESC)
         @Valid
         @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-            BehandlingUuidDto behandlingUuidDto
+        BehandlingUuidDto behandlingUuidDto
     ) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuidDto.getBehandlingUuid());
         var grunnlag = rettPleiepengerVedDødRepository.hentHvisEksisterer(behandling.getId());
         if (grunnlag.isPresent()) {
             var rettVedDød = grunnlag.get().getRettVedPleietrengendeDød();
-            var responseDto = new VurderingRettPleiepengerVedDødDto(rettVedDød.getVurdering(), rettVedDød.getRettVedDødType());
+            var responseDto = new VurderingRettPleiepengerVedDødDto(rettVedDød.getVurdering(), rettVedDød.getRettVedDødType(), rettVedDød.getVurdertAv(), rettVedDød.getVurdertTidspunkt());
             return Response.ok(responseDto).build();
         }
         return Response.noContent().build();
