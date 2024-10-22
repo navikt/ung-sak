@@ -57,6 +57,8 @@ spec:
         kvPath: /serviceuser/data/prod/srvssolinux
       - mountPath: /var/run/secrets/nais.io/vault
         kvPath: /kv/prod/fss/k9-sak/k9saksbehandling
+  tokenx:
+    enabled: true
   azure:
     application:
       enabled: true
