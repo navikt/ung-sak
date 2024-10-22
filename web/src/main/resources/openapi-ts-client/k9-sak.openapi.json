@@ -13186,6 +13186,16 @@
             "nullable" : true,
             "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
+          },
+          "vurdertAv" : {
+            "nullable" : true,
+            "pattern" : "^[\\p{L}\\p{N}]+$",
+            "type" : "string"
+          },
+          "vurdertTidspunkt" : {
+            "format" : "date-time",
+            "nullable" : true,
+            "type" : "string"
           }
         },
         "type" : "object"
