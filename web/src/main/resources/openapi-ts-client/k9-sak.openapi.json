@@ -12753,6 +12753,10 @@
             "nullable" : true,
             "type" : "number"
           },
+          "dagsatsBarnetillegg" : {
+            "nullable" : true,
+            "type" : "number"
+          },
           "fom" : {
             "format" : "date",
             "nullable" : true,
@@ -12777,7 +12781,7 @@
             "type" : "string"
           }
         },
-        "required" : [ "dagsats", "fom", "grunnbeløp", "grunnbeløpFaktor", "satsType", "tom" ],
+        "required" : [ "dagsats", "dagsatsBarnetillegg", "fom", "grunnbeløp", "grunnbeløpFaktor", "satsType", "tom" ],
         "type" : "object"
       },
       "UngdomsytelseUttakPeriodeDto" : {
