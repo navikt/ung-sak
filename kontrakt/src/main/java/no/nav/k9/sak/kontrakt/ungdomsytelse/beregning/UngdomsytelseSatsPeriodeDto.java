@@ -19,6 +19,8 @@ public record UngdomsytelseSatsPeriodeDto(
     @JsonProperty(value = "dagsats", required = true) BigDecimal dagsats,
     @JsonProperty(value = "grunnbeløpFaktor", required = true) BigDecimal grunnbeløpFaktor,
     @JsonProperty(value = "grunnbeløp", required = true) BigDecimal grunnbeløp,
-    @JsonProperty(value = "satsType", required = true) UngdomsytelseSatsType satsType
+    @JsonProperty(value = "satsType", required = true) UngdomsytelseSatsType satsType,
+        @JsonProperty(value = "dagsatsBarnetillegg", required = true) BigDecimal dagsatsBarnetillegg
+
 ) {
 }
