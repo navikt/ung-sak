@@ -30,6 +30,17 @@ public record UngdomsytelseSatser(BigDecimal dagsats,
 
         public Builder() {}
 
+        private Builder(Builder builder) {
+            grunnbeløp = builder.grunnbeløp;
+            grunnbeløpFaktor = builder.grunnbeløpFaktor;
+            satsType = builder.satsType;
+            antallBarn = builder.antallBarn;
+            dagsatsBarnetillegg = builder.dagsatsBarnetillegg;
+        }
+
+        public Builder kopi() {
+            return new Builder(this);
+        }
 
         public Builder medGrunnbeløp(BigDecimal grunnbeløp) {
             this.grunnbeløp = grunnbeløp;

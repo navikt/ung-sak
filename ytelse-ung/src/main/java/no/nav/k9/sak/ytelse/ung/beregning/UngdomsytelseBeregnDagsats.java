@@ -3,8 +3,6 @@ package no.nav.k9.sak.ytelse.ung.beregning;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import org.jetbrains.annotations.NotNull;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -47,14 +45,20 @@ public class UngdomsytelseBeregnDagsats {
     }
 
     private static LocalDateSegmentCombinator<UngdomsytelseSatser.Builder, BigDecimal, UngdomsytelseSatser.Builder> leggTilGrunnbeløp() {
-        return (di, lhs, rhs) -> new LocalDateSegment<>(di, lhs.getValue().medGrunnbeløp(rhs.getValue()));
+        return (di, lhs, rhs) -> {
+            var builder = lhs.getValue().kopi();
+            return new LocalDateSegment<>(di, builder.medGrunnbeløp(rhs.getValue()));
+        };
     }
 
     private static LocalDateSegmentCombinator<UngdomsytelseSatser.Builder, LagBarnetilleggTidslinje.Barnetillegg, UngdomsytelseSatser.Builder> leggTilBarnetillegg() {
-        return (di, lhs, rhs) -> new LocalDateSegment<>(di,
-            rhs == null ?
-                lhs.getValue().medAntallBarn(0).medBarnetilleggDagsats(BigDecimal.ZERO) :
-                lhs.getValue().medAntallBarn(rhs.getValue().antallBarn()).medBarnetilleggDagsats(rhs.getValue().dagsats()));
+        return (di, lhs, rhs) -> {
+            var builder = lhs.getValue().kopi();
+            return new LocalDateSegment<>(di,
+                rhs == null ?
+                    builder.medAntallBarn(0).medBarnetilleggDagsats(BigDecimal.ZERO) :
+                    builder.medAntallBarn(rhs.getValue().antallBarn()).medBarnetilleggDagsats(rhs.getValue().dagsats()));
+        };
     }
 
 }
