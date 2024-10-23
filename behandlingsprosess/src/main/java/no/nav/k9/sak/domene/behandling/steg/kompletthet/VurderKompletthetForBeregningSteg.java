@@ -128,8 +128,8 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
                 .map(arbeidsgiver -> arbeidsgiver != null ? new Mottaker(arbeidsgiver.getIdentifikator(), arbeidsgiver.getErVirksomhet() ? IdType.ORGNR : IdType.AKTØRID) : new Mottaker(ref.getAktørId().getAktørId(), IdType.AKTØRID))
                 .collect(Collectors.toSet());
 
-            var forspørsler = mapTilForespørsler(perioderMedManglendeVedlegg);
-            arbeidsgiverPortalenTjeneste.oppdaterInntektsmeldingforespørslerISak(forspørsler, ref);
+            var forespørsler = mapTilForespørsler(perioderMedManglendeVedlegg);
+            arbeidsgiverPortalenTjeneste.oppdaterInntektsmeldingforespørslerISak(forespørsler, ref);
             sendBrev(ref.getBehandlingId(), DokumentMalType.fraKode(kompletthetsAksjon.getDokumentMalType().getKode()), aktørerDetSkalEtterlysesFra);
         }
     }
