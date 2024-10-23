@@ -2,12 +2,12 @@ package no.nav.k9.sak.ytelse.ung.beregning;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
@@ -17,7 +17,6 @@ import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.domene.person.personopplysning.BasisPersonopplysningTjeneste;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
-import no.nav.k9.sak.kontrakt.vilkår.VilkårUtfallSamlet;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.vilkår.VilkårTjeneste;
 
@@ -41,7 +40,9 @@ public class UngdomsytelseBeregningSteg implements BehandlingSteg {
     public UngdomsytelseBeregningSteg(BasisPersonopplysningTjeneste personopplysningTjeneste,
                                       @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE) VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
                                       BehandlingRepository behandlingRepository,
-                                      UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository, UngdomsytelseBeregnDagsats beregnDagsatsTjeneste, VilkårTjeneste vilkårTjeneste) {
+                                      UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
+                                      UngdomsytelseBeregnDagsats beregnDagsatsTjeneste,
+                                      VilkårTjeneste vilkårTjeneste) {
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.behandlingRepository = behandlingRepository;
@@ -64,7 +65,7 @@ public class UngdomsytelseBeregningSteg implements BehandlingSteg {
         var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         var personopplysningerAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonPåTidspunkt(behandling.getId(), behandling.getAktørId(), behandling.getFagsak().getPeriode().getFomDato());
         var fødselsdato = personopplysningerAggregat.getSøker().getFødselsdato();
-        var satsTidslinje = beregnDagsatsTjeneste.beregnDagsats(innvilgetPerioderTidslinje, fødselsdato);
+        var satsTidslinje = beregnDagsatsTjeneste.beregnDagsats(BehandlingReferanse.fra(behandling), innvilgetPerioderTidslinje, fødselsdato);
         ungdomsytelseGrunnlagRepository.lagre(behandling.getId(), satsTidslinje);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }

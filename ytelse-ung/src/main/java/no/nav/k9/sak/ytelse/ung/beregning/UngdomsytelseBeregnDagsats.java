@@ -1,46 +1,60 @@
 package no.nav.k9.sak.ytelse.ung.beregning;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
+
+import org.jetbrains.annotations.NotNull;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.ytelse.ung.beregning.barnetillegg.LagBarnetilleggTidslinje;
 
 @Dependent
-class UngdomsytelseBeregnDagsats {
+public class UngdomsytelseBeregnDagsats {
 
-
-    public static final int VIRKEDAGER_I_ET_ÅR = 260;
-    private LagGrunnbeløpTidslinjeTjeneste lagGrunnbeløpTidslinjeTjeneste;
+    private final LagGrunnbeløpTidslinjeTjeneste lagGrunnbeløpTidslinjeTjeneste;
+    private final LagBarnetilleggTidslinje lagBarnetilleggTidslinje;
 
     @Inject
-    public UngdomsytelseBeregnDagsats(LagGrunnbeløpTidslinjeTjeneste lagGrunnbeløpTidslinjeTjeneste) {
+    public UngdomsytelseBeregnDagsats(LagGrunnbeløpTidslinjeTjeneste lagGrunnbeløpTidslinjeTjeneste,
+                                      LagBarnetilleggTidslinje lagBarnetilleggTidslinje) {
         this.lagGrunnbeløpTidslinjeTjeneste = lagGrunnbeløpTidslinjeTjeneste;
+        this.lagBarnetilleggTidslinje = lagBarnetilleggTidslinje;
     }
 
 
-    LocalDateTimeline<UngdomsytelseSatser> beregnDagsats(LocalDateTimeline<Boolean> perioder, LocalDate fødselsdato) {
+    LocalDateTimeline<UngdomsytelseSatser> beregnDagsats(BehandlingReferanse behandlingRef, LocalDateTimeline<Boolean> perioder, LocalDate fødselsdato) {
         var grunnbeløpTidslinje = lagGrunnbeløpTidslinjeTjeneste.lagGrunnbeløpTidslinjeForPeriode(perioder);
         var grunnbeløpFaktorTidslinje = LagGrunnbeløpFaktorTidslinje.lagGrunnbeløpFaktorTidslinje(fødselsdato);
-
+        var barnetilleggTidslinje = lagBarnetilleggTidslinje.lagTidslinje(behandlingRef);
 
         var satsTidslinje = perioder
             .intersection(grunnbeløpFaktorTidslinje, StandardCombinators::rightOnly)
-            .mapValue(sats -> new UngdomsytelseSatser(null, null, sats.getGrunnbeløpFaktor(), sats.getSatsType()))
-            .intersection(grunnbeløpTidslinje, UngdomsytelseBeregnDagsats::multiplyCombinator);
+            .mapValue(UngdomsytelseBeregnDagsats::leggTilSatsTypeOgGrunnbeløpFaktor)
+            .intersection(grunnbeløpTidslinje, leggTilGrunnbeløp())
+            .combine(barnetilleggTidslinje, leggTilBarnetillegg(), LocalDateTimeline.JoinStyle.LEFT_JOIN)
+            .mapValue(UngdomsytelseSatser.Builder::build);
         return satsTidslinje;
     }
 
-    private static LocalDateSegment<UngdomsytelseSatser> multiplyCombinator(LocalDateInterval di, LocalDateSegment<UngdomsytelseSatser> lhs, LocalDateSegment<BigDecimal> rhs) {
-        var grunnbeløp = rhs.getValue();
-        var dagsats = lhs.getValue().grunnbeløpFaktor().multiply(grunnbeløp)
-            .divide(BigDecimal.valueOf(VIRKEDAGER_I_ET_ÅR), 2, RoundingMode.HALF_UP);
-        return new LocalDateSegment<>(di, new UngdomsytelseSatser(dagsats, grunnbeløp, lhs.getValue().grunnbeløpFaktor(), lhs.getValue().satsType()));
+    private static UngdomsytelseSatser.Builder leggTilSatsTypeOgGrunnbeløpFaktor(Sats sats) {
+        return UngdomsytelseSatser.builder().medGrunnbeløpFaktor(sats.getGrunnbeløpFaktor()).medSatstype(sats.getSatsType());
+    }
+
+    private static LocalDateSegmentCombinator<UngdomsytelseSatser.Builder, BigDecimal, UngdomsytelseSatser.Builder> leggTilGrunnbeløp() {
+        return (di, lhs, rhs) -> new LocalDateSegment<>(di, lhs.getValue().medGrunnbeløp(rhs.getValue()));
+    }
+
+    private static LocalDateSegmentCombinator<UngdomsytelseSatser.Builder, LagBarnetilleggTidslinje.Barnetillegg, UngdomsytelseSatser.Builder> leggTilBarnetillegg() {
+        return (di, lhs, rhs) -> new LocalDateSegment<>(di,
+            rhs == null ?
+                lhs.getValue().medAntallBarn(0).medBarnetilleggDagsats(BigDecimal.ZERO) :
+                lhs.getValue().medAntallBarn(rhs.getValue().antallBarn()).medBarnetilleggDagsats(rhs.getValue().dagsats()));
     }
 
 }
