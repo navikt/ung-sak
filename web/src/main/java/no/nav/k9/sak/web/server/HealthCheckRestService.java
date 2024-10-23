@@ -9,6 +9,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.sak.web.server.jetty.JettyServer;
 import no.nav.k9.sikkerhet.oidc.config.OpenIDConfig;
 import no.nav.k9.sikkerhet.oidc.config.OpenIDConfigProvider;
@@ -35,7 +36,8 @@ public class HealthCheckRestService {
         var configs = OpenIDConfigProvider.instance().getConfigs().stream().map(OpenIDConfig::getProvider).collect(Collectors.toSet());
         Response.ResponseBuilder builder;
 
-        if (configs.size() > 1) {
+        //STS er fjernet for VTP, men fortsatt aktiv ellers.
+        if (Environment.current().isLocal() && !configs.isEmpty() || configs.size() > 1) {
             builder = Response.ok("OK", MediaType.TEXT_PLAIN_TYPE);
         } else {
             builder = Response.serverError();
