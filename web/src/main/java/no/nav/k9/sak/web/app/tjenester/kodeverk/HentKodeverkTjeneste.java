@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
 import no.nav.k9.kodeverk.Fagsystem;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
@@ -77,7 +76,6 @@ public class HentKodeverkTjeneste {
         map.put(OppgaveÅrsak.class.getSimpleName(), OppgaveÅrsak.kodeMap().values());
         map.put(MedlemskapManuellVurderingType.class.getSimpleName(), filtrerMedlemskapManuellVurderingType(MedlemskapManuellVurderingType.kodeMap().values()));
         map.put(BehandlingResultatType.class.getSimpleName(), BehandlingResultatType.kodeMap().values());
-        map.put(VirksomhetType.class.getSimpleName(), VirksomhetType.kodeMap().values());
         map.put(PersonstatusType.class.getSimpleName(), PersonstatusType.kodeMap().values());
         map.put(Venteårsak.class.getSimpleName(), Venteårsak.kodeMap().values());
         map.put(BehandlingType.class.getSimpleName(), BehandlingType.kodeMap().values());
