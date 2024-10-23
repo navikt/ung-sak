@@ -511,6 +511,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektAktivitetStatus"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -518,6 +520,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektArbeidType"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -525,6 +529,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektArbeidsforholdHandlingType"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -532,6 +538,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektArbeidskategori"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -539,6 +547,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektAvslagsårsak"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -557,6 +567,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektBehandlingResultatType"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -564,6 +576,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektBehandlingStatus"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -571,6 +585,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektBehandlingType"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -578,6 +594,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektBehandlingÅrsakType"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -585,6 +603,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektDokumentTypeId"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -592,6 +612,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektFagsakStatus"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -599,6 +621,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektFagsakYtelseType"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -606,6 +630,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektFagsystem"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -613,6 +639,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektFaktaOmBeregningTilfelle"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -620,6 +648,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektHistorikkAktør"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -627,6 +657,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektHistorikkAvklartSoeknadsperiodeType"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -634,6 +666,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektHistorikkBegrunnelseType"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -641,6 +675,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektHistorikkEndretFeltType"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -648,6 +684,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektHistorikkEndretFeltVerdiType"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -655,6 +693,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektHistorikkOpplysningType"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -662,6 +702,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektHistorikkResultatType"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -669,6 +711,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektHistorikkinnslagType"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -676,6 +720,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektInntektskategori"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -683,6 +729,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektKonsekvensForYtelsen"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -690,6 +738,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektLandkoder"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -697,6 +747,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektMedlemskapDekningType"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -704,6 +756,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektMedlemskapManuellVurderingType"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -711,6 +765,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektMedlemskapType"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -718,6 +774,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektOppgaveÅrsak"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -725,6 +783,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektOpptjeningAktivitetType"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -732,6 +792,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektPermisjonsbeskrivelseType"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -739,6 +801,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektPersonstatusType"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -746,6 +810,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektRegion"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -753,6 +819,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektRelatertYtelseTilstand"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -760,6 +828,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektRevurderingVarslingÅrsak"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -767,6 +837,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektSivilstandType"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -774,6 +846,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektSkjermlenkeType"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -781,6 +855,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektSpråkkode"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -788,6 +864,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektTilbakekrevingVidereBehandling"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -795,6 +873,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektUtenlandsoppholdÅrsak"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -802,6 +882,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektVedtakResultatType"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -809,6 +891,8 @@
             "items" : {
               "$ref" : "#/components/schemas/VenteårsakSomObjekt"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -816,6 +900,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektVilkårType"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -823,6 +909,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektVurderArbeidsforholdHistorikkinnslag"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -830,6 +918,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektVurderÅrsak"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           },
@@ -837,6 +927,8 @@
             "items" : {
               "$ref" : "#/components/schemas/KodeverdiSomObjektÅrsakTilVurdering"
             },
+            "maxItems" : 2147483647,
+            "minItems" : 0,
             "type" : "array",
             "uniqueItems" : true
           }
