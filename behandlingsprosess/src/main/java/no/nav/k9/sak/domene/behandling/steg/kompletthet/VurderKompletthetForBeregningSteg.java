@@ -7,8 +7,10 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRST�
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
@@ -37,11 +39,13 @@ import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository
 import no.nav.k9.sak.dokument.bestill.DokumentBestillerApplikasjonTjeneste;
 import no.nav.k9.sak.domene.behandling.steg.beregningsgrunnlag.BeregningsgrunnlagSteg;
 import no.nav.k9.sak.domene.behandling.steg.kompletthet.internal.KompletthetBeregningTjeneste;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.kompletthet.ManglendeVedlegg;
 import no.nav.k9.sak.kontrakt.dokument.BestillBrevDto;
 import no.nav.k9.sak.kontrakt.dokument.MottakerDto;
 import no.nav.k9.sak.produksjonsstyring.totrinn.TotrinnRepository;
 import no.nav.k9.sak.produksjonsstyring.totrinn.Totrinnsvurdering;
+import no.nav.k9.sak.typer.Arbeidsgiver;
 
 @FagsakYtelseTypeRef(PLEIEPENGER_SYKT_BARN)
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
@@ -123,10 +127,10 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
                 .distinct()
                 .map(arbeidsgiver -> arbeidsgiver != null ? new Mottaker(arbeidsgiver.getIdentifikator(), arbeidsgiver.getErVirksomhet() ? IdType.ORGNR : IdType.AKTØRID) : new Mottaker(ref.getAktørId().getAktørId(), IdType.AKTØRID))
                 .collect(Collectors.toSet());
-            arbeidsgiverPortalenTjeneste.sendInntektsmeldingForespørsel(manglendeBestillinger);
+
+            var forspørsler = mapTilForespørsler(perioderMedManglendeVedlegg);
+            arbeidsgiverPortalenTjeneste.oppdaterInntektsmeldingforespørslerISak(forspørsler, ref);
             sendBrev(ref.getBehandlingId(), DokumentMalType.fraKode(kompletthetsAksjon.getDokumentMalType().getKode()), aktørerDetSkalEtterlysesFra);
-
-
         }
     }
 
@@ -164,6 +168,18 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
             throw new IllegalArgumentException("Ukjent aksjonspunkt definisjon " + aksjonspunktDefinisjon);
         }
 
+    }
+
+    private static Map<DatoIntervallEntitet, List<Arbeidsgiver>> mapTilForespørsler(List<PeriodeMedMangler> perioderMedMangler) {
+        Map<DatoIntervallEntitet, List<Arbeidsgiver>> forespørselMap = new HashMap<>();
+        for (var periodeMedMangler : perioderMedMangler) {
+            var periode = periodeMedMangler.getPeriode();
+            var arbeidsgivere = periodeMedMangler.getMangler().stream()
+                .map(ManglendeVedlegg::getArbeidsgiver)
+                .collect(Collectors.toList());
+            forespørselMap.put(periode, arbeidsgivere);
+        }
+        return forespørselMap;
     }
 
     private boolean erIkkeSendtBrevTilSammeMottakerIDenneBehandlingen(List<BestiltEtterlysning> bestilteEtterlysninger, BestiltEtterlysning it) {
