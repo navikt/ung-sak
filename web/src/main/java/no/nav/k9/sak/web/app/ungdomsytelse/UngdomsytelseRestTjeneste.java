@@ -72,6 +72,7 @@ public class UngdomsytelseRestTjeneste {
                     p.getGrunnbeløpFaktor(),
                     p.getGrunnbeløp(),
                     p.getSatsType(),
+                    p.getAntallBarn(),
                     p.getDagsatsBarnetillegg()))
                 .toList();
         }

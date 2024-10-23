@@ -1,12 +1,12 @@
 package no.nav.k9.sak.kontrakt.ungdomsytelse.beregning;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
 
 import no.nav.k9.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 
@@ -20,7 +20,8 @@ public record UngdomsytelseSatsPeriodeDto(
     @JsonProperty(value = "grunnbeløpFaktor", required = true) BigDecimal grunnbeløpFaktor,
     @JsonProperty(value = "grunnbeløp", required = true) BigDecimal grunnbeløp,
     @JsonProperty(value = "satsType", required = true) UngdomsytelseSatsType satsType,
-        @JsonProperty(value = "dagsatsBarnetillegg", required = true) BigDecimal dagsatsBarnetillegg
+    @JsonProperty(value = "antallBarn", required = true) int antallBarn,
+    @JsonProperty(value = "dagsatsBarnetillegg", required = true) BigDecimal dagsatsBarnetillegg
 
 ) {
 }
