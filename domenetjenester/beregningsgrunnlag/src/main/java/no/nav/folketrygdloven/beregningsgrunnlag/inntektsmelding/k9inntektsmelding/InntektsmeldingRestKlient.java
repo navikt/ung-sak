@@ -3,6 +3,7 @@ package no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.k9inntektsmeld
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.LocalDate;
 
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
@@ -31,7 +32,6 @@ import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 
-
 @ApplicationScoped
 @ScopedRestIntegration(scopeKey = "k9inntektsmelding.scope", defaultScope = "api://prod-fss.k9saksbehandling.k9-inntektsmelding/.default")
 public class InntektsmeldingRestKlient {
@@ -43,6 +43,7 @@ public class InntektsmeldingRestKlient {
     private URI endpoint;
     private URI opprettForespørselEndpoint;
     private URI oppdaterSakEndpoint;
+    private URI settAlleTilUtgåttEndpoint;
 
     protected InntektsmeldingRestKlient() {
         // cdi
@@ -65,10 +66,16 @@ public class InntektsmeldingRestKlient {
         this.endpoint = endpoint;
         this.opprettForespørselEndpoint = toUri("/api/foresporsel/opprett");
         this.oppdaterSakEndpoint = toUri("/api/foresporsel/oppdater");
+        this.settAlleTilUtgåttEndpoint = toUri("/api/foresporsel/sett-til-utgatt");
     }
 
-
-    public void opprettForespørsel(OpprettForespørselRequest request) {
+    public void opprettForespørsel(String aktørId, String orgnr, LocalDate stp, YtelseType ytelseType, String saksnummer) {
+        var request = new OpprettForespørselRequest(
+            new AktørIdDto(aktørId),
+            new OrganisasjonsnummerDto(orgnr),
+            stp,
+            ytelseType,
+            new SaksnummerDto(saksnummer));
         var endpoint = opprettForespørselEndpoint;
         try {
             utførKall(endpoint, innteksmeldingJsonWriter.writeValueAsString(request));
@@ -79,6 +86,16 @@ public class InntektsmeldingRestKlient {
 
     public void oppdaterSak(OppdaterForespørslerISakRequest request) {
         var endpoint = oppdaterSakEndpoint;
+        try {
+            utførKall(endpoint, innteksmeldingJsonWriter.writeValueAsString(request));
+        } catch (JsonProcessingException e) {
+            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
+        }
+    }
+
+    public void settAlleÅpneForespørslerTilUtgått(String saksnummer) {
+        var request = new SettForespørslerUtgåttRequest(null, new SaksnummerDto(saksnummer), null);
+        var endpoint = settAlleTilUtgåttEndpoint;
         try {
             utførKall(endpoint, innteksmeldingJsonWriter.writeValueAsString(request));
         } catch (JsonProcessingException e) {

@@ -9,8 +9,12 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.jetbrains.annotations.NotNull;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
@@ -75,13 +79,18 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
 
     private TreeSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
         var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId);
-        TreeSet<DatoIntervallEntitet> periode = ungdomsprogramPeriodeGrunnlag.stream()
+        var periodeTidslinje = ungdomsprogramPeriodeGrunnlag.stream()
             .flatMap(gr -> gr.getUngdomsprogramPerioder().getPerioder().stream())
             .map(this::bestemPeriode)
-            .collect(Collectors.toCollection(TreeSet::new));
+            .map(p -> new LocalDateTimeline<>(p.getFomDato(), p.getTomDato(), true))
+            .reduce(LocalDateTimeline::crossJoin)
+            .map(this::komprimer)
+            .orElse(LocalDateTimeline.empty());
+        return periodeTidslinje.getLocalDateIntervals().stream().map(DatoIntervallEntitet::fra).collect(Collectors.toCollection(TreeSet::new));
+    }
 
-
-        return periode;
+    private LocalDateTimeline<Boolean> komprimer(LocalDateTimeline<Boolean> t) {
+        return t.compress((d1, d2) -> getKantIKantVurderer().erKantIKant(DatoIntervallEntitet.fra(d1), DatoIntervallEntitet.fra(d2)), Boolean::equals, StandardCombinators::alwaysTrueForMatch);
     }
 
     private DatoIntervallEntitet bestemPeriode(UngdomsprogramPeriode it) {
