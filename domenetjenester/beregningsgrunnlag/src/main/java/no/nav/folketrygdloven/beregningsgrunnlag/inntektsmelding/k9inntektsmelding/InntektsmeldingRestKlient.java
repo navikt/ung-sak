@@ -30,6 +30,7 @@ import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.integrasjon.rest.SystemUserOidcRestClient;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 
 
 @ApplicationScoped
@@ -43,6 +44,7 @@ public class InntektsmeldingRestKlient {
     private URI endpoint;
     private URI opprettForespørselEndpoint;
     private URI oppdaterSakEndpoint;
+    private URI settAlleTilUtgåttEndpoint;
 
     protected InntektsmeldingRestKlient() {
         // cdi
@@ -65,6 +67,7 @@ public class InntektsmeldingRestKlient {
         this.endpoint = endpoint;
         this.opprettForespørselEndpoint = toUri("/api/foresporsel/opprett");
         this.oppdaterSakEndpoint = toUri("/api/foresporsel/oppdater");
+        this.settAlleTilUtgåttEndpoint = toUri("/api/foresporsel/sett-til-utgatt/alle");
     }
 
 
@@ -79,6 +82,15 @@ public class InntektsmeldingRestKlient {
 
     public void oppdaterSak(OppdaterForespørslerISakRequest request) {
         var endpoint = oppdaterSakEndpoint;
+        try {
+            utførKall(endpoint, innteksmeldingJsonWriter.writeValueAsString(request));
+        } catch (JsonProcessingException e) {
+            throw RestTjenesteFeil.FEIL.feilVedJsonParsing(e.getMessage()).toException();
+        }
+    }
+
+    public void settAlleÅpneForespørslerTilUtgått(SaksnummerDto request) {
+        var endpoint = settAlleTilUtgåttEndpoint;
         try {
             utførKall(endpoint, innteksmeldingJsonWriter.writeValueAsString(request));
         } catch (JsonProcessingException e) {
