@@ -33,6 +33,6 @@ public class LukkAlleÅpneImForespørslerISakTask implements ProsessTaskHandler 
     public void doTask(ProsessTaskData prosessTaskData) {
         String saksnummer = prosessTaskData.getSaksnummer();
         log.info("Setter inntektsmeldingforespørsler for sak {} som ikke er behandlet til utgått", saksnummer);
-        inntektsmeldingRestKlient.lukkAlleÅpneForespørsler(new SaksnummerDto(saksnummer));
+        inntektsmeldingRestKlient.settAlleÅpneForespørslerTilUtgått(new SaksnummerDto(saksnummer));
     }
 }

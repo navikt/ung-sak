@@ -44,7 +44,7 @@ public class InntektsmeldingRestKlient {
     private URI endpoint;
     private URI opprettForespørselEndpoint;
     private URI oppdaterSakEndpoint;
-    private URI lukkÅpneEndpoint;
+    private URI settAlleTilUtgåttEndpoint;
 
     protected InntektsmeldingRestKlient() {
         // cdi
@@ -67,7 +67,7 @@ public class InntektsmeldingRestKlient {
         this.endpoint = endpoint;
         this.opprettForespørselEndpoint = toUri("/api/foresporsel/opprett");
         this.oppdaterSakEndpoint = toUri("/api/foresporsel/oppdater");
-        this.lukkÅpneEndpoint = toUri("/api/foresporsel/lukk-aapne");
+        this.settAlleTilUtgåttEndpoint = toUri("/api/foresporsel/sett-til-utgatt/alle");
     }
 
 
@@ -89,8 +89,8 @@ public class InntektsmeldingRestKlient {
         }
     }
 
-    public void lukkAlleÅpneForespørsler(SaksnummerDto request) {
-        var endpoint = lukkÅpneEndpoint;
+    public void settAlleÅpneForespørslerTilUtgått(SaksnummerDto request) {
+        var endpoint = settAlleTilUtgåttEndpoint;
         try {
             utførKall(endpoint, innteksmeldingJsonWriter.writeValueAsString(request));
         } catch (JsonProcessingException e) {
