@@ -5,14 +5,15 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import org.jetbrains.annotations.NotNull;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
@@ -78,15 +79,27 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
     }
 
     private TreeSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
+        var initieltGrunnlag = ungdomsprogramPeriodeRepository.hentInitieltGrunnlag(behandlingId);
         var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId);
-        var periodeTidslinje = ungdomsprogramPeriodeGrunnlag.stream()
+        var periodeTidslinje = lagPeriodeTidslinje(ungdomsprogramPeriodeGrunnlag);
+        var initiellPeriodeTidslinje = lagPeriodeTidslinje(initieltGrunnlag);
+        var endretPerioderTidslinje = initiellPeriodeTidslinje.crossJoin(periodeTidslinje, UngdomsytelseVilkårsperioderTilVurderingTjeneste::erEndret)
+            .filterValue(v -> v);
+        return endretPerioderTidslinje.getLocalDateIntervals().stream().map(DatoIntervallEntitet::fra).collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    private static LocalDateSegment<Boolean> erEndret(LocalDateInterval di, LocalDateSegment<Boolean> lhs, LocalDateSegment<Boolean> rhs) {
+        return new LocalDateSegment<>(di, lhs == null || rhs == null || lhs.getValue().equals(rhs.getValue()));
+    }
+
+    private LocalDateTimeline<Boolean> lagPeriodeTidslinje(Optional<UngdomsprogramPeriodeGrunnlag> ungdomsprogramPeriodeGrunnlag) {
+        return ungdomsprogramPeriodeGrunnlag.stream()
             .flatMap(gr -> gr.getUngdomsprogramPerioder().getPerioder().stream())
             .map(this::bestemPeriode)
             .map(p -> new LocalDateTimeline<>(p.getFomDato(), p.getTomDato(), true))
             .reduce(LocalDateTimeline::crossJoin)
             .map(this::komprimer)
             .orElse(LocalDateTimeline.empty());
-        return periodeTidslinje.getLocalDateIntervals().stream().map(DatoIntervallEntitet::fra).collect(Collectors.toCollection(TreeSet::new));
     }
 
     private LocalDateTimeline<Boolean> komprimer(LocalDateTimeline<Boolean> t) {

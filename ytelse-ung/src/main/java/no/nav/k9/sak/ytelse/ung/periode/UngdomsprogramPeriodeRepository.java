@@ -24,6 +24,10 @@ public class UngdomsprogramPeriodeRepository {
         return hentEksisterendeGrunnlag(behandlingId);
     }
 
+    public Optional<UngdomsprogramPeriodeGrunnlag> hentInitieltGrunnlag(Long behandlingId) {
+        return getInitieltGrunnlag(behandlingId);
+    }
+
     public void lagre(Long behandlingId, Collection<UngdomsprogramPeriode> ungdomsprogramPerioder) {
         var nyttGrunnlag = new UngdomsprogramPeriodeGrunnlag(behandlingId);
         nyttGrunnlag.leggTil(ungdomsprogramPerioder);
@@ -60,6 +64,18 @@ public class UngdomsprogramPeriodeRepository {
                 "FROM UngdomsprogramPeriodeGrunnlag gr " +
                 "WHERE gr.behandlingId = :behandlingId " +
                 "AND gr.aktiv = true", UngdomsprogramPeriodeGrunnlag.class);
+
+        query.setParameter("behandlingId", id);
+
+        return HibernateVerktøy.hentUniktResultat(query);
+    }
+
+    private Optional<UngdomsprogramPeriodeGrunnlag> getInitieltGrunnlag(Long id) {
+        var query = entityManager.createQuery(
+            "SELECT gr " +
+                "FROM UngdomsprogramPeriodeGrunnlag gr " +
+                "WHERE gr.behandlingId = :behandlingId " +
+                "ORDER BY gr.opprettetTidspunkt, gr.id", UngdomsprogramPeriodeGrunnlag.class);
 
         query.setParameter("behandlingId", id);
 
