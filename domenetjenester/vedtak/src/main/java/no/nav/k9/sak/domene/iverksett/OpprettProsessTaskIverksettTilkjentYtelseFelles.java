@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.k9inntektsmelding.LukkAlleÅpneImForespørslerISakTask;
+import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.k9inntektsmelding.SettÅpneImForespørslerTilUtgåttTask;
 import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedService;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
@@ -133,7 +133,7 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
     }
 
     private ProsessTaskData opprettTaskForÅLukkeÅpneImForespørsler(Behandling behandling) {
-        ProsessTaskData taskdata = ProsessTaskData.forProsessTask(LukkAlleÅpneImForespørslerISakTask.class);
+        ProsessTaskData taskdata = ProsessTaskData.forProsessTask(SettÅpneImForespørslerTilUtgåttTask.class);
         taskdata.setSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
         return taskdata;
     }
