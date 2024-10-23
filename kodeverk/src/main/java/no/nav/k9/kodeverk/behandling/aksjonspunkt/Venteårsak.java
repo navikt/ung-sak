@@ -191,6 +191,10 @@ public enum Venteårsak implements Kodeverdi {
         return Map.of("kanVelges", "" + kanVelgesIGui);
     }
 
+    public boolean getKanVelgesIGui() {
+        return this.kanVelgesIGui;
+    }
+
     @JsonProperty
     @Override
     public String getKode() {
