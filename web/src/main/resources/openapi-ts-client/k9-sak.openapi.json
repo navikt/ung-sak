@@ -12749,39 +12749,37 @@
       },
       "UngdomsytelseSatsPeriodeDto" : {
         "properties" : {
-          "dagsats" : {
+          "antallBarn" : {
+            "format" : "int32",
             "nullable" : true,
+            "type" : "integer"
+          },
+          "dagsats" : {
             "type" : "number"
           },
           "dagsatsBarnetillegg" : {
-            "nullable" : true,
             "type" : "number"
           },
           "fom" : {
             "format" : "date",
-            "nullable" : true,
             "type" : "string"
           },
           "grunnbeløp" : {
-            "nullable" : true,
             "type" : "number"
           },
           "grunnbeløpFaktor" : {
-            "nullable" : true,
             "type" : "number"
           },
           "satsType" : {
             "enum" : [ "LAV", "HØY" ],
-            "nullable" : true,
             "type" : "string"
           },
           "tom" : {
             "format" : "date",
-            "nullable" : true,
             "type" : "string"
           }
         },
-        "required" : [ "dagsats", "dagsatsBarnetillegg", "fom", "grunnbeløp", "grunnbeløpFaktor", "satsType", "tom" ],
+        "required" : [ "antallBarn", "dagsats", "dagsatsBarnetillegg", "fom", "grunnbeløp", "grunnbeløpFaktor", "satsType", "tom" ],
         "type" : "object"
       },
       "UngdomsytelseUttakPeriodeDto" : {
