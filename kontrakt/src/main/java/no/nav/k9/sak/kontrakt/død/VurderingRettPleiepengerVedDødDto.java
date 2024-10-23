@@ -10,7 +10,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -29,7 +28,8 @@ public class VurderingRettPleiepengerVedDødDto extends BekreftetAksjonspunktDto
     private RettVedDødType rettVedDødType;
 
     @JsonProperty(value = "vurdertAv")
-    @Pattern(regexp = Patterns.BOKSTAVER_OG_TALL, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Size(max = 20)
+    @Pattern(regexp = Patterns.BOKSTAVER_OG_TALL_UTEN_WHITESPACE_OG_SPESIALTEGN, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String vurdertAv;
 
     @JsonProperty(value = "vurdertTidspunkt")
