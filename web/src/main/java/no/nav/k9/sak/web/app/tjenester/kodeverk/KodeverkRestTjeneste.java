@@ -182,6 +182,7 @@ public class KodeverkRestTjeneste {
 
     @GET
     @Path("/alle/objekt")
+    @BeskyttetRessurs(action = READ, resource = APPLIKASJON, sporingslogg = false)
     @Operation(description = "Alle statisk kodeverdier som objekt", tags = "kodeverk")
     public AlleKodeverdierSomObjektResponse alleKodeverdierSomObjekt() {
         return KodeverkRestTjeneste.oppslagAlleResponse;
