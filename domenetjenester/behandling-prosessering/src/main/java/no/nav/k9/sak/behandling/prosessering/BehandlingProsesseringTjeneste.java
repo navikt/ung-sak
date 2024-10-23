@@ -28,20 +28,6 @@ public interface BehandlingProsesseringTjeneste {
     // Støttefunksjon for å sørge for at registerdata vil bli oppdatert, gjør ikke oppdatering
     void tvingInnhentingRegisteropplysninger(Behandling behandling);
 
-    // AV/PÅ Vent
-    void taBehandlingAvVent(Behandling behandling);
-
-    void settBehandlingPåVent(Behandling behandling, AksjonspunktDefinisjon apDef, LocalDateTime fristTid, Venteårsak venteårsak, String venteårsakVariant);
-
-    // For snapshot av grunnlag før man gjør andre endringer enn registerinnhenting
-    EndringsresultatSnapshot taSnapshotAvBehandlingsgrunnlag(Behandling behandling);
-
-    // Returnerer endringer i grunnlag mellom snapshot og nåtilstand
-    EndringsresultatDiff finnGrunnlagsEndring(Behandling behandling, EndringsresultatSnapshot før);
-
-    // Spole prosessen basert på diff. Til bruk ved grunnlagsendringer utenom register (søknad)
-    void reposisjonerBehandlingVedEndringer(Behandling behandling, EndringsresultatDiff grunnlagDiff);
-
     /** Innhenter registerdata hvis utdatert. */
     ProsessTaskGruppe lagOppdaterFortsettTasksForPolling(Behandling behandling);
 
@@ -66,7 +52,5 @@ public interface BehandlingProsesseringTjeneste {
     void opprettTasksForInitiellRegisterInnhenting(Behandling behandling);
 
     List<String> utledRegisterinnhentingTaskTyper(Behandling behandling);
-
-    void feilPågåendeTaskHvisFremtidigTaskEksisterer(Behandling behandling, Long kjørendeTaskId, Set<String> set);
 
 }
