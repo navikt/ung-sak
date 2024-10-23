@@ -77,7 +77,7 @@ public class UngdomsprogramPeriodeRepository {
                 "WHERE gr.behandlingId = :behandlingId " +
                 "ORDER BY gr.opprettetTidspunkt, gr.id", UngdomsprogramPeriodeGrunnlag.class);
 
-        query.setParameter("behandlingId", id);
+        query.setParameter("behandlingId", id).setMaxResults(1);
 
         return HibernateVerktøy.hentUniktResultat(query);
     }
