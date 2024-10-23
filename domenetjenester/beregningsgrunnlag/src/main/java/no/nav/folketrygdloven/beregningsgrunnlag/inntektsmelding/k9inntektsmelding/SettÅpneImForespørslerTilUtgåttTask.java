@@ -9,23 +9,22 @@ import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
-import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 
 @ApplicationScoped
-@ProsessTask(LukkAlleÅpneImForespørslerISakTask.TASKTYPE)
+@ProsessTask(SettÅpneImForespørslerTilUtgåttTask.TASKTYPE)
 @FagsakProsesstaskRekkefølge(gruppeSekvens = false)
-public class LukkAlleÅpneImForespørslerISakTask implements ProsessTaskHandler {
-    public static final String TASKTYPE = "iverksetteVedtak.lukkÅpneImForespørsler";
+public class SettÅpneImForespørslerTilUtgåttTask implements ProsessTaskHandler {
+    public static final String TASKTYPE = "iverksetteVedtak.settÅpneImForespørslerTilUtgått";
 
-    private static final Logger log = LoggerFactory.getLogger(LukkAlleÅpneImForespørslerISakTask.class);
+    private static final Logger log = LoggerFactory.getLogger(SettÅpneImForespørslerTilUtgåttTask.class);
 
     private InntektsmeldingRestKlient inntektsmeldingRestKlient;
 
-    public LukkAlleÅpneImForespørslerISakTask() {
+    public SettÅpneImForespørslerTilUtgåttTask() {
     }
 
     @Inject
-    public LukkAlleÅpneImForespørslerISakTask(InntektsmeldingRestKlient inntektsmeldingRestKlient) {
+    public SettÅpneImForespørslerTilUtgåttTask(InntektsmeldingRestKlient inntektsmeldingRestKlient) {
         this.inntektsmeldingRestKlient = inntektsmeldingRestKlient;
     }
 
@@ -33,6 +32,6 @@ public class LukkAlleÅpneImForespørslerISakTask implements ProsessTaskHandler 
     public void doTask(ProsessTaskData prosessTaskData) {
         String saksnummer = prosessTaskData.getSaksnummer();
         log.info("Setter inntektsmeldingforespørsler for sak {} som ikke er behandlet til utgått", saksnummer);
-        inntektsmeldingRestKlient.settAlleÅpneForespørslerTilUtgått(new SaksnummerDto(saksnummer));
+        inntektsmeldingRestKlient.settAlleÅpneForespørslerTilUtgått(saksnummer);
     }
 }
