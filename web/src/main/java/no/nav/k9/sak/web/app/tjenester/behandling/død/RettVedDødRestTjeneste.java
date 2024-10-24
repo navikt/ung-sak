@@ -81,9 +81,11 @@ public class RettVedDødRestTjeneste {
     ) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuidDto.getBehandlingUuid());
         var grunnlag = rettPleiepengerVedDødRepository.hentHvisEksisterer(behandling.getId());
+
         if (grunnlag.isPresent()) {
+            var aksjonspunkt = behandling.getAksjonspunkter().stream().filter(ap -> ap.getAksjonspunktDefinisjon().getKode().equals("9202") && ap.erUtført()).findFirst().get();
             var rettVedDød = grunnlag.get().getRettVedPleietrengendeDød();
-            var responseDto = new VurderingRettPleiepengerVedDødDto(rettVedDød.getVurdering(), rettVedDød.getRettVedDødType(), rettVedDød.getVurdertAv(), rettVedDød.getVurdertTidspunkt());
+            var responseDto = new VurderingRettPleiepengerVedDødDto(rettVedDød.getVurdering(), rettVedDød.getRettVedDødType(), aksjonspunkt.getAnsvarligSaksbehandler(), aksjonspunkt.getEndretTidspunkt());
             return Response.ok(responseDto).build();
         }
         return Response.noContent().build();

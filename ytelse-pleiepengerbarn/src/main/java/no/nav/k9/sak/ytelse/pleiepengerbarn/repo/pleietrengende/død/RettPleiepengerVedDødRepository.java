@@ -69,9 +69,7 @@ public class RettPleiepengerVedDødRepository {
         Optional<RettPleiepengerVedDødGrunnlag> grunnnlag = hentEksisterendeGrunnlag(gammelBehandlingId);
         grunnnlag.ifPresent(entitet -> lagreOgFlush(nyBehandlingId, new RettPleiepengerVedDød(
             entitet.getRettVedPleietrengendeDød().getVurdering(),
-            entitet.getRettVedPleietrengendeDød().getRettVedDødType(),
-            entitet.getRettVedPleietrengendeDød().getVurdertAv(),
-            entitet.getRettVedPleietrengendeDød().getVurdertTidspunkt()
+            entitet.getRettVedPleietrengendeDød().getRettVedDødType()
         )));
     }
 }

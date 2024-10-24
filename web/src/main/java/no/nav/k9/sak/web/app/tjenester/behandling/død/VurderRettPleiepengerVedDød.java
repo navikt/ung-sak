@@ -32,7 +32,7 @@ public class VurderRettPleiepengerVedDød implements AksjonspunktOppdaterer<Vurd
     @Override
     public OppdateringResultat oppdater(VurderingRettPleiepengerVedDødDto dto, AksjonspunktOppdaterParameter param) {
         String saksbehandlerIdent = SubjectHandler.getSubjectHandler().getUid();
-        rettPleiepengerVedDødRepository.lagreOgFlush(param.getBehandlingId(), new RettPleiepengerVedDød(dto.getVurdering(), dto.getRettVedDødType(), saksbehandlerIdent, LocalDateTime.now()));
+        rettPleiepengerVedDødRepository.lagreOgFlush(param.getBehandlingId(), new RettPleiepengerVedDød(dto.getVurdering(), dto.getRettVedDødType()));
         return OppdateringResultat.nyttResultat();
     }
 

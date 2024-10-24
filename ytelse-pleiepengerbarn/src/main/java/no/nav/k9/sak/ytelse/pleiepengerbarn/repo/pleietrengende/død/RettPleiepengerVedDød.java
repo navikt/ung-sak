@@ -23,12 +23,6 @@ public class RettPleiepengerVedDød extends BaseEntitet {
     @Column(name = "rett_ved_doed_type")
     private RettVedDødType rettVedDødType;
 
-    @Column(name = "vurdert_av")
-    private String vurdertAv;
-
-    @Column(name = "vurdert_tidspunkt")
-    private LocalDateTime vurdertTidspunkt;
-
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
@@ -37,11 +31,9 @@ public class RettPleiepengerVedDød extends BaseEntitet {
         // Hibernate
     }
 
-    public RettPleiepengerVedDød(String vurdering, RettVedDødType rettVedDødType, String vurdertAv, LocalDateTime vurdertTidspunkt) {
+    public RettPleiepengerVedDød(String vurdering, RettVedDødType rettVedDødType) {
         this.vurdering = vurdering;
         this.rettVedDødType = rettVedDødType;
-        this.vurdertAv = vurdertAv;
-        this.vurdertTidspunkt = vurdertTidspunkt;
     }
 
     public Long getId() {
@@ -50,14 +42,6 @@ public class RettPleiepengerVedDød extends BaseEntitet {
 
     public String getVurdering() {
         return vurdering;
-    }
-
-    public String getVurdertAv() {
-        return vurdertAv;
-    }
-
-    public LocalDateTime getVurdertTidspunkt() {
-        return vurdertTidspunkt;
     }
 
     public RettVedDødType getRettVedDødType() {

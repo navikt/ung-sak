@@ -20,8 +20,8 @@ class RettPleiepengerVedDødRepositoryTest {
     @Test
     void lagre_og_hent_igjen() {
         var behandlingId = 123L;
-        
-        var rettVedDød = new RettPleiepengerVedDød("Har rett på 6 uker.", RettVedDødType.RETT_6_UKER, "saksbehandler", null);
+
+        var rettVedDød = new RettPleiepengerVedDød("Har rett på 6 uker.", RettVedDødType.RETT_6_UKER);
         repo.lagreOgFlush(behandlingId, rettVedDød);
 
 
@@ -32,7 +32,6 @@ class RettPleiepengerVedDødRepositoryTest {
         assertThat(grunnlag.get().getRettVedPleietrengendeDød()).isNotNull();
         assertThat(grunnlag.get().getRettVedPleietrengendeDød().getRettVedDødType()).isEqualTo(RettVedDødType.RETT_6_UKER);
         assertThat(grunnlag.get().getRettVedPleietrengendeDød().getVurdering()).isEqualTo("Har rett på 6 uker.");
-        assertThat(grunnlag.get().getRettVedPleietrengendeDød().getVurdertAv()).isEqualTo("saksbehandler");
 
     }
 }
