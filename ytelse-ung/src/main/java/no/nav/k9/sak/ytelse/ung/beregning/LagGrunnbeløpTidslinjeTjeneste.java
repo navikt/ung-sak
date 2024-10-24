@@ -29,10 +29,11 @@ public class LagGrunnbeløpTidslinjeTjeneste {
     public LocalDateTimeline<BigDecimal> lagGrunnbeløpTidslinjeForPeriode(LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
         var grunnbeløpsdatoer = finnGrunnbeløpsdatoer(tidslinjeTilVurdering);
 
-        var grunnbeløpTidslinje = new LocalDateTimeline<>(grunnbeløpsdatoer.stream()
+        var grunnbeløpTidslinje = grunnbeløpsdatoer.stream()
             .map(d -> kalkulusTjeneste.hentGrunnbeløp(d))
-            .map(g -> new LocalDateSegment<>(g.getPeriode().getFomDato(), g.getPeriode().getTomDato(), BigDecimal.valueOf(g.getVerdi())))
-            .toList());
+            .map(g -> new LocalDateTimeline<>(g.getPeriode().getFomDato(), g.getPeriode().getTomDato(), BigDecimal.valueOf(g.getVerdi())))
+            .reduce(LocalDateTimeline::crossJoin)
+            .orElse(LocalDateTimeline.empty());
         if (grunnbeløpTidslinje.isEmpty()) {
             throw new IllegalStateException("Grunnbeløpstidslinjen var tom. Dette skal ikke skje.");
         }
