@@ -86,10 +86,10 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
 
     private NavigableSet<DatoIntervallEntitet> finnSøktePerioderOgEndringerIUngdomsprogram(Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
-        var søknadsperioder = ungdomsytelseSøknadsperiodeTjeneste.utledPeriode(behandlingId);
-        var søknadsperiodeTidslinje = TidslinjeUtil.tilTidslinje(søknadsperioder);
+        var alleSøknadsperioder = ungdomsytelseSøknadsperiodeTjeneste.utledFullstendigPeriode(behandlingId);
+        var søknadsperiodeTidslinje = TidslinjeUtil.tilTidslinje(alleSøknadsperioder);
         var ungdomsprogramEndretTidslinje = ungdomsprogramPeriodeTjeneste.finnEndretPeriodeTidslinje(BehandlingReferanse.fra(behandling), getKantIKantVurderer());
-        var endretTidslinje = ungdomsprogramEndretTidslinje.crossJoin(søknadsperiodeTidslinje);
+        var endretTidslinje = ungdomsprogramEndretTidslinje.intersection(søknadsperiodeTidslinje);
         return TidslinjeUtil.tilDatoIntervallEntiteter(endretTidslinje);
     }
 

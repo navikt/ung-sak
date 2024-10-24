@@ -2,6 +2,7 @@ package no.nav.k9.sak.ytelse.ung.søknadsperioder;
 
 import java.util.Collections;
 import java.util.NavigableSet;
+import java.util.function.Function;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -20,8 +21,15 @@ public class UngdomsytelseSøknadsperiodeTjeneste {
     }
 
     public NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
-        var søknadsperioder = søknadsperiodeRepository.hentGrunnlag(behandlingId)
-            .map(UngdomsytelseSøknadsperiodeGrunnlag::getRelevantSøknadsperioder);
+        return finnPerioder(behandlingId, UngdomsytelseSøknadsperiodeGrunnlag::getRelevantSøknadsperioder);
+    }
+
+    public NavigableSet<DatoIntervallEntitet> utledFullstendigPeriode(Long behandlingId) {
+        return finnPerioder(behandlingId, UngdomsytelseSøknadsperiodeGrunnlag::getOppgitteSøknadsperioder);
+    }
+
+    private NavigableSet<DatoIntervallEntitet> finnPerioder(Long behandlingId, Function<UngdomsytelseSøknadsperiodeGrunnlag, UngdomsytelseSøknadsperioderHolder> finnPeriodeHolder) {
+        var søknadsperioder = søknadsperiodeRepository.hentGrunnlag(behandlingId).map(finnPeriodeHolder);
 
         if (søknadsperioder.isEmpty() || søknadsperioder.get().getPerioder().isEmpty()) {
             return Collections.emptyNavigableSet();
