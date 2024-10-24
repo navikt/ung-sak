@@ -71,7 +71,7 @@ public class InnhentInntektsmeldingSteg implements BehandlingSteg {
         var manglendeVedleggPerPeriode = kompletthetForBeregningTjeneste.utledAlleManglendeVedleggFraGrunnlag(ref, true);
         var forespørsler = mapTilForespørsler(manglendeVedleggPerPeriode);
 
-        arbeidsgiverPortalenTjeneste.oppdaterInntektsmeldingforespørslerISak(forespørsler, behandling);
+        arbeidsgiverPortalenTjeneste.oppdaterInntektsmeldingforespørslerISak(forespørsler, ref);
         log.info("Oppdaterer forespørsler om inntektsmelding i arbeidsgiverportalen med følgende perioder: {}", forespørsler.keySet());
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
