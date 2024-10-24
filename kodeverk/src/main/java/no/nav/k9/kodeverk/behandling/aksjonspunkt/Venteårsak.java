@@ -186,11 +186,6 @@ public enum Venteårsak implements Kodeverdi {
         return navn;
     }
 
-    @Override
-    public Map<String, String> getEkstraFelter() {
-        return Map.of("kanVelges", "" + kanVelgesIGui);
-    }
-
     public boolean getKanVelgesIGui() {
         return this.kanVelgesIGui;
     }
