@@ -45,11 +45,11 @@ import no.nav.k9.sak.typer.Stillingsprosent;
 
 @Dependent
 class MapOpptjening {
-    private OpptjeningsperioderTjeneste opptjeningsperioderTjeneste;
-    private ArbeidsgiverTjeneste arbeidsgiverTjeneste;
-    private InntektArbeidYtelseTjeneste iayTjeneste;
-    private VilkårResultatRepository vilkårResultatRepository;
-    private OpptjeningAktivitetVurderingOpptjeningsvilkår vurderForOpptjeningsvilkår;
+    private final OpptjeningsperioderTjeneste opptjeningsperioderTjeneste;
+    private final ArbeidsgiverTjeneste arbeidsgiverTjeneste;
+    private final InntektArbeidYtelseTjeneste iayTjeneste;
+    private final VilkårResultatRepository vilkårResultatRepository;
+    private final OpptjeningAktivitetVurderingOpptjeningsvilkår vurderForOpptjeningsvilkår;
 
     @Inject
     MapOpptjening(OpptjeningsperioderTjeneste opptjeningsperioderTjeneste,
@@ -61,6 +61,25 @@ class MapOpptjening {
         this.iayTjeneste = iayTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.vurderForOpptjeningsvilkår = new OpptjeningAktivitetVurderingOpptjeningsvilkår();
+    }
+
+    OpptjeningerDto mapTilOpptjeninger(BehandlingReferanse ref) {
+        Long behandlingId = ref.getBehandlingId();
+
+        var opptjening = new OpptjeningerDto();
+        var opptjeningResultat = opptjeningsperioderTjeneste.hentOpptjeningHvisFinnes(behandlingId);
+        if (opptjeningResultat.isPresent()) {
+            var opptjeninger = new ArrayList<OpptjeningDto>();
+            List<OpptjeningDto> opptjeningDtoer = mapOpptjeninger(ref, opptjeningResultat.get());
+
+            for (var resultat : opptjeningDtoer) {
+                if (resultat.getFastsattOpptjening() != null || !resultat.getOpptjeningAktivitetList().isEmpty()) {
+                    opptjeninger.add(resultat);
+                }
+            }
+            opptjening.setOpptjeninger(opptjeninger);
+        }
+        return opptjening;
     }
 
     private List<OpptjeningDto> mapOpptjeninger(BehandlingReferanse ref, OpptjeningResultat opptjeningResultat) {
@@ -110,25 +129,6 @@ class MapOpptjening {
         return mellomliggendePeriode || vilkår.getPerioder().stream()
             .anyMatch(vilkårPeriode -> vilkårPeriode.getPeriode().overlapper(fom, tom)
                 && (vilkårPeriode.getGjeldendeUtfall() == Utfall.IKKE_OPPFYLT || vilkårPeriode.getErManueltVurdert()));
-    }
-
-    OpptjeningerDto mapTilOpptjeninger(BehandlingReferanse ref) {
-        Long behandlingId = ref.getBehandlingId();
-
-        var opptjening = new OpptjeningerDto();
-        var opptjeningResultat = opptjeningsperioderTjeneste.hentOpptjeningHvisFinnes(behandlingId);
-        if (opptjeningResultat.isPresent()) {
-            var opptjeninger = new ArrayList<OpptjeningDto>();
-            List<OpptjeningDto> opptjeningDtoer = mapOpptjeninger(ref, opptjeningResultat.get());
-
-            for (var resultat : opptjeningDtoer) {
-                if (resultat.getFastsattOpptjening() != null || !resultat.getOpptjeningAktivitetList().isEmpty()) {
-                    opptjeninger.add(resultat);
-                }
-            }
-            opptjening.setOpptjeninger(opptjeninger);
-        }
-        return opptjening;
     }
 
     private OpptjeningPeriodeDto mapFastsattOpptjening(Opptjening fastsattOpptjening) {
