@@ -9,7 +9,6 @@ import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -82,11 +81,15 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
     }
 
     private NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
+        return finnSøktePerioderOgEndringerIUngdomsprogram(behandlingId);
+    }
+
+    private NavigableSet<DatoIntervallEntitet> finnSøktePerioderOgEndringerIUngdomsprogram(Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var søknadsperioder = ungdomsytelseSøknadsperiodeTjeneste.utledPeriode(behandlingId);
-        var søknadsperiodeTidslinje = TidslinjeUtil.tilTidslinjeMedMuligOverlapp(søknadsperioder);
+        var søknadsperiodeTidslinje = TidslinjeUtil.tilTidslinje(søknadsperioder);
         var ungdomsprogramEndretTidslinje = ungdomsprogramPeriodeTjeneste.finnEndretPeriodeTidslinje(BehandlingReferanse.fra(behandling), getKantIKantVurderer());
-        var endretTidslinje = ungdomsprogramEndretTidslinje.intersection(søknadsperiodeTidslinje);
+        var endretTidslinje = ungdomsprogramEndretTidslinje.crossJoin(søknadsperiodeTidslinje);
         return TidslinjeUtil.tilDatoIntervallEntiteter(endretTidslinje);
     }
 

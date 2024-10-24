@@ -31,6 +31,11 @@ public class UngdomsytelseSøknadsperiodeGrunnlag extends BaseEntitet {
 
     @ManyToOne
     @Immutable
+    @JoinColumn(name = "relevant_soknadsperiode_id", nullable = false, updatable = false, unique = true)
+    private UngdomsytelseSøknadsperioderHolder relevanteSøknadsperioder;
+
+    @ManyToOne
+    @Immutable
     @JoinColumn(name = "oppgitt_soknadsperiode_id", nullable = false, updatable = false, unique = true)
     private UngdomsytelseSøknadsperioderHolder oppgitteSøknadsperioder;
 
@@ -47,6 +52,7 @@ public class UngdomsytelseSøknadsperiodeGrunnlag extends BaseEntitet {
     UngdomsytelseSøknadsperiodeGrunnlag(Long behandlingId, UngdomsytelseSøknadsperiodeGrunnlag grunnlag) {
         this.behandlingId = behandlingId;
         this.oppgitteSøknadsperioder = grunnlag.oppgitteSøknadsperioder;
+        this.relevanteSøknadsperioder = grunnlag.relevanteSøknadsperioder;
     }
 
     public UngdomsytelseSøknadsperiodeGrunnlag(Long behandlingId) {
@@ -59,6 +65,10 @@ public class UngdomsytelseSøknadsperiodeGrunnlag extends BaseEntitet {
 
     public UngdomsytelseSøknadsperioderHolder getOppgitteSøknadsperioder() {
         return oppgitteSøknadsperioder;
+    }
+
+    public UngdomsytelseSøknadsperioderHolder getRelevantSøknadsperioder() {
+        return relevanteSøknadsperioder;
     }
 
     public boolean isAktiv() {
@@ -78,17 +88,22 @@ public class UngdomsytelseSøknadsperiodeGrunnlag extends BaseEntitet {
         this.oppgitteSøknadsperioder = new UngdomsytelseSøknadsperioderHolder(perioder);
     }
 
+    void setRelevanteSøknadsperioder(UngdomsytelseSøknadsperioderHolder relevanteSøknadsperioder) {
+        Objects.requireNonNull(relevanteSøknadsperioder);
+        this.relevanteSøknadsperioder = relevanteSøknadsperioder;
+    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UngdomsytelseSøknadsperiodeGrunnlag that = (UngdomsytelseSøknadsperiodeGrunnlag) o;
-        return Objects.equals(oppgitteSøknadsperioder, that.oppgitteSøknadsperioder);
+        return Objects.equals(oppgitteSøknadsperioder, that.oppgitteSøknadsperioder)
+            && Objects.equals(relevanteSøknadsperioder, that.relevanteSøknadsperioder);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(oppgitteSøknadsperioder);
+        return Objects.hash(oppgitteSøknadsperioder, relevanteSøknadsperioder);
     }
 }

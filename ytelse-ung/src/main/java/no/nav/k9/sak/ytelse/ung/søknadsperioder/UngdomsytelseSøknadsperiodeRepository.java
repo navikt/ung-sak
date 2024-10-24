@@ -7,6 +7,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
+import no.nav.k9.sak.ytelse.ung.beregning.UngdomsytelseGrunnlag;
 
 @Dependent
 public class UngdomsytelseSøknadsperiodeRepository {
@@ -32,12 +33,25 @@ public class UngdomsytelseSøknadsperiodeRepository {
         persister(eksisterendeGrunnlag, nyttGrunnlag);
     }
 
+    public void lagreRelevanteSøknadsperioder(Long behandlingId, UngdomsytelseSøknadsperioderHolder søknadsperioder) {
+        var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
+        var nyttGrunnlag = eksisterendeGrunnlag.map(it -> new UngdomsytelseSøknadsperiodeGrunnlag(behandlingId, it))
+            .orElse(new UngdomsytelseSøknadsperiodeGrunnlag(behandlingId));
+        nyttGrunnlag.setRelevanteSøknadsperioder(søknadsperioder);
+
+        persister(eksisterendeGrunnlag, nyttGrunnlag);
+    }
+
+
 
     private void persister(Optional<UngdomsytelseSøknadsperiodeGrunnlag> eksisterendeGrunnlag, UngdomsytelseSøknadsperiodeGrunnlag nyttGrunnlag) {
         eksisterendeGrunnlag.ifPresent(this::deaktiverEksisterende);
 
         if (nyttGrunnlag.getOppgitteSøknadsperioder() != null) {
             entityManager.persist(nyttGrunnlag.getOppgitteSøknadsperioder());
+        }
+        if (nyttGrunnlag.getRelevantSøknadsperioder() != null) {
+            entityManager.persist(nyttGrunnlag.getRelevantSøknadsperioder());
         }
         entityManager.persist(nyttGrunnlag);
         entityManager.flush();

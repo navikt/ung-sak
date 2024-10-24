@@ -47,7 +47,7 @@ public class TidslinjeUtil {
     }
 
 
-    public static LocalDateTimeline<Boolean> tilTidslinjeMedMuligOverlapp(Collection<DatoIntervallEntitet> datoIntervaller) {
+    public static LocalDateTimeline<Boolean> tilTidslinje(Collection<DatoIntervallEntitet> datoIntervaller) {
         return new LocalDateTimeline<>(datoIntervaller.stream()
             .map(datoIntervall -> new LocalDateSegment<>(datoIntervall.getFomDato(), datoIntervall.getTomDato(), true)).toList(),
             StandardCombinators::alwaysTrueForMatch);

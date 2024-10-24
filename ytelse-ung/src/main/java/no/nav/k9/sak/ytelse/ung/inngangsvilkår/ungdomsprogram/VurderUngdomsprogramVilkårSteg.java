@@ -5,10 +5,14 @@ import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_UNGDOMSPRO
 import java.util.List;
 import java.util.NavigableSet;
 
+import org.jetbrains.annotations.NotNull;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
@@ -80,11 +84,15 @@ public class VurderUngdomsprogramVilkårSteg implements BehandlingSteg {
      * @return Vilkårperiodebuilders
      */
     private static List<VilkårPeriodeBuilder> vurderPerioder(LocalDateTimeline<Boolean> ungdomsprogramTidslinje, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, VilkårBuilder vilkårBuilder) {
-        var builders = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering).intersection(ungdomsprogramTidslinje)
-            .getLocalDateIntervals()
+        var builders = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering).combine(ungdomsprogramTidslinje, VurderUngdomsprogramVilkårSteg::settUtfall, LocalDateTimeline.JoinStyle.LEFT_JOIN)
+            .toSegments()
             .stream()
-            .map(p -> vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fra(p)).medUtfall(Utfall.OPPFYLT).medRegelInput("{ 'periode': '" + p + "' }")).toList();
+            .map(p -> vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fra(p.getLocalDateInterval())).medUtfall(p.getValue()).medRegelInput("{ 'periode': '" + p.getLocalDateInterval() + "' }")).toList();
         return builders;
+    }
+
+    private static LocalDateSegment<Utfall> settUtfall(LocalDateInterval di, LocalDateSegment<Boolean> lhs, LocalDateSegment<Boolean> rhs) {
+        return rhs == null ? new LocalDateSegment<>(di, Utfall.IKKE_OPPFYLT) : new LocalDateSegment<>(di, Utfall.OPPFYLT);
     }
 
 }

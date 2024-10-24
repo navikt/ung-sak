@@ -21,7 +21,7 @@ public class UngdomsytelseSøknadsperiodeTjeneste {
 
     public NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
         var søknadsperioder = søknadsperiodeRepository.hentGrunnlag(behandlingId)
-            .map(UngdomsytelseSøknadsperiodeGrunnlag::getOppgitteSøknadsperioder);
+            .map(UngdomsytelseSøknadsperiodeGrunnlag::getRelevantSøknadsperioder);
 
         if (søknadsperioder.isEmpty() || søknadsperioder.get().getPerioder().isEmpty()) {
             return Collections.emptyNavigableSet();
@@ -30,7 +30,7 @@ public class UngdomsytelseSøknadsperiodeTjeneste {
             var perioder = søknadsperioders.stream().flatMap(p -> p.getPerioder().stream())
                 .map(UngdomsytelseSøknadsperiode::getPeriode)
                 .toList();
-            var tidslinje = TidslinjeUtil.tilTidslinjeMedMuligOverlapp(perioder);
+            var tidslinje = TidslinjeUtil.tilTidslinje(perioder);
             return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje);
         }
     }
