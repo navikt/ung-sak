@@ -13,8 +13,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.DefaultKantIKantVurderer;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -29,6 +32,7 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
 
     private InngangsvilkårUtleder inngangsvilkårUtleder;
     private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
+    private BehandlingRepository behandlingRepository;
 
     UngdomsytelseVilkårsperioderTilVurderingTjeneste() {
         // CDI
@@ -36,9 +40,10 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
 
     @Inject
     public UngdomsytelseVilkårsperioderTilVurderingTjeneste(
-        @FagsakYtelseTypeRef(UNGDOMSYTELSE) InngangsvilkårUtleder inngangsvilkårUtleder, UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste) {
+        @FagsakYtelseTypeRef(UNGDOMSYTELSE) InngangsvilkårUtleder inngangsvilkårUtleder, UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste, BehandlingRepository behandlingRepository) {
         this.inngangsvilkårUtleder = inngangsvilkårUtleder;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
+        this.behandlingRepository = behandlingRepository;
     }
 
 
@@ -73,7 +78,8 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
     }
 
     private TreeSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
-        return ungdomsprogramPeriodeTjeneste.finnEndretPeriodeTidslinje(behandlingId, getKantIKantVurderer())
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        return ungdomsprogramPeriodeTjeneste.finnEndretPeriodeTidslinje(BehandlingReferanse.fra(behandling), getKantIKantVurderer())
             .getLocalDateIntervals()
             .stream()
             .map(DatoIntervallEntitet::fra)
