@@ -84,12 +84,12 @@ public class OpptjeningRepository {
             return nyOpptjening;
         };
 
-        Opptjening opptjening = lagre(behandling, oppdateringsfunksjon, true);
+        Opptjening opptjening = lagre(behandling, oppdateringsfunksjon, true, false);
 
         return opptjening;
     }
 
-    private Opptjening lagre(Behandling behandling, Function<OpptjeningResultatBuilder, Opptjening> oppdateringsFunksjon, boolean ryddOpptjeningsresultat) {
+    private Opptjening lagre(Behandling behandling, Function<OpptjeningResultatBuilder, Opptjening> oppdateringsFunksjon, boolean ryddOpptjeningsresultat, boolean erTilbakestilling) {
 
         BehandlingLås behandlingLås = behandlingRepository.taSkriveLås(behandling);
 
@@ -101,7 +101,7 @@ public class OpptjeningRepository {
         if (ryddOpptjeningsresultat) {
             ryddMotVilkårsPerioder(behandling, builder);
         } else {
-            validerMotVilkårsPerioder(behandling, builder);
+            validerMotVilkårsPerioder(behandling, builder, erTilbakestilling);
         }
         tidligereOpptjeninger.ifPresent(this::deaktiverTidligereOpptjening);
 
@@ -119,8 +119,12 @@ public class OpptjeningRepository {
         vilkår.ifPresent(builder::fjernOverflødigePerioder);
     }
 
-    private void validerMotVilkårsPerioder(Behandling behandling, OpptjeningResultatBuilder builder) {
+    private void validerMotVilkårsPerioder(Behandling behandling, OpptjeningResultatBuilder builder, boolean erTilbakestilling) {
         var vilkår = vilkårResultatRepository.hentHvisEksisterer(behandling.getId()).flatMap(it -> it.getVilkår(VilkårType.OPPTJENINGSVILKÅRET));
+        //FDBHE //TODO fjern når sak er ok
+        if (behandling.getId() == 1837447L && erTilbakestilling && vilkår.isPresent() && vilkår.get().getId() == 30417338L) {
+            return;
+        }
         vilkår.ifPresent(builder::validerMotVilkår);
     }
 
@@ -153,7 +157,7 @@ public class OpptjeningRepository {
             return ny;
         };
 
-        return lagre(behandling, oppdateringsfunksjon, false);
+        return lagre(behandling, oppdateringsfunksjon, false, false);
     }
 
     /**
@@ -216,7 +220,7 @@ public class OpptjeningRepository {
             return null;
         };
 
-        lagre(behandling, oppdateringsfunksjon, false);
+        lagre(behandling, oppdateringsfunksjon, false, true);
     }
 
     public void deaktiverOpptjening(Long behandlingId) {
