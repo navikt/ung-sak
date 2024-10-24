@@ -3508,9 +3508,12 @@
           },
           "opptjeningperiode" : {
             "$ref" : "#/components/schemas/OpptjeningPeriodeDto"
+          },
+          "vurderesIAksjonspunkt" : {
+            "type" : "boolean"
           }
         },
-        "required" : [ "opptjeningFom", "opptjeningTom", "opptjeningperiode" ],
+        "required" : [ "opptjeningFom", "opptjeningTom", "opptjeningperiode", "vurderesIAksjonspunkt" ],
         "type" : "object"
       },
       "FastsattUttakDto" : {
