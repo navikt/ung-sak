@@ -17,7 +17,6 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -40,6 +39,7 @@ import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.felles.util.LRUCache;
+import no.nav.k9.sak.web.server.caching.CacheControl;
 
 @Path("/kodeverk")
 @ApplicationScoped
@@ -184,6 +184,7 @@ public class KodeverkRestTjeneste {
     @Path("/alle/objekt")
     @BeskyttetRessurs(action = READ, resource = APPLIKASJON, sporingslogg = false)
     @Operation(description = "Alle statisk kodeverdier som objekt", tags = "kodeverk")
+    @CacheControl(maxAge = 60)
     public AlleKodeverdierSomObjektResponse alleKodeverdierSomObjekt() {
         return KodeverkRestTjeneste.oppslagAlleResponse;
     }
@@ -278,7 +279,7 @@ public class KodeverkRestTjeneste {
         final ObjectMapper om = ObjectMapperFactory.createBaseObjectMapper();
 
         String kodelisteJson = om.writeValueAsString(legacyGruppertKodeverdi);
-        CacheControl cc = new CacheControl();
+        jakarta.ws.rs.core.CacheControl cc = new jakarta.ws.rs.core.CacheControl();
         cc.setMaxAge(1 * 60); // tillater klient caching i 1 minutt
         return Response.ok()
             .entity(kodelisteJson)
