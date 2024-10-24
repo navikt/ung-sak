@@ -13,7 +13,7 @@ import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.k9inntektsmeldi
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
+import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.etterlysning.BestiltEtterlysning;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.typer.Arbeidsgiver;
@@ -51,14 +51,14 @@ public class ArbeidsgiverPortalenTjeneste {
             });
     }
 
-    public void oppdaterInntektsmeldingforespørslerISak(Map<DatoIntervallEntitet, List<Arbeidsgiver>> forespørselMap, Behandling behandling) {
+    public void oppdaterInntektsmeldingforespørslerISak(Map<DatoIntervallEntitet, List<Arbeidsgiver>> forespørselMap, BehandlingReferanse ref) {
         if (!skalSendeForesporsel) {
             return;
         }
 
-        var request = OppdaterForespørslerISakMapper.mapTilRequest(forespørselMap, behandling);
+        var request = OppdaterForespørslerISakMapper.mapTilRequest(forespørselMap, ref);
         var prosessTaskData = ProsessTaskData.forProsessTask(OppdaterForespørslerISakTask.class);
-        prosessTaskData.setBehandling(behandling.getFagsakId(), behandling.getId());
+        prosessTaskData.setBehandling(ref.getFagsakId(), ref.getBehandlingId());
         prosessTaskData.setPayload(JsonUtils.toString(request));
         prosessTaskData.setCallIdFraEksisterende();
         prosessTaskTjeneste.lagre(prosessTaskData);
