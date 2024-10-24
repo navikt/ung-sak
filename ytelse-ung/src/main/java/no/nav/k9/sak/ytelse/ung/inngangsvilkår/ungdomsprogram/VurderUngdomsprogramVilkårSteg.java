@@ -76,7 +76,7 @@ public class VurderUngdomsprogramVilkårSteg implements BehandlingSteg {
     }
 
     /**
-     * Setter alle periodene til OPPFYLT
+     * Setter perioder der bruker deltar i ungdomsprogrammet til oppfylt, andre perioder settes til avslått
      *
      * @param ungdomsprogramTidslinje
      * @param perioderTilVurdering    Perioder som vurderes

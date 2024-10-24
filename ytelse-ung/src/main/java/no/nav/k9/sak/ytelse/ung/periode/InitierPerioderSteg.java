@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.dokument.Brevkode;
-import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
@@ -38,7 +37,9 @@ public class InitierPerioderSteg implements BehandlingSteg {
 
     @Inject
     public InitierPerioderSteg(UngdomsprogramTjeneste ungdomsprogramTjeneste,
-                               BehandlingRepository behandlingRepository, UngdomsytelseSøknadsperiodeRepository søknadsperiodeRepository, MottatteDokumentRepository mottatteDokumentRepository) {
+                               BehandlingRepository behandlingRepository,
+                               UngdomsytelseSøknadsperiodeRepository søknadsperiodeRepository,
+                               MottatteDokumentRepository mottatteDokumentRepository) {
         this.ungdomsprogramTjeneste = ungdomsprogramTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.søknadsperiodeRepository = søknadsperiodeRepository;
@@ -51,11 +52,11 @@ public class InitierPerioderSteg implements BehandlingSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         ungdomsprogramTjeneste.innhentOpplysninger(kontekst);
-        finnRelevanteSøknadsperioder(kontekst);
+        initierRelevanteSøknadsperioder(kontekst);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private void finnRelevanteSøknadsperioder(BehandlingskontrollKontekst kontekst) {
+    private void initierRelevanteSøknadsperioder(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var søknadsperiodeGrunnlag = søknadsperiodeRepository.hentGrunnlag(behandlingId).orElseThrow();
@@ -71,15 +72,20 @@ public class InitierPerioderSteg implements BehandlingSteg {
     }
 
 
+    /** Lager aggregat av perioder som er relevant for denne behandlingen, altså perioder fra journalposter som har kommet inn i denne behandlingen.
+     * @param journalposterMottattIDenneBehandlingen Journalposter som er mottatt i denne behandlingen
+     * @param grunnlag Søknadsperiodegrunnlag
+     * @return Aggregat for perioder som er relevant for denne behandlingen
+     */
     private UngdomsytelseSøknadsperioderHolder mapSøknadsperioderRelevantForBehandlingen(Set<JournalpostId> journalposterMottattIDenneBehandlingen,
                                                                                          UngdomsytelseSøknadsperiodeGrunnlag grunnlag) {
-        var relevanteDokumenter = grunnlag.getOppgitteSøknadsperioder()
+        var relevantePerioder = grunnlag.getOppgitteSøknadsperioder()
             .getPerioder()
             .stream()
             .filter(it -> journalposterMottattIDenneBehandlingen.stream().anyMatch(at -> at.equals(it.getJournalpostId())))
             .collect(Collectors.toSet());
 
-        return new UngdomsytelseSøknadsperioderHolder(relevanteDokumenter);
+        return new UngdomsytelseSøknadsperioderHolder(relevantePerioder);
     }
 
 }

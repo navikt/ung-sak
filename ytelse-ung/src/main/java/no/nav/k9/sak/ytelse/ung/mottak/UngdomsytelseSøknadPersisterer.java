@@ -38,6 +38,7 @@ public class UngdomsytelseSøknadPersisterer {
     }
 
 
+    // TODO: Trenger vi å lagre ned en egen søknadentitet for ungdomsytelsen? Er relevant dersom vi skal vurdere kompletthet for søknad (f.eks om søknad har kommet inn for tidlig)
     public void lagreSøknadEntitet(Søknad søknad, JournalpostId journalpostId, Long behandlingId, Optional<Periode> maksSøknadsperiode, LocalDate mottattDato) {
         var søknadBuilder = new SøknadEntitet.Builder()
             .medSøknadsperiode(maksSøknadsperiode.map(it -> DatoIntervallEntitet.fraOgMedTilOgMed(it.getFraOgMed(), it.getTilOgMed())).orElse(null))
@@ -62,6 +63,10 @@ public class UngdomsytelseSøknadPersisterer {
     }
 
 
+    /** Utvider fagsakperiode i en eller begge ender fra fom og tom i oppgitt perioder dersom denne medfører en større periode.
+     * @param maksSøknadsperiode Ny utvidelse av fagsakperioder
+     * @param fagsakId FagsakId
+     */
     public void oppdaterFagsakperiode(Optional<Periode> maksSøknadsperiode, Long fagsakId) {
         maksSøknadsperiode.ifPresent(periode -> fagsakRepository.utvidPeriode(fagsakId, periode.getFraOgMed(), periode.getTilOgMed()));
     }

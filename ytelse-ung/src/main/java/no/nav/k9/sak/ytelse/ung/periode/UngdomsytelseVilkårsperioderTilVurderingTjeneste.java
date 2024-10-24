@@ -9,6 +9,7 @@ import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
@@ -80,17 +81,34 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
         return Set.of(VilkårType.UNGDOMSPROGRAMVILKÅRET);
     }
 
+    /** Finner perioder som vurderes.
+     * <p>
+     * Endringer som medfører at perioden vurderes er
+     * - Nye søknadsperioder fra bruker
+     * - Endringer i ungdomsprogram i perioder som er søkt om
+     *
+     * @param behandlingId BehandlingId
+     * @return Perioder som vurderes
+     */
     private NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
-        return finnSøktePerioderOgEndringerIUngdomsprogram(behandlingId);
+        var tidslinjeForRelevanteEndringerIUngdomsprogram = finnRelevanteEndringerIUngdomsprogram(behandlingId);
+        var relevantePerioderTidslinje = TidslinjeUtil.tilTidslinje(ungdomsytelseSøknadsperiodeTjeneste.utledPeriode(behandlingId));
+        var tidslinjeTilVurdering = tidslinjeForRelevanteEndringerIUngdomsprogram.crossJoin(relevantePerioderTidslinje);
+        return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinjeTilVurdering);
     }
 
-    private NavigableSet<DatoIntervallEntitet> finnSøktePerioderOgEndringerIUngdomsprogram(Long behandlingId) {
+    private LocalDateTimeline<Boolean> finnRelevanteEndringerIUngdomsprogram(Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
+        // Finner alle søknadsperioder på saken
         var alleSøknadsperioder = ungdomsytelseSøknadsperiodeTjeneste.utledFullstendigPeriode(behandlingId);
         var søknadsperiodeTidslinje = TidslinjeUtil.tilTidslinje(alleSøknadsperioder);
+
+        // Finner endringer i perioder der bruker er meldt inn i ungdomsprogram
         var ungdomsprogramEndretTidslinje = ungdomsprogramPeriodeTjeneste.finnEndretPeriodeTidslinje(BehandlingReferanse.fra(behandling), getKantIKantVurderer());
+
+        // Kun perioder med endringer som overlapper med søkte perioder tas hensyn til
         var endretTidslinje = ungdomsprogramEndretTidslinje.intersection(søknadsperiodeTidslinje);
-        return TidslinjeUtil.tilDatoIntervallEntiteter(endretTidslinje);
+        return endretTidslinje;
     }
 
 }

@@ -29,11 +29,17 @@ public class UngdomsytelseSøknadsperiodeGrunnlag extends BaseEntitet {
     @Column(name = "behandling_id", nullable = false, updatable = false, unique = true)
     private Long behandlingId;
 
+    /**
+     * Søknadsperioder som er relevant og som har krav som skal vurderes i behandlingen
+     */
     @ManyToOne
     @Immutable
     @JoinColumn(name = "relevant_soknadsperiode_id", nullable = false, updatable = false, unique = true)
     private UngdomsytelseSøknadsperioderHolder relevanteSøknadsperioder;
 
+    /**
+     * Alle søknadsperioder med krav som har kommet inn i denne og tidligere behandlinger
+     */
     @ManyToOne
     @Immutable
     @JoinColumn(name = "oppgitt_soknadsperiode_id", nullable = false, updatable = false, unique = true)

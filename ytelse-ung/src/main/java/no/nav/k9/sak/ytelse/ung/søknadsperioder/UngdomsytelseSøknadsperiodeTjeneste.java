@@ -20,10 +20,18 @@ public class UngdomsytelseSøknadsperiodeTjeneste {
         this.søknadsperiodeRepository = søknadsperiodeRepository;
     }
 
+    /** Finner søknadsperioder som har kommet inn i denne behandlingen
+     * @param behandlingId BehandlingId
+     * @return Relevante søknadsperioder for denne behandlingen
+     */
     public NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
         return finnPerioder(behandlingId, UngdomsytelseSøknadsperiodeGrunnlag::getRelevantSøknadsperioder);
     }
 
+    /** Finner alle perioder som har kommet inn på alle tidligere behandlinger.
+     * @param behandlingId behandlingid
+     * @return Alle perioder fra alle behandlinger
+     */
     public NavigableSet<DatoIntervallEntitet> utledFullstendigPeriode(Long behandlingId) {
         return finnPerioder(behandlingId, UngdomsytelseSøknadsperiodeGrunnlag::getOppgitteSøknadsperioder);
     }
