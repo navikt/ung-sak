@@ -5,7 +5,6 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.RE
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -20,7 +19,6 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,8 +27,8 @@ import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.k9.sak.web.app.jackson.ObjectMapperFactory;
-import no.nav.k9.sak.web.app.jackson.SakKodeverkOverstyringSerialisering;
 import no.nav.k9.sak.web.app.tjenester.kodeverk.dto.AlleKodeverdierSomObjektResponse;
 import no.nav.k9.sak.web.app.tjenester.kodeverk.dto.KodeverdiSomObjekt;
 import no.nav.k9.sak.web.app.tjenester.kodeverk.dto.LegacyVenteårsakSomObjekt;
@@ -38,7 +36,6 @@ import no.nav.k9.sak.web.app.tjenester.kodeverk.dto.VenteårsakSomObjekt;
 import no.nav.k9.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.k9.felles.util.LRUCache;
 import no.nav.k9.sak.web.server.caching.CacheControl;
 
 @Path("/kodeverk")
@@ -50,15 +47,11 @@ public class KodeverkRestTjeneste {
     public static final String KODERVERK_PATH = "/kodeverk";
     public static final String ENHETER_PATH = KODERVERK_PATH + "/behandlende-enheter";
 
-    private static final long CACHE_ELEMENT_LIVE_TIME_MS = TimeUnit.MILLISECONDS.convert(60, TimeUnit.MINUTES);
-
-    private final ObjectMapper objectMapper = ObjectMapperFactory.createBaseObjectMapper().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkOverstyringSerialisering.OBJEKT_MED_NAVN, true));
-    private HentKodeverkTjeneste hentKodeverkTjeneste; // NOSONAR
-    private LRUCache<String, String> kodelisteCache = new LRUCache<>(10, CACHE_ELEMENT_LIVE_TIME_MS);
+    private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
 
     @Inject
-    public KodeverkRestTjeneste(HentKodeverkTjeneste hentKodeverkTjeneste) {
-        this.hentKodeverkTjeneste = hentKodeverkTjeneste;
+    public KodeverkRestTjeneste(BehandlendeEnhetTjeneste behandlendeEnhetTjeneste) {
+        this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
     }
 
     public KodeverkRestTjeneste() {
@@ -89,31 +82,7 @@ public class KodeverkRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = APPLIKASJON, sporingslogg = false)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public List<OrganisasjonsEnhet> hentBehandlendeEnheter(@QueryParam("ytelseType") @DefaultValue(value = "OMP") @NotNull @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) FagsakYtelseType ytelseType) {
-        return hentKodeverkTjeneste.hentBehandlendeEnheter(ytelseType);
-    }
-
-    private String getKodeverkRawJson() throws JsonProcessingException {
-        if (kodelisteCache.get("alle") == null) {
-            kodelisteCache.put("alle", tilJson(this.hentGruppertKodelisteTilCache()));
-        }
-        String kodelisteJson = kodelisteCache.get("alle");
-        return kodelisteJson;
-    }
-
-    private String tilJson(Map<String, Object> kodeverk) throws JsonProcessingException {
-        return objectMapper.writeValueAsString(kodeverk);
-    }
-
-    private synchronized Map<String, Object> hentGruppertKodelisteTilCache() {
-        Map<String, Object> kodelisterGruppertPåType = new HashMap<>();
-
-        var grupperteKodelister = hentKodeverkTjeneste.hentGruppertKodeliste();
-        grupperteKodelister.entrySet().forEach(e -> kodelisterGruppertPåType.put(e.getKey(), e.getValue()));
-
-        var avslagårsakerGruppertPåVilkårType = VilkårType.finnAvslagårsakerGruppertPåVilkårType()
-            .entrySet().stream().collect(Collectors.toMap(e -> e.getKey().getKode(), Map.Entry::getValue));
-        kodelisterGruppertPåType.put(Avslagsårsak.class.getSimpleName(), avslagårsakerGruppertPåVilkårType);
-        return kodelisterGruppertPåType;
+        return behandlendeEnhetTjeneste.hentEnhetListe(ytelseType);
     }
 
     private final static AlleKodeverdierSomObjektResponse oppslagAlleResponse;

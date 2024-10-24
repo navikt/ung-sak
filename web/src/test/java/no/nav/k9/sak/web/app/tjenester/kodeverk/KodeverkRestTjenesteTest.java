@@ -4,23 +4,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.k9.kodeverk.behandling.FagsakStatus;
-import no.nav.k9.kodeverk.geografisk.Landkoder;
-import no.nav.k9.kodeverk.geografisk.Region;
-import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
+import no.nav.k9.kodeverk.api.Kodeverdi;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.db.util.JpaExtension;
+import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.k9.sak.web.app.jackson.ObjectMapperFactory;
+import no.nav.k9.sak.web.app.tjenester.kodeverk.dto.AlleKodeverdierSomObjektResponse;
+import no.nav.k9.sak.web.app.tjenester.kodeverk.dto.KodeverdiSomObjekt;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.SortedSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class KodeverkRestTjenesteTest {
 
     @Inject
-    private HentKodeverkTjeneste hentKodeverkTjeneste;
+    private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
 
     /**
      * Denne test sjekker at gammalt endepunkt for kodeverk returnerer det samme som før etter at det er implementert
@@ -37,7 +37,7 @@ public class KodeverkRestTjenesteTest {
      */
     @Test
     public void nytt_endepunkt_returnerer_samme_som_gamle() throws IOException {
-        KodeverkRestTjeneste tjeneste = new KodeverkRestTjeneste(hentKodeverkTjeneste);
+        KodeverkRestTjeneste tjeneste = new KodeverkRestTjeneste(behandlendeEnhetTjeneste);
         @SuppressWarnings("resource")
         Response response = tjeneste.hentGruppertKodeliste();
 
@@ -78,35 +78,29 @@ public class KodeverkRestTjenesteTest {
         }
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private static <K extends Kodeverdi> void checkResponseSet(final SortedSet<KodeverdiSomObjekt<K>> responseSet, final java.util.Set<K> statiskSet) {
+        assertThat(responseSet.stream().map(ko -> ko.getMadeFrom()).toList()).containsExactlyInAnyOrderElementsOf(statiskSet);
+    }
+
     @Test
-    public void skal_hente_kodeverk_og_gruppere_på_kodeverknavn() throws IOException {
+    public void skal_hente_statiske_kodeverdier() {
+        final KodeverkRestTjeneste tjeneste = new KodeverkRestTjeneste(behandlendeEnhetTjeneste);
+        final AlleKodeverdierSomObjektResponse response = tjeneste.alleKodeverdierSomObjekt();
+        final var statiske = StatiskeKodeverdier.alle;
+        checkResponseSet(response.aktivitetStatuser(), statiske.aktivitetStatuser());
+        checkResponseSet(response.arbeidskategorier(), statiske.arbeidskategorier());
+        checkResponseSet(response.arbeidsforholdHandlingTyper(), statiske.arbeidsforholdHandlingTyper());
+        checkResponseSet(response.avslagsårsaker(), statiske.avslagsårsaker());
 
-        KodeverkRestTjeneste tjeneste = new KodeverkRestTjeneste(hentKodeverkTjeneste);
-        @SuppressWarnings("resource")
-        Response response = tjeneste.hentGruppertKodeliste();
+        // Sjekk spesialtilfelle i respons, Avslagsprsaker gruppert pr vilkårtype.
+        final VilkårType vilkårtype = VilkårType.ALDERSVILKÅR;
+        final var k9Vk3Avslagsårsaker = VilkårType.finnAvslagårsakerGruppertPåVilkårType().get(vilkårtype);
+        checkResponseSet(response.avslagårsakerPrVilkårTypeKode().get(vilkårtype.getKode()), k9Vk3Avslagsårsaker);
 
-        String rawJson = (String) response.getEntity();
-        assertThat(rawJson).isNotNull();
-
-        Map<String, Object> gruppertKodeliste = ObjectMapperFactory.createBaseObjectMapper().readValue(rawJson, Map.class);
-
-        assertThat(gruppertKodeliste.keySet())
-            .contains(FagsakStatus.class.getSimpleName(), Avslagsårsak.class.getSimpleName(), Landkoder.class.getSimpleName(), Region.class.getSimpleName());
-
-        assertThat(gruppertKodeliste.keySet())
-            .containsAll(new HashSet<>(HentKodeverkTjeneste.KODEVERDIER_SOM_BRUKES_PÅ_KLIENT.keySet()));
-
-        assertThat(gruppertKodeliste.keySet()).hasSize(HentKodeverkTjeneste.KODEVERDIER_SOM_BRUKES_PÅ_KLIENT.size());
-
-        var fagsakStatuser = (List<Map<String, String>>) gruppertKodeliste.get(FagsakStatus.class.getSimpleName());
-        assertThat(fagsakStatuser.stream().map(k -> k.get("kode")).collect(Collectors.toList())).isNotEmpty();
-
-        var map = (Map<String, List<?>>) gruppertKodeliste.get(Avslagsårsak.class.getSimpleName());
-        assertThat(map.keySet()).contains(VilkårType.OPPTJENINGSVILKÅRET.getKode(), VilkårType.MEDLEMSKAPSVILKÅRET.getKode());
-
-        var avslagsårsaker = (List<Map<String, String>>) map.get(VilkårType.OPPTJENINGSVILKÅRET.getKode());
-        assertThat(avslagsårsaker.stream().map(k -> ((Map) k).get("kode")).collect(Collectors.toList())).isNotEmpty();
+        // Venteårsak er også litt spesiell
+        final List<Venteårsak> got = response.venteårsaker().stream().map(ko -> ko.getMadeFrom()).toList();
+        final List<Venteårsak> expected = statiske.venteårsaker().stream().toList();
+        assertThat(got).containsExactlyInAnyOrderElementsOf(expected);
     }
 
 }
