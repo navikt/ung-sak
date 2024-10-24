@@ -35,16 +35,22 @@ public class FastsattOpptjeningDto {
     @NotNull
     private OpptjeningPeriodeDto opptjeningperiode;
 
+    @JsonProperty(value = "vurderesIAksjonspunkt")
+    @NotNull
+    private boolean vurderesIAksjonspunkt;
+
     public FastsattOpptjeningDto() {
         // trengs for deserialisering av JSON
     }
 
     public FastsattOpptjeningDto(LocalDate fom, LocalDate tom, OpptjeningPeriodeDto opptjeningperiode,
-                                 List<FastsattOpptjeningAktivitetDto> fastsattOpptjeningAktivitetList) {
+                                 List<FastsattOpptjeningAktivitetDto> fastsattOpptjeningAktivitetList,
+                                 boolean vurderesIAksjonspunkt) {
         this.opptjeningFom = fom;
         this.opptjeningTom = tom;
         this.opptjeningperiode = opptjeningperiode;
         this.fastsattOpptjeningAktivitetList = fastsattOpptjeningAktivitetList;
+        this.vurderesIAksjonspunkt = vurderesIAksjonspunkt;
     }
 
     public List<FastsattOpptjeningAktivitetDto> getFastsattOpptjeningAktivitetList() {
@@ -63,6 +69,10 @@ public class FastsattOpptjeningDto {
         return opptjeningTom;
     }
 
+    public boolean isVurderesIAksjonspunkt() {
+        return vurderesIAksjonspunkt;
+    }
+
     public void setFastsattOpptjeningAktivitetList(List<FastsattOpptjeningAktivitetDto> fastsattOpptjeningAktivitetList) {
         this.fastsattOpptjeningAktivitetList = fastsattOpptjeningAktivitetList;
     }
@@ -77,5 +87,9 @@ public class FastsattOpptjeningDto {
 
     public void setOpptjeningTom(LocalDate opptjeningTom) {
         this.opptjeningTom = opptjeningTom;
+    }
+
+    public void setVurderesIAksjonspunkt(boolean vurderesIAksjonspunkt) {
+        this.vurderesIAksjonspunkt = vurderesIAksjonspunkt;
     }
 }

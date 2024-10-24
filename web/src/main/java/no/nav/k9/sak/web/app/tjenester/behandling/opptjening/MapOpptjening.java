@@ -1,6 +1,7 @@
 package no.nav.k9.sak.web.app.tjenester.behandling.opptjening;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -9,11 +10,14 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetKlassifisering;
+import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.Opptjening;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningAktivitet;
 import no.nav.k9.sak.behandlingslager.behandling.opptjening.OpptjeningResultat;
+import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.arbeidsforhold.MergeOverlappendePeriodeHjelp;
@@ -27,6 +31,8 @@ import no.nav.k9.sak.domene.opptjening.OpptjeningAktivitetVurderingOpptjeningsvi
 import no.nav.k9.sak.domene.opptjening.OpptjeningsperiodeForSaksbehandling;
 import no.nav.k9.sak.domene.opptjening.VurderingsStatus;
 import no.nav.k9.sak.domene.opptjening.aksjonspunkt.OpptjeningsperioderTjeneste;
+import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.kontrakt.opptjening.FastsattOpptjeningAktivitetDto;
 import no.nav.k9.sak.kontrakt.opptjening.FastsattOpptjeningDto;
 import no.nav.k9.sak.kontrakt.opptjening.OpptjeningAktivitetDto;
 import no.nav.k9.sak.kontrakt.opptjening.OpptjeningDto;
@@ -77,11 +83,15 @@ class MapOpptjening {
             var yrkesaktivitetFilter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(ref.getAktørId())).før(vilkårsperiode.getFomDato().plusDays(1));
             var relevanteOpptjeningAktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(ref, iayGrunnlag, vurderForOpptjeningsvilkår, opptjening.getOpptjeningPeriode(), vilkårsperiode, yrkesaktivitetFilter);
             List<OpptjeningAktivitet> opptjeningAktivitet = opptjening.getOpptjeningAktivitet();
-            resultat.setFastsattOpptjening(new FastsattOpptjeningDto(opptjening.getFom(),
-                opptjening.getTom(), mapFastsattOpptjening(opptjening),
-                MergeOverlappendePeriodeHjelp.mergeOverlappenePerioder(opptjeningAktivitet)));
-            List<ArbeidsforholdOverstyring> overstyringer = inntektArbeidYtelseGrunnlagOpt.map(InntektArbeidYtelseGrunnlag::getArbeidsforholdOverstyringer).orElse(Collections.emptyList());
+            var fastsattOpptjeningAktivitetList = MergeOverlappendePeriodeHjelp.mergeOverlappenePerioder(opptjeningAktivitet);
 
+            resultat.setFastsattOpptjening(new FastsattOpptjeningDto(
+                opptjening.getFom(), opptjening.getTom(),
+                mapFastsattOpptjening(opptjening),
+                fastsattOpptjeningAktivitetList,
+                periodeVurderesIAksjonspunkt(vilkåret, opptjening.getFom(), opptjening.getTom(), fastsattOpptjeningAktivitetList)));
+
+            List<ArbeidsforholdOverstyring> overstyringer = inntektArbeidYtelseGrunnlagOpt.map(InntektArbeidYtelseGrunnlag::getArbeidsforholdOverstyringer).orElse(Collections.emptyList());
             resultat.setOpptjeningAktivitetList(relevanteOpptjeningAktiviteter.stream()
                 .map(oap -> lagDtoFraOAPeriode(oap, overstyringer))
                 .collect(Collectors.toList()));
@@ -89,6 +99,17 @@ class MapOpptjening {
             resultatListe.add(resultat);
         }
         return Collections.unmodifiableList(resultatListe);
+    }
+
+    // Denne er ment å speile sjekken i VurderOpptjeningsvilkårStegFelles.håndtereAutomatiskAvslag, slik at de periodene som trigger aksjonspunkt vil returnere true her
+    private boolean periodeVurderesIAksjonspunkt(Vilkår vilkår, LocalDate fom, LocalDate tom, List<FastsattOpptjeningAktivitetDto> fastsattOpptjeningAktivitetList) {
+        boolean mellomliggendePeriode = fastsattOpptjeningAktivitetList.stream()
+            .anyMatch(aktivitet -> aktivitet.getKlasse() == OpptjeningAktivitetKlassifisering.MELLOMLIGGENDE_PERIODE
+                && DatoIntervallEntitet.fraOgMedTilOgMed(aktivitet.getFom(), aktivitet.getTom()).overlapper(fom, tom));
+
+        return mellomliggendePeriode || vilkår.getPerioder().stream()
+            .anyMatch(vilkårPeriode -> vilkårPeriode.getPeriode().overlapper(fom, tom)
+                && (vilkårPeriode.getGjeldendeUtfall() == Utfall.IKKE_OPPFYLT || vilkårPeriode.getErManueltVurdert()));
     }
 
     OpptjeningerDto mapTilOpptjeninger(BehandlingReferanse ref) {
