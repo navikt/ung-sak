@@ -35,16 +35,13 @@ public class SendInntektsmeldingForespørselTask implements ProsessTaskHandler {
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
         var fagsak = fagsakRepository.finnEksaktFagsak(prosessTaskData.getFagsakId());
-        inntektsmeldingRestKlient.opprettForespørsel(new OpprettForespørselRequest(
-            new AktørIdDto(fagsak.getBrukerAktørId().getAktørId()),
-            new OrganisasjonsnummerDto(prosessTaskData.getPropertyValue(ORG_NR)),
+        inntektsmeldingRestKlient.opprettForespørsel(
+            fagsak.getBrukerAktørId().getAktørId(),
+            prosessTaskData.getPropertyValue(ORG_NR),
             LocalDate.parse(prosessTaskData.getPropertyValue(SKJÆRINGSTIDSPUNKT)),
             finnYtelseType(fagsak),
-            new SaksnummerDto(fagsak.getSaksnummer().getVerdi())
-
-        ));
-
-
+            fagsak.getSaksnummer().getVerdi()
+        );
     }
 
     private static YtelseType finnYtelseType(Fagsak fagsak) {

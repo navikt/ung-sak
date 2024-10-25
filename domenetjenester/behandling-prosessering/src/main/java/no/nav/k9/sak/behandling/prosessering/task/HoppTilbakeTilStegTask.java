@@ -7,13 +7,11 @@ import jakarta.inject.Inject;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.k9.sak.behandlingslager.task.UnderBehandlingProsessTask;
 
@@ -27,17 +25,15 @@ public class HoppTilbakeTilStegTask extends UnderBehandlingProsessTask {
     public static final String PROPERTY_TIL_STEG = "tilSteg";
 
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
-    private ProsesseringAsynkTjeneste prosesseringAsynkTjeneste;
 
     HoppTilbakeTilStegTask() {
         // CDI
     }
 
     @Inject
-    public HoppTilbakeTilStegTask(BehandlingRepository repository, BehandlingLåsRepository behandlingLåsRepository, BehandlingskontrollTjeneste behandlingskontrollTjeneste, ProsesseringAsynkTjeneste prosesseringAsynkTjeneste, FagsakProsessTaskRepository prosessTaskRepository) {
+    public HoppTilbakeTilStegTask(BehandlingRepository repository, BehandlingLåsRepository behandlingLåsRepository, BehandlingskontrollTjeneste behandlingskontrollTjeneste) {
         super(repository, behandlingLåsRepository);
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
-        this.prosesseringAsynkTjeneste = prosesseringAsynkTjeneste;
     }
 
     @Override

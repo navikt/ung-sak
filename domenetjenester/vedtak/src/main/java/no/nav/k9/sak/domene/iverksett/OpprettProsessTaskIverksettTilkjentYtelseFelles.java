@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import no.nav.folketrygdloven.beregningsgrunnlag.inntektsmelding.k9inntektsmelding.SettÅpneImForespørslerTilUtgåttTask;
 import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.InfotrygdFeedService;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
@@ -32,6 +33,7 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
     protected OppgaveTjeneste oppgaveTjeneste;
     protected InfotrygdFeedService infotrygdFeedService;
     private StønadstatistikkService stønadstatistikkService;
+    private boolean skalLukkeImForesporsel;
 
     protected OpprettProsessTaskIverksettTilkjentYtelseFelles() {
         // for CDI proxy
@@ -40,11 +42,13 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
     public OpprettProsessTaskIverksettTilkjentYtelseFelles(FagsakProsessTaskRepository fagsakProsessTaskRepository,
                                                            OppgaveTjeneste oppgaveTjeneste,
                                                            InfotrygdFeedService infotrygdFeedService,
-                                                           StønadstatistikkService stønadstatistikkService) {
+                                                           StønadstatistikkService stønadstatistikkService,
+                                                           boolean skalLukkeImForesporsel) {
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
         this.oppgaveTjeneste = oppgaveTjeneste;
         this.infotrygdFeedService = infotrygdFeedService;
         this.stønadstatistikkService = stønadstatistikkService;
+        this.skalLukkeImForesporsel = skalLukkeImForesporsel;
     }
 
     @Override
@@ -66,6 +70,9 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
         List<ProsessTaskData> parallelle = new ArrayList<>();
         parallelle.add(ProsessTaskData.forProsessTask(SendVedtaksbrevTask.class));
         parallelle.add(opprettTaskSendTilØkonomi());
+        if (skalLukkeImForesporsel) {
+            parallelle.add(opprettTaskForÅLukkeÅpneImForespørsler(behandling));
+        }
         avsluttOppgave.ifPresent(parallelle::add);
 
         taskData.addNesteParallell(parallelle);
@@ -123,5 +130,11 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
         vurderOppgaveTilbakekreving.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         vurderOppgaveTilbakekreving.setCallIdFraEksisterende();
         return vurderOppgaveTilbakekreving;
+    }
+
+    private ProsessTaskData opprettTaskForÅLukkeÅpneImForespørsler(Behandling behandling) {
+        ProsessTaskData taskdata = ProsessTaskData.forProsessTask(SettÅpneImForespørslerTilUtgåttTask.class);
+        taskdata.setSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
+        return taskdata;
     }
 }

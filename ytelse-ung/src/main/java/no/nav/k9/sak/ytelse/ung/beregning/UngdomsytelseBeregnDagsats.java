@@ -10,7 +10,6 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 
 @Dependent
 class UngdomsytelseBeregnDagsats {
@@ -27,12 +26,12 @@ class UngdomsytelseBeregnDagsats {
 
     LocalDateTimeline<UngdomsytelseSatser> beregnDagsats(LocalDateTimeline<Boolean> perioder, LocalDate fødselsdato) {
         var grunnbeløpTidslinje = lagGrunnbeløpTidslinjeTjeneste.lagGrunnbeløpTidslinjeForPeriode(perioder);
-        var grunnbeløpFaktorTidslinje = LagGrunnbeløpFaktorTidslinje.lagGrunnbelpFaktorTidslinje(fødselsdato);
+        var grunnbeløpFaktorTidslinje = LagGrunnbeløpFaktorTidslinje.lagGrunnbeløpFaktorTidslinje(fødselsdato);
 
 
         var satsTidslinje = perioder
             .intersection(grunnbeløpFaktorTidslinje, StandardCombinators::rightOnly)
-            .mapValue(faktor -> new UngdomsytelseSatser(null, null, faktor))
+            .mapValue(sats -> new UngdomsytelseSatser(null, null, sats.getGrunnbeløpFaktor(), sats.getSatsType()))
             .intersection(grunnbeløpTidslinje, UngdomsytelseBeregnDagsats::multiplyCombinator);
         return satsTidslinje;
     }
@@ -41,7 +40,7 @@ class UngdomsytelseBeregnDagsats {
         var grunnbeløp = rhs.getValue();
         var dagsats = lhs.getValue().grunnbeløpFaktor().multiply(grunnbeløp)
             .divide(BigDecimal.valueOf(VIRKEDAGER_I_ET_ÅR), 2, RoundingMode.HALF_UP);
-        return new LocalDateSegment<>(di, new UngdomsytelseSatser(dagsats, grunnbeløp, lhs.getValue().grunnbeløpFaktor()));
+        return new LocalDateSegment<>(di, new UngdomsytelseSatser(dagsats, grunnbeløp, lhs.getValue().grunnbeløpFaktor(), lhs.getValue().satsType()));
     }
 
 }

@@ -21,8 +21,6 @@ import no.nav.k9.felles.log.mdc.MDCOperations;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskStatus;
@@ -30,11 +28,8 @@ import no.nav.k9.prosesstask.api.TaskType;
 import no.nav.k9.sak.behandling.prosessering.task.FortsettBehandlingTask;
 import no.nav.k9.sak.behandling.prosessering.task.GjenopptaBehandlingTask;
 import no.nav.k9.sak.behandling.prosessering.task.HoppTilbakeTilStegTask;
-import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatDiff;
-import no.nav.k9.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.k9.sak.behandlingslager.behandling.medlemskap.MedlemskapAggregat;
 import no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
@@ -101,35 +96,6 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     @Override
     public void tvingInnhentingRegisteropplysninger(Behandling behandling) {
         registerdataEndringshåndterer.sikreInnhentingRegisteropplysningerVedNesteOppdatering(behandling);
-    }
-
-    // AV/PÅ Vent
-    @Override
-    public void taBehandlingAvVent(Behandling behandling) {
-        BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
-        behandlingskontrollTjeneste.taBehandlingAvVentSetAlleAutopunktUtført(behandling, kontekst);
-    }
-
-    @Override
-    public void settBehandlingPåVent(Behandling behandling, AksjonspunktDefinisjon apDef, LocalDateTime fristTid, Venteårsak venteårsak, String venteårsakVariant) {
-        behandlingskontrollTjeneste.settBehandlingPåVent(behandling, apDef, behandling.getAktivtBehandlingSteg(), fristTid, venteårsak, venteårsakVariant);
-    }
-
-    // For snapshot av grunnlag før man gjør andre endringer enn registerinnhenting
-    @Override
-    public EndringsresultatSnapshot taSnapshotAvBehandlingsgrunnlag(Behandling behandling) {
-        return endringsresultatSjekker.opprettEndringsresultatPåBehandlingsgrunnlagSnapshot(behandling.getId());
-    }
-
-    // Returnerer endringer i grunnlag mellom snapshot og nåtilstand
-    @Override
-    public EndringsresultatDiff finnGrunnlagsEndring(Behandling behandling, EndringsresultatSnapshot før) {
-        return endringsresultatSjekker.finnSporedeEndringerPåBehandlingsgrunnlag(behandling.getId(), før);
-    }
-
-    @Override
-    public void reposisjonerBehandlingVedEndringer(Behandling behandling, EndringsresultatDiff grunnlagDiff) {
-        registerdataEndringshåndterer.reposisjonerBehandlingVedEndringer(behandling, grunnlagDiff);
     }
 
     @Override
@@ -407,24 +373,5 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         return fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId, gruppe);
     }
 
-    @Override
-    public void feilPågåendeTaskHvisFremtidigTaskEksisterer(Behandling behandling, Long kjørendeTaskId, Set<String> tasktyper) {
-        if (tasktyper.isEmpty()) {
-            return;
-        }
-        var pågår = fagsakProsessTaskRepository.sjekkStatusProsessTasks(behandling.getFagsakId(), behandling.getId(), null);
-        Optional<ProsessTaskData> firstMatch = pågår.stream()
-            .filter(p -> tasktyper.contains(p.getTaskType()))
-            .filter(p -> taskerSomKanBlokkere(kjørendeTaskId, p))
-            .findFirst();
-        if (firstMatch.isPresent()) {
-            var t = firstMatch.get();
-            throw ProsesseringsFeil.FACTORY.kanIkkePlanleggeNyTaskPgaAlleredePlanlagtetask(t.getId(), t.getTaskType(), t.getStatus()).toException();
-        }
-    }
-
-    boolean taskerSomKanBlokkere(Long kjørendeTaskId, ProsessTaskData p) {
-        return !(Objects.equals(ProsessTaskStatus.VETO, p.getStatus()) && Objects.equals(kjørendeTaskId, p.getBlokkertAvProsessTaskId()));
-    }
 
 }
