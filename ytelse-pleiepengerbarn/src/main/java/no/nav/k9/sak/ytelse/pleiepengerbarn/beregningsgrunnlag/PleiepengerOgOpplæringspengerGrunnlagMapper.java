@@ -7,13 +7,14 @@ import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BA
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
+import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -35,19 +36,19 @@ import no.nav.folketrygdloven.kalkulus.felles.v1.Organisasjon;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Periode;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Utbetalingsgrad;
 import no.nav.folketrygdloven.kalkulus.kodeverk.UttakArbeidType;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.perioder.KravDokument;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PSBVurdererSøknadsfristTjeneste;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.PeriodeFraSøknadForBrukerTjeneste;
-import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.PerioderFraSøknad;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.ArbeidstidMappingInput;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.input.arbeid.MapArbeid;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.tjeneste.UttakTjeneste;
+import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeid;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeidsforhold;
 import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
@@ -85,64 +86,143 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
     @Override
     public YtelsespesifiktGrunnlagDto lagYtelsespesifiktGrunnlag(BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode) {
         var uttaksplan = uttakRestKlient.hentUttaksplan(ref.getBehandlingUuid(), false);
-
-
-        List<UtbetalingsgradPrAktivitetDto> utbetalingsgrader = new ArrayList<>();
-        if (uttaksplan != null) {
-            utbetalingsgrader = finnUtbetalingsgrader(List.of(vilkårsperiode), uttaksplan);
-        } else {
-            var perioderFraSøknadene = periodeFraSøknadForBrukerTjeneste.hentPerioderFraSøknad(ref);
-            var kravDokumenter = søknadsfristTjeneste.vurderSøknadsfrist(ref).keySet();
-            utbetalingsgrader = finnUtbetalingsgraderFraSøknadsdata(vilkårsperiode, kravDokumenter, perioderFraSøknadene);
-        }
-
+        var arbeidIPeriode = finnArbeidIPeriodeFraSøknad(ref, vilkårsperiode);
+        var utbetalingsgrader = finnUtbetalingsgrader(vilkårsperiode, Optional.ofNullable(uttaksplan), arbeidIPeriode);
         var datoForNyeRegler = uttakNyeReglerRepository.finnDatoForNyeRegler(ref.getBehandlingId());
-
-
         return mapTilYtelseSpesifikkType(ref, utbetalingsgrader, datoForNyeRegler);
     }
 
-    private List<UtbetalingsgradPrAktivitetDto> finnUtbetalingsgraderFraSøknadsdata(DatoIntervallEntitet vilkårsperiode, Set<KravDokument> kravDokumenter, Set<PerioderFraSøknad> perioderFraSøknadene) {
-        List<UtbetalingsgradPrAktivitetDto> utbetalingsgrader;
-        var timeline = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(vilkårsperiode.toLocalDateInterval(), true)));
-
+    private List<Arbeid> finnArbeidIPeriodeFraSøknad(BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode) {
+        var perioderFraSøknadene = periodeFraSøknadForBrukerTjeneste.hentPerioderFraSøknad(ref);
+        var kravDokumenter = søknadsfristTjeneste.vurderSøknadsfrist(ref).keySet();
         var arbeidstidInput = new ArbeidstidMappingInput(kravDokumenter,
             perioderFraSøknadene,
-            timeline,
+            new LocalDateTimeline<>(List.of(new LocalDateSegment<>(vilkårsperiode.toLocalDateInterval(), true))),
             null,
             null);
-        var arbeidIPeriode = new MapArbeid().map(arbeidstidInput);
-        utbetalingsgrader = arbeidIPeriode.stream()
-            .filter(a -> !a.getPerioder().isEmpty())
-            .map(a -> {
-                var perioder = a.getPerioder().entrySet().stream().map(p -> new PeriodeMedUtbetalingsgradDto(
-                    new Periode(p.getKey().getFom(), p.getKey().getTom()),
-                    Utbetalingsgrad.fra(100),
-                    Aktivitetsgrad.fra(FinnAktivitetsgrad.finnAktivitetsgrad(p.getValue())))).toList();
-                Aktør aktør = null;
-                if (a.getArbeidsforhold().getOrganisasjonsnummer() != null) {
-                    aktør = new Organisasjon(a.getArbeidsforhold().getOrganisasjonsnummer());
-                } else if (a.getArbeidsforhold().getAktørId() != null) {
-                    aktør = new AktørIdPersonident(a.getArbeidsforhold().getAktørId());
-                }
-                return new UtbetalingsgradPrAktivitetDto(new AktivitetDto(aktør, a.getArbeidsforhold().getArbeidsforholdId() == null ? null : new InternArbeidsforholdRefDto(a.getArbeidsforhold().getArbeidsforholdId()), mapUttakArbeidType(a.getArbeidsforhold().getType())), perioder);
-            }).toList();
-        return utbetalingsgrader;
+        return new MapArbeid().map(arbeidstidInput);
     }
 
-    public static List<UtbetalingsgradPrAktivitetDto> finnUtbetalingsgrader(List<DatoIntervallEntitet> gyldigePerioder, Uttaksplan uttaksplan) {
-        List<UtbetalingsgradPrAktivitetDto> utbetalingsgrader;
-        utbetalingsgrader = uttaksplan.getPerioder()
+    private static List<UtbetalingsgradPrAktivitetDto> finnUtbetalingsgrader(DatoIntervallEntitet gyldigePerioder, Optional<Uttaksplan> uttaksplan, List<Arbeid> arbeidIPeriode) {
+        Set<AktivitetDto> aktiviteter = finnAlleAktiviteterIPeriode(gyldigePerioder, uttaksplan, arbeidIPeriode);
+        Map<AktivitetDto, List<PeriodeMedGrad>> utbetalingsgradPrAktivitet = finnUtbetalingsgradOgPeriodePrAktivitet(gyldigePerioder, uttaksplan);
+        Map<AktivitetDto, List<PeriodeMedGrad>> aktivitetsgradPrAktivitet = finnAktivitetsgradOgPeriodePrAktivitet(arbeidIPeriode);
+        return aktiviteter.stream().map(a -> {
+                var sammenslått = mapTilSammenslåttTidslinje(a, utbetalingsgradPrAktivitet, aktivitetsgradPrAktivitet);
+                var mappet = sammenslått.stream().map(s -> new PeriodeMedUtbetalingsgradDto(
+                    new Periode(s.getFom(), s.getTom()),
+                    Utbetalingsgrad.fra(s.getValue().utbetalingsgrad()),
+                    Aktivitetsgrad.fra(s.getValue().aktivitetsgrad()))).toList();
+                return new UtbetalingsgradPrAktivitetDto(a, mappet);
+            }
+        ).toList();
+    }
+
+    private static Map<AktivitetDto, List<PeriodeMedGrad>> finnUtbetalingsgradOgPeriodePrAktivitet(DatoIntervallEntitet gyldigePerioder, Optional<Uttaksplan> uttaksplan) {
+        return uttaksplan.flatMap(plan -> plan.getPerioder()
+                .entrySet()
+                .stream()
+                .filter(it -> gyldigePerioder.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(it.getKey().getFom(), it.getKey().getTom())))
+                .map(PleiepengerOgOpplæringspengerGrunnlagMapper::lagAktivitetTilPeriodeMap)
+                .reduce(mergeMaps()))
+            .orElse(Collections.emptyMap());
+    }
+
+    private static Map<AktivitetDto, List<PeriodeMedGrad>> lagAktivitetTilPeriodeMap(Map.Entry<LukketPeriode, UttaksperiodeInfo> e) {
+        return e.getValue().getUtbetalingsgrader()
+            .stream()
+            .collect(
+                Collectors.toMap(
+                    // Keymapper: Aktivitet
+                    PleiepengerOgOpplæringspengerGrunnlagMapper::mapUtbetalingsgradArbeidsforhold,
+                    // Valuemapper: Liste av perioder med grad (for å gjøre det enklere å gjøre reduce etterpå)
+                    a -> List.of(tilPeriodeMedGrad(e.getKey(), a.getUtbetalingsgrad()))));
+    }
+
+
+    private static BinaryOperator<Map<AktivitetDto, List<PeriodeMedGrad>>> mergeMaps() {
+        // Slår sammen verdier fra to maps. Ingen av periodene er overlappende siden de gjelder for samme aktivitet og kommer fra samme uttaksplan
+        return (m1, m2) -> {
+            m1.forEach((k, v) -> m2.merge(k, v, kombinerLister()));
+            return m2;
+        };
+    }
+
+    private static BiFunction<List<PeriodeMedGrad>, List<PeriodeMedGrad>, List<PeriodeMedGrad>> kombinerLister() {
+        return (perioderMedGrad1, perioderMedGrad2) -> {
+            var nyListe = new ArrayList<>(perioderMedGrad1);
+            nyListe.addAll(perioderMedGrad2);
+            return nyListe;
+        };
+    }
+
+    private static PeriodeMedGrad tilPeriodeMedGrad(LukketPeriode e, BigDecimal a) {
+        return new PeriodeMedGrad(DatoIntervallEntitet.fraOgMedTilOgMed(e.getFom(), e.getTom()), a);
+    }
+
+    private static Map<AktivitetDto, List<PeriodeMedGrad>> finnAktivitetsgradOgPeriodePrAktivitet(List<Arbeid> arbeidIPeriode) {
+        return arbeidIPeriode.stream()
+            .filter(a -> !a.getPerioder().isEmpty())
+            .collect(Collectors.toMap(
+                PleiepengerOgOpplæringspengerGrunnlagMapper::tilAktivitetDto,
+                a -> a.getPerioder().entrySet().stream().map(p -> tilPeriodeMedGrad(p.getKey(), FinnAktivitetsgrad.finnAktivitetsgrad(p.getValue()))).toList()
+            ));
+    }
+
+    private static LocalDateTimeline<AktivitetsgradOgUtbetalingsgrad> mapTilSammenslåttTidslinje(AktivitetDto a, Map<AktivitetDto, List<PeriodeMedGrad>> utbetalingsgradPrAktivitet, Map<AktivitetDto, List<PeriodeMedGrad>> aktivitetsgradPrAktivitet) {
+        var utbetalingsgradTidslinje = lagTidslinje(a, utbetalingsgradPrAktivitet);
+        var aktivitetsgradTidslinje = lagTidslinje(a, aktivitetsgradPrAktivitet);
+        return utbetalingsgradTidslinje.crossJoin(aktivitetsgradTidslinje, PleiepengerOgOpplæringspengerGrunnlagMapper::kombinerInformasjon);
+    }
+
+    private static LocalDateSegment<AktivitetsgradOgUtbetalingsgrad> kombinerInformasjon(LocalDateInterval di,
+                                                                                         LocalDateSegment<BigDecimal> utbetalingsgradSegment,
+                                                                                         LocalDateSegment<BigDecimal> aktivitetsgradSegment) {
+        if (utbetalingsgradSegment == null) {
+            // Dersom vi ikke har utbetalingsgrad settes denne til 0 (det skal aldri utbetales med mindre dette kommer fra uttak)
+            return new LocalDateSegment<>(di, new AktivitetsgradOgUtbetalingsgrad(BigDecimal.ZERO, aktivitetsgradSegment.getValue()));
+        } else if (aktivitetsgradSegment == null) {
+            // Dersom vi ikke har aktivitetgrad antar vi at bruker er i aktivitet i den delen det ikke utbetales pleiepenger for
+            return new LocalDateSegment<>(di, new AktivitetsgradOgUtbetalingsgrad(utbetalingsgradSegment.getValue(), BigDecimal.valueOf(100).subtract(utbetalingsgradSegment.getValue())));
+        }
+        return new LocalDateSegment<>(di, new AktivitetsgradOgUtbetalingsgrad(utbetalingsgradSegment.getValue(), aktivitetsgradSegment.getValue()));
+    }
+
+    private static LocalDateTimeline<BigDecimal> lagTidslinje(AktivitetDto a, Map<AktivitetDto, List<PeriodeMedGrad>> utbetalingsgradPrAktivitet) {
+        return utbetalingsgradPrAktivitet.get(a).stream()
+            .map(p -> new LocalDateTimeline<>(p.periode.getFomDato(), p.periode.getTomDato(), p.grad))
+            .reduce(LocalDateTimeline::crossJoin)
+            .orElse(LocalDateTimeline.empty());
+    }
+
+    private static Set<AktivitetDto> finnAlleAktiviteterIPeriode(DatoIntervallEntitet gyldigePerioder, Optional<Uttaksplan> uttaksplan, List<Arbeid> arbeidIPeriode) {
+        var aktiviteter = uttaksplan.map(plan -> plan.getPerioder()
             .entrySet()
             .stream()
-            .filter(it -> gyldigePerioder.stream().anyMatch(p -> p.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(it.getKey().getFom(), it.getKey().getTom()))))
-            .flatMap(e -> lagUtbetalingsgrad(e.getKey(), e.getValue()).entrySet().stream())
-            .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.mapping(Map.Entry::getValue, Collectors.toList())))
-            .entrySet()
-            .stream()
-            .map(e -> new UtbetalingsgradPrAktivitetDto(e.getKey(), e.getValue()))
-            .collect(Collectors.toList());
-        return utbetalingsgrader;
+            .filter(it -> gyldigePerioder.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(it.getKey().getFom(), it.getKey().getTom())))
+            .map(Map.Entry::getValue)
+            .flatMap(u -> u.getUtbetalingsgrader().stream())
+            .map(PleiepengerOgOpplæringspengerGrunnlagMapper::mapUtbetalingsgradArbeidsforhold)
+            .collect(Collectors.toCollection(HashSet::new))).orElse(new HashSet<>());
+
+        var aktivitetFraRapportertArbeid = arbeidIPeriode.stream()
+            .filter(a -> !a.getPerioder().isEmpty())
+            .filter(a -> a.getPerioder().keySet().stream().anyMatch(it -> gyldigePerioder.overlapper(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))))
+            .map(PleiepengerOgOpplæringspengerGrunnlagMapper::tilAktivitetDto).collect(Collectors.toCollection(HashSet::new));
+
+        aktiviteter.addAll(aktivitetFraRapportertArbeid);
+        return aktiviteter;
+    }
+
+    private static AktivitetDto tilAktivitetDto(Arbeid a) {
+        Aktør aktør = null;
+        if (a.getArbeidsforhold().getOrganisasjonsnummer() != null) {
+            aktør = new Organisasjon(a.getArbeidsforhold().getOrganisasjonsnummer());
+        } else if (a.getArbeidsforhold().getAktørId() != null) {
+            aktør = new AktørIdPersonident(a.getArbeidsforhold().getAktørId());
+        }
+        return new AktivitetDto(aktør, a.getArbeidsforhold().getArbeidsforholdId() == null ? null : new InternArbeidsforholdRefDto(a.getArbeidsforhold().getArbeidsforholdId()),
+            mapUttakArbeidType(no.nav.k9.kodeverk.uttak.UttakArbeidType.fraKode(a.getArbeidsforhold().getType())));
     }
 
     private YtelsespesifiktGrunnlagDto mapTilYtelseSpesifikkType(BehandlingReferanse ref, List<UtbetalingsgradPrAktivitetDto> utbetalingsgrader, Optional<LocalDate> datoForNyeRegler) {
@@ -155,21 +235,6 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
             default ->
                 throw new IllegalStateException("Ikke støttet ytelse for kalkulus Pleiepenger: " + ref.getFagsakYtelseType());
         };
-    }
-
-    private static Map<AktivitetDto, PeriodeMedUtbetalingsgradDto> lagUtbetalingsgrad(LukketPeriode periode, UttaksperiodeInfo plan) {
-        var perArbeidsforhold = plan.getUtbetalingsgrader()
-            .stream()
-            .collect(Collectors.toMap(PleiepengerOgOpplæringspengerGrunnlagMapper::mapUtbetalingsgradArbeidsforhold, Function.identity()));
-
-        Map<AktivitetDto, PeriodeMedUtbetalingsgradDto> res = new HashMap<>();
-        for (var entry : perArbeidsforhold.entrySet()) {
-            var utbetalingsgrader = entry.getValue();
-            var aktivitetsgrad = FinnAktivitetsgrad.finnAktivitetsgrad(utbetalingsgrader);
-            var utbetalingsgradPeriode = lagPeriode(periode, utbetalingsgrader.getUtbetalingsgrad(), aktivitetsgrad);
-            res.put(entry.getKey(), utbetalingsgradPeriode);
-        }
-        return res;
     }
 
     private static AktivitetDto mapUtbetalingsgradArbeidsforhold(Utbetalingsgrader utbGrad) {
@@ -187,11 +252,6 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
             arbeidsforhold.getType().equals(no.nav.k9.kodeverk.uttak.UttakArbeidType.IKKE_YRKESAKTIV_UTEN_ERSTATNING.getKode());
     }
 
-    private static PeriodeMedUtbetalingsgradDto lagPeriode(LukketPeriode periode, BigDecimal utbetalingsgrad, BigDecimal aktivitetsgrad) {
-        var kalkulusPeriode = new no.nav.folketrygdloven.kalkulus.felles.v1.Periode(periode.getFom(), periode.getTom());
-        return new PeriodeMedUtbetalingsgradDto(kalkulusPeriode, Utbetalingsgrad.fra(utbetalingsgrad), Aktivitetsgrad.fra(aktivitetsgrad));
-    }
-
     private static AktivitetDto lagArbeidsforhold(Arbeidsforhold arb) {
         return new AktivitetDto(lagAktør(arb),
             arb.getArbeidsforholdId() != null ? new InternArbeidsforholdRefDto(arb.getArbeidsforholdId()) : null,
@@ -202,17 +262,24 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
         if (arb.getType().equals(no.nav.k9.kodeverk.uttak.UttakArbeidType.IKKE_YRKESAKTIV_UTEN_ERSTATNING.getKode())) {
             return UttakArbeidType.IKKE_YRKESAKTIV;
         }
-        return mapUttakArbeidType(arb.getType());
+        return mapUttakArbeidType(no.nav.k9.kodeverk.uttak.UttakArbeidType.fraKode(arb.getType()));
     }
 
-    // Inntil man lager en switch
-    private static UttakArbeidType mapUttakArbeidType(String kode) {
-        if (kode == null) {
-            return null;
-        }
-        return Arrays.stream(UttakArbeidType.values()).filter(v -> v.getKode().equals(kode)).findFirst().orElse(null);
+    private static UttakArbeidType mapUttakArbeidType(no.nav.k9.kodeverk.uttak.UttakArbeidType uttakArbeidType) {
+        return switch (uttakArbeidType) {
+            case ARBEIDSTAKER -> UttakArbeidType.ORDINÆRT_ARBEID;
+            case FRILANSER -> UttakArbeidType.FRILANS;
+            case SELVSTENDIG_NÆRINGSDRIVENDE -> UttakArbeidType.SELVSTENDIG_NÆRINGSDRIVENDE;
+            case DAGPENGER -> UttakArbeidType.DAGPENGER;
+            case INAKTIV -> UttakArbeidType.MIDL_INAKTIV;
+            case KUN_YTELSE -> UttakArbeidType.BRUKERS_ANDEL;
+            case IKKE_YRKESAKTIV, IKKE_YRKESAKTIV_UTEN_ERSTATNING -> UttakArbeidType.IKKE_YRKESAKTIV;
+            case PLEIEPENGER_AV_DAGPENGER -> UttakArbeidType.PLEIEPENGER_AV_DAGPENGER;
+            case SYKEPENGER_AV_DAGPENGER -> UttakArbeidType.SYKEPENGER_AV_DAGPENGER;
+            case ANNET -> UttakArbeidType.ANNET;
+            case null -> null;
+        };
     }
-
 
     private static Aktør lagAktør(Arbeidsforhold arb) {
         if (arb.getAktørId() != null) {
@@ -224,4 +291,9 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
         }
     }
 
+    private record PeriodeMedGrad(DatoIntervallEntitet periode, BigDecimal grad) {
+    }
+
+    private record AktivitetsgradOgUtbetalingsgrad(BigDecimal utbetalingsgrad, BigDecimal aktivitetsgrad) {
+    }
 }
