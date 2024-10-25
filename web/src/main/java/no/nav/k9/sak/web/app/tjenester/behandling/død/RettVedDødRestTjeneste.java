@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.død.VurderingRettPleiepengerVedDødDto;
@@ -83,7 +84,7 @@ public class RettVedDødRestTjeneste {
         var grunnlag = rettPleiepengerVedDødRepository.hentHvisEksisterer(behandling.getId());
 
         if (grunnlag.isPresent()) {
-            var aksjonspunkt = behandling.getAksjonspunkter().stream().filter(ap -> ap.getAksjonspunktDefinisjon().getKode().equals("9202") && ap.erUtført()).findFirst().orElse(null);
+            var aksjonspunkt = behandling.getAksjonspunkter().stream().filter(ap -> ap.getAksjonspunktDefinisjon().getKode().equals(AksjonspunktKodeDefinisjon.VURDER_RETT_ETTER_PLEIETRENGENDES_DØD) && ap.erUtført()).findFirst().orElse(null);
             var rettVedDød = grunnlag.get().getRettVedPleietrengendeDød();
             var vurdertAv = aksjonspunkt != null ? aksjonspunkt.getAnsvarligSaksbehandler() : null;
             var vurdertTidspunkt = aksjonspunkt != null ? aksjonspunkt.getEndretTidspunkt() : null;

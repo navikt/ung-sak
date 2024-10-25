@@ -10,9 +10,6 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.pleietrengende.død.RettPleiepe
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.sikkerhet.context.SubjectHandler;
-
-import java.time.LocalDateTime;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = VurderingRettPleiepengerVedDødDto.class, adapter = AksjonspunktOppdaterer.class)
