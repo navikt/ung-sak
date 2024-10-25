@@ -77,7 +77,7 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
         var ytelseGrunnlagMapper = getYtelsesspesifikkMapper(FRISINN);
 
         for (var input : sortertInput) {
-            var ytelseGrunnlag = ytelseGrunnlagMapper.lagYtelsespesifiktGrunnlag(ref, input.getVilkårsperiode());
+            var ytelseGrunnlag = ytelseGrunnlagMapper.lagYtelsespesifiktGrunnlag(ref, input.getVilkårsperiode(), iayGrunnlag);
             var bgReferanse = input.getBgReferanse();
             FrisinnGrunnlag frisinnGrunnlag = (FrisinnGrunnlag) ytelseGrunnlag;
             // frisinn super-hacky håndtering av avslagsårsaker uten for kalkulkus. Slette denne klassen snarest Frisinn er ferdig.

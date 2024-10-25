@@ -14,13 +14,6 @@ public final class ArbeidsforholdMapper {
 
     private ArbeidsforholdMapper() {}
 
-    public static Arbeidsforhold mapArbeidsforholdFraUttakAktivitet(Optional<Arbeidsgiver> arbeidsgiver, Optional<InternArbeidsforholdRef> arbeidsforholdRef, UttakArbeidType uttakArbeidType) {
-        if (UttakArbeidType.FRILANSER.equals(uttakArbeidType)) {
-            return Arbeidsforhold.frilansArbeidsforhold();
-        }
-        return lagArbeidsforhold(arbeidsgiver, arbeidsforholdRef);
-    }
-
     public static Arbeidsforhold mapArbeidsforholdFraBeregningsgrunnlag(BeregningsgrunnlagPrStatusOgAndel andel) {
         if (AktivitetStatus.FRILANSER.equals(andel.getAktivitetStatus())) {
             return Arbeidsforhold.frilansArbeidsforhold();
