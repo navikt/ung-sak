@@ -379,8 +379,4 @@ public class KalkulusRestKlient {
         @TekniskFeil(feilkode = "F-FT-K-1000003", feilmelding = "Feil ved kall til Kalkulus: %s", logLevel = LogLevel.WARN)
         Feil feilVedJsonParsing(String feilmelding);
     }
-
-    public static ObjectMapper getMapper() {
-        return kalkulusMapper;
-    }
 }
