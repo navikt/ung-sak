@@ -1,18 +1,24 @@
 package no.nav.k9.sak.web.app.tjenester.kodeverk;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
+import no.nav.k9.sak.web.app.jackson.ObjectMapperFactory;
 import no.nav.k9.sak.web.app.tjenester.kodeverk.dto.AlleKodeverdierSomObjektResponse;
 import no.nav.k9.sak.web.app.tjenester.kodeverk.dto.KodeverdiSomObjekt;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,6 +32,39 @@ public class KodeverkRestTjenesteTest {
 
     private static <K extends Kodeverdi> void checkResponseSet(final SortedSet<KodeverdiSomObjekt<K>> responseSet, final java.util.Set<K> statiskSet) {
         assertThat(responseSet.stream().map(ko -> ko.getMadeFrom()).toList()).containsExactlyInAnyOrderElementsOf(statiskSet);
+    }
+
+    private static List<LinkedHashMap<String, String>> getKodelisteMap(final Map<String, Object> gruppertKodelisteMap, final String kodelisteNavn) {
+        final Object object = gruppertKodelisteMap.get(kodelisteNavn);
+        assertThat(object).isNotNull();
+        assertThat(object).isInstanceOf(List.class);
+        assertThat(((List<?>)object).getFirst()).isInstanceOf(LinkedHashMap.class);
+        return (List<LinkedHashMap<String, String>>) object;
+    }
+
+    /**
+     * Smoke test på at FagsakYtelseType frå gammalt endepunkt gjev samme svar som nytt (minus - kode)
+     */
+    @Test
+    public void hentGruppertKodeliste_fungerer_framleis() throws IOException {
+        final KodeverkRestTjeneste tjeneste = new KodeverkRestTjeneste(behandlendeEnhetTjeneste);
+        final Response hentGruppertKodelisteResponse = tjeneste.hentGruppertKodeliste();
+        final ObjectMapper om = ObjectMapperFactory.createBaseObjectMapper();
+        final Map<String, Object> hentGruppertKodelisteObjectMap = om.readValue((String)hentGruppertKodelisteResponse.getEntity(), Map.class);
+        final List<LinkedHashMap<String, String>> legacyFagsakYtelseType = getKodelisteMap(hentGruppertKodelisteObjectMap, "FagsakYtelseType");
+        final AlleKodeverdierSomObjektResponse alleKodeverdierSomObjektResponse = tjeneste.alleKodeverdierSomObjekt();
+        for(final var fagsakYtelseType : alleKodeverdierSomObjektResponse.fagsakYtelseTyper()) {
+            if(!fagsakYtelseType.getKode().equals("-")) {
+                // Sjekk at den finnast i gammalt resultat
+                final LinkedHashMap<String, String> funnet = legacyFagsakYtelseType.stream().filter(v -> {
+                    final String kode = v.get("kode");
+                    return kode.equals(fagsakYtelseType.getKode());
+                }).findAny().get();
+                assertThat(funnet.get("navn")).isEqualTo(fagsakYtelseType.getNavn());
+                assertThat(funnet.get("kodeverk")).isEqualTo(fagsakYtelseType.getKodeverk());
+            }
+        }
+
     }
 
     @Test
