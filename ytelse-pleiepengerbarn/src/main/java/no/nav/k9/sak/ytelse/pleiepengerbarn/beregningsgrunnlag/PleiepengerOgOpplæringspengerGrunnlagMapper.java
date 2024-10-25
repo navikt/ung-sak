@@ -83,11 +83,18 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
         this.søknadsfristTjeneste = søknadsfristTjeneste;
     }
 
+    /**
+     * Mapper ytelsesspesifikk informasjon for beregning. For PSB, OLP og PILS er dette utbetalingsgrader og aktivitetsgrader, samt dato for nye regler fra uttak (aksjonspunkt 9291)
+     *
+     * @param ref            Behandlingsreferanse
+     * @param vilkårsperiode Vilkårsperiode som det beregnes for
+     * @return
+     */
     @Override
     public YtelsespesifiktGrunnlagDto lagYtelsespesifiktGrunnlag(BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode) {
         var uttaksplan = uttakRestKlient.hentUttaksplan(ref.getBehandlingUuid(), false);
         var arbeidIPeriode = finnArbeidIPeriodeFraSøknad(ref, vilkårsperiode);
-        var utbetalingsgrader = finnUtbetalingsgrader(vilkårsperiode, Optional.ofNullable(uttaksplan), arbeidIPeriode);
+        var utbetalingsgrader = finnUtbetalingsgraderOgAktivitetsgrader(vilkårsperiode, Optional.ofNullable(uttaksplan), arbeidIPeriode);
         var datoForNyeRegler = uttakNyeReglerRepository.finnDatoForNyeRegler(ref.getBehandlingId());
         return mapTilYtelseSpesifikkType(ref, utbetalingsgrader, datoForNyeRegler);
     }
@@ -103,16 +110,22 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
         return new MapArbeid().map(arbeidstidInput);
     }
 
-    private static List<UtbetalingsgradPrAktivitetDto> finnUtbetalingsgrader(DatoIntervallEntitet gyldigePerioder, Optional<Uttaksplan> uttaksplan, List<Arbeid> arbeidIPeriode) {
-        Set<AktivitetDto> aktiviteter = finnAlleAktiviteterIPeriode(gyldigePerioder, uttaksplan, arbeidIPeriode);
-        Map<AktivitetDto, List<PeriodeMedGrad>> utbetalingsgradPrAktivitet = finnUtbetalingsgradOgPeriodePrAktivitet(gyldigePerioder, uttaksplan);
+    private static List<UtbetalingsgradPrAktivitetDto> finnUtbetalingsgraderOgAktivitetsgrader(DatoIntervallEntitet vilkårsperiode, Optional<Uttaksplan> uttaksplan, List<Arbeid> arbeidIPeriode) {
+        Set<AktivitetDto> aktiviteter = finnAlleAktiviteterIPeriode(vilkårsperiode, uttaksplan, arbeidIPeriode);
+        Map<AktivitetDto, List<PeriodeMedGrad>> utbetalingsgradPrAktivitet = finnUtbetalingsgradOgPeriodePrAktivitet(vilkårsperiode, uttaksplan);
         Map<AktivitetDto, List<PeriodeMedGrad>> aktivitetsgradPrAktivitet = finnAktivitetsgradOgPeriodePrAktivitet(arbeidIPeriode);
+        return kombinerOgMapTilKalkulusKontrakt(vilkårsperiode, aktiviteter, utbetalingsgradPrAktivitet, aktivitetsgradPrAktivitet);
+    }
+
+    private static List<UtbetalingsgradPrAktivitetDto> kombinerOgMapTilKalkulusKontrakt(DatoIntervallEntitet vilkårsperiode, Set<AktivitetDto> aktiviteter, Map<AktivitetDto, List<PeriodeMedGrad>> utbetalingsgradPrAktivitet, Map<AktivitetDto, List<PeriodeMedGrad>> aktivitetsgradPrAktivitet) {
         return aktiviteter.stream().map(a -> {
                 var sammenslått = mapTilSammenslåttTidslinje(a, utbetalingsgradPrAktivitet, aktivitetsgradPrAktivitet);
-                var mappet = sammenslått.stream().map(s -> new PeriodeMedUtbetalingsgradDto(
-                    new Periode(s.getFom(), s.getTom()),
-                    Utbetalingsgrad.fra(s.getValue().utbetalingsgrad()),
-                    Aktivitetsgrad.fra(s.getValue().aktivitetsgrad()))).toList();
+                var mappet = sammenslått.intersection(vilkårsperiode.toLocalDateInterval())
+                    .stream()
+                    .map(s -> new PeriodeMedUtbetalingsgradDto(
+                        new Periode(s.getFom(), s.getTom()),
+                        Utbetalingsgrad.fra(s.getValue().utbetalingsgrad()),
+                        Aktivitetsgrad.fra(s.getValue().aktivitetsgrad()))).toList();
                 return new UtbetalingsgradPrAktivitetDto(a, mappet);
             }
         ).toList();
@@ -140,6 +153,11 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
     }
 
 
+    /**
+     * Slår sammen to maps av perioder pr aktivite ved å ta alle entries fra den ene og legge inn i den andre. Ved konflikt slår vi sammen periodelistene
+     *
+     * @return Funksjon for å slå sammen to maps
+     */
     private static BinaryOperator<Map<AktivitetDto, List<PeriodeMedGrad>>> mergeMaps() {
         // Slår sammen verdier fra to maps. Ingen av periodene er overlappende siden de gjelder for samme aktivitet og kommer fra samme uttaksplan
         return (m1, m2) -> {
@@ -148,6 +166,11 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
         };
     }
 
+    /**
+     * Slår sammen to lister av perioder der periodene antas å være ikke-overlappende
+     *
+     * @return Funksjon for å kombinere to lister av perioder
+     */
     private static BiFunction<List<PeriodeMedGrad>, List<PeriodeMedGrad>, List<PeriodeMedGrad>> kombinerLister() {
         return (perioderMedGrad1, perioderMedGrad2) -> {
             var nyListe = new ArrayList<>(perioderMedGrad1);
@@ -165,13 +188,22 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
             .filter(a -> !a.getPerioder().isEmpty())
             .collect(Collectors.toMap(
                 PleiepengerOgOpplæringspengerGrunnlagMapper::tilAktivitetDto,
-                a -> a.getPerioder().entrySet().stream().map(p -> tilPeriodeMedGrad(p.getKey(), FinnAktivitetsgrad.finnAktivitetsgrad(p.getValue()))).toList()
+                PleiepengerOgOpplæringspengerGrunnlagMapper::finnPerioderMedAktivitetsgrad
             ));
+    }
+
+    private static List<PeriodeMedGrad> finnPerioderMedAktivitetsgrad(Arbeid a) {
+        return a.getPerioder()
+            .entrySet()
+            .stream()
+            .map(p -> tilPeriodeMedGrad(p.getKey(), FinnAktivitetsgrad.finnAktivitetsgrad(p.getValue())))
+            .toList();
     }
 
     private static LocalDateTimeline<AktivitetsgradOgUtbetalingsgrad> mapTilSammenslåttTidslinje(AktivitetDto a, Map<AktivitetDto, List<PeriodeMedGrad>> utbetalingsgradPrAktivitet, Map<AktivitetDto, List<PeriodeMedGrad>> aktivitetsgradPrAktivitet) {
         var utbetalingsgradTidslinje = lagTidslinje(a, utbetalingsgradPrAktivitet);
         var aktivitetsgradTidslinje = lagTidslinje(a, aktivitetsgradPrAktivitet);
+        // Tar med alle perioder fra begge tidslinjer
         return utbetalingsgradTidslinje.crossJoin(aktivitetsgradTidslinje, PleiepengerOgOpplæringspengerGrunnlagMapper::kombinerInformasjon);
     }
 
@@ -259,9 +291,6 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
     }
 
     private static UttakArbeidType mapUttakArbeidType(Arbeidsforhold arb) {
-        if (arb.getType().equals(no.nav.k9.kodeverk.uttak.UttakArbeidType.IKKE_YRKESAKTIV_UTEN_ERSTATNING.getKode())) {
-            return UttakArbeidType.IKKE_YRKESAKTIV;
-        }
         return mapUttakArbeidType(no.nav.k9.kodeverk.uttak.UttakArbeidType.fraKode(arb.getType()));
     }
 
