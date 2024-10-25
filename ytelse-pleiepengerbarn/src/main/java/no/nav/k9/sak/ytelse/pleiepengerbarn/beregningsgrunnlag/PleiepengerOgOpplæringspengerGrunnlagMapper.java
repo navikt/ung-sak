@@ -110,6 +110,13 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
         return new MapArbeid().map(arbeidstidInput);
     }
 
+    /** Finner utbetalingsgrader fra uttak og aktivitetsgrader fra søknad og mapper informasjonen til kalkulus-kontrakt.
+     * Grunnen til at vi må ta hensyn til aktiviteter som ligger i både uttak og søknad er fordi søknaden kan ha informasjon om aktiviteter som ikke ligger i uttak (f.eks omsorgsstønad)
+     * @param vilkårsperiode Vilkårsperiode det beregnes for
+     * @param uttaksplan Uttaksplan
+     * @param arbeidIPeriode Arbeid oppgitt i søknad
+     * @return Liste med utbetalingsgrader og perioder pr aktivitet
+     */
     private static List<UtbetalingsgradPrAktivitetDto> finnUtbetalingsgraderOgAktivitetsgrader(DatoIntervallEntitet vilkårsperiode, Optional<Uttaksplan> uttaksplan, List<Arbeid> arbeidIPeriode) {
         Set<AktivitetDto> aktiviteter = finnAlleAktiviteterIPeriode(vilkårsperiode, uttaksplan, arbeidIPeriode);
         Map<AktivitetDto, List<PeriodeMedGrad>> utbetalingsgradPrAktivitet = finnUtbetalingsgradOgPeriodePrAktivitet(vilkårsperiode, uttaksplan);
