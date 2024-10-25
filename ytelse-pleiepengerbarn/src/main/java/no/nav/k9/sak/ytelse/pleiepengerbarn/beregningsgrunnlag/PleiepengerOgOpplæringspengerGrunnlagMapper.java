@@ -305,7 +305,7 @@ public class PleiepengerOgOpplæringspengerGrunnlagMapper implements Beregningsg
     }
 
     private static LocalDateTimeline<BigDecimal> lagTidslinje(AktivitetDto a, Map<AktivitetDto, List<PeriodeMedGrad>> utbetalingsgradPrAktivitet) {
-        return utbetalingsgradPrAktivitet.get(a).stream()
+        return utbetalingsgradPrAktivitet.getOrDefault(a, Collections.emptyList()).stream()
             .map(p -> new LocalDateTimeline<>(p.periode.getFomDato(), p.periode.getTomDato(), p.grad))
             .reduce(LocalDateTimeline::crossJoin)
             .orElse(LocalDateTimeline.empty());
