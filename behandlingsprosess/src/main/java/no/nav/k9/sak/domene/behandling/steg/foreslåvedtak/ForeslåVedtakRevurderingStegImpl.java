@@ -3,6 +3,8 @@ package no.nav.k9.sak.domene.behandling.steg.foreslåvedtak;
 import static no.nav.k9.kodeverk.behandling.BehandlingStegType.FORESLÅ_VEDTAK;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
@@ -32,6 +34,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.dokument.bestill.tjenester.FormidlingDokumentdataTjeneste;
+import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 @BehandlingStegRef(value = FORESLÅ_VEDTAK)
 @BehandlingTypeRef(BehandlingType.REVURDERING) //Revurdering
@@ -44,6 +47,7 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
     private VilkårResultatRepository vilkårResultatRepository;
     private Instance<ErEndringIBeregningVurderer> endringIBeregningTjenester;
     private FormidlingDokumentdataTjeneste formidlingDokumentdataTjeneste;
+    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste;
 
     ForeslåVedtakRevurderingStegImpl() {
     }
@@ -52,12 +56,14 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
     ForeslåVedtakRevurderingStegImpl(ForeslåVedtakTjeneste foreslåVedtakTjeneste,
                                      BehandlingRepositoryProvider repositoryProvider,
                                      @Any Instance<ErEndringIBeregningVurderer> endringIBeregningTjenester,
-                                     FormidlingDokumentdataTjeneste formidlingDokumentdataTjeneste) {
+                                     FormidlingDokumentdataTjeneste formidlingDokumentdataTjeneste,
+                                     @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.foreslåVedtakTjeneste = foreslåVedtakTjeneste;
         this.endringIBeregningTjenester = endringIBeregningTjenester;
         this.formidlingDokumentdataTjeneste = formidlingDokumentdataTjeneste;
+        this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
     }
 
     @Override
@@ -67,6 +73,8 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
         var revurderingRef = BehandlingReferanse.fra(revurdering);
         var originalRef = BehandlingReferanse.fra(orginalBehandling);
         BehandleStegResultat behandleStegResultat = foreslåVedtakTjeneste.foreslåVedtak(revurdering, kontekst);
+
+        validerHarVilkårsperioder(revurdering);
 
         //Oppretter aksjonspunkt dersom revurdering har mindre beregningsgrunnlag enn orginal
         NavigableSet<LocalDate> skjæringstidspunkter = vilkårResultatRepository.hent(revurdering.getId())
@@ -90,6 +98,23 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
         }
 
         return behandleStegResultat;
+    }
+
+    private void validerHarVilkårsperioder(Behandling behandling) {
+        var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjeneste, behandling.getFagsakYtelseType(), behandling.getType());
+
+        var definerendeVilkår = perioderTilVurderingTjeneste.definerendeVilkår();
+
+        List<VilkårPeriode> vilkårPerioder = new ArrayList<>();
+        for (var v : definerendeVilkår) {
+            vilkårPerioder.addAll(vilkårResultatRepository.hent(behandling.getId())
+                .getVilkår(v)
+                .map(Vilkår::getPerioder)
+                .orElse(Collections.emptyList()));
+        }
+        if (vilkårPerioder.isEmpty()) {
+            throw new IllegalStateException("Fant ingen vilkårsperiode for definerende vilkår");
+        }
     }
 
     private Behandling getOriginalBehandling(Behandling behandling) {
