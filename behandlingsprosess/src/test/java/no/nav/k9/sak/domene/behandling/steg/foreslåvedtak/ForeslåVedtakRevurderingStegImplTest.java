@@ -109,7 +109,8 @@ public class ForeslåVedtakRevurderingStegImplTest {
         endringIBeregningTjeneste = new DefaultErEndringIBeregningTjeneste(beregningsgrunnlagTjeneste);
 
         foreslåVedtakRevurderingSteg =
-            new ForeslåVedtakRevurderingStegImpl(foreslåVedtakTjeneste, repositoryProvider, new UnitTestLookupInstanceImpl<>(endringIBeregningTjeneste), formidlingDokumentdataTjeneste);
+            new ForeslåVedtakRevurderingStegImpl(foreslåVedtakTjeneste, repositoryProvider, new UnitTestLookupInstanceImpl<>(endringIBeregningTjeneste), formidlingDokumentdataTjeneste,
+                null);
         when(foreslåVedtakTjeneste.foreslåVedtak(revurdering, kontekstRevurdering)).thenReturn(behandleStegResultat);
         when(behandleStegResultat.getAksjonspunktResultater()).thenReturn(Collections.emptyList());
     }
