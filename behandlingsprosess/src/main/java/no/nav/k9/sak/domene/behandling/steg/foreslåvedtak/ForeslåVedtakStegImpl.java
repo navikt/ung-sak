@@ -82,9 +82,6 @@ public class ForeslåVedtakStegImpl implements ForeslåVedtakSteg {
     }
 
     private void validerHarVilkårsperioder(Behandling behandling) {
-        if (vilkårsPerioderTilVurderingTjeneste == null) {
-            return;
-        }
         var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjeneste, behandling.getFagsakYtelseType(), behandling.getType());
 
         var definerendeVilkår = perioderTilVurderingTjeneste.definerendeVilkår();
