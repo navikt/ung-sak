@@ -42,7 +42,7 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
 import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
-class MapTilUtbetailgsgradPrAktivitet {
+class MapTilUtbetalingsgradPrAktivitet {
 
 
     /**
@@ -84,7 +84,7 @@ class MapTilUtbetailgsgradPrAktivitet {
                 .entrySet()
                 .stream()
                 .filter(it -> gyldigePerioder.overlapper(tilDatoIntervall(it.getKey())))
-                .map(MapTilUtbetailgsgradPrAktivitet::lagAktivitetTilPeriodeMap)
+                .map(MapTilUtbetalingsgradPrAktivitet::lagAktivitetTilPeriodeMap)
                 .reduce(mergeMaps()))
             .orElse(Collections.emptyMap());
     }
@@ -95,7 +95,7 @@ class MapTilUtbetailgsgradPrAktivitet {
             .collect(
                 Collectors.toMap(
                     // Keymapper: Aktivitet
-                    MapTilUtbetailgsgradPrAktivitet::mapUtbetalingsgradArbeidsforhold,
+                    MapTilUtbetalingsgradPrAktivitet::mapUtbetalingsgradArbeidsforhold,
                     // Valuemapper: Liste av perioder med grad (for å gjøre det enklere å gjøre reduce etterpå)
                     a -> List.of(tilPeriodeMedGrad(e.getKey(), a.getUtbetalingsgrad()))));
     }
@@ -139,7 +139,7 @@ class MapTilUtbetailgsgradPrAktivitet {
         return arbeidIPeriode.stream()
             .filter(a -> !a.getPerioder().isEmpty())
             .collect(Collectors.toMap(
-                MapTilUtbetailgsgradPrAktivitet::tilAktivitetDto,
+                MapTilUtbetalingsgradPrAktivitet::tilAktivitetDto,
                 a1 -> finnPerioderMedAktivitetsgrad(a1, yrkesaktiviteter)
             ));
     }
@@ -174,7 +174,7 @@ class MapTilUtbetailgsgradPrAktivitet {
         var periodeUtenNullOverNull = a.getPerioder().entrySet().stream()
             .filter(v -> !erNullOverNull(v))
             .map(Map.Entry::getKey)
-            .map(MapTilUtbetailgsgradPrAktivitet::tilDatoIntervall)
+            .map(MapTilUtbetalingsgradPrAktivitet::tilDatoIntervall)
             .toList();
         return TidslinjeUtil.tilTidslinjeKomprimertMedMuligOverlapp(periodeUtenNullOverNull);
     }
@@ -188,9 +188,9 @@ class MapTilUtbetailgsgradPrAktivitet {
     }
 
     private static List<DatoIntervallEntitet> finnNullOverNullPerioder(Arbeid a) {
-        return a.getPerioder().entrySet().stream().filter(MapTilUtbetailgsgradPrAktivitet::erNullOverNull)
+        return a.getPerioder().entrySet().stream().filter(MapTilUtbetalingsgradPrAktivitet::erNullOverNull)
             .map(Map.Entry::getKey)
-            .map(MapTilUtbetailgsgradPrAktivitet::tilDatoIntervall)
+            .map(MapTilUtbetalingsgradPrAktivitet::tilDatoIntervall)
             .toList();
     }
 
@@ -204,11 +204,17 @@ class MapTilUtbetailgsgradPrAktivitet {
 
     private static List<PeriodeMedGrad> finnPerioderMedAktivitetsgrad(Arbeid a, Collection<Yrkesaktivitet> yrkesaktiviteter) {
         var relevantePerioder = finnRelevantePerioderForAktivitet(yrkesaktiviteter, a);
-        return a.getPerioder()
+        var relevantPeriodeTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(relevantePerioder);
+        var oppgittGradTidslinje = a.getPerioder()
             .entrySet()
             .stream()
-            .filter(e -> relevantePerioder.stream().anyMatch(p -> p.overlapper(tilDatoIntervall(e.getKey()))))
-            .map(p -> tilPeriodeMedGrad(p.getKey(), FinnAktivitetsgrad.finnAktivitetsgrad(p.getValue())))
+            .map(p -> new LocalDateTimeline<>(p.getKey().getFom(), p.getKey().getTom(), FinnAktivitetsgrad.finnAktivitetsgrad(p.getValue())))
+            .reduce(LocalDateTimeline::crossJoin)
+            .orElse(LocalDateTimeline.empty());
+        return oppgittGradTidslinje.intersection(relevantPeriodeTidslinje)
+            .toSegments()
+            .stream()
+            .map(s -> new PeriodeMedGrad(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()), s.getValue()))
             .toList();
     }
 
@@ -218,7 +224,7 @@ class MapTilUtbetailgsgradPrAktivitet {
         var utbetalingsgradTidslinje = lagTidslinje(a, utbetalingsgradPrAktivitet);
         var aktivitetsgradTidslinje = lagTidslinje(a, aktivitetsgradPrAktivitet);
         // Tar med alle perioder fra begge tidslinjer
-        return utbetalingsgradTidslinje.crossJoin(aktivitetsgradTidslinje, MapTilUtbetailgsgradPrAktivitet::kombinerInformasjon);
+        return utbetalingsgradTidslinje.crossJoin(aktivitetsgradTidslinje, MapTilUtbetalingsgradPrAktivitet::kombinerInformasjon);
     }
 
     private static LocalDateSegment<AktivitetsgradOgUtbetalingsgrad> kombinerInformasjon(LocalDateInterval di,
@@ -248,7 +254,7 @@ class MapTilUtbetailgsgradPrAktivitet {
             .filter(it -> gyldigePerioder.overlapper(tilDatoIntervall(it.getKey())))
             .map(Map.Entry::getValue)
             .flatMap(u -> u.getUtbetalingsgrader().stream())
-            .map(MapTilUtbetailgsgradPrAktivitet::mapUtbetalingsgradArbeidsforhold)
+            .map(MapTilUtbetalingsgradPrAktivitet::mapUtbetalingsgradArbeidsforhold)
             .collect(Collectors.toCollection(HashSet::new))).orElse(new HashSet<>());
 
         var aktivitetFraRapportertArbeid = arbeidIPeriode.stream()
@@ -259,7 +265,7 @@ class MapTilUtbetailgsgradPrAktivitet {
                 return harOverlapp(søktePerioder, relevantePerioder);
             })
             .filter(a -> a.getPerioder().keySet().stream().anyMatch(it -> gyldigePerioder.overlapper(tilDatoIntervall(it))))
-            .map(MapTilUtbetailgsgradPrAktivitet::tilAktivitetDto).collect(Collectors.toCollection(HashSet::new));
+            .map(MapTilUtbetalingsgradPrAktivitet::tilAktivitetDto).collect(Collectors.toCollection(HashSet::new));
 
         aktiviteter.addAll(aktivitetFraRapportertArbeid);
         return aktiviteter;
@@ -267,7 +273,7 @@ class MapTilUtbetailgsgradPrAktivitet {
 
     private static TreeSet<DatoIntervallEntitet> finnSøktePerioder(Arbeid a) {
         return a.getPerioder().keySet().stream()
-            .map(MapTilUtbetailgsgradPrAktivitet::tilDatoIntervall)
+            .map(MapTilUtbetalingsgradPrAktivitet::tilDatoIntervall)
             .collect(Collectors.toCollection(TreeSet::new));
     }
 

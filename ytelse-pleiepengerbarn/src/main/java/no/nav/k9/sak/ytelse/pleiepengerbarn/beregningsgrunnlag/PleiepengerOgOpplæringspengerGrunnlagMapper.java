@@ -3,7 +3,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
-import static no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.MapTilUtbetailgsgradPrAktivitet.finnUtbetalingsgraderOgAktivitetsgrader;
+import static no.nav.k9.sak.ytelse.pleiepengerbarn.beregningsgrunnlag.MapTilUtbetalingsgradPrAktivitet.finnUtbetalingsgraderOgAktivitetsgrader;
 
 import java.time.LocalDate;
 import java.util.Collections;
