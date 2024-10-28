@@ -39,8 +39,8 @@ class MapTilUtbetalingsgradPrAktivitetTest {
     @Test
     void skal_ikke_mappe_utbetalingsgrader_dersom_ingen_uttaksplan_og_ingen_aktiviteter_fra_søknad() {
 
-        var fom = LocalDate.of(2024, 10, 28);
-        var tom = fom.plusDays(3);
+        var fom = LocalDate.now();
+        var tom = LocalDate.now().plusDays(10);
 
         var utbetalingsgrader = MapTilUtbetalingsgradPrAktivitet.finnUtbetalingsgraderOgAktivitetsgrader(DatoIntervallEntitet.fra(fom, tom),
             Optional.empty(),
@@ -54,8 +54,8 @@ class MapTilUtbetalingsgradPrAktivitetTest {
     @Test
     void skal_mappe_0_over_0_frilans_fra_søknad_om_det_finnes_yrkesaktivitet() {
 
-        var fom = LocalDate.of(2024, 10, 28);
-        var tom = fom.plusDays(3);
+        var fom = LocalDate.now();
+        var tom = LocalDate.now().plusDays(10);
 
         var frilansArbeidstid = lagArbeidstidForFrilans(fom, tom);
         var fomDatoFrilans = fom.plusDays(1);
@@ -82,8 +82,8 @@ class MapTilUtbetalingsgradPrAktivitetTest {
     @Test
     void skal_ikke_mappe_0_over_0_frilans_fra_søknad_om_det_ikke_finnes_yrkesaktivitet() {
 
-        var fom = LocalDate.of(2024, 10, 28);
-        var tom = fom.plusDays(3);
+        var fom = LocalDate.now();
+        var tom = LocalDate.now().plusDays(10);
 
         var frilansArbeidstid = lagArbeidstidForFrilans(fom, tom);
         var utbetalingsgrader = MapTilUtbetalingsgradPrAktivitet.finnUtbetalingsgraderOgAktivitetsgrader(DatoIntervallEntitet.fra(fom, tom),
@@ -97,8 +97,8 @@ class MapTilUtbetalingsgradPrAktivitetTest {
     @Test
     void skal_mappe_arbeidsaktivitet_fra_uttaksplan_og_søknad() {
 
-        var fom = LocalDate.of(2024, 10, 28);
-        var tom = fom.plusDays(3);
+        var fom = LocalDate.now();
+        var tom = LocalDate.now().plusDays(10);
 
         var periode = new LukketPeriode(fom, tom);
         var arbeidstidArbeid = lagArbeidstidForArbeid(periode);
@@ -126,8 +126,8 @@ class MapTilUtbetalingsgradPrAktivitetTest {
     @Test
     void skal_mappe_arbeidsaktivitet_fra_uttaksplan_og_søknad_der_utbetalingsgrad_fra_uttak_er_ulik_søknad() {
 
-        var fom = LocalDate.of(2024, 10, 28);
-        var tom = fom.plusDays(3);
+        var fom = LocalDate.now();
+        var tom = LocalDate.now().plusDays(10);
 
         var periode = new LukketPeriode(fom, tom);
         var arbeidstidArbeid = lagArbeidstidForArbeid(periode);
@@ -152,42 +152,6 @@ class MapTilUtbetalingsgradPrAktivitetTest {
         assertThat(periodeMedUtbetalingsgrad.getPeriode().getTom()).isEqualTo(tom);
     }
 
-
-
-    @Test
-    void skal_mappe_arbeidsaktivitet_og_fjerne_helger() {
-
-        var fom = LocalDate.of(2024, 10, 28);
-        var tom = fom.plusDays(7);
-
-        var periode = new LukketPeriode(fom, tom);
-        var arbeidstidArbeid = lagArbeidstidForArbeid(periode);
-        var uttaksplan = lagUttaksplanMedArbeid(periode, 50);
-        var utbetalingsgrader = MapTilUtbetalingsgradPrAktivitet.finnUtbetalingsgraderOgAktivitetsgrader(DatoIntervallEntitet.fra(fom, tom),
-            Optional.of(uttaksplan),
-            List.of(arbeidstidArbeid),
-            List.of(lagArbeidYrkesaktivitet(fom)));
-
-
-        assertThat(utbetalingsgrader.size()).isEqualTo(1);
-        var utbetalingsgradPrAktivitetDto = utbetalingsgrader.get(0);
-        var aktivitet = utbetalingsgradPrAktivitetDto.getUtbetalingsgradArbeidsforholdDto();
-        assertThat(aktivitet.getUttakArbeidType()).isEqualTo(no.nav.folketrygdloven.kalkulus.kodeverk.UttakArbeidType.ORDINÆRT_ARBEID);
-        assertThat(aktivitet.getArbeidsgiver().getIdent()).isEqualTo(ORGNR);
-        var perioderMedUtbetalingsgrad = utbetalingsgradPrAktivitetDto.getPeriodeMedUtbetalingsgrad();
-        assertThat(perioderMedUtbetalingsgrad.size()).isEqualTo(2);
-        var periodeMedUtbetalingsgrad = perioderMedUtbetalingsgrad.get(0);
-        assertThat(periodeMedUtbetalingsgrad.getUtbetalingsgrad()).isEqualTo(Utbetalingsgrad.fra(50));
-        assertThat(periodeMedUtbetalingsgrad.getAktivitetsgrad()).isEqualTo(Aktivitetsgrad.fra(50));
-        assertThat(periodeMedUtbetalingsgrad.getPeriode().getFom()).isEqualTo(fom);
-        assertThat(periodeMedUtbetalingsgrad.getPeriode().getTom()).isEqualTo(fom.plusDays(4));
-
-        var periodeMedUtbetalingsgrad2 = perioderMedUtbetalingsgrad.get(1);
-        assertThat(periodeMedUtbetalingsgrad2.getUtbetalingsgrad()).isEqualTo(Utbetalingsgrad.fra(50));
-        assertThat(periodeMedUtbetalingsgrad2.getAktivitetsgrad()).isEqualTo(Aktivitetsgrad.fra(50));
-        assertThat(periodeMedUtbetalingsgrad2.getPeriode().getFom()).isEqualTo(tom);
-        assertThat(periodeMedUtbetalingsgrad2.getPeriode().getTom()).isEqualTo(tom);
-    }
 
     private static Arbeid lagArbeidstidForFrilans(LocalDate fom, LocalDate tom) {
         return new Arbeid(new Arbeidsforhold(UttakArbeidType.FRILANSER.getKode(), null, null, null), Map.of(new LukketPeriode(fom, tom), new ArbeidsforholdPeriodeInfo(Duration.ZERO, Duration.ZERO)));

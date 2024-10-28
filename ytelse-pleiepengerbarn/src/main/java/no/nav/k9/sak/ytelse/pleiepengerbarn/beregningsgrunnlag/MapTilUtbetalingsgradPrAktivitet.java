@@ -30,11 +30,9 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
-import no.nav.k9.sak.behandlingslager.behandling.vilkår.PåTversAvHelgErKantIKantVurderer;
 import no.nav.k9.sak.domene.iay.modell.AktivitetsAvtale;
 import no.nav.k9.sak.domene.iay.modell.Yrkesaktivitet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.sak.domene.typer.tid.Hjelpetidslinjer;
 import no.nav.k9.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeid;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Arbeidsforhold;
@@ -67,14 +65,10 @@ class MapTilUtbetalingsgradPrAktivitet {
         return kombinerOgMapTilKalkulusKontrakt(vilkårsperiode, aktiviteter, utbetalingsgradPrAktivitet, aktivitetsgradPrAktivitet);
     }
 
-    private static List<UtbetalingsgradPrAktivitetDto> kombinerOgMapTilKalkulusKontrakt(DatoIntervallEntitet vilkårsperiode,
-                                                                                        Set<AktivitetDto> aktiviteter,
-                                                                                        Map<AktivitetDto, List<PeriodeMedGrad>> utbetalingsgradPrAktivitet,
-                                                                                        Map<AktivitetDto, List<PeriodeMedGrad>> aktivitetsgradPrAktivitet) {
+    private static List<UtbetalingsgradPrAktivitetDto> kombinerOgMapTilKalkulusKontrakt(DatoIntervallEntitet vilkårsperiode, Set<AktivitetDto> aktiviteter, Map<AktivitetDto, List<PeriodeMedGrad>> utbetalingsgradPrAktivitet, Map<AktivitetDto, List<PeriodeMedGrad>> aktivitetsgradPrAktivitet) {
         return aktiviteter.stream().map(a -> {
                 var sammenslått = mapTilSammenslåttTidslinje(a, utbetalingsgradPrAktivitet, aktivitetsgradPrAktivitet);
-                var mappet = Hjelpetidslinjer.fjernHelger(sammenslått)
-                    .intersection(vilkårsperiode.toLocalDateInterval())
+                var mappet = sammenslått.intersection(vilkårsperiode.toLocalDateInterval())
                     .stream()
                     .map(s -> new PeriodeMedUtbetalingsgradDto(
                         new Periode(s.getFom(), s.getTom()),
@@ -83,15 +77,6 @@ class MapTilUtbetalingsgradPrAktivitet {
                 return new UtbetalingsgradPrAktivitetDto(a, mappet);
             }
         ).toList();
-    }
-
-    private static LocalDateTimeline<Boolean> finnUttakTidslinje(Map<AktivitetDto, List<PeriodeMedGrad>> utbetalingsgradPrAktivitet) {
-        return utbetalingsgradPrAktivitet.values().stream()
-            .flatMap(Collection::stream)
-            .map(PeriodeMedGrad::periode)
-            .map(p -> new LocalDateTimeline<>(p.getFomDato(), p.getTomDato(), true))
-            .reduce(LocalDateTimeline::crossJoin)
-            .orElse(LocalDateTimeline.empty());
     }
 
     private static Map<AktivitetDto, List<PeriodeMedGrad>> finnUtbetalingsgradOgPeriodePrAktivitet(DatoIntervallEntitet gyldigePerioder, Optional<Uttaksplan> uttaksplan) {
