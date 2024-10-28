@@ -74,7 +74,7 @@ public class KalkulatorInputTjeneste {
         return input -> {
             var vilkårsMerknad = finnVilkårmerknadForOpptjening(opptjeningsvilkår, input);
             var vilkårsperiode = input.getVilkårsperiode();
-            var ytelsesGrunnlag = mapper.lagYtelsespesifiktGrunnlag(behandlingReferanse, vilkårsperiode, iayGrunnlag);
+            var ytelsesGrunnlag = mapper.lagYtelsespesifiktGrunnlag(behandlingReferanse, vilkårsperiode);
             return byggDto(
                 behandlingReferanse,
                 iayGrunnlag,
