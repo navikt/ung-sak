@@ -40,7 +40,7 @@ public class HentKalkulatorInputDump {
         return perioderTilVurdering.stream()
             .filter(periode -> !periodeErUtenforFagsaksIntervall(periode, ref.getFagsakPeriode()))
             .map(vilkårsperiode -> {
-                var ytelseGrunnlag = mapper.lagYtelsespesifiktGrunnlag(ref, vilkårsperiode, iayGrunnlag);
+                var ytelseGrunnlag = mapper.lagYtelsespesifiktGrunnlag(ref, vilkårsperiode);
                 var kalkulatorInput = forvaltningBeregning.getKalkulatorInputTjeneste(ref.getFagsakYtelseType()).byggDto(ref, iayGrunnlag, sakInntektsmeldinger, ytelseGrunnlag, vilkårsperiode, null);
                 return new KalkulatorInputPrVilkårperiodeDto(vilkårsperiode, kalkulatorInput);
             })
