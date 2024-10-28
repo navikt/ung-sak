@@ -95,6 +95,9 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
     private BehandleStegResultat nyKompletthetFlyt(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
         var kompletthetsAksjon = kompletthetBeregningTjeneste.utledTilstand(ref, kontekst);
 
+        var forespørsler = mapTilForespørsler(kompletthetsAksjon.getPerioderMedMangler());
+        arbeidsgiverPortalenTjeneste.oppdaterInntektsmeldingforespørslerISak(forespørsler, ref);
+
         if (kompletthetsAksjon.kanFortsette()) {
             avbrytAksjonspunktHvisTilstede(kontekst);
 
@@ -128,8 +131,6 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
                 .map(arbeidsgiver -> arbeidsgiver != null ? new Mottaker(arbeidsgiver.getIdentifikator(), arbeidsgiver.getErVirksomhet() ? IdType.ORGNR : IdType.AKTØRID) : new Mottaker(ref.getAktørId().getAktørId(), IdType.AKTØRID))
                 .collect(Collectors.toSet());
 
-            var forespørsler = mapTilForespørsler(perioderMedManglendeVedlegg);
-            arbeidsgiverPortalenTjeneste.oppdaterInntektsmeldingforespørslerISak(forespørsler, ref);
             sendBrev(ref.getBehandlingId(), DokumentMalType.fraKode(kompletthetsAksjon.getDokumentMalType().getKode()), aktørerDetSkalEtterlysesFra);
         }
     }
@@ -172,12 +173,18 @@ public class VurderKompletthetForBeregningSteg implements BeregningsgrunnlagSteg
 
     private static Map<DatoIntervallEntitet, List<Arbeidsgiver>> mapTilForespørsler(List<PeriodeMedMangler> perioderMedMangler) {
         Map<DatoIntervallEntitet, List<Arbeidsgiver>> forespørselMap = new HashMap<>();
+        if (perioderMedMangler == null) {
+            return forespørselMap;
+        }
+
         for (var periodeMedMangler : perioderMedMangler) {
             var periode = periodeMedMangler.getPeriode();
             var arbeidsgivere = periodeMedMangler.getMangler().stream()
                 .map(ManglendeVedlegg::getArbeidsgiver)
                 .collect(Collectors.toList());
-            forespørselMap.put(periode, arbeidsgivere);
+            if (!arbeidsgivere.isEmpty()) {
+                forespørselMap.put(periode, arbeidsgivere);
+            }
         }
         return forespørselMap;
     }
