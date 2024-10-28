@@ -17,6 +17,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 
 import org.hibernate.jpa.QueryHints;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -29,6 +31,8 @@ import no.nav.k9.felles.jpa.HibernateVerktøy;
 
 @Dependent
 public class OpptjeningRepository {
+
+    private static final Logger log = LoggerFactory.getLogger(OpptjeningRepository.class);
 
     private EntityManager em;
     private BehandlingRepository behandlingRepository;
@@ -123,6 +127,7 @@ public class OpptjeningRepository {
         var vilkår = vilkårResultatRepository.hentHvisEksisterer(behandling.getId()).flatMap(it -> it.getVilkår(VilkårType.OPPTJENINGSVILKÅRET));
         //FDBHE //TODO fjern når sak er ok
         if (behandling.getId() == 1837447L && erTilbakestilling) {
+            log.warn("Ignorerte validering mot vilkårsperioder for {}", vilkår);
             return;
         }
         vilkår.ifPresent(builder::validerMotVilkår);
