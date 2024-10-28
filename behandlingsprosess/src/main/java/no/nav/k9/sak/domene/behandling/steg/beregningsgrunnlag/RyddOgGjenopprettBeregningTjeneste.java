@@ -137,13 +137,28 @@ public class RyddOgGjenopprettBeregningTjeneste {
         FinnPerioderSomSkalFjernesIBeregning finnPerioderSomSkalFjernesIBeregning = FinnPerioderSomSkalFjernesIBeregning
             .getFinnPerioderSkalIgnoreresIBeregning(behandlingReferanse);
 
+        var aktuelleVilkårsperioder = getAktuelleVilkårsperioder(vilkårene, perioderSomSkalInitieres);
+
         finnPerioderSomSkalFjernesIBeregning
-            .finnPerioderSomSkalFjernes(vilkårene, behandlingReferanse, perioderSomSkalInitieres)
+            .finnPerioderSomSkalFjernes(vilkårene, behandlingReferanse, aktuelleVilkårsperioder)
             .forEach(vilkårBuilder::tilbakestill);
 
         resultatBuilder.leggTil(vilkårBuilder, true);
         vilkårResultatRepository.lagre(behandlingReferanse.getBehandlingId(), resultatBuilder.build());
 
+    }
+
+    private static Set<DatoIntervallEntitet> getAktuelleVilkårsperioder(Vilkårene vilkårene, Set<DatoIntervallEntitet> perioderSomSkalInitieres) {
+        var aktuelleVilkårsperioder = vilkårene
+            .getVilkår(VilkårType.BEREGNINGSGRUNNLAGVILKÅR).orElseThrow(() -> new IllegalStateException("Hadde ikke beregningsGrunnlagvilkår"))
+            .getPerioder().stream()
+            .filter(vilkårPeriode -> Utfall.IKKE_VURDERT.equals(vilkårPeriode.getUtfall()))
+            .map(VilkårPeriode::getPeriode)
+            .collect(Collectors.toCollection(HashSet::new));
+
+        aktuelleVilkårsperioder.addAll(perioderSomSkalInitieres);
+
+        return aktuelleVilkårsperioder;
     }
 
     /**
