@@ -15,6 +15,8 @@ import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 
+import org.jetbrains.annotations.NotNull;
+
 import no.nav.folketrygdloven.kalkulus.beregning.v1.AktivitetDto;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.PeriodeMedUtbetalingsgradDto;
 import no.nav.folketrygdloven.kalkulus.beregning.v1.UtbetalingsgradPrAktivitetDto;
@@ -66,9 +68,13 @@ class MapTilUtbetalingsgradPrAktivitet {
     }
 
     private static List<UtbetalingsgradPrAktivitetDto> kombinerOgMapTilKalkulusKontrakt(DatoIntervallEntitet vilkårsperiode, Set<AktivitetDto> aktiviteter, Map<AktivitetDto, List<PeriodeMedGrad>> utbetalingsgradPrAktivitet, Map<AktivitetDto, List<PeriodeMedGrad>> aktivitetsgradPrAktivitet) {
+        var uttakstidslinje = finnUttakstidslinje(utbetalingsgradPrAktivitet);
         return aktiviteter.stream().map(a -> {
                 var sammenslått = mapTilSammenslåttTidslinje(a, utbetalingsgradPrAktivitet, aktivitetsgradPrAktivitet);
-                var mappet = sammenslått.intersection(vilkårsperiode.toLocalDateInterval())
+                // Dersom vi har en uttaksplan begrenser vi utbetalingsgradene til periodene fra uttaksplanen
+                // dette er for å unngå manuelle aksjonspunkter i kalkulus for perioder som ikke er relevant for utbetaling
+                var overlappMotUttak = uttakstidslinje.map(sammenslått::intersection).orElse(sammenslått);
+                var mappet = overlappMotUttak.intersection(vilkårsperiode.toLocalDateInterval())
                     .stream()
                     .map(s -> new PeriodeMedUtbetalingsgradDto(
                         new Periode(s.getFom(), s.getTom()),
@@ -77,6 +83,15 @@ class MapTilUtbetalingsgradPrAktivitet {
                 return new UtbetalingsgradPrAktivitetDto(a, mappet);
             }
         ).toList();
+    }
+
+    private static Optional<LocalDateTimeline<Boolean>> finnUttakstidslinje(Map<AktivitetDto, List<PeriodeMedGrad>> utbetalingsgradPrAktivitet) {
+        return utbetalingsgradPrAktivitet.values()
+            .stream()
+            .flatMap(Collection::stream)
+            .map(PeriodeMedGrad::periode)
+            .map(p -> new LocalDateTimeline<>(p.getFomDato(), p.getTomDato(), true))
+            .reduce(LocalDateTimeline::crossJoin);
     }
 
     private static Map<AktivitetDto, List<PeriodeMedGrad>> finnUtbetalingsgradOgPeriodePrAktivitet(DatoIntervallEntitet gyldigePerioder, Optional<Uttaksplan> uttaksplan) {
