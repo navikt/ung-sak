@@ -122,7 +122,7 @@ public class OpptjeningRepository {
     private void validerMotVilkårsPerioder(Behandling behandling, OpptjeningResultatBuilder builder, boolean erTilbakestilling) {
         var vilkår = vilkårResultatRepository.hentHvisEksisterer(behandling.getId()).flatMap(it -> it.getVilkår(VilkårType.OPPTJENINGSVILKÅRET));
         //FDBHE //TODO fjern når sak er ok
-        if (behandling.getId() == 1837447L && erTilbakestilling && vilkår.isPresent() && vilkår.get().getId() == 30417338L) {
+        if (behandling.getId() == 1837447L && erTilbakestilling) {
             return;
         }
         vilkår.ifPresent(builder::validerMotVilkår);
