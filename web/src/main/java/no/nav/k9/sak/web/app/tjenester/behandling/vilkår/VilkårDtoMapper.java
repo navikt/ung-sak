@@ -47,6 +47,8 @@ class VilkårDtoMapper {
         dto.setBegrunnelse(it.getBegrunnelse());
         dto.setMerknad(it.getMerknad());
         dto.setVurderesIBehandlingen(vurderesIBehandlingen(it, aktuelleVilkårsperioder, vilkårType));
+        dto.setVurdertAv(it.getVurdertAv());
+        dto.setVurdertTidspunkt(it.getVurdertTidspunkt());
 
         if (medVilkårkjøring) {
             dto.setInput(it.getRegelInput());

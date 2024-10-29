@@ -1,6 +1,7 @@
 package no.nav.k9.sak.ytelse.omsorgspenger.utvidetrett.prosess;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -20,6 +21,7 @@ import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatReposito
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.k9.sak.kontrakt.omsorgspenger.AvklarAldersvilkårBarnDto;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = AvklarAldersvilkårBarnDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -75,7 +77,9 @@ public class AvklarAldersvilkårBarn implements AksjonspunktOppdaterer<AvklarAld
         Avslagsårsak settAvslagsårsak = utfallType.equals(Utfall.OPPFYLT) ? null : defaultAvslagsårsak;
         builder.leggTil(builder.hentBuilderFor(fom, tom)
             .medUtfallManuell(utfallType)
-            .medAvslagsårsak(settAvslagsårsak));
+            .medAvslagsårsak(settAvslagsårsak)
+            .medVurdertAv(SubjectHandler.getSubjectHandler().getUid())
+            .medVurdertTidspunkt(LocalDateTime.now()));
     }
 
     private void lagHistorikkInnslag(AksjonspunktOppdaterParameter param, Utfall orginaltUtfall, Utfall nyVerdi, String begrunnelse) {

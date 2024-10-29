@@ -1,5 +1,6 @@
 package no.nav.k9.sak.kontrakt.vilkår;
 
+import java.time.LocalDateTime;
 import java.util.Properties;
 
 import jakarta.validation.Valid;
@@ -80,6 +81,14 @@ public class VilkårPeriodeDto {
     @Valid
     private VilkårUtfallMerknad merknad;
 
+    @JsonProperty(value = "vurdertAv")
+    @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    private String vurdertAv;
+
+    @JsonProperty(value = "vurdertTidspunkt")
+    @Valid
+    private LocalDateTime vurdertTidspunkt;
+
     public VilkårPeriodeDto() {
     }
 
@@ -159,6 +168,22 @@ public class VilkårPeriodeDto {
 
     public void setMerknad(VilkårUtfallMerknad merknad) {
         this.merknad = merknad;
+    }
+
+    public String getVurdertAv() {
+        return vurdertAv;
+    }
+
+    public void setVurdertAv(String vurdertAv) {
+        this.vurdertAv = vurdertAv;
+    }
+
+    public LocalDateTime getVurdertTidspunkt() {
+        return vurdertTidspunkt;
+    }
+
+    public void setVurdertTidspunkt(LocalDateTime vurdertTidspunkt) {
+        this.vurdertTidspunkt = vurdertTidspunkt;
     }
 
     @Override

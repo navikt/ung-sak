@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
@@ -80,6 +81,12 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
     @Column(name = "avslag_kode", nullable = false)
     private Avslagsårsak avslagsårsak = Avslagsårsak.UDEFINERT;
 
+    @Column(name = "vurdert_av")
+    private String vurdertAv;
+
+    @Column(name = "vurdert_tidspunkt")
+    private LocalDateTime vurdertTidspunkt;
+
     @Column(name = "BEGRUNNELSE")
     private String begrunnelse;
 
@@ -119,8 +126,9 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
         this.regelEvalueringCached = vilkårPeriode.regelEvalueringCached;
         this.regelInput = vilkårPeriode.regelInput;
         this.regelEvaluering = vilkårPeriode.regelEvaluering;
-
         this.begrunnelse = vilkårPeriode.begrunnelse;
+        this.vurdertAv = vilkårPeriode.vurdertAv;
+        this.vurdertTidspunkt = vilkårPeriode.vurdertTidspunkt;
     }
 
     private static String getPayload(Clob payload, AtomicReference<String> payloadStringRef) {
@@ -239,6 +247,22 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
 
     public VilkårUtfallMerknad getMerknad() {
         return utfallMerknad;
+    }
+
+    void setVurdertAv(String vurdertAv) {
+        this.vurdertAv = vurdertAv;
+    }
+
+    public String getVurdertAv() {
+        return vurdertAv;
+    }
+
+    void setVurdertTidspunkt(LocalDateTime vurdertTidspunkt) {
+        this.vurdertTidspunkt = vurdertTidspunkt;
+    }
+
+    public LocalDateTime getVurdertTidspunkt() {
+        return vurdertTidspunkt;
     }
 
     void setUtfallMerknad(VilkårUtfallMerknad utfallMerknad) {
