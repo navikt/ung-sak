@@ -62,12 +62,14 @@ class MapTilUtbetalingsgradPrAktivitet {
         return mapTilKalkulusKontrakt(vilkårsperiode, utbetalingsgradPrAktivitet);
     }
 
-    /** Legger til frilansaktivitet som ikke er inkludert i uttaksplanen dersom bruker har aktiv frilansaktivitet.
+    /**
+     * Legger til frilansaktivitet som ikke er inkludert i uttaksplanen dersom bruker har aktiv frilansaktivitet.
      * Søknadsdialogen har over lang tid sendt 0/0 arbeidstid for frilans som default oppførsel i alle søknader, med mindre bruker selv oppgir arbeidstid for frilans. Dette skjer også i tilfeller der bruker ikke har aktive frilansaktiviteter i aareg.
      * I uttak behandles 0/0 arbeidstid som et flagg for at denne aktiviteten ikke skal inngå i uttaksplanen og påvirke uttaksgrad. Et eksempel på en slik aktivitet er omsorgsstønad.
      * I beregning er vi interessert i å vite om bruker har aktivitet som frilans for å eventuelt kunne gradere mot inntekt. Vi må derfor legge inn deler av perioden som ikke er inkludert i uttaksplanen.
-     * @param arbeidIPeriode Oppgitt arbeidsinformasjon fra søknad
-     * @param yrkesaktiviteter Yrkesaktiviteter
+     *
+     * @param arbeidIPeriode             Oppgitt arbeidsinformasjon fra søknad
+     * @param yrkesaktiviteter           Yrkesaktiviteter
      * @param utbetalingsgradPrAktivitet Utbetalingsgrader mappet fra uttaksplanen
      */
     private static void leggTilFrilansSomIkkeErInkludertIUttaksplanen(List<Arbeid> arbeidIPeriode, Collection<Yrkesaktivitet> yrkesaktiviteter, Map<AktivitetDto, List<PeriodeMedGrad>> utbetalingsgradPrAktivitet) {
@@ -89,17 +91,18 @@ class MapTilUtbetalingsgradPrAktivitet {
 
     private static List<UtbetalingsgradPrAktivitetDto> mapTilKalkulusKontrakt(DatoIntervallEntitet vilkårsperiode,
                                                                               Map<AktivitetDto, List<PeriodeMedGrad>> utbetalingsgradPrAktivitet) {
-        return utbetalingsgradPrAktivitet.entrySet().stream().map(entry -> {
-                var tidslinje = lagTidslinje(entry.getValue());
-                var mappet = tidslinje.intersection(vilkårsperiode.toLocalDateInterval())
-                    .stream()
-                    .map(s -> new PeriodeMedUtbetalingsgradDto(
-                        new Periode(s.getFom(), s.getTom()),
-                        Utbetalingsgrad.fra(s.getValue().utbetalingsgrad()),
-                        Aktivitetsgrad.fra(s.getValue().aktivitetsgrad()))).toList();
-                return new UtbetalingsgradPrAktivitetDto(entry.getKey(), mappet);
-            }
-        ).toList();
+        return utbetalingsgradPrAktivitet.entrySet().stream()
+            .filter(e -> !e.getValue().isEmpty()).map(entry -> {
+                    var tidslinje = lagTidslinje(entry.getValue());
+                    var mappet = tidslinje.intersection(vilkårsperiode.toLocalDateInterval())
+                        .stream()
+                        .map(s -> new PeriodeMedUtbetalingsgradDto(
+                            new Periode(s.getFom(), s.getTom()),
+                            Utbetalingsgrad.fra(s.getValue().utbetalingsgrad()),
+                            Aktivitetsgrad.fra(s.getValue().aktivitetsgrad()))).toList();
+                    return new UtbetalingsgradPrAktivitetDto(entry.getKey(), mappet);
+                }
+            ).toList();
     }
 
 
