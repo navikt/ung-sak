@@ -97,7 +97,7 @@ public class Språkkode implements Kodeverdi {
     }
 
     @JsonCreator
-    public static Språkkode fraKode(@JsonProperty("kode") String kode) {
+    public static Språkkode fraKode(String kode) {
         if (kode == null) {
             return null;
         }
@@ -106,6 +106,11 @@ public class Språkkode implements Kodeverdi {
             throw new IllegalArgumentException("Ukjent Språkkode: " + kode);
         }
         return ad;
+    }
+
+    @JsonCreator
+    public static Språkkode fraObjektProp(@JsonProperty("kode") String kode) {
+        return Språkkode.fraKode(kode);
     }
 
     public static Optional<Språkkode> fraKodeOptional(@JsonProperty("kode") String kode) {
