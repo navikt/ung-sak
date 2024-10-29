@@ -65,16 +65,20 @@ class MapTilUtbetalingsgradPrAktivitet {
      * @param utbetalingsgradPrAktivitet Utbetalingsgrader mappet fra uttaksplanen
      */
     private static void leggTilFrilansSomIgnoreresIUttak(List<Arbeid> arbeidIPeriode, Collection<Yrkesaktivitet> yrkesaktiviteter, Map<AktivitetDto, List<PeriodeMedGrad>> utbetalingsgradPrAktivitet) {
-        var perioderForFrilans = utbetalingsgradPrAktivitet.getOrDefault(new AktivitetDto(null, null, UttakArbeidType.FRILANS), new ArrayList<>());
+        var frilansperioder = new ArrayList<>(finnPerioderMappetFraUttak(utbetalingsgradPrAktivitet));
         var frilansAktivitetFraSøknadSomIkkeErMedIUttaket = finnFrilansaktivitetSomSkalLeggesTil(yrkesaktiviteter, arbeidIPeriode);
         frilansAktivitetFraSøknadSomIkkeErMedIUttaket.forEach(p -> {
-            if (perioderForFrilans.stream().noneMatch(eksisterendePeriode -> eksisterendePeriode.periode().overlapper(p))) {
-                perioderForFrilans.add(new PeriodeMedGrad(p, BigDecimal.ZERO, BigDecimal.valueOf(100)));
+            if (frilansperioder.stream().noneMatch(eksisterendePeriode -> eksisterendePeriode.periode().overlapper(p))) {
+                frilansperioder.add(new PeriodeMedGrad(p, BigDecimal.ZERO, BigDecimal.valueOf(100)));
             }
         });
-        if (!perioderForFrilans.isEmpty()) {
-            utbetalingsgradPrAktivitet.put(new AktivitetDto(null, null, UttakArbeidType.FRILANS), perioderForFrilans);
+        if (!frilansperioder.isEmpty()) {
+            utbetalingsgradPrAktivitet.put(new AktivitetDto(null, null, UttakArbeidType.FRILANS), frilansperioder);
         }
+    }
+
+    private static List<PeriodeMedGrad> finnPerioderMappetFraUttak(Map<AktivitetDto, List<PeriodeMedGrad>> utbetalingsgradPrAktivitet) {
+        return utbetalingsgradPrAktivitet.getOrDefault(new AktivitetDto(null, null, UttakArbeidType.FRILANS), Collections.emptyList());
     }
 
     private static List<UtbetalingsgradPrAktivitetDto> mapTilKalkulusKontrakt(DatoIntervallEntitet vilkårsperiode,
