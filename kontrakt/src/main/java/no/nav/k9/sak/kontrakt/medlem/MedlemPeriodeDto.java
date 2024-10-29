@@ -67,7 +67,7 @@ public class MedlemPeriodeDto {
 
     @JsonProperty(value = "vurdertAv")
     @Size(max = 20)
-    @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.BOKSTAVER_OG_TALL, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     private String vurdertAv;
 

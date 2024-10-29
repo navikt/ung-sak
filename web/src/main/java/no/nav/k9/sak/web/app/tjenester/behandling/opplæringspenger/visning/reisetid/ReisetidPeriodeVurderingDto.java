@@ -35,7 +35,7 @@ public class ReisetidPeriodeVurderingDto {
 
     @JsonProperty(value = "vurdertAv", required = true)
     @Size(max = 20)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.BOKSTAVER_OG_TALL, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @Valid
     private String vurdertAv;
 

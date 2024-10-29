@@ -4,6 +4,8 @@ import no.nav.k9.kodeverk.uttak.RettVedDødType;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 
 import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity(name = "RettVedPleietrengendeDød")
@@ -62,9 +64,6 @@ public class RettPleiepengerVedDød extends BaseEntitet {
 
     @Override
     public String toString() {
-        return "RettVedPleietrengendeDød{" +
-            "id=" + id +
-            ", rettVedDødType=" + rettVedDødType +
-            '}';
+        return "RettVedPleietrengendeDød{" + "id=" + id + ", rettVedDødType=" + rettVedDødType + '}';
     }
 }

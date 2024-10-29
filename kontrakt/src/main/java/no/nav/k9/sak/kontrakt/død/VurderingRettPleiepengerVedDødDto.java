@@ -10,6 +10,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import java.time.LocalDateTime;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
@@ -25,13 +27,24 @@ public class VurderingRettPleiepengerVedDødDto extends BekreftetAksjonspunktDto
     @JsonProperty(value = "rettVedDødType")
     private RettVedDødType rettVedDødType;
 
+    @JsonProperty(value = "vurdertAv")
+    @Size(max = 20)
+    @Pattern(regexp = Patterns.BOKSTAVER_OG_TALL, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    private String vurdertAv;
+
+    @JsonProperty(value = "vurdertTidspunkt")
+    @Valid
+    private LocalDateTime vurdertTidspunkt;
+
     public VurderingRettPleiepengerVedDødDto() {
         //
     }
 
-    public VurderingRettPleiepengerVedDødDto(String vurdering, RettVedDødType rettVedDødType) {
+    public VurderingRettPleiepengerVedDødDto(String vurdering, RettVedDødType rettVedDødType, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         this.vurdering = vurdering;
         this.rettVedDødType = rettVedDødType;
+        this.vurdertAv = vurdertAv;
+        this.vurdertTidspunkt = vurdertTidspunkt;
     }
 
     public String getVurdering() {

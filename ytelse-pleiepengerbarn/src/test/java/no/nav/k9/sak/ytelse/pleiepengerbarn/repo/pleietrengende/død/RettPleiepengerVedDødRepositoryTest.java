@@ -32,5 +32,6 @@ class RettPleiepengerVedDødRepositoryTest {
         assertThat(grunnlag.get().getRettVedPleietrengendeDød()).isNotNull();
         assertThat(grunnlag.get().getRettVedPleietrengendeDød().getRettVedDødType()).isEqualTo(RettVedDødType.RETT_6_UKER);
         assertThat(grunnlag.get().getRettVedPleietrengendeDød().getVurdering()).isEqualTo("Har rett på 6 uker.");
+
     }
 }

@@ -6,5 +6,9 @@ public final class Patterns {
     public static final String FRITEKSTBREV =
         "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$";
 
-    private Patterns() {}
+    // bokstaver og tall - ikke spesialtegn eller whitespace
+    public static final String BOKSTAVER_OG_TALL = "^[\\p{L}\\p{N}]+$";
+
+    private Patterns() {
+    }
 }

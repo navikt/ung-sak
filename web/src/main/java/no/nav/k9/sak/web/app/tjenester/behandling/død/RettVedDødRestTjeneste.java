@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.k9.sak.kontrakt.død.VurderingRettPleiepengerVedDødDto;
@@ -77,13 +78,17 @@ public class RettVedDødRestTjeneste {
         @Parameter(description = BehandlingUuidDto.DESC)
         @Valid
         @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-            BehandlingUuidDto behandlingUuidDto
+        BehandlingUuidDto behandlingUuidDto
     ) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuidDto.getBehandlingUuid());
         var grunnlag = rettPleiepengerVedDødRepository.hentHvisEksisterer(behandling.getId());
+
         if (grunnlag.isPresent()) {
+            var aksjonspunkt = behandling.getAksjonspunkter().stream().filter(ap -> ap.getAksjonspunktDefinisjon().getKode().equals(AksjonspunktKodeDefinisjon.VURDER_RETT_ETTER_PLEIETRENGENDES_DØD) && ap.erUtført()).findFirst().orElse(null);
             var rettVedDød = grunnlag.get().getRettVedPleietrengendeDød();
-            var responseDto = new VurderingRettPleiepengerVedDødDto(rettVedDød.getVurdering(), rettVedDød.getRettVedDødType());
+            var vurdertAv = aksjonspunkt != null ? aksjonspunkt.getAnsvarligSaksbehandler() : null;
+            var vurdertTidspunkt = aksjonspunkt != null ? aksjonspunkt.getEndretTidspunkt() : null;
+            var responseDto = new VurderingRettPleiepengerVedDødDto(rettVedDød.getVurdering(), rettVedDød.getRettVedDødType(), vurdertAv, vurdertTidspunkt);
             return Response.ok(responseDto).build();
         }
         return Response.noContent().build();
