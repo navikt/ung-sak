@@ -77,7 +77,8 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
         var ytelseGrunnlagMapper = getYtelsesspesifikkMapper(FRISINN);
 
         for (var input : sortertInput) {
-            var ytelseGrunnlag = ytelseGrunnlagMapper.lagYtelsespesifiktGrunnlag(ref, input.getVilkårsperiode());
+            var iayGrunnlag = iayTjeneste.hentGrunnlag(ref.getBehandlingId());
+            var ytelseGrunnlag = ytelseGrunnlagMapper.lagYtelsespesifiktGrunnlag(ref, input.getVilkårsperiode(), iayGrunnlag);
             var bgReferanse = input.getBgReferanse();
             FrisinnGrunnlag frisinnGrunnlag = (FrisinnGrunnlag) ytelseGrunnlag;
             // frisinn super-hacky håndtering av avslagsårsaker uten for kalkulkus. Slette denne klassen snarest Frisinn er ferdig.
@@ -85,7 +86,6 @@ public class FrisinnKalkulusTjeneste extends KalkulusTjeneste {
                 uuidKalkulusResulat.put(bgReferanse, new KalkulusResultat(Collections.emptyList()).medAvslåttVilkår(Avslagsårsak.INGEN_STØNADSDAGER_I_SØKNADSPERIODEN));
             } else {
                 // tar en og en
-                var iayGrunnlag = iayTjeneste.hentGrunnlag(ref.getBehandlingId());
                 var startBeregningRequest = beregnRequestTjeneste.lagMedInput(stegType, ref, beregnInput, iayGrunnlag, Collections.emptyList());
                 var inputPerRef = startBeregningRequest.getBeregnForListe();
                 if (inputPerRef.size() != 1) {
