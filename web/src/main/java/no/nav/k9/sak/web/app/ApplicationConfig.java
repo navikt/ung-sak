@@ -17,6 +17,7 @@ import no.nav.k9.sak.web.app.tjenester.RestImplementationClasses;
 import no.nav.k9.sak.web.app.tjenester.behandling.beregningsgrunnlag.ForvaltningBeregningRestTjeneste.OpprettManuellRevurderingBeregning.OpprettManuellRevurderingBeregningMessageBodyReader;
 import no.nav.k9.sak.web.app.tjenester.fordeling.FordelRestTjeneste.PsbInfotrygdFødselsnumre.PsbInfotrygdFødselsnumregMessageBodyReader;
 import no.nav.k9.sak.web.app.tjenester.forvaltning.ForvaltningMidlertidigDriftRestTjeneste.OpprettManuellRevurdering.OpprettManuellRevurderingMessageBodyReader;
+import no.nav.k9.sak.web.server.caching.CacheControlFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
 
@@ -75,6 +76,7 @@ public class ApplicationConfig extends ResourceConfig {
         register(new OpprettManuellRevurderingBeregningMessageBodyReader());
         register(new PsbInfotrygdFødselsnumregMessageBodyReader());
         registerInstances(new LinkedHashSet<>(new KnownExceptionMappers().getExceptionMappers()));
+        register(CacheControlFeature.class);
 
         property(org.glassfish.jersey.server.ServerProperties.PROCESSING_RESPONSE_ERRORS_ENABLED, true);
     }

@@ -13,6 +13,7 @@ import no.nav.folketrygdloven.kalkulus.kodeverk.FrisinnBehandlingType;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.BeregningsgrunnlagYtelsespesifiktGrunnlagMapper;
+import no.nav.k9.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakAktivitet;
 import no.nav.k9.sak.domene.uttak.repo.UttakRepository;
@@ -35,7 +36,7 @@ public class FrisinnYtelsesspesifiktGrunnlagMapper implements Beregningsgrunnlag
     }
 
     @Override
-    public FrisinnGrunnlag lagYtelsespesifiktGrunnlag(BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode) {
+    public FrisinnGrunnlag lagYtelsespesifiktGrunnlag(BehandlingReferanse ref, DatoIntervallEntitet vilkårsperiode, InntektArbeidYtelseGrunnlag iayGrunnlag) {
         var fastsattUttak = uttakRepository.hentFastsattUttak(ref.getBehandlingId());
         var origFastsattUttak = ref.getOriginalBehandlingId().map(origBehandlingId -> uttakRepository.hentFastsattUttak(origBehandlingId));
         List<PeriodeMedSøkerInfoDto> periodeMedSøkerInfoDtos = FrisinnMapper.mapPeriodeMedSøkerInfoDto(fastsattUttak);

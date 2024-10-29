@@ -1,77 +1,92 @@
 package no.nav.k9.sak.web.app.tjenester.kodeverk;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
-
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.kodeverk.api.Kodeverdi;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.sak.db.util.JpaExtension;
+import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.k9.sak.web.app.jackson.ObjectMapperFactory;
+import no.nav.k9.sak.web.app.tjenester.kodeverk.dto.AlleKodeverdierSomObjektResponse;
+import no.nav.k9.sak.web.app.tjenester.kodeverk.dto.KodeverdiSomObjekt;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
 
-import no.nav.k9.kodeverk.behandling.FagsakStatus;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.geografisk.Landkoder;
-import no.nav.k9.kodeverk.geografisk.Region;
-import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
-import no.nav.k9.sak.db.util.JpaExtension;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
 public class KodeverkRestTjenesteTest {
 
     @Inject
-    private HentKodeverkTjeneste hentKodeverkTjeneste;
+    private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private static <K extends Kodeverdi> void checkResponseSet(final SortedSet<KodeverdiSomObjekt<K>> responseSet, final java.util.Set<K> statiskSet) {
+        assertThat(responseSet.stream().map(ko -> ko.getMadeFrom()).toList()).containsExactlyInAnyOrderElementsOf(statiskSet);
+    }
+
+    private static List<LinkedHashMap<String, String>> getKodelisteMap(final Map<String, Object> gruppertKodelisteMap, final String kodelisteNavn) {
+        final Object object = gruppertKodelisteMap.get(kodelisteNavn);
+        assertThat(object).isNotNull();
+        assertThat(object).isInstanceOf(List.class);
+        assertThat(((List<?>)object).getFirst()).isInstanceOf(LinkedHashMap.class);
+        return (List<LinkedHashMap<String, String>>) object;
+    }
+
+    /**
+     * Smoke test på at FagsakYtelseType frå gammalt endepunkt gjev samme svar som nytt (minus - kode)
+     */
     @Test
-    public void skal_hente_kodeverk_og_gruppere_på_kodeverknavn() throws IOException {
+    public void hentGruppertKodeliste_fungerer_framleis() throws IOException {
+        final KodeverkRestTjeneste tjeneste = new KodeverkRestTjeneste(behandlendeEnhetTjeneste);
+        final Response hentGruppertKodelisteResponse = tjeneste.hentGruppertKodeliste();
+        final ObjectMapper om = ObjectMapperFactory.createBaseObjectMapper();
+        final Map<String, Object> hentGruppertKodelisteObjectMap = om.readValue((String)hentGruppertKodelisteResponse.getEntity(), Map.class);
+        final List<LinkedHashMap<String, String>> legacyFagsakYtelseType = getKodelisteMap(hentGruppertKodelisteObjectMap, "FagsakYtelseType");
+        final AlleKodeverdierSomObjektResponse alleKodeverdierSomObjektResponse = tjeneste.alleKodeverdierSomObjekt();
+        for(final var fagsakYtelseType : alleKodeverdierSomObjektResponse.fagsakYtelseTyper()) {
+            if(!fagsakYtelseType.getKode().equals("-")) {
+                // Sjekk at den finnast i gammalt resultat
+                final LinkedHashMap<String, String> funnet = legacyFagsakYtelseType.stream().filter(v -> {
+                    final String kode = v.get("kode");
+                    return kode.equals(fagsakYtelseType.getKode());
+                }).findAny().get();
+                assertThat(funnet.get("navn")).isEqualTo(fagsakYtelseType.getNavn());
+                assertThat(funnet.get("kodeverk")).isEqualTo(fagsakYtelseType.getKodeverk());
+            }
+        }
 
-        KodeverkRestTjeneste tjeneste = new KodeverkRestTjeneste(hentKodeverkTjeneste);
-        @SuppressWarnings("resource")
-        Response response = tjeneste.hentGruppertKodeliste();
-
-        String rawJson = (String) response.getEntity();
-        assertThat(rawJson).isNotNull();
-
-        Map<String, Object> gruppertKodeliste = ObjectMapperFactory.createBaseObjectMapper().readValue(rawJson, Map.class);
-
-        assertThat(gruppertKodeliste.keySet())
-            .contains(FagsakStatus.class.getSimpleName(), Avslagsårsak.class.getSimpleName(), Landkoder.class.getSimpleName(), Region.class.getSimpleName());
-
-        assertThat(gruppertKodeliste.keySet())
-            .containsAll(new HashSet<>(HentKodeverkTjeneste.KODEVERDIER_SOM_BRUKES_PÅ_KLIENT.keySet()));
-
-        assertThat(gruppertKodeliste.keySet()).hasSize(HentKodeverkTjeneste.KODEVERDIER_SOM_BRUKES_PÅ_KLIENT.size());
-
-        var fagsakStatuser = (List<Map<String, String>>) gruppertKodeliste.get(FagsakStatus.class.getSimpleName());
-        assertThat(fagsakStatuser.stream().map(k -> k.get("kode")).collect(Collectors.toList())).isNotEmpty();
-
-        var map = (Map<String, List<?>>) gruppertKodeliste.get(Avslagsårsak.class.getSimpleName());
-        assertThat(map.keySet()).contains(VilkårType.OPPTJENINGSVILKÅRET.getKode(), VilkårType.MEDLEMSKAPSVILKÅRET.getKode());
-
-        var avslagsårsaker = (List<Map<String, String>>) map.get(VilkårType.OPPTJENINGSVILKÅRET.getKode());
-        assertThat(avslagsårsaker.stream().map(k -> ((Map) k).get("kode")).collect(Collectors.toList())).isNotEmpty();
     }
 
     @Test
-    public void serialize_kodeverdi_enums() throws Exception {
-        // TODO Dette er ein ganske verdilaus test. Fjern eller erstatt med noko nyttig.
-        ObjectMapper om = ObjectMapperFactory.createBaseObjectMapper();
+    public void skal_hente_statiske_kodeverdier() {
+        final KodeverkRestTjeneste tjeneste = new KodeverkRestTjeneste(behandlendeEnhetTjeneste);
+        final AlleKodeverdierSomObjektResponse response = tjeneste.alleKodeverdierSomObjekt();
+        final var statiske = StatiskeKodeverdier.alle;
+        // Sjekk nokon av verdiane. Kan legge til fleire viss ein ønsker.
+        checkResponseSet(response.aktivitetStatuser(), statiske.aktivitetStatuser());
+        checkResponseSet(response.arbeidskategorier(), statiske.arbeidskategorier());
+        checkResponseSet(response.arbeidsforholdHandlingTyper(), statiske.arbeidsforholdHandlingTyper());
+        checkResponseSet(response.avslagsårsaker(), statiske.avslagsårsaker());
 
-        String json = om.writer().withDefaultPrettyPrinter().writeValueAsString(AksjonspunktDefinisjon.AUTO_MANUELT_SATT_PÅ_VENT);
+        // Sjekk spesialtilfelle i respons, Avslagsprsaker gruppert pr vilkårtype.
+        final VilkårType vilkårtype = VilkårType.ALDERSVILKÅR;
+        final var k9Vk3Avslagsårsaker = VilkårType.finnAvslagårsakerGruppertPåVilkårType().get(vilkårtype);
+        checkResponseSet(response.avslagårsakerPrVilkårTypeKode().get(vilkårtype.getKode()), k9Vk3Avslagsårsaker);
 
-        assertThat(json).isNotEmpty();
+        // Venteårsak er også litt spesiell
+        final List<Venteårsak> got = response.venteårsaker().stream().map(ko -> ko.getMadeFrom()).toList();
+        final List<Venteårsak> expected = statiske.venteårsaker().stream().toList();
+        assertThat(got).containsExactlyInAnyOrderElementsOf(expected);
     }
 
 }

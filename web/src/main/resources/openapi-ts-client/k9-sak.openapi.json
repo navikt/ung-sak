@@ -505,6 +505,437 @@
         } ],
         "type" : "object"
       },
+      "AlleKodeverdierSomObjektResponse" : {
+        "properties" : {
+          "aktivitetStatuser" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektAktivitetStatus"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "arbeidTyper" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektArbeidType"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "arbeidsforholdHandlingTyper" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektArbeidsforholdHandlingType"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "arbeidskategorier" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektArbeidskategori"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "avslagsårsaker" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektAvslagsårsak"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "avslagårsakerPrVilkårTypeKode" : {
+            "additionalProperties" : {
+              "items" : {
+                "$ref" : "#/components/schemas/KodeverdiSomObjektAvslagsårsak"
+              },
+              "nullable" : true,
+              "type" : "array",
+              "uniqueItems" : true
+            },
+            "type" : "object"
+          },
+          "behandlingResultatTyper" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektBehandlingResultatType"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "behandlingStatuser" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektBehandlingStatus"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "behandlingTyper" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektBehandlingType"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "behandlingÅrsakTyper" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektBehandlingÅrsakType"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "dokumentTypeIder" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektDokumentTypeId"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "fagsakStatuser" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektFagsakStatus"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "fagsakYtelseTyper" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektFagsakYtelseType"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "fagsystemer" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektFagsystem"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "faktaOmBeregningTilfeller" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektFaktaOmBeregningTilfelle"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "historikkAktører" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektHistorikkAktør"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "historikkAvklartSoeknadsperiodeTyper" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektHistorikkAvklartSoeknadsperiodeType"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "historikkBegrunnelseTyper" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektHistorikkBegrunnelseType"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "historikkEndretFeltTyper" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektHistorikkEndretFeltType"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "historikkEndretFeltVerdiTyper" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektHistorikkEndretFeltVerdiType"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "historikkOpplysningTyper" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektHistorikkOpplysningType"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "historikkResultatTyper" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektHistorikkResultatType"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "historikkinnslagTyper" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektHistorikkinnslagType"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "inntektskategorier" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektInntektskategori"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "konsekvenserForYtelsen" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektKonsekvensForYtelsen"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "landkoder" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektLandkoder"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "medlemskapDekningTyper" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektMedlemskapDekningType"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "medlemskapManuellVurderingTyper" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektMedlemskapManuellVurderingType"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "medlemskapTyper" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektMedlemskapType"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "oppgaveÅrsaker" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektOppgaveÅrsak"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "opptjeningAktivitetTyper" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektOpptjeningAktivitetType"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "permisjonsbeskrivelseTyper" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektPermisjonsbeskrivelseType"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "personstatusTyper" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektPersonstatusType"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "regioner" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektRegion"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "relatertYtelseTilstander" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektRelatertYtelseTilstand"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "revurderingVarslingÅrsaker" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektRevurderingVarslingÅrsak"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "sivilstandTyper" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektSivilstandType"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "skjermlenkeTyper" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektSkjermlenkeType"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "språkkoder" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektSpråkkode"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "tilbakekrevingVidereBehandlinger" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektTilbakekrevingVidereBehandling"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "utenlandsoppholdÅrsaker" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektUtenlandsoppholdÅrsak"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "vedtakResultatTyper" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektVedtakResultatType"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "venteårsaker" : {
+            "items" : {
+              "$ref" : "#/components/schemas/VenteårsakSomObjekt"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "vilkårTyper" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektVilkårType"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "vurderArbeidsforholdHistorikkinnslag" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektVurderArbeidsforholdHistorikkinnslag"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "vurderingsÅrsaker" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektVurderÅrsak"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "årsakerTilVurdering" : {
+            "items" : {
+              "$ref" : "#/components/schemas/KodeverdiSomObjektÅrsakTilVurdering"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          }
+        },
+        "required" : [ "aktivitetStatuser", "arbeidTyper", "arbeidsforholdHandlingTyper", "arbeidskategorier", "avslagsårsaker", "avslagårsakerPrVilkårTypeKode", "behandlingResultatTyper", "behandlingStatuser", "behandlingTyper", "behandlingÅrsakTyper", "dokumentTypeIder", "fagsakStatuser", "fagsakYtelseTyper", "fagsystemer", "faktaOmBeregningTilfeller", "historikkAktører", "historikkAvklartSoeknadsperiodeTyper", "historikkBegrunnelseTyper", "historikkEndretFeltTyper", "historikkEndretFeltVerdiTyper", "historikkOpplysningTyper", "historikkResultatTyper", "historikkinnslagTyper", "inntektskategorier", "konsekvenserForYtelsen", "landkoder", "medlemskapDekningTyper", "medlemskapManuellVurderingTyper", "medlemskapTyper", "oppgaveÅrsaker", "opptjeningAktivitetTyper", "permisjonsbeskrivelseTyper", "personstatusTyper", "regioner", "relatertYtelseTilstander", "revurderingVarslingÅrsaker", "sivilstandTyper", "skjermlenkeTyper", "språkkoder", "tilbakekrevingVidereBehandlinger", "utenlandsoppholdÅrsaker", "vedtakResultatTyper", "venteårsaker", "vilkårTyper", "vurderArbeidsforholdHistorikkinnslag", "vurderingsÅrsaker", "årsakerTilVurdering" ],
+        "type" : "object"
+      },
       "AndelForFaktaOmBeregningDto" : {
         "properties" : {
           "aktivitetStatus" : {
@@ -3508,9 +3939,12 @@
           },
           "opptjeningperiode" : {
             "$ref" : "#/components/schemas/OpptjeningPeriodeDto"
+          },
+          "vurderesIAksjonspunkt" : {
+            "type" : "boolean"
           }
         },
-        "required" : [ "opptjeningFom", "opptjeningTom", "opptjeningperiode" ],
+        "required" : [ "opptjeningFom", "opptjeningTom", "opptjeningperiode", "vurderesIAksjonspunkt" ],
         "type" : "object"
       },
       "FastsattUttakDto" : {
@@ -5717,6 +6151,681 @@
           }
         },
         "required" : [ "kalkulatorInput", "vilkårPeriode" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektAktivitetStatus" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektArbeidType" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektArbeidsforholdHandlingType" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektArbeidskategori" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektAvslagsårsak" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektBehandlingResultatType" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektBehandlingStatus" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektBehandlingType" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektBehandlingÅrsakType" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektDokumentTypeId" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektFagsakStatus" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektFagsakYtelseType" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektFagsystem" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektFaktaOmBeregningTilfelle" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektHistorikkAktør" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektHistorikkAvklartSoeknadsperiodeType" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektHistorikkBegrunnelseType" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektHistorikkEndretFeltType" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektHistorikkEndretFeltVerdiType" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektHistorikkOpplysningType" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektHistorikkResultatType" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektHistorikkinnslagType" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektInntektskategori" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektKonsekvensForYtelsen" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektLandkoder" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektMedlemskapDekningType" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektMedlemskapManuellVurderingType" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektMedlemskapType" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektOppgaveÅrsak" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektOpptjeningAktivitetType" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektPermisjonsbeskrivelseType" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektPersonstatusType" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektRegion" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektRelatertYtelseTilstand" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektRevurderingVarslingÅrsak" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektSivilstandType" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektSkjermlenkeType" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektSpråkkode" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektTilbakekrevingVidereBehandling" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektUtenlandsoppholdÅrsak" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektVedtakResultatType" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektVilkårType" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektVurderArbeidsforholdHistorikkinnslag" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektVurderÅrsak" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverdiSomObjektÅrsakTilVurdering" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kode", "kodeverk", "navn" ],
         "type" : "object"
       },
       "KompletthetsTilstandPåPeriodeDto" : {
@@ -12821,6 +13930,24 @@
         "required" : [ "varseltekst" ],
         "type" : "object"
       },
+      "VenteårsakSomObjekt" : {
+        "properties" : {
+          "kanVelges" : {
+            "type" : "boolean"
+          },
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kanVelges", "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
       "VilkårDto" : {
         "properties" : {
           "avslagKode" : {
@@ -18903,12 +20030,32 @@
     },
     "/kodeverk" : {
       "get" : {
+        "deprecated" : true,
         "description" : "Henter kodeliste",
         "operationId" : "hentGruppertKodeliste",
         "responses" : {
           "default" : {
             "content" : {
               "application/json" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "kodeverk" ]
+      }
+    },
+    "/kodeverk/alle/objekt" : {
+      "get" : {
+        "description" : "Alle statisk kodeverdier som objekt",
+        "operationId" : "alleKodeverdierSomObjekt",
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/AlleKodeverdierSomObjektResponse"
+                }
+              }
             },
             "description" : "default response"
           }

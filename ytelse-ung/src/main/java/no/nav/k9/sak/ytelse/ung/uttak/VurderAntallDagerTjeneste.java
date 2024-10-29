@@ -74,7 +74,9 @@ class VurderAntallDagerTjeneste {
                 resultatTidslinje = resultatTidslinje.crossJoin(new LocalDateTimeline<>(List.of(virkedagSegment)));
                 antallDager += antallDagerISegment;
             } else {
-                resultatTidslinje = innvilgDelerAvSegment(virkedagSegment, antallDager, resultatTidslinje);
+                var delAvPeriode = finnDelAvPeriodeSomInnvilges(virkedagSegment, antallDager);
+                resultatTidslinje = resultatTidslinje.crossJoin(delAvPeriode);
+                antallDager += delAvPeriode.getLocalDateIntervals().stream().map(LocalDateInterval::totalDays).reduce(Long::sum).orElse(0L);
                 break;
             }
         }
@@ -91,16 +93,14 @@ class VurderAntallDagerTjeneste {
         return new VurderAntallDagerResultet(LocalDateTimeline.empty(), antallDager);
     }
 
-    private static LocalDateTimeline<Boolean> innvilgDelerAvSegment(LocalDateSegment<Boolean> virkedagSegment, long antallDager, LocalDateTimeline<Boolean> resultatTidslinje) {
+    private static LocalDateTimeline<Boolean> finnDelAvPeriodeSomInnvilges(LocalDateSegment<Boolean> virkedagSegment, long antallDager) {
         var dagerSomGjenstår = MAKS_ANTALL_DAGER - antallDager;
 
         if (dagerSomGjenstår < 1) {
             throw new IllegalStateException("Skal ha minst en dag igjen");
         }
 
-        var delvisInnvilgetPeriode = new LocalDateTimeline<>(virkedagSegment.getFom(), virkedagSegment.getFom().plusDays(dagerSomGjenstår - 1), Boolean.TRUE);
-        resultatTidslinje = resultatTidslinje.crossJoin(delvisInnvilgetPeriode);
-        return resultatTidslinje;
+        return new LocalDateTimeline<>(virkedagSegment.getFom(), virkedagSegment.getFom().plusDays(dagerSomGjenstår - 1), Boolean.TRUE);
     }
 
     private static LocalDateTimeline<Boolean> leggTilManglendeHelger(LocalDateTimeline<Boolean> resultatTidslinje, LocalDateTimeline<Boolean> helgerSomBleFjernet) {

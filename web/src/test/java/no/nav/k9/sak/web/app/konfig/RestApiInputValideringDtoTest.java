@@ -141,7 +141,7 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
     }
 
     private static boolean erKodeverk(Type... args) {
-        return Kodeverdi.class.isAssignableFrom((Class<?>) args[0]) || ((Class<?>) args[0]).isEnum();
+        return Kodeverdi.class.isAssignableFrom(args[0].getClass ()) || args[0].getClass().isEnum();
     }
 
     private static Set<Class<?>> finnAlleDtoTyper() {
@@ -270,7 +270,7 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
         Set<Class<?>> klasser = new HashSet<>();
         ParameterizedType type = (ParameterizedType) field.getGenericType();
         for (Type t : type.getActualTypeArguments()) {
-            klasser.add((Class<?>) t);
+            klasser.add(t.getClass());
         }
         return klasser;
     }

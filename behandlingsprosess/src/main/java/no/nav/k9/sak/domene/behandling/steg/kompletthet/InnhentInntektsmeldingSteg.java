@@ -71,7 +71,7 @@ public class InnhentInntektsmeldingSteg implements BehandlingSteg {
         var manglendeVedleggPerPeriode = kompletthetForBeregningTjeneste.utledAlleManglendeVedleggFraGrunnlag(ref, true);
         var forespørsler = mapTilForespørsler(manglendeVedleggPerPeriode);
 
-        arbeidsgiverPortalenTjeneste.oppdaterInntektsmeldingforespørslerISak(forespørsler, behandling);
+        arbeidsgiverPortalenTjeneste.oppdaterInntektsmeldingforespørslerISak(forespørsler, ref);
         log.info("Oppdaterer forespørsler om inntektsmelding i arbeidsgiverportalen med følgende perioder: {}", forespørsler.keySet());
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
@@ -80,6 +80,7 @@ public class InnhentInntektsmeldingSteg implements BehandlingSteg {
     private static Map<DatoIntervallEntitet, List<Arbeidsgiver>> mapTilForespørsler(Map<DatoIntervallEntitet, List<ManglendeVedlegg>> manglendeVedleggPerPeriode) {
         return manglendeVedleggPerPeriode.entrySet()
             .stream()
+            .filter(e -> !e.getValue().isEmpty())
             .collect(Collectors.toMap(Map.Entry::getKey,
                 e -> e.getValue().stream().map(ManglendeVedlegg::getArbeidsgiver).collect(Collectors.toList())));
     }
