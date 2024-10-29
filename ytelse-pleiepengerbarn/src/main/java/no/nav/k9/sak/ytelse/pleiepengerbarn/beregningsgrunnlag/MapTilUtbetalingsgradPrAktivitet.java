@@ -37,6 +37,9 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.Utbetalingsgrader;
 import no.nav.pleiepengerbarn.uttak.kontrakter.UttaksperiodeInfo;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksplan;
 
+/**
+ * Mapper utbetalingsgrader fra uttaksplan. Dersom det finnes frilansaktiviteter i aareg som ikke er inkludert i uttaksplan (f.eks omsorgsstønad) legges denne også til.
+ */
 class MapTilUtbetalingsgradPrAktivitet {
 
 
@@ -55,16 +58,19 @@ class MapTilUtbetalingsgradPrAktivitet {
                                                                                        List<Arbeid> arbeidIPeriode,
                                                                                        Collection<Yrkesaktivitet> yrkesaktiviteter) {
         Map<AktivitetDto, List<PeriodeMedGrad>> utbetalingsgradPrAktivitet = finnUtbetalingsgradOgPeriodePrAktivitet(vilkårsperiode, uttaksplan);
-        leggTilFrilansSomIgnoreresIUttak(arbeidIPeriode, yrkesaktiviteter, utbetalingsgradPrAktivitet);
+        leggTilFrilansSomIkkeErInkludertIUttaksplanen(arbeidIPeriode, yrkesaktiviteter, utbetalingsgradPrAktivitet);
         return mapTilKalkulusKontrakt(vilkårsperiode, utbetalingsgradPrAktivitet);
     }
 
-    /** Legger til 0/0 frilansaktivitet som ikke er inkludert i uttaksplanen dersom bruker har aktiv frilansaktivitet
+    /** Legger til frilansaktivitet som ikke er inkludert i uttaksplanen dersom bruker har aktiv frilansaktivitet.
+     * Søknadsdialogen har over lang tid sendt 0/0 arbeidstid for frilans som default oppførsel i alle søknader, med mindre bruker selv oppgir arbeidstid for frilans. Dette skjer også i tilfeller der bruker ikke har aktive frilansaktiviteter i aareg.
+     * I uttak behandles 0/0 arbeidstid som et flagg for at denne aktiviteten ikke skal inngå i uttaksplanen og påvirke uttaksgrad. Et eksempel på en slik aktivitet er omsorgsstønad.
+     * I beregning er vi interessert i å vite om bruker har aktivitet som frilans for å eventuelt kunne gradere mot inntekt. Vi må derfor legge inn deler av perioden som ikke er inkludert i uttaksplanen.
      * @param arbeidIPeriode Oppgitt arbeidsinformasjon fra søknad
      * @param yrkesaktiviteter Yrkesaktiviteter
      * @param utbetalingsgradPrAktivitet Utbetalingsgrader mappet fra uttaksplanen
      */
-    private static void leggTilFrilansSomIgnoreresIUttak(List<Arbeid> arbeidIPeriode, Collection<Yrkesaktivitet> yrkesaktiviteter, Map<AktivitetDto, List<PeriodeMedGrad>> utbetalingsgradPrAktivitet) {
+    private static void leggTilFrilansSomIkkeErInkludertIUttaksplanen(List<Arbeid> arbeidIPeriode, Collection<Yrkesaktivitet> yrkesaktiviteter, Map<AktivitetDto, List<PeriodeMedGrad>> utbetalingsgradPrAktivitet) {
         var frilansperioder = new ArrayList<>(finnPerioderMappetFraUttak(utbetalingsgradPrAktivitet));
         var frilansAktivitetFraSøknadSomIkkeErMedIUttaket = finnFrilansaktivitetSomSkalLeggesTil(yrkesaktiviteter, arbeidIPeriode);
         frilansAktivitetFraSøknadSomIkkeErMedIUttaket.forEach(p -> {
@@ -168,14 +174,14 @@ class MapTilUtbetalingsgradPrAktivitet {
             .filter(MapTilUtbetalingsgradPrAktivitet::gjelderFrilans)
             .flatMap(a -> {
                 var ansettelseFrilansTidslinje = finnAnsettelsestidslinje(alleYrkesaktiviteter);
-                var nullOverNullTidslinje = finnTidslinjeNullOverNull(a);
-                var tidslinjeAvInteresse = ansettelseFrilansTidslinje.intersection(nullOverNullTidslinje);
+                var søktePerioderUnntattNullOverNull = finnTidslinjeSøktePerioderUnntattNullOverNull(a);
+                var tidslinjeAvInteresse = ansettelseFrilansTidslinje.disjoint(søktePerioderUnntattNullOverNull);
                 return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinjeAvInteresse).stream();
             }).collect(Collectors.toCollection(TreeSet::new));
     }
 
-    private static LocalDateTimeline<Boolean> finnTidslinjeNullOverNull(Arbeid a) {
-        var nullOverNullPerioder = finnNullOverNullPerioder(a);
+    private static LocalDateTimeline<Boolean> finnTidslinjeSøktePerioderUnntattNullOverNull(Arbeid a) {
+        var nullOverNullPerioder = finnSøktePerioderUnntattNullOverNull(a);
         return TidslinjeUtil.tilTidslinjeKomprimertMedMuligOverlapp(nullOverNullPerioder);
     }
 
@@ -187,8 +193,8 @@ class MapTilUtbetalingsgradPrAktivitet {
         return TidslinjeUtil.tilTidslinjeKomprimertMedMuligOverlapp(ansettelsesperioderFrilans);
     }
 
-    private static List<DatoIntervallEntitet> finnNullOverNullPerioder(Arbeid a) {
-        return a.getPerioder().entrySet().stream().filter(MapTilUtbetalingsgradPrAktivitet::erNullOverNull)
+    private static List<DatoIntervallEntitet> finnSøktePerioderUnntattNullOverNull(Arbeid a) {
+        return a.getPerioder().entrySet().stream().filter(it -> !erNullOverNull(it))
             .map(Map.Entry::getKey)
             .map(MapTilUtbetalingsgradPrAktivitet::tilDatoIntervall)
             .toList();

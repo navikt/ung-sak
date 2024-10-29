@@ -10,8 +10,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
+import no.nav.folketrygdloven.kalkulus.beregning.v1.UtbetalingsgradPrAktivitetDto;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Aktivitetsgrad;
 import no.nav.folketrygdloven.kalkulus.felles.v1.Utbetalingsgrad;
 import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
@@ -96,11 +98,9 @@ class MapTilUtbetalingsgradPrAktivitetTest {
         // Assert
         assertThat(utbetalingsgrader.size()).isEqualTo(2);
 
-        var frilansUtbetalingsgradPrAktivitetDto = utbetalingsgrader.get(1);
-        var frilansAktivitet = frilansUtbetalingsgradPrAktivitetDto.getUtbetalingsgradArbeidsforholdDto();
-        assertThat(frilansAktivitet.getUttakArbeidType()).isEqualTo(no.nav.folketrygdloven.kalkulus.kodeverk.UttakArbeidType.FRILANS);
-        assertThat(frilansAktivitet.getArbeidsgiver()).isNull();
-        var frilansPerioderMedUtbetalingsgrad = frilansUtbetalingsgradPrAktivitetDto.getPeriodeMedUtbetalingsgrad();
+        var frilansUtbetalingsgradPrAktivitetDto = finnMappetUtbetalingsgradForType(utbetalingsgrader, no.nav.folketrygdloven.kalkulus.kodeverk.UttakArbeidType.FRILANS);
+        assertThat(frilansUtbetalingsgradPrAktivitetDto.isPresent()).isTrue();
+        var frilansPerioderMedUtbetalingsgrad = frilansUtbetalingsgradPrAktivitetDto.get().getPeriodeMedUtbetalingsgrad();
         assertThat(frilansPerioderMedUtbetalingsgrad.size()).isEqualTo(2);
         var frilansPeriodeMedUtbetalingsgrad1 = frilansPerioderMedUtbetalingsgrad.get(0);
         assertThat(frilansPeriodeMedUtbetalingsgrad1.getUtbetalingsgrad()).isEqualTo(Utbetalingsgrad.fra(0));
@@ -138,11 +138,9 @@ class MapTilUtbetalingsgradPrAktivitetTest {
         // Assert
         assertThat(utbetalingsgrader.size()).isEqualTo(2);
 
-        var utbetalingsgradPrAktivitetDto = utbetalingsgrader.get(0);
-        var aktivitet = utbetalingsgradPrAktivitetDto.getUtbetalingsgradArbeidsforholdDto();
-        assertThat(aktivitet.getUttakArbeidType()).isEqualTo(no.nav.folketrygdloven.kalkulus.kodeverk.UttakArbeidType.FRILANS);
-        assertThat(aktivitet.getArbeidsgiver()).isNull();
-        var perioderMedUtbetalingsgrad = utbetalingsgradPrAktivitetDto.getPeriodeMedUtbetalingsgrad();
+        var frilansUtbetalingsgrader = finnMappetUtbetalingsgradForType(utbetalingsgrader, no.nav.folketrygdloven.kalkulus.kodeverk.UttakArbeidType.FRILANS);
+        assertThat(frilansUtbetalingsgrader.isPresent()).isTrue();
+        var perioderMedUtbetalingsgrad = frilansUtbetalingsgrader.get().getPeriodeMedUtbetalingsgrad();
         assertThat(perioderMedUtbetalingsgrad.size()).isEqualTo(1);
         var periodeMedUtbetalingsgrad = perioderMedUtbetalingsgrad.get(0);
         assertThat(periodeMedUtbetalingsgrad.getUtbetalingsgrad()).isEqualTo(Utbetalingsgrad.fra(0));
@@ -150,11 +148,11 @@ class MapTilUtbetalingsgradPrAktivitetTest {
         assertThat(periodeMedUtbetalingsgrad.getPeriode().getFom()).isEqualTo(fomDatoFrilans);
         assertThat(periodeMedUtbetalingsgrad.getPeriode().getTom()).isEqualTo(tom);
 
-        var utbetalingsgradPrAktivitetDto2 = utbetalingsgrader.get(1);
-        var aktivitet2 = utbetalingsgradPrAktivitetDto2.getUtbetalingsgradArbeidsforholdDto();
-        assertThat(aktivitet2.getUttakArbeidType()).isEqualTo(no.nav.folketrygdloven.kalkulus.kodeverk.UttakArbeidType.ORDINÆRT_ARBEID);
+        var arbeidUtbetalingsgrader = finnMappetUtbetalingsgradForType(utbetalingsgrader, no.nav.folketrygdloven.kalkulus.kodeverk.UttakArbeidType.ORDINÆRT_ARBEID);
+        assertThat(arbeidUtbetalingsgrader.isPresent()).isTrue();
+        var aktivitet2 = arbeidUtbetalingsgrader.get().getUtbetalingsgradArbeidsforholdDto();
         assertThat(aktivitet2.getArbeidsgiver().getIdent()).isEqualTo(ORGNR);
-        var perioderMedUtbetalingsgrad2 = utbetalingsgradPrAktivitetDto2.getPeriodeMedUtbetalingsgrad();
+        var perioderMedUtbetalingsgrad2 = arbeidUtbetalingsgrader.get().getPeriodeMedUtbetalingsgrad();
         assertThat(perioderMedUtbetalingsgrad2.size()).isEqualTo(1);
         var periodeMedUtbetalingsgrad2 = perioderMedUtbetalingsgrad2.get(0);
         assertThat(periodeMedUtbetalingsgrad2.getUtbetalingsgrad()).isEqualTo(Utbetalingsgrad.fra(50));
@@ -255,6 +253,10 @@ class MapTilUtbetalingsgradPrAktivitetTest {
         assertThat(periodeMedUtbetalingsgrad.getPeriode().getTom()).isEqualTo(tom);
     }
 
+
+    private static Optional<UtbetalingsgradPrAktivitetDto> finnMappetUtbetalingsgradForType(List<UtbetalingsgradPrAktivitetDto> utbetalingsgrader, no.nav.folketrygdloven.kalkulus.kodeverk.UttakArbeidType uttakArbeidType) {
+        return utbetalingsgrader.stream().filter(it -> it.getUtbetalingsgradArbeidsforholdDto().getUttakArbeidType().equals(uttakArbeidType)).findFirst();
+    }
 
     private static Arbeid lagNullOverNullArbeidstidForFrilans(LocalDate fom, LocalDate tom) {
         return new Arbeid(new Arbeidsforhold(UttakArbeidType.FRILANSER.getKode(), null, null, null), Map.of(new LukketPeriode(fom, tom), new ArbeidsforholdPeriodeInfo(Duration.ZERO, Duration.ZERO)));
