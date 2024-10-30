@@ -67,21 +67,25 @@ public class StatiskeKodeverdierDeSerialiseringTest {
         assertThat(deserialisert.getClass().getSimpleName()).isEqualTo(kv.getClass().getSimpleName());
     }
 
-    private <KV extends Kodeverdi> void checkOpenapiObjectMapperKodeverdi(KV kv, final boolean isEnum) throws JsonProcessingException {
+    private <KV extends Kodeverdi> void checkOpenapiObjectMapperKodeverdi(KV kv) throws JsonProcessingException {
         final String serialisert = openapiMapper.writeValueAsString(kv);
+        // Nokon enum instanser er anonyme subklasser av enum klassen, må bruke getEnclosingClass for å finne info om
+        // enum klassen då.
+        final boolean isAnon = kv.getClass().isAnonymousClass();
+        final Class<?> cls = isAnon ? kv.getClass().getEnclosingClass() : kv.getClass();
+        final boolean isEnum = cls.isEnum();
         if(isEnum) {
             try {
                 assertThat(serialisert)
-                    .as("kodeverk: %s, klasse: %s toString ikkje lik", kv.getKodeverk(), kv.getClass().getSimpleName())
+                    .as("kodeverk: %s, klasse: %s toString ikkje lik", kv.getKodeverk(), cls.getSimpleName())
                     .isEqualToIgnoringWhitespace("\"" + kv.toString() + "\"");
             } catch (AssertionFailedError e) {
                 assertThat(serialisert)
-                    .as("kodeverk: %s, klasse: %s toString ikkje lik, getKode ikkje lik", kv.getKodeverk(), kv.getClass().getSimpleName())
+                    .as("kodeverk: %s, klasse: %s toString ikkje lik, getKode ikkje lik", kv.getKodeverk(), cls.getSimpleName())
                     .isEqualToIgnoringWhitespace("\"" + kv.getKode() + "\"");
             }
         } // Else is default serialization, no need, and hard to check generally here
 
-        final Class<?> cls = kv.getClass().isAnonymousClass() ? kv.getClass().getSuperclass() : kv.getClass();
         assertThat(Kodeverdi.class.isAssignableFrom(cls)).isTrue();
         final Kodeverdi deserialisert = openapiMapper.readValue(serialisert, (Class<? extends Kodeverdi>) cls);
         assertThat(deserialisert).isInstanceOf(kv.getClass());
@@ -101,10 +105,7 @@ public class StatiskeKodeverdierDeSerialiseringTest {
                     if(o instanceof Kodeverdi) {
                         checkDefaultObjectMapperKodeverdi((Kodeverdi) o);
                         checkStringObjectMapperKodeverdi((Kodeverdi) o);
-                        final boolean isEnum =  o.getClass().isEnum();
-                        if(isEnum) {
-                            checkOpenapiObjectMapperKodeverdi((Kodeverdi) o, isEnum);
-                        }
+                        checkOpenapiObjectMapperKodeverdi((Kodeverdi) o);
                     }
                 }
             }
