@@ -7,12 +7,10 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
 /**
@@ -52,17 +50,21 @@ public enum HistorikkOpplysningType implements Kodeverdi {
         this.navn = navn;
     }
 
-    @JsonCreator(mode = Mode.DELEGATING)
-    public static HistorikkOpplysningType  fraKode(Object node)  {
-        if (node == null) {
+    @JsonCreator
+    public static HistorikkOpplysningType fraKode(String kode)  {
+        if (kode == null) {
             return null;
         }
-        String kode = TempAvledeKode.getVerdi(HistorikkOpplysningType.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
             throw new IllegalArgumentException("Ukjent HistorikkOpplysningType: " + kode);
         }
         return ad;
+    }
+
+    @JsonCreator
+    public static HistorikkOpplysningType fraObjektProp(@JsonProperty("kode") final String kode) {
+        return fraKode(kode);
     }
 
     public static Map<String, HistorikkOpplysningType> kodeMap() {

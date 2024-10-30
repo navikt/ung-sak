@@ -7,12 +7,10 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
 /**
@@ -52,17 +50,21 @@ public enum HistorikkAvklartSoeknadsperiodeType implements Kodeverdi {
         this.navn = navn;
     }
 
-    @JsonCreator(mode = Mode.DELEGATING)
-    public static HistorikkAvklartSoeknadsperiodeType  fraKode(Object node)  {
-        if (node == null) {
+    @JsonCreator
+    public static HistorikkAvklartSoeknadsperiodeType  fraKode(String kode)  {
+        if (kode == null) {
             return null;
         }
-        String kode = TempAvledeKode.getVerdi(HistorikkAvklartSoeknadsperiodeType.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
-            throw new IllegalArgumentException("Ukjent HistorikkAvklartSoeknadsperiodeType: " + kode);
+            return valueOf(kode); // Sjekk om vi finner verdi viss søker etter name, brukast for openapi deserialisering inntil @JsonValue er på plass.
         }
         return ad;
+    }
+
+    @JsonCreator
+    public static HistorikkAvklartSoeknadsperiodeType fraObjektProp(@JsonProperty("kode") String kode) {
+        return fraKode(kode);
     }
 
     public static Map<String, HistorikkAvklartSoeknadsperiodeType> kodeMap() {

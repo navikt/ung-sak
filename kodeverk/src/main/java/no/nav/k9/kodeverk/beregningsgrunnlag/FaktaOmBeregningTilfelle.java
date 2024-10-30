@@ -7,12 +7,10 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -60,17 +58,21 @@ public enum FaktaOmBeregningTilfelle implements Kodeverdi {
         this.navn = navn;
     }
 
-    @JsonCreator(mode = Mode.DELEGATING)
-    public static FaktaOmBeregningTilfelle fraKode(Object node) {
-        if (node == null) {
+    @JsonCreator
+    public static FaktaOmBeregningTilfelle fraKode(String kode) {
+        if (kode == null) {
             return null;
         }
-        String kode = TempAvledeKode.getVerdi(FaktaOmBeregningTilfelle.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
             throw new IllegalArgumentException("Ukjent FaktaOmBeregningTilfelle: " + kode);
         }
         return ad;
+    }
+
+    @JsonCreator
+    public static FaktaOmBeregningTilfelle fraString(@JsonProperty("kode") String s) {
+        return fraKode(s);
     }
 
     public static Map<String, FaktaOmBeregningTilfelle> kodeMap() {
