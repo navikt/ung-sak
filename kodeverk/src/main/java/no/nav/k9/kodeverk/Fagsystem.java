@@ -7,7 +7,6 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -74,17 +73,21 @@ public enum Fagsystem implements Kodeverdi {
         return this.getKode();
     }
 
-    @JsonCreator(mode = Mode.DELEGATING)
-    public static Fagsystem fraKode(Object node) {
-        if (node == null) {
+    @JsonCreator
+    public static Fagsystem fraKode(String kode) {
+        if (kode == null) {
             return null;
         }
-        String kode = TempAvledeKode.getVerdi(Fagsystem.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
-            throw new IllegalArgumentException("Ukjent Fagsystem: for input " + node);
+            throw new IllegalArgumentException("Ukjent Fagsystem: for input " + kode);
         }
         return ad;
+    }
+
+    @JsonCreator
+    public static Fagsystem fraObjektProp(@JsonProperty("kode") String kode) {
+        return fraKode(kode);
     }
 
     public static Map<String, Fagsystem> kodeMap() {
