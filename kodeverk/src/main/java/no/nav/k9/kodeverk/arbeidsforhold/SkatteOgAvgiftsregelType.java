@@ -7,13 +7,11 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
 @JsonFormat(shape = Shape.OBJECT)
@@ -73,17 +71,21 @@ public enum SkatteOgAvgiftsregelType implements Kodeverdi {
         return this.getKode();
     }
 
-    @JsonCreator(mode = Mode.DELEGATING)
-    public static SkatteOgAvgiftsregelType fraKode(Object node) {
-        if (node == null) {
+    @JsonCreator
+    public static SkatteOgAvgiftsregelType fraKode(String kode) {
+        if (kode == null) {
             return null;
         }
-        String kode = TempAvledeKode.getVerdi(SkatteOgAvgiftsregelType.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
             throw new IllegalArgumentException("Ukjent SkatteOgAvgiftsregelType: " + kode);
         }
         return ad;
+    }
+
+    @JsonCreator
+    public static SkatteOgAvgiftsregelType fraObjektProp(@JsonProperty("kode") String kode) {
+        return fraKode(kode);
     }
 
     public static Map<String, SkatteOgAvgiftsregelType> kodeMap() {
