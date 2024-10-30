@@ -17,8 +17,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 
 import org.hibernate.jpa.QueryHints;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
@@ -31,8 +29,6 @@ import no.nav.k9.felles.jpa.HibernateVerktøy;
 
 @Dependent
 public class OpptjeningRepository {
-
-    private static final Logger log = LoggerFactory.getLogger(OpptjeningRepository.class);
 
     private EntityManager em;
     private BehandlingRepository behandlingRepository;
@@ -88,12 +84,12 @@ public class OpptjeningRepository {
             return nyOpptjening;
         };
 
-        Opptjening opptjening = lagre(behandling, oppdateringsfunksjon, true, false);
+        Opptjening opptjening = lagre(behandling, oppdateringsfunksjon, true);
 
         return opptjening;
     }
 
-    private Opptjening lagre(Behandling behandling, Function<OpptjeningResultatBuilder, Opptjening> oppdateringsFunksjon, boolean ryddOpptjeningsresultat, boolean erTilbakestilling) {
+    private Opptjening lagre(Behandling behandling, Function<OpptjeningResultatBuilder, Opptjening> oppdateringsFunksjon, boolean ryddOpptjeningsresultat) {
 
         BehandlingLås behandlingLås = behandlingRepository.taSkriveLås(behandling);
 
@@ -105,7 +101,7 @@ public class OpptjeningRepository {
         if (ryddOpptjeningsresultat) {
             ryddMotVilkårsPerioder(behandling, builder);
         } else {
-            validerMotVilkårsPerioder(behandling, builder, erTilbakestilling);
+            validerMotVilkårsPerioder(behandling, builder);
         }
         tidligereOpptjeninger.ifPresent(this::deaktiverTidligereOpptjening);
 
@@ -123,13 +119,8 @@ public class OpptjeningRepository {
         vilkår.ifPresent(builder::fjernOverflødigePerioder);
     }
 
-    private void validerMotVilkårsPerioder(Behandling behandling, OpptjeningResultatBuilder builder, boolean erTilbakestilling) {
+    private void validerMotVilkårsPerioder(Behandling behandling, OpptjeningResultatBuilder builder) {
         var vilkår = vilkårResultatRepository.hentHvisEksisterer(behandling.getId()).flatMap(it -> it.getVilkår(VilkårType.OPPTJENINGSVILKÅRET));
-        //FDBHE //TODO fjern når sak er ok
-        if (behandling.getId() == 1837447L && erTilbakestilling) {
-            log.warn("Ignorerte validering mot vilkårsperioder for {}", vilkår);
-            return;
-        }
         vilkår.ifPresent(builder::validerMotVilkår);
     }
 
@@ -162,7 +153,7 @@ public class OpptjeningRepository {
             return ny;
         };
 
-        return lagre(behandling, oppdateringsfunksjon, false, false);
+        return lagre(behandling, oppdateringsfunksjon, false);
     }
 
     /**
@@ -225,7 +216,7 @@ public class OpptjeningRepository {
             return null;
         };
 
-        lagre(behandling, oppdateringsfunksjon, false, true);
+        lagre(behandling, oppdateringsfunksjon, false);
     }
 
     public void deaktiverOpptjening(Long behandlingId) {
