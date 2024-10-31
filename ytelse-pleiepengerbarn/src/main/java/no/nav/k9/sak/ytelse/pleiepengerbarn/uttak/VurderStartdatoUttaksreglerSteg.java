@@ -4,6 +4,7 @@ import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_STARTDATO_
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+import static no.nav.k9.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_BEGYNNELSE;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,6 +20,7 @@ import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.k9.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
 
 @ApplicationScoped
 @BehandlingStegRef(value = VURDER_STARTDATO_UTTAKSREGLER)
@@ -30,6 +32,7 @@ public class VurderStartdatoUttaksreglerSteg implements BehandlingSteg {
 
     private BehandlingRepository behandlingRepository;
     private AksjonspunktUtlederNyeRegler aksjonspunktUtlederNyeRegler;
+    private UttakNyeReglerRepository uttakNyeReglerRepository;
 
     VurderStartdatoUttaksreglerSteg() {
         // for proxy
@@ -37,17 +40,19 @@ public class VurderStartdatoUttaksreglerSteg implements BehandlingSteg {
 
     @Inject
     public VurderStartdatoUttaksreglerSteg(BehandlingRepository behandlingRepository,
-                                           AksjonspunktUtlederNyeRegler aksjonspunktUtlederNyeRegler) {
+                                           AksjonspunktUtlederNyeRegler aksjonspunktUtlederNyeRegler,
+                                           UttakNyeReglerRepository uttakNyeReglerRepository) {
         this.behandlingRepository = behandlingRepository;
         this.aksjonspunktUtlederNyeRegler = aksjonspunktUtlederNyeRegler;
+        this.uttakNyeReglerRepository = uttakNyeReglerRepository;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         var behandlingId = kontekst.getBehandlingId();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
-        // TODO: Dette burde løses i prosessmodell, men lar alle saker som har fått aksjonspunkt gå videre før vi eventuelt løser det der
         if (!behandling.erRevurdering()) {
+            uttakNyeReglerRepository.lagreDatoForNyeRegler(kontekst.getBehandlingId(), TIDENES_BEGYNNELSE);
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
         Optional<AksjonspunktDefinisjon> aksjonspunktSetteDatoNyeRegler = aksjonspunktUtlederNyeRegler.utledAksjonspunktDatoForNyeRegler(behandling);

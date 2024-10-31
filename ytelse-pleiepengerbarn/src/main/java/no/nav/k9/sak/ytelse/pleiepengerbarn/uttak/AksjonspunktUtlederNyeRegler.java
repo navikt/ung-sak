@@ -31,7 +31,7 @@ import no.nav.pleiepengerbarn.uttak.kontrakter.LukketPeriode;
 import no.nav.pleiepengerbarn.uttak.kontrakter.Uttaksgrunnlag;
 
 @Dependent
-class AksjonspunktUtlederNyeRegler {
+public class AksjonspunktUtlederNyeRegler {
 
     private static final Logger log = LoggerFactory.getLogger(AksjonspunktUtlederNyeRegler.class);
 
@@ -39,7 +39,6 @@ class AksjonspunktUtlederNyeRegler {
     private UttakNyeReglerRepository uttakNyeReglerRepository;
     private TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste;
     private AksjonspunktKontrollRepository aksjonspunktKontrollRepository;
-    private SøknadsperiodeTjeneste søknadsperiodeTjeneste;
     private MapInputTilUttakTjeneste mapInputTilUttakTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
 
@@ -52,14 +51,12 @@ class AksjonspunktUtlederNyeRegler {
                                         UttakNyeReglerRepository uttakNyeReglerRepository,
                                         TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste,
                                         AksjonspunktKontrollRepository aksjonspunktKontrollRepository,
-                                        SøknadsperiodeTjeneste søknadsperiodeTjeneste,
                                         MapInputTilUttakTjeneste mapInputTilUttakTjeneste,
                                         @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester) {
         this.behandlingRepository = behandlingRepository;
         this.uttakNyeReglerRepository = uttakNyeReglerRepository;
         this.tilkommetAktivitetTjeneste = tilkommetAktivitetTjeneste;
         this.aksjonspunktKontrollRepository = aksjonspunktKontrollRepository;
-        this.søknadsperiodeTjeneste = søknadsperiodeTjeneste;
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
     }
