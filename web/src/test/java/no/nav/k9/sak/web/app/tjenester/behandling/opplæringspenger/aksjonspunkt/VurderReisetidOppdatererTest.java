@@ -62,7 +62,7 @@ class VurderReisetidOppdatererTest {
     }
 
     private OppdateringResultat lagreGrunnlag(VurderReisetidDto dto) {
-        Optional<Aksjonspunkt> aksjonspunkt = behandling.getAksjonspunktFor(dto.getKode());
+        Optional<Aksjonspunkt> aksjonspunkt = behandling.getAksjonspunktForHvisFinnes(dto.getKode());
         AksjonspunktOppdaterParameter param = new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, dto);
 
         return vurderReisetidOppdaterer.oppdater(dto, param);

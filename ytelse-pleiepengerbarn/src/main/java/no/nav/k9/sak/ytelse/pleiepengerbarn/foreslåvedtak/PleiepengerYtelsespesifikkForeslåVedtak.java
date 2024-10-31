@@ -72,7 +72,7 @@ public class PleiepengerYtelsespesifikkForeslåVedtak implements Ytelsespesifikk
             .stream()
             .noneMatch(v -> !v.isBesluttet());
 
-        Optional<Aksjonspunkt> sykdomAP = behandling.getAksjonspunktFor(AksjonspunktKodeDefinisjon.KONTROLLER_LEGEERKLÆRING_KODE);
+        Optional<Aksjonspunkt> sykdomAP = behandling.getAksjonspunktForHvisFinnes(AksjonspunktKodeDefinisjon.KONTROLLER_LEGEERKLÆRING_KODE);
         if (harUbesluttedeSykdomsVurderinger) {
             if (sykdomAP.isEmpty()) {
                 Aksjonspunkt aksjonspunkt = aksjonspunktKontrollRepository.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING);
