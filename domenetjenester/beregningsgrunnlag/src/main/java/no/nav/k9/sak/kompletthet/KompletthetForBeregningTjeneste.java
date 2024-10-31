@@ -112,12 +112,11 @@ public class KompletthetForBeregningTjeneste {
 
         if (skalIgnorereInntektsmeldingUtenStp) {
             List<LocalDate> stp = vilkårsPerioder.stream().map(DatoIntervallEntitet::getFomDato).toList();
-            Set<JournalpostId> ignorerteInntektsmeldinger = inntektsmeldinger.stream()
+            Set<Inntektsmelding> ignorerteInntektsmeldinger = inntektsmeldinger.stream()
                 .filter(im -> im.getStartDatoPermisjon().isPresent() && !stp.contains(im.getStartDatoPermisjon().get()))
                 .filter(im -> Objects.equals(im.getKildesystem(), "NAV_NO"))
-                .map(Inntektsmelding::getJournalpostId).collect(Collectors.toSet());
-
-            inntektsmeldinger = inntektsmeldinger.stream().filter(im -> !ignorerteInntektsmeldinger.contains(im.getJournalpostId())).collect(Collectors.toSet());
+                .collect(Collectors.toSet());
+            inntektsmeldinger.removeAll(ignorerteInntektsmeldinger);
         }
 
         var journalpostIds = inntektsmeldinger.stream().map(Inntektsmelding::getJournalpostId).toList();
