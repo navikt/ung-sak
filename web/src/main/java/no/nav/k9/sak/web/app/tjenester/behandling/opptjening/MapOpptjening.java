@@ -103,7 +103,7 @@ class MapOpptjening {
             var yrkesaktivitetFilter = new YrkesaktivitetFilter(iayGrunnlag.getArbeidsforholdInformasjon(), iayGrunnlag.getAktørArbeidFraRegister(ref.getAktørId())).før(vilkårsperiode.getFomDato().plusDays(1));
             var relevanteOpptjeningAktiviteter = opptjeningsperioderTjeneste.mapPerioderForSaksbehandling(ref, iayGrunnlag, vurderForOpptjeningsvilkår, opptjening.getOpptjeningPeriode(), vilkårsperiode, yrkesaktivitetFilter);
             List<OpptjeningAktivitet> opptjeningAktivitet = opptjening.getOpptjeningAktivitet();
-            var fastsattOpptjeningAktivitetList = MergeOverlappendePeriodeHjelp.mergeOverlappenePerioder(opptjeningAktivitet);
+            List<FastsattOpptjeningAktivitetDto> fastsattOpptjeningAktivitetList = MergeOverlappendePeriodeHjelp.mergeOverlappenePerioder(opptjeningAktivitet);
             boolean vurderesIAksjonspunkt= periodeVurderesIAksjonspunkt(vilkåret, opptjening.getFom(), opptjening.getTom(), opptjeningAktivitet);
 
             resultat.setFastsattOpptjening(new FastsattOpptjeningDto(
