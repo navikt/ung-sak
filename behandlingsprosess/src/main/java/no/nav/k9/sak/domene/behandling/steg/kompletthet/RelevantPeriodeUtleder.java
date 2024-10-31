@@ -38,15 +38,25 @@ public class RelevantPeriodeUtleder {
         this.fagsakRepository = fagsakRepository;
     }
 
-    public DatoIntervallEntitet utledRelevantPeriode(BehandlingReferanse referanse, DatoIntervallEntitet periode) {
+    public DatoIntervallEntitet utledRelevantPeriode(BehandlingReferanse referanse, DatoIntervallEntitet periode, boolean tillatGyldighetTilbakeITid) {
         var tidslinje = utledTidslinje(referanse);
-        return utledRelevantPeriode(tidslinje, periode, true);
+        return utledRelevantPeriode(tidslinje, periode, true, tillatGyldighetTilbakeITid);
     }
 
-    public Set<Inntektsmelding> utledRelevanteInntektsmeldinger(Set<Inntektsmelding> inntektsmeldinger, DatoIntervallEntitet relevantPeriode) {
+    public Set<Inntektsmelding> utledRelevanteInntektsmeldinger(Set<Inntektsmelding> inntektsmeldinger, DatoIntervallEntitet relevantPeriode, DatoIntervallEntitet relevantPeriodeUtenGyldighetTilbakeITid) {
         return inntektsmeldinger.stream()
-            .filter(im -> im.getStartDatoPermisjon().isPresent() && relevantPeriode.inkluderer(im.getStartDatoPermisjon().orElseThrow()))
+            .filter(im -> imErRelevant(im, relevantPeriode, relevantPeriodeUtenGyldighetTilbakeITid))
             .collect(Collectors.toSet());
+    }
+
+    private static boolean imErRelevant(Inntektsmelding inntektsmelding, DatoIntervallEntitet relevantPeriode, DatoIntervallEntitet relevantPeriodeUtenGyldighetTilbakeITid) {
+        if (inntektsmelding.getStartDatoPermisjon().isEmpty()) {
+            return false;
+        }
+        if (inntektsmelding.getKildesystem().equals("NAV_NO")) {
+            return relevantPeriodeUtenGyldighetTilbakeITid.inkluderer(inntektsmelding.getStartDatoPermisjon().get());
+        }
+        return relevantPeriode.inkluderer(inntektsmelding.getStartDatoPermisjon().get());
     }
 
     private LocalDateTimeline<Boolean> utledTidslinje(BehandlingReferanse referanse) {
@@ -69,13 +79,13 @@ public class RelevantPeriodeUtleder {
     }
 
     DatoIntervallEntitet utledRelevantPeriode(LocalDateTimeline<Boolean> tidslinje, DatoIntervallEntitet periode) {
-        return utledRelevantPeriode(tidslinje, periode, true);
+        return utledRelevantPeriode(tidslinje, periode, true, true);
     }
 
-    private DatoIntervallEntitet utledRelevantPeriode(LocalDateTimeline<Boolean> tidslinje, DatoIntervallEntitet periode, boolean justerStart) {
+    private DatoIntervallEntitet utledRelevantPeriode(LocalDateTimeline<Boolean> tidslinje, DatoIntervallEntitet periode, boolean justerStart, boolean tillatGyldighetTilbakeITid) {
         DatoIntervallEntitet orginalRelevantPeriode = periode;
         if (justerStart) {
-            orginalRelevantPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato().minusWeeks(4), periode.getTomDato().plusWeeks(4));
+            orginalRelevantPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato().minusWeeks(tillatGyldighetTilbakeITid ? 4 : 0), periode.getTomDato().plusWeeks(4));
         }
 
         if (tidslinje.isEmpty()) {
@@ -85,13 +95,13 @@ public class RelevantPeriodeUtleder {
         if (intersection.isEmpty()) {
             return orginalRelevantPeriode;
         }
-        var relevantPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(intersection.getMinLocalDate().minusWeeks(4), intersection.getMaxLocalDate().plusWeeks(4));
+        var relevantPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(intersection.getMinLocalDate().minusWeeks(tillatGyldighetTilbakeITid ? 4 : 0), intersection.getMaxLocalDate().plusWeeks(4));
 
         if (orginalRelevantPeriode.equals(relevantPeriode)) {
             return relevantPeriode;
         }
 
-        return utledRelevantPeriode(tidslinje, relevantPeriode, false);
+        return utledRelevantPeriode(tidslinje, relevantPeriode, false, tillatGyldighetTilbakeITid);
     }
 
     /**
