@@ -12,7 +12,7 @@ import jakarta.ws.rs.ext.Provider;
  * different ObjectMappers based on incoming http request header.
  */
 @Provider
-@Consumes(MediaType.WILDCARD) // NOTE: required to support "non-standard" JSON variants
+@Consumes({MediaType.APPLICATION_JSON, "text/json", MediaType.WILDCARD})
 @Produces({MediaType.APPLICATION_JSON, "text/json", MediaType.WILDCARD})
 public class CustomJacksonJsonProvider extends JacksonJsonProvider {
     public CustomJacksonJsonProvider() {
