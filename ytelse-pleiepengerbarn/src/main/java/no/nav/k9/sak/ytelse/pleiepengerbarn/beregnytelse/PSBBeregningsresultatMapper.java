@@ -319,7 +319,8 @@ public class PSBBeregningsresultatMapper implements BeregningsresultatMapper {
         BeregningsresultatAndel ny = new BeregningsresultatAndel(a);
         BeregningsresultatAndel.builder(ny)
             .medDagsats(a.getDagsats() + b.getDagsats())
-            .medDagsatsFraBg(a.getDagsatsFraBg() + b.getDagsatsFraBg());
+            .medDagsatsFraBg(a.getDagsatsFraBg() + b.getDagsatsFraBg())
+            .medPeriode(a.getPeriode());
         return ny;
     }
 
