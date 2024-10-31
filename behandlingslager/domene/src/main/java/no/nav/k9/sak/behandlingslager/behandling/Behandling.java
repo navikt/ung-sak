@@ -497,7 +497,7 @@ public class Behandling extends BaseEntitet {
             .orElseThrow(() -> FeilFactory.create(BehandlingFeil.class).aksjonspunktIkkeFunnet(definisjon.getKode()).toException());
     }
 
-    public Optional<Aksjonspunkt> getAksjonspunktFor(String aksjonspunktDefinisjonKode) {
+    public Optional<Aksjonspunkt> getAksjonspunktForHvisFinnes(String aksjonspunktDefinisjonKode) {
         return getAksjonspunkterStream()
             .filter(a -> a.getAksjonspunktDefinisjon().getKode().equals(aksjonspunktDefinisjonKode))
             .findFirst();

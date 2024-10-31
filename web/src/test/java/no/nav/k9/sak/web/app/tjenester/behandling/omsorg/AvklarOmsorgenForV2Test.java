@@ -100,7 +100,7 @@ class AvklarOmsorgenForV2Test {
     }
 
     private void oppdater(AvklarOmsorgenForDto dto) {
-        Optional<Aksjonspunkt> aksjonspunkt = behandling.getAksjonspunktFor(dto.getKode());
+        Optional<Aksjonspunkt> aksjonspunkt = behandling.getAksjonspunktForHvisFinnes(dto.getKode());
         OppdateringResultat resultat = avklarOmsorgenForV2.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, dto));
         assertThat(resultat).isNotNull();
     }

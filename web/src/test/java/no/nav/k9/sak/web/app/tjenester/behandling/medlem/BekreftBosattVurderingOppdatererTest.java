@@ -76,7 +76,7 @@ public class BekreftBosattVurderingOppdatererTest {
         // Act
         final MedlemskapAksjonspunktTjeneste medlemskapTjeneste = new MedlemskapAksjonspunktTjeneste(
             repositoryProvider, mock(HistorikkTjenesteAdapter.class), skjæringstidspunktTjeneste);
-        var aksjonspunkt = behandling.getAksjonspunktFor(dto.getKode());
+        var aksjonspunkt = behandling.getAksjonspunktForHvisFinnes(dto.getKode());
         new BekreftBosattVurderingOppdaterer(repositoryProvider, lagMockHistory(), medlemskapTjeneste).oppdater(dto, new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, dto));
 
         // Assert

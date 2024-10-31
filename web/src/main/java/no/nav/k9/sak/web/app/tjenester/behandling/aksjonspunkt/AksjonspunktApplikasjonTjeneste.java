@@ -156,7 +156,7 @@ public class AksjonspunktApplikasjonTjeneste {
 
         // Valider at aksjonspunktene eksisterer på behandlingen
         var invalidAksjonspunkt = bekreftedeApKoder.stream()
-            .filter(it -> behandling.getAksjonspunktFor(it).isEmpty())
+            .filter(it -> behandling.getAksjonspunktForHvisFinnes(it).isEmpty())
             .collect(Collectors.toSet());
 
         if (!invalidAksjonspunkt.isEmpty()) {
@@ -186,7 +186,7 @@ public class AksjonspunktApplikasjonTjeneste {
         AksjonspunktProsessResultat prosessResultat = overstyrVilkårEllerBeregning(aksjonspunkterDto.getOverstyrteAksjonspunktDtoer(), behandling, kontekst);
 
         aksjonspunkterDto.getOverstyrteAksjonspunktDtoer().forEach(dto ->
-            behandling.getAksjonspunktFor(dto.getKode()).ifPresent(aksjonspunkt ->
+            behandling.getAksjonspunktForHvisFinnes(dto.getKode()).ifPresent(aksjonspunkt ->
                 aksjonspunkt.setAnsvarligSaksbehandler(getCurrentUserId())
             )
         );
@@ -328,7 +328,7 @@ public class AksjonspunktApplikasjonTjeneste {
                                      AksjonspunktProsessResultat aksjonspunktProsessResultat,
                                      BekreftetAksjonspunktDto dto) {
         // Endringskontroll for aksjonspunkt
-        Aksjonspunkt aksjonspunkt = behandling.getAksjonspunktFor(dto.getKode())
+        Aksjonspunkt aksjonspunkt = behandling.getAksjonspunktForHvisFinnes(dto.getKode())
             .orElseThrow(() -> new IllegalStateException("Utvikler-feil: Har ikke aksjonspunkt av type: " + dto.getKode()));
 
         aksjonspunkt.setAnsvarligSaksbehandler(getCurrentUserId());

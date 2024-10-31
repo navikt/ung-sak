@@ -78,7 +78,7 @@ public class KompletthetBeregningTjeneste {
     }
 
     private static boolean erManuellRevurderingOgHarTattStillingTilTingPåNytt(Behandling behandling) {
-        return erManueltOpprettetRevurdering(behandling) && behandling.getAksjonspunktFor(AksjonspunktKodeDefinisjon.ENDELING_AVKLAR_KOMPLETT_NOK_FOR_BEREGNING_KODE).map(Aksjonspunkt::erUtført).orElse(false);
+        return erManueltOpprettetRevurdering(behandling) && behandling.getAksjonspunktForHvisFinnes(AksjonspunktKodeDefinisjon.ENDELING_AVKLAR_KOMPLETT_NOK_FOR_BEREGNING_KODE).map(Aksjonspunkt::erUtført).orElse(false);
     }
 
     public KompletthetsAksjon utledTilstand(BehandlingReferanse ref, BehandlingskontrollKontekst kontekst) {
@@ -131,7 +131,7 @@ public class KompletthetBeregningTjeneste {
         }
 
         // Be Saksbehandler avklar fortsettelse eller varsle avslag
-        var avklarKompletthetAvklaring1 = behandling.getAksjonspunktFor(AksjonspunktKodeDefinisjon.AVKLAR_KOMPLETT_NOK_FOR_BEREGNING_KODE);
+        var avklarKompletthetAvklaring1 = behandling.getAksjonspunktForHvisFinnes(AksjonspunktKodeDefinisjon.AVKLAR_KOMPLETT_NOK_FOR_BEREGNING_KODE);
         if ((avklarKompletthetAvklaring1.isEmpty() || avklarKompletthetAvklaring1.get().erÅpentAksjonspunkt()) && etterlysAksjon.erUavklart()) {
             log.info("Behandlingen er IKKE komplett, ber om manuell avklaring.");
             return KompletthetsAksjon.manuellAvklaring(AksjonspunktDefinisjon.AVKLAR_KOMPLETT_NOK_FOR_BEREGNING);

@@ -93,7 +93,7 @@ public class VedtakTjeneste {
         if (behandling.isToTrinnsBehandling()) {
             return HistorikkAktør.BESLUTTER;
         }
-        var aksjonspunkt = behandling.getAksjonspunktFor(AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT.getKode());
+        var aksjonspunkt = behandling.getAksjonspunktForHvisFinnes(AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT.getKode());
         if (aksjonspunkt.map(Aksjonspunkt::erUtført).orElse(false) && !Objects.equals(null, behandling.getAnsvarligSaksbehandler())) {
             return HistorikkAktør.SAKSBEHANDLER;
         }

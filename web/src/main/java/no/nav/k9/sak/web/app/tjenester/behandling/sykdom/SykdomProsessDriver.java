@@ -44,7 +44,7 @@ public class SykdomProsessDriver {
             return;
         }
 
-        var aksjonspunkt = behandling.getAksjonspunktFor(AksjonspunktKodeDefinisjon.KONTROLLER_LEGEERKLÆRING_KODE);
+        var aksjonspunkt = behandling.getAksjonspunktForHvisFinnes(AksjonspunktKodeDefinisjon.KONTROLLER_LEGEERKLÆRING_KODE);
         if (aksjonspunkt.isEmpty()) {
             // Legg til
             aksjonspunktKontrollRepository.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.KONTROLLER_LEGEERKLÆRING);
