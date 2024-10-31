@@ -103,11 +103,12 @@ public class AksjonspunktUtlederNyeRegler {
 
     private void kopierVurderingFraOriginalBehandling(Behandling behandling) {
         var originalAksjonspunkt = behandling.getOriginalBehandlingId().map(behandlingRepository::hentBehandling)
-            .map(b -> b.getAksjonspunktFor(AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK))
-            .orElseThrow(() -> new IllegalStateException("Forventer at det finnes aksjonspunkt i original behandling dersom dato er satt"));
-        var nyttAksjonspunkt = aksjonspunktKontrollRepository.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK);
-        aksjonspunktKontrollRepository.setTilUtført(nyttAksjonspunkt, originalAksjonspunkt.getBegrunnelse());
-        nyttAksjonspunkt.setAnsvarligSaksbehandler(originalAksjonspunkt.getAnsvarligSaksbehandler());
+            .map(b -> b.getAksjonspunktFor(AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK));
+        if (originalAksjonspunkt.isPresent()) {
+            var nyttAksjonspunkt = aksjonspunktKontrollRepository.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK);
+            aksjonspunktKontrollRepository.setTilUtført(nyttAksjonspunkt, originalAksjonspunkt.get().getBegrunnelse());
+            nyttAksjonspunkt.setAnsvarligSaksbehandler(originalAksjonspunkt.get().getAnsvarligSaksbehandler());
+        }
     }
 
     private boolean harTilkommmetAktivitet(Behandling behandling, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
