@@ -46,6 +46,10 @@ public class VurderStartdatoUttaksreglerSteg implements BehandlingSteg {
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         var behandlingId = kontekst.getBehandlingId();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
+        // TODO: Dette burde løses i prosessmodell, men lar alle saker som har fått aksjonspunkt gå videre før vi eventuelt løser det der
+        if (!behandling.erRevurdering()) {
+            return BehandleStegResultat.utførtUtenAksjonspunkter();
+        }
         Optional<AksjonspunktDefinisjon> aksjonspunktSetteDatoNyeRegler = aksjonspunktUtlederNyeRegler.utledAksjonspunktDatoForNyeRegler(behandling);
         return aksjonspunktSetteDatoNyeRegler.map(aksjonspunktDefinisjon -> BehandleStegResultat.utførtMedAksjonspunkter(List.of(aksjonspunktDefinisjon))).orElseGet(BehandleStegResultat::utførtUtenAksjonspunkter);
     }
