@@ -3,6 +3,7 @@ package no.nav.k9.sak.domene.behandling.steg.kompletthet;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -53,7 +54,7 @@ public class RelevantPeriodeUtleder {
         if (inntektsmelding.getStartDatoPermisjon().isEmpty()) {
             return false;
         }
-        if (inntektsmelding.getKildesystem().equals("NAV_NO")) {
+        if (Objects.equals(inntektsmelding.getKildesystem(), "NAV_NO")) {
             return relevantPeriodeUtenGyldighetTilbakeITid.inkluderer(inntektsmelding.getStartDatoPermisjon().get());
         }
         return relevantPeriode.inkluderer(inntektsmelding.getStartDatoPermisjon().get());
