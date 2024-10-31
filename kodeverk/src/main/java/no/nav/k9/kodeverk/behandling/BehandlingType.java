@@ -8,13 +8,11 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
 @JsonFormat(shape = Shape.OBJECT)
@@ -83,17 +81,23 @@ public enum BehandlingType implements Kodeverdi {
         return this.getKode();
     }
 
-    @JsonCreator(mode = Mode.DELEGATING)
-    public static BehandlingType fraKode(Object node) {
-        if (node == null) {
+    // For autodeserialisering frå string serialisering
+    @JsonCreator
+    public static BehandlingType fraKode(String kode) {
+        if (kode == null) {
             return null;
         }
-        String kode = TempAvledeKode.getVerdi(BehandlingType.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
-            throw new IllegalArgumentException("Ukjent BehandlingType: for input " + node);
+            throw new IllegalArgumentException("Ukjent BehandlingType: for input " + kode);
         }
         return ad;
+    }
+
+    // For autodeserialisering frå objekt serialisering
+    @JsonCreator
+    public static BehandlingType fraObjektProp(@JsonProperty("kode") String kode) {
+        return fraKode(kode);
     }
 
     public static Map<String, BehandlingType> kodeMap() {
@@ -115,10 +119,6 @@ public enum BehandlingType implements Kodeverdi {
     @Override
     public String getKodeverk() {
         return KODEVERK;
-    }
-
-    public static BehandlingType fromString(String kode) {
-        return fraKode(kode);
     }
 
     @Override

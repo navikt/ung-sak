@@ -7,12 +7,10 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -62,17 +60,21 @@ public enum UtsettelseÅrsak implements Kodeverdi {
         return this.getKode();
     }
 
-    @JsonCreator(mode = Mode.DELEGATING)
-    public static UtsettelseÅrsak fraKode(Object node) {
-        if (node == null) {
+    @JsonCreator
+    public static UtsettelseÅrsak fraKode(String kode) {
+        if (kode == null) {
             return null;
         }
-        String kode = TempAvledeKode.getVerdi(UtsettelseÅrsak.class, node, "kode");
         var ad = KODER.get(kode);
         if (ad == null) {
-            throw new IllegalArgumentException("Ukjent UtsettelseÅrsak: for input " + node);
+            throw new IllegalArgumentException("Ukjent UtsettelseÅrsak: for input " + kode);
         }
         return ad;
+    }
+
+    @JsonCreator
+    public static UtsettelseÅrsak fraObjektProp(@JsonProperty("kode") String kode) {
+        return fraKode(kode);
     }
 
     public static Map<String, UtsettelseÅrsak> kodeMap() {
