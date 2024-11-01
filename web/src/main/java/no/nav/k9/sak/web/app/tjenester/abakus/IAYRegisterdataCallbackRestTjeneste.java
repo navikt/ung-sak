@@ -3,6 +3,7 @@ package no.nav.k9.sak.web.app.tjenester.abakus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.abakus.callback.registerdata.CallbackDto;
+import no.nav.k9.prosesstask.api.PollTaskAfterTransaction;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.RegisterdataCallback;
@@ -54,6 +55,7 @@ public class IAYRegisterdataCallbackRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Callback når registerinnhenting av IAY har blitt fullført i Abakus", tags = "registerdata")
+    @PollTaskAfterTransaction
     @BeskyttetRessurs(action = UPDATE, resource = APPLIKASJON)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response callback(@Parameter(description = "callbackDto") @Valid @TilpassetAbacAttributt(supplierClass = AbacDataSupplier.class) CallbackDto dto) {
