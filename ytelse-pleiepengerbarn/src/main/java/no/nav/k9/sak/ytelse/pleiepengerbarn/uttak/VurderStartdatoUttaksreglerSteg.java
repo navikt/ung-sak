@@ -4,14 +4,13 @@ import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_STARTDATO_
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
 import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
-import static no.nav.k9.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_BEGYNNELSE;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
@@ -29,6 +28,8 @@ import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
 @FagsakYtelseTypeRef(PLEIEPENGER_NÆRSTÅENDE)
 @FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
 public class VurderStartdatoUttaksreglerSteg implements BehandlingSteg {
+
+    private static final LocalDate EN_DATO_FOR_LENGE_SIDEN = LocalDate.of(2000, 1, 1);
 
     private BehandlingRepository behandlingRepository;
     private AksjonspunktUtlederNyeRegler aksjonspunktUtlederNyeRegler;
@@ -52,7 +53,7 @@ public class VurderStartdatoUttaksreglerSteg implements BehandlingSteg {
         var behandlingId = kontekst.getBehandlingId();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         if (!behandling.erRevurdering()) {
-            uttakNyeReglerRepository.lagreDatoForNyeRegler(kontekst.getBehandlingId(), TIDENES_BEGYNNELSE);
+            uttakNyeReglerRepository.lagreDatoForNyeRegler(kontekst.getBehandlingId(), EN_DATO_FOR_LENGE_SIDEN);
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
         Optional<AksjonspunktDefinisjon> aksjonspunktSetteDatoNyeRegler = aksjonspunktUtlederNyeRegler.utledAksjonspunktDatoForNyeRegler(behandling);
