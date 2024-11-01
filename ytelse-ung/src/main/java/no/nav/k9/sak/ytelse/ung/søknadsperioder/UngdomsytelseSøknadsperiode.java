@@ -63,6 +63,10 @@ public class UngdomsytelseSøknadsperiode extends BaseEntitet implements SøktPe
         this.periode = it.getPeriode();
     }
 
+    public UngdomsytelseSøknadsperiode() {
+        // hibernate
+    }
+
     public DatoIntervallEntitet getPeriode() {
         return periode;
     }
