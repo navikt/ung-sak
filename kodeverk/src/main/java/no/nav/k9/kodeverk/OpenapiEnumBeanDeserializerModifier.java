@@ -1,16 +1,21 @@
 package no.nav.k9.kodeverk;
 
 import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.deser.BeanDeserializerBuilder;
 import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
 import com.fasterxml.jackson.databind.deser.std.EnumDeserializer;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
-import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.fasterxml.jackson.databind.util.ClassUtil;
 import com.fasterxml.jackson.databind.util.EnumResolver;
 
-import java.util.List;
-
+/**
+ * Modifiserer deserialisering for enums til å først bruke @JsonValue basert deserialisering, deretter toString()
+ * viss ingen @JsonValue annotasjon finnast på enum som skal deserialiserast.
+ * <p>
+ * For at denne skal fungere som tenkt må den brukast i ObjectMapper der OpenapiCompatAnnotationIntrospector er aktivert,
+ * slik at evt @JsonCreator, @JsonFormat og @JsonSerialize er ignorert ved serialisering og deserialisering.
+ * <p>
+ * ObjectMapper skal og ha SerializationFeature.WRITE_ENUMS_USING_TO_STRING aktivert, men DeserializationFeature.READ_ENUMS_USING_TO_STRING skal <b>ikkje</b> vere aktivert.
+ */
 public class OpenapiEnumBeanDeserializerModifier extends BeanDeserializerModifier {
 
     // Basert på implementasjon frå jackson.databind.deser.BasicDeserializerFactory.
@@ -26,22 +31,14 @@ public class OpenapiEnumBeanDeserializerModifier extends BeanDeserializerModifie
         return EnumResolver.constructUsingToString(config, beanDesc.getClassInfo());
     }
 
-
     @Override
     public JsonDeserializer<?> modifyEnumDeserializer(DeserializationConfig config, JavaType type, BeanDescription beanDesc, JsonDeserializer<?> deserializer) {
-        final var resolved = super.modifyEnumDeserializer(config, type, beanDesc, deserializer);
-        if(!(resolved instanceof EnumDeserializer)) {
-            // Vi har fått ein "creator based deserializer". Det fungerer ikkje for openapi serialiserte enums, så
-            // returner vanleg EnumDeserializer istaden, oppsatt til å bruke kun @JsonValue eller toString() for
-            // deserialisering.
-            return new EnumDeserializer(
-                constructPrimaryEnumResolver(config, beanDesc),
-                config.isEnabled(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS),
-                null,
-                EnumResolver.constructUsingToString(config, beanDesc.getClassInfo())
-            );
-        }
-        return resolved;
+        return new EnumDeserializer(
+            constructPrimaryEnumResolver(config, beanDesc),
+            config.isEnabled(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS),
+            null,
+            EnumResolver.constructUsingToString(config, beanDesc.getClassInfo())
+        );
     }
 
 
