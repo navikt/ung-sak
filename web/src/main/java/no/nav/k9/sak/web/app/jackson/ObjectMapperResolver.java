@@ -7,6 +7,7 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.ext.ContextResolver;
 import jakarta.ws.rs.ext.Provider;
+import no.nav.k9.kodeverk.OpenapiCompatSerializerModule;
 import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.Søknad;
 
@@ -35,7 +36,7 @@ public class ObjectMapperResolver implements ContextResolver<ObjectMapper> {
         // Når alle klienter kan handtere at Kalkulus Kodeverdi kjem som string kan denne sannsynlegvis settast lik baseObjektMapper.
         this.defaultObjektMapper = this.baseObjektMapper.copy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkOverstyringSerialisering.INGEN, true));
         // openaapiObjektMapper bør brukast viss ein ønsker at enums skal bli serialisert slik openapi spesifikasjon tilseier.
-        this.openapiObjektMapper = this.baseObjektMapper.copy().registerModule(ObjectMapperFactory.createOpenapiCompatSerializerModule(this.baseObjektMapper));
+        this.openapiObjektMapper = this.baseObjektMapper.copy().registerModule(new OpenapiCompatSerializerModule(this.baseObjektMapper));
     }
 
     public final ObjectMapper getDefaultObjektMapper() {

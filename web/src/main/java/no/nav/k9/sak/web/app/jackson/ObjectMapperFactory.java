@@ -9,8 +9,6 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusKodeverdiSomObjektSerializer;
-import no.nav.k9.kodeverk.OpenapiEnumBeanDeserializerModifier;
-import no.nav.k9.kodeverk.OpenapiEnumSerializer;
 import no.nav.k9.kodeverk.KodeverdiSomStringSerializer;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
 import no.nav.k9.sak.kontrakt.beregningsgrunnlag.aksjonspunkt.VurderFaktaOmBeregningDto;
@@ -44,13 +42,6 @@ public class ObjectMapperFactory {
         if(serialiserKalkulusKodeverkSomObjekt) {
             module.addSerializer(new KalkulusKodeverdiSomObjektSerializer());
         }
-        return module;
-    }
-
-    public static SimpleModule createOpenapiCompatSerializerModule(final ObjectMapper baseObjectMapper) {
-        final SimpleModule module = new SimpleModule("OpenapiSerialisering");
-        module.addSerializer(new OpenapiEnumSerializer(baseObjectMapper));
-        module.setDeserializerModifier(new OpenapiEnumBeanDeserializerModifier());
         return module;
     }
 
