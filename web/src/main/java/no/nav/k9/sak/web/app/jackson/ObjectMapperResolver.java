@@ -7,7 +7,6 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.ext.ContextResolver;
 import jakarta.ws.rs.ext.Provider;
-import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.Søknad;
 
@@ -37,6 +36,16 @@ public class ObjectMapperResolver implements ContextResolver<ObjectMapper> {
         this.defaultObjektMapper = this.baseObjektMapper.copy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkOverstyringSerialisering.INGEN, true));
         // openaapiObjektMapper bør brukast viss ein ønsker at enums skal bli serialisert slik openapi spesifikasjon tilseier.
         this.openapiObjektMapper = this.baseObjektMapper.copy().registerModule(ObjectMapperFactory.createOpenapiCompatSerializerModule(this.baseObjektMapper));
+    }
+
+    public final ObjectMapper getDefaultObjektMapper() {
+        return this.defaultObjektMapper;
+    }
+    public final ObjectMapper getOverstyrKodeverdiAlltidSomStringMapper() {
+        return this.overstyrKodeverdiAlltidSomStringMapper;
+    }
+    public final ObjectMapper getOpenapiObjektMapper() {
+        return this.openapiObjektMapper;
     }
 
     private String getJsonSerializerOptionHeaderValue() {
