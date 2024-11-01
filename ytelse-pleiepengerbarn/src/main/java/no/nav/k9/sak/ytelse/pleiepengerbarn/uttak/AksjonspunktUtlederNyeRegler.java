@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.NavigableSet;
 import java.util.Optional;
