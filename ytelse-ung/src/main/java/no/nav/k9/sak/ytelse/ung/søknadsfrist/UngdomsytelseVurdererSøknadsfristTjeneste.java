@@ -51,7 +51,7 @@ public class UngdomsytelseVurdererSøknadsfristTjeneste implements VurderSøknad
 
     @Override
     public Map<KravDokument, List<SøktPeriode<UngdomsytelseSøknadsperiode>>> hentPerioderTilVurdering(BehandlingReferanse referanse) {
-        var result = new HashMap<KravDokument, List<SøktPeriode<Søknadsperiode>>>();
+        var result = new HashMap<KravDokument, List<SøktPeriode<UngdomsytelseSøknadsperiode>>>();
         return result;
     }
 
