@@ -38,10 +38,10 @@ spec:
         - id: "elastic-apm"
   resources:
     limits:
-      cpu: "500m"
-      memory: "2048Mi"
+      cpu: "4000m"
+      memory: "1024Mi"
     requests:
-      cpu: "200m"
+      cpu: "300m"
       memory: "1024Mi"
   ingresses:
     - "https://k9-sak.nais.preprod.local/"
