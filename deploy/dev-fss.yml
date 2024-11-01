@@ -306,6 +306,8 @@ spec:
       value: "true"
     - name: SOSKENSAK_UTTAK_OVERSTYRING
       value: "true"
+    - name: DATO_NYE_REGLER_PREUTFYLLING
+      value: "true"
 
 
     # Konfigurasjoner
