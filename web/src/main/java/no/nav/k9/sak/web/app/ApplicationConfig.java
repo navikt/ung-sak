@@ -69,8 +69,8 @@ public class ApplicationConfig extends ResourceConfig {
 
         registerClasses(new LinkedHashSet<>(new RestImplementationClasses().getImplementationClasses()));
 
+        register(ObjectMapperResolver.class);
         register(CustomJacksonJsonProvider.class);
-        register(new ObjectMapperResolver());
 
         register(new OpprettManuellRevurderingMessageBodyReader());
         register(new OpprettManuellRevurderingBeregningMessageBodyReader());
@@ -79,6 +79,7 @@ public class ApplicationConfig extends ResourceConfig {
         register(CacheControlFeature.class);
 
         property(org.glassfish.jersey.server.ServerProperties.PROCESSING_RESPONSE_ERRORS_ENABLED, true);
+
     }
 
 }

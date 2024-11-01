@@ -122,14 +122,14 @@ public class FaktaOmUttakSteg implements BehandlingSteg {
         if (søktOmNattevåk(unntakEtablertTilsynForPleietrengende) && harNoenGodkjentPerioderMedSykdom(innvilgedePerioderTilVurdering)) {
             if (harNattevåkPerioderSomIkkeErVurdert(unntakEtablertTilsynForPleietrengende)) {
                 aksjonspunkter.add(AksjonspunktDefinisjon.VURDER_NATTEVÅK);
-            } else if (skalRevurdere(behandling, innvilgedePerioderTilVurdering) && behandling.getAksjonspunktFor(AksjonspunktDefinisjon.VURDER_NATTEVÅK.getKode()).isEmpty()) {
+            } else if (skalRevurdere(behandling, innvilgedePerioderTilVurdering) && behandling.getAksjonspunktForHvisFinnes(AksjonspunktDefinisjon.VURDER_NATTEVÅK.getKode()).isEmpty()) {
                 aksjonspunkter.add(AksjonspunktDefinisjon.VURDER_NATTEVÅK);
             }
         }
         if (søktOmBeredskap(unntakEtablertTilsynForPleietrengende) && harNoenGodkjentPerioderMedSykdom(innvilgedePerioderTilVurdering)) {
             if (harBeredskapPerioderSomIkkeErVurdert(unntakEtablertTilsynForPleietrengende)) {
                 aksjonspunkter.add(AksjonspunktDefinisjon.VURDER_BEREDSKAP);
-            } else if (skalRevurdere(behandling, innvilgedePerioderTilVurdering) && behandling.getAksjonspunktFor(AksjonspunktDefinisjon.VURDER_BEREDSKAP.getKode()).isEmpty()) {
+            } else if (skalRevurdere(behandling, innvilgedePerioderTilVurdering) && behandling.getAksjonspunktForHvisFinnes(AksjonspunktDefinisjon.VURDER_BEREDSKAP.getKode()).isEmpty()) {
                 aksjonspunkter.add(AksjonspunktDefinisjon.VURDER_BEREDSKAP);
             }
         }

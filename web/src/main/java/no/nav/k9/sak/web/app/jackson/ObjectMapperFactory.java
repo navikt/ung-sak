@@ -8,7 +8,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusKodelisteSerializer;
+import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusKodeverdiSomObjektSerializer;
+import no.nav.k9.kodeverk.OpenapiEnumBeanDeserializerModifier;
 import no.nav.k9.kodeverk.OpenapiEnumSerializer;
 import no.nav.k9.kodeverk.KodeverdiSomStringSerializer;
 import no.nav.k9.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
@@ -31,19 +32,25 @@ public class ObjectMapperFactory {
         final SimpleModule module = new SimpleModule("KodeverdiSerialisering", new Version(1, 0, 0, null, null, null));
 
         if(sakKodeverkOverstyringSerialisering == SakKodeverkOverstyringSerialisering.KODE_STRING) {
-            // Legger til overstyring av serialisering av k9.kodeverk.api.Kodeverdi, enten til objekt eller string.
+            // Legger til overstyring av serialisering av k9.kodeverk.api.Kodeverdi, til å bli kode string istadenfor
+            // objekt som annotasjonane på disse pr no tilseier.
+            // Denne kan fjernast når alle Kodeverdi typane sine annotasjoner er oppdatert slik at serialisering som standard blir ein rein string.
             module.addSerializer(new KodeverdiSomStringSerializer());
         }
         // BeregningsgrunnlagRestTjeneste eksponerer kalkulus sine kodeverdier opp til frontend.
-        // Legger her til overstyring av serialisering av folketrygdloven.kalkulus.kodeverk.Kodeverdi. Enten til objekt
-        // (Legacy), eller string. Overstyring til string kan sannsynlegvis fjernast, sjå TODO i KalkulusKodelisteSerializer.
-        module.addSerializer(new KalkulusKodelisteSerializer(serialiserKalkulusKodeverkSomObjekt));
+        // Legger her til overstyring av serialisering av folketrygdloven.kalkulus.kodeverk.Kodeverdi slik at det blir
+        // serialisert som objekt istadenfor kode string verdi som annotasjonane på disse typane tilseier.
+        // Denne kan fjernast når frontend kan handtere å få disse Kodeverdier som kode string istadenfor objekt.
+        if(serialiserKalkulusKodeverkSomObjekt) {
+            module.addSerializer(new KalkulusKodeverdiSomObjektSerializer());
+        }
         return module;
     }
 
     public static SimpleModule createOpenapiCompatSerializerModule(final ObjectMapper baseObjectMapper) {
         final SimpleModule module = new SimpleModule("OpenapiSerialisering");
         module.addSerializer(new OpenapiEnumSerializer(baseObjectMapper));
+        module.setDeserializerModifier(new OpenapiEnumBeanDeserializerModifier());
         return module;
     }
 

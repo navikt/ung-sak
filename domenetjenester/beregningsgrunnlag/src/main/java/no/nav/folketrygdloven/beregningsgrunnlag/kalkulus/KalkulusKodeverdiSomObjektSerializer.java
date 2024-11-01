@@ -7,33 +7,25 @@ import no.nav.folketrygdloven.kalkulus.kodeverk.AvklaringsbehovDefinisjon;
 
 import java.io.IOException;
 
-public class KalkulusKodelisteSerializer extends StdSerializer<no.nav.folketrygdloven.kalkulus.kodeverk.Kodeverdi> {
+public class KalkulusKodeverdiSomObjektSerializer extends StdSerializer<no.nav.folketrygdloven.kalkulus.kodeverk.Kodeverdi> {
 
     public static final String KODE = "kode";
     public static final String KODEVERK = "kodeverk";
 
-    private final boolean serialiserKalkulusSomObjekt;
-
-    // TODO Skriv om denne til å alltid serialisere som objekt, og fjern bruken av den når ein vil ha serialisert som string.
-    // Meiner alle Kodeverdi typer i Kalkulus serialiserer korrekt til string av seg sjølv.
-    public KalkulusKodelisteSerializer(boolean serialiserKalkulusSomObjekt) {
+    public KalkulusKodeverdiSomObjektSerializer() {
         super(no.nav.folketrygdloven.kalkulus.kodeverk.Kodeverdi.class);
-        this.serialiserKalkulusSomObjekt = serialiserKalkulusSomObjekt;
     }
 
     @Override
     public void serialize(no.nav.folketrygdloven.kalkulus.kodeverk.Kodeverdi value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
-        if (serialiserKalkulusSomObjekt) {
-            jgen.writeStartObject();
-            jgen.writeStringField(KODE, value.getKode());
-            jgen.writeStringField(KODEVERK, getKodeverkVerdi(value));
-            jgen.writeEndObject();
-        } else {
-            jgen.writeString(value.getKode());
-        }
+        jgen.writeStartObject();
+        jgen.writeStringField(KODE, value.getKode());
+        jgen.writeStringField(KODEVERK, getKodeverkVerdi(value));
+        jgen.writeEndObject();
     }
 
     private String getKodeverkVerdi(no.nav.folketrygdloven.kalkulus.kodeverk.Kodeverdi value) {
+        // TODO Denne kan fjernast når "kodeverk branch" (på dev-next1 pr no) er rulla ut, kodeverkUtils.ts fila med bruk av denne blir då fjerna.
         if (value instanceof AvklaringsbehovDefinisjon) {
             return "AVKLARINGSBEHOV_DEF"; // Eksplisitt bruk i k9-sak-web sin kodeverkUtils.ts !!!
         }

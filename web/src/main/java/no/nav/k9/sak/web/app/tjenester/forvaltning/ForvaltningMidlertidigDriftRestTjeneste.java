@@ -807,7 +807,7 @@ public class ForvaltningMidlertidigDriftRestTjeneste {
         if (!behandling.isBehandlingPåVent()) {
             throw new IllegalStateException("Behandlingen må være på vent");
         }
-        Aksjonspunkt aksjonspunkt = behandling.getAksjonspunktFor(dto.getAksjonspunktKode()).orElseThrow(() -> new IllegalStateException("Har ikke aksjonspunkt med kode " + dto.getAksjonspunktKode()));
+        Aksjonspunkt aksjonspunkt = behandling.getAksjonspunktForHvisFinnes(dto.getAksjonspunktKode()).orElseThrow(() -> new IllegalStateException("Har ikke aksjonspunkt med kode " + dto.getAksjonspunktKode()));
         if (!aksjonspunkt.erÅpentAksjonspunkt()) {
             throw new IllegalStateException("Aksjonspunktet har status: " + aksjonspunkt.getStatus());
         }
