@@ -13,19 +13,9 @@ import java.util.List;
 
 public class OpenapiEnumBeanDeserializerModifier extends BeanDeserializerModifier {
 
-    @Override
-    public List<BeanPropertyDefinition> updateProperties(DeserializationConfig config, BeanDescription beanDesc, List<BeanPropertyDefinition> propDefs) {
-        return super.updateProperties(config, beanDesc, propDefs);
-    }
-
-    @Override
-    public BeanDeserializerBuilder updateBuilder(DeserializationConfig config, BeanDescription beanDesc, BeanDeserializerBuilder builder) {
-        return super.updateBuilder(config, beanDesc, builder);
-    }
-
-    // Copied in from
-    protected EnumResolver constructPrimaryEnumResolver(Class<?> enumClass, DeserializationConfig config, BeanDescription beanDesc) {
-        AnnotatedMember jvAcc = beanDesc.findJsonValueAccessor();
+    // Basert på implementasjon frå jackson.databind.deser.BasicDeserializerFactory.
+    protected EnumResolver constructPrimaryEnumResolver(final DeserializationConfig config, final BeanDescription beanDesc) {
+        final AnnotatedMember jvAcc = beanDesc.findJsonValueAccessor();
         if (jvAcc != null) {
             if (config.canOverrideAccessModifiers()) {
                 ClassUtil.checkAndFixAccess(jvAcc.getMember(),
@@ -45,7 +35,7 @@ public class OpenapiEnumBeanDeserializerModifier extends BeanDeserializerModifie
             // returner vanleg EnumDeserializer istaden, oppsatt til å bruke kun @JsonValue eller toString() for
             // deserialisering.
             return new EnumDeserializer(
-                constructPrimaryEnumResolver(type.getRawClass(), config, beanDesc),
+                constructPrimaryEnumResolver(config, beanDesc),
                 config.isEnabled(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS),
                 null,
                 EnumResolver.constructUsingToString(config, beanDesc.getClassInfo())
