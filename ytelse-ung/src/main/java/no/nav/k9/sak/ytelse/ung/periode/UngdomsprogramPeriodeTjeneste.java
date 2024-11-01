@@ -10,7 +10,6 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
-import no.nav.k9.sak.domene.typer.tid.AbstractLocalDateInterval;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Dependent
@@ -31,6 +30,7 @@ public class UngdomsprogramPeriodeTjeneste {
 
     /**
      * Utleder tidslinje for endringer i perioder fra grunnlaget i forrige behandling og det aktive. I førstegangsbehandlinger vil alle perioder returnerers som endring.
+     *
      * @param behandlingReferanse Behandlingreferanse
      * @param kantIKantVurderer   Kant-i-kant-vurderer, vurderer om to perioder skal regnes for å være sammenhengende
      * @return Tidslinje for endrede perioder
@@ -54,7 +54,7 @@ public class UngdomsprogramPeriodeTjeneste {
     private LocalDateTimeline<Boolean> lagPeriodeTidslinje(Optional<UngdomsprogramPeriodeGrunnlag> ungdomsprogramPeriodeGrunnlag, KantIKantVurderer kantIKantVurderer) {
         return ungdomsprogramPeriodeGrunnlag.stream()
             .flatMap(gr -> gr.getUngdomsprogramPerioder().getPerioder().stream())
-            .map(this::bestemPeriode)
+            .map(UngdomsprogramPeriode::getPeriode)
             .map(p -> new LocalDateTimeline<>(p.getFomDato(), p.getTomDato(), true))
             .reduce(LocalDateTimeline::crossJoin)
             .map(t -> komprimer(t, kantIKantVurderer))
@@ -70,15 +70,4 @@ public class UngdomsprogramPeriodeTjeneste {
         return t.compress((d1, d2) -> kantIKantVurderer.erKantIKant(DatoIntervallEntitet.fra(d1), DatoIntervallEntitet.fra(d2)), Boolean::equals, StandardCombinators::alwaysTrueForMatch);
     }
 
-    private DatoIntervallEntitet bestemPeriode(UngdomsprogramPeriode it) {
-        DatoIntervallEntitet periode = it.getPeriode();
-        // TOM dato fra register kan være null som mapper til tidenes ende. Men vi lar likevel vilkåret ha en enkel
-        // maksgrense foreløpig
-        if (periode.getTomDato().equals(AbstractLocalDateInterval.TIDENES_ENDE)) {
-            return DatoIntervallEntitet.fraOgMedTilOgMed(
-                periode.getFomDato(), periode.getFomDato().plus(PeriodeKonstanter.MAKS_PERIODE));
-        }
-
-        return periode;
-    }
 }

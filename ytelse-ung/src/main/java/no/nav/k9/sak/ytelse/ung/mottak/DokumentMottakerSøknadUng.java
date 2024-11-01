@@ -20,7 +20,6 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.k9.sak.mottak.dokumentmottak.Dokumentmottaker;
 import no.nav.k9.sak.mottak.dokumentmottak.SøknadParser;
-import no.nav.k9.sak.ytelse.ung.periode.UtledSluttdato;
 import no.nav.k9.søknad.felles.type.Periode;
 
 
@@ -66,7 +65,10 @@ public class DokumentMottakerSøknadUng implements Dokumentmottaker {
 
             var ytelse = søknad.getYtelse();
             var fom = ytelse.getSøknadsperiode().getFraOgMed();
-            var tom = UtledSluttdato.utledSluttdato(fom, ytelse.getSøknadsperiode().getTilOgMed());
+            var tom = ytelse.getSøknadsperiode().getTilOgMed();
+            if (tom == null) {
+                throw new IllegalStateException("Søknad for ungdomsytelse må ha en sluttdato");
+            }
             var faktiskSøknadsperiode = new Periode(fom, tom);
             ungdomsytelseSøknadPersisterer.lagreSøknadEntitet(søknad, dokument.getJournalpostId(), behandlingId, Optional.of(faktiskSøknadsperiode), dokument.getMottattDato());
             ungdomsytelseSøknadPersisterer.lagreSøknadsperioder(List.of(faktiskSøknadsperiode), dokument.getJournalpostId(), behandlingId);
