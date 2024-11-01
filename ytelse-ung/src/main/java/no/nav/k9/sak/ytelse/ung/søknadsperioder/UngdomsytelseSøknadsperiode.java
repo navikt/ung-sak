@@ -92,10 +92,11 @@ public class UngdomsytelseSøknadsperiode extends BaseEntitet implements SøktPe
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() +"<" +
-            "id=" + id +
-            ", periode=" + periode +
-            ", versjon=" + versjon +
-            '>';
+        return "UngdomsytelseSøknadsperiode{" +
+                "id=" + id +
+                ", periode=" + periode +
+                ", journalpostId=" + journalpostId +
+                ", versjon=" + versjon +
+                '}';
     }
 }
