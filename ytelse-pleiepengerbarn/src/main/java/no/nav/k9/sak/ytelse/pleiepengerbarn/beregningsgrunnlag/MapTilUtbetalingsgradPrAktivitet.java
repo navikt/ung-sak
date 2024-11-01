@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Objects;
 import java.util.TreeSet;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
@@ -92,7 +93,7 @@ class MapTilUtbetalingsgradPrAktivitet {
     private static List<UtbetalingsgradPrAktivitetDto> mapTilKalkulusKontrakt(DatoIntervallEntitet vilkårsperiode,
                                                                               Map<AktivitetDto, List<PeriodeMedGrad>> utbetalingsgradPrAktivitet) {
         return utbetalingsgradPrAktivitet.entrySet().stream()
-            .filter(e -> !e.getValue().isEmpty()).map(entry -> {
+            .map(entry -> {
                     var tidslinje = lagTidslinje(entry.getValue());
                     var mappet = tidslinje.intersection(vilkårsperiode.toLocalDateInterval())
                         .stream()
@@ -100,9 +101,15 @@ class MapTilUtbetalingsgradPrAktivitet {
                             new Periode(s.getFom(), s.getTom()),
                             Utbetalingsgrad.fra(s.getValue().utbetalingsgrad()),
                             Aktivitetsgrad.fra(s.getValue().aktivitetsgrad()))).toList();
-                    return new UtbetalingsgradPrAktivitetDto(entry.getKey(), mappet);
+                    // Dersom det ikke finnes overlapp med vilkårsperiode vil listen være tom, dette håndterer ikke kalkulus
+                    if (!mappet.isEmpty()) {
+                        return new UtbetalingsgradPrAktivitetDto(entry.getKey(), mappet);
+                    }
+                    return null;
                 }
-            ).toList();
+            )
+            .filter(Objects::nonNull)
+            .toList();
     }
 
 
