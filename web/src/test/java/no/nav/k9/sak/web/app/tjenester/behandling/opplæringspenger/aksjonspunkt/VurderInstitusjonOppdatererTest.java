@@ -102,7 +102,7 @@ class VurderInstitusjonOppdatererTest {
     }
 
     private OppdateringResultat lagreGrunnlag(VurderInstitusjonDto dto) {
-        Optional<Aksjonspunkt> aksjonspunkt = behandling.getAksjonspunktFor(dto.getKode());
+        Optional<Aksjonspunkt> aksjonspunkt = behandling.getAksjonspunktForHvisFinnes(dto.getKode());
         AksjonspunktOppdaterParameter param = new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, dto);
 
         return vurderInstitusjonOppdaterer.oppdater(dto, param);

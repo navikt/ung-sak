@@ -69,13 +69,12 @@ public class AksjonspunktUtlederNyeReglerTest {
     private UttakNyeReglerRepository uttakNyeReglerRepository = mock(UttakNyeReglerRepository.class);
     @Inject
     private AksjonspunktKontrollRepository aksjonspunktKontrollRepository;
-    private SøknadsperiodeTjeneste søknadsperiodeTjeneste = mock(SøknadsperiodeTjeneste.class);
     private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = mock(VilkårsPerioderTilVurderingTjeneste.class);
 
 
     @BeforeEach
     void setUp() {
-        utleder = new AksjonspunktUtlederNyeRegler(behandlingRepository, uttakNyeReglerRepository, tilkommetAktivitetTjeneste, aksjonspunktKontrollRepository, søknadsperiodeTjeneste, mapInputTilUttakTjeneste,
+        utleder = new AksjonspunktUtlederNyeRegler(behandlingRepository, uttakNyeReglerRepository, tilkommetAktivitetTjeneste, aksjonspunktKontrollRepository, mapInputTilUttakTjeneste,
             new UnitTestLookupInstanceImpl<>(vilkårsPerioderTilVurderingTjeneste));
 
         var fagsak = Fagsak.opprettNy(FagsakYtelseType.DAGPENGER, new AktørId(123L), new Saksnummer("987"), LocalDate.now(), LocalDate.now());

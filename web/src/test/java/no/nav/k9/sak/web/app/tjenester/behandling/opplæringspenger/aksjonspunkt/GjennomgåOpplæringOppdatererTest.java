@@ -152,7 +152,7 @@ class GjennomgåOpplæringOppdatererTest {
     }
 
     private OppdateringResultat lagreGrunnlag(VurderGjennomgåttOpplæringDto dto) {
-        Optional<Aksjonspunkt> aksjonspunkt = behandling.getAksjonspunktFor(dto.getKode());
+        Optional<Aksjonspunkt> aksjonspunkt = behandling.getAksjonspunktForHvisFinnes(dto.getKode());
         AksjonspunktOppdaterParameter param = new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, dto);
 
         return gjennomgåOpplæringOppdaterer.oppdater(dto, param);
