@@ -29,6 +29,11 @@ import no.nav.k9.sak.behandlingslager.behandling.uttak.UttakNyeReglerRepository;
 @FagsakYtelseTypeRef(OPPLÆRINGSPENGER)
 public class VurderStartdatoUttaksreglerSteg implements BehandlingSteg {
 
+    /**
+     * Hensikten med denne datoen er å velge en spesifikk dato som alle som får automatisk vurdering av nye regler bruker.
+     * Denne datoen vil føre til at alle perioder vurderes etter nye regler.
+     * Samtidig har vi en enkel måte å finne disse på senere dersom vi heller bestemmer oss for å løse dette med et boolsk flagg.
+     */
     private static final LocalDate EN_DATO_FOR_LENGE_SIDEN = LocalDate.of(2000, 1, 1);
 
     private BehandlingRepository behandlingRepository;
