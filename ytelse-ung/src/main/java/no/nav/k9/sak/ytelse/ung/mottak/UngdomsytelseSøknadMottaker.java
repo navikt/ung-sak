@@ -16,8 +16,6 @@ import no.nav.k9.sak.behandlingslager.saksnummer.SaksnummerRepository;
 import no.nav.k9.sak.mottak.SøknadMottakTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
-import no.nav.k9.sak.ytelse.ung.periode.PeriodeKonstanter;
-import no.nav.k9.sak.ytelse.ung.periode.UtledSluttdato;
 
 @FagsakYtelseTypeRef(UNGDOMSYTELSE)
 @ApplicationScoped
@@ -55,7 +53,7 @@ public class UngdomsytelseSøknadMottaker implements SøknadMottakTjeneste<Ungdo
         }
 
         final Saksnummer saksnummer = new Saksnummer(saksnummerRepository.genererNyttSaksnummer());
-        final Fagsak nyFagsak = opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, ytelseType, startDato, UtledSluttdato.utledSluttdato(startDato, sluttDato));
+        final Fagsak nyFagsak = opprettSakFor(saksnummer, søkerAktørId, pleietrengendeAktørId, ytelseType, startDato, sluttDato);
         return nyFagsak;
     }
 

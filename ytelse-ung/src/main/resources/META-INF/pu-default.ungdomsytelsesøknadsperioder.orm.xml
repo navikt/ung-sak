@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="https://jakarta.ee/xml/ns/persistence/orm"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm https://jakarta.ee/xml/ns/persistence/orm/orm_3_0.xsd"
+        version="3.0">
+
+	<sequence-generator name="SEQ_UNG_GR_SOEKNADSPERIODE" allocation-size="50" sequence-name="SEQ_UNG_GR_SOEKNADSPERIODE" />
+	<sequence-generator name="SEQ_UNG_SOEKNADSPERIODER" allocation-size="50" sequence-name="SEQ_UNG_SOEKNADSPERIODER" />
+	<sequence-generator name="SEQ_UNG_SOEKNADSPERIODE" allocation-size="50" sequence-name="SEQ_UNG_SOEKNADSPERIODE" />
+
+	<entity class="no.nav.k9.sak.ytelse.ung.søknadsperioder.UngdomsytelseSøknadsperiodeGrunnlag" />
+    <entity class="no.nav.k9.sak.ytelse.ung.søknadsperioder.UngdomsytelseSøknadsperioder" />
+    <entity class="no.nav.k9.sak.ytelse.ung.søknadsperioder.UngdomsytelseSøknadsperiode" />
+
+</entity-mappings>
