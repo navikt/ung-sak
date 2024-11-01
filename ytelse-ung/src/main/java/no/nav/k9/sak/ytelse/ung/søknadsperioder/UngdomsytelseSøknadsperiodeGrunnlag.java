@@ -1,6 +1,8 @@
 package no.nav.k9.sak.ytelse.ung.søknadsperioder;
 
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -35,7 +37,7 @@ public class UngdomsytelseSøknadsperiodeGrunnlag extends BaseEntitet {
     @ManyToOne
     @Immutable
     @JoinColumn(name = "relevant_soknadsperiode_id", nullable = false, updatable = false, unique = true)
-    private UngdomsytelseSøknadsperioderHolder relevanteSøknadsperioder;
+    private UngdomsytelseSøknadsperioder relevanteSøknadsperioder;
 
     /**
      * Alle søknadsperioder med krav som har kommet inn i denne og tidligere behandlinger
@@ -43,7 +45,7 @@ public class UngdomsytelseSøknadsperiodeGrunnlag extends BaseEntitet {
     @ManyToOne
     @Immutable
     @JoinColumn(name = "oppgitt_soknadsperiode_id", nullable = false, updatable = false, unique = true)
-    private UngdomsytelseSøknadsperioderHolder oppgitteSøknadsperioder;
+    private UngdomsytelseSøknadsperioder oppgitteSøknadsperioder;
 
     @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
@@ -69,11 +71,11 @@ public class UngdomsytelseSøknadsperiodeGrunnlag extends BaseEntitet {
         return id;
     }
 
-    public UngdomsytelseSøknadsperioderHolder getOppgitteSøknadsperioder() {
+    public UngdomsytelseSøknadsperioder getOppgitteSøknadsperioder() {
         return oppgitteSøknadsperioder;
     }
 
-    public UngdomsytelseSøknadsperioderHolder getRelevantSøknadsperioder() {
+    public UngdomsytelseSøknadsperioder getRelevantSøknadsperioder() {
         return relevanteSøknadsperioder;
     }
 
@@ -85,16 +87,16 @@ public class UngdomsytelseSøknadsperiodeGrunnlag extends BaseEntitet {
         this.aktiv = aktiv;
     }
 
-    void leggTil(UngdomsytelseSøknadsperioder søknadsperioder) {
+    void leggTil(Collection<UngdomsytelseSøknadsperiode> søknadsperioder) {
         if (id != null) {
             throw new IllegalStateException("[Utvikler feil] Kan ikke editere persistert grunnlag");
         }
-        var perioder = this.oppgitteSøknadsperioder != null ? new HashSet<>(this.oppgitteSøknadsperioder.getPerioder()) : new HashSet<>(Set.of(søknadsperioder));
-        perioder.add(søknadsperioder);
-        this.oppgitteSøknadsperioder = new UngdomsytelseSøknadsperioderHolder(perioder);
+        var perioder = this.oppgitteSøknadsperioder != null ? new HashSet<>(this.oppgitteSøknadsperioder.getPerioder()) : new HashSet<>(søknadsperioder);
+        perioder.addAll(søknadsperioder);
+        this.oppgitteSøknadsperioder = new UngdomsytelseSøknadsperioder(perioder);
     }
 
-    void setRelevanteSøknadsperioder(UngdomsytelseSøknadsperioderHolder relevanteSøknadsperioder) {
+    void setRelevanteSøknadsperioder(UngdomsytelseSøknadsperioder relevanteSøknadsperioder) {
         Objects.requireNonNull(relevanteSøknadsperioder);
         this.relevanteSøknadsperioder = relevanteSøknadsperioder;
     }

@@ -18,6 +18,7 @@ import jakarta.persistence.Version;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.k9.sak.perioder.VurdertSøktPeriode.SøktPeriodeData;
+import no.nav.k9.sak.typer.JournalpostId;
 
 @Entity(name = "UngdomsytelseSøknadsperiode")
 @Table(name = "UNG_SOEKNADSPERIODE")
@@ -35,12 +36,17 @@ public class UngdomsytelseSøknadsperiode extends BaseEntitet implements SøktPe
     })
     private DatoIntervallEntitet periode;
 
+    @Embedded
+    @AttributeOverrides(@AttributeOverride(name = "journalpostId", column = @Column(name = "journalpost_id")))
+    private JournalpostId journalpostId;
 
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    public UngdomsytelseSøknadsperiode() {
+    public UngdomsytelseSøknadsperiode(DatoIntervallEntitet periode, JournalpostId journalpostId) {
+        this.periode = periode;
+        this.journalpostId = journalpostId;
     }
 
     public UngdomsytelseSøknadsperiode(DatoIntervallEntitet periode) {
@@ -48,11 +54,12 @@ public class UngdomsytelseSøknadsperiode extends BaseEntitet implements SøktPe
     }
 
 
-    public UngdomsytelseSøknadsperiode(LocalDate fom, LocalDate tom) {
-        this(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
+    public UngdomsytelseSøknadsperiode(LocalDate fom, LocalDate tom, JournalpostId journalpostId) {
+        this(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), journalpostId);
     }
 
     public UngdomsytelseSøknadsperiode(UngdomsytelseSøknadsperiode it) {
+        this.journalpostId = it.getJournalpostId();
         this.periode = it.getPeriode();
     }
 
@@ -60,6 +67,9 @@ public class UngdomsytelseSøknadsperiode extends BaseEntitet implements SøktPe
         return periode;
     }
 
+    public JournalpostId getJournalpostId() {
+        return journalpostId;
+    }
 
     @Override
     public <V> V getPayload() {

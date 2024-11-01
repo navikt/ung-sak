@@ -56,10 +56,10 @@ public class UngdomsytelseSøknadPersisterer {
     public void lagreSøknadsperioder(List<Periode> søknadsperioder, JournalpostId journalpostId, Long behandlingId) {
         final List<UngdomsytelseSøknadsperiode> søknadsperiodeliste = new ArrayList<>();
         søknadsperioder.stream()
-            .map(s -> new UngdomsytelseSøknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFraOgMed(), s.getTilOgMed())))
+            .map(s -> new UngdomsytelseSøknadsperiode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFraOgMed(), s.getTilOgMed()), journalpostId))
             .forEach(søknadsperiodeliste::add);
 
-        ungdomsytelseSøknadsperiodeRepository.lagre(behandlingId, new UngdomsytelseSøknadsperioder(journalpostId, søknadsperiodeliste.toArray(new UngdomsytelseSøknadsperiode[0])));
+        ungdomsytelseSøknadsperiodeRepository.lagre(behandlingId, søknadsperiodeliste);
     }
 
 

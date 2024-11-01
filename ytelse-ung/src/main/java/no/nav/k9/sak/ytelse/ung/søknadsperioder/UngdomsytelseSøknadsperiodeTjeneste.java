@@ -36,15 +36,15 @@ public class UngdomsytelseSøknadsperiodeTjeneste {
         return finnPerioder(behandlingId, UngdomsytelseSøknadsperiodeGrunnlag::getOppgitteSøknadsperioder);
     }
 
-    private NavigableSet<DatoIntervallEntitet> finnPerioder(Long behandlingId, Function<UngdomsytelseSøknadsperiodeGrunnlag, UngdomsytelseSøknadsperioderHolder> finnPeriodeHolder) {
+    private NavigableSet<DatoIntervallEntitet> finnPerioder(Long behandlingId,
+                                                            Function<UngdomsytelseSøknadsperiodeGrunnlag, UngdomsytelseSøknadsperioder> finnPeriodeHolder) {
         var søknadsperioder = søknadsperiodeRepository.hentGrunnlag(behandlingId).map(finnPeriodeHolder);
 
         if (søknadsperioder.isEmpty() || søknadsperioder.get().getPerioder().isEmpty()) {
             return Collections.emptyNavigableSet();
         } else {
             final var søknadsperioders = søknadsperioder.get().getPerioder();
-            var perioder = søknadsperioders.stream().flatMap(p -> p.getPerioder().stream())
-                .map(UngdomsytelseSøknadsperiode::getPeriode)
+            var perioder = søknadsperioders.stream().map(UngdomsytelseSøknadsperiode::getPeriode)
                 .toList();
             var tidslinje = TidslinjeUtil.tilTidslinje(perioder);
             return TidslinjeUtil.tilDatoIntervallEntiteter(tidslinje);

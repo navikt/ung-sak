@@ -1,5 +1,6 @@
 package no.nav.k9.sak.ytelse.ung.søknadsperioder;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -24,7 +25,7 @@ public class UngdomsytelseSøknadsperiodeRepository {
         return hentEksisterendeGrunnlag(behandlingId);
     }
 
-    public void lagre(Long behandlingId, UngdomsytelseSøknadsperioder søknadsperioder) {
+    public void lagre(Long behandlingId, List<UngdomsytelseSøknadsperiode> søknadsperioder) {
         var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
         var nyttGrunnlag = eksisterendeGrunnlag.map(it -> new UngdomsytelseSøknadsperiodeGrunnlag(behandlingId, it))
             .orElse(new UngdomsytelseSøknadsperiodeGrunnlag(behandlingId));
@@ -33,7 +34,7 @@ public class UngdomsytelseSøknadsperiodeRepository {
         persister(eksisterendeGrunnlag, nyttGrunnlag);
     }
 
-    public void lagreRelevanteSøknadsperioder(Long behandlingId, UngdomsytelseSøknadsperioderHolder søknadsperioder) {
+    public void lagreRelevanteSøknadsperioder(Long behandlingId, UngdomsytelseSøknadsperioder søknadsperioder) {
         var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
         var nyttGrunnlag = eksisterendeGrunnlag.map(it -> new UngdomsytelseSøknadsperiodeGrunnlag(behandlingId, it))
             .orElse(new UngdomsytelseSøknadsperiodeGrunnlag(behandlingId));

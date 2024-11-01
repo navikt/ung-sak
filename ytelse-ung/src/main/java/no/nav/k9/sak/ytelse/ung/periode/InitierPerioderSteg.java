@@ -22,7 +22,7 @@ import no.nav.k9.sak.typer.JournalpostId;
 import no.nav.k9.sak.ytelse.ung.registerdata.UngdomsprogramTjeneste;
 import no.nav.k9.sak.ytelse.ung.søknadsperioder.UngdomsytelseSøknadsperiodeGrunnlag;
 import no.nav.k9.sak.ytelse.ung.søknadsperioder.UngdomsytelseSøknadsperiodeRepository;
-import no.nav.k9.sak.ytelse.ung.søknadsperioder.UngdomsytelseSøknadsperioderHolder;
+import no.nav.k9.sak.ytelse.ung.søknadsperioder.UngdomsytelseSøknadsperioder;
 
 @ApplicationScoped
 @BehandlingStegRef(value = INIT_PERIODER)
@@ -67,25 +67,27 @@ public class InitierPerioderSteg implements BehandlingSteg {
             .map(MottattDokument::getJournalpostId)
             .collect(Collectors.toSet());
 
-        var søknadsperioderHolder = mapSøknadsperioderRelevantForBehandlingen(mottatteDokumenter, søknadsperiodeGrunnlag);
-        søknadsperiodeRepository.lagreRelevanteSøknadsperioder(behandlingId, søknadsperioderHolder);
+        var søknadsperioder = mapSøknadsperioderRelevantForBehandlingen(mottatteDokumenter, søknadsperiodeGrunnlag);
+        søknadsperiodeRepository.lagreRelevanteSøknadsperioder(behandlingId, søknadsperioder);
     }
 
 
-    /** Lager aggregat av perioder som er relevant for denne behandlingen, altså perioder fra journalposter som har kommet inn i denne behandlingen.
+    /**
+     * Lager aggregat av perioder som er relevant for denne behandlingen, altså perioder fra journalposter som har kommet inn i denne behandlingen.
+     *
      * @param journalposterMottattIDenneBehandlingen Journalposter som er mottatt i denne behandlingen
-     * @param grunnlag Søknadsperiodegrunnlag
+     * @param grunnlag                               Søknadsperiodegrunnlag
      * @return Aggregat for perioder som er relevant for denne behandlingen
      */
-    private UngdomsytelseSøknadsperioderHolder mapSøknadsperioderRelevantForBehandlingen(Set<JournalpostId> journalposterMottattIDenneBehandlingen,
-                                                                                         UngdomsytelseSøknadsperiodeGrunnlag grunnlag) {
+    private UngdomsytelseSøknadsperioder mapSøknadsperioderRelevantForBehandlingen(Set<JournalpostId> journalposterMottattIDenneBehandlingen,
+                                                                                   UngdomsytelseSøknadsperiodeGrunnlag grunnlag) {
         var relevantePerioder = grunnlag.getOppgitteSøknadsperioder()
             .getPerioder()
             .stream()
             .filter(it -> journalposterMottattIDenneBehandlingen.stream().anyMatch(at -> at.equals(it.getJournalpostId())))
             .collect(Collectors.toSet());
 
-        return new UngdomsytelseSøknadsperioderHolder(relevantePerioder);
+        return new UngdomsytelseSøknadsperioder(relevantePerioder);
     }
 
 }

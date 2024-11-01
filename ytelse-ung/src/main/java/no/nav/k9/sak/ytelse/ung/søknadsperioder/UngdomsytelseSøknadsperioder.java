@@ -11,11 +11,8 @@ import java.util.stream.Collectors;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Immutable;
 
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -26,8 +23,6 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import no.nav.k9.sak.behandlingslager.BaseEntitet;
 import no.nav.k9.sak.behandlingslager.diff.ChangeTracked;
-import no.nav.k9.sak.domene.uttak.repo.Søknadsperiode;
-import no.nav.k9.sak.domene.uttak.repo.Søknadsperioder;
 import no.nav.k9.sak.typer.JournalpostId;
 
 @Entity(name = "UngdomsytelseSøknadsperioder")
@@ -39,13 +34,9 @@ public class UngdomsytelseSøknadsperioder extends BaseEntitet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UNG_SOEKNADSPERIODER")
     private Long id;
 
-    @Embedded
-    @AttributeOverrides(@AttributeOverride(name = "journalpostId", column = @Column(name = "journalpost_id")))
-    private JournalpostId journalpostId;
-
     @ChangeTracked
     @BatchSize(size = 20)
-    @JoinColumn(name = "holder_id", nullable = false)
+    @JoinColumn(name = "UNG_SOEKNADSPERIODER_ID", nullable = false)
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
     private Set<UngdomsytelseSøknadsperiode> perioder;
 
@@ -58,7 +49,6 @@ public class UngdomsytelseSøknadsperioder extends BaseEntitet {
     }
 
     public UngdomsytelseSøknadsperioder(UngdomsytelseSøknadsperioder periode) {
-        this.journalpostId = periode.getJournalpostId();
         this.perioder = periode.getPerioder()
             .stream()
             .map(UngdomsytelseSøknadsperiode::new)
@@ -66,12 +56,11 @@ public class UngdomsytelseSøknadsperioder extends BaseEntitet {
         // hibernate
     }
 
-    public UngdomsytelseSøknadsperioder(JournalpostId journalpostId, UngdomsytelseSøknadsperiode... perioder) {
-        this(journalpostId, Arrays.asList(perioder));
+    public UngdomsytelseSøknadsperioder(UngdomsytelseSøknadsperiode... perioder) {
+        this(Arrays.asList(perioder));
     }
 
-    public UngdomsytelseSøknadsperioder(JournalpostId journalpostId, Collection<UngdomsytelseSøknadsperiode> perioder) {
-        this.journalpostId = journalpostId;
+    public UngdomsytelseSøknadsperioder(Collection<UngdomsytelseSøknadsperiode> perioder) {
         this.perioder = new LinkedHashSet<>(Objects.requireNonNull(perioder));
     }
 
@@ -79,9 +68,6 @@ public class UngdomsytelseSøknadsperioder extends BaseEntitet {
         return id;
     }
 
-    public JournalpostId getJournalpostId() {
-        return journalpostId;
-    }
 
     public Set<UngdomsytelseSøknadsperiode> getPerioder() {
         return Collections.unmodifiableSet(perioder);
@@ -92,18 +78,17 @@ public class UngdomsytelseSøknadsperioder extends BaseEntitet {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UngdomsytelseSøknadsperioder that = (UngdomsytelseSøknadsperioder) o;
-        return Objects.equals(journalpostId, that.journalpostId);
+        return Objects.equals(perioder, that.perioder);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(journalpostId);
+        return Objects.hash(perioder);
     }
 
     @Override
     public String toString() {
         return "Søknadsperioder{" +
-            "journalpostId=" + journalpostId +
             ", perioder=" + perioder +
             '}';
     }
