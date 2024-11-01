@@ -4,19 +4,12 @@ import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.vilkår.VilkårType.Serializer;
 
-import java.io.IOException;
 import java.util.*;
 
-@JsonSerialize(contentUsing = Serializer.class)
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)
 public enum VilkårType implements Kodeverdi {
@@ -281,22 +274,6 @@ public enum VilkårType implements Kodeverdi {
     @Override
     public String getOffisiellKode() {
         return getKode();
-    }
-
-    static class Serializer extends StdSerializer<VilkårType> {
-
-        public Serializer() {
-            super(VilkårType.class);
-        }
-
-        @Override
-        public void serialize(VilkårType value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
-            jgen.writeStartObject();
-            jgen.writeStringField("kode", value.getKode());
-            jgen.writeStringField("kodeverk", value.getKodeverk());
-            jgen.writeEndObject();
-        }
-
     }
 
 }
