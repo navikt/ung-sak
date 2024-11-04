@@ -15,6 +15,7 @@
 
     <properties>
         <swagger-ui.version>5.17.14</swagger-ui.version>
+        <jetty.version>12.0.14</jetty.version>
     </properties>
 
 
@@ -23,7 +24,14 @@
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-bom</artifactId>
-                <version>11.0.24</version>
+                <version>${jetty.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty.ee9</groupId>
+                <artifactId>jetty-ee9-bom</artifactId>
+                <version>${jetty.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -228,28 +236,24 @@
 
         <!-- Server -->
         <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-plus</artifactId>
+            <groupId>org.eclipse.jetty.ee9</groupId>
+            <artifactId>jetty-ee9-plus</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-annotations</artifactId>
+            <groupId>org.eclipse.jetty.ee9</groupId>
+            <artifactId>jetty-ee9-annotations</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-servlets</artifactId>
+            <groupId>org.eclipse.jetty.ee9</groupId>
+            <artifactId>jetty-ee9-servlets</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-jaas</artifactId>
+            <groupId>org.eclipse.jetty.ee9</groupId>
+            <artifactId>jetty-ee9-security</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-security</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-jaspi</artifactId>
+            <groupId>org.eclipse.jetty.ee9</groupId>
+            <artifactId>jetty-ee9-jaspi</artifactId>
         </dependency>
 
         <!-- Metrics, logging, helse- og healthchecks -->

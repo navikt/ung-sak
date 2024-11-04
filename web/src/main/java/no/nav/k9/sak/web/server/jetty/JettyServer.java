@@ -1,46 +1,36 @@
 package no.nav.k9.sak.web.server.jetty;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.eclipse.jetty.jaas.JAASLoginService;
-import org.eclipse.jetty.plus.jndi.EnvEntry;
-import org.eclipse.jetty.security.ConstraintSecurityHandler;
-import org.eclipse.jetty.security.DefaultIdentityService;
-import org.eclipse.jetty.security.SecurityHandler;
-import org.eclipse.jetty.security.jaspi.DefaultAuthConfigFactory;
-import org.eclipse.jetty.security.jaspi.JaspiAuthenticatorFactory;
-import org.eclipse.jetty.security.jaspi.provider.JaspiAuthConfigProvider;
-import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.HttpConfiguration;
-import org.eclipse.jetty.server.HttpConnectionFactory;
-import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.handler.AbstractHandler;
-import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.servlet.ServletContainerInitializerHolder;
-import org.eclipse.jetty.util.resource.Resource;
-import org.eclipse.jetty.util.resource.ResourceCollection;
-import org.eclipse.jetty.webapp.WebAppContext;
-import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
-
 import com.zaxxer.hikari.HikariDataSource;
-
 import jakarta.security.auth.message.config.AuthConfigFactory;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.sikkerhet.jaspic.OidcAuthModule;
 import no.nav.k9.sak.web.server.jetty.db.DatabaseScript;
 import no.nav.k9.sak.web.server.jetty.db.DatasourceRole;
 import no.nav.k9.sak.web.server.jetty.db.DatasourceUtil;
 import no.nav.k9.sak.web.server.jetty.db.EnvironmentClass;
+import org.eclipse.jetty.ee9.security.ConstraintSecurityHandler;
+import org.eclipse.jetty.ee9.security.jaspi.DefaultAuthConfigFactory;
+import org.eclipse.jetty.ee9.security.jaspi.JaspiAuthenticatorFactory;
+import org.eclipse.jetty.ee9.security.jaspi.provider.JaspiAuthConfigProvider;
+import org.eclipse.jetty.ee9.servlet.ServletContainerInitializerHolder;
+import org.eclipse.jetty.ee9.webapp.MetaInfConfiguration;
+import org.eclipse.jetty.ee9.webapp.WebAppContext;
+import org.eclipse.jetty.plus.jndi.EnvEntry;
+import org.eclipse.jetty.security.DefaultIdentityService;
+import org.eclipse.jetty.security.jaas.JAASLoginService;
+import org.eclipse.jetty.server.*;
+import org.eclipse.jetty.util.resource.Resource;
+import org.eclipse.jetty.util.resource.ResourceFactory;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.eclipse.jetty.util.thread.VirtualThreadPool;
+import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class JettyServer {
 
@@ -99,11 +89,20 @@ public class JettyServer {
     }
 
     private void start(AppKonfigurasjon appKonfigurasjon) throws Exception {
-        Server server = new Server(appKonfigurasjon.getServerPort());
+        // setter opp jetty til å bruke virtuelle tråder.
+        // hver request får sin egen (virtuelle) tråd, så det er ingen risiko for å lekke informasjon (for eksempel: innlogginstilstand,token,MDC-context) ved at tråder gjenbrukes
+
+        // https://jetty.org/docs/jetty/12/programming-guide/arch/threads.html
+        QueuedThreadPool threadPool = new QueuedThreadPool();
+        VirtualThreadPool virtualExecutor = new VirtualThreadPool();
+        virtualExecutor.setMaxThreads(128);
+        threadPool.setVirtualThreadsExecutor(virtualExecutor);
+
+        Server server = new Server(threadPool);
         server.setConnectors(createConnectors(appKonfigurasjon, server).toArray(new Connector[]{}));
 
-        var handlers = new HandlerList(new ResetLogContextHandler(), createContext(appKonfigurasjon));
-        server.setHandler(handlers);
+        server.setHandler(createContext(appKonfigurasjon, server));
+
         server.addEventListener(new JettyServerLifeCyleListener());
         server.start();
         server.join();
@@ -132,7 +131,7 @@ public class JettyServer {
         System.setProperty("task.manager.polling.tasks.size", "10");
         System.setProperty("task.manager.polling.scrolling.select.size", "10");
 
-        if (ENV.isDev()){
+        if (ENV.isDev()) {
             System.setProperty("task.manager.auto.traceparent", "true");
         }
     }
@@ -184,18 +183,14 @@ public class JettyServer {
     }
 
     @SuppressWarnings("resource")
-    protected WebAppContext createContext(AppKonfigurasjon appKonfigurasjon) throws IOException {
+    protected WebAppContext createContext(AppKonfigurasjon appKonfigurasjon, Server server) throws IOException {
         WebAppContext webAppContext = new WebAppContext();
         webAppContext.setParentLoaderPriority(true);
 
-        // må hoppe litt bukk for å hente web.xml fra classpath i stedet for fra
-        // filsystem.
-        String descriptor;
-        try (var resource = Resource.newClassPathResource("/WEB-INF/web.xml")) {
-            descriptor = resource.getURI().toURL().toExternalForm();
-        }
+        // må hoppe litt bukk for å hente web.xml fra classpath i stedet for fra filsystem.
+        String descriptor = ResourceFactory.of(server).newClassLoaderResource("/WEB-INF/web.xml").getURI().toURL().toExternalForm();
         webAppContext.setDescriptor(descriptor);
-        webAppContext.setBaseResource(createResourceCollection());
+        webAppContext.setBaseResource(createResourceCollection(server));
         webAppContext.setContextPath(appKonfigurasjon.getContextPath());
 
         webAppContext.setInitParameter("org.eclipse.jetty.servlet.Default.dirAllowed", "false");
@@ -205,16 +200,13 @@ public class JettyServer {
          * annotations),
          * men bare de som matchr pattern for raskere oppstart
          */
-        webAppContext.setAttribute("org.eclipse.jetty.server.webapp.WebInfIncludeJarPattern",
-            "^.*jersey-.*.jar$|^.*felles-sikkerhet.*.jar$");
+        webAppContext.setAttribute(MetaInfConfiguration.WEBINF_JAR_PATTERN, "^.*jersey-.*.jar$|^.*felles-sikkerhet.*.jar$");
         webAppContext.setSecurityHandler(createSecurityHandler());
 
         final ServletContainerInitializerHolder jerseyHolder = webAppContext.addServletContainerInitializer(new JerseyServletContainerInitializer());
         jerseyHolder.addStartupClasses(getJaxRsApplicationClasses());
 
         webAppContext.setThrowUnavailableOnStartupException(true);
-
-
 
         return webAppContext;
     }
@@ -240,7 +232,7 @@ public class JettyServer {
 
     }
 
-    private SecurityHandler createSecurityHandler() {
+    private org.eclipse.jetty.ee9.security.SecurityHandler createSecurityHandler() {
         ConstraintSecurityHandler securityHandler = new ConstraintSecurityHandler();
         securityHandler.setAuthenticatorFactory(new JaspiAuthenticatorFactory());
 
@@ -254,23 +246,10 @@ public class JettyServer {
     }
 
     @SuppressWarnings("resource")
-    protected ResourceCollection createResourceCollection() {
-        return new ResourceCollection(
-            Resource.newClassPathResource("META-INF/resources/webjars/"),
-            Resource.newClassPathResource("/web"));
-    }
-
-    /**
-     * Legges først slik at alltid resetter context før prosesserer nye requests.
-     * Kjøres først så ikke risikerer andre har satt
-     * Request#setHandled(true).
-     */
-    static final class ResetLogContextHandler extends AbstractHandler {
-        @Override
-        public void handle(String target, Request baseRequest, HttpServletRequest request,
-                           HttpServletResponse response) {
-            MDC.clear();
-        }
+    protected Resource createResourceCollection(Server server) {
+        return ResourceFactory.combine(
+            ResourceFactory.of(server).newClassLoaderResource("META-INF/resources/webjars/"),
+            ResourceFactory.of(server).newClassLoaderResource("/web"));
     }
 
 }

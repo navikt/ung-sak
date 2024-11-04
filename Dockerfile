@@ -5,7 +5,7 @@ LABEL org.opencontainers.image.source=https://github.com/navikt/k9-sak
 RUN mkdir /app/lib
 RUN mkdir /app/conf
 
-ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 -Djava.security.egd=file:/dev/./urandom -Duser.timezone=Europe/Oslo "
+ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 -XX:ActiveProcessorCount=4 -Djava.security.egd=file:/dev/./urandom -Duser.timezone=Europe/Oslo "
 
 # Application Start Konfigurasjon
 COPY build/init-app.sh /init-scripts/init-app.sh
