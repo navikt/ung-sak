@@ -1,6 +1,5 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.uttak;
 
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.NavigableSet;
 import java.util.Optional;
@@ -41,6 +40,7 @@ public class AksjonspunktUtlederNyeRegler {
     private AksjonspunktKontrollRepository aksjonspunktKontrollRepository;
     private MapInputTilUttakTjeneste mapInputTilUttakTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
+    private UtledVirkningsdatoNyeUttaksregler utledVirkningsdatoNyeUttaksregler;
 
     AksjonspunktUtlederNyeRegler() {
         // for proxy
@@ -52,13 +52,14 @@ public class AksjonspunktUtlederNyeRegler {
                                         TilkommetAktivitetTjeneste tilkommetAktivitetTjeneste,
                                         AksjonspunktKontrollRepository aksjonspunktKontrollRepository,
                                         MapInputTilUttakTjeneste mapInputTilUttakTjeneste,
-                                        @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester) {
+                                        @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester, UtledVirkningsdatoNyeUttaksregler utledVirkningsdatoNyeUttaksregler) {
         this.behandlingRepository = behandlingRepository;
         this.uttakNyeReglerRepository = uttakNyeReglerRepository;
         this.tilkommetAktivitetTjeneste = tilkommetAktivitetTjeneste;
         this.aksjonspunktKontrollRepository = aksjonspunktKontrollRepository;
         this.mapInputTilUttakTjeneste = mapInputTilUttakTjeneste;
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
+        this.utledVirkningsdatoNyeUttaksregler = utledVirkningsdatoNyeUttaksregler;
     }
 
 
@@ -87,6 +88,11 @@ public class AksjonspunktUtlederNyeRegler {
 
 
         var skalHaAksjonspunkt = harAktivitetIkkeYrkesaktivEllerKunYtelse(behandling, perioderTilVurdering) || harTilkommmetAktivitet(behandling, perioderTilVurdering);
+
+        if (!datoHarBlittSatt && skalHaAksjonspunkt) {
+            utledVirkningsdatoNyeUttaksregler.utledDato(BehandlingReferanse.fra(behandling))
+                .ifPresent(it -> uttakNyeReglerRepository.lagreDatoForNyeRegler(behandling.getId(), it));
+        }
 
         return skalHaAksjonspunkt
             ? Optional.of(AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK)
