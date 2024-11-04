@@ -122,11 +122,14 @@ public class FinnInntektsmeldingForBeregning {
         if (a.getInntektPrÅr() != null) {
             return a.getInntektPrÅr().getVerdi().divide(BigDecimal.valueOf(12), RoundingMode.HALF_UP);
         }
-        return inntektsmeldingerForAktivitet.stream()
-            .map(Inntektsmelding::getInntektBeløp)
-            .reduce(Beløp::adder)
-            .map(Beløp::getVerdi)
-            .orElseThrow(() -> new IllegalStateException("Fant ingen inntektsmelding for aktivitet"));
+        if (!inntektsmeldingerForAktivitet.isEmpty()) {
+            return inntektsmeldingerForAktivitet.stream()
+                .map(Inntektsmelding::getInntektBeløp)
+                .reduce(Beløp::adder)
+                .map(Beløp::getVerdi)
+                .orElseThrow(() -> new IllegalStateException("Fant ingen inntektsmelding for aktivitet"));
+        }
+        return null;
     }
 
     /**
