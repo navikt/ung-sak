@@ -291,6 +291,8 @@ spec:
       value: "false"
     - name: SOSKENSAK_UTTAK_OVERSTYRING
       value: "false"
+    - name: DATO_NYE_REGLER_PREUTFYLLING
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
