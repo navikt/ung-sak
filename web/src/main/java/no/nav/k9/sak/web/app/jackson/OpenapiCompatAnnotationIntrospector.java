@@ -1,4 +1,4 @@
-package no.nav.k9.kodeverk;
+package no.nav.k9.sak.web.app.jackson;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.JavaType;

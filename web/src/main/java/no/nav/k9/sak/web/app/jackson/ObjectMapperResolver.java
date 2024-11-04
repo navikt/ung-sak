@@ -8,8 +8,6 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.ext.ContextResolver;
 import jakarta.ws.rs.ext.Provider;
-import no.nav.k9.kodeverk.OpenapiCompatAnnotationIntrospector;
-import no.nav.k9.kodeverk.OpenapiCompatDeserializerModule;
 import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.Søknad;
 
