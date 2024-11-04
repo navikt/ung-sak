@@ -11,6 +11,7 @@ import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingSteg;
@@ -39,6 +40,7 @@ public class VurderStartdatoUttaksreglerSteg implements BehandlingSteg {
     private BehandlingRepository behandlingRepository;
     private AksjonspunktUtlederNyeRegler aksjonspunktUtlederNyeRegler;
     private UttakNyeReglerRepository uttakNyeReglerRepository;
+    private boolean skalIkkeFåAksjonspunktIFørstegangsbehandling;
 
     VurderStartdatoUttaksreglerSteg() {
         // for proxy
@@ -47,17 +49,19 @@ public class VurderStartdatoUttaksreglerSteg implements BehandlingSteg {
     @Inject
     public VurderStartdatoUttaksreglerSteg(BehandlingRepository behandlingRepository,
                                            AksjonspunktUtlederNyeRegler aksjonspunktUtlederNyeRegler,
-                                           UttakNyeReglerRepository uttakNyeReglerRepository) {
+                                           UttakNyeReglerRepository uttakNyeReglerRepository,
+                                           @KonfigVerdi(value = "INGEN_AP_9291_I_FORSTEGANGSBEHANDLING", defaultVerdi = "true") boolean skalIkkeFåAksjonspunktIFørstegangsbehandling) {
         this.behandlingRepository = behandlingRepository;
         this.aksjonspunktUtlederNyeRegler = aksjonspunktUtlederNyeRegler;
         this.uttakNyeReglerRepository = uttakNyeReglerRepository;
+        this.skalIkkeFåAksjonspunktIFørstegangsbehandling = skalIkkeFåAksjonspunktIFørstegangsbehandling;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         var behandlingId = kontekst.getBehandlingId();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
-        if (!behandling.erRevurdering()) {
+        if (!behandling.erRevurdering() && skalIkkeFåAksjonspunktIFørstegangsbehandling) {
             uttakNyeReglerRepository.lagreDatoForNyeRegler(kontekst.getBehandlingId(), EN_DATO_FOR_LENGE_SIDEN);
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }

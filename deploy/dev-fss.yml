@@ -308,7 +308,8 @@ spec:
       value: "true"
     - name: DATO_NYE_REGLER_PREUTFYLLING
       value: "true"
-
+    - name: INGEN_AP_9291_I_FORSTEGANGSBEHANDLING
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
