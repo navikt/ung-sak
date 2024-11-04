@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -67,7 +68,8 @@ public class FinnInntektsmeldingForBeregning {
         LocalDate stp = overstyrtPeriode.getSkjæringstidspunkt();
         return overstyrtPeriode.getAktivitetOverstyringer().stream()
             .filter(a -> a.getAktivitetStatus().erArbeidstaker())
-            .map(a -> mapAktivitetTilInntektsmelding(a, stp, inntektsmeldingTidslinje));
+            .map(a -> mapAktivitetTilInntektsmelding(a, stp, inntektsmeldingTidslinje))
+            .filter(Objects::nonNull);
     }
 
     static Inntektsmelding mapAktivitetTilInntektsmelding(InputAktivitetOverstyring a,
@@ -79,6 +81,10 @@ public class FinnInntektsmeldingForBeregning {
         logger.info("Overgang fra infotrygd: Mapper overstyring for aktivitet " + a
             + " Fant mottatte " + alleInntektsmeldinger.size() + " inntektsmeldinger for abrbeidsgiver: "
             + alleInntektsmeldinger.stream().map(Inntektsmelding::getJournalpostId).toList());
+
+        if (alleInntektsmeldinger.isEmpty()) {
+            return null;
+        }
 
         var summertRefusjonTidslinje = SammenstillRefusjonskravForInfotrygdmigrering.lagTidslinje(stp, inntektsmeldingerForAktivitet);
 
