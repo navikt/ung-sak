@@ -4,17 +4,25 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
 import no.nav.k9.kodeverk.behandling.BehandlingStatus;
+import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.prosesstask.impl.ProsessTaskRepositoryImpl;
 import no.nav.k9.prosesstask.impl.ProsessTaskTjenesteImpl;
 import no.nav.k9.prosesstask.impl.TaskManager;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
+import no.nav.k9.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
+import no.nav.k9.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
+import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
+import no.nav.k9.sak.behandlingskontroll.impl.BehandlingskontrollTjenesteImpl;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
+import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -22,19 +30,28 @@ import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.k9.sak.db.util.CdiDbAwareTest;
+import no.nav.k9.sak.domene.behandling.steg.vedtak.BehandlingVedtakTjeneste;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
+import no.nav.k9.sak.trigger.ProsessTriggereRepository;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingsoppretterTjeneste;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @CdiDbAwareTest
 class RevurderBeregningTjenesteTest {
@@ -53,17 +70,37 @@ class RevurderBeregningTjenesteTest {
 
     private FagsakRepository fagsakRepository;
 
+    private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste = mock(BehandlendeEnhetTjeneste.class);
+
+    private BehandlingsoppretterTjeneste behandlingsoppretterTjeneste;
+
+    @Inject
+    private BehandlingVedtakRepository behandlingVedtakRepository;
+
+    @Inject
+    private ProsessTriggereRepository prosessTriggereRepository;
+    @Inject
+    private BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste;
+    @Inject
+    private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
+
     @BeforeEach
     void setUp() {
         ProsessTaskRepositoryImpl prosessTaskRepository = new ProsessTaskRepositoryImpl(entityManager, null, null);
         fagsakRepository = new FagsakRepository(entityManager);
-        TaskManager taskManager = Mockito.mock(TaskManager.class);
+        TaskManager taskManager = mock(TaskManager.class);
         vilkårResultatRepository = new VilkårResultatRepository(entityManager);
 
+        when(behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(ArgumentMatchers.any())).thenReturn(new OrganisasjonsEnhet("test", "Enheten"));
+        behandlingsoppretterTjeneste = new BehandlingsoppretterTjeneste(new BehandlingRepositoryProvider(entityManager), behandlendeEnhetTjeneste);
         FagsakProsessTaskRepository fagsakProsessTaskRepository = new FagsakProsessTaskRepository(entityManager, new ProsessTaskTjenesteImpl(prosessTaskRepository), taskManager);
+        prosessTriggereRepository = new ProsessTriggereRepository(entityManager);
         revurderBeregningTjeneste = new RevurderBeregningTjeneste(behandlingRepository, null, vilkårResultatRepository, new FagsakTjeneste(new BehandlingRepositoryProvider(entityManager), null),
             fagsakProsessTaskRepository,
-            null, null, null
+            null, null, null,
+            behandlingsoppretterTjeneste,
+            prosessTriggereRepository,
+            behandlingsprosessApplikasjonTjeneste, behandlingskontrollTjeneste
         );
     }
 
@@ -85,9 +122,10 @@ class RevurderBeregningTjenesteTest {
         var fom = STP.minusDays(10);
         var tom = STP.minusDays(4);
 
-        var gruppeId = revurderBeregningTjeneste.revurderEnkeltperiodeFraGittSteg(fom, tom, SAKSNUMMER, BehandlingÅrsakType.RE_ENDRET_FORDELING);
+        revurderBeregningTjeneste.revurderEnkeltperiodeFraGittSteg(fom, tom, SAKSNUMMER, BehandlingÅrsakType.RE_ENDRET_FORDELING);
 
-        assertThat(gruppeId).isNotNull();
+        var sisteBehandling = behandlingRepository.hentSisteBehandlingForFagsakId(fagsak.getId());
+        assertThat(sisteBehandling.get().getType()).isEqualTo(BehandlingType.REVURDERING);
     }
 
     @Test
@@ -184,6 +222,7 @@ class RevurderBeregningTjenesteTest {
             .medBehandlingResultatType(BehandlingResultatType.INNVILGET)
             .build();
         behandlingRepository.lagre(sisteBehandling, behandlingRepository.taSkriveLås(sisteBehandling));
+        behandlingVedtakRepository.lagre(BehandlingVedtak.builder(sisteBehandling.getId()).medAnsvarligSaksbehandler("superansvarlig").medVedtakstidspunkt(LocalDateTime.now()).build(), behandlingRepository.taSkriveLås(sisteBehandling));
         initierVilkårMedPerioder(
             sisteBehandling,
             List.of(
