@@ -1,6 +1,7 @@
 package no.nav.k9.sak.web.app.jackson;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
@@ -35,7 +36,10 @@ public class ObjectMapperResolver implements ContextResolver<ObjectMapper> {
         // Når alle klienter kan handtere at Kalkulus Kodeverdi kjem som string kan denne sannsynlegvis settast lik baseObjektMapper.
         this.defaultObjektMapper = this.baseObjektMapper.copy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkOverstyringSerialisering.INGEN, true));
         // openaapiObjektMapper bør brukast viss ein ønsker at enums skal bli serialisert slik openapi spesifikasjon tilseier.
-        this.openapiObjektMapper = this.baseObjektMapper.copy().registerModule(ObjectMapperFactory.createOpenapiCompatSerializerModule(this.baseObjektMapper));
+        this.openapiObjektMapper = this.baseObjektMapper.copy()
+            .setAnnotationIntrospector(new OpenapiCompatAnnotationIntrospector()) // <- Deaktiverer alle annotasjoner utenom @JsonValue
+            .enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING) // <- Bruk toString() viss @JsonValue ikkje er spesifisert
+            .registerModule(new OpenapiCompatDeserializerModule()); // <- EnumDeserializer skal først sjå etter @JsonValue, deretter toString()
     }
 
     public final ObjectMapper getDefaultObjektMapper() {
