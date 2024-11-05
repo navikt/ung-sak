@@ -4,11 +4,15 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.FastsettPGIPeriodeTjeneste;
 import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
+import no.nav.k9.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.k9.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
+import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollKontekst;
+import no.nav.k9.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.k9.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -18,8 +22,11 @@ import no.nav.k9.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.domene.opptjening.OppgittOpptjeningFilterProvider;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.trigger.ProsessTriggereRepository;
+import no.nav.k9.sak.trigger.Trigger;
 import no.nav.k9.sak.typer.Periode;
 import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.k9.sak.web.app.tjenester.behandling.BehandlingsoppretterTjeneste;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.BeregningPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.beregning.grunnlag.PGIPeriode;
 import org.slf4j.Logger;
@@ -55,6 +62,10 @@ public class RevurderBeregningTjeneste {
     private FastsettPGIPeriodeTjeneste fastsettPGIPeriodeTjeneste;
     private OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider;
     private BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository;
+    private BehandlingsoppretterTjeneste behandlingsoppretterTjeneste;
+    private ProsessTriggereRepository prosessTriggereRepository;
+    private BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste;
+    private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
 
     public RevurderBeregningTjeneste() {
     }
@@ -67,7 +78,11 @@ public class RevurderBeregningTjeneste {
                                      FagsakProsessTaskRepository fagsakProsessTaskRepository,
                                      FastsettPGIPeriodeTjeneste fastsettPGIPeriodeTjeneste,
                                      OppgittOpptjeningFilterProvider oppgittOpptjeningFilterProvider,
-                                     BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository) {
+                                     BeregningPerioderGrunnlagRepository beregningPerioderGrunnlagRepository,
+                                     BehandlingsoppretterTjeneste behandlingsoppretterTjeneste,
+                                     ProsessTriggereRepository prosessTriggereRepository,
+                                     BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste,
+                                     BehandlingskontrollTjeneste behandlingskontrollTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.iayTjeneste = iayTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -76,6 +91,10 @@ public class RevurderBeregningTjeneste {
         this.fastsettPGIPeriodeTjeneste = fastsettPGIPeriodeTjeneste;
         this.oppgittOpptjeningFilterProvider = oppgittOpptjeningFilterProvider;
         this.beregningPerioderGrunnlagRepository = beregningPerioderGrunnlagRepository;
+        this.behandlingsoppretterTjeneste = behandlingsoppretterTjeneste;
+        this.prosessTriggereRepository = prosessTriggereRepository;
+        this.behandlingsprosessApplikasjonTjeneste = behandlingsprosessApplikasjonTjeneste;
+        this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
     }
 
     /**
@@ -84,7 +103,6 @@ public class RevurderBeregningTjeneste {
      * @param saksnummer          Saksnummer
      * @param skjæringstidspunkt  Skjæringstidspunkt for aktuell periode
      * @param behandlingÅrsakType Behandlingsårsaktype
-     * @param nesteKjøringEtter   Neste kjøring etter for å spre tasker
      * @return ProsessTaskGruppeId
      */
     public String revurderMedÅrsak(Saksnummer saksnummer, LocalDate skjæringstidspunkt, BehandlingÅrsakType behandlingÅrsakType, Optional<LocalDateTime> nesteKjøringEtter) {
@@ -99,19 +117,8 @@ public class RevurderBeregningTjeneste {
         LocalDate fomDato = aktuellPeriode.getFomDato();
         LocalDate tomDato = aktuellPeriode.getTomDato();
 
-        return revurder(behandlingÅrsakType, nesteKjøringEtter, fomDato, tomDato, tilRevurdering);
+        return revurderAsync(behandlingÅrsakType, nesteKjøringEtter, fomDato, tomDato, tilRevurdering);
     }
-
-    private String revurder(BehandlingÅrsakType behandlingÅrsakType, Optional<LocalDateTime> nesteKjøringEtter, LocalDate fomDato, LocalDate tomDato, Behandling tilRevurdering) {
-        ProsessTaskData tilRevurderingTaskData = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
-        tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK, behandlingÅrsakType.getKode());
-        tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_FOM, fomDato.toString());
-        tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_TOM, tomDato.toString());
-        tilRevurderingTaskData.setBehandling(tilRevurdering.getFagsakId(), tilRevurdering.getId(), tilRevurdering.getAktørId().getId());
-        nesteKjøringEtter.ifPresent(tilRevurderingTaskData::setNesteKjøringEtter);
-        return fagsakProsessTaskRepository.lagreNyGruppe(tilRevurderingTaskData);
-    }
-
 
     /**
      * Revurder en enkeltperiode fra et gitt steg
@@ -121,7 +128,7 @@ public class RevurderBeregningTjeneste {
      * @param saksnummer Fagsakens saksnummer
      * @param steg       Hvilket steg man skal hoppe tilbake til
      */
-    public String revurderEnkeltperiodeFraGittSteg(LocalDate fom, LocalDate tom, Saksnummer saksnummer, BehandlingÅrsakType steg) {
+    public void revurderEnkeltperiodeFraGittSteg(LocalDate fom, LocalDate tom, Saksnummer saksnummer, BehandlingÅrsakType steg) {
         var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(saksnummer, true).orElseThrow(() -> new IllegalArgumentException("Finnes ikke fagsak med saksnummer: " + saksnummer));
         var behandling = behandlingRepository.hentSisteBehandlingForFagsakId(fagsak.getId()).orElseThrow(() -> new IllegalArgumentException("Finnes ingen behandlinger på fagsak med saksnummer: " + saksnummer));
         var periode = new Periode(fom, tom);
@@ -142,7 +149,7 @@ public class RevurderBeregningTjeneste {
             throw new IllegalArgumentException("Perioden man ønsker å revurdere overlapper ikke med noen godkjente vilkårsperioder.");
         }
 
-        return revurder(steg, Optional.empty(), fom, tom, behandling);
+        revurderMedManuellKontroll(steg, fom, tom, behandling);
     }
 
 
@@ -176,6 +183,24 @@ public class RevurderBeregningTjeneste {
         tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_TOM, aktuellPeriode.getTomDato().toString());
         tilRevurderingTaskData.setBehandling(tilRevurdering.getFagsakId(), tilRevurdering.getId(), tilRevurdering.getAktørId().getId());
         fagsakProsessTaskRepository.lagreNyGruppe(tilRevurderingTaskData);
+    }
+
+    private String revurderAsync(BehandlingÅrsakType behandlingÅrsakType, Optional<LocalDateTime> nesteKjøringEtter, LocalDate fomDato, LocalDate tomDato, Behandling tilRevurdering) {
+        ProsessTaskData tilRevurderingTaskData = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
+        tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK, behandlingÅrsakType.getKode());
+        tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_FOM, fomDato.toString());
+        tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_TOM, tomDato.toString());
+        tilRevurderingTaskData.setBehandling(tilRevurdering.getFagsakId(), tilRevurdering.getId(), tilRevurdering.getAktørId().getId());
+        nesteKjøringEtter.ifPresent(tilRevurderingTaskData::setNesteKjøringEtter);
+        return fagsakProsessTaskRepository.lagreNyGruppe(tilRevurderingTaskData);
+    }
+
+    private void revurderMedManuellKontroll(BehandlingÅrsakType behandlingÅrsakType, LocalDate fomDato, LocalDate tomDato, Behandling tilRevurdering) {
+        var nyBehandling = behandlingsoppretterTjeneste.opprettAutomatiskRevurdering(tilRevurdering.getFagsak(), behandlingÅrsakType);
+        prosessTriggereRepository.leggTil(nyBehandling.getId(), Set.of(new Trigger(behandlingÅrsakType, DatoIntervallEntitet.fraOgMedTilOgMed(fomDato, tomDato))));
+        BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(nyBehandling);
+        behandlingskontrollTjeneste.lagreAksjonspunkterFunnet(kontekst, List.of(AksjonspunktDefinisjon.KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING));
+        behandlingsprosessApplikasjonTjeneste.asynkStartBehandlingsprosess(nyBehandling);
     }
 
     private PGIPeriode lagPGIPeriodeForForrigeSkatteoppgjør(LocalDate skjæringstidspunkt, Behandling behandlingMedRiktigSkatteoppgjør) {
