@@ -295,6 +295,8 @@ spec:
       value: "false"
     - name: INGEN_AP_9291_I_FORSTEGANGSBEHANDLING
       value: "true"
+    - name: FJERN_INAKTIVE_VILKAR_RESULTAT
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
