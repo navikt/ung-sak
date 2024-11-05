@@ -291,8 +291,6 @@ spec:
       value: "false"
     - name: SOSKENSAK_UTTAK_OVERSTYRING
       value: "false"
-    - name: DATO_NYE_REGLER_PREUTFYLLING
-      value: "false"
     - name: INGEN_AP_9291_I_FORSTEGANGSBEHANDLING
       value: "true"
 
