@@ -74,12 +74,8 @@ public class AksjonspunktUtlederNyeReglerTest {
 
     @BeforeEach
     void setUp() {
-        utleder = new AksjonspunktUtlederNyeRegler(behandlingRepository,
-            uttakNyeReglerRepository,
-            tilkommetAktivitetTjeneste,
-            aksjonspunktKontrollRepository, mapInputTilUttakTjeneste,
-            new UnitTestLookupInstanceImpl<>(vilkårsPerioderTilVurderingTjeneste),
-            new UtledVirkningsdatoNyeUttaksregler(new UnitTestLookupInstanceImpl<>(vilkårsPerioderTilVurderingTjeneste), true));
+        utleder = new AksjonspunktUtlederNyeRegler(behandlingRepository, uttakNyeReglerRepository, tilkommetAktivitetTjeneste, aksjonspunktKontrollRepository, mapInputTilUttakTjeneste,
+            new UnitTestLookupInstanceImpl<>(vilkårsPerioderTilVurderingTjeneste));
 
         var fagsak = Fagsak.opprettNy(FagsakYtelseType.DAGPENGER, new AktørId(123L), new Saksnummer("987"), LocalDate.now(), LocalDate.now());
         fagsakRepository.opprettNy(fagsak);
@@ -98,7 +94,6 @@ public class AksjonspunktUtlederNyeReglerTest {
         LocalDate dag2 = dag1.plusDays(1);
         DatoIntervallEntitet søknadsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(dag1, dag2);
         when(vilkårsPerioderTilVurderingTjeneste.utled(anyLong(), any())).thenReturn(new TreeSet<>(Set.of(søknadsperiode)));
-        when(vilkårsPerioderTilVurderingTjeneste.utledFullstendigePerioder(anyLong())).thenReturn(new TreeSet<>(Set.of(søknadsperiode)));
         when(tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(anyLong(), any())).thenReturn(Map.of(new AktivitetstatusOgArbeidsgiver(UttakArbeidType.FRILANSER, null), LocalDateTimeline.empty()));
         when(mapInputTilUttakTjeneste.hentUtOgMapRequestUtenInntektsgradering(BehandlingReferanse.fra(førstegangsbehandling))).thenReturn(lagUttaksgrunnlag());
 
@@ -114,7 +109,6 @@ public class AksjonspunktUtlederNyeReglerTest {
         LocalDate dag2 = dag1.plusDays(1);
         DatoIntervallEntitet søknadsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(dag1, dag2);
         when(vilkårsPerioderTilVurderingTjeneste.utled(anyLong(), any())).thenReturn(new TreeSet<>(Set.of(søknadsperiode)));
-        when(vilkårsPerioderTilVurderingTjeneste.utledFullstendigePerioder(anyLong())).thenReturn(new TreeSet<>(Set.of(søknadsperiode)));
         when(tilkommetAktivitetTjeneste.finnTilkommedeAktiviteter(anyLong(), any())).thenReturn(Map.of(new AktivitetstatusOgArbeidsgiver(UttakArbeidType.FRILANSER, null), LocalDateTimeline.empty()));
         when(mapInputTilUttakTjeneste.hentUtOgMapRequestUtenInntektsgradering(BehandlingReferanse.fra(revurdering))).thenReturn(lagUttaksgrunnlag());
 

@@ -3,6 +3,7 @@ package no.nav.k9.sak.ytelse.pleiepengerbarn.beregninginput;
 import java.util.Arrays;
 import java.util.NavigableSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
@@ -58,12 +59,21 @@ public class BeregningInputOppdaterer implements AksjonspunktOppdaterer<Overstyr
         if (!harTillatelseTilÅLøseAksjonspunkt()) {
             throw new ManglerTilgangException("K9-IF-01", "Har ikke tilgang til å løse aksjonspunkt.");
         }
+        validerAtInntektErSatt(dto);
         var iayGrunnlag = inntektArbeidYtelseTjeneste.hentGrunnlag(param.getBehandlingId());
         var inntektsmeldingerForSak = inntektArbeidYtelseTjeneste.hentUnikeInntektsmeldingerForSak(param.getRef().getSaksnummer());
         var perioderTilVurdering = getPerioderTilVurdering(param);
         beregningInputLagreTjeneste.lagreInputOverstyringer(param.getRef(), dto, iayGrunnlag, inntektsmeldingerForSak, perioderTilVurdering);
         beregningInputHistorikkTjeneste.lagHistorikk(param.getBehandlingId(), dto.getBegrunnelse());
         return OppdateringResultat.nyttResultat();
+    }
+
+    private static void validerAtInntektErSatt(OverstyrInputForBeregningDto dto) {
+        var aktiviteterUtenInntekt = dto.getPerioder().stream().flatMap(p -> p.getAktivitetliste().stream().filter(a -> a.getInntektPrAar() == null))
+            .collect(Collectors.toSet());
+        if (!aktiviteterUtenInntekt.isEmpty()) {
+            throw new IllegalArgumentException("Alle aktiviteter må ha satt inntekt. Fant følgende aktiviteter uten inntekt: " + aktiviteterUtenInntekt);
+        }
     }
 
     private NavigableSet<DatoIntervallEntitet> getPerioderTilVurdering(AksjonspunktOppdaterParameter param) {
