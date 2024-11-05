@@ -122,5 +122,13 @@ public class OverstyrBeregningAktivitet {
         return startdatoRefusjon.isBefore(opphørRefusjon);
     }
 
+    @AssertTrue(message = "Enten inntekt eller refusjonsinformasjon må vere satt")
+    public boolean isHarInformasjon() {
+        if (startdatoRefusjon == null && opphørRefusjon == null && inntektPrAar == null) {
+            return false;
+        }
+        return true;
+    }
+
 
 }
