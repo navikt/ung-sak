@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.prosesstask.api.PollTaskAfterTransaction;
 import no.nav.k9.sak.hendelsemottak.tjenester.HendelsemottakTjeneste;
 import no.nav.k9.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.k9.sak.kontrakt.hendelser.HendelseDto;
@@ -67,6 +68,7 @@ public class FordelHendelseRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(JSON_UTF8)
     @Operation(description = "Mottak av dokument.", tags = "fordel")
+    @PollTaskAfterTransaction
     @BeskyttetRessurs(action = BeskyttetRessursActionAttributt.CREATE, resource = FAGSAK)
     public PåvirkedeSaker innsending(@Parameter(description = "Hendelse innsendt.") @TilpassetAbacAttributt(supplierClass = FordelRestTjeneste.AbacDataSupplier.class) @Valid HendelseDto dto) {
         var aktørId = dto.getAktørId();
