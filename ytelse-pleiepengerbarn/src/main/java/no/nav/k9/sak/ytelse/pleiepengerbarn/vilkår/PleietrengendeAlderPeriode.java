@@ -1,7 +1,6 @@
 package no.nav.k9.sak.ytelse.pleiepengerbarn.vilkår;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.NavigableSet;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -52,14 +51,8 @@ public class PleietrengendeAlderPeriode implements VilkårsPeriodiseringsFunksjo
     public NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
         final Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
 
-        /*
-         * Denne sjekken kan fjernes når det ikke lenger finnes noen åpne
-         * behandlinger opprettet før angitt tidspunkt.
-         */
-        final boolean opprettetEtterNyHåndtering = behandling.getOpprettetTidspunkt().isAfter(LocalDateTime.of(2021, 11, 30, 21, 15, 0));
-
         final NavigableSet<DatoIntervallEntitet> perioder;
-        if (brukRelevantPeriode && opprettetEtterNyHåndtering) {
+        if (brukRelevantPeriode) {
             perioder = søknadsperiodeTjeneste.utledPeriode(behandlingId, true);
         } else {
             perioder = søknadsperiodeTjeneste.utledFullstendigPeriode(behandlingId);
