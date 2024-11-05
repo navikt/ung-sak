@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -67,7 +68,8 @@ public class FinnInntektsmeldingForBeregning {
         LocalDate stp = overstyrtPeriode.getSkjæringstidspunkt();
         return overstyrtPeriode.getAktivitetOverstyringer().stream()
             .filter(a -> a.getAktivitetStatus().erArbeidstaker())
-            .map(a -> mapAktivitetTilInntektsmelding(a, stp, inntektsmeldingTidslinje));
+            .map(a -> mapAktivitetTilInntektsmelding(a, stp, inntektsmeldingTidslinje))
+            .filter(Objects::nonNull);
     }
 
     static Inntektsmelding mapAktivitetTilInntektsmelding(InputAktivitetOverstyring a,
@@ -101,6 +103,12 @@ public class FinnInntektsmeldingForBeregning {
                                                       Collection<Inntektsmelding> inntektsmeldingerForAktivitet) {
         var opphører = finnOpphør(a, summertRefusjonTidslinje);
         var startDato = a.getStartdatoRefusjon().filter(d -> !d.isBefore(stp)).orElse(stp);
+        var inntektBeløp = finnInntektsbeløp(a, inntektsmeldingerForAktivitet);
+        if (inntektBeløp == null) {
+            // Dersom vi ikke finner beløp hverken fra overstyringen eller fra eksisterende inntektsmeldinger,
+            // så betyr det i praksis at ingenting er overstyrt, og vi trenger ikke lage en overstyrt inntektsmelding her
+            return null;
+        }
 
         // Hack for å sørge for at inntektsmeldingen velges blant inntektsmeldinger med samem skjæringstidspunkt
         var kanalReferansePrefiks = finnKanalReferansePrefiks(stp, inntektsmeldingerForAktivitet);
@@ -109,7 +117,7 @@ public class FinnInntektsmeldingForBeregning {
             .medArbeidsgiver(a.getArbeidsgiver())
             .medStartDatoPermisjon(stp)
             .medRefusjon(finnRefusjonVedStp(stp, summertRefusjonTidslinje, a, startDato), opphører)
-            .medBeløp(finnInntektsbeløp(a, inntektsmeldingerForAktivitet))
+            .medBeløp(inntektBeløp)
             .medArbeidsforholdId(InternArbeidsforholdRef.nullRef())
             .medJournalpostId("OVERSTYRT_" + stp)
             .medKanalreferanse(kanalReferansePrefiks + "_OVERSTYRT_" + stp);
