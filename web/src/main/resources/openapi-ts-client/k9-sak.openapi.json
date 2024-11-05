@@ -9319,6 +9319,10 @@
             "nullable" : true,
             "type" : "string"
           },
+          "harInformasjon" : {
+            "nullable" : true,
+            "type" : "boolean"
+          },
           "inntektPrAar" : {
             "format" : "int32",
             "maximum" : 100000000,

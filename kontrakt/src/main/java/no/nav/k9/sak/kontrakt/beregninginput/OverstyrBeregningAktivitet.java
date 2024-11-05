@@ -114,12 +114,20 @@ public class OverstyrBeregningAktivitet {
         return orgnr != null || aktørId != null;
     }
 
-    @AssertTrue(message = "Enten orgnr eller aktørId må være satt")
+    @AssertTrue(message = "Startdato for refusjon må være før opphørsdato")
     public boolean isStartdatoRefusjonFørOpphør() {
         if (startdatoRefusjon == null || opphørRefusjon == null) {
             return true;
         }
         return startdatoRefusjon.isBefore(opphørRefusjon);
+    }
+
+    @AssertTrue(message = "Enten inntekt eller refusjonsinformasjon må vere satt")
+    public boolean isHarInformasjon() {
+        if (startdatoRefusjon == null && opphørRefusjon == null && inntektPrAar == null) {
+            return false;
+        }
+        return true;
     }
 
 
