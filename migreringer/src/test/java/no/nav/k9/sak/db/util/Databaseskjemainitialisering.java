@@ -2,6 +2,7 @@ package no.nav.k9.sak.db.util;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -22,6 +23,7 @@ public final class Databaseskjemainitialisering {
 
     static final String USER = "k9sak_unit";
 
+    private static final ReentrantLock LOCK = new ReentrantLock();
     private static final DataSource DS = settJdniOppslag(USER);
 
     public static void main(String[] args) {
@@ -53,16 +55,20 @@ public final class Databaseskjemainitialisering {
         }
     }
 
-    private static synchronized DataSource settJdniOppslag(String user) {
-
-        var ds = createDs(user);
-
+    private static DataSource settJdniOppslag(String user) {
         try {
+            LOCK.lock();
+            var ds = createDs(user);
 
-            new EnvEntry("jdbc/defaultDS", ds); // NOSONAR
-            return ds;
-        } catch (NamingException e) {
-            throw new IllegalStateException("Feil under registrering av JDNI-entry for default datasource", e); // NOSONAR
+            try {
+
+                new EnvEntry("jdbc/defaultDS", ds); // NOSONAR
+                return ds;
+            } catch (NamingException e) {
+                throw new IllegalStateException("Feil under registrering av JDNI-entry for default datasource", e); // NOSONAR
+            }
+        } finally {
+            LOCK.unlock();
         }
     }
 
