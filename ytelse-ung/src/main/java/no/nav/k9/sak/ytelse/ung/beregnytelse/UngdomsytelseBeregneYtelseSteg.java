@@ -15,6 +15,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.k9.kodeverk.ungdomsytelse.uttak.UngdomsytelseUttakAvslagsårsak;
 import no.nav.k9.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegModell;
 import no.nav.k9.sak.behandlingskontroll.BehandlingStegRef;
@@ -32,6 +33,7 @@ import no.nav.k9.sak.domene.behandling.steg.beregnytelse.BeregneYtelseSteg;
 import no.nav.k9.sak.ytelse.ung.beregning.UngdomsytelseGrunnlag;
 import no.nav.k9.sak.ytelse.ung.beregning.UngdomsytelseGrunnlagRepository;
 import no.nav.k9.sak.ytelse.ung.beregning.UngdomsytelseSatser;
+import no.nav.k9.sak.ytelse.ung.uttak.UngdomsytelseUttak;
 
 @FagsakYtelseTypeRef(UNGDOMSYTELSE)
 @BehandlingStegRef(value = BEREGN_YTELSE)
@@ -102,13 +104,17 @@ public class UngdomsytelseBeregneYtelseSteg implements BeregneYtelseSteg {
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private static LocalDateSegmentCombinator<UngdomsytelseSatser, BigDecimal, DagsatsOgUtbetalingsgrad> sammenstillSatsOgGradering() {
+    private static LocalDateSegmentCombinator<UngdomsytelseSatser, UngdomsytelseUttak, DagsatsOgUtbetalingsgrad> sammenstillSatsOgGradering() {
         return (di, lhs, rhs) ->
-            new LocalDateSegment<>(di,
-                new DagsatsOgUtbetalingsgrad(lhs.getValue().dagsats().multiply(rhs.getValue()).divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP), rhs.getValue()));
+        {
+            var dagsats = lhs.getValue().dagsats().multiply(rhs.getValue().utbetalingsgrad()).divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP);
+            var dagsatsBarnetillegg = UngdomsytelseUttakAvslagsårsak.IKKE_NOK_DAGER.equals(rhs.getValue().avslagsårsak()) ? BigDecimal.ZERO : lhs.getValue().dagsatsBarnetillegg();
+            return new LocalDateSegment<>(di,
+                new DagsatsOgUtbetalingsgrad(dagsats.add(dagsatsBarnetillegg), rhs.getValue().utbetalingsgrad()));
+        };
     }
 
-    private String mapTilRegelInput(LocalDateTimeline<UngdomsytelseSatser> satsTidslinje, LocalDateTimeline<BigDecimal> utbetalingsgradTidslinje) {
+    private String mapTilRegelInput(LocalDateTimeline<UngdomsytelseSatser> satsTidslinje, LocalDateTimeline<UngdomsytelseUttak> utbetalingsgradTidslinje) {
 
         var satsperioder = satsTidslinje.toSegments().stream().map(s -> """
             { "periode": ":periode", "satser": ":satser" }""".stripLeading()
@@ -117,9 +123,9 @@ public class UngdomsytelseBeregneYtelseSteg implements BeregneYtelseSteg {
             .reduce("", (s1, s2) -> s1 + ", " + s2);
 
         var utbetalingsgradperioder = utbetalingsgradTidslinje.toSegments().stream().map(s -> """
-                { "periode": ":periode", "utbetalingsgrad": ":grad" }""".stripLeading()
+                { "periode": ":periode", "uttak": ":uttak" }""".stripLeading()
                 .replaceFirst(":periode", s.getLocalDateInterval().toString())
-                .replaceFirst(":grad", s.getValue().toString()))
+                .replaceFirst(":uttak", s.getValue().toString()))
             .reduce("", (s1, s2) -> s1 + ", " + s2);
 
         return """

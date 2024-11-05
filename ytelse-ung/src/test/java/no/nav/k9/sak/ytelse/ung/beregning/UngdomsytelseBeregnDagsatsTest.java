@@ -1,36 +1,38 @@
 package no.nav.k9.sak.ytelse.ung.beregning;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
-import java.util.Iterator;
-import java.util.NavigableSet;
-import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import no.nav.folketrygdloven.beregningsgrunnlag.kalkulus.KalkulusTjeneste;
 import no.nav.folketrygdloven.beregningsgrunnlag.modell.Grunnbeløp;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.integrasjon.pdl.PdlKlient;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.sak.ytelse.ung.beregning.barnetillegg.LagAntallBarnTidslinje;
+import no.nav.k9.sak.ytelse.ung.beregning.barnetillegg.LagBarnetilleggTidslinje;
 
 class UngdomsytelseBeregnDagsatsTest {
 
     private UngdomsytelseBeregnDagsats tjeneste;
     private KalkulusTjeneste kalkulusTjeneste = mock(KalkulusTjeneste.class);
+    private LagAntallBarnTidslinje lagAntallBarnTidslinje = mock(LagAntallBarnTidslinje.class);
+
 
     @BeforeEach
     void setUp() {
-        tjeneste = new UngdomsytelseBeregnDagsats(new LagGrunnbeløpTidslinjeTjeneste(kalkulusTjeneste));
+        tjeneste = new UngdomsytelseBeregnDagsats(new LagGrunnbeløpTidslinjeTjeneste(kalkulusTjeneste), new LagBarnetilleggTidslinje(lagAntallBarnTidslinje));
         when(kalkulusTjeneste.hentGrunnbeløp(LocalDate.of(2023,5,1))).thenReturn(new Grunnbeløp(100000, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2023,5,1), LocalDate.of(2024,4,30))));
         when(kalkulusTjeneste.hentGrunnbeløp(LocalDate.of(2024,5,1))).thenReturn(new Grunnbeløp(124028, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2024,5,1), LocalDate.MAX)));
+        when(lagAntallBarnTidslinje.lagAntallBarnTidslinje(any())).thenReturn(LocalDateTimeline.empty());
     }
 
     @Test
@@ -39,7 +41,7 @@ class UngdomsytelseBeregnDagsatsTest {
         var tom = LocalDate.of(2024, 4, 15);
         var perioder = new LocalDateTimeline<>(fom, tom, Boolean.TRUE);
         var fødselsdag = fom.minusYears(18).minusDays(1);
-        var dagsatsTidslinje = tjeneste.beregnDagsats(perioder, fødselsdag);
+        var dagsatsTidslinje = tjeneste.beregnDagsats(null, perioder, fødselsdag);
 
         var segmenter = dagsatsTidslinje.toSegments();
         assertThat(segmenter.size()).isEqualTo(1);
@@ -59,7 +61,7 @@ class UngdomsytelseBeregnDagsatsTest {
         var tom = LocalDate.of(2024, 5, 15);
         var perioder = new LocalDateTimeline<>(fom, tom, Boolean.TRUE);
         var fødselsdag = fom.minusYears(18).minusDays(1);
-        var dagsatsTidslinje = tjeneste.beregnDagsats(perioder, fødselsdag);
+        var dagsatsTidslinje = tjeneste.beregnDagsats(null, perioder, fødselsdag);
 
         var segmenter = dagsatsTidslinje.toSegments();
         assertThat(segmenter.size()).isEqualTo(2);
@@ -87,7 +89,7 @@ class UngdomsytelseBeregnDagsatsTest {
         var perioder = new LocalDateTimeline<>(fom, tom, Boolean.TRUE);
         var tjuefemårsdag = LocalDate.of(2024, 4, 15);
         var fødselsdato = tjuefemårsdag.minusYears(25);
-        var dagsatsTidslinje = tjeneste.beregnDagsats(perioder, fødselsdato);
+        var dagsatsTidslinje = tjeneste.beregnDagsats(null, perioder, fødselsdato);
 
         var segmenter = dagsatsTidslinje.toSegments();
         assertThat(segmenter.size()).isEqualTo(2);
@@ -117,7 +119,7 @@ class UngdomsytelseBeregnDagsatsTest {
         var perioder = new LocalDateTimeline<>(fom, tom, Boolean.TRUE);
         var tjuefemårsdag = LocalDate.of(2024, 4, 1);
         var fødselsdato = tjuefemårsdag.minusYears(25);
-        var dagsatsTidslinje = tjeneste.beregnDagsats(perioder, fødselsdato);
+        var dagsatsTidslinje = tjeneste.beregnDagsats(null, perioder, fødselsdato);
 
         var segmenter = dagsatsTidslinje.toSegments();
         assertThat(segmenter.size()).isEqualTo(2);

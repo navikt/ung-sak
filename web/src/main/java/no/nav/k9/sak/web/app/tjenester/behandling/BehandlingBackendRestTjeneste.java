@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 
+import no.nav.k9.prosesstask.api.PollTaskAfterTransaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,6 +100,7 @@ public class BehandlingBackendRestTjeneste {
     @Operation(description = "Init hent behandling", tags = "behandlinger", responses = {
             @ApiResponse(responseCode = "202", description = "Hent behandling initiert, Returnerer status på fremdrift/feil i backend", headers = @Header(name = HttpHeaders.LOCATION))
     })
+    @PollTaskAfterTransaction
     @BeskyttetRessurs(action = UPDATE, resource = BeskyttetRessursKoder.REFRESH_BEHANDLING_REGISTERDATA)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response oppfriskSaker(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = BehandlingBackendRestTjeneste.AbacDataSupplier.class) BehandlingIdListe behandlinger) {
