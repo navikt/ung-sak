@@ -94,9 +94,7 @@ public class JettyServer {
 
         // https://jetty.org/docs/jetty/12/programming-guide/arch/threads.html
         QueuedThreadPool threadPool = new QueuedThreadPool();
-        VirtualThreadPool virtualExecutor = new VirtualThreadPool();
-        virtualExecutor.setMaxThreads(128);
-        threadPool.setVirtualThreadsExecutor(virtualExecutor);
+        threadPool.setVirtualThreadsExecutor(new VirtualThreadPool());
 
         Server server = new Server(threadPool);
         server.setConnectors(createConnectors(appKonfigurasjon, server).toArray(new Connector[]{}));
@@ -188,6 +186,7 @@ public class JettyServer {
         webAppContext.setParentLoaderPriority(true);
 
         // må hoppe litt bukk for å hente web.xml fra classpath i stedet for fra filsystem.
+
         String descriptor = ResourceFactory.of(server).newClassLoaderResource("/WEB-INF/web.xml").getURI().toURL().toExternalForm();
         webAppContext.setDescriptor(descriptor);
         webAppContext.setBaseResource(createResourceCollection(server));
