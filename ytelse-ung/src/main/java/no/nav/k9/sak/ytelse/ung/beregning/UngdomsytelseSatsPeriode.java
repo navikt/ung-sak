@@ -26,6 +26,9 @@ public class UngdomsytelseSatsPeriode extends BaseEntitet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UNG_SATS_PERIODE")
     private Long id;
 
+    /**
+     * Dagsats basert på satstype og grunnbeløp, ekskludert barnetillegg
+     */
     @Column(name = "dagsats", nullable = false)
     private BigDecimal dagsats;
 
@@ -42,6 +45,12 @@ public class UngdomsytelseSatsPeriode extends BaseEntitet {
     @Column(name = "sats_type", nullable = false)
     private UngdomsytelseSatsType satsType;
 
+    @Column(name = "antall_barn", nullable = false)
+    private int antallBarn;
+
+    @Column(name = "dagsats_barnetillegg", nullable = false)
+    private BigDecimal dagsatsBarnetillegg;
+
     public UngdomsytelseSatsPeriode() {
     }
 
@@ -51,6 +60,8 @@ public class UngdomsytelseSatsPeriode extends BaseEntitet {
         this.grunnbeløp = ungdomsytelseSatsPeriode.getGrunnbeløp();
         this.grunnbeløpFaktor = ungdomsytelseSatsPeriode.getGrunnbeløpFaktor();
         this.satsType = ungdomsytelseSatsPeriode.getSatsType();
+        this.antallBarn = ungdomsytelseSatsPeriode.getAntallBarn();
+        this.dagsatsBarnetillegg = ungdomsytelseSatsPeriode.getDagsatsBarnetillegg();
     }
 
     public UngdomsytelseSatsPeriode(LocalDateInterval periode, UngdomsytelseSatser satser) {
@@ -59,6 +70,8 @@ public class UngdomsytelseSatsPeriode extends BaseEntitet {
         this.grunnbeløp = satser.grunnbeløp();
         this.grunnbeløpFaktor = satser.grunnbeløpFaktor();
         this.satsType = satser.satsType();
+        this.antallBarn = satser.antallBarn();
+        this.dagsatsBarnetillegg = satser.dagsatsBarnetillegg();
     }
 
     public BigDecimal getDagsats() {
@@ -81,7 +94,15 @@ public class UngdomsytelseSatsPeriode extends BaseEntitet {
         return satsType;
     }
 
+    public int getAntallBarn() {
+        return antallBarn;
+    }
+
+    public BigDecimal getDagsatsBarnetillegg() {
+        return dagsatsBarnetillegg;
+    }
+
     public UngdomsytelseSatser satser(){
-        return new UngdomsytelseSatser(dagsats, grunnbeløp, grunnbeløpFaktor, satsType);
+        return new UngdomsytelseSatser(dagsats, grunnbeløp, grunnbeløpFaktor, satsType, antallBarn, dagsatsBarnetillegg);
     }
 }
