@@ -271,6 +271,12 @@ public enum VilkårType implements Kodeverdi {
         return kode;
     }
 
+    // Overstyr standard toString() slik at generert openapi spesifikasjon blir enum med kode verdi, samtidig som legacy
+    // serialisering fungerer som før.
+    public String toString() {
+        return this.getKode();
+    }
+
     @Override
     public String getOffisiellKode() {
         return getKode();
