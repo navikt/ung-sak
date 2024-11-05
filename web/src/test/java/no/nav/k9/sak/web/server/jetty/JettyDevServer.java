@@ -1,26 +1,19 @@
 package no.nav.k9.sak.web.server.jetty;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.HttpConfiguration;
-import org.eclipse.jetty.server.HttpConnectionFactory;
-import org.eclipse.jetty.server.SecureRequestCustomizer;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.SslConnectionFactory;
-import org.eclipse.jetty.util.ssl.SslContextFactory;
-import org.eclipse.jetty.webapp.WebAppContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.k9.sak.web.app.JettyTestApplication;
 import no.nav.k9.sak.web.server.jetty.db.DatasourceRole;
 import no.nav.k9.sak.web.server.jetty.db.DatasourceUtil;
 import no.nav.k9.sak.web.server.jetty.db.EnvironmentClass;
+import org.eclipse.jetty.ee9.webapp.WebAppContext;
+import org.eclipse.jetty.server.*;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class JettyDevServer extends JettyServer {
 
@@ -146,8 +139,8 @@ public class JettyDevServer extends JettyServer {
     }
 
     @Override
-    protected WebAppContext createContext(AppKonfigurasjon appKonfigurasjon) throws IOException {
-        WebAppContext webAppContext = super.createContext(appKonfigurasjon);
+    protected WebAppContext createContext(AppKonfigurasjon appKonfigurasjon, Server server) throws IOException {
+        WebAppContext webAppContext = super.createContext(appKonfigurasjon, server);
         // https://www.eclipse.org/jetty/documentation/9.4.x/troubleshooting-locked-files-on-windows.html
         webAppContext.setInitParameter("org.eclipse.jetty.servlet.Default.useFileMappedBuffer", "false");
         return webAppContext;
