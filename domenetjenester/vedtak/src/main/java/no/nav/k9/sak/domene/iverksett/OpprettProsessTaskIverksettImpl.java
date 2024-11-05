@@ -24,7 +24,8 @@ public class OpprettProsessTaskIverksettImpl extends OpprettProsessTaskIverksett
                                            OppgaveTjeneste oppgaveTjeneste,
                                            InfotrygdFeedService infotrygdFeedService,
                                            StønadstatistikkService stønadstatistikkService,
-                                           @KonfigVerdi(value = "SEND_INNTEKTSMELDING_FORESPORSEL", defaultVerdi = "false") boolean skalSendeForesporsel) {
-        super(prosessTaskRepository, oppgaveTjeneste, infotrygdFeedService, stønadstatistikkService, skalSendeForesporsel);
+                                           @KonfigVerdi(value = "SEND_INNTEKTSMELDING_FORESPORSEL", defaultVerdi = "false") boolean skalSendeForesporsel,
+                                           @KonfigVerdi(value = "FJERN_INAKTIVE_VILKAR_RESULTAT", defaultVerdi = "true") boolean skalFjerneInaktiveVilkårsresultat) {
+        super(prosessTaskRepository, oppgaveTjeneste, infotrygdFeedService, stønadstatistikkService, skalSendeForesporsel, skalFjerneInaktiveVilkårsresultat);
     }
 }

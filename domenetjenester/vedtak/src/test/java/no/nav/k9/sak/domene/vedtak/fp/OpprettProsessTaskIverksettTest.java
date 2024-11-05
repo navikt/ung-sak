@@ -79,7 +79,7 @@ public class OpprettProsessTaskIverksettTest {
 
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagMocked();
-        opprettProsessTaskIverksett = new OpprettProsessTaskIverksettImpl(fagsakProsessTaskRepository, oppgaveTjeneste, infotrygdFeedService, stønadstatistikkService, false);
+        opprettProsessTaskIverksett = new OpprettProsessTaskIverksettImpl(fagsakProsessTaskRepository, oppgaveTjeneste, infotrygdFeedService, stønadstatistikkService, false, true);
     }
 
     @Test

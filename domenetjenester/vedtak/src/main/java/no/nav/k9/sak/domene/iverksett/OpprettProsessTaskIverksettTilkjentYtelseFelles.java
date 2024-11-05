@@ -34,6 +34,7 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
     protected InfotrygdFeedService infotrygdFeedService;
     private StønadstatistikkService stønadstatistikkService;
     private boolean skalLukkeImForesporsel;
+    private boolean skalFjerneInaktiveVilkårsreultat;
 
     protected OpprettProsessTaskIverksettTilkjentYtelseFelles() {
         // for CDI proxy
@@ -43,12 +44,13 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
                                                            OppgaveTjeneste oppgaveTjeneste,
                                                            InfotrygdFeedService infotrygdFeedService,
                                                            StønadstatistikkService stønadstatistikkService,
-                                                           boolean skalLukkeImForesporsel) {
+                                                           boolean skalLukkeImForesporsel, boolean skalFjerneInaktiveVilkårsreultat) {
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
         this.oppgaveTjeneste = oppgaveTjeneste;
         this.infotrygdFeedService = infotrygdFeedService;
         this.stønadstatistikkService = stønadstatistikkService;
         this.skalLukkeImForesporsel = skalLukkeImForesporsel;
+        this.skalFjerneInaktiveVilkårsreultat = skalFjerneInaktiveVilkårsreultat;
     }
 
     @Override
@@ -82,6 +84,10 @@ public abstract class OpprettProsessTaskIverksettTilkjentYtelseFelles implements
         // taskData.addNesteSekvensiell( ProsessTaskData.forProsessTask(SendTilkjentYtelseTask.TASKTYPE));
 
         if (behandling.getFagsakYtelseType().omfattesAvK8()) {
+            taskData.addNesteSekvensiell(ProsessTaskData.forProsessTask(FastsettPGIPerioderTask.class));
+        }
+
+        if (skalFjerneInaktiveVilkårsreultat) {
             taskData.addNesteSekvensiell(ProsessTaskData.forProsessTask(FastsettPGIPerioderTask.class));
         }
 
