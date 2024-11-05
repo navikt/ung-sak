@@ -48,8 +48,8 @@
         <jackson.version>2.17.2</jackson.version>
         <asm.version>9.7.1</asm.version>
         <kotlin-stdlib.version>2.0.21</kotlin-stdlib.version>
-        <jandex.version>3.2.2</jandex.version>
-        <flyway.version>10.20.0</flyway.version>
+        <jandex.version>3.2.3</jandex.version>
+        <flyway.version>10.20.1</flyway.version>
 
     </properties>
 
@@ -691,7 +691,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.8.0</version>
+                    <version>3.8.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -733,12 +733,12 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.1</version>
+                    <version>3.5.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>3.5.1</version>
+                    <version>3.5.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
