@@ -2,13 +2,14 @@ package no.nav.k9.sak.produksjonsstyring.behandlingenhet;
 
 import static java.util.Optional.ofNullable;
 
-import java.time.LocalDate;
-import java.util.Arrays;
+import java.time.Duration;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -16,6 +17,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.arbeidsfordeling.rest.ArbeidsfordelingRequest;
 import no.nav.k9.felles.integrasjon.arbeidsfordeling.rest.ArbeidsfordelingResponse;
 import no.nav.k9.felles.integrasjon.arbeidsfordeling.rest.ArbeidsfordelingRestKlient;
+import no.nav.k9.felles.util.LRUCache;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.person.Diskresjonskode;
@@ -28,26 +30,21 @@ import no.nav.k9.sak.typer.PersonIdent;
 @ApplicationScoped
 public class EnhetsTjeneste {
 
-    static class EnhetsTjenesteData {
-        OrganisasjonsEnhet enhetKode6;
-        OrganisasjonsEnhet enhetKlage;
-        List<OrganisasjonsEnhet> alleBehandlendeEnheter;
-        LocalDate sisteInnhenting = LocalDate.MIN;
-
-        Optional<OrganisasjonsEnhet> finnOrganisasjonsEnhet(String enhetId) {
-            return alleBehandlendeEnheter.stream().filter(e -> enhetId.equals(e.getEnhetId())).findFirst();
-        }
+    private static class EnhetsTjenesteData {
+        private OrganisasjonsEnhet enhetKode6;
+        private OrganisasjonsEnhet enhetKlage;
+        private List<OrganisasjonsEnhet> alleBehandlendeEnheter;
     }
 
     private static final String NK_ENHET_ID = "4292";
     private static final OrganisasjonsEnhet KLAGE_ENHET = new OrganisasjonsEnhet(NK_ENHET_ID, "NAV Klageinstans Midt-Norge");
+    private final static Duration AKSEPTERBAR_ALDER_CACHE = Duration.ofHours(1);
 
     private TpsTjeneste tpsTjeneste;
     private ArbeidsfordelingRestKlient arbeidsfordelingTjeneste;
 
-    private final Map<FagsakYtelseType, EnhetsTjenesteData> cache =
-        Arrays.stream(FagsakYtelseType.values())
-            .collect(Collectors.toMap(v -> v, v -> new EnhetsTjenesteData()));
+    private final LRUCache<FagsakYtelseType, EnhetsTjenesteData> cache = new LRUCache<>(FagsakYtelseType.values().length, AKSEPTERBAR_ALDER_CACHE.toMillis());
+    private final Map<FagsakYtelseType, ReentrantLock> låser = initLåser();
 
     public EnhetsTjeneste() {
         // For CDI proxy
@@ -79,23 +76,6 @@ public class EnhetsTjeneste {
         return Optional.empty();
     }
 
-    Optional<OrganisasjonsEnhet> oppdaterEnhetSjekkRegistrerteRelasjoner(FagsakYtelseType ytelseType,
-                                                                         String enhetId,
-                                                                         AktørId hovedAktør,
-                                                                         Collection<AktørId> alleAktører) {
-        var cacheEntry = oppdaterEnhetCache(ytelseType);
-        if (cacheEntry.enhetKode6.getEnhetId().equals(enhetId) || NK_ENHET_ID.equals(enhetId)) {
-            return Optional.empty();
-        }
-        if (harNoenDiskresjonskode6(alleAktører)) {
-            return Optional.of(cacheEntry.enhetKode6);
-        }
-        if (cacheEntry.finnOrganisasjonsEnhet(enhetId).isEmpty()) {
-            return Optional.of(hentEnhetSjekkKunAktør(hovedAktør, ytelseType));
-        }
-        return Optional.empty();
-    }
-
     OrganisasjonsEnhet hentEnhetSjekkKunAktør(AktørId aktørId, FagsakYtelseType ytelseType) {
         PersonIdent fnr = tpsTjeneste.hentFnrForAktør(aktørId);
         GeografiskTilknytning geografiskTilknytning = tpsTjeneste.hentGeografiskTilknytning(fnr);
@@ -120,18 +100,21 @@ public class EnhetsTjeneste {
     }
 
     private EnhetsTjenesteData oppdaterEnhetCache(FagsakYtelseType ytelseType) {
-        var cacheEntry = cache.get(ytelseType);
-        if (cacheEntry.sisteInnhenting.isBefore(LocalDate.now())) {
-            synchronized (cacheEntry) {
-                if (cacheEntry.sisteInnhenting.isBefore(LocalDate.now())) {
-                    cacheEntry.enhetKode6 = hentEnheterFor(null, Diskresjonskode.KODE6.getKode(), ytelseType).get(0);
-                    cacheEntry.enhetKlage = KLAGE_ENHET;
-                    cacheEntry.alleBehandlendeEnheter = hentEnheterFor(null, null, ytelseType);
-                    cacheEntry.sisteInnhenting = LocalDate.now();
-                }
+        try {
+            låser.get(ytelseType).lock();
+            EnhetsTjenesteData fraCache = cache.get(ytelseType);
+            if (fraCache != null) {
+                return fraCache;
             }
+            var entry = new EnhetsTjenesteData();
+            entry.enhetKode6 = hentEnheterFor(null, Diskresjonskode.KODE6.getKode(), ytelseType).get(0);
+            entry.enhetKlage = KLAGE_ENHET;
+            entry.alleBehandlendeEnheter = hentEnheterFor(null, null, ytelseType);
+            cache.put(ytelseType, entry);
+            return entry;
+        } finally {
+            låser.get(ytelseType).unlock();
         }
-        return cacheEntry;
     }
 
     OrganisasjonsEnhet getEnhetKlage() {
@@ -161,5 +144,13 @@ public class EnhetsTjeneste {
         return restenhet.stream()
             .map(r -> new OrganisasjonsEnhet(r.getEnhetNr(), r.getEnhetNavn()))
             .collect(Collectors.toList());
+    }
+
+    private Map<FagsakYtelseType, ReentrantLock> initLåser() {
+        Map<FagsakYtelseType, ReentrantLock> låser = new EnumMap<>(FagsakYtelseType.class);
+        for (FagsakYtelseType value : FagsakYtelseType.values()) {
+            låser.put(value, new ReentrantLock());
+        }
+        return låser;
     }
 }
