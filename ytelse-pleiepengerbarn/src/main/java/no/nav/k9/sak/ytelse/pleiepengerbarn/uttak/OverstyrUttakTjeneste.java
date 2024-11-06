@@ -16,6 +16,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.kodeverk.uttak.UttakArbeidType;
 import no.nav.k9.kodeverk.vilkår.Utfall;
 import no.nav.k9.sak.behandling.BehandlingReferanse;
+import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrUttakRepository;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrtUttakPeriode;
 import no.nav.k9.sak.behandlingslager.behandling.uttak.OverstyrtUttakUtbetalingsgrad;
@@ -35,6 +36,7 @@ public class OverstyrUttakTjeneste {
     private OverstyrUttakRepository overstyrUttakRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
+    private BehandlingRepository behandlingRepository;
 
     public OverstyrUttakTjeneste() {
     }
@@ -43,16 +45,17 @@ public class OverstyrUttakTjeneste {
     public OverstyrUttakTjeneste(UttakTjeneste uttakTjeneste,
                                  OverstyrUttakRepository overstyrUttakRepository,
                                  @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
-                                 VilkårResultatRepository vilkårResultatRepository) {
+                                 VilkårResultatRepository vilkårResultatRepository, BehandlingRepository behandlingRepository) {
         this.overstyrUttakRepository = overstyrUttakRepository;
         this.uttakTjeneste = uttakTjeneste;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
+        this.behandlingRepository = behandlingRepository;
     }
 
     public boolean skalOverstyreUttak(BehandlingReferanse behandlingReferanse) {
         var periodeTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjeneste, behandlingReferanse.getFagsakYtelseType(), behandlingReferanse.getBehandlingType());
-        var vurderer = new SkalOverstyreUttakVurderer(overstyrUttakRepository, periodeTjeneste);
+        var vurderer = new SkalOverstyreUttakVurderer(overstyrUttakRepository, periodeTjeneste, behandlingRepository);
         return vurderer.skalOverstyreUttak(behandlingReferanse);
     }
 

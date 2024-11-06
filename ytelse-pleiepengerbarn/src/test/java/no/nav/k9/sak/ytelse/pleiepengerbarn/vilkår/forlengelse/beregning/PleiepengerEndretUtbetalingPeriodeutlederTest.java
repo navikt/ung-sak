@@ -138,7 +138,7 @@ class PleiepengerEndretUtbetalingPeriodeutlederTest {
             personopplysningTjeneste,
             pleietrengendeRevurderingPerioderTjeneste,
             erEndringIRefusjonskravVurderer,
-            new OverstyrUttakTjeneste(null, new OverstyrUttakRepository(entityManager), null, null));
+            new OverstyrUttakTjeneste(null, new OverstyrUttakRepository(entityManager), null, null, null));
         originalBehandling = opprettBehandling(SKJÆRINGSTIDSPUNKT);
         behandling = Behandling.fraTidligereBehandling(originalBehandling, BehandlingType.REVURDERING).build();
         behandlingRepository.lagre(behandling, new BehandlingLås(null));

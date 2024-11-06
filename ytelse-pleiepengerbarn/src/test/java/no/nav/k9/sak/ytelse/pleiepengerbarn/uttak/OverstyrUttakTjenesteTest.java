@@ -41,7 +41,7 @@ class OverstyrUttakTjenesteTest {
 
     @BeforeEach
     void setUp() {
-        overstyrUttakTjeneste = new OverstyrUttakTjeneste(null, overstyrUttakRepository, null, null);
+        overstyrUttakTjeneste = new OverstyrUttakTjeneste(null, overstyrUttakRepository, null, null, null);
         SubjectHandlerUtils.useSubjectHandler(StaticSubjectHandler.class);
         SubjectHandlerUtils.setInternBruker("saksbehandler1");
     }

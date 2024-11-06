@@ -16,7 +16,7 @@ public class SkalOverstyreUttakVurderer {
     private final VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private final BehandlingRepository behandlingRepository;
 
-    public SkalOverstyreUttakVurderer(OverstyrUttakRepository overstyrUttakRepository, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste, AksjonspunktRepository aksjonspunktRepository, BehandlingRepository behandlingRepository) {
+    public SkalOverstyreUttakVurderer(OverstyrUttakRepository overstyrUttakRepository, VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste, BehandlingRepository behandlingRepository) {
         this.overstyrUttakRepository = overstyrUttakRepository;
         this.perioderTilVurderingTjeneste = perioderTilVurderingTjeneste;
         this.behandlingRepository = behandlingRepository;
@@ -28,7 +28,7 @@ public class SkalOverstyreUttakVurderer {
         var tidslinjeTilVurdering = new LocalDateTimeline<>(perioderTilVurdering.stream().map(p -> new LocalDateSegment<>(p.toLocalDateInterval(), Boolean.TRUE)).toList());
         var harOverstyringForPeriode = overstyrtUttak.intersects(tidslinjeTilVurdering);
         var behandling = behandlingRepository.hentBehandling(behandlingReferanse.getBehandlingId());
-        var harLøstOverlappendeSakerAksjonspunkt = behandling.getAksjonspunkter().stream().anyMatch(ap -> ap.erUtført() && ap.getAksjonspunktDefinisjon().equals(AksjonspunktDefinisjon.VURDER_OVERLAPPENDE_SØSKENSAKER));
+        var harLøstOverlappendeSakerAksjonspunkt = behandling.getAksjonspunkter().stream().anyMatch(ap -> !ap.erAvbrutt() && ap.getAksjonspunktDefinisjon().equals(AksjonspunktDefinisjon.VURDER_OVERLAPPENDE_SØSKENSAKER));
         return harOverstyringForPeriode && !harLøstOverlappendeSakerAksjonspunkt;
     }
 
