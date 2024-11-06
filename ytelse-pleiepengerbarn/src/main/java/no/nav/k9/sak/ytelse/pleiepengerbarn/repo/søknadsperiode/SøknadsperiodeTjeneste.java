@@ -9,6 +9,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -33,6 +36,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.uttak.død.HåndterePleietrengendeD�
 @Dependent
 public class SøknadsperiodeTjeneste {
 
+    private static final Logger log = LoggerFactory.getLogger(SøknadsperiodeTjeneste.class);
     private final BehandlingRepository behandlingRepository;
     private FagsakRepository fagsakRepository;
     private final SøknadsperiodeRepository søknadsperiodeRepository;
@@ -146,6 +150,11 @@ public class SøknadsperiodeTjeneste {
         if (utvidetPeriode.isPresent()) {
             var periode = utvidetPeriode.get();
             tidslinje = tidslinje.union(new LocalDateTimeline<>(List.of(new LocalDateSegment<>(periode.toLocalDateInterval(), new Kravperiode(periode, referanse.getBehandlingId(), false)))), this::mergeUtvidetPeriodeForDødsfall);
+        }
+
+        if (referanse.getBehandlingId() == 1846760L) { //BQiGE //TODO fjern
+            log.info("søknadsperioders: {}", søknadsperioders);
+            log.info("tidslinje: {}", tidslinje);
         }
 
         return tidslinje.stream().map(s -> new Kravperiode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()), s.getValue().getBehandlingId(), s.getValue().isHarTrukketKrav())).toList();

@@ -35,6 +35,7 @@ import no.nav.k9.sak.ytelse.pleiepengerbarn.inngangsvilkår.søknadsfrist.PSBVur
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperiode;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeGrunnlag;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperiodeRepository;
+import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.Søknadsperioder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.søknadsperiode.SøknadsperioderHolder;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderGrunnlagRepository;
 import no.nav.k9.sak.ytelse.pleiepengerbarn.repo.uttak.UttakPerioderHolder;
@@ -132,12 +133,14 @@ public class InitierPerioderSteg implements BehandlingSteg {
             .filter(it -> mottatteDokumenter.contains(it.getKey().getJournalpostId()))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        var relevanteDokumenter = grunnlag.getOppgitteSøknadsperioder()
+        Set<Søknadsperioder> relevanteSøknadsperioder = grunnlag.getOppgitteSøknadsperioder()
             .getPerioder()
             .stream()
             .filter(it -> entries.keySet().stream().map(KravDokument::getJournalpostId).anyMatch(at -> at.getJournalpostId().equals(it.getJournalpostId())))
             .collect(Collectors.toSet());
 
-        return new SøknadsperioderHolder(relevanteDokumenter);
+        log.info("Fant {} søknadsperioder relevante for behandlingen", relevanteSøknadsperioder);
+
+        return new SøknadsperioderHolder(relevanteSøknadsperioder);
     }
 }
