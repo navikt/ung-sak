@@ -24,7 +24,7 @@ public class OpprettProsessTaskIverksettImpl extends OpprettProsessTaskIverksett
                                            OppgaveTjeneste oppgaveTjeneste,
                                            InfotrygdFeedService infotrygdFeedService,
                                            StønadstatistikkService stønadstatistikkService,
-                                           @KonfigVerdi(value = "SEND_INNTEKTSMELDING_FORESPORSEL", defaultVerdi = "false") boolean skalSendeForesporsel) {
-        super(prosessTaskRepository, oppgaveTjeneste, infotrygdFeedService, stønadstatistikkService, skalSendeForesporsel);
+                                           @KonfigVerdi(value = "LUKK_INNTEKTSMELDING_FORESPORSEL", defaultVerdi = "false") boolean skalLukkeImForesporsel) {
+        super(prosessTaskRepository, oppgaveTjeneste, infotrygdFeedService, stønadstatistikkService, skalLukkeImForesporsel);
     }
 }

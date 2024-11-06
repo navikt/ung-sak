@@ -56,8 +56,9 @@ class InntektsmeldingVurderingUtleder {
         var resultat = new ArrayList<VurderingPåPeriode>();
 
         for (DatoIntervallEntitet periode : perioderTilVurdering) {
-            var relevantPeriode = relevantPeriodeUtleder.utledRelevantPeriode(ref, periode);
-            var aktuelleInntektsmeldinger = relevantPeriodeUtleder.utledRelevanteInntektsmeldinger(alleInntektsmeldinger, relevantPeriode);
+            var relevantPeriode = relevantPeriodeUtleder.utledRelevantPeriode(ref, periode, true);
+            var relevantPeriodeUtenGyldighetTilbakeITid = relevantPeriodeUtleder.utledRelevantPeriode(ref, periode, false);
+            var aktuelleInntektsmeldinger = relevantPeriodeUtleder.utledRelevanteInntektsmeldinger(alleInntektsmeldinger, relevantPeriode, relevantPeriodeUtenGyldighetTilbakeITid);
             var inntektsmeldingerSomSendesInnTilBeregning = kompletthetForBeregningTjeneste.utledInntektsmeldingerSomSendesInnTilBeregningForPeriode(ref, alleInntektsmeldinger, periode);
 
             var utdaterteInntektsmeldinger = aktuelleInntektsmeldinger.stream()

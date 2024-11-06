@@ -42,8 +42,9 @@ public class PleiepengerInntektsmeldingerRelevantForBeregning implements Inntekt
 
     @Override
     public Collection<Inntektsmelding> begrensSakInntektsmeldinger(BehandlingReferanse referanse, Collection<Inntektsmelding> sakInntektsmeldinger, DatoIntervallEntitet vilkårsPeriode) {
-        var relevantPeriode = relevantPeriodeUtleder.utledRelevantPeriode(referanse, vilkårsPeriode);
-        return relevantPeriodeUtleder.utledRelevanteInntektsmeldinger(new HashSet<>(sakInntektsmeldinger), relevantPeriode);
+        var relevantPeriode = relevantPeriodeUtleder.utledRelevantPeriode(referanse, vilkårsPeriode, true);
+        var relevantPeriodeUtenGyldighetTilbakeITid = relevantPeriodeUtleder.utledRelevantPeriode(referanse, vilkårsPeriode, false);
+        return relevantPeriodeUtleder.utledRelevanteInntektsmeldinger(new HashSet<>(sakInntektsmeldinger), relevantPeriode, relevantPeriodeUtenGyldighetTilbakeITid);
     }
 
     @Override
