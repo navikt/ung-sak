@@ -291,6 +291,8 @@ spec:
       value: "false"
     - name: SOSKENSAK_UTTAK_OVERSTYRING
       value: "false"
+    - name: INGEN_AP_9291_I_FORSTEGANGSBEHANDLING
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

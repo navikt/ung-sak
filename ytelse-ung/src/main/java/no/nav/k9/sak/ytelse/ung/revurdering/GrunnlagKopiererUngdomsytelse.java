@@ -12,6 +12,7 @@ import no.nav.k9.sak.behandlingslager.behandling.personopplysning.Personopplysni
 import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.k9.sak.domene.arbeidsforhold.InntektArbeidYtelseTjeneste;
 import no.nav.k9.sak.ytelse.ung.periode.UngdomsprogramPeriodeRepository;
+import no.nav.k9.sak.ytelse.ung.søknadsperioder.UngdomsytelseSøknadsperiodeRepository;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(UNGDOMSYTELSE)
@@ -21,6 +22,7 @@ public class GrunnlagKopiererUngdomsytelse implements GrunnlagKopierer {
     private MedlemskapRepository medlemskapRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
+    private UngdomsytelseSøknadsperiodeRepository ungdomsytelseSøknadsperiodeRepository;
 
     public GrunnlagKopiererUngdomsytelse() {
         // for CDI proxy
@@ -29,11 +31,12 @@ public class GrunnlagKopiererUngdomsytelse implements GrunnlagKopierer {
     @Inject
     public GrunnlagKopiererUngdomsytelse(BehandlingRepositoryProvider repositoryProvider,
                                          InntektArbeidYtelseTjeneste iayTjeneste,
-                                         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
+                                         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository, UngdomsytelseSøknadsperiodeRepository ungdomsytelseSøknadsperiodeRepository) {
         this.iayTjeneste = iayTjeneste;
         this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
         this.medlemskapRepository = repositoryProvider.getMedlemskapRepository();
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
+        this.ungdomsytelseSøknadsperiodeRepository = ungdomsytelseSøknadsperiodeRepository;
     }
 
 
@@ -44,6 +47,7 @@ public class GrunnlagKopiererUngdomsytelse implements GrunnlagKopierer {
         personopplysningRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         medlemskapRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         ungdomsprogramPeriodeRepository.kopier(originalBehandlingId, nyBehandlingId);
+        ungdomsytelseSøknadsperiodeRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
 
         // gjør til slutt, innebærer kall til abakus
         iayTjeneste.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);

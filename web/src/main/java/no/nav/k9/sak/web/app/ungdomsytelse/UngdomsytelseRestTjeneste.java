@@ -65,7 +65,15 @@ public class UngdomsytelseRestTjeneste {
             return Collections.emptyList();
         } else {
             return perioder.getPerioder().stream()
-                .map(p->new UngdomsytelseSatsPeriodeDto(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), p.getDagsats(), p.getGrunnbeløpFaktor(), p.getGrunnbeløp(), p.getSatsType()))
+                .map(p->new UngdomsytelseSatsPeriodeDto(
+                    p.getPeriode().getFomDato(),
+                    p.getPeriode().getTomDato(),
+                    p.getDagsats(),
+                    p.getGrunnbeløpFaktor(),
+                    p.getGrunnbeløp(),
+                    p.getSatsType(),
+                    p.getAntallBarn(),
+                    p.getDagsatsBarnetillegg()))
                 .toList();
         }
     }

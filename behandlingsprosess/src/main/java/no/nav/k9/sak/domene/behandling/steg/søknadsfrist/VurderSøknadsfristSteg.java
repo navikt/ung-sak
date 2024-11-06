@@ -65,7 +65,7 @@ public class VurderSøknadsfristSteg implements BehandlingSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-        var aksjonspunktFor = behandling.getAksjonspunktFor(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_SØKNADSFRISTVILKÅRET_KODE);
+        var aksjonspunktFor = behandling.getAksjonspunktForHvisFinnes(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_SØKNADSFRISTVILKÅRET_KODE);
         aksjonspunktFor.ifPresent(this::settÅpentAksjonspunktTilUtført);
 
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(kontekst.getBehandlingId());
@@ -89,7 +89,7 @@ public class VurderSøknadsfristSteg implements BehandlingSteg {
     }
 
     private boolean erManuellRevurderingOgHarGjortVurderingerTidligere(Behandling behandling, Optional<AvklartSøknadsfristResultat> avklartSøknadsfristResultatOpt) {
-        return behandling.erManueltOpprettet() && harGjortAvklaringerTidligere(avklartSøknadsfristResultatOpt) && !behandling.getAksjonspunktFor(AksjonspunktKodeDefinisjon.KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST_KODE).map(Aksjonspunkt::erUtført).orElse(false);
+        return behandling.erManueltOpprettet() && harGjortAvklaringerTidligere(avklartSøknadsfristResultatOpt) && !behandling.getAksjonspunktForHvisFinnes(AksjonspunktKodeDefinisjon.KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST_KODE).map(Aksjonspunkt::erUtført).orElse(false);
     }
 
     private boolean harGjortAvklaringerTidligere(Optional<AvklartSøknadsfristResultat> avklartSøknadsfristResultatOpt) {

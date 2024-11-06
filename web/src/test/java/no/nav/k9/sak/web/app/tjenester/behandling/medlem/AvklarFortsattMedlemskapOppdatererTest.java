@@ -71,7 +71,7 @@ public class AvklarFortsattMedlemskapOppdatererTest {
 
         final MedlemskapAksjonspunktTjeneste medlemskapTjeneste = new MedlemskapAksjonspunktTjeneste(
             repositoryProvider, historikkTjenesteAdapter, lagMockYtelseSkjæringstidspunktTjeneste(LocalDate.now()));
-        var aksjonspunkt = behandling.getAksjonspunktFor(dto.getKode());
+        var aksjonspunkt = behandling.getAksjonspunktForHvisFinnes(dto.getKode());
 
         // Act
         new AvklarFortsattMedlemskapOppdaterer(medlemskapTjeneste)

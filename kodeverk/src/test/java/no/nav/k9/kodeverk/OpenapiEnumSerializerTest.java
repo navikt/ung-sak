@@ -3,7 +3,9 @@ package no.nav.k9.kodeverk;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -19,6 +21,7 @@ class OpenapiEnumSerializerTest {
         final var moduleToTest = new SimpleModule();
         ObjectMapper baseObjectMapper = new ObjectMapper();
         moduleToTest.addSerializer(new OpenapiEnumSerializer(baseObjectMapper));
+        moduleToTest.setDeserializerModifier(new OpenapiEnumBeanDeserializerModifier());
         this.om = baseObjectMapper.copy().registerModule(moduleToTest);
     }
 
@@ -111,6 +114,19 @@ class OpenapiEnumSerializerTest {
         @JsonValue
         public String getKode() {
             return this.kode;
+        }
+
+        // Simuler den vanlege no situasjonen i Kodeverdi enums, at det finnast JsonCreator som ikkje fungerer med name
+        // input. Dette vil dermed feile i standard deserialisering når serialisering har skjedd med OpenapiEnumSerializer.
+        // Med ny OpenapiEnumBeanDeserializerModifier skal det fungere.
+        @JsonCreator
+        public static TestEnum4 fraObjekt(@JsonProperty("kode") String kode) {
+            for(var v : values()) {
+                if(v.getKode().equals(kode)) {
+                    return v;
+                }
+            }
+            throw new IllegalArgumentException("TestEnum4 med kode " + kode + " ikke funnet");
         }
     }
     // Serialisering av denne blir overstyrt til å konvertere @JsonValue verdi return med toString().

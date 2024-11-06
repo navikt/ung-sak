@@ -81,7 +81,7 @@ public class BekreftOppholdVurderingTest {
         final MedlemskapAksjonspunktTjeneste medlemskapAksjonspunktTjeneste = new MedlemskapAksjonspunktTjeneste(
             repositoryProvider, mock(HistorikkTjenesteAdapter.class), skjæringstidspunktTjeneste);
 
-        Optional<Aksjonspunkt> aksjonspunkt = behandling.getAksjonspunktFor(dto.getKode());
+        Optional<Aksjonspunkt> aksjonspunkt = behandling.getAksjonspunktForHvisFinnes(dto.getKode());
         BekreftOppholdOppdaterer bekreftOppholdOppdaterer = new BekreftOppholdOppdaterer(
             lagMockHistory(), medlemskapTjeneste, medlemskapAksjonspunktTjeneste) {
         };
@@ -121,7 +121,7 @@ public class BekreftOppholdVurderingTest {
         final MedlemskapAksjonspunktTjeneste medlemskapAksjonspunktTjeneste = new MedlemskapAksjonspunktTjeneste(
             repositoryProvider, mock(HistorikkTjenesteAdapter.class), skjæringstidspunktTjeneste);
 
-        var aksjonspunkt = behandling.getAksjonspunktFor(dto.getKode());
+        var aksjonspunkt = behandling.getAksjonspunktForHvisFinnes(dto.getKode());
         new BekreftOppholdOppdaterer(lagMockHistory(), medlemskapTjeneste, medlemskapAksjonspunktTjeneste) {
         }.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, dto));
 

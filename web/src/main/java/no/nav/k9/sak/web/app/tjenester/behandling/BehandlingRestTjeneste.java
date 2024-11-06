@@ -36,6 +36,7 @@ import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.k9.kodeverk.historikk.HistorikkAktør;
 import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.k9.prosesstask.api.PollTaskAfterTransaction;
 import no.nav.k9.sak.behandling.FagsakTjeneste;
 import no.nav.k9.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.k9.sak.behandlingskontroll.BehandlingTypeRef;
@@ -296,6 +297,7 @@ public class BehandlingRestTjeneste {
     @Operation(description = "Gjenopptar behandling som er satt på vent", tags = "behandlinger", responses = {
         @ApiResponse(responseCode = "200", description = "Gjenoppta behandling påstartet i bakgrunnen", headers = @Header(name = HttpHeaders.LOCATION))
     })
+    @PollTaskAfterTransaction
     @BeskyttetRessurs(action = UPDATE, resource = FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response gjenopptaBehandling(@Context HttpServletRequest request,
@@ -389,6 +391,7 @@ public class BehandlingRestTjeneste {
     @Operation(description = "Opprette ny unntaksbehandling", tags = "behandlinger", responses = {
         @ApiResponse(responseCode = "202", description = "Opprett ny unntaksbehandling pågår", headers = @Header(name = HttpHeaders.LOCATION))
     })
+    @PollTaskAfterTransaction
     @BeskyttetRessurs(action = CREATE, resource = DRIFT)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response opprettNyUnntaksbehandling(@Context HttpServletRequest request,

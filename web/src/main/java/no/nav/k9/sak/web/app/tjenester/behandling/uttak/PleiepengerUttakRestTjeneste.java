@@ -64,7 +64,6 @@ import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrUttakPeriodeDto;
 import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrUttakUtbetalingsgradDto;
 import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrbareUttakAktiviterDto;
 import no.nav.k9.sak.kontrakt.uttak.overstyring.OverstyrtUttakDto;
-import no.nav.k9.sak.kontrakt.uttak.søskensaker.EgneOverlappendeSakerDto;
 import no.nav.k9.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.k9.sak.typer.AktørId;
 import no.nav.k9.sak.typer.InternArbeidsforholdRef;
@@ -190,16 +189,16 @@ public class PleiepengerUttakRestTjeneste {
 
         final LocalDate virkningsdatoUttakNyeRegler = uttakNyeReglerRepository.finnDatoForNyeRegler(behandling.getId()).orElse(null);
 
+        var harAPForVurderingAvDato = behandling.getAksjonspunkter().stream().anyMatch(a -> a.getAksjonspunktDefinisjon().equals(AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK) && !a.erAvbrutt());
         var uttaksplan = uttakTjeneste.hentUttaksplan(behandlingIdDto.getBehandlingUuid(), true);
         if (uttaksplan != null) {
-            return UttaksplanMedUtsattePerioder.medUttaksplan(uttaksplan, utsattePerioder, virkningsdatoUttakNyeRegler, perioderTilVurdering);
+            return UttaksplanMedUtsattePerioder.medUttaksplan(uttaksplan, utsattePerioder, finnVirkniningsdatoForVisning(virkningsdatoUttakNyeRegler, harAPForVurderingAvDato), perioderTilVurdering);
         }
 
-        var harAPForVurderingAvDato = behandling.getAksjonspunkter().stream().anyMatch(a -> a.getAksjonspunktDefinisjon().equals(AksjonspunktDefinisjon.VURDER_DATO_NY_REGEL_UTTAK) && !a.erAvbrutt());
-        if (harAPForVurderingAvDato || virkningsdatoUttakNyeRegler != null) {
+        if (harAPForVurderingAvDato) {
             final Uttaksgrunnlag uttaksgrunnlag = mapInputTilUttakTjeneste.hentUtOgMapRequestUtenInntektsgradering(BehandlingReferanse.fra(behandling));
             var simulerUttaksplan = uttakTjeneste.simulerUttaksplan(uttaksgrunnlag);
-            return UttaksplanMedUtsattePerioder.medSimulertUttaksplan(simulerUttaksplan.getSimulertUttaksplan(), utsattePerioder, virkningsdatoUttakNyeRegler, perioderTilVurdering);
+            return UttaksplanMedUtsattePerioder.medSimulertUttaksplan(simulerUttaksplan.getSimulertUttaksplan(), utsattePerioder, finnVirkniningsdatoForVisning(virkningsdatoUttakNyeRegler, harAPForVurderingAvDato), perioderTilVurdering);
         }
 
         return UttaksplanMedUtsattePerioder.medUttaksplan(null, utsattePerioder, null, perioderTilVurdering);
@@ -329,6 +328,11 @@ public class PleiepengerUttakRestTjeneste {
         ArbeidsgiverOversiktDto arbeidsgiverOversikt = arbeidsgiverOversiktTjeneste.getArbeidsgiverOpplysninger(behandlingUuid);
         return new OverstyrbareUttakAktiviterDto(aktiviteter, arbeidsgiverOversikt);
     }
+
+    private static LocalDate finnVirkniningsdatoForVisning(LocalDate virkningsdatoUttakNyeRegler, boolean harAPForVurderingAvDato) {
+        return harAPForVurderingAvDato ? virkningsdatoUttakNyeRegler : null;
+    }
+
 
     private static no.nav.k9.sak.typer.Periode tilPeriode(LukketPeriode lukketPeriode) {
         return new no.nav.k9.sak.typer.Periode(lukketPeriode.getFom(), lukketPeriode.getTom());

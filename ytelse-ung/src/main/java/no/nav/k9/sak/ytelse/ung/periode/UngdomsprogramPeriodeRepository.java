@@ -66,5 +66,4 @@ public class UngdomsprogramPeriodeRepository {
         return HibernateVerktøy.hentUniktResultat(query);
     }
 
-
 }

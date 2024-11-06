@@ -11,12 +11,11 @@ import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.kafka.InfotrygdFeedMeldingProducer;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
+import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.kafka.InfotrygdFeedMeldingProducer;
 import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.uttak.Tid;
@@ -53,7 +52,7 @@ public class PubliserInfotrygdFeedElementTaskTest {
 
     @Test
     public void skal_sende_melding() {
-        ProsessTaskData pd =  ProsessTaskData.forProsessTask(PubliserInfotrygdFeedElementTask.class);
+        ProsessTaskData pd = ProsessTaskData.forProsessTask(PubliserInfotrygdFeedElementTask.class);
         pd.setBehandling("", "", "");
         pd.setProperty(PubliserInfotrygdFeedElementTask.KAFKA_KEY_PROPERTY, "kafka-key");
         pd.setPayload("payload");
@@ -214,8 +213,7 @@ class FeedServiceMockHelper {
 
         return behandling;
     }
-
-    @NotNull
+    
     private Field getField(Class<?> classToBeManipuliated, String fieltName) throws NoSuchFieldException {
         var field = classToBeManipuliated.getDeclaredField(fieltName);
         field.setAccessible(true);

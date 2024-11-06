@@ -1,7 +1,6 @@
 package no.nav.k9.sak.ytelse.ung.inngangsvilkår.alder;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.NavigableSet;
 
@@ -26,7 +25,7 @@ public class VurderAldersVilkårTjeneste {
             .replaceFirst(":førsteDagMedGodkjentAlder", førsteDagMedGodkjentAlder.toString())
             .replaceFirst(":sisteDagMedGodkjentAlder", sisteDagMedGodkjentAlder.toString());
 
-        LocalDateTimeline<Boolean> tidslinjeTilVurdering = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering);
+        LocalDateTimeline<Boolean> tidslinjeTilVurdering = TidslinjeUtil.tilTidslinje(perioderTilVurdering);
 
         LocalDateTimeline<Boolean> tidslinjeSøkerForUng = tidslinjeTilVurdering.disjoint(new LocalDateInterval(førsteDagMedGodkjentAlder, LocalDate.MAX));
         LocalDateTimeline<Boolean> tidslinjeSøkerForGammel = tidslinjeTilVurdering.disjoint(new LocalDateInterval(LocalDate.MIN, sisteDagMedGodkjentAlder));
