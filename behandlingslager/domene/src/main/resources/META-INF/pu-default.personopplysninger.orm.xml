@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="https://jakarta.ee/xml/ns/persistence/orm"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm https://jakarta.ee/xml/ns/persistence/orm/orm_3_0.xsd"
+        version="3.0">
+
+	<sequence-generator name="SEQ_GR_PERSONOPPLYSNING" allocation-size="50" sequence-name="SEQ_GR_PERSONOPPLYSNING" />
+	<sequence-generator name="SEQ_PO_INFORMASJON" allocation-size="50" sequence-name="SEQ_PO_INFORMASJON" />
+	<sequence-generator name="SEQ_PO_PERSONOPPLYSNING" allocation-size="50" sequence-name="SEQ_PO_PERSONOPPLYSNING" />
+	<sequence-generator name="SEQ_PO_PERSONSTATUS" allocation-size="50" sequence-name="SEQ_PO_PERSONSTATUS" />
+	<sequence-generator name="SEQ_PO_STATSBORGERSKAP" allocation-size="50" sequence-name="SEQ_PO_STATSBORGERSKAP" />
+	<sequence-generator name="SEQ_PO_RELASJON" allocation-size="50" sequence-name="SEQ_PO_RELASJON" />
+	<sequence-generator name="SEQ_PO_ADRESSE" allocation-size="50" sequence-name="SEQ_PO_ADRESSE" />
+
+	<!-- Personopplysning aggregat og grunnlag -->
+	<entity class="no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet" />
+	<entity class="no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet" />
+	<entity class="no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonAdresseEntitet" />
+	<entity class="no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet" />
+	<entity class="no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonstatusEntitet" />
+	<entity class="no.nav.k9.sak.behandlingslager.behandling.personopplysning.PersonRelasjonEntitet" />
+	<entity class="no.nav.k9.sak.behandlingslager.behandling.personopplysning.StatsborgerskapEntitet" />
+
+</entity-mappings>

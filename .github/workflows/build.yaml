@@ -1,0 +1,155 @@
+name: "Bygg og deploy"
+on:
+  push:
+    branches:
+      - '**'
+    paths-ignore:
+      - '**.md'
+      - '**.MD'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'CODEOWNERS'
+      - '.github/*.yml'
+
+jobs:
+  build-app:
+    name: Build
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    uses: navikt/sif-gha-workflows/.github/workflows/maven-build-app-db.yml@main
+    with:
+      java-version: 21
+      build-image: ${{ github.actor != 'dependabot[bot]' }}
+      push-image: ${{ github.ref_name == github.event.repository.default_branch}}
+      upload-image: ${{ github.ref_name != github.event.repository.default_branch }}
+      db_schema: ung_sak_unit
+      pg_version: 16
+    secrets: inherit
+
+
+#  build-typescript-client:
+#    name: Build typescript client
+#    runs-on: ubuntu-latest
+#    needs: build-app
+#    permissions:
+#      contents: write
+#    steps:
+#      - uses: actions/checkout@v4
+#      - uses: ./.github/actions/generate-openapi
+#        id: generate-openapi
+#        with:
+#          readerToken: ${{ secrets.READER_TOKEN }}
+#          githubToken: ${{ secrets.GITHUB_TOKEN }}
+#      - uses: ./.github/actions/generate-typescript-client
+#        id: generate-typescript
+#        with:
+#          openapiVersion: ${{ steps.generate-openapi.outputs.openapiVersion }}
+#          patchVersion: ${{ needs.build-app.outputs.build-version }}
+#      # Upload generated typescript package, so it can be downloaded and published by later job
+#      - uses: actions/upload-artifact@v4
+#        id: upload-typescript
+#        with:
+#          name: k9-sak-typescript-client-src
+#          path: "${{ steps.generate-typescript.outputs.resultDir }}"
+#          if-no-files-found: error
+
+  verdikjede-tester:
+    name: Verdikjedetester
+    secrets: inherit
+    permissions:
+      id-token: write
+      contents: read
+      packages: read
+    uses: navikt/sif-gha-workflows/.github/workflows/verdikjede-test-v2.yml@main
+    if: ${{github.actor != 'dependabot[bot]'}}
+    needs: build-app
+    with:
+      tag: ${{ needs.build-app.outputs.build-version }}
+      suites: "ung"
+      override_image_artifact_name: ${{ github.ref_name != github.event.repository.default_branch && needs.build-app.outputs.image-artifact-name || null }}
+      image_version: ${{ needs.build-app.outputs.build-version }}
+
+
+#  deploy-dev:
+#    name: Deploy dev
+#    permissions:
+#      id-token: write
+#      contents: write
+#    # Multiline if condition with pipe must be defined without using ${{ }} around the expressions
+#    # bruker always() for å tvinge if'en til å kjøre selv om verdikjedetest feiler pga needs - dette fordi noen av verdikjede suitene er ikke påkrevd for deploy
+#    if: |
+#      github.ref_name == 'master'
+#        && always()
+#        && needs.verdikjede-tester.outputs.pleiepenger == 'success'
+#        && needs.verdikjede-tester.outputs.livetssluttfase == 'success'
+#        && needs.verdikjede-tester.outputs.annet == 'success'
+#        && needs.verdikjede-tester.outputs.frontend == 'success'
+#    needs: [build-app, verdikjede-tester]
+#    uses: navikt/sif-gha-workflows/.github/workflows/maven-deploy.yml@main
+#    with:
+#      gar: true
+#      image: ${{ needs.build-app.outputs.build-version }}
+#      cluster: dev-gcp
+#      naiserator_file: deploy/dev-gcp.yml
+#    secrets: inherit
+
+#  check-change-compat-typescript-client:
+#    name: Change and compatibility check typescript client
+#    runs-on: ubuntu-latest
+#    needs: [build-typescript-client, deploy-dev]
+#    outputs:
+#      hasChanged: ${{ steps.compare-with-published.outputs.hasChanged }}
+#    permissions:
+#      contents: read
+#      packages: read
+#    steps:
+#      - uses: actions/download-artifact@v4
+#        with:
+#          name: k9-sak-typescript-client-src
+#          path: /tmp/k9-sak-typescript-client
+#      - uses: navikt/openapi-ts-clientmaker/extra/actions/compare-with-published@v1
+#        id: compare-with-published
+#        with:
+#          localPath: /tmp/k9-sak-typescript-client
+#          npmPackageName: k9-sak-typescript-client
+#          githubToken: ${{ secrets.GITHUB_TOKEN }}
+#      - uses: navikt/k9-sak-web/.github/actions/check-compat-typescript-client@master
+#        if: steps.compare-with-published.outputs.hasChanged == 'true'
+#        with:
+#          readerToken: ${{ secrets.READER_TOKEN }}
+#          newClientPath: /tmp/k9-sak-typescript-client
+
+#  publish-typescript-client:
+#    name: Publish typescript client
+#    runs-on: ubuntu-latest
+#    needs: [check-change-compat-typescript-client]
+#    if: needs.check-change-compat-typescript-client.outputs.hasChanged == 'true'
+#    permissions:
+#      contents: read
+#      packages: write
+#    steps:
+#     - uses: actions/download-artifact@v4
+#       with:
+#         name: k9-sak-typescript-client-src
+#         path: /tmp/k9-sak-typescript-client
+#     - uses: navikt/openapi-ts-clientmaker/extra/actions/publish-typescript-client@v1
+#       with:
+#         contentPath: /tmp/k9-sak-typescript-client
+#         githubToken: ${{ secrets.GITHUB_TOKEN }}
+
+#  deploy-prod:
+#    name: Deploy prod
+#    permissions:
+#      id-token: write
+#      contents: write
+#    if: github.ref_name == 'master'
+#    needs: [build-app, verdikjede-tester, deploy-dev]
+#    uses: navikt/sif-gha-workflows/.github/workflows/maven-deploy.yml@main
+#    with:
+#      gar: true
+#      image: ${{ needs.build-app.outputs.build-version }}
+#      cluster: prod-gcp
+#      naiserator_file: deploy/prod-gcp.yml
+#    secrets: inherit

@@ -1,0 +1,12 @@
+{
+  "behandlingId" : 999952,
+  "saksnummer" : "5YC36",
+  "behandlingVersjon" : 16,
+  "bekreftedeAksjonspunktDtoer" : [ {
+    "bekreftedePerioder" : [ {
+      "skalBrukeOverstyrendeFritekstBrev" : false,
+      "begrunnelse" : null
+    } ],
+    "@type" : "5015"
+  } ]
+}

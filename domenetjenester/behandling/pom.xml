@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>domenetjenester-pom</artifactId>
+        <groupId>no.nav.k9.sak</groupId>
+        <version>${revision}${sha1}${changelist}</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>behandling</artifactId>
+    <packaging>jar</packaging>
+    <name>K9SAK :: Domenetjenester - Behandling</name>
+
+    <!-- Eksterne -->
+    <dependencies>
+        <dependency>
+            <groupId>no.nav.k9.sak</groupId>
+            <artifactId>behandlingskontroll</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.k9.sak</groupId>
+            <artifactId>dokumentarkiv</artifactId>
+        </dependency>
+		<dependency>
+            <groupId>no.nav.k9.sak</groupId>
+            <artifactId>kontrakt</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>no.nav.k9.sak</groupId>
+            <artifactId>behandlingslager-domene</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.k9.felles</groupId>
+            <artifactId>k9-felles-util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.k9.felles</groupId>
+            <artifactId>k9-felles-feil</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-streams</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.k9.felles.integrasjon</groupId>
+            <artifactId>k9-kafka-klient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry.instrumentation</groupId>
+            <artifactId>opentelemetry-instrumentation-annotations</artifactId>
+        </dependency>
+        <!-- Test avhengigheter -->
+        <dependency>
+            <groupId>no.nav.k9.sak</groupId>
+            <artifactId>behandlingslager-testutilities</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+</project>

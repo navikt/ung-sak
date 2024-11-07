@@ -1,0 +1,56 @@
+name: Create or update Kafka topics
+
+on:
+  push:
+    paths:
+      - 'deploy/kafka/**'
+      - '.github/workflows/kafka.yaml'
+
+jobs:
+  deploy-kafka-topics-dev:
+#    permissions:
+#      id-token: write
+    name: Deploy to Aiven Dev
+    if: startsWith(github.ref, 'refs/heads/master')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          APIKEY: ${{ secrets.DEPLOY_KEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: deploy/kafka/aapen-ung-stonadstatistikk-v1-dev.yml
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          APIKEY: ${{ secrets.DEPLOY_KEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: deploy/kafka/aksjonspunkthendelse-dev.yml
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          APIKEY: ${{ secrets.DEPLOY_KEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: deploy/kafka/ung-vedtakhendelse-dev.yml
+
+  deploy-kafka-topics-prod:
+#    permissions:
+#      id-token: write
+    name: Deploy to Aiven Prod
+    if: startsWith(github.ref, 'refs/heads/master')  # If the branch is master
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          APIKEY: ${{ secrets.DEPLOY_KEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: deploy/kafka/aapen-ung-stonadstatistikk-v1-prod.yml
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          APIKEY: ${{ secrets.DEPLOY_KEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: deploy/kafka/aksjonspunkthendelse-prod.yml
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          APIKEY: ${{ secrets.DEPLOY_KEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: deploy/kafka/ung-vedtakhendelse-prod.yml

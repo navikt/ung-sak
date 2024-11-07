@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<artifactId>domenetjenester-pom</artifactId>
+		<groupId>no.nav.k9.sak</groupId>
+		<version>${revision}${sha1}${changelist}</version>
+	</parent>
+
+	<artifactId>punsj</artifactId>
+	<packaging>jar</packaging>
+	<name>K9SAK :: Domenetjenester - Punsj</name>
+
+	<dependencies>
+
+		<!-- Modul interne avhengigheter -->
+		<dependency>
+			<groupId>no.nav.k9.sak</groupId>
+			<artifactId>domenetjenester-bom</artifactId>
+		</dependency>
+
+		<!-- Interne avhengigheter -->
+		<dependency>
+			<groupId>no.nav.k9.sak</groupId>
+			<artifactId>behandlingslager-domene</artifactId>
+		</dependency>
+
+		<!-- Integrasjon avhengigheter -->
+
+		<!-- Test avhengigheter -->
+		<dependency>
+			<groupId>no.nav.k9.sak</groupId>
+			<artifactId>migreringer</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>

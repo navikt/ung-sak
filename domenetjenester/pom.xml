@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>k9sak</artifactId>
+        <groupId>no.nav.k9.sak</groupId>
+        <version>${revision}${sha1}${changelist}</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>domenetjenester-pom</artifactId>
+    <packaging>pom</packaging>
+    <name>K9SAK :: Domenetjenester - Pom</name>
+
+    <modules>
+        <module>behandling</module>
+        <module>behandling-revurdering</module>
+        <module>behandling-prosessering</module>
+        <module>beregning-ytelse</module>
+        <module>datavarehus</module>
+        <module>dokumentarkiv</module>
+        <module>hendelsemottak</module>
+        <module>inngangsvilkar</module>
+        <module>innsyn</module>
+        <module>arbeidsforhold</module>
+        <module>mottak</module>
+        <module>okonomistotte</module>
+        <module>person</module>
+        <module>produksjonsstyring</module>
+        <module>registerinnhenting</module>
+        <module>vedtak</module>
+        <module>skjaeringstidspunkt</module>
+        <module>punsj</module>
+        <module>bom</module>
+        <module>grunnbelop</module>
+
+        <module>behandlingskontroll</module>
+    </modules>
+
+</project>

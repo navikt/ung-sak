@@ -1,0 +1,68 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>no.nav.k9.sak</groupId>
+		<artifactId>domenetjenester-pom</artifactId>
+		<version>${revision}${sha1}${changelist}</version>
+	</parent>
+
+	<artifactId>datavarehus</artifactId>
+	<packaging>jar</packaging>
+	<name>K9SAK :: Domenetjenester - Datavarehus</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>no.nav.k9.felles.sikkerhet</groupId>
+			<artifactId>k9-felles-sikkerhet</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>no.nav.k9.sak</groupId>
+			<artifactId>behandlingslager-domene</artifactId>
+		</dependency>
+
+		<!-- Domenetjenester avhengigheter -->
+		<dependency>
+			<groupId>no.nav.k9.sak</groupId>
+			<artifactId>behandlingskontroll</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>no.nav.k9.sak</groupId>
+			<artifactId>inngangsvilkar</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>no.nav.k9.sak</groupId>
+			<artifactId>okonomistotte</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>no.nav.k9.sak</groupId>
+			<artifactId>vedtak</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>no.nav.k9.sak</groupId>
+			<artifactId>skjaeringstidspunkt</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>no.nav.k9.felles.integrasjon</groupId>
+			<artifactId>k9-sensu-klient</artifactId>
+		</dependency>
+
+		<!-- Test avhengigheter -->
+		<dependency>
+			<groupId>no.nav.k9.sak</groupId>
+			<artifactId>migreringer</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>no.nav.k9.sak</groupId>
+			<artifactId>behandlingslager-testutilities</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+
+	</dependencies>
+</project>

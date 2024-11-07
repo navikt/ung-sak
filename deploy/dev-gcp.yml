@@ -1,0 +1,333 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: ung-sak
+  namespace: k9saksbehandling
+  labels:
+    team: k9saksbehandling
+spec:
+  image: "{{ image }}"
+  port: 8080
+  liveness:
+    path: /k9/sak/internal/health/isAlive
+    initialDelay: 30
+    timeout: 5
+    periodSeconds: 10
+    failureThreshold: 27
+    # nais will try failureThreshold times before giving up and restarting the Pod
+    # Defaults to 3
+  readiness:
+    path: /k9/sak/internal/health/isReady
+    initialDelay: 30
+    timeout: 5
+    periodSeconds: 10
+    failureThreshold: 27
+  replicas:
+    min: 2
+    max: 2
+    cpuThresholdPercentage: 80
+  prometheus:
+    enabled: true
+    path: /k9/sak/internal/metrics/prometheus
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+      destinations:
+        - id: "grafana-lgtm"
+        - id: "elastic-apm"
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "2048Mi"
+    requests:
+      cpu: "200m"
+      memory: "1024Mi"
+  ingresses:
+    - "https://ung-sak.intern.dev.nav.no"
+  kafka:
+    pool: "nav-dev"
+  vault:
+    enabled: false
+  tokenx:
+    enabled: true
+  azure:
+    application:
+      enabled: true
+      replyURLs:
+        - "https://ung-sak.dev.intern.nav.no/ung/sak/cb"
+        - "https://ung-sak.intern.dev.nav.no/ung/sak/cb"
+      claims:
+        extra:
+          - "NAVident"
+      allowAllUsers: true
+  accessPolicy:
+    outbound:
+      external:
+        - host: "k9-abakus.dev-fss-pub.nais.io",
+        - host: "k9-formidling-dokumentdata.dev-fss-pub.nais.io",
+        - host: "k9-oppdrag.dev-fss-pub.nais.io"
+        - host: "k9-tilbake.dev-fss-pub.nais.io"
+        - host: "k9-formidling.dev-fss-pub.nais.io"
+        - host: "k9-fordel.dev-fss-pub.nais.io"
+        - host: "pdl-api.dev-fss-pub.nais.io",
+        - host: "saf-q1.dev-fss-pub.nais.io"
+    inbound:
+      rules:
+        - application: k9-sak-web
+          namespace: k9saksbehandling
+          cluster: dev-gcp
+        - application: k9-los-api
+        - application: k9-fordel
+        - application: ung-sak
+        - application: k9-tilbake
+        - application: k9-klage
+        - application: k9-formidling
+        - application: k9-formidling-dokumentdata
+        - application: k9-abakus
+          namespace: omsorgspenger
+          cluster: dev-gcp
+        - application: k9-sak-innsyn-api
+          namespace: dusseldorf
+          cluster: dev-gcp
+        - application: ung-deltakelse-opplyser
+          namespace: k9saksbehandling
+          cluster: dev-gcp
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_16
+        name: ung-sak-db
+        tier: db-custom-1-3840
+        diskSize: 10
+        diskAutoresize: false
+        highAvailability: false
+        databases:
+          - name: ung-sak
+            envVarPrefix: DB
+  env:
+    - name: TZ
+      value: "Europe/Oslo"
+    - name: APP_NAME
+      value: "UNG-SAK"
+
+      # open telemetry
+    - name: OTEL_RESOURCE_ATTRIBUTES
+      value: "service.name=ung-sak,service.namespace=k9saksbehandling,deployment.environment=q,nais.backend=elastic-apm;grafana-lgtm"
+
+    # Integrasjoner (Kafka)
+    - name: KAFKA_AKSJONSPUNKTHENDELSE_TOPIC
+      value: privat-k9-aksjonspunkthendelse
+    - name: KAFKA_AKSJONSPUNKTHENDELSE_AIVEN_TOPIC
+      value: k9saksbehandling.ung-sak-aksjonspunkthendelse
+    - name: KAFKA_DOKUMENTBESTILLING_AIVEN_TOPIC
+      value: k9saksbehandling.k9-dokumenthendelse-v1
+    - name: KAFKA_FATTEVEDTAK_TOPIC
+      value: teamforeldrepenger.familie-vedtakfattet-v1
+    - name: KAFKA_VEDTAKHENDELSE_TOPIC
+      value: privat-ung-vedtakhendelse
+    - name: KAFKA_VEDTAKHENDELSE_AIVEN_TOPIC
+      value: k9saksbehandling.ung-vedtakhendelse
+    - name: KAFKA_STONADSTATISTIKK_TOPIC
+      value: k9saksbehandling.aapen-ung-stonadstatistikk-v1
+    - name: KAFKA_BRUKERDIALOGINNSYN_TOPIC
+      value: dusseldorf.privat-k9-sak-innsyn-v1
+    - name: KAFKA_PRODUKSJONSSTYRING_TOPIC
+      value: k9saksbehandling.privat-k9-produksjonsstyring-sak-v1
+    - name: KAFKA_K9_RAPID_TOPIC
+      value: omsorgspenger.k9-rapid-v2
+    - name: KAFKA_INFOTRYGDFEED_AIVEN_TOPIC
+      value: k9saksbehandling.k9-infotrygd-feed-hendelse
+
+    # Baseurl
+    - name: SCHEMA_REGISTRY_URL
+      value: https://kafka-schema-registry.nais.preprod.local
+    - name: BOOTSTRAP_SERVERS
+      value: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
+
+    # Loadbalancerconfig
+    - name: LOADBALANCER_URL
+      value: https://ung-sak.intern.dev.nav.no
+    - name: LOADBALANCER_ALTERNATIVE_URL
+      value: https://ung-sak.dev.intern.nav.no
+
+    # LDAP
+    - name: LDAP_URL
+      value: ldaps://ldapgw.preprod.local
+    - name: LDAP_BASEDN
+      value: "dc=preprod,dc=local"
+    - name: LDAP_DOMAIN
+      value: "PREPROD.LOCAL"
+    - name: LDAP_USER_BASEDN
+      value: "ou=NAV,ou=BusinessUnits,dc=preprod,dc=local"
+    - name: LDAP_SERVICEUSER_BASEDN
+      value: "ou=ServiceAccounts,dc=preprod,dc=local"
+
+    # PDL
+    - name: PDL_TEMA
+      value: OMS
+
+    # Restservice Generelle
+    - name: K9ABAKUS_URL
+      value: https://k9-abakus.dev-fss-pub.nais.io
+    - name: K9ABAKUS_SCOPE
+      value: api://dev-fss.k9saksbehandling.k9-abakus/.default
+    - name: FTKALKULUS_URL
+      value: http://ftkalkulus.k9saksbehandling/ftkalkulus
+    - name: FTKALKULUS_SCOPE
+      value: api://dev-fss.k9saksbehandling.ftkalkulus/.default
+    - name: ABAKUS_CALLBACK_URL
+      value: http://ung-sak.k9saksbehandling/k9/sak/api/registerdata/iay/callback
+    - name: ABAKUS_CALLBACK_SCOPE
+      value: api://dev-fss.k9saksbehandling.ung-sak/.default
+    - name: ABAC_PDP_ENDPOINT_URL
+      value: http://abac-k9.k9saksbehandling/application/authorize
+    - name: K9_OPPDRAG_PROXY_URL
+      value: /k9/oppdrag/api
+    - name: ARBEIDSFORDELING_RS_URL
+      value: https://norg2.intern.dev.nav.no/norg2/api/v1/arbeidsfordeling/enheter
+    - name: OPPGAVE_RS_URI
+      value: https://oppgave-q1.nais.preprod.local/api/v1/oppgaver
+    - name: OPPGAVE_RS_SCOPE
+      value: api://dev-fss.oppgavehandtering.oppgave-q1/.default
+    - name: MEDL2_RS_URL
+      value: https://medlemskap-medl-api.dev.intern.nav.no/api/v1/medlemskapsunntak
+    - name: MEDL2_RS_SCOPE
+      value: api://dev-fss.team-rocket.medlemskap-medl-api/.default
+    - name: PDL_BASE_URL
+      value: https://pdl-api.dev-fss-pub.nais.io/graphql
+    - name: PDL_SCOPE
+      value: api://dev-fss.pdl.pdl-api/.default
+    - name: ORGANISASJON_RS_URL
+      value: https://modapp-q1.adeo.no/ereg/api/v1/organisasjon
+    - name: K9_FORMIDLING_DOKUMENTDATA_URL
+      value: https://k9-formidling-dokumentdata.dev-fss-pub.nais.io/k9/formidling/dokumentdata
+    - name: K9_FORMIDLING_DOKUMENTDATA_SCOPE
+      value: api://dev-fss.k9saksbehandling.k9-formidling-dokumentdata/.default
+    - name: K9_OPPDRAG_DIREKTE_URL
+      value: https://k9-formidling-dokumentdata.dev-fss-pub.nais.io/k9/oppdrag/api
+    - name: K9_OPPDRAG_SCOPE
+      value: api://dev-fss.k9saksbehandling.k9-oppdrag/.default
+    - name: K9_TILBAKE_DIREKTE_URL
+      value: https://k9-tilbake.dev-fss-pub.nais.io/k9/tilbake/api
+    - name: K9_TILBAKE_SCOPE
+      value: api://dev-fss.k9saksbehandling.k9-tilbake/.default
+    - name: K9_FORMIDLING_URL
+      value: https://k9-formidling.dev-fss-pub.nais.io/k9/formidling
+    - name: K9_FORMIDLING_SCOPE
+      value: api://dev-fss.k9saksbehandling.k9-formidling/.default
+    - name: K9_PUNSJ_URL
+      value: http://k9-punsj.k9saksbehandling/api
+    - name: K9_PUNSJ_SCOPE
+      value: api://dev-fss.k9saksbehandling.k9-punsj/.default
+    - name: INFOTRYGD_BS_BASE_URI
+      value: http://k9-infotrygd-grunnlag-paaroerende-sykdom.k9saksbehandling
+    - name: K9_INFOTRYGD_SCOPE
+      value: api://dev-fss.k9saksbehandling.k9-infotrygd-grunnlag-paaroerende-sykdom/.default
+    - name: ARBEID_OG_INNTEKT_BASE_URL
+      value: https://arbeid-og-inntekt.nais.preprod.local
+    - name: K9INNTEKTSMELDING_URL
+      value: https://k9-inntektsmelding.intern.dev.nav.no/k9/inntektsmelding
+    - name: K9INNTEKTSMELDING_SCOPE
+      value: api://dev-gcp.k9saksbehandling.k9-inntektsmelding/.default
+    - name: K9FORDEL_URL
+      value: https://k9-fordel.dev-fss-pub.nais.io/k9/fordel/api
+    - name: K9FORDEL_SCOPE
+      value: api://dev-fss.k9saksbehandling.k9-fordel/.default
+    - name: UNGDOMSPROGRAMREGISTER_URL
+      value: https://ung-deltakelse-opplyser.intern.dev.nav.no
+    - name: UNGDOMSPROGRAMREGISTER_SCOPE
+      value: api://dev-gcp.k9saksbehandling.ung-deltakelse-opplyser/.default
+
+
+    # Restservice OMS spesifikt
+    - name: K9_OMS_AARSKVANTUM_URL
+      value: http://k9-aarskvantum.k9saksbehandling
+    - name: K9_OMS_AARSKVANTUM_SCOPE
+      value: api://dev-fss.k9saksbehandling.k9-aarskvantum/.default
+
+    # Restservice PSB spesifikt
+    - name: K9_PSB_UTTAK_URL
+      value: http://pleiepenger-barn-uttak.k9saksbehandling/pleiepenger-barn-uttak
+    - name: K9_PSB_UTTAK_SCOPE
+      value: api://dev-fss.k9saksbehandling.pleiepenger-barn-uttak/.default
+
+    # Graphql services
+    - name: SAF_BASE_URL
+      value: https://saf.dev-fss-pub.nais.io
+    - name: SAF_SCOPE
+      value: api://dev-fss.teamdokumenthandtering.saf-q1/.default
+
+    # Sikkerhet:
+    - name: APP_AUTH_SCHEMA_AZUREAD_ADDITIONAL_PATHS
+      value: "/k9/formidling/dokumentdata,api://dev-fss.k9saksbehandling.k9-formidling-dokumentdata/.default;/k9/formidling,api://dev-fss.k9saksbehandling.k9-formidling/.default"
+    - name: APP_AUTH_SCHEMA_AZUREAD_OPTIONAL_PATHS
+      value: "/k9/klage,api://dev-fss.k9saksbehandling.k9-klage/.default;/k9/tilbake,api://dev-fss.k9saksbehandling.k9-tilbake/.default;/k9/oppdrag,api://dev-fss.k9saksbehandling.k9-oppdrag/.default;/k9/abakus,api://dev-fss.k9saksbehandling.k9-abakus/.default"
+    - name: OIDC_STS_HOST_URL
+      value: https://security-token-service.nais.preprod.local
+    - name: CLIENT_SCOPE
+      value: "api://dev-fss.k9saksbehandling.ung-sak/.default"
+    - name: SECURITYTOKENSERVICE_URL
+      value: https://sts-q1.preprod.local/SecurityTokenServiceProvider/
+    - name: ABAC_ATTRIBUTT_DRIFT
+      value: "no.nav.abac.attributter.k9.drift"
+
+    - name: SENSU_HOST
+      value: "sensu.nais"
+    - name: SENSU_PORT
+      value: "3030"
+
+    # Feature-flag
+    - name: YTELSE_OLP_AKTIVERT
+      value: "true"
+    - name: FILTRER_TILSTOTENDE_PERIODE
+      value: "true"
+    - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
+      value: "2022-08-08"
+    - name: IKKE_YRKESAKTIV_UTEN_SPEILING
+      value: "false"
+    - name: OMP_NULL_HELG_I_KRAVPERIODER
+      value: "true"
+    - name: FJERN_VILKARSPERIODER_BEREGNING
+      value: "true"
+    - name: VALIDER_KALKULUS_REFERANSER
+      value: "true"
+    - name: AVKLAR_ARBEIDSFORHOLD_REUTLED_VED_REVURDERING
+      value: "true"
+    - name: OMP_RELEVANT_ENDRING_UTLEDNING
+      value: "true"
+    - name: KODEVERK_SOM_STRING_TOPICS
+      value: "true"
+    - name: AAPEN_PUNSJOPPGAVE_STOPPER_AUTOMATISK_VEDTAK
+      value: "true"
+    - name: SEND_INNTEKTSMELDING_FORESPORSEL
+      value: "true"
+    - name: ENABLE_INNHENT_INNTEKTSMELDING_STEG
+      value: "true"
+    - name: OMP_RAMMEVEDTAK_SAMMENSTILLNG_AARSKVANTUM
+      value: "true"
+    - name: ALDERSVILKAR_I_KRONISK_SYK
+      value: "true"
+    - name: UNGDOMSYTELSE_ENABLED
+      value: "true"
+    - name: SOSKENSAK_UTTAK_OVERSTYRING
+      value: "true"
+    - name: INGEN_AP_9291_I_FORSTEGANGSBEHANDLING
+      value: "false"
+
+    # Konfigurasjoner
+    - name: FLYWAY_REPAIR_ON_FAIL
+      value: "false"
+    - name: RESTART_APP_ON_ERROR
+      value: "true"
+
+
+      # Audit logging
+    - name: AUDITLOGGER_ENABLED
+      value: "true"
+    - name: AUDITLOGGER_VENDOR
+      value: "k9"
+    - name: AUDITLOGGER_PRODUCT
+      value: "ung-sak"
+
+    - name: PIP_USERS
+      value: "srvPDP,srvk9-tilbake,srvsaf,srvk9-abakus,Z993210,Z994080,Z994692"
