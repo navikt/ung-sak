@@ -11,25 +11,29 @@ import java.time.temporal.TemporalAdjusters;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.sak.db.util.JpaExtension;
 import no.nav.k9.sak.grunnbeløp.GrunnbeløpTjeneste;
 import no.nav.k9.sak.ytelse.ung.beregning.barnetillegg.LagAntallBarnTidslinje;
 import no.nav.k9.sak.ytelse.ung.beregning.barnetillegg.LagBarnetilleggTidslinje;
 
+@ExtendWith(JpaExtension.class)
+@ExtendWith(CdiAwareExtension.class)
 class UngdomsytelseBeregnDagsatsTest {
 
     private UngdomsytelseBeregnDagsats tjeneste;
-    private GrunnbeløpTjeneste grunnbeløpTjeneste = mock(GrunnbeløpTjeneste.class);
+    @Inject
+    private GrunnbeløpTjeneste grunnbeløpTjeneste;
     private LagAntallBarnTidslinje lagAntallBarnTidslinje = mock(LagAntallBarnTidslinje.class);
 
 
     @BeforeEach
     void setUp() {
         tjeneste = new UngdomsytelseBeregnDagsats(new LagGrunnbeløpTidslinjeTjeneste(grunnbeløpTjeneste), new LagBarnetilleggTidslinje(lagAntallBarnTidslinje));
-        when(grunnbeløpTjeneste.hentGrunnbeløp(LocalDate.of(2023,5,1))).thenReturn(new no.nav.k9.sak.grunnbeløp.Grunnbeløp(100000, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2023,5,1), LocalDate.of(2024,4,30))));
-        when(grunnbeløpTjeneste.hentGrunnbeløp(LocalDate.of(2024,5,1))).thenReturn(new no.nav.k9.sak.grunnbeløp.Grunnbeløp(124028, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2024,5,1), LocalDate.MAX)));
         when(lagAntallBarnTidslinje.lagAntallBarnTidslinje(any())).thenReturn(LocalDateTimeline.empty());
     }
 
@@ -48,8 +52,8 @@ class UngdomsytelseBeregnDagsatsTest {
         assertThat(first.getFom()).isEqualTo(fom);
         assertThat(first.getTom()).isEqualTo(tom);
         assertThat(first.getValue().grunnbeløpFaktor().compareTo(BigDecimal.valueOf(1.33333))).isEqualTo(0);
-        assertThat(first.getValue().grunnbeløp().compareTo(BigDecimal.valueOf(100000))).isEqualTo(0);
-        assertThat(first.getValue().dagsats().compareTo(BigDecimal.valueOf(512.82))).isEqualTo(0);
+        assertThat(first.getValue().grunnbeløp().compareTo(BigDecimal.valueOf(118620))).isEqualTo(0);
+        assertThat(first.getValue().dagsats().compareTo(BigDecimal.valueOf(608.31))).isEqualTo(0);
     }
 
 
@@ -67,13 +71,13 @@ class UngdomsytelseBeregnDagsatsTest {
         var iterator = segmenter.iterator();
         var first = iterator.next();
         assertThat(first.getFom()).isEqualTo(fom);
-        assertThat(first.getTom()).isEqualTo(LocalDate.of(2024,4, 30));
+        assertThat(first.getTom()).isEqualTo(LocalDate.of(2024, 4, 30));
         assertThat(first.getValue().grunnbeløpFaktor().compareTo(BigDecimal.valueOf(1.33333))).isEqualTo(0);
-        assertThat(first.getValue().grunnbeløp().compareTo(BigDecimal.valueOf(100000))).isEqualTo(0);
-        assertThat(first.getValue().dagsats().compareTo(BigDecimal.valueOf(512.82))).isEqualTo(0);
+        assertThat(first.getValue().grunnbeløp().compareTo(BigDecimal.valueOf(118620))).isEqualTo(0);
+        assertThat(first.getValue().dagsats().compareTo(BigDecimal.valueOf(608.31))).isEqualTo(0);
 
         var second = iterator.next();
-        assertThat(second.getFom()).isEqualTo(LocalDate.of(2024,5, 1));
+        assertThat(second.getFom()).isEqualTo(LocalDate.of(2024, 5, 1));
         assertThat(second.getTom()).isEqualTo(tom);
         assertThat(second.getValue().grunnbeløpFaktor().compareTo(BigDecimal.valueOf(1.33333))).isEqualTo(0);
         assertThat(second.getValue().grunnbeløp().compareTo(BigDecimal.valueOf(124028))).isEqualTo(0);
@@ -98,8 +102,8 @@ class UngdomsytelseBeregnDagsatsTest {
         assertThat(first.getFom()).isEqualTo(fom);
         assertThat(first.getTom()).isEqualTo(førsteDagMedHøySats.minusDays(1));
         assertThat(first.getValue().grunnbeløpFaktor().compareTo(BigDecimal.valueOf(1.33333))).isEqualTo(0);
-        assertThat(first.getValue().grunnbeløp().compareTo(BigDecimal.valueOf(100000))).isEqualTo(0);
-        assertThat(first.getValue().dagsats().compareTo(BigDecimal.valueOf(512.82))).isEqualTo(0);
+        assertThat(first.getValue().grunnbeløp().compareTo(BigDecimal.valueOf(118620))).isEqualTo(0);
+        assertThat(first.getValue().dagsats().compareTo(BigDecimal.valueOf(608.31))).isEqualTo(0);
 
         var second = iterator.next();
         assertThat(second.getFom()).isEqualTo(førsteDagMedHøySats);
@@ -128,8 +132,8 @@ class UngdomsytelseBeregnDagsatsTest {
         var sisteDagMedLavSats = tjuefemårsdag.with(TemporalAdjusters.lastDayOfMonth());
         assertThat(first.getTom()).isEqualTo(sisteDagMedLavSats);
         assertThat(first.getValue().grunnbeløpFaktor().compareTo(BigDecimal.valueOf(1.33333))).isEqualTo(0);
-        assertThat(first.getValue().grunnbeløp().compareTo(BigDecimal.valueOf(100000))).isEqualTo(0);
-        assertThat(first.getValue().dagsats().compareTo(BigDecimal.valueOf(512.82))).isEqualTo(0);
+        assertThat(first.getValue().grunnbeløp().compareTo(BigDecimal.valueOf(118620))).isEqualTo(0);
+        assertThat(first.getValue().dagsats().compareTo(BigDecimal.valueOf(608.31))).isEqualTo(0);
 
         var second = iterator.next();
         assertThat(second.getFom()).isEqualTo(sisteDagMedLavSats.plusDays(1));
@@ -138,7 +142,6 @@ class UngdomsytelseBeregnDagsatsTest {
         assertThat(second.getValue().grunnbeløp().compareTo(BigDecimal.valueOf(124028))).isEqualTo(0);
         assertThat(second.getValue().dagsats().compareTo(BigDecimal.valueOf(954.06))).isEqualTo(0);
     }
-
 
 
 }

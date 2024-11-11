@@ -1,7 +1,9 @@
 package no.nav.k9.sak.grunnbeløp;
 
+import jakarta.persistence.Entity;
 import no.nav.k9.sak.domene.typer.tid.DatoIntervallEntitet;
 
+@Entity()
 public class Grunnbeløp {
 
     private long verdi;
