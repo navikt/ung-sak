@@ -5,8 +5,8 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>no.nav.k9.sak</groupId>
-		<artifactId>k9sak</artifactId>
+		<groupId>no.nav.ung.sak</groupId>
+		<artifactId>ung-sak</artifactId>
 		<version>${revision}${sha1}${changelist}</version>
 	</parent>
 
@@ -18,15 +18,15 @@
 	<dependencies>
 
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>behandlingsprosess-steg</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>behandlingskontroll</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>behandlingslager-domene</artifactId>
 		</dependency>
 		<dependency>
@@ -34,23 +34,23 @@
 			<artifactId>k9-felles-db</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>domenetjenester-bom</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>mottak</artifactId>
 		</dependency>
         <dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>hendelsemottak</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>grunnbelop</artifactId>
             <exclusions>
                 <exclusion>
-                    <groupId>no.nav.k9.sak</groupId>
+                    <groupId>no.nav.ung.sak</groupId>
                     <artifactId>behandlingslager-domene</artifactId>
                 </exclusion>
             </exclusions>
@@ -58,7 +58,7 @@
 
 		<!-- Test avhengigheter -->
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>behandlingslager-testutilities</artifactId>
 			<scope>test</scope>
 		</dependency>

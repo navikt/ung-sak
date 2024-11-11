@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>no.nav.k9.sak</groupId>
+        <groupId>no.nav.ung.sak</groupId>
         <artifactId>behandlingslager-pom</artifactId>
         <version>${revision}${sha1}${changelist}</version>
     </parent>
@@ -16,7 +16,7 @@
     <dependencies>
 
         <dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>behandlingslager-domene</artifactId>
         </dependency>
         <!-- Greit å ha denne i produksjonsscope siden dette er en modul som benyttes i test -->
@@ -34,7 +34,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>migreringer</artifactId>
             <type>test-jar</type>
             <scope>compile</scope>

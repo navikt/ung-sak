@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>no.nav.k9.sak</groupId>
+		<groupId>no.nav.ung.sak</groupId>
 		<artifactId>domenetjenester-pom</artifactId>
 		<version>${revision}${sha1}${changelist}</version>
 	</parent>
@@ -20,29 +20,29 @@
 			<artifactId>k9-felles-sikkerhet</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>behandlingslager-domene</artifactId>
 		</dependency>
 
 		<!-- Domenetjenester avhengigheter -->
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>behandlingskontroll</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>inngangsvilkar</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>okonomistotte</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>vedtak</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>skjaeringstidspunkt</artifactId>
 		</dependency>
 		<dependency>
@@ -52,13 +52,13 @@
 
 		<!-- Test avhengigheter -->
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>migreringer</artifactId>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>behandlingslager-testutilities</artifactId>
 			<scope>test</scope>
 		</dependency>

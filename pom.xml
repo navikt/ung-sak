@@ -3,8 +3,8 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>no.nav.k9.sak</groupId>
-    <artifactId>k9sak</artifactId>
+    <groupId>no.nav.ung.sak</groupId>
+    <artifactId>ung-sak</artifactId>
     <packaging>pom</packaging>
     <name>K9SAK :: Root</name>
     <version>${revision}${sha1}${changelist}</version>
@@ -169,138 +169,138 @@
 
             <!-- Prosjektets egne biblioteker -->
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>migreringer</artifactId>
                 <version>${project.version}</version>
                 <type>test-jar</type>
             </dependency>
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>migreringer</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>domenetjenester-bom</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>kodeverk</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>punsj</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>kontrakt</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>behandlingslager-domene</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>behandlingsprosess-steg</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>behandlingskontroll</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>inngangsvilkar</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>datavarehus</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>mottak</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>hendelsemottak</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>grunnbelop</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>oppgavebehandling</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>beregning-ytelse</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>produksjonsstyring</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>registerinnhenting</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>person</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>skjaeringstidspunkt</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>vedtak</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>arbeidsforhold</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>innsyn</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>behandling</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>behandling-revurdering</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>behandling-prosessering</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -341,23 +341,23 @@
             <!-- Prosjektets egne TEST AVHENGIGHETER -->
             <!-- NB: Definer scope der det brukes, ikke her. -->
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>web-webapp</artifactId>
                 <type>jar</type>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>okonomistotte</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>behandlingslager-testutilities</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.k9.sak</groupId>
+                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>dokumentarkiv</artifactId>
                 <version>${project.version}</version>
             </dependency>

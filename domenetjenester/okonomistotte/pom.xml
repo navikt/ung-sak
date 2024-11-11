@@ -5,7 +5,7 @@
 
 	<parent>
 		<artifactId>domenetjenester-pom</artifactId>
-		<groupId>no.nav.k9.sak</groupId>
+		<groupId>no.nav.ung.sak</groupId>
 		<version>${revision}${sha1}${changelist}</version>
 	</parent>
 
@@ -23,36 +23,36 @@
 		</dependency>
 
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>behandlingslager-domene</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>person</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>arbeidsforhold</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>produksjonsstyring</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>skjaeringstidspunkt</artifactId>
 		</dependency>
 
         <dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>behandling-prosessering</artifactId>
         </dependency>
 
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>beregning-ytelse</artifactId>
 		</dependency>
 
@@ -63,7 +63,7 @@
 
 		<!-- Test -->
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>behandlingslager-testutilities</artifactId>
 			<scope>test</scope>
 		</dependency>
