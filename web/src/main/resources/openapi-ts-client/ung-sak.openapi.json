@@ -2308,142 +2308,6 @@
         },
         "type" : "object"
       },
-      "K9SakKodeverkArbeidsforhold" : {
-        "properties" : {
-          "aktivitetStatus" : {
-            "enum" : [ "MIDL_INAKTIV", "AAP", "AT", "DP", "SP_AV_DP", "PSB_AV_DP", "FL", "MS", "SN", "AT_FL", "AT_SN", "FL_SN", "AT_FL_SN", "BA", "IKKE_YRKESAKTIV", "KUN_YTELSE", "TY", "VENTELØNN_VARTPENGER", "-" ],
-            "type" : "string"
-          },
-          "arbeidType" : {
-            "enum" : [ "ETTERLØNN_SLUTTPAKKE", "FORENKLET_OPPGJØRSORDNING", "FRILANSER", "FRILANSER_OPPDRAGSTAKER", "LØNN_UNDER_UTDANNING", "MARITIMT_ARBEIDSFORHOLD", "MILITÆR_ELLER_SIVILTJENESTE", "ORDINÆRT_ARBEIDSFORHOLD", "PENSJON_OG_ANDRE_TYPER_YTELSER_UTEN_ANSETTELSESFORHOLD", "NÆRING", "UTENLANDSK_ARBEIDSFORHOLD", "VENTELØNN_VARTPENGER", "VANLIG", "-" ],
-            "type" : "string"
-          },
-          "arbeidskategori" : {
-            "enum" : [ "FISKER", "ARBEIDSTAKER", "SELVSTENDIG_NÆRINGSDRIVENDE", "KOMBINASJON_ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE", "SJØMANN", "JORDBRUKER", "DAGPENGER", "INAKTIV", "KOMBINASJON_ARBEIDSTAKER_OG_JORDBRUKER", "KOMBINASJON_ARBEIDSTAKER_OG_FISKER", "FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_DAGPENGER", "DAGMAMMA", "UGYLDIG", "-" ],
-            "type" : "string"
-          },
-          "inntektskategori" : {
-            "enum" : [ "ARBEIDSTAKER", "FRILANSER", "SELVSTENDIG_NÆRINGSDRIVENDE", "DAGPENGER", "ARBEIDSAVKLARINGSPENGER", "SJØMANN", "DAGMAMMA", "JORDBRUKER", "FISKER", "ARBEIDSTAKER_UTEN_FERIEPENGER", "-" ],
-            "type" : "string"
-          },
-          "relatertYtelseTilstand" : {
-            "enum" : [ "ÅPEN", "LØPENDE", "AVSLUTTET", "IKKESTARTET" ],
-            "type" : "string"
-          }
-        },
-        "required" : [ "aktivitetStatus", "arbeidType", "arbeidskategori", "inntektskategori", "relatertYtelseTilstand" ],
-        "type" : "object"
-      },
-      "K9SakKodeverkBehandling" : {
-        "properties" : {
-          "aksjonspunkt" : {
-            "$ref" : "#/components/schemas/K9SakKodeverkBehandlingAksjonspunkt"
-          },
-          "behandlingResultatType" : {
-            "enum" : [ "IKKE_FASTSATT", "INNVILGET", "DELVIS_INNVILGET", "AVSLÅTT", "OPPHØR", "HENLAGT_SØKNAD_TRUKKET", "HENLAGT_FEILOPPRETTET", "HENLAGT_BRUKER_DØD", "MERGET_OG_HENLAGT", "HENLAGT_SØKNAD_MANGLER", "HENLAGT_MASKINELT", "INNVILGET_ENDRING", "INGEN_ENDRING", "MANGLER_BEREGNINGSREGLER" ],
-            "type" : "string"
-          },
-          "behandlingType" : {
-            "enum" : [ "BT-002", "BT-004", "BT-010", "-" ],
-            "type" : "string"
-          },
-          "behandlingÅrsakType" : {
-            "enum" : [ "RE-MF", "RE-MFIP", "RE-AVAB", "RE-LOV", "RE-RGLF", "RE-FEFAKTA", "RE-PRSSL", "RE-END-FRA-BRUKER", "RE-FRAVÆRKORR-SAKSB", "RE-END-INNTEKTSMELD", "BERØRT-BEHANDLING", "RE-ANNET", "RE-SATS-REGULERING", "RE-ENDRET-FORDELING", "INFOBREV_BEHANDLING", "INFOBREV_OPPHOLD", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-MDL", "RE-OPTJ", "RE-FRDLING", "RE-INNTK", "RE-DØD", "RE-SRTB", "RE-FRIST", "RE-BER-GRUN", "RE-KLAG-INNH-PGI", "RE-NB", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-DØDFØD", "RE-HENDELSE-OPPHØR-UNG", "RE-REGISTEROPPL", "RE-YTELSE", "RE-TILST-YT-INNVIL", "RE-ENDR-BER-GRUN", "RE-TILST-YT-OPPH", "RE_REBEREGN_FP", "RE_ANNEN_SAK", "RE_UTSATT_BEHANDLING", "RE_GJENOPPTAR_UTSATT_BEHANDLING", "RE_ANNEN_SAK_ET", "RE_ANNEN_SAK_NB", "RE_ANNEN_SAK_S", "RE_ANNEN_SAK_NB_ET", "RE_ANNEN_SAK_S_ET", "RE_ANNEN_SAK_S_NB", "RE_ANNEN_SAK_S_ET_NB", "RE_ANNEN_SAK_FP", "UNNT_GENERELL", "REVURDERER_BERØRT_PERIODE", "-" ],
-            "type" : "string"
-          },
-          "revurderingVarslingÅrsak" : {
-            "enum" : [ "BARNIKKEREG", "JOBBFULLTID", "IKKEOPPTJENT", "UTVANDRET", "JOBBUTLAND", "IKKEOPPHOLD", "JOBB6MND", "AKTIVITET", "ANNET" ],
-            "type" : "string"
-          }
-        },
-        "required" : [ "aksjonspunkt", "behandlingResultatType", "behandlingType", "behandlingÅrsakType", "revurderingVarslingÅrsak" ],
-        "type" : "object"
-      },
-      "K9SakKodeverkBehandlingAksjonspunkt" : {
-        "properties" : {
-          "venteårsak" : {
-            "enum" : [ "-", "ANKE_OVERSENDT_TIL_TRYGDERETTEN", "ANKE_VENTER_PAA_MERKNADER_FRA_BRUKER", "AVV_DOK", "AVV_IM_MOT_AAREG", "AVV_IM_MOT_SØKNAD_AT", "AVV_SØKNADSPERIODER", "AVV_FODSEL", "AVV_RESPONS_REVURDERING", "FOR_TIDLIG_SOKNAD", "GRADERING_FLERE_ARBEIDSFORHOLD", "REFUSJON_3_MÅNEDER", "SCANN", "UTV_FRIST", "VENT_FEIL_ENDRINGSSØKNAD", "VENT_GRADERING_UTEN_BEREGNINGSGRUNNLAG", "VENT_INFOTRYGD", "VENT_INNTEKT_RAPPORTERINGSFRIST", "VENT_MILITÆR_OG_BG_UNDER_3G", "VENT_OPDT_INNTEKTSMELDING", "VENT_OPPTJENING_OPPLYSNINGER", "VENT_PÅ_NY_INNTEKTSMELDING_MED_GYLDIG_ARB_ID", "VENT_REGISTERINNHENTING", "VENT_PÅ_SISTE_AAP_MELDEKORT", "VENT_SØKNAD_SENDT_INFORMASJONSBREV", "VENT_TIDLIGERE_BEHANDLING", "VENT_ÅPEN_BEHANDLING", "VENT_MANGL_FUNKSJ_SAKSBEHANDLER", "VENTER_SVAR_PORTEN", "VENTER_SVAR_TEAMS", "ANDRE_INNTEKTSOPPLYSNINGER", "INNTEKTSMELDING", "LEGEERKLÆRING", "MEDISINSKE_OPPLYSNINGER", "ANNET", "VENTER_ETTERLYS_IM", "VENTER_ETTERLYS_IM_VARSEL", "OPPD_ÅPEN_BEH", "VENT_DEKGRAD_REGEL", "VENT_ØKONOMI", "VENT_TILBAKEKREVING", "VENTELØNN_ELLER_MILITÆR_MED_FLERE_AKTIVITETER", "VENT_BEREGNING_TILBAKE_I_TID", "BRUKER_70ÅR_VED_REFUSJON", "VENT_LOVENDRING_8_41", "INGEN_PERIODE_UTEN_YTELSE", "PERIODE_MED_AVSLAG", "MANGLENDE_FUNKSJONALITET", "KORTVARIG_ARBEID", "FRISINN_ATFL_SAMME_ORG", "FRISINN_VARIANT_SN_MED_FL_INNTEKT", "FRISINN_VARIANT_FL_MED_SN_INNTEKT", "FRISINN_VARIANT_NY_FL", "FRISINN_VARIANT_NY_SN_2019", "FRISINN_VARIANT_NY_SN_2020", "FRISINN_VARIANT_KOMBINERT", "FRISINN_VARIANT_KOMBINERT_NY_FL", "FRISINN_VARIANT_KOMBINERT_NY_FL_NY_SN_2019", "FRISINN_VARIANT_KOMBINERT_NY_FL_NY_SN_2020", "FRISINN_VARIANT_KOMBINERT_NY_SN_2019", "FRISINN_VARIANT_KOMBINERT_NY_SN_2020", "FRISINN_VARIANT_SN_MED_FL_INNTEKT_NY_SN_2019", "FRISINN_VARIANT_SN_MED_FL_INNTEKT_NY_SN_2020", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_SN_2019", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_SN_2020", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL_NY_SN_2019", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL_NY_SN_2020", "FRISINN_VARIANT_ENDRET_INNTEKTSTYPE", "AVV_SOKN_IT_PERIODER", "AVV_SOKN_NAERING", "AVV_SOKN_FRILANS", "DELVIS_TILRETTELEGGING_OG_REFUSJON_SVP", "AAP_DP_SISTE_10_MND_SVP", "FL_SN_IKKE_STOTTET_FOR_SVP" ],
-            "type" : "string"
-          }
-        },
-        "required" : [ "venteårsak" ],
-        "type" : "object"
-      },
-      "K9SakKodeverkHistorikk" : {
-        "properties" : {
-          "historikkBegrunnelseType" : {
-            "enum" : [ "-", "SAKSBEH_START_PA_NYTT", "BEH_STARTET_PA_NYTT", "BERORT_BEH_ENDRING_DEKNINGSGRAD", "BERORT_BEH_OPPHOR" ],
-            "type" : "string"
-          }
-        },
-        "required" : [ "historikkBegrunnelseType" ],
-        "type" : "object"
-      },
-      "K9SakKodeverkMedlem" : {
-        "properties" : {
-          "medlemskapManuellVurderingType" : {
-            "enum" : [ "-", "MEDLEM", "UNNTAK", "IKKE_RELEVANT", "OPPHOR_PGA_ENDRING_I_TPS" ],
-            "type" : "string"
-          }
-        },
-        "required" : [ "medlemskapManuellVurderingType" ],
-        "type" : "object"
-      },
-      "K9SakKodeverkOpptjening" : {
-        "properties" : {
-          "opptjeningAktivitetType" : {
-            "enum" : [ "AAP", "ARBEID", "DAGPENGER", "FORELDREPENGER", "FRILANS", "MILITÆR_ELLER_SIVILTJENESTE", "NÆRING", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "PLEIEPENGER", "ETTERLØNN_SLUTTPAKKE", "SVANGERSKAPSPENGER", "SYKEPENGER", "SYKEPENGER_AV_DAGPENGER", "PLEIEPENGER_AV_DAGPENGER", "VENTELØNN_VARTPENGER", "VIDERE_ETTERUTDANNING", "UTENLANDSK_ARBEIDSFORHOLD", "FRISINN", "UTDANNINGSPERMISJON", "MELLOM_ARBEID", "-" ],
-            "type" : "string"
-          }
-        },
-        "required" : [ "opptjeningAktivitetType" ],
-        "type" : "object"
-      },
-      "K9SakKodeverkPerson" : {
-        "properties" : {
-          "personstatusType" : {
-            "enum" : [ "ABNR", "ADNR", "BOSA", "DØD", "DØDD", "FOSV", "FØDR", "UFUL", "UREG", "UTAN", "UTPE", "UTVA", "-" ],
-            "type" : "string"
-          },
-          "sivilstandType" : {
-            "enum" : [ "ENKE", "GIFT", "GJPA", "GLAD", "NULL", "REPA", "SAMB", "SEPA", "SEPR", "SKIL", "SKPA", "UGIF" ],
-            "type" : "string"
-          }
-        },
-        "required" : [ "personstatusType", "sivilstandType" ],
-        "type" : "object"
-      },
-      "K9SakKodeverkWeb" : {
-        "properties" : {
-          "arbeidsforhold" : {
-            "$ref" : "#/components/schemas/K9SakKodeverkArbeidsforhold"
-          },
-          "behandling" : {
-            "$ref" : "#/components/schemas/K9SakKodeverkBehandling"
-          },
-          "fagsystem" : {
-            "enum" : [ "K9SAK", "FPSAK", "TPS", "VLSP", "JOARK", "INFOTRYGD", "ARENA", "INNTEKT", "MEDL", "GOSYS", "ENHETSREGISTERET", "AAREGISTERET", "-" ],
-            "type" : "string"
-          },
-          "historikk" : {
-            "$ref" : "#/components/schemas/K9SakKodeverkHistorikk"
-          },
-          "iaygrunnlag" : {
-            "$ref" : "#/components/schemas/AbakusKodeverkIaygrunnlag"
-          },
-          "medlem" : {
-            "$ref" : "#/components/schemas/K9SakKodeverkMedlem"
-          },
-          "opptjening" : {
-            "$ref" : "#/components/schemas/K9SakKodeverkOpptjening"
-          },
-          "person" : {
-            "$ref" : "#/components/schemas/K9SakKodeverkPerson"
-          }
-        },
-        "required" : [ "arbeidsforhold", "behandling", "fagsystem", "historikk", "iaygrunnlag", "medlem", "opptjening", "person" ],
-        "type" : "object"
-      },
       "KodeverdiSomObjektAktivitetStatus" : {
         "properties" : {
           "kode" : {
@@ -3117,6 +2981,142 @@
           }
         },
         "required" : [ "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
+      "KodeverkArbeidsforhold" : {
+        "properties" : {
+          "aktivitetStatus" : {
+            "enum" : [ "MIDL_INAKTIV", "AAP", "AT", "DP", "SP_AV_DP", "PSB_AV_DP", "FL", "MS", "SN", "AT_FL", "AT_SN", "FL_SN", "AT_FL_SN", "BA", "IKKE_YRKESAKTIV", "KUN_YTELSE", "TY", "VENTELØNN_VARTPENGER", "-" ],
+            "type" : "string"
+          },
+          "arbeidType" : {
+            "enum" : [ "ETTERLØNN_SLUTTPAKKE", "FORENKLET_OPPGJØRSORDNING", "FRILANSER", "FRILANSER_OPPDRAGSTAKER", "LØNN_UNDER_UTDANNING", "MARITIMT_ARBEIDSFORHOLD", "MILITÆR_ELLER_SIVILTJENESTE", "ORDINÆRT_ARBEIDSFORHOLD", "PENSJON_OG_ANDRE_TYPER_YTELSER_UTEN_ANSETTELSESFORHOLD", "NÆRING", "UTENLANDSK_ARBEIDSFORHOLD", "VENTELØNN_VARTPENGER", "VANLIG", "-" ],
+            "type" : "string"
+          },
+          "arbeidskategori" : {
+            "enum" : [ "FISKER", "ARBEIDSTAKER", "SELVSTENDIG_NÆRINGSDRIVENDE", "KOMBINASJON_ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE", "SJØMANN", "JORDBRUKER", "DAGPENGER", "INAKTIV", "KOMBINASJON_ARBEIDSTAKER_OG_JORDBRUKER", "KOMBINASJON_ARBEIDSTAKER_OG_FISKER", "FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_FRILANSER", "KOMBINASJON_ARBEIDSTAKER_OG_DAGPENGER", "DAGMAMMA", "UGYLDIG", "-" ],
+            "type" : "string"
+          },
+          "inntektskategori" : {
+            "enum" : [ "ARBEIDSTAKER", "FRILANSER", "SELVSTENDIG_NÆRINGSDRIVENDE", "DAGPENGER", "ARBEIDSAVKLARINGSPENGER", "SJØMANN", "DAGMAMMA", "JORDBRUKER", "FISKER", "ARBEIDSTAKER_UTEN_FERIEPENGER", "-" ],
+            "type" : "string"
+          },
+          "relatertYtelseTilstand" : {
+            "enum" : [ "ÅPEN", "LØPENDE", "AVSLUTTET", "IKKESTARTET" ],
+            "type" : "string"
+          }
+        },
+        "required" : [ "aktivitetStatus", "arbeidType", "arbeidskategori", "inntektskategori", "relatertYtelseTilstand" ],
+        "type" : "object"
+      },
+      "KodeverkBehandling" : {
+        "properties" : {
+          "aksjonspunkt" : {
+            "$ref" : "#/components/schemas/KodeverkBehandlingAksjonspunkt"
+          },
+          "behandlingResultatType" : {
+            "enum" : [ "IKKE_FASTSATT", "INNVILGET", "DELVIS_INNVILGET", "AVSLÅTT", "OPPHØR", "HENLAGT_SØKNAD_TRUKKET", "HENLAGT_FEILOPPRETTET", "HENLAGT_BRUKER_DØD", "MERGET_OG_HENLAGT", "HENLAGT_SØKNAD_MANGLER", "HENLAGT_MASKINELT", "INNVILGET_ENDRING", "INGEN_ENDRING", "MANGLER_BEREGNINGSREGLER" ],
+            "type" : "string"
+          },
+          "behandlingType" : {
+            "enum" : [ "BT-002", "BT-004", "BT-010", "-" ],
+            "type" : "string"
+          },
+          "behandlingÅrsakType" : {
+            "enum" : [ "RE-MF", "RE-MFIP", "RE-AVAB", "RE-LOV", "RE-RGLF", "RE-FEFAKTA", "RE-PRSSL", "RE-END-FRA-BRUKER", "RE-FRAVÆRKORR-SAKSB", "RE-END-INNTEKTSMELD", "BERØRT-BEHANDLING", "RE-ANNET", "RE-SATS-REGULERING", "RE-ENDRET-FORDELING", "INFOBREV_BEHANDLING", "INFOBREV_OPPHOLD", "RE-KLAG-U-INNTK", "RE-KLAG-M-INNTK", "RE-MDL", "RE-OPTJ", "RE-FRDLING", "RE-INNTK", "RE-DØD", "RE-SRTB", "RE-FRIST", "RE-BER-GRUN", "RE-KLAG-INNH-PGI", "RE-NB", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-DØDFØD", "RE-HENDELSE-OPPHØR-UNG", "RE-REGISTEROPPL", "RE-YTELSE", "RE-TILST-YT-INNVIL", "RE-ENDR-BER-GRUN", "RE-TILST-YT-OPPH", "RE_REBEREGN_FP", "RE_ANNEN_SAK", "RE_UTSATT_BEHANDLING", "RE_GJENOPPTAR_UTSATT_BEHANDLING", "RE_ANNEN_SAK_ET", "RE_ANNEN_SAK_NB", "RE_ANNEN_SAK_S", "RE_ANNEN_SAK_NB_ET", "RE_ANNEN_SAK_S_ET", "RE_ANNEN_SAK_S_NB", "RE_ANNEN_SAK_S_ET_NB", "RE_ANNEN_SAK_FP", "UNNT_GENERELL", "REVURDERER_BERØRT_PERIODE", "-" ],
+            "type" : "string"
+          },
+          "revurderingVarslingÅrsak" : {
+            "enum" : [ "BARNIKKEREG", "JOBBFULLTID", "IKKEOPPTJENT", "UTVANDRET", "JOBBUTLAND", "IKKEOPPHOLD", "JOBB6MND", "AKTIVITET", "ANNET" ],
+            "type" : "string"
+          }
+        },
+        "required" : [ "aksjonspunkt", "behandlingResultatType", "behandlingType", "behandlingÅrsakType", "revurderingVarslingÅrsak" ],
+        "type" : "object"
+      },
+      "KodeverkBehandlingAksjonspunkt" : {
+        "properties" : {
+          "venteårsak" : {
+            "enum" : [ "-", "ANKE_OVERSENDT_TIL_TRYGDERETTEN", "ANKE_VENTER_PAA_MERKNADER_FRA_BRUKER", "AVV_DOK", "AVV_IM_MOT_AAREG", "AVV_IM_MOT_SØKNAD_AT", "AVV_SØKNADSPERIODER", "AVV_FODSEL", "AVV_RESPONS_REVURDERING", "FOR_TIDLIG_SOKNAD", "GRADERING_FLERE_ARBEIDSFORHOLD", "REFUSJON_3_MÅNEDER", "SCANN", "UTV_FRIST", "VENT_FEIL_ENDRINGSSØKNAD", "VENT_GRADERING_UTEN_BEREGNINGSGRUNNLAG", "VENT_INFOTRYGD", "VENT_INNTEKT_RAPPORTERINGSFRIST", "VENT_MILITÆR_OG_BG_UNDER_3G", "VENT_OPDT_INNTEKTSMELDING", "VENT_OPPTJENING_OPPLYSNINGER", "VENT_PÅ_NY_INNTEKTSMELDING_MED_GYLDIG_ARB_ID", "VENT_REGISTERINNHENTING", "VENT_PÅ_SISTE_AAP_MELDEKORT", "VENT_SØKNAD_SENDT_INFORMASJONSBREV", "VENT_TIDLIGERE_BEHANDLING", "VENT_ÅPEN_BEHANDLING", "VENT_MANGL_FUNKSJ_SAKSBEHANDLER", "VENTER_SVAR_PORTEN", "VENTER_SVAR_TEAMS", "ANDRE_INNTEKTSOPPLYSNINGER", "INNTEKTSMELDING", "LEGEERKLÆRING", "MEDISINSKE_OPPLYSNINGER", "ANNET", "VENTER_ETTERLYS_IM", "VENTER_ETTERLYS_IM_VARSEL", "OPPD_ÅPEN_BEH", "VENT_DEKGRAD_REGEL", "VENT_ØKONOMI", "VENT_TILBAKEKREVING", "VENTELØNN_ELLER_MILITÆR_MED_FLERE_AKTIVITETER", "VENT_BEREGNING_TILBAKE_I_TID", "BRUKER_70ÅR_VED_REFUSJON", "VENT_LOVENDRING_8_41", "INGEN_PERIODE_UTEN_YTELSE", "PERIODE_MED_AVSLAG", "MANGLENDE_FUNKSJONALITET", "KORTVARIG_ARBEID", "FRISINN_ATFL_SAMME_ORG", "FRISINN_VARIANT_SN_MED_FL_INNTEKT", "FRISINN_VARIANT_FL_MED_SN_INNTEKT", "FRISINN_VARIANT_NY_FL", "FRISINN_VARIANT_NY_SN_2019", "FRISINN_VARIANT_NY_SN_2020", "FRISINN_VARIANT_KOMBINERT", "FRISINN_VARIANT_KOMBINERT_NY_FL", "FRISINN_VARIANT_KOMBINERT_NY_FL_NY_SN_2019", "FRISINN_VARIANT_KOMBINERT_NY_FL_NY_SN_2020", "FRISINN_VARIANT_KOMBINERT_NY_SN_2019", "FRISINN_VARIANT_KOMBINERT_NY_SN_2020", "FRISINN_VARIANT_SN_MED_FL_INNTEKT_NY_SN_2019", "FRISINN_VARIANT_SN_MED_FL_INNTEKT_NY_SN_2020", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_SN_2019", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_SN_2020", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL_NY_SN_2019", "FRISINN_VARIANT_FL_MED_SN_INNTEKT_NY_FL_NY_SN_2020", "FRISINN_VARIANT_ENDRET_INNTEKTSTYPE", "AVV_SOKN_IT_PERIODER", "AVV_SOKN_NAERING", "AVV_SOKN_FRILANS", "DELVIS_TILRETTELEGGING_OG_REFUSJON_SVP", "AAP_DP_SISTE_10_MND_SVP", "FL_SN_IKKE_STOTTET_FOR_SVP" ],
+            "type" : "string"
+          }
+        },
+        "required" : [ "venteårsak" ],
+        "type" : "object"
+      },
+      "KodeverkHistorikk" : {
+        "properties" : {
+          "historikkBegrunnelseType" : {
+            "enum" : [ "-", "SAKSBEH_START_PA_NYTT", "BEH_STARTET_PA_NYTT", "BERORT_BEH_ENDRING_DEKNINGSGRAD", "BERORT_BEH_OPPHOR" ],
+            "type" : "string"
+          }
+        },
+        "required" : [ "historikkBegrunnelseType" ],
+        "type" : "object"
+      },
+      "KodeverkMedlem" : {
+        "properties" : {
+          "medlemskapManuellVurderingType" : {
+            "enum" : [ "-", "MEDLEM", "UNNTAK", "IKKE_RELEVANT", "OPPHOR_PGA_ENDRING_I_TPS" ],
+            "type" : "string"
+          }
+        },
+        "required" : [ "medlemskapManuellVurderingType" ],
+        "type" : "object"
+      },
+      "KodeverkOpptjening" : {
+        "properties" : {
+          "opptjeningAktivitetType" : {
+            "enum" : [ "AAP", "ARBEID", "DAGPENGER", "FORELDREPENGER", "FRILANS", "MILITÆR_ELLER_SIVILTJENESTE", "NÆRING", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "PLEIEPENGER", "ETTERLØNN_SLUTTPAKKE", "SVANGERSKAPSPENGER", "SYKEPENGER", "SYKEPENGER_AV_DAGPENGER", "PLEIEPENGER_AV_DAGPENGER", "VENTELØNN_VARTPENGER", "VIDERE_ETTERUTDANNING", "UTENLANDSK_ARBEIDSFORHOLD", "FRISINN", "UTDANNINGSPERMISJON", "MELLOM_ARBEID", "-" ],
+            "type" : "string"
+          }
+        },
+        "required" : [ "opptjeningAktivitetType" ],
+        "type" : "object"
+      },
+      "KodeverkPerson" : {
+        "properties" : {
+          "personstatusType" : {
+            "enum" : [ "ABNR", "ADNR", "BOSA", "DØD", "DØDD", "FOSV", "FØDR", "UFUL", "UREG", "UTAN", "UTPE", "UTVA", "-" ],
+            "type" : "string"
+          },
+          "sivilstandType" : {
+            "enum" : [ "ENKE", "GIFT", "GJPA", "GLAD", "NULL", "REPA", "SAMB", "SEPA", "SEPR", "SKIL", "SKPA", "UGIF" ],
+            "type" : "string"
+          }
+        },
+        "required" : [ "personstatusType", "sivilstandType" ],
+        "type" : "object"
+      },
+      "KodeverkWeb" : {
+        "properties" : {
+          "arbeidsforhold" : {
+            "$ref" : "#/components/schemas/KodeverkArbeidsforhold"
+          },
+          "behandling" : {
+            "$ref" : "#/components/schemas/KodeverkBehandling"
+          },
+          "fagsystem" : {
+            "enum" : [ "K9SAK", "FPSAK", "TPS", "VLSP", "JOARK", "INFOTRYGD", "ARENA", "INNTEKT", "MEDL", "GOSYS", "ENHETSREGISTERET", "AAREGISTERET", "-" ],
+            "type" : "string"
+          },
+          "historikk" : {
+            "$ref" : "#/components/schemas/KodeverkHistorikk"
+          },
+          "iaygrunnlag" : {
+            "$ref" : "#/components/schemas/AbakusKodeverkIaygrunnlag"
+          },
+          "medlem" : {
+            "$ref" : "#/components/schemas/KodeverkMedlem"
+          },
+          "opptjening" : {
+            "$ref" : "#/components/schemas/KodeverkOpptjening"
+          },
+          "person" : {
+            "$ref" : "#/components/schemas/KodeverkPerson"
+          }
+        },
+        "required" : [ "arbeidsforhold", "behandling", "fagsystem", "historikk", "iaygrunnlag", "medlem", "opptjening", "person" ],
         "type" : "object"
       },
       "KravDokumentMedSøktePerioder" : {
@@ -5419,7 +5419,7 @@
                 }
               }
             },
-            "description" : "Returnerer basisinformasjon om en aktør og hvilke fagsaker vedkommede har i k9-sak."
+            "description" : "Returnerer basisinformasjon om en aktør og hvilke fagsaker vedkommede har i ung-sak."
           }
         },
         "tags" : [ "aktoer" ]
@@ -7657,7 +7657,7 @@
                 }
               }
             },
-            "description" : "Liste av fagsaker i k9-sak personen er del av."
+            "description" : "Liste av fagsaker i ung-sak personen er del av."
           }
         },
         "tags" : [ "aktoer" ]
@@ -7815,16 +7815,16 @@
         "tags" : [ "kodeverk" ]
       }
     },
-    "/kodeverk/k9sak/kodeverk/typer" : {
+    "/kodeverk/ung-sak/kodeverk/typer" : {
       "get" : {
-        "description" : "Ikkje reell implementasjon for bruk. Kun for openapi type generering av k9-sak kodeverkstyper",
-        "operationId" : "getK9SakKodeverkTyper",
+        "description" : "Ikkje reell implementasjon for bruk. Kun for openapi type generering av ung-sak kodeverkstyper",
+        "operationId" : "getUngSakKodeverkTyper",
         "responses" : {
           "default" : {
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/K9SakKodeverkWeb"
+                  "$ref" : "#/components/schemas/KodeverkWeb"
                 }
               }
             },
@@ -8105,7 +8105,7 @@
     },
     "/oppdrag/forvaltning/hent-iverksetting-data" : {
       "get" : {
-        "description" : "Henter data som k9-sak sender til k9-oppdrag ved iverksetting",
+        "description" : "Henter data som ung-sak sender til k9-oppdrag ved iverksetting",
         "operationId" : "hentIverksettingData",
         "parameters" : [ {
           "in" : "query",
@@ -8124,10 +8124,10 @@
                 }
               }
             },
-            "description" : "Returnerer data som k9-sak sender tli k9-oppdrag ved iverksetting"
+            "description" : "Returnerer data som ung-sak sender tli k9-oppdrag ved iverksetting"
           }
         },
-        "summary" : "Henter data som k9-sak sender til k9-oppdrag ved iverksetting",
+        "summary" : "Henter data som ung-sak sender til k9-oppdrag ved iverksetting",
         "tags" : [ "oppdrag" ]
       }
     },
