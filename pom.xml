@@ -40,11 +40,11 @@
         <swagger.version>2.2.25</swagger.version>
         <junit.version>5.11.3</junit.version>
         <k9format.version>9.7.1</k9format.version>
-        <jackson.version>2.17.2</jackson.version>
+        <jackson.version>2.18.1</jackson.version>
         <asm.version>9.7.1</asm.version>
         <kotlin-stdlib.version>2.0.21</kotlin-stdlib.version>
         <jandex.version>3.2.3</jandex.version>
-        <flyway.version>10.20.1</flyway.version>
+        <flyway.version>10.21.0</flyway.version>
 
     </properties>
 
@@ -149,7 +149,7 @@
             <dependency>
                 <groupId>com.zaxxer</groupId>
                 <artifactId>HikariCP</artifactId>
-                <version>6.0.0</version>
+                <version>6.1.0</version>
             </dependency>
             <dependency>
                 <groupId>org.threeten</groupId>
