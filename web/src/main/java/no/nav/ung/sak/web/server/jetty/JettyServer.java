@@ -159,16 +159,10 @@ public class JettyServer {
 
     protected void migrerDatabaser() throws IOException {
         EnvironmentClass environmentClass = getEnvironmentClass();
-        String initSql = String.format("SET ROLE \"%s\"", DatasourceUtil.getDbRole("defaultDS", DatasourceRole.ADMIN));
-        if (EnvironmentClass.LOCALHOST.equals(environmentClass)) {
-            // TODO: Ønsker egentlig ikke dette, men har ikke satt opp skjema lokalt
-            // til å ha en admin bruker som gjør migrering og en annen som gjør CRUD
-            // operasjoner
-            initSql = null;
-        }
+
         try (HikariDataSource migreringDs = DatasourceUtil.createDatasource(envVarPrefix, environmentClass, 2)) {
             var flywayRepairOnFail = Boolean.valueOf(ENV.getProperty("FLYWAY_REPAIR_ON_FAIL", "false"));
-            DatabaseScript.migrate(migreringDs, initSql, flywayRepairOnFail);
+            DatabaseScript.migrate(migreringDs, null, flywayRepairOnFail);
         }
     }
 
