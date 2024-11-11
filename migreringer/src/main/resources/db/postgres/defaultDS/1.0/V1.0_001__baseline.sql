@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS btree_gist;
+
 CREATE TABLE IF NOT EXISTS aksjonspunkt (
     id bigint NOT NULL,
     periode_fom date,
