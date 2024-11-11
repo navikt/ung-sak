@@ -64,8 +64,8 @@ spec:
   accessPolicy:
     outbound:
       external:
-        - host: "k9-abakus.dev-fss-pub.nais.io",
-        - host: "k9-formidling-dokumentdata.dev-fss-pub.nais.io",
+        - host: "k9-abakus.dev-fss-pub.nais.io"
+        - host: "k9-formidling-dokumentdata.dev-fss-pub.nais.io"
         - host: "k9-oppdrag.dev-fss-pub.nais.io"
         - host: "k9-tilbake.dev-fss-pub.nais.io"
         - host: "k9-formidling.dev-fss-pub.nais.io"

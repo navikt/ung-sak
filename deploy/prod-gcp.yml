@@ -63,13 +63,13 @@ spec:
   accessPolicy:
     outbound:
       external:
-        - host: "k9-abakus.prod-fss-pub.nais.io",
-        - host: "k9-formidling-dokumentdata.prod-fss-pub.nais.io",
+        - host: "k9-abakus.prod-fss-pub.nais.io"
+        - host: "k9-formidling-dokumentdata.prod-fss-pub.nais.io"
         - host: "k9-oppdrag.prod-fss-pub.nais.io"
         - host: "k9-tilbake.prod-fss-pub.nais.io"
         - host: "k9-formidling.prod-fss-pub.nais.io"
         - host: "k9-fordel.prod-fss-pub.nais.io"
-        - host: "pdl-api.prod-fss-pub.nais.io",
+        - host: "pdl-api.prod-fss-pub.nais.io"
         - host: "saf.prod-fss-pub.nais.io"
     inbound:
       rules:
