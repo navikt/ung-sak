@@ -316,7 +316,7 @@ spec:
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
-      value: "true"
+      value: "false"
     - name: RESTART_APP_ON_ERROR
       value: "true"
 
