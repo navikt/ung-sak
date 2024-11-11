@@ -1,26 +1,23 @@
 package no.nav.ung.sak.web.server.jetty.db;
 
-import java.util.Locale;
-import java.util.Properties;
-
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
-import no.nav.vault.jdbc.hikaricp.HikariCPVaultUtil;
-import no.nav.vault.jdbc.hikaricp.VaultError;
+import java.util.Locale;
+import java.util.Properties;
 
 public class DatasourceUtil {
 
     public static HikariDataSource createDatasource(String envVarPrefix, DatasourceRole role, EnvironmentClass environmentClass, int maxPoolSize) {
         String rolePrefix = getRolePrefix(envVarPrefix);
+        String password = getProperty(envVarPrefix + ".password");
         if (EnvironmentClass.LOCALHOST.equals(environmentClass)) {
             var config = initConnectionPoolConfig(envVarPrefix, null, maxPoolSize);
-            String password = getProperty(envVarPrefix + ".password");
-            return createLocalDatasource(config, "public", rolePrefix, password);
+            return createDatasource(config, "public", rolePrefix, password);
         } else {
             String dbRole = getRole(rolePrefix, role);
             var config = initConnectionPoolConfig(envVarPrefix, dbRole, maxPoolSize);
-            return createVaultDatasource(config, environmentClass.mountPath(), dbRole);
+            return createDatasource(config, environmentClass.mountPath(), dbRole, password);
         }
     }
 
@@ -69,15 +66,7 @@ public class DatasourceUtil {
         return config;
     }
 
-    private static HikariDataSource createVaultDatasource(HikariConfig config, String mountPath, String role) {
-        try {
-            return HikariCPVaultUtil.createHikariDataSourceWithVaultIntegration(config, mountPath, role);
-        } catch (VaultError vaultError) {
-            throw new RuntimeException("Vault feil ved opprettelse av databaseforbindelse", vaultError);
-        }
-    }
-
-    private static HikariDataSource createLocalDatasource(HikariConfig config, String schema, String username, String password) {
+    private static HikariDataSource createDatasource(HikariConfig config, String schema, String username, String password) {
         config.setUsername(username);
         config.setPassword(password); // NOSONAR false positive
         if (schema != null && !schema.isEmpty()) {
