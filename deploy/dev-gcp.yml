@@ -35,7 +35,6 @@ spec:
       runtime: java
       destinations:
         - id: "grafana-lgtm"
-        - id: "elastic-apm"
   resources:
     limits:
       cpu: "500m"
@@ -64,48 +63,53 @@ spec:
   accessPolicy:
     outbound:
       external:
-        - host: "k9-abakus.dev-fss-pub.nais.io",
-        - host: "k9-formidling-dokumentdata.dev-fss-pub.nais.io",
+        - host: "k9-abakus.dev-fss-pub.nais.io"
+        - host: "k9-formidling-dokumentdata.dev-fss-pub.nais.io"
         - host: "k9-oppdrag.dev-fss-pub.nais.io"
         - host: "k9-tilbake.dev-fss-pub.nais.io"
         - host: "k9-formidling.dev-fss-pub.nais.io"
         - host: "k9-fordel.dev-fss-pub.nais.io"
-        - host: "pdl-api.dev-fss-pub.nais.io",
+        - host: "pdl-api.dev-fss-pub.nais.io"
         - host: "saf-q1.dev-fss-pub.nais.io"
     inbound:
       rules:
-        - application: k9-sak-web
-          namespace: k9saksbehandling
-          cluster: dev-gcp
-        - application: k9-los-api
-        - application: k9-fordel
         - application: ung-sak
-        - application: k9-tilbake
-        - application: k9-klage
-        - application: k9-formidling
-        - application: k9-formidling-dokumentdata
-        - application: k9-abakus
-          namespace: omsorgspenger
-          cluster: dev-gcp
-        - application: k9-sak-innsyn-api
-          namespace: dusseldorf
-          cluster: dev-gcp
+        - application: k9-sak-web
         - application: ung-deltakelse-opplyser
+        - application: k9-los-api
           namespace: k9saksbehandling
-          cluster: dev-gcp
+          cluster: dev-fss
+        - application: k9-fordel
+          namespace: k9saksbehandling
+          cluster: dev-fss
+        - application: k9-tilbake
+          namespace: k9saksbehandling
+          cluster: dev-fss
+        - application: k9-klage
+          namespace: k9saksbehandling
+          cluster: dev-fss
+        - application: k9-formidling
+          namespace: k9saksbehandling
+          cluster: dev-fss
+        - application: k9-formidling-dokumentdata
+          namespace: k9saksbehandling
+          cluster: dev-fss
+        - application: k9-abakus
+          namespace: k9saksbehandling
+          cluster: dev-fss
   gcp:
     sqlInstances:
       - type: POSTGRES_16
         name: ung-sak-db
-        tier: db-custom-1-3840
+        tier: db-g1-small # delt CPU, 1.7 RAM
         diskSize: 10
         diskAutoresize: false
         highAvailability: false
         databases:
           - name: ung-sak
             envVarPrefix: DB
-    envFrom:
-      - secret: ung-sak-secrets
+  envFrom:
+    - secret: ung-sak-secrets
   env:
     - name: TZ
       value: "Europe/Oslo"

@@ -35,7 +35,6 @@ spec:
       runtime: java
       destinations:
         - id: "grafana-lgtm"
-        - id: "elastic-apm"
   resources:
     limits:
       cpu: "4000m"
@@ -63,35 +62,38 @@ spec:
   accessPolicy:
     outbound:
       external:
-        - host: "k9-abakus.prod-fss-pub.nais.io",
-        - host: "k9-formidling-dokumentdata.prod-fss-pub.nais.io",
+        - host: "k9-abakus.prod-fss-pub.nais.io"
+        - host: "k9-formidling-dokumentdata.prod-fss-pub.nais.io"
         - host: "k9-oppdrag.prod-fss-pub.nais.io"
         - host: "k9-tilbake.prod-fss-pub.nais.io"
         - host: "k9-formidling.prod-fss-pub.nais.io"
         - host: "k9-fordel.prod-fss-pub.nais.io"
-        - host: "pdl-api.prod-fss-pub.nais.io",
+        - host: "pdl-api.prod-fss-pub.nais.io"
         - host: "saf.prod-fss-pub.nais.io"
     inbound:
       rules:
-        - application: k9-los-api
-        - application: k9-fordel
         - application: ung-sak
-        - application: k9-tilbake
-        - application: k9-klage
-        - application: k9-formidling
-        - application: k9-formidling-dokumentdata
-        - application: k9-abakus
-          namespace: omsorgspenger
+        - application: k9-los-api
+          namespace: k9saksbehandling
           cluster: prod-gcp
-        - application: k9-sak-innsyn-api
-          namespace: dusseldorf
+        - application: k9-fordel
+          namespace: k9saksbehandling
+          cluster: prod-gcp
+        - application: k9-tilbake
+          namespace: k9saksbehandling
+          cluster: prod-gcp
+        - application: k9-klage
+          namespace: k9saksbehandling
+          cluster: prod-gcp
+        - application: k9-abakus
+          namespace: k9saksbehandling
           cluster: prod-gcp
   gcp:
     sqlInstances:
       - type: POSTGRES_16
         name: ung-sak-db
-        tier: db-custom-2-7680
-        diskSize: 100
+        tier: db-custom-1-3840 # 1 CPU, 3.75 GB RAM
+        diskSize: 10
         diskAutoresize: true
         highAvailability: true
         databases:
