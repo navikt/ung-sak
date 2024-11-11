@@ -88,37 +88,37 @@ jobs:
       naiserator_file: deploy/dev-gcp.yml
     secrets: inherit
 
-#  check-change-compat-typescript-client:
-#    name: Change and compatibility check typescript client
-#    runs-on: ubuntu-latest
-#    needs: [build-typescript-client, deploy-dev]
-#    outputs:
-#      hasChanged: ${{ steps.compare-with-published.outputs.hasChanged }}
-#    permissions:
-#      contents: read
-#      packages: read
-#    steps:
-#      - uses: actions/download-artifact@v4
-#        with:
-#          name: ung-sak-typescript-client-src
-#          path: /tmp/ung-sak-typescript-client
-#      - uses: navikt/openapi-ts-clientmaker/extra/actions/compare-with-published@v1
-#        id: compare-with-published
-#        with:
-#          localPath: /tmp/ung-sak-typescript-client
-#          npmPackageName: ung-sak-typescript-client
-#          githubToken: ${{ secrets.GITHUB_TOKEN }}
-#      - uses: navikt/ung-sak-web/.github/actions/check-compat-typescript-client@master
-#        if: steps.compare-with-published.outputs.hasChanged == 'true'
-#        with:
-#          readerToken: ${{ secrets.READER_TOKEN }}
-#          newClientPath: /tmp/ung-sak-typescript-client
+  check-change-compat-typescript-client:
+    name: Change and compatibility check typescript client
+    runs-on: ubuntu-latest
+    needs: [build-typescript-client, deploy-dev]
+    outputs:
+      hasChanged: ${{ steps.compare-with-published.outputs.hasChanged }}
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ung-sak-typescript-client-src
+          path: /tmp/ung-sak-typescript-client
+      - uses: navikt/openapi-ts-clientmaker/extra/actions/compare-with-published@v1
+        id: compare-with-published
+        with:
+          localPath: /tmp/ung-sak-typescript-client
+          npmPackageName: ung-sak-typescript-client
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+      - uses: navikt/k9-sak-web/.github/actions/check-compat-typescript-client@master
+        if: steps.compare-with-published.outputs.hasChanged == 'true'
+        with:
+          readerToken: ${{ secrets.READER_TOKEN }}
+          newClientPath: /tmp/ung-sak-typescript-client
 
   publish-typescript-client:
     name: Publish typescript client
     runs-on: ubuntu-latest
-    needs: [build-typescript-client]
-    #if: needs.check-change-compat-typescript-client.outputs.hasChanged == 'true'
+    needs: [check-change-compat-typescript-client]
+    if: needs.check-change-compat-typescript-client.outputs.hasChanged == 'true'
     permissions:
       contents: read
       packages: write
