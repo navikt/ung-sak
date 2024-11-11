@@ -27,11 +27,6 @@
             <artifactId>kodeverk</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>no.nav.folketrygdloven.kalkulus</groupId>
-            <artifactId>beregning-kontrakt</artifactId>
-        </dependency>
-
         <!-- for Bean validation -->
         <dependency>
             <groupId>org.hibernate.validator</groupId>

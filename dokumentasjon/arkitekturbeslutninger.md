@@ -6,7 +6,6 @@
     1. Mottak av dokumenter
     1. Mottak av eksterne hendelser (eks. fødsel/dødsfall, inntektsopplysninger)
     1. Abakus: Registeropplysninger for inntekt-arbeid-ytelse
-    1. Kalkulus: Beregningsgrunnlag og fordeling av beregning inntektskomponsasjon per yrkesaktivitet, ytelse og arbeidsgiver
     1. Formidling og Dokgen: Aggreging av data og produksjon av brev til bruker
     1. Uttak: Beregning av årskvantum, uttak av pleiepenger, opplæringspenger, frisinn)
     1. Følgende er opprettet fra start som uavhengige moduler:

@@ -18,7 +18,6 @@ public class ObjectMapperResolver implements ContextResolver<ObjectMapper> {
 
     private final ObjectMapper baseObjektMapper;
     private final ObjectMapper overstyrKodeverdiAlltidSomStringMapper;
-    private final ObjectMapper overstyrKalkulusKodeverdiSomStringMapper;
     private final ObjectMapper defaultObjektMapper;
     private final ObjectMapper openapiObjektMapper;
 
@@ -29,7 +28,6 @@ public class ObjectMapperResolver implements ContextResolver<ObjectMapper> {
     public ObjectMapperResolver() {
         this.baseObjektMapper = ObjectMapperFactory.createBaseObjectMapper();
         this.overstyrKodeverdiAlltidSomStringMapper = this.baseObjektMapper.copy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkOverstyringSerialisering.KODE_STRING));
-        this.overstyrKalkulusKodeverdiSomStringMapper = this.baseObjektMapper.copy().registerModule(ObjectMapperFactory.createOverstyrendeKodeverdiSerializerModule(SakKodeverkOverstyringSerialisering.INGEN));
         // defaultObjektMapper brukast når input header for overstyring ikkje er satt.
         // Bruker samme logikk som har vore pr no. Det vil seie overstyring av Kalkulus Kodeverdi serialisering til objekt, så lenge ikkje feature flagg for string serialisering er aktivt.
         // Når alle klienter kan handtere at Kalkulus Kodeverdi kjem som string kan denne sannsynlegvis settast lik baseObjektMapper.
@@ -81,8 +79,6 @@ public class ObjectMapperResolver implements ContextResolver<ObjectMapper> {
     public ObjectMapper getContext(Class<?> type) {
         final String serializerOption = this.getJsonSerializerOptionHeaderValue();
         return switch (serializerOption) {
-            // Kompatibilitet for verdikjede test klient, istadenfor feature flag på server:
-            case "kodeverdi-kalkulus-string" -> this.overrideMapperForSøknad(type, this.overstyrKalkulusKodeverdiSomStringMapper);
             case "kodeverdi-string" -> this.overrideMapperForSøknad(type, this.overstyrKodeverdiAlltidSomStringMapper);
             case "base" -> this.baseObjektMapper;
             case "openapi-compat" -> this.openapiObjektMapper; // <- Også hardkoda i k9-sak-web jsonSerializerOption.ts
