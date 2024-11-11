@@ -10,7 +10,7 @@
 
     <artifactId>skjaeringstidspunkt</artifactId>
     <packaging>jar</packaging>
-    <name>K9SAK :: Domenetjenester - Skjæringstidspunkt</name>
+    <name>ung-sak :: Domenetjenester - Skjæringstidspunkt</name>
 
     <!-- Eksterne -->
     <dependencies>

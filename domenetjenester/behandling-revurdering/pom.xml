@@ -8,7 +8,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>behandling-revurdering</artifactId>
-    <name>K9SAK :: Domenetjenester - Behandling Revurdering</name>
+    <name>ung-sak :: Domenetjenester - Behandling Revurdering</name>
     <packaging>jar</packaging>
 
     <dependencies>

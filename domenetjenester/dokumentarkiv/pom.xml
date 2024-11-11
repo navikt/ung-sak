@@ -13,7 +13,7 @@
 
 	<artifactId>dokumentarkiv</artifactId>
 	<packaging>jar</packaging>
-	<name>K9SAK :: Domenetjenester - Dokumentarkiv</name>
+	<name>ung-sak :: Domenetjenester - Dokumentarkiv</name>
 
 	<dependencies>
 

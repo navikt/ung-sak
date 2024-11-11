@@ -12,7 +12,7 @@
 
 	<artifactId>behandlingsprosess-steg</artifactId>
 	<packaging>jar</packaging>
-	<name>K9SAK :: Behandlingsprosess - Steg</name>
+	<name>ung-sak :: Behandlingsprosess - Steg</name>
 
 	<dependencies>
 

@@ -23,10 +23,10 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 public abstract class ProduksjonsstyringHendelse {
     public final UUID eksternId;
     public final LocalDateTime hendelseTid;
-    public final K9SakHendelseType hendelseType;
+    public final UngSakHendelseType hendelseType;
 
     @JsonCreator
-    public ProduksjonsstyringHendelse(UUID eksternId, LocalDateTime hendelseTid, K9SakHendelseType hendelseType) {
+    public ProduksjonsstyringHendelse(UUID eksternId, LocalDateTime hendelseTid, UngSakHendelseType hendelseType) {
         this.eksternId = eksternId;
         this.hendelseTid = hendelseTid;
         this.hendelseType = hendelseType;

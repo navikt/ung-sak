@@ -9,7 +9,7 @@
         <version>${revision}${sha1}${changelist}</version>
     </parent>
 
-    <name>K9SAK :: Domenetjenester - Grunnbeløp</name>
+    <name>ung-sak :: Domenetjenester - Grunnbeløp</name>
     <artifactId>grunnbelop</artifactId>
     <packaging>jar</packaging>
 

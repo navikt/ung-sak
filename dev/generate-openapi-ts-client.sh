@@ -16,10 +16,10 @@ TS_CLIENT_TARGET_DIR="$(pwd)/web/target/ts-client"
 # Get all dependencies in order
 mvn install -DskipTests=true
 
-# Generate k9-sak.openapi.json in the resources/openapi-ts-client directory
+# Generate ung-sak.openapi.json in the resources/openapi-ts-client directory
 mvn --projects web exec:java
 
-# Use docker to make the typescript client from the generated k9-sak.openapi.json
+# Use docker to make the typescript client from the generated ung-sak.openapi.json
 mkdir -p "${TS_CLIENT_TARGET_DIR}"
 CONTAINER_NAME="openapi-ts-clientmaker-cli"
 IMAGE_URL="europe-north1-docker.pkg.dev/nais-management-233d/k9saksbehandling/navikt/${CONTAINER_NAME}:v1"
@@ -32,7 +32,7 @@ docker run \
   --mount type=bind,source="${TS_CLIENT_SRC_DIR}",target=/in \
   --mount type=bind,source="${TS_CLIENT_TARGET_DIR}",target=/out \
   $IMAGE_URL -- \
-  --openapi-spec-file in/k9-sak.openapi.json \
+  --openapi-spec-file in/ung-sak.openapi.json \
   --package-json-file in/package.json \
   --client-name K9SakClient
 

@@ -1,6 +1,6 @@
 package no.nav.ung.sak.kontrakt.produksjonsstyring.los;
 
-enum K9SakHendelseType {
+enum UngSakHendelseType {
     KRAVDOKUMENT,
     AKSJONSPUNKT,
     BEHANDLING_OPPRETTET,

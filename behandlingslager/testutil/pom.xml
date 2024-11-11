@@ -11,7 +11,7 @@
 
     <artifactId>behandlingslager-testutilities</artifactId>
     <packaging>jar</packaging>
-    <name>K9SAK :: Behandlingslager - Testutilities</name>
+    <name>ung-sak :: Behandlingslager - Testutilities</name>
 
     <dependencies>
 

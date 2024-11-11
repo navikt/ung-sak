@@ -10,7 +10,7 @@
 
     <artifactId>behandlingslager-pom</artifactId>
     <packaging>pom</packaging>
-    <name>K9SAK :: Behandlingslager - Pom</name>
+    <name>ung-sak :: Behandlingslager - Pom</name>
 
     <modules>
         <module>domene</module>

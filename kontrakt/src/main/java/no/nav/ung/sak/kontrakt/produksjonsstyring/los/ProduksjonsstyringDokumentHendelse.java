@@ -23,7 +23,7 @@ public class ProduksjonsstyringDokumentHendelse extends ProduksjonsstyringHendel
         @JsonProperty("eksternId") UUID eksternId,
         @JsonProperty("hendelseTid") LocalDateTime hendelseTid,
         @JsonProperty("kravdokumenter") List<KravDokumentType> kravdokumenter) {
-        super(eksternId, hendelseTid, K9SakHendelseType.KRAVDOKUMENT);
+        super(eksternId, hendelseTid, UngSakHendelseType.KRAVDOKUMENT);
         this.kravdokumenter = kravdokumenter;
     }
 }

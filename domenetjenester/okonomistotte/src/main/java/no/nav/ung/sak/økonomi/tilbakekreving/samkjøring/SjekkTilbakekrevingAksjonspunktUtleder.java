@@ -40,7 +40,7 @@ public class SjekkTilbakekrevingAksjonspunktUtleder {
     }
 
     /**
-     * Når k9-sak iverksetter endringer for bruker mot oppdragsystemet og det finnes et kravgrunnlag (pga feilutbetaling til bruker),
+     * Når ung-sak iverksetter endringer for bruker mot oppdragsystemet og det finnes et kravgrunnlag (pga feilutbetaling til bruker),
      * vil oppdragsystemet sperre kravgrunnlaget i en periode (3 dager). Mens kravgrunnlaget er sperret, er det ikke mulig å
      * gjennomføre tilbakekrevingsbehandlinger. Når bruker sender inn daglige endringer som behandles automatisk, vil det
      * da bli umulig å gjennomføre tilbakekrevingsbehandligner på saken.

@@ -66,11 +66,11 @@ public class KodeverkRestTjeneste {
 
 
     @GET
-    @Path("/k9sak/kodeverk/typer")
-    @Operation(description = "Ikkje reell implementasjon for bruk. Kun for openapi type generering av k9-sak kodeverkstyper", tags = "kodeverk")
+    @Path("/ung-sak/kodeverk/typer")
+    @Operation(description = "Ikkje reell implementasjon for bruk. Kun for openapi type generering av ung-sak kodeverkstyper", tags = "kodeverk")
     @BeskyttetRessurs(action = READ, resource = APPLIKASJON, sporingslogg = false)
-    public K9SakKodeverkWeb getK9SakKodeverkTyper() {
-        return new K9SakKodeverkWeb();
+    public KodeverkWeb getUngSakKodeverkTyper() {
+        return new KodeverkWeb();
     }
 
     @GET

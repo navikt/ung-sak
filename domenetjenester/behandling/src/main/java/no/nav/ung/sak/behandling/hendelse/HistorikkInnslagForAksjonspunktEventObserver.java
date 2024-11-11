@@ -36,7 +36,7 @@ public class HistorikkInnslagForAksjonspunktEventObserver {
          * heller bruker IdentType når det fikses.
          */
         @KonfigVerdi(value = "systembruker.username", required = false) String systembruker,
-        @KonfigVerdi(value = "NAIS_APP_NAME", defaultVerdi = "k9-sak") String appName) {
+        @KonfigVerdi(value = "NAIS_APP_NAME", defaultVerdi = "ung-sak") String appName) {
         this.historikkRepository = historikkRepository;
         this.systembruker = systembruker;
         this.appName = appName;

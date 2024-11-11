@@ -12,7 +12,7 @@
 
 	<artifactId>behandlingskontroll</artifactId>
 	<packaging>jar</packaging>
-	<name>K9SAK :: Domenetjenester - Behandlingskontroll</name>
+	<name>ung-sak :: Domenetjenester - Behandlingskontroll</name>
 
 
 	<dependencies>

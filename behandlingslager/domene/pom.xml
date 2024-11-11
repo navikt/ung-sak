@@ -10,7 +10,7 @@
     </parent>
     <artifactId>behandlingslager-domene</artifactId>
     <packaging>jar</packaging>
-    <name>K9SAK :: Behandlingslager - Domene</name>
+    <name>ung-sak :: Behandlingslager - Domene</name>
 
     <dependencies>
         <dependency>

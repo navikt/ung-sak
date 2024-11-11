@@ -24,7 +24,7 @@ public class ProduksjonsstyringAksjonspunktHendelse extends ProduksjonsstyringHe
         @JsonProperty("hendelseTid") LocalDateTime hendelseTid,
         @JsonProperty("aksjonspunktTilstander") List<AksjonspunktTilstandDto> aksjonspunktTilstander
     ) {
-        super(eksternId, hendelseTid, K9SakHendelseType.AKSJONSPUNKT);
+        super(eksternId, hendelseTid, UngSakHendelseType.AKSJONSPUNKT);
         this.aksjonspunktTilstander = aksjonspunktTilstander;
     }
 }

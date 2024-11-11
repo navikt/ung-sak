@@ -9,7 +9,7 @@
 
     <artifactId>produksjonsstyring</artifactId>
     <packaging>jar</packaging>
-    <name>K9SAK :: Domenetjenester - Produksjonsstyring</name>
+    <name>ung-sak :: Domenetjenester - Produksjonsstyring</name>
 
     <dependencies>
         <!-- Domenetjenester avhengigheter -->

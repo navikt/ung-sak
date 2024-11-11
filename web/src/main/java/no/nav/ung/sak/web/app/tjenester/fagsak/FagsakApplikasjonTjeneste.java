@@ -53,7 +53,7 @@ public class FagsakApplikasjonTjeneste {
                                      ProsesseringAsynkTjeneste prosesseringAsynkTjeneste,
                                      TpsTjeneste tpsTjeneste,
                                      PersoninfoAdapter personinfoAdapter
-                                     ) {
+    ) {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.tpsTjeneste = tpsTjeneste;
         this.prosesseringAsynkTjeneste = prosesseringAsynkTjeneste;
@@ -159,7 +159,9 @@ public class FagsakApplikasjonTjeneste {
         }
     }
 
-    /** Returnerer samling med kun en fagsak. */
+    /**
+     * Returnerer samling med kun en fagsak.
+     */
     public FagsakSamlingForBruker hentFagsakForSaksnummer(Saksnummer saksnummer) {
         Optional<Fagsak> fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer);
         if (fagsak.isEmpty()) {
@@ -173,7 +175,7 @@ public class FagsakApplikasjonTjeneste {
             return FagsakSamlingForBruker.emptyView();
         }
 
-        return tilFagsakView(fagsaker, finnAntallBarnTps(fagsaker), funnetNavBruker.get());
+        return tilFagsakView(fagsaker, funnetNavBruker.get());
     }
 
     private FagsakSamlingForBruker hentSakerForFnr(PersonIdent fnr) {
@@ -182,22 +184,14 @@ public class FagsakApplikasjonTjeneste {
             return FagsakSamlingForBruker.emptyView();
         }
         List<Fagsak> fagsaker = fagsakRepository.hentForBruker(funnetNavBruker.get().getAktørId());
-        return tilFagsakView(fagsaker, finnAntallBarnTps(fagsaker), funnetNavBruker.get());
+        return tilFagsakView(fagsaker, funnetNavBruker.get());
     }
 
-    private FagsakSamlingForBruker tilFagsakView(List<Fagsak> fagsaker, Map<Long, Integer> antallBarnPerFagsak, Personinfo personinfo) {
+    private FagsakSamlingForBruker tilFagsakView(List<Fagsak> fagsaker, Personinfo personinfo) {
         FagsakSamlingForBruker view = new FagsakSamlingForBruker(personinfo);
         // FIXME K9 relevante data
-        fagsaker.forEach(sak -> view.leggTil(sak, antallBarnPerFagsak.get(sak.getId()), null));
+        fagsaker.forEach(sak -> view.leggTil(sak));
         return view;
-    }
-
-    private Map<Long, Integer> finnAntallBarnTps(List<Fagsak> fagsaker) {
-        Map<Long, Integer> antallBarnPerFagsak = new HashMap<>();
-        for (Fagsak fagsak : fagsaker) {
-            antallBarnPerFagsak.put(fagsak.getId(), 0); // FIXME: Skal ikke være hardkodet.
-        }
-        return antallBarnPerFagsak;
     }
 
     private AktørId finnAktørId(PersonIdent bruker) {

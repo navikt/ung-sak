@@ -9,7 +9,7 @@
 
     <artifactId>hendelsemottak</artifactId>
     <packaging>jar</packaging>
-    <name>K9SAK :: Domenetjenester - Hendelsemottak</name>
+    <name>ung-sak :: Domenetjenester - Hendelsemottak</name>
 
     <dependencies>
         <dependency>

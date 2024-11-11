@@ -9,7 +9,7 @@
 
     <artifactId>mottak</artifactId>
     <packaging>jar</packaging>
-    <name>K9SAK :: Domenetjenester - Mottak</name>
+    <name>ung-sak :: Domenetjenester - Mottak</name>
 
     <dependencies>
         <dependency>

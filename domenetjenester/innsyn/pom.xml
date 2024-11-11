@@ -9,7 +9,7 @@
 
 	<artifactId>innsyn</artifactId>
 	<packaging>jar</packaging>
-	<name>K9SAK :: Domenetjenester - Innsyn</name>
+	<name>ung-sak :: Domenetjenester - Innsyn</name>
 
      <dependencies>
         <dependency>

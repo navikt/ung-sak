@@ -22,7 +22,7 @@ public class ProduksjonsstyringBehandlingAvsluttetHendelse extends Produksjonsst
         @JsonProperty("eksternId") UUID eksternId,
         @JsonProperty("hendelseTid") LocalDateTime hendelseTid,
         @JsonProperty("behandlingResultatType") BehandlingResultatType behandlingResultatType) {
-        super(eksternId, hendelseTid, K9SakHendelseType.BEHANDLING_AVSLUTTET);
+        super(eksternId, hendelseTid, UngSakHendelseType.BEHANDLING_AVSLUTTET);
         this.behandlingResultatType = behandlingResultatType.getKode();
     }
 }

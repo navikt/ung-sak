@@ -10,7 +10,7 @@
 
     <artifactId>behandling</artifactId>
     <packaging>jar</packaging>
-    <name>K9SAK :: Domenetjenester - Behandling</name>
+    <name>ung-sak :: Domenetjenester - Behandling</name>
 
     <!-- Eksterne -->
     <dependencies>
