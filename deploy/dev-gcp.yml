@@ -97,7 +97,7 @@ spec:
     sqlInstances:
       - type: POSTGRES_16
         name: ung-sak-db
-        tier: db-custom-1-3840
+        tier: db-g1-small # delt CPU, 1.7 RAM
         diskSize: 10
         diskAutoresize: false
         highAvailability: false
