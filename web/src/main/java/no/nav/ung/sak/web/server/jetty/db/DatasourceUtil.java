@@ -12,15 +12,7 @@ public class DatasourceUtil {
         String username = username(envVarPrefix);
         String password = getProperty(envVarPrefix + ".password");
         HikariConfig config = initConnectionPoolConfig(envVarPrefix, maxPoolSize);
-        if (EnvironmentClass.LOCALHOST.equals(environmentClass)) {
-            return createDatasource(config, "public", username, password);
-        } else {
-            return createDatasource(config, environmentClass.mountPath(), username, password);
-        }
-    }
-
-    public static String getDbRole(String datasoureName, DatasourceRole role) {
-        return String.format("%s-%s", username(datasoureName), role.name().toLowerCase());
+        return createDatasource(config, "public", username, password);
     }
 
     private static String username(String envVarPrefix) {
