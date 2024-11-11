@@ -78,7 +78,7 @@ jobs:
       id-token: write
       contents: write
     if: github.ref_name == 'master'
-    needs: [build-app, verdikjede-tester]
+    needs: [build-app]
     uses: navikt/sif-gha-workflows/.github/workflows/maven-deploy.yml@main
     with:
       gar: true
