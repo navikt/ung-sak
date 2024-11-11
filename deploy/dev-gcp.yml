@@ -109,8 +109,8 @@ spec:
         databases:
           - name: ung-sak
             envVarPrefix: DB
-    envFrom:
-      - secret: ung-sak-secrets
+  envFrom:
+    - secret: ung-sak-secrets
   env:
     - name: TZ
       value: "Europe/Oslo"
