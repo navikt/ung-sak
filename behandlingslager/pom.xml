@@ -3,8 +3,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>k9sak</artifactId>
-        <groupId>no.nav.k9.sak</groupId>
+        <artifactId>ung-sak</artifactId>
+        <groupId>no.nav.ung.sak</groupId>
         <version>${revision}${sha1}${changelist}</version>
     </parent>
 

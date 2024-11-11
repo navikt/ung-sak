@@ -8,8 +8,8 @@
     <sequence-generator name="SEQ_UNG_UNGDOMSPROGRAMPERIODER" allocation-size="50" sequence-name="SEQ_UNG_UNGDOMSPROGRAMPERIODER"/>
     <sequence-generator name="SEQ_UNG_UNGDOMSPROGRAMPERIODE" allocation-size="50" sequence-name="SEQ_UNG_UNGDOMSPROGRAMPERIODE"/>
 
-    <entity class="no.nav.k9.sak.ytelse.ung.periode.UngdomsprogramPeriodeGrunnlag"/>
-    <entity class="no.nav.k9.sak.ytelse.ung.periode.UngdomsprogramPerioder"/>
-    <entity class="no.nav.k9.sak.ytelse.ung.periode.UngdomsprogramPeriode"/>
+    <entity class="no.nav.ung.sak.ytelse.ung.periode.UngdomsprogramPeriodeGrunnlag"/>
+    <entity class="no.nav.ung.sak.ytelse.ung.periode.UngdomsprogramPerioder"/>
+    <entity class="no.nav.ung.sak.ytelse.ung.periode.UngdomsprogramPeriode"/>
 
 </entity-mappings>

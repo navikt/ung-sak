@@ -5,6 +5,6 @@
         version="3.0">
 
     <sequence-generator name="SEQ_DIAGNOSTIKK_FAGSAK_LOGG" allocation-size="50" sequence-name="SEQ_DIAGNOSTIKK_FAGSAK_LOGG" />
-    <entity class="no.nav.k9.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg" />
+    <entity class="no.nav.ung.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg" />
 
 </entity-mappings>

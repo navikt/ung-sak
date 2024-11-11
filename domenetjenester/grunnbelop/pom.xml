@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>domenetjenester-pom</artifactId>
-        <groupId>no.nav.k9.sak</groupId>
+        <groupId>no.nav.ung.sak</groupId>
         <version>${revision}${sha1}${changelist}</version>
     </parent>
 
@@ -22,26 +22,16 @@
             <groupId>no.nav.k9.felles</groupId>
             <artifactId>k9-felles-db</artifactId>
         </dependency>
-        <dependency>
-            <groupId>no.nav.k9.felles.integrasjon</groupId>
-            <artifactId>k9-felles-integrasjon-rest-klient</artifactId>
-        </dependency>
 
         <!-- Domenetjenester avhengigheter -->
         <dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>kontrakt</artifactId>
-        </dependency>
-
-        <!-- kontrakter -->
-        <dependency>
-            <groupId>no.nav.folketrygdloven.kalkulus</groupId>
-            <artifactId>beregning-kontrakt</artifactId>
         </dependency>
 
         <!-- Prosjekt avhengigheter -->
         <dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>behandlingslager-domene</artifactId>
         </dependency>
 
@@ -52,7 +42,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>migreringer</artifactId>
             <type>test-jar</type>
             <scope>test</scope>

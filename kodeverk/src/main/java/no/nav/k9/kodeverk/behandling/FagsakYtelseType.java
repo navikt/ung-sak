@@ -27,7 +27,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import no.nav.k9.kodeverk.TempAvledeKode;
 import no.nav.k9.kodeverk.api.Kodeverdi;
-import no.nav.k9.sak.typer.AktørId;
+import no.nav.ung.sak.typer.AktørId;
 
 @JsonFormat(shape = Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)

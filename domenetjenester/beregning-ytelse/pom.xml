@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<artifactId>domenetjenester-pom</artifactId>
-		<groupId>no.nav.k9.sak</groupId>
+		<groupId>no.nav.ung.sak</groupId>
 		<version>${revision}${sha1}${changelist}</version>
 	</parent>
 
@@ -16,7 +16,7 @@
 	<dependencies>
 
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>kontrakt</artifactId>
 		</dependency>
 
@@ -31,12 +31,12 @@
 
 		<!-- Prosjekt avhengigheter -->
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>behandlingslager-domene</artifactId>
 		</dependency>
 
         <dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>behandling</artifactId>
         </dependency>
 
@@ -55,7 +55,7 @@
 
 		<!-- Test avhengigheter -->
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>behandlingslager-testutilities</artifactId>
 			<scope>test</scope>
 		</dependency>

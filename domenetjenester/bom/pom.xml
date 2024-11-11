@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>no.nav.k9.sak</groupId>
+		<groupId>no.nav.ung.sak</groupId>
 		<artifactId>domenetjenester-pom</artifactId>
         <version>${revision}${sha1}${changelist}</version>
 	</parent>
@@ -15,51 +15,51 @@
 	<dependencies>
 		<!-- håndeterer behandlingskontroll utenfor BOM -->
 		<dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>dokumentarkiv</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>skjaeringstidspunkt</artifactId>
         </dependency>
 		 <dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>arbeidsforhold</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>inngangsvilkar</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>innsyn</artifactId>
         </dependency>
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>person</artifactId>
 		</dependency>
         <dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>produksjonsstyring</artifactId>
         </dependency>
 		<dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>registerinnhenting</artifactId>
         </dependency>
 		<dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>behandling</artifactId>
         </dependency>
 		<dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>behandling-prosessering</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>behandling-revurdering</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>beregning-ytelse</artifactId>
         </dependency>
     </dependencies>

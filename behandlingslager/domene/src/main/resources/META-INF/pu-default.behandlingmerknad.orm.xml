@@ -6,6 +6,6 @@
 
 	<sequence-generator name="SEQ_BEHANDLING_MERKNAD" allocation-size="50" sequence-name="SEQ_BEHANDLING_MERKNAD" />
 
-	<entity class="no.nav.k9.sak.behandlingslager.behandling.merknad.BehandlingMerknadEntitet" />
+	<entity class="no.nav.ung.sak.behandlingslager.behandling.merknad.BehandlingMerknadEntitet" />
 
 </entity-mappings>

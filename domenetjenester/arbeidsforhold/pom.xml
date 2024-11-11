@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<parent>
 		<artifactId>domenetjenester-pom</artifactId>
-		<groupId>no.nav.k9.sak</groupId>
+		<groupId>no.nav.ung.sak</groupId>
 		<version>${revision}${sha1}${changelist}</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
@@ -15,7 +15,7 @@
 	<dependencies>
 		<!-- for Bean validation -->
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>kontrakt</artifactId>
 		</dependency>
 		<dependency>
@@ -30,7 +30,7 @@
 
 		<!-- Modul interne avhengigheter -->
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>behandling</artifactId>
 		</dependency>
 
@@ -45,7 +45,7 @@
             <artifactId>k9-ereg-klient</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>person</artifactId>
         </dependency>
 
@@ -57,7 +57,7 @@
 
 		<!-- Test -->
         <dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>behandlingslager-testutilities</artifactId>
             <scope>test</scope>
         </dependency>

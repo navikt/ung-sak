@@ -20,11 +20,11 @@ import no.nav.k9.kodeverk.behandling.BehandlingType;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.kodeverk.uttak.Tid;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.Saksnummer;
 
 public class PubliserInfotrygdFeedElementTaskTest {
 
@@ -213,7 +213,7 @@ class FeedServiceMockHelper {
 
         return behandling;
     }
-    
+
     private Field getField(Class<?> classToBeManipuliated, String fieltName) throws NoSuchFieldException {
         var field = classToBeManipuliated.getDeclaredField(fieltName);
         field.setAccessible(true);

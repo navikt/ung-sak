@@ -8,8 +8,8 @@
     <sequence-generator name="SEQ_JOURNALPOST" allocation-size="50" sequence-name="SEQ_JOURNALPOST"/>
 
 
-    <entity class="no.nav.k9.sak.behandlingslager.fagsak.Fagsak"/>
-    <entity class="no.nav.k9.sak.behandlingslager.fagsak.Journalpost"/>
+    <entity class="no.nav.ung.sak.behandlingslager.fagsak.Fagsak"/>
+    <entity class="no.nav.ung.sak.behandlingslager.fagsak.Journalpost"/>
 
 
 </entity-mappings>

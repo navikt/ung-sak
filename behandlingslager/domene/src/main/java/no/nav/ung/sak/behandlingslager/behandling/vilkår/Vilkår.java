@@ -1,0 +1,140 @@
+package no.nav.ung.sak.behandlingslager.behandling.vilkår;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.hibernate.annotations.BatchSize;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
+import jakarta.persistence.Table;
+import jakarta.persistence.Version;
+import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.ung.sak.behandlingslager.diff.IndexKeyComposer;
+
+@Entity(name = "Vilkar")
+@Table(name = "VR_VILKAR")
+public class Vilkår extends BaseEntitet implements IndexKey {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_VILKAR")
+    private Long id;
+
+    @Convert(converter = VilkårTypeKodeverdiConverter.class)
+    @Column(name = "vilkar_type", nullable = false, updatable = false)
+    private VilkårType vilkårType;
+
+    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true)
+    @JoinColumn(name = "vilkar_id", nullable = false)
+    @OrderBy(value = "periode.fomDato asc nulls first")
+    @BatchSize(size = 20)
+    private List<VilkårPeriode> perioder = new ArrayList<>();
+
+    @Version
+    @Column(name = "versjon", nullable = false)
+    private long versjon;
+
+    /**
+     * Merk - denne er kun for builder - bygger en ugyldig Vilkår (uten vilkårtype).
+     *
+     * @deprecated bør ikke brukes av builder og gjøres private
+     */
+    @Deprecated
+    Vilkår() {
+        // for hibernate og builder
+    }
+
+    Vilkår(Vilkår v) {
+        this(v.getVilkårType());
+        this.perioder = v.getPerioder().stream().map(VilkårPeriode::new).collect(Collectors.toList());
+    }
+
+    Vilkår(VilkårType vilkårType) {
+        this.vilkårType = Objects.requireNonNull(vilkårType, "vilkårType");
+    }
+
+    @Override
+    public String getIndexKey() {
+        Object[] keyParts = {getVilkårType()};
+        return IndexKeyComposer.createKey(keyParts);
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public VilkårType getVilkårType() {
+        return vilkårType;
+    }
+
+    void setVilkårType(VilkårType vilkårType) {
+        this.vilkårType = Objects.requireNonNull(vilkårType, "vilkårType");
+    }
+
+    public List<VilkårPeriode> getPerioder() {
+        return Collections.unmodifiableList(perioder);
+    }
+
+    void setPerioder(List<VilkårPeriode> perioder) {
+        this.perioder.clear();
+        this.perioder.addAll(perioder.stream().map(VilkårPeriode::new).collect(Collectors.toList()));
+    }
+
+    public VilkårPeriode finnPeriodeForSkjæringstidspunkt(LocalDate skjæringstidspunkt) {
+        return finnPeriodeForSkjæringstidspunktHvisFinnes(skjæringstidspunkt).orElseThrow(() -> new IllegalStateException("Fant ikke vilkårsperiode for skjæringstidspunkt " + skjæringstidspunkt));
+    }
+
+    public Optional<VilkårPeriode> finnPeriodeForSkjæringstidspunktHvisFinnes(LocalDate skjæringstidspunkt) {
+        return this.perioder.stream()
+            .filter(it -> it.getSkjæringstidspunkt().equals(skjæringstidspunkt))
+            .findFirst();
+    }
+
+
+    public Optional<VilkårPeriode> finnPeriodeSomInneholderDato(LocalDate dato) {
+        return this.perioder.stream()
+            .filter(it -> it.getPeriode().inkluderer(dato))
+            .findFirst();
+    }
+
+    @Override
+    public String toString() {
+        return "Vilkår{" +
+            "vilkårType=" + vilkårType +
+            ", perioder=" + perioder +
+            '}';
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == this) {
+            return true;
+        }
+        if (!(object instanceof Vilkår)) {
+            return false;
+        }
+        Vilkår other = (Vilkår) object;
+        return Objects.equals(getVilkårType(), other.getVilkårType());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getVilkårType());
+    }
+}

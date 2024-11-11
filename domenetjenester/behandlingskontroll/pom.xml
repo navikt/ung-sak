@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>no.nav.k9.sak</groupId>
+		<groupId>no.nav.ung.sak</groupId>
 		<artifactId>domenetjenester-pom</artifactId>
 		<version>${revision}${sha1}${changelist}</version>
 	</parent>
@@ -25,12 +25,12 @@
 		<!-- Interne avhengigheter -->
 		<dependency>
 			<!-- TODO: Fjern denne, dekk gjennom SPI -->
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>behandlingslager-domene</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>migreringer</artifactId>
 			<type>test-jar</type>
 			<scope>test</scope>

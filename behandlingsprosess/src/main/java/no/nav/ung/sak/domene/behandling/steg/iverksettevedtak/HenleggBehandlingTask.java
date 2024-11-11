@@ -1,0 +1,50 @@
+package no.nav.ung.sak.domene.behandling.steg.iverksettevedtak;
+
+import java.util.Optional;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+
+import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
+import no.nav.ung.sak.behandlingslager.task.UnderBehandlingProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+
+@ApplicationScoped
+@ProsessTask(HenleggBehandlingTask.TASKTYPE)
+@FagsakProsesstaskRekkefølge(gruppeSekvens = false)
+public class HenleggBehandlingTask extends UnderBehandlingProsessTask {
+
+    public static final String TASKTYPE = "behandlingskontroll.henleggBehandling";
+
+    /** Kode fra BehandlingResultatType. */
+    public static final String HENLEGGELSE_TYPE_KEY = "henleggesGrunn";
+
+    private HenleggBehandlingTjeneste henleggBehandlingTjeneste;
+
+    HenleggBehandlingTask() {
+        // for CDI proxy
+    }
+
+    @Inject
+    public HenleggBehandlingTask(BehandlingRepositoryProvider repositoryProvider,
+                                  HenleggBehandlingTjeneste henleggBehandlingTjeneste) {
+        super(repositoryProvider.getBehandlingRepository(), repositoryProvider.getBehandlingLåsRepository());
+        this.henleggBehandlingTjeneste = henleggBehandlingTjeneste;
+
+    }
+
+    @Override
+    protected void doProsesser(ProsessTaskData prosessTaskData, Behandling behandling) {
+        var behandlingId = prosessTaskData.getBehandlingId();
+
+        BehandlingResultatType henleggelseType = Optional.ofNullable(prosessTaskData.getPropertyValue(HENLEGGELSE_TYPE_KEY))
+            .map(BehandlingResultatType::fraKode)
+            .orElse(BehandlingResultatType.MANGLER_BEREGNINGSREGLER);
+
+        henleggBehandlingTjeneste.henleggBehandlingOgAksjonspunkter(behandlingId, henleggelseType, "Forvaltning");
+    }
+}

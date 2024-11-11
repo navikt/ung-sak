@@ -7,7 +7,7 @@
 
 	<parent>
 		<artifactId>domenetjenester-pom</artifactId>
-		<groupId>no.nav.k9.sak</groupId>
+		<groupId>no.nav.ung.sak</groupId>
 		<version>${revision}${sha1}${changelist}</version>
 	</parent>
 
@@ -21,7 +21,7 @@
 
 		<!-- Interne avhengigheter -->
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>behandlingslager-domene</artifactId>
 		</dependency>
 
@@ -42,7 +42,7 @@
 
 		<!-- Test avhengigheter -->
 		<dependency>
-			<groupId>no.nav.k9.sak</groupId>
+			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>migreringer</artifactId>
 			<type>test-jar</type>
 			<scope>test</scope>

@@ -5,8 +5,8 @@
 	   bean-discovery-mode="all"
 	   version="3.0">
 	<alternatives>
-		<class>no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste</class>
-		<class>no.nav.k9.sak.behandling.revurdering.ytelse.GrunnlagKopiererPleiepengerMock</class>
+		<class>no.nav.ung.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste</class>
+		<class>no.nav.ung.sak.behandling.revurdering.ytelse.GrunnlagKopiererPleiepengerMock</class>
 	</alternatives>
 </beans>
 

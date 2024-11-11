@@ -4,8 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>no.nav.k9.sak</groupId>
-        <artifactId>k9sak</artifactId>
+        <groupId>no.nav.ung.sak</groupId>
+        <artifactId>ung-sak</artifactId>
         <version>${revision}${sha1}${changelist}</version>
     </parent>
 
@@ -107,16 +107,16 @@
         </dependency>
 
         <dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>punsj</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>kontrakt</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>datavarehus</artifactId>
         </dependency>
 
@@ -126,15 +126,15 @@
         </dependency>
 
         <dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>behandlingsprosess-steg</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>vedtak</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>hendelsemottak</artifactId>
         </dependency>
 
@@ -165,7 +165,7 @@
             <artifactId>k9-felles-util</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>migreringer</artifactId>
             <scope>compile</scope>
         </dependency>
@@ -291,7 +291,7 @@
         </dependency>
 
         <dependency>
-            <groupId>no.nav.k9.sak</groupId>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>behandlingslager-testutilities</artifactId>
             <scope>test</scope>
         </dependency>
@@ -354,7 +354,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>no.nav.k9.sak.web.server.jetty.JettyServer</mainClass>
+                            <mainClass>no.nav.ung.sak.web.server.jetty.JettyServer</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -376,7 +376,7 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>no.nav.k9.sak.web.app.util.OpenapiGenerate</mainClass>
+                    <mainClass>no.nav.ung.sak.web.app.util.OpenapiGenerate</mainClass>
                     <classpathScope>compile</classpathScope>
                     <arguments>
                         <argument>${project.build.sourceDirectory}/../resources/openapi-ts-client/ung-sak.openapi.json</argument>

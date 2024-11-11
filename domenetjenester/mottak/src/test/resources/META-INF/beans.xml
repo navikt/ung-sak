@@ -4,6 +4,6 @@
        bean-discovery-mode="annotated" 
        version="3.0">
     <alternatives>
-        <class>no.nav.k9.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste</class>
+        <class>no.nav.ung.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste</class>
     </alternatives>
 </beans>

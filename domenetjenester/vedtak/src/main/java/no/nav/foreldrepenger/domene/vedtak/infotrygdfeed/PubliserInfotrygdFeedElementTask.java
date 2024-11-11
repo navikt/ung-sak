@@ -8,16 +8,15 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import no.nav.foreldrepenger.domene.vedtak.infotrygdfeed.kafka.InfotrygdFeedMeldingProducer;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.k9.kodeverk.uttak.Tid;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.k9.sak.typer.AktørId;
-import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
