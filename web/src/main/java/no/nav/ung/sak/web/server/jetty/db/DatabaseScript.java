@@ -15,6 +15,7 @@ public final class DatabaseScript {
         conf.setDataSource(dataSource);
         conf.setLocationsAsStrings(location);
         conf.setBaselineOnMigrate(true);
+        conf.setCleanDisabled(false);
         if (initSql != null) {
             conf.setInitSql(initSql);
         }
