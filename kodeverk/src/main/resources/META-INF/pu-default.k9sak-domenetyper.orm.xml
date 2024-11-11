@@ -7,7 +7,7 @@
 
 	<!-- mapping av domene typer til JPA (optional) -->
 
-	<embeddable class="no.nav.k9.sak.typer.Saksnummer"
+	<embeddable class="no.nav.ung.sak.typer.Saksnummer"
 		access="FIELD">
 		<attributes>
 			<basic name="saksnummer" access="FIELD">
@@ -16,7 +16,7 @@
 		</attributes>
 	</embeddable>
 
-	<embeddable class="no.nav.k9.sak.typer.AktørId"
+	<embeddable class="no.nav.ung.sak.typer.AktørId"
 		access="FIELD">
 		<attributes>
 			<basic name="aktørId" access="FIELD">
@@ -25,7 +25,7 @@
 		</attributes>
 	</embeddable>
 
-	<embeddable class="no.nav.k9.sak.typer.JournalpostId"
+	<embeddable class="no.nav.ung.sak.typer.JournalpostId"
 		access="FIELD">
 		<attributes>
 			<basic name="journalpostId" access="FIELD">
@@ -34,7 +34,7 @@
 		</attributes>
 	</embeddable>
 
-	<embeddable class="no.nav.k9.sak.typer.PersonIdent"
+	<embeddable class="no.nav.ung.sak.typer.PersonIdent"
 		access="FIELD">
 		<attributes>
 			<basic name="ident" access="FIELD">
@@ -43,7 +43,7 @@
 		</attributes>
 	</embeddable>
 
-	<embeddable class="no.nav.k9.sak.typer.Stillingsprosent"
+	<embeddable class="no.nav.ung.sak.typer.Stillingsprosent"
 		access="FIELD">
 		<attributes>
 			<basic name="verdi" access="FIELD">
@@ -53,7 +53,7 @@
 	</embeddable>
 
 	<embeddable
-		class="no.nav.k9.sak.typer.EksternArbeidsforholdRef" access="FIELD">
+            class="no.nav.ung.sak.typer.EksternArbeidsforholdRef" access="FIELD">
 		<attributes>
 			<basic name="referanse" access="FIELD">
 				<column name="arbeidsforhold_id" />
@@ -63,7 +63,7 @@
 
 
 	<embeddable
-		class="no.nav.k9.sak.typer.InternArbeidsforholdRef" access="FIELD">
+            class="no.nav.ung.sak.typer.InternArbeidsforholdRef" access="FIELD">
 		<attributes>
 			<basic name="referanse" access="FIELD">
 				<column name="arbeidsforhold_intern_id" />
@@ -71,7 +71,7 @@
 		</attributes>
 	</embeddable>
 
-	<embeddable class="no.nav.k9.sak.typer.OrgNummer"
+	<embeddable class="no.nav.ung.sak.typer.OrgNummer"
 		access="FIELD">
 		<attributes>
 			<basic name="orgNummer" access="FIELD">
@@ -81,7 +81,7 @@
 	</embeddable>
 
 
-	<embeddable class="no.nav.k9.sak.typer.Arbeidsgiver" access="FIELD">
+	<embeddable class="no.nav.ung.sak.typer.Arbeidsgiver" access="FIELD">
 		<attributes>
 			<basic name="arbeidsgiverOrgnr" access="FIELD">
 				<column name="arbeidsgiver_orgnr" updatable="false" length="50" />

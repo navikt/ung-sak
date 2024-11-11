@@ -12,14 +12,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
-import no.nav.k9.sak.behandlingslager.behandling.Behandling;
-import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
-import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
-import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.db.util.JpaExtension;
-import no.nav.k9.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
+import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
+import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 
 @ExtendWith(CdiAwareExtension.class)

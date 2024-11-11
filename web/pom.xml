@@ -354,7 +354,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>no.nav.k9.sak.web.server.jetty.JettyServer</mainClass>
+                            <mainClass>no.nav.ung.sak.web.server.jetty.JettyServer</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -376,7 +376,7 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>no.nav.k9.sak.web.app.util.OpenapiGenerate</mainClass>
+                    <mainClass>no.nav.ung.sak.web.app.util.OpenapiGenerate</mainClass>
                     <classpathScope>compile</classpathScope>
                     <arguments>
                         <argument>${project.build.sourceDirectory}/../resources/openapi-ts-client/k9-sak.openapi.json</argument>

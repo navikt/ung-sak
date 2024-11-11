@@ -9,9 +9,9 @@
     <sequence-generator name="SEQ_BR_ANDEL" allocation-size="50" sequence-name="SEQ_BR_ANDEL" />
     <sequence-generator name="SEQ_BR_RESULTAT_BEHANDLING" allocation-size="50" sequence-name="SEQ_BR_RESULTAT_BEHANDLING" />
 
-    <entity class="no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode"/>
-    <entity class="no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel"/>
-    <entity class="no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet"/>
-    <entity class="no.nav.k9.sak.behandlingslager.behandling.beregning.BehandlingBeregningsresultatEntitet"/>
+    <entity class="no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode"/>
+    <entity class="no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel"/>
+    <entity class="no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet"/>
+    <entity class="no.nav.ung.sak.behandlingslager.behandling.beregning.BehandlingBeregningsresultatEntitet"/>
 
 </entity-mappings>

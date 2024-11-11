@@ -9,9 +9,9 @@
 	<sequence-generator name="seq_notat_sak" allocation-size="50" sequence-name="seq_notat_sak" />
 	<sequence-generator name="seq_notat_sak_tekst" allocation-size="50" sequence-name="seq_notat_sak_tekst" />
 
-	<entity class="no.nav.k9.sak.behandlingslager.notat.NotatAktørEntitet" />
-	<entity class="no.nav.k9.sak.behandlingslager.notat.NotatSakEntitet" />
-	<entity class="no.nav.k9.sak.behandlingslager.notat.NotatAktørTekst" />
-	<entity class="no.nav.k9.sak.behandlingslager.notat.NotatSakTekst" />
+	<entity class="no.nav.ung.sak.behandlingslager.notat.NotatAktørEntitet" />
+	<entity class="no.nav.ung.sak.behandlingslager.notat.NotatSakEntitet" />
+	<entity class="no.nav.ung.sak.behandlingslager.notat.NotatAktørTekst" />
+	<entity class="no.nav.ung.sak.behandlingslager.notat.NotatSakTekst" />
 
 </entity-mappings>

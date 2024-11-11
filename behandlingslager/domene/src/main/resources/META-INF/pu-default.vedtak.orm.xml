@@ -6,7 +6,7 @@
 
 	<sequence-generator name="SEQ_BEHANDLING_VEDTAK" allocation-size="50" sequence-name="SEQ_BEHANDLING_VEDTAK" />
 
-	<entity class="no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak" />
+	<entity class="no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak" />
 
 
 </entity-mappings>

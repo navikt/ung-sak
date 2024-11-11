@@ -5,6 +5,6 @@
         version="3.0">
 
     <sequence-generator name="SEQ_TMP_AKTOER_ID" allocation-size="50" sequence-name="SEQ_TMP_AKTOER_ID" />
-    <entity class="no.nav.k9.sak.web.app.tjenester.forvaltning.rapportering.TmpAktoerId" />
+    <entity class="no.nav.ung.sak.web.app.tjenester.forvaltning.rapportering.TmpAktoerId" />
 
 </entity-mappings>

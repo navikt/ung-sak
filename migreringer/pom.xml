@@ -52,7 +52,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>no.nav.k9.sak.db.util.Databaseskjemainitialisering</mainClass>
+                    <mainClass>no.nav.ung.sak.db.util.Databaseskjemainitialisering</mainClass>
                     <classpathScope>test</classpathScope>
                     <cleanupDaemonThreads>false</cleanupDaemonThreads>
                     <skip>${skipTests}</skip>

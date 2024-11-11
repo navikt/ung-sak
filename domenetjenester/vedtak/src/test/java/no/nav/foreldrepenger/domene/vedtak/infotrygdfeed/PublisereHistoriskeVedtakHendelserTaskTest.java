@@ -21,11 +21,11 @@ import org.mockito.quality.Strictness;
 
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
-import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
-import no.nav.k9.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
-import no.nav.k9.sak.domene.vedtak.midlertidig.PublisereHistoriskeVedtakHendelserTask;
-import no.nav.k9.sak.domene.vedtak.observer.PubliserVedtakHendelseTask;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
+import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
+import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
+import no.nav.ung.sak.domene.vedtak.midlertidig.PublisereHistoriskeVedtakHendelserTask;
+import no.nav.ung.sak.domene.vedtak.observer.PubliserVedtakHendelseTask;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)

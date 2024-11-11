@@ -6,13 +6,13 @@ import java.util.Optional;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import no.nav.k9.sak.behandlingslager.behandling.beregning.BehandlingBeregningsresultatEntitet;
-import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
-import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
-import no.nav.k9.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
-import no.nav.k9.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.k9.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.k9.sak.typer.Saksnummer;
+import no.nav.ung.sak.behandlingslager.behandling.beregning.BehandlingBeregningsresultatEntitet;
+import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
+import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
+import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.ung.sak.typer.Saksnummer;
 
 
 @ApplicationScoped
