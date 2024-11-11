@@ -114,23 +114,23 @@ jobs:
 #          readerToken: ${{ secrets.READER_TOKEN }}
 #          newClientPath: /tmp/ung-sak-typescript-client
 
-#  publish-typescript-client:
-#    name: Publish typescript client
-#    runs-on: ubuntu-latest
-#    needs: [check-change-compat-typescript-client]
-#    if: needs.check-change-compat-typescript-client.outputs.hasChanged == 'true'
-#    permissions:
-#      contents: read
-#      packages: write
-#    steps:
-#     - uses: actions/download-artifact@v4
-#       with:
-#         name: ung-sak-typescript-client-src
-#         path: /tmp/ung-sak-typescript-client
-#     - uses: navikt/openapi-ts-clientmaker/extra/actions/publish-typescript-client@v1
-#       with:
-#         contentPath: /tmp/ung-sak-typescript-client
-#         githubToken: ${{ secrets.GITHUB_TOKEN }}
+  publish-typescript-client:
+    name: Publish typescript client
+    runs-on: ubuntu-latest
+    needs: [build-typescript-client]
+    #if: needs.check-change-compat-typescript-client.outputs.hasChanged == 'true'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+     - uses: actions/download-artifact@v4
+       with:
+         name: ung-sak-typescript-client-src
+         path: /tmp/ung-sak-typescript-client
+     - uses: navikt/openapi-ts-clientmaker/extra/actions/publish-typescript-client@v1
+       with:
+         contentPath: /tmp/ung-sak-typescript-client
+         githubToken: ${{ secrets.GITHUB_TOKEN }}
 
 #  deploy-prod:
 #    name: Deploy prod
