@@ -23,7 +23,7 @@ runs:
       id: typescript-generate
       uses: navikt/openapi-ts-clientmaker@v1
       with:
-        openapi-spec-file: web/src/main/resources/openapi-ts-client/k9-sak.openapi.json
+        openapi-spec-file: web/src/main/resources/openapi-ts-client/UNG-sak.openapi.json
         package-json-file: web/src/main/resources/openapi-ts-client/package.json
         package-json-version: "${{ env.PACKAGE_JSON_VERSION }}"
         out-dir: "${{ steps.set-output.outputs.resultDir }}"

@@ -13,7 +13,7 @@
 
 	<artifactId>okonomistotte</artifactId>
 	<packaging>jar</packaging>
-	<name>K9SAK :: Domenetjenester - Okonomistotte</name>
+	<name>ung-sak :: Domenetjenester - Okonomistotte</name>
 
 	<dependencies>
 

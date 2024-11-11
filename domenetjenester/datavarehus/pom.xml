@@ -12,7 +12,7 @@
 
 	<artifactId>datavarehus</artifactId>
 	<packaging>jar</packaging>
-	<name>K9SAK :: Domenetjenester - Datavarehus</name>
+	<name>ung-sak :: Domenetjenester - Datavarehus</name>
 
 	<dependencies>
 		<dependency>

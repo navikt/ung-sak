@@ -12,8 +12,8 @@
 
     <artifactId>kontrakt</artifactId>
     <packaging>jar</packaging>
-    <name>K9SAK :: Kontrakter</name>
-    <description>Kontrakter for tjenester eksponert / topics publisert av K9SAK</description>
+    <name>ung-sak :: Kontrakter</name>
+    <description>Kontrakter for tjenester eksponert / topics publisert av ung-sak</description>
 
     <properties>
         <maven.deploy.skip>false</maven.deploy.skip>

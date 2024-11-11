@@ -6,7 +6,7 @@
     <groupId>no.nav.ung.sak</groupId>
     <artifactId>ung-sak</artifactId>
     <packaging>pom</packaging>
-    <name>K9SAK :: Root</name>
+    <name>ung-sak :: Root</name>
     <version>${revision}${sha1}${changelist}</version>
 
     <modules>

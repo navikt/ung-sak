@@ -12,8 +12,8 @@
 
     <artifactId>kodeverk</artifactId>
     <packaging>jar</packaging>
-    <name>K9SAK :: Kodeverk</name>
-    <description>Kodeverk for tjenester eksponert / topics publisert av K9SAK</description>
+    <name>ung-sak :: Kodeverk</name>
+    <description>Kodeverk for tjenester eksponert / topics publisert av ung-sak</description>
 
     <properties>
         <maven.deploy.skip>false</maven.deploy.skip>

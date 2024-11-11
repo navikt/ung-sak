@@ -9,7 +9,7 @@
 
     <artifactId>person</artifactId>
     <packaging>jar</packaging>
-    <name>K9SAK :: Domenetjenester - Person</name>
+    <name>ung-sak :: Domenetjenester - Person</name>
 
     <dependencies>
         <!-- Modulinterne avhengigheter -->

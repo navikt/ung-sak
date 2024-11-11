@@ -1,8 +1,8 @@
 #version: 2
 #registries:
-#  k9-sak:
+#  ung-sak:
 #    type: maven-repository
-#    url: https://maven.pkg.github.com/navikt/k9-sak
+#    url: https://maven.pkg.github.com/navikt/ung-sak
 #    username: x-access-token
 #    password: ${{secrets.READER_TOKEN}}
 #  k9-felles:
@@ -62,7 +62,7 @@
 #      interval: daily
 #    open-pull-requests-limit: 15
 #    registries:
-#      - k9-sak
+#      - ung-sak
 #      - k9-felles
 #      - k9-prosesstask
 #      - k9-format

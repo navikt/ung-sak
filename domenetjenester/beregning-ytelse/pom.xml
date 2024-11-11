@@ -9,7 +9,7 @@
 		<version>${revision}${sha1}${changelist}</version>
 	</parent>
 
-	<name>K9SAK :: Domenetjenester - Beregning Ytelse </name>
+	<name>ung-sak :: Domenetjenester - Beregning Ytelse </name>
 	<artifactId>beregning-ytelse</artifactId>
 	<packaging>jar</packaging>
 

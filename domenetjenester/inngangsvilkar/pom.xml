@@ -8,7 +8,7 @@
     </parent>
 
 	<artifactId>inngangsvilkar</artifactId>
-    <name>K9SAK :: Domenetjenester - Inngangsvilkår</name>
+    <name>ung-sak :: Domenetjenester - Inngangsvilkår</name>
     <packaging>jar</packaging>
 
 	<dependencies>

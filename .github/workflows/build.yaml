@@ -51,7 +51,7 @@ jobs:
 #      - uses: actions/upload-artifact@v4
 #        id: upload-typescript
 #        with:
-#          name: k9-sak-typescript-client-src
+#          name: ung-sak-typescript-client-src
 #          path: "${{ steps.generate-typescript.outputs.resultDir }}"
 #          if-no-files-found: error
 
@@ -99,19 +99,19 @@ jobs:
 #    steps:
 #      - uses: actions/download-artifact@v4
 #        with:
-#          name: k9-sak-typescript-client-src
-#          path: /tmp/k9-sak-typescript-client
+#          name: ung-sak-typescript-client-src
+#          path: /tmp/ung-sak-typescript-client
 #      - uses: navikt/openapi-ts-clientmaker/extra/actions/compare-with-published@v1
 #        id: compare-with-published
 #        with:
-#          localPath: /tmp/k9-sak-typescript-client
-#          npmPackageName: k9-sak-typescript-client
+#          localPath: /tmp/ung-sak-typescript-client
+#          npmPackageName: ung-sak-typescript-client
 #          githubToken: ${{ secrets.GITHUB_TOKEN }}
-#      - uses: navikt/k9-sak-web/.github/actions/check-compat-typescript-client@master
+#      - uses: navikt/ung-sak-web/.github/actions/check-compat-typescript-client@master
 #        if: steps.compare-with-published.outputs.hasChanged == 'true'
 #        with:
 #          readerToken: ${{ secrets.READER_TOKEN }}
-#          newClientPath: /tmp/k9-sak-typescript-client
+#          newClientPath: /tmp/ung-sak-typescript-client
 
 #  publish-typescript-client:
 #    name: Publish typescript client
@@ -124,11 +124,11 @@ jobs:
 #    steps:
 #     - uses: actions/download-artifact@v4
 #       with:
-#         name: k9-sak-typescript-client-src
-#         path: /tmp/k9-sak-typescript-client
+#         name: ung-sak-typescript-client-src
+#         path: /tmp/ung-sak-typescript-client
 #     - uses: navikt/openapi-ts-clientmaker/extra/actions/publish-typescript-client@v1
 #       with:
-#         contentPath: /tmp/k9-sak-typescript-client
+#         contentPath: /tmp/ung-sak-typescript-client
 #         githubToken: ${{ secrets.GITHUB_TOKEN }}
 
 #  deploy-prod:

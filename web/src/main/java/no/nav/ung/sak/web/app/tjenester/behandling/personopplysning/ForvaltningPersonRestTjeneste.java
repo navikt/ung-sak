@@ -271,7 +271,7 @@ public class ForvaltningPersonRestTjeneste {
 
     @GET
     @Operation(description = "Henter saksnumre for en person. Kan for eksempel brukes for å finne ut om k9 er påvirket av 'aktør-splitt'", tags = "aktoer", responses = {
-        @ApiResponse(responseCode = "200", description = "Liste av fagsaker i k9-sak personen er del av.", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AktørInfoDto.class)))
+        @ApiResponse(responseCode = "200", description = "Liste av fagsaker i ung-sak personen er del av.", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AktørInfoDto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = DRIFT)
     @Path("/saksnumre-for-person")

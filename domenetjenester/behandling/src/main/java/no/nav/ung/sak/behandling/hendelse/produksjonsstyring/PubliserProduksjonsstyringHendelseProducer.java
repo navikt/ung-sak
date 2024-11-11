@@ -27,7 +27,7 @@ public class PubliserProduksjonsstyringHendelseProducer extends KafkaProducer {
                                                       @KonfigVerdi("KAFKA_CREDSTORE_PASSWORD") String aivenCredstorePassword,
                                                       @KonfigVerdi(value = "KAFKA_OVERRIDE_KEYSTORE_PASSWORD", required = false) String overrideKeystorePassword,
                                                       @KonfigVerdi(value = "NAIS_NAMESPACE", defaultVerdi = "k9saksbehandling") String appNamespace,
-                                                      @KonfigVerdi(value = "NAIS_APP_NAME", defaultVerdi = "k9-sak") String appName,
+                                                      @KonfigVerdi(value = "NAIS_APP_NAME", defaultVerdi = "ung-sak") String appName,
                                                       @KonfigVerdi("systembruker.username") String username,
                                                       @KonfigVerdi("systembruker.password") String password) {
         Properties properties = new Properties();

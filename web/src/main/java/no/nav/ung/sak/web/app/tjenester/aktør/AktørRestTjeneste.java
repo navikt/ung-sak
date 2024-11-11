@@ -58,7 +58,7 @@ public class AktørRestTjeneste {
 
     @GET
     @Operation(description = "Henter informasjon om en aktøer", tags = "aktoer", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer basisinformasjon om en aktør og hvilke fagsaker vedkommede har i k9-sak.", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AktørInfoDto.class)))
+            @ApiResponse(responseCode = "200", description = "Returnerer basisinformasjon om en aktør og hvilke fagsaker vedkommede har i ung-sak.", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AktørInfoDto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = FAGSAK)
     @Path("/aktoer-info")

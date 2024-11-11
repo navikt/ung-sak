@@ -1,8 +1,8 @@
 {
-  "name": "@navikt/k9-sak-typescript-client",
+  "name": "@navikt/ung-sak-typescript-client",
   "version": "0.0.8-alpha",
   "type": "module",
-  "description": "Typescript client for k9-sak. Automatically generated from openapi specification",
+  "description": "Typescript client for ung-sak. Automatically generated from openapi specification",
   "keywords": [
     "k9-sak",
     "openapi"
@@ -10,7 +10,7 @@
   "author": "https://github.com/navikt",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/navikt/k9-sak.git"
+    "url": "git+https://github.com/navikt/ung-sak.git"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"

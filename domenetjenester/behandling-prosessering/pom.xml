@@ -8,7 +8,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>behandling-prosessering</artifactId>
-    <name>K9SAK :: Domenetjenester - Behandling Prosessering</name>
+    <name>ung-sak :: Domenetjenester - Behandling Prosessering</name>
     <packaging>jar</packaging>
     <dependencies>
         

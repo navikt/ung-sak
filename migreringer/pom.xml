@@ -9,7 +9,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>migreringer</artifactId>
-    <name>K9SAK :: Migreringer</name>
+    <name>ung-sak :: Migreringer</name>
     <description>Inneholder migreringsfiler for alle datasources brukt i VL</description>
     <packaging>jar</packaging>
 

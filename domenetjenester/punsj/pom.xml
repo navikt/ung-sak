@@ -13,7 +13,7 @@
 
 	<artifactId>punsj</artifactId>
 	<packaging>jar</packaging>
-	<name>K9SAK :: Domenetjenester - Punsj</name>
+	<name>ung-sak :: Domenetjenester - Punsj</name>
 
 	<dependencies>
 

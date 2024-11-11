@@ -9,7 +9,7 @@
 	</parent>
 
 	<artifactId>domenetjenester-bom</artifactId>
-	<name>K9SAK :: Domenetjenester - Bill Of Material</name>
+	<name>ung-sak :: Domenetjenester - Bill Of Material</name>
 	<packaging>jar</packaging>
 
 	<dependencies>

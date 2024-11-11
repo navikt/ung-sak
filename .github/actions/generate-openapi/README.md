@@ -1,9 +1,9 @@
 actions/generate-openapi
 ========================
 
-Dette er ein custom composite action som genererer ny k9-sak.openapi.json ut frå java koden.
+Dette er ein custom composite action som genererer ny ung-sak.openapi.json ut frå java koden.
 
-Viss ny k9-sak.openapi.json er forskjellig frå tidlegare, commit og push endringer til branch.
+Viss ny ung-sak.openapi.json er forskjellig frå tidlegare, commit og push endringer til branch.
 
 ### Inputs
 
@@ -11,6 +11,6 @@ Viss ny k9-sak.openapi.json er forskjellig frå tidlegare, commit og push endrin
 
 ### Outputs
 
-- _haschanged_: true viss køyring av action førte til endring (og commit) av k9-sak.openapi.json
-- _openapiVersion_: versjonsnr frå generert k9-sak.openapi.json
+- _haschanged_: true viss køyring av action førte til endring (og commit) av ung-sak.openapi.json
+- _openapiVersion_: versjonsnr frå generert ung-sak.openapi.json
 

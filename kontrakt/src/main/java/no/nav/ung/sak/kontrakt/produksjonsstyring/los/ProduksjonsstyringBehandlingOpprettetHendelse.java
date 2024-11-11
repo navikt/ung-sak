@@ -42,7 +42,7 @@ public class ProduksjonsstyringBehandlingOpprettetHendelse extends Produksjonsst
         @JsonProperty("pleietrengendeAktørId") AktørId pleietrengendeAktørId,
         @JsonProperty("relatertPartAktørId") AktørId relatertPartAktørId
     ) {
-        super(eksternId, hendelseTid, K9SakHendelseType.BEHANDLING_OPPRETTET);
+        super(eksternId, hendelseTid, UngSakHendelseType.BEHANDLING_OPPRETTET);
         this.saksnummer = saksnummer;
         this.ytelseType = ytelseType.getKode();
         this.behandlingType = behandlingType.getKode();

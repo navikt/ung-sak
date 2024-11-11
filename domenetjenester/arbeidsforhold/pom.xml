@@ -10,7 +10,7 @@
 
 	<artifactId>arbeidsforhold</artifactId>
 	<packaging>jar</packaging>
-	<name>K9SAK :: Domenetjenester - Arbeidsforhold</name>
+	<name>ung-sak :: Domenetjenester - Arbeidsforhold</name>
 
 	<dependencies>
 		<!-- for Bean validation -->

@@ -10,7 +10,7 @@
 
     <artifactId>domenetjenester-pom</artifactId>
     <packaging>pom</packaging>
-    <name>K9SAK :: Domenetjenester - Pom</name>
+    <name>ung-sak :: Domenetjenester - Pom</name>
 
     <modules>
         <module>behandling</module>

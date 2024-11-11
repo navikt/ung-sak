@@ -31,7 +31,7 @@ runs:
       shell: bash
       # extract version number from generated openapi.json
       run: |
-        echo "openapiVersion=$(jq --exit-status --raw-output '.info.version | capture("^(?<major>\\d+)\\.(?<minor>\\d+)$") | .major + "." + .minor' ./web/src/main/resources/openapi-ts-client/k9-sak.openapi.json || echo 'FEIL')" >> $GITHUB_OUTPUT
+        echo "openapiVersion=$(jq --exit-status --raw-output '.info.version | capture("^(?<major>\\d+)\\.(?<minor>\\d+)$") | .major + "." + .minor' ./web/src/main/resources/openapi-ts-client/ung-sak.openapi.json || echo 'FEIL')" >> $GITHUB_OUTPUT
     - name: Feilsjekk OPENAPI_VERSION
       if: "${{ env.OPENAPI_VERSION == 'FEIL'}}"
       env:
@@ -39,15 +39,15 @@ runs:
       uses: actions/github-script@v7
       with:
         script: |
-          core.setFailed('fant ikkje korrekt openapi version frå k9-sak.openapi.json')
-    # Commit and push any changes to k9-sak.openapi.json
+          core.setFailed('fant ikkje korrekt openapi version frå ung-sak.openapi.json')
+    # Commit and push any changes to ung-sak.openapi.json
     - name: Commit api endringer
       if: ${{ success() }}
       id: change-commit
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.githubToken }}
-        FILE_NAME: k9-sak.openapi.json
+        FILE_NAME: ung-sak.openapi.json
         FILE_DIRECTORY: web/src/main/resources/openapi-ts-client
         DESTINATION_BRANCH: ${{ github.head_ref || github.ref_name }}
       run: |
