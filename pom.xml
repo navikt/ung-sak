@@ -797,7 +797,7 @@
         <repository>
             <id>github</id>
             <name>GitHub Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/navikt/k9-sak/</url>
+            <url>https://maven.pkg.github.com/navikt/ung-sak/</url>
         </repository>
         <repository>
             <id>central</id>
@@ -816,16 +816,16 @@
     </repositories>
 
     <scm>
-        <connection>scm:git:https://github.com/navikt/k9-sak.git</connection>
-        <developerConnection>scm:git:https://github.com/navikt/k9-sak.git</developerConnection>
-        <url>https://github.com/navikt/k9-sak</url>
+        <connection>scm:git:https://github.com/navikt/ung-sak.git</connection>
+        <developerConnection>scm:git:https://github.com/navikt/ung-sak.git</developerConnection>
+        <url>https://github.com/navikt/ung-sak</url>
         <tag>HEAD</tag>
     </scm>
     <distributionManagement>
         <repository>
             <id>github</id>
             <name>Github navikt Maven Packages</name>
-            <url>https://maven.pkg.github.com/navikt/k9-sak</url>
+            <url>https://maven.pkg.github.com/navikt/ung-sak</url>
         </repository>
     </distributionManagement>
 </project>
