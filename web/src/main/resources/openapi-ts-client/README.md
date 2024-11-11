@@ -1,15 +1,15 @@
 openapi-ts-client
 =================
 
-This directory contains the generated **k9-sak.openapi.json** specification file and other files used as input to define
+This directory contains the generated **ung-sak.openapi.json** specification file and other files used as input to define
 a generated openapi typescript client.
 
-The k9-sak.openapi.json file is generated from the java source in this project, and represents a specification of the 
+The ung-sak.openapi.json file is generated from the java source in this project, and represents a specification of the 
 rest api the web server provides.
 
 It is used to generate and publish a typescript/javascript client library npm package for communicating with the web server.
 
-The k9-sak.openapi.json file is automatically generated during the build pipeline. Changes to the generated result is 
+The ung-sak.openapi.json file is automatically generated during the build pipeline. Changes to the generated result is 
 automatically committed to git in the build pipeline. One should never edit the file manually.
 
 This is done so that the build pipeline can detect if there are changes in the api spec since last deployment, and only
@@ -24,7 +24,7 @@ client is built in the GitHub pipeline. See the GitHub workflow definition for m
 ## Use of published package
 
 The generated package is published as a **GitHub npm package 
-[@navikt/k9-sak-typescript-client](https://github.com/navikt/k9-sak/pkgs/npm/k9-sak-typescript-client)**.
+[@navikt/ung-sak-typescript-client](https://github.com/navikt/ung-sak/pkgs/npm/ung-sak-typescript-client)**.
 It can be used like this:
 
 ### installation
@@ -33,11 +33,11 @@ Install the package as usual from GitHub package registry. More info about that 
 
 ### Code example
 ```typescript
-import { K9SakClient } from "@navikt/k9-sak-typescript-client";
+import { UngSakClient } from "@navikt/ung-sak-typescript-client";
 
 const organisasjonsnr = 111222333; // input
-const k9sak = new K9SakClient();
-const mottakerinfo = await k9sak.brev.getBrevMottakerinfoEreg({organisasjonsnr})
+const ungSak = new UngSakClient();
+const mottakerinfo = await ungSak.brev.getBrevMottakerinfoEreg({organisasjonsnr})
 
 console.debug(`mottaker navn: ${mottakerinfo?.navn}`)
 ```

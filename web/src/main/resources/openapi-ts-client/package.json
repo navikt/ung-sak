@@ -1,10 +1,10 @@
 {
   "name": "@navikt/ung-sak-typescript-client",
-  "version": "0.0.8-alpha",
+  "version": "0.0.1-alpha",
   "type": "module",
   "description": "Typescript client for ung-sak. Automatically generated from openapi specification",
   "keywords": [
-    "k9-sak",
+    "ung-sak",
     "openapi"
   ],
   "author": "https://github.com/navikt",
