@@ -91,7 +91,7 @@ spec:
       - type: POSTGRES_16
         name: ung-sak-db
         tier: db-custom-1-3840 # 1 CPU, 3.75 GB RAM
-        diskSize: 100
+        diskSize: 10
         diskAutoresize: true
         highAvailability: true
         databases:
