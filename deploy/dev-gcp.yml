@@ -74,25 +74,30 @@ spec:
         - host: "saf-q1.dev-fss-pub.nais.io"
     inbound:
       rules:
-        - application: k9-sak-web
-          namespace: k9saksbehandling
-          cluster: dev-gcp
-        - application: k9-los-api
-        - application: k9-fordel
         - application: ung-sak
-        - application: k9-tilbake
-        - application: k9-klage
-        - application: k9-formidling
-        - application: k9-formidling-dokumentdata
-        - application: k9-abakus
-          namespace: omsorgspenger
-          cluster: dev-gcp
-        - application: k9-sak-innsyn-api
-          namespace: dusseldorf
-          cluster: dev-gcp
+        - application: k9-sak-web
         - application: ung-deltakelse-opplyser
+        - application: k9-los-api
           namespace: k9saksbehandling
-          cluster: dev-gcp
+          cluster: dev-fss
+        - application: k9-fordel
+          namespace: k9saksbehandling
+          cluster: dev-fss
+        - application: k9-tilbake
+          namespace: k9saksbehandling
+          cluster: dev-fss
+        - application: k9-klage
+          namespace: k9saksbehandling
+          cluster: dev-fss
+        - application: k9-formidling
+          namespace: k9saksbehandling
+          cluster: dev-fss
+        - application: k9-formidling-dokumentdata
+          namespace: k9saksbehandling
+          cluster: dev-fss
+        - application: k9-abakus
+          namespace: k9saksbehandling
+          cluster: dev-fss
   gcp:
     sqlInstances:
       - type: POSTGRES_16

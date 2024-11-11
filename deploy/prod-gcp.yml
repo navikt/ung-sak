@@ -73,18 +73,21 @@ spec:
         - host: "saf.prod-fss-pub.nais.io"
     inbound:
       rules:
-        - application: k9-los-api
-        - application: k9-fordel
         - application: ung-sak
-        - application: k9-tilbake
-        - application: k9-klage
-        - application: k9-formidling
-        - application: k9-formidling-dokumentdata
-        - application: k9-abakus
-          namespace: omsorgspenger
+        - application: k9-los-api
+          namespace: k9saksbehandling
           cluster: prod-gcp
-        - application: k9-sak-innsyn-api
-          namespace: dusseldorf
+        - application: k9-fordel
+          namespace: k9saksbehandling
+          cluster: prod-gcp
+        - application: k9-tilbake
+          namespace: k9saksbehandling
+          cluster: prod-gcp
+        - application: k9-klage
+          namespace: k9saksbehandling
+          cluster: prod-gcp
+        - application: k9-abakus
+          namespace: k9saksbehandling
           cluster: prod-gcp
   gcp:
     sqlInstances:
