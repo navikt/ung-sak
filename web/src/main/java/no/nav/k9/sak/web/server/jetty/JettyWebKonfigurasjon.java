@@ -3,7 +3,7 @@ package no.nav.k9.sak.web.server.jetty;
 import no.nav.k9.felles.sikkerhet.ContextPathHolder;
 
 public class JettyWebKonfigurasjon implements AppKonfigurasjon {
-    public static final String COOKIE_PATH = "/k9";
+    public static final String COOKIE_PATH = "/ung";
     public static final String CONTEXT_PATH = COOKIE_PATH + "/sak";
 
     private Integer serverPort;

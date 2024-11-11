@@ -31,13 +31,13 @@ public class ApplicationConfig extends ResourceConfig {
     public static OpenAPI resolveOpenAPI() {
         OpenAPI oas = new OpenAPI();
         Info info = new Info()
-            .title("K9 saksbehandling - Saksbehandling av kapittel 9 i folketrygden")
-            .version("1.0")
+            .title("Ung saksbehandling - Saksbehandling for ungdomsytelse")
+            .version("0.1")
             .description("REST grensesnitt for Vedtaksløsningen.");
 
         oas.info(info)
             .addServersItem(new Server()
-                .url("/k9/sak"));
+                .url("/ung/sak"));
         // Alle properties som kan vere null skal ha nullable satt
         ModelConverters.getInstance().addConverter(new NullablePropertyConverter());
         SwaggerConfiguration oasConfig = new SwaggerConfiguration()

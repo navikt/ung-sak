@@ -365,7 +365,7 @@
 
                 The compile phase must have run before this so that the classes that defines the api has been built.
 
-                By default the plugin writes the result to the file target/k9-sak.openapi.json. One can override this
+                By default the plugin writes the result to the file target/ung-sak.openapi.json. One can override this
                 with an argument override from the command line.
 
                 Example of invocation from root project dir:
@@ -379,7 +379,7 @@
                     <mainClass>no.nav.k9.sak.web.app.util.OpenapiGenerate</mainClass>
                     <classpathScope>compile</classpathScope>
                     <arguments>
-                        <argument>${project.build.sourceDirectory}/../resources/openapi-ts-client/k9-sak.openapi.json</argument>
+                        <argument>${project.build.sourceDirectory}/../resources/openapi-ts-client/ung-sak.openapi.json</argument>
                     </arguments>
                 </configuration>
             </plugin>
