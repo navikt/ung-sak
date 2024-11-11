@@ -143,7 +143,7 @@ public class JettyServer {
 
     private void konfigurerJndi() throws Exception {
         new EnvEntry("jdbc/defaultDS",
-            DatasourceUtil.createDatasource(envVarPrefix, DatasourceRole.ADMIN, getEnvironmentClass(), 15));
+            DatasourceUtil.createDatasource(envVarPrefix, getEnvironmentClass(), 15));
     }
 
     protected void konfigurerSikkerhet() {
@@ -166,7 +166,7 @@ public class JettyServer {
             // operasjoner
             initSql = null;
         }
-        try (HikariDataSource migreringDs = DatasourceUtil.createDatasource(envVarPrefix, DatasourceRole.ADMIN, environmentClass, 2)) {
+        try (HikariDataSource migreringDs = DatasourceUtil.createDatasource(envVarPrefix, environmentClass, 2)) {
             var flywayRepairOnFail = Boolean.valueOf(ENV.getProperty("FLYWAY_REPAIR_ON_FAIL", "false"));
             DatabaseScript.migrate(migreringDs, initSql, flywayRepairOnFail);
         }

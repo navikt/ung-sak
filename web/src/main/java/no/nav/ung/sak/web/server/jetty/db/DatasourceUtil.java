@@ -8,28 +8,22 @@ import java.util.Properties;
 
 public class DatasourceUtil {
 
-    public static HikariDataSource createDatasource(String envVarPrefix, DatasourceRole role, EnvironmentClass environmentClass, int maxPoolSize) {
-        String rolePrefix = getRolePrefix(envVarPrefix);
+    public static HikariDataSource createDatasource(String envVarPrefix, EnvironmentClass environmentClass, int maxPoolSize) {
+        String username = username(envVarPrefix);
         String password = getProperty(envVarPrefix + ".password");
+        HikariConfig config = initConnectionPoolConfig(envVarPrefix, maxPoolSize);
         if (EnvironmentClass.LOCALHOST.equals(environmentClass)) {
-            var config = initConnectionPoolConfig(envVarPrefix, null, maxPoolSize);
-            return createDatasource(config, "public", rolePrefix, password);
+            return createDatasource(config, "public", username, password);
         } else {
-            String dbRole = getRole(rolePrefix, role);
-            var config = initConnectionPoolConfig(envVarPrefix, dbRole, maxPoolSize);
-            return createDatasource(config, environmentClass.mountPath(), dbRole, password);
+            return createDatasource(config, environmentClass.mountPath(), username, password);
         }
     }
 
-    private static String getRole(String rolePrefix, DatasourceRole role) {
-        return String.format("%s-%s", rolePrefix, role.name().toLowerCase());
-    }
-
     public static String getDbRole(String datasoureName, DatasourceRole role) {
-        return String.format("%s-%s", getRolePrefix(datasoureName), role.name().toLowerCase());
+        return String.format("%s-%s", username(datasoureName), role.name().toLowerCase());
     }
 
-    private static String getRolePrefix(String envVarPrefix) {
+    private static String username(String envVarPrefix) {
         return getProperty(envVarPrefix + ".username");
     }
 
@@ -37,7 +31,7 @@ public class DatasourceUtil {
         return System.getProperty(key, System.getenv(key.toUpperCase(Locale.getDefault()).replace('.', '_')));
     }
 
-    private static HikariConfig initConnectionPoolConfig(String envVarPrefix, String dbRole, int maxPoolSize) {
+    private static HikariConfig initConnectionPoolConfig(String envVarPrefix, int maxPoolSize) {
         var config = new HikariConfig();
         config.setJdbcUrl(getProperty(envVarPrefix + ".jdbc.url"));
 
@@ -48,11 +42,6 @@ public class DatasourceUtil {
         config.setMaximumPoolSize(maxPoolSize);
         config.setConnectionTestQuery("select 1");
         config.setDriverClassName("org.postgresql.Driver");
-
-        if (dbRole != null) {
-            var initSql = String.format("SET ROLE \"%s\"", dbRole);
-            config.setConnectionInitSql(initSql);
-        }
 
         // optimaliserer inserts for postgres
         var dsProperties = new Properties();

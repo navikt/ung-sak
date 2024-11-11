@@ -1,7 +1,6 @@
 package no.nav.ung.sak.web.server.jetty;
 
 import no.nav.ung.sak.web.app.JettyTestApplication;
-import no.nav.ung.sak.web.server.jetty.db.DatasourceRole;
 import no.nav.ung.sak.web.server.jetty.db.DatasourceUtil;
 import no.nav.ung.sak.web.server.jetty.db.EnvironmentClass;
 import org.eclipse.jetty.ee9.webapp.WebAppContext;
@@ -71,7 +70,7 @@ public class JettyDevServer extends JettyServer {
             super.migrerDatabaser();
         } catch (IllegalStateException e) {
             log.info("Migreringer feilet, cleaner og prøver på nytt for lokal db.");
-            try (var migreringDs = DatasourceUtil.createDatasource("db", DatasourceRole.ADMIN,
+            try (var migreringDs = DatasourceUtil.createDatasource("db",
                 getEnvironmentClass(), 2)) {
                 DevDatabaseScript.clean(migreringDs);
             }
