@@ -56,7 +56,6 @@ import no.nav.ung.sak.kontrakt.mottak.FinnEllerOpprettSakFnr;
 import no.nav.ung.sak.kontrakt.mottak.FinnSak;
 import no.nav.ung.sak.kontrakt.mottak.JournalpostMottakDto;
 import no.nav.ung.sak.kontrakt.mottak.JournalpostMottakOpprettSakDto;
-import no.nav.ung.sak.kontrakt.søknad.innsending.Innsending;
 import no.nav.ung.sak.mottak.SøknadMottakTjenesteContainer;
 import no.nav.ung.sak.mottak.dokumentmottak.InngåendeSaksdokument;
 import no.nav.ung.sak.mottak.dokumentmottak.SaksbehandlingDokumentmottakTjeneste;
@@ -90,7 +89,6 @@ public class FordelRestTjeneste {
     private SøknadMottakTjenesteContainer søknadMottakere;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private AktørTjeneste aktørTjeneste;
-    private ObjectWriter objectWriter = ObjectMapperFactory.createBaseObjectMapper().writerFor(Innsending.class);
 
     public FordelRestTjeneste() {// For Rest-CDI
     }
@@ -391,15 +389,6 @@ public class FordelRestTjeneste {
             return kanalReferanse;
         } else {
             return utledAltinnReferanseFraInntektsmelding(journalpostId);
-        }
-    }
-
-    private String writePayload(Innsending innsending) {
-        // burde kunne ha streamet direkte fra input, får bli en senere optimalisering...
-        try {
-            return objectWriter.writeValueAsString(innsending);
-        } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("Kan ikke serialisere innsendt dokument: " + innsending, e);
         }
     }
 

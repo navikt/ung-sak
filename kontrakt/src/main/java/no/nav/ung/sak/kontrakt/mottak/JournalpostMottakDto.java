@@ -62,7 +62,7 @@ public class JournalpostMottakDto {
     @JsonProperty(value = "type", required = true)
     @Valid
     @NotNull
-    private Brevkode type = Brevkode.INNTEKTSMELDING; // FIXME K9: kan defaulte så lenge det er kun inntektsmeldinger som mottas i k9-sak
+    private Brevkode type;
 
     @JsonProperty(value = "kanalReferanse")
     @Pattern(regexp = "^[a-zA-Z0-9\\\\/\\.\\:\\-_=]*$")
