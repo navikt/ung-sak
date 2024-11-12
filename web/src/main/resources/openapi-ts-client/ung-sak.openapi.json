@@ -2285,29 +2285,6 @@
         "required" : [ "journalpostId" ],
         "type" : "object"
       },
-      "JournalpostIderDto" : {
-        "properties" : {
-          "journalpostIder" : {
-            "items" : {
-              "$ref" : "#/components/schemas/JournalpostIdDto"
-            },
-            "maxItems" : 100,
-            "minItems" : 0,
-            "nullable" : true,
-            "type" : "array"
-          },
-          "journalpostIderBarn" : {
-            "items" : {
-              "$ref" : "#/components/schemas/JournalpostIdDto"
-            },
-            "maxItems" : 100,
-            "minItems" : 0,
-            "nullable" : true,
-            "type" : "array"
-          }
-        },
-        "type" : "object"
-      },
       "KodeverdiSomObjektAktivitetStatus" : {
         "properties" : {
           "kode" : {
@@ -8331,64 +8308,6 @@
           }
         },
         "tags" : [ "prosesstask" ]
-      }
-    },
-    "/punsj/journalpost/uferdig" : {
-      "get" : {
-        "deprecated" : true,
-        "description" : "Henter uferdig journalposter fra punsj for en gitt behandlingUuid",
-        "operationId" : "getUferdigJournalpostIderPrAktoer",
-        "parameters" : [ {
-          "description" : "behandlingUUID",
-          "in" : "query",
-          "name" : "behandlingUuid",
-          "required" : true,
-          "schema" : {
-            "format" : "uuid",
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/JournalpostIderDto"
-                }
-              }
-            },
-            "description" : "Returnerer en liste med uferdig journalpostIder som ligger i punsj på gitt behandlingUuid."
-          }
-        },
-        "tags" : [ "journalposter" ]
-      }
-    },
-    "/punsj/journalpost/uferdig/v2" : {
-      "get" : {
-        "description" : "Henter uferdige journalposter fra punsj for søker og pleietrengende",
-        "operationId" : "getUferdigJournalpostIderPrAktoer_1",
-        "parameters" : [ {
-          "description" : "SAKSNUMMER",
-          "in" : "query",
-          "name" : "saksnummer",
-          "required" : true,
-          "schema" : {
-            "$ref" : "#/components/schemas/SaksnummerDto"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/JournalpostIderDto"
-                }
-              }
-            },
-            "description" : "Returnerer en liste med uferdig journalpostIder som ligger i punsj på et gitt saksnummer."
-          }
-        },
-        "tags" : [ "journalposter" ]
       }
     },
     "/rapportering/dump-fnr" : {
