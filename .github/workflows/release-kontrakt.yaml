@@ -5,9 +5,12 @@ on:
 
 jobs:
   build:
-    name: Bygg pull-request
+    name: Release kontrakt
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
