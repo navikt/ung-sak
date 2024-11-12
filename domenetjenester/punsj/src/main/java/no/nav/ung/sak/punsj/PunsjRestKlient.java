@@ -1,21 +1,5 @@
 package no.nav.ung.sak.punsj;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Objects;
-import java.util.Optional;
-
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -29,7 +13,6 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -40,6 +23,21 @@ import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.kontrakt.dokument.JournalpostIderDto;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.net.URIBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Objects;
+import java.util.Optional;
 
 
 @ApplicationScoped
@@ -93,9 +91,9 @@ public class PunsjRestKlient {
             httpPost.setHeader(HttpHeaders.ACCEPT, "application/json");
 
             try (var httpResponse = restClient.execute(httpPost)) {
-                int responseCode = httpResponse.getStatusLine().getStatusCode();
+                int responseCode = httpResponse.getCode();
                 if (isOk(responseCode)) {
-                    ObjectReaderResponseHandler<Object> handler = new ObjectReaderResponseHandler<>(httpPost.getURI(), journalpostIderReader);
+                    ObjectReaderResponseHandler<Object> handler = new ObjectReaderResponseHandler<>(httpPost.getUri(), journalpostIderReader);
                     return Optional.of((JournalpostIderDto) handler.handleResponse(httpResponse));
                 } else {
                     log.info("Fikk ikke hentet informasjon fra k9-punsj - responseCode=" + responseCode);
