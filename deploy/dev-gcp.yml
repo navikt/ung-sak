@@ -220,19 +220,6 @@ spec:
     - name: UNGDOMSPROGRAMREGISTER_SCOPE
       value: api://dev-gcp.k9saksbehandling.ung-deltakelse-opplyser/.default
 
-
-    # Restservice OMS spesifikt
-    - name: K9_OMS_AARSKVANTUM_URL
-      value: http://k9-aarskvantum.k9saksbehandling
-    - name: K9_OMS_AARSKVANTUM_SCOPE
-      value: api://dev-fss.k9saksbehandling.k9-aarskvantum/.default
-
-    # Restservice PSB spesifikt
-    - name: K9_PSB_UTTAK_URL
-      value: http://pleiepenger-barn-uttak.k9saksbehandling/pleiepenger-barn-uttak
-    - name: K9_PSB_UTTAK_SCOPE
-      value: api://dev-fss.k9saksbehandling.pleiepenger-barn-uttak/.default
-
     # Graphql services
     - name: SAF_BASE_URL
       value: https://saf.dev-fss-pub.nais.io
@@ -249,46 +236,12 @@ spec:
       value: "3030"
 
     # Feature-flag
-    - name: YTELSE_OLP_AKTIVERT
-      value: "true"
-    - name: FILTRER_TILSTOTENDE_PERIODE
-      value: "true"
-    - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
-      value: "2022-08-08"
-    - name: IKKE_YRKESAKTIV_UTEN_SPEILING
-      value: "false"
-    - name: OMP_NULL_HELG_I_KRAVPERIODER
-      value: "true"
-    - name: FJERN_VILKARSPERIODER_BEREGNING
-      value: "true"
-    - name: AVKLAR_ARBEIDSFORHOLD_REUTLED_VED_REVURDERING
-      value: "true"
-    - name: OMP_RELEVANT_ENDRING_UTLEDNING
-      value: "true"
     - name: KODEVERK_SOM_STRING_TOPICS
       value: "true"
-    - name: AAPEN_PUNSJOPPGAVE_STOPPER_AUTOMATISK_VEDTAK
-      value: "true"
-    - name: SEND_INNTEKTSMELDING_FORESPORSEL
-      value: "true"
-    - name: ENABLE_INNHENT_INNTEKTSMELDING_STEG
-      value: "true"
-    - name: OMP_RAMMEVEDTAK_SAMMENSTILLNG_AARSKVANTUM
-      value: "true"
-    - name: ALDERSVILKAR_I_KRONISK_SYK
-      value: "true"
-    - name: UNGDOMSYTELSE_ENABLED
-      value: "true"
-    - name: SOSKENSAK_UTTAK_OVERSTYRING
-      value: "true"
-    - name: INGEN_AP_9291_I_FORSTEGANGSBEHANDLING
-      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
       value: "false"
-    - name: RESTART_APP_ON_ERROR
-      value: "true"
 
 
       # Audit logging

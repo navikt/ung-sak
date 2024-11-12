@@ -209,18 +209,6 @@ spec:
     - name: UNGDOMSPROGRAMREGISTER_SCOPE
       value: api://prod-gcp.k9saksbehandling.ung-deltakelse-opplyser/.default
 
-    # Restservice OMS spesifikt
-    - name: K9_OMS_AARSKVANTUM_URL
-      value: http://k9-aarskvantum.k9saksbehandling
-    - name: K9_OMS_AARSKVANTUM_SCOPE
-      value: api://prod-fss.k9saksbehandling.k9-aarskvantum/.default
-
-    # Restservice PSB spesifikt
-    - name: K9_PSB_UTTAK_URL
-      value: http://pleiepenger-barn-uttak.k9saksbehandling/pleiepenger-barn-uttak
-    - name: K9_PSB_UTTAK_SCOPE
-      value: api://prod-fss.k9saksbehandling.pleiepenger-barn-uttak/.default
-
     # Graphql services
     - name: SAF_BASE_URL
       value: https://saf.prod-fss-pub.nais.io
@@ -237,41 +225,13 @@ spec:
     - name: SENSU_PORT
       value: "3030"
 
-    # Feature-flag
-    - name: PSB_UTTAK_UNNTAK_AKTIVITETER
-      value: "AFMX0|2021-03-01"
-    - name: UKESMOERING_OMSORGSTILBUD_FOM_DATO
-      value: "2023-01-02"
-    - name: IKKE_YRKESAKTIV_UTEN_SPEILING
-      value: "false"
-    - name: OMP_NULL_HELG_I_KRAVPERIODER
-      value: "false"
-    - name: FJERN_VILKARSPERIODER_BEREGNING
-      value: "false"
-    - name: AVKLAR_ARBEIDSFORHOLD_REUTLED_VED_REVURDERING
-      value: "false"
-    - name: OMP_RELEVANT_ENDRING_UTLEDNING
-      value: "false"
+        # Feature-flag
     - name: KODEVERK_SOM_STRING_TOPICS
-      value: "false"
-    - name: SEND_INNTEKTSMELDING_FORESPORSEL
-      value: "false"
-    - name: OMP_RAMMEVEDTAK_SAMMENSTILLNG_AARSKVANTUM
-      value: "true"
-    - name: ALDERSVILKAR_I_KRONISK_SYK
-      value: "true"
-    - name: UNGDOMSYTELSE_ENABLED
-      value: "false"
-    - name: SOSKENSAK_UTTAK_OVERSTYRING
-      value: "false"
-    - name: INGEN_AP_9291_I_FORSTEGANGSBEHANDLING
       value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
       value: "false"
-    - name: RESTART_APP_ON_ERROR
-      value: "true"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

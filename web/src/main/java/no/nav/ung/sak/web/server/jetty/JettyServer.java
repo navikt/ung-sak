@@ -82,8 +82,6 @@ public class JettyServer {
     }
 
     private static void taNedApplikasjonVedError() {
-        String restartAppOnError = System.getenv("RESTART_APP_ON_ERROR");
-        if (Boolean.parseBoolean(restartAppOnError)) {
             Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
                 // Frigir minne for å sikre at vi kan logge exception
                 EMERGENCY_HEAP_SPACE = null;
@@ -94,7 +92,6 @@ public class JettyServer {
                 }
 
             });
-        }
     }
 
     private void start(AppKonfigurasjon appKonfigurasjon) throws Exception {

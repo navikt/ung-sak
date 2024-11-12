@@ -31,27 +31,20 @@ public class DokumentMottakerSøknadUng implements Dokumentmottaker {
     private MottatteDokumentRepository mottatteDokumentRepository;
     private FagsakRepository fagsakRepository;
     private UngdomsytelseSøknadPersisterer ungdomsytelseSøknadPersisterer;
-    private boolean enabled;
-
 
     public DokumentMottakerSøknadUng() {
     }
 
     @Inject
-    public DokumentMottakerSøknadUng(SøknadParser søknadParser, MottatteDokumentRepository mottatteDokumentRepository, FagsakRepository fagsakRepository, UngdomsytelseSøknadPersisterer ungdomsytelseSøknadPersisterer,
-                                     @KonfigVerdi(value = "UNGDOMSYTELSE_ENABLED", defaultVerdi = "false") boolean enabled) {
+    public DokumentMottakerSøknadUng(SøknadParser søknadParser, MottatteDokumentRepository mottatteDokumentRepository, FagsakRepository fagsakRepository, UngdomsytelseSøknadPersisterer ungdomsytelseSøknadPersisterer) {
         this.søknadParser = søknadParser;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.fagsakRepository = fagsakRepository;
         this.ungdomsytelseSøknadPersisterer = ungdomsytelseSøknadPersisterer;
-        this.enabled = enabled;
     }
 
     @Override
     public void lagreDokumentinnhold(Collection<MottattDokument> mottattDokument, Behandling behandling) {
-        if (!enabled) {
-            throw new IllegalStateException("Ytelsen er ikke skrudd på");
-        }
         var behandlingId = behandling.getId();
         for (MottattDokument dokument : mottattDokument) {
             var søknad = søknadParser.parseSøknad(dokument);
