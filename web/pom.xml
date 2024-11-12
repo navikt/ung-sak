@@ -98,11 +98,6 @@
 
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
-            <artifactId>punsj</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>no.nav.ung.sak</groupId>
             <artifactId>kontrakt</artifactId>
         </dependency>
         <dependency>

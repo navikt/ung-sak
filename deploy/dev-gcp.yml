@@ -64,10 +64,8 @@ spec:
     outbound:
       external:
         - host: "k9-abakus.dev-fss-pub.nais.io"
-        - host: "k9-formidling-dokumentdata.dev-fss-pub.nais.io"
         - host: "k9-oppdrag.dev-fss-pub.nais.io"
         - host: "k9-tilbake.dev-fss-pub.nais.io"
-        - host: "k9-formidling.dev-fss-pub.nais.io"
         - host: "k9-fordel.dev-fss-pub.nais.io"
         - host: "pdl-api.dev-fss-pub.nais.io"
         - host: "saf-q1.dev-fss-pub.nais.io"
@@ -86,12 +84,6 @@ spec:
           namespace: k9saksbehandling
           cluster: dev-fss
         - application: k9-klage
-          namespace: k9saksbehandling
-          cluster: dev-fss
-        - application: k9-formidling
-          namespace: k9saksbehandling
-          cluster: dev-fss
-        - application: k9-formidling-dokumentdata
           namespace: k9saksbehandling
           cluster: dev-fss
         - application: k9-abakus
@@ -201,10 +193,6 @@ spec:
       value: api://dev-fss.pdl.pdl-api/.default
     - name: ORGANISASJON_RS_URL
       value: https://modapp-q1.adeo.no/ereg/api/v1/organisasjon
-    - name: K9_FORMIDLING_DOKUMENTDATA_URL
-      value: https://k9-formidling-dokumentdata.dev-fss-pub.nais.io/k9/formidling/dokumentdata
-    - name: K9_FORMIDLING_DOKUMENTDATA_SCOPE
-      value: api://dev-fss.k9saksbehandling.k9-formidling-dokumentdata/.default
     - name: K9_OPPDRAG_DIREKTE_URL
       value: https://k9-formidling-dokumentdata.dev-fss-pub.nais.io/k9/oppdrag/api
     - name: K9_OPPDRAG_SCOPE
@@ -213,14 +201,6 @@ spec:
       value: https://k9-tilbake.dev-fss-pub.nais.io/k9/tilbake/api
     - name: K9_TILBAKE_SCOPE
       value: api://dev-fss.k9saksbehandling.k9-tilbake/.default
-    - name: K9_FORMIDLING_URL
-      value: https://k9-formidling.dev-fss-pub.nais.io/k9/formidling
-    - name: K9_FORMIDLING_SCOPE
-      value: api://dev-fss.k9saksbehandling.k9-formidling/.default
-    - name: K9_PUNSJ_URL
-      value: http://k9-punsj.k9saksbehandling/api
-    - name: K9_PUNSJ_SCOPE
-      value: api://dev-fss.k9saksbehandling.k9-punsj/.default
     - name: INFOTRYGD_BS_BASE_URI
       value: http://k9-infotrygd-grunnlag-paaroerende-sykdom.k9saksbehandling
     - name: K9_INFOTRYGD_SCOPE
@@ -260,14 +240,6 @@ spec:
       value: api://dev-fss.teamdokumenthandtering.saf-q1/.default
 
     # Sikkerhet:
-    - name: APP_AUTH_SCHEMA_AZUREAD_ADDITIONAL_PATHS
-      value: "/k9/formidling/dokumentdata,api://dev-fss.k9saksbehandling.k9-formidling-dokumentdata/.default;/k9/formidling,api://dev-fss.k9saksbehandling.k9-formidling/.default"
-    - name: APP_AUTH_SCHEMA_AZUREAD_OPTIONAL_PATHS
-      value: "/k9/klage,api://dev-fss.k9saksbehandling.k9-klage/.default;/k9/tilbake,api://dev-fss.k9saksbehandling.k9-tilbake/.default;/k9/oppdrag,api://dev-fss.k9saksbehandling.k9-oppdrag/.default;/k9/abakus,api://dev-fss.k9saksbehandling.k9-abakus/.default"
-    - name: CLIENT_SCOPE
-      value: "api://dev-fss.k9saksbehandling.ung-sak/.default"
-    - name: SECURITYTOKENSERVICE_URL
-      value: https://sts-q1.preprod.local/SecurityTokenServiceProvider/
     - name: ABAC_ATTRIBUTT_DRIFT
       value: "no.nav.abac.attributter.k9.drift"
 

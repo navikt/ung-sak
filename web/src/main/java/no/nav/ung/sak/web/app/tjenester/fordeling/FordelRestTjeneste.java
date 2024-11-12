@@ -1,25 +1,6 @@
 package no.nav.ung.sak.web.app.tjenester.fordeling;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.APPLIKASJON;
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.util.Base64;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectWriter;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -31,17 +12,9 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import no.nav.k9.felles.integrasjon.saf.Journalpost;
-import no.nav.k9.felles.integrasjon.saf.JournalpostQueryRequest;
-import no.nav.k9.felles.integrasjon.saf.JournalpostResponseProjection;
-import no.nav.k9.felles.integrasjon.saf.Journalstatus;
-import no.nav.k9.felles.integrasjon.saf.SafTjeneste;
+import no.nav.k9.felles.integrasjon.saf.*;
 import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
-import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
-import no.nav.k9.felles.sikkerhet.abac.AbacDto;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
-import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.felles.sikkerhet.abac.*;
 import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.prosesstask.api.PollTaskAfterTransaction;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
@@ -51,22 +24,24 @@ import no.nav.ung.sak.dokument.arkiv.ArkivJournalPost;
 import no.nav.ung.sak.dokument.arkiv.journal.SafAdapter;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
-import no.nav.ung.sak.kontrakt.mottak.FinnEllerOpprettSak;
-import no.nav.ung.sak.kontrakt.mottak.FinnEllerOpprettSakFnr;
-import no.nav.ung.sak.kontrakt.mottak.FinnSak;
-import no.nav.ung.sak.kontrakt.mottak.JournalpostMottakDto;
-import no.nav.ung.sak.kontrakt.mottak.JournalpostMottakOpprettSakDto;
+import no.nav.ung.sak.kontrakt.mottak.*;
 import no.nav.ung.sak.mottak.SøknadMottakTjenesteContainer;
 import no.nav.ung.sak.mottak.dokumentmottak.InngåendeSaksdokument;
 import no.nav.ung.sak.mottak.dokumentmottak.SaksbehandlingDokumentmottakTjeneste;
 import no.nav.ung.sak.sikkerhet.abac.AppAbacAttributtType;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.JournalpostId;
-import no.nav.ung.sak.typer.Periode;
-import no.nav.ung.sak.typer.PersonIdent;
-import no.nav.ung.sak.typer.Saksnummer;
-import no.nav.ung.sak.web.app.jackson.ObjectMapperFactory;
+import no.nav.ung.sak.typer.*;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static no.nav.k9.abac.BeskyttetRessursKoder.APPLIKASJON;
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
 
 /**
  * Mottar dokumenter fra k9-fordel og k9-punsj og håndterer dispatch internt for saksbehandlingsløsningen.

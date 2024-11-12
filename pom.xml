@@ -192,11 +192,6 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.ung.sak</groupId>
-                <artifactId>punsj</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>kontrakt</artifactId>
                 <version>${project.version}</version>
             </dependency>

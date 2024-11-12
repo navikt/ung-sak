@@ -37,7 +37,6 @@ import no.nav.ung.sak.web.app.tjenester.kodeverk.KodeverkRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.kravperioder.PerioderTilBehandlingMedKildeRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.los.LosRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.notat.NotatRestTjeneste;
-import no.nav.ung.sak.web.app.tjenester.punsj.PunsjRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.register.RedirectToRegisterRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.saksbehandler.InitielleLinksRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.saksbehandler.NavAnsattRestTjeneste;
@@ -77,7 +76,6 @@ public class RestImplementationClasses {
         classes.add(AktørRestTjeneste.class);
         classes.add(KontrollRestTjeneste.class);
         classes.add(IAYRegisterdataCallbackRestTjeneste.class);
-        classes.add(PunsjRestTjeneste.class);
         classes.add(OverlapendeYtelserRestTjeneste.class);
         classes.add(RedirectToRegisterRestTjeneste.class);
         classes.add(LosRestTjeneste.class);
