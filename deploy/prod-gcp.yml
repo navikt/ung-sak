@@ -135,12 +135,6 @@ spec:
     - name: KAFKA_INFOTRYGDFEED_AIVEN_TOPIC
       value: k9saksbehandling.k9-infotrygd-feed-hendelse
 
-    # Baseurl
-    - name: SCHEMA_REGISTRY_URL
-      value: https://kafka-schema-registry.nais.adeo.no
-    - name: BOOTSTRAP_SERVERS
-      value: a01apvl00145.adeo.no:8443,a01apvl00146.adeo.no:8443,a01apvl00147.adeo.no:8443,a01apvl00148.adeo.no:8443,a01apvl00149.adeo.no:8443,a01apvl00150.adeo.no:8443
-
     # Loadbalancerconfig
     - name: LOADBALANCER_URL
       value: https://k9.intern.nav.no
@@ -254,8 +248,6 @@ spec:
       value: "/k9/klage,api://prod-fss.k9saksbehandling.k9-klage/.default;/k9/tilbake,api://prod-fss.k9saksbehandling.k9-tilbake/.default;/k9/oppdrag,api://prod-fss.k9saksbehandling.k9-oppdrag/.default"
     - name: SECURITYTOKENSERVICE_URL
       value: https://sts.adeo.no/SecurityTokenServiceProvider/
-    - name: OIDC_STS_HOST_URL
-      value: https://security-token-service.nais.adeo.no
     - name: CLIENT_SCOPE
       value: "api://prod-fss.k9saksbehandling.ung-sak/.default"
     - name: ABAC_ATTRIBUTT_DRIFT
