@@ -1,15 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.register;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-
-import java.io.IOException;
-import java.net.URI;
-
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.message.BasicHeader;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -32,6 +22,15 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
 import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.core5.http.message.BasicHeader;
+
+import java.io.IOException;
+import java.net.URI;
+
+import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 @ApplicationScoped
 @Transactional
@@ -83,7 +82,7 @@ public class RedirectToRegisterRestTjeneste {
 
         var uri = URI.create(arbeidOgInntektBaseURL + "/api/v2/redirect/sok/arbeidstaker");
 
-        HttpUriRequest request = new HttpGet(uri);
+        HttpUriRequestBase request = new HttpGet(uri);
         request.addHeader(new BasicHeader("Nav-Personident", personIdent.getIdent()));
         try {
             var respons = restClient.execute(request, new OidcRestClientResponseHandler.StringResponseHandler(uri));
@@ -112,7 +111,7 @@ public class RedirectToRegisterRestTjeneste {
         var personIdent = tpsTjeneste.hentFnrForAktør(fagsak.getAktørId());
 
         var uri = URI.create(arbeidOgInntektBaseURL + "/api/v2/redirect/sok/a-inntekt");
-        HttpUriRequest request = new HttpGet(uri);
+        HttpUriRequestBase request = new HttpGet(uri);
         request.addHeader(new BasicHeader("Nav-Personident", personIdent.getIdent()));
         try {
             var respons = restClient.execute(request, new OidcRestClientResponseHandler.StringResponseHandler(uri));

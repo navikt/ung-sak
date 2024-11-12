@@ -1,8 +1,10 @@
 package no.nav.ung.sak.økonomi.simulering.klient;
 
-import org.apache.http.impl.client.CloseableHttpClient;
 
 import no.nav.k9.felles.integrasjon.rest.RestClientConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+
+import java.util.concurrent.TimeUnit;
 
 public class K9OppdragRestClientConfig extends RestClientConfig {
 
@@ -11,7 +13,7 @@ public class K9OppdragRestClientConfig extends RestClientConfig {
     private static final int TIMEOUT_SEKUNDER = 60; //simuleringer med veldig mange perioder tar 20+ sekunder, så må øke fra default
 
     public K9OppdragRestClientConfig() {
-        super(RestClientConfig.defaultRequestConfig().setSocketTimeout(TIMEOUT_SEKUNDER * 1000),
+        super(RestClientConfig.defaultRequestConfig().setConnectionRequestTimeout(TIMEOUT_SEKUNDER, TimeUnit.SECONDS),
             MAX_TOTAL, DEFAULT_MAX_PER_ROUTE);
     }
 

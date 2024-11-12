@@ -23,6 +23,7 @@ import org.eclipse.jetty.plus.jndi.EnvEntry;
 import org.eclipse.jetty.security.DefaultIdentityService;
 import org.eclipse.jetty.security.jaas.JAASLoginService;
 import org.eclipse.jetty.server.*;
+import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.ResourceFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
@@ -30,6 +31,7 @@ import org.eclipse.jetty.util.thread.VirtualThreadPool;
 import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -96,17 +98,17 @@ public class JettyServer {
     }
 
     private void start(AppKonfigurasjon appKonfigurasjon) throws Exception {
-        // setter opp jetty til å bruke virtuelle tråder.
-        // hver request får sin egen (virtuelle) tråd, så det er ingen risiko for å lekke informasjon (for eksempel: innlogginstilstand,token,MDC-context) ved at tråder gjenbrukes
-
         // https://jetty.org/docs/jetty/12/programming-guide/arch/threads.html
         QueuedThreadPool threadPool = new QueuedThreadPool();
         threadPool.setVirtualThreadsExecutor(new VirtualThreadPool());
 
         Server server = new Server(threadPool);
         server.setConnectors(createConnectors(appKonfigurasjon, server).toArray(new Connector[]{}));
-
-        server.setHandler(createContext(appKonfigurasjon, server));
+        WebAppContext webAppContext = createContext(appKonfigurasjon, server);
+        server.setHandler(new Handler.Sequence(
+            new ClearMdcHandler(),
+            webAppContext.get()
+        ));
 
         server.addEventListener(new JettyServerLifeCyleListener());
         server.start();
@@ -250,6 +252,17 @@ public class JettyServer {
         return ResourceFactory.combine(
             ResourceFactory.of(server).newClassLoaderResource("META-INF/resources/webjars/"),
             ResourceFactory.of(server).newClassLoaderResource("/web"));
+    }
+
+    /**
+     * brukes for å slette tilstand i MDC på starten av en request
+     */
+    private static class ClearMdcHandler extends Handler.Abstract{
+        @Override
+        public boolean handle(Request request, Response response, Callback callback) {
+            MDC.clear();
+            return false;
+        }
     }
 
 }

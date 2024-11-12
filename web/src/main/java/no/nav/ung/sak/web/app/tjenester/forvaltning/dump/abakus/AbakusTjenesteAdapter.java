@@ -35,6 +35,7 @@ import no.nav.ung.sak.domene.iay.modell.Inntektsmelding;
 import no.nav.ung.sak.domene.iay.modell.InntektsmeldingAggregat;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
+import org.apache.hc.core5.http.ParseException;
 
 @Dependent
 @Default
@@ -97,7 +98,7 @@ public class AbakusTjenesteAdapter {
     private InntektsmeldingerDto hentUnikeInntektsmeldinger(InntektsmeldingerRequest request) {
         try {
             return abakusTjeneste.hentUnikeUnntektsmeldinger(request);
-        } catch (IOException e) {
+        } catch (IOException | ParseException e) {
             throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente inntektsmeldinger fra Abakus: " + e.getMessage(), e).toException();
         }
     }
@@ -105,7 +106,7 @@ public class AbakusTjenesteAdapter {
     private InntektArbeidYtelseGrunnlagDto hentGrunnlag(InntektArbeidYtelseGrunnlagRequest request) {
         try {
             return abakusTjeneste.hentGrunnlag(request);
-        } catch (IOException e) {
+        } catch (IOException | ParseException e) {
             throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente grunnlag fra Abakus: " + e.getMessage(), e).toException();
         }
     }

@@ -11,8 +11,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.apache.http.client.utils.URIBuilder;
-
 import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -25,6 +23,7 @@ import no.nav.ung.sak.kontrakt.behandling.BehandlingStegTilstandDto;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingÅrsakDto;
 import no.nav.ung.sak.web.app.ApplicationConfig;
 import no.nav.ung.sak.web.server.jetty.JettyWebKonfigurasjon;
+import org.apache.hc.core5.net.URIBuilder;
 
 public class BehandlingDtoUtil {
 
