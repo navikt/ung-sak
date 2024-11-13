@@ -7,6 +7,7 @@ jobs:
   build:
     name: Release kontrakt
     runs-on: ubuntu-latest
+    secrets: inherit
     permissions:
       contents: read
       packages: write
