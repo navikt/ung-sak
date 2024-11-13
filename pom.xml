@@ -125,7 +125,7 @@
             <dependency>
                 <groupId>no.nav.k9.prosesstask</groupId>
                 <artifactId>prosesstask-root</artifactId>
-                <version>2.6.0</version>
+                <version>2.5.0</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>

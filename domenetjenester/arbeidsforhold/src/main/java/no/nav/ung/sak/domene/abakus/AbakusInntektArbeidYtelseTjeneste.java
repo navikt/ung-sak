@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.apache.hc.core5.http.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -333,7 +332,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
 
         try {
             abakusTjeneste.lagreOverstyrtOppgittOpptjening(request);
-        } catch (IOException | ParseException e) {
+        } catch (IOException e) {
             throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Lagre oppgitt opptjening i abakus: " + e.getMessage(), e).toException();
         }
 
@@ -373,7 +372,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
 
         try {
             abakusTjeneste.lagreInntektsmeldinger(inntektsmeldingerMottattRequest);
-        } catch (IOException | ParseException e) {
+        } catch (IOException e) {
             throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Lagre mottatte inntektsmeldinger i abakus: " + e.getMessage(), e).toException();
         }
 
@@ -411,7 +410,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     private InntektsmeldingerDto hentUnikeInntektsmeldinger(InntektsmeldingerRequest request) {
         try {
             return abakusTjeneste.hentUnikeUnntektsmeldinger(request);
-        } catch (IOException | ParseException e) {
+        } catch (IOException e) {
             throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente inntektsmeldinger fra Abakus: " + e.getMessage(), e).toException();
         }
     }
@@ -419,7 +418,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     private InntektArbeidYtelseGrunnlagDto hentGrunnlag(InntektArbeidYtelseGrunnlagRequest request) {
         try {
             return abakusTjeneste.hentGrunnlag(request);
-        } catch (IOException | ParseException e) {
+        } catch (IOException e) {
             throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente grunnlag fra Abakus: " + e.getMessage(), e).toException();
         }
 
@@ -428,7 +427,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
     private InntektArbeidYtelseGrunnlagSakSnapshotDto hentGrunnlagSnapshot(InntektArbeidYtelseGrunnlagRequest request) {
         try {
             return abakusTjeneste.hentGrunnlagSnapshot(request);
-        } catch (IOException | ParseException e) {
+        } catch (IOException e) {
             throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke hente grunnlag snapshot fra Abakus: " + e.getMessage(), e).toException();
         }
     }
@@ -566,7 +565,7 @@ public class AbakusInntektArbeidYtelseTjeneste implements InntektArbeidYtelseTje
         try {
             abakusTjeneste.lagreOverstyrt(dto);
             return dto.getGrunnlagReferanse();
-        } catch (IOException | ParseException e) {
+        } catch (IOException e) {
             throw AbakusInntektArbeidYtelseTjenesteFeil.FEIL.feilVedKallTilAbakus("Kunne ikke lagre overstyrt arbeid i Abakus: " + e.getMessage(), e).toException();
         }
     }
