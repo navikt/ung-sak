@@ -21,7 +21,6 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.task.UnderBehandlingProsessTask;
 import no.nav.ung.sak.domene.abakus.AbakusTjeneste;
-import org.apache.hc.core5.http.ParseException;
 
 @ApplicationScoped
 @ProsessTask(AsyncAbakusKopierGrunnlagTask.TASKTYPE)
@@ -69,7 +68,7 @@ class AsyncAbakusKopierGrunnlagTask extends UnderBehandlingProsessTask {
 
         try {
             abakusTjeneste.kopierGrunnlag(request);
-        } catch (IOException | ParseException e) {
+        } catch (IOException e) {
             throw new IllegalStateException(String.format("Kunne ikke kopiere abakus grunnlag: fra [%s] til [%s], dataset: %s", fraBehandlingId, tilBehandling.getId(), dataset), e);
         }
     }
