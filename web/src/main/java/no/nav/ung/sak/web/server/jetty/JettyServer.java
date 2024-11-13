@@ -98,7 +98,6 @@ public class JettyServer {
 
         // https://jetty.org/docs/jetty/12/programming-guide/arch/threads.html
         QueuedThreadPool threadPool = new QueuedThreadPool();
-        threadPool.setVirtualThreadsExecutor(new VirtualThreadPool());
 
         Server server = new Server(threadPool);
         server.setConnectors(createConnectors(appKonfigurasjon, server).toArray(new Connector[]{}));
