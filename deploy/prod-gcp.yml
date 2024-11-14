@@ -54,7 +54,7 @@ spec:
     application:
       enabled: true
       replyURLs:
-        - "https://k9.intern.nav.no/k9/sak/cb"
+        - "https://ung-sak.intern.nav.no/k9/sak/cb"
       claims:
         extra:
           - "NAVident"
