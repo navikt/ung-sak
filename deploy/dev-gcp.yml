@@ -68,8 +68,8 @@ spec:
         - host: "k9-tilbake.dev-fss-pub.nais.io"
         - host: "k9-fordel.dev-fss-pub.nais.io"
         - host: "pdl-api.dev-fss-pub.nais.io"
-        - host: "saf-q1.dev-fss-pub.nais.io",
-        - host: "norg2.dev-fss-pub.nais.io",
+        - host: "saf-q1.dev-fss-pub.nais.io"
+        - host: "norg2.dev-fss-pub.nais.io"
     inbound:
       rules:
         - application: ung-sak
