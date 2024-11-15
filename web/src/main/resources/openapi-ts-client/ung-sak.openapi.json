@@ -7825,7 +7825,7 @@
           "in" : "query",
           "name" : "original",
           "schema" : {
-            "default" : "/k9/sak",
+            "default" : "/ung/sak",
             "type" : "string"
           }
         } ],
