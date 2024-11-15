@@ -67,7 +67,8 @@ spec:
         - host: "k9-tilbake.prod-fss-pub.nais.io"
         - host: "k9-fordel.prod-fss-pub.nais.io"
         - host: "pdl-api.prod-fss-pub.nais.io"
-        - host: "saf.prod-fss-pub.nais.io"
+        - host: "saf.prod-fss-pub.nais.io",
+        - host: "norg2.prod-fss-pub.nais.io"
     inbound:
       rules:
         - application: ung-sak
@@ -167,7 +168,7 @@ spec:
     - name: K9_OPPDRAG_PROXY_URL
       value: /k9/oppdrag/api
     - name: ARBEIDSFORDELING_RS_URL
-      value: https://norg2.intern.nav.no/norg2/api/v1/arbeidsfordeling/enheter
+      value: https://norg2.prod-fss-pub.nais.io/norg2/api/v1/arbeidsfordeling/enheter
     - name: OPPGAVE_RS_URI
       value: https://oppgave.nais.adeo.no/api/v1/oppgaver
     - name: OPPGAVE_RS_SCOPE
