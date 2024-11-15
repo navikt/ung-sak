@@ -52,19 +52,19 @@ public class FrontendLoginResourceTest {
         var response = resource.login(basepath, "", null);
         assertThat(URI.create("/")).isEqualTo(response.getLocation());
 
-        var hovedside = "/k9/web/";
+        var hovedside = "/ung/web/";
         response = resource.login(hovedside, "", null);
         assertThat(URI.create(hovedside)).isEqualTo(response.getLocation());
 
-        var medQuery = "/k9/web/fagsak/1234/behandling/?collapsed=true";
+        var medQuery = "/ung/web/fagsak/1234/behandling/?collapsed=true";
         response = resource.login(medQuery, "", null);
         assertThat(URI.create(medQuery)).isEqualTo(response.getLocation());
 
-        var medFragment = "/k9/web/fagsak/1234/behandling/#panel-42";
+        var medFragment = "/ung/web/fagsak/1234/behandling/#panel-42";
         response = resource.login(medFragment, "", null);
         assertThat(URI.create(medFragment)).isEqualTo(response.getLocation());
 
-        var medQueryOgFragment = "/k9/web/fagsak/1234/behandling/?collapsed=true#panel42";
+        var medQueryOgFragment = "/ung/web/fagsak/1234/behandling/?collapsed=true#panel42";
         response = resource.login(medQueryOgFragment, "", null);
         assertThat(URI.create(medQueryOgFragment)).isEqualTo(response.getLocation());
     }

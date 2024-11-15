@@ -46,7 +46,7 @@ public class FrontendLoginResource {
     }
 
     @GET
-    public Response login(@QueryParam("redirectTo") @DefaultValue("/k9/web/") String redirectTo, @QueryParam("original") @DefaultValue("/ung/sak") String originalUri, @Context HttpServletRequest httpServletRequest) {
+    public Response login(@QueryParam("redirectTo") @DefaultValue("/ung/web/") String redirectTo, @QueryParam("original") @DefaultValue("/ung/sak") String originalUri, @Context HttpServletRequest httpServletRequest) {
         var uri = URI.create(redirectTo);
         var relativePath = "";
         if (uri.getPath() != null) {
