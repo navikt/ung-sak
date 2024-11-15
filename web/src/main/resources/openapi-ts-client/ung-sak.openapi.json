@@ -7818,7 +7818,7 @@
           "in" : "query",
           "name" : "redirectTo",
           "schema" : {
-            "default" : "/k9/web/",
+            "default" : "/ung/web/",
             "type" : "string"
           }
         }, {
