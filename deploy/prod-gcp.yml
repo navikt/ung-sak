@@ -54,7 +54,7 @@ spec:
     application:
       enabled: true
       replyURLs:
-        - "https://ung-sak.intern.nav.no/k9/sak/cb"
+        - "https://ung-sak.intern.nav.no/ung/sak/cb"
       claims:
         extra:
           - "NAVident"
@@ -160,7 +160,7 @@ spec:
     - name: K9ABAKUS_SCOPE
       value: api://prod-fss.k9saksbehandling.k9-abakus/.default
     - name: ABAKUS_CALLBACK_URL
-      value: http://ung-sak.k9saksbehandling/k9/sak/api/registerdata/iay/callback
+      value: http://ung-sak.k9saksbehandling/ung/sak/api/registerdata/iay/callback
     - name: ABAKUS_CALLBACK_SCOPE
       value: api://prod-fss.k9saksbehandling.ung-sak/.default
     - name: ABAC_PDP_ENDPOINT_URL

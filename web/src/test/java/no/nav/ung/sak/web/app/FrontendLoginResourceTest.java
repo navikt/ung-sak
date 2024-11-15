@@ -21,7 +21,7 @@ public class FrontendLoginResourceTest {
 
     @BeforeEach
     void setUp() {
-        ContextPathHolder.instance("/k9/sak");
+        ContextPathHolder.instance("/ung/sak");
         var mock = mock(ContextAwareTokenProvider.class);
         var mockToken = mock(OidcToken.class);
         when(mockToken.getIssuer()).thenReturn(OpenIDProvider.ISSO);

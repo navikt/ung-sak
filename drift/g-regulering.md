@@ -10,7 +10,7 @@ Dokumentasjon for å kjøre g-regulering for ytelser i k9-sak.
 ## Utførelse
 
 1. Logg inn i produksjonsmiljø med driftsbruker
-2. Gå til swagger https://----produksjon----/k9/sak/swagger
+2. Gå til swagger https://----produksjon----/ung/sak/swagger
 3. Velg tjenesten '/api/prosesstask/createProsessTask' (Oppretter en prosess task i henhold til request)
 4. Kjør med payload, hvor YTELSE(ytelsen det skal kjøres for), FOM og TOM settes til datoene fom = dagen ny g-sats gjelder fra, tom = dagen satsen ble produksjonssatt i kalkulus
    
