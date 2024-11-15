@@ -228,6 +228,8 @@ spec:
       value: api://dev-fss.teamdokumenthandtering.saf-q1/.default
 
     # Sikkerhet:
+    - name: CLIENT_SCOPE
+      value: "api://dev-gcp.k9saksbehandling.ung-sak/.default"
     - name: ABAC_ATTRIBUTT_DRIFT
       value: "no.nav.abac.attributter.k9.drift"
 
