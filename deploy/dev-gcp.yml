@@ -167,7 +167,7 @@ spec:
 
     # Restservice Generelle
     - name: K9ABAKUS_URL
-      value: https://k9-abakus.dev-fss-pub.nais.io
+      value: https://k9-abakus.dev-fss-pub.nais.io/k9/abakus
     - name: K9ABAKUS_SCOPE
       value: api://dev-fss.k9saksbehandling.k9-abakus/.default
     - name: ABAKUS_CALLBACK_URL
