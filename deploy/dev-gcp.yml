@@ -73,7 +73,7 @@ spec:
     inbound:
       rules:
         - application: ung-sak
-        - application: k9-sak-web
+        - application: ung-sak-web
         - application: ung-deltakelse-opplyser
         - application: k9-los-api
           namespace: k9saksbehandling
