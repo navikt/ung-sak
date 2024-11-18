@@ -195,7 +195,7 @@ spec:
     - name: ORGANISASJON_RS_URL
       value: https://modapp-q1.adeo.no/ereg/api/v1/organisasjon
     - name: K9_OPPDRAG_DIREKTE_URL
-      value: https://k9-formidling-dokumentdata.dev-fss-pub.nais.io/k9/oppdrag/api
+      value: https://k9-oppdrag.dev-fss-pub.nais.io/k9/oppdrag/api
     - name: K9_OPPDRAG_SCOPE
       value: api://dev-fss.k9saksbehandling.k9-oppdrag/.default
     - name: K9_TILBAKE_DIREKTE_URL
