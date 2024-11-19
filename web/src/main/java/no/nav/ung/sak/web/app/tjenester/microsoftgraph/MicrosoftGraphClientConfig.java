@@ -11,7 +11,7 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 public class MicrosoftGraphClientConfig {
     private final GraphServiceClient graphClient;
 
-    final String[] scopes = new String[] { "https://graph.microsoft.com/.default" };
+    final String[] scopes = new String[] { "https://graph.microsoft.com/.default", "User.Read.All" };
 
     @Inject
     public MicrosoftGraphClientConfig(
