@@ -99,7 +99,7 @@ public class FrontendLoginResource {
             var path = split[0].trim();
             var scope = split[1].trim();
 
-            if (!path.startsWith("/k9/") || Objects.equals("/k9/", path) || Objects.equals("/k9", path) || Objects.equals(cookiePath, path)) {
+            if (!path.startsWith("/ung/") || Objects.equals("/ung/", path) || Objects.equals("/ung", path) || Objects.equals(cookiePath, path)) {
                 throw new IllegalStateException("Ugyldig path");
             }
 
