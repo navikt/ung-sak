@@ -2,7 +2,7 @@ package no.nav.ung.sak.behandlingslager.aktør;
 
 import java.util.Objects;
 
-import no.nav.k9.kodeverk.geografisk.AdresseType;
+import no.nav.ung.kodeverk.geografisk.AdresseType;
 
 public class Adresseinfo {
 

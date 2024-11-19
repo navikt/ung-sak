@@ -1,6 +1,6 @@
 package no.nav.ung.sak.domene.arbeidsforhold;
 
-import no.nav.k9.kodeverk.api.Kodeverdi;
+import no.nav.ung.kodeverk.api.Kodeverdi;
 import no.nav.ung.sak.behandlingslager.diff.DiffEntity;
 import no.nav.ung.sak.behandlingslager.diff.TraverseGraph;
 import no.nav.ung.sak.behandlingslager.diff.TraverseGraphConfig;

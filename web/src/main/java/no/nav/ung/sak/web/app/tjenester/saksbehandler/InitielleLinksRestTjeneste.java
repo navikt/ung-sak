@@ -1,6 +1,6 @@
 package no.nav.ung.sak.web.app.tjenester.saksbehandler;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.APPLIKASJON;
+import static no.nav.ung.abac.BeskyttetRessursKoder.APPLIKASJON;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import java.util.ArrayList;

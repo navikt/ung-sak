@@ -2,7 +2,7 @@ package no.nav.ung.sak.web.app.tjenester.kodeverk.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotNull;
-import no.nav.k9.kodeverk.api.Kodeverdi;
+import no.nav.ung.kodeverk.api.Kodeverdi;
 
 import java.util.*;
 

@@ -17,6 +17,7 @@ import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.ung.kodeverk.Fagsystem;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -149,7 +150,7 @@ public class PubliserVedtakHendelseTask extends BehandlingProsessTask {
         vedtakHendelse.setFagsakYtelseType(behandling.getFagsakYtelseType());
         vedtakHendelse.setSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
         vedtakHendelse.setStatus(behandling.getFagsak().getStatus());
-        vedtakHendelse.setFagsystem(no.nav.k9.kodeverk.Fagsystem.K9SAK);
+        vedtakHendelse.setFagsystem(Fagsystem.K9SAK);
         vedtakHendelse.setAktør(behandling.getAktørId());
         vedtakHendelse.setBehandlingResultatType(behandling.getBehandlingResultatType());
         vedtakHendelse.setVedtakResultat(vedtak.getVedtakResultatType());

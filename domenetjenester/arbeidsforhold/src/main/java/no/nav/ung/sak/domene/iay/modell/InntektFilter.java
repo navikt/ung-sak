@@ -1,7 +1,7 @@
 package no.nav.ung.sak.domene.iay.modell;
 
-import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
-import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
+import no.nav.ung.kodeverk.arbeidsforhold.InntektsKilde;
+import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.Arbeidsgiver;
 

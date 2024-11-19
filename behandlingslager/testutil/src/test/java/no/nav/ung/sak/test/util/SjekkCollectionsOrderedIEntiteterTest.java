@@ -23,7 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.ung.kodeverk.api.IndexKey;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.db.util.Databaseskjemainitialisering;
 

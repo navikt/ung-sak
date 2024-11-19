@@ -15,7 +15,7 @@ import jakarta.ws.rs.core.MediaType;
 import no.nav.k9.felles.integrasjon.saf.*;
 import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.felles.sikkerhet.abac.*;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.prosesstask.api.PollTaskAfterTransaction;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
@@ -40,8 +40,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.APPLIKASJON;
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.ung.abac.BeskyttetRessursKoder.APPLIKASJON;
+import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
 
 /**
  * Mottar dokumenter fra k9-fordel og k9-punsj og håndterer dispatch internt for saksbehandlingsløsningen.

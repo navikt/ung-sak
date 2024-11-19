@@ -14,8 +14,8 @@ import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.kodeverk.Fagsystem;
-import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
+import no.nav.ung.kodeverk.Fagsystem;
+import no.nav.ung.kodeverk.vedtak.VedtakResultatType;
 import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatRepository;

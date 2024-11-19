@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import java.util.Collection;
 import java.util.List;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.APPLIKASJON;
+import static no.nav.ung.abac.BeskyttetRessursKoder.APPLIKASJON;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.k9.felles.sikkerhet.abac.PepImpl.ENV;
 

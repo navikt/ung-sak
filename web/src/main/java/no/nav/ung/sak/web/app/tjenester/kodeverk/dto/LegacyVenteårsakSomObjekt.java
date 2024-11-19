@@ -1,7 +1,7 @@
 package no.nav.ung.sak.web.app.tjenester.kodeverk.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 
 /**
  * Konverterer VenteårsakSomObjekt.kanVelges property til string i json serialisering, for kompatibilitet med gammalt

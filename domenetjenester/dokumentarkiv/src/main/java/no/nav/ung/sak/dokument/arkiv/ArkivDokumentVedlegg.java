@@ -2,7 +2,7 @@ package no.nav.ung.sak.dokument.arkiv;
 
 import java.util.Objects;
 
-import no.nav.k9.kodeverk.dokument.DokumentTypeId;
+import no.nav.ung.kodeverk.dokument.DokumentTypeId;
 
 /*
  * Til bruk for journalposter der hoveddokument er ett scannet dokument som inneholder både hoveddokument og vedlegg

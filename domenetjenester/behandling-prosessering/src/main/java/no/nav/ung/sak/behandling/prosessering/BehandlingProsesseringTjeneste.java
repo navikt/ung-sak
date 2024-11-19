@@ -3,7 +3,7 @@ package no.nav.ung.sak.behandling.prosessering;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 

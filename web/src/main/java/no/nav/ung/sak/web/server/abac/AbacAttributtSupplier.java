@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Function;
 
-import no.nav.k9.abac.AbacAttributt;
+import no.nav.ung.abac.AbacAttributt;
 import no.nav.ung.sak.sikkerhet.abac.AppAbacAttributtType;
 import no.nav.k9.felles.sikkerhet.abac.AbacAttributtType;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;

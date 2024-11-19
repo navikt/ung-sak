@@ -1,10 +1,10 @@
 package no.nav.ung.sak.domene.iay.modell;
 
-import no.nav.k9.kodeverk.api.IndexKey;
-import no.nav.k9.kodeverk.arbeidsforhold.InntektYtelseType;
-import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
-import no.nav.k9.kodeverk.arbeidsforhold.LønnsinntektBeskrivelse;
-import no.nav.k9.kodeverk.arbeidsforhold.SkatteOgAvgiftsregelType;
+import no.nav.ung.kodeverk.api.IndexKey;
+import no.nav.ung.kodeverk.arbeidsforhold.InntektYtelseType;
+import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
+import no.nav.ung.kodeverk.arbeidsforhold.LønnsinntektBeskrivelse;
+import no.nav.ung.kodeverk.arbeidsforhold.SkatteOgAvgiftsregelType;
 import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.ung.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;

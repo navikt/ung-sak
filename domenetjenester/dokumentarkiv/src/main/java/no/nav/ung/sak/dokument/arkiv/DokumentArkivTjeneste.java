@@ -33,10 +33,10 @@ import no.nav.k9.felles.integrasjon.saf.RelevantDato;
 import no.nav.k9.felles.integrasjon.saf.RelevantDatoResponseProjection;
 import no.nav.k9.felles.integrasjon.saf.SafTjeneste;
 import no.nav.k9.felles.integrasjon.saf.SakResponseProjection;
-import no.nav.k9.kodeverk.Fagsystem;
-import no.nav.k9.kodeverk.dokument.ArkivFilType;
-import no.nav.k9.kodeverk.dokument.Kommunikasjonsretning;
-import no.nav.k9.kodeverk.dokument.VariantFormat;
+import no.nav.ung.kodeverk.Fagsystem;
+import no.nav.ung.kodeverk.dokument.ArkivFilType;
+import no.nav.ung.kodeverk.dokument.Kommunikasjonsretning;
+import no.nav.ung.kodeverk.dokument.VariantFormat;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Saksnummer;
 

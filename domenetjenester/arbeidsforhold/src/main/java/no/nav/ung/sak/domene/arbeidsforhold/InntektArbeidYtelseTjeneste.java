@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import no.nav.abakus.iaygrunnlag.request.Dataset;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;

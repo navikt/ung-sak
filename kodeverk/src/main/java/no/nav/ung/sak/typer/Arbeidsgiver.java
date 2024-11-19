@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.ung.kodeverk.api.IndexKey;
 
 /** En arbeidsgiver (enten virksomhet eller personlig arbeidsgiver). */
 @JsonIgnoreProperties(ignoreUnknown = true)

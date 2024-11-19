@@ -3,7 +3,7 @@ package no.nav.ung.sak.behandlingslager.kodeverk;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.ung.kodeverk.person.PersonstatusType;
 
 @Converter(autoApply = true)
 public class PersonstatusKodeverdiConverter implements AttributeConverter<PersonstatusType, String> {

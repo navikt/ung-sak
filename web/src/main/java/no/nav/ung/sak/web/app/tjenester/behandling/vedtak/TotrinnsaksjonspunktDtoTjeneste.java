@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.kontrakt.vedtak.TotrinnsArbeidsforholdDto;
 import no.nav.ung.sak.kontrakt.vedtak.TotrinnskontrollAksjonspunkterDto;

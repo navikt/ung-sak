@@ -1,6 +1,6 @@
 package no.nav.ung.sak.domene.iay.modell;
 
-import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.IKKE_BRUK;
+import static no.nav.ung.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType.IKKE_BRUK;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -2,8 +2,8 @@ package no.nav.ung.sak.dokument.arkiv;
 
 import java.util.Objects;
 
-import no.nav.k9.kodeverk.dokument.ArkivFilType;
-import no.nav.k9.kodeverk.dokument.VariantFormat;
+import no.nav.ung.kodeverk.dokument.ArkivFilType;
+import no.nav.ung.kodeverk.dokument.VariantFormat;
 
 /*
  * Hvilke varianter og filformater dokumentet er tilgjengelig som. Fx ARKIV/PDF(A) ORIGINAL/XML

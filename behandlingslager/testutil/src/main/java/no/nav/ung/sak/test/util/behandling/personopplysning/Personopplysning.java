@@ -1,8 +1,8 @@
 package no.nav.ung.sak.test.util.behandling.personopplysning;
 
-import no.nav.k9.kodeverk.geografisk.Region;
-import no.nav.k9.kodeverk.person.NavBrukerKjønn;
-import no.nav.k9.kodeverk.person.SivilstandType;
+import no.nav.ung.kodeverk.geografisk.Region;
+import no.nav.ung.kodeverk.person.NavBrukerKjønn;
+import no.nav.ung.kodeverk.person.SivilstandType;
 import no.nav.ung.sak.typer.AktørId;
 
 import java.time.LocalDate;

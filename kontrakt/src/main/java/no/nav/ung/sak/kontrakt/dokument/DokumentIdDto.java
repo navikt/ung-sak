@@ -2,7 +2,7 @@ package no.nav.ung.sak.kontrakt.dokument;
 
 import jakarta.validation.constraints.Digits;
 
-import no.nav.k9.abac.AbacAttributt;
+import no.nav.ung.abac.AbacAttributt;
 
 public class DokumentIdDto {
     @Digits(integer = 18, fraction = 0)

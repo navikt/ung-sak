@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jakarta.persistence.Tuple;
-import no.nav.k9.kodeverk.api.Kodeverdi;
+import no.nav.ung.kodeverk.api.Kodeverdi;
 
 public class CsvOutput {
 

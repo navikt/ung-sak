@@ -8,7 +8,7 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import no.nav.k9.kodeverk.dokument.Kommunikasjonsretning;
+import no.nav.ung.kodeverk.dokument.Kommunikasjonsretning;
 import no.nav.ung.sak.typer.JournalpostId;
 
 public class DokumentDto {

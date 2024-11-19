@@ -3,7 +3,7 @@ package no.nav.ung.sak.produksjonsstyring.oppgavebehandling;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
+import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
 
 @Converter(autoApply = true)
 public class OppgaveÅrsakKodeverdiConverter implements AttributeConverter<OppgaveÅrsak, String> {

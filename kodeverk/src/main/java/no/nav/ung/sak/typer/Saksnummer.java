@@ -11,8 +11,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-import no.nav.k9.abac.AbacAttributt;
-import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.ung.abac.AbacAttributt;
+import no.nav.ung.kodeverk.api.IndexKey;
 
 /**
  * Saksnummer refererer til saksnummer registret i GSAK.

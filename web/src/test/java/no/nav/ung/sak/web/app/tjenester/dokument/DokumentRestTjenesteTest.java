@@ -8,8 +8,8 @@ import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.k9.kodeverk.dokument.Kommunikasjonsretning;
-import no.nav.k9.kodeverk.uttak.Tid;
+import no.nav.ung.kodeverk.dokument.Kommunikasjonsretning;
+import no.nav.ung.kodeverk.uttak.Tid;
 import no.nav.ung.sak.kontrakt.dokument.DokumentDto;
 
 class DokumentRestTjenesteTest {

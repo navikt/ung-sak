@@ -12,8 +12,8 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import no.nav.k9.abac.AbacAttributt;
-import no.nav.k9.kodeverk.dokument.DokumentMalType;
+import no.nav.ung.abac.AbacAttributt;
+import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.kontrakt.Patterns;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

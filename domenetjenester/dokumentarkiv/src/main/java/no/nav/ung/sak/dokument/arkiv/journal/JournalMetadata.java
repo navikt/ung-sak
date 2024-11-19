@@ -4,9 +4,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.nav.k9.kodeverk.dokument.ArkivFilType;
-import no.nav.k9.kodeverk.dokument.DokumentTypeId;
-import no.nav.k9.kodeverk.dokument.VariantFormat;
+import no.nav.ung.kodeverk.dokument.ArkivFilType;
+import no.nav.ung.kodeverk.dokument.DokumentTypeId;
+import no.nav.ung.kodeverk.dokument.VariantFormat;
 import no.nav.ung.sak.typer.JournalpostId;
 
 public class JournalMetadata {

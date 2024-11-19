@@ -10,7 +10,7 @@ import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.kodeverk.behandling.BehandlingStatus;
+import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.sak.behandlingskontroll.BehandlingStegTilstandSnapshot;
 import no.nav.ung.sak.behandlingskontroll.events.BehandlingStegOvergangEvent;
 import no.nav.ung.sak.behandlingskontroll.impl.BehandlingskontrollEventPubliserer;

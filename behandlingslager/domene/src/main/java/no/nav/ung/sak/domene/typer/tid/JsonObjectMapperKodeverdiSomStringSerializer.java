@@ -10,8 +10,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import no.nav.k9.felles.feil.Feil;
-import no.nav.k9.kodeverk.KodeverdiSomStringSerializer;
-import no.nav.k9.kodeverk.api.Kodeverdi;
+import no.nav.ung.kodeverk.KodeverdiSomStringSerializer;
+import no.nav.ung.kodeverk.api.Kodeverdi;
 
 public class JsonObjectMapperKodeverdiSomStringSerializer {
 

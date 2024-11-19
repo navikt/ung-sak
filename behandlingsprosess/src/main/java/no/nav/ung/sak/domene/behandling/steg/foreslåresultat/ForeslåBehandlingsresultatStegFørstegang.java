@@ -1,7 +1,7 @@
 package no.nav.ung.sak.domene.behandling.steg.foreslåresultat;
 
-import static no.nav.k9.kodeverk.behandling.BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT;
-import static no.nav.k9.kodeverk.behandling.BehandlingType.FØRSTEGANGSSØKNAD;
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT;
+import static no.nav.ung.kodeverk.behandling.BehandlingType.FØRSTEGANGSSØKNAD;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;

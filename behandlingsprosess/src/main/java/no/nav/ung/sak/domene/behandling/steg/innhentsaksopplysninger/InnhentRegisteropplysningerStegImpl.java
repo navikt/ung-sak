@@ -1,6 +1,6 @@
 package no.nav.ung.sak.domene.behandling.steg.innhentsaksopplysninger;
 
-import static no.nav.k9.kodeverk.behandling.BehandlingStegType.INNHENT_REGISTEROPP;
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.INNHENT_REGISTEROPP;
 
 import java.util.stream.Collectors;
 

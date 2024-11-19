@@ -23,7 +23,7 @@ import jakarta.enterprise.inject.spi.CDI;
 import jakarta.enterprise.util.AnnotationLiteral;
 import jakarta.inject.Qualifier;
 
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef.ContainerOfFagsakYtelseTypeRef;
 
 /**
@@ -46,7 +46,7 @@ public @interface FagsakYtelseTypeRef {
      * <p>
      * Må matche ett innslag i <code>FAGSAK_YTELSE_TYPE</code> tabell for å kunne kjøres.
      *
-     * @see no.nav.k9.kodeverk.behandling.FagsakYtelseType
+     * @see FagsakYtelseType
      */
     FagsakYtelseType value() default FagsakYtelseType.UDEFINERT;
 

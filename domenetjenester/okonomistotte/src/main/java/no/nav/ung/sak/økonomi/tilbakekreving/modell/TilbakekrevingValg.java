@@ -1,6 +1,6 @@
 package no.nav.ung.sak.økonomi.tilbakekreving.modell;
 
-import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
+import no.nav.ung.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
 
 public class TilbakekrevingValg {
 

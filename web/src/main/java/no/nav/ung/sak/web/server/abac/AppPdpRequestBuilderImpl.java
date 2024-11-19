@@ -19,7 +19,7 @@ import jakarta.annotation.Priority;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Inject;
-import no.nav.k9.abac.BeskyttetRessursKoder;
+import no.nav.ung.abac.BeskyttetRessursKoder;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.konfigurasjon.env.Cluster;
 import no.nav.k9.felles.konfigurasjon.env.Environment;

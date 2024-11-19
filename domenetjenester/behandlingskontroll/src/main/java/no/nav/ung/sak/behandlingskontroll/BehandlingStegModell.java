@@ -1,6 +1,6 @@
 package no.nav.ung.sak.behandlingskontroll;
 
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 
 public interface BehandlingStegModell {
 

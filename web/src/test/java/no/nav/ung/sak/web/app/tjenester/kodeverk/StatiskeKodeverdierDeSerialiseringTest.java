@@ -2,8 +2,8 @@ package no.nav.ung.sak.web.app.tjenester.kodeverk;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.k9.kodeverk.api.Kodeverdi;
-import no.nav.k9.kodeverk.uttak.UtenlandsoppholdÅrsak;
+import no.nav.ung.kodeverk.api.Kodeverdi;
+import no.nav.ung.kodeverk.uttak.UtenlandsoppholdÅrsak;
 import no.nav.ung.sak.kontrakt.krav.ÅrsakTilVurdering;
 import no.nav.ung.sak.web.app.jackson.ObjectMapperResolver;
 import org.junit.jupiter.api.Test;

@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
+import no.nav.ung.kodeverk.arbeidsforhold.Inntektskategori;
 
 class MapperForInntektskategori {
 

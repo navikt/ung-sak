@@ -3,7 +3,7 @@ package no.nav.ung.sak.behandlingslager.virksomhet;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import no.nav.k9.kodeverk.organisasjon.Organisasjonstype;
+import no.nav.ung.kodeverk.organisasjon.Organisasjonstype;
 
 public class Virksomhet {
 

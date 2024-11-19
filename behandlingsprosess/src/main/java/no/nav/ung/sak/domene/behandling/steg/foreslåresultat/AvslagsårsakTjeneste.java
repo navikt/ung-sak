@@ -6,7 +6,7 @@ import java.util.Set;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
+import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.k9.felles.feil.Feil;

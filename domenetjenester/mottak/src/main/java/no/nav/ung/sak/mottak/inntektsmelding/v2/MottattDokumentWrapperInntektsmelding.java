@@ -10,7 +10,7 @@ import java.util.Optional;
 import jakarta.xml.bind.JAXBElement;
 
 import no.nav.inntektsmelding.xml.kodeliste._2019xxyy.BegrunnelseIngenEllerRedusertUtbetalingKodeliste;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.domene.iay.modell.PeriodeAndel;
 import no.nav.ung.sak.mottak.inntektsmelding.MapYtelseTypeFraInntektsmelding;
 import no.nav.ung.sak.mottak.inntektsmelding.MottattInntektsmeldingWrapper;

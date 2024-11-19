@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 
-import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.domene.arbeidsforhold.impl.FinnEksternReferanse;
 import no.nav.ung.sak.domene.iay.modell.AktivitetsAvtale;

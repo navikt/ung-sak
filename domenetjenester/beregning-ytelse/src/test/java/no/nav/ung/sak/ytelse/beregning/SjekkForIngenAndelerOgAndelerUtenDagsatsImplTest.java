@@ -8,8 +8,8 @@ import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
-import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
+import no.nav.ung.kodeverk.arbeidsforhold.AktivitetStatus;
+import no.nav.ung.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatAndel;
 import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatPeriode;

@@ -3,7 +3,7 @@ package no.nav.ung.sak.behandlingslager.kodeverk;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-import no.nav.k9.kodeverk.medlem.MedlemskapType;
+import no.nav.ung.kodeverk.medlem.MedlemskapType;
 
 @Converter(autoApply = true)
 public class MedlemskapTypeKodeverdiConverter implements AttributeConverter<MedlemskapType, String> {

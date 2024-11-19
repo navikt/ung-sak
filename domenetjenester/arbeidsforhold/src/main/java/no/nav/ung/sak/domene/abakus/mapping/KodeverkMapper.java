@@ -1,23 +1,23 @@
 package no.nav.ung.sak.domene.abakus.mapping;
 
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseStatus;
-import no.nav.k9.kodeverk.Fagsystem;
-import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
-import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
-import no.nav.k9.kodeverk.arbeidsforhold.Arbeidskategori;
-import no.nav.k9.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;
-import no.nav.k9.kodeverk.arbeidsforhold.InntektPeriodeType;
-import no.nav.k9.kodeverk.arbeidsforhold.InntektYtelseType;
-import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
-import no.nav.k9.kodeverk.arbeidsforhold.InntektsmeldingInnsendingsårsak;
-import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
-import no.nav.k9.kodeverk.arbeidsforhold.LønnsinntektBeskrivelse;
-import no.nav.k9.kodeverk.arbeidsforhold.NaturalYtelseType;
-import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
-import no.nav.k9.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
-import no.nav.k9.kodeverk.arbeidsforhold.SkatteOgAvgiftsregelType;
-import no.nav.k9.kodeverk.arbeidsforhold.UtsettelseÅrsak;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.Fagsystem;
+import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.ung.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
+import no.nav.ung.kodeverk.arbeidsforhold.Arbeidskategori;
+import no.nav.ung.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;
+import no.nav.ung.kodeverk.arbeidsforhold.InntektPeriodeType;
+import no.nav.ung.kodeverk.arbeidsforhold.InntektYtelseType;
+import no.nav.ung.kodeverk.arbeidsforhold.InntektsKilde;
+import no.nav.ung.kodeverk.arbeidsforhold.InntektsmeldingInnsendingsårsak;
+import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
+import no.nav.ung.kodeverk.arbeidsforhold.LønnsinntektBeskrivelse;
+import no.nav.ung.kodeverk.arbeidsforhold.NaturalYtelseType;
+import no.nav.ung.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
+import no.nav.ung.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
+import no.nav.ung.kodeverk.arbeidsforhold.SkatteOgAvgiftsregelType;
+import no.nav.ung.kodeverk.arbeidsforhold.UtsettelseÅrsak;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 
 public final class KodeverkMapper {
 

@@ -8,8 +8,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
-import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
+import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.ung.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Arbeidsgiver;
 import no.nav.ung.sak.typer.EksternArbeidsforholdRef;

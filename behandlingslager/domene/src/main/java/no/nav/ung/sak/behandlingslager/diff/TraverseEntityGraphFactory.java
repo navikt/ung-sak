@@ -4,7 +4,7 @@ import java.util.function.Function;
 
 import no.nav.ung.sak.behandlingslager.Range;
 
-import no.nav.k9.kodeverk.api.Kodeverdi;
+import no.nav.ung.kodeverk.api.Kodeverdi;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;

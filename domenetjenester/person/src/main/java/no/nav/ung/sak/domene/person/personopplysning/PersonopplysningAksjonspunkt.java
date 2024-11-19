@@ -3,7 +3,7 @@ package no.nav.ung.sak.domene.person.personopplysning;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.ung.kodeverk.person.PersonstatusType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public class PersonopplysningAksjonspunkt {

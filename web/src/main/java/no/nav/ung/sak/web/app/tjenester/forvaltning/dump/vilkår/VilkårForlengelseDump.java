@@ -1,9 +1,9 @@
 package no.nav.ung.sak.web.app.tjenester.forvaltning.dump.vilkår;
 
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import java.util.List;
 import java.util.TreeSet;

@@ -1,7 +1,7 @@
 package no.nav.ung.sak.web.app.tjenester.kodeverk.dto;
 
 import jakarta.validation.constraints.NotNull;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 
 import java.util.Set;
 import java.util.SortedSet;

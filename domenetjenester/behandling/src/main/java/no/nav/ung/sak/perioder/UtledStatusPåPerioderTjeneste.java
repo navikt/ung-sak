@@ -1,7 +1,7 @@
 package no.nav.ung.sak.perioder;
 
 import no.nav.fpsak.tidsserie.*;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;

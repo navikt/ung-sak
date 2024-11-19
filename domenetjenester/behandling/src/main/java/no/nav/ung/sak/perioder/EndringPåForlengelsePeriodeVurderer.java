@@ -2,8 +2,8 @@ package no.nav.ung.sak.perioder;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Instance;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingskontroll.VilkårTypeRef;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;

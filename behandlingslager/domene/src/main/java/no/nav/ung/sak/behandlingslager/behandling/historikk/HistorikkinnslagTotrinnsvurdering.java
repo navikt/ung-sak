@@ -2,7 +2,7 @@ package no.nav.ung.sak.behandlingslager.behandling.historikk;
 
 import java.time.LocalDateTime;
 
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 
 public class HistorikkinnslagTotrinnsvurdering {
     private int sekvensNr;

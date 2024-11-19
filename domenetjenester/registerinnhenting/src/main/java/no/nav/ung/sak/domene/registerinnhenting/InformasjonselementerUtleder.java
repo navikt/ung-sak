@@ -5,8 +5,8 @@ import java.util.Set;
 import jakarta.enterprise.inject.Instance;
 
 import no.nav.abakus.iaygrunnlag.request.RegisterdataType;
-import no.nav.k9.kodeverk.behandling.BehandlingType;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 
 public interface InformasjonselementerUtleder {

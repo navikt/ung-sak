@@ -2,7 +2,7 @@ package no.nav.ung.sak.test.util.behandling.personopplysning;
 
 import java.time.LocalDate;
 
-import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.ung.kodeverk.person.PersonstatusType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
 

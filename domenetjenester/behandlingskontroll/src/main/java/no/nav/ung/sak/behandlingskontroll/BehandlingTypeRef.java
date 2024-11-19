@@ -21,8 +21,8 @@ import jakarta.enterprise.inject.spi.CDI;
 import jakarta.enterprise.util.AnnotationLiteral;
 import jakarta.inject.Qualifier;
 
-import no.nav.k9.kodeverk.behandling.BehandlingType;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef.ContainerOfBehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef.FagsakYtelseTypeRefLiteral;
 
@@ -46,7 +46,7 @@ public @interface BehandlingTypeRef {
      * <p>
      * Må matche ett innslag i <code>BEHANDling_TYPE</code> tabell for å kunne kjøres.
      *
-     * @see no.nav.k9.kodeverk.behandling.BehandlingType
+     * @see BehandlingType
      */
     BehandlingType value() default BehandlingType.UDEFINERT;
 

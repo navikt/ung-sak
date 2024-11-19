@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdKilde;
+import no.nav.ung.kodeverk.arbeidsforhold.ArbeidsforholdKilde;
 import no.nav.ung.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.ung.sak.domene.iay.modell.ArbeidsforholdInformasjonBuilder;
 import no.nav.ung.sak.domene.iay.modell.Inntektsmelding;

@@ -1,10 +1,10 @@
 package no.nav.ung.sak.web.app.tjenester.forvaltning.dump.beregningsresultat;
 
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.FRISINN;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.FRISINN;
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.OMSORGSPENGER;
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.OPPLÆRINGSPENGER;
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_NÆRSTÅENDE;
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import java.util.stream.Stream;
 

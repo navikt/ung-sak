@@ -9,8 +9,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.k9.kodeverk.geografisk.Region;
-import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.ung.kodeverk.geografisk.Region;
+import no.nav.ung.kodeverk.person.PersonstatusType;
 
 public class RegionTest {
 

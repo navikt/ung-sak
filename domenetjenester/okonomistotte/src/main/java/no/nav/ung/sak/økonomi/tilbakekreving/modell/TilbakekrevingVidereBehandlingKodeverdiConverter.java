@@ -3,7 +3,7 @@ package no.nav.ung.sak.økonomi.tilbakekreving.modell;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-import no.nav.k9.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
+import no.nav.ung.kodeverk.økonomi.tilbakekreving.TilbakekrevingVidereBehandling;
 
 @Converter(autoApply = true)
 public class TilbakekrevingVidereBehandlingKodeverdiConverter implements AttributeConverter<TilbakekrevingVidereBehandling, String> {

@@ -1,9 +1,9 @@
 package no.nav.ung.sak.domene.behandling.steg.kompletthet;
 
-import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_KOMPLETTHET;
-import static no.nav.k9.kodeverk.behandling.BehandlingType.FØRSTEGANGSSØKNAD;
-import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_VENTER_PÅ_KOMPLETT_SØKNAD;
-import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.VENT_PGA_FOR_TIDLIG_SØKNAD;
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_KOMPLETTHET;
+import static no.nav.ung.kodeverk.behandling.BehandlingType.FØRSTEGANGSSØKNAD;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_VENTER_PÅ_KOMPLETT_SØKNAD;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.VENT_PGA_FOR_TIDLIG_SØKNAD;
 import static no.nav.ung.sak.domene.behandling.steg.kompletthet.VurderKompletthetStegFelles.autopunktAlleredeUtført;
 
 import jakarta.enterprise.context.ApplicationScoped;

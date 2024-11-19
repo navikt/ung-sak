@@ -2,8 +2,8 @@ package no.nav.ung.sak.web.server.abac;
 
 import java.util.Optional;
 
-import no.nav.k9.kodeverk.behandling.BehandlingStatus;
-import no.nav.k9.kodeverk.behandling.FagsakStatus;
+import no.nav.ung.kodeverk.behandling.BehandlingStatus;
+import no.nav.ung.kodeverk.behandling.FagsakStatus;
 
 public final class AbacUtil {
 

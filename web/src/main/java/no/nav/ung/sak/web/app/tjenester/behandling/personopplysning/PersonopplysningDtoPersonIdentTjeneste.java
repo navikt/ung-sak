@@ -8,7 +8,7 @@ import java.util.function.Function;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import no.nav.k9.kodeverk.person.Diskresjonskode;
+import no.nav.ung.kodeverk.person.Diskresjonskode;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
 import no.nav.ung.sak.kontrakt.person.PersonopplysningDto;
 import no.nav.ung.sak.typer.AktørId;

@@ -1,7 +1,7 @@
 package no.nav.ung.sak.ytelse.beregning;
 
 import jakarta.enterprise.inject.Instance;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.beregning.BeregningsresultatEntitet;

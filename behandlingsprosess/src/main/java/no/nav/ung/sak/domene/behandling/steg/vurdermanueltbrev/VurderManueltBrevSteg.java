@@ -1,6 +1,6 @@
 package no.nav.ung.sak.domene.behandling.steg.vurdermanueltbrev;
 
-import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VURDER_MANUELT_BREV;
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_MANUELT_BREV;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

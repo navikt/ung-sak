@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 import jakarta.enterprise.context.RequestScoped;
 
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandling.Skjæringstidspunkt;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;

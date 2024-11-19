@@ -1,6 +1,6 @@
 package no.nav.ung.sak.web.app.tjenester.dokument;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import java.io.ByteArrayInputStream;
@@ -36,8 +36,8 @@ import no.nav.k9.felles.exception.ManglerTilgangException;
 import no.nav.k9.felles.exception.TekniskException;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.k9.kodeverk.dokument.Kommunikasjonsretning;
-import no.nav.k9.kodeverk.uttak.Tid;
+import no.nav.ung.kodeverk.dokument.Kommunikasjonsretning;
+import no.nav.ung.kodeverk.uttak.Tid;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;

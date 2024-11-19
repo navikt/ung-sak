@@ -1,8 +1,8 @@
 package no.nav.ung.sak.domene.person.pdl;
 
 import static java.util.stream.Stream.of;
-import static no.nav.k9.kodeverk.person.Diskresjonskode.KODE6;
-import static no.nav.k9.kodeverk.person.Diskresjonskode.KODE7;
+import static no.nav.ung.kodeverk.person.Diskresjonskode.KODE6;
+import static no.nav.ung.kodeverk.person.Diskresjonskode.KODE7;
 import static no.nav.k9.felles.integrasjon.pdl.AdressebeskyttelseGradering.FORTROLIG;
 import static no.nav.k9.felles.integrasjon.pdl.AdressebeskyttelseGradering.STRENGT_FORTROLIG;
 import static no.nav.k9.felles.integrasjon.pdl.AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND;
@@ -16,7 +16,7 @@ import org.assertj.core.api.AbstractComparableAssert;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import no.nav.k9.kodeverk.person.Diskresjonskode;
+import no.nav.ung.kodeverk.person.Diskresjonskode;
 import no.nav.k9.felles.integrasjon.pdl.Adressebeskyttelse;
 import no.nav.k9.felles.integrasjon.pdl.AdressebeskyttelseGradering;
 

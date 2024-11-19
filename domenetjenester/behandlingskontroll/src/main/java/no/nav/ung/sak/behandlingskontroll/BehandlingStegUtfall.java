@@ -1,7 +1,7 @@
 package no.nav.ung.sak.behandlingskontroll;
 
-import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.behandling.BehandlingStegStatus;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 
 public class BehandlingStegUtfall {
     private final BehandlingStegType behandlingStegType;

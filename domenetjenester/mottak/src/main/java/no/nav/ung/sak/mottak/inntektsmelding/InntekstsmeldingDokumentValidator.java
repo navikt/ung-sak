@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import no.nav.k9.kodeverk.dokument.Brevkode;
+import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.domene.iay.modell.InntektsmeldingBuilder;
 import no.nav.ung.sak.mottak.dokumentmottak.DokumentGruppeRef;

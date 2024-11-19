@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import no.nav.k9.kontrakt.JsonUtil;
+import no.nav.ung.kontrakt.JsonUtil;
 import no.nav.ung.sak.kontrakt.vedtak.ForeslaVedtakAksjonspunktDto;
 
 public class BekreftedeAksjonspunktDtoTest {

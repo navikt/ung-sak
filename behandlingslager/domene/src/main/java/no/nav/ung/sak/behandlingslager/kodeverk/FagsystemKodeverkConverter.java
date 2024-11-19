@@ -3,7 +3,7 @@ package no.nav.ung.sak.behandlingslager.kodeverk;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-import no.nav.k9.kodeverk.Fagsystem;
+import no.nav.ung.kodeverk.Fagsystem;
 
 @Converter(autoApply = true)
 public class FagsystemKodeverkConverter implements AttributeConverter<Fagsystem, String> {

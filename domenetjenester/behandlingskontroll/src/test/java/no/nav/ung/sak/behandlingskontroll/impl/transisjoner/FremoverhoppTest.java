@@ -1,9 +1,9 @@
 package no.nav.ung.sak.behandlingskontroll.impl.transisjoner;
 
-import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus.AVBRUTT;
-import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus.UTFØRT;
-import static no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderingspunktType.INN;
-import static no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderingspunktType.UT;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus.AVBRUTT;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus.UTFØRT;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderingspunktType.INN;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderingspunktType.UT;
 import static no.nav.ung.sak.behandlingskontroll.transisjoner.FellesTransisjoner.FREMHOPP_TIL_IVERKSETT_VEDTAK;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,14 +20,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import no.nav.k9.kodeverk.behandling.BehandlingStatus;
-import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
-import no.nav.k9.kodeverk.behandling.BehandlingType;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderingspunktType;
+import no.nav.ung.kodeverk.behandling.BehandlingStatus;
+import no.nav.ung.kodeverk.behandling.BehandlingStegStatus;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderingspunktType;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.ung.sak.behandlingskontroll.BehandlingSteg.TransisjonType;

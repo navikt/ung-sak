@@ -2,7 +2,7 @@ package no.nav.ung.sak.perioder;
 
 import java.util.Objects;
 
-import no.nav.k9.kodeverk.uttak.UttakArbeidType;
+import no.nav.ung.kodeverk.uttak.UttakArbeidType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.Arbeidsgiver;
 import no.nav.ung.sak.typer.InternArbeidsforholdRef;

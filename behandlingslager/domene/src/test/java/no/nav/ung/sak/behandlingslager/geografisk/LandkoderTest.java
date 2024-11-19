@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.k9.kodeverk.geografisk.Landkoder;
+import no.nav.ung.kodeverk.geografisk.Landkoder;
 
 public class LandkoderTest {
 

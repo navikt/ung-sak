@@ -3,8 +3,8 @@ package no.nav.ung.sak.domene.iay.modell;
 import java.util.Objects;
 import java.util.Optional;
 
-import no.nav.k9.kodeverk.api.IndexKey;
-import no.nav.k9.kodeverk.arbeidsforhold.InntektPeriodeType;
+import no.nav.ung.kodeverk.api.IndexKey;
+import no.nav.ung.kodeverk.arbeidsforhold.InntektPeriodeType;
 import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.ung.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.ung.sak.typer.Beløp;

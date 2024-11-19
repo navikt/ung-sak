@@ -27,8 +27,8 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.engine.jdbc.ClobProxy;
 
-import no.nav.k9.kodeverk.dokument.Brevkode;
-import no.nav.k9.kodeverk.dokument.DokumentStatus;
+import no.nav.ung.kodeverk.dokument.Brevkode;
+import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.kodeverk.BrevkodeKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.DokumentStatusKodeverdiConverter;

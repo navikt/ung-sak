@@ -2,8 +2,8 @@ package no.nav.ung.sak.behandlingskontroll;
 
 import java.util.Objects;
 
-import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.behandling.BehandlingStegStatus;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 
 public class BehandlingStegTilstandSnapshot {
 

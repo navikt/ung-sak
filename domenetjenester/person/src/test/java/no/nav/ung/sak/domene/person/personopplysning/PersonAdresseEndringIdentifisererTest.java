@@ -11,7 +11,7 @@ import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.k9.kodeverk.geografisk.AdresseType;
+import no.nav.ung.kodeverk.geografisk.AdresseType;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonAdresseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet;

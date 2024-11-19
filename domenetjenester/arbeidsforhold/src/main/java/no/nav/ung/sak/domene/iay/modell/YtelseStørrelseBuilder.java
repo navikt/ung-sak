@@ -2,7 +2,7 @@ package no.nav.ung.sak.domene.iay.modell;
 
 import java.math.BigDecimal;
 
-import no.nav.k9.kodeverk.arbeidsforhold.InntektPeriodeType;
+import no.nav.ung.kodeverk.arbeidsforhold.InntektPeriodeType;
 import no.nav.ung.sak.typer.Beløp;
 import no.nav.ung.sak.typer.OrgNummer;
 

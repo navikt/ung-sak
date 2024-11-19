@@ -3,7 +3,7 @@ package no.nav.ung.sak.behandlingslager.behandling.personopplysning;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-import no.nav.k9.kodeverk.geografisk.AdresseType;
+import no.nav.ung.kodeverk.geografisk.AdresseType;
 
 @Converter(autoApply = true)
 public class AdresseTypeKodeverdiConverter implements AttributeConverter<AdresseType, String> {

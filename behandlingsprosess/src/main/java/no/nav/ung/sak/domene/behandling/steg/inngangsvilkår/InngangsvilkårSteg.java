@@ -3,7 +3,7 @@ package no.nav.ung.sak.domene.behandling.steg.inngangsvilkår;
 import java.util.List;
 import java.util.NavigableSet;
 
-import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 

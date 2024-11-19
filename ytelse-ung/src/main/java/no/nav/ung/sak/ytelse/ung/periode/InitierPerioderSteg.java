@@ -1,14 +1,14 @@
 package no.nav.ung.sak.ytelse.ung.periode;
 
-import static no.nav.k9.kodeverk.behandling.BehandlingStegType.INIT_PERIODER;
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.INIT_PERIODER;
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.kodeverk.dokument.Brevkode;
+import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.ung.sak.behandlingskontroll.BehandlingStegRef;

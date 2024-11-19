@@ -2,7 +2,7 @@ package no.nav.ung.sak.kompletthet;
 
 import java.util.Objects;
 
-import no.nav.k9.kodeverk.dokument.DokumentTypeId;
+import no.nav.ung.kodeverk.dokument.DokumentTypeId;
 import no.nav.ung.sak.typer.Arbeidsgiver;
 
 public class ManglendeVedlegg {

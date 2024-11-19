@@ -22,10 +22,10 @@ import jakarta.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
-import no.nav.k9.kodeverk.historikk.HistorikkOpplysningType;
-import no.nav.k9.kodeverk.historikk.HistorikkinnslagFeltType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.historikk.HistorikkEndretFeltType;
+import no.nav.ung.kodeverk.historikk.HistorikkOpplysningType;
+import no.nav.ung.kodeverk.historikk.HistorikkinnslagFeltType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 
 @Entity(name = "HistorikkinnslagDel")
