@@ -75,9 +75,10 @@ public class NavAnsattRestTjeneste {
         String token = SubjectHandler.getSubjectHandler().getInternSsoToken();
         JwtUtil.CachedClaims claims = JwtUtil.CachedClaims.forToken(token);
 
-        if (ENV.isLocal()) {
-            return mockInnloggetBrukerDto(ident);
-        }
+        // trenger mock-brukeren ved testing lokalt inntil vtp utvides til å legge gruppene i tokene
+//        if (ENV.isLocal()) {
+//            return mockInnloggetBrukerDto(ident);
+//        }
         return getInnloggetBrukerDto(ident, claims.getName(), claims.getGroups());
     }
 
