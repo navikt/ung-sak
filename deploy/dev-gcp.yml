@@ -248,7 +248,7 @@ spec:
 
     # Loadbalancerconfig
     - name: LOADBALANCER_URL
-      value: https://k9.intern.dev.nav.no
+      value: https://ung.intern.dev.nav.no
 
       # Audit logging
     - name: AUDITLOGGER_ENABLED
