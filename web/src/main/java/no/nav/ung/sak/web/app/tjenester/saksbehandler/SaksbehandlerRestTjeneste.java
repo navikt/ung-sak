@@ -1,16 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.saksbehandler;
 
-import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -23,9 +12,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-import no.nav.k9.felles.exception.VLException;
-import no.nav.k9.felles.integrasjon.ldap.LdapBruker;
-import no.nav.k9.felles.integrasjon.ldap.LdapBrukeroppslag;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
@@ -38,6 +24,16 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.saksbehandler.SaksbehandlerDto;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
 
 @Path("/saksbehandler")
 @ApplicationScoped
@@ -86,8 +82,6 @@ public class SaksbehandlerRestTjeneste {
         Behandling behandling = behandlingRepository.hentBehandlingHvisFinnes(behandlingUuid.getBehandlingUuid()).orElseThrow();
         List<Historikkinnslag> historikkinnslag = historikkRepository.hentHistorikkForSaksnummer(behandling.getFagsak().getSaksnummer());
 
-
-
         Set<String> unikeIdenter = historikkinnslag.stream()
             .map(BaseEntitet::getOpprettetAv)
             .collect(Collectors.toSet());
@@ -100,31 +94,13 @@ public class SaksbehandlerRestTjeneste {
 
         Map<String, String> identTilNavn = new HashMap<>();
 
-        unikeIdenter.stream()
-            .filter(Objects::nonNull)
-            .map(String::trim)
-            .forEach(ident -> hentNavForIdent(identTilNavn, ident));
+        for (String ident : unikeIdenter) {
+            String navn = ident; //FIXME slå opp navn på saksbehandler
+
+            identTilNavn.put(ident, navn);
+        }
 
         return new SaksbehandlerDto(identTilNavn);
-    }
-
-    private void hentNavForIdent(Map<String, String> identTilNavn, String ident) {
-        if (!identTilNavn.containsKey(ident)) {
-            String saksbehandlerCachet = cache.get(ident);
-            if (saksbehandlerCachet == null) {
-                try {
-                    LdapBruker ldapBruker = new LdapBrukeroppslag().hentBrukerinformasjon(ident);
-                    String brukernavn = ldapBruker.getDisplayName();
-                    cache.put(ident, brukernavn);
-                    saksbehandlerCachet = brukernavn;
-                } catch (VLException e) {
-                    // Feil mot LDAP
-                }
-            }
-            if (saksbehandlerCachet != null) {
-                identTilNavn.put(ident, saksbehandlerCachet);
-            }
-        }
     }
 
 }

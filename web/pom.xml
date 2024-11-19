@@ -154,10 +154,6 @@
             <artifactId>migreringer</artifactId>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>no.nav.k9.felles.integrasjon</groupId>
-            <artifactId>k9-ldap-klient</artifactId>
-        </dependency>
 
         <!-- REST + -->
         <dependency>

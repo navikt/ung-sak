@@ -27,7 +27,6 @@ import static no.nav.ung.abac.BeskyttetRessursKoder.APPLIKASJON;
 @Transactional
 public class NavAnsattRestTjeneste {
     public static final String NAV_ANSATT_PATH = "/nav-ansatt";
-    private static final Logger log = org.slf4j.LoggerFactory.getLogger(NavAnsattRestTjeneste.class);
 
     private String gruppeIdSaksbehandler;
     private String gruppeIdVeileder;
@@ -74,8 +73,9 @@ public class NavAnsattRestTjeneste {
     public InnloggetAnsattDto innloggetBruker() {
         String ident = SubjectHandler.getSubjectHandler().getUid();
         String token = SubjectHandler.getSubjectHandler().getInternSsoToken();
-        List<String> groupIds = JwtUtil.getGroups(token);
-        String navn = JwtUtil.getName(token);
+        JwtUtil.CachedClaims claims = JwtUtil.CachedClaims.forToken(token);
+        List<String> groupIds = claims.getGroups();
+        String navn = claims.getName();
 
         if (ENV.isLocal()) {
             return mockInnloggetBrukerDto(ident);

@@ -1,15 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.behandling;
 
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.feil.Feil;
@@ -17,14 +7,14 @@ import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.LogLevel;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
-import no.nav.k9.felles.integrasjon.ldap.LdapBruker;
-import no.nav.k9.felles.integrasjon.ldap.LdapBrukeroppslag;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
+import no.nav.k9.sikkerhet.oidc.token.internal.JwtUtil;
+import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.ung.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
 import no.nav.ung.sak.behandling.prosessering.task.OppfriskTask;
@@ -33,8 +23,11 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.kontrakt.AsyncPollingStatus;
 import no.nav.ung.sak.web.app.tjenester.VurderProsessTaskStatusForPollingApi;
 import no.nav.ung.sak.web.app.tjenester.VurderProsessTaskStatusForPollingApi.ProsessTaskFeilmelder;
-import no.nav.ung.sak.web.app.util.LdapUtil;
-import no.nav.k9.sikkerhet.context.SubjectHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Dependent
 public class SjekkProsessering {
@@ -47,7 +40,7 @@ public class SjekkProsessering {
     private BehandlingRepository behandlingRepository;
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
     private ProsessTaskTjeneste prosessTaskRepository;
-    private String gruppenavnSaksbehandler;
+    private String gruppeIdSaksbehandler;
 
     SjekkProsessering(ProsesseringAsynkTjeneste asynkTjeneste) {
         this.asynkTjeneste = asynkTjeneste;
@@ -56,12 +49,12 @@ public class SjekkProsessering {
     @Inject
     public SjekkProsessering(ProsesseringAsynkTjeneste asynkTjeneste,
                              BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
-                             @KonfigVerdi(value = "bruker.gruppenavn.saksbehandler", defaultVerdi = "dummyGruppe") String gruppenavnSaksbehandler,
+                             @KonfigVerdi(value = "bruker.gruppe.id.saksbehandler") String gruppeIdSaksbehandler,
                              BehandlingRepository behandlingRepository,
                              ProsessTaskTjeneste prosessTaskRepository) {
         this.asynkTjeneste = asynkTjeneste;
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
-        this.gruppenavnSaksbehandler = gruppenavnSaksbehandler;
+        this.gruppeIdSaksbehandler = this.gruppeIdSaksbehandler;
         this.behandlingRepository = behandlingRepository;
         this.prosessTaskRepository = prosessTaskRepository;
     }
@@ -94,9 +87,8 @@ public class SjekkProsessering {
 
     private boolean harRolleSaksbehandler() {
         String ident = SubjectHandler.getSubjectHandler().getUid();
-        LdapBruker ldapBruker = new LdapBrukeroppslag().hentBrukerinformasjon(ident);
-        Collection<String> grupper = LdapUtil.filtrerGrupper(ldapBruker.getGroups());
-        return grupper.contains(gruppenavnSaksbehandler);
+        List<String> brukersGrupper = JwtUtil.getGroups(ident);
+        return brukersGrupper.contains(gruppeIdSaksbehandler);
     }
 
     /**
