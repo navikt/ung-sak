@@ -46,6 +46,7 @@ import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.ung.sak.kontrakt.behandling.SettBehandlingPaVentDto;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårResultatDto;
 import no.nav.ung.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
+import no.nav.ung.sak.web.app.proxy.oppdrag.OppdragProxyRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.arbeidsforhold.ArbeidsgiverRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.arbeidsforhold.InntektArbeidYtelseRestTjeneste;
@@ -77,10 +78,6 @@ public class BehandlingDtoTjeneste {
     private final VilkårResultatRepository vilkårResultatRepository;
     private final TotrinnTjeneste totrinnTjeneste;
 
-    /**
-     * denne kan overstyres for testing lokalt
-     */
-    private final String k9OppdragProxyUrl;
     private final Instance<InformasjonselementerUtleder> informasjonselementer;
 
     @Inject
@@ -90,8 +87,7 @@ public class BehandlingDtoTjeneste {
                                  TilbakekrevingRepository tilbakekrevingRepository,
                                  VilkårResultatRepository vilkårResultatRepository,
                                  TotrinnTjeneste totrinnTjeneste,
-                                 @Any Instance<InformasjonselementerUtleder> informasjonselementer,
-                                 @KonfigVerdi(value = "k9.oppdrag.proxy.url") String k9OppdragProxyUrl) {
+                                 @Any Instance<InformasjonselementerUtleder> informasjonselementer) {
 
         this.tilbakekrevingRepository = tilbakekrevingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -100,7 +96,6 @@ public class BehandlingDtoTjeneste {
         this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.totrinnTjeneste = totrinnTjeneste;
         this.informasjonselementer = informasjonselementer;
-        this.k9OppdragProxyUrl = k9OppdragProxyUrl;
     }
 
     private static Språkkode getSpråkkode(Behandling behandling, SøknadRepository søknadRepository) {
@@ -322,9 +317,8 @@ public class BehandlingDtoTjeneste {
     }
 
     private Optional<ResourceLink> lagSimuleringResultatLink(Behandling behandling) {
-        return Optional.of(ResourceLink.eksternPost(k9OppdragProxyUrl + "/simulering/detaljert-resultat", "simuleringResultat", behandling.getUuid()));
+        return Optional.of(ResourceLink.eksternGet(OppdragProxyRestTjeneste.SIMULERING_RESULTAT_URL, "simuleringResultat", behandling.getUuid()));
     }
-
 
     private List<ResourceLink> lagTilbakekrevingValgLink(Behandling behandling) {
         var queryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
