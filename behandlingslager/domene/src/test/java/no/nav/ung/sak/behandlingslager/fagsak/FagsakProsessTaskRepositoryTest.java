@@ -14,7 +14,7 @@ import org.mockito.Mockito;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskStatus;

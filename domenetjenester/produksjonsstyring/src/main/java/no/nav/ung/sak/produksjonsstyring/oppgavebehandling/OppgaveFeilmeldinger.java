@@ -1,7 +1,7 @@
 package no.nav.ung.sak.produksjonsstyring.oppgavebehandling;
 
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.LogLevel;

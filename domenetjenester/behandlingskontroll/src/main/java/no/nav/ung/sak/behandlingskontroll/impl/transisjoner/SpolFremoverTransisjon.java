@@ -2,7 +2,7 @@ package no.nav.ung.sak.behandlingskontroll.impl.transisjoner;
 
 import java.util.Optional;
 
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingStegModell;
 import no.nav.ung.sak.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.ung.sak.behandlingskontroll.transisjoner.StegTransisjon;

@@ -1,6 +1,6 @@
 package no.nav.ung.sak.web.app.tjenester.fordeling;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
 
 import java.util.stream.Collectors;
 

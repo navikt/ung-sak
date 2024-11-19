@@ -8,7 +8,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 class ProsessTriggereRepositoryTest {

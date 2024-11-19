@@ -22,7 +22,7 @@ import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittFrilansDto;
 import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittFrilansoppdragDto;
 import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgittOpptjeningDto;
 import no.nav.abakus.iaygrunnlag.oppgittopptjening.v1.OppgitteOpptjeningerDto;
-import no.nav.k9.kodeverk.geografisk.Landkoder;
+import no.nav.ung.kodeverk.geografisk.Landkoder;
 import no.nav.ung.sak.domene.iay.modell.OppgittAnnenAktivitet;
 import no.nav.ung.sak.domene.iay.modell.OppgittArbeidsforhold;
 import no.nav.ung.sak.domene.iay.modell.OppgittEgenNæring;

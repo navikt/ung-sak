@@ -14,7 +14,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
@@ -30,7 +30,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 @ApplicationScoped

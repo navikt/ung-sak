@@ -2,7 +2,7 @@ package no.nav.ung.sak.perioder;
 
 import java.util.Objects;
 
-import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public class PeriodeMedÅrsak implements Comparable<PeriodeMedÅrsak> {

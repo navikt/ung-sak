@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
-import no.nav.k9.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;
+import no.nav.ung.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
+import no.nav.ung.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;
 
 public class ArbeidsforholdOverstyringTest {
 

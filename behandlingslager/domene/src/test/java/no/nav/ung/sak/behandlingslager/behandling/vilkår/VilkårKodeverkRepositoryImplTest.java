@@ -7,8 +7,8 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 
 public class VilkårKodeverkRepositoryImplTest {
 

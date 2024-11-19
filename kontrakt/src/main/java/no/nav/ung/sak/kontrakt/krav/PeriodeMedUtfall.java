@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

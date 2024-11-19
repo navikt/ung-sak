@@ -2,12 +2,12 @@ package no.nav.ung.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
-import no.nav.k9.kodeverk.historikk.HistorikkAktør;
-import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
-import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
+import no.nav.ung.kodeverk.historikk.HistorikkAktør;
+import no.nav.ung.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.ung.kodeverk.vedtak.VedtakResultatType;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;

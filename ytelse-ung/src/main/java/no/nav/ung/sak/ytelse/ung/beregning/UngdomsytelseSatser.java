@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 
-import no.nav.k9.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
+import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 
 
 public record UngdomsytelseSatser(BigDecimal dagsats,

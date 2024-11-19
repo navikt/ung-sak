@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.perioder.VurdertSøktPeriode.SøktPeriodeData;
 

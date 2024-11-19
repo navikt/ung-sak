@@ -6,7 +6,7 @@ import jakarta.enterprise.event.Observes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.kodeverk.behandling.BehandlingStatus;
+import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.sak.behandlingskontroll.events.BehandlingStatusEvent;
 
 @ApplicationScoped

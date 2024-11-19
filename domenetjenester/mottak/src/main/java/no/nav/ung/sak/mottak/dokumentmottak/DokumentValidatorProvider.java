@@ -5,7 +5,7 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 
-import no.nav.k9.kodeverk.dokument.Brevkode;
+import no.nav.ung.kodeverk.dokument.Brevkode;
 
 @Dependent
 public class DokumentValidatorProvider {

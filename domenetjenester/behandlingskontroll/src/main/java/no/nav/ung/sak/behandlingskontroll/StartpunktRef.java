@@ -20,8 +20,8 @@ import jakarta.enterprise.inject.Stereotype;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.enterprise.util.AnnotationLiteral;
 import jakarta.inject.Qualifier;
-import no.nav.k9.kodeverk.behandling.BehandlingType;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef.BehandlingTypeRefLiteral;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef.FagsakYtelseTypeRefLiteral;
 import no.nav.ung.sak.behandlingskontroll.StartpunktRef.ContainerOfStartpunktRef;
@@ -47,7 +47,7 @@ public @interface StartpunktRef {
      * <p>
      * Må matche ett innslag i <code>BEHANDling_TYPE</code> tabell for å kunne kjøres.
      *
-     * @see no.nav.k9.kodeverk.behandling.BehandlingType
+     * @see BehandlingType
      */
     StartpunktType value() default StartpunktType.UDEFINERT;
 

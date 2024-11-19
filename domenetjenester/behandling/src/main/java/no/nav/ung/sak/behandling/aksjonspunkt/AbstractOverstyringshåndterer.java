@@ -1,10 +1,10 @@
 package no.nav.ung.sak.behandling.aksjonspunkt;
 
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
-import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
-import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltVerdiType;
-import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
+import no.nav.ung.kodeverk.historikk.HistorikkEndretFeltType;
+import no.nav.ung.kodeverk.historikk.HistorikkEndretFeltVerdiType;
+import no.nav.ung.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunkt;

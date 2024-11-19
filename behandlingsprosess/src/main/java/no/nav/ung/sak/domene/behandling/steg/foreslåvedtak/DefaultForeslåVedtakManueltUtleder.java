@@ -2,7 +2,7 @@ package no.nav.ung.sak.domene.behandling.steg.foreslåvedtak;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
-import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 

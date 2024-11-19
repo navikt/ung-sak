@@ -1,6 +1,6 @@
 package no.nav.ung.sak.domene.arbeidsgiver;
 
-import static no.nav.k9.StringTrimmer.trim;
+import static no.nav.ung.StringTrimmer.trim;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -12,7 +12,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.organisasjon.OrganisasjonRestKlient;
 import no.nav.k9.felles.integrasjon.organisasjon.OrganisasjonstypeEReg;
 import no.nav.k9.felles.util.LRUCache;
-import no.nav.k9.kodeverk.organisasjon.Organisasjonstype;
+import no.nav.ung.kodeverk.organisasjon.Organisasjonstype;
 import no.nav.ung.sak.behandlingslager.virksomhet.Virksomhet;
 import no.nav.ung.sak.typer.OrgNummer;
 import no.nav.ung.sak.typer.OrganisasjonsNummerValidator;

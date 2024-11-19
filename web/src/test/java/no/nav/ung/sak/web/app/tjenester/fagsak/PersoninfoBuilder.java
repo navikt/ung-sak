@@ -1,13 +1,13 @@
 package no.nav.ung.sak.web.app.tjenester.fagsak;
 
 import static java.time.Month.OCTOBER;
-import static no.nav.k9.kodeverk.person.NavBrukerKjønn.KVINNE;
+import static no.nav.ung.kodeverk.person.NavBrukerKjønn.KVINNE;
 
 import java.time.LocalDate;
 
-import no.nav.k9.kodeverk.geografisk.Språkkode;
-import no.nav.k9.kodeverk.person.NavBrukerKjønn;
-import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.ung.kodeverk.geografisk.Språkkode;
+import no.nav.ung.kodeverk.person.NavBrukerKjønn;
+import no.nav.ung.kodeverk.person.PersonstatusType;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;

@@ -1,0 +1,5 @@
+package no.nav.ung.kodeverk.medlem;
+
+public enum VurderingsÅrsak {
+    SKJÆRINGSTIDSPUNKT, STATSBORGERSKAP, ADRESSE, PERSONSTATUS, MEDL_PERIODE, BORTFALL_INNTEKT, ENDRING_I_REGISTERDATA
+}

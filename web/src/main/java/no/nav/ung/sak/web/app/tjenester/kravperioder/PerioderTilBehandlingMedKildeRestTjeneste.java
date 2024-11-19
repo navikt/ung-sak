@@ -1,6 +1,6 @@
 package no.nav.ung.sak.web.app.tjenester.kravperioder;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import java.util.Collection;
@@ -31,7 +31,7 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;

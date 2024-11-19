@@ -1,6 +1,6 @@
 package no.nav.ung.sak.domene.behandling.steg.vedtak;
 
-import static no.nav.k9.kodeverk.behandling.BehandlingStegType.FATTE_VEDTAK;
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.FATTE_VEDTAK;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

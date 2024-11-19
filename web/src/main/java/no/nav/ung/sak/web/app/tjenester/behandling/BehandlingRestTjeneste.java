@@ -1,8 +1,8 @@
 package no.nav.ung.sak.web.app.tjenester.behandling;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
-import static no.nav.k9.abac.BeskyttetRessursKoder.VENTEFRIST;
+import static no.nav.ung.abac.BeskyttetRessursKoder.DRIFT;
+import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.ung.abac.BeskyttetRessursKoder.VENTEFRIST;
 import static no.nav.k9.felles.feil.LogLevel.ERROR;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.CREATE;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
@@ -46,11 +46,11 @@ import no.nav.k9.felles.jpa.TomtResultatException;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
-import no.nav.k9.kodeverk.behandling.BehandlingType;
-import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.k9.kodeverk.historikk.HistorikkAktør;
-import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
+import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.historikk.HistorikkAktør;
+import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.k9.prosesstask.api.PollTaskAfterTransaction;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
 import no.nav.ung.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;

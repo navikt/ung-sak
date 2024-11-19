@@ -6,8 +6,8 @@ import java.util.Optional;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
-import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
+import no.nav.ung.kodeverk.arbeidsforhold.AktivitetStatus;
+import no.nav.ung.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.ung.sak.domene.arbeidsforhold.impl.FinnNavnForManueltLagtTilArbeidsforholdTjeneste;
 import no.nav.ung.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.ung.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;

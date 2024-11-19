@@ -6,8 +6,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 
 /**
  * Knytter {@link AksjonspunktDefinisjon} med en callback for å modifisere aksjonpunktet som blir opprettet.

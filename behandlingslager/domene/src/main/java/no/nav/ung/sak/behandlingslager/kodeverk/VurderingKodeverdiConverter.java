@@ -3,7 +3,7 @@ package no.nav.ung.sak.behandlingslager.kodeverk;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-import no.nav.k9.kodeverk.beregningsgrunnlag.kompletthet.Vurdering;
+import no.nav.ung.kodeverk.beregningsgrunnlag.kompletthet.Vurdering;
 
 @Converter(autoApply = true)
 public class VurderingKodeverdiConverter implements AttributeConverter<Vurdering, String> {

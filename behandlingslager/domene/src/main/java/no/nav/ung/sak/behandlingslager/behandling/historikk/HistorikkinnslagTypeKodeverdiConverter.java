@@ -3,7 +3,7 @@ package no.nav.ung.sak.behandlingslager.behandling.historikk;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.ung.kodeverk.historikk.HistorikkinnslagType;
 
 @Converter(autoApply = true)
 public class HistorikkinnslagTypeKodeverdiConverter implements AttributeConverter<HistorikkinnslagType, String> {

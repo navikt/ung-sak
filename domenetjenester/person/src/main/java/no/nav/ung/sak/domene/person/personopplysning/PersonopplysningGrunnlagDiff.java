@@ -9,9 +9,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import no.nav.k9.kodeverk.geografisk.Region;
-import no.nav.k9.kodeverk.person.RelasjonsRolleType;
-import no.nav.k9.kodeverk.person.SivilstandType;
+import no.nav.ung.kodeverk.geografisk.Region;
+import no.nav.ung.kodeverk.person.RelasjonsRolleType;
+import no.nav.ung.kodeverk.person.SivilstandType;
 import no.nav.ung.sak.behandlingslager.behandling.RegisterdataDiffsjekker;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonAdresseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet;

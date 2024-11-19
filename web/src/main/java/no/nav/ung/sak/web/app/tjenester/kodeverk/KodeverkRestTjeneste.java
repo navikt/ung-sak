@@ -1,6 +1,6 @@
 package no.nav.ung.sak.web.app.tjenester.kodeverk;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.APPLIKASJON;
+import static no.nav.ung.abac.BeskyttetRessursKoder.APPLIKASJON;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import java.io.IOException;
@@ -30,11 +30,11 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.k9.kodeverk.api.Kodeverdi;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
-import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.ung.kodeverk.api.Kodeverdi;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
+import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.ung.sak.web.app.jackson.ObjectMapperFactory;
 import no.nav.ung.sak.web.app.tjenester.kodeverk.dto.AlleKodeverdierSomObjektResponse;

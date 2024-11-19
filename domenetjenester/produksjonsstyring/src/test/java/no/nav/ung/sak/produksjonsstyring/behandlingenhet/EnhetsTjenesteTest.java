@@ -16,10 +16,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.person.Diskresjonskode;
-import no.nav.k9.kodeverk.person.RelasjonsRolleType;
-import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.person.Diskresjonskode;
+import no.nav.ung.kodeverk.person.RelasjonsRolleType;
+import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandlingslager.aktør.Familierelasjon;
 import no.nav.ung.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;

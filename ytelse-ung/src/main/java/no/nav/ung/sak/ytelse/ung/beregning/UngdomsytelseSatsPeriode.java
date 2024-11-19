@@ -12,7 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.k9.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
+import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.PostgreSQLRangeType;
 import no.nav.ung.sak.behandlingslager.Range;

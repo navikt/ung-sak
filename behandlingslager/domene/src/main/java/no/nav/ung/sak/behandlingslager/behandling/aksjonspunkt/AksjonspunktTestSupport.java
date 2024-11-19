@@ -4,11 +4,11 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 
 /**

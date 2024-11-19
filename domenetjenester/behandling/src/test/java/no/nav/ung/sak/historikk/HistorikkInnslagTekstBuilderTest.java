@@ -13,9 +13,9 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
-import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
+import no.nav.ung.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagDel;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagTotrinnsvurdering;

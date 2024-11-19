@@ -3,7 +3,7 @@ package no.nav.ung.sak.behandlingslager.behandling.vedtak;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-import no.nav.k9.kodeverk.vedtak.VedtakResultatType;
+import no.nav.ung.kodeverk.vedtak.VedtakResultatType;
 
 @Converter(autoApply = true)
 public class VedtakResultatTypeKodeverdiConverter implements AttributeConverter<VedtakResultatType, String> {

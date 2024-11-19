@@ -1,8 +1,8 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.vilkår.aksjonspunkt;
 
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.vilkår.Utfall;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.vilkår.Utfall;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.aksjonspunkt.AbstractOverstyringshåndterer;
 import no.nav.ung.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;

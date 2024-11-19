@@ -1,6 +1,6 @@
 package no.nav.ung.sak.behandling.revurdering.ytelse;
 
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.inject.Alternative;

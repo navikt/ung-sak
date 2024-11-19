@@ -16,7 +16,7 @@ import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.PostgreSQLRangeType;
 import no.nav.ung.sak.behandlingslager.Range;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.k9.kodeverk.ungdomsytelse.uttak.UngdomsytelseUttakAvslagsårsak;
+import no.nav.ung.kodeverk.ungdomsytelse.uttak.UngdomsytelseUttakAvslagsårsak;
 import no.nav.ung.sak.ytelse.ung.kodeverk.UngdomsytelseUttakAvslagsårsakKodeverdiConverter;
 
 @Entity(name = "UngdomsytelseUttakPeriode")

@@ -15,8 +15,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 
-import no.nav.k9.kodeverk.vilkår.Utfall;
-import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
+import no.nav.ung.kodeverk.vilkår.Utfall;
+import no.nav.ung.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.ung.sak.kontrakt.Patterns;
 import no.nav.ung.sak.typer.Periode;
 

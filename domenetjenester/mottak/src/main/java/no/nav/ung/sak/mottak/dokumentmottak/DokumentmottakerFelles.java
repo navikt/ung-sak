@@ -2,8 +2,8 @@ package no.nav.ung.sak.mottak.dokumentmottak;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.k9.kodeverk.dokument.Brevkode;
-import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.ung.kodeverk.dokument.Brevkode;
+import no.nav.ung.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.sak.behandling.prosessering.task.StartBehandlingTask;

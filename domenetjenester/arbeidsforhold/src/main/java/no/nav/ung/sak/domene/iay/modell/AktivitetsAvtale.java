@@ -5,7 +5,7 @@ import java.util.Comparator;
 import java.util.Objects;
 
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
-import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.ung.kodeverk.api.IndexKey;
 import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.ung.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;

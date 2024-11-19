@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
-import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.ung.kodeverk.api.IndexKey;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 /**

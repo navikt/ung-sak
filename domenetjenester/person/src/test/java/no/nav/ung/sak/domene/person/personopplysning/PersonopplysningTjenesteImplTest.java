@@ -14,9 +14,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import no.nav.k9.kodeverk.geografisk.Landkoder;
-import no.nav.k9.kodeverk.person.PersonstatusType;
-import no.nav.k9.kodeverk.person.SivilstandType;
+import no.nav.ung.kodeverk.geografisk.Landkoder;
+import no.nav.ung.kodeverk.person.PersonstatusType;
+import no.nav.ung.kodeverk.person.SivilstandType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;

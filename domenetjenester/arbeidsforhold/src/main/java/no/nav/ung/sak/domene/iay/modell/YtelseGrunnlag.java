@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import no.nav.k9.kodeverk.arbeidsforhold.Arbeidskategori;
+import no.nav.ung.kodeverk.arbeidsforhold.Arbeidskategori;
 import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.ung.sak.typer.Beløp;
 import no.nav.ung.sak.typer.Stillingsprosent;

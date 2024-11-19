@@ -18,9 +18,9 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
-import no.nav.k9.kodeverk.api.IndexKey;
-import no.nav.k9.kodeverk.api.Kodeverdi;
-import no.nav.k9.kodeverk.historikk.HistorikkinnslagFeltType;
+import no.nav.ung.kodeverk.api.IndexKey;
+import no.nav.ung.kodeverk.api.Kodeverdi;
+import no.nav.ung.kodeverk.historikk.HistorikkinnslagFeltType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.diff.IndexKeyComposer;
 

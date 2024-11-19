@@ -3,8 +3,8 @@ package no.nav.ung.sak.behandlingslager.aktør;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import no.nav.k9.kodeverk.geografisk.AdresseType;
-import no.nav.k9.kodeverk.person.RelasjonsRolleType;
+import no.nav.ung.kodeverk.geografisk.AdresseType;
+import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.PersonIdent;
 

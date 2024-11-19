@@ -2,7 +2,7 @@ package no.nav.ung.sak.domene.iay.modell;
 
 import java.util.Optional;
 
-import no.nav.k9.kodeverk.arbeidsforhold.InntektsKilde;
+import no.nav.ung.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.ung.sak.typer.Arbeidsgiver;
 
 public class InntektBuilder {

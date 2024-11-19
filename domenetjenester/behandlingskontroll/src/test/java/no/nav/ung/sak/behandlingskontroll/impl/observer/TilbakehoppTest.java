@@ -1,7 +1,7 @@
 package no.nav.ung.sak.behandlingskontroll.impl.observer;
 
-import static no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderingspunktType.INN;
-import static no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderingspunktType.UT;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderingspunktType.INN;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderingspunktType.UT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
@@ -16,14 +16,14 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import no.nav.k9.kodeverk.behandling.BehandlingStatus;
-import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
-import no.nav.k9.kodeverk.behandling.BehandlingType;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderingspunktType;
+import no.nav.ung.kodeverk.behandling.BehandlingStatus;
+import no.nav.ung.kodeverk.behandling.BehandlingStegStatus;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderingspunktType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingModell;
 import no.nav.ung.sak.behandlingskontroll.BehandlingSteg.TransisjonType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingStegModell;

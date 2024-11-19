@@ -7,8 +7,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.sak.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.ung.sak.behandlingskontroll.transisjoner.TransisjonIdentifikator;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;

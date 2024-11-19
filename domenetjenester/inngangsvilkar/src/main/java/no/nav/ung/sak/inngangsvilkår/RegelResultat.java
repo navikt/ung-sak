@@ -10,9 +10,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.vilkår.Utfall;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.vilkår.Utfall;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.AksjonspunktResultat;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;

@@ -3,7 +3,7 @@ package no.nav.ung.sak.mottak;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandling.revurdering.RevurderingTjeneste;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;

@@ -2,8 +2,8 @@ package no.nav.ung.sak.domene.iay.modell;
 
 import java.io.Serializable;
 
-import no.nav.k9.kodeverk.api.IndexKey;
-import no.nav.k9.kodeverk.geografisk.Landkoder;
+import no.nav.ung.kodeverk.api.IndexKey;
+import no.nav.ung.kodeverk.geografisk.Landkoder;
 import no.nav.ung.sak.behandlingslager.diff.IndexKeyComposer;
 
 /**

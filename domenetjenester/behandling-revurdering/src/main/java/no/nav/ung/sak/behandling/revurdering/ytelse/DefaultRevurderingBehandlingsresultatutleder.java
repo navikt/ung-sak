@@ -2,7 +2,7 @@ package no.nav.ung.sak.behandling.revurdering.ytelse;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
-import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;

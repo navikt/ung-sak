@@ -9,8 +9,8 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.kodeverk.vilkår.Utfall;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.ung.kodeverk.vilkår.Utfall;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.VilkårTypeRef;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;

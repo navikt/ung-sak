@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.oppdrag.kontrakt.kodeverk.Inntektskategori;
 import no.nav.k9.oppdrag.kontrakt.kodeverk.SatsType;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseAndelV1;

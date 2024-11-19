@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 import org.apache.http.client.utils.URIBuilder;
 
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;

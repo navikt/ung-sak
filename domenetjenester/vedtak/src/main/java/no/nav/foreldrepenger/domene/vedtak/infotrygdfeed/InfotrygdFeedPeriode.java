@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.domene.vedtak.infotrygdfeed;
 
-import no.nav.k9.kodeverk.uttak.Tid;
+import no.nav.ung.kodeverk.uttak.Tid;
 
 import java.time.LocalDate;
 import java.util.Objects;

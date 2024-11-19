@@ -1,6 +1,6 @@
 package no.nav.ung.sak.ytelse.ung.iverksett;
 
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;

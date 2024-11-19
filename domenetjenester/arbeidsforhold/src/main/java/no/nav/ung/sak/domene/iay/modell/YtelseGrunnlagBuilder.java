@@ -3,7 +3,7 @@ package no.nav.ung.sak.domene.iay.modell;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import no.nav.k9.kodeverk.arbeidsforhold.Arbeidskategori;
+import no.nav.ung.kodeverk.arbeidsforhold.Arbeidskategori;
 import no.nav.ung.sak.typer.Beløp;
 import no.nav.ung.sak.typer.Stillingsprosent;
 

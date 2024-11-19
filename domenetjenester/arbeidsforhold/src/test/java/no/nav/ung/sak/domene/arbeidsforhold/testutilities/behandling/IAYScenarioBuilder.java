@@ -1,6 +1,6 @@
 package no.nav.ung.sak.domene.arbeidsforhold.testutilities.behandling;
 
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 
 /**
  * Default test scenario builder for Mor søker Engangsstønad. Kan opprettes for fødsel eller adopsjon og brukes til å

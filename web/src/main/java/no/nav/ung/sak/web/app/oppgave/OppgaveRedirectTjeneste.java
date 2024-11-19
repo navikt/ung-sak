@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import no.nav.k9.abac.BeskyttetRessursKoder;
+import no.nav.ung.abac.BeskyttetRessursKoder;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.ung.sak.kontrakt.produksjonsstyring.OppgaveIdDto;

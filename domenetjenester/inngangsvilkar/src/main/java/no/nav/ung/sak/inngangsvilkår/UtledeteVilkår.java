@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 
 public class UtledeteVilkår {
 

@@ -3,7 +3,7 @@ package no.nav.ung.sak.behandlingslager.notat;
 import java.util.Objects;
 import java.util.UUID;
 
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.typer.AktørId;
 

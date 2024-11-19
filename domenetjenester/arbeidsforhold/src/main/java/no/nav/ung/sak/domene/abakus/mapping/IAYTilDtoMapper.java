@@ -14,7 +14,7 @@ import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseAggregatOverstyrtDto;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseAggregatRegisterDto;
 import no.nav.abakus.iaygrunnlag.v1.InntektArbeidYtelseGrunnlagDto;
 import no.nav.abakus.iaygrunnlag.v1.OverstyrtInntektArbeidYtelseDto;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseAggregat;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;

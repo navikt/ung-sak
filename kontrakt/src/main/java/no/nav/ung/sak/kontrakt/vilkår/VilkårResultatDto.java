@@ -11,8 +11,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
-import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
+import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.typer.Periode;
 
 /** Minimum vilkårresultat. */

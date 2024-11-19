@@ -1,6 +1,6 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.vilkår;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.FAGSAK;
+import static no.nav.ung.abac.BeskyttetRessursKoder.FAGSAK;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 import java.util.Collections;
@@ -35,7 +35,7 @@ import jakarta.ws.rs.core.Response;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;

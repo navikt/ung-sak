@@ -21,9 +21,9 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.NaturalId;
 
-import no.nav.k9.kodeverk.Fagsystem;
-import no.nav.k9.kodeverk.historikk.HistorikkAktør;
-import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.ung.kodeverk.Fagsystem;
+import no.nav.ung.kodeverk.historikk.HistorikkAktør;
+import no.nav.ung.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 

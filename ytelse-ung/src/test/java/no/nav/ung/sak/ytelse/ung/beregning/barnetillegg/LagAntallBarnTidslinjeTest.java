@@ -15,7 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.k9.kodeverk.person.RelasjonsRolleType;
+import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;

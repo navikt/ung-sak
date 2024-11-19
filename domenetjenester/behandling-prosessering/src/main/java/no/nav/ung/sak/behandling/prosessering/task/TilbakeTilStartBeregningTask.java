@@ -4,9 +4,9 @@ package no.nav.ung.sak.behandling.prosessering.task;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
-import no.nav.k9.kodeverk.historikk.HistorikkAktør;
-import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.historikk.HistorikkAktør;
+import no.nav.ung.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.ung.sak.behandling.prosessering.ProsesseringAsynkTjeneste;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;

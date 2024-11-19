@@ -15,7 +15,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.db.util.Repository;
 import no.nav.ung.sak.typer.AktørId;

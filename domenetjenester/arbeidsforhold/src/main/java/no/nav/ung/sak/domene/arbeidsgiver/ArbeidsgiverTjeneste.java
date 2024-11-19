@@ -9,7 +9,7 @@ import jakarta.inject.Inject;
 
 import no.nav.k9.felles.exception.VLException;
 import no.nav.k9.felles.util.LRUCache;
-import no.nav.k9.kodeverk.organisasjon.Organisasjonstype;
+import no.nav.ung.kodeverk.organisasjon.Organisasjonstype;
 import no.nav.ung.sak.behandlingslager.aktør.PersoninfoArbeidsgiver;
 import no.nav.ung.sak.behandlingslager.virksomhet.Virksomhet;
 import no.nav.ung.sak.domene.arbeidsforhold.person.PersonIdentTjeneste;

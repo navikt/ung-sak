@@ -8,9 +8,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import no.nav.k9.kodeverk.OpenapiEnumBeanDeserializerModifier;
-import no.nav.k9.kodeverk.OpenapiEnumSerializer;
-import no.nav.k9.kodeverk.KodeverdiSomStringSerializer;
+import no.nav.ung.kodeverk.OpenapiEnumBeanDeserializerModifier;
+import no.nav.ung.kodeverk.OpenapiEnumSerializer;
+import no.nav.ung.kodeverk.KodeverdiSomStringSerializer;
 import no.nav.ung.sak.kontrakt.arbeidsforhold.AvklarArbeidsforholdDto;
 import no.nav.ung.sak.web.app.tjenester.RestImplementationClasses;
 

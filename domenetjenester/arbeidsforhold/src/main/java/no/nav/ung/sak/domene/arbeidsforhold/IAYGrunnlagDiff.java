@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.diff.DiffResult;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.ung.sak.domene.iay.modell.InntektFilter;

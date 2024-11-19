@@ -3,7 +3,7 @@ package no.nav.ung.sak.behandlingslager.behandling.vilkår;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 
 @Converter(autoApply = true)
 public class VilkårTypeKodeverdiConverter implements AttributeConverter<VilkårType, String> {

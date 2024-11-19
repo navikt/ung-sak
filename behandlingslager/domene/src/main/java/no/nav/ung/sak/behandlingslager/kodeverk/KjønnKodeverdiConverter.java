@@ -3,7 +3,7 @@ package no.nav.ung.sak.behandlingslager.kodeverk;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-import no.nav.k9.kodeverk.person.NavBrukerKjønn;
+import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 
 @Converter(autoApply = true)
 public class KjønnKodeverdiConverter implements AttributeConverter<NavBrukerKjønn, String> {

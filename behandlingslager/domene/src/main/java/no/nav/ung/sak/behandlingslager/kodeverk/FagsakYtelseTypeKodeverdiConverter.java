@@ -3,7 +3,7 @@ package no.nav.ung.sak.behandlingslager.kodeverk;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 
 @Converter(autoApply = true)
 public class FagsakYtelseTypeKodeverdiConverter implements AttributeConverter<FagsakYtelseType, String> {

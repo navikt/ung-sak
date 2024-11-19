@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import no.nav.k9.kodeverk.dokument.Kommunikasjonsretning;
+import no.nav.ung.kodeverk.dokument.Kommunikasjonsretning;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Saksnummer;
 

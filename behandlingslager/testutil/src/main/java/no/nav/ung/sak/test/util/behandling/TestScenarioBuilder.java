@@ -2,8 +2,8 @@ package no.nav.ung.sak.test.util.behandling;
 
 import java.time.LocalDate;
 
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.person.RelasjonsRolleType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 import no.nav.ung.sak.typer.AktørId;
 
 /**

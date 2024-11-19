@@ -3,13 +3,13 @@ package no.nav.ung.sak.test.util.behandling.personopplysning;
 import java.time.LocalDate;
 
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
-import no.nav.k9.kodeverk.geografisk.AdresseType;
-import no.nav.k9.kodeverk.geografisk.Landkoder;
-import no.nav.k9.kodeverk.geografisk.Region;
-import no.nav.k9.kodeverk.person.NavBrukerKjønn;
-import no.nav.k9.kodeverk.person.PersonstatusType;
-import no.nav.k9.kodeverk.person.RelasjonsRolleType;
-import no.nav.k9.kodeverk.person.SivilstandType;
+import no.nav.ung.kodeverk.geografisk.AdresseType;
+import no.nav.ung.kodeverk.geografisk.Landkoder;
+import no.nav.ung.kodeverk.geografisk.Region;
+import no.nav.ung.kodeverk.person.NavBrukerKjønn;
+import no.nav.ung.kodeverk.person.PersonstatusType;
+import no.nav.ung.kodeverk.person.RelasjonsRolleType;
+import no.nav.ung.kodeverk.person.SivilstandType;
 import no.nav.ung.sak.test.util.behandling.personopplysning.PersonInformasjon.Builder;
 import no.nav.ung.sak.typer.AktørId;
 

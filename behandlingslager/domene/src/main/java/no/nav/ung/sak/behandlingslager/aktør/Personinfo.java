@@ -9,12 +9,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import no.nav.k9.kodeverk.geografisk.Landkoder;
-import no.nav.k9.kodeverk.geografisk.Region;
-import no.nav.k9.kodeverk.geografisk.Språkkode;
-import no.nav.k9.kodeverk.person.NavBrukerKjønn;
-import no.nav.k9.kodeverk.person.PersonstatusType;
-import no.nav.k9.kodeverk.person.SivilstandType;
+import no.nav.ung.kodeverk.geografisk.Landkoder;
+import no.nav.ung.kodeverk.geografisk.Region;
+import no.nav.ung.kodeverk.geografisk.Språkkode;
+import no.nav.ung.kodeverk.person.NavBrukerKjønn;
+import no.nav.ung.kodeverk.person.PersonstatusType;
+import no.nav.ung.kodeverk.person.SivilstandType;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
 

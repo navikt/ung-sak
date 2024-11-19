@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
-import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdKilde;
+import no.nav.ung.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
+import no.nav.ung.kodeverk.arbeidsforhold.ArbeidsforholdKilde;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.ung.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;

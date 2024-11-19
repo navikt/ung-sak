@@ -20,12 +20,12 @@ import jakarta.enterprise.inject.spi.CDI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
-import no.nav.k9.kodeverk.behandling.BehandlingType;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.VurderingspunktType;
+import no.nav.ung.kodeverk.behandling.BehandlingStegStatus;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderingspunktType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingModell;
 import no.nav.ung.sak.behandlingskontroll.BehandlingModellVisitor;
 import no.nav.ung.sak.behandlingskontroll.BehandlingSteg;

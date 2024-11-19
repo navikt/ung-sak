@@ -10,11 +10,11 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.historikk.HistorikkAktør;
-import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
-import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
-import no.nav.k9.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.historikk.HistorikkAktør;
+import no.nav.ung.kodeverk.historikk.HistorikkEndretFeltType;
+import no.nav.ung.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkRepository;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;

@@ -3,7 +3,7 @@ package no.nav.ung.sak.behandlingslager.aktør;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import no.nav.k9.kodeverk.person.NavBrukerKjønn;
+import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import no.nav.ung.sak.typer.PersonIdent;
 
 public class FødtBarnInfo {

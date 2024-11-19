@@ -8,9 +8,9 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
-import no.nav.k9.kodeverk.vilkår.Utfall;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
+import no.nav.ung.kodeverk.vilkår.Utfall;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;

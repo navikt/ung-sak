@@ -1,6 +1,6 @@
 package no.nav.ung.sak.domene.behandling.steg.foreslåvedtak;
 
-import static no.nav.k9.kodeverk.behandling.BehandlingStegType.FORESLÅ_VEDTAK;
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.FORESLÅ_VEDTAK;
 
 import java.util.Optional;
 
@@ -8,7 +8,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingStegModell;

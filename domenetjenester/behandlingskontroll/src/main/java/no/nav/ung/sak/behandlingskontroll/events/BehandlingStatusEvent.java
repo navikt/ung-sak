@@ -2,7 +2,7 @@ package no.nav.ung.sak.behandlingskontroll.events;
 
 import java.util.Objects;
 
-import no.nav.k9.kodeverk.behandling.BehandlingStatus;
+import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingEvent;
 import no.nav.ung.sak.typer.AktørId;

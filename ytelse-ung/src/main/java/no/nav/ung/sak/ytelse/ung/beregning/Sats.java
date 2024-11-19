@@ -3,7 +3,7 @@ package no.nav.ung.sak.ytelse.ung.beregning;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import no.nav.k9.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
+import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 
 public enum Sats {
 

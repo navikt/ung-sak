@@ -14,9 +14,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType.PlainYtelseDeserializer;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType.PlainYtelseSerializer;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType.PlainYtelseDeserializer;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType.PlainYtelseSerializer;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)

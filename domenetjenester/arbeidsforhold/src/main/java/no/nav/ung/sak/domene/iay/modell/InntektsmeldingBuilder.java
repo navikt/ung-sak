@@ -9,8 +9,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
-import no.nav.k9.kodeverk.arbeidsforhold.InntektsmeldingInnsendingsårsak;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.arbeidsforhold.InntektsmeldingInnsendingsårsak;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.typer.Arbeidsgiver;
 import no.nav.ung.sak.typer.Beløp;
 import no.nav.ung.sak.typer.EksternArbeidsforholdRef;

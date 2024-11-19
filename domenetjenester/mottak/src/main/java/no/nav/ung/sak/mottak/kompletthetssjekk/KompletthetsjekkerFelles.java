@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.k9.kodeverk.dokument.DokumentMalType;
+import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.k9.oppdrag.kontrakt.oppsummering.Mottaker;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;

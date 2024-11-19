@@ -1,6 +1,6 @@
 package no.nav.ung.sak.web.app.tjenester.integrasjonstatus;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.APPLIKASJON;
+import static no.nav.ung.abac.BeskyttetRessursKoder.APPLIKASJON;
 
 import java.util.Collections;
 import java.util.List;

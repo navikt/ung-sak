@@ -1,7 +1,7 @@
 package no.nav.ung.sak.web.app.tjenester.forvaltning.rapportering;
 
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.DRIFT;
+import static no.nav.ung.abac.BeskyttetRessursKoder.DRIFT;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

@@ -1,7 +1,7 @@
 package no.nav.ung.sak.domene.behandling.steg.varselrevurdering;
 
-import static no.nav.k9.kodeverk.behandling.BehandlingStegType.VARSEL_REVURDERING;
-import static no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_REVURDERING;
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VARSEL_REVURDERING;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_REVURDERING;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

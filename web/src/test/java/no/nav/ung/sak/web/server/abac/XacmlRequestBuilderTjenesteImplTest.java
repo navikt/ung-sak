@@ -13,7 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-import no.nav.k9.abac.BeskyttetRessursKoder;
+import no.nav.ung.abac.BeskyttetRessursKoder;
 import no.nav.k9.felles.sikkerhet.abac.AbacIdToken;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt;
 import no.nav.k9.felles.sikkerhet.abac.NavAbacCommonAttributter;

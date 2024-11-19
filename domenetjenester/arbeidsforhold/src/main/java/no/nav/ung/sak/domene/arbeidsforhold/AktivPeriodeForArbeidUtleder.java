@@ -7,7 +7,7 @@ import java.util.Map;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
+import no.nav.ung.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.ung.sak.domene.iay.modell.AktivitetsAvtale;
 import no.nav.ung.sak.domene.iay.modell.AktivitetsAvtaleInnhold;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;

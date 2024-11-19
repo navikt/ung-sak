@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static no.nav.k9.abac.BeskyttetRessursKoder.PIP;
+import static no.nav.ung.abac.BeskyttetRessursKoder.PIP;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 
 @Path("/pip")

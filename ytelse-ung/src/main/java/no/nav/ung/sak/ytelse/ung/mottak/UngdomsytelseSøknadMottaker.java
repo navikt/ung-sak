@@ -1,14 +1,14 @@
 package no.nav.ung.sak.ytelse.ung.mottak;
 
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 import java.time.LocalDate;
 import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.uttak.Tid;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.uttak.Tid;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;

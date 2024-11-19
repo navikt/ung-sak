@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import no.nav.k9.abac.AbacAttributt;
+import no.nav.ung.abac.AbacAttributt;
 import no.nav.ung.sak.behandlingslager.behandling.merknad.BehandlingMerknadType;
 import no.nav.ung.sak.kontrakt.Patterns;
 

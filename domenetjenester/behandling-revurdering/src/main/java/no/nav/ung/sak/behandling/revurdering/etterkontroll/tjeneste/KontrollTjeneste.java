@@ -1,7 +1,7 @@
 package no.nav.ung.sak.behandling.revurdering.etterkontroll.tjeneste;
 
 import jakarta.enterprise.inject.Instance;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandling.revurdering.etterkontroll.Etterkontroll;
 import no.nav.ung.sak.behandling.revurdering.etterkontroll.EtterkontrollRef;
 import no.nav.ung.sak.behandling.revurdering.etterkontroll.KontrollType;

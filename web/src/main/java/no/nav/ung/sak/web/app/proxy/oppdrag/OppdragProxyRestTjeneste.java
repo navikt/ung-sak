@@ -7,16 +7,14 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
-import no.nav.k9.abac.BeskyttetRessursKoder;
+import no.nav.ung.abac.BeskyttetRessursKoder;
 import no.nav.k9.felles.sikkerhet.abac.*;
 import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.kontrakt.behandling.*;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.ung.sak.økonomi.simulering.klient.K9OppdragRestKlient;
 
 import java.util.*;
-import java.util.function.Function;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 

@@ -7,7 +7,7 @@ import java.util.Optional;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.k9.kodeverk.geografisk.Språkkode;
+import no.nav.ung.kodeverk.geografisk.Språkkode;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;

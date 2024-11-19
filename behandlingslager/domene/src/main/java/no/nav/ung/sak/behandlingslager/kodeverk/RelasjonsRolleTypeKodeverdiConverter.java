@@ -3,7 +3,7 @@ package no.nav.ung.sak.behandlingslager.kodeverk;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-import no.nav.k9.kodeverk.person.RelasjonsRolleType;
+import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 
 @Converter(autoApply = true)
 public class RelasjonsRolleTypeKodeverdiConverter implements AttributeConverter<RelasjonsRolleType, String> {

@@ -2,8 +2,8 @@ package no.nav.ung.sak.behandlingskontroll.events;
 
 import java.util.Optional;
 
-import no.nav.k9.kodeverk.behandling.BehandlingStegStatus;
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.behandling.BehandlingStegStatus;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.transisjoner.TransisjonIdentifikator;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingEvent;

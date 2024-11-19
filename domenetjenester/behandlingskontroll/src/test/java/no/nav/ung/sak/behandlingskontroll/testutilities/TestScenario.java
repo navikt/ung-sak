@@ -1,6 +1,6 @@
 package no.nav.ung.sak.behandlingskontroll.testutilities;
 
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 
 /**
  * Default test scenario builder for Behandlingskontroll enhetstester.

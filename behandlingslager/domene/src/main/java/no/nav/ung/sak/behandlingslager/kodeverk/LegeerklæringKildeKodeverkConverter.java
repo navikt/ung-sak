@@ -3,7 +3,7 @@ package no.nav.ung.sak.behandlingslager.kodeverk;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-import no.nav.k9.kodeverk.medisinsk.LegeerklæringKilde;
+import no.nav.ung.kodeverk.medisinsk.LegeerklæringKilde;
 
 @Converter(autoApply = true)
 public class LegeerklæringKildeKodeverkConverter implements AttributeConverter<LegeerklæringKilde, String> {

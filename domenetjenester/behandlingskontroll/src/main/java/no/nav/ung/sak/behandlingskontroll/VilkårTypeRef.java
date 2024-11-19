@@ -12,7 +12,7 @@ import java.util.Objects;
 import jakarta.enterprise.inject.Stereotype;
 import jakarta.enterprise.util.AnnotationLiteral;
 import jakarta.inject.Qualifier;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.VilkårTypeRef.ContainerOfVilkårTypeRef;
 
 @Repeatable(value = ContainerOfVilkårTypeRef.class)

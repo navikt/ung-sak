@@ -14,7 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.sak.behandling.revurdering.etterkontroll.Etterkontroll;
 import no.nav.ung.sak.behandling.revurdering.etterkontroll.EtterkontrollRepository;
 import no.nav.ung.sak.behandling.revurdering.etterkontroll.KontrollType;

@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
-import no.nav.k9.abac.AbacAttributt;
+import no.nav.ung.abac.AbacAttributt;
 import no.nav.ung.sak.kontrakt.Patterns;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)

@@ -13,7 +13,7 @@ import java.util.Set;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import no.nav.abakus.iaygrunnlag.request.RegisterdataType;
-import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 

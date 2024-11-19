@@ -4,9 +4,9 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Properties;
 
-import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
-import no.nav.k9.kodeverk.vilkår.Utfall;
-import no.nav.k9.kodeverk.vilkår.VilkårUtfallMerknad;
+import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
+import no.nav.ung.kodeverk.vilkår.Utfall;
+import no.nav.ung.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public class VilkårPeriodeBuilder {

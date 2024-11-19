@@ -3,7 +3,7 @@ package no.nav.ung.sak.behandlingslager.kodeverk;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-import no.nav.k9.kodeverk.vilkår.Utfall;
+import no.nav.ung.kodeverk.vilkår.Utfall;
 
 @Converter(autoApply = true)
 public class UtfallKodeverdiConverter implements AttributeConverter<Utfall, String> {

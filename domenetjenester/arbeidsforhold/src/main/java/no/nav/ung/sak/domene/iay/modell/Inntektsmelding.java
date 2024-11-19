@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import no.nav.k9.kodeverk.api.IndexKey;
-import no.nav.k9.kodeverk.arbeidsforhold.InntektsmeldingInnsendingsårsak;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.api.IndexKey;
+import no.nav.ung.kodeverk.arbeidsforhold.InntektsmeldingInnsendingsårsak;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.ung.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.ung.sak.behandlingslager.virksomhet.Virksomhet;

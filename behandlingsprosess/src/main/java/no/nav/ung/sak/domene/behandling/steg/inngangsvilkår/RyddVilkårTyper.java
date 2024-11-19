@@ -2,7 +2,7 @@ package no.nav.ung.sak.domene.behandling.steg.inngangsvilkår;
 
 import java.util.Objects;
 
-import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
+import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingStegModell;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;

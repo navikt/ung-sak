@@ -6,8 +6,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import no.nav.k9.abac.AbacAttributt;
-import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.abac.AbacAttributt;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.typer.Saksnummer;
 
 import java.time.LocalDate;

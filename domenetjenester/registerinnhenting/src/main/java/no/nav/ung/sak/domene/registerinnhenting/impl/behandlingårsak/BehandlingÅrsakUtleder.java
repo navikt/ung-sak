@@ -4,8 +4,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import jakarta.enterprise.inject.Instance;
-import no.nav.k9.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.domene.registerinnhenting.GrunnlagRef;
 

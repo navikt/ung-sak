@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.k9.kodeverk.opptjening.OpptjeningAktivitetType;
+import no.nav.ung.kodeverk.opptjening.OpptjeningAktivitetType;
 import no.nav.ung.sak.typer.OrgNummer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

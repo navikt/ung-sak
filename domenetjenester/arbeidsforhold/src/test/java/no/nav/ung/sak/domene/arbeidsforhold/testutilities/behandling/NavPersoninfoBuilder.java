@@ -1,12 +1,12 @@
 package no.nav.ung.sak.domene.arbeidsforhold.testutilities.behandling;
 
 import static java.time.Month.OCTOBER;
-import static no.nav.k9.kodeverk.person.NavBrukerKjønn.KVINNE;
+import static no.nav.ung.kodeverk.person.NavBrukerKjønn.KVINNE;
 
 import java.time.LocalDate;
 
-import no.nav.k9.kodeverk.person.NavBrukerKjønn;
-import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.ung.kodeverk.person.NavBrukerKjønn;
+import no.nav.ung.kodeverk.person.PersonstatusType;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;

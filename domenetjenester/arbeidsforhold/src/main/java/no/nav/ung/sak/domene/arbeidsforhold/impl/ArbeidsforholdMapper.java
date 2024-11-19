@@ -16,9 +16,9 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
-import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdKilde;
-import no.nav.k9.kodeverk.dokument.DokumentStatus;
+import no.nav.ung.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
+import no.nav.ung.kodeverk.arbeidsforhold.ArbeidsforholdKilde;
+import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.sak.domene.iay.modell.AktivitetsAvtale;
 import no.nav.ung.sak.domene.iay.modell.ArbeidsforholdInformasjon;
 import no.nav.ung.sak.domene.iay.modell.ArbeidsforholdOverstyring;

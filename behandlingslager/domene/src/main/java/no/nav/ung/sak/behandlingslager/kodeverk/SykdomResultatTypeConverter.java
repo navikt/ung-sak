@@ -1,7 +1,7 @@
 package no.nav.ung.sak.behandlingslager.kodeverk;
 
 import jakarta.persistence.AttributeConverter;
-import no.nav.k9.kodeverk.sykdom.Resultat;
+import no.nav.ung.kodeverk.sykdom.Resultat;
 
 public class SykdomResultatTypeConverter implements AttributeConverter<Resultat, String> {
     @Override

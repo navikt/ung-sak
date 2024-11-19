@@ -1,6 +1,6 @@
 package no.nav.ung.sak.ytelse.ung.kompletthet;
 
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 import java.util.Collections;
 import java.util.List;

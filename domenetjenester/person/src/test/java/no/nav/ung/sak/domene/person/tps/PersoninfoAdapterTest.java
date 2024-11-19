@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import no.nav.k9.kodeverk.person.NavBrukerKjønn;
+import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.domene.person.pdl.PersonBasisTjeneste;

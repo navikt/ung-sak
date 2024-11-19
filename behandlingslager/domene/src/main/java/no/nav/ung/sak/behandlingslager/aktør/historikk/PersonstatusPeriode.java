@@ -2,7 +2,7 @@ package no.nav.ung.sak.behandlingslager.aktør.historikk;
 
 import java.util.Objects;
 
-import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.ung.kodeverk.person.PersonstatusType;
 
 public class PersonstatusPeriode {
 

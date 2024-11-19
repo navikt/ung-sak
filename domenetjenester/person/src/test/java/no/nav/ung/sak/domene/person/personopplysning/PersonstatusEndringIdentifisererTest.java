@@ -12,7 +12,7 @@ import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.k9.kodeverk.person.PersonstatusType;
+import no.nav.ung.kodeverk.person.PersonstatusType;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagBuilder;

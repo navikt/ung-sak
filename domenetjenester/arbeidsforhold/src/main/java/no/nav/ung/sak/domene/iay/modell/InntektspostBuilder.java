@@ -1,9 +1,9 @@
 package no.nav.ung.sak.domene.iay.modell;
 
-import no.nav.k9.kodeverk.arbeidsforhold.InntektYtelseType;
-import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
-import no.nav.k9.kodeverk.arbeidsforhold.LønnsinntektBeskrivelse;
-import no.nav.k9.kodeverk.arbeidsforhold.SkatteOgAvgiftsregelType;
+import no.nav.ung.kodeverk.arbeidsforhold.InntektYtelseType;
+import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
+import no.nav.ung.kodeverk.arbeidsforhold.LønnsinntektBeskrivelse;
+import no.nav.ung.kodeverk.arbeidsforhold.SkatteOgAvgiftsregelType;
 import no.nav.ung.sak.typer.Beløp;
 
 import java.math.BigDecimal;

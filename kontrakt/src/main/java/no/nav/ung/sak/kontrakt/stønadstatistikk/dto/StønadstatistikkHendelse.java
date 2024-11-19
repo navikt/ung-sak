@@ -16,9 +16,9 @@ import jakarta.validation.constraints.AssertFalse;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType.PlainYtelseDeserializer;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType.PlainYtelseSerializer;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType.PlainYtelseDeserializer;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType.PlainYtelseSerializer;
 import no.nav.ung.sak.typer.PersonIdent;
 import no.nav.ung.sak.typer.Saksnummer;
 

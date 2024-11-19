@@ -4,11 +4,11 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import no.nav.k9.kodeverk.Fagsystem;
-import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
-import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
-import no.nav.k9.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.Fagsystem;
+import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.ung.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
+import no.nav.ung.kodeverk.arbeidsforhold.RelatertYtelseTilstand;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.domene.iay.modell.AktivitetsAvtaleBuilder;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.ung.sak.domene.iay.modell.Opptjeningsnøkkel;

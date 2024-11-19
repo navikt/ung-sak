@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.pdl.PdlKlient;
-import no.nav.k9.kodeverk.dokument.Brevkode;
+import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;

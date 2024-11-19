@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import no.nav.k9.felles.integrasjon.pdl.Bostedsadresse;
 import no.nav.k9.felles.integrasjon.pdl.Oppholdsadresse;
 import no.nav.k9.felles.integrasjon.pdl.Vegadresse;
-import no.nav.k9.kodeverk.geografisk.AdresseType;
+import no.nav.ung.kodeverk.geografisk.AdresseType;
 import no.nav.ung.sak.behandlingslager.aktør.historikk.AdressePeriode;
 import no.nav.ung.sak.behandlingslager.aktør.historikk.Gyldighetsperiode;
 

@@ -1,6 +1,6 @@
 package no.nav.ung.sak.behandlingslager.aktør;
 
-import no.nav.k9.kodeverk.person.Diskresjonskode;
+import no.nav.ung.kodeverk.person.Diskresjonskode;
 
 public class GeografiskTilknytning {
     private final String tilknytning;

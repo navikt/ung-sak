@@ -3,7 +3,7 @@ package no.nav.ung.sak.behandlingslager.kodeverk;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-import no.nav.k9.kodeverk.dokument.DokumentStatus;
+import no.nav.ung.kodeverk.dokument.DokumentStatus;
 
 @Converter(autoApply = true)
 public class DokumentStatusKodeverdiConverter implements AttributeConverter<DokumentStatus, String> {

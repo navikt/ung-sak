@@ -9,8 +9,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.arbeidsforhold.Inntektskategori;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.oppdrag.kontrakt.kodeverk.SatsType;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseAndelV1;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseFeriepengerV1;

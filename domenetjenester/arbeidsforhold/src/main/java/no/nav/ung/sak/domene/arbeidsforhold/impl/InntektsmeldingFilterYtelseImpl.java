@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import no.nav.k9.kodeverk.arbeidsforhold.InntektspostType;
+import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;

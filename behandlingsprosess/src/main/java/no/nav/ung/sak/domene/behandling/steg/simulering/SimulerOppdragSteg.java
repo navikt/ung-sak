@@ -1,7 +1,7 @@
 package no.nav.ung.sak.domene.behandling.steg.simulering;
 
 import static java.util.Collections.singletonList;
-import static no.nav.k9.kodeverk.behandling.BehandlingStegType.SIMULER_OPPDRAG;
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.SIMULER_OPPDRAG;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
@@ -14,8 +14,8 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.exception.IntegrasjonException;
-import no.nav.k9.kodeverk.behandling.BehandlingStegType;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
 import no.nav.ung.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;

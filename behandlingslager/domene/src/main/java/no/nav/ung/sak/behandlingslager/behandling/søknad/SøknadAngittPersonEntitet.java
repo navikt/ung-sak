@@ -13,7 +13,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 
-import no.nav.k9.kodeverk.person.RelasjonsRolleType;
+import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 import no.nav.ung.sak.behandlingslager.kodeverk.RelasjonsRolleTypeKodeverdiConverter;
 import no.nav.ung.sak.typer.AktørId;
 

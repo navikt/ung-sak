@@ -1,8 +1,8 @@
 package no.nav.ung.sak.ytelse.ung.inngangsvilkår.alder;
 
-import no.nav.k9.kodeverk.vilkår.Avslagsårsak;
-import no.nav.k9.kodeverk.vilkår.Utfall;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
+import no.nav.ung.kodeverk.vilkår.Utfall;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import org.junit.jupiter.api.Test;

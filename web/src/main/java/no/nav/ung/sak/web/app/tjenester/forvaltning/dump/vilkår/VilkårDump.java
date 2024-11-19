@@ -11,7 +11,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.persistence.Tuple;
 import jakarta.persistence.TupleElement;
-import no.nav.k9.kodeverk.vilkår.VilkårType;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.CsvOutput;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;

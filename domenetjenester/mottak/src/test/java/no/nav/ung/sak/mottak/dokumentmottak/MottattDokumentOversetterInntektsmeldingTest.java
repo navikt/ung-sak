@@ -1,7 +1,7 @@
 package no.nav.ung.sak.mottak.dokumentmottak;
 
-import static no.nav.k9.kodeverk.arbeidsforhold.NaturalYtelseType.AKSJER_GRUNNFONDSBEVIS_TIL_UNDERKURS;
-import static no.nav.k9.kodeverk.arbeidsforhold.NaturalYtelseType.ELEKTRISK_KOMMUNIKASJON;
+import static no.nav.ung.kodeverk.arbeidsforhold.NaturalYtelseType.AKSJER_GRUNNFONDSBEVIS_TIL_UNDERKURS;
+import static no.nav.ung.kodeverk.arbeidsforhold.NaturalYtelseType.ELEKTRISK_KOMMUNIKASJON;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -25,7 +25,7 @@ import org.mockito.quality.Strictness;
 
 import jakarta.inject.Inject;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.k9.kodeverk.dokument.DokumentStatus;
+import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;

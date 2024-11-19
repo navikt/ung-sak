@@ -14,7 +14,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.ung.kodeverk.api.IndexKey;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.ung.sak.typer.JournalpostId;

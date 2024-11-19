@@ -15,10 +15,10 @@ import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 
 import no.nav.k9.felles.util.Tuple;
-import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
-import no.nav.k9.kodeverk.behandling.BehandlingResultatType;
-import no.nav.k9.kodeverk.behandling.BehandlingStatus;
-import no.nav.k9.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.arbeidsforhold.AktivitetStatus;
+import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
+import no.nav.ung.kodeverk.behandling.BehandlingStatus;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.ung.sak.typer.AktørId;

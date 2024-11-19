@@ -55,7 +55,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import no.nav.k9.kodeverk.api.Kodeverdi;
+import no.nav.ung.kodeverk.api.Kodeverdi;
 import no.nav.ung.sak.typer.PersonIdent;
 import no.nav.ung.sak.web.app.jackson.IndexClasses;
 

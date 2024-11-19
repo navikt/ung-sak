@@ -4,11 +4,11 @@ import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-import no.nav.k9.kodeverk.geografisk.Landkoder;
-import no.nav.k9.kodeverk.geografisk.Region;
-import no.nav.k9.kodeverk.person.NavBrukerKjønn;
-import no.nav.k9.kodeverk.person.PersonstatusType;
-import no.nav.k9.kodeverk.person.SivilstandType;
+import no.nav.ung.kodeverk.geografisk.Landkoder;
+import no.nav.ung.kodeverk.geografisk.Region;
+import no.nav.ung.kodeverk.person.NavBrukerKjønn;
+import no.nav.ung.kodeverk.person.PersonstatusType;
+import no.nav.ung.kodeverk.person.SivilstandType;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;

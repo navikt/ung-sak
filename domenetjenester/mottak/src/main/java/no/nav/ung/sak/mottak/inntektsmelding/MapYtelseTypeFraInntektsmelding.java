@@ -5,7 +5,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import no.nav.inntektsmelding.xml.kodeliste._20210216.YtelseKodeliste;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 
 public class MapYtelseTypeFraInntektsmelding {
 

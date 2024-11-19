@@ -3,7 +3,7 @@ package no.nav.ung.sak.domene.iay.modell;
 import java.util.List;
 import java.util.Optional;
 
-import no.nav.k9.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.Arbeidsgiver;
 import no.nav.ung.sak.typer.InternArbeidsforholdRef;

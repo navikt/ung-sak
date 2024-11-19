@@ -2,7 +2,7 @@ package no.nav.ung.sak.produksjonsstyring.oppgavebehandling;
 
 import java.util.Objects;
 
-import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
+import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
 
 public class Oppgaveinfo {
 

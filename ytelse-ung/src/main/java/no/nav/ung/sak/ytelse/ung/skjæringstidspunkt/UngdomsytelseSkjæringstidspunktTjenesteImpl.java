@@ -1,13 +1,13 @@
 package no.nav.ung.sak.ytelse.ung.skjæringstidspunkt;
 
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 import java.time.LocalDate;
 import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandling.Skjæringstidspunkt;
 import no.nav.ung.sak.behandling.Skjæringstidspunkt.Builder;

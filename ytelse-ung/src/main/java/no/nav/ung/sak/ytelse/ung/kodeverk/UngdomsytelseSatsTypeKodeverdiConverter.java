@@ -2,8 +2,7 @@ package no.nav.ung.sak.ytelse.ung.kodeverk;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
-import no.nav.k9.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
-import no.nav.k9.kodeverk.ungdomsytelse.uttak.UngdomsytelseUttakAvslagsårsak;
+import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 
 @Converter(autoApply = true)
 public class UngdomsytelseSatsTypeKodeverdiConverter implements AttributeConverter<UngdomsytelseSatsType, String> {

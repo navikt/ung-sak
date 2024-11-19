@@ -1,6 +1,6 @@
 package no.nav.ung.sak.behandlingskontroll;
 
-import static no.nav.k9.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.PLEIEPENGER_SYKT_BARN;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 

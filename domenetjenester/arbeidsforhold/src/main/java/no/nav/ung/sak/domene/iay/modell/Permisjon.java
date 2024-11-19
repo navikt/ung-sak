@@ -3,8 +3,8 @@ package no.nav.ung.sak.domene.iay.modell;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import no.nav.k9.kodeverk.api.IndexKey;
-import no.nav.k9.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
+import no.nav.ung.kodeverk.api.IndexKey;
+import no.nav.ung.kodeverk.arbeidsforhold.PermisjonsbeskrivelseType;
 import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.ung.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;

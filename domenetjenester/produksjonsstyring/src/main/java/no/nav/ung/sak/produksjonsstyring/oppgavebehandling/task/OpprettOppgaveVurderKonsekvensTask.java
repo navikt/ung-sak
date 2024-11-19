@@ -8,7 +8,7 @@ import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.k9.kodeverk.produksjonsstyring.OppgaveÅrsak;
+import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.task.FagsakProsessTask;

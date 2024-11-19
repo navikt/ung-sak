@@ -22,8 +22,8 @@ import jakarta.persistence.Version;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
-import no.nav.k9.kodeverk.geografisk.Språkkode;
-import no.nav.k9.kodeverk.person.RelasjonsRolleType;
+import no.nav.ung.kodeverk.geografisk.Språkkode;
+import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.kodeverk.RelasjonsRolleTypeKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.SpråkKodeverdiConverter;

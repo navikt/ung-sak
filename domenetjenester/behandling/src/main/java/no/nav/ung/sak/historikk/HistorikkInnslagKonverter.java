@@ -9,12 +9,12 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 
-import no.nav.k9.kodeverk.api.Kodeverdi;
-import no.nav.k9.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
-import no.nav.k9.kodeverk.historikk.HistorikkAvklartSoeknadsperiodeType;
-import no.nav.k9.kodeverk.historikk.HistorikkEndretFeltType;
-import no.nav.k9.kodeverk.historikk.HistorikkOpplysningType;
-import no.nav.k9.kodeverk.historikk.HistorikkinnslagType;
+import no.nav.ung.kodeverk.api.Kodeverdi;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
+import no.nav.ung.kodeverk.historikk.HistorikkAvklartSoeknadsperiodeType;
+import no.nav.ung.kodeverk.historikk.HistorikkEndretFeltType;
+import no.nav.ung.kodeverk.historikk.HistorikkOpplysningType;
+import no.nav.ung.kodeverk.historikk.HistorikkinnslagType;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagDel;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagDokumentLink;

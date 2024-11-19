@@ -5,7 +5,7 @@ import java.util.Objects;
 
 import jakarta.persistence.Embeddable;
 
-import no.nav.k9.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;
+import no.nav.ung.kodeverk.arbeidsforhold.BekreftetPermisjonStatus;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Embeddable

@@ -2,8 +2,8 @@ package no.nav.ung.sak.behandlingslager.behandling.beregning;
 
 import java.util.Objects;
 
-import no.nav.k9.kodeverk.arbeidsforhold.AktivitetStatus;
-import no.nav.k9.kodeverk.arbeidsforhold.Inntektskategori;
+import no.nav.ung.kodeverk.arbeidsforhold.AktivitetStatus;
+import no.nav.ung.kodeverk.arbeidsforhold.Inntektskategori;
 import no.nav.ung.sak.typer.Arbeidsgiver;
 import no.nav.ung.sak.typer.InternArbeidsforholdRef;
 

@@ -1,7 +1,7 @@
 package no.nav.ung.sak.domene.registerinnhenting;
 
 import jakarta.enterprise.inject.Instance;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.typer.Periode;
 

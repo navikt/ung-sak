@@ -3,7 +3,7 @@ package no.nav.ung.sak.domene.vedtak.observer;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
-import no.nav.k9.kodeverk.vedtak.IverksettingStatus;
+import no.nav.ung.kodeverk.vedtak.IverksettingStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;

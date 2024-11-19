@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
-import no.nav.k9.kodeverk.api.IndexKey;
+import no.nav.ung.kodeverk.api.IndexKey;
 import no.nav.ung.sak.behandlingslager.diff.IndexKeyComposer;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 

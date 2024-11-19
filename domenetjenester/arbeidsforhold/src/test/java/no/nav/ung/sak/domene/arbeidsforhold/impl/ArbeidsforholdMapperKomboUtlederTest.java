@@ -1,6 +1,6 @@
 package no.nav.ung.sak.domene.arbeidsforhold.impl;
 
-import static no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdKilde.SAKSBEHANDLER;
+import static no.nav.ung.kodeverk.arbeidsforhold.ArbeidsforholdKilde.SAKSBEHANDLER;
 import static no.nav.ung.sak.domene.arbeidsforhold.impl.ArbeidsforholdMapperUtledFraArbeidsforholdInformasjonTest.GenererArbinfoArbeidsforhold.overstyringer;
 import static no.nav.ung.sak.domene.arbeidsforhold.impl.ArbeidsforholdMapperUtledInntektsmeldingerTest.GenererImArbeidsforhold.inntektsmeldinger;
 import static no.nav.ung.sak.domene.arbeidsforhold.impl.ArbeidsforholdMapperUtledYrkesaktivitetTest.GenererYrkArbeidsforhold.yrkesaktiviteter;
@@ -16,8 +16,8 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
-import no.nav.k9.kodeverk.arbeidsforhold.ArbeidsforholdKilde;
+import no.nav.ung.kodeverk.arbeidsforhold.ArbeidsforholdHandlingType;
+import no.nav.ung.kodeverk.arbeidsforhold.ArbeidsforholdKilde;
 import no.nav.ung.sak.domene.arbeidsforhold.impl.ArbeidsforholdMapperUtledFraArbeidsforholdInformasjonTest.GenererArbinfoArbeidsforhold;
 import no.nav.ung.sak.domene.arbeidsforhold.impl.ArbeidsforholdMapperUtledInntektsmeldingerTest.GenererImArbeidsforhold;
 import no.nav.ung.sak.domene.arbeidsforhold.impl.ArbeidsforholdMapperUtledYrkesaktivitetTest.GenererYrkArbeidsforhold;

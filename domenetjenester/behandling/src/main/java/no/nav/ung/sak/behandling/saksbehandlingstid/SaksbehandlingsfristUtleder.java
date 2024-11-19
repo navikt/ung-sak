@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import jakarta.enterprise.inject.Instance;
-import no.nav.k9.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 
