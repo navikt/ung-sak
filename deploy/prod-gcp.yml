@@ -135,7 +135,7 @@ spec:
       value: k9saksbehandling.k9-infotrygd-feed-hendelse
 
     # Loadbalancerconfig
-    - name: LOADBALANCER_URL
+    - name: UNG_SAK_WEB_URL
       value: https://ung.intern.nav.no
 
     # LDAP

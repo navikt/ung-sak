@@ -143,8 +143,7 @@ spec:
     - name: BOOTSTRAP_SERVERS
       value: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
 
-    # Loadbalancerconfig
-    - name: LOADBALANCER_URL
+    - name: UNG_SAK_WEB_URL
       value: https://ung.intern.dev.nav.no
 
     # LDAP
