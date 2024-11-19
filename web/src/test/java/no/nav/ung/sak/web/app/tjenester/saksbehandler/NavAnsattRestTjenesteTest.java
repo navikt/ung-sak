@@ -1,14 +1,17 @@
 package no.nav.ung.sak.web.app.tjenester.saksbehandler;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.List;
-
+import com.microsoft.graph.models.Group;
+import com.microsoft.graph.models.User;
+import no.nav.ung.sak.kontrakt.abac.InnloggetAnsattDto;
+import no.nav.ung.sak.web.app.tjenester.microsoftgraph.MSGraphBruker;
+import no.nav.ung.sak.web.app.tjenester.microsoftgraph.MicrosoftGraphTjeneste;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import no.nav.ung.sak.kontrakt.abac.InnloggetAnsattDto;
-import no.nav.k9.felles.integrasjon.ldap.LdapBruker;
+import java.util.Arrays;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 public class NavAnsattRestTjenesteTest {
     private static final String gruppenavnSaksbehandler = "Saksbehandler";
@@ -21,15 +24,17 @@ public class NavAnsattRestTjenesteTest {
     private static final Boolean skalViseDetaljerteFeilmeldinger = true;
     private NavAnsattRestTjeneste saksbehandlerTjeneste;
 
+    private MicrosoftGraphTjeneste microsoftGraphTjeneste = mock(MicrosoftGraphTjeneste.class);
+
     @BeforeEach
     public void setUp() {
-        saksbehandlerTjeneste = new NavAnsattRestTjeneste(gruppenavnSaksbehandler, gruppenavnVeileder, gruppenavnBeslutter, gruppenavnOverstyrer, gruppenavnEgenAnsatt, gruppenavnKode6, gruppenavnKode7, skalViseDetaljerteFeilmeldinger);
+        saksbehandlerTjeneste = new NavAnsattRestTjeneste(gruppenavnSaksbehandler, gruppenavnVeileder, gruppenavnBeslutter, gruppenavnOverstyrer, gruppenavnEgenAnsatt, gruppenavnKode6, gruppenavnKode7, skalViseDetaljerteFeilmeldinger, microsoftGraphTjeneste);
     }
 
     @Test
     public void skalMappeSaksbehandlerGruppeTilKanSaksbehandleRettighet() {
-        LdapBruker brukerUtenforSaksbehandlerGruppe = getTestBruker();
-        LdapBruker brukerISaksbehandlerGruppe = getTestBruker(gruppenavnSaksbehandler);
+        MSGraphBruker brukerUtenforSaksbehandlerGruppe = getTestBruker();
+        MSGraphBruker brukerISaksbehandlerGruppe = getTestBruker(gruppenavnSaksbehandler);
 
         InnloggetAnsattDto innloggetBrukerUtenSaksbehandlerRettighet = saksbehandlerTjeneste.getInnloggetBrukerDto(null, brukerUtenforSaksbehandlerGruppe);
         InnloggetAnsattDto innloggetBrukerMedSaksbehandlerRettighet = saksbehandlerTjeneste.getInnloggetBrukerDto(null, brukerISaksbehandlerGruppe);
@@ -40,8 +45,8 @@ public class NavAnsattRestTjenesteTest {
 
     @Test
     public void skalMappeVeilederGruppeTilKanVeiledeRettighet() {
-        LdapBruker brukerUtenforVeilederGruppe = getTestBruker();
-        LdapBruker brukerIVeilederGruppe = getTestBruker(gruppenavnVeileder);
+        MSGraphBruker brukerUtenforVeilederGruppe = getTestBruker();
+        MSGraphBruker brukerIVeilederGruppe = getTestBruker(gruppenavnVeileder);
 
         InnloggetAnsattDto innloggetBrukerUtenVeilederRettighet = saksbehandlerTjeneste.getInnloggetBrukerDto(null, brukerUtenforVeilederGruppe);
         InnloggetAnsattDto innloggetBrukerMedVeilederRettighet = saksbehandlerTjeneste.getInnloggetBrukerDto(null, brukerIVeilederGruppe);
@@ -52,8 +57,8 @@ public class NavAnsattRestTjenesteTest {
 
     @Test
     public void skalMappeBeslutterGruppeTilKanBeslutteRettighet() {
-        LdapBruker brukerUtenforBeslutterGruppe = getTestBruker();
-        LdapBruker brukerIBeslutterGruppe = getTestBruker(gruppenavnBeslutter);
+        MSGraphBruker brukerUtenforBeslutterGruppe = getTestBruker();
+        MSGraphBruker brukerIBeslutterGruppe = getTestBruker(gruppenavnBeslutter);
 
         InnloggetAnsattDto innloggetBrukerUtenBeslutterRettighet = saksbehandlerTjeneste.getInnloggetBrukerDto(null, brukerUtenforBeslutterGruppe);
         InnloggetAnsattDto innloggetBrukerMedBeslutterRettighet = saksbehandlerTjeneste.getInnloggetBrukerDto(null, brukerIBeslutterGruppe);
@@ -64,8 +69,8 @@ public class NavAnsattRestTjenesteTest {
 
     @Test
     public void skalMappeOverstyrerGruppeTilKanOverstyreRettighet() {
-        LdapBruker brukerUtenforOverstyrerGruppe = getTestBruker();
-        LdapBruker brukerIOverstyrerGruppe = getTestBruker(gruppenavnOverstyrer);
+        MSGraphBruker brukerUtenforOverstyrerGruppe = getTestBruker();
+        MSGraphBruker brukerIOverstyrerGruppe = getTestBruker(gruppenavnOverstyrer);
 
         InnloggetAnsattDto innloggetBrukerUtenOverstyrerRettighet = saksbehandlerTjeneste.getInnloggetBrukerDto(null, brukerUtenforOverstyrerGruppe);
         InnloggetAnsattDto innloggetBrukerMedOverstyrerRettighet = saksbehandlerTjeneste.getInnloggetBrukerDto(null, brukerIOverstyrerGruppe);
@@ -76,8 +81,8 @@ public class NavAnsattRestTjenesteTest {
 
     @Test
     public void skalMappeEgenAnsattGruppeTilKanBehandleEgenAnsattRettighet() {
-        LdapBruker brukerUtenforEgenAnsattGruppe = getTestBruker();
-        LdapBruker brukerIEgenAnsattGruppe = getTestBruker(gruppenavnEgenAnsatt);
+        MSGraphBruker brukerUtenforEgenAnsattGruppe = getTestBruker();
+        MSGraphBruker brukerIEgenAnsattGruppe = getTestBruker(gruppenavnEgenAnsatt);
 
         InnloggetAnsattDto innloggetBrukerUtenEgenAnsattRettighet = saksbehandlerTjeneste.getInnloggetBrukerDto(null, brukerUtenforEgenAnsattGruppe);
         InnloggetAnsattDto innloggetBrukerMedEgenAnsattRettighet = saksbehandlerTjeneste.getInnloggetBrukerDto(null, brukerIEgenAnsattGruppe);
@@ -88,8 +93,8 @@ public class NavAnsattRestTjenesteTest {
 
     @Test
     public void skalMappeKode6GruppeTilKanBehandleKode6Rettighet() {
-        LdapBruker brukerUtenforKode6Gruppe = getTestBruker();
-        LdapBruker brukerIKode6Gruppe = getTestBruker(gruppenavnKode6);
+        MSGraphBruker brukerUtenforKode6Gruppe = getTestBruker();
+        MSGraphBruker brukerIKode6Gruppe = getTestBruker(gruppenavnKode6);
 
         InnloggetAnsattDto innloggetBrukerUtenKode6Rettighet = saksbehandlerTjeneste.getInnloggetBrukerDto(null, brukerUtenforKode6Gruppe);
         InnloggetAnsattDto innloggetBrukerMedKode6Rettighet = saksbehandlerTjeneste.getInnloggetBrukerDto(null, brukerIKode6Gruppe);
@@ -100,8 +105,8 @@ public class NavAnsattRestTjenesteTest {
 
     @Test
     public void skalMappeKode7GruppeTilKanBehandleKode7Rettighet() {
-        LdapBruker brukerUtenforKode7Gruppe = getTestBruker();
-        LdapBruker brukerIKode7Gruppe = getTestBruker(gruppenavnKode7);
+        MSGraphBruker brukerUtenforKode7Gruppe = getTestBruker();
+        MSGraphBruker brukerIKode7Gruppe = getTestBruker(gruppenavnKode7);
 
         InnloggetAnsattDto innloggetBrukerUtenKode7Rettighet = saksbehandlerTjeneste.getInnloggetBrukerDto(null, brukerUtenforKode7Gruppe);
         InnloggetAnsattDto innloggetBrukerMedKode7Rettighet = saksbehandlerTjeneste.getInnloggetBrukerDto(null, brukerIKode7Gruppe);
@@ -110,7 +115,13 @@ public class NavAnsattRestTjenesteTest {
         assertThat(innloggetBrukerMedKode7Rettighet.getKanBehandleKode7()).isTrue();
     }
 
-    private static LdapBruker getTestBruker(String... grupper) {
-        return new LdapBruker("Testbruker", List.of(grupper));
+    private static MSGraphBruker getTestBruker(String... grupper) {
+        User user = new User();
+        user.setDisplayName("Testbruker");
+        return new MSGraphBruker(user, Arrays.stream(grupper).map(g -> {
+            Group group = new Group();
+            group.setDisplayName(g);
+            return group;
+        }).toList());
     }
 }
