@@ -22,7 +22,7 @@ public class RedirectExceptionMapperTest {
         initMocks(this);
 
         exceptionMapper = new RedirectExceptionMapper();
-        Whitebox.setInternalState(exceptionMapper, "loadBalancerUrl", "https://erstatter.nav.no");
+        Whitebox.setInternalState(exceptionMapper, "ungSakWebUrl", "https://erstatter.nav.no");
 
         ContextPathHolder.instance("/ung/sak");
     }
