@@ -65,7 +65,7 @@ public class BehandlingDtoTjenesteImplTest {
     public void setUp() {
         existingRoutes = RestUtils.getRoutes();
         tjeneste = new BehandlingDtoTjeneste(behandlingRepository, behandlingVedtakRepository, søknadRepository, tilbakekrevingRepository, vilkårResultatRepository,
-            totrinnTjeneste, informasjonselementer, "/k9/oppdrag/api");
+            totrinnTjeneste, informasjonselementer);
     }
 
     @Test

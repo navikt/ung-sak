@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import no.nav.k9.prosesstask.rest.ProsessTaskRestTjeneste;
+import no.nav.ung.sak.web.app.proxy.oppdrag.OppdragProxyRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.abakus.IAYRegisterdataCallbackRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.aktør.AktørRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.BehandlingBackendRestTjeneste;
@@ -82,6 +83,8 @@ public class RestImplementationClasses {
         classes.add(BrukerdialogRestTjeneste.class);
 
         classes.add(UngdomsytelseRestTjeneste.class);
+
+        classes.add(OppdragProxyRestTjeneste.class);
 
         // Forvaltningstjenester - fjernes løpende
         classes.add(ProsessTaskRestTjeneste.class);
