@@ -7818,14 +7818,14 @@
           "in" : "query",
           "name" : "redirectTo",
           "schema" : {
-            "default" : "/k9/web/",
+            "default" : "/ung/web/",
             "type" : "string"
           }
         }, {
           "in" : "query",
           "name" : "original",
           "schema" : {
-            "default" : "/k9/sak",
+            "default" : "/ung/sak",
             "type" : "string"
           }
         } ],

@@ -2,6 +2,7 @@ package no.nav.ung.sak.web.app.tjenester.saksbehandler;
 
 import static no.nav.k9.abac.BeskyttetRessursKoder.APPLIKASJON;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
+import static no.nav.k9.felles.sikkerhet.abac.PepImpl.ENV;
 
 import java.util.Collection;
 
@@ -23,6 +24,7 @@ import no.nav.k9.felles.integrasjon.ldap.LdapBrukeroppslag;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
+import org.slf4j.Logger;
 
 @Path("/nav-ansatt")
 @ApplicationScoped
@@ -38,6 +40,8 @@ public class NavAnsattRestTjeneste {
     private String gruppenavnKode6;
     private String gruppenavnKode7;
     private boolean skalViseDetaljerteFeilmeldinger;
+
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(NavAnsattRestTjeneste.class);
 
     public NavAnsattRestTjeneste() {
         //NOSONAR
@@ -74,6 +78,13 @@ public class NavAnsattRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = APPLIKASJON, sporingslogg = false)
     public InnloggetAnsattDto innloggetBruker() {
         String ident = SubjectHandler.getSubjectHandler().getUid();
+
+        if (!ENV.isProd()) {
+            log.info("Kjører i ikke-prod, mocket bruker.");
+            return mockInnloggetBrukerDto(ident);
+        }
+
+        // FIXME: Erstatt med Microsoft Graph.
         LdapBruker ldapBruker = new LdapBrukeroppslag().hentBrukerinformasjon(ident);
         return getInnloggetBrukerDto(ident, ldapBruker);
     }
@@ -91,6 +102,22 @@ public class NavAnsattRestTjeneste {
             .setKanBehandleKodeEgenAnsatt(grupper.contains(gruppenavnEgenAnsatt))
             .setKanBehandleKode6(grupper.contains(gruppenavnKode6))
             .setKanBehandleKode7(grupper.contains(gruppenavnKode7))
+            .skalViseDetaljerteFeilmeldinger(this.skalViseDetaljerteFeilmeldinger)
+            .create();
+    }
+
+    InnloggetAnsattDto mockInnloggetBrukerDto(String ident) {
+        String navn = "Mocket saksbehandler";
+        return InnloggetAnsattDto.builder()
+            .setBrukernavn(ident)
+            .setNavn(navn)
+            .setKanSaksbehandle(true)
+            .setKanVeilede(true)
+            .setKanBeslutte(true)
+            .setKanOverstyre(true)
+            .setKanBehandleKodeEgenAnsatt(true)
+            .setKanBehandleKode6(true)
+            .setKanBehandleKode7(true)
             .skalViseDetaljerteFeilmeldinger(this.skalViseDetaljerteFeilmeldinger)
             .create();
     }

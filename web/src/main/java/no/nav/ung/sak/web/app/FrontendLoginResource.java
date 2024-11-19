@@ -46,7 +46,7 @@ public class FrontendLoginResource {
     }
 
     @GET
-    public Response login(@QueryParam("redirectTo") @DefaultValue("/k9/web/") String redirectTo, @QueryParam("original") @DefaultValue("/k9/sak") String originalUri, @Context HttpServletRequest httpServletRequest) {
+    public Response login(@QueryParam("redirectTo") @DefaultValue("/ung/web/") String redirectTo, @QueryParam("original") @DefaultValue("/ung/sak") String originalUri, @Context HttpServletRequest httpServletRequest) {
         var uri = URI.create(redirectTo);
         var relativePath = "";
         if (uri.getPath() != null) {
@@ -62,7 +62,7 @@ public class FrontendLoginResource {
             relativePath = "/" + relativePath;
         }
         var responseBuilder = Response.status(307);
-        if (originalUri != null && !originalUri.startsWith("/k9/sak") && brukerTokenProvider.getToken().getIssuer() == OpenIDProvider.AZUREAD) {
+        if (originalUri != null && !originalUri.startsWith("/ung/sak") && brukerTokenProvider.getToken().getIssuer() == OpenIDProvider.AZUREAD) {
             var tuple = findScopeForUrl(originalUri);
             if (tuple != null) {
                 var requestedDomain = requestDataHelp.requestedHostWithScheme(httpServletRequest);
@@ -99,7 +99,7 @@ public class FrontendLoginResource {
             var path = split[0].trim();
             var scope = split[1].trim();
 
-            if (!path.startsWith("/k9/") || Objects.equals("/k9/", path) || Objects.equals("/k9", path) || Objects.equals(cookiePath, path)) {
+            if (!path.startsWith("/ung/") || Objects.equals("/ung/", path) || Objects.equals("/ung", path) || Objects.equals(cookiePath, path)) {
                 throw new IllegalStateException("Ugyldig path");
             }
 

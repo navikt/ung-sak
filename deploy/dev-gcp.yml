@@ -69,10 +69,11 @@ spec:
         - host: "k9-fordel.dev-fss-pub.nais.io"
         - host: "pdl-api.dev-fss-pub.nais.io"
         - host: "saf-q1.dev-fss-pub.nais.io"
+        - host: "norg2.dev-fss-pub.nais.io"
     inbound:
       rules:
         - application: ung-sak
-        - application: k9-sak-web
+        - application: ung-sak-web
         - application: ung-deltakelse-opplyser
         - application: k9-los-api
           namespace: k9saksbehandling
@@ -142,11 +143,8 @@ spec:
     - name: BOOTSTRAP_SERVERS
       value: b27apvl00045.preprod.local:8443,b27apvl00046.preprod.local:8443,b27apvl00047.preprod.local:8443
 
-    # Loadbalancerconfig
-    - name: LOADBALANCER_URL
-      value: https://ung-sak.intern.dev.nav.no
-    - name: LOADBALANCER_ALTERNATIVE_URL
-      value: https://ung-sak.dev.intern.nav.no
+    - name: UNG_SAK_WEB_URL
+      value: https://ung.intern.dev.nav.no
 
     # LDAP
     - name: LDAP_URL
@@ -166,19 +164,19 @@ spec:
 
     # Restservice Generelle
     - name: K9ABAKUS_URL
-      value: https://k9-abakus.dev-fss-pub.nais.io
+      value: https://k9-abakus.dev-fss-pub.nais.io/k9/abakus
     - name: K9ABAKUS_SCOPE
       value: api://dev-fss.k9saksbehandling.k9-abakus/.default
     - name: ABAKUS_CALLBACK_URL
-      value: http://ung-sak.k9saksbehandling/k9/sak/api/registerdata/iay/callback
+      value: https://ung-sak.intern.dev.nav.no/ung/sak/api/registerdata/iay/callback
     - name: ABAKUS_CALLBACK_SCOPE
-      value: api://dev-fss.k9saksbehandling.ung-sak/.default
+      value: api://dev-gcp.k9saksbehandling.ung-sak/.default
     - name: ABAC_PDP_ENDPOINT_URL
       value: http://abac-k9.k9saksbehandling/application/authorize
     - name: K9_OPPDRAG_PROXY_URL
       value: /k9/oppdrag/api
     - name: ARBEIDSFORDELING_RS_URL
-      value: https://norg2.intern.dev.nav.no/norg2/api/v1/arbeidsfordeling/enheter
+      value: https://norg2.dev-fss-pub.nais.io/norg2/api/v1/arbeidsfordeling/enheter
     - name: OPPGAVE_RS_URI
       value: https://oppgave-q1.nais.preprod.local/api/v1/oppgaver
     - name: OPPGAVE_RS_SCOPE
@@ -194,7 +192,7 @@ spec:
     - name: ORGANISASJON_RS_URL
       value: https://modapp-q1.adeo.no/ereg/api/v1/organisasjon
     - name: K9_OPPDRAG_DIREKTE_URL
-      value: https://k9-formidling-dokumentdata.dev-fss-pub.nais.io/k9/oppdrag/api
+      value: https://k9-oppdrag.dev-fss-pub.nais.io/k9/oppdrag/api
     - name: K9_OPPDRAG_SCOPE
       value: api://dev-fss.k9saksbehandling.k9-oppdrag/.default
     - name: K9_TILBAKE_DIREKTE_URL
@@ -227,6 +225,8 @@ spec:
       value: api://dev-fss.teamdokumenthandtering.saf-q1/.default
 
     # Sikkerhet:
+    - name: CLIENT_SCOPE
+      value: "api://dev-gcp.k9saksbehandling.ung-sak/.default"
     - name: ABAC_ATTRIBUTT_DRIFT
       value: "no.nav.abac.attributter.k9.drift"
 
@@ -242,7 +242,6 @@ spec:
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
       value: "false"
-
 
       # Audit logging
     - name: AUDITLOGGER_ENABLED

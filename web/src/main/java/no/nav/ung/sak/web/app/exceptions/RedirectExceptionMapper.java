@@ -12,7 +12,7 @@ import no.nav.ung.sak.kontrakt.FeilDto;
 
 public class RedirectExceptionMapper implements ExceptionMapper<Throwable> {
 
-    private String loadBalancerUrl = System.getProperty("loadbalancer.url");
+    private String ungSakWebUrl = System.getProperty("ung.sak.web.url");
 
     private KnownExceptionMappers exceptionMappers = new KnownExceptionMappers();
 
@@ -34,6 +34,6 @@ public class RedirectExceptionMapper implements ExceptionMapper<Throwable> {
 
 
     protected String getBaseUrl() {
-        return loadBalancerUrl + ContextPathHolder.instance().getContextPath();
+        return ungSakWebUrl + ContextPathHolder.instance().getContextPath();
     }
 }

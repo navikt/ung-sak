@@ -118,6 +118,7 @@ public class InnhentDokumentTjeneste {
 
         if (sisteYtelsesbehandling.isEmpty()) {
             // ingen tidligere behandling - Opprett ny førstegangsbehandling
+            log.info("Ingen tidligere behandling for fagsak {}, oppretter ny førstegangsbehandling", fagsakId);
             Behandling behandling = behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
             return BehandlingMedOpprettelseResultat.nyBehandling(behandling);
         } else {

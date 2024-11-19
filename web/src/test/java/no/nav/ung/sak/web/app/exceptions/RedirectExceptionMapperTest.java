@@ -22,9 +22,9 @@ public class RedirectExceptionMapperTest {
         initMocks(this);
 
         exceptionMapper = new RedirectExceptionMapper();
-        Whitebox.setInternalState(exceptionMapper, "loadBalancerUrl", "https://erstatter.nav.no");
+        Whitebox.setInternalState(exceptionMapper, "ungSakWebUrl", "https://erstatter.nav.no");
 
-        ContextPathHolder.instance("/k9/sak");
+        ContextPathHolder.instance("/ung/sak");
     }
 
     @Test
@@ -42,7 +42,7 @@ public class RedirectExceptionMapperTest {
         assertThat(response.getMetadata().get("Content-Encoding").get(0))
             .isEqualTo("UTF-8");
         assertThat(response.getMetadata().get("Location").get(0).toString())
-            .isEqualTo("https://erstatter.nav.no/k9/sak/#?errorcode=" + feilmelding);
+            .isEqualTo("https://erstatter.nav.no/ung/sak/#?errorcode=" + feilmelding);
     }
 
 }
