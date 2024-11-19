@@ -1,6 +1,17 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.personopplysning;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.util.EntityUtils;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.feil.Feil;
@@ -13,17 +24,6 @@ import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.typer.AktørId;
-import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.core5.http.ContentType;
-import org.apache.hc.core5.http.HttpStatus;
-import org.apache.hc.core5.http.ParseException;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
-import org.apache.hc.core5.http.io.entity.StringEntity;
-import org.apache.hc.core5.http.message.StatusLine;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 @ApplicationScoped
 @ScopedRestIntegration(scopeKey = "k9fordel.scope", defaultScope = "api://prod-fss.k9saksbehandling.k9fordel/.default")
@@ -54,19 +54,19 @@ public class AktørBytteFordelKlient {
         }
         httpPost.setEntity(new StringEntity(json, ContentType.APPLICATION_JSON));
         try (var httpResponse = restClient.execute(httpPost)) {
-            int responseCode = httpResponse.getCode();
+            int responseCode = httpResponse.getStatusLine().getStatusCode();
             if (!isOk(responseCode)) {
                 if (responseCode != HttpStatus.SC_NO_CONTENT && responseCode != HttpStatus.SC_ACCEPTED) {
                     String responseBody = EntityUtils.toString(httpResponse.getEntity());
                     String feilmelding = "Kunne ikke utføre kall til k9-fordel,"
-                        + " endpoint=" + httpPost.getRequestUri()
-                        + ", HTTP status=" + new StatusLine(httpResponse)
+                        + " endpoint=" + httpPost.getURI()
+                        + ", HTTP status=" + httpResponse.getStatusLine()
                         + ". HTTP Errormessage=" + responseBody;
                     throw RestTjenesteFeil.FEIL.feilVedKallTilFordel(endpoint, feilmelding).toException();
                 }
             }
             return Integer.parseInt(EntityUtils.toString(httpResponse.getEntity()));
-        } catch (IOException | ParseException e) {
+        } catch (IOException e) {
             throw RestTjenesteFeil.FEIL.feilVedKallTilFordel(endpoint, e.getMessage()).toException();
         }
     }

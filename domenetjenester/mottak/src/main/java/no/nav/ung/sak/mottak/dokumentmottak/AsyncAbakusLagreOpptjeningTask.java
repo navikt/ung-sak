@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-import org.apache.hc.core5.http.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +95,7 @@ public class AsyncAbakusLagreOpptjeningTask extends UnderBehandlingProsessTask {
             } else {
                 abakusTjeneste.lagreOppgittOpptjeningV2(request);
             }
-        } catch (IOException | ParseException e) {
+        } catch (IOException e) {
             throw new IllegalStateException("Kunne ikke lagre abakus oppgitt opptjening", e);
         }
     }
