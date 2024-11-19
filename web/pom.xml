@@ -290,6 +290,13 @@
             <artifactId>k9-felles-sikkerhet-testutilities</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.12.6</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

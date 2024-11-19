@@ -8,17 +8,15 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import no.nav.k9.felles.integrasjon.ldap.LdapBruker;
-import no.nav.k9.felles.integrasjon.ldap.LdapBrukeroppslag;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
+import no.nav.k9.sikkerhet.oidc.token.internal.JwtUtil;
 import no.nav.ung.sak.kontrakt.abac.InnloggetAnsattDto;
-import no.nav.ung.sak.web.app.util.LdapUtil;
 import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 
-import java.util.Collection;
+import java.util.List;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionAttributt.READ;
 import static no.nav.k9.felles.sikkerhet.abac.PepImpl.ENV;
@@ -31,13 +29,13 @@ public class NavAnsattRestTjeneste {
     public static final String NAV_ANSATT_PATH = "/nav-ansatt";
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(NavAnsattRestTjeneste.class);
 
-    private String gruppenavnSaksbehandler;
-    private String gruppenavnVeileder;
-    private String gruppenavnBeslutter;
-    private String gruppenavnOverstyrer;
-    private String gruppenavnEgenAnsatt;
-    private String gruppenavnKode6;
-    private String gruppenavnKode7;
+    private String gruppeIdSaksbehandler;
+    private String gruppeIdVeileder;
+    private String gruppeIdBeslutter;
+    private String gruppeIdOverstyrer;
+    private String gruppeIdEgenAnsatt;
+    private String gruppeIdKode6;
+    private String gruppeIdKode7;
     private boolean skalViseDetaljerteFeilmeldinger;
 
     public NavAnsattRestTjeneste() {
@@ -46,22 +44,22 @@ public class NavAnsattRestTjeneste {
 
     @Inject
     public NavAnsattRestTjeneste(
-        @KonfigVerdi(value = "bruker.gruppenavn.saksbehandler") String gruppenavnSaksbehandler,
-        @KonfigVerdi(value = "bruker.gruppenavn.veileder") String gruppenavnVeileder,
-        @KonfigVerdi(value = "bruker.gruppenavn.beslutter") String gruppenavnBeslutter,
-        @KonfigVerdi(value = "bruker.gruppenavn.overstyrer") String gruppenavnOverstyrer,
-        @KonfigVerdi(value = "bruker.gruppenavn.egenansatt") String gruppenavnEgenAnsatt,
-        @KonfigVerdi(value = "bruker.gruppenavn.kode6") String gruppenavnKode6,
-        @KonfigVerdi(value = "bruker.gruppenavn.kode7") String gruppenavnKode7,
+        @KonfigVerdi(value = "bruker.gruppe.id.saksbehandler") String gruppeIdSaksbehandler,
+        @KonfigVerdi(value = "bruker.gruppe.id.veileder") String gruppeIdVeileder,
+        @KonfigVerdi(value = "bruker.gruppe.id.beslutter") String gruppeIdBeslutter,
+        @KonfigVerdi(value = "bruker.gruppe.id.overstyrer") String gruppeIdOverstyrer,
+        @KonfigVerdi(value = "bruker.gruppe.id.egenansatt") String gruppeIdEgenAnsatt,
+        @KonfigVerdi(value = "bruker.gruppe.id.kode6") String gruppeIdKode6,
+        @KonfigVerdi(value = "bruker.gruppe.id.kode7") String gruppeIdKode7,
         @KonfigVerdi(value = "vise.detaljerte.feilmeldinger", defaultVerdi = "true") Boolean viseDetaljerteFeilmeldinger
     ) {
-        this.gruppenavnSaksbehandler = gruppenavnSaksbehandler;
-        this.gruppenavnVeileder = gruppenavnVeileder;
-        this.gruppenavnBeslutter = gruppenavnBeslutter;
-        this.gruppenavnOverstyrer = gruppenavnOverstyrer;
-        this.gruppenavnEgenAnsatt = gruppenavnEgenAnsatt;
-        this.gruppenavnKode6 = gruppenavnKode6;
-        this.gruppenavnKode7 = gruppenavnKode7;
+        this.gruppeIdSaksbehandler = gruppeIdSaksbehandler;
+        this.gruppeIdVeileder = gruppeIdVeileder;
+        this.gruppeIdBeslutter = gruppeIdBeslutter;
+        this.gruppeIdOverstyrer = gruppeIdOverstyrer;
+        this.gruppeIdEgenAnsatt = gruppeIdEgenAnsatt;
+        this.gruppeIdKode6 = gruppeIdKode6;
+        this.gruppeIdKode7 = gruppeIdKode7;
         this.skalViseDetaljerteFeilmeldinger = BooleanUtils.toBoolean(viseDetaljerteFeilmeldinger);
     }
 
@@ -75,29 +73,28 @@ public class NavAnsattRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = APPLIKASJON, sporingslogg = false)
     public InnloggetAnsattDto innloggetBruker() {
         String ident = SubjectHandler.getSubjectHandler().getUid();
+        String token = SubjectHandler.getSubjectHandler().getInternSsoToken();
+        List<String> groupIds = JwtUtil.getGroups(token);
+        String navn = JwtUtil.getName(token);
 
-        if (!ENV.isProd() && !ENV.isLocal()) {
+        if (ENV.isLocal()) {
             return mockInnloggetBrukerDto(ident);
         }
 
-        // FIXME: Erstatt med Microsoft Graph.
-        LdapBruker ldapBruker = new LdapBrukeroppslag().hentBrukerinformasjon(ident);
-        return getInnloggetBrukerDto(ident, ldapBruker);
+        return getInnloggetBrukerDto(ident, navn, groupIds);
     }
 
-    InnloggetAnsattDto getInnloggetBrukerDto(String ident, LdapBruker ldapBruker) {
-        String navn = ldapBruker.getDisplayName();
-        Collection<String> grupper = LdapUtil.filtrerGrupper(ldapBruker.getGroups());
+    private InnloggetAnsattDto getInnloggetBrukerDto(String ident, String navn, List<String> groupIds) {
         return InnloggetAnsattDto.builder()
             .setBrukernavn(ident)
             .setNavn(navn)
-            .setKanSaksbehandle(grupper.contains(gruppenavnSaksbehandler))
-            .setKanVeilede(grupper.contains(gruppenavnVeileder))
-            .setKanBeslutte(grupper.contains(gruppenavnBeslutter))
-            .setKanOverstyre(grupper.contains(gruppenavnOverstyrer))
-            .setKanBehandleKodeEgenAnsatt(grupper.contains(gruppenavnEgenAnsatt))
-            .setKanBehandleKode6(grupper.contains(gruppenavnKode6))
-            .setKanBehandleKode7(grupper.contains(gruppenavnKode7))
+            .setKanSaksbehandle(groupIds.contains(gruppeIdSaksbehandler))
+            .setKanVeilede(groupIds.contains(gruppeIdVeileder))
+            .setKanBeslutte(groupIds.contains(gruppeIdBeslutter))
+            .setKanOverstyre(groupIds.contains(gruppeIdOverstyrer))
+            .setKanBehandleKodeEgenAnsatt(groupIds.contains(gruppeIdEgenAnsatt))
+            .setKanBehandleKode6(groupIds.contains(gruppeIdKode6))
+            .setKanBehandleKode7(groupIds.contains(gruppeIdKode7))
             .skalViseDetaljerteFeilmeldinger(this.skalViseDetaljerteFeilmeldinger)
             .create();
     }
