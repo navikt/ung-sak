@@ -28,6 +28,7 @@ public class MicrosoftGraphTjeneste {
         return new MSGraphBruker(user, getUserGroupsFromGraph(userPrincipalName));
     }
 
+    // TODO: Cache gruppene
     public List<Group> getUserGroupsFromGraph(String userPrincipalName) {
         GroupCollectionResponse groupCollectionResponse = graphClient
             .users()
