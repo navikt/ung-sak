@@ -7,7 +7,7 @@ import no.nav.k9.felles.sikkerhet.ContextPathHolder;
 
 class RedirectFactory {
 
-    private String ungSakWebUrl;
+    private String loadBalancerUrl;
 
     //TODO (TOR) Denne bør ikkje ligga på server, men heller automatisk redirecte i klient. (Men dette er tryggast løysing tett opptil release)
     private String defaultPartUrl = "?punkt=default&fakta=default";
@@ -23,11 +23,11 @@ class RedirectFactory {
     }
 
     protected String getBaseUrl() {
-        return ungSakWebUrl + ContextPathHolder.instance().getContextPath();
+        return loadBalancerUrl + ContextPathHolder.instance().getContextPath();
     }
 
     @Inject
-    public void setUngSakWebUrl(@KonfigVerdi("ung.sak.web.url") String ungSakWebUrl) {
-        this.ungSakWebUrl = ungSakWebUrl;
+    public void setLoadBalancerUrl(@KonfigVerdi("loadbalancer.url") String loadBalancerUrl) {
+        this.loadBalancerUrl = loadBalancerUrl;
     }
 }

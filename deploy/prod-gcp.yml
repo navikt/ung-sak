@@ -134,7 +134,7 @@ spec:
     - name: KAFKA_INFOTRYGDFEED_AIVEN_TOPIC
       value: k9saksbehandling.k9-infotrygd-feed-hendelse
 
-    - name: UNG_SAK_WEB_URL
+    - name: LOADBALANCER_URL
       value: https://ung.intern.nav.no
 
     # LDAP
