@@ -4307,6 +4307,25 @@
         "required" : [ "behandlingId", "behandlingVersjon" ],
         "type" : "object"
       },
+      "SimuleringResultatDto" : {
+        "properties" : {
+          "slåttAvInntrekk" : {
+            "nullable" : true,
+            "type" : "boolean"
+          },
+          "sumFeilutbetaling" : {
+            "format" : "int64",
+            "nullable" : true,
+            "type" : "integer"
+          },
+          "sumInntrekk" : {
+            "format" : "int64",
+            "nullable" : true,
+            "type" : "integer"
+          }
+        },
+        "type" : "object"
+      },
       "SkjulNotatDto" : {
         "properties" : {
           "notatId" : {
@@ -8308,6 +8327,35 @@
           }
         },
         "tags" : [ "prosesstask" ]
+      }
+    },
+    "/proxy/oppdrag/simulering/detaljert-resultat" : {
+      "get" : {
+        "description" : "Hent detaljert resultat av simulering mot økonomi med og uten inntrekk",
+        "operationId" : "hentSimuleringResultat",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SimuleringResultatDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Returnerer simuleringsresultat.",
+        "tags" : [ "simulering" ]
       }
     },
     "/rapportering/dump-fnr" : {
