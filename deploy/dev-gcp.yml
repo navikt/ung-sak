@@ -54,8 +54,7 @@ spec:
     application:
       enabled: true
       replyURLs:
-        - "https://ung-sak.dev.intern.nav.no/ung/sak/cb"
-        - "https://ung-sak.intern.dev.nav.no/ung/sak/cb"
+        - "https://ung.intern.dev.nav.no/ung/sak/cb"
       claims:
         extra:
           - "NAVident"
