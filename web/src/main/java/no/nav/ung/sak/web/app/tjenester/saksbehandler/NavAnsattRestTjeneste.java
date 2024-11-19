@@ -74,14 +74,11 @@ public class NavAnsattRestTjeneste {
         String ident = SubjectHandler.getSubjectHandler().getUid();
         String token = SubjectHandler.getSubjectHandler().getInternSsoToken();
         JwtUtil.CachedClaims claims = JwtUtil.CachedClaims.forToken(token);
-        List<String> groupIds = claims.getGroups();
-        String navn = claims.getName();
 
         if (ENV.isLocal()) {
             return mockInnloggetBrukerDto(ident);
         }
-
-        return getInnloggetBrukerDto(ident, navn, groupIds);
+        return getInnloggetBrukerDto(ident, claims.getName(), claims.getGroups());
     }
 
     private InnloggetAnsattDto getInnloggetBrukerDto(String ident, String navn, List<String> groupIds) {
