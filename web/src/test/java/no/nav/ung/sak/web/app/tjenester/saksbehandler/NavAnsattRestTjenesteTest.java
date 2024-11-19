@@ -38,7 +38,13 @@ public class NavAnsattRestTjenesteTest {
             "Kode6",
             "Kode7",
             true
-        );
+        ) {
+            @Override
+            protected boolean brukMockBrukerLokalt() {
+                //gjør at vi kan teste-prod-kode isdf å treffe shortcut til mock-saksbehandler som brukes lokalt
+                return false;
+            }
+        };
     }
 
     @AfterEach

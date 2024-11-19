@@ -14,7 +14,6 @@ import no.nav.k9.sikkerhet.context.SubjectHandler;
 import no.nav.k9.sikkerhet.oidc.token.internal.JwtUtil;
 import no.nav.ung.sak.kontrakt.abac.InnloggetAnsattDto;
 import org.apache.commons.lang3.BooleanUtils;
-import org.slf4j.Logger;
 
 import java.util.List;
 
@@ -62,6 +61,10 @@ public class NavAnsattRestTjeneste {
         this.skalViseDetaljerteFeilmeldinger = BooleanUtils.toBoolean(viseDetaljerteFeilmeldinger);
     }
 
+    protected boolean brukMockBrukerLokalt() {
+        return true;
+    }
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(
@@ -75,10 +78,10 @@ public class NavAnsattRestTjeneste {
         String token = SubjectHandler.getSubjectHandler().getInternSsoToken();
         JwtUtil.CachedClaims claims = JwtUtil.CachedClaims.forToken(token);
 
-        // trenger mock-brukeren ved testing lokalt inntil vtp utvides til å legge gruppene i tokene
-//        if (ENV.isLocal()) {
-//            return mockInnloggetBrukerDto(ident);
-//        }
+        if (ENV.isLocal() && brukMockBrukerLokalt()) {
+            // trenger mock-brukeren ved testing lokalt inntil vtp utvides til å legge gruppene i tokene
+            return mockInnloggetBrukerDto(ident);
+        }
         return getInnloggetBrukerDto(ident, claims.getName(), claims.getGroups());
     }
 
