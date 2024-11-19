@@ -37,7 +37,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
         <felles.version>4.0.5</felles.version>
-        <swagger.version>2.2.25</swagger.version>
+        <swagger.version>2.2.26</swagger.version>
         <junit.version>5.11.3</junit.version>
         <k9format.version>9.7.1</k9format.version>
         <jackson.version>2.18.1</jackson.version>
@@ -144,7 +144,7 @@
             <dependency>
                 <groupId>com.zaxxer</groupId>
                 <artifactId>HikariCP</artifactId>
-                <version>6.1.0</version>
+                <version>6.2.1</version>
             </dependency>
             <dependency>
                 <groupId>org.threeten</groupId>
@@ -164,7 +164,7 @@
             <dependency>
                 <groupId>io.opentelemetry.instrumentation</groupId>
                 <artifactId>opentelemetry-instrumentation-annotations</artifactId>
-                <version>2.9.0</version>
+                <version>2.10.0</version>
             </dependency>
 
             <!-- Prosjektets egne biblioteker -->
@@ -504,7 +504,7 @@
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>io.github.classgraph</groupId>
                 <artifactId>classgraph</artifactId>
-                <version>4.8.177</version>
+                <version>4.8.179</version>
             </dependency>
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->
