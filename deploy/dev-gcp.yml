@@ -246,6 +246,9 @@ spec:
     - name: FLYWAY_REPAIR_ON_FAIL
       value: "false"
 
+    # Loadbalancerconfig
+    - name: LOADBALANCER_URL
+      value: https://k9.intern.dev.nav.no
 
       # Audit logging
     - name: AUDITLOGGER_ENABLED

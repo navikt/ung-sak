@@ -136,7 +136,7 @@ spec:
 
     # Loadbalancerconfig
     - name: LOADBALANCER_URL
-      value: https://k9.intern.nav.no
+      value: https://ung.intern.nav.no
 
     # LDAP
     - name: LDAP_URL
