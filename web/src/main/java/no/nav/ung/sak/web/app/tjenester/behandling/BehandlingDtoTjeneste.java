@@ -316,7 +316,8 @@ public class BehandlingDtoTjeneste {
     }
 
     private Optional<ResourceLink> lagSimuleringResultatLink(Behandling behandling) {
-        return Optional.of(ResourceLink.eksternGet(OppdragProxyRestTjeneste.SIMULERING_RESULTAT_URL, "simuleringResultat", behandling.getUuid()));
+        var queryParams = Map.of(BehandlingUuidDto.NAME, behandling.getUuid().toString());
+        return Optional.of(getFraMap(OppdragProxyRestTjeneste.SIMULERING_RESULTAT_URL, "simuleringResultat", queryParams));
     }
 
     private List<ResourceLink> lagTilbakekrevingValgLink(Behandling behandling) {
