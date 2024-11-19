@@ -134,7 +134,6 @@ spec:
     - name: KAFKA_INFOTRYGDFEED_AIVEN_TOPIC
       value: k9saksbehandling.k9-infotrygd-feed-hendelse
 
-    # Loadbalancerconfig
     - name: UNG_SAK_WEB_URL
       value: https://ung.intern.nav.no
 
