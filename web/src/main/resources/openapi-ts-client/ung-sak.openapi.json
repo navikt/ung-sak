@@ -3074,7 +3074,7 @@
             "$ref" : "#/components/schemas/KodeverkBehandling"
           },
           "fagsystem" : {
-            "enum" : [ "K9SAK", "FPSAK", "TPS", "VLSP", "JOARK", "INFOTRYGD", "ARENA", "INNTEKT", "MEDL", "GOSYS", "ENHETSREGISTERET", "AAREGISTERET", "-" ],
+            "enum" : [ "UNG_SAK", "K9SAK", "FPSAK", "TPS", "VLSP", "JOARK", "INFOTRYGD", "ARENA", "INNTEKT", "MEDL", "GOSYS", "ENHETSREGISTERET", "AAREGISTERET", "-" ],
             "type" : "string"
           },
           "historikk" : {
@@ -3516,7 +3516,7 @@
       "OverlappendeYtelseDto" : {
         "properties" : {
           "kilde" : {
-            "enum" : [ "K9SAK", "FPSAK", "TPS", "VLSP", "JOARK", "INFOTRYGD", "ARENA", "INNTEKT", "MEDL", "GOSYS", "ENHETSREGISTERET", "AAREGISTERET", "-" ],
+            "enum" : [ "UNG_SAK", "K9SAK", "FPSAK", "TPS", "VLSP", "JOARK", "INFOTRYGD", "ARENA", "INNTEKT", "MEDL", "GOSYS", "ENHETSREGISTERET", "AAREGISTERET", "-" ],
             "type" : "string"
           },
           "overlappendePerioder" : {
