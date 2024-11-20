@@ -36,7 +36,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <felles.version>4.0.5</felles.version>
+        <felles.version>4.2.0</felles.version>
         <swagger.version>2.2.25</swagger.version>
         <junit.version>5.11.3</junit.version>
         <k9format.version>9.7.1</k9format.version>
@@ -114,11 +114,6 @@
             <dependency>
                 <groupId>no.nav.k9.felles.integrasjon</groupId>
                 <artifactId>k9-sensu-klient</artifactId>
-                <version>${felles.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.k9.felles.integrasjon</groupId>
-                <artifactId>k9-ldap-klient</artifactId>
                 <version>${felles.version}</version>
             </dependency>
 
