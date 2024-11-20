@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 public class NavAnsattRestTjenesteTest {
@@ -68,14 +68,14 @@ public class NavAnsattRestTjenesteTest {
 
         assertEquals(ident, result.getBrukernavn());
         assertEquals(navnet, result.getNavn());
-        assertEquals(true, result.getKanSaksbehandle());
-        assertEquals(false, result.getKanVeilede());
-        assertEquals(false, result.getKanBeslutte());
-        assertEquals(false, result.getKanOverstyre());
-        assertEquals(false, result.getKanBehandleKodeEgenAnsatt());
-        assertEquals(false, result.getKanBehandleKode6());
-        assertEquals(true, result.getKanBehandleKode7());
-        assertEquals(true, result.getSkalViseDetaljerteFeilmeldinger());
+        assertTrue(result.getKanSaksbehandle());
+        assertFalse(result.getKanVeilede());
+        assertFalse(result.getKanBeslutte());
+        assertFalse(result.getKanOverstyre());
+        assertFalse(result.getKanBehandleKodeEgenAnsatt());
+        assertFalse(result.getKanBehandleKode6());
+        assertTrue(result.getKanBehandleKode7());
+        assertTrue(result.getSkalViseDetaljerteFeilmeldinger());
     }
 
     public static String createJWT(String ident, String name, List<String> groupIds) {
