@@ -55,6 +55,7 @@ spec:
       enabled: true
       replyURLs:
         - "https://ung.intern.dev.nav.no/ung/sak/cb"
+      allowAllUsers: true
       claims:
         groups:
           # 0000-GA-k9-beslutter
@@ -73,7 +74,6 @@ spec:
           - id: 5bc5cae2-3ef9-4897-9828-766757299de8
         extra:
           - "NAVident"
-      allowAllUsers: true
   accessPolicy:
     outbound:
       external:
