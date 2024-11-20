@@ -83,6 +83,9 @@ public enum BehandlingÅrsakType implements Kodeverdi {
     UNNT_GENERELL("UNNT_GENERELL", "Manuell saksbehandling"),
     REVURDERER_BERØRT_PERIODE("REVURDERER_BERØRT_PERIODE", "Revurderer berørt periode"),
 
+    //ungdomsytelsespesifikt
+    RE_TRIGGER_BEREGNING_HØY_SATS("RE_TRIGGER_BEREGNING_HØY_SATS", "Beregn høy sats"),
+
     UDEFINERT("-", "Ikke definert"),
 
     ;

@@ -12,20 +12,30 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 
 public class LagGrunnbeløpFaktorTidslinje {
 
-    static LocalDateTimeline<Sats> lagGrunnbeløpFaktorTidslinje(LocalDate fødselsdato) {
-        var datoForEndringAvSats = fødselsdato.plusYears(25).with(TemporalAdjusters.lastDayOfMonth()).plusDays(1);
-        return new LocalDateTimeline<>(
-            List.of(
-                new LocalDateSegment<>(
-                    fødselsdato.plusYears(18).with(TemporalAdjusters.lastDayOfMonth()).plusDays(1),
-                    datoForEndringAvSats.minusDays(1),
-                    LAV),
-                new LocalDateSegment<>(
-                    datoForEndringAvSats,
-                    fødselsdato.plusYears(29).with(TemporalAdjusters.lastDayOfMonth()).plusDays(1),
-                    HØY)
+    static LocalDateTimeline<Sats> lagGrunnbeløpFaktorTidslinje(LocalDate fødselsdato, LocalDate beregningsdato, boolean harTriggerBeregnHøySats) {
+        var førsteMuligeDato = fødselsdato.plusYears(18).with(TemporalAdjusters.lastDayOfMonth()).plusDays(1);
+        LocalDate tjuefemårsdagen = fødselsdato.plusYears(25);
+        var datoForEndringAvSats = tjuefemårsdagen.with(TemporalAdjusters.lastDayOfMonth()).plusDays(1);
+        var sisteMuligeDato = fødselsdato.plusYears(29).with(TemporalAdjusters.lastDayOfMonth()).plusDays(1);
 
-            ));
+        var regnUtHøySats = harTriggerBeregnHøySats || beregningsdato.isAfter(tjuefemårsdagen);
+        if (regnUtHøySats){
+            return new LocalDateTimeline<>(
+                List.of(
+                    new LocalDateSegment<>(
+                        førsteMuligeDato,
+                        datoForEndringAvSats.minusDays(1),
+                        LAV),
+                    new LocalDateSegment<>(
+                        datoForEndringAvSats,
+                        sisteMuligeDato,
+                        HØY)
+
+                ));
+        } else {
+            return new LocalDateTimeline<>(førsteMuligeDato, sisteMuligeDato, LAV);
+        }
+
     }
 
 

@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
@@ -19,6 +20,8 @@ import no.nav.ung.sak.domene.person.personopplysning.BasisPersonopplysningTjenes
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
+
+import java.time.LocalDate;
 
 @ApplicationScoped
 @BehandlingStegRef(BehandlingStegType.UNGDOMSYTELSE_BEREGNING)
@@ -65,7 +68,9 @@ public class UngdomsytelseBeregningSteg implements BehandlingSteg {
         var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         var personopplysningerAggregat = personopplysningTjeneste.hentGjeldendePersoninformasjonPåTidspunkt(behandling.getId(), behandling.getAktørId(), behandling.getFagsak().getPeriode().getFomDato());
         var fødselsdato = personopplysningerAggregat.getSøker().getFødselsdato();
-        var satsTidslinje = beregnDagsatsTjeneste.beregnDagsats(BehandlingReferanse.fra(behandling), innvilgetPerioderTidslinje, fødselsdato);
+        var beregningsdato = LocalDate.now();
+        var harTriggerBeregnHøySats = behandling.getBehandlingÅrsaker().stream().anyMatch(it->it.getBehandlingÅrsakType() == BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS);
+        var satsTidslinje = beregnDagsatsTjeneste.beregnDagsats(BehandlingReferanse.fra(behandling), innvilgetPerioderTidslinje, fødselsdato, beregningsdato, harTriggerBeregnHøySats);
         ungdomsytelseGrunnlagRepository.lagre(behandling.getId(), satsTidslinje);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
