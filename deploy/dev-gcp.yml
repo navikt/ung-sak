@@ -161,18 +161,6 @@ spec:
     - name: LOADBALANCER_URL
       value: https://ung.intern.dev.nav.no
 
-    # LDAP
-    - name: LDAP_URL
-      value: ldaps://ldapgw.preprod.local
-    - name: LDAP_BASEDN
-      value: "dc=preprod,dc=local"
-    - name: LDAP_DOMAIN
-      value: "PREPROD.LOCAL"
-    - name: LDAP_USER_BASEDN
-      value: "ou=NAV,ou=BusinessUnits,dc=preprod,dc=local"
-    - name: LDAP_SERVICEUSER_BASEDN
-      value: "ou=ServiceAccounts,dc=preprod,dc=local"
-
     # PDL
     - name: PDL_TEMA
       value: OMS

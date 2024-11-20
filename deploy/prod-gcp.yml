@@ -137,18 +137,6 @@ spec:
     - name: LOADBALANCER_URL
       value: https://ung.intern.nav.no
 
-    # LDAP
-    - name: LDAP_URL
-      value: ldaps://ldapgw.adeo.no
-    - name: LDAP_BASEDN
-      value: "dc=adeo,dc=no"
-    - name: LDAP_DOMAIN
-      value: "ADEO.NO"
-    - name: LDAP_USER_BASEDN
-      value: "ou=NAV,ou=BusinessUnits,dc=adeo,dc=no"
-    - name: LDAP_SERVICEUSER_BASEDN
-      value: "ou=ServiceAccounts,dc=adeo,dc=no"
-
     # PDL
     - name: PDL_TEMA
       value: OMS
