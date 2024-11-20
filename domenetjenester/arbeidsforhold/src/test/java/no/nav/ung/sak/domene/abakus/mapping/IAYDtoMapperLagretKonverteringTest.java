@@ -127,7 +127,7 @@ public class IAYDtoMapperLagretKonverteringTest {
     private YtelseBuilder lagYtelse() {
         Saksnummer sakId = new Saksnummer("1200094");
         YtelseBuilder ytelselseBuilder = YtelseBuilder.oppdatere(Optional.empty())
-                .medKilde(Fagsystem.K9SAK)
+                .medKilde(Fagsystem.K9SAK)  // FIXME: Bytt til UNG_SAK når det er støttet
                 .medYtelseType(FagsakYtelseType.SYKEPENGER)
                 .medSaksnummer(sakId);
 

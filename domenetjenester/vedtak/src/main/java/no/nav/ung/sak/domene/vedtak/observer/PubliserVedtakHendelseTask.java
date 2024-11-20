@@ -156,7 +156,7 @@ public class PubliserVedtakHendelseTask extends BehandlingProsessTask {
         vedtakHendelse.setFagsakYtelseType(behandling.getFagsakYtelseType());
         vedtakHendelse.setSaksnummer(behandling.getFagsak().getSaksnummer().getVerdi());
         vedtakHendelse.setStatus(behandling.getFagsak().getStatus());
-        vedtakHendelse.setFagsystem(Fagsystem.K9SAK);
+        vedtakHendelse.setFagsystem(Fagsystem.K9SAK); // FIXME: Bytt til UNG_SAK når det er støttet
         vedtakHendelse.setAktør(behandling.getAktørId());
         vedtakHendelse.setBehandlingResultatType(behandling.getBehandlingResultatType());
         vedtakHendelse.setVedtakResultat(vedtak.getVedtakResultatType());
