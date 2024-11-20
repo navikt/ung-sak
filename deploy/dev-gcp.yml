@@ -55,8 +55,11 @@ spec:
       enabled: true
       replyURLs:
         - "https://ung.intern.dev.nav.no/ung/sak/cb"
+
+      # Tillater innlogging for alle brukere.
       allowAllUsers: true
       claims:
+        # Kun de gruppene brukeren er medlem av vil bli lagt til i claims på tokenet.
         groups:
           # 0000-GA-k9-beslutter
           - id: f171716a-aaab-4e76-8869-047abaebb8f5
