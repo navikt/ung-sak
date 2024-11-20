@@ -110,6 +110,12 @@ public class PubliserVedtattYtelseHendelseTask extends BehandlingProsessTask {
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
         String behandingIdString = prosessTaskData.getBehandlingId();
+
+        // FIXME: Fjerne dette når man har avklart om man skal bruke familie-vedtakfattet-v1 eller lage ny.
+        if (true) {
+            return;
+        }
+
         if (behandingIdString != null && !behandingIdString.isEmpty()) {
             long behandlingId = Long.parseLong(behandingIdString);
 
