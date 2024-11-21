@@ -26,9 +26,9 @@ public class UngdomsytelseBeregnDagsats {
     }
 
 
-    LocalDateTimeline<UngdomsytelseSatser> beregnDagsats(BehandlingReferanse behandlingRef, LocalDateTimeline<Boolean> perioder, LocalDate fødselsdato) {
+    LocalDateTimeline<UngdomsytelseSatser> beregnDagsats(BehandlingReferanse behandlingRef, LocalDateTimeline<Boolean> perioder, LocalDate fødselsdato, LocalDate beregningsdato, boolean harTriggerBeregnHøySats) {
         var grunnbeløpTidslinje = lagGrunnbeløpTidslinjeTjeneste.lagGrunnbeløpTidslinjeForPeriode(perioder);
-        var grunnbeløpFaktorTidslinje = LagGrunnbeløpFaktorTidslinje.lagGrunnbeløpFaktorTidslinje(fødselsdato);
+        var grunnbeløpFaktorTidslinje = LagGrunnbeløpFaktorTidslinje.lagGrunnbeløpFaktorTidslinje(fødselsdato, beregningsdato, harTriggerBeregnHøySats);
         var barnetilleggTidslinje = lagBarnetilleggTidslinje.lagTidslinje(behandlingRef);
 
         var satsTidslinje = perioder
