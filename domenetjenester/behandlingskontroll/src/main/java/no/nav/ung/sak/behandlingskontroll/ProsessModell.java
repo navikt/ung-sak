@@ -1,4 +1,4 @@
-package no.nav.ung.sak.behandlingskontroll;
+package no.nav.ung.sak.ytelse.ung.prosess;
 
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -6,6 +6,9 @@ import jakarta.enterprise.inject.Produces;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.sak.behandlingskontroll.BehandlingModell;
+import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingskontroll.impl.BehandlingModellImpl;
 import no.nav.ung.sak.behandlingslager.hendelser.StartpunktType;
 
@@ -28,6 +31,7 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
             .medSteg(BehandlingStegType.UNGDOMSYTELSE_BEREGNING, StartpunktType.BEREGNING)
             .medSteg(BehandlingStegType.VURDER_UTTAK)
+            .medSteg(BehandlingStegType.SIMULER_OPPDRAG)
             .medSteg(BehandlingStegType.FORESLÅ_VEDTAK)
             .medSteg(BehandlingStegType.FATTE_VEDTAK)
             .medSteg(BehandlingStegType.IVERKSETT_VEDTAK);
@@ -50,6 +54,7 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
             .medSteg(BehandlingStegType.UNGDOMSYTELSE_BEREGNING, StartpunktType.BEREGNING)
             .medSteg(BehandlingStegType.VURDER_UTTAK)
+            .medSteg(BehandlingStegType.SIMULER_OPPDRAG)
             .medSteg(BehandlingStegType.FORESLÅ_VEDTAK)
             .medSteg(BehandlingStegType.FATTE_VEDTAK)
             .medSteg(BehandlingStegType.IVERKSETT_VEDTAK);
